@@ -1,10 +1,12 @@
-# NapCatQQ
+<div align="center">
+  <img src="https://socialify.git.ci/NapNeko/NapCatQQ/image?description=1&font=Inter&forks=1&issues=1&language=1&name=1&owner=1&pattern=Plus&pulls=1&stargazers=1&theme=Auto" alt="Repo banner" />
+</div>
 
 ## 介绍
 无
 
 ## 下载与安装
-还在开发中，敬请期待
+
 
 ## 使用与配置
 参考文档
