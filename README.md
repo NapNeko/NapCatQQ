@@ -2,14 +2,20 @@
   <img src="https://socialify.git.ci/NapNeko/NapCatQQ/image?description=1&font=Inter&forks=1&issues=1&language=1&name=1&owner=1&pattern=Plus&pulls=1&stargazers=1&theme=Auto" alt="Repo banner" />
 </div>
 
-## 介绍
-无
+## 项目介绍
+NapCat 是基于 NTQQ 实现的Bot框架
 
-## 下载与安装
+## 相关提示
+* 由于该项目特殊性，NapCat/Core 部分没有开源打算，可能会开放CoreApi以便开发与适配协议实现。
 
+* 请不要在无关地方 宣传NapCat，违法使用NapCat。
 
-## 使用与配置
-参考文档
+## 隐私警告
+NapCat将会收集一个会话唯一ID用于统计在线数量以及平台，该Id不可逆获取用户其余信息。
 
-## 开源与安全
-由于项目特殊性，core 部分暂时没有开源的打算，请不要违法使用与宣传本项目。
+## 相关链接
+[官方文档](https://napneko.github.io/)
+
+[官方群聊](https://napneko.github.io/)
+
+## 友情链接
