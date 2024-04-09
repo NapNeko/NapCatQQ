@@ -4,6 +4,10 @@
 
 ## 项目介绍
 NapCat 是基于 NTQQ 实现的Bot框架
+## 测试版本
+前往 Action 下载最新测试版
+
+[跳转链接](https://github.com/NapNeko/NapCat.Build/actions)
 
 ## 相关提示
 * 由于该项目特殊性，NapCat/Core 部分没有开源打算，可能会开放CoreApi以便开发与适配协议实现。
