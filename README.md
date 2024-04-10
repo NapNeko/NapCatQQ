@@ -13,15 +13,13 @@ NapCat 是基于 官方NTQQ 实现的Bot框架
 
 [跳转链接](https://github.com/NapNeko/NapCat.Build/actions)
 
-## 相关提示
+## 声明
 
-* 请不要在无关地方 宣传NapCat，违法使用NapCat，
+* 请不要在无关地方宣传NapCatQQ，本项目只是用于学习 node 相关知识，切勿用于违法用途
 
 * NapCat 不会收集用户隐私信息，但是未来可能会为了更好的利于 NapCat 的优化会收集一些设备信息，如 cpu 架构，系统版本等
   
 ## 相关链接
-[官方文档](https://napneko.github.io/)
 
-[官方群聊](https://napneko.github.io/)
+[TG群](https://t.me/+nLZEnpne-pQ1OWFl)
 
-## 友情链接
