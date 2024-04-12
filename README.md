@@ -23,3 +23,7 @@ NapCat 是基于 官方NTQQ 实现的Bot框架
 
 [TG群](https://t.me/+nLZEnpne-pQ1OWFl)
 
+## 鸣谢名单
+[OpenShamrock]()
+
+[Lagrange]()
