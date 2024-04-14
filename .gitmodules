@@ -1,0 +1,4 @@
+[submodule "src/core"]
+	path = src/core
+	url = https://github.com/NapNeko/core.git
+	branch = master
