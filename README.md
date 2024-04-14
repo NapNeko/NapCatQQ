@@ -93,8 +93,6 @@ json 配置内容参数解释：
 ```
 
 ```bash
-
-```bash
 sudo apt install ./qq.deb
 ```
 
