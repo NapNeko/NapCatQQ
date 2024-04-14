@@ -1,0 +1,16 @@
+# Logs
+
+# Develop
+node_modules/
+package-lock.json
+out/
+dist/
+src/core.lib/common/
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/*
+
+# Build
+*.db

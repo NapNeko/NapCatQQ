@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "skipLibCheck": true,
+    "moduleResolution": "Node",
+    "allowImportingTsExtensions": false,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "preserve",
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "@*": [
+        "./src*"
+      ],
+      "@/core": [
+        "./src/core/src/index",
+        "./src/core.lib/src/index"
+      ],
+      "@/core/qqnt/*": [
+        "./src/core/src/qqnt/*",
+        "./src/core.lib/src/qqnt/index"
+      ],
+      "@/core/*": [
+        "./src/core/src/*",
+        "./src/core.lib/src"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*.ts"
+  ]
+}

@@ -1,0 +1,23 @@
+name: "publish"
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v3
+
+    - name: setup node
+      uses: actions/setup-node@v2
+      with:
+        node-version: 18
+
+    - name: install dependenies
+      run: export ELECTRON_SKIP_BINARY_DOWNLOAD=1 && npm install
+
+    - name: build
+      run: npm run build:prod
