@@ -72,10 +72,17 @@ jobs:
     steps:
     - name: Download All Artifact
       uses: actions/download-artifact@v4
-      
+    
+    - name: Compress subdirectories
+      run: |
+       for dir in */; do
+          base=$(basename "$dir")
+          zip -r "${base}.zip" "$dir"
+        done 
     - name: Create Release Draft and Upload Artifacts
       uses: softprops/action-gh-release@v1
       with:
+        token: ${{ secrets.NAPCAT_BUILD }}
         files: |
           NapCat.win32.amd64.zip
           NapCat.linux.amd64.zip
