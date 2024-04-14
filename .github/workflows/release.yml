@@ -67,7 +67,7 @@ jobs:
               name: NapCat.${{ matrix.target_platform }}.${{ matrix.target_arch }}
               path: dist
   release-napcat:
-    needs:[build-win32,build-linux]
+    needs: [build-win32,build-linux]
     runs-on: ubuntu-latest
     steps:
     - name: Download Linux Amd64
