@@ -18,5 +18,5 @@ for %%a in ("!RetString!") do (
 
 set "QQPath=!pathWithoutUninstall!QQ.exe"
 set ELECTRON_RUN_AS_NODE=1
-echo !QQPath!
-!QQPath! ./napcat.cjs
+echo "!QQPath!"
+"!QQPath!" %~dp0/napcat.cjs %*
