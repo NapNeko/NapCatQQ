@@ -82,11 +82,12 @@ jobs:
     - name: Create Release Draft and Upload Artifacts
       uses: softprops/action-gh-release@v1
       with:
+        name: NapCat V0.0.0
         token: ${{ secrets.NAPCAT_BUILD }}
         files: |
-          NapCat.win32.amd64.zip
-          NapCat.linux.amd64.zip
+          NapCat.win32.x64.zip
+          NapCat.linux.x64.zip
           NapCat.linux.arm64.zip
-          NapCat.darwin.amd64.zip
+          NapCat.darwin.x64.zip
           NapCat.darwin.arm64.zip
         draft: true
