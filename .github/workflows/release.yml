@@ -1,5 +1,6 @@
 name: "release"
 on:
+  workflow_dispatch:
   push:
     tags:
       - "v*"
@@ -65,3 +66,37 @@ jobs:
           with:
               name: NapCat.${{ matrix.target_platform }}.${{ matrix.target_arch }}
               path: dist
+  release-napcat:
+    needs:[build-win32,build-linux]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download Linux Amd64
+      uses: actions/download-artifact@v2
+      with:
+        name: NapCat.linux.amd64
+    - name: Download Linux Arm64
+      uses: actions/download-artifact@v2
+      with:
+        name: NapCat.linux.arm64
+    - name: Download Darwin Arm64
+      uses: actions/download-artifact@v2
+      with:
+        name: NapCat.darwin.arm64
+    - name: Download Darwin Amd64
+      uses: actions/download-artifact@v2
+      with:
+        name: NapCat.darwin.amd64
+    - name: Download Window Amd.64
+      uses: actions/download-artifact@v2
+      with:
+        name: NapCat.win32.amd64
+    - name: Create Release Draft and Upload Artifacts
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          NapCat.win32.amd64.zip
+          NapCat.linux.amd64.zip
+          NapCat.linux.arm64.zip
+          NapCat.darwin.amd64.zip
+          NapCat.darwin.arm64.zip
+        draft: true
