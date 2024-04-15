@@ -52,7 +52,7 @@ napCatCore.on('system.login.qrcode', (qrCodeData: { url: string, base64: string 
   fs.writeFile(qrcodePath, qrCodeData.base64.split('data:image/png;base64')[1], 'base64').then(() => {
     console.log('二维码已保存到', qrcodePath);
   });
-  qrcode.generate(qrCodeData.url, {small: true}, (res) => {
+  qrcode.generate(qrCodeData.url, { small: true }, (res) => {
     console.log(res);
   });
 });

@@ -3,7 +3,7 @@ module.exports = {
     'es2021': true,
     'node': true
   },
-  'ignorePatterns': ['src/core/'],
+  'ignorePatterns': ['src/core/', 'src/core.lib/'],
   'extends': [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended'
