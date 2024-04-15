@@ -8,7 +8,6 @@ import { dbUtil } from './db';
 import * as fileType from 'file-type';
 import { v4 as uuidv4 } from 'uuid';
 import { napCatCore } from '@/core';
-import os from 'node:os';
 
 export const getNapCatDir = () => {
   const p = path.join(napCatCore.wrapper.dataPath, 'NapCat');
