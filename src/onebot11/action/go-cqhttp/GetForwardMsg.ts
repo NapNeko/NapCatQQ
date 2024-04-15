@@ -39,6 +39,6 @@ export class GoCQHTTGetForwardMsgAction extends BaseAction<Payload, any> {
       (<OB11ForwardMessage>msg).content = msg.message;
       delete (<any>msg).message;
     });
-    return {messages};
+    return { messages };
   }
 }

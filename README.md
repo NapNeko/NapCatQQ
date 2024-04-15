@@ -10,13 +10,15 @@ NapCatQQ（瞌睡猫QQ，不准叫我NCQQ！），像睡着了一样在后台低
 
 由于 Linux 上的 QQ 图形依赖较多，会导致内存占用小高，大约 **100+M**，目前正在研究如何优化
 
+具体占用会因人而异，QQ 群、好友越多占用越高
+
 ## 下载
 
 前往 Release 页面下载最新版本
 
 ## 启动
 
-NapCat 是基于 官方NTQQ 实现的Bot框架，因此先需要安装官方QQ
+NapCat 是基于 官方NTQQ 实现的Bot框架，因此先需要安装官方QQ，**注意同个账号不能同时登录原版 QQ 和 NapCatQQ**
 
 *如果没有安装 QQ 请往后翻查看安装方法*
 
@@ -62,7 +64,9 @@ json 配置内容参数解释：
 
 ### Windows 启动
 
-运行`powershell ./napcat.ps1`, 或者 `napcat.bat`，如果出现乱码，可以尝试运行`napcat_utf8.ps1`
+运行`powershell ./napcat.ps1`, 或者 `napcat.bat`，如果出现乱码，可以尝试运行`napcat-utf8.ps1` 或 `napcat-utf8.bat`
+
+*如果出现 powershell 运行不了，以管理员身份打开 powershell，输入 `Set-ExecutionPolicy RemoteSigned`*
 
 ### Linux 启动
 
@@ -80,17 +84,13 @@ json 配置内容参数解释：
 
 目前还在研究怎么精简安装，暂时只能安装官方QQ整体依赖
 
-```bash
-下载QQ的deb包
+下载QQ
  
 [deb x86版本](https://dldir1.qq.com/qqfile/qq/QQNT/Linux/QQ_3.2.7_240403_amd64_01.deb)
 [deb arm版本](https://dldir1.qq.com/qqfile/qq/QQNT/Linux/QQ_3.2.7_240403_arm64_01.deb)
 
 [rpm x86版本](https://dldir1.qq.com/qqfile/qq/QQNT/Linux/QQ_3.2.7_240403_x86_64_01.rpm)
 [rpm arm版本](https://dldir1.qq.com/qqfile/qq/QQNT/Linux/QQ_3.2.7_240403_aarch64_01.rpm)
-```
-
-```bash
 
 ```bash
 sudo apt install ./qq.deb
@@ -141,6 +141,9 @@ $env:FFMPEG_PATH="d:\ffmpeg\bin\ffmpeg.exe"
 
 不用管，这是正常现象，是因为 QQ 本身的问题，不影响使用
 
+## API 文档
+
+参考 [LLOneBot](https://llonebot.github.io/zh-CN/develop/api) 的文档
 
 <!-- 
 QQ群：545402644

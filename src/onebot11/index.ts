@@ -24,11 +24,13 @@ checkVersion().then((remoteVersion: string) => {
   for (const k of [0, 1, 2]) {
     if (parseInt(remoteVersionList[k]) > parseInt(localVersionList[k])) {
       console.log('检测到更新,请前往 https://github.com/NapNeko/NapCatQQ 下载 NapCatQQ V', remoteVersion);
+      return;
     } else if (parseInt(remoteVersionList[k]) < parseInt(localVersionList[k])) {
       break;
     }
   }
   console.log('当前已是最新版本,版本:', localVersion);
+  return;
 });
 new NapCatOnebot11();
 napCatCore.addLoginSuccessCallback(() => {
@@ -50,7 +52,7 @@ napCatCore.on('system.login.qrcode', (qrCodeData: { url: string, base64: string 
   fs.writeFile(qrcodePath, qrCodeData.base64.split('data:image/png;base64')[1], 'base64').then(() => {
     console.log('二维码已保存到', qrcodePath);
   });
-  qrcode.generate(qrCodeData.url, {small: true}, (res) => {
+  qrcode.generate(qrCodeData.url, { small: true }, (res) => {
     console.log(res);
   });
 });

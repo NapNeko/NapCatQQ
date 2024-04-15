@@ -120,7 +120,7 @@ export class NapCatOnebot11 {
   }
 
   async postReceiveMsg(msgList: RawMessage[]) {
-    const {debug, reportSelfMessage} = ob11Config;
+    const { debug, reportSelfMessage } = ob11Config;
     for (const message of msgList) {
       // console.log("ob11 收到新消息", message)
       // if (message.senderUin !== selfInfo.uin){

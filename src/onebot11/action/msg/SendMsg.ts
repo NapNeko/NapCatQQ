@@ -160,7 +160,7 @@ export async function createSendElements(messageData: OB11MessageData[], group: 
         //   }
         //   log("找到文件缓存", file);
         // }
-        const {path, isLocal, fileName, errMsg} = (await uri2local(file));
+        const { path, isLocal, fileName, errMsg } = (await uri2local(file));
         if (errMsg) {
           throw errMsg;
         }
@@ -309,7 +309,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
     if (this.getSpecialMsgNum(payload, OB11MessageDataType.node)) {
       try {
         const returnMsg = await this.handleForwardNode(peer, messages as OB11MessageNode[], group);
-        return {message_id: returnMsg!.id!};
+        return { message_id: returnMsg!.id! };
       } catch (e: any) {
         throw ('发送转发消息失败 ' + e.toString());
       }
@@ -317,8 +317,8 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
       if (this.getSpecialMsgNum(payload, OB11MessageDataType.music)) {
         const music: OB11MessageCustomMusic = messages[0] as OB11MessageCustomMusic;
         if (music) {
-          const {url, audio, title, content, image} = music.data;
-          const selfPeer: Peer = {peerUid: selfInfo.uid, chatType: ChatType.friend};
+          const { url, audio, title, content, image } = music.data;
+          const selfPeer: Peer = { peerUid: selfInfo.uid, chatType: ChatType.friend };
           // 搞不定！
           // const musicMsg = await this.send(selfPeer, [this.genMusicElement(url, audio, title, content, image)], [], false)
           // 转发
@@ -329,12 +329,12 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
       }
     }
     // log("send msg:", peer, sendElements)
-    const {sendElements, deleteAfterSentFiles} = await createSendElements(messages, group);
+    const { sendElements, deleteAfterSentFiles } = await createSendElements(messages, group);
     const returnMsg = await sendMsg(peer, sendElements, deleteAfterSentFiles);
     deleteAfterSentFiles.map(f => fs.unlink(f, () => {
     }));
 
-    const res = {message_id: returnMsg.id!};
+    const res = { message_id: returnMsg.id! };
     // console.log(res);
     return res;
   }
@@ -452,7 +452,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
       if (nodeMsg) {
         nodeMsgArray.push(nodeMsg);
         if (!srcPeer) {
-          srcPeer = {chatType: nodeMsg.chatType, peerUid: nodeMsg.peerUid};
+          srcPeer = { chatType: nodeMsg.chatType, peerUid: nodeMsg.peerUid };
         } else if (srcPeer.peerUid !== nodeMsg.peerUid) {
           needSendSelf = true;
           srcPeer = selfPeer;
@@ -501,7 +501,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         token: '5c1e4905f926dd3a64a4bd3841460351',
         type: 'normal'
       },
-      extra: {app_type: 1, appid: 100497308, uin: selfInfo.uin},
+      extra: { app_type: 1, appid: 100497308, uin: selfInfo.uin },
       meta: {
         news: {
           action: '',
