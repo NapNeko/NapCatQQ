@@ -1,11 +1,10 @@
-name: "release"
+name: "Build"
 on:
   push:
-    tags:
-      - "v*"
 
 jobs:
   build-linux:
+    if: ${{ startsWith(github.event.head_commit.message, 'build:') }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -36,6 +35,7 @@ jobs:
         name: NapCat.${{ matrix.target_platform }}.${{ matrix.target_arch }}
         path: dist
   build-win32:
+    if: ${{ startsWith(github.event.head_commit.message, 'build:') }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -65,28 +65,3 @@ jobs:
           with:
               name: NapCat.${{ matrix.target_platform }}.${{ matrix.target_arch }}
               path: dist
-  release-napcat:
-    needs: [build-win32,build-linux]
-    runs-on: ubuntu-latest
-    steps:
-    - name: Download All Artifact
-      uses: actions/download-artifact@v4
-    
-    - name: Compress subdirectories
-      run: |
-       for dir in */; do
-          base=$(basename "$dir")
-          zip -r "${base}.zip" "$dir"
-        done 
-    - name: Create Release Draft and Upload Artifacts
-      uses: softprops/action-gh-release@v1
-      with:
-        name: NapCat V0.0.0
-        token: ${{ secrets.NAPCAT_BUILD }}
-        files: |
-          NapCat.win32.x64.zip
-          NapCat.linux.x64.zip
-          NapCat.linux.arm64.zip
-          NapCat.darwin.x64.zip
-          NapCat.darwin.arm64.zip
-        draft: true
