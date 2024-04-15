@@ -1,5 +1,4 @@
 import crypto from 'node:crypto';
-import { resolve } from 'dns';
 
 export function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
