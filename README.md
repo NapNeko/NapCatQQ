@@ -84,7 +84,7 @@ json 配置内容参数解释：
 
 目前还在研究怎么精简安装，暂时只能安装官方QQ整体依赖
 
-下载QQ的deb包
+下载QQ
  
 [deb x86版本](https://dldir1.qq.com/qqfile/qq/QQNT/Linux/QQ_3.2.7_240403_amd64_01.deb)
 [deb arm版本](https://dldir1.qq.com/qqfile/qq/QQNT/Linux/QQ_3.2.7_240403_arm64_01.deb)
