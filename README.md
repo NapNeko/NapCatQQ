@@ -143,6 +143,9 @@ $env:FFMPEG_PATH="d:\ffmpeg\bin\ffmpeg.exe"
 
 不用管，这是正常现象，是因为 QQ 本身的问题，不影响使用
 
+## API 文档
+
+参考 [LLOneBot](https://llonebot.github.io/zh-CN/develop/api) 的文档
 
 <!-- 
 QQ群：545402644
