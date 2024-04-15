@@ -64,7 +64,7 @@ json 配置内容参数解释：
 
 ### Windows 启动
 
-运行`powershell ./napcat.ps1`, 或者 `napcat.bat`，如果出现乱码，可以尝试运行`napcat_utf8.ps1`
+运行`powershell ./napcat.ps1`, 或者 `napcat.bat`，如果出现乱码，可以尝试运行`napcat-utf8.ps1` 或 `napcat-utf8.bat`
 
 ### Linux 启动
 
