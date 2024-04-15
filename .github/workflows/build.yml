@@ -15,7 +15,7 @@ jobs:
     - name: Clone Main Repository
       uses: actions/checkout@v4
       with:
-          repository: 'NapNeko/NapCat'
+          repository: 'NapNeko/NapCatQQ'
           submodules: true
           token: ${{ secrets.NAPCAT_BUILD }}
     - name: Use Node.js 20.X
@@ -46,7 +46,7 @@ jobs:
         - name: Clone Main Repository
           uses: actions/checkout@v4
           with:
-                repository: 'NapNeko/NapCat'
+                repository: 'NapNeko/NapCatQQ'
                 submodules: true
                 token: ${{ secrets.NAPCAT_BUILD }}
         - name: Use Node.js 20.X
