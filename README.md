@@ -66,6 +66,8 @@ json 配置内容参数解释：
 
 运行`powershell ./napcat.ps1`, 或者 `napcat.bat`，如果出现乱码，可以尝试运行`napcat-utf8.ps1` 或 `napcat-utf8.bat`
 
+*如果出现 powershell 运行不了，以管理员身份打开 powershell，输入 `Set-ExecutionPolicy RemoteSigned`*
+
 ### Linux 启动
 
 运行`napcat.sh`
