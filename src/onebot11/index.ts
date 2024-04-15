@@ -24,11 +24,13 @@ checkVersion().then((remoteVersion: string) => {
   for (const k of [0, 1, 2]) {
     if (parseInt(remoteVersionList[k]) > parseInt(localVersionList[k])) {
       console.log('检测到更新,请前往 https://github.com/NapNeko/NapCatQQ 下载 NapCatQQ V', remoteVersion);
+      return;
     } else if (parseInt(remoteVersionList[k]) < parseInt(localVersionList[k])) {
       break;
     }
   }
   console.log('当前已是最新版本,版本:', localVersion);
+  return;
 });
 new NapCatOnebot11();
 napCatCore.addLoginSuccessCallback(() => {
