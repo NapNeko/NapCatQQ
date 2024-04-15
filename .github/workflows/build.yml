@@ -4,7 +4,7 @@ on:
 
 jobs:
   build-linux:
-    if: ${{ ! startsWith(github.event.head_commit.message, 'build:') }}
+    if: ${{ startsWith(github.event.head_commit.message, 'build:') }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -35,7 +35,7 @@ jobs:
         name: NapCat.${{ matrix.target_platform }}.${{ matrix.target_arch }}
         path: dist
   build-win32:
-    if: ${{ ! startsWith(github.event.head_commit.message, 'build:') }}
+    if: ${{ startsWith(github.event.head_commit.message, 'build:') }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
