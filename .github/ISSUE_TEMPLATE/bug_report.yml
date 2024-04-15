@@ -1,0 +1,81 @@
+name: Bug 反馈
+description: 报告可能的 NapCat 异常行为
+title: '[BUG] '
+labels: bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        欢迎来到 NapCat 的 Issue Tracker！请填写以下表格来提交 Bug。
+        在提交新的 Bug 反馈前，请确保您：
+        * 已经搜索了现有的 issues，并且没有找到可以解决您问题的方法
+        * 不与现有的某一 issue 重复
+  - type: input
+    id: system-version
+    attributes:
+      label: 系统版本
+      description: 运行 QQNT 的系统版本
+      placeholder: Windows 10 Pro Workstation 22H2
+    validations:
+      required: true
+  - type: input
+    id: qqnt-version
+    attributes:
+      label: QQNT 版本
+      description: 可在 QQNT 的「关于」的设置页中找到
+      placeholder: 9.9.7-21804
+    validations:
+      required: true
+  - type: input
+    id: napcat-version
+    attributes:
+      label: NapCat 版本
+      description: 可在 LiteLoaderQQNT 的设置页或是 QQNT 的设置页侧栏中找到
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: input
+    id: onebot-client-version
+    attributes:
+      label: OneBot 客户端
+      description: 连接至 NapCat 的客户端版本信息
+      placeholder: Overflow 2.16.0-2cf7991-SNAPSHOT
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 发生了什么?
+      description: 填写你认为的 NapCat 的不正常行为
+    validations:
+      required: true
+  - type: textarea
+    id: how-reproduce
+    attributes:
+      label: 如何复现
+      description: 填写应当如何操作才能触发这个不正常行为
+      placeholder: |
+        1. xxx
+        2. xxx
+        3. xxx
+    validations:
+      required: true
+  - type: textarea
+    id: what-expected
+    attributes:
+      label: 期望的结果?
+      description: 填写你认为 NapCat 应当执行的正常行为
+    validations:
+      required: true
+  - type: textarea
+    id: napcat-log
+    attributes:
+      label: NapCat 运行日志
+      description: 粘贴相关日志内容到此处
+      render: shell
+  - type: textarea
+    id: onebot-client-log
+    attributes:
+      label: OneBot 客户端运行日志
+      description: 粘贴 OneBot 客户端的相关日志内容到此处
+      render: shell
