@@ -82,7 +82,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         name: NapCat V0.0.0
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.NAPCAT_BUILD }}
         files: |
           NapCat.win32.x64.zip
           NapCat.linux.x64.zip
