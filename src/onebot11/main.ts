@@ -298,38 +298,38 @@ export class NapCatOnebot11 {
     }
   }
 
-  async postGroupMemberChange(groupList: Group[]) {
-    // todo: 有无更好的方法判断群成员变动
-    const newGroupList = groupList;
-    for (const group of newGroupList) {
-      const existGroup = await getGroup(group.groupCode);
-      if (existGroup) {
-        if (existGroup.memberCount > group.memberCount) {
-          log(`群(${group.groupCode})成员数量减少${existGroup.memberCount} -> ${group.memberCount}`);
-          const oldMembers = existGroup.members;
-          const newMembers = await NTQQGroupApi.getGroupMembers(group.groupCode);
-          group.members = newMembers;
-          const newMembersSet = new Set<string>();  // 建立索引降低时间复杂度
-
-          for (const member of newMembers) {
-            newMembersSet.add(member.uin);
-          }
-
-          // 判断bot是否是管理员，如果是管理员不需要从这里得知有人退群，这里的退群无法得知是主动退群还是被踢
-          const bot = await getGroupMember(group.groupCode, selfInfo.uin);
-          if (bot!.role == GroupMemberRole.admin || bot!.role == GroupMemberRole.owner) {
-            continue;
-          }
-          for (const member of oldMembers) {
-            if (!newMembersSet.has(member.uin) && member.uin != selfInfo.uin) {
-              postOB11Event(new OB11GroupDecreaseEvent(parseInt(group.groupCode), parseInt(member.uin), parseInt(member.uin), 'leave'));
-              break;
-            }
-          }
-        }
-      }
-    }
-  }
+  // async postGroupMemberChange(groupList: Group[]) {
+  //   // todo: 有无更好的方法判断群成员变动
+  //   const newGroupList = groupList;
+  //   for (const group of newGroupList) {
+  //     const existGroup = await getGroup(group.groupCode);
+  //     if (existGroup) {
+  //       if (existGroup.memberCount > group.memberCount) {
+  //         log(`群(${group.groupCode})成员数量减少${existGroup.memberCount} -> ${group.memberCount}`);
+  //         const oldMembers = existGroup.members;
+  //         const newMembers = await NTQQGroupApi.getGroupMembers(group.groupCode);
+  //         group.members = newMembers;
+  //         const newMembersSet = new Set<string>();  // 建立索引降低时间复杂度
+  //
+  //         for (const member of newMembers) {
+  //           newMembersSet.add(member.uin);
+  //         }
+  //
+  //         // 判断bot是否是管理员，如果是管理员不需要从这里得知有人退群，这里的退群无法得知是主动退群还是被踢
+  //         const bot = await getGroupMember(group.groupCode, selfInfo.uin);
+  //         if (bot!.role == GroupMemberRole.admin || bot!.role == GroupMemberRole.owner) {
+  //           continue;
+  //         }
+  //         for (const member of oldMembers) {
+  //           if (!newMembersSet.has(member.uin) && member.uin != selfInfo.uin) {
+  //             postOB11Event(new OB11GroupDecreaseEvent(parseInt(group.groupCode), parseInt(member.uin), parseInt(member.uin), 'leave'));
+  //             break;
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 }
 
 // export const napCatOneBot11 = new NapCatOnebot11();
