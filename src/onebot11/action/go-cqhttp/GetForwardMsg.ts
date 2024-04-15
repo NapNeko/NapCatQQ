@@ -7,6 +7,7 @@ import { ActionName } from '../types';
 
 interface Payload {
   message_id: string;  // long msg id
+  id?: string;  // short msg id
 }
 
 interface Response {
@@ -17,7 +18,7 @@ export class GoCQHTTGetForwardMsgAction extends BaseAction<Payload, any> {
   actionName = ActionName.GoCQHTTP_GetForwardMsg;
 
   protected async _handle(payload: Payload): Promise<any> {
-    const rootMsg = await dbUtil.getMsgByLongId(payload.message_id);
+    const rootMsg = await dbUtil.getMsgByLongId( payload.id || payload.message_id);
     if (!rootMsg) {
       throw Error('msg not found');
     }
