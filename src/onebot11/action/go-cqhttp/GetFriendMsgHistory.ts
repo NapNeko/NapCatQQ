@@ -21,15 +21,15 @@ interface Response {
 export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
     actionName = ActionName.GoCQHTTP_GetGroupMsgHistory;
     protected async _handle(payload: Payload): Promise<Response> {
-        let uin = getUidByUin(payload.user_id.toString())
-        if (!uin) {
+        let uid = getUidByUin(payload.user_id.toString())
+        if (!uid) {
             throw `记录${payload.user_id}不存在`;
         }
         const startMsgId = (await dbUtil.getMsgByShortId(payload.message_seq))?.msgId || '0';
-        let friend = await getFriend(uid2UinMap?.[payload.user_id].toString())
+        let friend = await getFriend(uid);
         let historyResult = (await NTQQMsgApi.getMsgHistory({
             chatType: friend ? ChatType.friend : ChatType.temp,
-            peerUid: uin
+            peerUid: uid
         }, startMsgId, parseInt(payload.count?.toString()) || 20));
         console.log(historyResult);
         const msgList = historyResult.msgList;
