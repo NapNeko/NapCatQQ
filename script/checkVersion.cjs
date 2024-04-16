@@ -8,9 +8,6 @@ console.log("[NapCat] [CheckVersion] currentVersion:", currentVersion, " targetV
 if (currentVersion === targetVersion) {
     fs.writeFileSync("./checkVersion.sh", "#!/bin/bashe\necho \"CheckVersion Is Done\"")
 } else {
-    let packageJson = JSON.parse(fs.readFileSync("./package.json"));
-    packageJson.version = targetVersion;
-    fs.writeFileSync("./package.json", JSON.stringify(packageJson));
     let runscript = "sed -i 's/\"version\": \"" + currentVersion + "\"/\"version\": \"" + targetVersion + "\"/g' package.json";
     fs.writeFileSync("./checkVersion.sh", "#!/bin/bashe\ngit config --global user.email \"bot@test.nanaeo.cn\"\n git config --global user.name \"Version\"\n" + runscript + "\ngit add .\n git commit -m \"chore:version change\"\n git push -u origin main")
 }
