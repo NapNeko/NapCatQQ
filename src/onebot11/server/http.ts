@@ -3,6 +3,10 @@ import { OB11Response } from '../action/OB11Response';
 import { HttpServerBase } from '@/common/server/http';
 import { actionHandlers, actionMap } from '../action';
 import { ob11Config } from '@/onebot11/config';
+import { selfInfo } from '@/common/data';
+import { OB11HeartbeatEvent } from '@/onebot11/event/meta/OB11HeartbeatEvent';
+import { postOB11Event } from '@/onebot11/server/postOB11Event';
+import { napCatCore } from '@/core';
 
 class OB11HTTPServer extends HttpServerBase {
   name = 'OneBot V11 server';
@@ -29,3 +33,26 @@ setTimeout(() => {
     }
   }
 }, 0);
+
+
+class HTTPHeart{
+  intervalId: NodeJS.Timeout | null = null;
+  start(){
+    const { heartInterval, } = ob11Config;
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
+    this.intervalId = setInterval(() => {
+      // ws的心跳是ws自己维护的
+      postOB11Event(new OB11HeartbeatEvent(!!selfInfo.online, true, heartInterval), false, false);
+    }, heartInterval);
+  }
+
+  stop(){
+    if (this.intervalId){
+      clearInterval(this.intervalId);
+    }
+  }
+}
+
+export const httpHeart = new HTTPHeart();

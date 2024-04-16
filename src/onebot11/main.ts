@@ -12,7 +12,7 @@ import {
   RawMessage
 } from '@/core/qqnt/entities';
 import { ob11Config } from '@/onebot11/config';
-import { ob11HTTPServer } from '@/onebot11/server/http';
+import { httpHeart, ob11HTTPServer } from '@/onebot11/server/http';
 import { ob11WebsocketServer } from '@/onebot11/server/ws/WebsocketServer';
 import { ob11ReverseWebsockets } from '@/onebot11/server/ws/ReverseWebsocket';
 import { friendRequests, getFriend, getGroup, getGroupMember, groupNotifies, selfInfo } from '@/common/data';
@@ -48,6 +48,10 @@ export class NapCatOnebot11 {
     }
     if (ob11Config.enableWsReverse) {
       ob11ReverseWebsockets.start();
+    }
+    if (ob11Config.enableHttpHeart){
+      // 启动http心跳
+      httpHeart.start();
     }
     // MsgListener
     const msgListener = new MsgListener();

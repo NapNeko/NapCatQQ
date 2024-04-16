@@ -7,6 +7,7 @@
   "wsReverseUrls": [],
   "enableHttpPost": false,
   "httpPostUrls": [],
+  "enableHttpHeart": false,
   "httpSecret": "",
   "messagePostFormat": "array",
   "reportSelfMessage": false,

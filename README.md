@@ -28,7 +28,7 @@ json 配置内容参数解释：
 
 ```json5
 {
-  // 是否启用http服务，如果启用，可以通过http接口发送消息
+  // 是否启用http服务, true为启动，false为禁用，如果启用，可以通过http接口发送消息
   "enableHttp": false,
   // http服务端口
   "httpPort": 3000,
@@ -44,6 +44,8 @@ json 配置内容参数解释：
   "enableHttpPost": false,
   // http上报地址, 如["http://127.0.0.1:8080/onebot/v11/http"]
   "httpPostUrls": [],
+  // 是否启用http心跳
+  "enableHttpHeart": false,
   // http上报密钥，可为空
   "httpSecret": "",
   // 消息上报格式，array为消息组，string为cq码字符串

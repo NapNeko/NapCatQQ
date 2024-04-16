@@ -9,6 +9,7 @@ export interface OB11Config {
   wsPort: number;
   wsReverseUrls: string[];
   enableHttp: boolean;
+  enableHttpHeart: boolean;
   enableHttpPost: boolean;
   enableWs: boolean;
   enableWsReverse: boolean;
@@ -35,6 +36,7 @@ class Config implements OB11Config {
   wsReverseUrls: string[] = [];
   enableHttp = false;
   enableHttpPost = false;
+  enableHttpHeart = false;
   enableWs = false;
   enableWsReverse = false;
   messagePostFormat: 'array' | 'string' = 'array';
