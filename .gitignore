@@ -14,3 +14,4 @@ src/core.lib/common/
 
 # Build
 *.db
+checkVersion.sh
