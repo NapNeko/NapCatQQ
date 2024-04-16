@@ -15,5 +15,5 @@ export declare class NapCatCoreServiceGroup {
      * @returns {void}
      */
     init(service: NodeIKernelGroupService): void;
-    addGroupListener(listener: GroupListener): void;
+    addGroupListener(listener: GroupListener): number | undefined;
 }

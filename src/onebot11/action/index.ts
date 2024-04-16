@@ -96,6 +96,8 @@ function initActionMap() {
   const actionMap = new Map<string, BaseAction<any, any>>();
   for (const action of actionHandlers) {
     actionMap.set(action.actionName, action);
+    actionMap.set(action.actionName + '_async', action);
+    actionMap.set(action.actionName + '_rate_limited', action);
   }
 
   return actionMap;
