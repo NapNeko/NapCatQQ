@@ -44,6 +44,7 @@ import GoCQHTTPDownloadFile from './go-cqhttp/DownloadFile';
 import GoCQHTTPGetGroupMsgHistory from './go-cqhttp/GetGroupMsgHistory';
 import GetFile from './file/GetFile';
 import { GoCQHTTGetForwardMsgAction } from './go-cqhttp/GetForwardMsg';
+import GetFriendMsgHistory from './go-cqhttp/GetFriendMsgHistory';
 
 export const actionHandlers = [
   new GetFile(),
@@ -89,7 +90,7 @@ export const actionHandlers = [
   new GoCQHTTPUploadGroupFile(),
   new GoCQHTTPGetGroupMsgHistory(),
   new GoCQHTTGetForwardMsgAction(),
-
+  new GetFriendMsgHistory()
 ];
 
 function initActionMap() {
