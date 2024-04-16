@@ -30,6 +30,7 @@ jobs:
               node ./script/checkVersion.cjs
               sh ./checkVersion.sh
   build-linux:
+    needs: [check-version]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -62,6 +63,7 @@ jobs:
         path: dist
   build-win32:
     runs-on: ubuntu-latest
+    needs: [check-version]
     strategy:
       fail-fast: false
       matrix:
