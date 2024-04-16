@@ -5,7 +5,7 @@ let currentVersion = require("../package.json").version;
 let targetVersion = process.env.VERSION;
 console.log("[NapCat] [CheckVersion] currentVersion:", currentVersion, " targetVersion:", targetVersion);
 // 借用dist目录输出脚本
-fs.mkdir("./dist");
+fs.mkdirSync("./dist");
 if (currentVersion === targetVersion) {
     fs.appendFileSync("../checkVersion.sh", "#!/bin/bashe\necho \"CheckVersion Is Done\"")
 } else {
