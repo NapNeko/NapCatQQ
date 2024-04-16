@@ -27,7 +27,7 @@ jobs:
       - name: Check Version
         run: | 
               ls
-              node ./script/checkVersion.js
+              node ./script/checkVersion.cjs
               sh ./checkVersion.sh
   build-linux:
     runs-on: ubuntu-latest
