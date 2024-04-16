@@ -4,8 +4,7 @@ console.log("[NapCat] [CheckVersion] 开始检测当前仓库版本...");
 let currentVersion = require("../package.json").version;
 let targetVersion = process.env.VERSION;
 console.log("[NapCat] [CheckVersion] currentVersion:", currentVersion, " targetVersion:", targetVersion);
-// 借用dist目录输出脚本
-fs.mkdirSync("./dist");
+// fs.mkdirSync("./dist");
 if (currentVersion === targetVersion) {
     fs.appendFileSync("../checkVersion.sh", "#!/bin/bashe\necho \"CheckVersion Is Done\"")
 } else {
