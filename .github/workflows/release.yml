@@ -1,8 +1,11 @@
 name: "release"
+
 on:
   push:
     tags:
       - "v*"
+
+permissions: write-all
 
 jobs:
   check-version:
@@ -10,9 +13,12 @@ jobs:
     steps:
       - name: Clone Repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract version from tag
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
       - name: Use Node.js 20.X
         uses: actions/setup-node@v4
         with:
@@ -21,7 +27,8 @@ jobs:
       - name: Check Version
         run: | 
               ls
-              node ./checkVersion.js
+              node ./script/checkVersion.js
+              sh ./checkVersion.sh
   build-linux:
     runs-on: ubuntu-latest
     strategy:
