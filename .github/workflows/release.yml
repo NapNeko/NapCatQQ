@@ -5,6 +5,23 @@ on:
       - "v*"
 
 jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone Repository
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+      - name: Use Node.js 20.X
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Check Version
+        run: | 
+              ls
+              node ./checkVersion.js
   build-linux:
     runs-on: ubuntu-latest
     strategy:
@@ -23,12 +40,6 @@ jobs:
       uses: actions/setup-node@v4
       with:
           node-version: 20.x
-
-    - name: Extract version from tag
-      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
-
-    - name: Print version
-      run: echo $VERSION
 
     - name: Build NuCat Linux
       run: |
@@ -56,15 +67,11 @@ jobs:
                 repository: 'NapNeko/NapCatQQ'
                 submodules: true
                 token: ${{ secrets.NAPCAT_BUILD }}
+
         - name: Use Node.js 20.X
           uses: actions/setup-node@v4
           with:
               node-version: 20.x
-        - name: Extract version from tag
-          run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
-              
-        - name: Print version
-          run: echo $VERSION
           
         - name: Build NuCat Linux
           run: |
@@ -73,11 +80,13 @@ jobs:
                 cd dist
                 npm i --omit=dev --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
                 cd ..
+
         - name: Upload Artifact
           uses: actions/upload-artifact@v4
           with:
               name: NapCat.${{ matrix.target_platform }}.${{ matrix.target_arch }}
               path: dist
+
   release-napcat:
     needs: [build-win32,build-linux]
     runs-on: ubuntu-latest
@@ -91,6 +100,7 @@ jobs:
           base=$(basename "$dir")
           zip -r "${base}.zip" "$dir"
         done 
+        
     - name: Create Release Draft and Upload Artifacts
       uses: softprops/action-gh-release@v1
       with:
