@@ -28,6 +28,7 @@ import { sleep } from '@/common/utils/helper';
 import { uri2local } from '@/common/utils/file';
 import { getFriend, getGroup, getGroupMember, getUidByUin, selfInfo } from '@/common/data';
 import { NTQQMsgApi } from '@/core/qqnt/apis/msg';
+import {NTQQFileApi} from "@/core/qqnt/apis/file";
 
 const ALLOW_SEND_TEMP_MSG = false;
 
@@ -144,25 +145,40 @@ export async function createSendElements(messageData: OB11MessageData[], group: 
     case OB11MessageDataType.file:
     case OB11MessageDataType.video:
     case OB11MessageDataType.voice: {
-      const file = sendMsg.data?.file;
+      let file = sendMsg.data?.file;
       const payloadFileName = sendMsg.data?.name;
       if (file) {
         // todo: 使用缓存文件发送
-        // const cache = await dbUtil.getFileCache(file);
-        // if (cache) {
-        //   if (fs.existsSync(cache.filePath)) {
-        //     file = "file://" + cache.filePath;
-        //   } else if (cache.downloadFunc) {
-        //     await cache.downloadFunc();
-        //     file = cache.filePath;
-        //   } else if (cache.url) {
-        //     file = cache.url;
-        //   }
-        //   log("找到文件缓存", file);
-        // }
+        const cache = await dbUtil.getFileCacheByName(file);
+        if (cache) {
+          if (fs.existsSync(cache.path)) {
+            file = "file://" + cache.path;
+          }
+          else if (cache.url) {
+            file = cache.url;
+          }
+          else{
+            const fileMsg = await dbUtil.getMsgByLongId(cache.msgId);
+            if (fileMsg){
+              const downloadPath = await NTQQFileApi.downloadMedia(fileMsg.msgId, fileMsg.chatType, fileMsg.peerUid,
+                cache.elementId, '', '');
+              cache.path = downloadPath!;
+              dbUtil.updateFileCache(cache).then();
+              file = "file://" + cache.path;
+            }
+            // await sleep(1000);
+
+            // log('download result', downloadPath);
+            // log('下载完成后的msg', msg);
+          }
+          log("找到文件缓存", file);
+        }
         const { path, isLocal, fileName, errMsg } = (await uri2local(file));
         if (errMsg) {
-          throw errMsg;
+          log('文件下载失败', errMsg);
+          throw Error('文件下载失败' + errMsg);
+          // throw (errMsg);
+          // continue
         }
         if (path) {
           if (!isLocal) { // 只删除http和base64转过来的文件
@@ -311,7 +327,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         const returnMsg = await this.handleForwardNode(peer, messages as OB11MessageNode[], group);
         return { message_id: returnMsg!.id! };
       } catch (e: any) {
-        throw ('发送转发消息失败 ' + e.toString());
+        throw Error('发送转发消息失败 ' + e.toString());
       }
     } else {
       if (this.getSpecialMsgNum(payload, OB11MessageDataType.music)) {
@@ -482,6 +498,9 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
     // nodeIds.push(nodeMsg.msgId)
     // await sleep(500);
     // 开发转发
+    if (nodeMsgIds.length === 0){
+      throw Error('转发消息失败，生成节点为空');
+    }
     try {
       log('开发转发', nodeMsgIds);
       return await NTQQMsgApi.multiForwardMsg(srcPeer!, destPeer, nodeMsgIds);

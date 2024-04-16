@@ -79,6 +79,7 @@ export class ReverseWebsocket {
   private connect() {
     const { token, heartInterval } = ob11Config;
     this.websocket = new WebSocketClass(this.url, {
+      maxPayload: 1024 * 1024 * 1024,
       handshakeTimeout: 2000,
       perMessageDeflate: false,
       headers: {
