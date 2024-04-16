@@ -38,7 +38,8 @@ import { OB11GroupTitleEvent } from './event/notice/OB11GroupTitleEvent';
 import { OB11GroupCardEvent } from './event/notice/OB11GroupCardEvent';
 import { OB11GroupDecreaseEvent } from './event/notice/OB11GroupDecreaseEvent';
 import { ob11Config } from '@/onebot11/config';
-import { getFriend, getGroupMember, groupMembers, selfInfo, tempGroupCodeMap } from '@/common/data';
+import { deleteGroup, getFriend, getGroupMember, groupMembers, selfInfo, tempGroupCodeMap } from '@/common/data';
+import { NTQQGroupApi, NTQQUserApi } from '@/core/qqnt/apis';
 
 
 export class OB11Constructor {
@@ -322,10 +323,16 @@ export class OB11Constructor {
             return event;
           }
         } else if (groupElement.type == TipGroupElementType.kicked) {
-          log('收到我被踢出提示', groupElement);
-          const adminUin = (await getGroupMember(msg.peerUid, groupElement.adminUid))?.uin; //|| (await NTQQUserApi.getUserDetailInfo(groupElement.adminUid))?.uin
-          if (adminUin) {
-            return new OB11GroupDecreaseEvent(parseInt(msg.peerUid), parseInt(selfInfo.uin), parseInt(adminUin), 'kick_me');
+          log(`收到我被踢出或退群提示, 群${msg.peerUid}`, groupElement);
+          deleteGroup(msg.peerUid);
+          NTQQGroupApi.quitGroup(msg.peerUid).then();
+          try {
+            const adminUin = (await getGroupMember(msg.peerUid, groupElement.adminUid))?.uin || (await NTQQUserApi.getUserDetailInfo(groupElement.adminUid))?.uin;
+            if (adminUin) {
+              return new OB11GroupDecreaseEvent(parseInt(msg.peerUid), parseInt(selfInfo.uin), parseInt(adminUin), 'kick_me');
+            }
+          } catch (e) {
+            return new OB11GroupDecreaseEvent(parseInt(msg.peerUid), parseInt(selfInfo.uin), 0, 'leave');
           }
         }
       } else if (element.fileElement) {

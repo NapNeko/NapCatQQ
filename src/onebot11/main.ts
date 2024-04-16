@@ -29,7 +29,7 @@ import { OB11GroupRecallNoticeEvent } from '@/onebot11/event/notice/OB11GroupRec
 
 
 export class NapCatOnebot11 {
-  private bootTime: number = Date.now() / 1000;
+  private bootTime: number = Date.now() / 1000;  // 秒
 
 
   constructor() {
@@ -130,7 +130,6 @@ export class NapCatOnebot11 {
       // if (message.senderUin !== selfInfo.uin){
       // message.msgShortId = await dbUtil.addMsg(message);
       // }
-
       OB11Constructor.message(message).then((msg) => {
         if (debug) {
           msg.raw = message;
