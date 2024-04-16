@@ -11,5 +11,6 @@ if (currentVersion === targetVersion) {
     let packageJson = JSON.parse(fs.readFileSync("./package.json"));
     packageJson.version = targetVersion;
     fs.writeFileSync("./package.json", JSON.stringify(packageJson));
-    fs.writeFileSync("./checkVersion.sh", "#!/bin/bashe\ngit config --global user.email \"bot@test.mail\"\n git config --global user.name \"Version\"\ngit add .\n git commit -m \"chore:version change\"\n git push -u origin main")
+    let runscript = "sed -i 's/\"version\": \"" + currentVersion + "\"/\"version\": \"" + targetVersion + "\"/g' package.json";
+    fs.writeFileSync("./checkVersion.sh", "#!/bin/bashe\ngit config --global user.email \"bot@test.mail\"\n git config --global user.name \"Version\"\n" + runscript + "\ngit add .\n git commit -m \"chore:version change\"\n git push -u origin main")
 }
