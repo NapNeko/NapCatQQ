@@ -18,6 +18,11 @@ export const selfInfo: SelfInfo = {
 // groupCode -> Group
 export const groups: Map<string, Group> = new Map<string, Group>();
 
+export function deleteGroup(groupQQ: string) {
+  groups.delete(groupQQ);
+  groupMembers.delete(groupQQ);
+}
+
 // 群号 -> 群成员map(uid=>GroupMember)
 export const groupMembers: Map<string, Map<string, GroupMember>> = new Map<string, Map<string, GroupMember>>();
 
