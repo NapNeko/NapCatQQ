@@ -11,6 +11,6 @@ if (currentVersion === targetVersion) {
 } else {
     let packageJson = JSON.parse(fs.readFileSync("./package.json"));
     packageJson.version = targetVersion;
-    fs.writeFileSync(JSON.stringify(packageJson));
+    fs.writeFileSync("./package.json", JSON.stringify(packageJson));
     fs.appendFileSync("./checkVersion.sh", "#!/bin/bashe\ngit add .\n git commit -m \"chore:version change\"\n git push")
 }
