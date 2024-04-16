@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { OB11Response } from '../action/OB11Response';
 import { HttpServerBase } from '@/common/server/http';
-import { actionHandlers } from '../action';
+import { actionHandlers, actionMap } from '../action';
 import { ob11Config } from '@/onebot11/config';
 
 class OB11HTTPServer extends HttpServerBase {
@@ -21,10 +21,9 @@ class OB11HTTPServer extends HttpServerBase {
 export const ob11HTTPServer = new OB11HTTPServer();
 
 setTimeout(() => {
-  for (const action of actionHandlers) {
+  for (const [actionName, action] of actionMap) {
     for (const method of ['post', 'get']) {
-      ob11HTTPServer.registerRouter(method, action.actionName, (res, payload) => {
-        // @ts-expect-error wait fix
+      ob11HTTPServer.registerRouter(method, actionName, (res, payload) => {
         return action.handle(payload);
       });
     }

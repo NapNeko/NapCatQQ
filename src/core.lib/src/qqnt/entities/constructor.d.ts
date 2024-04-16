@@ -8,5 +8,7 @@ export declare class SendMsgElementConstructor {
     static video(filePath: string, fileName?: string, diyThumbPath?: string): Promise<SendVideoElement>;
     static ptt(pttPath: string): Promise<SendPttElement>;
     static face(faceId: number): SendFaceElement;
+    static dice(resultId: number | null): SendFaceElement;
+    static rps(resultId: number | null): SendFaceElement;
     static ark(data: any): SendArkElement;
 }

@@ -1,4 +1,4 @@
-import { PicSubType, RawMessage } from '@/core/entity';
+import { PicSubType, RawMessage } from '@/core/qqnt/entities';
 import { EventType } from './event/OB11BaseEvent';
 
 export interface OB11User {
@@ -116,7 +116,10 @@ export enum OB11MessageDataType {
   markdown = 'markdown',
   node = 'node',  // 合并转发消息节点
   forward = 'forward',  // 合并转发消息，用于上报
-  xml = 'xml'
+  xml = 'xml',
+  poke = 'poke',
+  dice = 'dice',
+  RPS = 'rps'
 }
 
 export interface OB11MessageMFace {
@@ -213,12 +216,26 @@ export interface OB11MessageJson {
   data: { config: { token: string } } & any
 }
 
+export interface OB11MessageDice{
+  type: OB11MessageDataType.dice,
+  data: {
+    result: number
+  }
+}
+export interface OB11MessageRPS{
+  type: OB11MessageDataType.RPS,
+  data: {
+    result: number
+  }
+}
+
 export type OB11MessageData =
   OB11MessageText |
   OB11MessageFace | OB11MessageMFace |
   OB11MessageAt | OB11MessageReply |
   OB11MessageImage | OB11MessageRecord | OB11MessageFile | OB11MessageVideo |
-  OB11MessageNode | OB11MessageCustomMusic | OB11MessageJson
+  OB11MessageNode | OB11MessageCustomMusic | OB11MessageJson |
+  OB11MessageDice | OB11MessageRPS
 
 export interface OB11PostSendMsg {
   message_type?: 'private' | 'group'
@@ -226,6 +243,7 @@ export interface OB11PostSendMsg {
   group_id?: string,
   message: OB11MessageMixType;
   messages?: OB11MessageMixType;  // 兼容 go-cqhttp
+  auto_escape?: boolean
 }
 
 export interface OB11Version {

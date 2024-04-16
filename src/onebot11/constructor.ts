@@ -11,7 +11,7 @@ import {
 import {
   AtType,
   ChatType,
-  ElementType,
+  ElementType, FaceIndex,
   Friend,
   GrayTipElementSubType,
   Group,
@@ -224,18 +224,23 @@ export class OB11Constructor {
           elementId: element.elementId
         }).then();
 
-        // log("收到语音消息", msg)
-        // window.LLAPI.Ptt2Text(message.raw.msgId, message.peer, messages).then(text => {
-        //     console.log("语音转文字结果", text);
-        // }).catch(err => {
-        //     console.log("语音转文字失败", err);
-        // })
       } else if (element.arkElement) {
         message_data['type'] = OB11MessageDataType.json;
         message_data['data']['data'] = element.arkElement.bytesData;
       } else if (element.faceElement) {
-        message_data['type'] = OB11MessageDataType.face;
-        message_data['data']['id'] = element.faceElement.faceIndex.toString();
+        const faceId = element.faceElement.faceIndex;
+        if (faceId === FaceIndex.dice){
+          message_data['type'] = OB11MessageDataType.dice;
+          message_data['data']['result'] = element.faceElement.resultId;
+        }
+        else if (faceId === FaceIndex.RPS){
+          message_data['type'] = OB11MessageDataType.RPS;
+          message_data['data']['result'] = element.faceElement.resultId;
+        }
+        else{
+          message_data['type'] = OB11MessageDataType.face;
+          message_data['data']['id'] = element.faceElement.faceIndex.toString();
+        }
       } else if (element.marketFaceElement) {
         message_data['type'] = OB11MessageDataType.mface;
         message_data['data']['text'] = element.marketFaceElement.faceName;

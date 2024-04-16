@@ -192,9 +192,26 @@ export interface GrayTipElement {
         jsonStr: string;
     };
 }
+export declare enum FaceType {
+    normal = 1,// 小黄脸
+    normal2 = 2,// 新小黄脸, 从faceIndex 222开始？
+    dice = 3
+}
+export declare enum FaceIndex {
+    dice = 358,
+    RPS = 359
+}
 export interface FaceElement {
     faceIndex: number;
-    faceType: 1;
+    faceType: FaceType;
+    faceText?: string;
+    packId?: string;
+    stickerId?: string;
+    sourceType?: number;
+    stickerType?: number;
+    resultId?: string;
+    surpriseId?: string;
+    randomType?: number;
 }
 export interface MarketFaceElement {
     'itemType': 6;

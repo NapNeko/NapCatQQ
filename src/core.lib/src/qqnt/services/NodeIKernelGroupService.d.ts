@@ -2,7 +2,7 @@ import { NodeIKernelGroupListener } from '@/core/qqnt/listeners/NodeIKernelGroup
 import { GroupMember, GroupMemberRole, GroupNotifyTypes, GroupRequestOperateTypes } from '@/core/qqnt/entities';
 import { GeneralCallResult } from '@/core/qqnt/services/common';
 export interface NodeIKernelGroupService {
-    addKernelGroupListener(listener: NodeIKernelGroupListener): void;
+    addKernelGroupListener(listener: NodeIKernelGroupListener): number;
     removeKernelGroupListener(listenerId: unknown): void;
     createMemberListScene(groupCode: string, scene: string): string;
     destroyMemberListScene(): void;
