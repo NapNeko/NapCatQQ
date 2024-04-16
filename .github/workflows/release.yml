@@ -112,12 +112,15 @@ jobs:
           base=$(basename "$dir")
           zip -r "${base}.zip" "$dir"
         done 
-        
+    
+    - name: Extract version from tag
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
     - name: Create Release Draft and Upload Artifacts
       uses: softprops/action-gh-release@v1
       with:
         name: NapCat V0.0.0
-        token: ${{ secrets.NAPCAT_BUILD }}
+        token: ${{ env.VERSION }}
         files: |
           NapCat.win32.x64.zip
           NapCat.linux.x64.zip
