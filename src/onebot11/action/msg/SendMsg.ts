@@ -329,7 +329,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
     } else {
       throw ('发送消息参数错误, 请指定group_id或user_id');
     }
-    const messages = convertMessage2List(payload.message, payload.auto_escape);
+    const messages = convertMessage2List(payload.message, payload.auto_escape === true || payload.auto_escape === 'true');
     if (this.getSpecialMsgNum(payload, OB11MessageDataType.node)) {
       try {
         const returnMsg = await this.handleForwardNode(peer, messages as OB11MessageNode[], group);
