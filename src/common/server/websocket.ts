@@ -29,7 +29,10 @@ export class WebsocketServerBase {
 
   start(port: number) {
     try {
-      this.ws = new WebSocketServer({ port });
+      this.ws = new WebSocketServer({
+        port ,
+        maxPayload: 1024 * 1024 * 1024
+      });
     } catch (e: any) {
       throw Error('ws服务启动失败, ' + e.toString());
     }
