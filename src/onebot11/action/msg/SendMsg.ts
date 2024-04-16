@@ -27,8 +27,8 @@ import { log } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';
 import { uri2local } from '@/common/utils/file';
 import { getFriend, getGroup, getGroupMember, getUidByUin, selfInfo } from '@/common/data';
-import { NTQQMsgApi } from '@/core/qqnt/apis/msg';
-import {NTQQFileApi} from "@/core/qqnt/apis/file";
+import { NTQQMsgApi } from '@/core/qqnt/apis';
+import { NTQQFileApi } from '@/core/qqnt/apis';
 
 const ALLOW_SEND_TEMP_MSG = false;
 
@@ -152,7 +152,7 @@ export async function createSendElements(messageData: OB11MessageData[], group: 
         const cache = await dbUtil.getFileCacheByName(file);
         if (cache) {
           if (fs.existsSync(cache.path)) {
-            file = "file://" + cache.path;
+            file = 'file://' + cache.path;
           }
           else if (cache.url) {
             file = cache.url;
@@ -164,14 +164,14 @@ export async function createSendElements(messageData: OB11MessageData[], group: 
                 cache.elementId, '', '');
               cache.path = downloadPath!;
               dbUtil.updateFileCache(cache).then();
-              file = "file://" + cache.path;
+              file = 'file://' + cache.path;
             }
             // await sleep(1000);
 
             // log('download result', downloadPath);
             // log('下载完成后的msg', msg);
           }
-          log("找到文件缓存", file);
+          log('找到文件缓存', file);
         }
         const { path, isLocal, fileName, errMsg } = (await uri2local(file));
         if (errMsg) {
