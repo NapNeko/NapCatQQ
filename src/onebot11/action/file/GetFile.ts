@@ -21,7 +21,6 @@ export interface GetFileResponse {
   base64?: string;
 }
 
-
 export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
   private getElement(msg: RawMessage): { id: string, element: VideoElement | FileElement } {
     let element = msg.elements.find(e => e.fileElement);

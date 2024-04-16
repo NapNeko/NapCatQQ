@@ -17,7 +17,7 @@ class GetMsg extends BaseAction<PayloadType, OB11Message> {
   protected async _handle(payload: PayloadType) {
     // log("history msg ids", Object.keys(msgHistory));
     if (!payload.message_id) {
-      throw ('参数message_id不能为空');
+      throw Error('参数message_id不能为空');
     }
     let msg = await dbUtil.getMsgByShortId(payload.message_id);
     if (!msg) {
