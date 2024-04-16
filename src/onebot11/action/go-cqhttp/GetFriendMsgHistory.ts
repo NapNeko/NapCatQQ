@@ -20,6 +20,7 @@ interface Response {
 
 export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
     actionName = ActionName.GetFriendMsgHistory;
+    
     protected async _handle(payload: Payload): Promise<Response> {
         let uid = getUidByUin(payload.user_id.toString())
         if (!uid) {
