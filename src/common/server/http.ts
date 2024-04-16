@@ -94,6 +94,8 @@ export abstract class HttpServerBase {
       let payload = req.body;
       if (method == 'get') {
         payload = req.query;
+      } else if (req.query) {
+        payload = { ...req.query, ...req.body };
       }
       log('收到http请求', url, payload);
       try {
