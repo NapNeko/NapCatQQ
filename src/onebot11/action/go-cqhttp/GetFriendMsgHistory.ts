@@ -1,6 +1,6 @@
 import BaseAction from '../BaseAction';
 import { OB11Message, OB11User } from '../../types';
-import { getFriend, friends, uid2UinMap } from '@/common/data';
+import { getFriend, friends, uid2UinMap, getUidByUin } from '@/common/data';
 import { ActionName } from '../types';
 import { ChatType } from '@/core/qqnt/entities';
 import { dbUtil } from '@/common/utils/db';
@@ -21,26 +21,16 @@ interface Response {
 export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
     actionName = ActionName.GoCQHTTP_GetGroupMsgHistory;
     protected async _handle(payload: Payload): Promise<Response> {
-        if (!uid2UinMap?.[payload.user_id]) {
+        let uin = getUidByUin(payload.user_id.toString())
+        if (!uin) {
             throw `记录${payload.user_id}不存在`;
         }
         const startMsgId = (await dbUtil.getMsgByShortId(payload.message_seq))?.msgId || '0';
-        // log("startMsgId", startMsgId)
-
         let friend = await getFriend(uid2UinMap?.[payload.user_id].toString())
-        let historyResult = undefined;
-        if (friend) {
-            historyResult = (await NTQQMsgApi.getMsgHistory({
-                chatType: ChatType.friend,
-                peerUid: uid2UinMap?.[payload.user_id]
-            }, startMsgId, parseInt(payload.count?.toString()) || 20));
-
-        } else {
-            historyResult = (await NTQQMsgApi.getMsgHistory({
-                chatType: ChatType.temp,
-                peerUid: uid2UinMap?.[payload.user_id]
-            }, startMsgId, parseInt(payload.count?.toString()) || 20));
-        }
+        let historyResult = (await NTQQMsgApi.getMsgHistory({
+            chatType: friend ? ChatType.friend : ChatType.temp,
+            peerUid: uin
+        }, startMsgId, parseInt(payload.count?.toString()) || 20));
         console.log(historyResult);
         const msgList = historyResult.msgList;
         await Promise.all(msgList.map(async msg => {
