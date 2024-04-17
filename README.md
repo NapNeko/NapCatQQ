@@ -74,6 +74,8 @@ json 配置内容参数解释：
 
 运行`napcat.sh`
 
+或使用[NapCatDocker](https://github.com/NapNeko/NapCat-Docker)
+
 ## 使用无需扫码快速登录
 
 前提是你已经成功登录过QQ，可以加参数` -q <你的QQ>` 进行登录，如`napcat.sh -q 1234567`
