@@ -4,6 +4,8 @@ on:
     branches:
       - main
 
+permissions: write-all
+
 jobs:
   build-linux:
     if: ${{ startsWith(github.event.head_commit.message, 'build:') }}
@@ -19,7 +21,7 @@ jobs:
       with:
           repository: 'NapNeko/NapCatQQ'
           submodules: true
-          token: ${{ secrets.NAPCAT_BUILD }}
+          token: ${{ secrets.GITHUB_TOKEN }}
     - name: Use Node.js 20.X
       uses: actions/setup-node@v4
       with:
@@ -50,7 +52,7 @@ jobs:
           with:
                 repository: 'NapNeko/NapCatQQ'
                 submodules: true
-                token: ${{ secrets.NAPCAT_BUILD }}
+                token: ${{ secrets.GITHUB_TOKEN }}
         - name: Use Node.js 20.X
           uses: actions/setup-node@v4
           with:
