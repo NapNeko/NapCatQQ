@@ -18,9 +18,16 @@ export class GoCQHTTGetForwardMsgAction extends BaseAction<Payload, any> {
   actionName = ActionName.GoCQHTTP_GetForwardMsg;
 
   protected async _handle(payload: Payload): Promise<any> {
-    const rootMsg = await dbUtil.getMsgByLongId( payload.id || payload.message_id);
+    const msgId = payload.message_id || payload.id;
+    if (!msgId) {
+      throw Error('message_id is required');
+    }
+    let rootMsg = await dbUtil.getMsgByLongId(msgId);
     if (!rootMsg) {
-      throw Error('msg not found');
+      rootMsg = await dbUtil.getMsgByShortId(parseInt(msgId));
+      if (!rootMsg){
+        throw Error('msg not found');
+      }
     }
     const data = await NTQQMsgApi.getMultiMsg({
       chatType: rootMsg.chatType,

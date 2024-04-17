@@ -333,7 +333,13 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
     if (this.getSpecialMsgNum(payload, OB11MessageDataType.node)) {
       try {
         const returnMsg = await this.handleForwardNode(peer, messages as OB11MessageNode[], group);
-        return { message_id: returnMsg!.id! };
+        if (returnMsg){
+          const msgShortId =await dbUtil.addMsg(returnMsg!, false);
+          return { message_id: msgShortId };
+        }
+        else{
+          throw Error('发送转发消息失败');
+        }
       } catch (e: any) {
         throw Error('发送转发消息失败 ' + e.toString());
       }
@@ -510,7 +516,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
       throw Error('转发消息失败，生成节点为空');
     }
     try {
-      log('开发转发', nodeMsgIds);
+      log('开发转发', srcPeer, destPeer, nodeMsgIds);
       return await NTQQMsgApi.multiForwardMsg(srcPeer!, destPeer, nodeMsgIds);
     } catch (e) {
       log('forward failed', e);
