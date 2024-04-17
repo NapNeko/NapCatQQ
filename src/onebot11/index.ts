@@ -7,7 +7,7 @@ import qrcode from 'qrcode-terminal';
 import * as readline from 'node:readline';
 import fs from 'fs/promises';
 import path from 'node:path';
-import { noifyLoginStatus } from '@/common/utils/umami';
+import { postLoginStatus } from '@/common/utils/umami';
 import { checkVersion } from '@/common/utils/version';
 
 program
@@ -36,7 +36,7 @@ checkVersion().then((remoteVersion: string) => {
 new NapCatOnebot11();
 napCatCore.addLoginSuccessCallback(() => {
   console.log('login success');
-  noifyLoginStatus();
+  postLoginStatus();
   const msgListener = new MsgListener();
   msgListener.onRecvMsg = (msg) => {
     // console.log("onRecvMsg", msg)

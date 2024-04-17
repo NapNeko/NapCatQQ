@@ -1,4 +1,5 @@
 import express, { Express, Request, Response } from 'express';
+import cors from 'cors';
 import http from 'http';
 import { log } from '../utils/log';
 import { ob11Config } from '@/onebot11/config';
@@ -12,6 +13,7 @@ export abstract class HttpServerBase {
 
   constructor() {
     this.expressAPP = express();
+    this.expressAPP.use(cors());
     this.expressAPP.use(express.urlencoded({ extended: true, limit: '5000mb' }));
     this.expressAPP.use((req, res, next) => {
       // 兼容处理没有带content-type的请求
