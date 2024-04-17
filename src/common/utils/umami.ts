@@ -1,5 +1,5 @@
 import { request } from 'https';
-export function noifyLoginStatus() {
+export function postLoginStatus() {
   const req = request(
     {
       hostname: 'napcat.wumiao.wang',
@@ -16,11 +16,16 @@ export function noifyLoginStatus() {
       res.on('data', (chunk) => {
         //data += chunk;
       });
+      res.on('error', (err) => {
+      });
       res.on('end', () => {
         //console.log('Response:', data);
       });
     }
   );
+  req.on('error', (e) => {
+    // console.error('Request error:', e);
+  });
   const StatesData = {
     type: 'event',
     payload: {
@@ -34,5 +39,6 @@ export function noifyLoginStatus() {
     }
   };
   req.write(JSON.stringify(StatesData));
+
   req.end();
 }
