@@ -45,7 +45,7 @@ jobs:
           repository: 'NapNeko/NapCatQQ'
           submodules: true
           ref: main
-          token: ${{ secrets.NAPCAT_BUILD }}
+          token: ${{ secrets.GITHUB_TOKEN }}
     - name: Use Node.js 20.X
       uses: actions/setup-node@v4
       with:
@@ -78,7 +78,7 @@ jobs:
                 repository: 'NapNeko/NapCatQQ'
                 submodules: true
                 ref: main
-                token: ${{ secrets.NAPCAT_BUILD }}
+                token: ${{ secrets.GITHUB_TOKEN }}
 
         - name: Use Node.js 20.X
           uses: actions/setup-node@v4
@@ -120,11 +120,11 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         name: NapCat V${{ env.VERSION }}
-        token: ${{ secrets.NAPCAT_BUILD }}
+        token: ${{ secrets.GITHUB_TOKEN }}
         files: |
           NapCat.win32.x64.zip
           NapCat.linux.x64.zip
           NapCat.linux.arm64.zip
-          NapCat.darwin.x64.zip
-          NapCat.darwin.arm64.zip
+#          NapCat.darwin.x64.zip
+#          NapCat.darwin.arm64.zip
         draft: true
