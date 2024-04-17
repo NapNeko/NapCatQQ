@@ -43,7 +43,7 @@ jobs:
       uses: actions/checkout@v4
       with:
           repository: 'NapNeko/NapCatQQ'
-          submodules: true
+          submodules: false
           ref: main
           token: ${{ secrets.GITHUB_TOKEN }}
     - name: Use Node.js 20.X
