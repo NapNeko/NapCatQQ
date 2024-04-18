@@ -148,7 +148,6 @@ export async function createSendElements(messageData: OB11MessageData[], group: 
       let file = sendMsg.data?.file;
       const payloadFileName = sendMsg.data?.name;
       if (file) {
-        // todo: 使用缓存文件发送
         const cache = await dbUtil.getFileCacheByName(file);
         if (cache) {
           if (fs.existsSync(cache.path)) {
