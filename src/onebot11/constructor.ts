@@ -16,7 +16,7 @@ import {
   GrayTipElementSubType,
   Group,
   GroupMember,
-  IMAGE_HTTP_HOST,
+  IMAGE_HTTP_HOST, IMAGE_HTTP_HOST_NT,
   RawMessage,
   SelfInfo,
   Sex,
@@ -160,7 +160,11 @@ export class OB11Constructor {
               message_data['data']['url'] = IMAGE_HTTP_HOST + url;
             } else {
               // 有可能会碰到appid为1406的，这个不能使用新的NT域名，并且需要把appid改为1407才可访问
-              message_data['data']['url'] = `${IMAGE_HTTP_HOST}/download?appid=1407&fileid=${fileUuid}&rkey=${currentRKey}&spec=0`;
+              let host = IMAGE_HTTP_HOST_NT;
+              if (url.includes('appid=1406')) {
+                host = IMAGE_HTTP_HOST;
+              }
+              message_data['data']['url'] = `${host}/download?appid=1407&fileid=${fileUuid}&rkey=${currentRKey}&spec=0`;
             }
           } else {
             message_data['data']['url'] = IMAGE_HTTP_HOST + url;

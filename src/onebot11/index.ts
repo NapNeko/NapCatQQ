@@ -21,17 +21,19 @@ checkVersion().then((remoteVersion: string) => {
   const localVersion = require('./package.json').version;
   const localVersionList = localVersion.split('.');
   const remoteVersionList = remoteVersion.split('.');
-  console.log('[NapCat] [Upate] 当前版本:', localVersion);
+  console.log('[NapCat]  当前版本:', localVersion);
   for (const k of [0, 1, 2]) {
     if (parseInt(remoteVersionList[k]) > parseInt(localVersionList[k])) {
-      console.log('[NapCat] [Upate] 检测到更新,请前往 https://github.com/NapNeko/NapCatQQ 下载 NapCatQQ V', remoteVersion);
+      console.log('[NapCat] 检测到更新,请前往 https://github.com/NapNeko/NapCatQQ 下载 NapCatQQ V', remoteVersion);
       return;
     } else if (parseInt(remoteVersionList[k]) < parseInt(localVersionList[k])) {
       break;
     }
   }
-  console.log('[NapCat] [Upate] 当前已是最新版本');
+  console.log('[NapCat]  当前已是最新版本');
   return;
+}).catch((e) => {
+  console.error('[NapCat] 检测更新失败');
 });
 new NapCatOnebot11();
 napCatCore.addLoginSuccessCallback(() => {
