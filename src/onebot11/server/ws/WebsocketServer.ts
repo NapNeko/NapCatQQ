@@ -17,6 +17,12 @@ import { selfInfo } from '@/common/data';
 const heartbeatRunning = false;
 
 class OB11WebsocketServer extends WebsocketServerBase {
+
+  public start(port: number) {
+    this.token = ob11Config.token;
+    super.start(port);
+  }
+
   authorizeFailed(wsClient: WebSocket) {
     wsClient.send(JSON.stringify(OB11Response.res(null, 'failed', 1403, 'token验证失败')));
   }
