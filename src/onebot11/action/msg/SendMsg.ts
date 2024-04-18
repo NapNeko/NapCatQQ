@@ -152,13 +152,11 @@ export async function createSendElements(messageData: OB11MessageData[], group: 
         if (cache) {
           if (fs.existsSync(cache.path)) {
             file = 'file://' + cache.path;
-          }
-          else if (cache.url) {
+          } else if (cache.url) {
             file = cache.url;
-          }
-          else{
+          } else {
             const fileMsg = await dbUtil.getMsgByLongId(cache.msgId);
-            if (fileMsg){
+            if (fileMsg) {
               const downloadPath = await NTQQFileApi.downloadMedia(fileMsg.msgId, fileMsg.chatType, fileMsg.peerUid,
                 cache.elementId, '', '');
               cache.path = downloadPath!;
@@ -209,14 +207,20 @@ export async function createSendElements(messageData: OB11MessageData[], group: 
       sendElements.push(SendMsgElementConstructor.ark(sendMsg.data.data));
     }
       break;
-    case OB11MessageDataType.dice:{
+    case OB11MessageDataType.dice: {
       const resultId = sendMsg.data?.result;
       sendElements.push(SendMsgElementConstructor.dice(resultId));
-    }break;
-    case OB11MessageDataType.RPS:{
+    }
+      break;
+    case OB11MessageDataType.RPS: {
       const resultId = sendMsg.data?.result;
       sendElements.push(SendMsgElementConstructor.rps(resultId));
-    }break;
+    }
+      break;
+    case OB11MessageDataType.markdown: {
+      const content = sendMsg.data?.content;
+      sendElements.push(SendMsgElementConstructor.markdown(content));
+    }
     }
 
   }
@@ -332,11 +336,10 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
     if (this.getSpecialMsgNum(payload, OB11MessageDataType.node)) {
       try {
         const returnMsg = await this.handleForwardNode(peer, messages as OB11MessageNode[], group);
-        if (returnMsg){
-          const msgShortId =await dbUtil.addMsg(returnMsg!, false);
+        if (returnMsg) {
+          const msgShortId = await dbUtil.addMsg(returnMsg!, false);
           return { message_id: msgShortId };
-        }
-        else{
+        } else {
           throw Error('发送转发消息失败');
         }
       } catch (e: any) {
@@ -511,7 +514,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
     // nodeIds.push(nodeMsg.msgId)
     // await sleep(500);
     // 开发转发
-    if (nodeMsgIds.length === 0){
+    if (nodeMsgIds.length === 0) {
       throw Error('转发消息失败，生成节点为空');
     }
     try {

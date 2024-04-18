@@ -229,13 +229,20 @@ export interface OB11MessageRPS{
   }
 }
 
+export interface OB11MessageMarkdown {
+  type: OB11MessageDataType.markdown
+  data: {
+    content: string
+  }
+}
+
 export type OB11MessageData =
   OB11MessageText |
   OB11MessageFace | OB11MessageMFace |
   OB11MessageAt | OB11MessageReply |
   OB11MessageImage | OB11MessageRecord | OB11MessageFile | OB11MessageVideo |
   OB11MessageNode | OB11MessageCustomMusic | OB11MessageJson |
-  OB11MessageDice | OB11MessageRPS
+  OB11MessageDice | OB11MessageRPS | OB11MessageMarkdown
 
 export interface OB11PostSendMsg {
   message_type?: 'private' | 'group'
