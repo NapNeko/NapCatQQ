@@ -12,6 +12,8 @@ NapCatQQ（瞌睡猫QQ，不准叫我NCQQ！），像睡着了一样在后台低
 
 具体占用会因人而异，QQ 群、好友越多占用越高
 
+目前只支持 onebot11 协议
+
 ## 下载
 
 前往 Release 页面下载最新版本
@@ -73,6 +75,8 @@ json 配置内容参数解释：
 ### Linux 启动
 
 运行`napcat.sh`
+
+或使用[NapCatDocker](https://github.com/NapNeko/NapCat-Docker)
 
 ## 使用无需扫码快速登录
 
