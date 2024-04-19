@@ -72,7 +72,7 @@ json 配置内容参数解释：
 
 *如果出现 powershell 运行不了，可以尝试 `powershell.exe -ExecutionPolicy Bypass -File ".\napcat.ps1"`*
 
-**推荐使用 bat运行，powershell会自身占用20MB左右的内存**
+**推荐使用 bat 运行，powershell 会自身占用 20MB 左右的内存**
 
 ### Linux 启动
 
