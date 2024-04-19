@@ -70,7 +70,9 @@ json 配置内容参数解释：
 
 运行`powershell ./napcat.ps1`, 或者 `napcat.bat`，如果出现乱码，可以尝试运行`napcat-utf8.ps1` 或 `napcat-utf8.bat`
 
-*如果出现 powershell 运行不了，以管理员身份打开 powershell，输入 `Set-ExecutionPolicy RemoteSigned`*
+*如果出现 powershell 运行不了，可以尝试 `powershell.exe -ExecutionPolicy Bypass -File ".\napcat.ps1"`*
+
+**推荐使用 bat运行，powershell会自身占用20MB左右的内存**
 
 ### Linux 启动
 
@@ -120,8 +122,8 @@ sudo apt install libgbm1 libasound2
 准备环境 [node18.18](https://nodejs.org/download/release/v18.18.2/)
 
 ```
-export NODE_ENV=production
 npm install
+npm run build
 ```
 
 ## 常见问题
@@ -149,11 +151,7 @@ $env:FFMPEG_PATH="d:\ffmpeg\bin\ffmpeg.exe"
 
 ## API 文档
 
-参考 [LLOneBot](https://llonebot.github.io/zh-CN/develop/api) 的文档
-
-<!-- 
-QQ群：545402644
--->
+[NapCat Doc](https://napneko.github.io/)
 
 ## 声明
 
@@ -166,6 +164,11 @@ QQ群：545402644
 [TG群](https://t.me/+nLZEnpne-pQ1OWFl)
 
 ## 鸣谢名单
+
 [OpenShamrock]()
 
 [Lagrange]()
+
+<!-- 
+QQ群：545402644
+-->
