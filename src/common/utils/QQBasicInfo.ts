@@ -45,7 +45,12 @@ let _qqVersionConfigInfo: QQVersionConfigInfo = {
 };
 
 if (fs.existsSync(configVersionInfoPath)) {
-  _qqVersionConfigInfo = JSON.parse(fs.readFileSync(configVersionInfoPath).toString());
+  try {
+    const _ =JSON.parse(fs.readFileSync(configVersionInfoPath).toString());
+    _qqVersionConfigInfo = Object.assign(_qqVersionConfigInfo, _);
+  } catch (e) {
+    console.error('Load QQ version config info failed, Use default version', e);
+  }
 }
 
 export const qqVersionConfigInfo: QQVersionConfigInfo = _qqVersionConfigInfo;
