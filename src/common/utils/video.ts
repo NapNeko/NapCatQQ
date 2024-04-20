@@ -16,8 +16,7 @@ export async function getVideoInfo(filePath: string) {
         size: number,
         filePath: string
     }>((resolve, reject) => {
-      // todo: 从配置文件中读取ffmpeg路径
-      const ffmpegPath = './ffmpeg';
+      const ffmpegPath = process.env.FFMPEG_PATH;
       ffmpegPath && ffmpeg.setFfmpegPath(ffmpegPath);
       ffmpeg(filePath).ffprobe((err: any, metadata: any) => {
         if (err) {
@@ -27,7 +26,7 @@ export async function getVideoInfo(filePath: string) {
           if (videoStream) {
             console.log(`视频尺寸: ${videoStream.width}x${videoStream.height}`);
           } else {
-            console.log('未找到视频流信息。');
+            return reject('未找到视频流信息。');
           }
           resolve({
             width: videoStream.width, height: videoStream.height,
