@@ -100,12 +100,13 @@ json 配置内容参数解释：
 [rpm x86版本](https://dldir1.qq.com/qqfile/qq/QQNT/Linux/QQ_3.2.7_240403_x86_64_01.rpm)
 [rpm arm版本](https://dldir1.qq.com/qqfile/qq/QQNT/Linux/QQ_3.2.7_240403_aarch64_01.rpm)
 
+安装QQ
 ```bash
-sudo apt install ./qq.deb
+sudo dpkg -i --force-depends ./qq.deb
 ```
 
-```bash
 安装QQ的依赖
+```bash
 sudo apt install libgbm1 libasound2
 ```
 
@@ -144,10 +145,19 @@ NapCat 会自动保存二维码到目录，可以手动打开图片扫描
 ```powershell
 $env:FFMPEG_PATH="d:\ffmpeg\bin\ffmpeg.exe"
 ```
-
 ### 出现 error code v2:-1 之类的提示
 
 不用管，这是正常现象，是因为 QQ 本身的问题，不影响使用
+
+### 本地登录后迁移至服务器
+
+如果在服务器扫码登录提示出现网络环境不稳定不在同一网络，可以尝试在本地登录后，将 QQ 的文档传到服务器相同目录覆盖，Linux 目录位于 `~/.config/QQ`, Windows 一般是 **文档下的QQ文件夹**，具体可以打开 `QQ的设置->存储管理` 查看
+
+或者手机使用 VPN 等方式连接到服务器网络使其和服务器在同一网络
+
+### 其他问题
+
+NapCat 是基于 QQ 22741 版本开发的，其他版本不敢保证是否会出现一些奇怪的问题，有问题可以尝试安装此版本的 QQ
 
 ## API 文档
 
