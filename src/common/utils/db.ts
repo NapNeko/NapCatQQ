@@ -260,7 +260,7 @@ class DBUtil extends DBUtilBase {
   async updateFileCache(file: DBFile) {
     const stmt = this.db!.prepare('UPDATE files SET path = ?, url = ? WHERE uuid = ?');
     return new Promise((resolve, reject) => {
-      stmt.run(file.path, file.url, function (err: any) {
+      stmt.run(file.path, file.url,file.uuid, function (err: any) {
         if (err) {
           log('db could not update file cache', err);
           reject(err);

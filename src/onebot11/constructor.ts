@@ -39,7 +39,9 @@ import { OB11GroupCardEvent } from './event/notice/OB11GroupCardEvent';
 import { OB11GroupDecreaseEvent } from './event/notice/OB11GroupDecreaseEvent';
 import { ob11Config } from '@/onebot11/config';
 import { deleteGroup, getFriend, getGroupMember, groupMembers, selfInfo, tempGroupCodeMap } from '@/common/data';
-import { NTQQGroupApi, NTQQUserApi } from '@/core/qqnt/apis';
+import { NTQQFileApi, NTQQGroupApi, NTQQUserApi } from '@/core/qqnt/apis';
+import { rkeyHook } from '@/core/qqnt/extends/rkey';
+import http from 'http';
 
 
 export class OB11Constructor {
@@ -143,9 +145,10 @@ export class OB11Constructor {
         const fileMd5 = element.picElement.md5HexStr;
         const fileUuid = element.picElement.fileUuid;
         // let currentRKey = config.imageRKey || "CAQSKAB6JWENi5LMk0kc62l8Pm3Jn1dsLZHyRLAnNmHGoZ3y_gDZPqZt-64"
-        const currentRKey = 'CAQSKAB6JWENi5LMk0kc62l8Pm3Jn1dsLZHyRLAnNmHGoZ3y_gDZPqZt-64';
         if (url) {
           if (url.startsWith('/download')) {
+            let rkey = rkeyHook.GetRkey();
+            console.log('rkey', rkey);
             if (url.includes('&rkey=')) {
               // 正则提取rkey
               // const rkey = url.match(/&rkey=([^&]+)/)[1]
@@ -157,14 +160,57 @@ export class OB11Constructor {
               //         getConfigUtil().setConfig(config)
               //     }
               // }
-              message_data['data']['url'] = IMAGE_HTTP_HOST + url;
+              message_data['data']['url'] = IMAGE_HTTP_HOST_NT + url;
             } else {
-              // 有可能会碰到appid为1406的，这个不能使用新的NT域名，并且需要把appid改为1407才可访问
-              let host = IMAGE_HTTP_HOST_NT;
-              if (url.includes('appid=1406')) {
-                host = IMAGE_HTTP_HOST;
+              const getRkey = async () => {
+                await NTQQFileApi.downloadMedia(msg.msgId, msg.chatType, msg.peerUid, element.elementId, '', '');
+                rkey = rkeyHook.GetRkey();
+              };
+              if (!rkey) {
+                // 下载一次图片获取rkey
+                try {
+                  await getRkey();
+                } catch (e) {
+                  continue;
+                }
               }
-              message_data['data']['url'] = `${host}/download?appid=1407&fileid=${fileUuid}&rkey=${currentRKey}&spec=0`;
+              let imageUrl = IMAGE_HTTP_HOST_NT + url + `${rkey}`;
+              // 调用head请求获取图片rkey是否正常
+              const checkUrl = new Promise((resolve, reject) => {
+                const options = {
+                  method: 'HEAD',
+                  host: new URL(imageUrl).host,
+                  path: new URL(imageUrl).pathname
+                };
+                const req = http.request(options, (res) => {
+                  console.log(`STATUS: ${res.statusCode}`);
+                  console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
+
+                  if (res.statusCode == 200) {
+                    console.log('The Image URL is accessible.');
+                    resolve('ok');
+                  } else {
+                    reject('The Image URL is not accessible.');
+                  }
+                });
+
+                req.on('error', (e) => {
+                  console.error(`problem with request: ${e.message}`);
+                  reject(e.message);
+                });
+                req.end();
+              });
+              try {
+                await checkUrl;
+              } catch (e) {
+                try {
+                  await getRkey();
+                  imageUrl = IMAGE_HTTP_HOST_NT + url + `${rkey}`;
+                } catch (e) {
+                  log('获取rkey失败', e);
+                }
+              }
+              message_data['data']['url'] = imageUrl;
             }
           } else {
             message_data['data']['url'] = IMAGE_HTTP_HOST + url;
@@ -234,15 +280,13 @@ export class OB11Constructor {
         message_data['data']['data'] = element.arkElement.bytesData;
       } else if (element.faceElement) {
         const faceId = element.faceElement.faceIndex;
-        if (faceId === FaceIndex.dice){
+        if (faceId === FaceIndex.dice) {
           message_data['type'] = OB11MessageDataType.dice;
           message_data['data']['result'] = element.faceElement.resultId;
-        }
-        else if (faceId === FaceIndex.RPS){
+        } else if (faceId === FaceIndex.RPS) {
           message_data['type'] = OB11MessageDataType.RPS;
           message_data['data']['result'] = element.faceElement.resultId;
-        }
-        else{
+        } else {
           message_data['type'] = OB11MessageDataType.face;
           message_data['data']['id'] = element.faceElement.faceIndex.toString();
         }
