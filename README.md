@@ -116,17 +116,6 @@ sudo apt install libgbm1 libasound2
 
 [Windows版本QQ下载](https://dldir1.qq.com/qqfile/qq/QQNT/Windows/QQ_9.9.9_240403_x64_01.exe)
 
-### 编译安装 NapCat
-
-**如果你是直接下载编译好的版本，可以跳过这一步**
-
-准备环境 [node18.18](https://nodejs.org/download/release/v18.18.2/)
-
-```
-npm install
-npm run build
-```
-
 ## 常见问题
 
 ### 二维码无法扫描
