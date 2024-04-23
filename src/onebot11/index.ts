@@ -1,3 +1,4 @@
+import { rkeyHook } from '@/core/qqnt/extends/rkey';
 import { napCatCore } from '@/core';
 import { MsgListener } from '@/core/qqnt/listeners';
 import { NapCatOnebot11 } from '@/onebot11/main';
@@ -38,6 +39,12 @@ checkVersion().then((remoteVersion: string) => {
 new NapCatOnebot11();
 napCatCore.addLoginSuccessCallback(() => {
   console.log('login success');
+  try{
+
+    console.log(rkeyHook.HookRkey());
+  }catch (e) {
+    console.error();
+  }
   postLoginStatus();
   const msgListener = new MsgListener();
   msgListener.onRecvMsg = (msg) => {

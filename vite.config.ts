@@ -11,14 +11,14 @@ import os from 'node:os';
 import fs from 'node:fs';
 
 const external = ['silk-wasm', 'ws', 'express', 'uuid', 'fluent-ffmpeg', 'sqlite3', 'log4js',
-  'qrcode-terminal'];
+  'qrcode-terminal', 'MoeHook'];
 
 const nodeModules = [...builtinModules, builtinModules.map(m => `node:${m}`)].flat();
 // let nodeModules = ["fs", "path", "events", "buffer", "url", "crypto", "fs/promise", "fsPromise", "os", "http", "net"]
 // nodeModules = [...nodeModules, ...nodeModules.map(m => `node:${m}`)]
 
 function genCpModule(module: string) {
-  return {src: `./node_modules/${module}`, dest: `dist/node_modules/${module}`, flatten: false};
+  return { src: `./node_modules/${module}`, dest: `dist/node_modules/${module}`, flatten: false };
 }
 
 const startScripts: string[] = ['./script/napcat.ps1', './script/napcat.bat', './script/napcat-utf8.bat', './script/napcat-utf8.ps1', './script/napcat-log.ps1',
@@ -34,11 +34,12 @@ const baseConfigPlugin: PluginOption[] = [
   cp({
     targets: [
       // ...external.map(genCpModule),
-      {src: './src/onebot11/onebot11.json', dest: 'dist/config/'},
-      {src: './package.json', dest: 'dist'},
-      {src: './README.md', dest: 'dist'},
+      { src: './src/onebot11/onebot11.json', dest: 'dist/config/' },
+      { src: './package.json', dest: 'dist' },
+      { src: './README.md', dest: 'dist' },
+      { src: './src/core.lib/MoeHook.node', dest: 'dist' },
       ...(startScripts.map((startScript) => {
-        return {src: startScript, dest: 'dist'};
+        return { src: startScript, dest: 'dist' };
       })),
     ]
   }),
@@ -74,7 +75,7 @@ const baseConfig = (mode: string = 'development') => defineConfig({
   },
 });
 
-export default defineConfig(({mode}): UserConfig => {
+export default defineConfig(({ mode }): UserConfig => {
   if (mode === 'production') {
     return {
       ...baseConfig(mode),

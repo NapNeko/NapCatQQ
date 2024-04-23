@@ -155,6 +155,16 @@ $env:FFMPEG_PATH="d:\ffmpeg\bin\ffmpeg.exe"
 
 或者手机使用 VPN 等方式连接到服务器网络使其和服务器在同一网络
 
+### Windows 运行出现 sqlite3 不是 win32 程序
+
+运行时出现`node_sqlite3.node is not a valid Win32 application`
+
+尝试自己用 npm 重新安装 sqlite3
+
+```bash
+npm uninstall sqlite3
+npm install sqlite3
+```
 ### 其他问题
 
 NapCat 是基于 QQ 22741 版本开发的，其他版本不敢保证是否会出现一些奇怪的问题，有问题可以尝试安装此版本的 QQ
