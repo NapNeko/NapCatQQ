@@ -455,6 +455,7 @@ export class OB11Constructor {
       const event = new OB11FriendAddNoticeEvent(parseInt(msg.peerUin));
       return event;
     }
+    return;
   }
 
   static friend(friend: User): OB11User {
