@@ -30,6 +30,7 @@ import { OB11GroupIncreaseEvent } from './event/notice/OB11GroupIncreaseEvent';
 import { OB11GroupBanEvent } from './event/notice/OB11GroupBanEvent';
 import { OB11GroupUploadNoticeEvent } from './event/notice/OB11GroupUploadNoticeEvent';
 import { OB11GroupNoticeEvent } from './event/notice/OB11GroupNoticeEvent';
+import { OB11FriendAddNoticeEvent } from './event/notice/OB11FriendAddNoticeEvent';
 
 import { calcQQLevel } from '../common/utils/qqlevel';
 import { log } from '../common/utils/log';
