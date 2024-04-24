@@ -451,10 +451,10 @@ export class OB11Constructor {
     if (msg.chatType !== ChatType.friend) {
       return;
     }
-    if (msg.peerUin&&msg.peerUid) {
-        const event = new OB11FriendAddNoticeEvent(parseInt(msg.peerUin));
-        return event;
-      }
+    if (msg.peerUin && msg.peerUid) {
+      const event = new OB11FriendAddNoticeEvent(parseInt(msg.peerUin));
+      return event;
+    }
   }
 
   static friend(friend: User): OB11User {
