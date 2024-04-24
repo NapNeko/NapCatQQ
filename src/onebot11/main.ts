@@ -154,6 +154,11 @@ export class NapCatOnebot11 {
           postOB11Event(groupEvent);
         }
       }).catch(e => log('constructGroupEvent error: ', e));
+      OB11Constructor.FriendAddEvent(message).then(friendAddEvent=>{
+        if(friendAddEvent){
+          postOB11Event(friendAddEvent)
+        }
+      }).catch(e => log('constructFriendAddEvent error: ', e));
     }
   }
 
