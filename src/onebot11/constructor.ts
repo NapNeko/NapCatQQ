@@ -451,7 +451,7 @@ export class OB11Constructor {
     if (msg.chatType !== ChatType.friend) {
       return;
     }
-    if (msg.peerUin && msg.peerUid) {
+    if (msg.msgType === 5 && msg.subMsgType === 12) {
       const event = new OB11FriendAddNoticeEvent(parseInt(msg.peerUin));
       return event;
     }
