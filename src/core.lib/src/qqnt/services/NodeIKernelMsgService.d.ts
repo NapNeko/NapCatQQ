@@ -1,4 +1,4 @@
-import { ElementType, Peer, RawMessage, SendMessageElement } from '@/core/qqnt/entities';
+import { ChatType, ElementType, Peer, RawMessage, SendMessageElement } from '@/core/qqnt/entities';
 import { NodeIKernelMsgListener } from '@/core/qqnt/listeners/NodeIKernelMsgListener';
 import { GeneralCallResult } from '@/core/qqnt/services/common';
 export interface NodeIKernelMsgService {
@@ -115,7 +115,7 @@ export interface NodeIKernelMsgService {
     setUnVisibleChannelCntInfo(...args: unknown[]): unknown;
     setUnVisibleChannelTypeCntInfo(...args: unknown[]): unknown;
     setVisibleGuildCntInfo(...args: unknown[]): unknown;
-    setMsgRead(...args: unknown[]): unknown;
+    setMsgRead(chatType: ChatType, peerUid: string, guildId: string): Promise<GeneralCallResult>;
     setAllC2CAndGroupMsgRead(...args: unknown[]): unknown;
     setGuildMsgRead(...args: unknown[]): unknown;
     setAllGuildMsgRead(...args: unknown[]): unknown;
