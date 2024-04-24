@@ -1,7 +1,6 @@
-import { ISizeCalculationResult } from 'image-size/dist/types/interface';
-import { ChatType, ElementType } from '../entities';
-
+import { ChatType, ElementType } from '@/core/qqnt/entities';
 import * as fileType from 'file-type';
+import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 export declare class NTQQFileApi {
     static getFileType(filePath: string): Promise<fileType.FileTypeResult | undefined>;
     static copyFile(filePath: string, destPath: string): Promise<void>;

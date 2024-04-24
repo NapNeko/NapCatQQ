@@ -1,5 +1,4 @@
-import { RawMessage } from '../entities';
-
+import { RawMessage } from '@/core/qqnt/entities';
 export interface OnRichMediaDownloadCompleteParams {
     fileModelId: string;
     msgElementId: string;

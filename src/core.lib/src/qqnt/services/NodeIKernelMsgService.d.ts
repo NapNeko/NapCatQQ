@@ -1,7 +1,6 @@
-import { GeneralCallResult } from './common';
-import { NodeIKernelMsgListener } from '../listeners/NodeIKernelMsgListener';
-import { ChatType, ElementType, Peer, RawMessage, SendMessageElement } from '../entities';
-
+import { ChatType, ElementType, Peer, RawMessage, SendMessageElement } from '@/core/qqnt/entities';
+import { NodeIKernelMsgListener } from '@/core/qqnt/listeners/NodeIKernelMsgListener';
+import { GeneralCallResult } from '@/core/qqnt/services/common';
 export interface NodeIKernelMsgService {
     addKernelMsgListener(nodeIKernelMsgListener: NodeIKernelMsgListener): void;
     sendMsg(msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<any, any>): Promise<unknown>;
