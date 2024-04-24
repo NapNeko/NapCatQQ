@@ -1,4 +1,5 @@
-import { NodeIKernelLoginListener } from '@/core/qqnt/listeners/NodeIKernelLoginListener';
+import { NodeIKernelLoginListener } from '../listeners/NodeIKernelLoginListener';
+
 export interface LoginInitConfig {
     machineId: '';
     appid: string;

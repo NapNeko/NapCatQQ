@@ -1,6 +1,7 @@
-import { Peer, RawMessage, SendMessageElement } from '@/core/qqnt/entities';
-import { NapCatCore } from '@/core';
-import { GeneralCallResult } from '@/core/qqnt/services/common';
+import { GeneralCallResult } from '../services/common';
+import { NapCatCore } from '../..';
+import { Peer, RawMessage, SendMessageElement } from '../entities';
+
 export declare class NTQQMsgApi {
     static napCatCore: NapCatCore | null;
     static getMultiMsg(peer: Peer, rootMsgId: string, parentMsgId: string): Promise<GeneralCallResult & {
@@ -8,6 +9,7 @@ export declare class NTQQMsgApi {
     } | undefined>;
     static activateChat(peer: Peer): Promise<void>;
     static activateChatAndGetHistory(peer: Peer): Promise<void>;
+    static setMsgRead(peer: Peer): Promise<GeneralCallResult>;
     static getMsgHistory(peer: Peer, msgId: string, count: number): Promise<GeneralCallResult & {
         msgList: RawMessage[];
     }>;

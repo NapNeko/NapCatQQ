@@ -13,18 +13,18 @@ class MarkMsgAsRead extends BaseAction<Payload, null> {
   protected async _handle(payload: Payload): Promise<null> {
     let uid: string | undefined = payload.uin;
     if (this.ReqChatType != ChatType.group) {
-      uid = getUidByUin(payload.uin.toString())
+      uid = getUidByUin(payload.uin.toString());
       if (!uid) {
         throw `记录${payload.uin}不存在`;
       }
-      let friend = await getFriend(uid);
+      const friend = await getFriend(uid);
       this.ReqChatType = friend ? ChatType.friend : ChatType.temp;//重写
     }
     // 获取UID 组装Peer
     // GuildId: string 留空
-    let ReqPeer: Peer = { chatType: this.ReqChatType, peerUid: uid, guildId: "" };
+    const ReqPeer: Peer = { chatType: this.ReqChatType, peerUid: uid, guildId: '' };
     // 调用API
-    let ret = await NTQQMsgApi.setMsgRead(ReqPeer);
+    const ret = await NTQQMsgApi.setMsgRead(ReqPeer);
     if (ret.result != 0) {
       throw ('设置已读失败');
     }

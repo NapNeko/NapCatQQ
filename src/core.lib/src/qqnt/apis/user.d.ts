@@ -1,4 +1,5 @@
-import { User } from '@/core/qqnt/entities';
+import { User } from '../entities';
+
 export declare class NTQQUserApi {
     static like(uid: string, count?: number): Promise<{
         result: number;

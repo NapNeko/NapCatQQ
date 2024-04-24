@@ -1,4 +1,5 @@
 import { ChatType } from './msg';
+
 export interface CacheScanResult {
     result: number;
     size: [

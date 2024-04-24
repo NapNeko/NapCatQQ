@@ -1,4 +1,5 @@
-import QQWrapper from './wrapper';
+import { default as QQWrapper } from './wrapper';
+
 export * from './adapters';
 export * from './apis';
 export * from './entities';

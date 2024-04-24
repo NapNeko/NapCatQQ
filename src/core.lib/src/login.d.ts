@@ -1,6 +1,7 @@
-import { LoginListener } from './qqnt/listeners';
-import { LoginInitConfig, NodeIKernelLoginService } from './qqnt/services';
 import { NapCatCore } from '.';
+import { LoginInitConfig, NodeIKernelLoginService } from './qqnt/services';
+import { LoginListener } from './qqnt/listeners';
+
 /**
  * NapCat 登录相关核心类
  *

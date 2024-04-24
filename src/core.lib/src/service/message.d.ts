@@ -1,5 +1,6 @@
-import { MsgListener } from '../qqnt/listeners';
 import { NodeIKernelMsgService } from '../qqnt/services';
+import { MsgListener } from '../qqnt/listeners';
+
 /**
  * NapCat 服务相关核心消息子类
  *
