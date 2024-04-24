@@ -1,4 +1,5 @@
-import { AtType, SendArkElement, SendFaceElement, SendFileElement, SendPicElement, SendPttElement, SendReplyElement, SendTextElement, SendVideoElement } from '../entities';
+import { AtType, SendArkElement, SendFaceElement, SendFileElement, SendMarkdownElement, SendPicElement, SendPttElement, SendReplyElement, SendTextElement, SendVideoElement } from '../entities';
+
 export declare class SendMsgElementConstructor {
     static text(content: string): SendTextElement;
     static at(atUid: string, atNtUid: string, atType: AtType, atName: string): SendTextElement;
@@ -11,4 +12,5 @@ export declare class SendMsgElementConstructor {
     static dice(resultId: number | null): SendFaceElement;
     static rps(resultId: number | null): SendFaceElement;
     static ark(data: any): SendArkElement;
+    static markdown(content: string): SendMarkdownElement;
 }

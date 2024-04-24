@@ -1,7 +1,8 @@
-import { WrapperSessionInitConfig } from './sessionConfig';
-import { NodeIDependsAdapter, NodeIDispatcherAdapter, NodeIGlobalAdapter } from './adapters';
-import { NodeIKernelSessionListener, NodeIKernelMsgListener, NodeIKernelLoginListener, NodeIKernelBuddyListener, NodeIKernelGroupListener, NodeIKernelProfileListener } from './listeners';
 import { NodeIKernelLoginService, NodeIKernelMsgService, NodeIKernelBuddyService, NodeIKernelGroupService, NodeIKernelProfileService, NodeIKernelProfileLikeService } from './services';
+import { NodeIKernelSessionListener, NodeIKernelMsgListener, NodeIKernelLoginListener, NodeIKernelBuddyListener, NodeIKernelGroupListener, NodeIKernelProfileListener } from './listeners';
+import { NodeIDependsAdapter, NodeIDispatcherAdapter, NodeIGlobalAdapter } from './adapters';
+import { WrapperSessionInitConfig } from './sessionConfig';
+
 export interface NodeQQNTWrapperUtil {
     new (): NodeQQNTWrapperUtil;
     getNTUserDataInfoConfig(): string;

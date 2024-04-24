@@ -1,5 +1,6 @@
-import { BuddyListener } from '../qqnt/listeners';
 import { NodeIKernelBuddyService } from '../qqnt/services';
+import { BuddyListener } from '../qqnt/listeners';
+
 /**
  * NapCat 服务相关核心好友子类
  *

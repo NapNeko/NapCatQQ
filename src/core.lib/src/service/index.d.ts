@@ -1,10 +1,11 @@
-import { NapCatCoreServiceMessage } from './message';
-import { NapCatCoreServiceGroup } from './group';
-import { NapCatCoreServiceBuddy } from './buddy';
-import { NapCatCoreServiceProfile } from './profile';
-import { NapCatCoreServiceProfileLike } from './profileLike';
-import { NodeIKernelBuddyService, NodeIKernelGroupService, NodeIKernelMsgService, NodeIKernelProfileService, NodeIKernelProfileLikeService } from '../qqnt/services';
 import { NapCatCore } from '..';
+import { NodeIKernelBuddyService, NodeIKernelGroupService, NodeIKernelMsgService, NodeIKernelProfileService, NodeIKernelProfileLikeService } from '../qqnt/services';
+import { NapCatCoreServiceProfileLike } from './profileLike';
+import { NapCatCoreServiceProfile } from './profile';
+import { NapCatCoreServiceBuddy } from './buddy';
+import { NapCatCoreServiceGroup } from './group';
+import { NapCatCoreServiceMessage } from './message';
+
 /**
  * NapCat 服务相关核心类
  *

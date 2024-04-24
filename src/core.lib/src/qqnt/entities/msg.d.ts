@@ -1,4 +1,5 @@
 import { GroupMemberRole } from './group';
+
 export interface Peer {
     chatType: ChatType;
     peerUid: string;
@@ -12,7 +13,8 @@ export declare enum ElementType {
     VIDEO = 5,
     FACE = 6,
     REPLY = 7,
-    ARK = 10
+    ARK = 10,
+    MARKDOWN = 14
 }
 export interface SendTextElement {
     elementType: ElementType.TEXT;
@@ -117,7 +119,12 @@ export interface SendArkElement {
     elementId: '';
     arkElement: ArkElement;
 }
-export type SendMessageElement = SendTextElement | SendPttElement | SendPicElement | SendReplyElement | SendFaceElement | SendFileElement | SendVideoElement | SendArkElement;
+export interface SendMarkdownElement {
+    elementType: ElementType.MARKDOWN;
+    elementId: '';
+    markdownElement: MarkdownElement;
+}
+export type SendMessageElement = SendTextElement | SendPttElement | SendPicElement | SendReplyElement | SendFaceElement | SendFileElement | SendVideoElement | SendArkElement | SendMarkdownElement;
 export declare enum AtType {
     notAt = 0,
     atAll = 1,

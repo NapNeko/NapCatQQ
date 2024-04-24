@@ -1,4 +1,5 @@
 import { QQLevel, Sex } from './user';
+
 export interface Group {
     groupCode: string;
     maxMember: number;

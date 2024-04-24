@@ -19,25 +19,25 @@ interface Response {
 }
 
 export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
-    actionName = ActionName.GetFriendMsgHistory;
+  actionName = ActionName.GetFriendMsgHistory;
     
-    protected async _handle(payload: Payload): Promise<Response> {
-        let uid = getUidByUin(payload.user_id.toString())
-        if (!uid) {
-            throw `记录${payload.user_id}不存在`;
-        }
-        const startMsgId = (await dbUtil.getMsgByShortId(payload.message_seq))?.msgId || '0';
-        let friend = await getFriend(uid);
-        let historyResult = (await NTQQMsgApi.getMsgHistory({
-            chatType: friend ? ChatType.friend : ChatType.temp,
-            peerUid: uid
-        }, startMsgId, parseInt(payload.count?.toString()) || 20));
-        console.log(historyResult);
-        const msgList = historyResult.msgList;
-        await Promise.all(msgList.map(async msg => {
-            msg.id = await dbUtil.addMsg(msg);
-        }));
-        const ob11MsgList = await Promise.all(msgList.map(msg => OB11Constructor.message(msg)));
-        return { 'messages': ob11MsgList };
+  protected async _handle(payload: Payload): Promise<Response> {
+    const uid = getUidByUin(payload.user_id.toString());
+    if (!uid) {
+      throw `记录${payload.user_id}不存在`;
     }
+    const startMsgId = (await dbUtil.getMsgByShortId(payload.message_seq))?.msgId || '0';
+    const friend = await getFriend(uid);
+    const historyResult = (await NTQQMsgApi.getMsgHistory({
+      chatType: friend ? ChatType.friend : ChatType.temp,
+      peerUid: uid
+    }, startMsgId, parseInt(payload.count?.toString()) || 20));
+    console.log(historyResult);
+    const msgList = historyResult.msgList;
+    await Promise.all(msgList.map(async msg => {
+      msg.id = await dbUtil.addMsg(msg);
+    }));
+    const ob11MsgList = await Promise.all(msgList.map(msg => OB11Constructor.message(msg)));
+    return { 'messages': ob11MsgList };
+  }
 }
