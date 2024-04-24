@@ -1,4 +1,4 @@
-import { rkeyHook } from '@/core/qqnt/extends/rkey';
+import { rkeyManager } from '@/core/qqnt/extends/rkey';
 import { napCatCore } from '@/core';
 import { MsgListener } from '@/core/qqnt/listeners';
 import { NapCatOnebot11 } from '@/onebot11/main';
@@ -41,7 +41,7 @@ napCatCore.addLoginSuccessCallback(() => {
   console.log('login success');
   try{
 
-    console.log(rkeyHook.HookRkey());
+    console.log(rkeyManager.HookRkey());
   }catch (e) {
     console.error();
   }
