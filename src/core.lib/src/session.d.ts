@@ -1,6 +1,5 @@
-import { SessionListener } from './qqnt/listeners';
 import { NodeIQQNTWrapperSession } from './qqnt/wrapper';
-
+import { SessionListener } from './qqnt/listeners';
 /**
  * NapCat WrapperSession 相关核心类
  *

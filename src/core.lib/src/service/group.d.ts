@@ -1,6 +1,5 @@
-import { NodeIKernelGroupService } from '../qqnt/services';
 import { GroupListener } from '../qqnt/listeners';
-
+import { NodeIKernelGroupService } from '../qqnt/services';
 /**
  * NapCat 服务相关核心群聊子类
  *

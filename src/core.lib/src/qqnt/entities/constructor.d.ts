@@ -1,5 +1,4 @@
 import { AtType, SendArkElement, SendFaceElement, SendFileElement, SendMarkdownElement, SendPicElement, SendPttElement, SendReplyElement, SendTextElement, SendVideoElement } from '../entities';
-
 export declare class SendMsgElementConstructor {
     static text(content: string): SendTextElement;
     static at(atUid: string, atNtUid: string, atType: AtType, atName: string): SendTextElement;

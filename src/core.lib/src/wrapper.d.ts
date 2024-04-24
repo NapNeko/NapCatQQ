@@ -1,6 +1,5 @@
-import { NodeIGlobalAdapter } from './qqnt/adapters';
 import { NodeIQQNTWrapperEngine, NodeQQNTWrapperUtil, EnginInitDesktopConfig } from './qqnt/wrapper';
-
+import { NodeIGlobalAdapter } from './qqnt/adapters';
 /**
  * NapCat Wrapper 相关核心类
  *

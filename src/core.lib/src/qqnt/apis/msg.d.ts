@@ -1,7 +1,6 @@
-import { GeneralCallResult } from '../services/common';
-import { NapCatCore } from '../..';
-import { Peer, RawMessage, SendMessageElement } from '../entities';
-
+import { Peer, RawMessage, SendMessageElement } from '@/core/qqnt/entities';
+import { NapCatCore } from '@/core';
+import { GeneralCallResult } from '@/core/qqnt/services/common';
 export declare class NTQQMsgApi {
     static napCatCore: NapCatCore | null;
     static getMultiMsg(peer: Peer, rootMsgId: string, parentMsgId: string): Promise<GeneralCallResult & {

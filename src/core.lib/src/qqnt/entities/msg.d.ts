@@ -1,5 +1,4 @@
 import { GroupMemberRole } from './group';
-
 export interface Peer {
     chatType: ChatType;
     peerUid: string;

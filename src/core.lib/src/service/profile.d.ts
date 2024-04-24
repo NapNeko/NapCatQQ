@@ -1,6 +1,5 @@
-import { NodeIKernelProfileService } from '../qqnt/services';
 import { ProfileListener } from '../qqnt/listeners';
-
+import { NodeIKernelProfileService } from '../qqnt/services';
 export declare class NapCatCoreServiceProfile {
     kernelService: NodeIKernelProfileService | null;
     readonly listener: ProfileListener;

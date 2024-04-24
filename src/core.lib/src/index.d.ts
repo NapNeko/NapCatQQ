@@ -1,11 +1,11 @@
-import { EventEmitter } from 'node:events';
-import { NapCatCoreService } from './service';
-import { NapCatCoreSession } from './session';
-import { NapCatCoreLogin } from './login';
-import { NapCatCoreWrapper } from './wrapper';
-import { QRCodeLoginSucceedType } from './qqnt/services';
+/// <reference types="node" />
 import { GlobalAdapter } from './qqnt/adapters';
-
+import { QRCodeLoginSucceedType } from './qqnt/services';
+import { NapCatCoreWrapper } from './wrapper';
+import { NapCatCoreLogin } from './login';
+import { NapCatCoreSession } from './session';
+import { NapCatCoreService } from './service';
+import { EventEmitter } from 'node:events';
 import * as log4js from '@log4js-node/log4js-api';
 export interface LoginSuccessCallback {
     (): void | Promise<void>;
