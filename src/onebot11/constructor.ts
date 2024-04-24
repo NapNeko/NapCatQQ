@@ -446,6 +446,16 @@ export class OB11Constructor {
     }
   }
 
+  static async FriendAddEvent(msg: RawMessage): Promise<OB11FriendAddNoticeEvent | undefined> {
+    if (msg.chatType !== ChatType.friend) {
+      return;
+    }
+    if (msg.peerUin&&msg.peerUid) {
+        const event = new OB11FriendAddNoticeEvent(parseInt(msg.peerUin));
+        return event;
+      }
+  }
+
   static friend(friend: User): OB11User {
     return {
       user_id: parseInt(friend.uin),
