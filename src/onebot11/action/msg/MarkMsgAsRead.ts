@@ -20,9 +20,6 @@ class MarkMsgAsRead extends BaseAction<Payload, null> {
       let friend = await getFriend(uid);
       this.ReqChatType = friend ? ChatType.friend : ChatType.temp;//重写
     }
-
-
-
     // 获取UID 组装Peer
     // GuildId: string 留空
     let ReqPeer: Peer = { chatType: this.ReqChatType, peerUid: uid, guildId: "" };
