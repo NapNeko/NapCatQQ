@@ -1,41 +1,55 @@
-import { ChatType, Peer, RawMessage, SendMessageElement } from '@/core/qqnt/entities';
+import { ChatType, Peer } from '@/core/qqnt/entities';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { NTQQMsgApi } from '@/core/qqnt/apis';
 import { getFriend, getUidByUin } from '@/common/data';
 
 interface Payload {
-  uin: string,
+  user_id: number;
+  group_id?: number;
 }
 
 class MarkMsgAsRead extends BaseAction<Payload, null> {
-  ReqChatType = 0;
-  protected async _handle(payload: Payload): Promise<null> {
-    let uid: string | undefined = payload.uin;
-    if (this.ReqChatType != ChatType.group) {
-      uid = getUidByUin(payload.uin.toString());
-      if (!uid) {
-        throw `记录${payload.uin}不存在`;
+
+  async getPeer(payload: Payload): Promise<Peer> {
+    if (payload.user_id) {
+      const peerUid = getUidByUin(payload.user_id.toString());
+      if (!peerUid) {
+        throw `私聊${payload.user_id}不存在`;
       }
-      const friend = await getFriend(uid);
-      this.ReqChatType = friend ? ChatType.friend : ChatType.temp;//重写
+      const friend = await getFriend(peerUid);
+      return { chatType: friend ? ChatType.friend: ChatType.temp, peerUid };
     }
-    // 获取UID 组装Peer
-    // GuildId: string 留空
-    const ReqPeer: Peer = { chatType: this.ReqChatType, peerUid: uid, guildId: '' };
+    if (!payload.group_id) {
+      throw '缺少参数 group_id 或 user_id';
+    }
+    return { chatType: ChatType.group, peerUid: payload.group_id.toString() };
+  }
+  protected async _handle(payload: Payload): Promise<null> {
     // 调用API
-    const ret = await NTQQMsgApi.setMsgRead(ReqPeer);
+    const ret = await NTQQMsgApi.setMsgRead(await this.getPeer(payload));
     if (ret.result != 0) {
-      throw ('设置已读失败');
+      throw ('设置已读失败,' + ret.errMsg);
     }
     return null;
   }
 }
 export class MarkPrivateMsgAsRead extends MarkMsgAsRead {
   actionName = ActionName.MarkPrivateMsgAsRead;
-  ReqChatType = ChatType.friend;
 }
 export class MarkGroupMsgAsRead extends MarkMsgAsRead {
   actionName = ActionName.MarkGroupMsgAsRead;
-  ReqChatType = ChatType.group;
+}
+
+
+interface Payload{
+  message_id: number
+}
+
+export class GoCQHTTPMarkMsgAsRead extends BaseAction<Payload, null>{
+  actionName = ActionName.GoCQHTTP_MarkMsgAsRead;
+
+  protected async _handle(payload: Payload): Promise<null> {
+    return null;
+  }
 }
