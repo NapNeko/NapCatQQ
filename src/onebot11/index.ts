@@ -41,6 +41,9 @@ napCatCore.addLoginSuccessCallback(() => {
   postLoginStatus();
   const msgListener = new MsgListener();
   msgListener.onRecvMsg = (msg) => {
+    // console.log(JSON.stringify(Array.from(msg[0].msgAttrs.values())));
+    // napCatCore.service.msg.kernelService?.getMsgsByMsgId(msg[0].msgId, 20).then(res=>console.log(res));
+
     // console.log("onRecvMsg", msg)
   };
   // napCatCore.getGroupService().getGroupExtList(true).then((res) => {
