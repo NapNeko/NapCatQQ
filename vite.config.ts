@@ -11,7 +11,7 @@ import os from 'node:os';
 import fs from 'node:fs';
 
 const external = ['silk-wasm', 'ws', 'express', 'uuid', 'fluent-ffmpeg', 'sqlite3', 'log4js',
-  'qrcode-terminal', 'MoeHook'];
+  'qrcode-terminal', 'MoeHoo'];
 
 const nodeModules = [...builtinModules, builtinModules.map(m => `node:${m}`)].flat();
 // let nodeModules = ["fs", "path", "events", "buffer", "url", "crypto", "fs/promise", "fsPromise", "os", "http", "net"]
@@ -37,7 +37,7 @@ const baseConfigPlugin: PluginOption[] = [
       { src: './src/onebot11/onebot11.json', dest: 'dist/config/' },
       { src: './package.json', dest: 'dist' },
       { src: './README.md', dest: 'dist' },
-      { src: './src/core.lib/MoeHook.node', dest: 'dist' },
+      { src: './src/core.lib/MoeHoo.node', dest: 'dist' },
       ...(startScripts.map((startScript) => {
         return { src: startScript, dest: 'dist' };
       })),
