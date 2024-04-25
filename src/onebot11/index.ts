@@ -1,4 +1,4 @@
-import { rkeyManager } from '@/core/qqnt/extends/rkey';
+import { rkeyHook as rkeyManager } from '@/core/qqnt/extends/rkey';
 import { napCatCore } from '@/core';
 import { MsgListener } from '@/core/qqnt/listeners';
 import { NapCatOnebot11 } from '@/onebot11/main';
