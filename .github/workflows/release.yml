@@ -121,6 +121,7 @@ jobs:
       with:
         name: NapCat V${{ env.VERSION }}
         token: ${{ secrets.GITHUB_TOKEN }}
+        body_path: CHANGELOG.md
         files: |
           NapCat.win32.x64.zip
           NapCat.linux.x64.zip
