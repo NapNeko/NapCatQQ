@@ -34,7 +34,7 @@ export class NapCatOnebot11 {
 
   constructor() {
     // console.log('ob11 init');
-    napCatCore.addLoginSuccessCallback(this.onReady.bind(this));
+    napCatCore.onLoginSuccess(this.onReady.bind(this));
   }
 
   public onReady() {
@@ -94,7 +94,7 @@ export class NapCatOnebot11 {
         });
       }
     };
-    napCatCore.service.msg.addMsgListener(msgListener);
+    napCatCore.addListener(msgListener);
     console.log('ob11 msg listener added');
 
     // BuddyListener
@@ -102,7 +102,7 @@ export class NapCatOnebot11 {
     buddyListener.onBuddyReqChange = ((req) => {
       this.postFriendRequest(req.buddyReqs).then().catch(log);
     });
-    napCatCore.service.buddy.addBuddyListener(buddyListener);
+    napCatCore.addListener(buddyListener);
     console.log('ob11 buddy listener added');
 
     // GroupListener
@@ -119,7 +119,7 @@ export class NapCatOnebot11 {
       // this.postGroupMemberChange(groupList).then();
     };
 
-    napCatCore.service.group.addGroupListener(groupListener);
+    napCatCore.addListener(groupListener);
     console.log('ob11 group listener added');
   }
 
