@@ -217,7 +217,8 @@ export class OB11Constructor {
         // 取md5的前两位
         const dir = md5.substring(0, 2);
         // 获取组装url
-        const url = `https://p.qpic.cn/CDN_STATIC/0/data/imgcache/htdocs/club/item/parcel/item/${dir}/${md5}/300x300.png?max_age=31536000`;
+        // const url = `https://p.qpic.cn/CDN_STATIC/0/data/imgcache/htdocs/club/item/parcel/item/${dir}/${md5}/300x300.gif?max_age=31536000`;
+        const url = `https://gxh.vip.qq.com/club/item/parcel/item/${dir}/${md5}/raw300.gif`;
         message_data['data']['url'] = url;
       } else if (element.markdownElement) {
         message_data['type'] = OB11MessageDataType.markdown;
