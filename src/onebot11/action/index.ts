@@ -34,7 +34,7 @@ import SetGroupAdmin from './group/SetGroupAdmin';
 import SetGroupCard from './group/SetGroupCard';
 import GetImage from './file/GetImage';
 import GetRecord from './file/GetRecord';
-import { MarkGroupMsgAsRead, MarkPrivateMsgAsRead } from './msg/MarkMsgAsRead';
+import { GoCQHTTPMarkMsgAsRead, MarkGroupMsgAsRead, MarkPrivateMsgAsRead } from './msg/MarkMsgAsRead';
 import CleanCache from './system/CleanCache';
 import GoCQHTTPUploadGroupFile from './go-cqhttp/UploadGroupFile';
 import { GetConfigAction, SetConfigAction } from '@/onebot11/action/extends/Config';
@@ -52,6 +52,8 @@ export const actionHandlers = [
   // new GetConfigAction(),
   // new SetConfigAction(),
   // new GetGroupAddRequest(),
+  new MarkGroupMsgAsRead(),
+  new MarkPrivateMsgAsRead(),
   new SetQQAvatar(),
   // onebot11
   new SendLike(),
@@ -86,8 +88,7 @@ export const actionHandlers = [
   new GoCQHTTPGetStrangerInfo(),
   new GoCQHTTPDownloadFile(),
   new GetGuildList(),
-  new MarkGroupMsgAsRead(),
-  new MarkPrivateMsgAsRead(),
+  new GoCQHTTPMarkMsgAsRead(),
   new GoCQHTTPUploadGroupFile(),
   new GoCQHTTPGetGroupMsgHistory(),
   new GoCQHTTGetForwardMsgAction(),
