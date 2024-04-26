@@ -1,4 +1,4 @@
-import { PicSubType, RawMessage } from '@/core/qqnt/entities';
+import { PicSubType, RawMessage } from '@/core';
 import { EventType } from './event/OB11BaseEvent';
 
 export interface OB11User {

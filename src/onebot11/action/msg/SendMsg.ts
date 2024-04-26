@@ -7,7 +7,7 @@ import {
   SendArkElement,
   SendMessageElement,
   Peer
-} from '@/core/qqnt/entities';
+} from '@/core/entities';
 
 import {
   OB11MessageCustomMusic,
@@ -17,7 +17,7 @@ import {
   OB11MessageNode,
   OB11PostSendMsg
 } from '../../types';
-import { SendMsgElementConstructor } from '@/core/qqnt/entities/constructor';
+import { SendMsgElementConstructor } from '@/core/entities/constructor';
 import BaseAction from '../BaseAction';
 import { ActionName, BaseCheckResult } from '../types';
 import * as fs from 'node:fs';
@@ -27,8 +27,8 @@ import { log } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';
 import { uri2local } from '@/common/utils/file';
 import { getFriend, getGroup, getGroupMember, getUidByUin, selfInfo } from '@/common/data';
-import { NTQQMsgApi } from '@/core/qqnt/apis';
-import { NTQQFileApi } from '@/core/qqnt/apis';
+import { NTQQMsgApi } from '../../../core/src/apis';
+import { NTQQFileApi } from '../../../core/src/apis';
 
 const ALLOW_SEND_TEMP_MSG = false;
 

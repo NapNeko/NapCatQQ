@@ -1,6 +1,6 @@
-import { NodeIKernelGroupListener } from '@/core/qqnt/listeners/NodeIKernelGroupListener';
-import { GroupMember, GroupMemberRole, GroupNotifyTypes, GroupRequestOperateTypes } from '@/core/qqnt/entities';
-import { GeneralCallResult } from '@/core/qqnt/services/common';
+import { NodeIKernelGroupListener } from '@/core/listeners/NodeIKernelGroupListener';
+import { GroupMember, GroupMemberRole, GroupNotifyTypes, GroupRequestOperateTypes } from '../../../../core/src/entities';
+import { GeneralCallResult } from '@/core/services/common';
 export interface NodeIKernelGroupService {
     addKernelGroupListener(listener: NodeIKernelGroupListener): number;
     removeKernelGroupListener(listenerId: unknown): void;

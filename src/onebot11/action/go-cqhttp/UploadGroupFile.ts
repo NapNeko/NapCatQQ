@@ -1,10 +1,10 @@
 import BaseAction from '../BaseAction';
 import { getGroup } from '@/common/data';
 import { ActionName } from '../types';
-import { SendMsgElementConstructor } from '@/core/qqnt/entities/constructor';
-import { ChatType, SendFileElement } from '@/core/qqnt/entities';
+import { SendMsgElementConstructor } from '@/core/entities/constructor';
+import { ChatType, SendFileElement } from '@/core/entities';
 import fs from 'fs';
-import { NTQQMsgApi } from '@/core/qqnt/apis/msg';
+import { NTQQMsgApi } from '@/core/apis/msg';
 import { uri2local } from '@/common/utils/file';
 
 interface Payload {

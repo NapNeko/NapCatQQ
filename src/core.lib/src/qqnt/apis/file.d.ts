@@ -1,4 +1,4 @@
-import { ChatType, ElementType } from '@/core/qqnt/entities';
+import { ChatType, ElementType } from '../../../../core/src/entities';
 import * as fileType from 'file-type';
 import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 export declare class NTQQFileApi {

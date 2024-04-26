@@ -1,7 +1,7 @@
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { NTQQGroupApi } from '@/core/qqnt/apis/group';
-import { log } from '../../../common/utils/log';
+import { NTQQGroupApi } from '@/core/apis/group';
+import { log } from '@/common/utils/log';
 
 interface Payload {
     group_id: number,

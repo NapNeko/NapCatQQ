@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { napCatCore } from '@/core';
 
 export const getNapCatDir = () => {
-  const p = path.join(napCatCore.wrapper.dataPath, 'NapCat');
+  const p = path.join(napCatCore.dataPath, 'NapCat');
   fs.mkdirSync(p, { recursive: true });
   return p;
 };

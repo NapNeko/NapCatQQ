@@ -1,7 +1,7 @@
-import { ChatType, Peer } from '@/core/qqnt/entities';
+import { ChatType, Peer } from '@/core/entities';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { NTQQMsgApi } from '@/core/qqnt/apis';
+import { NTQQMsgApi } from '@/core/apis';
 import { getFriend, getUidByUin } from '@/common/data';
 
 interface Payload {

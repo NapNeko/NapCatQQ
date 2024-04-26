@@ -1,5 +1,5 @@
 import { napCatCore } from '@/core';
-import { MsgListener } from '@/core/qqnt/listeners';
+import { MsgListener } from '../core/src/listeners';
 import { OB11Constructor } from '@/onebot11/constructor';
 import { postOB11Event } from '@/onebot11/server/postOB11Event';
 import {
@@ -10,16 +10,16 @@ import {
   GroupNotify,
   GroupNotifyTypes,
   RawMessage
-} from '@/core/qqnt/entities';
+} from '../core/src/entities';
 import { ob11Config } from '@/onebot11/config';
 import { httpHeart, ob11HTTPServer } from '@/onebot11/server/http';
 import { ob11WebsocketServer } from '@/onebot11/server/ws/WebsocketServer';
 import { ob11ReverseWebsockets } from '@/onebot11/server/ws/ReverseWebsocket';
 import { friendRequests, getFriend, getGroup, getGroupMember, groupNotifies, selfInfo } from '@/common/data';
 import { dbUtil } from '@/common/utils/db';
-import { BuddyListener, GroupListener, NodeIKernelBuddyListener } from '@/core/qqnt/listeners';
+import { BuddyListener, GroupListener, NodeIKernelBuddyListener } from '../core/src/listeners';
 import { OB11FriendRequestEvent } from '@/onebot11/event/request/OB11FriendRequest';
-import { NTQQGroupApi, NTQQUserApi } from '@/core/qqnt/apis';
+import { NTQQGroupApi, NTQQUserApi } from '../core/src/apis';
 import { log } from '@/common/utils/log';
 import { OB11GroupRequestEvent } from '@/onebot11/event/request/OB11GroupRequest';
 import { OB11GroupAdminNoticeEvent } from '@/onebot11/event/notice/OB11GroupAdminNoticeEvent';
@@ -156,7 +156,7 @@ export class NapCatOnebot11 {
       }).catch(e => log('constructGroupEvent error: ', e));
       OB11Constructor.FriendAddEvent(message).then(friendAddEvent=>{
         if(friendAddEvent){
-          postOB11Event(friendAddEvent)
+          postOB11Event(friendAddEvent);
         }
       }).catch(e => log('constructFriendAddEvent error: ', e));
     }

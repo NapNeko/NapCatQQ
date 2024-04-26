@@ -1,4 +1,4 @@
-import { ElementType, FileElement, PicElement, PttElement, RawMessage, VideoElement } from '@/core/qqnt/entities';
+import { ElementType, FileElement, PicElement, PttElement, RawMessage, VideoElement } from '../../core/src/entities';
 
 import sqlite3 from 'sqlite3';
 import { log } from '@/common/utils/log';

@@ -28,10 +28,6 @@
         "./src/core/src/index",
         "./src/core.lib/src/index"
       ],
-      "@/core/qqnt/*": [
-        "./src/core/src/qqnt/*",
-        "./src/core.lib/src/qqnt/*"
-      ],
       "@/core/*": [
         "./src/core/src/*",
         "./src/core.lib/src/*"

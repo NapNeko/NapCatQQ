@@ -1,6 +1,6 @@
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { NTQQFriendApi } from '@/core/qqnt/apis/friend';
+import { NTQQFriendApi } from '@/core/apis/friend';
 import { friendRequests } from '@/common/data';
 
 interface Payload {

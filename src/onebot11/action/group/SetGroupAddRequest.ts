@@ -1,7 +1,7 @@
 import BaseAction from '../BaseAction';
-import { GroupRequestOperateTypes } from '@/core/qqnt/entities';
+import { GroupRequestOperateTypes } from '@/core/entities';
 import { ActionName } from '../types';
-import { NTQQGroupApi } from '@/core/qqnt/apis/group';
+import { NTQQGroupApi } from '@/core/apis/group';
 import { groupNotifies } from '@/common/data';
 
 interface Payload {

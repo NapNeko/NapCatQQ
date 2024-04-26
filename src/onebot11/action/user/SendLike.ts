@@ -1,4 +1,4 @@
-import { NTQQUserApi } from '@/core/qqnt/apis';
+import { NTQQUserApi } from '../../../core/src/apis';
 import BaseAction from '../BaseAction';
 import { getFriend, getUidByUin, uid2UinMap } from '../../../common/data';
 import { ActionName } from '../types';

@@ -8,9 +8,9 @@ import {
   NTQQFileApi,
   // NTQQFileCacheApi,
   NTQQWindowApi,
-} from '@/core/qqnt/apis';
+} from '@/core';
 import { ActionName } from '../types';
-import { log } from '../../../common/utils/log';
+import { log } from '@/common/utils/log';
 
 interface Payload {
   method: string,

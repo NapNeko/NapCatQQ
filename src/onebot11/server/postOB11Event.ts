@@ -6,14 +6,14 @@ import { wsReply } from './ws/reply';
 import { log } from '@/common/utils/log';
 import { ob11Config } from '@/onebot11/config';
 import crypto from 'crypto';
-import { ChatType, Group, GroupRequestOperateTypes, Peer } from '@/core/qqnt/entities';
+import { ChatType, Group, GroupRequestOperateTypes, Peer } from '../../core/src/entities';
 import { convertMessage2List, createSendElements, sendMsg } from '../action/msg/SendMsg';
 import { OB11FriendRequestEvent } from '../event/request/OB11FriendRequest';
 import { OB11GroupRequestEvent } from '../event/request/OB11GroupRequest';
 import { isNull } from '@/common/utils/helper';
 import { dbUtil } from '@/common/utils/db';
 import { friendRequests, getGroup, groupNotifies, selfInfo } from '@/common/data';
-import { NTQQFriendApi, NTQQGroupApi, NTQQMsgApi } from '@/core/qqnt/apis';
+import { NTQQFriendApi, NTQQGroupApi, NTQQMsgApi } from '../../core/src/apis';
 
 export type PostEventType = OB11Message | OB11BaseMetaEvent | OB11BaseNoticeEvent
 
