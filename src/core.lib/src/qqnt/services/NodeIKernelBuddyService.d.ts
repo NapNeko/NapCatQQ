@@ -1,6 +1,6 @@
-import { Friend } from '@/core/qqnt/entities';
-import { GeneralCallResult } from '@/core/qqnt/services/common';
-import { NodeIKernelBuddyListener } from '@/core/qqnt/listeners';
+import { Friend } from '../../../../core/src/entities';
+import { GeneralCallResult } from '@/core/services/common';
+import { NodeIKernelBuddyListener } from '../../../../core/src/listeners';
 export interface NodeIKernelBuddyService {
     friends: Friend[];
     getFriend(uidOrUin: string): Promise<Friend>;

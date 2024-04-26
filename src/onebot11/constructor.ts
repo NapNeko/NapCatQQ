@@ -22,7 +22,7 @@ import {
   Sex,
   TipGroupElementType,
   User
-} from '@/core/qqnt/entities';
+} from '../core/src/entities';
 import { EventType } from './event/OB11BaseEvent';
 import { encodeCQCode } from './cqcode';
 import { dbUtil } from '@/common/utils/db';
@@ -40,7 +40,7 @@ import { OB11GroupCardEvent } from './event/notice/OB11GroupCardEvent';
 import { OB11GroupDecreaseEvent } from './event/notice/OB11GroupDecreaseEvent';
 import { ob11Config } from '@/onebot11/config';
 import { deleteGroup, getFriend, getGroupMember, groupMembers, selfInfo, tempGroupCodeMap } from '@/common/data';
-import { NTQQFileApi, NTQQGroupApi, NTQQUserApi } from '@/core/qqnt/apis';
+import { NTQQFileApi, NTQQGroupApi, NTQQUserApi } from '../core/src/apis';
 import http from 'http';
 
 

@@ -3,7 +3,7 @@ import { OB11User } from '../../types';
 import { getUidByUin, uid2UinMap } from '@/common/data';
 import { OB11Constructor } from '../../constructor';
 import { ActionName } from '../types';
-import { NTQQUserApi } from '@/core/qqnt/apis/user';
+import { NTQQUserApi } from '@/core/apis/user';
 import { log } from '@/common/utils/log';
 
 

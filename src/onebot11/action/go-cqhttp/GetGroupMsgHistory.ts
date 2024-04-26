@@ -2,9 +2,9 @@ import BaseAction from '../BaseAction';
 import { OB11Message, OB11User } from '../../types';
 import { getGroup, groups } from '@/common/data';
 import { ActionName } from '../types';
-import { ChatType } from '@/core/qqnt/entities';
+import { ChatType } from '@/core/entities';
 import { dbUtil } from '@/common/utils/db';
-import { NTQQMsgApi } from '@/core/qqnt/apis/msg';
+import { NTQQMsgApi } from '@/core/apis/msg';
 import { OB11Constructor } from '../../constructor';
 
 

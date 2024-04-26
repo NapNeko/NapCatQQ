@@ -1,7 +1,6 @@
 import { napCatCore } from '@/core';
-import { MsgListener } from '@/core/qqnt/listeners';
+import { MsgListener } from '@/core/listeners';
 import { NapCatOnebot11 } from '@/onebot11/main';
-import { ob11Config } from '@/onebot11/config';
 import { program } from 'commander';
 import qrcode from 'qrcode-terminal';
 import * as readline from 'node:readline';
@@ -36,47 +35,35 @@ checkVersion().then((remoteVersion: string) => {
   console.error('[NapCat] 检测更新失败');
 });
 new NapCatOnebot11();
-napCatCore.addLoginSuccessCallback(() => {
+napCatCore.onLoginSuccess(() => {
   console.log('login success');
   postLoginStatus();
-  const msgListener = new MsgListener();
-  msgListener.onRecvMsg = (msg) => {
-    // console.log(JSON.stringify(Array.from(msg[0].msgAttrs.values())));
-    // napCatCore.service.msg.kernelService?.getMsgsByMsgId(msg[0].msgId, 20).then(res=>console.log(res));
-
-    // console.log("onRecvMsg", msg)
-  };
-  // napCatCore.getGroupService().getGroupExtList(true).then((res) => {
-  //     console.log(res)
-  // })
-  napCatCore.service.msg.addMsgListener(msgListener);
 });
-napCatCore.on('system.login.qrcode', (qrCodeData: { url: string, base64: string }) => {
+const showQRCode = (qrCodeData: { url: string, base64: string, buffer: Buffer }) => {
   console.log('请扫描下面的二维码，然后在手Q上授权登录：');
   console.log('二维码解码URL:', qrCodeData.url);
   const qrcodePath = path.join(__dirname, 'qrcode.png');
-  fs.writeFile(qrcodePath, qrCodeData.base64.split('data:image/png;base64')[1], 'base64').then(() => {
+  fs.writeFile(qrcodePath, qrCodeData.buffer).then(() => {
     console.log('二维码已保存到', qrcodePath);
   });
   qrcode.generate(qrCodeData.url, { small: true }, (res) => {
     console.log(res);
   });
-});
-// console.log(cmdOptions);
+};
 const quickLoginQQ = cmdOptions.qq;
-napCatCore.on('system.login.error', (result) => {
-  console.error('登录失败', result);
-  napCatCore.login.qrcode().then().catch(console.error);
-});
+// napCatCore.on('system.login.error', (result) => {
+//   console.error('登录失败', result);
+//   napCatCore.qrLogin().then().catch(console.error);
+// });
 if (quickLoginQQ) {
   console.log('quick login', quickLoginQQ);
-  napCatCore.login.quick(quickLoginQQ).then().catch((e) => {
-    console.error(`${quickLoginQQ}快速登录不可用，请检查是否已经登录了`, e);
-    napCatCore.login.qrcode().then();
+  napCatCore.quickLogin(quickLoginQQ).then().catch((e) => {
+    console.error(e);
+    napCatCore.qrLogin().then(showQRCode);
   });
 } else {
   console.info('没有 -q 参数指定快速登录的QQ，将使用二维码登录方式');
-  napCatCore.login.qrcode().then();
+  napCatCore.qrLogin().then(showQRCode);
 }
 
 // napCatCore.login.service.getLoginList().then((res) => {

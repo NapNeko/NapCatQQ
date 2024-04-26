@@ -6,9 +6,9 @@ import {
   ChatType,
   ChatCacheListItemBasic,
   CacheFileType
-} from '../../../ntqqapi/types';
+} from '@/core/entities';
 import { dbUtil } from '../../../common/db';
-import { NTQQFileApi, NTQQFileCacheApi } from '@/core/qqnt/apis/file';
+import { NTQQFileApi, NTQQFileCacheApi } from '@/core/apis/file';
 
 export default class CleanCache extends BaseAction<void, void> {
   actionName = ActionName.CleanCache;

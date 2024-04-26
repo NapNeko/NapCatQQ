@@ -1,4 +1,4 @@
-import { FriendRequestNotify, User } from '@/core/qqnt/entities';
+import { FriendRequestNotify, User } from '../../../../core/src/entities';
 interface IBuddyListener {
     onBuddyListChange(arg: {
         categoryId: number;

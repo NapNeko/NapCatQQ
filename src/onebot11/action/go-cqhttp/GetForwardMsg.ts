@@ -1,6 +1,6 @@
 import BaseAction from '../BaseAction';
 import { OB11ForwardMessage, OB11Message, OB11MessageData } from '../../types';
-import { NTQQMsgApi } from '@/core/qqnt/apis';
+import { NTQQMsgApi } from '@/core/apis';
 import { dbUtil } from '@/common/utils/db';
 import { OB11Constructor } from '../../constructor';
 import { ActionName } from '../types';

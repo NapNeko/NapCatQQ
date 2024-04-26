@@ -66,7 +66,7 @@ class Config implements OB11Config {
       console.log('get config', jsonData);
       Object.assign(this, jsonData);
       // eslint-disable-next-line
-    } catch (e) {
+    } catch (e: any) {
       if (e instanceof SyntaxError) {
         console.error(`配置文件 ${ob11ConfigPath} 格式错误，请检查配置文件:`, e.message);
       }else{

@@ -1,5 +1,5 @@
 // QQ等级换算
-import { QQLevel } from '@/core/qqnt/entities';
+import { QQLevel } from '../../core/src/entities';
 
 export function calcQQLevel(level: QQLevel) {
   const { crownNum, sunNum, moonNum, starNum } = level;

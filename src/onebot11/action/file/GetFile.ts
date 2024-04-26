@@ -6,8 +6,8 @@ import { log } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';
 import { uri2local } from '@/common/utils/file';
 import { ActionName } from '../types';
-import { FileElement, RawMessage, VideoElement } from '@/core/qqnt/entities';
-import { NTQQFileApi } from '@/core/qqnt/apis';
+import { FileElement, RawMessage, VideoElement } from '@/core/entities';
+import { NTQQFileApi } from '@/core/apis';
 
 export interface GetFilePayload {
   file: string; // 文件名或者fileUuid

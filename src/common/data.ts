@@ -4,7 +4,7 @@ import {
   type Group,
   type GroupMember, GroupNotify,
   type SelfInfo
-} from '@/core/qqnt/entities';
+} from '../core/src/entities';
 import { isNumeric } from './utils/helper';
 import { log } from '@/common/utils/log';
 

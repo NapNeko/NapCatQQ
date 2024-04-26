@@ -1,4 +1,4 @@
-import { NTQQMsgApi } from '@/core/qqnt/apis';
+import { NTQQMsgApi } from '@/core/apis';
 import { ActionName } from '../types';
 import BaseAction from '../BaseAction';
 import { dbUtil } from '@/common/utils/db';

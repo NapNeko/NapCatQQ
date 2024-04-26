@@ -1,10 +1,9 @@
-import { GroupNotify, GroupNotifyStatus } from '../../../ntqqapi/types';
+import { GroupNotify, GroupNotifyStatus } from '@/core/entities';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { uid2UinMap } from '../../../common/data';
-import { NTQQUserApi } from '@/core/qqnt/apis/user';
-import { NTQQGroupApi } from '@/core/qqnt/apis/group';
-import { log } from '../../../common/utils/log';
+import { uid2UinMap } from '@/common/data';
+import { NTQQUserApi } from '@/core/apis/user';
+import { NTQQGroupApi } from '@/core/apis/group';
 
 interface OB11GroupRequestNotify {
   group_id: number,

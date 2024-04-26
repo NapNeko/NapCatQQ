@@ -1,4 +1,4 @@
-import { User } from '@/core/qqnt/entities';
+import { User } from '../../../../core/src/entities';
 interface IProfileListener {
     onProfileSimpleChanged(...args: unknown[]): void;
     onProfileDetailInfoChanged(profile: User): void;

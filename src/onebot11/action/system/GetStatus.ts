@@ -1,7 +1,7 @@
 import BaseAction from '../BaseAction';
 import { OB11Status } from '../../types';
 import { ActionName } from '../types';
-import { selfInfo } from '../../../common/data';
+import { selfInfo } from '@/common/data';
 
 
 export default class GetStatus extends BaseAction<any, OB11Status> {

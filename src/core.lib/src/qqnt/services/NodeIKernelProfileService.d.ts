@@ -1,5 +1,5 @@
 import { NodeIKernelProfileListener } from '../listeners';
-import { GeneralCallResult } from '@/core/qqnt/services/common';
+import { GeneralCallResult } from '@/core/services/common';
 export interface NodeIKernelProfileService {
     addKernelProfileListener(listener: NodeIKernelProfileListener): void;
     removeKernelProfileListener(listenerId: unknown): void;
