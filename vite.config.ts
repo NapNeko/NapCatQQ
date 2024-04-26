@@ -64,7 +64,7 @@ const baseConfig = (mode: string = 'development') => defineConfig({
     target: 'esnext',
     minify: mode === 'production' ? 'esbuild' : false,
     lib: {
-      entry: 'src/onebot11/index.ts',
+      entry: 'src/index.ts',
       formats: ['cjs'],
       fileName: () => 'napcat.cjs',
     },

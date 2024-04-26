@@ -10,7 +10,7 @@ import { WebsocketServerBase } from '@/common/server/websocket';
 import { IncomingMessage } from 'node:http';
 import { wsReply } from './reply';
 import { napCatCore } from '@/core';
-import { log } from '../../../common/utils/log';
+import { log, logDebug, logError } from '../../../common/utils/log';
 import { ob11Config } from '@/onebot11/config';
 import { selfInfo } from '@/common/data';
 
@@ -58,19 +58,19 @@ class OB11WebsocketServer extends WebsocketServerBase {
     if (url == '/event' || url == '/event/' || url == '/') {
       registerWsEventSender(wsClient);
 
-      log('event上报ws客户端已连接');
+      logDebug('event上报ws客户端已连接');
 
       try {
         wsReply(wsClient, new OB11LifeCycleEvent(LifeCycleSubType.CONNECT));
       } catch (e) {
-        log('发送生命周期失败', e);
+        logError('发送生命周期失败', e);
       }
       const { heartInterval } = ob11Config;
       const wsClientInterval = setInterval(() => {
         postWsEvent(new OB11HeartbeatEvent(!!selfInfo.online, true, heartInterval));
       }, heartInterval);  // 心跳包
       wsClient.on('close', () => {
-        log('event上报ws客户端已断开');
+        logError('event上报ws客户端已断开');
         clearInterval(wsClientInterval);
         unregisterWsEventSender(wsClient);
       });

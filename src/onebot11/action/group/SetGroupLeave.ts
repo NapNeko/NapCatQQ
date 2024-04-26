@@ -1,7 +1,7 @@
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { NTQQGroupApi } from '@/core/apis/group';
-import { log } from '@/common/utils/log';
+import { log, logError } from '@/common/utils/log';
 
 interface Payload {
     group_id: number,
@@ -15,7 +15,7 @@ export default class SetGroupLeave extends BaseAction<Payload, any> {
     try {
       await NTQQGroupApi.quitGroup(payload.group_id.toString());
     } catch (e) {
-      log('退群失败', e);
+      logError('退群失败', e);
       throw e;
     }
   }

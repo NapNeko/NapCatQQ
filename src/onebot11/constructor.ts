@@ -33,7 +33,7 @@ import { OB11GroupNoticeEvent } from './event/notice/OB11GroupNoticeEvent';
 import { OB11FriendAddNoticeEvent } from './event/notice/OB11FriendAddNoticeEvent';
 
 import { calcQQLevel } from '../common/utils/qqlevel';
-import { log } from '../common/utils/log';
+import { log, logDebug, logError } from '../common/utils/log';
 import { sleep } from '../common/utils/helper';
 import { OB11GroupTitleEvent } from './event/notice/OB11GroupTitleEvent';
 import { OB11GroupCardEvent } from './event/notice/OB11GroupCardEvent';
@@ -132,7 +132,7 @@ export class OB11Constructor {
             continue;
           }
         } catch (e: any) {
-          log('获取不到引用的消息', e.stack, element.replyElement.replayMsgSeq);
+          logError('获取不到引用的消息', e.stack, element.replyElement.replayMsgSeq);
         }
 
       } else if (element.picElement) {
@@ -259,7 +259,7 @@ export class OB11Constructor {
       if (groupElement) {
         // log("收到群提示消息", groupElement)
         if (groupElement.type == TipGroupElementType.memberIncrease) {
-          log('收到群成员增加消息', groupElement);
+          logDebug('收到群成员增加消息', groupElement);
           await sleep(1000);
           const member = await getGroupMember(msg.peerUid, groupElement.memberUid);
           const memberUin = member?.uin;
@@ -276,7 +276,7 @@ export class OB11Constructor {
             return event;
           }
         } else if (groupElement.type === TipGroupElementType.ban) {
-          log('收到群群员禁言提示', groupElement);
+          logDebug('收到群群员禁言提示', groupElement);
           const memberUid = groupElement.shutUp!.member.uid;
           const adminUid = groupElement.shutUp!.admin.uid;
           let memberUin: string = '';
@@ -298,7 +298,7 @@ export class OB11Constructor {
             return event;
           }
         } else if (groupElement.type == TipGroupElementType.kicked) {
-          log(`收到我被踢出或退群提示, 群${msg.peerUid}`, groupElement);
+          logDebug(`收到我被踢出或退群提示, 群${msg.peerUid}`, groupElement);
           deleteGroup(msg.peerUid);
           NTQQGroupApi.quitGroup(msg.peerUid).then();
           try {
@@ -321,7 +321,7 @@ export class OB11Constructor {
 
       if (grayTipElement) {
         if (grayTipElement.subElementType == GrayTipElementSubType.INVITE_NEW_MEMBER) {
-          log('收到新人被邀请进群消息', grayTipElement);
+          logDebug('收到新人被邀请进群消息', grayTipElement);
           const xmlElement = grayTipElement.xmlElement;
           if (xmlElement?.content) {
             const regex = /jp="(\d+)"/g;
@@ -366,7 +366,7 @@ export class OB11Constructor {
             * */
           const memberUin = json.items[1].param[0];
           const title = json.items[3].txt;
-          log('收到群成员新头衔消息', json);
+          logDebug('收到群成员新头衔消息', json);
           return new OB11GroupTitleEvent(parseInt(msg.peerUid), parseInt(memberUin), title);
         }
       }
@@ -451,7 +451,7 @@ export class OB11Constructor {
   }
 
   static stranger(user: User): OB11User {
-    log('construct ob11 stranger', user);
+    logDebug('construct ob11 stranger', user);
     return {
       ...user,
       user_id: parseInt(user.uin),
@@ -465,7 +465,7 @@ export class OB11Constructor {
   }
 
   static groupMembers(group: Group): OB11GroupMember[] {
-    log('construct ob11 group members', group);
+    logDebug('construct ob11 group members', group);
     return Array.from(groupMembers.get(group.groupCode)?.values() || []).map(m => OB11Constructor.groupMember(group.groupCode, m));
   }
 

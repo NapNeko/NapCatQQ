@@ -20,7 +20,7 @@ import { dbUtil } from '@/common/utils/db';
 import { BuddyListener, GroupListener, NodeIKernelBuddyListener } from '../core/src/listeners';
 import { OB11FriendRequestEvent } from '@/onebot11/event/request/OB11FriendRequest';
 import { NTQQGroupApi, NTQQUserApi } from '../core/src/apis';
-import { log } from '@/common/utils/log';
+import { log, logDebug, logError } from '@/common/utils/log';
 import { OB11GroupRequestEvent } from '@/onebot11/event/request/OB11GroupRequest';
 import { OB11GroupAdminNoticeEvent } from '@/onebot11/event/notice/OB11GroupAdminNoticeEvent';
 import { GroupDecreaseSubType, OB11GroupDecreaseEvent } from '@/onebot11/event/notice/OB11GroupDecreaseEvent';
@@ -38,7 +38,7 @@ export class NapCatOnebot11 {
   }
 
   public onReady() {
-    console.log('ob11 ready');
+    logDebug('ob11 ready');
     ob11Config.read();
     if (ob11Config.enableHttp) {
       ob11HTTPServer.start(ob11Config.httpPort);
@@ -95,7 +95,7 @@ export class NapCatOnebot11 {
       }
     };
     napCatCore.addListener(msgListener);
-    console.log('ob11 msg listener added');
+    logDebug('ob11 msg listener added');
 
     // BuddyListener
     const buddyListener = new BuddyListener();
@@ -103,13 +103,13 @@ export class NapCatOnebot11 {
       this.postFriendRequest(req.buddyReqs).then().catch(log);
     });
     napCatCore.addListener(buddyListener);
-    console.log('ob11 buddy listener added');
+    logDebug('ob11 buddy listener added');
 
     // GroupListener
     const groupListener = new GroupListener();
     groupListener.onGroupNotifiesUpdated = (doubt, notifies) => {
       // console.log('ob11 onGroupNotifiesUpdated', notifies);
-      this.postGroupNotifies(notifies).then().catch(e => log('postGroupNotifies error: ', e));
+      this.postGroupNotifies(notifies).then().catch(e => logError('postGroupNotifies error: ', e));
     };
     groupListener.onJoinGroupNotify = (...notify) => {
       // console.log('ob11 onJoinGroupNotify', notify);
@@ -120,13 +120,13 @@ export class NapCatOnebot11 {
     };
 
     napCatCore.addListener(groupListener);
-    console.log('ob11 group listener added');
+    logDebug('ob11 group listener added');
   }
 
   async postReceiveMsg(msgList: RawMessage[]) {
     const { debug, reportSelfMessage } = ob11Config;
     for (const message of msgList) {
-      // console.log("ob11 收到新消息", message)
+      log('收到新消息', message);
       // if (message.senderUin !== selfInfo.uin){
       // message.msgShortId = await dbUtil.addMsg(message);
       // }
@@ -147,18 +147,18 @@ export class NapCatOnebot11 {
         }
         postOB11Event(msg);
         // log("post msg", msg)
-      }).catch(e => log('constructMessage error: ', e));
+      }).catch(e => logError('constructMessage error: ', e));
       OB11Constructor.GroupEvent(message).then(groupEvent => {
         if (groupEvent) {
           // log("post group event", groupEvent);
           postOB11Event(groupEvent);
         }
-      }).catch(e => log('constructGroupEvent error: ', e));
+      }).catch(e => logError('constructGroupEvent error: ', e));
       OB11Constructor.FriendAddEvent(message).then(friendAddEvent=>{
         if(friendAddEvent){
           postOB11Event(friendAddEvent);
         }
-      }).catch(e => log('constructFriendAddEvent error: ', e));
+      }).catch(e => logError('constructFriendAddEvent error: ', e));
     }
   }
 
@@ -176,7 +176,7 @@ export class NapCatOnebot11 {
         if (existNotify) {
           continue;
         }
-        log('收到群通知', notify);
+        logDebug('收到群通知', notify);
         groupNotifies[flag] = notify;
         // let member2: GroupMember;
         // if (notify.user2.uid) {
@@ -184,22 +184,22 @@ export class NapCatOnebot11 {
         // }
         if ([GroupNotifyTypes.ADMIN_SET, GroupNotifyTypes.ADMIN_UNSET].includes(notify.type)) {
           const member1 = await getGroupMember(notify.group.groupCode, notify.user1.uid);
-          log('有管理员变动通知');
+          logDebug('有管理员变动通知');
           // refreshGroupMembers(notify.group.groupCode).then();
           const groupAdminNoticeEvent = new OB11GroupAdminNoticeEvent();
           groupAdminNoticeEvent.group_id = parseInt(notify.group.groupCode);
-          log('开始获取变动的管理员');
+          logDebug('开始获取变动的管理员');
           if (member1) {
-            log('变动管理员获取成功');
+            logDebug('变动管理员获取成功');
             groupAdminNoticeEvent.user_id = parseInt(member1.uin);
             groupAdminNoticeEvent.sub_type = notify.type == GroupNotifyTypes.ADMIN_UNSET ? 'unset' : 'set';
             // member1.role = notify.type == GroupNotifyTypes.ADMIN_SET ? GroupMemberRole.admin : GroupMemberRole.normal;
             postOB11Event(groupAdminNoticeEvent, true);
           } else {
-            log('获取群通知的成员信息失败', notify, getGroup(notify.group.groupCode));
+            logDebug('获取群通知的成员信息失败', notify, getGroup(notify.group.groupCode));
           }
         } else if (notify.type == GroupNotifyTypes.MEMBER_EXIT || notify.type == GroupNotifyTypes.KICK_MEMBER) {
-          log('有成员退出通知', notify);
+          logDebug('有成员退出通知', notify);
           try {
             const member1 = await NTQQUserApi.getUserDetailInfo(notify.user1.uid);
             let operatorId = member1.uin;
@@ -215,17 +215,17 @@ export class NapCatOnebot11 {
             const groupDecreaseEvent = new OB11GroupDecreaseEvent(parseInt(notify.group.groupCode), parseInt(member1.uin), parseInt(operatorId), subType);
             postOB11Event(groupDecreaseEvent, true);
           } catch (e: any) {
-            log('获取群通知的成员信息失败', notify, e.stack.toString());
+            logError('获取群通知的成员信息失败', notify, e.stack.toString());
           }
         } else if ([GroupNotifyTypes.JOIN_REQUEST].includes(notify.type)) {
-          log('有加群请求');
+          logDebug('有加群请求');
           const groupRequestEvent = new OB11GroupRequestEvent();
           groupRequestEvent.group_id = parseInt(notify.group.groupCode);
           let requestQQ = '';
           try {
             requestQQ = (await NTQQUserApi.getUserDetailInfo(notify.user1.uid)).uin;
           } catch (e) {
-            log('获取加群人QQ号失败', e);
+            logError('获取加群人QQ号失败', e);
           }
           groupRequestEvent.user_id = parseInt(requestQQ) || 0;
           groupRequestEvent.sub_type = 'add';
@@ -233,7 +233,7 @@ export class NapCatOnebot11 {
           groupRequestEvent.flag = flag;
           postOB11Event(groupRequestEvent);
         } else if (notify.type == GroupNotifyTypes.INVITE_ME) {
-          log('收到邀请我加群通知');
+          logDebug('收到邀请我加群通知');
           const groupInviteEvent = new OB11GroupRequestEvent();
           groupInviteEvent.group_id = parseInt(notify.group.groupCode);
           let user_id = (await getFriend(notify.user2.uid))?.uin;
@@ -246,7 +246,7 @@ export class NapCatOnebot11 {
           postOB11Event(groupInviteEvent);
         }
       } catch (e: any) {
-        log('解析群通知失败', e.stack.toString());
+        logDebug('解析群通知失败', e.stack.toString());
       }
     }
 
@@ -298,7 +298,7 @@ export class NapCatOnebot11 {
         const requester = await NTQQUserApi.getUserDetailInfo(req.friendUid);
         friendRequestEvent.user_id = parseInt(requester.uin);
       } catch (e) {
-        log('获取加好友者QQ号失败', e);
+        logDebug('获取加好友者QQ号失败', e);
       }
       friendRequestEvent.flag = flag;
       friendRequestEvent.comment = req.extWords;

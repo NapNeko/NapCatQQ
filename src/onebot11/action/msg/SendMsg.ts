@@ -23,7 +23,7 @@ import { ActionName, BaseCheckResult } from '../types';
 import * as fs from 'node:fs';
 import { decodeCQCode } from '../../cqcode';
 import { dbUtil } from '@/common/utils/db';
-import { log } from '@/common/utils/log';
+import { log, logDebug, logError } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';
 import { uri2local } from '@/common/utils/file';
 import { getFriend, getGroup, getGroupMember, getUidByUin, selfInfo } from '@/common/data';
@@ -168,11 +168,11 @@ export async function createSendElements(messageData: OB11MessageData[], group: 
             // log('download result', downloadPath);
             // log('下载完成后的msg', msg);
           }
-          log('找到文件缓存', file);
+          logDebug('找到文件缓存', file);
         }
         const { path, isLocal, fileName, errMsg } = (await uri2local(file));
         if (errMsg) {
-          log('文件下载失败', errMsg);
+          logError('文件下载失败', errMsg);
           throw Error('文件下载失败' + errMsg);
           // throw (errMsg);
           // continue
@@ -182,10 +182,10 @@ export async function createSendElements(messageData: OB11MessageData[], group: 
             deleteAfterSentFiles.push(path);
           }
           if (sendMsg.type === OB11MessageDataType.file) {
-            log('发送文件', path, payloadFileName || fileName);
+            logDebug('发送文件', path, payloadFileName || fileName);
             sendElements.push(await SendMsgElementConstructor.file(path, payloadFileName || fileName));
           } else if (sendMsg.type === OB11MessageDataType.video) {
-            log('发送视频', path, payloadFileName || fileName);
+            logDebug('发送视频', path, payloadFileName || fileName);
             let thumb = sendMsg.data?.thumb;
             if (thumb) {
               const uri2LocalRes = await uri2local(thumb);
@@ -239,7 +239,7 @@ export async function sendMsg(peer: Peer, sendElements: SendMessageElement[], de
   try {
     returnMsg.id = await dbUtil.addMsg(returnMsg, false);
   } catch (e: any) {
-    log('发送消息id获取失败', e);
+    logDebug('发送消息id获取失败', e);
     returnMsg.id = 0;
   }
   // log('消息发送结果', returnMsg);
@@ -380,7 +380,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
   }
 
   private async cloneMsg(msg: RawMessage): Promise<RawMessage | undefined> {
-    log('克隆的目标消息', msg);
+    logDebug('克隆的目标消息', msg);
     const sendElements: SendMessageElement[] = [];
     for (const ele of msg.elements) {
       sendElements.push(ele as SendMessageElement);
@@ -390,9 +390,9 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
 
     }
     if (sendElements.length === 0) {
-      log('需要clone的消息无法解析，将会忽略掉', msg);
+      logDebug('需要clone的消息无法解析，将会忽略掉', msg);
     }
-    log('克隆消息', sendElements);
+    logDebug('克隆消息', sendElements);
     try {
       const nodeMsg = await NTQQMsgApi.sendMsg({
         chatType: ChatType.friend,
@@ -401,7 +401,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
       await sleep(500);
       return nodeMsg;
     } catch (e) {
-      log(e, '克隆转发消息失败,将忽略本条消息', msg);
+      logError(e, '克隆转发消息失败,将忽略本条消息', msg);
     }
 
   }
@@ -440,7 +440,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
             sendElements,
             deleteAfterSentFiles
           } = await createSendElements(convertMessage2List(messageNode.data.content), group);
-          log('开始生成转发节点', sendElements);
+          logDebug('开始生成转发节点', sendElements);
           const sendElementsSplit: SendMessageElement[][] = [];
           let splitIndex = 0;
           for (const ele of sendElements) {
@@ -457,20 +457,20 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
             } else {
               sendElementsSplit[splitIndex].push(ele);
             }
-            log(sendElementsSplit);
+            logDebug(sendElementsSplit);
           }
           // log("分割后的转发节点", sendElementsSplit)
           for (const eles of sendElementsSplit) {
             const nodeMsg = await sendMsg(selfPeer, eles, [], true);
             nodeMsgIds.push(nodeMsg.msgId);
             await sleep(500);
-            log('转发节点生成成功', nodeMsg.msgId);
+            logDebug('转发节点生成成功', nodeMsg.msgId);
           }
           deleteAfterSentFiles.map(f => fs.unlink(f, () => {
           }));
 
         } catch (e) {
-          log('生成转发消息节点失败', e);
+          logDebug('生成转发消息节点失败', e);
         }
       }
     }
@@ -491,10 +491,10 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         }
       }
     }
-    log('nodeMsgArray', nodeMsgArray);
+    logDebug('nodeMsgArray', nodeMsgArray);
     nodeMsgIds = nodeMsgArray.map(msg => msg.msgId);
     if (needSendSelf) {
-      log('需要克隆转发消息');
+      logDebug('需要克隆转发消息');
       for (const [index, msg] of nodeMsgArray.entries()) {
         if (msg.peerUid !== selfInfo.uid) {
           const cloneMsg = await this.cloneMsg(msg);
@@ -518,10 +518,10 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
       throw Error('转发消息失败，生成节点为空');
     }
     try {
-      log('开发转发', srcPeer, destPeer, nodeMsgIds);
+      logDebug('开发转发', srcPeer, destPeer, nodeMsgIds);
       return await NTQQMsgApi.multiForwardMsg(srcPeer!, destPeer, nodeMsgIds);
     } catch (e) {
-      log('forward failed', e);
+      logError('forward failed', e);
       return null;
     }
   }

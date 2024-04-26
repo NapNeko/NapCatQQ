@@ -2,10 +2,10 @@ import { ActionName, BaseCheckResult } from './types';
 import { OB11Response } from './OB11Response';
 import { OB11Return } from '../types';
 
-import { log } from '../../common/utils/log';
+import { log, logError } from '../../common/utils/log';
 
 class BaseAction<PayloadType, ReturnDataType> {
-  actionName: ActionName;
+  actionName!: ActionName;
 
   protected async check(payload: PayloadType): Promise<BaseCheckResult> {
     return {
@@ -21,8 +21,8 @@ class BaseAction<PayloadType, ReturnDataType> {
     try {
       const resData = await this._handle(payload);
       return OB11Response.ok(resData);
-    } catch (e) {
-      log('发生错误', e);
+    } catch (e: any) {
+      logError('发生错误', e);
       return OB11Response.error(e?.toString() || e?.stack?.toString() || '未知错误，可能操作超时', 200);
     }
   }
@@ -35,8 +35,8 @@ class BaseAction<PayloadType, ReturnDataType> {
     try {
       const resData = await this._handle(payload);
       return OB11Response.ok(resData, echo);
-    } catch (e) {
-      log('发生错误', e);
+    } catch (e: any) {
+      logError('发生错误', e);
       return OB11Response.error(e.stack?.toString() || e.toString(), 1200, echo);
     }
   }

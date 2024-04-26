@@ -1,26 +1,26 @@
 import { napCatCore } from '@/core';
-import { MsgListener } from '@/core/listeners';
-import { NapCatOnebot11 } from '@/onebot11/main';
 import { program } from 'commander';
 import qrcode from 'qrcode-terminal';
-import * as readline from 'node:readline';
 import fs from 'fs/promises';
 import path from 'node:path';
 import { postLoginStatus } from '@/common/utils/umami';
 import { checkVersion } from '@/common/utils/version';
+import { log, logError, LogLevel, setLogLevel } from '@/common/utils/log';
+import { NapCatOnebot11 } from '@/onebot11/main';
 
 program
   .option('-q, --qq <type>', 'QQ号')
   .parse(process.argv);
 
 const cmdOptions = program.opts();
-console.log(process.argv);
+// console.log(process.argv);
+setLogLevel(LogLevel.DEBUG, LogLevel.DEBUG);
 
 checkVersion().then((remoteVersion: string) => {
   const localVersion = require('./package.json').version;
   const localVersionList = localVersion.split('.');
   const remoteVersionList = remoteVersion.split('.');
-  console.log('[NapCat]  当前版本:', localVersion);
+  log('[NapCat]  当前版本:', localVersion);
   for (const k of [0, 1, 2]) {
     if (parseInt(remoteVersionList[k]) > parseInt(localVersionList[k])) {
       console.log('[NapCat] 检测到更新,请前往 https://github.com/NapNeko/NapCatQQ 下载 NapCatQQ V', remoteVersion);
@@ -29,25 +29,25 @@ checkVersion().then((remoteVersion: string) => {
       break;
     }
   }
-  console.log('[NapCat]  当前已是最新版本');
+  log('[NapCat]  当前已是最新版本');
   return;
 }).catch((e) => {
-  console.error('[NapCat] 检测更新失败');
+  logError('[NapCat] 检测更新失败');
 });
 new NapCatOnebot11();
 napCatCore.onLoginSuccess(() => {
-  console.log('login success');
+  log('登录成功!');
   postLoginStatus();
 });
 const showQRCode = (qrCodeData: { url: string, base64: string, buffer: Buffer }) => {
-  console.log('请扫描下面的二维码，然后在手Q上授权登录：');
-  console.log('二维码解码URL:', qrCodeData.url);
+  log('请扫描下面的二维码，然后在手Q上授权登录：');
+  log('二维码解码URL:', qrCodeData.url);
   const qrcodePath = path.join(__dirname, 'qrcode.png');
   fs.writeFile(qrcodePath, qrCodeData.buffer).then(() => {
-    console.log('二维码已保存到', qrcodePath);
+    log('二维码已保存到', qrcodePath);
   });
   qrcode.generate(qrCodeData.url, { small: true }, (res) => {
-    console.log(res);
+    log('\n' + res);
   });
 };
 const quickLoginQQ = cmdOptions.qq;
@@ -57,12 +57,14 @@ const quickLoginQQ = cmdOptions.qq;
 // });
 if (quickLoginQQ) {
   console.log('quick login', quickLoginQQ);
-  napCatCore.quickLogin(quickLoginQQ).then().catch((e) => {
+  napCatCore.quickLogin(quickLoginQQ).then(res=>{
+    // log('快速登录结果:', res);
+  }).catch((e) => {
     console.error(e);
     napCatCore.qrLogin().then(showQRCode);
   });
 } else {
-  console.info('没有 -q 参数指定快速登录的QQ，将使用二维码登录方式');
+  log('没有 -q 参数指定快速登录的QQ，将使用二维码登录方式');
   napCatCore.qrLogin().then(showQRCode);
 }
 
