@@ -7,7 +7,7 @@ import { postWsEvent, registerWsEventSender, unregisterWsEventSender } from '../
 import { wsReply } from './reply';
 import { WebSocket as WebSocketClass } from 'ws';
 import { OB11HeartbeatEvent } from '../../event/meta/OB11HeartbeatEvent';
-import { log } from '../../../common/utils/log';
+import { log, logDebug, logError } from '../../../common/utils/log';
 import { ob11Config } from '@/onebot11/config';
 import { napCatCore } from '@/core';
 import { selfInfo } from '@/common/data';
@@ -40,7 +40,7 @@ export class ReverseWebsocket {
     try {
       receiveData = JSON.parse(msg.toString());
       echo = receiveData.echo;
-      log('收到反向Websocket消息', receiveData);
+      logDebug('收到反向Websocket消息', receiveData);
     } catch (e) {
       return wsReply(this.websocket!, OB11Response.error('json解析失败，请检查数据格式', 1400, echo));
     }
@@ -57,7 +57,7 @@ export class ReverseWebsocket {
   }
 
   public onclose = () => {
-    log('反向ws断开', this.url);
+    logDebug('反向ws断开', this.url);
     unregisterWsEventSender(this.websocket!);
     if (this.running) {
       this.reconnect();
@@ -89,11 +89,11 @@ export class ReverseWebsocket {
       }
     });
     registerWsEventSender(this.websocket);
-    log('Trying to connect to the websocket server: ' + this.url);
+    logDebug('Trying to connect to the websocket server: ' + this.url);
 
 
     this.websocket.on('open', () => {
-      log('Connected to the websocket server: ' + this.url);
+      logDebug('Connected to the websocket server: ' + this.url);
       this.onopen();
     });
 
@@ -108,7 +108,7 @@ export class ReverseWebsocket {
     }, heartInterval);  // 心跳包
     this.websocket.on('close', () => {
       clearInterval(wsClientInterval);
-      log('The websocket connection: ' + this.url + ' closed, trying reconnecting...');
+      logDebug('The websocket connection: ' + this.url + ' closed, trying reconnecting...');
       this.onclose();
     });
   }
@@ -122,7 +122,7 @@ class OB11ReverseWebsockets {
         try {
           rwsList.push(new ReverseWebsocket(url));
         } catch (e: any) {
-          log(e.stack);
+          logError(e.stack);
         }
       }).then();
     }

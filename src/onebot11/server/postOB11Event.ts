@@ -3,7 +3,7 @@ import { OB11BaseMetaEvent } from '../event/meta/OB11BaseMetaEvent';
 import { OB11BaseNoticeEvent } from '../event/notice/OB11BaseNoticeEvent';
 import { WebSocket as WebSocketClass } from 'ws';
 import { wsReply } from './ws/reply';
-import { log } from '@/common/utils/log';
+import { log, logDebug, logError } from '@/common/utils/log';
 import { ob11Config } from '@/onebot11/config';
 import crypto from 'crypto';
 import { ChatType, Group, GroupRequestOperateTypes, Peer } from '../../core/src/entities';
@@ -95,14 +95,14 @@ export function postOB11Event(msg: PostEventType, reportSelf = false, postWs= tr
         headers,
         body: msgStr
       }).then(async (res) => {
-        log(`新消息事件HTTP上报成功: ${host} `, msgStr);
+        logDebug(`新消息事件HTTP上报成功: ${host} `, msgStr);
         // todo: 处理不够优雅，应该使用高级泛型进行QuickAction类型识别
         let resJson: QuickAction;
         try {
           resJson = await res.json();
-          log('新消息事件HTTP上报返回快速操作: ', JSON.stringify(resJson));
+          logDebug('新消息事件HTTP上报返回快速操作: ', JSON.stringify(resJson));
         } catch (e) {
-          log('新消息事件HTTP上报没有返回快速操作，不需要处理');
+          logDebug('新消息事件HTTP上报没有返回快速操作，不需要处理');
           return;
         }
         if (msg.post_type === 'message') {
@@ -177,7 +177,7 @@ export function postOB11Event(msg: PostEventType, reportSelf = false, postWs= tr
           }
         }
       }, (err: any) => {
-        log(`新消息事件HTTP上报失败: ${host} `, err, msg);
+        logError(`新消息事件HTTP上报失败: ${host} `, err, msg);
       });
     }
   }

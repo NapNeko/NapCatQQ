@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { selfInfo } from '@/common/data';
+import { logDebug, logError } from '@/common/utils/log';
 
 export interface OB11Config {
   httpPort: number;
@@ -56,21 +57,21 @@ class Config implements OB11Config {
   read() {
     const ob11ConfigPath = this.getConfigPath();
     if (!fs.existsSync(ob11ConfigPath)) {
-      console.log(`onebot11配置文件 ${ob11ConfigPath} 不存在, 现已创建，请修改配置文件后重启NapCat`);
+      logError(`onebot11配置文件 ${ob11ConfigPath} 不存在, 现已创建，请修改配置文件后重启NapCat`);
       this.save();
       return this;
     }
     const data = fs.readFileSync(ob11ConfigPath, 'utf-8');
     try {
       const jsonData = JSON.parse(data);
-      console.log('get config', jsonData);
+      logDebug('Onebot 11配置文件已加载', jsonData);
       Object.assign(this, jsonData);
       // eslint-disable-next-line
     } catch (e: any) {
       if (e instanceof SyntaxError) {
-        console.error(`配置文件 ${ob11ConfigPath} 格式错误，请检查配置文件:`, e.message);
+        logError(`配置文件 ${ob11ConfigPath} 格式错误，请检查配置文件:`, e.message);
       }else{
-        console.error(`读取配置文件 ${ob11ConfigPath} 时发生错误:`, e.message);
+        logError(`读取配置文件 ${ob11ConfigPath} 时发生错误:`, e.message);
       }
     }
     return this;

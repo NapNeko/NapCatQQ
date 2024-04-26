@@ -10,7 +10,7 @@ import {
   NTQQWindowApi,
 } from '@/core';
 import { ActionName } from '../types';
-import { log } from '@/common/utils/log';
+import { log, logDebug } from '@/common/utils/log';
 
 interface Payload {
   method: string,
@@ -21,12 +21,12 @@ export default class Debug extends BaseAction<Payload, any> {
   actionName = ActionName.Debug;
 
   protected async _handle(payload: Payload): Promise<any> {
-    log('debug call ntqq api', payload);
+    logDebug('debug call ntqq api', payload);
     const ntqqApi = [NTQQMsgApi, NTQQFriendApi, NTQQGroupApi, NTQQUserApi, NTQQFileApi,
       // NTQQFileCacheApi,
       NTQQWindowApi];
     for (const ntqqApiClass of ntqqApi) {
-      log('ntqqApiClass', ntqqApiClass);
+      logDebug('ntqqApiClass', ntqqApiClass);
       const method = (<any>ntqqApiClass)[payload.method];
       if (method) {
         const result = method(...payload.args);

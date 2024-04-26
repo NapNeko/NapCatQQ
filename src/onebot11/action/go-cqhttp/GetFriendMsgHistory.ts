@@ -6,6 +6,7 @@ import { ChatType } from '@/core/entities';
 import { dbUtil } from '@/common/utils/db';
 import { NTQQMsgApi } from '@/core/apis/msg';
 import { OB11Constructor } from '../../constructor';
+import { logDebug } from '@/common/utils/log';
 
 
 interface Payload {
@@ -32,7 +33,7 @@ export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
       chatType: friend ? ChatType.friend : ChatType.temp,
       peerUid: uid
     }, startMsgId, parseInt(payload.count?.toString()) || 20));
-    console.log(historyResult);
+    logDebug(historyResult);
     const msgList = historyResult.msgList;
     await Promise.all(msgList.map(async msg => {
       msg.id = await dbUtil.addMsg(msg);

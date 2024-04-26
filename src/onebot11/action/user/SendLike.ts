@@ -2,7 +2,7 @@ import { NTQQUserApi } from '../../../core/src/apis';
 import BaseAction from '../BaseAction';
 import { getFriend, getUidByUin, uid2UinMap } from '../../../common/data';
 import { ActionName } from '../types';
-import { log } from '../../../common/utils/log';
+import { log, logDebug } from '../../../common/utils/log';
 
 interface Payload {
   user_id: number,
@@ -13,7 +13,7 @@ export default class SendLike extends BaseAction<Payload, null> {
   actionName = ActionName.SendLike;
 
   protected async _handle(payload: Payload): Promise<null> {
-    log('点赞参数', payload);
+    logDebug('点赞参数', payload);
     try {
       const qq = payload.user_id.toString();
       const friend = await getFriend(qq);
@@ -24,7 +24,7 @@ export default class SendLike extends BaseAction<Payload, null> {
         uid = friend.uid;
       }
       const result = await NTQQUserApi.like(uid, parseInt(payload.times?.toString()) || 1);
-      console.log('点赞结果', result);
+      logDebug('点赞结果', result);
       if (result.result !== 0) {
         throw Error(result.errMsg);
       }

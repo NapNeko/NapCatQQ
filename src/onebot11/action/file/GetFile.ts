@@ -2,7 +2,7 @@ import BaseAction from '../BaseAction';
 import fs from 'fs/promises';
 import { dbUtil } from '@/common/utils/db';
 import { ob11Config } from '@/onebot11/config';
-import { log } from '@/common/utils/log';
+import { log, logDebug } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';
 import { uri2local } from '@/common/utils/file';
 import { ActionName } from '../types';
@@ -47,7 +47,7 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
     try {
       await fs.access(cache.path, fs.constants.F_OK);
     } catch (e) {
-      log('local file not found, start download...');
+      logDebug('local file not found, start download...');
       // if (cache.url) {
       //   const downloadResult = await uri2local(cache.url);
       //   if (downloadResult.success) {
