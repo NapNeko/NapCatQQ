@@ -20,7 +20,7 @@ import { dbUtil } from '@/common/utils/db';
 import { BuddyListener, GroupListener, NodeIKernelBuddyListener } from '../core/src/listeners';
 import { OB11FriendRequestEvent } from '@/onebot11/event/request/OB11FriendRequest';
 import { NTQQGroupApi, NTQQUserApi } from '../core/src/apis';
-import { log, logDebug, logError } from '@/common/utils/log';
+import { log, logDebug, logError, setLogSelfInfo } from '@/common/utils/log';
 import { OB11GroupRequestEvent } from '@/onebot11/event/request/OB11GroupRequest';
 import { OB11GroupAdminNoticeEvent } from '@/onebot11/event/notice/OB11GroupAdminNoticeEvent';
 import { GroupDecreaseSubType, OB11GroupDecreaseEvent } from '@/onebot11/event/notice/OB11GroupDecreaseEvent';
@@ -50,6 +50,7 @@ export class NapCatOnebot11 {
     log(serviceInfo);
     NTQQUserApi.getUserDetailInfo(selfInfo.uid).then(user => {
       selfInfo.nick = user.nick;
+      setLogSelfInfo(selfInfo);
     }).catch(logError);
     if (ob11Config.enableHttp) {
       ob11HTTPServer.start(ob11Config.httpPort, ob11Config.httpHost);
@@ -142,7 +143,6 @@ export class NapCatOnebot11 {
       // message.msgShortId = await dbUtil.addMsg(message);
       // }
       OB11Constructor.message(message).then((msg) => {
-        logMessage(msg).then().catch(logError);
         if (debug) {
           msg.raw = message;
         } else {

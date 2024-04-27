@@ -125,7 +125,8 @@ export enum OB11MessageDataType {
 export interface OB11MessageMFace {
   type: OB11MessageDataType.mface,
   data: {
-    text: string
+    text: string,
+    url: string
   }
 }
 
