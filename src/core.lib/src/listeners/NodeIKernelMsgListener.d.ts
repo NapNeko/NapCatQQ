@@ -90,6 +90,7 @@ export interface IKernelMsgListener {
     onUserSecQualityChanged(...args: unknown[]): void;
     onMsgWithRichLinkInfoUpdate(...args: unknown[]): void;
     onRedTouchChanged(...args: unknown[]): void;
+    onBroadcastHelperProgerssUpdate(...args: unknown[]): void;
 }
 export interface NodeIKernelMsgListener {
     new (listener: IKernelMsgListener): NodeIKernelMsgListener;
@@ -163,4 +164,5 @@ export declare class MsgListener implements IKernelMsgListener {
     onUserSecQualityChanged(...args: unknown[]): void;
     onMsgWithRichLinkInfoUpdate(...args: unknown[]): void;
     onRedTouchChanged(...args: unknown[]): void;
+    onBroadcastHelperProgerssUpdate(...args: unknown[]): void;
 }

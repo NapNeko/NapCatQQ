@@ -1,14 +1,18 @@
-export interface NodeIKernelProfileService {
-    addKernelStorageCleanListener(listener: unknown): void;
-    removeKernelStorageCleanListener(listenerId: unknown): void;
+import { NodeIKernelStorageCleanListener } from "@/core/listeners";
+import { GeneralCallResult } from "./common";
+export interface NodeIKernelStorageCleanService {
+    addKernelStorageCleanListener(Listener: NodeIKernelStorageCleanListener): number;
+    removeKernelStorageCleanListener(ListenerId: number): void;
     addCacheScanedPaths(arg: unknown): unknown;
     addFilesScanedPaths(arg: unknown): unknown;
-    scanCache(): unknown;
+    scanCache(): Promise<GeneralCallResult & {
+        size: string[];
+    }>;
     addReportData(arg: unknown): unknown;
     reportData(): unknown;
-    getChatCacheInfo(...args: unknown[]): unknown;
-    getFileCacheInfo(...args: unknown[]): unknown;
-    clearChatCacheInfo(...args: unknown[]): unknown;
+    getChatCacheInfo(arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown): unknown;
+    getFileCacheInfo(arg1: unknown, arg2: unknown, arg3: unknown, arg44: unknown, args5: unknown): unknown;
+    clearChatCacheInfo(arg1: unknown, arg2: unknown): unknown;
     clearCacheDataByKeys(arg: unknown): unknown;
     setSilentScan(arg: unknown): unknown;
     closeCleanWindow(): unknown;

@@ -9,3 +9,7 @@ export * from './NodeIKernelOnlineStatusService';
 export * from './NodeIKernelProfileLikeService';
 export * from './NodeIKernelProfileService';
 export * from './NodeIKernelTicketService';
+export * from './NodeIKernelStorageCleanService';
+export * from './NodeIKernelRobotService';
+export * from './NodeIKernelRichMediaService';
+export * from './NodeIKernelDbToolsService';

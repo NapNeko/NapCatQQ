@@ -12,6 +12,7 @@ export declare class NapCatCore {
     private loginService;
     private readonly loginListener;
     private onLoginSuccessFuncList;
+    private proxyHandler;
     constructor();
     get dataPath(): string;
     get dataPathGlobal(): string;

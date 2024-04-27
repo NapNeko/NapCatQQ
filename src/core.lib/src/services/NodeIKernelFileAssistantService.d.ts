@@ -1,19 +1,19 @@
 export interface NodeIKernelFileAssistantService {
-    addKernelFileAssistantListener(...args: unknown[]): unknown;
-    removeKernelFileAssistantListener(...args: unknown[]): unknown;
-    getFileAssistantList(...args: unknown[]): unknown;
-    getMoreFileAssistantList(...args: unknown[]): unknown;
-    getFileSessionList(...args: unknown[]): unknown;
-    searchFile(...args: unknown[]): unknown;
-    resetSearchFileSortType(...args: unknown[]): unknown;
-    searchMoreFile(...args: unknown[]): unknown;
-    cancelSearchFile(...args: unknown[]): unknown;
-    downloadFile(...args: unknown[]): unknown;
-    forwardFile(...args: unknown[]): unknown;
-    cancelFileAction(...args: unknown[]): unknown;
-    retryFileAction(...args: unknown[]): unknown;
-    deleteFile(...args: unknown[]): unknown;
-    saveAs(...args: unknown[]): unknown;
-    saveAsWithRename(...args: unknown[]): unknown;
+    addKernelFileAssistantListener(arg1: unknown[]): unknown;
+    removeKernelFileAssistantListener(arg1: unknown[]): unknown;
+    getFileAssistantList(arg1: unknown[]): unknown;
+    getMoreFileAssistantList(arg1: unknown[]): unknown;
+    getFileSessionList(): unknown;
+    searchFile(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
+    resetSearchFileSortType(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
+    searchMoreFile(arg1: unknown[]): unknown;
+    cancelSearchFile(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
+    downloadFile(arg1: unknown[]): unknown;
+    forwardFile(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
+    cancelFileAction(arg1: unknown[]): unknown;
+    retryFileAction(arg1: unknown[]): unknown;
+    deleteFile(arg1: unknown[]): unknown;
+    saveAs(arg1: unknown, arg2: unknown): unknown;
+    saveAsWithRename(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
     isNull(): boolean;
 }

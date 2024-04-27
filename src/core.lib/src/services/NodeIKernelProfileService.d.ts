@@ -2,7 +2,7 @@ import { NodeIKernelProfileListener } from '../listeners';
 import { GeneralCallResult } from '@/core/services/common';
 export interface NodeIKernelProfileService {
     addKernelProfileListener(listener: NodeIKernelProfileListener): number;
-    removeKernelProfileListener(listenerId: unknown): void;
+    removeKernelProfileListener(listenerId: number): void;
     prepareRegionConfig(...args: unknown[]): unknown;
     getLocalStrangerRemark(...args: unknown[]): unknown;
     enumCountryOptions(...args: unknown[]): unknown;

@@ -1,17 +1,17 @@
 export interface NodeIKernelAvatarService {
-    addAvatarListener(...args: unknown[]): unknown;
-    removeAvatarListener(...args: unknown[]): unknown;
-    getAvatarPath(...args: unknown[]): unknown;
-    forceDownloadAvatar(...args: unknown[]): unknown;
-    getGroupAvatarPath(...args: unknown[]): unknown;
-    getConfGroupAvatarPath(...args: unknown[]): unknown;
-    forceDownloadGroupAvatar(...args: unknown[]): unknown;
-    getGroupPortraitPath(...args: unknown[]): unknown;
-    forceDownloadGroupPortrait(...args: unknown[]): unknown;
-    getAvatarPaths(...args: unknown[]): unknown;
-    getGroupAvatarPaths(...args: unknown[]): unknown;
-    getConfGroupAvatarPaths(...args: unknown[]): unknown;
-    getAvatarPathByUin(...args: unknown[]): unknown;
-    forceDownloadAvatarByUin(...args: unknown[]): unknown;
+    addAvatarListener(arg: unknown): unknown;
+    removeAvatarListener(arg: unknown): unknown;
+    getAvatarPath(arg1: unknown, arg2: unknown): unknown;
+    forceDownloadAvatar(arg1: unknown, arg2: unknown): unknown;
+    getGroupAvatarPath(arg1: unknown, arg2: unknown): unknown;
+    getConfGroupAvatarPath(arg: unknown): unknown;
+    forceDownloadGroupAvatar(arg1: unknown, arg2: unknown): unknown;
+    getGroupPortraitPath(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
+    forceDownloadGroupPortrait(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
+    getAvatarPaths(arg1: unknown, arg2: unknown): unknown;
+    getGroupAvatarPaths(arg1: unknown, arg2: unknown): unknown;
+    getConfGroupAvatarPaths(arg: unknown): unknown;
+    getAvatarPathByUin(arg1: unknown, arg2: unknown): unknown;
+    forceDownloadAvatarByUin(arg1: unknown, arg2: unknown): unknown;
     isNull(): boolean;
 }
