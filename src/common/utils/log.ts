@@ -1,6 +1,7 @@
-import log4js from 'log4js';
+import log4js, { Configuration } from 'log4js';
 import { truncateString } from '@/common/utils/helper';
 import path from 'node:path';
+import { SelfInfo } from '@/core';
 
 export enum LogLevel {
   DEBUG = 'debug',
@@ -10,34 +11,64 @@ export enum LogLevel {
   FATAL = 'fatal',
 }
 
-const logPath = path.join(path.resolve(__dirname), 'logs', 'napcat.log');
+const logDir = path.join(path.resolve(__dirname), 'logs');
 
-function genLogConfig(fileLogLevel: LogLevel, consoleLogLevel: LogLevel) {
-  return {
-    appenders: {
-      fileAppender: { // 输出到文件的appender
-        type: 'file',
-        filename: logPath, // 指定日志文件的位置和文件名
-        maxLogSize: 10485760, // 日志文件的最大大小（单位：字节），这里设置为10MB
-      },
-      consoleAppender: { // 输出到控制台的appender
-        type: 'console'
+function getFormattedTimestamp() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = (now.getMonth() + 1).toString().padStart(2, '0');
+  const day = now.getDate().toString().padStart(2, '0');
+  const hours = now.getHours().toString().padStart(2, '0');
+  const minutes = now.getMinutes().toString().padStart(2, '0');
+  const seconds = now.getSeconds().toString().padStart(2, '0');
+  return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
+}
+
+const filename = `${getFormattedTimestamp()}.log`;
+const logPath = path.join(logDir, filename);
+
+const logConfig: Configuration = {
+  appenders: {
+    FileAppender: { // 输出到文件的appender
+      type: 'file',
+      filename: logPath, // 指定日志文件的位置和文件名
+      maxLoogSize: 10485760, // 日志文件的最大大小（单位：字节），这里设置为10MB
+      layout: {
+        type: 'pattern',
+        pattern: '%d{yyyy-MM-dd hh:mm:ss} [%p] - %m'
       }
     },
-    categories: {
-      default: { appenders: ['fileAppender', 'consoleAppender'], level: 'debug' }, // 默认情况下同时输出到文件和控制台
-      file: { appenders: ['fileAppender'], level: fileLogLevel },
-      console: { appenders: ['consoleAppender'], level: consoleLogLevel }
+    ConsoleAppender: { // 输出到控制台的appender
+      type: 'console',
+      layout: {
+        type: 'pattern',
+        pattern: '%d{yyyy-MM-dd hh:mm:ss} [%p] - %m'
+      }
     }
-  };
-}
+  },
+  categories: {
+    default: { appenders: ['FileAppender', 'ConsoleAppender'], level: 'debug' }, // 默认情况下同时输出到文件和控制台
+    file: { appenders: ['FileAppender'], level: 'debug' },
+    console: { appenders: ['ConsoleAppender'], level: 'debug' }
+  }
+};
+
+log4js.configure(logConfig);
 
 
 export function setLogLevel(fileLogLevel: LogLevel, consoleLogLevel: LogLevel) {
-  log4js.configure(genLogConfig(fileLogLevel, consoleLogLevel));
+  logConfig.categories.file.level = fileLogLevel;
+  logConfig.categories.console.level = consoleLogLevel;
+  log4js.configure(logConfig);
 }
 
-setLogLevel(LogLevel.DEBUG, LogLevel.INFO);
+export function setLogSelfInfo(selfInfo: SelfInfo) {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
+  logConfig.appenders.FileAppender.layout.pattern = logConfig.appenders.ConsoleAppender.layout.pattern =
+    `%d{yyyy-MM-dd hh:mm:ss} [%p] ${selfInfo.nick || selfInfo.uin}(${selfInfo.uin})  %m`;
+  log4js.configure(logConfig);
+}
 
 let fileLogEnabled = true;
 let consoleLogEnabled = true;
