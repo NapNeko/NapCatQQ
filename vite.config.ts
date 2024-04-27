@@ -38,7 +38,8 @@ const baseConfigPlugin: PluginOption[] = [
       { src: './src/onebot11/onebot11.json', dest: 'dist/config/' },
       { src: './package.json', dest: 'dist' },
       { src: './README.md', dest: 'dist' },
-      { src: './src/core.lib/MoeHoo.node', dest: 'dist' },
+      { src: './src/core.lib/MoeHoo-win32-x64.node', dest: 'dist' },
+      { src: './src/core.lib/MoeHoo-linux-x64.node', dest: 'dist' },
       ...(startScripts.map((startScript) => {
         return { src: startScript, dest: 'dist' };
       })),
