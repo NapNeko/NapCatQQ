@@ -36,7 +36,7 @@ export class WebsocketServerBase {
       });
       log(`ws服务启动成功, ${host}:${port}`);
     } catch (e: any) {
-      throw Error('ws服务启动失败, ' + e.toString());
+      throw Error('ws服务启动失败, 请检查监听的ip和端口' + e.toString());
     }
     this.ws.on('connection', (wsClient, req) => {
       const url: string = req.url!.split('?').shift() || '/';
