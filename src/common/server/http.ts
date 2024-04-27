@@ -110,9 +110,13 @@ export abstract class HttpServerBase {
 
   protected listen(port: number, host: string = '0.0.0.0') {
     host = host || '0.0.0.0';
-    this.server = this.expressAPP.listen(port, host, () => {
-      const info = `${this.name} started ${host}:${port}`;
-      log(info);
-    });
+    try {
+      this.server = this.expressAPP.listen(port, host, () => {
+        const info = `${this.name} started ${host}:${port}`;
+        log(info);
+      });
+    }catch (e: any) {
+      logError('HTTP服务启动失败, 请检查监听的ip地址和端口', e.stack.toString());
+    }
   }
 }

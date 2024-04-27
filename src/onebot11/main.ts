@@ -42,9 +42,9 @@ export class NapCatOnebot11 {
     logDebug('ob11 ready');
     ob11Config.read();
     const serviceInfo = `
-    HTTP服务 ${ob11Config.enableHttp ? '已启动' : '未启动'}, 端口: ${ob11Config.httpPort}
+    HTTP服务 ${ob11Config.enableHttp ? '已启动' : '未启动'}, ${ob11Config.httpHost}:${ob11Config.httpPort}
     HTTP上报服务 ${ob11Config.enableHttpPost ? '已启动' : '未启动'}, 上报地址: ${ob11Config.httpPostUrls}
-    WebSocket服务 ${ob11Config.enableWs ? '已启动' : '未启动'}, 端口: ${ob11Config.wsPort}
+    WebSocket服务 ${ob11Config.enableWs ? '已启动' : '未启动'}, ${ob11Config.wsHost}:${ob11Config.wsPort}
     WebSocket反向服务 ${ob11Config.enableWsReverse ? '已启动' : '未启动'}, 反向地址: ${ob11Config.wsReverseUrls}
     `;
     log(serviceInfo);
