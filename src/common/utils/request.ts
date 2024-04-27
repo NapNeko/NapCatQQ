@@ -1,17 +1,29 @@
 const https = require('node:https');
-export async function HttpGetWithCookies(url: string) {
-    const req = https.get(url, (res: any) => {
-        res.on('data', (data: any) => {
-        });
-        res.on('end', () => {
-            const responseCookies = res.headers['set-cookie'];
-            console.log('获取到的 cookies:', responseCookies);
-            console.log(res.headers)
-        });
-    });
+export async function HttpGetWithCookies(url: string): Promise<Map<string, string>> {
+    return new Promise((resolve, reject) => {
+        let result: Map<string, string> = new Map<string, string>();
+        const req = https.get(url, (res: any) => {
+            res.on('data', (data: any) => {
+            });
+            res.on('end', () => {
+                try {
+                    const responseCookies = res.headers['set-cookie'];
+                    for (const line of responseCookies) {
+                        const parts = line.split(';');
+                        const [key, value] = parts[0].split('=');
+                        result.set(key, value);
+                    }
+                } catch (e) {
+                }
+                resolve(result);
 
-    req.on('error', (error: any) => {
-        // console.log(error)
+            });
+        });
+        req.on('error', (error: any) => {
+            resolve(result);
+            // console.log(error)
+        })
+        req.end()
     })
-    req.end()
+
 }
