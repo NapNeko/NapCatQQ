@@ -7,7 +7,7 @@ import {
   ChatCacheListItemBasic,
   CacheFileType
 } from '@/core/entities';
-import { dbUtil } from '../../../common/db';
+import { dbUtil } from '../../../common/utils/db';
 import { NTQQFileApi, NTQQFileCacheApi } from '@/core/apis/file';
 
 export default class CleanCache extends BaseAction<void, void> {
@@ -23,7 +23,7 @@ export default class CleanCache extends BaseAction<void, void> {
 
         cacheFilePaths.push((await NTQQFileCacheApi.getHotUpdateCachePath()));
         cacheFilePaths.push((await NTQQFileCacheApi.getDesktopTmpPath()));
-        (await NTQQFileCacheApi.getCacheSessionPathList()).forEach(e => cacheFilePaths.push(e.value));
+        (await NTQQFileCacheApi.getCacheSessionPathList()).forEach((e: { value: string; }) => cacheFilePaths.push(e.value));
 
         // await NTQQApi.addCacheScannedPaths(); // XXX: 调用就崩溃，原因目前还未知
         const cacheScanResult = await NTQQFileCacheApi.scanCache();
@@ -55,7 +55,7 @@ export default class CleanCache extends BaseAction<void, void> {
           const fileTypeAny: any = CacheFileType[name];
           const fileType: CacheFileType = fileTypeAny;
 
-          cacheFileList.push(...(await NTQQFileCacheApi.getFileCacheInfo(fileType)).infos.map(file => file.fileKey));
+          cacheFileList.push(...(await NTQQFileCacheApi.getFileCacheInfo(fileType)).infos.map((file: { fileKey: any; }) => file.fileKey));
         }
 
         // 一并清除
@@ -89,17 +89,5 @@ function deleteCachePath(pathList: string[]) {
 
 function getCacheList(type: ChatType) { // NOTE: 做这个方法主要是因为目前还不支持针对频道消息的清理
   return new Promise<Array<ChatCacheListItemBasic>>((res, rej) => {
-    NTQQFileCacheApi.getChatCacheList(type, 1000, 0)
-      .then(data => {
-        const list = data.infos.filter(e => e.chatType === type && parseInt(e.basicChatCacheInfo.chatSize) > 0);
-        const result = list.map(e => {
-          const result = { ...e.basicChatCacheInfo };
-          result.chatType = type;
-          result.isChecked = true;
-          return result;
-        });
-        res(result);
-      })
-      .catch(e => rej(e));
   });
 }
