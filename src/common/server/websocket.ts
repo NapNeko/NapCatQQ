@@ -27,12 +27,14 @@ export class WebsocketServerBase {
   constructor() {
   }
 
-  start(port: number) {
+  start(port: number, host: string = '') {
     try {
       this.ws = new WebSocketServer({
         port ,
+        host: '',
         maxPayload: 1024 * 1024 * 1024
       });
+      log(`ws服务启动成功, ${host}:${port}`);
     } catch (e: any) {
       throw Error('ws服务启动失败, ' + e.toString());
     }

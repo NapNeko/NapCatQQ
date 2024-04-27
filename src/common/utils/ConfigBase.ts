@@ -36,6 +36,9 @@ export class ConfigBase<T>{
       const data = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
       logDebug(`配置文件${configPath}已加载`, data);
       Object.assign(this, data);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
+      this.save(this); // 保存一次，让新版本的字段写入
       return this;
     } catch (e: any) {
       if (e instanceof SyntaxError) {
@@ -48,9 +51,10 @@ export class ConfigBase<T>{
   }
 
   save(config: T) {
+    Object.assign(this, config);
     const configPath = this.getConfigPath();
     try {
-      fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+      fs.writeFileSync(configPath, JSON.stringify(this, null, 2));
     } catch (e: any) {
       logError(`保存配置文件 ${configPath} 时发生错误:`, e.message);
     }

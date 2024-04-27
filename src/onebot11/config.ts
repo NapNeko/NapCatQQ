@@ -5,9 +5,11 @@ import { logDebug, logError } from '@/common/utils/log';
 import { ConfigBase } from '@/common/utils/ConfigBase';
 
 export interface OB11Config {
+  httpHost: string;
   httpPort: number;
   httpPostUrls: string[];
   httpSecret: string;
+  wsHost: string;
   wsPort: number;
   wsReverseUrls: string[];
   enableHttp: boolean;
@@ -29,9 +31,11 @@ export interface OB11Config {
 
 
 class Config extends ConfigBase<OB11Config> implements OB11Config {
+  httpHost: string = '';
   httpPort: number = 3000;
   httpPostUrls: string[] = [];
   httpSecret = '';
+  wsHost: string = '';
   wsPort = 3001;
   wsReverseUrls: string[] = [];
   enableHttp = false;

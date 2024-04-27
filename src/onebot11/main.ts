@@ -52,10 +52,10 @@ export class NapCatOnebot11 {
       selfInfo.nick = user.nick;
     }).catch(logError);
     if (ob11Config.enableHttp) {
-      ob11HTTPServer.start(ob11Config.httpPort);
+      ob11HTTPServer.start(ob11Config.httpPort, ob11Config.httpHost);
     }
     if (ob11Config.enableWs) {
-      ob11WebsocketServer.start(ob11Config.wsPort);
+      ob11WebsocketServer.start(ob11Config.wsPort, ob11Config.wsHost);
     }
     if (ob11Config.enableWsReverse) {
       ob11ReverseWebsockets.start();
