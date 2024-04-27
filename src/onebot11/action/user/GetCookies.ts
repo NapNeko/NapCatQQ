@@ -3,12 +3,14 @@ import { OB11Constructor } from '../../constructor';
 import { friends } from '../../../common/data';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
+import { NTQQUserApi } from '@/core/apis';
 
 
 export class GetCookies extends BaseAction<null, null> {
   actionName = ActionName.GetCookies;
 
   protected async _handle(payload: null) {
+    NTQQUserApi.getSkey();
     // 取Skey
     // 先NodeIKernelTicketService.forceFetchClientKey('')
     // 返回值
