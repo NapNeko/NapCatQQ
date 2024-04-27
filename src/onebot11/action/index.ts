@@ -48,6 +48,7 @@ import GetFriendMsgHistory from './go-cqhttp/GetFriendMsgHistory';
 import { GetCookies } from './user/GetCookies';
 import { SetMsgEmojiLike } from '@/onebot11/action/msg/SetMsgEmojiLike';
 import { GetRobotUinRange } from './extends/GetRobotUinRange';
+import { SetOnlineStatus } from './extends/SetOnlineStatus';
 
 export const actionHandlers = [
   new GetFile(),
@@ -86,6 +87,7 @@ export const actionHandlers = [
   // new CleanCache(),
   new GetCookies(),
   //
+  new SetOnlineStatus(),
   new GetRobotUinRange(),
   //以下为go-cqhttp api
   new GoCQHTTPSendForwardMsg(),
