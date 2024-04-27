@@ -29,11 +29,13 @@ interface IGroupListener {
     onGroupFirstBulletinNotify(...args: unknown[]): void;
     onJoinGroupNoVerifyFlag(...args: unknown[]): void;
     onGroupArkInviteStateResult(...args: unknown[]): void;
+    onGroupMemberLevelInfoChange(...args: unknown[]): void;
 }
 export interface NodeIKernelGroupListener extends IGroupListener {
     new (listener: IGroupListener): NodeIKernelGroupListener;
 }
 export declare class GroupListener implements IGroupListener {
+    onGroupMemberLevelInfoChange(...args: unknown[]): void;
     onGetGroupBulletinListResult(...args: unknown[]): void;
     onGroupAllInfoChange(...args: unknown[]): void;
     onGroupBulletinChange(...args: unknown[]): void;
@@ -65,6 +67,7 @@ export declare class GroupListener implements IGroupListener {
     onShutUpMemberListChanged(...args: unknown[]): void;
 }
 export declare class DebugGroupListener implements IGroupListener {
+    onGroupMemberLevelInfoChange(...args: unknown[]): void;
     onGetGroupBulletinListResult(...args: unknown[]): void;
     onGroupAllInfoChange(...args: unknown[]): void;
     onGroupBulletinChange(...args: unknown[]): void;
