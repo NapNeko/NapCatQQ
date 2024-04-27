@@ -51,8 +51,9 @@ export enum ActionName {
     GetImage = 'get_image',
     GetRecord = 'get_record',
     CleanCache = 'clean_cache',
-    GetCookies = "get_cookies",
-
+    GetCookies = 'get_cookies',
+    // 以下为扩展napcat扩展
+    GetRobotUinRange = 'get_robot_uin_range',
     // 以下为go-cqhttp api
     GoCQHTTP_SendForwardMsg = 'send_forward_msg',
     GoCQHTTP_SendGroupForwardMsg = 'send_group_forward_msg',
