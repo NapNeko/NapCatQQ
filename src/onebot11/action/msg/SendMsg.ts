@@ -233,7 +233,7 @@ export async function createSendElements(messageData: OB11MessageData[], group: 
 
 export async function sendMsg(peer: Peer, sendElements: SendMessageElement[], deleteAfterSentFiles: string[], waitComplete = true) {
   if (!sendElements.length) {
-    throw ('消息体无法解析');
+    throw ('消息体无法解析, 请检查是否发送了不支持的消息类型');
   }
   const returnMsg = await NTQQMsgApi.sendMsg(peer, sendElements, waitComplete, 20000);
   try {
