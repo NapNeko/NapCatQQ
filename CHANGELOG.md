@@ -6,6 +6,6 @@
 6. 适配最新版Win 9.9.9 23159 提升了兼容性
 7. 表情回应api和上报
 8. 支持获取Cookies 实现更加稳定 API: /get_cookies
-9. 新增wsHost和httpHost配置
+9. 新增wsHost和httpHost配置 CONFIG: New
 10. 新增获取官方Bot账号范围 API: /get_robot_uin_range
 11. 新增设置自身在线状态 API： /set_online_status
