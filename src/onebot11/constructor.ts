@@ -1,3 +1,4 @@
+import fastXmlParser, { XMLParser } from 'fast-xml-parser';
 import {
   OB11Group,
   OB11GroupMember,
@@ -42,6 +43,7 @@ import { ob11Config } from '@/onebot11/config';
 import { deleteGroup, getFriend, getGroupMember, groupMembers, selfInfo, tempGroupCodeMap } from '@/common/data';
 import { NTQQFileApi, NTQQGroupApi, NTQQUserApi } from '../core/src/apis';
 import http from 'http';
+import { OB11GroupMsgEmojiLikeEvent } from '@/onebot11/event/notice/OB11MsgEmojiLikeEvent';
 
 
 export class OB11Constructor {
@@ -320,6 +322,38 @@ export class OB11Constructor {
       }
 
       if (grayTipElement) {
+        const xmlElement = grayTipElement.xmlElement;
+
+        if (xmlElement?.templId === '10382') {
+          // 表情回应消息
+          // "content":
+          //  "<gtip align=\"center\">
+          //    <qq uin=\"u_snYxnEfja-Po_\" col=\"3\" jp=\"3794\"/>
+          //    <nor txt=\"回应了你的\"/>
+          //    <url jp= \"\" msgseq=\"74711\" col=\"3\" txt=\"消息:\"/>
+          //    <face type=\"1\" id=\"76\">  </face>
+          //  </gtip>",
+          const emojiLikeData = new fastXmlParser.XMLParser({
+            ignoreAttributes: false,
+            attributeNamePrefix: ''
+          }).parse(xmlElement.content);
+          logDebug('收到表情回应我的消息', emojiLikeData);
+          try {
+            const senderUin = emojiLikeData.gtip.qq.jp;
+            const msgSeq = emojiLikeData.gtip.url.msgseq;
+            const emojiId = emojiLikeData.gtip.face.id;
+            const replyMsg = await dbUtil.getMsgBySeq(msg.peerUid, msgSeq);
+            if (!replyMsg) {
+              return;
+            }
+            return new OB11GroupMsgEmojiLikeEvent(parseInt(msg.peerUid), parseInt(senderUin), replyMsg.id!, [{
+              emoji_id: emojiId,
+              count: 1
+            }]);
+          } catch (e: any) {
+            logError('解析表情回应消息失败', e.stack);
+          }
+        }
         if (grayTipElement.subElementType == GrayTipElementSubType.INVITE_NEW_MEMBER) {
           logDebug('收到新人被邀请进群消息', grayTipElement);
           const xmlElement = grayTipElement.xmlElement;
