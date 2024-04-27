@@ -34,6 +34,7 @@ export enum ActionName {
     SendGroupMsg = 'send_group_msg',
     SendPrivateMsg = 'send_private_msg',
     DeleteMsg = 'delete_msg',
+    SetMsgEmojiLike = 'set_msg_emoji_like',
     SetGroupAddRequest = 'set_group_add_request',
     SetFriendAddRequest = 'set_friend_add_request',
     SetGroupLeave = 'set_group_leave',
@@ -51,6 +52,7 @@ export enum ActionName {
     GetRecord = 'get_record',
     CleanCache = 'clean_cache',
     GetCookies = "get_cookies",
+
     // 以下为go-cqhttp api
     GoCQHTTP_SendForwardMsg = 'send_forward_msg',
     GoCQHTTP_SendGroupForwardMsg = 'send_group_forward_msg',
