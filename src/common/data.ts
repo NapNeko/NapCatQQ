@@ -49,7 +49,7 @@ export async function getFriend(uinOrUid: string): Promise<Friend | undefined> {
   }
 }
 
-export async function getGroup(qq: string): Promise<Group | undefined> {
+export async function getGroup(qq: string | number): Promise<Group | undefined> {
   const group = groups.get(qq.toString());
   return group;
 }

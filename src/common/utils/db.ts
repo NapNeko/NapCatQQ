@@ -1,7 +1,7 @@
 import { ElementType, FileElement, PicElement, PttElement, RawMessage, VideoElement } from '../../core/src/entities';
 
 import sqlite3 from 'sqlite3';
-import { log } from '@/common/utils/log';
+import { log, logDebug, logError } from '@/common/utils/log';
 
 type DBMsg = {
   id: number,
@@ -33,7 +33,7 @@ class DBUtilBase {
     }
     this.db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
       if (err) {
-        log('Could not connect to database', err);
+        logError('Could not connect to database', err);
         return;
       }
       this.createTable();
@@ -56,7 +56,7 @@ class DBUtil extends DBUtilBase {
     super();
     const interval = 1000 * 60 * 10;  // 10分钟清理一次缓存
     setInterval(() => {
-      log('清理消息缓存');
+      logDebug('清理消息缓存');
       this.msgCache.forEach((msg, key) => {
         if ((Date.now() - parseInt(msg.msgTime) * 1000) > interval) {
           this.msgCache.delete(key);
@@ -78,7 +78,7 @@ class DBUtil extends DBUtilBase {
             )`;
     this.db!.run(createTableSQL, function (err) {
       if (err) {
-        log('Could not create table', err);
+        logError('Could not create table', err);
       }
     });
 
@@ -98,7 +98,7 @@ class DBUtil extends DBUtilBase {
             )`;
     this.db!.run(createFileTableSQL, function (err) {
       if (err) {
-        log('Could not create table files', err);
+        logError('Could not create table files', err);
       }
     });
 
@@ -111,7 +111,7 @@ class DBUtil extends DBUtilBase {
             )`;
     this.db!.run(createTempUinTableSQL, function (err) {
       if (err) {
-        log('Could not create table temp_uins', err);
+        logError('Could not create table temp_uins', err);
       }
     });
   }
@@ -122,7 +122,7 @@ class DBUtil extends DBUtilBase {
       stmt.get(...params, (err: any, row: DBMsg) => {
         // log("getMsg", row, err);
         if (err) {
-          log('Could not get msg by short id', err);
+          logError('Could not get msg by short id', err);
           resolve(null);
         }
         try {
@@ -154,10 +154,10 @@ class DBUtil extends DBUtilBase {
   }
 
   async addMsg(msg: RawMessage, update = true): Promise<number> {
-    log('正在记录消息到数据库', msg.msgId);
+    logDebug('正在记录消息到数据库', msg.msgId);
     const existMsg = await this.getMsgByLongId(msg.msgId);
     if (existMsg) {
-      // log('消息已存在，更新数据库', msg.msgId);
+      // logDebug('消息已存在，更新数据库', msg.msgId);
       if (update) this.updateMsg(msg).then();
       return existMsg.id!;
     }
@@ -170,19 +170,19 @@ class DBUtil extends DBUtilBase {
       stmt.run(msg.msgId, msg.msgSeq, msg.peerUid, JSON.stringify(msg), function (err: any) {
         if (err) {
           if (err.errno === 19) {
-            // log('消息已存在，更新数据库', msg.msgId);
+            // logDebug('消息已存在，更新数据库', msg.msgId);
             dbInstance.getMsgByLongId(msg.msgId).then((msg: RawMessage | null) => {
               if (msg) {
                 dbInstance.msgCache.set(msg.msgId, msg);
-                // log('获取消息短id成功', msg.id);
+                // logDebug('获取消息短id成功', msg.id);
                 resolve(msg.id!);
               } else {
-                log('db could not get msg by long id', err);
+                logError('db could not get msg by long id', err);
                 resolve(-1);
               }
             });
           } else {
-            log('db could not add msg', err);
+            logError('db could not add msg', err);
             resolve(-1);
           }
         } else {
@@ -210,7 +210,7 @@ class DBUtil extends DBUtilBase {
     try {
       stmt.run(JSON.stringify(msg), msg.msgSeq, msg.msgId);
     } catch (e) {
-      log('updateMsg db error', e);
+      logError('updateMsg db error', e);
     }
   }
 
@@ -224,7 +224,7 @@ class DBUtil extends DBUtilBase {
         file.msgId,
         function (err: any) {
           if (err) {
-            log('db could not add file', err);
+            logError('db could not add file', err);
             reject(err);
           }
           resolve(null);
@@ -237,7 +237,7 @@ class DBUtil extends DBUtilBase {
     return new Promise<DBFile | null>((resolve, reject) => {
       stmt.get(...params, (err: any, row: DBFile & { element: string }) => {
         if (err) {
-          log('db could not get file cache', err);
+          logError('db could not get file cache', err);
           reject(err);
         }
         if (row) {
@@ -262,7 +262,7 @@ class DBUtil extends DBUtilBase {
     return new Promise((resolve, reject) => {
       stmt.run(file.path, file.url,file.uuid, function (err: any) {
         if (err) {
-          log('db could not update file cache', err);
+          logError('db could not update file cache', err);
           reject(err);
         }
         resolve(null);
@@ -276,7 +276,7 @@ class DBUtil extends DBUtilBase {
     return new Promise<Record<string, string>>((resolve, reject) => {
       this.db!.all(stmt, (err, rows: { uin: string, uid: string }[]) => {
         if (err) {
-          log('db could not get temp uin map', err);
+          logError('db could not get temp uin map', err);
           reject(err);
         }
         const map: Record<string, string> = {};
@@ -294,7 +294,7 @@ class DBUtil extends DBUtilBase {
     return new Promise<string>((resolve, reject) => {
       this.db!.get(stmt, [uid], (err, row: { uin: string, uid: string }) => {
         if (err) {
-          log('db could not get temp uin map', err);
+          logError('db could not get temp uin map', err);
           reject(err);
         }
         resolve(row?.uid);
@@ -309,7 +309,7 @@ class DBUtil extends DBUtilBase {
       return new Promise((resolve, reject) => {
         stmt.run(uin, uid, function (err: any) {
           if (err) {
-            log('db could not add temp uin', err);
+            logError('db could not add temp uin', err);
             reject(err);
           }
           resolve(null);

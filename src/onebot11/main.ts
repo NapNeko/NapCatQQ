@@ -26,6 +26,7 @@ import { OB11GroupAdminNoticeEvent } from '@/onebot11/event/notice/OB11GroupAdmi
 import { GroupDecreaseSubType, OB11GroupDecreaseEvent } from '@/onebot11/event/notice/OB11GroupDecreaseEvent';
 import { OB11FriendRecallNoticeEvent } from '@/onebot11/event/notice/OB11FriendRecallNoticeEvent';
 import { OB11GroupRecallNoticeEvent } from '@/onebot11/event/notice/OB11GroupRecallNoticeEvent';
+import { logMessage } from '@/onebot11/log';
 
 
 export class NapCatOnebot11 {
@@ -40,6 +41,16 @@ export class NapCatOnebot11 {
   public onReady() {
     logDebug('ob11 ready');
     ob11Config.read();
+    const serviceInfo = `
+    HTTP服务 ${ob11Config.enableHttp ? '已启动' : '未启动'}, 端口: ${ob11Config.httpPort}
+    HTTP上报服务 ${ob11Config.enableHttpPost ? '已启动' : '未启动'}, 上报地址: ${ob11Config.httpPostUrls}
+    WebSocket服务 ${ob11Config.enableWs ? '已启动' : '未启动'}, 端口: ${ob11Config.wsPort}
+    WebSocket反向服务 ${ob11Config.enableWsReverse ? '已启动' : '未启动'}, 反向地址: ${ob11Config.wsReverseUrls}
+    `;
+    log(serviceInfo);
+    NTQQUserApi.getUserDetailInfo(selfInfo.uin).then(user => {
+      selfInfo.nick = user.nick;
+    }).catch(logError);
     if (ob11Config.enableHttp) {
       ob11HTTPServer.start(ob11Config.httpPort);
     }
@@ -78,19 +89,19 @@ export class NapCatOnebot11 {
         new Promise((resolve) => {
           dbUtil.addMsg(m).then(msgShortId => {
             m.id = msgShortId;
-            this.postReceiveMsg([m]).then().catch(log);
-          }).catch(log);
+            this.postReceiveMsg([m]).then().catch(logError);
+          }).catch(logError);
         }).then();
       }
     };
     msgListener.onMsgInfoListUpdate = (msgList) => {
-      this.postRecallMsg(msgList).then().catch(log);
+      this.postRecallMsg(msgList).then().catch(logError);
     };
     msgListener.onAddSendMsg = (msg) => {
       if (ob11Config.reportSelfMessage) {
         dbUtil.addMsg(msg).then(id => {
           msg.id = id;
-          this.postReceiveMsg([msg]).then().catch(log);
+          this.postReceiveMsg([msg]).then().catch(logError);
         });
       }
     };
@@ -100,7 +111,7 @@ export class NapCatOnebot11 {
     // BuddyListener
     const buddyListener = new BuddyListener();
     buddyListener.onBuddyReqChange = ((req) => {
-      this.postFriendRequest(req.buddyReqs).then().catch(log);
+      this.postFriendRequest(req.buddyReqs).then().catch(logError);
     });
     napCatCore.addListener(buddyListener);
     logDebug('ob11 buddy listener added');
@@ -126,11 +137,12 @@ export class NapCatOnebot11 {
   async postReceiveMsg(msgList: RawMessage[]) {
     const { debug, reportSelfMessage } = ob11Config;
     for (const message of msgList) {
-      log('收到新消息', message);
+      logDebug('收到新消息', message);
       // if (message.senderUin !== selfInfo.uin){
       // message.msgShortId = await dbUtil.addMsg(message);
       // }
       OB11Constructor.message(message).then((msg) => {
+        logMessage(msg).then().catch(logError);
         if (debug) {
           msg.raw = message;
         } else {
@@ -138,6 +150,7 @@ export class NapCatOnebot11 {
             return;
           }
         }
+        logDebug('收到消息: ', msg);
         const isSelfMsg = msg.user_id.toString() == selfInfo.uin;
         if (isSelfMsg && !reportSelfMessage) {
           return;
