@@ -11,6 +11,11 @@ export class ConfigBase<T>{
   constructor() {
   }
 
+  getConfigDir(){
+    const configDir = path.resolve(__dirname, 'config');
+    fs.mkdirSync(configDir, { recursive: true });
+    return configDir;
+  }
   getConfigPath(): string {
     throw new Error('Method not implemented.');
   }

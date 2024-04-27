@@ -1,7 +1,7 @@
 import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import http from 'http';
-import { log } from '../utils/log';
+import { log, logDebug, logError } from '../utils/log';
 import { ob11Config } from '@/onebot11/config';
 
 type RegisterHandler = (res: Response, payload: any) => Promise<any>
@@ -23,7 +23,7 @@ export abstract class HttpServerBase {
       // 调用原始的express.json()处理器
       originalJson(req, res, (err) => {
         if (err) {
-          log('Error parsing JSON:', err);
+          logError('Error parsing JSON:', err);
           return res.status(400).send('Invalid JSON');
         }
         next();
@@ -37,14 +37,14 @@ export abstract class HttpServerBase {
     const authHeader = req.get('authorization');
     if (authHeader) {
       clientToken = authHeader.split('Bearer ').pop() || '';
-      log('receive http header token', clientToken);
+      logDebug('receive http header token', clientToken);
     } else if (req.query.access_token) {
       if (Array.isArray(req.query.access_token)) {
         clientToken = req.query.access_token[0].toString();
       } else {
         clientToken = req.query.access_token.toString();
       }
-      log('receive http url token', clientToken);
+      logDebug('receive http url token', clientToken);
     }
 
     if (serverToken && clientToken != serverToken) {
@@ -60,7 +60,7 @@ export abstract class HttpServerBase {
       });
       this.listen(port);
     } catch (e: any) {
-      log('HTTP服务启动失败', e.toString());
+      logError('HTTP服务启动失败', e.toString());
       // llonebotError.httpServerError = "HTTP服务启动失败, " + e.toString()
     }
   }
@@ -88,7 +88,7 @@ export abstract class HttpServerBase {
     // @ts-expect-error wait fix
     if (!this.expressAPP[method]) {
       const err = `${this.name} register router failed，${method} not exist`;
-      log(err);
+      logError(err);
       throw err;
     }
     // @ts-expect-error wait fix
@@ -99,7 +99,7 @@ export abstract class HttpServerBase {
       } else if (req.query) {
         payload = { ...req.query, ...req.body };
       }
-      log('收到http请求', url, payload);
+      logDebug('收到http请求', url, payload);
       try {
         res.send(await handler(res, payload));
       } catch (e: any) {
