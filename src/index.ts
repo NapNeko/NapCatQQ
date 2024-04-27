@@ -14,7 +14,6 @@ program
 
 const cmdOptions = program.opts();
 // console.log(process.argv);
-setLogLevel(LogLevel.DEBUG, LogLevel.DEBUG);
 
 checkVersion().then((remoteVersion: string) => {
   const localVersion = require('./package.json').version;
@@ -56,7 +55,7 @@ const quickLoginQQ = cmdOptions.qq;
 //   napCatCore.qrLogin().then().catch(console.error);
 // });
 if (quickLoginQQ) {
-  console.log('quick login', quickLoginQQ);
+  log('正在快速登录 ', quickLoginQQ);
   napCatCore.quickLogin(quickLoginQQ).then(res=>{
     // log('快速登录结果:', res);
   }).catch((e) => {

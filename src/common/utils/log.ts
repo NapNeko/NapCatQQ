@@ -25,9 +25,9 @@ function genLogConfig(fileLogLevel: LogLevel, consoleLogLevel: LogLevel) {
       }
     },
     categories: {
-      default: { appenders: ['fileAppender', 'consoleAppender'], level: 'info' }, // 默认情况下同时输出到文件和控制台
+      default: { appenders: ['fileAppender', 'consoleAppender'], level: 'debug' }, // 默认情况下同时输出到文件和控制台
       file: { appenders: ['fileAppender'], level: fileLogLevel },
-      console: { appenders: ['consoleAppender'], level: fileLogLevel }
+      console: { appenders: ['consoleAppender'], level: consoleLogLevel }
     }
   };
 }
@@ -59,7 +59,7 @@ function formatMsg(msg: any[]){
     }
     logMsg += msgItem + ' ';
   }
-  return logMsg;
+  return '\n' + logMsg + '\n';
 }
 
 function _log(level: LogLevel, ...args: any[]){
