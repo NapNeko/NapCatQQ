@@ -5,7 +5,7 @@ import fs from 'fs/promises';
 import path from 'node:path';
 import { postLoginStatus } from '@/common/utils/umami';
 import { checkVersion } from '@/common/utils/version';
-import { log, logError, LogLevel, setLogLevel } from '@/common/utils/log';
+import { log, logDebug, logError, LogLevel, setLogLevel } from '@/common/utils/log';
 import { NapCatOnebot11 } from '@/onebot11/main';
 
 program
@@ -28,7 +28,7 @@ checkVersion().then((remoteVersion: string) => {
       break;
     }
   }
-  log('[NapCat]  当前已是最新版本');
+  logDebug('[NapCat]  当前已是最新版本');
   return;
 }).catch((e) => {
   logError('[NapCat] 检测更新失败');
@@ -40,13 +40,12 @@ napCatCore.onLoginSuccess(() => {
 });
 const showQRCode = (qrCodeData: { url: string, base64: string, buffer: Buffer }) => {
   log('请扫描下面的二维码，然后在手Q上授权登录：');
-  log('二维码解码URL:', qrCodeData.url);
   const qrcodePath = path.join(__dirname, 'qrcode.png');
-  fs.writeFile(qrcodePath, qrCodeData.buffer).then(() => {
-    log('二维码已保存到', qrcodePath);
-  });
   qrcode.generate(qrCodeData.url, { small: true }, (res) => {
-    log('\n' + res);
+    log(`${res}\n二维码解码URL: ${qrCodeData.url}\n如果控制台二维码无法扫码，可以复制解码url到二维码生成网站生成二维码再扫码，也可以打开下方的二维码路径图片进行扫码`);
+    fs.writeFile(qrcodePath, qrCodeData.buffer).then(() => {
+      log('二维码已保存到', qrcodePath);
+    });
   });
 };
 const quickLoginQQ = cmdOptions.qq;

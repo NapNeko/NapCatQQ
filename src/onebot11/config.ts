@@ -27,8 +27,6 @@ export interface OB11Config {
   save(config: OB11Config): void;
 }
 
-const ob11ConfigDir = path.resolve(__dirname, 'config');
-fs.mkdirSync(ob11ConfigDir, { recursive: true });
 
 class Config extends ConfigBase<OB11Config> implements OB11Config {
   httpPort: number = 3000;
@@ -49,7 +47,7 @@ class Config extends ConfigBase<OB11Config> implements OB11Config {
   token = '';
 
   getConfigPath() {
-    return path.join(ob11ConfigDir, `onebot11_${selfInfo.uin}.json`);
+    return path.join(this.getConfigDir(), `onebot11_${selfInfo.uin}.json`);
   }
 }
 

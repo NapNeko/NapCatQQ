@@ -48,7 +48,7 @@ export class NapCatOnebot11 {
     WebSocket反向服务 ${ob11Config.enableWsReverse ? '已启动' : '未启动'}, 反向地址: ${ob11Config.wsReverseUrls}
     `;
     log(serviceInfo);
-    NTQQUserApi.getUserDetailInfo(selfInfo.uin).then(user => {
+    NTQQUserApi.getUserDetailInfo(selfInfo.uid).then(user => {
       selfInfo.nick = user.nick;
     }).catch(logError);
     if (ob11Config.enableHttp) {
