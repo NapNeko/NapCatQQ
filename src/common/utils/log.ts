@@ -66,7 +66,7 @@ export function setLogSelfInfo(selfInfo: SelfInfo) {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
   logConfig.appenders.FileAppender.layout.pattern = logConfig.appenders.ConsoleAppender.layout.pattern =
-    `%d{yyyy-MM-dd hh:mm:ss} [%p] ${selfInfo.nick || selfInfo.uin}(${selfInfo.uin})  %m`;
+    `%d{yyyy-MM-dd hh:mm:ss} [%p] ${selfInfo.nick}(${selfInfo.uin})  %m`;
   log4js.configure(logConfig);
 }
 

@@ -1,6 +1,8 @@
 {
+  "httpHost": "",
   "enableHttp": false,
   "httpPort": 3000,
+  "wsHost": "",
   "enableWs": false,
   "wsPort": 3001,
   "enableWsReverse": false,
