@@ -34,6 +34,7 @@ class MarkMsgAsRead extends BaseAction<Payload, null> {
     return null;
   }
 }
+// 以下为非标准实现
 export class MarkPrivateMsgAsRead extends MarkMsgAsRead {
   actionName = ActionName.MarkPrivateMsgAsRead;
 }
