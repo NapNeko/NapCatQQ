@@ -34,6 +34,7 @@ const baseConfigPlugin: PluginOption[] = [
   cp({
     targets: [
       // ...external.map(genCpModule),
+      { src: './src/napcat.json', dest: 'dist/config/' },
       { src: './src/onebot11/onebot11.json', dest: 'dist/config/' },
       { src: './package.json', dest: 'dist' },
       { src: './README.md', dest: 'dist' },

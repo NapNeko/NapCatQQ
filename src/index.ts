@@ -35,16 +35,16 @@ checkVersion().then((remoteVersion: string) => {
 });
 new NapCatOnebot11();
 napCatCore.onLoginSuccess(() => {
-  log('登录成功!');
+  console.log('登录成功!');
   postLoginStatus();
 });
 const showQRCode = (qrCodeData: { url: string, base64: string, buffer: Buffer }) => {
-  log('请扫描下面的二维码，然后在手Q上授权登录：');
+  console.log('请扫描下面的二维码，然后在手Q上授权登录：');
   const qrcodePath = path.join(__dirname, 'qrcode.png');
   qrcode.generate(qrCodeData.url, { small: true }, (res) => {
-    log(`${res}\n二维码解码URL: ${qrCodeData.url}\n如果控制台二维码无法扫码，可以复制解码url到二维码生成网站生成二维码再扫码，也可以打开下方的二维码路径图片进行扫码`);
+    console.log(`${res}\n二维码解码URL: ${qrCodeData.url}\n如果控制台二维码无法扫码，可以复制解码url到二维码生成网站生成二维码再扫码，也可以打开下方的二维码路径图片进行扫码`);
     fs.writeFile(qrcodePath, qrCodeData.buffer).then(() => {
-      log('二维码已保存到', qrcodePath);
+      console.log('二维码已保存到', qrcodePath);
     });
   });
 };

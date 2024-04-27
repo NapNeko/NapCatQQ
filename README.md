@@ -14,11 +14,6 @@ NapCatQQ（瞌睡猫QQ，不准叫我NCQQ！），像睡着了一样在后台低
 
 目前只支持 onebot11 协议
 
-## 提示
-**请尽快移除CQCode支持**
-
-新功能不受CQCode支持，使用String储存不同字段数据存在 **安全风险**
-
 ## 下载
 
 前往 Release 页面下载最新版本
@@ -35,10 +30,14 @@ json 配置内容参数解释：
 
 ```json5
 {
+  // HTTP服务监听的 ip 地址，为空则监听所有地址
+  "httpHost": "",
   // 是否启用http服务, true为启动，false为禁用，如果启用，可以通过http接口发送消息
   "enableHttp": false,
   // http服务端口
   "httpPort": 3000,
+  // 正向 ws 服务监听的 ip 地址，为空则监听所有地址
+  "wsHost": "",
   // 是否启用正向websocket服务
   "enableWs": false,
   // 正向websocket服务端口
@@ -71,6 +70,22 @@ json 配置内容参数解释：
 
 ```
 
+配置日志：
+
+复制`config/napcat.json` 并重命名为 `config/napcat_<QQ号>.json`
+
+json 配置内容参数解释：
+```json5
+{
+  // 是否开启文件日志
+  "fileLog": true,
+  // 是否开启控制台日志
+  "consoleLog": true,
+  // 日志等级, 可选值: debug, info, error
+  "fileLogLevel": "debug",
+  "consoleLogLevel": "info"
+}
+```
 ### Windows 启动
 
 运行`powershell ./napcat.ps1`, 或者 `napcat.bat`，如果出现乱码，可以尝试运行`napcat-utf8.ps1` 或 `napcat-utf8.bat`
@@ -139,6 +154,11 @@ NapCat 会自动保存二维码到目录，可以手动打开图片扫描
 ```powershell
 $env:FFMPEG_PATH="d:\ffmpeg\bin\ffmpeg.exe"
 ```
+
+### 修改日志等级
+
+
+
 ### 出现 error code v2:-1 之类的提示
 
 不用管，这是正常现象，是因为 QQ 本身的问题，不影响使用
@@ -156,6 +176,10 @@ $env:FFMPEG_PATH="d:\ffmpeg\bin\ffmpeg.exe"
 检查下载的是否是 Windows 版本的 NapCatQQ
 
 检查是否是安装的 64 位版本的 QQ
+
+### 如果出现崩溃
+
+由于新版本使用了 Native Hook，如果你的 NapCatQQ 崩溃了，尝试删除 `MoeHoo.node`
 
 ### 其他问题
 
