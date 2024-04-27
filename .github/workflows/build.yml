@@ -21,7 +21,7 @@ jobs:
       with:
           repository: 'NapNeko/NapCatQQ'
           submodules: true
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.NAPCAT_BUILD }}
     - name: Use Node.js 20.X
       uses: actions/setup-node@v4
       with:
@@ -52,7 +52,7 @@ jobs:
           with:
                 repository: 'NapNeko/NapCatQQ'
                 submodules: true
-                token: ${{ secrets.GITHUB_TOKEN }}
+                token: ${{ secrets.NAPCAT_BUILD }}
         - name: Use Node.js 20.X
           uses: actions/setup-node@v4
           with:
