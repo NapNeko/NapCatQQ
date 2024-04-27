@@ -56,6 +56,13 @@ if (fs.existsSync(configVersionInfoPath)) {
 export const qqVersionConfigInfo: QQVersionConfigInfo = _qqVersionConfigInfo;
 
 export const qqPkgInfo: QQPkgInfo = require(pkgInfoPath);
+// platform_type: 3,
+// app_type: 4,
+// app_version: '9.9.9-23159',
+// qua: 'V1_WIN_NQ_9.9.9_23159_GW_B',
+// appid: '537213764',
+// platVer: '10.0.26100',
+// clientVer: '9.9.9-23159',
 
 let _appid: string = '537213335';  // 默认为 Windows 平台的 appid
 if (systemPlatform === 'linux') {
