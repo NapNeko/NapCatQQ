@@ -50,6 +50,7 @@ export enum ActionName {
     GetImage = 'get_image',
     GetRecord = 'get_record',
     CleanCache = 'clean_cache',
+    GetCookies = "get_cookies",
     // 以下为go-cqhttp api
     GoCQHTTP_SendForwardMsg = 'send_forward_msg',
     GoCQHTTP_SendGroupForwardMsg = 'send_group_forward_msg',
