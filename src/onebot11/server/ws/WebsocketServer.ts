@@ -18,9 +18,9 @@ const heartbeatRunning = false;
 
 class OB11WebsocketServer extends WebsocketServerBase {
 
-  public start(port: number) {
+  public start(port: number, host: string) {
     this.token = ob11Config.token;
-    super.start(port);
+    super.start(port, host);
   }
 
   authorizeFailed(wsClient: WebSocket) {
@@ -43,6 +43,8 @@ class OB11WebsocketServer extends WebsocketServerBase {
   onConnect(wsClient: WebSocket, url: string, req: IncomingMessage) {
     if (url == '/api' || url == '/api/' || url == '/') {
       wsClient.on('message', async (msg) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
         let receiveData: { action: ActionName, params: any, echo?: any } = { action: '', params: {} };
         let echo = null;
         try {

@@ -53,12 +53,12 @@ export abstract class HttpServerBase {
     next();
   }
 
-  start(port: number) {
+  start(port: number, host: string) {
     try {
       this.expressAPP.get('/', (req: Request, res: Response) => {
         res.send(`${this.name}已启动`);
       });
-      this.listen(port);
+      this.listen(port, host);
     } catch (e: any) {
       logError('HTTP服务启动失败', e.toString());
       // llonebotError.httpServerError = "HTTP服务启动失败, " + e.toString()
@@ -73,9 +73,9 @@ export abstract class HttpServerBase {
     }
   }
 
-  restart(port: number) {
+  restart(port: number, host: string) {
     this.stop();
-    this.start(port);
+    this.start(port, host);
   }
 
   abstract handleFailed(res: Response, payload: any, err: any): void
@@ -108,9 +108,10 @@ export abstract class HttpServerBase {
     });
   }
 
-  protected listen(port: number) {
-    this.server = this.expressAPP.listen(port, '0.0.0.0', () => {
-      const info = `${this.name} started 0.0.0.0:${port}`;
+  protected listen(port: number, host: string = '0.0.0.0') {
+    host = host || '0.0.0.0';
+    this.server = this.expressAPP.listen(port, host, () => {
+      const info = `${this.name} started ${host}:${port}`;
       log(info);
     });
   }
