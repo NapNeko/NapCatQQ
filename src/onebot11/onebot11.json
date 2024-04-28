@@ -16,5 +16,6 @@
   "debug": false,
   "enableLocalFile2Url": true,
   "heartInterval": 30000,
-  "token": ""
+  "token": "",
+  "musicSignUrl": ""
 }

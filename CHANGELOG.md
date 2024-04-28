@@ -11,3 +11,4 @@
 11. 新增设置自身在线状态 - 新增 API： /set_online_status
 12. 修复群成员加入时间 上次活跃 活跃等级字段 - 影响 API: /get_group_member_info /get_group_member_list
 13. 修复视频所需的 ffmpeg 路径不正确导致视频封面和时长获取失败
+14. 支持音乐卡片，需要配置签名服务器地址, `config/onebot11_<qq>.json`的`musicSignUrl`字段
