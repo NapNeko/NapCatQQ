@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { encode, getDuration, getWavFileInfo, isWav } from 'silk-wasm';
 import fsPromise from 'fs/promises';
-import { log } from './log';
+import { log, logError } from './log';
 import path from 'node:path';
 import { v4 as uuidv4 } from 'uuid';
 import { spawn } from 'node:child_process';
@@ -129,7 +129,7 @@ export async function encodeSilk(filePath: string) {
       };
     }
   } catch (error: any) {
-    log('convert silk failed', error.stack);
+    logError('convert silk failed', error.stack);
     return {};
   }
 }
