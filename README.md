@@ -27,6 +27,10 @@ NapCatQQ 是基于NTQQ本体实现一套 Bot 框架。
 
 容器运行：使用[NapCatDocker](https://github.com/NapNeko/NapCat-Docker)
 
+### 无需扫码快速登录
+
+前提是已经登录过了，可以直接加上`-q <qq号>`参数，例如 `napcat.sh -q 1234567890`
+
 ### 详细教程
 
 **首次使用** 请务必前往 [官方文档](https://napneko.github.io/) 查看使用文档与教程
