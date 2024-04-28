@@ -16,11 +16,11 @@ export async function logMessage(ob11Message: OB11Message){
       prefix += `${ob11Message.target_id}`;
     }
     else{
-      group = await getGroup(ob11Message.group_id!);
       prefix += '给群聊 ';
     }
   }
   if (ob11Message.message_type === 'group') {
+    group = await getGroup(ob11Message.group_id!);
     prefix += `群[${group?.groupName}(${ob11Message.group_id})] `;
   }
   let msgChain = '';
