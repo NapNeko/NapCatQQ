@@ -208,7 +208,8 @@ export interface OB11MessageCustomMusic {
     audio: string,
     title: string,
     content?: string,
-    image?: string
+    image?: string,
+    singer?: string,
   }
 }
 
