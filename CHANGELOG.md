@@ -13,3 +13,4 @@
 13. 修复视频所需的 ffmpeg 路径不正确导致视频封面和时长获取失败 - 影响 Event/API
 14. 支持音乐卡片，需要配置签名服务器地址, `config/onebot11_<qq>.json`的`musicSignUrl`字段 - 新增 Feat: Sign Music
 15. 支持获取与设置群公告 - 新增 API： (/_send_group_notice 暂时未完全实现) /_get_group_notice
+16. 支持获取群精华消息 - 新增 API： (/get_essence_msg_list 暂时未完全实现) 
