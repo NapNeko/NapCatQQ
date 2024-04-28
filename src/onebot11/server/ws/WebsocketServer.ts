@@ -50,7 +50,7 @@ class OB11WebsocketServer extends WebsocketServerBase {
         try {
           receiveData = JSON.parse(msg.toString());
           echo = receiveData.echo;
-          log('收到正向Websocket消息', receiveData);
+          logDebug('收到正向Websocket消息', receiveData);
         } catch (e) {
           return wsReply(wsClient, OB11Response.error('json解析失败，请检查数据格式', 1400, echo));
         }
