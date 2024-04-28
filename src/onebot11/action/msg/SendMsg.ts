@@ -29,6 +29,7 @@ import { uri2local } from '@/common/utils/file';
 import { getFriend, getGroup, getGroupMember, getUidByUin, selfInfo } from '@/common/data';
 import { NTQQMsgApi } from '../../../core/src/apis';
 import { NTQQFileApi } from '../../../core/src/apis';
+import { ob11Config } from '@/onebot11/config';
 
 const ALLOW_SEND_TEMP_MSG = false;
 
@@ -89,6 +90,74 @@ export function convertMessage2List(message: OB11MessageMixType, autoEscape = fa
   return message;
 }
 
+async function genMusicElement(url: string, audio: string, title: string, image: string | undefined, singer: string | undefined): Promise<SendArkElement | undefined> {
+  const getMusicJson = new Promise((resolve, reject) => {
+    const postData = {
+      url,
+      audio,
+      title,
+      image,
+      singer
+    };
+    fetch(ob11Config.musicSignUrl, {
+      method: 'POST', // 指定请求方法为 POST
+      headers: {
+        'Content-Type': 'application/json' // 设置请求头，指明发送的数据类型为 JSON
+      },
+      body: JSON.stringify(postData) // 将 JavaScript 对象转换为 JSON 字符串作为请求体
+    })
+      .then(response => {
+        if (!response.ok) {
+          reject(response.statusText); // 请求失败，返回错误信息
+        }
+        return response.json(); // 解析 JSON 格式的响应体
+      })
+      .then(data => {
+        logDebug('音乐消息生成成功', data);
+        resolve(data);
+      })
+      .catch(error => {
+        reject(error);
+      });
+  });
+  // const musicJson = {
+  //   app: 'com.tencent.structmsg',
+  //   config: {
+  //     ctime: 1709689928,
+  //     forward: 1,
+  //     token: '5c1e4905f926dd3a64a4bd3841460351',
+  //     type: 'normal'
+  //   },
+  //   extra: { app_type: 1, appid: 100497308, uin: selfInfo.uin },
+  //   meta: {
+  //     news: {
+  //       action: '',
+  //       android_pkg_name: '',
+  //       app_type: 1,
+  //       appid: 100497308,
+  //       ctime: 1709689928,
+  //       desc: content || title,
+  //       jumpUrl: url,
+  //       musicUrl: audio,
+  //       preview: image,
+  //       source_icon: 'https://p.qpic.cn/qqconnect/0/app_100497308_1626060999/100?max-age=2592000&t=0',
+  //       source_url: '',
+  //       tag: 'QQ音乐',
+  //       title: title,
+  //       uin: selfInfo.uin,
+  //     }
+  //   },
+  //   prompt: content || title,
+  //   ver: '0.0.0.1',
+  //   view: 'news'
+  // };
+  try{
+    const musicJson = await getMusicJson;
+    return SendMsgElementConstructor.ark(musicJson);
+  }catch (e) {
+    logError('生成音乐消息失败', e);
+  }
+}
 export async function createSendElements(messageData: OB11MessageData[], group: Group | undefined, ignoreTypes: OB11MessageDataType[] = []) {
   const sendElements: SendMessageElement[] = [];
   const deleteAfterSentFiles: string[] = [];
@@ -220,6 +289,24 @@ export async function createSendElements(messageData: OB11MessageData[], group: 
     case OB11MessageDataType.markdown: {
       const content = sendMsg.data?.content;
       sendElements.push(SendMsgElementConstructor.markdown(content));
+    }break;
+    case OB11MessageDataType.music:{
+      const musicData = sendMsg.data;
+      if (musicData.type !== 'custom') {
+        logError('只支持custom类型的音乐卡片', musicData.type);
+        break;
+      }
+      else{
+        try {
+          const musicMsgElement = await genMusicElement(musicData.url, musicData.audio, musicData.title, musicData.image, musicData.singer);
+          logDebug('生成音乐消息', musicMsgElement);
+          if (musicMsgElement) {
+            sendElements.push(musicMsgElement);
+          }
+        } catch (e) {
+          logError('生成音乐消息失败', e);
+        }
+      }
     }
     }
 
@@ -527,41 +614,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
   }
 
 
-  private genMusicElement(url: string, audio: string, title: string, content: string, image: string): SendArkElement {
-    const musicJson = {
-      app: 'com.tencent.structmsg',
-      config: {
-        ctime: 1709689928,
-        forward: 1,
-        token: '5c1e4905f926dd3a64a4bd3841460351',
-        type: 'normal'
-      },
-      extra: { app_type: 1, appid: 100497308, uin: selfInfo.uin },
-      meta: {
-        news: {
-          action: '',
-          android_pkg_name: '',
-          app_type: 1,
-          appid: 100497308,
-          ctime: 1709689928,
-          desc: content || title,
-          jumpUrl: url,
-          musicUrl: audio,
-          preview: image,
-          source_icon: 'https://p.qpic.cn/qqconnect/0/app_100497308_1626060999/100?max-age=2592000&t=0',
-          source_url: '',
-          tag: 'QQ音乐',
-          title: title,
-          uin: selfInfo.uin,
-        }
-      },
-      prompt: content || title,
-      ver: '0.0.0.1',
-      view: 'news'
-    };
 
-    return SendMsgElementConstructor.ark(musicJson);
-  }
 }
 
 export default SendMsg;

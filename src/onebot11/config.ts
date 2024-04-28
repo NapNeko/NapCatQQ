@@ -23,6 +23,7 @@ export interface OB11Config {
   debug: boolean;
   heartInterval: number;
   token: string;
+  musicSignUrl: string;
 
   read(): OB11Config;
 
@@ -49,6 +50,7 @@ class Config extends ConfigBase<OB11Config> implements OB11Config {
   enableLocalFile2Url = true;
   heartInterval = 30000;
   token = '';
+  musicSignUrl = '';
 
   getConfigPath() {
     return path.join(this.getConfigDir(), `onebot11_${selfInfo.uin}.json`);

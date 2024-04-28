@@ -38,13 +38,13 @@ export async function logMessage(ob11Message: OB11Message){
         msgChain += `[文件]${segment.data.file} `;
       }
       else if (segment.type === 'json') {
-        msgChain += `\n[json]${segment.data}\n`;
+        msgChain += `\n[json]${JSON.stringify(segment.data)}\n`;
       }
       else if (segment.type === 'markdown') {
         msgChain += `\n[json]${segment.data.content}\n`;
       }
       else {
-        msgChain += `${segment}`;
+        msgChain += `${JSON.stringify(segment)}`;
       }
     }
   }
