@@ -49,6 +49,7 @@ import { GetCookies } from './user/GetCookies';
 import { SetMsgEmojiLike } from '@/onebot11/action/msg/SetMsgEmojiLike';
 import { GetRobotUinRange } from './extends/GetRobotUinRange';
 import { SetOnlineStatus } from './extends/SetOnlineStatus';
+import { GetGroupNotice } from './group/GetGroupNotice';
 
 export const actionHandlers = [
   new GetFile(),
@@ -90,6 +91,7 @@ export const actionHandlers = [
   new SetOnlineStatus(),
   new GetRobotUinRange(),
   //以下为go-cqhttp api
+  new GetGroupNotice(),
   new GoCQHTTPSendForwardMsg(),
   new GoCQHTTPSendGroupForwardMsg(),
   new GoCQHTTPSendPrivateForwardMsg(),
