@@ -10,7 +10,7 @@ import { OB11HeartbeatEvent } from '../../event/meta/OB11HeartbeatEvent';
 import { log, logDebug, logError } from '../../../common/utils/log';
 import { ob11Config } from '@/onebot11/config';
 import { napCatCore } from '@/core';
-import { selfInfo } from '@/common/data';
+import { selfInfo } from '@/core/data';
 
 export const rwsList: ReverseWebsocket[] = [];
 

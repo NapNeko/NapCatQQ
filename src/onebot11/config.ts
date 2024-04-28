@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { selfInfo } from '@/common/data';
+import { selfInfo } from '@/core/data';
 import { logDebug, logError } from '@/common/utils/log';
 import { ConfigBase } from '@/common/utils/ConfigBase';
 

@@ -1,7 +1,7 @@
 import { GroupNotify, GroupNotifyStatus } from '@/core/entities';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { uid2UinMap } from '@/common/data';
+import { uid2UinMap } from '@/core/data';
 import { NTQQUserApi } from '@/core/apis/user';
 import { NTQQGroupApi } from '@/core/apis/group';
 

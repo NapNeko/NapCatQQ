@@ -1,5 +1,5 @@
 import BaseAction from '../BaseAction';
-import { getGroupMember } from '@/common/data';
+import { getGroupMember } from '@/core/data';
 import { GroupMemberRole } from '@/core/entities';
 import { ActionName } from '../types';
 import { NTQQGroupApi } from '@/core/apis/group';

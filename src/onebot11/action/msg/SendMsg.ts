@@ -26,7 +26,7 @@ import { dbUtil } from '@/common/utils/db';
 import { log, logDebug, logError } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';
 import { uri2local } from '@/common/utils/file';
-import { getFriend, getGroup, getGroupMember, getUidByUin, selfInfo } from '@/common/data';
+import { getFriend, getGroup, getGroupMember, getUidByUin, selfInfo } from '@/core/data';
 import { NTQQMsgApi } from '../../../core/src/apis';
 import { NTQQFileApi } from '../../../core/src/apis';
 import { ob11Config } from '@/onebot11/config';

@@ -2,7 +2,7 @@ import BaseAction from '../BaseAction';
 import { GroupRequestOperateTypes } from '@/core/entities';
 import { ActionName } from '../types';
 import { NTQQGroupApi } from '@/core/apis/group';
-import { groupNotifies } from '@/common/data';
+import { groupNotifies } from '@/core/data';
 
 interface Payload {
   flag: string,

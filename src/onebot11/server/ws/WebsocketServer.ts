@@ -12,7 +12,7 @@ import { wsReply } from './reply';
 import { napCatCore } from '@/core';
 import { log, logDebug, logError } from '../../../common/utils/log';
 import { ob11Config } from '@/onebot11/config';
-import { selfInfo } from '@/common/data';
+import { selfInfo } from '@/core/data';
 
 const heartbeatRunning = false;
 

@@ -1,4 +1,4 @@
-import { selfInfo } from '@/common/data';
+import { selfInfo } from '@/core/data';
 
 export enum EventType {
     META = 'meta_event',
