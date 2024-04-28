@@ -9,3 +9,4 @@
 9. 新增wsHost和httpHost配置 CONFIG: New
 10. 新增获取官方Bot账号范围 API: /get_robot_uin_range
 11. 新增设置自身在线状态 API： /set_online_status
+12. 修复群成员加入时间 上次活跃 活跃等级字段 影响 API: /get_group_member_info /get_group_member_list
