@@ -1,6 +1,7 @@
 import { Peer, RawMessage, SendMessageElement } from '@/core/entities';
 import { GeneralCallResult } from '@/core/services/common';
 export declare class NTQQMsgApi {
+    static setEmojiLike(peer: Peer, msgSeq: string, emojiId: string, set?: boolean): Promise<unknown>;
     static getMultiMsg(peer: Peer, rootMsgId: string, parentMsgId: string): Promise<GeneralCallResult & {
         msgList: RawMessage[];
     } | undefined>;

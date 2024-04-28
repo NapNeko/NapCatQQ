@@ -193,6 +193,7 @@ export interface GrayTipElement {
     groupElement: TipGroupElement;
     xmlElement: {
         content: string;
+        templId: string;
     };
     jsonGrayTipElement: {
         jsonStr: string;
