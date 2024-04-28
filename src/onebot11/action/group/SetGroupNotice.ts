@@ -1,3 +1,4 @@
+import { WebApi } from '@/core/apis/webapi';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 
@@ -10,7 +11,7 @@ export class SetGroupNotice extends BaseAction<PayloadType, null> {
 
   protected async _handle(payload: PayloadType) {
     const group = payload.group_id.toString();
-    // WebApi.getGrouptNotice(group);
+    WebApi.setGroupNotice(group);
     return null;
   }
 }
