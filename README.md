@@ -4,7 +4,7 @@
 
 ## 项目介绍
 
-NapCatQQ 是基于NTQQ本体实现一套 Bot 框架
+NapCatQQ 是基于NTQQ本体实现一套 Bot 框架。
 
 名字寓意 瞌睡猫QQ ，但是不准叫NCQQ！，像睡着了一样在后台低占用运行的无需GUI界面的NTQQ。
 
