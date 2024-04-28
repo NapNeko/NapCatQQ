@@ -53,6 +53,7 @@ export enum ActionName {
     CleanCache = 'clean_cache',
     GetCookies = 'get_cookies',
     // 以下为扩展napcat扩展
+    GetGroupNotice = 'get_group_notice',
     GetRobotUinRange = 'get_robot_uin_range',
     SetOnlineStatus = 'set_online_status',
     // 以下为go-cqhttp api
