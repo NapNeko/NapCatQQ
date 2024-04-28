@@ -65,7 +65,8 @@ const baseConfig = (mode: string = 'development') => defineConfig({
   },
   build: {
     target: 'esnext',
-    minify: mode === 'production' ? 'esbuild' : false,
+    // minify: mode === 'production' ? 'esbuild' : false,
+    minify: false,
     lib: {
       entry: 'src/index.ts',
       formats: ['cjs'],
