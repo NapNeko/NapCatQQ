@@ -10,6 +10,6 @@
 10. 新增获取官方Bot账号范围 - 新增 API: /get_robot_uin_range
 11. 新增设置自身在线状态 - 新增 API： /set_online_status
 12. 修复群成员加入时间 上次活跃 活跃等级字段 - 影响 API: /get_group_member_info /get_group_member_list
-13. 修复视频所需的 ffmpeg 路径不正确导致视频封面和时长获取失败
+13. 修复视频所需的 ffmpeg 路径不正确导致视频封面和时长获取失败 - 影响 Event/API
 14. 支持音乐卡片，需要配置签名服务器地址, `config/onebot11_<qq>.json`的`musicSignUrl`字段 - 新增 Feat: Sign Music
 15. 支持获取群公告 - 新增 API： /set_online_status
