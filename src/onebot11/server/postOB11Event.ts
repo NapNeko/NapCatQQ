@@ -14,7 +14,6 @@ import { isNull } from '@/common/utils/helper';
 import { dbUtil } from '@/common/utils/db';
 import { friendRequests, getGroup, groupNotifies, selfInfo } from '@/core/data';
 import { NTQQFriendApi, NTQQGroupApi, NTQQMsgApi } from '../../core/src/apis';
-import { logMessage, logNotice, logRequest } from '@/onebot11/log';
 
 export type PostEventType = OB11Message | OB11BaseMetaEvent | OB11BaseNoticeEvent
 
@@ -72,13 +71,7 @@ export function postWsEvent(event: PostEventType) {
 
 export function postOB11Event(msg: PostEventType, reportSelf = false, postWs = true) {
   const config = ob11Config;
-  if (msg.post_type === 'message' || msg.post_type === 'message_sent') {
-    logMessage(msg as OB11Message).then().catch(logError);
-  } else if (msg.post_type === 'notice') {
-    logNotice(msg).then().catch(logError);
-  } else if (msg.post_type === 'request') {
-    logRequest(msg).then().catch(logError);
-  }
+
   // 判断msg是否是event
   if (!config.reportSelfMessage && !reportSelf) {
     if (msg.post_type === 'message' && (msg as OB11Message).user_id.toString() == selfInfo.uin) {

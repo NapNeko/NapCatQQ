@@ -26,7 +26,8 @@ import { OB11GroupAdminNoticeEvent } from '@/onebot11/event/notice/OB11GroupAdmi
 import { GroupDecreaseSubType, OB11GroupDecreaseEvent } from '@/onebot11/event/notice/OB11GroupDecreaseEvent';
 import { OB11FriendRecallNoticeEvent } from '@/onebot11/event/notice/OB11FriendRecallNoticeEvent';
 import { OB11GroupRecallNoticeEvent } from '@/onebot11/event/notice/OB11GroupRecallNoticeEvent';
-import { logMessage } from '@/onebot11/log';
+import { logMessage, logNotice, logRequest } from '@/onebot11/log';
+import { OB11Message } from '@/onebot11/types';
 
 
 export class NapCatOnebot11 {
@@ -99,6 +100,10 @@ export class NapCatOnebot11 {
       this.postRecallMsg(msgList).then().catch(logError);
     };
     msgListener.onAddSendMsg = (msg) => {
+      OB11Constructor.message(msg).then((_msg) => {
+        _msg.target_id = parseInt(msg.peerUin);
+        logMessage(_msg as OB11Message).then().catch(logError);
+      });
       if (ob11Config.reportSelfMessage) {
         dbUtil.addMsg(msg).then(id => {
           msg.id = id;
@@ -143,6 +148,7 @@ export class NapCatOnebot11 {
       // message.msgShortId = await dbUtil.addMsg(message);
       // }
       OB11Constructor.message(message).then((msg) => {
+        logDebug('收到消息: ', msg);
         if (debug) {
           msg.raw = message;
         } else {
@@ -150,7 +156,13 @@ export class NapCatOnebot11 {
             return;
           }
         }
-        logDebug('收到消息: ', msg);
+        if (msg.post_type === 'message') {
+          logMessage(msg as OB11Message).then().catch(logError);
+        } else if (msg.post_type === 'notice') {
+          logNotice(msg).then().catch(logError);
+        } else if (msg.post_type === 'request') {
+          logRequest(msg).then().catch(logError);
+        }
         const isSelfMsg = msg.user_id.toString() == selfInfo.uin;
         if (isSelfMsg && !reportSelfMessage) {
           return;
