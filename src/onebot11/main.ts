@@ -84,8 +84,10 @@ export class NapCatOnebot11 {
     };
     msgListener.onRecvMsg = (msg) => {
       // console.log('ob11 onRecvMsg', JSON.stringify(msg, null, 2));
+      logDebug('收到消息', msg);
       for (const m of msg) {
         if (this.bootTime > parseInt(m.msgTime)) {
+          logDebug(`消息时间${m.msgTime}早于启动时间${this.bootTime}，忽略上报`);
           continue;
         }
         new Promise((resolve) => {
