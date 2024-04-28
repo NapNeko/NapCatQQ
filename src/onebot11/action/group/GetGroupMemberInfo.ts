@@ -6,6 +6,7 @@ import { ActionName } from '../types';
 import { NTQQUserApi } from '@/core/apis/user';
 import { log, logDebug } from '@/common/utils/log';
 import { isNull } from '../../../common/utils/helper';
+import { WebApi } from '@/core/apis/webapi';
 
 
 export interface PayloadType {
