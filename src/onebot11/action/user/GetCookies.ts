@@ -8,7 +8,7 @@ interface Payload {
   domain: string
 }
 interface Response {
-  Pskey: Object;
+  Pskey: object;
   Skey: string;
 }
 export class GetCookies extends BaseAction<Payload, Response> {

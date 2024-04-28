@@ -13,7 +13,7 @@ export interface NodeIKernelMsgService {
     getAutoReplyTextList(...args: unknown[]): unknown;
     getOnLineDev(...args: unknown[]): unknown;
     kickOffLine(...args: unknown[]): unknown;
-    setStatus(...args: unknown[]): unknown;
+    setStatus(...args: unknown[]): Promise<GeneralCallResult>;
     fetchStatusMgrInfo(...args: unknown[]): unknown;
     fetchStatusUnitedConfigInfo(...args: unknown[]): unknown;
     getOnlineStatusSmallIconBasePath(...args: unknown[]): unknown;
