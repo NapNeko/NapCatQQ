@@ -30,6 +30,7 @@ import { getFriend, getGroup, getGroupMember, getUidByUin, selfInfo } from '@/co
 import { NTQQMsgApi } from '../../../core/src/apis';
 import { NTQQFileApi } from '../../../core/src/apis';
 import { ob11Config } from '@/onebot11/config';
+import { CustomMusicSignPostData, MusicSign } from '@/core/apis/sign';
 
 const ALLOW_SEND_TEMP_MSG = false;
 
@@ -90,36 +91,7 @@ export function convertMessage2List(message: OB11MessageMixType, autoEscape = fa
   return message;
 }
 
-async function genMusicElement(url: string, audio: string, title: string, image: string | undefined, singer: string | undefined): Promise<SendArkElement | undefined> {
-  const getMusicJson = new Promise((resolve, reject) => {
-    const postData = {
-      url,
-      audio,
-      title,
-      image,
-      singer
-    };
-    fetch(ob11Config.musicSignUrl, {
-      method: 'POST', // 指定请求方法为 POST
-      headers: {
-        'Content-Type': 'application/json' // 设置请求头，指明发送的数据类型为 JSON
-      },
-      body: JSON.stringify(postData) // 将 JavaScript 对象转换为 JSON 字符串作为请求体
-    })
-      .then(response => {
-        if (!response.ok) {
-          reject(response.statusText); // 请求失败，返回错误信息
-        }
-        return response.json(); // 解析 JSON 格式的响应体
-      })
-      .then(data => {
-        logDebug('音乐消息生成成功', data);
-        resolve(data);
-      })
-      .catch(error => {
-        reject(error);
-      });
-  });
+async function genCustomMusicElement(url: string, audio: string, title: string, image: string | undefined, singer: string | undefined): Promise<SendArkElement | undefined> {
   // const musicJson = {
   //   app: 'com.tencent.structmsg',
   //   config: {
@@ -152,12 +124,34 @@ async function genMusicElement(url: string, audio: string, title: string, image:
   //   view: 'news'
   // };
   try{
-    const musicJson = await getMusicJson;
+    const postData: CustomMusicSignPostData = {
+      type: 'custom',
+      url,
+      audio,
+      title,
+      image,
+      singer
+    };
+    const musicJson = await new MusicSign(ob11Config.musicSignUrl).sign(postData);
     return SendMsgElementConstructor.ark(musicJson);
   }catch (e) {
     logError('生成音乐消息失败', e);
   }
 }
+
+async function genIdMusicElement(type: 'qq' | '163', id: string | number): Promise<SendArkElement | undefined> {
+  try {
+    const postData = {
+      type,
+      id
+    };
+    const musicJson = await new MusicSign(ob11Config.musicSignUrl).sign(postData);
+    return SendMsgElementConstructor.ark(musicJson);
+  } catch (e) {
+    logError('生成音乐消息失败', e);
+  }
+}
+
 export async function createSendElements(messageData: OB11MessageData[], group: Group | undefined, ignoreTypes: OB11MessageDataType[] = []) {
   const sendElements: SendMessageElement[] = [];
   const deleteAfterSentFiles: string[] = [];
@@ -292,20 +286,40 @@ export async function createSendElements(messageData: OB11MessageData[], group: 
     }break;
     case OB11MessageDataType.music:{
       const musicData = sendMsg.data;
-      if (musicData.type !== 'custom') {
-        logError('只支持custom类型的音乐卡片', musicData.type);
-        break;
-      }
-      else{
-        try {
-          const musicMsgElement = await genMusicElement(musicData.url, musicData.audio, musicData.title, musicData.image, musicData.singer);
-          logDebug('生成音乐消息', musicMsgElement);
-          if (musicMsgElement) {
-            sendElements.push(musicMsgElement);
+      try {
+        let musicMsgElement: SendArkElement | undefined;
+        if (musicData.type === 'custom'){
+          if (!musicData.url){
+            logError('自定义音卡缺少参数url');
+            break;
           }
-        } catch (e) {
-          logError('生成音乐消息失败', e);
+          if (!musicData.audio){
+            logError('自定义音卡缺少参数audio');
+            break;
+          }
+          if (!musicData.title){
+            logError('自定义音卡缺少参数title');
+            break;
+          }
+          musicMsgElement = await genCustomMusicElement(musicData.url, musicData.audio, musicData.title, musicData.image, musicData.singer);
         }
+        else{
+          if (!['qq', '163'].includes(musicData.type)){
+            logError('音乐卡片type错误, 只支持qq和163，当前type:', musicData.type);
+            break;
+          }
+          if (!musicData.id){
+            logError('音乐卡片缺少参数id');
+            break;
+          }
+          musicMsgElement = await genIdMusicElement(musicData.type, musicData.id);
+        }
+        logDebug('生成音乐消息', musicMsgElement);
+        if (musicMsgElement) {
+          sendElements.push(musicMsgElement);
+        }
+      } catch (e) {
+        logError('生成音乐消息失败', e);
       }
     }
     }
