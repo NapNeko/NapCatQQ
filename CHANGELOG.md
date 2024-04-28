@@ -1,10 +1,10 @@
 ## 修复与优化
 1. 修复图片URL,支持Win/Linux X64获取Rkey - 新增 Module: Moehoo
-4. 重构了商城表情URL拼接 - 重构 API: /
-5. 重构了Core日志与服务调用部分 - 重构 SYS: Log
-6. 适配最新版Win 9.9.9 23159 提升了兼容性 - 修复 SYS: Listener Proxy
-7. 修复群成员加入时间 上次活跃 活跃等级字段 - 影响 API: /get_group_member_info /get_group_member_list
-8. 修复视频所需的 ffmpeg 路径不正确导致视频封面和时长获取失败 - 影响 Event/API
+2. 重构了商城表情URL拼接 - 重构 API: /
+3. 重构了Core日志与服务调用部分 - 重构 SYS: Log
+4. 适配最新版Win 9.9.9 23159 提升了兼容性 - 修复 SYS: Listener Proxy
+5. 修复群成员加入时间 上次活跃 活跃等级字段 - 影响 API: /get_group_member_info /get_group_member_list
+6. 修复视频所需的 ffmpeg 路径不正确导致视频封面和时长获取失败 - 影响 Event/API
 ## 新增与调整
 1. 支持获取与设置群公告 - 新增 API： (/_send_group_notice 暂时未完全实现) /_get_group_notice
 2. 支持获取群精华消息 - 新增 API： /get_essence_msg_list
