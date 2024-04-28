@@ -4,16 +4,17 @@ import { OB11Constructor } from '../../constructor';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { NTQQMsgApi } from '@/core/apis/msg';
+import { WebApi } from '@/core/apis/webapi';
 
 interface PayloadType {
-  group_id: number
+    group_id: number;
+    pages: number;
 }
 
-export class GetGroupEssence extends BaseAction<PayloadType, null> {
-  actionName = ActionName.GoCQHTTP_GetEssenceMsg;
+export class GetGroupEssence extends BaseAction<PayloadType, any> {
+    actionName = ActionName.GoCQHTTP_GetEssenceMsg;
 
-  protected async _handle(payload: PayloadType) {
-    //await NTQQMsgApi.GetEssenceMsg()
-    return null;
-  }
+    protected async _handle(payload: PayloadType) {
+        return await WebApi.getGroupEssenceMsg(payload.group_id.toString(), payload.pages.toString());
+    }
 }
