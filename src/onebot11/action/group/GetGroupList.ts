@@ -2,7 +2,7 @@ import { OB11Group } from '../../types';
 import { OB11Constructor } from '../../constructor';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { groups } from '@/common/data';
+import { groups } from '@/core/data';
 import { NTQQGroupApi } from '@/core/apis';
 import { Group } from '@/core/entities';
 import { log } from '@/common/utils/log';

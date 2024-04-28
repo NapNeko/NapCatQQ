@@ -1,6 +1,6 @@
 import BaseAction from '../BaseAction';
 import { OB11User } from '../../types';
-import { getUidByUin, uid2UinMap } from '@/common/data';
+import { getUidByUin, uid2UinMap } from '@/core/data';
 import { OB11Constructor } from '../../constructor';
 import { ActionName } from '../types';
 import { NTQQUserApi } from '@/core/apis/user';

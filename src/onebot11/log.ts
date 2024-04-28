@@ -1,6 +1,6 @@
 import { OB11Message } from '@/onebot11/types';
 import { log } from '@/common/utils/log';
-import { getGroup, getGroupMember } from '@/common/data';
+import { getGroup, getGroupMember } from '@/core/data';
 import exp from 'constants';
 
 export async function logMessage(ob11Message: OB11Message){

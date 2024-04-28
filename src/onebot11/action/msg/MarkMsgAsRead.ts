@@ -2,7 +2,7 @@ import { ChatType, Peer } from '@/core/entities';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { NTQQMsgApi } from '@/core/apis';
-import { getFriend, getUidByUin } from '@/common/data';
+import { getFriend, getUidByUin } from '@/core/data';
 
 interface Payload {
   user_id: number;

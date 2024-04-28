@@ -1,5 +1,5 @@
 import { OB11GroupMember } from '../../types';
-import { getGroupMember } from '@/common/data';
+import { getGroupMember } from '@/core/data';
 import { OB11Constructor } from '../../constructor';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';

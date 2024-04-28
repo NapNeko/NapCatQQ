@@ -1,6 +1,6 @@
 import { NTQQUserApi } from '@/core/apis';
 import BaseAction from '../BaseAction';
-import { getFriend, getUidByUin, uid2UinMap } from '@/common/data';
+import { getFriend, getUidByUin, uid2UinMap } from '@/core/data';
 import { ActionName } from '../types';
 import { log, logDebug } from '@/common/utils/log';
 

@@ -1,4 +1,4 @@
-import { selfInfo } from '@/common/data';
+import { selfInfo } from '@/core/data';
 import { OB11User } from '../../types';
 import { OB11Constructor } from '../../constructor';
 import BaseAction from '../BaseAction';

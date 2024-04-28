@@ -12,7 +12,7 @@ import { OB11FriendRequestEvent } from '../event/request/OB11FriendRequest';
 import { OB11GroupRequestEvent } from '../event/request/OB11GroupRequest';
 import { isNull } from '@/common/utils/helper';
 import { dbUtil } from '@/common/utils/db';
-import { friendRequests, getGroup, groupNotifies, selfInfo } from '@/common/data';
+import { friendRequests, getGroup, groupNotifies, selfInfo } from '@/core/data';
 import { NTQQFriendApi, NTQQGroupApi, NTQQMsgApi } from '../../core/src/apis';
 import { logMessage, logNotice, logRequest } from '@/onebot11/log';
 

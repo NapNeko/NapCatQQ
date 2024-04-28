@@ -3,7 +3,7 @@ import { OB11Response } from '../action/OB11Response';
 import { HttpServerBase } from '@/common/server/http';
 import { actionHandlers, actionMap } from '../action';
 import { ob11Config } from '@/onebot11/config';
-import { selfInfo } from '@/common/data';
+import { selfInfo } from '@/core/data';
 import { OB11HeartbeatEvent } from '@/onebot11/event/meta/OB11HeartbeatEvent';
 import { postOB11Event } from '@/onebot11/server/postOB11Event';
 import { napCatCore } from '@/core';

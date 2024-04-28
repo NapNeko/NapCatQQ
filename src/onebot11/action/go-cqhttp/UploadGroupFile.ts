@@ -1,5 +1,5 @@
 import BaseAction from '../BaseAction';
-import { getGroup } from '@/common/data';
+import { getGroup } from '@/core/data';
 import { ActionName } from '../types';
 import { SendMsgElementConstructor } from '@/core/entities/constructor';
 import { ChatType, SendFileElement } from '@/core/entities';
