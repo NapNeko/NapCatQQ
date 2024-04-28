@@ -200,6 +200,13 @@ export interface OB11MessageNode {
   }
 }
 
+export interface OB11MessageIdMusic {
+  type: OB11MessageDataType.music
+  data: {
+    type: 'qq' | '163',
+    id: string | number,
+  }
+}
 export interface OB11MessageCustomMusic {
   type: OB11MessageDataType.music
   data: {
@@ -243,7 +250,7 @@ export type OB11MessageData =
   OB11MessageFace | OB11MessageMFace |
   OB11MessageAt | OB11MessageReply |
   OB11MessageImage | OB11MessageRecord | OB11MessageFile | OB11MessageVideo |
-  OB11MessageNode | OB11MessageCustomMusic | OB11MessageJson |
+  OB11MessageNode | OB11MessageIdMusic | OB11MessageCustomMusic | OB11MessageJson |
   OB11MessageDice | OB11MessageRPS | OB11MessageMarkdown
 
 export interface OB11PostSendMsg {
