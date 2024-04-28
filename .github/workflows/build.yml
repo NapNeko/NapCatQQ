@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target_platform: [linux,darwin]
+        target_platform: [linux]
         target_arch: [x64, arm64]
     steps:
     - name: Clone Main Repository
