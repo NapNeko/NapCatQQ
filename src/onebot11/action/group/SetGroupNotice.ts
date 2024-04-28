@@ -6,11 +6,11 @@ interface PayloadType {
 }
 
 export class SetGroupNotice extends BaseAction<PayloadType, null> {
-    actionName = ActionName.GoCQHTTP_SetGroupNotice;
+  actionName = ActionName.GoCQHTTP_SetGroupNotice;
 
-    protected async _handle(payload: PayloadType) {
-        const group = payload.group_id.toString();
-        // WebApi.getGrouptNotice(group);
-        return null;
-    }
+  protected async _handle(payload: PayloadType) {
+    const group = payload.group_id.toString();
+    // WebApi.getGrouptNotice(group);
+    return null;
+  }
 }
