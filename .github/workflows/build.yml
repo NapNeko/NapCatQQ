@@ -22,6 +22,7 @@ jobs:
       with:
           repository: 'NapNeko/NapCatQQ'
           submodules: true
+          ref: main
           token: ${{ secrets.NAPCAT_BUILD }}
     - name: Use Node.js 20.X
       uses: actions/setup-node@v4
@@ -53,6 +54,7 @@ jobs:
           with:
                 repository: 'NapNeko/NapCatQQ'
                 submodules: true
+                ref: main
                 token: ${{ secrets.NAPCAT_BUILD }}
         - name: Use Node.js 20.X
           uses: actions/setup-node@v4
