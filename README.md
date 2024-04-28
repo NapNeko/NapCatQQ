@@ -22,7 +22,6 @@ NapCatQQ 是基于NTQQ本体实现一套 Bot 框架。
 
 ### Linux 启动
 
-
 手动运行：运行`napcat.sh`
 
 容器运行：使用[NapCatDocker](https://github.com/NapNeko/NapCat-Docker)
