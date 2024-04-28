@@ -1,4 +1,4 @@
-import {OB11GroupNoticeEvent} from "./OB11GroupNoticeEvent";
+import { OB11GroupNoticeEvent } from './OB11GroupNoticeEvent';
 
 export interface MsgEmojiLike {
   emoji_id: string,
@@ -6,10 +6,10 @@ export interface MsgEmojiLike {
 }
 
 export class OB11GroupMsgEmojiLikeEvent extends OB11GroupNoticeEvent {
-  notice_type = "group_msg_emoji_like";
+  notice_type = 'group_msg_emoji_like';
   message_id: number;
-  sub_type: "ban" | "lift_ban";
-  likes: MsgEmojiLike[]
+  sub_type: 'ban' | 'lift_ban';
+  likes: MsgEmojiLike[];
 
   constructor(groupId: number, userId: number, messageId: number, likes: MsgEmojiLike[]) {
     super();

@@ -5,8 +5,8 @@ interface PayloadType {
     group_id: number
 }
 
-export class GetGroupNotice extends BaseAction<PayloadType, null> {
-  actionName = ActionName.GoCQHTTP_GetGroupNotice;
+export class SetGroupNotice extends BaseAction<PayloadType, null> {
+  actionName = ActionName.GoCQHTTP_SetGroupNotice;
 
   protected async _handle(payload: PayloadType) {
     const group = payload.group_id.toString();
