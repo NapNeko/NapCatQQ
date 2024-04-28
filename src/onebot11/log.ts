@@ -1,13 +1,27 @@
 import { OB11Message } from '@/onebot11/types';
 import { log } from '@/common/utils/log';
-import { getGroup, getGroupMember } from '@/core/data';
+import { getGroup, getGroupMember, selfInfo } from '@/core/data';
 import exp from 'constants';
+import { Group } from '@/core';
 
+// todo: 应该放到core去用RawMessage解析打印
 export async function logMessage(ob11Message: OB11Message){
+  const isSelfSent = ob11Message.sender.user_id.toString() === selfInfo.uin;
   let prefix = '';
+  let group: Group | undefined;
+  if (isSelfSent){
+    prefix = '发送消息 ';
+    if (ob11Message.message_type === 'private'){
+      prefix += '给私聊 ';
+      prefix += `${ob11Message.target_id}`;
+    }
+    else{
+      group = await getGroup(ob11Message.group_id!);
+      prefix += '给群聊 ';
+    }
+  }
   if (ob11Message.message_type === 'group') {
-    const group = await getGroup(ob11Message.group_id!);
-    prefix = `群[${group?.groupName}(${ob11Message.group_id})] `;
+    prefix += `群[${group?.groupName}(${ob11Message.group_id})] `;
   }
   let msgChain = '';
   if (Array.isArray(ob11Message.message)) {
@@ -51,7 +65,10 @@ export async function logMessage(ob11Message: OB11Message){
   else {
     msgChain = ob11Message.message;
   }
-  const msgString = `${prefix}${ob11Message.sender.nickname}(${ob11Message.sender.user_id}): ${msgChain}`;
+  let msgString = `${prefix}${ob11Message.sender.nickname}(${ob11Message.sender.user_id}): ${msgChain}`;
+  if (isSelfSent){
+    msgString = `${prefix}: ${msgChain}`;
+  }
   log(msgString);
 }
 
