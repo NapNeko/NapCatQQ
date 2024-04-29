@@ -5,6 +5,12 @@ export declare class NTQQMsgApi {
     static getMultiMsg(peer: Peer, rootMsgId: string, parentMsgId: string): Promise<GeneralCallResult & {
         msgList: RawMessage[];
     } | undefined>;
+    static getMsgsByMsgId(peer: Peer, msgIds: string[]): Promise<GeneralCallResult & {
+        msgList: RawMessage[];
+    }>;
+    static getMsgsBySeqAndCount(peer: Peer, seq: string, count: number, desc: boolean, unknownArg: boolean): Promise<GeneralCallResult & {
+        msgList: RawMessage[];
+    }>;
     static activateChat(peer: Peer): Promise<void>;
     static activateChatAndGetHistory(peer: Peer): Promise<void>;
     static setMsgRead(peer: Peer): Promise<GeneralCallResult>;

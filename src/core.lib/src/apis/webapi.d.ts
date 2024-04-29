@@ -58,9 +58,33 @@ export interface WebApiGroupNoticeRet {
     svrt: number;
     ad: number;
 }
+interface GroupEssenceMsg {
+    group_code: string;
+    msg_seq: number;
+    msg_random: number;
+    sender_uin: string;
+    sender_nick: string;
+    sender_time: number;
+    add_digest_uin: string;
+    add_digest_nick: string;
+    add_digest_time: number;
+    msg_content: any[];
+    can_be_removed: true;
+}
+export interface GroupEssenceMsgRet {
+    retcode: number;
+    retmsg: string;
+    data: {
+        msg_list: GroupEssenceMsg[];
+        is_end: boolean;
+        group_role: number;
+        config_page_url: string;
+    };
+}
 export declare class WebApi {
+    static getGroupEssenceMsg(GroupCode: string, page_start: string): Promise<GroupEssenceMsgRet | undefined>;
     static getGroupMembers(GroupCode: string): Promise<WebApiGroupMember[]>;
-    static setGroupNotice(GroupCode: string): Promise<void>;
+    static setGroupNotice(GroupCode: string, Content?: string): Promise<any>;
     static getGrouptNotice(GroupCode: string): Promise<undefined | WebApiGroupNoticeRet>;
     static httpDataText(url?: string, method?: string, data?: string, CookiesValue?: string): Promise<string>;
     static httpDataJson<T>(url?: string, method?: string, data?: string, CookiesValue?: string): Promise<T>;

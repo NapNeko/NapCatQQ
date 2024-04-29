@@ -1,4 +1,8 @@
 import { type Friend, type FriendRequest, type Group, type GroupMember, GroupNotify, type SelfInfo } from './entities';
+export declare const Credentials: {
+    Skey: string;
+    CreatTime: number;
+};
 export declare const selfInfo: SelfInfo;
 export declare const groups: Map<string, Group>;
 export declare function deleteGroup(groupQQ: string): void;
