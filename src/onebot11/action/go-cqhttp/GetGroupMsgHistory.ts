@@ -3,7 +3,7 @@ import { OB11Message, OB11User } from '../../types';
 import { getGroup, groups } from '@/core/data';
 import { ActionName } from '../types';
 import { ChatType } from '@/core/entities';
-import { dbUtil } from '@/common/utils/db';
+import { dbUtil } from '@/core/utils/db';
 import { NTQQMsgApi } from '@/core/apis/msg';
 import { OB11Constructor } from '../../constructor';
 import { logDebug } from '@/common/utils/log';

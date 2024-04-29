@@ -16,7 +16,7 @@ import { httpHeart, ob11HTTPServer } from '@/onebot11/server/http';
 import { ob11WebsocketServer } from '@/onebot11/server/ws/WebsocketServer';
 import { ob11ReverseWebsockets } from '@/onebot11/server/ws/ReverseWebsocket';
 import { friendRequests, getFriend, getGroup, getGroupMember, groupNotifies, selfInfo } from '@/core/data';
-import { dbUtil } from '@/common/utils/db';
+import { dbUtil } from '@/core/utils/db';
 import { BuddyListener, GroupListener, NodeIKernelBuddyListener } from '../core/src/listeners';
 import { OB11FriendRequestEvent } from '@/onebot11/event/request/OB11FriendRequest';
 import { NTQQGroupApi, NTQQUserApi } from '../core/src/apis';
