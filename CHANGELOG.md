@@ -6,7 +6,7 @@
 5. 修复群成员加入时间 上次活跃 活跃等级字段 - 影响 API: /get_group_member_info /get_group_member_list
 6. 修复视频所需的 ffmpeg 路径不正确导致视频封面和时长获取失败 - 影响 Event/API
 ## 新增与调整
-1. 支持获取与设置群公告 - 新增 API： (/_send_group_notice 暂时未完全实现) /_get_group_notice
+1. 支持获取与设置群公告 - 新增 API： /_send_group_notice /_get_group_notice
 2. 支持获取群精华消息 - 新增 API： /get_essence_msg_list
 3. 支持了设置已读群/私聊消息接口 - 新增 API: /mark_private_msg_as_read /mark_group_msg_as_read
 4. 支持了好友添加上报事件 - 新增 Event: AddFriend
