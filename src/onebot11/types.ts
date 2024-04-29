@@ -45,6 +45,7 @@ export interface OB11GroupMember {
   shut_up_timestamp?: number
   // 以下为扩展字段
   is_robot?: boolean
+  qage?: number
 }
 
 export interface OB11Group {
@@ -225,13 +226,13 @@ export interface OB11MessageJson {
   data: { config: { token: string } } & any
 }
 
-export interface OB11MessageDice{
+export interface OB11MessageDice {
   type: OB11MessageDataType.dice,
   data: {
     result: number
   }
 }
-export interface OB11MessageRPS{
+export interface OB11MessageRPS {
   type: OB11MessageDataType.RPS,
   data: {
     result: number
