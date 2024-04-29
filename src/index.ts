@@ -56,7 +56,9 @@ const quickLoginQQ = cmdOptions.qq;
 if (quickLoginQQ) {
   log('正在快速登录 ', quickLoginQQ);
   napCatCore.quickLogin(quickLoginQQ).then(res=>{
-    logDebug('快速登录结果:', res);
+    if (res.loginErrorInfo.errMsg){
+      logError('快速登录错误:', res.loginErrorInfo.errMsg);
+    }
   }).catch((e) => {
     console.error(e);
     napCatCore.qrLogin().then(showQRCode);
