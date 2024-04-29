@@ -15,4 +15,4 @@
 7. 支持获取官方Bot账号范围 - 新增 API: /get_robot_uin_range
 8. 支持设置自身在线状态 - 新增 API： /set_online_status
 9. 支持表情回应api和上报 - 新增 Event/API
-10. 支持获取Cookies 实现更加稳定 - 新增 API: /get_cookies
+10. 支持获取Cookies 实现更加稳定 Skey缓存3600S Pskey每次刷新 - 新增 API: /get_cookies
