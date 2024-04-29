@@ -3,7 +3,8 @@ import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 
 interface PayloadType {
-    group_id: number
+  group_id: number;
+  content: string;
 }
 
 export class SetGroupNotice extends BaseAction<PayloadType, null> {
@@ -11,7 +12,7 @@ export class SetGroupNotice extends BaseAction<PayloadType, null> {
 
   protected async _handle(payload: PayloadType) {
     const group = payload.group_id.toString();
-    WebApi.setGroupNotice(group);
+    WebApi.setGroupNotice(group, payload.content);
     return null;
   }
 }
