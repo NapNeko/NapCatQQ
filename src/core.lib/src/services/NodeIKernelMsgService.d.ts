@@ -76,8 +76,12 @@ export interface NodeIKernelMsgService {
     getMsgsWithMsgTimeAndClientSeqForC2C(...args: unknown[]): unknown;
     getMsgsWithStatus(...args: unknown[]): unknown;
     getMsgsBySeqRange(...args: unknown[]): unknown;
-    getMsgsBySeqAndCount(...args: unknown[]): unknown;
-    getMsgsByMsgId(...args: unknown[]): unknown;
+    getMsgsBySeqAndCount(peer: Peer, seq: string, count: number, desc: boolean, unknownArg: boolean): Promise<GeneralCallResult & {
+        msgList: RawMessage[];
+    }>;
+    getMsgsByMsgId(peer: Peer, ids: string[]): Promise<GeneralCallResult & {
+        msgList: RawMessage[];
+    }>;
     getRecallMsgsByMsgId(...args: unknown[]): unknown;
     getMsgsBySeqList(...args: unknown[]): unknown;
     getSingleMsg(...args: unknown[]): unknown;
