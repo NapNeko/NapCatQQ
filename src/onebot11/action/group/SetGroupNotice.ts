@@ -7,12 +7,11 @@ interface PayloadType {
   content: string;
 }
 
-export class SetGroupNotice extends BaseAction<PayloadType, null> {
+export class SetGroupNotice extends BaseAction<PayloadType, any> {
   actionName = ActionName.GoCQHTTP_SetGroupNotice;
 
   protected async _handle(payload: PayloadType) {
     const group = payload.group_id.toString();
-    WebApi.setGroupNotice(group, payload.content);
-    return null;
+    return await WebApi.setGroupNotice(group, payload.content);
   }
 }
