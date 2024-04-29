@@ -22,7 +22,7 @@ import BaseAction from '../BaseAction';
 import { ActionName, BaseCheckResult } from '../types';
 import * as fs from 'node:fs';
 import { decodeCQCode } from '../../cqcode';
-import { dbUtil } from '@/common/utils/db';
+import { dbUtil } from '@/core/utils/db';
 import { log, logDebug, logError } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';
 import { uri2local } from '@/common/utils/file';

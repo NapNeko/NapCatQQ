@@ -7,7 +7,7 @@ import {
   ChatCacheListItemBasic,
   CacheFileType
 } from '@/core/entities';
-import { dbUtil } from '../../../common/utils/db';
+import { dbUtil } from '@/core/utils/db';
 import { NTQQFileApi, NTQQFileCacheApi } from '@/core/apis/file';
 
 export default class CleanCache extends BaseAction<void, void> {

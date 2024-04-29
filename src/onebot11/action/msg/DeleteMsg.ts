@@ -1,7 +1,7 @@
 import { NTQQMsgApi } from '@/core/apis';
 import { ActionName } from '../types';
 import BaseAction from '../BaseAction';
-import { dbUtil } from '@/common/utils/db';
+import { dbUtil } from '@/core/utils/db';
 import { napCatCore } from '@/core';
 
 interface Payload {

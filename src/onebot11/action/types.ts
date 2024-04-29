@@ -19,7 +19,7 @@ export enum ActionName {
     SetQQAvatar = 'set_qq_avatar',
     GetConfig = 'get_config',
     SetConfig = 'set_config',
-    Debug = 'llonebot_debug',
+    Debug = 'debug',
     GetFile = 'get_file',
     // onebot 11
     SendLike = 'send_like',

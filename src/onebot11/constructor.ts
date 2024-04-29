@@ -26,7 +26,7 @@ import {
 } from '../core/src/entities';
 import { EventType } from './event/OB11BaseEvent';
 import { encodeCQCode } from './cqcode';
-import { dbUtil } from '@/common/utils/db';
+import { dbUtil } from '@/core/utils/db';
 import { OB11GroupIncreaseEvent } from './event/notice/OB11GroupIncreaseEvent';
 import { OB11GroupBanEvent } from './event/notice/OB11GroupBanEvent';
 import { OB11GroupUploadNoticeEvent } from './event/notice/OB11GroupUploadNoticeEvent';

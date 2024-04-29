@@ -26,7 +26,7 @@ export default class Debug extends BaseAction<Payload, any> {
       // NTQQFileCacheApi,
       NTQQWindowApi];
     for (const ntqqApiClass of ntqqApi) {
-      logDebug('ntqqApiClass', ntqqApiClass);
+      // logDebug('ntqqApiClass', ntqqApiClass);
       const method = (<any>ntqqApiClass)[payload.method];
       if (method) {
         const result = method(...payload.args);
