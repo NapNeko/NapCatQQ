@@ -44,8 +44,9 @@ import { deleteGroup, getFriend, getGroupMember, groupMembers, selfInfo, tempGro
 import { NTQQFileApi, NTQQGroupApi, NTQQUserApi } from '../core/src/apis';
 import http from 'http';
 import { OB11GroupMsgEmojiLikeEvent } from '@/onebot11/event/notice/OB11MsgEmojiLikeEvent';
-import { ImageQuene } from '@/common/utils/asyncQuene';
+import { AsyncQueue } from '@/common/utils/AsyncQueue';
 
+const imageQueue = new AsyncQueue();
 
 export class OB11Constructor {
   static async message(msg: RawMessage): Promise<OB11Message> {
@@ -144,18 +145,18 @@ export class OB11Constructor {
         message_data['data']['file'] = element.picElement.fileName;
         // message_data["data"]["path"] = element.picElement.sourcePath
         // let currentRKey = "CAQSKAB6JWENi5LMk0kc62l8Pm3Jn1dsLZHyRLAnNmHGoZ3y_gDZPqZt-64"
-        ImageQuene.addTask(NTQQFileApi.getImageUrl, [msg], (result: string) => {
-          message_data['data']['url'] = result;
+        await new Promise<void>((resolve, reject) => {
+          const task = new Promise<void>((taskResolve, taskReject) => {
+            log('开始获取图片url');
+            NTQQFileApi.getImageUrl(msg).then((url) => {
+              message_data['data']['url'] = url;
+              log('获取图片url结果:', url);
+              taskResolve();
+              resolve();
+            });
+          });
+          imageQueue.addTask(task);
         });
-        await ImageQuene.runQueue();
-        // 缓解获取失败
-        try {
-          if (!message_data['data']['url']) {
-            message_data['data']['url'] = "";
-          }
-        } catch (e) {
-          message_data['data']['url'] = "";
-        }
 
         // message_data["data"]["file_id"] = element.picElement.fileUuid
         message_data['data']['file_size'] = element.picElement.fileSize;

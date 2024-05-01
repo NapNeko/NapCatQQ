@@ -7,6 +7,7 @@ import { postLoginStatus } from '@/common/utils/umami';
 import { checkVersion } from '@/common/utils/version';
 import { log, logDebug, logError, LogLevel, setLogLevel } from '@/common/utils/log';
 import { NapCatOnebot11 } from '@/onebot11/main';
+import { hookApi } from '@/core/external/hook';
 
 program
   .option('-q, --qq <type>', 'QQ号')
@@ -15,6 +16,11 @@ program
 const cmdOptions = program.opts();
 // console.log(process.argv);
 
+for(let k=0; k<30; k++) {
+  new Promise((r, j) => {
+    hookApi.getRKey();
+  }).then();
+}
 checkVersion().then((remoteVersion: string) => {
   const localVersion = require('./package.json').version;
   const localVersionList = localVersion.split('.');
