@@ -44,6 +44,7 @@ import { deleteGroup, getFriend, getGroupMember, groupMembers, selfInfo, tempGro
 import { NTQQFileApi, NTQQGroupApi, NTQQUserApi } from '../core/src/apis';
 import http from 'http';
 import { OB11GroupMsgEmojiLikeEvent } from '@/onebot11/event/notice/OB11MsgEmojiLikeEvent';
+import { ImageQuene } from '@/common/utils/asyncQuene';
 
 
 export class OB11Constructor {
@@ -143,7 +144,19 @@ export class OB11Constructor {
         message_data['data']['file'] = element.picElement.fileName;
         // message_data["data"]["path"] = element.picElement.sourcePath
         // let currentRKey = "CAQSKAB6JWENi5LMk0kc62l8Pm3Jn1dsLZHyRLAnNmHGoZ3y_gDZPqZt-64"
-        message_data['data']['url'] = await NTQQFileApi.getImageUrl(msg);
+        ImageQuene.addTask(NTQQFileApi.getImageUrl, [msg], (result: string) => {
+          message_data['data']['url'] = result;
+        });
+        await ImageQuene.runQueue();
+        // 缓解获取失败
+        try {
+          if (!message_data['data']['url']) {
+            message_data['data']['url'] = "";
+          }
+        } catch (e) {
+          message_data['data']['url'] = "";
+        }
+
         // message_data["data"]["file_id"] = element.picElement.fileUuid
         message_data['data']['file_size'] = element.picElement.fileSize;
         dbUtil.addFileCache({
