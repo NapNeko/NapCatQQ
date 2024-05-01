@@ -3,8 +3,8 @@ import path from 'node:path';
 import fs from 'fs';
 
 export function getModuleWithArchName(moduleName: string) {
-  const systemPlatform = os.platform;
-  const cpuArch = os.arch;
+  const systemPlatform = os.platform();
+  const cpuArch = os.arch();
   return `${moduleName}-${systemPlatform}-${cpuArch}.node`;
 }
 
