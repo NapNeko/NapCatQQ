@@ -8,7 +8,7 @@ import { Group } from '@/core/entities';
 import { log } from '@/common/utils/log';
 
 interface Payload {
-  no_cache: boolean;
+  no_cache: boolean | string;
 }
 
 class GetGroupList extends BaseAction<Payload, OB11Group[]> {
@@ -16,7 +16,7 @@ class GetGroupList extends BaseAction<Payload, OB11Group[]> {
 
   protected async _handle(payload: Payload) {
     let groupList: Group[] = Array.from(groups.values());
-    if (groupList.length === 0 || payload?.no_cache === true) {
+    if (groupList.length === 0 || payload?.no_cache === true || payload?.no_cache === 'true') {
       groupList = await NTQQGroupApi.getGroups(true);
       // log('get groups', groups);
     }
