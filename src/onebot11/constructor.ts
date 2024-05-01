@@ -42,11 +42,8 @@ import { OB11GroupDecreaseEvent } from './event/notice/OB11GroupDecreaseEvent';
 import { ob11Config } from '@/onebot11/config';
 import { deleteGroup, getFriend, getGroupMember, groupMembers, selfInfo, tempGroupCodeMap } from '@/core/data';
 import { NTQQFileApi, NTQQGroupApi, NTQQUserApi } from '../core/src/apis';
-import http from 'http';
 import { OB11GroupMsgEmojiLikeEvent } from '@/onebot11/event/notice/OB11MsgEmojiLikeEvent';
-import { AsyncQueue } from '@/common/utils/AsyncQueue';
 
-const imageQueue = new AsyncQueue();
 
 export class OB11Constructor {
   static async message(msg: RawMessage): Promise<OB11Message> {
@@ -145,19 +142,12 @@ export class OB11Constructor {
         message_data['data']['file'] = element.picElement.fileName;
         // message_data["data"]["path"] = element.picElement.sourcePath
         // let currentRKey = "CAQSKAB6JWENi5LMk0kc62l8Pm3Jn1dsLZHyRLAnNmHGoZ3y_gDZPqZt-64"
-        await new Promise<void>((resolve, reject) => {
-          const task = new Promise<void>((taskResolve, taskReject) => {
-            log('开始获取图片url');
-            NTQQFileApi.getImageUrl(msg).then((url) => {
-              message_data['data']['url'] = url;
-              log('获取图片url结果:', url);
-              taskResolve();
-              resolve();
-            });
-          });
-          imageQueue.addTask(task);
-        });
 
+        try {
+          message_data['data']['url'] = await NTQQFileApi.getImageUrl(msg);
+        }catch (e: any) {
+          logError('获取图片url失败', e.stack);
+        }
         // message_data["data"]["file_id"] = element.picElement.fileUuid
         message_data['data']['file_size'] = element.picElement.fileSize;
         dbUtil.addFileCache({
