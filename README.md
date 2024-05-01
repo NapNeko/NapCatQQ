@@ -12,6 +12,8 @@ NapCatQQ 是基于NTQQ本体实现一套 Bot 框架。
 
 可前往 Release 页面下载最新版本
 
+如果你想体验最新的功能，可以到 Actions 下载开发版本，但不保证其稳定性
+
 ### Windows 启动
 
 运行`powershell ./napcat.ps1`, 或者 `napcat.bat`，如果出现乱码，可以尝试运行`napcat-utf8.ps1` 或 `napcat-utf8.bat`
