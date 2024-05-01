@@ -1,11 +1,12 @@
 import { FriendRequestNotify, User } from '@/core/entities';
+export type OnBuddyChangeParams = {
+    categoryId: number;
+    categroyName: string;
+    categroyMbCount: number;
+    buddyList: User[];
+}[];
 interface IBuddyListener {
-    onBuddyListChange(arg: {
-        categoryId: number;
-        categroyName: string;
-        categroyMbCount: number;
-        buddyList: User[];
-    }[]): void;
+    onBuddyListChange(arg: OnBuddyChangeParams): void;
     onBuddyInfoChange(arg: unknown): void;
     onBuddyDetailInfoChange(arg: unknown): void;
     onNickUpdated(arg: unknown): void;
@@ -33,12 +34,7 @@ export declare class BuddyListener implements IBuddyListener {
     onBlockChanged(arg: unknown): void;
     onBuddyDetailInfoChange(arg: unknown): void;
     onBuddyInfoChange(arg: unknown): void;
-    onBuddyListChange(arg: {
-        categoryId: number;
-        categroyName: string;
-        categroyMbCount: number;
-        buddyList: User[];
-    }[]): void;
+    onBuddyListChange(arg: OnBuddyChangeParams): void;
     onBuddyRemarkUpdated(arg: unknown): void;
     onBuddyReqChange(arg: FriendRequestNotify): void;
     onBuddyReqUnreadCntChange(arg: unknown): void;

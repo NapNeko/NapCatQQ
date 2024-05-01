@@ -42,5 +42,5 @@ export interface WrapperSessionInitConfig {
     };
     'deviceConfig': '{"appearance":{"isSplitViewMode":true},"msg":{}}';
 }
-export declare let sessionConfig: WrapperSessionInitConfig | null;
+export declare const sessionConfig: WrapperSessionInitConfig | any;
 export declare function genSessionConfig(selfUin: string, selfUid: string, account_path: string): WrapperSessionInitConfig;
