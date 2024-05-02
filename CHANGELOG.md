@@ -1,7 +1,7 @@
 ## 修复与优化
 1. 修复图片URL,支持 Win/Linux X64 获取Rkey - 新增 Module: Moehoo
 2. 重构了商城表情URL拼接 - 重构 API/Event
-3. 重构了Core日志与服务调用部分,提供重复登录提示 - 重构 SYS: Log
+3. 重构了Core服务调用部分 - 重构 SYS: Core
 4. 适配最新版 Windows 9.9.9-23361 / Linux 3.2.7-23361 提升了兼容性 - 修复 SYS: Listener Proxy
 5. 修复群成员加入时间 上次活跃 活跃等级字段 - 影响 API: /get_group_member_info /get_group_member_list
 6. 修复视频所需的 ffmpeg 路径不正确导致视频封面和时长获取失败 - 影响 Event/API
@@ -17,3 +17,4 @@
 8. 支持设置自身在线状态 - 新增 API： /set_online_status
 9. 支持表情回应api和上报 - 新增 Event/API
 10. 支持获取Cookies 实现更加稳定 且支持Skey缓存3600S Pskey每次刷新 - 新增 API: /get_cookies
+11. 支持 服务端踢下线 / 其它设备上线 / 重复登录 日志
