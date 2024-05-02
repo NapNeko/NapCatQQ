@@ -12,13 +12,13 @@ interface PayloadType {
 }
 
 export class GetGroupEssence extends BaseAction<PayloadType, GroupEssenceMsgRet> {
-    actionName = ActionName.GoCQHTTP_GetEssenceMsg;
+  actionName = ActionName.GoCQHTTP_GetEssenceMsg;
 
-    protected async _handle(payload: PayloadType) {
-        let ret = await WebApi.getGroupEssenceMsg(payload.group_id.toString(), payload.pages.toString());
-        if (!ret) {
-            throw new Error('获取失败');
-        }
-        return ret;
+  protected async _handle(payload: PayloadType) {
+    const ret = await WebApi.getGroupEssenceMsg(payload.group_id.toString(), payload.pages.toString());
+    if (!ret) {
+      throw new Error('获取失败');
     }
+    return ret;
+  }
 }
