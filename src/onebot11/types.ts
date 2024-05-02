@@ -1,5 +1,6 @@
 import { PicSubType, RawMessage } from '@/core';
 import { EventType } from './event/OB11BaseEvent';
+import { CustomMusicSignPostData, IdMusicSignPostData } from '@/core/apis/sign';
 
 export interface OB11User {
   user_id: number;
@@ -124,10 +125,12 @@ export enum OB11MessageDataType {
 }
 
 export interface OB11MessageMFace {
-  type: OB11MessageDataType.mface,
+  type: OB11MessageDataType.mface
   data: {
-    text: string,
-    url: string
+    emoji_package_id: number
+    emoji_id: string
+    key: string
+    summary: string
   }
 }
 
@@ -203,22 +206,11 @@ export interface OB11MessageNode {
 
 export interface OB11MessageIdMusic {
   type: OB11MessageDataType.music
-  data: {
-    type: 'qq' | '163',
-    id: string | number,
-  }
+  data: IdMusicSignPostData
 }
 export interface OB11MessageCustomMusic {
   type: OB11MessageDataType.music
-  data: {
-    type: 'custom'
-    url: string,
-    audio: string,
-    title: string,
-    content?: string,
-    image?: string,
-    singer?: string,
-  }
+  data: CustomMusicSignPostData
 }
 
 export interface OB11MessageJson {

@@ -1,4 +1,4 @@
-import { getGroup } from '@/core/data';
+import { getGroup, groupMembers } from '@/core/data';
 import { OB11GroupMember } from '../../types';
 import { OB11Constructor } from '../../constructor';
 import BaseAction from '../BaseAction';
@@ -8,7 +8,8 @@ import { WebApi } from '@/core/apis/webapi';
 import { logDebug } from '@/common/utils/log';
 
 export interface PayloadType {
-  group_id: number
+  group_id: number,
+  no_cache?: boolean | string
 }
 
 
@@ -23,10 +24,15 @@ class GetGroupMemberList extends BaseAction<PayloadType, OB11GroupMember[]> {
     if (!group) {
       throw (`群${payload.group_id}不存在`);
     }
-    const GroupMember = OB11Constructor.groupMembers(group);
+    if (payload.no_cache || payload.no_cache === 'true') {
+      const _groupMembers = await NTQQGroupApi.getGroupMembers(payload.group_id.toString());
+      groupMembers.set(group.groupCode, _groupMembers);
+    }
+    const _groupMembers = OB11Constructor.groupMembers(group);
+
     // 方便索引处理
-    for (let i = 0, len = GroupMember.length; i < len; i++) {
-      MemberMap.set(GroupMember[i].user_id, GroupMember[i]);
+    for (let i = 0, len = _groupMembers.length; i < len; i++) {
+      MemberMap.set(_groupMembers[i].user_id, _groupMembers[i]);
     }
     // 合并数据
     for (let i = 0, len = WebGroupMember.length; i < len; i++) {
