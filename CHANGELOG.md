@@ -17,4 +17,4 @@
 8. 支持设置自身在线状态 - 新增 API： /set_online_status
 9. 支持表情回应api和上报 - 新增 Event/API
 10. 支持获取Cookies 实现更加稳定 且支持Skey缓存3600S Pskey每次刷新 - 新增 API: /get_cookies
-11. 支持 服务端踢下线 / 其它设备上线 / 重复登录 日志
+11. 支持 服务端踢下线 / 其它设备上线 / 重复登录 日志 - 新增 Sys: Log
