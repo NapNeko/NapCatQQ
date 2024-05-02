@@ -1,6 +1,7 @@
 import { PicSubType, RawMessage } from '@/core';
 import { EventType } from './event/OB11BaseEvent';
 import { CustomMusicSignPostData, IdMusicSignPostData } from '@/core/apis/sign';
+import { stat } from '@/core/data';
 
 export interface OB11User {
   user_id: number;
@@ -264,6 +265,7 @@ export interface OB11Version {
 
 export interface OB11Status {
   online: boolean | null,
-  good: boolean
+  good: boolean,
+  stat: typeof stat
 }
 
