@@ -7,7 +7,6 @@ import {
   NTQQUserApi,
   NTQQFileApi,
   // NTQQFileCacheApi,
-  NTQQWindowApi,
 } from '@/core';
 import { ActionName } from '../types';
 import { log, logDebug } from '@/common/utils/log';
@@ -24,7 +23,7 @@ export default class Debug extends BaseAction<Payload, any> {
     logDebug('debug call ntqq api', payload);
     const ntqqApi = [NTQQMsgApi, NTQQFriendApi, NTQQGroupApi, NTQQUserApi, NTQQFileApi,
       // NTQQFileCacheApi,
-      NTQQWindowApi];
+    ];
     for (const ntqqApiClass of ntqqApi) {
       // logDebug('ntqqApiClass', ntqqApiClass);
       const method = (<any>ntqqApiClass)[payload.method];
