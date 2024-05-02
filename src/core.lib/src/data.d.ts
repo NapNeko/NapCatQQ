@@ -22,3 +22,13 @@ export declare function getGroupMember(groupQQ: string | number, memberUinOrUid:
 export declare const uid2UinMap: Record<string, string>;
 export declare function getUidByUin(uin: string): string | undefined;
 export declare const tempGroupCodeMap: Record<string, string>;
+export declare const stat: {
+    packet_received: number;
+    packet_sent: number;
+    message_received: number;
+    message_sent: number;
+    last_message_time: number;
+    disconnect_times: number;
+    lost_times: number;
+    packet_lost: number;
+};
