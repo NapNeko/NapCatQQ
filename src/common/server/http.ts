@@ -7,7 +7,7 @@ import { ob11Config } from '@/onebot11/config';
 type RegisterHandler = (res: Response, payload: any) => Promise<any>
 
 export abstract class HttpServerBase {
-  name: string = 'LLOneBot';
+  name: string = 'NapCatQQ';
   private readonly expressAPP: Express;
   private server: http.Server | null = null;
 
