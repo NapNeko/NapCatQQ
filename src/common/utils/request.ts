@@ -1,5 +1,5 @@
 const https = require('node:https');
-export async function HttpGetWithCookies(url: string): Promise<Map<string, string>> {
+export async function HttpGetCookies(url: string): Promise<Map<string, string>> {
   return new Promise((resolve, reject) => {
     const result: Map<string, string> = new Map<string, string>();
     const req = https.get(url, (res: any) => {
