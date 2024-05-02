@@ -7,14 +7,14 @@ interface PayloadType {
 }
 
 export class GetGroupNotice extends BaseAction<PayloadType, WebApiGroupNoticeRet> {
-    actionName = ActionName.GoCQHTTP_GetGroupNotice;
+  actionName = ActionName.GoCQHTTP_GetGroupNotice;
 
-    protected async _handle(payload: PayloadType) {
-        const group = payload.group_id.toString();
-        let ret = await WebApi.getGrouptNotice(group);
-        if (!ret) {
-            throw new Error('获取公告失败');
-        }
-        return ret;
+  protected async _handle(payload: PayloadType) {
+    const group = payload.group_id.toString();
+    const ret = await WebApi.getGrouptNotice(group);
+    if (!ret) {
+      throw new Error('获取公告失败');
     }
+    return ret;
+  }
 }
