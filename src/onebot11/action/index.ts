@@ -51,6 +51,7 @@ import { GetRobotUinRange } from './extends/GetRobotUinRange';
 import { SetOnlineStatus } from './extends/SetOnlineStatus';
 import { GetGroupNotice } from './group/GetGroupNotice';
 import { GetGroupEssence } from './group/GetGroupEssence';
+import { ForwardFriendSingleMsg, ForwardGroupSingleMsg } from '@/onebot11/action/msg/ForwardSingleMsg';
 
 export const actionHandlers = [
   new GetFile(),
@@ -58,6 +59,8 @@ export const actionHandlers = [
   // new GetConfigAction(),
   // new SetConfigAction(),
   // new GetGroupAddRequest(),
+  new ForwardFriendSingleMsg(),
+  new ForwardGroupSingleMsg(),
   new MarkGroupMsgAsRead(),
   new MarkPrivateMsgAsRead(),
   new SetQQAvatar(),

@@ -21,6 +21,8 @@ export enum ActionName {
     SetConfig = 'set_config',
     Debug = 'debug',
     GetFile = 'get_file',
+    ForwardFriendSingleMsg = 'forward_friend_single_msg',
+    ForwardGroupSingleMsg = 'forward_group_single_msg',
     // onebot 11
     SendLike = 'send_like',
     GetLoginInfo = 'get_login_info',
