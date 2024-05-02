@@ -40,7 +40,7 @@ export interface NodeIKernelMsgService {
     resendMsg(...args: unknown[]): unknown;
     recallMsg(...args: unknown[]): unknown;
     reeditRecallMsg(...args: unknown[]): unknown;
-    forwardMsg(...args: unknown[]): unknown;
+    forwardMsg(...args: unknown[]): Promise<GeneralCallResult>;
     forwardMsgWithComment(...args: unknown[]): unknown;
     forwardSubMsgWithComment(...args: unknown[]): unknown;
     forwardRichMsgInVist(...args: unknown[]): unknown;

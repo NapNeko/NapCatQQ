@@ -20,6 +20,6 @@ export declare class NTQQMsgApi {
     static fetchRecentContact(): Promise<void>;
     static recallMsg(peer: Peer, msgIds: string[]): Promise<void>;
     static sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete?: boolean, timeout?: number): Promise<RawMessage>;
-    static forwardMsg(srcPeer: Peer, destPeer: Peer, msgIds: string[]): Promise<void>;
+    static forwardMsg(srcPeer: Peer, destPeer: Peer, msgIds: string[]): Promise<GeneralCallResult>;
     static multiForwardMsg(srcPeer: Peer, destPeer: Peer, msgIds: string[]): Promise<RawMessage>;
 }

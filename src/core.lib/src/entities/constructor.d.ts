@@ -1,4 +1,5 @@
-import { AtType, SendArkElement, SendFaceElement, SendFileElement, SendMarkdownElement, SendPicElement, SendPttElement, SendReplyElement, SendTextElement, SendVideoElement } from './index';
+import { AtType, SendArkElement, SendFaceElement, SendFileElement, SendMarkdownElement, SendMarketFaceElement, SendPicElement, SendPttElement, SendReplyElement, SendTextElement, SendVideoElement } from './index';
+export declare const mFaceCache: Map<string, string>;
 export declare class SendMsgElementConstructor {
     static text(content: string): SendTextElement;
     static at(atUid: string, atNtUid: string, atType: AtType, atName: string): SendTextElement;
@@ -8,6 +9,7 @@ export declare class SendMsgElementConstructor {
     static video(filePath: string, fileName?: string, diyThumbPath?: string): Promise<SendVideoElement>;
     static ptt(pttPath: string): Promise<SendPttElement>;
     static face(faceId: number): SendFaceElement;
+    static mface(emojiPackageId: number, emojiId: string, key: string, faceName: string): SendMarketFaceElement;
     static dice(resultId: number | null): SendFaceElement;
     static rps(resultId: number | null): SendFaceElement;
     static ark(data: any): SendArkElement;

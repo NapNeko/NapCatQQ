@@ -13,6 +13,7 @@ export declare enum ElementType {
     FACE = 6,
     REPLY = 7,
     ARK = 10,
+    MFACE = 11,
     MARKDOWN = 14
 }
 export interface SendTextElement {
@@ -87,6 +88,10 @@ export interface SendFaceElement {
     elementId: '';
     faceElement: FaceElement;
 }
+export interface SendMarketFaceElement {
+    elementType: ElementType.MFACE;
+    marketFaceElement: MarketFaceElement;
+}
 export interface FileElement {
     'fileMd5'?: '';
     'fileName': string;
@@ -123,7 +128,7 @@ export interface SendMarkdownElement {
     elementId: '';
     markdownElement: MarkdownElement;
 }
-export type SendMessageElement = SendTextElement | SendPttElement | SendPicElement | SendReplyElement | SendFaceElement | SendFileElement | SendVideoElement | SendArkElement | SendMarkdownElement;
+export type SendMessageElement = SendTextElement | SendPttElement | SendPicElement | SendReplyElement | SendFaceElement | SendMarketFaceElement | SendFileElement | SendVideoElement | SendArkElement | SendMarkdownElement;
 export declare enum AtType {
     notAt = 0,
     atAll = 1,
@@ -221,42 +226,10 @@ export interface FaceElement {
     randomType?: number;
 }
 export interface MarketFaceElement {
-    'itemType': 6;
-    'faceInfo': 1;
-    'emojiPackageId': 203875;
-    'subType': 3;
-    'mediaType': 0;
-    'imageWidth': 200;
-    'imageHeight': 200;
-    'faceName': string;
-    'emojiId': '094d53bd1c9ac5d35d04b08e8a6c992c';
-    'key': 'a8b1dd0aebc8d910';
-    'param': null;
-    'mobileParam': null;
-    'sourceType': null;
-    'startTime': null;
-    'endTime': null;
-    'emojiType': 1;
-    'hasIpProduct': null;
-    'voiceItemHeightArr': null;
-    'sourceName': null;
-    'sourceJumpUrl': null;
-    'sourceTypeName': null;
-    'backColor': null;
-    'volumeColor': null;
-    'staticFacePath': 'E:\\SystemDocuments\\QQ\\721011692\\nt_qq\\nt_data\\Emoji\\marketface\\203875\\094d53bd1c9ac5d35d04b08e8a6c992c_aio.png';
-    'dynamicFacePath': 'E:\\SystemDocuments\\QQ\\721011692\\nt_qq\\nt_data\\Emoji\\marketface\\203875\\094d53bd1c9ac5d35d04b08e8a6c992c';
-    'supportSize': [
-        {
-            'width': 300;
-            'height': 300;
-        },
-        {
-            'width': 200;
-            'height': 200;
-        }
-    ];
-    'apngSupportSize': null;
+    emojiPackageId: number;
+    faceName: string;
+    emojiId: string;
+    key: string;
 }
 export interface VideoElement {
     'filePath': string;

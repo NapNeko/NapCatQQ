@@ -14,7 +14,7 @@ export declare class NTQQUserApi {
     static getSelfInfo(): Promise<void>;
     static getUserInfo(uid: string): Promise<void>;
     static getUserDetailInfo(uid: string): Promise<User>;
-    static getPSkey(domainList: string[]): Promise<Object>;
+    static getPSkey(domainList: string[]): Promise<any>;
     static getRobotUinRange(): Promise<Array<any>>;
     static getSkey(): Promise<string | undefined>;
 }
