@@ -10,29 +10,12 @@ NapCatQQ 是基于NTQQ本体实现一套 Bot 框架。
 
 ## 使用教程
 
-可前往 Release 页面下载最新版本，注意 v1.1.1 只能在 QQ 22741版本或以下版本使用，否则有可能出现崩溃情况。
+可前往 Release 页面下载最新版本
 
 如果你想体验最新的功能，可以到 [Actions](https://github.com/NapNeko/NapCatQQ/actions/workflows/build.yml) 下载开发版本，但不保证其稳定性
 
-### Windows 启动
-
-运行`powershell ./napcat.ps1`, 或者 `napcat.bat`，如果出现乱码，可以尝试运行`napcat-utf8.ps1` 或 `napcat-utf8.bat`
-
-*如果出现 powershell 运行不了，可以尝试 `powershell.exe -ExecutionPolicy Bypass -File ".\napcat.ps1"`*
-
-**推荐使用 bat 运行，powershell 会自身占用 20MB 左右的内存**
-
-### Linux 启动
-
-手动运行：运行`napcat.sh`
-
-容器运行：使用[NapCatDocker](https://github.com/NapNeko/NapCat-Docker)
-
-### 无需扫码快速登录
-
-前提是已经登录过了，可以直接加上`-q <qq号>`参数，例如 `napcat.sh -q 1234567890`
-
 ### 详细教程
+**请注意QQ版本与NapCat版本必须对应，请前往官方文档 更新日志 查看NapCat版本对应的QQ版本**
 
 **首次使用** 请务必前往 [官方文档](https://napneko.github.io/) 查看使用文档与教程
 
