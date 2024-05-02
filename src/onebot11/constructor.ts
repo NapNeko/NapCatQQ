@@ -17,7 +17,7 @@ import {
   GrayTipElementSubType,
   Group,
   GroupMember,
-  IMAGE_HTTP_HOST, IMAGE_HTTP_HOST_NT,
+  IMAGE_HTTP_HOST, IMAGE_HTTP_HOST_NT, mFaceCache,
   RawMessage,
   SelfInfo,
   Sex,
@@ -232,7 +232,7 @@ export class OB11Constructor {
       }
       else if (element.marketFaceElement) {
         message_data['type'] = OB11MessageDataType.mface;
-        message_data['data']['text'] = element.marketFaceElement.faceName;
+        message_data['data']['summary'] = element.marketFaceElement.faceName;
         const md5 = element.marketFaceElement.emojiId;
         // 取md5的前两位
         const dir = md5.substring(0, 2);
@@ -240,6 +240,10 @@ export class OB11Constructor {
         // const url = `https://p.qpic.cn/CDN_STATIC/0/data/imgcache/htdocs/club/item/parcel/item/${dir}/${md5}/300x300.gif?max_age=31536000`;
         const url = `https://gxh.vip.qq.com/club/item/parcel/item/${dir}/${md5}/raw300.gif`;
         message_data['data']['url'] = url;
+        message_data['data']['emoji_id'] = element.marketFaceElement.emojiId;
+        message_data['data']['emoji_package_id'] = String(element.marketFaceElement.emojiPackageId);
+        message_data['data']['key'] = element.marketFaceElement.key;
+        mFaceCache.set(md5, element.marketFaceElement.faceName);
       }
       else if (element.markdownElement) {
         message_data['type'] = OB11MessageDataType.markdown;

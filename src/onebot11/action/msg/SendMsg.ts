@@ -12,7 +12,7 @@ import {
 import {
   OB11MessageCustomMusic,
   OB11MessageData,
-  OB11MessageDataType,
+  OB11MessageDataType, OB11MessageIdMusic,
   OB11MessageMixType,
   OB11MessageNode,
   OB11PostSendMsg
@@ -27,10 +27,10 @@ import { log, logDebug, logError } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';
 import { uri2local } from '@/common/utils/file';
 import { getFriend, getGroup, getGroupMember, getUidByUin, selfInfo } from '@/core/data';
-import { NTQQMsgApi } from '../../../core/src/apis';
-import { NTQQFileApi } from '../../../core/src/apis';
+import { NTQQMsgApi } from '@/core/apis';
+import { NTQQFileApi } from '@/core/apis';
 import { ob11Config } from '@/onebot11/config';
-import { CustomMusicSignPostData, MusicSign } from '@/core/apis/sign';
+import { CustomMusicSignPostData, IdMusicSignPostData, MusicSign } from '@/core/apis/sign';
 
 const ALLOW_SEND_TEMP_MSG = false;
 
@@ -46,23 +46,29 @@ function checkSendMessage(sendMsgList: OB11MessageData[]) {
       const data = msg['data'];
       if (type === 'text' && !data['text']) {
         return 400;
-      } else if (['image', 'voice', 'record'].includes(type)) {
+      }
+      else if (['image', 'voice', 'record'].includes(type)) {
         if (!data['file']) {
           return 400;
-        } else {
+        }
+        else {
           if (checkUri(data['file'])) {
             return 200;
-          } else {
+          }
+          else {
             return 400;
           }
         }
 
-      } else if (type === 'at' && !data['qq']) {
-        return 400;
-      } else if (type === 'reply' && !data['id']) {
+      }
+      else if (type === 'at' && !data['qq']) {
         return 400;
       }
-    } else {
+      else if (type === 'reply' && !data['id']) {
+        return 400;
+      }
+    }
+    else {
       return 400;
     }
   }
@@ -82,16 +88,18 @@ export function convertMessage2List(message: OB11MessageMixType, autoEscape = fa
           text: message
         }
       }];
-    } else {
+    }
+    else {
       message = decodeCQCode(message.toString());
     }
-  } else if (!Array.isArray(message)) {
+  }
+  else if (!Array.isArray(message)) {
     message = [message];
   }
   return message;
 }
 
-async function genCustomMusicElement(url: string, audio: string, title: string, image: string | undefined, singer: string | undefined): Promise<SendArkElement | undefined> {
+async function genMusicElement(postData: IdMusicSignPostData | CustomMusicSignPostData): Promise<SendArkElement | undefined> {
   // const musicJson = {
   //   app: 'com.tencent.structmsg',
   //   config: {
@@ -123,34 +131,18 @@ async function genCustomMusicElement(url: string, audio: string, title: string, 
   //   ver: '0.0.0.1',
   //   view: 'news'
   // };
-  try{
-    const postData: CustomMusicSignPostData = {
-      type: 'custom',
-      url,
-      audio,
-      title,
-      image,
-      singer
-    };
-    const musicJson = await new MusicSign(ob11Config.musicSignUrl).sign(postData);
-    return SendMsgElementConstructor.ark(musicJson);
-  }catch (e) {
-    logError('生成音乐消息失败', e);
+  const signUrl = ob11Config.musicSignUrl;
+  if (!signUrl) {
+    throw Error('音乐消息签名地址未配置');
   }
-}
-
-async function genIdMusicElement(type: 'qq' | '163', id: string | number): Promise<SendArkElement | undefined> {
   try {
-    const postData = {
-      type,
-      id
-    };
-    const musicJson = await new MusicSign(ob11Config.musicSignUrl).sign(postData);
+    const musicJson = await new MusicSign(signUrl).sign(postData);
     return SendMsgElementConstructor.ark(musicJson);
   } catch (e) {
     logError('生成音乐消息失败', e);
   }
 }
+
 
 export async function createSendElements(messageData: OB11MessageData[], group: Group | undefined, ignoreTypes: OB11MessageDataType[] = []) {
   const sendElements: SendMessageElement[] = [];
@@ -176,7 +168,8 @@ export async function createSendElements(messageData: OB11MessageData[], group: 
         atQQ = atQQ.toString();
         if (atQQ === 'all') {
           sendElements.push(SendMsgElementConstructor.at(atQQ, atQQ, AtType.atAll, '全体成员'));
-        } else {
+        }
+        else {
           // const atMember = group?.members.find(m => m.uin == atQQ)
           const atMember = await getGroupMember(group?.groupCode, atQQ);
           if (atMember) {
@@ -203,7 +196,12 @@ export async function createSendElements(messageData: OB11MessageData[], group: 
       }
     }
       break;
-
+    case OB11MessageDataType.mface: {
+      sendElements.push(
+        SendMsgElementConstructor.mface(sendMsg.data.emoji_package_id, sendMsg.data.emoji_id, sendMsg.data.key, sendMsg.data.summary),
+      );
+    }
+      break;
     case OB11MessageDataType.image:
     case OB11MessageDataType.file:
     case OB11MessageDataType.video:
@@ -215,9 +213,11 @@ export async function createSendElements(messageData: OB11MessageData[], group: 
         if (cache) {
           if (fs.existsSync(cache.path)) {
             file = 'file://' + cache.path;
-          } else if (cache.url) {
+          }
+          else if (cache.url) {
             file = cache.url;
-          } else {
+          }
+          else {
             const fileMsg = await dbUtil.getMsgByLongId(cache.msgId);
             if (fileMsg) {
               const downloadPath = await NTQQFileApi.downloadMedia(fileMsg.msgId, fileMsg.chatType, fileMsg.peerUid,
@@ -247,7 +247,8 @@ export async function createSendElements(messageData: OB11MessageData[], group: 
           if (sendMsg.type === OB11MessageDataType.file) {
             logDebug('发送文件', path, payloadFileName || fileName);
             sendElements.push(await SendMsgElementConstructor.file(path, payloadFileName || fileName));
-          } else if (sendMsg.type === OB11MessageDataType.video) {
+          }
+          else if (sendMsg.type === OB11MessageDataType.video) {
             logDebug('发送视频', path, payloadFileName || fileName);
             let thumb = sendMsg.data?.thumb;
             if (thumb) {
@@ -257,9 +258,11 @@ export async function createSendElements(messageData: OB11MessageData[], group: 
               }
             }
             sendElements.push(await SendMsgElementConstructor.video(path, payloadFileName || fileName, thumb));
-          } else if (sendMsg.type === OB11MessageDataType.voice) {
+          }
+          else if (sendMsg.type === OB11MessageDataType.voice) {
             sendElements.push(await SendMsgElementConstructor.ptt(path));
-          } else if (sendMsg.type === OB11MessageDataType.image) {
+          }
+          else if (sendMsg.type === OB11MessageDataType.image) {
             sendElements.push(await SendMsgElementConstructor.pic(path, sendMsg.data.summary || '', <PicSubType>parseInt(sendMsg.data?.subType?.toString() || '0')));
           }
         }
@@ -283,43 +286,38 @@ export async function createSendElements(messageData: OB11MessageData[], group: 
     case OB11MessageDataType.markdown: {
       const content = sendMsg.data?.content;
       sendElements.push(SendMsgElementConstructor.markdown(content));
-    }break;
-    case OB11MessageDataType.music:{
+    }
+      break;
+    case OB11MessageDataType.music: {
       const musicData = sendMsg.data;
-      try {
-        let musicMsgElement: SendArkElement | undefined;
-        if (musicData.type === 'custom'){
-          if (!musicData.url){
-            logError('自定义音卡缺少参数url');
-            break;
-          }
-          if (!musicData.audio){
-            logError('自定义音卡缺少参数audio');
-            break;
-          }
-          if (!musicData.title){
-            logError('自定义音卡缺少参数title');
-            break;
-          }
-          musicMsgElement = await genCustomMusicElement(musicData.url, musicData.audio, musicData.title, musicData.image, musicData.singer);
+      if (musicData.type === 'custom') {
+        if (!musicData.url) {
+          logError('自定义音卡缺少参数url');
+          break;
         }
-        else{
-          if (!['qq', '163'].includes(musicData.type)){
-            logError('音乐卡片type错误, 只支持qq和163，当前type:', musicData.type);
-            break;
-          }
-          if (!musicData.id){
-            logError('音乐卡片缺少参数id');
-            break;
-          }
-          musicMsgElement = await genIdMusicElement(musicData.type, musicData.id);
+        if (!musicData.audio) {
+          logError('自定义音卡缺少参数audio');
+          break;
         }
-        logDebug('生成音乐消息', musicMsgElement);
-        if (musicMsgElement) {
-          sendElements.push(musicMsgElement);
+        if (!musicData.title) {
+          logError('自定义音卡缺少参数title');
+          break;
         }
-      } catch (e) {
-        logError('生成音乐消息失败', e);
+      }
+      else {
+        if (!['qq', '163'].includes(musicData.type)) {
+          logError('音乐卡片type错误, 只支持qq、163、custom，当前type:', musicData.type);
+          break;
+        }
+        if (!musicData.id) {
+          logError('音乐卡片缺少参数id');
+          break;
+        }
+      }
+      const musicMsgElement = await genMusicElement(sendMsg.data);
+      logDebug('生成音乐消息', musicMsgElement);
+      if (musicMsgElement) {
+        sendElements.push(musicMsgElement);
       }
     }
     }
@@ -412,7 +410,8 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
       if (friend) {
         // peer.name = friend.nickName
         peer.peerUid = friend.uid;
-      } else {
+      }
+      else {
         peer.chatType = ChatType.temp;
         const tempUserUid = getUidByUin(payload.user_id.toString());
         if (!tempUserUid) {
@@ -426,11 +425,14 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
     if (payload?.group_id && payload.message_type === 'group') {
       await genGroupPeer();
 
-    } else if (payload?.user_id) {
+    }
+    else if (payload?.user_id) {
       await genFriendPeer();
-    } else if (payload.group_id) {
+    }
+    else if (payload.group_id) {
       await genGroupPeer();
-    } else {
+    }
+    else {
       throw ('发送消息参数错误, 请指定group_id或user_id');
     }
     const messages = convertMessage2List(payload.message, payload.auto_escape === true || payload.auto_escape === 'true');
@@ -440,25 +442,19 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         if (returnMsg) {
           const msgShortId = await dbUtil.addMsg(returnMsg!, false);
           return { message_id: msgShortId };
-        } else {
+        }
+        else {
           throw Error('发送转发消息失败');
         }
       } catch (e: any) {
         throw Error('发送转发消息失败 ' + e.toString());
       }
-    } else {
+    }
+    else {
       if (this.getSpecialMsgNum(payload, OB11MessageDataType.music)) {
         const music: OB11MessageCustomMusic = messages[0] as OB11MessageCustomMusic;
-        if (music) {
-          const { url, audio, title, content, image } = music.data;
-          const selfPeer: Peer = { peerUid: selfInfo.uid, chatType: ChatType.friend };
-          // 搞不定！
-          // const musicMsg = await this.send(selfPeer, [this.genMusicElement(url, audio, title, content, image)], [], false)
-          // 转发
-          // const res = await NTQQApi.forwardMsg(selfPeer, peer, [musicMsg.msgId])
-          // log("转发音乐消息成功", res);
-          // return {message_id: musicMsg.msgShortId}
-        }
+        // if (music) {
+        // }
       }
     }
     // log("send msg:", peer, sendElements)
@@ -525,7 +521,8 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         const nodeMsg = await dbUtil.getMsgByShortId(parseInt(nodeId));
         if (!needClone) {
           nodeMsgIds.push(nodeMsg!.msgId);
-        } else {
+        }
+        else {
           if (nodeMsg!.peerUid !== selfInfo.uid) {
             const cloneMsg = await this.cloneMsg(nodeMsg!);
             if (cloneMsg) {
@@ -533,7 +530,8 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
             }
           }
         }
-      } else {
+      }
+      else {
         // 自定义的消息
         // 提取消息段，发给自己生成消息id
         try {
@@ -555,7 +553,8 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
               }
               sendElementsSplit[splitIndex] = [ele];
               splitIndex++;
-            } else {
+            }
+            else {
               sendElementsSplit[splitIndex].push(ele);
             }
             logDebug(sendElementsSplit);
@@ -586,7 +585,8 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         nodeMsgArray.push(nodeMsg);
         if (!srcPeer) {
           srcPeer = { chatType: nodeMsg.chatType, peerUid: nodeMsg.peerUid };
-        } else if (srcPeer.peerUid !== nodeMsg.peerUid) {
+        }
+        else if (srcPeer.peerUid !== nodeMsg.peerUid) {
           needSendSelf = true;
           srcPeer = selfPeer;
         }
@@ -626,7 +626,6 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
       return null;
     }
   }
-
 
 
 }
