@@ -1,7 +1,7 @@
 import { WrapperSessionInitConfig } from './sessionConfig';
 import { NodeIDependsAdapter, NodeIDispatcherAdapter, NodeIGlobalAdapter } from './adapters';
 import { NodeIKernelSessionListener, NodeIKernelMsgListener, NodeIKernelLoginListener, NodeIKernelBuddyListener, NodeIKernelGroupListener, NodeIKernelProfileListener } from './listeners';
-import { NodeIKernelLoginService, NodeIKernelMsgService, NodeIKernelBuddyService, NodeIKernelGroupService, NodeIKernelProfileService, NodeIKernelProfileLikeService, NodeIKernelTicketService } from './services';
+import { NodeIKernelLoginService, NodeIKernelMsgService, NodeIKernelBuddyService, NodeIKernelGroupService, NodeIKernelProfileService, NodeIKernelProfileLikeService, NodeIKernelTicketService, NodeIKernelTipOffService } from './services';
 import { NodeIKernelStorageCleanService } from './services/NodeIKernelStorageCleanService';
 import { NodeIKernelRobotService } from './services/NodeIKernelRobotService';
 export interface NodeQQNTWrapperUtil {
@@ -65,11 +65,11 @@ export interface NodeIQQNTWrapperSession {
     getBuddyService(): NodeIKernelBuddyService;
     getRobotService(): NodeIKernelRobotService;
     getTicketService(): NodeIKernelTicketService;
+    getTipOffService(): NodeIKernelTipOffService;
     getMsgBackupService(): unknown;
     getAlbumService(): unknown;
     getTianShuService(): unknown;
     getUnitedConfigService(): unknown;
-    getTipOffService(): unknown;
     getSearchService(): unknown;
     getRichMediaService(): unknown;
     getDirectSessionService(): unknown;
