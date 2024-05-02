@@ -1,6 +1,6 @@
 import path from 'node:path';
 import fs from 'node:fs';
-import { logDebug, logError } from '@/common/utils/log';
+import { log, logDebug, logError } from '@/common/utils/log';
 
 const configDir = path.resolve(__dirname, 'config');
 fs.mkdirSync(configDir, { recursive: true });
@@ -25,7 +25,7 @@ export class ConfigBase<T>{
     if (!fs.existsSync(configPath)) {
       try{
         fs.writeFileSync(configPath, JSON.stringify(this, null, 2));
-        logDebug(`配置文件${configPath}已创建, 修改此文件后重启NapCat生效`);
+        log(`配置文件${configPath}已创建\n如果修改此文件后需要重启 NapCat 生效`);
       }
       catch (e: any) {
         logError(`创建配置文件 ${configPath} 时发生错误:`, e.message);
