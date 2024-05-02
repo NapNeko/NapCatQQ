@@ -10,7 +10,7 @@ NapCatQQ 是基于NTQQ本体实现一套 Bot 框架。
 
 ## 使用教程
 
-可前往 Release 页面下载最新版本
+可前往 Release 页面下载最新版本，注意 v1.1.1 只能在 QQ 22741版本或以下版本使用，否则有可能出现崩溃情况。
 
 如果你想体验最新的功能，可以到 [Actions](https://github.com/NapNeko/NapCatQQ/actions/workflows/build.yml) 下载开发版本，但不保证其稳定性
 
