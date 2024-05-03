@@ -10,9 +10,7 @@ NapCatQQ 是基于 PC NTQQ 本体实现一套无头 Bot 框架。
 
 ## 如何使用
 
-可前往 Release 页面下载最新版本
-
-如果你想体验最新的功能，可以到 [Actions](https://github.com/NapNeko/NapCatQQ/actions/workflows/build.yml) 下载 beta 版本，但不保证其稳定性
+可前往 [Release](https://github.com/NapNeko/NapCatQQ/releases/) 页面下载最新版本
 
 **首次使用** 请务必前往 [官方文档](https://napneko.github.io/) 查看使用文档与教程
 
