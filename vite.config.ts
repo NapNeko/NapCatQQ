@@ -20,55 +20,42 @@ const nodeModules = [...builtinModules, builtinModules.map(m => `node:${m}`)].fl
 function genCpModule(module: string) {
   return { src: `./node_modules/${module}`, dest: `dist/node_modules/${module}`, flatten: false };
 }
-const systemPlatform = os.platform();
 let startScripts: string[] | undefined = undefined;
-let baseConfigPlugin: PluginOption[] | undefined = undefined;
-if (systemPlatform == "linux") {
+let MoeHooModule: any = [];
+if (process.env.NAPCAT_BUILDSYS == "linux") {
+  if (process.env.NAPCAT_BUILDARCH == "x64") {
+    MoeHooModule = [{ src: './src/core.lib/MoeHoo-linux-x64.node', dest: 'dist' }];
+  }
   startScripts = ['./script/napcat.sh'];
-  baseConfigPlugin = [
-    // PreprocessorDirectives(),
-    cp({
-      targets: [
-        // ...external.map(genCpModule),
-        { src: './src/napcat.json', dest: 'dist/config/' },
-        { src: './src/onebot11/onebot11.json', dest: 'dist/config/' },
-        { src: './package.json', dest: 'dist' },
-        { src: './README.md', dest: 'dist' },
-        { src: './logo.png', dest: 'dist/logs' },
-        { src: './src/core.lib/MoeHoo-linux-x64.node', dest: 'dist' },
-        ...(startScripts.map((startScript) => {
-          return { src: startScript, dest: 'dist' };
-        })),
-      ]
-    }),
-    nodeResolve(),
-    commonjs(),
-  ];
-} else {
+} else if (process.env.NAPCAT_BUILDSYS == "win32") {
+  if (process.env.NAPCAT_BUILDARCH == "x64") {
+    MoeHooModule = [{ src: './src/core.lib/MoeHoo-win32-x64.node', dest: 'dist' }];
+  }
   startScripts = ['./script/napcat.ps1', './script/napcat.bat', './script/napcat-utf8.bat', './script/napcat-utf8.ps1', './script/napcat-log.ps1'];
-  baseConfigPlugin = [
-    // PreprocessorDirectives(),
-    cp({
-      targets: [
-        // ...external.map(genCpModule),
-        { src: './src/napcat.json', dest: 'dist/config/' },
-        { src: './src/onebot11/onebot11.json', dest: 'dist/config/' },
-        { src: './package.json', dest: 'dist' },
-        { src: './README.md', dest: 'dist' },
-        { src: './logo.png', dest: 'dist/logs' },
-        { src: './src/core.lib/MoeHoo-win32-x64.node', dest: 'dist' },
-        ...(startScripts.map((startScript) => {
-          return { src: startScript, dest: 'dist' };
-        })),
-      ]
-    }),
-    nodeResolve(),
-    commonjs(),
-  ];
-
+} else {
+  MoeHooModule = [{ src: './src/core.lib/MoeHoo-win32-x64.node', dest: 'dist' }, { src: './src/core.lib/MoeHoo-linux-x64.node', dest: 'dist' }];
+  startScripts = ['./script/napcat.sh', './script/napcat.ps1', './script/napcat.bat', './script/napcat-utf8.bat', './script/napcat-utf8.ps1', './script/napcat-log.ps1'];
 }
 
-
+let baseConfigPlugin: PluginOption[] = [
+  // PreprocessorDirectives(),
+  cp({
+    targets: [
+      // ...external.map(genCpModule),
+      { src: './src/napcat.json', dest: 'dist/config/' },
+      { src: './src/onebot11/onebot11.json', dest: 'dist/config/' },
+      { src: './package.json', dest: 'dist' },
+      { src: './README.md', dest: 'dist' },
+      { src: './logo.png', dest: 'dist/logs' },
+      ...MoeHooModule,
+      ...(startScripts.map((startScript) => {
+        return { src: startScript, dest: 'dist' };
+      })),
+    ]
+  }),
+  nodeResolve(),
+  commonjs(),
+];
 // if (os.platform() !== 'win32') {
 //   startScripts = ['./script/napcat.sh'];
 // }
