@@ -3,7 +3,6 @@
 QQ Version: Windows 9.9.9-23361 / Linux 3.2.7-23361
 
 ## 修复与优化
-
 * 修复图片URL,支持 Win/Linux X64 获取Rkey，暂时不支持arm64
 * 适配最新版 Windows 9.9.9-23361 / Linux 3.2.7-23361 提升了兼容性 - 修复 SYS: Listener Proxy
 * 修复群成员加入时间 上次活跃 活跃等级字段 - 影响 API: /get_group_member_info /get_group_member_list
