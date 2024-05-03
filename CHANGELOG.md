@@ -1,4 +1,7 @@
+# v1.2.0
+
 QQ Version: 3.2.7-23361 / 9.9.9-23361
+
 ## 修复与优化
 1. 修复图片URL,支持 Win/Linux X64 获取Rkey - 新增 Module: Moehoo
 2. 重构了商城表情URL拼接 - 重构 API/Event
@@ -7,6 +10,8 @@ QQ Version: 3.2.7-23361 / 9.9.9-23361
 5. 修复群成员加入时间 上次活跃 活跃等级字段 - 影响 API: /get_group_member_info /get_group_member_list
 6. 修复视频所需的 ffmpeg 路径不正确导致视频封面和时长获取失败 - 影响 Event/API
 7. 优化数据库对消息储存，消耗储存减少 - 影响 Sys: OneBot
+8. 修复他人管理员被撤销时没有上报
+
 ## 新增与调整
 1. 支持获取与设置群公告 - 新增 API： /_send_group_notice /_get_group_notice
 2. 支持获取群精华消息 - 新增 API： /get_essence_msg_list
@@ -19,3 +24,4 @@ QQ Version: 3.2.7-23361 / 9.9.9-23361
 9. 支持表情回应api和上报 - 新增 Event/API
 10. 支持获取Cookies 实现更加稳定 且支持Skey缓存3600S Pskey每次刷新 - 新增 API: /get_cookies
 11. 支持 服务端踢下线 / 其它设备上线 / 重复登录 日志 - 新增 Sys: Log
+12. /get_status 新增了消息统计
