@@ -11,6 +11,11 @@ export class ConfigBase<T>{
   constructor() {
   }
 
+  protected getKeys(): string[] | null {
+    // 决定 key 在json配置文件中的顺序
+    return null;
+  }
+
   getConfigDir(){
     const configDir = path.resolve(__dirname, 'config');
     fs.mkdirSync(configDir, { recursive: true });
@@ -24,7 +29,7 @@ export class ConfigBase<T>{
     const configPath = this.getConfigPath();
     if (!fs.existsSync(configPath)) {
       try{
-        fs.writeFileSync(configPath, JSON.stringify(this, null, 2));
+        fs.writeFileSync(configPath, JSON.stringify(this, this.getKeys(), 2));
         log(`配置文件${configPath}已创建\n如果修改此文件后需要重启 NapCat 生效`);
       }
       catch (e: any) {
@@ -54,7 +59,7 @@ export class ConfigBase<T>{
     Object.assign(this, config);
     const configPath = this.getConfigPath();
     try {
-      fs.writeFileSync(configPath, JSON.stringify(this, null, 2));
+      fs.writeFileSync(configPath, JSON.stringify(this, this.getKeys(), 2));
     } catch (e: any) {
       logError(`保存配置文件 ${configPath} 时发生错误:`, e.message);
     }
