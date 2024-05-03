@@ -20,10 +20,14 @@ const nodeModules = [...builtinModules, builtinModules.map(m => `node:${m}`)].fl
 function genCpModule(module: string) {
   return { src: `./node_modules/${module}`, dest: `dist/node_modules/${module}`, flatten: false };
 }
+const systemPlatform = os.platform();
+let startScripts: string[] | undefined = undefined;
+if (systemPlatform == "linux") {
+  startScripts = ['./script/napcat.sh'];
+} else {
+  startScripts = ['./script/napcat.ps1', './script/napcat.bat', './script/napcat-utf8.bat', './script/napcat-utf8.ps1', './script/napcat-log.ps1'];
+}
 
-const startScripts: string[] = ['./script/napcat.ps1', './script/napcat.bat', './script/napcat-utf8.bat', './script/napcat-utf8.ps1', './script/napcat-log.ps1',
-  './script/napcat.sh'
-];
 
 // if (os.platform() !== 'win32') {
 //   startScripts = ['./script/napcat.sh'];
