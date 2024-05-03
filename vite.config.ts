@@ -22,10 +22,50 @@ function genCpModule(module: string) {
 }
 const systemPlatform = os.platform();
 let startScripts: string[] | undefined = undefined;
+let baseConfigPlugin: PluginOption[] | undefined = undefined;
 if (systemPlatform == "linux") {
   startScripts = ['./script/napcat.sh'];
+  baseConfigPlugin = [
+    // PreprocessorDirectives(),
+    cp({
+      targets: [
+        // ...external.map(genCpModule),
+        { src: './src/napcat.json', dest: 'dist/config/' },
+        { src: './src/onebot11/onebot11.json', dest: 'dist/config/' },
+        { src: './package.json', dest: 'dist' },
+        { src: './README.md', dest: 'dist' },
+        { src: './logo.png', dest: 'dist/logs' },
+        { src: './src/core.lib/MoeHoo-linux-x64.node', dest: 'dist' },
+        ...(startScripts.map((startScript) => {
+          return { src: startScript, dest: 'dist' };
+        })),
+      ]
+    }),
+    nodeResolve(),
+    commonjs(),
+  ];
 } else {
   startScripts = ['./script/napcat.ps1', './script/napcat.bat', './script/napcat-utf8.bat', './script/napcat-utf8.ps1', './script/napcat-log.ps1'];
+  baseConfigPlugin = [
+    // PreprocessorDirectives(),
+    cp({
+      targets: [
+        // ...external.map(genCpModule),
+        { src: './src/napcat.json', dest: 'dist/config/' },
+        { src: './src/onebot11/onebot11.json', dest: 'dist/config/' },
+        { src: './package.json', dest: 'dist' },
+        { src: './README.md', dest: 'dist' },
+        { src: './logo.png', dest: 'dist/logs' },
+        { src: './src/core.lib/MoeHoo-win32-x64.node', dest: 'dist' },
+        ...(startScripts.map((startScript) => {
+          return { src: startScript, dest: 'dist' };
+        })),
+      ]
+    }),
+    nodeResolve(),
+    commonjs(),
+  ];
+
 }
 
 
@@ -33,26 +73,7 @@ if (systemPlatform == "linux") {
 //   startScripts = ['./script/napcat.sh'];
 // }
 
-const baseConfigPlugin: PluginOption[] = [
-  // PreprocessorDirectives(),
-  cp({
-    targets: [
-      // ...external.map(genCpModule),
-      { src: './src/napcat.json', dest: 'dist/config/' },
-      { src: './src/onebot11/onebot11.json', dest: 'dist/config/' },
-      { src: './package.json', dest: 'dist' },
-      { src: './README.md', dest: 'dist' },
-      { src: './logo.png', dest: 'dist/logs' },
-      { src: './src/core.lib/MoeHoo-win32-x64.node', dest: 'dist' },
-      { src: './src/core.lib/MoeHoo-linux-x64.node', dest: 'dist' },
-      ...(startScripts.map((startScript) => {
-        return { src: startScript, dest: 'dist' };
-      })),
-    ]
-  }),
-  nodeResolve(),
-  commonjs(),
-];
+
 
 let corePath = resolve(__dirname, './src/core/src');
 if (!fs.existsSync(corePath)) {
