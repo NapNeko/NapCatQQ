@@ -36,7 +36,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target_platform: [linux,darwin]
+        target_platform: [linux]
         target_arch: [x64, arm64]
     steps:
     - name: Clone Main Repository
@@ -53,6 +53,8 @@ jobs:
 
     - name: Build NuCat Linux
       run: |
+          export NAPCAT_BUILDSYS=${{ matrix.target_platform }} 
+          export NAPCAT_BUILDARCH=${{ matrix.target_arch }} 
           npm i --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
           npm run build:prod
           cd dist
@@ -87,6 +89,8 @@ jobs:
           
         - name: Build NuCat Linux
           run: |
+                export NAPCAT_BUILDSYS=${{ matrix.target_platform }} 
+                export NAPCAT_BUILDARCH=${{ matrix.target_arch }} 
                 npm i --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
                 npm run build:prod
                 cd dist
