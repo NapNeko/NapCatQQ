@@ -22,13 +22,13 @@ function genCpModule(module: string) {
 }
 let startScripts: string[] | undefined = undefined;
 let MoeHooModule: any = [];
-if (process.env.NAPCAT_BUILDSYS == "linux") {
-  if (process.env.NAPCAT_BUILDARCH == "x64") {
+if (process.env.NAPCAT_BUILDSYS == 'linux') {
+  if (process.env.NAPCAT_BUILDARCH == 'x64') {
     MoeHooModule = [{ src: './src/core.lib/MoeHoo-linux-x64.node', dest: 'dist' }];
   }
   startScripts = ['./script/napcat.sh'];
-} else if (process.env.NAPCAT_BUILDSYS == "win32") {
-  if (process.env.NAPCAT_BUILDARCH == "x64") {
+} else if (process.env.NAPCAT_BUILDSYS == 'win32') {
+  if (process.env.NAPCAT_BUILDARCH == 'x64') {
     MoeHooModule = [{ src: './src/core.lib/MoeHoo-win32-x64.node', dest: 'dist' }];
   }
   startScripts = ['./script/napcat.ps1', './script/napcat.bat', './script/napcat-utf8.bat', './script/napcat-utf8.ps1', './script/napcat-log.ps1'];
@@ -37,7 +37,7 @@ if (process.env.NAPCAT_BUILDSYS == "linux") {
   startScripts = ['./script/napcat.sh', './script/napcat.ps1', './script/napcat.bat', './script/napcat-utf8.bat', './script/napcat-utf8.ps1', './script/napcat-log.ps1'];
 }
 
-let baseConfigPlugin: PluginOption[] = [
+const baseConfigPlugin: PluginOption[] = [
   // PreprocessorDirectives(),
   cp({
     targets: [
