@@ -209,7 +209,7 @@ export class NapCatOnebot11 {
         // if (notify.user2.uid) {
         //     member2 = await getGroupMember(notify.group.groupCode, null, notify.user2.uid);
         // }
-        if ([GroupNotifyTypes.ADMIN_SET, GroupNotifyTypes.ADMIN_UNSET].includes(notify.type)) {
+        if ([GroupNotifyTypes.ADMIN_SET, GroupNotifyTypes.ADMIN_UNSET, GroupNotifyTypes.ADMIN_UNSET_OTHER].includes(notify.type)) {
           const member1 = await getGroupMember(notify.group.groupCode, notify.user1.uid);
           logDebug('有管理员变动通知');
           // refreshGroupMembers(notify.group.groupCode).then();
@@ -219,7 +219,7 @@ export class NapCatOnebot11 {
           if (member1) {
             logDebug('变动管理员获取成功');
             groupAdminNoticeEvent.user_id = parseInt(member1.uin);
-            groupAdminNoticeEvent.sub_type = notify.type == GroupNotifyTypes.ADMIN_UNSET ? 'unset' : 'set';
+            groupAdminNoticeEvent.sub_type = [GroupNotifyTypes.ADMIN_UNSET, GroupNotifyTypes.ADMIN_UNSET_OTHER].includes(notify.type) ? 'unset' : 'set';
             // member1.role = notify.type == GroupNotifyTypes.ADMIN_SET ? GroupMemberRole.admin : GroupMemberRole.normal;
             postOB11Event(groupAdminNoticeEvent, true);
           } else {
