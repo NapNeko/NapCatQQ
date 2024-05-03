@@ -37,11 +37,11 @@ type QQVersionConfigInfo = {
 }
 
 let _qqVersionConfigInfo: QQVersionConfigInfo = {
-  'baseVersion': '9.9.9-23159',
-  'curVersion': '9.9.9-23159',
+  'baseVersion': '9.9.9-23361',
+  'curVersion': '9.9.9-23361',
   'prevVersion': '',
   'onErrorVersions': [],
-  'buildId': '23159'
+  'buildId': '23361'
 };
 
 if (fs.existsSync(configVersionInfoPath)) {
@@ -64,7 +64,7 @@ export const qqPkgInfo: QQPkgInfo = require(pkgInfoPath);
 // platVer: '10.0.26100',
 // clientVer: '9.9.9-23159',
 
-let _appid: string = '537213764';  // 默认为 Windows 平台的 appid
+let _appid: string = '537213803';  // 默认为 Windows 平台的 appid
 if (systemPlatform === 'linux') {
   _appid = '537213827';
 }
