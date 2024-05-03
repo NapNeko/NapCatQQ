@@ -17,7 +17,8 @@ interface GroupNotice {
     }>
   }
 }
-export class GetGroupNotice extends BaseAction<PayloadType, GroupNotice[]> {
+type ApiGroupNotice = GroupNotice & WebApiGroupNoticeFeed;
+export class GetGroupNotice extends BaseAction<PayloadType, ApiGroupNotice[]> {
   actionName = ActionName.GoCQHTTP_GetGroupNotice;
 
   protected async _handle(payload: PayloadType) {
@@ -26,9 +27,10 @@ export class GetGroupNotice extends BaseAction<PayloadType, GroupNotice[]> {
     if (!ret) {
       throw new Error('获取公告失败');
     }
-    let retNotices: GroupNotice[] = new Array<GroupNotice>();
+    let retNotices: ApiGroupNotice[] = new Array<ApiGroupNotice>();
     for (let key in ret.feeds) {
-      let retNotice: GroupNotice = {
+      let retNotice: ApiGroupNotice = {
+        ...ret.feeds[key],
         sender_id: ret.feeds[key].u,
         publish_time: ret.feeds[key].pubt,
         message: {
