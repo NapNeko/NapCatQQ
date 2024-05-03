@@ -55,6 +55,10 @@ class Config extends ConfigBase<OB11Config> implements OB11Config {
   getConfigPath() {
     return path.join(this.getConfigDir(), `onebot11_${selfInfo.uin}.json`);
   }
+
+  protected getKeys(): string[] {
+    return ['httpHost', 'enableHttp', 'httpPort', 'wsHost', 'enableWs', 'wsPort', 'enableWsReverse', 'wsReverseUrls', 'enableHttpPost', 'httpPostUrls', 'enableHttpHeart', 'httpSecret', 'messagePostFormat', 'reportSelfMessage', 'debug', 'enableLocalFile2Url', 'heartInterval', 'token', 'musicSignUrl'];
+  }
 }
 
 export const ob11Config = new Config();
