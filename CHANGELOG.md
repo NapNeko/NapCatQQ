@@ -1,6 +1,6 @@
 # v1.2.0
 
-QQ Version: 3.2.7-23361 / 9.9.9-23361
+QQ Version: Windows 9.9.9-23361 / Linux 3.2.7-23361
 
 ## 修复与优化
 1. 修复图片URL,支持 Win/Linux X64 获取Rkey - 新增 Module: Moehoo
