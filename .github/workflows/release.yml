@@ -116,13 +116,8 @@ jobs:
     - name: Extract version from tag
       run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
       
-    - name: Clone Main Repository
-      uses: actions/checkout@v4
-      with:
-        repository: 'NapNeko/NapCatQQ'
-        submodules: true
-        ref: main
-        token: ${{ secrets.NAPCAT_BUILD }}
+    - name: Clone Changes Log
+      run: curl -o CHANGELOG.md https://fastly.jsdelivr.net/gh/NapNeko/NapCatQQ@main/CHANGELOG.md
         
     - name: Create Release Draft and Upload Artifacts
       uses: softprops/action-gh-release@v1
