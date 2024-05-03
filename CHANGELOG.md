@@ -24,4 +24,4 @@ QQ Version: 3.2.7-23361 / 9.9.9-23361
 9. 支持表情回应api和上报 - 新增 Event/API
 10. 支持获取Cookies 实现更加稳定 且支持Skey缓存3600S Pskey每次刷新 - 新增 API: /get_cookies
 11. 支持 服务端踢下线 / 其它设备上线 / 重复登录 / 自身在线状态变更 日志 - 新增 Sys: Log
-12. /get_status 新增了消息统计
+12. 支持了消息统计  - 新增 API: /get_status 
