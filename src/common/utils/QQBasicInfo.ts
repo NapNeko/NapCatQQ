@@ -66,7 +66,7 @@ export const qqPkgInfo: QQPkgInfo = require(pkgInfoPath);
 
 let _appid: string = '537213764';  // 默认为 Windows 平台的 appid
 if (systemPlatform === 'linux') {
-  _appid = '537213710';
+  _appid = '537213827';
 }
 // todo: mac 平台的 appid
 export const appid = _appid;
