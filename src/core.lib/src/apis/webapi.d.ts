@@ -15,7 +15,7 @@ interface WebApiGroupMember {
     qage: number;
     rm: number;
 }
-interface WebApiGroupNoticeFeed {
+export interface WebApiGroupNoticeFeed {
     u: number;
     fid: string;
     pubt: number;
@@ -23,6 +23,11 @@ interface WebApiGroupNoticeFeed {
         text: string;
         text_face: string;
         title: string;
+        pics?: {
+            id: string;
+            w: string;
+            h: string;
+        }[];
     };
     type: number;
     fn: number;
