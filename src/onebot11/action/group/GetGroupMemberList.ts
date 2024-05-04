@@ -3,7 +3,7 @@ import { OB11GroupMember } from '../../types';
 import { OB11Constructor } from '../../constructor';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { napCatCore, NTQQGroupApi, WebApiGroupMember } from '@/core';
+import { napCatCore, NTQQGroupApi } from '@/core';
 import { WebApi } from '@/core/apis/webapi';
 import { logDebug } from '@/common/utils/log';
 
@@ -18,13 +18,12 @@ class GetGroupMemberList extends BaseAction<PayloadType, OB11GroupMember[]> {
 
   protected async _handle(payload: PayloadType) {
     const MemberMap: Map<number, OB11GroupMember> = new Map<number, OB11GroupMember>();
-    const webGroupMembers: WebApiGroupMember[] = [];
-    // await NTQQGroupApi.getGroupMembers(payload.group_id.toString());
+    const WebGroupMember = await WebApi.getGroupMembers(payload.group_id.toString());
     const group = await getGroup(payload.group_id.toString());
     if (!group) {
       throw (`群${payload.group_id}不存在`);
     }
-    if (payload.no_cache === true || payload.no_cache === 'true') {
+    if (payload.no_cache || payload.no_cache === 'true') {
       // webGroupMembers = await WebApi.getGroupMembers(payload.group_id.toString());
       const _groupMembers = await NTQQGroupApi.getGroupMembers(payload.group_id.toString());
       groupMembers.set(group.groupCode, _groupMembers);
@@ -36,17 +35,17 @@ class GetGroupMemberList extends BaseAction<PayloadType, OB11GroupMember[]> {
       MemberMap.set(_groupMembers[i].user_id, _groupMembers[i]);
     }
     // 合并数据
-    for (let i = 0, len = webGroupMembers.length; i < len; i++) {
-      if (!webGroupMembers[i]?.uin) {
+    for (let i = 0, len = WebGroupMember.length; i < len; i++) {
+      if (!WebGroupMember[i]?.uin) {
         continue;
       }
-      const MemberData = MemberMap.get(webGroupMembers[i]?.uin);
+      const MemberData = MemberMap.get(WebGroupMember[i]?.uin);
       if (MemberData) {
-        MemberData.join_time = webGroupMembers[i]?.join_time;
-        MemberData.last_sent_time = webGroupMembers[i]?.last_speak_time;
-        MemberData.qage = webGroupMembers[i]?.qage;
-        MemberData.level = webGroupMembers[i]?.lv.level;
-        MemberMap.set(webGroupMembers[i]?.uin, MemberData);
+        MemberData.join_time = WebGroupMember[i]?.join_time;
+        MemberData.last_sent_time = WebGroupMember[i]?.last_speak_time;
+        MemberData.qage = WebGroupMember[i]?.qage;
+        MemberData.level = WebGroupMember[i]?.lv.level;
+        MemberMap.set(WebGroupMember[i]?.uin, MemberData);
       }
     }
     // 还原Map到Array

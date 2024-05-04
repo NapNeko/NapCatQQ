@@ -7,6 +7,6 @@ QQ Version: Windows 9.9.9-23361 / Linux 3.2.7-23361
 
 
 ## 新增与调整
-* 支持WebUi远程配置
-
+* 再一次对获取Cookies与获取群成员优化，分别添加30/60/120分钟缓存
+* 
 新增的 API 详细见[API文档](https://napneko.github.io/zh-CN/develop/extends_api)
