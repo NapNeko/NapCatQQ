@@ -19,7 +19,6 @@ class GetGroupMemberList extends BaseAction<PayloadType, OB11GroupMember[]> {
   protected async _handle(payload: PayloadType) {
     const MemberMap: Map<number, OB11GroupMember> = new Map<number, OB11GroupMember>();
     const WebGroupMember = await WebApi.getGroupMembers(payload.group_id.toString());
-    // await NTQQGroupApi.getGroupMembers(payload.group_id.toString());
     const group = await getGroup(payload.group_id.toString());
     if (!group) {
       throw (`群${payload.group_id}不存在`);
