@@ -24,7 +24,7 @@ class GetGroupMemberList extends BaseAction<PayloadType, OB11GroupMember[]> {
     if (!group) {
       throw (`群${payload.group_id}不存在`);
     }
-    if (payload.no_cache || payload.no_cache === 'true') {
+    if (payload.no_cache === true || payload.no_cache === 'true') {
       // webGroupMembers = await WebApi.getGroupMembers(payload.group_id.toString());
       const _groupMembers = await NTQQGroupApi.getGroupMembers(payload.group_id.toString());
       groupMembers.set(group.groupCode, _groupMembers);
