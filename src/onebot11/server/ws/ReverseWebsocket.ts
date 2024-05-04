@@ -101,9 +101,7 @@ export class ReverseWebsocket {
       await this.onmessage(data.toString());
     });
 
-    this.websocket.on('error', (err) => {
-      logError('websocket error', err.toString());
-    });
+    this.websocket.on('error', log);
 
     const wsClientInterval = setInterval(() => {
       postWsEvent(new OB11HeartbeatEvent(!!selfInfo.online, true, heartInterval));
