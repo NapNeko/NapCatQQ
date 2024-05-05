@@ -10,7 +10,7 @@ async function onSettingWindowCreated(view: Element) {
   const setOB11Config = (key: string, value: any) => {
   }
 
-  const parser = new DOMParser()
+  const parser = new DOMParser();
   const doc = parser.parseFromString(
     [
       '<div>',
@@ -144,27 +144,6 @@ async function onSettingWindowCreated(view: Element) {
     ].join(''),
     'text/html',
   )
-
-  const showError = async () => {
-    await new Promise((res) => setTimeout(() => res(true), 1000))
-
-    const errDom = document.querySelector('#napcat-error') || doc.querySelector('#napcat-error')
-    //@ts-ignore 等待替换为前端实现
-    const errCodeDom = errDom.querySelector('code')
-    //@ts-ignore 等待替换为前端实现
-    const errMsg = await window.napcat.getError()
-
-    if (!errMsg) {
-      //@ts-ignore 等待修复
-      errDom.classList.remove('show')
-    } else {
-      //@ts-ignore 等待修复
-      errDom.classList.add('show')
-    }
-    //@ts-ignore 等待修复
-    errCodeDom.innerHTML = errMsg
-  }
-  showError().then()
 
   // 外链按钮
   doc.querySelector('#open-github')?.addEventListener('click', () => {
@@ -302,7 +281,6 @@ async function onSettingWindowCreated(view: Element) {
   // 保存按钮
   doc.querySelector('#config-ob11-save')?.addEventListener('click', () => {
     WebUiApi.setOB11Config(ob11Config);
-    showError().then();
     alert('保存成功');
   })
 }
