@@ -10,6 +10,7 @@
     "build:prod": "vite build --mode production",
     "build": "npm run build:dev",
     "build:core": "cd ./src/core && npm run build && cd ../.. && node ./script/copy-core.cjs",
+    "build:webui": "cd ./src/webui && vite build",
     "watch": "npm run watch:dev",
     "debug-win": "powershell dist/napcat.ps1",
     "lint": "eslint --fix src/**/*.{js,ts}",

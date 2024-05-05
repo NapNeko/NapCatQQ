@@ -12,6 +12,12 @@
     <link rel="stylesheet" href="./assets/color.css" />
     <!-- 脚手架 -->
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <!-- 渲染脚本 -->
+    <script>
+        const { onSettingWindowCreated } = await import("./assets/renderer.js");
+        onSettingWindowCreated(document.querySelector("body"));
+    </script>
+
     <title>NapCat-WebUi</title>
 </head>
 
