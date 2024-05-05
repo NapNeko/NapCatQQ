@@ -1,20 +1,9 @@
-/// <reference path="../global.d.ts" />
-import { CheckVersion } from '../common/types'
-import { SettingButton, SettingItem, SettingList, SettingSwitch, SettingSelect } from './components'
-// @ts-ignore
+
 import StyleRaw from './style.css?raw'
-import { iconSvg } from './icon'
 
 // 打开设置界面时触发
 
 function aprilFoolsEgg(node: Element) {
-  let today = new Date()
-  if (today.getDate() === 1) {
-    console.log('超时空猫猫!!!')
-    node.querySelector('.name').innerHTML = 'ChronoCat'
-  }
-}
-
 function initSideBar() {
   document.querySelectorAll('.nav-item.liteloader').forEach((node) => {
     if (node.textContent.startsWith('LLOneBot')) {
