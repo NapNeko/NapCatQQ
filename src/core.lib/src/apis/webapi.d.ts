@@ -1,4 +1,4 @@
-interface WebApiGroupMember {
+export interface WebApiGroupMember {
     uin: number;
     role: number;
     g: number;
@@ -88,7 +88,7 @@ export interface GroupEssenceMsgRet {
 }
 export declare class WebApi {
     static getGroupEssenceMsg(GroupCode: string, page_start: string): Promise<GroupEssenceMsgRet | undefined>;
-    static getGroupMembers(GroupCode: string): Promise<WebApiGroupMember[]>;
+    static getGroupMembers(GroupCode: string, cached?: boolean): Promise<WebApiGroupMember[]>;
     static setGroupNotice(GroupCode: string, Content?: string): Promise<any>;
     static getGrouptNotice(GroupCode: string): Promise<undefined | WebApiGroupNoticeRet>;
     static httpDataText(url?: string, method?: string, data?: string, CookiesValue?: string): Promise<string>;
