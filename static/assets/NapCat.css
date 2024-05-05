@@ -156,25 +156,25 @@ ob-setting-select::part(option-list) {
   gap: 4px;
 }
 
-#llonebot-error {
+#napcat-error {
   display: none;
 }
 
-#llonebot-error setting-panel {
+#napcat-error setting-panel {
   background: rgba(255, 0, 0, 0.5);
   color: white;
 }
 
-#llonebot-error setting-panel pre {
+#napcat-error setting-panel pre {
   margin: 0;
   padding: 16px;
   box-sizing: border-box;
 }
 
-#llonebot-error setting-panel pre code {
+#napcat-error setting-panel pre code {
   font-family: 'FiraCode Nerd Font', 'Fira Code', 'Cascadia Code', Consolas, 'Courier New', monospace;
 }
 
-#llonebot-error.show {
+#napcat-error.show {
   display: block;
 }
