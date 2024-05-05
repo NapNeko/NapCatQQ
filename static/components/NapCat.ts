@@ -4,8 +4,6 @@ import { SettingButton } from "./SettingButton";
 import { SettingSwitch } from "./SettingSwitch";
 import { SettingSelect } from "./SettingSelect";
 
-// @ts-ignore 引入Css 能不能优雅点 神经这样写
-import StyleRaw from "../assets/NapCat.css";
 function aprilFoolsEgg(node: Element) {
   async function onSettingWindowCreated(view: Element) {
     const isEmpty = (value: any) => value === undefined || value === undefined || value === ''
@@ -32,7 +30,6 @@ function aprilFoolsEgg(node: Element) {
     const doc = parser.parseFromString(
       [
         '<div>',
-        `<style>${StyleRaw}</style>`,
         `<setting-section id="llonebot-error">
             <setting-panel><pre><code></code></pre></setting-panel>
         </setting-section>`,
