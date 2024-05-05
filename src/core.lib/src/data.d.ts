@@ -1,7 +1,14 @@
 import { type Friend, type FriendRequest, type Group, type GroupMember, GroupNotify, type SelfInfo } from './entities';
+import { WebApiGroupMember } from '@/core/apis';
 export declare const Credentials: {
     Skey: string;
     CreatTime: number;
+    PskeyData: Map<string, string>;
+    PskeyTime: Map<string, number>;
+};
+export declare const WebGroupData: {
+    GroupData: Map<string, WebApiGroupMember[]>;
+    GroupTime: Map<string, number>;
 };
 export declare const selfInfo: SelfInfo;
 export declare const groups: Map<string, Group>;
