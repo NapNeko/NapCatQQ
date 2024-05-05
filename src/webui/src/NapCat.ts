@@ -1,9 +1,9 @@
-import { SettingList } from "./SettingList";
-import { SettingItem } from "./SettingItem";
-import { SettingButton } from "./SettingButton";
-import { SettingSwitch } from "./SettingSwitch";
-import { SettingSelect } from "./SettingSelect";
-import { WebUiApi } from "./WebApi"
+import { SettingList } from "./components/SettingList";
+import { SettingItem } from "./components/SettingItem";
+import { SettingButton } from "./components/SettingButton";
+import { SettingSwitch } from "./components/SettingSwitch";
+import { SettingSelect } from "./components/SettingSelect";
+import { WebUiApi } from "./components/WebApi"
 async function onSettingWindowCreated(view: Element) {
   const isEmpty = (value: any) => value === undefined || value === undefined || value === '';
   let ob11Config = await WebUiApi.getOB11Config();
