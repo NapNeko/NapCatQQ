@@ -6,7 +6,7 @@ export default defineConfig({
         minify: false,
         lib: {
           entry: 'src/NapCat.ts',
-          formats: ['cjs'],
+          formats: ['es'],
           fileName: () => 'renderer.js',
         }
     }

@@ -207,11 +207,10 @@ async function onSettingWindowCreated(view: Element) {
   }
   const initReverseHost = (type: string, doc: Document = document) => {
     const hostContainerDom = doc.body?.querySelector(`#config-ob11-${type}-list`);
-    //@ts-ignore 等待修复
-    [...hostContainerDom.childNodes].forEach((dom) => dom.remove());
+    /*[...hostContainerDom.childNodes].forEach((dom) => dom.remove());
     buildHostList(ob11Config[type], type).forEach((dom) => {
       hostContainerDom?.appendChild(dom);
-    })
+    })*/
   }
   initReverseHost('httpHosts', doc);
   initReverseHost('wsHosts', doc);
@@ -282,6 +281,9 @@ async function onSettingWindowCreated(view: Element) {
   doc.querySelector('#config-ob11-save')?.addEventListener('click', () => {
     WebUiApi.setOB11Config(ob11Config);
     alert('保存成功');
+  })
+  doc.body.childNodes.forEach((node) => {
+    view.appendChild(node)
   })
 }
 export { onSettingWindowCreated };
