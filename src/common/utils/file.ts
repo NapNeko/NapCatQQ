@@ -193,6 +193,7 @@ export async function uri2local(uri: string, fileName: string | null = null): Pr
           // res.ext = pathInfo.ext
         }
       }
+      fileName = fileName.replace(/[/\\:*?"<>|]/g, '_');
       res.fileName = fileName;
       filePath = path.join(getTempDir(), uuidv4() + fileName);
       fs.writeFileSync(filePath, buffer);
