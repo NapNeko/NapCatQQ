@@ -1,4 +1,4 @@
-import { SettingOption } from './option'
+import { SettingOption } from './SettingOption'
 
 interface MouseEventExtend extends MouseEvent {
   target: HTMLElement
@@ -30,15 +30,15 @@ window.customElements.define(
       super()
 
       this.attachShadow({ mode: 'open' })
-      this.shadowRoot.append(SelectTemplate.content.cloneNode(true))
+      this.shadowRoot?.append(SelectTemplate.content.cloneNode(true));
 
-      this._button = this.shadowRoot.querySelector('div[part="button"]')
-      this._text = this.shadowRoot.querySelector('input[part="current-text"]')
-      this._context = this.shadowRoot.querySelector('ul[part="option-list"]')
+      this._button = this.shadowRoot.querySelector('div[part="button"]');
+      this._text = this.shadowRoot.querySelector('input[part="current-text"]');
+      this._context = this.shadowRoot.querySelector('ul[part="option-list"]');
 
       const buttonClick = () => {
-        const isHidden = this._context.classList.toggle('hidden')
-        window[`${isHidden ? 'remove' : 'add'}EventListener`]('pointerdown', windowPointerDown)
+        const isHidden = this._context.classList.toggle('hidden');
+        window[`${isHidden ? 'remove' : 'add'}EventListener`]('pointerdown', windowPointerDown);
       }
 
       const windowPointerDown = ({ target }) => {
@@ -55,7 +55,7 @@ window.customElements.define(
         this.querySelectorAll('setting-option[is-selected]').forEach((dom) => dom.toggleAttribute('is-selected'))
         target.toggleAttribute('is-selected')
 
-        this._text.value = target.textContent
+        this._text.value = target.textContent as string;
         this.dispatchEvent(
           new CustomEvent('selected', {
             bubbles: true,
@@ -68,7 +68,7 @@ window.customElements.define(
         )
       })
 
-      this._text.value = this.querySelector('setting-option[is-selected]').textContent
+      this._text.value = this.querySelector('setting-option[is-selected]')?.textContent as string;
     }
   },
 )

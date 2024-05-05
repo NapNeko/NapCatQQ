@@ -1,0 +1,201 @@
+body, html {
+    background: var(--bg_bottom_standard);
+    color: var(--text_primary);
+    font-family: "Color Emoji", system-ui, "PingFang SC", PingFangSC-Regular, "Microsoft YaHei", "Hiragino Sans GB", "Heiti SC", "WenQuanYi Micro Hei", Arial, Helvetica, sans-serif, "Apple Braille", "Color Emoji Fix";
+    min-height: 100vh;
+    scroll-behavior: smooth;
+    width: 100%;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+  
+    --z_index_popover: 999;
+    --nt_mix_tokens: nt_brand_standard_2_overlay_hover_brand_2_mix,nt_brand_standard_2_overlay_pressed_brand_2_mix,nt_feedback_error_2_overlay_hover_brand_2_mix,nt_feedback_error_2_overlay_pressed_brand_2_mix,nt_icon_white_2_overlay_hover_2_mix,nt_icon_white_2_overlay_pressed_2_mix,nt_bubble_host_2_overlay_pressed_brand_2_mix,nt_bg_white_2_overlay_pressed_brand_2_mix,nt_bg_white_2_overlay_hover_2_mix,nt_bg_white_2_overlay_pressed_2_mix,nt_fg_white_2_overlay_hover_2_mix,nt_fg_white_2_overlay_pressed_2_mix,nt_icon_red_2_overlay_hover_2_mix,nt_icon_red_2_overlay_pressed_2_mix,nt_fg_grey_standard_2_overlay_hover_2_mix,nt_fg_grey_standard_2_overlay_pressed_2_mix,nt_bubble_guest_2_overlay_pressed_2_mix,nt_icon_primary_2_20_2_alpha,nt_bg_grey_standard_2_95_2_alpha,nt_tag_red_2_20_2_alpha,nt_tag_red_2_25_2_alpha,nt_tag_blue_2_20_2_alpha,nt_tag_blue_2_25_2_alpha,nt_tag_blue_2_10_2_alpha,nt_tag_purple_2_20_2_alpha,nt_brand_standard_2_20_2_alpha,nt_tag_sage_green_2_20_2_alpha,nt_feedback_error_2_20_2_alpha,nt_text_white_2_60_2_alpha,nt_bg_white_2_70_2_alpha,nt_bg_white_2_90_2_alpha,nt_bg_white_2_97_2_alpha,nt_bg_white_2_40_2_alpha,nt_bg_white_2_30_2_alpha,nt_text_white_2_80_2_alpha,nt_brand_standard_2_50_2_alpha,nt_bg_nav_secondary_2_60_2_alpha,nt_bg_nav_2_60_2_alpha,nt_feedback_error_2_10_2_alpha,nt_brand_standard_2_10_2_alpha,nt_on_brand_primary_2_40_2_alpha,nt_text_primary_2_72_2_alpha,nt_text_white_2_72_2_alpha;
+  }
+  
+  a, address, article, aside, b, blockquote, body, div, em, fieldset, footer, form, h1, h2, h3, h4, h5, h6, header, html, i, iframe, img, label, legend, li, main, nav, ol, p, s, section, span, table, tbody, td, tfoot, th, thead, tr, ul {
+    box-sizing: border-box;
+    font-size: 100%;
+    font-style: inherit;
+    font-weight: inherit;
+    border: 0px;
+    margin: 0px;
+    padding: 0px;
+  }
+  
+  #app {
+    position: relative;
+    display: block;
+    padding: 20px;
+    min-height: 100vh;
+    background: transparent;
+  }
+  
+  .fake-bar {
+    position: fixed;
+    display: none;
+    top: 0;
+    left: 0;
+  }
+  
+  /* ======== Input ======== */
+  .q-input {
+    align-items: center;
+    border-radius: 4px;
+    box-sizing: border-box;
+    color: var(--text_secondary);
+    display: inline-flex;
+    position: relative;
+    width: 100%;
+    border: 1px solid transparent;
+  }
+  
+  .q-input input, .q-input textarea {
+    appearance: none;
+    background-color: transparent;
+    box-sizing: border-box;
+    color: var(--text_primary);
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0%;
+    font-size: 14px;
+    height: fit-content;
+    outline-color: initial;
+    outline-style: none;
+    outline-width: initial;
+    resize: none;
+    width: 100%;
+    border: none;
+  }
+  
+  /* ======== Switch ======== */
+  .q-switch {
+    background-color: var(--fill_standard_primary);
+    border-radius: 14px;
+    box-sizing: border-box;
+    display: inline-flex;
+    position: relative;
+    transition-behavior: normal;
+    transition-duration: 0.2s;
+    transition-timing-function: cubic-bezier(0.38, 0, 0.24, 1);
+    transition-delay: 0s;
+    transition-property: all;
+    width: 28px;
+    padding: 3px;
+  }
+  
+  .q-switch__handle {
+    border-radius: 5px;
+    box-shadow: rgba(0, 0, 0, 0.09) 0px 2px 4px;
+    box-sizing: border-box;
+    display: inline-block;
+    height: 10px;
+    position: relative;
+    transition-behavior: normal;
+    transition-duration: 0.2s;
+    transition-timing-function: cubic-bezier(0.38, 0, 0.24, 1);
+    transition-delay: 0s;
+    transition-property: all;
+    width: 10px;
+    z-index: 2;
+    background: var(--icon_white);
+  }
+  
+  .q-switch:not(.is-disabled):hover {
+    background: var(--fill_standard_secondary);
+  }
+  
+  .q-switch:not(.is-disabled):active {
+    background: var(--nt_bg_white_2_overlay_pressed_brand_2_mix);
+  }
+  .q-switch:not(.is-disabled):active .q-switch__handle {
+    width: 12px;
+  }
+  
+  .q-switch.is-active {
+    background-color: var(--brand_standard);
+  }
+  
+  .q-switch.is-active .q-switch__handle {
+    transform: translateX(12px);
+  }
+  
+  .q-switch.is-active:not(.is-disabled):hover {
+    background: var(--nt_brand_standard_2_overlay_hover_brand_2_mix);
+  }
+  
+  .q-switch.is-active:not(.is-disabled):active {
+    background: var(--nt_brand_standard_2_overlay_pressed_brand_2_mix);
+  }
+  .q-switch.is-active:not(.is-disabled):active .q-switch__handle {
+    transform: translateX(10px);
+  }
+  
+  /* ======== Button ======== */
+  .q-button {
+    align-items: center;
+    background-color: var(--brand_standard);
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    display: inline-flex;
+    font-size: 14px;
+    justify-content: center;
+    line-height: 18px;
+    outline-color: initial;
+    outline-style: none;
+    outline-width: initial;
+    position: relative;
+    vertical-align: text-bottom;
+    border: 1px solid var(--fg_grey_standard);
+    padding: 5px 11px;
+  }
+  
+  .q-button--small {
+    font-size: 12px;
+    line-height: 14px;
+    min-width: 62px;
+    padding: 4px 7px;
+  }
+  
+  .q-button--primary {
+    background-color: var(--brand_standard);
+    border-color: var(--brand_standard);
+    color: var(--on_brand_primary);
+  }
+  
+  .q-button--secondary {
+    background-color: transparent;
+    border-color: var(--fg_grey_standard);
+    color: var(--text_primary);
+  }
+  
+  .q-button:not([disabled]):hover {
+    background-color: var(--overlay_hover);
+  }
+  
+  .q-button:not([disabled]):active {
+    background-color: var(--overlay_pressed);
+  }
+  
+  .q-button--primary:hover {
+    background-color: var(--nt_brand_standard_2_overlay_hover_brand_2_mix);
+    border-color: var(--nt_brand_standard_2_overlay_hover_brand_2_mix);
+  }
+  
+  .q-button--primary:active {
+    background-color: var(--nt_brand_standard_2_overlay_pressed_brand_2_mix);
+    border-color: var(--nt_brand_standard_2_overlay_pressed_brand_2_mix);
+  }
+  
+  .q-button[disabled] {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+  
+  .q-button--secondary[disabled] {
+    background-color: transparent;
+  }
