@@ -3,75 +3,61 @@ import { SettingItem } from "./SettingItem";
 import { SettingButton } from "./SettingButton";
 import { SettingSwitch } from "./SettingSwitch";
 import { SettingSelect } from "./SettingSelect";
+import { WebUiApi } from "./WebApi"
 async function onSettingWindowCreated(view: Element) {
-  const isEmpty = (value: any) => value === undefined || value === undefined || value === ''
-  //@ts-ignore 等待替换为异步Http获取 带上Token
-  let config = await window.llonebot.getConfig();
-  let ob11Config = { ...config.ob11 };
+  const isEmpty = (value: any) => value === undefined || value === undefined || value === '';
+  let ob11Config = await WebUiApi.getOB11Config();
   const setConfig = (key: string, value: any) => {
-    const configKey = key.split('.');
-    if (key.indexOf('ob11') === 0) {
-      if (configKey.length === 2) ob11Config[configKey[1]] = value;
-      else ob11Config[key] = value;
-    } else {
-      if (configKey.length === 2) { config[configKey[0]][configKey[1]] = value }
-      else { config[key] = value }
-
-      if (!['heartInterval', 'token', 'ffmpeg'].includes(key)) {
-        //@ts-ignore 等待替换为异步Http设置 带上Token
-        window.llonebot.setConfig(false, config)
-      }
-    }
   }
 
   const parser = new DOMParser()
   const doc = parser.parseFromString(
     [
       '<div>',
-      `<setting-section id="llonebot-error">
+      `<setting-section id="napcat-error">
             <setting-panel><pre><code></code></pre></setting-panel>
         </setting-section>`,
       SettingList([
         SettingItem(
-          '<span id="llonebot-update-title">正在检查 LLOneBot 更新</span>',
+          '<span id="napcat-update-title">正在检查 Napcat 更新</span>',
           undefined,
-          SettingButton('请稍候', 'llonebot-update-button', 'secondary'),
+          SettingButton('请稍候', 'napcat-update-button', 'secondary'),
         ),
       ]),
       SettingList([
         SettingItem(
           '启用 HTTP 服务',
           undefined,
-          SettingSwitch('ob11.enableHttp', config.ob11.enableHttp, { 'control-display-id': 'config-ob11-httpPort' }),
+          SettingSwitch('ob11.enableHttp', ob11Config.enableHttp, { 'control-display-id': 'config-ob11-httpPort' }),
         ),
         SettingItem(
           'HTTP 服务监听端口',
           undefined,
-          `<div class="q-input"><input class="q-input__inner" data-config-key="ob11.httpPort" type="number" min="1" max="65534" value="${config.ob11.httpPort}" placeholder="${config.ob11.httpPort}" /></div>`,
+          `<div class="q-input"><input class="q-input__inner" data-config-key="ob11.httpPort" type="number" min="1" max="65534" value="${ob11Config.httpPort}" placeholder="${ob11Config.httpPort}" /></div>`,
           'config-ob11-httpPort',
-          config.ob11.enableHttp,
+          ob11Config.enableHttp,
         ),
         SettingItem(
           '启用 HTTP 心跳',
           undefined,
-          SettingSwitch('ob11.enableHttpHeart', config.ob11.enableHttpHeart, {
+          SettingSwitch('ob11.enableHttpHeart', ob11Config.enableHttpHeart, {
             'control-display-id': 'config-ob11-enableHttpHeart',
           }),
         ),
         SettingItem(
           '启用 HTTP 事件上报',
           undefined,
-          SettingSwitch('ob11.enableHttpPost', config.ob11.enableHttpPost, {
+          SettingSwitch('ob11.enableHttpPost', ob11Config.enableHttpPost, {
             'control-display-id': 'config-ob11-httpHosts',
           }),
         ),
-        `<div class="config-host-list" id="config-ob11-httpHosts" ${config.ob11.enableHttpPost ? '' : 'is-hidden'}>
+        `<div class="config-host-list" id="config-ob11-httpHosts" ${ob11Config.enableHttpPost ? '' : 'is-hidden'}>
                 <setting-item data-direction="row">
                     <div>
                         <setting-text>HTTP 事件上报密钥</setting-text>
                     </div>
                     <div class="q-input">
-                        <input id="config-ob11-httpSecret" class="q-input__inner" data-config-key="ob11.httpSecret" type="text" value="${config.ob11.httpSecret
+                        <input id="config-ob11-httpSecret" class="q-input__inner" data-config-key="ob11.httpSecret" type="text" value="${ob11Config.httpSecret
         }" placeholder="未设置" />
                     </div>
                 </setting-item>
@@ -86,23 +72,23 @@ async function onSettingWindowCreated(view: Element) {
         SettingItem(
           '启用正向 WebSocket 服务',
           undefined,
-          SettingSwitch('ob11.enableWs', config.ob11.enableWs, { 'control-display-id': 'config-ob11-wsPort' }),
+          SettingSwitch('ob11.enableWs', ob11Config.enableWs, { 'control-display-id': 'config-ob11-wsPort' }),
         ),
         SettingItem(
           '正向 WebSocket 服务监听端口',
           undefined,
-          `<div class="q-input"><input class="q-input__inner" data-config-key="ob11.wsPort" type="number" min="1" max="65534" value="${config.ob11.wsPort}" placeholder="${config.ob11.wsPort}" /></div>`,
+          `<div class="q-input"><input class="q-input__inner" data-config-key="ob11.wsPort" type="number" min="1" max="65534" value="${ob11Config.wsPort}" placeholder="${ob11Config.wsPort}" /></div>`,
           'config-ob11-wsPort',
-          config.ob11.enableWs,
+          ob11Config.enableWs,
         ),
         SettingItem(
           '启用反向 WebSocket 服务',
           undefined,
-          SettingSwitch('ob11.enableWsReverse', config.ob11.enableWsReverse, {
+          SettingSwitch('ob11.enableWsReverse', ob11Config.enableWsReverse, {
             'control-display-id': 'config-ob11-wsHosts',
           }),
         ),
-        `<div class="config-host-list" id="config-ob11-wsHosts" ${config.ob11.enableWsReverse ? '' : 'is-hidden'}>
+        `<div class="config-host-list" id="config-ob11-wsHosts" ${ob11Config.enableWsReverse ? '' : 'is-hidden'}>
                 <setting-item data-direction="row">
                     <div>
                         <setting-text>反向 WebSocket 监听地址</setting-text>
@@ -114,12 +100,12 @@ async function onSettingWindowCreated(view: Element) {
         SettingItem(
           ' WebSocket 服务心跳间隔',
           '控制每隔多久发送一个心跳包，单位为毫秒',
-          `<div class="q-input"><input class="q-input__inner" data-config-key="heartInterval" type="number" min="1000" value="${config.heartInterval}" placeholder="${config.heartInterval}" /></div>`,
+          `<div class="q-input"><input class="q-input__inner" data-config-key="heartInterval" type="number" min="1000" value="${ob11Config.heartInterval}" placeholder="${ob11Config.heartInterval}" /></div>`,
         ),
         SettingItem(
           'Access token',
           undefined,
-          `<div class="q-input" style="width:210px;"><input class="q-input__inner" data-config-key="token" type="text" value="${config.token}" placeholder="未设置" /></div>`,
+          `<div class="q-input" style="width:210px;"><input class="q-input__inner" data-config-key="token" type="text" value="${ob11Config.token}" placeholder="未设置" /></div>`,
         ),
         SettingItem(
           '新消息上报格式',
@@ -130,61 +116,23 @@ async function onSettingWindowCreated(view: Element) {
               { text: 'CQ码', value: 'string' },
             ],
             'ob11.messagePostFormat',
-            config.ob11.messagePostFormat,
+            ob11Config.messagePostFormat,
           ),
-        ),
-        SettingItem(
-          'ffmpeg 路径，发送语音、视频需要，同时保证ffprobe和ffmpeg在一起',
-          ` <a href="javascript:LiteLoader.api.openExternal(\'https://llonebot.github.io/zh-CN/guide/ffmpeg\');">下载地址</a> <span id="config-ffmpeg-path-text">, 路径:${!isEmpty(config.ffmpeg) ? config.ffmpeg : '未指定'
-          }</span>`,
-          SettingButton('选择ffmpeg', 'config-ffmpeg-select'),
         ),
         SettingItem(
           '音乐卡片签名地址',
           undefined,
-          `<div class="q-input" style="width:210px;"><input class="q-input__inner" data-config-key="musicSignUrl" type="text" value="${config.musicSignUrl}" placeholder="未设置" /></div>`,
+          `<div class="q-input" style="width:210px;"><input class="q-input__inner" data-config-key="musicSignUrl" type="text" value="${ob11Config.musicSignUrl}" placeholder="未设置" /></div>`,
           'config-musicSignUrl',
         ),
         SettingItem('', undefined, SettingButton('保存', 'config-ob11-save', 'primary')),
       ]),
       SettingList([
         SettingItem(
-          '戳一戳消息, 暂时只支持Windows版的LLOneBot',
-          `重启QQ后生效，如果导致QQ崩溃请勿开启此项, 群戳一戳只能收到群号`,
-          SettingSwitch('enablePoke', config.enablePoke),
-        ),
-        SettingItem(
-          '使用 Base64 编码获取文件',
-          '调用 /get_image、/get_record、/get_file 时，没有 url 时添加 Base64 字段',
-          SettingSwitch('enableLocalFile2Url', config.enableLocalFile2Url),
-        ),
-        SettingItem('调试模式', '开启后上报信息会添加 raw 字段以附带原始信息', SettingSwitch('debug', config.debug)),
-        SettingItem(
           '上报 Bot 自身发送的消息',
           '上报 event 为 message_sent',
-          SettingSwitch('reportSelfMessage', config.reportSelfMessage),
-        ),
-        SettingItem(
-          '自动删除收到的文件',
-          '在收到文件后的指定时间内删除该文件',
-          SettingSwitch('autoDeleteFile', config.autoDeleteFile, {
-            'control-display-id': 'config-auto-delete-file-second',
-          }),
-        ),
-        SettingItem(
-          '自动删除文件时间',
-          '单位为秒',
-          `<div class="q-input"><input class="q-input__inner" data-config-key="autoDeleteFileSecond" type="number" min="1" value="${config.autoDeleteFileSecond}" placeholder="${config.autoDeleteFileSecond}" /></div>`,
-          'config-auto-delete-file-second',
-          config.autoDeleteFile,
-        ),
-        SettingItem('写入日志', `将日志文件写入插件的数据文件夹`, SettingSwitch('log', config.log)),
-        SettingItem(
-          '日志文件目录',
-          //@ts-ignore 等待替换为前端实现
-          `${window.LiteLoader.plugins['LLOneBot'].path.data}/logs`,
-          SettingButton('打开', 'config-open-log-path'),
-        ),
+          SettingSwitch('reportSelfMessage', ob11Config.reportSelfMessage),
+        )
       ]),
       SettingList([
         SettingItem('GitHub 仓库', `https://github.com/`, SettingButton('点个星星', 'open-github')),
@@ -200,11 +148,11 @@ async function onSettingWindowCreated(view: Element) {
   const showError = async () => {
     await new Promise((res) => setTimeout(() => res(true), 1000))
 
-    const errDom = document.querySelector('#llonebot-error') || doc.querySelector('#llonebot-error')
+    const errDom = document.querySelector('#napcat-error') || doc.querySelector('#napcat-error')
     //@ts-ignore 等待替换为前端实现
     const errCodeDom = errDom.querySelector('code')
     //@ts-ignore 等待替换为前端实现
-    const errMsg = await window.llonebot.getError()
+    const errMsg = await window.napcat.getError()
 
     if (!errMsg) {
       //@ts-ignore 等待修复
@@ -353,9 +301,9 @@ async function onSettingWindowCreated(view: Element) {
 
   // 保存按钮
   doc.querySelector('#config-ob11-save')?.addEventListener('click', () => {
-    config.ob11 = ob11Config
+    ob11Config = ob11Config
     //@ts-ignore 等待替换为前端实现
-    window.llonebot.setConfig(false, config)
+    window.napcat.setConfig(false, config)
     // window.location.reload();
     showError().then()
     alert('保存成功')
@@ -367,8 +315,8 @@ async function onSettingWindowCreated(view: Element) {
   // 更新逻辑
   //@ts-ignore 等待修复
   async function checkVersionFunc(ResultVersion: CheckVersion) {
-    const titleDom = view.querySelector<HTMLSpanElement>('#llonebot-update-title')!
-    const buttonDom = view.querySelector<HTMLButtonElement>('#llonebot-update-button')!
+    const titleDom = view.querySelector<HTMLSpanElement>('#napcat-update-title')!
+    const buttonDom = view.querySelector<HTMLButtonElement>('#napcat-update-button')!
 
     if (ResultVersion.version === '') {
       titleDom.innerHTML = '检查更新失败'
@@ -376,7 +324,7 @@ async function onSettingWindowCreated(view: Element) {
 
       buttonDom.addEventListener('click', async () => {
         //@ts-ignore 等待替换为前端实现
-        window.llonebot.checkVersion().then(checkVersionFunc)
+        window.napcat.checkVersion().then(checkVersionFunc)
       })
 
       return
@@ -392,7 +340,7 @@ async function onSettingWindowCreated(view: Element) {
       const update = async () => {
         buttonDom.innerHTML = '正在更新中...'
         //@ts-ignore 等待替换为前端实现
-        const result = await window.llonebot.updateLLOneBot()
+        const result = await window.napcat.updateNapcat()
         if (result) {
           buttonDom.innerHTML = '更新完成，请重启'
         } else {
@@ -405,12 +353,12 @@ async function onSettingWindowCreated(view: Element) {
     }
   }
   //@ts-ignore 等待替换为前端实现
-  window.llonebot.checkVersion().then(checkVersionFunc)
+  window.napcat.checkVersion().then(checkVersionFunc)
   window.addEventListener('beforeunload', (event) => {
-    if (JSON.stringify(ob11Config) === JSON.stringify(config.ob11)) return
-    config.ob11 = ob11Config
+    if (JSON.stringify(ob11Config) === JSON.stringify(ob11Config)) return
+    ob11Config = ob11Config
     //@ts-ignore 等待替换为前端实现
-    window.llonebot.setConfig(true, config)
+    window.napcat.setConfig(true, config)
   })
 }
 export { onSettingWindowCreated }
