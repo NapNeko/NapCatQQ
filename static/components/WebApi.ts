@@ -1,9 +1,9 @@
 export interface OB11Config {
-    httpHost: string;
+    httpHost: "",
     httpPort: number;
     httpPostUrls: string[];
-    httpSecret: string;
-    wsHost: string;
+    httpSecret: "",
+    wsHost: "",
     wsPort: number;
     wsReverseUrls: string[];
     enableHttp: boolean;
@@ -16,8 +16,8 @@ export interface OB11Config {
     enableLocalFile2Url: boolean;
     debug: boolean;
     heartInterval: number;
-    token: string;
-    musicSignUrl: string;
+    token: "",
+    musicSignUrl: "",
 }
 
 class WebUiApiWrapper {
@@ -26,7 +26,28 @@ class WebUiApiWrapper {
 
     }
     public async getOB11Config(): Promise<OB11Config> {
-        return {} as OB11Config;
+        // 返回示例配置
+        return {
+            httpHost: "",
+            httpPort: 3000,
+            httpPostUrls: [],
+            httpSecret: "",
+            wsHost: "",
+            wsPort: 3000,
+            wsReverseUrls: [],
+            enableHttp: false,
+            enableHttpHeart: false,
+            enableHttpPost: false,
+            enableWs: false,
+            enableWsReverse: false,
+            messagePostFormat: 'array',
+            reportSelfMessage: false,
+            enableLocalFile2Url: false,
+            debug: false,
+            heartInterval: 60000,
+            token: "",
+            musicSignUrl: "",
+        };
     }
 }
 export const WebUiApi = new WebUiApiWrapper();

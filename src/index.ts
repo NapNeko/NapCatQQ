@@ -8,15 +8,16 @@ import { checkVersion } from '@/common/utils/version';
 import { log, logDebug, logError, LogLevel, setLogLevel } from '@/common/utils/log';
 import { NapCatOnebot11 } from '@/onebot11/main';
 import { hookApi } from '@/core/external/hook';
-
+import { InitWebUi } from './webui/index';
 program
   .option('-q, --qq <type>', 'QQ号')
   .parse(process.argv);
 
+InitWebUi();
 const cmdOptions = program.opts();
 // console.log(process.argv);
 
-for(let k=0; k<30; k++) {
+for (let k = 0; k < 30; k++) {
   new Promise((r, j) => {
     hookApi.getRKey();
   }).then();
@@ -61,8 +62,8 @@ const quickLoginQQ = cmdOptions.qq;
 // });
 if (quickLoginQQ) {
   log('正在快速登录 ', quickLoginQQ);
-  napCatCore.quickLogin(quickLoginQQ).then(res=>{
-    if (res.loginErrorInfo.errMsg){
+  napCatCore.quickLogin(quickLoginQQ).then(res => {
+    if (res.loginErrorInfo.errMsg) {
       logError('快速登录错误:', res.loginErrorInfo.errMsg);
     }
   }).catch((e) => {
