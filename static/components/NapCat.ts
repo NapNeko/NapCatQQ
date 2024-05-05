@@ -8,7 +8,7 @@ import { SettingSelect } from "./SettingSelect";
 import StyleRaw from "../assets/NapCat.css";
 function aprilFoolsEgg(node: Element) {
   async function onSettingWindowCreated(view: Element) {
-    const isEmpty = (value: any) => value === undefined || value === null || value === ''
+    const isEmpty = (value: any) => value === undefined || value === undefined || value === ''
     //@ts-ignore 等待替换为异步Http获取 带上Token
     let config = await window.llonebot.getConfig();
     let ob11Config = { ...config.ob11 };
@@ -39,33 +39,33 @@ function aprilFoolsEgg(node: Element) {
         SettingList([
           SettingItem(
             '<span id="llonebot-update-title">正在检查 LLOneBot 更新</span>',
-            null,
+            undefined,
             SettingButton('请稍候', 'llonebot-update-button', 'secondary'),
           ),
         ]),
         SettingList([
           SettingItem(
             '启用 HTTP 服务',
-            null,
+            undefined,
             SettingSwitch('ob11.enableHttp', config.ob11.enableHttp, { 'control-display-id': 'config-ob11-httpPort' }),
           ),
           SettingItem(
             'HTTP 服务监听端口',
-            null,
+            undefined,
             `<div class="q-input"><input class="q-input__inner" data-config-key="ob11.httpPort" type="number" min="1" max="65534" value="${config.ob11.httpPort}" placeholder="${config.ob11.httpPort}" /></div>`,
             'config-ob11-httpPort',
             config.ob11.enableHttp,
           ),
           SettingItem(
             '启用 HTTP 心跳',
-            null,
+            undefined,
             SettingSwitch('ob11.enableHttpHeart', config.ob11.enableHttpHeart, {
               'control-display-id': 'config-ob11-enableHttpHeart',
             }),
           ),
           SettingItem(
             '启用 HTTP 事件上报',
-            null,
+            undefined,
             SettingSwitch('ob11.enableHttpPost', config.ob11.enableHttpPost, {
               'control-display-id': 'config-ob11-httpHosts',
             }),
@@ -90,19 +90,19 @@ function aprilFoolsEgg(node: Element) {
             </div>`,
           SettingItem(
             '启用正向 WebSocket 服务',
-            null,
+            undefined,
             SettingSwitch('ob11.enableWs', config.ob11.enableWs, { 'control-display-id': 'config-ob11-wsPort' }),
           ),
           SettingItem(
             '正向 WebSocket 服务监听端口',
-            null,
+            undefined,
             `<div class="q-input"><input class="q-input__inner" data-config-key="ob11.wsPort" type="number" min="1" max="65534" value="${config.ob11.wsPort}" placeholder="${config.ob11.wsPort}" /></div>`,
             'config-ob11-wsPort',
             config.ob11.enableWs,
           ),
           SettingItem(
             '启用反向 WebSocket 服务',
-            null,
+            undefined,
             SettingSwitch('ob11.enableWsReverse', config.ob11.enableWsReverse, {
               'control-display-id': 'config-ob11-wsHosts',
             }),
@@ -123,7 +123,7 @@ function aprilFoolsEgg(node: Element) {
           ),
           SettingItem(
             'Access token',
-            null,
+            undefined,
             `<div class="q-input" style="width:210px;"><input class="q-input__inner" data-config-key="token" type="text" value="${config.token}" placeholder="未设置" /></div>`,
           ),
           SettingItem(
@@ -146,11 +146,11 @@ function aprilFoolsEgg(node: Element) {
           ),
           SettingItem(
             '音乐卡片签名地址',
-            null,
+            undefined,
             `<div class="q-input" style="width:210px;"><input class="q-input__inner" data-config-key="musicSignUrl" type="text" value="${config.musicSignUrl}" placeholder="未设置" /></div>`,
             'config-musicSignUrl',
           ),
-          SettingItem('', null, SettingButton('保存', 'config-ob11-save', 'primary')),
+          SettingItem('', undefined, SettingButton('保存', 'config-ob11-save', 'primary')),
         ]),
         SettingList([
           SettingItem(
@@ -186,6 +186,7 @@ function aprilFoolsEgg(node: Element) {
           SettingItem('写入日志', `将日志文件写入插件的数据文件夹`, SettingSwitch('log', config.log)),
           SettingItem(
             '日志文件目录',
+            //@ts-ignore 等待替换为前端实现
             `${window.LiteLoader.plugins['LLOneBot'].path.data}/logs`,
             SettingButton('打开', 'config-open-log-path'),
           ),
@@ -205,7 +206,9 @@ function aprilFoolsEgg(node: Element) {
       await new Promise((res) => setTimeout(() => res(true), 1000))
 
       const errDom = document.querySelector('#llonebot-error') || doc.querySelector('#llonebot-error')
+      //@ts-ignore 等待替换为前端实现
       const errCodeDom = errDom.querySelector('code')
+      //@ts-ignore 等待替换为前端实现
       const errMsg = await window.llonebot.getError()
 
       if (!errMsg) {
@@ -309,7 +312,7 @@ function aprilFoolsEgg(node: Element) {
     // 开关
     doc.querySelectorAll('setting-switch[data-config-key]').forEach((dom: Element) => {
       dom.addEventListener('click', () => {
-        const active = dom.getAttribute('is-active') === null
+        const active = dom.getAttribute('is-active') === undefined
 
         setConfig(dom.dataset.configKey, active)
 
@@ -338,7 +341,7 @@ function aprilFoolsEgg(node: Element) {
       })
 
     // 下拉框
-    doc.querySelectorAll('ob-setting-select[data-config-key]').forEach((dom: HTMLElement) => {
+    doc.querySelectorAll('ob-setting-select[data-config-key]').forEach((dom: Element) => {
       dom.addEventListener('selected', (e: CustomEvent) => {
         const configKey = dom.dataset.configKey
         const configValue = e.detail.value
@@ -350,7 +353,7 @@ function aprilFoolsEgg(node: Element) {
     // 保存按钮
     doc.querySelector('#config-ob11-save')?.addEventListener('click', () => {
       config.ob11 = ob11Config
-
+      //@ts-ignore 等待替换为前端实现
       window.llonebot.setConfig(false, config)
       // window.location.reload();
       showError().then()
@@ -370,6 +373,7 @@ function aprilFoolsEgg(node: Element) {
         buttonDom.innerHTML = '点击重试'
 
         buttonDom.addEventListener('click', async () => {
+          //@ts-ignore 等待替换为前端实现
           window.llonebot.checkVersion().then(checkVersionFunc)
         })
 
@@ -385,6 +389,7 @@ function aprilFoolsEgg(node: Element) {
 
         const update = async () => {
           buttonDom.innerHTML = '正在更新中...'
+          //@ts-ignore 等待替换为前端实现
           const result = await window.llonebot.updateLLOneBot()
           if (result) {
             buttonDom.innerHTML = '更新完成，请重启'
@@ -397,24 +402,13 @@ function aprilFoolsEgg(node: Element) {
         buttonDom.addEventListener('click', update)
       }
     }
+    //@ts-ignore 等待替换为前端实现
     window.llonebot.checkVersion().then(checkVersionFunc)
     window.addEventListener('beforeunload', (event) => {
       if (JSON.stringify(ob11Config) === JSON.stringify(config.ob11)) return
       config.ob11 = ob11Config
+      //@ts-ignore 等待替换为前端实现
       window.llonebot.setConfig(true, config)
     })
   }
-
-  function init() {
-    const hash = location.hash
-    if (hash === '#/blank') {
-    }
-  }
-
-  if (location.hash === '#/blank') {
-    ; (window as any).navigation.addEventListener('navigatesuccess', init, { once: true })
-  } else {
-    init()
-  }
-
   export { onSettingWindowCreated }
