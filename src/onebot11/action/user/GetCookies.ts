@@ -1,6 +1,6 @@
 import { OB11User } from '../../types';
 import { OB11Constructor } from '../../constructor';
-import { friends } from '@/core/data';
+import { friends, selfInfo } from '@/core/data';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { NTQQUserApi } from '@/core/apis';
@@ -44,7 +44,7 @@ export class GetCookies extends BaseAction<Payload, Response> {
     if (!_PSkey || !_Skey) {
       throw new Error('获取Cookies失败');
     }
-    const cookies = `pskey=${_PSkey}; skey=${_Skey}`;
+    const cookies = `p_skey=${_PSkey}; skey=${_Skey}; p_uin=o${selfInfo.uin}`;
     return {
       cookies
     };
