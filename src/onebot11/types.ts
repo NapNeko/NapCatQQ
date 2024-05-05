@@ -77,6 +77,7 @@ export interface OB11Message {
   self_id?: number,
   time: number,
   message_id: number,
+  message_seq: number, // 和message_id一样
   real_id: number,
   user_id: number,
   group_id?: number,
