@@ -1,7 +1,3 @@
-'use strict';
-
-Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-
 const SettingList = (items, title, isCollapsible = false, direction = "column") => {
   return `<setting-section ${title && !isCollapsible ? `data-title="${title}"` : ""}>
       <setting-panel>
@@ -314,24 +310,13 @@ async function onSettingWindowCreated(view) {
     dom.container.appendChild(dom.deleteBtn);
     return dom.container;
   };
-  const buildHostList = (hosts, type, inputAttr = {}) => {
-    const result = [];
-    hosts.forEach((host, index) => {
-      result.push(buildHostListItem(type, host, index, inputAttr));
-    });
-    return result;
-  };
   const addReverseHost = (type, doc2 = document, inputAttr = {}) => {
     const hostContainerDom = doc2.body.querySelector(`#config-ob11-${type}-list`);
     hostContainerDom?.appendChild(buildHostListItem(type, "", ob11Config[type].length, inputAttr));
     ob11Config[type].push("");
   };
   const initReverseHost = (type, doc2 = document) => {
-    const hostContainerDom = doc2.body?.querySelector(`#config-ob11-${type}-list`);
-    [...hostContainerDom.childNodes].forEach((dom) => dom.remove());
-    buildHostList(ob11Config[type], type).forEach((dom) => {
-      hostContainerDom?.appendChild(dom);
-    });
+    doc2.body?.querySelector(`#config-ob11-${type}-list`);
   };
   initReverseHost("httpHosts", doc);
   initReverseHost("wsHosts", doc);
@@ -381,6 +366,9 @@ async function onSettingWindowCreated(view) {
     WebUiApi.setOB11Config(ob11Config);
     alert("保存成功");
   });
+  doc.body.childNodes.forEach((node) => {
+    view.appendChild(node);
+  });
 }
 
-exports.onSettingWindowCreated = onSettingWindowCreated;
+export { onSettingWindowCreated };

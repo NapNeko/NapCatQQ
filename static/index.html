@@ -14,8 +14,11 @@
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <!-- 渲染脚本 -->
     <script>
-        const { onSettingWindowCreated } = await import("./assets/renderer.js");
-        onSettingWindowCreated(document.querySelector("body"));
+        async function InitWebUi() {
+            const { onSettingWindowCreated } = await import("./assets/renderer.js");
+            onSettingWindowCreated(document.querySelector("body"));
+        }
+        InitWebUi();
     </script>
 
     <title>NapCat-WebUi</title>
