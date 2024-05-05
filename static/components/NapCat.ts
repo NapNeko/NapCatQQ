@@ -7,7 +7,7 @@ import { WebUiApi } from "./WebApi"
 async function onSettingWindowCreated(view: Element) {
   const isEmpty = (value: any) => value === undefined || value === undefined || value === '';
   let ob11Config = await WebUiApi.getOB11Config();
-  const setConfig = (key: string, value: any) => {
+  const setOB11Config = (key: string, value: any) => {
   }
 
   const parser = new DOMParser()
@@ -228,6 +228,7 @@ async function onSettingWindowCreated(view: Element) {
   }
   const initReverseHost = (type: string, doc: Document = document) => {
     const hostContainerDom = doc.body?.querySelector(`#config-ob11-${type}-list`);
+    //@ts-ignore 等待修复
     [...hostContainerDom.childNodes].forEach((dom) => dom.remove());
     buildHostList(ob11Config[type], type).forEach((dom) => {
       hostContainerDom?.appendChild(dom);
@@ -260,8 +261,7 @@ async function onSettingWindowCreated(view: Element) {
     dom.addEventListener('click', () => {
       const active = dom.getAttribute('is-active') === undefined
       //@ts-ignore 等待修复
-      setConfig(dom.dataset.configKey, active)
-
+      setOB11Config(dom.dataset.configKey, active)
       if (active) dom.setAttribute('is-active', '')
       else dom.removeAttribute('is-active')
       //@ts-ignore 等待修复
@@ -284,81 +284,26 @@ async function onSettingWindowCreated(view: Element) {
         const configKey = dom.dataset.configKey
         const configValue = Type === 'number' ? (parseInt((dom as HTMLInputElement).value) >= 1 ? parseInt((dom as HTMLInputElement).value) : 1) : (dom as HTMLInputElement).value
 
-        setConfig(configKey, configValue)
+        setOB11Config(configKey, configValue)
       })
     })
 
   // 下拉框
   doc.querySelectorAll('ob-setting-select[data-config-key]').forEach((dom: Element) => {
+    //@ts-ignore 等待修复
     dom?.addEventListener('selected', (e: CustomEvent) => {
       //@ts-ignore 等待修复
       const configKey = dom.dataset.configKey
       const configValue = e.detail.value
-
-      setConfig(configKey, configValue)
+      setOB11Config(configKey, configValue);
     })
   })
 
   // 保存按钮
   doc.querySelector('#config-ob11-save')?.addEventListener('click', () => {
-    ob11Config = ob11Config
-    //@ts-ignore 等待替换为前端实现
-    window.napcat.setConfig(false, config)
-    // window.location.reload();
-    showError().then()
-    alert('保存成功')
-  })
-
-  doc.body.childNodes.forEach((node) => {
-    view.appendChild(node)
-  })
-  // 更新逻辑
-  //@ts-ignore 等待修复
-  async function checkVersionFunc(ResultVersion: CheckVersion) {
-    const titleDom = view.querySelector<HTMLSpanElement>('#napcat-update-title')!
-    const buttonDom = view.querySelector<HTMLButtonElement>('#napcat-update-button')!
-
-    if (ResultVersion.version === '') {
-      titleDom.innerHTML = '检查更新失败'
-      buttonDom.innerHTML = '点击重试'
-
-      buttonDom.addEventListener('click', async () => {
-        //@ts-ignore 等待替换为前端实现
-        window.napcat.checkVersion().then(checkVersionFunc)
-      })
-
-      return
-    }
-    if (!ResultVersion.result) {
-      titleDom.innerHTML = '当前已是最新版本 v' + ResultVersion.version
-      buttonDom.innerHTML = '无需更新'
-    } else {
-      titleDom.innerHTML = '已检测到最新版本 v' + ResultVersion.version
-      buttonDom.innerHTML = '点击更新'
-      buttonDom.dataset.type = 'primary'
-
-      const update = async () => {
-        buttonDom.innerHTML = '正在更新中...'
-        //@ts-ignore 等待替换为前端实现
-        const result = await window.napcat.updateNapcat()
-        if (result) {
-          buttonDom.innerHTML = '更新完成，请重启'
-        } else {
-          buttonDom.innerHTML = '更新失败，前往仓库下载'
-        }
-
-        buttonDom.removeEventListener('click', update)
-      }
-      buttonDom.addEventListener('click', update)
-    }
-  }
-  //@ts-ignore 等待替换为前端实现
-  window.napcat.checkVersion().then(checkVersionFunc)
-  window.addEventListener('beforeunload', (event) => {
-    if (JSON.stringify(ob11Config) === JSON.stringify(ob11Config)) return
-    ob11Config = ob11Config
-    //@ts-ignore 等待替换为前端实现
-    window.napcat.setConfig(true, config)
+    WebUiApi.setOB11Config(ob11Config);
+    showError().then();
+    alert('保存成功');
   })
 }
-export { onSettingWindowCreated }
+export { onSettingWindowCreated };
