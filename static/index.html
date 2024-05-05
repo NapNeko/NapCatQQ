@@ -3,9 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NapCat-WebUi</title>
+    <base href="{ BASE_URL }" />
+    <link rel="stylesheet" href="/plugin/inject/color.css" />
+    <link rel="stylesheet" href="/plugin/inject/style.css" />
+    <link rel="stylesheet" href="/plugin/inject/webcomponents.css" />
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="/plugin/inject/ipc.js"></script>
+    <script src="/plugin/inject/llapi.js"></script>
+    <script src="/plugin/inject/iframe.js"></script>
+    <title>Plugin iframe</title>
 </head>
 <body>
-    
+<script>
+if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.body.classList.add('q-theme-tokens-dark');
+}
+</script>
 </body>
+<!--{ INJECT_JS }-->
 </html>
