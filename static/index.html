@@ -1,21 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <base href="{ BASE_URL }" />
-    <link rel="stylesheet" href="/plugin/inject/color.css" />
-    <link rel="stylesheet" href="/plugin/inject/style.css" />
-    <link rel="stylesheet" href="/plugin/inject/webcomponents.css" />
+    <!-- 源样式 -->
+    <link rel="stylesheet" href="./assets/NapCat.css" />
+    <!-- 修补样式 -->
+    <link rel="stylesheet" href="./assets/webcomponents.css" />
+    <link rel="stylesheet" href="./assets/style.css" />
+    <link rel="stylesheet" href="./assets/color.css" />
+    <!-- 脚手架 -->
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script src="/plugin/inject/iframe.js"></script>
-    <title>Plugin iframe</title>
+    <!-- 渲染脚本 -->
+    <script>
+        async function InitWebUi() {
+            const { onSettingWindowCreated } = await import("./assets/renderer.js");
+            onSettingWindowCreated(document.querySelector("body"));
+        }
+        InitWebUi();
+    </script>
+
+    <title>NapCat-WebUi</title>
 </head>
+
 <body>
-<script>
-if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    document.body.classList.add('q-theme-tokens-dark');
-}
-</script>
+    <script>
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.body.classList.add('q-theme-tokens-dark');
+        }
+    </script>
 </body>
+
 </html>
