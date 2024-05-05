@@ -212,10 +212,13 @@ function aprilFoolsEgg(node: Element) {
       const errMsg = await window.llonebot.getError()
 
       if (!errMsg) {
+        //@ts-ignore 等待修复
         errDom.classList.remove('show')
       } else {
+        //@ts-ignore 等待修复
         errDom.classList.add('show')
       }
+      //@ts-ignore 等待修复
       errCodeDom.innerHTML = errMsg
     }
     showError().then()
@@ -281,8 +284,8 @@ function aprilFoolsEgg(node: Element) {
       ob11Config[type].push('');
     }
     const initReverseHost = (type: string, doc: Document = document) => {
-      const hostContainerDom = doc.body.querySelector(`#config-ob11-${type}-list`)
-        ;[...hostContainerDom.childNodes].forEach((dom) => dom.remove())
+      const hostContainerDom = doc.body?.querySelector(`#config-ob11-${type}-list`);
+      [...hostContainerDom.childNodes].forEach((dom) => dom.remove());
       buildHostList(ob11Config[type], type).forEach((dom) => {
         hostContainerDom?.appendChild(dom);
       })
@@ -313,13 +316,14 @@ function aprilFoolsEgg(node: Element) {
     doc.querySelectorAll('setting-switch[data-config-key]').forEach((dom: Element) => {
       dom.addEventListener('click', () => {
         const active = dom.getAttribute('is-active') === undefined
-
+        //@ts-ignore 等待修复
         setConfig(dom.dataset.configKey, active)
 
         if (active) dom.setAttribute('is-active', '')
         else dom.removeAttribute('is-active')
-
+        //@ts-ignore 等待修复
         if (!isEmpty(dom.dataset.controlDisplayId)) {
+          //@ts-ignore 等待修复
           const displayDom = document.querySelector(`#${dom.dataset.controlDisplayId}`)
           if (active) displayDom?.removeAttribute('is-hidden')
           else displayDom?.setAttribute('is-hidden', '')
@@ -333,6 +337,7 @@ function aprilFoolsEgg(node: Element) {
       .forEach((dom: Element) => {
         dom.addEventListener('input', () => {
           const Type = dom.getAttribute('type')
+          //@ts-ignore 等待修复
           const configKey = dom.dataset.configKey
           const configValue = Type === 'number' ? (parseInt((dom as HTMLInputElement).value) >= 1 ? parseInt((dom as HTMLInputElement).value) : 1) : (dom as HTMLInputElement).value
 
@@ -342,7 +347,8 @@ function aprilFoolsEgg(node: Element) {
 
     // 下拉框
     doc.querySelectorAll('ob-setting-select[data-config-key]').forEach((dom: Element) => {
-      dom.addEventListener('selected', (e: CustomEvent) => {
+      dom?.addEventListener('selected', (e: CustomEvent) => {
+        //@ts-ignore 等待修复
         const configKey = dom.dataset.configKey
         const configValue = e.detail.value
 
@@ -364,6 +370,7 @@ function aprilFoolsEgg(node: Element) {
       view.appendChild(node)
     })
     // 更新逻辑
+    //@ts-ignore 等待修复
     async function checkVersionFunc(ResultVersion: CheckVersion) {
       const titleDom = view.querySelector<HTMLSpanElement>('#llonebot-update-title')!
       const buttonDom = view.querySelector<HTMLButtonElement>('#llonebot-update-button')!
@@ -411,4 +418,5 @@ function aprilFoolsEgg(node: Element) {
       window.llonebot.setConfig(true, config)
     })
   }
-  export { onSettingWindowCreated }
+}
+export { onSettingWindowCreated }
