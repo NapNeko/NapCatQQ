@@ -50,6 +50,14 @@
             gap: 15px;
         }
 
+        .qrcode {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            text-align: center;
+        }
+
         button {
             width: 100%;
             padding: 10px;
@@ -111,6 +119,23 @@
 
         .quick-login-option:hover {
             background-color: #e6f0ff;
+        }
+
+        #quick-login-select {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        #quick-login-select option {
+            background-color: #fff;
+            color: #333;
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
