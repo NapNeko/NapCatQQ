@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebUi - Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f2f5;
+        }
+
+        .login-container {
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            max-width: 400px;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            width: 90%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .error-message {
+            color: red;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <h2>Token Login</h2>
+        <form id="token-form" onsubmit="event.preventDefault(); submitToken();">
+            <div class="input-group">
+                <label for="token-input">Enter Token:</label>
+                <input type="text" id="token-input" required>
+            </div>
+            <p class="error-message hidden" id="error-message"></p>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+    <script>
+        function submitToken() {
+            const tokenInput = document.getElementById('token-input');
+            const errorMessage = document.getElementById('error-message');
+
+            if (tokenInput.value.trim() === '') {
+                errorMessage.textContent = 'Please enter a token.';
+                errorMessage.classList.remove('hidden');
+            } else {
+                errorMessage.textContent = '';
+                errorMessage.classList.add('hidden');
+                // Implement your login logic here, e.g. send the token to the server for validation
+                alert('Token submitted! Logging in...');
+            }
+        }
+    </script>
+</body>
+
+</html>
