@@ -5,7 +5,7 @@ export default defineConfig({
         target: 'esnext',
         minify: false,
         lib: {
-          entry: 'src/NapCat.ts',
+          entry: 'ui/NapCat.ts',
           formats: ['es'],
           fileName: () => 'renderer.js',
         }
