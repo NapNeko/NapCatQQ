@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NapCat - WebUi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f2f5;
+        }
+
+        .login-container {
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            max-width: 400px;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .login-methods {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .login-method {
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .login-method.active {
+            background-color: #e6f0ff;
+            color: #007BFF;
+        }
+
+        .login-form,
+        .qrcode {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .qrcode {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            text-align: center;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #qrcode-canvas {
+            width: 200px;
+            height: 200px;
+        }
+
+        #quick-login-dropdown {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        #quick-login-dropdown:hover {
+            background-color: #e6f0ff;
+        }
+
+        #quick-login-options {
+            position: absolute;
+            top: calc(100% + 5px);
+            left: 0;
+            right: 0;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+            display: none;
+        }
+
+        #quick-login-options.show {
+            display: block;
+        }
+
+        .quick-login-option {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quick-login-option:hover {
+            background-color: #e6f0ff;
+        }
+
+        #quick-login-select {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        #quick-login-select option {
+            background-color: #fff;
+            color: #333;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+</head>
+
+<body>
+    <div class="login-container">
+        <h2>Login</h2>
+        <div class="login-methods">
+            <button id="quick-login" class="login-method active">Quick Login</button>
+            <button id="qrcode-login" class="login-method">QR Code</button>
+        </div>
+        <div id="quick-login-dropdown" class="login-form">
+            <select id="quick-login-select" onchange="selectAccount(this.value)">
+                <option value="Account 1">Account 1</option>
+                <option value="Account 2">Account 2</option>
+                <option value="Account 3">Account 3</option>
+            </select>
+        </div>
+        <div id="qrcode" class="qrcode" style="display: none;">
+            <canvas id="qrcode-canvas"></canvas>
+        </div>
+        <p id="message"></p>
+    </div>
+    <script>
+        document.getElementById('quick-login').addEventListener('click', function () {
+            let quickLoginOptions = document.querySelector('#quick-login-dropdown');
+            let qrcode = document.querySelector('#qrcode');
+            quickLoginOptions.style.display = 'flex';
+            qrcode.style.display = 'none';
+        });
+
+        function selectAccount(accountName) {
+            alert(`Logging in with ${accountName}...`);
+            // Implement your login logic here
+            document.getElementById('quick-login-options').classList.remove('show');
+        }
+        document.getElementById('qrcode-login').addEventListener('click', function () {
+            let loginForm = document.querySelector('#quick-login-dropdown');
+            let qrcode = document.querySelector('#qrcode');
+            loginForm.style.display = 'none';
+            qrcode.style.display = 'flex';
+            let qrData = 'https://yourapp.com/login?code=123456';
+            generateQrCode(qrData, document.querySelector('#qrcode-canvas'));
+        });
+
+        function generateQrCode(data, canvas) {
+            QRCode.toCanvas(canvas, data, function (error) {
+                if (error) console.error(error);
+                console.log('QR Code generated!');
+            });
+        }
+    </script>
+</body>
+
+</html>
