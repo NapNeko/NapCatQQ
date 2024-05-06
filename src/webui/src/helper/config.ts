@@ -27,15 +27,17 @@ async function tryUsePort(port: number, tryCount: number = 0): Promise<number> {
 export interface WebUiConfig {
     port: number;
     token: string;
+    loginRate: number
 }
 
 // 读取当前目录下名为 webui.json 的配置文件，如果不存在则创建初始化配置文件
-export async function config(): Promise<WebUiConfig> {
+export async function WebUIConfig(): Promise<WebUiConfig> {
     try {
         let configPath = resolve(__dirname, "./webui.json");
         let config: WebUiConfig = {
             port: 6099,
-            token: Math.random().toString(36).slice(2)//生成随机密码
+            token: Math.random().toString(36).slice(2),//生成随机密码
+            loginRate: 3
         };
 
         if (!existsSync(configPath)) {
