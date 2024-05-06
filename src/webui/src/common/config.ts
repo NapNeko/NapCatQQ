@@ -1,51 +1,56 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-
 const net = require('net');
 
-async function tryUsePort(port: number) {
-    function portUsed(port: number) {
-        return new Promise((resolve, reject) => {
-            let server = net.createServer().listen(port);
-            server.on('listening', function () {
-                server.close();
-                resolve(port);
-            });
-            server.on('error', function (err: any) {
-                if (err.code == 'EADDRINUSE') {
-                    resolve(err);
-                }
-            });
-        });
-    }
+// 限制尝试端口的次数，避免死循环
+const MAX_PORT_TRY = 100;
 
-    let res = await portUsed(port);
-    if (res instanceof Error) {
-        port++;
-        return await tryUsePort(port);
-    }
-    return port;
+async function tryUsePort(port: number, tryCount: number = 0): Promise<number> {
+    return new Promise((resolve, reject) => {
+        let server = net.createServer().listen(port);
+        server.on('listening', function () {
+            server.close();
+            resolve(port);
+        });
+        server.on('error', function (err: any) {
+            if (err.code === 'EADDRINUSE' && tryCount < MAX_PORT_TRY) {
+                resolve(tryUsePort(port + 1, tryCount + 1));
+            } else if (err.code === 'EADDRINUSE' && tryCount >= MAX_PORT_TRY) {
+                reject("端口尝试失败");
+            } else {
+                reject(err);
+            }
+        });
+    });
 }
 
-
-//读取当前目录下名为 webui.json 的配置文件 如果不存在则创建初始化配置文件
 export interface WebUiConfig {
     port: number;
 }
+
+// 读取当前目录下名为 webui.json 的配置文件，如果不存在则创建初始化配置文件
 export async function config(): Promise<WebUiConfig> {
     try {
+        let configPath = resolve(__dirname, "./webui.json");
         let config: WebUiConfig = {
             port: 6099,
         };
-        if (!existsSync(resolve(__dirname, "./webui.json"))) {
-            writeFileSync(resolve(__dirname, "./webui.json"), JSON.stringify(config, null, 4));
+
+        if (!existsSync(configPath)) {
+            writeFileSync(configPath, JSON.stringify(config, null, 4));
         }
-        config = JSON.parse(readFileSync(resolve(__dirname, "./webui.json"), "utf-8")) as WebUiConfig;
-        //修正端口占用情况
-        config.port = await tryUsePort(config.port);
-        return config;
+
+        let fileContent = readFileSync(configPath, "utf-8");
+        let parsedConfig = JSON.parse(fileContent) as WebUiConfig;
+
+        // 修正端口占用情况
+        const [err, data] = await tryUsePort(parsedConfig.port).then(data => [null, data as number]).catch(err => [err, null]);
+        if (err) {
+            //一般没那么离谱 如果真有这么离谱 考虑下 向外抛出异常
+        }
+        return parsedConfig;
     } catch (e) {
-        //console.error("读取配置文件失败", e);
+        console.error("读取配置文件失败", e);
     }
-    return {} as WebUiConfig;
+    return {} as WebUiConfig; // 理论上这行代码到不了，为了保持函数完整性而保留
 }
