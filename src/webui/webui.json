@@ -1,3 +1,6 @@
 {
-    "port":6099
+    "port": 6099,
+    "token": "random",
+    "loginRate": 3
+    
 }
