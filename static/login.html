@@ -92,10 +92,11 @@
                         },
                         body: JSON.stringify({ token: tokenInput.value })
                     });
-                    let retCode = response.json().code;
-                    let retCredential = response.json().data.JSON;
+                    let responseJson = response.json();
+                    let retCode = responseJson.json().code;
                     if (retCode === 0) {
                         //登录成功
+                        let retCredential = responseJson.data.Credential;
                         localStorage.setItem('auth', retCredential);
                         window.location.href = './config.html';
                     }
