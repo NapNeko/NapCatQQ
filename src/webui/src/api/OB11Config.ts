@@ -5,6 +5,14 @@ import { resolve } from "node:path";
 import { OB11Config } from "@/webui/ui/components/WebApi";
 const isEmpty = (data: any) => data === undefined || data === null || data === '';
 export const OB11GetConfigHandler: RequestHandler = async (req, res) => {
+    let isLogin = await DataRuntime.getQQLoginStatus();
+    if(!isLogin){
+        res.send({
+            code: -1,
+            message: 'Not Login'
+        });
+        return;
+    }
     const uin = await DataRuntime.getQQLoginUin();
     let configFilePath = resolve(__dirname, `./config/onebot_${uin}.json`);
     let data: OB11Config;
