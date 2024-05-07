@@ -1,6 +1,48 @@
 import { RequestHandler } from "express";
 import { resolve } from "path";
-
-export const GetLogHandler: RequestHandler = (req, res) => {
-    //res.sendFile(resolve(__dirname, "../../../logs/napcat.log"));
+import { readdir, stat } from "fs/promises";
+import { existsSync } from "fs";
+export const GetLogFileListHandler: RequestHandler = async (req, res) => {
+    try {
+        let LogsPath = resolve(__dirname, "./logs/");
+        let LogFiles = await readdir(LogsPath);
+        res.json({
+            code: 0,
+            data: LogFiles
+        });
+    } catch (error) {
+        res.json({ code: -1, msg: "Failed to retrieve log file list." });
+    }
 };
+
+export const GetLogFileHandler: RequestHandler = async (req, res) => {
+    let LogsPath = resolve(__dirname, "./logs/");
+    let LogFile = req.query.file as string;
+
+    if (!isValidFileName(LogFile)) {
+        res.json({ code: -1, msg: "LogFile is not safe" });
+        return;
+    }
+
+    let filePath = `${LogsPath}/${LogFile}`;
+    if (!existsSync(filePath)) {
+        res.status(404).json({ code: -1, msg: "LogFile does not exist" });
+        return;
+    }
+
+    try {
+        let fileStats = await stat(filePath);
+        if (!fileStats.isFile()) {
+            res.json({ code: -1, msg: "LogFile must be a file" });
+            return;
+        }
+
+        res.sendFile(filePath);
+    } catch (error) {
+        res.json({ code: -1, msg: "Failed to send log file." });
+    }
+};
+export function isValidFileName(fileName: string): boolean {
+    const invalidChars = /[\.\:\*\?\"\<\>\|\/\\]/;
+    return !invalidChars.test(fileName);
+}
