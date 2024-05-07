@@ -2,7 +2,8 @@ let LoginRuntime = {
     LoginCurrentTime: Date.now(),
     LoginCurrentRate: 0,
     QQLoginStatus: false, //得去那边注册个回调刷新
-    QQQRCodeURL: ""
+    QQQRCodeURL: "",
+    QQLoginUin: 0
 }
 export const DataRuntime = {
     checkLoginRate: async function (RateLimit: number): Promise<boolean> {
@@ -31,5 +32,13 @@ export const DataRuntime = {
     ,
     getQQLoginQrcodeURL: async function (): Promise<string> {
         return LoginRuntime.QQQRCodeURL;
+    }
+    ,
+    setQQLoginUin: async function (uin: number): Promise<void> {
+        LoginRuntime.QQLoginUin = uin;
+    }
+    ,
+    getQQLoginUin: async function (): Promise<number> {
+        return LoginRuntime.QQLoginUin;
     }
 }
