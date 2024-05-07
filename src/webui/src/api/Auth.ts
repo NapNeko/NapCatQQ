@@ -7,7 +7,7 @@ export const LoginHandler: RequestHandler = async (req, res) => {
     const { token } = req.body;
     if (isEmpty(token)) {
         res.json({
-            code: 0,
+            code: -1,
             message: 'token is empty'
         });
         return;
@@ -15,8 +15,16 @@ export const LoginHandler: RequestHandler = async (req, res) => {
     let config = await WebUIConfig();
     if (!DataRuntime.checkLoginRate(config.loginRate)) {
         res.json({
-            code: 0,
+            code: -1,
             message: 'login rate limit'
+        });
+        return;
+    }
+    //验证config.token是否等于token
+    if (config.token !== token) {
+        res.json({
+            code: -1,
+            message: 'token is invalid'
         });
         return;
     }
