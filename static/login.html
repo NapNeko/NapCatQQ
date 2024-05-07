@@ -93,7 +93,7 @@
                         body: JSON.stringify({ token: tokenInput.value })
                     });
                     let responseJson = response.json();
-                    let retCode = responseJson.json().code;
+                    let retCode = responseJson.code;
                     if (retCode === 0) {
                         //登录成功
                         let retCredential = responseJson.data.Credential;
