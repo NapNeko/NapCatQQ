@@ -35,7 +35,19 @@ export const QQCheckLoginStatusHandler: RequestHandler = (req, res) => {
         }
     });
 };
-export const QQQuickLoginHandler: RequestHandler = async (req, res) => {
+export const QQSetQuickLoginHandler: RequestHandler = async (req, res) => {
+    // 未完成
+    const { token } = req.body;
+    if (token) {
+        const isLogin = await DataRuntime.getQQLoginStatus();
+    }
+    // 未实现
+    res.send({
+        code: 0,
+        message: 'success'
+    });
+}
+export const QQGetQuickLoginListHandler: RequestHandler = async (req, res) => {
     // 未完成
     const { token } = req.body;
     if (token) {
