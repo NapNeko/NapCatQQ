@@ -161,6 +161,59 @@
         <p id="message"></p>
     </div>
     <script>
+        async function CheckQQLoginStatus(retCredential) {
+            let QQLoginResponse = await fetch('/api/QQLogin/CheckLoginStatus', {
+                method: 'POST',
+                headers: {
+                    'Authorization': "Bearer " + retCredential,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (QQLoginResponse.status == 200) {
+                let QQLoginResponseJson = await QQLoginResponse.json();
+                if (QQLoginResponseJson.code == 0) {
+                    if (QQLoginResponseJson.data.isLogin) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+            return false;
+        }
+        async function GetQQQucickLoginList(retCredential) {
+            let QQLoginResponse = await fetch('/api/QQLogin/GetQQQucickLoginList', {
+                method: 'POST',
+                headers: {
+                    'Authorization': "Bearer " + retCredential,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (QQLoginResponse.status == 200) {
+                let QQLoginResponseJson = await QQLoginResponse.json();
+                if (QQLoginResponseJson.code == 0) {
+                    return QQLoginResponseJson?.data;
+                }
+            }
+            return [];
+        }
+        async function GetQQQucickLoginList(retCredential) {
+            let QQLoginResponse = await fetch('/api/QQLogin/GetQQLoginQrcode', {
+                method: 'POST',
+                headers: {
+                    'Authorization': "Bearer " + retCredential,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (QQLoginResponse.status == 200) {
+                let QQLoginResponseJson = await QQLoginResponse.json();
+                if (QQLoginResponseJson.code == 0) {
+                    return QQLoginResponseJson?.data;
+                }
+            }
+            return "";
+        }
+
         document.getElementById('quick-login').addEventListener('click', function () {
             let quickLoginOptions = document.querySelector('#quick-login-dropdown');
             let qrcode = document.querySelector('#qrcode');
