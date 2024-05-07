@@ -28,7 +28,7 @@ export const LoginHandler: RequestHandler = async (req, res) => {
         });
         return;
     }
-    let signCredential = Buffer.from(JSON.stringify(AuthHelper.signCredential(config.token))).toString('base64');
+    let signCredential = Buffer.from(JSON.stringify(await AuthHelper.signCredential(config.token))).toString('base64');
     res.json({
         code: 0,
         message: 'success',
