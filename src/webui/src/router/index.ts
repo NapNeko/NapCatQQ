@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { AuthHelper } from '../../src/helper/SignToken';
 import { NextFunction, Request, Response } from 'express';
+import { QQLoginRouter } from "./QQLogin";
 import { AuthRouter } from "./auth";
 const router = Router();
 export async function AuthApi(req: Request, res: Response, next: NextFunction) {
@@ -45,4 +46,5 @@ router.all("/test", (req, res) => {
     });
 });
 router.use('/auth', AuthRouter);//挂载权限路由
+router.use('/QQLogin',QQLoginRouter);
 export { router as ALLRouter }

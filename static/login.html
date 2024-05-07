@@ -85,24 +85,42 @@
                 let data = "";
 
                 try {
-                    let response = await fetch('/api/auth/login', {
+                    let loginResponse = await fetch('/api/auth/login', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({ token: tokenInput.value })
                     });
-                    const responseJson = await response.json();
-                    let retCode = responseJson.code;
+                    const loginResponseJson = await loginResponse.json();
+                    let retCode = loginResponseJson.code;
                     if (retCode === 0) {
                         //登录成功
-                        let retCredential = responseJson.data.Credential;
+                        let retCredential = loginResponseJson.data.Credential;
                         localStorage.setItem('auth', retCredential);
-                        window.location.href = './config.html';
+                        let QQLoginResponse = await fetch('/api/QQLogin/CheckLoginStatus', {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': "Bearer " + retCredential,
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        if (QQLoginResponse.status == 200) {
+                            let QQLoginResponseJson = await QQLoginResponse.json();
+                            if (QQLoginResponseJson.code == 0) {
+                                if (QQLoginResponseJson.data.isLogin) {
+                                    window.location.href = './config.html';
+                                } else {
+                                    window.location.href = './QQLogin.html';
+                                }
+                            }
+                        }
+
+
                         alert("登录成功即将跳转");
                     } else {
-                        console.log(responseJson.message);
-                        alert(responseJson.message);
+                        console.log(loginResponseJson.message);
+                        alert(loginResponseJson.message);
                     }
 
                 } catch (e) {
