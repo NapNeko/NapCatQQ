@@ -63,6 +63,32 @@ const quickLoginQQ = cmdOptions.qq;
 //   console.error('登录失败', result);
 //   napCatCore.qrLogin().then().catch(console.error);
 // });
+napCatCore.getQuickLoginList().then((res) => {
+  // 遍历 res.LocalLoginInfoList[x].isQuickLogin是否可以可以 res.LocalLoginInfoList[x].uin 转为string 加入string[] 最后遍历完成调用DataRuntime.setQQQuickLoginList
+  DataRuntime.setQQQuickLoginList(res.LocalLoginInfoList.filter((item) => item.isQuickLogin).map((item) => item.uin.toString()));
+});
+
+DataRuntime.setQQQuickLogin(async (uin: string) => {
+  let QuickLogin: Promise<{ result: boolean, message: string }> = new Promise((resolve, reject) => {
+    if (quickLoginQQ) {
+      log('正在快速登录 ', quickLoginQQ);
+      napCatCore.quickLogin(quickLoginQQ).then(res => {
+        if (res.loginErrorInfo.errMsg) {
+          resolve({ result: false, message: res.loginErrorInfo.errMsg });
+        }
+        resolve({ result: true, message: '' });
+      }).catch((e) => {
+        console.error(e);
+        resolve({ result: false, message: '快速登录发生错误' });
+      });
+    } else {
+      resolve({ result: false, message: '快速登录失败' });
+    }
+  });
+  let result = await QuickLogin;
+  return result;
+});
+
 if (quickLoginQQ) {
   log('正在快速登录 ', quickLoginQQ);
   napCatCore.quickLogin(quickLoginQQ).then(res => {
