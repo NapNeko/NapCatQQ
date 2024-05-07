@@ -35,4 +35,32 @@ export const OB11GetConfigHandler: RequestHandler = async (req, res) => {
     return;
 }
 export const OB11SetConfigHandler: RequestHandler = async (req, res) => {
+    let isLogin = await DataRuntime.getQQLoginStatus();
+    if(!isLogin){
+        res.send({
+            code: -1,
+            message: 'Not Login'
+        });
+        return;
+    }
+    if(isEmpty(req.body.config)){
+        res.send({
+            code: -1,
+            message: 'config is empty'
+        });
+        return;
+   }
+   let configFilePath = resolve(__dirname, `./config/onebot_${await DataRuntime.getQQLoginUin()}.json`);
+   try {
+       require(configFilePath);
+   }
+   catch (e) {
+       configFilePath = resolve(__dirname, `./config/onebot.json`);
+   }
+   require('fs').writeFileSync(configFilePath, JSON.stringify(req.body.config, null, 4));
+   res.send({
+       code: 0,
+       message: 'success'
+   });
+   return;
 }
