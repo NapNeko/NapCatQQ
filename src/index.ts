@@ -14,7 +14,7 @@ program
   .option('-q, --qq <type>', 'QQ号')
   .parse(process.argv);
 
-//InitWebUi();
+InitWebUi();
 const cmdOptions = program.opts();
 // console.log(process.argv);
 
