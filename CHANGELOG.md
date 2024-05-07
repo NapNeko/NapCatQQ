@@ -3,6 +3,7 @@
 QQ Version: Windows 9.9.9-23361 / Linux 3.2.7-23361
 
 ## 修复与优化
+* 修复了一个导致每个图片都自动下载的 bug
 * 再一次修复图片URL,支持 Win/Linux X64 获取Rkey，暂时不支持arm64
 
 ## 新增与调整
