@@ -26,7 +26,7 @@ export async function InitWebUi() {
     //挂载API接口
     app.all('/api', APIRouter);
     app.listen(config.port, async () => {
-        console.log(`[NapCat] [WebUi] Current WebUi is running at IP:6099`);
+        console.log(`[NapCat] [WebUi] Current WebUi is running at IP:${config.port}`);
     })
 
 }
