@@ -24,4 +24,12 @@ export const DataRuntime = {
     setQQLoginStatus: async function (status: boolean): Promise<void> {
         LoginRuntime.QQLoginStatus = status;
     }
+    ,
+    setQQLoginQrcodeURL: async function (url: string): Promise<void> {
+        LoginRuntime.QQQRCodeURL = url;
+    }
+    ,
+    getQQLoginQrcodeURL: async function (): Promise<string> {
+        return LoginRuntime.QQQRCodeURL;
+    }
 }
