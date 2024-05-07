@@ -13,7 +13,7 @@ export const LoginHandler: RequestHandler = async (req, res) => {
         return;
     }
     let config = await WebUIConfig();
-    if (!DataRuntime.checkLoginRate(config.loginRate)) {
+    if (!await DataRuntime.checkLoginRate(config.loginRate)) {
         res.json({
             code: -1,
             message: 'login rate limit'
