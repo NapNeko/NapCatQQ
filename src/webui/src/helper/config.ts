@@ -36,17 +36,15 @@ async function tryUsePort(port: number, tryCount: number = 0): Promise<number> {
     });
 }
 
-export interface WebUiConfig {
+export interface WebUiConfigType {
     port: number;
     token: string;
     loginRate: number
 }
-
-// 读取当前目录下名为 webui.json 的配置文件，如果不存在则创建初始化配置文件
-export async function WebUIConfig(): Promise<WebUiConfig> {
+async function WebUIConfig(): Promise<WebUiConfigType> {
     try {
         let configPath = resolve(__dirname, "./config/webui.json");
-        let config: WebUiConfig = {
+        let config: WebUiConfigType = {
             port: 6099,
             token: Math.random().toString(36).slice(2),//生成随机密码
             loginRate: 3
@@ -57,7 +55,7 @@ export async function WebUIConfig(): Promise<WebUiConfig> {
         }
 
         let fileContent = readFileSync(configPath, "utf-8");
-        let parsedConfig = JSON.parse(fileContent) as WebUiConfig;
+        let parsedConfig = JSON.parse(fileContent) as WebUiConfigType;
 
         // 修正端口占用情况
         const [err, data] = await tryUsePort(parsedConfig.port).then(data => [null, data as number]).catch(err => [err, null]);
@@ -69,5 +67,8 @@ export async function WebUIConfig(): Promise<WebUiConfig> {
     } catch (e) {
         console.error("读取配置文件失败", e);
     }
-    return {} as WebUiConfig; // 理论上这行代码到不了，为了保持函数完整性而保留
+    return {} as WebUiConfigType; // 理论上这行代码到不了，为了保持函数完整性而保留
 }
+
+// 读取当前目录下名为 webui.json 的配置文件，如果不存在则创建初始化配置文件
+export const WebUiConfig = await WebUIConfig();

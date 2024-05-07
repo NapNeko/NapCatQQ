@@ -71,6 +71,7 @@
         </form>
     </div>
     <script>
+        //待封装整理
         async function submitToken() {
             const tokenInput = document.getElementById('token-input');
             const errorMessage = document.getElementById('error-message');
@@ -115,8 +116,6 @@
                                 }
                             }
                         }
-
-
                         alert("登录成功即将跳转");
                     } else {
                         console.log(loginResponseJson.message);

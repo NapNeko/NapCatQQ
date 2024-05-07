@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import { AuthHelper } from './src/helper/SignToken';
 import { resolve } from 'node:path';
 import { ALLRouter } from './src/router';
-import { WebUIConfig } from './src/helper/config';
+import { WebUiConfig } from './src/helper/config';
 const app = express();
 /**
  * 初始化并启动WebUI服务。
@@ -12,7 +12,7 @@ const app = express();
  * @returns {Promise<void>} 无返回值。
  */
 export async function InitWebUi() {
-    let config = await WebUIConfig();
+    let config = WebUiConfig;
     app.use(express.json());
     // 初始服务
     app.all('/', (_req, res) => {
