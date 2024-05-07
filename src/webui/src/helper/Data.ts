@@ -22,12 +22,14 @@ let LoginRuntime: LoginRuntimeType = {
 }
 export const DataRuntime = {
     checkLoginRate: async function (RateLimit: number): Promise<boolean> {
+        LoginRuntime.LoginCurrentRate++;
+        //console.log(RateLimit, LoginRuntime.LoginCurrentRate, Date.now() - LoginRuntime.LoginCurrentTime);
         if (Date.now() - LoginRuntime.LoginCurrentTime > 1000 * 60) {
             LoginRuntime.LoginCurrentRate = 0;//超出时间重置限速
+            LoginRuntime.LoginCurrentTime = Date.now();
             return true;
         }
         if (LoginRuntime.LoginCurrentRate <= RateLimit) {
-            LoginRuntime.LoginCurrentRate++;
             return true;
         }
         return false;
