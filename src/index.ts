@@ -9,6 +9,7 @@ import { log, logDebug, logError, LogLevel, setLogLevel } from '@/common/utils/l
 import { NapCatOnebot11 } from '@/onebot11/main';
 import { hookApi } from '@/core/external/hook';
 import { InitWebUi } from './webui/index';
+import { DataRuntime } from './webui/src/helper/Data';
 program
   .option('-q, --qq <type>', 'QQ号')
   .parse(process.argv);
@@ -43,9 +44,11 @@ checkVersion().then((remoteVersion: string) => {
 new NapCatOnebot11();
 napCatCore.onLoginSuccess(() => {
   console.log('登录成功!');
+  DataRuntime.setQQLoginStatus(true);
   postLoginStatus();
 });
-const showQRCode = (qrCodeData: { url: string, base64: string, buffer: Buffer }) => {
+const showQRCode = async (qrCodeData: { url: string, base64: string, buffer: Buffer }) => {
+  await DataRuntime.setQQLoginQrcodeURL(qrCodeData.url);
   console.log('请扫描下面的二维码，然后在手Q上授权登录：');
   const qrcodePath = path.join(__dirname, 'qrcode.png');
   qrcode.generate(qrCodeData.url, { small: true }, (res) => {
