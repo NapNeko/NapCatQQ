@@ -85,25 +85,29 @@
                 let data = "";
 
                 try {
-                    response = await fetch('/api/auth/login', {
+                    let response = await fetch('/api/auth/login', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({ token: tokenInput.value })
                     });
-                    let responseJson = response.json();
+                    const responseJson = await response.json();
                     let retCode = responseJson.code;
                     if (retCode === 0) {
                         //登录成功
                         let retCredential = responseJson.data.Credential;
                         localStorage.setItem('auth', retCredential);
                         window.location.href = './config.html';
+                        alert("登录成功即将跳转");
+                    } else {
+                        console.log(responseJson.message);
+                        alert(responseJson.message);
                     }
-                    alert("登录失败,数据异常");
+
                 } catch (e) {
                     alert("登录失败");
-                    console.log("请求异常",e);
+                    console.log("请求异常", e);
                 }
 
             }
