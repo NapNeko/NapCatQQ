@@ -49,6 +49,7 @@ export async function WebUIConfig(): Promise<WebUiConfig> {
 
         // 修正端口占用情况
         const [err, data] = await tryUsePort(parsedConfig.port).then(data => [null, data as number]).catch(err => [err, null]);
+        config.port = data;
         if (err) {
             //一般没那么离谱 如果真有这么离谱 考虑下 向外抛出异常
         }
