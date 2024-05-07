@@ -41,7 +41,7 @@ export interface WebUiConfigType {
     token: string;
     loginRate: number
 }
-async function WebUIConfig(): Promise<WebUiConfigType> {
+async function GetWebUIConfig(): Promise<WebUiConfigType> {
     try {
         let configPath = resolve(__dirname, "./config/webui.json");
         let config: WebUiConfigType = {
@@ -71,4 +71,4 @@ async function WebUIConfig(): Promise<WebUiConfigType> {
 }
 
 // 读取当前目录下名为 webui.json 的配置文件，如果不存在则创建初始化配置文件
-export const WebUiConfig = await WebUIConfig();
+export const WebUiConfig = await GetWebUIConfig();
