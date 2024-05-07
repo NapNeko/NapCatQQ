@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import { DataRuntime } from "../helper/Data";
+import { sleep } from "@/common/utils/helper";
 const isEmpty = (data: any) => data === undefined || data === null || data === '';
 export const QQGetQRcodeHandler: RequestHandler = async (req, res) => {
     if (await DataRuntime.getQQLoginStatus()) {
@@ -36,26 +37,41 @@ export const QQCheckLoginStatusHandler: RequestHandler = (req, res) => {
     });
 };
 export const QQSetQuickLoginHandler: RequestHandler = async (req, res) => {
-    // 未完成
-    const { token } = req.body;
-    if (token) {
-        const isLogin = await DataRuntime.getQQLoginStatus();
+    let { uin } = req.body;
+    let isLogin = await DataRuntime.getQQLoginStatus();
+    if (isLogin) {
+        res.send({
+            code: -1,
+            message: 'QQ Is Logined'
+        });
+        return;
     }
-    // 未实现
+    if (isEmpty(uin)) {
+        res.send({
+            code: -1,
+            message: 'uin is empty'
+        });
+        return;
+    }
+    let ret = await DataRuntime.getQQQuickLogin(uin);
+    if (!ret.result) {
+        res.send({
+            code: -1,
+            message: ret.message
+        });
+        return;
+    }
+    //本来应该验证 但是http不宜这么搞 建议前端验证
+    //isLogin = await DataRuntime.getQQLoginStatus();
     res.send({
         code: 0,
         message: 'success'
     });
 }
 export const QQGetQuickLoginListHandler: RequestHandler = async (req, res) => {
-    // 未完成
-    const { token } = req.body;
-    if (token) {
-        const isLogin = await DataRuntime.getQQLoginStatus();
-    }
-    // 未实现
+    const quickLoginList = await DataRuntime.getQQQuickLoginList();
     res.send({
         code: 0,
-        message: 'success'
+        data: quickLoginList
     });
 }
