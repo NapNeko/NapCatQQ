@@ -85,15 +85,23 @@
                 let data = "";
 
                 try {
-                    data = await fetch('/api/auth/login', {
+                    response = await fetch('/api/auth/login', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({ token: tokenInput.value })
                     });
-                    console.log(data);
+                    let retCode = response.json().code;
+                    let retCredential = response.json().data.JSON;
+                    if (retCode === 0) {
+                        //登录成功
+                        localStorage.setItem('auth', retCredential);
+                        window.location.href = './config.html';
+                    }
+                    alert("登录失败,数据异常");
                 } catch (e) {
+                    alert("登录失败");
                     console.log("请求异常",e);
                 }
 
