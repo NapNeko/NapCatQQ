@@ -132,7 +132,7 @@ class WebUiApiOB11ConfigWrapper {
           "Authorization": "Bearer " + this.retCredential,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(config)
+        body: JSON.stringify({ config: JSON.stringify(config) })
       }
     );
     if (ConfigResponse.status == 200) {
@@ -353,7 +353,7 @@ async function onSettingWindowCreated(view) {
   });
   doc.querySelectorAll("setting-switch[data-config-key]").forEach((dom) => {
     dom.addEventListener("click", () => {
-      const active = dom.getAttribute("is-active") === void 0;
+      const active = dom.getAttribute("is-active") == void 0;
       setOB11Config(dom.dataset.configKey, active);
       if (active)
         dom.setAttribute("is-active", "");

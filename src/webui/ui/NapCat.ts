@@ -242,8 +242,8 @@ async function onSettingWindowCreated(view: Element) {
   // 开关
   doc.querySelectorAll('setting-switch[data-config-key]').forEach((dom: Element) => {
     dom.addEventListener('click', () => {
-      const active = dom.getAttribute('is-active') === undefined
-      //@ts-ignore 等待修复
+      const active = dom.getAttribute('is-active') == undefined;
+      //@ts-ignore 扩展
       setOB11Config(dom.dataset.configKey, active)
       if (active) dom.setAttribute('is-active', '')
       else dom.removeAttribute('is-active')
