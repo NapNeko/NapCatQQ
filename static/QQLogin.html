@@ -214,6 +214,27 @@
             }
             return [];
         }
+        async function SetQuickLogin(uin, retCredential) {
+            let QQLoginResponse = await fetch('/api/QQLogin/SetQuickLogin', {
+                method: 'POST',
+                headers: {
+                    'Authorization': "Bearer " + retCredential,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    uin: uin
+                })
+            });
+            if (QQLoginResponse.status == 200) {
+                let QQLoginResponseJson = await QQLoginResponse.json();
+                if (QQLoginResponseJson.code == 0) {
+                    return { result: true, errMsg: "" };
+                } else {
+                    return { result: false, errMsg: QQLoginResponseJson.message };
+                }
+            }
+            return { result: false, errMsg: "接口异常" };;
+        }
         //心跳轮询CheckQQLoginStatus 是否已经进入登录状态，如果为true进入./config.html
         async function HeartBeat() {
             let isLogined = await CheckQQLoginStatus(localStorage.getItem('auth'));
@@ -240,8 +261,16 @@
             qrcode.style.display = 'none';
         });
 
-        function selectAccount(accountName) {
-            alert(`Logging in with ${accountName}...`);
+        async function selectAccount(accountName) {
+            //alert(`Logging in with ${accountName}...`);
+            const { result, errMsg } = await SetQuickLogin(accountName, localStorage.getItem('auth'));
+            if (result) {
+                alert("登录成功即将跳转");
+                window.location.href = './config.html';
+            } else {
+                alert("登录失败," + errMsg);
+            }
+            //await (localStorage.getItem('auth'))
             document.getElementById('quick-login-options').classList.remove('show');
         }
         document.getElementById('qrcode-login').addEventListener('click', function () {
