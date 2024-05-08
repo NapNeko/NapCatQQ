@@ -8,7 +8,11 @@ async function onSettingWindowCreated(view: Element) {
   const isEmpty = (value: any) => value === undefined || value === undefined || value === '';
   let ob11Config: OB11Config = await OB11ConfigWrapper.GetOB11Config();
   const setOB11Config = (key: string, value: any) => {
-    console.log(key, value);
+    const configKey = key.split('.');
+    if (configKey.length === 2) {
+      ob11Config[configKey[1]] = value;
+    }
+    OB11ConfigWrapper.SetOB11Config(ob11Config);
   }
 
   const parser = new DOMParser();

@@ -37,13 +37,13 @@ export const OB11GetConfigHandler: RequestHandler = async (req, res) => {
 }
 export const OB11SetConfigHandler: RequestHandler = async (req, res) => {
     let isLogin = await DataRuntime.getQQLoginStatus();
-    if (!isLogin) {
-        res.send({
-            code: -1,
-            message: 'Not Login'
-        });
-        return;
-    }
+    // if (!isLogin) {
+    //     res.send({
+    //         code: -1,
+    //         message: 'Not Login'
+    //     });
+    //     return;
+    // }
     if (isEmpty(req.body.config)) {
         res.send({
             code: -1,
@@ -53,7 +53,7 @@ export const OB11SetConfigHandler: RequestHandler = async (req, res) => {
     }
     let configFilePath = resolve(__dirname, `./config/onebot_${await DataRuntime.getQQLoginUin()}.json`);
     try {
-        require(configFilePath);
+        readFileSync(configFilePath);
     }
     catch (e) {
         configFilePath = resolve(__dirname, `./config/onebot.json`);
