@@ -106,12 +106,12 @@ async function onSettingWindowCreated(view: Element) {
         SettingItem(
           ' WebSocket 服务心跳间隔',
           '控制每隔多久发送一个心跳包，单位为毫秒',
-          `<div class="q-input"><input class="q-input__inner" data-config-key="heartInterval" type="number" min="1000" value="${ob11Config.heartInterval}" placeholder="${ob11Config.heartInterval}" /></div>`,
+          `<div class="q-input"><input class="q-input__inner" data-config-key="ob11.heartInterval" type="number" min="1000" value="${ob11Config.heartInterval}" placeholder="${ob11Config.heartInterval}" /></div>`,
         ),
         SettingItem(
           'Access token',
           undefined,
-          `<div class="q-input" style="width:210px;"><input class="q-input__inner" data-config-key="token" type="text" value="${ob11Config.token}" placeholder="未设置" /></div>`,
+          `<div class="q-input" style="width:210px;"><input class="q-input__inner" data-config-key="ob11.token" type="text" value="${ob11Config.token}" placeholder="未设置" /></div>`,
         ),
         SettingItem(
           '新消息上报格式',
@@ -128,8 +128,8 @@ async function onSettingWindowCreated(view: Element) {
         SettingItem(
           '音乐卡片签名地址',
           undefined,
-          `<div class="q-input" style="width:210px;"><input class="q-input__inner" data-config-key="musicSignUrl" type="text" value="${ob11Config.musicSignUrl}" placeholder="未设置" /></div>`,
-          'config-musicSignUrl',
+          `<div class="q-input" style="width:210px;"><input class="q-input__inner" data-config-key="ob11.musicSignUrl" type="text" value="${ob11Config.musicSignUrl}" placeholder="未设置" /></div>`,
+          'ob11.musicSignUrl',
         ),
         SettingItem('', undefined, SettingButton('保存', 'config-ob11-save', 'primary')),
       ]),
@@ -137,7 +137,7 @@ async function onSettingWindowCreated(view: Element) {
         SettingItem(
           '上报 Bot 自身发送的消息',
           '上报 event 为 message_sent',
-          SettingSwitch('reportSelfMessage', ob11Config.reportSelfMessage),
+          SettingSwitch('ob11.reportSelfMessage', ob11Config.reportSelfMessage),
         )
       ]),
       SettingList([
@@ -213,10 +213,12 @@ async function onSettingWindowCreated(view: Element) {
   }
   const initReverseHost = (type: string, doc: Document = document) => {
     const hostContainerDom = doc.body?.querySelector(`#config-ob11-${type}-list`);
-    /*[...hostContainerDom.childNodes].forEach((dom) => dom.remove());
-    buildHostList(ob11Config[type], type).forEach((dom) => {
-      hostContainerDom?.appendChild(dom);
-    })*/
+    if (hostContainerDom) {
+      [...hostContainerDom.childNodes].forEach((dom) => dom.remove());
+      buildHostList(ob11Config[type], type).forEach((dom) => {
+        hostContainerDom?.appendChild(dom);
+      })
+    }
   }
   initReverseHost('httpHosts', doc);
   initReverseHost('wsHosts', doc);
