@@ -102,40 +102,55 @@ const SettingSelect = (items, configKey, configValue) => {
 </ob-setting-select>`;
 };
 
-class WebUiApiWrapper {
-  token = "";
-  async setOB11Config(config) {
+class WebUiApiOB11ConfigWrapper {
+  retCredential = "";
+  async Init(Credential) {
+    this.retCredential = Credential;
   }
-  async getOB11Config() {
-    return {
-      httpHost: "",
-      httpPort: 3e3,
-      httpPostUrls: [],
-      httpSecret: "",
-      wsHost: "",
-      wsPort: 3e3,
-      wsReverseUrls: [],
-      enableHttp: false,
-      enableHttpHeart: false,
-      enableHttpPost: false,
-      enableWs: false,
-      enableWsReverse: false,
-      messagePostFormat: "array",
-      reportSelfMessage: false,
-      enableLocalFile2Url: false,
-      debug: false,
-      heartInterval: 6e4,
-      token: "",
-      musicSignUrl: ""
-    };
+  async GetOB11Config() {
+    let ConfigResponse = await fetch("/api/OB11Config/GetConfig", {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + this.retCredential,
+        "Content-Type": "application/json"
+      }
+    });
+    if (ConfigResponse.status == 200) {
+      let ConfigResponseJson = await ConfigResponse.json();
+      if (ConfigResponseJson.code == 0) {
+        return ConfigResponseJson?.data;
+      }
+    }
+    return {};
+  }
+  async SetOB11Config(config) {
+    let ConfigResponse = await fetch(
+      "/api/OB11Config/SetConfig",
+      {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + this.retCredential,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(config)
+      }
+    );
+    if (ConfigResponse.status == 200) {
+      let ConfigResponseJson = await ConfigResponse.json();
+      if (ConfigResponseJson.code == 0) {
+        return true;
+      }
+    }
+    return false;
   }
 }
-const WebUiApi = new WebUiApiWrapper();
+const OB11ConfigWrapper = new WebUiApiOB11ConfigWrapper();
 
 async function onSettingWindowCreated(view) {
   const isEmpty = (value) => value === void 0 || value === void 0 || value === "";
-  let ob11Config = await WebUiApi.getOB11Config();
+  let ob11Config = await OB11ConfigWrapper.GetOB11Config();
   const setOB11Config = (key, value) => {
+    console.log(key, value);
   };
   const parser = new DOMParser();
   const doc = parser.parseFromString(
@@ -146,9 +161,9 @@ async function onSettingWindowCreated(view) {
         </setting-section>`,
       SettingList([
         SettingItem(
-          '<span id="napcat-update-title">正在检查 Napcat 更新</span>',
+          '<span id="napcat-update-title">Napcat</span>',
           void 0,
-          SettingButton("请稍候", "napcat-update-button", "secondary")
+          SettingButton("V1.3.0", "napcat-update-button", "secondary")
         )
       ]),
       SettingList([
@@ -261,8 +276,8 @@ async function onSettingWindowCreated(view) {
         )
       ]),
       SettingList([
-        SettingItem("GitHub 仓库", `https://github.com/`, SettingButton("点个星星", "open-github")),
-        SettingItem("NapCat 文档", `https://`, SettingButton("看看文档", "open-docs")),
+        SettingItem("GitHub 仓库", `https://github.com/NapNeko/NapCatQQ`, SettingButton("点个星星", "open-github")),
+        SettingItem("NapCat 文档", ``, SettingButton("看看文档", "open-docs")),
         SettingItem("Telegram 群", `https://t.me/+nLZEnpne-pQ1OWFl`, SettingButton("进去逛逛", "open-telegram")),
         SettingItem("QQ 群", `545402644`, SettingButton("我要进去", "open-qq-group"))
       ]),
@@ -271,7 +286,7 @@ async function onSettingWindowCreated(view) {
     "text/html"
   );
   doc.querySelector("#open-github")?.addEventListener("click", () => {
-    window.open("https://github.com/", "_blank");
+    window.open("https://napneko.github.io/", "_blank");
   });
   doc.querySelector("#open-telegram")?.addEventListener("click", () => {
     window.open("https://t.me/+nLZEnpne-pQ1OWFl");
@@ -280,7 +295,7 @@ async function onSettingWindowCreated(view) {
     window.open("https://qm.qq.com/q/bDnHRG38aI");
   });
   doc.querySelector("#open-docs")?.addEventListener("click", () => {
-    window.open("https://github.io/");
+    window.open("https://github.com/NapNeko/NapCatQQ");
   });
   const buildHostListItem = (type, host, index, inputAttrs = {}) => {
     const dom = {
@@ -335,7 +350,7 @@ async function onSettingWindowCreated(view) {
   doc.querySelectorAll("setting-switch[data-config-key]").forEach((dom) => {
     dom.addEventListener("click", () => {
       const active = dom.getAttribute("is-active") === void 0;
-      setOB11Config(dom.dataset.configKey);
+      setOB11Config(dom.dataset.configKey, active);
       if (active)
         dom.setAttribute("is-active", "");
       else
@@ -352,18 +367,20 @@ async function onSettingWindowCreated(view) {
   doc.querySelectorAll("setting-item .q-input input.q-input__inner[data-config-key]").forEach((dom) => {
     dom.addEventListener("input", () => {
       const Type = dom.getAttribute("type");
-      dom.dataset.configKey;
-      Type === "number" ? parseInt(dom.value) >= 1 ? parseInt(dom.value) : 1 : dom.value;
+      const configKey = dom.dataset.configKey;
+      const configValue = Type === "number" ? parseInt(dom.value) >= 1 ? parseInt(dom.value) : 1 : dom.value;
+      setOB11Config(configKey, configValue);
     });
   });
   doc.querySelectorAll("ob-setting-select[data-config-key]").forEach((dom) => {
     dom?.addEventListener("selected", (e) => {
-      dom.dataset.configKey;
-      e.detail.value;
+      const configKey = dom.dataset.configKey;
+      const configValue = e.detail.value;
+      setOB11Config(configKey, configValue);
     });
   });
   doc.querySelector("#config-ob11-save")?.addEventListener("click", () => {
-    WebUiApi.setOB11Config(ob11Config);
+    OB11ConfigWrapper.SetOB11Config(ob11Config);
     alert("保存成功");
   });
   doc.body.childNodes.forEach((node) => {
