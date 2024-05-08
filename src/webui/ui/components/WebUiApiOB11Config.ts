@@ -1,12 +1,31 @@
-import { OB11Config } from "../components/WebApi";
-
-
+export interface OB11Config {
+    [key: string]: any,
+    httpHost: "",
+    httpPort: number;
+    httpPostUrls: string[];
+    httpSecret: "",
+    wsHost: "",
+    wsPort: number;
+    wsReverseUrls: string[];
+    enableHttp: boolean;
+    enableHttpHeart: boolean;
+    enableHttpPost: boolean;
+    enableWs: boolean;
+    enableWsReverse: boolean;
+    messagePostFormat: 'array' | 'string';
+    reportSelfMessage: boolean;
+    enableLocalFile2Url: boolean;
+    debug: boolean;
+    heartInterval: number;
+    token: "",
+    musicSignUrl: "",
+}
 class WebUiApiOB11ConfigWrapper {
     private retCredential: string = "";
     async Init(Credential: string) {
         this.retCredential = Credential;
     }
-    async GetConfig(): Promise<OB11Config> {
+    async GetOB11Config(): Promise<OB11Config> {
         let ConfigResponse = await fetch('/api/OB11Config/GetConfig', {
             method: 'POST',
             headers: {
@@ -22,7 +41,7 @@ class WebUiApiOB11ConfigWrapper {
         }
         return {} as OB11Config;
     }
-    async SetConfig(config: OB11Config): Promise<Boolean> {
+    async SetOB11Config(config: OB11Config): Promise<Boolean> {
         let ConfigResponse = await fetch('/api/OB11Config/SetConfig',
             {
                 method: 'POST',

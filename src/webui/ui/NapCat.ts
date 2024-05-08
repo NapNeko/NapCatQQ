@@ -3,10 +3,10 @@ import { SettingItem } from "./components/SettingItem";
 import { SettingButton } from "./components/SettingButton";
 import { SettingSwitch } from "./components/SettingSwitch";
 import { SettingSelect } from "./components/SettingSelect";
-import { WebUiApi } from "./components/WebApi"
+import { OB11Config, OB11ConfigWrapper } from "./components/WebUiApiOB11Config"
 async function onSettingWindowCreated(view: Element) {
   const isEmpty = (value: any) => value === undefined || value === undefined || value === '';
-  let ob11Config = await WebUiApi.getOB11Config();
+  let ob11Config: OB11Config = await OB11ConfigWrapper.GetOB11Config();
   const setOB11Config = (key: string, value: any) => {
   }
 
@@ -135,8 +135,8 @@ async function onSettingWindowCreated(view: Element) {
         )
       ]),
       SettingList([
-        SettingItem('GitHub 仓库', `https://github.com/`, SettingButton('点个星星', 'open-github')),
-        SettingItem('NapCat 文档', `https://`, SettingButton('看看文档', 'open-docs')),
+        SettingItem('GitHub 仓库', `https://github.com/NapNeko/NapCatQQ`, SettingButton('点个星星', 'open-github')),
+        SettingItem('NapCat 文档', ``, SettingButton('看看文档', 'open-docs')),
         SettingItem('Telegram 群', `https://t.me/+nLZEnpne-pQ1OWFl`, SettingButton('进去逛逛', 'open-telegram')),
         SettingItem('QQ 群', `545402644`, SettingButton('我要进去', 'open-qq-group')),
       ]),
@@ -147,7 +147,7 @@ async function onSettingWindowCreated(view: Element) {
 
   // 外链按钮
   doc.querySelector('#open-github')?.addEventListener('click', () => {
-    window.open("https://github.com/", '_blank');
+    window.open("https://napneko.github.io/", '_blank');
   })
   doc.querySelector('#open-telegram')?.addEventListener('click', () => {
     window.open('https://t.me/+nLZEnpne-pQ1OWFl')
@@ -156,7 +156,7 @@ async function onSettingWindowCreated(view: Element) {
     window.open('https://qm.qq.com/q/bDnHRG38aI')
   })
   doc.querySelector('#open-docs')?.addEventListener('click', () => {
-    window.open('https://github.io/')
+    window.open('https://github.com/NapNeko/NapCatQQ')
   })
   // 生成反向地址列表
   const buildHostListItem = (type: string, host: string, index: number, inputAttrs: any = {}) => {
@@ -279,7 +279,7 @@ async function onSettingWindowCreated(view: Element) {
 
   // 保存按钮
   doc.querySelector('#config-ob11-save')?.addEventListener('click', () => {
-    WebUiApi.setOB11Config(ob11Config);
+    OB11ConfigWrapper.SetOB11Config(ob11Config);
     alert('保存成功');
   })
   doc.body.childNodes.forEach((node) => {
