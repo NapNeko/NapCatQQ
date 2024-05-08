@@ -196,12 +196,13 @@
             return [];
         }
         async function InitPages() {
-            let QuickLists = GetQQQucickLoginList(localStorage.getItem('auth'));
+            let QuickLists = await GetQQQucickLoginList(localStorage.getItem('auth'));
             let QuickListSelect = document.querySelector("#quick-login-select");
             QuickLists.forEach(QuickUin => {
                 let optionUinEle = document.createElement('option');
                 optionUinEle.innerHTML = QuickUin;
                 optionUinEle.value = QuickUin;
+                QuickListSelect.appendChild(optionUinEle);
             });
         }
         document.getElementById('quick-login').addEventListener('click', function () {
@@ -231,6 +232,7 @@
                 console.log('QR Code generated!');
             });
         }
+        InitPages();
     </script>
 </body>
 
