@@ -8,6 +8,7 @@ async function onSettingWindowCreated(view: Element) {
   const isEmpty = (value: any) => value === undefined || value === undefined || value === '';
   let ob11Config: OB11Config = await OB11ConfigWrapper.GetOB11Config();
   const setOB11Config = (key: string, value: any) => {
+    console.log(key, value);
   }
 
   const parser = new DOMParser();
@@ -19,9 +20,9 @@ async function onSettingWindowCreated(view: Element) {
         </setting-section>`,
       SettingList([
         SettingItem(
-          '<span id="napcat-update-title">正在检查 Napcat 更新</span>',
+          '<span id="napcat-update-title">Napcat</span>',
           undefined,
-          SettingButton('请稍候', 'napcat-update-button', 'secondary'),
+          SettingButton('V1.3.0', 'napcat-update-button', 'secondary'),
         ),
       ]),
       SettingList([
