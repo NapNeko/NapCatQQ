@@ -49,7 +49,7 @@ class WebUiApiOB11ConfigWrapper {
                     'Authorization': "Bearer " + this.retCredential,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(config)
+                body: JSON.stringify({ config: JSON.stringify(config) })
             }
         );
         if (ConfigResponse.status == 200) {
