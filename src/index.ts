@@ -48,13 +48,13 @@ napCatCore.onLoginSuccess((uin, uid) => {
   DataRuntime.setQQLoginUin(uin.toString());
   postLoginStatus();
 });
-const showQRCode = async (qrCodeData: { url: string, base64: string, buffer: Buffer }) => {
-  await DataRuntime.setQQLoginQrcodeURL(qrCodeData.url);
+const showQRCode = async (url: string, base64: string, buffer: Buffer) => {
+  await DataRuntime.setQQLoginQrcodeURL(url);
   console.log('请扫描下面的二维码，然后在手Q上授权登录：');
   const qrcodePath = path.join(__dirname, 'qrcode.png');
-  qrcode.generate(qrCodeData.url, { small: true }, (res) => {
-    console.log(`${res}\n二维码解码URL: ${qrCodeData.url}\n如果控制台二维码无法扫码，可以复制解码url到二维码生成网站生成二维码再扫码，也可以打开下方的二维码路径图片进行扫码`);
-    fs.writeFile(qrcodePath, qrCodeData.buffer).then(() => {
+  qrcode.generate(url, { small: true }, (res) => {
+    console.log(`${res}\n二维码解码URL: ${url}\n如果控制台二维码无法扫码，可以复制解码url到二维码生成网站生成二维码再扫码，也可以打开下方的二维码路径图片进行扫码`);
+    fs.writeFile(qrcodePath, buffer).then(() => {
       console.log('二维码已保存到', qrcodePath);
     });
   });
@@ -98,11 +98,11 @@ if (quickLoginQQ) {
     }
   }).catch((e) => {
     console.error(e);
-    napCatCore.qrLogin().then(showQRCode);
+    napCatCore.qrLogin(showQRCode);
   });
 } else {
   log('没有 -q 参数指定快速登录的QQ，将使用二维码登录方式');
-  napCatCore.qrLogin().then(showQRCode);
+  napCatCore.qrLogin(showQRCode);
 }
 
 // napCatCore.login.service.getLoginList().then((res) => {
