@@ -22,11 +22,15 @@ export declare class NapCatCore {
     addListener(listener: BuddyListener | GroupListener | MsgListener | ProfileListener): number;
     onLoginSuccess(func: OnLoginSuccess): void;
     quickLogin(uin: string): Promise<QuickLoginResult>;
-    qrLogin(): Promise<{
+    qrLogin(cb: (url: string, base64: string, buffer: Buffer) => Promise<void>): Promise<{
         url: string;
         base64: string;
         buffer: Buffer;
     }>;
     passwordLogin(uin: string, password: string, proofSig?: string, proofRand?: string, proofSid?: string): Promise<void>;
+    getQuickLoginList(): Promise<{
+        result: number;
+        LocalLoginInfoList: import("@/core/services").LoginListItem[];
+    }>;
 }
 export declare const napCatCore: NapCatCore;
