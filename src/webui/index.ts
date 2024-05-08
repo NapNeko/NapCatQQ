@@ -12,7 +12,7 @@ const app = express();
  * @returns {Promise<void>} 无返回值。
  */
 export async function InitWebUi() {
-    let config = WebUiConfig;
+    let config = await WebUiConfig.GetWebUIConfig();
     app.use(express.json());
     // 初始服务
     app.all('/', (_req, res) => {

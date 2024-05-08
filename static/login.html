@@ -109,6 +109,7 @@
                         if (QQLoginResponse.status == 200) {
                             let QQLoginResponseJson = await QQLoginResponse.json();
                             if (QQLoginResponseJson.code == 0) {
+                                alert(QQLoginResponseJson.data.isLogin.toString());
                                 if (QQLoginResponseJson.data.isLogin) {
                                     window.location.href = './config.html';
                                 } else {

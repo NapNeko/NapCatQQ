@@ -27,12 +27,12 @@ export const QQGetQRcodeHandler: RequestHandler = async (req, res) => {
     });
     return;
 };
-export const QQCheckLoginStatusHandler: RequestHandler = (req, res) => {
+export const QQCheckLoginStatusHandler: RequestHandler = async (req, res) => {
     res.send({
         code: 0,
         message: 'success',
         data: {
-            isLogin: DataRuntime.getQQLoginStatus()
+            isLogin: await DataRuntime.getQQLoginStatus()
         }
     });
 };
