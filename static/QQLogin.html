@@ -150,9 +150,6 @@
         </div>
         <div id="quick-login-dropdown" class="login-form">
             <select id="quick-login-select" onchange="selectAccount(this.value)">
-                <option value="Account 1">Account 1</option>
-                <option value="Account 2">Account 2</option>
-                <option value="Account 3">Account 3</option>
             </select>
         </div>
         <div id="qrcode" class="qrcode" style="display: none;">
@@ -161,6 +158,7 @@
         <p id="message"></p>
     </div>
     <script>
+
         async function CheckQQLoginStatus(retCredential) {
             let QQLoginResponse = await fetch('/api/QQLogin/CheckLoginStatus', {
                 method: 'POST',
@@ -182,7 +180,7 @@
             return false;
         }
         async function GetQQQucickLoginList(retCredential) {
-            let QQLoginResponse = await fetch('/api/QQLogin/GetQQQucickLoginList', {
+            let QQLoginResponse = await fetch('/api/QQLogin/GetQuickLoginList', {
                 method: 'POST',
                 headers: {
                     'Authorization': "Bearer " + retCredential,
@@ -197,23 +195,15 @@
             }
             return [];
         }
-        async function GetQQQucickLoginList(retCredential) {
-            let QQLoginResponse = await fetch('/api/QQLogin/GetQQLoginQrcode', {
-                method: 'POST',
-                headers: {
-                    'Authorization': "Bearer " + retCredential,
-                    'Content-Type': 'application/json'
-                }
+        async function InitPages() {
+            let QuickLists = GetQQQucickLoginList(localStorage.getItem('auth'));
+            let QuickListSelect = document.querySelector("#quick-login-select");
+            QuickLists.forEach(QuickUin => {
+                let optionUinEle = document.createElement('option');
+                optionUinEle.innerHTML = QuickUin;
+                optionUinEle.value = QuickUin;
             });
-            if (QQLoginResponse.status == 200) {
-                let QQLoginResponseJson = await QQLoginResponse.json();
-                if (QQLoginResponseJson.code == 0) {
-                    return QQLoginResponseJson?.data;
-                }
-            }
-            return "";
         }
-
         document.getElementById('quick-login').addEventListener('click', function () {
             let quickLoginOptions = document.querySelector('#quick-login-dropdown');
             let qrcode = document.querySelector('#qrcode');

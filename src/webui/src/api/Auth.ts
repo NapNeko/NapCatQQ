@@ -4,6 +4,7 @@ import { WebUiConfig } from "../helper/config";
 import { DataRuntime } from "../helper/Data";
 const isEmpty = (data: any) => data === undefined || data === null || data === '';
 export const LoginHandler: RequestHandler = async (req, res) => {
+    let WebUiConfigData = await WebUiConfig.GetWebUIConfig();
     const { token } = req.body;
     if (isEmpty(token)) {
         res.json({
@@ -12,7 +13,7 @@ export const LoginHandler: RequestHandler = async (req, res) => {
         });
         return;
     } 
-    if (!await DataRuntime.checkLoginRate(WebUiConfig.loginRate)) {
+    if (!await DataRuntime.checkLoginRate(WebUiConfigData.loginRate)) {
         res.json({
             code: -1,
             message: 'login rate limit'
@@ -20,14 +21,14 @@ export const LoginHandler: RequestHandler = async (req, res) => {
         return;
     }
     //验证config.token是否等于token
-    if (WebUiConfig.token !== token) {
+    if (WebUiConfigData.token !== token) {
         res.json({
             code: -1,
             message: 'token is invalid'
         });
         return;
     }
-    let signCredential = Buffer.from(JSON.stringify(await AuthHelper.signCredential(WebUiConfig.token))).toString('base64');
+    let signCredential = Buffer.from(JSON.stringify(await AuthHelper.signCredential(WebUiConfigData.token))).toString('base64');
     res.json({
         code: 0,
         message: 'success',
@@ -46,11 +47,12 @@ export const LogoutHandler: RequestHandler = (req, res) => {
     return;
 };
 export const checkHandler: RequestHandler = async (req, res) => {
+    let WebUiConfigData = await WebUiConfig.GetWebUIConfig();
     const authorization = req.headers.authorization;
     try {
         let CredentialBase64:string = authorization?.split(' ')[1] as string;
         let Credential = JSON.parse(Buffer.from(CredentialBase64, 'base64').toString());
-        await AuthHelper.validateCredentialWithinOneHour(WebUiConfig.token,Credential)
+        await AuthHelper.validateCredentialWithinOneHour(WebUiConfigData.token,Credential)
         res.json({
             code: 0,
             message: 'success'
