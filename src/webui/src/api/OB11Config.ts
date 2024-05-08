@@ -6,19 +6,19 @@ import { OB11Config } from "@/webui/ui/components/WebApi";
 const isEmpty = (data: any) => data === undefined || data === null || data === '';
 export const OB11GetConfigHandler: RequestHandler = async (req, res) => {
     let isLogin = await DataRuntime.getQQLoginStatus();
-    if (!isLogin) {
-        res.send({
-            code: -1,
-            message: 'Not Login'
-        });
-        return;
-    }
+    // if (!isLogin) {
+    //     res.send({
+    //         code: -1,
+    //         message: 'Not Login'
+    //     });
+    //     return;
+    // }
     const uin = await DataRuntime.getQQLoginUin();
-    let configFilePath = resolve(__dirname, `./config/onebot_${uin}.json`);
-    console.log(configFilePath);
+    let configFilePath = resolve(__dirname, `./config/onebot11_${uin}.json`);
+    //console.log(configFilePath);
     let data: OB11Config;
     try {
-        data = JSON.parse(existsSync(configFilePath) ? readFileSync(configFilePath).toString() : readFileSync(resolve(__dirname, `./config/onebot.json`)).toString());
+        data = JSON.parse(existsSync(configFilePath) ? readFileSync(configFilePath).toString() : readFileSync(resolve(__dirname, `./config/onebot11.json`)).toString());
     }
     catch (e) {
         data = {} as OB11Config;
