@@ -3,6 +3,7 @@ import { AuthHelper } from '../../src/helper/SignToken';
 import { NextFunction, Request, Response } from 'express';
 import { QQLoginRouter } from "./QQLogin";
 import { AuthRouter } from "./auth";
+import { OB11ConfigRouter } from "./OB11Config";
 const router = Router();
 export async function AuthApi(req: Request, res: Response, next: NextFunction) {
     //判断当前url是否为/api/login 如果是跳过鉴权
@@ -45,6 +46,7 @@ router.all("/test", (req, res) => {
         msg: 'ok',
     });
 });
-router.use('/auth', AuthRouter);//挂载权限路由
+router.use('/auth', AuthRouter);
 router.use('/QQLogin',QQLoginRouter);
+router.use('/OB11Config',OB11ConfigRouter);
 export { router as ALLRouter }

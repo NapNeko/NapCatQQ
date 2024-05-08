@@ -42,9 +42,10 @@ checkVersion().then((remoteVersion: string) => {
   logError('[NapCat] 检测更新失败');
 });
 new NapCatOnebot11();
-napCatCore.onLoginSuccess(() => {
+napCatCore.onLoginSuccess((uin, uid) => {
   console.log('登录成功!');
   DataRuntime.setQQLoginStatus(true);
+  DataRuntime.setQQLoginUin(uin.toString());
   postLoginStatus();
 });
 const showQRCode = async (qrCodeData: { url: string, base64: string, buffer: Buffer }) => {

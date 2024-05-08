@@ -3,7 +3,7 @@ interface LoginRuntimeType {
     LoginCurrentRate: number;
     QQLoginStatus: boolean;
     QQQRCodeURL: string;
-    QQLoginUin: number;
+    QQLoginUin: string;
     NapCatHelper: {
         CoreQuickLogin: (uin: string) => Promise<{ result: boolean, message: string }>;
         QQLoginList: string[]
@@ -14,7 +14,7 @@ let LoginRuntime: LoginRuntimeType = {
     LoginCurrentRate: 0,
     QQLoginStatus: false, //已实现 但太傻了 得去那边注册个回调刷新
     QQQRCodeURL: "",
-    QQLoginUin: 0,
+    QQLoginUin: "",
     NapCatHelper: {
         CoreQuickLogin: async (uin: string) => { return { result: false, message: '' }; },
         QQLoginList: []
@@ -51,11 +51,11 @@ export const DataRuntime = {
         return LoginRuntime.QQQRCodeURL;
     }
     ,
-    setQQLoginUin: async function (uin: number): Promise<void> {
+    setQQLoginUin: async function (uin: string): Promise<void> {
         LoginRuntime.QQLoginUin = uin;
     }
     ,
-    getQQLoginUin: async function (): Promise<number> {
+    getQQLoginUin: async function (): Promise<string> {
         return LoginRuntime.QQLoginUin;
     },
     getQQQuickLoginList: async function (): Promise<any[]> {
