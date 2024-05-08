@@ -2,7 +2,7 @@ import { RequestHandler } from "express";
 import { DataRuntime } from "../helper/Data";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { OB11Config } from "@/webui/ui/components/WebApi";
+import { OB11Config } from "@/webui/ui/components/WebUiApiOB11Config";
 const isEmpty = (data: any) => data === undefined || data === null || data === '';
 export const OB11GetConfigHandler: RequestHandler = async (req, res) => {
     let isLogin = await DataRuntime.getQQLoginStatus();
@@ -53,12 +53,13 @@ export const OB11SetConfigHandler: RequestHandler = async (req, res) => {
     }
     let configFilePath = resolve(__dirname, `./config/onebot_${await DataRuntime.getQQLoginUin()}.json`);
     try {
+        JSON.parse(req.body.config)
         readFileSync(configFilePath);
     }
     catch (e) {
         configFilePath = resolve(__dirname, `./config/onebot.json`);
     }
-    writeFileSync(configFilePath, JSON.stringify(req.body.config, null, 4));
+    writeFileSync(configFilePath, JSON.stringify(JSON.parse(req.body.config), null, 4));
     res.send({
         code: 0,
         message: 'success'
