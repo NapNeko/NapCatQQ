@@ -148,6 +148,7 @@ const OB11ConfigWrapper = new WebUiApiOB11ConfigWrapper();
 
 async function onSettingWindowCreated(view) {
   const isEmpty = (value) => value === void 0 || value === void 0 || value === "";
+  await OB11ConfigWrapper.Init(localStorage.getItem("auth"));
   let ob11Config = await OB11ConfigWrapper.GetOB11Config();
   const setOB11Config = (key, value) => {
     const configKey = key.split(".");

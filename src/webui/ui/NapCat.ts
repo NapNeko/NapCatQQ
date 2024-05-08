@@ -6,6 +6,7 @@ import { SettingSelect } from "./components/SettingSelect";
 import { OB11Config, OB11ConfigWrapper } from "./components/WebUiApiOB11Config"
 async function onSettingWindowCreated(view: Element) {
   const isEmpty = (value: any) => value === undefined || value === undefined || value === '';
+  await OB11ConfigWrapper.Init(localStorage.getItem('auth') as string);
   let ob11Config: OB11Config = await OB11ConfigWrapper.GetOB11Config();
   const setOB11Config = (key: string, value: any) => {
     const configKey = key.split('.');
