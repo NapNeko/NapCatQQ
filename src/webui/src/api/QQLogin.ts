@@ -53,11 +53,11 @@ export const QQSetQuickLoginHandler: RequestHandler = async (req, res) => {
         });
         return;
     }
-    let ret = await DataRuntime.getQQQuickLogin(uin);
-    if (!ret.result) {
+    const { result, message } = await DataRuntime.getQQQuickLogin(uin);
+    if (!result) {
         res.send({
             code: -1,
-            message: ret.message
+            message: message
         });
         return;
     }
