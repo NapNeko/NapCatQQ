@@ -158,7 +158,26 @@
         <p id="message"></p>
     </div>
     <script>
-
+        async function GetQQLoginQrcode(retCredential) {
+            let QQLoginResponse = await fetch('/api/QQLogin/GetQQLoginQrcode', {
+                method: 'POST',
+                headers: {
+                    'Authorization': "Bearer " + retCredential,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (QQLoginResponse.status == 200) {
+                let QQLoginResponseJson = await QQLoginResponse.json();
+                if (QQLoginResponseJson.code == 0) {
+                    if (QQLoginResponseJson.data.qrcode) {
+                        return QQLoginResponseJson.data.qrcode;
+                    } else {
+                        return "";
+                    }
+                }
+            }
+            return "";
+        }
         async function CheckQQLoginStatus(retCredential) {
             let QQLoginResponse = await fetch('/api/QQLogin/CheckLoginStatus', {
                 method: 'POST',
@@ -195,6 +214,13 @@
             }
             return [];
         }
+        //心跳轮询CheckQQLoginStatus 是否已经进入登录状态，如果为true进入./config.html
+        async function HeartBeat() {
+            let isLogined = await CheckQQLoginStatus(localStorage.getItem('auth'));
+            if (isLogined) {
+                window.location.href = './config.html';
+            }
+        }
         async function InitPages() {
             let QuickLists = await GetQQQucickLoginList(localStorage.getItem('auth'));
             let QuickListSelect = document.querySelector("#quick-login-select");
@@ -204,6 +230,8 @@
                 optionUinEle.value = QuickUin;
                 QuickListSelect.appendChild(optionUinEle);
             });
+            generateQrCode(await GetQQLoginQrcode(), document.querySelector('#qrcode-canvas'));
+            setTimeout(HeartBeat, 3000);
         }
         document.getElementById('quick-login').addEventListener('click', function () {
             let quickLoginOptions = document.querySelector('#quick-login-dropdown');
@@ -214,7 +242,6 @@
 
         function selectAccount(accountName) {
             alert(`Logging in with ${accountName}...`);
-            // Implement your login logic here
             document.getElementById('quick-login-options').classList.remove('show');
         }
         document.getElementById('qrcode-login').addEventListener('click', function () {
@@ -222,8 +249,6 @@
             let qrcode = document.querySelector('#qrcode');
             loginForm.style.display = 'none';
             qrcode.style.display = 'flex';
-            let qrData = 'https://yourapp.com/login?code=123456';
-            generateQrCode(qrData, document.querySelector('#qrcode-canvas'));
         });
 
         function generateQrCode(data, canvas) {
