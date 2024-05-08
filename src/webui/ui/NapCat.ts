@@ -54,10 +54,10 @@ async function onSettingWindowCreated(view: Element) {
           '启用 HTTP 事件上报',
           undefined,
           SettingSwitch('ob11.enableHttpPost', ob11Config.enableHttpPost, {
-            'control-display-id': 'config-ob11-httpHosts',
+            'control-display-id': 'config-ob11-httpPostUrls',
           }),
         ),
-        `<div class="config-host-list" id="config-ob11-httpHosts" ${ob11Config.enableHttpPost ? '' : 'is-hidden'}>
+        `<div class="config-host-list" id="config-ob11-httpPostUrls" ${ob11Config.enableHttpPost ? '' : 'is-hidden'}>
                 <setting-item data-direction="row">
                     <div>
                         <setting-text>HTTP 事件上报密钥</setting-text>
@@ -71,9 +71,9 @@ async function onSettingWindowCreated(view: Element) {
                     <div>
                         <setting-text>HTTP 事件上报地址</setting-text>
                     </div>
-                    <setting-button id="config-ob11-httpHosts-add" data-type="primary">添加</setting-button>
+                    <setting-button id="config-ob11-httpPostUrls-add" data-type="primary">添加</setting-button>
                 </setting-item>
-                <div id="config-ob11-httpHosts-list"></div>
+                <div id="config-ob11-httpPostUrls-list"></div>
             </div>`,
         SettingItem(
           '启用正向 WebSocket 服务',
@@ -91,17 +91,17 @@ async function onSettingWindowCreated(view: Element) {
           '启用反向 WebSocket 服务',
           undefined,
           SettingSwitch('ob11.enableWsReverse', ob11Config.enableWsReverse, {
-            'control-display-id': 'config-ob11-wsHosts',
+            'control-display-id': 'config-ob11-wsReverseUrls',
           }),
         ),
-        `<div class="config-host-list" id="config-ob11-wsHosts" ${ob11Config.enableWsReverse ? '' : 'is-hidden'}>
+        `<div class="config-host-list" id="config-ob11-wsReverseUrls" ${ob11Config.enableWsReverse ? '' : 'is-hidden'}>
                 <setting-item data-direction="row">
                     <div>
                         <setting-text>反向 WebSocket 监听地址</setting-text>
                     </div>
-                    <setting-button id="config-ob11-wsHosts-add" data-type="primary">添加</setting-button>
+                    <setting-button id="config-ob11-wsReverseUrls-add" data-type="primary">添加</setting-button>
                 </setting-item>
-                <div id="config-ob11-wsHosts-list"></div>
+                <div id="config-ob11-wsReverseUrls-list"></div>
             </div>`,
         SettingItem(
           ' WebSocket 服务心跳间隔',
@@ -220,18 +220,18 @@ async function onSettingWindowCreated(view: Element) {
       })
     }
   }
-  initReverseHost('httpHosts', doc);
-  initReverseHost('wsHosts', doc);
+  initReverseHost('httpPostUrls', doc);
+  initReverseHost('wsReverseUrls', doc);
 
   doc
-    .querySelector('#config-ob11-httpHosts-add')
+    .querySelector('#config-ob11-httpPostUrls-add')
     ?.addEventListener('click', () =>
-      addReverseHost('httpHosts', document, { placeholder: '如：http://127.0.0.1:5140/onebot' }),
+      addReverseHost('httpPostUrls', document, { placeholder: '如：http://127.0.0.1:5140/onebot' }),
     )
   doc
-    .querySelector('#config-ob11-wsHosts-add')
+    .querySelector('#config-ob11-wsReverseUrls-add')
     ?.addEventListener('click', () =>
-      addReverseHost('wsHosts', document, { placeholder: '如：ws://127.0.0.1:5140/onebot' }),
+      addReverseHost('wsReverseUrls', document, { placeholder: '如：ws://127.0.0.1:5140/onebot' }),
     )
 
   doc.querySelector('#config-ffmpeg-select')?.addEventListener('click', () => {

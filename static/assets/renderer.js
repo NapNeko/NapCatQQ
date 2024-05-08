@@ -195,10 +195,10 @@ async function onSettingWindowCreated(view) {
           "启用 HTTP 事件上报",
           void 0,
           SettingSwitch("ob11.enableHttpPost", ob11Config.enableHttpPost, {
-            "control-display-id": "config-ob11-httpHosts"
+            "control-display-id": "config-ob11-httpPostUrls"
           })
         ),
-        `<div class="config-host-list" id="config-ob11-httpHosts" ${ob11Config.enableHttpPost ? "" : "is-hidden"}>
+        `<div class="config-host-list" id="config-ob11-httpPostUrls" ${ob11Config.enableHttpPost ? "" : "is-hidden"}>
                 <setting-item data-direction="row">
                     <div>
                         <setting-text>HTTP 事件上报密钥</setting-text>
@@ -211,9 +211,9 @@ async function onSettingWindowCreated(view) {
                     <div>
                         <setting-text>HTTP 事件上报地址</setting-text>
                     </div>
-                    <setting-button id="config-ob11-httpHosts-add" data-type="primary">添加</setting-button>
+                    <setting-button id="config-ob11-httpPostUrls-add" data-type="primary">添加</setting-button>
                 </setting-item>
-                <div id="config-ob11-httpHosts-list"></div>
+                <div id="config-ob11-httpPostUrls-list"></div>
             </div>`,
         SettingItem(
           "启用正向 WebSocket 服务",
@@ -231,27 +231,27 @@ async function onSettingWindowCreated(view) {
           "启用反向 WebSocket 服务",
           void 0,
           SettingSwitch("ob11.enableWsReverse", ob11Config.enableWsReverse, {
-            "control-display-id": "config-ob11-wsHosts"
+            "control-display-id": "config-ob11-wsReverseUrls"
           })
         ),
-        `<div class="config-host-list" id="config-ob11-wsHosts" ${ob11Config.enableWsReverse ? "" : "is-hidden"}>
+        `<div class="config-host-list" id="config-ob11-wsReverseUrls" ${ob11Config.enableWsReverse ? "" : "is-hidden"}>
                 <setting-item data-direction="row">
                     <div>
                         <setting-text>反向 WebSocket 监听地址</setting-text>
                     </div>
-                    <setting-button id="config-ob11-wsHosts-add" data-type="primary">添加</setting-button>
+                    <setting-button id="config-ob11-wsReverseUrls-add" data-type="primary">添加</setting-button>
                 </setting-item>
-                <div id="config-ob11-wsHosts-list"></div>
+                <div id="config-ob11-wsReverseUrls-list"></div>
             </div>`,
         SettingItem(
           " WebSocket 服务心跳间隔",
           "控制每隔多久发送一个心跳包，单位为毫秒",
-          `<div class="q-input"><input class="q-input__inner" data-config-key="heartInterval" type="number" min="1000" value="${ob11Config.heartInterval}" placeholder="${ob11Config.heartInterval}" /></div>`
+          `<div class="q-input"><input class="q-input__inner" data-config-key="ob11.heartInterval" type="number" min="1000" value="${ob11Config.heartInterval}" placeholder="${ob11Config.heartInterval}" /></div>`
         ),
         SettingItem(
           "Access token",
           void 0,
-          `<div class="q-input" style="width:210px;"><input class="q-input__inner" data-config-key="token" type="text" value="${ob11Config.token}" placeholder="未设置" /></div>`
+          `<div class="q-input" style="width:210px;"><input class="q-input__inner" data-config-key="ob11.token" type="text" value="${ob11Config.token}" placeholder="未设置" /></div>`
         ),
         SettingItem(
           "新消息上报格式",
@@ -268,8 +268,8 @@ async function onSettingWindowCreated(view) {
         SettingItem(
           "音乐卡片签名地址",
           void 0,
-          `<div class="q-input" style="width:210px;"><input class="q-input__inner" data-config-key="musicSignUrl" type="text" value="${ob11Config.musicSignUrl}" placeholder="未设置" /></div>`,
-          "config-musicSignUrl"
+          `<div class="q-input" style="width:210px;"><input class="q-input__inner" data-config-key="ob11.musicSignUrl" type="text" value="${ob11Config.musicSignUrl}" placeholder="未设置" /></div>`,
+          "ob11.musicSignUrl"
         ),
         SettingItem("", void 0, SettingButton("保存", "config-ob11-save", "primary"))
       ]),
@@ -277,7 +277,7 @@ async function onSettingWindowCreated(view) {
         SettingItem(
           "上报 Bot 自身发送的消息",
           "上报 event 为 message_sent",
-          SettingSwitch("reportSelfMessage", ob11Config.reportSelfMessage)
+          SettingSwitch("ob11.reportSelfMessage", ob11Config.reportSelfMessage)
         )
       ]),
       SettingList([
@@ -330,23 +330,36 @@ async function onSettingWindowCreated(view) {
     dom.container.appendChild(dom.deleteBtn);
     return dom.container;
   };
+  const buildHostList = (hosts, type, inputAttr = {}) => {
+    const result = [];
+    hosts.forEach((host, index) => {
+      result.push(buildHostListItem(type, host, index, inputAttr));
+    });
+    return result;
+  };
   const addReverseHost = (type, doc2 = document, inputAttr = {}) => {
     const hostContainerDom = doc2.body.querySelector(`#config-ob11-${type}-list`);
     hostContainerDom?.appendChild(buildHostListItem(type, "", ob11Config[type].length, inputAttr));
     ob11Config[type].push("");
   };
   const initReverseHost = (type, doc2 = document) => {
-    doc2.body?.querySelector(`#config-ob11-${type}-list`);
+    const hostContainerDom = doc2.body?.querySelector(`#config-ob11-${type}-list`);
+    if (hostContainerDom) {
+      [...hostContainerDom.childNodes].forEach((dom) => dom.remove());
+      buildHostList(ob11Config[type], type).forEach((dom) => {
+        hostContainerDom?.appendChild(dom);
+      });
+    }
   };
-  initReverseHost("httpHosts", doc);
-  initReverseHost("wsHosts", doc);
-  doc.querySelector("#config-ob11-httpHosts-add")?.addEventListener(
+  initReverseHost("httpPostUrls", doc);
+  initReverseHost("wsReverseUrls", doc);
+  doc.querySelector("#config-ob11-httpPostUrls-add")?.addEventListener(
     "click",
-    () => addReverseHost("httpHosts", document, { placeholder: "如：http://127.0.0.1:5140/onebot" })
+    () => addReverseHost("httpPostUrls", document, { placeholder: "如：http://127.0.0.1:5140/onebot" })
   );
-  doc.querySelector("#config-ob11-wsHosts-add")?.addEventListener(
+  doc.querySelector("#config-ob11-wsReverseUrls-add")?.addEventListener(
     "click",
-    () => addReverseHost("wsHosts", document, { placeholder: "如：ws://127.0.0.1:5140/onebot" })
+    () => addReverseHost("wsReverseUrls", document, { placeholder: "如：ws://127.0.0.1:5140/onebot" })
   );
   doc.querySelector("#config-ffmpeg-select")?.addEventListener("click", () => {
   });
