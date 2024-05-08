@@ -12,4 +12,3 @@ QQ Version: Windows 9.9.9-23361 / Linux 3.2.7-23361
 * 新增二维码过期自动刷新功能
 
 新增的 API 详细见[API文档](https://napneko.github.io/zh-CN/develop/extends_api)
-
