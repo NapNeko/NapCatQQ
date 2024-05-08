@@ -13,14 +13,15 @@ export async function AuthApi(req: Request, res: Response, next: NextFunction) {
             next();
             return;
         }
-        if (req.headers?.authorization) {
-            let token = req.headers?.authorization.split(' ')[1];
+        if (req.headers.authorization) {
+            let token = req.headers.authorization.split(' ')[1];
             let Credential = JSON.parse(Buffer.from(token, 'base64').toString('utf-8'));
             let config = await WebUiConfig.GetWebUIConfig();
             let credentialJson = await AuthHelper.validateCredentialWithinOneHour(config.token, Credential);
             if (credentialJson) {
                 //通过验证
                 next();
+                return;
             }
             res.json({
                 code: -1,
@@ -29,10 +30,7 @@ export async function AuthApi(req: Request, res: Response, next: NextFunction) {
             return;
         }
     } catch (e: any) {
-        res.json({
-            code: -1,
-            msg: 'Server Error',
-        });
+        console.log(e);
         return;
     }
     res.json({

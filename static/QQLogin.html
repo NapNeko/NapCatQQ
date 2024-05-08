@@ -252,8 +252,8 @@
                 optionUinEle.value = QuickUin;
                 QuickListSelect.appendChild(optionUinEle);
             });
-            generateQrCode(await GetQQLoginQrcode(), document.querySelector('#qrcode-canvas'));
-            setTimeout(HeartBeat, 3000);
+            generateQrCode(await GetQQLoginQrcode(localStorage.getItem('auth')), document.querySelector('#qrcode-canvas'));
+            setInterval(HeartBeat, 3000);
         }
         document.getElementById('quick-login').addEventListener('click', function () {
             let quickLoginOptions = document.querySelector('#quick-login-dropdown');
@@ -272,7 +272,7 @@
                 alert("登录失败," + errMsg);
             }
             //await (localStorage.getItem('auth'))
-            document.getElementById('quick-login-options').classList.remove('show');
+            //document.getElementById('quick-login-options').classList.remove('show');
         }
         document.getElementById('qrcode-login').addEventListener('click', function () {
             let loginForm = document.querySelector('#quick-login-dropdown');
