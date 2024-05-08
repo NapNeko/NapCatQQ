@@ -51,14 +51,16 @@ export const OB11SetConfigHandler: RequestHandler = async (req, res) => {
         });
         return;
     }
-    let configFilePath = resolve(__dirname, `./config/onebot_${await DataRuntime.getQQLoginUin()}.json`);
+    let configFilePath = resolve(__dirname, `./config/onebot11_${await DataRuntime.getQQLoginUin()}.json`);
     try {
         JSON.parse(req.body.config)
         readFileSync(configFilePath);
     }
     catch (e) {
-        configFilePath = resolve(__dirname, `./config/onebot.json`);
+        //console.log(e);
+        configFilePath = resolve(__dirname, `./config/onebot11.json`);
     }
+    //console.log(configFilePath,JSON.parse(req.body.config));
     writeFileSync(configFilePath, JSON.stringify(JSON.parse(req.body.config), null, 4));
     res.send({
         code: 0,
