@@ -6,13 +6,13 @@ import { OB11Config } from "@/webui/ui/components/WebUiApiOB11Config";
 const isEmpty = (data: any) => data === undefined || data === null || data === '';
 export const OB11GetConfigHandler: RequestHandler = async (req, res) => {
     let isLogin = await DataRuntime.getQQLoginStatus();
-    // if (!isLogin) {
-    //     res.send({
-    //         code: -1,
-    //         message: 'Not Login'
-    //     });
-    //     return;
-    // }
+    if (!isLogin) {
+        res.send({
+            code: -1,
+            message: 'Not Login'
+        });
+        return;
+    }
     const uin = await DataRuntime.getQQLoginUin();
     let configFilePath = resolve(__dirname, `./config/onebot11_${uin}.json`);
     //console.log(configFilePath);
@@ -37,13 +37,13 @@ export const OB11GetConfigHandler: RequestHandler = async (req, res) => {
 }
 export const OB11SetConfigHandler: RequestHandler = async (req, res) => {
     let isLogin = await DataRuntime.getQQLoginStatus();
-    // if (!isLogin) {
-    //     res.send({
-    //         code: -1,
-    //         message: 'Not Login'
-    //     });
-    //     return;
-    // }
+    if (!isLogin) {
+        res.send({
+            code: -1,
+            message: 'Not Login'
+        });
+        return;
+    }
     if (isEmpty(req.body.config)) {
         res.send({
             code: -1,

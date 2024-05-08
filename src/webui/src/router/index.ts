@@ -4,20 +4,22 @@ import { NextFunction, Request, Response } from 'express';
 import { QQLoginRouter } from "./QQLogin";
 import { AuthRouter } from "./auth";
 import { OB11ConfigRouter } from "./OB11Config";
+import { WebUiConfig } from "../helper/config";
 const router = Router();
 export async function AuthApi(req: Request, res: Response, next: NextFunction) {
-    //判断当前url是否为/api/login 如果是跳过鉴权
-    console.log(req.url);
+    //判断当前url是否为/login 如果是跳过鉴权
     try {
-        if (req.url == '/api/auth/login') {
+        if (req.url == '/auth/login') {
             next();
             return;
         }
         if (req.headers?.authorization) {
             let token = req.headers?.authorization.split(' ')[1];
             let Credential = JSON.parse(Buffer.from(token, 'base64').toString('utf-8'));
-            let credentialJson = await AuthHelper.checkCredential(Credential);
+            let config = await WebUiConfig.GetWebUIConfig();
+            let credentialJson = await AuthHelper.validateCredentialWithinOneHour(config.token, Credential);
             if (credentialJson) {
+                //通过验证
                 next();
             }
             res.json({
@@ -39,7 +41,7 @@ export async function AuthApi(req: Request, res: Response, next: NextFunction) {
     });
     return;
 }
-//router.use('/*', AuthApi);//鉴权
+router.use(AuthApi);
 router.all("/test", (req, res) => {
     res.json({
         code: 0,
@@ -47,6 +49,6 @@ router.all("/test", (req, res) => {
     });
 });
 router.use('/auth', AuthRouter);
-router.use('/QQLogin',QQLoginRouter);
-router.use('/OB11Config',OB11ConfigRouter);
+router.use('/QQLogin', QQLoginRouter);
+router.use('/OB11Config', OB11ConfigRouter);
 export { router as ALLRouter }
