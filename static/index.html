@@ -9,13 +9,58 @@
 
 <body>
     <script>
-        //读取localStorge 查看是否储存了为auth的数据
-        let authData = localStorage.getItem('auth');
-        if (authData) {
-            //请求下api 看看QQlogin没有 没有去登录
-            window.location.href = './config.html';
+         async function CheckQQLoginStatus(retCredential) {
+            let QQLoginResponse = await fetch('/api/QQLogin/CheckLoginStatus', {
+                method: 'POST',
+                headers: {
+                    'Authorization': "Bearer " + retCredential,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (QQLoginResponse.status == 200) {
+                let QQLoginResponseJson = await QQLoginResponse.json();
+                if (QQLoginResponseJson.code == 0) {
+                    if (QQLoginResponseJson.data.isLogin) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+            return false;
         }
-        window.location.href = './login.html';
+        async function CheckWebUiLogined(retCredential) {
+            let LoginResponse = await fetch('/api/auth/check', {
+                method: 'POST',
+                headers: {
+                    'Authorization': "Bearer " + retCredential,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (LoginResponse.status == 200) {
+                let LoginResponseJson = await LoginResponse.json();
+                if (LoginResponseJson.code == 0) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        async function InitPage() {
+            let authData = localStorage.getItem('auth');
+            let isLogined = await CheckWebUiLogined(authData);
+            if (authData && isLogined) {
+                let isQQLoined = await CheckQQLoginStatus(authData);
+                if (!isQQLoined) {
+                    window.location.href = './QQLogin.html';
+                    return;
+                }
+                window.location.href = './config.html';
+                return;
+            }
+            window.location.href = './login.html';
+            return;
+        }
+        InitPage();
     </script>
 </body>
 

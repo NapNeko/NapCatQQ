@@ -57,12 +57,12 @@ export const checkHandler: RequestHandler = async (req, res) => {
             code: 0,
             message: 'success'
         });
+        return;
     } catch (e) {
         res.json({
             code: -1,
             message: 'failed'
         });
     }
-
     return;
 };
