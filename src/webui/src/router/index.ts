@@ -8,31 +8,44 @@ import { WebUiConfig } from "../helper/config";
 const router = Router();
 export async function AuthApi(req: Request, res: Response, next: NextFunction) {
     //判断当前url是否为/login 如果是跳过鉴权
-    try {
-        if (req.url == '/auth/login') {
-            next();
-            return;
-        }
-        if (req.headers.authorization) {
-            let token = req.headers.authorization.split(' ')[1];
-            let Credential = JSON.parse(Buffer.from(token, 'base64').toString('utf-8'));
-            let config = await WebUiConfig.GetWebUIConfig();
-            let credentialJson = await AuthHelper.validateCredentialWithinOneHour(config.token, Credential);
-            if (credentialJson) {
-                //通过验证
-                next();
-                return;
-            }
+    if (req.url == '/auth/login') {
+        next();
+        return;
+    }
+    if (req.headers?.authorization) {
+        let authorization = req.headers.authorization.split(' ');
+        if (authorization.length < 2) {
             res.json({
                 code: -1,
                 msg: 'Unauthorized',
             });
             return;
         }
-    } catch (e: any) {
-        console.log(e);
+        let token = authorization[1];
+        let Credential: any;
+        try {
+            Credential = JSON.parse(Buffer.from(token, 'base64').toString('utf-8'));
+        } catch (e) {
+            res.json({
+                code: -1,
+                msg: 'Unauthorized',
+            });
+            return;
+        }
+        let config = await WebUiConfig.GetWebUIConfig();
+        let credentialJson = await AuthHelper.validateCredentialWithinOneHour(config.token, Credential);
+        if (credentialJson) {
+            //通过验证
+            next();
+            return;
+        }
+        res.json({
+            code: -1,
+            msg: 'Unauthorized',
+        });
         return;
     }
+
     res.json({
         code: -1,
         msg: 'Server Error',
