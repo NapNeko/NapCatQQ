@@ -1,11 +1,10 @@
-# Logs
-
 # Develop
 node_modules/
 package-lock.json
 out/
 dist/
 src/core.lib/common/
+test
 
 # Editor
 .vscode/*

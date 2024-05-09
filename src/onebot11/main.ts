@@ -15,7 +15,7 @@ import { ob11Config } from '@/onebot11/config';
 import { httpHeart, ob11HTTPServer } from '@/onebot11/server/http';
 import { ob11WebsocketServer } from '@/onebot11/server/ws/WebsocketServer';
 import { ob11ReverseWebsockets } from '@/onebot11/server/ws/ReverseWebsocket';
-import { friendRequests, getFriend, getGroup, getGroupMember, groupNotifies, selfInfo } from '@/core/data';
+import { friendRequests, getFriend, getGroup, getGroupMember, groupNotifies, selfInfo, uid2UinMap } from '@/core/data';
 import { dbUtil } from '@/core/utils/db';
 import { BuddyListener, GroupListener, NodeIKernelBuddyListener } from '../core/src/listeners';
 import { OB11FriendRequestEvent } from '@/onebot11/event/request/OB11FriendRequest';
@@ -62,7 +62,7 @@ export class NapCatOnebot11 {
     if (ob11Config.enableWsReverse) {
       ob11ReverseWebsockets.start();
     }
-    if (ob11Config.enableHttpHeart){
+    if (ob11Config.enableHttpHeart) {
       // 启动http心跳
       httpHeart.start();
     }
@@ -126,8 +126,14 @@ export class NapCatOnebot11 {
 
     // GroupListener
     const groupListener = new GroupListener();
-    groupListener.onGroupNotifiesUpdated = (doubt, notifies) => {
-      // console.log('ob11 onGroupNotifiesUpdated', notifies);
+    groupListener.onGroupNotifiesUpdated = async (doubt, notifies) => {
+      for (let i = 0; i < notifies.length; i++) {
+        let UserInfo_User1 = await NTQQUserApi.getUserDetailInfo(notifies[i].user1.uid);
+        let UserInfo_User2 = await NTQQUserApi.getUserDetailInfo(notifies[i].user2.uid);
+        uid2UinMap[UserInfo_User1.uid] = UserInfo_User1.uin;
+        uid2UinMap[UserInfo_User2.uid] = UserInfo_User2.uin;
+      }
+      //console.log('ob11 onGroupNotifiesUpdated', notifies[0], notifies[0].group, notifies[0].user1, notifies[0].user2);
       this.postGroupNotifies(notifies).then().catch(e => logError('postGroupNotifies error: ', e));
     };
     groupListener.onJoinGroupNotify = (...notify) => {
@@ -181,8 +187,8 @@ export class NapCatOnebot11 {
           postOB11Event(groupEvent);
         }
       }).catch(e => logError('constructGroupEvent error: ', e));
-      OB11Constructor.FriendAddEvent(message).then(friendAddEvent=>{
-        if(friendAddEvent){
+      OB11Constructor.FriendAddEvent(message).then(friendAddEvent => {
+        if (friendAddEvent) {
           postOB11Event(friendAddEvent);
         }
       }).catch(e => logError('constructFriendAddEvent error: ', e));
