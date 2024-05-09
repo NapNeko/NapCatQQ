@@ -133,7 +133,7 @@ export class NapCatOnebot11 {
         uid2UinMap[UserInfo_User1.uid] = UserInfo_User1.uin;
         uid2UinMap[UserInfo_User2.uid] = UserInfo_User2.uin;
       }
-      //console.log('ob11 onGroupNotifiesUpdated', notifies[0], notifies[0].group, notifies[0].user1, notifies[0].user2);
+      //console.log('ob11 onGroupNotifiesUpdated', notifies[0]);
       this.postGroupNotifies(notifies).then().catch(e => logError('postGroupNotifies error: ', e));
     };
     groupListener.onJoinGroupNotify = (...notify) => {
