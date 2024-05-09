@@ -1,3 +1,4 @@
+import { BuddyProfileLikeReq } from "../entities/user";
 export interface NodeIKernelProfileLikeService {
     addKernelProfileLikeListener(listener: NodeIKernelProfileLikeService): void;
     removeKernelProfileLikeListener(listener: unknown): void;
@@ -6,7 +7,7 @@ export interface NodeIKernelProfileLikeService {
         errMsg: string;
         succCounts: number;
     };
-    getBuddyProfileLike(...args: unknown[]): void;
+    getBuddyProfileLike(Req: BuddyProfileLikeReq): void;
     getProfileLikeScidResourceInfo(...args: unknown[]): void;
     isNull(): boolean;
 }
