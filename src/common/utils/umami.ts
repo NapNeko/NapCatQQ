@@ -34,7 +34,7 @@ export function postLoginStatus() {
       'screen': '1920x1080',
       'language': 'zh-CN',
       'title': 'OneBot.Login',
-      'url': '/login/onebot11/1.2.0',
+      'url': '/login/onebot11/1.3.0',
       'referrer': 'https://napcat.demo.cn/login?type=onebot11'
     }
   };
