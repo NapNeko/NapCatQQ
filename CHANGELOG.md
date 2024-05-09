@@ -1,6 +1,6 @@
 # v1.3.0
 
-QQ Version: Windows 9.9.9-23361 / Linux 3.2.7-23361
+QQ Version: Windows 9.9.9-23424 / Linux 3.2.7-23361
 
 ## 修复与优化
 * 修复了一个导致每个图片都自动下载的 bug
