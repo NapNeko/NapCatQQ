@@ -3,6 +3,16 @@ export declare enum Sex {
     female = 2,
     unknown = 255
 }
+export interface BuddyProfileLikeReq {
+    friendUids: string[];
+    basic: number;
+    vote: number;
+    favorite: number;
+    userProfile: number;
+    type: number;
+    start: number;
+    limit: number;
+}
 export interface QQLevel {
     'crownNum': number;
     'sunNum': number;
