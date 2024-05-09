@@ -26,9 +26,7 @@ NapCatQQ 是基于 PC NTQQ 本体实现一套无头 Bot 框架。
 
 ## 鸣谢名单
 
-[OpenShamrock]()
-
-[Lagrange]()
+[Lagrange](https://github.com/LagrangeDev/Lagrange.Core)
 
 <!-- 
 QQ群：545402644
