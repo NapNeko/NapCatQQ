@@ -1,16 +1,16 @@
 import { RequestHandler } from "express";
-import { DataRuntime } from "../helper/Data";
+import { WebUiDataRuntime } from "../helper/Data";
 import { sleep } from "@/common/utils/helper";
 const isEmpty = (data: any) => data === undefined || data === null || data === '';
 export const QQGetQRcodeHandler: RequestHandler = async (req, res) => {
-    if (await DataRuntime.getQQLoginStatus()) {
+    if (await WebUiDataRuntime.getQQLoginStatus()) {
         res.send({
             code: -1,
             message: 'QQ Is Logined'
         });
         return;
     }
-    let qrcodeUrl = await DataRuntime.getQQLoginQrcodeURL();
+    let qrcodeUrl = await WebUiDataRuntime.getQQLoginQrcodeURL();
     if (isEmpty(qrcodeUrl)) {
         res.send({
             code: -1,
@@ -32,13 +32,13 @@ export const QQCheckLoginStatusHandler: RequestHandler = async (req, res) => {
         code: 0,
         message: 'success',
         data: {
-            isLogin: await DataRuntime.getQQLoginStatus()
+            isLogin: await WebUiDataRuntime.getQQLoginStatus()
         }
     });
 };
 export const QQSetQuickLoginHandler: RequestHandler = async (req, res) => {
     let { uin } = req.body;
-    let isLogin = await DataRuntime.getQQLoginStatus();
+    let isLogin = await WebUiDataRuntime.getQQLoginStatus();
     if (isLogin) {
         res.send({
             code: -1,
@@ -53,7 +53,7 @@ export const QQSetQuickLoginHandler: RequestHandler = async (req, res) => {
         });
         return;
     }
-    const { result, message } = await DataRuntime.getQQQuickLogin(uin);
+    const { result, message } = await WebUiDataRuntime.getQQQuickLogin(uin);
     if (!result) {
         res.send({
             code: -1,
@@ -62,14 +62,14 @@ export const QQSetQuickLoginHandler: RequestHandler = async (req, res) => {
         return;
     }
     //本来应该验证 但是http不宜这么搞 建议前端验证
-    //isLogin = await DataRuntime.getQQLoginStatus();
+    //isLogin = await WebUiDataRuntime.getQQLoginStatus();
     res.send({
         code: 0,
         message: 'success'
     });
 }
 export const QQGetQuickLoginListHandler: RequestHandler = async (req, res) => {
-    const quickLoginList = await DataRuntime.getQQQuickLoginList();
+    const quickLoginList = await WebUiDataRuntime.getQQQuickLoginList();
     res.send({
         code: 0,
         data: quickLoginList

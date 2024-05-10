@@ -20,7 +20,7 @@ let LoginRuntime: LoginRuntimeType = {
         QQLoginList: []
     }
 }
-export const DataRuntime = {
+export const WebUiDataRuntime = {
     checkLoginRate: async function (RateLimit: number): Promise<boolean> {
         LoginRuntime.LoginCurrentRate++;
         //console.log(RateLimit, LoginRuntime.LoginCurrentRate, Date.now() - LoginRuntime.LoginCurrentTime);
