@@ -314,6 +314,11 @@ export async function createSendElements(messageData: OB11MessageData[], group: 
           break;
         }
       }
+      const postData = { ...sendMsg.data } as IdMusicSignPostData | CustomMusicSignPostData;
+      if (sendMsg.data.type === 'custom' && sendMsg.data.content) {
+        (postData as CustomMusicSignPostData).singer = sendMsg.data.content;
+        delete (postData as OB11MessageCustomMusic['data']).content;
+      }
       const musicMsgElement = await genMusicElement(sendMsg.data);
       logDebug('生成音乐消息', musicMsgElement);
       if (musicMsgElement) {
@@ -321,7 +326,6 @@ export async function createSendElements(messageData: OB11MessageData[], group: 
       }
     }
     }
-
   }
 
   return {
