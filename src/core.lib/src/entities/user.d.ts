@@ -3,6 +3,11 @@ export declare enum Sex {
     female = 2,
     unknown = 255
 }
+export interface buddyCategorType {
+    categoryId: number;
+    categroyName: string;
+    categroyMbCount: number;
+}
 export interface BuddyProfileLikeReq {
     friendUids: string[];
     basic: number;
@@ -14,10 +19,10 @@ export interface BuddyProfileLikeReq {
     limit: number;
 }
 export interface QQLevel {
-    'crownNum': number;
-    'sunNum': number;
-    'moonNum': number;
-    'starNum': number;
+    crownNum: number;
+    sunNum: number;
+    moonNum: number;
+    starNum: number;
 }
 export interface User {
     uid: string;
@@ -29,52 +34,52 @@ export interface User {
     sex?: Sex;
     qqLevel?: QQLevel;
     qid?: string;
-    'birthday_year'?: number;
-    'birthday_month'?: number;
-    'birthday_day'?: number;
-    'topTime'?: string;
-    'constellation'?: number;
-    'shengXiao'?: number;
-    'kBloodType'?: number;
-    'homeTown'?: string;
-    'makeFriendCareer'?: number;
-    'pos'?: string;
-    'eMail'?: string;
-    'phoneNum'?: string;
-    'college'?: string;
-    'country'?: string;
-    'province'?: string;
-    'city'?: string;
-    'postCode'?: string;
-    'address'?: string;
-    'isBlock'?: boolean;
-    'isSpecialCareOpen'?: boolean;
-    'isSpecialCareZone'?: boolean;
-    'ringId'?: string;
-    'regTime'?: number;
+    birthday_year?: number;
+    birthday_month?: number;
+    birthday_day?: number;
+    topTime?: string;
+    constellation?: number;
+    shengXiao?: number;
+    kBloodType?: number;
+    homeTown?: string;
+    makeFriendCareer?: number;
+    pos?: string;
+    eMail?: string;
+    phoneNum?: string;
+    college?: string;
+    country?: string;
+    province?: string;
+    city?: string;
+    postCode?: string;
+    address?: string;
+    isBlock?: boolean;
+    isSpecialCareOpen?: boolean;
+    isSpecialCareZone?: boolean;
+    ringId?: string;
+    regTime?: number;
     interest?: string;
-    'labels'?: string[];
-    'isHideQQLevel'?: number;
-    'privilegeIcon'?: {
-        'jumpUrl': string;
-        'openIconList': unknown[];
-        'closeIconList': unknown[];
+    labels?: string[];
+    isHideQQLevel?: number;
+    privilegeIcon?: {
+        jumpUrl: string;
+        openIconList: unknown[];
+        closeIconList: unknown[];
     };
-    'photoWall'?: {
-        'picList': unknown[];
+    photoWall?: {
+        picList: unknown[];
     };
-    'vipFlag'?: boolean;
-    'yearVipFlag'?: boolean;
-    'svipFlag'?: boolean;
-    'vipLevel'?: number;
-    'status'?: number;
-    'qidianMasterFlag'?: number;
-    'qidianCrewFlag'?: number;
-    'qidianCrewFlag2'?: number;
-    'extStatus'?: number;
-    'recommendImgFlag'?: number;
-    'disableEmojiShortCuts'?: number;
-    'pendantId'?: string;
+    vipFlag?: boolean;
+    yearVipFlag?: boolean;
+    svipFlag?: boolean;
+    vipLevel?: number;
+    status?: number;
+    qidianMasterFlag?: number;
+    qidianCrewFlag?: number;
+    qidianCrewFlag2?: number;
+    extStatus?: number;
+    recommendImgFlag?: number;
+    disableEmojiShortCuts?: number;
+    pendantId?: string;
 }
 export interface SelfInfo extends User {
     online?: boolean;

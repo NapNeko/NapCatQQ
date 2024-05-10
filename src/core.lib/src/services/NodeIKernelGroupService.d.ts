@@ -50,12 +50,12 @@ export interface NodeIKernelGroupService {
     getGroupNotifiesUnreadCount(groupCode: string): void;
     clearGroupNotifiesUnreadCount(groupCode: string): void;
     operateSysNotify(doubt: boolean, operateMsg: {
-        'operateType': GroupRequestOperateTypes;
-        'targetMsg': {
-            'seq': string;
-            'type': GroupNotifyTypes;
-            'groupCode': string;
-            'postscript': string;
+        operateType: GroupRequestOperateTypes;
+        targetMsg: {
+            seq: string;
+            type: GroupNotifyTypes;
+            groupCode: string;
+            postscript: string;
         };
     }): Promise<void>;
     setTop(groupCode: string, isTop: boolean): void;
