@@ -9,7 +9,7 @@ import { log, logDebug, logError, LogLevel, setLogLevel } from '@/common/utils/l
 import { NapCatOnebot11 } from '@/onebot11/main';
 import { hookApi } from '@/core/external/hook';
 import { InitWebUi } from './webui/index';
-import { DataRuntime } from './webui/src/helper/Data';
+import { WebUiDataRuntime } from './webui/src/helper/Data';
 program
   .option('-q, --qq <type>', 'QQ号')
   .parse(process.argv);
@@ -44,12 +44,12 @@ checkVersion().then((remoteVersion: string) => {
 new NapCatOnebot11();
 napCatCore.onLoginSuccess((uin, uid) => {
   console.log('登录成功!');
-  DataRuntime.setQQLoginStatus(true);
-  DataRuntime.setQQLoginUin(uin.toString());
+  WebUiDataRuntime.setQQLoginStatus(true);
+  WebUiDataRuntime.setQQLoginUin(uin.toString());
   postLoginStatus();
 });
 const showQRCode = async (url: string, base64: string, buffer: Buffer) => {
-  await DataRuntime.setQQLoginQrcodeURL(url);
+  await WebUiDataRuntime.setQQLoginQrcodeURL(url);
   console.log('请扫描下面的二维码，然后在手Q上授权登录：');
   const qrcodePath = path.join(__dirname, 'qrcode.png');
   qrcode.generate(url, { small: true }, (res) => {
@@ -65,11 +65,11 @@ const quickLoginQQ = cmdOptions.qq;
 //   napCatCore.qrLogin().then().catch(console.error);
 // });
 napCatCore.getQuickLoginList().then((res) => {
-  // 遍历 res.LocalLoginInfoList[x].isQuickLogin是否可以可以 res.LocalLoginInfoList[x].uin 转为string 加入string[] 最后遍历完成调用DataRuntime.setQQQuickLoginList
-  DataRuntime.setQQQuickLoginList(res.LocalLoginInfoList.filter((item) => item.isQuickLogin).map((item) => item.uin.toString()));
+  // 遍历 res.LocalLoginInfoList[x].isQuickLogin是否可以可以 res.LocalLoginInfoList[x].uin 转为string 加入string[] 最后遍历完成调用WebUiDataRuntime.setQQQuickLoginList
+  WebUiDataRuntime.setQQQuickLoginList(res.LocalLoginInfoList.filter((item) => item.isQuickLogin).map((item) => item.uin.toString()));
 });
 
-DataRuntime.setQQQuickLogin(async (uin: string) => {
+WebUiDataRuntime.setQQQuickLogin(async (uin: string) => {
   let QuickLogin: Promise<{ result: boolean, message: string }> = new Promise((resolve, reject) => {
     if (quickLoginQQ) {
       log('正在快速登录 ', quickLoginQQ);

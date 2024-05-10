@@ -1,7 +1,7 @@
 import { RequestHandler } from "express";
 import { AuthHelper } from "../helper/SignToken";
 import { WebUiConfig } from "../helper/config";
-import { DataRuntime } from "../helper/Data";
+import { WebUiDataRuntime } from "../helper/Data";
 const isEmpty = (data: any) => data === undefined || data === null || data === '';
 export const LoginHandler: RequestHandler = async (req, res) => {
     let WebUiConfigData = await WebUiConfig.GetWebUIConfig();
@@ -13,7 +13,7 @@ export const LoginHandler: RequestHandler = async (req, res) => {
         });
         return;
     } 
-    if (!await DataRuntime.checkLoginRate(WebUiConfigData.loginRate)) {
+    if (!await WebUiDataRuntime.checkLoginRate(WebUiConfigData.loginRate)) {
         res.json({
             code: -1,
             message: 'login rate limit'
