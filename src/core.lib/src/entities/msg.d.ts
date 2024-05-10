@@ -2,7 +2,7 @@ import { GroupMemberRole } from './group';
 export interface Peer {
     chatType: ChatType;
     peerUid: string;
-    guildId?: '';
+    guildId?: string;
 }
 export declare enum ElementType {
     TEXT = 1,
@@ -18,7 +18,7 @@ export declare enum ElementType {
 }
 export interface SendTextElement {
     elementType: ElementType.TEXT;
-    elementId: '';
+    elementId: string;
     textElement: {
         content: string;
         atType: number;
@@ -29,7 +29,7 @@ export interface SendTextElement {
 }
 export interface SendPttElement {
     elementType: ElementType.PTT;
-    elementId: '';
+    elementId: string;
     pttElement: {
         fileName: string;
         filePath: string;
@@ -41,7 +41,7 @@ export interface SendPttElement {
         voiceChangeType: number;
         canConvert2Text: boolean;
         waveAmplitudes: number[];
-        fileSubId: '';
+        fileSubId: string;
         playState: number;
         autoConvertText: number;
     };
@@ -56,7 +56,7 @@ export declare enum PicSubType {
 }
 export interface SendPicElement {
     elementType: ElementType.PIC;
-    elementId: '';
+    elementId: string;
     picElement: {
         md5HexStr: string;
         fileSize: number | string;
@@ -75,7 +75,7 @@ export interface SendPicElement {
 }
 export interface SendReplyElement {
     elementType: ElementType.REPLY;
-    elementId: '';
+    elementId: string;
     replyElement: {
         replayMsgSeq: string;
         replayMsgId: string;
@@ -85,7 +85,7 @@ export interface SendReplyElement {
 }
 export interface SendFaceElement {
     elementType: ElementType.FACE;
-    elementId: '';
+    elementId: string;
     faceElement: FaceElement;
 }
 export interface SendMarketFaceElement {
@@ -93,39 +93,39 @@ export interface SendMarketFaceElement {
     marketFaceElement: MarketFaceElement;
 }
 export interface FileElement {
-    'fileMd5'?: '';
-    'fileName': string;
-    'filePath': string;
+    fileMd5?: string;
+    fileName: string;
+    filePath: string;
     fileSize: string;
-    'picHeight'?: number;
-    'picWidth'?: number;
-    'picThumbPath'?: Map<number, string>;
-    'file10MMd5'?: '';
-    'fileSha'?: '';
-    'fileSha3'?: '';
-    'fileUuid'?: '';
-    'fileSubId'?: '';
-    'thumbFileSize'?: number;
+    picHeight?: number;
+    picWidth?: number;
+    picThumbPath?: Map<number, string>;
+    file10MMd5?: string;
+    fileSha?: string;
+    fileSha3?: string;
+    fileUuid?: string;
+    fileSubId?: string;
+    thumbFileSize?: number;
     fileBizId?: number;
 }
 export interface SendFileElement {
     elementType: ElementType.FILE;
-    elementId: '';
+    elementId: string;
     fileElement: FileElement;
 }
 export interface SendVideoElement {
     elementType: ElementType.VIDEO;
-    elementId: '';
+    elementId: string;
     videoElement: VideoElement;
 }
 export interface SendArkElement {
     elementType: ElementType.ARK;
-    elementId: '';
+    elementId: string;
     arkElement: ArkElement;
 }
 export interface SendMarkdownElement {
     elementType: ElementType.MARKDOWN;
-    elementId: '';
+    elementId: string;
     markdownElement: MarkdownElement;
 }
 export type SendMessageElement = SendTextElement | SendPttElement | SendPicElement | SendReplyElement | SendFaceElement | SendMarketFaceElement | SendFileElement | SendVideoElement | SendArkElement | SendMarkdownElement;
@@ -137,6 +137,7 @@ export declare enum AtType {
 export declare enum ChatType {
     friend = 1,
     group = 2,
+    chatDevice = 8,//移动设备?
     temp = 100
 }
 export interface PttElement {
@@ -232,49 +233,49 @@ export interface MarketFaceElement {
     key: string;
 }
 export interface VideoElement {
-    'filePath': string;
-    'fileName': string;
-    'videoMd5'?: string;
-    'thumbMd5'?: string;
-    'fileTime'?: number;
-    'thumbSize'?: number;
-    'fileFormat'?: number;
-    'fileSize'?: string;
-    'thumbWidth'?: number;
-    'thumbHeight'?: number;
-    'busiType'?: 0;
-    'subBusiType'?: 0;
-    'thumbPath'?: Map<number, any>;
-    'transferStatus'?: 0;
-    'progress'?: 0;
-    'invalidState'?: 0;
-    'fileUuid'?: string;
-    'fileSubId'?: '';
-    'fileBizId'?: null;
-    'originVideoMd5'?: '';
-    'import_rich_media_context'?: null;
-    'sourceVideoCodecFormat'?: number;
+    filePath: string;
+    fileName: string;
+    videoMd5?: string;
+    thumbMd5?: string;
+    fileTime?: number;
+    thumbSize?: number;
+    fileFormat?: number;
+    fileSize?: string;
+    thumbWidth?: number;
+    thumbHeight?: number;
+    busiType?: 0;
+    subBusiType?: 0;
+    thumbPath?: Map<number, any>;
+    transferStatus?: 0;
+    progress?: 0;
+    invalidState?: 0;
+    fileUuid?: string;
+    fileSubId?: string;
+    fileBizId?: null;
+    originVideoMd5?: string;
+    import_rich_media_context?: null;
+    sourceVideoCodecFormat?: number;
 }
 export interface MarkdownElement {
     content: string;
 }
 export interface InlineKeyboardElementRowButton {
-    'id': '';
-    'label': string;
-    'visitedLabel': string;
-    'style': 1;
-    'type': 2;
-    'clickLimit': 0;
-    'unsupportTips': '请升级新版手机QQ';
-    'data': string;
-    'atBotShowChannelList': false;
-    'permissionType': 2;
-    'specifyRoleIds': [];
-    'specifyTinyids': [];
-    'isReply': false;
-    'anchor': 0;
-    'enter': false;
-    'subscribeDataTemplateIds': [];
+    id: string;
+    label: string;
+    visitedLabel: string;
+    style: 1;
+    type: 2;
+    clickLimit: 0;
+    unsupportTips: string;
+    data: string;
+    atBotShowChannelList: boolean;
+    permissionType: number;
+    specifyRoleIds: [];
+    specifyTinyids: [];
+    isReply: false;
+    anchor: 0;
+    enter: false;
+    subscribeDataTemplateIds: [];
 }
 export interface InlineKeyboardElement {
     rows: [
@@ -294,40 +295,40 @@ export declare enum TipGroupElementType {
     ban = 8
 }
 export interface TipGroupElement {
-    'type': TipGroupElementType;
-    'role': 0;
-    'groupName': string;
-    'memberUid': string;
-    'memberNick': string;
-    'memberRemark': string;
-    'adminUid': string;
-    'adminNick': string;
-    'adminRemark': string;
-    'createGroup': null;
-    'memberAdd'?: {
-        'showType': 1;
-        'otherAdd': null;
-        'otherAddByOtherQRCode': null;
-        'otherAddByYourQRCode': null;
-        'youAddByOtherQRCode': null;
-        'otherInviteOther': null;
-        'otherInviteYou': null;
-        'youInviteOther': null;
+    type: TipGroupElementType;
+    role: 0;
+    groupName: string;
+    memberUid: string;
+    memberNick: string;
+    memberRemark: string;
+    adminUid: string;
+    adminNick: string;
+    adminRemark: string;
+    createGroup: null;
+    memberAdd?: {
+        showType: 1;
+        otherAdd: null;
+        otherAddByOtherQRCode: null;
+        otherAddByYourQRCode: null;
+        youAddByOtherQRCode: null;
+        otherInviteOther: null;
+        otherInviteYou: null;
+        youInviteOther: null;
     };
-    'shutUp'?: {
-        'curTime': string;
-        'duration': string;
-        'admin': {
-            'uid': string;
-            'card': string;
-            'name': string;
-            'role': GroupMemberRole;
+    shutUp?: {
+        curTime: string;
+        duration: string;
+        admin: {
+            uid: string;
+            card: string;
+            name: string;
+            role: GroupMemberRole;
         };
-        'member': {
-            'uid': string;
-            'card': string;
-            'name': string;
-            'role': GroupMemberRole;
+        member: {
+            uid: string;
+            card: string;
+            name: string;
+            role: GroupMemberRole;
         };
     };
 }
