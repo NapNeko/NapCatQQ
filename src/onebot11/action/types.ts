@@ -57,8 +57,9 @@ export enum ActionName {
     // 以下为扩展napcat扩展
     GetRobotUinRange = 'get_robot_uin_range',
     SetOnlineStatus = 'set_online_status',
+    GetFriendCategory = 'get_friend_category',
     // 以下为go-cqhttp api
-    GoCQHTTP_GetEssenceMsg='get_essence_msg_list',
+    GoCQHTTP_GetEssenceMsg = 'get_essence_msg_list',
     GoCQHTTP_SetGroupNotice = '_send_group_notice',
     GoCQHTTP_GetGroupNotice = '_get_group_notice',
     GoCQHTTP_SendForwardMsg = 'send_forward_msg',
