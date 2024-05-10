@@ -7,7 +7,7 @@ export interface NodeIKernelProfileLikeService {
         errMsg: string;
         succCounts: number;
     };
-    getBuddyProfileLike(Req: BuddyProfileLikeReq): void;
+    getBuddyProfileLike(req: BuddyProfileLikeReq): void;
     getProfileLikeScidResourceInfo(...args: unknown[]): void;
     isNull(): boolean;
 }
