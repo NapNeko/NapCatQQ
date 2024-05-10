@@ -319,7 +319,7 @@ export async function createSendElements(messageData: OB11MessageData[], group: 
         (postData as CustomMusicSignPostData).singer = sendMsg.data.content;
         delete (postData as OB11MessageCustomMusic['data']).content;
       }
-      const musicMsgElement = await genMusicElement(sendMsg.data);
+      const musicMsgElement = await genMusicElement(postData);
       logDebug('生成音乐消息', musicMsgElement);
       if (musicMsgElement) {
         sendElements.push(musicMsgElement);
