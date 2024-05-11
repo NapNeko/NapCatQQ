@@ -155,7 +155,7 @@ export class OB11Constructor {
         } catch (e: any) {
           logError('获取图片url失败', e.stack);
         }
-        console.log(message_data['data']['url'])
+        //console.log(message_data['data']['url'])
         // message_data["data"]["file_id"] = element.picElement.fileUuid
         message_data['data']['file_size'] = element.picElement.fileSize;
         dbUtil.addFileCache({
