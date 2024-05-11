@@ -57,7 +57,7 @@ export class ReverseWebsocket {
   }
 
   public onclose = () => {
-    logDebug('反向ws断开', this.url);
+    logError('反向ws断开', this.url);
     unregisterWsEventSender(this.websocket!);
     if (this.running) {
       this.reconnect();

@@ -52,7 +52,7 @@ import { SetOnlineStatus } from './extends/SetOnlineStatus';
 import { GetGroupNotice } from './group/GetGroupNotice';
 import { GetGroupEssence } from './group/GetGroupEssence';
 import { ForwardFriendSingleMsg, ForwardGroupSingleMsg } from '@/onebot11/action/msg/ForwardSingleMsg';
-import { GetFriendCategory } from './extends/GetFriendCategory';
+import { GetFriendWithCategory } from './extends/GetFriendWithCategory';
 
 export const actionHandlers = [
   new GetFile(),
@@ -95,7 +95,7 @@ export const actionHandlers = [
   //
   new SetOnlineStatus(),
   new GetRobotUinRange(),
-  new GetFriendCategory(),
+  new GetFriendWithCategory(),
   //以下为go-cqhttp api
   new GetGroupNotice(),
   new GetGroupEssence(),

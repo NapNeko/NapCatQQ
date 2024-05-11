@@ -48,7 +48,7 @@ const baseConfigPlugin: PluginOption[] = [
       { src: './package.json', dest: 'dist' },
       { src: './README.md', dest: 'dist' },
       { src: './logo.png', dest: 'dist/logs' },
-      ...MoeHooModule,
+      // ...MoeHooModule,
       ...(startScripts.map((startScript) => {
         return { src: startScript, dest: 'dist' };
       })),
