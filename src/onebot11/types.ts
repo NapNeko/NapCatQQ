@@ -212,7 +212,7 @@ export interface OB11MessageIdMusic {
 }
 export interface OB11MessageCustomMusic {
   type: OB11MessageDataType.music
-  data: CustomMusicSignPostData
+  data: Omit<CustomMusicSignPostData, 'singer'> & { content?: string }
 }
 
 export interface OB11MessageJson {

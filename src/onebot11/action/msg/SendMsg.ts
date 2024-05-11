@@ -314,14 +314,18 @@ export async function createSendElements(messageData: OB11MessageData[], group: 
           break;
         }
       }
-      const musicMsgElement = await genMusicElement(sendMsg.data);
+      const postData = { ...sendMsg.data } as IdMusicSignPostData | CustomMusicSignPostData;
+      if (sendMsg.data.type === 'custom' && sendMsg.data.content) {
+        (postData as CustomMusicSignPostData).singer = sendMsg.data.content;
+        delete (postData as OB11MessageCustomMusic['data']).content;
+      }
+      const musicMsgElement = await genMusicElement(postData);
       logDebug('生成音乐消息', musicMsgElement);
       if (musicMsgElement) {
         sendElements.push(musicMsgElement);
       }
     }
     }
-
   }
 
   return {
