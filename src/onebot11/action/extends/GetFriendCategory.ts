@@ -5,8 +5,8 @@ import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { buddyCategorType } from '@/core/entities/';
 
-export class GetFriendCategory extends BaseAction<void, Array<buddyCategorType>> {
-    actionName = ActionName.GetFriendCategory;
+export class GetFriendWithCategory extends BaseAction<void, Array<buddyCategorType>> {
+    actionName = ActionName.GetFriendWithCategory;
 
     protected async _handle(payload: void) {
         return buddyCategory.data;
