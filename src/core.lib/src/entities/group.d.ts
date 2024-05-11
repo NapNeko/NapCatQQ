@@ -7,7 +7,7 @@ export interface Group {
     groupStatus: 0;
     memberRole: 2;
     isTop: boolean;
-    toppedTimestamp: '0';
+    toppedTimestamp: string;
     privilegeFlag: number;
     isConf: boolean;
     hasModifyConfGroupFace: boolean;
@@ -24,8 +24,8 @@ export interface Group {
     groupCreditLevel: number;
     groupFlagExt3: number;
     groupOwnerId: {
-        'memberUin': string;
-        'memberUid': string;
+        memberUin: string;
+        memberUid: string;
     };
 }
 export declare enum GroupMemberRole {

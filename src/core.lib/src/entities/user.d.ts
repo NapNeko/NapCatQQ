@@ -3,10 +3,11 @@ export declare enum Sex {
     female = 2,
     unknown = 255
 }
-export interface buddyCategorType {
+export interface BuddyCategoryType {
     categoryId: number;
     categroyName: string;
     categroyMbCount: number;
+    buddyList: User[];
 }
 export interface BuddyProfileLikeReq {
     friendUids: string[];
