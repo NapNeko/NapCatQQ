@@ -7,7 +7,6 @@ import { postLoginStatus } from '@/common/utils/umami';
 import { checkVersion } from '@/common/utils/version';
 import { log, logDebug, logError, LogLevel, setLogLevel } from '@/common/utils/log';
 import { NapCatOnebot11 } from '@/onebot11/main';
-import { hookApi } from '@/core/external/hook';
 import { InitWebUi } from './webui/index';
 import { WebUiDataRuntime } from './webui/src/helper/Data';
 program
@@ -18,11 +17,7 @@ InitWebUi();
 const cmdOptions = program.opts();
 // console.log(process.argv);
 
-for (let k = 0; k < 30; k++) {
-  new Promise((r, j) => {
-    hookApi.getRKey();
-  }).then();
-}
+
 checkVersion().then((remoteVersion: string) => {
   const localVersion = require('./package.json').version;
   const localVersionList = localVersion.split('.');
@@ -70,7 +65,7 @@ napCatCore.getQuickLoginList().then((res) => {
 });
 
 WebUiDataRuntime.setQQQuickLogin(async (uin: string) => {
-  let QuickLogin: Promise<{ result: boolean, message: string }> = new Promise((resolve, reject) => {
+  const QuickLogin: Promise<{ result: boolean, message: string }> = new Promise((resolve, reject) => {
     if (quickLoginQQ) {
       log('正在快速登录 ', quickLoginQQ);
       napCatCore.quickLogin(quickLoginQQ).then(res => {
@@ -86,7 +81,7 @@ WebUiDataRuntime.setQQQuickLogin(async (uin: string) => {
       resolve({ result: false, message: '快速登录失败' });
     }
   });
-  let result = await QuickLogin;
+  const result = await QuickLogin;
   return result;
 });
 
