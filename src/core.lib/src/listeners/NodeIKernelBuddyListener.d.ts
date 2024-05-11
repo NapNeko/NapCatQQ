@@ -1,10 +1,5 @@
-import { FriendRequestNotify, User } from '@/core/entities';
-export type OnBuddyChangeParams = {
-    categoryId: number;
-    categroyName: string;
-    categroyMbCount: number;
-    buddyList: User[];
-}[];
+import { BuddyCategoryType, FriendRequestNotify } from '@/core/entities';
+export type OnBuddyChangeParams = BuddyCategoryType[];
 interface IBuddyListener {
     onBuddyListChange(arg: OnBuddyChangeParams): void;
     onBuddyInfoChange(arg: unknown): void;

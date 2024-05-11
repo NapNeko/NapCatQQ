@@ -1,4 +1,4 @@
-import { type Friend, type FriendRequest, type Group, type GroupMember, GroupNotify, type SelfInfo, buddyCategorType } from './entities';
+import { type Friend, type FriendRequest, type Group, type GroupMember, GroupNotify, type SelfInfo, BuddyCategoryType } from './entities';
 import { WebApiGroupMember } from '@/core/apis';
 export declare const Credentials: {
     Skey: string;
@@ -29,9 +29,7 @@ export declare function getGroupMember(groupQQ: string | number, memberUinOrUid:
 export declare const uid2UinMap: Record<string, string>;
 export declare function getUidByUin(uin: string): string | undefined;
 export declare const tempGroupCodeMap: Record<string, string>;
-export declare const buddyCategory: {
-    data: Array<buddyCategorType>;
-};
+export declare const rawFriends: Array<BuddyCategoryType>;
 export declare const stat: {
     packet_received: number;
     packet_sent: number;
