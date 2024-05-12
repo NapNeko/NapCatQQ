@@ -125,7 +125,7 @@ export async function httpDownload(options: string | HttpDownloadOptions): Promi
       }
     }
   }
-  const fetchRes = await fetch(url, headers);
+  const fetchRes = await fetch(url, { headers });
   if (!fetchRes.ok) throw new Error(`下载文件失败: ${fetchRes.statusText}`);
 
   const blob = await fetchRes.blob();
