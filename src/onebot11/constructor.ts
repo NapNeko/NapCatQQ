@@ -23,7 +23,7 @@ import {
   Sex,
   TipGroupElementType,
   User
-} from '../core/src/entities';
+} from '@/core/entities';
 import { EventType } from './event/OB11BaseEvent';
 import { encodeCQCode } from './cqcode';
 import { dbUtil } from '@/core/utils/db';
@@ -41,7 +41,7 @@ import { OB11GroupCardEvent } from './event/notice/OB11GroupCardEvent';
 import { OB11GroupDecreaseEvent } from './event/notice/OB11GroupDecreaseEvent';
 import { ob11Config } from '@/onebot11/config';
 import { deleteGroup, getFriend, getGroupMember, groupMembers, selfInfo, tempGroupCodeMap } from '@/core/data';
-import { NTQQFileApi, NTQQGroupApi, NTQQUserApi } from '../core/src/apis';
+import { NTQQFileApi, NTQQGroupApi, NTQQUserApi } from '@/core/apis';
 import { OB11GroupMsgEmojiLikeEvent } from '@/onebot11/event/notice/OB11MsgEmojiLikeEvent';
 
 
