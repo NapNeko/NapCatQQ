@@ -205,7 +205,7 @@ export class NapCatOnebot11 {
       try {
         notify.time = Date.now();
         const notifyTime = parseInt(notify.seq) / 1000 / 1000;
-        // log(`群通知时间${notifyTime}`, `LLOneBot启动时间${this.bootTime}`);
+        // log(`群通知时间${notifyTime}`, `启动时间${this.bootTime}`);
         if (notifyTime < this.bootTime) {
           continue;
         }

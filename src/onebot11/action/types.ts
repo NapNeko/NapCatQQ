@@ -14,7 +14,10 @@ export interface InvalidCheckResult {
 }
 
 export enum ActionName {
-    // llonebot
+    // 以下为扩展napcat扩展
+    GetRobotUinRange = 'get_robot_uin_range',
+    SetOnlineStatus = 'set_online_status',
+    GetFriendsWithCategory = 'get_friends_with_category',
     GetGroupIgnoreAddRequest = 'get_group_ignore_add_request',
     SetQQAvatar = 'set_qq_avatar',
     GetConfig = 'get_config',
@@ -54,10 +57,6 @@ export enum ActionName {
     GetRecord = 'get_record',
     CleanCache = 'clean_cache',
     GetCookies = 'get_cookies',
-    // 以下为扩展napcat扩展
-    GetRobotUinRange = 'get_robot_uin_range',
-    SetOnlineStatus = 'set_online_status',
-    GetFriendsWithCategory = 'get_friends_with_category',
     // 以下为go-cqhttp api
     GoCQHTTP_SendGroupNotice = '_send_group_notice',
     GoCQHTTP_GetEssenceMsg = 'get_essence_msg_list',
