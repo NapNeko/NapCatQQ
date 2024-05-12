@@ -54,10 +54,12 @@ import { GetGroupEssence } from './group/GetGroupEssence';
 import { ForwardFriendSingleMsg, ForwardGroupSingleMsg } from '@/onebot11/action/msg/ForwardSingleMsg';
 import { GetFriendWithCategory } from './extends/GetFriendWithCategory';
 import { SendGroupNotice } from './go-cqhttp/SendGroupNotice';
+import Reboot from './system/Reboot';
 
 export const actionHandlers = [
   new GetFile(),
   new Debug(),
+  new Reboot(),
   // new GetConfigAction(),
   // new SetConfigAction(),
   // new GetGroupAddRequest(),

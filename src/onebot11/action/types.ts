@@ -27,6 +27,7 @@ export enum ActionName {
     ForwardFriendSingleMsg = 'forward_friend_single_msg',
     ForwardGroupSingleMsg = 'forward_group_single_msg',
     // onebot 11
+    Reboot = 'set_restart',
     SendLike = 'send_like',
     GetLoginInfo = 'get_login_info',
     GetFriendList = 'get_friend_list',
