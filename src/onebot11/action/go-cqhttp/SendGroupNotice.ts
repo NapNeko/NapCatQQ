@@ -6,6 +6,9 @@ interface Payload {
     group_id: string;
     content: string;
     image?: string;
+    pinned?: number;
+    confirmRequired?: number;
+
 }
 export class SendGroupNotice extends BaseAction<Payload, null> {
     actionName = ActionName.GoCQHTTP_SendGroupNotice;
@@ -31,12 +34,21 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
             }
             UploadImage = ImageUploadResult.picInfo;
         }
-        let PublishGroupBulletinResult = await NTQQGroupApi.publishGroupBulletin(payload.group_id, payload.content, UploadImage);
-        if(PublishGroupBulletinResult.result ! = 0){
+        let Notice_Pinned = 0;
+        let Notice_confirmRequired = 0;
+        if (!payload.pinned) {
+            Notice_Pinned = 0;
+        }
+        if (!payload.confirmRequired) {
+            Notice_confirmRequired = 0;
+        }
+        let PublishGroupBulletinResult = await NTQQGroupApi.publishGroupBulletin(payload.group_id, payload.content, UploadImage, Notice_Pinned, Notice_confirmRequired);
+
+        if (PublishGroupBulletinResult.result! = 0) {
             throw `设置群公告失败,错误信息:${PublishGroupBulletinResult.errMsg}`;
         }
         // 下面实现扬了
-        //await WebApi.setGroupNotice(payload.group_id, payload.content);
+        //await WebApi.setGroupNotice(payload.group_id, payload.content) ;
         return null;
     }
 }
