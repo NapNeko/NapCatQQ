@@ -57,10 +57,9 @@ export enum ActionName {
     GetRecord = 'get_record',
     CleanCache = 'clean_cache',
     GetCookies = 'get_cookies',
-    // 以下为go-cqhttp api
-    GoCQHTTP_SendGroupNotice = '_send_group_notice',
+    // 以下为go-cqhttp api 
     GoCQHTTP_GetEssenceMsg = 'get_essence_msg_list',
-    GoCQHTTP_SetGroupNotice = '_send_group_notice',
+    GoCQHTTP_SendGroupNotice = '_send_group_notice',
     GoCQHTTP_GetGroupNotice = '_get_group_notice',
     GoCQHTTP_SendForwardMsg = 'send_forward_msg',
     GoCQHTTP_SendGroupForwardMsg = 'send_group_forward_msg',
