@@ -570,7 +570,6 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
             await sleep(Math.trunc(sendElementsSplit.length / 10) * 100);
             //await sleep(10);
           }
-
           for (const msgNode of MsgNodeList) {
             let result = await msgNode;
             nodeMsgIds.push(result.msgId);
