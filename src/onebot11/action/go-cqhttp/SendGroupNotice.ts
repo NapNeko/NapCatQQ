@@ -2,6 +2,7 @@ import { checkFileReceived, uri2local } from '@/common/utils/file';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { NTQQGroupApi, WebApi } from '@/core/apis';
+import { unlink } from 'node:fs';
 interface Payload {
     group_id: string;
     content: string;
@@ -16,7 +17,7 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
         let UploadImage: { id: string, width: number, height: number } | undefined = undefined;
         if (payload.image) {
             //公告图逻辑
-            let Image_path, Image_IsLocal, Image_errMsg;
+            let Image_path, Image_errMsg, Image_IsLocal = false;
             let Uri2LocalRet = (await uri2local(payload.image));
             Image_errMsg = Uri2LocalRet.errMsg;
             Image_path = Uri2LocalRet.path;
@@ -31,6 +32,9 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
             let ImageUploadResult = await NTQQGroupApi.uploadGroupBulletinPic(payload.group_id, Image_path);
             if (ImageUploadResult.errCode != 0) {
                 throw `群公告${payload.image}设置失败,图片上传失败`;
+            }
+            if (!Image_IsLocal) {
+                unlink(Image_path, () => { });
             }
             UploadImage = ImageUploadResult.picInfo;
         }
