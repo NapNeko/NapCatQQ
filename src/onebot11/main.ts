@@ -130,12 +130,20 @@ export class NapCatOnebot11 {
     groupListener.onGroupNotifiesUpdated = async (doubt, notifies) => {
       for (let i = 0; i < notifies.length; i++) {
         if (notifies[i].user1.uid && notifies[i].user1.uid.startsWith('u_')) {
-          let UserInfo_User1 = await NTQQUserApi.getUserDetailInfo(notifies[i].user1.uid);
-          uid2UinMap[UserInfo_User1.uid] = UserInfo_User1.uin;
+          try {
+            const UserInfo_User1 = await NTQQUserApi.getUserDetailInfo(notifies[i].user1.uid);
+            uid2UinMap[UserInfo_User1.uid] = UserInfo_User1.uin;
+          }catch (e) {
+            logDebug('获取群通知相关信息失败' + e, notifies[i].user1.uid);
+          }
         }
         if (notifies[i].user2.uid && notifies[i].user2.uid.startsWith('u_')) {
-          let UserInfo_User2 = await NTQQUserApi.getUserDetailInfo(notifies[i].user2.uid);
-          uid2UinMap[UserInfo_User2.uid] = UserInfo_User2.uin;
+          try {
+            const UserInfo_User2 = await NTQQUserApi.getUserDetailInfo(notifies[i].user2.uid);
+            uid2UinMap[UserInfo_User2.uid] = UserInfo_User2.uin;
+          }catch (e) {
+            logDebug('获取群通知相关信息失败' + e, notifies[i].user2.uid);
+          }
         }
       }
       //console.log('ob11 onGroupNotifiesUpdated', notifies[0]);
