@@ -11,4 +11,5 @@ QQ Version: Windows 9.9.9-23424 / Linux 3.2.7-23361
 ## 新增与调整
 * 新增设置群公告 Api: /_send_group_notice
 * 新增重启实现 包括重启快速登录/普通重启
+
 新增的 API 详细见[API文档](https://napneko.github.io/zh-CN/develop/extends_api)
