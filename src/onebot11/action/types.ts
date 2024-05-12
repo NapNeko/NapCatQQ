@@ -59,6 +59,7 @@ export enum ActionName {
     SetOnlineStatus = 'set_online_status',
     GetFriendsWithCategory = 'get_friends_with_category',
     // 以下为go-cqhttp api
+    GoCQHTTP_SendGroupNotice = '_send_group_notice',
     GoCQHTTP_GetEssenceMsg = 'get_essence_msg_list',
     GoCQHTTP_SetGroupNotice = '_send_group_notice',
     GoCQHTTP_GetGroupNotice = '_get_group_notice',
