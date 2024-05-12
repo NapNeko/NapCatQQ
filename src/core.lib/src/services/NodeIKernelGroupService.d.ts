@@ -61,9 +61,16 @@ export interface NodeIKernelGroupService {
     setTop(groupCode: string, isTop: boolean): void;
     getGroupBulletin(groupCode: string): unknown;
     deleteGroupBulletin(groupCode: string, seq: string): void;
-    publishGroupBulletin(groupCode: string, arg: unknown): void;
+    publishGroupBulletin(groupCode: string, pskey: string, data: any): Promise<GeneralCallResult>;
     publishInstructionForNewcomers(groupCode: string, arg: unknown): void;
-    uploadGroupBulletinPic(groupCode: string, arg: unknown): void;
+    uploadGroupBulletinPic(groupCode: string, pskey: string, imagePath: string): Promise<GeneralCallResult & {
+        errCode: number;
+        picInfo?: {
+            id: string;
+            width: number;
+            height: number;
+        };
+    }>;
     downloadGroupBulletinRichMedia(groupCode: string): unknown;
     getGroupBulletinList(groupCode: string): unknown;
     getGroupStatisticInfo(groupCode: string): unknown;
