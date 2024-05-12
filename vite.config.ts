@@ -7,7 +7,6 @@ import { PluginOption, Plugin } from 'vite';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import { builtinModules } from 'module';
-import os from 'node:os';
 import fs from 'node:fs';
 
 const external = ['silk-wasm', 'ws', 'express', 'uuid', 'fluent-ffmpeg', 'sqlite3', 'log4js',
