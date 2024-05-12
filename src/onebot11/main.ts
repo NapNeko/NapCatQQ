@@ -1,5 +1,5 @@
 import { napCatCore } from '@/core';
-import { MsgListener } from '../core/src/listeners';
+import { MsgListener } from '@/core/listeners';
 import { OB11Constructor } from '@/onebot11/constructor';
 import { postOB11Event } from '@/onebot11/server/postOB11Event';
 import {
@@ -10,16 +10,16 @@ import {
   GroupNotify,
   GroupNotifyTypes,
   RawMessage
-} from '../core/src/entities';
+} from '@/core/entities';
 import { ob11Config } from '@/onebot11/config';
 import { httpHeart, ob11HTTPServer } from '@/onebot11/server/http';
 import { ob11WebsocketServer } from '@/onebot11/server/ws/WebsocketServer';
 import { ob11ReverseWebsockets } from '@/onebot11/server/ws/ReverseWebsocket';
 import { friendRequests, getFriend, getGroup, getGroupMember, groupNotifies, selfInfo, uid2UinMap } from '@/core/data';
 import { dbUtil } from '@/core/utils/db';
-import { BuddyListener, GroupListener, NodeIKernelBuddyListener } from '../core/src/listeners';
+import { BuddyListener, GroupListener, NodeIKernelBuddyListener } from '@/core/listeners';
 import { OB11FriendRequestEvent } from '@/onebot11/event/request/OB11FriendRequest';
-import { NTQQGroupApi, NTQQUserApi } from '../core/src/apis';
+import { NTQQGroupApi, NTQQUserApi } from '@/core/apis';
 import { log, logDebug, logError, setLogSelfInfo } from '@/common/utils/log';
 import { OB11GroupRequestEvent } from '@/onebot11/event/request/OB11GroupRequest';
 import { OB11GroupAdminNoticeEvent } from '@/onebot11/event/notice/OB11GroupAdminNoticeEvent';
@@ -205,7 +205,7 @@ export class NapCatOnebot11 {
       try {
         notify.time = Date.now();
         const notifyTime = parseInt(notify.seq) / 1000 / 1000;
-        // log(`群通知时间${notifyTime}`, `LLOneBot启动时间${this.bootTime}`);
+        // log(`群通知时间${notifyTime}`, `启动时间${this.bootTime}`);
         if (notifyTime < this.bootTime) {
           continue;
         }
