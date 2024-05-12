@@ -61,12 +61,12 @@ export abstract class HttpServerBase {
       this.listen(port, host);
     } catch (e: any) {
       logError('HTTP服务启动失败', e.toString());
-      // llonebotError.httpServerError = "HTTP服务启动失败, " + e.toString()
+      // httpServerError = "HTTP服务启动失败, " + e.toString()
     }
   }
 
   stop() {
-    // llonebotError.httpServerError = ""
+    // httpServerError = ""
     if (this.server) {
       this.server.close();
       this.server = null;

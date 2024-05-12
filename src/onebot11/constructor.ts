@@ -23,7 +23,7 @@ import {
   Sex,
   TipGroupElementType,
   User
-} from '../core/src/entities';
+} from '@/core/entities';
 import { EventType } from './event/OB11BaseEvent';
 import { encodeCQCode } from './cqcode';
 import { dbUtil } from '@/core/utils/db';
@@ -41,7 +41,7 @@ import { OB11GroupCardEvent } from './event/notice/OB11GroupCardEvent';
 import { OB11GroupDecreaseEvent } from './event/notice/OB11GroupDecreaseEvent';
 import { ob11Config } from '@/onebot11/config';
 import { deleteGroup, getFriend, getGroupMember, groupMembers, selfInfo, tempGroupCodeMap } from '@/core/data';
-import { NTQQFileApi, NTQQGroupApi, NTQQUserApi } from '../core/src/apis';
+import { NTQQFileApi, NTQQGroupApi, NTQQUserApi } from '@/core/apis';
 import { OB11GroupMsgEmojiLikeEvent } from '@/onebot11/event/notice/OB11MsgEmojiLikeEvent';
 
 
@@ -92,7 +92,6 @@ export class OB11Constructor {
         resMsg.group_id = parseInt(tempGroupCode);
       }
     }
-
     for (const element of msg.elements) {
       const message_data: OB11MessageData | any = {
         data: {},
@@ -152,10 +151,11 @@ export class OB11Constructor {
         // let currentRKey = "CAQSKAB6JWENi5LMk0kc62l8Pm3Jn1dsLZHyRLAnNmHGoZ3y_gDZPqZt-64"
 
         try {
-          message_data['data']['url'] = await NTQQFileApi.getImageUrl(msg);
+          message_data['data']['url'] = await NTQQFileApi.getImageUrl(element.picElement, msg.chatType !== ChatType.group);
         } catch (e: any) {
           logError('获取图片url失败', e.stack);
         }
+        //console.log(message_data['data']['url'])
         // message_data["data"]["file_id"] = element.picElement.fileUuid
         message_data['data']['file_size'] = element.picElement.fileSize;
         dbUtil.addFileCache({

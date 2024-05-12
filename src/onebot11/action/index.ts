@@ -53,6 +53,7 @@ import { GetGroupNotice } from './group/GetGroupNotice';
 import { GetGroupEssence } from './group/GetGroupEssence';
 import { ForwardFriendSingleMsg, ForwardGroupSingleMsg } from '@/onebot11/action/msg/ForwardSingleMsg';
 import { GetFriendWithCategory } from './extends/GetFriendWithCategory';
+import { SendGroupNotice } from './go-cqhttp/SendGroupNotice';
 
 export const actionHandlers = [
   new GetFile(),
@@ -97,6 +98,7 @@ export const actionHandlers = [
   new GetRobotUinRange(),
   new GetFriendWithCategory(),
   //以下为go-cqhttp api
+  new SendGroupNotice(),
   new GetGroupNotice(),
   new GetGroupEssence(),
   new GoCQHTTPSendForwardMsg(),
