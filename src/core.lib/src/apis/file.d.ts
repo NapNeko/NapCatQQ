@@ -1,4 +1,4 @@
-import { CacheFileListItem, CacheFileType, ChatCacheListItemBasic, ChatType, ElementType, RawMessage } from '@/core/entities';
+import { CacheFileListItem, CacheFileType, ChatCacheListItemBasic, ChatType, ElementType } from '@/core/entities';
 import { GeneralCallResult } from '@/core';
 import * as fileType from 'file-type';
 import { ISizeCalculationResult } from 'image-size/dist/types/interface';
@@ -15,7 +15,11 @@ export declare class NTQQFileApi {
     }>;
     static downloadMedia(msgId: string, chatType: ChatType, peerUid: string, elementId: string, thumbPath: string, sourcePath: string, timeout?: number, force?: boolean): Promise<string>;
     static getImageSize(filePath: string): Promise<ISizeCalculationResult | undefined>;
-    static getImageUrl(msg: RawMessage): Promise<string>;
+    static getImageUrl(element: {
+        originImageUrl: any;
+        md5HexStr?: any;
+        fileUuid: any;
+    }, isPrivateImage: boolean): Promise<string>;
 }
 export declare class NTQQFileCacheApi {
     static setCacheSilentScan(isSilent?: boolean): Promise<string>;
