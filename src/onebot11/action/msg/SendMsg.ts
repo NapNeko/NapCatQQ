@@ -30,7 +30,8 @@ import { getFriend, getGroup, getGroupMember, getUidByUin, selfInfo } from '@/co
 import { NTQQMsgApi } from '@/core/apis';
 import { NTQQFileApi } from '@/core/apis';
 import { ob11Config } from '@/onebot11/config';
-import { CustomMusicSignPostData, IdMusicSignPostData, MusicSign } from '@/core/apis/sign';
+import { CustomMusicSignPostData, IdMusicSignPostData } from '@/core/apis/sign';
+import { RequestUtil } from '@/common/utils/request';
 
 const ALLOW_SEND_TEMP_MSG = false;
 
@@ -136,7 +137,9 @@ async function genMusicElement(postData: IdMusicSignPostData | CustomMusicSignPo
     throw Error('音乐消息签名地址未配置');
   }
   try {
-    const musicJson = await new MusicSign(signUrl).sign(postData);
+    //const musicJson = await new MusicSign(signUrl).sign(postData);
+    // 待测试
+    const musicJson = await RequestUtil.HttpGetJson<any>(signUrl, 'POST', postData);
     return SendMsgElementConstructor.ark(musicJson);
   } catch (e) {
     logError('生成音乐消息失败', e);
