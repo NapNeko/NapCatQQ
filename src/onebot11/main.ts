@@ -11,7 +11,7 @@ import {
   GroupNotifyTypes,
   RawMessage
 } from '@/core/entities';
-import { ob11Config } from '@/onebot11/config';
+import { OB11Config, ob11Config } from '@/onebot11/config';
 import { httpHeart, ob11HTTPServer } from '@/onebot11/server/http';
 import { ob11WebsocketServer } from '@/onebot11/server/ws/WebsocketServer';
 import { ob11ReverseWebsockets } from '@/onebot11/server/ws/ReverseWebsocket';
@@ -87,7 +87,7 @@ export class NapCatOnebot11 {
       logDebug('收到消息', msg);
       for (const m of msg) {
         // try: 减掉3s 试图修复消息半天收不到
-        if (this.bootTime - 3> parseInt(m.msgTime)) {
+        if (this.bootTime - 3 > parseInt(m.msgTime)) {
           logDebug(`消息时间${m.msgTime}早于启动时间${this.bootTime}，忽略上报`);
           continue;
         }
@@ -189,7 +189,72 @@ export class NapCatOnebot11 {
       }).catch(e => logError('constructFriendAddEvent error: ', e));
     }
   }
+  async SetConfig(NewOb11: OB11Config) {
+    function isEqual(obj1: any, obj2: any) {
+      if (obj1 === obj2) return true;
+      if (obj1 == null || obj2 == null) return false;
+      if (typeof obj1 !== 'object' || typeof obj2 !== 'object') return obj1 === obj2;
 
+      const keys1 = Object.keys(obj1);
+      const keys2 = Object.keys(obj2);
+
+      if (keys1.length !== keys2.length) return false;
+
+      for (let key of keys1) {
+        if (!isEqual(obj1[key], obj2[key])) return false;
+      }
+      return true;
+    }
+    // if (!NewOb11 || typeof NewOb11 !== 'object') {
+    //   throw new Error('Invalid configuration object');
+    // }
+
+    const isHttpChanged = !isEqual(NewOb11.httpPort, ob11Config.httpPort) && NewOb11.enableHttp;
+    const isWsChanged = !isEqual(NewOb11.wsPort, ob11Config.wsPort);
+    const isEnableWsChanged = !isEqual(NewOb11.enableWs, ob11Config.enableWs);
+    const isEnableWsReverseChanged = !isEqual(NewOb11.enableWsReverse, ob11Config.enableWsReverse);
+    const isWsReverseUrlsChanged = !isEqual(NewOb11.wsReverseUrls, ob11Config.wsReverseUrls);
+
+    if (isHttpChanged) {
+      ob11HTTPServer.restart(NewOb11.httpPort, NewOb11.httpHost);
+    }
+
+    if (!NewOb11.enableHttp) {
+      ob11HTTPServer.stop();
+    } else {
+      ob11HTTPServer.start(NewOb11.httpPort, NewOb11.httpHost);
+    }
+
+    if (isWsChanged) {
+      ob11WebsocketServer.restart(NewOb11.wsPort);
+    }
+
+    if (isEnableWsChanged) {
+      if (NewOb11.enableWs) {
+        ob11WebsocketServer.start(NewOb11.wsPort, NewOb11.wsHost);
+      } else {
+        ob11WebsocketServer.stop();
+      }
+    }
+
+    if (isEnableWsReverseChanged) {
+      if (NewOb11.enableWsReverse) {
+        ob11ReverseWebsockets.start();
+      } else {
+        ob11ReverseWebsockets.stop();
+      }
+    }
+    if (NewOb11.enableWsReverse && isWsReverseUrlsChanged) {
+      logDebug('反向ws地址有变化, 重启反向ws服务');
+      ob11ReverseWebsockets.restart();
+    }
+    if (NewOb11.enableHttpHeart) {
+      httpHeart.start();
+    } else if (!NewOb11.enableHttpHeart) {
+      httpHeart.stop();
+    }
+    ob11Config.save(NewOb11);
+  }
   async postGroupNotifies(notifies: GroupNotify[]) {
     for (const notify of notifies) {
       try {

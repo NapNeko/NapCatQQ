@@ -51,20 +51,36 @@ export const OB11SetConfigHandler: RequestHandler = async (req, res) => {
         });
         return;
     }
-    let configFilePath = resolve(__dirname, `./config/onebot11_${await WebUiDataRuntime.getQQLoginUin()}.json`);
+    let SetResult;
     try {
-        JSON.parse(req.body.config)
-        readFileSync(configFilePath);
+        await WebUiDataRuntime.setOB11Config(JSON.parse(req.body.config));
+        SetResult = true;
+    } catch (e) {
+        SetResult = false;
     }
-    catch (e) {
-        //console.log(e);
-        configFilePath = resolve(__dirname, `./config/onebot11.json`);
+
+    // let configFilePath = resolve(__dirname, `./config/onebot11_${await WebUiDataRuntime.getQQLoginUin()}.json`);
+    // try {
+    //     JSON.parse(req.body.config)
+    //     readFileSync(configFilePath);
+    // }
+    // catch (e) {
+    //     //console.log(e);
+    //     configFilePath = resolve(__dirname, `./config/onebot11.json`);
+    // }
+    // //console.log(configFilePath,JSON.parse(req.body.config));
+    // writeFileSync(configFilePath, JSON.stringify(JSON.parse(req.body.config), null, 4));
+    if (SetResult) {
+        res.send({
+            code: 0,
+            message: 'success'
+        });
+    } else {
+        res.send({
+            code: -1,
+            message: 'Config Set Error'
+        });
     }
-    //console.log(configFilePath,JSON.parse(req.body.config));
-    writeFileSync(configFilePath, JSON.stringify(JSON.parse(req.body.config), null, 4));
-    res.send({
-        code: 0,
-        message: 'success'
-    });
+
     return;
 }
