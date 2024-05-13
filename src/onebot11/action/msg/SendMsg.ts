@@ -152,179 +152,179 @@ export async function createSendElements(messageData: OB11MessageData[], group: 
       continue;
     }
     switch (sendMsg.type) {
-      case OB11MessageDataType.text: {
-        const text = sendMsg.data?.text;
-        if (text) {
-          sendElements.push(SendMsgElementConstructor.text(sendMsg.data!.text));
-        }
+    case OB11MessageDataType.text: {
+      const text = sendMsg.data?.text;
+      if (text) {
+        sendElements.push(SendMsgElementConstructor.text(sendMsg.data!.text));
       }
-        break;
-      case OB11MessageDataType.at: {
-        if (!group) {
-          continue;
-        }
-        let atQQ = sendMsg.data?.qq;
-        if (atQQ) {
-          atQQ = atQQ.toString();
-          if (atQQ === 'all') {
-            sendElements.push(SendMsgElementConstructor.at(atQQ, atQQ, AtType.atAll, '全体成员'));
-          }
-          else {
-            // const atMember = group?.members.find(m => m.uin == atQQ)
-            const atMember = await getGroupMember(group?.groupCode, atQQ);
-            if (atMember) {
-              sendElements.push(SendMsgElementConstructor.at(atQQ, atMember.uid, AtType.atUser, atMember.cardName || atMember.nick));
-            }
-          }
-        }
+    }
+      break;
+    case OB11MessageDataType.at: {
+      if (!group) {
+        continue;
       }
-        break;
-      case OB11MessageDataType.reply: {
-        const replyMsgId = sendMsg.data.id;
-        if (replyMsgId) {
-          const replyMsg = await dbUtil.getMsgByShortId(parseInt(replyMsgId));
-          if (replyMsg) {
-            sendElements.push(SendMsgElementConstructor.reply(replyMsg.msgSeq, replyMsg.msgId, replyMsg.senderUin!, replyMsg.senderUin!));
-          }
-        }
-      }
-        break;
-      case OB11MessageDataType.face: {
-        const faceId = sendMsg.data?.id;
-        if (faceId) {
-          sendElements.push(SendMsgElementConstructor.face(parseInt(faceId)));
-        }
-      }
-        break;
-      case OB11MessageDataType.mface: {
-        sendElements.push(
-          SendMsgElementConstructor.mface(sendMsg.data.emoji_package_id, sendMsg.data.emoji_id, sendMsg.data.key, sendMsg.data.summary),
-        );
-      }
-        break;
-      case OB11MessageDataType.image:
-      case OB11MessageDataType.file:
-      case OB11MessageDataType.video:
-      case OB11MessageDataType.voice: {
-        let file = sendMsg.data?.file;
-        const payloadFileName = sendMsg.data?.name;
-        if (file) {
-          const cache = await dbUtil.getFileCacheByName(file);
-          if (cache) {
-            if (fs.existsSync(cache.path)) {
-              file = 'file://' + cache.path;
-            }
-            else if (cache.url) {
-              file = cache.url;
-            }
-            else {
-              const fileMsg = await dbUtil.getMsgByLongId(cache.msgId);
-              if (fileMsg) {
-                const downloadPath = await NTQQFileApi.downloadMedia(fileMsg.msgId, fileMsg.chatType, fileMsg.peerUid,
-                  cache.elementId, '', '');
-                cache.path = downloadPath!;
-                dbUtil.updateFileCache(cache).then();
-                file = 'file://' + cache.path;
-              }
-              // await sleep(1000);
-
-              // log('download result', downloadPath);
-              // log('下载完成后的msg', msg);
-            }
-            logDebug('找到文件缓存', file);
-          }
-          const { path, isLocal, fileName, errMsg } = (await uri2local(file));
-          if (errMsg) {
-            logError('文件下载失败', errMsg);
-            throw Error('文件下载失败' + errMsg);
-            // throw (errMsg);
-            // continue
-          }
-          if (path) {
-            if (!isLocal) { // 只删除http和base64转过来的文件
-              deleteAfterSentFiles.push(path);
-            }
-            if (sendMsg.type === OB11MessageDataType.file) {
-              logDebug('发送文件', path, payloadFileName || fileName);
-              sendElements.push(await SendMsgElementConstructor.file(path, payloadFileName || fileName));
-            }
-            else if (sendMsg.type === OB11MessageDataType.video) {
-              logDebug('发送视频', path, payloadFileName || fileName);
-              let thumb = sendMsg.data?.thumb;
-              if (thumb) {
-                const uri2LocalRes = await uri2local(thumb);
-                if (uri2LocalRes.success) {
-                  thumb = uri2LocalRes.path;
-                }
-              }
-              sendElements.push(await SendMsgElementConstructor.video(path, payloadFileName || fileName, thumb));
-            }
-            else if (sendMsg.type === OB11MessageDataType.voice) {
-              sendElements.push(await SendMsgElementConstructor.ptt(path));
-            }
-            else if (sendMsg.type === OB11MessageDataType.image) {
-              sendElements.push(await SendMsgElementConstructor.pic(path, sendMsg.data.summary || '', <PicSubType>parseInt(sendMsg.data?.subType?.toString() || '0')));
-            }
-          }
-        }
-      }
-        break;
-      case OB11MessageDataType.json: {
-        sendElements.push(SendMsgElementConstructor.ark(sendMsg.data.data));
-      }
-        break;
-      case OB11MessageDataType.dice: {
-        const resultId = sendMsg.data?.result;
-        sendElements.push(SendMsgElementConstructor.dice(resultId));
-      }
-        break;
-      case OB11MessageDataType.RPS: {
-        const resultId = sendMsg.data?.result;
-        sendElements.push(SendMsgElementConstructor.rps(resultId));
-      }
-        break;
-      case OB11MessageDataType.markdown: {
-        const content = sendMsg.data?.content;
-        sendElements.push(SendMsgElementConstructor.markdown(content));
-      }
-        break;
-      case OB11MessageDataType.music: {
-        const musicData = sendMsg.data;
-        if (musicData.type === 'custom') {
-          if (!musicData.url) {
-            logError('自定义音卡缺少参数url');
-            break;
-          }
-          if (!musicData.audio) {
-            logError('自定义音卡缺少参数audio');
-            break;
-          }
-          if (!musicData.title) {
-            logError('自定义音卡缺少参数title');
-            break;
-          }
+      let atQQ = sendMsg.data?.qq;
+      if (atQQ) {
+        atQQ = atQQ.toString();
+        if (atQQ === 'all') {
+          sendElements.push(SendMsgElementConstructor.at(atQQ, atQQ, AtType.atAll, '全体成员'));
         }
         else {
-          if (!['qq', '163'].includes(musicData.type)) {
-            logError('音乐卡片type错误, 只支持qq、163、custom，当前type:', musicData.type);
-            break;
+          // const atMember = group?.members.find(m => m.uin == atQQ)
+          const atMember = await getGroupMember(group?.groupCode, atQQ);
+          if (atMember) {
+            sendElements.push(SendMsgElementConstructor.at(atQQ, atMember.uid, AtType.atUser, atMember.cardName || atMember.nick));
           }
-          if (!musicData.id) {
-            logError('音乐卡片缺少参数id');
-            break;
-          }
-        }
-        const postData = { ...sendMsg.data } as IdMusicSignPostData | CustomMusicSignPostData;
-        if (sendMsg.data.type === 'custom' && sendMsg.data.content) {
-          (postData as CustomMusicSignPostData).singer = sendMsg.data.content;
-          delete (postData as OB11MessageCustomMusic['data']).content;
-        }
-        const musicMsgElement = await genMusicElement(postData);
-        logDebug('生成音乐消息', musicMsgElement);
-        if (musicMsgElement) {
-          sendElements.push(musicMsgElement);
         }
       }
+    }
+      break;
+    case OB11MessageDataType.reply: {
+      const replyMsgId = sendMsg.data.id;
+      if (replyMsgId) {
+        const replyMsg = await dbUtil.getMsgByShortId(parseInt(replyMsgId));
+        if (replyMsg) {
+          sendElements.push(SendMsgElementConstructor.reply(replyMsg.msgSeq, replyMsg.msgId, replyMsg.senderUin!, replyMsg.senderUin!));
+        }
+      }
+    }
+      break;
+    case OB11MessageDataType.face: {
+      const faceId = sendMsg.data?.id;
+      if (faceId) {
+        sendElements.push(SendMsgElementConstructor.face(parseInt(faceId)));
+      }
+    }
+      break;
+    case OB11MessageDataType.mface: {
+      sendElements.push(
+        SendMsgElementConstructor.mface(sendMsg.data.emoji_package_id, sendMsg.data.emoji_id, sendMsg.data.key, sendMsg.data.summary),
+      );
+    }
+      break;
+    case OB11MessageDataType.image:
+    case OB11MessageDataType.file:
+    case OB11MessageDataType.video:
+    case OB11MessageDataType.voice: {
+      let file = sendMsg.data?.file;
+      const payloadFileName = sendMsg.data?.name;
+      if (file) {
+        const cache = await dbUtil.getFileCacheByName(file);
+        if (cache) {
+          if (fs.existsSync(cache.path)) {
+            file = 'file://' + cache.path;
+          }
+          else if (cache.url) {
+            file = cache.url;
+          }
+          else {
+            const fileMsg = await dbUtil.getMsgByLongId(cache.msgId);
+            if (fileMsg) {
+              const downloadPath = await NTQQFileApi.downloadMedia(fileMsg.msgId, fileMsg.chatType, fileMsg.peerUid,
+                cache.elementId, '', '');
+              cache.path = downloadPath!;
+              dbUtil.updateFileCache(cache).then();
+              file = 'file://' + cache.path;
+            }
+            // await sleep(1000);
+
+            // log('download result', downloadPath);
+            // log('下载完成后的msg', msg);
+          }
+          logDebug('找到文件缓存', file);
+        }
+        const { path, isLocal, fileName, errMsg } = (await uri2local(file));
+        if (errMsg) {
+          logError('文件下载失败', errMsg);
+          throw Error('文件下载失败' + errMsg);
+          // throw (errMsg);
+          // continue
+        }
+        if (path) {
+          if (!isLocal) { // 只删除http和base64转过来的文件
+            deleteAfterSentFiles.push(path);
+          }
+          if (sendMsg.type === OB11MessageDataType.file) {
+            logDebug('发送文件', path, payloadFileName || fileName);
+            sendElements.push(await SendMsgElementConstructor.file(path, payloadFileName || fileName));
+          }
+          else if (sendMsg.type === OB11MessageDataType.video) {
+            logDebug('发送视频', path, payloadFileName || fileName);
+            let thumb = sendMsg.data?.thumb;
+            if (thumb) {
+              const uri2LocalRes = await uri2local(thumb);
+              if (uri2LocalRes.success) {
+                thumb = uri2LocalRes.path;
+              }
+            }
+            sendElements.push(await SendMsgElementConstructor.video(path, payloadFileName || fileName, thumb));
+          }
+          else if (sendMsg.type === OB11MessageDataType.voice) {
+            sendElements.push(await SendMsgElementConstructor.ptt(path));
+          }
+          else if (sendMsg.type === OB11MessageDataType.image) {
+            sendElements.push(await SendMsgElementConstructor.pic(path, sendMsg.data.summary || '', <PicSubType>parseInt(sendMsg.data?.subType?.toString() || '0')));
+          }
+        }
+      }
+    }
+      break;
+    case OB11MessageDataType.json: {
+      sendElements.push(SendMsgElementConstructor.ark(sendMsg.data.data));
+    }
+      break;
+    case OB11MessageDataType.dice: {
+      const resultId = sendMsg.data?.result;
+      sendElements.push(SendMsgElementConstructor.dice(resultId));
+    }
+      break;
+    case OB11MessageDataType.RPS: {
+      const resultId = sendMsg.data?.result;
+      sendElements.push(SendMsgElementConstructor.rps(resultId));
+    }
+      break;
+    case OB11MessageDataType.markdown: {
+      const content = sendMsg.data?.content;
+      sendElements.push(SendMsgElementConstructor.markdown(content));
+    }
+      break;
+    case OB11MessageDataType.music: {
+      const musicData = sendMsg.data;
+      if (musicData.type === 'custom') {
+        if (!musicData.url) {
+          logError('自定义音卡缺少参数url');
+          break;
+        }
+        if (!musicData.audio) {
+          logError('自定义音卡缺少参数audio');
+          break;
+        }
+        if (!musicData.title) {
+          logError('自定义音卡缺少参数title');
+          break;
+        }
+      }
+      else {
+        if (!['qq', '163'].includes(musicData.type)) {
+          logError('音乐卡片type错误, 只支持qq、163、custom，当前type:', musicData.type);
+          break;
+        }
+        if (!musicData.id) {
+          logError('音乐卡片缺少参数id');
+          break;
+        }
+      }
+      const postData = { ...sendMsg.data } as IdMusicSignPostData | CustomMusicSignPostData;
+      if (sendMsg.data.type === 'custom' && sendMsg.data.content) {
+        (postData as CustomMusicSignPostData).singer = sendMsg.data.content;
+        delete (postData as OB11MessageCustomMusic['data']).content;
+      }
+      const musicMsgElement = await genMusicElement(postData);
+      logDebug('生成音乐消息', musicMsgElement);
+      if (musicMsgElement) {
+        sendElements.push(musicMsgElement);
+      }
+    }
     }
   }
 
@@ -564,14 +564,14 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
             logDebug(sendElementsSplit);
           }
           // log("分割后的转发节点", sendElementsSplit)
-          let MsgNodeList: Promise<RawMessage>[] = [];
+          const MsgNodeList: Promise<RawMessage>[] = [];
           for (const eles of sendElementsSplit) {
             MsgNodeList.push(sendMsg(selfPeer, eles, [], true));
             await sleep(Math.trunc(sendElementsSplit.length / 10) * 100);
             //await sleep(10);
           }
           for (const msgNode of MsgNodeList) {
-            let result = await msgNode;
+            const result = await msgNode;
             nodeMsgIds.push(result.msgId);
             logDebug('转发节点生成成功', result.msgId);
           }
