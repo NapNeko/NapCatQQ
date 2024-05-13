@@ -11,7 +11,7 @@ get_script_dir() {
 
 SCRIPT_DIR=$(get_script_dir)
 
-ELECTRON_RUN_AS_NODE=1
+export ELECTRON_RUN_AS_NODE=1
 
 if ! [ -x /opt/QQ/qq ]; then
     echo "Error: /opt/QQ/qq is not executable or does not exist." >&2
