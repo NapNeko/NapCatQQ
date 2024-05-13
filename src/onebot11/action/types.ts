@@ -15,6 +15,7 @@ export interface InvalidCheckResult {
 
 export enum ActionName {
     // 以下为扩展napcat扩展
+    RebootNormol = 'reboot_normol',//无快速登录重新启动
     GetRobotUinRange = 'get_robot_uin_range',
     SetOnlineStatus = 'set_online_status',
     GetFriendsWithCategory = 'get_friends_with_category',
