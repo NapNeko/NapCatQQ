@@ -8,6 +8,7 @@ QQ Version: Windows 9.9.9-23424 / Linux 3.2.7-23361
 * 修复兼容性问题支持Win7
 * 修复下载 http 资源缺少UA
 * 优化少量消息合并转发速度
+* 修复加载群通知时导致程序崩溃
   
 ## 新增与调整
 * 新增设置群公告 Api: /_send_group_notice
