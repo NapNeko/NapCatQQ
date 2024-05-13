@@ -91,8 +91,6 @@ export declare class WebApi {
     static getGroupMembers(GroupCode: string, cached?: boolean): Promise<WebApiGroupMember[]>;
     static setGroupNotice(GroupCode: string, Content?: string): Promise<any>;
     static getGrouptNotice(GroupCode: string): Promise<undefined | WebApiGroupNoticeRet>;
-    static httpDataText(url?: string, method?: string, data?: string, CookiesValue?: string): Promise<string>;
-    static httpDataJson<T>(url?: string, method?: string, data?: string, CookiesValue?: string): Promise<T>;
     static genBkn(sKey: string): string;
 }
 export {};
