@@ -24,7 +24,7 @@ export async function rebootWithNormolLogin() {
     let batUtf8Script = resolve(__dirname, './napcat-utf8.bat');
     let bashScript = resolve(__dirname, './napcat.sh');
     if (process.platform === 'win32') {
-        const subProcess = spawn(`start ${batUtf8Script} -q ${uin}`, { detached: true, windowsHide: false, env: process.env, shell: true, stdio: 'ignore' });
+        const subProcess = spawn(`start ${batUtf8Script} `, { detached: true, windowsHide: false, env: process.env, shell: true, stdio: 'ignore' });
         subProcess.unref();
         // 子父进程一起送走 有点效果
         spawn('cmd /c taskkill /t /f /pid ' + pid.toString(), { detached: true, shell: true, stdio: 'ignore' });
