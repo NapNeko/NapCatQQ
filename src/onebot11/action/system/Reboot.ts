@@ -22,7 +22,7 @@ export class Reboot extends BaseAction<Payload, null> {
     }
 }
 export class RebootNormol extends BaseAction<Payload, null> {
-    actionName = ActionName.Reboot;
+    actionName = ActionName.RebootNormol;
 
     protected async _handle(payload: Payload): Promise<null> {
         if (payload.delay) {
