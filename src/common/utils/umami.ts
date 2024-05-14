@@ -14,12 +14,16 @@ export async function postLoginStatus() {
         'referrer': 'https://napcat.demo.cn/login?type=onebot11'
       }
     };
-    await RequestUtil.HttpGetText('https://napcat.wumiao.wang/api/send',
-      'POST',
-      StatesData, {
-      'Content-Type': 'application/json',
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0'
-    });
-    resolve(true);
+    try {
+      await RequestUtil.HttpGetText('https://napcat.wumiao.wang/api/send',
+        'POST',
+        JSON.stringify(StatesData), {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0'
+      });
+      resolve(true);
+    } catch {
+      reject('umami post failed')
+    }
   });
 }

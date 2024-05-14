@@ -2,7 +2,6 @@ function Get-QQpath {
     try {
         $key = Get-ItemProperty -Path "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\QQ"
         $uninstallString = $key.UninstallString
-	throw "get QQ path error:"
         return [System.IO.Path]::GetDirectoryName($uninstallString) + "\QQ.exe"
     } catch {
         throw "get QQ path error: $_"
