@@ -1,23 +1,31 @@
+import { get as httpsGet } from 'https';
 export class RequestUtil {
-  //适用于获取服务器下发cookies时获取
-  static async HttpGetCookies(url: string, method: string = 'GET'): Promise<Map<string, string>> {
-    const response = await fetch(url, { method: method });
-    if (!response.ok) {
-      throw new Error(`Failed to fetch: ${response.statusText}`);
-    }
-
-    const cookiesHeader = response.headers.get('set-cookie');
-    if (!cookiesHeader) {
-      return new Map<string, string>();
-    }
-
-    const result = new Map<string, string>();
-    cookiesHeader.split(';').forEach((cookieLine) => {
-      const [key, value] = cookieLine.split('=');
-      result.set(key.trim(), value.trim());
+  //适用于获取服务器下发cookies时获取 仅get
+  static async HttpsGetCookies(url: string): Promise<Map<string, string>> {
+    return new Promise((resolve, reject) => {
+      const result: Map<string, string> = new Map<string, string>();
+      const req = httpsGet(url, (res: any) => {
+        res.on('data', (data: any) => {
+        });
+        res.on('end', () => {
+          try {
+            const responseCookies = res.headers['set-cookie'];
+            for (const line of responseCookies) {
+              const parts = line.split(';');
+              const [key, value] = parts[0].split('=');
+              result.set(key, value);
+            }
+          } catch (e) {
+          }
+          resolve(result);
+        });
+      });
+      req.on('error', (error: any) => {
+        resolve(result);
+        // console.log(error)
+      });
+      req.end();
     });
-
-    return result;
   }
   // 请求和回复都是JSON data传原始内容 自动编码json
   static async HttpGetJson<T>(url: string, method: string = 'GET', data?: any, headers: Record<string, string> = {}):
