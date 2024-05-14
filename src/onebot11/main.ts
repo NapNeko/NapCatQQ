@@ -132,16 +132,16 @@ export class NapCatOnebot11 {
       //console.log('ob11 onGroupNotifiesUpdated', notifies[0]);
       this.postGroupNotifies(notifies).then().catch(e => logError('postGroupNotifies error: ', e));
     };
-    groupListener.onMemberInfoChange = (groupCode: string, changeType: number, members: Map<string, GroupMember>) => {
-      // 如果自身是非管理员也许要从这里获取Delete 成员变动
-      // for (const member of members.values()) {
-      //   if (member?.isDelete) {
-      //     const groupDecreaseEvent = new OB11GroupDecreaseEvent(parseInt(groupCode), parseInt(member.uin), 0, 'leave');// 不知道怎么出去的
-      //     postOB11Event(groupDecreaseEvent, true);
-      //   }
-      // }
-
-
+    groupListener.onMemberInfoChange = async (groupCode: string, changeType: number, members: Map<string, GroupMember>) => {
+      // 如果自身是非管理员也许要从这里获取Delete 成员变动 待测试与验证
+      let role = (await getGroupMember(groupCode, selfInfo.uin))?.role;
+      let isPrivilege = role === 3 || role === 4;
+      for (const member of members.values()) {
+        if (member?.isDelete && !isPrivilege) {
+          const groupDecreaseEvent = new OB11GroupDecreaseEvent(parseInt(groupCode), parseInt(member.uin), 0, 'leave');// 不知道怎么出去的
+          postOB11Event(groupDecreaseEvent, true);
+        }
+      }
     }
     groupListener.onJoinGroupNotify = (...notify) => {
       // console.log('ob11 onJoinGroupNotify', notify);
