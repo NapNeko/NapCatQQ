@@ -10,7 +10,6 @@ declare class RkeyManager {
     getRkey(): Promise<ServerRkeyData>;
     isExpired(): boolean;
     refreshRkey(): Promise<any>;
-    fetchServerRkey(): Promise<ServerRkeyData>;
 }
 export declare const rkeyManager: RkeyManager;
 export {};
