@@ -34,36 +34,36 @@ async function onSettingWindowCreated(view: Element) {
         SettingItem(
           '启用 HTTP 服务',
           undefined,
-          SettingSwitch('ob11.enableHttp', ob11Config.enableHttp, { 'control-display-id': 'config-ob11-httpPort' }),
+          SettingSwitch('ob11.http.enable', ob11Config.http.enable, { 'control-display-id': 'config-ob11-httpPort' }),
         ),
         SettingItem(
           'HTTP 服务监听端口',
           undefined,
           `<div class="q-input"><input class="q-input__inner" data-config-key="ob11.httpPort" type="number" min="1" max="65534" value="${ob11Config.httpPort}" placeholder="${ob11Config.httpPort}" /></div>`,
           'config-ob11-httpPort',
-          ob11Config.enableHttp,
+          ob11Config.http.enable,
         ),
         SettingItem(
           '启用 HTTP 心跳',
           undefined,
-          SettingSwitch('ob11.enableHttpHeart', ob11Config.enableHttpHeart, {
+          SettingSwitch('ob11.http.enableHeart', ob11Config.http.enableHeart, {
             'control-display-id': 'config-ob11-enableHttpHeart',
           }),
         ),
         SettingItem(
           '启用 HTTP 事件上报',
           undefined,
-          SettingSwitch('ob11.enableHttpPost', ob11Config.enableHttpPost, {
+          SettingSwitch('ob11.http.enablePost', ob11Config.http.enablePost, {
             'control-display-id': 'config-ob11-httpPostUrls',
           }),
         ),
-        `<div class="config-host-list" id="config-ob11-httpPostUrls" ${ob11Config.enableHttpPost ? '' : 'is-hidden'}>
+        `<div class="config-host-list" id="config-ob11-httpPostUrls" ${ob11Config.http.enablePost ? '' : 'is-hidden'}>
                 <setting-item data-direction="row">
                     <div>
                         <setting-text>HTTP 事件上报密钥</setting-text>
                     </div>
                     <div class="q-input">
-                        <input id="config-ob11-httpSecret" class="q-input__inner" data-config-key="ob11.httpSecret" type="text" value="${ob11Config.httpSecret
+                        <input id="config-ob11-httpSecret" class="q-input__inner" data-config-key="ob11.http.secret" type="text" value="${ob11Config.http.secret
         }" placeholder="未设置" />
                     </div>
                 </setting-item>

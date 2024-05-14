@@ -78,19 +78,19 @@ export function postOB11Event(msg: PostEventType, reportSelf = false, postWs = t
       return;
     }
   }
-  if (config.enableHttpPost) {
+  if (config.http.enablePost) {
     const msgStr = JSON.stringify(msg);
-    const hmac = crypto.createHmac('sha1', ob11Config.httpSecret);
+    const hmac = crypto.createHmac('sha1', ob11Config.http.secret);
     hmac.update(msgStr);
     const sig = hmac.digest('hex');
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'x-self-id': selfInfo.uin
     };
-    if (config.httpSecret) {
+    if (config.http.secret) {
       headers['x-signature'] = 'sha1=' + sig;
     }
-    for (const host of config.httpPostUrls) {
+    for (const host of config.http.postUrls) {
       fetch(host, {
         method: 'POST',
         headers,
