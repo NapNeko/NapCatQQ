@@ -30,16 +30,16 @@ export class RequestUtil {
   }
 
   // 请求和回复都是JSON data传原始内容 自动编码json
-  static async HttpGetJson<T>(url: string, method: string = 'GET', data?: any, headers: Record<string, string> = {}) {
+  static async HttpGetJson<T>(url: string, method: string = 'GET', data?: any, headers: Record<string, string> = {}): Promise<T> {
+    let option = new URL(url);
     const protocol = url.startsWith('https://') ? https : http;
     const options = {
-      hostname: url.replace(/^(https?:\/\/)?(.*?)(\/.*)?$/, '$2'),
-      port: url.startsWith('https://') ? 443 : 80,
-      path: url.replace(/^(https?:\/\/[^\/]+)?(.*?)(\/.*)?$/, '$3'),
+      hostname: option.hostname,
+      port: option.port,
+      path: option.href,
       method,
       headers,
     };
-
     return new Promise((resolve, reject) => {
       const req = protocol.request(options, (res: any) => {
         let responseBody = '';
@@ -64,11 +64,9 @@ export class RequestUtil {
       req.on('error', (error: any) => {
         reject(error);
       });
-
       if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
         req.write(JSON.stringify(data));
       }
-
       req.end();
     });
   }
