@@ -1,88 +1,80 @@
-import { get as httpsGet } from 'https';
+import https from 'node:https';
+import http from 'node:http';
+
 export class RequestUtil {
-  //适用于获取服务器下发cookies时获取 仅get
+  // 适用于获取服务器下发cookies时获取，仅GET
   static async HttpsGetCookies(url: string): Promise<Map<string, string>> {
+    return new Promise<Map<string, string>>((resolve, reject) => {
+      const protocol = url.startsWith('https://') ? https : http;
+      protocol.get(url, (res) => {
+        const cookiesHeader = res.headers['set-cookie'];
+        if (!cookiesHeader) {
+          resolve(new Map<string, string>());
+        } else {
+          const cookiesMap = new Map<string, string>();
+          cookiesHeader.forEach((cookieStr) => {
+            cookieStr.split(';').forEach((cookiePart) => {
+              const trimmedPart = cookiePart.trim();
+              if (trimmedPart.includes('=')) {
+                const [key, value] = trimmedPart.split('=').map(part => part.trim());
+                cookiesMap.set(key, decodeURIComponent(value)); // 解码cookie值
+              }
+            });
+          });
+          resolve(cookiesMap);
+        }
+      }).on('error', (error) => {
+        reject(error);
+      });
+    });
+  }
+
+  // 请求和回复都是JSON data传原始内容 自动编码json
+  static async HttpGetJson<T>(url: string, method: string = 'GET', data?: any, headers: Record<string, string> = {}) {
+    const protocol = url.startsWith('https://') ? https : http;
+    const options = {
+      hostname: url.replace(/^(https?:\/\/)?(.*?)(\/.*)?$/, '$2'),
+      port: url.startsWith('https://') ? 443 : 80,
+      path: url.replace(/^(https?:\/\/[^\/]+)?(.*?)(\/.*)?$/, '$3'),
+      method,
+      headers,
+    };
+
     return new Promise((resolve, reject) => {
-      const result: Map<string, string> = new Map<string, string>();
-      const req = httpsGet(url, (res: any) => {
-        res.on('data', (data: any) => {
+      const req = protocol.request(options, (res: any) => {
+        let responseBody = '';
+        res.on('data', (chunk: string | Buffer) => {
+          responseBody += chunk.toString();
         });
+
         res.on('end', () => {
           try {
-            const responseCookies = res.headers['set-cookie'];
-            for (const line of responseCookies) {
-              const parts = line.split(';');
-              const [key, value] = parts[0].split('=');
-              result.set(key, value);
+            if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
+              const responseJson = JSON.parse(responseBody);
+              resolve(responseJson as T);
+            } else {
+              reject(new Error(`Unexpected status code: ${res.statusCode}`));
             }
-          } catch (e) {
+          } catch (parseError) {
+            reject(parseError);
           }
-          resolve(result);
         });
       });
+
       req.on('error', (error: any) => {
-        resolve(result);
-        // console.log(error)
+        reject(error);
       });
+
+      if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
+        req.write(JSON.stringify(data));
+      }
+
       req.end();
     });
   }
-  // 请求和回复都是JSON data传原始内容 自动编码json
-  static async HttpGetJson<T>(url: string, method: string = 'GET', data?: any, headers: Record<string, string> = {}):
-    Promise<T> {
-    let body: BodyInit | undefined = undefined;
-    let requestInit: RequestInit = { method: method };
 
-    if (method.toUpperCase() === 'POST' && data !== undefined) {
-      body = JSON.stringify(data);
-      if (headers) {
-        headers['Content-Type'] = 'application/json';
-        requestInit.headers = new Headers(headers);
-      } else {
-        requestInit.headers = new Headers({ 'Content-Type': 'application/json' });
-      }
-    } else {
-      requestInit.headers = new Headers(headers);
-    }
-    try {
-      const response = await fetch(url, { ...requestInit, body });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const jsonResult = await response.json();
-      return jsonResult as T;
-    } catch (error: any) {
-      throw new Error(`Failed to fetch JSON: ${error.message}`);
-    }
-  }
   // 请求返回都是原始内容
-  static async HttpGetText(url: string, method: string = 'GET', data?: any, headers: Record<string, string> = {}): Promise<string> {
-    let requestInit: RequestInit = { method: method };
-    if (method.toUpperCase() === 'POST' && data !== undefined) {
-      if (headers) {
-        headers['Content-Type'] = 'application/json';
-        requestInit.headers = new Headers(headers);
-      } else {
-        requestInit.headers = new Headers({ 'Content-Type': 'application/json' });
-      }
-    } else {
-      requestInit.headers = new Headers(headers);
-    }
-    try {
-      let response;
-      if (method.toUpperCase() === 'POST') {
-        //console.log({ method: 'POST', ...requestInit, body: data });
-        response = await fetch(url, { method: 'POST', ...requestInit, body: data });
-      } else {
-        response = await fetch(url, { method: method, ...requestInit });
-      }
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const jsonResult = await response.text();
-      return jsonResult;
-    } catch (error: any) {
-      throw new Error(`Failed to fetch JSON: ${error.message}`);
-    }
+  static async HttpGetText(url: string, method: string = 'GET', data?: any, headers: Record<string, string> = {}) {
+    return this.HttpGetJson<string>(url, method, data, headers);
   }
 }
