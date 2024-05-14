@@ -30,15 +30,15 @@ export class RequestUtil {
   }
 
   // 请求和回复都是JSON data传原始内容 自动编码json
-  static async HttpGetJson<T>(url: string, method: string = 'GET', data?: any, headers: Record<string, string> = {}): Promise<T> {
+  static async HttpGetJson<T>(url: string, method: string = 'GET', data?: any, headers: Record<string, string> = {}, isJsonRet: boolean = true): Promise<T> {
     let option = new URL(url);
     const protocol = url.startsWith('https://') ? https : http;
     const options = {
       hostname: option.hostname,
       port: option.port,
       path: option.href,
-      method,
-      headers,
+      method: method,
+      headers: headers
     };
     return new Promise((resolve, reject) => {
       const req = protocol.request(options, (res: any) => {
@@ -50,8 +50,12 @@ export class RequestUtil {
         res.on('end', () => {
           try {
             if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
-              const responseJson = JSON.parse(responseBody);
-              resolve(responseJson as T);
+              if (isJsonRet) {
+                const responseJson = JSON.parse(responseBody);
+                resolve(responseJson as T);
+              } else {
+                resolve(responseBody as T);
+              }
             } else {
               reject(new Error(`Unexpected status code: ${res.statusCode}`));
             }
@@ -73,6 +77,7 @@ export class RequestUtil {
 
   // 请求返回都是原始内容
   static async HttpGetText(url: string, method: string = 'GET', data?: any, headers: Record<string, string> = {}) {
-    return this.HttpGetJson<string>(url, method, data, headers);
+    //console.log(url);
+    return this.HttpGetJson<string>(url, method, data, headers, false);
   }
 }
