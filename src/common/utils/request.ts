@@ -63,9 +63,10 @@ export class RequestUtil {
     try {
       let response;
       if (method.toUpperCase() === 'POST') {
-        response = await fetch(url, { ...requestInit, body: data });
+        //console.log({ method: 'POST', ...requestInit, body: data });
+        response = await fetch(url, { method: 'POST', ...requestInit, body: data });
       } else {
-        response = await fetch(url, { ...requestInit });
+        response = await fetch(url, { method: method, ...requestInit });
       }
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
