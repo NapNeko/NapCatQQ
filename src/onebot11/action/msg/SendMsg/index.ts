@@ -72,22 +72,13 @@ export interface ReturnDataType {
   message_id: number;
 }
 
-export function convertMessage2List(message: OB11MessageMixType, autoEscape = false) {
-  if (typeof message === 'string') {
-    if (autoEscape === true) {
-      message = [{
-        type: OB11MessageDataType.text,
-        data: {
-          text: message
-        }
-      }];
-    } else {
-      message = decodeCQCode(message.toString());
-    }
-  } else if (!Array.isArray(message)) {
-    message = [message];
-  }
-  return message;
+// Normalizes a mixed type (CQCode/a single segment/segment array) into a segment array.
+export function normalize(message: OB11MessageMixType, autoEscape = false): OB11MessageData[] {
+  return typeof message === 'string' ? (
+    autoEscape ?
+      [{ type: OB11MessageDataType.text, data: { text: message } }] :
+      decodeCQCode(message)
+  ) : Array.isArray(message) ? message : [message];
 }
 
 export async function sendMsg(peer: Peer, sendElements: SendMessageElement[], deleteAfterSentFiles: string[], waitComplete = true) {
