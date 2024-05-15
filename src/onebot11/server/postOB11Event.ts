@@ -7,13 +7,14 @@ import { log, logDebug, logError } from '@/common/utils/log';
 import { ob11Config } from '@/onebot11/config';
 import crypto from 'crypto';
 import { ChatType, Group, GroupRequestOperateTypes, Peer } from '@/core/entities';
-import { convertMessage2List, createSendElements, sendMsg } from '../action/msg/SendMsg';
+import { convertMessage2List, sendMsg } from '../action/msg/SendMsg';
 import { OB11FriendRequestEvent } from '../event/request/OB11FriendRequest';
 import { OB11GroupRequestEvent } from '../event/request/OB11GroupRequest';
 import { isNull } from '@/common/utils/helper';
 import { dbUtil } from '@/core/utils/db';
 import { friendRequests, getGroup, groupNotifies, selfInfo } from '@/core/data';
 import { NTQQFriendApi, NTQQGroupApi, NTQQMsgApi } from '@/core/apis';
+import createSendElements from '../action/msg/SendMsg/create-send-elements';
 
 export type PostEventType = OB11Message | OB11BaseMetaEvent | OB11BaseNoticeEvent
 
