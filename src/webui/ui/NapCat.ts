@@ -62,17 +62,15 @@ async function onSettingWindowCreated(view: Element) {
             "control-display-id": "config-ob11-http.postUrls",
           })
         ),
-        `<div class="config-host-list" id="config-ob11-http.postUrls" ${
-          ob11Config.http.enablePost ? "" : "is-hidden"
+        `<div class="config-host-list" id="config-ob11-http.postUrls" ${ob11Config.http.enablePost ? "" : "is-hidden"
         }>
                 <setting-item data-direction="row">
                     <div>
                         <setting-text>HTTP 事件上报密钥</setting-text>
                     </div>
                     <div class="q-input">
-                        <input id="config-ob11-http.secret" class="q-input__inner" data-config-key="ob11.http.secret" type="text" value="${
-                          ob11Config.http.secret
-                        }" placeholder="未设置" />
+                        <input id="config-ob11-http.secret" class="q-input__inner" data-config-key="ob11.http.secret" type="text" value="${ob11Config.http.secret
+        }" placeholder="未设置" />
                     </div>
                 </setting-item>
                 <setting-item data-direction="row">
@@ -104,8 +102,7 @@ async function onSettingWindowCreated(view: Element) {
             "control-display-id": "config-ob11-reverseWs.urls",
           })
         ),
-        `<div class="config-host-list" id="config-ob11-reverseWs.urls" ${
-          ob11Config.reverseWs.enable ? "" : "is-hidden"
+        `<div class="config-host-list" id="config-ob11-reverseWs.urls" ${ob11Config.reverseWs.enable ? "" : "is-hidden"
         }>
                 <setting-item data-direction="row">
                     <div>
@@ -238,7 +235,7 @@ async function onSettingWindowCreated(view: Element) {
   ) => {
     const result: HTMLElement[] = [];
 
-    hosts.forEach((host, index) => {
+    hosts?.forEach((host, index) => {
       result.push(buildHostListItem(type, host, index, inputAttr));
     });
 
@@ -314,8 +311,8 @@ async function onSettingWindowCreated(view: Element) {
         else dom.removeAttribute("is-active");
         //@ts-ignore 等待修复
         if (!isEmpty(dom.dataset.controlDisplayId)) {
-          //@ts-ignore 等待修复
           const displayDom = document.querySelector(
+            //@ts-ignore 等待修复
             `#${dom.dataset.controlDisplayId}`
           );
           if (active) displayDom?.removeAttribute("is-hidden");

@@ -111,7 +111,7 @@ class WebUiApiOB11ConfigWrapper {
     let ConfigResponse = await fetch("/api/OB11Config/GetConfig", {
       method: "POST",
       headers: {
-        "Authorization": "Bearer " + this.retCredential,
+        Authorization: "Bearer " + this.retCredential,
         "Content-Type": "application/json"
       }
     });
@@ -124,17 +124,14 @@ class WebUiApiOB11ConfigWrapper {
     return {};
   }
   async SetOB11Config(config) {
-    let ConfigResponse = await fetch(
-      "/api/OB11Config/SetConfig",
-      {
-        method: "POST",
-        headers: {
-          "Authorization": "Bearer " + this.retCredential,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ config: JSON.stringify(config) })
-      }
-    );
+    let ConfigResponse = await fetch("/api/OB11Config/SetConfig", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + this.retCredential,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ config: JSON.stringify(config) })
+    });
     if (ConfigResponse.status == 200) {
       let ConfigResponseJson = await ConfigResponse.json();
       if (ConfigResponseJson.code == 0) {
@@ -154,6 +151,8 @@ async function onSettingWindowCreated(view) {
     const configKey = key.split(".");
     if (configKey.length === 2) {
       ob11Config[configKey[1]] = value;
+    } else if (configKey.length === 3) {
+      ob11Config[configKey[1]][configKey[2]] = value;
     }
     OB11ConfigWrapper.SetOB11Config(ob11Config);
   };
@@ -175,73 +174,77 @@ async function onSettingWindowCreated(view) {
         SettingItem(
           "启用 HTTP 服务",
           void 0,
-          SettingSwitch("ob11.enableHttp", ob11Config.enableHttp, { "control-display-id": "config-ob11-httpPort" })
+          SettingSwitch("ob11.http.enable", ob11Config.http.enable, {
+            "control-display-id": "config-ob11-http.port"
+          })
         ),
         SettingItem(
           "HTTP 服务监听端口",
           void 0,
-          `<div class="q-input"><input class="q-input__inner" data-config-key="ob11.httpPort" type="number" min="1" max="65534" value="${ob11Config.httpPort}" placeholder="${ob11Config.httpPort}" /></div>`,
-          "config-ob11-httpPort",
-          ob11Config.enableHttp
+          `<div class="q-input"><input class="q-input__inner" data-config-key="ob11.http.port" type="number" min="1" max="65534" value="${ob11Config.http.port}" placeholder="${ob11Config.http.port}" /></div>`,
+          "config-ob11-http.port",
+          ob11Config.http.enable
         ),
         SettingItem(
           "启用 HTTP 心跳",
           void 0,
-          SettingSwitch("ob11.enableHttpHeart", ob11Config.enableHttpHeart, {
-            "control-display-id": "config-ob11-enableHttpHeart"
+          SettingSwitch("ob11.http.enableHeart", ob11Config.http.enableHeart, {
+            "control-display-id": "config-ob11-HTTP.enableHeart"
           })
         ),
         SettingItem(
           "启用 HTTP 事件上报",
           void 0,
-          SettingSwitch("ob11.enableHttpPost", ob11Config.enableHttpPost, {
-            "control-display-id": "config-ob11-httpPostUrls"
+          SettingSwitch("ob11.http.enablePost", ob11Config.http.enablePost, {
+            "control-display-id": "config-ob11-http.postUrls"
           })
         ),
-        `<div class="config-host-list" id="config-ob11-httpPostUrls" ${ob11Config.enableHttpPost ? "" : "is-hidden"}>
+        `<div class="config-host-list" id="config-ob11-http.postUrls" ${ob11Config.http.enablePost ? "" : "is-hidden"}>
                 <setting-item data-direction="row">
                     <div>
                         <setting-text>HTTP 事件上报密钥</setting-text>
                     </div>
                     <div class="q-input">
-                        <input id="config-ob11-httpSecret" class="q-input__inner" data-config-key="ob11.httpSecret" type="text" value="${ob11Config.httpSecret}" placeholder="未设置" />
+                        <input id="config-ob11-http.secret" class="q-input__inner" data-config-key="ob11.http.secret" type="text" value="${ob11Config.http.secret}" placeholder="未设置" />
                     </div>
                 </setting-item>
                 <setting-item data-direction="row">
                     <div>
                         <setting-text>HTTP 事件上报地址</setting-text>
                     </div>
-                    <setting-button id="config-ob11-httpPostUrls-add" data-type="primary">添加</setting-button>
+                    <setting-button id="config-ob11-http.postUrls-add" data-type="primary">添加</setting-button>
                 </setting-item>
-                <div id="config-ob11-httpPostUrls-list"></div>
+                <div id="config-ob11-http.postUrls-list"></div>
             </div>`,
         SettingItem(
           "启用正向 WebSocket 服务",
           void 0,
-          SettingSwitch("ob11.enableWs", ob11Config.enableWs, { "control-display-id": "config-ob11-wsPort" })
+          SettingSwitch("ob11.ws.enable", ob11Config.ws.enable, {
+            "control-display-id": "config-ob11-ws.port"
+          })
         ),
         SettingItem(
           "正向 WebSocket 服务监听端口",
           void 0,
-          `<div class="q-input"><input class="q-input__inner" data-config-key="ob11.wsPort" type="number" min="1" max="65534" value="${ob11Config.wsPort}" placeholder="${ob11Config.wsPort}" /></div>`,
-          "config-ob11-wsPort",
-          ob11Config.enableWs
+          `<div class="q-input"><input class="q-input__inner" data-config-key="ob11.ws.port" type="number" min="1" max="65534" value="${ob11Config.ws.port}" placeholder="${ob11Config.ws.port}" /></div>`,
+          "config-ob11-ws.port",
+          ob11Config.ws.enable
         ),
         SettingItem(
           "启用反向 WebSocket 服务",
           void 0,
-          SettingSwitch("ob11.enableWsReverse", ob11Config.enableWsReverse, {
-            "control-display-id": "config-ob11-wsReverseUrls"
+          SettingSwitch("ob11.reverseWs.enable", ob11Config.reverseWs.enable, {
+            "control-display-id": "config-ob11-reverseWs.urls"
           })
         ),
-        `<div class="config-host-list" id="config-ob11-wsReverseUrls" ${ob11Config.enableWsReverse ? "" : "is-hidden"}>
+        `<div class="config-host-list" id="config-ob11-reverseWs.urls" ${ob11Config.reverseWs.enable ? "" : "is-hidden"}>
                 <setting-item data-direction="row">
                     <div>
                         <setting-text>反向 WebSocket 监听地址</setting-text>
                     </div>
-                    <setting-button id="config-ob11-wsReverseUrls-add" data-type="primary">添加</setting-button>
+                    <setting-button id="config-ob11-reverseWs.urls-add" data-type="primary">添加</setting-button>
                 </setting-item>
-                <div id="config-ob11-wsReverseUrls-list"></div>
+                <div id="config-ob11-reverseWs.urls-list"></div>
             </div>`,
         SettingItem(
           " WebSocket 服务心跳间隔",
@@ -271,7 +274,11 @@ async function onSettingWindowCreated(view) {
           `<div class="q-input" style="width:210px;"><input class="q-input__inner" data-config-key="ob11.musicSignUrl" type="text" value="${ob11Config.musicSignUrl}" placeholder="未设置" /></div>`,
           "ob11.musicSignUrl"
         ),
-        SettingItem("", void 0, SettingButton("保存", "config-ob11-save", "primary"))
+        SettingItem(
+          "",
+          void 0,
+          SettingButton("保存", "config-ob11-save", "primary")
+        )
       ]),
       SettingList([
         SettingItem(
@@ -281,10 +288,22 @@ async function onSettingWindowCreated(view) {
         )
       ]),
       SettingList([
-        SettingItem("GitHub 仓库", `https://github.com/NapNeko/NapCatQQ`, SettingButton("点个星星", "open-github")),
+        SettingItem(
+          "GitHub 仓库",
+          `https://github.com/NapNeko/NapCatQQ`,
+          SettingButton("点个星星", "open-github")
+        ),
         SettingItem("NapCat 文档", ``, SettingButton("看看文档", "open-docs")),
-        SettingItem("Telegram 群", `https://t.me/+nLZEnpne-pQ1OWFl`, SettingButton("进去逛逛", "open-telegram")),
-        SettingItem("QQ 群", `545402644`, SettingButton("我要进去", "open-qq-group"))
+        SettingItem(
+          "Telegram 群",
+          `https://t.me/+nLZEnpne-pQ1OWFl`,
+          SettingButton("进去逛逛", "open-telegram")
+        ),
+        SettingItem(
+          "QQ 群",
+          `545402644`,
+          SettingButton("我要进去", "open-qq-group")
+        )
       ]),
       "</div>"
     ].join(""),
@@ -316,14 +335,14 @@ async function onSettingWindowCreated(view) {
     dom.input.type = "url";
     dom.input.value = host;
     dom.input.addEventListener("input", () => {
-      ob11Config[type][index] = dom.input.value;
+      ob11Config[type.split(".")[0]][type.split(".")[-1]][index] = dom.input.value;
     });
     dom.inputContainer.classList.add("q-input");
     dom.inputContainer.appendChild(dom.input);
     dom.deleteBtn.innerHTML = "删除";
     dom.deleteBtn.dataset.type = "secondary";
     dom.deleteBtn.addEventListener("click", () => {
-      ob11Config[type].splice(index, 1);
+      ob11Config[type.split(".")[0]][type.split(".")[-1]].splice(index, 1);
       initReverseHost(type);
     });
     dom.container.appendChild(dom.inputContainer);
@@ -332,34 +351,52 @@ async function onSettingWindowCreated(view) {
   };
   const buildHostList = (hosts, type, inputAttr = {}) => {
     const result = [];
-    hosts.forEach((host, index) => {
+    hosts?.forEach((host, index) => {
       result.push(buildHostListItem(type, host, index, inputAttr));
     });
     return result;
   };
   const addReverseHost = (type, doc2 = document, inputAttr = {}) => {
-    const hostContainerDom = doc2.body.querySelector(`#config-ob11-${type}-list`);
-    hostContainerDom?.appendChild(buildHostListItem(type, "", ob11Config[type].length, inputAttr));
-    ob11Config[type].push("");
+    const hostContainerDom = doc2.body.querySelector(
+      `#config-ob11-${type}-list`
+    );
+    hostContainerDom?.appendChild(
+      buildHostListItem(
+        type,
+        "",
+        ob11Config[type.split(".")[0]][type.split(".")[-1]].length,
+        inputAttr
+      )
+    );
+    ob11Config[type.split(".")[0]][type.split(".")[-1]].push("");
   };
   const initReverseHost = (type, doc2 = document) => {
-    const hostContainerDom = doc2.body?.querySelector(`#config-ob11-${type}-list`);
+    const hostContainerDom = doc2.body?.querySelector(
+      `#config-ob11-${type}-list`
+    );
     if (hostContainerDom) {
       [...hostContainerDom.childNodes].forEach((dom) => dom.remove());
-      buildHostList(ob11Config[type], type).forEach((dom) => {
+      buildHostList(
+        ob11Config[type.split(".")[0]][type.split(".")[-1]],
+        type
+      ).forEach((dom) => {
         hostContainerDom?.appendChild(dom);
       });
     }
   };
-  initReverseHost("httpPostUrls", doc);
-  initReverseHost("wsReverseUrls", doc);
-  doc.querySelector("#config-ob11-httpPostUrls-add")?.addEventListener(
+  initReverseHost("http.postUrls", doc);
+  initReverseHost("reverseWs.urls", doc);
+  doc.querySelector("#config-ob11-http.postUrls-add")?.addEventListener(
     "click",
-    () => addReverseHost("httpPostUrls", document, { placeholder: "如：http://127.0.0.1:5140/onebot" })
+    () => addReverseHost("http.postUrls", document, {
+      placeholder: "如：http://127.0.0.1:5140/onebot"
+    })
   );
-  doc.querySelector("#config-ob11-wsReverseUrls-add")?.addEventListener(
+  doc.querySelector("#config-ob11-reverseWs.urls-add")?.addEventListener(
     "click",
-    () => addReverseHost("wsReverseUrls", document, { placeholder: "如：ws://127.0.0.1:5140/onebot" })
+    () => addReverseHost("reverseWs.urls", document, {
+      placeholder: "如：ws://127.0.0.1:5140/onebot"
+    })
   );
   doc.querySelector("#config-ffmpeg-select")?.addEventListener("click", () => {
   });
@@ -374,7 +411,10 @@ async function onSettingWindowCreated(view) {
       else
         dom.removeAttribute("is-active");
       if (!isEmpty(dom.dataset.controlDisplayId)) {
-        const displayDom = document.querySelector(`#${dom.dataset.controlDisplayId}`);
+        const displayDom = document.querySelector(
+          //@ts-ignore 等待修复
+          `#${dom.dataset.controlDisplayId}`
+        );
         if (active)
           displayDom?.removeAttribute("is-hidden");
         else
@@ -382,7 +422,9 @@ async function onSettingWindowCreated(view) {
       }
     });
   });
-  doc.querySelectorAll("setting-item .q-input input.q-input__inner[data-config-key]").forEach((dom) => {
+  doc.querySelectorAll(
+    "setting-item .q-input input.q-input__inner[data-config-key]"
+  ).forEach((dom) => {
     dom.addEventListener("input", () => {
       const Type = dom.getAttribute("type");
       const configKey = dom.dataset.configKey;
