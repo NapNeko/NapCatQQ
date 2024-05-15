@@ -3,11 +3,11 @@ import { OB11BaseMetaEvent } from '../event/meta/OB11BaseMetaEvent';
 import { OB11BaseNoticeEvent } from '../event/notice/OB11BaseNoticeEvent';
 import { WebSocket as WebSocketClass } from 'ws';
 import { wsReply } from './ws/reply';
-import { log, logDebug, logError } from '@/common/utils/log';
+import { logDebug, logError } from '@/common/utils/log';
 import { ob11Config } from '@/onebot11/config';
 import crypto from 'crypto';
 import { ChatType, Group, GroupRequestOperateTypes, Peer } from '@/core/entities';
-import { convertMessage2List, sendMsg } from '../action/msg/SendMsg';
+import { normalize, sendMsg } from '../action/msg/SendMsg';
 import { OB11FriendRequestEvent } from '../event/request/OB11FriendRequest';
 import { OB11GroupRequestEvent } from '../event/request/OB11GroupRequest';
 import { isNull } from '@/common/utils/helper';
@@ -139,7 +139,7 @@ export function postOB11Event(msg: PostEventType, reportSelf = false, postWs = t
                 } as OB11MessageAt);
               }
             }
-            replyMessage = replyMessage.concat(convertMessage2List(reply, resJson.auto_escape));
+            replyMessage = replyMessage.concat(normalize(reply, resJson.auto_escape));
             const { sendElements, deleteAfterSentFiles } = await createSendElements(replyMessage, group);
             sendMsg(peer, sendElements, deleteAfterSentFiles, false).then();
           } else if (resJson.delete) {
