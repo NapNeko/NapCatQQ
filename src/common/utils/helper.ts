@@ -35,3 +35,34 @@ export function truncateString(obj: any, maxLength = 500) {
   }
   return obj;
 }
+
+
+
+/**
+ * 函数缓存装饰器，根据方法名、参数、自定义key生成缓存键，在一定时间内返回缓存结果
+ * @param ttl 超时时间，单位毫秒
+ * @param customKey 自定义缓存键前缀，可为空，防止方法名参数名一致时导致缓存键冲突
+ * @returns 处理后缓存或调用原方法的结果
+ */
+export function cacheFunc(ttl: number, customKey: string='') {
+  const cache = new Map<string, { expiry: number; value: any }>();
+
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor): PropertyDescriptor {
+    const originalMethod = descriptor.value;
+    const className = target.constructor.name;  // 获取类名
+    const methodName = propertyKey;             // 获取方法名
+    descriptor.value = async function (...args: any[]){
+      const cacheKey = `${customKey}${className}.${methodName}:${JSON.stringify(args)}`;
+      const cached = cache.get(cacheKey);
+      if (cached && cached.expiry > Date.now()) {
+        return cached.value;
+      } else {
+        const result = await originalMethod.apply(this, args);
+        cache.set(cacheKey, { value: result, expiry: Date.now() + ttl });
+        return result;
+      }
+    };
+
+    return descriptor;
+  };
+}
