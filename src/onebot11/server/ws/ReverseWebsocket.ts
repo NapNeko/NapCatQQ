@@ -116,7 +116,7 @@ export class ReverseWebsocket {
 
 class OB11ReverseWebsockets {
   start() {
-    for (const url of ob11Config.wsReverseUrls) {
+    for (const url of ob11Config.reverseWs.urls) {
       log('开始连接反向ws', url);
       new Promise(() => {
         try {
