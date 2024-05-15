@@ -16,7 +16,7 @@ class OB11HTTPServer extends HttpServerBase {
   }
 
   protected listen(port: number, host: string) {
-    if (ob11Config.enableHttp) {
+    if (ob11Config.http.enable) {
       super.listen(port, host);
     }
   }

@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import { NodeIQQNTWrapperSession, NodeQQNTWrapperUtil } from '@/core/wrapper';
+import { NodeIQQNTWrapperEngine, NodeIQQNTWrapperSession, NodeQQNTWrapperUtil } from '@/core/wrapper';
 import { QuickLoginResult } from '@/core/services';
 import { BuddyListener, GroupListener, MsgListener, ProfileListener } from '@/core/listeners';
 export interface OnLoginSuccess {
@@ -8,9 +8,9 @@ export interface OnLoginSuccess {
 export declare class NapCatCore {
     readonly session: NodeIQQNTWrapperSession;
     readonly util: NodeQQNTWrapperUtil;
-    private engine;
-    private loginService;
+    readonly engine: NodeIQQNTWrapperEngine;
     private readonly loginListener;
+    private loginService;
     private onLoginSuccessFuncList;
     private proxyHandler;
     constructor();

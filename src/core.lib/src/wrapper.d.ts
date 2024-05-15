@@ -47,7 +47,7 @@ export interface NodeQQNTWrapperUtil {
     checkNewUserDataSaveDirAvailable(arg0: string): unknown;
     copyUserData(arg0: string, arg1: string): Promise<any>;
     setUserDataSaveDirectory(arg0: string): Promise<any>;
-    hasOtherRunningQQProcess(): unknown;
+    hasOtherRunningQQProcess(): boolean;
     quitAllRunningQQProcess(arg: boolean): unknown;
     checkNvidiaConfig(): unknown;
     repairNvidiaConfig(): unknown;
