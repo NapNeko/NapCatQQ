@@ -3,7 +3,7 @@ import { OB11BaseMetaEvent } from '../event/meta/OB11BaseMetaEvent';
 import { OB11BaseNoticeEvent } from '../event/notice/OB11BaseNoticeEvent';
 import { WebSocket as WebSocketClass } from 'ws';
 import { wsReply } from './ws/reply';
-import { log, logDebug, logError } from '@/common/utils/log';
+import { logDebug, logError } from '@/common/utils/log';
 import { ob11Config } from '@/onebot11/config';
 import crypto from 'crypto';
 import { ChatType, Group, GroupRequestOperateTypes, Peer } from '@/core/entities';
