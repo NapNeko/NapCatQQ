@@ -143,7 +143,7 @@ export interface OB11MessageText {
   }
 }
 
-interface OB11MessageFileBase {
+export interface OB11MessageFileBase {
   data: {
     thumb?: string;
     name?: string;
@@ -176,7 +176,7 @@ export interface OB11MessageVideo extends OB11MessageFileBase {
 export interface OB11MessageAt {
   type: OB11MessageDataType.at
   data: {
-    qq: string | 'all'
+    qq: `${number}` | 'all'
   }
 }
 
