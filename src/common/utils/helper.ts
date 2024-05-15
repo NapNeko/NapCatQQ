@@ -44,14 +44,14 @@ export function truncateString(obj: any, maxLength = 500) {
  * @param customKey 自定义缓存键前缀，可为空，防止方法名参数名一致时导致缓存键冲突
  * @returns 处理后缓存或调用原方法的结果
  */
-export function cacheFunc(ttl: number, customKey: string='') {
+export function cacheFunc(ttl: number, customKey: string = '') {
   const cache = new Map<string, { expiry: number; value: any }>();
 
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor): PropertyDescriptor {
     const originalMethod = descriptor.value;
     const className = target.constructor.name;  // 获取类名
     const methodName = propertyKey;             // 获取方法名
-    descriptor.value = async function (...args: any[]){
+    descriptor.value = async function (...args: any[]) {
       const cacheKey = `${customKey}${className}.${methodName}:${JSON.stringify(args)}`;
       const cached = cache.get(cacheKey);
       if (cached && cached.expiry > Date.now()) {
@@ -65,4 +65,78 @@ export function cacheFunc(ttl: number, customKey: string='') {
 
     return descriptor;
   };
+}
+function isValidOldConfig(config: any) {
+  if (typeof config !== 'object') {
+    return false;
+  }
+  const requiredKeys = [
+    'httpHost', 'httpPort', 'httpPostUrls', 'httpSecret',
+    'wsHost', 'wsPort', 'wsReverseUrls', 'enableHttp',
+    'enableHttpHeart', 'enableHttpPost', 'enableWs', 'enableWsReverse',
+    'messagePostFormat', 'reportSelfMessage', 'enableLocalFile2Url',
+    'debug', 'heartInterval', 'token', 'musicSignUrl'
+  ];
+  for (const key of requiredKeys) {
+    if (!(key in config)) {
+      return false;
+    }
+  }
+  if (!Array.isArray(config.httpPostUrls) || !Array.isArray(config.wsReverseUrls)) {
+    return false;
+  }
+  if (config.httpPostUrls.some((url: any) => typeof url !== 'string')) {
+    return false;
+  }
+  if (config.wsReverseUrls.some((url: any) => typeof url !== 'string')) {
+    return false;
+  }
+  if (typeof config.httpPort !== 'number' || typeof config.wsPort !== 'number' || typeof config.heartInterval !== 'number') {
+    return false;
+  }
+  if (
+    typeof config.enableHttp !== 'boolean' ||
+    typeof config.enableHttpHeart !== 'boolean' ||
+    typeof config.enableHttpPost !== 'boolean' ||
+    typeof config.enableWs !== 'boolean' ||
+    typeof config.enableWsReverse !== 'boolean' ||
+    typeof config.enableLocalFile2Url !== 'boolean' ||
+    typeof config.reportSelfMessage !== 'boolean'
+  ) {
+    return false;
+  }
+  if (config.messagePostFormat !== 'array' && config.messagePostFormat !== 'string') {
+    return false;
+  }
+  return true;
+}
+function migrateConfig(oldConfig: any) {
+  const newConfig = {
+    http: {
+      enable: oldConfig.enableHttp,
+      host: oldConfig.httpHost,
+      port: oldConfig.httpPort,
+      secret: oldConfig.httpSecret,
+      enableHeart: oldConfig.enableHttpHeart,
+      enablePost: oldConfig.enableHttpPost,
+      postUrls: oldConfig.httpPostUrls,
+    },
+    ws: {
+      enable: oldConfig.enableWs,
+      host: oldConfig.wsHost,
+      port: oldConfig.wsPort,
+    },
+    reverseWs: {
+      enable: oldConfig.enableWsReverse,
+      urls: oldConfig.wsReverseUrls,
+    },
+    debug: oldConfig.debug,
+    heartInterval: oldConfig.heartInterval,
+    messagePostFormat: oldConfig.messagePostFormat,
+    enableLocalFile2Url: oldConfig.enableLocalFile2Url,
+    musicSignUrl: oldConfig.musicSignUrl,
+    reportSelfMessage: oldConfig.reportSelfMessage,
+    token: oldConfig.token,
+  };
+  return newConfig;
 }
