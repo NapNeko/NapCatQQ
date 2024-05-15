@@ -26,6 +26,7 @@ export async function InitWebUi() {
     app.use('/api', ALLRouter);
     app.listen(config.port, async () => {
         console.log(`[NapCat] [WebUi] Current WebUi is running at IP:${config.port}`);
+        console.log(`[NapCat] [WebUi] Login Token is ${config.token}`);
     })
 
 }
