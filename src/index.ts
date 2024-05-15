@@ -3,7 +3,6 @@ import { program } from 'commander';
 import qrcode from 'qrcode-terminal';
 import fs from 'fs/promises';
 import path from 'node:path';
-import { postLoginStatus } from '@/common/utils/umami';
 import { checkVersion } from '@/common/utils/version';
 import { log, logDebug, logError, LogLevel, setLogLevel } from '@/common/utils/log';
 import { NapCatOnebot11 } from '@/onebot11/main';
