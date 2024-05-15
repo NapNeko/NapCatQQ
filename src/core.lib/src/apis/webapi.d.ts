@@ -1,3 +1,11 @@
+export declare enum WebHonorType {
+    ALL = "all",
+    TALKACTIVE = "talkative",
+    PERFROMER = "performer",
+    LEGEND = "legend",
+    STORONGE_NEWBI = "strong_newbie",
+    EMOTION = "emotion"
+}
 export interface WebApiGroupMember {
     uin: number;
     role: number;
@@ -92,5 +100,6 @@ export declare class WebApi {
     static setGroupNotice(GroupCode: string, Content?: string): Promise<any>;
     static getGrouptNotice(GroupCode: string): Promise<undefined | WebApiGroupNoticeRet>;
     static genBkn(sKey: string): string;
+    static getGroupHonorInfo(groupCode: string, getType: WebHonorType): Promise<any>;
 }
 export {};

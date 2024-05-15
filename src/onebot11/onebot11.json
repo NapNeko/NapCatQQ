@@ -1,21 +1,27 @@
 {
-  "httpHost": "",
-  "enableHttp": false,
-  "httpPort": 3000,
-  "wsHost": "",
-  "enableWs": false,
-  "wsPort": 3001,
-  "enableWsReverse": false,
-  "wsReverseUrls": [],
-  "enableHttpPost": false,
-  "httpPostUrls": [],
-  "enableHttpHeart": false,
-  "httpSecret": "",
-  "messagePostFormat": "array",
-  "reportSelfMessage": false,
+  "http": {
+    "enable": false,
+    "host": "",
+    "port": 3000,
+    "secret": "",
+    "enableHeart": false,
+    "enablePost": false,
+    "postUrls": []
+  },
+  "ws": {
+    "enable": false,
+    "host": "",
+    "port": 3001
+  },
+  "reverseWs": {
+    "enable": false,
+    "urls": []
+  },
   "debug": false,
-  "enableLocalFile2Url": true,
   "heartInterval": 30000,
-  "token": "",
-  "musicSignUrl": ""
+  "messagePostFormat": "array",
+  "enableLocalFile2Url": true,
+  "musicSignUrl": "",
+  "reportSelfMessage": false,
+  "token": ""
 }
