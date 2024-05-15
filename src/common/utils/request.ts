@@ -30,7 +30,7 @@ export class RequestUtil {
   }
 
   // 请求和回复都是JSON data传原始内容 自动编码json
-  static async HttpGetJson<T>(url: string, method: string = 'GET', data?: any, headers: Record<string, string> = {}, isJsonRet: boolean = true): Promise<T> {
+  static async HttpGetJson<T>(url: string, method: string = 'GET', data?: any, headers: Record<string, string> = {}, isJsonRet: boolean = true, isArgJson: boolean = true): Promise<T> {
     let option = new URL(url);
     const protocol = url.startsWith('https://') ? https : http;
     const options = {
@@ -69,7 +69,12 @@ export class RequestUtil {
         reject(error);
       });
       if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
-        req.write(JSON.stringify(data));
+        if (isArgJson) {
+          req.write(JSON.stringify(data));
+        } else {
+          req.write(data);
+        }
+
       }
       req.end();
     });
@@ -77,7 +82,6 @@ export class RequestUtil {
 
   // 请求返回都是原始内容
   static async HttpGetText(url: string, method: string = 'GET', data?: any, headers: Record<string, string> = {}) {
-    //console.log(url);
-    return this.HttpGetJson<string>(url, method, data, headers, false);
+    return this.HttpGetJson<string>(url, method, data, headers, false, false);
   }
 }

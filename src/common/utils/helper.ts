@@ -66,7 +66,7 @@ export function cacheFunc(ttl: number, customKey: string = '') {
     return descriptor;
   };
 }
-function isValidOldConfig(config: any) {
+export function isValidOldConfig(config: any) {
   if (typeof config !== 'object') {
     return false;
   }
@@ -110,7 +110,7 @@ function isValidOldConfig(config: any) {
   }
   return true;
 }
-function migrateConfig(oldConfig: any) {
+export function migrateConfig(oldConfig: any) {
   const newConfig = {
     http: {
       enable: oldConfig.enableHttp,
