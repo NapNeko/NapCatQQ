@@ -10,8 +10,3 @@ export interface CustomMusicSignPostData {
     image?: string;
     singer?: string;
 }
-export declare class MusicSign {
-    private readonly url;
-    constructor(url: string);
-    sign(postData: CustomMusicSignPostData | IdMusicSignPostData): Promise<any>;
-}

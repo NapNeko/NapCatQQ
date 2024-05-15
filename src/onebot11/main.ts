@@ -6,12 +6,13 @@ import {
   ChatType,
   FriendRequest,
   Group,
+  GroupMember,
   GroupMemberRole,
   GroupNotify,
   GroupNotifyTypes,
   RawMessage
 } from '@/core/entities';
-import { ob11Config } from '@/onebot11/config';
+import { OB11Config, ob11Config } from '@/onebot11/config';
 import { httpHeart, ob11HTTPServer } from '@/onebot11/server/http';
 import { ob11WebsocketServer } from '@/onebot11/server/ws/WebsocketServer';
 import { ob11ReverseWebsockets } from '@/onebot11/server/ws/ReverseWebsocket';
@@ -43,26 +44,26 @@ export class NapCatOnebot11 {
     logDebug('ob11 ready');
     ob11Config.read();
     const serviceInfo = `
-    HTTP服务 ${ob11Config.enableHttp ? '已启动' : '未启动'}, ${ob11Config.httpHost}:${ob11Config.httpPort}
-    HTTP上报服务 ${ob11Config.enableHttpPost ? '已启动' : '未启动'}, 上报地址: ${ob11Config.httpPostUrls}
-    WebSocket服务 ${ob11Config.enableWs ? '已启动' : '未启动'}, ${ob11Config.wsHost}:${ob11Config.wsPort}
-    WebSocket反向服务 ${ob11Config.enableWsReverse ? '已启动' : '未启动'}, 反向地址: ${ob11Config.wsReverseUrls}
+    HTTP服务 ${ob11Config.http.enable ? '已启动' : '未启动'}, ${ob11Config.http.host}:${ob11Config.http.port}
+    HTTP上报服务 ${ob11Config.http.enablePost ? '已启动' : '未启动'}, 上报地址: ${ob11Config.http.postUrls}
+    WebSocket服务 ${ob11Config.ws.enable ? '已启动' : '未启动'}, ${ob11Config.ws.host}:${ob11Config.ws.port}
+    WebSocket反向服务 ${ob11Config.reverseWs.enable ? '已启动' : '未启动'}, 反向地址: ${ob11Config.reverseWs.urls}
     `;
     log(serviceInfo);
     NTQQUserApi.getUserDetailInfo(selfInfo.uid).then(user => {
       selfInfo.nick = user.nick;
       setLogSelfInfo(selfInfo);
     }).catch(logError);
-    if (ob11Config.enableHttp) {
-      ob11HTTPServer.start(ob11Config.httpPort, ob11Config.httpHost);
+    if (ob11Config.http.enable) {
+      ob11HTTPServer.start(ob11Config.http.port, ob11Config.http.host);
     }
-    if (ob11Config.enableWs) {
-      ob11WebsocketServer.start(ob11Config.wsPort, ob11Config.wsHost);
+    if (ob11Config.ws.enable) {
+      ob11WebsocketServer.start(ob11Config.ws.port, ob11Config.ws.host);
     }
-    if (ob11Config.enableWsReverse) {
+    if (ob11Config.reverseWs.enable) {
       ob11ReverseWebsockets.start();
     }
-    if (ob11Config.enableHttpHeart) {
+    if (ob11Config.http.enableHeart) {
       // 启动http心跳
       httpHeart.start();
     }
@@ -87,7 +88,7 @@ export class NapCatOnebot11 {
       logDebug('收到消息', msg);
       for (const m of msg) {
         // try: 减掉3s 试图修复消息半天收不到
-        if (this.bootTime - 3> parseInt(m.msgTime)) {
+        if (this.bootTime - 3 > parseInt(m.msgTime)) {
           logDebug(`消息时间${m.msgTime}早于启动时间${this.bootTime}，忽略上报`);
           continue;
         }
@@ -131,6 +132,17 @@ export class NapCatOnebot11 {
       //console.log('ob11 onGroupNotifiesUpdated', notifies[0]);
       this.postGroupNotifies(notifies).then().catch(e => logError('postGroupNotifies error: ', e));
     };
+    groupListener.onMemberInfoChange = async (groupCode: string, changeType: number, members: Map<string, GroupMember>) => {
+      // 如果自身是非管理员也许要从这里获取Delete 成员变动 待测试与验证
+      let role = (await getGroupMember(groupCode, selfInfo.uin))?.role;
+      let isPrivilege = role === 3 || role === 4;
+      for (const member of members.values()) {
+        if (member?.isDelete && !isPrivilege) {
+          const groupDecreaseEvent = new OB11GroupDecreaseEvent(parseInt(groupCode), parseInt(member.uin), 0, 'leave');// 不知道怎么出去的
+          postOB11Event(groupDecreaseEvent, true);
+        }
+      }
+    }
     groupListener.onJoinGroupNotify = (...notify) => {
       // console.log('ob11 onJoinGroupNotify', notify);
     };
@@ -189,7 +201,72 @@ export class NapCatOnebot11 {
       }).catch(e => logError('constructFriendAddEvent error: ', e));
     }
   }
+  async SetConfig(NewOb11: OB11Config) {
+    function isEqual(obj1: any, obj2: any) {
+      if (obj1 === obj2) return true;
+      if (obj1 == null || obj2 == null) return false;
+      if (typeof obj1 !== 'object' || typeof obj2 !== 'object') return obj1 === obj2;
 
+      const keys1 = Object.keys(obj1);
+      const keys2 = Object.keys(obj2);
+
+      if (keys1.length !== keys2.length) return false;
+
+      for (let key of keys1) {
+        if (!isEqual(obj1[key], obj2[key])) return false;
+      }
+      return true;
+    }
+    // if (!NewOb11 || typeof NewOb11 !== 'object') {
+    //   throw new Error('Invalid configuration object');
+    // }
+
+    const isHttpChanged = !isEqual(NewOb11.http.port, ob11Config.http.port) && NewOb11.http.enable;
+    const isWsChanged = !isEqual(NewOb11.ws.port, ob11Config.ws.port);
+    const isEnableWsChanged = !isEqual(NewOb11.ws.enable, ob11Config.ws.enable);
+    const isEnableWsReverseChanged = !isEqual(NewOb11.reverseWs.enable, ob11Config.reverseWs.enable);
+    const isWsReverseUrlsChanged = !isEqual(NewOb11.reverseWs.urls, ob11Config.reverseWs.urls);
+
+    if (isHttpChanged) {
+      ob11HTTPServer.restart(NewOb11.http.port, NewOb11.http.host);
+    }
+
+    if (!NewOb11.http.enable) {
+      ob11HTTPServer.stop();
+    } else {
+      ob11HTTPServer.start(NewOb11.http.port, NewOb11.http.host);
+    }
+
+    if (isWsChanged) {
+      ob11WebsocketServer.restart(NewOb11.ws.port);
+    }
+
+    if (isEnableWsChanged) {
+      if (NewOb11.ws.enable) {
+        ob11WebsocketServer.start(NewOb11.ws.port, NewOb11.ws.host);
+      } else {
+        ob11WebsocketServer.stop();
+      }
+    }
+
+    if (isEnableWsReverseChanged) {
+      if (NewOb11.reverseWs.enable) {
+        ob11ReverseWebsockets.start();
+      } else {
+        ob11ReverseWebsockets.stop();
+      }
+    }
+    if (NewOb11.reverseWs.enable && isWsReverseUrlsChanged) {
+      logDebug('反向ws地址有变化, 重启反向ws服务');
+      ob11ReverseWebsockets.restart();
+    }
+    if (NewOb11.http.enableHeart) {
+      httpHeart.start();
+    } else if (!NewOb11.http.enableHeart) {
+      httpHeart.stop();
+    }
+    ob11Config.save(NewOb11);
+  }
   async postGroupNotifies(notifies: GroupNotify[]) {
     for (const notify of notifies) {
       try {

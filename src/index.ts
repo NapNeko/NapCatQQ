@@ -36,12 +36,16 @@ checkVersion().then((remoteVersion: string) => {
 }).catch((e) => {
   logError('[NapCat] 检测更新失败');
 });
-new NapCatOnebot11();
+// 不是很好待优化
+let NapCat_OneBot11 = new NapCatOnebot11();
+
+WebUiDataRuntime.setOB11ConfigCall(NapCat_OneBot11.SetConfig);
+
 napCatCore.onLoginSuccess((uin, uid) => {
   console.log('登录成功!');
   WebUiDataRuntime.setQQLoginStatus(true);
   WebUiDataRuntime.setQQLoginUin(uin.toString());
-  postLoginStatus();
+  postLoginStatus().catch(logDebug);
 });
 const showQRCode = async (url: string, base64: string, buffer: Buffer) => {
   await WebUiDataRuntime.setQQLoginQrcodeURL(url);
@@ -64,7 +68,7 @@ napCatCore.getQuickLoginList().then((res) => {
   WebUiDataRuntime.setQQQuickLoginList(res.LocalLoginInfoList.filter((item) => item.isQuickLogin).map((item) => item.uin.toString()));
 });
 
-WebUiDataRuntime.setQQQuickLogin(async (uin: string) => {
+WebUiDataRuntime.setQQQuickLoginCall(async (uin: string) => {
   const QuickLogin: Promise<{ result: boolean, message: string }> = new Promise((resolve, reject) => {
     if (quickLoginQQ) {
       log('正在快速登录 ', quickLoginQQ);

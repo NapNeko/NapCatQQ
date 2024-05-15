@@ -55,6 +55,7 @@ import { ForwardFriendSingleMsg, ForwardGroupSingleMsg } from '@/onebot11/action
 import { GetFriendWithCategory } from './extends/GetFriendWithCategory';
 import { SendGroupNotice } from './go-cqhttp/SendGroupNotice';
 import { Reboot, RebootNormol } from './system/Reboot';
+import { GetGroupHonorInfo } from './go-cqhttp/GetGroupHonorInfo';
 
 export const actionHandlers = [
   new RebootNormol(),
@@ -101,6 +102,7 @@ export const actionHandlers = [
   new GetRobotUinRange(),
   new GetFriendWithCategory(),
   //以下为go-cqhttp api
+  new GetGroupHonorInfo(),
   new SendGroupNotice(),
   new GetGroupNotice(),
   new GetGroupEssence(),
