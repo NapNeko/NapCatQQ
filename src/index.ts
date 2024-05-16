@@ -44,7 +44,6 @@ napCatCore.onLoginSuccess((uin, uid) => {
   console.log('登录成功!');
   WebUiDataRuntime.setQQLoginStatus(true);
   WebUiDataRuntime.setQQLoginUin(uin.toString());
-  postLoginStatus().catch(logDebug);
 });
 const showQRCode = async (url: string, base64: string, buffer: Buffer) => {
   await WebUiDataRuntime.setQQLoginQrcodeURL(url);
