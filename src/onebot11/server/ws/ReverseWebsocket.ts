@@ -104,7 +104,7 @@ export class ReverseWebsocket {
     this.websocket.on('error', log);
 
     const wsClientInterval = setInterval(() => {
-      postWsEvent(new OB11HeartbeatEvent(!!selfInfo.online, true, heartInterval));
+      wsReply(this.websocket!, new OB11HeartbeatEvent(!!selfInfo.online, true, heartInterval));
     }, heartInterval);  // 心跳包
     this.websocket.on('close', () => {
       clearInterval(wsClientInterval);

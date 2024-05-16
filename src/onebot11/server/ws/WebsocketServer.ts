@@ -69,7 +69,7 @@ class OB11WebsocketServer extends WebsocketServerBase {
       }
       const { heartInterval } = ob11Config;
       const wsClientInterval = setInterval(() => {
-        postWsEvent(new OB11HeartbeatEvent(!!selfInfo.online, true, heartInterval));
+        wsReply(wsClient, new OB11HeartbeatEvent(!!selfInfo.online, true, heartInterval));
       }, heartInterval);  // 心跳包
       wsClient.on('close', () => {
         logError('event上报ws客户端已断开');
