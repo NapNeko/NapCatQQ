@@ -8,10 +8,14 @@ import { log, logDebug, logError, LogLevel, setLogLevel } from '@/common/utils/l
 import { NapCatOnebot11 } from '@/onebot11/main';
 import { InitWebUi } from './webui/index';
 import { WebUiDataRuntime } from './webui/src/helper/Data';
+import { UpdateConfig } from './common/utils/helper';
 program
   .option('-q, --qq <type>', 'QQ号')
   .parse(process.argv);
 
+// 无缝升级旧的配置到新的
+UpdateConfig().catch(logError);
+//
 InitWebUi();
 const cmdOptions = program.opts();
 // console.log(process.argv);

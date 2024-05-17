@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
-
+import path from 'node:path';
+import fs from 'fs/promises';
 export function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -139,4 +140,17 @@ export function migrateConfig(oldConfig: any) {
     token: oldConfig.token,
   };
   return newConfig;
+}
+// 升级旧的配置到新的
+export async function UpdateConfig() {
+    const configFiles = await fs.readdir(path.join(__dirname, 'config'));
+    for (const file of configFiles) {
+      if (file.match(/^onebot11_\d+.json$/)) {
+        let CurrentConfig = JSON.parse(await fs.readFile(path.join(__dirname, 'config', file), 'utf8'));
+        if (isValidOldConfig(CurrentConfig)) {
+          let NewConfig = migrateConfig(CurrentConfig);
+          await fs.writeFile(path.join(__dirname, 'config', file), JSON.stringify(NewConfig, null, 2));
+        }
+      }
+    }
 }
