@@ -10,6 +10,7 @@ import {
   GroupMemberRole,
   GroupNotify,
   GroupNotifyTypes,
+  KickedOffLineInfo,
   RawMessage
 } from '@/core/entities';
 import { OB11Config, ob11Config } from '@/onebot11/config';
@@ -29,6 +30,7 @@ import { OB11FriendRecallNoticeEvent } from '@/onebot11/event/notice/OB11FriendR
 import { OB11GroupRecallNoticeEvent } from '@/onebot11/event/notice/OB11GroupRecallNoticeEvent';
 import { logMessage, logNotice, logRequest } from '@/onebot11/log';
 import { OB11Message } from '@/onebot11/types';
+import { OB11LifeCycleEvent } from './event/meta/OB11LifeCycleEvent';
 
 
 export class NapCatOnebot11 {
@@ -82,6 +84,10 @@ export class NapCatOnebot11 {
       // console.log('ob11 onRecvSysMsg', hexString, Date.now() / 1000);
       // console.log(buffer.toString());
       // console.log('ob11 onRecvSysMsg', JSON.stringify(msg, null, 2));
+    };
+    msgListener.onKickedOffLine = (Info: KickedOffLineInfo) => {
+      // 下线通知
+      //postOB11Event
     };
     msgListener.onRecvMsg = (msg) => {
       // console.log('ob11 onRecvMsg', JSON.stringify(msg, null, 2));
