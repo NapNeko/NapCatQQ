@@ -208,70 +208,75 @@ export class NapCatOnebot11 {
     }
   }
   async SetConfig(NewOb11: OB11Config) {
-    function isEqual(obj1: any, obj2: any) {
-      if (obj1 === obj2) return true;
-      if (obj1 == null || obj2 == null) return false;
-      if (typeof obj1 !== 'object' || typeof obj2 !== 'object') return obj1 === obj2;
+    try {
+      function isEqual(obj1: any, obj2: any) {
+        if (obj1 === obj2) return true;
+        if (obj1 == null || obj2 == null) return false;
+        if (typeof obj1 !== 'object' || typeof obj2 !== 'object') return obj1 === obj2;
 
-      const keys1 = Object.keys(obj1);
-      const keys2 = Object.keys(obj2);
+        const keys1 = Object.keys(obj1);
+        const keys2 = Object.keys(obj2);
 
-      if (keys1.length !== keys2.length) return false;
+        if (keys1.length !== keys2.length) return false;
 
-      for (let key of keys1) {
-        if (!isEqual(obj1[key], obj2[key])) return false;
+        for (let key of keys1) {
+          if (!isEqual(obj1[key], obj2[key])) return false;
+        }
+        return true;
       }
-      return true;
-    }
-    // if (!NewOb11 || typeof NewOb11 !== 'object') {
-    //   throw new Error('Invalid configuration object');
-    // }
+      // if (!NewOb11 || typeof NewOb11 !== 'object') {
+      //   throw new Error('Invalid configuration object');
+      // }
 
-    const isHttpChanged = !isEqual(NewOb11.http.port, ob11Config.http.port) && NewOb11.http.enable;
-    const isWsChanged = !isEqual(NewOb11.ws.port, ob11Config.ws.port);
-    const isEnableWsChanged = !isEqual(NewOb11.ws.enable, ob11Config.ws.enable);
-    const isEnableWsReverseChanged = !isEqual(NewOb11.reverseWs.enable, ob11Config.reverseWs.enable);
-    const isWsReverseUrlsChanged = !isEqual(NewOb11.reverseWs.urls, ob11Config.reverseWs.urls);
+      const isHttpChanged = !isEqual(NewOb11.http.port, ob11Config.http.port) && NewOb11.http.enable;
+      const isWsChanged = !isEqual(NewOb11.ws.port, ob11Config.ws.port);
+      const isEnableWsChanged = !isEqual(NewOb11.ws.enable, ob11Config.ws.enable);
+      const isEnableWsReverseChanged = !isEqual(NewOb11.reverseWs.enable, ob11Config.reverseWs.enable);
+      const isWsReverseUrlsChanged = !isEqual(NewOb11.reverseWs.urls, ob11Config.reverseWs.urls);
 
-    if (isHttpChanged) {
-      ob11HTTPServer.restart(NewOb11.http.port, NewOb11.http.host);
-    }
+      if (isHttpChanged) {
+        ob11HTTPServer.restart(NewOb11.http.port, NewOb11.http.host);
+      }
 
-    if (!NewOb11.http.enable) {
-      ob11HTTPServer.stop();
-    } else {
-      ob11HTTPServer.start(NewOb11.http.port, NewOb11.http.host);
-    }
-
-    if (isWsChanged) {
-      ob11WebsocketServer.restart(NewOb11.ws.port);
-    }
-
-    if (isEnableWsChanged) {
-      if (NewOb11.ws.enable) {
-        ob11WebsocketServer.start(NewOb11.ws.port, NewOb11.ws.host);
+      if (!NewOb11.http.enable) {
+        ob11HTTPServer.stop();
       } else {
-        ob11WebsocketServer.stop();
+        ob11HTTPServer.start(NewOb11.http.port, NewOb11.http.host);
       }
+
+      if (isWsChanged) {
+        ob11WebsocketServer.restart(NewOb11.ws.port);
+      }
+
+      if (isEnableWsChanged) {
+        if (NewOb11.ws.enable) {
+          ob11WebsocketServer.start(NewOb11.ws.port, NewOb11.ws.host);
+        } else {
+          ob11WebsocketServer.stop();
+        }
+      }
+
+      if (isEnableWsReverseChanged) {
+        if (NewOb11.reverseWs.enable) {
+          ob11ReverseWebsockets.start();
+        } else {
+          ob11ReverseWebsockets.stop();
+        }
+      }
+      if (NewOb11.reverseWs.enable && isWsReverseUrlsChanged) {
+        logDebug('反向ws地址有变化, 重启反向ws服务');
+        ob11ReverseWebsockets.restart();
+      }
+      if (NewOb11.http.enableHeart) {
+        httpHeart.start();
+      } else if (!NewOb11.http.enableHeart) {
+        httpHeart.stop();
+      }
+      ob11Config.save(NewOb11);
+    } catch (e) {
+      logError('热重载配置失败', e);
     }
 
-    if (isEnableWsReverseChanged) {
-      if (NewOb11.reverseWs.enable) {
-        ob11ReverseWebsockets.start();
-      } else {
-        ob11ReverseWebsockets.stop();
-      }
-    }
-    if (NewOb11.reverseWs.enable && isWsReverseUrlsChanged) {
-      logDebug('反向ws地址有变化, 重启反向ws服务');
-      ob11ReverseWebsockets.restart();
-    }
-    if (NewOb11.http.enableHeart) {
-      httpHeart.start();
-    } else if (!NewOb11.http.enableHeart) {
-      httpHeart.stop();
-    }
-    ob11Config.save(NewOb11);
   }
   async postGroupNotifies(notifies: GroupNotify[]) {
     for (const notify of notifies) {
