@@ -115,7 +115,7 @@ export function postOB11Event(msg: PostEventType, reportSelf = false, postWs = t
             const reply = resJson.reply;
             const peer: Peer = {
               chatType: ChatType.friend,
-              peerUid: msg.user_id.toString()
+              peerUid: getUidByUin(msg.user_id.toString()) as string
             };
             if (msg.message_type == 'private') {
               if (msg.sub_type === 'group') {
