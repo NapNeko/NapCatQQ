@@ -2,7 +2,6 @@ function Get-QQpath {
     try {
         $key = Get-ItemProperty -Path "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\QQ"
         $uninstallString = $key.UninstallString
-        throw "get QQ path error:"
         return [System.IO.Path]::GetDirectoryName($uninstallString) + "\QQ.exe"
     }
     catch {
@@ -13,8 +12,8 @@ function Select-QQPath {
     Add-Type -AssemblyName System.Windows.Forms
     [System.Windows.Forms.Application]::EnableVisualStyles()
 
-    $dialogTitle = "Select an EXE File"
-    
+    $dialogTitle = "Select QQ.exe"
+
     $filePicker = New-Object System.Windows.Forms.OpenFileDialog
     $filePicker.Title = $dialogTitle
     $filePicker.Filter = "Executable Files (*.exe)|*.exe|All Files (*.*)|*.*"
