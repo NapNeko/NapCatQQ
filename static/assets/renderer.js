@@ -357,6 +357,7 @@ async function onSettingWindowCreated(view) {
     return result;
   };
   const addReverseHost = (type, doc2 = document, inputAttr = {}) => {
+    type = type.replace(/\./g, "-");
     const hostContainerDom = doc2.body.querySelector(
       `#config-ob11-${type}-list`
     );
@@ -364,11 +365,11 @@ async function onSettingWindowCreated(view) {
       buildHostListItem(
         type,
         "",
-        ob11Config[type.split(".")[0]][type.split(".")[1]].length,
+        ob11Config[type.split("-")[0]][type.split("-")[1]].length,
         inputAttr
       )
     );
-    ob11Config[type.split(".")[0]][type.split(".")[1]].push("");
+    ob11Config[type.split("-")[0]][type.split("-")[1]].push("");
   };
   const initReverseHost = (type, doc2 = document) => {
     const hostContainerDom = doc2.body?.querySelector(
