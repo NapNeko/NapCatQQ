@@ -4,6 +4,15 @@ export interface Peer {
     peerUid: string;
     guildId?: string;
 }
+export interface KickedOffLineInfo {
+    appId: number;
+    instanceId: number;
+    sameDevice: boolean;
+    tipsDesc: string;
+    tipsTitle: string;
+    kickedType: number;
+    securityKickedType: number;
+}
 export declare enum ElementType {
     TEXT = 1,
     PIC = 2,
