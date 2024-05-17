@@ -175,14 +175,14 @@ async function onSettingWindowCreated(view) {
           "启用 HTTP 服务",
           void 0,
           SettingSwitch("ob11.http.enable", ob11Config.http.enable, {
-            "control-display-id": "config-ob11-http.port"
+            "control-display-id": "config-ob11-http-port"
           })
         ),
         SettingItem(
           "HTTP 服务监听端口",
           void 0,
           `<div class="q-input"><input class="q-input__inner" data-config-key="ob11.http.port" type="number" min="1" max="65534" value="${ob11Config.http.port}" placeholder="${ob11Config.http.port}" /></div>`,
-          "config-ob11-http.port",
+          "config-ob11-http-port",
           ob11Config.http.enable
         ),
         SettingItem(
