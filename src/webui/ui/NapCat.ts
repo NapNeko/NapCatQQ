@@ -5,8 +5,7 @@ import { SettingSwitch } from "./components/SettingSwitch";
 import { SettingSelect } from "./components/SettingSelect";
 import { OB11Config, OB11ConfigWrapper } from "./components/WebUiApiOB11Config";
 async function onSettingWindowCreated(view: Element) {
-  const isEmpty = (value: any) =>
-    value === undefined || value === undefined || value === "";
+  const isEmpty = (value: any) => value === undefined || value === undefined || value === "";
   await OB11ConfigWrapper.Init(localStorage.getItem("auth") as string);
   let ob11Config: OB11Config = await OB11ConfigWrapper.GetOB11Config();
   const setOB11Config = (key: string, value: any) => {
@@ -59,17 +58,17 @@ async function onSettingWindowCreated(view: Element) {
           "启用 HTTP 事件上报",
           undefined,
           SettingSwitch("ob11.http.enablePost", ob11Config.http.enablePost, {
-            "control-display-id": "config-ob11-http.postUrls",
+            "control-display-id": "config-ob11-http-postUrls",
           })
         ),
-        `<div class="config-host-list" id="config-ob11-http.postUrls" ${ob11Config.http.enablePost ? "" : "is-hidden"
+        `<div class="config-host-list" id="config-ob11-http-postUrls" ${ob11Config.http.enablePost ? "" : "is-hidden"
         }>
                 <setting-item data-direction="row">
                     <div>
                         <setting-text>HTTP 事件上报密钥</setting-text>
                     </div>
                     <div class="q-input">
-                        <input id="config-ob11-http.secret" class="q-input__inner" data-config-key="ob11.http.secret" type="text" value="${ob11Config.http.secret
+                        <input id="config-ob11-http-secret" class="q-input__inner" data-config-key="ob11.http.secret" type="text" value="${ob11Config.http.secret
         }" placeholder="未设置" />
                     </div>
                 </setting-item>
@@ -77,9 +76,9 @@ async function onSettingWindowCreated(view: Element) {
                     <div>
                         <setting-text>HTTP 事件上报地址</setting-text>
                     </div>
-                    <setting-button id="config-ob11-http.postUrls-add" data-type="primary">添加</setting-button>
+                    <setting-button id="config-ob11-http-postUrls-add" data-type="primary">添加</setting-button>
                 </setting-item>
-                <div id="config-ob11-http.postUrls-list"></div>
+                <div id="config-ob11-http-postUrls-list"></div>
             </div>`,
         SettingItem(
           "启用正向 WebSocket 服务",
@@ -99,18 +98,18 @@ async function onSettingWindowCreated(view: Element) {
           "启用反向 WebSocket 服务",
           undefined,
           SettingSwitch("ob11.reverseWs.enable", ob11Config.reverseWs.enable, {
-            "control-display-id": "config-ob11-reverseWs.urls",
+            "control-display-id": "config-ob11-reverseWs-urls",
           })
         ),
-        `<div class="config-host-list" id="config-ob11-reverseWs.urls" ${ob11Config.reverseWs.enable ? "" : "is-hidden"
+        `<div class="config-host-list" id="config-ob11-reverseWs-urls" ${ob11Config.reverseWs.enable ? "" : "is-hidden"
         }>
                 <setting-item data-direction="row">
                     <div>
                         <setting-text>反向 WebSocket 监听地址</setting-text>
                     </div>
-                    <setting-button id="config-ob11-reverseWs.urls-add" data-type="primary">添加</setting-button>
+                    <setting-button id="config-ob11-reverseWs-urls-add" data-type="primary">添加</setting-button>
                 </setting-item>
-                <div id="config-ob11-reverseWs.urls-list"></div>
+                <div id="config-ob11-reverseWs-urls-list"></div>
             </div>`,
         SettingItem(
           " WebSocket 服务心跳间隔",
@@ -275,16 +274,15 @@ async function onSettingWindowCreated(view: Element) {
   };
   initReverseHost("http.postUrls", doc);
   initReverseHost("reverseWs.urls", doc);
-
   doc
-    .querySelector("#config-ob11-http.postUrls-add")
+    .querySelector("#config-ob11-http-postUrls-add")
     ?.addEventListener("click", () =>
       addReverseHost("http.postUrls", document, {
         placeholder: "如：http://127.0.0.1:5140/onebot",
       })
     );
   doc
-    .querySelector("#config-ob11-reverseWs.urls-add")
+    .querySelector("#config-ob11-reverseWs-urls-add")
     ?.addEventListener("click", () =>
       addReverseHost("reverseWs.urls", document, {
         placeholder: "如：ws://127.0.0.1:5140/onebot",
