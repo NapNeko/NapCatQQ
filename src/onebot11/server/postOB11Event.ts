@@ -107,77 +107,82 @@ export function postOB11Event(msg: PostEventType, reportSelf = false, postWs = t
           logDebug('新消息事件HTTP上报没有返回快速操作，不需要处理');
           return;
         }
-        if (msg.post_type === 'message') {
-          msg = msg as OB11Message;
-          const rawMessage = await dbUtil.getMsgByShortId(msg.message_id);
-          resJson = resJson as QuickActionPrivateMessage | QuickActionGroupMessage;
-          const reply = resJson.reply;
-          const peer: Peer = {
-            chatType: ChatType.friend,
-            peerUid: msg.user_id.toString()
-          };
-          if (msg.message_type == 'private') {
-            if (msg.sub_type === 'group') {
-              peer.chatType = ChatType.temp;
+        try {
+          if (msg.post_type === 'message') {
+            msg = msg as OB11Message;
+            const rawMessage = await dbUtil.getMsgByShortId(msg.message_id);
+            resJson = resJson as QuickActionPrivateMessage | QuickActionGroupMessage;
+            const reply = resJson.reply;
+            const peer: Peer = {
+              chatType: ChatType.friend,
+              peerUid: msg.user_id.toString()
+            };
+            if (msg.message_type == 'private') {
+              if (msg.sub_type === 'group') {
+                peer.chatType = ChatType.temp;
+              }
+            } else {
+              peer.chatType = ChatType.group;
+              peer.peerUid = msg.group_id!.toString();
             }
-          } else {
-            peer.chatType = ChatType.group;
-            peer.peerUid = msg.group_id!.toString();
-          }
-          if (reply) {
-            let group: Group | undefined;
-            let replyMessage: OB11MessageData[] = [];
+            if (reply) {
+              let group: Group | undefined;
+              let replyMessage: OB11MessageData[] = [];
 
-            if (msg.message_type == 'group') {
-              group = await getGroup(msg.group_id!.toString());
-              if ((resJson as QuickActionGroupMessage).at_sender) {
-                replyMessage.push({
-                  type: 'at',
-                  data: {
-                    qq: msg.user_id.toString()
-                  }
-                } as OB11MessageAt);
+              if (msg.message_type == 'group') {
+                group = await getGroup(msg.group_id!.toString());
+                if ((resJson as QuickActionGroupMessage).at_sender) {
+                  replyMessage.push({
+                    type: 'at',
+                    data: {
+                      qq: msg.user_id.toString()
+                    }
+                  } as OB11MessageAt);
+                }
+              }
+              replyMessage = replyMessage.concat(normalize(reply, resJson.auto_escape));
+              const { sendElements, deleteAfterSentFiles } = await createSendElements(replyMessage, group);
+              sendMsg(peer, sendElements, deleteAfterSentFiles, false).then();
+            } else if (resJson.delete) {
+              NTQQMsgApi.recallMsg(peer, [rawMessage!.msgId]).then();
+            } else if (resJson.kick) {
+              NTQQGroupApi.kickMember(peer.peerUid, [rawMessage!.senderUid]).then();
+            } else if (resJson.ban) {
+              NTQQGroupApi.banMember(peer.peerUid, [{
+                uid: rawMessage!.senderUid,
+                timeStamp: resJson.ban_duration || 60 * 30
+              }],).then();
+            }
+
+          } else if (msg.post_type === 'request') {
+            if ((msg as OB11FriendRequestEvent).request_type === 'friend') {
+              resJson = resJson as QuickActionFriendRequest;
+              if (!isNull(resJson.approve)) {
+                // todo: set remark
+                const flag = (msg as OB11FriendRequestEvent).flag;
+                // const [friendUid, seq] = flag.split('|');
+                const request = friendRequests[flag];
+                NTQQFriendApi.handleFriendRequest(
+                  request,
+                  !!resJson.approve,
+                ).then();
+              }
+            } else if ((msg as OB11GroupRequestEvent).request_type === 'group') {
+              resJson = resJson as QuickActionGroupRequest;
+              if (!isNull(resJson.approve)) {
+                const flag = (msg as OB11GroupRequestEvent).flag;
+                const request = groupNotifies[flag];
+                // const [groupCode, seq] = flag.split('|');
+                NTQQGroupApi.handleGroupRequest(request,
+                  resJson.approve ? GroupRequestOperateTypes.approve : GroupRequestOperateTypes.reject
+                ).then();
               }
             }
-            replyMessage = replyMessage.concat(normalize(reply, resJson.auto_escape));
-            const { sendElements, deleteAfterSentFiles } = await createSendElements(replyMessage, group);
-            sendMsg(peer, sendElements, deleteAfterSentFiles, false).then();
-          } else if (resJson.delete) {
-            NTQQMsgApi.recallMsg(peer, [rawMessage!.msgId]).then();
-          } else if (resJson.kick) {
-            NTQQGroupApi.kickMember(peer.peerUid, [rawMessage!.senderUid]).then();
-          } else if (resJson.ban) {
-            NTQQGroupApi.banMember(peer.peerUid, [{
-              uid: rawMessage!.senderUid,
-              timeStamp: resJson.ban_duration || 60 * 30
-            }],).then();
           }
-
-        } else if (msg.post_type === 'request') {
-          if ((msg as OB11FriendRequestEvent).request_type === 'friend') {
-            resJson = resJson as QuickActionFriendRequest;
-            if (!isNull(resJson.approve)) {
-              // todo: set remark
-              const flag = (msg as OB11FriendRequestEvent).flag;
-              // const [friendUid, seq] = flag.split('|');
-              const request = friendRequests[flag];
-              NTQQFriendApi.handleFriendRequest(
-                request,
-                !!resJson.approve,
-              ).then();
-            }
-          } else if ((msg as OB11GroupRequestEvent).request_type === 'group') {
-            resJson = resJson as QuickActionGroupRequest;
-            if (!isNull(resJson.approve)) {
-              const flag = (msg as OB11GroupRequestEvent).flag;
-              const request = groupNotifies[flag];
-              // const [groupCode, seq] = flag.split('|');
-              NTQQGroupApi.handleGroupRequest(request,
-                resJson.approve ? GroupRequestOperateTypes.approve : GroupRequestOperateTypes.reject
-              ).then();
-            }
-          }
+        } catch (e: any) {
+          logError('新消息事件HTTP上报返回快速操作失败', e);
         }
+
       }, (err: any) => {
         logError(`新消息事件HTTP上报失败: ${host} `, err, msg);
       });
