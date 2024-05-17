@@ -272,8 +272,10 @@ async function onSettingWindowCreated(view: Element) {
       });
     }
   };
+
   initReverseHost("http.postUrls", doc);
   initReverseHost("reverseWs.urls", doc);
+  
   doc
     .querySelector("#config-ob11-http-postUrls-add")
     ?.addEventListener("click", () =>
@@ -281,6 +283,7 @@ async function onSettingWindowCreated(view: Element) {
         placeholder: "如：http://127.0.0.1:5140/onebot",
       })
     );
+  
   doc
     .querySelector("#config-ob11-reverseWs-urls-add")
     ?.addEventListener("click", () =>
