@@ -142,16 +142,16 @@ export function postOB11Event(msg: PostEventType, reportSelf = false, postWs = t
               }
               replyMessage = replyMessage.concat(normalize(reply, resJson.auto_escape));
               const { sendElements, deleteAfterSentFiles } = await createSendElements(replyMessage, group);
-              sendMsg(peer, sendElements, deleteAfterSentFiles, false).then();
+              sendMsg(peer, sendElements, deleteAfterSentFiles, false).then().catch(logError);
             } else if (resJson.delete) {
-              NTQQMsgApi.recallMsg(peer, [rawMessage!.msgId]).then();
+              NTQQMsgApi.recallMsg(peer, [rawMessage!.msgId]).then().catch(logError);
             } else if (resJson.kick) {
-              NTQQGroupApi.kickMember(peer.peerUid, [rawMessage!.senderUid]).then();
+              NTQQGroupApi.kickMember(peer.peerUid, [rawMessage!.senderUid]).then().catch(logError);
             } else if (resJson.ban) {
               NTQQGroupApi.banMember(peer.peerUid, [{
                 uid: rawMessage!.senderUid,
                 timeStamp: resJson.ban_duration || 60 * 30
-              }],).then();
+              }],).then().catch(logError);
             }
 
           } else if (msg.post_type === 'request') {
@@ -165,7 +165,7 @@ export function postOB11Event(msg: PostEventType, reportSelf = false, postWs = t
                 NTQQFriendApi.handleFriendRequest(
                   request,
                   !!resJson.approve,
-                ).then();
+                ).then().catch(logError);
               }
             } else if ((msg as OB11GroupRequestEvent).request_type === 'group') {
               resJson = resJson as QuickActionGroupRequest;
@@ -175,7 +175,7 @@ export function postOB11Event(msg: PostEventType, reportSelf = false, postWs = t
                 // const [groupCode, seq] = flag.split('|');
                 NTQQGroupApi.handleGroupRequest(request,
                   resJson.approve ? GroupRequestOperateTypes.approve : GroupRequestOperateTypes.reject
-                ).then();
+                ).then().catch(logError);
               }
             }
           }
