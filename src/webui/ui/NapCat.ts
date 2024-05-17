@@ -245,6 +245,8 @@ async function onSettingWindowCreated(view: Element) {
     doc: Document = document,
     inputAttr: any = {}
   ) => {
+    type = type.replace(/\./g, "-");//替换操作
+
     const hostContainerDom = doc.body.querySelector(
       `#config-ob11-${type}-list`
     );
@@ -252,11 +254,11 @@ async function onSettingWindowCreated(view: Element) {
       buildHostListItem(
         type,
         "",
-        ob11Config[type.split(".")[0]][type.split(".")[1]].length,
+        ob11Config[type.split("-")[0]][type.split("-")[1]].length,
         inputAttr
       )
     );
-    ob11Config[type.split(".")[0]][type.split(".")[1]].push("");
+    ob11Config[type.split("-")[0]][type.split("-")[1]].push("");
   };
   const initReverseHost = (type: string, doc: Document = document) => {
     const hostContainerDom = doc.body?.querySelector(
@@ -275,7 +277,7 @@ async function onSettingWindowCreated(view: Element) {
 
   initReverseHost("http.postUrls", doc);
   initReverseHost("reverseWs.urls", doc);
-  
+
   doc
     .querySelector("#config-ob11-http-postUrls-add")
     ?.addEventListener("click", () =>
@@ -283,7 +285,7 @@ async function onSettingWindowCreated(view: Element) {
         placeholder: "如：http://127.0.0.1:5140/onebot",
       })
     );
-  
+
   doc
     .querySelector("#config-ob11-reverseWs-urls-add")
     ?.addEventListener("click", () =>
