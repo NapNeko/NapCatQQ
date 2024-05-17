@@ -208,7 +208,7 @@ async function onSettingWindowCreated(view: Element) {
     dom.input.type = "url";
     dom.input.value = host;
     dom.input.addEventListener("input", () => {
-      ob11Config[type.split(".")[0]][type.split(".")[1]][index] =
+      ob11Config[type.split("-")[0]][type.split("-")[1]][index] =
         dom.input.value;
     });
 
@@ -218,7 +218,7 @@ async function onSettingWindowCreated(view: Element) {
     dom.deleteBtn.innerHTML = "删除";
     dom.deleteBtn.dataset.type = "secondary";
     dom.deleteBtn.addEventListener("click", () => {
-      ob11Config[type.split(".")[0]][type.split(".")[1]].splice(index, 1);
+      ob11Config[type.split("-")[0]][type.split("-")[1]].splice(index, 1);
       initReverseHost(type);
     });
 
@@ -261,13 +261,14 @@ async function onSettingWindowCreated(view: Element) {
     ob11Config[type.split("-")[0]][type.split("-")[1]].push("");
   };
   const initReverseHost = (type: string, doc: Document = document) => {
+    type = type.replace(/\./g, "-");//替换操作
     const hostContainerDom = doc.body?.querySelector(
       `#config-ob11-${type}-list`
     );
     if (hostContainerDom) {
       [...hostContainerDom.childNodes].forEach((dom) => dom.remove());
       buildHostList(
-        ob11Config[type.split(".")[0]][type.split(".")[1]],
+        ob11Config[type.split("-")[0]][type.split("-")[1]],
         type
       ).forEach((dom) => {
         hostContainerDom?.appendChild(dom);
