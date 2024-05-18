@@ -1,4 +1,4 @@
-import { OB11Message, OB11MessageAt, OB11MessageData } from '../types';
+import { OB11Message, OB11MessageAt, OB11MessageData, OB11MessageReply } from '../types';
 import { OB11BaseMetaEvent } from '../event/meta/OB11BaseMetaEvent';
 import { OB11BaseNoticeEvent } from '../event/notice/OB11BaseNoticeEvent';
 import { WebSocket as WebSocketClass } from 'ws';
@@ -144,6 +144,12 @@ async function handleMsg(msg: OB11Message, quickAction: QuickAction) {
 
     if (msg.message_type == 'group') {
       group = await getGroup(msg.group_id!.toString());
+      replyMessage.push({
+        type: 'reply',
+        data: {
+          id: msg.message_id.toString()
+        }
+      } as OB11MessageReply);
       if ((quickAction as QuickActionGroupMessage).at_sender) {
         replyMessage.push({
           type: 'at',
