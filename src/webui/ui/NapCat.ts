@@ -84,14 +84,14 @@ async function onSettingWindowCreated(view: Element) {
           "启用正向 WebSocket 服务",
           undefined,
           SettingSwitch("ob11.ws.enable", ob11Config.ws.enable, {
-            "control-display-id": "config-ob11-ws.port",
+            "control-display-id": "config-ob11-ws-port",
           })
         ),
         SettingItem(
           "正向 WebSocket 服务监听端口",
           undefined,
           `<div class="q-input"><input class="q-input__inner" data-config-key="ob11.ws.port" type="number" min="1" max="65534" value="${ob11Config.ws.port}" placeholder="${ob11Config.ws.port}" /></div>`,
-          "config-ob11-ws.port",
+          "config-ob11-ws-port",
           ob11Config.ws.enable
         ),
         SettingItem(
