@@ -1,6 +1,7 @@
 import { GroupMember, GroupRequestOperateTypes, GroupMemberRole, GroupNotify, Group } from '../entities';
 export declare class NTQQGroupApi {
     static getGroups(forced?: boolean): Promise<Group[]>;
+    static getSingleScreenNotifies(num: number): Promise<unknown>;
     static getGroupMembers(groupQQ: string, num?: number): Promise<Map<string, GroupMember>>;
     static getGroupNotifies(): Promise<void>;
     static getGroupIgnoreNotifies(): Promise<void>;
