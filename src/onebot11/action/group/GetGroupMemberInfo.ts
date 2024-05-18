@@ -8,24 +8,31 @@ import { log, logDebug } from '@/common/utils/log';
 import { isNull } from '../../../common/utils/helper';
 import { WebApi } from '@/core/apis/webapi';
 import { NTQQGroupApi } from '@/core';
+import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
+// no_cache get时传字符串
+const SchemaData = {
+  type: 'object',
+  properties: {
+    group_id: { type: 'number' },
+    user_id: { type: 'number' },
+    no_cache: { type: 'boolean' },
+  },
+  required: ['group_id', 'user_id']
+} as const satisfies JSONSchema;
 
-export interface PayloadType {
-  group_id: number;
-  user_id: number;
-  no_cache?: boolean | string;
-}
+type Payload = FromSchema<typeof SchemaData>;
 
-class GetGroupMemberInfo extends BaseAction<PayloadType, OB11GroupMember> {
+class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
   actionName = ActionName.GetGroupMemberInfo;
-
-  protected async _handle(payload: PayloadType) {
+  PayloadSchema = SchemaData;
+  protected async _handle(payload: Payload) {
     const group = await getGroup(payload.group_id.toString());
     if (!group) {
       throw (`群(${payload.group_id})不存在`);
     }
     const webGroupMembers = await WebApi.getGroupMembers(payload.group_id.toString());
-    if (payload.no_cache == true || payload.no_cache === 'true') {
+    if (payload.no_cache == true /*|| payload.no_cache === 'true'*/) {
       groupMembers.set(group.groupCode, await NTQQGroupApi.getGroupMembers(payload.group_id.toString()));
     }
     const member = await getGroupMember(payload.group_id.toString(), payload.user_id.toString());

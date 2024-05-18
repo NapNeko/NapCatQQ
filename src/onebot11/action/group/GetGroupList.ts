@@ -6,17 +6,23 @@ import { groups } from '@/core/data';
 import { NTQQGroupApi } from '@/core/apis';
 import { Group } from '@/core/entities';
 import { log } from '@/common/utils/log';
+import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+// no_cache get时传字符串
+const SchemaData = {
+  type: 'object',
+  properties: {
+    no_cache: { type: 'boolean' },
+  }
+} as const satisfies JSONSchema;
 
-interface Payload {
-  no_cache: boolean | string;
-}
+type Payload = FromSchema<typeof SchemaData>;
 
 class GetGroupList extends BaseAction<Payload, OB11Group[]> {
   actionName = ActionName.GetGroupList;
-
+  PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
     let groupList: Group[] = Array.from(groups.values());
-    if (groupList.length === 0 || payload?.no_cache === true || payload?.no_cache === 'true') {
+    if (groupList.length === 0 || payload?.no_cache === true /*|| payload.no_cache === 'true'*/) {
       groupList = await NTQQGroupApi.getGroups(true);
       // log('get groups', groups);
     }

@@ -6,24 +6,29 @@ import { ActionName } from '../types';
 import { napCatCore, NTQQGroupApi } from '@/core';
 import { WebApi } from '@/core/apis/webapi';
 import { logDebug } from '@/common/utils/log';
+import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+const SchemaData = {
+  type: 'object',
+  properties: {
+    group_id: { type: 'number' },
+    no_cache: { type: 'boolean' },
+  },
+  required: ['group_id', 'user_id']
+} as const satisfies JSONSchema;
 
-export interface PayloadType {
-  group_id: number,
-  no_cache?: boolean | string
-}
+type Payload = FromSchema<typeof SchemaData>;
 
-
-class GetGroupMemberList extends BaseAction<PayloadType, OB11GroupMember[]> {
+class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
   actionName = ActionName.GetGroupMemberList;
-
-  protected async _handle(payload: PayloadType) {
+  PayloadSchema = SchemaData;
+  protected async _handle(payload: Payload) {
     const MemberMap: Map<number, OB11GroupMember> = new Map<number, OB11GroupMember>();
     const webGroupMembers = await WebApi.getGroupMembers(payload.group_id.toString());
     const group = await getGroup(payload.group_id.toString());
     if (!group) {
       throw (`群${payload.group_id}不存在`);
     }
-    if (payload.no_cache == true || payload.no_cache === 'true') {
+    if (payload.no_cache == true /*|| payload.no_cache === 'true'*/) {
       // webGroupMembers = await WebApi.getGroupMembers(payload.group_id.toString());
       const _groupMembers = await NTQQGroupApi.getGroupMembers(payload.group_id.toString());
       groupMembers.set(group.groupCode, _groupMembers);

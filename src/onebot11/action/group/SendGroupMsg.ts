@@ -2,7 +2,7 @@ import SendMsg from '../msg/SendMsg';
 import { ActionName, BaseCheckResult } from '../types';
 import { OB11PostSendMsg } from '../../types';
 
-
+// 未检测参数
 class SendGroupMsg extends SendMsg {
   actionName = ActionName.SendGroupMsg;
 

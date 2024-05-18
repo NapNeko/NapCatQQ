@@ -6,17 +6,23 @@ import { ChatType, SendFileElement } from '@/core/entities';
 import fs from 'fs';
 import { NTQQMsgApi } from '@/core/apis/msg';
 import { uri2local } from '@/common/utils/file';
+import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+const SchemaData = {
+  type: 'object',
+  properties: {
+    group_id: { type: 'number' },
+    file: { type: 'string' },
+    name: { type: 'string' },
+    folder: { type: 'string' }
+  },
+  required: ['group_id', 'file', 'name', 'folder']
+} as const satisfies JSONSchema;
 
-interface Payload {
-  group_id: number;
-  file: string;
-  name: string;
-  folder: string;
-}
+type Payload = FromSchema<typeof SchemaData>;
 
 export default class GoCQHTTPUploadGroupFile extends BaseAction<Payload, null> {
   actionName = ActionName.GoCQHTTP_UploadGroupFile;
-
+  PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<null> {
     const group = await getGroup(payload.group_id.toString());
     if (!group) {
