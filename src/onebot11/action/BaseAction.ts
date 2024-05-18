@@ -9,13 +9,14 @@ class BaseAction<PayloadType, ReturnDataType> {
   private validate: any = undefined;
   PayloadSchema: any = undefined;
   protected async check(payload: PayloadType): Promise<BaseCheckResult> {
+    if (this.PayloadSchema) {
+      this.validate = new Ajv().compile(this.PayloadSchema);
+    }
     if (this.validate && !this.validate(payload)) {
       return {
         valid: false,
         message: this.validate.errors?.map((e: { message: any; }) => e.message).join(',') as string
       }
-    } else if (this.PayloadSchema) {
-      this.validate = new Ajv().compile(this.PayloadSchema);
     }
     return {
       valid: true
