@@ -127,6 +127,7 @@ export class NapCatOnebot11 {
     // BuddyListener
     const buddyListener = new BuddyListener();
     buddyListener.onBuddyReqChange = ((req) => {
+      //从这里获取?好友请求
       this.postFriendRequest(req.buddyReqs).then().catch(logError);
     });
     napCatCore.addListener(buddyListener);
@@ -298,7 +299,7 @@ export class NapCatOnebot11 {
         // if (notify.user2.uid) {
         //     member2 = await getGroupMember(notify.group.groupCode, null, notify.user2.uid);
         // }
-        
+
         if ([GroupNotifyTypes.ADMIN_SET, GroupNotifyTypes.ADMIN_UNSET, GroupNotifyTypes.ADMIN_UNSET_OTHER].includes(notify.type)) {
           const member1 = await getGroupMember(notify.group.groupCode, notify.user1.uid);
           logDebug('有管理员变动通知');

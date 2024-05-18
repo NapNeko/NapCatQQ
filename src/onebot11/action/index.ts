@@ -57,6 +57,7 @@ import { SendGroupNotice } from './go-cqhttp/SendGroupNotice';
 import { Reboot, RebootNormol } from './system/Reboot';
 import { GetGroupHonorInfo } from './go-cqhttp/GetGroupHonorInfo';
 import { GoCQHTTHandleQuickAction } from './go-cqhttp/QuickAction';
+import { GetGroupSystemMsg } from './group/GetGroupSystemMsg';
 
 export const actionHandlers = [
   new RebootNormol(),
@@ -118,7 +119,8 @@ export const actionHandlers = [
   new GoCQHTTPGetGroupMsgHistory(),
   new GoCQHTTGetForwardMsgAction(),
   new GetFriendMsgHistory(),
-  new GoCQHTTHandleQuickAction()
+  new GoCQHTTHandleQuickAction(),
+  new GetGroupSystemMsg()
 ];
 
 function initActionMap() {

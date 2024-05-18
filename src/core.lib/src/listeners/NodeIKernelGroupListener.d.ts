@@ -2,7 +2,7 @@ import { Group, GroupMember, GroupNotify } from '@/core/entities';
 interface IGroupListener {
     onGroupListUpdate(updateType: number, groupList: Group[]): void;
     onGroupExtListUpdate(...args: unknown[]): void;
-    onGroupSingleScreenNotifies(arg1: boolean, arg2: string, NotifyList: GroupNotify[]): void;
+    onGroupSingleScreenNotifies(doubt: boolean, seq: string, notifies: GroupNotify[]): void;
     onGroupNotifiesUpdated(dboubt: boolean, notifies: GroupNotify[]): void;
     onGroupNotifiesUnreadCountUpdated(...args: unknown[]): void;
     onGroupDetailInfoChange(...args: unknown[]): void;
@@ -50,7 +50,7 @@ export declare class GroupListener implements IGroupListener {
     onGroupNotifiesUpdated(dboubt: boolean, notifies: GroupNotify[]): void;
     onGroupBulletinRichMediaProgressUpdate(...args: unknown[]): void;
     onGroupNotifiesUnreadCountUpdated(...args: unknown[]): void;
-    onGroupSingleScreenNotifies(arg1: boolean, arg2: string, NotifyList: GroupNotify[]): void;
+    onGroupSingleScreenNotifies(doubt: boolean, seq: string, notifies: GroupNotify[]): void;
     onGroupsMsgMaskResult(...args: unknown[]): void;
     onGroupStatisticInfoChange(...args: unknown[]): void;
     onJoinGroupNotify(...args: unknown[]): void;
@@ -82,7 +82,7 @@ export declare class DebugGroupListener implements IGroupListener {
     onGroupNotifiesUpdated(...args: unknown[]): void;
     onGroupBulletinRichMediaProgressUpdate(...args: unknown[]): void;
     onGroupNotifiesUnreadCountUpdated(...args: unknown[]): void;
-    onGroupSingleScreenNotifies(arg1: boolean, arg2: string, NotifyList: GroupNotify[]): void;
+    onGroupSingleScreenNotifies(doubt: boolean, seq: string, notifies: GroupNotify[]): void;
     onGroupsMsgMaskResult(...args: unknown[]): void;
     onGroupStatisticInfoChange(...args: unknown[]): void;
     onJoinGroupNotify(...args: unknown[]): void;
