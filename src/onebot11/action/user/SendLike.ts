@@ -3,15 +3,22 @@ import BaseAction from '../BaseAction';
 import { getFriend, getUidByUin, uid2UinMap } from '@/core/data';
 import { ActionName } from '../types';
 import { log, logDebug } from '@/common/utils/log';
+import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
-interface Payload {
-  user_id: number,
-  times: number
-}
+const SchemaData = {
+  type: 'object',
+  properties: {
+    user_id: { type: 'number' },
+    times: { type: 'number' }
+  },
+  required: ['user_id', 'times']
+} as const satisfies JSONSchema;
+
+type Payload = FromSchema<typeof SchemaData>;
 
 export default class SendLike extends BaseAction<Payload, null> {
   actionName = ActionName.SendLike;
-
+  PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<null> {
     logDebug('点赞参数', payload);
     try {

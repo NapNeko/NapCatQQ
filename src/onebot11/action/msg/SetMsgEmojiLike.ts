@@ -2,15 +2,22 @@ import { ActionName } from '../types';
 import BaseAction from '../BaseAction';
 import { dbUtil } from '@/core/utils/db';
 import { NTQQMsgApi } from '@/core/apis';
+import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
-interface Payload {
-    message_id: number,
-    emoji_id: string
-}
+const SchemaData = {
+  type: 'object',
+  properties: {
+    message_id: { type: 'number' },
+    emoji_id: { type: 'string' }
+  },
+  required: ['message_id', 'emoji_id']
+} as const satisfies JSONSchema;
+
+type Payload = FromSchema<typeof SchemaData>;
 
 export class SetMsgEmojiLike extends BaseAction<Payload, any> {
   actionName = ActionName.SetMsgEmojiLike;
-
+  PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
     const msg = await dbUtil.getMsgByShortId(payload.message_id);
     if (!msg) {

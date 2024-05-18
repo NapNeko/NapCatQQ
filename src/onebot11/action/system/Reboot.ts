@@ -2,10 +2,17 @@ import { rebootWithNormolLogin, rebootWithQuickLogin } from '@/common/utils/rebo
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { selfInfo } from '@/core/data';
+import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
-interface Payload {
-    delay: number
-}
+const SchemaData = {
+    type: 'object',
+    properties: {
+        delay: { type: 'number' }
+    },
+    required: ['delay']
+} as const satisfies JSONSchema;
+
+type Payload = FromSchema<typeof SchemaData>;
 
 export class Reboot extends BaseAction<Payload, null> {
     actionName = ActionName.Reboot;

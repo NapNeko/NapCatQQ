@@ -2,15 +2,21 @@ import { NTQQMsgApi } from '@/core/apis';
 import { ActionName } from '../types';
 import BaseAction from '../BaseAction';
 import { dbUtil } from '@/core/utils/db';
-import { napCatCore } from '@/core';
+import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
-interface Payload {
-  message_id: number
-}
+const SchemaData = {
+  type: 'object',
+  properties: {
+    message_id: { type: 'number' },
+  },
+  required: ['message_id']
+} as const satisfies JSONSchema;
+
+type Payload = FromSchema<typeof SchemaData>;
 
 class DeleteMsg extends BaseAction<Payload, void> {
   actionName = ActionName.DeleteMsg;
-
+  PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
     const msg = await dbUtil.getMsgByShortId(payload.message_id);
     if (msg) {
