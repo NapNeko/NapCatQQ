@@ -81,7 +81,16 @@ async function createContext(payload: OB11PostSendMsg): Promise<{
   // not message_type.
   // This redundant design of Ob11 here should be blamed.
 
-  if (payload.user_id) { // take this as a private message
+  if (payload.group_id) { // take this as a group message
+    const group = (await getGroup(payload.group_id))!; // checked before
+    return {
+      peer: {
+        chatType: ChatType.group,
+        peerUid: group.groupCode
+      },
+      group: group,
+    };
+  } else if (payload.user_id) { // take this as a private message
     const friend = await getFriend(payload.user_id.toString());
     if (!friend) {
       if (ALLOW_SEND_TEMP_MSG) {
@@ -100,15 +109,6 @@ async function createContext(payload: OB11PostSendMsg): Promise<{
         chatType: ChatType.friend,
         peerUid: friend.uid
       },
-    };
-  } else if (payload.group_id) { // take this as a group message
-    const group = (await getGroup(payload.group_id))!; // checked before
-    return {
-      peer: {
-        chatType: ChatType.group,
-        peerUid: group.groupCode
-      },
-      group: group,
     };
   }
   throw '请指定 group_id 或 user_id';
