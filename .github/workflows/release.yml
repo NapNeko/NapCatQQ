@@ -121,7 +121,7 @@ jobs:
       run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
       
     - name: Clone Changes Log
-      run: curl -o CHANGELOG.md https://fastly.jsdelivr.net/gh/NapNeko/NapCatQQ@main/docs/CHANGELOG.v${{ env.VERSION }}.md
+      run: curl -o CHANGELOG.md https://fastly.jsdelivr.net/gh/NapNeko/NapCatQQ@main/docs/changelogs/CHANGELOG.v${{ env.VERSION }}.md
         
     - name: Create Release Draft and Upload Artifacts
       uses: softprops/action-gh-release@v1
