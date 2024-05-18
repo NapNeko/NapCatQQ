@@ -3,18 +3,25 @@ import { OB11Constructor } from '../../constructor';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { dbUtil } from '@/core/utils/db';
+import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
-
-export interface PayloadType {
-  message_id: number
-}
 
 export type ReturnDataType = OB11Message
 
-class GetMsg extends BaseAction<PayloadType, OB11Message> {
-  actionName = ActionName.GetMsg;
+const SchemaData = {
+  type: 'object',
+  properties: {
+    message_id: { type: 'number' },
+  },
+  required: ['message_id']
+} as const satisfies JSONSchema;
 
-  protected async _handle(payload: PayloadType) {
+type Payload = FromSchema<typeof SchemaData>;
+
+class GetMsg extends BaseAction<Payload, OB11Message> {
+  actionName = ActionName.GetMsg;
+  PayloadSchema = SchemaData;
+  protected async _handle(payload: Payload) {
     // log("history msg ids", Object.keys(msgHistory));
     if (!payload.message_id) {
       throw Error('参数message_id不能为空');

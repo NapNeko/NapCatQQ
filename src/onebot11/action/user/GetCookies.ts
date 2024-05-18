@@ -4,15 +4,23 @@ import { friends, selfInfo } from '@/core/data';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { NTQQUserApi } from '@/core/apis';
-interface Payload {
-  domain: string
-}
+import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 interface Response {
   cookies: string
 }
+const SchemaData = {
+  type: 'object',
+  properties: {
+    domain: { type: 'string' }
+  },
+  required: ['domain']
+} as const satisfies JSONSchema;
+
+type Payload = FromSchema<typeof SchemaData>;
+
 export class GetCookies extends BaseAction<Payload, Response> {
   actionName = ActionName.GetCookies;
-
+  PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
     if (!payload.domain){
       throw new Error('缺少参数 domain');

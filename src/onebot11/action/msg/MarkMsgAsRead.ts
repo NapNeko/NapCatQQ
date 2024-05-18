@@ -3,15 +3,20 @@ import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { NTQQMsgApi } from '@/core/apis';
 import { getFriend, getUidByUin } from '@/core/data';
+import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
-interface Payload {
-  user_id: number;
-  group_id?: number;
-}
+const SchemaData = {
+  type: 'object',
+  properties: {
+    user_id: { type: 'number' },
+    group_id: { type: 'number' }
+  }
+} as const satisfies JSONSchema;
 
-class MarkMsgAsRead extends BaseAction<Payload, null> {
+type PlayloadType = FromSchema<typeof SchemaData>;
 
-  async getPeer(payload: Payload): Promise<Peer> {
+class MarkMsgAsRead extends BaseAction<PlayloadType, null> {
+  async getPeer(payload: PlayloadType): Promise<Peer> {
     if (payload.user_id) {
       const peerUid = getUidByUin(payload.user_id.toString());
       if (!peerUid) {
@@ -25,7 +30,7 @@ class MarkMsgAsRead extends BaseAction<Payload, null> {
     }
     return { chatType: ChatType.group, peerUid: payload.group_id.toString() };
   }
-  protected async _handle(payload: Payload): Promise<null> {
+  protected async _handle(payload: PlayloadType): Promise<null> {
     // 调用API
     const ret = await NTQQMsgApi.setMsgRead(await this.getPeer(payload));
     if (ret.result != 0) {
@@ -36,9 +41,11 @@ class MarkMsgAsRead extends BaseAction<Payload, null> {
 }
 // 以下为非标准实现
 export class MarkPrivateMsgAsRead extends MarkMsgAsRead {
+  PayloadSchema = SchemaData;
   actionName = ActionName.MarkPrivateMsgAsRead;
 }
 export class MarkGroupMsgAsRead extends MarkMsgAsRead {
+  PayloadSchema = SchemaData;
   actionName = ActionName.MarkGroupMsgAsRead;
 }
 
