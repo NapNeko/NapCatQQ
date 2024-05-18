@@ -13,7 +13,7 @@ const SchemaData = {
     group_id: { type: 'number' },
     no_cache: { type: ['boolean', 'string'] },
   },
-  required: ['group_id', 'user_id']
+  required: ['group_id']
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
