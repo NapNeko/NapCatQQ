@@ -1,21 +1,23 @@
-import { OB11User } from '../../types';
-import { OB11Constructor } from '../../constructor';
-import { friends } from '@/core/data';
+
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { NTQQUserApi, WebApi, WebHonorType } from '@/core/apis';
-interface Payload {
-  group_id: number,
-  type?: WebHonorType
-}
+import { WebApi, WebHonorType } from '@/core/apis';
+import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+const SchemaData = {
+  type: 'object',
+  properties: {
+    group_id: { type: 'number' },
+    type: { enum: [WebHonorType.ALL, WebHonorType.EMOTION, WebHonorType.LEGEND, WebHonorType.PERFROMER, WebHonorType.STORONGE_NEWBI, WebHonorType.TALKACTIVE] }
+  },
+  required: ['group_id']
+} as const satisfies JSONSchema;
+// enum是不是有点抽象
+type Payload = FromSchema<typeof SchemaData>;
+
 export class GetGroupHonorInfo extends BaseAction<Payload, Array<any>> {
   actionName = ActionName.GetGroupHonorInfo;
-
+  PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
-    // console.log(await NTQQUserApi.getRobotUinRange());
-    if (!payload.group_id) {
-      throw '缺少参数group_id';
-    }
     if (!payload.type) {
       payload.type = WebHonorType.ALL;
     }
