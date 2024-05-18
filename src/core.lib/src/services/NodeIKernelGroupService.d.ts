@@ -45,9 +45,9 @@ export interface NodeIKernelGroupService {
     createGroupWithMembers(arg: unknown): void;
     quitGroup(groupCode: string): void;
     destroyGroup(groupCode: string): void;
-    getSingleScreenNotifies(groupCode: string, ...args: unknown[]): void;
+    getSingleScreenNotifies(arg1: boolean, arg2: string, arg3: number): Promise<GeneralCallResult>;
     clearGroupNotifies(groupCode: string): void;
-    getGroupNotifiesUnreadCount(groupCode: string): void;
+    getGroupNotifiesUnreadCount(unknown: Boolean): Promise<GeneralCallResult>;
     clearGroupNotifiesUnreadCount(groupCode: string): void;
     operateSysNotify(doubt: boolean, operateMsg: {
         operateType: GroupRequestOperateTypes;

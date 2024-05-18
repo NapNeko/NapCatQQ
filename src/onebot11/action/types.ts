@@ -77,5 +77,6 @@ export enum ActionName {
     GoCQHTTP_DownloadFile = 'download_file',
     GoCQHTTP_GetGroupMsgHistory = 'get_group_msg_history',
     GoCQHTTP_GetForwardMsg = 'get_forward_msg',
-    GetFriendMsgHistory = 'get_friend_msg_history'
+    GetFriendMsgHistory = 'get_friend_msg_history',
+    GetGroupSystemMsg = "get_group_system_msg"
 }
