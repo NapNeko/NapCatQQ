@@ -3,18 +3,23 @@ import { GroupRequestOperateTypes } from '@/core/entities';
 import { ActionName } from '../types';
 import { NTQQGroupApi } from '@/core/apis/group';
 import { groupNotifies } from '@/core/data';
+import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
-interface Payload {
-  flag: string,
-  // sub_type: "add" | "invite",
-  // type: "add" | "invite"
-  approve: boolean,
-  reason: string
-}
+const SchemaData = {
+  type: 'object',
+  properties: {
+    flag: { type: 'string' },
+    approve: { type: 'boolean' },
+    reason: { type: 'string' }
+  },
+  required: ['flag', 'approve', 'reson']
+} as const satisfies JSONSchema;
+
+type Payload = FromSchema<typeof SchemaData>;
 
 export default class SetGroupAddRequest extends BaseAction<Payload, null> {
   actionName = ActionName.SetGroupAddRequest;
-
+  PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<null> {
     const flag = payload.flag.toString();
     const approve = payload.approve.toString() === 'true';

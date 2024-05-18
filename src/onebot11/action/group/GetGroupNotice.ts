@@ -1,10 +1,7 @@
 import { WebApi, WebApiGroupNoticeFeed, WebApiGroupNoticeRet } from '@/core/apis/webapi';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-
-interface PayloadType {
-  group_id: number
-}
+import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 interface GroupNotice {
   sender_id: number
   publish_time: number
@@ -17,11 +14,22 @@ interface GroupNotice {
     }>
   }
 }
-type ApiGroupNotice = GroupNotice & WebApiGroupNoticeFeed;
-export class GetGroupNotice extends BaseAction<PayloadType, GroupNotice[]> {
-  actionName = ActionName.GoCQHTTP_GetGroupNotice;
 
-  protected async _handle(payload: PayloadType) {
+const SchemaData = {
+  type: 'object',
+  properties: {
+    group_id: { type: 'number' },
+  },
+  required: ['group_id']
+} as const satisfies JSONSchema;
+
+type Payload = FromSchema<typeof SchemaData>;
+
+type ApiGroupNotice = GroupNotice & WebApiGroupNoticeFeed;
+export class GetGroupNotice extends BaseAction<Payload, GroupNotice[]> {
+  actionName = ActionName.GoCQHTTP_GetGroupNotice;
+  PayloadSchema = SchemaData;
+  protected async _handle(payload: Payload) {
     const group = payload.group_id.toString();
     const ret = await WebApi.getGrouptNotice(group);
     if (!ret) {

@@ -3,15 +3,22 @@ import { OB11Group } from '../../types';
 import { OB11Constructor } from '../../constructor';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
+import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
-interface PayloadType {
-  group_id: number
-}
+const SchemaData = {
+  type: 'object',
+  properties: {
+    group_id: { type: 'number' },
+  },
+  required: ['group_id']
+} as const satisfies JSONSchema;
 
-class GetGroupInfo extends BaseAction<PayloadType, OB11Group> {
+type Payload = FromSchema<typeof SchemaData>;
+
+class GetGroupInfo extends BaseAction<Payload, OB11Group> {
   actionName = ActionName.GetGroupInfo;
-
-  protected async _handle(payload: PayloadType) {
+  PayloadSchema = SchemaData;
+  protected async _handle(payload: Payload) {
     const group = await getGroup(payload.group_id.toString());
     if (group) {
       return OB11Constructor.group(group);
