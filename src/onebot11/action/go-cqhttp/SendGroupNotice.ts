@@ -3,14 +3,21 @@ import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { NTQQGroupApi, WebApi } from '@/core/apis';
 import { unlink } from 'node:fs';
-interface Payload {
-    group_id: string;
-    content: string;
-    image?: string;
-    pinned?: number;
-    confirmRequired?: number;
+import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+const SchemaData = {
+    type: 'object',
+    properties: {
+        group_id: { type: 'number' },
+        content: { type: 'string' },
+        image: { type: 'string' },
+        pinned: { type: 'number' },
+        confirmRequired: { type: 'number' }
+    },
+    required: ['group_id', 'content']
+} as const satisfies JSONSchema;
 
-}
+type Payload = FromSchema<typeof SchemaData>;
+
 export class SendGroupNotice extends BaseAction<Payload, null> {
     actionName = ActionName.GoCQHTTP_SendGroupNotice;
     protected async _handle(payload: Payload) {
@@ -29,7 +36,7 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
                 throw `群公告${payload.image}设置失败,获取资源失败`;
             }
             await checkFileReceived(Image_path, 5000); // 文件不存在QQ会崩溃，需要提前判断
-            let ImageUploadResult = await NTQQGroupApi.uploadGroupBulletinPic(payload.group_id, Image_path);
+            let ImageUploadResult = await NTQQGroupApi.uploadGroupBulletinPic(payload.group_id.toString(), Image_path);
             if (ImageUploadResult.errCode != 0) {
                 throw `群公告${payload.image}设置失败,图片上传失败`;
             }
@@ -46,7 +53,7 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
         if (!payload.confirmRequired) {
             Notice_confirmRequired = 0;
         }
-        let PublishGroupBulletinResult = await NTQQGroupApi.publishGroupBulletin(payload.group_id, payload.content, UploadImage, Notice_Pinned, Notice_confirmRequired);
+        let PublishGroupBulletinResult = await NTQQGroupApi.publishGroupBulletin(payload.group_id.toString(), payload.content, UploadImage, Notice_Pinned, Notice_confirmRequired);
 
         if (PublishGroupBulletinResult.result! = 0) {
             throw `设置群公告失败,错误信息:${PublishGroupBulletinResult.errMsg}`;

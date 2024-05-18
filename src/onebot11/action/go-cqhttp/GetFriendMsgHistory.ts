@@ -7,21 +7,27 @@ import { dbUtil } from '@/core/utils/db';
 import { NTQQMsgApi } from '@/core/apis/msg';
 import { OB11Constructor } from '../../constructor';
 import { logDebug } from '@/common/utils/log';
-
-
-interface Payload {
-    user_id: number
-    message_seq: number,
-    count: number
-}
+import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
 interface Response {
-    messages: OB11Message[];
+  messages: OB11Message[];
 }
+
+const SchemaData = {
+  type: 'object',
+  properties: {
+    user_id: { type: 'number' },
+    message_seq: { type: 'number' },
+    count: { type: 'number' }
+  },
+  required: ['user_id', 'message_seq', 'count']
+} as const satisfies JSONSchema;
+
+type Payload = FromSchema<typeof SchemaData>;
 
 export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
   actionName = ActionName.GetFriendMsgHistory;
-    
+  PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<Response> {
     const uid = getUidByUin(payload.user_id.toString());
     if (!uid) {

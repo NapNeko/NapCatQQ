@@ -7,21 +7,26 @@ import { dbUtil } from '@/core/utils/db';
 import { NTQQMsgApi } from '@/core/apis/msg';
 import { OB11Constructor } from '../../constructor';
 import { logDebug } from '@/common/utils/log';
-
-
-interface Payload {
-  group_id: number
-  message_seq: number,
-  count: number
-}
-
+import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 interface Response {
   messages: OB11Message[];
 }
 
+const SchemaData = {
+  type: 'object',
+  properties: {
+    group_id: { type: 'number' },
+    message_seq: { type: 'number' },
+    count: { type: 'number' }
+  },
+  required: ['group_id', 'message_seq', 'count']
+} as const satisfies JSONSchema;
+
+type Payload = FromSchema<typeof SchemaData>;
+
 export default class GoCQHTTPGetGroupMsgHistory extends BaseAction<Payload, Response> {
   actionName = ActionName.GoCQHTTP_GetGroupMsgHistory;
-
+  PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<Response> {
     const group = await getGroup(payload.group_id.toString());
     if (!group) {
