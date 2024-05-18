@@ -42,13 +42,13 @@ export async function sendMsg(peer: Peer, sendElements: SendMessageElement[], de
   try {
     for (const fileElement of sendElements) {
       if (fileElement.elementType === ElementType.PTT) {
-        totalSize += fs.statSync(fileElement.pttElement.filePath).size
+        totalSize += fs.statSync(fileElement.pttElement.filePath).size;
       }
       if (fileElement.elementType === ElementType.FILE) {
-        totalSize += fs.statSync(fileElement.fileElement.filePath).size
+        totalSize += fs.statSync(fileElement.fileElement.filePath).size;
       }
       if (fileElement.elementType === ElementType.VIDEO) {
-        totalSize += fs.statSync(fileElement.videoElement.filePath).size
+        totalSize += fs.statSync(fileElement.videoElement.filePath).size;
       }
       if (fileElement.elementType === ElementType.PIC) {
         totalSize += fs.statSync(fileElement.picElement.sourcePath).size
@@ -57,7 +57,7 @@ export async function sendMsg(peer: Peer, sendElements: SendMessageElement[], de
     //且 PredictTime ((totalSize / 1024 / 512) * 1000)不等于Nan
     let PredictTime = totalSize / 1024 / 512 * 1000;
     if (!Number.isNaN(PredictTime)) {
-      timeout += PredictTime// 10S Basic Timeout + PredictTime( For File 512kb/s )
+      timeout += PredictTime// 5S Basic Timeout + PredictTime( For File 512kb/s )
     }
   } catch (e) {
     logError("发送消息计算预计时间异常", e);
