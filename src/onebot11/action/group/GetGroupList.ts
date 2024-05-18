@@ -11,7 +11,7 @@ import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 const SchemaData = {
   type: 'object',
   properties: {
-    no_cache: { type: 'boolean' },
+    no_cache: { type: ['boolean', 'string'] },
   }
 } as const satisfies JSONSchema;
 
@@ -22,7 +22,7 @@ class GetGroupList extends BaseAction<Payload, OB11Group[]> {
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
     let groupList: Group[] = Array.from(groups.values());
-    if (groupList.length === 0 || payload?.no_cache === true /*|| payload.no_cache === 'true'*/) {
+    if (groupList.length === 0 || payload?.no_cache === true || payload.no_cache === 'true') {
       groupList = await NTQQGroupApi.getGroups(true);
       // log('get groups', groups);
     }

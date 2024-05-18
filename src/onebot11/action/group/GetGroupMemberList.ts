@@ -11,7 +11,7 @@ const SchemaData = {
   type: 'object',
   properties: {
     group_id: { type: 'number' },
-    no_cache: { type: 'boolean' },
+    no_cache: { type: ['boolean', 'string'] },
   },
   required: ['group_id', 'user_id']
 } as const satisfies JSONSchema;
@@ -28,7 +28,7 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
     if (!group) {
       throw (`群${payload.group_id}不存在`);
     }
-    if (payload.no_cache == true /*|| payload.no_cache === 'true'*/) {
+    if (payload.no_cache == true || payload.no_cache === 'true') {
       // webGroupMembers = await WebApi.getGroupMembers(payload.group_id.toString());
       const _groupMembers = await NTQQGroupApi.getGroupMembers(payload.group_id.toString());
       groupMembers.set(group.groupCode, _groupMembers);

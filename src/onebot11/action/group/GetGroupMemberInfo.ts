@@ -16,7 +16,7 @@ const SchemaData = {
   properties: {
     group_id: { type: 'number' },
     user_id: { type: 'number' },
-    no_cache: { type: 'boolean' },
+    no_cache: { type: ['boolean', 'string'] },
   },
   required: ['group_id', 'user_id']
 } as const satisfies JSONSchema;
