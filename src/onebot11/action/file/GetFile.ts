@@ -5,9 +5,11 @@ import { ob11Config } from '@/onebot11/config';
 import { log, logDebug } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';
 import { uri2local } from '@/common/utils/file';
-import { ActionName } from '../types';
+import { ActionName, BaseCheckResult } from '../types';
 import { FileElement, RawMessage, VideoElement } from '@/core/entities';
 import { NTQQFileApi } from '@/core/apis';
+import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import Ajv from 'ajv';
 
 export interface GetFilePayload {
   file: string; // 文件名或者fileUuid
@@ -20,8 +22,16 @@ export interface GetFileResponse {
   file_name?: string;
   base64?: string;
 }
+const GetFileBase_PayloadSchema = {
+  type: 'object',
+  properties: {
+    file: { type: 'string' }
+  },
+  required: ['file']
+} as const satisfies JSONSchema;
 
 export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
+  PayloadSchema: any = GetFileBase_PayloadSchema;
   private getElement(msg: RawMessage): { id: string, element: VideoElement | FileElement } {
     let element = msg.elements.find(e => e.fileElement);
     if (!element) {
@@ -34,7 +44,6 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
     }
     return { id: element.elementId, element: element.fileElement };
   }
-
   protected async _handle(payload: GetFilePayload): Promise<GetFileResponse> {
     let cache = await dbUtil.getFileCacheByName(payload.file);
     if (!cache) {
@@ -102,13 +111,25 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
   }
 }
 
+const GetFile_PayloadSchema = {
+  type: 'object',
+  properties: {
+    file_id: { type: 'string' },
+    file: { type: 'string' }
+  },
+  required: ['file_id']
+} as const satisfies JSONSchema;
+
+type GetFile_Payload_Internal = FromSchema<typeof GetFile_PayloadSchema>;
+
+interface GetFile_Payload extends GetFile_Payload_Internal {
+  file: string
+}
+
 export default class GetFile extends GetFileBase {
   actionName = ActionName.GetFile;
-
-  protected async _handle(payload: { file_id: string, file: string }): Promise<GetFileResponse> {
-    if (!payload.file_id) {
-      throw new Error('file_id 不能为空');
-    }
+  PayloadSchema = GetFile_PayloadSchema;
+  protected async _handle(payload: GetFile_Payload): Promise<GetFileResponse> {
     payload.file = payload.file_id;
     return super._handle(payload);
   }

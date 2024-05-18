@@ -1,16 +1,25 @@
 import { ActionName, BaseCheckResult } from './types';
 import { OB11Response } from './OB11Response';
 import { OB11Return } from '../types';
-
 import { log, logError } from '../../common/utils/log';
+import Ajv from 'ajv';
 
 class BaseAction<PayloadType, ReturnDataType> {
   actionName!: ActionName;
-
+  private validate: any = undefined;
+  PayloadSchema: any = undefined;
   protected async check(payload: PayloadType): Promise<BaseCheckResult> {
+    if (this.validate && !this.validate(payload)) {
+      return {
+        valid: false,
+        message: this.validate.errors?.map((e: { message: any; }) => e.message).join(',') as string
+      }
+    } else if (this.PayloadSchema) {
+      this.validate = new Ajv().compile(this.PayloadSchema);
+    }
     return {
-      valid: true,
-    };
+      valid: true
+    }
   }
 
   public async handle(payload: PayloadType): Promise<OB11Return<ReturnDataType | null>> {

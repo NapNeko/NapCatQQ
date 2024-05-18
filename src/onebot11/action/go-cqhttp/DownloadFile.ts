@@ -1,25 +1,46 @@
 import BaseAction from '../BaseAction';
-import { ActionName } from '../types';
+import { ActionName, BaseCheckResult } from '../types';
 import fs from 'fs';
 import { join as joinPath } from 'node:path';
 import { calculateFileMD5, getTempDir, httpDownload } from '@/common/utils/file';
 import { v4 as uuid4 } from 'uuid';
-
-interface Payload {
-  thread_count?: number;
-  url?: string;
-  base64?: string;
-  name?: string;
-  headers?: string | string[];
-}
-
+import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import Ajv from 'ajv';
 interface FileResponse {
   file: string;
 }
+const PayloadSchema = {
+  type: 'object',
+  properties: {
+    thread_count: { type: 'number' },
+    url: { type: 'string' },
+    base64: { type: 'string' },
+    name: { type: 'string' },
+    headers: {
+      type: "array",
+      items: {
+        type: "string"
+      }
+    }
+  },
+} as const satisfies JSONSchema;
+
+type Payload = FromSchema<typeof PayloadSchema>;
 
 export default class GoCQHTTPDownloadFile extends BaseAction<Payload, FileResponse> {
   actionName = ActionName.GoCQHTTP_DownloadFile;
-
+  validateDownload = new Ajv().compile(PayloadSchema);
+  // 这里重写是为了兼容 headers可能出现 string string[]
+  protected async check(payload: Payload): Promise<BaseCheckResult> {
+    if (payload.headers) {
+      // 如果存在headers 为数组则开始兼容string string[]
+      payload.headers = payload?.headers && Array.isArray(payload.headers) ? payload.headers : [payload.headers as unknown as string];
+    }
+    if (!this.validateDownload(payload)) {
+      return { valid: false, message: this.validateDownload.errors?.map(e => e.message).join(', ') as string };
+    }
+    return { valid: true };
+  }
   protected async _handle(payload: Payload): Promise<FileResponse> {
     const isRandomName = !payload.name;
     const name = payload.name || uuid4();
