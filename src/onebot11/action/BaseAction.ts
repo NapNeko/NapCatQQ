@@ -10,7 +10,7 @@ class BaseAction<PayloadType, ReturnDataType> {
   PayloadSchema: any = undefined;
   protected async check(payload: PayloadType): Promise<BaseCheckResult> {
     if (this.PayloadSchema) {
-      this.validate = new Ajv().compile(this.PayloadSchema);
+      this.validate = new Ajv({ allowUnionTypes: true }).compile(this.PayloadSchema);
     }
     if (this.validate && !this.validate(payload)) {
       const errors = this.validate.errors as ErrorObject[];
