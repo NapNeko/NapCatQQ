@@ -56,6 +56,7 @@ import { GetFriendWithCategory } from './extends/GetFriendWithCategory';
 import { SendGroupNotice } from './go-cqhttp/SendGroupNotice';
 import { Reboot, RebootNormol } from './system/Reboot';
 import { GetGroupHonorInfo } from './go-cqhttp/GetGroupHonorInfo';
+import { GoCQHTTHandleQuickAction } from './go-cqhttp/QuickAction';
 
 export const actionHandlers = [
   new RebootNormol(),
@@ -116,7 +117,8 @@ export const actionHandlers = [
   new GoCQHTTPUploadGroupFile(),
   new GoCQHTTPGetGroupMsgHistory(),
   new GoCQHTTGetForwardMsgAction(),
-  new GetFriendMsgHistory()
+  new GetFriendMsgHistory(),
+  new GoCQHTTHandleQuickAction()
 ];
 
 function initActionMap() {
