@@ -8,8 +8,8 @@ interface Payload{
   operation: QuickAction
 }
 
-export class GoCQHTTHandleQuickOperation extends BaseAction<Payload, null>{
-  actionName = ActionName.GoCQHTTP_HandleQuickOperation
+export class GoCQHTTHandleQuickAction extends BaseAction<Payload, null>{
+  actionName = ActionName.GoCQHTTP_HandleQuickAction
   protected async _handle(payload: Payload): Promise<null> {
     handleQuickOperation(payload.context, payload.operation).then().catch(log);
     return null
