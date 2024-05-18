@@ -11,7 +11,7 @@ import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 const SchemaData = {
   type: 'object',
   properties: {
-    no_cache: { type: 'boolean' },
+    no_cache: { type: ['boolean', 'string'] },
   }
 } as const satisfies JSONSchema;
 
@@ -20,7 +20,7 @@ export default class GetFriendList extends BaseAction<Payload, OB11User[]> {
   actionName = ActionName.GetFriendList;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
-    if (friends.size === 0 || payload?.no_cache === true /*|| payload?.no_cache === 'true'*/) {
+    if (friends.size === 0 || payload?.no_cache === true || payload?.no_cache === 'true') {
       const _friends = await NTQQFriendApi.getFriends(true);
       // log('强制刷新好友列表，结果: ', _friends)
       if (_friends.length > 0) {
