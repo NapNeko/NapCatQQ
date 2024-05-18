@@ -2,20 +2,24 @@ import { ActionName, BaseCheckResult } from './types';
 import { OB11Response } from './OB11Response';
 import { OB11Return } from '../types';
 import { log, logError } from '../../common/utils/log';
-import Ajv from 'ajv';
+import Ajv, { ErrorObject, ValidateFunction } from 'ajv';
 
 class BaseAction<PayloadType, ReturnDataType> {
   actionName!: ActionName;
-  private validate: any = undefined;
+  private validate: undefined | ValidateFunction<any> = undefined;
   PayloadSchema: any = undefined;
   protected async check(payload: PayloadType): Promise<BaseCheckResult> {
     if (this.PayloadSchema) {
       this.validate = new Ajv().compile(this.PayloadSchema);
     }
     if (this.validate && !this.validate(payload)) {
+      const errors = this.validate.errors as ErrorObject[];
+      const errorMessages: string[] = errors.map((e) => {
+        return `Key: ${e.instancePath.split('/').slice(1).join('.')}, Message: ${e.message}`;
+      });
       return {
         valid: false,
-        message: this.validate.errors?.map((e: { message: any; }) => e.message).join(',') as string
+        message: errorMessages.join('\n') as string || '未知错误'
       }
     }
     return {
