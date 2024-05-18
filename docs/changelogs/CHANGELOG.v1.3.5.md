@@ -13,5 +13,5 @@ QQ Version: Windows 9.9.9-23424 / Linux 3.2.7-23361
 * 支持WebUi热重载
 * 新增启动输出WEBUI秘钥
 * 新增群荣誉信息 /get_group_honor_info
-
+* 支持获取群系统消息 /get_group_system_msg
 新增的 API 详细见[API文档](https://napneko.github.io/zh-CN/develop/extends_api)
