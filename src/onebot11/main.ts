@@ -31,8 +31,7 @@ import { OB11GroupRecallNoticeEvent } from '@/onebot11/event/notice/OB11GroupRec
 import { logMessage, logNotice, logRequest } from '@/onebot11/log';
 import { OB11Message } from '@/onebot11/types';
 import { OB11LifeCycleEvent } from './event/meta/OB11LifeCycleEvent';
-
-
+import { Data as SysData } from '@/proto/SysMessage'
 export class NapCatOnebot11 {
   private bootTime: number = Date.now() / 1000;  // 秒
 
@@ -71,19 +70,26 @@ export class NapCatOnebot11 {
     }
     // MsgListener
     const msgListener = new MsgListener();
-    msgListener.onRecvSysMsg = (protobuf: number[]) => {
-      // todo: 解码protobuf，这里可以拿到戳一戳，但是群戳一戳只有群号
-      const buffer = Buffer.from(protobuf);
-      // 转换为十六进制字符串
-      const hexString = protobuf.map(byte => {
-        // 将负数转换为补码表示的正数
-        byte = byte < 0 ? 256 + byte : byte;
-        // 转换为十六进制，确保结果为两位数
-        return ('0' + byte.toString(16)).slice(-2);
-      }).join('');
-      // console.log('ob11 onRecvSysMsg', hexString, Date.now() / 1000);
-      // console.log(buffer.toString());
-      // console.log('ob11 onRecvSysMsg', JSON.stringify(msg, null, 2));
+    msgListener.onRecvSysMsg = (protobufData: number[]) => {
+      // let Data: Data = {
+      //   header: {
+      //     GroupNumber: 0,
+      //     GroupString: '',
+      //     QQ: 0,
+      //     Uid: '',
+      //   },
+      //   Body: {
+      //     MsgType: 0,
+      //     SubType_0: 0,
+      //     SubType_1: 0,
+      //     MsgSeq: 0,
+      //     Time: 0,
+      //     MsgID: 0,
+      //     Other: 0,
+      //   }
+      // };
+      let sysMsg = SysData.fromBinary(Buffer.from(protobufData));
+      //onsole.log(sysMsg);
     };
     msgListener.onKickedOffLine = (Info: KickedOffLineInfo) => {
       // 下线通知
