@@ -32,6 +32,7 @@ import { logMessage, logNotice, logRequest } from '@/onebot11/log';
 import { OB11Message } from '@/onebot11/types';
 import { OB11LifeCycleEvent } from './event/meta/OB11LifeCycleEvent';
 import { Data as SysData } from '@/proto/SysMessage'
+import { OB11FriendPokeEvent, OB11GroupPokeEvent } from './event/notice/OB11PokeEvent';
 export class NapCatOnebot11 {
   private bootTime: number = Date.now() / 1000;  // 秒
 
@@ -95,14 +96,20 @@ export class NapCatOnebot11 {
         let MsgType = sysMsg.body[0].msgType;
         let subType0 = sysMsg.body[0].subType0;
         let subType1 = sysMsg.body[0].subType1;
+        let pokeEvent: OB11FriendPokeEvent | OB11GroupPokeEvent
         if (MsgType == 528 && subType0 == 290) {
           log("[私聊] 用户 ", peeruin, " 对你戳一戳");
+          pokeEvent = new OB11GroupPokeEvent(peeruin);
+          postOB11Event(pokeEvent)
           //私聊戳一戳
         }
         if (MsgType == 732 && subType0 == 20) {
           log("[群聊] 群组 ", peeruin, " 戳一戳");
+          pokeEvent = new OB11FriendPokeEvent(peeruin);
+          postOB11Event(pokeEvent)
           //群聊戳一戳
         }
+
       } catch (e) {
         log("解析SysMsg异常", e);
         // console.log(e);
