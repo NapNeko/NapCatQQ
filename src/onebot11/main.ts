@@ -109,7 +109,6 @@ export class NapCatOnebot11 {
           postOB11Event(pokeEvent)
           //群聊戳一戳
         }
-
       } catch (e) {
         log("解析SysMsg异常", e);
         // console.log(e);
