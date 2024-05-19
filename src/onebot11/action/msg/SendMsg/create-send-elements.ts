@@ -103,12 +103,16 @@ const _handlers: {
 
   // File service
 
-  [OB11MessageDataType.image]: async (sendMsg, context) =>
-    SendMsgElementConstructor.pic(
+  [OB11MessageDataType.image]: async (sendMsg, context) => {
+    let PicEle = await SendMsgElementConstructor.pic(
       (await handleOb11FileLikeMessage(sendMsg, context)).path,
       sendMsg.data.summary || '',
       sendMsg.data.subType || 0
-    ), // currently not supported
+    );
+    context.deleteAfterSentFiles.push(PicEle.picElement.sourcePath);
+    return PicEle;
+  }
+  , // currently not supported
 
   [OB11MessageDataType.file]: async (sendMsg, context) => {
     const { path, fileName } = await handleOb11FileLikeMessage(sendMsg, context);

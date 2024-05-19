@@ -70,7 +70,7 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
       // 自定义的消息
       // 提取消息段，发给自己生成消息id
       try {
-        const { sendElements, deleteAfterSentFiles } = await createSendElements(normalize(messageNode.data.content), group);
+        const { sendElements } = await createSendElements(normalize(messageNode.data.content), group);
         logDebug('开始生成转发节点', sendElements);
         const sendElementsSplit: SendMessageElement[][] = [];
         let splitIndex = 0;
@@ -102,9 +102,6 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
           nodeMsgIds.push(result.msgId);
           logDebug('转发节点生成成功', result.msgId);
         }
-        deleteAfterSentFiles.map(f => fs.unlink(f, () => {
-        }));
-
       } catch (e) {
         logDebug('生成转发消息节点失败', e);
       }
