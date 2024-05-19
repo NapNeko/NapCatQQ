@@ -49,6 +49,7 @@ export class ReverseWebsocket {
       return wsReply(this.websocket!, OB11Response.error('不支持的api ' + receiveData.action, 1404, echo));
     }
     try {
+      receiveData.params = (receiveData?.params) ? receiveData.params : {};//兼容类型验证
       const handleResult = await action.websocketHandle(receiveData.params, echo);
       wsReply(this.websocket!, handleResult);
     } catch (e) {
