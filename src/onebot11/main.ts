@@ -99,13 +99,13 @@ export class NapCatOnebot11 {
         let pokeEvent: OB11FriendPokeEvent | OB11GroupPokeEvent
         if (MsgType == 528 && subType0 == 290) {
           log("[私聊] 用户 ", peeruin, " 对你戳一戳");
-          pokeEvent = new OB11GroupPokeEvent(peeruin);
+          pokeEvent = new OB11FriendPokeEvent(peeruin);
           postOB11Event(pokeEvent)
           //私聊戳一戳
         }
         if (MsgType == 732 && subType0 == 20) {
           log("[群聊] 群组 ", peeruin, " 戳一戳");
-          pokeEvent = new OB11FriendPokeEvent(peeruin);
+          pokeEvent = new OB11GroupPokeEvent(peeruin);
           postOB11Event(pokeEvent)
           //群聊戳一戳
         }
