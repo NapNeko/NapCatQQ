@@ -24,21 +24,11 @@ export interface ReturnDataType {
 
 // Normalizes a mixed type (CQCode/a single segment/segment array) into a segment array.
 export function normalize(message: OB11MessageMixType, autoEscape = false): OB11MessageData[] {
-  if (typeof message === 'string') {
-    if (autoEscape) {
-      return [{ type: OB11MessageDataType.text, data: { text: message } }];
-    } else {
-      try {
-        return decodeCQCode(message);
-      } catch {
-        return [{ type: OB11MessageDataType.text, data: { text: message } }];
-      }
-    }
-  } else if (Array.isArray(message)) {
-    return message;
-  } else {
-    return [message];
-  }
+  return typeof message === 'string' ? (
+    autoEscape ?
+      [{ type: OB11MessageDataType.text, data: { text: message } }] :
+      decodeCQCode(message)
+  ) : Array.isArray(message) ? message : [message];
 }
 
 export { createSendElements };
