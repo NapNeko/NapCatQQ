@@ -143,7 +143,7 @@ export class NapCatOnebot11 {
       OB11Constructor.message(msg).then((_msg) => {
         _msg.target_id = parseInt(msg.peerUin);
         logMessage(_msg as OB11Message).then().catch(logError);
-      });
+      }).catch(logError);
       if (ob11Config.reportSelfMessage) {
         dbUtil.addMsg(msg).then(id => {
           msg.id = id;
