@@ -45,7 +45,7 @@ class OB11WebsocketServer extends WebsocketServerBase {
       wsClient.on('message', async (msg) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error
-        let receiveData: { action: ActionName, params: any, echo?: any } = { action: '', params: {} };
+        let receiveData: { action: ActionName, params?: any, echo?: any } = { action: '', params: {} };
         let echo = null;
         try {
           receiveData = JSON.parse(msg.toString());
@@ -54,6 +54,7 @@ class OB11WebsocketServer extends WebsocketServerBase {
         } catch (e) {
           return wsReply(wsClient, OB11Response.error('json解析失败，请检查数据格式', 1400, echo));
         }
+        receiveData.params = (receiveData?.params) ? receiveData.params : {};//兼容类型验证
         this.handleAction(wsClient, receiveData.action, receiveData.params, receiveData.echo).then();
       });
     }
