@@ -62,15 +62,15 @@ export async function sendMsg(peer: Peer, sendElements: SendMessageElement[], de
   } catch (e) {
     logError("发送消息计算预计时间异常", e);
   }
-  const returnMsg = await NTQQMsgApi.sendMsg(peer, sendElements, waitComplete, 20000);
+  const returnMsg = await NTQQMsgApi.sendMsg(peer, sendElements, waitComplete, timeout);
   try {
     returnMsg.id = await dbUtil.addMsg(returnMsg, false);
   } catch (e: any) {
     logDebug('发送消息id获取失败', e);
     returnMsg.id = 0;
   }
-  deleteAfterSentFiles.map(f => fs.unlink(f, () => {
-  }));
+  // deleteAfterSentFiles.map(f => fs.unlink(f, () => {
+  // }));
   return returnMsg;
 }
 
