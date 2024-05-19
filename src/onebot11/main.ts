@@ -88,8 +88,26 @@ export class NapCatOnebot11 {
       //     Other: 0,
       //   }
       // };
-      let sysMsg = SysData.fromBinary(Buffer.from(protobufData));
-      //onsole.log(sysMsg);
+      try {
+        let sysMsg = SysData.fromBinary(Buffer.from(protobufData));
+        let peeruin = sysMsg.header[0].groupNumber;
+        let peeruid = sysMsg.header[0].groupString;
+        let MsgType = sysMsg.body[0].msgType;
+        let subType0 = sysMsg.body[0].subType0;
+        let subType1 = sysMsg.body[0].subType1;
+        if (MsgType == 528 && subType0 == 290) {
+          log("[私聊] 用户 ", peeruin, " 对你戳一戳");
+          //私聊戳一戳
+        }
+        if (MsgType == 732 && subType0 == 20) {
+          log("[群聊] 群组 ", peeruin, " 戳一戳");
+          //群聊戳一戳
+        }
+      } catch (e) {
+        log("解析SysMsg异常", e);
+        // console.log(e);
+        //
+      }
     };
     msgListener.onKickedOffLine = (Info: KickedOffLineInfo) => {
       // 下线通知
