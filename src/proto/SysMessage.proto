@@ -5,9 +5,9 @@ message Data{
     repeated Body body = 2;
 }
 message Header {
-        uint32  GroupNumber = 1;
-        string GroupString = 2;
-        uint32   QQ = 5;
+        uint32  PeerNumber = 1;
+        string PeerString = 2;
+        uint32   Uin = 5;
         optional string Uid = 6;
  }  
 message Body {
