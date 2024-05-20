@@ -35,10 +35,13 @@ setTimeout(() => {
 }, 0);
 
 
-class HTTPHeart{
+class HTTPHeart {
   intervalId: NodeJS.Timeout | null = null;
-  start(){
-    const { heartInterval, } = ob11Config;
+  start(NewHeartInterval: number | undefined = undefined) {
+    let { heartInterval } = ob11Config;
+    if (NewHeartInterval && !Number.isNaN(NewHeartInterval)) {
+      heartInterval = NewHeartInterval;
+    }
     if (this.intervalId) {
       clearInterval(this.intervalId);
     }
@@ -48,8 +51,8 @@ class HTTPHeart{
     }, heartInterval);
   }
 
-  stop(){
-    if (this.intervalId){
+  stop() {
+    if (this.intervalId) {
       clearInterval(this.intervalId);
     }
   }

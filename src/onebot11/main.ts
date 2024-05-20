@@ -259,22 +259,44 @@ export class NapCatOnebot11 {
       //   throw new Error('Invalid configuration object');
       // }
 
+      // 先设置
+      ob11Config.save(NewOb11);
+
       const isHttpChanged = !isEqual(NewOb11.http.port, ob11Config.http.port) && NewOb11.http.enable;
+      const isHttpEnableChanged = !isEqual(NewOb11.http.enable, ob11Config.http.enable);
+
+      const isHttpPostChanged = !isEqual(NewOb11.http.postUrls, ob11Config.http.postUrls);
+      const isEnanleHttpPostChanged = !isEqual(NewOb11.http.enablePost, ob11Config.http.enablePost);
+
       const isWsChanged = !isEqual(NewOb11.ws.port, ob11Config.ws.port);
       const isEnableWsChanged = !isEqual(NewOb11.ws.enable, ob11Config.ws.enable);
+
       const isEnableWsReverseChanged = !isEqual(NewOb11.reverseWs.enable, ob11Config.reverseWs.enable);
       const isWsReverseUrlsChanged = !isEqual(NewOb11.reverseWs.urls, ob11Config.reverseWs.urls);
 
+      const isEnableHeartBeatChanged = !isEqual(NewOb11.heartInterval, ob11Config.heartInterval);
+      // http重启逻辑
       if (isHttpChanged) {
         ob11HTTPServer.restart(NewOb11.http.port, NewOb11.http.host);
       }
 
-      if (!NewOb11.http.enable) {
-        ob11HTTPServer.stop();
-      } else {
-        ob11HTTPServer.start(NewOb11.http.port, NewOb11.http.host);
+      if (isHttpEnableChanged) {
+        if (NewOb11.http.enable) {
+          ob11HTTPServer.start(NewOb11.http.port, NewOb11.http.host);
+        } else {
+          ob11HTTPServer.stop();
+        }
       }
+      // http post重启逻辑
 
+      // if(isHttpPostChanged){
+      //   logDebug('http post urls changed, restart http server');
+      // }
+      // if(isEnanleHttpPostChanged){
+      //   logDebug('http post enable changed, restart http server');
+      // }
+
+      // ws重启逻辑
       if (isWsChanged) {
         ob11WebsocketServer.restart(NewOb11.ws.port);
       }
@@ -287,6 +309,7 @@ export class NapCatOnebot11 {
         }
       }
 
+      // 反向ws重启逻辑
       if (isEnableWsReverseChanged) {
         if (NewOb11.reverseWs.enable) {
           ob11ReverseWebsockets.start();
@@ -294,16 +317,6 @@ export class NapCatOnebot11 {
           ob11ReverseWebsockets.stop();
         }
       }
-      if (NewOb11.reverseWs.enable && isWsReverseUrlsChanged) {
-        logDebug('反向ws地址有变化, 重启反向ws服务');
-        ob11ReverseWebsockets.restart();
-      }
-      if (NewOb11.http.enableHeart) {
-        httpHeart.start();
-      } else if (!NewOb11.http.enableHeart) {
-        httpHeart.stop();
-      }
-      ob11Config.save(NewOb11);
     } catch (e) {
       logError('热重载配置失败', e);
     }
