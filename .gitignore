@@ -4,8 +4,8 @@ package-lock.json
 pnpm-lock.yaml
 out/
 dist/
-src/core.lib/common/
-test
+/src/core.lib/common/
+/localdebug/
 
 # Editor
 .vscode/*
