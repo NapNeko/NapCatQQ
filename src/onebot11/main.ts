@@ -258,64 +258,54 @@ export class NapCatOnebot11 {
       // if (!NewOb11 || typeof NewOb11 !== 'object') {
       //   throw new Error('Invalid configuration object');
       // }
+      const OldConfig = JSON.parse(JSON.stringify(ob11Config)); //进行深拷贝
+      ob11Config.save(NewOb11);//保存新配置
+      
+      const isHttpChanged = !isEqual(NewOb11.http.port, OldConfig.http.port);
+      const isHttpEnableChanged = !isEqual(NewOb11.http.enable, OldConfig.http.enable);
 
-      const isHttpChanged = !isEqual(NewOb11.http.port, ob11Config.http.port) && NewOb11.http.enable;
-      const isHttpEnableChanged = !isEqual(NewOb11.http.enable, ob11Config.http.enable);
+      // const isHttpPostChanged = !isEqual(NewOb11.http.postUrls, OldConfig.http.postUrls);
+      // const isEnanleHttpPostChanged = !isEqual(NewOb11.http.enablePost, OldConfig.http.enablePost);
 
-      const isHttpPostChanged = !isEqual(NewOb11.http.postUrls, ob11Config.http.postUrls);
-      const isEnanleHttpPostChanged = !isEqual(NewOb11.http.enablePost, ob11Config.http.enablePost);
+      const isWsChanged = !isEqual(NewOb11.ws.port, OldConfig.ws.port);
+      const isEnableWsChanged = !isEqual(NewOb11.ws.enable, OldConfig.ws.enable);
 
-      const isWsChanged = !isEqual(NewOb11.ws.port, ob11Config.ws.port);
-      const isEnableWsChanged = !isEqual(NewOb11.ws.enable, ob11Config.ws.enable);
+      const isEnableWsReverseChanged = !isEqual(NewOb11.reverseWs.enable, OldConfig.reverseWs.enable);
+      const isWsReverseUrlsChanged = !isEqual(NewOb11.reverseWs.urls, OldConfig.reverseWs.urls);
 
-      const isEnableWsReverseChanged = !isEqual(NewOb11.reverseWs.enable, ob11Config.reverseWs.enable);
-      const isWsReverseUrlsChanged = !isEqual(NewOb11.reverseWs.urls, ob11Config.reverseWs.urls);
+      //const isEnableHeartBeatChanged = !isEqual(NewOb11.heartInterval, OldConfig.heartInterval);
 
-      const isEnableHeartBeatChanged = !isEqual(NewOb11.heartInterval, ob11Config.heartInterval);
       // http重启逻辑
-      if (isHttpChanged) {
-        ob11HTTPServer.restart(NewOb11.http.port, NewOb11.http.host);
-      }
-
-      if (isHttpEnableChanged) {
-        if (NewOb11.http.enable) {
-          ob11HTTPServer.start(NewOb11.http.port, NewOb11.http.host);
-        } else {
+      console.log(isHttpEnableChanged, isHttpChanged, NewOb11.http.enable);
+      if ((isHttpEnableChanged || isHttpChanged) && NewOb11.http.enable) {
+        if (OldConfig.http.enable) {
           ob11HTTPServer.stop();
         }
+        ob11HTTPServer.start(NewOb11.http.port, NewOb11.http.host);
+      } else if (isHttpEnableChanged && !NewOb11.http.enable) {
+        ob11HTTPServer.stop();
       }
-      // http post重启逻辑
-
-      // if(isHttpPostChanged){
-      //   logDebug('http post urls changed, restart http server');
-      // }
-      // if(isEnanleHttpPostChanged){
-      //   logDebug('http post enable changed, restart http server');
-      // }
 
       // ws重启逻辑
-      if (isWsChanged) {
-        ob11WebsocketServer.restart(NewOb11.ws.port);
-      }
-
-      if (isEnableWsChanged) {
-        if (NewOb11.ws.enable) {
-          ob11WebsocketServer.start(NewOb11.ws.port, NewOb11.ws.host);
-        } else {
-          ob11WebsocketServer.stop();
+      if ((isEnableWsChanged || isWsChanged) && NewOb11.ws.enable) {
+        if (OldConfig.ws.enable) {
+          ob11HTTPServer.stop();
         }
+        ob11WebsocketServer.start(NewOb11.ws.port, NewOb11.ws.host);
+      } else if (isHttpEnableChanged && !NewOb11.http.enable) {
+        ob11WebsocketServer.stop();
       }
 
       // 反向ws重启逻辑
-      if (isEnableWsReverseChanged) {
-        if (NewOb11.reverseWs.enable) {
-          ob11ReverseWebsockets.start();
-        } else {
-          ob11ReverseWebsockets.stop();
+      if ((isEnableWsReverseChanged || isWsReverseUrlsChanged) && NewOb11.reverseWs.enable) {
+        if (OldConfig.reverseWs.enable) {
+          ob11HTTPServer.stop();
         }
+        ob11ReverseWebsockets.start();
+      } else if (isHttpEnableChanged && !NewOb11.http.enable) {
+        ob11WebsocketServer.stop();
       }
       
-      ob11Config.save(NewOb11);
     } catch (e) {
       logError('热重载配置失败', e);
     }

@@ -69,7 +69,7 @@ export abstract class HttpServerBase {
     // httpServerError = ""
     if (this.server) {
       this.server.close();
-      this.server = null;
+      // this.server = null;
     }
   }
 
