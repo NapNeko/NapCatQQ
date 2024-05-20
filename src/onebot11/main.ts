@@ -260,7 +260,7 @@ export class NapCatOnebot11 {
       // }
       const OldConfig = JSON.parse(JSON.stringify(ob11Config)); //进行深拷贝
       ob11Config.save(NewOb11);//保存新配置
-      
+
       const isHttpChanged = !isEqual(NewOb11.http.port, OldConfig.http.port);
       const isHttpEnableChanged = !isEqual(NewOb11.http.enable, OldConfig.http.enable);
 
@@ -276,7 +276,7 @@ export class NapCatOnebot11 {
       //const isEnableHeartBeatChanged = !isEqual(NewOb11.heartInterval, OldConfig.heartInterval);
 
       // http重启逻辑
-      console.log(isHttpEnableChanged, isHttpChanged, NewOb11.http.enable);
+      // console.log(isHttpEnableChanged, isHttpChanged, NewOb11.http.enable);
       if ((isHttpEnableChanged || isHttpChanged) && NewOb11.http.enable) {
         if (OldConfig.http.enable) {
           ob11HTTPServer.stop();
