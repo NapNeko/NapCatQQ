@@ -299,11 +299,11 @@ export class NapCatOnebot11 {
       // 反向ws重启逻辑
       if ((isEnableWsReverseChanged || isWsReverseUrlsChanged) && NewOb11.reverseWs.enable) {
         if (OldConfig.reverseWs.enable) {
-          ob11HTTPServer.stop();
+          ob11ReverseWebsockets.stop();
         }
         ob11ReverseWebsockets.start();
       } else if (isHttpEnableChanged && !NewOb11.http.enable) {
-        ob11WebsocketServer.stop();
+        ob11ReverseWebsockets.stop();
       }
       
     } catch (e) {
