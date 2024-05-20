@@ -259,9 +259,6 @@ export class NapCatOnebot11 {
       //   throw new Error('Invalid configuration object');
       // }
 
-      // 先设置
-      ob11Config.save(NewOb11);
-
       const isHttpChanged = !isEqual(NewOb11.http.port, ob11Config.http.port) && NewOb11.http.enable;
       const isHttpEnableChanged = !isEqual(NewOb11.http.enable, ob11Config.http.enable);
 
@@ -317,6 +314,8 @@ export class NapCatOnebot11 {
           ob11ReverseWebsockets.stop();
         }
       }
+      
+      ob11Config.save(NewOb11);
     } catch (e) {
       logError('热重载配置失败', e);
     }
