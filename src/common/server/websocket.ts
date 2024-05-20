@@ -30,9 +30,10 @@ export class WebsocketServerBase {
   start(port: number, host: string = '') {
     try {
       this.ws = new WebSocketServer({
-        port ,
+        port,
         host: '',
         maxPayload: 1024 * 1024 * 1024
+      }).on('error', () => {
       });
       log(`ws服务启动成功, ${host}:${port}`);
     } catch (e: any) {
