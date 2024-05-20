@@ -58,9 +58,6 @@ export abstract class HttpServerBase {
       this.expressAPP.get('/', (req: Request, res: Response) => {
         res.send(`${this.name}已启动`);
       });
-      this.expressAPP.on('error', (err) => {
-        logError('HTTP服务启动失败', err.toString());
-      });
       this.listen(port, host);
     } catch (e: any) {
       logError('HTTP服务启动失败', e.toString());
@@ -117,6 +114,8 @@ export abstract class HttpServerBase {
       this.server = this.expressAPP.listen(port, host, () => {
         const info = `${this.name} started ${host}:${port}`;
         log(info);
+      }).on('error', (err) => {
+        logError('HTTP服务启动失败', err.toString());
       });
     } catch (e: any) {
       logError('HTTP服务启动失败, 请检查监听的ip地址和端口', e.stack.toString());
