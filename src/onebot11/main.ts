@@ -289,7 +289,7 @@ export class NapCatOnebot11 {
       // ws重启逻辑
       if ((isEnableWsChanged || isWsChanged) && NewOb11.ws.enable) {
         if (OldConfig.ws.enable) {
-          ob11HTTPServer.stop();
+          ob11WebsocketServer.stop();
         }
         ob11WebsocketServer.start(NewOb11.ws.port, NewOb11.ws.host);
       } else if (isHttpEnableChanged && !NewOb11.http.enable) {
