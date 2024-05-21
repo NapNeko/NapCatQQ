@@ -47,7 +47,6 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
       }
       const MemberData = MemberMap.get(webGroupMembers[i]?.uin);
       if (MemberData) {
-        MemberData.card = webGroupMembers[i].card;
         MemberData.join_time = webGroupMembers[i]?.join_time;
         MemberData.last_sent_time = webGroupMembers[i]?.last_speak_time;
         MemberData.qage = webGroupMembers[i]?.qage;
