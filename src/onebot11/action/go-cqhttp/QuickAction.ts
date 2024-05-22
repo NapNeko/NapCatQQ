@@ -1,6 +1,6 @@
 import { log } from '@/common/utils/log';
-import BaseAction from '../BaseAction'
-import { ActionName } from '../types'
+import BaseAction from '../BaseAction';
+import { ActionName } from '../types';
 import { QuickAction, QuickActionEvent, handleQuickOperation } from '@/onebot11/server/postOB11Event';
 
 interface Payload{
@@ -9,9 +9,9 @@ interface Payload{
 }
 
 export class GoCQHTTHandleQuickAction extends BaseAction<Payload, null>{
-  actionName = ActionName.GoCQHTTP_HandleQuickAction
+  actionName = ActionName.GoCQHTTP_HandleQuickAction;
   protected async _handle(payload: Payload): Promise<null> {
     handleQuickOperation(payload.context, payload.operation).then().catch(log);
-    return null
+    return null;
   }
 }

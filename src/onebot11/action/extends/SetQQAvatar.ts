@@ -13,7 +13,7 @@ export default class SetAvatar extends BaseAction<Payload, null> {
   actionName = ActionName.SetQQAvatar;
   // 用不着复杂检测
   protected async check(payload: Payload): Promise<BaseCheckResult> {
-    if (!payload.file || typeof payload.file != "string") {
+    if (!payload.file || typeof payload.file != 'string') {
       return {
         valid: false,
         message: 'file字段不能为空或者类型错误',

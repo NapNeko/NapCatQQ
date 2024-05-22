@@ -1,11 +1,11 @@
-import { SettingOption } from './SettingOption'
+import { SettingOption } from './SettingOption';
 
 interface MouseEventExtend extends MouseEvent {
   target: HTMLElement
 }
 
 // <ob-setting-select>
-const SelectTemplate = document.createElement('template')
+const SelectTemplate = document.createElement('template');
 SelectTemplate.innerHTML = `<style>
     .hidden { display: none !important; }
 </style>
@@ -17,19 +17,19 @@ SelectTemplate.innerHTML = `<style>
             </svg>
         </div>
     <ul class="hidden" part="option-list"><slot></slot></ul>
-</div>`
+</div>`;
 
 window.customElements.define(
   'ob-setting-select',
   class extends HTMLElement {
-    readonly _button: HTMLDivElement
-    readonly _text: HTMLInputElement
-    readonly _context: HTMLUListElement
+    readonly _button: HTMLDivElement;
+    readonly _text: HTMLInputElement;
+    readonly _context: HTMLUListElement;
 
     constructor() {
-      super()
+      super();
 
-      this.attachShadow({ mode: 'open' })
+      this.attachShadow({ mode: 'open' });
       this.shadowRoot?.append(SelectTemplate.content.cloneNode(true));
 
       this._button = this.shadowRoot.querySelector('div[part="button"]');
@@ -39,21 +39,21 @@ window.customElements.define(
       const buttonClick = () => {
         const isHidden = this._context.classList.toggle('hidden');
         window[`${isHidden ? 'remove' : 'add'}EventListener`]('pointerdown', windowPointerDown);
-      }
+      };
 
       const windowPointerDown = ({ target }) => {
-        if (!this.contains(target)) buttonClick()
-      }
+        if (!this.contains(target)) buttonClick();
+      };
 
-      this._button.addEventListener('click', buttonClick)
+      this._button.addEventListener('click', buttonClick);
       this._context.addEventListener('click', ({ target }: MouseEventExtend) => {
-        if (target.tagName !== 'SETTING-OPTION') return
-        buttonClick()
+        if (target.tagName !== 'SETTING-OPTION') return;
+        buttonClick();
 
-        if (target.hasAttribute('is-selected')) return
+        if (target.hasAttribute('is-selected')) return;
 
-        this.querySelectorAll('setting-option[is-selected]').forEach((dom) => dom.toggleAttribute('is-selected'))
-        target.toggleAttribute('is-selected')
+        this.querySelectorAll('setting-option[is-selected]').forEach((dom) => dom.toggleAttribute('is-selected'));
+        target.toggleAttribute('is-selected');
 
         this._text.value = target.textContent as string;
         this.dispatchEvent(
@@ -65,20 +65,20 @@ window.customElements.define(
               value: target.dataset.value,
             },
           }),
-        )
-      })
+        );
+      });
 
       this._text.value = this.querySelector('setting-option[is-selected]')?.textContent as string;
     }
   },
-)
+);
 
 export const SettingSelect = (items: Array<{ text: string; value: string }>, configKey?: string, configValue?: any) => {
   return `<ob-setting-select ${configKey ? `data-config-key="${configKey}"` : ''}>
     ${items
-      .map((e, i) => {
-        return SettingOption(e.text, e.value, configKey && configValue ? configValue === e.value : i === 0)
-      })
-      .join('')}
-</ob-setting-select>`
-}
+    .map((e, i) => {
+      return SettingOption(e.text, e.value, configKey && configValue ? configValue === e.value : i === 0);
+    })
+    .join('')}
+</ob-setting-select>`;
+};

@@ -17,9 +17,9 @@ const SchemaData = {
     base64: { type: 'string' },
     name: { type: 'string' },
     headers: {
-      type: ["string", "array"],
+      type: ['string', 'array'],
       items: {
-        type: "string"
+        type: 'string'
       }
     }
   },

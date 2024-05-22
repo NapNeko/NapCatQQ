@@ -31,7 +31,7 @@ export class RequestUtil {
 
   // 请求和回复都是JSON data传原始内容 自动编码json
   static async HttpGetJson<T>(url: string, method: string = 'GET', data?: any, headers: Record<string, string> = {}, isJsonRet: boolean = true, isArgJson: boolean = true): Promise<T> {
-    let option = new URL(url);
+    const option = new URL(url);
     const protocol = url.startsWith('https://') ? https : http;
     const options = {
       hostname: option.hostname,

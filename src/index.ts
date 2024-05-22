@@ -10,8 +10,8 @@ import { NapCatOnebot11 } from '@/onebot11/main';
 import { InitWebUi } from './webui/index';
 import { WebUiDataRuntime } from './webui/src/helper/Data';
 import { UpdateConfig } from './common/utils/helper';
-import { dirname } from "node:path"
-import { fileURLToPath } from "node:url"
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -46,7 +46,7 @@ checkVersion().then(async (remoteVersion: string) => {
   logError('[NapCat] 检测更新失败', e);
 });
 // 不是很好待优化
-let NapCat_OneBot11 = new NapCatOnebot11();
+const NapCat_OneBot11 = new NapCatOnebot11();
 
 WebUiDataRuntime.setOB11ConfigCall(NapCat_OneBot11.SetConfig);
 

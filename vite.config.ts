@@ -9,7 +9,7 @@ import { builtinModules } from 'module';
 import fs from 'node:fs';
 
 const external = ['silk-wasm', 'ws', 'express', 'uuid', 'fluent-ffmpeg', 'sqlite3', 'log4js',
-  'qrcode-terminal', 'MoeHoo', 'frida'];
+  'qrcode-terminal'];
 
 const nodeModules = [...builtinModules, builtinModules.map(m => `node:${m}`)].flat();
 // let nodeModules = ["fs", "path", "events", "buffer", "url", "crypto", "fs/promise", "fsPromise", "os", "http", "net"]

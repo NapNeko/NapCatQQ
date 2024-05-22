@@ -18,8 +18,8 @@ export class GetGroupSystemMsg extends BaseAction<void, any> {
   actionName = ActionName.GetGroupSystemMsg;
   protected async _handle(payload: void) {
     // 默认10条 该api未完整实现 包括响应数据规范化 类型规范化 
-    let SingleScreenNotifies = await NTQQGroupApi.getSingleScreenNotifies(10);
-    let retData: any = { InvitedRequest: [], join_requests: [] };
+    const SingleScreenNotifies = await NTQQGroupApi.getSingleScreenNotifies(10);
+    const retData: any = { InvitedRequest: [], join_requests: [] };
     for (const SSNotify of SingleScreenNotifies) {
       if (SSNotify.type == 1) {
         retData.InvitedRequest.push({

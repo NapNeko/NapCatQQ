@@ -104,7 +104,7 @@ const _handlers: {
   // File service
 
   [OB11MessageDataType.image]: async (sendMsg, context) => {
-    let PicEle = await SendMsgElementConstructor.pic(
+    const PicEle = await SendMsgElementConstructor.pic(
       (await handleOb11FileLikeMessage(sendMsg, context)).path,
       sendMsg.data.summary || '',
       sendMsg.data.subType || 0

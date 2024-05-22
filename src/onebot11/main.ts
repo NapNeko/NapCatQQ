@@ -31,10 +31,11 @@ import { OB11GroupRecallNoticeEvent } from '@/onebot11/event/notice/OB11GroupRec
 import { logMessage, logNotice, logRequest } from '@/onebot11/log';
 import { OB11Message } from '@/onebot11/types';
 import { OB11LifeCycleEvent } from './event/meta/OB11LifeCycleEvent';
-import { Data as SysData } from '@/proto/SysMessage'
+import { Data as SysData } from '@/proto/SysMessage';
 import { OB11FriendPokeEvent, OB11GroupPokeEvent } from './event/notice/OB11PokeEvent';
+import { isEqual } from '@/common/utils/helper';
 //peer->cached(boolen)
-let PokeCache = new Map<string, boolean>();
+const PokeCache = new Map<string, boolean>();
 export class NapCatOnebot11 {
   private bootTime: number = Date.now() / 1000;  // 秒
 
@@ -92,12 +93,12 @@ export class NapCatOnebot11 {
       //   }
       // };
       try {
-        let sysMsg = SysData.fromBinary(Buffer.from(protobufData));
-        let peeruin = sysMsg.header[0].groupNumber;
-        let peeruid = sysMsg.header[0].groupString;
-        let MsgType = sysMsg.body[0].msgType;
-        let subType0 = sysMsg.body[0].subType0;
-        let subType1 = sysMsg.body[0].subType1;
+        const sysMsg = SysData.fromBinary(Buffer.from(protobufData));
+        const peeruin = sysMsg.header[0].groupNumber;
+        const peeruid = sysMsg.header[0].groupString;
+        const MsgType = sysMsg.body[0].msgType;
+        const subType0 = sysMsg.body[0].subType0;
+        const subType1 = sysMsg.body[0].subType1;
         let pokeEvent: OB11FriendPokeEvent | OB11GroupPokeEvent;
         //console.log(peeruid);
         if (MsgType == 528 && subType0 == 290) {
@@ -106,7 +107,7 @@ export class NapCatOnebot11 {
             PokeCache.delete(peeruid);
           } else {
             PokeCache.set(peeruid, false);
-            log("[私聊] 用户 ", peeruin, " 对你戳一戳");
+            log('[私聊] 用户 ', peeruin, ' 对你戳一戳');
             pokeEvent = new OB11FriendPokeEvent(peeruin);
             postOB11Event(pokeEvent);
           }
@@ -117,13 +118,13 @@ export class NapCatOnebot11 {
             PokeCache.delete(peeruid);
           } else {
             PokeCache.set(peeruid, false);
-            log("[群聊] 群组 ", peeruin, " 戳一戳");
+            log('[群聊] 群组 ', peeruin, ' 戳一戳');
             pokeEvent = new OB11GroupPokeEvent(peeruin);
             postOB11Event(pokeEvent);
           }
         }
       } catch (e) {
-        log("解析SysMsg异常", e);
+        log('解析SysMsg异常', e);
         // console.log(e);
         //
       }
@@ -184,15 +185,15 @@ export class NapCatOnebot11 {
     };
     groupListener.onMemberInfoChange = async (groupCode: string, changeType: number, members: Map<string, GroupMember>) => {
       // 如果自身是非管理员也许要从这里获取Delete 成员变动 待测试与验证
-      let role = (await getGroupMember(groupCode, selfInfo.uin))?.role;
-      let isPrivilege = role === 3 || role === 4;
+      const role = (await getGroupMember(groupCode, selfInfo.uin))?.role;
+      const isPrivilege = role === 3 || role === 4;
       for (const member of members.values()) {
         if (member?.isDelete && !isPrivilege) {
           const groupDecreaseEvent = new OB11GroupDecreaseEvent(parseInt(groupCode), parseInt(member.uin), 0, 'leave');// 不知道怎么出去的
           postOB11Event(groupDecreaseEvent, true);
         }
       }
-    }
+    };
     groupListener.onJoinGroupNotify = (...notify) => {
       // console.log('ob11 onJoinGroupNotify', notify);
     };
@@ -253,21 +254,6 @@ export class NapCatOnebot11 {
   }
   async SetConfig(NewOb11: OB11Config) {
     try {
-      function isEqual(obj1: any, obj2: any) {
-        if (obj1 === obj2) return true;
-        if (obj1 == null || obj2 == null) return false;
-        if (typeof obj1 !== 'object' || typeof obj2 !== 'object') return obj1 === obj2;
-
-        const keys1 = Object.keys(obj1);
-        const keys2 = Object.keys(obj2);
-
-        if (keys1.length !== keys2.length) return false;
-
-        for (let key of keys1) {
-          if (!isEqual(obj1[key], obj2[key])) return false;
-        }
-        return true;
-      }
       // if (!NewOb11 || typeof NewOb11 !== 'object') {
       //   throw new Error('Invalid configuration object');
       // }

@@ -2,8 +2,8 @@ import crypto from 'node:crypto';
 import path from 'node:path';
 import fs from 'fs/promises';
 import { log, logDebug } from './log';
-import { dirname } from "node:path"
-import { fileURLToPath } from "node:url"
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -153,12 +153,27 @@ export async function UpdateConfig() {
   const configFiles = await fs.readdir(path.join(__dirname, 'config'));
   for (const file of configFiles) {
     if (file.match(/^onebot11_\d+.json$/)) {
-      let CurrentConfig = JSON.parse(await fs.readFile(path.join(__dirname, 'config', file), 'utf8'));
+      const CurrentConfig = JSON.parse(await fs.readFile(path.join(__dirname, 'config', file), 'utf8'));
       if (isValidOldConfig(CurrentConfig)) {
-        log("正在迁移旧配置到新配置 File:", file);
-        let NewConfig = migrateConfig(CurrentConfig);
+        log('正在迁移旧配置到新配置 File:', file);
+        const NewConfig = migrateConfig(CurrentConfig);
         await fs.writeFile(path.join(__dirname, 'config', file), JSON.stringify(NewConfig, null, 2));
       }
     }
   }
+}
+export function isEqual(obj1: any, obj2: any) {
+  if (obj1 === obj2) return true;
+  if (obj1 == null || obj2 == null) return false;
+  if (typeof obj1 !== 'object' || typeof obj2 !== 'object') return obj1 === obj2;
+
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+
+  if (keys1.length !== keys2.length) return false;
+
+  for (const key of keys1) {
+    if (!isEqual(obj1[key], obj2[key])) return false;
+  }
+  return true;
 }
