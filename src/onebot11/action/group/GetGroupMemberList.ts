@@ -30,7 +30,7 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
     }
     if (payload.no_cache == true || payload.no_cache === 'true') {
       // webGroupMembers = await WebApi.getGroupMembers(payload.group_id.toString());'
-      const _groupMembers = await NTQQGroupApi.getGroupMembers(payload.group_id.toString(), true);
+      const _groupMembers = await NTQQGroupApi.getGroupMembers(payload.group_id.toString());
       groupMembers.set(group.groupCode, _groupMembers);
     }
     const _groupMembers = OB11Constructor.groupMembers(group);
