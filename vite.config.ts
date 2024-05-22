@@ -5,7 +5,6 @@ import { UserConfig, defineConfig } from 'vite';
 import { resolve } from 'path';
 import { PluginOption, Plugin } from 'vite';
 import nodeResolve from '@rollup/plugin-node-resolve';
-import commonjs from '@rollup/plugin-commonjs';
 import { builtinModules } from 'module';
 import fs from 'node:fs';
 
@@ -54,7 +53,6 @@ const baseConfigPlugin: PluginOption[] = [
     ]
   }),
   nodeResolve(),
-  commonjs(),
 ];
 // if (os.platform() !== 'win32') {
 //   startScripts = ['./script/napcat.sh'];
