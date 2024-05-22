@@ -1,5 +1,5 @@
-import sys
-import os
+import requests
+import pyyaml
 def __main__():
     print("TEST")
 
