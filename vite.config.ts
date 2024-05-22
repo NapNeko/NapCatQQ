@@ -83,8 +83,8 @@ const baseConfig = (mode: string = 'development') => defineConfig({
     minify: false,
     lib: {
       entry: 'src/index.ts',
-      formats: ['cjs'],
-      fileName: () => 'napcat.cjs',
+      formats: ['es'],
+      fileName: () => 'napcat.mjs',
     },
     rollupOptions: {
       // external: [ /node:*/ ],

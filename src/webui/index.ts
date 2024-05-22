@@ -5,6 +5,13 @@ import { resolve } from 'node:path';
 import { ALLRouter } from './src/router';
 import { WebUiConfig } from './src/helper/config';
 const app = express();
+import { dirname } from "node:path"
+import { fileURLToPath } from "node:url"
+
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 /**
  * 初始化并启动WebUI服务。
  * 该函数配置了Express服务器以支持JSON解析和静态文件服务，并监听6099端口。

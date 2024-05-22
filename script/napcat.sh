@@ -18,4 +18,4 @@ if ! [ -x /opt/QQ/qq ]; then
     exit 1
 fi
 
-/opt/QQ/qq "${SCRIPT_DIR}/napcat.cjs" "$@"
+/opt/QQ/qq "${SCRIPT_DIR}/napcat.mjs" "$@"

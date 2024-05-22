@@ -1,6 +1,13 @@
 import { resolve } from "node:path";
 import { spawn } from "node:child_process";
 import { pid, ppid, exit } from 'node:process';
+import { dirname } from "node:path"
+import { fileURLToPath } from "node:url"
+
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 export async function rebootWithQuickLogin(uin: string) {
     let batScript = resolve(__dirname, './napcat.bat');
     let batUtf8Script = resolve(__dirname, './napcat-utf8.bat');

@@ -37,7 +37,7 @@ if (!(Test-Path $QQpath)) {
     throw "provided QQ path is invalid: $QQpath"
 }
 
-$Bootfile = Join-Path $PSScriptRoot "napcat.cjs"
+$Bootfile = Join-Path $PSScriptRoot "napcat.mjs"
 $env:ELECTRON_RUN_AS_NODE = 1
 $commandInfo = Get-Command $QQpath -ErrorAction Stop
 Start-Process powershell -ArgumentList "-noexit", "-noprofile", "-command &{& '$($commandInfo.Path)' $Bootfile $params}"

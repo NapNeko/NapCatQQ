@@ -1,6 +1,12 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-const net = require('net');
+import * as net from "node:net";
+import { dirname } from "node:path"
+import { fileURLToPath } from "node:url"
+
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // 限制尝试端口的次数，避免死循环
 const MAX_PORT_TRY = 100;

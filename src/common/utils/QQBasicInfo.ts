@@ -55,7 +55,7 @@ if (fs.existsSync(configVersionInfoPath)) {
 
 export const qqVersionConfigInfo: QQVersionConfigInfo = _qqVersionConfigInfo;
 
-export const qqPkgInfo: QQPkgInfo = require(pkgInfoPath);
+export const qqPkgInfo: QQPkgInfo = JSON.parse(fs.readFileSync(pkgInfoPath).toString());
 // platform_type: 3,
 // app_type: 4,
 // app_version: '9.9.9-23159',
