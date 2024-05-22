@@ -20,6 +20,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
+    "sourceMap": true,
     "paths": {
       "@*": [
         "./src*"
