@@ -76,6 +76,7 @@ const baseConfig = (mode: string = 'development') => defineConfig({
     },
   },
   build: {
+    sourcemap: mode === 'development',
     target: 'esnext',
     // minify: mode === 'production' ? 'esbuild' : false,
     // 压缩代码出现了未知问题导致无法运行，暂时不启用
