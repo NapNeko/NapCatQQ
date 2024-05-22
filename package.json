@@ -43,10 +43,10 @@
     "vite": "^5.2.6",
     "vite-plugin-cp": "^4.0.8",
     "vite-plugin-dts": "^3.8.2",
-    "vite-tsconfig-paths": "^4.3.2"
+    "vite-tsconfig-paths": "^4.3.2",
+    "@protobuf-ts/plugin": "^2.9.4"
   },
   "dependencies": {
-    "@protobuf-ts/plugin": "^2.9.4",
     "ajv": "^8.13.0",
     "commander": "^12.0.0",
     "cors": "^2.8.5",
