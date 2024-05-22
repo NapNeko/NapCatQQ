@@ -28,7 +28,7 @@ InitWebUi();
 const cmdOptions = program.opts();
 // console.log(process.argv);
 checkVersion().then(async (remoteVersion: string) => {
-  const localVersion = JSON.parse(fsSync.readFileSync(path.join(__dirname, 'package.json')).toString());
+  const localVersion = JSON.parse(fsSync.readFileSync(path.join(__dirname, 'package.json')).toString()).version;
   const localVersionList = localVersion.split('.');
   const remoteVersionList = remoteVersion.split('.');
   log('[NapCat]  当前版本:', localVersion);
@@ -43,7 +43,7 @@ checkVersion().then(async (remoteVersion: string) => {
   logDebug('[NapCat]  当前已是最新版本');
   return;
 }).catch((e) => {
-  logError('[NapCat] 检测更新失败');
+  logError('[NapCat] 检测更新失败', e);
 });
 // 不是很好待优化
 let NapCat_OneBot11 = new NapCatOnebot11();
