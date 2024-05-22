@@ -2,8 +2,8 @@ import log4js, { Configuration } from 'log4js';
 import { truncateString } from '@/common/utils/helper';
 import path from 'node:path';
 import { SelfInfo } from '@/core';
-import { dirname } from "node:path"
-import { fileURLToPath } from "node:url"
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 
 const __filename = fileURLToPath(import.meta.url);

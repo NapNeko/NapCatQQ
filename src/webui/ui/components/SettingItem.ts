@@ -11,5 +11,5 @@ export const SettingItem = (
           ${subtitle ? `<setting-text data-type="secondary">${subtitle}</setting-text>` : ''}
       </div>
       ${action ? `<div>${action}</div>` : ''}
-  </setting-item>`
-}
+  </setting-item>`;
+};

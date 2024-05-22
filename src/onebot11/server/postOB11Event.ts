@@ -170,26 +170,26 @@ async function handleGroupRequest(request: OB11GroupRequestEvent, quickAction: Q
       groupNotifies[request.flag],
       quickAction.approve ? GroupRequestOperateTypes.approve : GroupRequestOperateTypes.reject,
       quickAction.reason,
-    ).then().catch(logError)
+    ).then().catch(logError);
   }
 }
 async function handleFriendRequest(request: OB11FriendRequestEvent, quickAction: QuickActionFriendRequest) {
   if (!isNull(quickAction.approve)) {
-    NTQQFriendApi.handleFriendRequest(friendRequests[request.flag], !!quickAction.approve).then().catch(logError)
+    NTQQFriendApi.handleFriendRequest(friendRequests[request.flag], !!quickAction.approve).then().catch(logError);
   }
 }
 export async function handleQuickOperation(context: QuickActionEvent, quickAction: QuickAction) {
   if (context.post_type === 'message') {
-    handleMsg(context as OB11Message, quickAction).then().catch(logError)
+    handleMsg(context as OB11Message, quickAction).then().catch(logError);
   }
   if (context.post_type === 'request') {
     const friendRequest = context as OB11FriendRequestEvent;
     const groupRequest = context as OB11GroupRequestEvent;
     if ((friendRequest).request_type === 'friend') {
-      handleFriendRequest(friendRequest, quickAction).then().catch(logError)
+      handleFriendRequest(friendRequest, quickAction).then().catch(logError);
     }
     else if (groupRequest.request_type === 'group') {
-      handleGroupRequest(groupRequest, quickAction).then().catch(logError)
+      handleGroupRequest(groupRequest, quickAction).then().catch(logError);
     }
   }
 }

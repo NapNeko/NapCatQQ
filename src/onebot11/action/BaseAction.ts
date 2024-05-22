@@ -20,11 +20,11 @@ class BaseAction<PayloadType, ReturnDataType> {
       return {
         valid: false,
         message: errorMessages.join('\n') as string || '未知错误'
-      }
+      };
     }
     return {
       valid: true
-    }
+    };
   }
 
   public async handle(payload: PayloadType): Promise<OB11Return<ReturnDataType | null>> {

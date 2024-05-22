@@ -5,7 +5,7 @@ import BaseAction from '../BaseAction';
 import { ActionName, BaseCheckResult } from '../types';
 import { NTQQUserApi } from '@/core/apis';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import Ajv from "ajv"
+import Ajv from 'ajv';
 // 设置在线状态
 
 const SchemaData = {

@@ -1,9 +1,10 @@
 module.exports = {
   'env': {
+    'browser': true,
     'es2021': true,
     'node': true
   },
-  'ignorePatterns': ['src/core/', 'src/core.lib/'],
+  'ignorePatterns': ['src/core/', 'src/core.lib/','src/proto/'],
   'extends': [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended'

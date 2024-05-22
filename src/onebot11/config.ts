@@ -1,9 +1,9 @@
-import fs from "node:fs";
-import path from "node:path";
-import { selfInfo } from "@/core/data";
-import { logDebug, logError } from "@/common/utils/log";
-import { ConfigBase } from "@/common/utils/ConfigBase";
-import { json } from "stream/consumers";
+import fs from 'node:fs';
+import path from 'node:path';
+import { selfInfo } from '@/core/data';
+import { logDebug, logError } from '@/common/utils/log';
+import { ConfigBase } from '@/common/utils/ConfigBase';
+import { json } from 'stream/consumers';
 
 export interface OB11Config {
   http: {
@@ -27,7 +27,7 @@ export interface OB11Config {
 
   debug: boolean;
   heartInterval: number;
-  messagePostFormat: "array" | "string";
+  messagePostFormat: 'array' | 'string';
   enableLocalFile2Url: boolean;
   musicSignUrl: string;
   reportSelfMessage: boolean;
@@ -41,16 +41,16 @@ export interface OB11Config {
 class Config extends ConfigBase<OB11Config> implements OB11Config {
   http = {
     enable: false,
-    host: "",
+    host: '',
     port: 3000,
-    secret: "",
+    secret: '',
     enableHeart: false,
     enablePost: false,
     postUrls: [],
   };
   ws = {
     enable: false,
-    host: "",
+    host: '',
     port: 3001,
   };
   reverseWs = {
@@ -59,11 +59,11 @@ class Config extends ConfigBase<OB11Config> implements OB11Config {
   };
   debug = false;
   heartInterval = 30000;
-  messagePostFormat: "array" | "string" = "array";
+  messagePostFormat: 'array' | 'string' = 'array';
   enableLocalFile2Url = true;
-  musicSignUrl = "";
+  musicSignUrl = '';
   reportSelfMessage = false;
-  token = "";
+  token = '';
 
   getConfigPath() {
     return path.join(this.getConfigDir(), `onebot11_${selfInfo.uin}.json`);
