@@ -3,6 +3,13 @@ import { WebUiDataRuntime } from "../helper/Data";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { OB11Config } from "@/webui/ui/components/WebUiApiOB11Config";
+import { dirname } from "node:path"
+import { fileURLToPath } from "node:url"
+
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const isEmpty = (data: any) =>
   data === undefined || data === null || data === "";
 export const OB11GetConfigHandler: RequestHandler = async (req, res) => {

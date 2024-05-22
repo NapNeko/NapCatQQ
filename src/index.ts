@@ -2,6 +2,7 @@ import { napCatCore } from '@/core';
 import { program } from 'commander';
 import qrcode from 'qrcode-terminal';
 import fs from 'fs/promises';
+import fsSync from 'fs';
 import path from 'node:path';
 import { checkVersion } from '@/common/utils/version';
 import { log, logDebug, logError, LogLevel, setLogLevel } from '@/common/utils/log';
@@ -9,6 +10,13 @@ import { NapCatOnebot11 } from '@/onebot11/main';
 import { InitWebUi } from './webui/index';
 import { WebUiDataRuntime } from './webui/src/helper/Data';
 import { UpdateConfig } from './common/utils/helper';
+import { dirname } from "node:path"
+import { fileURLToPath } from "node:url"
+
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 program
   .option('-q, --qq <type>', 'QQ号')
   .parse(process.argv);
@@ -19,10 +27,8 @@ UpdateConfig().catch(logError);
 InitWebUi();
 const cmdOptions = program.opts();
 // console.log(process.argv);
-
-
-checkVersion().then((remoteVersion: string) => {
-  const localVersion = require('./package.json').version;
+checkVersion().then(async (remoteVersion: string) => {
+  const localVersion = JSON.parse(fsSync.readFileSync(path.join(__dirname, 'package.json')).toString());
   const localVersionList = localVersion.split('.');
   const remoteVersionList = remoteVersion.split('.');
   log('[NapCat]  当前版本:', localVersion);
