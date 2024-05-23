@@ -69,13 +69,7 @@ const _handlers: {
     context: MessageContext
   ) => SendMessageElement | undefined | Promise<SendMessageElement | undefined>
 } = {
-  [OB11MessageDataType.text]: ({ data: { text } }) => {
-    //如果匹配\n \r\n失败则 将全部\r转换为\n 兼容QQ 9.7.x（非NT架构）
-    if (!text.match(/\r\n/g) && !text.match(/\n/g)) {
-      text = text.replace(/\r/g, '\n');
-    }
-    return SendMsgElementConstructor.text(text);
-  },
+  [OB11MessageDataType.text]: ({ data: { text } }) => SendMsgElementConstructor.text(text),
 
   [OB11MessageDataType.at]: async ({ data: { qq: atQQ } }, context) => {
     if (!context.group) return undefined;

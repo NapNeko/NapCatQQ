@@ -120,9 +120,14 @@ export class OB11Constructor {
       }
       else if (element.textElement) {
         message_data['type'] = 'text';
-        const text = element.textElement.content;
+
+        let text = element.textElement.content;
         if (!text.trim()) {
           continue;
+        }
+        // 兼容 9.7.x 换行符
+        if (text.indexOf('\n') === -1 && text.indexOf('\r\n') === -1) {
+          text = text.replace(/\r/g, '\n');
         }
         message_data['data']['text'] = text;
       }
