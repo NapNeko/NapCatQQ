@@ -12,7 +12,7 @@ const SchemaData = {
     approve: { type: 'boolean' },
     reason: { type: 'string' }
   },
-  required: ['flag', 'approve', 'reson']
+  required: ['flag', 'approve', 'reason']
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
