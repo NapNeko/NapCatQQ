@@ -74,7 +74,12 @@ export class NapCatOnebot11 {
     }
     // MsgListener
     const msgListener = new MsgListener();
-    msgListener.onRecvSysMsg = (protobufData: number[]) => {
+    msgListener.onRecvSysMsg = async (protobufData: number[]) => {
+      // function buf2hex(buffer: Buffer) {
+      //   return [...new Uint8Array(buffer)]
+      //     .map(x => x.toString(16).padStart(2, '0'))
+      //     .join('');
+      // }
       // let Data: Data = {
       //   header: {
       //     GroupNumber: 0,
@@ -94,8 +99,9 @@ export class NapCatOnebot11 {
       // };
       try {
         const sysMsg = SysData.fromBinary(Buffer.from(protobufData));
-        const peeruin = sysMsg.header[0].groupNumber;
-        const peeruid = sysMsg.header[0].groupString;
+        //console.log(buf2hex(Buffer.from(protobufData)));
+        const peeruin = sysMsg.header[0].peerNumber;
+        const peeruid = sysMsg.header[0].peerString;
         const MsgType = sysMsg.body[0].msgType;
         const subType0 = sysMsg.body[0].subType0;
         const subType1 = sysMsg.body[0].subType1;
@@ -121,6 +127,16 @@ export class NapCatOnebot11 {
             log('[群聊] 群组 ', peeruin, ' 戳一戳');
             pokeEvent = new OB11GroupPokeEvent(peeruin);
             postOB11Event(pokeEvent);
+          }
+        }
+        if (MsgType == 34 && subType0 == 0) {
+          const role = (await getGroupMember(peeruin, selfInfo.uin))?.role;
+          const isPrivilege = role === 3 || role === 4;
+          if (!isPrivilege) {
+            const leaveUin = uid2UinMap[sysMsg.other[0].event[0].peerString];
+            log('[群聊] 群组 ', peeruin, ' 成员' + leaveUin + '退出');
+            const groupDecreaseEvent = new OB11GroupDecreaseEvent(peeruin, parseInt(leaveUin), 0, 'leave');// 不知道怎么出去的
+            postOB11Event(groupDecreaseEvent, true);
           }
         }
       } catch (e) {
@@ -185,14 +201,14 @@ export class NapCatOnebot11 {
     };
     groupListener.onMemberInfoChange = async (groupCode: string, changeType: number, members: Map<string, GroupMember>) => {
       // 如果自身是非管理员也许要从这里获取Delete 成员变动 待测试与验证
-      const role = (await getGroupMember(groupCode, selfInfo.uin))?.role;
-      const isPrivilege = role === 3 || role === 4;
-      for (const member of members.values()) {
-        if (member?.isDelete && !isPrivilege) {
-          const groupDecreaseEvent = new OB11GroupDecreaseEvent(parseInt(groupCode), parseInt(member.uin), 0, 'leave');// 不知道怎么出去的
-          postOB11Event(groupDecreaseEvent, true);
-        }
-      }
+      // const role = (await getGroupMember(groupCode, selfInfo.uin))?.role;
+      // const isPrivilege = role === 3 || role === 4;
+      // for (const member of members.values()) {
+      //   if (member?.isDelete && !isPrivilege) {
+      //     const groupDecreaseEvent = new OB11GroupDecreaseEvent(parseInt(groupCode), parseInt(member.uin), 0, 'leave');// 不知道怎么出去的
+      //     postOB11Event(groupDecreaseEvent, true);
+      //   }
+      // }
     };
     groupListener.onJoinGroupNotify = (...notify) => {
       // console.log('ob11 onJoinGroupNotify', notify);
