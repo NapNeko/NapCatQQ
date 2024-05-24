@@ -140,6 +140,24 @@ export class NapCatOnebot11 {
         //     postOB11Event(groupDecreaseEvent, true);
         //   }
         // }
+        // MsgType (SubType) EventName
+        // 33 GroupMemIncreased
+        // 34 GroupMemberDecreased
+        // 44 GroupAdminChange
+        // 82 GroupMessage
+        // 84 GroupApply
+        // 87 InviteGroup
+        // 528 35  FriendApply
+        // 528 39  CardChange
+        // 528 68  GroupApply
+        // 528 138 C2CRecall
+        // 528 290 C2CPoke
+        // 732 12  GroupBan
+        // 732 16  GroupUniqueTitleChange
+        // 732 17  GroupRecall
+        // 732 20  GroupCommonTips
+        // 732 21  EssenceMessage
+        }
       } catch (e) {
         log('解析SysMsg异常', e);
         // console.log(e);
