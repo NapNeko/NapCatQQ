@@ -142,7 +142,6 @@ export class NapCatOnebot11 {
       } catch (e) {
         log('解析SysMsg异常', e);
         // console.log(e);
-        //
       }
     };
     msgListener.onKickedOffLine = (Info: KickedOffLineInfo) => {
