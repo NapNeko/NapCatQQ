@@ -157,7 +157,6 @@ export class NapCatOnebot11 {
         // 732 17  GroupRecall
         // 732 20  GroupCommonTips
         // 732 21  EssenceMessage
-        }
       } catch (e) {
         log('解析SysMsg异常', e);
         // console.log(e);
