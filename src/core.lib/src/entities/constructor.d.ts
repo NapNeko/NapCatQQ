@@ -1,4 +1,4 @@
-import { AtType, SendArkElement, SendFaceElement, SendFileElement, SendMarkdownElement, SendMarketFaceElement, SendPicElement, SendPttElement, SendReplyElement, SendTextElement, SendVideoElement } from './index';
+import { AtType, ElementType, SendArkElement, SendFaceElement, SendFileElement, SendMarkdownElement, SendMarketFaceElement, SendPicElement, SendPttElement, SendReplyElement, SendTextElement, SendVideoElement } from './index';
 export declare const mFaceCache: Map<string, string>;
 export declare class SendMsgElementConstructor {
     static text(content: string): SendTextElement;
@@ -14,4 +14,13 @@ export declare class SendMsgElementConstructor {
     static rps(resultId: number | null): SendFaceElement;
     static ark(data: any): SendArkElement;
     static markdown(content: string): SendMarkdownElement;
+    static miniapp(): Promise<{
+        elementType: ElementType;
+        elementId: string;
+        arkElement: {
+            bytesData: string;
+            linkInfo: null;
+            subElementType: null;
+        };
+    }>;
 }
