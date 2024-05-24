@@ -72,7 +72,7 @@ export class NapCatOnebot11 {
       // 启动http心跳
       httpHeart.start();
     }
-    // MsgListener
+    // Create MsgListener
     const msgListener = new MsgListener();
     msgListener.onRecvSysMsg = async (protobufData: number[]) => {
       // function buf2hex(buffer: Buffer) {
