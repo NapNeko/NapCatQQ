@@ -1,0 +1,28 @@
+syntax = "proto3";
+package SysMessage;
+message Data  {
+    repeated Header header = 1;
+    repeated Body body = 2;
+    repeated Other other = 2;
+}
+message Header {
+        uint32  PeerNumber = 1;
+        string PeerString = 2;
+        uint32   Uin = 5;
+        optional string Uid = 6;
+ }  
+message Body {
+        uint32  MsgType = 1;
+        uint32  SubType_0 = 2;
+        uint32  SubType_1 = 3;
+        uint32  MsgSeq=  5;
+        uint32  Time = 6;
+        uint64  MsgID = 12;
+        uint32  Other = 13;
+}
+message Event {
+    
+}  
+message Other {
+        repeated Event event = 2;
+}  
