@@ -3,6 +3,9 @@ import { WebApiGroupMember } from '@/core/apis';
 export declare const Credentials: {
     Skey: string;
     CreatTime: number;
+    Cookies: Map<string, string>;
+    ClientKey: string;
+    KeyIndex: string;
     PskeyData: Map<string, string>;
     PskeyTime: Map<string, number>;
 };

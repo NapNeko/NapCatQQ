@@ -18,5 +18,8 @@ export declare class NTQQUserApi {
         [key: string]: string;
     }>;
     static getRobotUinRange(): Promise<Array<any>>;
+    static getQzoneCookies(): Promise<{
+        [key: string]: string;
+    }>;
     static getSkey(cached?: boolean): Promise<string | undefined>;
 }
