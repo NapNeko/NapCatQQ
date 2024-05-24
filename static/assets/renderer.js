@@ -142,7 +142,6 @@ class WebUiApiOB11ConfigWrapper {
   }
 }
 const OB11ConfigWrapper = new WebUiApiOB11ConfigWrapper();
-
 async function onSettingWindowCreated(view) {
   const isEmpty = (value) => value === void 0 || value === void 0 || value === "";
   await OB11ConfigWrapper.Init(localStorage.getItem("auth"));
