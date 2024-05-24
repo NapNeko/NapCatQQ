@@ -22,10 +22,6 @@ export interface Data {
      * @generated from protobuf field: repeated SysMessage.Body body = 2;
      */
     body: Body[];
-    /**
-     * @generated from protobuf field: repeated SysMessage.Other other = 3;
-     */
-    other: Other[];
 }
 /**
  * @generated from protobuf message SysMessage.Header
@@ -81,42 +77,18 @@ export interface Body {
      */
     other: number;
 }
-/**
- * @generated from protobuf message SysMessage.Event
- */
-export interface Event {
-    /**
-     * @generated from protobuf field: uint32 PeerNumber = 1 [json_name = "PeerNumber"];
-     */
-    peerNumber: number;
-    /**
-     * @generated from protobuf field: string PeerString = 3 [json_name = "PeerString"];
-     */
-    peerString: string;
-}
-/**
- * @generated from protobuf message SysMessage.Other
- */
-export interface Other {
-    /**
-     * @generated from protobuf field: repeated SysMessage.Event event = 2;
-     */
-    event: Event[];
-}
 // @generated message type with reflection information, may provide speed optimized methods
 class Data$Type extends MessageType<Data> {
     constructor() {
         super("SysMessage.Data", [
             { no: 1, name: "header", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => Header },
-            { no: 2, name: "body", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => Body },
-            { no: 3, name: "other", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => Other }
+            { no: 2, name: "body", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => Body }
         ]);
     }
     create(value?: PartialMessage<Data>): Data {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.header = [];
         message.body = [];
-        message.other = [];
         if (value !== undefined)
             reflectionMergePartial<Data>(this, message, value);
         return message;
@@ -131,9 +103,6 @@ class Data$Type extends MessageType<Data> {
                     break;
                 case /* repeated SysMessage.Body body */ 2:
                     message.body.push(Body.internalBinaryRead(reader, reader.uint32(), options));
-                    break;
-                case /* repeated SysMessage.Other other */ 3:
-                    message.other.push(Other.internalBinaryRead(reader, reader.uint32(), options));
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -153,9 +122,6 @@ class Data$Type extends MessageType<Data> {
         /* repeated SysMessage.Body body = 2; */
         for (let i = 0; i < message.body.length; i++)
             Body.internalBinaryWrite(message.body[i], writer.tag(2, WireType.LengthDelimited).fork(), options).join();
-        /* repeated SysMessage.Other other = 3; */
-        for (let i = 0; i < message.other.length; i++)
-            Other.internalBinaryWrite(message.other[i], writer.tag(3, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -331,105 +297,3 @@ class Body$Type extends MessageType<Body> {
  * @generated MessageType for protobuf message SysMessage.Body
  */
 export const Body = new Body$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class Event$Type extends MessageType<Event> {
-    constructor() {
-        super("SysMessage.Event", [
-            { no: 1, name: "PeerNumber", kind: "scalar", jsonName: "PeerNumber", T: 13 /*ScalarType.UINT32*/ },
-            { no: 3, name: "PeerString", kind: "scalar", jsonName: "PeerString", T: 9 /*ScalarType.STRING*/ }
-        ]);
-    }
-    create(value?: PartialMessage<Event>): Event {
-        const message = globalThis.Object.create((this.messagePrototype!));
-        message.peerNumber = 0;
-        message.peerString = "";
-        if (value !== undefined)
-            reflectionMergePartial<Event>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Event): Event {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* uint32 PeerNumber = 1 [json_name = "PeerNumber"];*/ 1:
-                    message.peerNumber = reader.uint32();
-                    break;
-                case /* string PeerString = 3 [json_name = "PeerString"];*/ 3:
-                    message.peerString = reader.string();
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: Event, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* uint32 PeerNumber = 1 [json_name = "PeerNumber"]; */
-        if (message.peerNumber !== 0)
-            writer.tag(1, WireType.Varint).uint32(message.peerNumber);
-        /* string PeerString = 3 [json_name = "PeerString"]; */
-        if (message.peerString !== "")
-            writer.tag(3, WireType.LengthDelimited).string(message.peerString);
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message SysMessage.Event
- */
-export const Event = new Event$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class Other$Type extends MessageType<Other> {
-    constructor() {
-        super("SysMessage.Other", [
-            { no: 2, name: "event", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => Event }
-        ]);
-    }
-    create(value?: PartialMessage<Other>): Other {
-        const message = globalThis.Object.create((this.messagePrototype!));
-        message.event = [];
-        if (value !== undefined)
-            reflectionMergePartial<Other>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Other): Other {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* repeated SysMessage.Event event */ 2:
-                    message.event.push(Event.internalBinaryRead(reader, reader.uint32(), options));
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: Other, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* repeated SysMessage.Event event = 2; */
-        for (let i = 0; i < message.event.length; i++)
-            Event.internalBinaryWrite(message.event[i], writer.tag(2, WireType.LengthDelimited).fork(), options).join();
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message SysMessage.Other
- */
-export const Other = new Other$Type();
