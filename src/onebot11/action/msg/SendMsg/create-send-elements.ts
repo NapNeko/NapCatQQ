@@ -133,8 +133,8 @@ const _handlers: {
 
     return SendMsgElementConstructor.video(path, fileName, thumb);
   },
-  [OB11MessageDataType.miniapp]: async ({ data: any }) => (await SendMsgElementConstructor.miniapp()) as SendArkElement,
-  
+  [OB11MessageDataType.miniapp]: async ({ data: any }) => SendMsgElementConstructor.miniapp(),
+
   [OB11MessageDataType.voice]: async (sendMsg, context) =>
     SendMsgElementConstructor.ptt((await handleOb11FileLikeMessage(sendMsg, context)).path),
 
