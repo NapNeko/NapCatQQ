@@ -3,7 +3,7 @@ import { OB11Constructor } from '../../constructor';
 import { friends, selfInfo } from '@/core/data';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { NTQQUserApi } from '@/core/apis';
+import { NTQQUserApi, WebApi } from '@/core/apis';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 interface Response {
   cookies: string
@@ -22,8 +22,16 @@ export class GetCookies extends BaseAction<Payload, Response> {
   actionName = ActionName.GetCookies;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
-    if (!payload.domain){
+    if (!payload.domain) {
       throw new Error('缺少参数 domain');
+    }
+    if (payload.domain.endsWith("qzone.qq.com")) {
+      const _Skey = await NTQQUserApi.getSkey() as string;
+      // 兼容整个 *.qzone.qq.com
+      let data = (await NTQQUserApi.getQzoneCookies());
+      const Bkn = WebApi.genBkn(data.p_skey);
+      const CookieValue = 'p_skey=' + data.p_skey + '; skey=' + data.skey + '; p_uin=o' + selfInfo.uin + '; uin=o' + selfInfo.uin;
+      return { cookies: CookieValue };
     }
     const _Skey = await NTQQUserApi.getSkey();
     // 取Skey
