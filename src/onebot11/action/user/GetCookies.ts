@@ -60,7 +60,7 @@ export class GetCookies extends BaseAction<Payload, Response> {
     if (!_PSkey || !_Skey) {
       throw new Error('获取Cookies失败');
     }
-    const cookies = `p_skey=${_PSkey}; skey=${_Skey}; p_uin=o${selfInfo.uin}`;
+    const cookies = `p_skey=${_PSkey}; skey=${_Skey}; p_uin=o${selfInfo.uin}; uin=o${selfInfo.uin}`;
     return {
       cookies
     };
