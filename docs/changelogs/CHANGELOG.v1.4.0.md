@@ -1,6 +1,6 @@
 # v1.4.0
 
-QQ Version: Windows 9.9.10-23873 / Linux 3.2.7-23361
+QQ Version: Windows 9.9.10-24108 / Linux 3.2.7-23361
 
 ## 修复与优化
 
