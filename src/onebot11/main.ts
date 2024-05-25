@@ -32,10 +32,22 @@ import { logMessage, logNotice, logRequest } from '@/onebot11/log';
 import { OB11Message } from '@/onebot11/types';
 import { OB11LifeCycleEvent } from './event/meta/OB11LifeCycleEvent';
 import { Data as SysData } from '@/proto/SysMessage';
+import { Data as DeviceData } from '@/proto/SysMessage.DeviceChange';
 import { OB11FriendPokeEvent, OB11GroupPokeEvent } from './event/notice/OB11PokeEvent';
 import { isEqual } from '@/common/utils/helper';
+
+//下面几个其实应该移进Core-Data 缓存实现 但是现在在这里方便
+//
+export interface LineDevice {
+  app_id: string;
+  device_name: string;
+  device_kind: string;
+}
+export let DeviceList = new Array<LineDevice>();
+
 //peer->cached(boolen)
 const PokeCache = new Map<string, boolean>();
+
 export class NapCatOnebot11 {
   private bootTime: number = Date.now() / 1000;  // 秒
 
@@ -128,6 +140,18 @@ export class NapCatOnebot11 {
             pokeEvent = new OB11GroupPokeEvent(peeruin);
             postOB11Event(pokeEvent);
           }
+        }
+        if (MsgType == 528 && subType0 == 349) {
+          const sysDeviceMsg = DeviceData.fromBinary(Buffer.from(protobufData));
+          DeviceList = [];
+          sysDeviceMsg.event[0].content[0].devices.forEach(device => {
+            DeviceList.push({
+              app_id: '0',
+              device_name: device.deviceName,
+              device_kind: 'none'
+            })
+            // log('[设备列表] 设备名称: ' + device.deviceName);
+          });
         }
         // 未区分增加与减少
         // if (MsgType == 34 && subType0 == 0) {
