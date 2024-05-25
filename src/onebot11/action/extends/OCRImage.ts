@@ -22,7 +22,7 @@ export class OCRImage extends BaseAction<Payload, any> {
   protected async _handle(payload: Payload) {
     const { path, isLocal, errMsg } = (await uri2local(payload.image));
     if (errMsg) {
-      throw `头像${payload.file}设置失败,file字段可能格式不正确`;
+      throw `OCR ${payload.file}失败,file字段可能格式不正确`;
     }
     if (path) {
       await checkFileReceived(path, 5000); // 文件不存在QQ会崩溃，需要提前判断
@@ -33,7 +33,6 @@ export class OCRImage extends BaseAction<Payload, any> {
       if (!ret) {
         throw `OCR ${payload.file}失败`;
       }
-      // log(`头像设置返回：${JSON.stringify(ret)}`)
       return ret.result;
     }
     if (!isLocal) {
