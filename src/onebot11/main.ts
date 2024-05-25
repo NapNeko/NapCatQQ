@@ -75,11 +75,11 @@ export class NapCatOnebot11 {
     // Create MsgListener
     const msgListener = new MsgListener();
     msgListener.onRecvSysMsg = async (protobufData: number[]) => {
-      // function buf2hex(buffer: Buffer) {
-      //   return [...new Uint8Array(buffer)]
-      //     .map(x => x.toString(16).padStart(2, '0'))
-      //     .join('');
-      // }
+      function buf2hex(buffer: Buffer) {
+        return [...new Uint8Array(buffer)]
+          .map(x => x.toString(16).padStart(2, '0'))
+          .join('');
+      }
       // let Data: Data = {
       //   header: {
       //     GroupNumber: 0,
@@ -152,6 +152,7 @@ export class NapCatOnebot11 {
         // 528 68  GroupApply
         // 528 138 C2CRecall
         // 528 290 C2CPoke
+        // 528 349 DeviceChange
         // 732 12  GroupBan
         // 732 16  GroupUniqueTitleChange
         // 732 17  GroupRecall
