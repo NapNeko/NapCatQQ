@@ -59,7 +59,7 @@ import { GetGroupHonorInfo } from './go-cqhttp/GetGroupHonorInfo';
 import { GoCQHTTHandleQuickAction } from './go-cqhttp/QuickAction';
 import { GetGroupSystemMsg } from './group/GetGroupSystemMsg';
 import { GetOnlineClient } from './go-cqhttp/GetOnlineClient';
-import { IOCRImage, OCRImage } from './go-cqhttp/OCRImage';
+import { IOCRImage, OCRImage } from './extends/OCRImage';
 
 export const actionHandlers = [
   new RebootNormol(),

@@ -22,7 +22,7 @@ export class OCRImage extends BaseAction<Payload, any> {
   protected async _handle(payload: Payload) {
     const { path, isLocal, errMsg } = (await uri2local(payload.image));
     if (errMsg) {
-      throw `OCR ${payload.file}失败,file字段可能格式不正确`;
+      throw `OCR ${payload.file}失败,image字段可能格式不正确`;
     }
     if (path) {
       await checkFileReceived(path, 5000); // 文件不存在QQ会崩溃，需要提前判断
