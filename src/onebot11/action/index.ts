@@ -58,6 +58,8 @@ import { Reboot, RebootNormol } from './system/Reboot';
 import { GetGroupHonorInfo } from './go-cqhttp/GetGroupHonorInfo';
 import { GoCQHTTHandleQuickAction } from './go-cqhttp/QuickAction';
 import { GetGroupSystemMsg } from './group/GetGroupSystemMsg';
+import { GetOnlineClient } from './go-cqhttp/GetOnlineClient';
+import { IOCRImage, OCRImage } from './go-cqhttp/OCRImage';
 
 export const actionHandlers = [
   new RebootNormol(),
@@ -104,6 +106,9 @@ export const actionHandlers = [
   new GetRobotUinRange(),
   new GetFriendWithCategory(),
   //以下为go-cqhttp api
+  new GetOnlineClient(),
+  new OCRImage(),
+  new IOCRImage(),
   new GetGroupHonorInfo(),
   new SendGroupNotice(),
   new GetGroupNotice(),

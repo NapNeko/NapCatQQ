@@ -79,5 +79,7 @@ export enum ActionName {
     GoCQHTTP_GetForwardMsg = 'get_forward_msg',
     GetFriendMsgHistory = 'get_friend_msg_history',
     GetGroupSystemMsg = 'get_group_system_msg',
-    GetOnlineClient = "get_online_clients"
+    GetOnlineClient = "get_online_clients",
+    OCRImage = "ocr_image",
+    IOCRImage = ".ocr_image"
 }
