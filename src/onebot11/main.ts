@@ -110,7 +110,10 @@ export class NapCatOnebot11 {
       //   }
       // };
       try {
-        //console.log(buf2hex(Buffer.from(protobufData)));
+        // 生产环境会自己去掉
+        if (import.meta.env.MODE == 'development') {
+          console.log(buf2hex(Buffer.from(protobufData)));
+        }
         const sysMsg = SysData.fromBinary(Buffer.from(protobufData));
         const peeruin = sysMsg.header[0].peerNumber;
         const peeruid = sysMsg.header[0].peerString;
