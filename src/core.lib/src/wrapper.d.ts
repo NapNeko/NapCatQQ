@@ -4,6 +4,7 @@ import { NodeIKernelSessionListener, NodeIKernelMsgListener, NodeIKernelLoginLis
 import { NodeIKernelLoginService, NodeIKernelMsgService, NodeIKernelBuddyService, NodeIKernelGroupService, NodeIKernelProfileService, NodeIKernelProfileLikeService, NodeIKernelTicketService, NodeIKernelTipOffService } from './services';
 import { NodeIKernelStorageCleanService } from './services/NodeIKernelStorageCleanService';
 import { NodeIKernelRobotService } from './services/NodeIKernelRobotService';
+import { NodeIKernelNodeMiscService } from './services/NodeIKernelNodeMiscService';
 export interface NodeQQNTWrapperUtil {
     new (): NodeQQNTWrapperUtil;
     getNTUserDataInfoConfig(): string;
@@ -68,6 +69,7 @@ export interface NodeIQQNTWrapperSession {
     getRobotService(): NodeIKernelRobotService;
     getTicketService(): NodeIKernelTicketService;
     getTipOffService(): NodeIKernelTipOffService;
+    getNodeMiscService(): NodeIKernelNodeMiscService;
     getMsgBackupService(): unknown;
     getAlbumService(): unknown;
     getTianShuService(): unknown;
@@ -97,7 +99,6 @@ export interface NodeIQQNTWrapperSession {
     getGuildMsgService(): unknown;
     getLockService(): unknown;
     getMSFService(): unknown;
-    getNodeMiscService(): unknown;
     getGuildHotUpdateService(): unknown;
     getAVSDKService(): unknown;
     getRecentContactService(): unknown;
