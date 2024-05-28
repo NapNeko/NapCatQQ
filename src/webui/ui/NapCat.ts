@@ -141,18 +141,18 @@ async function onSettingWindowCreated(view: Element) {
         SettingItem(
           '启用本地进群时间与发言时间记录',
           undefined,
-          SettingSwitch('ob11.GroupLocalTime.Record', ob11Config.reverseWs.enable, {
+          SettingSwitch('ob11.GroupLocalTime.Record', ob11Config.GroupLocalTime.Record, {
             'control-display-id': 'config-ob11-GroupLocalTime-RecordList',
           })
         ),
-        `<div class="config-host-list" id="config-ob11-GroupLocalTime-RecordList" ${ob11Config.reverseWs.enable ? '' : 'is-hidden'}>
+        `<div class="config-host-list" id="config-ob11-GroupLocalTime-RecordList" ${ob11Config.GroupLocalTime.Record ? '' : 'is-hidden'}>
                 <setting-item data-direction="row">
                     <div>
                         <setting-text>群列表</setting-text>
                     </div>
-                    <setting-button id="config-ob11-GroupLocalTime-RecordList"-add" data-type="primary">添加</setting-button>
+                    <setting-button id="config-ob11-GroupLocalTime-RecordList-add" data-type="primary">添加</setting-button>
                 </setting-item>
-                <div id="config-ob11-GroupLocalTime-RecordList"-list"></div>
+                <div id="config-ob11-GroupLocalTime-RecordList-list"></div>
             </div>`,
         SettingItem(
           '',
@@ -313,7 +313,7 @@ async function onSettingWindowCreated(view: Element) {
     .querySelector('#config-ob11-GroupLocalTime-RecordList-add')
     ?.addEventListener('click', () =>
       addReverseHost('GroupLocalTime.RecordList', document, {
-        placeholder: '如：ws://127.0.0.1:5140/onebot',
+        placeholder: '此处填写群号 -1为全部',
       })
     );
   doc.querySelector('#config-ffmpeg-select')?.addEventListener('click', () => {
