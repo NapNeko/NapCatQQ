@@ -4,6 +4,7 @@ import sqlite3 from 'sqlite3';
 import { log, logDebug, logError } from '@/common/utils/log';
 import { NTQQMsgApi } from '@/core';
 import LRU from "@/common/utils/LRUCache";
+import { ob11Config } from '@/onebot11/config';
 
 export interface IRember {
   last_sent_time: number;
@@ -483,24 +484,27 @@ class DBUtil extends DBUtilBase {
     userId: number,
     time: number
   ) {
-    this.LURCache.set(groupId, userId, time)
+    if (ob11Config.GroupLocalTimeRecord[0] == -1 || ob11Config.GroupLocalTimeRecord.includes(groupId))
+      this.LURCache.set(groupId, userId, time)
   }
   async insertJoinTime(
     groupId: number,
     userId: number,
     time: number
   ) {
-    await this.createGroupInfoTimeTableIfNotExist(groupId);
-    this.db!.all(
-      `INSERT OR REPLACE INTO "${groupId}"  (user_id, last_sent_time, join_time) VALUES (?,?,?)`,
-      [userId, time, time],
-      (err) => {
-        if (err)
-          logError(err),
-            Promise.reject(),
-            console.log("插入入群时间失败", userId, groupId);
-      }
-    );
+    if (ob11Config.GroupLocalTimeRecord[0] == -1 || ob11Config.GroupLocalTimeRecord.includes(groupId)){
+      await this.createGroupInfoTimeTableIfNotExist(groupId);
+      this.db!.all(
+        `INSERT OR REPLACE INTO "${groupId}"  (user_id, last_sent_time, join_time) VALUES (?,?,?)`,
+        [userId, time, time],
+        (err) => {
+          if (err)
+            logError(err),
+              Promise.reject(),
+              console.log("插入入群时间失败", userId, groupId);
+        }
+      );
+    }
   }
 }
 
