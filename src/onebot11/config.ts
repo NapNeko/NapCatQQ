@@ -33,6 +33,8 @@ export interface OB11Config {
   reportSelfMessage: boolean;
   token: string;
 
+  localDB: boolean;
+
   read(): OB11Config;
 
   save(config: OB11Config): void;
@@ -64,6 +66,8 @@ class Config extends ConfigBase<OB11Config> implements OB11Config {
   musicSignUrl = '';
   reportSelfMessage = false;
   token = '';
+
+  localDB = true;
 
   getConfigPath() {
     return path.join(this.getConfigDir(), `onebot11_${selfInfo.uin}.json`);

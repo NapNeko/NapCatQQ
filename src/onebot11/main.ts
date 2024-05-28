@@ -35,6 +35,7 @@ import { Data as SysData } from '@/proto/SysMessage';
 import { Data as DeviceData } from '@/proto/SysMessage.DeviceChange';
 import { OB11FriendPokeEvent, OB11GroupPokeEvent } from './event/notice/OB11PokeEvent';
 import { isEqual } from '@/common/utils/helper';
+import { insertLastSentTime } from "./action/group/LastSendAndJoinRemberLRU"
 
 //下面几个其实应该移进Core-Data 缓存实现 但是现在在这里方便
 //
@@ -286,6 +287,9 @@ export class NapCatOnebot11 {
         }
         if (msg.post_type === 'message') {
           logMessage(msg as OB11Message).then().catch(logError);
+           if (msg.message_type == 'group' && msg.group_id) {
+              insertLastSentTime(msg.group_id, msg.user_id, msg.time)
+            }
         } else if (msg.post_type === 'notice') {
           logNotice(msg).then().catch(logError);
         } else if (msg.post_type === 'request') {
