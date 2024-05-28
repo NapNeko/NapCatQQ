@@ -62,7 +62,7 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
      // 无管理员权限通过本地记录获取发言时间
     const haveAdmin = RetGroupMember[0].last_sent_time !== 0;
     if (!haveAdmin) {
-      logDebug('没有管理员权限，使用本地记录');
+      //logDebug('没有管理员权限，使用本地记录');
       const _sendAndJoinRember = await getLastSentTimeAndJoinTime(parseInt(group.groupCode));
       _sendAndJoinRember.forEach((rember) => {
         const member = RetGroupMember.find(member=>member.user_id == rember.user_id);

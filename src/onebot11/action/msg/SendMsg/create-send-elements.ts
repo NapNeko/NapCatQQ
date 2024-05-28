@@ -117,14 +117,14 @@ const _handlers: {
 
   [OB11MessageDataType.file]: async (sendMsg, context) => {
     const { path, fileName } = await handleOb11FileLikeMessage(sendMsg, context);
-    logDebug('发送文件', path, fileName);
+    //logDebug('发送文件', path, fileName);
     return SendMsgElementConstructor.file(path, fileName);
   },
 
   [OB11MessageDataType.video]: async (sendMsg, context) => {
     const { path, fileName } = await handleOb11FileLikeMessage(sendMsg, context);
 
-    logDebug('发送视频', path, fileName);
+    //logDebug('发送视频', path, fileName);
     let thumb = sendMsg.data.thumb;
     if (thumb) {
       const uri2LocalRes = await uri2local(thumb);

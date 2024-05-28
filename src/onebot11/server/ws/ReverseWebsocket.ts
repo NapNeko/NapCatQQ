@@ -40,7 +40,7 @@ export class ReverseWebsocket {
     try {
       receiveData = JSON.parse(msg.toString());
       echo = receiveData.echo;
-      logDebug('收到反向Websocket消息', receiveData);
+      //logDebug('收到反向Websocket消息', receiveData);
     } catch (e) {
       return wsReply(this.websocket!, OB11Response.error('json解析失败，请检查数据格式', 1400, echo));
     }

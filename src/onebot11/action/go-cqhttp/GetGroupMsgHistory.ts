@@ -38,7 +38,7 @@ export default class GoCQHTTPGetGroupMsgHistory extends BaseAction<Payload, Resp
       chatType: ChatType.group,
       peerUid: group.groupCode
     }, startMsgId, parseInt(payload.count?.toString()) || 20));
-    logDebug(historyResult);
+    //logDebug(historyResult);
     const msgList = historyResult.msgList;
     await Promise.all(msgList.map(async msg => {
       msg.id = await dbUtil.addMsg(msg);

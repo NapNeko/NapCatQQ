@@ -37,14 +37,14 @@ export abstract class HttpServerBase {
     const authHeader = req.get('authorization');
     if (authHeader) {
       clientToken = authHeader.split('Bearer ').pop() || '';
-      logDebug('receive http header token', clientToken);
+      //logDebug('receive http header token', clientToken);
     } else if (req.query.access_token) {
       if (Array.isArray(req.query.access_token)) {
         clientToken = req.query.access_token[0].toString();
       } else {
         clientToken = req.query.access_token.toString();
       }
-      logDebug('receive http url token', clientToken);
+      //logDebug('receive http url token', clientToken);
     }
 
     if (serverToken && clientToken != serverToken) {
