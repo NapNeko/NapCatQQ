@@ -33,7 +33,7 @@ export interface OB11Config {
   reportSelfMessage: boolean;
   token: string;
 
-  GroupLocalTimeRecord: Array<string>;
+  GroupLocalTimeRecord: Array<number>;
 
   read(): OB11Config;
 
@@ -67,7 +67,7 @@ class Config extends ConfigBase<OB11Config> implements OB11Config {
   reportSelfMessage = false;
   token = '';
 
-  GroupLocalTimeRecord = [];
+  GroupLocalTimeRecord =  [] as Array<number>;
 
   getConfigPath() {
     return path.join(this.getConfigDir(), `onebot11_${selfInfo.uin}.json`);
