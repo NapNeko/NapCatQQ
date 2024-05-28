@@ -39,7 +39,7 @@ export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
       chatType: friend ? ChatType.friend : ChatType.temp,
       peerUid: uid
     }, startMsgId, parseInt(payload.count?.toString()) || 20));
-    logDebug(historyResult);
+    //logDebug(historyResult);
     const msgList = historyResult.msgList;
     await Promise.all(msgList.map(async msg => {
       msg.id = await dbUtil.addMsg(msg);

@@ -22,7 +22,7 @@ export default class GoCQHTTPGetStrangerInfo extends BaseAction<Payload, OB11Use
 
   protected async _handle(payload: Payload): Promise<OB11User> {
     const user_id = payload.user_id.toString();
-    logDebug('uidMaps', uid2UinMap);
+    //logDebug('uidMaps', uidMaps);
     const uid = getUidByUin(user_id);
     if (!uid) {
       throw new Error('查无此人');

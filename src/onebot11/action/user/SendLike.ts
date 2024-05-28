@@ -20,7 +20,7 @@ export default class SendLike extends BaseAction<Payload, null> {
   actionName = ActionName.SendLike;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<null> {
-    logDebug('点赞参数', payload);
+    //logDebug('点赞参数', payload);
     try {
       const qq = payload.user_id.toString();
       const friend = await getFriend(qq);
@@ -31,7 +31,7 @@ export default class SendLike extends BaseAction<Payload, null> {
         uid = friend.uid;
       }
       const result = await NTQQUserApi.like(uid, parseInt(payload.times?.toString()) || 1);
-      logDebug('点赞结果', result);
+      //logDebug('点赞结果', result);
       if (result.result !== 0) {
         throw Error(result.errMsg);
       }

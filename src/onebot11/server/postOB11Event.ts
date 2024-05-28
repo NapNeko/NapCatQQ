@@ -17,6 +17,7 @@ import { NTQQFriendApi, NTQQGroupApi, NTQQMsgApi } from '@/core/apis';
 import createSendElements from '../action/msg/SendMsg/create-send-elements';
 
 export type QuickActionEvent = OB11Message | OB11BaseMetaEvent | OB11BaseNoticeEvent
+export type PostEventType = OB11Message | OB11BaseMetaEvent | OB11BaseNoticeEvent
 
 interface QuickActionPrivateMessage {
   reply?: string;
@@ -97,12 +98,12 @@ export function postOB11Event(msg: QuickActionEvent, reportSelf = false, postWs 
         headers,
         body: msgStr
       }).then(async (res) => {
-        logDebug(`新消息事件HTTP上报成功: ${host} `, msgStr);
+        //logDebug(`新消息事件HTTP上报成功: ${host} `, msgStr);
         // todo: 处理不够优雅，应该使用高级泛型进行QuickAction类型识别
         let resJson: QuickAction;
         try {
           resJson = await res.json();
-          logDebug('新消息事件HTTP上报返回快速操作: ', JSON.stringify(resJson));
+          //logDebug('新消息事件HTTP上报返回快速操作: ', JSON.stringify(resJson));
         } catch (e) {
           logDebug('新消息事件HTTP上报没有返回快速操作，不需要处理');
           return;

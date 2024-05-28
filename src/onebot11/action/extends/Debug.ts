@@ -20,7 +20,7 @@ export default class Debug extends BaseAction<Payload, any> {
   actionName = ActionName.Debug;
 
   protected async _handle(payload: Payload): Promise<any> {
-    logDebug('debug call ntqq api', payload);
+    //logDebug('debug call ntqq api', payload);
     const ntqqApi = [NTQQMsgApi, NTQQFriendApi, NTQQGroupApi, NTQQUserApi, NTQQFileApi,
       // NTQQFileCacheApi,
     ];

@@ -14,7 +14,7 @@ export async function checkVersion(): Promise<string> {
       try {
         version = (await RequestUtil.HttpGetJson<{ version: string }>(url)).version;
       } catch (e) {
-        logDebug(e);
+        logDebug("检测更新异常",e);
       }
       if (version) {
         resolve(version);

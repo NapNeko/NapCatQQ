@@ -14,7 +14,7 @@ async function cloneMsg(msg: RawMessage): Promise<RawMessage | undefined> {
     peerUid: selfInfo.uid
   };
 
-  logDebug('克隆的目标消息', msg);
+ // logDebug('克隆的目标消息', msg);
 
   const sendElements: SendMessageElement[] = [];
 
@@ -26,7 +26,7 @@ async function cloneMsg(msg: RawMessage): Promise<RawMessage | undefined> {
     logDebug('需要clone的消息无法解析，将会忽略掉', msg);
   }
 
-  logDebug('克隆消息', sendElements);
+  //logDebug('克隆消息', sendElements);
 
   try {
     const nodeMsg = await NTQQMsgApi.sendMsg(selfPeer, sendElements, true);
@@ -71,7 +71,7 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
       // 提取消息段，发给自己生成消息id
       try {
         const { sendElements } = await createSendElements(normalize(messageNode.data.content), group);
-        logDebug('开始生成转发节点', sendElements);
+        //logDebug('开始生成转发节点', sendElements);
         const sendElementsSplit: SendMessageElement[][] = [];
         let splitIndex = 0;
         for (const sendElement of sendElements) {
@@ -88,7 +88,7 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
           } else {
             sendElementsSplit[splitIndex].push(sendElement);
           }
-          logDebug(sendElementsSplit);
+          //logDebug(sendElementsSplit);
         }
         // log("分割后的转发节点", sendElementsSplit)
         const MsgNodeList: Promise<RawMessage>[] = [];
@@ -100,7 +100,7 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
         for (const msgNode of MsgNodeList) {
           const result = await msgNode;
           nodeMsgIds.push(result.msgId);
-          logDebug('转发节点生成成功', result.msgId);
+          //logDebug('转发节点生成成功', result.msgId);
         }
       } catch (e) {
         logDebug('生成转发消息节点失败', e);
@@ -124,10 +124,10 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
       }
     }
   }
-  logDebug('nodeMsgArray', nodeMsgArray);
+  //logDebug('nodeMsgArray', nodeMsgArray);
   nodeMsgIds = nodeMsgArray.map(msg => msg.msgId);
   if (needSendSelf) {
-    logDebug('需要克隆转发消息');
+    //logDebug('需要克隆转发消息');
     for (const [index, msg] of nodeMsgArray.entries()) {
       if (msg.peerUid !== selfInfo.uid) {
         const clonedMsg = await cloneMsg(msg);
