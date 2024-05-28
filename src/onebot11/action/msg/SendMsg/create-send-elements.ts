@@ -10,7 +10,7 @@ import {
   SendMsgElementConstructor
 } from '@/core';
 import { getGroupMember } from '@/core/data';
-import { dbUtil } from '@/core/utils/db';
+import { dbUtil } from '@/common/utils/db';
 import { logDebug, logError } from '@/common/utils/log';
 import { uri2local } from '@/common/utils/file';
 import { ob11Config } from '@/onebot11/config';

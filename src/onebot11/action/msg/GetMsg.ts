@@ -2,7 +2,7 @@ import { OB11Message } from '../../types';
 import { OB11Constructor } from '../../constructor';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { dbUtil } from '@/core/utils/db';
+import { dbUtil } from '@/common/utils/db';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
 

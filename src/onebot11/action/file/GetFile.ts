@@ -1,6 +1,6 @@
 import BaseAction from '../BaseAction';
 import fs from 'fs/promises';
-import { dbUtil } from '@/core/utils/db';
+import { dbUtil } from '@/common/utils/db';
 import { ob11Config } from '@/onebot11/config';
 import { log, logDebug } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';

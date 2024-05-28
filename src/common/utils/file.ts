@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import util from 'util';
 import path from 'node:path';
 import { log } from './log';
-import { dbUtil } from '@/core/utils/db';
+import { dbUtil } from '@/common/utils/db';
 import * as fileType from 'file-type';
 import { v4 as uuidv4 } from 'uuid';
 import { napCatCore } from '@/core';
