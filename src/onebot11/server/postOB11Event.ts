@@ -11,7 +11,7 @@ import { normalize, sendMsg } from '../action/msg/SendMsg';
 import { OB11FriendRequestEvent } from '../event/request/OB11FriendRequest';
 import { OB11GroupRequestEvent } from '../event/request/OB11GroupRequest';
 import { isNull } from '@/common/utils/helper';
-import { dbUtil } from '@/core/utils/db';
+import { dbUtil } from '@/common/utils/db';
 import { friendRequests, getGroup, getUidByUin, groupNotifies, selfInfo } from '@/core/data';
 import { NTQQFriendApi, NTQQGroupApi, NTQQMsgApi } from '@/core/apis';
 import createSendElements from '../action/msg/SendMsg/create-send-elements';

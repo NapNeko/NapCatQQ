@@ -1,7 +1,7 @@
 import { ChatType, ElementType, Group, NTQQMsgApi, Peer, RawMessage, SendMessageElement } from '@/core';
 import { OB11MessageNode } from '@/onebot11/types';
 import { selfInfo } from '@/core/data';
-import { dbUtil } from '@/core/utils/db';
+import { dbUtil } from '@/common/utils/db';
 import createSendElements from '@/onebot11/action/msg/SendMsg/create-send-elements';
 import { logDebug, logError } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';

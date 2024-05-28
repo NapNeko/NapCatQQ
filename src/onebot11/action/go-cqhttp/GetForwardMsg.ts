@@ -1,7 +1,7 @@
 import BaseAction from '../BaseAction';
 import { OB11ForwardMessage, OB11Message, OB11MessageData } from '../../types';
 import { NTQQMsgApi } from '@/core/apis';
-import { dbUtil } from '@/core/utils/db';
+import { dbUtil } from '@/common/utils/db';
 import { OB11Constructor } from '../../constructor';
 import { ActionName, BaseCheckResult } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';

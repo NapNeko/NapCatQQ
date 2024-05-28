@@ -8,7 +8,7 @@ import { WebApi } from '@/core/apis/webapi';
 import { logDebug } from '@/common/utils/log';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { ob11Config } from '@/onebot11/config';
-import { dbUtil } from '@/core/utils/db';
+import { dbUtil } from '@/common/utils/db';
 
 const SchemaData = {
   type: 'object',

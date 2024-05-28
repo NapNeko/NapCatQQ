@@ -1,7 +1,7 @@
 import BaseAction from '../BaseAction';
 import { NTQQMsgApi } from '@/core/apis';
 import { ChatType, Peer } from '@/core/entities';
-import { dbUtil } from '@/core/utils/db';
+import { dbUtil } from '@/common/utils/db';
 import { getUidByUin } from '@/core/data';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';

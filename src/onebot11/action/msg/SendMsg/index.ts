@@ -8,7 +8,7 @@ import {
 } from '@/onebot11/types';
 import { ActionName, BaseCheckResult } from '@/onebot11/action/types';
 import { getFriend, getGroup, getUidByUin } from '@/core/data';
-import { dbUtil } from '@/core/utils/db';
+import { dbUtil } from '@/common/utils/db';
 import { ChatType, ElementType, Group, NTQQMsgApi, Peer, SendMessageElement, } from '@/core';
 import fs from 'node:fs';
 import { logDebug, logError } from '@/common/utils/log';

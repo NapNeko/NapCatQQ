@@ -1,6 +1,6 @@
 import { ActionName } from '../types';
 import BaseAction from '../BaseAction';
-import { dbUtil } from '@/core/utils/db';
+import { dbUtil } from '@/common/utils/db';
 import { NTQQMsgApi } from '@/core/apis';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 

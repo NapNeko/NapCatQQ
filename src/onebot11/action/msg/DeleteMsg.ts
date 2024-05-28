@@ -1,7 +1,7 @@
 import { NTQQMsgApi } from '@/core/apis';
 import { ActionName } from '../types';
 import BaseAction from '../BaseAction';
-import { dbUtil } from '@/core/utils/db';
+import { dbUtil } from '@/common/utils/db';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
 const SchemaData = {
