@@ -69,7 +69,7 @@ async function onSettingWindowCreated(view: Element) {
                     </div>
                     <div class="q-input">
                         <input id="config-ob11-http-secret" class="q-input__inner" data-config-key="ob11.http.secret" type="text" value="${ob11Config.http.secret
-}" placeholder="未设置" />
+        }" placeholder="未设置" />
                     </div>
                 </setting-item>
                 <setting-item data-direction="row">
@@ -101,8 +101,7 @@ async function onSettingWindowCreated(view: Element) {
             'control-display-id': 'config-ob11-reverseWs-urls',
           })
         ),
-        `<div class="config-host-list" id="config-ob11-reverseWs-urls" ${ob11Config.reverseWs.enable ? '' : 'is-hidden'
-        }>
+        `<div class="config-host-list" id="config-ob11-reverseWs-urls" ${ob11Config.reverseWs.enable ? '' : 'is-hidden' }>
                 <setting-item data-direction="row">
                     <div>
                         <setting-text>反向 WebSocket 监听地址</setting-text>
@@ -138,7 +137,23 @@ async function onSettingWindowCreated(view: Element) {
           undefined,
           `<div class="q-input" style="width:210px;"><input class="q-input__inner" data-config-key="ob11.musicSignUrl" type="text" value="${ob11Config.musicSignUrl}" placeholder="未设置" /></div>`,
           'ob11.musicSignUrl'
+        ), 
+        SettingItem(
+          '启用本地进群时间与发言时间记录',
+          undefined,
+          SettingSwitch('ob11.GroupLocalTimeRecord', ob11Config.reverseWs.enable, {
+            'control-display-id': 'config-ob11-GroupLocalTimeRecordList',
+          })
         ),
+        `<div class="config-host-list" id="config-ob11-GroupLocalTimeRecordList" ${ob11Config.reverseWs.enable ? '' : 'is-hidden'}>
+                <setting-item data-direction="row">
+                    <div>
+                        <setting-text>反向 WebSocket 监听地址</setting-text>
+                    </div>
+                    <setting-button id="config-ob11-GroupLocalTimeRecordList-add" data-type="primary">添加</setting-button>
+                </setting-item>
+                <div id="config-ob11-GroupLocalTimeRecordList-list"></div>
+            </div>`,
         SettingItem(
           '',
           undefined,
