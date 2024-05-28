@@ -26,7 +26,8 @@ export interface OB11Config {
   musicSignUrl: '';
   reportSelfMessage: boolean;
   token: '';
-  GroupLocalTimeRecord: [];
+  GroupLocalTimeRecord: false;
+  GroupLocalTimeRecordList: [];
 }
 
 class WebUiApiOB11ConfigWrapper {

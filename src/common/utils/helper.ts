@@ -145,7 +145,8 @@ export function migrateConfig(oldConfig: any) {
     musicSignUrl: oldConfig.musicSignUrl,
     reportSelfMessage: oldConfig.reportSelfMessage,
     token: oldConfig.token,
-    GroupLocalTimeRecord: []
+    GroupLocalTimeRecord: false,
+    GroupLocalTimeRecordList: []
   };
   return newConfig;
 }
