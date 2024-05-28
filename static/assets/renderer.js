@@ -275,6 +275,22 @@ async function onSettingWindowCreated(view) {
           "ob11.musicSignUrl"
         ),
         SettingItem(
+          "启用本地进群时间与发言时间记录",
+          void 0,
+          SettingSwitch("ob11.GroupLocalTime.Record", ob11Config.reverseWs.enable, {
+            "control-display-id": "config-ob11-GroupLocalTime-RecordList"
+          })
+        ),
+        `<div class="config-host-list" id="config-ob11-GroupLocalTime-RecordList" ${ob11Config.reverseWs.enable ? "" : "is-hidden"}>
+                <setting-item data-direction="row">
+                    <div>
+                        <setting-text>群列表</setting-text>
+                    </div>
+                    <setting-button id="config-ob11-GroupLocalTime-RecordList"-add" data-type="primary">添加</setting-button>
+                </setting-item>
+                <div id="config-ob11-GroupLocalTime-RecordList"-list"></div>
+            </div>`,
+        SettingItem(
           "",
           void 0,
           SettingButton("保存", "config-ob11-save", "primary")
@@ -388,6 +404,7 @@ async function onSettingWindowCreated(view) {
   };
   initReverseHost("http.postUrls", doc);
   initReverseHost("reverseWs.urls", doc);
+  initReverseHost("GroupLocalTime.RecordList", doc);
   doc.querySelector("#config-ob11-http-postUrls-add")?.addEventListener(
     "click",
     () => addReverseHost("http.postUrls", document, {
@@ -397,6 +414,12 @@ async function onSettingWindowCreated(view) {
   doc.querySelector("#config-ob11-reverseWs-urls-add")?.addEventListener(
     "click",
     () => addReverseHost("reverseWs.urls", document, {
+      placeholder: "如：ws://127.0.0.1:5140/onebot"
+    })
+  );
+  doc.querySelector("#config-ob11-GroupLocalTime-RecordList-add")?.addEventListener(
+    "click",
+    () => addReverseHost("GroupLocalTime.RecordList", document, {
       placeholder: "如：ws://127.0.0.1:5140/onebot"
     })
   );

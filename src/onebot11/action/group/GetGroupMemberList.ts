@@ -62,7 +62,7 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
           MemberMap.set(webGroupMembers[i]?.uin, MemberData);
         }
       }
-    } else if (ob11Config.GroupLocalTimeRecord && ob11Config.GroupLocalTimeRecordList[0] === -1 || ob11Config.GroupLocalTimeRecordList.includes(payload.group_id)) {
+    } else if (ob11Config.GroupLocalTime.Record && ob11Config.GroupLocalTime.RecordList[0] === '-1' || ob11Config.GroupLocalTime.RecordList.includes(payload.group_id.toString())) {
       const _sendAndJoinRember = await dbUtil.getLastSentTimeAndJoinTime(payload.group_id);
       _sendAndJoinRember.forEach((element) => {
         let MemberData = MemberMap.get(element.user_id);

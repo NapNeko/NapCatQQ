@@ -138,6 +138,10 @@ export function migrateConfig(oldConfig: any) {
       enable: oldConfig.enableWsReverse,
       urls: oldConfig.wsReverseUrls,
     },
+    GroupLocalTime: {
+      Record: false,
+      RecordList: []
+    },
     debug: oldConfig.debug,
     heartInterval: oldConfig.heartInterval,
     messagePostFormat: oldConfig.messagePostFormat,
@@ -145,8 +149,7 @@ export function migrateConfig(oldConfig: any) {
     musicSignUrl: oldConfig.musicSignUrl,
     reportSelfMessage: oldConfig.reportSelfMessage,
     token: oldConfig.token,
-    GroupLocalTimeRecord: false,
-    GroupLocalTimeRecordList: []
+
   };
   return newConfig;
 }

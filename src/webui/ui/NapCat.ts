@@ -101,7 +101,7 @@ async function onSettingWindowCreated(view: Element) {
             'control-display-id': 'config-ob11-reverseWs-urls',
           })
         ),
-        `<div class="config-host-list" id="config-ob11-reverseWs-urls" ${ob11Config.reverseWs.enable ? '' : 'is-hidden' }>
+        `<div class="config-host-list" id="config-ob11-reverseWs-urls" ${ob11Config.reverseWs.enable ? '' : 'is-hidden'}>
                 <setting-item data-direction="row">
                     <div>
                         <setting-text>反向 WebSocket 监听地址</setting-text>
@@ -137,22 +137,22 @@ async function onSettingWindowCreated(view: Element) {
           undefined,
           `<div class="q-input" style="width:210px;"><input class="q-input__inner" data-config-key="ob11.musicSignUrl" type="text" value="${ob11Config.musicSignUrl}" placeholder="未设置" /></div>`,
           'ob11.musicSignUrl'
-        ), 
+        ),
         SettingItem(
           '启用本地进群时间与发言时间记录',
           undefined,
-          SettingSwitch('ob11.GroupLocalTimeRecord', ob11Config.reverseWs.enable, {
-            'control-display-id': 'config-ob11-GroupLocalTimeRecordList',
+          SettingSwitch('ob11.GroupLocalTime.Record', ob11Config.reverseWs.enable, {
+            'control-display-id': 'config-ob11-GroupLocalTime-RecordList',
           })
         ),
-        `<div class="config-host-list" id="config-ob11-GroupLocalTimeRecordList" ${ob11Config.reverseWs.enable ? '' : 'is-hidden'}>
+        `<div class="config-host-list" id="config-ob11-GroupLocalTime-RecordList" ${ob11Config.reverseWs.enable ? '' : 'is-hidden'}>
                 <setting-item data-direction="row">
                     <div>
-                        <setting-text>反向 WebSocket 监听地址</setting-text>
+                        <setting-text>群列表</setting-text>
                     </div>
-                    <setting-button id="config-ob11-GroupLocalTimeRecordList-add" data-type="primary">添加</setting-button>
+                    <setting-button id="config-ob11-GroupLocalTime-RecordList"-add" data-type="primary">添加</setting-button>
                 </setting-item>
-                <div id="config-ob11-GroupLocalTimeRecordList-list"></div>
+                <div id="config-ob11-GroupLocalTime-RecordList"-list"></div>
             </div>`,
         SettingItem(
           '',
@@ -261,7 +261,6 @@ async function onSettingWindowCreated(view: Element) {
     inputAttr: any = {}
   ) => {
     type = type.replace(/\./g, '-');//替换操作
-
     const hostContainerDom = doc.body.querySelector(
       `#config-ob11-${type}-list`
     );
@@ -293,6 +292,7 @@ async function onSettingWindowCreated(view: Element) {
 
   initReverseHost('http.postUrls', doc);
   initReverseHost('reverseWs.urls', doc);
+  initReverseHost('GroupLocalTime.RecordList', doc);
 
   doc
     .querySelector('#config-ob11-http-postUrls-add')
@@ -309,7 +309,13 @@ async function onSettingWindowCreated(view: Element) {
         placeholder: '如：ws://127.0.0.1:5140/onebot',
       })
     );
-
+  doc
+    .querySelector('#config-ob11-GroupLocalTime-RecordList-add')
+    ?.addEventListener('click', () =>
+      addReverseHost('GroupLocalTime.RecordList', document, {
+        placeholder: '如：ws://127.0.0.1:5140/onebot',
+      })
+    );
   doc.querySelector('#config-ffmpeg-select')?.addEventListener('click', () => {
     //选择ffmpeg
   });
