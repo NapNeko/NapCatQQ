@@ -2,7 +2,7 @@ import sqlite3 from "sqlite3";
 import { logError, logDebug } from "@/common/utils/log";
 import { selfInfo } from "@/core/data";
 import { ob11Config } from "@/onebot11/config";
-import LRU from "./LRUCache";
+import LRU from "../../onebot11/action/group/LRUCache";
 import path from "path";
 
 const dbPath = path.join(
@@ -32,8 +32,7 @@ const createTableSQL = (groupId: number) =>
     );`;
 
 async function createTableIfNotExist(groupId: number) {
-  // 未开启本地记录
-  if (!ob11Config.localDB) return;
+
 
   logDebug("检测数据表存在", groupId);
   if (groupIds.includes(groupId)) {
@@ -63,9 +62,6 @@ export async function insertJoinTime(
   userId: number,
   time: number
 ) {
-  // 未开启本地记录
-  if (!ob11Config.localDB) return;
-
   logDebug("插入入群时间", userId, groupId);
   await createTableIfNotExist(groupId);
   remberDb.all(
@@ -183,6 +179,5 @@ export function insertLastSentTime(
   userId: number,
   time: number
 ) {
-  if (!ob11Config.localDB) return;
   LURCache.set(groupId, userId,time)
 }

@@ -108,7 +108,7 @@ class WebUiApiOB11ConfigWrapper {
     this.retCredential = Credential;
   }
   async GetOB11Config() {
-    let ConfigResponse = await fetch("/api/OB11Config/GetConfig", {
+    const ConfigResponse = await fetch("/api/OB11Config/GetConfig", {
       method: "POST",
       headers: {
         Authorization: "Bearer " + this.retCredential,
@@ -116,7 +116,7 @@ class WebUiApiOB11ConfigWrapper {
       }
     });
     if (ConfigResponse.status == 200) {
-      let ConfigResponseJson = await ConfigResponse.json();
+      const ConfigResponseJson = await ConfigResponse.json();
       if (ConfigResponseJson.code == 0) {
         return ConfigResponseJson?.data;
       }
@@ -124,7 +124,7 @@ class WebUiApiOB11ConfigWrapper {
     return {};
   }
   async SetOB11Config(config) {
-    let ConfigResponse = await fetch("/api/OB11Config/SetConfig", {
+    const ConfigResponse = await fetch("/api/OB11Config/SetConfig", {
       method: "POST",
       headers: {
         Authorization: "Bearer " + this.retCredential,
@@ -133,7 +133,7 @@ class WebUiApiOB11ConfigWrapper {
       body: JSON.stringify({ config: JSON.stringify(config) })
     });
     if (ConfigResponse.status == 200) {
-      let ConfigResponseJson = await ConfigResponse.json();
+      const ConfigResponseJson = await ConfigResponse.json();
       if (ConfigResponseJson.code == 0) {
         return true;
       }
@@ -142,10 +142,11 @@ class WebUiApiOB11ConfigWrapper {
   }
 }
 const OB11ConfigWrapper = new WebUiApiOB11ConfigWrapper();
+
 async function onSettingWindowCreated(view) {
   const isEmpty = (value) => value === void 0 || value === void 0 || value === "";
   await OB11ConfigWrapper.Init(localStorage.getItem("auth"));
-  let ob11Config = await OB11ConfigWrapper.GetOB11Config();
+  const ob11Config = await OB11ConfigWrapper.GetOB11Config();
   const setOB11Config = (key, value) => {
     const configKey = key.split(".");
     if (configKey.length === 2) {
@@ -289,18 +290,18 @@ async function onSettingWindowCreated(view) {
       SettingList([
         SettingItem(
           "GitHub 仓库",
-          `https://github.com/NapNeko/NapCatQQ`,
+          "https://github.com/NapNeko/NapCatQQ",
           SettingButton("点个星星", "open-github")
         ),
-        SettingItem("NapCat 文档", ``, SettingButton("看看文档", "open-docs")),
+        SettingItem("NapCat 文档", "", SettingButton("看看文档", "open-docs")),
         SettingItem(
           "Telegram 群",
-          `https://t.me/+nLZEnpne-pQ1OWFl`,
+          "https://t.me/+nLZEnpne-pQ1OWFl",
           SettingButton("进去逛逛", "open-telegram")
         ),
         SettingItem(
           "QQ 群",
-          `545402644`,
+          "545402644",
           SettingButton("我要进去", "open-qq-group")
         )
       ]),
@@ -413,7 +414,7 @@ async function onSettingWindowCreated(view) {
         dom.removeAttribute("is-active");
       if (!isEmpty(dom.dataset.controlDisplayId)) {
         const displayDom = document.querySelector(
-          //@ts-ignore 等待修复
+          //@ts-expect-error 等待修复
           `#${dom.dataset.controlDisplayId}`
         );
         if (active)
