@@ -286,7 +286,8 @@ export class NapCatOnebot11 {
         }
         if (msg.post_type === 'message') {
           logMessage(msg as OB11Message).then().catch(logError);
-          if (msg.message_type == 'group' && msg.group_id && (ob11Config.GroupLocalTimeRecord as Array<number>).find((item) => item == msg.group_id)) {
+          // 大概测试了一下，10000个以内 includes 和 find 性能差距不大
+          if (msg.message_type == 'group' && msg.group_id && (ob11Config.GroupLocalTimeRecord[0] === -1 || ob11Config.GroupLocalTimeRecord.find(gid=>gid == msg.group_id))) {
             dbUtil.insertLastSentTime(msg.group_id, msg.user_id, msg.time);
           }
         } else if (msg.post_type === 'notice') {
