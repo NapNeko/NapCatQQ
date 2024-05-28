@@ -55,7 +55,6 @@ class LRU<T> {
     this.removeNode(node);
     this.onFuncs.forEach((func) => func(node));
     this.currentSize--;
-    logDebug("removeLRUNode", "After", this.currentSize);
   }
 
   public on(func: (node: cacheNode<T>) => void) {
@@ -63,13 +62,6 @@ class LRU<T> {
   }
 
   private removeExpired() {
-    console.log("remove expired LRU node", !!this.tail);
-    //console.log(`now current`, this.currentSize);
-    //const rCurrent = Object.values(this.cache)
-    //  .map((group) => Object.values(group))
-    //  .flat().length;
-    //console.log(`realiy current`, rCurrent);
-
     const now = Date.now();
     let current = this.tail;
     const nodesToRemove: cacheNode<T>[] = [];
@@ -94,24 +86,13 @@ class LRU<T> {
       this.tail = newTail;
     }
 
-    // 删除收集到的节点
-    // console.log(nodesToRemove)
     nodesToRemove.forEach((node) => {
-      // console.log("node is null", node === null);
       node.prev = node.next = null;
       delete this.cache[node.groupId][node.userId];
 
       this.currentSize--;
       this.onFuncs.forEach((func) => func(node));
     });
-    
-    console.log("after remove expired current", this.currentSize);
-    // console.log(
-    //  "after remove expired realiy current",
-    //  Object.values(this.cache)
-    //    .map((group) => Object.values(group))
-    //    .flat().length
-    // );
   }
 
   private addNode(node: cacheNode<T>) {
@@ -134,41 +115,27 @@ class LRU<T> {
     this.removeNode(node);
     this.addNode(node);
     node.prev = null;
-
-    logDebug("moveToHead", node.groupId, node.userId, node.value);
   }
 
   public set(groupId: group_id, userId: user_id, value: T) {
-    logDebug("set", groupId, userId, value, this.currentSize);
-
     if (!this.cache[groupId]) {
-      logDebug("set", "create group", groupId);
       this.cache[groupId] = Object.create(null);
     }
 
     const groupObject = this.cache[groupId];
 
     if (groupObject[userId]) {
-      logDebug("update", groupId, userId, value);
       const node = groupObject[userId];
       node.value = value;
       node.timestamp = Date.now();
       this.moveToHead(node);
     } else {
-      logDebug("add", groupId, userId, value);
       const node = new cacheNode(groupId, userId, value);
       groupObject[userId] = node;
       this.currentSize++;
       this.addNode(node);
       if (this.currentSize > this.maxSize) {
         const tail = this.tail!;
-        logDebug(
-          "remove expired LRU node",
-          tail.groupId,
-          tail.userId,
-          tail.value,
-          this.currentSize
-        );
         this.removeLRUNode(tail);
       }
     }
