@@ -286,7 +286,7 @@ export class NapCatOnebot11 {
         }
         if (msg.post_type === 'message') {
           logMessage(msg as OB11Message).then().catch(logError);
-          if (msg.message_type == 'group' && msg.group_id && (ob11Config.GroupLocalTimeRecord as Array<number>).find((item) => item == msg.group_id)) {
+          if (msg.message_type == 'group' && msg.group_id && (ob11Config.GroupLocalTimeRecord[0] === -1 || ob11Config.GroupLocalTimeRecord.includes(msg.group_id))) {
             dbUtil.insertLastSentTime(msg.group_id, msg.user_id, msg.time);
           }
         } else if (msg.post_type === 'notice') {
