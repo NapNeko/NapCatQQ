@@ -1,5 +1,6 @@
 import { OB11GroupNoticeEvent } from './OB11GroupNoticeEvent';
 import { dbUtil } from '@/common/utils/db';
+import { ob11Config } from '@/onebot11/config';
 
 type GroupIncreaseSubType = 'approve' | 'invite';
 export class OB11GroupIncreaseEvent extends OB11GroupNoticeEvent {
@@ -13,7 +14,8 @@ export class OB11GroupIncreaseEvent extends OB11GroupNoticeEvent {
     this.user_id = userId;
     this.sub_type = subType;
 
-    dbUtil.insertJoinTime(groupId, userId, Math.floor(Date.now() / 1000))
+    if((ob11Config.GroupLocalTimeRecord[0] == -1 || ob11Config.GroupLocalTimeRecord.includes(groupId)))
+      dbUtil.insertJoinTime(groupId, userId, Math.floor(Date.now() / 1000))
     
   }
 }
