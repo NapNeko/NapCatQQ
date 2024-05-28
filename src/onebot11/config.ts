@@ -32,9 +32,10 @@ export interface OB11Config {
   musicSignUrl: string;
   reportSelfMessage: boolean;
   token: string;
-  GroupLocalTimeRecord: boolean;
-  GroupLocalTimeRecordList: Array<number>;
-
+  GroupLocalTime: {
+    Record: boolean,
+    RecordList: Array<string>
+  },
   read(): OB11Config;
 
   save(config: OB11Config): void;
@@ -66,8 +67,10 @@ class Config extends ConfigBase<OB11Config> implements OB11Config {
   musicSignUrl = '';
   reportSelfMessage = false;
   token = '';
-  GroupLocalTimeRecord = false;
-  GroupLocalTimeRecordList = [] as Array<number>;
+  GroupLocalTime = {
+    Record: false,
+    RecordList: [] as Array<string>
+  };
 
   getConfigPath() {
     return path.join(this.getConfigDir(), `onebot11_${selfInfo.uin}.json`);

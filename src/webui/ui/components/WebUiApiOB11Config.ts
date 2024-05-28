@@ -18,7 +18,10 @@ export interface OB11Config {
     enable: boolean;
     urls: string[];
   };
-
+  GroupLocalTime: {
+    Record: boolean,
+    RecordList: Array<string>
+  };
   debug: boolean;
   heartInterval: number;
   messagePostFormat: 'array' | 'string';
@@ -26,8 +29,7 @@ export interface OB11Config {
   musicSignUrl: '';
   reportSelfMessage: boolean;
   token: '';
-  GroupLocalTimeRecord: false;
-  GroupLocalTimeRecordList: [];
+
 }
 
 class WebUiApiOB11ConfigWrapper {
