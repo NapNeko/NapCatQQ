@@ -7,8 +7,8 @@ import { napCatCore, NTQQGroupApi, NTQQUserApi, SignMiniApp } from '@/core';
 import { WebApi } from '@/core/apis/webapi';
 import { logDebug } from '@/common/utils/log';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import { getLastSentTimeAndJoinTime } from "../../../common/utils/LastSendAndJoinRemberLRU"
 import { ob11Config } from '@/onebot11/config';
+import { dbUtil } from '@/core/utils/db';
 
 const SchemaData = {
   type: 'object',
@@ -63,7 +63,7 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
         }
       }
     } else if ((ob11Config.GroupLocalTimeRecord as Array<number>).includes(payload.group_id)) {
-      const _sendAndJoinRember = await getLastSentTimeAndJoinTime(payload.group_id);
+      const _sendAndJoinRember = await dbUtil.getLastSentTimeAndJoinTime(payload.group_id);
       _sendAndJoinRember.forEach((element) => {
         let MemberData = MemberMap.get(element.user_id);
         if (MemberData) {
