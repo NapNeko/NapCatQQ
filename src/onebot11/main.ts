@@ -193,6 +193,7 @@ export class NapCatOnebot11 {
     msgListener.onKickedOffLine = (Info: KickedOffLineInfo) => {
       // 下线通知
       //postOB11Event
+      selfInfo.online = false;
     };
     msgListener.onRecvMsg = (msg) => {
       // console.log('ob11 onRecvMsg', JSON.stringify(msg, null, 2));
