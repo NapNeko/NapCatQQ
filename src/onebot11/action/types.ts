@@ -81,5 +81,6 @@ export enum ActionName {
     GetGroupSystemMsg = 'get_group_system_msg',
     GetOnlineClient = "get_online_clients",
     OCRImage = "ocr_image",
-    IOCRImage = ".ocr_image"
+    IOCRImage = ".ocr_image",
+    TranslateEnWordToZn = "translate_en2zh"
 }

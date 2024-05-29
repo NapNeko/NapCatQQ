@@ -9,7 +9,7 @@ const SchemaData = {
     group_id: { type: 'number' },
     is_dismiss: { type: 'boolean' }
   },
-  required: ['group_id', 'is_dismiss']
+  required: ['group_id']
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;

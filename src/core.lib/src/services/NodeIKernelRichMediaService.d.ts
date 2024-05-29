@@ -1,3 +1,4 @@
+import { GeneralCallResult } from "./common";
 export interface NodeIKernelRichMediaService {
     getVideoPlayUrl(arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown, arg5: unknown): unknown;
     getVideoPlayUrlV2(arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown, arg5: unknown): unknown;
@@ -27,8 +28,10 @@ export interface NodeIKernelRichMediaService {
     transGroupFile(arg1: unknown, arg2: unknown): unknown;
     searchGroupFileByWord(arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown, arg5: unknown): unknown;
     deleteGroupFile(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
+    translateEnWordToZn(words: string[]): Promise<GeneralCallResult & {
+        words: string[];
+    }>;
     getScreenOCR(arg: unknown): unknown;
-    translateEnWordToZn(arg: unknown): unknown;
     batchGetGroupFileCount(arg: unknown): unknown;
     queryPicDownloadSize(arg: unknown): unknown;
     searchGroupFiletransgroupfile(arg1: unknown, arg2: unknown): unknown;

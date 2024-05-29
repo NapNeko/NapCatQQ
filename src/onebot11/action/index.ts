@@ -60,6 +60,7 @@ import { GoCQHTTHandleQuickAction } from './go-cqhttp/QuickAction';
 import { GetGroupSystemMsg } from './group/GetGroupSystemMsg';
 import { GetOnlineClient } from './go-cqhttp/GetOnlineClient';
 import { IOCRImage, OCRImage } from './extends/OCRImage';
+import { TranslateEnWordToZn } from './extends/translateEnWordToZn';
 
 export const actionHandlers = [
   new RebootNormol(),
@@ -74,6 +75,7 @@ export const actionHandlers = [
   new MarkGroupMsgAsRead(),
   new MarkPrivateMsgAsRead(),
   new SetQQAvatar(),
+  new TranslateEnWordToZn(),
   // onebot11
   new SendLike(),
   new GetMsg(),

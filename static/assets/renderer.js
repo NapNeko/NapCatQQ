@@ -420,7 +420,7 @@ async function onSettingWindowCreated(view) {
   doc.querySelector("#config-ob11-GroupLocalTime-RecordList-add")?.addEventListener(
     "click",
     () => addReverseHost("GroupLocalTime.RecordList", document, {
-      placeholder: "如：ws://127.0.0.1:5140/onebot"
+      placeholder: "此处填写群号 -1为全部"
     })
   );
   doc.querySelector("#config-ffmpeg-select")?.addEventListener("click", () => {
