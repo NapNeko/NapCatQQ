@@ -13,6 +13,13 @@ export interface KickedOffLineInfo {
     kickedType: number;
     securityKickedType: number;
 }
+export interface GetFileListParam {
+    sortType: number;
+    fileCount: number;
+    startIndex: number;
+    sortOrder: number;
+    showOnlinedocFolder: number;
+}
 export declare enum ElementType {
     TEXT = 1,
     PIC = 2,

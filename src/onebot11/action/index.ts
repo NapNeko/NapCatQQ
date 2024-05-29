@@ -60,7 +60,12 @@ import { GoCQHTTHandleQuickAction } from './go-cqhttp/QuickAction';
 import { GetGroupSystemMsg } from './group/GetGroupSystemMsg';
 import { GetOnlineClient } from './go-cqhttp/GetOnlineClient';
 import { IOCRImage, OCRImage } from './extends/OCRImage';
-import { TranslateEnWordToZn } from './extends/translateEnWordToZn';
+import { GetGroupFileCount } from './file/GetGroupFileCount';
+import { GetGroupFileList } from './file/GetGroupFileList';
+import { TranslateEnWordToZn } from './extends/TranslateEnWordToZn';
+import { SetGroupFileFolder } from './file/SetGroupFileFolder';
+import { DelGroupFile } from './file/DelGroupFile';
+import { DelGroupFileFolder } from './file/DelGroupFileFolder';
 
 export const actionHandlers = [
   new RebootNormol(),
@@ -70,12 +75,18 @@ export const actionHandlers = [
   // new GetConfigAction(),
   // new SetConfigAction(),
   // new GetGroupAddRequest(),
+  // TranslateEnWordToZn = "translate_en2zh",
   new ForwardFriendSingleMsg(),
   new ForwardGroupSingleMsg(),
   new MarkGroupMsgAsRead(),
   new MarkPrivateMsgAsRead(),
   new SetQQAvatar(),
   new TranslateEnWordToZn(),
+  new GetGroupFileCount(),
+  new GetGroupFileList(),
+  new SetGroupFileFolder(),
+  new DelGroupFile(),
+  new DelGroupFileFolder(),
   // onebot11
   new SendLike(),
   new GetMsg(),
