@@ -1,9 +1,33 @@
 import { GroupMember, GroupRequestOperateTypes, GroupMemberRole, GroupNotify, Group } from '../entities';
 export declare class NTQQGroupApi {
     static getGroups(forced?: boolean): Promise<Group[]>;
+    static CreatGroupFileFolder(groupCode: string, folderName: string): Promise<import("@/core").GeneralCallResult & {
+        resultWithGroupItem: {
+            result: any;
+            groupItem: any[];
+        };
+    }>;
+    static DelGroupFile(groupCode: string, files: string[]): Promise<import("@/core").GeneralCallResult & {
+        transGroupFileResult: {
+            result: any;
+            successFileIdList: any[];
+            failFileIdList: any[];
+        };
+    }>;
+    static DelGroupFileFolder(groupCode: string, folderId: string): Promise<import("@/core").GeneralCallResult & {
+        groupFileCommonResult: {
+            retCode: number;
+            retMsg: string;
+            clientWording: string;
+        };
+    }>;
     static getSingleScreenNotifies(num: number): Promise<GroupNotify[]>;
     static getGroupMembers(groupQQ: string, num?: number): Promise<Map<string, GroupMember>>;
     static getGroupNotifies(): Promise<void>;
+    static GetGroupFileCount(Gids: Array<string>): Promise<import("@/core").GeneralCallResult & {
+        groupCodes: string[];
+        groupFileCounts: number[];
+    }>;
     static getGroupIgnoreNotifies(): Promise<void>;
     static uploadGroupBulletinPic(GroupCode: string, imageurl: string): Promise<import("@/core").GeneralCallResult & {
         errCode: number;

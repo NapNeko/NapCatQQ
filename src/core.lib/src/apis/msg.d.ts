@@ -1,4 +1,4 @@
-import { Peer, RawMessage, SendMessageElement } from '@/core/entities';
+import { GetFileListParam, Peer, RawMessage, SendMessageElement } from '@/core/entities';
 import { GeneralCallResult } from '@/core/services/common';
 export declare class NTQQMsgApi {
     static setEmojiLike(peer: Peer, msgSeq: string, emojiId: string, set?: boolean): Promise<unknown>;
@@ -14,6 +14,12 @@ export declare class NTQQMsgApi {
     static activateChat(peer: Peer): Promise<void>;
     static activateChatAndGetHistory(peer: Peer): Promise<void>;
     static setMsgRead(peer: Peer): Promise<GeneralCallResult>;
+    static getGroupFileList(GroupCode: string, params: GetFileListParam): Promise<{
+        FileList: Array<any>;
+        totalSpace: number;
+        usedSpace: number;
+        allUpload: boolean;
+    }>;
     static getMsgHistory(peer: Peer, msgId: string, count: number): Promise<GeneralCallResult & {
         msgList: RawMessage[];
     }>;

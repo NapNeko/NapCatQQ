@@ -9,6 +9,6 @@ QQ Version: Windows 9.9.10-24108 / Linux 3.2.7-23361
 ## 新增与调整
 * 支持非管理群 本地记录时间数据 (建议 **备份配置 清空配置 重新配置**)
 * 新增英译中接口 Api: /translate_en2zh
-* 新增群文件管理相关扩展接口 Api: /xxxx
+* 新增群文件管理相关扩展接口 Api: /get_group_file_count /get_group_file_list /set_group_file_folder /del_group_file /del_group_file_folder
 
 新增的 API 详细见[API文档](https://napneko.github.io/zh-CN/develop/extends_api)

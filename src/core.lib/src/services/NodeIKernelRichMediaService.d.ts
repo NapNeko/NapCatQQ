@@ -1,3 +1,4 @@
+import { GetFileListParam } from "../entities";
 import { GeneralCallResult } from "./common";
 export interface NodeIKernelRichMediaService {
     getVideoPlayUrl(arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown, arg5: unknown): unknown;
@@ -5,11 +6,24 @@ export interface NodeIKernelRichMediaService {
     getRichMediaFileDir(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
     getVideoPlayUrlInVisit(arg: unknown): unknown;
     isFileExpired(arg: unknown): unknown;
+    deleteGroupFolder(GroupCode: string, FolderId: string): Promise<GeneralCallResult & {
+        groupFileCommonResult: {
+            retCode: number;
+            retMsg: string;
+            clientWording: string;
+        };
+    }>;
     downloadRichMediaInVisit(arg: unknown): unknown;
     downloadFileForModelId(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
     downloadFileForFileUuid(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
     downloadFileByUrlListtransgroupfile(arg1: unknown, arg2: unknown): unknown;
     downloadFileForFileInfotransgroupfile(arg1: unknown, arg2: unknown): unknown;
+    createGroupFolder(GroupCode: string, FolderName: string): Promise<GeneralCallResult & {
+        resultWithGroupItem: {
+            result: any;
+            groupItem: Array<any>;
+        };
+    }>;
     downloadFile(arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown): unknown;
     createGroupFoldertransgroupfile(arg1: unknown, arg2: unknown): unknown;
     downloadGroupFolder(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
@@ -20,6 +34,16 @@ export interface NodeIKernelRichMediaService {
     cancelUrlDownload(arg: unknown): unknown;
     updateOnlineVideoElemStatus(arg: unknown): unknown;
     getGroupSpace(arg: unknown): unknown;
+    getGroupFileList(groupCode: string, params: GetFileListParam): Promise<GeneralCallResult & {
+        groupSpaceResult: {
+            retCode: number;
+            retMsg: string;
+            clientWording: string;
+            totalSpace: number;
+            usedSpace: number;
+            allUpload: boolean;
+        };
+    }>;
     getGroupFileInfotransgroupfile(arg1: unknown, arg2: unknown): unknown;
     getGroupFileListtransgroupfile(arg1: unknown, arg2: unknown): unknown;
     getGroupTransferListtransgroupfile(arg1: unknown, arg2: unknown): unknown;
@@ -27,12 +51,21 @@ export interface NodeIKernelRichMediaService {
     moveGroupFile(arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown, arg5: unknown): unknown;
     transGroupFile(arg1: unknown, arg2: unknown): unknown;
     searchGroupFileByWord(arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown, arg5: unknown): unknown;
-    deleteGroupFile(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
+    deleteGroupFile(GroupCode: string, params: Array<number>, Files: Array<string>): Promise<GeneralCallResult & {
+        transGroupFileResult: {
+            result: any;
+            successFileIdList: Array<any>;
+            failFileIdList: Array<any>;
+        };
+    }>;
     translateEnWordToZn(words: string[]): Promise<GeneralCallResult & {
         words: string[];
     }>;
     getScreenOCR(arg: unknown): unknown;
-    batchGetGroupFileCount(arg: unknown): unknown;
+    batchGetGroupFileCount(Gids: Array<string>): Promise<GeneralCallResult & {
+        groupCodes: Array<string>;
+        groupFileCounts: Array<number>;
+    }>;
     queryPicDownloadSize(arg: unknown): unknown;
     searchGroupFiletransgroupfile(arg1: unknown, arg2: unknown): unknown;
     searchMoreGroupFile(arg: unknown): unknown;

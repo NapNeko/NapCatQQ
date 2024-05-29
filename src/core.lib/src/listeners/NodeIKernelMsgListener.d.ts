@@ -21,6 +21,16 @@ export interface OnRichMediaDownloadCompleteParams {
     userTotalSpacePerDay: unknown | null;
     userUsedSpacePerDay: unknown | null;
 }
+export interface onGroupFileInfoUpdateParamType {
+    retCode: number;
+    retMsg: string;
+    clientWording: string;
+    isEnd: boolean;
+    item: Array<any>;
+    allFileCount: string;
+    nextIndex: string;
+    reqId: string;
+}
 export interface IKernelMsgListener {
     onAddSendMsg(msgRecord: RawMessage): void;
     onBroadcastHelperDownloadComplete(broadcastHelperTransNotifyInfo: unknown): void;
@@ -37,7 +47,7 @@ export interface IKernelMsgListener {
     onFirstViewGroupGuildMapping(arrayList: unknown): void;
     onGrabPasswordRedBag(i2: unknown, str: unknown, i3: unknown, recvdOrder: unknown, msgRecord: unknown): void;
     onGroupFileInfoAdd(groupItem: unknown): void;
-    onGroupFileInfoUpdate(groupFileListResult: unknown): void;
+    onGroupFileInfoUpdate(groupFileListResult: onGroupFileInfoUpdateParamType): void;
     onGroupGuildUpdate(groupGuildNotifyInfo: unknown): void;
     onGroupTransferInfoAdd(groupItem: unknown): void;
     onGroupTransferInfoUpdate(groupFileListResult: unknown): void;
@@ -111,7 +121,7 @@ export declare class MsgListener implements IKernelMsgListener {
     onFirstViewGroupGuildMapping(arrayList: unknown): void;
     onGrabPasswordRedBag(i2: unknown, str: unknown, i3: unknown, recvdOrder: unknown, msgRecord: unknown): void;
     onGroupFileInfoAdd(groupItem: unknown): void;
-    onGroupFileInfoUpdate(groupFileListResult: unknown): void;
+    onGroupFileInfoUpdate(groupFileListResult: onGroupFileInfoUpdateParamType): void;
     onGroupGuildUpdate(groupGuildNotifyInfo: unknown): void;
     onGroupTransferInfoAdd(groupItem: unknown): void;
     onGroupTransferInfoUpdate(groupFileListResult: unknown): void;
