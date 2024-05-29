@@ -4,7 +4,6 @@ import sqlite3 from 'sqlite3';
 import { log, logDebug, logError } from '@/common/utils/log';
 import { NTQQMsgApi } from '@/core';
 import LRU from "@/common/utils/LRUCache";
-import { ob11Config } from '@/onebot11/config';
 
 export interface IRember {
   last_sent_time: number;
