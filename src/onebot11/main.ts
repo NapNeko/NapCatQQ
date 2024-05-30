@@ -250,7 +250,8 @@ export class NapCatOnebot11 {
       const role = (await getGroupMember(groupCode, selfInfo.uin))?.role;
       const isPrivilege = role === 3 || role === 4;
       for (const member of members.values()) {
-        if (member?.isDelete && !isPrivilege) {
+        //console.log(member?.isDelete, role, isPrivilege);
+        if (member?.isDelete && !isPrivilege /*&& selfInfo.uin !== member.uin*/) {
           console.log('[群聊] 群组 ', groupCode, ' 成员' + member.uin + '退出');
           const groupDecreaseEvent = new OB11GroupDecreaseEvent(parseInt(groupCode), parseInt(member.uin), 0, 'leave');// 不知道怎么出去的
           postOB11Event(groupDecreaseEvent, true);
