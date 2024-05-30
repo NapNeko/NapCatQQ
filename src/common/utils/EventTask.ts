@@ -3,7 +3,7 @@ export enum NTEventMode {
     Once = 1,
     Twice = 2
 }
-export interface NTEventType<U> {
+export interface NTEventType<U extends (...args: any[]) => any> {
     EventName: string,
     EventFunction: U,
     ListenerName: string,
@@ -15,14 +15,16 @@ interface Internal_MapKey {
     createtime: number,
     func: Function
 }
-export class NTEvent<T extends (...args: any[]) => any, R> {
+export class NTEvent<T extends (...args: any[]) => any, R = any> {
     EventData: NTEventType<T>;
     EventTask: Map<string, Internal_MapKey> = new Map<string, Internal_MapKey>();
     constructor(params: NTEventType<T>) {
-        params.ListenerFunction = this.DispatcherListener;
+        params.ListenerFunction = this.DispatcherListener.bind(this);
         this.EventData = params;
+        this.EventData.EventFunction = params.EventFunction.bind(this) as any;
     }
     async DispatcherListener(...args: any[]) {
+        console.log(...args);
         this.EventTask.forEach((task, uuid) => {
             if (task.createtime + task.timeout > Date.now()) {
                 this.EventTask.delete(uuid);
@@ -39,11 +41,12 @@ export class NTEvent<T extends (...args: any[]) => any, R> {
             let databack = () => {
                 if (!complete) {
                     this.EventTask.delete(id);
-                } else {
                     reject(new Error('NTEvent EventName:' + this.EventData.EventName + ' EventListener:' + this.EventData.ListenerName + ' timeout'));
+                } else {
+                    resolve(retData as R);
                 }
             }
-            
+
             let Timeouter = setTimeout(databack, timeout);
 
             this.EventTask.set(id, {
@@ -59,7 +62,7 @@ export class NTEvent<T extends (...args: any[]) => any, R> {
                     }
                 }
             });
-
+            this.EventData.EventFunction(...args);
         });
     }
 
@@ -71,8 +74,9 @@ export class NTEvent<T extends (...args: any[]) => any, R> {
             let databack = () => {
                 if (!complete) {
                     this.EventTask.delete(id);
-                } else {
                     reject(new Error('NTEvent EventName:' + this.EventData.EventName + ' EventListener:' + this.EventData.ListenerName + ' timeout'));
+                } else {
+                    resolve(retData as R);
                 }
             }
             let Timeouter = setTimeout(databack, timeout);
@@ -88,7 +92,7 @@ export class NTEvent<T extends (...args: any[]) => any, R> {
                     databack();
                 }
             });
-
+            this.EventData.EventFunction(...args);
         });
     }
 }
