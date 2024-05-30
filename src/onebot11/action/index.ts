@@ -43,7 +43,7 @@ import SetQQAvatar from '@/onebot11/action/extends/SetQQAvatar';
 import GoCQHTTPDownloadFile from './go-cqhttp/DownloadFile';
 import GoCQHTTPGetGroupMsgHistory from './go-cqhttp/GetGroupMsgHistory';
 import GetFile from './file/GetFile';
-import { GoCQHTTGetForwardMsgAction } from './go-cqhttp/GetForwardMsg';
+import { GoCQHTTPGetForwardMsgAction } from './go-cqhttp/GetForwardMsg';
 import GetFriendMsgHistory from './go-cqhttp/GetFriendMsgHistory';
 import { GetCookies } from './user/GetCookies';
 import { SetMsgEmojiLike } from '@/onebot11/action/msg/SetMsgEmojiLike';
@@ -56,7 +56,7 @@ import { GetFriendWithCategory } from './extends/GetFriendWithCategory';
 import { SendGroupNotice } from './go-cqhttp/SendGroupNotice';
 import { Reboot, RebootNormol } from './system/Reboot';
 import { GetGroupHonorInfo } from './go-cqhttp/GetGroupHonorInfo';
-import { GoCQHTTHandleQuickAction } from './go-cqhttp/QuickAction';
+import { GoCQHTTPHandleQuickAction } from './go-cqhttp/QuickAction';
 import { GetGroupSystemMsg } from './group/GetGroupSystemMsg';
 import { GetOnlineClient } from './go-cqhttp/GetOnlineClient';
 import { IOCRImage, OCRImage } from './extends/OCRImage';
@@ -135,9 +135,9 @@ export const actionHandlers = [
   new GoCQHTTPMarkMsgAsRead(),
   new GoCQHTTPUploadGroupFile(),
   new GoCQHTTPGetGroupMsgHistory(),
-  new GoCQHTTGetForwardMsgAction(),
+  new GoCQHTTPGetForwardMsgAction(),
   new GetFriendMsgHistory(),
-  new GoCQHTTHandleQuickAction(),
+  new GoCQHTTPHandleQuickAction(),
   new GetGroupSystemMsg()
 ];
 
