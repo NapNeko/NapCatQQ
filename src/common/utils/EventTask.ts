@@ -1,33 +1,95 @@
 import { randomUUID } from "crypto";
-export interface NTEventType {
+export enum NTEventMode {
+    Once = 1,
+    Twice = 2
+}
+export interface NTEventType<U> {
     EventName: string,
-    EventFunction: Function,
+    EventFunction: U,
     ListenerName: string,
     ListenerFunction: Function
 }
-export class NTEvent<T> {
-    EventData: NTEventType;
-    EventTask: Map<string, Function> = new Map<string, Function>();
-    constructor(params: NTEventType) {
+interface Internal_MapKey {
+    mode: NTEventMode,
+    timeout: number,
+    createtime: number,
+    func: Function
+}
+export class NTEvent<T extends (...args: any[]) => any, R> {
+    EventData: NTEventType<T>;
+    EventTask: Map<string, Internal_MapKey> = new Map<string, Internal_MapKey>();
+    constructor(params: NTEventType<T>) {
         params.ListenerFunction = this.DispatcherListener;
         this.EventData = params;
     }
     async DispatcherListener(...args: any[]) {
-        for (let task of this.EventTask.values()) {
-            if (task instanceof Promise) {
-                await task(...args);
+        this.EventTask.forEach((task, uuid) => {
+            if (task.createtime + task.timeout > Date.now()) {
+                this.EventTask.delete(uuid);
+                return;
             }
-            task(...args);
-        }
+            task.func(...args);
+        })
     }
-    async Call(params: T & { checker?: Function }) {
+    async CallTwiceEvent(timeout: number = 3000, ...args: Parameters<T>) {
+        return new Promise<R>((resolve, reject) => {
+            const id = randomUUID();
+            let complete = 0;
+            let retData: R | undefined = undefined;
+            let databack = () => {
+                if (!complete) {
+                    this.EventTask.delete(id);
+                } else {
+                    reject(new Error('NTEvent EventName:' + this.EventData.EventName + ' EventListener:' + this.EventData.ListenerName + ' timeout'));
+                }
+            }
+            
+            let Timeouter = setTimeout(databack, timeout);
 
+            this.EventTask.set(id, {
+                mode: NTEventMode.Once,
+                timeout: timeout,
+                createtime: Date.now(),
+                func: (...args: any[]) => {
+                    complete++;
+                    retData = args as R;
+                    if (complete == 2) {
+                        clearTimeout(Timeouter);
+                        databack();
+                    }
+                }
+            });
+
+        });
     }
-    async CallWaitTwice(params: T & { checker?: Function }) {
 
-    }
-    async CallWaitVoid(param: T & { checker?: Function }) {
+    async CallOnceEvent(timeout: number = 3000, ...args: Parameters<T>) {
+        return new Promise<R>((resolve, reject) => {
+            const id = randomUUID();
+            let complete = false;
+            let retData: R | undefined = undefined;
+            let databack = () => {
+                if (!complete) {
+                    this.EventTask.delete(id);
+                } else {
+                    reject(new Error('NTEvent EventName:' + this.EventData.EventName + ' EventListener:' + this.EventData.ListenerName + ' timeout'));
+                }
+            }
+            let Timeouter = setTimeout(databack, timeout);
 
+            this.EventTask.set(id, {
+                mode: NTEventMode.Once,
+                timeout: timeout,
+                createtime: Date.now(),
+                func: (...args: any[]) => {
+                    clearTimeout(Timeouter);
+                    complete = true;
+                    retData = args as R;
+                    databack();
+                }
+            });
+
+        });
     }
 }
 
