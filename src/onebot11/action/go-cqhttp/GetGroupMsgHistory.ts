@@ -15,7 +15,7 @@ interface Response {
 const SchemaData = {
   type: 'object',
   properties: {
-    group_id: { type: 'number' },
+    group_id: { type: [ 'number' , 'string' ] },
     message_seq: { type: 'number' },
     count: { type: 'number' }
   },

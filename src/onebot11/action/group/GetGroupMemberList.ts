@@ -13,7 +13,7 @@ import { dbUtil } from '@/common/utils/db';
 const SchemaData = {
   type: 'object',
   properties: {
-    group_id: { type: 'number' },
+    group_id: { type: [ 'number' , 'string' ] },
     no_cache: { type: ['boolean', 'string'] },
   },
   required: ['group_id']

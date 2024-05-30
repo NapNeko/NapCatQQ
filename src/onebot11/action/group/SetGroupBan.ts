@@ -7,9 +7,9 @@ import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 const SchemaData = {
   type: 'object',
   properties: {
-    group_id: { type: 'number' },
-    user_id: { type: 'number' },
-    duration: { type: 'number' }
+    group_id: { type: ['number', 'string'] },
+    user_id: { type: ['number', 'string'] },
+    duration: { type: ['number', 'string'] }
   },
   required: ['group_id', 'user_id', 'duration']
 } as const satisfies JSONSchema;

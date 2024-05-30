@@ -7,7 +7,7 @@ import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 const SchemaData = {
   type: 'object',
   properties: {
-    group_id: { type: 'number' },
+    group_id: { type: [ 'number' , 'string' ] },
     content: { type: 'string' },
     image: { type: 'string' },
     pinned: { type: 'number' },

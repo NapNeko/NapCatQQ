@@ -6,7 +6,7 @@ import { NTQQGroupApi } from '@/core/apis/group';
 const SchemaData = {
   type: 'object',
   properties: {
-    group_id: { type: 'number' },
+    group_id: { type: [ 'number' , 'string' ] },
     group_name: { type: 'string' }
   },
   required: ['group_id', 'group_name']
