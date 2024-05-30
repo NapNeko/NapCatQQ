@@ -8,8 +8,8 @@ import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 const SchemaData = {
   type: 'object',
   properties: {
-    user_id: { type: 'number' },
-    group_id: { type: 'number' }
+    user_id: { type: [ 'number' , 'string' ] },
+    group_id: { type: [ 'number' , 'string' ] }
   }
 } as const satisfies JSONSchema;
 

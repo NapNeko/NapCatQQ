@@ -6,7 +6,7 @@ import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 const SchemaData = {
   type: 'object',
   properties: {
-    group_id: { type: 'number' },
+    group_id: { type: [ 'number' , 'string' ] },
     type: { enum: [WebHonorType.ALL, WebHonorType.EMOTION, WebHonorType.LEGEND, WebHonorType.PERFROMER, WebHonorType.STORONGE_NEWBI, WebHonorType.TALKACTIVE] }
   },
   required: ['group_id']

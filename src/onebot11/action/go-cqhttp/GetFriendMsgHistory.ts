@@ -16,7 +16,7 @@ interface Response {
 const SchemaData = {
   type: 'object',
   properties: {
-    user_id: { type: 'number' },
+    user_id: { type: [ 'number' , 'string' ] },
     message_seq: { type: 'number' },
     count: { type: 'number' }
   },
