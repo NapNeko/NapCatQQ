@@ -118,7 +118,10 @@ const _handlers: {
   [OB11MessageDataType.file]: async (sendMsg, context) => {
     const { path, fileName } = await handleOb11FileLikeMessage(sendMsg, context);
     //logDebug('发送文件', path, fileName);
-    return SendMsgElementConstructor.file(path, fileName);
+    const FileEle = await SendMsgElementConstructor.file(path, fileName);
+    // 清除Upload的应该
+    // context.deleteAfterSentFiles.push(fileName || FileEle.fileElement.filePath);
+    return FileEle;
   },
 
   [OB11MessageDataType.video]: async (sendMsg, context) => {
