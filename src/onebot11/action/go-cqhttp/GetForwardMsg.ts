@@ -21,7 +21,7 @@ interface Response {
   messages: (OB11Message & { content: OB11MessageData })[];
 }
 
-export class GoCQHTTGetForwardMsgAction extends BaseAction<Payload, any> {
+export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
   actionName = ActionName.GoCQHTTP_GetForwardMsg;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<any> {
