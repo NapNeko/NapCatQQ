@@ -4,7 +4,7 @@ import { ActionName } from '../types';
 import { SendMsgElementConstructor } from '@/core/entities/constructor';
 import { ChatType, SendFileElement } from '@/core/entities';
 import fs from 'fs';
-import { NTQQMsgApi } from '@/core/apis/msg';
+import { SendMsg, sendMsg } from '@/onebot11/action/msg/SendMsg';
 import { uri2local } from '@/common/utils/file';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 const SchemaData = {
@@ -37,7 +37,7 @@ export default class GoCQHTTPUploadGroupFile extends BaseAction<Payload, null> {
       throw new Error(downloadResult.errMsg);
     }
     const sendFileEle: SendFileElement = await SendMsgElementConstructor.file(downloadResult.path, payload.name);
-    await NTQQMsgApi.sendMsg({ chatType: ChatType.group, peerUid: group.groupCode }, [sendFileEle]);
+    await sendMsg({ chatType: ChatType.group, peerUid: group.groupCode }, [sendFileEle], [], true);
     return null;
   }
 }
