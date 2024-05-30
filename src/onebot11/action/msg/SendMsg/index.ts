@@ -55,7 +55,7 @@ export async function sendMsg(peer: Peer, sendElements: SendMessageElement[], de
       }
     }
     //且 PredictTime ((totalSize / 1024 / 512) * 1000)不等于Nan
-    const PredictTime = totalSize / 1024 / 512 * 1000;
+    const PredictTime = totalSize / 1024 / 256 * 1000;
     if (!Number.isNaN(PredictTime)) {
       timeout += PredictTime;// 5S Basic Timeout + PredictTime( For File 512kb/s )
     }
