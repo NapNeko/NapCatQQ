@@ -32,7 +32,7 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
       throw (`群(${payload.group_id})不存在`);
     }
     const webGroupMembers = await WebApi.getGroupMembers(payload.group_id.toString());
-    if (payload.no_cache == true /*|| payload.no_cache === 'true'*/) {
+    if (payload.no_cache == true || payload.no_cache === 'true') {
       groupMembers.set(group.groupCode, await NTQQGroupApi.getGroupMembers(payload.group_id.toString()));
     }
     const member = await getGroupMember(payload.group_id.toString(), payload.user_id.toString());
