@@ -15,21 +15,17 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export class GetGroupFileList extends BaseAction<Payload, {
-    FileList: Array<any>,
-    totalSpace: number;
-    usedSpace: number;
-    allUpload: boolean;
-}> {
+export class GetGroupFileList extends BaseAction<Payload, { FileList: Array<any> }> {
     actionName = ActionName.GetGroupFileList;
     PayloadSchema = SchemaData;
     protected async _handle(payload: Payload) {
-        return await NTQQMsgApi.getGroupFileList(payload.group_id.toString(), {
+        let ret = await NTQQMsgApi.getGroupFileList(payload.group_id.toString(), {
             sortType: 1,
             fileCount: payload.file_count,
             startIndex: payload.start_index,
             sortOrder: 2,
             showOnlinedocFolder: 0
-        })
+        }).catch((e) => { return []; });
+        return { FileList: ret };
     }
 }

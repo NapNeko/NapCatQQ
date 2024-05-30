@@ -14,12 +14,7 @@ export declare class NTQQMsgApi {
     static activateChat(peer: Peer): Promise<void>;
     static activateChatAndGetHistory(peer: Peer): Promise<void>;
     static setMsgRead(peer: Peer): Promise<GeneralCallResult>;
-    static getGroupFileList(GroupCode: string, params: GetFileListParam): Promise<{
-        FileList: Array<any>;
-        totalSpace: number;
-        usedSpace: number;
-        allUpload: boolean;
-    }>;
+    static getGroupFileList(GroupCode: string, params: GetFileListParam): Promise<any[]>;
     static getMsgHistory(peer: Peer, msgId: string, count: number): Promise<GeneralCallResult & {
         msgList: RawMessage[];
     }>;
