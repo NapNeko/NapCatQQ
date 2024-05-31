@@ -1,21 +1,26 @@
+import { NodeIKernelMsgListener } from "@/core";
 import { NodeIQQNTWrapperSession } from "@/core/wrapper";
+
 import { randomUUID } from "crypto";
 // export enum NTEventMode {
 //     Once = 1,
 //     Twice = 2
 // }
+
 // export interface NTEventType<U extends (...args: any[]) => Promise<any>> {
 //     EventName: string,
 //     EventFunction: U,
 //     ListenerName: string,
 //     ListenerFunction: Function
 // }
+
 // interface Internal_MapKey {
 //     mode: NTEventMode,
 //     timeout: number,
 //     createtime: number,
 //     func: Function
 // }
+
 // export class NTEvent<T extends (...args: any[]) => any, R = any> {
 //     EventData: NTEventType<T>;
 //     EventTask: Map<string, Internal_MapKey> = new Map<string, Internal_MapKey>();
@@ -103,14 +108,17 @@ export class ListenerClassBase {
 }
 
 export class NTEventWrapper {
-    private ListenerMap: Map<string, typeof ListenerClassBase>;
-    private WrapperSession: NodeIQQNTWrapperSession;
+    private ListenerMap: Map<string, typeof ListenerClassBase> | undefined;
+    private WrapperSession: NodeIQQNTWrapperSession | undefined;
     private ListenerManger: Map<string, ListenerClassBase> = new Map<string, ListenerClassBase>();
-    constructor({ ListenerMap, WrapperSession }: { ListenerMap: Map<string, typeof ListenerClassBase>, WrapperSession: NodeIQQNTWrapperSession }) {
+    constructor() {
+
+    }
+    init({ ListenerMap, WrapperSession }: { ListenerMap: Map<string, typeof ListenerClassBase>, WrapperSession: NodeIQQNTWrapperSession }) {
         this.ListenerMap = ListenerMap;
         this.WrapperSession = WrapperSession;
     }
-    GetEvent<T extends (...args: any) => any>(eventName: string) {
+    CreatEventFunction<T extends (...args: any) => any>(eventName: string): T | undefined {
         // 将 eventName 'NodeIKernelProfileLikeService/GetTest' => 转换成 this.WrapperSession.getProfileLikeService().getTest
         let eventNameArr = eventName.split('/');
         type eventType = {
@@ -124,7 +132,7 @@ export class NTEventWrapper {
             //重新绑定this
             event = event.bind(services);
             if (event) {
-                return event;
+                return event as T;
             }
             return undefined;
 
@@ -132,16 +140,27 @@ export class NTEventWrapper {
 
     }
     // 获取某个Listener
-    GetListener(listenerName: string, uniqueCode: string = "") {
-        let ListenerType = this.ListenerMap.get(listenerName);
+    CreatListenerFunction<T>(listenerName: string, uniqueCode: string = ""): T {
+        let ListenerType = this.ListenerMap!.get(listenerName);
         let Listener = this.ListenerManger.get(listenerName + uniqueCode);
         if (!Listener && ListenerType) {
             Listener = new ListenerType();
             this.ListenerManger.set(listenerName + uniqueCode, Listener);
         }
-        return Listener;
+        return Listener as T;
     }
 }
+// 示例代码 快速创建事件
+// let NTEvent = new NTEventWrapper();
+// let TestEvent = NTEvent.CreatEventFunction<(force: boolean) => Promise<Number>>('NodeIKernelProfileLikeService/GetTest');
+// if (TestEvent) {
+//     TestEvent(true);
+// }
+
+// 示例代码 快速创建监听Listener类
+// let NTEvent = new NTEventWrapper();
+// NTEvent.CreatListenerFunction<NodeIKernelMsgListener>('NodeIKernelMsgListener', 'core')
+
 
 // 初步构想
 // NTEventDispatch NTEvent NTEventWrapper
