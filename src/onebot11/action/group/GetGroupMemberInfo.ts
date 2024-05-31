@@ -52,9 +52,8 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
           retMember.join_time = webGroupMembers[i]?.join_time;
           retMember.last_sent_time = webGroupMembers[i]?.last_speak_time;
           retMember.qage = webGroupMembers[i]?.qage;
-          retMember.level = webGroupMembers[i]?.lv.level;
+          retMember.level = webGroupMembers[i]?.lv.level.toString();
         }
-
       }
       return retMember;
     } else {
