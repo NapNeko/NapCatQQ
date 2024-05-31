@@ -2,13 +2,8 @@ import { NodeIKernelMsgListener } from "@/core";
 import { NodeIQQNTWrapperSession } from "@/core/wrapper";
 
 import { randomUUID } from "crypto";
-export enum NTEventMode {
-    Once = 1,
-    Twice = 2
-}
 
 interface Internal_MapKey {
-    mode: NTEventMode,
     timeout: number,
     createtime: number,
     func: Function
@@ -78,50 +73,30 @@ export class NTEventWrapper {
                 this.EventTask.delete(uuid);
                 return;
             }
-            if (task.mode == NTEventMode.Once) {
-                this.EventTask.delete(uuid);
-            }
             task.func(...args);
         })
     }
-    async CallOnceEvent<EventType extends (...args: any[]) => any, ListenerType extends (...args: any[]) => void>(EventName = '', ListenerName = '', timeout: number = 3000, ...args: Parameters<EventType>) {
-        return new Promise<ArrayLike<Parameters<ListenerType>>>((resolve, reject) => {
-            const id = randomUUID();
-            let complete = false;
-            let retData: ArrayLike<Parameters<ListenerType>> | undefined = undefined;
-            let databack = () => {
-                if (!complete) {
-                    this.EventTask.delete(id);
-                    reject(new Error('NTEvent EventName:' + EventName + ' ListenerName:' + ListenerName + ' timeout'));
-                } else {
-                    resolve(retData as ArrayLike<Parameters<ListenerType>>);
-                }
-            }
-            let Timeouter = setTimeout(databack, timeout);
-
-            this.EventTask.set(id, {
-                mode: NTEventMode.Once,
-                timeout: timeout,
-                createtime: Date.now(),
-                func: (...args: any[]) => {
-                    clearTimeout(Timeouter);
-                    complete = true;
-                    retData = args as ArrayLike<Parameters<ListenerType>>;
-                    databack();
-                }
-            });
+    async CallNoListenerEvent<EventType extends (...args: any[]) => Promise<any>,>(EventName = '', timeout: number = 3000, ...args: Parameters<EventType>) {
+        return new Promise<ReturnType<EventType>>((resolve, reject) => {
             let EventFunc = this.CreatEventFunction<EventType>(EventName);
-            EventFunc!(...args);
-        });
+            let complete = false;
+            let Timeouter = setTimeout(() => {
+                if (!complete) {
+                    reject(new Error('NTEvent EventName:' + EventName + ' timeout'));
+                }
+            }, timeout);
+            let retData = await EventFunc!(...args);
+            complete = true;
+            resolve(retData);
+        }
     }
-    async CallTwiceEvent<EventType extends (...args: any[]) => any, ListenerType extends (...args: any[]) => void>(EventName = '', ListenerName = '', timeout: number = 3000, ...args: Parameters<EventType>) {
+    async CallNormalEvent<EventType extends (...args: any[]) => Promise<any>, ListenerType extends (...args: any[]) => void>(EventName = '', ListenerName = '', waitTimes = 1, timeout: number = 3000, ...args: Parameters<EventType>) {
         return new Promise<ArrayLike<Parameters<ListenerType>>>((resolve, reject) => {
             const id = randomUUID();
             let complete = 0;
             let retData: ArrayLike<Parameters<ListenerType>> | undefined = undefined;
             let databack = () => {
-                if (complete < 2) {
-                    this.EventTask.delete(id);
+                if (complete < waitTimes) {
                     reject(new Error('NTEvent EventName:' + EventName + ' ListenerName:' + ListenerName + ' timeout'));
                 } else {
                     resolve(retData as ArrayLike<Parameters<ListenerType>>);
@@ -130,20 +105,19 @@ export class NTEventWrapper {
             let Timeouter = setTimeout(databack, timeout);
 
             this.EventTask.set(id, {
-                mode: NTEventMode.Once,
                 timeout: timeout,
                 createtime: Date.now(),
                 func: (...args: any[]) => {
                     complete++;
                     retData = args as ArrayLike<Parameters<ListenerType>>;
-                    if (complete == 2) {
+                    if (complete == waitTimes) {
                         clearTimeout(Timeouter);
                         databack();
                     }
                 }
             });
             let EventFunc = this.CreatEventFunction<EventType>(EventName);
-            EventFunc!(...args);
+            await EventFunc!(...args);
         });
     }
 
