@@ -142,3 +142,20 @@ export class NTEventWrapper {
         return Listener;
     }
 }
+
+// 初步构想
+// NTEventDispatch NTEvent NTEventWrapper
+// 示例
+
+// 调用接口
+// NTEventDispatch.CallSerice('NodeIKernelProfileLikeService/GetTest', true);
+
+// 注册监听 解除监听
+// NTEventDispatch.RigisterListener('NodeIKernelMsgListener/onAddSendMsg','core',cb);
+// NTEventDispatch.UnRigisterListener('NodeIKernelMsgListener/onAddSendMsg','core');
+
+// let GetTest = NTEventDispatch.CreatEvent('NodeIKernelProfileLikeService/GetTest','NodeIKernelMsgListener/onAddSendMsg',Mode);
+// GetTest('test');
+
+// always模式
+// NTEventDispatch.CreatEvent('NodeIKernelProfileLikeService/GetTest','NodeIKernelMsgListener/onAddSendMsg',Mode,(...args:any[])=>{ console.log(args) });
