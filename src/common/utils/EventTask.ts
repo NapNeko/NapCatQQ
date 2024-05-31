@@ -151,8 +151,8 @@ export class NTEventWrapper {
 
 
 // 调用接口
-let NTEvent = new NTEventWrapper();
-NTEvent.CallNormalEvent<(force: boolean) => Promise<Number>, (data1: string, data2: number) => void>('NodeIKernelProfileLikeService/GetTest', 'NodeIKernelMsgListener/onAddSendMsg', 1, 3000, true);
+//let NTEvent = new NTEventWrapper();
+//let ret = await NTEvent.CallNormalEvent<(force: boolean) => Promise<Number>, (data1: string, data2: number) => void>('NodeIKernelProfileLikeService/GetTest', 'NodeIKernelMsgListener/onAddSendMsg', 1, 3000, true);
 
 // 注册监听 解除监听
 // NTEventDispatch.RigisterListener('NodeIKernelMsgListener/onAddSendMsg','core',cb);
