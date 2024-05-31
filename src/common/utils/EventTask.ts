@@ -13,16 +13,37 @@ export class ListenerClassBase {
     [key: string]: string;
 }
 
+export interface ListenerIBase {
+    // eslint-disable-next-line @typescript-eslint/no-misused-new
+    new(listener: any): ListenerClassBase;
+}
+
 export class NTEventWrapper {
-    private ListenerMap: Map<string, typeof ListenerClassBase> | undefined;//ListenerName-Unique -> Listener构造函数
+
+    private ListenerMap: { [key: string]: ListenerIBase } | undefined;//ListenerName-Unique -> Listener构造函数
     private WrapperSession: NodeIQQNTWrapperSession | undefined;//WrapperSession
     private ListenerManger: Map<string, ListenerClassBase> = new Map<string, ListenerClassBase>(); //ListenerName-Unique -> Listener实例
-    private EventTask: Map<string, Map<string, Internal_MapKey>> = new Map<string, Map<string, Internal_MapKey>>();//tasks ListenerName -> uuid -> {timeout,createtime,func}
-    private ListenerInit: Map<string, boolean> = new Map<string, boolean>();
+    private EventTask = new Map<string, Map<string, Map<string, Internal_MapKey>>>();//tasks ListenerMainName -> ListenerSubName-> uuid -> {timeout,createtime,func}
     constructor() {
 
     }
-    init({ ListenerMap, WrapperSession }: { ListenerMap: Map<string, typeof ListenerClassBase>, WrapperSession: NodeIQQNTWrapperSession }) {
+    createProxyDispatch(ListenerMainName: string) {
+        let current = this;
+        return new Proxy({}, {
+            get(target: any, prop: any, receiver: any) {
+                // console.log('get', prop, typeof target[prop]);
+                if (typeof target[prop] === 'undefined') {
+                    // 如果方法不存在，返回一个函数，这个函数调用existentMethod
+                    return (...args: any[]) => {
+                        current.DispatcherListener.apply(current, [ListenerMainName, prop, ...args]).then();
+                    };
+                }
+                // 如果方法存在，正常返回
+                return Reflect.get(target, prop, receiver);
+            }
+        });
+    }
+    init({ ListenerMap, WrapperSession }: { ListenerMap: { [key: string]: typeof ListenerClassBase }, WrapperSession: NodeIQQNTWrapperSession }) {
         this.ListenerMap = ListenerMap;
         this.WrapperSession = WrapperSession;
     }
@@ -34,6 +55,8 @@ export class NTEventWrapper {
         if (eventNameArr.length > 1) {
             let serviceName = 'get' + eventNameArr[0].replace('NodeIKernel', '');
             let eventName = eventNameArr[1];
+            //getNodeIKernelGroupListener,GroupService
+            //console.log('2', eventName);
             let services = (this.WrapperSession as unknown as eventType)[serviceName]();
             let event = services[eventName];
             //重新绑定this
@@ -45,44 +68,27 @@ export class NTEventWrapper {
         }
 
     }
-    // 获取某个Listener 存在返回 不存在创建
-    CreatListenerFunction<T>(listenerName: string, uniqueCode: string = ""): T {
-        let ListenerType = this.ListenerMap!.get(listenerName);
-        let Listener = this.ListenerManger.get(listenerName + uniqueCode);
+    CreatListenerFunction<T>(listenerMainName: string, uniqueCode: string = ""): T {
+        let ListenerType = this.ListenerMap![listenerMainName];
+        let Listener = this.ListenerManger.get(listenerMainName + uniqueCode);
         if (!Listener && ListenerType) {
-            Listener = new ListenerType();
-            let ServiceSubName = listenerName.match(/^NodeIKernel(.*?)Listener$/);
+            Listener = new ListenerType(this.createProxyDispatch(listenerMainName));
+            let ServiceSubName = listenerMainName.match(/^NodeIKernel(.*?)Listener$/)![1];
             let Service = "NodeIKernel" + ServiceSubName + "Service/addKernel" + ServiceSubName + "Listener";
             let addfunc = this.CreatEventFunction<(listener: T) => number>(Service);
             addfunc!(Listener as T);
-            this.ListenerManger.set(listenerName + uniqueCode, Listener);
+            //console.log(addfunc!(Listener as T));
+            this.ListenerManger.set(listenerMainName + uniqueCode, Listener);
         }
         return Listener as T;
     }
-    // 如果存在覆盖注册 不存在则创建Listener
-    RigisterListener<T extends { [key: string]: (...args: any) => any }>(listenerName: string, uniqueCode: string = "NTEvent", cb: (...args: any) => any) {
-        let ListenerNameList = listenerName.split('/');
-        let ListenerMain = ListenerNameList[0];
-        let ListenerMethod = ListenerNameList[1];
-        let Listener = this.CreatListenerFunction<T>(ListenerMain, uniqueCode); //uniqueCode NTEvent
-        (Listener[ListenerMethod] as any) = cb;
-    }
-    //初始化Listener回调
-    initNTListener(ListenerName: string) {
-        if (this.ListenerInit.get(ListenerName)) {
-            return;
-        }
-        this.RigisterListener(ListenerName, "NTEvent", (...args) => {
-            console.log('wait... DispatcherListener');
-            this.DispatcherListener(ListenerName, ...args).then().catch();
-        })
-        this.ListenerInit.set(ListenerName, true);
-    }
     //统一回调清理事件
-    async DispatcherListener(ListenerName: string, ...args: any[]) {
-        this.EventTask.get(ListenerName)?.forEach((task, uuid) => {
-            if (task.createtime + task.timeout > Date.now()) {
-                this.EventTask.get(ListenerName)?.delete(uuid);
+    async DispatcherListener(ListenerMainName: string, ListenerSubName: string, ...args: any[]) {
+        console.log(ListenerMainName, this.EventTask.get(ListenerMainName), ListenerSubName, this.EventTask.get(ListenerMainName)?.get(ListenerSubName));
+        this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.forEach((task, uuid) => {
+            //console.log(task.func, uuid, task.createtime, task.timeout);
+            if (task.createtime + task.timeout < Date.now()) {
+                this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.delete(uuid);
                 return;
             }
             task.func(...args);
@@ -114,32 +120,42 @@ export class NTEventWrapper {
                     resolve(retData as ArrayLike<Parameters<ListenerType>>);
                 }
             }
-            this.initNTListener(ListenerName);
             let Timeouter = setTimeout(databack, timeout);
-            let ListenerNameList = ListenerName.split('/');
-            let ListenerMain = ListenerNameList[0];
-            let ListenerMethod = ListenerNameList[1];
 
-            this.EventTask.get(ListenerMain)?.set(id, {
+            let ListenerNameList = ListenerName.split('/');
+            let ListenerMainName = ListenerNameList[0];
+            let ListenerSubName = ListenerNameList[1];
+            let eventCallbak = {
                 timeout: timeout,
                 createtime: Date.now(),
                 func: (...args: any[]) => {
                     complete++;
+                    //console.log('func', ...args);
                     retData = args as ArrayLike<Parameters<ListenerType>>;
-                    if (complete == waitTimes) {
+                    if (complete >= waitTimes) {
                         clearTimeout(Timeouter);
                         databack();
                     }
                 }
-            });
+            }
+            if (!this.EventTask.get(ListenerMainName)) {
+                this.EventTask.set(ListenerMainName, new Map());
+            }
+            if (!(this.EventTask.get(ListenerMainName)?.get(ListenerSubName))) {
+                this.EventTask.get(ListenerMainName)?.set(ListenerSubName, new Map());
+            }
+            this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.set(id, eventCallbak);
+            this.CreatListenerFunction(ListenerMainName);
             let EventFunc = this.CreatEventFunction<EventType>(EventName);
-            await EventFunc!(...args);
+            console.log(await EventFunc!(...args));
         });
     }
 
 }
+export const NTEventDispatch = new NTEventWrapper();
+
 // 示例代码 快速创建事件
-//let NTEvent = new NTEventWrapper();
+// let NTEvent = new NTEventWrapper();
 // let TestEvent = NTEvent.CreatEventFunction<(force: boolean) => Promise<Number>>('NodeIKernelProfileLikeService/GetTest');
 // if (TestEvent) {
 //     TestEvent(true);
