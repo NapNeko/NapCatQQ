@@ -506,7 +506,7 @@ export class OB11Constructor {
       sex: OB11Constructor.sex(member.sex!),
       age: 0,
       area: '',
-      level: 0,
+      level: '0',
       qq_level: member.qqLevel && calcQQLevel(member.qqLevel) || 0,
       join_time: 0,  // 暂时没法获取
       last_sent_time: 0,  // 暂时没法获取
