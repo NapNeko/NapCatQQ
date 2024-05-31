@@ -14,10 +14,11 @@ export class ListenerClassBase {
 }
 
 export class NTEventWrapper {
-    private ListenerMap: Map<string, typeof ListenerClassBase> | undefined;
-    private WrapperSession: NodeIQQNTWrapperSession | undefined;
-    private ListenerManger: Map<string, ListenerClassBase> = new Map<string, ListenerClassBase>();
-    private EventTask: Map<string, Internal_MapKey> = new Map<string, Internal_MapKey>();
+    private ListenerMap: Map<string, typeof ListenerClassBase> | undefined;//ListenerName-Unique -> Listener构造函数
+    private WrapperSession: NodeIQQNTWrapperSession | undefined;//WrapperSession
+    private ListenerManger: Map<string, ListenerClassBase> = new Map<string, ListenerClassBase>(); //ListenerName-Unique -> Listener实例
+    private EventTask: Map<string, Map<string, Internal_MapKey>> = new Map<string, Map<string, Internal_MapKey>>();//tasks ListenerName -> uuid -> {timeout,createtime,func}
+    private ListenerInit: Map<string, boolean> = new Map<string, boolean>();
     constructor() {
 
     }
@@ -66,18 +67,29 @@ export class NTEventWrapper {
         let Listener = this.CreatListenerFunction<T>(ListenerMain, uniqueCode); //uniqueCode NTEvent
         (Listener[ListenerMethod] as any) = cb;
     }
+    //初始化Listener回调
+    initNTListener(ListenerName: string) {
+        if (this.ListenerInit.get(ListenerName)) {
+            return;
+        }
+        this.RigisterListener(ListenerName, "NTEvent", (...args) => {
+            console.log('wait... DispatcherListener');
+            this.DispatcherListener(ListenerName, ...args).then().catch();
+        })
+        this.ListenerInit.set(ListenerName, true);
+    }
     //统一回调清理事件
-    async DispatcherListener(...args: any[]) {
-        this.EventTask.forEach((task, uuid) => {
+    async DispatcherListener(ListenerName: string, ...args: any[]) {
+        this.EventTask.get(ListenerName)?.forEach((task, uuid) => {
             if (task.createtime + task.timeout > Date.now()) {
-                this.EventTask.delete(uuid);
+                this.EventTask.get(ListenerName)?.delete(uuid);
                 return;
             }
             task.func(...args);
         })
     }
     async CallNoListenerEvent<EventType extends (...args: any[]) => Promise<any>,>(EventName = '', timeout: number = 3000, ...args: Parameters<EventType>) {
-        return new Promise<ReturnType<EventType>>((resolve, reject) => {
+        return new Promise<ReturnType<EventType>>(async (resolve, reject) => {
             let EventFunc = this.CreatEventFunction<EventType>(EventName);
             let complete = false;
             let Timeouter = setTimeout(() => {
@@ -88,10 +100,10 @@ export class NTEventWrapper {
             let retData = await EventFunc!(...args);
             complete = true;
             resolve(retData);
-        }
+        });
     }
     async CallNormalEvent<EventType extends (...args: any[]) => Promise<any>, ListenerType extends (...args: any[]) => void>(EventName = '', ListenerName = '', waitTimes = 1, timeout: number = 3000, ...args: Parameters<EventType>) {
-        return new Promise<ArrayLike<Parameters<ListenerType>>>((resolve, reject) => {
+        return new Promise<ArrayLike<Parameters<ListenerType>>>(async (resolve, reject) => {
             const id = randomUUID();
             let complete = 0;
             let retData: ArrayLike<Parameters<ListenerType>> | undefined = undefined;
@@ -102,9 +114,13 @@ export class NTEventWrapper {
                     resolve(retData as ArrayLike<Parameters<ListenerType>>);
                 }
             }
+            this.initNTListener(ListenerName);
             let Timeouter = setTimeout(databack, timeout);
+            let ListenerNameList = ListenerName.split('/');
+            let ListenerMain = ListenerNameList[0];
+            let ListenerMethod = ListenerNameList[1];
 
-            this.EventTask.set(id, {
+            this.EventTask.get(ListenerMain)?.set(id, {
                 timeout: timeout,
                 createtime: Date.now(),
                 func: (...args: any[]) => {
@@ -123,7 +139,7 @@ export class NTEventWrapper {
 
 }
 // 示例代码 快速创建事件
-// let NTEvent = new NTEventWrapper();
+//let NTEvent = new NTEventWrapper();
 // let TestEvent = NTEvent.CreatEventFunction<(force: boolean) => Promise<Number>>('NodeIKernelProfileLikeService/GetTest');
 // if (TestEvent) {
 //     TestEvent(true);
@@ -134,12 +150,9 @@ export class NTEventWrapper {
 // NTEvent.CreatListenerFunction<NodeIKernelMsgListener>('NodeIKernelMsgListener', 'core')
 
 
-// 初步构想
-// NTEventDispatch NTEvent NTEventWrapper
-// 示例
-
 // 调用接口
-// NTEventDispatch.CallSerice('NodeIKernelProfileLikeService/GetTest', true);
+let NTEvent = new NTEventWrapper();
+NTEvent.CallNormalEvent<(force: boolean) => Promise<Number>, (data1: string, data2: number) => void>('NodeIKernelProfileLikeService/GetTest', 'NodeIKernelMsgListener/onAddSendMsg', 1, 3000, true);
 
 // 注册监听 解除监听
 // NTEventDispatch.RigisterListener('NodeIKernelMsgListener/onAddSendMsg','core',cb);
