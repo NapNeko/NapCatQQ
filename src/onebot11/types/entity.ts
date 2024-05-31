@@ -30,7 +30,7 @@ export interface OB11GroupMember {
   age?: number
   join_time?: number
   last_sent_time?: number
-  level?: number
+  level?: string
   qq_level?: number
   role?: OB11GroupMemberRole
   title?: string

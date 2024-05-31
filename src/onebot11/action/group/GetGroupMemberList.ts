@@ -9,11 +9,12 @@ import { logDebug } from '@/common/utils/log';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { ob11Config } from '@/onebot11/config';
 import { dbUtil } from '@/common/utils/db';
+import { TypeConvert } from '@/common/utils/type';
 
 const SchemaData = {
   type: 'object',
   properties: {
-    group_id: { type: [ 'number' , 'string' ] },
+    group_id: { type: ['number', 'string'] },
     no_cache: { type: ['boolean', 'string'] },
   },
   required: ['group_id']
@@ -58,12 +59,12 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
           MemberData.join_time = webGroupMembers[i]?.join_time;
           MemberData.last_sent_time = webGroupMembers[i]?.last_speak_time;
           MemberData.qage = webGroupMembers[i]?.qage;
-          MemberData.level = webGroupMembers[i]?.lv.level;
+          MemberData.level = webGroupMembers[i]?.lv.level.toString();
           MemberMap.set(webGroupMembers[i]?.uin, MemberData);
         }
       }
     } else if (ob11Config.GroupLocalTime.Record && ob11Config.GroupLocalTime.RecordList[0] === '-1' || ob11Config.GroupLocalTime.RecordList.includes(payload.group_id.toString())) {
-      const _sendAndJoinRember = await dbUtil.getLastSentTimeAndJoinTime(payload.group_id);
+      const _sendAndJoinRember = await dbUtil.getLastSentTimeAndJoinTime(TypeConvert.toNumber(payload.group_id));
       _sendAndJoinRember.forEach((element) => {
         let MemberData = MemberMap.get(element.user_id);
         if (MemberData) {
@@ -73,6 +74,15 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
       });
     }
     // 还原索引到Array 一同返回
+
+    // let retData: any[] = [];
+    // for (let retMem of MemberMap.values()) {
+    //   retMem.level = TypeConvert.toString(retMem.level) as any;
+    //   retData.push(retMem)
+    // }
+
+    // _groupMembers = Array.from(retData);
+    
     _groupMembers = Array.from(MemberMap.values());
     return _groupMembers;
   }
