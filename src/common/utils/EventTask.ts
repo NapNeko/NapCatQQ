@@ -119,7 +119,7 @@ export class NTEventWrapper {
                     reject(new Error('NTEvent EventName:' + EventName + ' ListenerName:' + ListenerName + ' timeout'));
                 } else {
 
-                    resolve([retEvent, ...(retData as Parameters<ListenerType>)]);
+                    resolve([retEvent as Awaited<ReturnType<EventType>>, ...(retData as Parameters<ListenerType>)]);
                 }
             }
             let Timeouter = setTimeout(databack, timeout);
