@@ -109,7 +109,7 @@ export class NTEventWrapper {
         });
     }
     async CallNormalEvent<EventType extends (...args: any[]) => Promise<any>, ListenerType extends (...args: any[]) => void>(EventName = '', ListenerName = '', waitTimes = 1, timeout: number = 3000, ...args: Parameters<EventType>) {
-        return new Promise<ArrayLike<[EventRet: Awaited<ReturnType<EventType>>, ...Parameters<ListenerType>]>>(async (resolve, reject) => {
+        return new Promise<[EventRet: Awaited<ReturnType<EventType>>, ...Parameters<ListenerType>]>(async (resolve, reject) => {
             const id = randomUUID();
             let complete = 0;
             let retData: ArrayLike<Parameters<ListenerType>> | undefined = undefined;
