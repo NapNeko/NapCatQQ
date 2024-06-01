@@ -115,6 +115,7 @@ export interface FileElement {
     fileSize: string;
     picHeight?: number;
     picWidth?: number;
+    folderId?: string;
     picThumbPath?: Map<number, string>;
     file10MMd5?: string;
     fileSha?: string;
