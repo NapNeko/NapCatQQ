@@ -1,6 +1,5 @@
 import { NodeIKernelMsgListener } from "@/core";
 import { NodeIQQNTWrapperSession } from "@/core/wrapper";
-
 import { randomUUID } from "crypto";
 
 interface Internal_MapKey {
@@ -152,7 +151,6 @@ export class NTEventWrapper {
             retEvent = await EventFunc!(...args);
         });
     }
-
 }
 export const NTEventDispatch = new NTEventWrapper();
 
