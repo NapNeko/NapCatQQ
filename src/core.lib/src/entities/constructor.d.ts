@@ -5,7 +5,7 @@ export declare class SendMsgElementConstructor {
     static at(atUid: string, atNtUid: string, atType: AtType, atName: string): SendTextElement;
     static reply(msgSeq: string, msgId: string, senderUin: string, senderUinStr: string): SendReplyElement;
     static pic(picPath: string, summary?: string, subType?: 0 | 1): Promise<SendPicElement>;
-    static file(filePath: string, fileName?: string): Promise<SendFileElement>;
+    static file(filePath: string, fileName?: string, folderId?: string): Promise<SendFileElement>;
     static video(filePath: string, fileName?: string, diyThumbPath?: string): Promise<SendVideoElement>;
     static ptt(pttPath: string): Promise<SendPttElement>;
     static face(faceId: number): SendFaceElement;
