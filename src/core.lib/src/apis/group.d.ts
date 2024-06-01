@@ -1,6 +1,6 @@
 import { GroupMember, GroupRequestOperateTypes, GroupMemberRole, GroupNotify, Group } from '../entities';
 export declare class NTQQGroupApi {
-    static getGroups(forced?: boolean): Promise<Group[]>;
+    static getGroups(forced?: boolean): Promise<[EventRet: any, updateType: number, groupList: Group[]]>;
     static CreatGroupFileFolder(groupCode: string, folderName: string): Promise<import("@/core").GeneralCallResult & {
         resultWithGroupItem: {
             result: any;

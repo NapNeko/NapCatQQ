@@ -84,7 +84,7 @@ export class NTEventWrapper {
     }
     //统一回调清理事件
     async DispatcherListener(ListenerMainName: string, ListenerSubName: string, ...args: any[]) {
-        console.log(ListenerMainName, this.EventTask.get(ListenerMainName), ListenerSubName, this.EventTask.get(ListenerMainName)?.get(ListenerSubName));
+        //console.log(ListenerMainName, this.EventTask.get(ListenerMainName), ListenerSubName, this.EventTask.get(ListenerMainName)?.get(ListenerSubName));
         this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.forEach((task, uuid) => {
             //console.log(task.func, uuid, task.createtime, task.timeout);
             if (task.createtime + task.timeout < Date.now()) {
@@ -109,15 +109,17 @@ export class NTEventWrapper {
         });
     }
     async CallNormalEvent<EventType extends (...args: any[]) => Promise<any>, ListenerType extends (...args: any[]) => void>(EventName = '', ListenerName = '', waitTimes = 1, timeout: number = 3000, ...args: Parameters<EventType>) {
-        return new Promise<ArrayLike<Parameters<ListenerType>>>(async (resolve, reject) => {
+        return new Promise<ArrayLike<[EventRet: Awaited<ReturnType<EventType>>, ...Parameters<ListenerType>]>>(async (resolve, reject) => {
             const id = randomUUID();
             let complete = 0;
             let retData: ArrayLike<Parameters<ListenerType>> | undefined = undefined;
+            let retEvent: any = {};
             let databack = () => {
                 if (complete < waitTimes) {
                     reject(new Error('NTEvent EventName:' + EventName + ' ListenerName:' + ListenerName + ' timeout'));
                 } else {
-                    resolve(retData as ArrayLike<Parameters<ListenerType>>);
+
+                    resolve([retEvent, ...(retData as Parameters<ListenerType>)]);
                 }
             }
             let Timeouter = setTimeout(databack, timeout);
@@ -147,7 +149,7 @@ export class NTEventWrapper {
             this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.set(id, eventCallbak);
             this.CreatListenerFunction(ListenerMainName);
             let EventFunc = this.CreatEventFunction<EventType>(EventName);
-            console.log(await EventFunc!(...args));
+            retEvent = await EventFunc!(...args);
         });
     }
 
