@@ -152,7 +152,7 @@ export class NapCatOnebot11 {
               app_id: '0',
               device_name: device.deviceName,
               device_kind: 'none'
-            })
+            });
             // log('[设备列表] 设备名称: ' + device.deviceName);
           });
         }

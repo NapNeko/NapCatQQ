@@ -27,12 +27,12 @@ export enum ActionName {
     GetFile = 'get_file',
     ForwardFriendSingleMsg = 'forward_friend_single_msg',
     ForwardGroupSingleMsg = 'forward_group_single_msg',
-    TranslateEnWordToZn = "translate_en2zh",
-    GetGroupFileCount = "get_group_file_count",
-    GetGroupFileList = "get_group_file_list",
-    SetGroupFileFolder = "set_group_file_folder",
-    DelGroupFile = "del_group_file",
-    DelGroupFileFolder = "del_group_file_folder",
+    TranslateEnWordToZn = 'translate_en2zh',
+    GetGroupFileCount = 'get_group_file_count',
+    GetGroupFileList = 'get_group_file_list',
+    SetGroupFileFolder = 'set_group_file_folder',
+    DelGroupFile = 'del_group_file',
+    DelGroupFileFolder = 'del_group_file_folder',
     // onebot 11
     Reboot = 'set_restart',
     SendLike = 'send_like',
@@ -85,7 +85,7 @@ export enum ActionName {
     GoCQHTTP_GetForwardMsg = 'get_forward_msg',
     GetFriendMsgHistory = 'get_friend_msg_history',
     GetGroupSystemMsg = 'get_group_system_msg',
-    GetOnlineClient = "get_online_clients",
-    OCRImage = "ocr_image",
-    IOCRImage = ".ocr_image"
+    GetOnlineClient = 'get_online_clients',
+    OCRImage = 'ocr_image',
+    IOCRImage = '.ocr_image'
 }

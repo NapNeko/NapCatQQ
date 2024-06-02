@@ -66,7 +66,7 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
     } else if (ob11Config.GroupLocalTime.Record && ob11Config.GroupLocalTime.RecordList[0] === '-1' || ob11Config.GroupLocalTime.RecordList.includes(payload.group_id.toString())) {
       const _sendAndJoinRember = await dbUtil.getLastSentTimeAndJoinTime(TypeConvert.toNumber(payload.group_id));
       _sendAndJoinRember.forEach((element) => {
-        let MemberData = MemberMap.get(element.user_id);
+        const MemberData = MemberMap.get(element.user_id);
         if (MemberData) {
           MemberData.join_time = element.join_time;
           MemberData.last_sent_time = element.last_sent_time;

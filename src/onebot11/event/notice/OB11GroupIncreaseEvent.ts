@@ -15,6 +15,6 @@ export class OB11GroupIncreaseEvent extends OB11GroupNoticeEvent {
     this.sub_type = subType;
 
     if(ob11Config.GroupLocalTime.Record && (ob11Config.GroupLocalTime.RecordList[0] == '-1' || ob11Config.GroupLocalTime.RecordList.includes(groupId.toString())))
-      dbUtil.insertJoinTime(groupId, userId, Math.floor(Date.now() / 1000))
+      dbUtil.insertJoinTime(groupId, userId, Math.floor(Date.now() / 1000));
   }
 }

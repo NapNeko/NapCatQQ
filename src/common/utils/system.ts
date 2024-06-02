@@ -21,6 +21,7 @@ const invalidMacAddresses = new Set([
 ]);
 
 function validateMacAddress(candidate: string): boolean {
+  // eslint-disable-next-line no-useless-escape
   const tempCandidate = candidate.replace(/\-/g, ':').toLowerCase();
   return !invalidMacAddresses.has(tempCandidate);
 }
