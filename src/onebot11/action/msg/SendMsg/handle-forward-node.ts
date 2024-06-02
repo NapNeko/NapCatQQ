@@ -14,7 +14,7 @@ async function cloneMsg(msg: RawMessage): Promise<RawMessage | undefined> {
     peerUid: selfInfo.uid
   };
 
- // logDebug('克隆的目标消息', msg);
+  // logDebug('克隆的目标消息', msg);
 
   const sendElements: SendMessageElement[] = [];
 

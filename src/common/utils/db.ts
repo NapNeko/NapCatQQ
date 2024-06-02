@@ -3,7 +3,7 @@ import { ElementType, FileElement, PicElement, PttElement, RawMessage, VideoElem
 import sqlite3 from 'sqlite3';
 import { log, logDebug, logError } from '@/common/utils/log';
 import { NTQQMsgApi } from '@/core';
-import LRU from "@/common/utils/LRUCache";
+import LRU from '@/common/utils/LRUCache';
 
 export interface IRember {
   last_sent_time: number;
@@ -111,7 +111,7 @@ class DBUtil extends DBUtilBase {
 
     // 初始化群缓存列表
     this.db!.serialize(() => {
-      const sql = `SELECT * FROM sqlite_master WHERE type='table'`;
+      const sql = 'SELECT * FROM sqlite_master WHERE type=\'table\'';
       this.db!.all(sql, [], (err, rows: { name: string }[]) => {
         if (err) return logError(err);
         rows.forEach((row) => this.groupIds.push(parseInt(row.name)));
@@ -123,22 +123,22 @@ class DBUtil extends DBUtilBase {
     this.LURCache.on(async (node) => {
       const { value: time, groupId, userId } = node;
 
-      logDebug("插入发言时间", userId, groupId);
+      logDebug('插入发言时间', userId, groupId);
       await this.createGroupInfoTimeTableIfNotExist(groupId);
 
       const method = await this.getDataSetMethod(groupId, userId);
-      logDebug("插入发言时间方法判断", userId, groupId, method);
+      logDebug('插入发言时间方法判断', userId, groupId, method);
 
       const sql =
-        method == "update"
+        method == 'update'
           ? `UPDATE "${groupId}" SET last_sent_time = ? WHERE user_id = ?`
           : `INSERT INTO "${groupId}" (last_sent_time, user_id)  VALUES (?, ?)`;
 
       this.db!.all(sql, [time, userId], (err) => {
         if (err) {
-          return logError("插入/更新发言时间失败", userId, groupId);
+          return logError('插入/更新发言时间失败', userId, groupId);
         }
-        logDebug("插入/更新发言时间成功", userId, groupId);
+        logDebug('插入/更新发言时间成功', userId, groupId);
       });
 
     });
@@ -146,28 +146,28 @@ class DBUtil extends DBUtilBase {
   async getDataSetMethod(groupId: number, userId: number) {
     // 缓存记录
     if (this.LastSentCache.get(groupId, userId)) {
-      logDebug("缓存命中", userId, groupId);
-      return "update";
+      logDebug('缓存命中', userId, groupId);
+      return 'update';
     }
 
     // 数据库判断
-    return new Promise<"insert" | "update">((resolve, reject) => {
+    return new Promise<'insert' | 'update'>((resolve, reject) => {
       this.db!.all(
         `SELECT * FROM "${groupId}" WHERE user_id = ?`,
         [userId],
         (err, rows) => {
           if (err) {
-            logError("查询发言时间存在失败", userId, groupId, err);
-            return logError("插入发言时间失败", userId, groupId, err);
+            logError('查询发言时间存在失败', userId, groupId, err);
+            return logError('插入发言时间失败', userId, groupId, err);
           }
 
           if (rows.length === 0) {
-            logDebug("查询发言时间不存在", userId, groupId);
-            return resolve("insert");
+            logDebug('查询发言时间不存在', userId, groupId);
+            return resolve('insert');
           }
 
-          logDebug("查询发言时间存在", userId, groupId);
-          resolve("update");
+          logDebug('查询发言时间存在', userId, groupId);
+          resolve('update');
         }
       );
     });
@@ -465,14 +465,14 @@ class DBUtil extends DBUtilBase {
   async getLastSentTimeAndJoinTime(
     groupId: number
   ): Promise<IRember[]> {
-    logDebug("读取发言时间", groupId);
+    logDebug('读取发言时间', groupId);
     return new Promise<IRember[]>((resolve, reject) => {
       this.db!.all(`SELECT * FROM "${groupId}" `, (err, rows: IRember[]) => {
         if (err) {
-          logError("查询发言时间失败", groupId);
+          logError('查询发言时间失败', groupId);
           return resolve([]);
         }
-        logDebug("查询发言时间成功", groupId, rows);
+        logDebug('查询发言时间成功', groupId, rows);
         resolve(rows);
       });
     });
@@ -483,7 +483,7 @@ class DBUtil extends DBUtilBase {
     userId: number,
     time: number
   ) {
-    this.LURCache.set(groupId, userId, time)
+    this.LURCache.set(groupId, userId, time);
   }
   async insertJoinTime(
     groupId: number,
@@ -497,8 +497,8 @@ class DBUtil extends DBUtilBase {
       (err) => {
         if (err)
           logError(err),
-            Promise.reject(),
-            console.log("插入入群时间失败", userId, groupId);
+          Promise.reject(),
+          console.log('插入入群时间失败', userId, groupId);
       }
     );
 

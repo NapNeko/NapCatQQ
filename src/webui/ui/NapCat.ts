@@ -69,7 +69,7 @@ async function onSettingWindowCreated(view: Element) {
                     </div>
                     <div class="q-input">
                         <input id="config-ob11-http-secret" class="q-input__inner" data-config-key="ob11.http.secret" type="text" value="${ob11Config.http.secret
-        }" placeholder="未设置" />
+}" placeholder="未设置" />
                     </div>
                 </setting-item>
                 <setting-item data-direction="row">

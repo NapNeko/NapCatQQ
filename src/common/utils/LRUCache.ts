@@ -1,4 +1,4 @@
-import { logError, logDebug } from "@/common/utils/log";
+import { logError, logDebug } from '@/common/utils/log';
 
 type group_id = number;
 type user_id = number;
@@ -44,7 +44,7 @@ class LRU<T> {
   // 移除LRU节点
   private removeLRUNode(node: cacheNode<T>) {
     logDebug(
-      "removeLRUNode",
+      'removeLRUNode',
       node.groupId,
       node.userId,
       node.value,
