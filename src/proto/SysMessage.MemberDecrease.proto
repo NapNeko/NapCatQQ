@@ -25,4 +25,4 @@ message Event {
 }  
 message Other {
         repeated Event event = 2;
-}  
+}
