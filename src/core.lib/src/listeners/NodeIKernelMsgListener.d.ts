@@ -1,4 +1,4 @@
-import { RawMessage } from '@/core/entities';
+import { ChatType, RawMessage } from '@/core/entities';
 export interface OnRichMediaDownloadCompleteParams {
     fileModelId: string;
     msgElementId: string;
@@ -30,6 +30,14 @@ export interface onGroupFileInfoUpdateParamType {
     allFileCount: string;
     nextIndex: string;
     reqId: string;
+}
+export interface TempOnRecvParams {
+    sessionType: number;
+    chatType: ChatType;
+    peerUid: string;
+    groupCode: string;
+    fromNick: string;
+    sig: string;
 }
 export interface IKernelMsgListener {
     onAddSendMsg(msgRecord: RawMessage): void;
@@ -89,7 +97,7 @@ export interface IKernelMsgListener {
     onSearchGroupFileInfoUpdate(searchGroupFileResult: unknown): void;
     onSendMsgError(j2: unknown, contact: unknown, i2: unknown, str: unknown): void;
     onSysMsgNotification(i2: unknown, j2: unknown, j3: unknown, arrayList: unknown): void;
-    onTempChatInfoUpdate(tempChatInfo: unknown): void;
+    onTempChatInfoUpdate(tempChatInfo: TempOnRecvParams): void;
     onUnreadCntAfterFirstView(hashMap: unknown): void;
     onUnreadCntUpdate(hashMap: unknown): void;
     onUserChannelTabStatusChanged(z: unknown): void;
@@ -163,7 +171,7 @@ export declare class MsgListener implements IKernelMsgListener {
     onSearchGroupFileInfoUpdate(searchGroupFileResult: unknown): void;
     onSendMsgError(j2: unknown, contact: unknown, i2: unknown, str: unknown): void;
     onSysMsgNotification(i2: unknown, j2: unknown, j3: unknown, arrayList: unknown): void;
-    onTempChatInfoUpdate(tempChatInfo: unknown): void;
+    onTempChatInfoUpdate(tempChatInfo: TempOnRecvParams): void;
     onUnreadCntAfterFirstView(hashMap: unknown): void;
     onUnreadCntUpdate(hashMap: unknown): void;
     onUserChannelTabStatusChanged(z: unknown): void;

@@ -1,5 +1,5 @@
 import { napCatCore } from '@/core';
-import { MsgListener } from '@/core/listeners';
+import { MsgListener, TempOnRecvParams } from '@/core/listeners';
 import { OB11Constructor } from '@/onebot11/constructor';
 import { postOB11Event } from '@/onebot11/server/postOB11Event';
 import {
@@ -17,7 +17,7 @@ import { OB11Config, ob11Config } from '@/onebot11/config';
 import { httpHeart, ob11HTTPServer } from '@/onebot11/server/http';
 import { ob11WebsocketServer } from '@/onebot11/server/ws/WebsocketServer';
 import { ob11ReverseWebsockets } from '@/onebot11/server/ws/ReverseWebsocket';
-import { friendRequests, getFriend, getGroup, getGroupMember, groupNotifies, selfInfo, uid2UinMap } from '@/core/data';
+import { friendRequests, getFriend, getGroup, getGroupMember, groupNotifies, selfInfo, tempGroupCodeMap, uid2UinMap } from '@/core/data';
 import { dbUtil } from '@/common/utils/db';
 import { BuddyListener, GroupListener, NodeIKernelBuddyListener } from '@/core/listeners';
 import { OB11FriendRequestEvent } from '@/onebot11/event/request/OB11FriendRequest';
@@ -195,9 +195,15 @@ export class NapCatOnebot11 {
       //postOB11Event
       selfInfo.online = false;
     };
+    msgListener.onTempChatInfoUpdate = (tempChatInfo: TempOnRecvParams) => {
+      if (tempChatInfo.sessionType == 1 && tempChatInfo.chatType == ChatType.temp) {
+        tempGroupCodeMap[tempChatInfo.peerUid] = tempChatInfo.groupCode;
+      }
+      // 临时会话更新 tempGroupCodeMap uid -> source/GroupCode
+    };
     msgListener.onRecvMsg = (msg) => {
       // console.log('ob11 onRecvMsg', JSON.stringify(msg, null, 2));
-      logDebug('收到消息', msg);
+      // logDebug('收到消息', msg);
       for (const m of msg) {
         // try: 减掉3s 试图修复消息半天收不到
         if (this.bootTime - 3 > parseInt(m.msgTime)) {
