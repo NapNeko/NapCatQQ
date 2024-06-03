@@ -9,6 +9,17 @@ export interface BuddyCategoryType {
     categroyMbCount: number;
     buddyList: User[];
 }
+export interface ModifyProfileParams {
+    nick: string;
+    longNick: string;
+    sex: Sex;
+    birthday: {
+        birthday_year: string;
+        birthday_month: string;
+        birthday_day: string;
+    };
+    location: any;
+}
 export interface BuddyProfileLikeReq {
     friendUids: string[];
     basic: number;

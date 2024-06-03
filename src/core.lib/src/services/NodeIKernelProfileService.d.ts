@@ -1,3 +1,4 @@
+import { ModifyProfileParams } from '../entities';
 import { NodeIKernelProfileListener } from '../listeners';
 import { GeneralCallResult } from '@/core/services/common';
 export interface NodeIKernelProfileService {
@@ -10,7 +11,7 @@ export interface NodeIKernelProfileService {
     enumCityOptions(...args: unknown[]): unknown;
     enumAreaOptions(...args: unknown[]): unknown;
     modifySelfProfile(...args: unknown[]): unknown;
-    modifyDesktopMiniProfile(...args: unknown[]): unknown;
+    modifyDesktopMiniProfile(param: ModifyProfileParams): Promise<GeneralCallResult>;
     setNickName(...args: unknown[]): unknown;
     setLongNick(...args: unknown[]): unknown;
     setBirthday(...args: unknown[]): unknown;
