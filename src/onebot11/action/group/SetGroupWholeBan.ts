@@ -7,9 +7,9 @@ const SchemaData = {
   type: 'object',
   properties: {
     group_id: { type: [ 'number' , 'string' ] },
-    enable: { type: 'boolean' }
+    enable: { type: ['boolean','string'] }
   },
-  required: ['group_id', 'enable']
+  required: ['group_id']
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
@@ -18,7 +18,7 @@ export default class SetGroupWholeBan extends BaseAction<Payload, null> {
   actionName = ActionName.SetGroupWholeBan;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<null> {
-    const enable = payload.enable.toString() === 'true';
+    const enable = payload.enable?.toString() !== 'false';
     await NTQQGroupApi.banGroup(payload.group_id.toString(), enable);
     return null;
   }
