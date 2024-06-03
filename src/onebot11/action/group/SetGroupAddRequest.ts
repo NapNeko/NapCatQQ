@@ -22,7 +22,7 @@ export default class SetGroupAddRequest extends BaseAction<Payload, null> {
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<null> {
     const flag = payload.flag.toString();
-    const approve = payload.approve?.toString() === 'true';
+    const approve = payload.approve?.toString() !== 'false';
     const notify = groupNotifies[flag];
     if (!notify) {
       throw `${flag}对应的加群通知不存在`;

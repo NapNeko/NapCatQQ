@@ -12,7 +12,7 @@ const SchemaData = {
     user_id: { type: [ 'number' , 'string' ] },
     enable: { type: 'boolean' }
   },
-  required: ['group_id', 'user_id', 'enable']
+  required: ['group_id', 'user_id']
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
@@ -23,7 +23,7 @@ export default class SetGroupAdmin extends BaseAction<Payload, null> {
   protected async _handle(payload: Payload): Promise<null> {
     const member = await getGroupMember(payload.group_id, payload.user_id);
     // 已经前置验证类型
-    const enable = payload.enable.toString() === 'true';
+    const enable = payload.enable?.toString() !== 'false';
     if (!member) {
       throw `群成员${payload.user_id}不存在`;
     }
