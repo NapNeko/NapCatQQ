@@ -4,7 +4,7 @@ import path from 'node:path';
 import { SelfInfo } from '@/core';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
+import chalk from 'chalk';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -42,14 +42,14 @@ const logConfig: Configuration = {
       maxLoogSize: 10485760, // 日志文件的最大大小（单位：字节），这里设置为10MB
       layout: {
         type: 'pattern',
-        pattern: '%d{yyyy-MM-dd hh:mm:ss} [%p] - %m'
+        pattern: '%d{yyyy-MM-dd hh:mm:ss} [%p] %X{userInfo} | %m'
       }
     },
     ConsoleAppender: { // 输出到控制台的appender
       type: 'console',
       layout: {
         type: 'pattern',
-        pattern: '%d{yyyy-MM-dd hh:mm:ss} [%p] - %m'
+        pattern: `%d{yyyy-MM-dd hh:mm:ss} [%[%p%]] ${chalk.magenta('%X{userInfo}')} | %m`
       }
     }
   },
@@ -61,7 +61,9 @@ const logConfig: Configuration = {
 };
 
 log4js.configure(logConfig);
-
+const loggerConsole = log4js.getLogger('console');
+const loggerFile = log4js.getLogger('file');
+const loggerDefault = log4js.getLogger('default');
 
 export function setLogLevel(fileLogLevel: LogLevel, consoleLogLevel: LogLevel) {
   logConfig.categories.file.level = fileLogLevel;
@@ -70,12 +72,12 @@ export function setLogLevel(fileLogLevel: LogLevel, consoleLogLevel: LogLevel) {
 }
 
 export function setLogSelfInfo(selfInfo: SelfInfo) {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-  logConfig.appenders.FileAppender.layout.pattern = logConfig.appenders.ConsoleAppender.layout.pattern =
-    `%d{yyyy-MM-dd hh:mm:ss} [%p] ${selfInfo.nick}(${selfInfo.uin}) %m`;
-  log4js.configure(logConfig);
+  const userInfo = `${selfInfo.nick}(${selfInfo.uin})`;
+  loggerConsole.addContext('userInfo', userInfo);
+  loggerFile.addContext('userInfo', userInfo);
+  loggerDefault.addContext('userInfo', userInfo);
 }
+setLogSelfInfo({ nick: '', uin: '', uid: '' });
 
 let fileLogEnabled = true;
 let consoleLogEnabled = true;
@@ -86,7 +88,7 @@ export function enableConsoleLog(enable: boolean) {
   consoleLogEnabled = enable;
 }
 
-function formatMsg(msg: any[]){
+function formatMsg(msg: any[]) {
   let logMsg = '';
   for (const msgItem of msg) {
     // 判断是否是对象
@@ -97,15 +99,18 @@ function formatMsg(msg: any[]){
     }
     logMsg += msgItem + ' ';
   }
-  return '\n' + logMsg + '\n';
+  return logMsg.trim();
 }
 
-function _log(level: LogLevel, ...args: any[]){
-  if (consoleLogEnabled){
-    log4js.getLogger('console')[level](formatMsg(args));
+// eslint-disable-next-line no-control-regex
+const colorEscape = /\x1B[@-_][0-?]*[ -/]*[@-~]/g;
+
+function _log(level: LogLevel, ...args: any[]) {
+  if (consoleLogEnabled) {
+    loggerConsole[level](formatMsg(args));
   }
-  if (fileLogEnabled){
-    log4js.getLogger('file')[level](formatMsg(args));
+  if (fileLogEnabled) {
+    loggerFile[level](formatMsg(args).replace(colorEscape, ''));
   }
 }
 
@@ -120,4 +125,12 @@ export function logDebug(...args: any[]) {
 
 export function logError(...args: any[]) {
   _log(LogLevel.ERROR, ...args);
+}
+
+export function logWarn(...args: any[]) {
+  _log(LogLevel.WARN, ...args);
+}
+
+export function logFatal(...args: any[]) {
+  _log(LogLevel.FATAL, ...args);
 }
