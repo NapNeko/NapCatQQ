@@ -12,7 +12,7 @@ const SchemaData = {
     approve: { type: 'boolean' },
     reason: { type: 'string' }
   },
-  required: ['flag', 'approve']
+  required: ['flag']
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
@@ -22,7 +22,7 @@ export default class SetGroupAddRequest extends BaseAction<Payload, null> {
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<null> {
     const flag = payload.flag.toString();
-    const approve = payload.approve.toString() === 'true';
+    const approve = payload.approve?.toString() === 'true';
     const notify = groupNotifies[flag];
     if (!notify) {
       throw `${flag}对应的加群通知不存在`;
