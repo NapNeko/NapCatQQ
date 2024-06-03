@@ -2,6 +2,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import os from 'node:os';
 import { systemPlatform } from '@/common/utils/system';
+import { logError } from '@/common/utils/log';
 
 export const exePath = process.execPath;
 
@@ -49,7 +50,7 @@ if (fs.existsSync(configVersionInfoPath)) {
     const _ =JSON.parse(fs.readFileSync(configVersionInfoPath).toString());
     _qqVersionConfigInfo = Object.assign(_qqVersionConfigInfo, _);
   } catch (e) {
-    console.error('Load QQ version config info failed, Use default version', e);
+    logError('Load QQ version config info failed, Use default version', e);
   }
 }
 

@@ -112,7 +112,7 @@ export class NapCatOnebot11 {
       try {
         // 生产环境会自己去掉
         if (import.meta.env.MODE == 'development') {
-          console.log(buf2hex(Buffer.from(protobufData)));
+          logDebug(buf2hex(Buffer.from(protobufData)));
         }
         const sysMsg = SysData.fromBinary(Buffer.from(protobufData));
         const peeruin = sysMsg.header[0].peerNumber;
@@ -258,7 +258,7 @@ export class NapCatOnebot11 {
       for (const member of members.values()) {
         //console.log(member?.isDelete, role, isPrivilege);
         if (member?.isDelete && !isPrivilege /*&& selfInfo.uin !== member.uin*/) {
-          console.log('[群聊] 群组 ', groupCode, ' 成员' + member.uin + '退出');
+          log('[群聊] 群组 ', groupCode, ' 成员' + member.uin + '退出');
           const groupDecreaseEvent = new OB11GroupDecreaseEvent(parseInt(groupCode), parseInt(member.uin), 0, 'leave');// 不知道怎么出去的
           postOB11Event(groupDecreaseEvent, true);
         }

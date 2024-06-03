@@ -9,6 +9,7 @@ import {
 } from '@/core/entities';
 import { dbUtil } from '@/common/utils/db';
 import { NTQQFileApi, NTQQFileCacheApi } from '@/core/apis/file';
+import { logError } from '@/common/utils/log';
 
 export default class CleanCache extends BaseAction<void, void> {
   actionName = ActionName.CleanCache;
@@ -62,7 +63,7 @@ export default class CleanCache extends BaseAction<void, void> {
         await NTQQFileCacheApi.clearChatCache(chatCacheList, cacheFileList);
         res();
       } catch(e) {
-        console.error('清理缓存时发生了错误');
+        logError('清理缓存时发生了错误');
         rej(e);
       }
     });
