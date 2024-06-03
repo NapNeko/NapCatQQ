@@ -54,7 +54,7 @@ import { GetGroupEssence } from './group/GetGroupEssence';
 import { ForwardFriendSingleMsg, ForwardGroupSingleMsg } from '@/onebot11/action/msg/ForwardSingleMsg';
 import { GetFriendWithCategory } from './extends/GetFriendWithCategory';
 import { SendGroupNotice } from './go-cqhttp/SendGroupNotice';
-import { Reboot, RebootNormol } from './system/Reboot';
+import { Reboot, RebootNormal } from './system/Reboot';
 import { GetGroupHonorInfo } from './go-cqhttp/GetGroupHonorInfo';
 import { GoCQHTTPHandleQuickAction } from './go-cqhttp/QuickAction';
 import { GetGroupSystemMsg } from './group/GetGroupSystemMsg';
@@ -66,12 +66,14 @@ import { TranslateEnWordToZn } from './extends/TranslateEnWordToZn';
 import { SetGroupFileFolder } from './file/SetGroupFileFolder';
 import { DelGroupFile } from './file/DelGroupFile';
 import { DelGroupFileFolder } from './file/DelGroupFileFolder';
+import { SetSelfProfile } from './extends/SetSelfProfile';
 
 export const actionHandlers = [
-  new RebootNormol(),
+  new RebootNormal(),
   new GetFile(),
   new Debug(),
   new Reboot(),
+  new SetSelfProfile(),
   // new GetConfigAction(),
   // new SetConfigAction(),
   // new GetGroupAddRequest(),

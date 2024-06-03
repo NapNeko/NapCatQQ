@@ -28,8 +28,8 @@ export class Reboot extends BaseAction<Payload, null> {
     return null;
   }
 }
-export class RebootNormol extends BaseAction<Payload, null> {
-  actionName = ActionName.RebootNormol;
+export class RebootNormal extends BaseAction<Payload, null> {
+  actionName = ActionName.RebootNormal;
 
   protected async _handle(payload: Payload): Promise<null> {
     if (payload.delay) {
