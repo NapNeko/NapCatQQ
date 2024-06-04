@@ -7,6 +7,7 @@ import { WebUiConfig } from './src/helper/config';
 const app = express();
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { log } from '@/common/utils/log';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -32,8 +33,8 @@ export async function InitWebUi() {
   //挂载API接口
   app.use('/api', ALLRouter);
   app.listen(config.port, async () => {
-    console.log(`[NapCat] [WebUi] Current WebUi is running at IP:${config.port}`);
-    console.log(`[NapCat] [WebUi] Login Token is ${config.token}`);
+    log(`[NapCat] [WebUi] Current WebUi is running at IP:${config.port}`);
+    log(`[NapCat] [WebUi] Login Token is ${config.token}`);
   });
 
 }
