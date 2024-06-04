@@ -8,7 +8,7 @@ import { uid2UinMap } from '@/core/data';
 const SchemaData = {
   type: 'object',
   properties: {
-    group_id: { type: [ 'number' , 'string' ] }
+    group_id: { type: ['number', 'string'] }
   },
 } as const satisfies JSONSchema;
 

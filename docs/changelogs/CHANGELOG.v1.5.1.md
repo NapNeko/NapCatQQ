@@ -4,7 +4,7 @@ QQ Version: Windows 9.9.10-24108 / Linux 3.2.7-23361
 
 ## 修复与优化
 * 支持 新Api: set_self_profile 可设置个性签名
-
+* 修复 Api: get_group_system_msg
 ## 新增与调整
 
 
