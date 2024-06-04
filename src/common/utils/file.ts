@@ -3,7 +3,7 @@ import fsPromise from 'fs/promises';
 import crypto from 'crypto';
 import util from 'util';
 import path from 'node:path';
-import { log } from './log';
+import { log, logError } from './log';
 import { dbUtil } from '@/common/utils/db';
 import * as fileType from 'file-type';
 import { v4 as uuidv4 } from 'uuid';
@@ -262,12 +262,12 @@ export async function copyFolder(sourcePath: string, destPath: string) {
         try {
           await fsPromise.copyFile(srcPath, dstPath);
         } catch (error) {
-          console.error(`无法复制文件 '${srcPath}' 到 '${dstPath}': ${error}`);
+          logError(`无法复制文件 '${srcPath}' 到 '${dstPath}': ${error}`);
           // 这里可以决定是否要继续复制其他文件
         }
       }
     }
   } catch (error) {
-    console.error('复制文件夹时出错:', error);
+    logError('复制文件夹时出错:', error);
   }
 }

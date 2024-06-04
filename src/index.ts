@@ -5,18 +5,19 @@ import fs from 'fs/promises';
 import fsSync from 'fs';
 import path from 'node:path';
 import { checkVersion } from '@/common/utils/version';
-import { log, logDebug, logError, LogLevel, setLogLevel } from '@/common/utils/log';
+import { log, logDebug, logError, LogLevel, logWarn, setLogLevel } from '@/common/utils/log';
 import { NapCatOnebot11 } from '@/onebot11/main';
 import { InitWebUi } from './webui/index';
 import { WebUiDataRuntime } from './webui/src/helper/Data';
 import { UpdateConfig } from './common/utils/helper';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import chalk from 'chalk';
 
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
+const tagColor = chalk.cyan;
 program
   .option('-q, --qq <type>', 'QQ号')
   .parse(process.argv);
@@ -31,19 +32,19 @@ checkVersion().then(async (remoteVersion: string) => {
   const localVersion = JSON.parse(fsSync.readFileSync(path.join(__dirname, 'package.json')).toString()).version;
   const localVersionList = localVersion.split('.');
   const remoteVersionList = remoteVersion.split('.');
-  log('[NapCat]  当前版本:', localVersion);
+  log(tagColor('[NapCat]'), '当前版本:', localVersion);
   for (const k of [0, 1, 2]) {
     if (parseInt(remoteVersionList[k]) > parseInt(localVersionList[k])) {
-      console.log(`[NapCat] 检测到更新,请前往 https://github.com/NapNeko/NapCatQQ 下载 NapCatQQ V ${remoteVersion}`);
+      logWarn(tagColor('[NapCat]'), `检测到更新,请前往 https://github.com/NapNeko/NapCatQQ 下载 NapCatQQ V ${remoteVersion}`);
       return;
     } else if (parseInt(remoteVersionList[k]) < parseInt(localVersionList[k])) {
       break;
     }
   }
-  logDebug('[NapCat]  当前已是最新版本');
+  logDebug(tagColor('[NapCat]'),'当前已是最新版本');
   return;
 }).catch((e) => {
-  logError('[NapCat] 检测更新失败', e);
+  logError(tagColor('[NapCat]'),'检测更新失败', e);
 });
 // 不是很好待优化
 const NapCat_OneBot11 = new NapCatOnebot11();
@@ -51,18 +52,18 @@ const NapCat_OneBot11 = new NapCatOnebot11();
 WebUiDataRuntime.setOB11ConfigCall(NapCat_OneBot11.SetConfig);
 
 napCatCore.onLoginSuccess((uin, uid) => {
-  console.log('登录成功!');
+  log('登录成功!');
   WebUiDataRuntime.setQQLoginStatus(true);
   WebUiDataRuntime.setQQLoginUin(uin.toString());
 });
 const showQRCode = async (url: string, base64: string, buffer: Buffer) => {
   await WebUiDataRuntime.setQQLoginQrcodeURL(url);
-  console.log('请扫描下面的二维码，然后在手Q上授权登录：');
+  logWarn('请扫描下面的二维码，然后在手Q上授权登录：');
   const qrcodePath = path.join(__dirname, 'qrcode.png');
   qrcode.generate(url, { small: true }, (res) => {
-    console.log(`${res}\n二维码解码URL: ${url}\n如果控制台二维码无法扫码，可以复制解码url到二维码生成网站生成二维码再扫码，也可以打开下方的二维码路径图片进行扫码`);
+    logWarn(`\n${res}\n二维码解码URL: ${url}\n如果控制台二维码无法扫码，可以复制解码url到二维码生成网站生成二维码再扫码，也可以打开下方的二维码路径图片进行扫码`);
     fs.writeFile(qrcodePath, buffer).then(() => {
-      console.log('二维码已保存到', qrcodePath);
+      logWarn('二维码已保存到', qrcodePath);
     });
   });
 };
@@ -86,7 +87,7 @@ WebUiDataRuntime.setQQQuickLoginCall(async (uin: string) => {
         }
         resolve({ result: true, message: '' });
       }).catch((e) => {
-        console.error(e);
+        logError(e);
         resolve({ result: false, message: '快速登录发生错误' });
       });
     } else {
@@ -104,7 +105,7 @@ if (quickLoginQQ) {
       logError('快速登录错误:', res.loginErrorInfo.errMsg);
     }
   }).catch((e) => {
-    console.error(e);
+    logError(e);
     napCatCore.qrLogin(showQRCode);
   });
 } else {
