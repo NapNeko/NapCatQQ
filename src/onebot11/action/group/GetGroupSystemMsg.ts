@@ -1,9 +1,7 @@
-import { NTQQGroupApi } from '@/core';
+import { NTQQGroupApi, NTQQUserApi } from '@/core';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { NTQQMsgApi } from '@/core/apis/msg';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import { uid2UinMap } from '@/core/data';
 
 const SchemaData = {
   type: 'object',
@@ -24,22 +22,22 @@ export class GetGroupSystemMsg extends BaseAction<void, any> {
       if (SSNotify.type == 1) {
         retData.InvitedRequest.push({
           request_id: SSNotify.seq,
-          invitor_uin: uid2UinMap[SSNotify.user1?.uid],
+          invitor_uin: await NTQQUserApi.getUinByUid(SSNotify.user1?.uid),
           invitor_nick: SSNotify.user1?.nickName,
           group_id: SSNotify.group?.groupCode,
           group_name: SSNotify.group?.groupName,
           checked: SSNotify.status === 1 ? false : true,
-          actor: uid2UinMap[SSNotify.user2?.uid] || 0,
+          actor: await NTQQUserApi.getUinByUid(SSNotify.user2?.uid) || 0,
         });
       } else if (SSNotify.type == 7) {
         retData.join_requests.push({
           request_id: SSNotify.seq,
-          requester_uin: uid2UinMap[SSNotify.user1?.uid],
+          requester_uin: await NTQQUserApi.getUinByUid(SSNotify.user1?.uid),
           requester_nick: SSNotify.user1?.nickName,
           group_id: SSNotify.group?.groupCode,
           group_name: SSNotify.group?.groupName,
           checked: SSNotify.status === 1 ? false : true,
-          actor: uid2UinMap[SSNotify.user2?.uid] || 0,
+          actor: await NTQQUserApi.getUinByUid(SSNotify.user2?.uid) || 0,
         });
       }
     }

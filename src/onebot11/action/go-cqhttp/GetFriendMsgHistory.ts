@@ -1,6 +1,6 @@
 import BaseAction from '../BaseAction';
 import { OB11Message, OB11User } from '../../types';
-import { getFriend, friends, uid2UinMap, getUidByUin } from '@/core/data';
+import { getFriend, friends } from '@/core/data';
 import { ActionName } from '../types';
 import { ChatType } from '@/core/entities';
 import { dbUtil } from '@/common/utils/db';
@@ -8,6 +8,7 @@ import { NTQQMsgApi } from '@/core/apis/msg';
 import { OB11Constructor } from '../../constructor';
 import { logDebug } from '@/common/utils/log';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { NTQQUserApi } from '@/core';
 
 interface Response {
   messages: OB11Message[];
@@ -16,7 +17,7 @@ interface Response {
 const SchemaData = {
   type: 'object',
   properties: {
-    user_id: { type: [ 'number' , 'string' ] },
+    user_id: { type: ['number', 'string'] },
     message_seq: { type: 'number' },
     count: { type: 'number' }
   },
@@ -29,7 +30,7 @@ export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
   actionName = ActionName.GetFriendMsgHistory;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<Response> {
-    const uid = getUidByUin(payload.user_id.toString());
+    const uid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
     if (!uid) {
       throw `记录${payload.user_id}不存在`;
     }
