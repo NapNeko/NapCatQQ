@@ -3,8 +3,6 @@ import path from 'node:path';
 import fs from 'fs';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { logError } from './log';
-
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -20,6 +18,6 @@ export function cpModule(moduleName: string) {
   try {
     fs.copyFileSync(path.join(currentDir, fileName), path.join(currentDir, `${moduleName}.node`));
   } catch (e) {
-    logError(e);
+    console.error(e);
   }
 }
