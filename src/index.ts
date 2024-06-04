@@ -61,7 +61,7 @@ const showQRCode = async (url: string, base64: string, buffer: Buffer) => {
   logWarn('请扫描下面的二维码，然后在手Q上授权登录：');
   const qrcodePath = path.join(__dirname, 'qrcode.png');
   qrcode.generate(url, { small: true }, (res) => {
-    logWarn(`${res}\n二维码解码URL: ${url}\n如果控制台二维码无法扫码，可以复制解码url到二维码生成网站生成二维码再扫码，也可以打开下方的二维码路径图片进行扫码`);
+    logWarn(`\n${res}\n二维码解码URL: ${url}\n如果控制台二维码无法扫码，可以复制解码url到二维码生成网站生成二维码再扫码，也可以打开下方的二维码路径图片进行扫码`);
     fs.writeFile(qrcodePath, buffer).then(() => {
       logWarn('二维码已保存到', qrcodePath);
     });

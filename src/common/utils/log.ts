@@ -99,7 +99,7 @@ function formatMsg(msg: any[]) {
     }
     logMsg += msgItem + ' ';
   }
-  return logMsg.trim();
+  return logMsg;
 }
 
 // eslint-disable-next-line no-control-regex
