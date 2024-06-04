@@ -17,7 +17,7 @@ import { OB11Config, ob11Config } from '@/onebot11/config';
 import { httpHeart, ob11HTTPServer } from '@/onebot11/server/http';
 import { ob11WebsocketServer } from '@/onebot11/server/ws/WebsocketServer';
 import { ob11ReverseWebsockets } from '@/onebot11/server/ws/ReverseWebsocket';
-import { friendRequests, getFriend, getGroup, getGroupMember, groupNotifies, selfInfo, tempGroupCodeMap, uid2UinMap } from '@/core/data';
+import { friendRequests, getFriend, getGroup, getGroupMember, groupNotifies, selfInfo, tempGroupCodeMap } from '@/core/data';
 import { dbUtil } from '@/common/utils/db';
 import { BuddyListener, GroupListener, NodeIKernelBuddyListener } from '@/core/listeners';
 import { OB11FriendRequestEvent } from '@/onebot11/event/request/OB11FriendRequest';
@@ -161,7 +161,7 @@ export class NapCatOnebot11 {
         //   const role = (await getGroupMember(peeruin, selfInfo.uin))?.role;
         //   const isPrivilege = role === 3 || role === 4;
         //   if (!isPrivilege) {
-        //     const leaveUin = uid2UinMap[sysMsg.other[0].event[0].peerString];
+        //     const leaveUin = 
         //     log('[群聊] 群组 ', peeruin, ' 成员' + leaveUin + '退出');
         //     const groupDecreaseEvent = new OB11GroupDecreaseEvent(peeruin, parseInt(leaveUin), 0, 'leave');// 不知道怎么出去的
         //     postOB11Event(groupDecreaseEvent, true);
