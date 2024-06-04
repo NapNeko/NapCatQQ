@@ -10,9 +10,9 @@ const SchemaData = {
   properties: {
     group_id: { type: [ 'number' , 'string' ] },
     user_id: { type: [ 'number' , 'string' ] },
-    reject_add_request: { type: 'boolean' }
+    reject_add_request: { type: [ 'boolean' , 'string' ] }
   },
-  required: ['group_id', 'user_id', 'reject_add_request']
+  required: ['group_id', 'user_id']
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
@@ -25,7 +25,8 @@ export default class SetGroupKick extends BaseAction<Payload, null> {
     if (!member) {
       throw `群成员${payload.user_id}不存在`;
     }
-    await NTQQGroupApi.kickMember(payload.group_id.toString(), [member.uid], !!payload.reject_add_request);
+    let rejectReq = payload.reject_add_request.toString() == 'true';
+    await NTQQGroupApi.kickMember(payload.group_id.toString(), [member.uid], rejectReq);
     return null;
   }
 }
