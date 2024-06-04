@@ -498,7 +498,7 @@ class DBUtil extends DBUtilBase {
         if (err)
           logError(err),
           Promise.reject(),
-          console.log('插入入群时间失败', userId, groupId);
+          logError('插入入群时间失败', userId, groupId);
       }
     );
 

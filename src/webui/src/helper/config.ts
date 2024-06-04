@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import * as net from 'node:net';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { logError } from '@/common/utils/log';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -78,7 +79,7 @@ class WebUiConfigWrapper {
       this.WebUiConfigData = parsedConfig;
       return this.WebUiConfigData;
     } catch (e) {
-      console.error('读取配置文件失败', e);
+      logError('读取配置文件失败', e);
     }
     return {} as WebUiConfigType; // 理论上这行代码到不了，为了保持函数完整性而保留
   }
