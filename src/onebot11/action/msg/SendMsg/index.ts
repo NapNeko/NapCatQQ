@@ -7,9 +7,9 @@ import {
   OB11PostSendMsg
 } from '@/onebot11/types';
 import { ActionName, BaseCheckResult } from '@/onebot11/action/types';
-import { getFriend, getGroup, getUidByUin } from '@/core/data';
+import { getFriend, getGroup } from '@/core/data';
 import { dbUtil } from '@/common/utils/db';
-import { ChatType, ElementType, Group, NTQQMsgApi, Peer, SendMessageElement, } from '@/core';
+import { ChatType, ElementType, Group, NTQQMsgApi, NTQQUserApi, Peer, SendMessageElement, } from '@/core';
 import fs from 'node:fs';
 import { logDebug, logError } from '@/common/utils/log';
 import { decodeCQCode } from '@/onebot11/cqcode';
@@ -93,7 +93,8 @@ async function createContext(payload: OB11PostSendMsg): Promise<{
     const friend = await getFriend(payload.user_id.toString());
     if (!friend) {
       if (ALLOW_SEND_TEMP_MSG) {
-        const tempUid = getUidByUin(payload.user_id.toString());
+        //const tempUid = getUidByUin(payload.user_id.toString());
+        const tempUid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
         if (tempUid) return {
           peer: {
             chatType: ChatType.temp,

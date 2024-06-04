@@ -12,8 +12,8 @@ import { OB11FriendRequestEvent } from '../event/request/OB11FriendRequest';
 import { OB11GroupRequestEvent } from '../event/request/OB11GroupRequest';
 import { isNull } from '@/common/utils/helper';
 import { dbUtil } from '@/common/utils/db';
-import { friendRequests, getGroup, getUidByUin, groupNotifies, selfInfo } from '@/core/data';
-import { NTQQFriendApi, NTQQGroupApi, NTQQMsgApi } from '@/core/apis';
+import { friendRequests, getGroup, groupNotifies, selfInfo } from '@/core/data';
+import { NTQQFriendApi, NTQQGroupApi, NTQQUserApi } from '@/core/apis';
 import createSendElements from '../action/msg/SendMsg/create-send-elements';
 
 export type QuickActionEvent = OB11Message | OB11BaseMetaEvent | OB11BaseNoticeEvent
@@ -129,7 +129,7 @@ async function handleMsg(msg: OB11Message, quickAction: QuickAction) {
   const reply = quickAction.reply;
   const peer: Peer = {
     chatType: ChatType.friend,
-    peerUid: getUidByUin(msg.user_id.toString()) as string
+    peerUid: await NTQQUserApi.getUidByUin(msg.user_id.toString()) as string
   };
   if (msg.message_type == 'private') {
     if (msg.sub_type === 'group') {
