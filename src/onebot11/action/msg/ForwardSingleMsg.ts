@@ -1,8 +1,7 @@
 import BaseAction from '../BaseAction';
-import { NTQQMsgApi } from '@/core/apis';
+import { NTQQMsgApi, NTQQUserApi } from '@/core/apis';
 import { ChatType, Peer } from '@/core/entities';
 import { dbUtil } from '@/common/utils/db';
-import { getUidByUin } from '@/core/data';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
@@ -21,7 +20,7 @@ type Payload = FromSchema<typeof SchemaData>;
 class ForwardSingleMsg extends BaseAction<Payload, null> {
   protected async getTargetPeer(payload: Payload): Promise<Peer> {
     if (payload.user_id) {
-      const peerUid = getUidByUin(payload.user_id.toString());
+      const peerUid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
       if (!peerUid) {
         throw new Error(`无法找到私聊对象${payload.user_id}`);
       }

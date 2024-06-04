@@ -424,18 +424,18 @@ export class NapCatOnebot11 {
         } else if (notify.type == GroupNotifyTypes.MEMBER_EXIT || notify.type == GroupNotifyTypes.KICK_MEMBER) {
           logDebug('有成员退出通知', notify);
           try {
-            const member1 = await NTQQUserApi.getUserDetailInfo(notify.user1.uid);
-            let operatorId = member1.uin;
+            const member1Uin = (await NTQQUserApi.getUinByUid(notify.user1.uid))!;
+            let operatorId = member1Uin;
             let subType: GroupDecreaseSubType = 'leave';
             if (notify.user2.uid) {
               // 是被踢的
-              const member2 = await getGroupMember(notify.group.groupCode, notify.user2.uid);
-              if (member2) {
-                operatorId = member2.uin;
+              const member2Uin = await NTQQUserApi.getUinByUid(notify.user2.uid);
+              if (member2Uin) {
+                operatorId = member2Uin;
               }
               subType = 'kick';
             }
-            const groupDecreaseEvent = new OB11GroupDecreaseEvent(parseInt(notify.group.groupCode), parseInt(member1.uin), parseInt(operatorId), subType);
+            const groupDecreaseEvent = new OB11GroupDecreaseEvent(parseInt(notify.group.groupCode), parseInt(member1Uin), parseInt(operatorId), subType);
             postOB11Event(groupDecreaseEvent, true);
           } catch (e: any) {
             logError('获取群通知的成员信息失败', notify, e.stack.toString());
@@ -463,7 +463,7 @@ export class NapCatOnebot11 {
           groupInviteEvent.group_id = parseInt(notify.group.groupCode);
           let user_id = (await getFriend(notify.user2.uid))?.uin;
           if (!user_id) {
-            user_id = (await NTQQUserApi.getUserDetailInfo(notify.user2.uid))?.uin;
+            user_id = (await NTQQUserApi.getUinByUid(notify.user2.uid)) || '';
           }
           groupInviteEvent.user_id = parseInt(user_id);
           groupInviteEvent.sub_type = 'invite';
@@ -520,8 +520,8 @@ export class NapCatOnebot11 {
       friendRequests[flag] = req;
       const friendRequestEvent = new OB11FriendRequestEvent();
       try {
-        const requester = await NTQQUserApi.getUserDetailInfo(req.friendUid);
-        friendRequestEvent.user_id = parseInt(requester.uin);
+        const requesterUin = await NTQQUserApi.getUinByUid(req.friendUid);
+        friendRequestEvent.user_id = parseInt(requesterUin!);
       } catch (e) {
         logDebug('获取加好友者QQ号失败', e);
       }

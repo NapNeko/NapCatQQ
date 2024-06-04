@@ -1,6 +1,6 @@
 import { NTQQUserApi } from '@/core/apis';
 import BaseAction from '../BaseAction';
-import { getFriend, getUidByUin, uid2UinMap } from '@/core/data';
+import { getFriend } from '@/core/data';
 import { ActionName } from '../types';
 import { log, logDebug } from '@/common/utils/log';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
@@ -8,7 +8,7 @@ import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 const SchemaData = {
   type: 'object',
   properties: {
-    user_id: { type: [ 'number' , 'string' ] },
+    user_id: { type: ['number', 'string'] },
     times: { type: 'number' }
   },
   required: ['user_id', 'times']
@@ -26,7 +26,7 @@ export default class SendLike extends BaseAction<Payload, null> {
       const friend = await getFriend(qq);
       let uid: string;
       if (!friend) {
-        uid = getUidByUin(qq) || '';
+        uid = await NTQQUserApi.getUidByUin(qq) || '';
       } else {
         uid = friend.uid;
       }

@@ -338,7 +338,7 @@ export class OB11Constructor {
           deleteGroup(msg.peerUid);
           NTQQGroupApi.quitGroup(msg.peerUid).then();
           try {
-            const adminUin = (await getGroupMember(msg.peerUid, groupElement.adminUid))?.uin || (await NTQQUserApi.getUserDetailInfo(groupElement.adminUid))?.uin;
+            const adminUin = (await getGroupMember(msg.peerUid, groupElement.adminUid))?.uin || (await NTQQUserApi.getUidByUin(groupElement.adminUid));
             if (adminUin) {
               return new OB11GroupDecreaseEvent(parseInt(msg.peerUid), parseInt(selfInfo.uin), parseInt(adminUin), 'kick_me');
             }
