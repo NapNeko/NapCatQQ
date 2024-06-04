@@ -112,14 +112,13 @@ export class NTEventWrapper {
     return new Promise<[EventRet: Awaited<ReturnType<EventType>>, ...Parameters<ListenerType>]>(async (resolve, reject) => {
       const id = randomUUID();
       let complete = 0;
-      let retData: ArrayLike<Parameters<ListenerType>> | undefined = undefined;
+      let retData: Parameters<ListenerType> | undefined = undefined;
       let retEvent: any = {};
       const databack = () => {
         if (complete < waitTimes) {
           reject(new Error('NTEvent EventName:' + EventName + ' ListenerName:' + ListenerName + ' timeout'));
         } else {
-
-          resolve([retEvent as Awaited<ReturnType<EventType>>, ...(retData as Parameters<ListenerType>)]);
+          resolve([retEvent as Awaited<ReturnType<EventType>>, ...retData!]);
         }
       };
       const Timeouter = setTimeout(databack, timeout);
@@ -133,7 +132,7 @@ export class NTEventWrapper {
         func: (...args: any[]) => {
           complete++;
           //console.log('func', ...args);
-          retData = args as ArrayLike<Parameters<ListenerType>>;
+          retData = args as Parameters<ListenerType>;
           if (complete >= waitTimes) {
             clearTimeout(Timeouter);
             databack();
@@ -149,7 +148,8 @@ export class NTEventWrapper {
       this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.set(id, eventCallbak);
       this.CreatListenerFunction(ListenerMainName);
       const EventFunc = this.CreatEventFunction<EventType>(EventName);
-      retEvent = await EventFunc!(...args);
+      //console.log("测试打点", args);
+      retEvent = await EventFunc!(...(args as any[]));
     });
   }
 }
