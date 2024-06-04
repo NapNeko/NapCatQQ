@@ -95,7 +95,7 @@ export class NTEventWrapper {
     });
   }
   async CallNoListenerEvent<EventType extends (...args: any[]) => Promise<any>,>(EventName = '', timeout: number = 3000, ...args: Parameters<EventType>) {
-    return new Promise<ReturnType<EventType>>(async (resolve, reject) => {
+    return new Promise<Awaited<ReturnType<EventType>>>(async (resolve, reject) => {
       const EventFunc = this.CreatEventFunction<EventType>(EventName);
       let complete = false;
       const Timeouter = setTimeout(() => {
