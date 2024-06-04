@@ -446,7 +446,9 @@ export class NapCatOnebot11 {
           groupRequestEvent.group_id = parseInt(notify.group.groupCode);
           let requestQQ = '';
           try {
-            requestQQ = (await NTQQUserApi.getUserDetailInfo(notify.user1.uid)).uin;
+            // requestQQ = (await NTQQUserApi.getUserDetailInfo(notify.user1.uid)).uin;
+            // uid-->uin
+            requestQQ = (await NTQQUserApi.getUinByUid(notify.user1.uid))!;
           } catch (e) {
             logError('获取加群人QQ号失败', e);
           }
