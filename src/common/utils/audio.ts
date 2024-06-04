@@ -24,7 +24,7 @@ export async function encodeSilk(filePath: string) {
       const fileHeader = buffer.toString('hex', 0, bytesToRead);
       return fileHeader;
     } catch (err) {
-      console.error('读取文件错误:', err);
+      logError('读取文件错误:', err);
       return;
     }
   }

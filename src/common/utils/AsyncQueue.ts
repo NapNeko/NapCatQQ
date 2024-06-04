@@ -1,5 +1,5 @@
 import { sleep } from '@/common/utils/helper';
-
+import { logError } from './log';
 type AsyncQueueTask = (() => void) | (()=>Promise<void>);
 
 
@@ -26,7 +26,8 @@ export class AsyncQueue {
           await taskRet;
         }
       } catch (e) {
-        console.error(e);
+        // console.error(e);
+        logError(e);
       }
       this.tasks.shift();
       await sleep(100);

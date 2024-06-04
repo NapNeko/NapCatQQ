@@ -24,7 +24,7 @@ export async function getVideoInfo(filePath: string) {
         } else {
           const videoStream = metadata.streams.find((s: { codec_type: string; }) => s.codec_type === 'video');
           if (videoStream) {
-            console.log(`视频尺寸: ${videoStream.width}x${videoStream.height}`);
+            log(`视频尺寸: ${videoStream.width}x${videoStream.height}`);
           } else {
             return reject('未找到视频流信息。');
           }
