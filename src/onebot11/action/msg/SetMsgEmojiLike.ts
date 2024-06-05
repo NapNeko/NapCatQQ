@@ -7,8 +7,8 @@ import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 const SchemaData = {
   type: 'object',
   properties: {
-    message_id: { type: 'number' },
-    emoji_id: { type: 'string' }
+    message_id: { type: ['string','number'] },
+    emoji_id: { type: ['string','number'] }
   },
   required: ['message_id', 'emoji_id']
 } as const satisfies JSONSchema;
@@ -19,7 +19,7 @@ export class SetMsgEmojiLike extends BaseAction<Payload, any> {
   actionName = ActionName.SetMsgEmojiLike;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
-    const msg = await dbUtil.getMsgByShortId(payload.message_id);
+    const msg = await dbUtil.getMsgByShortId(parseInt(payload.message_id.toString()));
     if (!msg) {
       throw new Error('msg not found');
     }
@@ -29,6 +29,6 @@ export class SetMsgEmojiLike extends BaseAction<Payload, any> {
     return await NTQQMsgApi.setEmojiLike({
       chatType: msg.chatType,
       peerUid: msg.peerUid
-    }, msg.msgSeq, payload.emoji_id, true);
+    }, msg.msgSeq, payload.emoji_id.toString(), true);
   }
 }
