@@ -1,4 +1,4 @@
-import { ModifyProfileParams } from '../entities';
+import { ModifyProfileParams, UserDetailInfoByUin } from '../entities';
 import { NodeIKernelProfileListener } from '../listeners';
 import { GeneralCallResult } from '@/core/services/common';
 export interface NodeIKernelProfileService {
@@ -21,7 +21,7 @@ export interface NodeIKernelProfileService {
     getUserSimpleInfo(...args: unknown[]): unknown;
     getUserDetailInfo(...args: unknown[]): unknown;
     getUserDetailInfoWithBizInfo(uid: string, arg2: number[]): Promise<GeneralCallResult>;
-    getUserDetailInfoByUin(uin: string): Promise<any>;
+    getUserDetailInfoByUin(uin: string): Promise<UserDetailInfoByUin>;
     getZplanAvatarInfos(...args: unknown[]): unknown;
     getStatus(...args: unknown[]): unknown;
     startStatusPolling(...args: unknown[]): unknown;

@@ -1,4 +1,4 @@
-import { ModifyProfileParams, User } from '@/core/entities';
+import { ModifyProfileParams, User, UserDetailInfoByUin } from '@/core/entities';
 import { GeneralCallResult } from '@/core';
 export declare class NTQQUserApi {
     static setSelfOnlineStatus(status: number, extStatus: number, batteryStatus: number): Promise<GeneralCallResult>;
@@ -25,4 +25,5 @@ export declare class NTQQUserApi {
     static getSkey(cached?: boolean): Promise<string | undefined>;
     static getUidByUin(Uin: string): Promise<string | undefined>;
     static getUinByUid(Uid: string | undefined): Promise<string | undefined>;
+    static getUserDetailInfoByUin(Uin: string): Promise<UserDetailInfoByUin>;
 }
