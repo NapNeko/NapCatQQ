@@ -9,7 +9,7 @@ const SchemaData = {
   type: 'object',
   properties: {
     user_id: { type: ['number', 'string'] },
-    times: { type: 'number' }
+    times: { type: ['number', 'string'] }
   },
   required: ['user_id', 'times']
 } as const satisfies JSONSchema;
