@@ -29,8 +29,6 @@ export declare const napCatError: {
 export declare function getFriend(uinOrUid: string): Promise<Friend | undefined>;
 export declare function getGroup(qq: string | number): Promise<Group | undefined>;
 export declare function getGroupMember(groupQQ: string | number, memberUinOrUid: string | number): Promise<GroupMember | null | undefined>;
-export declare const uid2UinMap: Record<string, string>;
-export declare function getUidByUin(uin: string): string | undefined;
 export declare const tempGroupCodeMap: Record<string, string>;
 export declare const rawFriends: Array<BuddyCategoryType>;
 export declare const stat: {
