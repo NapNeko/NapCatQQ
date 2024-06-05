@@ -521,7 +521,7 @@ export class OB11Constructor {
   }
 
   static stranger(user: User): OB11User {
-    logDebug('construct ob11 stranger', user);
+    //logDebug('construct ob11 stranger', user);
     return {
       ...user,
       user_id: parseInt(user.uin),
@@ -535,7 +535,7 @@ export class OB11Constructor {
   }
 
   static groupMembers(group: Group): OB11GroupMember[] {
-    logDebug('construct ob11 group members', group);
+    //logDebug('construct ob11 group members', group);
     return Array.from(groupMembers.get(group.groupCode)?.values() || []).map(m => OB11Constructor.groupMember(group.groupCode, m));
   }
 
