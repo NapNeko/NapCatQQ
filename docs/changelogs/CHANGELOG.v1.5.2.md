@@ -7,6 +7,6 @@ QQ Version: Windows 9.9.10-24108 / Linux 3.2.7-23361
 * 增加HttpApi调用稳定性
 
 ## 新增与调整
-
+* 支持真正意义上的陌生人信息获取 Api: GoCQHTTP_GetStrangerInfo
 
 新增的 API 详细见[API文档](https://napneko.github.io/zh-CN/develop/extends_api)
