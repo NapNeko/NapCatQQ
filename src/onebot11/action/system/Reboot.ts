@@ -8,8 +8,7 @@ const SchemaData = {
   type: 'object',
   properties: {
     delay: { type: 'number' }
-  },
-  required: ['delay']
+  }
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
