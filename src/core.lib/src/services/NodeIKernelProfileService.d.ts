@@ -21,7 +21,7 @@ export interface NodeIKernelProfileService {
     getUserSimpleInfo(...args: unknown[]): unknown;
     getUserDetailInfo(...args: unknown[]): unknown;
     getUserDetailInfoWithBizInfo(uid: string, arg2: number[]): Promise<GeneralCallResult>;
-    getUserDetailInfoByUin(...args: unknown[]): unknown;
+    getUserDetailInfoByUin(uin: string): Promise<any>;
     getZplanAvatarInfos(...args: unknown[]): unknown;
     getStatus(...args: unknown[]): unknown;
     startStatusPolling(...args: unknown[]): unknown;

@@ -23,4 +23,6 @@ export declare class NTQQUserApi {
         [key: string]: string;
     }>;
     static getSkey(cached?: boolean): Promise<string | undefined>;
+    static getUidByUin(Uin: string): Promise<string | undefined>;
+    static getUinByUid(Uid: string | undefined): Promise<string | undefined>;
 }

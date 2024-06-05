@@ -5,6 +5,7 @@ import { NodeIKernelLoginService, NodeIKernelMsgService, NodeIKernelBuddyService
 import { NodeIKernelStorageCleanService } from './services/NodeIKernelStorageCleanService';
 import { NodeIKernelRobotService } from './services/NodeIKernelRobotService';
 import { NodeIKernelNodeMiscService } from './services/NodeIKernelNodeMiscService';
+import { NodeIKernelUixConvertService } from './services/NodeIKernelUixConvertService';
 export interface NodeQQNTWrapperUtil {
     new (): NodeQQNTWrapperUtil;
     getNTUserDataInfoConfig(): string;
@@ -90,7 +91,7 @@ export interface NodeIQQNTWrapperSession {
     getTestPerformanceService(): unknown;
     getQQPlayService(): unknown;
     getDbToolsService(): unknown;
-    getUixConvertService(): unknown;
+    getUixConvertService(): NodeIKernelUixConvertService;
     getOnlineStatusService(): unknown;
     getRemotingService(): unknown;
     getGroupTabService(): unknown;
