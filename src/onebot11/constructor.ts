@@ -41,7 +41,7 @@ import { OB11GroupCardEvent } from './event/notice/OB11GroupCardEvent';
 import { OB11GroupDecreaseEvent } from './event/notice/OB11GroupDecreaseEvent';
 import { ob11Config } from '@/onebot11/config';
 import { deleteGroup, getFriend, getGroupMember, groupMembers, selfInfo, tempGroupCodeMap } from '@/core/data';
-import { NTQQFileApi, NTQQGroupApi, NTQQUserApi } from '@/core/apis';
+import { NTQQFileApi, NTQQGroupApi, NTQQMsgApi, NTQQUserApi } from '@/core/apis';
 import { OB11GroupMsgEmojiLikeEvent } from '@/onebot11/event/notice/OB11MsgEmojiLikeEvent';
 
 
@@ -135,6 +135,17 @@ export class OB11Constructor {
         message_data['type'] = 'reply';
         // log("收到回复消息", element.replyElement.replayMsgSeq)
         try {
+          // await NTQQMsgApi.getMsgsBySeqAndCount(
+          //   {
+          //     chatType: msg.chatType,
+          //     peerUid: msg.peerUid,
+          //     guildId: '',
+          //   },
+          //   element.replyElement.replayMsgSeq,
+          //   1,
+          //   true,
+          //   true
+          // )
           const replyMsg = await dbUtil.getMsgBySeq(msg.peerUid, element.replyElement.replayMsgSeq);
           // log("找到回复消息", replyMsg.msgShortId, replyMsg.msgId)
           if (replyMsg && replyMsg.id) {
