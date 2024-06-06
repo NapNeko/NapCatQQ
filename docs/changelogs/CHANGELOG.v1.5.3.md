@@ -1,6 +1,6 @@
 # v1.5.2
 
-QQ Version: Windows 9.9.10-24108 / Linux 3.2.7-23361
+QQ Version: Windows 9.9.11-24568 / Linux 3.2.9-23568
 
 ## 修复与优化
 * 重构message_id<->MsgId转换
