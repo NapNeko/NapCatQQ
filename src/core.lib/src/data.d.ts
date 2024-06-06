@@ -20,12 +20,6 @@ export declare const groupMembers: Map<string, Map<string, GroupMember>>;
 export declare const friends: Map<string, Friend>;
 export declare const friendRequests: Record<string, FriendRequest>;
 export declare const groupNotifies: Record<string, GroupNotify>;
-export declare const napCatError: {
-    ffmpegError: string;
-    httpServerError: string;
-    wsServerError: string;
-    otherError: string;
-};
 export declare function getFriend(uinOrUid: string): Promise<Friend | undefined>;
 export declare function getGroup(qq: string | number): Promise<Group | undefined>;
 export declare function getGroupMember(groupQQ: string | number, memberUinOrUid: string | number): Promise<GroupMember | null | undefined>;

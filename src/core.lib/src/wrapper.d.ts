@@ -1,11 +1,16 @@
 import { WrapperSessionInitConfig } from './sessionConfig';
 import { NodeIDependsAdapter, NodeIDispatcherAdapter, NodeIGlobalAdapter } from './adapters';
 import { NodeIKernelSessionListener, NodeIKernelMsgListener, NodeIKernelLoginListener, NodeIKernelBuddyListener, NodeIKernelGroupListener, NodeIKernelProfileListener } from './listeners';
-import { NodeIKernelLoginService, NodeIKernelMsgService, NodeIKernelBuddyService, NodeIKernelGroupService, NodeIKernelProfileService, NodeIKernelProfileLikeService, NodeIKernelTicketService, NodeIKernelTipOffService, NodeIKernelRichMediaService } from './services';
+import { NodeIKernelLoginService, NodeIKernelMsgService, NodeIKernelBuddyService, NodeIKernelGroupService, NodeIKernelProfileService, NodeIKernelProfileLikeService, NodeIKernelTicketService, NodeIKernelTipOffService, NodeIKernelRichMediaService, NodeIKernelAvatarService } from './services';
 import { NodeIKernelStorageCleanService } from './services/NodeIKernelStorageCleanService';
 import { NodeIKernelRobotService } from './services/NodeIKernelRobotService';
 import { NodeIKernelNodeMiscService } from './services/NodeIKernelNodeMiscService';
 import { NodeIKernelUixConvertService } from './services/NodeIKernelUixConvertService';
+import { NodeIKernelMsgBackupService } from './services/NodeIKernelMsgBackupService';
+import { NodeIKernelAlbumService } from './services/NodeIKernelAlbumService';
+import { NodeIKernelTianShuService } from './services/NodeIKernelTianShuService';
+import { NodeIKernelUnitedConfigService } from './services/NodeIKernelUnitedConfigService';
+import { NodeIKernelSearchService } from './services/NodeIKernelSearchService';
 export interface NodeQQNTWrapperUtil {
     new (): NodeQQNTWrapperUtil;
     getNTUserDataInfoConfig(): string;
@@ -72,14 +77,14 @@ export interface NodeIQQNTWrapperSession {
     getTipOffService(): NodeIKernelTipOffService;
     getNodeMiscService(): NodeIKernelNodeMiscService;
     getRichMediaService(): NodeIKernelRichMediaService;
-    getMsgBackupService(): unknown;
-    getAlbumService(): unknown;
-    getTianShuService(): unknown;
-    getUnitedConfigService(): unknown;
-    getSearchService(): unknown;
+    getMsgBackupService(): NodeIKernelMsgBackupService;
+    getAlbumService(): NodeIKernelAlbumService;
+    getTianShuService(): NodeIKernelTianShuService;
+    getUnitedConfigService(): NodeIKernelUnitedConfigService;
+    getSearchService(): NodeIKernelSearchService;
     getDirectSessionService(): unknown;
     getRDeliveryService(): unknown;
-    getAvatarService(): unknown;
+    getAvatarService(): NodeIKernelAvatarService;
     getFeedChannelService(): unknown;
     getYellowFaceService(): unknown;
     getCollectionService(): unknown;
