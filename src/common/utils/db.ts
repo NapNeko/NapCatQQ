@@ -232,19 +232,6 @@ class DBUtil extends DBUtilBase {
         logError('Could not create table files', err);
       }
     });
-
-    // 接收到的临时会话消息uid
-    const createTempUinTableSQL = `
-            CREATE TABLE IF NOT EXISTS temp_uins (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                uid TEXT,
-                uin TEXT
-            )`;
-    this.db!.run(createTempUinTableSQL, function (err) {
-      if (err) {
-        logError('Could not create table temp_uins', err);
-      }
-    });
   }
 
   private async getCurrentMaxShortId() {
@@ -415,53 +402,6 @@ class DBUtil extends DBUtilBase {
     });
   }
 
-  // 被动收到的临时会话消息uin->uid
-  async getReceivedTempUinMap() {
-    const stmt = 'SELECT * FROM temp_uins';
-    return new Promise<Record<string, string>>((resolve, reject) => {
-      this.db!.all(stmt, (err, rows: { uin: string, uid: string }[]) => {
-        if (err) {
-          logError('db could not get temp uin map', err);
-          reject(err);
-        }
-        const map: Record<string, string> = {};
-        rows.forEach(row => {
-          map[row.uin] = row.uid;
-        });
-        resolve(map);
-      });
-    });
-  }
-
-  // 通过uin获取临时会话消息uid
-  async getUidByTempUin(uid: string) {
-    const stmt = 'SELECT * FROM temp_uins WHERE uin = ?';
-    return new Promise<string>((resolve, reject) => {
-      this.db!.get(stmt, [uid], (err, row: { uin: string, uid: string }) => {
-        if (err) {
-          logError('db could not get temp uin map', err);
-          reject(err);
-        }
-        resolve(row?.uid);
-      });
-    });
-  }
-
-  async addTempUin(uin: string, uid: string) {
-    const existUid = await this.getUidByTempUin(uin);
-    if (!existUid) {
-      const stmt = this.db!.prepare('INSERT INTO temp_uins (uin, uid) VALUES (?, ?)');
-      return new Promise((resolve, reject) => {
-        stmt.run(uin, uid, function (err: any) {
-          if (err) {
-            logError('db could not add temp uin', err);
-            reject(err);
-          }
-          resolve(null);
-        });
-      });
-    }
-  }
   async getLastSentTimeAndJoinTime(
     groupId: number
   ): Promise<IRember[]> {
