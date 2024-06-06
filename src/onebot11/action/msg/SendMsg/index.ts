@@ -137,7 +137,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
       if (!(await getFriend(payload.user_id))) {
         if (
           !ALLOW_SEND_TEMP_MSG &&
-          !(await dbUtil.getUidByTempUin(payload.user_id))
+          !(await NTQQUserApi.getUidByUin(payload.user_id))
         ) {
           return { valid: false, message: '不能发送临时消息' };
         }
