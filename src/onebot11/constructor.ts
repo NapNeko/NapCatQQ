@@ -135,7 +135,7 @@ export class OB11Constructor {
         message_data['type'] = 'reply';
         // log("收到回复消息", element.replyElement.replayMsgSeq)
         try {
-          // await NTQQMsgApi.getMsgsBySeqAndCount(
+          // let retData = await NTQQMsgApi.getMsgsBySeqAndCount(
           //   {
           //     chatType: msg.chatType,
           //     peerUid: msg.peerUid,
@@ -143,9 +143,10 @@ export class OB11Constructor {
           //   },
           //   element.replyElement.replayMsgSeq,
           //   1,
-          //   true,
+          //   false,
           //   true
-          // )
+          // );
+          // console.log(JSON.stringify(retData, null, 2));
           const replyMsg = await dbUtil.getMsgBySeq(msg.peerUid, element.replyElement.replayMsgSeq);
           // log("找到回复消息", replyMsg.msgShortId, replyMsg.msgId)
           if (replyMsg && replyMsg.id) {
