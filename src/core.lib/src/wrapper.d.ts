@@ -11,6 +11,7 @@ import { NodeIKernelAlbumService } from './services/NodeIKernelAlbumService';
 import { NodeIKernelTianShuService } from './services/NodeIKernelTianShuService';
 import { NodeIKernelUnitedConfigService } from './services/NodeIKernelUnitedConfigService';
 import { NodeIKernelSearchService } from './services/NodeIKernelSearchService';
+import { NodeIKernelCollectionService } from './services/NodeIKernelCollectionService';
 export interface NodeQQNTWrapperUtil {
     new (): NodeQQNTWrapperUtil;
     getNTUserDataInfoConfig(): string;
@@ -87,7 +88,7 @@ export interface NodeIQQNTWrapperSession {
     getAvatarService(): NodeIKernelAvatarService;
     getFeedChannelService(): unknown;
     getYellowFaceService(): unknown;
-    getCollectionService(): unknown;
+    getCollectionService(): NodeIKernelCollectionService;
     getSettingService(): unknown;
     getQiDianService(): unknown;
     getFileAssistantService(): unknown;

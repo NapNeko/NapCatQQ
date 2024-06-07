@@ -1,20 +1,21 @@
 import { GroupMember, GroupRequestOperateTypes, GroupMemberRole, GroupNotify, Group } from '../entities';
+import { GeneralCallResult } from '@/core';
 export declare class NTQQGroupApi {
     static getGroups(forced?: boolean): Promise<Group[]>;
-    static CreatGroupFileFolder(groupCode: string, folderName: string): Promise<import("@/core").GeneralCallResult & {
+    static CreatGroupFileFolder(groupCode: string, folderName: string): Promise<GeneralCallResult & {
         resultWithGroupItem: {
             result: any;
             groupItem: any[];
         };
     }>;
-    static DelGroupFile(groupCode: string, files: string[]): Promise<import("@/core").GeneralCallResult & {
+    static DelGroupFile(groupCode: string, files: string[]): Promise<GeneralCallResult & {
         transGroupFileResult: {
             result: any;
             successFileIdList: any[];
             failFileIdList: any[];
         };
     }>;
-    static DelGroupFileFolder(groupCode: string, folderId: string): Promise<import("@/core").GeneralCallResult & {
+    static DelGroupFileFolder(groupCode: string, folderId: string): Promise<GeneralCallResult & {
         groupFileCommonResult: {
             retCode: number;
             retMsg: string;
@@ -24,12 +25,13 @@ export declare class NTQQGroupApi {
     static getSingleScreenNotifies(num: number): Promise<GroupNotify[]>;
     static getGroupMembers(groupQQ: string, num?: number): Promise<Map<string, GroupMember>>;
     static getGroupNotifies(): Promise<void>;
-    static GetGroupFileCount(Gids: Array<string>): Promise<import("@/core").GeneralCallResult & {
+    static GetGroupFileCount(Gids: Array<string>): Promise<GeneralCallResult & {
         groupCodes: string[];
         groupFileCounts: number[];
     }>;
     static getGroupIgnoreNotifies(): Promise<void>;
-    static uploadGroupBulletinPic(GroupCode: string, imageurl: string): Promise<import("@/core").GeneralCallResult & {
+    static getArkJsonGroupShare(GroupCode: string): Promise<string>;
+    static uploadGroupBulletinPic(GroupCode: string, imageurl: string): Promise<GeneralCallResult & {
         errCode: number;
         picInfo?: {
             id: string;
@@ -53,5 +55,5 @@ export declare class NTQQGroupApi {
         id: string;
         width: number;
         height: number;
-    } | undefined, pinned?: number, confirmRequired?: number): Promise<import("@/core").GeneralCallResult>;
+    } | undefined, pinned?: number, confirmRequired?: number): Promise<GeneralCallResult>;
 }

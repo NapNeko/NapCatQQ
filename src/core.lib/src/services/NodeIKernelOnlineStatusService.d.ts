@@ -8,5 +8,9 @@ export interface NodeIKernelOnlineStatusService {
     getAggregationPageEntrance(): unknown;
     didClickAggregationPageEntrance(): unknown;
     getAggregationGroupModels(): unknown;
+    checkLikeStatus(param: {
+        businessType: number;
+        uins: string[];
+    }): Promise<any>;
     isNull(): boolean;
 }

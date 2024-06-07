@@ -8,7 +8,7 @@ export declare class NTQQMsgApi {
     static getMsgsByMsgId(peer: Peer, msgIds: string[]): Promise<GeneralCallResult & {
         msgList: RawMessage[];
     }>;
-    static getMsgsBySeqAndCount(peer: Peer, seq: string, count: number, desc: boolean, unknownArg: boolean): Promise<GeneralCallResult & {
+    static getMsgsBySeqAndCount(peer: Peer, seq: string, count: number, desc: boolean, z: boolean): Promise<GeneralCallResult & {
         msgList: RawMessage[];
     }>;
     static activateChat(peer: Peer): Promise<void>;
