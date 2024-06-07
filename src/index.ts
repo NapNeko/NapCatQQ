@@ -73,7 +73,7 @@ const quickLoginQQ = cmdOptions.qq;
 //   napCatCore.qrLogin().then().catch(console.error);
 // });
 napCatCore.getQuickLoginList().then((res) => {
-  // 遍历 res.LocalLoginInfoList[x].isQuickLogin是否可以可以 res.LocalLoginInfoList[x].uin 转为string 加入string[] 最后遍历完成调用WebUiDataRuntime.setQQQuickLoginList
+  // 遍历 res.LocalLoginInfoList[x].isQuickLogin是否可以 res.LocalLoginInfoList[x].uin 转为string 加入string[] 最后遍历完成调用WebUiDataRuntime.setQQQuickLoginList
   WebUiDataRuntime.setQQQuickLoginList(res.LocalLoginInfoList.filter((item) => item.isQuickLogin).map((item) => item.uin.toString()));
 });
 
