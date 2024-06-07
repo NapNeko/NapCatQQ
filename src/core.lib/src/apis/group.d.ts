@@ -56,4 +56,6 @@ export declare class NTQQGroupApi {
         width: number;
         height: number;
     } | undefined, pinned?: number, confirmRequired?: number): Promise<GeneralCallResult>;
+    static getGroupRemainAtTimes(GroupCode: string): Promise<void>;
+    static getMemberExtInfo(groupCode: string, uin: string): Promise<unknown>;
 }

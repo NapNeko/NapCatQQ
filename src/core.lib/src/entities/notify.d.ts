@@ -67,3 +67,39 @@ export interface FriendRequestNotify {
     unreadNums: number;
     buddyReqs: FriendRequest[];
 }
+export declare enum MemberExtSourceType {
+    DEFAULTTYPE = 0,
+    TITLETYPE = 1,
+    NEWGROUPTYPE = 2
+}
+export interface GroupExtParam {
+    groupCode: string;
+    seq: string;
+    beginUin: string;
+    dataTime: string;
+    uinList: Array<string>;
+    uinNum: string;
+    groupType: string;
+    richCardNameVer: string;
+    sourceType: MemberExtSourceType;
+    memberExtFilter: {
+        memberLevelInfoUin: number;
+        memberLevelInfoPoint: number;
+        memberLevelInfoActiveDay: number;
+        memberLevelInfoLevel: number;
+        memberLevelInfoName: number;
+        levelName: number;
+        dataTime: number;
+        userShowFlag: number;
+        sysShowFlag: number;
+        timeToUpdate: number;
+        nickName: number;
+        specialTitle: number;
+        levelNameNew: number;
+        userShowFlagNew: number;
+        msgNeedField: number;
+        cmdUinFlagExt3Grocery: number;
+        memberIcon: number;
+        memberInfoSeq: number;
+    };
+}
