@@ -1,5 +1,5 @@
 import { NodeIKernelGroupListener } from '@/core/listeners/NodeIKernelGroupListener';
-import { GroupMember, GroupMemberRole, GroupNotifyTypes, GroupRequestOperateTypes } from '@/core/entities';
+import { GroupExtParam, GroupMember, GroupMemberRole, GroupNotifyTypes, GroupRequestOperateTypes } from '@/core/entities';
 import { GeneralCallResult } from '@/core/services/common';
 export interface NodeIKernelGroupService {
     addKernelGroupListener(listener: NodeIKernelGroupListener): number;
@@ -28,7 +28,7 @@ export interface NodeIKernelGroupService {
     getGroupList(force: boolean): Promise<GeneralCallResult>;
     getGroupExtList(force: boolean): Promise<GeneralCallResult>;
     getGroupDetailInfo(groupCode: string): unknown;
-    getMemberExtInfo(arg: object): unknown;
+    getMemberExtInfo(arg: GroupExtParam): Promise<unknown>;
     getGroupAllInfo(): unknown;
     getDiscussExistInfo(): unknown;
     getGroupConfMember(): unknown;
