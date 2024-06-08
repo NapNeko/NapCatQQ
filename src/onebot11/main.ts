@@ -201,7 +201,7 @@ export class NapCatOnebot11 {
       }
       // 临时会话更新 tempGroupCodeMap uid -> source/GroupCode
     };
-    msgListener.onRecvMsg = (msg) => {
+    msgListener.onRecvMsg = async (msg) => {
       // console.log('ob11 onRecvMsg', JSON.stringify(msg, null, 2));
       // logDebug('收到消息', msg);
       for (const m of msg) {
@@ -210,6 +210,21 @@ export class NapCatOnebot11 {
           logDebug(`消息时间${m.msgTime}早于启动时间${this.bootTime}，忽略上报`);
           continue;
         }
+        // 调用应该必须带 chatInfo 不然不行 想不通想不通
+        // let ret = await napCatCore.session.getMsgService().queryMsgsWithFilterEx(m.msgId, '0', '0', {
+        //   chatInfo: {
+        //     peerUid: '',
+        //     chatType: 0,
+        //   },
+        //   filterMsgType: [],
+        //   filterSendersUid: [],
+        //   filterMsgToTime: '0',
+        //   filterMsgFromTime: '0',
+        //   isReverseOrder: false,
+        //   isIncludeCurrent: true,
+        //   pageLimit: 2,
+        // });
+        // console.log(ret);
         new Promise((resolve) => {
           dbUtil.addMsg(m).then(msgShortId => {
             m.id = msgShortId;

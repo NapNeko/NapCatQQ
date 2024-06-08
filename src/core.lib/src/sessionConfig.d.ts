@@ -1,3 +1,25 @@
+export declare enum PlatformType {
+    KUNKNOWN = 0,
+    KANDROID = 1,
+    KIOS = 2,
+    KWINDOWS = 3,
+    KMAC = 4
+}
+export declare enum DeviceType {
+    KUNKNOWN = 0,
+    KPHONE = 1,
+    KPAD = 2,
+    KCOMPUTER = 3
+}
+export declare enum VendorType {
+    KNOSETONIOS = 0,
+    KSUPPORTGOOGLEPUSH = 99,
+    KSUPPORTHMS = 3,
+    KSUPPORTOPPOPUSH = 4,
+    KSUPPORTTPNS = 2,
+    KSUPPORTVIVOPUSH = 5,
+    KUNSUPPORTANDROIDPUSH = 1
+}
 export interface WrapperSessionInitConfig {
     selfUin: string;
     selfUid: string;
