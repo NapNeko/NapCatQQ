@@ -6,13 +6,13 @@ export interface NodeIKernelMsgService {
     sendMsg(msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<any, any>): Promise<unknown>;
     recallMsg(peer: Peer, msgIds: string[]): Promise<GeneralCallResult>;
     addKernelMsgImportToolListener(arg: Object): unknown;
-    removeKernelMsgListener(...args: unknown[]): unknown;
+    removeKernelMsgListener(args: unknown): unknown;
     addKernelTempChatSigListener(...args: unknown[]): unknown;
     removeKernelTempChatSigListener(...args: unknown[]): unknown;
-    setAutoReplyTextList(...args: unknown[]): unknown;
+    setAutoReplyTextList(AutoReplyText: Array<unknown>, i2: number): unknown;
     getAutoReplyTextList(...args: unknown[]): unknown;
     getOnLineDev(): Promise<any>;
-    kickOffLine(args: Object): unknown;
+    kickOffLine(DevInfo: Object): unknown;
     setStatus(args: {
         status: number;
         extStatus: number;
@@ -40,7 +40,7 @@ export interface NodeIKernelMsgService {
     cancelSendMsg(...args: unknown[]): unknown;
     switchToOfflineSendMsg(...args: unknown[]): unknown;
     reqToOfflineSendMsg(...args: unknown[]): unknown;
-    refuseReceiveOnlineFileMsg(...args: unknown[]): unknown;
+    refuseReceiveOnlineFileMsg(peer: Peer, MsgId: string): unknown;
     resendMsg(...args: unknown[]): unknown;
     recallMsg(...args: unknown[]): unknown;
     reeditRecallMsg(...args: unknown[]): unknown;
@@ -70,35 +70,55 @@ export interface NodeIKernelMsgService {
     isMsgMatched(...args: unknown[]): unknown;
     getOnlineFileMsgs(...args: unknown[]): unknown;
     getAllOnlineFileMsgs(...args: unknown[]): unknown;
-    getLatestDbMsgs(...args: unknown[]): unknown;
-    getLastMessageList(...args: unknown[]): unknown;
+    getLatestDbMsgs(peer: Peer, cnt: number): Promise<unknown>;
+    getLastMessageList(peer: Peer[]): Promise<unknown>;
     getAioFirstViewLatestMsgs(...args: unknown[]): unknown;
-    getMsgs(...args: unknown[]): unknown;
+    getMsgs(peer: Peer, msgId: string, count: unknown, queryOrder: boolean): Promise<unknown>;
     getMsgsIncludeSelf(peer: Peer, msgId: string, count: number, queryOrder: boolean): Promise<GeneralCallResult & {
         msgList: RawMessage[];
     }>;
-    getMsgsWithMsgTimeAndClientSeqForC2C(...args: unknown[]): unknown;
-    getMsgsWithStatus(...args: unknown[]): unknown;
-    getMsgsBySeqRange(...args: unknown[]): unknown;
+    getMsgsWithMsgTimeAndClientSeqForC2C(...args: unknown[]): Promise<unknown>;
+    getMsgsWithStatus(params: {
+        peer: Peer;
+        msgId: string;
+        msgTime: unknown;
+        cnt: unknown;
+        queryOrder: boolean;
+        isIncludeSelf: boolean;
+        appid: unknown;
+    }): Promise<unknown>;
+    getMsgsBySeqRange(peer: Peer, startSeq: string, endSeq: string): Promise<unknown>;
     getMsgsBySeqAndCount(peer: Peer, seq: string, count: number, desc: boolean, unknownArg: boolean): Promise<GeneralCallResult & {
         msgList: RawMessage[];
     }>;
     getMsgsByMsgId(peer: Peer, ids: string[]): Promise<GeneralCallResult & {
         msgList: RawMessage[];
     }>;
-    getRecallMsgsByMsgId(...args: unknown[]): unknown;
-    getMsgsBySeqList(...args: unknown[]): unknown;
-    getSingleMsg(...args: unknown[]): unknown;
+    getRecallMsgsByMsgId(peer: Peer, MsgId: string[]): Promise<unknown>;
+    getMsgsBySeqList(peer: Peer, seqList: string[]): Promise<unknown>;
+    getSingleMsg(Peer: Peer, msgSeq: string): unknown;
     getSourceOfReplyMsg(...args: unknown[]): unknown;
     getSourceOfReplyMsgV2(...args: unknown[]): unknown;
     getMsgByClientSeqAndTime(...args: unknown[]): unknown;
     getSourceOfReplyMsgByClientSeqAndTime(...args: unknown[]): unknown;
-    getMsgsByTypeFilter(...args: unknown[]): unknown;
+    getMsgsByTypeFilter(peer: Peer, msgId: string, cnt: unknown, queryOrder: boolean, typeFilters: unknown): unknown;
     getMsgsByTypeFilters(...args: unknown[]): unknown;
     getMsgWithAbstractByFilterParam(...args: unknown[]): unknown;
     queryMsgsWithFilter(...args: unknown[]): unknown;
     queryMsgsWithFilterVer2(...args: unknown[]): unknown;
-    queryMsgsWithFilterEx(...args: unknown[]): unknown;
+    queryMsgsWithFilterEx(msgId: string, msgTime: string, megSeq: string, param: {
+        chatInfo: {
+            chatType: number;
+            peerUid: string;
+        };
+        filterMsgType: [];
+        filterSendersUid: [];
+        filterMsgFromTime: string;
+        filterMsgToTime: string;
+        pageLimit: number;
+        isReverseOrder: boolean;
+        isIncludeCurrent: boolean;
+    }): unknown;
     queryFileMsgsDesktop(...args: unknown[]): unknown;
     setMsgRichInfoFlag(...args: unknown[]): unknown;
     queryPicOrVideoMsgs(...args: unknown[]): unknown;
@@ -208,11 +228,11 @@ export interface NodeIKernelMsgService {
     clickInlineKeyboardButton(...args: unknown[]): unknown;
     setCurOnScreenMsg(...args: unknown[]): unknown;
     setCurOnScreenMsgForMsgEvent(...args: unknown[]): unknown;
-    getMiscData(...args: unknown[]): unknown;
-    setMiscData(...args: unknown[]): unknown;
+    getMiscData(key: string): unknown;
+    setMiscData(key: string, value: string): unknown;
     getBookmarkData(...args: unknown[]): unknown;
     setBookmarkData(...args: unknown[]): unknown;
-    sendShowInputStatusReq(...args: unknown[]): unknown;
+    sendShowInputStatusReq(ChatType: number, EventType: number, toUid: string): Promise<unknown>;
     queryCalendar(...args: unknown[]): unknown;
     queryFirstMsgSeq(...args: unknown[]): unknown;
     queryRoamCalendar(...args: unknown[]): unknown;
@@ -239,7 +259,7 @@ export interface NodeIKernelMsgService {
     clearMsgRecords(...args: unknown[]): unknown;
     IsExistOldDb(...args: unknown[]): unknown;
     canImportOldDbMsg(...args: unknown[]): unknown;
-    setPowerStatus(...args: unknown[]): unknown;
+    setPowerStatus(z: boolean): unknown;
     canProcessDataMigration(...args: unknown[]): unknown;
     importOldDbMsg(...args: unknown[]): unknown;
     stopImportOldDbMsgAndroid(...args: unknown[]): unknown;
@@ -254,14 +274,14 @@ export interface NodeIKernelMsgService {
     registerSysMsgNotification(...args: unknown[]): unknown;
     unregisterSysMsgNotification(...args: unknown[]): unknown;
     enterOrExitAio(...args: unknown[]): unknown;
-    prepareTempChat(...args: unknown[]): unknown;
-    getTempChatInfo(...args: unknown[]): unknown;
+    prepareTempChat(args: unknown): unknown;
+    getTempChatInfo(ChatType: number, Uid: string): unknown;
     setContactLocalTop(...args: unknown[]): unknown;
     switchAnonymousChat(...args: unknown[]): unknown;
     renameAnonyChatNick(...args: unknown[]): unknown;
     getAnonymousInfo(...args: unknown[]): unknown;
     updateAnonymousInfo(...args: unknown[]): unknown;
-    sendSummonMsg(...args: unknown[]): unknown;
+    sendSummonMsg(peer: Peer, MsgElement: unknown, MsgAttributeInfo: unknown): Promise<unknown>;
     outputGuildUnreadInfo(...args: unknown[]): unknown;
     checkMsgWithUrl(...args: unknown[]): unknown;
     checkTabListStatus(...args: unknown[]): unknown;
@@ -282,7 +302,7 @@ export interface NodeIKernelMsgService {
     tianshuMultiReport(...args: unknown[]): unknown;
     GetMsgSubType(a0: number, a1: number): unknown;
     setIKernelPublicAccountAdapter(...args: unknown[]): unknown;
-    createUidFromTinyId(a0: string, a1: string): unknown;
+    createUidFromTinyId(fromTinyId: string, toTinyId: string): unknown;
     dataMigrationGetDataAvaiableContactList(...args: unknown[]): unknown;
     dataMigrationGetMsgList(...args: unknown[]): unknown;
     dataMigrationStopOperation(...args: unknown[]): unknown;
