@@ -92,5 +92,6 @@ export enum ActionName {
     IOCRImage = '.ocr_image',
     SetSelfProfile = "set_self_profile",
     CreateCollection = "create_collection",
-    GetCollectionList = "get_collection_list"
+    GetCollectionList = "get_collection_list",
+    SetLongNick = "set_self_longnick"
 }
