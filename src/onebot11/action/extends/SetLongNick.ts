@@ -15,7 +15,7 @@ const SchemaData = {
 type Payload = FromSchema<typeof SchemaData>;
 
 export class SetLongNick extends BaseAction<Payload, any> {
-    actionName = ActionName.SetSelfProfile;
+    actionName = ActionName.SetLongNick;
     PayloadSchema = SchemaData;
     protected async _handle(payload: Payload) {
         let ret = await NTQQUserApi.setLongNick(payload.longNick)

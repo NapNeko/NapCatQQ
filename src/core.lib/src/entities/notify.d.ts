@@ -54,8 +54,26 @@ export declare enum GroupRequestOperateTypes {
     approve = 1,
     reject = 2
 }
+export declare enum BuddyReqType {
+    KMEINITIATOR = 0,
+    KPEERINITIATOR = 1,
+    KMEAGREED = 2,
+    KMEAGREEDANDADDED = 3,
+    KPEERAGREED = 4,
+    KPEERAGREEDANDADDED = 5,
+    KPEERREFUSED = 6,
+    KMEREFUSED = 7,
+    KMEIGNORED = 8,
+    KMEAGREEANYONE = 9,
+    KMESETQUESTION = 10,
+    KMEAGREEANDADDFAILED = 11,
+    KMSGINFO = 12,
+    KMEINITIATORWAITPEERCONFIRM = 13
+}
 export interface FriendRequest {
+    isDecide: boolean;
     friendUid: string;
+    reqType: BuddyReqType;
     reqTime: string;
     extWords: string;
     isUnread: boolean;

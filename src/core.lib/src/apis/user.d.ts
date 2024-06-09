@@ -1,6 +1,7 @@
 import { ModifyProfileParams, User, UserDetailInfoByUin } from '@/core/entities';
 import { GeneralCallResult } from '@/core';
 export declare class NTQQUserApi {
+    static setLongNick(longNick: string): Promise<unknown>;
     static setSelfOnlineStatus(status: number, extStatus: number, batteryStatus: number): Promise<GeneralCallResult>;
     static getBuddyRecommendContactArkJson(uin: string, sencenID?: string): Promise<unknown>;
     static like(uid: string, count?: number): Promise<{
