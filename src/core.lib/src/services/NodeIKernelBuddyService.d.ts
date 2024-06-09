@@ -50,6 +50,6 @@ export interface NodeIKernelBuddyService {
     delDoubtBuddyReq(uid: number): void;
     delAllDoubtBuddyReq(): void;
     reportDoubtBuddyReqUnread(): void;
-    getBuddyRecommendContactArkJson(a1: string, a2: string): Promise<unknown>;
+    getBuddyRecommendContactArkJson(uid: string, phoneNumber: string): Promise<unknown>;
     isNull(): boolean;
 }

@@ -11,7 +11,7 @@ const SchemaData = {
         longNick: { type: 'string' },
         sex: { type: 'number' }//传Sex值？建议传0 
     },
-    required: ['nick', 'longNick', 'sex',],
+    required: ['nick', 'longNick', 'sex'],
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
