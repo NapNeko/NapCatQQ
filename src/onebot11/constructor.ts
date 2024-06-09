@@ -192,7 +192,7 @@ export class OB11Constructor {
       else if (element.videoElement || element.fileElement) {
         const videoOrFileElement = element.videoElement || element.fileElement;
         const ob11MessageDataType = element.videoElement ? OB11MessageDataType.video : OB11MessageDataType.file;
-        let videoDownUrl = NTQQFileApi.getVideoUrl(msg, element);
+        let videoDownUrl = await NTQQFileApi.getVideoUrl(msg, element);
         message_data['type'] = ob11MessageDataType;
         message_data['data']['file'] = videoOrFileElement.fileName;
         message_data['data']['path'] = videoDownUrl;
