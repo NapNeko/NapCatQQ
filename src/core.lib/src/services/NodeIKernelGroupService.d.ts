@@ -28,7 +28,7 @@ export interface NodeIKernelGroupService {
     getGroupList(force: boolean): Promise<GeneralCallResult>;
     getGroupExtList(force: boolean): Promise<GeneralCallResult>;
     getGroupDetailInfo(groupCode: string): unknown;
-    getMemberExtInfo(arg: GroupExtParam): Promise<unknown>;
+    getMemberExtInfo(param: GroupExtParam): Promise<unknown>;
     getGroupAllInfo(): unknown;
     getDiscussExistInfo(): unknown;
     getGroupConfMember(): unknown;
