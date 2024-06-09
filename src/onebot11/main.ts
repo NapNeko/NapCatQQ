@@ -5,6 +5,7 @@ import { postOB11Event } from '@/onebot11/server/postOB11Event';
 import {
   BuddyReqType,
   ChatType,
+  ElementType,
   FriendRequest,
   Group,
   GroupMember,
@@ -36,6 +37,7 @@ import { Data as SysData } from '@/proto/SysMessage';
 import { Data as DeviceData } from '@/proto/SysMessage.DeviceChange';
 import { OB11FriendPokeEvent, OB11GroupPokeEvent } from './event/notice/OB11PokeEvent';
 import { isEqual } from '@/common/utils/helper';
+import e from 'express';
 
 //下面几个其实应该移进Core-Data 缓存实现 但是现在在这里方便
 //
@@ -203,7 +205,7 @@ export class NapCatOnebot11 {
       // 临时会话更新 tempGroupCodeMap uid -> source/GroupCode
     };
     msgListener.onRecvMsg = async (msg) => {
-      // console.log('ob11 onRecvMsg', JSON.stringify(msg, null, 2));
+      //console.log('ob11 onRecvMsg', JSON.stringify(msg, null, 2));
       // logDebug('收到消息', msg);
       for (const m of msg) {
         // try: 减掉3s 试图修复消息半天收不到

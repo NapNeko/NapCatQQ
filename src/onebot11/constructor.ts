@@ -42,6 +42,7 @@ import { ob11Config } from '@/onebot11/config';
 import { deleteGroup, getFriend, getGroupMember, groupMembers, selfInfo, tempGroupCodeMap } from '@/core/data';
 import { NTQQFileApi, NTQQGroupApi, NTQQMsgApi, NTQQUserApi } from '@/core/apis';
 import { OB11GroupMsgEmojiLikeEvent } from '@/onebot11/event/notice/OB11MsgEmojiLikeEvent';
+import { napCatCore } from '@/core';
 
 
 export class OB11Constructor {
@@ -191,23 +192,13 @@ export class OB11Constructor {
       else if (element.videoElement || element.fileElement) {
         const videoOrFileElement = element.videoElement || element.fileElement;
         const ob11MessageDataType = element.videoElement ? OB11MessageDataType.video : OB11MessageDataType.file;
+        let videoDownUrl = NTQQFileApi.getVideoUrl(msg, element);
         message_data['type'] = ob11MessageDataType;
         message_data['data']['file'] = videoOrFileElement.fileName;
-        message_data['data']['path'] = videoOrFileElement.filePath;
+        message_data['data']['path'] = videoDownUrl;
+        message_data['data']['url'] = videoDownUrl;
         message_data['data']['file_id'] = videoOrFileElement.fileUuid;
         message_data['data']['file_size'] = videoOrFileElement.fileSize;
-        // 怎么拿到url呢
-        dbUtil.addFileCache({
-          msgId: msg.msgId,
-          name: videoOrFileElement.fileName,
-          path: videoOrFileElement.filePath,
-          size: parseInt(videoOrFileElement.fileSize || '0'),
-          uuid: videoOrFileElement.fileUuid || '',
-          url: '',
-          element: element.videoElement || element.fileElement,
-          elementType: element.videoElement ? ElementType.VIDEO : ElementType.FILE,
-          elementId: element.elementId
-        }).then();
       }
       else if (element.pttElement) {
         message_data['type'] = OB11MessageDataType.voice;

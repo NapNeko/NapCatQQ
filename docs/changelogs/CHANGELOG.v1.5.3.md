@@ -19,5 +19,6 @@ QQ Version: Windows 9.9.11-24568 / Linux 3.2.9-23568
 * 扩展在线文件通知event与api
 * 限制日志总体文件大小
 * 支持专属群头衔获取
+* 支持视频获取直链
 
 新增的 API 详细见[API文档](https://napneko.github.io/zh-CN/develop/extends_api)

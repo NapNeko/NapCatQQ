@@ -2,7 +2,21 @@ import { GetFileListParam, Peer } from "../entities";
 import { GeneralCallResult } from "./common";
 export interface NodeIKernelRichMediaService {
     getVideoPlayUrl(peer: Peer, msgId: string, elemId: string, videoCodecFormat: number, VideoRequestWay: number): Promise<unknown>;
-    getVideoPlayUrlV2(peer: Peer, msgId: string, elemId: string, videoCodecFormat: number, exParams: unknown): unknown;
+    getVideoPlayUrlV2(peer: Peer, msgId: string, elemId: string, videoCodecFormat: number, exParams: {
+        downSourceType: number;
+        triggerType: number;
+    }): Promise<GeneralCallResult & {
+        urlResult: {
+            v4IpUrl: [];
+            v6IpUrl: [];
+            domainUrl: Array<{
+                url: string;
+                isHttps: boolean;
+                httpsDomain: string;
+            }>;
+            videoCodecFormat: number;
+        };
+    }>;
     getRichMediaFileDir(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
     getVideoPlayUrlInVisit(arg: unknown): unknown;
     isFileExpired(arg: unknown): unknown;
