@@ -3,6 +3,7 @@ import { MsgListener, TempOnRecvParams } from '@/core/listeners';
 import { OB11Constructor } from '@/onebot11/constructor';
 import { postOB11Event } from '@/onebot11/server/postOB11Event';
 import {
+  BuddyReqType,
   ChatType,
   FriendRequest,
   Group,
@@ -17,7 +18,7 @@ import { OB11Config, ob11Config } from '@/onebot11/config';
 import { httpHeart, ob11HTTPServer } from '@/onebot11/server/http';
 import { ob11WebsocketServer } from '@/onebot11/server/ws/WebsocketServer';
 import { ob11ReverseWebsockets } from '@/onebot11/server/ws/ReverseWebsocket';
-import { friendRequests, getFriend, getGroup, getGroupMember, groupNotifies, selfInfo, tempGroupCodeMap } from '@/core/data';
+import { getFriend, getGroup, getGroupMember, groupNotifies, selfInfo, tempGroupCodeMap } from '@/core/data';
 import { dbUtil } from '@/common/utils/db';
 import { BuddyListener, GroupListener, NodeIKernelBuddyListener } from '@/core/listeners';
 import { OB11FriendRequestEvent } from '@/onebot11/event/request/OB11FriendRequest';
@@ -334,11 +335,6 @@ export class NapCatOnebot11 {
           postOB11Event(groupEvent);
         }
       }).catch(e => logError('constructGroupEvent error: ', e));
-      OB11Constructor.FriendAddEvent(message).then(friendAddEvent => {
-        if (friendAddEvent) {
-          postOB11Event(friendAddEvent);
-        }
-      }).catch(e => logError('constructFriendAddEvent error: ', e));
     }
   }
   async SetConfig(NewOb11: OB11Config) {
@@ -525,14 +521,9 @@ export class NapCatOnebot11 {
 
   async postFriendRequest(reqs: FriendRequest[]) {
     for (const req of reqs) {
-      if (parseInt(req.reqTime) < this.bootTime) {
+      if (req.isDecide && req.reqType !== BuddyReqType.KMEINITIATORWAITPEERCONFIRM) {
         continue;
       }
-      const flag = req.friendUid + '|' + req.reqTime;
-      if (friendRequests[flag]) {
-        continue;
-      }
-      friendRequests[flag] = req;
       const friendRequestEvent = new OB11FriendRequestEvent();
       try {
         const requesterUin = await NTQQUserApi.getUinByUid(req.friendUid);
@@ -540,7 +531,7 @@ export class NapCatOnebot11 {
       } catch (e) {
         logDebug('获取加好友者QQ号失败', e);
       }
-      friendRequestEvent.flag = flag;
+      friendRequestEvent.flag = req.friendUid + "|" + req.reqTime;
       friendRequestEvent.comment = req.extWords;
       postOB11Event(friendRequestEvent);
     }

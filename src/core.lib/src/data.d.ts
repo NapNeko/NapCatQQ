@@ -1,4 +1,4 @@
-import { type Friend, type FriendRequest, type Group, type GroupMember, GroupNotify, type SelfInfo, BuddyCategoryType } from './entities';
+import { type Friend, type Group, type GroupMember, GroupNotify, type SelfInfo, BuddyCategoryType } from './entities';
 import { WebApiGroupMember } from '@/core/apis';
 export declare const Credentials: {
     Skey: string;
@@ -18,7 +18,6 @@ export declare const groups: Map<string, Group>;
 export declare function deleteGroup(groupQQ: string): void;
 export declare const groupMembers: Map<string, Map<string, GroupMember>>;
 export declare const friends: Map<string, Friend>;
-export declare const friendRequests: Record<string, FriendRequest>;
 export declare const groupNotifies: Record<string, GroupNotify>;
 export declare function getFriend(uinOrUid: string): Promise<Friend | undefined>;
 export declare function getGroup(qq: string | number): Promise<Group | undefined>;

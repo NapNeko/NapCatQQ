@@ -31,7 +31,6 @@ import { OB11GroupIncreaseEvent } from './event/notice/OB11GroupIncreaseEvent';
 import { OB11GroupBanEvent } from './event/notice/OB11GroupBanEvent';
 import { OB11GroupUploadNoticeEvent } from './event/notice/OB11GroupUploadNoticeEvent';
 import { OB11GroupNoticeEvent } from './event/notice/OB11GroupNoticeEvent';
-import { OB11FriendAddNoticeEvent } from './event/notice/OB11FriendAddNoticeEvent';
 
 import { calcQQLevel } from '../common/utils/qqlevel';
 import { log, logDebug, logError } from '../common/utils/log';
@@ -454,18 +453,6 @@ export class OB11Constructor {
       }
     }
   }
-
-  static async FriendAddEvent(msg: RawMessage): Promise<OB11FriendAddNoticeEvent | undefined> {
-    if (msg.chatType !== ChatType.friend) {
-      return;
-    }
-    if (msg.msgType === 5 && msg.subMsgType === 12) {
-      const event = new OB11FriendAddNoticeEvent(parseInt(msg.peerUin));
-      return event;
-    }
-    return;
-  }
-
   static friend(friend: User): OB11User {
     return {
       user_id: parseInt(friend.uin),
