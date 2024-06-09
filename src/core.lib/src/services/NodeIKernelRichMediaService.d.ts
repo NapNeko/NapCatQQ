@@ -1,8 +1,8 @@
-import { GetFileListParam } from "../entities";
+import { GetFileListParam, Peer } from "../entities";
 import { GeneralCallResult } from "./common";
 export interface NodeIKernelRichMediaService {
-    getVideoPlayUrl(arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown, arg5: unknown): unknown;
-    getVideoPlayUrlV2(arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown, arg5: unknown): unknown;
+    getVideoPlayUrl(peer: Peer, msgId: string, elemId: string, videoCodecFormat: number, VideoRequestWay: number): Promise<unknown>;
+    getVideoPlayUrlV2(peer: Peer, msgId: string, elemId: string, videoCodecFormat: number, exParams: unknown): unknown;
     getRichMediaFileDir(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
     getVideoPlayUrlInVisit(arg: unknown): unknown;
     isFileExpired(arg: unknown): unknown;
@@ -14,8 +14,8 @@ export interface NodeIKernelRichMediaService {
         };
     }>;
     downloadRichMediaInVisit(arg: unknown): unknown;
-    downloadFileForModelId(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
-    downloadFileForFileUuid(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
+    downloadFileForModelId(peer: Peer, arg: unknown[], arg3: string): unknown;
+    downloadFileForFileUuid(peer: Peer, arg1: string, arg3: unknown[]): unknown;
     downloadFileByUrlListtransgroupfile(arg1: unknown, arg2: unknown): unknown;
     downloadFileForFileInfotransgroupfile(arg1: unknown, arg2: unknown): unknown;
     createGroupFolder(GroupCode: string, FolderName: string): Promise<GeneralCallResult & {
@@ -61,7 +61,7 @@ export interface NodeIKernelRichMediaService {
     translateEnWordToZn(words: string[]): Promise<GeneralCallResult & {
         words: string[];
     }>;
-    getScreenOCR(arg: unknown): unknown;
+    getScreenOCR(path: string): Promise<unknown>;
     batchGetGroupFileCount(Gids: Array<string>): Promise<GeneralCallResult & {
         groupCodes: Array<string>;
         groupFileCounts: Array<number>;

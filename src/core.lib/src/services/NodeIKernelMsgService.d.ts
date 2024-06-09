@@ -105,7 +105,19 @@ export interface NodeIKernelMsgService {
     getMsgsByTypeFilters(...args: unknown[]): unknown;
     getMsgWithAbstractByFilterParam(...args: unknown[]): unknown;
     queryMsgsWithFilter(...args: unknown[]): unknown;
-    queryMsgsWithFilterVer2(...args: unknown[]): unknown;
+    queryMsgsWithFilterVer2(MsgId: string, MsgTime: string, param: {
+        chatInfo: {
+            chatType: number;
+            peerUid: string;
+        };
+        filterMsgType: [];
+        filterSendersUid: [];
+        filterMsgFromTime: string;
+        filterMsgToTime: string;
+        pageLimit: number;
+        isReverseOrder: boolean;
+        isIncludeCurrent: boolean;
+    }): Promise<unknown>;
     queryMsgsWithFilterEx(msgId: string, msgTime: string, megSeq: string, param: {
         chatInfo: {
             chatType: number;
@@ -118,10 +130,22 @@ export interface NodeIKernelMsgService {
         pageLimit: number;
         isReverseOrder: boolean;
         isIncludeCurrent: boolean;
-    }): unknown;
+    }): Promise<unknown>;
     queryFileMsgsDesktop(...args: unknown[]): unknown;
     setMsgRichInfoFlag(...args: unknown[]): unknown;
-    queryPicOrVideoMsgs(...args: unknown[]): unknown;
+    queryPicOrVideoMsgs(msgId: string, msgTime: string, megSeq: string, param: {
+        chatInfo: {
+            chatType: number;
+            peerUid: string;
+        };
+        filterMsgType: [];
+        filterSendersUid: [];
+        filterMsgFromTime: string;
+        filterMsgToTime: string;
+        pageLimit: number;
+        isReverseOrder: boolean;
+        isIncludeCurrent: boolean;
+    }): Promise<unknown>;
     queryPicOrVideoMsgsDesktop(...args: unknown[]): unknown;
     queryEmoticonMsgs(...args: unknown[]): unknown;
     queryTroopEmoticonMsgs(...args: unknown[]): unknown;

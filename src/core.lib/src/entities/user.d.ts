@@ -98,6 +98,10 @@ export interface SelfInfo extends User {
 }
 export interface Friend extends User {
 }
+export declare enum BizKey {
+    KPRIVILEGEICON = 0,
+    KPHOTOWALL = 1
+}
 export interface UserDetailInfoByUin {
     result: number;
     errMsg: string;
