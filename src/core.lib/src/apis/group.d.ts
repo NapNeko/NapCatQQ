@@ -2,6 +2,7 @@ import { GroupMember, GroupRequestOperateTypes, GroupMemberRole, GroupNotify, Gr
 import { GeneralCallResult } from '@/core';
 export declare class NTQQGroupApi {
     static getGroups(forced?: boolean): Promise<Group[]>;
+    static getGroupRecommendContactArkJson(GroupCode: string): Promise<unknown>;
     static CreatGroupFileFolder(groupCode: string, folderName: string): Promise<GeneralCallResult & {
         resultWithGroupItem: {
             result: any;

@@ -15,6 +15,8 @@ export interface InvalidCheckResult {
 
 export enum ActionName {
     // 以下为扩展napcat扩展
+    SharePeer = 'ArkShareGroup',
+    ShareGroupEx = 'ArkSharePeer',
     RebootNormal = 'reboot_normal',//无快速登录重新启动
     GetRobotUinRange = 'get_robot_uin_range',
     SetOnlineStatus = 'set_online_status',
@@ -88,5 +90,6 @@ export enum ActionName {
     GetOnlineClient = 'get_online_clients',
     OCRImage = 'ocr_image',
     IOCRImage = '.ocr_image',
-    SetSelfProfile = "set_self_profile"
+    SetSelfProfile = "set_self_profile",
+    CreateCollection = "create_collection"
 }
