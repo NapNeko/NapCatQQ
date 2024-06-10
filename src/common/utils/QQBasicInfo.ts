@@ -65,7 +65,7 @@ export const qqPkgInfo: QQPkgInfo = JSON.parse(fs.readFileSync(pkgInfoPath).toSt
 // platVer: '10.0.26100',
 // clientVer: '9.9.9-23159',
 
-let _appid: string = '537213803';  // 默认为 Windows 平台的 appid
+let _appid: string = '537216417';  // 默认为 Windows 平台的 appid
 if (systemPlatform === 'linux') {
   _appid = '537213827';
 }
