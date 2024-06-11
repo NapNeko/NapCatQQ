@@ -197,6 +197,19 @@ export class OB11Constructor {
         message_data['data']['url'] = videoDownUrl;
         message_data['data']['file_id'] = videoOrFileElement.fileUuid;
         message_data['data']['file_size'] = videoOrFileElement.fileSize;
+        if (!element.videoElement) {
+          dbUtil.addFileCache({
+            msgId: msg.msgId,
+            name: videoOrFileElement.fileName,
+            path: videoOrFileElement.filePath,
+            size: parseInt(videoOrFileElement.fileSize || '0'),
+            uuid: videoOrFileElement.fileUuid || '',
+            url: '',
+            element: element.videoElement || element.fileElement,
+            elementType: element.videoElement ? ElementType.VIDEO : ElementType.FILE,
+            elementId: element.elementId
+          }).then();
+        }
       }
       else if (element.pttElement) {
         message_data['type'] = OB11MessageDataType.voice;

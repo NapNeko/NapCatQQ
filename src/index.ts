@@ -23,7 +23,7 @@ program
   .parse(process.argv);
 
 // 无缝升级旧的配置到新的 应在1.3.5发布 1.5.5 左右移除兼容支持
-UpdateConfig().catch(logError);
+// UpdateConfig().catch(logError); 移除支持
 // 启动WebUi
 InitWebUi();
 const cmdOptions = program.opts();
