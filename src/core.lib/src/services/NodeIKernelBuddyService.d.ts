@@ -11,7 +11,7 @@ export interface NodeIKernelBuddyService {
     getBuddyRemark(uid: number): string;
     setBuddyRemark(uid: number, remark: string): void;
     getAvatarUrl(uid: number): string;
-    isBuddy(uid: number): boolean;
+    isBuddy(uid: string): boolean;
     getCategoryNameWithUid(uid: number): string;
     getTargetBuddySetting(uid: number): unknown;
     getTargetBuddySettingByType(uid: number, type: number): unknown;

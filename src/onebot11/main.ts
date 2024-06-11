@@ -19,7 +19,7 @@ import { OB11Config, ob11Config } from '@/onebot11/config';
 import { httpHeart, ob11HTTPServer } from '@/onebot11/server/http';
 import { ob11WebsocketServer } from '@/onebot11/server/ws/WebsocketServer';
 import { ob11ReverseWebsockets } from '@/onebot11/server/ws/ReverseWebsocket';
-import { getFriend, getGroup, getGroupMember, groupNotifies, selfInfo, tempGroupCodeMap } from '@/core/data';
+import { getGroup, getGroupMember, groupNotifies, selfInfo, tempGroupCodeMap } from '@/core/data';
 import { dbUtil } from '@/common/utils/db';
 import { BuddyListener, GroupListener, NodeIKernelBuddyListener } from '@/core/listeners';
 import { OB11FriendRequestEvent } from '@/onebot11/event/request/OB11FriendRequest';
@@ -474,10 +474,7 @@ export class NapCatOnebot11 {
           logDebug('收到邀请我加群通知');
           const groupInviteEvent = new OB11GroupRequestEvent();
           groupInviteEvent.group_id = parseInt(notify.group.groupCode);
-          let user_id = (await getFriend(notify.user2.uid))?.uin;
-          if (!user_id) {
-            user_id = (await NTQQUserApi.getUinByUid(notify.user2.uid)) || '';
-          }
+          let user_id = (await NTQQUserApi.getUinByUid(notify.user2.uid)) || '';
           groupInviteEvent.user_id = parseInt(user_id);
           groupInviteEvent.sub_type = 'invite';
           groupInviteEvent.flag = flag;

@@ -1,8 +1,7 @@
 import { ChatType, Peer } from '@/core/entities';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { NTQQMsgApi, NTQQUserApi } from '@/core/apis';
-import { getFriend } from '@/core/data';
+import { NTQQFriendApi, NTQQMsgApi, NTQQUserApi } from '@/core/apis';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
 const SchemaData = {
@@ -22,8 +21,8 @@ class MarkMsgAsRead extends BaseAction<PlayloadType, null> {
       if (!peerUid) {
         throw `私聊${payload.user_id}不存在`;
       }
-      const friend = await getFriend(peerUid);
-      return { chatType: friend ? ChatType.friend : ChatType.temp, peerUid };
+      const isBuddy = await NTQQFriendApi.isBuddy(peerUid);
+      return { chatType: isBuddy ? ChatType.friend : ChatType.temp, peerUid };
     }
     if (!payload.group_id) {
       throw '缺少参数 group_id 或 user_id';

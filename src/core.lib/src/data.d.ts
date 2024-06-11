@@ -19,7 +19,6 @@ export declare function deleteGroup(groupQQ: string): void;
 export declare const groupMembers: Map<string, Map<string, GroupMember>>;
 export declare const friends: Map<string, Friend>;
 export declare const groupNotifies: Record<string, GroupNotify>;
-export declare function getFriend(uinOrUid: string): Promise<Friend | undefined>;
 export declare function getGroup(qq: string | number): Promise<Group | undefined>;
 export declare function getGroupMember(groupQQ: string | number, memberUinOrUid: string | number): Promise<GroupMember | null | undefined>;
 export declare const tempGroupCodeMap: Record<string, string>;

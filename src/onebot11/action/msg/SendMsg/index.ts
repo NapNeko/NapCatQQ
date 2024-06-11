@@ -7,16 +7,14 @@ import {
   OB11PostSendMsg
 } from '@/onebot11/types';
 import { ActionName, BaseCheckResult } from '@/onebot11/action/types';
-import { getFriend, getGroup } from '@/core/data';
+import { getGroup } from '@/core/data';
 import { dbUtil } from '@/common/utils/db';
-import { ChatType, ElementType, Group, NTQQMsgApi, NTQQUserApi, Peer, SendMessageElement, } from '@/core';
+import { ChatType, ElementType, Group, NTQQFileApi, NTQQFriendApi, NTQQMsgApi, NTQQUserApi, Peer, SendMessageElement, } from '@/core';
 import fs from 'node:fs';
 import { logDebug, logError } from '@/common/utils/log';
 import { decodeCQCode } from '@/onebot11/cqcode';
 import createSendElements from './create-send-elements';
 import { handleForwardNode } from '@/onebot11/action/msg/SendMsg/handle-forward-node';
-
-const ALLOW_SEND_TEMP_MSG = false;
 
 export interface ReturnDataType {
   message_id: number;
@@ -90,24 +88,12 @@ async function createContext(payload: OB11PostSendMsg): Promise<{
       group: group,
     };
   } else if (payload.user_id) { // take this as a private message
-    const friend = await getFriend(payload.user_id.toString());
-    if (!friend) {
-      if (ALLOW_SEND_TEMP_MSG) {
-        //const tempUid = getUidByUin(payload.user_id.toString());
-        const tempUid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
-        if (tempUid) return {
-          peer: {
-            chatType: ChatType.temp,
-            peerUid: tempUid
-          },
-        };
-      }
-      throw `找不到私聊对象 ${payload.user_id}`;
-    }
+    const Uid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
+    const isBuddy = await NTQQFriendApi.isBuddy(payload.user_id.toString());
     return {
       peer: {
-        chatType: ChatType.friend,
-        peerUid: friend.uid
+        chatType: isBuddy ? ChatType.friend : ChatType.temp,
+        peerUid: Uid!
       },
     };
   }
@@ -134,16 +120,18 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
       return { valid: false, message: `群${payload.group_id}不存在` };
     }
     if (payload.user_id && payload.message_type !== 'group') {
-      if (!(await getFriend(payload.user_id))) {
+      let isBuddy = await NTQQFriendApi.isBuddy(payload.user_id.toString());
+      // 此处有问题
+      if (!isBuddy) {
         if (
-          !ALLOW_SEND_TEMP_MSG &&
           !(await NTQQUserApi.getUidByUin(payload.user_id))
         ) {
-          return { valid: false, message: '不能发送临时消息' };
+          return { valid: false, message: '异常消息' };
         }
+
       }
     }
-    return { valid: true, };
+    return { valid: true };
   }
 
   protected async _handle(payload: OB11PostSendMsg): Promise<{ message_id: number }> {
