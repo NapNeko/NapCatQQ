@@ -1,8 +1,6 @@
 import { NTQQUserApi } from '@/core/apis';
 import BaseAction from '../BaseAction';
-import { getFriend } from '@/core/data';
 import { ActionName } from '../types';
-import { log, logDebug } from '@/common/utils/log';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
 const SchemaData = {
@@ -23,13 +21,7 @@ export default class SendLike extends BaseAction<Payload, null> {
     //logDebug('点赞参数', payload);
     try {
       const qq = payload.user_id.toString();
-      const friend = await getFriend(qq);
-      let uid: string;
-      if (!friend) {
-        uid = await NTQQUserApi.getUidByUin(qq) || '';
-      } else {
-        uid = friend.uid;
-      }
+      let uid: string = await NTQQUserApi.getUidByUin(qq) || '';
       const result = await NTQQUserApi.like(uid, parseInt(payload.times?.toString()) || 1);
       //logDebug('点赞结果', result);
       if (result.result !== 0) {

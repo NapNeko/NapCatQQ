@@ -1,14 +1,12 @@
 import BaseAction from '../BaseAction';
 import { OB11Message, OB11User } from '../../types';
-import { getFriend, friends } from '@/core/data';
 import { ActionName } from '../types';
 import { ChatType } from '@/core/entities';
 import { dbUtil } from '@/common/utils/db';
 import { NTQQMsgApi } from '@/core/apis/msg';
 import { OB11Constructor } from '../../constructor';
-import { logDebug } from '@/common/utils/log';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import { NTQQUserApi } from '@/core';
+import { NTQQFriendApi, NTQQUserApi } from '@/core';
 
 interface Response {
   messages: OB11Message[];
@@ -35,7 +33,7 @@ export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
       throw `记录${payload.user_id}不存在`;
     }
     const startMsgId = (await dbUtil.getMsgByShortId(payload.message_seq))?.msgId || '0';
-    const friend = await getFriend(uid);
+    const friend = await NTQQFriendApi.isBuddy(uid);
     const historyResult = (await NTQQMsgApi.getMsgHistory({
       chatType: friend ? ChatType.friend : ChatType.temp,
       peerUid: uid
