@@ -89,7 +89,7 @@ async function createContext(payload: OB11PostSendMsg): Promise<{
     };
   } else if (payload.user_id) { // take this as a private message
     const Uid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
-    const isBuddy = await NTQQFriendApi.isBuddy(payload.user_id.toString());
+    const isBuddy = await NTQQFriendApi.isBuddy(Uid!);
     return {
       peer: {
         chatType: isBuddy ? ChatType.friend : ChatType.temp,
@@ -120,15 +120,11 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
       return { valid: false, message: `群${payload.group_id}不存在` };
     }
     if (payload.user_id && payload.message_type !== 'group') {
-      let isBuddy = await NTQQFriendApi.isBuddy(payload.user_id.toString());
+      let uid = await NTQQUserApi.getUidByUin(payload.user_id)
+      let isBuddy = await NTQQFriendApi.isBuddy(uid!);
       // 此处有问题
       if (!isBuddy) {
-        if (
-          !(await NTQQUserApi.getUidByUin(payload.user_id))
-        ) {
-          return { valid: false, message: '异常消息' };
-        }
-
+          //return { valid: false, message: '异常消息' };
       }
     }
     return { valid: true };
@@ -158,7 +154,9 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
       // }
     }
     // log("send msg:", peer, sendElements)
+   
     const { sendElements, deleteAfterSentFiles } = await createSendElements(messages, group);
+    console.log(peer);
     const returnMsg = await sendMsg(peer, sendElements, deleteAfterSentFiles);
     return { message_id: returnMsg.id! };
   }
