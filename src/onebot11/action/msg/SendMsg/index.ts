@@ -156,7 +156,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
     // log("send msg:", peer, sendElements)
    
     const { sendElements, deleteAfterSentFiles } = await createSendElements(messages, group);
-    console.log(peer);
+   // console.log(peer);
     const returnMsg = await sendMsg(peer, sendElements, deleteAfterSentFiles);
     return { message_id: returnMsg.id! };
   }
