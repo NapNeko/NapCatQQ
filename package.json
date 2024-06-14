@@ -2,7 +2,7 @@
   "name": "napcat",
   "private": true,
   "type": "module",
-  "version": "1.5.5",
+  "version": "1.5.6",
   "scripts": {
     "watch:dev": "vite --mode development",
     "watch:prod": "vite --mode production",
