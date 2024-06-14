@@ -65,9 +65,13 @@ export const qqPkgInfo: QQPkgInfo = JSON.parse(fs.readFileSync(pkgInfoPath).toSt
 // platVer: '10.0.26100',
 // clientVer: '9.9.9-23159',
 
+// Linux
+// app_version: '3.2.9-24568',
+// qua: 'V1_LNX_NQ_3.2.9_24568_GW_B',
+
 let _appid: string = '537226369';  // 默认为 Windows 平台的 appid
 if (systemPlatform === 'linux') {
-  _appid = '537213827';
+  _appid = '537226441';
 }
 // todo: mac 平台的 appid
 export const appid = _appid;
