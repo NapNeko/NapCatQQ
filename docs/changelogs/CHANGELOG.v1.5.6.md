@@ -1,6 +1,6 @@
-# v1.5.6
+# v1.5.7
 
-QQ Version: Windows 9.9.11-24568 / Linux 3.2.9-23568
+QQ Version: Windows 9.9.11-24568 / Linux 3.2.9-24568
 
 ## 修复与优化
 * 修复一些问题
