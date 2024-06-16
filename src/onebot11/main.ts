@@ -571,6 +571,7 @@ export class NapCatOnebot11 {
 }
 
 // export const napCatOneBot11 = new NapCatOnebot11();
-// setTimeout(() => {
-//   MiniAppUtil.RunMiniAppWithGUI();
+// setTimeout(async () => {
+//   let ret = await MiniAppUtil.RunMiniAppWithGUI();
+//   console.log(ret);
 // }, 20000);
