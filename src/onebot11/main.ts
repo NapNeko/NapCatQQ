@@ -37,7 +37,7 @@ import { Data as SysData } from '@/proto/SysMessage';
 import { Data as DeviceData } from '@/proto/SysMessage.DeviceChange';
 import { OB11FriendPokeEvent, OB11GroupPokeEvent } from './event/notice/OB11PokeEvent';
 import { isEqual } from '@/common/utils/helper';
-import e from 'express';
+import { MiniAppUtil } from '@/common/utils/Packet'
 
 //下面几个其实应该移进Core-Data 缓存实现 但是现在在这里方便
 //
@@ -571,3 +571,6 @@ export class NapCatOnebot11 {
 }
 
 // export const napCatOneBot11 = new NapCatOnebot11();
+// setTimeout(() => {
+//   MiniAppUtil.RunMiniAppWithGUI();
+// }, 20000);
