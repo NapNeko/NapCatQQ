@@ -40,7 +40,7 @@ if (process.env.NAPCAT_BUILDSYS == 'linux') {
 const baseConfigPlugin: PluginOption[] = [
   // PreprocessorDirectives(),
   babel({
-    filter: /.*\.(ts)$/,
+    filter: /.*\.(ts|js)$/,
     babelConfig: {
       babelrc: false,
       configFile: false,
