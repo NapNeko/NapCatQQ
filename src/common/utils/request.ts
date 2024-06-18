@@ -1,6 +1,6 @@
 import https from 'node:https';
 import http from 'node:http';
-
+import fs from 'node:fs';
 export class RequestUtil {
   // 适用于获取服务器下发cookies时获取，仅GET
   static async HttpsGetCookies(url: string): Promise<{ [key: string]: string }> {
@@ -102,5 +102,58 @@ export class RequestUtil {
   // 请求返回都是原始内容
   static async HttpGetText(url: string, method: string = 'GET', data?: any, headers: Record<string, string> = {}) {
     return this.HttpGetJson<string>(url, method, data, headers, false, false);
+  }
+  static async HttpUploadFile(url: string, filePath: string, headers: Record<string, string> = {}) {
+    // 验证URL
+    try {
+      new URL(url);
+    } catch (e: any) {
+      return Promise.reject(`Invalid URL: ${e.message}`);
+    }
+
+    const option = new URL(url);
+    const protocol = url.startsWith('https://') ? https : http;
+    const options = {
+      hostname: option.hostname,
+      port: option.port,
+      path: option.pathname + option.search,
+      method: 'POST',
+      headers: headers
+    };
+
+    return new Promise((resolve, reject) => {
+      const req = protocol.request(options, (res: any) => {
+        let responseBody = '';
+        res.on('data', (chunk: string | Buffer) => {
+          responseBody += chunk.toString();
+          // 响应体最大为10M
+          if (responseBody.length > 10 * 1024 * 1024) {
+            reject('Response body size exceeded the limit');
+          }
+        });
+        res.on('end', () => {
+          try {
+            if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
+              resolve(responseBody);
+            } else {
+              reject(`Error: HTTP Status ${res.statusCode}`);
+            }
+          } catch (parseError) {
+            reject(parseError);
+          }
+        });
+      });
+
+      req.on('error', (e) => {
+        reject(`Request error: ${e.message}`);
+      });
+
+      req.on('close', () => {
+        console.warn('Request closed unexpectedly');
+      });
+
+      const fileStream = fs.createReadStream(filePath);
+      fileStream.pipe(req);
+    });
   }
 }
