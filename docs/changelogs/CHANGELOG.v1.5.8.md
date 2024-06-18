@@ -8,5 +8,6 @@ QQ Version: Windows 9.9.11-24568 / Linux 3.2.9-24568
 ## 新增与调整
 * 日志清理
 * 支持QQ音乐 图文卡片
+* 支持Window X86-32机器
 
 新增的 API 详细见[API文档](https://napneko.github.io/zh-CN/develop/extends_api)
