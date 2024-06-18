@@ -7,7 +7,9 @@ import { PluginOption, Plugin } from 'vite';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import { builtinModules } from 'module';
 import fs from 'node:fs';
-
+import babel from 'vite-plugin-babel';
+import { version } from 'os';
+// "@rollup/plugin-babel": "^6.0.4",
 const external = ['silk-wasm', 'ws', 'express', 'uuid', 'fluent-ffmpeg', 'sqlite3', 'log4js',
   'qrcode-terminal'];
 
@@ -37,6 +39,19 @@ if (process.env.NAPCAT_BUILDSYS == 'linux') {
 
 const baseConfigPlugin: PluginOption[] = [
   // PreprocessorDirectives(),
+  babel({
+    filter: /.*\.(ts)$/,
+    babelConfig: {
+      babelrc: false,
+      configFile: false,
+      presets: ["@babel/preset-typescript"],
+      plugins: [
+        //'2018-09', decoratorsBeforeExport: true
+        ['@babel/plugin-proposal-decorators', { legacy: true }],
+        '@babel/plugin-proposal-class-properties',
+      ],
+    },
+  }),
   cp({
     targets: [
       // ...external.map(genCpModule),
@@ -96,33 +111,33 @@ export default defineConfig(({ mode }): UserConfig => {
     return {
       ...baseConfig(mode),
       plugins: [
-        ...baseConfigPlugin,
-        {
-          ...(obfuscator({
-            options: {
-              compact: true,
-              controlFlowFlattening: true,
-              controlFlowFlatteningThreshold: 0.75,
-              deadCodeInjection: true,
-              deadCodeInjectionThreshold: 0.4,
-              debugProtection: false,
-              disableConsoleOutput: false,
-              identifierNamesGenerator: 'hexadecimal',
-              log: false,
-              renameGlobals: false,
-              rotateStringArray: true,
-              selfDefending: true,
-              stringArray: true,
-              stringArrayEncoding: ['base64'],
-              stringArrayThreshold: 0.75,
-              transformObjectKeys: true,
-              unicodeEscapeSequence: false
-            },
-            include: ['src/**/*.js', 'src/**/*.ts'],
-          }) as Plugin),
-          enforce: 'post',
-          apply: 'build',
-        },
+         ...baseConfigPlugin,
+        // {
+        //   ...(obfuscator({
+        //     options: {
+        //       compact: true,
+        //       controlFlowFlattening: true,
+        //       controlFlowFlatteningThreshold: 0.75,
+        //       deadCodeInjection: true,
+        //       deadCodeInjectionThreshold: 0.4,
+        //       debugProtection: false,
+        //       disableConsoleOutput: false,
+        //       identifierNamesGenerator: 'hexadecimal',
+        //       log: false,
+        //       renameGlobals: false,
+        //       rotateStringArray: true,
+        //       selfDefending: true,
+        //       stringArray: true,
+        //       stringArrayEncoding: ['base64'],
+        //       stringArrayThreshold: 0.75,
+        //       transformObjectKeys: true,
+        //       unicodeEscapeSequence: false
+        //     },
+        //     include: ['src/**/*.js', 'src/**/*.ts'],
+        //   }) as Plugin),
+        //   enforce: 'post',
+        //   apply: 'build',
+        // },
       ]
     };
   } else {

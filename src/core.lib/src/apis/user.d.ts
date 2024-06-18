@@ -17,15 +17,19 @@ export declare class NTQQUserApi {
     static getUserInfo(uid: string): Promise<void>;
     static getUserDetailInfo(uid: string): Promise<User>;
     static modifySelfProfile(param: ModifyProfileParams): Promise<GeneralCallResult>;
-    static getPSkey(domainList: string[], cached?: boolean): Promise<{
+    static getCookies(domain: string): Promise<{
         [key: string]: string;
+    }>;
+    static getPSkey(domainList: string[]): Promise<GeneralCallResult & {
+        domainPskeyMap: Map<string, string>;
     }>;
     static getRobotUinRange(): Promise<Array<any>>;
     static getQzoneCookies(): Promise<{
         [key: string]: string;
     }>;
-    static getSkey(cached?: boolean): Promise<string | undefined>;
+    static getSkey(): Promise<string | undefined>;
     static getUidByUin(Uin: string): Promise<string | undefined>;
     static getUinByUid(Uid: string | undefined): Promise<string | undefined>;
     static getUserDetailInfoByUin(Uin: string): Promise<UserDetailInfoByUin>;
+    static forceFetchClientKey(): Promise<import("@/core").forceFetchClientKeyRetType>;
 }

@@ -10,6 +10,7 @@
     ],
     "skipLibCheck": true,
     "moduleResolution": "Node",
+    "experimentalDecorators": true,
     "allowImportingTsExtensions": false,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
