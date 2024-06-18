@@ -9,4 +9,5 @@ export declare class NTQQSystemApi {
     static getArkJsonCollection(cid: string): Promise<GeneralCallResult & {
         arkJson: string;
     }>;
+    static BootMiniApp(appfile: string, params: string): Promise<unknown>;
 }

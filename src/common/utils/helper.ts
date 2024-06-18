@@ -43,8 +43,59 @@ export function truncateString(obj: any, maxLength = 500) {
   }
   return obj;
 }
+export function simpleDecorator(target: any, context: any) {
+}
 
+// export function CacheClassFunc(ttl: number = 3600 * 1000, customKey: string = '') {
+//   const cache = new Map<string, { expiry: number; value: any }>();
+//   return function CacheClassFuncDecorator(originalMethod: Function, context: ClassMethodDecoratorContext) {
+//     async function CacheClassFuncDecoratorInternal(this: any, ...args: any[]) {
+//       const key = `${customKey}${String(context.name)}.(${args.map(arg => JSON.stringify(arg)).join(', ')})`;
+//       const cachedValue = cache.get(key);
+//       if (cachedValue && cachedValue.expiry > Date.now()) {
+//         return cachedValue.value;
+//       }
+//       const result = originalMethod.call(this, ...args);
+//       cache.set(key, { expiry: Date.now() + ttl, value: result });
+//       return result;
+//     }
+//     return CacheClassFuncDecoratorInternal;
+//   }
+// }
 
+export function CacheClassFuncAsync(ttl: number = 3600 * 1000, customKey: string = ''): any {
+  const cache = new Map<string, { expiry: number; value: any }>();
+
+  // 注意：在JavaScript装饰器中，我们通常不直接处理ClassMethodDecoratorContext这样的类型，
+  // 因为装饰器的参数通常是目标类（对于类装饰器）、属性名（对于属性装饰器）等。
+  // 对于方法装饰器，我们关注的是方法本身及其描述符。
+  // 但这里我们维持原逻辑，假设有一个自定义的处理上下文的方式。
+
+  return function (originalMethod: Function): any {
+    // 由于JavaScript装饰器原生不支持异步直接定义，我们保持async定义以便处理异步方法。
+    async function decoratorWrapper(this: any, ...args: any[]): Promise<any> {
+      const key = `${customKey}${originalMethod.name}.(${args.map(arg => JSON.stringify(arg)).join(', ')})`;
+      const cachedValue = cache.get(key);
+      // 遍历cache 清除expiry内容
+      cache.forEach((value, key) => {
+        if (value.expiry < Date.now()) {
+          cache.delete(key);
+        }
+      });
+      if (cachedValue && cachedValue.expiry > Date.now()) {
+        return cachedValue.value;
+      }
+
+      // 直接await异步方法的结果
+      const result = await originalMethod.apply(this, args);
+      cache.set(key, { expiry: Date.now() + ttl, value: result });
+      return result;
+    }
+
+    // 返回装饰后的方法，保持与原方法相同的名称和描述符（如果需要更精细的控制，可以考虑使用Object.getOwnPropertyDescriptor等）
+    return decoratorWrapper;
+  };
+}
 
 /**
  * 函数缓存装饰器，根据方法名、参数、自定义key生成缓存键，在一定时间内返回缓存结果
