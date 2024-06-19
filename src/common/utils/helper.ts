@@ -63,15 +63,27 @@ export function simpleDecorator(target: any, context: any) {
 //   }
 // }
 export function CacheClassFuncAsync(ttl: number = 3600 * 1000, customKey: string = '') {
-  console.log('CacheClassFuncAsync', ttl, customKey);
+  //console.log('CacheClassFuncAsync', ttl, customKey);
   function logExecutionTime(target: any, methodName: string, descriptor: PropertyDescriptor) {
-    console.log('logExecutionTime', target, methodName, descriptor);
+    //console.log('logExecutionTime', target, methodName, descriptor);
+    const cache = new Map<string, { expiry: number; value: any }>();
     const originalMethod = descriptor.value;
-    descriptor.value = function (...args: any[]) {
-      const start = Date.now();
-      const result = originalMethod.apply(this, args);
-      const end = Date.now();
-      console.log(`Method ${methodName} executed in ${end - start} ms.`);
+    descriptor.value = async function (...args: any[]) {
+      const key = `${customKey}${String(methodName)}.(${args.map(arg => JSON.stringify(arg)).join(', ')})`;
+      cache.forEach((value, key) => {
+        if (value.expiry < Date.now()) {
+          cache.delete(key);
+        }
+      });
+      const cachedValue = cache.get(key);
+      if (cachedValue && cachedValue.expiry > Date.now()) {
+        return cachedValue.value;
+      }
+      // const start = Date.now();
+      const result = await originalMethod.apply(this, args);
+      // const end = Date.now();
+      // console.log(`Method ${methodName} executed in ${end - start} ms.`);
+      cache.set(key, { expiry: Date.now() + ttl, value: result });
       return result;
     };
   }
