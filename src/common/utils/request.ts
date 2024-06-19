@@ -1,6 +1,7 @@
 import https from 'node:https';
 import http from 'node:http';
 import fs from 'node:fs';
+import { NTQQUserApi } from '@/core';
 export class RequestUtil {
   // 适用于获取服务器下发cookies时获取，仅GET
   static async HttpsGetCookies(url: string): Promise<{ [key: string]: string }> {
@@ -60,9 +61,9 @@ export class RequestUtil {
       headers: headers
     };
     // headers: {
-    //   *     'Content-Type': 'application/json',
-    //   *     'Content-Length': Buffer.byteLength(postData),
-    //   *   },
+    //       'Content-Type': 'application/json',
+    //       'Content-Length': Buffer.byteLength(postData),
+    //     },
     return new Promise((resolve, reject) => {
       const req = protocol.request(options, (res: any) => {
         let responseBody = '';
@@ -107,57 +108,50 @@ export class RequestUtil {
   static async HttpGetText(url: string, method: string = 'GET', data?: any, headers: { [key: string]: string } = {}) {
     return this.HttpGetJson<string>(url, method, data, headers, false, false);
   }
-  static async HttpUploadFile(url: string, filePath: string, headers: { [key: string]: string } = {}) {
-    // 验证URL
-    try {
-      new URL(url);
-    } catch (e: any) {
-      return Promise.reject(`Invalid URL: ${e.message}`);
-    }
-
-    const option = new URL(url);
-    const protocol = url.startsWith('https://') ? https : http;
-    const options = {
-      hostname: option.hostname,
-      port: option.port,
-      path: option.pathname + option.search,
-      method: 'POST',
-      headers: headers
-    };
-
+  static async HttpUploadFileForOpenPlatform(filePath: string) {
+    const cookies = Object.entries(await NTQQUserApi.getCookies('connect.qq.com')).map(([key, value]) => `${key}=${value}`).join('; ');
     return new Promise((resolve, reject) => {
-      const req = protocol.request(options, (res: any) => {
-        let responseBody = '';
-        res.on('data', (chunk: string | Buffer) => {
-          responseBody += chunk.toString();
-          // 响应体最大为10M
-          if (responseBody.length > 10 * 1024 * 1024) {
-            reject('Response body size exceeded the limit');
-          }
+      var options = {
+        'method': 'POST',
+        'hostname': 'cgi.connect.qq.com',
+        'path': '/qqconnectopen/upload_share_image',
+        'headers': {
+          'Referer': 'https://cgi.connect.qq.com',
+          'Cookie': cookies,
+          'Accept': '*/*',
+          'Host': 'cgi.connect.qq.com',
+          'Connection': 'keep-alive',
+          'Content-Type': 'multipart/form-data; boundary=--------------------------800945582706338065206240'
+        },
+        'maxRedirects': 20
+      };
+      let body;
+      let req = https.request(options, function (res) {
+        let chunks: any = [];
+
+        res.on("data", function (chunk) {
+          chunks.push(chunk);
         });
-        res.on('end', () => {
-          try {
-            if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
-              resolve(responseBody);
-            } else {
-              reject(`Error: HTTP Status ${res.statusCode}`);
-            }
-          } catch (parseError) {
-            reject(parseError);
-          }
+
+        res.on("end", function () {
+          body = Buffer.concat(chunks);
+          console.log(body.toString());
+        });
+
+        res.on("error", function (error) {
+          console.error(error);
         });
       });
 
-      req.on('error', (e) => {
-        reject(`Request error: ${e.message}`);
-      });
-
-      req.on('close', () => {
-        console.warn('Request closed unexpectedly');
-      });
-
-      const fileStream = fs.createReadStream(filePath);
-      fileStream.pipe(req);
+      var postData = "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"share_image\"; filename=\"C:/1.png\"\r\nContent-Type: \"{Insert_File_Content_Type}\"\r\n\r\n" + fs.readFileSync(filePath) + "\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW--";
+      req.setHeader('content-type', 'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW');
+      req.write(postData);
+      req.end();
+      if (body) {
+        resolve(JSON.parse(body));
+      } else {
+        reject();
+      }
     });
   }
 }
