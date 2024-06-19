@@ -1,6 +1,3 @@
-import { OB11User } from '../../types';
-import { OB11Constructor } from '../../constructor';
-import { friends } from '@/core/data';
 import BaseAction from '../BaseAction';
 import { ActionName, BaseCheckResult } from '../types';
 import { NTQQSystemApi, NTQQUserApi } from '@/core/apis';
