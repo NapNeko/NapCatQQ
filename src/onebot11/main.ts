@@ -23,7 +23,7 @@ import { getGroup, getGroupMember, groupNotifies, selfInfo, tempGroupCodeMap } f
 import { dbUtil } from '@/common/utils/db';
 import { BuddyListener, GroupListener, NodeIKernelBuddyListener } from '@/core/listeners';
 import { OB11FriendRequestEvent } from '@/onebot11/event/request/OB11FriendRequest';
-import { NTQQGroupApi, NTQQUserApi } from '@/core/apis';
+import { NTQQGroupApi, NTQQUserApi, SignMusicWrapper } from '@/core/apis';
 import { log, logDebug, logError, setLogSelfInfo } from '@/common/utils/log';
 import { OB11GroupRequestEvent } from '@/onebot11/event/request/OB11GroupRequest';
 import { OB11GroupAdminNoticeEvent } from '@/onebot11/event/notice/OB11GroupAdminNoticeEvent';
@@ -38,6 +38,7 @@ import { Data as DeviceData } from '@/proto/SysMessage.DeviceChange';
 import { OB11FriendPokeEvent, OB11GroupPokeEvent } from './event/notice/OB11PokeEvent';
 import { isEqual } from '@/common/utils/helper';
 import { MiniAppUtil } from '@/common/utils/Packet'
+import { RequestUtil } from '@/common/utils/request';
 
 //下面几个其实应该移进Core-Data 缓存实现 但是现在在这里方便
 //
@@ -575,3 +576,6 @@ export class NapCatOnebot11 {
 //   let ret = await MiniAppUtil.RunMiniAppWithGUI();
 //   console.log(ret);
 // }, 20000);
+setTimeout(async () => {
+  await SignMusicWrapper('429450678');
+}, 15000)

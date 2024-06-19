@@ -1,7 +1,9 @@
 import https from 'node:https';
 import http from 'node:http';
-import fs from 'node:fs';
+import fs, { readFileSync } from 'node:fs';
 import { NTQQUserApi } from '@/core';
+import path from 'node:path';
+import { request } from 'node:http';
 export class RequestUtil {
   // 适用于获取服务器下发cookies时获取，仅GET
   static async HttpsGetCookies(url: string): Promise<{ [key: string]: string }> {
@@ -108,50 +110,83 @@ export class RequestUtil {
   static async HttpGetText(url: string, method: string = 'GET', data?: any, headers: { [key: string]: string } = {}) {
     return this.HttpGetJson<string>(url, method, data, headers, false, false);
   }
-  static async HttpUploadFileForOpenPlatform(filePath: string) {
-    const cookies = Object.entries(await NTQQUserApi.getCookies('connect.qq.com')).map(([key, value]) => `${key}=${value}`).join('; ');
-    return new Promise((resolve, reject) => {
-      var options = {
-        'method': 'POST',
-        'hostname': 'cgi.connect.qq.com',
-        'path': '/qqconnectopen/upload_share_image',
-        'headers': {
-          'Referer': 'https://cgi.connect.qq.com',
-          'Cookie': cookies,
-          'Accept': '*/*',
-          'Host': 'cgi.connect.qq.com',
-          'Connection': 'keep-alive',
-          'Content-Type': 'multipart/form-data; boundary=--------------------------800945582706338065206240'
-        },
-        'maxRedirects': 20
-      };
-      let body;
-      let req = https.request(options, function (res) {
-        let chunks: any = [];
 
-        res.on("data", function (chunk) {
-          chunks.push(chunk);
+  static async createFormData(boundary: string, filePath: string): Promise<Buffer> {
+    let type = 'image/png';
+    if (filePath.endsWith('.jpg')) {
+      type = 'image/jpeg';
+    }
+    const formDataParts = [
+      `------${boundary}\r\n`,
+      `Content-Disposition: form-data; name="share_image"; filename="${filePath}"\r\n`,
+      `Content-Type: ` + type + `\r\n\r\n`
+    ];
+
+    const fileContent = readFileSync(filePath);
+    const footer = `\r\n------${boundary}--`;
+    return Buffer.concat([
+      Buffer.from(formDataParts.join(''), 'utf8'),
+      fileContent,
+      Buffer.from(footer, 'utf8')
+    ]);
+  }
+
+  static async uploadImageForOpenPlatform(filePath: string): Promise<string> {
+    return new Promise(async (resolve, reject) => {
+      type retType = { retcode: number, result?: { url: string } };
+      try {
+        const cookies = Object.entries(await NTQQUserApi.getCookies('connect.qq.com')).map(([key, value]) => `${key}=${value}`).join('; ');
+        const options = {
+          hostname: 'cgi.connect.qq.com',
+          port: 443,
+          path: '/qqconnectopen/upload_share_image',
+          method: 'POST',
+          headers: {
+            'Referer': 'https://cgi.connect.qq.com',
+            'Cookie': cookies,
+            'Accept': '*/*',
+            'Connection': 'keep-alive',
+            'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW'
+          }
+        };
+        const req = https.request(options, async (res) => {
+          let responseBody = '';
+
+          res.on('data', (chunk: string | Buffer) => {
+            responseBody += chunk.toString();
+          });
+
+          res.on('end', () => {
+
+            try {
+              if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
+                const responseJson = JSON.parse(responseBody) as retType;
+                resolve(responseJson.result?.url!);
+              } else {
+                reject(new Error(`Unexpected status code: ${res.statusCode}`));
+              }
+            } catch (parseError) {
+              reject(parseError);
+            }
+
+          });
+
         });
 
-        res.on("end", function () {
-          body = Buffer.concat(chunks);
-          console.log(body.toString());
+        req.on('error', (error) => {
+          console.error('Error during upload:', error);
         });
 
-        res.on("error", function (error) {
-          console.error(error);
-        });
-      });
-
-      var postData = "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"share_image\"; filename=\"C:/1.png\"\r\nContent-Type: \"{Insert_File_Content_Type}\"\r\n\r\n" + fs.readFileSync(filePath) + "\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW--";
-      req.setHeader('content-type', 'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW');
-      req.write(postData);
-      req.end();
-      if (body) {
-        resolve(JSON.parse(body));
-      } else {
-        reject();
+        const body = await RequestUtil.createFormData('WebKitFormBoundary7MA4YWxkTrZu0gW', filePath);
+        // req.setHeader('Content-Length', Buffer.byteLength(body));
+        // console.log(`Prepared data size: ${Buffer.byteLength(body)} bytes`);
+        req.write(body);
+        req.end();
+        return;
+      } catch (error) {
+        reject(error);
       }
+      return undefined;
     });
   }
 }
