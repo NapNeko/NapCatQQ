@@ -134,8 +134,10 @@ const _handlers: {
       const uri2LocalRes = await uri2local(thumb);
       if (uri2LocalRes.success) thumb = uri2LocalRes.path;
     }
-
-    return SendMsgElementConstructor.video(path, fileName, thumb);
+    let videoEle = await SendMsgElementConstructor.video(path, fileName, thumb);
+    //未测试
+    context.deleteAfterSentFiles.push(videoEle.videoElement.filePath);
+    return videoEle;
   },
   [OB11MessageDataType.miniapp]: async ({ data: any }) => SendMsgElementConstructor.miniapp(),
 
