@@ -49,7 +49,7 @@ export class RequestUtil {
 
 
   // 请求和回复都是JSON data传原始内容 自动编码json
-  static async HttpGetJson<T>(url: string, method: string = 'GET', data?: any, headers: Record<string, string> = {}, isJsonRet: boolean = true, isArgJson: boolean = true): Promise<T> {
+  static async HttpGetJson<T>(url: string, method: string = 'GET', data?: any, headers: { [key: string]: string } = {}, isJsonRet: boolean = true, isArgJson: boolean = true): Promise<T> {
     const option = new URL(url);
     const protocol = url.startsWith('https://') ? https : http;
     const options = {
@@ -59,6 +59,10 @@ export class RequestUtil {
       method: method,
       headers: headers
     };
+    // headers: {
+    //   *     'Content-Type': 'application/json',
+    //   *     'Content-Length': Buffer.byteLength(postData),
+    //   *   },
     return new Promise((resolve, reject) => {
       const req = protocol.request(options, (res: any) => {
         let responseBody = '';
@@ -100,10 +104,10 @@ export class RequestUtil {
   }
 
   // 请求返回都是原始内容
-  static async HttpGetText(url: string, method: string = 'GET', data?: any, headers: Record<string, string> = {}) {
+  static async HttpGetText(url: string, method: string = 'GET', data?: any, headers: { [key: string]: string } = {}) {
     return this.HttpGetJson<string>(url, method, data, headers, false, false);
   }
-  static async HttpUploadFile(url: string, filePath: string, headers: Record<string, string> = {}) {
+  static async HttpUploadFile(url: string, filePath: string, headers: { [key: string]: string } = {}) {
     // 验证URL
     try {
       new URL(url);

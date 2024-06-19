@@ -21,3 +21,16 @@ export interface MiniAppLuaJsonType {
     sourcelogo: string;
 }
 export declare function SignMiniApp(CardData: MiniAppLuaJsonType): Promise<string>;
+export declare function SignMusicInternal(songname: string, singer: string, songmid: string, songmusic: string): Promise<{
+    code: number;
+    data: {
+        signed_ark: string;
+    };
+}>;
+export declare function CreateMusicThridWay0(id?: string, mid?: string): Promise<{
+    mid: string;
+    name?: string | undefined;
+    singer?: string | undefined;
+    url?: string | undefined;
+    cover?: string | undefined;
+}>;
