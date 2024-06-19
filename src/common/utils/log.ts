@@ -39,7 +39,7 @@ const logConfig: Configuration = {
     FileAppender: { // 输出到文件的appender
       type: 'file',
       filename: logPath, // 指定日志文件的位置和文件名
-      maxLoogSize: 10485760, // 日志文件的最大大小（单位：字节），这里设置为10MB
+      maxLogSize: 10485760, // 日志文件的最大大小（单位：字节），这里设置为10MB
       layout: {
         type: 'pattern',
         pattern: '%d{yyyy-MM-dd hh:mm:ss} [%p] %X{userInfo} | %m'

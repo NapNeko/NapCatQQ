@@ -4,7 +4,7 @@ import fs from 'fs/promises';
 import { log, logDebug } from './log';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
+import * as fsPromise from 'node:fs/promises';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -261,4 +261,26 @@ export function isEqual(obj1: any, obj2: any) {
     if (!isEqual(obj1[key], obj2[key])) return false;
   }
   return true;
+}
+
+export async function deleteOldFiles(directoryPath: string, daysThreshold: number) {
+    try {
+        const files = await fsPromise.readdir(directoryPath);
+
+        for (const file of files) {
+            const filePath = path.join(directoryPath, file);
+            const stats = await fsPromise.stat(filePath);
+            const lastModifiedTime = stats.mtimeMs;
+            const currentTime = Date.now();
+            const timeDifference = currentTime - lastModifiedTime;
+            const daysDifference = timeDifference / (1000 * 60 * 60 * 24);
+
+            if (daysDifference > daysThreshold) {
+                await fsPromise.unlink(filePath); // Delete the file
+                //console.log(`Deleted: ${filePath}`);
+            }
+        }
+    } catch (error) {
+        //console.error('Error deleting files:', error);
+    }
 }
