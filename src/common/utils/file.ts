@@ -1,5 +1,5 @@
 import fs from 'fs';
-import fsPromise from 'fs/promises';
+import fsPromise, { stat } from 'fs/promises';
 import crypto from 'crypto';
 import util from 'util';
 import path from 'node:path';
@@ -50,7 +50,40 @@ export function checkFileReceived(path: string, timeout: number = 3000): Promise
     check();
   });
 }
+// 定义一个异步函数来检查文件是否存在
+export async function checkFileReceived2(path: string, timeout: number = 3000): Promise<void> {
+  // 使用 Promise.race 来同时进行文件状态检查和超时计时
+  // Promise.race 会返回第一个解决（resolve）或拒绝（reject）的 Promise
+  await Promise.race([
+    checkFile(path),
+    timeoutPromise(timeout, `文件不存在: ${path}`),
+  ]);
+}
 
+// 转换超时时间至 Promise
+function timeoutPromise(timeout: number, errorMsg: string): Promise<void> {
+  return new Promise((_, reject) => {
+    setTimeout(() => {
+      reject(new Error(errorMsg));
+    }, timeout);
+  });
+}
+
+// 异步检查文件是否存在
+async function checkFile(path: string): Promise<void> {
+  try {
+    await stat(path);
+  } catch (error: any) {
+    if (error.code === 'ENOENT') {
+      // 如果文件不存在，则抛出一个错误
+      throw new Error(`文件不存在: ${path}`);
+    } else {
+      // 对于 stat 调用的其他错误，重新抛出
+      throw error;
+    }
+  }
+  // 如果文件存在，则无需做任何事情，Promise 解决（resolve）自身
+}
 export async function file2base64(path: string) {
   const readFile = util.promisify(fs.readFile);
   const result = {
