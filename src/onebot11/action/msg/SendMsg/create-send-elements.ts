@@ -7,7 +7,8 @@ import {
   NTQQFileApi,
   SendArkElement,
   SendMessageElement,
-  SendMsgElementConstructor
+  SendMsgElementConstructor,
+  SignMusicWrapper
 } from '@/core';
 import { getGroupMember } from '@/core/data';
 import { dbUtil } from '@/common/utils/db';
@@ -185,6 +186,10 @@ const _handlers: {
 
     const signUrl = ob11Config.musicSignUrl;
     if (!signUrl) {
+      if (data.type === 'qq') {
+        const musicJson = (await SignMusicWrapper(data.id.toString())).data.arkResult.slice(0, -1);
+        return SendMsgElementConstructor.ark(musicJson);
+      }
       throw Error('音乐消息签名地址未配置');
     }
     try {
