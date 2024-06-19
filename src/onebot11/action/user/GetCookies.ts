@@ -6,7 +6,8 @@ import { ActionName } from '../types';
 import { NTQQUserApi, WebApi } from '@/core/apis';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 interface Response {
-  cookies: string
+  cookies: string,
+  bkn: string
 }
 const SchemaData = {
   type: 'object',
@@ -18,7 +19,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export class GetCookies extends BaseAction<Payload, any> {
+export class GetCookies extends BaseAction<Payload, Response> {
   actionName = ActionName.GetCookies;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
