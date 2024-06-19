@@ -9,7 +9,7 @@ import { log, logDebug, logError, LogLevel, logWarn, setLogLevel } from '@/commo
 import { NapCatOnebot11 } from '@/onebot11/main';
 import { InitWebUi } from './webui/index';
 import { WebUiDataRuntime } from './webui/src/helper/Data';
-import { UpdateConfig } from './common/utils/helper';
+import { deleteOldFiles, UpdateConfig } from './common/utils/helper';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import chalk from 'chalk';
@@ -22,6 +22,7 @@ program
   .option('-q, --qq <type>', 'QQ号')
   .parse(process.argv);
 
+//deleteOldFiles(path.join(__dirname, 'logs'), 3).then().catch();
 // UpdateConfig().catch(logError); 移除支持
 // 启动WebUi
 InitWebUi();
@@ -40,10 +41,10 @@ checkVersion().then(async (remoteVersion: string) => {
       break;
     }
   }
-  logDebug(tagColor('[NapCat]'),'当前已是最新版本');
+  logDebug(tagColor('[NapCat]'), '当前已是最新版本');
   return;
 }).catch((e) => {
-  logError(tagColor('[NapCat]'),'检测更新失败', e);
+  logError(tagColor('[NapCat]'), '检测更新失败', e);
 });
 // 不是很好待优化
 const NapCat_OneBot11 = new NapCatOnebot11();
