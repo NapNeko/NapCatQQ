@@ -1,6 +1,4 @@
-import { OB11User } from '../../types';
-import { OB11Constructor } from '../../constructor';
-import { rawFriends, friends } from '@/core/data';
+import { rawFriends } from '@/core/data';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { BuddyCategoryType } from '@/core/entities/';

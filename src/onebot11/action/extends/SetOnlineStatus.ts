@@ -1,11 +1,7 @@
-import { OB11User } from '../../types';
-import { OB11Constructor } from '../../constructor';
-import { friends } from '@/core/data';
 import BaseAction from '../BaseAction';
 import { ActionName, BaseCheckResult } from '../types';
 import { NTQQUserApi } from '@/core/apis';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import Ajv from 'ajv';
 // 设置在线状态
 
 const SchemaData = {
