@@ -64,7 +64,8 @@ export const qqPkgInfo: QQPkgInfo = JSON.parse(fs.readFileSync(pkgInfoPath).toSt
 // appid: '537213764',
 // platVer: '10.0.26100',
 // clientVer: '9.9.9-23159',
-
+//Android
+//V1_AND_SQ_9.0.60_6478_YYB_D
 // Linux
 // app_version: '3.2.9-24568',
 // qua: 'V1_LNX_NQ_3.2.9_24568_GW_B',
