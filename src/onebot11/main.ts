@@ -576,7 +576,7 @@ export class NapCatOnebot11 {
 //   let ret = await MiniAppUtil.RunMiniAppWithGUI();
 //   console.log(ret);
 // }, 20000);
-setTimeout(async () => {
-  let t =await SignMusicWrapper('429450678');
-  console.log(t)
-}, 15000)
+// setTimeout(async () => {
+//   let t =await SignMusicWrapper('429450678');
+//   console.log(t)
+// }, 15000)
