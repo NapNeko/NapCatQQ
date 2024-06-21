@@ -25,7 +25,7 @@ export default class SetGroupKick extends BaseAction<Payload, null> {
     if (!member) {
       throw `群成员${payload.user_id}不存在`;
     }
-    let rejectReq = payload.reject_add_request?.toString() == 'true';
+    const rejectReq = payload.reject_add_request?.toString() == 'true';
     await NTQQGroupApi.kickMember(payload.group_id.toString(), [member.uid], rejectReq);
     return null;
   }

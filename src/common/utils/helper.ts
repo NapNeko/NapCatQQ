@@ -264,23 +264,23 @@ export function isEqual(obj1: any, obj2: any) {
 }
 
 export async function deleteOldFiles(directoryPath: string, daysThreshold: number) {
-    try {
-        const files = await fsPromise.readdir(directoryPath);
+  try {
+    const files = await fsPromise.readdir(directoryPath);
 
-        for (const file of files) {
-            const filePath = path.join(directoryPath, file);
-            const stats = await fsPromise.stat(filePath);
-            const lastModifiedTime = stats.mtimeMs;
-            const currentTime = Date.now();
-            const timeDifference = currentTime - lastModifiedTime;
-            const daysDifference = timeDifference / (1000 * 60 * 60 * 24);
+    for (const file of files) {
+      const filePath = path.join(directoryPath, file);
+      const stats = await fsPromise.stat(filePath);
+      const lastModifiedTime = stats.mtimeMs;
+      const currentTime = Date.now();
+      const timeDifference = currentTime - lastModifiedTime;
+      const daysDifference = timeDifference / (1000 * 60 * 60 * 24);
 
-            if (daysDifference > daysThreshold) {
-                await fsPromise.unlink(filePath); // Delete the file
-                //console.log(`Deleted: ${filePath}`);
-            }
-        }
-    } catch (error) {
-        //console.error('Error deleting files:', error);
+      if (daysDifference > daysThreshold) {
+        await fsPromise.unlink(filePath); // Delete the file
+        //console.log(`Deleted: ${filePath}`);
+      }
     }
+  } catch (error) {
+    //console.error('Error deleting files:', error);
+  }
 }

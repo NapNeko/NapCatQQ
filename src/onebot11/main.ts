@@ -37,7 +37,7 @@ import { Data as SysData } from '@/proto/SysMessage';
 import { Data as DeviceData } from '@/proto/SysMessage.DeviceChange';
 import { OB11FriendPokeEvent, OB11GroupPokeEvent } from './event/notice/OB11PokeEvent';
 import { isEqual } from '@/common/utils/helper';
-import { MiniAppUtil } from '@/common/utils/Packet'
+import { MiniAppUtil } from '@/common/utils/Packet';
 import { RequestUtil } from '@/common/utils/request';
 
 //下面几个其实应该移进Core-Data 缓存实现 但是现在在这里方便
@@ -115,9 +115,7 @@ export class NapCatOnebot11 {
       // };
       try {
         // 生产环境会自己去掉
-        if (import.meta.env.MODE == 'development') {
-          logDebug(buf2hex(Buffer.from(protobufData)));
-        }
+        const hex = buf2hex(Buffer.from(protobufData));
         const sysMsg = SysData.fromBinary(Buffer.from(protobufData));
         const peeruin = sysMsg.header[0].peerNumber;
         const peeruid = sysMsg.header[0].peerString;
@@ -126,27 +124,29 @@ export class NapCatOnebot11 {
         const subType1 = sysMsg.body[0].subType1;
         let pokeEvent: OB11FriendPokeEvent | OB11GroupPokeEvent;
         //console.log(peeruid);
-        if (MsgType == 528 && subType0 == 290) {
+        if (MsgType == 528 && subType0 == 290 && hex.length < 250 && hex.endsWith('04')) {
           // 防止上报两次 私聊戳一戳
           if (PokeCache.has(peeruid)) {
-            PokeCache.delete(peeruid);
-          } else {
-            PokeCache.set(peeruid, false);
             log('[私聊] 用户 ', peeruin, ' 对你戳一戳');
             pokeEvent = new OB11FriendPokeEvent(peeruin);
             postOB11Event(pokeEvent);
           }
+          PokeCache.set(peeruid, false);
+          setTimeout(() => {
+            PokeCache.delete(peeruid);
+          }, 1000);
         }
-        if (MsgType == 732 && subType0 == 20) {
+        if (MsgType == 732 && subType0 == 20 && hex.length < 150 && hex.endsWith('04')) {
           // 防止上报两次 群聊戳一戳
           if (PokeCache.has(peeruid)) {
-            PokeCache.delete(peeruid);
-          } else {
-            PokeCache.set(peeruid, false);
             log('[群聊] 群组 ', peeruin, ' 戳一戳');
             pokeEvent = new OB11GroupPokeEvent(peeruin);
             postOB11Event(pokeEvent);
           }
+          PokeCache.set(peeruid, false);
+          setTimeout(() => {
+            PokeCache.delete(peeruid);
+          }, 1000);
         }
         if (MsgType == 528 && subType0 == 349) {
           const sysDeviceMsg = DeviceData.fromBinary(Buffer.from(protobufData));
@@ -475,7 +475,7 @@ export class NapCatOnebot11 {
           logDebug('收到邀请我加群通知');
           const groupInviteEvent = new OB11GroupRequestEvent();
           groupInviteEvent.group_id = parseInt(notify.group.groupCode);
-          let user_id = (await NTQQUserApi.getUinByUid(notify.user2.uid)) || '';
+          const user_id = (await NTQQUserApi.getUinByUid(notify.user2.uid)) || '';
           groupInviteEvent.user_id = parseInt(user_id);
           groupInviteEvent.sub_type = 'invite';
           groupInviteEvent.flag = flag;
@@ -531,7 +531,7 @@ export class NapCatOnebot11 {
       } catch (e) {
         logDebug('获取加好友者QQ号失败', e);
       }
-      friendRequestEvent.flag = req.friendUid + "|" + req.reqTime;
+      friendRequestEvent.flag = req.friendUid + '|' + req.reqTime;
       friendRequestEvent.comment = req.extWords;
       postOB11Event(friendRequestEvent);
     }

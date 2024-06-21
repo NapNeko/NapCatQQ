@@ -80,7 +80,7 @@ export class OB11Constructor {
     }
     else if (msg.chatType == ChatType.friend) {
       resMsg.sub_type = 'friend';
-      let user = await NTQQUserApi.getUserDetailInfoByUin(msg.senderUin!);
+      const user = await NTQQUserApi.getUserDetailInfoByUin(msg.senderUin!);
       resMsg.sender.nickname = user.info.nick;
     }
     else if (msg.chatType == ChatType.temp) {
@@ -191,7 +191,7 @@ export class OB11Constructor {
       else if (element.videoElement || element.fileElement) {
         const videoOrFileElement = element.videoElement || element.fileElement;
         const ob11MessageDataType = element.videoElement ? OB11MessageDataType.video : OB11MessageDataType.file;
-        let videoDownUrl = element.videoElement ? await NTQQFileApi.getVideoUrl(msg, element) : videoOrFileElement.filePath;
+        const videoDownUrl = element.videoElement ? await NTQQFileApi.getVideoUrl(msg, element) : videoOrFileElement.filePath;
         message_data['type'] = ob11MessageDataType;
         message_data['data']['file'] = videoOrFileElement.fileName;
         message_data['data']['path'] = videoDownUrl;
