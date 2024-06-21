@@ -118,7 +118,7 @@ export class NapCatOnebot11 {
         // if (import.meta.env.MODE == 'development') {
         //   logDebug(buf2hex(Buffer.from(protobufData)));
         // }
-        console.log(hex);
+        //console.log(hex);
         const sysMsg = SysData.fromBinary(Buffer.from(protobufData));
         const peeruin = sysMsg.header[0].peerNumber;
         const peeruid = sysMsg.header[0].peerString;
