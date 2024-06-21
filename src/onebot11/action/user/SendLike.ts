@@ -21,7 +21,7 @@ export default class SendLike extends BaseAction<Payload, null> {
     //logDebug('点赞参数', payload);
     try {
       const qq = payload.user_id.toString();
-      let uid: string = await NTQQUserApi.getUidByUin(qq) || '';
+      const uid: string = await NTQQUserApi.getUidByUin(qq) || '';
       const result = await NTQQUserApi.like(uid, parseInt(payload.times?.toString()) || 1);
       //logDebug('点赞结果', result);
       if (result.result !== 0) {
