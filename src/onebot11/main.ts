@@ -114,10 +114,11 @@ export class NapCatOnebot11 {
       //   }
       // };
       try {
-        // 生产环境会自己去掉
-        if (import.meta.env.MODE == 'development') {
-          logDebug(buf2hex(Buffer.from(protobufData)));
-        }
+        let hex = buf2hex(Buffer.from(protobufData));
+        // if (import.meta.env.MODE == 'development') {
+        //   logDebug(buf2hex(Buffer.from(protobufData)));
+        // }
+        console.log(hex);
         const sysMsg = SysData.fromBinary(Buffer.from(protobufData));
         const peeruin = sysMsg.header[0].peerNumber;
         const peeruid = sysMsg.header[0].peerString;
@@ -127,25 +128,31 @@ export class NapCatOnebot11 {
         let pokeEvent: OB11FriendPokeEvent | OB11GroupPokeEvent;
         //console.log(peeruid);
         if (MsgType == 528 && subType0 == 290) {
-          // 防止上报两次 私聊戳一戳
-          if (PokeCache.has(peeruid)) {
-            PokeCache.delete(peeruid);
-          } else {
+          // 这里不知道怎么也会有奇怪的信息乱来 04结尾就是没有content
+          if (hex.length < 250 && hex.endsWith('04')) {
+            if (!PokeCache.has(peeruid)) {
+              log('[私聊] 用户 ', peeruin, ' 对你戳一戳');
+              pokeEvent = new OB11FriendPokeEvent(peeruin);
+              postOB11Event(pokeEvent);
+            }
             PokeCache.set(peeruid, false);
-            log('[私聊] 用户 ', peeruin, ' 对你戳一戳');
-            pokeEvent = new OB11FriendPokeEvent(peeruin);
-            postOB11Event(pokeEvent);
+            setTimeout(() => {
+              PokeCache.delete(peeruid)
+            }, 1000);
           }
         }
         if (MsgType == 732 && subType0 == 20) {
-          // 防止上报两次 群聊戳一戳
-          if (PokeCache.has(peeruid)) {
-            PokeCache.delete(peeruid);
-          } else {
+          // GroupCommonTip 由于GroupPoke没有关键内容 所以混在一起 小包且无内容为poke
+          if (hex.length < 150 && hex.endsWith('04')) {
+            if (PokeCache.has(peeruid)) {
+              log('[群聊] 群组 ', peeruin, ' 戳一戳');
+              pokeEvent = new OB11GroupPokeEvent(peeruin);
+              postOB11Event(pokeEvent);
+            }
             PokeCache.set(peeruid, false);
-            log('[群聊] 群组 ', peeruin, ' 戳一戳');
-            pokeEvent = new OB11GroupPokeEvent(peeruin);
-            postOB11Event(pokeEvent);
+            setTimeout(() => {
+              PokeCache.delete(peeruid)
+            }, 1000);
           }
         }
         if (MsgType == 528 && subType0 == 349) {
