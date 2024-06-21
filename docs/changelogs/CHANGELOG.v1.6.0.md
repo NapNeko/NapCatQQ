@@ -6,6 +6,6 @@ QQ Version: Windows 9.9.11-24815 / Linux 3.2.9-24815
 
 
 ## 新增与调整
-
+* 新增图片subtype属性 区分表情图片与商城图片
 
 新增的 API 详细见[API文档](https://napneko.github.io/zh-CN/develop/extends_api)

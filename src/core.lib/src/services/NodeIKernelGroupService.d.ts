@@ -46,7 +46,7 @@ export interface NodeIKernelGroupService {
     createGroupWithMembers(arg: unknown): void;
     quitGroup(groupCode: string): void;
     destroyGroup(groupCode: string): void;
-    getSingleScreenNotifies(arg1: boolean, arg2: string, arg3: number): Promise<GeneralCallResult>;
+    getSingleScreenNotifies(force: boolean, start_seq: string, num: number): Promise<GeneralCallResult>;
     clearGroupNotifies(groupCode: string): void;
     getGroupNotifiesUnreadCount(unknown: Boolean): Promise<GeneralCallResult>;
     clearGroupNotifiesUnreadCount(groupCode: string): void;

@@ -229,6 +229,7 @@ export interface ArkElement {
 export declare const IMAGE_HTTP_HOST = "https://gchat.qpic.cn";
 export declare const IMAGE_HTTP_HOST_NT = "https://multimedia.nt.qq.com.cn";
 export interface PicElement {
+    picSubType?: number;
     originImageUrl: string;
     originImageMd5?: string;
     sourcePath: string;
