@@ -24,7 +24,6 @@ export declare class NTQQGroupApi {
         };
     }>;
     static getSingleScreenNotifies(num: number): Promise<GroupNotify[]>;
-    static getGroupMembersWithNoCache(groupQQ: string, num?: number): Promise<Map<string, GroupMember>>;
     static getGroupMembers(groupQQ: string, num?: number): Promise<Map<string, GroupMember>>;
     static getGroupNotifies(): Promise<void>;
     static GetGroupFileCount(Gids: Array<string>): Promise<GeneralCallResult & {
