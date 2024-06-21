@@ -37,7 +37,7 @@ import { Data as SysData } from '@/proto/SysMessage';
 import { Data as DeviceData } from '@/proto/SysMessage.DeviceChange';
 import { OB11FriendPokeEvent, OB11GroupPokeEvent } from './event/notice/OB11PokeEvent';
 import { isEqual } from '@/common/utils/helper';
-import { MiniAppUtil } from '@/common/utils/Packet'
+import { MiniAppUtil } from '@/common/utils/Packet';
 import { RequestUtil } from '@/common/utils/request';
 
 //下面几个其实应该移进Core-Data 缓存实现 但是现在在这里方便
@@ -475,7 +475,7 @@ export class NapCatOnebot11 {
           logDebug('收到邀请我加群通知');
           const groupInviteEvent = new OB11GroupRequestEvent();
           groupInviteEvent.group_id = parseInt(notify.group.groupCode);
-          let user_id = (await NTQQUserApi.getUinByUid(notify.user2.uid)) || '';
+          const user_id = (await NTQQUserApi.getUinByUid(notify.user2.uid)) || '';
           groupInviteEvent.user_id = parseInt(user_id);
           groupInviteEvent.sub_type = 'invite';
           groupInviteEvent.flag = flag;
@@ -531,7 +531,7 @@ export class NapCatOnebot11 {
       } catch (e) {
         logDebug('获取加好友者QQ号失败', e);
       }
-      friendRequestEvent.flag = req.friendUid + "|" + req.reqTime;
+      friendRequestEvent.flag = req.friendUid + '|' + req.reqTime;
       friendRequestEvent.comment = req.extWords;
       postOB11Event(friendRequestEvent);
     }

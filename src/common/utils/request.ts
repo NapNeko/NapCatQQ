@@ -119,7 +119,7 @@ export class RequestUtil {
     const formDataParts = [
       `------${boundary}\r\n`,
       `Content-Disposition: form-data; name="share_image"; filename="${filePath}"\r\n`,
-      `Content-Type: ` + type + `\r\n\r\n`
+      'Content-Type: ' + type + '\r\n\r\n'
     ];
 
     const fileContent = readFileSync(filePath);
@@ -161,7 +161,7 @@ export class RequestUtil {
             try {
               if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
                 const responseJson = JSON.parse(responseBody) as retType;
-                resolve(responseJson.result?.url!);
+                resolve(responseJson.result!.url!);
               } else {
                 reject(new Error(`Unexpected status code: ${res.statusCode}`));
               }

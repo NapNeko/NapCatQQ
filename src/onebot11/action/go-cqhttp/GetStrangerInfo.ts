@@ -21,10 +21,10 @@ export default class GoCQHTTPGetStrangerInfo extends BaseAction<Payload, OB11Use
 
   protected async _handle(payload: Payload): Promise<OB11User> {
     const user_id = payload.user_id.toString();
-    let extendData = await NTQQUserApi.getUserDetailInfoByUin(user_id);
-    let uid = (await NTQQUserApi.getUidByUin(user_id))!;
+    const extendData = await NTQQUserApi.getUserDetailInfoByUin(user_id);
+    const uid = (await NTQQUserApi.getUidByUin(user_id))!;
     if (!uid || uid.indexOf('*') != -1) {
-      let ret = {
+      const ret = {
         ...extendData,
         user_id: parseInt(extendData.info.uin) || 0,
         nickname: extendData.info.nick,
@@ -34,10 +34,10 @@ export default class GoCQHTTPGetStrangerInfo extends BaseAction<Payload, OB11Use
         level: extendData.info.qqLevel && calcQQLevel(extendData.info.qqLevel) || 0,
         login_days: 0,
         uid: ''
-      }
+      };
       return ret;
     }
-    let data = { ...extendData, ...(await NTQQUserApi.getUserDetailInfo(uid)) };
+    const data = { ...extendData, ...(await NTQQUserApi.getUserDetailInfo(uid)) };
     return OB11Constructor.stranger(data);
   }
 }

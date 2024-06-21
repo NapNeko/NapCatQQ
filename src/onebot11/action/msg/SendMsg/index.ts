@@ -120,11 +120,11 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
       return { valid: false, message: `群${payload.group_id}不存在` };
     }
     if (payload.user_id && payload.message_type !== 'group') {
-      let uid = await NTQQUserApi.getUidByUin(payload.user_id)
-      let isBuddy = await NTQQFriendApi.isBuddy(uid!);
+      const uid = await NTQQUserApi.getUidByUin(payload.user_id);
+      const isBuddy = await NTQQFriendApi.isBuddy(uid!);
       // 此处有问题
       if (!isBuddy) {
-          //return { valid: false, message: '异常消息' };
+        //return { valid: false, message: '异常消息' };
       }
     }
     return { valid: true };
