@@ -1,7 +1,7 @@
 import { BuddyCategoryType, FriendRequestNotify } from '@/core/entities';
 export type OnBuddyChangeParams = BuddyCategoryType[];
 interface IBuddyListener {
-    onBuddyListChange(arg: OnBuddyChangeParams): void;
+    onBuddyListChange(arg: BuddyCategoryType[]): void;
     onBuddyInfoChange(arg: unknown): void;
     onBuddyDetailInfoChange(arg: unknown): void;
     onNickUpdated(arg: unknown): void;
