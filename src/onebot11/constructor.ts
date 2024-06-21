@@ -162,6 +162,7 @@ export class OB11Constructor {
         message_data['type'] = 'image';
         // message_data["data"]["file"] = element.picElement.sourcePath
         message_data['data']['file'] = element.picElement.fileName;
+        message_data['subType']= element.picElement.picSubType;
         // message_data["data"]["path"] = element.picElement.sourcePath
         // let currentRKey = "CAQSKAB6JWENi5LMk0kc62l8Pm3Jn1dsLZHyRLAnNmHGoZ3y_gDZPqZt-64"
 
