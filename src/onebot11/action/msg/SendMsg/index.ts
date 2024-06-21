@@ -7,9 +7,8 @@ import {
   OB11PostSendMsg
 } from '@/onebot11/types';
 import { ActionName, BaseCheckResult } from '@/onebot11/action/types';
-import { getGroup } from '@/core/data';
 import { dbUtil } from '@/common/utils/db';
-import { ChatType, ElementType, Group, NTQQFileApi, NTQQFriendApi, NTQQMsgApi, NTQQUserApi, Peer, SendMessageElement, } from '@/core';
+import { ChatType, ElementType, Group, NTQQFileApi, NTQQFriendApi, NTQQGroupApi, NTQQMsgApi, NTQQUserApi, Peer, SendMessageElement, } from '@/core';
 import fs from 'node:fs';
 import { logDebug, logError } from '@/common/utils/log';
 import { decodeCQCode } from '@/onebot11/cqcode';
@@ -79,7 +78,7 @@ async function createContext(payload: OB11PostSendMsg): Promise<{
   // This redundant design of Ob11 here should be blamed.
 
   if (payload.group_id) { // take this as a group message
-    const group = (await getGroup(payload.group_id))!; // checked before
+    const group = (await NTQQGroupApi.getGroups()).find(e => e.groupCode == payload.group_id?.toString())!; // checked before
     return {
       peer: {
         chatType: ChatType.group,
@@ -116,7 +115,8 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
     if (nodeElementLength > 0 && nodeElementLength != messages.length) {
       return { valid: false, message: '转发消息不能和普通消息混在一起发送,转发需要保证message只有type为node的元素' };
     }
-    if (payload.message_type !== 'private' && payload.group_id && !(await getGroup(payload.group_id))) {
+    if (payload.message_type !== 'private' && payload.group_id && !(
+      (await NTQQGroupApi.getGroups()).find(e => e.groupCode == payload.group_id!.toString()))) {
       return { valid: false, message: `群${payload.group_id}不存在` };
     }
     if (payload.user_id && payload.message_type !== 'group') {

@@ -12,7 +12,7 @@ import { OB11FriendRequestEvent } from '../event/request/OB11FriendRequest';
 import { OB11GroupRequestEvent } from '../event/request/OB11GroupRequest';
 import { isNull } from '@/common/utils/helper';
 import { dbUtil } from '@/common/utils/db';
-import { getGroup, groupNotifies, selfInfo } from '@/core/data';
+import { groupNotifies, selfInfo } from '@/core/data';
 import { NTQQFriendApi, NTQQGroupApi, NTQQUserApi } from '@/core/apis';
 import createSendElements from '../action/msg/SendMsg/create-send-elements';
 
@@ -144,7 +144,9 @@ async function handleMsg(msg: OB11Message, quickAction: QuickAction) {
     let replyMessage: OB11MessageData[] = [];
 
     if (msg.message_type == 'group') {
-      group = await getGroup(msg.group_id!.toString());
+      group = (await NTQQGroupApi.getGroups()).find(e => e.groupCode == msg.group_id!.toString());
+      //筛选
+      //group = await getGroup(msg.group_id!.toString());
       replyMessage.push({
         type: 'reply',
         data: {

@@ -1,5 +1,4 @@
 import BaseAction from '../BaseAction';
-import { getGroup } from '@/core/data';
 import { ActionName } from '../types';
 import { SendMsgElementConstructor } from '@/core/entities/constructor';
 import { ChatType, SendFileElement } from '@/core/entities';
@@ -7,6 +6,7 @@ import fs from 'fs';
 import { SendMsg, sendMsg } from '@/onebot11/action/msg/SendMsg';
 import { uri2local } from '@/common/utils/file';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { NTQQGroupApi } from '@/core';
 const SchemaData = {
   type: 'object',
   properties: {
@@ -25,7 +25,7 @@ export default class GoCQHTTPUploadGroupFile extends BaseAction<Payload, null> {
   actionName = ActionName.GoCQHTTP_UploadGroupFile;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<null> {
-    const group = await getGroup(payload.group_id.toString());
+    const group = (await NTQQGroupApi.getGroups()).find(e => e.groupCode == payload.group_id?.toString());
     if (!group) {
       throw new Error(`群组${payload.group_id}不存在`);
     }

@@ -31,7 +31,6 @@ import { OB11GroupIncreaseEvent } from './event/notice/OB11GroupIncreaseEvent';
 import { OB11GroupBanEvent } from './event/notice/OB11GroupBanEvent';
 import { OB11GroupUploadNoticeEvent } from './event/notice/OB11GroupUploadNoticeEvent';
 import { OB11GroupNoticeEvent } from './event/notice/OB11GroupNoticeEvent';
-
 import { calcQQLevel } from '../common/utils/qqlevel';
 import { log, logDebug, logError } from '../common/utils/log';
 import { sleep } from '../common/utils/helper';
@@ -39,7 +38,7 @@ import { OB11GroupTitleEvent } from './event/notice/OB11GroupTitleEvent';
 import { OB11GroupCardEvent } from './event/notice/OB11GroupCardEvent';
 import { OB11GroupDecreaseEvent } from './event/notice/OB11GroupDecreaseEvent';
 import { ob11Config } from '@/onebot11/config';
-import { deleteGroup, getGroupMember, groupMembers, selfInfo, tempGroupCodeMap } from '@/core/data';
+import { getGroupMember, groupMembers, selfInfo, tempGroupCodeMap } from '@/core/data';
 import { NTQQFileApi, NTQQGroupApi, NTQQMsgApi, NTQQUserApi } from '@/core/apis';
 import { OB11GroupMsgEmojiLikeEvent } from '@/onebot11/event/notice/OB11MsgEmojiLikeEvent';
 import { napCatCore } from '@/core';
@@ -348,7 +347,8 @@ export class OB11Constructor {
         }
         else if (groupElement.type == TipGroupElementType.kicked) {
           logDebug(`收到我被踢出或退群提示, 群${msg.peerUid}`, groupElement);
-          deleteGroup(msg.peerUid);
+          await NTQQGroupApi.getGroups(true);
+          //deleteGroup(msg.peerUid);
           NTQQGroupApi.quitGroup(msg.peerUid).then();
           try {
             const adminUin = (await getGroupMember(msg.peerUid, groupElement.adminUid))?.uin || (await NTQQUserApi.getUidByUin(groupElement.adminUid));

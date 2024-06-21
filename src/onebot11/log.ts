@@ -1,8 +1,7 @@
 import { OB11Message } from '@/onebot11/types';
 import { log } from '@/common/utils/log';
-import { getGroup, getGroupMember, selfInfo } from '@/core/data';
-import exp from 'constants';
-import { Group } from '@/core';
+import { getGroupMember, selfInfo } from '@/core/data';
+import { Group, NTQQGroupApi } from '@/core';
 import chalk from 'chalk';
 
 const spSegColor = chalk.blue;// for special segment
@@ -24,7 +23,8 @@ export async function logMessage(ob11Message: OB11Message) {
     }
   }
   if (ob11Message.message_type === 'group') {
-    group = await getGroup(ob11Message.group_id!);
+    group = (await NTQQGroupApi.getGroups()).find(e => e.groupCode == ob11Message.group_id!.toString());
+    // group = await getGroup(ob11Message.group_id!);
     prefix += `群[${group?.groupName}(${ob11Message.group_id})] `;
   }
   let msgChain = '';

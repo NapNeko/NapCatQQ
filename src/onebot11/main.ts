@@ -19,7 +19,7 @@ import { OB11Config, ob11Config } from '@/onebot11/config';
 import { httpHeart, ob11HTTPServer } from '@/onebot11/server/http';
 import { ob11WebsocketServer } from '@/onebot11/server/ws/WebsocketServer';
 import { ob11ReverseWebsockets } from '@/onebot11/server/ws/ReverseWebsocket';
-import { getGroup, getGroupMember, groupNotifies, selfInfo, tempGroupCodeMap } from '@/core/data';
+import { getGroupMember, groupNotifies, selfInfo, tempGroupCodeMap } from '@/core/data';
 import { dbUtil } from '@/common/utils/db';
 import { BuddyListener, GroupListener, NodeIKernelBuddyListener } from '@/core/listeners';
 import { OB11FriendRequestEvent } from '@/onebot11/event/request/OB11FriendRequest';
@@ -433,7 +433,7 @@ export class NapCatOnebot11 {
             // member1.role = notify.type == GroupNotifyTypes.ADMIN_SET ? GroupMemberRole.admin : GroupMemberRole.normal;
             postOB11Event(groupAdminNoticeEvent, true);
           } else {
-            logDebug('获取群通知的成员信息失败', notify, getGroup(notify.group.groupCode));
+            logDebug('获取群通知的成员信息失败', notify, (notify.group.groupCode));
           }
         } else if (notify.type == GroupNotifyTypes.MEMBER_EXIT || notify.type == GroupNotifyTypes.KICK_MEMBER) {
           logDebug('有成员退出通知', notify);

@@ -1,13 +1,12 @@
 import BaseAction from '../BaseAction';
 import { OB11Message, OB11User } from '../../types';
-import { getGroup, groups } from '@/core/data';
 import { ActionName } from '../types';
 import { ChatType } from '@/core/entities';
 import { dbUtil } from '@/common/utils/db';
 import { NTQQMsgApi } from '@/core/apis/msg';
 import { OB11Constructor } from '../../constructor';
-import { logDebug } from '@/common/utils/log';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { NTQQGroupApi } from '@/core';
 interface Response {
   messages: OB11Message[];
 }
@@ -28,7 +27,7 @@ export default class GoCQHTTPGetGroupMsgHistory extends BaseAction<Payload, Resp
   actionName = ActionName.GoCQHTTP_GetGroupMsgHistory;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<Response> {
-    const group = await getGroup(payload.group_id.toString());
+    const group =  (await NTQQGroupApi.getGroups()).find(e => e.groupCode == payload.group_id?.toString());
     if (!group) {
       throw `群${payload.group_id}不存在`;
     }

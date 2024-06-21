@@ -1,5 +1,5 @@
 import { OB11GroupMember } from '../../types';
-import { getGroup, getGroupMember, groupMembers } from '@/core/data';
+import { getGroupMember, groupMembers } from '@/core/data';
 import { OB11Constructor } from '../../constructor';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
@@ -27,7 +27,7 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
   actionName = ActionName.GetGroupMemberInfo;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
-    const group = await getGroup(payload.group_id.toString());
+    const group =  (await NTQQGroupApi.getGroups()).find(e => e.groupCode == payload.group_id?.toString());
     if (!group) {
       throw (`群(${payload.group_id})不存在`);
     }

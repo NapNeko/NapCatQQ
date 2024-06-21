@@ -1,9 +1,10 @@
-import { getGroup } from '@/core/data';
+
 import { OB11Group } from '../../types';
 import { OB11Constructor } from '../../constructor';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { NTQQGroupApi } from '@/core';
 
 const SchemaData = {
   type: 'object',
@@ -19,7 +20,7 @@ class GetGroupInfo extends BaseAction<Payload, OB11Group> {
   actionName = ActionName.GetGroupInfo;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
-    const group = await getGroup(payload.group_id.toString());
+    const group =  (await NTQQGroupApi.getGroups()).find(e => e.groupCode == payload.group_id?.toString());
     if (group) {
       return OB11Constructor.group(group);
     } else {
