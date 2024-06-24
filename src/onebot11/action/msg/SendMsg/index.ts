@@ -67,7 +67,14 @@ export async function sendMsg(peer: Peer, sendElements: SendMessageElement[], de
     logDebug('发送消息id获取失败', e);
     returnMsg.id = 0;
   }
-  deleteAfterSentFiles.map(f => fs.unlinkSync(f));
+
+  deleteAfterSentFiles.map((f) => {
+    try {
+      fs.unlinkSync(f);
+    } catch (e) {
+      logError('发送消息删除文件失败', e);
+    }
+  });
   return returnMsg;
 }
 
@@ -154,7 +161,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
       // }
     }
     // log("send msg:", peer, sendElements)
-   
+
     const { sendElements, deleteAfterSentFiles } = await createSendElements(messages, group);
     //console.log(peer, JSON.stringify(sendElements,null,2));
     const returnMsg = await sendMsg(peer, sendElements, deleteAfterSentFiles);
