@@ -33,7 +33,7 @@
     "@types/fluent-ffmpeg": "^2.1.24",
     "@types/node": "^20.11.30",
     "@types/qrcode-terminal": "^0.12.2",
-    "@types/uuid": "^9.0.8",
+    "@types/uuid": "^10.0.0",
     "@types/ws": "^8.5.10",
     "@typescript-eslint/eslint-plugin": "^7.4.0",
     "@typescript-eslint/parser": "^7.4.0",
