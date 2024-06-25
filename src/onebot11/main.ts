@@ -209,8 +209,8 @@ export class NapCatOnebot11 {
       //console.log('ob11 onRecvMsg', JSON.stringify(msg, null, 2));
       // logDebug('收到消息', msg);
       for (const m of msg) {
-        // try: 减掉3s 试图修复消息半天收不到
-        if (this.bootTime - 3 > parseInt(m.msgTime)) {
+        // try: 减掉3s 试图修复消息半天收不到（不减了不减了 会出大问题）
+        if (this.bootTime > parseInt(m.msgTime)) {
           logDebug(`消息时间${m.msgTime}早于启动时间${this.bootTime}，忽略上报`);
           continue;
         }
