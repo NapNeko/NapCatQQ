@@ -1,15 +1,13 @@
 import https from 'node:https';
 import http from 'node:http';
-import fs, { readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { NTQQUserApi } from '@/core';
-import path from 'node:path';
-import { request } from 'node:http';
 export class RequestUtil {
   // 适用于获取服务器下发cookies时获取，仅GET
   static async HttpsGetCookies(url: string): Promise<{ [key: string]: string }> {
     const client = url.startsWith('https') ? https : http;
     return new Promise((resolve, reject) => {
-      client.get(url, (res) => {
+      let req = client.get(url, (res) => {
         let cookies: { [key: string]: string } = {};
         const handleRedirect = (res: http.IncomingMessage) => {
           //console.log(res.headers.location);
@@ -20,6 +18,8 @@ export class RequestUtil {
                 // 合并重定向过程中的cookies
                 cookies = { ...cookies, ...redirectCookies };
                 resolve(cookies);
+              }).catch((err) => {
+                reject(err);
               });
             } else {
               resolve(cookies);
@@ -43,8 +43,6 @@ export class RequestUtil {
             }
           });
         }
-      }).on('error', (err) => {
-        reject(err);
       });
     });
   }
@@ -173,6 +171,7 @@ export class RequestUtil {
         });
 
         req.on('error', (error) => {
+          reject(error);
           console.error('Error during upload:', error);
         });
 

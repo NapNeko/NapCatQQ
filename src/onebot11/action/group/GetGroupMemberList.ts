@@ -3,7 +3,7 @@ import { OB11GroupMember } from '../../types';
 import { OB11Constructor } from '../../constructor';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { napCatCore, NTQQGroupApi, NTQQUserApi, SignMiniApp } from '@/core';
+import { napCatCore, NTQQGroupApi, NTQQUserApi } from '@/core';
 import { WebApi } from '@/core/apis/webapi';
 import { logDebug } from '@/common/utils/log';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
