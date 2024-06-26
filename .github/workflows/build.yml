@@ -1,4 +1,4 @@
-name: "Build"
+name: "Build Action"
 on:
   workflow_dispatch:
   push:
