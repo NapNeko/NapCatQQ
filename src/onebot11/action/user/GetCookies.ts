@@ -24,14 +24,12 @@ export class GetCookies extends BaseAction<Payload, Response> {
     //   throw new Error('缺少参数 domain');
     // }
     // if (payload.domain.endsWith('qzone.qq.com')) {
-    //   const _Skey = await NTQQUserApi.getSkey() as string;
     //   // 兼容整个 *.qzone.qq.com
     //   const data = (await NTQQUserApi.getQzoneCookies());
     //   const Bkn = WebApi.genBkn(data.p_skey);
     //   const CookieValue = 'p_skey=' + data.p_skey + '; skey=' + data.skey + '; p_uin=o' + selfInfo.uin + '; uin=o' + selfInfo.uin;
     //   return { cookies: CookieValue };
     // }
-    // const _Skey = await NTQQUserApi.getSkey();
     // // 取Skey
     // // 先NodeIKernelTicketService.forceFetchClientKey('')
     // // 返回值
