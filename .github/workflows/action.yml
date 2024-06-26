@@ -1,0 +1,70 @@
+name: "Build"
+on:
+  workflow_dispatch:
+
+permissions: write-all
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target_platform: [linux]
+        target_arch: [x64, arm64]
+    steps:
+    - name: Clone Main Repository
+      uses: actions/checkout@v4
+      with:
+          repository: 'NapNeko/NapCatQQ'
+          submodules: true
+          ref: main
+          token: ${{ secrets.NAPCAT_BUILD }}
+    - name: Use Node.js 20.X
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+    - name: Build NuCat Linux
+      run: |
+          npm i --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
+          npm run build:prod
+          cd dist
+          npm i --omit=dev --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
+          cd ..
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: NapCat.${{ matrix.target_platform }}.${{ matrix.target_arch }}
+        path: dist
+  build-win32:
+    if: ${{ startsWith(github.event.head_commit.message, 'build:') }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target_platform: [win32]
+        target_arch: [x64,ia32]
+    steps:
+        - name: Clone Main Repository
+          uses: actions/checkout@v4
+          with:
+                repository: 'NapNeko/NapCatQQ'
+                submodules: true
+                ref: main
+                token: ${{ secrets.NAPCAT_BUILD }}
+        - name: Use Node.js 20.X
+          uses: actions/setup-node@v4
+          with:
+              node-version: 20.x
+        - name: Build NuCat Linux
+          run: |
+                npm i --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
+                npm run build:prod
+                cd dist
+                npm i --omit=dev --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
+                cd ..
+        - name: Upload Artifact
+          uses: actions/upload-artifact@v4
+          with:
+              name: NapCat.${{ matrix.target_platform }}.${{ matrix.target_arch }}
+              path: dist
