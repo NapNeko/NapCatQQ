@@ -44,6 +44,9 @@ export class RequestUtil {
           });
         }
       });
+     req.on('error', (error: any) => {
+        reject(error);
+      }); 
     });
   }
 
