@@ -460,11 +460,13 @@ export class NapCatOnebot11 {
           groupRequestEvent.group_id = parseInt(notify.group.groupCode);
           let requestQQ = '';
           try {
-            // requestQQ = (await NTQQUserApi.getUserDetailInfo(notify.user1.uid)).uin;
             // uid-->uin
             requestQQ = (await NTQQUserApi.getUinByUid(notify.user1.uid))!;
+            if (isNaN(parseInt(requestQQ))) {
+              requestQQ = (await NTQQUserApi.getUserDetailInfo(notify.user1.uid)).uin;
+            }
           } catch (e) {
-            logError('获取加群人QQ号失败', e);
+            logError('获取加群人QQ号失败 Uid:', notify.user1.uid, e);
           }
           groupRequestEvent.user_id = parseInt(requestQQ) || 0;
           groupRequestEvent.sub_type = 'add';
