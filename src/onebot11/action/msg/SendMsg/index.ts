@@ -19,7 +19,11 @@ import { handleForwardNode } from '@/onebot11/action/msg/SendMsg/handle-forward-
 export interface ReturnDataType {
   message_id: number;
 }
-
+export enum ContextMode {
+  Normal = 0,
+  Private = 1,
+  Group = 2
+}
 // Normalizes a mixed type (CQCode/a single segment/segment array) into a segment array.
 export function normalize(message: OB11MessageMixType, autoEscape = false): OB11MessageData[] {
   return typeof message === 'string' ? (
@@ -78,14 +82,14 @@ export async function sendMsg(peer: Peer, sendElements: SendMessageElement[], de
   return returnMsg;
 }
 
-async function createContext(payload: OB11PostSendMsg): Promise<{
+async function createContext(payload: OB11PostSendMsg, contextMode: ContextMode): Promise<{
   peer: Peer, group?: Group
 }> {
   // This function determines the type of message by the existence of user_id / group_id,
   // not message_type.
   // This redundant design of Ob11 here should be blamed.
 
-  if (payload.group_id) { // take this as a group message
+  if ((contextMode === ContextMode.Group || contextMode === ContextMode.Normal) && payload.group_id) {
     const group = (await getGroup(payload.group_id))!; // checked before
     return {
       peer: {
@@ -94,7 +98,8 @@ async function createContext(payload: OB11PostSendMsg): Promise<{
       },
       group: group,
     };
-  } else if (payload.user_id) { // take this as a private message
+  }
+  if ((contextMode === ContextMode.Private || contextMode === ContextMode.Normal) && payload.user_id) {
     const Uid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
     const isBuddy = await NTQQFriendApi.isBuddy(Uid!);
     return {
@@ -116,6 +121,7 @@ function getSpecialMsgNum(payload: OB11PostSendMsg, msgType: OB11MessageDataType
 
 export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
   actionName = ActionName.SendMsg;
+  contextMode = ContextMode.Normal;
 
   protected async check(payload: OB11PostSendMsg): Promise<BaseCheckResult> {
     const messages = normalize(payload.message);
@@ -138,7 +144,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
   }
 
   protected async _handle(payload: OB11PostSendMsg): Promise<{ message_id: number }> {
-    const { peer, group } = await createContext(payload);
+    let { peer, group } = await createContext(payload, this.contextMode);
 
     const messages = normalize(
       payload.message,
