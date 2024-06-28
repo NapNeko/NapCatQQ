@@ -12,7 +12,7 @@ import { ob11Config } from '@/onebot11/config';
 import { napCatCore } from '@/core';
 import { selfInfo } from '@/core/data';
 
-export const rwsList: ReverseWebsocket[] = [];
+export let rwsList: ReverseWebsocket[] = [];
 
 export class ReverseWebsocket {
   public websocket: WebSocketClass | undefined;
@@ -133,6 +133,7 @@ class OB11ReverseWebsockets {
     for (const rws of rwsList) {
       rws.stop();
     }
+    rwsList = [];//清空旧的反向ws
   }
 
   restart() {
