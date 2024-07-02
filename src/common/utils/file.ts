@@ -148,6 +148,8 @@ export async function httpDownload(options: string | HttpDownloadOptions): Promi
   };
   if (typeof options === 'string') {
     url = options;
+    const host = new URL(url).hostname;
+    headers['Host'] = host;
   } else {
     url = options.url;
     if (options.headers) {
