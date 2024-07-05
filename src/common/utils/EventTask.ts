@@ -1,4 +1,3 @@
-import { NodeIKernelMsgListener } from '@/core';
 import { NodeIQQNTWrapperSession } from '@/core/wrapper';
 import { randomUUID } from 'crypto';
 
