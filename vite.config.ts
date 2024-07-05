@@ -59,6 +59,7 @@ const baseConfigPlugin: PluginOption[] = [
       { src: './static/', dest: 'dist/static/', flatten: false },
       { src: './src/onebot11/onebot11.json', dest: 'dist/config/' },
       { src: './package.json', dest: 'dist' },
+      { src: './package-lock.json', dest: 'dist' },
       { src: './README.md', dest: 'dist' },
       { src: './logo.png', dest: 'dist/logs' },
       // ...MoeHooModule,
