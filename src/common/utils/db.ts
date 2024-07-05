@@ -408,10 +408,12 @@ class DBUtil extends DBUtilBase {
     logDebug('读取发言时间', groupId);
     return new Promise<IRember[]>((resolve, reject) => {
       this.db!.all(`SELECT * FROM "${groupId}" `, (err, rows: IRember[]) => {
+        const cache = this.LURCache.get(groupId).map(e=>({user_id:e.userId, last_sent_time:e.value}));
         if (err) {
           logError('查询发言时间失败', groupId);
-          return resolve([]);
+          return resolve(cache.map(e=>({...e, join_time:0})));
         }
+         Object.assign(rows, cache)
         logDebug('查询发言时间成功', groupId, rows);
         resolve(rows);
       });

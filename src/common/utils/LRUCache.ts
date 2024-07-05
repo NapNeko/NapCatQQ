@@ -1,4 +1,4 @@
-import { logError, logDebug } from '@/common/utils/log';
+import { logError, logDebug } from "@/common/utils/log";
 
 type group_id = number;
 type user_id = number;
@@ -31,7 +31,7 @@ class LRU<T> {
   private tail: cacheNode<T> | null = null;
   private onFuncs: ((node: cacheNode<T>) => void)[] = [];
 
-  constructor(maxAge: number = 2e4, maxSize: number = 5e3) {
+  constructor(maxAge: number = 6e4, maxSize: number = 5e3) {
     this.maxAge = maxAge;
     this.maxSize = maxSize;
     this.cache = Object.create(null);
@@ -44,7 +44,7 @@ class LRU<T> {
   // 移除LRU节点
   private removeLRUNode(node: cacheNode<T>) {
     logDebug(
-      'removeLRUNode',
+      "removeLRUNode",
       node.groupId,
       node.userId,
       node.value,
@@ -139,6 +139,26 @@ class LRU<T> {
         this.removeLRUNode(tail);
       }
     }
+  }
+  public get(groupId: group_id): { userId: user_id; value: T }[];
+  public get(groupId: group_id, userId: user_id): null | { userId: user_id; value: T };
+  public get(groupId: group_id, userId?: user_id): any {
+    const groupObject = this.cache[groupId];
+    if(!groupObject) return userId === undefined ? [] : null;
+
+    if (userId === undefined) {
+      return Object.entries(groupObject).map(([userId, { value }]) => ({
+        userId: Number(userId),
+        value,
+      }));
+    }
+
+    if (groupObject[userId]) {
+      return { userId, value: groupObject[userId].value };
+    }
+  
+    return null;
+    
   }
 }
 
