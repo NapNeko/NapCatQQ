@@ -171,7 +171,7 @@ export interface NodeIQQNTWrapperSession {
   getTicketService(): NodeIKernelTicketService;
 
   getTipOffService(): NodeIKernelTipOffService;
-  
+
   getNodeMiscService(): NodeIKernelNodeMiscService;
 
   getRichMediaService(): NodeIKernelRichMediaService;
@@ -286,11 +286,7 @@ let wrapperNodePath = path.resolve(path.dirname(process.execPath), './resources/
 if (!fs.existsSync(wrapperNodePath)) {
   wrapperNodePath = path.join(path.dirname(process.execPath), `resources/app/versions/${qqVersionConfigInfo.curVersion}/wrapper.node`);
 }
-let WrapperLoader = path.join(__dirname, "WrapperLoader.cjs");
-//此处待优化
-fs.writeFileSync(WrapperLoader, `
-module.exports = require("${wrapperNodePath.replace(/\\/g, "\\\\")}");
-exports = module.exports;
-`)
-const QQWrapper: WrapperNodeApi = (await import("file://" + WrapperLoader)).default;
+const nativemodule: any = { exports: {} };
+process.dlopen(nativemodule, wrapperNodePath);
+const QQWrapper: WrapperNodeApi = nativemodule.exports;
 export default QQWrapper;
