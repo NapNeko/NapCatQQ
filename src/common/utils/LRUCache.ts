@@ -31,7 +31,7 @@ class LRU<T> {
   private tail: cacheNode<T> | null = null;
   private onFuncs: ((node: cacheNode<T>) => void)[] = [];
 
-  constructor(maxAge: number = 2e4, maxSize: number = 5e3) {
+  constructor(maxAge: number = 6e4, maxSize: number = 5e3) {
     this.maxAge = maxAge;
     this.maxSize = maxSize;
     this.cache = Object.create(null);
