@@ -10,6 +10,7 @@ QQ Version: Windows 9.9.12-26000 / Linux 3.2.9-26000
 
 ## 修复与优化
 1. 优化了WrapperNative载入代码
+2. 优化缓存
 
 ## 新增与调整
 没有哦
