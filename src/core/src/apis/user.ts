@@ -170,16 +170,27 @@ export class NTQQUserApi {
         5000,
         [Uin]
       );
-    let uid = ret.uidInfo.get(Uin);
-    //let t = await NTQQUserApi.getUserDetailInfoByUin(Uin);
+    let uid = ret.uidInfo.get(Uin); //通过QQ默认方式转换
     if (!uid) {
-      uid = (await NTQQFriendApi.getFriends(true)).find((t) => { t.uin == Uin })?.uid;
+      Array.from(friends.values()).forEach((t) => {
+        if (t.uid == Uin) {
+          uid = t.uid;
+        }
+        //console.log(t.uid, t.uin, Uin);
+      });
+      //uid = Array.from(friends.values()).find((t) => { t.uin == Uin })?.uid;  // 从NC维护的QQ Buddy缓存 转换
     }
     if (!uid) {
-      uid = Array.from(friends.values()).find((t) => { t.uin == Uin })?.uid;
+      uid = (await NTQQFriendApi.getFriends(false)).find((t) => { t.uin == Uin })?.uid;  //从QQ Native 缓存转换 方法一
     }
     if (!uid) {
-      //uid获取失败
+      uid = (await NTQQFriendApi.getFriends(true)).find((t) => { t.uin == Uin })?.uid;  //从QQ Native 非缓存转换 方法二
+    }
+    if (!uid) {
+      let unveifyUid = (await NTQQUserApi.getUserDetailInfoByUin(Uin)).info.uid;//从QQ Native 特殊转换 方法三
+      if (unveifyUid.indexOf("*") == -1) {
+        uid = unveifyUid;
+      }
     }
     return uid;
   }
