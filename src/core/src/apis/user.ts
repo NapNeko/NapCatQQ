@@ -173,7 +173,8 @@ export class NTQQUserApi {
     let uid = ret.uidInfo.get(Uin); //通过QQ默认方式转换
     if (!uid) {
       Array.from(friends.values()).forEach((t) => {
-        if (t.uid == Uin) {
+        if (t.uin == Uin) {
+          //logDebug('getUidByUin', t.uid, t.uin, Uin);
           uid = t.uid;
         }
         //console.log(t.uid, t.uin, Uin);
