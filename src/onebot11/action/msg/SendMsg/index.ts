@@ -102,6 +102,7 @@ async function createContext(payload: OB11PostSendMsg, contextMode: ContextMode)
   if ((contextMode === ContextMode.Private || contextMode === ContextMode.Normal) && payload.user_id) {
     const Uid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
     const isBuddy = await NTQQFriendApi.isBuddy(Uid!);
+    //console.log("[调试代码] UIN:", payload.user_id, " UID:", Uid, " IsBuddy:", isBuddy);
     return {
       peer: {
         chatType: isBuddy ? ChatType.friend : ChatType.temp,
