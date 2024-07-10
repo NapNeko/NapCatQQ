@@ -1,7 +1,7 @@
 import { ModifyProfileParams, SelfInfo, User, UserDetailInfoByUin } from '@/core/entities';
-import { selfInfo } from '@/core/data';
+import { friends, selfInfo } from '@/core/data';
 import { CacheClassFuncAsync } from '@/common/utils/helper';
-import { GeneralCallResult, napCatCore } from '@/core';
+import { GeneralCallResult, napCatCore, NTQQFriendApi } from '@/core';
 import { ProfileListener } from '@/core/listeners';
 import { rejects } from 'assert';
 import { randomUUID } from 'crypto';
@@ -170,7 +170,18 @@ export class NTQQUserApi {
         5000,
         [Uin]
       );
-    return ret.uidInfo.get(Uin);
+    let uid = ret.uidInfo.get(Uin);
+    //let t = await NTQQUserApi.getUserDetailInfoByUin(Uin);
+    if (!uid) {
+      uid = (await NTQQFriendApi.getFriends(true)).find((t) => { t.uin == Uin })?.uid;
+    }
+    if (!uid) {
+      uid = Array.from(friends.values()).find((t) => { t.uin == Uin })?.uid;
+    }
+    if (!uid) {
+      //uid获取失败
+    }
+    return uid;
   }
   static async getUinByUid(Uid: string | undefined) {
     if (!Uid) {
