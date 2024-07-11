@@ -332,7 +332,6 @@ export class NapCatOnebot11 {
         postOB11Event(msg);
         // log("post msg", msg)
       }).catch(e => logError('constructMessage error: ', e));
-      await OB11Constructor.GroupEvent(message);
       OB11Constructor.GroupEvent(message).then(groupEvent => {
         if (groupEvent) {
           // log("post group event", groupEvent);
