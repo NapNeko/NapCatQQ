@@ -116,6 +116,7 @@ export class NapCatOnebot11 {
       try {
         // 生产环境会自己去掉
         const hex = buf2hex(Buffer.from(protobufData));
+        //console.log(hex);
         const sysMsg = SysData.fromBinary(Buffer.from(protobufData));
         const peeruin = sysMsg.header[0].peerNumber;
         const peeruid = sysMsg.header[0].peerString;
@@ -124,18 +125,18 @@ export class NapCatOnebot11 {
         const subType1 = sysMsg.body[0].subType1;
         let pokeEvent: OB11FriendPokeEvent | OB11GroupPokeEvent;
         //console.log(peeruid);
-        // if (MsgType == 528 && subType0 == 290 && hex.length < 250 && hex.endsWith('04')) {
-        //   // 防止上报两次 私聊戳一戳
-        //   if (PokeCache.has(peeruid)) {
-        //     log('[私聊] 用户 ', peeruin, ' 对你戳一戳');
-        //     pokeEvent = new OB11FriendPokeEvent(peeruin);
-        //     postOB11Event(pokeEvent);
-        //   }
-        //   PokeCache.set(peeruid, false);
-        //   setTimeout(() => {
-        //     PokeCache.delete(peeruid);
-        //   }, 1000);
-        // }
+        if (MsgType == 528 && subType0 == 290 && hex.length < 250 && hex.endsWith('04')) {
+          // 防止上报两次 私聊戳一戳
+          if (PokeCache.has(peeruid)) {
+            //log('[私聊] 用户 ', peeruin, ' 对你戳一戳');
+            pokeEvent = new OB11FriendPokeEvent(parseInt(selfInfo.uin), peeruin);
+            postOB11Event(pokeEvent);
+          }
+          PokeCache.set(peeruid, false);
+          setTimeout(() => {
+            PokeCache.delete(peeruid);
+          }, 1000);
+        }
         // if (MsgType == 732 && subType0 == 20 && hex.length < 150 && hex.endsWith('04')) {
         //   // 防止上报两次 群聊戳一戳
         //   if (PokeCache.has(peeruid)) {
