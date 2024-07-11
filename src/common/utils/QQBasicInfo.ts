@@ -69,7 +69,7 @@ export const qqPkgInfo: QQPkgInfo = JSON.parse(fs.readFileSync(pkgInfoPath).toSt
 // app_version: '3.2.9-24568',
 // qua: 'V1_LNX_NQ_3.2.9_24568_GW_B',
 
-let _appid: string = '537226369';  // 默认为 Windows 平台的 appid
+let _appid: string = '537231759';  // 默认为 Windows 平台的 appid
 if (systemPlatform === 'linux') {
   _appid = '537226441';
 }

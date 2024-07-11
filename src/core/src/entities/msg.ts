@@ -30,6 +30,7 @@ export enum ElementType {
   VIDEO = 5,
   FACE = 6,
   REPLY = 7,
+  GreyTip = 8,//Poke别叫戳一搓了 官方名字拍一拍 戳一戳是另一个名字
   ARK = 10,
   MFACE = 11,
   MARKDOWN = 14
@@ -289,6 +290,7 @@ export interface GrayTipElement {
     templId: string;
   };
   jsonGrayTipElement: {
+    busiId?: number;
     jsonStr: string;
   };
 }

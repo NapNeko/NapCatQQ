@@ -205,7 +205,25 @@ export class NTQQUserApi {
         5000,
         [Uid]
       );
-    return ret.uinInfo.get(Uid);
+    let uin = ret.uinInfo.get(Uid);
+    if (!uin) {
+      //从Buddy缓存获取Uin
+      Array.from(friends.values()).forEach((t) => {
+        if (t.uid == Uid) {
+          uin = t.uin;
+        }
+      })
+    }
+    if (!uin) {
+      uin = (await NTQQUserApi.getUserDetailInfo(Uid)).uin; //从QQ Native 转换
+    }
+    if (!uin) {
+      uin = (await NTQQFriendApi.getFriends(false)).find((t) => { t.uid == Uid })?.uin;  //从QQ Native 缓存转换
+    }
+    if (!uin) {
+      uin = (await NTQQFriendApi.getFriends(true)).find((t) => { t.uid == Uid })?.uin;  //从QQ Native 非缓存转换
+    }
+    return uin;
   }
   static async getUserDetailInfoByUin(Uin: string) {
     return NTEventDispatch.CallNoListenerEvent
