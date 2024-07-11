@@ -43,6 +43,7 @@ import { deleteGroup, getGroupMember, groupMembers, selfInfo, tempGroupCodeMap }
 import { NTQQFileApi, NTQQGroupApi, NTQQMsgApi, NTQQUserApi } from '@/core/apis';
 import { OB11GroupMsgEmojiLikeEvent } from '@/onebot11/event/notice/OB11MsgEmojiLikeEvent';
 import { napCatCore } from '@/core';
+import { OB11GroupPokeEvent } from './event/notice/OB11PokeEvent';
 
 
 export class OB11Constructor {
@@ -162,7 +163,7 @@ export class OB11Constructor {
         message_data['type'] = 'image';
         // message_data["data"]["file"] = element.picElement.sourcePath
         message_data['data']['file'] = element.picElement.fileName;
-        message_data['subType']= element.picElement.picSubType;
+        message_data['subType'] = element.picElement.picSubType;
         // message_data["data"]["path"] = element.picElement.sourcePath
         // let currentRKey = "CAQSKAB6JWENi5LMk0kc62l8Pm3Jn1dsLZHyRLAnNmHGoZ3y_gDZPqZt-64"
 
@@ -287,10 +288,11 @@ export class OB11Constructor {
   }
 
   static async GroupEvent(msg: RawMessage): Promise<OB11GroupNoticeEvent | undefined> {
+    //log("group msg", msg);
     if (msg.chatType !== ChatType.group) {
       return;
     }
-    if (msg.senderUin) {
+    if (msg.senderUin && msg.senderUin !== '0') {
       const member = await getGroupMember(msg.peerUid, msg.senderUin);
       if (member && member.cardName !== msg.sendMemberName) {
         const newCardName = msg.sendMemberName || '';
@@ -299,7 +301,6 @@ export class OB11Constructor {
         return event;
       }
     }
-    // log("group msg", msg);
     for (const element of msg.elements) {
       const grayTipElement = element.grayTipElement;
       const groupElement = grayTipElement?.groupElement;
@@ -369,11 +370,8 @@ export class OB11Constructor {
           busid: element.fileElement.fileBizId || 0
         });
       }
-
       if (grayTipElement) {
-        const xmlElement = grayTipElement.xmlElement;
-
-        if (xmlElement?.templId === '10382') {
+        if (grayTipElement.xmlElement?.templId === '10382') {
           // 表情回应消息
           // "content":
           //  "<gtip align=\"center\">
@@ -385,7 +383,7 @@ export class OB11Constructor {
           const emojiLikeData = new fastXmlParser.XMLParser({
             ignoreAttributes: false,
             attributeNamePrefix: ''
-          }).parse(xmlElement.content);
+          }).parse(grayTipElement.xmlElement.content);
           logDebug('收到表情回应我的消息', emojiLikeData);
           try {
             const senderUin = emojiLikeData.gtip.qq.jp;
@@ -422,6 +420,7 @@ export class OB11Constructor {
             }
           }
         }
+        //代码歧义 GrayTipElementSubType.MEMBER_NEW_TITLE
         else if (grayTipElement.subElementType == GrayTipElementSubType.MEMBER_NEW_TITLE) {
           const json = JSON.parse(grayTipElement.jsonGrayTipElement.jsonStr);
           /*
@@ -448,6 +447,18 @@ export class OB11Constructor {
             }
 
             * */
+          if (grayTipElement.jsonGrayTipElement.busiId == 1061) {
+            //判断业务类型
+            //Poke事件
+            let pokedetail: any[] = json.items;
+            //筛选item带有uid的元素
+            pokedetail = pokedetail.filter(item => item.uid);
+            console.log("[NapCat] 群拍一拍 群:", pokedetail, parseInt(msg.peerUid), " ", await NTQQUserApi.getUinByUid(pokedetail[0].uid), "拍了拍", await NTQQUserApi.getUinByUid(pokedetail[1].uid));
+            if (pokedetail.length == 2) {
+              return new OB11GroupPokeEvent(parseInt(msg.peerUid), parseInt((await NTQQUserApi.getUinByUid(pokedetail[0].uid))!), parseInt((await NTQQUserApi.getUinByUid(pokedetail[1].uid))!));
+            }
+          }
+          //下面得改 上面也是错的grayTipElement.subElementType == GrayTipElementSubType.MEMBER_NEW_TITLE
           const memberUin = json.items[1].param[0];
           const title = json.items[3].txt;
           logDebug('收到群成员新头衔消息', json);
