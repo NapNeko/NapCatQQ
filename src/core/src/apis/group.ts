@@ -31,6 +31,11 @@ export class NTQQGroupApi {
   static async DelGroupFileFolder(groupCode: string, folderId: string) {
     return napCatCore.session.getRichMediaService().deleteGroupFolder(groupCode, folderId);
   }
+  static async addGroupEssence(){
+    // 需要 ob11msgid->msgId + (peer) -> msgSeq + msgRandom
+    // GetMsgByShoretID(ShoretID); -> MsgService.getMsgs(Peer,MsgId,1,false); -> 组出参数
+    //return napCatCore.session.getGroupService().addGroupEssence();
+  }
   static async getSingleScreenNotifies(num: number) {
     let [_retData, _doubt, _seq, notifies] = await NTEventDispatch.CallNormalEvent
       <(arg1: boolean, arg2: string, arg3: number) => Promise<any>, (doubt: boolean, seq: string, notifies: GroupNotify[]) => void>
