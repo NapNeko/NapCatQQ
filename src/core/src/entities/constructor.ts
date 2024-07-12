@@ -30,7 +30,7 @@ export const mFaceCache = new Map<string, string>(); // emojiId -> faceName
 export class SendMsgElementConstructor {
   static location(): sendShareLocationElement {
     return {
-      elementType: ElementType.ARK,
+      elementType: ElementType.SHARELOCATION,
       elementId: '',
       shareLocationElement: {
         text: "测试",
