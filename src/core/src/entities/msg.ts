@@ -492,6 +492,7 @@ export interface MultiForwardMsgElement {
 }
 
 export interface RawMessage {
+  msgRandom: string;
   // int32, 自己维护的消息id
   id?: number;
 

@@ -31,10 +31,29 @@ export class NTQQGroupApi {
   static async DelGroupFileFolder(groupCode: string, folderId: string) {
     return napCatCore.session.getRichMediaService().deleteGroupFolder(groupCode, folderId);
   }
-  static async addGroupEssence(){
+  static async addGroupEssence(GroupCode: string, msgId: string) {
+    // 代码没测过
     // 需要 ob11msgid->msgId + (peer) -> msgSeq + msgRandom
+    let MsgData = await napCatCore.session.getMsgService().getMsgsIncludeSelf({ chatType: 2, guildId: '', peerUid: GroupCode }, msgId, 1, false);
+    let param = {
+      groupCode: GroupCode,
+      msgRandom: parseInt(MsgData.msgList[0].msgRandom),
+      msgSeq: parseInt(MsgData.msgList[0].msgSeq)
+    };
     // GetMsgByShoretID(ShoretID); -> MsgService.getMsgs(Peer,MsgId,1,false); -> 组出参数
-    //return napCatCore.session.getGroupService().addGroupEssence();
+    return napCatCore.session.getGroupService().addGroupEssence(param);
+  }
+  static async removeGroupEssence(GroupCode: string, msgId: string) {
+    // 代码没测过
+    // 需要 ob11msgid->msgId + (peer) -> msgSeq + msgRandom
+    let MsgData = await napCatCore.session.getMsgService().getMsgsIncludeSelf({ chatType: 2, guildId: '', peerUid: GroupCode }, msgId, 1, false);
+    let param = {
+      groupCode: GroupCode,
+      msgRandom: parseInt(MsgData.msgList[0].msgRandom),
+      msgSeq: parseInt(MsgData.msgList[0].msgSeq)
+    };
+    // GetMsgByShoretID(ShoretID); -> MsgService.getMsgs(Peer,MsgId,1,false); -> 组出参数
+    return napCatCore.session.getGroupService().removeGroupEssence(param);
   }
   static async getSingleScreenNotifies(num: number) {
     let [_retData, _doubt, _seq, notifies] = await NTEventDispatch.CallNormalEvent
