@@ -21,7 +21,8 @@ class cacheNode<T> {
   }
 }
 
-type cache<T> = { [key: group_id]: { [key: user_id]: cacheNode<T> } };
+type cache<T, K = { [key: user_id]: cacheNode<T> }> = { [key: group_id]: K };
+type removeObject<T> = cache<T, { userId: user_id, value: T }[]>
 class LRU<T> {
   private maxAge: number;
   private maxSize: number;
@@ -29,9 +30,9 @@ class LRU<T> {
   private cache: cache<T>;
   private head: cacheNode<T> | null = null;
   private tail: cacheNode<T> | null = null;
-  private onFuncs: ((node: cacheNode<T>) => void)[] = [];
+  private onFuncs: ((node: removeObject<T>) => void)[] = [];
 
-  constructor(maxAge: number = 6e4, maxSize: number = 5e3) {
+  constructor(maxAge: number = 6e4 * 3, maxSize: number = 1e4) {
     this.maxAge = maxAge;
     this.maxSize = maxSize;
     this.cache = Object.create(null);
@@ -53,46 +54,39 @@ class LRU<T> {
     node.prev = node.next = null;
     delete this.cache[node.groupId][node.userId];
     this.removeNode(node);
-    this.onFuncs.forEach((func) => func(node));
+    this.onFuncs.forEach((func) => func({ [node.groupId]: [node] }));
     this.currentSize--;
   }
 
-  public on(func: (node: cacheNode<T>) => void) {
+  public on(func: (node: removeObject<T>) => void) {
     this.onFuncs.push(func);
   }
 
   private removeExpired() {
     const now = Date.now();
     let current = this.tail;
-    const nodesToRemove: cacheNode<T>[] = [];
-    let removedCount = 0;
+    let totalNodeNum = 0;
 
-    // 收集需要删除的节点
+    const removeObject: cache<T, { userId: user_id, value: T }[]> = {};
+
     while (current && now - current.timestamp > this.maxAge) {
-      nodesToRemove.push(current);
+      // 收集节点
+      if (!removeObject[current.groupId]) removeObject[current.groupId] = [];
+      removeObject[current.groupId].push({ userId: current.userId, value: current.value });
+      // 删除LRU节点
+      delete this.cache[current.groupId][current.userId]
       current = current.prev;
-      removedCount++;
-      if (removedCount >= 100) break;
+      totalNodeNum++;
+      this.currentSize--
     }
 
-    // 更新链表指向
-    if (nodesToRemove.length > 0) {
-      const newTail = nodesToRemove[nodesToRemove.length - 1].prev;
-      if (newTail) {
-        newTail.next = null;
-      } else {
-        this.head = null;
-      }
-      this.tail = newTail;
-    }
+    if (!totalNodeNum) return;
 
-    nodesToRemove.forEach((node) => {
-      node.prev = node.next = null;
-      delete this.cache[node.groupId][node.userId];
+    // 跟新链表指向
+    if (current) { current.next = null } else { this.head = null }
+    this.tail = current
 
-      this.currentSize--;
-      this.onFuncs.forEach((func) => func(node));
-    });
+    this.onFuncs.forEach(func => func(removeObject))
   }
 
   private addNode(node: cacheNode<T>) {
@@ -144,7 +138,7 @@ class LRU<T> {
   public get(groupId: group_id, userId: user_id): null | { userId: user_id; value: T };
   public get(groupId: group_id, userId?: user_id): any {
     const groupObject = this.cache[groupId];
-    if(!groupObject) return userId === undefined ? [] : null;
+    if (!groupObject) return userId === undefined ? [] : null;
 
     if (userId === undefined) {
       return Object.entries(groupObject).map(([userId, { value }]) => ({
@@ -156,10 +150,12 @@ class LRU<T> {
     if (groupObject[userId]) {
       return { userId, value: groupObject[userId].value };
     }
-  
+
     return null;
-    
+
   }
 }
+
+
 
 export default LRU;
