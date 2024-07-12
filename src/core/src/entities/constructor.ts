@@ -8,6 +8,7 @@ import {
   SendPicElement,
   SendPttElement,
   SendReplyElement,
+  sendShareLocationElement,
   SendTextElement,
   SendVideoElement
 } from './index';
@@ -27,6 +28,16 @@ export const mFaceCache = new Map<string, string>(); // emojiId -> faceName
 
 
 export class SendMsgElementConstructor {
+  static location(): sendShareLocationElement {
+    return {
+      elementType: ElementType.ARK,
+      elementId: '',
+      shareLocationElement: {
+        text: "测试",
+        ext: ""
+      }
+    }
+  }
   static text(content: string): SendTextElement {
     return {
       elementType: ElementType.TEXT,

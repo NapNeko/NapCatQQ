@@ -209,6 +209,10 @@ const _handlers: {
   [OB11MessageDataType.xml]: () => undefined,
 
   [OB11MessageDataType.poke]: () => undefined,
+
+  [OB11MessageDataType.Location]: async () => {
+    return SendMsgElementConstructor.location();
+  }
 };
 
 const handlers = <{

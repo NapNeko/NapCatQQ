@@ -59,7 +59,8 @@ export enum OB11MessageDataType {
   poke = 'poke',
   dice = 'dice',
   RPS = 'rps',
-  miniapp = 'miniapp'//json类
+  miniapp = 'miniapp',//json类
+  Location = "Location"
 }
 
 export interface OB11MessageMFace {
