@@ -122,7 +122,7 @@ export interface SendMarketFaceElement {
 }
 
 export interface sendShareLocationElement {
-  elementType: ElementType.ARK;
+  elementType: ElementType.SHARELOCATION;
   elementId: string;
   shareLocationElement: {
     text: string;
