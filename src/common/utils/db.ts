@@ -72,7 +72,7 @@ class DBUtil extends DBUtilBase {
     private cache: { gid: number; uid: number }[] = [];
     private maxSize: number;
 
-    constructor(maxSize: number = 5000) {
+    constructor(maxSize: number = 50000) {
       this.maxSize = maxSize;
     }
 
@@ -120,57 +120,83 @@ class DBUtil extends DBUtilBase {
     });
 
 
-    this.LURCache.on(async (node) => {
-      const { value: time, groupId, userId } = node;
+    this.LURCache.on(async (nodeObject) => {
 
-      logDebug('插入发言时间', userId, groupId);
-      await this.createGroupInfoTimeTableIfNotExist(groupId);
+      Object.entries(nodeObject).forEach(async ([_groupId, datas]) => {
+        const userIds = datas.map(v => v.userId);
+        const groupId = Number(_groupId)
+        logDebug('插入发言时间', _groupId);
 
-      const method = await this.getDataSetMethod(groupId, userId);
-      logDebug('插入发言时间方法判断', userId, groupId, method);
+        await this.createGroupInfoTimeTableIfNotExist(groupId);
 
-      const sql =
-        method == 'update'
-          ? `UPDATE "${groupId}" SET last_sent_time = ? WHERE user_id = ?`
-          : `INSERT INTO "${groupId}" (last_sent_time, user_id)  VALUES (?, ?)`;
+        const needCreatUsers = await this.getNeedCreatList(groupId, userIds);
+        const updateList = needCreatUsers.length > 0 ? datas.filter(user => !needCreatUsers.includes(user.userId)) : datas;
+        const insertList = needCreatUsers.map(userId => datas.find(e => userId == e.userId)!)
 
-      this.db!.all(sql, [time, userId], (err) => {
-        if (err) {
-          return logError('插入/更新发言时间失败', userId, groupId);
+        logDebug(`updateList`, updateList);
+        logDebug(`insertList`, insertList)
+
+        if (insertList.length) {
+          const insertSql = `INSERT INTO "${groupId}" (last_sent_time, user_id) VALUES ${insertList.map(() => '(?, ?)').join(', ')};`
+
+          this.db!.all(insertSql, insertList.map(v => [v.value, v.userId]).flat(), err => {
+            if (err) {
+              logError(`群 ${groupId} 插入失败`)
+              logError(`更新Sql : ${insertSql}`)
+            }
+          })
         }
-        logDebug('插入/更新发言时间成功', userId, groupId);
-      });
+
+        if (updateList.length) {
+          const updateSql =
+            `UPDATE "${groupId}" SET last_sent_time = CASE ` +
+            updateList.map(v => `WHEN user_id = ${v.userId} THEN ${v.value}`).join(" ") +
+            " ELSE last_sent_time END WHERE user_id IN " +
+            `(${updateList.map(v => v.userId).join(", ")});`
+
+          this.db!.all(updateSql, [], err => {
+            if (err) {
+              logError(`群 ${groupId} 跟新失败`)
+              logError(`更新Sql : ${updateSql}`)
+            }
+          })
+        }
+
+      })
+
 
     });
   }
-  async getDataSetMethod(groupId: number, userId: number) {
-    // 缓存记录
-    if (this.LastSentCache.get(groupId, userId)) {
-      logDebug('缓存命中', userId, groupId);
-      return 'update';
+  async getNeedCreatList(groupId: number, userIds: number[]) {
+
+    // 获取缓存中没有的
+    const unhas = userIds.filter(userId => !this.LastSentCache.get(groupId, userId));
+
+    if (unhas.length == 0) {
+      logDebug('缓存全部命中');
+      return [];
     }
 
-    // 数据库判断
-    return new Promise<'insert' | 'update'>((resolve, reject) => {
-      this.db!.all(
-        `SELECT * FROM "${groupId}" WHERE user_id = ?`,
-        [userId],
-        (err, rows) => {
-          if (err) {
-            logError('查询发言时间存在失败', userId, groupId, err);
-            return logError('插入发言时间失败', userId, groupId, err);
-          }
+    logDebug('缓存未全部命中');
 
-          if (rows.length === 0) {
-            logDebug('查询发言时间不存在', userId, groupId);
-            return resolve('insert');
-          }
+    const sql = `SELECT * FROM "${groupId}" WHERE user_id IN (${unhas.map(() => '?').join(',')})`;
 
-          logDebug('查询发言时间存在', userId, groupId);
-          resolve('update');
+    return new Promise<number[]>((resolve) => {
+      this.db!.all(sql, unhas, (err, rows: { user_id: number }[]) => {
+        const has = rows.map(v => v.user_id);
+        const needCreatUsers = unhas.filter(userId => !has.includes(userId));
+
+        if (needCreatUsers.length == 0) {
+          logDebug('数据库全部命中')
+        } else {
+          logDebug('数据库未全部命中')
         }
-      );
-    });
+
+        resolve(needCreatUsers)
+      })
+    })
+
+
   }
   async createGroupInfoTimeTableIfNotExist(groupId: number) {
     const createTableSQL = (groupId: number) =>
@@ -408,12 +434,12 @@ class DBUtil extends DBUtilBase {
     logDebug('读取发言时间', groupId);
     return new Promise<IRember[]>((resolve, reject) => {
       this.db!.all(`SELECT * FROM "${groupId}" `, (err, rows: IRember[]) => {
-        const cache = this.LURCache.get(groupId).map(e=>({user_id:e.userId, last_sent_time:e.value}));
+        const cache = this.LURCache.get(groupId).map(e => ({ user_id: e.userId, last_sent_time: e.value }));
         if (err) {
           logError('查询发言时间失败', groupId);
-          return resolve(cache.map(e=>({...e, join_time:0})));
+          return resolve(cache.map(e => ({ ...e, join_time: 0 })));
         }
-         Object.assign(rows, cache)
+        Object.assign(rows, cache)
         logDebug('查询发言时间成功', groupId, rows);
         resolve(rows);
       });
@@ -439,8 +465,8 @@ class DBUtil extends DBUtilBase {
       (err) => {
         if (err)
           logError(err),
-          Promise.reject(),
-          logError('插入入群时间失败', userId, groupId);
+            Promise.reject(),
+            logError('插入入群时间失败', userId, groupId);
       }
     );
 
