@@ -149,5 +149,18 @@ export interface NodeIKernelGroupService {
 
   modifyGroupExtInfo(groupCode: string, arg: unknown): void;
 
+  //需要提前判断是否存在 高版本新增
+  addGroupEssence(param: {
+    groupCode: string
+    msgRandom: number,
+    msgSeq: number
+  }): Promise<unknown>;
+  //需要提前判断是否存在 高版本新增
+  removeGroupEssence(param: {
+    groupCode: string
+    msgRandom: number,
+    msgSeq: number
+  }): Promise<unknown>;
+
   isNull(): boolean;
 }
