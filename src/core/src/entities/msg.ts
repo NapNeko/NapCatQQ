@@ -33,7 +33,8 @@ export enum ElementType {
   GreyTip = 8,//Poke别叫戳一搓了 官方名字拍一拍 戳一戳是另一个名字
   ARK = 10,
   MFACE = 11,
-  MARKDOWN = 14
+  MARKDOWN = 14,
+  SHARELOCATION = 28
 }
 
 export interface SendTextElement {
@@ -120,6 +121,15 @@ export interface SendMarketFaceElement {
   marketFaceElement: MarketFaceElement;
 }
 
+export interface sendShareLocationElement {
+  elementType: ElementType.ARK;
+  elementId: string;
+  shareLocationElement: {
+    text: string;
+    ext: string;
+  }
+}
+
 export interface FileElement {
   fileMd5?: string;
   fileName: string;
@@ -163,7 +173,7 @@ export interface SendMarkdownElement {
 }
 
 export type SendMessageElement = SendTextElement | SendPttElement |
-  SendPicElement | SendReplyElement | SendFaceElement | SendMarketFaceElement | SendFileElement | SendVideoElement | SendArkElement | SendMarkdownElement
+  SendPicElement | SendReplyElement | SendFaceElement | SendMarketFaceElement | SendFileElement | SendVideoElement | SendArkElement | SendMarkdownElement | sendShareLocationElement
 
 export enum AtType {
   notAt = 0,
