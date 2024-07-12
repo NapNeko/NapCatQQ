@@ -23,6 +23,7 @@ export interface GetFileListParam {
   showOnlinedocFolder: number
 }
 export enum ElementType {
+  UNKNOWN = 0,
   TEXT = 1,
   PIC = 2,
   FILE = 3,
@@ -33,10 +34,145 @@ export enum ElementType {
   GreyTip = 8,//Poke别叫戳一搓了 官方名字拍一拍 戳一戳是另一个名字
   ARK = 10,
   MFACE = 11,
+  LIVEGIFT = 12,
+  STRUCTLONGMSG = 13,
   MARKDOWN = 14,
-  SHARELOCATION = 28
+  GIPHY = 15,
+  INLINEKEYBOARD = 17,
+  CALENDAR = 19,
+  YOLOGAMERESULT = 20,
+  AVRECORD = 21,
+  TOFURECORD = 23,
+  FACEBUBBLE = 24,
+  SHARELOCATION = 28,
+  TASKTOPMSG = 29,
+  RECOMMENDEDMSG = 43,
+  ACTIONBAR = 44
 }
+export interface SendActionBarElement {
+  elementType: ElementType.ACTIONBAR;
+  elementId: string;
+  actionBarElement: {}
+}
+export interface SendRecommendedMsgElement {
+  elementType: ElementType.RECOMMENDEDMSG;
+  elementId: string;
+  recommendedMsgElement: {}
 
+}
+export interface TofuElementContent {
+  color: string;
+  tittle: string;
+}
+export interface SendTaskTopMsgElement {
+  elementType: ElementType.TASKTOPMSG;
+  elementId: string;
+  taskTopMsgElement: {}
+}
+export interface SendTofuRecordElement {
+  elementType: ElementType.TOFURECORD;
+  elementId: string;
+  tofuRecordElement: {
+    type: number;
+    busiid: string;
+    busiuuid: string;
+    descriptionContent: string;
+    contentlist: TofuElementContent[],
+    background: string;
+    icon: string;
+    uinlist: string[],
+    uidlist: string[],
+    busiExtra: string;
+    updateTime: string;
+    dependedmsgid: string;
+    msgtime: string;
+    onscreennotify: boolean;
+  }
+}
+export interface SendFaceBubbleElement {
+  elementType: ElementType.FACEBUBBLE;
+  elementId: string;
+  faceBubbleElement: {
+    faceCount: number;
+    faceSummary: string;
+    faceFlag: number;
+    content: string;
+    oldVersionStr: string;
+    faceType: number;
+    others: string;
+    yellowFaceInfo: {
+      index: number;
+      buf: string;
+      compatibleText: string;
+      text: string;
+    }
+  }
+
+}
+export interface SendavRecordElement {
+  elementType: ElementType.AVRECORD;
+  elementId: string;
+  avRecordElement: {
+    type: number;
+    time: string;
+    text: string;
+    mainType: number;
+    hasRead: boolean;
+    extraType: number;
+  }
+}
+export interface YoloUserInfo {
+  uid: string;
+  result: number;
+  rank: number;
+  bizId: string
+}
+export interface SendInlineKeyboardElement {
+  elementType: ElementType.INLINEKEYBOARD;
+  elementId: string;
+  inlineKeyboardElement: {
+    rows: number;
+    botAppid: string;
+  }
+
+}
+export interface SendYoloGameResultElement {
+  elementType: ElementType.YOLOGAMERESULT;
+  yoloGameResultElement: {
+    UserInfo: YoloUserInfo[];
+  }
+}
+export interface SendGiphyElement {
+  elementType: ElementType.GIPHY;
+  elementId: string;
+  giphyElement: {
+    id: string;
+    isClip: boolean;
+    width: number;
+    height: number;
+  }
+}
+export interface SendWalletElement {
+  elementType: ElementType.UNKNOWN;//不做 设置位置
+  elementId: string;
+  walletElement: {}
+}
+export interface SendCalendarElement {
+  elementType: ElementType.CALENDAR;
+  elementId: string;
+  calendarElement: {
+    summary: string;
+    msg: string;
+    expireTimeMs: string;
+    schemaType: number;
+    schema: string
+  }
+}
+export interface SendliveGiftElement {
+  elementType: ElementType.LIVEGIFT;
+  elementId: string;
+  liveGiftElement: {}
+}
 export interface SendTextElement {
   elementType: ElementType.TEXT;
   elementId: string;
@@ -120,7 +256,22 @@ export interface SendMarketFaceElement {
   elementType: ElementType.MFACE;
   marketFaceElement: MarketFaceElement;
 }
-
+export interface SendstructLongMsgElement {
+  elementType: ElementType.STRUCTLONGMSG;
+  elementId: string;
+  structLongMsgElement: {
+    xmlContent: string;
+    resId: string;
+  }
+}
+export interface SendactionBarElement {
+  elementType: ElementType.ACTIONBAR;
+  elementId: string;
+  actionBarElement: {
+    rows: number;
+    botAppid: string;
+  }
+}
 export interface sendShareLocationElement {
   elementType: ElementType.SHARELOCATION;
   elementId: string;
