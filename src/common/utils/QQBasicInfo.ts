@@ -71,7 +71,7 @@ export const qqPkgInfo: QQPkgInfo = JSON.parse(fs.readFileSync(pkgInfoPath).toSt
 
 let _appid: string = '537234702';  // 默认为 Windows 平台的 appid
 if (systemPlatform === 'linux') {
-  _appid = '537226441';
+  _appid = '537234773';
 }
 // todo: mac 平台的 appid
 export const appid = _appid;
