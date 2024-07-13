@@ -37,8 +37,6 @@ import { Data as SysData } from '@/proto/SysMessage';
 import { Data as DeviceData } from '@/proto/SysMessage.DeviceChange';
 import { OB11FriendPokeEvent, OB11GroupPokeEvent } from './event/notice/OB11PokeEvent';
 import { isEqual } from '@/common/utils/helper';
-import { MiniAppUtil } from '@/common/utils/Packet';
-import { RequestUtil } from '@/common/utils/request';
 
 //下面几个其实应该移进Core-Data 缓存实现 但是现在在这里方便
 //
