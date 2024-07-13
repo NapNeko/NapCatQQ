@@ -60,7 +60,7 @@ export enum OB11MessageDataType {
   dice = 'dice',
   RPS = 'rps',
   miniapp = 'miniapp',//json类
-  Location = "location"
+  Location = 'location'
 }
 
 export interface OB11MessageMFace {

@@ -7,7 +7,7 @@ export class RequestUtil {
   static async HttpsGetCookies(url: string): Promise<{ [key: string]: string }> {
     const client = url.startsWith('https') ? https : http;
     return new Promise((resolve, reject) => {
-      let req = client.get(url, (res) => {
+      const req = client.get(url, (res) => {
         let cookies: { [key: string]: string } = {};
         const handleRedirect = (res: http.IncomingMessage) => {
           //console.log(res.headers.location);
@@ -44,7 +44,7 @@ export class RequestUtil {
           });
         }
       });
-     req.on('error', (error: any) => {
+      req.on('error', (error: any) => {
         reject(error);
       }); 
     });
