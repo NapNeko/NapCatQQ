@@ -38,11 +38,11 @@ type QQVersionConfigInfo = {
 }
 
 let _qqVersionConfigInfo: QQVersionConfigInfo = {
-  'baseVersion': '9.9.11-24568',
-  'curVersion': '9.9.11-24568',
+  'baseVersion': '9.9.12-25765',
+  'curVersion': '9.9.12-25765',
   'prevVersion': '',
   'onErrorVersions': [],
-  'buildId': '24568'
+  'buildId': '25765'
 };
 
 if (fs.existsSync(configVersionInfoPath)) {
@@ -55,21 +55,21 @@ if (fs.existsSync(configVersionInfoPath)) {
 }
 
 export const qqVersionConfigInfo: QQVersionConfigInfo = _qqVersionConfigInfo;
-//V1_WIN_NQ_9.9.11_24568_GW_B
+//V1_WIN_NQ_9.9.12_25765_GW_B
 export const qqPkgInfo: QQPkgInfo = JSON.parse(fs.readFileSync(pkgInfoPath).toString());
 // platform_type: 3,
 // app_type: 4,
-// app_version: '9.9.9-23159',
-// qua: 'V1_WIN_NQ_9.9.9_23159_GW_B',
-// appid: '537213764',
+// app_version: '9.9.12-25765',
+// qua: 'V1_WIN_NQ_9.9.12_25765_GW_B',
+// appid: '537234702',
 // platVer: '10.0.26100',
-// clientVer: '9.9.9-23159',
+// clientVer: '9.9.9-25765',
 
 // Linux
-// app_version: '3.2.9-24568',
-// qua: 'V1_LNX_NQ_3.2.9_24568_GW_B',
+// app_version: '3.2.9-25765',
+// qua: 'V1_LNX_NQ_3.2.10_25765_GW_B',
 
-let _appid: string = '537231759';  // 默认为 Windows 平台的 appid
+let _appid: string = '537234702';  // 默认为 Windows 平台的 appid
 if (systemPlatform === 'linux') {
   _appid = '537226441';
 }
