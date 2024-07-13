@@ -43,7 +43,8 @@ import { deleteGroup, getGroupMember, groupMembers, selfInfo, tempGroupCodeMap }
 import { NTQQFileApi, NTQQGroupApi, NTQQMsgApi, NTQQUserApi } from '@/core/apis';
 import { OB11GroupMsgEmojiLikeEvent } from '@/onebot11/event/notice/OB11MsgEmojiLikeEvent';
 import { napCatCore } from '@/core';
-import { OB11GroupPokeEvent } from './event/notice/OB11PokeEvent';
+import { OB11FriendPokeEvent, OB11GroupPokeEvent } from './event/notice/OB11PokeEvent';
+import { OB11BaseNoticeEvent } from './event/notice/OB11BaseNoticeEvent';
 
 
 export class OB11Constructor {
@@ -286,7 +287,30 @@ export class OB11Constructor {
     resMsg.raw_message = resMsg.raw_message.trim();
     return resMsg;
   }
-
+  static async PrivateEvent(msg: RawMessage): Promise<OB11BaseNoticeEvent | undefined> {
+    if (msg.chatType !== ChatType.friend) {
+      return;
+    }
+    for (const element of msg.elements) {
+      if (element.grayTipElement) {
+        if (element.grayTipElement.subElementType == GrayTipElementSubType.MEMBER_NEW_TITLE) {
+          const json = JSON.parse(element.grayTipElement.jsonGrayTipElement.jsonStr);
+          if (element.grayTipElement.jsonGrayTipElement.busiId == 1061) {
+            //判断业务类型
+            //Poke事件
+            let pokedetail: any[] = json.items;
+            //筛选item带有uid的元素
+            pokedetail = pokedetail.filter(item => item.uid);
+            //console.log("[NapCat] 群拍一拍 群:", pokedetail, parseInt(msg.peerUid), " ", await NTQQUserApi.getUinByUid(pokedetail[0].uid), "拍了拍", await NTQQUserApi.getUinByUid(pokedetail[1].uid));
+            if (pokedetail.length == 2) {
+              return new OB11FriendPokeEvent(parseInt((await NTQQUserApi.getUinByUid(pokedetail[1].uid))!), parseInt((await NTQQUserApi.getUinByUid(pokedetail[0].uid))!));
+            }
+          }
+          //下面得改 上面也是错的grayTipElement.subElementType == GrayTipElementSubType.MEMBER_NEW_TITLE
+        }
+      }
+    }
+  }
   static async GroupEvent(msg: RawMessage): Promise<OB11GroupNoticeEvent | undefined> {
     //log("group msg", msg);
     if (msg.chatType !== ChatType.group) {
