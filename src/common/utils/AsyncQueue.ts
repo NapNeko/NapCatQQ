@@ -1,7 +1,7 @@
 import { sleep } from '@/common/utils/helper';
 import { logError } from './log';
 type AsyncQueueTask = (() => void) | (()=>Promise<void>);
-
+// 2024.7.13 废弃
 
 export class AsyncQueue {
   private tasks: (AsyncQueueTask)[] = [];
