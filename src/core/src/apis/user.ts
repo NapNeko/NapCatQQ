@@ -217,6 +217,7 @@ export class NTQQUserApi {
     if (!uin) {
       uin = (await NTQQUserApi.getUserDetailInfo(Uid)).uin; //从QQ Native 转换
     }
+    
     // if (!uin) {
     //   uin = (await NTQQFriendApi.getFriends(false)).find((t) => { t.uid == Uid })?.uin;  //从QQ Native 缓存转换
     // }
