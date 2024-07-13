@@ -12,7 +12,7 @@ import { OB11FriendRequestEvent } from '../event/request/OB11FriendRequest';
 import { OB11GroupRequestEvent } from '../event/request/OB11GroupRequest';
 import { isNull } from '@/common/utils/helper';
 import { dbUtil } from '@/common/utils/db';
-import { getGroup, groupNotifies, selfInfo } from '@/core/data';
+import { getGroup, selfInfo } from '@/core/data';
 import { NTQQFriendApi, NTQQGroupApi, NTQQUserApi } from '@/core/apis';
 import createSendElements from '../action/msg/SendMsg/create-send-elements';
 
@@ -168,7 +168,7 @@ async function handleMsg(msg: OB11Message, quickAction: QuickAction) {
 async function handleGroupRequest(request: OB11GroupRequestEvent, quickAction: QuickActionGroupRequest) {
   if (!isNull(quickAction.approve)) {
     NTQQGroupApi.handleGroupRequest(
-      groupNotifies[request.flag],
+      request.flag,
       quickAction.approve ? GroupRequestOperateTypes.approve : GroupRequestOperateTypes.reject,
       quickAction.reason,
     ).then().catch(logError);

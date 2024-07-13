@@ -19,7 +19,7 @@ import { OB11Config, ob11Config } from '@/onebot11/config';
 import { httpHeart, ob11HTTPServer } from '@/onebot11/server/http';
 import { ob11WebsocketServer } from '@/onebot11/server/ws/WebsocketServer';
 import { ob11ReverseWebsockets } from '@/onebot11/server/ws/ReverseWebsocket';
-import { getGroup, getGroupMember, groupNotifies, selfInfo, tempGroupCodeMap } from '@/core/data';
+import { getGroup, getGroupMember, selfInfo, tempGroupCodeMap } from '@/core/data';
 import { dbUtil } from '@/common/utils/db';
 import { BuddyListener, GroupListener, NodeIKernelBuddyListener } from '@/core/listeners';
 import { OB11FriendRequestEvent } from '@/onebot11/event/request/OB11FriendRequest';
@@ -408,13 +408,8 @@ export class NapCatOnebot11 {
         if (notifyTime < this.bootTime) {
           continue;
         }
-        const flag = notify.group.groupCode + '|' + notify.seq;
-        const existNotify = groupNotifies[flag];
-        if (existNotify) {
-          continue;
-        }
+        const flag = notify.group.groupCode + '|' + notify.seq + '|' + notify.type;
         logDebug('收到群通知', notify);
-        groupNotifies[flag] = notify;
         // let member2: GroupMember;
         // if (notify.user2.uid) {
         //     member2 = await getGroupMember(notify.group.groupCode, null, notify.user2.uid);
