@@ -181,12 +181,12 @@ export class NTQQUserApi {
       });
       //uid = Array.from(friends.values()).find((t) => { t.uin == Uin })?.uid;  // 从NC维护的QQ Buddy缓存 转换
     }
-    if (!uid) {
-      uid = (await NTQQFriendApi.getFriends(false)).find((t) => { t.uin == Uin })?.uid;  //从QQ Native 缓存转换 方法一
-    }
-    if (!uid) {
-      uid = (await NTQQFriendApi.getFriends(true)).find((t) => { t.uin == Uin })?.uid;  //从QQ Native 非缓存转换 方法二
-    }
+    // if (!uid) {
+    //   uid = (await NTQQFriendApi.getFriends(false)).find((t) => { t.uin == Uin })?.uid;  //从QQ Native 缓存转换 方法一
+    // }
+    // if (!uid) {
+    //   uid = (await NTQQFriendApi.getFriends(true)).find((t) => { t.uin == Uin })?.uid;  //从QQ Native 非缓存转换 方法二
+    // }
     if (!uid) {
       let unveifyUid = (await NTQQUserApi.getUserDetailInfoByUin(Uin)).info.uid;//从QQ Native 特殊转换 方法三
       if (unveifyUid.indexOf("*") == -1) {
@@ -217,12 +217,12 @@ export class NTQQUserApi {
     if (!uin) {
       uin = (await NTQQUserApi.getUserDetailInfo(Uid)).uin; //从QQ Native 转换
     }
-    if (!uin) {
-      uin = (await NTQQFriendApi.getFriends(false)).find((t) => { t.uid == Uid })?.uin;  //从QQ Native 缓存转换
-    }
-    if (!uin) {
-      uin = (await NTQQFriendApi.getFriends(true)).find((t) => { t.uid == Uid })?.uin;  //从QQ Native 非缓存转换
-    }
+    // if (!uin) {
+    //   uin = (await NTQQFriendApi.getFriends(false)).find((t) => { t.uid == Uid })?.uin;  //从QQ Native 缓存转换
+    // }
+    // if (!uin) {
+    //   uin = (await NTQQFriendApi.getFriends(true)).find((t) => { t.uid == Uid })?.uin;  //从QQ Native 非缓存转换
+    // }
     return uin;
   }
   static async getUserDetailInfoByUin(Uin: string) {
