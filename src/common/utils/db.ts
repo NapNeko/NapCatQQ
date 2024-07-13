@@ -124,45 +124,45 @@ class DBUtil extends DBUtilBase {
 
       Object.entries(nodeObject).forEach(async ([_groupId, datas]) => {
         const userIds = datas.map(v => v.userId);
-        const groupId = Number(_groupId)
+        const groupId = Number(_groupId);
         logDebug('插入发言时间', _groupId);
 
         await this.createGroupInfoTimeTableIfNotExist(groupId);
 
         const needCreatUsers = await this.getNeedCreatList(groupId, userIds);
         const updateList = needCreatUsers.length > 0 ? datas.filter(user => !needCreatUsers.includes(user.userId)) : datas;
-        const insertList = needCreatUsers.map(userId => datas.find(e => userId == e.userId)!)
+        const insertList = needCreatUsers.map(userId => datas.find(e => userId == e.userId)!);
 
-        logDebug(`updateList`, updateList);
-        logDebug(`insertList`, insertList)
+        logDebug('updateList', updateList);
+        logDebug('insertList', insertList);
 
         if (insertList.length) {
-          const insertSql = `INSERT INTO "${groupId}" (last_sent_time, user_id) VALUES ${insertList.map(() => '(?, ?)').join(', ')};`
+          const insertSql = `INSERT INTO "${groupId}" (last_sent_time, user_id) VALUES ${insertList.map(() => '(?, ?)').join(', ')};`;
 
           this.db!.all(insertSql, insertList.map(v => [v.value, v.userId]).flat(), err => {
             if (err) {
-              logError(`群 ${groupId} 插入失败`)
-              logError(`更新Sql : ${insertSql}`)
+              logError(`群 ${groupId} 插入失败`);
+              logError(`更新Sql : ${insertSql}`);
             }
-          })
+          });
         }
 
         if (updateList.length) {
           const updateSql =
             `UPDATE "${groupId}" SET last_sent_time = CASE ` +
-            updateList.map(v => `WHEN user_id = ${v.userId} THEN ${v.value}`).join(" ") +
-            " ELSE last_sent_time END WHERE user_id IN " +
-            `(${updateList.map(v => v.userId).join(", ")});`
+            updateList.map(v => `WHEN user_id = ${v.userId} THEN ${v.value}`).join(' ') +
+            ' ELSE last_sent_time END WHERE user_id IN ' +
+            `(${updateList.map(v => v.userId).join(', ')});`;
 
           this.db!.all(updateSql, [], err => {
             if (err) {
-              logError(`群 ${groupId} 跟新失败`)
-              logError(`更新Sql : ${updateSql}`)
+              logError(`群 ${groupId} 跟新失败`);
+              logError(`更新Sql : ${updateSql}`);
             }
-          })
+          });
         }
 
-      })
+      });
 
 
     });
@@ -187,14 +187,14 @@ class DBUtil extends DBUtilBase {
         const needCreatUsers = unhas.filter(userId => !has.includes(userId));
 
         if (needCreatUsers.length == 0) {
-          logDebug('数据库全部命中')
+          logDebug('数据库全部命中');
         } else {
-          logDebug('数据库未全部命中')
+          logDebug('数据库未全部命中');
         }
 
-        resolve(needCreatUsers)
-      })
-    })
+        resolve(needCreatUsers);
+      });
+    });
 
 
   }
@@ -439,7 +439,7 @@ class DBUtil extends DBUtilBase {
           logError('查询发言时间失败', groupId);
           return resolve(cache.map(e => ({ ...e, join_time: 0 })));
         }
-        Object.assign(rows, cache)
+        Object.assign(rows, cache);
         logDebug('查询发言时间成功', groupId, rows);
         resolve(rows);
       });
@@ -465,8 +465,8 @@ class DBUtil extends DBUtilBase {
       (err) => {
         if (err)
           logError(err),
-            Promise.reject(),
-            logError('插入入群时间失败', userId, groupId);
+          Promise.reject(),
+          logError('插入入群时间失败', userId, groupId);
       }
     );
 

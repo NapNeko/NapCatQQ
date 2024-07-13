@@ -145,7 +145,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
   }
 
   protected async _handle(payload: OB11PostSendMsg): Promise<{ message_id: number }> {
-    let { peer, group } = await createContext(payload, this.contextMode);
+    const { peer, group } = await createContext(payload, this.contextMode);
 
     const messages = normalize(
       payload.message,

@@ -1,9 +1,9 @@
 import {
   type Friend,
   type Group,
-  type GroupMember, GroupNotify,
+  type GroupMember,
   type SelfInfo,
-  BuddyCategoryType
+  type BuddyCategoryType
 } from './entities';
 import { isNumeric } from '@/common/utils/helper';
 import { NTQQGroupApi } from '@/core/apis';

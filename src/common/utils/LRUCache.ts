@@ -1,4 +1,4 @@
-import { logError, logDebug } from "@/common/utils/log";
+import { logError, logDebug } from '@/common/utils/log';
 
 type group_id = number;
 type user_id = number;
@@ -45,7 +45,7 @@ class LRU<T> {
   // 移除LRU节点
   private removeLRUNode(node: cacheNode<T>) {
     logDebug(
-      "removeLRUNode",
+      'removeLRUNode',
       node.groupId,
       node.userId,
       node.value,
@@ -74,19 +74,19 @@ class LRU<T> {
       if (!removeObject[current.groupId]) removeObject[current.groupId] = [];
       removeObject[current.groupId].push({ userId: current.userId, value: current.value });
       // 删除LRU节点
-      delete this.cache[current.groupId][current.userId]
+      delete this.cache[current.groupId][current.userId];
       current = current.prev;
       totalNodeNum++;
-      this.currentSize--
+      this.currentSize--;
     }
 
     if (!totalNodeNum) return;
 
     // 跟新链表指向
-    if (current) { current.next = null } else { this.head = null }
-    this.tail = current
+    if (current) { current.next = null; } else { this.head = null; }
+    this.tail = current;
 
-    this.onFuncs.forEach(func => func(removeObject))
+    this.onFuncs.forEach(func => func(removeObject));
   }
 
   private addNode(node: cacheNode<T>) {
