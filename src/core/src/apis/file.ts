@@ -21,10 +21,7 @@ import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 import { sessionConfig } from '@/core/sessionConfig';
 import { randomUUID } from 'crypto';
 import { rkeyManager } from '../utils/rkey';
-import { AsyncQueue } from '@/common/utils/AsyncQueue';
-// const rkeyExpireTime = 1000;
 
-const getRKeyTaskQueue = new AsyncQueue();
 
 const downloadMediaTasks: Map<string, (arg: OnRichMediaDownloadCompleteParams) => void> = new Map<string, (arg: OnRichMediaDownloadCompleteParams) => void>();
 
