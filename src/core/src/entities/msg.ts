@@ -31,7 +31,7 @@ export enum ElementType {
   VIDEO = 5,
   FACE = 6,
   REPLY = 7,
-  EWALLET = 9,
+  WALLET = 9,
   GreyTip = 8,//Poke别叫戳一搓了 官方名字拍一拍 戳一戳是另一个名字
   ARK = 10,
   MFACE = 11,
@@ -59,13 +59,35 @@ export enum ElementType {
 export interface SendActionBarElement {
   elementType: ElementType.ACTIONBAR;
   elementId: string;
-  actionBarElement: {}
+  actionBarElement: {
+    rows: InlineKeyboardRow[];
+    botAppid: string;
+  }
 }
 export interface SendRecommendedMsgElement {
   elementType: ElementType.RECOMMENDEDMSG;
   elementId: string;
-  recommendedMsgElement: {}
-
+  recommendedMsgElement: {
+    rows: InlineKeyboardRow[];
+    botAppid: string;
+  }
+}
+export interface InlineKeyboardButton {
+  id: string;
+  label: string;
+  visitedLabel: string;
+  unsupportTips: string;
+  data: string;
+  specifyRoleIds: string[];
+  specifyTinyids: string[];
+  style: number;
+  type: number;
+  clickLimit: number;
+  atBotShowChannelList: boolean;
+  permissionType: number;
+}
+export interface InlineKeyboardRow {
+  buttons: InlineKeyboardButton[];
 }
 export interface TofuElementContent {
   color: string;
@@ -74,7 +96,12 @@ export interface TofuElementContent {
 export interface SendTaskTopMsgElement {
   elementType: ElementType.TASKTOPMSG;
   elementId: string;
-  taskTopMsgElement: {}
+  taskTopMsgElement: {
+    msgTitle: string;
+    msgSummary: string;
+    iconUrl: string;
+    topMsgType: number;
+  }
 }
 export interface SendTofuRecordElement {
   elementType: ElementType.TOFURECORD;
