@@ -1,4 +1,4 @@
-import { GroupMember, GroupRequestOperateTypes, GroupMemberRole, GroupNotify, Group, MemberExtSourceType } from '../entities';
+import { GroupMember, GroupRequestOperateTypes, GroupMemberRole, GroupNotify, Group, MemberExtSourceType, GroupNotifyTypes } from '../entities';
 import { GeneralCallResult, NTQQUserApi, napCatCore } from '@/core';
 import { NTEventDispatch } from '@/common/utils/EventTask';
 import { logDebug } from '@/common/utils/log';
@@ -111,15 +111,20 @@ export class NTQQGroupApi {
     const _Pskey = (await NTQQUserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com')!;
     return napCatCore.session.getGroupService().uploadGroupBulletinPic(GroupCode, _Pskey, imageurl);
   }
-  static async handleGroupRequest(notify: GroupNotify, operateType: GroupRequestOperateTypes, reason?: string) {
+  static async handleGroupRequest(flag: string, operateType: GroupRequestOperateTypes, reason?: string) {
+    let flagitem = flag.split('|');
+    let groupCode = flagitem[0];
+    let seq = flagitem[1];
+    let type = parseInt(flagitem[2]);
+
     return napCatCore.session.getGroupService().operateSysNotify(
       false,
       {
         'operateType': operateType, // 2 拒绝
         'targetMsg': {
-          'seq': notify.seq,  // 通知序列号
-          'type': notify.type,
-          'groupCode': notify.group.groupCode,
+          'seq': seq,  // 通知序列号
+          'type': type,
+          'groupCode': groupCode,
           'postscript': reason || ''
         }
       });

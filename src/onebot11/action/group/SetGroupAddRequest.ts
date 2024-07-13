@@ -2,7 +2,6 @@ import BaseAction from '../BaseAction';
 import { GroupRequestOperateTypes } from '@/core/entities';
 import { ActionName } from '../types';
 import { NTQQGroupApi } from '@/core/apis/group';
-import { groupNotifies } from '@/core/data';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
 const SchemaData = {
@@ -23,11 +22,7 @@ export default class SetGroupAddRequest extends BaseAction<Payload, null> {
   protected async _handle(payload: Payload): Promise<null> {
     const flag = payload.flag.toString();
     const approve = payload.approve?.toString() !== 'false';
-    const notify = groupNotifies[flag];
-    if (!notify) {
-      throw `${flag}对应的加群通知不存在`;
-    }
-    await NTQQGroupApi.handleGroupRequest(notify,
+    await NTQQGroupApi.handleGroupRequest(flag,
       approve ? GroupRequestOperateTypes.approve : GroupRequestOperateTypes.reject,
       payload.reason
     );
