@@ -28,9 +28,9 @@ if (process.env.NAPCAT_BUILDSYS == 'linux') {
 } else if (process.env.NAPCAT_BUILDSYS == 'win32') {
   if (process.env.NAPCAT_BUILDARCH == 'x64') {
   }
-  startScripts = ['./script/napcat.ps1', './script/napcat.bat', './script/napcat-utf8.bat', './script/napcat-utf8.ps1', './script/napcat-log.ps1','./script/NapCat.164.bat'];
+  startScripts = ['./script/napcat.ps1', './script/napcat.bat', './script/napcat-utf8.bat', './script/napcat-utf8.ps1', './script/napcat-log.ps1','./script/NapCat.164.bat','./script/napcat-9912.ps1','./script/napcat-9912-utf8.ps1','./script/napcat-9912.bat','./script/napcat-9912-utf8.bat'];
 } else {
-  startScripts = ['./script/napcat.sh', './script/napcat.ps1', './script/napcat.bat', './script/napcat-utf8.bat', './script/napcat-utf8.ps1', './script/napcat-log.ps1'];
+  startScripts = ['./script/napcat.sh', './script/napcat.ps1', './script/napcat.bat', './script/napcat-utf8.bat', './script/napcat-utf8.ps1', './script/napcat-log.ps1','./script/napcat-9912.ps1','./script/napcat-9912-utf8.ps1','./script/napcat-9912.bat','./script/napcat-9912-utf8.bat'];
 }
 
 const baseConfigPlugin: PluginOption[] = [
