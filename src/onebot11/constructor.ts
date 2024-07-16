@@ -303,7 +303,7 @@ export class OB11Constructor {
             pokedetail = pokedetail.filter(item => item.uid);
             //console.log("[NapCat] 群拍一拍 群:", pokedetail, parseInt(msg.peerUid), " ", await NTQQUserApi.getUinByUid(pokedetail[0].uid), "拍了拍", await NTQQUserApi.getUinByUid(pokedetail[1].uid));
             if (pokedetail.length == 2) {
-              return new OB11FriendPokeEvent(parseInt((await NTQQUserApi.getUinByUid(pokedetail[1].uid))!), parseInt((await NTQQUserApi.getUinByUid(pokedetail[0].uid))!));
+              return new OB11FriendPokeEvent(parseInt((await NTQQUserApi.getUinByUid(pokedetail[0].uid))!), parseInt((await NTQQUserApi.getUinByUid(pokedetail[1].uid))!));
             }
           }
           //下面得改 上面也是错的grayTipElement.subElementType == GrayTipElementSubType.MEMBER_NEW_TITLE
