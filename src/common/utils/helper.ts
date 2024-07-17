@@ -89,7 +89,36 @@ export function CacheClassFuncAsync(ttl: number = 3600 * 1000, customKey: string
   }
   return logExecutionTime;
 }
-
+export function CacheClassFuncAsyncExtend(ttl: number = 3600 * 1000, customKey: string = '', checker: any = (_data: any) => { return true; }) {
+  //console.log('CacheClassFuncAsync', ttl, customKey);
+  function logExecutionTime(target: any, methodName: string, descriptor: PropertyDescriptor) {
+    //console.log('logExecutionTime', target, methodName, descriptor);
+    const cache = new Map<string, { expiry: number; value: any }>();
+    const originalMethod = descriptor.value;
+    descriptor.value = async function (...args: any[]) {
+      const key = `${customKey}${String(methodName)}.(${args.map(arg => JSON.stringify(arg)).join(', ')})`;
+      cache.forEach((value, key) => {
+        if (value.expiry < Date.now()) {
+          cache.delete(key);
+        }
+      });
+      const cachedValue = cache.get(key);
+      if (cachedValue && cachedValue.expiry > Date.now()) {
+        return cachedValue.value;
+      }
+      // const start = Date.now();
+      const result = await originalMethod.apply(this, args);
+      if (!checker(result)) {
+        return result;//丢弃缓存
+      }
+      // const end = Date.now();
+      // console.log(`Method ${methodName} executed in ${end - start} ms.`);
+      cache.set(key, { expiry: Date.now() + ttl, value: result });
+      return result;
+    };
+  }
+  return logExecutionTime;
+}
 // export function CacheClassFuncAsync(ttl: number = 3600 * 1000, customKey: string = ''): any {
 //   const cache = new Map<string, { expiry: number; value: any }>();
 

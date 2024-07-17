@@ -1,6 +1,6 @@
 import { ModifyProfileParams, SelfInfo, User, UserDetailInfoByUin } from '@/core/entities';
 import { friends, selfInfo } from '@/core/data';
-import { CacheClassFuncAsync } from '@/common/utils/helper';
+import { CacheClassFuncAsync, CacheClassFuncAsyncExtend } from '@/common/utils/helper';
 import { GeneralCallResult, napCatCore, NTQQFriendApi } from '@/core';
 import { ProfileListener } from '@/core/listeners';
 import { rejects } from 'assert';
@@ -163,6 +163,7 @@ export class NTQQUserApi {
     }
     return skey;
   }
+  @CacheClassFuncAsyncExtend(3600, 'Uin2Uid', (data: string | undefined) => { if (data && data.indexOf('u_') != -1) { return true } return false; })
   static async getUidByUin(Uin: string) {
     let ret = await NTEventDispatch.CallNoListenerEvent
       <(Uin: string[]) => Promise<{ uidInfo: Map<string, string> }>>(
@@ -195,6 +196,7 @@ export class NTQQUserApi {
     }
     return uid;
   }
+  @CacheClassFuncAsyncExtend(3600, 'Uid2Uin', (data: number | undefined) => { if (data && data != 0 && !isNaN(data)) { return true } return false; })
   static async getUinByUid(Uid: string | undefined) {
     if (!Uid) {
       return '';
@@ -217,7 +219,7 @@ export class NTQQUserApi {
     if (!uin) {
       uin = (await NTQQUserApi.getUserDetailInfo(Uid)).uin; //从QQ Native 转换
     }
-    
+
     // if (!uin) {
     //   uin = (await NTQQFriendApi.getFriends(false)).find((t) => { t.uid == Uid })?.uin;  //从QQ Native 缓存转换
     // }
