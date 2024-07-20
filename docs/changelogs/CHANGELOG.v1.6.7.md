@@ -10,12 +10,11 @@ QQ Version: Windows 9.9.12-26000 / Linux 3.2.9-26000
 
 ## 修复与优化
 1. 尝试修复卡顿问题
-2. 修复精华消息设置时的报错
+2. 修复 精华消息被设置/一起听 接受时的报错
 
 ## 新增与调整
 1. 戳一戳上报raw
 2. 精华消息设置通知事件
 3. 新增设置/删除群精华API
-4. 表情回应事件
 
 新增的 API 详细见[API文档](https://napneko.github.io/zh-CN/develop/extends_api)
