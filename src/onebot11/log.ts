@@ -63,6 +63,9 @@ export async function logMessage(ob11Message: OB11Message) {
       else if (segment.type === 'markdown') {
         msgParts.push(spSegColor(`[markdown|${segment.data.content}]`));
       }
+      else if (segment.type === 'video') {
+        msgParts.push(spSegColor(`[视频|${segment.data.url}]`));
+      }
       else {
         msgParts.push(spSegColor(`[未实现|${JSON.stringify(segment)}]`));
       }

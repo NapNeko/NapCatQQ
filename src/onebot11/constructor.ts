@@ -477,12 +477,11 @@ export class OB11Constructor {
           if (grayTipElement.jsonGrayTipElement.busiId == 1061) {
             //判断业务类型
             //Poke事件
-            let pokedetail: any[] = json.items;
+            const pokedetail: any[] = json.items;
             //筛选item带有uid的元素
-            pokedetail = pokedetail.filter(item => item.uid);
-            //console.log("[NapCat] 群拍一拍 群:", pokedetail, parseInt(msg.peerUid), " ", await NTQQUserApi.getUinByUid(pokedetail[0].uid), "拍了拍", await NTQQUserApi.getUinByUid(pokedetail[1].uid));
-            if (pokedetail.length == 2) {
-              return new OB11GroupPokeEvent(parseInt(msg.peerUid), parseInt((await NTQQUserApi.getUinByUid(pokedetail[0].uid))!), parseInt((await NTQQUserApi.getUinByUid(pokedetail[1].uid))!));
+            const poke_uid = pokedetail.filter(item => item.uid);
+            if (poke_uid.length == 2) {
+              return new OB11GroupPokeEvent(parseInt(msg.peerUid), parseInt((await NTQQUserApi.getUinByUid(poke_uid[0].uid))!), parseInt((await NTQQUserApi.getUinByUid(poke_uid[1].uid))!), pokedetail);
             }
           }
           if (grayTipElement.jsonGrayTipElement.busiId == 2401) {
