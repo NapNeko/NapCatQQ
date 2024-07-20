@@ -46,6 +46,7 @@ import { OB11GroupMsgEmojiLikeEvent } from '@/onebot11/event/notice/OB11MsgEmoji
 import { napCatCore } from '@/core';
 import { OB11FriendPokeEvent, OB11GroupPokeEvent } from './event/notice/OB11PokeEvent';
 import { OB11BaseNoticeEvent } from './event/notice/OB11BaseNoticeEvent';
+import { OB11GroupEssenceEvent } from './event/notice/OB11GroupEssenceEvent';
 
 
 export class OB11Constructor {
@@ -317,7 +318,7 @@ export class OB11Constructor {
     if (msg.chatType !== ChatType.group) {
       return;
     }
-    //log("group msg", msg);
+    log("group msg", msg);
     if (msg.senderUin && msg.senderUin !== '0') {
       const member = await getGroupMember(msg.peerUid, msg.senderUin);
       if (member && member.cardName !== msg.sendMemberName) {
@@ -327,7 +328,7 @@ export class OB11Constructor {
         return event;
       }
     }
-    
+
     for (const element of msg.elements) {
       const grayTipElement = element.grayTipElement;
       const groupElement = grayTipElement?.groupElement;
@@ -494,13 +495,16 @@ export class OB11Constructor {
               chatType: ChatType.group,
               peerUid: Group!
             };
+            return new OB11GroupEssenceEvent(parseInt(msg.peerUid), msg.id!);
             // 获取MsgSeq+Peer可获取具体消息
           }
-          //下面得改 上面也是错的grayTipElement.subElementType == GrayTipElementSubType.MEMBER_NEW_TITLE
-          const memberUin = json.items[1].param[0];
-          const title = json.items[3].txt;
-          logDebug('收到群成员新头衔消息', json);
-          return new OB11GroupTitleEvent(parseInt(msg.peerUid), parseInt(memberUin), title);
+          if (grayTipElement.jsonGrayTipElement.busiId == 2407) {
+            //下面得改 上面也是错的grayTipElement.subElementType == GrayTipElementSubType.MEMBER_NEW_TITLE
+            const memberUin = json.items[1].param[0];
+            const title = json.items[3].txt;
+            logDebug('收到群成员新头衔消息', json);
+            return new OB11GroupTitleEvent(parseInt(msg.peerUid), parseInt(memberUin), title);
+          }
         }
       }
     }
