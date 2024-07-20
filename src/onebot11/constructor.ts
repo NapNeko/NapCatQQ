@@ -18,6 +18,7 @@ import {
   Group,
   GroupMember,
   IMAGE_HTTP_HOST, IMAGE_HTTP_HOST_NT, mFaceCache,
+  Peer,
   RawMessage,
   SelfInfo,
   Sex,
@@ -316,6 +317,7 @@ export class OB11Constructor {
     if (msg.chatType !== ChatType.group) {
       return;
     }
+    //log("group msg", msg);
     if (msg.senderUin && msg.senderUin !== '0') {
       const member = await getGroupMember(msg.peerUid, msg.senderUin);
       if (member && member.cardName !== msg.sendMemberName) {
@@ -481,6 +483,18 @@ export class OB11Constructor {
             if (pokedetail.length == 2) {
               return new OB11GroupPokeEvent(parseInt(msg.peerUid), parseInt((await NTQQUserApi.getUinByUid(pokedetail[0].uid))!), parseInt((await NTQQUserApi.getUinByUid(pokedetail[1].uid))!));
             }
+          }
+          if (grayTipElement.jsonGrayTipElement.busiId == 2401) {
+            let searchParams = new URL(json[0].jp).searchParams;
+            let msgSeq = searchParams.get('msgSeq');
+            let Group = searchParams.get('groupCode');
+            let Businessid = searchParams.get('businessid');
+            let Peer: Peer = {
+              guildId: '',
+              chatType: ChatType.group,
+              peerUid: Group!
+            };
+            // 获取MsgSeq+Peer可获取具体消息
           }
           //下面得改 上面也是错的grayTipElement.subElementType == GrayTipElementSubType.MEMBER_NEW_TITLE
           const memberUin = json.items[1].param[0];
