@@ -97,5 +97,6 @@ export enum ActionName {
     SetEssenceMsg = "set_essence_msg",
     DelEssenceMsg = "delete_essence_msg",
     GetRecentContact = "get_recent_contact",
-    _MarkAllMsgAsRead = "_mark_all_as_read"
+    _MarkAllMsgAsRead = "_mark_all_as_read",
+    GetProfileLike = "get_profile_like"
 }
