@@ -228,4 +228,7 @@ export class NTQQMsgApi {
     }
     );
   }
+  static async markallMsgAsRead() {
+    return napCatCore.session.getMsgService().setAllC2CAndGroupMsgRead();
+  }
 }

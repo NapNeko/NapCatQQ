@@ -60,3 +60,12 @@ export class GoCQHTTPMarkMsgAsRead extends BaseAction<Payload, null> {
     return null;
   }
 }
+
+export class MarkAllMsgAsRead extends BaseAction<Payload, null> {
+  actionName = ActionName._MarkAllMsgAsRead;
+
+  protected async _handle(payload: Payload): Promise<null> {
+    await NTQQMsgApi.markallMsgAsRead();
+    return null;
+  }
+}

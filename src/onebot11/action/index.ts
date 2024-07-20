@@ -34,7 +34,7 @@ import SetGroupAdmin from './group/SetGroupAdmin';
 import SetGroupCard from './group/SetGroupCard';
 import GetImage from './file/GetImage';
 import GetRecord from './file/GetRecord';
-import { GoCQHTTPMarkMsgAsRead, MarkGroupMsgAsRead, MarkPrivateMsgAsRead } from './msg/MarkMsgAsRead';
+import { GoCQHTTPMarkMsgAsRead, MarkAllMsgAsRead, MarkGroupMsgAsRead, MarkPrivateMsgAsRead } from './msg/MarkMsgAsRead';
 import CleanCache from './system/CleanCache';
 import GoCQHTTPUploadGroupFile from './go-cqhttp/UploadGroupFile';
 import { GetConfigAction, SetConfigAction } from '@/onebot11/action/extends/Config';
@@ -153,7 +153,8 @@ export const actionHandlers = [
   new GetGroupSystemMsg(),
   new DelEssenceMsg(),
   new SetEssenceMsg(),
-  new GetRecentContact()
+  new GetRecentContact(),
+  new MarkAllMsgAsRead()
 ];
 
 function initActionMap() {
