@@ -72,8 +72,9 @@ class Config extends ConfigBase<OB11Config> implements OB11Config {
     RecordList: [] as Array<string>
   };
 
-  getConfigPath() {
-    return path.join(this.getConfigDir(), `onebot11_${selfInfo.uin}.json`);
+  getConfigPath(pathName: string) {
+    const filename = `onebot11_${pathName ? "_" : ""}${pathName}.json`
+    return path.join(this.getConfigDir(), filename);
   }
 
   protected getKeys(): string[] | null {
