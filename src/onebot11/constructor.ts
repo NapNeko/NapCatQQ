@@ -314,7 +314,6 @@ export class OB11Constructor {
     }
   }
   static async GroupEvent(msg: RawMessage): Promise<OB11GroupNoticeEvent | undefined> {
-    //log("group msg", msg);
     if (msg.chatType !== ChatType.group) {
       return;
     }
@@ -400,14 +399,6 @@ export class OB11Constructor {
       }
       if (grayTipElement) {
         if (grayTipElement.xmlElement?.templId === '10382') {
-          // 表情回应消息
-          // "content":
-          //  "<gtip align=\"center\">
-          //    <qq uin=\"u_snYxnEfja-Po_\" col=\"3\" jp=\"3794\"/>
-          //    <nor txt=\"回应了你的\"/>
-          //    <url jp= \"\" msgseq=\"74711\" col=\"3\" txt=\"消息:\"/>
-          //    <face type=\"1\" id=\"76\">  </face>
-          //  </gtip>",
           const emojiLikeData = new fastXmlParser.XMLParser({
             ignoreAttributes: false,
             attributeNamePrefix: ''
@@ -451,30 +442,6 @@ export class OB11Constructor {
         //代码歧义 GrayTipElementSubType.MEMBER_NEW_TITLE
         else if (grayTipElement.subElementType == GrayTipElementSubType.MEMBER_NEW_TITLE) {
           const json = JSON.parse(grayTipElement.jsonGrayTipElement.jsonStr);
-          /*
-            {
-              align: 'center',
-              items: [
-                { txt: '恭喜', type: 'nor' },
-                {
-                  col: '3',
-                  jp: '5',
-                  param: ["QQ号"],
-                  txt: '林雨辰',
-                  type: 'url'
-                },
-                { txt: '获得群主授予的', type: 'nor' },
-                {
-                  col: '3',
-                  jp: '',
-                  txt: '好好好',
-                  type: 'url'
-                },
-                { txt: '头衔', type: 'nor' }
-              ]
-            }
-
-            * */
           if (grayTipElement.jsonGrayTipElement.busiId == 1061) {
             //判断业务类型
             //Poke事件
@@ -486,7 +453,7 @@ export class OB11Constructor {
             }
           }
           if (grayTipElement.jsonGrayTipElement.busiId == 2401) {
-            let searchParams = new URL(json[0].jp).searchParams;
+            let searchParams = new URL(json.items[0].jp).searchParams;
             let msgSeq = searchParams.get('msgSeq')!;
             let Group = searchParams.get('groupCode');
             let Businessid = searchParams.get('businessid');
@@ -495,7 +462,6 @@ export class OB11Constructor {
               chatType: ChatType.group,
               peerUid: Group!
             };
-
             let msgData = await NTQQMsgApi.getMsgsBySeqAndCount(Peer, msgSeq.toString(), 1, true, true);
             return new OB11GroupEssenceEvent(parseInt(msg.peerUid), await dbUtil.addMsg(msgData.msgList[0]), parseInt(msgData.msgList[0].senderUin));
             // 获取MsgSeq+Peer可获取具体消息
