@@ -93,5 +93,7 @@ export enum ActionName {
     SetSelfProfile = 'set_self_profile',
     CreateCollection = 'create_collection',
     GetCollectionList = 'get_collection_list',
-    SetLongNick = 'set_self_longnick'
+    SetLongNick = 'set_self_longnick',
+    SetEssenceMsg = "set_essence_msg",
+    DelEssenceMsg = "delete_essence_msg"
 }
