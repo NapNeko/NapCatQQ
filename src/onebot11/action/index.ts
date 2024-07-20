@@ -73,6 +73,7 @@ import { SetLongNick } from './extends/SetLongNick';
 import DelEssenceMsg from './group/DelEssenceMsg';
 import SetEssenceMsg from './group/SetEssenceMsg';
 import GetRecentContact from './user/GetRecentContact';
+import { GetProfileLike } from './extends/GetProfileLike';
 
 export const actionHandlers = [
   new RebootNormal(),
@@ -154,7 +155,8 @@ export const actionHandlers = [
   new DelEssenceMsg(),
   new SetEssenceMsg(),
   new GetRecentContact(),
-  new MarkAllMsgAsRead()
+  new MarkAllMsgAsRead(),
+  new GetProfileLike()
 ];
 
 function initActionMap() {

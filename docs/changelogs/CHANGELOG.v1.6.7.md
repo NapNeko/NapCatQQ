@@ -21,5 +21,6 @@ QQ Version: Windows 9.9.12-26000 / Linux 3.2.9-26000
 4. 新增最近联系列表API（RAW 不稳定）
 5. 上报群精华设置事件
 6. 新增设置所有消息已读API（非标准）
+7. 新增获取点赞信息获取API（非标准）
 
 新增的 API 详细见[API文档](https://napneko.github.io/zh-CN/develop/extends_api)

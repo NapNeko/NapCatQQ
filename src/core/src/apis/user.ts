@@ -35,6 +35,20 @@ setTimeout(() => {
 //   }
 // };
 export class NTQQUserApi {
+  static async getProfileLike(uin: string) {
+    return napCatCore.session.getProfileLikeService().getBuddyProfileLike(  {
+      "friendUids": [
+        "u_FUSS0_x06S_9Tf4na_WpUg"
+      ],
+      "basic": 1,
+      "vote": 1,
+      "favorite": 0,
+      "userProfile": 1,
+      "type": 2,
+      "start": 0,
+      "limit": 20
+    });
+  }
   static async setLongNick(longNick: string) {
     return napCatCore.session.getProfileService().setLongNick(longNick);
   }
