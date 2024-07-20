@@ -327,6 +327,7 @@ export class OB11Constructor {
         return event;
       }
     }
+    
     for (const element of msg.elements) {
       const grayTipElement = element.grayTipElement;
       const groupElement = grayTipElement?.groupElement;
