@@ -70,6 +70,8 @@ import { SetSelfProfile } from './extends/SetSelfProfile';
 import { shareGroupEx, sharePeer } from './extends/sharePeer';
 import { CreateCollection } from './extends/CreateCollection';
 import { SetLongNick } from './extends/SetLongNick';
+import DelEssenceMsg from './group/DelEssenceMsg';
+import SetEssenceMsg from './group/SetEssenceMsg';
 
 export const actionHandlers = [
   new RebootNormal(),
@@ -147,7 +149,9 @@ export const actionHandlers = [
   new GoCQHTTPGetForwardMsgAction(),
   new GetFriendMsgHistory(),
   new GoCQHTTPHandleQuickAction(),
-  new GetGroupSystemMsg()
+  new GetGroupSystemMsg(),
+  new DelEssenceMsg(),
+  new SetEssenceMsg()
 ];
 
 function initActionMap() {
