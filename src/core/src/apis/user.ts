@@ -35,10 +35,10 @@ setTimeout(() => {
 //   }
 // };
 export class NTQQUserApi {
-  static async getProfileLike(uin: string) {
-    return napCatCore.session.getProfileLikeService().getBuddyProfileLike(  {
+  static async getProfileLike(uid: string) {
+    return napCatCore.session.getProfileLikeService().getBuddyProfileLike({
       "friendUids": [
-        (await NTQQUserApi.getUidByUin(uin))!
+        uid
       ],
       "basic": 1,
       "vote": 1,
@@ -221,7 +221,7 @@ export class NTQQUserApi {
     if (Uin && Uin != 0 && !isNaN(Uin)) {
       return true
     }
-    logWarn("uin转换到uid时异常", Uid);
+    logWarn("uid转换到uin时异常", Uid);
     return false;
   })
   static async getUinByUid(Uid: string | undefined) {
