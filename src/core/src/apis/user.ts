@@ -6,7 +6,7 @@ import { ProfileListener } from '@/core/listeners';
 import { rejects } from 'assert';
 import { randomUUID } from 'crypto';
 import { RequestUtil } from '@/common/utils/request';
-import { logDebug, logError } from '@/common/utils/log';
+import { log, logDebug, logError, logWarn } from '@/common/utils/log';
 import { NTEventDispatch } from '@/common/utils/EventTask';
 const userInfoCache: Record<string, User> = {};  // uid: User
 
@@ -163,7 +163,13 @@ export class NTQQUserApi {
     }
     return skey;
   }
-  @CacheClassFuncAsyncExtend(3600, 'Uin2Uid', (data: string | undefined) => { if (data && data.indexOf('u_') != -1) { return true } return false; })
+  @CacheClassFuncAsyncExtend(3600, 'Uin2Uid', (Uin: string, Uid: string | undefined) => {
+    if (Uid && Uid.indexOf('u_') != -1) {
+      return true
+    }
+    logWarn("uin转换到uid时异常", Uin);
+    return false;
+  })
   static async getUidByUin(Uin: string) {
     let ret = await NTEventDispatch.CallNoListenerEvent
       <(Uin: string[]) => Promise<{ uidInfo: Map<string, string> }>>(
@@ -182,7 +188,7 @@ export class NTQQUserApi {
       });
       //uid = Array.from(friends.values()).find((t) => { t.uin == Uin })?.uid;  // 从NC维护的QQ Buddy缓存 转换
     }
-    
+
     // if (!uid) {
     //   uid = (await NTQQFriendApi.getFriends(false)).find((t) => { t.uin == Uin })?.uid;  //从QQ Native 缓存转换 方法一
     // }
@@ -197,7 +203,13 @@ export class NTQQUserApi {
     }
     return uid;
   }
-  @CacheClassFuncAsyncExtend(3600, 'Uid2Uin', (data: number | undefined) => { if (data && data != 0 && !isNaN(data)) { return true } return false; })
+  @CacheClassFuncAsyncExtend(3600, 'Uid2Uin', (Uid: string | undefined, Uin: number | undefined) => {
+    if (Uin && Uin != 0 && !isNaN(Uin)) {
+      return true
+    }
+    logWarn("uin转换到uid时异常", Uid);
+    return false;
+  })
   static async getUinByUid(Uid: string | undefined) {
     if (!Uid) {
       return '';

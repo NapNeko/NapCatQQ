@@ -89,7 +89,7 @@ export function CacheClassFuncAsync(ttl: number = 3600 * 1000, customKey: string
   }
   return logExecutionTime;
 }
-export function CacheClassFuncAsyncExtend(ttl: number = 3600 * 1000, customKey: string = '', checker: any = (_data: any) => { return true; }) {
+export function CacheClassFuncAsyncExtend(ttl: number = 3600 * 1000, customKey: string = '', checker: any = (...data: any[]) => { return true; }) {
   //console.log('CacheClassFuncAsync', ttl, customKey);
   function logExecutionTime(target: any, methodName: string, descriptor: PropertyDescriptor) {
     //console.log('logExecutionTime', target, methodName, descriptor);
@@ -108,7 +108,7 @@ export function CacheClassFuncAsyncExtend(ttl: number = 3600 * 1000, customKey: 
       }
       // const start = Date.now();
       const result = await originalMethod.apply(this, args);
-      if (!checker(result)) {
+      if (!checker(...args, result)) {
         return result;//丢弃缓存
       }
       // const end = Date.now();
