@@ -9,7 +9,7 @@ const SchemaData = {
   properties: {
     flag: { type: 'string' },
     approve: { type: ['string', 'boolean'] },
-    reason: { type: 'string' }
+    reason: { type: 'string', nullable: true, }
   },
   required: ['flag'],
 } as const satisfies JSONSchema;

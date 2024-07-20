@@ -125,7 +125,7 @@ export class NTQQGroupApi {
           'seq': seq,  // 通知序列号
           'type': type,
           'groupCode': groupCode,
-          'postscript': reason || ''
+          'postscript': reason || ' ' // 仅传空值可能导致处理失败，故默认给个空格
         }
       });
   }
