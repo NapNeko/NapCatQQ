@@ -1,4 +1,4 @@
-# v1.6.5
+# v1.6.7
 
 QQ Version: Windows 9.9.12-26000 / Linux 3.2.9-26000
 ## 使用前警告
@@ -9,9 +9,13 @@ QQ Version: Windows 9.9.12-26000 / Linux 3.2.9-26000
 启动方式: WayBoot.03 （Electron Main进程为Node 直接注入代码 同理项目: LiteLoader）
 
 ## 修复与优化
-1. 修复了一些问题
+1. 尝试修复卡顿问题
+2. 修复精华消息设置时的报错
 
 ## 新增与调整
-没有哦
+1. 戳一戳上报raw
+2. 精华消息设置通知事件
+3. 新增设置/删除群精华API
+4. 表情回应事件
 
 新增的 API 详细见[API文档](https://napneko.github.io/zh-CN/develop/extends_api)
