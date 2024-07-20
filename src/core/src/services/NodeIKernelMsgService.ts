@@ -299,7 +299,7 @@ export interface NodeIKernelMsgService {
 
   setMsgRead(peer: Peer): Promise<GeneralCallResult>;
 
-  setAllC2CAndGroupMsgRead(...args: unknown[]): unknown;
+  setAllC2CAndGroupMsgRead(): Promise<unknown>;
 
   setGuildMsgRead(...args: unknown[]): unknown;
 
@@ -355,8 +355,8 @@ export interface NodeIKernelMsgService {
   getFileThumbSavePathForSend(...args: unknown[]): unknown;
 
   getFileThumbSavePath(...args: unknown[]): unknown;
-
-  translatePtt2Text(j2: string, e2: {}, e3: {}): unknown;
+  //猜测居多
+  translatePtt2Text(MsgId: string, Peer: {}, MsgElement: {}): unknown;
 
   setPttPlayedState(...args: unknown[]): unknown;
 
@@ -406,7 +406,7 @@ export interface NodeIKernelMsgService {
 
   getEmojiResourcePath(...args: unknown[]): unknown;
 
-  JoinDragonGroupEmoji(...args: unknown[]): unknown;
+  JoinDragonGroupEmoji(JoinDragonGroupEmojiReq: any/*joinDragonGroupEmojiReq*/): unknown;
 
   getMsgAbstracts(...args: unknown[]): unknown;
 
