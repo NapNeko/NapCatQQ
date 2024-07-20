@@ -38,7 +38,7 @@ export class NTQQUserApi {
   static async getProfileLike(uin: string) {
     return napCatCore.session.getProfileLikeService().getBuddyProfileLike(  {
       "friendUids": [
-        "u_FUSS0_x06S_9Tf4na_WpUg"
+        (await NTQQUserApi.getUidByUin(uin))!
       ],
       "basic": 1,
       "vote": 1,
