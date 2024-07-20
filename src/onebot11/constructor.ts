@@ -487,7 +487,7 @@ export class OB11Constructor {
           }
           if (grayTipElement.jsonGrayTipElement.busiId == 2401) {
             let searchParams = new URL(json[0].jp).searchParams;
-            let msgSeq = searchParams.get('msgSeq');
+            let msgSeq = searchParams.get('msgSeq')!;
             let Group = searchParams.get('groupCode');
             let Businessid = searchParams.get('businessid');
             let Peer: Peer = {
@@ -495,7 +495,8 @@ export class OB11Constructor {
               chatType: ChatType.group,
               peerUid: Group!
             };
-            return new OB11GroupEssenceEvent(parseInt(msg.peerUid), msg.id!);
+            let msgData = await NTQQMsgApi.getMsgsBySeqAndCount(Peer, msgSeq.toString(), 1, true, true);
+            return new OB11GroupEssenceEvent(parseInt(msg.peerUid), msg.id!, parseInt(msgData.msgList[0].senderUin));
             // 获取MsgSeq+Peer可获取具体消息
           }
           if (grayTipElement.jsonGrayTipElement.busiId == 2407) {
