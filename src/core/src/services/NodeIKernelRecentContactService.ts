@@ -43,7 +43,7 @@ export interface NodeIKernelRecentContactService {
 
     deleteRecentContactsVer2(...args: unknown[]): unknown; // 1 arguments
 
-    getRecentContactList(): unknown;
+    getRecentContactList(): Promise<any>;
 
     getMsgUnreadCount(): unknown;
 

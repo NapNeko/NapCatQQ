@@ -241,6 +241,9 @@ export class NTQQUserApi {
     // }
     return uin;
   }
+  static async getRecentContactList() {
+    return await napCatCore.session.getRecentContactService().getRecentContactList();
+  }
   static async getUserDetailInfoByUin(Uin: string) {
     return NTEventDispatch.CallNoListenerEvent
       <(Uin: string) => Promise<UserDetailInfoByUin>>(

@@ -72,6 +72,7 @@ import { CreateCollection } from './extends/CreateCollection';
 import { SetLongNick } from './extends/SetLongNick';
 import DelEssenceMsg from './group/DelEssenceMsg';
 import SetEssenceMsg from './group/SetEssenceMsg';
+import GetRecentContact from './user/GetRecentContact';
 
 export const actionHandlers = [
   new RebootNormal(),
@@ -151,7 +152,8 @@ export const actionHandlers = [
   new GoCQHTTPHandleQuickAction(),
   new GetGroupSystemMsg(),
   new DelEssenceMsg(),
-  new SetEssenceMsg()
+  new SetEssenceMsg(),
+  new GetRecentContact()
 ];
 
 function initActionMap() {

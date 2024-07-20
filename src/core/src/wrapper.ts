@@ -39,6 +39,7 @@ import { NodeIKernelTianShuService } from './services/NodeIKernelTianShuService'
 import { NodeIKernelUnitedConfigService } from './services/NodeIKernelUnitedConfigService';
 import { NodeIKernelSearchService } from './services/NodeIKernelSearchService';
 import { NodeIKernelCollectionService } from './services/NodeIKernelCollectionService';
+import { NodeIKernelRecentContactService } from './services/NodeIKernelRecentContactService';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -236,7 +237,7 @@ export interface NodeIQQNTWrapperSession {
 
   getAVSDKService(): unknown;
 
-  getRecentContactService(): unknown;
+  getRecentContactService(): NodeIKernelRecentContactService;
 
   getConfigMgrService(): unknown;
 }

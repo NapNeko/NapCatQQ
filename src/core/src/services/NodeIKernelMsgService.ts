@@ -253,7 +253,7 @@ export interface NodeIKernelMsgService {
     pageLimit: number,
     isReverseOrder: boolean,
     isIncludeCurrent: boolean
-  }):Promise<unknown>;
+  }): Promise<unknown>;
 
   queryPicOrVideoMsgsDesktop(...args: unknown[]): unknown;
 
@@ -356,7 +356,7 @@ export interface NodeIKernelMsgService {
 
   getFileThumbSavePath(...args: unknown[]): unknown;
 
-  translatePtt2Text(...args: unknown[]): unknown;
+  translatePtt2Text(j2: string, e2: {}, e3: {}): unknown;
 
   setPttPlayedState(...args: unknown[]): unknown;
 
