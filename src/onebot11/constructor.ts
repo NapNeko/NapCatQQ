@@ -318,7 +318,7 @@ export class OB11Constructor {
     if (msg.chatType !== ChatType.group) {
       return;
     }
-    log("group msg", msg);
+    //log("group msg", msg);
     if (msg.senderUin && msg.senderUin !== '0') {
       const member = await getGroupMember(msg.peerUid, msg.senderUin);
       if (member && member.cardName !== msg.sendMemberName) {
