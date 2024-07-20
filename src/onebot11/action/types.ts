@@ -95,5 +95,6 @@ export enum ActionName {
     GetCollectionList = 'get_collection_list',
     SetLongNick = 'set_self_longnick',
     SetEssenceMsg = "set_essence_msg",
-    DelEssenceMsg = "delete_essence_msg"
+    DelEssenceMsg = "delete_essence_msg",
+    GetRecentContact = "get_recent_contact"
 }
