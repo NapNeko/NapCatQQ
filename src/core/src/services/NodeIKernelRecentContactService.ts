@@ -1,4 +1,5 @@
 import { Peer } from "../entities";
+import { NodeIKernelRecentContactListener } from "../listeners/NodeIKernelRecentContactListener";
 
 export interface NodeIKernelRecentContactService {
     setGuildDisplayStatus(...args: unknown[]): unknown; // 2 arguments
@@ -33,7 +34,7 @@ export interface NodeIKernelRecentContactService {
 
     removeKernelRecentContactListener(...args: unknown[]): unknown; // 1 arguments
 
-    addKernelRecentContactListener(...args: unknown[]): unknown; // 1 arguments
+    addKernelRecentContactListener(listener: NodeIKernelRecentContactListener): number;
 
     clearRecentContactsByChatType(...args: unknown[]): unknown; // 1 arguments
 
