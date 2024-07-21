@@ -21,7 +21,7 @@ import { dbUtil } from '@/common/utils/db';
 import { sleep } from '@/common/utils/helper';
 import crypto from 'node:crypto';
 import { rawFriends, friends, groupMembers, groups, selfInfo, stat } from '@/core/data';
-import { RawMessage } from '@/core/entities';
+import { GroupMember, RawMessage } from '@/core/entities';
 import { NTEventDispatch } from '@/common/utils/EventTask';
 import {
   enableConsoleLog,
@@ -346,7 +346,7 @@ export class NapCatCore {
       // console.log('onMemberListChange', groupCode, arg);
     };
     groupListener.onMemberInfoChange = (groupCode, changeType, members) => {
-      // console.log('onMemberInfoChange', arg);
+      //console.log('onMemberInfoChange', groupCode, changeType, members);
       if (changeType === 0 && members.get(selfInfo.uid)?.isDelete) {
         // 自身退群或者被踢退群 5s用于Api操作 之后不再出现
         setTimeout(() => {
@@ -359,6 +359,9 @@ export class NapCatCore {
         members.forEach((member, uid) => {
           const existMember = existMembers.get(uid);
           if (existMember) {
+            // 检查管理变动
+            member.isChangeRole = this.checkAdminEvent(groupCode, member, existMember);
+            // 更新成员信息
             Object.assign(existMember, member);
           }
           else {
@@ -470,6 +473,13 @@ export class NapCatCore {
   async getQuickLoginList() {
     const loginList = await this.loginService.getLoginList();
     return loginList;
+  }
+  checkAdminEvent(groupCode: string, memberNew: GroupMember, memberOld: GroupMember | undefined ) : boolean {
+    if (memberNew.role !== memberOld.role) {
+      log(`群 ${groupCode} ${memberNew.nick} 角色变更为 ${memberNew.role === 3 ? '管理员' : '群员' }`);
+      return true;
+    }
+    return false;
   }
 }
 

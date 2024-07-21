@@ -19,7 +19,7 @@ import { OB11Config, ob11Config } from '@/onebot11/config';
 import { httpHeart, ob11HTTPServer } from '@/onebot11/server/http';
 import { ob11WebsocketServer } from '@/onebot11/server/ws/WebsocketServer';
 import { ob11ReverseWebsockets } from '@/onebot11/server/ws/ReverseWebsocket';
-import { getGroup, getGroupMember, selfInfo, tempGroupCodeMap } from '@/core/data';
+import { getGroup, getGroupMember, groupMembers, selfInfo, tempGroupCodeMap } from '@/core/data';
 import { dbUtil } from '@/common/utils/db';
 import { BuddyListener, GroupListener, NodeIKernelBuddyListener } from '@/core/listeners';
 import { OB11FriendRequestEvent } from '@/onebot11/event/request/OB11FriendRequest';
@@ -267,9 +267,46 @@ export class NapCatOnebot11 {
     const groupListener = new GroupListener();
     groupListener.onGroupNotifiesUpdated = async (doubt, notifies) => {
       //console.log('ob11 onGroupNotifiesUpdated', notifies[0]);
-      this.postGroupNotifies(notifies).then().catch(e => logError('postGroupNotifies error: ', e));
+      if (![GroupNotifyTypes.ADMIN_SET, GroupNotifyTypes.ADMIN_UNSET, GroupNotifyTypes.ADMIN_UNSET_OTHER].includes(notifies[0].type)) {
+        this.postGroupNotifies(notifies).then().catch(e => logError('postGroupNotifies error: ', e));
+      };
     };
     groupListener.onMemberInfoChange = async (groupCode: string, changeType: number, members: Map<string, GroupMember>) => {
+      //console.log("ob11 onMemberInfoChange", groupCode, changeType, members)
+      if (changeType === 1) {
+        let member;
+        for (const [key, value] of members) {
+          member = value;
+          break;
+        }
+        const existMembers = groupMembers.get(groupCode);
+        if (existMembers) {
+          const existMember = existMembers.get(member.uid);
+          if (existMember) {
+            if (existMember.isChangeRole) {
+              //console.log("ob11 onMemberInfoChange:eventMember:localMember", member, existMember)
+              const notify: GroupNotify[] = [
+                {
+                  time: Date.now(),
+                  seq: (Date.now() * 1000 * 1000).toString(),
+                  type: member.role === GroupMemberRole.admin ? GroupNotifyTypes.ADMIN_SET : GroupNotifyTypes.ADMIN_UNSET_OTHER, // 8 设置; 13 取消
+                  status: 0,
+                  group: { groupCode: groupCode, groupName: '' },
+                  user1: { uid: member.uid, nickName: member.nick },
+                  user2: { uid: member.uid, nickName: member.nick },
+                  actionUser: { uid: '', nickName: '' },
+                  actionTime: '0',
+                  invitationExt: { srcType: 0, groupCode: '0', waitStatus: 0 },
+                  postscript: '',
+                  repeatSeqs: [],
+                  warningTips: ''
+                }
+              ];
+              this.postGroupNotifies(notify).then().catch(e => logError('postGroupNotifies error: ', e));
+            }
+          }
+        }
+      }
       // 如果自身是非管理员也许要从这里获取Delete 成员变动 待测试与验证
       const role = (await getGroupMember(groupCode, selfInfo.uin))?.role;
       const isPrivilege = role === 3 || role === 4;
