@@ -52,4 +52,5 @@ export interface GroupMember {
     isRobot: boolean;
     sex?: Sex
     qqLevel?: QQLevel
+    isChangeRole: boolean;
 }
