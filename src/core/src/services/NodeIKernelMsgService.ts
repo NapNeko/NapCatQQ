@@ -141,7 +141,7 @@ export interface NodeIKernelMsgService {
 
   getLastMessageList(peer: Peer[]): Promise<unknown>;
 
-  getAioFirstViewLatestMsgs(...args: unknown[]): unknown;
+  getAioFirstViewLatestMsgs(peer:Peer,unknown:number): unknown;
 
   getMsgs(peer: Peer, msgId: string, count: unknown, queryOrder: boolean): Promise<unknown>;
 
@@ -430,7 +430,10 @@ export interface NodeIKernelMsgService {
 
   downloadRichMedia(...args: unknown[]): unknown;
 
-  getFirstUnreadMsgSeq(...args: unknown[]): unknown;
+  getFirstUnreadMsgSeq(args: {
+    peerUid: string
+    guildId: string
+  }): unknown;
 
   getFirstUnreadCommonMsg(...args: unknown[]): unknown;
 
