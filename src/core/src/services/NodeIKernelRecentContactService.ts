@@ -1,6 +1,27 @@
 import { Peer } from "../entities";
 import { NodeIKernelRecentContactListener } from "../listeners/NodeIKernelRecentContactListener";
-
+export interface FSABRecentContactParams {
+    anchorPointContact: {
+        contactId: string;
+        sortField: string;
+        pos: number;
+    },
+    relativeMoveCount: number;
+    listType: number;
+    count: number;
+    fetchOld: boolean;
+}
+// {
+//     "anchorPointContact": {
+//       "contactId": "",
+//       "sortField": "",
+//       "pos": 0
+//     },
+//     "relativeMoveCount": 0,
+//     "listType": 1,
+//     "count": 200,
+//     "fetchOld": true
+//   }
 export interface NodeIKernelRecentContactService {
     setGuildDisplayStatus(...args: unknown[]): unknown; // 2 arguments
 
@@ -12,7 +33,7 @@ export interface NodeIKernelRecentContactService {
 
     enterOrExitMsgList(...args: unknown[]): unknown; // 1 arguments
 
-    getRecentContactListSnapShot(...args: unknown[]): unknown; // 1 arguments
+    /*!---!*/getRecentContactListSnapShot(count: number): unknown; // 1 arguments
 
     clearMsgUnreadCount(...args: unknown[]): unknown; // 1 arguments
 
@@ -20,7 +41,7 @@ export interface NodeIKernelRecentContactService {
 
     jumpToSpecifyRecentContact(...args: unknown[]): unknown; // 1 arguments
 
-    fetchAndSubscribeABatchOfRecentContact(...args: unknown[]): unknown; // 1 arguments
+    /*!---!*/fetchAndSubscribeABatchOfRecentContact(params: FSABRecentContactParams): unknown; // 1 arguments
 
     addRecentContact(peer: Peer): unknown;
 
@@ -32,9 +53,9 @@ export interface NodeIKernelRecentContactService {
 
     updateGameMsgConfigs(...args: unknown[]): unknown; // 1 arguments
 
-    removeKernelRecentContactListener(...args: unknown[]): unknown; // 1 arguments
+    removeKernelRecentContactListener(listenerid: number): unknown; // 1 arguments
 
-    addKernelRecentContactListener(listener: NodeIKernelRecentContactListener): number;
+    addKernelRecentContactListener(listener: NodeIKernelRecentContactListener): void;
 
     clearRecentContactsByChatType(...args: unknown[]): unknown; // 1 arguments
 

@@ -16,7 +16,7 @@ export class NTQQSystemApi {
     static async translateEnWordToZn(words: string[]) {
         return napCatCore.session.getRichMediaService().translateEnWordToZn(words);
     }
-    //调用会超时 没灯用
+    //调用会超时 没灯用 (好像是通知listener的) onLineDev
     static async getOnlineDev() {
         return napCatCore.session.getMsgService().getOnLineDev();
     }
