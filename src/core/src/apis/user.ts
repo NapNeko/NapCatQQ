@@ -255,6 +255,12 @@ export class NTQQUserApi {
     // }
     return uin;
   }
+  static async getRecentContactListSyncLimit(count: number) {
+    return await napCatCore.session.getRecentContactService().getRecentContactListSyncLimit(count);
+  }
+  static async getRecentContactListSync() {
+    return await napCatCore.session.getRecentContactService().getRecentContactListSync();
+  }
   static async getRecentContactList() {
     return await napCatCore.session.getRecentContactService().getRecentContactList();
   }
