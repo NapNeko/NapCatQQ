@@ -33,6 +33,7 @@ setTimeout(() => {
     }, 500);
   });
 }, 100);
+
 const sendMessagePool: Record<string, ((sendSuccessMsg: RawMessage) => void | Promise<void>) | null> = {};// peerUid: callbackFunc
 
 const sendSuccessCBMap: Record<string, ((sendSuccessMsg: RawMessage) => boolean | Promise<boolean>) | null> = {};// uuid: callbackFunc
