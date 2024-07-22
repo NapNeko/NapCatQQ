@@ -216,7 +216,6 @@ export class NTQQMsgApi {
         reject('发送超时');
       }, timeout);
       let msgId = await NTQQMsgApi.getMsgUnique(await NTQQMsgApi.getServerTime());
-      console.log(msgId);
       const result = napCatCore.session.getMsgService().sendMsg(msgId, peer, msgElements, new Map());
     });
   }
