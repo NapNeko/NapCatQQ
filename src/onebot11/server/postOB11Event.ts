@@ -125,7 +125,6 @@ export function postOB11Event(msg: QuickActionEvent, reportSelf = false, postWs 
 }
 async function handleMsg(msg: OB11Message, quickAction: QuickAction) {
   msg = msg as OB11Message;
-  const rawMessage = await dbUtil.getMsgByShortId(msg.message_id);
   const reply = quickAction.reply;
   const peer: Peer = {
     chatType: ChatType.friend,

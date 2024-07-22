@@ -37,6 +37,7 @@ import { Data as SysData } from '@/proto/SysMessage';
 import { Data as DeviceData } from '@/proto/SysMessage.DeviceChange';
 import { OB11FriendPokeEvent, OB11GroupPokeEvent } from './event/notice/OB11PokeEvent';
 import { isEqual } from '@/common/utils/helper';
+import { MessageUnique } from '@/common/utils/MessageUnique';
 
 //下面几个其实应该移进Core-Data 缓存实现 但是现在在这里方便
 //
@@ -229,10 +230,8 @@ export class NapCatOnebot11 {
         // });
         // console.log(ret);
         new Promise((resolve) => {
-          dbUtil.addMsg(m).then(msgShortId => {
-            m.id = msgShortId;
-            this.postReceiveMsg([m]).then().catch(logError);
-          }).catch(logError);
+          m.id = MessageUnique.createMsg({ chatType: m.chatType, peerUid: m.peerUid, guildId: '' }, m.msgId);
+          this.postReceiveMsg([m]).then().catch(logError);
         }).then();
       }
     };
@@ -245,10 +244,8 @@ export class NapCatOnebot11 {
         logMessage(_msg as OB11Message).then().catch(logError);
       }).catch(logError);
       if (ob11Config.reportSelfMessage) {
-        dbUtil.addMsg(msg).then(id => {
-          msg.id = id;
-          this.postReceiveMsg([msg]).then().catch(logError);
-        });
+        msg.id = MessageUnique.createMsg({ chatType: msg.chatType, peerUid: msg.peerUid, guildId: '' }, msg.msgId);
+        this.postReceiveMsg([msg]).then().catch(logError);
       }
     };
     napCatCore.addListener(msgListener);
@@ -349,10 +346,6 @@ export class NapCatOnebot11 {
         }
         if (msg.post_type === 'message') {
           logMessage(msg as OB11Message).then().catch(logError);
-          // 大概测试了一下，10000个以内 includes 和 find 性能差距不大
-          if (msg.message_type == 'group' && msg.group_id && ob11Config.GroupLocalTime.Record && (ob11Config.GroupLocalTime.RecordList[0] === '-1' || ob11Config.GroupLocalTime.RecordList.find(gid => gid == msg.group_id?.toString()))) {
-            dbUtil.insertLastSentTime(msg.group_id, msg.user_id, msg.time);
-          }
         } else if (msg.post_type === 'notice') {
           logNotice(msg).then().catch(logError);
         } else if (msg.post_type === 'request') {
@@ -534,12 +527,12 @@ export class NapCatOnebot11 {
       // log("message update", message.sendStatus, message.msgId, message.msgSeq)
       if (message.recallTime != '0') { //todo: 这个判断方法不太好，应该使用灰色消息元素来判断?
         // 撤回消息上报
-        const oriMessage = await dbUtil.getMsgByLongId(message.msgId);
-        if (!oriMessage) {
+        const oriMessageId = await MessageUnique.getShortIdByMsgId(message.msgId);
+        if (!oriMessageId) {
           continue;
         }
         if (message.chatType == ChatType.friend) {
-          const friendRecallEvent = new OB11FriendRecallNoticeEvent(parseInt(message!.senderUin), oriMessage!.id!);
+          const friendRecallEvent = new OB11FriendRecallNoticeEvent(parseInt(message!.senderUin), oriMessageId);
           postOB11Event(friendRecallEvent);
         } else if (message.chatType == ChatType.group) {
           let operatorId = message.senderUin;
@@ -552,7 +545,7 @@ export class NapCatOnebot11 {
             parseInt(message.peerUin),
             parseInt(message.senderUin),
             parseInt(operatorId),
-            oriMessage.id!
+            oriMessageId
           );
           postOB11Event(groupRecallEvent);
         }

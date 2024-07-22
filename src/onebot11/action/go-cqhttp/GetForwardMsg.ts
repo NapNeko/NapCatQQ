@@ -6,6 +6,7 @@ import { OB11Constructor } from '../../constructor';
 import { ActionName, BaseCheckResult } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import Ajv from 'ajv';
+import { MessageUnique } from '@/common/utils/MessageUnique';
 
 const SchemaData = {
   type: 'object',
@@ -29,17 +30,12 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
     if (!msgId) {
       throw Error('message_id is required');
     }
-    let rootMsg = await dbUtil.getMsgByLongId(msgId);
+    let rootMsgId = MessageUnique.getShortIdByMsgId(msgId);
+    let rootMsg = MessageUnique.getMsgIdAndPeerByShortId(rootMsgId || parseInt(msgId))
     if (!rootMsg) {
-      rootMsg = await dbUtil.getMsgByShortId(parseInt(msgId));
-      if (!rootMsg) {
-        throw Error('msg not found');
-      }
+      throw Error('msg not found');
     }
-    const data = await NTQQMsgApi.getMultiMsg({
-      chatType: rootMsg.chatType,
-      peerUid: rootMsg.peerUid
-    }, rootMsg.msgId, rootMsg.msgId);
+    const data = await NTQQMsgApi.getMultiMsg(rootMsg.Peer, rootMsg.MsgId, rootMsg.MsgId);
     if (!data || data.result !== 0) {
       throw Error('找不到相关的聊天记录' + data?.errMsg);
     }

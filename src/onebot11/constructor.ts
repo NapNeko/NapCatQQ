@@ -47,6 +47,7 @@ import { napCatCore } from '@/core';
 import { OB11FriendPokeEvent, OB11GroupPokeEvent } from './event/notice/OB11PokeEvent';
 import { OB11BaseNoticeEvent } from './event/notice/OB11BaseNoticeEvent';
 import { OB11GroupEssenceEvent } from './event/notice/OB11GroupEssenceEvent';
+import { MessageUnique } from '@/common/utils/MessageUnique';
 
 
 export class OB11Constructor {
@@ -408,11 +409,12 @@ export class OB11Constructor {
             const senderUin = emojiLikeData.gtip.qq.jp;
             const msgSeq = emojiLikeData.gtip.url.msgseq;
             const emojiId = emojiLikeData.gtip.face.id;
+            let msgList = (await NTQQMsgApi.getMsgsBySeqAndCount({ chatType: ChatType.group, guildId: '', peerUid: msg.peerUid }, msgSeq, 1, true, true)).msgList;
             const replyMsg = await dbUtil.getMsgBySeq(msg.peerUid, msgSeq);
-            if (!replyMsg) {
+            if (msgList.length < 1) {
               return;
             }
-            return new OB11GroupMsgEmojiLikeEvent(parseInt(msg.peerUid), parseInt(senderUin), replyMsg.id!, [{
+            return new OB11GroupMsgEmojiLikeEvent(parseInt(msg.peerUid), parseInt(senderUin), MessageUnique.getShortIdByMsgId(replyMsg?.msgId!)!, [{
               emoji_id: emojiId,
               count: 1
             }]);
@@ -463,7 +465,7 @@ export class OB11Constructor {
               peerUid: Group!
             };
             let msgData = await NTQQMsgApi.getMsgsBySeqAndCount(Peer, msgSeq.toString(), 1, true, true);
-            return new OB11GroupEssenceEvent(parseInt(msg.peerUid), await dbUtil.addMsg(msgData.msgList[0]), parseInt(msgData.msgList[0].senderUin));
+            return new OB11GroupEssenceEvent(parseInt(msg.peerUid), MessageUnique.getShortIdByMsgId(msgData.msgList[0].msgId)!, parseInt(msgData.msgList[0].senderUin));
             // 获取MsgSeq+Peer可获取具体消息
           }
           if (grayTipElement.jsonGrayTipElement.busiId == 2407) {

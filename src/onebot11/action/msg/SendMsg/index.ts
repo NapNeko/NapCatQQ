@@ -8,13 +8,13 @@ import {
 } from '@/onebot11/types';
 import { ActionName, BaseCheckResult } from '@/onebot11/action/types';
 import { getGroup } from '@/core/data';
-import { dbUtil } from '@/common/utils/db';
 import { ChatType, ElementType, Group, NTQQFileApi, NTQQFriendApi, NTQQMsgApi, NTQQUserApi, Peer, SendMessageElement, } from '@/core';
 import fs from 'node:fs';
 import { logDebug, logError } from '@/common/utils/log';
 import { decodeCQCode } from '@/onebot11/cqcode';
 import createSendElements from './create-send-elements';
 import { handleForwardNode } from '@/onebot11/action/msg/SendMsg/handle-forward-node';
+import { MessageUnique } from '@/common/utils/MessageUnique';
 
 export interface ReturnDataType {
   message_id: number;
@@ -66,7 +66,7 @@ export async function sendMsg(peer: Peer, sendElements: SendMessageElement[], de
   }
   const returnMsg = await NTQQMsgApi.sendMsg(peer, sendElements, waitComplete, timeout);
   try {
-    returnMsg.id = await dbUtil.addMsg(returnMsg, false);
+    returnMsg.id = await MessageUnique.createMsg({ chatType: peer.chatType, guildId: '', peerUid: peer.peerUid }, returnMsg.msgId);
   } catch (e: any) {
     logDebug('发送消息id获取失败', e);
     returnMsg.id = 0;
@@ -155,8 +155,8 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
     if (getSpecialMsgNum(payload, OB11MessageDataType.node)) {
       const returnMsg = await handleForwardNode(peer, messages as OB11MessageNode[], group);
       if (returnMsg) {
-        const msgShortId = await dbUtil.addMsg(returnMsg!, false);
-        return { message_id: msgShortId };
+        const msgShortId = await MessageUnique.createMsg({ guildId: '', peerUid: peer.peerUid, chatType: peer.chatType }, returnMsg!.msgId);
+        return { message_id: msgShortId! };
       } else {
         throw Error('发送转发消息失败');
       }

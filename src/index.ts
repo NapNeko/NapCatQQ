@@ -13,6 +13,8 @@ import { deleteOldFiles, UpdateConfig } from './common/utils/helper';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import chalk from 'chalk';
+import { randomInt } from 'crypto';
+import { MessageUnique } from './common/utils/MessageUnique';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -25,6 +27,16 @@ program
 //deleteOldFiles(path.join(__dirname, 'logs'), 3).then().catch();
 // UpdateConfig().catch(logError); 移除支持
 // 启动WebUi
+
+for (let i = 0; i < 100; i++) {
+  console.log('---------------');
+  let msgid = randomInt(1000000000).toString();
+  let shortId = MessageUnique.createMsg({ chatType: 1, peerUid: '123' }, msgid);
+  console.log(`${msgid}--->${shortId}`);
+  msgid = MessageUnique.getMsgIdAndPeerByShortId(shortId!)?.MsgId!;
+  console.log(`${msgid}<---${shortId}`);
+}
+
 InitWebUi();
 const cmdOptions = program.opts();
 // console.log(process.argv);

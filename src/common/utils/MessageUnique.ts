@@ -1,5 +1,5 @@
 import { Peer } from '@/core';
-import crypto from 'crypto';
+import crypto, { randomInt, randomUUID } from 'crypto';
 
 class LimitedHashTable<K, V> {
   private keyToValue: Map<K, V> = new Map();
@@ -17,14 +17,17 @@ class LimitedHashTable<K, V> {
     }
     this.keyToValue.set(key, value);
     this.valueToKey.set(value, key);
-    while (this.keyToValue.size !== this.valueToKey.size){
-      console.log('keyToValue.size !== valueToKey.size');
+    while (this.keyToValue.size !== this.valueToKey.size) {
+      console.log('keyToValue.size !== valueToKey.size Error Atom');
     }
+    // console.log('---------------');
+    // console.log(this.keyToValue);
+    // console.log(this.valueToKey);
+    // console.log('---------------');
     while (this.keyToValue.size > this.maxSize || this.valueToKey.size > this.maxSize) {
-      //删除旧的值
       const oldestKey = this.keyToValue.keys().next().value;
+      this.valueToKey.delete(this.keyToValue.get(oldestKey)!);
       this.keyToValue.delete(oldestKey);
-      this.valueToKey.delete(oldestKey);
     }
   }
 
@@ -91,5 +94,4 @@ class MessageUniqueWrapper {
   }
 }
 
-export const MessageUnique = new MessageUniqueWrapper();
-
+export const MessageUnique = new MessageUniqueWrapper(1000);

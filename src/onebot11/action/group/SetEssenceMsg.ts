@@ -1,8 +1,8 @@
-import { dbUtil } from '@/common/utils/db';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { NTQQGroupApi, NTQQMsgApi } from '@/core';
+import { MessageUnique } from '@/common/utils/MessageUnique';
 
 const SchemaData = {
   type: 'object',
@@ -18,13 +18,13 @@ export default class SetEssenceMsg extends BaseAction<Payload, any> {
   actionName = ActionName.SetEssenceMsg;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<any> {
-    const msg = await dbUtil.getMsgByShortId(parseInt(payload.message_id.toString()));
+    const msg = await MessageUnique.getMsgIdAndPeerByShortId(parseInt(payload.message_id.toString()));
     if (!msg) {
       throw new Error('msg not found');
     }
     return await NTQQGroupApi.addGroupEssence(
-        msg.peerUin,
-        msg.msgId
+        msg.Peer.peerUid,
+        msg.MsgId
     );
   }
 }

@@ -7,6 +7,7 @@ import { logDebug, logError } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';
 import fs from 'node:fs';
 import { normalize, sendMsg } from '@/onebot11/action/msg/SendMsg/index';
+import { MessageUnique } from '@/common/utils/MessageUnique';
 
 async function cloneMsg(msg: RawMessage): Promise<RawMessage | undefined> {
   const selfPeer = {
@@ -54,13 +55,14 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
     const nodeId = messageNode.data.id;
     // 有nodeId表示一个子转发消息卡片
     if (nodeId) {
-      const nodeMsg = await dbUtil.getMsgByShortId(parseInt(nodeId));
+      const nodeMsg =  MessageUnique.getMsgIdAndPeerByShortId(parseInt(nodeId));
       if (!needClone) {
-        nodeMsgIds.push(nodeMsg!.msgId);
+        nodeMsgIds.push(nodeMsg!.MsgId);
       } else {
-        if (nodeMsg!.peerUid !== selfInfo.uid) {
+        if (nodeMsg!.Peer.peerUid !== selfInfo.uid) {
           // need cloning
-          const clonedMsg = await cloneMsg(nodeMsg!);
+          let rawClone = await NTQQMsgApi.getMsgsByMsgId(nodeMsg?.Peer!,[nodeMsg?.MsgId!]);
+          const clonedMsg = await cloneMsg(rawClone.msgList[0]);
           if (clonedMsg) {
             nodeMsgIds.push(clonedMsg.msgId);
           }

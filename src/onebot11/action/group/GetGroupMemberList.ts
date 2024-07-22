@@ -3,13 +3,9 @@ import { OB11GroupMember } from '../../types';
 import { OB11Constructor } from '../../constructor';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { napCatCore, NTQQGroupApi, NTQQUserApi } from '@/core';
+import { NTQQGroupApi } from '@/core';
 import { WebApi } from '@/core/apis/webapi';
-import { logDebug } from '@/common/utils/log';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import { ob11Config } from '@/onebot11/config';
-import { dbUtil } from '@/common/utils/db';
-import { TypeConvert } from '@/common/utils/type';
 
 const SchemaData = {
   type: 'object',
@@ -63,15 +59,6 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
           MemberMap.set(webGroupMembers[i]?.uin, MemberData);
         }
       }
-    } else if (ob11Config.GroupLocalTime.Record && ob11Config.GroupLocalTime.RecordList[0] === '-1' || ob11Config.GroupLocalTime.RecordList.includes(payload.group_id.toString())) {
-      const _sendAndJoinRember = await dbUtil.getLastSentTimeAndJoinTime(TypeConvert.toNumber(payload.group_id));
-      _sendAndJoinRember.forEach((element) => {
-        const MemberData = MemberMap.get(element.user_id);
-        if (MemberData) {
-          MemberData.join_time = element.join_time;
-          MemberData.last_sent_time = element.last_sent_time;
-        }
-      });
     }
     // 还原索引到Array 一同返回
 
@@ -82,7 +69,7 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
     // }
 
     // _groupMembers = Array.from(retData);
-    
+
     _groupMembers = Array.from(MemberMap.values());
     return _groupMembers;
   }
