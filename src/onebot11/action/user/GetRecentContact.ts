@@ -7,6 +7,6 @@ export default class GetRecentContact extends BaseAction<void, any> {
   actionName = ActionName.GetRecentContact;
   protected async _handle(payload: void) {
     //没有效果
-    return await NTQQUserApi.getRecentContactListSync();
+    return await NTQQUserApi.getRecentContactListSnapShot(10);
   }
 }
