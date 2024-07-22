@@ -42,6 +42,7 @@ export interface OB11Config {
 }
 
 class Config extends ConfigBase<OB11Config> implements OB11Config {
+  name: string = 'onebot11'
   http = {
     enable: false,
     host: '',
@@ -71,11 +72,6 @@ class Config extends ConfigBase<OB11Config> implements OB11Config {
     Record: false,
     RecordList: [] as Array<string>
   };
-
-  getConfigPath(pathName: string) {
-    const filename = `onebot11_${pathName ? "_" : ""}${pathName}.json`
-    return path.join(this.getConfigDir(), filename);
-  }
 
   protected getKeys(): string[] | null {
     return null;

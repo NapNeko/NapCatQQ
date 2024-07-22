@@ -14,7 +14,8 @@ fs.mkdirSync(configDir, { recursive: true });
 
 
 export class ConfigBase<T> {
-
+  public name: string = 'default_config'
+  private pathName: string | null = null // 本次读取的文件路径
   constructor() {
   }
 
@@ -28,10 +29,11 @@ export class ConfigBase<T> {
     fs.mkdirSync(configDir, { recursive: true });
     return configDir;
   }
-  getConfigPath(pathName: string): string {
-    throw new Error('Method not implemented.');
+  getConfigPath(pathName: string | null): string {
+    const suffix = pathName ? `_${pathName}` : ''
+    const filename = `${this.name}${suffix}.json`
+    return path.join(this.getConfigDir(), filename);
   }
-
   read() {
     // 尝试加载当前账号配置
     if (this.read_from_file(selfInfo.uin, false)) return this
@@ -42,6 +44,7 @@ export class ConfigBase<T> {
     const configPath = this.getConfigPath(pathName);
     if (!fs.existsSync(configPath)) {
       if (!createIfNotExist) return null
+      this.pathName = pathName // 记录有效的设置文件
       try {
         fs.writeFileSync(configPath, JSON.stringify(this, this.getKeys(), 2));
         log(`配置文件${configPath}已创建\n如果修改此文件后需要重启 NapCat 生效`);
@@ -72,7 +75,7 @@ export class ConfigBase<T> {
 
   save(config: T) {
     Object.assign(this, config);
-    const configPath = this.getConfigPath();
+    const configPath = this.getConfigPath(this.pathName);
     try {
       fs.writeFileSync(configPath, JSON.stringify(this, this.getKeys(), 2));
     } catch (e: any) {
