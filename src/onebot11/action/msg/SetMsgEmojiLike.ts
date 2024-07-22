@@ -26,7 +26,7 @@ export class SetMsgEmojiLike extends BaseAction<Payload, any> {
     if (!payload.emoji_id){
       throw new Error('emojiId not found');
     }
-    let msgSeq = (await NTQQMsgApi.getMsgsByMsgId(msg.Peer, [msg.MsgId])).msgList[0].msgSeq;
+    const msgSeq = (await NTQQMsgApi.getMsgsByMsgId(msg.Peer, [msg.MsgId])).msgList[0].msgSeq;
     return await NTQQMsgApi.setEmojiLike(msg.Peer, msgSeq, payload.emoji_id.toString(), true);
   }
 }

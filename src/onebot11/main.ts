@@ -265,7 +265,7 @@ export class NapCatOnebot11 {
       //console.log('ob11 onGroupNotifiesUpdated', notifies[0]);
       if (![GroupNotifyTypes.ADMIN_SET, GroupNotifyTypes.ADMIN_UNSET, GroupNotifyTypes.ADMIN_UNSET_OTHER].includes(notifies[0].type)) {
         this.postGroupNotifies(notifies).then().catch(e => logError('postGroupNotifies error: ', e));
-      };
+      }
     };
     groupListener.onMemberInfoChange = async (groupCode: string, changeType: number, members: Map<string, GroupMember>) => {
       //console.log("ob11 onMemberInfoChange", groupCode, changeType, members)

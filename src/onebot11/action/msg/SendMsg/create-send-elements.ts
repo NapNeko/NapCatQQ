@@ -28,7 +28,7 @@ async function handleOb11FileLikeMessage(
   { data: { file, name: payloadFileName } }: OB11MessageFileBase,
   { deleteAfterSentFiles }: MessageContext
 ) {
-  let uri = file;
+  const uri = file;
 
   // const cache = await dbUtil.getFileCacheByName(file);
   // if (cache) {

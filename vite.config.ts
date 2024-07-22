@@ -10,8 +10,7 @@ import fs from 'node:fs';
 import babel from 'vite-plugin-babel';
 import { version } from 'os';
 // "@rollup/plugin-babel": "^6.0.4",
-const external = ['silk-wasm', 'ws', 'express', 'uuid', 'fluent-ffmpeg', 'sqlite3', 'log4js',
-  'qrcode-terminal'];
+const external = ['silk-wasm', 'ws', 'express', 'uuid', 'fluent-ffmpeg', 'log4js', 'qrcode-terminal'];
 
 const nodeModules = [...builtinModules, builtinModules.map(m => `node:${m}`)].flat();
 // let nodeModules = ["fs", "path", "events", "buffer", "url", "crypto", "fs/promise", "fsPromise", "os", "http", "net"]
@@ -28,9 +27,9 @@ if (process.env.NAPCAT_BUILDSYS == 'linux') {
 } else if (process.env.NAPCAT_BUILDSYS == 'win32') {
   if (process.env.NAPCAT_BUILDARCH == 'x64') {
   }
-  startScripts = ['./script/napcat.ps1', './script/napcat.bat', './script/napcat-utf8.bat', './script/napcat-utf8.ps1', './script/napcat-log.ps1','./script/NapCat.164.bat','./script/napcat-9912.ps1','./script/napcat-9912-utf8.ps1','./script/napcat-9912.bat','./script/napcat-9912-utf8.bat'];
+  startScripts = ['./script/napcat.ps1', './script/napcat.bat', './script/napcat-utf8.bat', './script/napcat-utf8.ps1', './script/napcat-log.ps1', './script/NapCat.164.bat', './script/napcat-9912.ps1', './script/napcat-9912-utf8.ps1', './script/napcat-9912.bat', './script/napcat-9912-utf8.bat'];
 } else {
-  startScripts = ['./script/napcat.sh', './script/napcat.ps1', './script/napcat.bat', './script/napcat-utf8.bat', './script/napcat-utf8.ps1', './script/napcat-log.ps1','./script/napcat-9912.ps1','./script/napcat-9912-utf8.ps1','./script/napcat-9912.bat','./script/napcat-9912-utf8.bat'];
+  startScripts = ['./script/napcat.sh', './script/napcat.ps1', './script/napcat.bat', './script/napcat-utf8.bat', './script/napcat-utf8.ps1', './script/napcat-log.ps1', './script/napcat-9912.ps1', './script/napcat-9912-utf8.ps1', './script/napcat-9912.bat', './script/napcat-9912-utf8.bat'];
 }
 
 const baseConfigPlugin: PluginOption[] = [
@@ -107,7 +106,7 @@ export default defineConfig(({ mode }): UserConfig => {
     return {
       ...baseConfig(mode),
       plugins: [
-         ...baseConfigPlugin,
+        ...baseConfigPlugin,
         // {
         //   ...(obfuscator({
         //     options: {

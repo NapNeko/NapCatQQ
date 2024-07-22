@@ -27,12 +27,12 @@ class GetMsg extends BaseAction<Payload, OB11Message> {
     if (!payload.message_id) {
       throw Error('参数message_id不能为空');
     }
-    let MsgShortId = await MessageUnique.getShortIdByMsgId(payload.message_id.toString());
-    let msgIdWithPeer = await MessageUnique.getMsgIdAndPeerByShortId(MsgShortId || parseInt(payload.message_id.toString()));
+    const MsgShortId = await MessageUnique.getShortIdByMsgId(payload.message_id.toString());
+    const msgIdWithPeer = await MessageUnique.getMsgIdAndPeerByShortId(MsgShortId || parseInt(payload.message_id.toString()));
     if (!msgIdWithPeer) {
       throw ('消息不存在');
     }
-    let msg = await NTQQMsgApi.getMsgsByMsgId(
+    const msg = await NTQQMsgApi.getMsgsByMsgId(
       { guildId: '', peerUid: msgIdWithPeer?.Peer.peerUid, chatType: msgIdWithPeer.Peer.chatType },
       [msgIdWithPeer?.MsgId || payload.message_id.toString()]);
     return await OB11Constructor.message(msg.msgList[0]);

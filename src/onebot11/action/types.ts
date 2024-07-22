@@ -94,9 +94,9 @@ export enum ActionName {
     CreateCollection = 'create_collection',
     GetCollectionList = 'get_collection_list',
     SetLongNick = 'set_self_longnick',
-    SetEssenceMsg = "set_essence_msg",
-    DelEssenceMsg = "delete_essence_msg",
-    GetRecentContact = "get_recent_contact",
-    _MarkAllMsgAsRead = "_mark_all_as_read",
-    GetProfileLike = "get_profile_like"
+    SetEssenceMsg = 'set_essence_msg',
+    DelEssenceMsg = 'delete_essence_msg',
+    GetRecentContact = 'get_recent_contact',
+    _MarkAllMsgAsRead = '_mark_all_as_read',
+    GetProfileLike = 'get_profile_like'
 }
