@@ -276,30 +276,32 @@ export class NapCatOnebot11 {
           member = value;
           break;
         }
-        const existMembers = groupMembers.get(groupCode);
-        if (existMembers) {
-          const existMember = existMembers.get(member.uid);
-          if (existMember) {
-            if (existMember.isChangeRole) {
-              //console.log("ob11 onMemberInfoChange:eventMember:localMember", member, existMember)
-              const notify: GroupNotify[] = [
-                {
-                  time: Date.now(),
-                  seq: (Date.now() * 1000 * 1000).toString(),
-                  type: member.role === GroupMemberRole.admin ? GroupNotifyTypes.ADMIN_SET : GroupNotifyTypes.ADMIN_UNSET_OTHER, // 8 设置; 13 取消
-                  status: 0,
-                  group: { groupCode: groupCode, groupName: '' },
-                  user1: { uid: member.uid, nickName: member.nick },
-                  user2: { uid: member.uid, nickName: member.nick },
-                  actionUser: { uid: '', nickName: '' },
-                  actionTime: '0',
-                  invitationExt: { srcType: 0, groupCode: '0', waitStatus: 0 },
-                  postscript: '',
-                  repeatSeqs: [],
-                  warningTips: ''
-                }
-              ];
-              this.postGroupNotifies(notify).then().catch(e => logError('postGroupNotifies error: ', e));
+        if (member) {
+          const existMembers = groupMembers.get(groupCode);
+          if (existMembers) {
+            const existMember = existMembers.get(member.uid);
+            if (existMember) {
+              if (existMember.isChangeRole) {
+                //console.log("ob11 onMemberInfoChange:eventMember:localMember", member, existMember)
+                const notify: GroupNotify[] = [
+                  {
+                    time: Date.now(),
+                    seq: (Date.now() * 1000 * 1000).toString(),
+                    type: member.role === GroupMemberRole.admin ? GroupNotifyTypes.ADMIN_SET : GroupNotifyTypes.ADMIN_UNSET_OTHER, // 8 设置; 13 取消
+                    status: 0,
+                    group: { groupCode: groupCode, groupName: '' },
+                    user1: { uid: member.uid, nickName: member.nick },
+                    user2: { uid: member.uid, nickName: member.nick },
+                    actionUser: { uid: '', nickName: '' },
+                    actionTime: '0',
+                    invitationExt: { srcType: 0, groupCode: '0', waitStatus: 0 },
+                    postscript: '',
+                    repeatSeqs: [],
+                    warningTips: ''
+                  }
+                ];
+                this.postGroupNotifies(notify).then().catch(e => logError('postGroupNotifies error: ', e));
+              }
             }
           }
         }
