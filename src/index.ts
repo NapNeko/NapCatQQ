@@ -21,7 +21,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const tagColor = chalk.cyan;
 program
-  .option('-q, --qq <type>', 'QQ号')
+  .option('-q, --qq [type]', 'QQ号')
   .parse(process.argv);
 
 //deleteOldFiles(path.join(__dirname, 'logs'), 3).then().catch();
@@ -69,7 +69,18 @@ const showQRCode = async (url: string, base64: string, buffer: Buffer) => {
     });
   });
 };
-const quickLoginQQ = cmdOptions.qq;
+
+let quickLoginQQ = cmdOptions.qq;
+const QuickLoginList = await napCatCore.getQuickLoginList();
+if (quickLoginQQ == true) {
+  if (QuickLoginList.LocalLoginInfoList.length > 0) {
+    quickLoginQQ = QuickLoginList.LocalLoginInfoList[0].uin;
+    log('-q 指令指定使用最近的QQ进行快速登录');
+  } else {
+    quickLoginQQ = '';
+  }
+}
+
 // napCatCore.on('system.login.error', (result) => {
 //   console.error('登录失败', result);
 //   napCatCore.qrLogin().then().catch(console.error);
@@ -107,11 +118,14 @@ if (quickLoginQQ) {
       logError('快速登录错误:', res.loginErrorInfo.errMsg);
     }
   }).catch((e) => {
-    logError(e);
+    logError('快速登录错误:', e);
     napCatCore.qrLogin(showQRCode);
   });
 } else {
-  log('没有 -q 参数指定快速登录的QQ，将使用二维码登录方式');
+  log('没有 -q 指令指定快速登录，将使用二维码登录方式');
+  if (QuickLoginList.LocalLoginInfoList.length > 0) {
+    log(`可用于快速登录的QQ：${QuickLoginList.LocalLoginInfoList.map((u, index) => `\n${index}: ${u.uin} ${u.nickName}`)}`);
+  }
   napCatCore.qrLogin(showQRCode);
 }
 

@@ -1,4 +1,5 @@
 import { WebSocket, WebSocketServer } from 'ws';
+import http from 'http';
 import urlParse from 'url';
 import { IncomingMessage } from 'node:http';
 import { log } from '@/common/utils/log';
@@ -27,17 +28,36 @@ export class WebsocketServerBase {
   constructor() {
   }
 
-  start(port: number, host: string = '') {
-    try {
-      this.ws = new WebSocketServer({
-        port,
-        host: '',
-        maxPayload: 1024 * 1024 * 1024
-      }).on('error', () => {
-      });
-      log(`ws服务启动成功, ${host}:${port}`);
-    } catch (e: any) {
-      throw Error('ws服务启动失败, 请检查监听的ip和端口' + e.toString());
+  start(port: number | http.Server, host: string = '') {
+    if (port instanceof http.Server) {
+      try {
+        const wss = new WebSocketServer({
+            noServer: true,
+            maxPayload: 1024 * 1024 * 1024
+          }).on('error', () => {
+          });
+        this.ws = wss;
+        port.on('upgrade', function upgrade(request, socket, head) {
+          wss.handleUpgrade(request, socket, head, function done(ws) {
+            wss.emit('connection', ws, request);
+          });
+        });
+        log(`ws服务启动成功, 绑定到HTTP服务`);
+      } catch (e: any) {
+        throw Error('ws服务启动失败, 可能是绑定的HTTP服务异常' + e.toString());
+      }
+    } else {
+      try {
+        this.ws = new WebSocketServer({
+          port,
+          host: '',
+          maxPayload: 1024 * 1024 * 1024
+        }).on('error', () => {
+        });
+        log(`ws服务启动成功, ${host}:${port}`);
+      } catch (e: any) {
+        throw Error('ws服务启动失败, 请检查监听的ip和端口' + e.toString());
+      }
     }
     this.ws.on('connection', (wsClient, req) => {
       const url: string = req.url!.split('?').shift() || '/';

@@ -73,7 +73,11 @@ export class NapCatOnebot11 {
       ob11HTTPServer.start(ob11Config.http.port, ob11Config.http.host);
     }
     if (ob11Config.ws.enable) {
-      ob11WebsocketServer.start(ob11Config.ws.port, ob11Config.ws.host);
+      if (ob11Config.http.port == ob11Config.ws.port && ob11Config.http.host == ob11Config.ws.host && ob11HTTPServer.server) {
+        ob11WebsocketServer.start(ob11HTTPServer.server);
+      } else {
+        ob11WebsocketServer.start(ob11Config.ws.port, ob11Config.ws.host);
+      }
     }
     if (ob11Config.reverseWs.enable) {
       ob11ReverseWebsockets.start();
