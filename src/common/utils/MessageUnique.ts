@@ -9,6 +9,9 @@ class LimitedHashTable<K, V> {
   constructor(maxSize: number) {
     this.maxSize = maxSize;
   }
+  resize(count: number) {
+    this.maxSize = count;
+  }
 
   set(key: K, value: V): void {
     const isExist = this.keyToValue.get(key);
@@ -19,6 +22,8 @@ class LimitedHashTable<K, V> {
     this.valueToKey.set(value, key);
     while (this.keyToValue.size !== this.valueToKey.size) {
       console.log('keyToValue.size !== valueToKey.size Error Atom');
+      this.keyToValue.clear();
+      this.valueToKey.clear();
     }
     // console.log('---------------');
     // console.log(this.keyToValue);
@@ -71,7 +76,7 @@ class MessageUniqueWrapper {
     const shortId = parseInt(hash.digest('hex').slice(0, 8), 16);
     const isExist = this.msgIdMap.getKey(shortId);
     if (isExist && isExist === msgId) {
-      return undefined;
+      return shortId;
     }
     this.msgIdMap.set(msgId, shortId);
     this.msgDataMap.set(key, shortId);
@@ -100,6 +105,10 @@ class MessageUniqueWrapper {
     if (!shortId) return undefined;
     return this.getMsgIdAndPeerByShortId(shortId);
   }
+  resize(maxSize: number): void {
+    this.msgIdMap.resize(maxSize);
+    this.msgDataMap.resize(maxSize);
+  }
 }
 
-export const MessageUnique = new MessageUniqueWrapper(1000);
+export const MessageUnique: MessageUniqueWrapper = new MessageUniqueWrapper();
