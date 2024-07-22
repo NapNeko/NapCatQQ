@@ -333,9 +333,6 @@ export class NapCatOnebot11 {
     const { debug, reportSelfMessage } = ob11Config;
     for (const message of msgList) {
       logDebug('收到新消息', message);
-      // if (message.senderUin !== selfInfo.uin){
-      // message.msgShortId = await dbUtil.addMsg(message);
-      // }
       OB11Constructor.message(message).then((msg) => {
         logDebug('收到消息: ', msg);
         if (debug) {

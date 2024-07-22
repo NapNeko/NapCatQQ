@@ -7,7 +7,6 @@ import {
   ChatCacheListItemBasic,
   CacheFileType
 } from '@/core/entities';
-import { dbUtil } from '@/common/utils/db';
 import { NTQQFileApi, NTQQFileCacheApi } from '@/core/apis/file';
 import { logError } from '@/common/utils/log';
 
