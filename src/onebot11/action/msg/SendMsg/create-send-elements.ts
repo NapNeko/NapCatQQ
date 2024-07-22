@@ -5,13 +5,13 @@ import {
   Group,
   IdMusicSignPostData,
   NTQQFileApi,
+  NTQQMsgApi,
   SendArkElement,
   SendMessageElement,
   SendMsgElementConstructor,
   SignMusicWrapper
 } from '@/core';
 import { getGroupMember } from '@/core/data';
-import { dbUtil } from '@/common/utils/db';
 import { logDebug, logError } from '@/common/utils/log';
 import { uri2local } from '@/common/utils/file';
 import { ob11Config } from '@/onebot11/config';
@@ -30,25 +30,25 @@ async function handleOb11FileLikeMessage(
 ) {
   let uri = file;
 
-  const cache = await dbUtil.getFileCacheByName(file);
-  if (cache) {
-    if (fs.existsSync(cache.path)) {
-      uri = 'file://' + cache.path;
-    } else if (cache.url) {
-      uri = cache.url;
-    } else {
-      const fileMsgPeer = MessageUnique.getPeerByMsgId(cache.msgId);
-      if (fileMsgPeer) {
-        cache.path = await NTQQFileApi.downloadMedia(
-          fileMsgPeer.MsgId, fileMsgPeer.Peer.chatType, fileMsgPeer.Peer.peerUid,
-          cache.elementId, '', ''
-        );
-        uri = 'file://' + cache.path;
-        dbUtil.updateFileCache(cache);
-      }
-    }
-    logDebug('找到文件缓存', uri);
-  }
+  // const cache = await dbUtil.getFileCacheByName(file);
+  // if (cache) {
+  //   if (fs.existsSync(cache.path)) {
+  //     uri = 'file://' + cache.path;
+  //   } else if (cache.url) {
+  //     uri = cache.url;
+  //   } else {
+  //     const fileMsgPeer = MessageUnique.getPeerByMsgId(cache.msgId);
+  //     if (fileMsgPeer) {
+  //       cache.path = await NTQQFileApi.downloadMedia(
+  //         fileMsgPeer.MsgId, fileMsgPeer.Peer.chatType, fileMsgPeer.Peer.peerUid,
+  //         cache.elementId, '', ''
+  //       );
+  //       uri = 'file://' + cache.path;
+  //       dbUtil.updateFileCache(cache);
+  //     }
+  //   }
+  //   logDebug('找到文件缓存', uri);
+  // }
 
   const { path, isLocal, fileName, errMsg } = (await uri2local(uri));
 
@@ -87,7 +87,8 @@ const _handlers: {
   },
 
   [OB11MessageDataType.reply]: async ({ data: { id } }) => {
-    const replyMsg = await dbUtil.getMsgByShortId(parseInt(id));
+    const replyMsgM = MessageUnique.getMsgIdAndPeerByShortId(parseInt(id));
+    const replyMsg = (await NTQQMsgApi.getMsgsByMsgId(replyMsgM?.Peer!, [replyMsgM?.MsgId!])).msgList[0];
     return replyMsg ?
       SendMsgElementConstructor.reply(replyMsg.msgSeq, replyMsg.msgId, replyMsg.senderUin!, replyMsg.senderUin!) :
       undefined;

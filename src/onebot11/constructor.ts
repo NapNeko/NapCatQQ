@@ -42,7 +42,6 @@ import { ob11Config } from '@/onebot11/config';
 import { deleteGroup, getGroupMember, groupMembers, selfInfo, tempGroupCodeMap } from '@/core/data';
 import { NTQQFileApi, NTQQGroupApi, NTQQMsgApi, NTQQUserApi } from '@/core/apis';
 import { OB11GroupMsgEmojiLikeEvent } from '@/onebot11/event/notice/OB11MsgEmojiLikeEvent';
-import { napCatCore } from '@/core';
 import { OB11FriendPokeEvent, OB11GroupPokeEvent } from './event/notice/OB11PokeEvent';
 import { OB11BaseNoticeEvent } from './event/notice/OB11BaseNoticeEvent';
 import { OB11GroupEssenceEvent } from './event/notice/OB11GroupEssenceEvent';
@@ -178,17 +177,17 @@ export class OB11Constructor {
         //console.log(message_data['data']['url'])
         // message_data["data"]["file_id"] = element.picElement.fileUuid
         message_data['data']['file_size'] = element.picElement.fileSize;
-        dbUtil.addFileCache({
-          name: element.picElement.fileName,
-          path: element.picElement.sourcePath,
-          size: element.picElement.fileSize,
-          url: message_data['data']['url'],
-          uuid: element.picElement.fileUuid || '',
-          msgId: msg.msgId,
-          element: element.picElement,
-          elementType: ElementType.PIC,
-          elementId: element.elementId
-        }).then();
+        // dbUtil.addFileCache({
+        //   name: element.picElement.fileName,
+        //   path: element.picElement.sourcePath,
+        //   size: element.picElement.fileSize,
+        //   url: message_data['data']['url'],
+        //   uuid: element.picElement.fileUuid || '',
+        //   msgId: msg.msgId,
+        //   element: element.picElement,
+        //   elementType: ElementType.PIC,
+        //   elementId: element.elementId
+        // }).then();
         // 不自动下载图片
 
       }
@@ -203,17 +202,18 @@ export class OB11Constructor {
         message_data['data']['file_id'] = videoOrFileElement.fileUuid;
         message_data['data']['file_size'] = videoOrFileElement.fileSize;
         if (!element.videoElement) {
-          dbUtil.addFileCache({
-            msgId: msg.msgId,
-            name: videoOrFileElement.fileName,
-            path: videoOrFileElement.filePath,
-            size: parseInt(videoOrFileElement.fileSize || '0'),
-            uuid: videoOrFileElement.fileUuid || '',
-            url: '',
-            element: element.videoElement || element.fileElement,
-            elementType: element.videoElement ? ElementType.VIDEO : ElementType.FILE,
-            elementId: element.elementId
-          }).then();
+        //   dbUtil.addFileCache({
+        //     msgId: msg.msgId,
+        //     name: videoOrFileElement.fileName,
+        //     path: videoOrFileElement.filePath,
+        //     size: parseInt(videoOrFileElement.fileSize || '0'),
+        //     uuid: videoOrFileElement.fileUuid || '',
+        //     url: '',
+        //     element: element.videoElement || element.fileElement,
+        //     elementType: element.videoElement ? ElementType.VIDEO : ElementType.FILE,
+        //     elementId: element.elementId
+        //   }).then();
+        // }
         }
       }
       else if (element.pttElement) {
@@ -222,17 +222,17 @@ export class OB11Constructor {
         message_data['data']['path'] = element.pttElement.filePath;
         // message_data["data"]["file_id"] = element.pttElement.fileUuid
         message_data['data']['file_size'] = element.pttElement.fileSize;
-        dbUtil.addFileCache({
-          name: element.pttElement.fileName,
-          path: element.pttElement.filePath,
-          size: parseInt(element.pttElement.fileSize) || 0,
-          url: '',
-          uuid: element.pttElement.fileUuid || '',
-          msgId: msg.msgId,
-          element: element.pttElement,
-          elementType: ElementType.PTT,
-          elementId: element.elementId
-        }).then();
+        // dbUtil.addFileCache({
+        //   name: element.pttElement.fileName,
+        //   path: element.pttElement.filePath,
+        //   size: parseInt(element.pttElement.fileSize) || 0,
+        //   url: '',
+        //   uuid: element.pttElement.fileUuid || '',
+        //   msgId: msg.msgId,
+        //   element: element.pttElement,
+        //   elementType: ElementType.PTT,
+        //   elementId: element.elementId
+        // }).then();
 
       }
       else if (element.arkElement) {

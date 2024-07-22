@@ -4,7 +4,6 @@ import crypto from 'crypto';
 import util from 'util';
 import path from 'node:path';
 import { log, logError } from './log';
-import { dbUtil } from '@/common/utils/db';
 import * as fileType from 'file-type';
 import { v4 as uuidv4 } from 'uuid';
 import { napCatCore } from '@/core';
@@ -251,13 +250,14 @@ export async function uri2local(uri: string, fileName: string | null = null): Pr
       } else {
         filePath = pathname;
       }
-    } else {
-      const cache = await dbUtil.getFileCacheByName(uri);
-      if (cache) {
-        filePath = cache.path;
-      } else {
-        filePath = uri;
-      }
+    } 
+    else {
+      // const cache = await dbUtil.getFileCacheByName(uri);
+      // if (cache) {
+      //   filePath = cache.path;
+      // } else {
+      //   filePath = uri;
+      // }
     }
 
     res.isLocal = true;

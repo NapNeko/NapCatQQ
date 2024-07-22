@@ -4,7 +4,6 @@ import { selfInfo } from '@/core/data';
 import createSendElements from '@/onebot11/action/msg/SendMsg/create-send-elements';
 import { logDebug, logError } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';
-import fs from 'node:fs';
 import { normalize, sendMsg } from '@/onebot11/action/msg/SendMsg/index';
 import { MessageUnique } from '@/common/utils/MessageUnique';
 
