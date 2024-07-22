@@ -187,11 +187,12 @@ export class NTQQMsgApi {
     };
     await waitLastSend();
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       let completed = false;
       let sentMessage: RawMessage | null = null;
       const sendSuccessCBId = randomUUID() as string;
       sendSuccessCBMap[sendSuccessCBId] = (msgRecord: RawMessage) => {
+        console.log(msgRecord);
         if (msgRecord.msgId === sentMessage?.msgId) {
           if (msgRecord.sendStatus === 2) {
             delete sendSuccessCBMap[sendSuccessCBId];
@@ -214,10 +215,17 @@ export class NTQQMsgApi {
         delete sendSuccessCBMap[sendSuccessCBId];
         reject('发送超时');
       }, timeout);
-      const result = napCatCore.session.getMsgService().sendMsg('0', peer, msgElements, new Map());
+      let msgId = await NTQQMsgApi.getMsgUnique(await NTQQMsgApi.getServerTime());
+      console.log(msgId);
+      const result = napCatCore.session.getMsgService().sendMsg(msgId, peer, msgElements, new Map());
     });
   }
-
+  static async getMsgUnique(time: string) {
+    return napCatCore.session.getMsgService().getMsgUniqueId(time);
+  }
+  static async getServerTime() {
+    return napCatCore.session.getMSFService().getServerTime();
+  }
   static async forwardMsg(srcPeer: Peer, destPeer: Peer, msgIds: string[]) {
     return napCatCore.session.getMsgService().forwardMsg(msgIds, srcPeer, [destPeer], new Map());
   }

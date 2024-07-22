@@ -40,6 +40,7 @@ import { NodeIKernelUnitedConfigService } from './services/NodeIKernelUnitedConf
 import { NodeIKernelSearchService } from './services/NodeIKernelSearchService';
 import { NodeIKernelCollectionService } from './services/NodeIKernelCollectionService';
 import { NodeIKernelRecentContactService } from './services/NodeIKernelRecentContactService';
+import { NodeIKernelMSFService } from './services/NodeIKernelMSFService';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -231,7 +232,7 @@ export interface NodeIQQNTWrapperSession {
 
   getLockService(): unknown;
 
-  getMSFService(): unknown
+  getMSFService(): NodeIKernelMSFService;
 
   getGuildHotUpdateService(): unknown;
 
