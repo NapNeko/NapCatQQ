@@ -12,17 +12,18 @@ export interface NapCatConfig {
   consoleLogLevel: LogLevel,
 }
 
-class Config extends ConfigBase<NapCatConfig> implements NapCatConfig{
+class Config extends ConfigBase<NapCatConfig> implements NapCatConfig {
   fileLog = true;
   consoleLog = true;
-  fileLogLevel  = LogLevel.DEBUG;
-  consoleLogLevel  = LogLevel.INFO;
+  fileLogLevel = LogLevel.DEBUG;
+  consoleLogLevel = LogLevel.INFO;
 
   constructor() {
     super();
   }
-  getConfigPath() {
-    return path.join(this.getConfigDir(), `napcat_${selfInfo.uin}.json`);
+  getConfigPath(pathName: string) {
+    const filename = `napcat${pathName ? "_" : ""}${pathName}.json`
+    return path.join(this.getConfigDir(), filename);
   }
 }
 
