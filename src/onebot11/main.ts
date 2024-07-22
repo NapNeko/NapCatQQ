@@ -22,7 +22,7 @@ import { ob11ReverseWebsockets } from '@/onebot11/server/ws/ReverseWebsocket';
 import { getGroup, getGroupMember, groupMembers, selfInfo, tempGroupCodeMap } from '@/core/data';
 import { BuddyListener, GroupListener, NodeIKernelBuddyListener } from '@/core/listeners';
 import { OB11FriendRequestEvent } from '@/onebot11/event/request/OB11FriendRequest';
-import { NTQQGroupApi, NTQQUserApi, SignMusicWrapper } from '@/core/apis';
+import { NTQQUserApi } from '@/core/apis';
 import { log, logDebug, logError, setLogSelfInfo } from '@/common/utils/log';
 import { OB11GroupRequestEvent } from '@/onebot11/event/request/OB11GroupRequest';
 import { OB11GroupAdminNoticeEvent } from '@/onebot11/event/notice/OB11GroupAdminNoticeEvent';
@@ -31,10 +31,6 @@ import { OB11FriendRecallNoticeEvent } from '@/onebot11/event/notice/OB11FriendR
 import { OB11GroupRecallNoticeEvent } from '@/onebot11/event/notice/OB11GroupRecallNoticeEvent';
 import { logMessage, logNotice, logRequest } from '@/onebot11/log';
 import { OB11Message } from '@/onebot11/types';
-import { OB11LifeCycleEvent } from './event/meta/OB11LifeCycleEvent';
-import { Data as SysData } from '@/proto/SysMessage';
-import { Data as DeviceData } from '@/proto/SysMessage.DeviceChange';
-import { OB11FriendPokeEvent, OB11GroupPokeEvent } from './event/notice/OB11PokeEvent';
 import { isEqual } from '@/common/utils/helper';
 import { MessageUnique } from '@/common/utils/MessageUnique';
 
@@ -89,109 +85,109 @@ export class NapCatOnebot11 {
     // Create MsgListener
     const msgListener = new MsgListener();
     msgListener.onRecvSysMsg = async (protobufData: number[]) => {
-      function buf2hex(buffer: Buffer) {
-        return [...new Uint8Array(buffer)]
-          .map(x => x.toString(16).padStart(2, '0'))
-          .join('');
-      }
-      // let Data: Data = {
-      //   header: {
-      //     GroupNumber: 0,
-      //     GroupString: '',
-      //     QQ: 0,
-      //     Uid: '',
-      //   },
-      //   Body: {
-      //     MsgType: 0,
-      //     SubType_0: 0,
-      //     SubType_1: 0,
-      //     MsgSeq: 0,
-      //     Time: 0,
-      //     MsgID: 0,
-      //     Other: 0,
+      // function buf2hex(buffer: Buffer) {
+      //   return [...new Uint8Array(buffer)]
+      //     .map(x => x.toString(16).padStart(2, '0'))
+      //     .join('');
+      // }
+      // // let Data: Data = {
+      // //   header: {
+      // //     GroupNumber: 0,
+      // //     GroupString: '',
+      // //     QQ: 0,
+      // //     Uid: '',
+      // //   },
+      // //   Body: {
+      // //     MsgType: 0,
+      // //     SubType_0: 0,
+      // //     SubType_1: 0,
+      // //     MsgSeq: 0,
+      // //     Time: 0,
+      // //     MsgID: 0,
+      // //     Other: 0,
+      // //   }
+      // // };
+      // try {
+      //   // 生产环境会自己去掉
+      //   const hex = buf2hex(Buffer.from(protobufData));
+      //   //console.log(hex);
+      //   const sysMsg = SysData.fromBinary(Buffer.from(protobufData));
+      //   const peeruin = sysMsg.header[0].peerNumber;
+      //   const peeruid = sysMsg.header[0].peerString;
+      //   const MsgType = sysMsg.body[0].msgType;
+      //   const subType0 = sysMsg.body[0].subType0;
+      //   const subType1 = sysMsg.body[0].subType1;
+      //   // let pokeEvent: OB11FriendPokeEvent | OB11GroupPokeEvent;
+      //   // //console.log(peeruid);
+      //   // if (MsgType == 528 && subType0 == 290 && hex.length < 250 && hex.endsWith('04')) {
+      //   //   // 防止上报两次 私聊戳一戳
+      //   //   if (PokeCache.has(peeruid)) {
+      //   //     //log('[私聊] 用户 ', peeruin, ' 对你戳一戳');
+      //   //     pokeEvent = new OB11FriendPokeEvent(parseInt(selfInfo.uin), peeruin);
+      //   //     postOB11Event(pokeEvent);
+      //   //   }
+      //   //   PokeCache.set(peeruid, false);
+      //   //   setTimeout(() => {
+      //   //     PokeCache.delete(peeruid);
+      //   //   }, 1000);
+      //   // }
+      //   // if (MsgType == 732 && subType0 == 20 && hex.length < 150 && hex.endsWith('04')) {
+      //   //   // 防止上报两次 群聊戳一戳
+      //   //   if (PokeCache.has(peeruid)) {
+      //   //     log('[群聊] 群组 ', peeruin, ' 戳一戳');
+      //   //     pokeEvent = new OB11GroupPokeEvent(peeruin);
+      //   //     postOB11Event(pokeEvent);
+      //   //   }
+      //   //   PokeCache.set(peeruid, false);
+      //   //   setTimeout(() => {
+      //   //     PokeCache.delete(peeruid);
+      //   //   }, 1000);
+      //   // }
+      //   if (MsgType == 528 && subType0 == 349) {
+      //     const sysDeviceMsg = DeviceData.fromBinary(Buffer.from(protobufData));
+      //     DeviceList = [];
+      //     sysDeviceMsg.event[0].content[0].devices.forEach(device => {
+      //       DeviceList.push({
+      //         app_id: '0',
+      //         device_name: device.deviceName,
+      //         device_kind: 'none'
+      //       });
+      //       // log('[设备列表] 设备名称: ' + device.deviceName);
+      //     });
       //   }
-      // };
-      try {
-        // 生产环境会自己去掉
-        const hex = buf2hex(Buffer.from(protobufData));
-        //console.log(hex);
-        const sysMsg = SysData.fromBinary(Buffer.from(protobufData));
-        const peeruin = sysMsg.header[0].peerNumber;
-        const peeruid = sysMsg.header[0].peerString;
-        const MsgType = sysMsg.body[0].msgType;
-        const subType0 = sysMsg.body[0].subType0;
-        const subType1 = sysMsg.body[0].subType1;
-        // let pokeEvent: OB11FriendPokeEvent | OB11GroupPokeEvent;
-        // //console.log(peeruid);
-        // if (MsgType == 528 && subType0 == 290 && hex.length < 250 && hex.endsWith('04')) {
-        //   // 防止上报两次 私聊戳一戳
-        //   if (PokeCache.has(peeruid)) {
-        //     //log('[私聊] 用户 ', peeruin, ' 对你戳一戳');
-        //     pokeEvent = new OB11FriendPokeEvent(parseInt(selfInfo.uin), peeruin);
-        //     postOB11Event(pokeEvent);
-        //   }
-        //   PokeCache.set(peeruid, false);
-        //   setTimeout(() => {
-        //     PokeCache.delete(peeruid);
-        //   }, 1000);
-        // }
-        // if (MsgType == 732 && subType0 == 20 && hex.length < 150 && hex.endsWith('04')) {
-        //   // 防止上报两次 群聊戳一戳
-        //   if (PokeCache.has(peeruid)) {
-        //     log('[群聊] 群组 ', peeruin, ' 戳一戳');
-        //     pokeEvent = new OB11GroupPokeEvent(peeruin);
-        //     postOB11Event(pokeEvent);
-        //   }
-        //   PokeCache.set(peeruid, false);
-        //   setTimeout(() => {
-        //     PokeCache.delete(peeruid);
-        //   }, 1000);
-        // }
-        if (MsgType == 528 && subType0 == 349) {
-          const sysDeviceMsg = DeviceData.fromBinary(Buffer.from(protobufData));
-          DeviceList = [];
-          sysDeviceMsg.event[0].content[0].devices.forEach(device => {
-            DeviceList.push({
-              app_id: '0',
-              device_name: device.deviceName,
-              device_kind: 'none'
-            });
-            // log('[设备列表] 设备名称: ' + device.deviceName);
-          });
-        }
-        // 未区分增加与减少
-        // if (MsgType == 34 && subType0 == 0) {
-        //   const role = (await getGroupMember(peeruin, selfInfo.uin))?.role;
-        //   const isPrivilege = role === 3 || role === 4;
-        //   if (!isPrivilege) {
-        //     const leaveUin = 
-        //     log('[群聊] 群组 ', peeruin, ' 成员' + leaveUin + '退出');
-        //     const groupDecreaseEvent = new OB11GroupDecreaseEvent(peeruin, parseInt(leaveUin), 0, 'leave');// 不知道怎么出去的
-        //     postOB11Event(groupDecreaseEvent, true);
-        //   }
-        // }
-        // MsgType (SubType) EventName
-        // 33 GroupMemIncreased
-        // 34 GroupMemberDecreased
-        // 44 GroupAdminChange
-        // 82 GroupMessage
-        // 84 GroupApply
-        // 87 InviteGroup
-        // 528 35  FriendApply
-        // 528 39  CardChange
-        // 528 68  GroupApply
-        // 528 138 C2CRecall
-        // 528 290 C2CPoke
-        // 528 349 DeviceChange
-        // 732 12  GroupBan
-        // 732 16  GroupUniqueTitleChange
-        // 732 17  GroupRecall
-        // 732 20  GroupCommonTips
-        // 732 21  EssenceMessage
-      } catch (e) {
-        log('解析SysMsg异常', e);
-        // console.log(e);
-      }
+      //   // 未区分增加与减少
+      //   // if (MsgType == 34 && subType0 == 0) {
+      //   //   const role = (await getGroupMember(peeruin, selfInfo.uin))?.role;
+      //   //   const isPrivilege = role === 3 || role === 4;
+      //   //   if (!isPrivilege) {
+      //   //     const leaveUin = 
+      //   //     log('[群聊] 群组 ', peeruin, ' 成员' + leaveUin + '退出');
+      //   //     const groupDecreaseEvent = new OB11GroupDecreaseEvent(peeruin, parseInt(leaveUin), 0, 'leave');// 不知道怎么出去的
+      //   //     postOB11Event(groupDecreaseEvent, true);
+      //   //   }
+      //   // }
+      //   // MsgType (SubType) EventName
+      //   // 33 GroupMemIncreased
+      //   // 34 GroupMemberDecreased
+      //   // 44 GroupAdminChange
+      //   // 82 GroupMessage
+      //   // 84 GroupApply
+      //   // 87 InviteGroup
+      //   // 528 35  FriendApply
+      //   // 528 39  CardChange
+      //   // 528 68  GroupApply
+      //   // 528 138 C2CRecall
+      //   // 528 290 C2CPoke
+      //   // 528 349 DeviceChange
+      //   // 732 12  GroupBan
+      //   // 732 16  GroupUniqueTitleChange
+      //   // 732 17  GroupRecall
+      //   // 732 20  GroupCommonTips
+      //   // 732 21  EssenceMessage
+      // } catch (e) {
+      //   log('解析SysMsg异常', e);
+      //   // console.log(e);
+      // }
     };
     msgListener.onKickedOffLine = (Info: KickedOffLineInfo) => {
       // 下线通知
