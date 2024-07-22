@@ -190,7 +190,6 @@ export class NapCatCore {
       }
     });
   }
-
   private initDataListener() {
     // 消息相关
     interface LineDevice {
