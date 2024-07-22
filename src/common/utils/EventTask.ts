@@ -5,6 +5,7 @@ interface Internal_MapKey {
   timeout: number,
   createtime: number,
   func: (...arg: any[]) => any,
+  checker: ((...args: any[]) => boolean) | undefined,
 }
 
 export class ListenerClassBase {
@@ -90,10 +91,12 @@ export class NTEventWrapper {
         this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.delete(uuid);
         return;
       }
-      task.func(...args);
+      if (task.checker && task.checker(...args)) {
+        task.func(...args);
+      }
     });
   }
-  async CallNoListenerEvent<EventType extends (...args: any[]) => Promise<any>,>(EventName = '', timeout: number = 3000, ...args: Parameters<EventType>) {
+  async CallNoListenerEvent<EventType extends (...args: any[]) => Promise<any>>(EventName = '', timeout: number = 3000, ...args: Parameters<EventType>) {
     return new Promise<Awaited<ReturnType<EventType>>>(async (resolve, reject) => {
       const EventFunc = this.CreatEventFunction<EventType>(EventName);
       let complete = false;
@@ -107,14 +110,15 @@ export class NTEventWrapper {
       resolve(retData);
     });
   }
-  async CallNormalEvent<EventType extends (...args: any[]) => Promise<any>, ListenerType extends (...args: any[]) => void>(EventName = '', ListenerName = '', waitTimes = 1, timeout: number = 3000, ...args: Parameters<EventType>) {
+  async CallNormalEvent<EventType extends (...args: any[]) => Promise<any>, ListenerType extends (...args: any[]) => void>
+    (EventName = '', ListenerName = '', waitTimes = 1, timeout: number = 3000, checker: (...args: Parameters<ListenerType>) => boolean, ...args: Parameters<EventType>) {
     return new Promise<[EventRet: Awaited<ReturnType<EventType>>, ...Parameters<ListenerType>]>(async (resolve, reject) => {
       const id = randomUUID();
       let complete = 0;
       let retData: Parameters<ListenerType> | undefined = undefined;
       let retEvent: any = {};
       const databack = () => {
-        if (complete < waitTimes) {
+        if (complete == 0) {
           reject(new Error('NTEvent EventName:' + EventName + ' ListenerName:' + ListenerName + ' timeout'));
         } else {
           resolve([retEvent as Awaited<ReturnType<EventType>>, ...retData!]);
@@ -128,6 +132,7 @@ export class NTEventWrapper {
       const eventCallbak = {
         timeout: timeout,
         createtime: Date.now(),
+        checker: checker,
         func: (...args: any[]) => {
           complete++;
           //console.log('func', ...args);
