@@ -13,6 +13,7 @@ export interface NapCatConfig {
 }
 
 class Config extends ConfigBase<NapCatConfig> implements NapCatConfig {
+  name: string = 'napcat'
   fileLog = true;
   consoleLog = true;
   fileLogLevel = LogLevel.DEBUG;
@@ -20,10 +21,6 @@ class Config extends ConfigBase<NapCatConfig> implements NapCatConfig {
 
   constructor() {
     super();
-  }
-  getConfigPath(pathName: string) {
-    const filename = `napcat${pathName ? "_" : ""}${pathName}.json`
-    return path.join(this.getConfigDir(), filename);
   }
 }
 
