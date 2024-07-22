@@ -7,6 +7,7 @@ import { MsgListener, onGroupFileInfoUpdateParamType } from '@/core/listeners';
 import { GeneralCallResult } from '@/core/services/common';
 import { randomUUID } from 'crypto';
 import { MessageUnique } from '../../../common/utils/MessageUnique';
+import { NTEventDispatch } from '@/common/utils/EventTask';
 
 setTimeout(() => {
   napCatCore.onLoginSuccess(() => {
@@ -34,7 +35,7 @@ setTimeout(() => {
   });
 }, 100);
 
-const sendMessagePool: Record<string, ((sendSuccessMsg: RawMessage) => void | Promise<void>) | null> = {};// peerUid: callbackFunc
+// const sendMessagePool: Record<string, ((sendSuccessMsg: RawMessage) => void | Promise<void>) | null> = {};// peerUid: callbackFunc
 
 const sendSuccessCBMap: Record<string, ((sendSuccessMsg: RawMessage) => boolean | Promise<boolean>) | null> = {};// uuid: callbackFunc
 
@@ -51,19 +52,19 @@ msgListener.onGroupFileInfoUpdate = (groupFileListResult: onGroupFileInfoUpdateP
   }
 };
 
-msgListener.onAddSendMsg = (msgRecord: RawMessage) => {
-  // console.log("sent msg", msgRecord, sendMessagePool);
-  for (const [uuid, cb] of sentMsgTasks) {
-    cb(msgRecord);
-    sentMsgTasks.delete(uuid);
-  }
-  if (sendMessagePool[msgRecord.peerUid]) {
-    const r = sendMessagePool[msgRecord.peerUid]?.(msgRecord);
-    if (r instanceof Promise) {
-      r.then().catch(logError);
-    }
-  }
-};
+// msgListener.onAddSendMsg = (msgRecord: RawMessage) => {
+//   // console.log("sent msg", msgRecord, sendMessagePool);
+//   for (const [uuid, cb] of sentMsgTasks) {
+//     cb(msgRecord);
+//     sentMsgTasks.delete(uuid);
+//   }
+//   if (sendMessagePool[msgRecord.peerUid]) {
+//     const r = sendMessagePool[msgRecord.peerUid]?.(msgRecord);
+//     if (r instanceof Promise) {
+//       r.then().catch(logError);
+//     }
+//   }
+// };
 
 msgListener.onMsgInfoListUpdate = (msgInfoList: RawMessage[]) => {
   msgInfoList.forEach(msg => {
@@ -166,59 +167,72 @@ export class NTQQMsgApi {
       peerUid: peer.peerUid
     }, msgIds);
   }
-
-  static async sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000): Promise<RawMessage> {
-    const peerUid = peer.peerUid;
-    // 等待上一个相同的peer发送完
-    let checkLastSendUsingTime = 0;
-    const waitLastSend: () => Promise<void> = async () => {
-      if (checkLastSendUsingTime > timeout) {
-        throw ('发送超时');
-      }
-      const lastSending = sendMessagePool[peer.peerUid];
-      if (lastSending) {
-        // log("有正在发送的消息，等待中...")
-        await sleep(500);
-        checkLastSendUsingTime += 500;
-        return await waitLastSend();
-      } else {
-        return;
-      }
-    };
-    await waitLastSend();
-
-    return new Promise(async (resolve, reject) => {
-      let completed = false;
-      let sentMessage: RawMessage | null = null;
-      const sendSuccessCBId = randomUUID() as string;
-      sendSuccessCBMap[sendSuccessCBId] = (msgRecord: RawMessage) => {
-        console.log(msgRecord);
-        if (msgRecord.msgId === sentMessage?.msgId) {
-          if (msgRecord.sendStatus === 2) {
-            delete sendSuccessCBMap[sendSuccessCBId];
-            completed = true;
-            resolve(msgRecord);
-            return true;
-          }
-          return false;
-        }
-        return false;
-      };
-      sendMessagePool[peerUid] = async (rawMessage: RawMessage) => {
-        // console.log('收到sent 消息', rawMessage.msgId);
-        delete sendMessagePool[peerUid];
-        sentMessage = rawMessage;
-      };
-      setTimeout(() => {
-        if (completed) return;
-        delete sendMessagePool[peerUid];
-        delete sendSuccessCBMap[sendSuccessCBId];
-        reject('发送超时');
-      }, timeout);
-      let msgId = await NTQQMsgApi.getMsgUnique(await NTQQMsgApi.getServerTime());
-      const result = napCatCore.session.getMsgService().sendMsg(msgId, peer, msgElements, new Map());
-    });
+  static async sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
+    let msgId = await NTQQMsgApi.getMsgUnique(await NTQQMsgApi.getServerTime());
+    let data = await NTEventDispatch.CallNormalEvent<(msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<any, any>) => Promise<unknown>, (msgList: RawMessage[]) => void>(
+      'NodeIKernelMsgService/sendMsg',
+      'NodeIKernelMsgListener/onMsgInfoListUpdate',
+      timeout,
+      1,
+      () => true,
+      msgId,
+      peer,
+      msgElements,
+      new Map()
+    );
+    //const result = napCatCore.session.getMsgService().sendMsg(msgId, peer, msgElements, new Map());
   }
+  // static async sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000): Promise<RawMessage> {
+  //   const peerUid = peer.peerUid;
+  //   // 等待上一个相同的peer发送完
+  //   let checkLastSendUsingTime = 0;
+  //   const waitLastSend: () => Promise<void> = async () => {
+  //     if (checkLastSendUsingTime > timeout) {
+  //       throw ('发送超时');
+  //     }
+  //     const lastSending = sendMessagePool[peer.peerUid];
+  //     if (lastSending) {
+  //       // log("有正在发送的消息，等待中...")
+  //       await sleep(500);
+  //       checkLastSendUsingTime += 500;
+  //       return await waitLastSend();
+  //     } else {
+  //       return;
+  //     }
+  //   };
+  //   await waitLastSend();
+
+  //   return new Promise(async (resolve, reject) => {
+  //     let completed = false;
+  //     let sentMessage: RawMessage | null = null;
+  //     const sendSuccessCBId = randomUUID() as string;
+  //     sendSuccessCBMap[sendSuccessCBId] = (msgRecord: RawMessage) => {
+  //       if (msgRecord.msgId === sentMessage?.msgId) {
+  //         if (msgRecord.sendStatus === 2) {
+  //           delete sendSuccessCBMap[sendSuccessCBId];
+  //           completed = true;
+  //           resolve(msgRecord);
+  //           return true;
+  //         }
+  //         return false;
+  //       }
+  //       return false;
+  //     };
+  //     sendMessagePool[peerUid] = async (rawMessage: RawMessage) => {
+  //       // console.log('收到sent 消息', rawMessage.msgId);
+  //       delete sendMessagePool[peerUid];
+  //       sentMessage = rawMessage;
+  //     };
+  //     setTimeout(() => {
+  //       if (completed) return;
+  //       delete sendMessagePool[peerUid];
+  //       delete sendSuccessCBMap[sendSuccessCBId];
+  //       reject('发送超时');
+  //     }, timeout);
+  //     let msgId = await NTQQMsgApi.getMsgUnique(await NTQQMsgApi.getServerTime());
+  //     const result = napCatCore.session.getMsgService().sendMsg(msgId, peer, msgElements, new Map());
+  //   });
+  // }
   static async getMsgUnique(time: string) {
     return napCatCore.session.getMsgService().getMsgUniqueId(time);
   }
