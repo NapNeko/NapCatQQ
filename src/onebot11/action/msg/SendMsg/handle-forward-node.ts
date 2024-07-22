@@ -1,7 +1,6 @@
 import { ChatType, ElementType, Group, NTQQMsgApi, Peer, RawMessage, SendMessageElement } from '@/core';
 import { OB11MessageNode } from '@/onebot11/types';
 import { selfInfo } from '@/core/data';
-import { dbUtil } from '@/common/utils/db';
 import createSendElements from '@/onebot11/action/msg/SendMsg/create-send-elements';
 import { logDebug, logError } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';
@@ -115,7 +114,8 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
   let srcPeer: Peer | undefined = undefined;
   let needSendSelf = false;
   for (const msgId of nodeMsgIds) {
-    const nodeMsg = await dbUtil.getMsgByLongId(msgId);
+    const nodeMsgPeer = await MessageUnique.getPeerByMsgId(msgId);
+    let nodeMsg = (await NTQQMsgApi.getMsgsByMsgId(nodeMsgPeer?.Peer!, [msgId])).msgList[0];
     if (nodeMsg) {
       nodeMsgArray.push(nodeMsg);
       if (!srcPeer) {
