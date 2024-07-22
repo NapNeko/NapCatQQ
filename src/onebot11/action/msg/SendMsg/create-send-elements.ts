@@ -17,6 +17,7 @@ import { uri2local } from '@/common/utils/file';
 import { ob11Config } from '@/onebot11/config';
 import { RequestUtil } from '@/common/utils/request';
 import fs from 'node:fs';
+import { MessageUnique } from '@/common/utils/MessageUnique';
 
 export type MessageContext = {
   group?: Group,
@@ -36,10 +37,10 @@ async function handleOb11FileLikeMessage(
     } else if (cache.url) {
       uri = cache.url;
     } else {
-      const fileMsg = await dbUtil.getMsgByLongId(cache.msgId);
-      if (fileMsg) {
+      const fileMsgPeer = MessageUnique.getPeerByMsgId(cache.msgId);
+      if (fileMsgPeer) {
         cache.path = await NTQQFileApi.downloadMedia(
-          fileMsg.msgId, fileMsg.chatType, fileMsg.peerUid,
+          fileMsgPeer.MsgId, fileMsgPeer.Peer.chatType, fileMsgPeer.Peer.peerUid,
           cache.elementId, '', ''
         );
         uri = 'file://' + cache.path;

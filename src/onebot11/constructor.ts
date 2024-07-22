@@ -27,7 +27,6 @@ import {
 } from '@/core/entities';
 import { EventType } from './event/OB11BaseEvent';
 import { encodeCQCode } from './cqcode';
-import { dbUtil } from '@/common/utils/db';
 import { OB11GroupIncreaseEvent } from './event/notice/OB11GroupIncreaseEvent';
 import { OB11GroupBanEvent } from './event/notice/OB11GroupBanEvent';
 import { OB11GroupUploadNoticeEvent } from './event/notice/OB11GroupUploadNoticeEvent';
@@ -150,10 +149,10 @@ export class OB11Constructor {
           //   true
           // );
           // console.log(JSON.stringify(retData, null, 2));
-          const replyMsg = await dbUtil.getMsgBySeq(msg.peerUid, element.replyElement.replayMsgSeq);
+          const replyMsg = await NTQQMsgApi.getMsgsBySeqAndCount({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, element.replyElement.replayMsgSeq, 1, true, true);
           // log("找到回复消息", replyMsg.msgShortId, replyMsg.msgId)
-          if (replyMsg && replyMsg.id) {
-            message_data['data']['id'] = replyMsg.id!.toString();
+          if (replyMsg) {
+            message_data['data']['id'] = MessageUnique.createMsg({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, replyMsg.msgList[0].msgId);
           }
           else {
             continue;
@@ -409,11 +408,11 @@ export class OB11Constructor {
             const senderUin = emojiLikeData.gtip.qq.jp;
             const msgSeq = emojiLikeData.gtip.url.msgseq;
             const emojiId = emojiLikeData.gtip.face.id;
-            let msgList = (await NTQQMsgApi.getMsgsBySeqAndCount({ chatType: ChatType.group, guildId: '', peerUid: msg.peerUid }, msgSeq, 1, true, true)).msgList;
-            const replyMsg = await dbUtil.getMsgBySeq(msg.peerUid, msgSeq);
-            if (msgList.length < 1) {
+            let replyMsgList = (await NTQQMsgApi.getMsgsBySeqAndCount({ chatType: ChatType.group, guildId: '', peerUid: msg.peerUid }, msgSeq, 1, true, true)).msgList;
+            if (replyMsgList.length < 1) {
               return;
             }
+            let replyMsg = replyMsgList[0];
             return new OB11GroupMsgEmojiLikeEvent(parseInt(msg.peerUid), parseInt(senderUin), MessageUnique.getShortIdByMsgId(replyMsg?.msgId!)!, [{
               emoji_id: emojiId,
               count: 1

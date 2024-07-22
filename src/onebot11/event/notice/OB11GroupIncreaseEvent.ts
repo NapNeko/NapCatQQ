@@ -1,6 +1,4 @@
 import { OB11GroupNoticeEvent } from './OB11GroupNoticeEvent';
-import { dbUtil } from '@/common/utils/db';
-import { ob11Config } from '@/onebot11/config';
 
 type GroupIncreaseSubType = 'approve' | 'invite';
 export class OB11GroupIncreaseEvent extends OB11GroupNoticeEvent {

@@ -57,9 +57,11 @@ class LimitedHashTable<K, V> {
 }
 
 class MessageUniqueWrapper {
+  private msgDataMap: LimitedHashTable<string, number>;
   private msgIdMap: LimitedHashTable<string, number>;
   constructor(maxMap: number = 1000) {
     this.msgIdMap = new LimitedHashTable<string, number>(maxMap);
+    this.msgDataMap = new LimitedHashTable<string, number>(maxMap);
   }
 
   createMsg(peer: Peer, msgId: string): number | undefined {
@@ -70,8 +72,8 @@ class MessageUniqueWrapper {
     if (isExist && isExist === msgId) {
       return undefined;
     }
-
-    this.msgIdMap.set(key, shortId);
+    this.msgIdMap.set(msgId, shortId);
+    this.msgDataMap.set(key, shortId);
     return shortId;
   }
 
@@ -91,6 +93,11 @@ class MessageUniqueWrapper {
 
   getShortIdByMsgId(msgId: string): number | undefined {
     return this.msgIdMap.getValue(msgId);
+  }
+  getPeerByMsgId(msgId: string) {
+    const shortId = this.msgIdMap.getValue(msgId);
+    if (!shortId) return undefined;
+    return this.getMsgIdAndPeerByShortId(shortId);
   }
 }
 
