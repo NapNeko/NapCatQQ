@@ -23,8 +23,8 @@ export default class SetEssenceMsg extends BaseAction<Payload, any> {
       throw new Error('msg not found');
     }
     return await NTQQGroupApi.addGroupEssence(
-        msg.Peer.peerUid,
-        msg.MsgId
+      msg.Peer.peerUid,
+      msg.MsgId
     );
   }
 }

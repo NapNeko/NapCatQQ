@@ -28,8 +28,8 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
     if (!msgId) {
       throw Error('message_id is required');
     }
-    let rootMsgId = MessageUnique.getShortIdByMsgId(msgId);
-    let rootMsg = MessageUnique.getMsgIdAndPeerByShortId(rootMsgId || parseInt(msgId))
+    const rootMsgId = MessageUnique.getShortIdByMsgId(msgId);
+    const rootMsg = MessageUnique.getMsgIdAndPeerByShortId(rootMsgId || parseInt(msgId));
     if (!rootMsg) {
       throw Error('msg not found');
     }
@@ -40,7 +40,7 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
     const msgList = data.msgList;
     const messages = await Promise.all(msgList.map(async msg => {
       const resMsg = await OB11Constructor.message(msg);
-      resMsg.message_id = await MessageUnique.createMsg({guildId:'',chatType:msg.chatType,peerUid:msg.peerUid},msg.msgId)!;
+      resMsg.message_id = await MessageUnique.createMsg({ guildId:'',chatType:msg.chatType,peerUid:msg.peerUid },msg.msgId)!;
       return resMsg;
     }));
     messages.map(msg => {

@@ -250,7 +250,7 @@ export async function uri2local(uri: string, fileName: string | null = null): Pr
       } else {
         filePath = pathname;
       }
-    } 
+    }
     else {
       // const cache = await dbUtil.getFileCacheByName(uri);
       // if (cache) {

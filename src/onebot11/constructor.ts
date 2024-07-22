@@ -408,11 +408,11 @@ export class OB11Constructor {
             const senderUin = emojiLikeData.gtip.qq.jp;
             const msgSeq = emojiLikeData.gtip.url.msgseq;
             const emojiId = emojiLikeData.gtip.face.id;
-            let replyMsgList = (await NTQQMsgApi.getMsgsBySeqAndCount({ chatType: ChatType.group, guildId: '', peerUid: msg.peerUid }, msgSeq, 1, true, true)).msgList;
+            const replyMsgList = (await NTQQMsgApi.getMsgsBySeqAndCount({ chatType: ChatType.group, guildId: '', peerUid: msg.peerUid }, msgSeq, 1, true, true)).msgList;
             if (replyMsgList.length < 1) {
               return;
             }
-            let replyMsg = replyMsgList[0];
+            const replyMsg = replyMsgList[0];
             return new OB11GroupMsgEmojiLikeEvent(parseInt(msg.peerUid), parseInt(senderUin), MessageUnique.getShortIdByMsgId(replyMsg?.msgId!)!, [{
               emoji_id: emojiId,
               count: 1
@@ -454,16 +454,16 @@ export class OB11Constructor {
             }
           }
           if (grayTipElement.jsonGrayTipElement.busiId == 2401) {
-            let searchParams = new URL(json.items[0].jp).searchParams;
-            let msgSeq = searchParams.get('msgSeq')!;
-            let Group = searchParams.get('groupCode');
-            let Businessid = searchParams.get('businessid');
-            let Peer: Peer = {
+            const searchParams = new URL(json.items[0].jp).searchParams;
+            const msgSeq = searchParams.get('msgSeq')!;
+            const Group = searchParams.get('groupCode');
+            const Businessid = searchParams.get('businessid');
+            const Peer: Peer = {
               guildId: '',
               chatType: ChatType.group,
               peerUid: Group!
             };
-            let msgData = await NTQQMsgApi.getMsgsBySeqAndCount(Peer, msgSeq.toString(), 1, true, true);
+            const msgData = await NTQQMsgApi.getMsgsBySeqAndCount(Peer, msgSeq.toString(), 1, true, true);
             return new OB11GroupEssenceEvent(parseInt(msg.peerUid), MessageUnique.getShortIdByMsgId(msgData.msgList[0].msgId)!, parseInt(msgData.msgList[0].senderUin));
             // 获取MsgSeq+Peer可获取具体消息
           }

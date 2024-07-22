@@ -59,7 +59,7 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
       } else {
         if (nodeMsg!.Peer.peerUid !== selfInfo.uid) {
           // need cloning
-          let rawClone = await NTQQMsgApi.getMsgsByMsgId(nodeMsg?.Peer!,[nodeMsg?.MsgId!]);
+          const rawClone = await NTQQMsgApi.getMsgsByMsgId(nodeMsg?.Peer!,[nodeMsg?.MsgId!]);
           const clonedMsg = await cloneMsg(rawClone.msgList[0]);
           if (clonedMsg) {
             nodeMsgIds.push(clonedMsg.msgId);
@@ -114,7 +114,7 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
   let needSendSelf = false;
   for (const msgId of nodeMsgIds) {
     const nodeMsgPeer = await MessageUnique.getPeerByMsgId(msgId);
-    let nodeMsg = (await NTQQMsgApi.getMsgsByMsgId(nodeMsgPeer?.Peer!, [msgId])).msgList[0];
+    const nodeMsg = (await NTQQMsgApi.getMsgsByMsgId(nodeMsgPeer?.Peer!, [msgId])).msgList[0];
     if (nodeMsg) {
       nodeMsgArray.push(nodeMsg);
       if (!srcPeer) {
