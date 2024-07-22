@@ -136,26 +136,26 @@ export class OB11Constructor {
         message_data['type'] = 'reply';
         // log("收到回复消息", element.replyElement.replayMsgSeq)
         try {
-          // let retData = await NTQQMsgApi.getMsgsBySeqAndCount(
-          //   {
-          //     chatType: msg.chatType,
-          //     peerUid: msg.peerUid,
-          //     guildId: '',
-          //   },
-          //   element.replyElement.replayMsgSeq,
-          //   1,
-          //   false,
-          //   true
-          // );
+          let replyMsg = await NTQQMsgApi.getMsgsBySeqAndCount(
+            {
+              chatType: msg.chatType,
+              peerUid: msg.peerUid,
+              guildId: '',
+            },
+            element.replyElement.replayMsgSeq,
+            1,
+            true,
+            true
+          );
           // console.log(JSON.stringify(retData, null, 2));
-          const replyMsg = await NTQQMsgApi.getMsgsBySeqAndCount({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, element.replyElement.replayMsgSeq, 1, true, true);
-          // log("找到回复消息", replyMsg.msgShortId, replyMsg.msgId)
+          // const replyMsg = await NTQQMsgApi.getMsgsBySeqAndCount({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, element.replyElement.replayMsgSeq, 1, true, true);
           if (replyMsg) {
-            message_data['data']['id'] = MessageUnique.createMsg({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, replyMsg.msgList[0].msgId);
+            message_data['data']['id'] = MessageUnique.createMsg({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, replyMsg.msgList[0].msgId)?.toString();
           }
           else {
             continue;
           }
+          //log("找到回复消息", message_data['data']['id'], replyMsg.msgList[0].msgId)
         } catch (e: any) {
           logError('获取不到引用的消息', e.stack, element.replyElement.replayMsgSeq);
         }
@@ -202,18 +202,18 @@ export class OB11Constructor {
         message_data['data']['file_id'] = videoOrFileElement.fileUuid;
         message_data['data']['file_size'] = videoOrFileElement.fileSize;
         if (!element.videoElement) {
-        //   dbUtil.addFileCache({
-        //     msgId: msg.msgId,
-        //     name: videoOrFileElement.fileName,
-        //     path: videoOrFileElement.filePath,
-        //     size: parseInt(videoOrFileElement.fileSize || '0'),
-        //     uuid: videoOrFileElement.fileUuid || '',
-        //     url: '',
-        //     element: element.videoElement || element.fileElement,
-        //     elementType: element.videoElement ? ElementType.VIDEO : ElementType.FILE,
-        //     elementId: element.elementId
-        //   }).then();
-        // }
+          //   dbUtil.addFileCache({
+          //     msgId: msg.msgId,
+          //     name: videoOrFileElement.fileName,
+          //     path: videoOrFileElement.filePath,
+          //     size: parseInt(videoOrFileElement.fileSize || '0'),
+          //     uuid: videoOrFileElement.fileUuid || '',
+          //     url: '',
+          //     element: element.videoElement || element.fileElement,
+          //     elementType: element.videoElement ? ElementType.VIDEO : ElementType.FILE,
+          //     elementId: element.elementId
+          //   }).then();
+          // }
         }
       }
       else if (element.pttElement) {
@@ -285,6 +285,7 @@ export class OB11Constructor {
         else (resMsg.message as OB11MessageData[]).push(message_data);
         resMsg.raw_message += cqCode;
       }
+      
     }
     resMsg.raw_message = resMsg.raw_message.trim();
     return resMsg;

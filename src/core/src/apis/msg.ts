@@ -1,13 +1,38 @@
-import { GetFileListParam, Peer, RawMessage, SendMessageElement } from '@/core/entities';
-import { selfInfo } from '@/core/data';
-import { log, logError } from '@/common/utils/log';
+import { ChatType, GetFileListParam, Peer, RawMessage, SendMessageElement } from '@/core/entities';
+import { friends, groups, selfInfo } from '@/core/data';
+import { log, logError, logWarn } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';
-import { napCatCore } from '@/core';
+import { napCatCore, NTQQUserApi } from '@/core';
 import { MsgListener, onGroupFileInfoUpdateParamType } from '@/core/listeners';
 import { GeneralCallResult } from '@/core/services/common';
 import { randomUUID } from 'crypto';
+import { MessageUnique } from '../../../common/utils/MessageUnique';
 
-
+setTimeout(() => {
+  napCatCore.onLoginSuccess(() => {
+    setTimeout(async () => {
+      if (groups.size > 100) {
+        logWarn('群数量大于100，可能会导致性能问题');
+      }
+      let predict = (groups.size + friends.size) / 5;
+      predict = predict < 20 ? 20 : predict;
+      predict = predict > 50 ? 50 : predict;
+      //let waitpromise: Array<Promise<{ msgList: RawMessage[]; }>> = [];
+      MessageUnique.resize(predict * 50);
+      let RecentContact = await NTQQUserApi.getRecentContactListSnapShot(predict);
+      if (RecentContact?.info?.changedList && RecentContact?.info?.changedList?.length > 0) {
+        for (let i = 0; i < RecentContact.info.changedList.length; i++) {
+          let Peer: Peer = { chatType: RecentContact.info.changedList[i].chatType, peerUid: RecentContact.info.changedList[i].peerUid, guildId: '' };
+          let msgList = await NTQQMsgApi.getMsgHistory(Peer, RecentContact.info.changedList[i].msgId, 50);
+          for (let j = 0; j < msgList.msgList.length; j++) {
+            let shortId = MessageUnique.createMsg(Peer, msgList.msgList[j].msgId);
+            //console.log(`开始创建 ${shortId}<------>${msgList.msgList[j].msgId}`)
+          }
+        }
+      }
+    }, 500);
+  });
+}, 100);
 const sendMessagePool: Record<string, ((sendSuccessMsg: RawMessage) => void | Promise<void>) | null> = {};// peerUid: callbackFunc
 
 const sendSuccessCBMap: Record<string, ((sendSuccessMsg: RawMessage) => boolean | Promise<boolean>) | null> = {};// uuid: callbackFunc
@@ -71,13 +96,13 @@ setTimeout(() => {
 
 export class NTQQMsgApi {
   // static napCatCore: NapCatCore | null = null;
-//   enum BaseEmojiType {
-//     NORMAL_EMOJI,
-//     SUPER_EMOJI,
-//     RANDOM_SUPER_EMOJI,
-//     CHAIN_SUPER_EMOJI,
-//     EMOJI_EMOJI
-// }
+  //   enum BaseEmojiType {
+  //     NORMAL_EMOJI,
+  //     SUPER_EMOJI,
+  //     RANDOM_SUPER_EMOJI,
+  //     CHAIN_SUPER_EMOJI,
+  //     EMOJI_EMOJI
+  // }
   static async setEmojiLike(peer: Peer, msgSeq: string, emojiId: string, set: boolean = true) {
     // nt_qq//global//nt_data//Emoji//emoji-resource//sysface_res/apng/ 下可以看到所有QQ表情预览
     // nt_qq\global\nt_data\Emoji\emoji-resource\face_config.json 里面有所有表情的id, 自带表情id是QSid, 标准emoji表情id是QCid
