@@ -1,4 +1,5 @@
 import QQWrapper, { NodeIQQNTWrapperEngine, NodeIQQNTWrapperSession, NodeQQNTWrapperUtil } from '@/core/wrapper';
+import { DeviceList } from '@/onebot11/main';
 import {
   NodeIKernelLoginService,
   NodeIKernelBuddyService,
@@ -208,10 +209,17 @@ export class NapCatCore {
     }
     const msgListener = new MsgListener();
     msgListener.onLineDev = (Devices: LineDevice[]) => {
+      DeviceList.splice(0, DeviceList.length);
       Devices.map((Device: LineDevice) => {
-        if (Device.clientType === 2) {
-          log('账号设备(' + Device.devUid + ') 在线状态变更');
-        }
+        let DeviceData = {
+          app_id: Device.devUid,
+          device_name: Device.clientType.toString(),
+          device_kind: Device.clientType.toString(),
+        };
+        DeviceList.push(DeviceData);
+        // if (Device.clientType === 2) {
+        //   log('账号设备(' + Device.devUid + ') 在线状态变更');
+        // }
       });
     };
     msgListener.onKickedOffLine = (Info: KickedOffLineInfo) => {
