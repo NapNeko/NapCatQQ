@@ -109,8 +109,8 @@ export class NapCatCore {
       logError('登录失败(onQRCodeSessionFailed)', errMsg);
       if (errType == 1 && errCode == 3) {
         // 二维码过期刷新
-        this.loginService.getQRCodePicture();
       }
+      this.loginService.getQRCodePicture();
     };
     this.loginListener.onLoginFailed = (args) => {
       logError('登录失败(onLoginFailed)', args);
