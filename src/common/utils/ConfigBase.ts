@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import { log, logDebug, logError } from '@/common/utils/log';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { selfInfo } from '@/core/data';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -12,7 +13,7 @@ const configDir = path.resolve(__dirname, 'config');
 fs.mkdirSync(configDir, { recursive: true });
 
 
-export class ConfigBase<T>{
+export class ConfigBase<T> {
 
   constructor() {
   }
@@ -22,19 +23,26 @@ export class ConfigBase<T>{
     return null;
   }
 
-  getConfigDir(){
+  getConfigDir() {
     const configDir = path.resolve(__dirname, 'config');
     fs.mkdirSync(configDir, { recursive: true });
     return configDir;
   }
-  getConfigPath(): string {
+  getConfigPath(pathName: string): string {
     throw new Error('Method not implemented.');
   }
 
   read() {
-    const configPath = this.getConfigPath();
+    // 尝试加载当前账号配置
+    if (this.read_from_file(selfInfo.uin, false)) return this
+    // 尝试加载默认配置
+    return this.read_from_file('', true)
+  }
+  read_from_file(pathName: string, createIfNotExist: boolean) {
+    const configPath = this.getConfigPath(pathName);
     if (!fs.existsSync(configPath)) {
-      try{
+      if (!createIfNotExist) return null
+      try {
         fs.writeFileSync(configPath, JSON.stringify(this, this.getKeys(), 2));
         log(`配置文件${configPath}已创建\n如果修改此文件后需要重启 NapCat 生效`);
       }
@@ -43,6 +51,7 @@ export class ConfigBase<T>{
       }
       return this;
     }
+
     try {
       const data = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
       logDebug(`配置文件${configPath}已加载`, data);
