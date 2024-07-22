@@ -1,16 +1,16 @@
 import BaseAction from '../BaseAction';
 import { NTQQMsgApi, NTQQUserApi } from '@/core/apis';
 import { ChatType, Peer } from '@/core/entities';
-import { dbUtil } from '@/common/utils/db';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { MessageUnique } from '@/common/utils/MessageUnique';
 
 const SchemaData = {
   type: 'object',
   properties: {
     message_id: { type: 'number' },
-    group_id: { type: [ 'number' , 'string' ] },
-    user_id: { type: [ 'number' , 'string' ] }
+    group_id: { type: ['number', 'string'] },
+    user_id: { type: ['number', 'string'] }
   },
   required: ['message_id']
 } as const satisfies JSONSchema;
@@ -30,18 +30,14 @@ class ForwardSingleMsg extends BaseAction<Payload, null> {
   }
 
   protected async _handle(payload: Payload): Promise<null> {
-    const msg = await dbUtil.getMsgByShortId(payload.message_id);
+    const msg = await MessageUnique.getMsgIdAndPeerByShortId(payload.message_id);
     if (!msg) {
       throw new Error(`无法找到消息${payload.message_id}`);
     }
     const peer = await this.getTargetPeer(payload);
-    const ret = await NTQQMsgApi.forwardMsg(
-      {
-        chatType: msg.chatType,
-        peerUid: msg.peerUid,
-      },
+    const ret = await NTQQMsgApi.forwardMsg(msg.Peer,
       peer,
-      [msg.msgId],
+      [msg.MsgId],
     );
     if (ret.result !== 0) {
       throw new Error(`转发消息失败 ${ret.errMsg}`);
