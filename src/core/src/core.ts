@@ -84,15 +84,15 @@ export class NapCatCore {
         fs.mkdirSync(dataPath, { recursive: true });
         logDebug('本账号数据/缓存目录：', dataPath);
         // dbUtil.init(path.resolve(dataPath, `./${arg.uin}-v2.db`)).then(() => {
-        //   this.initDataListener();
-        //   this.onLoginSuccessFuncList.map(cb => {
-        //     new Promise((resolve, reject) => {
-        //       const result = cb(arg.uin, arg.uid);
-        //       if (result instanceof Promise) {
-        //         result.then(resolve).catch(reject);
-        //       }
-        //     }).then();
-        //   });
+        this.initDataListener();
+        this.onLoginSuccessFuncList.map(cb => {
+          new Promise((resolve, reject) => {
+            const result = cb(arg.uin, arg.uid);
+            if (result instanceof Promise) {
+              result.then(resolve).catch(reject);
+            }
+          }).then();
+        });
         // }).catch((e) => {
         //   logError('数据库初始化失败', e);
         // });
@@ -474,9 +474,9 @@ export class NapCatCore {
     const loginList = await this.loginService.getLoginList();
     return loginList;
   }
-  checkAdminEvent(groupCode: string, memberNew: GroupMember, memberOld: GroupMember | undefined ) : boolean {
+  checkAdminEvent(groupCode: string, memberNew: GroupMember, memberOld: GroupMember | undefined): boolean {
     if (memberNew.role !== memberOld?.role) {
-      log(`群 ${groupCode} ${memberNew.nick} 角色变更为 ${memberNew.role === 3 ? '管理员' : '群员' }`);
+      log(`群 ${groupCode} ${memberNew.nick} 角色变更为 ${memberNew.role === 3 ? '管理员' : '群员'}`);
       return true;
     }
     return false;
