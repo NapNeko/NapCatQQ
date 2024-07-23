@@ -33,7 +33,7 @@ export class NTQQSystemApi {
     static async BootMiniApp(appfile: string, params: string) {
         await napCatCore.session.getNodeMiscService().setMiniAppVersion('2.16.4');
         let c = await napCatCore.session.getNodeMiscService().getMiniAppPath();
-        console.log(c);
+
         return napCatCore.session.getNodeMiscService().startNewMiniApp(appfile, params);
     }
 }

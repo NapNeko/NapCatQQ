@@ -31,7 +31,7 @@ class LimitedHashTable<K, V> {
     // console.log(this.valueToKey);
     // console.log('---------------');
     while (this.keyToValue.size > this.maxSize || this.valueToKey.size > this.maxSize) {
-      console.log(this.keyToValue.size > this.maxSize, this.valueToKey.size > this.maxSize);
+      //console.log(this.keyToValue.size > this.maxSize, this.valueToKey.size > this.maxSize);
       const oldestKey = this.keyToValue.keys().next().value;
       this.valueToKey.delete(this.keyToValue.get(oldestKey)!);
       this.keyToValue.delete(oldestKey);

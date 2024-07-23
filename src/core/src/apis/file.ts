@@ -12,7 +12,6 @@ import { log, logDebug, logError } from '@/common/utils/log';
 import { GeneralCallResult, napCatCore, OnRichMediaDownloadCompleteParams } from '@/core';
 import { calculateFileMD5 } from '@/common/utils/file';
 import * as fileType from 'file-type';
-import { MsgListener } from '@/core/listeners';
 import imageSize from 'image-size';
 import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 import { sessionConfig } from '@/core/sessionConfig';
@@ -149,7 +148,6 @@ export class NTQQFileApi {
   }
 
   static async getImageUrl(element: { originImageUrl: any; md5HexStr?: any; fileUuid: any; }, isPrivateImage: boolean) {
-
     if (!element) {
       return '';
     }
