@@ -37,7 +37,7 @@ setTimeout(() => {
 
 // const sendMessagePool: Record<string, ((sendSuccessMsg: RawMessage) => void | Promise<void>) | null> = {};// peerUid: callbackFunc
 
-const sendSuccessCBMap: Record<string, ((sendSuccessMsg: RawMessage) => boolean | Promise<boolean>) | null> = {};// uuid: callbackFunc
+// const sendSuccessCBMap: Record<string, ((sendSuccessMsg: RawMessage) => boolean | Promise<boolean>) | null> = {};// uuid: callbackFunc
 
 const GroupFileInfoUpdateTasks: Map<string, ((groupFileListResult: onGroupFileInfoUpdateParamType) => void)> = new Map();
 
@@ -66,26 +66,26 @@ msgListener.onGroupFileInfoUpdate = (groupFileListResult: onGroupFileInfoUpdateP
 //   }
 // };
 
-msgListener.onMsgInfoListUpdate = (msgInfoList: RawMessage[]) => {
-  msgInfoList.forEach(msg => {
-    new Promise((resolve, reject) => {
-      for (const cbId in sendSuccessCBMap) {
-        const cb = sendSuccessCBMap[cbId]!;
-        const cbResult = cb(msg);
-        const checkResult = (result: boolean) => {
-          if (result) {
-            delete sendSuccessCBMap[cbId];
-          }
-        };
-        if (cbResult instanceof Promise) {
-          cbResult.then(checkResult);
-        } else {
-          checkResult(cbResult);
-        }
-      }
-    }).then().catch(log);
-  });
-};
+// msgListener.onMsgInfoListUpdate = (msgInfoList: RawMessage[]) => {
+//   msgInfoList.forEach(msg => {
+//     new Promise((resolve, reject) => {
+//       for (const cbId in sendSuccessCBMap) {
+//         const cb = sendSuccessCBMap[cbId]!;
+//         const cbResult = cb(msg);
+//         const checkResult = (result: boolean) => {
+//           if (result) {
+//             delete sendSuccessCBMap[cbId];
+//           }
+//         };
+//         if (cbResult instanceof Promise) {
+//           cbResult.then(checkResult);
+//         } else {
+//           checkResult(cbResult);
+//         }
+//       }
+//     }).then().catch(log);
+//   });
+// };
 
 
 
