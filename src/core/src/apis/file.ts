@@ -1,9 +1,6 @@
 import {
-  CacheFileList,
   CacheFileListItem,
   CacheFileType,
-  CacheScanResult,
-  ChatCacheList,
   ChatCacheListItemBasic,
   ChatType,
   ElementType, IMAGE_HTTP_HOST, IMAGE_HTTP_HOST_NT, RawMessage
@@ -21,22 +18,8 @@ import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 import { sessionConfig } from '@/core/sessionConfig';
 import { randomUUID } from 'crypto';
 import { rkeyManager } from '../utils/rkey';
+import { NTEventDispatch } from '@/common/utils/EventTask';
 
-
-const downloadMediaTasks: Map<string, (arg: OnRichMediaDownloadCompleteParams) => void> = new Map<string, (arg: OnRichMediaDownloadCompleteParams) => void>();
-
-const downloadMediaListener = new MsgListener();
-downloadMediaListener.onRichMediaDownloadComplete = arg => {
-  for (const [uuid, cb] of downloadMediaTasks) {
-    cb(arg);
-    downloadMediaTasks.delete(uuid);
-  }
-};
-setTimeout(() => {
-  napCatCore.onLoginSuccess(() => {
-    napCatCore.addListener(downloadMediaListener);
-  });
-}, 100);
 export class NTQQFileApi {
   static async getFileType(filePath: string) {
     return fileType.fileTypeFromFile(filePath);
@@ -103,31 +86,33 @@ export class NTQQFileApi {
         return sourcePath;
       }
     }
-    //logDebug('start downloadMedia', msgId, chatType, peerUid, elementId, thumbPath, sourcePath, timeout, force);
-    return new Promise<string>((resolve, reject) => {
-      let completed = false;
-      const cb = (arg: OnRichMediaDownloadCompleteParams) => {
-        //logDebug('downloadMedia complete', arg, msgId);
+    let data = await NTEventDispatch.CallNormalEvent<
+      (
+        params: {
+          fileModelId: string,
+          downloadSourceType: number,
+          triggerType: number,
+          msgId: string,
+          chatType: ChatType,
+          peerUid: string,
+          elementId: string,
+          thumbSize: number,
+          downloadType: number,
+          filePath: string
+        }) => Promise<unknown>,
+      (fileTransNotifyInfo: OnRichMediaDownloadCompleteParams) => void
+    >(
+      'NodeIKernelMsgService/downloadRichMedia',
+      'NodeIKernelMsgListener/onRichMediaDownloadComplete',
+      1,
+      timeout,
+      (arg: OnRichMediaDownloadCompleteParams) => {
         if (arg.msgId === msgId) {
-          completed = true;
-          let filePath = arg.filePath;
-          if (filePath.startsWith('\\')) {
-            // log('filePath start with \\');
-            const downloadPath = sessionConfig.defaultFileDownloadPath;
-            //logDebug('downloadPath', downloadPath);
-            filePath = path.join(downloadPath, filePath);
-            // 下载路径是下载文件夹的相对路径
-          }
-          resolve(filePath);
+          return true;
         }
-      };
-      downloadMediaTasks.set(randomUUID(), cb);
-      setTimeout(() => {
-        if (!completed) {
-          reject('下载超时');
-        }
-      }, timeout);
-      napCatCore.session.getMsgService().downloadRichMedia({
+        return false;
+      },
+      {
         fileModelId: '0',
         downloadSourceType: 0,
         triggerType: 1,
@@ -137,9 +122,18 @@ export class NTQQFileApi {
         elementId: elementId,
         thumbSize: 0,
         downloadType: 1,
-        filePath: thumbPath,
-      });
-    });
+        filePath: thumbPath
+      }
+    );
+    let filePath = data[1].filePath;
+    if (filePath.startsWith('\\')) {
+      // log('filePath start with \\');
+      const downloadPath = sessionConfig.defaultFileDownloadPath;
+      //logDebug('downloadPath', downloadPath);
+      filePath = path.join(downloadPath, filePath);
+      // 下载路径是下载文件夹的相对路径
+    }
+    return filePath;
   }
 
   static async getImageSize(filePath: string): Promise<ISizeCalculationResult | undefined> {
