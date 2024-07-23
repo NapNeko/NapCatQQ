@@ -75,6 +75,7 @@ class MessageUniqueWrapper {
     const hash = crypto.createHash('sha1').update(key);
     const shortId = parseInt(hash.digest('hex').slice(0, 8), 16);
     const isExist = this.msgIdMap.getKey(shortId);
+    console.log(`${peer.peerUid} ${msgId} ------- ${shortId}`);
     if (isExist && isExist === msgId) {
       return shortId;
     }
@@ -84,7 +85,7 @@ class MessageUniqueWrapper {
   }
 
   getMsgIdAndPeerByShortId(shortId: number): { MsgId: string; Peer: Peer } | undefined {
-    const data = this.msgIdMap.getKey(shortId);
+    const data = this.msgDataMap.getKey(shortId);
     if (data) {
       const [msgId, chatTypeStr, peerUid] = data.split('|');
       const peer: Peer = {

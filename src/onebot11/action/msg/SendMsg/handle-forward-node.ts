@@ -13,7 +13,7 @@ async function cloneMsg(msg: RawMessage): Promise<RawMessage | undefined> {
     peerUid: selfInfo.uid
   };
 
-  // logDebug('克隆的目标消息', msg);
+  //logDebug('克隆的目标消息', msg);
 
   const sendElements: SendMessageElement[] = [];
 
@@ -109,14 +109,15 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
       }
     }
   }
-
   // 检查srcPeer是否一致，不一致则需要克隆成自己的消息, 让所有srcPeer都变成自己的，使其保持一致才能够转发
   const nodeMsgArray: Array<RawMessage> = [];
+
   let srcPeer: Peer | undefined = undefined;
   let needSendSelf = false;
   for (const msgId of nodeMsgIds) {
     const nodeMsgPeer = await MessageUnique.getPeerByMsgId(msgId);
     const nodeMsg = (await NTQQMsgApi.getMsgsByMsgId(nodeMsgPeer?.Peer!, [msgId])).msgList[0];
+    console.log("4545",nodeMsgPeer);
     if (nodeMsg) {
       nodeMsgArray.push(nodeMsg);
       if (!srcPeer) {
@@ -127,7 +128,7 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
       }
     }
   }
-  //logDebug('nodeMsgArray', nodeMsgArray);
+ // logDebug('nodeMsgArray', nodeMsgArray);
   nodeMsgIds = nodeMsgArray.map(msg => msg.msgId);
   if (needSendSelf) {
     //logDebug('需要克隆转发消息');
