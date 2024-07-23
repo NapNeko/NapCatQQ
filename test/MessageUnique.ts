@@ -39,7 +39,6 @@ describe('MessageUniqueWrapper', () => {
       peer.chatType = 1;
       peer.peerUid = '123';
       const msgId = 'msgId123';
-  
       messageUniqueWrapper.createMsg(peer, msgId);
   
       const shortId = messageUniqueWrapper.getShortIdByMsgId(msgId);
