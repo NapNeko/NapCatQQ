@@ -172,10 +172,11 @@ export class NTQQMsgApi {
     let data = await NTEventDispatch.CallNormalEvent<(msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<any, any>) => Promise<unknown>, (msgList: RawMessage[]) => void>(
       'NodeIKernelMsgService/sendMsg',
       'NodeIKernelMsgListener/onMsgInfoListUpdate',
-      timeout,
       1,
+      5000,
       (msgRecords: RawMessage[]) => {
         for (let msgRecord of msgRecords) {
+          //console.log(msgRecord);
           if (msgRecord.msgId === msgId && msgRecord.sendStatus === 2) {
             return true;
           }
