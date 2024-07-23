@@ -52,19 +52,13 @@ msgListener.onGroupFileInfoUpdate = (groupFileListResult: onGroupFileInfoUpdateP
   }
 };
 
-// msgListener.onAddSendMsg = (msgRecord: RawMessage) => {
-//   // console.log("sent msg", msgRecord, sendMessagePool);
-//   for (const [uuid, cb] of sentMsgTasks) {
-//     cb(msgRecord);
-//     sentMsgTasks.delete(uuid);
-//   }
-//   if (sendMessagePool[msgRecord.peerUid]) {
-//     const r = sendMessagePool[msgRecord.peerUid]?.(msgRecord);
-//     if (r instanceof Promise) {
-//       r.then().catch(logError);
-//     }
-//   }
-// };
+msgListener.onAddSendMsg = (msgRecord: RawMessage) => {
+  // console.log("sent msg", msgRecord, sendMessagePool);
+  for (const [uuid, cb] of sentMsgTasks) {
+    cb(msgRecord);
+    sentMsgTasks.delete(uuid);
+  }
+};
 
 // msgListener.onMsgInfoListUpdate = (msgInfoList: RawMessage[]) => {
 //   msgInfoList.forEach(msg => {
