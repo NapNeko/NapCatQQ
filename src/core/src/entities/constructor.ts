@@ -10,7 +10,8 @@ import {
   SendReplyElement,
   sendShareLocationElement,
   SendTextElement,
-  SendVideoElement
+  SendVideoElement,
+  viedo_type
 } from './index';
 import { promises as fs } from 'node:fs';
 import ffmpeg from 'fluent-ffmpeg';
@@ -127,7 +128,7 @@ export class SendMsgElementConstructor {
     return element;
   }
 
-  static async video(filePath: string, fileName: string = '', diyThumbPath: string = ''): Promise<SendVideoElement> {
+  static async video(filePath: string, fileName: string = '', diyThumbPath: string = '', videotype: viedo_type = viedo_type.VIDEO_FORMAT_MP4): Promise<SendVideoElement> {
     const { fileName: _fileName, path, fileSize, md5 } = await NTQQFileApi.uploadFile(filePath, ElementType.VIDEO);
     if (fileSize === 0) {
       throw '文件异常，大小为0';
@@ -195,6 +196,7 @@ export class SendMsgElementConstructor {
         thumbWidth: videoInfo.width,
         thumbHeight: videoInfo.height,
         fileSize: '' + fileSize,
+        fileFormat: videotype
         // fileUuid: "",
         // transferStatus: 0,
         // progress: 0,

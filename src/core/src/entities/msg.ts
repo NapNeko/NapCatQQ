@@ -526,7 +526,7 @@ export interface VideoElement {
   thumbMd5?: string
   fileTime?: number; // second
   thumbSize?: number; // byte
-  fileFormat?: number;  // 2表示mp4 参考下面条目
+  fileFormat?: viedo_type;  // 2表示mp4 参考下面条目
   fileSize?: string;  // byte
   thumbWidth?: number;
   thumbHeight?: number;
