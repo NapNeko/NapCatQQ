@@ -8,30 +8,39 @@ import { GeneralCallResult } from '@/core/services/common';
 import { randomUUID } from 'crypto';
 import { MessageUnique } from '../../../common/utils/MessageUnique';
 import { NTEventDispatch } from '@/common/utils/EventTask';
+async function LoadMessageIdList(Peer: Peer, msgId: string) {
+  let msgList = await NTQQMsgApi.getMsgHistory(Peer, msgId, 50);
+  for (let j = 0; j < msgList.msgList.length; j++) {
+    let shortId = MessageUnique.createMsg(Peer, msgList.msgList[j].msgId);
+    //console.log(`开始创建 ${shortId}<------>${msgList.msgList[j].msgId}`)
+  }
+}
+async function loadMessageUnique() {
+  if (groups.size > 100) {
+    logWarn('群数量大于100，可能会导致性能问题');
+  }
+  let predict = (groups.size + friends.size) / 5;
+  predict = predict < 20 ? 20 : predict;
+  predict = predict > 50 ? 50 : predict;
+  //let waitpromise: Array<Promise<{ msgList: RawMessage[]; }>> = [];
+  MessageUnique.resize(predict * 50);
+  let RecentContact = await NTQQUserApi.getRecentContactListSnapShot(predict);
+  let LoadMessageIdDo: Array<Promise<void>> = new Array<Promise<void>>();
+  if (RecentContact?.info?.changedList && RecentContact?.info?.changedList?.length > 0) {
+    for (let i = 0; i < RecentContact.info.changedList.length; i++) {
+      let Peer: Peer = { chatType: RecentContact.info.changedList[i].chatType, peerUid: RecentContact.info.changedList[i].peerUid, guildId: '' };
+      LoadMessageIdDo.push(LoadMessageIdList(Peer, RecentContact.info.changedList[i].msgId));
+    }
+  }
+  await Promise.all(LoadMessageIdDo).then(() => {
+    log('消息列表加载完成');
+  });
+}
 
 setTimeout(() => {
-  napCatCore.onLoginSuccess(() => {
-    setTimeout(async () => {
-      if (groups.size > 100) {
-        logWarn('群数量大于100，可能会导致性能问题');
-      }
-      let predict = (groups.size + friends.size) / 5;
-      predict = predict < 20 ? 20 : predict;
-      predict = predict > 50 ? 50 : predict;
-      //let waitpromise: Array<Promise<{ msgList: RawMessage[]; }>> = [];
-      MessageUnique.resize(predict * 50);
-      let RecentContact = await NTQQUserApi.getRecentContactListSnapShot(predict);
-      if (RecentContact?.info?.changedList && RecentContact?.info?.changedList?.length > 0) {
-        for (let i = 0; i < RecentContact.info.changedList.length; i++) {
-          let Peer: Peer = { chatType: RecentContact.info.changedList[i].chatType, peerUid: RecentContact.info.changedList[i].peerUid, guildId: '' };
-          let msgList = await NTQQMsgApi.getMsgHistory(Peer, RecentContact.info.changedList[i].msgId, 50);
-          for (let j = 0; j < msgList.msgList.length; j++) {
-            let shortId = MessageUnique.createMsg(Peer, msgList.msgList[j].msgId);
-            //console.log(`开始创建 ${shortId}<------>${msgList.msgList[j].msgId}`)
-          }
-        }
-      }
-    }, 500);
+  napCatCore.onLoginSuccess(async () => {
+    await sleep(100);
+    loadMessageUnique().then().catch();
   });
 }, 100);
 

@@ -117,7 +117,6 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
   for (const msgId of nodeMsgIds) {
     const nodeMsgPeer = await MessageUnique.getPeerByMsgId(msgId);
     const nodeMsg = (await NTQQMsgApi.getMsgsByMsgId(nodeMsgPeer?.Peer!, [msgId])).msgList[0];
-    console.log("4545",nodeMsgPeer);
     if (nodeMsg) {
       nodeMsgArray.push(nodeMsg);
       if (!srcPeer) {

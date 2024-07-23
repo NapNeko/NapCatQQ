@@ -1,5 +1,6 @@
 import { Peer } from '@/core';
 import crypto, { randomInt, randomUUID } from 'crypto';
+import { logError } from './log';
 
 class LimitedHashTable<K, V> {
   private keyToValue: Map<K, V> = new Map();
@@ -75,7 +76,7 @@ class MessageUniqueWrapper {
     const hash = crypto.createHash('sha1').update(key);
     const shortId = parseInt(hash.digest('hex').slice(0, 8), 16);
     const isExist = this.msgIdMap.getKey(shortId);
-    console.log(`${peer.peerUid} ${msgId} ------- ${shortId}`);
+    //console.log(`${peer.peerUid} ${msgId} ------- ${shortId}`);
     if (isExist && isExist === msgId) {
       return shortId;
     }
