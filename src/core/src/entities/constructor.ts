@@ -196,7 +196,7 @@ export class SendMsgElementConstructor {
         thumbWidth: videoInfo.width,
         thumbHeight: videoInfo.height,
         fileSize: '' + fileSize,
-        fileFormat: videotype
+        //fileFormat: videotype
         // fileUuid: "",
         // transferStatus: 0,
         // progress: 0,
