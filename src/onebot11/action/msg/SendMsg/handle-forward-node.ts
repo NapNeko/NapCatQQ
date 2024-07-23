@@ -53,13 +53,13 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
     const nodeId = messageNode.data.id;
     // 有nodeId表示一个子转发消息卡片
     if (nodeId) {
-      const nodeMsg =  MessageUnique.getMsgIdAndPeerByShortId(parseInt(nodeId));
+      const nodeMsg = MessageUnique.getMsgIdAndPeerByShortId(parseInt(nodeId));
       if (!needClone) {
         nodeMsgIds.push(nodeMsg!.MsgId);
       } else {
         if (nodeMsg!.Peer.peerUid !== selfInfo.uid) {
           // need cloning
-          const rawClone = await NTQQMsgApi.getMsgsByMsgId(nodeMsg?.Peer!,[nodeMsg?.MsgId!]);
+          const rawClone = await NTQQMsgApi.getMsgsByMsgId(nodeMsg?.Peer!, [nodeMsg?.MsgId!]);
           const clonedMsg = await cloneMsg(rawClone.msgList[0]);
           if (clonedMsg) {
             nodeMsgIds.push(clonedMsg.msgId);
@@ -91,7 +91,7 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
           //logDebug(sendElementsSplit);
         }
         // log("分割后的转发节点", sendElementsSplit)
-        const MsgNodeList: Promise<RawMessage>[] = [];
+        const MsgNodeList: Promise<RawMessage | undefined>[] = [];
         for (const sendElementsSplitElement of sendElementsSplit) {
           MsgNodeList.push(sendMsg(selfPeer, sendElementsSplitElement, [], true));
           await sleep(Math.trunc(sendElementsSplit.length / 10) * 100);
@@ -99,7 +99,9 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
         }
         for (const msgNode of MsgNodeList) {
           const result = await msgNode;
-          nodeMsgIds.push(result.msgId);
+          if (result) {
+            nodeMsgIds.push(result.msgId);
+          }
           //logDebug('转发节点生成成功', result.msgId);
         }
       } catch (e) {
