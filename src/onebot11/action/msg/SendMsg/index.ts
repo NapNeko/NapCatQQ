@@ -66,10 +66,10 @@ export async function sendMsg(peer: Peer, sendElements: SendMessageElement[], de
   }
   const returnMsg = await NTQQMsgApi.sendMsg(peer, sendElements, waitComplete, timeout);
   try {
-    returnMsg.id = await MessageUnique.createMsg({ chatType: peer.chatType, guildId: '', peerUid: peer.peerUid }, returnMsg.msgId);
+    returnMsg!.id = await MessageUnique.createMsg({ chatType: peer.chatType, guildId: '', peerUid: peer.peerUid }, returnMsg!.msgId);
   } catch (e: any) {
     logDebug('发送消息id获取失败', e);
-    returnMsg.id = 0;
+    returnMsg!.id = 0;
   }
 
   deleteAfterSentFiles.map((f) => {
@@ -172,7 +172,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
     const { sendElements, deleteAfterSentFiles } = await createSendElements(messages, group);
     //console.log(peer, JSON.stringify(sendElements,null,2));
     const returnMsg = await sendMsg(peer, sendElements, deleteAfterSentFiles);
-    return { message_id: returnMsg.id! };
+    return { message_id: returnMsg!.id! };
   }
 }
 

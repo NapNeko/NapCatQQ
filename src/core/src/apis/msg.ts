@@ -174,12 +174,25 @@ export class NTQQMsgApi {
       'NodeIKernelMsgListener/onMsgInfoListUpdate',
       timeout,
       1,
-      () => true,
+      (msgRecords: RawMessage[]) => {
+        for (let msgRecord of msgRecords) {
+          if (msgRecord.msgId === msgId && msgRecord.sendStatus === 2) {
+            return true;
+          }
+        }
+        return false;
+      },
       msgId,
       peer,
       msgElements,
       new Map()
     );
+    let retMsg = data[1].find(msgRecord => {
+      if (msgRecord.msgId === msgId) {
+        return true;
+      }
+    });
+    return retMsg;
     //const result = napCatCore.session.getMsgService().sendMsg(msgId, peer, msgElements, new Map());
   }
   // static async sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000): Promise<RawMessage> {
