@@ -163,7 +163,10 @@ export class NTQQMsgApi {
   }
   static async sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
     let msgId = await NTQQMsgApi.getMsgUnique(await NTQQMsgApi.getServerTime());
-    let data = await NTEventDispatch.CallNormalEvent<(msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<any, any>) => Promise<unknown>, (msgList: RawMessage[]) => void>(
+    let data = await NTEventDispatch.CallNormalEvent<
+      (msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<any, any>) => Promise<unknown>,
+      (msgList: RawMessage[]) => void
+    >(
       'NodeIKernelMsgService/sendMsg',
       'NodeIKernelMsgListener/onMsgInfoListUpdate',
       1,
@@ -249,39 +252,79 @@ export class NTQQMsgApi {
   static async forwardMsg(srcPeer: Peer, destPeer: Peer, msgIds: string[]) {
     return napCatCore.session.getMsgService().forwardMsg(msgIds, srcPeer, [destPeer], new Map());
   }
-
   static async multiForwardMsg(srcPeer: Peer, destPeer: Peer, msgIds: string[]): Promise<RawMessage> {
     const msgInfos = msgIds.map(id => {
       return { msgId: id, senderShowName: selfInfo.nick };
     });
-
-    return new Promise((resolve, reject) => {
-      let complete = false;
-      const onSentCB = (msg: RawMessage) => {
-        const arkElement = msg.elements.find(ele => ele.arkElement);
-        if (!arkElement) {
-          // log("收到的不是转发消息")
-          return;
+    let data = await NTEventDispatch.CallNormalEvent<
+      (msgInfo: typeof msgInfos, srcPeer: Peer, destPeer: Peer, comment: Array<any>, attr: Map<any, any>,) => Promise<unknown>,
+      (msgList: RawMessage[]) => void
+    >(
+      'NodeIKernelMsgService/multiForwardMsgWithComment',
+      'NodeIKernelMsgListener/onMsgInfoListUpdate',
+      1,
+      5000,
+      (msgRecords: RawMessage[]) => {
+        for (let msgRecord of msgRecords) {
+          if (msgRecord.peerUid == destPeer.peerUid && msgRecord.senderUid == selfInfo.uid) {
+            return true;
+          }
         }
-        const forwardData: any = JSON.parse(arkElement.arkElement.bytesData);
-        if (forwardData.app != 'com.tencent.multimsg') {
-          return;
-        }
-        if (msg.peerUid == destPeer.peerUid && msg.senderUid == selfInfo.uid) {
-          complete = true;
-          resolve(msg);
-        }
-      };
-      sentMsgTasks.set(randomUUID(), onSentCB);
-      setTimeout(() => {
-        if (!complete) {
-          reject('转发消息超时');
-        }
-      }, 5000);
-      napCatCore.session.getMsgService().multiForwardMsgWithComment(msgInfos, srcPeer, destPeer, [], new Map());
-    }
+        return false;
+      },
+      msgInfos,
+      srcPeer,
+      destPeer,
+      [],
+      new Map()
     );
+    for (let msg of data[1]) {
+      const arkElement = msg.elements.find(ele => ele.arkElement);
+      if (!arkElement) {
+        continue;
+      }
+      const forwardData: any = JSON.parse(arkElement.arkElement.bytesData);
+      if (forwardData.app != 'com.tencent.multimsg') {
+        continue;
+      }
+      if (msg.peerUid == destPeer.peerUid && msg.senderUid == selfInfo.uid) {
+        return msg;
+      }
+    }
+    throw new Error('转发消息超时');
   }
+  // static async multiForwardMsg2(srcPeer: Peer, destPeer: Peer, msgIds: string[]): Promise<RawMessage> {
+  //   const msgInfos = msgIds.map(id => {
+  //     return { msgId: id, senderShowName: selfInfo.nick };
+  //   });
+
+  //   return new Promise((resolve, reject) => {
+  //     let complete = false;
+  //     const onSentCB = (msg: RawMessage) => {
+  //       const arkElement = msg.elements.find(ele => ele.arkElement);
+  //       if (!arkElement) {
+  //         // log("收到的不是转发消息")
+  //         return;
+  //       }
+  //       const forwardData: any = JSON.parse(arkElement.arkElement.bytesData);
+  //       if (forwardData.app != 'com.tencent.multimsg') {
+  //         return;
+  //       }
+  //       if (msg.peerUid == destPeer.peerUid && msg.senderUid == selfInfo.uid) {
+  //         complete = true;
+  //         resolve(msg);
+  //       }
+  //     };
+  //     sentMsgTasks.set(randomUUID(), onSentCB);
+  //     setTimeout(() => {
+  //       if (!complete) {
+  //         reject('转发消息超时');
+  //       }
+  //     }, 5000);
+  //     napCatCore.session.getMsgService().multiForwardMsgWithComment(msgInfos, srcPeer, destPeer, [], new Map());
+  //   }
+  //   );
+  // }
   static async markallMsgAsRead() {
     return napCatCore.session.getMsgService().setAllC2CAndGroupMsgRead();
   }
