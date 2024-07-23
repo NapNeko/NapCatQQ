@@ -248,7 +248,28 @@ export class SendMsgElementConstructor {
       }
     };
   }
-
+  // NodeIQQNTWrapperSession sendMsg  [
+  //   "0",
+  //   {
+  //     "peerUid": "u_e_RIxgTs2NaJ68h0PwOPSg",
+  //     "chatType": 1,
+  //     "guildId": ""
+  //   },
+  //   [
+  //     {
+  //       "elementId": "0",
+  //       "elementType": 6,
+  //       "faceElement": {
+  //         "faceIndex": 0,
+  //         "faceType": 5,
+  //         "msgType": 0,
+  //         "pokeType": 1,
+  //         "pokeStrength": 0
+  //       }
+  //     }
+  //   ],
+  //   {}
+  // ]
   static face(faceId: number): SendFaceElement {
     // 从face_config.json中获取表情名称
     const sysFaces = faceConfig.sysface;
