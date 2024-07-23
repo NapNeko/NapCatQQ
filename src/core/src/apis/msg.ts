@@ -173,10 +173,9 @@ export class NTQQMsgApi {
       'NodeIKernelMsgService/sendMsg',
       'NodeIKernelMsgListener/onMsgInfoListUpdate',
       1,
-      5000,
+      timeout,
       (msgRecords: RawMessage[]) => {
         for (let msgRecord of msgRecords) {
-          //console.log(msgRecord);
           if (msgRecord.msgId === msgId && msgRecord.sendStatus === 2) {
             return true;
           }
