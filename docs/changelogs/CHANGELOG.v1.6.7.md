@@ -28,6 +28,5 @@ QQ Version: Windows 9.9.12-26000 / Linux 3.2.9-26000
 3. 支持 设置消息编辑状态 (如正在输入中...) ~ 扩展接口
 4. 移除群本地时间记录功能 ~ 移除功能
 5. 支持 群文件 子目录列表 获取 ~ 扩展接口
-6. 支持 实时语音 接口
 
 新增的 API 详细见[API文档](https://napneko.github.io/zh-CN/develop/extends_api)
