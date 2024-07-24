@@ -21,6 +21,10 @@ const __dirname = dirname(__filename);
  */
 export async function InitWebUi() {
   const config = await WebUiConfig.GetWebUIConfig();
+  if (config.port == 0) {
+    log('[NapCat] [WebUi] Current WebUi is not run.');
+    return;
+  }
   app.use(express.json());
   // 初始服务
   app.all('/', (_req, res) => {

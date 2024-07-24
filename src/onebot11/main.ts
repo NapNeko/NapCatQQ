@@ -46,6 +46,10 @@ export let DeviceList = new Array<LineDevice>();
 //peer->cached(boolen)
 // const PokeCache = new Map<string, boolean>();
 
+function check_http_ws_equal(conf: any) { // 放在NapCatOnebot11里能被onReady调用却不能被SetConfig调用 不知道为什么 只能放这里了
+  return isEqual(conf.http.port, conf.ws.port) && isEqual(conf.http.host, conf.ws.host);
+}
+
 export class NapCatOnebot11 {
   private bootTime: number = Date.now() / 1000;  // 秒
 
@@ -73,7 +77,11 @@ export class NapCatOnebot11 {
       ob11HTTPServer.start(ob11Config.http.port, ob11Config.http.host);
     }
     if (ob11Config.ws.enable) {
-      ob11WebsocketServer.start(ob11Config.ws.port, ob11Config.ws.host);
+      if (check_http_ws_equal(ob11Config) && ob11HTTPServer.server) { // ob11HTTPServer.server != null 隐含了 ob11Config.http.enable == true 的条件
+        ob11WebsocketServer.start(ob11HTTPServer.server);
+      } else {
+        ob11WebsocketServer.start(ob11Config.ws.port, ob11Config.ws.host);
+      }
     }
     if (ob11Config.reverseWs.enable) {
       ob11ReverseWebsockets.start();
@@ -379,49 +387,66 @@ export class NapCatOnebot11 {
       const OldConfig = JSON.parse(JSON.stringify(ob11Config)); //进行深拷贝
       ob11Config.save(NewOb11);//保存新配置
 
-      const isHttpChanged = !isEqual(NewOb11.http.port, OldConfig.http.port);
-      const isHttpEnableChanged = !isEqual(NewOb11.http.enable, OldConfig.http.enable);
+      const isHttpChanged = !isEqual(NewOb11.http.enable, OldConfig.http.enable) ||
+                            !isEqual(NewOb11.http.host, OldConfig.http.host) ||
+                            !isEqual(NewOb11.http.port, OldConfig.http.port);
 
       // const isHttpPostChanged = !isEqual(NewOb11.http.postUrls, OldConfig.http.postUrls);
       // const isEnanleHttpPostChanged = !isEqual(NewOb11.http.enablePost, OldConfig.http.enablePost);
 
-      const isWsChanged = !isEqual(NewOb11.ws.port, OldConfig.ws.port);
-      const isEnableWsChanged = !isEqual(NewOb11.ws.enable, OldConfig.ws.enable);
+      const isWsChanged = !isEqual(NewOb11.ws.enable, OldConfig.ws.enable) ||
+                          !isEqual(NewOb11.ws.host, OldConfig.ws.host) ||
+                          !isEqual(NewOb11.ws.port, OldConfig.ws.port);
 
-      const isEnableWsReverseChanged = !isEqual(NewOb11.reverseWs.enable, OldConfig.reverseWs.enable);
-      const isWsReverseUrlsChanged = !isEqual(NewOb11.reverseWs.urls, OldConfig.reverseWs.urls);
+      const isWsReverseChanged = !isEqual(NewOb11.reverseWs.enable, OldConfig.reverseWs.enable) ||
+                                 !isEqual(NewOb11.reverseWs.urls, OldConfig.reverseWs.urls);
 
       //const isEnableHeartBeatChanged = !isEqual(NewOb11.heartInterval, OldConfig.heartInterval);
 
-      // http重启逻辑
-      // console.log(isHttpEnableChanged, isHttpChanged, NewOb11.http.enable);
-      if ((isHttpEnableChanged || isHttpChanged) && NewOb11.http.enable) {
-        if (OldConfig.http.enable) {
-          ob11HTTPServer.stop();
-        }
-        ob11HTTPServer.start(NewOb11.http.port, NewOb11.http.host);
-      } else if (isHttpEnableChanged && !NewOb11.http.enable) {
-        ob11HTTPServer.stop();
-      }
-
-      // ws重启逻辑
-      if ((isEnableWsChanged || isWsChanged) && NewOb11.ws.enable) {
-        if (OldConfig.ws.enable) {
+      if (check_http_ws_equal(NewOb11) || check_http_ws_equal(OldConfig)) {
+        // http与ws共站 需要同步重启
+        if (isHttpChanged || isWsChanged) {
+          log("http与ws进行热重载")
           ob11WebsocketServer.stop();
+          ob11HTTPServer.stop();
+          if (NewOb11.http.enable) {
+            ob11HTTPServer.start(NewOb11.http.port, NewOb11.http.host);
+          }
+          if (NewOb11.ws.enable) {
+            if (check_http_ws_equal(NewOb11) && ob11HTTPServer.server) {
+              ob11WebsocketServer.start(ob11HTTPServer.server);
+            } else {
+              ob11WebsocketServer.start(NewOb11.ws.port, NewOb11.ws.host);
+            }
+          }
         }
-        ob11WebsocketServer.start(NewOb11.ws.port, NewOb11.ws.host);
-      } else if (isHttpEnableChanged && !NewOb11.http.enable) {
-        ob11WebsocketServer.stop();
+      } else {
+        // http重启逻辑
+        if (isHttpChanged) {
+          log("http进行热重载")
+          ob11HTTPServer.stop();
+          if (NewOb11.http.enable) {
+            ob11HTTPServer.start(NewOb11.http.port, NewOb11.http.host);
+          }
+        }
+
+        // ws重启逻辑
+        if (isWsChanged) {
+          log("ws进行热重载")
+          ob11WebsocketServer.stop();
+          if (NewOb11.ws.enable) {
+            ob11WebsocketServer.start(NewOb11.ws.port, NewOb11.ws.host);
+          }
+        }
       }
 
       // 反向ws重启逻辑
-      if ((isEnableWsReverseChanged || isWsReverseUrlsChanged) && NewOb11.reverseWs.enable) {
-        if (OldConfig.reverseWs.enable) {
-          ob11ReverseWebsockets.stop();
-        }
-        ob11ReverseWebsockets.start();
-      } else if (isHttpEnableChanged && !NewOb11.http.enable) {
+      if (isWsReverseChanged) {
+        log("反向ws进行热重载")
         ob11ReverseWebsockets.stop();
+        if (NewOb11.reverseWs.enable) {
+          ob11ReverseWebsockets.start();
+        }
       }
 
     } catch (e) {

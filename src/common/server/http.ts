@@ -9,7 +9,15 @@ type RegisterHandler = (res: Response, payload: any) => Promise<any>
 export abstract class HttpServerBase {
   name: string = 'NapCatQQ';
   private readonly expressAPP: Express;
-  private server: http.Server | null = null;
+  private _server: http.Server | null = null;
+
+  public get server(): http.Server | null {
+    return this._server;
+  }
+
+  private set server(value: http.Server | null) {
+    this._server = value;
+  }
 
   constructor() {
     this.expressAPP = express();
