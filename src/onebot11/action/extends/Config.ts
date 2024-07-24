@@ -15,6 +15,6 @@ export class SetConfigAction extends BaseAction<OB11Config, void> {
   actionName = ActionName.SetConfig;
 
   protected async _handle(payload: OB11Config): Promise<void> {
-    ob11Config.save(payload);
+    ob11Config.save(payload, true);
   }
 }
