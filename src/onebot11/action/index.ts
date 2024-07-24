@@ -74,6 +74,7 @@ import DelEssenceMsg from './group/DelEssenceMsg';
 import SetEssenceMsg from './group/SetEssenceMsg';
 import GetRecentContact from './user/GetRecentContact';
 import { GetProfileLike } from './extends/GetProfileLike';
+import SetGroupHeader from './extends/SetGroupHeader';
 
 export const actionHandlers = [
   new RebootNormal(),
@@ -85,10 +86,6 @@ export const actionHandlers = [
   new sharePeer(),
   new CreateCollection(),
   new SetLongNick(),
-  // new GetConfigAction(),
-  // new SetConfigAction(),
-  // new GetGroupAddRequest(),
-  // TranslateEnWordToZn = "translate_en2zh",
   new ForwardFriendSingleMsg(),
   new ForwardGroupSingleMsg(),
   new MarkGroupMsgAsRead(),
@@ -125,9 +122,7 @@ export const actionHandlers = [
   new GetImage(),
   new GetRecord(),
   new SetMsgEmojiLike(),
-  // new CleanCache(),
   new GetCookies(),
-  //
   new SetOnlineStatus(),
   new GetRobotUinRange(),
   new GetFriendWithCategory(),
@@ -156,7 +151,8 @@ export const actionHandlers = [
   new SetEssenceMsg(),
   new GetRecentContact(),
   new MarkAllMsgAsRead(),
-  new GetProfileLike()
+  new GetProfileLike(),
+  new SetGroupHeader()
 ];
 
 function initActionMap() {
