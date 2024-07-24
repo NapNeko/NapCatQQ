@@ -40,14 +40,14 @@ export interface onGroupFileInfoUpdateParamType {
 //   fromNick: '拾xxxx,
 //   sig: '0x'
 // }
-export interface TempOnRecvParams{
-    sessionType: number,//1
-    chatType: ChatType,//100
-    peerUid: string,//uid
-    groupCode: string,//gc
-    fromNick: string,//gc name
-    sig: string,
-  
+export interface TempOnRecvParams {
+  sessionType: number,//1
+  chatType: ChatType,//100
+  peerUid: string,//uid
+  groupCode: string,//gc
+  fromNick: string,//gc name
+  sig: string,
+
 }
 export interface IKernelMsgListener {
   onAddSendMsg(msgRecord: RawMessage): void;
@@ -158,7 +158,41 @@ export interface IKernelMsgListener {
 
   onRichMediaUploadComplete(fileTransNotifyInfo: unknown): void;
 
-  onSearchGroupFileInfoUpdate(searchGroupFileResult: unknown): void;
+  onSearchGroupFileInfoUpdate(searchGroupFileResult:
+    {
+      result: {
+        retCode: number,
+        retMsg: string,
+        clientWording: string
+      },
+      syncCookie: string,
+      totalMatchCount: number,
+      ownerMatchCount: number,
+      isEnd: boolean,
+      reqId: number,
+      item: Array<{
+        groupCode: string,
+        groupName: string,
+        uploaderUin: string,
+        uploaderName: string,
+        matchUin: string,
+        matchWords: Array<unknown>,
+        fileNameHits: Array<{
+          start: number,
+          end: number
+        }>,
+        fileModelId: string,
+        fileId: string,
+        fileName: string,
+        fileSize: string,
+        busId: number,
+        uploadTime: number,
+        modifyTime: number,
+        deadTime: number,
+        downloadTimes: number,
+        localPath: string
+      }>
+    }): void;
 
   onSendMsgError(j2: unknown, contact: unknown, i2: unknown, str: unknown): void;
 

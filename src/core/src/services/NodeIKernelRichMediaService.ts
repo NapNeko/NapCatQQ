@@ -133,7 +133,16 @@ export interface NodeIKernelRichMediaService {
     moveGroupFile(arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown, arg5: unknown): unknown;
 
     transGroupFile(arg1: unknown, arg2: unknown): unknown;
-
+    searchGroupFile(
+        keywords: Array<string>,
+        param: {
+            groupIds: Array<string>,
+            fileType: number,
+            context: string,
+            count: number,
+            sortType: number,
+            groupNames: Array<string>
+        }): Promise<unknown>;
     searchGroupFileByWord(arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown, arg5: unknown): unknown;
 
     deleteGroupFile(GroupCode: string, params: Array<number>, Files: Array<string>): Promise<GeneralCallResult & {
