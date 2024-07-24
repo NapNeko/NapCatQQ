@@ -99,9 +99,9 @@ export interface NodeIKernelRichMediaService {
 
     renameGroupFolder(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
 
-    deleteGroupFoldertransgroupfile(arg1: unknown, arg2: unknown): unknown;
+    deleteGroupFolder(arg1: unknown, arg2: unknown): unknown;
 
-    deleteTransferInfotransgroupfile(arg1: unknown, arg2: unknown): unknown;
+    deleteTransferInfo(arg1: unknown, arg2: unknown): unknown;
 
     cancelTransferTask(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
 
@@ -122,17 +122,18 @@ export interface NodeIKernelRichMediaService {
         }
     }>;
 
-    getGroupFileInfotransgroupfile(arg1: unknown, arg2: unknown): unknown;
+    getGroupFileInfo(arg1: unknown, arg2: unknown): unknown;
 
-    getGroupFileListtransgroupfile(arg1: unknown, arg2: unknown): unknown;
+    getGroupFileList(arg1: unknown, arg2: unknown): unknown;
 
-    getGroupTransferListtransgroupfile(arg1: unknown, arg2: unknown): unknown;
+    getGroupTransferList(arg1: unknown, arg2: unknown): unknown;
 
     renameGroupFile(arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown, arg5: unknown): unknown;
 
     moveGroupFile(arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown, arg5: unknown): unknown;
 
     transGroupFile(arg1: unknown, arg2: unknown): unknown;
+    
     searchGroupFile(
         keywords: Array<string>,
         param: {
@@ -161,7 +162,7 @@ export interface NodeIKernelRichMediaService {
 
     queryPicDownloadSize(arg: unknown): unknown;
 
-    searchGroupFiletransgroupfile(arg1: unknown, arg2: unknown): unknown;
+    searchGroupFile(arg1: unknown, arg2: unknown): unknown;
 
     searchMoreGroupFile(arg: unknown): unknown;
 
@@ -169,7 +170,7 @@ export interface NodeIKernelRichMediaService {
 
     onlyDownloadFile(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
 
-    onlyUploadFiletransgroupfile(arg1: unknown, arg2: unknown): unknown;
+    onlyUploadFile(arg1: unknown, arg2: unknown): unknown;
 
     isExtraLargePic(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
 
