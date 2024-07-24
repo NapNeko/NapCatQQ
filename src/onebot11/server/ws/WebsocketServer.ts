@@ -1,4 +1,5 @@
 import { WebSocket } from 'ws';
+import http from 'http';
 import { actionMap } from '../../action';
 import { OB11Response } from '../../action/OB11Response';
 import { postWsEvent, registerWsEventSender, unregisterWsEventSender } from '../postOB11Event';
@@ -18,7 +19,7 @@ const heartbeatRunning = false;
 
 class OB11WebsocketServer extends WebsocketServerBase {
 
-  public start(port: number, host: string) {
+  public start(port: number | http.Server, host: string = '') {
     this.token = ob11Config.token;
     super.start(port, host);
   }
