@@ -70,10 +70,12 @@ export class WebsocketServerBase {
   }
 
   stop() {
-    this.ws && this.ws.close((err) => {
-      log('ws server close failed!', err);
-    });
-    this.ws = null;
+    if (this.ws) {
+      this.ws.close((err) => {
+        if (err) log('ws server close failed!', err);
+      });
+      this.ws = null;
+    }
   }
 
   restart(port: number) {

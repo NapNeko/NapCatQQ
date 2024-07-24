@@ -70,7 +70,7 @@ const showQRCode = async (url: string, base64: string, buffer: Buffer) => {
   });
 };
 
-let quickLoginQQ = cmdOptions.qq;
+let quickLoginQQ = cmdOptions.qq; // undefine、true、string
 const QuickLoginList = await napCatCore.getQuickLoginList();
 if (quickLoginQQ == true) {
   if (QuickLoginList.LocalLoginInfoList.length > 0) {
