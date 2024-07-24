@@ -1,7 +1,7 @@
 import { ModifyProfileParams, SelfInfo, User, UserDetailInfoByUin } from '@/core/entities';
 import { friends, selfInfo } from '@/core/data';
 import { CacheClassFuncAsync, CacheClassFuncAsyncExtend } from '@/common/utils/helper';
-import {  napCatCore } from '@/core';
+import { napCatCore } from '@/core';
 import { NodeIKernelProfileListener, ProfileListener } from '@/core/listeners';
 import { RequestUtil } from '@/common/utils/request';
 import { logWarn } from '@/common/utils/log';
@@ -46,9 +46,8 @@ export class NTQQUserApi {
     const ret = await napCatCore.session.getProfileService().setHeader(filePath) as setQQAvatarRet;
     return { result: ret?.result, errMsg: ret?.errMsg };
   }
-  static async setGroupAvatar(gc:string,filePath: string) {
-    const ret = await napCatCore.session.getGroupService().setHeader(gc,filePath);
-    return { result: ret?.result, errMsg: ret?.errMsg };
+  static async setGroupAvatar(gc: string, filePath: string) {
+    return napCatCore.session.getGroupService().setHeader(gc, filePath);
   }
 
   static async getSelfInfo() {
@@ -81,10 +80,10 @@ export class NTQQUserApi {
           }
           return false;
         },
-        uid, 
+        uid,
         [0]
       );
-      return profile;
+    return profile;
   }
   static async modifySelfProfile(param: ModifyProfileParams) {
     return napCatCore.session.getProfileService().modifyDesktopMiniProfile(param);
