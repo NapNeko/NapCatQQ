@@ -85,15 +85,15 @@ export interface NodeIKernelRichMediaService {
 
     downloadFileForFileUuid(peer: Peer, arg1: string, arg3: unknown[]): unknown;
 
-    downloadFileByUrlListtransgroupfile(arg1: unknown, arg2: unknown): unknown;
+    downloadFileByUrlList(arg1: unknown, arg2: unknown): unknown;
 
-    downloadFileForFileInfotransgroupfile(arg1: unknown, arg2: unknown): unknown;
+    downloadFileForFileInfo(arg1: unknown, arg2: unknown): unknown;
 
     createGroupFolder(GroupCode: string, FolderName: string): Promise<GeneralCallResult & { resultWithGroupItem: { result: any, groupItem: Array<any> } }>
 
     downloadFile(arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown): unknown;
 
-    createGroupFoldertransgroupfile(arg1: unknown, arg2: unknown): unknown;
+    createGroupFolder(arg1: unknown, arg2: unknown): unknown;
 
     downloadGroupFolder(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
 
