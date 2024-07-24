@@ -1,14 +1,15 @@
-import { GroupMember, GroupRequestOperateTypes, GroupMemberRole, GroupNotify, Group, MemberExtSourceType, GroupNotifyTypes } from '../entities';
+import { GroupMember, GroupRequestOperateTypes, GroupMemberRole, GroupNotify, Group, MemberExtSourceType, GroupNotifyTypes, ChatType } from '../entities';
 import { GeneralCallResult, NTQQUserApi, napCatCore } from '@/core';
 import { NTEventDispatch } from '@/common/utils/EventTask';
-import { logDebug } from '@/common/utils/log';
-// console.log(process.pid);
+import { log } from '@/common/utils/log';
+import { groupMembers } from '../data';
+import { PromiseTimer } from '@/common/utils/helper';
 // setTimeout(async () => {
-//   console.log(JSON.stringify(await NTQQGroupApi.getMemberExtInfo(), null, 2));
-// }, 20000);
+//   console.log(JSON.stringify(await NTQQGroupApi.getGroupMemberLastestSendTime('726067488'), null, 2));
+// }, 21000);
 export class NTQQGroupApi {
-  static async setGroupAvatar(gc:string,filePath: string) {
-    return napCatCore.session.getGroupService().setHeader(gc,filePath);
+  static async setGroupAvatar(gc: string, filePath: string) {
+    return napCatCore.session.getGroupService().setHeader(gc, filePath);
   }
   static async getGroups(forced = false) {
     let [_retData, _updateType, groupList] = await NTEventDispatch.CallNormalEvent
@@ -18,10 +19,81 @@ export class NTQQGroupApi {
         'NodeIKernelGroupListener/onGroupListUpdate',
         1,
         5000,
-        ()=>true,
+        () => true,
         forced
       );
     return groupList;
+  }
+  static async getGroupMemberLastestSendTime(GroupCode: string) {
+    async function getdata(uid: string) {
+      let NTRet = await NTQQGroupApi.getLastestMsgByUids(GroupCode, [uid]);
+      if (NTRet.result != 0 && NTRet.msgList.length < 1) {
+        return undefined;
+      }
+      return { sendUin: NTRet.msgList[0].senderUin, sendTime: NTRet.msgList[0].msgTime }
+    }
+    let currentGroupMembers = groupMembers.get(GroupCode);
+    let PromiseData: Promise<({
+      sendUin: string;
+      sendTime: string;
+    } | undefined) | undefined>[] = [];
+    let ret: Map<string, string> = new Map();
+    if (!currentGroupMembers) {
+      return ret;
+    }
+    for (let member of currentGroupMembers.values()) {
+      PromiseData.push(PromiseTimer(getdata(member.uid), 2500));
+    }
+    let allRet = await Promise.all(PromiseData);
+    for (let PromiseDo of allRet) {
+      if (PromiseDo) {
+        ret.set(PromiseDo.sendUin, PromiseDo.sendTime)
+      }
+    }
+    return ret;
+  }
+  static async getLastestMsgByUids(GroupCode: string, uids: string[]) {
+    let ret = await napCatCore.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {
+      chatInfo: {
+        peerUid: GroupCode,
+        chatType: ChatType.group,
+      },
+      filterMsgType: [],
+      filterSendersUid: uids,
+      filterMsgToTime: '0',
+      filterMsgFromTime: '0',
+      isReverseOrder: false,
+      isIncludeCurrent: true,
+      pageLimit: 1,
+    });
+    return ret;
+  }
+  static async getLastestMsg(GroupCode: string, uins: string[]) {
+    let uids: Array<string> = [];
+    for (let uin of uins) {
+      try {
+        let uid = await NTQQUserApi.getUidByUin(uin)
+        if (uid) {
+          uids.push(uid);
+        }
+      } catch (error) {
+        log("getLastestMsg--->", error)
+      }
+    }
+    let ret = await napCatCore.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {
+      chatInfo: {
+        peerUid: GroupCode,
+        chatType: ChatType.group,
+      },
+      filterMsgType: [],
+      filterSendersUid: uids,
+      filterMsgToTime: '0',
+      filterMsgFromTime: '0',
+      isReverseOrder: false,
+      isIncludeCurrent: true,
+      pageLimit: 1,
+    });
+    return ret;
   }
   static async getGroupRecommendContactArkJson(GroupCode: string) {
     return napCatCore.session.getGroupService().getGroupRecommendContactArkJson(GroupCode);
@@ -67,7 +139,7 @@ export class NTQQGroupApi {
         'NodeIKernelGroupListener/onGroupSingleScreenNotifies',
         1,
         5000,
-        ()=>true,
+        () => true,
         false,
         '',
         num

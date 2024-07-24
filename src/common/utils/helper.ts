@@ -11,6 +11,14 @@ const __dirname = dirname(__filename);
 export function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+export function PromiseTimer<T>(promise: Promise<T>, ms: number): Promise<T | undefined> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(undefined), ms)
+    ),
+  ]).catch((error) => error);
+}
 
 export function getMd5(s: string) {
 

@@ -141,7 +141,7 @@ export interface NodeIKernelMsgService {
 
   getLastMessageList(peer: Peer[]): Promise<unknown>;
 
-  getAioFirstViewLatestMsgs(peer:Peer,unknown:number): unknown;
+  getAioFirstViewLatestMsgs(peer: Peer, unknown: number): unknown;
 
   getMsgs(peer: Peer, msgId: string, count: unknown, queryOrder: boolean): Promise<unknown>;
 
@@ -186,27 +186,48 @@ export interface NodeIKernelMsgService {
 
   getSourceOfReplyMsgByClientSeqAndTime(...args: unknown[]): unknown;
 
-  getMsgsByTypeFilter(peer: Peer, msgId: string, cnt: unknown, queryOrder: boolean, typeFilters: unknown): unknown;
+  getMsgsByTypeFilter(peer: Peer, msgId: string, cnt: unknown, queryOrder: boolean, typeFilter: { type: number, subtype: Array<number> }): unknown;
 
-  getMsgsByTypeFilters(...args: unknown[]): unknown;
+  getMsgsByTypeFilters(peer: Peer, msgId: string, cnt: unknown, queryOrder: boolean, typeFilters: Array<{ type: number, subtype: Array<number> }>): unknown;
 
   getMsgWithAbstractByFilterParam(...args: unknown[]): unknown;
 
   queryMsgsWithFilter(...args: unknown[]): unknown;
 
+  /**
+   * @deprecated 该函数已被标记为废弃，请使用新的替代方法。
+   * 使用过滤条件查询消息列表的版本2接口。
+   * 
+   * 该函数通过一系列过滤条件来查询特定聊天中的消息列表。这些条件包括消息类型、发送者、时间范围等。
+   * 函数返回一个Promise，解析为查询结果的未知类型对象。
+   * 
+   * @param MsgId 消息ID，用于特定消息的查询。
+   * @param MsgTime 消息时间，用于指定消息的时间范围。
+   * @param param 查询参数对象，包含详细的过滤条件和分页信息。
+   * @param param.chatInfo 聊天信息，包括聊天类型和对方用户ID。
+   * @param param.filterMsgType 需要过滤的消息类型数组，留空表示不过滤。
+   * @param param.filterSendersUid 需要过滤的发送者用户ID数组。
+   * @param param.filterMsgFromTime 查询消息的起始时间。
+   * @param param.filterMsgToTime 查询消息的结束时间。
+   * @param param.pageLimit 每页的消息数量限制。
+   * @param param.isReverseOrder 是否按时间顺序倒序返回消息。
+   * @param param.isIncludeCurrent 是否包含当前页码。
+   * @returns 返回一个Promise，解析为查询结果的未知类型对象。
+   */
   queryMsgsWithFilterVer2(MsgId: string, MsgTime: string, param: {
     chatInfo: {
       chatType: number,
       peerUid: string
     },
     filterMsgType: [],
-    filterSendersUid: [],
+    filterSendersUid: Array<string>,
     filterMsgFromTime: string,
     filterMsgToTime: string,
     pageLimit: number,
     isReverseOrder: boolean,
     isIncludeCurrent: boolean
   }): Promise<unknown>;
+
   // this.chatType = i2;
   // this.peerUid = str;
 
@@ -228,14 +249,15 @@ export interface NodeIKernelMsgService {
       peerUid: string
     },
     filterMsgType: [],
-    filterSendersUid: [],
+    filterSendersUid: string[],
     filterMsgFromTime: string,
     filterMsgToTime: string,
     pageLimit: number,
     isReverseOrder: boolean,
     isIncludeCurrent: boolean
-
-  }): Promise<unknown>;
+  }): Promise<GeneralCallResult & {
+    msgList: RawMessage[]
+  }>;
   //queryMsgsWithFilterEx(this.$msgId, this.$msgTime, this.$msgSeq, this.$param)
   queryFileMsgsDesktop(...args: unknown[]): unknown;
 
@@ -261,7 +283,19 @@ export interface NodeIKernelMsgService {
 
   queryTroopEmoticonMsgs(...args: unknown[]): unknown;
 
-  queryMsgsAndAbstractsWithFilter(...args: unknown[]): unknown;
+  queryMsgsAndAbstractsWithFilter(msgId: string, msgTime: string, megSeq: string, param: {
+    chatInfo: {
+      chatType: number,
+      peerUid: string
+    },
+    filterMsgType: [],
+    filterSendersUid: [],
+    filterMsgFromTime: string,
+    filterMsgToTime: string,
+    pageLimit: number,
+    isReverseOrder: boolean,
+    isIncludeCurrent: boolean
+  }): unknown;
 
   setFocusOnGuild(...args: unknown[]): unknown;
 
