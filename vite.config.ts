@@ -15,7 +15,6 @@ const external = ['silk-wasm', 'ws', 'express', 'fluent-ffmpeg', 'log4js', 'qrco
 const nodeModules = [...builtinModules, builtinModules.map(m => `node:${m}`)].flat();
 // let nodeModules = ["fs", "path", "events", "buffer", "url", "crypto", "fs/promise", "fsPromise", "os", "http", "net"]
 // nodeModules = [...nodeModules, ...nodeModules.map(m => `node:${m}`)]
-
 function genCpModule(module: string) {
   return { src: `./node_modules/${module}`, dest: `dist/node_modules/${module}`, flatten: false };
 }
