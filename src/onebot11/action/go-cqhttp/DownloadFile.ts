@@ -1,11 +1,10 @@
 import BaseAction from '../BaseAction';
-import { ActionName, BaseCheckResult } from '../types';
+import { ActionName } from '../types';
 import fs from 'fs';
 import { join as joinPath } from 'node:path';
 import { calculateFileMD5, getTempDir, httpDownload } from '@/common/utils/file';
-import { v4 as uuid4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import Ajv from 'ajv';
 interface FileResponse {
   file: string;
 }
@@ -32,7 +31,7 @@ export default class GoCQHTTPDownloadFile extends BaseAction<Payload, FileRespon
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<FileResponse> {
     const isRandomName = !payload.name;
-    const name = payload.name || uuid4();
+    const name = payload.name || randomUUID();
     const filePath = joinPath(getTempDir(), name);
 
     if (payload.base64) {
