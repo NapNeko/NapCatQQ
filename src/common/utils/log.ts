@@ -91,8 +91,10 @@ export function enableConsoleLog(enable: boolean) {
 function formatMsg(msg: any[]) {
   let logMsg = '';
   for (const msgItem of msg) {
-    // 判断是否是对象
-    if (typeof msgItem === 'object') {
+    if (msgItem instanceof Error) { // 判断是否是错误
+      logMsg += msgItem.stack + ' ';
+      continue;
+    } else if (typeof msgItem === 'object') { // 判断是否是对象
       const obj = JSON.parse(JSON.stringify(msgItem, null, 2));
       logMsg += JSON.stringify(truncateString(obj)) + ' ';
       continue;
