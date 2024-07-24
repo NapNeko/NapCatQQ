@@ -98,5 +98,6 @@ export enum ActionName {
     DelEssenceMsg = 'delete_essence_msg',
     GetRecentContact = 'get_recent_contact',
     _MarkAllMsgAsRead = '_mark_all_as_read',
-    GetProfileLike = 'get_profile_like'
+    GetProfileLike = 'get_profile_like',
+    SetGroupHeader = "set_group_head"
 }

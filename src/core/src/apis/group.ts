@@ -7,6 +7,9 @@ import { logDebug } from '@/common/utils/log';
 //   console.log(JSON.stringify(await NTQQGroupApi.getMemberExtInfo(), null, 2));
 // }, 20000);
 export class NTQQGroupApi {
+  static async setGroupAvatar(gc:string,filePath: string) {
+    return napCatCore.session.getGroupService().setHeader(gc,filePath);
+  }
   static async getGroups(forced = false) {
     let [_retData, _updateType, groupList] = await NTEventDispatch.CallNormalEvent
       <(force: boolean) => Promise<any>, (updateType: number, groupList: Group[]) => void>
