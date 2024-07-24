@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import babel from 'vite-plugin-babel';
 import { version } from 'os';
 // "@rollup/plugin-babel": "^6.0.4",
-const external = ['silk-wasm', 'ws', 'express', 'uuid', 'fluent-ffmpeg', 'log4js', 'qrcode-terminal'];
+const external = ['silk-wasm', 'ws', 'express', 'fluent-ffmpeg', 'log4js', 'qrcode-terminal'];
 
 const nodeModules = [...builtinModules, builtinModules.map(m => `node:${m}`)].flat();
 // let nodeModules = ["fs", "path", "events", "buffer", "url", "crypto", "fs/promise", "fsPromise", "os", "http", "net"]

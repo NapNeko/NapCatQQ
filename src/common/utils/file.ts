@@ -5,7 +5,7 @@ import util from 'util';
 import path from 'node:path';
 import { log, logError } from './log';
 import * as fileType from 'file-type';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import { napCatCore } from '@/core';
 
 export const getNapCatDir = () => {
@@ -191,7 +191,7 @@ export async function uri2local(uri: string, fileName: string | null = null): Pr
     isLocal: false
   };
   if (!fileName) {
-    fileName = uuidv4();
+    fileName = randomUUID();
   }
   let filePath = path.join(getTempDir(), fileName);
   let url = null;
@@ -234,7 +234,7 @@ export async function uri2local(uri: string, fileName: string | null = null): Pr
       }
       fileName = fileName.replace(/[/\\:*?"<>|]/g, '_');
       res.fileName = fileName;
-      filePath = path.join(getTempDir(), uuidv4() + fileName);
+      filePath = path.join(getTempDir(), randomUUID() + fileName);
       fs.writeFileSync(filePath, buffer);
     } catch (e: any) {
       res.errMsg = `${url}下载失败,` + e.toString();
