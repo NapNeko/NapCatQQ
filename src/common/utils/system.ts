@@ -1,7 +1,7 @@
 import os from 'node:os';
 import path from 'node:path';
 import { networkInterfaces } from 'os';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 
 // 缓解Win7设备兼容性问题
 let osName: string;
@@ -30,7 +30,7 @@ export async function getMachineId(): Promise<string> {
   if (!machineId) {
     machineId = (async () => {
       const id = await getMacMachineId();
-      return id || uuidv4(); // fallback, generate a UUID
+      return id || randomUUID(); // fallback, generate a UUID
     })();
   }
 
