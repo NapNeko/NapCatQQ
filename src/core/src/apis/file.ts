@@ -15,7 +15,6 @@ import * as fileType from 'file-type';
 import imageSize from 'image-size';
 import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 import { sessionConfig } from '@/core/sessionConfig';
-import { randomUUID } from 'crypto';
 import { rkeyManager } from '../utils/rkey';
 import { NTEventDispatch } from '@/common/utils/EventTask';
 

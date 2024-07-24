@@ -1,52 +1,26 @@
 import { ModifyProfileParams, SelfInfo, User, UserDetailInfoByUin } from '@/core/entities';
 import { friends, selfInfo } from '@/core/data';
 import { CacheClassFuncAsync, CacheClassFuncAsyncExtend } from '@/common/utils/helper';
-import { GeneralCallResult, napCatCore, NTQQFriendApi } from '@/core';
-import { ProfileListener } from '@/core/listeners';
-import { rejects } from 'assert';
-import { randomUUID } from 'crypto';
+import {  napCatCore } from '@/core';
+import { NodeIKernelProfileListener, ProfileListener } from '@/core/listeners';
 import { RequestUtil } from '@/common/utils/request';
-import { log, logDebug, logError, logWarn } from '@/common/utils/log';
+import { logWarn } from '@/common/utils/log';
 import { NTEventDispatch } from '@/common/utils/EventTask';
-const userInfoCache: Record<string, User> = {};  // uid: User
+import { NodeIKernelProfileService } from '@/core/services';
 
-const profileListener = new ProfileListener();
-
-const userDetailHandlers: Map<string, ((profile: User) => void)> = new Map();
-profileListener.onProfileDetailInfoChanged = (profile) => {
-  userInfoCache[profile.uid] = profile;
-  userDetailHandlers.forEach(handler => handler(profile));
-};
-setTimeout(() => {
-  napCatCore.onLoginSuccess(() => {
-    napCatCore.addListener(profileListener);
-  });
-}, 100);
-//   老版本逻辑现已移除
-//   console.log('onProfileDetailInfoChanged', profile);
-//   recevCount++;
-//   firstProfile = profile;
-//   if (recevCount === 2) {
-//     profileService.removeKernelProfileListener(listenerId);
-//     // if (!completed) {
-//     completed = true;
-//     resolve(profile);
-//     // }
-//   }
-// };
 export class NTQQUserApi {
   static async getProfileLike(uid: string) {
     return napCatCore.session.getProfileLikeService().getBuddyProfileLike({
-      "friendUids": [
+      friendUids: [
         uid
       ],
-      "basic": 1,
-      "vote": 1,
-      "favorite": 0,
-      "userProfile": 1,
-      "type": 2,
-      "start": 0,
-      "limit": 20
+      basic: 1,
+      vote: 1,
+      favorite: 0,
+      userProfile: 1,
+      type: 2,
+      start: 0,
+      limit: 20
     });
   }
   static async setLongNick(longNick: string) {
@@ -87,45 +61,26 @@ export class NTQQUserApi {
   //     KQZONE,
   //     KOTHER
   // }
-  static async getUserDetailInfo(uid: string): Promise<User> {
-    // const existUser = userInfoCache[uid];
-    // if (existUser) {
-    //   return existUser;
-    // }
-    const profileService = napCatCore.session.getProfileService();
-    // console.log('getUserDetailInfo', result);
-    return new Promise((resolve, reject) => {
-      const uuid = randomUUID();
-      let completed = false;
-      let retData: User | undefined = undefined;
-      let isFirst = true;
-      // 不管返回几次 超时有数据就该返回 兼容就好了
-      setTimeout(() => {
-        if (!completed) {
-          if (retData) {
-            resolve(retData);
-          } else {
-            reject('getUserDetailInfo timeout');
+  static async getUserDetailInfo(uid: string) {
+    type EventService = NodeIKernelProfileService['getUserDetailInfoWithBizInfo'];
+    type EventListener = NodeIKernelProfileListener['onProfileDetailInfoChanged'];
+    let [_retData, profile] = await NTEventDispatch.CallNormalEvent
+      <EventService, EventListener>
+      (
+        'NodeIKernelProfileService/getUserDetailInfoWithBizInfo',
+        'NodeIKernelProfileListener/onProfileDetailInfoChanged',
+        2,
+        5000,
+        (profile: User) => {
+          if (profile.uid === uid) {
+            return true;
           }
-        }
-        userDetailHandlers.delete(uuid);
-      }, 5000);
-      userDetailHandlers.set(uuid, (profile) => {
-        if (profile.uid === uid) {
-          if (isFirst) {
-            retData = profile;
-            isFirst = false;
-            // console.log('getUserDetailInfo', profile);
-          } else {
-            completed = true;
-            resolve(profile);
-          }
-        }
-      });
-      profileService.getUserDetailInfoWithBizInfo(uid, [0]).then(result => {
-        // console.log('getUserDetailInfo', result);
-      });
-    });
+          return false;
+        },
+        uid, 
+        [0]
+      );
+      return profile;
   }
   static async modifySelfProfile(param: ModifyProfileParams) {
     return napCatCore.session.getProfileService().modifyDesktopMiniProfile(param);
