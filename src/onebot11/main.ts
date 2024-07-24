@@ -377,7 +377,7 @@ export class NapCatOnebot11 {
       //   throw new Error('Invalid configuration object');
       // }
       const OldConfig = JSON.parse(JSON.stringify(ob11Config)); //进行深拷贝
-      ob11Config.save(NewOb11);//保存新配置
+      ob11Config.save(NewOb11, true);//保存新配置
 
       const isHttpChanged = !isEqual(NewOb11.http.port, OldConfig.http.port);
       const isHttpEnableChanged = !isEqual(NewOb11.http.enable, OldConfig.http.enable);
@@ -500,7 +500,7 @@ export class NapCatOnebot11 {
           groupRequestEvent.flag = flag;
           postOB11Event(groupRequestEvent);
         } else if (notify.type == GroupNotifyTypes.INVITE_ME) {
-          logDebug('收到邀请我加群通知');
+          logDebug(`收到邀请我加群通知:${notify}`);
           const groupInviteEvent = new OB11GroupRequestEvent();
           groupInviteEvent.group_id = parseInt(notify.group.groupCode);
           const user_id = (await NTQQUserApi.getUinByUid(notify.user2.uid)) || '';

@@ -73,8 +73,12 @@ export class ConfigBase<T> {
     }
   }
 
-  save(config: T) {
+  save(config: T, overwrite: boolean = false) {
     Object.assign(this, config);
+    if (overwrite) {
+      // 用户要求强制写入，则变更当前文件为目标文件
+      this.pathName = `${selfInfo.uin}`
+    }
     const configPath = this.getConfigPath(this.pathName);
     try {
       fs.writeFileSync(configPath, JSON.stringify(this, this.getKeys(), 2));
