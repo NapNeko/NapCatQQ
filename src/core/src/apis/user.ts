@@ -46,6 +46,10 @@ export class NTQQUserApi {
     const ret = await napCatCore.session.getProfileService().setHeader(filePath) as setQQAvatarRet;
     return { result: ret?.result, errMsg: ret?.errMsg };
   }
+  static async setGroupAvatar(gc:string,filePath: string) {
+    const ret = await napCatCore.session.getGroupService().setHeader(gc,filePath);
+    return { result: ret?.result, errMsg: ret?.errMsg };
+  }
 
   static async getSelfInfo() {
 

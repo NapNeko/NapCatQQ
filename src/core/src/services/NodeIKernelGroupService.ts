@@ -9,6 +9,7 @@ import {
 import { GeneralCallResult } from '@/core/services/common';
 
 export interface NodeIKernelGroupService {
+  setHeader(uid:string,path:string): unknown;
 
   addKernelGroupListener(listener: NodeIKernelGroupListener): number;
 
