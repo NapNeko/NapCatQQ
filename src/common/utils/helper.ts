@@ -18,9 +18,8 @@ export function PromiseTimer<T>(promise: Promise<T>, ms: number): Promise<T> {
   );
   return Promise.race([promise, timeoutPromise]);
 }
-
 export async function runAllWithTimeout<T>(tasks: Promise<T>[], timeout: number): Promise<T[]> {
-  const wrappedTasks = tasks.map(task => 
+  const wrappedTasks = tasks.map(task =>
     PromiseTimer(task, timeout).then(
       result => ({ status: 'fulfilled', value: result }),
       error => ({ status: 'rejected', reason: error })
