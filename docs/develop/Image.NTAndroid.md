@@ -1,3 +1,4 @@
+
     public static final int C2C_PIC_DOWNLOAD = 1004;
     public static final String C2C_PIC_DOWNLOAD_DOMAIN = "c2cpicdw.qpic.cn";
     public static final String C2C_PIC_DOWNLOAD_QUIC_DOMAIN = "c2cpicdw.quic.qpic.cn";
