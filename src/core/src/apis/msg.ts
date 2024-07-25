@@ -31,7 +31,7 @@ async function loadMessageUnique() {
     }
   }
   await Promise.all(LoadMessageIdDo).then(() => {
-    log('消息列表加载完成');
+    log(`[消息序列] 加载 ${predict * 50} 条历史消息记录完成`);
   });
 }
 
