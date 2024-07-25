@@ -3,7 +3,7 @@ import { GeneralCallResult, NTQQUserApi, napCatCore } from '@/core';
 import { NTEventDispatch } from '@/common/utils/EventTask';
 import { log } from '@/common/utils/log';
 import { groupMembers } from '../data';
-import { runAllWithTimeout } from '@/common/utils/helper';
+import { CacheClassFuncAsyncExtend, runAllWithTimeout } from '@/common/utils/helper';
 export class NTQQGroupApi {
   static async setGroupAvatar(gc: string, filePath: string) {
     return napCatCore.session.getGroupService().setHeader(gc, filePath);
@@ -21,6 +21,12 @@ export class NTQQGroupApi {
       );
     return groupList;
   }
+
+  @CacheClassFuncAsyncExtend(600, "LastestSendTime", () => true)
+  static async getGroupMemberLastestSendTimeCache(GroupCode: string) {
+    return NTQQGroupApi.getGroupMemberLastestSendTime(GroupCode);
+  }
+
   /**
    * 通过QQ自带数据库获取群成员最后发言时间(仅返回有效数据 且消耗延迟大 需要进行缓存)
    * @param GroupCode 群号
@@ -84,7 +90,8 @@ export class NTQQGroupApi {
           uids.push(uid);
         }
       } catch (error) {
-        log("getLastestMsg--->", error)
+        log("getLastestMsg--->", error);
+        return undefined;
       }
     }
     let ret = await napCatCore.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {
