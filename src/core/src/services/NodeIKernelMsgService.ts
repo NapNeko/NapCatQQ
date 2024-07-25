@@ -1,4 +1,4 @@
-import { ChatType, ElementType, Peer, RawMessage, SendMessageElement } from '@/core/entities';
+import { ElementType, Peer, RawMessage, SendMessageElement } from '@/core/entities';
 import { NodeIKernelMsgListener } from '@/core/listeners/NodeIKernelMsgListener';
 import { GeneralCallResult } from '@/core/services/common';
 
