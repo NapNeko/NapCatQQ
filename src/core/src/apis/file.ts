@@ -145,26 +145,27 @@ export class NTQQFileApi {
       });
     });
   }
-
-  static async getImageUrl(element: { originImageUrl: any; md5HexStr?: any; fileUuid: any; }, isPrivateImage: boolean) {
+  static async getImageUrl(element: { originImageUrl: any; md5HexStr?: any; fileUuid: any; }) {
     if (!element) {
       return '';
     }
-    const url = element.originImageUrl;  // 没有域名
+    const url: string = element.originImageUrl;  // 没有域名
     const md5HexStr = element.md5HexStr;
     const fileMd5 = element.md5HexStr;
     const fileUuid = element.fileUuid;
 
     if (url) {
-      if (url.startsWith('/download')) {
-        if (url.includes('&rkey=')) {
+      let UrlParse = new URL(IMAGE_HTTP_HOST + url);//临时解析拼接
+      let imageAppid = UrlParse.searchParams.get('appid');
+      let isNewPic = imageAppid && ['1406', '1407'].includes(imageAppid);
+      if (isNewPic) {
+        let UrlRkey = UrlParse.searchParams.get('rkey');
+        if (UrlRkey) {
           return IMAGE_HTTP_HOST_NT + url;
         }
-
         const rkeyData = await rkeyManager.getRkey();
-
-        const existsRKey = isPrivateImage ? rkeyData.private_rkey : rkeyData.group_rkey;
-        return IMAGE_HTTP_HOST_NT + url + `${existsRKey}`;
+        UrlRkey = imageAppid === '1406' ? rkeyData.private_rkey : rkeyData.group_rkey;
+        return IMAGE_HTTP_HOST_NT + url + `${UrlRkey}`;
       } else {
         // 老的图片url，不需要rkey
         return IMAGE_HTTP_HOST + url;
