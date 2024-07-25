@@ -3,10 +3,7 @@ import { GeneralCallResult, NTQQUserApi, napCatCore } from '@/core';
 import { NTEventDispatch } from '@/common/utils/EventTask';
 import { log } from '@/common/utils/log';
 import { groupMembers } from '../data';
-import { PromiseTimer } from '@/common/utils/helper';
-// setTimeout(async () => {
-//   console.log(JSON.stringify(await NTQQGroupApi.getGroupMemberLastestSendTime('726067488'), null, 2));
-// }, 21000);
+import { runAllWithTimeout } from '@/common/utils/helper';
 export class NTQQGroupApi {
   static async setGroupAvatar(gc: string, filePath: string) {
     return napCatCore.session.getGroupService().setHeader(gc, filePath);
@@ -24,6 +21,16 @@ export class NTQQGroupApi {
       );
     return groupList;
   }
+  /**
+   * 通过QQ自带数据库获取群成员最后发言时间(仅返回有效数据 且消耗延迟大 需要进行缓存)
+   * @param GroupCode 群号
+   * @returns Map<string, string> key: uin value: sendTime
+   * @example
+   * let ret = await NTQQGroupApi.getGroupMemberLastestSendTime('123456');
+   * for (let [uin, sendTime] of ret) {
+   *  console.log(uin, sendTime);
+   * }
+  */
   static async getGroupMemberLastestSendTime(GroupCode: string) {
     async function getdata(uid: string) {
       let NTRet = await NTQQGroupApi.getLastestMsgByUids(GroupCode, [uid]);
@@ -36,18 +43,18 @@ export class NTQQGroupApi {
     let PromiseData: Promise<({
       sendUin: string;
       sendTime: string;
-    } | undefined) | undefined>[] = [];
+    } | undefined)>[] = [];
     let ret: Map<string, string> = new Map();
     if (!currentGroupMembers) {
       return ret;
     }
     for (let member of currentGroupMembers.values()) {
-      PromiseData.push(PromiseTimer(getdata(member.uid), 2500));
+      PromiseData.push(getdata(member.uid).catch(() => undefined));
     }
-    let allRet = await Promise.all(PromiseData);
+    let allRet = await runAllWithTimeout(PromiseData, 2500);
     for (let PromiseDo of allRet) {
       if (PromiseDo) {
-        ret.set(PromiseDo.sendUin, PromiseDo.sendTime)
+        ret.set(PromiseDo.sendUin, PromiseDo.sendTime);
       }
     }
     return ret;

@@ -11,13 +11,25 @@ const __dirname = dirname(__filename);
 export function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
-export function PromiseTimer<T>(promise: Promise<T>, ms: number): Promise<T | undefined> {
-  return Promise.race([
-    promise,
-    new Promise<T>((_, reject) =>
-      setTimeout(() => reject(undefined), ms)
-    ),
-  ]).catch((error) => error);
+
+export function PromiseTimer<T>(promise: Promise<T>, ms: number): Promise<T> {
+  const timeoutPromise = new Promise<T>((_, reject) =>
+    setTimeout(() => reject(new Error("PromiseTimer: Operation timed out")), ms)
+  );
+  return Promise.race([promise, timeoutPromise]);
+}
+
+export async function runAllWithTimeout<T>(tasks: Promise<T>[], timeout: number): Promise<T[]> {
+  const wrappedTasks = tasks.map(task => 
+    PromiseTimer(task, timeout).then(
+      result => ({ status: 'fulfilled', value: result }),
+      error => ({ status: 'rejected', reason: error })
+    )
+  );
+  const results = await Promise.all(wrappedTasks);
+  return results
+    .filter(result => result.status === 'fulfilled')
+    .map(result => (result as { status: 'fulfilled'; value: T }).value);
 }
 
 export function getMd5(s: string) {
