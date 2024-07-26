@@ -12,7 +12,7 @@ import {
   SignMusicWrapper
 } from '@/core';
 import { getGroupMember } from '@/core/data';
-import { logDebug, logError } from '@/common/utils/log';
+import { logDebug, logError, logWarn } from '@/common/utils/log';
 import { uri2local } from '@/common/utils/file';
 import { ob11Config } from '@/onebot11/config';
 import { RequestUtil } from '@/common/utils/request';
@@ -88,6 +88,10 @@ const _handlers: {
 
   [OB11MessageDataType.reply]: async ({ data: { id } }) => {
     const replyMsgM = MessageUnique.getMsgIdAndPeerByShortId(parseInt(id));
+    if (!replyMsgM) {
+      logWarn('回复消息不存在', id);
+      return undefined;
+    }
     const replyMsg = (await NTQQMsgApi.getMsgsByMsgId(replyMsgM?.Peer!, [replyMsgM?.MsgId!])).msgList[0];
     return replyMsg ?
       SendMsgElementConstructor.reply(replyMsg.msgSeq, replyMsg.msgId, replyMsg.senderUin!, replyMsg.senderUin!) :
