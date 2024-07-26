@@ -18,7 +18,7 @@ const SchemaData = {
     message_seq: { type: 'number' },
     count: { type: 'number' }
   },
-  required: ['group_id', 'message_seq', 'count']
+  required: ['group_id', 'count']
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
@@ -31,7 +31,7 @@ export default class GoCQHTTPGetGroupMsgHistory extends BaseAction<Payload, Resp
     if (!group) {
       throw `群${payload.group_id}不存在`;
     }
-    const startMsgId = (await MessageUnique.getMsgIdAndPeerByShortId(payload.message_seq))?.MsgId || '0';
+    const startMsgId = (await MessageUnique.getMsgIdAndPeerByShortId(payload.message_seq || 0))?.MsgId || '0';
     // log("startMsgId", startMsgId)
     const historyResult = (await NTQQMsgApi.getMsgHistory({
       chatType: ChatType.group,
