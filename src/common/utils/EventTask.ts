@@ -110,6 +110,44 @@ export class NTEventWrapper {
       resolve(retData);
     });
   }
+  async RegisterListen<ListenerType extends (...args: any[]) => void>(ListenerName = '', waitTimes = 1, timeout = 5000, checker: (...args: Parameters<ListenerType>) => boolean) {
+    return new Promise<Parameters<ListenerType>>((resolve, reject) => {
+      const ListenerNameList = ListenerName.split('/');
+      const ListenerMainName = ListenerNameList[0];
+      const ListenerSubName = ListenerNameList[1];
+      const id = randomUUID();
+      let complete = 0;
+      let retData: Parameters<ListenerType> | undefined = undefined;
+      const databack = () => {
+        if (complete == 0) {
+          reject(new Error(' ListenerName:' + ListenerName + ' timeout'));
+        } else {
+          resolve(retData!);
+        }
+      };
+      const Timeouter = setTimeout(databack, timeout);
+      const eventCallbak = {
+        timeout: timeout,
+        createtime: Date.now(),
+        checker: checker,
+        func: (...args: Parameters<ListenerType>) => {
+          complete++;
+          retData = args;
+          if (complete >= waitTimes) {
+            clearTimeout(Timeouter);
+            databack();
+          }
+        }
+      };
+      if (!this.EventTask.get(ListenerMainName)) {
+        this.EventTask.set(ListenerMainName, new Map());
+      }
+      if (!(this.EventTask.get(ListenerMainName)?.get(ListenerSubName))) {
+        this.EventTask.get(ListenerMainName)?.set(ListenerSubName, new Map());
+      }
+      this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.set(id, eventCallbak);
+    });
+  }
   async CallNormalEvent<EventType extends (...args: any[]) => Promise<any>, ListenerType extends (...args: any[]) => void>
     (EventName = '', ListenerName = '', waitTimes = 1, timeout: number = 3000, checker: (...args: Parameters<ListenerType>) => boolean, ...args: Parameters<EventType>) {
     return new Promise<[EventRet: Awaited<ReturnType<EventType>>, ...Parameters<ListenerType>]>(async (resolve, reject) => {
