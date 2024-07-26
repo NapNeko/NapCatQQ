@@ -1,4 +1,4 @@
-export interface NodeIKernelSearchService{
+export interface NodeIKernelSearchService {
     addKernelSearchListenerr(...args: any[]): unknown;// needs 1 arguments
 
     removeKernelSearchListenerr(...args: any[]): unknown;// needs 1 arguments
@@ -48,10 +48,10 @@ export interface NodeIKernelSearchService{
     searchMsgWithKeywordsr(...args: any[]): unknown;// needs 2 arguments
 
     searchMoreMsgWithKeywordsr(...args: any[]): unknown;// needs 1 arguments
-    
-    cancelSearchMsgWithKeywordsr(...args: any[]): unknown;// needs 3 arguments
 
-    searchFileWithKeywordsr(...args: any[]): unknown;// needs 2 arguments
+    cancelSearchMsgWithKeywords(...args: any[]): unknown;// needs 3 arguments
+
+    searchFileWithKeywords(keywords: string[], source: number): Promise<unknown>;// needs 2 arguments
 
     searchMoreFileWithKeywordsr(...args: any[]): unknown;// needs 1 arguments
 

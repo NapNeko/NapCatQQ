@@ -17,6 +17,7 @@ import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 import { sessionConfig } from '@/core/sessionConfig';
 import { rkeyManager } from '../utils/rkey';
 import { NTEventDispatch } from '@/common/utils/EventTask';
+import { NodeIKernelSearchService } from '../services/NodeIKernelSearchService';
 
 export class NTQQFileApi {
   static async getFileType(filePath: string) {
@@ -144,6 +145,58 @@ export class NTQQFileApi {
         }
       });
     });
+  }
+  static async searchfile(keys: string[]) {
+
+    type EventType = NodeIKernelSearchService['searchFileWithKeywords'];
+    interface OnListener {
+      searchId: string,
+      hasMore: boolean,
+      resultItems: {
+        chatType: ChatType,
+        buddyChatInfo: any[],
+        discussChatInfo: any[],
+        groupChatInfo:
+        {
+          groupCode: string,
+          isConf: boolean,
+          hasModifyConfGroupFace: boolean,
+          hasModifyConfGroupName: boolean,
+          groupName: string,
+          remark: string
+        }[]
+        ,
+        dataLineChatInfo: any[],
+        tmpChatInfo: any[],
+        msgId: string,
+        msgSeq: string,
+        msgTime: string,
+        senderUid: string,
+        senderNick: string,
+        senderRemark: string,
+        senderCard: string,
+        elemId: string,
+        elemType: number,
+        fileSize: string,
+        filePath: string,
+        fileName: string,
+        hits:
+        {
+          start: number,
+          end: number
+        }[]
+      }[]
+    };
+    const [id, data] = await NTEventDispatch.CallNormalEvent<EventType, (params: OnListener) => void>(
+      'NodeIKernelSearchService/searchFileWithKeywords',
+      'NodeIKernelSearchListener/onSearchFileKeywordsResult',
+      1,
+      10000,
+      (arg): boolean => { return id == data.searchId },
+      keys,
+      12
+    );
+    return data.resultItems[0];
   }
   static async getImageUrl(element: { originImageUrl: any; md5HexStr?: any; fileUuid: any; }) {
     if (!element) {
