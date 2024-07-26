@@ -1,4 +1,4 @@
-import { GetFileListParam, Peer } from "../entities";
+import { GetFileListParam, MessageElement, Peer, SendMessageElement } from "../entities";
 import { GeneralCallResult } from "./common";
 
 export interface NodeIKernelRichMediaService {
@@ -46,7 +46,7 @@ export interface NodeIKernelRichMediaService {
         }
     }>;
 
-    getRichMediaFileDir(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
+    getRichMediaFileDir(elementType: number, downType: number, isTemp: boolean): unknown;
 
     // this.senderUid = "";
     // this.peerUid = "";
@@ -65,7 +65,20 @@ export interface NodeIKernelRichMediaService {
     // this.elem = msgElement;
     // this.useHttps = num;
 
-    getVideoPlayUrlInVisit(arg: unknown): unknown;
+    getVideoPlayUrlInVisit(arg: {
+        downloadType: number,
+        thumbSize: number,
+        msgId: string,
+        msgRandom: string,
+        msgSeq: string,
+        msgTime: string,
+        chatType: number,
+        senderUid: string,
+        peerUid: string,
+        guildId: string,
+        ele: MessageElement,
+        useHttps: boolean
+    }): Promise<unknown>;
 
     isFileExpired(arg: unknown): unknown;
 
@@ -83,7 +96,12 @@ export interface NodeIKernelRichMediaService {
     // this.fileSize = j2;
     // this.fileModelId = j3;
 
-    downloadFileForFileUuid(peer: Peer, arg1: string, arg3: unknown[]): unknown;
+    downloadFileForFileUuid(peer: Peer, uuid: string, arg3: {
+        fileId: string,
+        fileName: string,
+        fileSize: string,
+        fileModelId: string
+    }[]): unknown;
 
     downloadFileByUrlList(arg1: unknown, arg2: unknown): unknown;
 
@@ -133,7 +151,7 @@ export interface NodeIKernelRichMediaService {
     moveGroupFile(arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown, arg5: unknown): unknown;
 
     transGroupFile(arg1: unknown, arg2: unknown): unknown;
-    
+
     searchGroupFile(
         keywords: Array<string>,
         param: {

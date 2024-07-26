@@ -1,4 +1,4 @@
-import { ElementType, Peer, RawMessage, SendMessageElement } from '@/core/entities';
+import { ElementType, MessageElement, Peer, RawMessage, SendMessageElement } from '@/core/entities';
 import { NodeIKernelMsgListener } from '@/core/listeners/NodeIKernelMsgListener';
 import { GeneralCallResult } from '@/core/services/common';
 
@@ -115,7 +115,7 @@ export interface NodeIKernelMsgService {
 
   addLocalTofuRecordMsg(...args: unknown[]): unknown;
 
-  addLocalRecordMsg(Peer: Peer, msgId: string, rawMessage: RawMessage, attr: Array<any> | number, front: boolean): Promise<unknown>;
+  addLocalRecordMsg(Peer: Peer, msgId: string, ele: MessageElement, attr: Array<any> | number, front: boolean): Promise<unknown>;
 
   deleteMsg(...args: unknown[]): unknown;
 

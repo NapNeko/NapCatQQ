@@ -55,22 +55,24 @@ export enum ElementType {
   TASKTOPMSG = 29,
   RECOMMENDEDMSG = 43,
   ACTIONBAR = 44
+} 
+export interface ActionBarElement {
+  rows: InlineKeyboardRow[];
+  botAppid: string;
 }
 export interface SendActionBarElement {
   elementType: ElementType.ACTIONBAR;
   elementId: string;
-  actionBarElement: {
-    rows: InlineKeyboardRow[];
-    botAppid: string;
-  }
+  actionBarElement: ActionBarElement;
+}
+export interface RecommendedMsgElement {
+  rows: InlineKeyboardRow[];
+  botAppid: string;
 }
 export interface SendRecommendedMsgElement {
   elementType: ElementType.RECOMMENDEDMSG;
   elementId: string;
-  recommendedMsgElement: {
-    rows: InlineKeyboardRow[];
-    botAppid: string;
-  }
+  recommendedMsgElement: RecommendedMsgElement;
 }
 export interface InlineKeyboardButton {
   id: string;
@@ -93,67 +95,72 @@ export interface TofuElementContent {
   color: string;
   tittle: string;
 }
+export interface TaskTopMsgElement {
+  msgTitle: string;
+  msgSummary: string;
+  iconUrl: string;
+  topMsgType: number;
+}
 export interface SendTaskTopMsgElement {
   elementType: ElementType.TASKTOPMSG;
   elementId: string;
-  taskTopMsgElement: {
-    msgTitle: string;
-    msgSummary: string;
-    iconUrl: string;
-    topMsgType: number;
-  }
+  taskTopMsgElement: TaskTopMsgElement;
+}
+export interface TofuRecordElement {
+  type: number;
+  busiid: string;
+  busiuuid: string;
+  descriptionContent: string;
+  contentlist: TofuElementContent[],
+  background: string;
+  icon: string;
+  uinlist: string[],
+  uidlist: string[],
+  busiExtra: string;
+  updateTime: string;
+  dependedmsgid: string;
+  msgtime: string;
+  onscreennotify: boolean;
 }
 export interface SendTofuRecordElement {
   elementType: ElementType.TOFURECORD;
   elementId: string;
-  tofuRecordElement: {
-    type: number;
-    busiid: string;
-    busiuuid: string;
-    descriptionContent: string;
-    contentlist: TofuElementContent[],
-    background: string;
-    icon: string;
-    uinlist: string[],
-    uidlist: string[],
-    busiExtra: string;
-    updateTime: string;
-    dependedmsgid: string;
-    msgtime: string;
-    onscreennotify: boolean;
+  tofuRecordElement: TofuRecordElement;
+}
+
+export interface FaceBubbleElement {
+  faceCount: number;
+  faceSummary: string;
+  faceFlag: number;
+  content: string;
+  oldVersionStr: string;
+  faceType: number;
+  others: string;
+  yellowFaceInfo: {
+    index: number;
+    buf: string;
+    compatibleText: string;
+    text: string;
   }
 }
 export interface SendFaceBubbleElement {
   elementType: ElementType.FACEBUBBLE;
   elementId: string;
-  faceBubbleElement: {
-    faceCount: number;
-    faceSummary: string;
-    faceFlag: number;
-    content: string;
-    oldVersionStr: string;
-    faceType: number;
-    others: string;
-    yellowFaceInfo: {
-      index: number;
-      buf: string;
-      compatibleText: string;
-      text: string;
-    }
-  }
+  faceBubbleElement: FaceBubbleElement;
 
+}
+export interface AvRecordElement {
+  type: number;
+  time: string;
+  text: string;
+  mainType: number;
+  hasRead: boolean;
+  extraType: number;
 }
 export interface SendavRecordElement {
   elementType: ElementType.AVRECORD;
   elementId: string;
-  avRecordElement: {
-    type: number;
-    time: string;
-    text: string;
-    mainType: number;
-    hasRead: boolean;
-    extraType: number;
-  }
+  avRecordElement: AvRecordElement;
 }
 export interface YoloUserInfo {
   uid: string;
@@ -170,37 +177,40 @@ export interface SendInlineKeyboardElement {
   }
 
 }
+export interface YoloGameResultElement {
+  UserInfo: YoloUserInfo[];
+}
 export interface SendYoloGameResultElement {
   elementType: ElementType.YOLOGAMERESULT;
-  yoloGameResultElement: {
-    UserInfo: YoloUserInfo[];
-  }
+  yoloGameResultElement: YoloGameResultElement
+}
+export interface GiphyElement {
+  id: string;
+  isClip: boolean;
+  width: number;
+  height: number;
 }
 export interface SendGiphyElement {
   elementType: ElementType.GIPHY;
   elementId: string;
-  giphyElement: {
-    id: string;
-    isClip: boolean;
-    width: number;
-    height: number;
-  }
+  giphyElement: GiphyElement;
 }
 export interface SendWalletElement {
   elementType: ElementType.UNKNOWN;//不做 设置位置
   elementId: string;
   walletElement: {}
 }
+export interface CalendarElement {
+  summary: string;
+  msg: string;
+  expireTimeMs: string;
+  schemaType: number;
+  schema: string
+}
 export interface SendCalendarElement {
   elementType: ElementType.CALENDAR;
   elementId: string;
-  calendarElement: {
-    summary: string;
-    msg: string;
-    expireTimeMs: string;
-    schemaType: number;
-    schema: string
-  }
+  calendarElement: CalendarElement;
 }
 export interface SendliveGiftElement {
   elementType: ElementType.LIVEGIFT;
@@ -252,32 +262,18 @@ export enum PicSubType {
 export interface SendPicElement {
   elementType: ElementType.PIC;
   elementId: string;
-  picElement: {
-    md5HexStr: string;
-    fileSize: number | string;
-    picWidth: number;
-    picHeight: number;
-    fileName: string;
-    sourcePath: string;
-    original: boolean;
-    picType: PicType;
-    picSubType: PicSubType;
-    fileUuid: string;
-    fileSubId: string;
-    thumbFileSize: number;
-    summary: string;
-  };
+  picElement:PicElement
 }
-
+export interface ReplyElement {
+  replayMsgSeq: string;
+  replayMsgId: string;
+  senderUin: string;
+  senderUinStr: string;
+}
 export interface SendReplyElement {
   elementType: ElementType.REPLY;
   elementId: string;
-  replyElement: {
-    replayMsgSeq: string;
-    replayMsgId: string;
-    senderUin: string;
-    senderUinStr: string;
-  }
+  replyElement: ReplyElement
 }
 
 export interface SendFaceElement {
@@ -293,10 +289,11 @@ export interface SendMarketFaceElement {
 export interface SendstructLongMsgElement {
   elementType: ElementType.STRUCTLONGMSG;
   elementId: string;
-  structLongMsgElement: {
-    xmlContent: string;
-    resId: string;
-  }
+  structLongMsgElement: StructLongMsgElement;
+}
+export interface StructLongMsgElement {
+  xmlContent: string;
+  resId: string;
 }
 export interface SendactionBarElement {
   elementType: ElementType.ACTIONBAR;
@@ -306,13 +303,14 @@ export interface SendactionBarElement {
     botAppid: string;
   }
 }
+export interface ShareLocationElement {
+  text: string;
+  ext: string;
+}
 export interface sendShareLocationElement {
   elementType: ElementType.SHARELOCATION;
   elementId: string;
-  shareLocationElement: {
-    text: string;
-    ext: string;
-  }
+  shareLocationElement?: ShareLocationElement;
 }
 
 export interface FileElement {
@@ -356,10 +354,51 @@ export interface SendMarkdownElement {
   elementId: string;
   markdownElement: MarkdownElement;
 }
-
 export type SendMessageElement = SendTextElement | SendPttElement |
-  SendPicElement | SendReplyElement | SendFaceElement | SendMarketFaceElement | SendFileElement | SendVideoElement | SendArkElement | SendMarkdownElement | sendShareLocationElement
+  SendPicElement | SendReplyElement | SendFaceElement | SendMarketFaceElement | SendFileElement |
+  SendVideoElement | SendArkElement | SendMarkdownElement | sendShareLocationElement;
 
+export interface TextElement {
+  content: string;
+  atType: number;
+  atUid: string;
+  atTinyId: string;
+  atNtUid: string;
+}
+export interface MessageElement {
+  elementType: ElementType,
+  elementId: string,
+  extBufForUI: string,
+  textElement?: TextElement;
+  faceElement?: FaceElement,
+  marketFaceElement?: MarkdownElement,
+  replyElement?: ReplyElement,
+  picElement?: PicElement,
+  pttElement?: PttElement,
+  videoElement?: VideoElement,
+  grayTipElement?: GrayTipElement,
+  arkElement?: ArkElement,
+  fileElement?: FileElement,
+  liveGiftElement?: null,
+  markdownElement?: MarkdownElement,
+  structLongMsgElement?: StructLongMsgElement,
+  multiForwardMsgElement?: MultiForwardMsgElement,
+  giphyElement?: GiphyElement,
+  walletElement?: null,
+  inlineKeyboardElement?: InlineKeyboardElement,
+  textGiftElement?: null,//????
+  calendarElement?: CalendarElement,
+  yoloGameResultElement?: YoloGameResultElement,
+  avRecordElement?: AvRecordElement,
+  structMsgElement?: null,
+  faceBubbleElement?: FaceBubbleElement,
+  shareLocationElement: ShareLocationElement,
+  tofuRecordElement?: TofuRecordElement,
+  taskTopMsgElement?: TaskTopMsgElement,
+  recommendedMsgElement?: RecommendedMsgElement,
+  actionBarElement?:ActionBarElement
+
+}
 export enum AtType {
   notAt = 0,
   atAll = 1,
@@ -450,18 +489,23 @@ export const IMAGE_HTTP_HOST = 'https://gchat.qpic.cn';
 export const IMAGE_HTTP_HOST_NT = 'https://multimedia.nt.qq.com.cn';
 
 export interface PicElement {
-  picSubType?: number;
-  originImageUrl: string;  // http url, 没有host，host是https://gchat.qpic.cn/, 带download参数的是https://multimedia.nt.qq.com.cn
-  originImageMd5?: string;
-  sourcePath: string; // 图片本地路径
-  thumbPath: Map<number, string>;
+  md5HexStr?: string;
+  fileSize: number | string;//number
   picWidth: number;
   picHeight: number;
-  fileSize: number;
   fileName: string;
+  sourcePath: string;
+  original: boolean;
+  picType: PicType;
+  picSubType?: PicSubType;
   fileUuid: string;
-  md5HexStr?: string;
-}
+  fileSubId: string;
+  thumbFileSize: number;
+  summary: string;
+  thumbPath: Map<number, string>;
+  originImageMd5?: string;
+  originImageUrl?: string;  // http url, 没有host，host是https://gchat.qpic.cn/, 带download参数的是https://multimedia.nt.qq.com.cn
+};
 
 export enum GrayTipElementSubType {
   INVITE_NEW_MEMBER = 12,
