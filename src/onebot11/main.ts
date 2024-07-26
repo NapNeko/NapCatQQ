@@ -1,5 +1,5 @@
 import { napCatCore } from '@/core';
-import { MsgListener, TempOnRecvParams } from '@/core/listeners';
+import { DebugGroupListener, MsgListener, TempOnRecvParams } from '@/core/listeners';
 import { OB11Constructor } from '@/onebot11/constructor';
 import { postOB11Event } from '@/onebot11/server/postOB11Event';
 import {
@@ -22,7 +22,7 @@ import { ob11ReverseWebsockets } from '@/onebot11/server/ws/ReverseWebsocket';
 import { getGroup, getGroupMember, groupMembers, selfInfo, tempGroupCodeMap } from '@/core/data';
 import { BuddyListener, GroupListener, NodeIKernelBuddyListener } from '@/core/listeners';
 import { OB11FriendRequestEvent } from '@/onebot11/event/request/OB11FriendRequest';
-import { NTQQUserApi } from '@/core/apis';
+import { NTQQGroupApi, NTQQUserApi } from '@/core/apis';
 import { log, logDebug, logError, setLogSelfInfo } from '@/common/utils/log';
 import { OB11GroupRequestEvent } from '@/onebot11/event/request/OB11GroupRequest';
 import { OB11GroupAdminNoticeEvent } from '@/onebot11/event/notice/OB11GroupAdminNoticeEvent';
@@ -265,6 +265,15 @@ export class NapCatOnebot11 {
 
     // GroupListener
     const groupListener = new GroupListener();
+    // groupListener.onMemberListChange = async (arg: {
+    //   sceneId: string,
+    //   ids: string[],
+    //   infos: Map<string, GroupMember>, // uid -> GroupMember
+    //   finish: boolean,
+    //   hasRobot: boolean
+    // }) => {
+
+    // }
     groupListener.onGroupNotifiesUpdated = async (doubt, notifies) => {
       //console.log('ob11 onGroupNotifiesUpdated', notifies[0]);
       if (![GroupNotifyTypes.ADMIN_SET, GroupNotifyTypes.ADMIN_UNSET, GroupNotifyTypes.ADMIN_UNSET_OTHER].includes(notifies[0].type)) {
@@ -314,7 +323,7 @@ export class NapCatOnebot11 {
       const isPrivilege = role === 3 || role === 4;
       for (const member of members.values()) {
         //console.log(member?.isDelete, role, isPrivilege);
-        if (member?.isDelete && !isPrivilege && selfInfo.uin !== member.uin && this.bootTime < Date.now() / 1000) {
+        if (member?.isDelete && !isPrivilege && selfInfo.uin !== member.uin) {
           log('[群聊] 群组 ', groupCode, ' 成员' + member.uin + '退出');
           const groupDecreaseEvent = new OB11GroupDecreaseEvent(parseInt(groupCode), parseInt(member.uin), 0, 'leave');// 不知道怎么出去的
           postOB11Event(groupDecreaseEvent, true);
@@ -388,18 +397,18 @@ export class NapCatOnebot11 {
       ob11Config.save(NewOb11, true);//保存新配置
 
       const isHttpChanged = !isEqual(NewOb11.http.enable, OldConfig.http.enable) ||
-                            !isEqual(NewOb11.http.host, OldConfig.http.host) ||
-                            !isEqual(NewOb11.http.port, OldConfig.http.port);
+        !isEqual(NewOb11.http.host, OldConfig.http.host) ||
+        !isEqual(NewOb11.http.port, OldConfig.http.port);
 
       // const isHttpPostChanged = !isEqual(NewOb11.http.postUrls, OldConfig.http.postUrls);
       // const isEnanleHttpPostChanged = !isEqual(NewOb11.http.enablePost, OldConfig.http.enablePost);
 
       const isWsChanged = !isEqual(NewOb11.ws.enable, OldConfig.ws.enable) ||
-                          !isEqual(NewOb11.ws.host, OldConfig.ws.host) ||
-                          !isEqual(NewOb11.ws.port, OldConfig.ws.port);
+        !isEqual(NewOb11.ws.host, OldConfig.ws.host) ||
+        !isEqual(NewOb11.ws.port, OldConfig.ws.port);
 
       const isWsReverseChanged = !isEqual(NewOb11.reverseWs.enable, OldConfig.reverseWs.enable) ||
-                                 !isEqual(NewOb11.reverseWs.urls, OldConfig.reverseWs.urls);
+        !isEqual(NewOb11.reverseWs.urls, OldConfig.reverseWs.urls);
 
       //const isEnableHeartBeatChanged = !isEqual(NewOb11.heartInterval, OldConfig.heartInterval);
 
