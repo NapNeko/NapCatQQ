@@ -160,7 +160,7 @@
     </div>
     <script>
         async function GetQQLoginQrcode(retCredential) {
-            let QQLoginResponse = await fetch('/api/QQLogin/GetQQLoginQrcode', {
+            let QQLoginResponse = await fetch('../api/QQLogin/GetQQLoginQrcode', {
                 method: 'POST',
                 headers: {
                     'Authorization': "Bearer " + retCredential,
@@ -180,7 +180,7 @@
             return "";
         }
         async function CheckQQLoginStatus(retCredential) {
-            let QQLoginResponse = await fetch('/api/QQLogin/CheckLoginStatus', {
+            let QQLoginResponse = await fetch('../api/QQLogin/CheckLoginStatus', {
                 method: 'POST',
                 headers: {
                     'Authorization': "Bearer " + retCredential,
@@ -200,7 +200,7 @@
             return false;
         }
         async function GetQQQucickLoginList(retCredential) {
-            let QQLoginResponse = await fetch('/api/QQLogin/GetQuickLoginList', {
+            let QQLoginResponse = await fetch('../api/QQLogin/GetQuickLoginList', {
                 method: 'POST',
                 headers: {
                     'Authorization': "Bearer " + retCredential,
@@ -216,7 +216,7 @@
             return [];
         }
         async function SetQuickLogin(uin, retCredential) {
-            let QQLoginResponse = await fetch('/api/QQLogin/SetQuickLogin', {
+            let QQLoginResponse = await fetch('../api/QQLogin/SetQuickLogin', {
                 method: 'POST',
                 headers: {
                     'Authorization': "Bearer " + retCredential,

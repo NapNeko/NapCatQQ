@@ -15,7 +15,7 @@ async function onSettingWindowCreated(view: Element) {
     } else if (configKey.length === 3) {
       ob11Config[configKey[1]][configKey[2]] = value;
     }
-    OB11ConfigWrapper.SetOB11Config(ob11Config);
+    // OB11ConfigWrapper.SetOB11Config(ob11Config); // 只有当点保存时才下发配置，而不是在修改值后立即下发
   };
 
   const parser = new DOMParser();
@@ -192,7 +192,7 @@ async function onSettingWindowCreated(view: Element) {
 
   // 外链按钮
   doc.querySelector('#open-github')?.addEventListener('click', () => {
-    window.open('https://napneko.github.io/', '_blank');
+    window.open('https://github.com/NapNeko/NapCatQQ', '_blank');
   });
   doc.querySelector('#open-telegram')?.addEventListener('click', () => {
     window.open('https://t.me/+nLZEnpne-pQ1OWFl');
@@ -201,7 +201,7 @@ async function onSettingWindowCreated(view: Element) {
     window.open('https://qm.qq.com/q/bDnHRG38aI');
   });
   doc.querySelector('#open-docs')?.addEventListener('click', () => {
-    window.open('https://github.com/NapNeko/NapCatQQ');
+    window.open('https://napneko.github.io/', '_blank');
   });
   // 生成反向地址列表
   const buildHostListItem = (

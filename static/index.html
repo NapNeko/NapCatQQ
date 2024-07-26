@@ -10,7 +10,7 @@
 <body>
     <script>
          async function CheckQQLoginStatus(retCredential) {
-            let QQLoginResponse = await fetch('/api/QQLogin/CheckLoginStatus', {
+            let QQLoginResponse = await fetch('../api/QQLogin/CheckLoginStatus', {
                 method: 'POST',
                 headers: {
                     'Authorization': "Bearer " + retCredential,
@@ -30,7 +30,7 @@
             return false;
         }
         async function CheckWebUiLogined(retCredential) {
-            let LoginResponse = await fetch('/api/auth/check', {
+            let LoginResponse = await fetch('../api/auth/check', {
                 method: 'POST',
                 headers: {
                     'Authorization': "Bearer " + retCredential,
