@@ -70,9 +70,9 @@ const _handlers: {
     // This picks the correct message type out
     // How great the type system of TypeScript is!
     context: MessageContext
-  ) => SendMessageElement | undefined | Promise<SendMessageElement | undefined>
+  ) => Promise<SendMessageElement | undefined>
 } = {
-  [OB11MessageDataType.text]: ({ data: { text } }) => SendMsgElementConstructor.text(text),
+  [OB11MessageDataType.text]: async ({ data: { text } }) => SendMsgElementConstructor.text(text),
 
   [OB11MessageDataType.at]: async ({ data: { qq: atQQ } }, context) => {
     if (!context.group) return undefined;
@@ -94,9 +94,9 @@ const _handlers: {
       undefined;
   },
 
-  [OB11MessageDataType.face]: ({ data: { id } }) => SendMsgElementConstructor.face(parseInt(id)),
+  [OB11MessageDataType.face]: async ({ data: { id } }) => SendMsgElementConstructor.face(parseInt(id)),
 
-  [OB11MessageDataType.mface]: ({
+  [OB11MessageDataType.mface]: async ({
     data: {
       emoji_package_id,
       emoji_id,
@@ -146,13 +146,13 @@ const _handlers: {
   [OB11MessageDataType.voice]: async (sendMsg, context) =>
     SendMsgElementConstructor.ptt((await handleOb11FileLikeMessage(sendMsg, context)).path),
 
-  [OB11MessageDataType.json]: ({ data: { data } }) => SendMsgElementConstructor.ark(data),
+  [OB11MessageDataType.json]: async ({ data: { data } }) => SendMsgElementConstructor.ark(data),
 
-  [OB11MessageDataType.dice]: ({ data: { result } }) => SendMsgElementConstructor.dice(result),
+  [OB11MessageDataType.dice]: async ({ data: { result } }) => SendMsgElementConstructor.dice(result),
 
-  [OB11MessageDataType.RPS]: ({ data: { result } }) => SendMsgElementConstructor.rps(result),
+  [OB11MessageDataType.RPS]: async ({ data: { result } }) => SendMsgElementConstructor.rps(result),
 
-  [OB11MessageDataType.markdown]: ({ data: { content } }) => SendMsgElementConstructor.markdown(content),
+  [OB11MessageDataType.markdown]: async ({ data: { content } }) => SendMsgElementConstructor.markdown(content),
 
   [OB11MessageDataType.music]: async ({ data }) => {
     // 保留, 直到...找到更好的解决方案
@@ -204,13 +204,13 @@ const _handlers: {
     }
   },
 
-  [OB11MessageDataType.node]: () => undefined,
+  [OB11MessageDataType.node]: async () => undefined,
 
-  [OB11MessageDataType.forward]: () => undefined,
+  [OB11MessageDataType.forward]: async () => undefined,
 
-  [OB11MessageDataType.xml]: () => undefined,
+  [OB11MessageDataType.xml]: async () => undefined,
 
-  [OB11MessageDataType.poke]: () => undefined,
+  [OB11MessageDataType.poke]: async () => undefined,
 
   [OB11MessageDataType.Location]: async () => {
     return SendMsgElementConstructor.location();
@@ -221,7 +221,7 @@ const handlers = <{
   [Key in OB11MessageDataType]: (
     sendMsg: OB11MessageData,
     context: MessageContext
-  ) => SendMessageElement | undefined | Promise<SendMessageElement | undefined>
+  ) => Promise<SendMessageElement | undefined>
 }>_handlers;
 
 export default async function createSendElements(
@@ -229,18 +229,20 @@ export default async function createSendElements(
   group?: Group,
   ignoreTypes: OB11MessageDataType[] = []
 ) {
-  const sendElements: SendMessageElement[] = [];
   const deleteAfterSentFiles: string[] = [];
+  let callResultList: Array<Promise<SendMessageElement | undefined>> = [];
   for (const sendMsg of messageData) {
     if (ignoreTypes.includes(sendMsg.type)) {
       continue;
     }
-    const callResult = await handlers[sendMsg.type](
+    const callResult = handlers[sendMsg.type](
       sendMsg,
       { group, deleteAfterSentFiles }
-    );
-    if (callResult) sendElements.push(callResult);
+    )?.catch(undefined);
+    callResultList.push(callResult);
   }
+  let ret = await Promise.all(callResultList);
+  const sendElements: SendMessageElement[] = ret.filter(ele => ele) as SendMessageElement[];
   return { sendElements, deleteAfterSentFiles };
 }
 
