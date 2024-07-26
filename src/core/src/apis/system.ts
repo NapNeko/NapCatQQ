@@ -1,11 +1,11 @@
 
 
 import { NTEventDispatch } from '@/common/utils/EventTask';
-import { GeneralCallResult, NTQQUserApi, napCatCore } from '@/core';
-// setTimeout(async () => {
-//     let ret = await NTQQSystemApi.getArkJsonCollection('1-2-162b9b42-65b9-4405-a8ed-2e256ec8aa50');
-//     console.log(ret);
-// }, 20000)
+import { GeneralCallResult, NTQQFileApi, NTQQUserApi, napCatCore } from '@/core';
+setTimeout(async () => {
+    let ret = await NTQQFileApi.searchfile(['doc']);
+    console.log(ret);
+}, 20000)
 export class NTQQSystemApi {
     static async hasOtherRunningQQProcess() {
         return napCatCore.util.hasOtherRunningQQProcess();

@@ -19,6 +19,7 @@ import { rkeyManager } from '../utils/rkey';
 import { NTEventDispatch } from '@/common/utils/EventTask';
 import { NodeIKernelSearchService } from '../services/NodeIKernelSearchService';
 
+
 export class NTQQFileApi {
   static async getFileType(filePath: string) {
     return fileType.fileTypeFromFile(filePath);
@@ -147,7 +148,6 @@ export class NTQQFileApi {
     });
   }
   static async searchfile(keys: string[]) {
-
     type EventType = NodeIKernelSearchService['searchFileWithKeywords'];
     interface OnListener {
       searchId: string,
@@ -187,22 +187,17 @@ export class NTQQFileApi {
         }[]
       }[]
     };
-    // (params: OnListener) => void 'NodeIKernelSearchListener/onSearchFileKeywordsResult',
-    // 1,
-    // 10000,
-    // (arg): boolean => { return id == data.searchId },
-    // keys,
-    // 12
     const Event = await NTEventDispatch.CreatEventFunction<EventType>('NodeIKernelSearchService/searchFileWithKeywords');
     let id = '';
-    const [Listener] = await NTEventDispatch.RegisterListen<(params: OnListener) => void>('NodeIKernelSearchListener/onSearchFileKeywordsResult', 1, 5000, (params) => {
+    const Listener = NTEventDispatch.RegisterListen<(params: OnListener) => void>('NodeIKernelSearchListener/onSearchFileKeywordsResult', 1, 20000, (params) => {
       if (id !== '' && params.searchId == id) {
         return true
       }
       return false;
     });
     id = await Event!(keys, 12);
-    return Listener.resultItems[0];
+    let [ret] = (await Listener);
+    return ret;
   }
   static async getImageUrl(element: PicElement) {
     if (!element) {

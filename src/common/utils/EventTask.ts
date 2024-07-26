@@ -146,6 +146,7 @@ export class NTEventWrapper {
         this.EventTask.get(ListenerMainName)?.set(ListenerSubName, new Map());
       }
       this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.set(id, eventCallbak);
+      this.CreatListenerFunction(ListenerMainName);
     });
   }
   async CallNormalEvent<EventType extends (...args: any[]) => Promise<any>, ListenerType extends (...args: any[]) => void>
