@@ -73,7 +73,7 @@ export interface NodeIKernelMsgService {
 
   cancelSendMsg(...args: unknown[]): unknown;
 
-  switchToOfflineSendMsg(...args: unknown[]): unknown;
+  switchToOfflineSendMsg(peer: Peer, MsgId: string): unknown;
 
   reqToOfflineSendMsg(...args: unknown[]): unknown;
 
@@ -166,7 +166,7 @@ export interface NodeIKernelMsgService {
     appid: unknown
   }): Promise<GeneralCallResult & { msgList: RawMessage[] }>;
 
-  getMsgsBySeqRange(peer: Peer, startSeq: string, endSeq: string):Promise<GeneralCallResult & { msgList: RawMessage[] }>;
+  getMsgsBySeqRange(peer: Peer, startSeq: string, endSeq: string): Promise<GeneralCallResult & { msgList: RawMessage[] }>;
 
   getMsgsBySeqAndCount(peer: Peer, seq: string, count: number, desc: boolean, unknownArg: boolean): Promise<GeneralCallResult & { msgList: RawMessage[] }>;
 
@@ -361,7 +361,7 @@ export interface NodeIKernelMsgService {
 
   setGuildTabUserFlag(...args: unknown[]): unknown;
 
-  setBuildMode(...args: unknown[]): unknown;
+  setBuildMode(flag:number/*0 1 3*/): unknown;
 
   setConfigurationServiceData(...args: unknown[]): unknown;
 
@@ -485,7 +485,7 @@ export interface NodeIKernelMsgService {
 
   setMsgEmojiLikes(...args: unknown[]): unknown;
 
-  getMsgEmojiLikesList(...args: unknown[]): unknown;
+  getMsgEmojiLikesList(peer: Peer, msgSeq: string, emojiId: string, emojiType: string, cookie: string, bForward: boolean, number: number): Promise<unknown>;
 
   setMsgEmojiLikesForRole(...args: unknown[]): unknown;
 
@@ -513,7 +513,7 @@ export interface NodeIKernelMsgService {
 
   queryFirstRoamMsg(...args: unknown[]): unknown;
 
-  fetchLongMsg(...args: unknown[]): unknown;
+  fetchLongMsg(peer: Peer, msgId: string): unknown;
 
   fetchLongMsgWithCb(...args: unknown[]): unknown;
 
@@ -547,9 +547,9 @@ export interface NodeIKernelMsgService {
 
   deleteReplyDraft(...args: unknown[]): unknown;
 
-  getFirstUnreadAtMsg(...args: unknown[]): unknown;
+  getFirstUnreadAtMsg(peer: Peer): unknown;
 
-  clearMsgRecords(...args: unknown[]): unknown;//设置已读后调用我觉得比较好 清理记录
+  clearMsgRecords(...args: unknown[]): unknown;//设置已读后调用我觉得比较好 清理记录 现在别了
 
   IsExistOldDb(...args: unknown[]): unknown;
 
@@ -569,7 +569,7 @@ export interface NodeIKernelMsgService {
 
   getCurChatImportStatusByUin(...args: unknown[]): unknown;
 
-  getDataImportUserLevel(...args: unknown[]): unknown;
+  getDataImportUserLevel(): unknown;
 
   getMsgQRCode(...args: unknown[]): unknown;
 
@@ -624,7 +624,7 @@ export interface NodeIKernelMsgService {
 
   getABatchOfContactMsgBoxInfo(...args: unknown[]): unknown;
 
-  insertMsgToMsgBox(...args: unknown[]): unknown;
+  insertMsgToMsgBox(peer: Peer, msgId: string, arg: 2006): unknown;
 
   isHitEmojiKeyword(...args: unknown[]): unknown;
 
