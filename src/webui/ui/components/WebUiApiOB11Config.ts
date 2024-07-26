@@ -38,7 +38,7 @@ class WebUiApiOB11ConfigWrapper {
     this.retCredential = Credential;
   }
   async GetOB11Config(): Promise<OB11Config> {
-    const ConfigResponse = await fetch('/api/OB11Config/GetConfig', {
+    const ConfigResponse = await fetch('../api/OB11Config/GetConfig', {
       method: 'POST',
       headers: {
         Authorization: 'Bearer ' + this.retCredential,
@@ -54,7 +54,7 @@ class WebUiApiOB11ConfigWrapper {
     return {} as OB11Config;
   }
   async SetOB11Config(config: OB11Config): Promise<boolean> {
-    const ConfigResponse = await fetch('/api/OB11Config/SetConfig', {
+    const ConfigResponse = await fetch('../api/OB11Config/SetConfig', {
       method: 'POST',
       headers: {
         Authorization: 'Bearer ' + this.retCredential,

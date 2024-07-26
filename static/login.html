@@ -86,7 +86,7 @@
                 let data = "";
 
                 try {
-                    let loginResponse = await fetch('/api/auth/login', {
+                    let loginResponse = await fetch('../api/auth/login', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -99,7 +99,7 @@
                         //登录成功
                         let retCredential = loginResponseJson.data.Credential;
                         localStorage.setItem('auth', retCredential);
-                        let QQLoginResponse = await fetch('/api/QQLogin/CheckLoginStatus', {
+                        let QQLoginResponse = await fetch('../api/QQLogin/CheckLoginStatus', {
                             method: 'POST',
                             headers: {
                                 'Authorization': "Bearer " + retCredential,

@@ -1,7 +1,7 @@
 const SettingList = (items, title, isCollapsible = false, direction = "column") => {
-  return `<setting-section ${title && !isCollapsible ? `data-title="${title}"` : ""}>
+  return `<setting-section ${""}>
       <setting-panel>
-          <setting-list ${direction ? `data-direction="${direction}"` : ""} ${isCollapsible ? "is-collapsible" : ""} ${title && isCollapsible ? `data-title="${title}"` : ""}>
+          <setting-list ${direction ? `data-direction="${direction}"` : ""} ${isCollapsible ? "is-collapsible" : ""} ${""}>
               ${items.join("")}
           </setting-list>
       </setting-panel>
@@ -66,16 +66,13 @@ window.customElements.define(
         window[`${isHidden ? "remove" : "add"}EventListener`]("pointerdown", windowPointerDown);
       };
       const windowPointerDown = ({ target }) => {
-        if (!this.contains(target))
-          buttonClick();
+        if (!this.contains(target)) buttonClick();
       };
       this._button.addEventListener("click", buttonClick);
       this._context.addEventListener("click", ({ target }) => {
-        if (target.tagName !== "SETTING-OPTION")
-          return;
+        if (target.tagName !== "SETTING-OPTION") return;
         buttonClick();
-        if (target.hasAttribute("is-selected"))
-          return;
+        if (target.hasAttribute("is-selected")) return;
         this.querySelectorAll("setting-option[is-selected]").forEach((dom) => dom.toggleAttribute("is-selected"));
         target.toggleAttribute("is-selected");
         this._text.value = target.textContent;
@@ -95,9 +92,9 @@ window.customElements.define(
   }
 );
 const SettingSelect = (items, configKey, configValue) => {
-  return `<ob-setting-select ${configKey ? `data-config-key="${configKey}"` : ""}>
+  return `<ob-setting-select ${`data-config-key="${configKey}"` }>
     ${items.map((e, i) => {
-    return SettingOption(e.text, e.value, configKey && configValue ? configValue === e.value : i === 0);
+    return SettingOption(e.text, e.value, configValue ? configValue === e.value : i === 0);
   }).join("")}
 </ob-setting-select>`;
 };
@@ -108,7 +105,7 @@ class WebUiApiOB11ConfigWrapper {
     this.retCredential = Credential;
   }
   async GetOB11Config() {
-    const ConfigResponse = await fetch("/api/OB11Config/GetConfig", {
+    const ConfigResponse = await fetch("../api/OB11Config/GetConfig", {
       method: "POST",
       headers: {
         Authorization: "Bearer " + this.retCredential,
@@ -124,7 +121,7 @@ class WebUiApiOB11ConfigWrapper {
     return {};
   }
   async SetOB11Config(config) {
-    const ConfigResponse = await fetch("/api/OB11Config/SetConfig", {
+    const ConfigResponse = await fetch("../api/OB11Config/SetConfig", {
       method: "POST",
       headers: {
         Authorization: "Bearer " + this.retCredential,
@@ -154,7 +151,6 @@ async function onSettingWindowCreated(view) {
     } else if (configKey.length === 3) {
       ob11Config[configKey[1]][configKey[2]] = value;
     }
-    OB11ConfigWrapper.SetOB11Config(ob11Config);
   };
   const parser = new DOMParser();
   const doc = parser.parseFromString(
@@ -326,7 +322,7 @@ async function onSettingWindowCreated(view) {
     "text/html"
   );
   doc.querySelector("#open-github")?.addEventListener("click", () => {
-    window.open("https://napneko.github.io/", "_blank");
+    window.open("https://github.com/NapNeko/NapCatQQ", "_blank");
   });
   doc.querySelector("#open-telegram")?.addEventListener("click", () => {
     window.open("https://t.me/+nLZEnpne-pQ1OWFl");
@@ -335,7 +331,7 @@ async function onSettingWindowCreated(view) {
     window.open("https://qm.qq.com/q/bDnHRG38aI");
   });
   doc.querySelector("#open-docs")?.addEventListener("click", () => {
-    window.open("https://github.com/NapNeko/NapCatQQ");
+    window.open("https://napneko.github.io/", "_blank");
   });
   const buildHostListItem = (type, host, index, inputAttrs = {}) => {
     const dom = {
@@ -431,19 +427,15 @@ async function onSettingWindowCreated(view) {
     dom.addEventListener("click", () => {
       const active = dom.getAttribute("is-active") == void 0;
       setOB11Config(dom.dataset.configKey, active);
-      if (active)
-        dom.setAttribute("is-active", "");
-      else
-        dom.removeAttribute("is-active");
+      if (active) dom.setAttribute("is-active", "");
+      else dom.removeAttribute("is-active");
       if (!isEmpty(dom.dataset.controlDisplayId)) {
         const displayDom = document.querySelector(
           //@ts-expect-error 等待修复
           `#${dom.dataset.controlDisplayId}`
         );
-        if (active)
-          displayDom?.removeAttribute("is-hidden");
-        else
-          displayDom?.setAttribute("is-hidden", "");
+        if (active) displayDom?.removeAttribute("is-hidden");
+        else displayDom?.setAttribute("is-hidden", "");
       }
     });
   });
