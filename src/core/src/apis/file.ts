@@ -3,7 +3,7 @@ import {
   CacheFileType,
   ChatCacheListItemBasic,
   ChatType,
-  ElementType, IMAGE_HTTP_HOST, IMAGE_HTTP_HOST_NT, RawMessage
+  ElementType, IMAGE_HTTP_HOST, IMAGE_HTTP_HOST_NT, PicElement, RawMessage
 } from '@/core/entities';
 import path from 'path';
 import fs from 'fs';
@@ -198,11 +198,11 @@ export class NTQQFileApi {
     );
     return data.resultItems[0];
   }
-  static async getImageUrl(element: { originImageUrl: any; md5HexStr?: any; fileUuid: any; }) {
+  static async getImageUrl(element: PicElement) {
     if (!element) {
       return '';
     }
-    const url: string = element.originImageUrl;  // 没有域名
+    const url: string = element.originImageUrl!;  // 没有域名
     const md5HexStr = element.md5HexStr;
     const fileMd5 = element.md5HexStr;
     const fileUuid = element.fileUuid;
