@@ -130,6 +130,10 @@ export class NTQQMsgApi {
     });
     return retMsg;
   }
+  static async getMsgUniqueEx(){
+    let msgId = await NTQQMsgApi.getMsgUnique(await NTQQMsgApi.getServerTime());
+    return msgId;
+  }
   static async getMsgUnique(time: string) {
     return napCatCore.session.getMsgService().getMsgUniqueId(time);
   }

@@ -249,6 +249,7 @@ export class NapCatCore {
       stat.last_message_time = Math.floor(Date.now() / 1000);
     };
     msgListener.onRecvMsg = (msgList: RawMessage[]) => {
+      // console.log(JSON.stringify(msgList[0],null,2));
       stat.packet_received += 1;
       stat.message_received += msgList.length;
       stat.last_message_time = Math.floor(Date.now() / 1000);

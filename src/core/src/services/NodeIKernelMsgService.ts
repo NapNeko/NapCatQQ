@@ -21,7 +21,7 @@ export interface NodeIKernelMsgService {
 
   getAutoReplyTextList(...args: unknown[]): unknown;
 
-  getOnLineDev(): Promise<any>;
+  getOnLineDev(): void;
 
   kickOffLine(DevInfo: Object): unknown;
 
@@ -115,7 +115,7 @@ export interface NodeIKernelMsgService {
 
   addLocalTofuRecordMsg(...args: unknown[]): unknown;
 
-  addLocalRecordMsg(...args: unknown[]): unknown;
+  addLocalRecordMsg(Peer: Peer, msgId: string, rawMessage: RawMessage, attr: Array<any> | number, front: boolean): Promise<unknown>;
 
   deleteMsg(...args: unknown[]): unknown;
 
