@@ -368,7 +368,7 @@ export interface TextElement {
 export interface MessageElement {
   elementType: ElementType,
   elementId: string,
-  extBufForUI: string,
+  extBufForUI: string,//"0x",
   textElement?: TextElement;
   faceElement?: FaceElement,
   marketFaceElement?: MarkdownElement,

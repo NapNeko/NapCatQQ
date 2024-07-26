@@ -1,6 +1,33 @@
 import { GetFileListParam, MessageElement, Peer, SendMessageElement } from "../entities";
 import { GeneralCallResult } from "./common";
-
+export enum UrlFileDownloadType {
+    KUNKNOWN,
+    KURLFILEDOWNLOADPRIVILEGEICON,
+    KURLFILEDOWNLOADPHOTOWALL,
+    KURLFILEDOWNLOADQZONE,
+    KURLFILEDOWNLOADCOMMON,
+    KURLFILEDOWNLOADINSTALLAPP
+}
+export interface CommonFileInfo {
+    bizType: number;
+    chatType: number;
+    elemId: string;
+    favId: string;
+    fileModelId: string;
+    fileName: string;
+    fileSize: string;
+    md5: string;
+    md510m: string;
+    msgId: string;
+    msgTime: string;
+    parent: string;
+    peerUid: string;
+    picThumbPath: Array<string>
+    sha: string;
+    sha3: string;
+    subId: string;
+    uuid: string;
+}
 export interface NodeIKernelRichMediaService {
     //getVideoPlayUrl(peer, msgId, elemId, videoCodecFormat, VideoRequestWay.KHAND, cb);
     // public enum VideoCodecFormatType {
@@ -80,12 +107,26 @@ export interface NodeIKernelRichMediaService {
         useHttps: boolean
     }): Promise<unknown>;
 
-    isFileExpired(arg: unknown): unknown;
+    //arg双端number
+    isFileExpired(arg: number): unknown;
 
     deleteGroupFolder(GroupCode: string, FolderId: string): Promise<GeneralCallResult & { groupFileCommonResult: { retCode: number, retMsg: string, clientWording: string } }>;
 
     //参数与getVideoPlayUrlInVisit一样
-    downloadRichMediaInVisit(arg: unknown): unknown;
+    downloadRichMediaInVisit(arg: {
+        downloadType: number,
+        thumbSize: number,
+        msgId: string,
+        msgRandom: string,
+        msgSeq: string,
+        msgTime: string,
+        chatType: number,
+        senderUid: string,
+        peerUid: string,
+        guildId: string,
+        ele: MessageElement,
+        useHttps: boolean
+    }): unknown;
 
     downloadFileForModelId(peer: Peer, arg: unknown[], arg3: string): unknown;
     //第三个参数 Array<Type>
@@ -103,13 +144,13 @@ export interface NodeIKernelRichMediaService {
         fileModelId: string
     }[]): unknown;
 
-    downloadFileByUrlList(arg1: unknown, arg2: unknown): unknown;
+    downloadFileByUrlList(fileDownloadTyp: UrlFileDownloadType, urlList: Array<string>): unknown;
 
-    downloadFileForFileInfo(arg1: unknown, arg2: unknown): unknown;
+    downloadFileForFileInfo(fileInfo: CommonFileInfo[], savePath: string): unknown;
 
     createGroupFolder(GroupCode: string, FolderName: string): Promise<GeneralCallResult & { resultWithGroupItem: { result: any, groupItem: Array<any> } }>
 
-    downloadFile(arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown): unknown;
+    downloadFile(commonFile: CommonFileInfo, arg2: unknown, arg3: unknown, savePath: string): unknown;
 
     createGroupFolder(arg1: unknown, arg2: unknown): unknown;
 
