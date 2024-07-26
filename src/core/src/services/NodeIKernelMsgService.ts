@@ -154,7 +154,7 @@ export interface NodeIKernelMsgService {
   // this.$clientSeq = j3;
   // this.$cnt = i2;
 
-  getMsgsWithMsgTimeAndClientSeqForC2C(...args: unknown[]): Promise<unknown>;
+  getMsgsWithMsgTimeAndClientSeqForC2C(...args: unknown[]): Promise<GeneralCallResult & { msgList: RawMessage[] }>;
 
   getMsgsWithStatus(params: {
     peer: Peer
@@ -164,9 +164,9 @@ export interface NodeIKernelMsgService {
     queryOrder: boolean
     isIncludeSelf: boolean
     appid: unknown
-  }): Promise<unknown>;
+  }): Promise<GeneralCallResult & { msgList: RawMessage[] }>;
 
-  getMsgsBySeqRange(peer: Peer, startSeq: string, endSeq: string): Promise<unknown>;
+  getMsgsBySeqRange(peer: Peer, startSeq: string, endSeq: string):Promise<GeneralCallResult & { msgList: RawMessage[] }>;
 
   getMsgsBySeqAndCount(peer: Peer, seq: string, count: number, desc: boolean, unknownArg: boolean): Promise<GeneralCallResult & { msgList: RawMessage[] }>;
 
@@ -174,7 +174,7 @@ export interface NodeIKernelMsgService {
 
   getRecallMsgsByMsgId(peer: Peer, MsgId: string[]): Promise<unknown>;
 
-  getMsgsBySeqList(peer: Peer, seqList: string[]): Promise<unknown>;
+  getMsgsBySeqList(peer: Peer, seqList: string[]): Promise<GeneralCallResult & { msgList: RawMessage[] }>;
 
   getSingleMsg(Peer: Peer, msgSeq: string): unknown;
 
