@@ -187,16 +187,22 @@ export class NTQQFileApi {
         }[]
       }[]
     };
-    const [id, data] = await NTEventDispatch.CallNormalEvent<EventType, (params: OnListener) => void>(
-      'NodeIKernelSearchService/searchFileWithKeywords',
-      'NodeIKernelSearchListener/onSearchFileKeywordsResult',
-      1,
-      10000,
-      (arg): boolean => { return id == data.searchId },
-      keys,
-      12
-    );
-    return data.resultItems[0];
+    // (params: OnListener) => void 'NodeIKernelSearchListener/onSearchFileKeywordsResult',
+    // 1,
+    // 10000,
+    // (arg): boolean => { return id == data.searchId },
+    // keys,
+    // 12
+    const Event = await NTEventDispatch.CreatEventFunction<EventType>('NodeIKernelSearchService/searchFileWithKeywords');
+    let id = '';
+    const [Listener] = await NTEventDispatch.RegisterListen<(params: OnListener) => void>('NodeIKernelSearchListener/onSearchFileKeywordsResult', 1, 5000, (params) => {
+      if (id !== '' && params.searchId == id) {
+        return true
+      }
+      return false;
+    });
+    id = await Event!(keys, 12);
+    return Listener.resultItems[0];
   }
   static async getImageUrl(element: PicElement) {
     if (!element) {

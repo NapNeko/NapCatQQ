@@ -51,7 +51,7 @@ export interface NodeIKernelSearchService {
 
     cancelSearchMsgWithKeywords(...args: any[]): unknown;// needs 3 arguments
 
-    searchFileWithKeywords(keywords: string[], source: number): Promise<unknown>;// needs 2 arguments
+    searchFileWithKeywords(keywords: string[], source: number): Promise<string>;// needs 2 arguments
 
     searchMoreFileWithKeywordsr(...args: any[]): unknown;// needs 1 arguments
 

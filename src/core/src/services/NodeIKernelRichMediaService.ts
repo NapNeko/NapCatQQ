@@ -8,6 +8,23 @@ export enum UrlFileDownloadType {
     KURLFILEDOWNLOADCOMMON,
     KURLFILEDOWNLOADINSTALLAPP
 }
+export enum RMBizTypeEnum {
+    KUNKNOWN,
+    KC2CFILE,
+    KGROUPFILE,
+    KC2CPIC,
+    KGROUPPIC,
+    KDISCPIC,
+    KC2CVIDEO,
+    KGROUPVIDEO,
+    KC2CPTT,
+    KGROUPPTT,
+    KFEEDCOMMENTPIC,
+    KGUILDFILE,
+    KGUILDPIC,
+    KGUILDPTT,
+    KGUILDVIDEO
+}
 export interface CommonFileInfo {
     bizType: number;
     chatType: number;
@@ -227,13 +244,25 @@ export interface NodeIKernelRichMediaService {
 
     cancelSearcheGroupFile(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
 
-    onlyDownloadFile(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
+    onlyDownloadFile(peer: Peer, arg2: unknown, arg3: Array<{
+        fileId: string,
+        fileName: string,
+        fileSize: string,
+        fileModelId: string
+    }
+    >): unknown;
 
     onlyUploadFile(arg1: unknown, arg2: unknown): unknown;
 
     isExtraLargePic(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
 
-    uploadRMFileWithoutMsg(arg: unknown): unknown;
+    uploadRMFileWithoutMsg(arg: {
+        bizType: RMBizTypeEnum,
+        filePath: string,
+        peerUid: string,
+        transferId: string
+        useNTV2: string
+    }): Promise<unknown>;
 
     isNull(): boolean;
 }
