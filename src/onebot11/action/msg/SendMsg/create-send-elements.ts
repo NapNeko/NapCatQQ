@@ -65,7 +65,6 @@ const _handlers: {
       SendMsgElementConstructor.at(atQQ, atMember.uid, AtType.atUser, atMember.cardName || atMember.nick) :
       undefined;
   },
-
   [OB11MessageDataType.reply]: async ({ data: { id } }) => {
     const replyMsgM = MessageUnique.getMsgIdAndPeerByShortId(parseInt(id));
     if (!replyMsgM) {
