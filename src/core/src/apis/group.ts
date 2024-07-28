@@ -1,4 +1,4 @@
-import { GroupMember, GroupRequestOperateTypes, GroupMemberRole, GroupNotify, Group, MemberExtSourceType, GroupNotifyTypes, ChatType } from '../entities';
+import { GroupMember, GroupRequestOperateTypes, GroupMemberRole, GroupNotify, Group, MemberExtSourceType, GroupNotifyTypes, ChatType, Peer } from '../entities';
 import { GeneralCallResult, NTQQUserApi, napCatCore } from '@/core';
 import { NTEventDispatch } from '@/common/utils/EventTask';
 import { log } from '@/common/utils/log';
@@ -84,14 +84,9 @@ export class NTQQGroupApi {
   static async getLastestMsg(GroupCode: string, uins: string[]) {
     let uids: Array<string> = [];
     for (let uin of uins) {
-      try {
-        let uid = await NTQQUserApi.getUidByUin(uin)
-        if (uid) {
-          uids.push(uid);
-        }
-      } catch (error) {
-        log("getLastestMsg--->", error);
-        return undefined;
+      let uid = await NTQQUserApi.getUidByUin(uin)
+      if (uid) {
+        uids.push(uid);
       }
     }
     let ret = await napCatCore.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {

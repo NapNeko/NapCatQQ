@@ -63,7 +63,19 @@ export class NTQQMsgApi {
   } | undefined> {
     return napCatCore.session.getMsgService().getMultiMsg(peer, rootMsgId, parentMsgId);
   }
-
+  static async getLastestMsgByUids(peer: Peer) {
+    let ret = await napCatCore.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {
+      chatInfo: peer,
+      filterMsgType: [],
+      filterSendersUid: [],
+      filterMsgToTime: '0',
+      filterMsgFromTime: '0',
+      isReverseOrder: false,
+      isIncludeCurrent: true,
+      pageLimit: 1,
+    });
+    return ret;
+  }
   static async getMsgsByMsgId(peer: Peer, msgIds: string[]) {
     return await napCatCore.session.getMsgService().getMsgsByMsgId(peer, msgIds);
   }

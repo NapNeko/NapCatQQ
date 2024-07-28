@@ -61,6 +61,10 @@ class LimitedHashTable<K, V> {
       this.valueToKey.delete(value);
     }
   }
+
+  getKeyList(): K[] {
+    return Array.from(this.keyToValue.keys());
+  }
 }
 
 class MessageUniqueWrapper {
