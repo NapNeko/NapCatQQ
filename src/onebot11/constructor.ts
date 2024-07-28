@@ -168,7 +168,6 @@ export class OB11Constructor {
         message_data['data']['file'] = element.picElement.fileName;
         message_data['subType'] = element.picElement.picSubType;
         // message_data["data"]["path"] = element.picElement.sourcePath
-        // let currentRKey = "CAQSKAB6JWENi5LMk0kc62l8Pm3Jn1dsLZHyRLAnNmHGoZ3y_gDZPqZt-64"
 
         try {
           message_data['data']['url'] = await NTQQFileApi.getImageUrl(element.picElement);
@@ -178,19 +177,6 @@ export class OB11Constructor {
         //console.log(message_data['data']['url'])
         // message_data["data"]["file_id"] = element.picElement.fileUuid
         message_data['data']['file_size'] = element.picElement.fileSize;
-        // dbUtil.addFileCache({
-        //   name: element.picElement.fileName,
-        //   path: element.picElement.sourcePath,
-        //   size: element.picElement.fileSize,
-        //   url: message_data['data']['url'],
-        //   uuid: element.picElement.fileUuid || '',
-        //   msgId: msg.msgId,
-        //   element: element.picElement,
-        //   elementType: ElementType.PIC,
-        //   elementId: element.elementId
-        // }).then();
-        // 不自动下载图片
-
       }
       else if (element.fileElement) {
 
@@ -266,7 +252,7 @@ export class OB11Constructor {
         message_data['type'] = OB11MessageDataType.voice;
         message_data['data']['file'] = element.pttElement.fileName;
         message_data['data']['path'] = element.pttElement.filePath;
-        // message_data["data"]["file_id"] = element.pttElement.fileUuid
+        message_data["data"]["file_id"] = element.pttElement.fileUuid;
         message_data['data']['file_size'] = element.pttElement.fileSize;
         // dbUtil.addFileCache({
         //   name: element.pttElement.fileName,
@@ -279,7 +265,20 @@ export class OB11Constructor {
         //   elementType: ElementType.PTT,
         //   elementId: element.elementId
         // }).then();
-
+        await NTQQFileApi.addFileCache({
+          peerUid: msg.peerUid,
+          chatType: msg.chatType,
+          guildId: '',
+        },
+          msg.msgId,
+          msg.msgSeq,
+          msg.senderUid,
+          element.elementId,
+          element.elementType.toString(),
+          element.pttElement.fileSize || '0',
+          element.pttElement.fileUuid || ''
+        );
+        //以uuid作为文件名
       }
       else if (element.arkElement) {
         message_data['type'] = OB11MessageDataType.json;
