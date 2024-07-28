@@ -143,39 +143,32 @@ export class NTQQUserApi {
     return false;
   })
   static async getUidByUin(Uin: string) {
+    //Uid 接口转
     let ret = await NTEventDispatch.CallNoListenerEvent
       <(Uin: string[]) => Promise<{ uidInfo: Map<string, string> }>>(
         'NodeIKernelUixConvertService/getUid',
         5000,
         [Uin]
       );
-    let uid = ret.uidInfo.get(Uin); //通过QQ默认方式转换
+    let uid = ret.uidInfo.get(Uin);
+    // Uid 好友转
     if (!uid) {
       Array.from(friends.values()).forEach((t) => {
         if (t.uin == Uin) {
-          //logDebug('getUidByUin', t.uid, t.uin, Uin);
           uid = t.uid;
         }
-        //console.log(t.uid, t.uin, Uin);
       });
-      //缓解措施 从群里取
-      if (!uid) {
-        for (let groupMembersList of groupMembers.values()) {
-          let data = groupMembersList.get(Uin);
-          if (data?.uid) {
-            uid = data.uid;
+    }
+    //Uid 群友列表转
+    if (!uid) {
+      for (let groupMembersList of groupMembers.values()) {
+        for (let GroupMember of groupMembersList.values()) {
+          if (GroupMember.uin == Uin) {
+            uid = GroupMember.uid;
           }
         }
       }
-      //uid = Array.from(friends.values()).find((t) => { t.uin == Uin })?.uid;  // 从NC维护的QQ Buddy缓存 转换
     }
-
-    // if (!uid) {
-    //   uid = (await NTQQFriendApi.getFriends(false)).find((t) => { t.uin == Uin })?.uid;  //从QQ Native 缓存转换 方法一
-    // }
-    // if (!uid) {
-    //   uid = (await NTQQFriendApi.getFriends(true)).find((t) => { t.uin == Uin })?.uid;  //从QQ Native 非缓存转换 方法二
-    // }
     if (!uid) {
       let unveifyUid = (await NTQQUserApi.getUserDetailInfoByUin(Uin)).info.uid;//从QQ Native 特殊转换 方法三
       if (unveifyUid.indexOf("*") == -1) {
