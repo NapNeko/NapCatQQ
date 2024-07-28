@@ -1,5 +1,5 @@
 import { ModifyProfileParams, SelfInfo, User, UserDetailInfoByUin } from '@/core/entities';
-import { friends, selfInfo } from '@/core/data';
+import { friends, groupMembers, selfInfo } from '@/core/data';
 import { CacheClassFuncAsync, CacheClassFuncAsyncExtend } from '@/common/utils/helper';
 import { napCatCore } from '@/core';
 import { NodeIKernelProfileListener, ProfileListener } from '@/core/listeners';
@@ -158,6 +158,15 @@ export class NTQQUserApi {
         }
         //console.log(t.uid, t.uin, Uin);
       });
+      //缓解措施 从群里取
+      if (!uid) {
+        for (let groupMembersList of groupMembers.values()) {
+          let data = groupMembersList.get(Uin);
+          if (data?.uid) {
+            uid = data.uid;
+          }
+        }
+      }
       //uid = Array.from(friends.values()).find((t) => { t.uin == Uin })?.uid;  // 从NC维护的QQ Buddy缓存 转换
     }
 
