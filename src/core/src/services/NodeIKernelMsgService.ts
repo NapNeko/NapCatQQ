@@ -176,7 +176,7 @@ export interface NodeIKernelMsgService {
 
   getMsgsBySeqList(peer: Peer, seqList: string[]): Promise<GeneralCallResult & { msgList: RawMessage[] }>;
 
-  getSingleMsg(Peer: Peer, msgSeq: string): unknown;
+  getSingleMsg(Peer: Peer, msgSeq: string): Promise<GeneralCallResult & { msgList: RawMessage[] }>;
 
   getSourceOfReplyMsg(...args: unknown[]): unknown;
 

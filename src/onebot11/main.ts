@@ -240,16 +240,19 @@ export class NapCatOnebot11 {
     };
     msgListener.onMsgInfoListUpdate = (msgList) => {
       this.postRecallMsg(msgList).then().catch(logError);
+      for (const msg of msgList.filter(e => e.senderUin == selfInfo.uin)) {
+        OB11Constructor.message(msg).then((_msg) => {
+          _msg.target_id = parseInt(msg.peerUin);
+          logMessage(_msg as OB11Message).then().catch(logError);
+        }).catch(logError);
+        if (ob11Config.reportSelfMessage) {
+          msg.id = MessageUnique.createMsg({ chatType: msg.chatType, peerUid: msg.peerUid, guildId: '' }, msg.msgId);
+          this.postReceiveMsg([msg]).then().catch(logError);
+        }
+      }
     };
     msgListener.onAddSendMsg = (msg) => {
-      OB11Constructor.message(msg).then((_msg) => {
-        _msg.target_id = parseInt(msg.peerUin);
-        logMessage(_msg as OB11Message).then().catch(logError);
-      }).catch(logError);
-      if (ob11Config.reportSelfMessage) {
-        msg.id = MessageUnique.createMsg({ chatType: msg.chatType, peerUid: msg.peerUid, guildId: '' }, msg.msgId);
-        this.postReceiveMsg([msg]).then().catch(logError);
-      }
+
     };
     napCatCore.addListener(msgListener);
     logDebug('ob11 msg listener added');
