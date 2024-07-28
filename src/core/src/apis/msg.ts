@@ -96,6 +96,9 @@ export class NTQQMsgApi {
   static async getMsgsByMsgId(peer: Peer, msgIds: string[]) {
     return await napCatCore.session.getMsgService().getMsgsByMsgId(peer, msgIds);
   }
+  static async getSingleMsg(peer: Peer, seq: string) {
+    return await napCatCore.session.getMsgService().getSingleMsg(peer, seq);
+  }
   static async queryMsgsWithFilterExWithSeq(peer: Peer, msgSeq: string, msgTime: string, senderUid: string) {
     let ret = await napCatCore.session.getMsgService().queryMsgsWithFilterEx('0', msgTime, msgSeq, {
       chatInfo: peer,
