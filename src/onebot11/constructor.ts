@@ -183,7 +183,7 @@ export class OB11Constructor {
         message_data['type'] = 'image';
         // message_data["data"]["file"] = element.picElement.sourcePath
         message_data['data']['file'] = element.picElement.fileName;
-        message_data['subType'] = element.picElement.picSubType;
+        message_data['data']['subType'] = element.picElement.picSubType;
         // message_data["data"]["path"] = element.picElement.sourcePath
 
         try {
