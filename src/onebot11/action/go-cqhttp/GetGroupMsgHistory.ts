@@ -38,7 +38,7 @@ export default class GoCQHTTPGetGroupMsgHistory extends BaseAction<Payload, Resp
     }
     if (!payload.message_seq) {
       let latestMsgId = (await NTQQMsgApi.getLastestMsgByUids(peer)).msgList[0].msgId;
-      targetMsgShortId = await MessageUnique.createMsg(peer, latestMsgId);
+      targetMsgShortId = await MessageUnique.createMsg(peer, latestMsgId || '0');
     }
     const startMsgId = (await MessageUnique.getMsgIdAndPeerByShortId(targetMsgShortId ?? (payload.message_seq ?? 0)))?.MsgId || '0';
     const historyResult = (await NTQQMsgApi.getMsgHistory(peer, startMsgId, count));
