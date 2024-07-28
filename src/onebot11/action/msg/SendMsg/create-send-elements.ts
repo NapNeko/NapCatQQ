@@ -30,26 +30,6 @@ async function handleOb11FileLikeMessage(
 ) {
   const uri = file;
 
-  // const cache = await dbUtil.getFileCacheByName(file);
-  // if (cache) {
-  //   if (fs.existsSync(cache.path)) {
-  //     uri = 'file://' + cache.path;
-  //   } else if (cache.url) {
-  //     uri = cache.url;
-  //   } else {
-  //     const fileMsgPeer = MessageUnique.getPeerByMsgId(cache.msgId);
-  //     if (fileMsgPeer) {
-  //       cache.path = await NTQQFileApi.downloadMedia(
-  //         fileMsgPeer.MsgId, fileMsgPeer.Peer.chatType, fileMsgPeer.Peer.peerUid,
-  //         cache.elementId, '', ''
-  //       );
-  //       uri = 'file://' + cache.path;
-  //       dbUtil.updateFileCache(cache);
-  //     }
-  //   }
-  //   logDebug('找到文件缓存', uri);
-  // }
-
   const { path, isLocal, fileName, errMsg } = (await uri2local(uri));
 
   if (errMsg) {
