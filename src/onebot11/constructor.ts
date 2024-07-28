@@ -152,13 +152,13 @@ export class OB11Constructor {
           replyMsg = (await NTQQMsgApi.getMsgsBySeqAndCount({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, element.replyElement.replayMsgSeq, 1, true, true)).msgList[0];
 
           if (!replyMsg || replyMsg.msgRandom !== records.msgRandom) {
-            logWarn(`消息比对失败,准备重新尝试 Info: CurrentMsgRandom:${replyMsg?.msgRandom}/TargetMsgRandom:${records.msgRandom}`);
-            await sleep(500);
+            //logWarn(`消息比对失败,准备重新尝试 Info: CurrentMsgRandom:${replyMsg?.msgRandom}/TargetMsgRandom:${records.msgRandom}`);
+            await sleep(700);
             replyMsg = (await NTQQMsgApi.getMsgsByMsgId(peer, MessageUnique.getRecentMsgIds(peer, 50))).msgList.find((msg) => msg.msgRandom == records.msgRandom && msg.msgSeq == element.replyElement.replayMsgSeq);
           }
           if (!replyMsg || replyMsg.msgRandom !== records.msgRandom) {
-            logWarn(`消息比对失败,准备重新尝试 Info: CurrentMsgRandom:${replyMsg?.msgRandom}/TargetMsgRandom:${records.msgRandom}`);
-            await sleep(500);
+            //logWarn(`消息比对失败,准备重新尝试 Info: CurrentMsgRandom:${replyMsg?.msgRandom}/TargetMsgRandom:${records.msgRandom}`);
+            await sleep(700);
             replyMsg = (await NTQQMsgApi.queryMsgsWithFilterExWithSeq(
               peer,
               element.replyElement.replayMsgSeq,
@@ -166,8 +166,15 @@ export class OB11Constructor {
               records.senderUid
             )).msgList[0];
           }
+
+          // 最后尝试第一次的方法
           if (!replyMsg || replyMsg.msgRandom !== records.msgRandom) {
-            logWarn(`消息比对失败,准备重新尝试 Info: CurrentMsgRandom:${replyMsg?.msgRandom}/TargetMsgRandom:${records.msgRandom}`);
+            //logWarn(`消息比对失败,准备重新尝试 Info: CurrentMsgRandom:${replyMsg?.msgRandom}/TargetMsgRandom:${records.msgRandom}`);
+            await sleep(700);
+            replyMsg = (await NTQQMsgApi.getMsgsByMsgId(peer, MessageUnique.getRecentMsgIds(peer, 50))).msgList.find((msg) => msg.msgRandom == records.msgRandom && msg.msgSeq == element.replyElement.replayMsgSeq);
+          }
+          if (!replyMsg || replyMsg.msgRandom !== records.msgRandom) {
+            //logWarn(`消息比对失败,准备重新尝试 Info: CurrentMsgRandom:${replyMsg?.msgRandom}/TargetMsgRandom:${records.msgRandom}`);
             throw new Error('回复消息消息验证失败')
           }
           if (replyMsg) {
