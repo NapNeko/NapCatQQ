@@ -23,7 +23,8 @@ import {
   SelfInfo,
   Sex,
   TipGroupElementType,
-  User
+  User,
+  VideoElement
 } from '@/core/entities';
 import { EventType } from './event/OB11BaseEvent';
 import { encodeCQCode } from './cqcode';
@@ -191,30 +192,34 @@ export class OB11Constructor {
         // 不自动下载图片
 
       }
-      else if (element.videoElement || element.fileElement) {
-        const videoOrFileElement = element.videoElement || element.fileElement;
-        const ob11MessageDataType = element.videoElement ? OB11MessageDataType.video : OB11MessageDataType.file;
-        const videoDownUrl = element.videoElement ? await NTQQFileApi.getVideoUrl(msg, element) : videoOrFileElement.filePath;
-        message_data['type'] = ob11MessageDataType;
-        message_data['data']['file'] = videoOrFileElement.fileName;
+      else if (element.fileElement) {
+        const FileElement = element.videoElement || element.fileElement;
+        message_data['type'] = OB11MessageDataType.file;
+        message_data['data']['file'] = FileElement.fileName;
+        message_data['data']['path'] = FileElement.filePath;
+        message_data['data']['url'] = FileElement.filePath;
+        message_data['data']['file_id'] = FileElement.fileUuid;
+        message_data['data']['file_size'] = FileElement.fileSize;
+      }
+      else if (element.videoElement) {
+        const videoElement: VideoElement = element.videoElement;
+        let videoUrl;
+        try {
+          videoUrl = await NTQQFileApi.getVideoUrl({
+            chatType: msg.chatType,
+            peerUid: msg.peerUid,
+            guildId: '0'
+          }, msg.msgId, element.elementId);
+        } catch (error) {
+          videoUrl = undefined;
+        }
+        const videoDownUrl = videoUrl ? videoUrl : videoElement.filePath;
+        message_data['type'] = OB11MessageDataType.video;
+        message_data['data']['file'] = videoElement.fileName;
         message_data['data']['path'] = videoDownUrl;
         message_data['data']['url'] = videoDownUrl;
-        message_data['data']['file_id'] = videoOrFileElement.fileUuid;
-        message_data['data']['file_size'] = videoOrFileElement.fileSize;
-        if (!element.videoElement) {
-          //   dbUtil.addFileCache({
-          //     msgId: msg.msgId,
-          //     name: videoOrFileElement.fileName,
-          //     path: videoOrFileElement.filePath,
-          //     size: parseInt(videoOrFileElement.fileSize || '0'),
-          //     uuid: videoOrFileElement.fileUuid || '',
-          //     url: '',
-          //     element: element.videoElement || element.fileElement,
-          //     elementType: element.videoElement ? ElementType.VIDEO : ElementType.FILE,
-          //     elementId: element.elementId
-          //   }).then();
-          // }
-        }
+        message_data['data']['file_id'] = videoElement.fileUuid;
+        message_data['data']['file_size'] = videoElement.fileSize;
       }
       else if (element.pttElement) {
         message_data['type'] = OB11MessageDataType.voice;
@@ -285,7 +290,7 @@ export class OB11Constructor {
         else (resMsg.message as OB11MessageData[]).push(message_data);
         resMsg.raw_message += cqCode;
       }
-      
+
     }
     resMsg.raw_message = resMsg.raw_message.trim();
     return resMsg;

@@ -3,7 +3,7 @@ import {
   CacheFileType,
   ChatCacheListItemBasic,
   ChatType,
-  ElementType, IMAGE_HTTP_HOST, IMAGE_HTTP_HOST_NT, PicElement, RawMessage
+  ElementType, IMAGE_HTTP_HOST, IMAGE_HTTP_HOST_NT, Peer, PicElement, RawMessage
 } from '@/core/entities';
 import path from 'path';
 import fs from 'fs';
@@ -32,12 +32,8 @@ export class NTQQFileApi {
   static async getFileSize(filePath: string): Promise<number> {
     return await napCatCore.util.getFileSize(filePath);
   }
-  static async getVideoUrl(msg: RawMessage, element: any) {
-    return (await napCatCore.session.getRichMediaService().getVideoPlayUrlV2({
-      chatType: msg.chatType,
-      peerUid: msg.peerUid,
-      guildId: '0'
-    }, msg.msgId, element.elementId, 0, { downSourceType: 1, triggerType: 1 })).urlResult.domainUrl[0].url;
+  static async getVideoUrl(peer: Peer, msgId: string, elementId: string) {
+    return (await napCatCore.session.getRichMediaService().getVideoPlayUrlV2(peer, msgId, elementId, 0, { downSourceType: 1, triggerType: 1 })).urlResult.domainUrl;
   }
   // 上传文件到QQ的文件夹
   static async uploadFile(filePath: string, elementType: ElementType = ElementType.PIC, elementSubType: number = 0) {
