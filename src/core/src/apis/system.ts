@@ -2,10 +2,6 @@
 
 import { NTEventDispatch } from '@/common/utils/EventTask';
 import { GeneralCallResult, NTQQFileApi, NTQQUserApi, napCatCore } from '@/core';
-setTimeout(async () => {
-    let ret = JSON.stringify(await NTQQFileApi.searchfile(['doc']));
-    console.log(ret);
-}, 20000)
 export class NTQQSystemApi {
     static async hasOtherRunningQQProcess() {
         return napCatCore.util.hasOtherRunningQQProcess();
