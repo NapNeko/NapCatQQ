@@ -5,7 +5,7 @@ import { log, logDebug } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';
 import { uri2local } from '@/common/utils/file';
 import { ActionName, BaseCheckResult } from '../types';
-import { FileElement, RawMessage, VideoElement } from '@/core/entities';
+import { ChatType, FileElement, Peer, RawMessage, VideoElement } from '@/core/entities';
 import { NTQQFileApi, NTQQMsgApi } from '@/core/apis';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import Ajv from 'ajv';
@@ -45,6 +45,44 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
     return { id: element.elementId, element: element.fileElement };
   }
   protected async _handle(payload: GetFilePayload): Promise<GetFileResponse> {
+    const { enableLocalFile2Url } = ob11Config;
+    const NTSearchNameResult = (await NTQQFileApi.searchfile([payload.file])).resultItems;
+    if (NTSearchNameResult.length !== 0) {
+      let MsgId = NTSearchNameResult[0].msgId;
+      let peer: Peer | undefined = undefined;
+      if (NTSearchNameResult[0].chatType == ChatType.group) {
+        peer = { chatType: ChatType.group, peerUid: NTSearchNameResult[0].groupChatInfo[0].groupCode };
+      }
+      if (!peer) {
+        throw new Error('chattype not support');
+      }
+      let msgList: RawMessage[] = (await NTQQMsgApi.getMsgsByMsgId(peer, [MsgId]))?.msgList;
+      if (!msgList || msgList.length == 0) {
+        throw new Error('msg not found');
+      }
+      let msg = msgList[0];
+      let file = msg.elements.filter(e => e.elementType == NTSearchNameResult[0].elemType);
+      if (file.length == 0) {
+        throw new Error('file not found');
+      }
+      const downloadPath = await NTQQFileApi.downloadMedia(msg.msgId, msg.chatType, msg.peerUid, file[0].elementId, '', '');
+      const res: GetFileResponse = {
+        file: downloadPath,
+        url: downloadPath,
+        file_size:  NTSearchNameResult[0].fileSize.toString(),
+        file_name: NTSearchNameResult[0].fileName
+      };
+      if (enableLocalFile2Url) {
+          try {
+            res.base64 = await fs.readFile(downloadPath, 'base64');
+          } catch (e) {
+            throw new Error('文件下载失败. ' + e);
+          }
+      }
+      //不手动删除？文件持久化了
+      return res;
+    }
+    //下面逻辑是有UUID的情况
     throw new Error('file not found');
     // let cache = await dbUtil.getFileCacheByName(payload.file);
     // if (!cache) {
