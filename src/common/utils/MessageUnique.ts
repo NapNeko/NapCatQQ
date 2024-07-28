@@ -115,25 +115,6 @@ class MessageUniqueWrapper {
     this.msgIdMap.resize(maxSize);
     this.msgDataMap.resize(maxSize);
   }
-  getNthLatestShortIdByPeer(peer: Peer, index: number = 1): number | undefined {
-    const peerUid = peer.peerUid;
-    const chatType = peer.chatType;
-    const keys = this.msgDataMap.getKeyList();
-    const matches: number[] = [];
-    for (const key of keys) {
-      const [msgId, chatTypeStr, peerUidStr] = key.split('|');
-      if (peerUidStr === peerUid && chatTypeStr === chatType.toString()) {
-        const shortId = this.msgDataMap.getValue(key);
-        if (shortId) {
-          matches.push(shortId);
-        }
-      }
-    }
-    if (matches.length >= index) {
-      return matches[matches.length - index];
-    }
-    return undefined;
-  }
 }
 
 export const MessageUnique: MessageUniqueWrapper = new MessageUniqueWrapper();

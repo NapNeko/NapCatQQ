@@ -141,7 +141,7 @@ export interface NodeIKernelMsgService {
 
   getLastMessageList(peer: Peer[]): Promise<unknown>;
 
-  getAioFirstViewLatestMsgs(peer: Peer, unknown: number): unknown;
+  getAioFirstViewLatestMsgs(peer: Peer, num: number): unknown;
 
   getMsgs(peer: Peer, msgId: string, count: unknown, queryOrder: boolean): Promise<unknown>;
 
