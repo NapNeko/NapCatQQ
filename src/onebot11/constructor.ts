@@ -203,7 +203,8 @@ export class OB11Constructor {
       }
       else if (element.videoElement) {
         const videoElement: VideoElement = element.videoElement;
-        let videoUrl;
+        //读取视频链接并兜底
+        let videoUrl;//Array
         try {
           videoUrl = await NTQQFileApi.getVideoUrl({
             chatType: msg.chatType,
@@ -213,7 +214,19 @@ export class OB11Constructor {
         } catch (error) {
           videoUrl = undefined;
         }
-        const videoDownUrl = videoUrl ? videoUrl : videoElement.filePath;
+        //读取在线URL
+        let videoDownUrl = undefined;
+
+        if (videoUrl) {
+          let videoDownUrlTemp = videoUrl.find((url) => { if (url.url) { return true; } return false; });
+          if (videoDownUrlTemp) {
+            videoDownUrl = videoDownUrlTemp.url;
+          }
+        }
+        //开始兜底
+        if (!videoDownUrl) {
+          videoDownUrl = videoElement.filePath;
+        }
         message_data['type'] = OB11MessageDataType.video;
         message_data['data']['file'] = videoElement.fileName;
         message_data['data']['path'] = videoDownUrl;
