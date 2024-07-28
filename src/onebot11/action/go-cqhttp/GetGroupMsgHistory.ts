@@ -18,7 +18,7 @@ const SchemaData = {
     message_seq: { type: 'number' },
     count: { type: 'number' }
   },
-  required: [ 'group_id' ]
+  required: ['group_id']
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
@@ -36,8 +36,9 @@ export default class GoCQHTTPGetGroupMsgHistory extends BaseAction<Payload, Resp
       chatType: ChatType.group,
       peerUid: group.groupCode
     }
-    if ( !payload.message_seq ) {
-      targetMsgShortId = await MessageUnique.getNthLatestShortIdByPeer(peer, count)
+    if (!payload.message_seq) {
+      let latestMsgId = (await NTQQMsgApi.getLastestMsgByUids(peer)).msgList[0].msgId;
+      targetMsgShortId = await MessageUnique.createMsg(peer, latestMsgId);
     }
     const startMsgId = (await MessageUnique.getMsgIdAndPeerByShortId(targetMsgShortId ?? (payload.message_seq ?? 0)))?.MsgId || '0';
     const historyResult = (await NTQQMsgApi.getMsgHistory(peer, startMsgId, count));
