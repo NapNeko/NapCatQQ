@@ -1,3 +1,5 @@
+import { ChatType } from "../entities";
+
 export interface NodeIKernelSearchService {
     addKernelSearchListener(...args: any[]): unknown;// needs 1 arguments
 
@@ -7,7 +9,7 @@ export interface NodeIKernelSearchService {
 
     searchGroup(...args: any[]): unknown;// needs 1 arguments
 
-    searchLocalInfo(keywords: string,unknown:number/*4*/): unknown;
+    searchLocalInfo(keywords: string, unknown: number/*4*/): unknown;
 
     cancelSearchLocalInfo(...args: any[]): unknown;// needs 3 arguments
 
@@ -69,7 +71,55 @@ export interface NodeIKernelSearchService {
 
     cancelSearchChatAtMeMsgs(...args: any[]): unknown;// needs 3 arguments
 
-    addSearchHistory(...args: any[]): unknown;// needs 1 arguments
+    addSearchHistory(param: {
+        type: number,//4
+        contactList: [],
+        id: number,//-1
+        groupInfos: [],
+        msgs: [],
+        fileInfos: [
+            {
+                chatType: ChatType,
+                buddyChatInfo: Array<{ category_name: string, peerUid: string, peerUin: string, remark: string }>,
+                discussChatInfo: [],
+                groupChatInfo: Array<
+                    {
+                        groupCode: string,
+                        isConf: boolean,
+                        hasModifyConfGroupFace: boolean,
+                        hasModifyConfGroupName: boolean,
+                        groupName: string,
+                        remark: string
+                    }>
+                ,
+                dataLineChatInfo: [],
+                tmpChatInfo: [],
+                msgId: string,
+                msgSeq: string,
+                msgTime: string,
+                senderUid: string,
+                senderNick: string,
+                senderRemark: string,
+                senderCard: string,
+                elemId: string,
+                elemType: string,//3
+                fileSize: string,
+                filePath: string,
+                fileName: string,
+                hits: Array<
+                    {
+                        start: 12,
+                        end: 14
+                    }
+                >
+            }
+        ]
+
+    }): Promise<{
+        result: number,
+        errMsg: string,
+        id?: number
+    }>;
 
     removeSearchHistory(...args: any[]): unknown;// needs 1 arguments
 

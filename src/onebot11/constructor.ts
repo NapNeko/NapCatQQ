@@ -193,13 +193,27 @@ export class OB11Constructor {
 
       }
       else if (element.fileElement) {
-        const FileElement = element.videoElement || element.fileElement;
+
+        const FileElement = element.fileElement;
         message_data['type'] = OB11MessageDataType.file;
         message_data['data']['file'] = FileElement.fileName;
         message_data['data']['path'] = FileElement.filePath;
         message_data['data']['url'] = FileElement.filePath;
         message_data['data']['file_id'] = FileElement.fileUuid;
         message_data['data']['file_size'] = FileElement.fileSize;
+        await NTQQFileApi.addFileCache({
+          peerUid: msg.peerUid,
+          chatType: msg.chatType,
+          guildId: '',
+        },
+          msg.msgId,
+          msg.msgSeq,
+          msg.senderUid,
+          element.elementId,
+          element.elementType.toString(),
+          FileElement.fileSize,
+          FileElement.fileName
+        );
       }
       else if (element.videoElement) {
         const videoElement: VideoElement = element.videoElement;
@@ -233,6 +247,20 @@ export class OB11Constructor {
         message_data['data']['url'] = videoDownUrl;
         message_data['data']['file_id'] = videoElement.fileUuid;
         message_data['data']['file_size'] = videoElement.fileSize;
+
+        await NTQQFileApi.addFileCache({
+          peerUid: msg.peerUid,
+          chatType: msg.chatType,
+          guildId: '',
+        },
+          msg.msgId,
+          msg.msgSeq,
+          msg.senderUid,
+          element.elementId,
+          element.elementType.toString(),
+          videoElement.fileSize || '0',
+          videoElement.fileName
+        );
       }
       else if (element.pttElement) {
         message_data['type'] = OB11MessageDataType.voice;
