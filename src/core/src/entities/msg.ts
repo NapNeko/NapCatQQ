@@ -752,10 +752,12 @@ export interface RawMessage {
   chatType: ChatType;
   sendStatus?: number;  // 消息状态，别人发的2是已撤回，自己发的2是已发送
   recallTime: string; // 撤回时间, "0"是没有撤回
+  records: RawMessage[];
   elements: {
     elementId: string;
     elementType: ElementType;
     replyElement: {
+      sourceMsgIdInRecords: string;
       senderUid: string; // 原消息发送者QQ号
       sourceMsgIsIncPic: boolean; // 原消息是否有图片
       sourceMsgText: string;

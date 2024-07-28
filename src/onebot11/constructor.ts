@@ -135,21 +135,28 @@ export class OB11Constructor {
       }
       else if (element.replyElement) {
         message_data['type'] = 'reply';
-        // log("收到回复消息", element.replyElement.replayMsgSeq)
+        //log("收到回复消息", element.replyElement);
         try {
-          let replyMsg = await NTQQMsgApi.getMsgsBySeqAndCount(
+          //做这么多都是因为NC速度太快 可能nt还没有写入数据库
+          let records = msg.records.find(msgRecord => msgRecord.msgId === element.replyElement.sourceMsgIdInRecords);
+          if (!records) {
+            throw new Error('Record筛选失败');
+          }
+          let replyMsg = await NTQQMsgApi.queryMsgsWithFilterExWithSeq(
             {
               chatType: msg.chatType,
               peerUid: msg.peerUid,
               guildId: '',
             },
             element.replyElement.replayMsgSeq,
-            1,
-            true,
-            true
+            records.msgTime,
+            records.senderUid
           );
-          // console.log(JSON.stringify(retData, null, 2));
-          // const replyMsg = await NTQQMsgApi.getMsgsBySeqAndCount({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, element.replyElement.replayMsgSeq, 1, true, true);
+          if (replyMsg.msgList.length === 0 || replyMsg.msgList[0].msgRandom !== records.msgRandom) {
+            await sleep(300);
+            replyMsg = await NTQQMsgApi.getMsgsBySeqAndCount({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, element.replyElement.replayMsgSeq, 1, true, true);
+          }
+
           if (replyMsg) {
             message_data['data']['id'] = MessageUnique.createMsg({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, replyMsg.msgList[0].msgId)?.toString();
           }
