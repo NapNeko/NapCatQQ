@@ -96,6 +96,19 @@ export class NTQQMsgApi {
   static async getMsgsByMsgId(peer: Peer, msgIds: string[]) {
     return await napCatCore.session.getMsgService().getMsgsByMsgId(peer, msgIds);
   }
+  static async queryMsgsWithFilterExWithSeq(peer: Peer, msgSeq: string, msgTime: string, senderUid: string) {
+    let ret = await napCatCore.session.getMsgService().queryMsgsWithFilterEx('0', msgTime, msgSeq, {
+      chatInfo: peer,
+      filterMsgType: [],
+      filterSendersUid: [senderUid],
+      filterMsgToTime: '0',
+      filterMsgFromTime: '0',
+      isReverseOrder: false,
+      isIncludeCurrent: true,
+      pageLimit: 1,
+    });
+    return ret;
+  }
   static async getMsgsBySeqAndCount(peer: Peer, seq: string, count: number, desc: boolean, z: boolean) {
     return await napCatCore.session.getMsgService().getMsgsBySeqAndCount(peer, seq, count, desc, z);
   }
