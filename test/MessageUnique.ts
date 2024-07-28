@@ -1,6 +1,5 @@
 describe('MessageUniqueWrapper', () => {
-    let messageUniqueWrapper: MessageUniqueWrapper;
-    
+    let messageUniqueWrapper: MessageUniqueWrapper;  
     beforeEach(() => {
       messageUniqueWrapper = new MessageUniqueWrapper();
     });
