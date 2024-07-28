@@ -26,7 +26,6 @@ export class NTQQGroupApi {
   static async getGroupMemberLastestSendTimeCache(GroupCode: string) {
     return NTQQGroupApi.getGroupMemberLastestSendTime(GroupCode);
   }
-
   /**
    * 通过QQ自带数据库获取群成员最后发言时间(仅返回有效数据 且消耗延迟大 需要进行缓存)
    * @param GroupCode 群号
