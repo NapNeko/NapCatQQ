@@ -41,6 +41,7 @@ import { NodeIKernelSearchService } from './services/NodeIKernelSearchService';
 import { NodeIKernelCollectionService } from './services/NodeIKernelCollectionService';
 import { NodeIKernelRecentContactService } from './services/NodeIKernelRecentContactService';
 import { NodeIKernelMSFService } from './services/NodeIKernelMSFService';
+import { NodeIkernelTestPerformanceService } from './services/NodeIkernelTestPerformanceService';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -210,7 +211,7 @@ export interface NodeIQQNTWrapperSession {
 
   getSkinService(): unknown;
 
-  getTestPerformanceService(): unknown;
+  getTestPerformanceService(): NodeIkernelTestPerformanceService;
 
   getQQPlayService(): unknown;
 
