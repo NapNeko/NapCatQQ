@@ -361,7 +361,7 @@ export interface NodeIKernelMsgService {
 
   setGuildTabUserFlag(...args: unknown[]): unknown;
 
-  setBuildMode(flag:number/*0 1 3*/): unknown;
+  setBuildMode(flag: number/*0 1 3*/): unknown;
 
   setConfigurationServiceData(...args: unknown[]): unknown;
 
@@ -663,8 +663,26 @@ export interface NodeIKernelMsgService {
   dataMigrationGetMsgList(...args: unknown[]): unknown;
 
   dataMigrationStopOperation(...args: unknown[]): unknown;
-
-  dataMigrationImportMsgPbRecord(...args: unknown[]): unknown;
+  
+  //新的希望
+  dataMigrationImportMsgPbRecord(DataMigrationMsgInfo: Array<{
+    extensionData: string//"Hex" 
+    extraData: string //""
+    chatType: number
+    chatUin: string
+    msgType: number
+    msgTime: string
+    msgSeq: string
+    msgRandom: string
+  }>, DataMigrationResourceInfo: {
+    extraData: string
+    filePath: string
+    fileSize: string
+    msgRandom: string
+    msgSeq: string
+    msgSubType: number
+    msgType: number
+  }): unknown;
 
   dataMigrationGetResourceLocalDestinyPath(...args: unknown[]): unknown;
 

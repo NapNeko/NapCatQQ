@@ -41,17 +41,23 @@ setTimeout(() => {
     loadMessageUnique().then().catch();
   });
 }, 100);
+//歇菜LocalMsg压根不写Db
 // setTimeout(async () => {
-//   let ele: MessageElement = {extBufForUI: '0x' ,...SendMsgElementConstructor.text('测试消息')};
+//   let ele: MessageElement = { extBufForUI: '0x', ...SendMsgElementConstructor.text('测试消息') };
 //   let MsgId = await NTQQMsgApi.getMsgUniqueEx();
-//   let peer ={ chatType: 2, peerUid: '809079648', guildId: '' };
-//   console.log(await napCatCore.session.getMsgService().addLocalRecordMsg(
-//     peer,
-//     MsgId,
-//     ele, [], true
+//   let peer = { chatType: 2, peerUid: '', guildId: '' };
+//   console.log(await napCatCore.session.getTestPerformanceService().insertMsg(
+//     {
+//       peer: peer,
+//       msgTime: Math.floor(Date.now() / 1000).toString(),
+//       msgId: MsgId,
+//       msgSeq: '56564',
+//       batchNums: 1,
+//       timesPerBatch: 1,
+//       numPerTime: 1
+//     }, [ele]
 //   ));
-//   console.log(await NTQQMsgApi.multiForwardMsg(peer,peer,[MsgId]));
-
+//   console.log(await NTQQMsgApi.multiForwardMsg(peer, peer, [MsgId]));
 // }, 25000)
 export class NTQQMsgApi {
   // static napCatCore: NapCatCore | null = null;
