@@ -171,7 +171,7 @@ export class OB11Constructor {
           if (!replyMsg || replyMsg.msgRandom !== records.msgRandom) {
             //logWarn(`消息比对失败,准备重新尝试 Info: CurrentMsgRandom:${replyMsg?.msgRandom}/TargetMsgRandom:${records.msgRandom}`);
             await sleep(700);
-            replyMsg = (await NTQQMsgApi.getMsgsByMsgId(peer, MessageUnique.getRecentMsgIds(peer, 50))).msgList.find((msg) => msg.msgRandom == records.msgRandom && msg.msgSeq == element.replyElement.replayMsgSeq);
+            replyMsg = (await NTQQMsgApi.getMsgsBySeqAndCount({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, element.replyElement.replayMsgSeq, 1, true, true)).msgList[0];
           }
           if (!replyMsg || replyMsg.msgRandom !== records.msgRandom) {
             //logWarn(`消息比对失败,准备重新尝试 Info: CurrentMsgRandom:${replyMsg?.msgRandom}/TargetMsgRandom:${records.msgRandom}`);
