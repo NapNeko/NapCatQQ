@@ -144,8 +144,8 @@ export interface NodeIKernelRichMediaService {
         ele: MessageElement,
         useHttps: boolean
     }): unknown;
-
-    downloadFileForModelId(peer: Peer, arg: unknown[], arg3: string): unknown;
+    //arg3为“”
+    downloadFileForModelId(peer: Peer, ModelId: string[], arg3: string): unknown;
     //第三个参数 Array<Type>
     // this.fileId = "";
     // this.fileName = "";

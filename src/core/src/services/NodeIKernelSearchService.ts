@@ -1,79 +1,79 @@
 export interface NodeIKernelSearchService {
-    addKernelSearchListenerr(...args: any[]): unknown;// needs 1 arguments
+    addKernelSearchListener(...args: any[]): unknown;// needs 1 arguments
 
-    removeKernelSearchListenerr(...args: any[]): unknown;// needs 1 arguments
+    removeKernelSearchListener(...args: any[]): unknown;// needs 1 arguments
 
-    searchStrangerr(...args: any[]): unknown;// needs 3 arguments
+    searchStranger(...args: any[]): unknown;// needs 3 arguments
 
-    searchGroupr(...args: any[]): unknown;// needs 1 arguments
+    searchGroup(...args: any[]): unknown;// needs 1 arguments
 
-    searchLocalInfor(...args: any[]): unknown;// needs 2 arguments
+    searchLocalInfo(keywords: string,unknown:number/*4*/): unknown;
 
-    cancelSearchLocalInfor(...args: any[]): unknown;// needs 3 arguments
+    cancelSearchLocalInfo(...args: any[]): unknown;// needs 3 arguments
 
-    searchBuddyChatInfor(...args: any[]): unknown;// needs 2 arguments
+    searchBuddyChatInfo(...args: any[]): unknown;// needs 2 arguments
 
-    searchMoreBuddyChatInfor(...args: any[]): unknown;// needs 1 arguments
+    searchMoreBuddyChatInfo(...args: any[]): unknown;// needs 1 arguments
 
-    cancelSearchBuddyChatInfor(...args: any[]): unknown;// needs 3 arguments
+    cancelSearchBuddyChatInfo(...args: any[]): unknown;// needs 3 arguments
 
-    searchContactr(...args: any[]): unknown;// needs 2 arguments
+    searchContact(...args: any[]): unknown;// needs 2 arguments
 
-    searchMoreContactr(...args: any[]): unknown;// needs 1 arguments
+    searchMoreContact(...args: any[]): unknown;// needs 1 arguments
 
-    cancelSearchContactr(...args: any[]): unknown;// needs 3 arguments
+    cancelSearchContact(...args: any[]): unknown;// needs 3 arguments
 
-    searchGroupChatInfor(...args: any[]): unknown;// needs 3 arguments
+    searchGroupChatInfo(...args: any[]): unknown;// needs 3 arguments
 
-    resetSearchGroupChatInfoSortTyper(...args: any[]): unknown;// needs 3 arguments
+    resetSearchGroupChatInfoSortType(...args: any[]): unknown;// needs 3 arguments
 
-    resetSearchGroupChatInfoFilterMembersr(...args: any[]): unknown;// needs 3 arguments
+    resetSearchGroupChatInfoFilterMembers(...args: any[]): unknown;// needs 3 arguments
 
-    searchMoreGroupChatInfor(...args: any[]): unknown;// needs 1 arguments
+    searchMoreGroupChatInfo(...args: any[]): unknown;// needs 1 arguments
 
-    cancelSearchGroupChatInfor(...args: any[]): unknown;// needs 3 arguments
+    cancelSearchGroupChatInfo(...args: any[]): unknown;// needs 3 arguments
 
-    searchChatsWithKeywordsr(...args: any[]): unknown;// needs 3 arguments
+    searchChatsWithKeywords(...args: any[]): unknown;// needs 3 arguments
 
-    searchMoreChatsWithKeywordsr(...args: any[]): unknown;// needs 1 arguments
+    searchMoreChatsWithKeywords(...args: any[]): unknown;// needs 1 arguments
 
-    cancelSearchChatsWithKeywordsr(...args: any[]): unknown;// needs 3 arguments
+    cancelSearchChatsWithKeywords(...args: any[]): unknown;// needs 3 arguments
 
-    searchChatMsgsr(...args: any[]): unknown;// needs 2 arguments
+    searchChatMsgs(...args: any[]): unknown;// needs 2 arguments
 
-    searchMoreChatMsgsr(...args: any[]): unknown;// needs 1 arguments
+    searchMoreChatMsgs(...args: any[]): unknown;// needs 1 arguments
 
-    cancelSearchChatMsgsr(...args: any[]): unknown;// needs 3 arguments
+    cancelSearchChatMsgs(...args: any[]): unknown;// needs 3 arguments
 
-    searchMsgWithKeywordsr(...args: any[]): unknown;// needs 2 arguments
+    searchMsgWithKeywords(...args: any[]): unknown;// needs 2 arguments
 
-    searchMoreMsgWithKeywordsr(...args: any[]): unknown;// needs 1 arguments
+    searchMoreMsgWithKeywords(...args: any[]): unknown;// needs 1 arguments
 
     cancelSearchMsgWithKeywords(...args: any[]): unknown;// needs 3 arguments
 
     searchFileWithKeywords(keywords: string[], source: number): Promise<string>;// needs 2 arguments
 
-    searchMoreFileWithKeywordsr(...args: any[]): unknown;// needs 1 arguments
+    searchMoreFileWithKeywords(...args: any[]): unknown;// needs 1 arguments
 
-    cancelSearchFileWithKeywordsr(...args: any[]): unknown;// needs 3 arguments
+    cancelSearchFileWithKeywords(...args: any[]): unknown;// needs 3 arguments
 
-    searchAtMeChatsr(...args: any[]): unknown;// needs 3 arguments
+    searchAtMeChats(...args: any[]): unknown;// needs 3 arguments
 
-    searchMoreAtMeChatsr(...args: any[]): unknown;// needs 1 arguments
+    searchMoreAtMeChats(...args: any[]): unknown;// needs 1 arguments
 
-    cancelSearchAtMeChatsr(...args: any[]): unknown;// needs 3 arguments
+    cancelSearchAtMeChats(...args: any[]): unknown;// needs 3 arguments
 
-    searchChatAtMeMsgsr(...args: any[]): unknown;// needs 1 arguments
+    searchChatAtMeMsgs(...args: any[]): unknown;// needs 1 arguments
 
-    searchMoreChatAtMeMsgsr(...args: any[]): unknown;// needs 1 arguments
+    searchMoreChatAtMeMsgs(...args: any[]): unknown;// needs 1 arguments
 
-    cancelSearchChatAtMeMsgsr(...args: any[]): unknown;// needs 3 arguments
+    cancelSearchChatAtMeMsgs(...args: any[]): unknown;// needs 3 arguments
 
-    addSearchHistoryr(...args: any[]): unknown;// needs 1 arguments
+    addSearchHistory(...args: any[]): unknown;// needs 1 arguments
 
-    removeSearchHistoryr(...args: any[]): unknown;// needs 1 arguments
+    removeSearchHistory(...args: any[]): unknown;// needs 1 arguments
 
-    searchCacher(...args: any[]): unknown;// needs 3 arguments
+    searchCache(...args: any[]): unknown;// needs 3 arguments
 
-    clearSearchCacher(...args: any[]): unknown;// needs 1 arguments
+    clearSearchCache(...args: any[]): unknown;// needs 1 arguments
 }
