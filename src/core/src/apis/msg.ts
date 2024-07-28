@@ -1,4 +1,4 @@
-import { GetFileListParam, Peer, RawMessage, SendMessageElement } from '@/core/entities';
+import { ElementType, GetFileListParam, MessageElement, Peer, RawMessage, SendMessageElement, SendMsgElementConstructor } from '@/core/entities';
 import { friends, groups, selfInfo } from '@/core/data';
 import { log, logWarn } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';
@@ -41,7 +41,18 @@ setTimeout(() => {
     loadMessageUnique().then().catch();
   });
 }, 100);
+// setTimeout(async () => {
+//   let ele: MessageElement = {extBufForUI: '0x' ,...SendMsgElementConstructor.text('测试消息')};
+//   let MsgId = await NTQQMsgApi.getMsgUniqueEx();
+//   let peer ={ chatType: 2, peerUid: '809079648', guildId: '' };
+//   console.log(await napCatCore.session.getMsgService().addLocalRecordMsg(
+//     peer,
+//     MsgId,
+//     ele, [], true
+//   ));
+//   console.log(await NTQQMsgApi.multiForwardMsg(peer,peer,[MsgId]));
 
+// }, 25000)
 export class NTQQMsgApi {
   // static napCatCore: NapCatCore | null = null;
   //   enum BaseEmojiType {
@@ -142,7 +153,7 @@ export class NTQQMsgApi {
     });
     return retMsg;
   }
-  static async getMsgUniqueEx(){
+  static async getMsgUniqueEx() {
     let msgId = await NTQQMsgApi.getMsgUnique(await NTQQMsgApi.getServerTime());
     return msgId;
   }

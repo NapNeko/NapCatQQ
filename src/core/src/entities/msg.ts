@@ -392,7 +392,7 @@ export interface MessageElement {
   avRecordElement?: AvRecordElement,
   structMsgElement?: null,
   faceBubbleElement?: FaceBubbleElement,
-  shareLocationElement: ShareLocationElement,
+  shareLocationElement?: ShareLocationElement,
   tofuRecordElement?: TofuRecordElement,
   taskTopMsgElement?: TaskTopMsgElement,
   recommendedMsgElement?: RecommendedMsgElement,
