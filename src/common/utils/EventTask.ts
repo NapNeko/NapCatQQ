@@ -158,7 +158,7 @@ export class NTEventWrapper {
       let retEvent: any = {};
       const databack = () => {
         if (complete == 0) {
-          reject(new Error('NTEvent EventName:' + EventName + ' ListenerName:' + ListenerName + ' timeout'));
+          reject(new Error('Timeout: NTEvent EventName:' + EventName + ' ListenerName:' + ListenerName + ' EventRet:\n' + JSON.stringify(retEvent, null, 4) + '\n'));
         } else {
           resolve([retEvent as Awaited<ReturnType<EventType>>, ...retData!]);
         }
