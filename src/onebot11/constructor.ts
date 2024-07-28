@@ -147,10 +147,15 @@ export class OB11Constructor {
             peerUid: msg.peerUid,
             guildId: '',
           };
+
           let replyMsg: RawMessage | undefined;
-          replyMsg = (await NTQQMsgApi.getMsgsByMsgId(peer, MessageUnique.getRecentMsgIds(peer, 50))).msgList.find((msg) => msg.msgRandom == records.msgRandom && msg.msgSeq == element.replyElement.replayMsgSeq);
+          replyMsg = (await NTQQMsgApi.getMsgsBySeqAndCount({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, element.replyElement.replayMsgSeq, 1, true, true)).msgList[0];
 
-
+          if (!replyMsg || replyMsg.msgRandom !== records.msgRandom) {
+            logWarn(`消息比对失败,准备重新尝试 Info: CurrentMsgRandom:${replyMsg?.msgRandom}/TargetMsgRandom:${records.msgRandom}`);
+            await sleep(500);
+            replyMsg = (await NTQQMsgApi.getMsgsByMsgId(peer, MessageUnique.getRecentMsgIds(peer, 50))).msgList.find((msg) => msg.msgRandom == records.msgRandom && msg.msgSeq == element.replyElement.replayMsgSeq);
+          }
           if (!replyMsg || replyMsg.msgRandom !== records.msgRandom) {
             logWarn(`消息比对失败,准备重新尝试 Info: CurrentMsgRandom:${replyMsg?.msgRandom}/TargetMsgRandom:${records.msgRandom}`);
             await sleep(500);
@@ -160,12 +165,6 @@ export class OB11Constructor {
               records.msgTime,
               records.senderUid
             )).msgList[0];
-          }
-
-          if (!replyMsg || replyMsg.msgRandom !== records.msgRandom) {
-            logWarn(`消息比对失败,准备重新尝试 Info: CurrentMsgRandom:${replyMsg?.msgRandom}/TargetMsgRandom:${records.msgRandom}`);
-            await sleep(500);
-            replyMsg = (await NTQQMsgApi.getMsgsBySeqAndCount({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, element.replyElement.replayMsgSeq, 1, true, true)).msgList[0];
           }
           if (!replyMsg || replyMsg.msgRandom !== records.msgRandom) {
             logWarn(`消息比对失败,准备重新尝试 Info: CurrentMsgRandom:${replyMsg?.msgRandom}/TargetMsgRandom:${records.msgRandom}`);

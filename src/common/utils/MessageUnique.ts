@@ -72,8 +72,9 @@ class LimitedHashTable<K, V> {
       return undefined;
     }
     const result: { key: K; value: V }[] = [];
-    for (let i = 0; i < Math.min(size, keyList.length); i++) {
-      const key = keyList[i];
+    const listSize = Math.min(size, keyList.length);
+    for (let i = 0; i < listSize; i++) {
+      const key = keyList[listSize - i];
       result.push({ key, value: this.keyToValue.get(key)! });
     }
     return result;
@@ -92,8 +93,8 @@ class MessageUniqueWrapper {
     if (!heads) {
       return [];
     }
-    let date = heads.map((t) => MessageUnique.getMsgIdAndPeerByShortId(t.value));
-    let ret = date.filter((t) => t?.Peer.chatType === Peer.chatType && t?.Peer.peerUid === Peer.peerUid);
+    let data = heads.map((t) => MessageUnique.getMsgIdAndPeerByShortId(t.value));
+    let ret = data.filter((t) => t?.Peer.chatType === Peer.chatType && t?.Peer.peerUid === Peer.peerUid);
     return ret.map((t) => t?.MsgId).filter((t) => t !== undefined);
   }
   createMsg(peer: Peer, msgId: string): number | undefined {
