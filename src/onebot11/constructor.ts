@@ -34,7 +34,7 @@ import { OB11GroupUploadNoticeEvent } from './event/notice/OB11GroupUploadNotice
 import { OB11GroupNoticeEvent } from './event/notice/OB11GroupNoticeEvent';
 
 import { calcQQLevel } from '../common/utils/qqlevel';
-import { log, logDebug, logError } from '../common/utils/log';
+import { log, logDebug, logError, logWarn } from '../common/utils/log';
 import { sleep } from '../common/utils/helper';
 import { OB11GroupTitleEvent } from './event/notice/OB11GroupTitleEvent';
 import { OB11GroupCardEvent } from './event/notice/OB11GroupCardEvent';
@@ -142,23 +142,37 @@ export class OB11Constructor {
           if (!records) {
             throw new Error('Record筛选失败');
           }
-          let replyMsg = await NTQQMsgApi.queryMsgsWithFilterExWithSeq(
-            {
-              chatType: msg.chatType,
-              peerUid: msg.peerUid,
-              guildId: '',
-            },
-            element.replyElement.replayMsgSeq,
-            records.msgTime,
-            records.senderUid
-          );
-          if (replyMsg.msgList.length === 0 || replyMsg.msgList[0].msgRandom !== records.msgRandom) {
-            await sleep(300);
-            replyMsg = await NTQQMsgApi.getMsgsBySeqAndCount({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, element.replyElement.replayMsgSeq, 1, true, true);
+          let peer = {
+            chatType: msg.chatType,
+            peerUid: msg.peerUid,
+            guildId: '',
+          };
+          let replyMsg: RawMessage | undefined;
+          replyMsg = (await NTQQMsgApi.getMsgsByMsgId(peer, MessageUnique.getRecentMsgIds(peer, 50))).msgList.find((msg) => msg.msgRandom == records.msgRandom && msg.msgSeq == element.replyElement.replayMsgSeq);
+
+
+          if (!replyMsg || replyMsg.msgRandom !== records.msgRandom) {
+            logWarn(`消息比对失败,准备重新尝试 Info: CurrentMsgRandom:${replyMsg?.msgRandom}/TargetMsgRandom:${records.msgRandom}`);
+            await sleep(500);
+            replyMsg = (await NTQQMsgApi.queryMsgsWithFilterExWithSeq(
+              peer,
+              element.replyElement.replayMsgSeq,
+              records.msgTime,
+              records.senderUid
+            )).msgList[0];
           }
 
+          if (!replyMsg || replyMsg.msgRandom !== records.msgRandom) {
+            logWarn(`消息比对失败,准备重新尝试 Info: CurrentMsgRandom:${replyMsg?.msgRandom}/TargetMsgRandom:${records.msgRandom}`);
+            await sleep(500);
+            replyMsg = (await NTQQMsgApi.getMsgsBySeqAndCount({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, element.replyElement.replayMsgSeq, 1, true, true)).msgList[0];
+          }
+          if (!replyMsg || replyMsg.msgRandom !== records.msgRandom) {
+            logWarn(`消息比对失败,准备重新尝试 Info: CurrentMsgRandom:${replyMsg?.msgRandom}/TargetMsgRandom:${records.msgRandom}`);
+            throw new Error('回复消息消息验证失败')
+          }
           if (replyMsg) {
-            message_data['data']['id'] = MessageUnique.createMsg({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, replyMsg.msgList[0].msgId)?.toString();
+            message_data['data']['id'] = MessageUnique.createMsg({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, replyMsg.msgId)?.toString();
           }
           else {
             continue;

@@ -65,6 +65,19 @@ class LimitedHashTable<K, V> {
   getKeyList(): K[] {
     return Array.from(this.keyToValue.keys());
   }
+  //获取最近刚写入的几个值
+  getHeads(size: number): { key: K; value: V }[] | undefined {
+    const keyList = this.getKeyList();
+    if (keyList.length === 0) {
+      return undefined;
+    }
+    const result: { key: K; value: V }[] = [];
+    for (let i = 0; i < Math.min(size, keyList.length); i++) {
+      const key = keyList[i];
+      result.push({ key, value: this.keyToValue.get(key)! });
+    }
+    return result;
+  }
 }
 
 class MessageUniqueWrapper {
@@ -74,11 +87,19 @@ class MessageUniqueWrapper {
     this.msgIdMap = new LimitedHashTable<string, number>(maxMap);
     this.msgDataMap = new LimitedHashTable<string, number>(maxMap);
   }
-
+  getRecentMsgIds(Peer: Peer, size: number): string[] {
+    const heads = this.msgIdMap.getHeads(size);
+    if (!heads) {
+      return [];
+    }
+    let date = heads.map((t) => MessageUnique.getMsgIdAndPeerByShortId(t.value));
+    let ret = date.filter((t) => t?.Peer.chatType === Peer.chatType && t?.Peer.peerUid === Peer.peerUid);
+    return ret.map((t) => t?.MsgId).filter((t) => t !== undefined);
+  }
   createMsg(peer: Peer, msgId: string): number | undefined {
     const key = `${msgId}|${peer.chatType}|${peer.peerUid}`;
     const hash = crypto.createHash('sha1').update(key);
-    const shortId = Buffer.from(hash.digest('hex').slice(0, 8),'hex').readInt32BE();
+    const shortId = Buffer.from(hash.digest('hex').slice(0, 8), 'hex').readInt32BE();
     const isExist = this.msgIdMap.getKey(shortId);
     //console.log(`${peer.peerUid} ${msgId} ------- ${shortId}`);
     if (isExist && isExist === msgId) {
