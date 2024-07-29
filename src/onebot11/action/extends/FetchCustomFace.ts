@@ -11,10 +11,11 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export class FetchCustomFace extends BaseAction<Payload, any> {
+export class FetchCustomFace extends BaseAction<Payload, string[]> {
   actionName = ActionName.FetchCustomFace;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
-    return await NTQQMsgApi.fetchFavEmojiList(payload.count || 48);
+    let ret = await NTQQMsgApi.fetchFavEmojiList(payload.count || 48);
+    return ret.emojiInfoList.map(e => e.url);
   }
 }

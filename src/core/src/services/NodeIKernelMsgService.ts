@@ -399,7 +399,29 @@ export interface NodeIKernelMsgService {
   //   true,
   //   true
   // ]
-  fetchFavEmojiList(str: string, num: number, uk1: boolean, uk2: boolean): Promise<unknown>;
+  fetchFavEmojiList(str: string, num: number, uk1: boolean, uk2: boolean): Promise<GeneralCallResult & {
+    emojiInfoList: Array<{
+      uin: string,
+      emoId: number,
+      emoPath: string,
+      isExist: boolean,
+      resId: string,
+      url: string,
+      md5: string,
+      emoOriginalPath: string,
+      thumbPath: string,
+      RomaingType: string,
+      isAPNG: false,
+      isMarkFace: false,
+      eId: string,
+      epId: string,
+      ocrWord: string,
+      modifyWord: string,
+      exposeNum: number,
+      clickNum: number,
+      desc: string
+    }>
+  }>;
 
   addFavEmoji(...args: unknown[]): unknown;
 
