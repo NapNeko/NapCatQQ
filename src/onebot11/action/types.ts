@@ -99,5 +99,6 @@ export enum ActionName {
     GetRecentContact = 'get_recent_contact',
     _MarkAllMsgAsRead = '_mark_all_as_read',
     GetProfileLike = 'get_profile_like',
-    SetGroupHeader = "set_group_head"
+    SetGroupHeader = "set_group_head",
+    FetchCustomFace = "fetch_custom_face"
 }

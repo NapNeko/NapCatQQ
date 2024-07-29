@@ -75,6 +75,7 @@ import SetEssenceMsg from './group/SetEssenceMsg';
 import GetRecentContact from './user/GetRecentContact';
 import { GetProfileLike } from './extends/GetProfileLike';
 import SetGroupHeader from './extends/SetGroupHeader';
+import { FetchCustomFace } from './extends/FetchCustomFace';
 
 export const actionHandlers = [
   new RebootNormal(),
@@ -156,7 +157,8 @@ export const actionHandlers = [
   new GetRecentContact(),
   new MarkAllMsgAsRead(),
   new GetProfileLike(),
-  new SetGroupHeader()
+  new SetGroupHeader(),
+  new FetchCustomFace()
 ];
 
 function initActionMap() {
