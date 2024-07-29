@@ -279,7 +279,7 @@ export class NapCatOnebot11 {
     // }
     groupListener.onGroupNotifiesUpdated = async (doubt, notifies) => {
       //console.log('ob11 onGroupNotifiesUpdated', notifies[0]);
-      if (![GroupNotifyTypes.INVITE_ME,GroupNotifyTypes.ADMIN_SET, GroupNotifyTypes.ADMIN_UNSET, GroupNotifyTypes.ADMIN_UNSET_OTHER].includes(notifies[0].type)) {
+      if (![GroupNotifyTypes.INVITE_ME, GroupNotifyTypes.ADMIN_SET, GroupNotifyTypes.ADMIN_UNSET, GroupNotifyTypes.ADMIN_UNSET_OTHER].includes(notifies[0].type)) {
         this.postGroupNotifies(notifies).then().catch(e => logError('postGroupNotifies error: ', e));
       }
     };
@@ -518,7 +518,8 @@ export class NapCatOnebot11 {
           } catch (e: any) {
             logError('获取群通知的成员信息失败', notify, e.stack.toString());
           }
-        } else if ([GroupNotifyTypes.JOIN_REQUEST].includes(notify.type)) {
+          //notify.status == 1 表示未处理 2表示处理完成
+        } else if ([GroupNotifyTypes.JOIN_REQUEST].includes(notify.type) && notify.status == 1) {
           logDebug('有加群请求');
           const groupRequestEvent = new OB11GroupRequestEvent();
           groupRequestEvent.group_id = parseInt(notify.group.groupCode);
