@@ -150,16 +150,8 @@ export class OB11Constructor {
             guildId: '',
           };
           let replyMsg: RawMessage | undefined;
-          
+
           replyMsg = (await NTQQMsgApi.getMsgsBySeqAndCount({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, element.replyElement.replayMsgSeq, 1, true, true)).msgList[0];
-          if (!replyMsg || element.replyElement.replayMsgSeq !== replyMsg.msgSeq) {
-            replyMsg = (await NTQQMsgApi.queryMsgsWithFilterExWithSeq(
-              peer,
-              element.replyElement.replayMsgSeq,
-              '0',
-              '0'
-            )).msgList[0];
-          }
           if (!replyMsg || element.replyElement.replayMsgSeq !== replyMsg.msgSeq) {
             replyMsg = (await NTQQMsgApi.getSingleMsg(peer, element.replyElement.replayMsgSeq)).msgList[0];
           }

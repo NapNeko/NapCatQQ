@@ -103,11 +103,11 @@ export class NTQQMsgApi {
   static async fetchFavEmojiList(num: number) {
     return napCatCore.session.getMsgService().fetchFavEmojiList("", num, true, true)
   }
-  static async queryMsgsWithFilterExWithSeq(peer: Peer, msgSeq: string, msgTime: string, senderUid: string) {
-    let ret = await napCatCore.session.getMsgService().queryMsgsWithFilterEx('0', msgTime, msgSeq, {
+  static async queryMsgsWithFilterExWithSeq(peer: Peer, msgSeq: string) {
+    let ret = await napCatCore.session.getMsgService().queryMsgsWithFilterEx('0', '0', msgSeq, {
       chatInfo: peer,
       filterMsgType: [],
-      filterSendersUid: [senderUid],
+      filterSendersUid: [],
       filterMsgToTime: '0',
       filterMsgFromTime: '0',
       isReverseOrder: false,
