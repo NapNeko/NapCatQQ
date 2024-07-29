@@ -100,5 +100,6 @@ export enum ActionName {
     _MarkAllMsgAsRead = '_mark_all_as_read',
     GetProfileLike = 'get_profile_like',
     SetGroupHeader = "set_group_head",
-    FetchCustomFace = "fetch_custom_face"
+    FetchCustomFace = "fetch_custom_face",
+    GOCQHTTP_UploadPrivateFile = 'upload_private_file'
 }
