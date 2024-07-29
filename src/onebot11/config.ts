@@ -42,7 +42,7 @@ export interface OB11Config {
 }
 
 class Config extends ConfigBase<OB11Config> implements OB11Config {
-  name: string = 'onebot11'
+  name: string = 'onebot11';
   http = {
     enable: false,
     host: '',

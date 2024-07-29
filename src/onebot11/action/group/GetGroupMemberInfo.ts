@@ -59,9 +59,9 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
         }
       }
     } else {
-      let LastestMsgList = await NTQQGroupApi.getLastestMsg(payload.group_id.toString(), [payload.user_id.toString()]);
+      const LastestMsgList = await NTQQGroupApi.getLastestMsg(payload.group_id.toString(), [payload.user_id.toString()]);
       if (LastestMsgList?.msgList?.length && LastestMsgList?.msgList?.length > 0) {
-        let last_send_time = LastestMsgList.msgList[0].msgTime;
+        const last_send_time = LastestMsgList.msgList[0].msgTime;
         if (last_send_time && last_send_time != '0' && last_send_time != '') {
           retMember.last_sent_time = parseInt(last_send_time);
           retMember.join_time = Math.round(Date.now() / 1000);//兜底数据 防止群管乱杀

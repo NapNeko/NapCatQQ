@@ -213,7 +213,7 @@ export default async function createSendElements(
   ignoreTypes: OB11MessageDataType[] = []
 ) {
   const deleteAfterSentFiles: string[] = [];
-  let callResultList: Array<Promise<SendMessageElement | undefined>> = [];
+  const callResultList: Array<Promise<SendMessageElement | undefined>> = [];
   for (const sendMsg of messageData) {
     if (ignoreTypes.includes(sendMsg.type)) {
       continue;
@@ -224,7 +224,7 @@ export default async function createSendElements(
     )?.catch(undefined);
     callResultList.push(callResult);
   }
-  let ret = await Promise.all(callResultList);
+  const ret = await Promise.all(callResultList);
   const sendElements: SendMessageElement[] = ret.filter(ele => ele) as SendMessageElement[];
   return { sendElements, deleteAfterSentFiles };
 }

@@ -93,8 +93,8 @@ class MessageUniqueWrapper {
     if (!heads) {
       return [];
     }
-    let data = heads.map((t) => MessageUnique.getMsgIdAndPeerByShortId(t.value));
-    let ret = data.filter((t) => t?.Peer.chatType === Peer.chatType && t?.Peer.peerUid === Peer.peerUid);
+    const data = heads.map((t) => MessageUnique.getMsgIdAndPeerByShortId(t.value));
+    const ret = data.filter((t) => t?.Peer.chatType === Peer.chatType && t?.Peer.peerUid === Peer.peerUid);
     return ret.map((t) => t?.MsgId).filter((t) => t !== undefined);
   }
   createMsg(peer: Peer, msgId: string): number | undefined {

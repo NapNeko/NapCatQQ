@@ -39,7 +39,7 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
 
     const MemberMap: Map<number, OB11GroupMember> = new Map<number, OB11GroupMember>();
     // 转为Map 方便索引
-    let date = Math.round(Date.now() / 1000);
+    const date = Math.round(Date.now() / 1000);
     for (let i = 0, len = _groupMembers.length; i < len; i++) {
       // 保证基础数据有这个 同时避免群管插件过于依赖这个杀了
       _groupMembers[i].join_time = date;
@@ -65,7 +65,7 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
       }
     } else {
       const DateMap = await NTQQGroupApi.getGroupMemberLastestSendTimeCache(payload.group_id.toString());//开始从本地拉取
-      for (let DateUin of DateMap.keys()) {
+      for (const DateUin of DateMap.keys()) {
         const MemberData = MemberMap.get(parseInt(DateUin));
         if (MemberData) {
           MemberData.last_sent_time = parseInt(DateMap.get(DateUin)!);
