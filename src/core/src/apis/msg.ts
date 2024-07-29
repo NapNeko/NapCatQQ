@@ -17,11 +17,12 @@ async function loadMessageUnique() {
   if (groups.size > 100) {
     logWarn('群数量大于100，可能会导致性能问题');
   }
-  let predict = (groups.size + friends.size) / 5;
+  let predict = (groups.size + friends.size / 2) / 5;
   predict = predict < 20 ? 20 : predict;
   predict = predict > 50 ? 50 : predict;
   //let waitpromise: Array<Promise<{ msgList: RawMessage[]; }>> = [];
-  MessageUnique.resize(predict * 50);
+  predict = Math.floor(predict * 50);
+  MessageUnique.resize(predict);
   let RecentContact = await NTQQUserApi.getRecentContactListSnapShot(predict);
   let LoadMessageIdDo: Array<Promise<void>> = new Array<Promise<void>>();
   if (RecentContact?.info?.changedList && RecentContact?.info?.changedList?.length > 0) {
@@ -31,7 +32,7 @@ async function loadMessageUnique() {
     }
   }
   await Promise.all(LoadMessageIdDo).then(() => {
-    log(`[消息序列] 加载 ${predict * 50} 条历史消息记录完成`);
+    log(`[消息序列] 加载 ${predict} 条历史消息记录完成`);
   });
 }
 
@@ -99,8 +100,8 @@ export class NTQQMsgApi {
   static async getSingleMsg(peer: Peer, seq: string) {
     return await napCatCore.session.getMsgService().getSingleMsg(peer, seq);
   }
-  static async fetchFavEmojiList(num:number) {
-    return napCatCore.session.getMsgService().fetchFavEmojiList("",num , true, true)
+  static async fetchFavEmojiList(num: number) {
+    return napCatCore.session.getMsgService().fetchFavEmojiList("", num, true, true)
   }
   static async queryMsgsWithFilterExWithSeq(peer: Peer, msgSeq: string, msgTime: string, senderUid: string) {
     let ret = await napCatCore.session.getMsgService().queryMsgsWithFilterEx('0', msgTime, msgSeq, {
