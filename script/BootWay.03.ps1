@@ -42,4 +42,4 @@ if (!(Test-Path $QQpath)) {
 $Bootfile = Join-Path $PSScriptRoot "napcat.mjs"
 $env:ELECTRON_RUN_AS_NODE = 1
 $commandInfo = Get-Command $QQpath -ErrorAction Stop
-Start-Process powershell -ArgumentList "-noexit", "-noprofile", "-command &{& chcp 65001;& '$($commandInfo.Path)' --enable-logging $params}"
+Start-Process powershell -ArgumentList "-noexit", "-noprofile", "-command &{& chcp 65001;& '$($commandInfo.Path)' --enable-logging }"
