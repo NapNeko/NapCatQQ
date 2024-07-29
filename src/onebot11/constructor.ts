@@ -143,43 +143,35 @@ export class OB11Constructor {
         //log("收到回复消息", element.replyElement);
         try {
           //做这么多都是因为NC速度太快 可能nt还没有写入数据库
-          const records = msg.records.find(msgRecord => msgRecord.msgId === element.replyElement.sourceMsgIdInRecords);
-
-          if (!records) {
-            throw new Error('Record筛选失败');
-          }
+          //const records = msg.records.find(msgRecord => msgRecord.msgId === element.replyElement.sourceMsgIdInRecords);
           const peer = {
             chatType: msg.chatType,
             peerUid: msg.peerUid,
             guildId: '',
           };
           let replyMsg: RawMessage | undefined;
+          
           replyMsg = (await NTQQMsgApi.getMsgsBySeqAndCount({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, element.replyElement.replayMsgSeq, 1, true, true)).msgList[0];
-          if (!replyMsg || replyMsg.msgRandom !== records.msgRandom) {
-            replyMsg = (await NTQQMsgApi.getMsgsByMsgId(peer, MessageUnique.getRecentMsgIds(peer, 50))).msgList.find((msg) => msg.msgRandom == records.msgRandom && msg.msgSeq == element.replyElement.replayMsgSeq);
-          }
-          if (!replyMsg || replyMsg.msgRandom !== records.msgRandom) {
+          if (!replyMsg || element.replyElement.replayMsgSeq !== replyMsg.msgSeq) {
             replyMsg = (await NTQQMsgApi.queryMsgsWithFilterExWithSeq(
               peer,
               element.replyElement.replayMsgSeq,
-              records.msgTime,
-              records.senderUid
+              '0',
+              '0'
             )).msgList[0];
           }
-          if (!replyMsg || replyMsg.msgRandom !== records.msgRandom) {
+          if (!replyMsg || element.replyElement.replayMsgSeq !== replyMsg.msgSeq) {
             replyMsg = (await NTQQMsgApi.getSingleMsg(peer, element.replyElement.replayMsgSeq)).msgList[0];
           }
-          if (!replyMsg || replyMsg.msgRandom !== records.msgRandom) {
+
+          if (!replyMsg || element.replyElement.replayMsgSeq !== replyMsg.msgSeq) {
             throw new Error('回复消息消息验证失败');
           }
-          if (replyMsg) {
-            message_data['data']['id'] = MessageUnique.createMsg({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, replyMsg.msgId)?.toString();
-          }
-          else {
-            continue;
-          }
+          message_data['data']['id'] = MessageUnique.createMsg({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, replyMsg.msgId)?.toString();
           //log("找到回复消息", message_data['data']['id'], replyMsg.msgList[0].msgId)
         } catch (e: any) {
+          message_data['type'] = "unknown";
+          message_data['data'] = undefined;
           logError('获取不到引用的消息', e.stack, element.replyElement.replayMsgSeq);
         }
 
@@ -214,13 +206,13 @@ export class OB11Constructor {
           chatType: msg.chatType,
           guildId: '',
         },
-        msg.msgId,
-        msg.msgSeq,
-        msg.senderUid,
-        element.elementId,
-        element.elementType.toString(),
-        FileElement.fileSize,
-        FileElement.fileName
+          msg.msgId,
+          msg.msgSeq,
+          msg.senderUid,
+          element.elementId,
+          element.elementType.toString(),
+          FileElement.fileSize,
+          FileElement.fileName
         );
       }
       else if (element.videoElement) {
@@ -261,13 +253,13 @@ export class OB11Constructor {
           chatType: msg.chatType,
           guildId: '',
         },
-        msg.msgId,
-        msg.msgSeq,
-        msg.senderUid,
-        element.elementId,
-        element.elementType.toString(),
-        videoElement.fileSize || '0',
-        videoElement.fileName
+          msg.msgId,
+          msg.msgSeq,
+          msg.senderUid,
+          element.elementId,
+          element.elementType.toString(),
+          videoElement.fileSize || '0',
+          videoElement.fileName
         );
       }
       else if (element.pttElement) {
@@ -292,13 +284,13 @@ export class OB11Constructor {
           chatType: msg.chatType,
           guildId: '',
         },
-        msg.msgId,
-        msg.msgSeq,
-        msg.senderUid,
-        element.elementId,
-        element.elementType.toString(),
-        element.pttElement.fileSize || '0',
-        element.pttElement.fileUuid || ''
+          msg.msgId,
+          msg.msgSeq,
+          msg.senderUid,
+          element.elementId,
+          element.elementType.toString(),
+          element.pttElement.fileSize || '0',
+          element.pttElement.fileUuid || ''
         );
         //以uuid作为文件名
       }
