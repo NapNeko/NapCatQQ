@@ -31,7 +31,7 @@
     "@types/figlet": "^1.5.8",
     "@types/fluent-ffmpeg": "^2.1.24",
     "@types/jest": "^29.5.12",
-    "@types/node": "^20.11.30",
+    "@types/node": "^22.0.0",
     "@types/qrcode-terminal": "^0.12.2",
     "@types/ws": "^8.5.10",
     "@typescript-eslint/eslint-plugin": "^7.4.0",
