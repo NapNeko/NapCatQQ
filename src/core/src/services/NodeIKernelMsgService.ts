@@ -393,8 +393,13 @@ export interface NodeIKernelMsgService {
   translatePtt2Text(MsgId: string, Peer: {}, MsgElement: {}): unknown;
 
   setPttPlayedState(...args: unknown[]): unknown;
-
-  fetchFavEmojiList(...args: unknown[]): unknown;
+  // NodeIQQNTWrapperSession fetchFavEmojiList [
+  //   "",
+  //   48,
+  //   true,
+  //   true
+  // ]
+  fetchFavEmojiList(str: string, num: number, uk1: boolean, uk2: boolean): Promise<unknown>;
 
   addFavEmoji(...args: unknown[]): unknown;
 
@@ -663,7 +668,7 @@ export interface NodeIKernelMsgService {
   dataMigrationGetMsgList(...args: unknown[]): unknown;
 
   dataMigrationStopOperation(...args: unknown[]): unknown;
-  
+
   //新的希望
   dataMigrationImportMsgPbRecord(DataMigrationMsgInfo: Array<{
     extensionData: string//"Hex" 
