@@ -23,7 +23,7 @@ async function tryUseHost(host: string): Promise<string> {
 
       server.on('error', (err: any) => {
         if (err.code === 'EADDRNOTAVAIL') {
-          reject("主机地址验证失败，可能为非本机地址");
+          reject('主机地址验证失败，可能为非本机地址');
         } else {
           reject(`遇到错误: ${err.code}`);
         }
@@ -87,10 +87,10 @@ class WebUiConfigWrapper {
       return this.WebUiConfigData;
     }
     const defaultconfig: WebUiConfigType = {
-      host: "0.0.0.0",
+      host: '0.0.0.0',
       port: 6099,
-      prefix: "",
-      token: "", // 默认先填空，空密码无法登录
+      prefix: '',
+      token: '', // 默认先填空，空密码无法登录
       loginRate: 3
     };
     try {
@@ -109,8 +109,8 @@ class WebUiConfigWrapper {
       // 更新配置字段后新增字段可能会缺失，同步一下
       const parsedConfig = this.applyDefaults(JSON.parse(fileContent) as Partial<WebUiConfigType>, defaultconfig);
 
-      if (!parsedConfig.prefix.startsWith("/")) parsedConfig.prefix = "/" + parsedConfig.prefix;
-      if (parsedConfig.prefix.endsWith("/")) parsedConfig.prefix = parsedConfig.prefix.slice(0, -1);
+      if (!parsedConfig.prefix.startsWith('/')) parsedConfig.prefix = '/' + parsedConfig.prefix;
+      if (parsedConfig.prefix.endsWith('/')) parsedConfig.prefix = parsedConfig.prefix.slice(0, -1);
       // 配置已经被操作过了，还是回写一下吧，不然新配置不会出现在配置文件里
       writeFileSync(configPath, JSON.stringify(parsedConfig, null, 4));
       // 不希望回写的配置放后面
@@ -118,14 +118,14 @@ class WebUiConfigWrapper {
       // 查询主机地址是否可用
       const [host_err, host] = await tryUseHost(parsedConfig.host).then(data => [null, data as string]).catch(err => [err, null]);
       if (host_err) {
-        logError("host不可用", host_err)
+        logError('host不可用', host_err);
         parsedConfig.port = 0; // 设置为0，禁用WebUI
       } else {
         parsedConfig.host = host;
         // 修正端口占用情况
         const [port_err, port] = await tryUsePort(parsedConfig.port, parsedConfig.host).then(data => [null, data as number]).catch(err => [err, null]);
         if (port_err) {
-          logError("port不可用", port_err)
+          logError('port不可用', port_err);
           parsedConfig.port = 0; // 设置为0，禁用WebUI
         } else {
           parsedConfig.port = port;

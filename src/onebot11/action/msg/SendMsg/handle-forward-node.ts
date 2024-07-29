@@ -127,7 +127,7 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
       }
     }
   }
- // logDebug('nodeMsgArray', nodeMsgArray);
+  // logDebug('nodeMsgArray', nodeMsgArray);
   nodeMsgIds = nodeMsgArray.map(msg => msg.msgId);
   if (needSendSelf) {
     //logDebug('需要克隆转发消息');

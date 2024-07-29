@@ -12,12 +12,12 @@ import {
 import {
   AtType,
   ChatType,
-  ElementType, FaceIndex,
+  FaceIndex,
   Friend,
   GrayTipElementSubType,
   Group,
   GroupMember,
-  IMAGE_HTTP_HOST, IMAGE_HTTP_HOST_NT, mFaceCache,
+  mFaceCache,
   Peer,
   RawMessage,
   SelfInfo,
@@ -76,7 +76,12 @@ export class OB11Constructor {
     if (msg.chatType == ChatType.group) {
       resMsg.sub_type = 'normal'; // 这里go-cqhttp是group，而onebot11标准是normal, 蛋疼
       resMsg.group_id = parseInt(msg.peerUin);
-      const member = await getGroupMember(msg.peerUin, msg.senderUin!);
+      let member = await getGroupMember(msg.peerUin, msg.senderUin!);
+      if (!member) {
+        //直接去QQNative取
+        const memberList = await NTQQGroupApi.getGroupMembers(msg.peerUin);
+        member = memberList.get(msg.senderUin!);
+      }
       if (member) {
         resMsg.sender.role = OB11Constructor.groupMemberRole(member.role);
         resMsg.sender.nickname = member.nick;
@@ -138,12 +143,12 @@ export class OB11Constructor {
         //log("收到回复消息", element.replyElement);
         try {
           //做这么多都是因为NC速度太快 可能nt还没有写入数据库
-          let records = msg.records.find(msgRecord => msgRecord.msgId === element.replyElement.sourceMsgIdInRecords);
+          const records = msg.records.find(msgRecord => msgRecord.msgId === element.replyElement.sourceMsgIdInRecords);
 
           if (!records) {
             throw new Error('Record筛选失败');
           }
-          let peer = {
+          const peer = {
             chatType: msg.chatType,
             peerUid: msg.peerUid,
             guildId: '',
@@ -165,7 +170,7 @@ export class OB11Constructor {
             replyMsg = (await NTQQMsgApi.getSingleMsg(peer, element.replyElement.replayMsgSeq)).msgList[0];
           }
           if (!replyMsg || replyMsg.msgRandom !== records.msgRandom) {
-            throw new Error('回复消息消息验证失败')
+            throw new Error('回复消息消息验证失败');
           }
           if (replyMsg) {
             message_data['data']['id'] = MessageUnique.createMsg({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, replyMsg.msgId)?.toString();
@@ -209,13 +214,13 @@ export class OB11Constructor {
           chatType: msg.chatType,
           guildId: '',
         },
-          msg.msgId,
-          msg.msgSeq,
-          msg.senderUid,
-          element.elementId,
-          element.elementType.toString(),
-          FileElement.fileSize,
-          FileElement.fileName
+        msg.msgId,
+        msg.msgSeq,
+        msg.senderUid,
+        element.elementId,
+        element.elementType.toString(),
+        FileElement.fileSize,
+        FileElement.fileName
         );
       }
       else if (element.videoElement) {
@@ -235,7 +240,7 @@ export class OB11Constructor {
         let videoDownUrl = undefined;
 
         if (videoUrl) {
-          let videoDownUrlTemp = videoUrl.find((url) => { if (url.url) { return true; } return false; });
+          const videoDownUrlTemp = videoUrl.find((url) => { if (url.url) { return true; } return false; });
           if (videoDownUrlTemp) {
             videoDownUrl = videoDownUrlTemp.url;
           }
@@ -256,20 +261,20 @@ export class OB11Constructor {
           chatType: msg.chatType,
           guildId: '',
         },
-          msg.msgId,
-          msg.msgSeq,
-          msg.senderUid,
-          element.elementId,
-          element.elementType.toString(),
-          videoElement.fileSize || '0',
-          videoElement.fileName
+        msg.msgId,
+        msg.msgSeq,
+        msg.senderUid,
+        element.elementId,
+        element.elementType.toString(),
+        videoElement.fileSize || '0',
+        videoElement.fileName
         );
       }
       else if (element.pttElement) {
         message_data['type'] = OB11MessageDataType.voice;
         message_data['data']['file'] = element.pttElement.fileName;
         message_data['data']['path'] = element.pttElement.filePath;
-        message_data["data"]["file_id"] = element.pttElement.fileUuid;
+        message_data['data']['file_id'] = element.pttElement.fileUuid;
         message_data['data']['file_size'] = element.pttElement.fileSize;
         // dbUtil.addFileCache({
         //   name: element.pttElement.fileName,
@@ -287,13 +292,13 @@ export class OB11Constructor {
           chatType: msg.chatType,
           guildId: '',
         },
-          msg.msgId,
-          msg.msgSeq,
-          msg.senderUid,
-          element.elementId,
-          element.elementType.toString(),
-          element.pttElement.fileSize || '0',
-          element.pttElement.fileUuid || ''
+        msg.msgId,
+        msg.msgSeq,
+        msg.senderUid,
+        element.elementId,
+        element.elementType.toString(),
+        element.pttElement.fileSize || '0',
+        element.pttElement.fileUuid || ''
         );
         //以uuid作为文件名
       }

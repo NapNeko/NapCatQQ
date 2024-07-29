@@ -14,7 +14,7 @@ export function sleep(ms: number): Promise<void> {
 
 export function PromiseTimer<T>(promise: Promise<T>, ms: number): Promise<T> {
   const timeoutPromise = new Promise<T>((_, reject) =>
-    setTimeout(() => reject(new Error("PromiseTimer: Operation timed out")), ms)
+    setTimeout(() => reject(new Error('PromiseTimer: Operation timed out')), ms)
   );
   return Promise.race([promise, timeoutPromise]);
 }

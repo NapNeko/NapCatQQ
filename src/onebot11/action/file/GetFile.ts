@@ -48,7 +48,7 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
     const { enableLocalFile2Url } = ob11Config;
     const NTSearchNameResult = (await NTQQFileApi.searchfile([payload.file])).resultItems;
     if (NTSearchNameResult.length !== 0) {
-      let MsgId = NTSearchNameResult[0].msgId;
+      const MsgId = NTSearchNameResult[0].msgId;
       let peer: Peer | undefined = undefined;
       if (NTSearchNameResult[0].chatType == ChatType.group) {
         peer = { chatType: ChatType.group, peerUid: NTSearchNameResult[0].groupChatInfo[0].groupCode };
@@ -56,12 +56,12 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
       if (!peer) {
         throw new Error('chattype not support');
       }
-      let msgList: RawMessage[] = (await NTQQMsgApi.getMsgsByMsgId(peer, [MsgId]))?.msgList;
+      const msgList: RawMessage[] = (await NTQQMsgApi.getMsgsByMsgId(peer, [MsgId]))?.msgList;
       if (!msgList || msgList.length == 0) {
         throw new Error('msg not found');
       }
-      let msg = msgList[0];
-      let file = msg.elements.filter(e => e.elementType == NTSearchNameResult[0].elemType);
+      const msg = msgList[0];
+      const file = msg.elements.filter(e => e.elementType == NTSearchNameResult[0].elemType);
       if (file.length == 0) {
         throw new Error('file not found');
       }
@@ -73,11 +73,11 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
         file_name: NTSearchNameResult[0].fileName
       };
       if (enableLocalFile2Url) {
-          try {
-            res.base64 = await fs.readFile(downloadPath, 'base64');
-          } catch (e) {
-            throw new Error('文件下载失败. ' + e);
-          }
+        try {
+          res.base64 = await fs.readFile(downloadPath, 'base64');
+        } catch (e) {
+          throw new Error('文件下载失败. ' + e);
+        }
       }
       //不手动删除？文件持久化了
       return res;

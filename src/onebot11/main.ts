@@ -41,7 +41,7 @@ export interface LineDevice {
   device_name: string;
   device_kind: string;
 }
-export let DeviceList = new Array<LineDevice>();
+export const DeviceList = new Array<LineDevice>();
 
 //peer->cached(boolen)
 // const PokeCache = new Map<string, boolean>();
@@ -419,7 +419,7 @@ export class NapCatOnebot11 {
       if (check_http_ws_equal(NewOb11) || check_http_ws_equal(OldConfig)) {
         // http与ws共站 需要同步重启
         if (isHttpChanged || isWsChanged) {
-          log("http与ws进行热重载")
+          log('http与ws进行热重载');
           ob11WebsocketServer.stop();
           ob11HTTPServer.stop();
           if (NewOb11.http.enable) {
@@ -436,7 +436,7 @@ export class NapCatOnebot11 {
       } else {
         // http重启逻辑
         if (isHttpChanged) {
-          log("http进行热重载")
+          log('http进行热重载');
           ob11HTTPServer.stop();
           if (NewOb11.http.enable) {
             ob11HTTPServer.start(NewOb11.http.port, NewOb11.http.host);
@@ -445,7 +445,7 @@ export class NapCatOnebot11 {
 
         // ws重启逻辑
         if (isWsChanged) {
-          log("ws进行热重载")
+          log('ws进行热重载');
           ob11WebsocketServer.stop();
           if (NewOb11.ws.enable) {
             ob11WebsocketServer.start(NewOb11.ws.port, NewOb11.ws.host);
@@ -455,7 +455,7 @@ export class NapCatOnebot11 {
 
       // 反向ws重启逻辑
       if (isWsReverseChanged) {
-        log("反向ws进行热重载")
+        log('反向ws进行热重载');
         ob11ReverseWebsockets.stop();
         if (NewOb11.reverseWs.enable) {
           ob11ReverseWebsockets.start();
