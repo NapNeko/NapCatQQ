@@ -76,6 +76,7 @@ import GetRecentContact from './user/GetRecentContact';
 import { GetProfileLike } from './extends/GetProfileLike';
 import SetGroupHeader from './extends/SetGroupHeader';
 import { FetchCustomFace } from './extends/FetchCustomFace';
+import GoCQHTTPUploadPrivateFile from './go-cqhttp/UploadPrivareFile';
 
 export const actionHandlers = [
   new RebootNormal(),
@@ -158,7 +159,8 @@ export const actionHandlers = [
   new MarkAllMsgAsRead(),
   new GetProfileLike(),
   new SetGroupHeader(),
-  new FetchCustomFace()
+  new FetchCustomFace(),
+  new GoCQHTTPUploadPrivateFile()
 ];
 
 function initActionMap() {
