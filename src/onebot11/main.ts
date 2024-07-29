@@ -279,7 +279,7 @@ export class NapCatOnebot11 {
     // }
     groupListener.onGroupNotifiesUpdated = async (doubt, notifies) => {
       //console.log('ob11 onGroupNotifiesUpdated', notifies[0]);
-      if (![GroupNotifyTypes.ADMIN_SET, GroupNotifyTypes.ADMIN_UNSET, GroupNotifyTypes.ADMIN_UNSET_OTHER].includes(notifies[0].type)) {
+      if (![GroupNotifyTypes.INVITE_ME,GroupNotifyTypes.ADMIN_SET, GroupNotifyTypes.ADMIN_UNSET, GroupNotifyTypes.ADMIN_UNSET_OTHER].includes(notifies[0].type)) {
         this.postGroupNotifies(notifies).then().catch(e => logError('postGroupNotifies error: ', e));
       }
     };
