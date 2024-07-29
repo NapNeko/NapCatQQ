@@ -330,6 +330,7 @@ export class OB11Constructor {
       }
       if (message_data.type !== 'unknown' && message_data.data) {
         const cqCode = encodeCQCode(message_data);
+
         if (messagePostFormat === 'string') {
           (resMsg.message as string) += cqCode;
         }

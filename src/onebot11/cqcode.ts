@@ -66,10 +66,10 @@ export function encodeCQCode(data: OB11MessageData) {
 
   let result = '[CQ:' + data.type;
   for (const name in data.data) {
-    const value = data.data[name];
+    let value = data.data[name];
     try {
       // Check if the value can be converted to a string
-      value.toString();
+      value = value.toString();
     } catch (error) {
       // If it can't be converted, skip this name-value pair
       // console.warn(`Skipping problematic name-value pair. Name: ${name}, Value: ${value}`);
