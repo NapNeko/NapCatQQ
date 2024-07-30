@@ -45,7 +45,14 @@ $jsCode | Out-File -FilePath $jsFilePath -Encoding UTF8
 Write-Output "JavaScript code has been generated and saved to $jsFilePath"
 # 设置NAPCAT_PATH环境变量为 当前目录的loadScript.js地址
 $env:NAPCAT_PATH = $jsFilePath
-
+for ($i = 0; $i -lt $args.Length; $i++) {
+    $param = $args[$i]
+    if ($args[$i] -eq "-q" -and $i + 1 -lt $args.Length) {
+        $nextParam = $args[$i + 1]
+        $params = "$param $nextParam"
+        break  
+    }
+}
 Try {
     $QQpath = Get-QQpath
 }
@@ -57,4 +64,4 @@ Catch {
 }
 
 $commandInfo = Get-Command $QQpath -ErrorAction Stop
-Start-Process powershell -ArgumentList "-noexit", "-noprofile", "-command &{& chcp 65001;& '$($commandInfo.Path)' --enable-logging }"
+Start-Process powershell -ArgumentList "-noexit", "-noprofile", "-command &{& chcp 65001;& '$($commandInfo.Path)' --enable-logging $params}"
