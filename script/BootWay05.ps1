@@ -1,4 +1,4 @@
-# 检查当前会话是否具有管理员权限
+﻿# 检查当前会话是否具有管理员权限
 function Test-Administrator {
     $user = [Security.Principal.WindowsIdentity]::GetCurrent()
     (New-Object Security.Principal.WindowsPrincipal $user).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
