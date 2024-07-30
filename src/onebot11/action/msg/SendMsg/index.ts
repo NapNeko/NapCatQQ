@@ -40,7 +40,7 @@ export async function sendMsg(peer: Peer, sendElements: SendMessageElement[], de
     throw ('消息体无法解析, 请检查是否发送了不支持的消息类型');
   }
   let totalSize = 0;
-  let timeout = 5000;
+  let timeout = 10000;
   try {
     for (const fileElement of sendElements) {
       if (fileElement.elementType === ElementType.PTT) {
@@ -59,7 +59,7 @@ export async function sendMsg(peer: Peer, sendElements: SendMessageElement[], de
     //且 PredictTime ((totalSize / 1024 / 512) * 1000)不等于Nan
     const PredictTime = totalSize / 1024 / 256 * 1000;
     if (!Number.isNaN(PredictTime)) {
-      timeout += PredictTime;// 5S Basic Timeout + PredictTime( For File 512kb/s )
+      timeout += PredictTime;// 10S Basic Timeout + PredictTime( For File 512kb/s )
     }
   } catch (e) {
     logError('发送消息计算预计时间异常', e);
@@ -170,7 +170,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
     // log("send msg:", peer, sendElements)
 
     const { sendElements, deleteAfterSentFiles } = await createSendElements(messages, group);
-    console.log(peer, JSON.stringify(sendElements,null,2));
+    //console.log(peer, JSON.stringify(sendElements,null,2));
     const returnMsg = await sendMsg(peer, sendElements, deleteAfterSentFiles);
     return { message_id: returnMsg!.id! };
   }

@@ -3,10 +3,11 @@ import { friends, groups, selfInfo } from '@/core/data';
 import { log, logWarn } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';
 import { napCatCore, NodeIKernelMsgService, NTQQUserApi } from '@/core';
-import { onGroupFileInfoUpdateParamType } from '@/core/listeners';
+import { NodeIKernelMsgListener, onGroupFileInfoUpdateParamType } from '@/core/listeners';
 import { GeneralCallResult } from '@/core/services/common';
 import { MessageUnique } from '../../../common/utils/MessageUnique';
 import { NTEventDispatch } from '@/common/utils/EventTask';
+let MsgSendMode = 0;
 async function LoadMessageIdList(Peer: Peer, msgId: string) {
   let msgList = await NTQQMsgApi.getMsgHistory(Peer, msgId, 50);
   for (let j = 0; j < msgList.msgList.length; j++) {
@@ -119,6 +120,9 @@ export class NTQQMsgApi {
   static async getMsgsBySeqAndCount(peer: Peer, seq: string, count: number, desc: boolean, z: boolean) {
     return await napCatCore.session.getMsgService().getMsgsBySeqAndCount(peer, seq, count, desc, z);
   }
+  static async testMode() {
+
+  }
   static async setMsgRead(peer: Peer) {
     return napCatCore.session.getMsgService().setMsgRead(peer);
   }
@@ -149,21 +153,17 @@ export class NTQQMsgApi {
       peerUid: peer.peerUid
     }, msgIds);
   }
-  static async sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
+  static async sendMsgV2(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
+    // function generateMsgId() {
+    //   const timestamp = Math.floor(Date.now() / 1000);
+    //   const random = Math.floor(Math.random() * Math.pow(2, 32));
+    //   const buffer = Buffer.alloc(8);
+    //   buffer.writeUInt32BE(timestamp, 0);
+    //   buffer.writeUInt32BE(random, 4);
+    //   const msgId = BigInt("0x" + buffer.toString('hex')).toString();
+    //   return msgId;
+    // }
     let msgId = await NTQQMsgApi.getMsgUnique(await NTQQMsgApi.getServerTime());
-    //为MsgId兜底的算法
-    if (!msgId || msgId.length == 0) {
-      function generateMsgId() {
-        const timestamp = Math.floor(Date.now() / 1000);
-        const random = Math.floor(Math.random() * Math.pow(2, 32));
-        const buffer = Buffer.alloc(8);
-        buffer.writeUInt32BE(timestamp, 0);
-        buffer.writeUInt32BE(random, 4);
-        const msgId = BigInt("0x" + buffer.toString('hex')).toString();
-        return msgId;
-      }
-      msgId = generateMsgId();
-    }
     let data = await NTEventDispatch.CallNormalEvent<
       (msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<any, any>) => Promise<unknown>,
       (msgList: RawMessage[]) => void
@@ -191,6 +191,41 @@ export class NTQQMsgApi {
       }
     });
     return retMsg;
+  }
+  static async sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
+    //实时结算不进行等待
+    let msgList = await NTQQMsgApi.getLastestMsgByUids(peer);
+    let msgSeq = 0;
+    if (msgList.msgList.length > 0) {
+      msgSeq = parseInt(msgList.msgList[0].msgSeq);
+      //console.log(JSON.stringify(msgList.msgList[0], null, 4));
+    }
+    let SendDate = Math.floor(Date.now() / 1000);
+    let rawMsg: RawMessage | undefined;
+    let EventListener = NTEventDispatch.RegisterListen<NodeIKernelMsgListener['onAddSendMsg']>('NodeIKernelMsgListener/onAddSendMsg', 1, timeout, (msg: RawMessage) => {
+      //console.log(JSON.stringify(msg, null, 4));
+      if (parseInt(msg.msgTime) < SendDate + timeout / 1000 && msg.peerUid == peer.peerUid && (msgList.msgList[0].msgSeq == msgSeq.toString() || msgSeq == 0)) {
+        rawMsg = msg;
+        return true;
+      }
+      return false;
+    }).catch();
+    // let EventListener2 = NTEventDispatch.RegisterListen<NodeIKernelMsgListener['onMsgInfoListUpdate']>('NodeIKernelMsgListener/onMsgInfoListUpdate', 1, timeout,
+    //   (msgList: RawMessage[]) => {
+    //     for (let msg of msgList) {
+    //       if (msg.peerUid == peer.peerUid && rawMsg && rawMsg.msgId == msg.msgId && msg.sendStatus == 2) {
+    //         rawMsg = msg;
+    //         return true;
+    //       }
+    //     }
+    //     return false;
+    //   })
+    await NTEventDispatch.CallNoListenerEvent<NodeIKernelMsgService['sendMsg']>('NodeIKernelMsgService/sendMsg', timeout, "0", peer, msgElements, new Map());
+    await EventListener;
+    if (rawMsg) {
+      return rawMsg;
+    }
+    throw new Error('发送消息超时');
   }
   static async getMsgUniqueEx() {
     let msgId = await NTQQMsgApi.getMsgUnique(await NTQQMsgApi.getServerTime());
