@@ -28,7 +28,7 @@ if (process.env.NAPCAT_BUILDSYS == 'linux') {
   }
   startScripts = ['./script/dbghelp.dll', './script/BootWay05-utf8.ps1', './script/BootWay05.ps1', './script/napcat-9912.ps1', './script/napcat-9912-utf8.ps1', './script/napcat-9912.bat', './script/napcat-9912-utf8.bat'];
 } else {
-  startScripts = ['./script/napcat.sh', './script/napcat.ps1', './script/napcat.bat', './script/napcat-utf8.bat', './script/napcat-utf8.ps1', './script/napcat-log.ps1', './script/napcat-9912.ps1', './script/napcat-9912-utf8.ps1', './script/napcat-9912.bat', './script/napcat-9912-utf8.bat'];
+  startScripts = ['./script/BootWay05-utf8.ps1', './script/BootWay05.ps1', './script/napcat.sh', './script/napcat.ps1', './script/napcat.bat', './script/napcat-utf8.bat', './script/napcat-utf8.ps1', './script/napcat-log.ps1', './script/napcat-9912.ps1', './script/napcat-9912-utf8.ps1', './script/napcat-9912.bat', './script/napcat-9912-utf8.bat'];
 }
 
 const baseConfigPlugin: PluginOption[] = [
