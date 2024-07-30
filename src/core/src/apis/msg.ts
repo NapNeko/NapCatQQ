@@ -151,7 +151,7 @@ export class NTQQMsgApi {
   }
   static async sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
     let msgId = await NTQQMsgApi.getMsgUnique(await NTQQMsgApi.getServerTime());
-    //console.log(msgId);
+    console.log(msgId);
     let data = await NTEventDispatch.CallNormalEvent<
       (msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<any, any>) => Promise<unknown>,
       (msgList: RawMessage[]) => void
@@ -161,14 +161,14 @@ export class NTQQMsgApi {
       1,
       timeout,
       (msgRecords: RawMessage[]) => {
-        for (let msgRecord of msgRecords) {
-          if (msgRecord.msgId === msgId && msgRecord.sendStatus === 2) {
-            return true;
-          }
-        }
-        return false;
+        // for (let msgRecord of msgRecords) {
+        //   if (msgRecord.msgId === msgId && msgRecord.sendStatus === 2) {
+        //     return true;
+        //   }
+        // }
+        return true;
       },
-      msgId,
+      "0",
       peer,
       msgElements,
       new Map()
