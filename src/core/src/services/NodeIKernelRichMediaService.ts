@@ -159,7 +159,7 @@ export interface NodeIKernelRichMediaService {
         fileName: string,
         fileSize: string,
         fileModelId: string
-    }[]): unknown;
+    }[]): Promise<unknown>;
 
     downloadFileByUrlList(fileDownloadTyp: UrlFileDownloadType, urlList: Array<string>): unknown;
 

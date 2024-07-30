@@ -151,6 +151,7 @@ export class NTQQMsgApi {
   }
   static async sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
     let msgId = await NTQQMsgApi.getMsgUnique(await NTQQMsgApi.getServerTime());
+    //console.log(msgId);
     let data = await NTEventDispatch.CallNormalEvent<
       (msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<any, any>) => Promise<unknown>,
       (msgList: RawMessage[]) => void
