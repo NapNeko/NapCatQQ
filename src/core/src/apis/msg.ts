@@ -2,7 +2,7 @@ import { ElementType, GetFileListParam, MessageElement, Peer, RawMessage, SendMe
 import { friends, groups, selfInfo } from '@/core/data';
 import { log, logWarn } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';
-import { napCatCore, NTQQUserApi } from '@/core';
+import { napCatCore, NodeIKernelMsgService, NTQQUserApi } from '@/core';
 import { onGroupFileInfoUpdateParamType } from '@/core/listeners';
 import { GeneralCallResult } from '@/core/services/common';
 import { MessageUnique } from '../../../common/utils/MessageUnique';
@@ -151,7 +151,19 @@ export class NTQQMsgApi {
   }
   static async sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
     let msgId = await NTQQMsgApi.getMsgUnique(await NTQQMsgApi.getServerTime());
-    console.log(msgId);
+    //为MsgId兜底的算法
+    if (!msgId || msgId.length == 0) {
+      function generateMsgId() {
+        const timestamp = Math.floor(Date.now() / 1000);
+        const random = Math.floor(Math.random() * Math.pow(2, 32));
+        const buffer = Buffer.alloc(8);
+        buffer.writeUInt32BE(timestamp, 0);
+        buffer.writeUInt32BE(random, 4);
+        const msgId = BigInt("0x" + buffer.toString('hex')).toString();
+        return msgId;
+      }
+      msgId = generateMsgId();
+    }
     let data = await NTEventDispatch.CallNormalEvent<
       (msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<any, any>) => Promise<unknown>,
       (msgList: RawMessage[]) => void
@@ -161,14 +173,14 @@ export class NTQQMsgApi {
       1,
       timeout,
       (msgRecords: RawMessage[]) => {
-        // for (let msgRecord of msgRecords) {
-        //   if (msgRecord.msgId === msgId && msgRecord.sendStatus === 2) {
-        //     return true;
-        //   }
-        // }
-        return true;
+        for (let msgRecord of msgRecords) {
+          if (msgRecord.msgId === msgId && msgRecord.sendStatus === 2) {
+            return true;
+          }
+        }
+        return false;
       },
-      "0",
+      msgId,
       peer,
       msgElements,
       new Map()
@@ -187,8 +199,14 @@ export class NTQQMsgApi {
   static async getMsgUnique(time: string) {
     return napCatCore.session.getMsgService().getMsgUniqueId(time);
   }
+  static async getMsgUniqueByTimeV2() {
+    return NTEventDispatch.CallNoListenerEvent<NodeIKernelMsgService['getMsgUniqueId']>('NodeIKernelMsgService/getMsgUniqueId', 5000, await NTQQMsgApi.getServerTimeV2())
+  }
   static async getServerTime() {
     return napCatCore.session.getMSFService().getServerTime();
+  }
+  static async getServerTimeV2() {
+    return NTEventDispatch.CallNoListenerEvent<() => string>('NodeIKernelMsgService/getServerTime', 5000);
   }
   static async forwardMsg(srcPeer: Peer, destPeer: Peer, msgIds: string[]) {
     return napCatCore.session.getMsgService().forwardMsg(msgIds, srcPeer, [destPeer], new Map());
