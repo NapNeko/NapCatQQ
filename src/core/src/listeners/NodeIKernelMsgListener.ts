@@ -226,7 +226,7 @@ export interface IKernelMsgListener {
 
 }
 
-export interface NodeIKernelMsgListener {
+export interface NodeIKernelMsgListener extends IKernelMsgListener {
   // eslint-disable-next-line @typescript-eslint/no-misused-new
   new(listener: IKernelMsgListener): NodeIKernelMsgListener;
 }

@@ -163,11 +163,14 @@ export class NTEventWrapper {
           resolve([retEvent as Awaited<ReturnType<EventType>>, ...retData!]);
         }
       };
-      const Timeouter = setTimeout(databack, timeout);
+
 
       const ListenerNameList = ListenerName.split('/');
       const ListenerMainName = ListenerNameList[0];
       const ListenerSubName = ListenerNameList[1];
+
+      const Timeouter = setTimeout(databack, timeout);
+
       const eventCallbak = {
         timeout: timeout,
         createtime: Date.now(),
@@ -191,7 +194,6 @@ export class NTEventWrapper {
       this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.set(id, eventCallbak);
       this.CreatListenerFunction(ListenerMainName);
       const EventFunc = this.CreatEventFunction<EventType>(EventName);
-      //console.log("测试打点", args);
       retEvent = await EventFunc!(...(args as any[]));
     });
   }
