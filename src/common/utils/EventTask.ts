@@ -96,7 +96,7 @@ export class NTEventWrapper {
       }
     });
   }
-  async CallNoListenerEvent<EventType extends (...args: any[]) => Promise<any>>(EventName = '', timeout: number = 3000, ...args: Parameters<EventType>) {
+  async CallNoListenerEvent<EventType extends (...args: any[]) => Promise<any> | any>(EventName = '', timeout: number = 3000, ...args: Parameters<EventType>) {
     return new Promise<Awaited<ReturnType<EventType>>>(async (resolve, reject) => {
       const EventFunc = this.CreatEventFunction<EventType>(EventName);
       let complete = false;
@@ -150,7 +150,7 @@ export class NTEventWrapper {
     });
   }
   async CallNormalEvent<EventType extends (...args: any[]) => Promise<any>, ListenerType extends (...args: any[]) => void>
-  (EventName = '', ListenerName = '', waitTimes = 1, timeout: number = 3000, checker: (...args: Parameters<ListenerType>) => boolean, ...args: Parameters<EventType>) {
+    (EventName = '', ListenerName = '', waitTimes = 1, timeout: number = 3000, checker: (...args: Parameters<ListenerType>) => boolean, ...args: Parameters<EventType>) {
     return new Promise<[EventRet: Awaited<ReturnType<EventType>>, ...Parameters<ListenerType>]>(async (resolve, reject) => {
       const id = randomUUID();
       let complete = 0;
