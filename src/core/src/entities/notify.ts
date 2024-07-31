@@ -62,6 +62,7 @@ export enum BuddyReqType {
   KMEINITIATORWAITPEERCONFIRM
 }
 export interface FriendRequest {
+  isInitiator?: boolean;
   isDecide: boolean;
   friendUid: string;
   reqType: BuddyReqType,

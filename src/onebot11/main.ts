@@ -241,7 +241,7 @@ export class NapCatOnebot11 {
     msgListener.onMsgInfoListUpdate = (msgList) => {
       this.postRecallMsg(msgList).then().catch(logError);
       for (const msg of msgList.filter(e => e.senderUin == selfInfo.uin)) {
-      //  console.log(msg);
+        //  console.log(msg);
         if (msg.sendStatus !== 2) {
           //完成后再post
           return;
@@ -594,7 +594,7 @@ export class NapCatOnebot11 {
 
   async postFriendRequest(reqs: FriendRequest[]) {
     for (const req of reqs) {
-      if (req.isDecide && req.reqType !== BuddyReqType.KMEINITIATORWAITPEERCONFIRM) {
+      if (!!req.isInitiator && req.isDecide && req.reqType !== BuddyReqType.KMEINITIATORWAITPEERCONFIRM) {
         continue;
       }
       const friendRequestEvent = new OB11FriendRequestEvent();
