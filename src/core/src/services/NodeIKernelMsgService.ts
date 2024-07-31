@@ -5,7 +5,7 @@ import { GeneralCallResult } from '@/core/services/common';
 export interface NodeIKernelMsgService {
   addKernelMsgListener(nodeIKernelMsgListener: NodeIKernelMsgListener): number;
 
-  sendMsg(msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<any, any>): Promise<unknown>;
+  sendMsg(msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<any, any>): Promise<GeneralCallResult>;
 
   recallMsg(peer: Peer, msgIds: string[]): Promise<GeneralCallResult>;
 
@@ -117,7 +117,7 @@ export interface NodeIKernelMsgService {
 
   addLocalRecordMsg(Peer: Peer, msgId: string, ele: MessageElement, attr: Array<any> | number, front: boolean): Promise<unknown>;
 
-  deleteMsg(...args: unknown[]): unknown;
+  deleteMsg(Peer: Peer, msgIds: Array<string>): Promise<any>;
 
   updateElementExtBufForUI(...args: unknown[]): unknown;
 
