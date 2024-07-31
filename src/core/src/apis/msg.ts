@@ -69,15 +69,20 @@ export class NTQQMsgApi {
     try {
       NTQQMsgApi.sendMsgV2({ chatType: 1, peerUid: selfInfo.uid }, [SendMsgElementConstructor.text('消息队列模式测试')], true, 10000).then().catch();
       MsgSendMode = 2;
+      logNotice('[消息队列] 消息模式确认: MsgId异步队列');
+      return true;
     } catch (error) {
-      logNotice('[消息队列] 设置模式: MsgId异步队列');
+      logNotice('[消息队列] 消息模式失败: MsgId异步队列');
     }
     try {
       NTQQMsgApi.sendMsgV1({ chatType: 1, peerUid: selfInfo.uid }, [SendMsgElementConstructor.text('消息队列模式测试')], true, 10000).then().catch();
       MsgSendMode = 1;
+      logNotice('[消息队列] 消息模式确认: MsgSeq异步队列');
+      return true;
     } catch (error) {
-      logNotice('[消息队列] 设置模式: MsgSeq异步队列');
+      logNotice('[消息队列] 消息模式失败: MsgSeq异步队列');
     }
+    return false;
   }
   // static napCatCore: NapCatCore | null = null;
   //   enum BaseEmojiType {
