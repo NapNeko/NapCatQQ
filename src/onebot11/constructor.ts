@@ -35,7 +35,7 @@ import { OB11GroupNoticeEvent } from './event/notice/OB11GroupNoticeEvent';
 
 import { calcQQLevel } from '../common/utils/qqlevel';
 import { log, logDebug, logError, logWarn } from '../common/utils/log';
-import { sleep } from '../common/utils/helper';
+import { sleep, UUIDConverter } from '../common/utils/helper';
 import { OB11GroupTitleEvent } from './event/notice/OB11GroupTitleEvent';
 import { OB11GroupCardEvent } from './event/notice/OB11GroupCardEvent';
 import { OB11GroupDecreaseEvent } from './event/notice/OB11GroupDecreaseEvent';
@@ -185,13 +185,12 @@ export class OB11Constructor {
         message_data['data']['file_size'] = element.picElement.fileSize;
       }
       else if (element.fileElement) {
-
         const FileElement = element.fileElement;
         message_data['type'] = OB11MessageDataType.file;
         message_data['data']['file'] = FileElement.fileName;
         message_data['data']['path'] = FileElement.filePath;
         message_data['data']['url'] = FileElement.filePath;
-        message_data['data']['file_id'] = FileElement.fileUuid;
+        message_data['data']['file_id'] =  UUIDConverter.encode(msg.peerUin, msg.msgId);
         message_data['data']['file_size'] = FileElement.fileSize;
         await NTQQFileApi.addFileCache({
           peerUid: msg.peerUid,
@@ -237,7 +236,7 @@ export class OB11Constructor {
         message_data['data']['file'] = videoElement.fileName;
         message_data['data']['path'] = videoDownUrl;
         message_data['data']['url'] = videoDownUrl;
-        message_data['data']['file_id'] = videoElement.fileUuid;
+        message_data['data']['file_id'] = UUIDConverter.encode(msg.peerUin, msg.msgId);
         message_data['data']['file_size'] = videoElement.fileSize;
 
         await NTQQFileApi.addFileCache({
@@ -258,19 +257,9 @@ export class OB11Constructor {
         message_data['type'] = OB11MessageDataType.voice;
         message_data['data']['file'] = element.pttElement.fileName;
         message_data['data']['path'] = element.pttElement.filePath;
-        message_data['data']['file_id'] = element.pttElement.fileUuid;
+        //message_data['data']['file_id'] = element.pttElement.fileUuid;
+        message_data['data']['file_id'] = UUIDConverter.encode(msg.peerUin, msg.msgId);
         message_data['data']['file_size'] = element.pttElement.fileSize;
-        // dbUtil.addFileCache({
-        //   name: element.pttElement.fileName,
-        //   path: element.pttElement.filePath,
-        //   size: parseInt(element.pttElement.fileSize) || 0,
-        //   url: '',
-        //   uuid: element.pttElement.fileUuid || '',
-        //   msgId: msg.msgId,
-        //   element: element.pttElement,
-        //   elementType: ElementType.PTT,
-        //   elementId: element.elementId
-        // }).then();
         await NTQQFileApi.addFileCache({
           peerUid: msg.peerUid,
           chatType: msg.chatType,
@@ -350,6 +339,7 @@ export class OB11Constructor {
       if (element.grayTipElement) {
         if (element.grayTipElement.subElementType == GrayTipElementSubType.MEMBER_NEW_TITLE) {
           const json = JSON.parse(element.grayTipElement.jsonGrayTipElement.jsonStr);
+
           if (element.grayTipElement.jsonGrayTipElement.busiId == 1061) {
             //判断业务类型
             //Poke事件
@@ -358,7 +348,7 @@ export class OB11Constructor {
             pokedetail = pokedetail.filter(item => item.uid);
             //console.log("[NapCat] 群拍一拍 群:", pokedetail, parseInt(msg.peerUid), " ", await NTQQUserApi.getUinByUid(pokedetail[0].uid), "拍了拍", await NTQQUserApi.getUinByUid(pokedetail[1].uid));
             if (pokedetail.length == 2) {
-              return new OB11FriendPokeEvent(parseInt((await NTQQUserApi.getUinByUid(pokedetail[0].uid))!), parseInt((await NTQQUserApi.getUinByUid(pokedetail[1].uid))!));
+              return new OB11FriendPokeEvent(parseInt((await NTQQUserApi.getUinByUid(pokedetail[0].uid))!), parseInt((await NTQQUserApi.getUinByUid(pokedetail[1].uid))!), pokedetail);
             }
           }
           //下面得改 上面也是错的grayTipElement.subElementType == GrayTipElementSubType.MEMBER_NEW_TITLE

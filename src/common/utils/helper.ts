@@ -8,6 +8,27 @@ import * as fsPromise from 'node:fs/promises';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+//下面这个类是用于将uid+msgid合并的类
+export class UUIDConverter {
+  static encode(highStr: string, lowStr: string): string {
+    const high = BigInt(highStr);
+    const low = BigInt(lowStr);
+    const highHex = high.toString(16).padStart(16, '0');
+    const lowHex = low.toString(16).padStart(16, '0');
+    const combinedHex = highHex + lowHex;
+    const uuid = `${combinedHex.substring(0, 8)}-${combinedHex.substring(8, 12)}-${combinedHex.substring(12, 16)}-${combinedHex.substring(16, 20)}-${combinedHex.substring(20)}`;
+    return uuid;
+  }
+  static decode(uuid: string): { high: string, low: string } {
+    const hex = uuid.replace(/-/g, '');
+    const high = BigInt('0x' + hex.substring(0, 16));
+    const low = BigInt('0x' + hex.substring(16));
+    return { high: high.toString(), low: low.toString() };
+  }
+}
+
+
 export function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
