@@ -1,15 +1,12 @@
 import BaseAction from '../BaseAction';
 import fs from 'fs/promises';
 import { ob11Config } from '@/onebot11/config';
-import { log, logDebug } from '@/common/utils/log';
-import { sleep } from '@/common/utils/helper';
-import { uri2local } from '@/common/utils/file';
+import { UUIDConverter } from '@/common/utils/helper';
 import { ActionName, BaseCheckResult } from '../types';
-import { ChatType, FileElement, Peer, RawMessage, VideoElement } from '@/core/entities';
-import { NTQQFileApi, NTQQMsgApi } from '@/core/apis';
+import { ChatType, ElementType, FileElement, Peer, RawMessage, VideoElement } from '@/core/entities';
+import { NTQQFileApi, NTQQFriendApi, NTQQMsgApi, NTQQUserApi } from '@/core/apis';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import Ajv from 'ajv';
-import { MessageUnique } from '@/common/utils/MessageUnique';
+import { getGroup } from '@/core/data';
 
 export interface GetFilePayload {
   file: string; // 文件名或者fileUuid
@@ -46,6 +43,65 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
   }
   protected async _handle(payload: GetFilePayload): Promise<GetFileResponse> {
     const { enableLocalFile2Url } = ob11Config;
+    let UuidData: {
+      high: string;
+      low: string;
+    } | undefined;
+    try {
+      UuidData = UUIDConverter.decode(payload.file);
+      if (UuidData) {
+        let peerUin = UuidData.high;
+        let msgId = UuidData.low;
+        let isGroup = await getGroup(peerUin);
+        let peer: Peer | undefined;
+        //识别Peer
+        if (isGroup) {
+          peer = { chatType: ChatType.group, peerUid: peerUin };
+        }
+        let PeerUid = await NTQQUserApi.getUidByUin(peerUin);
+        if (PeerUid) {
+          let isBuddy = await NTQQFriendApi.isBuddy(PeerUid);
+          if (isBuddy) {
+            peer = { chatType: ChatType.friend, peerUid: PeerUid };
+          } else {
+            peer = { chatType: ChatType.temp, peerUid: PeerUid };
+          }
+        }
+        if (!peer) {
+          throw new Error('chattype not support');
+        }
+        let msgList = await NTQQMsgApi.getMsgsByMsgId(peer, [msgId]);
+        if (msgList.msgList.length == 0) {
+          throw new Error('msg not found');
+        }
+        let msg = msgList.msgList[0];
+        let findEle = msg.elements.find(e => e.elementType == ElementType.VIDEO || e.elementType == ElementType.FILE || e.elementType == ElementType.PTT);
+        if (!findEle) {
+          throw new Error('element not found');
+        }
+        let downloadPath = await NTQQFileApi.downloadMedia(msgId, msg.chatType, msg.peerUid, findEle.elementId, '', '');
+        let fileSize = findEle?.videoElement?.fileSize || findEle?.fileElement?.fileSize || findEle?.pttElement?.fileSize || '0';
+        let fileName = findEle?.videoElement?.fileName || findEle?.fileElement?.fileName || findEle?.pttElement?.fileName || '';
+        const res: GetFileResponse = {
+          file: downloadPath,
+          url: downloadPath,
+          file_size: fileSize,
+          file_name: fileName
+        };
+        if (enableLocalFile2Url) {
+          try {
+            res.base64 = await fs.readFile(downloadPath, 'base64');
+          } catch (e) {
+            throw new Error('文件下载失败. ' + e);
+          }
+        }
+        //不手动删除？文件持久化了
+        return res;
+      }
+    } catch {
+
+    }
+
     const NTSearchNameResult = (await NTQQFileApi.searchfile([payload.file])).resultItems;
     if (NTSearchNameResult.length !== 0) {
       const MsgId = NTSearchNameResult[0].msgId;
@@ -69,7 +125,7 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
       const res: GetFileResponse = {
         file: downloadPath,
         url: downloadPath,
-        file_size:  NTSearchNameResult[0].fileSize.toString(),
+        file_size: NTSearchNameResult[0].fileSize.toString(),
         file_name: NTSearchNameResult[0].fileName
       };
       if (enableLocalFile2Url) {
@@ -82,7 +138,6 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
       //不手动删除？文件持久化了
       return res;
     }
-    //下面逻辑是有UUID的情况
     throw new Error('file not found');
     // let cache = await dbUtil.getFileCacheByName(payload.file);
     // if (!cache) {

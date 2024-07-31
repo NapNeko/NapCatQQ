@@ -18,6 +18,7 @@ import { sessionConfig } from '@/core/sessionConfig';
 import { rkeyManager } from '../utils/rkey';
 import { NTEventDispatch } from '@/common/utils/EventTask';
 import { NodeIKernelSearchService } from '../services/NodeIKernelSearchService';
+import { selfInfo } from '../data';
 
 
 export class NTQQFileApi {
@@ -67,7 +68,9 @@ export class NTQQFileApi {
       ext
     };
   }
-
+  static async downloadMediaByUuid() {
+    //napCatCore.session.getRichMediaService().downloadFileForFileUuid();
+  }
   static async downloadMedia(msgId: string, chatType: ChatType, peerUid: string, elementId: string, thumbPath: string, sourcePath: string, timeout = 1000 * 60 * 2, force: boolean = false) {
     //logDebug('receive downloadMedia task', msgId, chatType, peerUid, elementId, thumbPath, sourcePath, timeout, force);
     // 用于下载收到的消息中的图片等
