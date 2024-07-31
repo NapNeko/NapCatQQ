@@ -154,7 +154,7 @@ export class NTQQMsgApi {
       (GroupCode: string, params: GetFileListParam) => Promise<unknown>,
       (groupFileListResult: onGroupFileInfoUpdateParamType) => void
     >(
-      'NodeIKernelRichMediaService/sendMsg',
+      'NodeIKernelRichMediaService/getGroupFileList',
       'NodeIKernelMsgListener/onGroupFileInfoUpdate',
       1,
       5000,

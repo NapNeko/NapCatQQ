@@ -200,8 +200,6 @@ export interface NodeIKernelRichMediaService {
 
     getGroupFileInfo(arg1: unknown, arg2: unknown): unknown;
 
-    getGroupFileList(arg1: unknown, arg2: unknown): unknown;
-
     getGroupTransferList(arg1: unknown, arg2: unknown): unknown;
 
     renameGroupFile(arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown, arg5: unknown): unknown;
