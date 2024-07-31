@@ -594,7 +594,7 @@ export class NapCatOnebot11 {
 
   async postFriendRequest(reqs: FriendRequest[]) {
     for (const req of reqs) {
-      if (!!req.isInitiator && req.isDecide && req.reqType !== BuddyReqType.KMEINITIATORWAITPEERCONFIRM) {
+      if (!!req.isInitiator || (req.isDecide && req.reqType !== BuddyReqType.KMEINITIATORWAITPEERCONFIRM)) {
         continue;
       }
       const friendRequestEvent = new OB11FriendRequestEvent();
