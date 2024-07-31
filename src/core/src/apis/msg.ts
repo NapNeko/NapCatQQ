@@ -8,7 +8,8 @@ import { GeneralCallResult } from '@/core/services/common';
 import { MessageUnique } from '../../../common/utils/MessageUnique';
 import { NTEventDispatch } from '@/common/utils/EventTask';
 import { logNotice } from '@/onebot11/log';
-let MsgSendMode = 2;
+import { c } from 'vite/dist/node/types.d-aGj9QkWt';
+//let MsgSendMode = 2;
 
 async function LoadMessageIdList(Peer: Peer, msgId: string) {
   let msgList = await NTQQMsgApi.getMsgHistory(Peer, msgId, 50);
@@ -42,7 +43,7 @@ async function loadMessageUnique() {
 setTimeout(() => {
   napCatCore.onLoginSuccess(async () => {
     await sleep(100);
-    NTQQMsgApi.CheckSendMode().then().catch();
+    // NTQQMsgApi.CheckSendMode().then().catch();
     loadMessageUnique().then().catch();
   });
 }, 100);
@@ -65,25 +66,25 @@ setTimeout(() => {
 //   console.log(await NTQQMsgApi.multiForwardMsg(peer, peer, [MsgId]));
 // }, 25000)
 export class NTQQMsgApi {
-  static async CheckSendMode() {
-    try {
-      NTQQMsgApi.sendMsgV2({ chatType: 1, peerUid: selfInfo.uid }, [SendMsgElementConstructor.text('消息队列模式测试')], true, 10000).then().catch();
-      MsgSendMode = 2;
-      logNotice('[消息队列] 消息模式确认: MsgId异步队列');
-      return true;
-    } catch (error) {
-      logNotice('[消息队列] 消息模式失败: MsgId异步队列');
-    }
-    try {
-      NTQQMsgApi.sendMsgV1({ chatType: 1, peerUid: selfInfo.uid }, [SendMsgElementConstructor.text('消息队列模式测试')], true, 10000).then().catch();
-      MsgSendMode = 1;
-      logNotice('[消息队列] 消息模式确认: MsgSeq异步队列');
-      return true;
-    } catch (error) {
-      logNotice('[消息队列] 消息模式失败: MsgSeq异步队列');
-    }
-    return false;
-  }
+  // static async CheckSendMode() {
+  //   try {
+  //     NTQQMsgApi.sendMsgV2({ chatType: 1, peerUid: selfInfo.uid }, [SendMsgElementConstructor.text('消息队列模式测试')], true, 10000).then().catch();
+  //     MsgSendMode = 2;
+  //     logNotice('[消息队列] 消息模式确认: MsgId异步队列');
+  //     return true;
+  //   } catch (error) {
+  //     logNotice('[消息队列] 消息模式失败: MsgId异步队列');
+  //   }
+  //   try {
+  //     NTQQMsgApi.sendMsgV1({ chatType: 1, peerUid: selfInfo.uid }, [SendMsgElementConstructor.text('消息队列模式测试')], true, 10000).then().catch();
+  //     MsgSendMode = 1;
+  //     logNotice('[消息队列] 消息模式确认: MsgSeq异步队列');
+  //     return true;
+  //   } catch (error) {
+  //     logNotice('[消息队列] 消息模式失败: MsgSeq异步队列');
+  //   }
+  //   return false;
+  // }
   // static napCatCore: NapCatCore | null = null;
   //   enum BaseEmojiType {
   //     NORMAL_EMOJI,
@@ -215,12 +216,8 @@ export class NTQQMsgApi {
     return retMsg;
   }
   static sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
-    if (MsgSendMode == 1) {
-      return NTQQMsgApi.sendMsgV1(peer, msgElements, waitComplete, timeout);
-    } else if (MsgSendMode == 2) {
-      return NTQQMsgApi.sendMsgV2(peer, msgElements, waitComplete, timeout);
-    }
-    throw new Error('未知的发送消息模式');
+    console.log("sendMsg", peer, msgElements, waitComplete, timeout);
+    return NTQQMsgApi.sendMsgV1(peer, msgElements, waitComplete, timeout);
   }
   static async sendMsgV1(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
     let msgList = await NTQQMsgApi.getLastestMsgByUids(peer);
@@ -247,10 +244,11 @@ export class NTQQMsgApi {
         }
         return false;
       }).catch(logError);
-    await NTEventDispatch.CallNoListenerEvent<NodeIKernelMsgService['sendMsg']>('NodeIKernelMsgService/sendMsg', timeout, "0", peer, msgElements, new Map());
+    await napCatCore.session.getMsgService().sendMsg("0", peer, msgElements, new Map());
+    //await NTEventDispatch.CallNoListenerEvent<NodeIKernelMsgService['sendMsg']>('NodeIKernelMsgService/sendMsg', timeout, "0", peer, msgElements, new Map());
     await EventListener;
     await EventListener2;
-   // console.log("rawMsg", JSON.stringify(rawMsg, null, 4));
+    // console.log("rawMsg", JSON.stringify(rawMsg, null, 4));
     if (rawMsg) {
       return rawMsg;
     }
