@@ -244,9 +244,14 @@ export class NTQQMsgApi {
         }
         return false;
       }).catch(logError);
-    await napCatCore.session.getMsgService().sendMsg("0", peer, msgElements, new Map());
+    let data = await napCatCore.session.getMsgService().sendMsg("0", peer, msgElements, new Map());
     //await NTEventDispatch.CallNoListenerEvent<NodeIKernelMsgService['sendMsg']>('NodeIKernelMsgService/sendMsg', timeout, "0", peer, msgElements, new Map());
     await EventListener;
+    if (data.result !== 0 && rawMsg) {
+      //发送失败msgid
+      await napCatCore.session.getMsgService().deleteMsg(peer, [rawMsg.msgId]);
+      throw new Error('发送消息失败');
+    }
     await EventListener2;
     // console.log("rawMsg", JSON.stringify(rawMsg, null, 4));
     if (rawMsg) {
