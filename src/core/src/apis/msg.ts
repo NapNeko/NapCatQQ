@@ -1,13 +1,15 @@
 import { ElementType, GetFileListParam, MessageElement, Peer, RawMessage, SendMessageElement, SendMsgElementConstructor } from '@/core/entities';
 import { friends, groups, selfInfo } from '@/core/data';
-import { log, logWarn } from '@/common/utils/log';
+import { log, logError, logWarn } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';
 import { napCatCore, NodeIKernelMsgService, NTQQUserApi } from '@/core';
 import { NodeIKernelMsgListener, onGroupFileInfoUpdateParamType } from '@/core/listeners';
 import { GeneralCallResult } from '@/core/services/common';
 import { MessageUnique } from '../../../common/utils/MessageUnique';
 import { NTEventDispatch } from '@/common/utils/EventTask';
-let MsgSendMode = 0;
+import { logNotice } from '@/onebot11/log';
+let MsgSendMode = 2;
+
 async function LoadMessageIdList(Peer: Peer, msgId: string) {
   let msgList = await NTQQMsgApi.getMsgHistory(Peer, msgId, 50);
   for (let j = 0; j < msgList.msgList.length; j++) {
@@ -40,6 +42,7 @@ async function loadMessageUnique() {
 setTimeout(() => {
   napCatCore.onLoginSuccess(async () => {
     await sleep(100);
+    NTQQMsgApi.CheckSendMode().then().catch();
     loadMessageUnique().then().catch();
   });
 }, 100);
@@ -62,6 +65,20 @@ setTimeout(() => {
 //   console.log(await NTQQMsgApi.multiForwardMsg(peer, peer, [MsgId]));
 // }, 25000)
 export class NTQQMsgApi {
+  static async CheckSendMode() {
+    try {
+      NTQQMsgApi.sendMsgV2({ chatType: 1, peerUid: selfInfo.uid }, [SendMsgElementConstructor.text('消息队列模式测试')], true, 10000).then().catch();
+      MsgSendMode = 2;
+    } catch (error) {
+      logNotice('[消息队列] 设置模式: MsgId异步队列');
+    }
+    try {
+      NTQQMsgApi.sendMsgV1({ chatType: 1, peerUid: selfInfo.uid }, [SendMsgElementConstructor.text('消息队列模式测试')], true, 10000).then().catch();
+      MsgSendMode = 1;
+    } catch (error) {
+      logNotice('[消息队列] 设置模式: MsgSeq异步队列');
+    }
+  }
   // static napCatCore: NapCatCore | null = null;
   //   enum BaseEmojiType {
   //     NORMAL_EMOJI,
@@ -192,36 +209,43 @@ export class NTQQMsgApi {
     });
     return retMsg;
   }
-  static async sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
-    //实时结算不进行等待
-    let msgList = await NTQQMsgApi.getLastestMsgByUids(peer);
-    let msgSeq = 0;
-    if (msgList.msgList.length > 0) {
-      msgSeq = parseInt(msgList.msgList[0].msgSeq);
-      //console.log(JSON.stringify(msgList.msgList[0], null, 4));
+  static sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
+    if (MsgSendMode == 1) {
+      return NTQQMsgApi.sendMsgV1(peer, msgElements, waitComplete, timeout);
+    } else if (MsgSendMode == 1) {
+      return NTQQMsgApi.sendMsgV2(peer, msgElements, waitComplete, timeout);
     }
-    let SendDate = Math.floor(Date.now() / 1000);
+    throw new Error('未知的发送消息模式');
+  }
+  static async sendMsgV1(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
+    let msgList = await NTQQMsgApi.getLastestMsgByUids(peer);
+    let msgCurrentSeq = 0n;
+    if (msgList.msgList.length > 0) {
+      msgCurrentSeq = BigInt(msgList.msgList[0].msgSeq);
+    }
     let rawMsg: RawMessage | undefined;
     let EventListener = NTEventDispatch.RegisterListen<NodeIKernelMsgListener['onAddSendMsg']>('NodeIKernelMsgListener/onAddSendMsg', 1, timeout, (msg: RawMessage) => {
-      //console.log(JSON.stringify(msg, null, 4));
-      if (parseInt(msg.msgTime) < SendDate + timeout / 1000 && msg.peerUid == peer.peerUid && (msgList.msgList[0].msgSeq == msgSeq.toString() || msgSeq == 0)) {
+      console.log("msgSeq:", msgCurrentSeq.toString(), JSON.stringify(msgList.msgList[0], null, 4));
+      if (msg.peerUid == peer.peerUid && (msgCurrentSeq == 0n || msgList.msgList[0].msgSeq == msgCurrentSeq.toString())) {
         rawMsg = msg;
         return true;
       }
       return false;
-    }).catch();
-    // let EventListener2 = NTEventDispatch.RegisterListen<NodeIKernelMsgListener['onMsgInfoListUpdate']>('NodeIKernelMsgListener/onMsgInfoListUpdate', 1, timeout,
-    //   (msgList: RawMessage[]) => {
-    //     for (let msg of msgList) {
-    //       if (msg.peerUid == peer.peerUid && rawMsg && rawMsg.msgId == msg.msgId && msg.sendStatus == 2) {
-    //         rawMsg = msg;
-    //         return true;
-    //       }
-    //     }
-    //     return false;
-    //   })
+    }).catch(logError);
+    let EventListener2 = NTEventDispatch.RegisterListen<NodeIKernelMsgListener['onMsgInfoListUpdate']>('NodeIKernelMsgListener/onMsgInfoListUpdate', 1, timeout,
+      (msgList: RawMessage[]) => {
+        for (let msg of msgList) {
+          if (msg.peerUid == peer.peerUid && rawMsg && rawMsg.msgId == msg.msgId && msg.sendStatus == 2) {
+            rawMsg = msg;
+            return true;
+          }
+        }
+        return false;
+      }).catch(logError);
     await NTEventDispatch.CallNoListenerEvent<NodeIKernelMsgService['sendMsg']>('NodeIKernelMsgService/sendMsg', timeout, "0", peer, msgElements, new Map());
     await EventListener;
+    await EventListener2;
+    console.log("rawMsg", JSON.stringify(rawMsg, null, 4));
     if (rawMsg) {
       return rawMsg;
     }
