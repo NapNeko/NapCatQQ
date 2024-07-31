@@ -26,7 +26,7 @@ if (process.env.NAPCAT_BUILDSYS == 'linux') {
 } else if (process.env.NAPCAT_BUILDSYS == 'win32') {
   if (process.env.NAPCAT_BUILDARCH == 'x64') {
   }
-  startScripts = ['./script/dbghelp.dll', './script/BootWay05-utf8.ps1', './script/BootWay05.ps1', './script/napcat-9912.ps1', './script/napcat-9912-utf8.ps1', './script/napcat-9912.bat', './script/napcat-9912-utf8.bat'];
+  startScripts = ['./script/dbghelp.dll', './script/BootWay05.ps1', './script/napcat-9912.ps1', './script/napcat-9912-utf8.ps1', './script/napcat-9912.bat', './script/napcat-9912-utf8.bat'];
 } else {
   startScripts = ['./script/dbghelp.dll', './script/BootWay05.ps1', './script/napcat.sh', './script/napcat.ps1', './script/napcat.bat', './script/napcat-utf8.bat', './script/napcat-utf8.ps1', './script/napcat-log.ps1', './script/napcat-9912.ps1', './script/napcat-9912-utf8.ps1', './script/napcat-9912.bat', './script/napcat-9912-utf8.bat'];
 }
