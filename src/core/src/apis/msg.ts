@@ -217,7 +217,7 @@ export class NTQQMsgApi {
   static sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
     if (MsgSendMode == 1) {
       return NTQQMsgApi.sendMsgV1(peer, msgElements, waitComplete, timeout);
-    } else if (MsgSendMode == 1) {
+    } else if (MsgSendMode == 2) {
       return NTQQMsgApi.sendMsgV2(peer, msgElements, waitComplete, timeout);
     }
     throw new Error('未知的发送消息模式');
@@ -230,7 +230,7 @@ export class NTQQMsgApi {
     }
     let rawMsg: RawMessage | undefined;
     let EventListener = NTEventDispatch.RegisterListen<NodeIKernelMsgListener['onAddSendMsg']>('NodeIKernelMsgListener/onAddSendMsg', 1, timeout, (msg: RawMessage) => {
-      console.log("msgSeq:", msgCurrentSeq.toString(), JSON.stringify(msgList.msgList[0], null, 4));
+      //console.log("msgSeq:", msgCurrentSeq.toString(), JSON.stringify(msgList.msgList[0], null, 4));
       if (msg.peerUid == peer.peerUid && (msgCurrentSeq == 0n || msgList.msgList[0].msgSeq == msgCurrentSeq.toString())) {
         rawMsg = msg;
         return true;
@@ -250,7 +250,7 @@ export class NTQQMsgApi {
     await NTEventDispatch.CallNoListenerEvent<NodeIKernelMsgService['sendMsg']>('NodeIKernelMsgService/sendMsg', timeout, "0", peer, msgElements, new Map());
     await EventListener;
     await EventListener2;
-    console.log("rawMsg", JSON.stringify(rawMsg, null, 4));
+   // console.log("rawMsg", JSON.stringify(rawMsg, null, 4));
     if (rawMsg) {
       return rawMsg;
     }
