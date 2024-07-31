@@ -176,7 +176,7 @@ export class NTQQMsgApi {
       peerUid: peer.peerUid
     }, msgIds);
   }
-  static async sendMsgV2(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
+  static async sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
     // function generateMsgId() {
     //   const timestamp = Math.floor(Date.now() / 1000);
     //   const random = Math.floor(Math.random() * Math.pow(2, 32));
@@ -215,9 +215,8 @@ export class NTQQMsgApi {
     });
     return retMsg;
   }
-  static sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
-    console.log("sendMsg", peer, msgElements, waitComplete, timeout);
-    return NTQQMsgApi.sendMsgV1(peer, msgElements, waitComplete, timeout);
+  static sendMsgEx(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
+    //return NTQQMsgApi.sendMsgV1(peer, msgElements, waitComplete, timeout);
   }
   static async sendMsgV1(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
     let msgList = await NTQQMsgApi.getLastestMsgByUids(peer);
@@ -226,7 +225,7 @@ export class NTQQMsgApi {
       msgCurrentSeq = BigInt(msgList.msgList[0].msgSeq);
     }
     let rawMsg: RawMessage | undefined;
-    let EventListener = NTEventDispatch.RegisterListen<NodeIKernelMsgListener['onAddSendMsg']>('NodeIKernelMsgListener/onAddSendMsg', 1, timeout, (msg: RawMessage) => {
+    let onAddSendMsgListener = NTEventDispatch.RegisterListen<NodeIKernelMsgListener['onAddSendMsg']>('NodeIKernelMsgListener/onAddSendMsg', 1, timeout, (msg: RawMessage) => {
       //console.log("msgSeq:", msgCurrentSeq.toString(), JSON.stringify(msgList.msgList[0], null, 4));
       if (msg.peerUid == peer.peerUid && (msgCurrentSeq == 0n || msgList.msgList[0].msgSeq == msgCurrentSeq.toString())) {
         rawMsg = msg;
@@ -234,7 +233,7 @@ export class NTQQMsgApi {
       }
       return false;
     }).catch(logError);
-    let EventListener2 = NTEventDispatch.RegisterListen<NodeIKernelMsgListener['onMsgInfoListUpdate']>('NodeIKernelMsgListener/onMsgInfoListUpdate', 1, timeout,
+    let MsgInfoListUpdateListener = NTEventDispatch.RegisterListen<NodeIKernelMsgListener['onMsgInfoListUpdate']>('NodeIKernelMsgListener/onMsgInfoListUpdate', 1, timeout,
       (msgList: RawMessage[]) => {
         for (let msg of msgList) {
           if (msg.peerUid == peer.peerUid && rawMsg && rawMsg.msgId == msg.msgId && msg.sendStatus == 2) {
@@ -246,13 +245,13 @@ export class NTQQMsgApi {
       }).catch(logError);
     let data = await napCatCore.session.getMsgService().sendMsg("0", peer, msgElements, new Map());
     //await NTEventDispatch.CallNoListenerEvent<NodeIKernelMsgService['sendMsg']>('NodeIKernelMsgService/sendMsg', timeout, "0", peer, msgElements, new Map());
-    await EventListener;
+    await onAddSendMsgListener;
     if (data.result !== 0 && rawMsg) {
       //发送失败msgid
       await napCatCore.session.getMsgService().deleteMsg(peer, [rawMsg.msgId]);
       throw new Error('发送消息失败');
     }
-    await EventListener2;
+    await MsgInfoListUpdateListener;
     // console.log("rawMsg", JSON.stringify(rawMsg, null, 4));
     if (rawMsg) {
       return rawMsg;
