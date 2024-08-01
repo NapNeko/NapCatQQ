@@ -101,5 +101,6 @@ export enum ActionName {
     GetProfileLike = 'get_profile_like',
     SetGroupHeader = 'set_group_head',
     FetchCustomFace = 'fetch_custom_face',
-    GOCQHTTP_UploadPrivateFile = 'upload_private_file'
+    GOCQHTTP_UploadPrivateFile = 'upload_private_file',
+    TestApi01 = "test_api_01"
 }

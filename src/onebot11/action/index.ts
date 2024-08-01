@@ -77,6 +77,7 @@ import { GetProfileLike } from './extends/GetProfileLike';
 import SetGroupHeader from './extends/SetGroupHeader';
 import { FetchCustomFace } from './extends/FetchCustomFace';
 import GoCQHTTPUploadPrivateFile from './go-cqhttp/UploadPrivareFile';
+import TestApi01 from './extends/TestApi01';
 
 export const actionHandlers = [
   new RebootNormal(),
@@ -160,7 +161,8 @@ export const actionHandlers = [
   new GetProfileLike(),
   new SetGroupHeader(),
   new FetchCustomFace(),
-  new GoCQHTTPUploadPrivateFile()
+  new GoCQHTTPUploadPrivateFile(),
+  new TestApi01()
 ];
 
 function initActionMap() {
