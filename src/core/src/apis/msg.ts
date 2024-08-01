@@ -7,9 +7,6 @@ import { NodeIKernelMsgListener, onGroupFileInfoUpdateParamType } from '@/core/l
 import { GeneralCallResult } from '@/core/services/common';
 import { MessageUnique } from '../../../common/utils/MessageUnique';
 import { NTEventDispatch } from '@/common/utils/EventTask';
-import { logNotice } from '@/onebot11/log';
-import { c } from 'vite/dist/node/types.d-aGj9QkWt';
-//let MsgSendMode = 2;
 
 async function LoadMessageIdList(Peer: Peer, msgId: string) {
   let msgList = await NTQQMsgApi.getMsgHistory(Peer, msgId, 50);
