@@ -44,6 +44,7 @@ import { deleteGroup, getGroupMember, groupMembers, selfInfo, tempGroupCodeMap }
 import { NTQQFileApi, NTQQGroupApi, NTQQMsgApi, NTQQUserApi } from '@/core/apis';
 import { OB11GroupMsgEmojiLikeEvent } from '@/onebot11/event/notice/OB11MsgEmojiLikeEvent';
 import { OB11FriendPokeEvent, OB11GroupPokeEvent } from './event/notice/OB11PokeEvent';
+import { OB11FriendAddNoticeEvent } from './event/notice/OB11FriendAddNoticeEvent';
 import { OB11BaseNoticeEvent } from './event/notice/OB11BaseNoticeEvent';
 import { OB11GroupEssenceEvent } from './event/notice/OB11GroupEssenceEvent';
 import { MessageUnique } from '@/common/utils/MessageUnique';
@@ -190,7 +191,7 @@ export class OB11Constructor {
         message_data['data']['file'] = FileElement.fileName;
         message_data['data']['path'] = FileElement.filePath;
         message_data['data']['url'] = FileElement.filePath;
-        message_data['data']['file_id'] =  UUIDConverter.encode(msg.peerUin, msg.msgId);
+        message_data['data']['file_id'] = UUIDConverter.encode(msg.peerUin, msg.msgId);
         message_data['data']['file_size'] = FileElement.fileSize;
         await NTQQFileApi.addFileCache({
           peerUid: msg.peerUid,
@@ -352,6 +353,12 @@ export class OB11Constructor {
             }
           }
           //下面得改 上面也是错的grayTipElement.subElementType == GrayTipElementSubType.MEMBER_NEW_TITLE
+        }
+        if (element.grayTipElement.subElementType == GrayTipElementSubType.INVITE_NEW_MEMBER) {
+          //好友添加成功事件
+          if (element.grayTipElement.xmlElement.templId === '10229' && msg.peerUin !== '') {
+            return new OB11FriendAddNoticeEvent(parseInt(msg.peerUin));
+          }
         }
       }
     }
