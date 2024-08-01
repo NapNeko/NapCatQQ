@@ -42,6 +42,8 @@ setTimeout(() => {
     await sleep(100);
     // NTQQMsgApi.CheckSendMode().then().catch();
     loadMessageUnique().then().catch();
+    //let data  = await napCatCore.session.getMsgService().sendSsoCmdReqByContend("LightAppSvc.mini_app_growguard.ReportExecute","1124343");
+    //console.log(data);
   });
 }, 100);
 //歇菜LocalMsg压根不写Db
