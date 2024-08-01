@@ -164,7 +164,6 @@ export const actionHandlers = [
   new GoCQHTTPUploadPrivateFile(),
   new TestApi01()
 ];
-
 function initActionMap() {
   const actionMap = new Map<string, BaseAction<any, any>>();
   for (const action of actionHandlers) {
