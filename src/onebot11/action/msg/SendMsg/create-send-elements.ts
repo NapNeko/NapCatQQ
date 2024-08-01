@@ -12,11 +12,10 @@ import {
   SignMusicWrapper
 } from '@/core';
 import { getGroupMember } from '@/core/data';
-import { logDebug, logError, logWarn } from '@/common/utils/log';
+import { logError, logWarn } from '@/common/utils/log';
 import { uri2local } from '@/common/utils/file';
 import { ob11Config } from '@/onebot11/config';
 import { RequestUtil } from '@/common/utils/request';
-import fs from 'node:fs';
 import { MessageUnique } from '@/common/utils/MessageUnique';
 
 export type MessageContext = {
@@ -25,12 +24,11 @@ export type MessageContext = {
 }
 
 async function handleOb11FileLikeMessage(
-  { data: { file, name: payloadFileName } }: OB11MessageFileBase,
+  { data: inputdata }: OB11MessageFileBase,
   { deleteAfterSentFiles }: MessageContext
 ) {
-  const uri = file;
-
-  const { path, isLocal, fileName, errMsg } = (await uri2local(uri));
+  //有的奇怪的框架将url作为参数 而不是file 此时优先url
+  let { path, isLocal, fileName, errMsg } = (await uri2local(inputdata?.url || inputdata.file));
 
   if (errMsg) {
     logError('文件下载失败', errMsg);
@@ -41,7 +39,7 @@ async function handleOb11FileLikeMessage(
     deleteAfterSentFiles.push(path);
   }
 
-  return { path, fileName: payloadFileName || fileName };
+  return { path, fileName: inputdata.name || fileName };
 }
 
 const _handlers: {
