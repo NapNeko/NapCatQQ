@@ -178,14 +178,14 @@ export interface NodeIKernelMsgService {
 
   getSingleMsg(Peer: Peer, msgSeq: string): Promise<GeneralCallResult & { msgList: RawMessage[] }>;
 
-  getSourceOfReplyMsg(...args: unknown[]): unknown;
+  getSourceOfReplyMsg(peer: Peer, MsgId: string, SourceSeq: string): unknown;
 
-  getSourceOfReplyMsgV2(...args: unknown[]): unknown;
+  getSourceOfReplyMsgV2(peer: Peer, RootMsgId: string, ReplyMsgId: string): unknown;
 
-  getMsgByClientSeqAndTime(...args: unknown[]): unknown;
+  getMsgByClientSeqAndTime(peer: Peer, clientSeq: string, time: string): unknown;
 
-  getSourceOfReplyMsgByClientSeqAndTime(...args: unknown[]): unknown;
-
+  getSourceOfReplyMsgByClientSeqAndTime(peer: Peer, clientSeq: string, time: string): unknown;
+  //cnt clientSeq?并不是吧
   getMsgsByTypeFilter(peer: Peer, msgId: string, cnt: unknown, queryOrder: boolean, typeFilter: { type: number, subtype: Array<number> }): unknown;
 
   getMsgsByTypeFilters(peer: Peer, msgId: string, cnt: unknown, queryOrder: boolean, typeFilters: Array<{ type: number, subtype: Array<number> }>): unknown;
