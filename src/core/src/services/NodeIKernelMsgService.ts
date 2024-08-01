@@ -534,7 +534,7 @@ export interface NodeIKernelMsgService {
 
   queryCalendar(...args: unknown[]): unknown;
 
-  queryFirstMsgSeq(...args: unknown[]): unknown;
+  queryFirstMsgSeq(peer: Peer, ...args: unknown[]): unknown;
 
   queryRoamCalendar(...args: unknown[]): unknown;
 
@@ -628,6 +628,8 @@ export interface NodeIKernelMsgService {
   // this.gameSession = tempChatGameSession;
   prepareTempChat(args: unknown): unknown;//主动临时消息 不做
 
+  sendSsoCmdReqByContend(cmd: string, param: string): Promise<unknown>;
+  
   //chattype,uid->Promise<any>
   getTempChatInfo(ChatType: number, Uid: string): unknown;
 
