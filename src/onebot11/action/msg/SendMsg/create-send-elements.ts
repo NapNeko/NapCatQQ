@@ -22,7 +22,6 @@ export type MessageContext = {
   group?: Group,
   deleteAfterSentFiles: string[],
 }
-
 async function handleOb11FileLikeMessage(
   { data: inputdata }: OB11MessageFileBase,
   { deleteAfterSentFiles }: MessageContext
