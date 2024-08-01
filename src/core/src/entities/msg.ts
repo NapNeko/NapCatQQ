@@ -731,6 +731,7 @@ export interface MultiForwardMsgElement {
 }
 
 export interface RawMessage {
+  guildId: string;
   msgRandom: string;
   // int32, 自己维护的消息id
   id?: number;
