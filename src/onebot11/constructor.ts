@@ -174,6 +174,7 @@ export class OB11Constructor {
         // message_data["data"]["file"] = element.picElement.sourcePath
         message_data['data']['file'] = element.picElement.fileName;
         message_data['data']['subType'] = element.picElement.picSubType;
+        message_data['data']['file_id'] = UUIDConverter.encode(msg.peerUin, msg.msgId);
         // message_data["data"]["path"] = element.picElement.sourcePath
 
         try {
