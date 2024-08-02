@@ -101,33 +101,40 @@ export class OB11Constructor {
       }
     }
     for (const element of msg.elements) {
-      const message_data: OB11MessageData | any = {
-        data: {},
-        type: 'unknown'
+      let message_data: OB11MessageData = {
+        data: {} as any,
+        type: 'unknown' as any
       };
       if (element.textElement && element.textElement?.atType !== AtType.notAt) {
-        message_data['type'] = OB11MessageDataType.at;
+        let qq: `${number}` | 'all';
+        let name: string | undefined;
         if (element.textElement.atType == AtType.atAll) {
-          // message_data["data"]["mention"] = "all"
-          message_data['data']['qq'] = 'all';
+          qq = 'all';
         }
         else {
-          const atUid = element.textElement.atNtUid;
+          const { atNtUid, content } = element.textElement;
           let atQQ = element.textElement.atUid;
           if (!atQQ || atQQ === '0') {
-            const atMember = await getGroupMember(msg.peerUin, atUid);
+            const atMember = await getGroupMember(msg.peerUin, atNtUid);
             if (atMember) {
               atQQ = atMember.uin;
             }
           }
           if (atQQ) {
-            // message_data["data"]["mention"] = atQQ
-            message_data['data']['qq'] = atQQ;
+            qq = atQQ as `${number}`;
+            name = content.replace('@', '');
+          }
+        }
+        message_data = {
+          type: OB11MessageDataType.at,
+          data: {
+            qq: qq!,
+            name
           }
         }
       }
       else if (element.textElement) {
-        message_data['type'] = 'text';
+        message_data['type'] = OB11MessageDataType.text;
 
         let text = element.textElement.content;
         if (!text.trim()) {
@@ -140,7 +147,7 @@ export class OB11Constructor {
         message_data['data']['text'] = text;
       }
       else if (element.replyElement) {
-        message_data['type'] = 'reply';
+        message_data['type'] = OB11MessageDataType.reply;
         //log("收到回复消息", element.replyElement);
         try {
           //做这么多都是因为NC速度太快 可能nt还没有写入数据库
@@ -163,14 +170,14 @@ export class OB11Constructor {
           message_data['data']['id'] = MessageUnique.createMsg({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, replyMsg.msgId)?.toString();
           //log("找到回复消息", message_data['data']['id'], replyMsg.msgList[0].msgId)
         } catch (e: any) {
-          message_data['type'] = "unknown";
+          message_data['type'] = "unknown" as any;
           message_data['data'] = undefined;
           logError('获取不到引用的消息', e.stack, element.replyElement.replayMsgSeq);
         }
 
       }
       else if (element.picElement) {
-        message_data['type'] = 'image';
+        message_data['type'] = OB11MessageDataType.image;
         // message_data["data"]["file"] = element.picElement.sourcePath
         message_data['data']['file'] = element.picElement.fileName;
         message_data['data']['subType'] = element.picElement.picSubType;
@@ -319,7 +326,7 @@ export class OB11Constructor {
         message_data['type'] = OB11MessageDataType.forward;
         message_data['data']['id'] = msg.msgId;
       }
-      if (message_data.type !== 'unknown' && message_data.data) {
+      if ((message_data.type as string) !== 'unknown' && message_data.data) {
         const cqCode = encodeCQCode(message_data);
 
         if (messagePostFormat === 'string') {

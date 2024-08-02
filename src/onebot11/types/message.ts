@@ -114,6 +114,7 @@ export interface OB11MessageAt {
   type: OB11MessageDataType.at
   data: {
     qq: `${number}` | 'all'
+    name?: string
   }
 }
 
@@ -177,13 +178,20 @@ export interface OB11MessageMarkdown {
   }
 }
 
+export interface OB11MessageForward {
+  type: OB11MessageDataType.forward
+  data: {
+    id: string
+  }
+}
+
 export type OB11MessageData =
   OB11MessageText |
   OB11MessageFace | OB11MessageMFace |
   OB11MessageAt | OB11MessageReply |
   OB11MessageImage | OB11MessageRecord | OB11MessageFile | OB11MessageVideo |
   OB11MessageNode | OB11MessageIdMusic | OB11MessageCustomMusic | OB11MessageJson |
-  OB11MessageDice | OB11MessageRPS | OB11MessageMarkdown
+  OB11MessageDice | OB11MessageRPS | OB11MessageMarkdown | OB11MessageForward
 
 export interface OB11PostSendMsg {
   message_type?: 'private' | 'group'
