@@ -131,7 +131,7 @@ export class OB11Constructor {
             qq: qq!,
             name
           }
-        }
+        };
       }
       else if (element.textElement) {
         message_data['type'] = OB11MessageDataType.text;
@@ -170,7 +170,7 @@ export class OB11Constructor {
           message_data['data']['id'] = MessageUnique.createMsg({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, replyMsg.msgId)?.toString();
           //log("找到回复消息", message_data['data']['id'], replyMsg.msgList[0].msgId)
         } catch (e: any) {
-          message_data['type'] = "unknown" as any;
+          message_data['type'] = 'unknown' as any;
           message_data['data'] = undefined;
           logError('获取不到引用的消息', e.stack, element.replyElement.replayMsgSeq);
         }
@@ -206,13 +206,13 @@ export class OB11Constructor {
           chatType: msg.chatType,
           guildId: '',
         },
-          msg.msgId,
-          msg.msgSeq,
-          msg.senderUid,
-          element.elementId,
-          element.elementType.toString(),
-          FileElement.fileSize,
-          FileElement.fileName
+        msg.msgId,
+        msg.msgSeq,
+        msg.senderUid,
+        element.elementId,
+        element.elementType.toString(),
+        FileElement.fileSize,
+        FileElement.fileName
         );
       }
       else if (element.videoElement) {
@@ -253,13 +253,13 @@ export class OB11Constructor {
           chatType: msg.chatType,
           guildId: '',
         },
-          msg.msgId,
-          msg.msgSeq,
-          msg.senderUid,
-          element.elementId,
-          element.elementType.toString(),
-          videoElement.fileSize || '0',
-          videoElement.fileName
+        msg.msgId,
+        msg.msgSeq,
+        msg.senderUid,
+        element.elementId,
+        element.elementType.toString(),
+        videoElement.fileSize || '0',
+        videoElement.fileName
         );
       }
       else if (element.pttElement) {
@@ -274,13 +274,13 @@ export class OB11Constructor {
           chatType: msg.chatType,
           guildId: '',
         },
-          msg.msgId,
-          msg.msgSeq,
-          msg.senderUid,
-          element.elementId,
-          element.elementType.toString(),
-          element.pttElement.fileSize || '0',
-          element.pttElement.fileUuid || ''
+        msg.msgId,
+        msg.msgSeq,
+        msg.senderUid,
+        element.elementId,
+        element.elementType.toString(),
+        element.pttElement.fileSize || '0',
+        element.pttElement.fileUuid || ''
         );
         //以uuid作为文件名
       }
