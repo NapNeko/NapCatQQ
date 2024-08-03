@@ -1,19 +1,33 @@
 import { Friend } from '@/core/entities';
 import { GeneralCallResult } from '@/core/services/common';
 import { NodeIKernelBuddyListener } from '@/core/listeners';
-
+export enum BuddyListReqType {
+  KNOMAL,
+  KLETTER
+}
 export interface NodeIKernelBuddyService {
-  // 以下为自行添加的，wrapper.node中并没有这些方法,目的是简化调用
-  friends: Friend[];
-
-  getFriend(uidOrUin: string): Promise<Friend>;
-
+  // 26702 以上
+  getBuddyListV2(callFrom: string, reqType: BuddyListReqType): Promise<GeneralCallResult>;
+  //26702 以上
+  getBuddyListFromCache(callFrom: string): Promise<Array<
+    {
+      categoryId: number,//9999应该跳过 那是兜底数据吧
+      categorySortId: number,//排序方式
+      categroyName: string,//分类名
+      categroyMbCount: number,//不懂
+      onlineCount: number,//在线数目
+      buddyUids: Array<string>//Uids
+    }>>;
   // 以下为原生方法
   addKernelBuddyListener(listener: NodeIKernelBuddyListener): number;
 
   removeKernelBuddyListener(listener: unknown): void;
 
-  getBuddyList(bool: boolean): Promise<GeneralCallResult>;
+  /**
+   * @deprecated
+   * @param nocache 使用缓存
+   */
+  getBuddyList(nocache: boolean): Promise<GeneralCallResult>;
 
   getBuddyNick(uid: number): string;
 

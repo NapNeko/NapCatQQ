@@ -9,7 +9,44 @@ import {
 import { GeneralCallResult } from '@/core/services/common';
 
 export interface NodeIKernelGroupService {
-  setHeader(uid:string,path:string): unknown;
+  getGroupMemberLevelInfo(groupCode: string): Promise<unknown>;
+  //26702
+  getGroupHonorList(groupCodes: Array<string>): unknown;
+  getUinByUids(uins: string[]): Promise<unknown>;
+  getUidByUins(uins: string[]): Promise<unknown>;
+  //26702(其实更早 但是我不知道)
+  checkGroupMemberCache(arrayList: Array<string>): Promise<unknown>;
+  //26702(其实更早 但是我不知道)
+  getGroupLatestEssenceList(groupCode: string): Promise<unknown>;
+  //26702(其实更早 但是我不知道)
+  shareDigest(Req: {
+    appId: string,
+    appType: number,
+    msgStyle: number,
+    recvUin: string,
+    sendType: number,
+    clientInfo: {
+      platform: number
+    },
+    richMsg: {
+      usingArk: boolean,
+      title: string,
+      summary: string,
+      url: string,
+      pictureUrl: string,
+      brief: string
+    }
+  }): Promise<unknown>;
+  //26702(其实更早 但是我不知道)
+  isEssenceMsg(Req: { groupCode: string, msgRandom: number, msgSeq: number }): Promise<unknown>;
+  //26702(其实更早 但是我不知道)
+  queryCachedEssenceMsg(Req: { groupCode: string, msgRandom: number, msgSeq: number }): Promise<unknown>;
+  //26702(其实更早 但是我不知道)
+  fetchGroupEssenceList(Req: { groupCode: string, pageStart: number, pageLimit: number }, Arg: unknown): Promise<unknown>;
+  //26702
+  getAllMemberList(groupCode: string, refresh: boolean): Promise<unknown>;
+
+  setHeader(uid: string, path: string): unknown;
 
   addKernelGroupListener(listener: NodeIKernelGroupListener): number;
 
@@ -39,7 +76,7 @@ export interface NodeIKernelGroupService {
 
   modifyMemberCardName(groupCode: string, uid: string, cardName: string): void;
 
-  getTransferableMemberInfo(uid: string): unknown;
+  getTransferableMemberInfo(groupCode: string): unknown;//获取整个群的
 
   transferGroup(uid: string): void;
 
