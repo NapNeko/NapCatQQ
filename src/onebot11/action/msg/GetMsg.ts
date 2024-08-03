@@ -36,7 +36,7 @@ class GetMsg extends BaseAction<Payload, OB11Message> {
     const msg = await NTQQMsgApi.getMsgsByMsgId(
       peer,
       [msgIdWithPeer?.MsgId || payload.message_id.toString()]);
-    let retMsg = await OB11Constructor.message(msg.msgList[0]);
+    const retMsg = await OB11Constructor.message(msg.msgList[0]);
     try {
       retMsg.message_id = MessageUnique.createMsg(peer, msg.msgList[0].msgId)!;
       retMsg.message_seq = retMsg.message_id;

@@ -1,9 +1,9 @@
-import { ChatType, ElementType, GetFileListParam, MessageElement, Peer, RawMessage, SendMessageElement, SendMsgElementConstructor } from '@/core/entities';
+import { GetFileListParam, Peer, RawMessage, SendMessageElement, SendMsgElementConstructor } from '@/core/entities';
 import { friends, groups, selfInfo } from '@/core/data';
-import { log, logError, logWarn } from '@/common/utils/log';
+import { log, logWarn } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';
-import { napCatCore, NodeIKernelMsgService, NTQQUserApi } from '@/core';
-import { NodeIKernelMsgListener, onGroupFileInfoUpdateParamType } from '@/core/listeners';
+import { napCatCore, NTQQUserApi } from '@/core';
+import { onGroupFileInfoUpdateParamType } from '@/core/listeners';
 import { GeneralCallResult } from '@/core/services/common';
 import { MessageUnique } from '../../../common/utils/MessageUnique';
 import { NTEventDispatch } from '@/common/utils/EventTask';
@@ -67,25 +67,6 @@ setTimeout(() => {
 // }, 25000)
 
 export class NTQQMsgApi {
-  // static async CheckSendMode() {
-  //   try {
-  //     NTQQMsgApi.sendMsgV2({ chatType: 1, peerUid: selfInfo.uid }, [SendMsgElementConstructor.text('消息队列模式测试')], true, 10000).then().catch();
-  //     MsgSendMode = 2;
-  //     logNotice('[消息队列] 消息模式确认: MsgId异步队列');
-  //     return true;
-  //   } catch (error) {
-  //     logNotice('[消息队列] 消息模式失败: MsgId异步队列');
-  //   }
-  //   try {
-  //     NTQQMsgApi.sendMsgV1({ chatType: 1, peerUid: selfInfo.uid }, [SendMsgElementConstructor.text('消息队列模式测试')], true, 10000).then().catch();
-  //     MsgSendMode = 1;
-  //     logNotice('[消息队列] 消息模式确认: MsgSeq异步队列');
-  //     return true;
-  //   } catch (error) {
-  //     logNotice('[消息队列] 消息模式失败: MsgSeq异步队列');
-  //   }
-  //   return false;
-  // }
   // static napCatCore: NapCatCore | null = null;
   //   enum BaseEmojiType {
   //     NORMAL_EMOJI,
