@@ -106,7 +106,7 @@ export class NTQQMsgApi {
   } | undefined> {
     return napCatCore.session.getMsgService().getMultiMsg(peer, rootMsgId, parentMsgId);
   }
-  static async getLastestMsgByUids(peer: Peer) {
+  static async getLastestMsgByUids(peer: Peer, count: number = 20) {
     let ret = await napCatCore.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {
       chatInfo: peer,
       filterMsgType: [],

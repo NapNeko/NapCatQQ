@@ -2,7 +2,7 @@ import BaseAction from '../BaseAction';
 import { OB11Message, OB11User } from '../../types';
 import { getGroup, groups } from '@/core/data';
 import { ActionName } from '../types';
-import { ChatType } from '@/core/entities';
+import { ChatType, RawMessage } from '@/core/entities';
 import { NTQQMsgApi } from '@/core/apis/msg';
 import { OB11Constructor } from '../../constructor';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
@@ -36,13 +36,13 @@ export default class GoCQHTTPGetGroupMsgHistory extends BaseAction<Payload, Resp
       chatType: ChatType.group,
       peerUid: group.groupCode
     };
+    let msgList: RawMessage[];
     if (!payload.message_seq) {
-      const latestMsgId = (await NTQQMsgApi.getLastestMsgByUids(peer)).msgList[0].msgId;
-      targetMsgShortId = await MessageUnique.createMsg(peer, latestMsgId || '0');
+      msgList = (await NTQQMsgApi.getLastestMsgByUids(peer, count)).msgList;
+    } else {
+      const startMsgId = (await MessageUnique.getMsgIdAndPeerByShortId(targetMsgShortId ?? (payload.message_seq ?? 0)))?.MsgId || '0';
+      msgList = (await NTQQMsgApi.getMsgHistory(peer, startMsgId, count)).msgList;
     }
-    const startMsgId = (await MessageUnique.getMsgIdAndPeerByShortId(targetMsgShortId ?? (payload.message_seq ?? 0)))?.MsgId || '0';
-    const historyResult = (await NTQQMsgApi.getMsgHistory(peer, startMsgId, count));
-    const msgList = historyResult.msgList;
     await Promise.all(msgList.map(async msg => {
       msg.id = await MessageUnique.createMsg({ guildId: '', chatType: msg.chatType, peerUid: msg.peerUid }, msg.msgId);
     }));
