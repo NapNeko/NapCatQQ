@@ -592,7 +592,7 @@ export interface NodeIKernelMsgService {
   // this.selfPhone = str5;
   // this.gameSession = tempChatGameSession;
   prepareTempChat(args: unknown): unknown;//主动临时消息 不做
-
+  
   sendSsoCmdReqByContend(cmd: string, param: string): Promise<unknown>;
 
   //chattype,uid->Promise<any>

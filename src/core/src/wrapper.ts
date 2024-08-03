@@ -42,6 +42,7 @@ import { NodeIKernelCollectionService } from './services/NodeIKernelCollectionSe
 import { NodeIKernelRecentContactService } from './services/NodeIKernelRecentContactService';
 import { NodeIKernelMSFService } from './services/NodeIKernelMSFService';
 import { NodeIkernelTestPerformanceService } from './services/NodeIkernelTestPerformanceService';
+import { NodeIKernelECDHService } from './services/NodeIKernelECDHService';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -156,6 +157,10 @@ export interface NodeIQQNTWrapperSession {
   startNT(n: 0): void;
 
   startNT(): void;
+
+  getBdhUploadService(): unknown;
+  
+  getECDHService(): NodeIKernelECDHService;
 
   getMsgService(): NodeIKernelMsgService;
 
