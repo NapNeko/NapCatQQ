@@ -66,8 +66,6 @@ setTimeout(() => {
 //   console.log(await NTQQMsgApi.multiForwardMsg(peer, peer, [MsgId]));
 // }, 25000)
 
-let SendMsgSeq = new Map<Peer, Array<number>>();
-
 export class NTQQMsgApi {
   // static async CheckSendMode() {
   //   try {
@@ -175,12 +173,6 @@ export class NTQQMsgApi {
       chatType: peer.chatType,
       peerUid: peer.peerUid
     }, msgIds);
-  }
-  //并发Seq
-  static async sendMsgV3(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
-    let msgList = await NTQQMsgApi.getLastestMsgByUids(peer);
-    let data = await napCatCore.session.getMsgService().sendMsg("0", peer, msgElements, new Map());
-    SendMsgSeq.get(peer)?.push()
   }
   static async sendMsgV2(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
     // function generateMsgId() {
