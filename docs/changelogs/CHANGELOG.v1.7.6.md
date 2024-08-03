@@ -1,4 +1,4 @@
-# v1.7.5
+# v1.7.6
 
 QQ Version: Windows 9.9.15-26702 / Linux 3.2.12-26702
 

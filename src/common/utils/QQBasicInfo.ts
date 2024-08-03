@@ -72,7 +72,7 @@ export function requireMinNTQBuild(buildStr: string) {
 }
 let _appid: string = '537237765';  // 默认为 Windows 平台的 appid
 if (systemPlatform === 'linux') {
-  _appid = '537234773';
+  _appid = '537237950';
 }
 // todo: mac 平台的 appid
 export const appid = _appid;
