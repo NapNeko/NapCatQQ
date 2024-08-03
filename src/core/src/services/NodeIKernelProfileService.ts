@@ -2,8 +2,19 @@ import { AnyCnameRecord } from 'node:dns';
 import { BizKey, ModifyProfileParams, UserDetailInfoByUin } from '../entities';
 import { NodeIKernelProfileListener } from '../listeners';
 import { GeneralCallResult } from '@/core/services/common';
-
+export enum UserDetailSource {
+  KDB,
+  KSERVER
+}
+export enum ProfileBizType {
+  KALL,
+  KBASEEXTEND,
+  KVAS,
+  KQZONE,
+  KOTHER
+}
 export interface NodeIKernelProfileService {
+  fetchUserDetailInfo(trace: string, uids: string[], arg2: number, arg3: number[]): Promise<unknown>;
 
   addKernelProfileListener(listener: NodeIKernelProfileListener): number;
 
