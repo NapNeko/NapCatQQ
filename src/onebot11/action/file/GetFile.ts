@@ -50,17 +50,17 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
     try {
       UuidData = UUIDConverter.decode(payload.file);
       if (UuidData) {
-        let peerUin = UuidData.high;
-        let msgId = UuidData.low;
-        let isGroup = await getGroup(peerUin);
+        const peerUin = UuidData.high;
+        const msgId = UuidData.low;
+        const isGroup = await getGroup(peerUin);
         let peer: Peer | undefined;
         //识别Peer
         if (isGroup) {
           peer = { chatType: ChatType.group, peerUid: peerUin };
         }
-        let PeerUid = await NTQQUserApi.getUidByUin(peerUin);
+        const PeerUid = await NTQQUserApi.getUidByUin(peerUin);
         if (PeerUid) {
-          let isBuddy = await NTQQFriendApi.isBuddy(PeerUid);
+          const isBuddy = await NTQQFriendApi.isBuddy(PeerUid);
           if (isBuddy) {
             peer = { chatType: ChatType.friend, peerUid: PeerUid };
           } else {
@@ -70,18 +70,18 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
         if (!peer) {
           throw new Error('chattype not support');
         }
-        let msgList = await NTQQMsgApi.getMsgsByMsgId(peer, [msgId]);
+        const msgList = await NTQQMsgApi.getMsgsByMsgId(peer, [msgId]);
         if (msgList.msgList.length == 0) {
           throw new Error('msg not found');
         }
-        let msg = msgList.msgList[0];
-        let findEle = msg.elements.find(e => e.elementType == ElementType.VIDEO || e.elementType == ElementType.FILE || e.elementType == ElementType.PTT);
+        const msg = msgList.msgList[0];
+        const findEle = msg.elements.find(e => e.elementType == ElementType.VIDEO || e.elementType == ElementType.FILE || e.elementType == ElementType.PTT);
         if (!findEle) {
           throw new Error('element not found');
         }
-        let downloadPath = await NTQQFileApi.downloadMedia(msgId, msg.chatType, msg.peerUid, findEle.elementId, '', '');
-        let fileSize = findEle?.videoElement?.fileSize || findEle?.fileElement?.fileSize || findEle?.pttElement?.fileSize || '0';
-        let fileName = findEle?.videoElement?.fileName || findEle?.fileElement?.fileName || findEle?.pttElement?.fileName || '';
+        const downloadPath = await NTQQFileApi.downloadMedia(msgId, msg.chatType, msg.peerUid, findEle.elementId, '', '');
+        const fileSize = findEle?.videoElement?.fileSize || findEle?.fileElement?.fileSize || findEle?.pttElement?.fileSize || '0';
+        const fileName = findEle?.videoElement?.fileName || findEle?.fileElement?.fileName || findEle?.pttElement?.fileName || '';
         const res: GetFileResponse = {
           file: downloadPath,
           url: downloadPath,

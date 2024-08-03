@@ -27,7 +27,7 @@ async function handleOb11FileLikeMessage(
   { deleteAfterSentFiles }: MessageContext
 ) {
   //有的奇怪的框架将url作为参数 而不是file 此时优先url
-  let { path, isLocal, fileName, errMsg } = (await uri2local(inputdata?.url || inputdata.file));
+  const { path, isLocal, fileName, errMsg } = (await uri2local(inputdata?.url || inputdata.file));
 
   if (errMsg) {
     logError('文件下载失败', errMsg);
