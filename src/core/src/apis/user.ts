@@ -67,15 +67,15 @@ export class NTQQUserApi {
   // }
   static async fetchUserDetailInfo(uid: string) {
     type EventService = NodeIKernelProfileService['fetchUserDetailInfo'];
-    type EventListener = NodeIKernelProfileListener['onProfileDetailInfoChanged'];
+    type EventListener = NodeIKernelProfileListener['onUserDetailInfoChanged'];
     let [_retData, profile] = await NTEventDispatch.CallNormalEvent
       <EventService, EventListener>
       (
-        'NodeIKernelProfileService/getUserDetailInfoWithBizInfo',
-        'NodeIKernelProfileListener/onProfileDetailInfoChanged',
+        'NodeIKernelProfileService/fetchUserDetailInfo',
+        'NodeIKernelProfileListener/onUserDetailInfoChanged',
         2,
         5000,
-        (profile: User) => {
+        (profile) => {
           if (profile.uid === uid) {
             return true;
           }
@@ -90,10 +90,19 @@ export class NTQQUserApi {
           ProfileBizType.KALL
         ]
       );
-    return profile;
+    let RetUser: User = {
+      ...profile.simpleInfo.baseInfo,
+      ...profile.simpleInfo.coreInfo,
+      ...profile.simpleInfo.status,
+      ...profile.commonExt,
+      ...profile.simpleInfo.vasInfo,
+      ...profile.simpleInfo.relationFlags,
+      ...profile.simpleInfo.otherFlags,
+      ...profile.simpleInfo.intimate
+    };
+    return RetUser;
   }
   static async getUserDetailInfo(uid: string) {
-    //此处需要判断是否支持新接口 同时呢应该是临时方案
     if (requireMinNTQBuild('26702')) {
       return this.fetchUserDetailInfo(uid);
     }
