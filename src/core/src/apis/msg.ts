@@ -1,4 +1,4 @@
-import { ElementType, GetFileListParam, MessageElement, Peer, RawMessage, SendMessageElement, SendMsgElementConstructor } from '@/core/entities';
+import { ChatType, ElementType, GetFileListParam, MessageElement, Peer, RawMessage, SendMessageElement, SendMsgElementConstructor } from '@/core/entities';
 import { friends, groups, selfInfo } from '@/core/data';
 import { log, logError, logWarn } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';
@@ -7,6 +7,7 @@ import { NodeIKernelMsgListener, onGroupFileInfoUpdateParamType } from '@/core/l
 import { GeneralCallResult } from '@/core/services/common';
 import { MessageUnique } from '../../../common/utils/MessageUnique';
 import { NTEventDispatch } from '@/common/utils/EventTask';
+import { requireMinNTQBuild } from '@/common/utils/QQBasicInfo';
 
 async function LoadMessageIdList(Peer: Peer, msgId: string) {
   let msgList = await NTQQMsgApi.getMsgHistory(Peer, msgId, 50);
@@ -192,7 +193,7 @@ export class NTQQMsgApi {
     //   return msgId;
     // }
 
-    let msgId = await NTQQMsgApi.getMsgUnique(await NTQQMsgApi.getServerTime());
+    let msgId = await NTQQMsgApi.getMsgUnique(peer.chatType, await NTQQMsgApi.getServerTime());
     let data = await NTEventDispatch.CallNormalEvent<
       (msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<any, any>) => Promise<unknown>,
       (msgList: RawMessage[]) => void
@@ -226,7 +227,7 @@ export class NTQQMsgApi {
   }
   static async sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
     //唉？ ！我有个想法
-    let msgId = await NTQQMsgApi.getMsgUnique(await NTQQMsgApi.getServerTime());
+    let msgId = await NTQQMsgApi.getMsgUnique(peer.chatType, await NTQQMsgApi.getServerTime());
     peer.guildId = msgId;
     let data = await NTEventDispatch.CallNormalEvent<
       (msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<any, any>) => Promise<unknown>,
@@ -256,15 +257,11 @@ export class NTQQMsgApi {
     });
     return retMsg;
   }
-  static async getMsgUniqueEx() {
-    let msgId = await NTQQMsgApi.getMsgUnique(await NTQQMsgApi.getServerTime());
-    return msgId;
-  }
-  static async getMsgUnique(time: string) {
+  static async getMsgUnique(chatType: number, time: string) {
+    if (requireMinNTQBuild('26702')) {
+      return napCatCore.session.getMsgService().generateMsgUniqueId(chatType, time);
+    }
     return napCatCore.session.getMsgService().getMsgUniqueId(time);
-  }
-  static async getMsgUniqueByTimeV2() {
-    return NTEventDispatch.CallNoListenerEvent<NodeIKernelMsgService['getMsgUniqueId']>('NodeIKernelMsgService/getMsgUniqueId', 5000, await NTQQMsgApi.getServerTimeV2())
   }
   static async getServerTime() {
     return napCatCore.session.getMSFService().getServerTime();
