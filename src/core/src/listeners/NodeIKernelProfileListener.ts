@@ -1,8 +1,8 @@
-import { User } from '@/core/entities';
+import { User, UserDetailInfoListenerArg } from '@/core/entities';
 
 interface IProfileListener {
   onProfileSimpleChanged(...args: unknown[]): void;
-
+  onUserDetailInfoChanged(arg: UserDetailInfoListenerArg): void;
   onProfileDetailInfoChanged(profile: User): void;
 
   onStatusUpdate(...args: unknown[]): void;
@@ -18,6 +18,9 @@ export interface NodeIKernelProfileListener extends IProfileListener {
 }
 
 export class ProfileListener implements IProfileListener {
+  onUserDetailInfoChanged(arg: UserDetailInfoListenerArg): void {
+    
+  }
   onProfileSimpleChanged(...args: unknown[]) {
 
   }
