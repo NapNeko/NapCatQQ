@@ -2,6 +2,16 @@ import { ElementType, MessageElement, Peer, RawMessage, SendMessageElement } fro
 import { NodeIKernelMsgListener } from '@/core/listeners/NodeIKernelMsgListener';
 import { GeneralCallResult } from '@/core/services/common';
 
+export interface QueryMsgsParams {
+  chatInfo: Peer,
+  filterMsgType: [],
+  filterSendersUid: [],
+  filterMsgFromTime: string,
+  filterMsgToTime: string,
+  pageLimit: number,
+  isReverseOrder: boolean,
+  isIncludeCurrent: boolean
+}
 export interface NodeIKernelMsgService {
 
   generateMsgUniqueId(chatType: number, time: string): string;
@@ -217,19 +227,7 @@ export interface NodeIKernelMsgService {
    * @param param.isIncludeCurrent 是否包含当前页码。
    * @returns 返回一个Promise，解析为查询结果的未知类型对象。
    */
-  queryMsgsWithFilterVer2(MsgId: string, MsgTime: string, param: {
-    chatInfo: {
-      chatType: number,
-      peerUid: string
-    },
-    filterMsgType: [],
-    filterSendersUid: Array<string>,
-    filterMsgFromTime: string,
-    filterMsgToTime: string,
-    pageLimit: number,
-    isReverseOrder: boolean,
-    isIncludeCurrent: boolean
-  }): Promise<unknown>;
+  queryMsgsWithFilterVer2(MsgId: string, MsgTime: string, param: QueryMsgsParams): Promise<unknown>;
 
   // this.chatType = i2;
   // this.peerUid = str;
@@ -246,19 +244,7 @@ export interface NodeIKernelMsgService {
   // this.isReverseOrder = z;
   // this.isIncludeCurrent = z2;
   //queryMsgsWithFilterEx(0L, 0L, 0L, new QueryMsgsParams(new ChatInfo(2, str), new ArrayList(), new ArrayList(), 0L, 0L, 250, false, true))
-  queryMsgsWithFilterEx(msgId: string, msgTime: string, megSeq: string, param: {
-    chatInfo: {
-      chatType: number,
-      peerUid: string
-    },
-    filterMsgType: [],
-    filterSendersUid: string[],
-    filterMsgFromTime: string,
-    filterMsgToTime: string,
-    pageLimit: number,
-    isReverseOrder: boolean,
-    isIncludeCurrent: boolean
-  }): Promise<GeneralCallResult & {
+  queryMsgsWithFilterEx(msgId: string, msgTime: string, megSeq: string, param: QueryMsgsParams): Promise<GeneralCallResult & {
     msgList: RawMessage[]
   }>;
   //queryMsgsWithFilterEx(this.$msgId, this.$msgTime, this.$msgSeq, this.$param)
@@ -266,39 +252,15 @@ export interface NodeIKernelMsgService {
 
   setMsgRichInfoFlag(...args: unknown[]): unknown;
 
-  queryPicOrVideoMsgs(msgId: string, msgTime: string, megSeq: string, param: {
-    chatInfo: {
-      chatType: number,
-      peerUid: string
-    },
-    filterMsgType: [],
-    filterSendersUid: [],
-    filterMsgFromTime: string,
-    filterMsgToTime: string,
-    pageLimit: number,
-    isReverseOrder: boolean,
-    isIncludeCurrent: boolean
-  }): Promise<unknown>;
+  queryPicOrVideoMsgs(msgId: string, msgTime: string, megSeq: string, param: QueryMsgsParams): Promise<unknown>;
 
   queryPicOrVideoMsgsDesktop(...args: unknown[]): unknown;
 
-  queryEmoticonMsgs(...args: unknown[]): unknown;
+  queryEmoticonMsgs(msgId: string, msgTime: string, msgSeq: string, Params: QueryMsgsParams): Promise<unknown>;
 
-  queryTroopEmoticonMsgs(...args: unknown[]): unknown;
+  queryTroopEmoticonMsgs(msgId: string, msgTime: string, msgSeq: string, Params: QueryMsgsParams): Promise<unknown>;
 
-  queryMsgsAndAbstractsWithFilter(msgId: string, msgTime: string, megSeq: string, param: {
-    chatInfo: {
-      chatType: number,
-      peerUid: string
-    },
-    filterMsgType: [],
-    filterSendersUid: [],
-    filterMsgFromTime: string,
-    filterMsgToTime: string,
-    pageLimit: number,
-    isReverseOrder: boolean,
-    isIncludeCurrent: boolean
-  }): unknown;
+  queryMsgsAndAbstractsWithFilter(msgId: string, msgTime: string, megSeq: string, param: QueryMsgsParams): unknown;
 
   setFocusOnGuild(...args: unknown[]): unknown;
 
