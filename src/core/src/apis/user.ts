@@ -73,7 +73,7 @@ export class NTQQUserApi {
       (
         'NodeIKernelProfileService/fetchUserDetailInfo',
         'NodeIKernelProfileListener/onUserDetailInfoChanged',
-        2,
+        1,
         5000,
         (profile) => {
           if (profile.uid === uid) {
@@ -85,20 +85,19 @@ export class NTQQUserApi {
         [
           uid
         ],
-        UserDetailSource.KDB,
+        UserDetailSource.KSERVER,
         [
           ProfileBizType.KALL
         ]
       );
     let RetUser: User = {
-      ...profile.simpleInfo.baseInfo,
       ...profile.simpleInfo.coreInfo,
       ...profile.simpleInfo.status,
-      ...profile.commonExt,
       ...profile.simpleInfo.vasInfo,
-      ...profile.simpleInfo.relationFlags,
-      ...profile.simpleInfo.otherFlags,
-      ...profile.simpleInfo.intimate
+      ...profile.commonExt,
+      ...profile.simpleInfo.baseInfo,
+      qqLevel: profile.commonExt.qqLevel,
+      pendantId: ""
     };
     return RetUser;
   }
