@@ -3,6 +3,9 @@ import { NodeIKernelMsgListener } from '@/core/listeners/NodeIKernelMsgListener'
 import { GeneralCallResult } from '@/core/services/common';
 
 export interface NodeIKernelMsgService {
+
+  generateMsgUniqueId(chatType: number, time: string): string;
+
   addKernelMsgListener(nodeIKernelMsgListener: NodeIKernelMsgListener): number;
 
   sendMsg(msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<any, any>): Promise<GeneralCallResult>;
@@ -629,7 +632,7 @@ export interface NodeIKernelMsgService {
   prepareTempChat(args: unknown): unknown;//主动临时消息 不做
 
   sendSsoCmdReqByContend(cmd: string, param: string): Promise<unknown>;
-  
+
   //chattype,uid->Promise<any>
   getTempChatInfo(ChatType: number, Uid: string): unknown;
 

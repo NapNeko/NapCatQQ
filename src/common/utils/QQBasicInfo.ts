@@ -3,7 +3,6 @@ import fs from 'node:fs';
 import os from 'node:os';
 import { systemPlatform } from '@/common/utils/system';
 import { logError } from '@/common/utils/log';
-
 export const exePath = process.execPath;
 
 export const pkgInfoPath = path.join(path.dirname(exePath), 'resources', 'app', 'package.json');
@@ -47,7 +46,7 @@ let _qqVersionConfigInfo: QQVersionConfigInfo = {
 
 if (fs.existsSync(configVersionInfoPath)) {
   try {
-    const _ =JSON.parse(fs.readFileSync(configVersionInfoPath).toString());
+    const _ = JSON.parse(fs.readFileSync(configVersionInfoPath).toString());
     _qqVersionConfigInfo = Object.assign(_qqVersionConfigInfo, _);
   } catch (e) {
     logError('Load QQ version config info failed, Use default version', e);
@@ -68,7 +67,9 @@ export const qqPkgInfo: QQPkgInfo = JSON.parse(fs.readFileSync(pkgInfoPath).toSt
 // Linux
 // app_version: '3.2.9-25765',
 // qua: 'V1_LNX_NQ_3.2.10_25765_GW_B',
-
+export function requireMinNTQBuild(buildStr: string) {
+  return parseInt(qqVersionConfigInfo.buildId) >= parseInt(buildStr);
+}
 let _appid: string = '537237765';  // 默认为 Windows 平台的 appid
 if (systemPlatform === 'linux') {
   _appid = '537234773';
