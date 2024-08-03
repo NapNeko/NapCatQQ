@@ -6,7 +6,8 @@ import { NodeIKernelProfileListener, ProfileListener } from '@/core/listeners';
 import { RequestUtil } from '@/common/utils/request';
 import { logWarn } from '@/common/utils/log';
 import { NTEventDispatch } from '@/common/utils/EventTask';
-import { NodeIKernelProfileService } from '@/core/services';
+import { NodeIKernelProfileService, ProfileBizType, UserDetailSource } from '@/core/services';
+import { requireMinNTQBuild } from '@/common/utils/QQBasicInfo';
 
 export class NTQQUserApi {
   static async getProfileLike(uid: string) {
@@ -64,7 +65,41 @@ export class NTQQUserApi {
   //     KQZONE,
   //     KOTHER
   // }
+  static async fetchUserDetailInfo(uid: string) {
+    type EventService = NodeIKernelProfileService['fetchUserDetailInfo'];
+    type EventListener = NodeIKernelProfileListener['onProfileDetailInfoChanged'];
+    let [_retData, profile] = await NTEventDispatch.CallNormalEvent
+      <EventService, EventListener>
+      (
+        'NodeIKernelProfileService/getUserDetailInfoWithBizInfo',
+        'NodeIKernelProfileListener/onProfileDetailInfoChanged',
+        2,
+        5000,
+        (profile: User) => {
+          if (profile.uid === uid) {
+            return true;
+          }
+          return false;
+        },
+        "BuddyProfileStore",
+        [
+          uid
+        ],
+        UserDetailSource.KDB,
+        [
+          ProfileBizType.KALL
+        ]
+      );
+    return profile;
+  }
   static async getUserDetailInfo(uid: string) {
+    //此处需要判断是否支持新接口 同时呢应该是临时方案
+    if (requireMinNTQBuild('26702')) {
+      return this.fetchUserDetailInfo(uid);
+    }
+    return this.getUserDetailInfoOld(uid);
+  }
+  static async getUserDetailInfoOld(uid: string) {
     type EventService = NodeIKernelProfileService['getUserDetailInfoWithBizInfo'];
     type EventListener = NodeIKernelProfileListener['onProfileDetailInfoChanged'];
     let [_retData, profile] = await NTEventDispatch.CallNormalEvent
