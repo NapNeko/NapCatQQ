@@ -21,6 +21,8 @@ export interface NodeIKernelBuddyService {
   // 以下为原生方法
   addKernelBuddyListener(listener: NodeIKernelBuddyListener): number;
 
+  getAllBuddyCount(): number;
+  
   removeKernelBuddyListener(listener: unknown): void;
 
   /**
