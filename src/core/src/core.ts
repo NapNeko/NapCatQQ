@@ -84,7 +84,6 @@ export class NapCatCore {
         const dataPath = path.resolve(this.dataPath, './NapCat/data');
         fs.mkdirSync(dataPath, { recursive: true });
         logDebug('本账号数据/缓存目录：', dataPath);
-        // dbUtil.init(path.resolve(dataPath, `./${arg.uin}-v2.db`)).then(() => {
         this.initDataListener();
         this.onLoginSuccessFuncList.map(cb => {
           new Promise((resolve, reject) => {
@@ -94,11 +93,6 @@ export class NapCatCore {
             }
           }).then();
         });
-        // }).catch((e) => {
-        //   logError('数据库初始化失败', e);
-        // });
-        // this.initDataListener();
-
       }).catch((e) => {
         logError('initSession failed', e);
         throw new Error(`启动失败: ${JSON.stringify(e)}`);
@@ -258,7 +252,7 @@ export class NapCatCore {
       stat.packet_received += 1;
     };
     this.addListener(msgListener);
-    // 好友相关
+    // 好友相关 
     const buddyListener = new BuddyListener();
     buddyListener.onBuddyListChange = arg => {
       rawFriends.length = 0;
