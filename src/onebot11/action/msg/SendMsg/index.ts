@@ -10,6 +10,7 @@ import { ActionName, BaseCheckResult } from '@/onebot11/action/types';
 import { getGroup } from '@/core/data';
 import { ChatType, ElementType, Group, NTQQFileApi, NTQQFriendApi, NTQQMsgApi, NTQQUserApi, Peer, SendMessageElement, } from '@/core';
 import fs from 'node:fs';
+import fsPromise from 'node:fs/promises';
 import { logDebug, logError } from '@/common/utils/log';
 import { decodeCQCode } from '@/onebot11/cqcode';
 import createSendElements from './create-send-elements';
@@ -71,14 +72,7 @@ export async function sendMsg(peer: Peer, sendElements: SendMessageElement[], de
     logDebug('发送消息id获取失败', e);
     returnMsg!.id = 0;
   }
-
-  deleteAfterSentFiles.map((f) => {
-    try {
-      fs.unlinkSync(f);
-    } catch (e) {
-      logError('发送消息删除文件失败', e);
-    }
-  });
+  deleteAfterSentFiles.map((f) => { fsPromise.unlink(f).then().catch(e => logError('发送消息删除文件失败', e)); });
   return returnMsg;
 }
 

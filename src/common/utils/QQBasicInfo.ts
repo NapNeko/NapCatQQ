@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import { systemPlatform } from '@/common/utils/system';
 import { getDefaultQQVersionConfigInfo, getQQVersionConfigPath } from './helper';
 import AppidTable from '@/core/external/appid.json';
-import { logNotice } from '@/onebot11/log';
+import { log } from './log';
 
 //基础目录获取
 export let QQMainPath = process.execPath;
@@ -11,9 +11,9 @@ export let QQPackageInfoPath: string = path.join(path.dirname(QQMainPath), 'reso
 export let QQVersionConfigPath: string | undefined = getQQVersionConfigPath(QQMainPath);
 
 //基础信息获取 无快更则启用默认模板填充
-export let { appid: QQVersionAppid, qua: QQVersionQua } = getAppidV2();
 export let isQuickUpdate: boolean = !!QQVersionConfigPath;
 export let QQVersionConfig: QQVersionConfigType = isQuickUpdate ? JSON.parse(fs.readFileSync(QQVersionConfigPath!).toString()) : getDefaultQQVersionConfigInfo();
+export let { appid: QQVersionAppid, qua: QQVersionQua } = getAppidV2();
 export let QQPackageInfo: QQPackageInfoType = JSON.parse(fs.readFileSync(QQPackageInfoPath).toString());
 
 //基础函数
@@ -39,7 +39,7 @@ export function getAppidV2(): { appid: string, qua: string } {
     }
   }
   catch (e) {
-    logNotice('[QQ版本兼容性检测] 版本兼容性不佳，可能会导致一些功能无法正常使用');
+    log('[QQ版本兼容性检测] 版本兼容性不佳，可能会导致一些功能无法正常使用', e);
   }
   // 以下是兜底措施
   return { appid: systemPlatform === 'linux' ? '537237950' : '537237765', qua: getQUAInternal() };

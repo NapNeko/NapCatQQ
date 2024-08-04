@@ -1,9 +1,13 @@
 import { FriendRequest, User } from '@/core/entities';
-import { BuddyListReqType, napCatCore, OnBuddyChangeParams } from '@/core';
+import { BuddyListReqType, napCatCore, NodeIKernelBuddyListener, OnBuddyChangeParams } from '@/core';
 import { NTEventDispatch } from '@/common/utils/EventTask';
 
 export class NTQQFriendApi {
   static async getBuddyV2(refresh = false) {
+    NTEventDispatch.RegisterListen<NodeIKernelBuddyListener['onBuddyListChange']>('NodeIKernelBuddyListener/onBuddyListChange', 1, 5000, (arg: OnBuddyChangeParams) => {
+      console.log(arg);
+      return true;
+    }).catch().then();
     if (!refresh) {
       return await napCatCore.session.getBuddyService().getBuddyListFromCache('0');
     }
