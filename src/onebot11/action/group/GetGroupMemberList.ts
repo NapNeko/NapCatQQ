@@ -1,4 +1,4 @@
-import { getGroup, getGroupMember, groupMembers, selfInfo } from '@/core/data';
+import { selfInfo } from '@/core/data';
 import { OB11GroupMember } from '../../types';
 import { OB11Constructor } from '../../constructor';
 import BaseAction from '../BaseAction';
@@ -22,20 +22,16 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
   actionName = ActionName.GetGroupMemberList;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
-    const role = (await getGroupMember(payload.group_id, selfInfo.uin))?.role;
+    const isNocache = payload.no_cache == true || payload.no_cache === 'true';
 
-    const group = await getGroup(payload.group_id.toString());
+    const GroupList = await NTQQGroupApi.getGroups(isNocache);
+    const group = GroupList.find(item => item.groupCode == payload.group_id);
     if (!group) {
       throw (`群${payload.group_id}不存在`);
     }
-
-    // 从Data里面获取
-    let _groupMembers: OB11GroupMember[] = OB11Constructor.groupMembers(group);
-    if (payload.no_cache == true || payload.no_cache === 'true') {
-      // webGroupMembers = await WebApi.getGroupMembers(payload.group_id.toString());'
-      const _groupMembers = await NTQQGroupApi.getGroupMembers(payload.group_id.toString());
-      groupMembers.set(group.groupCode, _groupMembers);
-    }
+    let groupMembers = await NTQQGroupApi.getGroupMembers(payload.group_id.toString());
+    let _groupMembers = Array.from(groupMembers.values())
+      .map(item => { return OB11Constructor.groupMember(group.groupCode, item); });
 
     const MemberMap: Map<number, OB11GroupMember> = new Map<number, OB11GroupMember>();
     // 转为Map 方便索引
@@ -47,7 +43,9 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
       MemberMap.set(_groupMembers[i].user_id, _groupMembers[i]);
     }
 
-    const isPrivilege = role === 3 || role === 4;
+    const selfRole = groupMembers.get(selfInfo.uid)?.role;
+    const isPrivilege = selfRole === 3 || selfRole === 4;
+
     if (isPrivilege) {
       const webGroupMembers = await WebApi.getGroupMembers(payload.group_id.toString());
       for (let i = 0, len = webGroupMembers.length; i < len; i++) {
@@ -64,13 +62,20 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
         }
       }
     } else {
-      const DateMap = await NTQQGroupApi.getGroupMemberLastestSendTimeCache(payload.group_id.toString());//开始从本地拉取
-      for (const DateUin of DateMap.keys()) {
-        const MemberData = MemberMap.get(parseInt(DateUin));
-        if (MemberData) {
-          MemberData.last_sent_time = parseInt(DateMap.get(DateUin)!);
-          //join_time 有基础数据兜底
+      if (isNocache) {
+        const DateMap = await NTQQGroupApi.getGroupMemberLastestSendTimeCache(payload.group_id.toString());//开始从本地拉取
+        for (const DateUin of DateMap.keys()) {
+          const MemberData = MemberMap.get(parseInt(DateUin));
+          if (MemberData) {
+            MemberData.last_sent_time = parseInt(DateMap.get(DateUin)!);
+            //join_time 有基础数据兜底
+          }
         }
+      } else {
+        _groupMembers.forEach(item => {
+          item.last_sent_time = date;
+          item.join_time = date;
+        });
       }
     }
     // 还原索引到Array 一同返回
