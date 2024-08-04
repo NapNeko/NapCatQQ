@@ -15,7 +15,7 @@ import { DependsAdapter, DispatcherAdapter, GlobalAdapter, NodeIGlobalAdapter } 
 import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs';
-import { getFullQQVesion, getQUA, QQVersionAppid } from '@/common/utils/QQBasicInfo';
+import { getFullQQVesion, QQVersionAppid, QQVersionQua } from '@/common/utils/QQBasicInfo';
 import { hostname, systemVersion } from '@/common/utils/system';
 import { genSessionConfig } from '@/core/sessionConfig';
 import { sleep } from '@/common/utils/helper';
@@ -142,7 +142,7 @@ export class NapCatCore {
       app_version: getFullQQVesion(),
       os_version: 'Windows 10 Pro',
       use_xlog: true,
-      qua: getQUA(),
+      qua: QQVersionQua,
       global_path_config: {
         desktopGlobalPath: this.dataPathGlobal,
       },
