@@ -184,6 +184,7 @@ export class NTQQGroupApi {
     if (result.errCode !== 0) {
       throw ('获取群成员列表出错,' + result.errMsg);
     }
+    
     //logDebug(`获取群(${groupQQ})成员列表结果:`, `finish: ${result.result.finish}`); //, Array.from(result.result.infos.values()));
     return result.result.infos;
     /*

@@ -99,7 +99,7 @@ export interface NodeIKernelGroupService {
 
   createMemberListScene(groupCode: string, scene: string): string;
 
-  destroyMemberListScene(): void;
+  destroyMemberListScene(SceneId:string): void;
   //About Arg (a) name: lastId 根据手Q来看为object {index:?(number),uid:string}
   getNextMemberList(sceneId: string, a: undefined, num: number): Promise<{
     errCode: number, errMsg: string,
