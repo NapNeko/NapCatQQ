@@ -3,6 +3,8 @@ import { BuddyCategoryType, FriendRequestNotify } from '@/core/entities';
 export type OnBuddyChangeParams = BuddyCategoryType[]
 
 interface IBuddyListener {
+  onBuddyListChangedV2(arg: unknown): void,//V2版本 还没兼容
+
   onBuddyListChange(arg: OnBuddyChangeParams): void,
 
   onBuddyInfoChange(arg: unknown): void,
@@ -44,6 +46,9 @@ export interface NodeIKernelBuddyListener extends IBuddyListener {
 }
 
 export class BuddyListener implements IBuddyListener {
+  onBuddyListChangedV2(arg: unknown): void {
+    //throw new Error('Method not implemented.');
+  }
   onAddBuddyNeedVerify(arg: unknown) {
   }
 
