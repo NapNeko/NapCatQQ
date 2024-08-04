@@ -15,12 +15,12 @@ import { DependsAdapter, DispatcherAdapter, GlobalAdapter, NodeIGlobalAdapter } 
 import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs';
-import { getFullQQVesion, QQVersionAppid, QQVersionQua } from '@/common/utils/QQBasicInfo';
+import { getFullQQVesion, QQVersionAppid, QQVersionQua, requireMinNTQQBuild } from '@/common/utils/QQBasicInfo';
 import { hostname, systemVersion } from '@/common/utils/system';
 import { genSessionConfig } from '@/core/sessionConfig';
 import { sleep } from '@/common/utils/helper';
 import crypto from 'node:crypto';
-import { rawFriends, friends, groupMembers, groups, selfInfo, stat } from '@/core/data';
+import { friends, groupMembers, groups, selfInfo, stat } from '@/core/data';
 import { GroupMember, RawMessage } from '@/core/entities';
 import { NTEventDispatch } from '@/common/utils/EventTask';
 import {
@@ -254,29 +254,16 @@ export class NapCatCore {
     this.addListener(msgListener);
     // 好友相关 
     const buddyListener = new BuddyListener();
-    buddyListener.onBuddyListChange = arg => {
-      rawFriends.length = 0;
-      rawFriends.push(...arg);
-      // console.log('onBuddyListChange', arg);
-      for (const categoryItem of arg) {
-        for (const friend of categoryItem.buddyList) {
-          // console.log("onBuddyListChange", friend)
-          const existFriend = friends.get(friend.uid);
-          if (existFriend) {
-            Object.assign(existFriend, friend);
-          }
-          else {
-            friends.set(friend.uid, friend);
-          }
-        }
-        // console.log("onBuddyListChange", friend)
-      }
-    };
+
+
     this.addListener(buddyListener);
-    // 刷新一次好友列表
-    this.session.getBuddyService().getBuddyList(true).then(arg => {
-      // console.log('getBuddyList', arg);
-    });
+    // 刷新一次好友列表  26702版本以下需要手动刷新一次获取 高版本NTQQ自带缓存
+    if (!requireMinNTQQBuild('26702')) {
+      this.session.getBuddyService().getBuddyList(true).then(arg => {
+        // console.log('getBuddyList', arg);
+      });
+    }
+
     interface SelfStatusInfo {
       uid: string
       status: number
