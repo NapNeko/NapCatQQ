@@ -7,7 +7,16 @@ export enum BuddyListReqType {
 }
 export interface NodeIKernelBuddyService {
   // 26702 以上
-  getBuddyListV2(callFrom: string, reqType: BuddyListReqType): Promise<GeneralCallResult>;
+  getBuddyListV2(callFrom: string, reqType: BuddyListReqType): Promise<GeneralCallResult & {
+    data: Array<{
+      categoryId: number,
+      categorySortId: number,
+      categroyName: string,
+      categroyMbCount: number,
+      onlineCount: number,
+      buddyUids: Array<string>
+    }>
+  }>;
   //26702 以上
   getBuddyListFromCache(callFrom: string): Promise<Array<
     {
@@ -22,7 +31,7 @@ export interface NodeIKernelBuddyService {
   addKernelBuddyListener(listener: NodeIKernelBuddyListener): number;
 
   getAllBuddyCount(): number;
-  
+
   removeKernelBuddyListener(listener: unknown): void;
 
   /**

@@ -1,8 +1,14 @@
 import { FriendRequest, User } from '@/core/entities';
-import { napCatCore, OnBuddyChangeParams } from '@/core';
+import { BuddyListReqType, napCatCore, OnBuddyChangeParams } from '@/core';
 import { NTEventDispatch } from '@/common/utils/EventTask';
 
 export class NTQQFriendApi {
+  static async getBuddyV2(refresh = false) {
+    if (!refresh) {
+      return await napCatCore.session.getBuddyService().getBuddyListFromCache('0');
+    }
+    return (await (napCatCore.session.getBuddyService().getBuddyListV2('0', BuddyListReqType.KNOMAL))).data;
+  }
   static async isBuddy(uid: string) {
     return napCatCore.session.getBuddyService().isBuddy(uid);
   }
