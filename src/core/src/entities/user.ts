@@ -276,6 +276,17 @@ export enum BizKey {
     KPRIVILEGEICON,
     KPHOTOWALL
 }
+export interface UserDetailInfoByUinV2 {
+    result: number,
+    errMsg: string,
+    detail: {
+        uid: string,
+        uin: string,
+        simpleInfo: SimpleInfo,
+        commonExt: CommonExt,
+        photoWall: null
+    }
+}
 export interface UserDetailInfoByUin {
     result: number,
     errMsg: string,

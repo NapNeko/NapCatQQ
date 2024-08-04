@@ -1,4 +1,4 @@
-import { ModifyProfileParams, SelfInfo, User, UserDetailInfoByUin } from '@/core/entities';
+import { ModifyProfileParams, SelfInfo, User, UserDetailInfoByUin, UserDetailInfoByUinV2 } from '@/core/entities';
 import { friends, groupMembers, selfInfo } from '@/core/data';
 import { CacheClassFuncAsync, CacheClassFuncAsyncExtend } from '@/common/utils/helper';
 import { napCatCore, NTQQFriendApi } from '@/core';
@@ -211,7 +211,7 @@ export class NTQQUserApi {
   })
   static async getUidByUin(Uin: string) {
     //此代码仅临时使用，后期会被废弃
-    if (!requireMinNTQQBuild('26702')) {
+    if (requireMinNTQQBuild('26702')) {
       return await NTQQUserApi.getUidByUinV2(Uin);
     }
     return await NTQQUserApi.getUidByUinV1(Uin);
@@ -225,7 +225,7 @@ export class NTQQUserApi {
   })
   static async getUinByUid(Uid: string) {
     //此代码仅临时使用，后期会被废弃
-    if (!requireMinNTQQBuild('26702')) {
+    if (requireMinNTQQBuild('26702')) {
       return await NTQQUserApi.getUinByUidV2(Uid);
     }
     return await NTQQUserApi.getUinByUidV1(Uid);
@@ -243,10 +243,11 @@ export class NTQQUserApi {
     if (uid) return uid;
     uid = (await NTQQFriendApi.getBuddyIdMap(true)).getValue(Uin);
     if (uid) return uid;
-    let unveifyUid = (await NTQQUserApi.getUserDetailInfoByUin(Uin)).info.uid;//从QQ Native 特殊转换
-    if (unveifyUid.indexOf("*") == -1) uid = unveifyUid;
+    // let unveifyUid = (await NTQQUserApi.getUserDetailInfoByUin(Uin)).info.uid;//从QQ Native 特殊转换
+    // if (unveifyUid.indexOf("*") == -1) uid = unveifyUid;
 
-    if (uid) return uid; return uid;
+    //if (uid) return uid;
+    return uid;
   }
   //后期改成流水线处理
   static async getUinByUidV2(Uid: string) {
@@ -332,6 +333,14 @@ export class NTQQUserApi {
   }
   static async getRecentContactList() {
     return await napCatCore.session.getRecentContactService().getRecentContactList();
+  }
+  static async getUserDetailInfoByUinV2(Uin: string) {
+    return await NTEventDispatch.CallNoListenerEvent
+      <(Uin: string) => Promise<UserDetailInfoByUinV2>>(
+        'NodeIKernelProfileService/getUserDetailInfoByUin',
+        5000,
+        Uin
+      );
   }
   static async getUserDetailInfoByUin(Uin: string) {
     return NTEventDispatch.CallNoListenerEvent
