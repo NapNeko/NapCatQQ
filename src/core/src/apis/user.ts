@@ -229,10 +229,13 @@ export class NTQQUserApi {
     return await NTQQUserApi.getUinByUidV1(Uid);
   }
 
+  //后期改成流水线处理
   static async getUidByUinV2(Uin: string) {
     let uid = (await napCatCore.session.getProfileService().getUidByUin('FriendsServiceImpl', [Uin])).get(Uin);
     if (uid) return uid;
     uid = (await napCatCore.session.getGroupService().getUidByUins([Uin])).uids.get(Uin);
+    if (uid) return uid;
+    uid = (await napCatCore.session.getUixConvertService().getUid([Uin])).uidInfo.get(Uin);
     if (uid) return uid;
     uid = (await NTQQFriendApi.getBuddyIdMapCache(true)).getValue(Uin);//从Buddy缓存获取Uid
     if (uid) return uid;
@@ -240,13 +243,16 @@ export class NTQQUserApi {
     if (uid) return uid;
     let unveifyUid = (await NTQQUserApi.getUserDetailInfoByUin(Uin)).info.uid;//从QQ Native 特殊转换
     if (unveifyUid.indexOf("*") == -1) uid = unveifyUid;
-    if (uid) return uid;
-    return uid;
+
+    if (uid) return uid; return uid;
   }
+  //后期改成流水线处理
   static async getUinByUidV2(Uid: string) {
     let uin = (await napCatCore.session.getProfileService().getUinByUid('FriendsServiceImpl', [Uid])).get(Uid);
     if (uin) return uin;
     uin = (await napCatCore.session.getGroupService().getUinByUids([Uid])).uins.get(Uid);
+    if (uin) return uin;
+    uin = (await napCatCore.session.getUixConvertService().getUin([Uid])).uinInfo.get(Uid);
     if (uin) return uin;
     uin = (await NTQQFriendApi.getBuddyIdMapCache(true)).getKey(Uid);//从Buddy缓存获取Uin
     if (uin) return uin;
@@ -258,7 +264,7 @@ export class NTQQUserApi {
 
   static async getUidByUinV1(Uin: string) {
     // 通用转换开始尝试
-    let uid = (await napCatCore.session.getUixConvertService().getUid([Uin])).uinInfo.get(Uin);
+    let uid = (await napCatCore.session.getUixConvertService().getUid([Uin])).uidInfo.get(Uin);
     // Uid 好友转
     if (!uid) {
       Array.from(friends.values()).forEach((t) => {
