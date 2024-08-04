@@ -86,7 +86,7 @@ export abstract class HttpServerBase {
     this.start(port, host);
   }
 
-  abstract handleFailed(res: Response, payload: any, err: any): void
+  abstract handleFailed(res: Response, payload: any, err: Error): void
 
   registerRouter(method: 'post' | 'get' | string, url: string, handler: RegisterHandler) {
     if (!url.startsWith('/')) {
@@ -111,7 +111,7 @@ export abstract class HttpServerBase {
       try {
         res.send(await handler(res, payload));
       } catch (e: any) {
-        this.handleFailed(res, payload, e.stack.toString());
+        this.handleFailed(res, payload, e);
       }
     });
   }

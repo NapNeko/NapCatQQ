@@ -10,8 +10,8 @@ import { postOB11Event } from '@/onebot11/server/postOB11Event';
 class OB11HTTPServer extends HttpServerBase {
   name = 'OneBot V11 server';
 
-  handleFailed(res: Response, payload: any, e: any) {
-    res.send(OB11Response.error(e.stack.toString(), 200));
+  handleFailed(res: Response, payload: any, e: Error) {
+    res.send(OB11Response.error(e?.stack?.toString() || e.message || "Error Handle", 200));
   }
 
   protected listen(port: number, host: string) {
