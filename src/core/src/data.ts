@@ -3,9 +3,11 @@ import {
   type Group,
   type GroupMember,
   type SelfInfo,
-  type BuddyCategoryType
+  type BuddyCategoryType,
+  FriendV2
 } from './entities';
 import { isNumeric } from '@/common/utils/helper';
+import { LimitedHashTable } from '@/common/utils/MessageUnique';
 import { NTQQGroupApi } from '@/core/apis';
 
 export const selfInfo: SelfInfo = {
@@ -14,8 +16,6 @@ export const selfInfo: SelfInfo = {
   nick: '',
   online: true
 };
-// 未来只在此处保留 selfInfo stat
-// groupCode -> Group
 export const groups: Map<string, Group> = new Map<string, Group>();
 
 export function deleteGroup(groupQQ: string) {
@@ -26,8 +26,10 @@ export function deleteGroup(groupQQ: string) {
 // 群号 -> 群成员map(uid=>GroupMember)
 export const groupMembers: Map<string, Map<string, GroupMember>> = new Map<string, Map<string, GroupMember>>();
 
-// uid -> Friend 下面这俩个准备移除 QQ里面自带缓存
 export const friends: Map<string, Friend> = new Map<string, Friend>();
+
+//转换列表
+//export const CachedIdMap = new LimitedHashTable<string, string>(1000);
 
 export async function getGroup(qq: string | number): Promise<Group | undefined> {
   let group = groups.get(qq.toString());

@@ -96,7 +96,7 @@ export class GroupListener implements IGroupListener {
   onGroupFirstBulletinNotify(...args: unknown[]) {
   }
 
-  onGroupListUpdate(updateType: number, groupList: Group[]) {
+  onGroupListUpdate(updateType: GroupListUpdateType, groupList: Group[]) {
   }
 
   onGroupNotifiesUpdated(dboubt: boolean, notifies: GroupNotify[]) {

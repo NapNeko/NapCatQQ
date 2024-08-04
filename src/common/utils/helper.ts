@@ -350,6 +350,20 @@ export function getDefaultQQVersionConfigInfo(): QQVersionConfigType {
     buildId: '26702'
   };
 }
+export async function promisePipeline(promises: Promise<any>[], callback: (result: any) => boolean): Promise<void> {
+  let callbackCalled = false;
+  for (const promise of promises) {
+    if (callbackCalled) break;
+    try {
+      const result = await promise;
+      if (!callbackCalled) {
+        callbackCalled = callback(result);
+      }
+    } catch (error) {
+      console.error("Error in promise pipeline:", error);
+    }
+  }
+}
 
 export function getQQVersionConfigPath(exePath: string = ""): string | undefined {
   let configVersionInfoPath;
