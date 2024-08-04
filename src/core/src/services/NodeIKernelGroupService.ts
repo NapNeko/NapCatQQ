@@ -11,16 +11,35 @@ import { GeneralCallResult } from '@/core/services/common';
 //高版本的接口不应该随意使用 使用应该严格进行pr审核 同时部分ipc中未出现的接口不要过于依赖 应该做好数据兜底
 
 export interface NodeIKernelGroupService {
-  getMemberCommonInfo(...arg: unknown[]): unknown;
+  getMemberCommonInfo(Req: {
+    groupCode: string,
+    startUin: string,
+    identifyFlag: string,
+    uinList: string[],
+    memberCommonFilter: {
+      memberUin: number,
+      uinFlag: number,
+      uinFlagExt: number,
+      uinMobileFlag: number,
+      shutUpTime: number,
+      privilege: number,
+    },
+    memberNum: number,
+    filterMethod: string,
+    onlineFlag: string,
+    realSpecialTitleFlag: number
+  }): Promise<unknown>;
   //26702
   getGroupMemberLevelInfo(groupCode: string): Promise<unknown>;
   //26702
   getGroupHonorList(groupCodes: Array<string>): unknown;
+
   getUinByUids(uins: string[]): Promise<{
     errCode: number,
     errMsg: string,
     uins: Map<string, string>
   }>;
+  
   getUidByUins(uins: string[]): Promise<{
     errCode: number,
     errMsg: string,
@@ -28,8 +47,10 @@ export interface NodeIKernelGroupService {
   }>;
   //26702(其实更早 但是我不知道)
   checkGroupMemberCache(arrayList: Array<string>): Promise<unknown>;
+
   //26702(其实更早 但是我不知道)
   getGroupLatestEssenceList(groupCode: string): Promise<unknown>;
+  
   //26702(其实更早 但是我不知道) 
   shareDigest(Req: {
     appId: string,
