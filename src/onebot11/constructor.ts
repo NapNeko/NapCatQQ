@@ -14,6 +14,7 @@ import {
   ChatType,
   FaceIndex,
   Friend,
+  FriendV2,
   GrayTipElementSubType,
   Group,
   GroupMember,
@@ -553,11 +554,21 @@ export class OB11Constructor {
       nickname: selfInfo.nick,
     };
   }
-  static friendsV2(friends: SimpleInfo[]): OB11User[] {
+  static friendsV2(friends: FriendV2[]): OB11User[] {
     const data: OB11User[] = [];
     friends.forEach(friend => {
       const sexValue = this.sex(friend.baseInfo.sex!);
-      data.push({ ...friend.baseInfo, ...friend.coreInfo, user_id: parseInt(friend.coreInfo.uin), nickname: friend.coreInfo.nick, remark: friend.coreInfo.nick, sex: sexValue, level: 0 });
+      data.push({
+        ...friend.baseInfo,
+        ...friend.coreInfo,
+        user_id: parseInt(friend.coreInfo.uin),
+        nickname: friend.coreInfo.nick,
+        remark: friend.coreInfo.nick,
+        sex: sexValue,
+        level: 0,
+        categroyName: friend.categroyName,
+        categoryId: friend.categoryId
+      });
     });
     return data;
   }
