@@ -21,7 +21,7 @@ export interface NodeIKernelRobotService {
 
     removeKernelRobotListener(ListenerId: number): unknown;
 
-    getAllRobotFriendsFromCache(): unknown;
+    getAllRobotFriendsFromCache(): Promise<unknown>;
 
     fetchAllRobots(arg1: unknown, arg2: unknown): unknown;
 
