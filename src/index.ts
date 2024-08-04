@@ -92,9 +92,9 @@ napCatCore.getQuickLoginList().then((res) => {
 
 WebUiDataRuntime.setQQQuickLoginCall(async (uin: string) => {
   const QuickLogin: Promise<{ result: boolean, message: string }> = new Promise((resolve, reject) => {
-    if (quickLoginQQ) {
-      log('正在快速登录 ', quickLoginQQ);
-      napCatCore.quickLogin(quickLoginQQ).then(res => {
+    if (uin) {
+      log('正在快速登录 ', uin);
+      napCatCore.quickLogin(uin).then(res => {
         if (res.loginErrorInfo.errMsg) {
           resolve({ result: false, message: res.loginErrorInfo.errMsg });
         }
