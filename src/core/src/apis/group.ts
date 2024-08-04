@@ -1,5 +1,5 @@
 import { GroupMember, GroupRequestOperateTypes, GroupMemberRole, GroupNotify, Group, MemberExtSourceType, GroupNotifyTypes, ChatType, Peer, GroupListUpdateType } from '../entities';
-import { GeneralCallResult, NTQQUserApi, NodeIKernelGroupListener, napCatCore } from '@/core';
+import { GeneralCallResult, NTQQUserApi, NodeIKernelGroupListener, NodeIKernelGroupService, napCatCore } from '@/core';
 import { NTEventDispatch } from '@/common/utils/EventTask';
 import { log } from '@/common/utils/log';
 import { groupMembers } from '../data';
@@ -159,9 +159,23 @@ export class NTQQGroupApi {
     return notifies;
   }
   static async getGroupMemberV2(GroupCode: string, uid: string, forced = false) {
-    //type ListenerType = NodeIKernelGroupListener['onGroupMemberInfoUpdate'];
-   // NTEventDispatch.CreatListenerFunction('NodeIKernelGroupListener/onGroupMemberInfoUpdate', 
-    return napCatCore.session.getGroupService().getMemberInfo(GroupCode, [uid], forced);
+    type ListenerType = NodeIKernelGroupListener['onMemberInfoChange'];
+    type EventType = NodeIKernelGroupService['getMemberInfo'];
+    // NTEventDispatch.CreatListenerFunction('NodeIKernelGroupListener/onGroupMemberInfoUpdate', 
+    //return napCatCore.session.getGroupService().getMemberInfo(GroupCode, [uid], forced);
+    const [ret, _groupCode, _changeType, _members] = await NTEventDispatch.CallNormalEvent
+      <EventType, ListenerType>
+      (
+        'NodeIKernelGroupService/getMemberInfo',
+        'NodeIKernelGroupListener/onMemberInfoChange',
+        1,
+        5000,
+        (groupCode: string, changeType: number, members: Map<string, GroupMember>) => {
+          return groupCode == GroupCode && members.has(uid);
+        },
+        GroupCode, [uid], forced
+      );
+    return _members.get(uid);
   }
   static async getGroupMembers(groupQQ: string, num = 3000): Promise<Map<string, GroupMember>> {
     const groupService = napCatCore.session.getGroupService();

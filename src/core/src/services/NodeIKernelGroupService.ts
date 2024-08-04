@@ -50,7 +50,7 @@ export interface NodeIKernelGroupService {
 
   //26702(其实更早 但是我不知道)
   getGroupLatestEssenceList(groupCode: string): Promise<unknown>;
-  
+
   //26702(其实更早 但是我不知道) 
   shareDigest(Req: {
     appId: string,
@@ -112,7 +112,7 @@ export interface NodeIKernelGroupService {
 
   searchMember(sceneId: string, keywords: string[]): unknown;
 
-  getMemberInfo(group_id: string, uids: string[], forceFetch: boolean): unknown;
+  getMemberInfo(group_id: string, uids: string[], forceFetch: boolean): Promise<GeneralCallResult>;
   //getMemberInfo  [ '56729xxxx', [ 'u_4Nj08cwW5Hxxxxx' ], true ]
 
   kickMember(groupCode: string, memberUids: string[], refuseForever: boolean, kickReason: string): Promise<void>;
