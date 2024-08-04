@@ -13,8 +13,8 @@ export let QQVersionConfigPath: string | undefined = getQQVersionConfigPath(QQMa
 //基础信息获取 无快更则启用默认模板填充
 export let isQuickUpdate: boolean = !!QQVersionConfigPath;
 export let QQVersionConfig: QQVersionConfigType = isQuickUpdate ? JSON.parse(fs.readFileSync(QQVersionConfigPath!).toString()) : getDefaultQQVersionConfigInfo();
-export let { appid: QQVersionAppid, qua: QQVersionQua } = getAppidV2();
 export let QQPackageInfo: QQPackageInfoType = JSON.parse(fs.readFileSync(QQPackageInfoPath).toString());
+export let { appid: QQVersionAppid, qua: QQVersionQua } = getAppidV2();
 
 //基础函数
 export function getQQBuildStr() {
