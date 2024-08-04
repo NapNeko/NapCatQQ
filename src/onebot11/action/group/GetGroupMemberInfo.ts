@@ -26,6 +26,7 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
   actionName = ActionName.GetGroupMemberInfo;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
+
     const group = await getGroup(payload.group_id.toString());
     const role = (await getGroupMember(payload.group_id, selfInfo.uin))?.role;
     const isPrivilege = role === 3 || role === 4;
@@ -40,6 +41,7 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
     if (!member) {
       throw (`群(${payload.group_id})成员${payload.user_id}不存在`);
     }
+    //console.log('GetGroupMemberInfo', JSON.stringify(await NTQQGroupApi.getGroupMemberV2(payload.group_id.toString(), member.uid, true), null, 4));
     try {
       const info = (await NTQQUserApi.getUserDetailInfo(member.uid));
       logDebug('群成员详细信息结果', info);

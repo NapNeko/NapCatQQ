@@ -291,7 +291,7 @@ export class NapCatOnebot11 {
       }
     };
     groupListener.onMemberInfoChange = async (groupCode: string, changeType: number, members: Map<string, GroupMember>) => {
-      //console.log("ob11 onMemberInfoChange", groupCode, changeType, members)
+      console.log("ob11 onMemberInfoChange", groupCode, changeType, members)
       if (changeType === 1) {
         let member;
         for (const [key, value] of members) {

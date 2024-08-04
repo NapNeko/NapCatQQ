@@ -8,7 +8,10 @@ import {
 } from '@/core/entities';
 import { GeneralCallResult } from '@/core/services/common';
 
+//高版本的接口不应该随意使用 使用应该严格进行pr审核 同时部分ipc中未出现的接口不要过于依赖 应该做好数据兜底
+
 export interface NodeIKernelGroupService {
+  getMemberCommonInfo(...arg: unknown[]): unknown;
   //26702
   getGroupMemberLevelInfo(groupCode: string): Promise<unknown>;
   //26702
@@ -27,7 +30,7 @@ export interface NodeIKernelGroupService {
   checkGroupMemberCache(arrayList: Array<string>): Promise<unknown>;
   //26702(其实更早 但是我不知道)
   getGroupLatestEssenceList(groupCode: string): Promise<unknown>;
-  //26702(其实更早 但是我不知道)
+  //26702(其实更早 但是我不知道) 
   shareDigest(Req: {
     appId: string,
     appType: number,
@@ -53,7 +56,19 @@ export interface NodeIKernelGroupService {
   //26702(其实更早 但是我不知道)
   fetchGroupEssenceList(Req: { groupCode: string, pageStart: number, pageLimit: number }, Arg: unknown): Promise<unknown>;
   //26702
-  getAllMemberList(groupCode: string, refresh: boolean): Promise<unknown>;
+  getAllMemberList(groupCode: string, forceFetch: boolean): Promise<{
+    errCode: number,
+    errMsg: string,
+    result: {
+      ids: Array<{
+        uid: string,
+        index: number//0
+      }>,
+      infos: {},
+      finish: true,
+      hasRobot: false
+    }
+  }>;
 
   setHeader(uid: string, path: string): unknown;
 
@@ -74,9 +89,9 @@ export interface NodeIKernelGroupService {
 
   monitorMemberList(): unknown;
 
-  searchMember(uid: string): unknown;
+  searchMember(sceneId: string, keywords: string[]): unknown;
 
-  getMemberInfo(uid: string): unknown;
+  getMemberInfo(group_id: string, uids: string[], forceFetch: boolean): unknown;
   //getMemberInfo  [ '56729xxxx', [ 'u_4Nj08cwW5Hxxxxx' ], true ]
 
   kickMember(groupCode: string, memberUids: string[], refuseForever: boolean, kickReason: string): Promise<void>;
