@@ -11,7 +11,7 @@ export let QQPackageInfoPath: string = path.join(path.dirname(QQMainPath), 'reso
 export let QQVersionConfigPath: string | undefined = getQQVersionConfigPath(QQMainPath);
 
 //基础信息获取 无快更则启用默认模板填充
-export let QQVersionAppid: string = getAppidV2().appid;
+export let { appid: QQVersionAppid, qua: QQVersionQua } = getAppidV2();
 export let isQuickUpdate: boolean = !!QQVersionConfigPath;
 export let QQVersionConfig: QQVersionConfigType = isQuickUpdate ? JSON.parse(fs.readFileSync(QQVersionConfigPath!).toString()) : getDefaultQQVersionConfigInfo();
 export let QQPackageInfo: QQPackageInfoType = JSON.parse(fs.readFileSync(QQPackageInfoPath).toString());
@@ -26,7 +26,8 @@ export function getFullQQVesion() {
 export function requireMinNTQQBuild(buildStr: string) {
   return parseInt(getQQBuildStr()) >= parseInt(buildStr);
 }
-export function getQUA() {
+//此方法不要直接使用
+export function getQUAInternal() {
   return systemPlatform === 'linux' ? `V1_LNX_NQ_${getFullQQVesion()}_${getQQBuildStr()}_GW_B` : `V1_WIN_NQ_${getFullQQVesion()}_${getQQBuildStr()}_GW_B`;
 }
 export function getAppidV2(): { appid: string, qua: string } {
@@ -41,7 +42,7 @@ export function getAppidV2(): { appid: string, qua: string } {
     logNotice('[QQ版本兼容性检测] 版本兼容性不佳，可能会导致一些功能无法正常使用');
   }
   // 以下是兜底措施
-  return { appid: systemPlatform === 'linux' ? '537237950' : '537237765', qua: getQUA() };
+  return { appid: systemPlatform === 'linux' ? '537237950' : '537237765', qua: getQUAInternal() };
 }
 // platform_type: 3,
 // app_type: 4,
