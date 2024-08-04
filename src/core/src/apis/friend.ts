@@ -17,8 +17,14 @@ export class NTQQFriendApi {
     let uids: string[] = [];
     let categoryMap: Map<string, any> = new Map();
     const buddyService = napCatCore.session.getBuddyService();
-    const buddyListV2 = refresh ? await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL) : await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL);
-    uids.push(...buddyListV2.data.flatMap(item => item.buddyUids));
+    const buddyListV2 = refresh ? (await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL)).data : (await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL)).data;
+    uids.push(
+      ...buddyListV2.flatMap(item => {
+        item.buddyUids.forEach(uid => {
+          categoryMap.set(uid, { categoryId: item.categoryId, categroyName: item.categroyName });
+        });
+        return item.buddyUids
+      }));
     const data = await NTEventDispatch.CallNoListenerEvent<NodeIKernelProfileService['getCoreAndBaseInfo']>(
       'NodeIKernelProfileService/getCoreAndBaseInfo', 5000, 'nodeStore', uids
     );
