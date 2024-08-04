@@ -84,7 +84,7 @@ export class NTEventWrapper {
   }
   //统一回调清理事件
   async DispatcherListener(ListenerMainName: string, ListenerSubName: string, ...args: any[]) {
-    //console.log(ListenerMainName, ListenerSubName, ...args,this.EventTask.get(ListenerMainName)?.get(ListenerSubName));
+    //console.log("[EventDispatcher]",ListenerMainName, ListenerSubName, ...args);
     this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.forEach((task, uuid) => {
       //console.log(task.func, uuid, task.createtime, task.timeout);
       if (task.createtime + task.timeout < Date.now()) {
