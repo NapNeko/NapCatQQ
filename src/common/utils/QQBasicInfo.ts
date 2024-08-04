@@ -6,7 +6,7 @@ import { getDefaultQQVersionConfigInfo, getQQVersionConfigPath } from './helper'
 //基础目录获取
 export let QQMainPath = process.execPath;
 export let QQPackageInfoPath: string = path.join(path.dirname(QQMainPath), 'resources', 'app', 'package.json');
-export let QQVersionConfigPath: string | undefined = getQQVersionConfigPath();
+export let QQVersionConfigPath: string | undefined = getQQVersionConfigPath(QQMainPath);
 
 //基础信息获取 无快更则启用默认模板填充
 export let QQVersionAppid: string = systemPlatform === 'linux' ? '537237950' : '537237765';
