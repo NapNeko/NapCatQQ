@@ -12,3 +12,6 @@ type QQVersionConfigType = {
   onErrorVersions: Array<any>;
   buildId: string;
 }
+type QQAppidTableType = {
+  [key: string]: { appid: string, qua: string };
+}
