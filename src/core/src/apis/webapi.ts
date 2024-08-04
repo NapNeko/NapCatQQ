@@ -114,6 +114,22 @@ export interface GroupEssenceMsgRet {
   }
 }
 export class WebApi {
+  static async shareDigest(groupCode: string, msgSeq: string, msgRandom: string, targetGroupCode: string) {
+    const CookiesObject = await NTQQUserApi.getCookies('qun.qq.com');
+    const CookieValue = Object.entries(CookiesObject).map(([key, value]) => `${key}=${value}`).join('; ');
+    const Bkn = WebApi.genBkn(CookiesObject.skey);
+    let ret: any = undefined;
+    const data = 'group_code=' + groupCode + '&msg_seq=' + msgSeq + '&msg_random=' + msgRandom + '&target_group_code=' + targetGroupCode;
+    const url = 'https://qun.qq.com/cgi-bin/group_digest/share_digest?bkn=' + Bkn + "&" + data;
+    //console.log(url);
+    try {
+      ret = await RequestUtil.HttpGetText(url, 'GET', '', { 'Cookie': CookieValue });
+      return ret;
+    } catch (e) {
+      return undefined;
+    }
+    return undefined;
+  }
   @CacheClassFuncAsync(3600 * 1000, 'webapi_get_group_members')
   static async getGroupEssenceMsg(GroupCode: string, page_start: string) {
     const CookiesObject = await NTQQUserApi.getCookies('qun.qq.com');
