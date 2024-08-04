@@ -92,8 +92,9 @@ export class OB11Constructor {
     }
     else if (msg.chatType == ChatType.friend) {
       resMsg.sub_type = 'friend';
-      const user = await NTQQUserApi.getUserDetailInfoByUin(msg.senderUin!);
-      resMsg.sender.nickname = user.info.nick;
+      resMsg.sender.nickname = (await NTQQUserApi.getUserDetailInfo(msg.senderUid)).nick;
+      //const user = await NTQQUserApi.getUserDetailInfoByUin(msg.senderUin!);
+      //resMsg.sender.nickname = user.info.nick;
     }
     else if (msg.chatType == ChatType.temp) {
       resMsg.sub_type = 'group';
