@@ -13,7 +13,7 @@ export class GetFriendWithCategory extends BaseAction<void, any> {
       //全新逻辑
       return OB11Constructor.friendsV2(await NTQQFriendApi.getBuddyV2ExWithCate(true));
     } else {
-      throw new Error('not support');
+      throw new Error('this ntqq version not support, must be 26702 or later');
     }
   }
 }
