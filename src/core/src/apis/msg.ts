@@ -7,7 +7,7 @@ import { onGroupFileInfoUpdateParamType } from '@/core/listeners';
 import { GeneralCallResult } from '@/core/services/common';
 import { MessageUnique } from '../../../common/utils/MessageUnique';
 import { NTEventDispatch } from '@/common/utils/EventTask';
-import { requireMinNTQBuild } from '@/common/utils/QQBasicInfo';
+import { requireMinNTQQBuild } from '@/common/utils/QQBasicInfo';
 
 async function LoadMessageIdList(Peer: Peer, msgId: string) {
   let msgList = await NTQQMsgApi.getMsgHistory(Peer, msgId, 50);
@@ -231,7 +231,7 @@ export class NTQQMsgApi {
     return retMsg;
   }
   static async getMsgUnique(chatType: number, time: string) {
-    if (requireMinNTQBuild('26702')) {
+    if (requireMinNTQQBuild('26702')) {
       return napCatCore.session.getMsgService().generateMsgUniqueId(chatType, time);
     }
     return napCatCore.session.getMsgService().getMsgUniqueId(time);

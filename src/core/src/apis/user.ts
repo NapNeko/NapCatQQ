@@ -7,7 +7,7 @@ import { RequestUtil } from '@/common/utils/request';
 import { logWarn } from '@/common/utils/log';
 import { NTEventDispatch } from '@/common/utils/EventTask';
 import { NodeIKernelProfileService, ProfileBizType, UserDetailSource } from '@/core/services';
-import { requireMinNTQBuild } from '@/common/utils/QQBasicInfo';
+import { requireMinNTQQBuild } from '@/common/utils/QQBasicInfo';
 
 export class NTQQUserApi {
   static async getProfileLike(uid: string) {
@@ -49,14 +49,6 @@ export class NTQQUserApi {
   }
   static async setGroupAvatar(gc: string, filePath: string) {
     return napCatCore.session.getGroupService().setHeader(gc, filePath);
-  }
-
-  static async getSelfInfo() {
-
-  }
-
-  static async getUserInfo(uid: string) {
-
   }
   //   enum ProfileBizType {
   //     KALL,
@@ -139,7 +131,7 @@ export class NTQQUserApi {
     return RetUser;
   }
   static async getUserDetailInfo(uid: string) {
-    if (requireMinNTQBuild('26702')) {
+    if (requireMinNTQQBuild('26702')) {
       return this.fetchUserDetailInfo(uid);
     }
     return this.getUserDetailInfoOld(uid);

@@ -1,10 +1,11 @@
 import crypto from 'node:crypto';
 import path from 'node:path';
-import fs from 'fs/promises';
+import fs from 'fs';
 import { log, logDebug } from './log';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as fsPromise from 'node:fs/promises';
+import os from 'node:os';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -304,14 +305,14 @@ export function migrateConfig(oldConfig: any) {
 }
 // 升级旧的配置到新的
 export async function UpdateConfig() {
-  const configFiles = await fs.readdir(path.join(__dirname, 'config'));
+  const configFiles = await fsPromise.readdir(path.join(__dirname, 'config'));
   for (const file of configFiles) {
     if (file.match(/^onebot11_\d+.json$/)) {
-      const CurrentConfig = JSON.parse(await fs.readFile(path.join(__dirname, 'config', file), 'utf8'));
+      const CurrentConfig = JSON.parse(await fsPromise.readFile(path.join(__dirname, 'config', file), 'utf8'));
       if (isValidOldConfig(CurrentConfig)) {
         log('正在迁移旧配置到新配置 File:', file);
         const NewConfig = migrateConfig(CurrentConfig);
-        await fs.writeFile(path.join(__dirname, 'config', file), JSON.stringify(NewConfig, null, 2));
+        await fsPromise.writeFile(path.join(__dirname, 'config', file), JSON.stringify(NewConfig, null, 2));
       }
     }
   }
@@ -331,7 +332,42 @@ export function isEqual(obj1: any, obj2: any) {
   }
   return true;
 }
+export function getDefaultQQVersionConfigInfo(): QQVersionConfigType {
+  if (os.platform() === 'linux') {
+    return {
+      baseVersion: '3.2.12-26702',
+      curVersion: '3.2.12-26702',
+      prevVersion: '',
+      onErrorVersions: [],
+      buildId: '26702'
+    };
+  }
+  return {
+    baseVersion: '9.9.15-26702',
+    curVersion: '9.9.15-26702',
+    prevVersion: '',
+    onErrorVersions: [],
+    buildId: '26702'
+  };
+}
 
+export function getQQVersionConfigPath(exePath: string = ""): string | undefined {
+  let configVersionInfoPath;
+  if (os.platform() !== 'linux') {
+    configVersionInfoPath = path.join(path.dirname(exePath), 'resources', 'app', 'versions', 'config.json');
+  } else {
+    const userPath = os.homedir();
+    const appDataPath = path.resolve(userPath, './.config/QQ');
+    configVersionInfoPath = path.resolve(appDataPath, './versions/config.json');
+  }
+  if (typeof configVersionInfoPath !== 'string') {
+    return undefined;
+  }
+  if (!fs.existsSync(configVersionInfoPath)) {
+    return undefined;
+  }
+  return configVersionInfoPath;
+}
 export async function deleteOldFiles(directoryPath: string, daysThreshold: number) {
   try {
     const files = await fsPromise.readdir(directoryPath);

@@ -26,7 +26,6 @@ import {
   NodeIKernelRichMediaService,
   NodeIKernelAvatarService,
 } from './services';
-import { qqVersionConfigInfo } from '@/common/utils/QQBasicInfo';
 import { NodeIKernelStorageCleanService } from './services/NodeIKernelStorageCleanService';
 import { NodeIKernelRobotService } from './services/NodeIKernelRobotService';
 import { dirname } from "node:path"
@@ -43,6 +42,7 @@ import { NodeIKernelRecentContactService } from './services/NodeIKernelRecentCon
 import { NodeIKernelMSFService } from './services/NodeIKernelMSFService';
 import { NodeIkernelTestPerformanceService } from './services/NodeIkernelTestPerformanceService';
 import { NodeIKernelECDHService } from './services/NodeIKernelECDHService';
+import { getFullQQVesion } from '@/common/utils/QQBasicInfo';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -292,7 +292,7 @@ export interface WrapperNodeApi {
 
 let wrapperNodePath = path.resolve(path.dirname(process.execPath), './resources/app/wrapper.node');
 if (!fs.existsSync(wrapperNodePath)) {
-  wrapperNodePath = path.join(path.dirname(process.execPath), `resources/app/versions/${qqVersionConfigInfo.curVersion}/wrapper.node`);
+  wrapperNodePath = path.join(path.dirname(process.execPath), `resources/app/versions/${getFullQQVesion()}/wrapper.node`);
 }
 const nativemodule: any = { exports: {} };
 process.dlopen(nativemodule, wrapperNodePath);
