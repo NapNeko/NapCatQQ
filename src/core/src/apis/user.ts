@@ -65,6 +65,43 @@ export class NTQQUserApi {
   //     KQZONE,
   //     KOTHER
   // }
+  static async fetchUserDetailInfos(uids: string[]) {
+    type EventService = NodeIKernelProfileService['fetchUserDetailInfo'];
+    type EventListener = NodeIKernelProfileListener['onUserDetailInfoChanged'];
+    let retData: User[] = [];
+    let [_retData, _retListener] = await NTEventDispatch.CallNormalEvent
+      <EventService, EventListener>
+      (
+        'NodeIKernelProfileService/fetchUserDetailInfo',
+        'NodeIKernelProfileListener/onUserDetailInfoChanged',
+        uids.length,
+        5000,
+        (profile) => {
+          if (uids.includes(profile.uid)) {
+            let RetUser: User = {
+              ...profile.simpleInfo.coreInfo,
+              ...profile.simpleInfo.status,
+              ...profile.simpleInfo.vasInfo,
+              ...profile.commonExt,
+              ...profile.simpleInfo.baseInfo,
+              qqLevel: profile.commonExt.qqLevel,
+              pendantId: ""
+            };
+            retData.push(RetUser);
+            return true;
+          }
+          return false;
+        },
+        "BuddyProfileStore",
+        uids,
+        UserDetailSource.KSERVER,
+        [
+          ProfileBizType.KALL
+        ]
+      );
+
+    return retData;
+  }
   static async fetchUserDetailInfo(uid: string) {
     type EventService = NodeIKernelProfileService['fetchUserDetailInfo'];
     type EventListener = NodeIKernelProfileListener['onUserDetailInfoChanged'];
