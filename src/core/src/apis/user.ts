@@ -210,6 +210,7 @@ export class NTQQUserApi {
     return false;
   })
   static async getUidByUin(Uin: string) {
+    //此代码仅临时使用，后期会被废弃
     if (!requireMinNTQQBuild('26702')) {
       return await NTQQUserApi.getUidByUinV2(Uin);
     }
@@ -223,6 +224,7 @@ export class NTQQUserApi {
     return false;
   })
   static async getUinByUid(Uid: string) {
+    //此代码仅临时使用，后期会被废弃
     if (!requireMinNTQQBuild('26702')) {
       return await NTQQUserApi.getUinByUidV2(Uid);
     }

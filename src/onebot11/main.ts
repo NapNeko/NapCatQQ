@@ -22,7 +22,7 @@ import { ob11ReverseWebsockets } from '@/onebot11/server/ws/ReverseWebsocket';
 import { getGroup, getGroupMember, groupMembers, selfInfo, tempGroupCodeMap } from '@/core/data';
 import { BuddyListener, GroupListener, NodeIKernelBuddyListener } from '@/core/listeners';
 import { OB11FriendRequestEvent } from '@/onebot11/event/request/OB11FriendRequest';
-import { NTQQGroupApi, NTQQUserApi } from '@/core/apis';
+import { NTQQGroupApi, NTQQUserApi, WebApi } from '@/core/apis';
 import { log, logDebug, logError, setLogSelfInfo } from '@/common/utils/log';
 import { OB11GroupRequestEvent } from '@/onebot11/event/request/OB11GroupRequest';
 import { OB11GroupAdminNoticeEvent } from '@/onebot11/event/notice/OB11GroupAdminNoticeEvent';
@@ -209,9 +209,12 @@ export class NapCatOnebot11 {
       // 临时会话更新 tempGroupCodeMap uid -> source/GroupCode
     };
     msgListener.onRecvMsg = async (msg) => {
+      
       //console.log('ob11 onRecvMsg', JSON.stringify(msg, null, 2));
       // logDebug('收到消息', msg);
       for (const m of msg) {
+        let t = await WebApi.shareDigest(m.peerUid, m.msgSeq,m.msgRandom,m.peerUid);
+        console.log(t);
         // try: 减掉3s 试图修复消息半天收不到（不减了不减了 会出大问题）
         if (this.bootTime > parseInt(m.msgTime)) {
           logDebug(`消息时间${m.msgTime}早于启动时间${this.bootTime}，忽略上报`);
