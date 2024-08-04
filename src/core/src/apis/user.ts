@@ -1,7 +1,7 @@
 import { ModifyProfileParams, SelfInfo, User, UserDetailInfoByUin } from '@/core/entities';
 import { friends, groupMembers, selfInfo } from '@/core/data';
 import { CacheClassFuncAsync, CacheClassFuncAsyncExtend } from '@/common/utils/helper';
-import { napCatCore } from '@/core';
+import { napCatCore, NTQQFriendApi } from '@/core';
 import { NodeIKernelProfileListener, ProfileListener } from '@/core/listeners';
 import { RequestUtil } from '@/common/utils/request';
 import { logWarn } from '@/common/utils/log';
@@ -50,14 +50,9 @@ export class NTQQUserApi {
   static async setGroupAvatar(gc: string, filePath: string) {
     return napCatCore.session.getGroupService().setHeader(gc, filePath);
   }
-  //   enum ProfileBizType {
-  //     KALL,
-  //     KBASEEXTEND,
-  //     KVAS,
-  //     KQZONE,
-  //     KOTHER
-  // }
+
   static async fetchUserDetailInfos(uids: string[]) {
+    //26702 以上使用新接口 .Dev Mlikiowa
     type EventService = NodeIKernelProfileService['fetchUserDetailInfo'];
     type EventListener = NodeIKernelProfileListener['onUserDetailInfoChanged'];
     let retData: User[] = [];
@@ -214,23 +209,54 @@ export class NTQQUserApi {
     logWarn("uin转换到uid时异常", Uin);
     return false;
   })
+  static async getUidByUin(Uin: string) {
+    if (!requireMinNTQQBuild('26702')) {
+      return await NTQQUserApi.getUidByUinV2(Uin);
+    }
+    return await NTQQUserApi.getUidByUinV1(Uin);
+  }
+  @CacheClassFuncAsyncExtend(3600, 'Uid2Uin', (Uid: string | undefined, Uin: number | undefined) => {
+    if (Uin && Uin != 0 && !isNaN(Uin)) {
+      return true
+    }
+    logWarn("uid转换到uin时异常", Uid);
+    return false;
+  })
+  static async getUinByUid(Uid: string) {
+    if (!requireMinNTQQBuild('26702')) {
+      return await NTQQUserApi.getUinByUidV2(Uid);
+    }
+    return await NTQQUserApi.getUinByUidV1(Uid);
+  }
+
   static async getUidByUinV2(Uin: string) {
     let uid = (await napCatCore.session.getProfileService().getUidByUin('FriendsServiceImpl', [Uin])).get(Uin);
     if (uid) return uid;
     uid = (await napCatCore.session.getGroupService().getUidByUins([Uin])).uids.get(Uin);
+    if (uid) return uid;
+    uid = (await NTQQFriendApi.getBuddyIdMapCache(true)).getValue(Uin);//从Buddy缓存获取Uid
+    if (uid) return uid;
+    uid = (await NTQQFriendApi.getBuddyIdMap(true)).getValue(Uin);
+    if (uid) return uid;
+    let unveifyUid = (await NTQQUserApi.getUserDetailInfoByUin(Uin)).info.uid;//从QQ Native 特殊转换
+    if (unveifyUid.indexOf("*") == -1) uid = unveifyUid;
+    if (uid) return uid;
     return uid;
   }
   static async getUinByUidV2(Uid: string) {
-    let uid = (await napCatCore.session.getProfileService().getUinByUid('FriendsServiceImpl', [Uid])).get(Uid);
-    if (uid) return uid;
-    uid = (await napCatCore.session.getGroupService().getUinByUids([Uid])).uins.get(Uid);
-    return uid;
+    let uin = (await napCatCore.session.getProfileService().getUinByUid('FriendsServiceImpl', [Uid])).get(Uid);
+    if (uin) return uin;
+    uin = (await napCatCore.session.getGroupService().getUinByUids([Uid])).uins.get(Uid);
+    if (uin) return uin;
+    uin = (await NTQQFriendApi.getBuddyIdMapCache(true)).getKey(Uid);//从Buddy缓存获取Uin
+    if (uin) return uin;
+    uin = (await NTQQFriendApi.getBuddyIdMap(true)).getKey(Uid);
+    if (uin) return uin;
+    uin = (await NTQQUserApi.getUserDetailInfo(Uid)).uin; //从QQ Native 转换
+    return uin;
   }
-  static async getUidByUin(Uin: string) {
-    if (!requireMinNTQQBuild('26702')) {
-      let uidV2 = NTQQUserApi.getUidByUinV2(Uin);
-      if (uidV2) return uidV2;
-    }
+
+  static async getUidByUinV1(Uin: string) {
     // 通用转换开始尝试
     let uid = (await napCatCore.session.getUixConvertService().getUid([Uin])).uinInfo.get(Uin);
     // Uid 好友转
@@ -259,14 +285,7 @@ export class NTQQUserApi {
     }
     return uid;
   }
-  @CacheClassFuncAsyncExtend(3600, 'Uid2Uin', (Uid: string | undefined, Uin: number | undefined) => {
-    if (Uin && Uin != 0 && !isNaN(Uin)) {
-      return true
-    }
-    logWarn("uid转换到uin时异常", Uid);
-    return false;
-  })
-  static async getUinByUid(Uid: string) {
+  static async getUinByUidV1(Uid: string) {
     if (!requireMinNTQQBuild('26702')) {
       let uinV2 = NTQQUserApi.getUidByUinV2(Uid);
       if (uinV2) return uinV2;
