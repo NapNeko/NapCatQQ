@@ -14,7 +14,7 @@ export class NTQQFriendApi {
     );
     return Array.from(data.values());
   }
-  @CacheClassFuncAsyncExtend(5000, 'getBuddyIdMap', true)
+  @CacheClassFuncAsyncExtend(3600 * 1000, 'getBuddyIdMap', () => true)
   static async getBuddyIdMapCache(refresh = false): Promise<LimitedHashTable<string, string>> {
     return await NTQQFriendApi.getBuddyIdMap(refresh);
   }
@@ -30,6 +30,7 @@ export class NTQQFriendApi {
     data.forEach((value, key) => {
       retMap.set(value.uin!, value.uid!);
     });
+    //console.log('getBuddyIdMap', retMap.getValue);
     return retMap;
   }
   static async getBuddyV2ExWithCate(refresh = false) {

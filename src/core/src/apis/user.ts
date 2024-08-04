@@ -202,11 +202,11 @@ export class NTQQUserApi {
     }
     return skey;
   }
-  @CacheClassFuncAsyncExtend(3600, 'Uin2Uid', (Uin: string, Uid: string | undefined) => {
+  @CacheClassFuncAsyncExtend(3600 * 1000, 'Uin2Uid', (Uin: string, Uid: string | undefined) => {
     if (Uid && Uid.indexOf('u_') != -1) {
       return true
     }
-    logWarn("uin转换到uid时异常", Uin);
+    logWarn("uin转换到uid时异常", Uin, Uid);
     return false;
   })
   static async getUidByUin(Uin: string) {
@@ -216,11 +216,11 @@ export class NTQQUserApi {
     }
     return await NTQQUserApi.getUidByUinV1(Uin);
   }
-  @CacheClassFuncAsyncExtend(3600, 'Uid2Uin', (Uid: string | undefined, Uin: number | undefined) => {
+  @CacheClassFuncAsyncExtend(3600 * 1000, 'Uid2Uin', (Uid: string | undefined, Uin: number | undefined) => {
     if (Uin && Uin != 0 && !isNaN(Uin)) {
       return true
     }
-    logWarn("uid转换到uin时异常", Uid);
+    logWarn("uid转换到uin时异常", Uid, Uin);
     return false;
   })
   static async getUinByUid(Uid: string) {
@@ -239,13 +239,13 @@ export class NTQQUserApi {
     if (uid) return uid;
     uid = (await napCatCore.session.getUixConvertService().getUid([Uin])).uidInfo.get(Uin);
     if (uid) return uid;
+    console.log((await NTQQFriendApi.getBuddyIdMapCache(true)));
     uid = (await NTQQFriendApi.getBuddyIdMapCache(true)).getValue(Uin);//从Buddy缓存获取Uid
     if (uid) return uid;
     uid = (await NTQQFriendApi.getBuddyIdMap(true)).getValue(Uin);
     if (uid) return uid;
-    // let unveifyUid = (await NTQQUserApi.getUserDetailInfoByUin(Uin)).info.uid;//从QQ Native 特殊转换
-    // if (unveifyUid.indexOf("*") == -1) uid = unveifyUid;
-
+    let unveifyUid = (await NTQQUserApi.getUserDetailInfoByUinV2(Uin)).detail.uid;//从QQ Native 特殊转换
+    if (unveifyUid.indexOf("*") == -1) uid = unveifyUid;
     //if (uid) return uid;
     return uid;
   }
