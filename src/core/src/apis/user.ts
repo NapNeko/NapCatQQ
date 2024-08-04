@@ -292,10 +292,6 @@ export class NTQQUserApi {
     return uid;
   }
   static async getUinByUidV1(Uid: string) {
-    if (!requireMinNTQQBuild('26702')) {
-      let uinV2 = NTQQUserApi.getUidByUinV2(Uid);
-      if (uinV2) return uinV2;
-    }
     let ret = await NTEventDispatch.CallNoListenerEvent
       <(Uin: string[]) => Promise<{ uinInfo: Map<string, string> }>>(
         'NodeIKernelUixConvertService/getUin',
