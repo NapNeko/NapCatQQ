@@ -2,11 +2,12 @@ import { QQLevel, Sex } from './user';
 
 export interface Group {
     groupCode: string,
+    createTime?:string,//高版本才有
     maxMember: number,
     memberCount: number,
     groupName: string,
-    groupStatus: 0,
-    memberRole: 2,
+    groupStatus: number,
+    memberRole: number,
     isTop: boolean,
     toppedTimestamp: string,
     privilegeFlag: number, //65760

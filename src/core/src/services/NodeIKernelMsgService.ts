@@ -5,7 +5,7 @@ import { GeneralCallResult } from '@/core/services/common';
 export interface QueryMsgsParams {
   chatInfo: Peer,
   filterMsgType: [],
-  filterSendersUid: [],
+  filterSendersUid: string[],
   filterMsgFromTime: string,
   filterMsgToTime: string,
   pageLimit: number,

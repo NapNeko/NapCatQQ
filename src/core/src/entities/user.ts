@@ -9,14 +9,14 @@ export interface BuddyCategoryType {
     categroyMbCount: number;
     buddyList: User[];
 }
-interface CoreInfo {
+export interface CoreInfo {
     uid: string;
     uin: string;
     nick: string;
     remark: string;
 }
 
-interface BaseInfo {
+export interface BaseInfo {
     qid: string;
     longNick: string;
     birthday_year: number;
@@ -162,16 +162,16 @@ interface PhotoWall {
     picList: Pic[];
 }
 
-interface SimpleInfo {
-    uid: string;
-    uin: string;
+export interface SimpleInfo {
+    uid?: string;
+    uin?: string;
     coreInfo: CoreInfo;
     baseInfo: BaseInfo;
-    status: UserStatus;
-    vasInfo: VasInfo;
-    relationFlags: RelationFlags;
-    otherFlags: any;
-    intimate: any;
+    status: UserStatus | null;
+    vasInfo: VasInfo | null;
+    relationFlags: RelationFlags | null;
+    otherFlags: any | null;
+    intimate: any | null;
 }
 
 export interface UserDetailInfoListenerArg {
@@ -272,7 +272,7 @@ export interface Friend extends User { }
 export enum BizKey {
     KPRIVILEGEICON,
     KPHOTOWALL
-  }
+}
 export interface UserDetailInfoByUin {
     result: number,
     errMsg: string,

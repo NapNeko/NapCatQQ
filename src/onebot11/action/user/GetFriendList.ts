@@ -5,6 +5,7 @@ import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { NTQQFriendApi } from '@/core';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { requireMinNTQQBuild } from '@/common/utils/QQBasicInfo';
 
 
 // no_cache get时传字符串
@@ -20,7 +21,10 @@ export default class GetFriendList extends BaseAction<Payload, OB11User[]> {
   actionName = ActionName.GetFriendList;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
-   //let data = await NTQQFriendApi.getBuddyV2(payload?.no_cache === true || payload?.no_cache=== 'true');
+    if (requireMinNTQQBuild('26702')) {
+      //全新逻辑
+      return OB11Constructor.friendsV2(await NTQQFriendApi.getBuddyV2(payload?.no_cache === true || payload?.no_cache === 'true'));
+    }
     if (friends.size === 0 || payload?.no_cache === true || payload?.no_cache === 'true') {
       const _friends = await NTQQFriendApi.getFriends(true);
       // log('强制刷新好友列表，结果: ', _friends)

@@ -1,5 +1,5 @@
 import { AnyCnameRecord } from 'node:dns';
-import { BizKey, ModifyProfileParams, UserDetailInfoByUin } from '../entities';
+import { BaseInfo, BizKey, CoreInfo, ModifyProfileParams, SimpleInfo, UserDetailInfoByUin } from '../entities';
 import { NodeIKernelProfileListener } from '../listeners';
 import { GeneralCallResult } from '@/core/services/common';
 export enum UserDetailSource {
@@ -14,6 +14,17 @@ export enum ProfileBizType {
   KOTHER
 }
 export interface NodeIKernelProfileService {
+  // {
+  //   coreInfo: CoreInfo,
+  //   baseInfo: BaseInfo,
+  //   status: null,
+  //   vasInfo: null,
+  //   relationFlags: null,
+  //   otherFlags: null,
+  //   intimate: null
+  // }
+  getCoreAndBaseInfo(callfrom: string, uids: string[]): Promise<Map<string, SimpleInfo>>;
+
   fetchUserDetailInfo(trace: string, uids: string[], arg2: number, arg3: number[]): Promise<unknown>;
 
   addKernelProfileListener(listener: NodeIKernelProfileListener): number;

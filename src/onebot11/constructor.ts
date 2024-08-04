@@ -22,6 +22,7 @@ import {
   RawMessage,
   SelfInfo,
   Sex,
+  SimpleInfo,
   TipGroupElementType,
   User,
   VideoElement
@@ -206,13 +207,13 @@ export class OB11Constructor {
           chatType: msg.chatType,
           guildId: '',
         },
-        msg.msgId,
-        msg.msgSeq,
-        msg.senderUid,
-        element.elementId,
-        element.elementType.toString(),
-        FileElement.fileSize,
-        FileElement.fileName
+          msg.msgId,
+          msg.msgSeq,
+          msg.senderUid,
+          element.elementId,
+          element.elementType.toString(),
+          FileElement.fileSize,
+          FileElement.fileName
         );
       }
       else if (element.videoElement) {
@@ -253,13 +254,13 @@ export class OB11Constructor {
           chatType: msg.chatType,
           guildId: '',
         },
-        msg.msgId,
-        msg.msgSeq,
-        msg.senderUid,
-        element.elementId,
-        element.elementType.toString(),
-        videoElement.fileSize || '0',
-        videoElement.fileName
+          msg.msgId,
+          msg.msgSeq,
+          msg.senderUid,
+          element.elementId,
+          element.elementType.toString(),
+          videoElement.fileSize || '0',
+          videoElement.fileName
         );
       }
       else if (element.pttElement) {
@@ -274,13 +275,13 @@ export class OB11Constructor {
           chatType: msg.chatType,
           guildId: '',
         },
-        msg.msgId,
-        msg.msgSeq,
-        msg.senderUid,
-        element.elementId,
-        element.elementType.toString(),
-        element.pttElement.fileSize || '0',
-        element.pttElement.fileUuid || ''
+          msg.msgId,
+          msg.msgSeq,
+          msg.senderUid,
+          element.elementId,
+          element.elementType.toString(),
+          element.pttElement.fileSize || '0',
+          element.pttElement.fileUuid || ''
         );
         //以uuid作为文件名
       }
@@ -552,7 +553,14 @@ export class OB11Constructor {
       nickname: selfInfo.nick,
     };
   }
-
+  static friendsV2(friends: SimpleInfo[]): OB11User[] {
+    const data: OB11User[] = [];
+    friends.forEach(friend => {
+      const sexValue = this.sex(friend.baseInfo.sex!);
+      data.push({ ...friend.baseInfo, ...friend.coreInfo, user_id: parseInt(friend.coreInfo.uin), nickname: friend.coreInfo.nick, remark: friend.coreInfo.nick, sex: sexValue, level: 0 });
+    });
+    return data;
+  }
   static friends(friends: Friend[]): OB11User[] {
     const data: OB11User[] = [];
     friends.forEach(friend => {
