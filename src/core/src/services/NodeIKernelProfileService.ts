@@ -15,9 +15,9 @@ export enum ProfileBizType {
 }
 export interface NodeIKernelProfileService {
 
-  getUidByUin(uin: string): Promise<string>;
+  getUidByUin(callfrom: string, uin: Array<string>): Promise<Map<string,string>>;//uin->uid
 
-  getUinByUid(uid: string): Promise<string>;
+  getUinByUid(callfrom: string, uid: Array<string>): Promise<Map<string,string>>;
   // {
   //   coreInfo: CoreInfo,
   //   baseInfo: BaseInfo,

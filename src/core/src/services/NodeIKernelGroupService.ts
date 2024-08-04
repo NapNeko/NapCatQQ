@@ -9,7 +9,7 @@ import {
 import { GeneralCallResult } from '@/core/services/common';
 
 export interface NodeIKernelGroupService {
-  
+
   getUidByUin(uin: string): Promise<string>;
 
   getUinByUid(uid: string): Promise<string>;
@@ -17,8 +17,16 @@ export interface NodeIKernelGroupService {
   getGroupMemberLevelInfo(groupCode: string): Promise<unknown>;
   //26702
   getGroupHonorList(groupCodes: Array<string>): unknown;
-  getUinByUids(uins: string[]): Promise<unknown>;
-  getUidByUins(uins: string[]): Promise<unknown>;
+  getUinByUids(uins: string[]): Promise<{
+    errCode: number,
+    errMsg: string,
+    uins: Map<string, string>
+  }>;
+  getUidByUins(uins: string[]): Promise<{
+    errCode: number,
+    errMsg: string,
+    uids: Map<string, string>
+  }>;
   //26702(其实更早 但是我不知道)
   checkGroupMemberCache(arrayList: Array<string>): Promise<unknown>;
   //26702(其实更早 但是我不知道)

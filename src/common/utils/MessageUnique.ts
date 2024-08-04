@@ -2,7 +2,7 @@ import { Peer } from '@/core';
 import crypto, { randomInt, randomUUID } from 'crypto';
 import { logError } from './log';
 
-class LimitedHashTable<K, V> {
+export class LimitedHashTable<K, V> {
   private keyToValue: Map<K, V> = new Map();
   private valueToKey: Map<V, K> = new Map();
   private maxSize: number;

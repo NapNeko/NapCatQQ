@@ -20,7 +20,7 @@ import { hostname, systemVersion } from '@/common/utils/system';
 import { genSessionConfig } from '@/core/sessionConfig';
 import { sleep } from '@/common/utils/helper';
 import crypto from 'node:crypto';
-import { friends, groupMembers, groups, selfInfo, stat } from '@/core/data';
+import { groupMembers, groups, selfInfo, stat } from '@/core/data';
 import { GroupMember, RawMessage } from '@/core/entities';
 import { NTEventDispatch } from '@/common/utils/EventTask';
 import {
@@ -33,6 +33,7 @@ import {
   setLogSelfInfo
 } from '@/common/utils/log';
 import { napCatConfig } from '@/core/utils/config';
+import { NTQQFriendApi } from './apis';
 
 export interface OnLoginSuccess {
   (uin: string, uid: string): void | Promise<void>;
@@ -262,8 +263,13 @@ export class NapCatCore {
       this.session.getBuddyService().getBuddyList(true).then(arg => {
         // console.log('getBuddyList', arg);
       });
+    } else {
+      // NTQQFriendApi.getBuddyV2(true).then((res) => {
+      //   res.forEach((item) => {
+      //     CachedIdMap.set(item.uid!, item.uin!);
+      //   });
+      // }).catch();
     }
-
     interface SelfStatusInfo {
       uid: string
       status: number

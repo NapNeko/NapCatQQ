@@ -214,15 +214,25 @@ export class NTQQUserApi {
     logWarn("uin转换到uid时异常", Uin);
     return false;
   })
+  static async getUidByUinV2(Uin: string) {
+    let uid = (await napCatCore.session.getProfileService().getUidByUin('FriendsServiceImpl', [Uin])).get(Uin);
+    if (uid) return uid;
+    uid = (await napCatCore.session.getGroupService().getUidByUins([Uin])).uids.get(Uin);
+    return uid;
+  }
+  static async getUinByUidV2(Uid: string) {
+    let uid = (await napCatCore.session.getProfileService().getUinByUid('FriendsServiceImpl', [Uid])).get(Uid);
+    if (uid) return uid;
+    uid = (await napCatCore.session.getGroupService().getUinByUids([Uid])).uins.get(Uid);
+    return uid;
+  }
   static async getUidByUin(Uin: string) {
-    //Uid 接口转
-    let ret = await NTEventDispatch.CallNoListenerEvent
-      <(Uin: string[]) => Promise<{ uidInfo: Map<string, string> }>>(
-        'NodeIKernelUixConvertService/getUid',
-        5000,
-        [Uin]
-      );
-    let uid = ret.uidInfo.get(Uin);
+    if (!requireMinNTQQBuild('26702')) {
+      let uidV2 = NTQQUserApi.getUidByUinV2(Uin);
+      if (uidV2) return uidV2;
+    }
+    // 通用转换开始尝试
+    let uid = (await napCatCore.session.getUixConvertService().getUid([Uin])).uinInfo.get(Uin);
     // Uid 好友转
     if (!uid) {
       Array.from(friends.values()).forEach((t) => {
@@ -256,9 +266,10 @@ export class NTQQUserApi {
     logWarn("uid转换到uin时异常", Uid);
     return false;
   })
-  static async getUinByUid(Uid: string | undefined) {
-    if (!Uid) {
-      return '';
+  static async getUinByUid(Uid: string) {
+    if (!requireMinNTQQBuild('26702')) {
+      let uinV2 = NTQQUserApi.getUidByUinV2(Uid);
+      if (uinV2) return uinV2;
     }
     let ret = await NTEventDispatch.CallNoListenerEvent
       <(Uin: string[]) => Promise<{ uinInfo: Map<string, string> }>>(

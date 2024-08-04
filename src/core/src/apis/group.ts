@@ -1,5 +1,5 @@
-import { GroupMember, GroupRequestOperateTypes, GroupMemberRole, GroupNotify, Group, MemberExtSourceType, GroupNotifyTypes, ChatType, Peer } from '../entities';
-import { GeneralCallResult, NTQQUserApi, napCatCore } from '@/core';
+import { GroupMember, GroupRequestOperateTypes, GroupMemberRole, GroupNotify, Group, MemberExtSourceType, GroupNotifyTypes, ChatType, Peer, GroupListUpdateType } from '../entities';
+import { GeneralCallResult, NTQQUserApi, NodeIKernelGroupListener, napCatCore } from '@/core';
 import { NTEventDispatch } from '@/common/utils/EventTask';
 import { log } from '@/common/utils/log';
 import { groupMembers } from '../data';
@@ -9,14 +9,15 @@ export class NTQQGroupApi {
     return napCatCore.session.getGroupService().setHeader(gc, filePath);
   }
   static async getGroups(forced = false) {
+    type ListenerType = NodeIKernelGroupListener['onGroupListUpdate'];
     let [_retData, _updateType, groupList] = await NTEventDispatch.CallNormalEvent
-      <(force: boolean) => Promise<any>, (updateType: number, groupList: Group[]) => void>
+      <(force: boolean) => Promise<any>, ListenerType>
       (
         'NodeIKernelGroupService/getGroupList',
         'NodeIKernelGroupListener/onGroupListUpdate',
         1,
         5000,
-        () => true,
+        (updateType) => true,
         forced
       );
     return groupList;
