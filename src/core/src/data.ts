@@ -28,7 +28,6 @@ export const groupMembers: Map<string, Map<string, GroupMember>> = new Map<strin
 
 // uid -> Friend 下面这俩个准备移除 QQ里面自带缓存
 export const friends: Map<string, Friend> = new Map<string, Friend>();
-export const rawFriends: Array<BuddyCategoryType> = []; // 带分组的好友列表
 
 export async function getGroup(qq: string | number): Promise<Group | undefined> {
   let group = groups.get(qq.toString());
