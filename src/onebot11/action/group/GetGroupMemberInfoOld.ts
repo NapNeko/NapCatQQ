@@ -1,4 +1,5 @@
 import { OB11GroupMember } from '../../types';
+import { getGroup, getGroupMember, groupMembers, selfInfo } from '@/core/data';
 import { OB11Constructor } from '../../constructor';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
@@ -7,7 +8,9 @@ import { logDebug } from '@/common/utils/log';
 import { WebApi } from '@/core/apis/webapi';
 import { NTQQGroupApi } from '@/core';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import { selfInfo } from '@/core/data';
+import { requireMinNTQQBuild } from '@/common/utils/QQBasicInfo';
+
+// no_cache get时传字符串
 const SchemaData = {
   type: 'object',
   properties: {
@@ -24,15 +27,29 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
   actionName = ActionName.GetGroupMemberInfo;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
-    const isNocache = payload.no_cache == true || payload.no_cache === 'true';
-    let uid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
-    if (!uid) {
-      throw (`Uin2Uid Error ${payload.user_id}不存在`);
+    if (requireMinNTQQBuild('26702')) {
+      let V2Data = await NTQQGroupApi.getGroupMemberV2(payload.group_id.toString(), payload.user_id.toString(), payload.no_cache == true || payload.no_cache === 'true');
+      if (V2Data) {
+        return OB11Constructor.groupMember(payload.group_id.toString(), V2Data);
+      } else {
+        throw (`群(${payload.group_id})成员${payload.user_id}不存在`);
+      }
     }
-    let member = await NTQQGroupApi.getGroupMemberV2(payload.group_id.toString(), uid, isNocache);
+    const group = await getGroup(payload.group_id.toString());
+    const role = (await getGroupMember(payload.group_id, selfInfo.uin))?.role;
+    const isPrivilege = role === 3 || role === 4;
+    if (!group) {
+      throw (`群(${payload.group_id})不存在`);
+    }
+    if (payload.no_cache == true || payload.no_cache === 'true') {
+      groupMembers.set(group.groupCode, await NTQQGroupApi.getGroupMembers(payload.group_id.toString()));
+    }
+    const member = await getGroupMember(payload.group_id.toString(), payload.user_id.toString());
+    //早返回
     if (!member) {
       throw (`群(${payload.group_id})成员${payload.user_id}不存在`);
     }
+    //console.log('GetGroupMemberInfo', JSON.stringify(await NTQQGroupApi.getGroupMemberV2(payload.group_id.toString(), member.uid, true), null, 4));
     try {
       const info = (await NTQQUserApi.getUserDetailInfo(member.uid));
       logDebug('群成员详细信息结果', info);
@@ -41,11 +58,6 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
       logDebug('获取群成员详细信息失败, 只能返回基础信息', e);
     }
     const retMember = OB11Constructor.groupMember(payload.group_id.toString(), member);
-    let SelfInfoInGroup = await NTQQGroupApi.getGroupMemberV2(payload.group_id.toString(), selfInfo.uid, isNocache);
-    let isPrivilege = false;
-    if (SelfInfoInGroup) {
-      isPrivilege = SelfInfoInGroup.role === 3 || SelfInfoInGroup.role === 4;
-    }
     if (isPrivilege) {
       const webGroupMembers = await WebApi.getGroupMembers(payload.group_id.toString());
       for (let i = 0, len = webGroupMembers.length; i < len; i++) {
