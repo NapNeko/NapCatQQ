@@ -173,7 +173,10 @@ export interface SimpleInfo {
     otherFlags: any | null;
     intimate: any | null;
 }
-
+export interface FriendV2 extends SimpleInfo {
+    categoryId?: number;
+    categroyName?: string;
+}
 export interface UserDetailInfoListenerArg {
     uid: string;
     uin: string;

@@ -7,6 +7,8 @@ export interface OB11User {
   age?: number;
   qid?: string;
   login_days?: number;
+  categroyName?:string;
+  categoryId?:number;
 }
 
 export enum OB11UserSex {
