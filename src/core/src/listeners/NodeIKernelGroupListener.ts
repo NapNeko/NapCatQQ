@@ -1,7 +1,7 @@
-import { Group, GroupMember, GroupNotify } from '@/core/entities';
+import { Group, GroupListUpdateType, GroupMember, GroupNotify } from '@/core/entities';
 
 interface IGroupListener {
-  onGroupListUpdate(updateType: number, groupList: Group[]): void;
+  onGroupListUpdate(updateType: GroupListUpdateType, groupList: Group[]): void;
 
   onGroupExtListUpdate(...args: unknown[]): void;
 
@@ -202,7 +202,7 @@ export class DebugGroupListener implements IGroupListener {
     console.log('onGroupNotifiesUnreadCountUpdated:', ...args);
   }
 
-  onGroupSingleScreenNotifies(doubt: boolean, seq: string, notifies: GroupNotify[]){
+  onGroupSingleScreenNotifies(doubt: boolean, seq: string, notifies: GroupNotify[]) {
     console.log('onGroupSingleScreenNotifies:');
   }
 

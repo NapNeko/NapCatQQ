@@ -1,5 +1,10 @@
 import { QQLevel, Sex } from './user';
-
+export enum GroupListUpdateType {
+    REFRESHALL,
+    GETALL,
+    MODIFIED,
+    REMOVE
+}
 export interface Group {
     groupCode: string,
     createTime?:string,//高版本才有

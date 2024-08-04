@@ -9,6 +9,11 @@ import {
 import { GeneralCallResult } from '@/core/services/common';
 
 export interface NodeIKernelGroupService {
+  
+  getUidByUin(uin: string): Promise<string>;
+
+  getUinByUid(uid: string): Promise<string>;
+  //26702
   getGroupMemberLevelInfo(groupCode: string): Promise<unknown>;
   //26702
   getGroupHonorList(groupCodes: Array<string>): unknown;

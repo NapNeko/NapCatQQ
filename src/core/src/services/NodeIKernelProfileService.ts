@@ -14,6 +14,10 @@ export enum ProfileBizType {
   KOTHER
 }
 export interface NodeIKernelProfileService {
+
+  getUidByUin(uin: string): Promise<string>;
+
+  getUinByUid(uid: string): Promise<string>;
   // {
   //   coreInfo: CoreInfo,
   //   baseInfo: BaseInfo,
