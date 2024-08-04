@@ -17,7 +17,7 @@ async function LoadMessageIdList(Peer: Peer, msgId: string) {
 }
 async function loadMessageUnique() {
   if (groups.size > 100) {
-    logWarn('群数量大于100，可能会导致性能问题');
+    logWarn('[性能检测] 群数量大于100，可能会导致性能问题');
   }
   let predict = (groups.size + friends.size / 2) / 5;
   predict = predict < 20 ? 20 : predict;
@@ -165,7 +165,9 @@ export class NTQQMsgApi {
     //   const msgId = BigInt("0x" + buffer.toString('hex')).toString();
     //   return msgId;
     // }
-
+    // 此处有采用Hack方法 利用数据返回正确得到对应消息
+    // 与之前 Peer队列 MsgSeq队列 真正的MsgId并发不同
+    // 谨慎采用 目前测试暂无问题  Developer.Mlikiowa
     let msgId = await NTQQMsgApi.getMsgUnique(peer.chatType, await NTQQMsgApi.getServerTime());
     let data = await NTEventDispatch.CallNormalEvent<
       (msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<any, any>) => Promise<unknown>,
