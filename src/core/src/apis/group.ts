@@ -81,6 +81,9 @@ export class NTQQGroupApi {
     });
     return ret;
   }
+  static async getGroupMemberAll(GroupCode: string, forced = false) {
+    return napCatCore.session.getGroupService().getAllMemberList(GroupCode, forced);
+  }
   static async getLastestMsg(GroupCode: string, uins: string[]) {
     let uids: Array<string> = [];
     for (let uin of uins) {
@@ -154,6 +157,11 @@ export class NTQQGroupApi {
         num
       );
     return notifies;
+  }
+  static async getGroupMemberV2(GroupCode: string, uid: string, forced = false) {
+    //type ListenerType = NodeIKernelGroupListener['onGroupMemberInfoUpdate'];
+   // NTEventDispatch.CreatListenerFunction('NodeIKernelGroupListener/onGroupMemberInfoUpdate', 
+    return napCatCore.session.getGroupService().getMemberInfo(GroupCode, [uid], forced);
   }
   static async getGroupMembers(groupQQ: string, num = 3000): Promise<Map<string, GroupMember>> {
     const groupService = napCatCore.session.getGroupService();
