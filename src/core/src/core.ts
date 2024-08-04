@@ -15,7 +15,7 @@ import { DependsAdapter, DispatcherAdapter, GlobalAdapter, NodeIGlobalAdapter } 
 import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs';
-import { appid, qqVersionConfigInfo } from '@/common/utils/QQBasicInfo';
+import { getFullQQVesion, getQUA, QQVersionAppid } from '@/common/utils/QQBasicInfo';
 import { hostname, systemVersion } from '@/common/utils/system';
 import { genSessionConfig } from '@/core/sessionConfig';
 import { sleep } from '@/common/utils/helper';
@@ -139,10 +139,10 @@ export class NapCatCore {
       base_path_prefix: '',
       platform_type: 3,
       app_type: 4,
-      app_version: qqVersionConfigInfo.curVersion,
+      app_version: getFullQQVesion(),
       os_version: 'Windows 10 Pro',
       use_xlog: true,
-      qua: `V1_WIN_NQ_${qqVersionConfigInfo.curVersion.replace('-', '_')}_GW_B`,
+      qua: getQUA(),
       global_path_config: {
         desktopGlobalPath: this.dataPathGlobal,
       },
@@ -150,10 +150,10 @@ export class NapCatCore {
     }, new QQWrapper.NodeIGlobalAdapter(new GlobalAdapter()));
     this.loginService.initConfig({
       machineId: '',
-      appid,
+      appid: QQVersionAppid,
       platVer: systemVersion,
       commonPath: this.dataPathGlobal,
-      clientVer: qqVersionConfigInfo.curVersion,
+      clientVer: getFullQQVesion(),
       hostName: hostname
     });
   }
