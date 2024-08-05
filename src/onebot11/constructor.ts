@@ -153,21 +153,20 @@ export class OB11Constructor {
         message_data['type'] = OB11MessageDataType.reply;
         //log("收到回复消息", element.replyElement);
         try {
-          //做这么多都是因为NC速度太快 可能nt还没有写入数据库
-          //const records = msg.records.find(msgRecord => msgRecord.msgId === element.replyElement.sourceMsgIdInRecords);
+          const records = msg.records.find(msgRecord => msgRecord.msgId === element.replyElement.sourceMsgIdInRecords);
           const peer = {
             chatType: msg.chatType,
             peerUid: msg.peerUid,
             guildId: '',
           };
           let replyMsg: RawMessage | undefined;
-
+          if (!records) throw new Error('找不到回复消息');
           replyMsg = (await NTQQMsgApi.getMsgsBySeqAndCount({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, element.replyElement.replayMsgSeq, 1, true, true)).msgList[0];
-          if (!replyMsg || element.replyElement.replayMsgSeq !== replyMsg.msgSeq) {
+          if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
             replyMsg = (await NTQQMsgApi.getSingleMsg(peer, element.replyElement.replayMsgSeq)).msgList[0];
           }
 
-          if (!replyMsg || element.replyElement.replayMsgSeq !== replyMsg.msgSeq) {
+          if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
             throw new Error('回复消息消息验证失败');
           }
           message_data['data']['id'] = MessageUnique.createMsg({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, replyMsg.msgId)?.toString();
