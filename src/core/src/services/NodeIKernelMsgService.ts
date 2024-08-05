@@ -477,7 +477,19 @@ export interface NodeIKernelMsgService {
 
   setMsgEmojiLikes(...args: unknown[]): unknown;
 
-  getMsgEmojiLikesList(peer: Peer, msgSeq: string, emojiId: string, emojiType: string, cookie: string, bForward: boolean, number: number): Promise<unknown>;
+  getMsgEmojiLikesList(peer: Peer, msgSeq: string, emojiId: string, emojiType: string, cookie: string, bForward: boolean, number: number): Promise<{
+    result: number,
+    errMsg: string,
+    emojiLikesList:
+    Array<{
+      tinyId: string,
+      nickName: string,
+      headUrl: string
+    }>,
+    cookie: string,
+    isLastPage: boolean,
+    isFirstPage: boolean
+  }>;
 
   setMsgEmojiLikesForRole(...args: unknown[]): unknown;
 
@@ -592,7 +604,7 @@ export interface NodeIKernelMsgService {
   // this.selfPhone = str5;
   // this.gameSession = tempChatGameSession;
   prepareTempChat(args: unknown): unknown;//主动临时消息 不做
-  
+
   sendSsoCmdReqByContend(cmd: string, param: string): Promise<unknown>;
 
   //chattype,uid->Promise<any>

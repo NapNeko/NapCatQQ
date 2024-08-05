@@ -68,7 +68,7 @@ setTimeout(() => {
 
 export class NTQQMsgApi {
   static async getMsgEmojiLikesList(peer: Peer, msgSeq: string, emojiId: string, emojiType: string, count: number = 20) {
-    console.log(peer, msgSeq, emojiId, emojiType, count);
+    //console.log(peer, msgSeq, emojiId, emojiType, count);
     return napCatCore.session.getMsgService().getMsgEmojiLikesList(peer, msgSeq, emojiId, emojiType, "", false, 20)
   }
   // static napCatCore: NapCatCore | null = null;
