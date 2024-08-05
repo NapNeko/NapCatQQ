@@ -78,8 +78,10 @@ import SetGroupHeader from './extends/SetGroupHeader';
 import { FetchCustomFace } from './extends/FetchCustomFace';
 import GoCQHTTPUploadPrivateFile from './go-cqhttp/UploadPrivareFile';
 import TestApi01 from './extends/TestApi01';
+import { FetchEmojioLike } from './extends/FetchEmojioLike';
 
 export const actionHandlers = [
+  new FetchEmojioLike(),
   new RebootNormal(),
   new GetFile(),
   new Debug(),
