@@ -19,6 +19,43 @@ export interface CustomMusicSignPostData {
   image?: string,
   singer?: string
 }
+// let t = await napCatCore.session.getGroupService().shareDigest({
+//   appId: "100497308",
+//   appType: 1,
+//   msgStyle: 0,
+//   recvUin: "545402644",
+//   sendType: 2,
+//   clientInfo: {
+//     platform: 1
+//   },
+//   richMsg: {
+//     usingArk: true,
+//     title: "Bot测试title",
+//     summary:  "Bot测试summary",
+//     url: "https://www.bilibili.com",
+//     pictureUrl: "https://y.qq.com/music/photo_new/T002R300x300M0000035DC6W4ZpSqf_1.jpg?max_age=2592000",
+//     brief:  "Bot测试brief",
+//   }
+// });
+// {
+//   errCode: 0,
+//   errMsg: '',
+//   rsp: {
+//     sendType: 2,
+//     recvUin: '545402644',
+//     recvOpenId: '',
+//     errCode: 901501,
+//     errMsg: 'imagent service_error:150_OIDB_NO_PRIV',
+//     extInfo: {
+//       wording: '消息下发失败(错误码：901501)',
+//       jumpResult: 0,
+//       jumpUrl: '',
+//       level: 0,
+//       subLevel: 0,
+//       developMsg: 'imagent error'
+//     }
+//   }
+// }
 
 // export class MusicSign {
 //   private readonly url: string;
