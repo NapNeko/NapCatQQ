@@ -7,7 +7,7 @@ export enum GroupListUpdateType {
 }
 export interface Group {
     groupCode: string,
-    createTime?:string,//高版本才有
+    createTime?: string,//高版本才有
     maxMember: number,
     memberCount: number,
     groupName: string,
@@ -59,4 +59,6 @@ export interface GroupMember {
     sex?: Sex
     qqLevel?: QQLevel
     isChangeRole: boolean;
+    joinTime: string;
+    lastSpeakTime: string;
 }
