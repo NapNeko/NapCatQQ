@@ -1,4 +1,4 @@
-import { Peer } from "../entities";
+import { ChatType, Peer } from "../entities";
 import { NodeIKernelRecentContactListener } from "../listeners/NodeIKernelRecentContactListener";
 import { GeneralCallResult } from "./common";
 export interface FSABRecentContactParams {
@@ -39,7 +39,13 @@ export interface NodeIKernelRecentContactService {
             errCode: number,
             errMsg: string,
             sortedContactList: Array<number>,
-            changedList: Array<any>
+            changedList: Array<{
+              remark: any;
+              peerName: any;
+              sendMemberName: any;
+              sendNickName: any;
+                peerUid: string; peerUin: string, msgTime: string, chatType: ChatType, msgId: string
+            }>
         }
     }>; // 1 arguments
 
