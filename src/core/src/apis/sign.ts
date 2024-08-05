@@ -23,8 +23,8 @@ export interface CustomMusicSignPostData {
 //   appId: "100497308",
 //   appType: 1,
 //   msgStyle: 0,
-//   recvUin: "545402644",
-//   sendType: 2,
+//   recvUin: "726067488",
+//   sendType: 1,
 //   clientInfo: {
 //     platform: 1
 //   },
@@ -41,8 +41,8 @@ export interface CustomMusicSignPostData {
 //   errCode: 0,
 //   errMsg: '',
 //   rsp: {
-//     sendType: 2,
-//     recvUin: '545402644',
+//     sendType: 1,
+//     recvUin: '726067488',
 //     recvOpenId: '',
 //     errCode: 901501,
 //     errMsg: 'imagent service_error:150_OIDB_NO_PRIV',
