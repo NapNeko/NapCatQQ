@@ -322,6 +322,7 @@ export class NapCatCore {
       if (groupMembers.has(groupCode)) {
         const existMembers = groupMembers.get(groupCode)!;
         arg.infos.forEach((member, uid) => {
+          //console.log('onMemberListChange', member);
           const existMember = existMembers.get(uid);
           if (existMember) {
             Object.assign(existMember, member);
