@@ -100,7 +100,7 @@ class MessageUniqueWrapper {
   createMsg(peer: Peer, msgId: string): number | undefined {
     const key = `${msgId}|${peer.chatType}|${peer.peerUid}`;
     const hash = crypto.createHash('md5').update(key);
-    const shortId = hash.digest().readInt32BE(0);
+    const shortId = hash.digest().readUInt32BE(0);
     //减少性能损耗
     // const isExist = this.msgIdMap.getKey(shortId);
     // if (isExist && isExist === msgId) {
