@@ -98,6 +98,8 @@ export class NapCatOnebot11 {
       //     .map(x => x.toString(16).padStart(2, '0'))
       //     .join('');
       // }
+      // const hex = buf2hex(Buffer.from(protobufData));
+      // console.log(hex);
       // // let Data: Data = {
       // //   header: {
       // //     GroupNumber: 0,
@@ -192,6 +194,7 @@ export class NapCatOnebot11 {
       //   // 732 17  GroupRecall
       //   // 732 20  GroupCommonTips
       //   // 732 21  EssenceMessage
+      //   // 732 16 16 GrayTips ->Busi->GroupEmjioLike
       // } catch (e) {
       //   log('解析SysMsg异常', e);
       //   // console.log(e);
@@ -209,7 +212,7 @@ export class NapCatOnebot11 {
       // 临时会话更新 tempGroupCodeMap uid -> source/GroupCode
     };
     msgListener.onRecvMsg = async (msg) => {
-      
+
       //console.log('ob11 onRecvMsg', JSON.stringify(msg, null, 2));
       // logDebug('收到消息', msg);
       for (const m of msg) {
@@ -291,7 +294,7 @@ export class NapCatOnebot11 {
       }
     };
     groupListener.onMemberInfoChange = async (groupCode: string, changeType: number, members: Map<string, GroupMember>) => {
-     // console.log("ob11 onMemberInfoChange", groupCode, changeType, members)
+      // console.log("ob11 onMemberInfoChange", groupCode, changeType, members)
       if (changeType === 1) {
         let member;
         for (const [key, value] of members) {

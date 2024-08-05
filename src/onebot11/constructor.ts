@@ -458,6 +458,7 @@ export class OB11Constructor {
         });
       }
       if (grayTipElement) {
+        //console.log('收到群提示消息', grayTipElement);
         if (grayTipElement.xmlElement?.templId === '10382') {
           const emojiLikeData = new fastXmlParser.XMLParser({
             ignoreAttributes: false,
