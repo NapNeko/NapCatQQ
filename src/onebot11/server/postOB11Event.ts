@@ -159,7 +159,7 @@ async function handleMsg(msg: OB11Message, quickAction: QuickAction) {
       }
     }
     replyMessage = replyMessage.concat(normalize(reply, quickAction.auto_escape));
-    const { sendElements, deleteAfterSentFiles } = await createSendElements(replyMessage, group);
+    const { sendElements, deleteAfterSentFiles } = await createSendElements(replyMessage, peer);
     sendMsg(peer, sendElements, deleteAfterSentFiles, false).then().catch(logError);
   }
 }
