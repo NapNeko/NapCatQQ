@@ -104,7 +104,7 @@ export class NTQQMsgApi {
       filterSendersUid: [],
       filterMsgToTime: '0',
       filterMsgFromTime: '0',
-      isReverseOrder: isReverseOrder,
+      isReverseOrder: isReverseOrder,//此参数有点离谱 注意不是本次查询的排序 而是全部消历史信息的排序 默认false 从新消息拉取到旧消息
       isIncludeCurrent: true,
       pageLimit: count,
     });
@@ -113,6 +113,7 @@ export class NTQQMsgApi {
   static async getMsgsByMsgId(peer: Peer | undefined, msgIds: string[] | undefined) {
     if (!peer) throw new Error('peer is not allowed');
     if (!msgIds) throw new Error('msgIds is not allowed');
+    //Mlikiowa： 参数不合规会导致NC异常崩溃 原因是TX未对进入参数判断 对应Android标记@NotNull AndroidJADX分析可得
     return await napCatCore.session.getMsgService().getMsgsByMsgId(peer, msgIds);
   }
   static async getSingleMsg(peer: Peer, seq: string) {
@@ -123,7 +124,7 @@ export class NTQQMsgApi {
   }
   static async queryMsgsWithFilterExWithSeq(peer: Peer, msgSeq: string) {
     let ret = await napCatCore.session.getMsgService().queryMsgsWithFilterEx('0', '0', msgSeq, {
-      chatInfo: peer,
+      chatInfo: peer,//此处为Peer 为关键查询参数 没有啥也没有 by mlik iowa
       filterMsgType: [],
       filterSendersUid: [],
       filterMsgToTime: '0',
@@ -150,6 +151,7 @@ export class NTQQMsgApi {
       1,
       5000,
       (groupFileListResult: onGroupFileInfoUpdateParamType) => {
+        //Developer Mlikiowa Todo: 此处有问题 无法判断是否成功
         return true;
       },
       GroupCode,
@@ -168,19 +170,26 @@ export class NTQQMsgApi {
     }, msgIds);
   }
   static async sendMsgV2(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
-    // function generateMsgId() {
-    //   const timestamp = Math.floor(Date.now() / 1000);
-    //   const random = Math.floor(Math.random() * Math.pow(2, 32));
-    //   const buffer = Buffer.alloc(8);
-    //   buffer.writeUInt32BE(timestamp, 0);
-    //   buffer.writeUInt32BE(random, 4);
-    //   const msgId = BigInt("0x" + buffer.toString('hex')).toString();
-    //   return msgId;
-    // }
+    function generateMsgId() {
+      const timestamp = Math.floor(Date.now() / 1000);
+      const random = Math.floor(Math.random() * Math.pow(2, 32));
+      const buffer = Buffer.alloc(8);
+      buffer.writeUInt32BE(timestamp, 0);
+      buffer.writeUInt32BE(random, 4);
+      const msgId = BigInt("0x" + buffer.toString('hex')).toString();
+      return msgId;
+    }
     // 此处有采用Hack方法 利用数据返回正确得到对应消息
     // 与之前 Peer队列 MsgSeq队列 真正的MsgId并发不同
     // 谨慎采用 目前测试暂无问题  Developer.Mlikiowa
-    let msgId = await NTQQMsgApi.getMsgUnique(peer.chatType, await NTQQMsgApi.getServerTime());
+    let msgId: string;
+    try {
+      msgId = await NTQQMsgApi.getMsgUnique(peer.chatType, await NTQQMsgApi.getServerTime());
+    } catch (error) {
+      //if (!napCatCore.session.getMsgService()['generateMsgUniqueId'])
+      //兜底识别策略V2
+      msgId = generateMsgId().toString();
+    }
     let data = await NTEventDispatch.CallNormalEvent<
       (msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<any, any>) => Promise<unknown>,
       (msgList: RawMessage[]) => void
