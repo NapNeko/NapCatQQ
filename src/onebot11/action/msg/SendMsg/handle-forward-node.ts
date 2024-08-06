@@ -24,12 +24,8 @@ async function cloneMsg(msg: RawMessage): Promise<RawMessage | undefined> {
   if (sendElements.length === 0) {
     logDebug('需要clone的消息无法解析，将会忽略掉', msg);
   }
-
-  //logDebug('克隆消息', sendElements);
-
   try {
     const nodeMsg = await NTQQMsgApi.sendMsg(selfPeer, sendElements, true);
-    await sleep(500); // 防止风控
     return nodeMsg;
   } catch (e) {
     logError(e, '克隆转发消息失败,将忽略本条消息', msg);
