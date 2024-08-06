@@ -2,7 +2,7 @@ import { OB11Message } from '@/onebot11/types';
 import { log } from '@/common/utils/log';
 import { getGroup, getGroupMember, selfInfo } from '@/core/data';
 import exp from 'constants';
-import { Group } from '@/core';
+import { Group, NTQQMsgApi } from '@/core';
 import chalk from 'chalk';
 
 const spSegColor = chalk.blue;// for special segment
@@ -67,7 +67,7 @@ export async function logMessage(ob11Message: OB11Message) {
         msgParts.push(spSegColor(`[视频|${segment.data.url}]`));
       }
       else if (segment.type === 'forward') {
-        msgParts.push(spSegColor(`[转发|${JSON.stringify(segment.data.id)}]`));
+        msgParts.push(spSegColor(`[转发|${segment.data.id}]`));
       }
       else {
         msgParts.push(spSegColor(`[未实现|${JSON.stringify(segment)}]`));
