@@ -224,9 +224,10 @@ export class OB11Constructor {
         //读取视频链接并兜底
         let videoUrl;//Array
         if (msg.peerUin = '284840486') {
-          //合并消息内部 应该进行特殊处理
+          //合并消息内部 应该进行特殊处理 可能需要重写peer 待测试与研究
         }
         try {
+          
           videoUrl = await NTQQFileApi.getVideoUrl({
             chatType: msg.chatType,
             peerUid: msg.peerUid,

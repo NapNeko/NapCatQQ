@@ -1,5 +1,5 @@
 import { ChatType, ElementType, Group, NTQQMsgApi, Peer, RawMessage, SendMessageElement } from '@/core';
-import { OB11MessageNode } from '@/onebot11/types';
+import { OB11MessageDataType, OB11MessageNode } from '@/onebot11/types';
 import { selfInfo } from '@/core/data';
 import createSendElements from '@/onebot11/action/msg/SendMsg/create-send-elements';
 import { logDebug, logError } from '@/common/utils/log';
@@ -42,124 +42,72 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
     peerUid: selfInfo.uid
   };
   let nodeMsgIds: string[] = [];
-
-  // 先判断一遍是不是id和自定义混用
-  const needClone =
-    messageNodes.filter(node => node.data.id).length &&
-    messageNodes.filter(node => !node.data.id).length;
-
   for (const messageNode of messageNodes) {
-    // 一个node表示一个人的消息
     const nodeId = messageNode.data.id;
-    // 有nodeId表示一个子转发消息卡片
-    // 建议改成自带 forward 而不是 clone再发
     if (nodeId) {
+      //对Mgsid和OB11ID混用情况兜底
       const nodeMsg = MessageUnique.getMsgIdAndPeerByShortId(parseInt(nodeId)) || MessageUnique.getPeerByMsgId(nodeId);
       if (!nodeMsg) {
         logError('转发消息失败，未找到消息', nodeId);
         continue;
       }
-      if (!needClone) {
-        nodeMsgIds.push(nodeMsg.MsgId);
-      } else {
-        if (nodeMsg!.Peer.peerUid !== selfInfo.uid) {
-          // need cloning
-          const rawClone = await NTQQMsgApi.getMsgsByMsgId(nodeMsg?.Peer!, [nodeMsg?.MsgId!]);
-          const clonedMsg = await cloneMsg(rawClone.msgList[0]);
-          if (clonedMsg) {
-            nodeMsgIds.push(clonedMsg.msgId);
-          }
-        }
-      }
+      nodeMsgIds.push(nodeMsg.MsgId);
     } else {
       // 自定义的消息
-      // 提取消息段，发给自己生成消息id
       try {
-        //if(messageNode.data.content instanceof OB11MessageNode)
         let OB11Data = normalize(messageNode.data.content);
-        const { sendElements } = await createSendElements(OB11Data, inputPeer);
-        //logDebug('开始生成转发节点', sendElements);
-        const sendElementsSplit: SendMessageElement[][] = [];
-        let splitIndex = 0;
-        for (const sendElement of sendElements) {
-          if (!sendElementsSplit[splitIndex]) {
-            sendElementsSplit[splitIndex] = [];
-          }
-
-          if (sendElement.elementType === ElementType.FILE || sendElement.elementType === ElementType.VIDEO) {
-            if (sendElementsSplit[splitIndex].length > 0) {
-              splitIndex++;
-            }
-            sendElementsSplit[splitIndex] = [sendElement];
-            splitIndex++;
-          } else {
-            sendElementsSplit[splitIndex].push(sendElement);
-          }
-          //logDebug(sendElementsSplit);
+        //筛选node消息
+        let isNodeMsg = OB11Data.filter(e => e.type === OB11MessageDataType.node).length;//找到子转发消息
+        if (isNodeMsg !== 0) {
+          if (isNodeMsg !== OB11Data.length) { logError('子消息中包含非node消息 跳过不合法部分'); continue; }
+          const nodeMsg = await handleForwardNode(destPeer, OB11Data.filter(e => e.type === OB11MessageDataType.node), inputPeer);
+          if (nodeMsg) nodeMsgIds.push(nodeMsg.msgId);
+          //完成子卡片生成跳过后续
+          continue;
         }
-        // log("分割后的转发节点", sendElementsSplit)
+        const { sendElements } = await createSendElements(OB11Data, inputPeer);
+        //拆分消息
+        let MixElement = sendElements.filter(element => element.elementType !== ElementType.FILE && element.elementType !== ElementType.VIDEO);
+        let SingleElement = sendElements.filter(element => element.elementType === ElementType.FILE || element.elementType === ElementType.VIDEO).map(e => [e]);
+        let AllElement: SendMessageElement[][] = [MixElement, ...SingleElement];
         const MsgNodeList: Promise<RawMessage | undefined>[] = [];
-        for (const sendElementsSplitElement of sendElementsSplit) {
+        for (const sendElementsSplitElement of AllElement) {
           MsgNodeList.push(sendMsg(selfPeer, sendElementsSplitElement, [], true).catch(e => new Promise((resolve, reject) => { resolve(undefined) })));
-          //await sleep(Math.trunc(sendElementsSplit.length / 10) * 100); // 防止风控
           await sleep(10);
         }
-        for (const msgNode of MsgNodeList) {
-          const result = await msgNode;
-          if (result) {
-            nodeMsgIds.push(result.msgId);
+        (await Promise.allSettled(MsgNodeList)).map((result) => {
+          if (result.status === 'fulfilled' && result.value) {
+            nodeMsgIds.push(result.value.msgId);
           }
-          //logDebug('转发节点生成成功', result.msgId);
-        }
+        });
       } catch (e) {
         logDebug('生成转发消息节点失败', e);
       }
     }
   }
-  // 检查srcPeer是否一致，不一致则需要克隆成自己的消息, 让所有srcPeer都变成自己的，使其保持一致才能够转发
   const nodeMsgArray: Array<RawMessage> = [];
 
   let srcPeer: Peer | undefined = undefined;
   let needSendSelf = false;
-  for (const msgId of nodeMsgIds) {
-    const nodeMsgPeer = await MessageUnique.getPeerByMsgId(msgId);
+  //检测是否处于同一个Peer 不在同一个peer则全部消息由自身发送
+  for (let msgId of nodeMsgIds) {
+    const nodeMsgPeer = MessageUnique.getPeerByMsgId(msgId);
     const nodeMsg = (await NTQQMsgApi.getMsgsByMsgId(nodeMsgPeer?.Peer!, [msgId])).msgList[0];
-    if (nodeMsg) {
-      nodeMsgArray.push(nodeMsg);
-      if (!srcPeer) {
-        srcPeer = { chatType: nodeMsg.chatType, peerUid: nodeMsg.peerUid };
-      } else if (srcPeer.peerUid !== nodeMsg.peerUid) {
-        needSendSelf = true;
-        srcPeer = selfPeer;
-      }
+    srcPeer = srcPeer ?? { chatType: nodeMsg.chatType, peerUid: nodeMsg.peerUid };
+    if (srcPeer.peerUid !== nodeMsg.peerUid) {
+      needSendSelf = true;
     }
+    nodeMsgArray.push(nodeMsg);
   }
-  // logDebug('nodeMsgArray', nodeMsgArray);
   nodeMsgIds = nodeMsgArray.map(msg => msg.msgId);
   if (needSendSelf) {
-    //logDebug('需要克隆转发消息');
     for (const [index, msg] of nodeMsgArray.entries()) {
-      if (msg.peerUid !== selfInfo.uid) {
-        const clonedMsg = await cloneMsg(msg);
-        if (clonedMsg) {
-          nodeMsgIds[index] = clonedMsg.msgId;
-        }
-      }
+      if (msg.peerUid === selfInfo.uid) continue;
+      const clonedMsg = await cloneMsg(msg);
+      nodeMsgIds[index] = clonedMsg?.msgId || "";
     }
   }
-  // elements之间用换行符分隔
-  // let _sendForwardElements: SendMessageElement[] = []
-  // for(let i = 0; i < sendForwardElements.length; i++){
-  //     _sendForwardElements.push(sendForwardElements[i])
-  //     _sendForwardElements.push(SendMsgElementConstructor.text("\n\n"))
-  // }
-  // const nodeMsg = await NTQQApi.sendMsg(selfPeer, _sendForwardElements, true);
-  // nodeIds.push(nodeMsg.msgId)
-  // await sleep(500);
-  // 开发转发
-  if (nodeMsgIds.length === 0) {
-    throw Error('转发消息失败，生成节点为空');
-  }
+  if (nodeMsgIds.length === 0) throw Error('转发消息失败，生成节点为空');
   try {
     logDebug('开发转发', srcPeer, destPeer, nodeMsgIds);
     return await NTQQMsgApi.multiForwardMsg(srcPeer!, destPeer, nodeMsgIds);
