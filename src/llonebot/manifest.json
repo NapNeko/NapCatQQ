@@ -1,0 +1,37 @@
+{
+  "manifest_version": 4,
+  "type": "extension",
+  "name": "LLObV4",
+  "slug": "LLOneBotV4",
+  "description": "OneBot v11 protocol implementation with NapCat logic",
+  "version": "4.0.0-SNAPSHOT",
+  "icon": "./logo.png",
+  "authors": [
+    {
+      "name": "MliKiowa",
+      "link": "https://github.com/MliKiowa"
+    },
+    {
+      "name": "young",
+      "link": "https://github.com/Wesley-Young"
+    }
+  ],
+  "repository": {
+    "repo": "NapNeko/NCQQ_LLObv4",
+    "branch": "main",
+    "release": {
+      "tag": "latest",
+      "name": "LLObV4.zip"
+    }
+  },
+  "platform": [
+    "win32",
+    "linux",
+    "darwin"
+  ],
+  "injects": {
+    "renderer": "./renderer/index.js",
+    "main": "./main/index.cjs",
+    "preload": "./preload/index.cjs"
+  }
+}

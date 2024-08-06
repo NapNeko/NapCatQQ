@@ -11,6 +11,7 @@
     "build": "npm run build:dev",
     "build:core": "cd ./src/core && npm run build && cd ../.. && node ./script/copy-core.cjs",
     "build:webui": "cd ./src/webui && vite build",
+    "ll-build": "npx electron-vite build",
     "watch": "npm run watch:dev",
     "debug-win": "powershell dist/napcat.ps1",
     "lint": "eslint --fix src/**/*.{js,ts}",
@@ -49,7 +50,13 @@
     "vite-plugin-babel": "^1.2.0",
     "vite-plugin-cp": "^4.0.8",
     "vite-plugin-dts": "^3.8.2",
-    "vite-tsconfig-paths": "^4.3.2"
+    "vite-tsconfig-paths": "^4.3.2",
+    "@electron-toolkit/eslint-config-ts": "^1.0.1",
+    "@electron-toolkit/tsconfig": "^1.0.1",
+    "electron": "^29.1.4",
+    "electron-vite": "^2.1.0",
+    "unplugin-zip-pack": "^1.0.1",
+    "vite-plugin-checker": "^0.6.4"
   },
   "dependencies": {
     "ajv": "^8.13.0",
