@@ -1,5 +1,5 @@
-import QQWrapper, { NodeIQQNTWrapperSession, NodeQQNTWrapperUtil } from './wrapper';
-import { BuddyListener, GroupListener, MsgListener, ProfileListener } from './listeners';
+import QQWrapper from './wrapper';
+import { INapCatService } from '@/core/service-base';
 
 export * from './adapters';
 export * from './apis';
@@ -17,20 +17,7 @@ export * as WrapperInterface from './wrapper';
 export * as SessionConfig from './sessionConfig';
 
 export * from './core';
-
-export interface INapCatService {
-  session: NodeIQQNTWrapperSession;
-  util: NodeQQNTWrapperUtil;
-  dataPath: string;
-
-  onLoginSuccess(func: OnLoginSuccess): void;
-
-  addListener(listener: BuddyListener | GroupListener | MsgListener | ProfileListener): number
-}
-
-export interface OnLoginSuccess {
-  (uin: string, uid: string): void | Promise<void>;
-}
+export * from './service-base';
 
 export let napCatCore: INapCatService;
 

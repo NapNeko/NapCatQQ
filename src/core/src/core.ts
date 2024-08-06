@@ -32,36 +32,19 @@ import {
 } from '@/common/utils/log';
 import { napCatConfig } from '@/core/utils/config';
 
-import { INapCatService, OnLoginSuccess } from '@/core/index';
 
-export class NapCatAppImpl implements INapCatService {
-  public readonly session: NodeIQQNTWrapperSession;
-  public readonly util: NodeQQNTWrapperUtil;
+import { INapCatService, OnLoginSuccess } from '@/core';
+
+export class NapCatAppImpl extends INapCatService {
   public readonly engine: NodeIQQNTWrapperEngine;
   private readonly loginListener: LoginListener;
 
   private loginService: NodeIKernelLoginService;
-  private onLoginSuccessFuncList: OnLoginSuccess[] = [];
-
-  private proxyHandler = {
-    get(target: any, prop: any, receiver: any) {
-      // console.log('get', prop, typeof target[prop]);
-      if (typeof target[prop] === 'undefined') {
-        // 如果方法不存在，返回一个函数，这个函数调用existentMethod
-        return (...args: unknown[]) => {
-          logDebug(`${target.constructor.name} has no method ${prop}`);
-        };
-      }
-      // 如果方法存在，正常返回
-      return Reflect.get(target, prop, receiver);
-    }
-  };
 
   constructor() {
+    super(new QQWrapper.NodeIQQNTWrapperSession(), QQWrapper);
     this.engine = new QQWrapper.NodeIQQNTWrapperEngine();
-    this.util = new QQWrapper.NodeQQNTWrapperUtil();
     this.loginService = new QQWrapper.NodeIKernelLoginService();
-    this.session = new QQWrapper.NodeIQQNTWrapperSession();
     this.loginListener = new LoginListener();
     this.loginListener.onUserLoggedIn = (userid: string) => {
       logError('当前账号(' + userid + ')已登录,无法重复登录');
@@ -108,15 +91,6 @@ export class NapCatAppImpl implements INapCatService {
     this.loginListener = new Proxy(this.loginListener, this.proxyHandler);
     // 初始化流程：initConfig, login, initSession, loginSuccess | initDataListener
     this.loginService.addKernelLoginListener(new QQWrapper.NodeIKernelLoginListener(this.loginListener));
-  }
-
-  get dataPath(): string {
-    let result = this.util.getNTUserDataInfoConfig();
-    if (!result) {
-      result = path.resolve(os.homedir(), './.config/QQ');
-      fs.mkdirSync(result, { recursive: true });
-    }
-    return result;
   }
 
   get dataPathGlobal(): string {
@@ -368,41 +342,6 @@ export class NapCatAppImpl implements INapCatService {
       }
     };
     this.addListener(groupListener);
-  }
-
-  addListener(
-    listener: BuddyListener | GroupListener | MsgListener | ProfileListener
-  ): number {
-    // 根据listener的类型，找到对应的service，然后调用addListener方法
-    // logDebug('addListener', listener.constructor.name);
-
-    // proxy listener，调用 listener 不存在的方法时不会报错
-
-    listener = new Proxy(listener, this.proxyHandler);
-    switch (listener.constructor.name) {
-    case 'BuddyListener': {
-      return this.session.getBuddyService().addKernelBuddyListener(new QQWrapper.NodeIKernelBuddyListener(listener as BuddyListener));
-    }
-    case 'GroupListener': {
-      return this.session.getGroupService().addKernelGroupListener(new QQWrapper.NodeIKernelGroupListener(listener as GroupListener));
-    }
-    case 'MsgListener': {
-      return this.session.getMsgService().addKernelMsgListener(new QQWrapper.NodeIKernelMsgListener(listener as MsgListener));
-    }
-    case 'ProfileListener': {
-      return this.session.getProfileService().addKernelProfileListener(new QQWrapper.NodeIKernelProfileListener(listener as ProfileListener));
-    }
-    default:
-      return -1;
-    }
-  }
-
-  onLoginSuccess(func: OnLoginSuccess) {
-    NTEventDispatch.init({
-      ListenerMap: QQWrapper,
-      WrapperSession: this.session,
-    });
-    this.onLoginSuccessFuncList.push(func);
   }
 
   async quickLogin(uin: string): Promise<QuickLoginResult> {
