@@ -52,10 +52,15 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
     // 一个node表示一个人的消息
     const nodeId = messageNode.data.id;
     // 有nodeId表示一个子转发消息卡片
+    // 建议改成自带 forward 而不是 clone再发
     if (nodeId) {
-      const nodeMsg = MessageUnique.getMsgIdAndPeerByShortId(parseInt(nodeId));
+      const nodeMsg = MessageUnique.getMsgIdAndPeerByShortId(parseInt(nodeId)) || MessageUnique.getPeerByMsgId(nodeId);
+      if (!nodeMsg) {
+        logError('转发消息失败，未找到消息', nodeId);
+        continue;
+      }
       if (!needClone) {
-        nodeMsgIds.push(nodeMsg!.MsgId);
+        nodeMsgIds.push(nodeMsg.MsgId);
       } else {
         if (nodeMsg!.Peer.peerUid !== selfInfo.uid) {
           // need cloning

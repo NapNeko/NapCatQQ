@@ -94,6 +94,9 @@ export class NTQQMsgApi {
   } | undefined> {
     return napCatCore.session.getMsgService().getMultiMsg(peer, rootMsgId, parentMsgId);
   }
+  static async ForwardMsg(peer: Peer, msgIds: string[]) {
+    return napCatCore.session.getMsgService().forwardMsg(msgIds, peer, [peer], new Map());
+  }
   static async getLastestMsgByUids(peer: Peer, count: number = 20) {
     let ret = await napCatCore.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {
       chatInfo: peer,
