@@ -7,14 +7,11 @@ import path from 'node:path';
 import { checkVersion } from '@/common/utils/version';
 import { log, logDebug, logError, LogLevel, logWarn, setLogLevel } from '@/common/utils/log';
 import { NapCatOnebot11 } from '@/onebot11/main';
-import { InitWebUi } from './webui/index';
-import { WebUiDataRuntime } from './webui/src/helper/Data';
-import { deleteOldFiles, UpdateConfig } from './common/utils/helper';
+import { InitWebUi } from '@/webui';
+import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import chalk from 'chalk';
-import { randomInt } from 'crypto';
-import { MessageUnique } from './common/utils/MessageUnique';
 
 
 const __filename = fileURLToPath(import.meta.url);
