@@ -45,6 +45,7 @@ class DeleteMsg extends BaseAction<Payload, void> {
       if (!data) {
         throw new Error('Recall failed');
       }
+      
       //await sleep(100);
       //await NTQQMsgApi.getMsgsByMsgId(msg.Peer, [msg.MsgId]);
     }
