@@ -34,7 +34,7 @@
     "@types/node": "^22.0.0",
     "@types/qrcode-terminal": "^0.12.2",
     "@types/ws": "^8.5.10",
-    "@typescript-eslint/eslint-plugin": "^7.4.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.1",
     "@typescript-eslint/parser": "^7.4.0",
     "eslint": "^8.57.0",
     "eslint-import-resolver-typescript": "^3.6.1",
