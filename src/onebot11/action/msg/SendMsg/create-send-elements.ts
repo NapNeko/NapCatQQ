@@ -6,6 +6,7 @@ import {
   IdMusicSignPostData,
   NTQQFileApi,
   NTQQMsgApi,
+  Peer,
   SendArkElement,
   SendMessageElement,
   SendMsgElementConstructor,
@@ -19,8 +20,8 @@ import { RequestUtil } from '@/common/utils/request';
 import { MessageUnique } from '@/common/utils/MessageUnique';
 
 export type MessageContext = {
-  group?: Group,
   deleteAfterSentFiles: string[],
+  peer:Peer
 }
 async function handleOb11FileLikeMessage(
   { data: inputdata }: OB11MessageFileBase,
@@ -52,12 +53,12 @@ const _handlers: {
   [OB11MessageDataType.text]: async ({ data: { text } }) => SendMsgElementConstructor.text(text),
 
   [OB11MessageDataType.at]: async ({ data: { qq: atQQ } }, context) => {
-    if (!context.group) return undefined;
+    if (!context.peer) return undefined;
 
     if (atQQ === 'all') return SendMsgElementConstructor.at(atQQ, atQQ, AtType.atAll, '全体成员');
 
     // then the qq is a group member
-    const atMember = await getGroupMember(context.group.groupCode, atQQ);
+    const atMember = await getGroupMember(context.peer.peerUid, atQQ);
     return atMember ?
       SendMsgElementConstructor.at(atQQ, atMember.uid, AtType.atUser, atMember.cardName || atMember.nick) :
       undefined;
@@ -206,7 +207,7 @@ const handlers = <{
 
 export default async function createSendElements(
   messageData: OB11MessageData[],
-  group?: Group,
+  peer: Peer,
   ignoreTypes: OB11MessageDataType[] = []
 ) {
   const deleteAfterSentFiles: string[] = [];
@@ -217,7 +218,7 @@ export default async function createSendElements(
     }
     const callResult = handlers[sendMsg.type](
       sendMsg,
-      { group, deleteAfterSentFiles }
+      { peer, deleteAfterSentFiles }
     )?.catch(undefined);
     callResultList.push(callResult);
   }
@@ -228,7 +229,7 @@ export default async function createSendElements(
 
 export async function createSendElementsParallel(
   messageData: OB11MessageData[],
-  group?: Group,
+  peer: Peer,
   ignoreTypes: OB11MessageDataType[] = []
 ) {
   const deleteAfterSentFiles: string[] = [];
@@ -236,7 +237,7 @@ export async function createSendElementsParallel(
     await Promise.all(
       messageData.map(async sendMsg => ignoreTypes.includes(sendMsg.type) ?
         undefined :
-        handlers[sendMsg.type](sendMsg, { group, deleteAfterSentFiles }))
+        handlers[sendMsg.type](sendMsg, { peer, deleteAfterSentFiles }))
     ).then(
       results => results.filter(
         element => element !== undefined

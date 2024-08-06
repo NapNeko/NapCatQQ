@@ -36,7 +36,7 @@ async function cloneMsg(msg: RawMessage): Promise<RawMessage | undefined> {
   }
 }
 
-export async function handleForwardNode(destPeer: Peer, messageNodes: OB11MessageNode[], group: Group | undefined): Promise<RawMessage | null> {
+export async function handleForwardNode(destPeer: Peer, messageNodes: OB11MessageNode[], inputPeer: Peer): Promise<RawMessage | null> {
   const selfPeer = {
     chatType: ChatType.friend,
     peerUid: selfInfo.uid
@@ -75,7 +75,9 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
       // 自定义的消息
       // 提取消息段，发给自己生成消息id
       try {
-        const { sendElements } = await createSendElements(normalize(messageNode.data.content), group);
+        //if(messageNode.data.content instanceof OB11MessageNode)
+        let OB11Data = normalize(messageNode.data.content);
+        const { sendElements } = await createSendElements(OB11Data, inputPeer);
         //logDebug('开始生成转发节点', sendElements);
         const sendElementsSplit: SendMessageElement[][] = [];
         let splitIndex = 0;
@@ -98,9 +100,9 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
         // log("分割后的转发节点", sendElementsSplit)
         const MsgNodeList: Promise<RawMessage | undefined>[] = [];
         for (const sendElementsSplitElement of sendElementsSplit) {
-          MsgNodeList.push(sendMsg(selfPeer, sendElementsSplitElement, [], true));
-          await sleep(Math.trunc(sendElementsSplit.length / 10) * 100);
-          //await sleep(10);
+          MsgNodeList.push(sendMsg(selfPeer, sendElementsSplitElement, [], true).catch(e => new Promise((resolve, reject) => { resolve(undefined) })));
+          //await sleep(Math.trunc(sendElementsSplit.length / 10) * 100); // 防止风控
+          await sleep(10);
         }
         for (const msgNode of MsgNodeList) {
           const result = await msgNode;
