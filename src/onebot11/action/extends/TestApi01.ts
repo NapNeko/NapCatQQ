@@ -1,11 +1,7 @@
 import BaseAction from '../BaseAction';
 import { ActionName, BaseCheckResult } from '../types';
-import * as fs from 'node:fs';
-import { NTQQUserApi } from '@/core/apis/user';
-import { checkFileReceived, uri2local } from '@/common/utils/file';
 import { napCatCore, NTQQGroupApi } from '@/core';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-// import { log } from "../../../common/utils";
 
 const SchemaData = {
   type: 'object',
