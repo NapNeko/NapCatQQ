@@ -181,7 +181,8 @@ export interface OB11MessageMarkdown {
 export interface OB11MessageForward {
   type: OB11MessageDataType.forward
   data: {
-    id: string
+    id: string,
+    content: OB11Message[]
   }
 }
 

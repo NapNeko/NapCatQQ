@@ -65,7 +65,7 @@ export class OB11Constructor {
       real_id: msg.id!,
       message_type: msg.chatType == ChatType.group ? 'group' : 'private',
       sender: {
-        user_id: parseInt(msg.senderUin!),
+        user_id: parseInt(msg.senderUin || '0'),
         nickname: msg.sendNickName,
         card: msg.sendMemberName || '',
       },
@@ -165,7 +165,10 @@ export class OB11Constructor {
           if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
             replyMsg = (await NTQQMsgApi.getSingleMsg(peer, element.replyElement.replayMsgSeq)).msgList[0];
           }
-
+          if (msg.peerUin == '284840486') {
+            //合并消息内侧 消息具体定位不到
+            message_data['data']['id'] = MessageUnique.createMsg({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, records.msgId)?.toString();
+          }
           if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
             throw new Error('回复消息消息验证失败');
           }
@@ -221,6 +224,9 @@ export class OB11Constructor {
         const videoElement: VideoElement = element.videoElement;
         //读取视频链接并兜底
         let videoUrl;//Array
+        if (msg.peerUin = '284840486') {
+          //合并消息内部 应该进行特殊处理
+        }
         try {
           videoUrl = await NTQQFileApi.getVideoUrl({
             chatType: msg.chatType,
@@ -338,12 +344,15 @@ export class OB11Constructor {
         //拉取下级消息
         if (!MultiMsgs) continue;
         //拉取失败则跳过
+        message_data['data']['content'] = [];
         for (let MultiMsg of MultiMsgs) {
           //对每条拉取的消息传递ParentMsgPeer修正Peer
           MultiMsg.parentMsgPeer = ParentMsgPeer;
           MultiMsg.parentMsgIdList = msg.parentMsgIdList;
+          MultiMsg.id = MessageUnique.createMsg(ParentMsgPeer, MultiMsg.msgId);//该ID仅用查看 无法调用
           let msgList = await OB11Constructor.message(MultiMsg);
-          console.log(msgList);
+          message_data['data']['content'].push(msgList);
+          //console.log("合并消息", msgList);
         }
       }
       if ((message_data.type as string) !== 'unknown' && message_data.data) {
