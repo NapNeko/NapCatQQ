@@ -43,6 +43,7 @@ setTimeout(() => {
     await sleep(100);
     // NTQQMsgApi.CheckSendMode().then().catch();
     loadMessageUnique().then().catch();
+    //下面的代码还没摸清 不要使用
     //let data  = await napCatCore.session.getMsgService().sendSsoCmdReqByContend("LightAppSvc.mini_app_growguard.ReportExecute","1124343");
     //console.log(data);
   });
@@ -72,6 +73,7 @@ export class NTQQMsgApi {
   }
   static async getMsgEmojiLikesList(peer: Peer, msgSeq: string, emojiId: string, emojiType: string, count: number = 20) {
     //console.log(peer, msgSeq, emojiId, emojiType, count);
+    //注意此处emojiType 可选值一般为1-2 2好像是unicode表情dec值 大部分情况 Taged M likiowa
     return napCatCore.session.getMsgService().getMsgEmojiLikesList(peer, msgSeq, emojiId, emojiType, "", false, 20)
   }
   // static napCatCore: NapCatCore | null = null;
