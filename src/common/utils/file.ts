@@ -181,7 +181,7 @@ type Uri2LocalRes = {
   isLocal: boolean
 }
 
-export async function uri2local(uri: string, fileName: string | null = null): Promise<Uri2LocalRes> {
+export async function uri2local(UriOrPath: string, fileName: string | null = null): Promise<Uri2LocalRes> {
   const res = {
     success: false,
     errMsg: '',
@@ -190,26 +190,29 @@ export async function uri2local(uri: string, fileName: string | null = null): Pr
     path: '',
     isLocal: false
   };
-  if (!fileName) {
-    fileName = randomUUID();
-  }
-  let filePath = path.join(getTempDir(), fileName);
+  if (!fileName) fileName = randomUUID();
+  let filePath = path.join(getTempDir(), fileName);//临时目录
   let url = null;
+  //区分path和uri
   try {
-    url = new URL(uri);
-  } catch (e: any) {
-    res.errMsg = `uri ${uri} 解析失败,` + e.toString() + ` 可能${uri}不存在`;
+    if (fs.existsSync(UriOrPath)) url = new URL("file://" + UriOrPath);
+  } catch (error: any) { }
+  try {
+    url = new URL(UriOrPath);
+  } catch (error: any) { }
+
+  //验证url
+  if (!url) {
+    res.errMsg = `UriOrPath ${UriOrPath} 解析失败,可能${UriOrPath}不存在`;
     return res;
   }
 
-  // log("uri protocol", url.protocol, uri);
   if (url.protocol == 'base64:') {
     // base64转成文件
-    const base64Data = uri.split('base64://')[1];
+    const base64Data = UriOrPath.split('base64://')[1];
     try {
       const buffer = Buffer.from(base64Data, 'base64');
       fs.writeFileSync(filePath, buffer);
-
     } catch (e: any) {
       res.errMsg = 'base64文件下载失败,' + e.toString();
       return res;
@@ -218,7 +221,7 @@ export async function uri2local(uri: string, fileName: string | null = null): Pr
     // 下载文件
     let buffer: Buffer | null = null;
     try {
-      buffer = await httpDownload(uri);
+      buffer = await httpDownload(UriOrPath);
     } catch (e: any) {
       res.errMsg = `${url}下载失败,` + e.toString();
       return res;
@@ -252,6 +255,7 @@ export async function uri2local(uri: string, fileName: string | null = null): Pr
       }
     }
     else {
+      // 26702执行forword file文件操作 不应该在这里乱来
       // const cache = await dbUtil.getFileCacheByName(uri);
       // if (cache) {
       //   filePath = cache.path;
@@ -259,7 +263,6 @@ export async function uri2local(uri: string, fileName: string | null = null): Pr
       //   filePath = uri;
       // }
     }
-
     res.isLocal = true;
   }
   // else{

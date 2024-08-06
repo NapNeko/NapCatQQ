@@ -20,8 +20,8 @@ export class OCRImage extends BaseAction<Payload, any> {
   actionName = ActionName.OCRImage;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
-    const { path, isLocal, errMsg } = (await uri2local(payload.image));
-    if (errMsg) {
+    const { path, isLocal, errMsg,success } = (await uri2local(payload.image));
+    if (!success) {
       throw `OCR ${payload.image}失败,image字段可能格式不正确`;
     }
     if (path) {

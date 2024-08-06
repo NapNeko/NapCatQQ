@@ -24,8 +24,8 @@ export default class SetAvatar extends BaseAction<Payload, null> {
     };
   }
   protected async _handle(payload: Payload): Promise<null> {
-    const { path, isLocal, errMsg } = (await uri2local(payload.file));
-    if (errMsg) {
+    const { path, isLocal, errMsg,success } = (await uri2local(payload.file));
+    if (!success) {
       throw `头像${payload.file}设置失败,file字段可能格式不正确`;
     }
     if (path) {
