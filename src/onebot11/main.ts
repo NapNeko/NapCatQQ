@@ -33,6 +33,7 @@ import { logMessage, logNotice, logRequest } from '@/onebot11/log';
 import { OB11Message } from '@/onebot11/types';
 import { isEqual } from '@/common/utils/helper';
 import { MessageUnique } from '@/common/utils/MessageUnique';
+import { OB11InputStatusEvent } from './event/notice/OB11InputStatusEvent';
 
 //下面几个其实应该移进Core-Data 缓存实现 但是现在在这里方便
 //
@@ -92,6 +93,21 @@ export class NapCatOnebot11 {
     }
     // Create MsgListener
     const msgListener = new MsgListener();
+    msgListener.onInputStatusPush = async (data: {
+      chatType: number;
+      eventType: number;
+      fromUin: string;
+      interval: string;
+      showTime: string;
+      statusText: string;
+      timestamp: string;
+      toUin: string;
+    }
+    ) => {
+      let uin = await NTQQUserApi.getUinByUid(data.fromUin);
+      logNotice(`[输入状态] ${uin} ${data.statusText}`);
+      postOB11Event(new OB11InputStatusEvent(parseInt(uin), data.eventType, data.statusText));
+    }
     msgListener.onRecvSysMsg = async (protobufData: number[]) => {
       // function buf2hex(buffer: Buffer) {
       //   return [...new Uint8Array(buffer)]
