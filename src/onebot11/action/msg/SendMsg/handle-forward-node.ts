@@ -32,7 +32,7 @@ async function cloneMsg(msg: RawMessage): Promise<RawMessage | undefined> {
   }
 }
 
-export async function handleForwardNode(destPeer: Peer, messageNodes: OB11MessageNode[], inputPeer: Peer): Promise<RawMessage | null> {
+export async function handleForwardNode(destPeer: Peer, messageNodes: OB11MessageNode[]): Promise<RawMessage | null> {
   const selfPeer = {
     chatType: ChatType.friend,
     peerUid: selfInfo.uid
@@ -56,24 +56,24 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
         let isNodeMsg = OB11Data.filter(e => e.type === OB11MessageDataType.node).length;//找到子转发消息
         if (isNodeMsg !== 0) {
           if (isNodeMsg !== OB11Data.length) { logError('子消息中包含非node消息 跳过不合法部分'); continue; }
-          const nodeMsg = await handleForwardNode(destPeer, OB11Data.filter(e => e.type === OB11MessageDataType.node), inputPeer);
-          if (nodeMsg) nodeMsgIds.push(nodeMsg.msgId);
+          const nodeMsg = await handleForwardNode(selfPeer, OB11Data.filter(e => e.type === OB11MessageDataType.node));
+          if (nodeMsg) { nodeMsgIds.push(nodeMsg.msgId); MessageUnique.createMsg(selfPeer, nodeMsg.msgId) };
           //完成子卡片生成跳过后续
           continue;
         }
-        const { sendElements } = await createSendElements(OB11Data, inputPeer);
+        const { sendElements } = await createSendElements(OB11Data, destPeer);
         //拆分消息
         let MixElement = sendElements.filter(element => element.elementType !== ElementType.FILE && element.elementType !== ElementType.VIDEO);
         let SingleElement = sendElements.filter(element => element.elementType === ElementType.FILE || element.elementType === ElementType.VIDEO).map(e => [e]);
-        let AllElement: SendMessageElement[][] = [MixElement, ...SingleElement];
+        let AllElement: SendMessageElement[][] = [MixElement, ...SingleElement].filter(e => e !== undefined && e.length !== 0);
         const MsgNodeList: Promise<RawMessage | undefined>[] = [];
         for (const sendElementsSplitElement of AllElement) {
           MsgNodeList.push(sendMsg(selfPeer, sendElementsSplitElement, [], true).catch(e => new Promise((resolve, reject) => { resolve(undefined) })));
-          await sleep(10);
         }
         (await Promise.allSettled(MsgNodeList)).map((result) => {
           if (result.status === 'fulfilled' && result.value) {
             nodeMsgIds.push(result.value.msgId);
+            MessageUnique.createMsg(selfPeer, result.value.msgId);
           }
         });
       } catch (e) {
@@ -82,13 +82,16 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
     }
   }
   const nodeMsgArray: Array<RawMessage> = [];
-
   let srcPeer: Peer | undefined = undefined;
   let needSendSelf = false;
   //检测是否处于同一个Peer 不在同一个peer则全部消息由自身发送
   for (let msgId of nodeMsgIds) {
     const nodeMsgPeer = MessageUnique.getPeerByMsgId(msgId);
-    const nodeMsg = (await NTQQMsgApi.getMsgsByMsgId(nodeMsgPeer?.Peer!, [msgId])).msgList[0];
+    if (!nodeMsgPeer) {
+      logError('转发消息失败，未找到消息', msgId);
+      continue;
+    }
+    const nodeMsg = (await NTQQMsgApi.getMsgsByMsgId(nodeMsgPeer.Peer, [msgId])).msgList[0];
     srcPeer = srcPeer ?? { chatType: nodeMsg.chatType, peerUid: nodeMsg.peerUid };
     if (srcPeer.peerUid !== nodeMsg.peerUid) {
       needSendSelf = true;
@@ -96,12 +99,15 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
     nodeMsgArray.push(nodeMsg);
   }
   nodeMsgIds = nodeMsgArray.map(msg => msg.msgId);
+  let retMsgIds: string[] = [];
   if (needSendSelf) {
     for (const [index, msg] of nodeMsgArray.entries()) {
       if (msg.peerUid === selfInfo.uid) continue;
-      const clonedMsg = await cloneMsg(msg);
-      nodeMsgIds[index] = clonedMsg?.msgId || "";
+      const ClonedMsg = await cloneMsg(msg);
+      if (ClonedMsg) retMsgIds.push(ClonedMsg.msgId);
     }
+  } else {
+    retMsgIds = nodeMsgIds;
   }
   if (nodeMsgIds.length === 0) throw Error('转发消息失败，生成节点为空');
   try {

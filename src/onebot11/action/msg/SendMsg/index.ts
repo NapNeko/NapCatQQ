@@ -140,7 +140,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
     );
 
     if (getSpecialMsgNum(payload, OB11MessageDataType.node)) {
-      const returnMsg = await handleForwardNode(peer, messages as OB11MessageNode[], peer);
+      const returnMsg = await handleForwardNode(peer, messages as OB11MessageNode[]);
       if (returnMsg) {
         const msgShortId = MessageUnique.createMsg({ guildId: '', peerUid: peer.peerUid, chatType: peer.chatType }, returnMsg!.msgId);
         return { message_id: msgShortId! };
