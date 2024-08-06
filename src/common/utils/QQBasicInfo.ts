@@ -39,9 +39,10 @@ export function getAppidV2(): { appid: string, qua: string } {
     }
   }
   catch (e) {
-    log('[QQ版本兼容性检测] 版本兼容性不佳，可能会导致一些功能无法正常使用', e);
+    log(`[QQ版本兼容性检测] 获取Appid异常 请检测NapCat/QQNT是否正常`);
   }
   // 以下是兜底措施
+  log(`[QQ版本兼容性检测] ${getFullQQVesion()} 版本兼容性不佳，可能会导致一些功能无法正常使用`);
   return { appid: systemPlatform === 'linux' ? '537237950' : '537237765', qua: getQUAInternal() };
 }
 // platform_type: 3,
