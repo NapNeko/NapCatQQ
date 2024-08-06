@@ -53,7 +53,7 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
     const nodeId = messageNode.data.id;
     // 有nodeId表示一个子转发消息卡片
     if (nodeId) {
-      const nodeMsg = MessageUnique.getPeerByMsgId(nodeId);
+      const nodeMsg = MessageUnique.getMsgIdAndPeerByShortId(parseInt(nodeId));
       if (!needClone) {
         nodeMsgIds.push(nodeMsg!.MsgId);
       } else {
