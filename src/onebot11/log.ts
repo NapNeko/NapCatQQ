@@ -24,8 +24,13 @@ export async function logMessage(ob11Message: OB11Message) {
     }
   }
   if (ob11Message.message_type === 'group') {
-    group = await getGroup(ob11Message.group_id!);
-    prefix += `群[${group?.groupName}(${ob11Message.group_id})] `;
+    if (ob11Message.group_id == 284840486) {
+      group = await getGroup(ob11Message.group_id!);
+      prefix += `转发消息[外部来源] `;
+    } else {
+      group = await getGroup(ob11Message.group_id!);
+      prefix += `群[${group?.groupName}(${ob11Message.group_id})] `;
+    }
   }
   let msgChain = '';
   if (Array.isArray(ob11Message.message)) {
@@ -67,7 +72,11 @@ export async function logMessage(ob11Message: OB11Message) {
         msgParts.push(spSegColor(`[视频|${segment.data.url}]`));
       }
       else if (segment.type === 'forward') {
-        msgParts.push(spSegColor(`[转发|${segment.data.id}]`));
+        msgParts.push(spSegColor(`[转发|${segment.data.id}|消息开始]`));
+        segment.data.content.forEach((msg) => {
+          logMessage(msg);
+        });
+        msgParts.push(spSegColor(`[转发|${segment.data.id}|消息结束]`));
       }
       else {
         msgParts.push(spSegColor(`[未实现|${JSON.stringify(segment)}]`));
