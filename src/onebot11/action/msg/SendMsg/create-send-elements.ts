@@ -27,7 +27,7 @@ async function handleOb11FileLikeMessage(
   { data: inputdata }: OB11MessageFileBase,
   { deleteAfterSentFiles }: MessageContext
 ) {
-  //有的奇怪的框架将url作为参数 而不是file 此时优先url
+  //有的奇怪的框架将url作为参数 而不是file 此时优先url 同时注意可能传入的是非file://开头的目录 By Mlikiowa
   const { path, isLocal, fileName, errMsg,success } = (await uri2local(inputdata?.url || inputdata.file));
 
   if (!success) {
