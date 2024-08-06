@@ -1,17 +1,15 @@
 import QQWrapper, { NodeIQQNTWrapperEngine, NodeIQQNTWrapperSession, NodeQQNTWrapperUtil } from '@/core/wrapper';
 import { DeviceList } from '@/onebot11/main';
-import {
-  NodeIKernelLoginService,
-  NodeIKernelBuddyService,
-  QuickLoginResult, passwordLoginArgType
-} from '@/core/services';
+import { NodeIKernelLoginService, passwordLoginArgType, QuickLoginResult } from '@/core/services';
 import {
   BuddyListener,
   GroupListener,
-  LoginListener, MsgListener,
-  ProfileListener, SessionListener
+  LoginListener,
+  MsgListener,
+  ProfileListener,
+  SessionListener
 } from '@/core/listeners';
-import { DependsAdapter, DispatcherAdapter, GlobalAdapter, NodeIGlobalAdapter } from '@/core/adapters';
+import { DependsAdapter, DispatcherAdapter, GlobalAdapter } from '@/core/adapters';
 import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs';
@@ -33,14 +31,10 @@ import {
   setLogSelfInfo
 } from '@/common/utils/log';
 import { napCatConfig } from '@/core/utils/config';
-import { NTQQFriendApi } from './apis';
 
-export interface OnLoginSuccess {
-  (uin: string, uid: string): void | Promise<void>;
-}
+import { INapCatService, OnLoginSuccess } from '@/core/index';
 
-
-export class NapCatCore {
+export class NapCatAppImpl implements INapCatService {
   public readonly session: NodeIQQNTWrapperSession;
   public readonly util: NodeQQNTWrapperUtil;
   public readonly engine: NodeIQQNTWrapperEngine;
@@ -205,7 +199,7 @@ export class NapCatCore {
     msgListener.onLineDev = (Devices: LineDevice[]) => {
       DeviceList.splice(0, DeviceList.length);
       Devices.map((Device: LineDevice) => {
-        let DeviceData = {
+        const DeviceData = {
           app_id: Device.devUid,
           device_name: Device.clientType.toString(),
           device_kind: Device.clientType.toString(),
@@ -386,20 +380,20 @@ export class NapCatCore {
 
     listener = new Proxy(listener, this.proxyHandler);
     switch (listener.constructor.name) {
-      case 'BuddyListener': {
-        return this.session.getBuddyService().addKernelBuddyListener(new QQWrapper.NodeIKernelBuddyListener(listener as BuddyListener));
-      }
-      case 'GroupListener': {
-        return this.session.getGroupService().addKernelGroupListener(new QQWrapper.NodeIKernelGroupListener(listener as GroupListener));
-      }
-      case 'MsgListener': {
-        return this.session.getMsgService().addKernelMsgListener(new QQWrapper.NodeIKernelMsgListener(listener as MsgListener));
-      }
-      case 'ProfileListener': {
-        return this.session.getProfileService().addKernelProfileListener(new QQWrapper.NodeIKernelProfileListener(listener as ProfileListener));
-      }
-      default:
-        return -1;
+    case 'BuddyListener': {
+      return this.session.getBuddyService().addKernelBuddyListener(new QQWrapper.NodeIKernelBuddyListener(listener as BuddyListener));
+    }
+    case 'GroupListener': {
+      return this.session.getGroupService().addKernelGroupListener(new QQWrapper.NodeIKernelGroupListener(listener as GroupListener));
+    }
+    case 'MsgListener': {
+      return this.session.getMsgService().addKernelMsgListener(new QQWrapper.NodeIKernelMsgListener(listener as MsgListener));
+    }
+    case 'ProfileListener': {
+      return this.session.getProfileService().addKernelProfileListener(new QQWrapper.NodeIKernelProfileListener(listener as ProfileListener));
+    }
+    default:
+      return -1;
     }
   }
 
@@ -455,15 +449,15 @@ export class NapCatCore {
     const ret = await this.loginService.passwordLogin(loginArg);
 
     switch (ret.result) {
-      case '0': { // Success
-        break;
-      }
-      case '140022008': { // CAPTCHA required
-        break;
-      }
-      case '4': // Mobile verify required
-      case '140022013': // Incorrect password
-      default:
+    case '0': { // Success
+      break;
+    }
+    case '140022008': { // CAPTCHA required
+      break;
+    }
+    case '4': // Mobile verify required
+    case '140022013': // Incorrect password
+    default:
     }
   }
   async getQuickLoginList() {
@@ -478,7 +472,5 @@ export class NapCatCore {
     return false;
   }
 }
-
-export const napCatCore = new NapCatCore();
 
 

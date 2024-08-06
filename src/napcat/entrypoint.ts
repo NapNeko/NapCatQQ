@@ -1,18 +1,21 @@
-import { napCatCore } from '@/core';
+import { injectService, napCatCore as napCatCoreAppImpl } from '@/core';
 import { program } from 'commander';
 import qrcode from 'qrcode-terminal';
 import fs from 'fs/promises';
 import fsSync from 'fs';
 import path from 'node:path';
 import { checkVersion } from '@/common/utils/version';
-import { log, logDebug, logError, LogLevel, logWarn, setLogLevel } from '@/common/utils/log';
+import { log, logDebug, logError, logWarn } from '@/common/utils/log';
 import { NapCatOnebot11 } from '@/onebot11/main';
 import { InitWebUi } from '@/webui';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import chalk from 'chalk';
+import { NapCatAppImpl } from '@/core';
 
+injectService(new NapCatAppImpl());
+const napCatCore = napCatCoreAppImpl as NapCatAppImpl;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
