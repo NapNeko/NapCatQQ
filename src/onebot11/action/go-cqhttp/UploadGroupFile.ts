@@ -34,7 +34,7 @@ export default class GoCQHTTPUploadGroupFile extends BaseAction<Payload, null> {
       file = `file://${file}`;
     }
     const downloadResult = await uri2local(file);
-    if (downloadResult.errMsg) {
+    if (!downloadResult.success) {
       throw new Error(downloadResult.errMsg);
     }
     const sendFileEle: SendFileElement = await SendMsgElementConstructor.file(downloadResult.path, payload.name, payload.folder_id);
