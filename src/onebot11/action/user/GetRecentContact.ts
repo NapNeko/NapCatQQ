@@ -18,12 +18,12 @@ export default class GetRecentContact extends BaseAction<Payload, any> {
   actionName = ActionName.GetRecentContact;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
-    let ret = await NTQQUserApi.getRecentContactListSnapShot(parseInt((payload.count || 10).toString()));
-    let data = await Promise.all(ret.info.changedList.map(async (t) => {
-      let FastMsg = await NTQQMsgApi.getMsgsByMsgId({ chatType: t.chatType, peerUid: t.peerUid }, [t.msgId]);
+    const ret = await NTQQUserApi.getRecentContactListSnapShot(parseInt((payload.count || 10).toString()));
+    const data = await Promise.all(ret.info.changedList.map(async (t) => {
+      const FastMsg = await NTQQMsgApi.getMsgsByMsgId({ chatType: t.chatType, peerUid: t.peerUid }, [t.msgId]);
       if (FastMsg.msgList.length > 0) {
         //扩展ret.info.changedList
-        let lastestMsg = await OB11Constructor.message(FastMsg.msgList[0]);
+        const lastestMsg = await OB11Constructor.message(FastMsg.msgList[0]);
         return {
           lastestMsg: lastestMsg,
           peerUin: t.peerUin,

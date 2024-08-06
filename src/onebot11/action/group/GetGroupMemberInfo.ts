@@ -26,11 +26,11 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
     const isNocache = payload.no_cache == true || payload.no_cache === 'true';
-    let uid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
+    const uid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
     if (!uid) {
       throw (`Uin2Uid Error ${payload.user_id}不存在`);
     }
-    let member = await NTQQGroupApi.getGroupMemberV2(payload.group_id.toString(), uid, isNocache);
+    const member = await NTQQGroupApi.getGroupMemberV2(payload.group_id.toString(), uid, isNocache);
     if (!member) {
       throw (`群(${payload.group_id})成员${payload.user_id}不存在`);
     }
@@ -44,7 +44,7 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
     const date = Math.round(Date.now() / 1000);
     const retMember = OB11Constructor.groupMember(payload.group_id.toString(), member);
     if (!requireMinNTQQBuild('26702')) {
-      let SelfInfoInGroup = await NTQQGroupApi.getGroupMemberV2(payload.group_id.toString(), selfInfo.uid, isNocache);
+      const SelfInfoInGroup = await NTQQGroupApi.getGroupMemberV2(payload.group_id.toString(), selfInfo.uid, isNocache);
       let isPrivilege = false;
       if (SelfInfoInGroup) {
         isPrivilege = SelfInfoInGroup.role === 3 || SelfInfoInGroup.role === 4;

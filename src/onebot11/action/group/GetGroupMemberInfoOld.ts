@@ -28,7 +28,7 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
     if (requireMinNTQQBuild('26702')) {
-      let V2Data = await NTQQGroupApi.getGroupMemberV2(payload.group_id.toString(), payload.user_id.toString(), payload.no_cache == true || payload.no_cache === 'true');
+      const V2Data = await NTQQGroupApi.getGroupMemberV2(payload.group_id.toString(), payload.user_id.toString(), payload.no_cache == true || payload.no_cache === 'true');
       if (V2Data) {
         return OB11Constructor.groupMember(payload.group_id.toString(), V2Data);
       } else {

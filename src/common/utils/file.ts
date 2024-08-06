@@ -195,7 +195,7 @@ export async function uri2local(UriOrPath: string, fileName: string | null = nul
   let url = null;
   //区分path和uri
   try {
-    if (fs.existsSync(UriOrPath)) url = new URL("file://" + UriOrPath);
+    if (fs.existsSync(UriOrPath)) url = new URL('file://' + UriOrPath);
   } catch (error: any) { }
   try {
     url = new URL(UriOrPath);
