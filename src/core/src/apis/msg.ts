@@ -110,7 +110,9 @@ export class NTQQMsgApi {
     });
     return ret;
   }
-  static async getMsgsByMsgId(peer: Peer, msgIds: string[]) {
+  static async getMsgsByMsgId(peer: Peer | undefined, msgIds: string[] | undefined) {
+    if (!peer) throw new Error('peer is not allowed');
+    if (!msgIds) throw new Error('msgIds is not allowed');
     return await napCatCore.session.getMsgService().getMsgsByMsgId(peer, msgIds);
   }
   static async getSingleMsg(peer: Peer, seq: string) {

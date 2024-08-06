@@ -18,7 +18,7 @@ import { uri2local } from '@/common/utils/file';
 import { ob11Config } from '@/onebot11/config';
 import { RequestUtil } from '@/common/utils/request';
 import { MessageUnique } from '@/common/utils/MessageUnique';
-
+console.log(process.pid)
 export type MessageContext = {
   deleteAfterSentFiles: string[],
   peer:Peer
