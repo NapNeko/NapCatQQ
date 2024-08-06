@@ -167,9 +167,8 @@ export class OB11Constructor {
           }
           if (msg.peerUin == '284840486') {
             //合并消息内侧 消息具体定位不到
-            message_data['data']['id'] = MessageUnique.createMsg({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, records.msgId)?.toString();
           }
-          if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
+          if ((!replyMsg || records.msgRandom !== replyMsg.msgRandom) && msg.peerUin !== '284840486') {
             throw new Error('回复消息消息验证失败');
           }
           message_data['data']['id'] = MessageUnique.createMsg({ peerUid: msg.peerUid, guildId: '', chatType: msg.chatType }, replyMsg.msgId)?.toString();
