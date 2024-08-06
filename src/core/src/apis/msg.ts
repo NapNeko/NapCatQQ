@@ -97,14 +97,14 @@ export class NTQQMsgApi {
   static async ForwardMsg(peer: Peer, msgIds: string[]) {
     return napCatCore.session.getMsgService().forwardMsg(msgIds, peer, [peer], new Map());
   }
-  static async getLastestMsgByUids(peer: Peer, count: number = 20) {
+  static async getLastestMsgByUids(peer: Peer, count: number = 20, isReverseOrder: boolean = false) {
     let ret = await napCatCore.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {
       chatInfo: peer,
       filterMsgType: [],
       filterSendersUid: [],
       filterMsgToTime: '0',
       filterMsgFromTime: '0',
-      isReverseOrder: false,
+      isReverseOrder: isReverseOrder,
       isIncludeCurrent: true,
       pageLimit: count,
     });
@@ -157,9 +157,9 @@ export class NTQQMsgApi {
     );
     return data[1].item;
   }
-  static async getMsgHistory(peer: Peer, msgId: string, count: number) {
+  static async getMsgHistory(peer: Peer, msgId: string, count: number, isReverseOrder: boolean = false) {
     // 消息时间从旧到新
-    return napCatCore.session.getMsgService().getMsgsIncludeSelf(peer, msgId, count, true);
+    return napCatCore.session.getMsgService().getMsgsIncludeSelf(peer, msgId, count, isReverseOrder);
   }
   static async recallMsg(peer: Peer, msgIds: string[]) {
     await napCatCore.session.getMsgService().recallMsg({
