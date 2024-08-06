@@ -34,7 +34,7 @@ class DeleteMsg extends BaseAction<Payload, void> {
           1,
           5000,
           (msgs) => {
-            if (msgs.some(m => m.msgId === msg.MsgId)) {
+            if (msgs.find(m => m.msgId === msg.MsgId && m.recallTime !== '0')) {
               return true;
             }
             return false;
@@ -45,7 +45,6 @@ class DeleteMsg extends BaseAction<Payload, void> {
       if (!data) {
         throw new Error('Recall failed');
       }
-      
       //await sleep(100);
       //await NTQQMsgApi.getMsgsByMsgId(msg.Peer, [msg.MsgId]);
     }
