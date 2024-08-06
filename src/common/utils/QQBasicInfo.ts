@@ -6,15 +6,15 @@ import AppidTable from '@/core/external/appid.json';
 import { log } from './log';
 
 //基础目录获取
-export let QQMainPath = process.execPath;
-export let QQPackageInfoPath: string = path.join(path.dirname(QQMainPath), 'resources', 'app', 'package.json');
-export let QQVersionConfigPath: string | undefined = getQQVersionConfigPath(QQMainPath);
+export const QQMainPath = process.execPath;
+export const QQPackageInfoPath: string = path.join(path.dirname(QQMainPath), 'resources', 'app', 'package.json');
+export const QQVersionConfigPath: string | undefined = getQQVersionConfigPath(QQMainPath);
 
 //基础信息获取 无快更则启用默认模板填充
-export let isQuickUpdate: boolean = !!QQVersionConfigPath;
-export let QQVersionConfig: QQVersionConfigType = isQuickUpdate ? JSON.parse(fs.readFileSync(QQVersionConfigPath!).toString()) : getDefaultQQVersionConfigInfo();
-export let QQPackageInfo: QQPackageInfoType = JSON.parse(fs.readFileSync(QQPackageInfoPath).toString());
-export let { appid: QQVersionAppid, qua: QQVersionQua } = getAppidV2();
+export const isQuickUpdate: boolean = !!QQVersionConfigPath;
+export const QQVersionConfig: QQVersionConfigType = isQuickUpdate ? JSON.parse(fs.readFileSync(QQVersionConfigPath!).toString()) : getDefaultQQVersionConfigInfo();
+export const QQPackageInfo: QQPackageInfoType = JSON.parse(fs.readFileSync(QQPackageInfoPath).toString());
+export const { appid: QQVersionAppid, qua: QQVersionQua } = getAppidV2();
 
 //基础函数
 export function getQQBuildStr() {
@@ -31,9 +31,9 @@ export function getQUAInternal() {
   return systemPlatform === 'linux' ? `V1_LNX_NQ_${getFullQQVesion()}_${getQQBuildStr()}_GW_B` : `V1_WIN_NQ_${getFullQQVesion()}_${getQQBuildStr()}_GW_B`;
 }
 export function getAppidV2(): { appid: string, qua: string } {
-  let appidTbale = AppidTable as unknown as QQAppidTableType;
+  const appidTbale = AppidTable as unknown as QQAppidTableType;
   try {
-    let data = appidTbale[getFullQQVesion()];
+    const data = appidTbale[getFullQQVesion()];
     if (data) {
       return data;
     }

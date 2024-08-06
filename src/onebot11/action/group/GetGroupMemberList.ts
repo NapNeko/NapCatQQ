@@ -30,7 +30,7 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
     if (!group) {
       throw (`群${payload.group_id}不存在`);
     }
-    let groupMembers = await NTQQGroupApi.getGroupMembers(payload.group_id.toString());
+    const groupMembers = await NTQQGroupApi.getGroupMembers(payload.group_id.toString());
     let _groupMembers = Array.from(groupMembers.values())
       .map(item => { return OB11Constructor.groupMember(group.groupCode, item); });
 

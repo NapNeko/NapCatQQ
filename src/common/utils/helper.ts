@@ -360,12 +360,12 @@ export async function promisePipeline(promises: Promise<any>[], callback: (resul
         callbackCalled = callback(result);
       }
     } catch (error) {
-      console.error("Error in promise pipeline:", error);
+      console.error('Error in promise pipeline:', error);
     }
   }
 }
 
-export function getQQVersionConfigPath(exePath: string = ""): string | undefined {
+export function getQQVersionConfigPath(exePath: string = ''): string | undefined {
   let configVersionInfoPath;
   if (os.platform() !== 'linux') {
     configVersionInfoPath = path.join(path.dirname(exePath), 'resources', 'app', 'versions', 'config.json');

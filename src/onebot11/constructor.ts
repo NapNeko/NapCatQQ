@@ -208,13 +208,13 @@ export class OB11Constructor {
           chatType: msg.chatType,
           guildId: '',
         },
-          msg.msgId,
-          msg.msgSeq,
-          msg.senderUid,
-          element.elementId,
-          element.elementType.toString(),
-          FileElement.fileSize,
-          FileElement.fileName
+        msg.msgId,
+        msg.msgSeq,
+        msg.senderUid,
+        element.elementId,
+        element.elementType.toString(),
+        FileElement.fileSize,
+        FileElement.fileName
         );
       }
       else if (element.videoElement) {
@@ -255,13 +255,13 @@ export class OB11Constructor {
           chatType: msg.chatType,
           guildId: '',
         },
-          msg.msgId,
-          msg.msgSeq,
-          msg.senderUid,
-          element.elementId,
-          element.elementType.toString(),
-          videoElement.fileSize || '0',
-          videoElement.fileName
+        msg.msgId,
+        msg.msgSeq,
+        msg.senderUid,
+        element.elementId,
+        element.elementType.toString(),
+        videoElement.fileSize || '0',
+        videoElement.fileName
         );
       }
       else if (element.pttElement) {
@@ -276,13 +276,13 @@ export class OB11Constructor {
           chatType: msg.chatType,
           guildId: '',
         },
-          msg.msgId,
-          msg.msgSeq,
-          msg.senderUid,
-          element.elementId,
-          element.elementType.toString(),
-          element.pttElement.fileSize || '0',
-          element.pttElement.fileUuid || ''
+        msg.msgId,
+        msg.msgSeq,
+        msg.senderUid,
+        element.elementId,
+        element.elementType.toString(),
+        element.pttElement.fileSize || '0',
+        element.pttElement.fileUuid || ''
         );
         //以uuid作为文件名
       }

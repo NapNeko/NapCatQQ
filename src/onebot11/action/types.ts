@@ -103,5 +103,5 @@ export enum ActionName {
     FetchCustomFace = 'fetch_custom_face',
     GOCQHTTP_UploadPrivateFile = 'upload_private_file',
     TestApi01 = 'test_api_01',
-    FetchEmojioLike = "fetch_emoji_like"
+    FetchEmojioLike = 'fetch_emoji_like'
 }
