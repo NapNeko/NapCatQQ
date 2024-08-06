@@ -76,9 +76,7 @@ export async function sendMsg(peer: Peer, sendElements: SendMessageElement[], de
   return returnMsg;
 }
 
-async function createContext(payload: OB11PostSendMsg, contextMode: ContextMode): Promise<{
-  peer: Peer, group?: Group
-}> {
+async function createContext(payload: OB11PostSendMsg, contextMode: ContextMode): Promise<Peer> {
   // This function determines the type of message by the existence of user_id / group_id,
   // not message_type.
   // This redundant design of Ob11 here should be blamed.
@@ -86,11 +84,8 @@ async function createContext(payload: OB11PostSendMsg, contextMode: ContextMode)
   if ((contextMode === ContextMode.Group || contextMode === ContextMode.Normal) && payload.group_id) {
     const group = (await getGroup(payload.group_id))!; // checked before
     return {
-      peer: {
-        chatType: ChatType.group,
-        peerUid: group.groupCode
-      },
-      group: group,
+      chatType: ChatType.group,
+      peerUid: group.groupCode
     };
   }
   if ((contextMode === ContextMode.Private || contextMode === ContextMode.Normal) && payload.user_id) {
@@ -98,10 +93,8 @@ async function createContext(payload: OB11PostSendMsg, contextMode: ContextMode)
     const isBuddy = await NTQQFriendApi.isBuddy(Uid!);
     //console.log("[调试代码] UIN:", payload.user_id, " UID:", Uid, " IsBuddy:", isBuddy);
     return {
-      peer: {
-        chatType: isBuddy ? ChatType.friend : ChatType.temp,
-        peerUid: Uid!
-      },
+      chatType: isBuddy ? ChatType.friend : ChatType.temp,
+      peerUid: Uid!
     };
   }
   throw '请指定 group_id 或 user_id';
@@ -139,7 +132,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
   }
 
   protected async _handle(payload: OB11PostSendMsg): Promise<{ message_id: number }> {
-    const { peer, group } = await createContext(payload, this.contextMode);
+    const peer = await createContext(payload, this.contextMode);
 
     const messages = normalize(
       payload.message,
@@ -147,9 +140,9 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
     );
 
     if (getSpecialMsgNum(payload, OB11MessageDataType.node)) {
-      const returnMsg = await handleForwardNode(peer, messages as OB11MessageNode[], group);
+      const returnMsg = await handleForwardNode(peer, messages as OB11MessageNode[]);
       if (returnMsg) {
-        const msgShortId = await MessageUnique.createMsg({ guildId: '', peerUid: peer.peerUid, chatType: peer.chatType }, returnMsg!.msgId);
+        const msgShortId = MessageUnique.createMsg({ guildId: '', peerUid: peer.peerUid, chatType: peer.chatType }, returnMsg!.msgId);
         return { message_id: msgShortId! };
       } else {
         throw Error('发送转发消息失败');
@@ -163,7 +156,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
     }
     // log("send msg:", peer, sendElements)
 
-    const { sendElements, deleteAfterSentFiles } = await createSendElements(messages, group);
+    const { sendElements, deleteAfterSentFiles } = await createSendElements(messages, peer);
     //console.log(peer, JSON.stringify(sendElements,null,2));
     const returnMsg = await sendMsg(peer, sendElements, deleteAfterSentFiles);
     return { message_id: returnMsg!.id! };

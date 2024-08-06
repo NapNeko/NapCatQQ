@@ -10,9 +10,7 @@ const SchemaData = {
   properties: {
     words: {
       type: 'array',
-      items: {
-        type: 'string',
-      }
+      items: { type: 'string' }
     }
   },
   required: ['words'],

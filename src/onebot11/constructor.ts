@@ -210,23 +210,24 @@ export class OB11Constructor {
           chatType: msg.chatType,
           guildId: '',
         },
-        msg.msgId,
-        msg.msgSeq,
-        msg.senderUid,
-        element.elementId,
-        element.elementType.toString(),
-        FileElement.fileSize,
-        FileElement.fileName
+          msg.msgId,
+          msg.msgSeq,
+          msg.senderUid,
+          element.elementId,
+          element.elementType.toString(),
+          FileElement.fileSize,
+          FileElement.fileName
         );
       }
       else if (element.videoElement) {
         const videoElement: VideoElement = element.videoElement;
         //读取视频链接并兜底
         let videoUrl;//Array
-        if (msg.peerUin == '284840486') {
-          //合并消息内部 应该进行特殊处理
+        if (msg.peerUin = '284840486') {
+          //合并消息内部 应该进行特殊处理 可能需要重写peer 待测试与研究 Mlikiowa Taged TODO
         }
         try {
+          
           videoUrl = await NTQQFileApi.getVideoUrl({
             chatType: msg.chatType,
             peerUid: msg.peerUid,
@@ -260,13 +261,13 @@ export class OB11Constructor {
           chatType: msg.chatType,
           guildId: '',
         },
-        msg.msgId,
-        msg.msgSeq,
-        msg.senderUid,
-        element.elementId,
-        element.elementType.toString(),
-        videoElement.fileSize || '0',
-        videoElement.fileName
+          msg.msgId,
+          msg.msgSeq,
+          msg.senderUid,
+          element.elementId,
+          element.elementType.toString(),
+          videoElement.fileSize || '0',
+          videoElement.fileName
         );
       }
       else if (element.pttElement) {
@@ -281,13 +282,13 @@ export class OB11Constructor {
           chatType: msg.chatType,
           guildId: '',
         },
-        msg.msgId,
-        msg.msgSeq,
-        msg.senderUid,
-        element.elementId,
-        element.elementType.toString(),
-        element.pttElement.fileSize || '0',
-        element.pttElement.fileUuid || ''
+          msg.msgId,
+          msg.msgSeq,
+          msg.senderUid,
+          element.elementId,
+          element.elementType.toString(),
+          element.pttElement.fileSize || '0',
+          element.pttElement.fileUuid || ''
         );
         //以uuid作为文件名
       }
@@ -339,17 +340,17 @@ export class OB11Constructor {
         msg.parentMsgIdList.push(msg.msgId);
         //let parentMsgId = msg.parentMsgIdList[msg.parentMsgIdList.length - 2 < 0 ? 0 : msg.parentMsgIdList.length - 2];
         //加入自身MsgId
-        const MultiMsgs = (await NTQQMsgApi.getMultiMsg(ParentMsgPeer, msg.parentMsgIdList[0], msg.msgId))?.msgList;
+        let MultiMsgs = (await NTQQMsgApi.getMultiMsg(ParentMsgPeer, msg.parentMsgIdList[0], msg.msgId))?.msgList;
         //拉取下级消息
         if (!MultiMsgs) continue;
         //拉取失败则跳过
         message_data['data']['content'] = [];
-        for (const MultiMsg of MultiMsgs) {
+        for (let MultiMsg of MultiMsgs) {
           //对每条拉取的消息传递ParentMsgPeer修正Peer
           MultiMsg.parentMsgPeer = ParentMsgPeer;
           MultiMsg.parentMsgIdList = msg.parentMsgIdList;
           MultiMsg.id = MessageUnique.createMsg(ParentMsgPeer, MultiMsg.msgId);//该ID仅用查看 无法调用
-          const msgList = await OB11Constructor.message(MultiMsg);
+          let msgList = await OB11Constructor.message(MultiMsg);
           message_data['data']['content'].push(msgList);
           //console.log("合并消息", msgList);
         }
@@ -500,7 +501,7 @@ export class OB11Constructor {
               return;
             }
             const replyMsg = replyMsgList[0];
-            return new OB11GroupMsgEmojiLikeEvent(parseInt(msg.peerUid), parseInt(senderUin), MessageUnique.getShortIdByMsgId(replyMsg!.msgId!)!, [{
+            return new OB11GroupMsgEmojiLikeEvent(parseInt(msg.peerUid), parseInt(senderUin), MessageUnique.getShortIdByMsgId(replyMsg?.msgId!)!, [{
               emoji_id: emojiId,
               count: 1
             }]);

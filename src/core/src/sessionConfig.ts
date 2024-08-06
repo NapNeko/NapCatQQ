@@ -77,7 +77,7 @@ export const sessionConfig: WrapperSessionInitConfig | any = {};
 export async function genSessionConfig(selfUin: string, selfUid: string, account_path: string): Promise<WrapperSessionInitConfig> {
   const downloadPath = path.join(account_path, 'NapCat', 'temp');
   fs.mkdirSync(downloadPath, { recursive: true });
-  let guid: string = await getMachineId();
+  let guid: string = await getMachineId();//26702 支持JS获取guid值 在LoginService中获取 TODO mlikiow a
   //console.log(guid);
   // guid =  '52afb776-82f6-4e59-9d38-44705b112d0a';
   //let guid: string = await getMachineId();

@@ -1,6 +1,4 @@
 import { OB11BaseNoticeEvent } from './OB11BaseNoticeEvent';
-import { selfInfo } from '@/core/data';
-import { OB11BaseEvent } from '../OB11BaseEvent';
 
 class OB11PokeEvent extends OB11BaseNoticeEvent {
   notice_type = 'notify';
