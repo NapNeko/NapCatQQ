@@ -208,13 +208,13 @@ export class OB11Constructor {
           chatType: msg.chatType,
           guildId: '',
         },
-        msg.msgId,
-        msg.msgSeq,
-        msg.senderUid,
-        element.elementId,
-        element.elementType.toString(),
-        FileElement.fileSize,
-        FileElement.fileName
+          msg.msgId,
+          msg.msgSeq,
+          msg.senderUid,
+          element.elementId,
+          element.elementType.toString(),
+          FileElement.fileSize,
+          FileElement.fileName
         );
       }
       else if (element.videoElement) {
@@ -255,13 +255,13 @@ export class OB11Constructor {
           chatType: msg.chatType,
           guildId: '',
         },
-        msg.msgId,
-        msg.msgSeq,
-        msg.senderUid,
-        element.elementId,
-        element.elementType.toString(),
-        videoElement.fileSize || '0',
-        videoElement.fileName
+          msg.msgId,
+          msg.msgSeq,
+          msg.senderUid,
+          element.elementId,
+          element.elementType.toString(),
+          videoElement.fileSize || '0',
+          videoElement.fileName
         );
       }
       else if (element.pttElement) {
@@ -276,13 +276,13 @@ export class OB11Constructor {
           chatType: msg.chatType,
           guildId: '',
         },
-        msg.msgId,
-        msg.msgSeq,
-        msg.senderUid,
-        element.elementId,
-        element.elementType.toString(),
-        element.pttElement.fileSize || '0',
-        element.pttElement.fileUuid || ''
+          msg.msgId,
+          msg.msgSeq,
+          msg.senderUid,
+          element.elementId,
+          element.elementType.toString(),
+          element.pttElement.fileSize || '0',
+          element.pttElement.fileUuid || ''
         );
         //以uuid作为文件名
       }
@@ -327,6 +327,24 @@ export class OB11Constructor {
       else if (element.multiForwardMsgElement) {
         message_data['type'] = OB11MessageDataType.forward;
         message_data['data']['id'] = msg.msgId;
+        const ParentMsgPeer = msg.parentMsgPeer ?? { chatType: msg.chatType, guildId: '', peerUid: msg.peerUid };
+        //判断是否在合并消息内
+        msg.parentMsgIdList = msg.parentMsgIdList ?? [];
+        //首次列表不存在则开始创建
+        msg.parentMsgIdList.push(msg.msgId);
+        //let parentMsgId = msg.parentMsgIdList[msg.parentMsgIdList.length - 2 < 0 ? 0 : msg.parentMsgIdList.length - 2];
+        //加入自身MsgId
+        let MultiMsgs = (await NTQQMsgApi.getMultiMsg(ParentMsgPeer, msg.parentMsgIdList[0], msg.msgId))?.msgList;
+        //拉取下级消息
+        if (!MultiMsgs) continue;
+        //拉取失败则跳过
+        for (let MultiMsg of MultiMsgs) {
+          //对每条拉取的消息传递ParentMsgPeer修正Peer
+          MultiMsg.parentMsgPeer = ParentMsgPeer;
+          MultiMsg.parentMsgIdList = msg.parentMsgIdList;
+          let msgList = await OB11Constructor.message(MultiMsg);
+          console.log(msgList);
+        }
       }
       if ((message_data.type as string) !== 'unknown' && message_data.data) {
         const cqCode = encodeCQCode(message_data);

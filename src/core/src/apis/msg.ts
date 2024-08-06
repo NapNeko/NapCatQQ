@@ -67,6 +67,9 @@ setTimeout(() => {
 // }, 25000)
 
 export class NTQQMsgApi {
+  static async FetchLongMsg(peer: Peer, msgId: string) {
+    return napCatCore.session.getMsgService().fetchLongMsg(peer, msgId);
+  }
   static async getMsgEmojiLikesList(peer: Peer, msgSeq: string, emojiId: string, emojiType: string, count: number = 20) {
     //console.log(peer, msgSeq, emojiId, emojiType, count);
     return napCatCore.session.getMsgService().getMsgEmojiLikesList(peer, msgSeq, emojiId, emojiType, "", false, 20)
@@ -100,7 +103,7 @@ export class NTQQMsgApi {
       filterMsgFromTime: '0',
       isReverseOrder: false,
       isIncludeCurrent: true,
-      pageLimit: 1,
+      pageLimit: count,
     });
     return ret;
   }

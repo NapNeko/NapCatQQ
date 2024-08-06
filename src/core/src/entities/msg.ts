@@ -731,10 +731,12 @@ export interface MultiForwardMsgElement {
 }
 
 export interface RawMessage {
+  parentMsgPeer: Peer;
+  parentMsgIdList:string[];
+  id?: number;//扩展字段 用于处理OB11 ID
   guildId: string;
   msgRandom: string;
-  // int32, 自己维护的消息id
-  id?: number;
+
 
   msgId: string;
 
