@@ -28,20 +28,20 @@ class DeleteMsg extends BaseAction<Payload, void> {
   protected async _handle(payload: Payload) {
     const msg = MessageUnique.getMsgIdAndPeerByShortId(Number(payload.message_id));
     if (msg) {
-      let ret = NTEventDispatch.RegisterListen<NodeIKernelMsgListener['onMsgInfoListUpdate']>
-        (
-          'NodeIKernelMsgListener/onMsgInfoListUpdate',
-          1,
-          5000,
-          (msgs) => {
-            if (msgs.find(m => m.msgId === msg.MsgId && m.recallTime !== '0')) {
-              return true;
-            }
-            return false;
+      const ret = NTEventDispatch.RegisterListen<NodeIKernelMsgListener['onMsgInfoListUpdate']>
+      (
+        'NodeIKernelMsgListener/onMsgInfoListUpdate',
+        1,
+        5000,
+        (msgs) => {
+          if (msgs.find(m => m.msgId === msg.MsgId && m.recallTime !== '0')) {
+            return true;
           }
-        ).catch(e => new Promise<undefined>((resolve, reject) => { resolve(undefined) }));
+          return false;
+        }
+      ).catch(e => new Promise<undefined>((resolve, reject) => { resolve(undefined); }));
       await NTQQMsgApi.recallMsg(msg.Peer, [msg.MsgId]);
-      let data = await ret;
+      const data = await ret;
       if (!data) {
         throw new Error('Recall failed');
       }

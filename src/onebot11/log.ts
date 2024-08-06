@@ -26,7 +26,7 @@ export async function logMessage(ob11Message: OB11Message) {
   if (ob11Message.message_type === 'group') {
     if (ob11Message.group_id == 284840486) {
       group = await getGroup(ob11Message.group_id!);
-      prefix += `转发消息[外部来源] `;
+      prefix += '转发消息[外部来源] ';
     } else {
       group = await getGroup(ob11Message.group_id!);
       prefix += `群[${group?.groupName}(${ob11Message.group_id})] `;
