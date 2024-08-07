@@ -86,5 +86,5 @@ where wt >nul 2>nul
 if %errorlevel% equ 0 (
     wt "cmd" /c "%QQPath%" --enable-logging  %* 
 ) else (
-    %QQPath%" --enable-logging  %*
+    "%QQPath%" --enable-logging  %*
 )
