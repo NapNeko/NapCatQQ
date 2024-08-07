@@ -1,6 +1,6 @@
 import { injectService, LoginListener, NodeIKernelLoginService } from '@/core';
 import { NodeIQQNTWrapperSession, WrapperNodeApi } from '@/core/wrapper';
-import { fetchServices } from '@/liteloader/main/proxy';
+import { fetchServices } from './proxy';
 import { INapCatService } from '@/core';
 import { InitWebUi } from '@/webui';
 import { NapCatOnebot11 } from '@/onebot11/main';

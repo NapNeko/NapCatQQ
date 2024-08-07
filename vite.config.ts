@@ -63,9 +63,8 @@ const baseConfigPlugin: PluginOption[] = [
       { src: './README.md', dest: distRoot },
       { src: './logo.png', dest: join(distRoot, 'logs') },
       // ...MoeHooModule,
-      ...(startScripts.map((startScript) => {
-        return { src: startScript, dest: distRoot };
-      })),
+      ...(startScripts.map((startScript) => ({ src: startScript, dest: distRoot })
+      )),
     ]
   }),
   nodeResolve(),
@@ -74,14 +73,10 @@ const baseConfigPlugin: PluginOption[] = [
 //   startScripts = ['./script/napcat.sh'];
 // }
 
-
-
-const corePath = resolve(__dirname, 'src', 'core', 'src');
 const baseConfig = (mode: string = 'development') => defineConfig({
   resolve: {
     conditions: ['node', 'default'],
     alias: {
-      '@/core': corePath,
       '@': resolve(__dirname, './src'),
       './lib-cov/fluent-ffmpeg': './lib/fluent-ffmpeg',
     },
@@ -93,7 +88,7 @@ const baseConfig = (mode: string = 'development') => defineConfig({
     // 压缩代码出现了未知问题导致无法运行，暂时不启用
     minify: false,
     lib: {
-      entry: join('src', 'shell', 'entrypoint.ts'),
+      entry: 'entrypoint/shell.ts',
       formats: ['es'],
       fileName: () => 'napcat/napcat.mjs',
     },

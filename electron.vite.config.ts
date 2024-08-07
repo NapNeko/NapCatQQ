@@ -3,11 +3,11 @@ import { defineConfig as defineViteConfig } from 'vite';
 import { join, resolve } from 'path';
 import viteCp from 'vite-plugin-cp';
 import viteZipPack from 'unplugin-zip-pack/vite';
-import PluginManifest from './src/liteloader/manifest.json';
+import PluginManifest from './entrypoint/liteloader/manifest.json';
 import babel from 'vite-plugin-babel';
 import nodeResolve from '@rollup/plugin-node-resolve';
 
-const SRC_DIR = resolve(__dirname, './src');
+const SRC_DIR = resolve(__dirname, './entrypoint');
 const OUTPUT_DIR = resolve(__dirname, './dist/plugin');
 
 const corePath = resolve(__dirname, 'src', 'core', 'src');
@@ -16,7 +16,6 @@ const BaseConfig = defineViteConfig({
   root: __dirname,
   resolve: {
     alias: {
-      '@/core': corePath,
       '@': resolve(__dirname, './src'),
       './lib-cov/fluent-ffmpeg': './lib/fluent-ffmpeg',
     },
@@ -69,7 +68,7 @@ export default defineConfig({
           { src: './package.json', dest: OUTPUT_DIR },
           { src: './README.md', dest: OUTPUT_DIR },
           { src: './logo.png', dest: join(OUTPUT_DIR, 'logs') },
-          { src: './src/liteloader/manifest.json', dest: OUTPUT_DIR }
+          { src: './entrypoint/liteloader/manifest.json', dest: OUTPUT_DIR }
         ]
       }),
       viteZipPack({
