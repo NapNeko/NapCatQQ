@@ -69,7 +69,7 @@ const _handlers: {
       logWarn('回复消息不存在', id);
       return undefined;
     }
-    const replyMsg = (await NTQQMsgApi.getMsgsByMsgId(replyMsgM?.Peer!, [replyMsgM?.MsgId!])).msgList[0];
+    const replyMsg = (await NTQQMsgApi.getMsgsByMsgId(replyMsgM!.Peer!, [replyMsgM!.MsgId!])).msgList[0];
     return replyMsg ?
       SendMsgElementConstructor.reply(replyMsg.msgSeq, replyMsg.msgId, replyMsg.senderUin!, replyMsg.senderUin!) :
       undefined;

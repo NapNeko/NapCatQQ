@@ -1,4 +1,5 @@
 import QQWrapper from './wrapper';
+import { INapCatService } from '@/core/service-base';
 
 export * from './adapters';
 export * from './apis';
@@ -15,4 +16,11 @@ export { QQWrapper as Wrapper };
 export * as WrapperInterface from './wrapper';
 export * as SessionConfig from './sessionConfig';
 
-export { napCatCore } from './core';
+export * from './core';
+export * from './service-base';
+
+export let napCatCore: INapCatService;
+
+export function injectService(service: INapCatService) {
+  napCatCore = service;
+}

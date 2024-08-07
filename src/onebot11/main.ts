@@ -57,7 +57,7 @@ export class NapCatOnebot11 {
 
   constructor() {
     // console.log('ob11 init');
-    napCatCore.onLoginSuccess(this.onReady.bind(this));
+    napCatCore.onLoginSuccess(() => this.onReady());
   }
 
   public onReady() {

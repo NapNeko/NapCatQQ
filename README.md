@@ -1,6 +1,12 @@
 <div align="center">
-  <img src="https://socialify.git.ci/NapNeko/NapCatQQ/image?description=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2FNapNeko%2FNapCatQQ%2Fmain%2Flogo.png&name=1&stargazers=1&theme=Auto" alt="NapCatQQ" width="640" height="320" />
+  <img src="https://socialify.git.ci/NapNeko/NCQQ_LLObv4/image?description=1&language=1&logo=https%3A%2F%2Fraw.githubusercontent.com%2FNapNeko%2FNapCatQQ%2Fmain%2Flogo.png&name=1&stargazers=1&theme=Auto" alt="NapCatQQ" width="640" height="320" />
 </div>
+
+在 NapCat 和 LLOneBot 之间共享逻辑的尝试.
+
+以下为 NapCatQQ 的介绍：
+
+---
 
 ## 项目介绍
 
