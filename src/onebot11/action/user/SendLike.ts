@@ -13,7 +13,6 @@ const SchemaData = {
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
-
 export default class SendLike extends BaseAction<Payload, null> {
   actionName = ActionName.SendLike;
   PayloadSchema = SchemaData;

@@ -30,7 +30,7 @@ class ForwardSingleMsg extends BaseAction<Payload, null> {
   }
 
   protected async _handle(payload: Payload): Promise<null> {
-    const msg = await MessageUnique.getMsgIdAndPeerByShortId(payload.message_id);
+    const msg = MessageUnique.getMsgIdAndPeerByShortId(payload.message_id);
     if (!msg) {
       throw new Error(`无法找到消息${payload.message_id}`);
     }

@@ -104,10 +104,10 @@ export class NapCatOnebot11 {
       toUin: string;
     }
     ) => {
-      let uin = await NTQQUserApi.getUinByUid(data.fromUin);
+      const uin = await NTQQUserApi.getUinByUid(data.fromUin);
       logNotice(`[输入状态] ${uin} ${data.statusText}`);
       postOB11Event(new OB11InputStatusEvent(parseInt(uin), data.eventType, data.statusText));
-    }
+    };
     msgListener.onRecvSysMsg = async (protobufData: number[]) => {
       // function buf2hex(buffer: Buffer) {
       //   return [...new Uint8Array(buffer)]

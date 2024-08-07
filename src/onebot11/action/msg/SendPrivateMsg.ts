@@ -11,5 +11,4 @@ class SendPrivateMsg extends SendMsg {
     return super.check(payload);
   }
 }
-
 export default SendPrivateMsg;

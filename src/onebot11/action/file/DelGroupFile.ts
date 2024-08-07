@@ -1,7 +1,7 @@
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { NTQQGroupApi, NTQQMsgApi, NTQQUserApi } from '@/core/apis';
+import { NTQQGroupApi } from '@/core/apis';
 
 const SchemaData = {
   type: 'object',

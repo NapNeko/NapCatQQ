@@ -50,6 +50,7 @@ export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
     await Promise.all(msgList.map(async msg => {
       msg.id = MessageUnique.createMsg({ guildId: '', chatType: msg.chatType, peerUid: msg.peerUid }, msg.msgId);
     }));
+    
     //转换消息
     const ob11MsgList = await Promise.all(msgList.map(msg => OB11Constructor.message(msg)));
     return { 'messages': ob11MsgList };

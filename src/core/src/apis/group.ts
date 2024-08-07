@@ -220,7 +220,7 @@ export class NTQQGroupApi {
     const _Pskey = (await NTQQUserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com')!;
     return napCatCore.session.getGroupService().uploadGroupBulletinPic(GroupCode, _Pskey, imageurl);
   }
-  static async handleGroupRequest(flag: string, operateType: GroupRequestOperateTypes, reason?: string) {
+  static async handleGroupRequest(flag: string , operateType: GroupRequestOperateTypes, reason?: string) {
     let flagitem = flag.split('|');
     let groupCode = flagitem[0];
     let seq = flagitem[1];

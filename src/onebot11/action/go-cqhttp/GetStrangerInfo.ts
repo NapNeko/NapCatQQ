@@ -44,7 +44,6 @@ export default class GoCQHTTPGetStrangerInfo extends BaseAction<Payload, OB11Use
     } else {
       const user_id = payload.user_id.toString();
       const extendData = await NTQQUserApi.getUserDetailInfoByUinV2(user_id);
-      //console.log(extendData);
       const uid = (await NTQQUserApi.getUidByUin(user_id))!;
       if (!uid || uid.indexOf('*') != -1) {
         const ret = {
