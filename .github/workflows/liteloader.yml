@@ -9,7 +9,7 @@ permissions: write-all
 
 jobs:
   build-linux:
-    if: ${{ startsWith(github.event.head_commit.message, 'build: liteloader') }}
+    if: ${{ startsWith(github.event.head_commit.message, 'build:liteloader') }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

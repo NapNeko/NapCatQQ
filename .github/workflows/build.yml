@@ -9,7 +9,7 @@ permissions: write-all
 
 jobs:
   build-linux:
-    if: ${{ startsWith(github.event.head_commit.message, 'build: shell') }}
+    if: ${{ startsWith(github.event.head_commit.message, 'build:shell') }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
