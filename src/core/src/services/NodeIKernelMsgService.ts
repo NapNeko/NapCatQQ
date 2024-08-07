@@ -97,8 +97,8 @@ export interface NodeIKernelMsgService {
   recallMsg(...args: unknown[]): unknown;
 
   reeditRecallMsg(...args: unknown[]): unknown;
-
-  forwardMsg(...args: unknown[]): Promise<GeneralCallResult>;
+  //调用请检查除开commentElements其余参数不能为null
+  forwardMsg(msgIds: string[], srcContact: Peer, dstContacts: Peer[], commentElements: MessageElement[]): Promise<GeneralCallResult>;
 
   forwardMsgWithComment(...args: unknown[]): unknown;
 
@@ -156,6 +156,7 @@ export interface NodeIKernelMsgService {
 
   getAioFirstViewLatestMsgs(peer: Peer, num: number): unknown;
 
+  //deprecated 从9.9.15-26702版本开始，该接口已经废弃，请使用getMsgsEx
   getMsgs(peer: Peer, msgId: string, count: unknown, queryOrder: boolean): Promise<unknown>;
 
   getMsgsIncludeSelf(peer: Peer, msgId: string, count: number, queryOrder: boolean): Promise<GeneralCallResult & {
