@@ -31,7 +31,7 @@ jobs:
     - name: Build NuCat Linux
       run: |
           npm i --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
-          npm run build:prod
+          npm run build:liteloader
           cd dist/plugin
           npm i --omit=dev --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
           cd ../../
@@ -41,7 +41,7 @@ jobs:
         name: NapCat.LiteLoader.${{ matrix.target_platform }}.${{ matrix.target_arch }}
         path: dist/plugin
   build-win32:
-    if: ${{ startsWith(github.event.head_commit.message, 'build:') }}
+    if: ${{ startsWith(github.event.head_commit.message, 'build:liteloader') }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
