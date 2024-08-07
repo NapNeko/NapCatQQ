@@ -172,7 +172,6 @@ jobs:
           with:
               name: NapCat.shell.${{ matrix.target_platform }}.${{ matrix.target_arch }}
               path: dist
-
   release-napcat:
     needs: [build-shell-win32,build-shell-linux,build-liteloader-win32,build-liteloader-linux]
     runs-on: ubuntu-latest
