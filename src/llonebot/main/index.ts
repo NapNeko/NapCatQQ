@@ -5,6 +5,7 @@ import { INapCatService } from '@/core';
 import { InitWebUi } from '@/webui';
 import { NapCatOnebot11 } from '@/onebot11/main';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
+import { log } from '@/common/utils/log';
 
 class NapCatLLPluginImpl extends INapCatService {
   constructor(session: NodeIQQNTWrapperSession, wrapper: WrapperNodeApi, loginService: NodeIKernelLoginService) {
@@ -30,6 +31,11 @@ async function init() {
 
   const service = new NapCatLLPluginImpl(wrapperSession, wrapperNodeApi, wrapperLoginService);
   injectService(service);
+  service.onLoginSuccess((uin) => {
+    log('登录成功!');
+    WebUiDataRuntime.setQQLoginStatus(true);
+    WebUiDataRuntime.setQQLoginUin(uin.toString());
+  });
 
   await InitWebUi();
   const NapCat_OneBot11 = new NapCatOnebot11();
