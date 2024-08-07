@@ -11,7 +11,7 @@
     "build": "npm run build:dev",
     "build:core": "cd ./src/core && npm run build && cd ../.. && node ./script/copy-core.cjs",
     "build:webui": "cd ./src/webui && vite build",
-    "ll-build": "npx electron-vite build",
+    "build:liteloader": "npx electron-vite build",
     "watch": "npm run watch:dev",
     "debug-win": "powershell dist/napcat.ps1",
     "lint": "eslint --fix src/**/*.{js,ts}",

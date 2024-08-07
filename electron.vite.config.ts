@@ -4,7 +4,7 @@ import { join, resolve } from 'path';
 import viteChecker from 'vite-plugin-checker';
 import viteCp from 'vite-plugin-cp';
 import viteZipPack from 'unplugin-zip-pack/vite';
-import PluginManifest from './src/llonebot/manifest.json';
+import PluginManifest from './src/liteloader/manifest.json';
 import babel from 'vite-plugin-babel';
 import nodeResolve from '@rollup/plugin-node-resolve';
 
