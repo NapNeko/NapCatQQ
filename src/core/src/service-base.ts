@@ -28,6 +28,7 @@ export class INapCatService {
       result = path.resolve(os.homedir(), './.config/QQ');
       fs.mkdirSync(result, { recursive: true });
     }
+    //console.log('dataPath', result);
     return result;
   }
 
