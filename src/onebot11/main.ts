@@ -19,7 +19,7 @@ import { OB11Config, ob11Config } from '@/onebot11/config';
 import { httpHeart, ob11HTTPServer } from '@/onebot11/server/http';
 import { ob11WebsocketServer } from '@/onebot11/server/ws/WebsocketServer';
 import { ob11ReverseWebsockets } from '@/onebot11/server/ws/ReverseWebsocket';
-import { getGroup, getGroupMember, groupMembers, selfInfo, tempGroupCodeMap } from '@/core/data';
+import { getGroup, getGroupMember, groupMembers, selfInfo } from '@/core/data';
 import { BuddyListener, GroupListener, NodeIKernelBuddyListener } from '@/core/listeners';
 import { OB11FriendRequestEvent } from '@/onebot11/event/request/OB11FriendRequest';
 import { NTQQGroupApi, NTQQUserApi, WebApi } from '@/core/apis';
@@ -222,9 +222,9 @@ export class NapCatOnebot11 {
       selfInfo.online = false;
     };
     msgListener.onTempChatInfoUpdate = (tempChatInfo: TempOnRecvParams) => {
-      if (tempChatInfo.sessionType == 1 && tempChatInfo.chatType == ChatType.temp) {
-        tempGroupCodeMap[tempChatInfo.peerUid] = tempChatInfo.groupCode;
-      }
+      // if (tempChatInfo.sessionType == 1 && tempChatInfo.chatType == ChatType.temp) {
+      //   tempGroupCodeMap[tempChatInfo.peerUid] = tempChatInfo.groupCode;
+      // }
       // 临时会话更新 tempGroupCodeMap uid -> source/GroupCode
     };
     msgListener.onRecvMsg = async (msg) => {

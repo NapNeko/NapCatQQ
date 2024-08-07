@@ -12,6 +12,21 @@ export interface QueryMsgsParams {
   isReverseOrder: boolean,
   isIncludeCurrent: boolean
 }
+export interface TmpChatInfoApi {
+  errMsg: string;
+  result: number;
+  tmpChatInfo?: TmpChatInfo;
+}
+
+export interface TmpChatInfo {
+  chatType: number;
+  fromNick: string;
+  groupCode: string;
+  peerUid: string;
+  sessionType: number;
+  sig: string;
+}
+
 export interface NodeIKernelMsgService {
 
   generateMsgUniqueId(chatType: number, time: string): string;
@@ -609,7 +624,7 @@ export interface NodeIKernelMsgService {
   sendSsoCmdReqByContend(cmd: string, param: string): Promise<unknown>;
 
   //chattype,uid->Promise<any>
-  getTempChatInfo(ChatType: number, Uid: string): unknown;
+  getTempChatInfo(ChatType: number, Uid: string): Promise<TmpChatInfoApi>;
 
   setContactLocalTop(...args: unknown[]): unknown;
 

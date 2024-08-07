@@ -1,8 +1,8 @@
-import { ChatType2, GetFileListParam, Peer, RawMessage, SendMessageElement, SendMsgElementConstructor } from '@/core/entities';
-import { friends, groups, selfInfo } from '@/core/data';
+import { ChatType, ChatType2, GetFileListParam, Peer, RawMessage, SendMessageElement, SendMsgElementConstructor } from '@/core/entities';
+import { friends, getGroupMember, groups, selfInfo } from '@/core/data';
 import { log, logWarn } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';
-import { napCatCore, NTQQUserApi } from '@/core';
+import { napCatCore, NTQQGroupApi, NTQQUserApi } from '@/core';
 import { onGroupFileInfoUpdateParamType } from '@/core/listeners';
 import { GeneralCallResult } from '@/core/services/common';
 import { MessageUnique } from '../../../common/utils/MessageUnique';
@@ -71,6 +71,9 @@ export class NTQQMsgApi {
   static async FetchLongMsg(peer: Peer, msgId: string) {
     return napCatCore.session.getMsgService().fetchLongMsg(peer, msgId);
   }
+  static async getTempChatInfo(chatType: ChatType2, peerUid: string) {
+    return napCatCore.session.getMsgService().getTempChatInfo(chatType, peerUid);
+  }
   static async PrepareTempChat(toUserUid: string, GroupCode: string, nickname: string) {
     //By Jadx/Ida Mlikiowa
     let TempGameSession = {
@@ -80,7 +83,7 @@ export class NTQQMsgApi {
       peerRoleId: "",
       peerOpenId: "",
     };
-    await napCatCore.session.getMsgService().prepareTempChat({
+    return napCatCore.session.getMsgService().prepareTempChat({
       chatType: ChatType2.KCHATTYPETEMPC2CFROMGROUP,
       peerUid: toUserUid,
       peerNickname: nickname,
@@ -202,6 +205,9 @@ export class NTQQMsgApi {
     }, msgIds);
   }
   static async sendMsgV2(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
+    if (peer.chatType === ChatType.temp) {
+      //await NTQQMsgApi.PrepareTempChat().then().catch();
+    }
     function generateMsgId() {
       const timestamp = Math.floor(Date.now() / 1000);
       const random = Math.floor(Math.random() * Math.pow(2, 32));
@@ -255,7 +261,32 @@ export class NTQQMsgApi {
   }
   static async sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
     //唉？ ！我有个想法
-    let msgId = await NTQQMsgApi.getMsgUnique(peer.chatType, await NTQQMsgApi.getServerTime());
+    function generateMsgId() {
+      const timestamp = Math.floor(Date.now() / 1000);
+      const random = Math.floor(Math.random() * Math.pow(2, 32));
+      const buffer = Buffer.alloc(8);
+      buffer.writeUInt32BE(timestamp, 0);
+      buffer.writeUInt32BE(random, 4);
+      const msgId = BigInt("0x" + buffer.toString('hex')).toString();
+      return msgId;
+    }
+    // 此处有采用Hack方法 利用数据返回正确得到对应消息
+    // 与之前 Peer队列 MsgSeq队列 真正的MsgId并发不同
+    // 谨慎采用 目前测试暂无问题  Developer.Mlikiowa
+    let msgId: string;
+    try {
+      msgId = await NTQQMsgApi.getMsgUnique(peer.chatType, await NTQQMsgApi.getServerTime());
+    } catch (error) {
+      //if (!napCatCore.session.getMsgService()['generateMsgUniqueId'])
+      //兜底识别策略V2
+      msgId = generateMsgId();
+    }
+    if (peer.chatType === ChatType.temp && peer.guildId && peer.guildId !== '') {
+      let member = await getGroupMember(peer.guildId, peer.peerUid!);
+      if(member){
+        await NTQQMsgApi.PrepareTempChat(peer.peerUid,peer.guildId,member.nick);
+      }
+    }
     peer.guildId = msgId;
     let data = await NTEventDispatch.CallNormalEvent<
       (msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<any, any>) => Promise<unknown>,
