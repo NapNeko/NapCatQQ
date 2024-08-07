@@ -30,7 +30,7 @@ jobs:
               ls
               node ./script/checkVersion.cjs
               sh ./checkVersion.sh
-  build-linux:
+  build-shell-linux:
     needs: [check-version]
     runs-on: ubuntu-latest
     strategy:
@@ -63,9 +63,79 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: NapCat.${{ matrix.target_platform }}.${{ matrix.target_arch }}
+        name: NapCat.shell.${{ matrix.target_platform }}.${{ matrix.target_arch }}
         path: dist
-  build-win32:
+  build-liteloader-linux:
+    needs: [check-version]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target_platform: [linux]
+        target_arch: [x64, arm64]
+    steps:
+    - name: Clone Main Repository
+      uses: actions/checkout@v4
+      with:
+          repository: 'NapNeko/NapCatQQ'
+          submodules: true
+          ref: main
+          token: ${{ secrets.NAPCAT_BUILD }}
+    - name: Use Node.js 20.X
+      uses: actions/setup-node@v4
+      with:
+          node-version: 20.x
+
+    - name: Build NuCat Linux
+      run: |
+          export NAPCAT_BUILDSYS=${{ matrix.target_platform }} 
+          export NAPCAT_BUILDARCH=${{ matrix.target_arch }} 
+          npm i --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
+          npm run build:prod
+          cd dist/plugin
+          npm i --omit=dev --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
+          cd ../../
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: NapCat.liteloader.${{ matrix.target_platform }}.${{ matrix.target_arch }}
+        path: dist/plugin
+  build-liteloader-win32:
+    needs: [check-version]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target_platform: [linux]
+        target_arch: [x64, arm64]
+    steps:
+    - name: Clone Main Repository
+      uses: actions/checkout@v4
+      with:
+          repository: 'NapNeko/NapCatQQ'
+          submodules: true
+          ref: main
+          token: ${{ secrets.NAPCAT_BUILD }}
+    - name: Use Node.js 20.X
+      uses: actions/setup-node@v4
+      with:
+          node-version: 20.x
+
+    - name: Build NuCat Linux
+      run: |
+          export NAPCAT_BUILDSYS=${{ matrix.target_platform }} 
+          export NAPCAT_BUILDARCH=${{ matrix.target_arch }} 
+          npm i --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
+          npm run build:prod
+          cd dist/plugin
+          npm i --omit=dev --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
+          cd ../../
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: NapCat.liteloader.${{ matrix.target_platform }}.${{ matrix.target_arch }}
+        path: dist/plugin
+  build-shell-win32:
     runs-on: ubuntu-latest
     needs: [check-version]
     strategy:
@@ -100,11 +170,11 @@ jobs:
         - name: Upload Artifact
           uses: actions/upload-artifact@v4
           with:
-              name: NapCat.${{ matrix.target_platform }}.${{ matrix.target_arch }}
+              name: NapCat.shell.${{ matrix.target_platform }}.${{ matrix.target_arch }}
               path: dist
 
   release-napcat:
-    needs: [build-win32,build-linux]
+    needs: [build-shell-win32,build-shell-linux]
     runs-on: ubuntu-latest
     steps:
     - name: Download All Artifact
@@ -130,10 +200,10 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         body_path: CHANGELOG.md
         files: |
-          NapCat.win32.ia32.zip
-          NapCat.win32.x64.zip
-          NapCat.linux.x64.zip
-          NapCat.linux.arm64.zip
+          NapCat.shell.win32.ia32.zip
+          NapCat.shell.win32.x64.zip
+          NapCat.shell.linux.x64.zip
+          NapCat.shell.linux.arm64.zip
 #          NapCat.darwin.x64.zip
 #          NapCat.darwin.arm64.zip
         draft: true
