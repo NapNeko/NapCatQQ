@@ -1,12 +1,13 @@
-import { ModifyProfileParams, SelfInfo, User, UserDetailInfoByUin, UserDetailInfoByUinV2 } from '@/core/entities';
+import type { ModifyProfileParams, User, UserDetailInfoByUin, UserDetailInfoByUinV2 } from '@/core/entities';
+import type { ApiContext } from '../session';
 import { friends, groupMembers, selfInfo } from '@/core/data';
 import { CacheClassFuncAsync, CacheClassFuncAsyncExtend } from '@/common/utils/helper';
-import { NodeIKernelProfileListener, ProfileListener } from '@/core/listeners';
+import { NodeIKernelProfileListener } from '@/core/listeners';
 import { RequestUtil } from '@/common/utils/request';
 import { logWarn } from '@/common/utils/log';
 import { NodeIKernelProfileService, ProfileBizType, UserDetailSource } from '@/core/services';
 import { requireMinNTQQBuild } from '@/common/utils/QQBasicInfo';
-import { ApiContext, NTCoreWrapper } from '../session';
+
 
 export class NTQQUserApi {
   private context: ApiContext;

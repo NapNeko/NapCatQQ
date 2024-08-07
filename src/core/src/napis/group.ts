@@ -1,8 +1,9 @@
-import { GroupMember, GroupRequestOperateTypes, GroupMemberRole, GroupNotify, MemberExtSourceType, ChatType } from '../entities';
-import { GeneralCallResult, NTQQUserApi, NodeIKernelGroupListener, NodeIKernelGroupService } from '@/core';
-import { groupMembers } from '../data';
+import type { ApiContext } from '../session';
+import { GroupMember, GroupRequestOperateTypes, GroupMemberRole, GroupNotify, MemberExtSourceType } from '../entities';
+import { ChatType, GeneralCallResult, NTQQUserApi, NodeIKernelGroupListener, NodeIKernelGroupService } from '@/core';
 import { CacheClassFuncAsyncExtend, runAllWithTimeout } from '@/common/utils/helper';
-import { ApiContext } from '../session';
+import { groupMembers } from '../data';
+
 export class NTQQGroupApi {
   private context: ApiContext;
   constructor(context: ApiContext) {

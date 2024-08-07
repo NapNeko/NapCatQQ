@@ -1,11 +1,7 @@
 import { logDebug } from '@/common/utils/log';
-import { NTQQUserApi } from './user';
 import { selfInfo } from '../data';
 import { RequestUtil } from '@/common/utils/request';
 import { WebApi } from './webapi';
-import { checkFileReceived, checkFileReceived2, uri2local } from '@/common/utils/file';
-import fs from 'node:fs'
-import { sleep } from '@/common/utils/helper';
 import { ApiContext } from '../session';
 export interface IdMusicSignPostData {
   type: 'qq' | '163',

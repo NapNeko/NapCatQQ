@@ -1,5 +1,3 @@
-
-
 import { GeneralCallResult } from '@/core';
 import { ApiContext } from '../session';
 export class NTQQSystemApi {

@@ -2,52 +2,13 @@ import { GetFileListParam, Peer, RawMessage, SendMessageElement, SendMsgElementC
 import { friends, groups, selfInfo } from '@/core/data';
 import { log, logWarn } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';
-import { NTQQUserApi } from '@/core';
 import { onGroupFileInfoUpdateParamType } from '@/core/listeners';
 import { GeneralCallResult } from '@/core/services/common';
 import { MessageUnique } from '../../../common/utils/MessageUnique';
 import { requireMinNTQQBuild } from '@/common/utils/QQBasicInfo';
-import { ApiContext, NTCoreWrapper } from '../session';
+import type { ApiContext } from '../session';
 
-async function LoadMessageIdList(Peer: Peer, msgId: string) {
-  let msgList = await NTQQMsgApi.getMsgHistory(Peer, msgId, 50);
-  for (let j = 0; j < msgList.msgList.length; j++) {
-    let shortId = MessageUnique.createMsg(Peer, msgList.msgList[j].msgId);
-  }
-}
-async function loadMessageUnique() {
-  if (groups.size > 100) {
-    logWarn('[性能检测] 群数量大于100，可能会导致性能问题');
-  }
-  let predict = (groups.size + friends.size / 2) / 5;
-  predict = predict < 20 ? 20 : predict;
-  predict = predict > 50 ? 50 : predict;
-  //let waitpromise: Array<Promise<{ msgList: RawMessage[]; }>> = [];
-  predict = Math.floor(predict * 50);
-  MessageUnique.resize(predict);
-  let RecentContact = await NTQQUserApi.getRecentContactListSnapShot(predict);
-  let LoadMessageIdDo: Array<Promise<void>> = new Array<Promise<void>>();
-  if (RecentContact?.info?.changedList && RecentContact?.info?.changedList?.length > 0) {
-    for (let i = 0; i < RecentContact.info.changedList.length; i++) {
-      let Peer: Peer = { chatType: RecentContact.info.changedList[i].chatType, peerUid: RecentContact.info.changedList[i].peerUid, guildId: '' };
-      LoadMessageIdDo.push(LoadMessageIdList(Peer, RecentContact.info.changedList[i].msgId));
-    }
-  }
-  await Promise.all(LoadMessageIdDo).then(() => {
-    log(`[消息序列] 加载 ${predict} 条历史消息记录完成`);
-  });
-}
 
-setTimeout(() => {
-  napCatCore.onLoginSuccess(async () => {
-    await sleep(100);
-    // NTQQMsgApi.CheckSendMode().then().catch();
-    loadMessageUnique().then().catch();
-    //下面的代码还没摸清 不要使用
-    //let data  = await napCatCore.session.getMsgService().sendSsoCmdReqByContend("LightAppSvc.mini_app_growguard.ReportExecute","1124343");
-    //console.log(data);
-  });
-}, 100);
 //歇菜LocalMsg压根不写Db
 // setTimeout(async () => {
 //   let ele: MessageElement = { extBufForUI: '0x', ...SendMsgElementConstructor.text('测试消息') };
@@ -71,6 +32,34 @@ export class NTQQMsgApi {
   private context: ApiContext;
   constructor(context: ApiContext) {
     this.context = context;
+  }
+  async LoadMessageIdList(Peer: Peer, msgId: string) {
+    let msgList = await this.getMsgHistory(Peer, msgId, 50);
+    for (let j = 0; j < msgList.msgList.length; j++) {
+      let shortId = MessageUnique.createMsg(Peer, msgList.msgList[j].msgId);
+    }
+  }
+  async loadMessageUnique() {
+    if (groups.size > 100) {
+      logWarn('[性能检测] 群数量大于100，可能会导致性能问题');
+    }
+    let predict = (groups.size + friends.size / 2) / 5;
+    predict = predict < 20 ? 20 : predict;
+    predict = predict > 50 ? 50 : predict;
+    //let waitpromise: Array<Promise<{ msgList: RawMessage[]; }>> = [];
+    predict = Math.floor(predict * 50);
+    MessageUnique.resize(predict);
+    let RecentContact = await this.context.core.session.getRecentContactService().getRecentContactListSnapShot(predict);
+    let LoadMessageIdDo: Array<Promise<void>> = new Array<Promise<void>>();
+    if (RecentContact?.info?.changedList && RecentContact?.info?.changedList?.length > 0) {
+      for (let i = 0; i < RecentContact.info.changedList.length; i++) {
+        let Peer: Peer = { chatType: RecentContact.info.changedList[i].chatType, peerUid: RecentContact.info.changedList[i].peerUid, guildId: '' };
+        LoadMessageIdDo.push(this.LoadMessageIdList(Peer, RecentContact.info.changedList[i].msgId));
+      }
+    }
+    await Promise.all(LoadMessageIdDo).then(() => {
+      log(`[消息序列] 加载 ${predict} 条历史消息记录完成`);
+    });
   }
   async FetchLongMsg(peer: Peer, msgId: string) {
     return this.context.core.session.getMsgService().fetchLongMsg(peer, msgId);
@@ -315,7 +304,7 @@ export class NTQQMsgApi {
     }
     throw new Error('转发消息超时');
   }
-   async markallMsgAsRead() {
+  async markallMsgAsRead() {
     return this.context.core.session.getMsgService().setAllC2CAndGroupMsgRead();
   }
 }

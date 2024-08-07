@@ -1,9 +1,7 @@
-import { selfInfo } from '@/core/data';
-import { log, logDebug } from '@/common/utils/log';
-import { NTQQUserApi } from './user';
+import { logDebug } from '@/common/utils/log';
 import { RequestUtil } from '@/common/utils/request';
 import { CacheClassFuncAsync } from '@/common/utils/helper';
-import { ApiContext, NTCoreWrapper } from '../session';
+import type { ApiContext } from '../session';
 export enum WebHonorType {
   ALL = 'all',
   TALKACTIVE = 'talkative',

@@ -3,7 +3,7 @@ import {
   CacheFileType,
   ChatCacheListItemBasic,
   ChatType,
-  ElementType, IMAGE_HTTP_HOST, IMAGE_HTTP_HOST_NT, Peer, PicElement, RawMessage
+  ElementType, IMAGE_HTTP_HOST, IMAGE_HTTP_HOST_NT, Peer, PicElement
 } from '@/core/entities';
 import path from 'path';
 import fs from 'fs';
@@ -16,14 +16,14 @@ import imageSize from 'image-size';
 import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 import { sessionConfig } from '@/core/sessionConfig';
 import { rkeyManager } from '../utils/rkey';
-import { NodeIKernelSearchService } from '../services/NodeIKernelSearchService';
+import type { NodeIKernelSearchService } from '../services/NodeIKernelSearchService';
 import { ApiContext } from '../session';
 
 
 export class NTQQFileApi {
   private context: ApiContext;
   constructor(context: ApiContext) {
-      this.context = context;
+    this.context = context;
   }
   async getFileType(filePath: string) {
     return fileType.fileTypeFromFile(filePath);
@@ -296,7 +296,7 @@ export class NTQQFileApi {
 export class NTQQFileCacheApi {
   private context: ApiContext;
   constructor(context: ApiContext) {
-      this.context = context;
+    this.context = context;
   }
   async setCacheSilentScan(isSilent: boolean = true) {
     return '';
