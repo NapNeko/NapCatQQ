@@ -48,7 +48,7 @@
     "vite": "^5.2.6",
     "vite-plugin-babel": "^1.2.0",
     "vite-plugin-cp": "^4.0.8",
-    "vite-plugin-dts": "^3.8.2",
+    "vite-plugin-dts": "^4.0.1",
     "vite-tsconfig-paths": "^4.3.2"
   },
   "dependencies": {
