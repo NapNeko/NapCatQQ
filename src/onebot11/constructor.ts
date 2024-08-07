@@ -12,6 +12,7 @@ import {
 import {
   AtType,
   ChatType,
+  ChatType2,
   FaceIndex,
   Friend,
   FriendV2,
@@ -42,7 +43,7 @@ import { OB11GroupTitleEvent } from './event/notice/OB11GroupTitleEvent';
 import { OB11GroupCardEvent } from './event/notice/OB11GroupCardEvent';
 import { OB11GroupDecreaseEvent } from './event/notice/OB11GroupDecreaseEvent';
 import { ob11Config } from '@/onebot11/config';
-import { deleteGroup, getGroupMember, groupMembers, selfInfo, tempGroupCodeMap } from '@/core/data';
+import { deleteGroup, getGroupMember, groupMembers, selfInfo } from '@/core/data';
 import { NTQQFileApi, NTQQGroupApi, NTQQMsgApi, NTQQUserApi } from '@/core/apis';
 import { OB11GroupMsgEmojiLikeEvent } from '@/onebot11/event/notice/OB11MsgEmojiLikeEvent';
 import { OB11FriendPokeEvent, OB11GroupPokeEvent } from './event/notice/OB11PokeEvent';
@@ -96,11 +97,15 @@ export class OB11Constructor {
       //const user = await NTQQUserApi.getUserDetailInfoByUin(msg.senderUin!);
       //resMsg.sender.nickname = user.info.nick;
     }
-    else if (msg.chatType == ChatType.temp) {
+    else if (msg.chatType as unknown as ChatType2 == ChatType2.KCHATTYPETEMPC2CFROMGROUP) {
       resMsg.sub_type = 'group';
-      const tempGroupCode = tempGroupCodeMap[msg.peerUin];
-      if (tempGroupCode) {
-        resMsg.group_id = parseInt(tempGroupCode);
+      let ret = await NTQQMsgApi.getTempChatInfo(ChatType2.KCHATTYPETEMPC2CFROMGROUP, msg.senderUid);
+      if (ret.result === 0) {
+        resMsg.group_id = parseInt(ret.tmpChatInfo!.groupCode);
+        resMsg.sender.nickname = ret.tmpChatInfo!.fromNick;
+      } else {
+        resMsg.group_id = 284840486;//兜底数据
+        resMsg.sender.nickname = "临时会话";
       }
     }
     for (const element of msg.elements) {
@@ -227,7 +232,7 @@ export class OB11Constructor {
           //合并消息内部 应该进行特殊处理 可能需要重写peer 待测试与研究 Mlikiowa Taged TODO
         }
         try {
-          
+
           videoUrl = await NTQQFileApi.getVideoUrl({
             chatType: msg.chatType,
             peerUid: msg.peerUid,
@@ -340,17 +345,17 @@ export class OB11Constructor {
         msg.parentMsgIdList.push(msg.msgId);
         //let parentMsgId = msg.parentMsgIdList[msg.parentMsgIdList.length - 2 < 0 ? 0 : msg.parentMsgIdList.length - 2];
         //加入自身MsgId
-        let MultiMsgs = (await NTQQMsgApi.getMultiMsg(ParentMsgPeer, msg.parentMsgIdList[0], msg.msgId))?.msgList;
+        const MultiMsgs = (await NTQQMsgApi.getMultiMsg(ParentMsgPeer, msg.parentMsgIdList[0], msg.msgId))?.msgList;
         //拉取下级消息
         if (!MultiMsgs) continue;
         //拉取失败则跳过
         message_data['data']['content'] = [];
-        for (let MultiMsg of MultiMsgs) {
+        for (const MultiMsg of MultiMsgs) {
           //对每条拉取的消息传递ParentMsgPeer修正Peer
           MultiMsg.parentMsgPeer = ParentMsgPeer;
           MultiMsg.parentMsgIdList = msg.parentMsgIdList;
           MultiMsg.id = MessageUnique.createMsg(ParentMsgPeer, MultiMsg.msgId);//该ID仅用查看 无法调用
-          let msgList = await OB11Constructor.message(MultiMsg);
+          const msgList = await OB11Constructor.message(MultiMsg);
           message_data['data']['content'].push(msgList);
           //console.log("合并消息", msgList);
         }

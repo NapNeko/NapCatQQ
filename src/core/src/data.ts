@@ -80,9 +80,6 @@ export async function getGroupMember(groupQQ: string | number, memberUinOrUid: s
   }
   return member;
 }
-// 考虑优化 移入QQ缓存或使用Api直接获取
-export const tempGroupCodeMap: Record<string, string> = {};  // peerUid => 群号
-
 // 保留 需要频繁读写
 export const stat = {
   packet_received: 0,

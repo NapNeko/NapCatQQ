@@ -54,8 +54,6 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
     if (PublishGroupBulletinResult.result != 0) {
       throw `设置群公告失败,错误信息:${PublishGroupBulletinResult.errMsg}`;
     }
-    // 下面实现扬了
-    //await WebApi.setGroupNotice(payload.group_id, payload.content) ;
     return null;
   }
 }

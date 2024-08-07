@@ -18,9 +18,7 @@ export default class TestApi01 extends BaseAction<Payload, any> {
   actionName = ActionName.TestApi01;
   // 用不着复杂检测
   protected async check(payload: Payload): Promise<BaseCheckResult> {
-    return {
-      valid: true,
-    };
+    return { valid: true };
   }
   protected async _handle(payload: Payload): Promise<any> {
     return await napCatCore.session.getMsgService().sendSsoCmdReqByContend(payload.cmd, payload.param);

@@ -1,9 +1,5 @@
-import { getGroup } from '@/core/data';
-import { OB11Group } from '../../types';
-import { OB11Constructor } from '../../constructor';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { NTQQMsgApi } from '@/core/apis/msg';
 import { GroupEssenceMsgRet, WebApi } from '@/core/apis/webapi';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
