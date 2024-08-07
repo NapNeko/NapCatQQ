@@ -174,7 +174,7 @@ jobs:
               path: dist
 
   release-napcat:
-    needs: [build-shell-win32,build-shell-linux]
+    needs: [build-shell-win32,build-shell-linux,build-liteloader-win32,build-liteloader-linux]
     runs-on: ubuntu-latest
     steps:
     - name: Download All Artifact
