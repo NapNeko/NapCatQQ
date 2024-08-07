@@ -28,7 +28,7 @@ class DeleteMsg extends BaseAction<Payload, void> {
   protected async _handle(payload: Payload) {
     const msg = MessageUnique.getMsgIdAndPeerByShortId(Number(payload.message_id));
     if (msg) {
-      const ret = NTEventDispatch.RegisterListen<NodeIKernelMsgListener['onMsgInfoListUpdate']>
+      const ret = NTEventDispatch.RegisterListener<NodeIKernelMsgListener['onMsgInfoListUpdate']>
       (
         'NodeIKernelMsgListener/onMsgInfoListUpdate',
         1,

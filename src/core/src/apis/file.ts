@@ -246,7 +246,7 @@ export class NTQQFileApi {
     };
     const Event = await NTEventDispatch.CreatEventFunction<EventType>('NodeIKernelSearchService/searchFileWithKeywords');
     let id = '';
-    const Listener = NTEventDispatch.RegisterListen<(params: OnListener) => void>('NodeIKernelSearchListener/onSearchFileKeywordsResult', 1, 20000, (params) => {
+    const Listener = NTEventDispatch.RegisterListener<(params: OnListener) => void>('NodeIKernelSearchListener/onSearchFileKeywordsResult', 1, 20000, (params) => {
       if (id !== '' && params.searchId == id) {
         return true
       }

@@ -3,7 +3,7 @@ import { friends, getGroupMember, groups, selfInfo } from '@/core/data';
 import { log, logWarn } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';
 import { napCatCore, NTQQGroupApi, NTQQUserApi } from '@/core';
-import { onGroupFileInfoUpdateParamType } from '@/core/listeners';
+import { NodeIKernelMsgListener, onGroupFileInfoUpdateParamType } from '@/core/listeners';
 import { GeneralCallResult } from '@/core/services/common';
 import { MessageUnique } from '../../../common/utils/MessageUnique';
 import { NTEventDispatch } from '@/common/utils/EventTask';
@@ -15,7 +15,7 @@ async function LoadMessageIdList(Peer: Peer, msgId: string) {
     let shortId = MessageUnique.createMsg(Peer, msgList.msgList[j].msgId);
   }
 }
-async function loadMessageUnique() {
+export async function loadMessageUnique() {
   if (groups.size > 100) {
     logWarn('[性能检测] 群数量大于100，可能会导致性能问题');
   }
@@ -37,17 +37,19 @@ async function loadMessageUnique() {
     log(`[消息序列] 加载 ${predict} 条历史消息记录完成`);
   });
 }
-
-setTimeout(() => {
-  napCatCore.onLoginSuccess(async () => {
-    await sleep(100);
-    // NTQQMsgApi.CheckSendMode().then().catch();
-    loadMessageUnique().then().catch();
-    //下面的代码还没摸清 不要使用
-    //let data  = await napCatCore.session.getMsgService().sendSsoCmdReqByContend("LightAppSvc.mini_app_growguard.ReportExecute","1124343");
-    //console.log(data);
-  });
-}, 100);
+// NTEventDispatch.RegisterListener<NodeIKernelMsgListener['onMsgInfoListUpdate']>('NodeIKernelMsgListener/onMsgInfoListUpdate', 1,50000,(msgList: RawMessage[]) => {
+// return true;
+// });
+// setTimeout(() => {
+//   napCatCore.onLoginSuccess(async () => {
+//     await sleep(100);
+//     // NTQQMsgApi.CheckSendMode().then().catch();
+//     loadMessageUnique().then().catch();
+//     //下面的代码还没摸清 不要使用
+//     //let data  = await napCatCore.session.getMsgService().sendSsoCmdReqByContend("LightAppSvc.mini_app_growguard.ReportExecute","1124343");
+//     //console.log(data);
+//   });
+// }, 100);
 //歇菜LocalMsg压根不写Db
 // setTimeout(async () => {
 //   let ele: MessageElement = { extBufForUI: '0x', ...SendMsgElementConstructor.text('测试消息') };

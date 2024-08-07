@@ -110,7 +110,7 @@ export class NTEventWrapper {
       resolve(retData);
     });
   }
-  async RegisterListen<ListenerType extends (...args: any[]) => void>(ListenerName = '', waitTimes = 1, timeout = 5000, checker: (...args: Parameters<ListenerType>) => boolean) {
+  async RegisterListener<ListenerType extends (...args: any[]) => void>(ListenerName = '', waitTimes = 1, timeout = 5000, checker: (...args: Parameters<ListenerType>) => boolean) {
     return new Promise<Parameters<ListenerType>>((resolve, reject) => {
       const ListenerNameList = ListenerName.split('/');
       const ListenerMainName = ListenerNameList[0];

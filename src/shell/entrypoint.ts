@@ -1,4 +1,4 @@
-import { injectService, napCatCore as napCatCoreAppImpl } from '@/core';
+import { injectService, loadMessageUnique, napCatCore as napCatCoreAppImpl } from '@/core';
 import { program } from 'commander';
 import qrcode from 'qrcode-terminal';
 import fs from 'fs/promises';
@@ -55,6 +55,7 @@ WebUiDataRuntime.setOB11ConfigCall(NapCat_OneBot11.SetConfig);
 
 napCatCore.onLoginSuccess((uin, uid) => {
   log('登录成功!');
+  loadMessageUnique().then().catch();
   WebUiDataRuntime.setQQLoginStatus(true);
   WebUiDataRuntime.setQQLoginUin(uin.toString());
 });
