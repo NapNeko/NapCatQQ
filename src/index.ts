@@ -16,7 +16,6 @@ import chalk from 'chalk';
 import { randomInt } from 'crypto';
 import { MessageUnique } from './common/utils/MessageUnique';
 
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const tagColor = chalk.cyan;
