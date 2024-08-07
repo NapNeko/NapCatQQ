@@ -77,12 +77,38 @@ export class NewNapCatCore {
   get dataPathGlobal(): string {
     return path.resolve(this.dataPath, './nt_qq/global');
   }
-  InitLiteLoaderMode(QQWrapper: WrapperNodeApi, session: NodeIQQNTWrapperSession) {
+  InitLiteLoaderMode(QQWrapper: WrapperNodeApi, session: NodeIQQNTWrapperSession,loginService: NodeIKernelLoginService) {
     this.workMode = NewCoreWorkMode.LiteLoader;
     this.session = session;
+    this.loginService = loginService;
     this.util = new QQWrapper.NodeQQNTWrapperUtil();
     this.loginListener = new LoginListener();
-
+    this.loginListener.onQRCodeLoginSucceed = (arg) => {
+      selfInfo.uin = arg.uin;
+      selfInfo.uid = arg.uid;
+      napCatConfig.read();
+      setLogLevel(napCatConfig.fileLogLevel, napCatConfig.consoleLogLevel);
+      enableFileLog(napCatConfig.fileLog);
+      enableConsoleLog(napCatConfig.consoleLog);
+      setLogSelfInfo(selfInfo);
+      const dataPath = path.resolve(this.dataPath, './NapCat/data');
+      fs.mkdirSync(dataPath, { recursive: true });
+      logDebug('本账号数据/缓存目录：', dataPath);
+      this.initDataListener();
+      this.onLoginSuccessFuncList.map(cb => {
+        new Promise((resolve, reject) => {
+          const result = cb(arg.uin, arg.uid);
+          if (result instanceof Promise) {
+            result.then(resolve).catch(reject);
+          }
+        }).then();
+      });
+    };
+    this.loginListener = new Proxy(this.loginListener, this.proxyHandler);
+    // 初始化流程：initConfig, login, initSession, loginSuccess | initDataListener
+    if (!this.loginListener) throw new Error('loginListener not init');
+    //if(!this.loginService) throw new Error('loginService not init');
+    this.loginService.addKernelLoginListener(new QQWrapper.NodeIKernelLoginListener(this.loginListener));
   }
   InitShellMode() {
     this.engine = new QQWrapper.NodeIQQNTWrapperEngine();
