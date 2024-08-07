@@ -7,10 +7,10 @@ import { randomUUID } from 'crypto';
 import { spawn } from 'node:child_process';
 import { getTempDir } from '@/common/utils/file';
 
-let TEMP_DIR = './';
-setTimeout(() => {
-  TEMP_DIR = getTempDir();
-}, 100);
+export let TEMP_DIR = './';
+// setTimeout(() => {
+//   TEMP_DIR = getTempDir();
+// }, 100);
 export async function encodeSilk(filePath: string) {
   function getFileHeader(filePath: string) {
     // 定义要读取的字节数
