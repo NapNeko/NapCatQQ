@@ -5,7 +5,7 @@ import { sleep } from '@/common/utils/helper';
 import { napCatCore, NTQQGroupApi, NTQQUserApi } from '@/core';
 import { onGroupFileInfoUpdateParamType } from '@/core/listeners';
 import { GeneralCallResult } from '@/core/services/common';
-import { MessageUnique } from '../../../common/utils/MessageUnique';
+import { MessageUnique } from '@/common/utils/MessageUnique';
 import { NTEventDispatch } from '@/common/utils/EventTask';
 import { requireMinNTQQBuild } from '@/common/utils/QQBasicInfo';
 
