@@ -9,12 +9,9 @@ import { log, logDebug, logError, LogLevel, logWarn, setLogLevel } from '@/commo
 import { NapCatOnebot11 } from '@/onebot11/main';
 import { InitWebUi } from './webui/index';
 import { WebUiDataRuntime } from './webui/src/helper/Data';
-import { deleteOldFiles, UpdateConfig } from './common/utils/helper';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import chalk from 'chalk';
-import { randomInt } from 'crypto';
-import { MessageUnique } from './common/utils/MessageUnique';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
