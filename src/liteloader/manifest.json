@@ -1,10 +1,10 @@
 {
   "manifest_version": 4,
   "type": "extension",
-  "name": "NapCatLL",
-  "slug": "NapCatLL",
+  "name": "NapCat",
+  "slug": "NapCat",
   "description": "OneBot v11 protocol implementation with NapCat logic",
-  "version": "4.0.0-SNAPSHOT",
+  "version": "1.8.4",
   "icon": "./logo.png",
   "authors": [
     {
@@ -18,11 +18,7 @@
   ],
   "repository": {
     "repo": "NapNeko/NapCatQQ",
-    "branch": "main",
-    "release": {
-      "tag": "latest",
-      "name": "NapCatLL.zip"
-    }
+    "branch": "main"
   },
   "platform": [
     "win32",

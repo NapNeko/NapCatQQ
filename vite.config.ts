@@ -93,7 +93,7 @@ const baseConfig = (mode: string = 'development') => defineConfig({
     // 压缩代码出现了未知问题导致无法运行，暂时不启用
     minify: false,
     lib: {
-      entry: join('src', 'napcat', 'entrypoint.ts'),
+      entry: join('src', 'shell', 'entrypoint.ts'),
       formats: ['es'],
       fileName: () => 'napcat/napcat.mjs',
     },

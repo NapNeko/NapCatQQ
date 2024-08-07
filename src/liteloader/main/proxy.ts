@@ -1,5 +1,5 @@
 // https://github.com/NapNeko/LiteLoader-NapCatExample/blob/main/src/common/proxy.ts
-
+// By Mlikiowa
 import type { NodeIKernelLoginService } from '@/core/services';
 import type { NodeIQQNTWrapperSession, WrapperNodeApi } from '@/core/wrapper';
 import process from 'process';
