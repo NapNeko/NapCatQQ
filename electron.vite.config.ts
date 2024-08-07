@@ -1,7 +1,6 @@
 import { defineConfig } from 'electron-vite';
 import { defineConfig as defineViteConfig } from 'vite';
 import { join, resolve } from 'path';
-import viteChecker from 'vite-plugin-checker';
 import viteCp from 'vite-plugin-cp';
 import viteZipPack from 'unplugin-zip-pack/vite';
 import PluginManifest from './src/liteloader/manifest.json';
@@ -47,7 +46,7 @@ const ConfigBuilder = (type: 'main' | 'preload') => defineViteConfig({
     minify: true,
     outDir: resolve(OUTPUT_DIR, `./${type}`),
     lib: {
-      entry: resolve(SRC_DIR, `./llonebot/${type}/index.ts`),
+      entry: resolve(SRC_DIR, `./liteloader/${type}/index.ts`),
       formats: [ 'cjs' ],
       fileName: () => 'index.js',
     },
@@ -70,7 +69,7 @@ export default defineConfig({
           { src: './package.json', dest: OUTPUT_DIR },
           { src: './README.md', dest: OUTPUT_DIR },
           { src: './logo.png', dest: join(OUTPUT_DIR, 'logs') },
-          { src: './src/llonebot/manifest.json', dest: OUTPUT_DIR }
+          { src: './src/liteloader/manifest.json', dest: OUTPUT_DIR }
         ]
       }),
       viteZipPack({
@@ -82,12 +81,12 @@ export default defineConfig({
       minify: 'esbuild',
       outDir: resolve(OUTPUT_DIR, './renderer'),
       lib: {
-        entry: resolve(SRC_DIR, './llonebot/renderer/index.ts'),
+        entry: resolve(SRC_DIR, './liteloader/renderer/index.ts'),
         formats: [ 'es' ],
         fileName: () => 'index.js',
       },
       rollupOptions: {
-        input: resolve(SRC_DIR, './llonebot/renderer/index.ts'),
+        input: resolve(SRC_DIR, './liteloader/renderer/index.ts'),
       },
     },
   }),
