@@ -24,12 +24,12 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
   actionName = ActionName.GoCQHTTP_GetForwardMsg;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<any> {
-    const msgId = payload.message_id || payload.id;
-    if (!msgId) {
-      throw Error('message_id is required');
+    const msgIdMixOb11Id = payload.message_id || payload.id;
+    if (!msgIdMixOb11Id) {
+      throw Error('message_id or id is required');
     }
-    const rootMsgId = MessageUnique.getShortIdByMsgId(msgId);
-    const rootMsg = MessageUnique.getMsgIdAndPeerByShortId(rootMsgId || parseInt(msgId));
+    const rootMsgId = MessageUnique.getShortIdByMsgId(msgIdMixOb11Id);
+    const rootMsg = MessageUnique.getMsgIdAndPeerByShortId(rootMsgId || parseInt(msgIdMixOb11Id));
     if (!rootMsg) {
       throw Error('msg not found');
     }
