@@ -10,7 +10,7 @@ import { getTempDir } from '@/common/utils/file';
 let TEMP_DIR = './';
 setTimeout(() => {
   TEMP_DIR = getTempDir();
-}, 100);
+}, 10000);
 export async function encodeSilk(filePath: string) {
   function getFileHeader(filePath: string) {
     // 定义要读取的字节数

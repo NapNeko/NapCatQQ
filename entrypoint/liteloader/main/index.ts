@@ -1,4 +1,4 @@
-import { injectService, LoginListener, NodeIKernelLoginService } from '@/core';
+import { injectService, loadMessageUnique, LoginListener, NodeIKernelLoginService } from '@/core';
 import { NodeIQQNTWrapperSession, WrapperNodeApi } from '@/core/wrapper';
 import { fetchServices } from './proxy';
 import { INapCatService } from '@/core';
@@ -12,6 +12,7 @@ class NapCatLLPluginImpl extends INapCatService {
     super(session, wrapper);
     const ntLoginListener = new LoginListener();
     ntLoginListener.onQRCodeLoginSucceed = arg => {
+      loadMessageUnique().then().catch();
       this.onLoginSuccessFuncList.forEach(func => func(arg.uin, arg.uid));
     };
     loginService.addKernelLoginListener(
