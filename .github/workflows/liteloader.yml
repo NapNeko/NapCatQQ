@@ -9,7 +9,7 @@ permissions: write-all
 
 jobs:
   build-linux:
-    if: ${{ startsWith(github.event.head_commit.message, 'build: shell') }}
+    if: ${{ startsWith(github.event.head_commit.message, 'build: liteloader') }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -63,12 +63,12 @@ jobs:
         - name: Build NuCat Linux
           run: |
                 npm i --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
-                npm run build:prod
+                npm run build:liteloader
                 cd dist
                 npm i --omit=dev --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
                 cd ..
         - name: Upload Artifact
           uses: actions/upload-artifact@v4
           with:
-              name: NapCat.Shell.${{ matrix.target_platform }}.${{ matrix.target_arch }}
-              path: dist
+              name: NapCat.LiteLoader.${{ matrix.target_platform }}.${{ matrix.target_arch }}
+              path: dist/plugin
