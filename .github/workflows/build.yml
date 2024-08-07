@@ -60,7 +60,7 @@ jobs:
           uses: actions/setup-node@v4
           with:
               node-version: 20.x
-        - name: Build NuCat Linux
+        - name: Build NuCat Win32
           run: |
                 npm i --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
                 npm run build:prod

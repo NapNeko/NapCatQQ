@@ -32,14 +32,14 @@ jobs:
       run: |
           npm i --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
           npm run build:prod
-          cd dist
+          cd dist/plugin
           npm i --omit=dev --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
-          cd ..
+          cd ../../
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: NapCat.${{ matrix.target_platform }}.${{ matrix.target_arch }}
-        path: dist
+        name: NapCat.LiteLoader.${{ matrix.target_platform }}.${{ matrix.target_arch }}
+        path: dist/plugin
   build-win32:
     if: ${{ startsWith(github.event.head_commit.message, 'build:') }}
     runs-on: ubuntu-latest
@@ -60,13 +60,13 @@ jobs:
           uses: actions/setup-node@v4
           with:
               node-version: 20.x
-        - name: Build NuCat Linux
+        - name: Build NuCat Win32
           run: |
                 npm i --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
                 npm run build:liteloader
-                cd dist
+                cd dist/plugin
                 npm i --omit=dev --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
-                cd ..
+                cd ../../
         - name: Upload Artifact
           uses: actions/upload-artifact@v4
           with:
