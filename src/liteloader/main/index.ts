@@ -6,12 +6,15 @@ import { InitWebUi } from '@/webui';
 import { NapCatOnebot11 } from '@/onebot11/main';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { log } from '@/common/utils/log';
+import { selfInfo } from '@/core/data';
 
 class NapCatLLPluginImpl extends INapCatService {
   constructor(session: NodeIQQNTWrapperSession, wrapper: WrapperNodeApi, loginService: NodeIKernelLoginService) {
     super(session, wrapper);
     const ntLoginListener = new LoginListener();
     ntLoginListener.onQRCodeLoginSucceed = arg => {
+      selfInfo.uin = arg.uin;
+      selfInfo.uid = arg.uid;
       loadMessageUnique().then().catch();
       this.onLoginSuccessFuncList.forEach(func => func(arg.uin, arg.uid));
     };
