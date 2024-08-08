@@ -77,9 +77,10 @@ async function checkNTIsInit() {
 }
 async function NCInit() {
     console.log("[NapCat] [Info] 开始初始化NapCat");
-    //await import("file://" + path.join(CurrentPath, './napcat.mjs'));
+    const { NCoreInitLiteLoader } = await import("file://" + path.join(CurrentPath, './napcat.mjs'));
     //传入LoginService Session 其余自载入
-    console.log("[NapCat] [Info] NapCat初始化完成");
+    await NCoreInitLiteLoader(getWrapperSession(), getWrapperLoginService());
+    //console.log("[NapCat] [Info] NapCat初始化完成");
 }
 (async () => {
     try {

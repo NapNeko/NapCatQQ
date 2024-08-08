@@ -8,8 +8,6 @@ import nodeResolve from '@rollup/plugin-node-resolve';
 import { builtinModules } from 'module';
 import fs from 'node:fs';
 import babel from 'vite-plugin-babel';
-import { version } from 'os';
-// "@rollup/plugin-babel": "^6.0.4",
 const external = ['silk-wasm', 'ws', 'express', 'fluent-ffmpeg', 'log4js', 'qrcode-terminal'];
 
 const nodeModules = [...builtinModules, builtinModules.map(m => `node:${m}`)].flat();
@@ -55,7 +53,6 @@ const baseConfigPlugin: PluginOption[] = [
       { src: './package.json', dest: 'dist' },
       { src: './README.md', dest: 'dist' },
       { src: './logo.png', dest: 'dist/logs' },
-      // ...MoeHooModule,
       ...(startScripts.map((startScript) => {
         return { src: startScript, dest: 'dist' };
       })),
@@ -63,17 +60,13 @@ const baseConfigPlugin: PluginOption[] = [
   }),
   nodeResolve(),
 ];
-// if (os.platform() !== 'win32') {
-//   startScripts = ['./script/napcat.sh'];
-// }
-
 
 
 let corePath = resolve(__dirname, './src/core/src');
 if (!fs.existsSync(corePath)) {
   corePath = resolve(__dirname, './src/core.lib/src');
 }
-const baseConfig = (mode: string = 'development') => defineConfig({
+const baseConfig = (mode: string = 'shell') => defineConfig({
   resolve: {
     conditions: ['node', 'default'],
     alias: {
@@ -89,7 +82,7 @@ const baseConfig = (mode: string = 'development') => defineConfig({
     // 压缩代码出现了未知问题导致无法运行，暂时不启用
     minify: false,
     lib: {
-      entry: 'src/index.ts',
+      entry: mode === "shell" ? 'src/shell/napcat.ts' : "src/liteloader/napcat.ts",
       formats: ['es'],
       fileName: () => 'napcat.mjs',
     },
@@ -101,37 +94,11 @@ const baseConfig = (mode: string = 'development') => defineConfig({
 });
 
 export default defineConfig(({ mode }): UserConfig => {
-  if (mode === 'production') {
+  if (mode === 'shell') {
     return {
       ...baseConfig(mode),
       plugins: [
-        ...baseConfigPlugin,
-        // {
-        //   ...(obfuscator({
-        //     options: {
-        //       compact: true,
-        //       controlFlowFlattening: true,
-        //       controlFlowFlatteningThreshold: 0.75,
-        //       deadCodeInjection: true,
-        //       deadCodeInjectionThreshold: 0.4,
-        //       debugProtection: false,
-        //       disableConsoleOutput: false,
-        //       identifierNamesGenerator: 'hexadecimal',
-        //       log: false,
-        //       renameGlobals: false,
-        //       rotateStringArray: true,
-        //       selfDefending: true,
-        //       stringArray: true,
-        //       stringArrayEncoding: ['base64'],
-        //       stringArrayThreshold: 0.75,
-        //       transformObjectKeys: true,
-        //       unicodeEscapeSequence: false
-        //     },
-        //     include: ['src/**/*.js', 'src/**/*.ts'],
-        //   }) as Plugin),
-        //   enforce: 'post',
-        //   apply: 'build',
-        // },
+        ...baseConfigPlugin
       ]
     };
   } else {
