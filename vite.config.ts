@@ -28,8 +28,33 @@ if (process.env.NAPCAT_BUILDSYS == 'linux') {
 } else {
   startScripts = ['./script/BootWay05.bat', './script/BootWay05.utf8.bat', './script/dbghelp.dll', './script/BootWay05.ps1', './script/napcat.sh', './script/napcat.ps1', './script/napcat.bat', './script/napcat-utf8.bat', './script/napcat-utf8.ps1', './script/napcat-log.ps1', './script/napcat-9912.ps1', './script/napcat-9912-utf8.ps1', './script/napcat-9912.bat', './script/napcat-9912-utf8.bat'];
 }
-
-const baseConfigPlugin: PluginOption[] = [
+const LLBaseConfigPlugin: PluginOption[] = [
+  // PreprocessorDirectives(),
+  babel({
+    filter: /.*\.(ts|js)$/,
+    babelConfig: {
+      babelrc: false,
+      configFile: false,
+      presets: ["@babel/preset-typescript"],
+      plugins: [
+        //'2018-09', decoratorsBeforeExport: true
+        ['@babel/plugin-proposal-decorators', { legacy: true }],
+        '@babel/plugin-proposal-class-properties',
+      ],
+    },
+  }),
+  cp({
+    targets: [
+      { src: './manifest.json', dest: 'dist' },
+      { src: './src/liteloader/napcat.cjs', dest: 'dist' },
+      { src: './src/liteloader/preload.cjs', dest: 'dist' },
+      { src: './src/liteloader/renderer.cjs', dest: 'dist' },
+      { src: './logo.png', dest: 'dist' },
+    ]
+  }),
+  nodeResolve(),
+];
+const ShellBaseConfigPlugin: PluginOption[] = [
   // PreprocessorDirectives(),
   babel({
     filter: /.*\.(ts|js)$/,
@@ -99,7 +124,7 @@ const LLBaseConfig = () => defineConfig({
     target: 'esnext',
     minify: false,
     lib: {
-      entry:  "src/liteloader/napcat.ts",
+      entry: "src/liteloader/napcat.ts",
       formats: ['es'],
       fileName: () => 'napcat.mjs',
     },
@@ -113,14 +138,12 @@ export default defineConfig(({ mode }): UserConfig => {
   if (mode === 'shell') {
     return {
       ...ShellBaseConfig(),
-      plugins: [
-        ...baseConfigPlugin
-      ]
+      plugins: [...ShellBaseConfigPlugin]
     };
   } else {
     return {
       ...LLBaseConfig(),
-      plugins: baseConfigPlugin,
+      plugins: [...LLBaseConfigPlugin],
     };
   }
 });
