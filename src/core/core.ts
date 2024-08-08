@@ -1,42 +1,49 @@
-import { logDebug } from "@/common/utils/log";
+import { LogWrapper } from "@/common/utils/log";
+import { NodeIQQNTWrapperSession, WrapperNodeApi } from "./wrapper/wrapper";
+import path from "node:path";
+import fs from "node:fs";
 import { NodeIKernelLoginService } from "./services";
-import { NodeIQQNTWrapperSession } from "./wrapper/wrapper";
 
-export enum NCoreWorkMode {
+export enum NapCatCoreWorkingEnv {
     Unknown = 0,
     Shell = 1,
-    LiteLoader = 2
+    LiteLoader = 2,
 }
-export class NapCatCore {
-    public WorkMode: NCoreWorkMode = NCoreWorkMode.Unknown;
-    public isInit: boolean = false;
-    public session: NodeIQQNTWrapperSession | undefined;
-    private proxyHandler = {
-        get(target: any, prop: any, receiver: any) {
-          // console.log('get', prop, typeof target[prop]);
-          if (typeof target[prop] === 'undefined') {
-            // 如果方法不存在，返回一个函数，这个函数调用existentMethod
-            return (...args: unknown[]) => {
-              logDebug(`${target.constructor.name} has no method ${prop}`);
-            };
-          }
-          // 如果方法存在，正常返回
-          return Reflect.get(target, prop, receiver);
-        }
-      };
-    get IsInit(): boolean {
-        return this.isInit;
-    }
-}
-export class NapCatShell extends NapCatCore {
-    public WorkMode: NCoreWorkMode = NCoreWorkMode.Shell;
-    Init() {
-        
-    }
-}
-export class NapCatLiteLoader extends NapCatCore {
-    public WorkMode: NCoreWorkMode = NCoreWorkMode.LiteLoader;
-    Init(WrapperSession: NodeIQQNTWrapperSession, LoginService: NodeIKernelLoginService) {
 
+export function loadQQWrapper(QQVersion: string): WrapperNodeApi {
+    let wrapperNodePath = path.resolve(path.dirname(process.execPath), './resources/app/wrapper.node');
+    if (!fs.existsSync(wrapperNodePath)) {
+        wrapperNodePath = path.join(path.dirname(process.execPath), `resources/app/versions/${QQVersion}/wrapper.node`);
+    }
+    const nativemodule: any = { exports: {} };
+    process.dlopen(nativemodule, wrapperNodePath);
+    return nativemodule.exports;
+}
+
+export class NapCatCore {
+    readonly workingEnv: NapCatCoreWorkingEnv;
+    readonly wrapper: WrapperNodeApi;
+    readonly session: NodeIQQNTWrapperSession;
+    readonly logger: LogWrapper;
+    readonly loginService: NodeIKernelLoginService;
+
+    constructor(
+        env: NapCatCoreWorkingEnv,
+        wrapper: WrapperNodeApi,
+        session: NodeIQQNTWrapperSession, 
+        logger: LogWrapper,
+        loginService: NodeIKernelLoginService,
+        QQVersion: string
+    ) {
+        this.workingEnv = env;
+        this.logger = logger;
+        this.wrapper = wrapper;
+        this.session = session;
+        this.loginService = loginService;
+    }
+
+    // Renamed from 'InitDataListener'
+    initNapCatCoreListeners() {
+        
     }
 }
