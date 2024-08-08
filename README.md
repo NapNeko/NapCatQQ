@@ -8,12 +8,13 @@ NapCatQQ 是基于 PC NTQQ 本体实现的一套无头 Bot 框架。
 
 NapCat 意为「瞌睡猫」，像睡着了一样在后台低占用运行的、无需 GUI 界面的 NTQQ。
 
+项目的 [v2](https://github.com/NapNeko/NapCatQQ/tree/v2) 重构正在进行中，敬请关注。
+
 ## 如何使用
 
 可前往 [Release](https://github.com/NapNeko/NapCatQQ/releases/) 页面下载最新版本
 
 **首次使用** 请务必前往 [官方文档](https://napneko.github.io/) 查看使用文档与教程
-
 
 ## 项目声明
 
