@@ -39,7 +39,7 @@ export class NapCatCore {
         msg.onRecvMsg = (msg) => {
             console.log("RecvMsg", msg);
         }
-        await sleep(2500);
+        //await sleep(2500);
         this.context.session.getMsgService().addKernelMsgListener(
             new this.context.wrapper.NodeIKernelMsgListener(proxiedListenerOf(msg, this.context.logger))
         );
