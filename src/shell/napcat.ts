@@ -1,38 +1,42 @@
-import type { WrapperNodeApi, NodeIQQNTWrapperEngine, NodeQQNTWrapperUtil, NodeIQQNTWrapperSession } from "@/core/wrapper/wrapper";
-import type { NodeIKernelLoginService } from "@/core/services";
-import type { NapCatCore } from "@/core";
-import type { SelfInfo } from "@/core/entities";
+import type { SelfInfo } from '@/core/entities';
 
-import { LogWrapper } from "@/common/utils/log";
-import { LoginListener, SessionListener } from "@/core/listeners";
-import { DependsAdapter, DispatcherAdapter, GlobalAdapter } from "@/core/adapters";
-import { NapCatPathWrapper } from "@/common/framework/napcat";
-import { NapCatCoreWorkingEnv, loadQQWrapper } from "@/core";
-import { QQBasicInfoWrapper } from "@/common/utils/QQBasicInfo";
-import { hostname, systemVersion } from "@/common/utils/system";
-import { genSessionConfig } from "@/core/wrapper/helper";
-import { proxiedListenerOf } from "@/common/utils/proxy-handler";
+import { LogWrapper } from '@/common/utils/log';
+import { LoginListener, SessionListener } from '@/core/listeners';
+import { DependsAdapter, DispatcherAdapter, GlobalAdapter } from '@/core/adapters';
+import { NapCatPathWrapper } from '@/common/framework/napcat';
+import {
+    NapCatCoreWorkingEnv,
+    loadQQWrapper,
+    NapCatCore,
+    InstanceContext,
+    WrapperNodeApi,
+    NodeIQQNTWrapperSession
+} from '@/core';
+import { QQBasicInfoWrapper } from '@/common/utils/QQBasicInfo';
+import { hostname, systemVersion } from '@/common/utils/system';
+import { genSessionConfig } from '@/core/wrapper/helper';
+import { proxiedListenerOf } from '@/common/utils/proxy-handler';
 
-import path from "path";
-import fs from "fs";
-import os from "os";
-
-
+import path from 'path';
+import fs from 'fs';
+import os from 'os';
+import { NodeIKernelLoginService } from '@/core/services';
+import { NapCatOneBot11Adapter } from '@/onebot';
 
 // NapCat Shell App ES 入口文件
 export async function NCoreInitShell() {
-    console.log("NapCat Shell App Loading...");
+    console.log('NapCat Shell App Loading...');
 
-    let pathWrapper = new NapCatPathWrapper();
-    let logger = new LogWrapper(pathWrapper.logsPath);
-    let basicInfoWrapper = new QQBasicInfoWrapper({ logger });
-    let wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
+    const pathWrapper = new NapCatPathWrapper();
+    const logger = new LogWrapper(pathWrapper.logsPath);
+    const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
+    const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
 
     // from constructor
-    let engine = new wrapper.NodeIQQNTWrapperEngine();
-    let util = new wrapper.NodeQQNTWrapperUtil();
-    let loginService = new wrapper.NodeIKernelLoginService();
-    let session = new wrapper.NodeIQQNTWrapperSession();
+    const engine = new wrapper.NodeIQQNTWrapperEngine();
+    const util = new wrapper.NodeQQNTWrapperUtil();
+    const loginService = new wrapper.NodeIKernelLoginService();
+    const session = new wrapper.NodeIQQNTWrapperSession();
 
     // from get dataPath
     let dataPath = util.getNTUserDataInfoConfig();
@@ -40,7 +44,7 @@ export async function NCoreInitShell() {
         dataPath = path.resolve(os.homedir(), './.config/QQ');
         fs.mkdirSync(dataPath, { recursive: true });
     }
-    let dataPathGlobal = path.resolve(dataPath, './nt_qq/global');
+    const dataPathGlobal = path.resolve(dataPath, './nt_qq/global');
 
     // from initConfig
     engine.initWithDeskTopConfig(
@@ -68,12 +72,14 @@ export async function NCoreInitShell() {
         hostName: hostname
     });
 
-    let selfInfo = await new Promise<SelfInfo>((resolve) => {
-        let loginListener = new LoginListener();
+    console.log(wrapper);
+
+    const selfInfo = await new Promise<SelfInfo>((resolve) => {
+        const loginListener = new LoginListener();
 
         // from constructor
         loginListener.onUserLoggedIn = (userid: string) => {
-            logger.logError('当前账号(' + userid + ')已登录,无法重复登录');
+            logger.logError(`当前账号(${userid})已登录,无法重复登录`);
         };
 
         loginListener.onQRCodeLoginSucceed = async (loginResult) => resolve({
@@ -116,7 +122,42 @@ export async function NCoreInitShell() {
     const accountDataPath = path.resolve(dataPath, './NapCat/data');
     fs.mkdirSync(dataPath, { recursive: true });
     logger.logDebug('本账号数据/缓存目录：', accountDataPath);
+
+    new NapCatShell(
+        wrapper,
+        session,
+        logger,
+        loginService,
+        selfInfo,
+        basicInfoWrapper
+    );
 }
 
 export class NapCatShell {
+    readonly core: NapCatCore;
+    readonly context: InstanceContext;
+
+    constructor(
+        wrapper: WrapperNodeApi,
+        session: NodeIQQNTWrapperSession,
+        logger: LogWrapper,
+        loginService: NodeIKernelLoginService,
+        selfInfo: SelfInfo,
+        basicInfoWrapper: QQBasicInfoWrapper,
+    ) {
+        this.context = {
+            workingEnv: NapCatCoreWorkingEnv.Shell,
+            wrapper,
+            session,
+            logger,
+            loginService,
+            selfInfo,
+            basicInfoWrapper
+        };
+        this.core = new NapCatCore(this.context);
+
+        new NapCatOneBot11Adapter(this.core, this.context);
+    }
 }
+
+NCoreInitShell();
