@@ -1,347 +1,361 @@
-import path from 'node:path';
-import fs from 'node:fs';
+import path from "node:path";
+import fs from "node:fs";
+import { NodeIDependsAdapter, NodeIDispatcherAdapter, NodeIGlobalAdapter } from "../adapters";
 import {
-  NodeIDependsAdapter,
-  NodeIDispatcherAdapter,
-  NodeIGlobalAdapter,
-} from '../adapters';
+    NodeIKernelSessionListener,
+    NodeIKernelMsgListener,
+    NodeIKernelLoginListener,
+    NodeIKernelBuddyListener,
+    NodeIKernelGroupListener,
+    NodeIKernelProfileListener,
+} from "../listeners";
 import {
-  NodeIKernelSessionListener,
-  NodeIKernelMsgListener,
-  NodeIKernelLoginListener,
-  NodeIKernelBuddyListener,
-  NodeIKernelGroupListener,
-  NodeIKernelProfileListener,
-} from '../listeners';
-import {
-  NodeIKernelLoginService,
-  NodeIKernelMsgService,
-  NodeIKernelBuddyService,
-  NodeIKernelGroupService,
-  NodeIKernelProfileService,
-  NodeIKernelProfileLikeService,
-  NodeIKernelTicketService,
-  NodeIKernelTipOffService,
-  NodeIKernelRichMediaService,
-  NodeIKernelAvatarService,
-} from '../services';
-import { NodeIKernelStorageCleanService } from '../services/NodeIKernelStorageCleanService';
-import { NodeIKernelRobotService } from '../services/NodeIKernelRobotService';
-import { NodeIKernelNodeMiscService } from '../services/NodeIKernelNodeMiscService';
-import { NodeIKernelUixConvertService } from '../services/NodeIKernelUixConvertService';
-import { NodeIKernelMsgBackupService } from '../services/NodeIKernelMsgBackupService';
-import { NodeIKernelAlbumService } from '../services/NodeIKernelAlbumService';
-import { NodeIKernelTianShuService } from '../services/NodeIKernelTianShuService';
-import { NodeIKernelUnitedConfigService } from '../services/NodeIKernelUnitedConfigService';
-import { NodeIKernelSearchService } from '../services/NodeIKernelSearchService';
-import { NodeIKernelCollectionService } from '../services/NodeIKernelCollectionService';
-import { NodeIKernelRecentContactService } from '../services/NodeIKernelRecentContactService';
-import { NodeIKernelMSFService } from '../services/NodeIKernelMSFService';
-import { NodeIkernelTestPerformanceService } from '../services/NodeIkernelTestPerformanceService';
-import { NodeIKernelECDHService } from '../services/NodeIKernelECDHService';
+    NodeIKernelLoginService,
+    NodeIKernelMsgService,
+    NodeIKernelBuddyService,
+    NodeIKernelGroupService,
+    NodeIKernelProfileService,
+    NodeIKernelProfileLikeService,
+    NodeIKernelTicketService,
+    NodeIKernelTipOffService,
+    NodeIKernelRichMediaService,
+    NodeIKernelAvatarService,
+} from "../services";
+import { NodeIKernelStorageCleanService } from "../services/NodeIKernelStorageCleanService";
+import { NodeIKernelRobotService } from "../services/NodeIKernelRobotService";
+import { NodeIKernelNodeMiscService } from "../services/NodeIKernelNodeMiscService";
+import { NodeIKernelUixConvertService } from "../services/NodeIKernelUixConvertService";
+import { NodeIKernelMsgBackupService } from "../services/NodeIKernelMsgBackupService";
+import { NodeIKernelAlbumService } from "../services/NodeIKernelAlbumService";
+import { NodeIKernelTianShuService } from "../services/NodeIKernelTianShuService";
+import { NodeIKernelUnitedConfigService } from "../services/NodeIKernelUnitedConfigService";
+import { NodeIKernelSearchService } from "../services/NodeIKernelSearchService";
+import { NodeIKernelCollectionService } from "../services/NodeIKernelCollectionService";
+import { NodeIKernelRecentContactService } from "../services/NodeIKernelRecentContactService";
+import { NodeIKernelMSFService } from "../services/NodeIKernelMSFService";
+import { NodeIkernelTestPerformanceService } from "../services/NodeIkernelTestPerformanceService";
+import { NodeIKernelECDHService } from "../services/NodeIKernelECDHService";
 export interface NodeQQNTWrapperUtil {
-  // eslint-disable-next-line @typescript-eslint/no-misused-new
-  new(): NodeQQNTWrapperUtil
+    // eslint-disable-next-line @typescript-eslint/no-misused-new
+    new (): NodeQQNTWrapperUtil;
 
-  getNTUserDataInfoConfig(): string
+    getNTUserDataInfoConfig(): string;
 
-  emptyWorkingSet(n: number): void
+    emptyWorkingSet(n: number): void;
 
-  getSsoCmdOfOidbReq(arg1: number, arg2: number): unknown,
+    getSsoCmdOfOidbReq(arg1: number, arg2: number): unknown;
 
-  getSsoBufferOfOidbReq(...args: unknown[]): unknown,//有点看不懂参数定义 待补充 好像是三个参数
+    getSsoBufferOfOidbReq(...args: unknown[]): unknown; //有点看不懂参数定义 待补充 好像是三个参数
 
-  getOidbRspInfo(arg: string): unknown,//可能是错的
+    getOidbRspInfo(arg: string): unknown; //可能是错的
 
-  getFileSize(path: string): Promise<number>,//直接的猜测
+    getFileSize(path: string): Promise<number>; //直接的猜测
 
-  genFileMd5Buf(arg: string): unknown,//可能是错的
+    genFileMd5Buf(arg: string): unknown; //可能是错的
 
-  genFileMd5Hex(path: string): unknown,//直接的猜测
+    genFileMd5Hex(path: string): unknown; //直接的猜测
 
-  genFileShaBuf(path: string): unknown,//直接的猜测
+    genFileShaBuf(path: string): unknown; //直接的猜测
 
-  genFileCumulateSha1(path: string): unknown,//直接的猜测
+    genFileCumulateSha1(path: string): unknown; //直接的猜测
 
-  genFileShaHex(path: string): unknown,//直接的猜测
+    genFileShaHex(path: string): unknown; //直接的猜测
 
-  fileIsExist(path: string): unknown,
+    fileIsExist(path: string): unknown;
 
-  startTrace(path: string): unknown,//可能是错的
+    startTrace(path: string): unknown; //可能是错的
 
-  copyFile(src: string, dst: string): unknown,
+    copyFile(src: string, dst: string): unknown;
 
-  genFileShaAndMd5Hex(path: string, unknown: number): unknown,//可能是错的
+    genFileShaAndMd5Hex(path: string, unknown: number): unknown; //可能是错的
 
-  setTraceInfo(unknown: Object): unknown,
+    setTraceInfo(unknown: Object): unknown;
 
-  encodeOffLine(unknown: Object): unknown,
+    encodeOffLine(unknown: Object): unknown;
 
-  decodeOffLine(arg: string): unknown,//可能是错的 传递hex
+    decodeOffLine(arg: string): unknown; //可能是错的 传递hex
 
-  DecoderRecentInfo(arg: string): unknown,//可能是错的 传递hex
+    DecoderRecentInfo(arg: string): unknown; //可能是错的 传递hex
 
-  getPinyin(arg0: string, arg1: boolean): unknown,
+    getPinyin(arg0: string, arg1: boolean): unknown;
 
-  matchInPinyin(arg0: any[], arg1: string): unknown,//参数特复杂 arg0是个复杂数据类型
+    matchInPinyin(arg0: any[], arg1: string): unknown; //参数特复杂 arg0是个复杂数据类型
 
-  makeDirByPath(arg0: string): unknown,
+    makeDirByPath(arg0: string): unknown;
 
-  emptyWorkingSet(arg0: number): unknown,//参数是UINT32
+    emptyWorkingSet(arg0: number): unknown; //参数是UINT32
 
-  runProcess(arg0: string, arg1: boolean): unknown,
+    runProcess(arg0: string, arg1: boolean): unknown;
 
-  runProcessArgs(arg0: string, arg1: { [key: string]: string; }, arg2: boolean): unknown,
+    runProcessArgs(arg0: string, arg1: { [key: string]: string }, arg2: boolean): unknown;
 
-  calcThumbSize(arg0: number, arg1: number, arg2: Object): unknown,
+    calcThumbSize(arg0: number, arg1: number, arg2: Object): unknown;
 
-  fullWordToHalfWord(arg0: string): unknown,
+    fullWordToHalfWord(arg0: string): unknown;
 
-  getNTUserDataInfoConfig(): unknown,
+    getNTUserDataInfoConfig(): unknown;
 
-  pathIsReadableAndWriteable(path: string): unknown,//直接的猜测
+    pathIsReadableAndWriteable(path: string): unknown; //直接的猜测
 
-  resetUserDataSavePathToDocument(): unknown,
+    resetUserDataSavePathToDocument(): unknown;
 
-  getSoBuildInfo(): any,//例如 0[0]_d491dc01e0a_0
+    getSoBuildInfo(): any; //例如 0[0]_d491dc01e0a_0
 
-  registerCountInstruments(arg0: string, arg1: string[], arg2: number, arg3: number): unknown,
+    registerCountInstruments(arg0: string, arg1: string[], arg2: number, arg3: number): unknown;
 
-  registerValueInstruments(arg0: string, arg1: string[], arg2: number, arg3: number): unknown,
+    registerValueInstruments(arg0: string, arg1: string[], arg2: number, arg3: number): unknown;
 
-  registerValueInstrumentsWithBoundary(arg0: string, arg1: unknown, arg2: unknown, arg3: number, arg4: number): unknown,
+    registerValueInstrumentsWithBoundary(
+        arg0: string,
+        arg1: unknown,
+        arg2: unknown,
+        arg3: number,
+        arg4: number
+    ): unknown;
 
-  reportCountIndicators(arg0: string, arg1: Map<unknown, unknown>, arg2: string, arg3: number, arg4: boolean): unknown,
+    reportCountIndicators(
+        arg0: string,
+        arg1: Map<unknown, unknown>,
+        arg2: string,
+        arg3: number,
+        arg4: boolean
+    ): unknown;
 
-  reportValueIndicators(arg0: string, arg1: Map<unknown, unknown>, arg2: string, arg3: boolean, arg4: number): unknown,
+    reportValueIndicators(
+        arg0: string,
+        arg1: Map<unknown, unknown>,
+        arg2: string,
+        arg3: boolean,
+        arg4: number
+    ): unknown;
 
-  checkNewUserDataSaveDirAvailable(arg0: string): unknown,
+    checkNewUserDataSaveDirAvailable(arg0: string): unknown;
 
-  copyUserData(arg0: string, arg1: string): Promise<any>,
+    copyUserData(arg0: string, arg1: string): Promise<any>;
 
-  setUserDataSaveDirectory(arg0: string): Promise<any>,
+    setUserDataSaveDirectory(arg0: string): Promise<any>;
 
-  hasOtherRunningQQProcess(): boolean,
+    hasOtherRunningQQProcess(): boolean;
 
-  quitAllRunningQQProcess(arg: boolean): unknown,
+    quitAllRunningQQProcess(arg: boolean): unknown;
 
-  checkNvidiaConfig(): unknown,
+    checkNvidiaConfig(): unknown;
 
-  repairNvidiaConfig(): unknown,
+    repairNvidiaConfig(): unknown;
 
-  getNvidiaDriverVersion(): unknown,
+    getNvidiaDriverVersion(): unknown;
 
-  isNull(): unknown
+    isNull(): unknown;
 }
 
 export interface NodeIQQNTWrapperSession {
-  // eslint-disable-next-line @typescript-eslint/no-misused-new
-  new(): NodeIQQNTWrapperSession;
+    // eslint-disable-next-line @typescript-eslint/no-misused-new
+    new (): NodeIQQNTWrapperSession;
 
-  init(
-    wrapperSessionInitConfig: WrapperSessionInitConfig,
-    nodeIDependsAdapter: NodeIDependsAdapter,
-    nodeIDispatcherAdapter: NodeIDispatcherAdapter,
-    nodeIKernelSessionListener: NodeIKernelSessionListener
-  ): void;
+    init(
+        wrapperSessionInitConfig: WrapperSessionInitConfig,
+        nodeIDependsAdapter: NodeIDependsAdapter,
+        nodeIDispatcherAdapter: NodeIDispatcherAdapter,
+        nodeIKernelSessionListener: NodeIKernelSessionListener
+    ): void;
 
-  startNT(n: 0): void;
+    startNT(n: 0): void;
 
-  startNT(): void;
+    startNT(): void;
 
-  getBdhUploadService(): unknown;
-  
-  getECDHService(): NodeIKernelECDHService;
+    getBdhUploadService(): unknown;
 
-  getMsgService(): NodeIKernelMsgService;
+    getECDHService(): NodeIKernelECDHService;
 
-  getProfileService(): NodeIKernelProfileService;
+    getMsgService(): NodeIKernelMsgService;
 
-  getProfileLikeService(): NodeIKernelProfileLikeService;
+    getProfileService(): NodeIKernelProfileService;
 
-  getGroupService(): NodeIKernelGroupService;
+    getProfileLikeService(): NodeIKernelProfileLikeService;
 
-  getStorageCleanService(): NodeIKernelStorageCleanService;
+    getGroupService(): NodeIKernelGroupService;
 
-  getBuddyService(): NodeIKernelBuddyService;
+    getStorageCleanService(): NodeIKernelStorageCleanService;
 
-  getRobotService(): NodeIKernelRobotService;
+    getBuddyService(): NodeIKernelBuddyService;
 
-  getTicketService(): NodeIKernelTicketService;
+    getRobotService(): NodeIKernelRobotService;
 
-  getTipOffService(): NodeIKernelTipOffService;
+    getTicketService(): NodeIKernelTicketService;
 
-  getNodeMiscService(): NodeIKernelNodeMiscService;
+    getTipOffService(): NodeIKernelTipOffService;
 
-  getRichMediaService(): NodeIKernelRichMediaService;
+    getNodeMiscService(): NodeIKernelNodeMiscService;
 
-  getMsgBackupService(): NodeIKernelMsgBackupService;
+    getRichMediaService(): NodeIKernelRichMediaService;
 
-  getAlbumService(): NodeIKernelAlbumService;
+    getMsgBackupService(): NodeIKernelMsgBackupService;
 
-  getTianShuService(): NodeIKernelTianShuService;
+    getAlbumService(): NodeIKernelAlbumService;
 
-  getUnitedConfigService(): NodeIKernelUnitedConfigService;
+    getTianShuService(): NodeIKernelTianShuService;
 
-  getSearchService(): NodeIKernelSearchService;
+    getUnitedConfigService(): NodeIKernelUnitedConfigService;
 
-  getDirectSessionService(): unknown;
+    getSearchService(): NodeIKernelSearchService;
 
-  getRDeliveryService(): unknown;
+    getDirectSessionService(): unknown;
 
-  getAvatarService(): NodeIKernelAvatarService;
+    getRDeliveryService(): unknown;
 
-  getFeedChannelService(): unknown;
+    getAvatarService(): NodeIKernelAvatarService;
 
-  getYellowFaceService(): unknown;
+    getFeedChannelService(): unknown;
 
-  getCollectionService(): NodeIKernelCollectionService;
+    getYellowFaceService(): unknown;
 
-  getSettingService(): unknown;
+    getCollectionService(): NodeIKernelCollectionService;
 
-  getQiDianService(): unknown;
+    getSettingService(): unknown;
 
-  getFileAssistantService(): unknown;
+    getQiDianService(): unknown;
 
-  getGuildService(): unknown;
+    getFileAssistantService(): unknown;
 
-  getSkinService(): unknown;
+    getGuildService(): unknown;
 
-  getTestPerformanceService(): NodeIkernelTestPerformanceService;
+    getSkinService(): unknown;
 
-  getQQPlayService(): unknown;
+    getTestPerformanceService(): NodeIkernelTestPerformanceService;
 
-  getDbToolsService(): unknown;
+    getQQPlayService(): unknown;
 
-  getUixConvertService(): NodeIKernelUixConvertService;
+    getDbToolsService(): unknown;
 
-  getOnlineStatusService(): unknown;
+    getUixConvertService(): NodeIKernelUixConvertService;
 
-  getRemotingService(): unknown;
+    getOnlineStatusService(): unknown;
 
-  getGroupTabService(): unknown;
+    getRemotingService(): unknown;
 
-  getGroupSchoolService(): unknown;
+    getGroupTabService(): unknown;
 
-  getLiteBusinessService(): unknown;
+    getGroupSchoolService(): unknown;
 
-  getGuildMsgService(): unknown;
+    getLiteBusinessService(): unknown;
 
-  getLockService(): unknown;
+    getGuildMsgService(): unknown;
 
-  getMSFService(): NodeIKernelMSFService;
+    getLockService(): unknown;
 
-  getGuildHotUpdateService(): unknown;
+    getMSFService(): NodeIKernelMSFService;
 
-  getAVSDKService(): unknown;
+    getGuildHotUpdateService(): unknown;
 
-  getRecentContactService(): NodeIKernelRecentContactService;
+    getAVSDKService(): unknown;
 
-  getConfigMgrService(): unknown;
+    getRecentContactService(): NodeIKernelRecentContactService;
+
+    getConfigMgrService(): unknown;
 }
 
 export interface EnginInitDesktopConfig {
-  base_path_prefix: string,
-  platform_type: 3,
-  app_type: 4,
-  app_version: string,
-  os_version: string,
-  use_xlog: true,
-  qua: string,
-  global_path_config: {
-    desktopGlobalPath: string,
-  },
-  thumb_config: { maxSide: 324, minSide: 48, longLimit: 6, density: 2 }
+    base_path_prefix: string;
+    platform_type: 3;
+    app_type: 4;
+    app_version: string;
+    os_version: string;
+    use_xlog: true;
+    qua: string;
+    global_path_config: {
+        desktopGlobalPath: string;
+    };
+    thumb_config: { maxSide: 324; minSide: 48; longLimit: 6; density: 2 };
 }
 
 export interface NodeIQQNTWrapperEngine {
-  // eslint-disable-next-line @typescript-eslint/no-misused-new
-  new(): NodeIQQNTWrapperEngine;
-  initWithDeskTopConfig(config: EnginInitDesktopConfig, nodeIGlobalAdapter: NodeIGlobalAdapter): void;
+    // eslint-disable-next-line @typescript-eslint/no-misused-new
+    new (): NodeIQQNTWrapperEngine;
+    initWithDeskTopConfig(config: EnginInitDesktopConfig, nodeIGlobalAdapter: NodeIGlobalAdapter): void;
 }
 
 export interface WrapperNodeApi {
-  [key: string]: any;
+    [key: string]: any;
 
-  NodeIKernelBuddyListener: NodeIKernelBuddyListener;
-  NodeIKernelGroupListener: NodeIKernelGroupListener;
-  NodeQQNTWrapperUtil: NodeQQNTWrapperUtil;
-  NodeIQQNTWrapperSession: NodeIQQNTWrapperSession;
-  NodeIKernelMsgListener: NodeIKernelMsgListener;
-  NodeIQQNTWrapperEngine: NodeIQQNTWrapperEngine;
-  NodeIGlobalAdapter: NodeIGlobalAdapter;
-  NodeIDependsAdapter: NodeIDependsAdapter;
-  NodeIDispatcherAdapter: NodeIDispatcherAdapter;
-  NodeIKernelSessionListener: NodeIKernelSessionListener;
-  NodeIKernelLoginService: NodeIKernelLoginService;
-  NodeIKernelLoginListener: NodeIKernelLoginListener;
-  NodeIKernelProfileService: NodeIKernelProfileService;
-  NodeIKernelProfileListener: NodeIKernelProfileListener;
+    NodeIKernelBuddyListener: NodeIKernelBuddyListener;
+    NodeIKernelGroupListener: NodeIKernelGroupListener;
+    NodeQQNTWrapperUtil: NodeQQNTWrapperUtil;
+    NodeIQQNTWrapperSession: NodeIQQNTWrapperSession;
+    NodeIKernelMsgListener: NodeIKernelMsgListener;
+    NodeIQQNTWrapperEngine: NodeIQQNTWrapperEngine;
+    NodeIGlobalAdapter: NodeIGlobalAdapter;
+    NodeIDependsAdapter: NodeIDependsAdapter;
+    NodeIDispatcherAdapter: NodeIDispatcherAdapter;
+    NodeIKernelSessionListener: NodeIKernelSessionListener;
+    NodeIKernelLoginService: NodeIKernelLoginService;
+    NodeIKernelLoginListener: NodeIKernelLoginListener;
+    NodeIKernelProfileService: NodeIKernelProfileService;
+    NodeIKernelProfileListener: NodeIKernelProfileListener;
 }
 export enum PlatformType {
-  KUNKNOWN,
-  KANDROID,
-  KIOS,
-  KWINDOWS,
-  KMAC
+    KUNKNOWN,
+    KANDROID,
+    KIOS,
+    KWINDOWS,
+    KMAC,
 }
 export enum DeviceType {
-  KUNKNOWN,
-  KPHONE,
-  KPAD,
-  KCOMPUTER
+    KUNKNOWN,
+    KPHONE,
+    KPAD,
+    KCOMPUTER,
 }
 //推送类型
 export enum VendorType {
-  KNOSETONIOS = 0,
-  KSUPPORTGOOGLEPUSH = 99,
-  KSUPPORTHMS = 3,
-  KSUPPORTOPPOPUSH = 4,
-  KSUPPORTTPNS = 2,
-  KSUPPORTVIVOPUSH = 5,
-  KUNSUPPORTANDROIDPUSH = 1
+    KNOSETONIOS = 0,
+    KSUPPORTGOOGLEPUSH = 99,
+    KSUPPORTHMS = 3,
+    KSUPPORTOPPOPUSH = 4,
+    KSUPPORTTPNS = 2,
+    KSUPPORTVIVOPUSH = 5,
+    KUNSUPPORTANDROIDPUSH = 1,
 }
 export interface WrapperSessionInitConfig {
-  selfUin: string
-  selfUid: string
-  desktopPathConfig: {
-    account_path: string // 可以通过NodeQQNTWrapperUtil().getNTUserDataInfoConfig()获取
-  }
-  clientVer: string  // 9.9.8-22355
-  a2: string,
-  d2: string,
-  d2Key: string,
-  machineId: string,
-  platform: PlatformType,  // 3是Windows?
-  platVer: string,  // 系统版本号, 应该可以固定
-  appid: string,
-  rdeliveryConfig: {
-    appKey: string,
-    systemId: number,
-    appId: string,
-    logicEnvironment: string,
-    platform: PlatformType,
-    language: string,
-    sdkVersion: string,
-    userId: string,
-    appVersion: string,
-    osVersion: string,
-    bundleId: string,
-    serverUrl: string,
-    fixedAfterHitKeys: string[]
-  }
-  defaultFileDownloadPath: string, // 这个可以通过环境变量获取？
-  deviceInfo: {
-    guid: string,
-    buildVer: string,
-    localId: number,
-    devName: string,
-    devType: string,
-    vendorName: string,
-    osVer: string,
-    vendorOsName: string,
-    setMute: boolean,
-    vendorType: VendorType
-  },
-  deviceConfig: '{"appearance":{"isSplitViewMode":true},"msg":{}}'
+    selfUin: string;
+    selfUid: string;
+    desktopPathConfig: {
+        account_path: string; // 可以通过NodeQQNTWrapperUtil().getNTUserDataInfoConfig()获取
+    };
+    clientVer: string; // 9.9.8-22355
+    a2: string;
+    d2: string;
+    d2Key: string;
+    machineId: string;
+    platform: PlatformType; // 3是Windows?
+    platVer: string; // 系统版本号, 应该可以固定
+    appid: string;
+    rdeliveryConfig: {
+        appKey: string;
+        systemId: number;
+        appId: string;
+        logicEnvironment: string;
+        platform: PlatformType;
+        language: string;
+        sdkVersion: string;
+        userId: string;
+        appVersion: string;
+        osVersion: string;
+        bundleId: string;
+        serverUrl: string;
+        fixedAfterHitKeys: string[];
+    };
+    defaultFileDownloadPath: string; // 这个可以通过环境变量获取？
+    deviceInfo: {
+        guid: string;
+        buildVer: string;
+        localId: number;
+        devName: string;
+        devType: string;
+        vendorName: string;
+        osVer: string;
+        vendorOsName: string;
+        setMute: boolean;
+        vendorType: VendorType;
+    };
+    deviceConfig: '{"appearance":{"isSplitViewMode":true},"msg":{}}';
 }

@@ -65,7 +65,6 @@ async function getMacMachineId(): Promise<string | undefined> {
 
 const homeDir = os.homedir();
 
-
 export const systemPlatform = os.platform();
 export const cpuArch = os.arch();
 export const systemVersion = os.release();
