@@ -65,7 +65,7 @@ const ShellBaseConfig = () => defineConfig({
   resolve: {
     conditions: ['node', 'default'],
     alias: {
-      '@/core': resolve(__dirname, './src/core/src'),
+      '@/core': resolve(__dirname, './src/core'),
       '@': resolve(__dirname, './src'),
       './lib-cov/fluent-ffmpeg': './lib/fluent-ffmpeg',
     },
@@ -89,7 +89,7 @@ const LLBaseConfig = () => defineConfig({
   resolve: {
     conditions: ['node', 'default'],
     alias: {
-      '@/core': resolve(__dirname, './src/core/src'),
+      '@/core': resolve(__dirname, './src/core'),
       '@': resolve(__dirname, './src'),
       './lib-cov/fluent-ffmpeg': './lib/fluent-ffmpeg',
     },
