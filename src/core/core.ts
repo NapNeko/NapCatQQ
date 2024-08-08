@@ -1,3 +1,5 @@
+import { NodeIQQNTWrapperSession } from "./wrapper/wrapper";
+
 export enum NCoreWorkMode {
     Unknown = 0,
     Shell = 1,
@@ -6,6 +8,10 @@ export enum NCoreWorkMode {
 export class NapCatCore {
     public WorkMode: NCoreWorkMode = NCoreWorkMode.Unknown;
     public isInit: boolean = false;
+    public session: NodeIQQNTWrapperSession | undefined;
+    get IsInit(): boolean {
+        return this.isInit;
+    }
 }
 export class NapCatShell extends NapCatCore {
     public WorkMode: NCoreWorkMode = NCoreWorkMode.Shell;
