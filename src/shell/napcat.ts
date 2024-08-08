@@ -1,26 +1,49 @@
-import { NapCatPathWrapper } from "@/common/framework/napcat";
+import type { WrapperNodeApi, NodeIQQNTWrapperEngine, NodeQQNTWrapperUtil, NodeIQQNTWrapperSession } from "@/core/wrapper/wrapper";
+import type { NodeIKernelLoginService } from "@/core/services";
+import type { NapCatCore } from "@/core";
+import type { SelfInfo } from "@/core/entities";
+
 import { LogWrapper } from "@/common/utils/log";
+import { LoginListener, SessionListener } from "@/core/listeners";
+import { DependsAdapter, DispatcherAdapter, GlobalAdapter } from "@/core/adapters";
+import { NapCatPathWrapper } from "@/common/framework/napcat";
+import { NapCatCoreWorkingEnv, loadQQWrapper } from "@/core";
 import { QQBasicInfoWrapper } from "@/common/utils/QQBasicInfo";
 import { hostname, systemVersion } from "@/common/utils/system";
-import { DependsAdapter, DispatcherAdapter, GlobalAdapter } from "@/core/adapters";
-import { NapCatCoreWorkingEnv, NapCatCore, loadQQWrapper } from "@/core/core";
-import { LoginListener, SessionListener } from "@/core/listeners";
-import { NodeIKernelLoginService } from "@/core/services";
-import { WrapperNodeApi, NodeIQQNTWrapperEngine, NodeQQNTWrapperUtil, NodeIQQNTWrapperSession } from "@/core/wrapper/wrapper";
+import { genSessionConfig } from "@/core/wrapper/helper";
+import { proxiedListenerOf } from "@/common/utils/proxy-handler";
+
 import path from "path";
 import fs from "fs";
 import os from "os";
-import { genSessionConfig } from "@/core/wrapper/helper";
-import { selfInfo } from "@/core/wrapper/data";
+
+
 
 // NapCat Shell App ES 入口文件
 export async function NCoreInitShell() {
     console.log("NapCat Shell App Loading...");
-    let Basicframework = new NapCatPathWrapper();
-    let logger = new LogWrapper(Basicframework.logsPath);
-    let BasicInfo = new QQBasicInfoWrapper({ logger });
-    new NapCatShell(logger, BasicInfo);
+
+    let pathWrapper = new NapCatPathWrapper();
+    let logger = new LogWrapper(pathWrapper.logsPath);
+    let basicInfoWrapper = new QQBasicInfoWrapper({ logger });
+    let wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
+
+    let selfInfo = await new Promise<SelfInfo>((resolve) => {
+        let loginListener = new LoginListener();
+        loginListener.onQRCodeLoginSucceed = async (loginResult) => resolve({
+            uid: loginResult.uid,
+            uin: loginResult.uin,
+            nick: '', // 获取不到
+            online: true
+        });
+        loginService.addKernelLoginListener();
+
+    let ShellNapCat = new NapCatShell(logger, BasicInfo);
+    ShellNapCat.loginService.addKernelLoginListener(new wrapper.NodeIKernelLoginListener(
+        proxiedListenerOf(loginListener, logger)));
+})
 }
+
 export class NapCatShell {
     public QQWrapper: WrapperNodeApi;
     public WorkMode: NapCatCoreWorkingEnv = NapCatCoreWorkingEnv.Shell;
@@ -43,6 +66,7 @@ export class NapCatShell {
     get dataPathGlobal(): string {
         return path.resolve(this.dataPath, './nt_qq/global');
     }
+
     private initSession(BasicInfo: QQBasicInfoWrapper, uin: string, uid: string): Promise<number> {
         return new Promise(async (res, rej) => {
             if (!BasicInfo.QQVersionAppid) throw new Error("QQVersionAppid must be provided");
@@ -54,11 +78,6 @@ export class NapCatShell {
                 }
                 rej(r);
             };
-            // const oldOnSendOidbRepl = this.session.onSendOidbRepl;
-            // this.session.onSendOidbRepl = (...args: unknown[]) => {
-            //   console.log('onSendOidbRepl', args);
-            //   return oldOnSendOidbRepl(...args);
-            // };
             this.session.init(sessionConfig,
                 new this.QQWrapper.NodeIDependsAdapter(new DependsAdapter()),
                 new this.QQWrapper.NodeIDispatcherAdapter(new DispatcherAdapter()),

@@ -1,9 +1,8 @@
-import { LogWrapper } from "@/common/utils/log";
-import { NodeIQQNTWrapperSession, WrapperNodeApi } from "./wrapper/wrapper";
+import { WrapperNodeApi } from "./wrapper/wrapper";
 import path from "node:path";
 import fs from "node:fs";
-import { NodeIKernelLoginService } from "./services";
-import { SelfInfo } from "./entities";
+import { InstanceContext } from "./wrapper";
+import { NTEventChannel } from "@/common/framework/event";
 
 export enum NapCatCoreWorkingEnv {
     Unknown = 0,
@@ -21,22 +20,13 @@ export function loadQQWrapper(QQVersion: string): WrapperNodeApi {
     return nativemodule.exports;
 }
 
-export interface InstanceContext {
-    readonly workingEnv: NapCatCoreWorkingEnv;
-    readonly core: NapCatCore;
-    readonly wrapper: WrapperNodeApi;
-    readonly session: NodeIQQNTWrapperSession;
-    readonly logger: LogWrapper;
-    readonly loginService: NodeIKernelLoginService;
-    readonly selfInfo: SelfInfo;
-    readonly QQVersion: string;
-}
-
 export class NapCatCore {
     readonly context: InstanceContext;
+    readonly eventChannel: NTEventChannel;
 
     constructor(context: InstanceContext) {
         this.context = context;
+        this.eventChannel = new NTEventChannel(context.wrapper, context.session);
     }
 
     // Renamed from 'InitDataListener'
