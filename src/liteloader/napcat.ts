@@ -5,6 +5,7 @@ import { LogWrapper } from "@/common/utils/log";
 import { proxiedListenerOf } from "@/common/utils/proxy-handler";
 import { QQBasicInfoWrapper } from "@/common/utils/QQBasicInfo";
 import { NapCatCoreWorkingEnv, loadQQWrapper } from "@/core/core";
+import { SelfInfo } from "@/core/entities";
 import { LoginListener } from "@/core/listeners";
 import { NodeIKernelLoginService } from "@/core/services";
 import { selfInfo } from "@/core/wrapper/data";
@@ -21,9 +22,14 @@ export async function NCoreInitLiteLoader(session: NodeIQQNTWrapperSession, logi
     let LLNC = new NapCatLiteLoader(logger, session, loginService, BasicInfo);
     
     //直到登录成功后，执行下一步
-    await new Promise<void>((resolve) => {
+    let selfInfo = await new Promise<SelfInfo>((resolve) => {
         let OBLoginListener = new LoginListener();
-        OBLoginListener.onQRCodeLoginSucceed = async (arg) => resolve();
+        OBLoginListener.onQRCodeLoginSucceed = async (loginResult) => resolve({
+            uid: loginResult.uid,
+            uin: loginResult.uin,
+            nick: '', // 获取不到
+            online: true
+        });
         loginService.addKernelLoginListener(new LLNC.wrapper.NodeIKernelLoginListener(proxiedListenerOf(OBLoginListener, logger)));
     });
     //启动WebUi

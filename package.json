@@ -4,17 +4,10 @@
   "type": "module",
   "version": "1.8.3",
   "scripts": {
-    "watch:dev": "vite --mode development",
-    "watch:prod": "vite --mode production",
-    "build:dev": "vite build --mode development",
-    "build:prod": "vite build --mode production",
-    "build": "npm run build:dev",
-    "build:core": "cd ./src/core && npm run build && cd ../.. && node ./script/copy-core.cjs",
+    "build:liteloader": "vite build --mode ",
+    "build:shell": "vite build --mode production",
     "build:webui": "cd ./src/webui && vite build",
-    "watch": "npm run watch:dev",
-    "debug-win": "powershell dist/napcat.ps1",
     "lint": "eslint --fix src/**/*.{js,ts}",
-    "release": "npm run build:prod",
     "depend": "cd dist && npm install --omit=dev"
   },
   "devDependencies": {

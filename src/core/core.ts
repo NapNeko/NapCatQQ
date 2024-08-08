@@ -3,6 +3,7 @@ import { NodeIQQNTWrapperSession, WrapperNodeApi } from "./wrapper/wrapper";
 import path from "node:path";
 import fs from "node:fs";
 import { NodeIKernelLoginService } from "./services";
+import { SelfInfo } from "./entities";
 
 export enum NapCatCoreWorkingEnv {
     Unknown = 0,
@@ -20,26 +21,22 @@ export function loadQQWrapper(QQVersion: string): WrapperNodeApi {
     return nativemodule.exports;
 }
 
-export class NapCatCore {
+export interface InstanceContext {
     readonly workingEnv: NapCatCoreWorkingEnv;
+    readonly core: NapCatCore;
     readonly wrapper: WrapperNodeApi;
     readonly session: NodeIQQNTWrapperSession;
     readonly logger: LogWrapper;
     readonly loginService: NodeIKernelLoginService;
+    readonly selfInfo: SelfInfo;
+    readonly QQVersion: string;
+}
 
-    constructor(
-        env: NapCatCoreWorkingEnv,
-        wrapper: WrapperNodeApi,
-        session: NodeIQQNTWrapperSession, 
-        logger: LogWrapper,
-        loginService: NodeIKernelLoginService,
-        QQVersion: string
-    ) {
-        this.workingEnv = env;
-        this.logger = logger;
-        this.wrapper = wrapper;
-        this.session = session;
-        this.loginService = loginService;
+export class NapCatCore {
+    readonly context: InstanceContext;
+
+    constructor(context: InstanceContext) {
+        this.context = context;
     }
 
     // Renamed from 'InitDataListener'
