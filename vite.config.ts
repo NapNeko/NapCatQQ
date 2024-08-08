@@ -48,8 +48,10 @@ const LLBaseConfigPlugin: PluginOption[] = [
       { src: './manifest.json', dest: 'dist' },
       { src: './src/liteloader/napcat.cjs', dest: 'dist' },
       { src: './src/liteloader/preload.cjs', dest: 'dist' },
-      { src: './src/liteloader/renderer.cjs', dest: 'dist' },
+      { src: './src/liteloader/renderer.js', dest: 'dist' },
+      { src: './package.json', dest: 'dist' },
       { src: './logo.png', dest: 'dist' },
+      //...external.map(genCpModule)
     ]
   }),
   nodeResolve(),
@@ -75,7 +77,7 @@ const ShellBaseConfigPlugin: PluginOption[] = [
       // { src: './src/napcat.json', dest: 'dist/config/' },
       // { src: './static/', dest: 'dist/static/', flatten: false },
       // { src: './src/onebot11/onebot11.json', dest: 'dist/config/' },
-      // { src: './package.json', dest: 'dist' },
+       { src: './package.json', dest: 'dist' },
       // { src: './README.md', dest: 'dist' },
       // { src: './logo.png', dest: 'dist/logs' },
       // ...(startScripts.map((startScript) => {
