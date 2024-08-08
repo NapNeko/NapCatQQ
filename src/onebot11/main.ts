@@ -228,7 +228,6 @@ export class NapCatOnebot11 {
       // 临时会话更新 tempGroupCodeMap uid -> source/GroupCode
     };
     msgListener.onRecvMsg = async (msg) => {
-
       //console.log('ob11 onRecvMsg', JSON.stringify(msg, null, 2));
       // logDebug('收到消息', msg);
       for (const m of msg) {
@@ -254,6 +253,7 @@ export class NapCatOnebot11 {
         // console.log(ret);
         new Promise((resolve) => {
           m.id = MessageUnique.createMsg({ chatType: m.chatType, peerUid: m.peerUid, guildId: '' }, m.msgId);
+          console.log("消息接收 ", "MsgID", m.msgId, " ID", m.id, " Raw", m?.elements[0]?.textElement?.content);
           this.postReceiveMsg([m]).then().catch(logError);
         }).then();
       }
