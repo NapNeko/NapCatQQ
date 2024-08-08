@@ -72,8 +72,6 @@ export async function NCoreInitShell() {
         hostName: hostname
     });
 
-    console.log(wrapper);
-
     const selfInfo = await new Promise<SelfInfo>((resolve) => {
         const loginListener = new LoginListener();
 
