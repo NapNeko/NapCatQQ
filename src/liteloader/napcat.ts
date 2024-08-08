@@ -1,14 +1,13 @@
 import { NTEventChannel } from "@/common/framework/event";
 import { NapCatPathWrapper } from "@/common/framework/napcat";
-import { sleep } from "@/common/utils/helper";
 import { LogWrapper } from "@/common/utils/log";
 import { proxiedListenerOf } from "@/common/utils/proxy-handler";
 import { QQBasicInfoWrapper } from "@/common/utils/QQBasicInfo";
-import { NapCatCoreWorkingEnv, loadQQWrapper } from "@/core/core";
+import { NapCatCore, NapCatCoreWorkingEnv, loadQQWrapper } from "@/core/core";
+import { InstanceContext } from "@/core";
 import { SelfInfo } from "@/core/entities";
 import { LoginListener } from "@/core/listeners";
 import { NodeIKernelLoginService } from "@/core/services";
-import { selfInfo } from "@/core/wrapper/data";
 import { WrapperNodeApi, NodeIQQNTWrapperSession } from "@/core/wrapper/wrapper";
 import { NapCatOneBot11Adapter } from "@/onebot";
 
@@ -16,59 +15,53 @@ import { NapCatOneBot11Adapter } from "@/onebot";
 export async function NCoreInitLiteLoader(session: NodeIQQNTWrapperSession, loginService: NodeIKernelLoginService) {
     //在进入本层前是否登录未进行判断
     console.log("NapCat LiteLoader App Loading...");
-    let Basicframework = new NapCatPathWrapper();
-    let logger = new LogWrapper(Basicframework.logsPath);
-    let BasicInfo = new QQBasicInfoWrapper({ logger });
-    let LLNC = new NapCatLiteLoader(logger, session, loginService, BasicInfo);
-    
+    let pathWrapper = new NapCatPathWrapper();
+    let logger = new LogWrapper(pathWrapper.logsPath);
+    let basicInfoWrapper = new QQBasicInfoWrapper({ logger });
+    let wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
     //直到登录成功后，执行下一步
     let selfInfo = await new Promise<SelfInfo>((resolve) => {
-        let OBLoginListener = new LoginListener();
-        OBLoginListener.onQRCodeLoginSucceed = async (loginResult) => resolve({
+        let loginListener = new LoginListener();
+        loginListener.onQRCodeLoginSucceed = async (loginResult) => resolve({
             uid: loginResult.uid,
             uin: loginResult.uin,
             nick: '', // 获取不到
             online: true
         });
-        loginService.addKernelLoginListener(new LLNC.wrapper.NodeIKernelLoginListener(proxiedListenerOf(OBLoginListener, logger)));
+        loginService.addKernelLoginListener(new wrapper.NodeIKernelLoginListener(
+            proxiedListenerOf(loginListener, logger)));
     });
+
+    // 初始化 NapCatLiteLoader
+    let loaderObject = new NapCatLiteLoader(wrapper, session, logger, loginService, selfInfo, basicInfoWrapper);
+
     //启动WebUi
 
     //初始化LLNC的Onebot实现
-    new NapCatOneBot11Adapter();
-    
+    new NapCatOneBot11Adapter(loaderObject.core, loaderObject.context);
 }
 
 export class NapCatLiteLoader {
-    public workingEnv: NapCatCoreWorkingEnv = NapCatCoreWorkingEnv.LiteLoader;
-    public wrapper: WrapperNodeApi;
-    public EventChannel: NTEventChannel;
-    public session: NodeIQQNTWrapperSession;
-    public logger: LogWrapper;
-    public loginListener: LoginListener;
-    //public core: NapCatCore;
+    public core: NapCatCore;
+    context: InstanceContext;
+    
     constructor(
-        logger: LogWrapper,
+        wrapper: WrapperNodeApi,
         session: NodeIQQNTWrapperSession,
+        logger: LogWrapper,
         loginService: NodeIKernelLoginService,
-        QQBasic: QQBasicInfoWrapper
+        selfInfo: SelfInfo,
+        basicInfoWrapper: QQBasicInfoWrapper,
     ) {
-        this.session = session;
-        this.logger = logger;
-        //context保存
-        this.wrapper = loadQQWrapper(QQBasic.getFullQQVesion());
-        //载入Wrapper.node
-        this.EventChannel = new NTEventChannel(this.wrapper, session);
-        this.loginListener = new LoginListener();
-        this.loginListener.onQRCodeLoginSucceed = async (arg) => {
-            await sleep(2500); // TODO: 等待登录完成 init那堆不知道多久完成 搞清楚之前先用个sleep 2500顶着
-            selfInfo.uin = arg.uin;
-            selfInfo.uid = arg.uid;
-            // 保存基础登录信息
-            // 初始化DataListener
+       this.context = {
+            workingEnv: NapCatCoreWorkingEnv.LiteLoader,
+            wrapper,
+            session,
+            logger,
+            loginService,
+            selfInfo,
+            basicInfoWrapper
         };
-        loginService.addKernelLoginListener(new this.wrapper.NodeIKernelLoginListener(
-            proxiedListenerOf(this.loginListener, logger)
-        ));
+        this.core = new NapCatCore(this.context);
     }
 }
