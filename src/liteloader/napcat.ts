@@ -10,6 +10,7 @@ import { LoginListener } from "@/core/listeners";
 import { NodeIKernelLoginService } from "@/core/services";
 import { WrapperNodeApi, NodeIQQNTWrapperSession } from "@/core/wrapper/wrapper";
 import { NapCatOneBot11Adapter } from "@/onebot/main";
+import { sleep } from "@/common/utils/helper";
 
 //LiteLoader ES入口文件
 export async function NCoreInitLiteLoader(session: NodeIQQNTWrapperSession, loginService: NodeIKernelLoginService) {
@@ -31,7 +32,8 @@ export async function NCoreInitLiteLoader(session: NodeIQQNTWrapperSession, logi
         loginService.addKernelLoginListener(new wrapper.NodeIKernelLoginListener(
             proxiedListenerOf(loginListener, logger)));
     });
-
+    
+    await sleep(2500);
     // 初始化 NapCatLiteLoader
     let loaderObject = new NapCatLiteLoader(wrapper, session, logger, loginService, selfInfo, basicInfoWrapper);
 
@@ -44,7 +46,7 @@ export async function NCoreInitLiteLoader(session: NodeIQQNTWrapperSession, logi
 export class NapCatLiteLoader {
     public core: NapCatCore;
     context: InstanceContext;
-    
+
     constructor(
         wrapper: WrapperNodeApi,
         session: NodeIQQNTWrapperSession,
@@ -53,7 +55,7 @@ export class NapCatLiteLoader {
         selfInfo: SelfInfo,
         basicInfoWrapper: QQBasicInfoWrapper,
     ) {
-       this.context = {
+        this.context = {
             workingEnv: NapCatCoreWorkingEnv.LiteLoader,
             wrapper,
             session,
