@@ -266,6 +266,7 @@ export class NapCatOnebot11 {
           //完成后再post
           OB11Constructor.message(msg).then((_msg) => {
             _msg.target_id = parseInt(msg.peerUin);
+            console.log("自身消息接收 ", "MsgID", msg.msgId, " MsgSeq", msg.msgSeq, " Raw", msg?.elements[0]?.textElement?.content);
             if (ob11Config.reportSelfMessage) {
               msg.id = MessageUnique.createMsg({ chatType: msg.chatType, peerUid: msg.peerUid, guildId: '' }, msg.msgId);
               this.postReceiveMsg([msg]).then().catch(logError);
