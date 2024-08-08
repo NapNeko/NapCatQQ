@@ -1,13 +1,7 @@
 import log4js, { Configuration } from 'log4js';
 import { truncateString } from '@/common/utils/helper';
 import path from 'node:path';
-import { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import chalk from 'chalk';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
 export enum LogLevel {
   DEBUG = 'debug',
   INFO = 'info',
@@ -15,9 +9,6 @@ export enum LogLevel {
   ERROR = 'error',
   FATAL = 'fatal',
 }
-
-const logDir = path.join(path.resolve(__dirname), 'logs');
-
 function getFormattedTimestamp() {
   const now = new Date();
   const year = now.getFullYear();
@@ -29,109 +20,116 @@ function getFormattedTimestamp() {
   const milliseconds = now.getMilliseconds().toString().padStart(3, '0');
   return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}.${milliseconds}`;
 }
-
-const filename = `${getFormattedTimestamp()}.log`;
-const logPath = path.join(logDir, filename);
-
-const logConfig: Configuration = {
-  appenders: {
-    FileAppender: { // 输出到文件的appender
-      type: 'file',
-      filename: logPath, // 指定日志文件的位置和文件名
-      maxLogSize: 10485760, // 日志文件的最大大小（单位：字节），这里设置为10MB
-      layout: {
-        type: 'pattern',
-        pattern: '%d{yyyy-MM-dd hh:mm:ss} [%p] %X{userInfo} | %m'
+export class LogWrapper {
+  fileLogEnabled = true;
+  consoleLogEnabled = true;
+  logConfig: Configuration;
+  loggerConsole: log4js.Logger;
+  loggerFile: log4js.Logger;
+  loggerDefault: log4js.Logger;
+  // eslint-disable-next-line no-control-regex
+  colorEscape = /\x1B[@-_][0-?]*[ -/]*[@-~]/g;
+  constructor(logDir: string) {
+    // logDir = path.join(path.resolve(__dirname), 'logs');
+    const filename = `${getFormattedTimestamp()}.log`;
+    const logPath = path.join(logDir, filename);
+    this.logConfig = {
+      appenders: {
+        FileAppender: { // 输出到文件的appender
+          type: 'file',
+          filename: logPath, // 指定日志文件的位置和文件名
+          maxLogSize: 10485760, // 日志文件的最大大小（单位：字节），这里设置为10MB
+          layout: {
+            type: 'pattern',
+            pattern: '%d{yyyy-MM-dd hh:mm:ss} [%p] %X{userInfo} | %m'
+          }
+        },
+        ConsoleAppender: { // 输出到控制台的appender
+          type: 'console',
+          layout: {
+            type: 'pattern',
+            pattern: `%d{yyyy-MM-dd hh:mm:ss} [%[%p%]] ${chalk.magenta('%X{userInfo}')} | %m`
+          }
+        }
+      },
+      categories: {
+        default: { appenders: ['FileAppender', 'ConsoleAppender'], level: 'debug' }, // 默认情况下同时输出到文件和控制台
+        file: { appenders: ['FileAppender'], level: 'debug' },
+        console: { appenders: ['ConsoleAppender'], level: 'debug' }
       }
-    },
-    ConsoleAppender: { // 输出到控制台的appender
-      type: 'console',
-      layout: {
-        type: 'pattern',
-        pattern: `%d{yyyy-MM-dd hh:mm:ss} [%[%p%]] ${chalk.magenta('%X{userInfo}')} | %m`
+    };
+    log4js.configure(this.logConfig);
+    this.loggerConsole = log4js.getLogger('console');
+    this.loggerFile = log4js.getLogger('file');
+    this.loggerDefault = log4js.getLogger('default');
+    this.setLogSelfInfo({ nick: '', uin: '', uid: '' });
+  }
+  setLogLevel(fileLogLevel: LogLevel, consoleLogLevel: LogLevel) {
+    this.logConfig.categories.file.level = fileLogLevel;
+    this.logConfig.categories.console.level = consoleLogLevel;
+    log4js.configure(this.logConfig);
+  }
+
+  setLogSelfInfo(selfInfo: { nick: string, uin: string, uid: string }) {
+    const userInfo = `${selfInfo.nick}(${selfInfo.uin})`;
+    this.loggerConsole.addContext('userInfo', userInfo);
+    this.loggerFile.addContext('userInfo', userInfo);
+    this.loggerDefault.addContext('userInfo', userInfo);
+  }
+
+
+  enableFileLog(enable: boolean) {
+    this.fileLogEnabled = enable;
+  }
+  enableConsoleLog(enable: boolean) {
+    this.consoleLogEnabled = enable;
+  }
+
+  formatMsg(msg: any[]) {
+    let logMsg = '';
+    for (const msgItem of msg) {
+      if (msgItem instanceof Error) { // 判断是否是错误
+        logMsg += msgItem.stack + ' ';
+        continue;
+      } else if (typeof msgItem === 'object') { // 判断是否是对象
+        const obj = JSON.parse(JSON.stringify(msgItem, null, 2));
+        logMsg += JSON.stringify(truncateString(obj)) + ' ';
+        continue;
       }
+      logMsg += msgItem + ' ';
     }
-  },
-  categories: {
-    default: { appenders: ['FileAppender', 'ConsoleAppender'], level: 'debug' }, // 默认情况下同时输出到文件和控制台
-    file: { appenders: ['FileAppender'], level: 'debug' },
-    console: { appenders: ['ConsoleAppender'], level: 'debug' }
+    return logMsg;
   }
-};
 
-log4js.configure(logConfig);
-const loggerConsole = log4js.getLogger('console');
-const loggerFile = log4js.getLogger('file');
-const loggerDefault = log4js.getLogger('default');
 
-export function setLogLevel(fileLogLevel: LogLevel, consoleLogLevel: LogLevel) {
-  logConfig.categories.file.level = fileLogLevel;
-  logConfig.categories.console.level = consoleLogLevel;
-  log4js.configure(logConfig);
-}
 
-export function setLogSelfInfo(selfInfo: { nick: string, uin: string, uid: string }) {
-  const userInfo = `${selfInfo.nick}(${selfInfo.uin})`;
-  loggerConsole.addContext('userInfo', userInfo);
-  loggerFile.addContext('userInfo', userInfo);
-  loggerDefault.addContext('userInfo', userInfo);
-}
-setLogSelfInfo({ nick: '', uin: '', uid: '' });
-
-let fileLogEnabled = true;
-let consoleLogEnabled = true;
-export function enableFileLog(enable: boolean) {
-  fileLogEnabled = enable;
-}
-export function enableConsoleLog(enable: boolean) {
-  consoleLogEnabled = enable;
-}
-
-function formatMsg(msg: any[]) {
-  let logMsg = '';
-  for (const msgItem of msg) {
-    if (msgItem instanceof Error) { // 判断是否是错误
-      logMsg += msgItem.stack + ' ';
-      continue;
-    } else if (typeof msgItem === 'object') { // 判断是否是对象
-      const obj = JSON.parse(JSON.stringify(msgItem, null, 2));
-      logMsg += JSON.stringify(truncateString(obj)) + ' ';
-      continue;
+  _log(level: LogLevel, ...args: any[]) {
+    if (this.consoleLogEnabled) {
+      this.loggerConsole[level](this.formatMsg(args));
     }
-    logMsg += msgItem + ' ';
+    if (this.fileLogEnabled) {
+      this.loggerFile[level](this.formatMsg(args).replace(this.colorEscape, ''));
+    }
   }
-  return logMsg;
-}
 
-// eslint-disable-next-line no-control-regex
-const colorEscape = /\x1B[@-_][0-?]*[ -/]*[@-~]/g;
-
-function _log(level: LogLevel, ...args: any[]) {
-  if (consoleLogEnabled) {
-    loggerConsole[level](formatMsg(args));
+  log(...args: any[]) {
+    // info 等级
+    this._log(LogLevel.INFO, ...args);
   }
-  if (fileLogEnabled) {
-    loggerFile[level](formatMsg(args).replace(colorEscape, ''));
+
+  logDebug(...args: any[]) {
+    this._log(LogLevel.DEBUG, ...args);
   }
-}
 
-export function log(...args: any[]) {
-  // info 等级
-  _log(LogLevel.INFO, ...args);
-}
+  logError(...args: any[]) {
+    this._log(LogLevel.ERROR, ...args);
+  }
 
-export function logDebug(...args: any[]) {
-  _log(LogLevel.DEBUG, ...args);
-}
+  logWarn(...args: any[]) {
+    this._log(LogLevel.WARN, ...args);
+  }
 
-export function logError(...args: any[]) {
-  _log(LogLevel.ERROR, ...args);
-}
-
-export function logWarn(...args: any[]) {
-  _log(LogLevel.WARN, ...args);
-}
-
-export function logFatal(...args: any[]) {
-  _log(LogLevel.FATAL, ...args);
+  logFatal(...args: any[]) {
+    this._log(LogLevel.FATAL, ...args);
+  }
 }
