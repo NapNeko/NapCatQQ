@@ -1,7 +1,6 @@
 import crypto from 'node:crypto';
 import path from 'node:path';
 import fs from 'fs';
-import { log, logDebug } from './log';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as fsPromise from 'node:fs/promises';
@@ -302,20 +301,6 @@ export function migrateConfig(oldConfig: any) {
 
   };
   return newConfig;
-}
-// 升级旧的配置到新的
-export async function UpdateConfig() {
-  const configFiles = await fsPromise.readdir(path.join(__dirname, 'config'));
-  for (const file of configFiles) {
-    if (file.match(/^onebot11_\d+.json$/)) {
-      const CurrentConfig = JSON.parse(await fsPromise.readFile(path.join(__dirname, 'config', file), 'utf8'));
-      if (isValidOldConfig(CurrentConfig)) {
-        log('正在迁移旧配置到新配置 File:', file);
-        const NewConfig = migrateConfig(CurrentConfig);
-        await fsPromise.writeFile(path.join(__dirname, 'config', file), JSON.stringify(NewConfig, null, 2));
-      }
-    }
-  }
 }
 export function isEqual(obj1: any, obj2: any) {
   if (obj1 === obj2) return true;
