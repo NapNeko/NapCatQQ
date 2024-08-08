@@ -3,6 +3,8 @@ import path from "node:path";
 import fs from "node:fs";
 import { InstanceContext } from "./wrapper";
 import { NTEventChannel } from "@/common/framework/event";
+import { proxiedListenerOf } from "@/common/utils/proxy-handler";
+import { MsgListener } from "./listeners";
 
 export enum NapCatCoreWorkingEnv {
     Unknown = 0,
@@ -27,10 +29,17 @@ export class NapCatCore {
     constructor(context: InstanceContext) {
         this.context = context;
         this.eventChannel = new NTEventChannel(context.wrapper, context.session);
+        this.initNapCatCoreListeners();
     }
 
     // Renamed from 'InitDataListener'
     initNapCatCoreListeners() {
-        
+        let msg = new MsgListener();
+        msg.onRecvMsg = (msg) => {
+            console.log("RecvMsg", msg);
+        }
+        this.context.session.getMsgService().addKernelMsgListener(
+            new this.context.wrapper.NodeIKernelMsgListener(proxiedListenerOf(msg, this.context.logger))
+        );
     }
 }
