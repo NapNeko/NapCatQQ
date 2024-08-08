@@ -9,7 +9,7 @@ import { SelfInfo } from "@/core/entities";
 import { LoginListener } from "@/core/listeners";
 import { NodeIKernelLoginService } from "@/core/services";
 import { WrapperNodeApi, NodeIQQNTWrapperSession } from "@/core/wrapper/wrapper";
-import { NapCatOneBot11Adapter } from "@/onebot";
+import { NapCatOneBot11Adapter } from "@/onebot/main";
 
 //LiteLoader ES入口文件
 export async function NCoreInitLiteLoader(session: NodeIQQNTWrapperSession, loginService: NodeIKernelLoginService) {
