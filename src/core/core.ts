@@ -5,6 +5,7 @@ import { InstanceContext } from "./wrapper";
 import { NTEventChannel } from "@/common/framework/event";
 import { proxiedListenerOf } from "@/common/utils/proxy-handler";
 import { MsgListener } from "./listeners";
+import { sleep } from "@/common/utils/helper";
 
 export enum NapCatCoreWorkingEnv {
     Unknown = 0,
@@ -29,15 +30,16 @@ export class NapCatCore {
     constructor(context: InstanceContext) {
         this.context = context;
         this.eventChannel = new NTEventChannel(context.wrapper, context.session);
-        this.initNapCatCoreListeners();
+        this.initNapCatCoreListeners().then().catch(console.error);
     }
 
     // Renamed from 'InitDataListener'
-    initNapCatCoreListeners() {
+    async initNapCatCoreListeners() {
         let msg = new MsgListener();
         msg.onRecvMsg = (msg) => {
             console.log("RecvMsg", msg);
         }
+        await sleep(2500);
         this.context.session.getMsgService().addKernelMsgListener(
             new this.context.wrapper.NodeIKernelMsgListener(proxiedListenerOf(msg, this.context.logger))
         );
