@@ -227,7 +227,7 @@ export class OB11Constructor {
           //合并消息内部 应该进行特殊处理 可能需要重写peer 待测试与研究 Mlikiowa Taged TODO
         }
         try {
-          
+
           videoUrl = await NTQQFileApi.getVideoUrl({
             chatType: msg.chatType,
             peerUid: msg.peerUid,
@@ -496,10 +496,12 @@ export class OB11Constructor {
             const senderUin = emojiLikeData.gtip.qq.jp;
             const msgSeq = emojiLikeData.gtip.url.msgseq;
             const emojiId = emojiLikeData.gtip.face.id;
+
             const replyMsgList = (await NTQQMsgApi.getMsgsBySeqAndCount({ chatType: ChatType.group, guildId: '', peerUid: msg.peerUid }, msgSeq, 1, true, true)).msgList;
             if (replyMsgList.length < 1) {
               return;
             }
+            console.log('表情回应消息', msgSeq, " 结算ID", replyMsgList[0].msgId);
             const replyMsg = replyMsgList[0];
             return new OB11GroupMsgEmojiLikeEvent(parseInt(msg.peerUid), parseInt(senderUin), MessageUnique.getShortIdByMsgId(replyMsg?.msgId!)!, [{
               emoji_id: emojiId,
