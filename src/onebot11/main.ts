@@ -253,7 +253,7 @@ export class NapCatOnebot11 {
         // console.log(ret);
         new Promise((resolve) => {
           m.id = MessageUnique.createMsg({ chatType: m.chatType, peerUid: m.peerUid, guildId: '' }, m.msgId);
-          console.log("消息接收 ", "MsgID", m.msgId, " ID", m.id, " Raw", m?.elements[0]?.textElement?.content);
+          console.log("消息接收 ", "MsgID", m.msgId, " ID", m.id, " MsgSeq", m.msgSeq, " Raw", m?.elements[0]?.textElement?.content);
           this.postReceiveMsg([m]).then().catch(logError);
         }).then();
       }
