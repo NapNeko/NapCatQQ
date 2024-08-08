@@ -1,0 +1,33 @@
+{
+  "manifest_version": 4,
+  "type": "extension",
+  "name": "NapCat",
+  "slug": "NapCat",
+  "description": "OneBot v11 protocol implementation with NapCat logic",
+  "version": "1.8.4",
+  "icon": "./logo.png",
+  "authors": [
+    {
+      "name": "MliKiowa",
+      "link": "https://github.com/MliKiowa"
+    },
+    {
+      "name": "Young",
+      "link": "https://github.com/Wesley-Young"
+    }
+  ],
+  "repository": {
+    "repo": "NapNeko/NapCatQQ",
+    "branch": "main"
+  },
+  "platform": [
+    "win32",
+    "linux",
+    "darwin"
+  ],
+  "injects": {
+    "renderer": "./renderer.cjs",
+    "main": "./napcat.cjs",
+    "preload": "./preload.cjs"
+  }
+}
