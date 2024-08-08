@@ -93,16 +93,17 @@ async function NCInit() {
     }
     console.log("[NapCat] [Info] NTQQ初始化成功");
     console.log(getWrapperSession(), getWrapperLoginService());
+    NCInit().then().catch(console.log);
     //NTCore.instance = new NTCoreWrapper(getWrapperNodeApi(), getWrapperSession());
     // 挂载NTQQ 到 NapCat Core
-    let NCLoginListener = {};
-    NCLoginListener.onQRCodeLoginSucceed = (arg) => {
-        //登录成功 登录成功立刻进入真正初始化
-        console.log("[NapCat] [Info] UIN: ", arg.uin, " 登录成功!")
-        NCInit().then().catch();
-    }
+    //let NCLoginListener = {};
+    // NCLoginListener.onQRCodeLoginSucceed = (arg) => {
+    //     //登录成功 登录成功立刻进入真正初始化
+    //     console.log("[NapCat] [Info] UIN: ", arg.uin, " 登录成功!")
+    //     NCInit().then().catch();
+    // }
     // 添加Login监听
-    getWrapperLoginService().addKernelLoginListener(new (getWrapperNodeApi().NodeIKernelLoginListener)(new Proxy(NCLoginListener, proxyHandler)));
+    //getWrapperLoginService().addKernelLoginListener(new (getWrapperNodeApi().NodeIKernelLoginListener)(new Proxy(NCLoginListener, proxyHandler)));
 
     //await import("file://" + path.join(CurrentPath, './napcat.mjs'));
 })();
