@@ -12,12 +12,12 @@ export interface NodeIDispatcherAdapter extends IDispatcherAdapter {
 }
 
 export class DispatcherAdapter implements IDispatcherAdapter {
-  dispatchRequest(arg: unknown) {
-  }
+    dispatchRequest(arg: unknown) {
+    }
 
-  dispatchCall(arg: unknown) {
-  }
+    dispatchCall(arg: unknown) {
+    }
 
-  dispatchCallWithJson(arg: unknown) {
-  }
+    dispatchCallWithJson(arg: unknown) {
+    }
 }

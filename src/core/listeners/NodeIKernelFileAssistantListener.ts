@@ -15,13 +15,13 @@ export interface NodeIKernelFileAssistantListener extends IKernelFileAssistantLi
 }
 
 export class KernelFileAssistantListener implements IKernelFileAssistantListener {
-  onFileStatusChanged(...args: unknown[]) { }
+    onFileStatusChanged(...args: unknown[]) { }
 
-  onSessionListChanged(...args: unknown[]) { }
+    onSessionListChanged(...args: unknown[]) { }
 
-  onSessionChanged(...args: unknown[]) { }
+    onSessionChanged(...args: unknown[]) { }
 
-  onFileListChanged(...args: unknown[]) { }
+    onFileListChanged(...args: unknown[]) { }
 
-  onFileSearch(...args: unknown[]) { }
+    onFileSearch(...args: unknown[]) { }
 }

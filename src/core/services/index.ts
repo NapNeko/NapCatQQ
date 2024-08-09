@@ -13,4 +13,4 @@ export * from './NodeIKernelStorageCleanService';
 export * from './NodeIKernelRobotService';
 export * from './NodeIKernelRichMediaService';
 export * from './NodeIKernelDbToolsService';
-export * from './NodeIKernelTipOffService'
+export * from './NodeIKernelTipOffService';

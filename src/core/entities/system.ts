@@ -1,4 +1,4 @@
-import { SelfInfo } from "./user"
+import { SelfInfo } from "./user";
 
 export interface LineDevice {
     instanceId: number

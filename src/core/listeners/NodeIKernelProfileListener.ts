@@ -18,26 +18,26 @@ export interface NodeIKernelProfileListener extends IProfileListener {
 }
 
 export class ProfileListener implements IProfileListener {
-  onUserDetailInfoChanged(arg: UserDetailInfoListenerArg): void {
+    onUserDetailInfoChanged(arg: UserDetailInfoListenerArg): void {
     
-  }
-  onProfileSimpleChanged(...args: unknown[]) {
+    }
+    onProfileSimpleChanged(...args: unknown[]) {
 
-  }
+    }
 
-  onProfileDetailInfoChanged(profile: User) {
+    onProfileDetailInfoChanged(profile: User) {
 
-  }
+    }
 
-  onStatusUpdate(...args: unknown[]) {
+    onStatusUpdate(...args: unknown[]) {
 
-  }
+    }
 
-  onSelfStatusChanged(...args: unknown[]) {
+    onSelfStatusChanged(...args: unknown[]) {
 
-  }
+    }
 
-  onStrangerRemarkChanged(...args: unknown[]) {
+    onStrangerRemarkChanged(...args: unknown[]) {
 
-  }
+    }
 }
