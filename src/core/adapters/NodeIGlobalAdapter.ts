@@ -22,27 +22,27 @@ export interface NodeIGlobalAdapter extends IGlobalAdapter {
 }
 
 export class GlobalAdapter implements IGlobalAdapter {
-  onLog(...args: unknown[]) {
-  }
+    onLog(...args: unknown[]) {
+    }
 
-  onGetSrvCalTime(...args: unknown[]) {
-  }
+    onGetSrvCalTime(...args: unknown[]) {
+    }
 
-  onShowErrUITips(...args: unknown[]) {
-  }
+    onShowErrUITips(...args: unknown[]) {
+    }
 
-  fixPicImgType(...args: unknown[]) {
-  }
+    fixPicImgType(...args: unknown[]) {
+    }
 
-  getAppSetting(...args: unknown[]) {
-  }
+    getAppSetting(...args: unknown[]) {
+    }
 
-  onInstallFinished(...args: unknown[]) {
-  }
+    onInstallFinished(...args: unknown[]) {
+    }
 
-  onUpdateGeneralFlag(...args: unknown[]) {
-  }
+    onUpdateGeneralFlag(...args: unknown[]) {
+    }
 
-  onGetOfflineMsg(...args: unknown[]) {
-  }
+    onGetOfflineMsg(...args: unknown[]) {
+    }
 }

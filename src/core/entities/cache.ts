@@ -18,7 +18,7 @@ export interface CacheScanResult {
 export interface ChatCacheList {
     pageCount: number;
     infos: ChatCacheListItem[]
-};
+}
 
 export interface ChatCacheListItem {
     chatType: ChatType;

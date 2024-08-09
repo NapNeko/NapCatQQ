@@ -132,12 +132,12 @@ export class WebApi {
     sKey = sKey || '';
     let hash = 5381;
 
-    for (let i = 0; i < sKey.length; i++) {
-      const code = sKey.charCodeAt(i);
-      hash = hash + (hash << 5) + code;
-    }
+      for (let i = 0; i < sKey.length; i++) {
+          const code = sKey.charCodeAt(i);
+          hash = hash + (hash << 5) + code;
+      }
 
-    return (hash & 0x7FFFFFFF).toString();
+      return (hash & 0x7FFFFFFF).toString();
   }
   async getGroupHonorInfo(groupCode: string, getType: WebHonorType) {
     const CookiesObject = await this.core.getApiContext().UserApi.getCookies('qun.qq.com');
@@ -164,7 +164,7 @@ export class WebApi {
       return undefined;
     }
 
-    let HonorInfo: any = { group_id: groupCode };
+      const HonorInfo: any = { group_id: groupCode };
 
     if (getType === WebHonorType.TALKACTIVE || getType === WebHonorType.ALL) {
       try {
