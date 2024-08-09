@@ -1,0 +1,2 @@
+export const onSettingWindowCreated = (view) => {
+};
