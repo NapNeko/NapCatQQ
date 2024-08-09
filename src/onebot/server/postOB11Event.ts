@@ -9,7 +9,6 @@ import { normalize, sendMsg } from '../action/msg/SendMsg';
 import { OB11FriendRequestEvent } from '../event/request/OB11FriendRequest';
 import { OB11GroupRequestEvent } from '../event/request/OB11GroupRequest';
 import { isNull } from '@/common/utils/helper';
-import { NTQQFriendApi, NTQQGroupApi, NTQQUserApi } from '@/core/apis';
 import createSendElements from '../action/msg/SendMsg/create-send-elements';
 import { NapCatCore } from '@/core';
 
@@ -68,12 +67,12 @@ export function postWsEvent(event: QuickActionEvent) {
   }
 }
 
-export function postOB11Event(msg: QuickActionEvent, reportSelf = false, postWs = true) {
+export function postOB11Event(msg: QuickActionEvent, reportSelf = false, postWs = true, coreContext: NapCatCore) {
   const config = ob11Config;
 
   // 判断msg是否是event
   if (!config.reportSelfMessage && !reportSelf) {
-    if (msg.post_type === 'message' && (msg as OB11Message).user_id.toString() == selfInfo.uin) {
+    if (msg.post_type === 'message' && (msg as OB11Message).user_id.toString() == coreContext.selfInfo.uin) {
       return;
     }
   }
@@ -84,7 +83,7 @@ export function postOB11Event(msg: QuickActionEvent, reportSelf = false, postWs 
     const sig = hmac.digest('hex');
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'x-self-id': selfInfo.uin
+      'x-self-id': coreContext.selfInfo.uin
     };
     if (config.http.secret) {
       headers['x-signature'] = 'sha1=' + sig;
@@ -102,17 +101,17 @@ export function postOB11Event(msg: QuickActionEvent, reportSelf = false, postWs 
           resJson = await res.json();
           //logDebug('新消息事件HTTP上报返回快速操作: ', JSON.stringify(resJson));
         } catch (e) {
-          logDebug('新消息事件HTTP上报没有返回快速操作，不需要处理');
+          coreContext.context.logger.logDebug('新消息事件HTTP上报没有返回快速操作，不需要处理');
           return;
         }
         try {
-          handleQuickOperation(msg as QuickActionEvent, resJson).then().catch(logError);
+          handleQuickOperation(msg as QuickActionEvent, resJson,coreContext).then().catch(logError);
         } catch (e: any) {
-          logError('新消息事件HTTP上报返回快速操作失败', e);
+          coreContext.context.logger.logError('新消息事件HTTP上报返回快速操作失败', e);
         }
 
       }, (err: any) => {
-        logError(`新消息事件HTTP上报失败: ${host} `, err, msg);
+        coreContext.context.logger.logError(`新消息事件HTTP上报失败: ${host} `, err, msg);
       });
     }
   }
