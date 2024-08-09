@@ -253,24 +253,6 @@ export class NTQQUserApi {
   async getUidByUinV1(Uin: string) {
     // 通用转换开始尝试
     let uid = (await this.context.session.getUixConvertService().getUid([Uin])).uidInfo.get(Uin);
-    // Uid 好友转
-    if (!uid) {
-      Array.from(friends.values()).forEach((t) => {
-        if (t.uin == Uin) {
-          uid = t.uid;
-        }
-      });
-    }
-    //Uid 群友列表转
-    if (!uid) {
-      for (let groupMembersList of groupMembers.values()) {
-        for (let GroupMember of groupMembersList.values()) {
-          if (GroupMember.uin == Uin) {
-            uid = GroupMember.uid;
-          }
-        }
-      }
-    }
     if (!uid) {
       let unveifyUid = (await this.getUserDetailInfoByUin(Uin)).info.uid;//从QQ Native 特殊转换 方法三
       if (unveifyUid.indexOf("*") == -1) {
@@ -288,17 +270,8 @@ export class NTQQUserApi {
       );
     let uin = ret.uinInfo.get(Uid);
     if (!uin) {
-      //从Buddy缓存获取Uin
-      Array.from(friends.values()).forEach((t) => {
-        if (t.uid == Uid) {
-          uin = t.uin;
-        }
-      })
-    }
-    if (!uin) {
       uin = (await this.getUserDetailInfo(Uid)).uin; //从QQ Native 转换
     }
-
     // if (!uin) {
     //   uin = (await NTQQFriendApi.getFriends(false)).find((t) => { t.uid == Uid })?.uin;  //从QQ Native 缓存转换
     // }
