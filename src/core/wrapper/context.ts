@@ -5,6 +5,7 @@ import { SelfInfo } from "../entities";
 import { NodeIKernelLoginService } from "../services";
 import { WrapperNodeApi, NodeIQQNTWrapperSession } from "@/core";
 import { NTQQFriendApi, NTQQGroupApi, NTQQMsgApi, NTQQUserApi, NTQQWebApi } from "../apis";
+import { NTQQCollectionApi } from "../apis/collection";
 
 export interface InstanceContext {
     readonly workingEnv: NapCatCoreWorkingEnv;
@@ -15,6 +16,7 @@ export interface InstanceContext {
     readonly basicInfoWrapper: QQBasicInfoWrapper;
 }
 export interface NTApiContext {
+    CollectionApi: NTQQCollectionApi,
     WebApi: NTQQWebApi,
     FriendApi: NTQQFriendApi,
     MsgApi: NTQQMsgApi,

@@ -10,6 +10,7 @@ import { SelfInfo, LineDevice, SelfStatusInfo } from "./entities";
 import { LegacyNTEventWrapper } from "@/common/framework/event-legacy";
 import { NTQQFriendApi, NTQQGroupApi, NTQQMsgApi, NTQQUserApi, NTQQWebApi } from "./apis";
 import os from "node:os";
+import { NTQQCollectionApi } from "./apis/collection";
 export enum NapCatCoreWorkingEnv {
     Unknown = 0,
     Shell = 1,
@@ -42,6 +43,7 @@ export class NapCatCore {
         this.eventWrapper = new LegacyNTEventWrapper(context.wrapper, context.session);
         this.initNapCatCoreListeners().then().catch(console.error);
         this.ApiContext = {
+            CollectionApi:new NTQQCollectionApi(this.context, this),
             WebApi: new NTQQWebApi(this.context, this),
             FriendApi: new NTQQFriendApi(this.context, this),
             MsgApi: new NTQQMsgApi(this.context, this),
