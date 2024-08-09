@@ -228,16 +228,18 @@ export class OB11Constructor {
         const videoElement: VideoElement = element.videoElement;
         //读取视频链接并兜底
         let videoUrl;//Array
+        let peer:Peer = {
+          chatType: msg.chatType,
+          peerUid: msg.peerUid,
+          guildId: '0'
+        };
         if (msg.peerUin == '284840486') {
+          peer = msg.parentMsgPeer;
           //合并消息内部 应该进行特殊处理 可能需要重写peer 待测试与研究 Mlikiowa Taged TODO
         }
         try {
 
-          videoUrl = await NTQQFileApi.getVideoUrl({
-            chatType: msg.chatType,
-            peerUid: msg.peerUid,
-            guildId: '0'
-          }, msg.msgId, element.elementId);
+          videoUrl = await NTQQFileApi.getVideoUrl(peer, msg.msgId, element.elementId);
         } catch (error) {
           videoUrl = undefined;
         }
