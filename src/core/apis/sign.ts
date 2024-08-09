@@ -184,7 +184,7 @@ export class NTQQMusicSignApi {
         //   "ver": "0.0.0.1"
         // };
         const data = (await this.core.getApiContext().UserApi.getQzoneCookies());
-        const Bkn = this.core.getApiContext().WebApi.genBkn(data.p_skey);
+        const Bkn = this.core.getApiContext().WebApi.getBknFromCookie(data.p_skey);
 
         const CookieValue = 'p_skey=' + data.p_skey + '; skey=' + data.skey + '; p_uin=o' + this.core.selfInfo.uin + '; uin=o' + this.core.selfInfo.uin;
 
