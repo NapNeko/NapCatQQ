@@ -45,7 +45,7 @@ export default class GoCQHTTPUploadPrivateFile extends BaseAction<Payload, null>
       throw new Error(downloadResult.errMsg);
     }
     const sendFileEle: SendFileElement = await SendMsgElementConstructor.file(this.CoreContext, downloadResult.path, payload.name);
-    await sendMsg(peer, [sendFileEle], [], true);
+    await sendMsg(this.CoreContext, peer, [sendFileEle], [], true);
     return null;
   }
 }
