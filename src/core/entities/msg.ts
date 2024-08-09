@@ -1,6 +1,5 @@
 import { GroupMemberRole } from './group';
 
-
 export interface Peer {
   chatType: ChatType;
   peerUid: string;  // 如果是群聊uid为群号，私聊uid就是加密的字符串

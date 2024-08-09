@@ -1,4 +1,4 @@
-import { WrapperNodeApi } from "@/core/wrapper";
+import { NTApiContext, WrapperNodeApi } from "@/core/wrapper";
 import path from "node:path";
 import fs from "node:fs";
 import { InstanceContext } from "./wrapper";
@@ -7,7 +7,8 @@ import { proxiedListenerOf } from "@/common/utils/proxy-handler";
 import { MsgListener, ProfileListener } from "./listeners";
 import { sleep } from "@/common/utils/helper";
 import { SelfInfo, LineDevice, SelfStatusInfo } from "./entities";
-import {LegacyNTEventWrapper} from "@/common/framework/event-legacy";
+import { LegacyNTEventWrapper } from "@/common/framework/event-legacy";
+import { NTQQGroupApi, NTQQMsgApi, NTQQUserApi } from "./apis";
 
 export enum NapCatCoreWorkingEnv {
     Unknown = 0,
@@ -27,6 +28,7 @@ export function loadQQWrapper(QQVersion: string): WrapperNodeApi {
 
 export class NapCatCore {
     readonly context: InstanceContext;
+    readonly ApiContext: NTApiContext;
     readonly eventWrapper: LegacyNTEventWrapper;
     // readonly eventChannel: NTEventChannel;
 
@@ -38,8 +40,15 @@ export class NapCatCore {
         this.context = context;
         this.eventWrapper = new LegacyNTEventWrapper(context.wrapper, context.session);
         this.initNapCatCoreListeners().then().catch(console.error);
+        this.ApiContext = {
+            MsgApi: new NTQQMsgApi(this.context,this),
+            UserApi: new NTQQUserApi(this.context),
+            GroupApi: new NTQQGroupApi(this.context)
+        }
     }
-
+    getApiContext() {
+        return this.ApiContext;
+    }
     // Renamed from 'InitDataListener'
     async initNapCatCoreListeners() {
         let msgListener = new MsgListener();
@@ -50,7 +59,7 @@ export class NapCatCore {
         this.context.session.getMsgService().addKernelMsgListener(
             new this.context.wrapper.NodeIKernelMsgListener(proxiedListenerOf(msgListener, this.context.logger))
         );
-        
+
         const profileListener = new ProfileListener();
         profileListener.onProfileDetailInfoChanged = (profile) => {
             if (profile.uid === this.selfInfo.uid) {

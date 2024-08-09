@@ -4,7 +4,7 @@ import { NTEventDispatch } from '@/common/utils/EventTask';
 import { LimitedHashTable } from '@/common/utils/MessageUnique';
 import { CacheClassFuncAsyncExtend } from '@/common/utils/helper';
 export class NTQQFriendApi {
-  static async getBuddyV2(refresh = false): Promise<FriendV2[]> {
+   async getBuddyV2(refresh = false): Promise<FriendV2[]> {
     let uids: string[] = [];
     const buddyService = napCatCore.session.getBuddyService();
     const buddyListV2 = refresh ? await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL) : await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL);
@@ -15,10 +15,10 @@ export class NTQQFriendApi {
     return Array.from(data.values());
   }
   @CacheClassFuncAsyncExtend(3600 * 1000, 'getBuddyIdMap', () => true)
-  static async getBuddyIdMapCache(refresh = false): Promise<LimitedHashTable<string, string>> {
+   async getBuddyIdMapCache(refresh = false): Promise<LimitedHashTable<string, string>> {
     return await NTQQFriendApi.getBuddyIdMap(refresh);
   }
-  static async getBuddyIdMap(refresh = false): Promise<LimitedHashTable<string, string>> {
+   async getBuddyIdMap(refresh = false): Promise<LimitedHashTable<string, string>> {
     let uids: string[] = [];
     let retMap: LimitedHashTable<string, string> = new LimitedHashTable<string, string>(5000);
     const buddyService = napCatCore.session.getBuddyService();
@@ -33,7 +33,7 @@ export class NTQQFriendApi {
     //console.log('getBuddyIdMap', retMap.getValue);
     return retMap;
   }
-  static async getBuddyV2ExWithCate(refresh = false) {
+   async getBuddyV2ExWithCate(refresh = false) {
     let uids: string[] = [];
     let categoryMap: Map<string, any> = new Map();
     const buddyService = napCatCore.session.getBuddyService();
@@ -53,7 +53,7 @@ export class NTQQFriendApi {
       return category ? { ...value, categoryId: category.categoryId, categroyName: category.categroyName } : value;
     });
   }
-  static async isBuddy(uid: string) {
+   async isBuddy(uid: string) {
     return napCatCore.session.getBuddyService().isBuddy(uid);
   }
   /**
@@ -61,7 +61,7 @@ export class NTQQFriendApi {
    * @param forced 
    * @returns 
    */
-  static async getFriends(forced = false): Promise<User[]> {
+   async getFriends(forced = false): Promise<User[]> {
     let [_retData, _BuddyArg] = await NTEventDispatch.CallNormalEvent
       <(force: boolean) => Promise<any>, (arg: OnBuddyChangeParams) => void>
       (
@@ -81,7 +81,7 @@ export class NTQQFriendApi {
     return friends;
   }
 
-  static async handleFriendRequest(flag: string, accept: boolean) {
+   async handleFriendRequest(flag: string, accept: boolean) {
     let data = flag.split('|');
     if (data.length < 2) {
       return;

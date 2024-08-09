@@ -2,10 +2,17 @@ import type { ModifyProfileParams, SelfInfo, User, UserDetailInfoByUin, UserDeta
 import { NodeIKernelProfileListener, ProfileListener } from '@/core/listeners';
 import { RequestUtil } from '@/common/utils/request';
 import { NodeIKernelProfileService, ProfileBizType, UserDetailSource } from '@/core/services';
+import { InstanceContext, NapCatCore } from '..';
 
 export class NTQQUserApi {
+  context: InstanceContext;
+  core: NapCatCore;
+  constructor(context: InstanceContext, core: NapCatCore) {
+    this.context = context;
+    this.core = core;
+  }
    async getProfileLike(uid: string) {
-    return napCatCore.session.getProfileLikeService().getBuddyProfileLike({
+    return this.context.session.getProfileLikeService().getBuddyProfileLike({
       friendUids: [
         uid
       ],
@@ -19,16 +26,16 @@ export class NTQQUserApi {
     });
   }
    async setLongNick(longNick: string) {
-    return napCatCore.session.getProfileService().setLongNick(longNick);
+    return this.context.session.getProfileService().setLongNick(longNick);
   }
    async setSelfOnlineStatus(status: number, extStatus: number, batteryStatus: number) {
-    return napCatCore.session.getMsgService().setStatus({ status: status, extStatus: extStatus, batteryStatus: batteryStatus });
+    return this.context.session.getMsgService().setStatus({ status: status, extStatus: extStatus, batteryStatus: batteryStatus });
   }
    async getBuddyRecommendContactArkJson(uin: string, sencenID = '') {
-    return napCatCore.session.getBuddyService().getBuddyRecommendContactArkJson(uin, sencenID);
+    return this.context.session.getBuddyService().getBuddyRecommendContactArkJson(uin, sencenID);
   }
    async like(uid: string, count = 1): Promise<{ result: number, errMsg: string, succCounts: number }> {
-    return napCatCore.session.getProfileLikeService().setBuddyProfileLike({
+    return this.context.session.getProfileLikeService().setBuddyProfileLike({
       friendUid: uid,
       sourceId: 71,
       doLikeCount: count,
@@ -38,11 +45,11 @@ export class NTQQUserApi {
 
    async setQQAvatar(filePath: string) {
     type setQQAvatarRet = { result: number, errMsg: string };
-    const ret = await napCatCore.session.getProfileService().setHeader(filePath) as setQQAvatarRet;
+    const ret = await this.context.session.getProfileService().setHeader(filePath) as setQQAvatarRet;
     return { result: ret?.result, errMsg: ret?.errMsg };
   }
    async setGroupAvatar(gc: string, filePath: string) {
-    return napCatCore.session.getGroupService().setHeader(gc, filePath);
+    return this.context.session.getGroupService().setHeader(gc, filePath);
   }
 
    async fetchUserDetailInfos(uids: string[]) {
@@ -50,7 +57,7 @@ export class NTQQUserApi {
     type EventService = NodeIKernelProfileService['fetchUserDetailInfo'];
     type EventListener = NodeIKernelProfileListener['onUserDetailInfoChanged'];
     let retData: User[] = [];
-    let [_retData, _retListener] = await NTEventDispatch.CallNormalEvent
+    let [_retData, _retListener] = await this.core.eventWrapper.CallNormalEvent
       <EventService, EventListener>
       (
         'NodeIKernelProfileService/fetchUserDetailInfo',
@@ -86,7 +93,7 @@ export class NTQQUserApi {
    async fetchUserDetailInfo(uid: string) {
     type EventService = NodeIKernelProfileService['fetchUserDetailInfo'];
     type EventListener = NodeIKernelProfileListener['onUserDetailInfoChanged'];
-    let [_retData, profile] = await NTEventDispatch.CallNormalEvent
+    let [_retData, profile] = await this.core.eventWrapper.CallNormalEvent
       <EventService, EventListener>
       (
         'NodeIKernelProfileService/fetchUserDetailInfo',
@@ -120,7 +127,7 @@ export class NTQQUserApi {
     return RetUser;
   }
    async getUserDetailInfo(uid: string) {
-    if (requireMinNTQQBuild('26702')) {
+    if (this.context.basicInfoWrapper.requireMinNTQQBuild('26702')) {
       return this.fetchUserDetailInfo(uid);
     }
     return this.getUserDetailInfoOld(uid);
@@ -128,7 +135,7 @@ export class NTQQUserApi {
    async getUserDetailInfoOld(uid: string) {
     type EventService = NodeIKernelProfileService['getUserDetailInfoWithBizInfo'];
     type EventListener = NodeIKernelProfileListener['onProfileDetailInfoChanged'];
-    let [_retData, profile] = await NTEventDispatch.CallNormalEvent
+    let [_retData, profile] = await this.core.eventWrapper.CallNormalEvent
       <EventService, EventListener>
       (
         'NodeIKernelProfileService/getUserDetailInfoWithBizInfo',
@@ -151,16 +158,16 @@ export class NTQQUserApi {
   }
   //需要异常处理
    async getCookies(domain: string) {
-    const ClientKeyData = await NTQQUserApi.forceFetchClientKey();
+    const ClientKeyData = await this.forceFetchClientKey();
     const requestUrl = 'https://ssl.ptlogin2.qq.com/jump?ptlang=1033&clientuin=' + selfInfo.uin + '&clientkey=' + ClientKeyData.clientKey + '&u1=https%3A%2F%2F' + domain + '%2F' + selfInfo.uin + '%2Finfocenter&keyindex=19%27'
     let cookies: { [key: string]: string; } = await RequestUtil.HttpsGetCookies(requestUrl);
     return cookies;
   }
    async getPSkey(domainList: string[]) {
-    return await napCatCore.session.getTipOffService().getPskey(domainList, true);
+    return await this.context.session.getTipOffService().getPskey(domainList, true);
   }
    async getRobotUinRange(): Promise<Array<any>> {
-    const robotUinRanges = await napCatCore.session.getRobotService().getRobotUinRange({
+    const robotUinRanges = await this.context.session.getRobotService().getRobotUinRange({
       justFetchMsgConfig: '1',
       type: 1,
       version: 0,
@@ -172,7 +179,7 @@ export class NTQQUserApi {
   //需要异常处理
   
    async getQzoneCookies() {
-    const ClientKeyData = await NTQQUserApi.forceFetchClientKey();
+    const ClientKeyData = await this.forceFetchClientKey();
     const requestUrl = 'https://ssl.ptlogin2.qq.com/jump?ptlang=1033&clientuin=' + selfInfo.uin + '&clientkey=' + ClientKeyData.clientKey + '&u1=https%3A%2F%2Fuser.qzone.qq.com%2F' + selfInfo.uin + '%2Finfocenter&keyindex=19%27'
     let cookies: { [key: string]: string; } = await RequestUtil.HttpsGetCookies(requestUrl);
     return cookies;
@@ -180,7 +187,7 @@ export class NTQQUserApi {
   //需要异常处理
   
    async getSkey(): Promise<string | undefined> {
-    const ClientKeyData = await NTQQUserApi.forceFetchClientKey();
+    const ClientKeyData = await this.forceFetchClientKey();
     if (ClientKeyData.result !== 0) {
       throw new Error('getClientKey Error');
     }
@@ -194,72 +201,58 @@ export class NTQQUserApi {
     }
     return skey;
   }
-  @CacheClassFuncAsyncExtend(3600 * 1000, 'Uin2Uid', (Uin: string, Uid: string | undefined) => {
-    if (Uid && Uid.indexOf('u_') != -1) {
-      return true
-    }
-    logWarn("uin转换到uid时异常", Uin, Uid);
-    return false;
-  })
    async getUidByUin(Uin: string) {
     //此代码仅临时使用，后期会被废弃
-    if (requireMinNTQQBuild('26702')) {
-      return await NTQQUserApi.getUidByUinV2(Uin);
+    if (this.context.basicInfoWrapper.requireMinNTQQBuild('26702')) {
+      return await this..getUidByUinV2(Uin);
     }
-    return await NTQQUserApi.getUidByUinV1(Uin);
+    return await this.getUidByUinV1(Uin);
   }
-  @CacheClassFuncAsyncExtend(3600 * 1000, 'Uid2Uin', (Uid: string | undefined, Uin: number | undefined) => {
-    if (Uin && Uin != 0 && !isNaN(Uin)) {
-      return true
-    }
-    logWarn("uid转换到uin时异常", Uid, Uin);
-    return false;
-  })
    async getUinByUid(Uid: string) {
     //此代码仅临时使用，后期会被废弃
-    if (requireMinNTQQBuild('26702')) {
-      return await NTQQUserApi.getUinByUidV2(Uid);
+    if (this.context.basicInfoWrapper.requireMinNTQQBuild('26702')) {
+      return await this.getUinByUidV2(Uid);
     }
-    return await NTQQUserApi.getUinByUidV1(Uid);
+    return await this.getUinByUidV1(Uid);
   }
 
   //后期改成流水线处理
    async getUidByUinV2(Uin: string) {
-    let uid = (await napCatCore.session.getProfileService().getUidByUin('FriendsServiceImpl', [Uin])).get(Uin);
+    let uid = (await this.context.session.getProfileService().getUidByUin('FriendsServiceImpl', [Uin])).get(Uin);
     if (uid) return uid;
-    uid = (await napCatCore.session.getGroupService().getUidByUins([Uin])).uids.get(Uin);
+    uid = (await this.context.session.getGroupService().getUidByUins([Uin])).uids.get(Uin);
     if (uid) return uid;
-    uid = (await napCatCore.session.getUixConvertService().getUid([Uin])).uidInfo.get(Uin);
+    uid = (await this.context.session.getUixConvertService().getUid([Uin])).uidInfo.get(Uin);
     if (uid) return uid;
     console.log((await NTQQFriendApi.getBuddyIdMapCache(true)));
     uid = (await NTQQFriendApi.getBuddyIdMapCache(true)).getValue(Uin);//从Buddy缓存获取Uid
     if (uid) return uid;
     uid = (await NTQQFriendApi.getBuddyIdMap(true)).getValue(Uin);
     if (uid) return uid;
-    let unveifyUid = (await NTQQUserApi.getUserDetailInfoByUinV2(Uin)).detail.uid;//从QQ Native 特殊转换
+    let unveifyUid = (await this.getUserDetailInfoByUinV2(Uin)).detail.uid;//从QQ Native 特殊转换
     if (unveifyUid.indexOf("*") == -1) uid = unveifyUid;
     //if (uid) return uid;
     return uid;
   }
   //后期改成流水线处理
    async getUinByUidV2(Uid: string) {
-    let uin = (await napCatCore.session.getProfileService().getUinByUid('FriendsServiceImpl', [Uid])).get(Uid);
+    let uin = (await this.context.session.getProfileService().getUinByUid('FriendsServiceImpl', [Uid])).get(Uid);
     if (uin) return uin;
-    uin = (await napCatCore.session.getGroupService().getUinByUids([Uid])).uins.get(Uid);
+    uin = (await this.context.session.getGroupService().getUinByUids([Uid])).uins.get(Uid);
     if (uin) return uin;
-    uin = (await napCatCore.session.getUixConvertService().getUin([Uid])).uinInfo.get(Uid);
+    uin = (await this.context.session.getUixConvertService().getUin([Uid])).uinInfo.get(Uid);
     if (uin) return uin;
     uin = (await NTQQFriendApi.getBuddyIdMapCache(true)).getKey(Uid);//从Buddy缓存获取Uin
     if (uin) return uin;
     uin = (await NTQQFriendApi.getBuddyIdMap(true)).getKey(Uid);
     if (uin) return uin;
-    uin = (await NTQQUserApi.getUserDetailInfo(Uid)).uin; //从QQ Native 转换
+    uin = (await this.getUserDetailInfo(Uid)).uin; //从QQ Native 转换
     return uin;
   }
 
    async getUidByUinV1(Uin: string) {
     // 通用转换开始尝试
-    let uid = (await napCatCore.session.getUixConvertService().getUid([Uin])).uidInfo.get(Uin);
+    let uid = (await this.context.session.getUixConvertService().getUid([Uin])).uidInfo.get(Uin);
     // Uid 好友转
     if (!uid) {
       Array.from(friends.values()).forEach((t) => {
@@ -279,7 +272,7 @@ export class NTQQUserApi {
       }
     }
     if (!uid) {
-      let unveifyUid = (await NTQQUserApi.getUserDetailInfoByUin(Uin)).info.uid;//从QQ Native 特殊转换 方法三
+      let unveifyUid = (await this.getUserDetailInfoByUin(Uin)).info.uid;//从QQ Native 特殊转换 方法三
       if (unveifyUid.indexOf("*") == -1) {
         uid = unveifyUid;
       }
@@ -287,7 +280,7 @@ export class NTQQUserApi {
     return uid;
   }
    async getUinByUidV1(Uid: string) {
-    let ret = await NTEventDispatch.CallNoListenerEvent
+    let ret = await this.core.eventWrapper.callNoListenerEvent
       <(Uin: string[]) => Promise<{ uinInfo: Map<string, string> }>>(
         'NodeIKernelUixConvertService/getUin',
         5000,
@@ -303,7 +296,7 @@ export class NTQQUserApi {
       })
     }
     if (!uin) {
-      uin = (await NTQQUserApi.getUserDetailInfo(Uid)).uin; //从QQ Native 转换
+      uin = (await this.getUserDetailInfo(Uid)).uin; //从QQ Native 转换
     }
 
     // if (!uin) {
@@ -315,19 +308,19 @@ export class NTQQUserApi {
     return uin;
   }
    async getRecentContactListSnapShot(count: number) {
-    return await napCatCore.session.getRecentContactService().getRecentContactListSnapShot(count);
+    return await this.context.session.getRecentContactService().getRecentContactListSnapShot(count);
   }
    async getRecentContactListSyncLimit(count: number) {
-    return await napCatCore.session.getRecentContactService().getRecentContactListSyncLimit(count);
+    return await this.context.session.getRecentContactService().getRecentContactListSyncLimit(count);
   }
    async getRecentContactListSync() {
-    return await napCatCore.session.getRecentContactService().getRecentContactListSync();
+    return await this.context.session.getRecentContactService().getRecentContactListSync();
   }
    async getRecentContactList() {
-    return await napCatCore.session.getRecentContactService().getRecentContactList();
+    return await this.context.session.getRecentContactService().getRecentContactList();
   }
    async getUserDetailInfoByUinV2(Uin: string) {
-    return await NTEventDispatch.CallNoListenerEvent
+    return await this.core.eventWrapper.callNoListenerEvent
       <(Uin: string) => Promise<UserDetailInfoByUinV2>>(
         'NodeIKernelProfileService/getUserDetailInfoByUin',
         5000,
@@ -335,15 +328,14 @@ export class NTQQUserApi {
       );
   }
    async getUserDetailInfoByUin(Uin: string) {
-    return NTEventDispatch.CallNoListenerEvent
+    return this.core.eventWrapper.callNoListenerEvent
       <(Uin: string) => Promise<UserDetailInfoByUin>>(
         'NodeIKernelProfileService/getUserDetailInfoByUin',
         5000,
         Uin
       );
   }
-  @CacheClassFuncAsync(3600 * 1000, 'ClientKey')
    async forceFetchClientKey() {
-    return await napCatCore.session.getTicketService().forceFetchClientKey('');
+    return await this.context.session.getTicketService().forceFetchClientKey('');
   }
 }
