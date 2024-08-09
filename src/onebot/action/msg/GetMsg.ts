@@ -1,5 +1,5 @@
 import { OB11Message } from '../../types';
-import { OB11Constructor } from '../../helper/constructor';
+import { OB11Constructor } from '../../helper/data';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';

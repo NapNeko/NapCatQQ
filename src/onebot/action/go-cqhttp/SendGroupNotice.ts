@@ -1,7 +1,6 @@
 import { checkFileReceived, uri2local } from '@/common/utils/file';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { NTQQGroupApi, WebApi } from '@/core/apis';
 import { unlink } from 'node:fs';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 const SchemaData = {
@@ -25,7 +24,7 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
     let UploadImage: { id: string, width: number, height: number } | undefined = undefined;
     if (payload.image) {
       //公告图逻辑
-      const { errMsg, path, isLocal, success } = (await uri2local(payload.image));
+      const { errMsg, path, isLocal, success } = (await uri2local(this.CoreContext.NapCatTempPath,payload.image));
       if (!success) {
         throw `群公告${payload.image}设置失败,image字段可能格式不正确`;
       }

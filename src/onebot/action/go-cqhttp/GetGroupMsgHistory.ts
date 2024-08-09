@@ -1,9 +1,8 @@
 import BaseAction from '../BaseAction';
-import { OB11Message, OB11User } from '../../types';
+import { OB11Message } from '../../types';
 import { ActionName } from '../types';
 import { ChatType, Peer, RawMessage } from '@/core/entities';
-import { NTQQMsgApi } from '@/core/apis/msg';
-import { OB11Constructor } from '../../helper/constructor';
+import { OB11Constructor } from '../../helper/data';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/utils/MessageUnique';
 interface Response {
@@ -41,7 +40,7 @@ export default class GoCQHTTPGetGroupMsgHistory extends BaseAction<Payload, Resp
       if (!startMsgId) throw `消息${payload.message_seq}不存在`;
       msgList = (await NTQQMsgApi.getMsgHistory(peer, startMsgId, MsgCount)).msgList;
     }
-    if(isReverseOrder) msgList.reverse();
+    if (isReverseOrder) msgList.reverse();
     await Promise.all(msgList.map(async msg => {
       msg.id = MessageUnique.createMsg({ guildId: '', chatType: msg.chatType, peerUid: msg.peerUid }, msg.msgId);
     }));

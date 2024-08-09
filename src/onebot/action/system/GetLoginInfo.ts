@@ -1,6 +1,6 @@
 
 import { OB11User } from '../../types';
-import { OB11Constructor } from '../../helper/constructor';
+import { OB11Constructor } from '../../helper/data';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 

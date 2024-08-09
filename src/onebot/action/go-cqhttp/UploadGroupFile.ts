@@ -5,6 +5,7 @@ import fs from 'fs';
 import { sendMsg } from '@/onebot/action/msg/SendMsg';
 import { uri2local } from '@/common/utils/file';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { SendMsgElementConstructor } from '@/onebot/helper/msg';
 const SchemaData = {
   type: 'object',
   properties: {
@@ -27,12 +28,12 @@ export default class GoCQHTTPUploadGroupFile extends BaseAction<Payload, null> {
     if (fs.existsSync(file)) {
       file = `file://${file}`;
     }
-    const downloadResult = await uri2local(file);
+    const downloadResult = await uri2local(this.CoreContext.NapCatTempPath, file);
     if (!downloadResult.success) {
       throw new Error(downloadResult.errMsg);
     }
-    const sendFileEle: SendFileElement = await SendMsgElementConstructor.file(downloadResult.path, payload.name, payload.folder_id);
-    await sendMsg({ chatType: ChatType.group, peerUid: group.groupCode }, [sendFileEle], [], true);
+    const sendFileEle: SendFileElement = await SendMsgElementConstructor.file(this.CoreContext, downloadResult.path, payload.name, payload.folder_id);
+    await sendMsg({ chatType: ChatType.group, peerUid: payload.group_id.toString() }, [sendFileEle], [], true);
     return null;
   }
 }

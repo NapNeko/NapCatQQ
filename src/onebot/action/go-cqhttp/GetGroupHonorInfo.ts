@@ -7,7 +7,7 @@ const SchemaData = {
   type: 'object',
   properties: {
     group_id: { type: [ 'number' , 'string' ] },
-    type: { enum: [WebHonorType.ALL, WebHonorType.EMOTION, WebHonorType.LEGEND, WebHonorType.PERFROMER, WebHonorType.STORONGE_NEWBI, WebHonorType.TALKACTIVE] }
+    type: { enum: [WebHonorType.ALL, WebHonorType.EMOTION, WebHonorType.LEGEND, WebHonorType.PERFORMER, WebHonorType.STRONG_NEWBIE, WebHonorType.TALKATIVE] }
   },
   required: ['group_id']
 } as const satisfies JSONSchema;
