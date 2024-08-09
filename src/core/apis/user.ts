@@ -1,13 +1,7 @@
-import { ModifyProfileParams, SelfInfo, User, UserDetailInfoByUin, UserDetailInfoByUinV2 } from '@/core/entities';
-import { friends, groupMembers, selfInfo } from '@/core/data';
-import { CacheClassFuncAsync, CacheClassFuncAsyncExtend } from '@/common/utils/helper';
-import { napCatCore, NTQQFriendApi } from '@/core';
+import type { ModifyProfileParams, SelfInfo, User, UserDetailInfoByUin, UserDetailInfoByUinV2 } from '@/core/entities';
 import { NodeIKernelProfileListener, ProfileListener } from '@/core/listeners';
 import { RequestUtil } from '@/common/utils/request';
-import { logWarn } from '@/common/utils/log';
-import { NTEventDispatch } from '@/common/utils/EventTask';
 import { NodeIKernelProfileService, ProfileBizType, UserDetailSource } from '@/core/services';
-import { requireMinNTQQBuild } from '@/common/utils/QQBasicInfo';
 
 export class NTQQUserApi {
    async getProfileLike(uid: string) {
@@ -156,14 +150,12 @@ export class NTQQUserApi {
     return napCatCore.session.getProfileService().modifyDesktopMiniProfile(param);
   }
   //需要异常处理
-  @CacheClassFuncAsync(1800 * 1000)
    async getCookies(domain: string) {
     const ClientKeyData = await NTQQUserApi.forceFetchClientKey();
     const requestUrl = 'https://ssl.ptlogin2.qq.com/jump?ptlang=1033&clientuin=' + selfInfo.uin + '&clientkey=' + ClientKeyData.clientKey + '&u1=https%3A%2F%2F' + domain + '%2F' + selfInfo.uin + '%2Finfocenter&keyindex=19%27'
     let cookies: { [key: string]: string; } = await RequestUtil.HttpsGetCookies(requestUrl);
     return cookies;
   }
-  @CacheClassFuncAsync(1800 * 1000)
    async getPSkey(domainList: string[]) {
     return await napCatCore.session.getTipOffService().getPskey(domainList, true);
   }
@@ -178,7 +170,7 @@ export class NTQQUserApi {
     return robotUinRanges?.response?.robotUinRanges;
   }
   //需要异常处理
-  @CacheClassFuncAsync(1800 * 1000)
+  
    async getQzoneCookies() {
     const ClientKeyData = await NTQQUserApi.forceFetchClientKey();
     const requestUrl = 'https://ssl.ptlogin2.qq.com/jump?ptlang=1033&clientuin=' + selfInfo.uin + '&clientkey=' + ClientKeyData.clientKey + '&u1=https%3A%2F%2Fuser.qzone.qq.com%2F' + selfInfo.uin + '%2Finfocenter&keyindex=19%27'
@@ -186,7 +178,7 @@ export class NTQQUserApi {
     return cookies;
   }
   //需要异常处理
-  @CacheClassFuncAsync(1800 * 1000)
+  
    async getSkey(): Promise<string | undefined> {
     const ClientKeyData = await NTQQUserApi.forceFetchClientKey();
     if (ClientKeyData.result !== 0) {

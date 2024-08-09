@@ -3,12 +3,11 @@ import {
   CacheFileType,
   ChatCacheListItemBasic,
   ChatType,
-  ElementType, IMAGE_HTTP_HOST, IMAGE_HTTP_HOST_NT, Peer, PicElement, RawMessage
+  ElementType, IMAGE_HTTP_HOST, IMAGE_HTTP_HOST_NT, Peer, PicElement
 } from '@/core/entities';
 import path from 'path';
 import fs from 'fs';
 import fsPromises from 'fs/promises';
-import { log, logDebug, logError } from '@/common/utils/log';
 import { GeneralCallResult, napCatCore, OnRichMediaDownloadCompleteParams } from '@/core';
 import { calculateFileMD5 } from '@/common/utils/file';
 import * as fileType from 'file-type';
@@ -18,26 +17,25 @@ import { sessionConfig } from '@/core/sessionConfig';
 import { rkeyManager } from '../utils/rkey';
 import { NTEventDispatch } from '@/common/utils/EventTask';
 import { NodeIKernelSearchService } from '../services/NodeIKernelSearchService';
-import { selfInfo } from '../data';
 
 
 export class NTQQFileApi {
-  static async getFileType(filePath: string) {
+   async getFileType(filePath: string) {
     return fileType.fileTypeFromFile(filePath);
   }
 
-  static async copyFile(filePath: string, destPath: string) {
+   async copyFile(filePath: string, destPath: string) {
     await napCatCore.util.copyFile(filePath, destPath);
   }
 
-  static async getFileSize(filePath: string): Promise<number> {
+   async getFileSize(filePath: string): Promise<number> {
     return await napCatCore.util.getFileSize(filePath);
   }
-  static async getVideoUrl(peer: Peer, msgId: string, elementId: string) {
+   async getVideoUrl(peer: Peer, msgId: string, elementId: string) {
     return (await napCatCore.session.getRichMediaService().getVideoPlayUrlV2(peer, msgId, elementId, 0, { downSourceType: 1, triggerType: 1 })).urlResult.domainUrl;
   }
   // 上传文件到QQ的文件夹
-  static async uploadFile(filePath: string, elementType: ElementType = ElementType.PIC, elementSubType: number = 0) {
+   async uploadFile(filePath: string, elementType: ElementType = ElementType.PIC, elementSubType: number = 0) {
     // napCatCore.wrapper.util.
     const fileMd5 = await calculateFileMD5(filePath);
     let ext: string = (await NTQQFileApi.getFileType(filePath))?.ext as string || '';
@@ -68,10 +66,10 @@ export class NTQQFileApi {
       ext
     };
   }
-  static async downloadMediaByUuid() {
+   async downloadMediaByUuid() {
     //napCatCore.session.getRichMediaService().downloadFileForFileUuid();
   }
-  static async downloadMedia(msgId: string, chatType: ChatType, peerUid: string, elementId: string, thumbPath: string, sourcePath: string, timeout = 1000 * 60 * 2, force: boolean = false) {
+   async downloadMedia(msgId: string, chatType: ChatType, peerUid: string, elementId: string, thumbPath: string, sourcePath: string, timeout = 1000 * 60 * 2, force: boolean = false) {
     //logDebug('receive downloadMedia task', msgId, chatType, peerUid, elementId, thumbPath, sourcePath, timeout, force);
     // 用于下载收到的消息中的图片等
     if (sourcePath && fs.existsSync(sourcePath)) {
@@ -135,7 +133,7 @@ export class NTQQFileApi {
     return filePath;
   }
 
-  static async getImageSize(filePath: string): Promise<ISizeCalculationResult | undefined> {
+   async getImageSize(filePath: string): Promise<ISizeCalculationResult | undefined> {
     return new Promise((resolve, reject) => {
       imageSize(filePath, (err, dimensions) => {
         if (err) {
@@ -146,7 +144,7 @@ export class NTQQFileApi {
       });
     });
   }
-  static async addFileCache(peer: Peer, msgId: string, msgSeq: string, senderUid: string, elemId: string, elemType: string, fileSize: string, fileName: string) {
+   async addFileCache(peer: Peer, msgId: string, msgSeq: string, senderUid: string, elemId: string, elemType: string, fileSize: string, fileName: string) {
     let GroupData;
     let BuddyData;
     if (peer.chatType === ChatType.group) {
@@ -204,7 +202,7 @@ export class NTQQFileApi {
       ]
     });
   }
-  static async searchfile(keys: string[]) {
+   async searchfile(keys: string[]) {
     type EventType = NodeIKernelSearchService['searchFileWithKeywords'];
     interface OnListener {
       searchId: string,
@@ -256,7 +254,7 @@ export class NTQQFileApi {
     let [ret] = (await Listener);
     return ret;
   }
-  static async getImageUrl(element: PicElement) {
+   async getImageUrl(element: PicElement) {
     if (!element) {
       return '';
     }
@@ -291,51 +289,51 @@ export class NTQQFileApi {
 }
 
 export class NTQQFileCacheApi {
-  static async setCacheSilentScan(isSilent: boolean = true) {
+   async setCacheSilentScan(isSilent: boolean = true) {
     return '';
   }
 
-  static getCacheSessionPathList() {
+   getCacheSessionPathList() {
     return '';
   }
 
-  static clearCache(cacheKeys: Array<string> = ['tmp', 'hotUpdate']) {
+   clearCache(cacheKeys: Array<string> = ['tmp', 'hotUpdate']) {
     // 参数未验证
     return napCatCore.session.getStorageCleanService().clearCacheDataByKeys(cacheKeys);
   }
 
-  static addCacheScannedPaths(pathMap: object = {}) {
+   addCacheScannedPaths(pathMap: object = {}) {
     return napCatCore.session.getStorageCleanService().addCacheScanedPaths(pathMap);
   }
 
-  static scanCache(): Promise<GeneralCallResult & {
+   scanCache(): Promise<GeneralCallResult & {
     size: string[]
   }> {
     // 需要注册Listener onFinishScan
     return napCatCore.session.getStorageCleanService().scanCache();
   }
 
-  static getHotUpdateCachePath() {
+   getHotUpdateCachePath() {
     // 未实现
     return '';
   }
 
-  static getDesktopTmpPath() {
+   getDesktopTmpPath() {
     // 未实现
     return '';
   }
 
-  static getChatCacheList(type: ChatType, pageSize: number = 1000, pageIndex: number = 0) {
+   getChatCacheList(type: ChatType, pageSize: number = 1000, pageIndex: number = 0) {
     return napCatCore.session.getStorageCleanService().getChatCacheInfo(type, pageSize, 1, pageIndex);
   }
 
-  static getFileCacheInfo(fileType: CacheFileType, pageSize: number = 1000, lastRecord?: CacheFileListItem) {
+   getFileCacheInfo(fileType: CacheFileType, pageSize: number = 1000, lastRecord?: CacheFileListItem) {
     const _lastRecord = lastRecord ? lastRecord : { fileType: fileType };
     //需要五个参数
     //return napCatCore.session.getStorageCleanService().getFileCacheInfo();
   }
 
-  static async clearChatCache(chats: ChatCacheListItemBasic[] = [], fileKeys: string[] = []) {
+   async clearChatCache(chats: ChatCacheListItemBasic[] = [], fileKeys: string[] = []) {
     return napCatCore.session.getStorageCleanService().clearChatCacheInfo(chats, fileKeys);
   }
 }
