@@ -9,7 +9,7 @@ import { sleep } from "@/common/utils/helper";
 import { SelfInfo, LineDevice, SelfStatusInfo } from "./entities";
 import { LegacyNTEventWrapper } from "@/common/framework/event-legacy";
 import { NTQQFriendApi, NTQQGroupApi, NTQQMsgApi, NTQQUserApi, NTQQWebApi } from "./apis";
-
+import os from "node:os";
 export enum NapCatCoreWorkingEnv {
     Unknown = 0,
     Shell = 1,
@@ -31,7 +31,8 @@ export class NapCatCore {
     readonly ApiContext: NTApiContext;
     readonly eventWrapper: LegacyNTEventWrapper;
     // readonly eventChannel: NTEventChannel;
-
+    NapCatDataPath: string;
+    NapCatTempPath: string;
     // runtime info, not readonly
     selfInfo: SelfInfo;
     // 通过构造器递过去的 runtime info 应该尽量少
@@ -47,10 +48,26 @@ export class NapCatCore {
             UserApi: new NTQQUserApi(this.context, this),
             GroupApi: new NTQQGroupApi(this.context, this)
         };
+        this.NapCatDataPath = path.join(this.dataPath, 'NapCat');
+        fs.mkdirSync(this.NapCatDataPath, { recursive: true });
+        this.NapCatTempPath = path.join(this.NapCatDataPath, 'temp');
+        // 创建临时目录
+        if (!fs.existsSync(this.NapCatTempPath)) {
+            fs.mkdirSync(this.NapCatTempPath, { recursive: true });
+        }
     }
     getApiContext() {
         return this.ApiContext;
     }
+    get dataPath(): string {
+        let result = this.context.wrapper.util.getNTUserDataInfoConfig();
+        if (!result) {
+            result = path.resolve(os.homedir(), './.config/QQ');
+            fs.mkdirSync(result, { recursive: true });
+        }
+        return result;
+    }
+
     // Renamed from 'InitDataListener'
     async initNapCatCoreListeners() {
         const msgListener = new MsgListener();
