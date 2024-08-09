@@ -1,7 +1,7 @@
 import BaseAction from '../BaseAction';
 import { OB11ForwardMessage, OB11Message, OB11MessageData } from '../../types';
 import { NTQQMsgApi } from '@/core/apis';
-import { OB11Constructor } from '../../helper/constructor';
+import { OB11Constructor } from '../../helper/data';
 import { ActionName, BaseCheckResult } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/utils/MessageUnique';
@@ -41,7 +41,7 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
     const msgList = data.msgList;
     const messages = await Promise.all(msgList.map(async msg => {
       const resMsg = await OB11Constructor.message(msg);
-      resMsg.message_id = await MessageUnique.createMsg({ guildId:'',chatType:msg.chatType,peerUid:msg.peerUid },msg.msgId)!;
+      resMsg.message_id = MessageUnique.createMsg({ guildId:'',chatType:msg.chatType,peerUid:msg.peerUid },msg.msgId)!;
       return resMsg;
     }));
     messages.map(msg => {

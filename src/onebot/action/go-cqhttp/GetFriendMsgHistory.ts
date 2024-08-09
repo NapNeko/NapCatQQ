@@ -3,7 +3,7 @@ import { OB11Message, OB11User } from '../../types';
 import { ActionName } from '../types';
 import { ChatType, RawMessage } from '@/core/entities';
 import { NTQQMsgApi } from '@/core/apis/msg';
-import { OB11Constructor } from '../../helper/constructor';
+import { OB11Constructor } from '../../helper/data';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/utils/MessageUnique';
 
