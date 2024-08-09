@@ -58,21 +58,21 @@ export class NTEventChannel extends EventEmitter {
     }
 
     async createEventWithListener<EventType extends (...args: any) => any, ListenerType extends (...args: any) => any>
-        (
-            eventName: string,
-            listenerName: string,
-            waitTimes = 1,
-            timeout: number = 3000,
-            checker: (...args: Parameters<ListenerType>) => boolean,
-            ...eventArg: Parameters<EventType>
-        ) {
+    (
+        eventName: string,
+        listenerName: string,
+        waitTimes = 1,
+        timeout: number = 3000,
+        checker: (...args: Parameters<ListenerType>) => boolean,
+        ...eventArg: Parameters<EventType>
+    ) {
         return new Promise<[EventRet: Awaited<ReturnType<EventType>>, ...Parameters<ListenerType>]>(async (resolve, reject) => {
             const ListenerNameList = listenerName.split('/');
             const ListenerMainName = ListenerNameList[0];
             //const ListenerSubName = ListenerNameList[1];
             this.getOrInitListener<ListenerType>(ListenerMainName);
             let complete = 0;
-            let retData: Parameters<ListenerType> | undefined = undefined;
+            const retData: Parameters<ListenerType> | undefined = undefined;
             let retEvent: any = {};
             const databack = () => {
                 if (complete == 0) {
@@ -82,7 +82,7 @@ export class NTEventChannel extends EventEmitter {
                 }
             };
             const Timeouter = setTimeout(databack, timeout);
-            let callback = (...args: Parameters<ListenerType>) => {
+            const callback = (...args: Parameters<ListenerType>) => {
                 if (checker(...args)) {
                     complete++;
                     if (complete >= waitTimes) {
@@ -109,9 +109,9 @@ export class NTEventChannel extends EventEmitter {
             //getNodeIKernelGroupListener,GroupService
             //console.log('2', eventName);
             const services = (this.wrapperSession as unknown as eventType)[serviceName]();
-            let event = services[eventName]
+            const event = services[eventName]
             //重新绑定this
-            .bind(services);
+                .bind(services);
             if (event) {
                 return event as T;
             }

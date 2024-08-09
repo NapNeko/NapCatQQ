@@ -16,13 +16,13 @@ import { sleep } from "@/common/utils/helper";
 export async function NCoreInitLiteLoader(session: NodeIQQNTWrapperSession, loginService: NodeIKernelLoginService) {
     //在进入本层前是否登录未进行判断
     console.log("NapCat LiteLoader App Loading...");
-    let pathWrapper = new NapCatPathWrapper();
-    let logger = new LogWrapper(pathWrapper.logsPath);
-    let basicInfoWrapper = new QQBasicInfoWrapper({ logger });
-    let wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
+    const pathWrapper = new NapCatPathWrapper();
+    const logger = new LogWrapper(pathWrapper.logsPath);
+    const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
+    const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
     //直到登录成功后，执行下一步
-    let selfInfo = await new Promise<SelfInfo>((resolve) => {
-        let loginListener = new LoginListener();
+    const selfInfo = await new Promise<SelfInfo>((resolve) => {
+        const loginListener = new LoginListener();
         loginListener.onQRCodeLoginSucceed = async (loginResult) => resolve({
             uid: loginResult.uid,
             uin: loginResult.uin,
@@ -35,7 +35,7 @@ export async function NCoreInitLiteLoader(session: NodeIQQNTWrapperSession, logi
     // 过早进入会导致addKernelMsgListener等Listener添加失败
     await sleep(2500);
     // 初始化 NapCatLiteLoader
-    let loaderObject = new NapCatLiteLoader(wrapper, session, logger, loginService, selfInfo, basicInfoWrapper);
+    const loaderObject = new NapCatLiteLoader(wrapper, session, logger, loginService, selfInfo, basicInfoWrapper);
 
     //启动WebUi
 

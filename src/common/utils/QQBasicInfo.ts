@@ -29,7 +29,7 @@ export class QQBasicInfoWrapper {
             ? JSON.parse(fs.readFileSync(this.QQVersionConfigPath!).toString())
             : getDefaultQQVersionConfigInfo();
         this.QQPackageInfo = JSON.parse(fs.readFileSync(this.QQPackageInfoPath).toString());
-        let { appid: IQQVersionAppid, qua: IQQVersionQua } = this.getAppidV2();
+        const { appid: IQQVersionAppid, qua: IQQVersionQua } = this.getAppidV2();
         this.QQVersionAppid = IQQVersionAppid;
         this.QQVersionQua = IQQVersionQua;
     }
@@ -40,13 +40,13 @@ export class QQBasicInfoWrapper {
     }
 
     getFullQQVesion() {
-        let version =  this.isQuickUpdate ? this.QQVersionConfig?.curVersion : this.QQPackageInfo?.version;
+        const version =  this.isQuickUpdate ? this.QQVersionConfig?.curVersion : this.QQPackageInfo?.version;
         if(!version) throw new Error("QQ版本获取失败");
         return version;
     }
 
     requireMinNTQQBuild(buildStr: string) {
-        let currentBuild = parseInt(this.getQQBuildStr() || "0");
+        const currentBuild = parseInt(this.getQQBuildStr() || "0");
         if (currentBuild == 0) throw new Error("QQBuildStr获取失败");
         return currentBuild >= parseInt(buildStr);
     }
@@ -59,7 +59,7 @@ export class QQBasicInfoWrapper {
     getAppidV2(): { appid: string; qua: string } {
         const appidTbale = AppidTable as unknown as QQAppidTableType;
         try {
-            let fullVersion = this.getFullQQVesion();
+            const fullVersion = this.getFullQQVesion();
             if (!fullVersion) throw new Error("QQ版本获取失败");
             const data = appidTbale[fullVersion];
             if (data) {
