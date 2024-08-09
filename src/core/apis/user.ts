@@ -204,7 +204,7 @@ export class NTQQUserApi {
   async getUidByUin(Uin: string) {
     //此代码仅临时使用，后期会被废弃
     if (this.context.basicInfoWrapper.requireMinNTQQBuild('26702')) {
-      return await this..getUidByUinV2(Uin);
+      return await this.getUidByUinV2(Uin);
     }
     return await this.getUidByUinV1(Uin);
   }

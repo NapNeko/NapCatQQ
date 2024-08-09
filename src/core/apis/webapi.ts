@@ -289,7 +289,7 @@ export class NTQQWebApi {
         return Object.entries(cookieObject).map(([key, value]) => `${key}=${value}`).join('; ');
     }
     
-    private getBknFromCookie(cookieObject: any) {
+    public getBknFromCookie(cookieObject: any) {
         const sKey = cookieObject.skey as string;
         
         let hash = 5381;
