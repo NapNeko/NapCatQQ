@@ -20,10 +20,7 @@ export default class SetGroupCard extends BaseAction<Payload, null> {
   actionName = ActionName.SetGroupCard;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<null> {
-    const member = await getGroupMember(payload.group_id, payload.user_id);
-    if (!member) {
-      throw `群成员${payload.user_id}不存在`;
-    }
+    const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
     await NTQQGroupApi.setMemberCard(payload.group_id.toString(), member.uid, payload.card || '');
     return null;
   }

@@ -1,15 +1,9 @@
 import { OB11GroupMember } from '../../types';
-import { getGroup, getGroupMember, groupMembers, selfInfo } from '@/core/data';
-import { OB11Constructor } from '../../constructor';
+import { OB11Constructor } from '../../helper/constructor';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { NTQQUserApi } from '@/core/apis/user';
-import { logDebug } from '@/common/utils/log';
-import { WebApi } from '@/core/apis/webapi';
-import { NTQQGroupApi } from '@/core';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import { requireMinNTQQBuild } from '@/common/utils/QQBasicInfo';
-
 // no_cache get时传字符串
 const SchemaData = {
   type: 'object',
@@ -27,7 +21,9 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
   actionName = ActionName.GetGroupMemberInfo;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
-    if (requireMinNTQQBuild('26702')) {
+    const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
+    const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
+    if (this.CoreContext.context.basicInfoWrapper.requireMinNTQQBuild('26702')) {
       const V2Data = await NTQQGroupApi.getGroupMemberV2(payload.group_id.toString(), payload.user_id.toString(), payload.no_cache == true || payload.no_cache === 'true');
       if (V2Data) {
         return OB11Constructor.groupMember(payload.group_id.toString(), V2Data);

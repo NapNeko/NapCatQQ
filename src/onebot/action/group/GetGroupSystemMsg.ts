@@ -1,4 +1,3 @@
-import { NTQQGroupApi, NTQQUserApi } from '@/core';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
@@ -15,6 +14,8 @@ type Payload = FromSchema<typeof SchemaData>;
 export class GetGroupSystemMsg extends BaseAction<void, any> {
   actionName = ActionName.GetGroupSystemMsg;
   protected async _handle(payload: void) {
+    const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
+    const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
     // 默认10条 该api未完整实现 包括响应数据规范化 类型规范化 
     const SingleScreenNotifies = await NTQQGroupApi.getSingleScreenNotifies(10);
     const retData: any = { InvitedRequest: [], join_requests: [] };
