@@ -1,30 +1,33 @@
-import { FriendRequest, FriendV2, SimpleInfo, User } from '@/core/entities';
-import { BuddyListReqType, napCatCore, NodeIKernelBuddyListener, NodeIKernelProfileService, OnBuddyChangeParams } from '@/core';
-import { NTEventDispatch } from '@/common/utils/EventTask';
+import { FriendV2, User } from '@/core/entities';
+import { BuddyListReqType, InstanceContext, NapCatCore, NodeIKernelProfileService, OnBuddyChangeParams } from '@/core';
 import { LimitedHashTable } from '@/common/utils/MessageUnique';
-import { CacheClassFuncAsyncExtend } from '@/common/utils/helper';
 export class NTQQFriendApi {
+  context: InstanceContext;
+  core: NapCatCore;
+  constructor(context: InstanceContext, core: NapCatCore) {
+    this.context = context;
+    this.core = core;
+  }
    async getBuddyV2(refresh = false): Promise<FriendV2[]> {
     let uids: string[] = [];
-    const buddyService = napCatCore.session.getBuddyService();
+    const buddyService = this.context.session.getBuddyService();
     const buddyListV2 = refresh ? await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL) : await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL);
     uids.push(...buddyListV2.data.flatMap(item => item.buddyUids));
-    const data = await NTEventDispatch.CallNoListenerEvent<NodeIKernelProfileService['getCoreAndBaseInfo']>(
+    const data = await this.core.eventWrapper.callNoListenerEvent<NodeIKernelProfileService['getCoreAndBaseInfo']>(
       'NodeIKernelProfileService/getCoreAndBaseInfo', 5000, 'nodeStore', uids
     );
     return Array.from(data.values());
   }
-  @CacheClassFuncAsyncExtend(3600 * 1000, 'getBuddyIdMap', () => true)
    async getBuddyIdMapCache(refresh = false): Promise<LimitedHashTable<string, string>> {
-    return await NTQQFriendApi.getBuddyIdMap(refresh);
+    return await this.getBuddyIdMap(refresh);
   }
    async getBuddyIdMap(refresh = false): Promise<LimitedHashTable<string, string>> {
     let uids: string[] = [];
     let retMap: LimitedHashTable<string, string> = new LimitedHashTable<string, string>(5000);
-    const buddyService = napCatCore.session.getBuddyService();
+    const buddyService = this.context.session.getBuddyService();
     const buddyListV2 = refresh ? await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL) : await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL);
     uids.push(...buddyListV2.data.flatMap(item => item.buddyUids));
-    const data = await NTEventDispatch.CallNoListenerEvent<NodeIKernelProfileService['getCoreAndBaseInfo']>(
+    const data = await this.core.eventWrapper.callNoListenerEvent<NodeIKernelProfileService['getCoreAndBaseInfo']>(
       'NodeIKernelProfileService/getCoreAndBaseInfo', 5000, 'nodeStore', uids
     );
     data.forEach((value, key) => {
@@ -36,7 +39,7 @@ export class NTQQFriendApi {
    async getBuddyV2ExWithCate(refresh = false) {
     let uids: string[] = [];
     let categoryMap: Map<string, any> = new Map();
-    const buddyService = napCatCore.session.getBuddyService();
+    const buddyService = this.context.session.getBuddyService();
     const buddyListV2 = refresh ? (await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL)).data : (await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL)).data;
     uids.push(
       ...buddyListV2.flatMap(item => {
@@ -45,7 +48,7 @@ export class NTQQFriendApi {
         });
         return item.buddyUids
       }));
-    const data = await NTEventDispatch.CallNoListenerEvent<NodeIKernelProfileService['getCoreAndBaseInfo']>(
+    const data = await this.core.eventWrapper.callNoListenerEvent<NodeIKernelProfileService['getCoreAndBaseInfo']>(
       'NodeIKernelProfileService/getCoreAndBaseInfo', 5000, 'nodeStore', uids
     );
     return Array.from(data).map(([key, value]) => {
@@ -54,7 +57,7 @@ export class NTQQFriendApi {
     });
   }
    async isBuddy(uid: string) {
-    return napCatCore.session.getBuddyService().isBuddy(uid);
+    return this.context.session.getBuddyService().isBuddy(uid);
   }
   /**
    * @deprecated
@@ -62,7 +65,7 @@ export class NTQQFriendApi {
    * @returns 
    */
    async getFriends(forced = false): Promise<User[]> {
-    let [_retData, _BuddyArg] = await NTEventDispatch.CallNormalEvent
+    let [_retData, _BuddyArg] = await this.core.eventWrapper.CallNormalEvent
       <(force: boolean) => Promise<any>, (arg: OnBuddyChangeParams) => void>
       (
         'NodeIKernelBuddyService/getBuddyList',
@@ -88,7 +91,7 @@ export class NTQQFriendApi {
     }
     let friendUid = data[0];
     let reqTime = data[1];
-    napCatCore.session.getBuddyService()?.approvalFriendRequest({
+    this.context.session.getBuddyService()?.approvalFriendRequest({
       friendUid: friendUid,
       reqTime: reqTime,
       accept
