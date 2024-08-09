@@ -5,10 +5,12 @@ export class ConfigBase<T> {
   public name: string = 'default_config';
   private pathName: string | null = null; // 本次读取的文件路径
   coreContext: NapCatCore;
-  configPath:string;
-  constructor(coreContext: NapCatCore,configPath:string) {
+  configPath: string;
+  config: { [key: string]: any } = {};
+  constructor(coreContext: NapCatCore, configPath: string) {
     this.coreContext = coreContext;
     this.configPath = configPath;
+    this.read();
   }
 
   protected getKeys(): string[] | null {
@@ -32,6 +34,9 @@ export class ConfigBase<T> {
     // 尝试加载默认配置
     return this.read_from_file('', true);
   }
+  getConfig(): T {
+    return this.config as T;
+  }
   read_from_file(pathName: string, createIfNotExist: boolean) {
     const logger = this.coreContext.context.logger;
     const configPath = this.getConfigPath(pathName);
@@ -39,35 +44,32 @@ export class ConfigBase<T> {
       if (!createIfNotExist) return null;
       this.pathName = pathName; // 记录有效的设置文件
       try {
-        fs.writeFileSync(configPath, JSON.stringify(this, this.getKeys(), 2));
+        fs.writeFileSync(configPath, JSON.stringify(this.config, this.getKeys(), 2));
         logger.log(`配置文件${configPath}已创建\n如果修改此文件后需要重启 NapCat 生效`);
       }
       catch (e: any) {
         logger.logError(`创建配置文件 ${configPath} 时发生错误:`, e.message);
       }
-      return this;
+      return this.config;
     }
 
     try {
-      const data = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-      logger.logDebug(`配置文件${configPath}已加载`, data);
-      Object.assign(this, data);
+      this.config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+      logger.logDebug(`配置文件${configPath}已加载`, this.config);
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      this.save(this); // 保存一次，让新版本的字段写入
-      return this;
+      this.save(); // 保存一次，让新版本的字段写入
+      return this.config;
     } catch (e: any) {
       if (e instanceof SyntaxError) {
         logger.logError(`配置文件 ${configPath} 格式错误，请检查配置文件:`, e.message);
       } else {
         logger.logError(`读取配置文件 ${configPath} 时发生错误:`, e.message);
       }
-      return this;
+      return {};
     }
   }
 
-  save(config: T, overwrite: boolean = false) {
-    Object.assign(this, config);
+  save(configData: T = this.config as T, overwrite: boolean = false) {
     const logger = this.coreContext.context.logger;
     const selfInfo = this.coreContext.selfInfo;
     if (overwrite) {
@@ -76,7 +78,7 @@ export class ConfigBase<T> {
     }
     const configPath = this.getConfigPath(this.pathName);
     try {
-      fs.writeFileSync(configPath, JSON.stringify(this, this.getKeys(), 2));
+      fs.writeFileSync(configPath, JSON.stringify(configData, this.getKeys(), 2));
     } catch (e: any) {
       logger.logError(`保存配置文件 ${configPath} 时发生错误:`, e.message);
     }
