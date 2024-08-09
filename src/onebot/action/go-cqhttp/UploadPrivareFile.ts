@@ -1,7 +1,5 @@
-import BaseAction from '../BaseAction';
-import { getGroup } from '@/core/data';
+import BaseAction from '../BaseAction';;
 import { ActionName } from '../types';
-import { SendMsgElementConstructor } from '@/core/entities/constructor';
 import { ChatType, Peer, SendFileElement } from '@/core/entities';
 import fs from 'fs';
 import { SendMsg, sendMsg } from '@/onebot/action/msg/SendMsg';

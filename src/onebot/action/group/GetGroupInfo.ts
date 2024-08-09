@@ -1,4 +1,3 @@
-import { getGroup } from '@/core/data';
 import { OB11Group } from '../../types';
 import { OB11Constructor } from '../../helper/constructor';
 import BaseAction from '../BaseAction';
