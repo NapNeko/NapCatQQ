@@ -1,4 +1,3 @@
-import { NTEventChannel } from "@/common/framework/event";
 import { NapCatPathWrapper } from "@/common/framework/napcat";
 import { LogWrapper } from "@/common/utils/log";
 import { proxiedListenerOf } from "@/common/utils/proxy-handler";
@@ -61,9 +60,8 @@ export class NapCatLiteLoader {
             session,
             logger,
             loginService,
-            selfInfo,
             basicInfoWrapper
         };
-        this.core = new NapCatCore(this.context);
+        this.core = new NapCatCore(this.context, selfInfo);
     }
 }
