@@ -39,7 +39,7 @@ export async function NCoreInitLiteLoader(session: NodeIQQNTWrapperSession, logi
     //启动WebUi
 
     //初始化LLNC的Onebot实现
-    new NapCatOneBot11Adapter(loaderObject.core, loaderObject.context,pathWrapper);
+    new NapCatOneBot11Adapter(loaderObject.core, loaderObject.context, pathWrapper);
 }
 
 export class NapCatLiteLoader {
