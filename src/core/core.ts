@@ -8,7 +8,7 @@ import { MsgListener, ProfileListener } from "./listeners";
 import { sleep } from "@/common/utils/helper";
 import { SelfInfo, LineDevice, SelfStatusInfo } from "./entities";
 import { LegacyNTEventWrapper } from "@/common/framework/event-legacy";
-import { NTQQGroupApi, NTQQMsgApi, NTQQUserApi } from "./apis";
+import { NTQQFriendApi, NTQQGroupApi, NTQQMsgApi, NTQQUserApi } from "./apis";
 
 export enum NapCatCoreWorkingEnv {
     Unknown = 0,
@@ -41,9 +41,10 @@ export class NapCatCore {
         this.eventWrapper = new LegacyNTEventWrapper(context.wrapper, context.session);
         this.initNapCatCoreListeners().then().catch(console.error);
         this.ApiContext = {
+            FriendApi: new NTQQFriendApi(this.context,this),
             MsgApi: new NTQQMsgApi(this.context,this),
-            UserApi: new NTQQUserApi(this.context),
-            GroupApi: new NTQQGroupApi(this.context)
+            UserApi: new NTQQUserApi(this.context,this),
+            GroupApi: new NTQQGroupApi(this.context,this)
         }
     }
     getApiContext() {

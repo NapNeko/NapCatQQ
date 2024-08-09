@@ -8,7 +8,7 @@ import {
 import path from 'path';
 import fs from 'fs';
 import fsPromises from 'fs/promises';
-import { InstanceContext, NapCatCore } from '@/core';
+import { InstanceContext, NapCatCore, OnRichMediaDownloadCompleteParams } from '@/core';
 import * as fileType from 'file-type';
 import imageSize from 'image-size';
 import { ISizeCalculationResult } from 'image-size/dist/types/interface';

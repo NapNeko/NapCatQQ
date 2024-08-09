@@ -154,7 +154,7 @@ export class NTQQUserApi {
     return profile;
   }
    async modifySelfProfile(param: ModifyProfileParams) {
-    return napCatCore.session.getProfileService().modifyDesktopMiniProfile(param);
+    return this.context.session.getProfileService().modifyDesktopMiniProfile(param);
   }
   //需要异常处理
    async getCookies(domain: string) {
@@ -224,10 +224,10 @@ export class NTQQUserApi {
     if (uid) return uid;
     uid = (await this.context.session.getUixConvertService().getUid([Uin])).uidInfo.get(Uin);
     if (uid) return uid;
-    console.log((await NTQQFriendApi.getBuddyIdMapCache(true)));
-    uid = (await NTQQFriendApi.getBuddyIdMapCache(true)).getValue(Uin);//从Buddy缓存获取Uid
+    console.log((await this.core.getApiContext().FriendApi.getBuddyIdMapCache(true)));
+    uid = (await this.core.getApiContext().FriendApi.getBuddyIdMapCache(true)).getValue(Uin);//从Buddy缓存获取Uid
     if (uid) return uid;
-    uid = (await NTQQFriendApi.getBuddyIdMap(true)).getValue(Uin);
+    uid = (await this.core.getApiContext().FriendApi.getBuddyIdMap(true)).getValue(Uin);
     if (uid) return uid;
     let unveifyUid = (await this.getUserDetailInfoByUinV2(Uin)).detail.uid;//从QQ Native 特殊转换
     if (unveifyUid.indexOf("*") == -1) uid = unveifyUid;
@@ -242,9 +242,9 @@ export class NTQQUserApi {
     if (uin) return uin;
     uin = (await this.context.session.getUixConvertService().getUin([Uid])).uinInfo.get(Uid);
     if (uin) return uin;
-    uin = (await NTQQFriendApi.getBuddyIdMapCache(true)).getKey(Uid);//从Buddy缓存获取Uin
+    uin = (await this.core.getApiContext().FriendApi.getBuddyIdMapCache(true)).getKey(Uid);//从Buddy缓存获取Uin
     if (uin) return uin;
-    uin = (await NTQQFriendApi.getBuddyIdMap(true)).getKey(Uid);
+    uin = (await this.core.getApiContext().FriendApi.getBuddyIdMap(true)).getKey(Uid);
     if (uin) return uin;
     uin = (await this.getUserDetailInfo(Uid)).uin; //从QQ Native 转换
     return uin;
