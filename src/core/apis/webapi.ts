@@ -1,8 +1,4 @@
-import { selfInfo } from '@/core/data';
-import { log, logDebug } from '@/common/utils/log';
-import { NTQQUserApi } from './user';
 import { RequestUtil } from '@/common/utils/request';
-import { CacheClassFuncAsync } from '@/common/utils/helper';
 export enum WebHonorType {
   ALL = 'all',
   TALKACTIVE = 'talkative',
@@ -117,7 +113,7 @@ export class WebApi {
    async shareDigest(groupCode: string, msgSeq: string, msgRandom: string, targetGroupCode: string) {
     const CookiesObject = await NTQQUserApi.getCookies('qun.qq.com');
     const CookieValue = Object.entries(CookiesObject).map(([key, value]) => `${key}=${value}`).join('; ');
-    const Bkn = WebApi.genBkn(CookiesObject.skey);
+    const Bkn = this.genBkn(CookiesObject.skey);
     let ret: any = undefined;
     const data = 'group_code=' + groupCode + '&msg_seq=' + msgSeq + '&msg_random=' + msgRandom + '&target_group_code=' + targetGroupCode;
     const url = 'https://qun.qq.com/cgi-bin/group_digest/share_digest?bkn=' + Bkn + "&" + data;
@@ -134,7 +130,7 @@ export class WebApi {
    async getGroupEssenceMsg(GroupCode: string, page_start: string) {
     const CookiesObject = await NTQQUserApi.getCookies('qun.qq.com');
     const CookieValue = Object.entries(CookiesObject).map(([key, value]) => `${key}=${value}`).join('; ');
-    const Bkn = WebApi.genBkn(CookiesObject.skey);
+    const Bkn = this.genBkn(CookiesObject.skey);
     const url = 'https://qun.qq.com/cgi-bin/group_digest/digest_list?bkn=' + Bkn + '&group_code=' + GroupCode + '&page_start=' + page_start + '&page_limit=20';
     let ret;
     try {
@@ -155,7 +151,7 @@ export class WebApi {
     try {
       const CookiesObject = await NTQQUserApi.getCookies('qun.qq.com');
       const CookieValue = Object.entries(CookiesObject).map(([key, value]) => `${key}=${value}`).join('; ');
-      const Bkn = WebApi.genBkn(CookiesObject.skey);
+      const Bkn = this.genBkn(CookiesObject.skey);
       const retList: Promise<WebApiGroupMemberRet>[] = [];
       const fastRet = await RequestUtil.HttpGetJson<WebApiGroupMemberRet>('https://qun.qq.com/cgi-bin/qun_mgr/search_group_members?st=0&end=40&sort=1&gc=' + GroupCode + '&bkn=' + Bkn, 'POST', '', { 'Cookie': CookieValue });
       if (!fastRet?.count || fastRet?.errcode !== 0 || !fastRet?.mems) {
@@ -204,7 +200,7 @@ export class WebApi {
 
     const CookiesObject = await NTQQUserApi.getCookies('qun.qq.com');
     const CookieValue = Object.entries(CookiesObject).map(([key, value]) => `${key}=${value}`).join('; ');
-    const Bkn = WebApi.genBkn(CookiesObject.skey);
+    const Bkn = this.genBkn(CookiesObject.skey);
     let ret: any = undefined;
     const data = 'qid=' + GroupCode + '&bkn=' + Bkn + '&text=' + Content + '&pinned=0&type=1&settings={"is_show_edit_card":1,"tip_window_type":1,"confirm_required":1}';
     const url = 'https://web.qun.qq.com/cgi-bin/announce/add_qun_notice?bkn=' + Bkn;
@@ -219,7 +215,7 @@ export class WebApi {
    async getGrouptNotice(GroupCode: string): Promise<undefined | WebApiGroupNoticeRet> {
     const CookiesObject = await NTQQUserApi.getCookies('qun.qq.com');
     const CookieValue = Object.entries(CookiesObject).map(([key, value]) => `${key}=${value}`).join('; ');
-    const Bkn = WebApi.genBkn(CookiesObject.skey);
+    const Bkn = this.genBkn(CookiesObject.skey);
     let ret: WebApiGroupNoticeRet | undefined = undefined;
     //console.log(CookieValue);
     const url = 'https://web.qun.qq.com/cgi-bin/announce/get_t_list?bkn=' + Bkn + '&qid=' + GroupCode + '&ft=23&ni=1&n=1&i=1&log_read=1&platform=1&s=-1&n=20';
