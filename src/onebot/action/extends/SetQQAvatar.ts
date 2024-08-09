@@ -1,10 +1,7 @@
 import BaseAction from '../BaseAction';
 import { ActionName, BaseCheckResult } from '../types';
 import * as fs from 'node:fs';
-import { NTQQUserApi } from '@/core/apis/user';
 import { checkFileReceived, uri2local } from '@/common/utils/file';
-// import { log } from "../../../common/utils";
-
 interface Payload {
   file: string
 }
@@ -25,7 +22,7 @@ export default class SetAvatar extends BaseAction<Payload, null> {
   }
   protected async _handle(payload: Payload): Promise<null> {
     const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
-    const { path, isLocal, errMsg,success } = (await uri2local(payload.file));
+    const { path, isLocal, errMsg, success } = (await uri2local(this.CoreContext.NapCatTempPath, payload.file));
     if (!success) {
       throw `头像${payload.file}设置失败,file字段可能格式不正确`;
     }

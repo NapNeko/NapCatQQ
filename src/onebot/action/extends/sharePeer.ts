@@ -40,7 +40,6 @@ export class shareGroupEx extends BaseAction<PayloadGroupEx, any> {
   actionName = ActionName.ShareGroupEx;
   PayloadSchema = SchemaDataGroupEx;
   protected async _handle(payload: PayloadGroupEx) {
-    const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
     const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
     return await NTQQGroupApi.getArkJsonGroupShare(payload.group_id);
   }
