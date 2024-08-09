@@ -9,58 +9,58 @@ let osName: string;
 let machineId: Promise<string>;
 
 try {
-  osName = os.hostname();
+    osName = os.hostname();
 } catch (e) {
-  osName = 'NapCat'; // + crypto.randomUUID().substring(0, 4);
+    osName = 'NapCat'; // + crypto.randomUUID().substring(0, 4);
 }
 
 const invalidMacAddresses = new Set([
-  '00:00:00:00:00:00',
-  'ff:ff:ff:ff:ff:ff',
-  'ac:de:48:00:11:22'
+    '00:00:00:00:00:00',
+    'ff:ff:ff:ff:ff:ff',
+    'ac:de:48:00:11:22'
 ]);
 
 function validateMacAddress(candidate: string): boolean {
-  // eslint-disable-next-line no-useless-escape
-  const tempCandidate = candidate.replace(/\-/g, ':').toLowerCase();
-  return !invalidMacAddresses.has(tempCandidate);
+    // eslint-disable-next-line no-useless-escape
+    const tempCandidate = candidate.replace(/\-/g, ':').toLowerCase();
+    return !invalidMacAddresses.has(tempCandidate);
 }
 
 export async function getMachineId(): Promise<string> {
-  if (!machineId) {
-    machineId = (async () => {
-      const id = await getMacMachineId();
-      return id || randomUUID(); // fallback, generate a UUID
-    })();
-  }
+    if (!machineId) {
+        machineId = (async () => {
+            const id = await getMacMachineId();
+            return id || randomUUID(); // fallback, generate a UUID
+        })();
+    }
 
-  return machineId;
+    return machineId;
 }
 
 export function getMac(): string {
-  const ifaces = networkInterfaces();
-  for (const name in ifaces) {
-    const networkInterface = ifaces[name];
-    if (networkInterface) {
-      for (const { mac } of networkInterface) {
-        if (validateMacAddress(mac)) {
-          return mac;
+    const ifaces = networkInterfaces();
+    for (const name in ifaces) {
+        const networkInterface = ifaces[name];
+        if (networkInterface) {
+            for (const { mac } of networkInterface) {
+                if (validateMacAddress(mac)) {
+                    return mac;
+                }
+            }
         }
-      }
     }
-  }
 
-  throw new Error('Unable to retrieve mac address (unexpected format)');
+    throw new Error('Unable to retrieve mac address (unexpected format)');
 }
 
 async function getMacMachineId(): Promise<string | undefined> {
-  try {
-    const crypto = await import('crypto');
-    const macAddress = getMac();
-    return crypto.createHash('sha256').update(macAddress, 'utf8').digest('hex');
-  } catch (err) {
-    return undefined;
-  }
+    try {
+        const crypto = await import('crypto');
+        const macAddress = getMac();
+        return crypto.createHash('sha256').update(macAddress, 'utf8').digest('hex');
+    } catch (err) {
+        return undefined;
+    }
 }
 
 const homeDir = os.homedir();
