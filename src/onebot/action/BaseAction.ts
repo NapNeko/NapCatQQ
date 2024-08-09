@@ -3,15 +3,17 @@ import { OB11Response } from './OB11Response';
 import { OB11Return } from '@/onebot/types';
 import Ajv, { ErrorObject, ValidateFunction } from 'ajv';
 import { NapCatCore } from '@/core';
+import { NapCatOneBot11Adapter } from '../main';
 
 class BaseAction<PayloadType, ReturnDataType> {
     actionName: ActionName = ActionName.Unknown;
     CoreContext: NapCatCore;
     private validate: undefined | ValidateFunction<any> = undefined;
     PayloadSchema: any = undefined;
-    constructor(context: NapCatCore) {
-    //注入上下文
-        this.CoreContext = context;
+    OneBotContext: NapCatOneBot11Adapter;
+    constructor(onebotContext:NapCatOneBot11Adapter,coreContext: NapCatCore) {
+        this.OneBotContext = onebotContext;
+        this.CoreContext = coreContext;
     }
     protected async check(payload: PayloadType): Promise<BaseCheckResult> {
         if (this.PayloadSchema) {
