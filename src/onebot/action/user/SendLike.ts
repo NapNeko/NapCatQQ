@@ -1,4 +1,4 @@
-import { NTQQUserApi } from '@/core/apis';
+
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
@@ -18,6 +18,7 @@ export default class SendLike extends BaseAction<Payload, null> {
   actionName = ActionName.SendLike;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<null> {
+    const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
     //logDebug('点赞参数', payload);
     try {
       const qq = payload.user_id.toString();

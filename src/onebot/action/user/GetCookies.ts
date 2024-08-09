@@ -1,6 +1,6 @@
+
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { NTQQUserApi, WebApi } from '@/core/apis';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 interface Response {
   cookies: string,
@@ -20,6 +20,8 @@ export class GetCookies extends BaseAction<Payload, Response> {
   actionName = ActionName.GetCookies;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
+    const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
+    const NTQQWebApi = this.CoreContext.getApiContext().WebApi;
     // if (!payload.domain) {
     //   throw new Error('缺少参数 domain');
     // }
@@ -63,7 +65,7 @@ export class GetCookies extends BaseAction<Payload, Response> {
     const cookiesObject = await NTQQUserApi.getCookies(payload.domain);
     //把获取到的cookiesObject转换成 k=v; 格式字符串拼接在一起
     const cookies = Object.entries(cookiesObject).map(([key, value]) => `${key}=${value}`).join('; ');
-    const bkn = WebApi.genBkn(cookiesObject.p_skey);
+    const bkn = NTQQWebApi.getBknFromCookie(cookiesObject.p_skey);
     return { cookies, bkn };
   }
 }

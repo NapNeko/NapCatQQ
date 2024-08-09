@@ -20,9 +20,7 @@ export default class SetGroupKick extends BaseAction<Payload, null> {
   actionName = ActionName.SetGroupKick;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<null> {
-    const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
     const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
-    const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
     const rejectReq = payload.reject_add_request?.toString() == 'true';
     await NTQQGroupApi.kickMember(payload.group_id.toString(), [member.uid], rejectReq);
     return null;

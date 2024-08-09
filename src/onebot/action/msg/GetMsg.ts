@@ -1,10 +1,9 @@
 import { OB11Message } from '../../types';
-import { OB11Constructor } from '../../constructor';
+import { OB11Constructor } from '../../helper/constructor';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/utils/MessageUnique';
-import { NTQQMsgApi } from '@/core';
 
 
 export type ReturnDataType = OB11Message
@@ -23,6 +22,7 @@ class GetMsg extends BaseAction<Payload, OB11Message> {
   actionName = ActionName.GetMsg;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
+    const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
     // log("history msg ids", Object.keys(msgHistory));
     if (!payload.message_id) {
       throw Error('参数message_id不能为空');

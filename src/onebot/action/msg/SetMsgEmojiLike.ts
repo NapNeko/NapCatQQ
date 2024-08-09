@@ -19,6 +19,7 @@ export class SetMsgEmojiLike extends BaseAction<Payload, any> {
   actionName = ActionName.SetMsgEmojiLike;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
+    const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
     const msg = MessageUnique.getMsgIdAndPeerByShortId(parseInt(payload.message_id.toString()));
     if (!msg) {
       throw new Error('msg not found');
