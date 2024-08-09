@@ -1,5 +1,4 @@
 import BaseAction from '../BaseAction';
-import { getGroupMember } from '@/core/data';
 import { GroupMemberRole } from '@/core/entities';
 import { ActionName } from '../types';
 import { NTQQGroupApi } from '@/core/apis/group';
@@ -21,12 +20,7 @@ export default class SetGroupAdmin extends BaseAction<Payload, null> {
   actionName = ActionName.SetGroupAdmin;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<null> {
-    const member = await getGroupMember(payload.group_id, payload.user_id);
-    // 已经前置验证类型
-    const enable = payload.enable?.toString() !== 'false';
-    if (!member) {
-      throw `群成员${payload.user_id}不存在`;
-    }
+    const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
     await NTQQGroupApi.setMemberRole(payload.group_id.toString(), member.uid, enable ? GroupMemberRole.admin : GroupMemberRole.normal);
     return null;
   }

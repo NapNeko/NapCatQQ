@@ -1,4 +1,4 @@
-import { WebApi, WebApiGroupNoticeFeed, WebApiGroupNoticeRet } from '@/core/apis/webapi';
+import { WebApiGroupNoticeFeed } from '@/core';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
@@ -26,12 +26,15 @@ const SchemaData = {
 type Payload = FromSchema<typeof SchemaData>;
 
 type ApiGroupNotice = GroupNotice & WebApiGroupNoticeFeed;
+
 export class GetGroupNotice extends BaseAction<Payload, GroupNotice[]> {
   actionName = ActionName.GoCQHTTP_GetGroupNotice;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
+    const NTQQWebApi = this.CoreContext.getApiContext().WebApi;
+
     const group = payload.group_id.toString();
-    const ret = await WebApi.getGrouptNotice(group);
+    const ret = await NTQQWebApi.getGroupNotice(group);
     if (!ret) {
       throw new Error('获取公告失败');
     }

@@ -1,9 +1,6 @@
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { NTQQGroupApi } from '@/core/apis/group';
-import { log, logError } from '@/common/utils/log';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import { deleteGroup } from '@/core/data';
 const SchemaData = {
   type: 'object',
   properties: {
@@ -18,11 +15,10 @@ export default class SetGroupLeave extends BaseAction<Payload, any> {
   actionName = ActionName.SetGroupLeave;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<any> {
+    const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
     try {
       await NTQQGroupApi.quitGroup(payload.group_id.toString());
-      deleteGroup(payload.group_id.toString());
     } catch (e) {
-      logError('退群失败', e);
       throw e;
     }
   }

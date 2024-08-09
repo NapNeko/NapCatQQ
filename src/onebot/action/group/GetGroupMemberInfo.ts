@@ -1,14 +1,8 @@
 import { OB11GroupMember } from '../../types';
-import { OB11Constructor } from '../../constructor';
+import { OB11Constructor } from '../../helper/constructor';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { NTQQUserApi } from '@/core/apis/user';
-import { logDebug } from '@/common/utils/log';
-import { WebApi } from '@/core/apis/webapi';
-import { NTQQGroupApi } from '@/core';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import { getGroupMember, selfInfo } from '@/core/data';
-import { requireMinNTQQBuild } from '@/common/utils/QQBasicInfo';
 const SchemaData = {
   type: 'object',
   properties: {
@@ -25,6 +19,9 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
   actionName = ActionName.GetGroupMemberInfo;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
+    const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
+    const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
+    const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
     const isNocache = payload.no_cache == true || payload.no_cache === 'true';
     const uid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
     if (!uid) {
@@ -36,14 +33,14 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
     }
     try {
       const info = (await NTQQUserApi.getUserDetailInfo(member.uid));
-      logDebug('群成员详细信息结果', info);
+      this.CoreContext.context.logger.logDebug('群成员详细信息结果', info);
       Object.assign(member, info);
     } catch (e) {
-      logDebug('获取群成员详细信息失败, 只能返回基础信息', e);
+      this.CoreContext.context.loggerlogDebug('获取群成员详细信息失败, 只能返回基础信息', e);
     }
     const date = Math.round(Date.now() / 1000);
     const retMember = OB11Constructor.groupMember(payload.group_id.toString(), member);
-    if (!requireMinNTQQBuild('26702')) {
+    if (!this.CoreContext.context.basicInfoWrapper.requireMinNTQQBuild('26702')) {
       const SelfInfoInGroup = await NTQQGroupApi.getGroupMemberV2(payload.group_id.toString(), selfInfo.uid, isNocache);
       let isPrivilege = false;
       if (SelfInfoInGroup) {

@@ -1,13 +1,9 @@
-import { getGroup, getGroupMember, selfInfo } from '@/core/data';
+
 import { OB11GroupMember } from '../../types';
-import { OB11Constructor } from '../../constructor';
+import { OB11Constructor } from '../../helper/constructor';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { NTQQGroupApi } from '@/core';
-import { WebApi } from '@/core/apis/webapi';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import { requireMinNTQQBuild } from '@/common/utils/QQBasicInfo';
-
 const SchemaData = {
   type: 'object',
   properties: {
@@ -23,6 +19,8 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
   actionName = ActionName.GetGroupMemberList;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
+    const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
+    const NTQQWebApi = this.CoreContext.getApiContext().WebApi;
     const isNocache = payload.no_cache == true || payload.no_cache === 'true';
 
     const GroupList = await NTQQGroupApi.getGroups(isNocache);
@@ -44,12 +42,12 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
       MemberMap.set(_groupMembers[i].user_id, _groupMembers[i]);
     }
 
-    if (!requireMinNTQQBuild('26702')) {
-      const selfRole = groupMembers.get(selfInfo.uid)?.role;
+    if (!this.CoreContext.context.basicInfoWrapper.requireMinNTQQBuild('26702')) {
+      const selfRole = groupMembers.get(this.CoreContext.selfInfo.uid)?.role;
       const isPrivilege = selfRole === 3 || selfRole === 4;
 
       if (isPrivilege) {
-        const webGroupMembers = await WebApi.getGroupMembers(payload.group_id.toString());
+        const webGroupMembers = await NTQQWebApi.getGroupMembers(payload.group_id.toString());
         for (let i = 0, len = webGroupMembers.length; i < len; i++) {
           if (!webGroupMembers[i]?.uin) {
             continue;
@@ -65,7 +63,7 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
         }
       } else {
         if (isNocache) {
-          const DateMap = await NTQQGroupApi.getGroupMemberLastestSendTimeCache(payload.group_id.toString());//开始从本地拉取
+          const DateMap = await NTQQGroupApi.getGroupMemberLatestSendTimeCache(payload.group_id.toString());//开始从本地拉取
           for (const DateUin of DateMap.keys()) {
             const MemberData = MemberMap.get(parseInt(DateUin));
             if (MemberData) {

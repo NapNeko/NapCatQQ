@@ -1,6 +1,6 @@
 import { getGroup } from '@/core/data';
 import { OB11Group } from '../../types';
-import { OB11Constructor } from '../../constructor';
+import { OB11Constructor } from '../../helper/constructor';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
