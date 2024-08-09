@@ -26,8 +26,8 @@ export class NTQQGroupApi {
           );
     return groupList;
     }
-    async getGroupMemberLastestSendTimeCache(GroupCode: string) {
-        return this.getGroupMemberLastestSendTime(GroupCode);
+    async getGroupMemberLatestSendTimeCache(GroupCode: string) {
+        return this.getGroupMemberLatestSendTime(GroupCode);
     }
     /**
    * 通过QQ自带数据库获取群成员最后发言时间(仅返回有效数据 且消耗延迟大 需要进行缓存)
@@ -39,9 +39,9 @@ export class NTQQGroupApi {
    *  console.log(uin, sendTime);
    * }
   */
-    async getGroupMemberLastestSendTime(GroupCode: string) {
+    async getGroupMemberLatestSendTime(GroupCode: string) {
         const getdata = async (uid: string) => {
-            const NTRet = await this.getLastestMsgByUids(GroupCode, [uid]);
+            const NTRet = await this.getLatestMsgByUids(GroupCode, [uid]);
             if (NTRet.result != 0 && NTRet.msgList.length < 1) {
                 return undefined;
             }
@@ -67,7 +67,7 @@ export class NTQQGroupApi {
         }
         return ret;
     }
-    async getLastestMsgByUids(GroupCode: string, uids: string[]) {
+    async getLatestMsgByUids(GroupCode: string, uids: string[]) {
         const ret = await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {
             chatInfo: {
                 peerUid: GroupCode,
@@ -86,7 +86,7 @@ export class NTQQGroupApi {
     async getGroupMemberAll(GroupCode: string, forced = false) {
         return this.context.session.getGroupService().getAllMemberList(GroupCode, forced);
     }
-    async getLastestMsg(GroupCode: string, uins: string[]) {
+    async getLatestMsg(GroupCode: string, uins: string[]) {
         const uids: Array<string> = [];
         for (const uin of uins) {
             const uid = await this.core.getApiContext().UserApi.getUidByUin(uin);
