@@ -32,7 +32,7 @@ export class KernelRecentContactListener implements IKernelRecentContactListener
 
     onGuildDisplayRecentContactListChanged(...args: unknown[]) {
 
-     }
+    }
 
     onRecentContactListChanged(...args: unknown[]) { 
 

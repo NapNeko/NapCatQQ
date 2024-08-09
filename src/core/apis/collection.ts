@@ -4,11 +4,11 @@ export class NTQQCollectionApi {
     context: InstanceContext;
     core: NapCatCore;
     constructor(context: InstanceContext, core: NapCatCore) {
-      this.context = context;
-      this.core = core;
+        this.context = context;
+        this.core = core;
     }
-     async createCollection(authorUin: string, authorUid: string, authorName: string, brief: string, rawData: string) {
-        let param = {
+    async createCollection(authorUin: string, authorUid: string, authorName: string, brief: string, rawData: string) {
+        const param = {
             commInfo: {
                 bid: 1,
                 category: 2,
@@ -44,8 +44,8 @@ export class NTQQCollectionApi {
         };
         return this.context.session.getCollectionService().createNewCollectionItem(param);
     }
-     async getAllCollection(category: number = 0, count: number = 50) {
-        let param = {
+    async getAllCollection(category: number = 0, count: number = 50) {
+        const param = {
             category: category,
             groupId: -1,
             forceSync: true,

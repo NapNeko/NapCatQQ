@@ -46,57 +46,57 @@ export interface NodeIKernelBuddyListener extends IBuddyListener {
 }
 
 export class BuddyListener implements IBuddyListener {
-  onBuddyListChangedV2(arg: unknown): void {
+    onBuddyListChangedV2(arg: unknown): void {
     //throw new Error('Method not implemented.');
-  }
-  onAddBuddyNeedVerify(arg: unknown) {
-  }
+    }
+    onAddBuddyNeedVerify(arg: unknown) {
+    }
 
-  onAddMeSettingChanged(arg: unknown) {
-  }
+    onAddMeSettingChanged(arg: unknown) {
+    }
 
-  onAvatarUrlUpdated(arg: unknown) {
-  }
+    onAvatarUrlUpdated(arg: unknown) {
+    }
 
-  onBlockChanged(arg: unknown) {
-  }
+    onBlockChanged(arg: unknown) {
+    }
 
-  onBuddyDetailInfoChange(arg: unknown) {
-  }
+    onBuddyDetailInfoChange(arg: unknown) {
+    }
 
-  onBuddyInfoChange(arg: unknown) {
-  }
+    onBuddyInfoChange(arg: unknown) {
+    }
 
-  onBuddyListChange(arg: OnBuddyChangeParams): void {
-  }
+    onBuddyListChange(arg: OnBuddyChangeParams): void {
+    }
 
-  onBuddyRemarkUpdated(arg: unknown): void {
-  }
+    onBuddyRemarkUpdated(arg: unknown): void {
+    }
 
-  onBuddyReqChange(arg: FriendRequestNotify): void {
-  }
+    onBuddyReqChange(arg: FriendRequestNotify): void {
+    }
 
-  onBuddyReqUnreadCntChange(arg: unknown): void {
-  }
+    onBuddyReqUnreadCntChange(arg: unknown): void {
+    }
 
-  onCheckBuddySettingResult(arg: unknown): void {
-  }
+    onCheckBuddySettingResult(arg: unknown): void {
+    }
 
-  onDelBatchBuddyInfos(arg: unknown): void {
-  }
+    onDelBatchBuddyInfos(arg: unknown): void {
+    }
 
-  onDoubtBuddyReqChange(arg: unknown): void {
-  }
+    onDoubtBuddyReqChange(arg: unknown): void {
+    }
 
-  onDoubtBuddyReqUnreadNumChange(arg: unknown): void {
-  }
+    onDoubtBuddyReqUnreadNumChange(arg: unknown): void {
+    }
 
-  onNickUpdated(arg: unknown): void {
-  }
+    onNickUpdated(arg: unknown): void {
+    }
 
-  onSmartInfos(arg: unknown): void {
-  }
+    onSmartInfos(arg: unknown): void {
+    }
 
-  onSpacePermissionInfos(arg: unknown): void {
-  }
+    onSpacePermissionInfos(arg: unknown): void {
+    }
 }

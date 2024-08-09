@@ -45,17 +45,17 @@ export class NapCatCore {
             MsgApi: new NTQQMsgApi(this.context,this),
             UserApi: new NTQQUserApi(this.context,this),
             GroupApi: new NTQQGroupApi(this.context,this)
-        }
+        };
     }
     getApiContext() {
         return this.ApiContext;
     }
     // Renamed from 'InitDataListener'
     async initNapCatCoreListeners() {
-        let msgListener = new MsgListener();
+        const msgListener = new MsgListener();
         msgListener.onRecvMsg = (msg) => {
             console.log("RecvMsg", msg);
-        }
+        };
         //await sleep(2500);
         this.context.session.getMsgService().addKernelMsgListener(
             new this.context.wrapper.NodeIKernelMsgListener(proxiedListenerOf(msgListener, this.context.logger))
