@@ -4,9 +4,9 @@ import fs from "node:fs";
 import { InstanceContext } from "./wrapper";
 import { NTEventChannel } from "@/common/framework/event";
 import { proxiedListenerOf } from "@/common/utils/proxy-handler";
-import { MsgListener } from "./listeners";
+import { MsgListener, ProfileListener } from "./listeners";
 import { sleep } from "@/common/utils/helper";
-import { SelfInfo, LineDevice } from "./entities";
+import { SelfInfo, LineDevice, SelfStatusInfo } from "./entities";
 
 export enum NapCatCoreWorkingEnv {
     Unknown = 0,
@@ -30,12 +30,6 @@ export class NapCatCore {
 
     // runtime info, not readonly
     selfInfo: SelfInfo;
-    deviceList: {
-        app_id: string,
-        device_name: string,
-        device_kind: string
-    }[] = [];
-
     // 通过构造器递过去的 runtime info 应该尽量少
     constructor(context: InstanceContext, selfInfo: SelfInfo) {
         this.selfInfo = selfInfo;
@@ -50,16 +44,24 @@ export class NapCatCore {
         msgListener.onRecvMsg = (msg) => {
             console.log("RecvMsg", msg);
         }
-        msgListener.onLineDev = (devices: LineDevice[]) => {
-            this.deviceList = devices.map((device: LineDevice) => ({
-                app_id: device.devUid,
-                device_name: device.clientType.toString(),
-                device_kind: device.clientType.toString(),
-            }));
-        };
         //await sleep(2500);
         this.context.session.getMsgService().addKernelMsgListener(
             new this.context.wrapper.NodeIKernelMsgListener(proxiedListenerOf(msgListener, this.context.logger))
+        );
+        
+        const profileListener = new ProfileListener();
+        profileListener.onProfileDetailInfoChanged = (profile) => {
+            if (profile.uid === this.selfInfo.uid) {
+                Object.assign(this.selfInfo, profile);
+            }
+        };
+        profileListener.onSelfStatusChanged = (Info: SelfStatusInfo) => {
+            // if (Info.status == 20) {
+            //   log("账号状态变更为离线")
+            // }
+        };
+        this.context.session.getProfileService().addKernelProfileListener(
+            new this.context.wrapper.NodeIKernelProfileListener(proxiedListenerOf(profileListener, this.context.logger))
         );
     }
 }

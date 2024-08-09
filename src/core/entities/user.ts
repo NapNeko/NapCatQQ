@@ -177,6 +177,16 @@ export interface FriendV2 extends SimpleInfo {
     categoryId?: number;
     categroyName?: string;
 }
+export interface SelfStatusInfo {
+    uid: string
+    status: number
+    extStatus: number
+    termType: number
+    netType: number
+    iconType: number
+    customStatus: any
+    setTime: string
+  }
 export interface UserDetailInfoListenerArg {
     uid: string;
     uin: string;
