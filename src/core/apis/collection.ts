@@ -1,7 +1,6 @@
-import { napCatCore } from "..";
 
 export class NTQQCollectionApi {
-    static async createCollection(authorUin: string, authorUid: string, authorName: string, brief: string, rawData: string) {
+     async createCollection(authorUin: string, authorUid: string, authorName: string, brief: string, rawData: string) {
         let param = {
             commInfo: {
                 bid: 1,
@@ -38,7 +37,7 @@ export class NTQQCollectionApi {
         };
         return napCatCore.session.getCollectionService().createNewCollectionItem(param);
     }
-    static async getAllCollection(category: number = 0, count: number = 50) {
+     async getAllCollection(category: number = 0, count: number = 50) {
         let param = {
             category: category,
             groupId: -1,

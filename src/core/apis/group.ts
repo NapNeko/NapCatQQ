@@ -5,10 +5,10 @@ import { log } from '@/common/utils/log';
 import { groupMembers } from '../data';
 import { CacheClassFuncAsyncExtend, runAllWithTimeout } from '@/common/utils/helper';
 export class NTQQGroupApi {
-  static async setGroupAvatar(gc: string, filePath: string) {
+   async setGroupAvatar(gc: string, filePath: string) {
     return napCatCore.session.getGroupService().setHeader(gc, filePath);
   }
-  static async getGroups(forced = false) {
+   async getGroups(forced = false) {
     type ListenerType = NodeIKernelGroupListener['onGroupListUpdate'];
     let [_retData, _updateType, groupList] = await NTEventDispatch.CallNormalEvent
       <(force: boolean) => Promise<any>, ListenerType>
@@ -24,7 +24,7 @@ export class NTQQGroupApi {
   }
 
   @CacheClassFuncAsyncExtend(3600 * 1000, "LastestSendTime", () => true)
-  static async getGroupMemberLastestSendTimeCache(GroupCode: string) {
+   async getGroupMemberLastestSendTimeCache(GroupCode: string) {
     return NTQQGroupApi.getGroupMemberLastestSendTime(GroupCode);
   }
   /**
@@ -37,7 +37,7 @@ export class NTQQGroupApi {
    *  console.log(uin, sendTime);
    * }
   */
-  static async getGroupMemberLastestSendTime(GroupCode: string) {
+   async getGroupMemberLastestSendTime(GroupCode: string) {
     async function getdata(uid: string) {
       let NTRet = await NTQQGroupApi.getLastestMsgByUids(GroupCode, [uid]);
       if (NTRet.result != 0 && NTRet.msgList.length < 1) {
@@ -65,7 +65,7 @@ export class NTQQGroupApi {
     }
     return ret;
   }
-  static async getLastestMsgByUids(GroupCode: string, uids: string[]) {
+   async getLastestMsgByUids(GroupCode: string, uids: string[]) {
     let ret = await napCatCore.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {
       chatInfo: {
         peerUid: GroupCode,
@@ -81,10 +81,10 @@ export class NTQQGroupApi {
     });
     return ret;
   }
-  static async getGroupMemberAll(GroupCode: string, forced = false) {
+   async getGroupMemberAll(GroupCode: string, forced = false) {
     return napCatCore.session.getGroupService().getAllMemberList(GroupCode, forced);
   }
-  static async getLastestMsg(GroupCode: string, uins: string[]) {
+   async getLastestMsg(GroupCode: string, uins: string[]) {
     let uids: Array<string> = [];
     for (let uin of uins) {
       let uid = await NTQQUserApi.getUidByUin(uin)
@@ -107,19 +107,19 @@ export class NTQQGroupApi {
     });
     return ret;
   }
-  static async getGroupRecommendContactArkJson(GroupCode: string) {
+   async getGroupRecommendContactArkJson(GroupCode: string) {
     return napCatCore.session.getGroupService().getGroupRecommendContactArkJson(GroupCode);
   }
-  static async CreatGroupFileFolder(groupCode: string, folderName: string) {
+   async CreatGroupFileFolder(groupCode: string, folderName: string) {
     return napCatCore.session.getRichMediaService().createGroupFolder(groupCode, folderName);
   }
-  static async DelGroupFile(groupCode: string, files: string[]) {
+   async DelGroupFile(groupCode: string, files: string[]) {
     return napCatCore.session.getRichMediaService().deleteGroupFile(groupCode, [102], files);
   }
-  static async DelGroupFileFolder(groupCode: string, folderId: string) {
+   async DelGroupFileFolder(groupCode: string, folderId: string) {
     return napCatCore.session.getRichMediaService().deleteGroupFolder(groupCode, folderId);
   }
-  static async addGroupEssence(GroupCode: string, msgId: string) {
+   async addGroupEssence(GroupCode: string, msgId: string) {
     // 代码没测过
     // 需要 ob11msgid->msgId + (peer) -> msgSeq + msgRandom
     let MsgData = await napCatCore.session.getMsgService().getMsgsIncludeSelf({ chatType: 2, guildId: '', peerUid: GroupCode }, msgId, 1, false);
@@ -131,7 +131,7 @@ export class NTQQGroupApi {
     // GetMsgByShoretID(ShoretID); -> MsgService.getMsgs(Peer,MsgId,1,false); -> 组出参数
     return napCatCore.session.getGroupService().addGroupEssence(param);
   }
-  static async removeGroupEssence(GroupCode: string, msgId: string) {
+   async removeGroupEssence(GroupCode: string, msgId: string) {
     // 代码没测过
     // 需要 ob11msgid->msgId + (peer) -> msgSeq + msgRandom
     let MsgData = await napCatCore.session.getMsgService().getMsgsIncludeSelf({ chatType: 2, guildId: '', peerUid: GroupCode }, msgId, 1, false);
@@ -143,7 +143,7 @@ export class NTQQGroupApi {
     // GetMsgByShoretID(ShoretID); -> MsgService.getMsgs(Peer,MsgId,1,false); -> 组出参数
     return napCatCore.session.getGroupService().removeGroupEssence(param);
   }
-  static async getSingleScreenNotifies(num: number) {
+   async getSingleScreenNotifies(num: number) {
     let [_retData, _doubt, _seq, notifies] = await NTEventDispatch.CallNormalEvent
       <(arg1: boolean, arg2: string, arg3: number) => Promise<any>, (doubt: boolean, seq: string, notifies: GroupNotify[]) => void>
       (
@@ -158,7 +158,7 @@ export class NTQQGroupApi {
       );
     return notifies;
   }
-  static async getGroupMemberV2(GroupCode: string, uid: string, forced = false) {
+   async getGroupMemberV2(GroupCode: string, uid: string, forced = false) {
     type ListenerType = NodeIKernelGroupListener['onMemberInfoChange'];
     type EventType = NodeIKernelGroupService['getMemberInfo'];
     // NTEventDispatch.CreatListenerFunction('NodeIKernelGroupListener/onGroupMemberInfoUpdate', 
@@ -177,7 +177,7 @@ export class NTQQGroupApi {
       );
     return _members.get(uid);
   }
-  static async getGroupMembers(groupQQ: string, num = 3000): Promise<Map<string, GroupMember>> {
+   async getGroupMembers(groupQQ: string, num = 3000): Promise<Map<string, GroupMember>> {
     const groupService = napCatCore.session.getGroupService();
     const sceneId = groupService.createMemberListScene(groupQQ, 'groupMemberList_MainWindow');
     const result = await groupService.getNextMemberList(sceneId!, undefined, num);
@@ -196,17 +196,17 @@ export class NTQQGroupApi {
     */
   }
 
-  static async getGroupNotifies() {
+   async getGroupNotifies() {
     // 获取管理员变更
     // 加群通知，退出通知，需要管理员权限
 
   }
-  static async GetGroupFileCount(Gids: Array<string>) {
+   async GetGroupFileCount(Gids: Array<string>) {
     return napCatCore.session.getRichMediaService().batchGetGroupFileCount(Gids);
   }
-  static async getGroupIgnoreNotifies() {
+   async getGroupIgnoreNotifies() {
   }
-  static async getArkJsonGroupShare(GroupCode: string) {
+   async getArkJsonGroupShare(GroupCode: string) {
     let ret = await NTEventDispatch.CallNoListenerEvent
       <(GroupId: string) => Promise<GeneralCallResult & { arkJson: string }>>(
         'NodeIKernelGroupService/getGroupRecommendContactArkJson',
@@ -216,11 +216,11 @@ export class NTQQGroupApi {
     return ret.arkJson;
   }
   //需要异常处理
-  static async uploadGroupBulletinPic(GroupCode: string, imageurl: string) {
+   async uploadGroupBulletinPic(GroupCode: string, imageurl: string) {
     const _Pskey = (await NTQQUserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com')!;
     return napCatCore.session.getGroupService().uploadGroupBulletinPic(GroupCode, _Pskey, imageurl);
   }
-  static async handleGroupRequest(flag: string, operateType: GroupRequestOperateTypes, reason?: string) {
+   async handleGroupRequest(flag: string, operateType: GroupRequestOperateTypes, reason?: string) {
     let flagitem = flag.split('|');
     let groupCode = flagitem[0];
     let seq = flagitem[1];
@@ -239,41 +239,41 @@ export class NTQQGroupApi {
       });
   }
 
-  static async quitGroup(groupQQ: string) {
+   async quitGroup(groupQQ: string) {
     return napCatCore.session.getGroupService().quitGroup(groupQQ);
   }
 
-  static async kickMember(groupQQ: string, kickUids: string[], refuseForever: boolean = false, kickReason: string = '') {
+   async kickMember(groupQQ: string, kickUids: string[], refuseForever: boolean = false, kickReason: string = '') {
     return napCatCore.session.getGroupService().kickMember(groupQQ, kickUids, refuseForever, kickReason);
   }
 
-  static async banMember(groupQQ: string, memList: Array<{ uid: string, timeStamp: number }>) {
+   async banMember(groupQQ: string, memList: Array<{ uid: string, timeStamp: number }>) {
     // timeStamp为秒数, 0为解除禁言
     return napCatCore.session.getGroupService().setMemberShutUp(groupQQ, memList);
   }
 
-  static async banGroup(groupQQ: string, shutUp: boolean) {
+   async banGroup(groupQQ: string, shutUp: boolean) {
     return napCatCore.session.getGroupService().setGroupShutUp(groupQQ, shutUp);
   }
 
-  static async setMemberCard(groupQQ: string, memberUid: string, cardName: string) {
+   async setMemberCard(groupQQ: string, memberUid: string, cardName: string) {
     return napCatCore.session.getGroupService().modifyMemberCardName(groupQQ, memberUid, cardName);
   }
 
-  static async setMemberRole(groupQQ: string, memberUid: string, role: GroupMemberRole) {
+   async setMemberRole(groupQQ: string, memberUid: string, role: GroupMemberRole) {
     return napCatCore.session.getGroupService().modifyMemberRole(groupQQ, memberUid, role);
   }
 
-  static async setGroupName(groupQQ: string, groupName: string) {
+   async setGroupName(groupQQ: string, groupName: string) {
     return napCatCore.session.getGroupService().modifyGroupName(groupQQ, groupName, false);
   }
 
   // 头衔不可用
-  static async setGroupTitle(groupQQ: string, uid: string, title: string) {
+   async setGroupTitle(groupQQ: string, uid: string, title: string) {
 
   }
 
-  static async publishGroupBulletin(groupQQ: string, content: string, picInfo: { id: string, width: number, height: number } | undefined = undefined, pinned: number = 0, confirmRequired: number = 0,) {
+   async publishGroupBulletin(groupQQ: string, content: string, picInfo: { id: string, width: number, height: number } | undefined = undefined, pinned: number = 0, confirmRequired: number = 0,) {
     const _Pskey = (await NTQQUserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com');
     //text是content内容url编码
     let data = {
@@ -285,10 +285,10 @@ export class NTQQGroupApi {
     };
     return napCatCore.session.getGroupService().publishGroupBulletin(groupQQ, _Pskey!, data);
   }
-  static async getGroupRemainAtTimes(GroupCode: string) {
+   async getGroupRemainAtTimes(GroupCode: string) {
     napCatCore.session.getGroupService().getGroupRemainAtTimes(GroupCode);
   }
-  static async getMemberExtInfo(groupCode: string, uin: string) {
+   async getMemberExtInfo(groupCode: string, uin: string) {
     // 仅NTQQ 9.9.11 24568测试 容易炸开谨慎使用
     return napCatCore.session.getGroupService().getMemberExtInfo(
       {
