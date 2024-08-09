@@ -10,7 +10,7 @@ import {
     NapCatCore,
     InstanceContext,
     WrapperNodeApi,
-    NodeIQQNTWrapperSession
+    NodeIQQNTWrapperSession,
 } from '@/core';
 import { QQBasicInfoWrapper } from '@/common/utils/QQBasicInfo';
 import { hostname, systemVersion } from '@/common/utils/system';
@@ -21,7 +21,6 @@ import path from 'path';
 import fs from 'fs';
 import os from 'os';
 import { NodeIKernelLoginService } from '@/core/services';
-import { NapCatOneBot11Adapter } from '@/onebot';
 import { program } from 'commander';
 import qrcode from 'qrcode-terminal';
 
@@ -64,9 +63,9 @@ export async function NCoreInitShell() {
             global_path_config: {
                 desktopGlobalPath: dataPathGlobal,
             },
-            thumb_config: { maxSide: 324, minSide: 48, longLimit: 6, density: 2 }
+            thumb_config: { maxSide: 324, minSide: 48, longLimit: 6, density: 2 },
         },
-        new wrapper.NodeIGlobalAdapter(new GlobalAdapter())
+        new wrapper.NodeIGlobalAdapter(new GlobalAdapter()),
     );
     loginService.initConfig({
         machineId: '',
@@ -74,7 +73,7 @@ export async function NCoreInitShell() {
         platVer: systemVersion,
         commonPath: dataPathGlobal,
         clientVer: basicInfoWrapper.getFullQQVesion(),
-        hostName: hostname
+        hostName: hostname,
     });
 
     let quickLoginUin = cmdOptions.qq; // undefined | 'true' | string
@@ -88,7 +87,7 @@ export async function NCoreInitShell() {
         }
     }
 
-    const selfInfo = await new Promise<SelfInfo>((resolve) => {
+    const selfInfo = await new Promise<SelfInfo>((resolve, reject) => {
         const loginListener = new LoginListener();
 
         // from constructor
@@ -100,37 +99,47 @@ export async function NCoreInitShell() {
             uid: loginResult.uid,
             uin: loginResult.uin,
             nick: '', // 获取不到
-            online: true
+            online: true,
         });
 
         loginListener.onQRCodeGetPicture = ({ pngBase64QrcodeData, qrcodeUrl }) => {
             const realBase64 = pngBase64QrcodeData.replace(/^data:image\/\w+;base64,/, '');
             const buffer = Buffer.from(realBase64, 'base64');
             logger.logWarn('请扫描下面的二维码，然后在手Q上授权登录：');
-            const qrcodePath = path.join(__dirname, 'qrcode.png');
+            const qrcodePath = path.join(dataPath, 'qrcode.png');
             qrcode.generate(qrcodeUrl, { small: true }, (res) => {
                 logger.logWarn([
                     res,
                     '二维码解码URL: ' + qrcodeUrl,
-                    '如果控制台二维码无法扫码，可以复制解码url到二维码生成网站生成二维码再扫码，也可以打开下方的二维码路径图片进行扫码。'
+                    '如果控制台二维码无法扫码，可以复制解码url到二维码生成网站生成二维码再扫码，也可以打开下方的二维码路径图片进行扫码。',
                 ].join('\n'));
                 fs.writeFile(qrcodePath, buffer, {}, () => {
                     logger.logWarn('二维码已保存到', qrcodePath);
                 });
             });
-        }
+        };
 
         loginService.addKernelLoginListener(new wrapper.NodeIKernelLoginListener(
             proxiedListenerOf(loginListener, logger)));
 
         if (quickLoginUin && historyLoginList.some(u => u.uin === quickLoginUin)) {
             logger.log('正在快速登录 ', quickLoginUin);
-            loginService.quickLoginWithUin(quickLoginUin);
+            setTimeout(() => {
+                loginService.quickLoginWithUin(quickLoginUin)
+                    .then(result => {
+                        if (result.loginErrorInfo.errMsg) {
+                            logger.logError('快速登录错误：', result.loginErrorInfo.errMsg);
+                            reject();
+                        }
+                    })
+                    .catch(e => reject(e));
+            }, 1000);
         } else {
             logger.log('没有 -q 指令指定快速登录，或未曾登录过这个 QQ，将使用二维码登录方式');
             if (historyLoginList.length > 0) {
-                logger.log(`可用于快速登录的 QQ：\n${historyLoginList.map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`).join('\n')
-                    }`);
+                logger.log(`可用于快速登录的 QQ：\n${
+                    historyLoginList.map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`).join('\n')
+                }`);
             }
             loginService.getQRCodePicture();
         }
@@ -140,30 +149,39 @@ export async function NCoreInitShell() {
     // AFTER LOGGING IN
 
     // from initSession
-    const sessionConfig = await genSessionConfig(
-        basicInfoWrapper.QQVersionAppid!,
-        basicInfoWrapper.getFullQQVesion(),
-        selfInfo.uin,
-        selfInfo.uid,
-        dataPath
-    );
-    const sessionListener = new SessionListener();
-    sessionListener.onSessionInitComplete = (r: unknown) => {
-        if (r !== 0) {
-            throw r;
+    await new Promise<void>(async (resolve, reject) => {
+        const sessionConfig = await genSessionConfig(
+            basicInfoWrapper.QQVersionAppid!,
+            basicInfoWrapper.getFullQQVesion(),
+            selfInfo.uin,
+            selfInfo.uid,
+            dataPath,
+        );
+        const sessionListener = new SessionListener();
+        sessionListener.onSessionInitComplete = (r: unknown) => {
+            if (r === 0) {
+                resolve();
+            } else {
+                reject(r);
+            }
+        };
+        session.init(
+            sessionConfig,
+            new wrapper.NodeIDependsAdapter(new DependsAdapter()),
+            new wrapper.NodeIDispatcherAdapter(new DispatcherAdapter()),
+            new wrapper.NodeIKernelSessionListener(sessionListener),
+        );
+        logger.log('debug init')
+        try {
+            session.startNT(0);
+        } catch (_) { /* Empty */
+            try {
+                session.startNT();
+            } catch (e) {
+                reject('init failed ' + e);
+            }
         }
-    };
-    session.init(
-        sessionConfig,
-        new wrapper.NodeIDependsAdapter(new DependsAdapter()),
-        new wrapper.NodeIDispatcherAdapter(new DispatcherAdapter()),
-        new wrapper.NodeIKernelSessionListener(sessionListener)
-    );
-    try {
-        session.startNT(0);
-    } catch (__) {
-        session.startNT(); // may still throw error; we do not catch that
-    }
+    });
     // Initialization end!
 
     const accountDataPath = path.resolve(dataPath, './NapCat/data');
@@ -177,7 +195,7 @@ export async function NCoreInitShell() {
         loginService,
         selfInfo,
         basicInfoWrapper,
-        pathWrapper
+        pathWrapper,
     );
 }
 
@@ -200,11 +218,12 @@ export class NapCatShell {
             session,
             logger,
             loginService,
-            basicInfoWrapper
+            basicInfoWrapper,
         };
         this.core = new NapCatCore(this.context, selfInfo);
 
-        new NapCatOneBot11Adapter(this.core, this.context, pathWrapper);
+        // TODO: complete ob11 adapter initialization logic
+        // new NapCatOneBot11Adapter(this.core, this.context);
     }
 }
 
