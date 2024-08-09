@@ -1,16 +1,15 @@
 import BaseAction from '../BaseAction';
-import { OB11Version } from '../../types';
 import { ActionName } from '../types';
-import { version } from '@/onebot/version';
+import { napcat_version } from '@/common/framework/napcat';
 
-export default class GetVersionInfo extends BaseAction<any, OB11Version> {
+export default class GetVersionInfo extends BaseAction<any, any> {
   actionName = ActionName.GetVersionInfo;
 
   protected async _handle(payload: any): Promise<any> {
     return {
       app_name: 'NapCat.Onebot',
       protocol_version: 'v11',
-      app_version: version
+      app_version: napcat_version
     };
   }
 }

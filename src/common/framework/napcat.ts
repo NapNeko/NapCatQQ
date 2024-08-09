@@ -1,6 +1,6 @@
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
-
+export const napcat_version = "2.0.0";
 export class NapCatPathWrapper {
     binaryPath: string;
     logsPath: string;
