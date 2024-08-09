@@ -1,4 +1,3 @@
-import { log } from '@/common/utils/log';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { QuickAction, QuickActionEvent, handleQuickOperation } from '@/onebot11/server/postOB11Event';

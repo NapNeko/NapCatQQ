@@ -1,7 +1,5 @@
-import { NTQQGroupApi, NTQQUserApi } from '@/core';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { BuddyCategoryType } from '@/core/entities/';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
 const SchemaData = {
@@ -20,6 +18,8 @@ export class sharePeer extends BaseAction<Payload, any> {
   actionName = ActionName.SharePeer;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
+    const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
+    const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
     if (payload.group_id) {
       return await NTQQGroupApi.getGroupRecommendContactArkJson(payload.group_id);
     } else if (payload.user_id) {
@@ -40,6 +40,8 @@ export class shareGroupEx extends BaseAction<PayloadGroupEx, any> {
   actionName = ActionName.ShareGroupEx;
   PayloadSchema = SchemaDataGroupEx;
   protected async _handle(payload: PayloadGroupEx) {
+    const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
+    const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
     return await NTQQGroupApi.getArkJsonGroupShare(payload.group_id);
   }
 }

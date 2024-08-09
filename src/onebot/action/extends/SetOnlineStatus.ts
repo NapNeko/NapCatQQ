@@ -26,6 +26,7 @@ export class SetOnlineStatus extends BaseAction<Payload, null> {
     // { status: 50, extStatus: 0, batteryStatus: 0 }
     // { status: 60, extStatus: 0, batteryStatus: 0 }
     // { status: 70, extStatus: 0, batteryStatus: 0 }
+    const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
     const ret = await NTQQUserApi.setSelfOnlineStatus(payload.status, payload.extStatus, payload.batteryStatus);
     if (ret.result !== 0) {
       throw new Error('设置在线状态失败');

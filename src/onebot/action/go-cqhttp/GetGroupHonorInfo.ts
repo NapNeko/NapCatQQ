@@ -1,7 +1,7 @@
 
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { WebApi, WebHonorType } from '@/core/apis';
+import { WebHonorType } from '@/core/entities';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 const SchemaData = {
   type: 'object',
@@ -21,6 +21,7 @@ export class GetGroupHonorInfo extends BaseAction<Payload, Array<any>> {
     if (!payload.type) {
       payload.type = WebHonorType.ALL;
     }
-    return await WebApi.getGroupHonorInfo(payload.group_id.toString(), payload.type);
+    const NTQQWebApi = this.CoreContext.getApiContext().WebApi;
+    return await NTQQWebApi.getGroupHonorInfo(payload.group_id.toString(), payload.type);
   }
 }

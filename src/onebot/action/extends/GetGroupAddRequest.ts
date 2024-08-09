@@ -1,7 +1,5 @@
-import { GroupNotify, GroupNotifyStatus } from '@/core/entities';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { NTQQUserApi } from '@/core/apis/user';
 import { NTQQGroupApi } from '@/core/apis/group';
 
 interface OB11GroupRequestNotify {
@@ -14,7 +12,7 @@ export default class GetGroupAddRequest extends BaseAction<null, OB11GroupReques
   actionName = ActionName.GetGroupIgnoreAddRequest;
 
   protected async _handle(payload: null): Promise<OB11GroupRequestNotify[] | null> {
-    const data = await NTQQGroupApi.getGroupIgnoreNotifies();
+    const data = await this.CoreContext.getApiContext().GroupApi.getGroupIgnoreNotifies();
     // log(data);
     // const notifies: GroupNotify[] = data.notifies.filter(notify => notify.status === GroupNotifyStatus.WAIT_HANDLE);
     // const returnData: OB11GroupRequestNotify[] = [];

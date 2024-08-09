@@ -3,9 +3,8 @@ import { OB11Message, OB11User } from '../../types';
 import { ActionName } from '../types';
 import { ChatType, RawMessage } from '@/core/entities';
 import { NTQQMsgApi } from '@/core/apis/msg';
-import { OB11Constructor } from '../../constructor';
+import { OB11Constructor } from '../../helper/constructor';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import { NTQQFriendApi, NTQQUserApi } from '@/core';
 import { MessageUnique } from '@/common/utils/MessageUnique';
 
 interface Response {
@@ -29,6 +28,9 @@ export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
   actionName = ActionName.GetFriendMsgHistory;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<Response> {
+    const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
+    const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
+    const NTQQFriendApi = this.CoreContext.getApiContext().FriendApi;
     //处理参数
     const uid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
     const MsgCount = payload.count || 20;
