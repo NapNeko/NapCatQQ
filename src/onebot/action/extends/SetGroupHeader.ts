@@ -3,7 +3,6 @@ import { ActionName, BaseCheckResult } from '../types';
 import * as fs from 'node:fs';
 import { NTQQUserApi } from '@/core/apis/user';
 import { checkFileReceived, uri2local } from '@/common/utils/file';
-import { NTQQGroupApi } from '@/core';
 // import { log } from "../../../common/utils";
 
 interface Payload {
@@ -26,6 +25,7 @@ export default class SetGroupHeader extends BaseAction<Payload, any> {
     };
   }
   protected async _handle(payload: Payload): Promise<any> {
+    const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
     const { path, isLocal, errMsg,success } = (await uri2local(payload.file));
     if (!success) {
       throw `头像${payload.file}设置失败,file字段可能格式不正确`;

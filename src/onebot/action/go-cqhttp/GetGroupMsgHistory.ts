@@ -1,10 +1,9 @@
 import BaseAction from '../BaseAction';
 import { OB11Message, OB11User } from '../../types';
-import { getGroup, groups } from '@/core/data';
 import { ActionName } from '../types';
 import { ChatType, Peer, RawMessage } from '@/core/entities';
 import { NTQQMsgApi } from '@/core/apis/msg';
-import { OB11Constructor } from '../../constructor';
+import { OB11Constructor } from '../../helper/constructor';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/utils/MessageUnique';
 interface Response {
@@ -28,13 +27,11 @@ export default class GoCQHTTPGetGroupMsgHistory extends BaseAction<Payload, Resp
   actionName = ActionName.GoCQHTTP_GetGroupMsgHistory;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<Response> {
+    const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
     //处理参数
-    const group = await getGroup(payload.group_id.toString());
     const isReverseOrder = payload.reverseOrder || true;
     const MsgCount = payload.count || 20;
     const peer: Peer = { chatType: ChatType.group, peerUid: payload.group_id.toString() };
-    if (!group) throw `群${payload.group_id}不存在`;
-
     //拉取消息
     let msgList: RawMessage[];
     if (!payload.message_seq || payload.message_seq == 0) {
