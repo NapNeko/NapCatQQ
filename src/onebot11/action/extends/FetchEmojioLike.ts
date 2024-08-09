@@ -24,9 +24,9 @@ export class FetchEmojioLike extends BaseAction<Payload, any> {
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
     const msgIdPeer = MessageUnique.getMsgIdAndPeerByShortId(parseInt(payload.message_id.toString()));
-    if(!msgIdPeer) throw new Error('消息不存在');
+    if (!msgIdPeer) throw new Error('消息不存在');
     const msg = (await NTQQMsgApi.getMsgsByMsgId(msgIdPeer.Peer, [msgIdPeer.MsgId])).msgList[0];
-    const ret = await NTQQMsgApi.getMsgEmojiLikesList(msgIdPeer.Peer,msg.msgSeq,payload.emojiId,payload.emojiType,payload.count);
+    const ret = await NTQQMsgApi.getMsgEmojiLikesList(msgIdPeer.Peer, msg.msgSeq, payload.emojiId, payload.emojiType, payload.count);
     return ret;
   }
 }

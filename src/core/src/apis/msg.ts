@@ -1,8 +1,8 @@
-import { GetFileListParam, Peer, RawMessage, SendMessageElement, SendMsgElementConstructor } from '@/core/entities';
-import { friends, groups, selfInfo } from '@/core/data';
+import { ChatType, ChatType2, GetFileListParam, Peer, RawMessage, SendMessageElement, SendMsgElementConstructor } from '@/core/entities';
+import { friends, getGroupMember, groups, selfInfo } from '@/core/data';
 import { log, logWarn } from '@/common/utils/log';
 import { sleep } from '@/common/utils/helper';
-import { napCatCore, NTQQUserApi } from '@/core';
+import { napCatCore, NTQQGroupApi, NTQQUserApi } from '@/core';
 import { onGroupFileInfoUpdateParamType } from '@/core/listeners';
 import { GeneralCallResult } from '@/core/services/common';
 import { MessageUnique } from '../../../common/utils/MessageUnique';
@@ -71,6 +71,29 @@ export class NTQQMsgApi {
   static async FetchLongMsg(peer: Peer, msgId: string) {
     return napCatCore.session.getMsgService().fetchLongMsg(peer, msgId);
   }
+  static async getTempChatInfo(chatType: ChatType2, peerUid: string) {
+    return napCatCore.session.getMsgService().getTempChatInfo(chatType, peerUid);
+  }
+  static async PrepareTempChat(toUserUid: string, GroupCode: string, nickname: string) {
+    //By Jadx/Ida Mlikiowa
+    let TempGameSession = {
+      nickname: "",
+      gameAppId: "",
+      selfTinyId: "",
+      peerRoleId: "",
+      peerOpenId: "",
+    };
+    return napCatCore.session.getMsgService().prepareTempChat({
+      chatType: ChatType2.KCHATTYPETEMPC2CFROMGROUP,
+      peerUid: toUserUid,
+      peerNickname: nickname,
+      fromGroupCode: GroupCode,
+      sig: "",
+      selfPhone: "",
+      selfUid: selfInfo.uid,
+      gameSession: TempGameSession
+    });
+  }
   static async getMsgEmojiLikesList(peer: Peer, msgSeq: string, emojiId: string, emojiType: string, count: number = 20) {
     //console.log(peer, msgSeq, emojiId, emojiType, count);
     //注意此处emojiType 可选值一般为1-2 2好像是unicode表情dec值 大部分情况 Taged M likiowa
@@ -97,7 +120,7 @@ export class NTQQMsgApi {
     return napCatCore.session.getMsgService().getMultiMsg(peer, rootMsgId, parentMsgId);
   }
   static async ForwardMsg(peer: Peer, msgIds: string[]) {
-    return napCatCore.session.getMsgService().forwardMsg(msgIds, peer, [peer], new Map());
+    return napCatCore.session.getMsgService().forwardMsg(msgIds, peer, [peer], []);
   }
   static async getLastestMsgByUids(peer: Peer, count: number = 20, isReverseOrder: boolean = false) {
     let ret = await napCatCore.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {
@@ -137,6 +160,16 @@ export class NTQQMsgApi {
     });
     return ret;
   }
+  /**
+   * 
+   * @deprecated 从9.9.15-26702版本开始，该接口已经废弃，请使用getMsgsEx
+   * @param peer 
+   * @param seq 
+   * @param count 
+   * @param desc 
+   * @param z 
+   * @returns 
+   */
   static async getMsgsBySeqAndCount(peer: Peer, seq: string, count: number, desc: boolean, z: boolean) {
     return await napCatCore.session.getMsgService().getMsgsBySeqAndCount(peer, seq, count, desc, z);
   }
@@ -172,6 +205,9 @@ export class NTQQMsgApi {
     }, msgIds);
   }
   static async sendMsgV2(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
+    if (peer.chatType === ChatType.temp) {
+      //await NTQQMsgApi.PrepareTempChat().then().catch();
+    }
     function generateMsgId() {
       const timestamp = Math.floor(Date.now() / 1000);
       const random = Math.floor(Math.random() * Math.pow(2, 32));
@@ -225,7 +261,32 @@ export class NTQQMsgApi {
   }
   static async sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
     //唉？ ！我有个想法
-    let msgId = await NTQQMsgApi.getMsgUnique(peer.chatType, await NTQQMsgApi.getServerTime());
+    function generateMsgId() {
+      const timestamp = Math.floor(Date.now() / 1000);
+      const random = Math.floor(Math.random() * Math.pow(2, 32));
+      const buffer = Buffer.alloc(8);
+      buffer.writeUInt32BE(timestamp, 0);
+      buffer.writeUInt32BE(random, 4);
+      const msgId = BigInt("0x" + buffer.toString('hex')).toString();
+      return msgId;
+    }
+    // 此处有采用Hack方法 利用数据返回正确得到对应消息
+    // 与之前 Peer队列 MsgSeq队列 真正的MsgId并发不同
+    // 谨慎采用 目前测试暂无问题  Developer.Mlikiowa
+    let msgId: string;
+    try {
+      msgId = await NTQQMsgApi.getMsgUnique(peer.chatType, await NTQQMsgApi.getServerTime());
+    } catch (error) {
+      //if (!napCatCore.session.getMsgService()['generateMsgUniqueId'])
+      //兜底识别策略V2
+      msgId = generateMsgId();
+    }
+    if (peer.chatType === ChatType.temp && peer.guildId && peer.guildId !== '') {
+      let member = await getGroupMember(peer.guildId, peer.peerUid!);
+      if(member){
+        await NTQQMsgApi.PrepareTempChat(peer.peerUid,peer.guildId,member.nick);
+      }
+    }
     peer.guildId = msgId;
     let data = await NTEventDispatch.CallNormalEvent<
       (msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<any, any>) => Promise<unknown>,
@@ -268,7 +329,7 @@ export class NTQQMsgApi {
     return NTEventDispatch.CallNoListenerEvent<() => string>('NodeIKernelMsgService/getServerTime', 5000);
   }
   static async forwardMsg(srcPeer: Peer, destPeer: Peer, msgIds: string[]) {
-    return napCatCore.session.getMsgService().forwardMsg(msgIds, srcPeer, [destPeer], new Map());
+    return napCatCore.session.getMsgService().forwardMsg(msgIds, srcPeer, [destPeer], []);
   }
   static async multiForwardMsg(srcPeer: Peer, destPeer: Peer, msgIds: string[]): Promise<RawMessage> {
     const msgInfos = msgIds.map(id => {

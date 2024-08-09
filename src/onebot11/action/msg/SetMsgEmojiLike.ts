@@ -14,7 +14,6 @@ const SchemaData = {
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
-
 export class SetMsgEmojiLike extends BaseAction<Payload, any> {
   actionName = ActionName.SetMsgEmojiLike;
   PayloadSchema = SchemaData;

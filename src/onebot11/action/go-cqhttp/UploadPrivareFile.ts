@@ -1,10 +1,9 @@
 import BaseAction from '../BaseAction';
-import { getGroup } from '@/core/data';
 import { ActionName } from '../types';
 import { SendMsgElementConstructor } from '@/core/entities/constructor';
 import { ChatType, Peer, SendFileElement } from '@/core/entities';
 import fs from 'fs';
-import { SendMsg, sendMsg } from '@/onebot11/action/msg/SendMsg';
+import { sendMsg } from '@/onebot11/action/msg/SendMsg';
 import { uri2local } from '@/common/utils/file';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { NTQQFriendApi, NTQQUserApi } from '@/core';
