@@ -219,6 +219,7 @@ export class NapCatShell {
             logger,
             loginService,
             basicInfoWrapper,
+            pathWrapper
         };
         this.core = new NapCatCore(this.context, selfInfo);
 
