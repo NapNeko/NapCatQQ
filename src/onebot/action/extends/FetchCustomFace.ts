@@ -1,7 +1,6 @@
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { NTQQMsgApi } from '@/core/apis';
 const SchemaData = {
   type: 'object',
   properties: {
@@ -16,7 +15,7 @@ export class FetchCustomFace extends BaseAction<Payload, string[]> {
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
     //48 可能正好是QQ需要的一个页面的数量 Tagged Mlikiowa
-    const ret = await NTQQMsgApi.fetchFavEmojiList(payload.count || 48);
+    const ret = await this.CoreContext.getApiContext().MsgApi.fetchFavEmojiList(payload.count || 48);
     return ret.emojiInfoList.map(e => e.url);
   }
 }
