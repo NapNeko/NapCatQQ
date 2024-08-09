@@ -67,26 +67,34 @@ export function postWsEvent(event: QuickActionEvent) {
   }
 }
 
-export function postOB11Event(msg: QuickActionEvent, reportSelf = false, postWs = true, coreContext: NapCatCore) {
+export function postOB11Event(
+  msg: QuickActionEvent,
+  reportSelf = false,
+  postWs = true,
+  enablePost = true,
+  httpSecret: string | undefined = undefined,
+  coreContext: NapCatCore,
+  HttpPostUrl: string[]
+) {
   // 判断msg是否是event
-  if (!config.reportSelfMessage && !reportSelf) {
+  if (!reportSelf) {
     if (msg.post_type === 'message' && (msg as OB11Message).user_id.toString() == coreContext.selfInfo.uin) {
       return;
     }
   }
-  if (config.http.enablePost) {
+  if (enablePost) {
     const msgStr = JSON.stringify(msg);
-    const hmac = crypto.createHmac('sha1', ob11Config.http.secret);
+    const hmac = crypto.createHmac('sha1', (httpSecret || "").toString());
     hmac.update(msgStr);
     const sig = hmac.digest('hex');
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'x-self-id': coreContext.selfInfo.uin
     };
-    if (config.http.secret) {
+    if (httpSecret) {
       headers['x-signature'] = 'sha1=' + sig;
     }
-    for (const host of config.http.postUrls) {
+    for (const host of HttpPostUrl) {
       fetch(host, {
         method: 'POST',
         headers,
@@ -134,11 +142,11 @@ async function handleMsg(msg: OB11Message, quickAction: QuickAction, coreContext
     peer.peerUid = msg.group_id!.toString();
   }
   if (reply) {
-    let group: Group | undefined;
+    let group: string | undefined;
     let replyMessage: OB11MessageData[] = [];
 
     if (msg.message_type == 'group') {
-      group = await getGroup(msg.group_id!.toString());
+      group = msg.group_id!.toString();
       replyMessage.push({
         type: 'reply',
         data: {
