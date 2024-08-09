@@ -22,6 +22,11 @@ import fs from 'fs';
 import os from 'os';
 import { NodeIKernelLoginService } from '@/core/services';
 import { NapCatOneBot11Adapter } from '@/onebot';
+import { program } from 'commander';
+import qrcode from 'qrcode-terminal';
+
+program.option('-q, --qq [number]', 'QQ号').parse(process.argv);
+const cmdOptions = program.opts();
 
 // NapCat Shell App ES 入口文件
 export async function NCoreInitShell() {
@@ -72,6 +77,17 @@ export async function NCoreInitShell() {
         hostName: hostname
     });
 
+    let quickLoginUin = cmdOptions.qq; // undefined | 'true' | string
+    const historyLoginList = (await loginService.getLoginList()).LocalLoginInfoList;
+    if (quickLoginUin == 'true') {
+        if (historyLoginList.length > 0) {
+            quickLoginUin = historyLoginList[0].uin;
+            logger.log(`-q 指令指定使用最近的 QQ ${quickLoginUin} 进行快速登录`);
+        } else {
+            quickLoginUin = '';
+        }
+    }
+
     const selfInfo = await new Promise<SelfInfo>((resolve) => {
         const loginListener = new LoginListener();
 
@@ -86,9 +102,43 @@ export async function NCoreInitShell() {
             nick: '', // 获取不到
             online: true
         });
+
+        loginListener.onQRCodeGetPicture = ({ pngBase64QrcodeData, qrcodeUrl }) => {
+            const realBase64 = pngBase64QrcodeData.replace(/^data:image\/\w+;base64,/, '');
+            const buffer = Buffer.from(realBase64, 'base64');
+            logger.logWarn('请扫描下面的二维码，然后在手Q上授权登录：');
+            const qrcodePath = path.join(__dirname, 'qrcode.png');
+            qrcode.generate(qrcodeUrl, { small: true }, (res) => {
+                logger.logWarn([
+                    res,
+                    '二维码解码URL: ' + qrcodeUrl,
+                    '如果控制台二维码无法扫码，可以复制解码url到二维码生成网站生成二维码再扫码，也可以打开下方的二维码路径图片进行扫码。'
+                ].join('\n'));
+                fs.writeFile(qrcodePath, buffer, {}, () => {
+                    logger.logWarn('二维码已保存到', qrcodePath);
+                });
+            });
+        }
+
         loginService.addKernelLoginListener(new wrapper.NodeIKernelLoginListener(
             proxiedListenerOf(loginListener, logger)));
+
+        if (quickLoginUin && historyLoginList.some(u => u.uin === quickLoginUin)) {
+            logger.log('正在快速登录 ', quickLoginUin);
+            loginService.quickLoginWithUin(quickLoginUin);
+        } else {
+            logger.log('没有 -q 指令指定快速登录，或未曾登录过这个 QQ，将使用二维码登录方式');
+            if (historyLoginList.length > 0) {
+                logger.log(`可用于快速登录的 QQ：\n${
+                    historyLoginList.map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`).join('\n')
+                }`);
+            }
+            loginService.getQRCodePicture();
+        }
     });
+    // BEFORE LOGGING IN
+
+    // AFTER LOGGING IN
 
     // from initSession
     const sessionConfig = await genSessionConfig(
