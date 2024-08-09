@@ -15,9 +15,9 @@ import CanSendRecord from './system/CanSendRecord';
 import CanSendImage from './system/CanSendImage';
 import GetStatus from './system/GetStatus';
 import {
-  GoCQHTTPSendForwardMsg,
-  GoCQHTTPSendGroupForwardMsg,
-  GoCQHTTPSendPrivateForwardMsg
+    GoCQHTTPSendForwardMsg,
+    GoCQHTTPSendGroupForwardMsg,
+    GoCQHTTPSendPrivateForwardMsg
 } from './go-cqhttp/SendForwardMsg';
 import GoCQHTTPGetStrangerInfo from './go-cqhttp/GetStrangerInfo';
 import SendLike from './user/SendLike';
@@ -77,94 +77,94 @@ import { FetchEmojioLike } from './extends/FetchEmojioLike';
 import { NapCatCore } from '@/core';
 
 export function createActionMap(context: NapCatCore) {
-  let actionHandlers = [
-    new FetchEmojioLike(context),
-    new GetFile(context),
-    new SetSelfProfile(context),
-    new shareGroupEx(context),
-    new sharePeer(context),
-    new CreateCollection(context),
-    new SetLongNick(context),
-    new ForwardFriendSingleMsg(context),
-    new ForwardGroupSingleMsg(context),
-    new MarkGroupMsgAsRead(context),
-    new MarkPrivateMsgAsRead(context),
-    new SetQQAvatar(context),
-    new TranslateEnWordToZn(context),
-    new GetGroupFileCount(context),
-    new GetGroupFileList(context),
-    new SetGroupFileFolder(context),
-    new DelGroupFile(context),
-    new DelGroupFileFolder(context),
-    // onebot11
-    new SendLike(context),
-    new GetMsg(context),
-    new GetLoginInfo(context),
-    new GetFriendList(context),
-    new GetGroupList(context),
-    new GetGroupInfo(context),
-    new GetGroupMemberList(context),
-    new GetGroupMemberInfo(context),
-    new SendGroupMsg(context),
-    new SendPrivateMsg(context),
-    new SendMsg(context),
-    new DeleteMsg(context),
-    new SetGroupAddRequest(context),
-    new SetFriendAddRequest(context),
-    new SetGroupLeave(context),
-    new GetVersionInfo(context),
-    new CanSendRecord(context),
-    new CanSendImage(context),
-    new GetStatus(context),
-    new SetGroupWholeBan(context),
-    new SetGroupBan(context),
-    new SetGroupKick(context),
-    new SetGroupAdmin(context),
-    new SetGroupName(context),
-    new SetGroupCard(context),
-    new GetImage(context),
-    new GetRecord(context),
-    new SetMsgEmojiLike(context),
-    new GetCookies(context),
-    new SetOnlineStatus(context),
-    new GetRobotUinRange(context),
-    new GetFriendWithCategory(context),
-    //以下为go-cqhttp api
-    new GetOnlineClient(context),
-    new OCRImage(context),
-    new IOCRImage(context),
-    new GetGroupHonorInfo(context),
-    new SendGroupNotice(context),
-    new GetGroupNotice(context),
-    new GetGroupEssence(context),
-    new GoCQHTTPSendForwardMsg(context),
-    new GoCQHTTPSendGroupForwardMsg(context),
-    new GoCQHTTPSendPrivateForwardMsg(context),
-    new GoCQHTTPGetStrangerInfo(context),
-    new GoCQHTTPDownloadFile(context),
-    new GetGuildList(context),
-    new GoCQHTTPMarkMsgAsRead(context),
-    new GoCQHTTPUploadGroupFile(context),
-    new GoCQHTTPGetGroupMsgHistory(context),
-    new GoCQHTTPGetForwardMsgAction(context),
-    new GetFriendMsgHistory(context),
-    new GoCQHTTPHandleQuickAction(context),
-    new GetGroupSystemMsg(context),
-    new DelEssenceMsg(context),
-    new SetEssenceMsg(context),
-    new GetRecentContact(context),
-    new MarkAllMsgAsRead(context),
-    new GetProfileLike(context),
-    new SetGroupHeader(context),
-    new FetchCustomFace(context),
-    new GoCQHTTPUploadPrivateFile(context)
-  ];
-  const actionMap = new Map<string, BaseAction<any, any>>();
-  for (const action of actionHandlers) {
-    actionMap.set(action.actionName, action);
-    actionMap.set(action.actionName + '_async', action);
-    actionMap.set(action.actionName + '_rate_limited', action);
-  }
+    const actionHandlers = [
+        new FetchEmojioLike(context),
+        new GetFile(context),
+        new SetSelfProfile(context),
+        new shareGroupEx(context),
+        new sharePeer(context),
+        new CreateCollection(context),
+        new SetLongNick(context),
+        new ForwardFriendSingleMsg(context),
+        new ForwardGroupSingleMsg(context),
+        new MarkGroupMsgAsRead(context),
+        new MarkPrivateMsgAsRead(context),
+        new SetQQAvatar(context),
+        new TranslateEnWordToZn(context),
+        new GetGroupFileCount(context),
+        new GetGroupFileList(context),
+        new SetGroupFileFolder(context),
+        new DelGroupFile(context),
+        new DelGroupFileFolder(context),
+        // onebot11
+        new SendLike(context),
+        new GetMsg(context),
+        new GetLoginInfo(context),
+        new GetFriendList(context),
+        new GetGroupList(context),
+        new GetGroupInfo(context),
+        new GetGroupMemberList(context),
+        new GetGroupMemberInfo(context),
+        new SendGroupMsg(context),
+        new SendPrivateMsg(context),
+        new SendMsg(context),
+        new DeleteMsg(context),
+        new SetGroupAddRequest(context),
+        new SetFriendAddRequest(context),
+        new SetGroupLeave(context),
+        new GetVersionInfo(context),
+        new CanSendRecord(context),
+        new CanSendImage(context),
+        new GetStatus(context),
+        new SetGroupWholeBan(context),
+        new SetGroupBan(context),
+        new SetGroupKick(context),
+        new SetGroupAdmin(context),
+        new SetGroupName(context),
+        new SetGroupCard(context),
+        new GetImage(context),
+        new GetRecord(context),
+        new SetMsgEmojiLike(context),
+        new GetCookies(context),
+        new SetOnlineStatus(context),
+        new GetRobotUinRange(context),
+        new GetFriendWithCategory(context),
+        //以下为go-cqhttp api
+        new GetOnlineClient(context),
+        new OCRImage(context),
+        new IOCRImage(context),
+        new GetGroupHonorInfo(context),
+        new SendGroupNotice(context),
+        new GetGroupNotice(context),
+        new GetGroupEssence(context),
+        new GoCQHTTPSendForwardMsg(context),
+        new GoCQHTTPSendGroupForwardMsg(context),
+        new GoCQHTTPSendPrivateForwardMsg(context),
+        new GoCQHTTPGetStrangerInfo(context),
+        new GoCQHTTPDownloadFile(context),
+        new GetGuildList(context),
+        new GoCQHTTPMarkMsgAsRead(context),
+        new GoCQHTTPUploadGroupFile(context),
+        new GoCQHTTPGetGroupMsgHistory(context),
+        new GoCQHTTPGetForwardMsgAction(context),
+        new GetFriendMsgHistory(context),
+        new GoCQHTTPHandleQuickAction(context),
+        new GetGroupSystemMsg(context),
+        new DelEssenceMsg(context),
+        new SetEssenceMsg(context),
+        new GetRecentContact(context),
+        new MarkAllMsgAsRead(context),
+        new GetProfileLike(context),
+        new SetGroupHeader(context),
+        new FetchCustomFace(context),
+        new GoCQHTTPUploadPrivateFile(context)
+    ];
+    const actionMap = new Map<string, BaseAction<any, any>>();
+    for (const action of actionHandlers) {
+        actionMap.set(action.actionName, action);
+        actionMap.set(action.actionName + '_async', action);
+        actionMap.set(action.actionName + '_rate_limited', action);
+    }
 
-  return actionMap;
+    return actionMap;
 }

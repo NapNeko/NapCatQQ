@@ -2,11 +2,11 @@ import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { NTQQUserApi } from '@/core/apis';
 export class GetRobotUinRange extends BaseAction<void, Array<any>> {
-  actionName = ActionName.GetRobotUinRange;
+    actionName = ActionName.GetRobotUinRange;
 
-  protected async _handle(payload: void) {
+    protected async _handle(payload: void) {
     // console.log(await NTQQUserApi.getRobotUinRange());
-    const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
-    return await NTQQUserApi.getRobotUinRange();
-  }
+        const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
+        return await NTQQUserApi.getRobotUinRange();
+    }
 }

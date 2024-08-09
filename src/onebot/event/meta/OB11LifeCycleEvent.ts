@@ -7,11 +7,11 @@ export enum LifeCycleSubType {
 }
 
 export class OB11LifeCycleEvent extends OB11BaseMetaEvent {
-  meta_event_type = 'lifecycle';
-  sub_type: LifeCycleSubType;
+    meta_event_type = 'lifecycle';
+    sub_type: LifeCycleSubType;
 
-  public constructor(subType: LifeCycleSubType) {
-    super();
-    this.sub_type = subType;
-  }
+    public constructor(subType: LifeCycleSubType) {
+        super();
+        this.sub_type = subType;
+    }
 }

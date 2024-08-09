@@ -7,33 +7,33 @@ import { uri2local } from '@/common/utils/file';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { SendMsgElementConstructor } from '@/onebot/helper/msg';
 const SchemaData = {
-  type: 'object',
-  properties: {
-    group_id: { type: ['number', 'string'] },
-    file: { type: 'string' },
-    name: { type: 'string' },
-    folder: { type: 'string' },
-    folder_id: { type: 'string' }//临时扩展
-  },
-  required: ['group_id', 'file', 'name']
+    type: 'object',
+    properties: {
+        group_id: { type: ['number', 'string'] },
+        file: { type: 'string' },
+        name: { type: 'string' },
+        folder: { type: 'string' },
+        folder_id: { type: 'string' }//临时扩展
+    },
+    required: ['group_id', 'file', 'name']
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
 
 export default class GoCQHTTPUploadGroupFile extends BaseAction<Payload, null> {
-  actionName = ActionName.GoCQHTTP_UploadGroupFile;
-  PayloadSchema = SchemaData;
-  protected async _handle(payload: Payload): Promise<null> {
-    let file = payload.file;
-    if (fs.existsSync(file)) {
-      file = `file://${file}`;
+    actionName = ActionName.GoCQHTTP_UploadGroupFile;
+    PayloadSchema = SchemaData;
+    protected async _handle(payload: Payload): Promise<null> {
+        let file = payload.file;
+        if (fs.existsSync(file)) {
+            file = `file://${file}`;
+        }
+        const downloadResult = await uri2local(this.CoreContext.NapCatTempPath, file);
+        if (!downloadResult.success) {
+            throw new Error(downloadResult.errMsg);
+        }
+        const sendFileEle: SendFileElement = await SendMsgElementConstructor.file(this.CoreContext, downloadResult.path, payload.name, payload.folder_id);
+        await sendMsg(this.CoreContext, { chatType: ChatType.group, peerUid: payload.group_id.toString() }, [sendFileEle], [], true);
+        return null;
     }
-    const downloadResult = await uri2local(this.CoreContext.NapCatTempPath, file);
-    if (!downloadResult.success) {
-      throw new Error(downloadResult.errMsg);
-    }
-    const sendFileEle: SendFileElement = await SendMsgElementConstructor.file(this.CoreContext, downloadResult.path, payload.name, payload.folder_id);
-    await sendMsg(this.CoreContext, { chatType: ChatType.group, peerUid: payload.group_id.toString() }, [sendFileEle], [], true);
-    return null;
-  }
 }

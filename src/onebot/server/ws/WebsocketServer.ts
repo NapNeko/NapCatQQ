@@ -19,67 +19,67 @@ const heartbeatRunning = false;
 
 class OB11WebsocketServer extends WebsocketServerBase {
 
-  public start(port: number | http.Server, host: string = '') {
-    this.token = ob11Config.token;
-    super.start(port, host);
-  }
-
-  authorizeFailed(wsClient: WebSocket) {
-    wsClient.send(JSON.stringify(OB11Response.res(null, 'failed', 1403, 'token验证失败')));
-  }
-
-  async handleAction(wsClient: WebSocket, actionName: string, params: any, echo?: any) {
-    const action: BaseAction<any, any> | undefined = actionMap.get(actionName);
-    if (!action) {
-      return wsReply(wsClient, OB11Response.error('不支持的api ' + actionName, 1404, echo));
+    public start(port: number | http.Server, host: string = '') {
+        this.token = ob11Config.token;
+        super.start(port, host);
     }
-    try {
-      const handleResult = await action.websocketHandle(params, echo);
-      wsReply(wsClient, handleResult);
-    } catch (e: any) {
-      wsReply(wsClient, OB11Response.error(`api处理出错:${e.stack}`, 1200, echo));
-    }
-  }
 
-  onConnect(wsClient: WebSocket, url: string, req: IncomingMessage) {
-    if (url == '/api' || url == '/api/' || url == '/') {
-      wsClient.on('message', async (msg) => {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
-        let receiveData: { action: ActionName, params?: any, echo?: any } = { action: '', params: {} };
-        let echo = null;
-        try {
-          receiveData = JSON.parse(msg.toString());
-          echo = receiveData.echo;
-          logDebug('收到正向Websocket消息', receiveData);
-        } catch (e) {
-          return wsReply(wsClient, OB11Response.error('json解析失败，请检查数据格式', 1400, echo));
+    authorizeFailed(wsClient: WebSocket) {
+        wsClient.send(JSON.stringify(OB11Response.res(null, 'failed', 1403, 'token验证失败')));
+    }
+
+    async handleAction(wsClient: WebSocket, actionName: string, params: any, echo?: any) {
+        const action: BaseAction<any, any> | undefined = actionMap.get(actionName);
+        if (!action) {
+            return wsReply(wsClient, OB11Response.error('不支持的api ' + actionName, 1404, echo));
         }
-        receiveData.params = (receiveData?.params) ? receiveData.params : {};//兼容类型验证
-        this.handleAction(wsClient, receiveData.action, receiveData.params, receiveData.echo).then();
-      });
+        try {
+            const handleResult = await action.websocketHandle(params, echo);
+            wsReply(wsClient, handleResult);
+        } catch (e: any) {
+            wsReply(wsClient, OB11Response.error(`api处理出错:${e.stack}`, 1200, echo));
+        }
     }
-    if (url == '/event' || url == '/event/' || url == '/') {
-      registerWsEventSender(wsClient);
 
-      logDebug('event上报ws客户端已连接');
+    onConnect(wsClient: WebSocket, url: string, req: IncomingMessage) {
+        if (url == '/api' || url == '/api/' || url == '/') {
+            wsClient.on('message', async (msg) => {
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-expect-error
+                let receiveData: { action: ActionName, params?: any, echo?: any } = { action: '', params: {} };
+                let echo = null;
+                try {
+                    receiveData = JSON.parse(msg.toString());
+                    echo = receiveData.echo;
+                    logDebug('收到正向Websocket消息', receiveData);
+                } catch (e) {
+                    return wsReply(wsClient, OB11Response.error('json解析失败，请检查数据格式', 1400, echo));
+                }
+                receiveData.params = (receiveData?.params) ? receiveData.params : {};//兼容类型验证
+                this.handleAction(wsClient, receiveData.action, receiveData.params, receiveData.echo).then();
+            });
+        }
+        if (url == '/event' || url == '/event/' || url == '/') {
+            registerWsEventSender(wsClient);
 
-      try {
-        wsReply(wsClient, new OB11LifeCycleEvent(LifeCycleSubType.CONNECT));
-      } catch (e) {
-        logError('发送生命周期失败', e);
-      }
-      const { heartInterval } = ob11Config;
-      const wsClientInterval = setInterval(() => {
-        wsReply(wsClient, new OB11HeartbeatEvent(!!selfInfo.online, true, heartInterval));
-      }, heartInterval);  // 心跳包
-      wsClient.on('close', () => {
-        logError('event上报ws客户端已断开');
-        clearInterval(wsClientInterval);
-        unregisterWsEventSender(wsClient);
-      });
+            logDebug('event上报ws客户端已连接');
+
+            try {
+                wsReply(wsClient, new OB11LifeCycleEvent(LifeCycleSubType.CONNECT));
+            } catch (e) {
+                logError('发送生命周期失败', e);
+            }
+            const { heartInterval } = ob11Config;
+            const wsClientInterval = setInterval(() => {
+                wsReply(wsClient, new OB11HeartbeatEvent(!!selfInfo.online, true, heartInterval));
+            }, heartInterval);  // 心跳包
+            wsClient.on('close', () => {
+                logError('event上报ws客户端已断开');
+                clearInterval(wsClientInterval);
+                unregisterWsEventSender(wsClient);
+            });
+        }
     }
-  }
 }
 
 export const ob11WebsocketServer = new OB11WebsocketServer();

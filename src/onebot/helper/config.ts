@@ -39,38 +39,38 @@ import { ConfigBase } from '@/common/utils/ConfigBase';
 // }
 
 export class OB11Config extends ConfigBase<OB11Config>  {
-  name: string = 'onebot11';
-  http = {
-    enable: false,
-    host: '',
-    port: 3000,
-    secret: '',
-    enableHeart: false,
-    enablePost: false,
-    postUrls: [],
-  };
-  ws = {
-    enable: false,
-    host: '',
-    port: 3001,
-  };
-  reverseWs = {
-    enable: false,
-    urls: [],
-  };
-  debug = false;
-  heartInterval = 30000;
-  messagePostFormat: 'array' | 'string' = 'array';
-  enableLocalFile2Url = true;
-  musicSignUrl = '';
-  reportSelfMessage = false;
-  token = '';
-  GroupLocalTime = {
-    Record: false,
-    RecordList: [] as Array<string>
-  };
+    name: string = 'onebot11';
+    http = {
+        enable: false,
+        host: '',
+        port: 3000,
+        secret: '',
+        enableHeart: false,
+        enablePost: false,
+        postUrls: [],
+    };
+    ws = {
+        enable: false,
+        host: '',
+        port: 3001,
+    };
+    reverseWs = {
+        enable: false,
+        urls: [],
+    };
+    debug = false;
+    heartInterval = 30000;
+    messagePostFormat: 'array' | 'string' = 'array';
+    enableLocalFile2Url = true;
+    musicSignUrl = '';
+    reportSelfMessage = false;
+    token = '';
+    GroupLocalTime = {
+        Record: false,
+        RecordList: [] as Array<string>
+    };
 
-  protected getKeys(): string[] | null {
-    return null;
-  }
+    protected getKeys(): string[] | null {
+        return null;
+    }
 }

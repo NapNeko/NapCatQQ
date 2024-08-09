@@ -4,24 +4,24 @@ import { ActionName } from '../types';
 import { NTQQFriendApi } from '@/core/apis/friend';
 
 const SchemaData = {
-  type: 'object',
-  properties: {
-    flag: { type: 'string' },
-    approve: { type: ['string', 'boolean'] },
-    remark: { type: 'string' }
-  },
-  required: ['flag']
+    type: 'object',
+    properties: {
+        flag: { type: 'string' },
+        approve: { type: ['string', 'boolean'] },
+        remark: { type: 'string' }
+    },
+    required: ['flag']
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
 
 export default class SetFriendAddRequest extends BaseAction<Payload, null> {
-  actionName = ActionName.SetFriendAddRequest;
-  PayloadSchema = SchemaData;
-  protected async _handle(payload: Payload): Promise<null> {
-    const NTQQFriendApi = this.CoreContext.getApiContext().FriendApi;
-    const approve = payload.approve?.toString() !== 'false';
-    await NTQQFriendApi.handleFriendRequest(payload.flag, approve);
-    return null;
-  }
+    actionName = ActionName.SetFriendAddRequest;
+    PayloadSchema = SchemaData;
+    protected async _handle(payload: Payload): Promise<null> {
+        const NTQQFriendApi = this.CoreContext.getApiContext().FriendApi;
+        const approve = payload.approve?.toString() !== 'false';
+        await NTQQFriendApi.handleFriendRequest(payload.flag, approve);
+        return null;
+    }
 }

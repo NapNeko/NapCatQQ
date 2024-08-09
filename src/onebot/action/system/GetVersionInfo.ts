@@ -3,13 +3,13 @@ import { ActionName } from '../types';
 import { napcat_version } from '@/common/framework/napcat';
 
 export default class GetVersionInfo extends BaseAction<any, any> {
-  actionName = ActionName.GetVersionInfo;
+    actionName = ActionName.GetVersionInfo;
 
-  protected async _handle(payload: any): Promise<any> {
-    return {
-      app_name: 'NapCat.Onebot',
-      protocol_version: 'v11',
-      app_version: napcat_version
-    };
-  }
+    protected async _handle(payload: any): Promise<any> {
+        return {
+            app_name: 'NapCat.Onebot',
+            protocol_version: 'v11',
+            app_version: napcat_version
+        };
+    }
 }
