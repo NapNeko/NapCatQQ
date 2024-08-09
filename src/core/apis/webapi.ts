@@ -1,117 +1,17 @@
 import { RequestUtil } from '@/common/utils/request';
-export enum WebHonorType {
-  ALL = 'all',
-  TALKACTIVE = 'talkative',
-  PERFROMER = 'performer',
-  LEGEND = 'legend',
-  STORONGE_NEWBI = 'strong_newbie',
-  EMOTION = 'emotion'
-}
-export interface WebApiGroupMember {
-  uin: number
-  role: number
-  g: number
-  join_time: number
-  last_speak_time: number
-  lv: {
-    point: number
-    level: number
-  }
-  card: string
-  tags: string
-  flag: number
-  nick: string
-  qage: number
-  rm: number
-}
-interface WebApiGroupMemberRet {
-  ec: number
-  errcode: number
-  em: string
-  cache: number
-  adm_num: number
-  levelname: any
-  mems: WebApiGroupMember[]
-  count: number
-  svr_time: number
-  max_count: number
-  search_count: number
-  extmode: number
-}
-export interface WebApiGroupNoticeFeed {
-  u: number//发送者
-  fid: string//fid
-  pubt: number//时间
-  msg: {
-    text: string
-    text_face: string
-    title: string,
-    pics?: {
-      id: string,
-      w: string,
-      h: string
-    }[]
-  }
-  type: number
-  fn: number
-  cn: number
-  vn: number
-  settings: {
-    is_show_edit_card: number
-    remind_ts: number
-    tip_window_type: number
-    confirm_required: number
-  }
-  read_num: number
-  is_read: number
-  is_all_confirm: number
-}
-export interface WebApiGroupNoticeRet {
-  ec: number
-  em: string
-  ltsm: number
-  srv_code: number
-  read_only: number
-  role: number
-  feeds: WebApiGroupNoticeFeed[]
-  group: {
-    group_id: number
-    class_ext: number
-  }
-  sta: number,
-  gln: number
-  tst: number,
-  ui: any
-  server_time: number
-  svrt: number
-  ad: number
-}
-interface GroupEssenceMsg {
-  group_code: string
-  msg_seq: number
-  msg_random: number
-  sender_uin: string
-  sender_nick: string
-  sender_time: number
-  add_digest_uin: string
-  add_digest_nick: string
-  add_digest_time: number
-  msg_content: any[]
-  can_be_removed: true
-}
-export interface GroupEssenceMsgRet {
-  retcode: number
-  retmsg: string
-  data: {
-    msg_list: GroupEssenceMsg[]
-    is_end: boolean
-    group_role: number
-    config_page_url: string
-  }
-}
+import { InstanceContext } from '../wrapper';
+import { NapCatCore } from '..';
+import { GroupEssenceMsgRet, WebApiGroupMember, WebApiGroupMemberRet, WebApiGroupNoticeRet, WebHonorType } from '../entities/webapi';
+
 export class WebApi {
-   async shareDigest(groupCode: string, msgSeq: string, msgRandom: string, targetGroupCode: string) {
-    const CookiesObject = await NTQQUserApi.getCookies('qun.qq.com');
+  context: InstanceContext;
+  core: NapCatCore;
+  constructor(context: InstanceContext, core: NapCatCore) {
+    this.context = context;
+    this.core = core;
+  }
+  async shareDigest(groupCode: string, msgSeq: string, msgRandom: string, targetGroupCode: string) {
+    const CookiesObject = await this.core.getApiContext().UserApi.getCookies('qun.qq.com');
     const CookieValue = Object.entries(CookiesObject).map(([key, value]) => `${key}=${value}`).join('; ');
     const Bkn = this.genBkn(CookiesObject.skey);
     let ret: any = undefined;
@@ -126,9 +26,8 @@ export class WebApi {
     }
     return undefined;
   }
-  @CacheClassFuncAsync(3600 * 1000, 'webapi_get_group_members')
-   async getGroupEssenceMsg(GroupCode: string, page_start: string) {
-    const CookiesObject = await NTQQUserApi.getCookies('qun.qq.com');
+  async getGroupEssenceMsg(GroupCode: string, page_start: string) {
+    const CookiesObject = await this.core.getApiContext().UserApi.getCookies('qun.qq.com');
     const CookieValue = Object.entries(CookiesObject).map(([key, value]) => `${key}=${value}`).join('; ');
     const Bkn = this.genBkn(CookiesObject.skey);
     const url = 'https://qun.qq.com/cgi-bin/group_digest/digest_list?bkn=' + Bkn + '&group_code=' + GroupCode + '&page_start=' + page_start + '&page_limit=20';
@@ -144,12 +43,11 @@ export class WebApi {
     }
     return ret;
   }
-  @CacheClassFuncAsync(3600 * 1000, 'webapi_get_group_members')
-   async getGroupMembers(GroupCode: string, cached: boolean = true): Promise<WebApiGroupMember[]> {
+  async getGroupMembers(GroupCode: string, cached: boolean = true): Promise<WebApiGroupMember[]> {
     //logDebug('webapi 获取群成员', GroupCode);
     let MemberData: Array<WebApiGroupMember> = new Array<WebApiGroupMember>();
     try {
-      const CookiesObject = await NTQQUserApi.getCookies('qun.qq.com');
+      const CookiesObject = await this.core.getApiContext().UserApi.getCookies('qun.qq.com');
       const CookieValue = Object.entries(CookiesObject).map(([key, value]) => `${key}=${value}`).join('; ');
       const Bkn = this.genBkn(CookiesObject.skey);
       const retList: Promise<WebApiGroupMemberRet>[] = [];
@@ -194,11 +92,11 @@ export class WebApi {
   //   const res = await this.request(url);
   //   return await res.json();
   // }
-   async setGroupNotice(GroupCode: string, Content: string = '') {
+  async setGroupNotice(GroupCode: string, Content: string = '') {
     //https://web.qun.qq.com/cgi-bin/announce/add_qun_notice?bkn=${bkn}
     //qid=${群号}&bkn=${bkn}&text=${内容}&pinned=0&type=1&settings={"is_show_edit_card":1,"tip_window_type":1,"confirm_required":1}
 
-    const CookiesObject = await NTQQUserApi.getCookies('qun.qq.com');
+    const CookiesObject = await this.core.getApiContext().UserApi.getCookies('qun.qq.com');
     const CookieValue = Object.entries(CookiesObject).map(([key, value]) => `${key}=${value}`).join('; ');
     const Bkn = this.genBkn(CookiesObject.skey);
     let ret: any = undefined;
@@ -212,8 +110,8 @@ export class WebApi {
     }
     return undefined;
   }
-   async getGrouptNotice(GroupCode: string): Promise<undefined | WebApiGroupNoticeRet> {
-    const CookiesObject = await NTQQUserApi.getCookies('qun.qq.com');
+  async getGrouptNotice(GroupCode: string): Promise<undefined | WebApiGroupNoticeRet> {
+    const CookiesObject = await this.core.getApiContext().UserApi.getCookies('qun.qq.com');
     const CookieValue = Object.entries(CookiesObject).map(([key, value]) => `${key}=${value}`).join('; ');
     const Bkn = this.genBkn(CookiesObject.skey);
     let ret: WebApiGroupNoticeRet | undefined = undefined;
@@ -230,7 +128,7 @@ export class WebApi {
     }
     return undefined;
   }
-   genBkn(sKey: string) {
+  genBkn(sKey: string) {
     sKey = sKey || '';
     let hash = 5381;
 
@@ -241,13 +139,11 @@ export class WebApi {
 
     return (hash & 0x7FFFFFFF).toString();
   }
-
-  @CacheClassFuncAsync(3600 * 1000, 'GroupHonorInfo')
-   async getGroupHonorInfo(groupCode: string, getType: WebHonorType) {
-    const CookiesObject = await NTQQUserApi.getCookies('qun.qq.com');
+  async getGroupHonorInfo(groupCode: string, getType: WebHonorType) {
+    const CookiesObject = await this.core.getApiContext().UserApi.getCookies('qun.qq.com');
     const CookieValue = Object.entries(CookiesObject).map(([key, value]) => `${key}=${value}`).join('; ');
-    const Bkn = WebApi.genBkn(CookiesObject.skey);
-    async function getDataInternal(Internal_groupCode: string, Internal_type: number) {
+    const Bkn = this.genBkn(CookiesObject.skey);
+    const getDataInternal = async (Internal_groupCode: string, Internal_type: number) => {
       let url = 'https://qun.qq.com/interactive/honorlist?gc=' + Internal_groupCode + '&type=' + Internal_type.toString();
       let res = '';
       let resJson;
@@ -263,7 +159,7 @@ export class WebApi {
           return resJson?.actorList;
         }
       } catch (e) {
-        logDebug('获取当前群荣耀失败', url, e);
+        this.context.logger.logDebug('获取当前群荣耀失败', url, e);
       }
       return undefined;
     }
@@ -294,7 +190,7 @@ export class WebApi {
           });
         }
       } catch (e) {
-        logDebug(e);
+        this.context.logger.logDebug(e);
       }
     }
     if (getType === WebHonorType.PERFROMER || getType === WebHonorType.ALL) {
@@ -313,7 +209,7 @@ export class WebApi {
           });
         }
       } catch (e) {
-        logDebug(e);
+        this.context.logger.logDebug(e);
       }
     }
     if (getType === WebHonorType.PERFROMER || getType === WebHonorType.ALL) {
@@ -332,7 +228,7 @@ export class WebApi {
           });
         }
       } catch (e) {
-        logDebug('获取群聊炽焰失败', e);
+        this.context.logger.logDebug('获取群聊炽焰失败', e);
       }
     }
     if (getType === WebHonorType.EMOTION || getType === WebHonorType.ALL) {
@@ -351,7 +247,7 @@ export class WebApi {
           });
         }
       } catch (e) {
-        logDebug('获取快乐源泉失败', e);
+        this.context.logger.logDebug('获取快乐源泉失败', e);
       }
     }
     //冒尖小春笋好像已经被tx扬了
