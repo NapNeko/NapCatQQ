@@ -3,7 +3,7 @@ import { InstanceContext } from '../wrapper';
 import { NapCatCore } from '..';
 import { GroupEssenceMsgRet, WebApiGroupMember, WebApiGroupMemberRet, WebApiGroupNoticeRet, WebHonorType } from '../entities/webapi';
 
-export class WebApi {
+export class NTQQWebApi {
   context: InstanceContext;
   core: NapCatCore;
   constructor(context: InstanceContext, core: NapCatCore) {

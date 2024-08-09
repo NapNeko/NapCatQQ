@@ -159,7 +159,7 @@ export class NTQQUserApi {
   //需要异常处理
   async getCookies(domain: string) {
     const ClientKeyData = await this.forceFetchClientKey();
-    const requestUrl = 'https://ssl.ptlogin2.qq.com/jump?ptlang=1033&clientuin=' + selfInfo.uin + '&clientkey=' + ClientKeyData.clientKey + '&u1=https%3A%2F%2F' + domain + '%2F' + selfInfo.uin + '%2Finfocenter&keyindex=19%27'
+    const requestUrl = 'https://ssl.ptlogin2.qq.com/jump?ptlang=1033&clientuin=' + this.core.selfInfo.uin + '&clientkey=' + ClientKeyData.clientKey + '&u1=https%3A%2F%2F' + domain + '%2F' + this.core.selfInfo.uin + '%2Finfocenter&keyindex=19%27'
     let cookies: { [key: string]: string; } = await RequestUtil.HttpsGetCookies(requestUrl);
     return cookies;
   }
@@ -180,7 +180,7 @@ export class NTQQUserApi {
 
   async getQzoneCookies() {
     const ClientKeyData = await this.forceFetchClientKey();
-    const requestUrl = 'https://ssl.ptlogin2.qq.com/jump?ptlang=1033&clientuin=' + selfInfo.uin + '&clientkey=' + ClientKeyData.clientKey + '&u1=https%3A%2F%2Fuser.qzone.qq.com%2F' + selfInfo.uin + '%2Finfocenter&keyindex=19%27'
+    const requestUrl = 'https://ssl.ptlogin2.qq.com/jump?ptlang=1033&clientuin=' + this.core.selfInfo.uin + '&clientkey=' + ClientKeyData.clientKey + '&u1=https%3A%2F%2Fuser.qzone.qq.com%2F' + this.core.selfInfo.uin + '%2Finfocenter&keyindex=19%27'
     let cookies: { [key: string]: string; } = await RequestUtil.HttpsGetCookies(requestUrl);
     return cookies;
   }
@@ -193,7 +193,7 @@ export class NTQQUserApi {
     }
     const clientKey = ClientKeyData.clientKey;
     const keyIndex = ClientKeyData.keyIndex;
-    const requestUrl = 'https://ssl.ptlogin2.qq.com/jump?ptlang=1033&clientuin=' + selfInfo.uin + '&clientkey=' + clientKey + '&u1=https%3A%2F%2Fh5.qzone.qq.com%2Fqqnt%2Fqzoneinpcqq%2Ffriend%3Frefresh%3D0%26clientuin%3D0%26darkMode%3D0&keyindex=19%27';
+    const requestUrl = 'https://ssl.ptlogin2.qq.com/jump?ptlang=1033&clientuin=' + this.core.selfInfo.uin + '&clientkey=' + clientKey + '&u1=https%3A%2F%2Fh5.qzone.qq.com%2Fqqnt%2Fqzoneinpcqq%2Ffriend%3Frefresh%3D0%26clientuin%3D0%26darkMode%3D0&keyindex=19%27';
     let cookies: { [key: string]: string; } = await RequestUtil.HttpsGetCookies(requestUrl);
     const skey = cookies['skey'];
     if (!skey) {
