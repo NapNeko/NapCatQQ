@@ -1,8 +1,6 @@
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { NTQQGroupApi, NTQQMsgApi, NTQQUserApi } from '@/core/apis';
-
 const SchemaData = {
   type: 'object',
   properties: {
@@ -19,6 +17,7 @@ export class GetGroupFileList extends BaseAction<Payload, { FileList: Array<any>
   actionName = ActionName.GetGroupFileList;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
+    const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
     const ret = await NTQQMsgApi.getGroupFileList(payload.group_id.toString(), {
       sortType: 1,
       fileCount: payload.file_count,
