@@ -504,7 +504,7 @@ export interface PicElement {
   thumbPath: Map<number, string>;
   originImageMd5?: string;
   originImageUrl?: string;  // http url, 没有host，host是https://gchat.qpic.cn/, 带download参数的是https://multimedia.nt.qq.com.cn
-};
+}
 
 export enum GrayTipElementSubType {
   INVITE_NEW_MEMBER = 12,

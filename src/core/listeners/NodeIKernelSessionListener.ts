@@ -18,27 +18,27 @@ export interface NodeIKernelSessionListener extends ISessionListener {
 }
 
 export class SessionListener implements ISessionListener {
-  onNTSessionCreate(args: unknown) {
+    onNTSessionCreate(args: unknown) {
 
-  }
+    }
 
-  onGProSessionCreate(args: unknown) {
+    onGProSessionCreate(args: unknown) {
 
-  }
+    }
 
-  onSessionInitComplete(args: unknown) {
+    onSessionInitComplete(args: unknown) {
 
-  }
+    }
 
-  onOpentelemetryInit(args: unknown) {
+    onOpentelemetryInit(args: unknown) {
 
-  }
+    }
 
-  onUserOnlineResult(args: unknown) {
+    onUserOnlineResult(args: unknown) {
 
-  }
+    }
 
-  onGetSelfTinyId(args: unknown) {
+    onGetSelfTinyId(args: unknown) {
 
-  }
+    }
 }

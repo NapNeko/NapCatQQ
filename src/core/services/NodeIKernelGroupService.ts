@@ -1,10 +1,10 @@
 import { NodeIKernelGroupListener } from '@/core/listeners/NodeIKernelGroupListener';
 import {
-  GroupExtParam,
-  GroupMember,
-  GroupMemberRole,
-  GroupNotifyTypes,
-  GroupRequestOperateTypes,
+    GroupExtParam,
+    GroupMember,
+    GroupMemberRole,
+    GroupNotifyTypes,
+    GroupRequestOperateTypes,
 } from '@/core/entities';
 import { GeneralCallResult } from '@/core/services/common';
 
@@ -171,7 +171,7 @@ export interface NodeIKernelGroupService {
 
   clearGroupNotifies(groupCode: string): void;
 
-  getGroupNotifiesUnreadCount(unknown: Boolean): Promise<GeneralCallResult>;
+  getGroupNotifiesUnreadCount(unknown: boolean): Promise<GeneralCallResult>;
 
   clearGroupNotifiesUnreadCount(groupCode: string): void;
 
