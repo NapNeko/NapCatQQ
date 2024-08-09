@@ -15,7 +15,7 @@ async function handleOb11FileLikeMessage(
   { deleteAfterSentFiles }: MessageContext
 ) {
   //有的奇怪的框架将url作为参数 而不是file 此时优先url 同时注意可能传入的是非file://开头的目录 By Mlikiowa
-  const { path, isLocal, fileName, errMsg, success } = (await uri2local(coreContext.NapCatTempPath,inputdata?.url || inputdata.file));
+  const { path, isLocal, fileName, errMsg, success } = (await uri2local(coreContext.NapCatTempPath, inputdata?.url || inputdata.file));
 
   if (!success) {
     coreContext.context.logger.logError('文件下载失败', errMsg);
@@ -38,7 +38,7 @@ const _handlers: {
     context: MessageContext
   ) => Promise<SendMessageElement | undefined>
 } = {
-  [OB11MessageDataType.text]: async (coreContext, { data: { text } }) => SendMsgElementConstructor.text(text),
+  [OB11MessageDataType.text]: async (coreContext, { data: { text } }) => SendMsgElementConstructor.text(coreContext, text),
 
   [OB11MessageDataType.at]: async (coreContext, { data: { qq: atQQ } }, context) => {
     if (!context.peer) return undefined;
@@ -46,10 +46,10 @@ const _handlers: {
     if (atQQ === 'all') return SendMsgElementConstructor.at(coreContext, atQQ, atQQ, AtType.atAll, '全体成员');
 
     // then the qq is a group member
-    const atMember = await getGroupMember(context.peer.peerUid, atQQ);
-    return atMember ?
-      SendMsgElementConstructor.at(coreContext, atQQ, atMember.uid, AtType.atUser, atMember.cardName || atMember.nick) :
-      undefined;
+    // Mlikiowa V2.0.0 Refactor Todo
+    let uid = await coreContext.getApiContext().UserApi.getUidByUin(atQQ);
+    if (!uid) throw new Error('Get Uid Error')
+    return SendMsgElementConstructor.at(coreContext, atQQ, uid, AtType.atUser, "");
   },
   [OB11MessageDataType.reply]: async (coreContext, { data: { id } }) => {
     const replyMsgM = MessageUnique.getMsgIdAndPeerByShortId(parseInt(id));
@@ -64,19 +64,15 @@ const _handlers: {
       undefined;
   },
 
-  [OB11MessageDataType.face]: async (coreContext, { data: { id } }) => SendMsgElementConstructor.face(parseInt(id)),
+  [OB11MessageDataType.face]: async (coreContext, { data: { id } }) => SendMsgElementConstructor.face(coreContext, parseInt(id)),
 
   [OB11MessageDataType.mface]: async (coreContext, {
     data: {
-      emoji_package_id,
-      emoji_id,
-      key,
-      summary
+      emoji_package_id, emoji_id, key, summary
     }
   }) => SendMsgElementConstructor.mface(coreContext, emoji_package_id, emoji_id, key, summary),
 
   // File service
-
   [OB11MessageDataType.image]: async (coreContext, sendMsg, context) => {
     const PicEle = await SendMsgElementConstructor.pic(
       coreContext,
@@ -86,9 +82,7 @@ const _handlers: {
     );
     context.deleteAfterSentFiles.push(PicEle.picElement.sourcePath);
     return PicEle;
-  }
-  , // currently not supported
-
+  }, // currently not supported
   [OB11MessageDataType.file]: async (coreContext, sendMsg, context) => {
     const { path, fileName } = await handleOb11FileLikeMessage(coreContext, sendMsg, context);
     //logDebug('发送文件', path, fileName);
@@ -113,8 +107,7 @@ const _handlers: {
     return videoEle;
   },
 
-  [OB11MessageDataType.voice]: async (coreContext, sendMsg, context) =>
-    SendMsgElementConstructor.ptt(coreContext, (await handleOb11FileLikeMessage(coreContext, sendMsg, context)).path),
+  [OB11MessageDataType.voice]: async (coreContext, sendMsg, context) => SendMsgElementConstructor.ptt(coreContext, (await handleOb11FileLikeMessage(coreContext, sendMsg, context)).path),
 
   [OB11MessageDataType.json]: async (coreContext, { data: { data } }) => SendMsgElementConstructor.ark(coreContext, data),
 
@@ -170,7 +163,7 @@ const _handlers: {
       const musicJson = await RequestUtil.HttpGetJson<any>(signUrl, 'POST', postData);
       return SendMsgElementConstructor.ark(coreContext, musicJson);
     } catch (e) {
-      logError('生成音乐消息失败', e);
+      coreContext.context.logger.logError('生成音乐消息失败', e);
     }
   },
 
@@ -184,6 +177,9 @@ const _handlers: {
 
   [OB11MessageDataType.Location]: async (coreContext) => {
     return SendMsgElementConstructor.location(coreContext);
+  },
+  [OB11MessageDataType.miniapp]: function (CoreContext: NapCatCore, sendMsg: never, context: MessageContext): Promise<SendMessageElement | undefined> {
+    throw new Error('Function not implemented.');
   }
 };
 
