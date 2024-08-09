@@ -17,6 +17,7 @@ type PlayloadType = FromSchema<typeof SchemaData>;
 class MarkMsgAsRead extends BaseAction<PlayloadType, null> {
   async getPeer(payload: PlayloadType): Promise<Peer> {
     const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
+    const NTQQFriendApi = this.CoreContext.getApiContext().FriendApi;
     if (payload.user_id) {
       const peerUid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
       if (!peerUid) {
