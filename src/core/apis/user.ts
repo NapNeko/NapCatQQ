@@ -1,5 +1,5 @@
-import type { ModifyProfileParams, SelfInfo, User, UserDetailInfoByUin, UserDetailInfoByUinV2 } from '@/core/entities';
-import { NodeIKernelProfileListener, ProfileListener } from '@/core/listeners';
+import type { ModifyProfileParams, User, UserDetailInfoByUin, UserDetailInfoByUinV2 } from '@/core/entities';
+import { NodeIKernelProfileListener } from '@/core/listeners';
 import { RequestUtil } from '@/common/utils/request';
 import { NodeIKernelProfileService, ProfileBizType, UserDetailSource } from '@/core/services';
 import { InstanceContext, NapCatCore } from '..';
@@ -11,7 +11,7 @@ export class NTQQUserApi {
     this.context = context;
     this.core = core;
   }
-   async getProfileLike(uid: string) {
+  async getProfileLike(uid: string) {
     return this.context.session.getProfileLikeService().getBuddyProfileLike({
       friendUids: [
         uid
@@ -25,16 +25,16 @@ export class NTQQUserApi {
       limit: 20
     });
   }
-   async setLongNick(longNick: string) {
+  async setLongNick(longNick: string) {
     return this.context.session.getProfileService().setLongNick(longNick);
   }
-   async setSelfOnlineStatus(status: number, extStatus: number, batteryStatus: number) {
+  async setSelfOnlineStatus(status: number, extStatus: number, batteryStatus: number) {
     return this.context.session.getMsgService().setStatus({ status: status, extStatus: extStatus, batteryStatus: batteryStatus });
   }
-   async getBuddyRecommendContactArkJson(uin: string, sencenID = '') {
+  async getBuddyRecommendContactArkJson(uin: string, sencenID = '') {
     return this.context.session.getBuddyService().getBuddyRecommendContactArkJson(uin, sencenID);
   }
-   async like(uid: string, count = 1): Promise<{ result: number, errMsg: string, succCounts: number }> {
+  async like(uid: string, count = 1): Promise<{ result: number, errMsg: string, succCounts: number }> {
     return this.context.session.getProfileLikeService().setBuddyProfileLike({
       friendUid: uid,
       sourceId: 71,
@@ -43,16 +43,16 @@ export class NTQQUserApi {
     });
   }
 
-   async setQQAvatar(filePath: string) {
+  async setQQAvatar(filePath: string) {
     type setQQAvatarRet = { result: number, errMsg: string };
     const ret = await this.context.session.getProfileService().setHeader(filePath) as setQQAvatarRet;
     return { result: ret?.result, errMsg: ret?.errMsg };
   }
-   async setGroupAvatar(gc: string, filePath: string) {
+  async setGroupAvatar(gc: string, filePath: string) {
     return this.context.session.getGroupService().setHeader(gc, filePath);
   }
 
-   async fetchUserDetailInfos(uids: string[]) {
+  async fetchUserDetailInfos(uids: string[]) {
     //26702 以上使用新接口 .Dev Mlikiowa
     type EventService = NodeIKernelProfileService['fetchUserDetailInfo'];
     type EventListener = NodeIKernelProfileListener['onUserDetailInfoChanged'];
@@ -90,7 +90,7 @@ export class NTQQUserApi {
 
     return retData;
   }
-   async fetchUserDetailInfo(uid: string) {
+  async fetchUserDetailInfo(uid: string) {
     type EventService = NodeIKernelProfileService['fetchUserDetailInfo'];
     type EventListener = NodeIKernelProfileListener['onUserDetailInfoChanged'];
     let [_retData, profile] = await this.core.eventWrapper.CallNormalEvent
@@ -126,13 +126,13 @@ export class NTQQUserApi {
     };
     return RetUser;
   }
-   async getUserDetailInfo(uid: string) {
+  async getUserDetailInfo(uid: string) {
     if (this.context.basicInfoWrapper.requireMinNTQQBuild('26702')) {
       return this.fetchUserDetailInfo(uid);
     }
     return this.getUserDetailInfoOld(uid);
   }
-   async getUserDetailInfoOld(uid: string) {
+  async getUserDetailInfoOld(uid: string) {
     type EventService = NodeIKernelProfileService['getUserDetailInfoWithBizInfo'];
     type EventListener = NodeIKernelProfileListener['onProfileDetailInfoChanged'];
     let [_retData, profile] = await this.core.eventWrapper.CallNormalEvent
@@ -153,20 +153,20 @@ export class NTQQUserApi {
       );
     return profile;
   }
-   async modifySelfProfile(param: ModifyProfileParams) {
+  async modifySelfProfile(param: ModifyProfileParams) {
     return this.context.session.getProfileService().modifyDesktopMiniProfile(param);
   }
   //需要异常处理
-   async getCookies(domain: string) {
+  async getCookies(domain: string) {
     const ClientKeyData = await this.forceFetchClientKey();
     const requestUrl = 'https://ssl.ptlogin2.qq.com/jump?ptlang=1033&clientuin=' + selfInfo.uin + '&clientkey=' + ClientKeyData.clientKey + '&u1=https%3A%2F%2F' + domain + '%2F' + selfInfo.uin + '%2Finfocenter&keyindex=19%27'
     let cookies: { [key: string]: string; } = await RequestUtil.HttpsGetCookies(requestUrl);
     return cookies;
   }
-   async getPSkey(domainList: string[]) {
+  async getPSkey(domainList: string[]) {
     return await this.context.session.getTipOffService().getPskey(domainList, true);
   }
-   async getRobotUinRange(): Promise<Array<any>> {
+  async getRobotUinRange(): Promise<Array<any>> {
     const robotUinRanges = await this.context.session.getRobotService().getRobotUinRange({
       justFetchMsgConfig: '1',
       type: 1,
@@ -177,16 +177,16 @@ export class NTQQUserApi {
     return robotUinRanges?.response?.robotUinRanges;
   }
   //需要异常处理
-  
-   async getQzoneCookies() {
+
+  async getQzoneCookies() {
     const ClientKeyData = await this.forceFetchClientKey();
     const requestUrl = 'https://ssl.ptlogin2.qq.com/jump?ptlang=1033&clientuin=' + selfInfo.uin + '&clientkey=' + ClientKeyData.clientKey + '&u1=https%3A%2F%2Fuser.qzone.qq.com%2F' + selfInfo.uin + '%2Finfocenter&keyindex=19%27'
     let cookies: { [key: string]: string; } = await RequestUtil.HttpsGetCookies(requestUrl);
     return cookies;
   }
   //需要异常处理
-  
-   async getSkey(): Promise<string | undefined> {
+
+  async getSkey(): Promise<string | undefined> {
     const ClientKeyData = await this.forceFetchClientKey();
     if (ClientKeyData.result !== 0) {
       throw new Error('getClientKey Error');
@@ -201,14 +201,14 @@ export class NTQQUserApi {
     }
     return skey;
   }
-   async getUidByUin(Uin: string) {
+  async getUidByUin(Uin: string) {
     //此代码仅临时使用，后期会被废弃
     if (this.context.basicInfoWrapper.requireMinNTQQBuild('26702')) {
       return await this..getUidByUinV2(Uin);
     }
     return await this.getUidByUinV1(Uin);
   }
-   async getUinByUid(Uid: string) {
+  async getUinByUid(Uid: string) {
     //此代码仅临时使用，后期会被废弃
     if (this.context.basicInfoWrapper.requireMinNTQQBuild('26702')) {
       return await this.getUinByUidV2(Uid);
@@ -217,7 +217,7 @@ export class NTQQUserApi {
   }
 
   //后期改成流水线处理
-   async getUidByUinV2(Uin: string) {
+  async getUidByUinV2(Uin: string) {
     let uid = (await this.context.session.getProfileService().getUidByUin('FriendsServiceImpl', [Uin])).get(Uin);
     if (uid) return uid;
     uid = (await this.context.session.getGroupService().getUidByUins([Uin])).uids.get(Uin);
@@ -235,7 +235,7 @@ export class NTQQUserApi {
     return uid;
   }
   //后期改成流水线处理
-   async getUinByUidV2(Uid: string) {
+  async getUinByUidV2(Uid: string) {
     let uin = (await this.context.session.getProfileService().getUinByUid('FriendsServiceImpl', [Uid])).get(Uid);
     if (uin) return uin;
     uin = (await this.context.session.getGroupService().getUinByUids([Uid])).uins.get(Uid);
@@ -250,7 +250,7 @@ export class NTQQUserApi {
     return uin;
   }
 
-   async getUidByUinV1(Uin: string) {
+  async getUidByUinV1(Uin: string) {
     // 通用转换开始尝试
     let uid = (await this.context.session.getUixConvertService().getUid([Uin])).uidInfo.get(Uin);
     // Uid 好友转
@@ -279,7 +279,7 @@ export class NTQQUserApi {
     }
     return uid;
   }
-   async getUinByUidV1(Uid: string) {
+  async getUinByUidV1(Uid: string) {
     let ret = await this.core.eventWrapper.callNoListenerEvent
       <(Uin: string[]) => Promise<{ uinInfo: Map<string, string> }>>(
         'NodeIKernelUixConvertService/getUin',
@@ -307,19 +307,19 @@ export class NTQQUserApi {
     // }
     return uin;
   }
-   async getRecentContactListSnapShot(count: number) {
+  async getRecentContactListSnapShot(count: number) {
     return await this.context.session.getRecentContactService().getRecentContactListSnapShot(count);
   }
-   async getRecentContactListSyncLimit(count: number) {
+  async getRecentContactListSyncLimit(count: number) {
     return await this.context.session.getRecentContactService().getRecentContactListSyncLimit(count);
   }
-   async getRecentContactListSync() {
+  async getRecentContactListSync() {
     return await this.context.session.getRecentContactService().getRecentContactListSync();
   }
-   async getRecentContactList() {
+  async getRecentContactList() {
     return await this.context.session.getRecentContactService().getRecentContactList();
   }
-   async getUserDetailInfoByUinV2(Uin: string) {
+  async getUserDetailInfoByUinV2(Uin: string) {
     return await this.core.eventWrapper.callNoListenerEvent
       <(Uin: string) => Promise<UserDetailInfoByUinV2>>(
         'NodeIKernelProfileService/getUserDetailInfoByUin',
@@ -327,7 +327,7 @@ export class NTQQUserApi {
         Uin
       );
   }
-   async getUserDetailInfoByUin(Uin: string) {
+  async getUserDetailInfoByUin(Uin: string) {
     return this.core.eventWrapper.callNoListenerEvent
       <(Uin: string) => Promise<UserDetailInfoByUin>>(
         'NodeIKernelProfileService/getUserDetailInfoByUin',
@@ -335,7 +335,7 @@ export class NTQQUserApi {
         Uin
       );
   }
-   async forceFetchClientKey() {
+  async forceFetchClientKey() {
     return await this.context.session.getTicketService().forceFetchClientKey('');
   }
 }

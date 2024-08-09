@@ -13,31 +13,34 @@ import * as fileType from 'file-type';
 import imageSize from 'image-size';
 import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 import { NodeIKernelSearchService } from '../services/NodeIKernelSearchService';
+import { RkeyManager } from '../helper/rkey';
 
 
 export class NTQQFileApi {
   context: InstanceContext;
   core: NapCatCore;
+  rkeyManager: RkeyManager;
   constructor(context: InstanceContext, core: NapCatCore) {
     this.context = context;
     this.core = core;
+    this.rkeyManager = new RkeyManager('http://napcat-sign.wumiao.wang:2082/rkey', this.context.logger);
   }
-   async getFileType(filePath: string) {
+  async getFileType(filePath: string) {
     return fileType.fileTypeFromFile(filePath);
   }
 
-   async copyFile(filePath: string, destPath: string) {
+  async copyFile(filePath: string, destPath: string) {
     await this.context.wrapper.util.copyFile(filePath, destPath);
   }
 
-   async getFileSize(filePath: string): Promise<number> {
+  async getFileSize(filePath: string): Promise<number> {
     return await this.context.wrapper.util.getFileSize(filePath);
   }
-   async getVideoUrl(peer: Peer, msgId: string, elementId: string) {
+  async getVideoUrl(peer: Peer, msgId: string, elementId: string) {
     return (await this.context.session.getRichMediaService().getVideoPlayUrlV2(peer, msgId, elementId, 0, { downSourceType: 1, triggerType: 1 })).urlResult.domainUrl;
   }
   // 上传文件到QQ的文件夹
-   async uploadFile(filePath: string, elementType: ElementType = ElementType.PIC, elementSubType: number = 0) {
+  async uploadFile(filePath: string, elementType: ElementType = ElementType.PIC, elementSubType: number = 0) {
     // napCatCore.wrapper.util.
     const fileMd5 = await calculateFileMD5(filePath);
     let ext: string = (await this.getFileType(filePath))?.ext as string || '';
@@ -68,10 +71,10 @@ export class NTQQFileApi {
       ext
     };
   }
-   async downloadMediaByUuid() {
+  async downloadMediaByUuid() {
     //napCatCore.session.getRichMediaService().downloadFileForFileUuid();
   }
-   async downloadMedia(msgId: string, chatType: ChatType, peerUid: string, elementId: string, thumbPath: string, sourcePath: string, timeout = 1000 * 60 * 2, force: boolean = false) {
+  async downloadMedia(msgId: string, chatType: ChatType, peerUid: string, elementId: string, thumbPath: string, sourcePath: string, timeout = 1000 * 60 * 2, force: boolean = false) {
     //logDebug('receive downloadMedia task', msgId, chatType, peerUid, elementId, thumbPath, sourcePath, timeout, force);
     // 用于下载收到的消息中的图片等
     if (sourcePath && fs.existsSync(sourcePath)) {
@@ -135,7 +138,7 @@ export class NTQQFileApi {
     return filePath;
   }
 
-   async getImageSize(filePath: string): Promise<ISizeCalculationResult | undefined> {
+  async getImageSize(filePath: string): Promise<ISizeCalculationResult | undefined> {
     return new Promise((resolve, reject) => {
       imageSize(filePath, (err, dimensions) => {
         if (err) {
@@ -146,7 +149,7 @@ export class NTQQFileApi {
       });
     });
   }
-   async addFileCache(peer: Peer, msgId: string, msgSeq: string, senderUid: string, elemId: string, elemType: string, fileSize: string, fileName: string) {
+  async addFileCache(peer: Peer, msgId: string, msgSeq: string, senderUid: string, elemId: string, elemType: string, fileSize: string, fileName: string) {
     let GroupData;
     let BuddyData;
     if (peer.chatType === ChatType.group) {
@@ -204,7 +207,7 @@ export class NTQQFileApi {
       ]
     });
   }
-   async searchfile(keys: string[]) {
+  async searchfile(keys: string[]) {
     type EventType = NodeIKernelSearchService['searchFileWithKeywords'];
     interface OnListener {
       searchId: string,
@@ -256,7 +259,7 @@ export class NTQQFileApi {
     let [ret] = (await Listener);
     return ret;
   }
-   async getImageUrl(element: PicElement) {
+  async getImageUrl(element: PicElement) {
     if (!element) {
       return '';
     }
@@ -274,7 +277,7 @@ export class NTQQFileApi {
         if (UrlRkey) {
           return IMAGE_HTTP_HOST_NT + url;
         }
-        const rkeyData = await rkeyManager.getRkey();
+        const rkeyData = await this.rkeyManager.getRkey();
         UrlRkey = imageAppid === '1406' ? rkeyData.private_rkey : rkeyData.group_rkey;
         return IMAGE_HTTP_HOST_NT + url + `${UrlRkey}`;
       } else {
@@ -297,48 +300,48 @@ export class NTQQFileCacheApi {
     this.context = context;
     this.core = core;
   }
-   async setCacheSilentScan(isSilent: boolean = true) {
+  async setCacheSilentScan(isSilent: boolean = true) {
     return '';
   }
 
-   getCacheSessionPathList() {
+  getCacheSessionPathList() {
     return '';
   }
 
-   clearCache(cacheKeys: Array<string> = ['tmp', 'hotUpdate']) {
+  clearCache(cacheKeys: Array<string> = ['tmp', 'hotUpdate']) {
     // 参数未验证
     return this.context.session.getStorageCleanService().clearCacheDataByKeys(cacheKeys);
   }
 
-   addCacheScannedPaths(pathMap: object = {}) {
+  addCacheScannedPaths(pathMap: object = {}) {
     return this.context.session.getStorageCleanService().addCacheScanedPaths(pathMap);
   }
 
-   scanCache() {
+  scanCache() {
     //return (await this.context.session.getStorageCleanService().scanCache()).size;
   }
 
-   getHotUpdateCachePath() {
+  getHotUpdateCachePath() {
     // 未实现
     return '';
   }
 
-   getDesktopTmpPath() {
+  getDesktopTmpPath() {
     // 未实现
     return '';
   }
 
-   getChatCacheList(type: ChatType, pageSize: number = 1000, pageIndex: number = 0) {
+  getChatCacheList(type: ChatType, pageSize: number = 1000, pageIndex: number = 0) {
     return this.context.session.getStorageCleanService().getChatCacheInfo(type, pageSize, 1, pageIndex);
   }
 
-   getFileCacheInfo(fileType: CacheFileType, pageSize: number = 1000, lastRecord?: CacheFileListItem) {
+  getFileCacheInfo(fileType: CacheFileType, pageSize: number = 1000, lastRecord?: CacheFileListItem) {
     const _lastRecord = lastRecord ? lastRecord : { fileType: fileType };
     //需要五个参数
     //return napCatCore.session.getStorageCleanService().getFileCacheInfo();
   }
 
-   async clearChatCache(chats: ChatCacheListItemBasic[] = [], fileKeys: string[] = []) {
+  async clearChatCache(chats: ChatCacheListItemBasic[] = [], fileKeys: string[] = []) {
     return this.context.session.getStorageCleanService().clearChatCacheInfo(chats, fileKeys);
   }
 }
