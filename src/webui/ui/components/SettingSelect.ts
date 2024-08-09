@@ -20,65 +20,65 @@ SelectTemplate.innerHTML = `<style>
 </div>`;
 
 window.customElements.define(
-  'ob-setting-select',
-  class extends HTMLElement {
-    readonly _button: HTMLDivElement;
-    readonly _text: HTMLInputElement;
-    readonly _context: HTMLUListElement;
+    'ob-setting-select',
+    class extends HTMLElement {
+        readonly _button: HTMLDivElement;
+        readonly _text: HTMLInputElement;
+        readonly _context: HTMLUListElement;
 
-    constructor() {
-      super();
+        constructor() {
+            super();
 
-      this.attachShadow({ mode: 'open' });
-      this.shadowRoot?.append(SelectTemplate.content.cloneNode(true));
+            this.attachShadow({ mode: 'open' });
+            this.shadowRoot?.append(SelectTemplate.content.cloneNode(true));
 
-      this._button = this.shadowRoot.querySelector('div[part="button"]');
-      this._text = this.shadowRoot.querySelector('input[part="current-text"]');
-      this._context = this.shadowRoot.querySelector('ul[part="option-list"]');
+            this._button = this.shadowRoot.querySelector('div[part="button"]');
+            this._text = this.shadowRoot.querySelector('input[part="current-text"]');
+            this._context = this.shadowRoot.querySelector('ul[part="option-list"]');
 
-      const buttonClick = () => {
-        const isHidden = this._context.classList.toggle('hidden');
-        window[`${isHidden ? 'remove' : 'add'}EventListener`]('pointerdown', windowPointerDown);
-      };
+            const buttonClick = () => {
+                const isHidden = this._context.classList.toggle('hidden');
+                window[`${isHidden ? 'remove' : 'add'}EventListener`]('pointerdown', windowPointerDown);
+            };
 
-      const windowPointerDown = ({ target }) => {
-        if (!this.contains(target)) buttonClick();
-      };
+            const windowPointerDown = ({ target }) => {
+                if (!this.contains(target)) buttonClick();
+            };
 
-      this._button.addEventListener('click', buttonClick);
-      this._context.addEventListener('click', ({ target }: MouseEventExtend) => {
-        if (target.tagName !== 'SETTING-OPTION') return;
-        buttonClick();
+            this._button.addEventListener('click', buttonClick);
+            this._context.addEventListener('click', ({ target }: MouseEventExtend) => {
+                if (target.tagName !== 'SETTING-OPTION') return;
+                buttonClick();
 
-        if (target.hasAttribute('is-selected')) return;
+                if (target.hasAttribute('is-selected')) return;
 
-        this.querySelectorAll('setting-option[is-selected]').forEach((dom) => dom.toggleAttribute('is-selected'));
-        target.toggleAttribute('is-selected');
+                this.querySelectorAll('setting-option[is-selected]').forEach((dom) => dom.toggleAttribute('is-selected'));
+                target.toggleAttribute('is-selected');
 
-        this._text.value = target.textContent as string;
-        this.dispatchEvent(
-          new CustomEvent('selected', {
-            bubbles: true,
-            composed: true,
-            detail: {
-              name: target.textContent,
-              value: target.dataset.value,
-            },
-          }),
-        );
-      });
+                this._text.value = target.textContent as string;
+                this.dispatchEvent(
+                    new CustomEvent('selected', {
+                        bubbles: true,
+                        composed: true,
+                        detail: {
+                            name: target.textContent,
+                            value: target.dataset.value,
+                        },
+                    }),
+                );
+            });
 
-      this._text.value = this.querySelector('setting-option[is-selected]')?.textContent as string;
-    }
-  },
+            this._text.value = this.querySelector('setting-option[is-selected]')?.textContent as string;
+        }
+    },
 );
 
 export const SettingSelect = (items: Array<{ text: string; value: string }>, configKey?: string, configValue?: any) => {
-  return `<ob-setting-select ${configKey ? `data-config-key="${configKey}"` : ''}>
+    return `<ob-setting-select ${configKey ? `data-config-key="${configKey}"` : ''}>
     ${items
-    .map((e, i) => {
-      return SettingOption(e.text, e.value, configKey && configValue ? configValue === e.value : i === 0);
-    })
-    .join('')}
+        .map((e, i) => {
+            return SettingOption(e.text, e.value, configKey && configValue ? configValue === e.value : i === 0);
+        })
+        .join('')}
 </ob-setting-select>`;
 };
