@@ -4,7 +4,7 @@ const CurrentPath = path.dirname(__filename);
 let Process = require('process');
 let os = require('os');
 
-Process.dlopenOrig = Process.dlopen
+Process.dlopenOrig = Process.dlopen;
 
 let proxyHandler = {
     get(target, prop, receiver) {
@@ -22,22 +22,22 @@ let WrapperNodeApi = undefined;//NativeNpdeApi
 let WrapperLoginService = undefined;
 
 Process.dlopen = function (module, filename, flags = os.constants.dlopen.RTLD_LAZY) {
-    let dlopenRet = this.dlopenOrig(module, filename, flags)
+    let dlopenRet = this.dlopenOrig(module, filename, flags);
     for (let export_name in module.exports) {
         module.exports[export_name] = new Proxy(module.exports[export_name], {
             construct: (target, args, _newTarget) => {
-                let ret = new target(...args)
-                if (export_name === 'NodeIQQNTWrapperSession') WrapperSession = ret
-                if (export_name === 'NodeIKernelLoginService') WrapperLoginService = ret
-                return ret
+                let ret = new target(...args);
+                if (export_name === 'NodeIQQNTWrapperSession') WrapperSession = ret;
+                if (export_name === 'NodeIKernelLoginService') WrapperLoginService = ret;
+                return ret;
             },
-        })
+        });
     }
     if (filename.toLowerCase().indexOf('wrapper.node') != -1) {
         WrapperNodeApi = module.exports;
     }
     return dlopenRet;
-}
+};
 function getWrapperSession() {
     return WrapperSession;
 }

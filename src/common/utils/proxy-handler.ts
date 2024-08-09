@@ -17,5 +17,5 @@ export function proxyHandlerOf(logger: LogWrapper) {
 }
 
 export function proxiedListenerOf<T extends object>(listener: T, logger: LogWrapper) {
-    return new Proxy<T>(listener, proxyHandlerOf(logger))
+    return new Proxy<T>(listener, proxyHandlerOf(logger));
 }
