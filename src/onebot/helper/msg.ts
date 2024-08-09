@@ -74,7 +74,13 @@ export class SendMsgElementConstructor {
     };
   }
 
-  static async pic(CoreContext: NapCatCore, picPath: string, summary: string = '', subType: 0 | 1 = 0): Promise<SendPicElement> {
+  static async pic(coreContext: NapCatCore, picPath: string, summary: string = '', subType: 0 | 1 = 0): Promise<SendPicElement> {
+    const NTQQGroupApi = coreContext.getApiContext().GroupApi;
+    const NTQQUserApi = coreContext.getApiContext().UserApi;
+    const NTQQFileApi = coreContext.getApiContext().FileApi;
+    const NTQQMsgApi = coreContext.getApiContext().MsgApi;
+    const NTQQFriendApi = coreContext.getApiContext().FriendApi;
+    const logger = coreContext.context.logger;
     const { md5, fileName, path, fileSize } = await NTQQFileApi.uploadFile(picPath, ElementType.PIC, subType);
     if (fileSize === 0) {
       throw '文件异常，大小为0';
@@ -103,7 +109,13 @@ export class SendMsgElementConstructor {
     };
   }
 
-  static async file(CoreContext: NapCatCore, filePath: string, fileName: string = '', folderId: string = ''): Promise<SendFileElement> {
+  static async file(coreContext: NapCatCore, filePath: string, fileName: string = '', folderId: string = ''): Promise<SendFileElement> {
+    const NTQQGroupApi = coreContext.getApiContext().GroupApi;
+    const NTQQUserApi = coreContext.getApiContext().UserApi;
+    const NTQQFileApi = coreContext.getApiContext().FileApi;
+    const NTQQMsgApi = coreContext.getApiContext().MsgApi;
+    const NTQQFriendApi = coreContext.getApiContext().FriendApi;
+    const logger = coreContext.context.logger;
     const { md5, fileName: _fileName, path, fileSize } = await NTQQFileApi.uploadFile(filePath, ElementType.FILE);
     if (fileSize === 0) {
       throw '文件异常，大小为0';
@@ -122,7 +134,13 @@ export class SendMsgElementConstructor {
     return element;
   }
 
-  static async video(CoreContext: NapCatCore, filePath: string, fileName: string = '', diyThumbPath: string = '', videotype: viedo_type = viedo_type.VIDEO_FORMAT_MP4): Promise<SendVideoElement> {
+  static async video(coreContext: NapCatCore, filePath: string, fileName: string = '', diyThumbPath: string = '', videotype: viedo_type = viedo_type.VIDEO_FORMAT_MP4): Promise<SendVideoElement> {
+    const NTQQGroupApi = coreContext.getApiContext().GroupApi;
+    const NTQQUserApi = coreContext.getApiContext().UserApi;
+    const NTQQFileApi = coreContext.getApiContext().FileApi;
+    const NTQQMsgApi = coreContext.getApiContext().MsgApi;
+    const NTQQFriendApi = coreContext.getApiContext().FriendApi;
+    const logger = coreContext.context.logger;
     const { fileName: _fileName, path, fileSize, md5 } = await NTQQFileApi.uploadFile(filePath, ElementType.VIDEO);
     if (fileSize === 0) {
       throw '文件异常，大小为0';
@@ -138,10 +156,10 @@ export class SendMsgElementConstructor {
       filePath
     };
     try {
-      videoInfo = await getVideoInfo(path);
+      videoInfo = await getVideoInfo(path, logger);
       //logDebug('视频信息', videoInfo);
     } catch (e) {
-      logError('获取视频信息失败', e);
+      logger.logError('获取视频信息失败', e);
     }
     const createThumb = new Promise<string>((resolve, reject) => {
       const thumbFileName = `${md5}_0.png`;
@@ -150,7 +168,7 @@ export class SendMsgElementConstructor {
         .on('end', () => {
         })
         .on('error', (err) => {
-          logDebug('获取视频封面失败，使用默认封面', err);
+          logger.logDebug('获取视频封面失败，使用默认封面', err);
           if (diyThumbPath) {
             fs.copyFile(diyThumbPath, thumbPath).then(() => {
               resolve(thumbPath);
@@ -206,8 +224,14 @@ export class SendMsgElementConstructor {
     return element;
   }
 
-  static async ptt(CoreContext: NapCatCore, pttPath: string): Promise<SendPttElement> {
-    const { converted, path: silkPath, duration } = await encodeSilk(pttPath);
+  static async ptt(coreContext: NapCatCore, pttPath: string): Promise<SendPttElement> {
+    const NTQQGroupApi = coreContext.getApiContext().GroupApi;
+    const NTQQUserApi = coreContext.getApiContext().UserApi;
+    const NTQQFileApi = coreContext.getApiContext().FileApi;
+    const NTQQMsgApi = coreContext.getApiContext().MsgApi;
+    const NTQQFriendApi = coreContext.getApiContext().FriendApi;
+    const logger = coreContext.context.logger;
+    const { converted, path: silkPath, duration } = await encodeSilk(pttPath, coreContext.NapCatTempPath, coreContext.context.logger);
     // log("生成语音", silkPath, duration);
     if (!silkPath) {
       throw '语音转换失败, 请检查语音文件是否正常';

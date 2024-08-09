@@ -40,8 +40,8 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
     }
     const msgList = data.msgList;
     const messages = await Promise.all(msgList.map(async msg => {
-      const resMsg = await OB11Constructor.message(msg);
-      resMsg.message_id = MessageUnique.createMsg({ guildId:'',chatType:msg.chatType,peerUid:msg.peerUid },msg.msgId)!;
+      const resMsg = await OB11Constructor.message(this.CoreContext, msg, "array");
+      resMsg.message_id = MessageUnique.createMsg({ guildId: '', chatType: msg.chatType, peerUid: msg.peerUid }, msg.msgId)!;
       return resMsg;
     }));
     messages.map(msg => {
