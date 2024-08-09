@@ -21,7 +21,7 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
   protected async _handle(payload: Payload) {
     const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
     const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
-    const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
+    const NTQQWebApi = this.CoreContext.getApiContext().WebApi;
     const isNocache = payload.no_cache == true || payload.no_cache === 'true';
     const uid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
     if (!uid) {
@@ -41,13 +41,13 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
     const date = Math.round(Date.now() / 1000);
     const retMember = OB11Constructor.groupMember(payload.group_id.toString(), member);
     if (!this.CoreContext.context.basicInfoWrapper.requireMinNTQQBuild('26702')) {
-      const SelfInfoInGroup = await NTQQGroupApi.getGroupMemberV2(payload.group_id.toString(), selfInfo.uid, isNocache);
+      const SelfInfoInGroup = await NTQQGroupApi.getGroupMemberV2(payload.group_id.toString(), this.CoreContext.selfInfo.uid, isNocache);
       let isPrivilege = false;
       if (SelfInfoInGroup) {
         isPrivilege = SelfInfoInGroup.role === 3 || SelfInfoInGroup.role === 4;
       }
       if (isPrivilege) {
-        const webGroupMembers = await WebApi.getGroupMembers(payload.group_id.toString());
+        const webGroupMembers = await NTQQWebApi.getGroupMembers(payload.group_id.toString());
         for (let i = 0, len = webGroupMembers.length; i < len; i++) {
           if (webGroupMembers[i]?.uin && webGroupMembers[i].uin === retMember.user_id) {
             retMember.join_time = webGroupMembers[i]?.join_time;
@@ -67,8 +67,9 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
         }
       }
     } else {
-      retMember.last_sent_time = parseInt((await getGroupMember(payload.group_id.toString(), retMember.user_id))?.lastSpeakTime || date.toString());
-      retMember.join_time = parseInt((await getGroupMember(payload.group_id.toString(), retMember.user_id))?.joinTime || date.toString());
+      // Mlikiowa V2.0.0 Refactor Todo
+      // retMember.last_sent_time = parseInt((await getGroupMember(payload.group_id.toString(), retMember.user_id))?.lastSpeakTime || date.toString());
+      // retMember.join_time = parseInt((await getGroupMember(payload.group_id.toString(), retMember.user_id))?.joinTime || date.toString());
     }
     return retMember;
   }
