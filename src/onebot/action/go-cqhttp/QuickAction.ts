@@ -1,6 +1,6 @@
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { QuickAction, QuickActionEvent, handleQuickOperation } from '@/onebot11/server/postOB11Event';
+import { QuickAction, QuickActionEvent, handleQuickOperation } from '@/onebot/server/postOB11Event';
 
 interface Payload{
   context: QuickActionEvent,
