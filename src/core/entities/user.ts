@@ -208,6 +208,7 @@ export interface QQLevel {
     moonNum: number;
     starNum: number
 }
+
 export interface User {
     uid: string; // 加密的字符串
     uin: string; // QQ号
