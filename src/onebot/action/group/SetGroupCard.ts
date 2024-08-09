@@ -1,7 +1,5 @@
 import BaseAction from '../BaseAction';
-import { getGroupMember } from '@/core/data';
 import { ActionName } from '../types';
-import { NTQQGroupApi } from '@/core/apis/group';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
 const SchemaData = {
