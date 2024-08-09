@@ -1,4 +1,4 @@
-import { WrapperNodeApi } from "./wrapper/wrapper";
+import { WrapperNodeApi } from "@/core/wrapper";
 import path from "node:path";
 import fs from "node:fs";
 import { InstanceContext } from "./wrapper";
@@ -6,7 +6,7 @@ import { NTEventChannel } from "@/common/framework/event";
 import { proxiedListenerOf } from "@/common/utils/proxy-handler";
 import { MsgListener } from "./listeners";
 import { sleep } from "@/common/utils/helper";
-import { CoreCache, LineDevice } from "./entities";
+import { SelfInfo, LineDevice } from "./entities";
 
 export enum NapCatCoreWorkingEnv {
     Unknown = 0,
@@ -27,20 +27,21 @@ export function loadQQWrapper(QQVersion: string): WrapperNodeApi {
 export class NapCatCore {
     readonly context: InstanceContext;
     readonly eventChannel: NTEventChannel;
-    readonly cache: CoreCache;
-    constructor(context: InstanceContext) {
+
+    // runtime info, not readonly
+    selfInfo: SelfInfo;
+    deviceList: {
+        app_id: string,
+        device_name: string,
+        device_kind: string
+    }[] = [];
+
+    // 通过构造器递过去的 runtime info 应该尽量少
+    constructor(context: InstanceContext, selfInfo: SelfInfo) {
+        this.selfInfo = selfInfo;
         this.context = context;
         this.eventChannel = new NTEventChannel(context.wrapper, context.session);
-        this.cache = {
-            selfInfo: {
-                uid: "",
-                uin: "",
-                nick: ""
-            },
-            DeviceList: []
-        }
         this.initNapCatCoreListeners().then().catch(console.error);
-
     }
 
     // Renamed from 'InitDataListener'
@@ -49,16 +50,12 @@ export class NapCatCore {
         msgListener.onRecvMsg = (msg) => {
             console.log("RecvMsg", msg);
         }
-        msgListener.onLineDev = (Devices: LineDevice[]) => {
-            this.cache.DeviceList.splice(0, this.cache.DeviceList.length);
-            Devices.map((Device: LineDevice) => {
-                let DeviceData = {
-                    app_id: Device.devUid,
-                    device_name: Device.clientType.toString(),
-                    device_kind: Device.clientType.toString(),
-                };
-                this.cache.DeviceList.push(DeviceData);
-            });
+        msgListener.onLineDev = (devices: LineDevice[]) => {
+            this.deviceList = devices.map((device: LineDevice) => ({
+                app_id: device.devUid,
+                device_name: device.clientType.toString(),
+                device_kind: device.clientType.toString(),
+            }));
         };
         //await sleep(2500);
         this.context.session.getMsgService().addKernelMsgListener(

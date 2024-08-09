@@ -149,10 +149,9 @@ export class NapCatShell {
             session,
             logger,
             loginService,
-            selfInfo,
             basicInfoWrapper
         };
-        this.core = new NapCatCore(this.context);
+        this.core = new NapCatCore(this.context, selfInfo);
 
         new NapCatOneBot11Adapter(this.core, this.context);
     }
