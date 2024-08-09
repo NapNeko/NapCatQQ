@@ -7,7 +7,7 @@ interface ServerRkeyData {
   expired_time: number;
 }
 
-class RkeyManager {
+export class RkeyManager {
   serverUrl: string = '';
   private rkeyData: ServerRkeyData = {
     group_rkey: '',
