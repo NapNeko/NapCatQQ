@@ -75,69 +75,71 @@ export class NTQQFileApi {
     async downloadMediaByUuid() {
     //napCatCore.session.getRichMediaService().downloadFileForFileUuid();
     }
-    // async downloadMedia(msgId: string, chatType: ChatType, peerUid: string, elementId: string, thumbPath: string, sourcePath: string, timeout = 1000 * 60 * 2, force: boolean = false) {
-    //   //logDebug('receive downloadMedia task', msgId, chatType, peerUid, elementId, thumbPath, sourcePath, timeout, force);
-    //   // 用于下载收到的消息中的图片等
-    //   if (sourcePath && fs.existsSync(sourcePath)) {
-    //     if (force) {
-    //       try {
-    //         await fsPromises.unlink(sourcePath);
-    //       } catch (e) {
-    //         //
-    //       }
-    //     } else {
-    //       return sourcePath;
-    //     }
-    //   }
-    //   const data = await this.core.eventWrapper.CallNormalEvent<
-    //     (
-    //       params: {
-    //         fileModelId: string,
-    //         downloadSourceType: number,
-    //         triggerType: number,
-    //         msgId: string,
-    //         chatType: ChatType,
-    //         peerUid: string,
-    //         elementId: string,
-    //         thumbSize: number,
-    //         downloadType: number,
-    //         filePath: string
-    //       }) => Promise<unknown>,
-    //     (fileTransNotifyInfo: OnRichMediaDownloadCompleteParams) => void
-    //   >(
-    //     'NodeIKernelMsgService/downloadRichMedia',
-    //     'NodeIKernelMsgListener/onRichMediaDownloadComplete',
-    //     1,
-    //     timeout,
-    //     (arg: OnRichMediaDownloadCompleteParams) => {
-    //       if (arg.msgId === msgId) {
-    //         return true;
-    //       }
-    //       return false;
-    //     },
-    //     {
-    //       fileModelId: '0',
-    //       downloadSourceType: 0,
-    //       triggerType: 1,
-    //       msgId: msgId,
-    //       chatType: chatType,
-    //       peerUid: peerUid,
-    //       elementId: elementId,
-    //       thumbSize: 0,
-    //       downloadType: 1,
-    //       filePath: thumbPath
-    //     }
-    //   );
-    //   let filePath = data[1].filePath;
-    //   if (filePath.startsWith('\\')) {
-    //     // log('filePath start with \\');
-    //     const downloadPath = sessionConfig.defaultFileDownloadPath;
-    //     //logDebug('downloadPath', downloadPath);
-    //     filePath = path.join(downloadPath, filePath);
-    //     // 下载路径是下载文件夹的相对路径
-    //   }
-    //   return filePath;
-    // }
+    async downloadMedia(msgId: string, chatType: ChatType, peerUid: string, elementId: string, thumbPath: string, sourcePath: string, timeout = 1000 * 60 * 2, force: boolean = false) {
+      //logDebug('receive downloadMedia task', msgId, chatType, peerUid, elementId, thumbPath, sourcePath, timeout, force);
+      // 用于下载收到的消息中的图片等
+      if (sourcePath && fs.existsSync(sourcePath)) {
+        if (force) {
+          try {
+            await fsPromises.unlink(sourcePath);
+          } catch (e) {
+            //
+          }
+        } else {
+          return sourcePath;
+        }
+      }
+      const data = await this.core.eventWrapper.CallNormalEvent<
+        (
+          params: {
+            fileModelId: string,
+            downloadSourceType: number,
+            triggerType: number,
+            msgId: string,
+            chatType: ChatType,
+            peerUid: string,
+            elementId: string,
+            thumbSize: number,
+            downloadType: number,
+            filePath: string
+          }) => Promise<unknown>,
+        (fileTransNotifyInfo: OnRichMediaDownloadCompleteParams) => void
+      >(
+        'NodeIKernelMsgService/downloadRichMedia',
+        'NodeIKernelMsgListener/onRichMediaDownloadComplete',
+        1,
+        timeout,
+        (arg: OnRichMediaDownloadCompleteParams) => {
+          if (arg.msgId === msgId) {
+            return true;
+          }
+          return false;
+        },
+        {
+          fileModelId: '0',
+          downloadSourceType: 0,
+          triggerType: 1,
+          msgId: msgId,
+          chatType: chatType,
+          peerUid: peerUid,
+          elementId: elementId,
+          thumbSize: 0,
+          downloadType: 1,
+          filePath: thumbPath
+        }
+      );
+      let filePath = data[1].filePath;
+      if (filePath.startsWith('\\')) {
+        // log('filePath start with \\');
+        // Mlikiowa V2.0.0 Refactor Todo
+        //const downloadPath = sessionConfig.defaultFileDownloadPath;
+        //logDebug('downloadPath', downloadPath);
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        filePath = path.join("", filePath);
+        // 下载路径是下载文件夹的相对路径
+      }
+      return filePath;
+    }
 
     async getImageSize(filePath: string): Promise<ISizeCalculationResult | undefined> {
         return new Promise((resolve, reject) => {

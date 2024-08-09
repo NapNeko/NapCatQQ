@@ -17,7 +17,6 @@ export class CreateCollection extends BaseAction<Payload, any> {
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
     return await this.CoreContext.getApiContext().CollectionApi.createCollection(
-
       this.CoreContext.selfInfo.uin,
       this.CoreContext.selfInfo.uid,
       this.CoreContext.selfInfo.nick,

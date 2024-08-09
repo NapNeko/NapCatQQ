@@ -1,12 +1,9 @@
 import BaseAction from '../BaseAction';
 import fs from 'fs/promises';
-import { ob11Config } from '@/onebot11/config';
 import { UUIDConverter } from '@/common/utils/helper';
-import { ActionName, BaseCheckResult } from '../types';
+import { ActionName } from '../types';
 import { ChatType, ElementType, FileElement, Peer, RawMessage, VideoElement } from '@/core/entities';
-import { NTQQFileApi, NTQQFriendApi, NTQQMsgApi, NTQQUserApi } from '@/core/apis';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import { getGroup } from '@/core/data';
 
 export interface GetFilePayload {
   file: string; // 文件名或者fileUuid
@@ -42,7 +39,11 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
     return { id: element.elementId, element: element.fileElement };
   }
   protected async _handle(payload: GetFilePayload): Promise<GetFileResponse> {
-    const { enableLocalFile2Url } = ob11Config;
+    const NTQQFriendApi = this.CoreContext.getApiContext().FriendApi;
+    const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
+    const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
+    const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
+    const NTQQFileApi = this.CoreContext.getApiContext().FileApi;
     let UuidData: {
       high: string;
       low: string;
@@ -52,7 +53,7 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
       if (UuidData) {
         const peerUin = UuidData.high;
         const msgId = UuidData.low;
-        const isGroup = await getGroup(peerUin);
+        const isGroup: boolean = !!(await NTQQGroupApi.getGroups(false)).find(e => e.groupCode == peerUin);
         let peer: Peer | undefined;
         //识别Peer
         if (isGroup) {
@@ -88,7 +89,7 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
           file_size: fileSize,
           file_name: fileName
         };
-        if (enableLocalFile2Url) {
+        if (true/*enableLocalFile2Url*/) {
           try {
             res.base64 = await fs.readFile(downloadPath, 'base64');
           } catch (e) {
@@ -128,7 +129,7 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
         file_size: NTSearchNameResult[0].fileSize.toString(),
         file_name: NTSearchNameResult[0].fileName
       };
-      if (enableLocalFile2Url) {
+      if (true/*enableLocalFile2Url*/) {
         try {
           res.base64 = await fs.readFile(downloadPath, 'base64');
         } catch (e) {
