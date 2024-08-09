@@ -5,7 +5,6 @@ import { ActionName } from '../types';
 import { NTQQGroupApi } from '@/core/apis';
 import { Group } from '@/core/entities';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-// no_cache get时传字符串
 const SchemaData = {
   type: 'object',
   properties: {

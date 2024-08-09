@@ -1,10 +1,4 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { selfInfo } from '@/core/data';
-import { logDebug, logError } from '@/common/utils/log';
 import { ConfigBase } from '@/common/utils/ConfigBase';
-import { json } from 'stream/consumers';
-
 export interface OB11Config {
   http: {
     enable: boolean;
@@ -36,7 +30,7 @@ export interface OB11Config {
     Record: boolean,
     RecordList: Array<string>
   },
-  read(): OB11Config;
+  read(): OB11Config | null;
 
   save(config: OB11Config): void;
 }

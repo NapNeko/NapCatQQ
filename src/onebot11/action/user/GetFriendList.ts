@@ -6,8 +6,6 @@ import { ActionName } from '../types';
 import { NTQQFriendApi } from '@/core';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { requireMinNTQQBuild } from '@/common/utils/QQBasicInfo';
-
-
 // no_cache get时传字符串
 const SchemaData = {
   type: 'object',

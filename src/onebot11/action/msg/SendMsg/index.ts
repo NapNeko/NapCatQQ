@@ -67,7 +67,7 @@ export async function sendMsg(peer: Peer, sendElements: SendMessageElement[], de
   }
   const returnMsg = await NTQQMsgApi.sendMsg(peer, sendElements, waitComplete, timeout);
   try {
-    returnMsg!.id = await MessageUnique.createMsg({ chatType: peer.chatType, guildId: '', peerUid: peer.peerUid }, returnMsg!.msgId);
+    returnMsg!.id = MessageUnique.createMsg({ chatType: peer.chatType, guildId: '', peerUid: peer.peerUid }, returnMsg!.msgId);
   } catch (e: any) {
     logDebug('发送消息id获取失败', e);
     returnMsg!.id = 0;
@@ -94,7 +94,8 @@ async function createContext(payload: OB11PostSendMsg, contextMode: ContextMode)
     //console.log("[调试代码] UIN:", payload.user_id, " UID:", Uid, " IsBuddy:", isBuddy);
     return {
       chatType: isBuddy ? ChatType.friend : ChatType.temp,
-      peerUid: Uid!
+      peerUid: Uid!,
+      guildId: payload.group_id || ''//临时主动发起时需要传入群号
     };
   }
   throw '请指定 group_id 或 user_id';

@@ -19,7 +19,7 @@ import { OB11Config, ob11Config } from '@/onebot11/config';
 import { httpHeart, ob11HTTPServer } from '@/onebot11/server/http';
 import { ob11WebsocketServer } from '@/onebot11/server/ws/WebsocketServer';
 import { ob11ReverseWebsockets } from '@/onebot11/server/ws/ReverseWebsocket';
-import { getGroup, getGroupMember, groupMembers, selfInfo, tempGroupCodeMap } from '@/core/data';
+import { getGroup, getGroupMember, groupMembers, selfInfo } from '@/core/data';
 import { BuddyListener, GroupListener, NodeIKernelBuddyListener } from '@/core/listeners';
 import { OB11FriendRequestEvent } from '@/onebot11/event/request/OB11FriendRequest';
 import { NTQQGroupApi, NTQQUserApi, WebApi } from '@/core/apis';
@@ -104,10 +104,10 @@ export class NapCatOnebot11 {
       toUin: string;
     }
     ) => {
-      let uin = await NTQQUserApi.getUinByUid(data.fromUin);
+      const uin = await NTQQUserApi.getUinByUid(data.fromUin);
       logNotice(`[输入状态] ${uin} ${data.statusText}`);
       postOB11Event(new OB11InputStatusEvent(parseInt(uin), data.eventType, data.statusText));
-    }
+    };
     msgListener.onRecvSysMsg = async (protobufData: number[]) => {
       // function buf2hex(buffer: Buffer) {
       //   return [...new Uint8Array(buffer)]
@@ -222,12 +222,13 @@ export class NapCatOnebot11 {
       selfInfo.online = false;
     };
     msgListener.onTempChatInfoUpdate = (tempChatInfo: TempOnRecvParams) => {
-      if (tempChatInfo.sessionType == 1 && tempChatInfo.chatType == ChatType.temp) {
-        tempGroupCodeMap[tempChatInfo.peerUid] = tempChatInfo.groupCode;
-      }
+      // if (tempChatInfo.sessionType == 1 && tempChatInfo.chatType == ChatType.temp) {
+      //   tempGroupCodeMap[tempChatInfo.peerUid] = tempChatInfo.groupCode;
+      // }
       // 临时会话更新 tempGroupCodeMap uid -> source/GroupCode
     };
     msgListener.onRecvMsg = async (msg) => {
+
       //console.log('ob11 onRecvMsg', JSON.stringify(msg, null, 2));
       // logDebug('收到消息', msg);
       for (const m of msg) {
@@ -253,7 +254,6 @@ export class NapCatOnebot11 {
         // console.log(ret);
         new Promise((resolve) => {
           m.id = MessageUnique.createMsg({ chatType: m.chatType, peerUid: m.peerUid, guildId: '' }, m.msgId);
-          console.log("消息接收 ", "MsgID", m.msgId, " ID", m.id, " MsgSeq", m.msgSeq, " Raw", m?.elements[0]?.textElement?.content);
           this.postReceiveMsg([m]).then().catch(logError);
         }).then();
       }
@@ -266,7 +266,6 @@ export class NapCatOnebot11 {
           //完成后再post
           OB11Constructor.message(msg).then((_msg) => {
             _msg.target_id = parseInt(msg.peerUin);
-            console.log("自身消息接收 ", "MsgID", msg.msgId, " MsgSeq", msg.msgSeq, " Raw", msg?.elements[0]?.textElement?.content);
             if (ob11Config.reportSelfMessage) {
               msg.id = MessageUnique.createMsg({ chatType: msg.chatType, peerUid: msg.peerUid, guildId: '' }, msg.msgId);
               this.postReceiveMsg([msg]).then().catch(logError);

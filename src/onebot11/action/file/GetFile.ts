@@ -2,7 +2,7 @@ import BaseAction from '../BaseAction';
 import fs from 'fs/promises';
 import { ob11Config } from '@/onebot11/config';
 import { UUIDConverter } from '@/common/utils/helper';
-import { ActionName, BaseCheckResult } from '../types';
+import { ActionName } from '../types';
 import { ChatType, ElementType, FileElement, Peer, RawMessage, VideoElement } from '@/core/entities';
 import { NTQQFileApi, NTQQFriendApi, NTQQMsgApi, NTQQUserApi } from '@/core/apis';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';

@@ -51,24 +51,24 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
     } else {
       // 自定义的消息
       try {
-        let OB11Data = normalize(messageNode.data.content);
+        const OB11Data = normalize(messageNode.data.content);
         //筛选node消息
-        let isNodeMsg = OB11Data.filter(e => e.type === OB11MessageDataType.node).length;//找到子转发消息
+        const isNodeMsg = OB11Data.filter(e => e.type === OB11MessageDataType.node).length;//找到子转发消息
         if (isNodeMsg !== 0) {
           if (isNodeMsg !== OB11Data.length) { logError('子消息中包含非node消息 跳过不合法部分'); continue; }
           const nodeMsg = await handleForwardNode(selfPeer, OB11Data.filter(e => e.type === OB11MessageDataType.node));
-          if (nodeMsg) { nodeMsgIds.push(nodeMsg.msgId); MessageUnique.createMsg(selfPeer, nodeMsg.msgId) };
+          if (nodeMsg) { nodeMsgIds.push(nodeMsg.msgId); MessageUnique.createMsg(selfPeer, nodeMsg.msgId); }
           //完成子卡片生成跳过后续
           continue;
         }
         const { sendElements } = await createSendElements(OB11Data, destPeer);
         //拆分消息
-        let MixElement = sendElements.filter(element => element.elementType !== ElementType.FILE && element.elementType !== ElementType.VIDEO);
-        let SingleElement = sendElements.filter(element => element.elementType === ElementType.FILE || element.elementType === ElementType.VIDEO).map(e => [e]);
-        let AllElement: SendMessageElement[][] = [MixElement, ...SingleElement].filter(e => e !== undefined && e.length !== 0);
+        const MixElement = sendElements.filter(element => element.elementType !== ElementType.FILE && element.elementType !== ElementType.VIDEO);
+        const SingleElement = sendElements.filter(element => element.elementType === ElementType.FILE || element.elementType === ElementType.VIDEO).map(e => [e]);
+        const AllElement: SendMessageElement[][] = [MixElement, ...SingleElement].filter(e => e !== undefined && e.length !== 0);
         const MsgNodeList: Promise<RawMessage | undefined>[] = [];
         for (const sendElementsSplitElement of AllElement) {
-          MsgNodeList.push(sendMsg(selfPeer, sendElementsSplitElement, [], true).catch(e => new Promise((resolve, reject) => { resolve(undefined) })));
+          MsgNodeList.push(sendMsg(selfPeer, sendElementsSplitElement, [], true).catch(e => new Promise((resolve, reject) => { resolve(undefined); })));
         }
         (await Promise.allSettled(MsgNodeList)).map((result) => {
           if (result.status === 'fulfilled' && result.value) {
@@ -85,7 +85,7 @@ export async function handleForwardNode(destPeer: Peer, messageNodes: OB11Messag
   let srcPeer: Peer | undefined = undefined;
   let needSendSelf = false;
   //检测是否处于同一个Peer 不在同一个peer则全部消息由自身发送
-  for (let msgId of nodeMsgIds) {
+  for (const msgId of nodeMsgIds) {
     const nodeMsgPeer = MessageUnique.getPeerByMsgId(msgId);
     if (!nodeMsgPeer) {
       logError('转发消息失败，未找到消息', msgId);
