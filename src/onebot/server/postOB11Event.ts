@@ -68,8 +68,6 @@ export function postWsEvent(event: QuickActionEvent) {
 }
 
 export function postOB11Event(msg: QuickActionEvent, reportSelf = false, postWs = true, coreContext: NapCatCore) {
-  const config = ob11Config;
-
   // 判断msg是否是event
   if (!config.reportSelfMessage && !reportSelf) {
     if (msg.post_type === 'message' && (msg as OB11Message).user_id.toString() == coreContext.selfInfo.uin) {
@@ -105,7 +103,7 @@ export function postOB11Event(msg: QuickActionEvent, reportSelf = false, postWs 
           return;
         }
         try {
-          handleQuickOperation(msg as QuickActionEvent, resJson,coreContext).then().catch(logError);
+          handleQuickOperation(msg as QuickActionEvent, resJson, coreContext).then().catch(coreContext.context.logger.logError);
         } catch (e: any) {
           coreContext.context.logger.logError('新消息事件HTTP上报返回快速操作失败', e);
         }
@@ -157,8 +155,8 @@ async function handleMsg(msg: OB11Message, quickAction: QuickAction, coreContext
       }
     }
     replyMessage = replyMessage.concat(normalize(reply, quickAction.auto_escape));
-    const { sendElements, deleteAfterSentFiles } = await createSendElements(replyMessage, peer);
-    sendMsg(peer, sendElements, deleteAfterSentFiles, false).then().catch(logError);
+    const { sendElements, deleteAfterSentFiles } = await createSendElements(coreContext, replyMessage, peer);
+    sendMsg(coreContext, peer, sendElements, deleteAfterSentFiles, false).then().catch(coreContext.context.logger.logError);
   }
 }
 async function handleGroupRequest(request: OB11GroupRequestEvent, quickAction: QuickActionGroupRequest, coreContext: NapCatCore) {
