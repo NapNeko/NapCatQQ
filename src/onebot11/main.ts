@@ -31,9 +31,10 @@ import { OB11FriendRecallNoticeEvent } from '@/onebot11/event/notice/OB11FriendR
 import { OB11GroupRecallNoticeEvent } from '@/onebot11/event/notice/OB11GroupRecallNoticeEvent';
 import { logMessage, logNotice, logRequest } from '@/onebot11/log';
 import { OB11Message } from '@/onebot11/types';
-import { isEqual } from '@/common/utils/helper';
+import { isEqual, sleep } from '@/common/utils/helper';
 import { MessageUnique } from '@/common/utils/MessageUnique';
 import { OB11InputStatusEvent } from './event/notice/OB11InputStatusEvent';
+import QQWrapper from '@/core/wrapper';
 
 //下面几个其实应该移进Core-Data 缓存实现 但是现在在这里方便
 //
@@ -57,10 +58,11 @@ export class NapCatOnebot11 {
 
   constructor() {
     // console.log('ob11 init');
-    napCatCore.onLoginSuccess(() => this.onReady());
+    napCatCore.onLoginSuccess(async () => this.onReady().then().catch(console.log));
   }
 
-  public onReady() {
+  async onReady() {
+    await sleep(5000);
     logDebug('ob11 ready');
     ob11Config.read();
     const serviceInfo = `
@@ -280,7 +282,8 @@ export class NapCatOnebot11 {
     msgListener.onAddSendMsg = (msg) => {
 
     };
-    napCatCore.addListener(msgListener);
+    napCatCore.session.getMsgService().addKernelMsgListener(new QQWrapper.NodeIKernelMsgListener(msgListener as MsgListener));
+    //console.log(x,napCatCore.session.getMsgService().addKernelMsgListener);
     logDebug('ob11 msg listener added');
 
     // BuddyListener
@@ -289,7 +292,7 @@ export class NapCatOnebot11 {
       //从这里获取?好友请求
       this.postFriendRequest(req.buddyReqs).then().catch(logError);
     });
-    napCatCore.addListener(buddyListener);
+    napCatCore.session.getBuddyService().addKernelBuddyListener(new QQWrapper.NodeIKernelBuddyListener(buddyListener as BuddyListener));
     logDebug('ob11 buddy listener added');
 
     // GroupListener
@@ -367,7 +370,7 @@ export class NapCatOnebot11 {
       // console.log('ob11 onGroupListUpdate', updateType, groupList);
       // this.postGroupMemberChange(groupList).then();
     };
-
+    napCatCore.session.getGroupService().addKernelGroupListener(new QQWrapper.NodeIKernelGroupListener(groupListener as GroupListener));
     napCatCore.addListener(groupListener);
     logDebug('ob11 group listener added');
   }
