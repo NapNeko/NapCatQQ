@@ -7,6 +7,7 @@ import { proxiedListenerOf } from "@/common/utils/proxy-handler";
 import { MsgListener, ProfileListener } from "./listeners";
 import { sleep } from "@/common/utils/helper";
 import { SelfInfo, LineDevice, SelfStatusInfo } from "./entities";
+import {LegacyNTEventWrapper} from "@/common/framework/event-legacy";
 
 export enum NapCatCoreWorkingEnv {
     Unknown = 0,
@@ -26,7 +27,8 @@ export function loadQQWrapper(QQVersion: string): WrapperNodeApi {
 
 export class NapCatCore {
     readonly context: InstanceContext;
-    readonly eventChannel: NTEventChannel;
+    readonly eventWrapper: LegacyNTEventWrapper;
+    // readonly eventChannel: NTEventChannel;
 
     // runtime info, not readonly
     selfInfo: SelfInfo;
@@ -34,7 +36,7 @@ export class NapCatCore {
     constructor(context: InstanceContext, selfInfo: SelfInfo) {
         this.selfInfo = selfInfo;
         this.context = context;
-        this.eventChannel = new NTEventChannel(context.wrapper, context.session);
+        this.eventWrapper = new LegacyNTEventWrapper(context.wrapper, context.session);
         this.initNapCatCoreListeners().then().catch(console.error);
     }
 
