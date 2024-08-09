@@ -8,37 +8,39 @@ import {
 import path from 'path';
 import fs from 'fs';
 import fsPromises from 'fs/promises';
-import { GeneralCallResult, napCatCore, OnRichMediaDownloadCompleteParams } from '@/core';
-import { calculateFileMD5 } from '@/common/utils/file';
+import { InstanceContext, NapCatCore } from '@/core';
 import * as fileType from 'file-type';
 import imageSize from 'image-size';
 import { ISizeCalculationResult } from 'image-size/dist/types/interface';
-import { sessionConfig } from '@/core/sessionConfig';
-import { rkeyManager } from '../utils/rkey';
-import { NTEventDispatch } from '@/common/utils/EventTask';
 import { NodeIKernelSearchService } from '../services/NodeIKernelSearchService';
 
 
 export class NTQQFileApi {
+  context: InstanceContext;
+  core: NapCatCore;
+  constructor(context: InstanceContext, core: NapCatCore) {
+    this.context = context;
+    this.core = core;
+  }
    async getFileType(filePath: string) {
     return fileType.fileTypeFromFile(filePath);
   }
 
    async copyFile(filePath: string, destPath: string) {
-    await napCatCore.util.copyFile(filePath, destPath);
+    await this.context.wrapper.util.copyFile(filePath, destPath);
   }
 
    async getFileSize(filePath: string): Promise<number> {
-    return await napCatCore.util.getFileSize(filePath);
+    return await this.context.wrapper.util.getFileSize(filePath);
   }
    async getVideoUrl(peer: Peer, msgId: string, elementId: string) {
-    return (await napCatCore.session.getRichMediaService().getVideoPlayUrlV2(peer, msgId, elementId, 0, { downSourceType: 1, triggerType: 1 })).urlResult.domainUrl;
+    return (await this.context.session.getRichMediaService().getVideoPlayUrlV2(peer, msgId, elementId, 0, { downSourceType: 1, triggerType: 1 })).urlResult.domainUrl;
   }
   // 上传文件到QQ的文件夹
    async uploadFile(filePath: string, elementType: ElementType = ElementType.PIC, elementSubType: number = 0) {
     // napCatCore.wrapper.util.
     const fileMd5 = await calculateFileMD5(filePath);
-    let ext: string = (await NTQQFileApi.getFileType(filePath))?.ext as string || '';
+    let ext: string = (await this.getFileType(filePath))?.ext as string || '';
     if (ext) {
       ext = '.' + ext;
     }
@@ -46,7 +48,7 @@ export class NTQQFileApi {
     if (fileName.indexOf('.') === -1) {
       fileName += ext;
     }
-    const mediaPath = napCatCore.session.getMsgService().getRichMediaFilePathForGuild({
+    const mediaPath = this.context.session.getMsgService().getRichMediaFilePathForGuild({
       md5HexStr: fileMd5,
       fileName: fileName,
       elementType: elementType,
@@ -56,8 +58,8 @@ export class NTQQFileApi {
       downloadType: 1,
       file_uuid: ''
     });
-    await NTQQFileApi.copyFile(filePath, mediaPath!);
-    const fileSize = await NTQQFileApi.getFileSize(filePath);
+    await this.copyFile(filePath, mediaPath!);
+    const fileSize = await this.getFileSize(filePath);
     return {
       md5: fileMd5,
       fileName,
@@ -83,7 +85,7 @@ export class NTQQFileApi {
         return sourcePath;
       }
     }
-    let data = await NTEventDispatch.CallNormalEvent<
+    let data = await this.core.eventWrapper.CallNormalEvent<
       (
         params: {
           fileModelId: string,
@@ -168,7 +170,7 @@ export class NTQQFileApi {
       return undefined;
     }
 
-    return napCatCore.session.getSearchService().addSearchHistory({
+    return this.context.session.getSearchService().addSearchHistory({
       type: 4,
       contactList: [],
       id: -1,
@@ -242,9 +244,9 @@ export class NTQQFileApi {
         }[]
       }[]
     };
-    const Event = await NTEventDispatch.CreatEventFunction<EventType>('NodeIKernelSearchService/searchFileWithKeywords');
+    const Event = this.core.eventWrapper.createEventFunction<EventType>('NodeIKernelSearchService/searchFileWithKeywords');
     let id = '';
-    const Listener = NTEventDispatch.RegisterListen<(params: OnListener) => void>('NodeIKernelSearchListener/onSearchFileKeywordsResult', 1, 20000, (params) => {
+    const Listener = this.core.eventWrapper.RegisterListen<(params: OnListener) => void>('NodeIKernelSearchListener/onSearchFileKeywordsResult', 1, 20000, (params) => {
       if (id !== '' && params.searchId == id) {
         return true
       }
@@ -283,12 +285,18 @@ export class NTQQFileApi {
       // 没有url，需要自己拼接
       return `${IMAGE_HTTP_HOST}/gchatpic_new/0/0-0-${(fileMd5 || md5HexStr)!.toUpperCase()}/0`;
     }
-    logDebug('图片url获取失败', element);
+    this.context.logger.logDebug('图片url获取失败', element);
     return '';
   }
 }
 
 export class NTQQFileCacheApi {
+  context: InstanceContext;
+  core: NapCatCore;
+  constructor(context: InstanceContext, core: NapCatCore) {
+    this.context = context;
+    this.core = core;
+  }
    async setCacheSilentScan(isSilent: boolean = true) {
     return '';
   }
@@ -299,18 +307,15 @@ export class NTQQFileCacheApi {
 
    clearCache(cacheKeys: Array<string> = ['tmp', 'hotUpdate']) {
     // 参数未验证
-    return napCatCore.session.getStorageCleanService().clearCacheDataByKeys(cacheKeys);
+    return this.context.session.getStorageCleanService().clearCacheDataByKeys(cacheKeys);
   }
 
    addCacheScannedPaths(pathMap: object = {}) {
-    return napCatCore.session.getStorageCleanService().addCacheScanedPaths(pathMap);
+    return this.context.session.getStorageCleanService().addCacheScanedPaths(pathMap);
   }
 
-   scanCache(): Promise<GeneralCallResult & {
-    size: string[]
-  }> {
-    // 需要注册Listener onFinishScan
-    return napCatCore.session.getStorageCleanService().scanCache();
+   scanCache() {
+    //return (await this.context.session.getStorageCleanService().scanCache()).size;
   }
 
    getHotUpdateCachePath() {
@@ -324,7 +329,7 @@ export class NTQQFileCacheApi {
   }
 
    getChatCacheList(type: ChatType, pageSize: number = 1000, pageIndex: number = 0) {
-    return napCatCore.session.getStorageCleanService().getChatCacheInfo(type, pageSize, 1, pageIndex);
+    return this.context.session.getStorageCleanService().getChatCacheInfo(type, pageSize, 1, pageIndex);
   }
 
    getFileCacheInfo(fileType: CacheFileType, pageSize: number = 1000, lastRecord?: CacheFileListItem) {
@@ -334,6 +339,6 @@ export class NTQQFileCacheApi {
   }
 
    async clearChatCache(chats: ChatCacheListItemBasic[] = [], fileKeys: string[] = []) {
-    return napCatCore.session.getStorageCleanService().clearChatCacheInfo(chats, fileKeys);
+    return this.context.session.getStorageCleanService().clearChatCacheInfo(chats, fileKeys);
   }
 }

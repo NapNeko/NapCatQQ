@@ -1,5 +1,12 @@
+import { InstanceContext, NapCatCore } from "..";
 
 export class NTQQCollectionApi {
+    context: InstanceContext;
+    core: NapCatCore;
+    constructor(context: InstanceContext, core: NapCatCore) {
+      this.context = context;
+      this.core = core;
+    }
      async createCollection(authorUin: string, authorUid: string, authorName: string, brief: string, rawData: string) {
         let param = {
             commInfo: {
@@ -35,7 +42,7 @@ export class NTQQCollectionApi {
             },
             need_share_url: false
         };
-        return napCatCore.session.getCollectionService().createNewCollectionItem(param);
+        return this.context.session.getCollectionService().createNewCollectionItem(param);
     }
      async getAllCollection(category: number = 0, count: number = 50) {
         let param = {
@@ -47,6 +54,6 @@ export class NTQQCollectionApi {
             count: count,
             searchDown: true
         };
-        return napCatCore.session.getCollectionService().getCollectionItemList(param);
+        return this.context.session.getCollectionService().getCollectionItemList(param);
     }
 }
