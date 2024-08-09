@@ -1,3 +1,5 @@
+injectService(new NapCatAppImpl());
+
 import { injectService, loadMessageUnique, napCatCore as napCatCoreAppImpl } from '@/core';
 import { program } from 'commander';
 import qrcode from 'qrcode-terminal';
@@ -14,7 +16,6 @@ import { fileURLToPath } from 'node:url';
 import chalk from 'chalk';
 import { NapCatAppImpl } from '@/core';
 
-injectService(new NapCatAppImpl());
 const napCatCore = napCatCoreAppImpl as NapCatAppImpl;
 
 const __filename = fileURLToPath(import.meta.url);

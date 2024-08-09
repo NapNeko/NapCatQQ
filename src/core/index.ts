@@ -1,5 +1,6 @@
 import QQWrapper from './wrapper';
-import { INapCatService } from '@/core/service-base';
+
+import { INapCatService } from '@/core/core';
 
 export * from './adapters';
 export * from './apis';
