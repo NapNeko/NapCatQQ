@@ -1,17 +1,14 @@
 import BaseAction from '../BaseAction';
-import { OB11Status } from '../../types';
 import { ActionName } from '../types';
-import { selfInfo, stat } from '@/core/data';
 
-
-export default class GetStatus extends BaseAction<any, OB11Status> {
+export default class GetStatus extends BaseAction<any, any> {
   actionName = ActionName.GetStatus;
 
-  protected async _handle(payload: any): Promise<OB11Status> {
+  protected async _handle(payload: any): Promise<any> {
     return {
-      online: !!selfInfo.online,
+      online: !!this.CoreContext.selfInfo.online,
       good: true,
-      stat
+      stat:{}
     };
   }
 }

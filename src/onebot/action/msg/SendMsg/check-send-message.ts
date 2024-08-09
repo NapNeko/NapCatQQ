@@ -1,4 +1,4 @@
-import { OB11MessageData } from '@/onebot11/types';
+import { OB11MessageData } from '@/onebot/types';
 
 function checkSendMessage(sendMsgList: OB11MessageData[]) {
   function checkUri(uri: string): boolean {

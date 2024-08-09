@@ -19,6 +19,7 @@ export default class SetFriendAddRequest extends BaseAction<Payload, null> {
   actionName = ActionName.SetFriendAddRequest;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<null> {
+    const NTQQFriendApi = this.CoreContext.getApiContext().FriendApi;
     const approve = payload.approve?.toString() !== 'false';
     await NTQQFriendApi.handleFriendRequest(payload.flag, approve);
     return null;

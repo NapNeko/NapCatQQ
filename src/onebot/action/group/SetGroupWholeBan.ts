@@ -1,8 +1,6 @@
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { NTQQGroupApi } from '@/core/apis/group';
-
 const SchemaData = {
   type: 'object',
   properties: {
@@ -19,6 +17,7 @@ export default class SetGroupWholeBan extends BaseAction<Payload, null> {
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<null> {
     const enable = payload.enable?.toString() !== 'false';
+    const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
     await NTQQGroupApi.banGroup(payload.group_id.toString(), enable);
     return null;
   }

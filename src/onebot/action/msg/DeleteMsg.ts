@@ -1,10 +1,7 @@
-import { NTQQMsgApi } from '@/core/apis';
 import { ActionName } from '../types';
 import BaseAction from '../BaseAction';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/utils/MessageUnique';
-import { sleep } from '@/common/utils/helper';
-import { NTEventDispatch } from '@/common/utils/EventTask';
 import { NodeIKernelMsgListener } from '@/core';
 
 const SchemaData = {
@@ -26,9 +23,10 @@ class DeleteMsg extends BaseAction<Payload, void> {
   actionName = ActionName.DeleteMsg;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
+    const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
     const msg = MessageUnique.getMsgIdAndPeerByShortId(Number(payload.message_id));
     if (msg) {
-      let ret = NTEventDispatch.RegisterListen<NodeIKernelMsgListener['onMsgInfoListUpdate']>
+      let ret = this.CoreContext.eventWrapper.RegisterListen<NodeIKernelMsgListener['onMsgInfoListUpdate']>
         (
           'NodeIKernelMsgListener/onMsgInfoListUpdate',
           1,
