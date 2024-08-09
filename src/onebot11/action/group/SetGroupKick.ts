@@ -3,6 +3,7 @@ import { getGroupMember } from '@/core/data';
 import { ActionName } from '../types';
 import { NTQQGroupApi } from '@/core/apis/group';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { NTQQUserApi } from '@/core';
 
 
 const SchemaData = {
@@ -21,12 +22,8 @@ export default class SetGroupKick extends BaseAction<Payload, null> {
   actionName = ActionName.SetGroupKick;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload): Promise<null> {
-    const member = await getGroupMember(payload.group_id, payload.user_id);
-    if (!member) {
-      throw `群成员${payload.user_id}不存在`;
-    }
     const rejectReq = payload.reject_add_request?.toString() == 'true';
-    await NTQQGroupApi.kickMember(payload.group_id.toString(), [member.uid], rejectReq);
+    await NTQQGroupApi.kickMember(payload.group_id.toString(), [(await NTQQUserApi.getUidByUin(payload.user_id.toString()))!], rejectReq);
     return null;
   }
 }
