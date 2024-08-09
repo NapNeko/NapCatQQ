@@ -48,12 +48,12 @@ export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
       if (!startMsgId) throw `消息${payload.message_seq}不存在`;
       msgList = (await NTQQMsgApi.getMsgHistory(peer, startMsgId, MsgCount)).msgList;
     }
-    if(isReverseOrder) msgList.reverse();
+    if (isReverseOrder) msgList.reverse();
     await Promise.all(msgList.map(async msg => {
       msg.id = MessageUnique.createMsg({ guildId: '', chatType: msg.chatType, peerUid: msg.peerUid }, msg.msgId);
     }));
     //转换消息
-    const ob11MsgList = await Promise.all(msgList.map(msg => OB11Constructor.message(msg)));
+    const ob11MsgList = await Promise.all(msgList.map(msg => OB11Constructor.message(this.CoreContext, msg, "array")));
     return { 'messages': ob11MsgList };
   }
 }
