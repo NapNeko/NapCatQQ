@@ -207,14 +207,14 @@ export class NTQQMsgApi {
     return this.context.session.getMSFService().getServerTime();
   }
   async getServerTimeV2() {
-    return this.core.eventWrapper.CallNoListenerEvent<() => string>('NodeIKernelMsgService/getServerTime', 5000);
+    return this.core.eventWrapper.callNoListenerEvent<() => string>('NodeIKernelMsgService/getServerTime', 5000);
   }
   async forwardMsg(srcPeer: Peer, destPeer: Peer, msgIds: string[]) {
     return this.context.session.getMsgService().forwardMsg(msgIds, srcPeer, [destPeer], new Map());
   }
   async multiForwardMsg(srcPeer: Peer, destPeer: Peer, msgIds: string[]): Promise<RawMessage> {
     const msgInfos = msgIds.map(id => {
-      return { msgId: id, senderShowName: selfInfo.nick };
+      return { msgId: id, senderShowName: this.core.selfInfo.nick };
     });
     let data = await this.core.eventWrapper.CallNormalEvent<
       (msgInfo: typeof msgInfos, srcPeer: Peer, destPeer: Peer, comment: Array<any>, attr: Map<any, any>,) => Promise<unknown>,
@@ -226,7 +226,7 @@ export class NTQQMsgApi {
       5000,
       (msgRecords: RawMessage[]) => {
         for (let msgRecord of msgRecords) {
-          if (msgRecord.peerUid == destPeer.peerUid && msgRecord.senderUid == selfInfo.uid) {
+          if (msgRecord.peerUid == destPeer.peerUid && msgRecord.senderUid == this.core.selfInfo.uid) {
             return true;
           }
         }
@@ -247,7 +247,7 @@ export class NTQQMsgApi {
       if (forwardData.app != 'com.tencent.multimsg') {
         continue;
       }
-      if (msg.peerUid == destPeer.peerUid && msg.senderUid == selfInfo.uid) {
+      if (msg.peerUid == destPeer.peerUid && msg.senderUid == this.core.selfInfo.uid) {
         return msg;
       }
     }

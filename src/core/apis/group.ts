@@ -40,7 +40,7 @@ export class NTQQGroupApi {
    * }
   */
   async getGroupMemberLastestSendTime(GroupCode: string) {
-    async function getdata(uid: string) {
+     const getdata = async (uid: string) => {
       let NTRet = await this.getLastestMsgByUids(GroupCode, [uid]);
       if (NTRet.result != 0 && NTRet.msgList.length < 1) {
         return undefined;
