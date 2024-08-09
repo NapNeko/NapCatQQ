@@ -29,11 +29,13 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
       throw (`群${payload.group_id}不存在`);
     }
     const groupMembers = await NTQQGroupApi.getGroupMembers(payload.group_id.toString());
-    let _groupMembers = Array.from(groupMembers.values())
-      .map(item => { return OB11Constructor.groupMember(group.groupCode, item); });
+    const groupMembersArr = Array.from(groupMembers.values());
+    const groupMembersUids = groupMembersArr.map(e => e.uid);
+    let _groupMembers = groupMembersArr.map(item => { return OB11Constructor.groupMember(group.groupCode, item); });
 
     const MemberMap: Map<number, OB11GroupMember> = new Map<number, OB11GroupMember>();
     // 转为Map 方便索引
+    let GroupMemberUids: string[] = [];
     const date = Math.round(Date.now() / 1000);
     for (let i = 0, len = _groupMembers.length; i < len; i++) {
       // 保证基础数据有这个 同时避免群管插件过于依赖这个杀了
@@ -63,7 +65,7 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
         }
       } else {
         if (isNocache) {
-          const DateMap = await NTQQGroupApi.getGroupMemberLatestSendTimeCache(payload.group_id.toString());//开始从本地拉取
+          const DateMap = await NTQQGroupApi.getGroupMemberLatestSendTimeCache(payload.group_id.toString(), groupMembersUids);//开始从本地拉取
           for (const DateUin of DateMap.keys()) {
             const MemberData = MemberMap.get(parseInt(DateUin));
             if (MemberData) {
@@ -79,10 +81,11 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
         }
       }
     } else {
-      _groupMembers.forEach(async item => {
-        item.last_sent_time = parseInt((await getGroupMember(payload.group_id.toString(), item.user_id))?.lastSpeakTime || date.toString());
-        item.join_time = parseInt((await getGroupMember(payload.group_id.toString(), item.user_id))?.joinTime || date.toString());
-      });
+      // Mlikiowa V2.0.0 Refactor Todo
+      // _groupMembers.forEach(async item => {
+      //   item.last_sent_time = parseInt((await getGroupMember(payload.group_id.toString(), item.user_id))?.lastSpeakTime || date.toString());
+      //   item.join_time = parseInt((await getGroupMember(payload.group_id.toString(), item.user_id))?.joinTime || date.toString());
+      // });
     }
     // 还原索引到Array 一同返回
 
