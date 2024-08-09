@@ -23,6 +23,7 @@ export class FetchEmojioLike extends BaseAction<Payload, any> {
   actionName = ActionName.FetchEmojioLike;
   PayloadSchema = SchemaData;
   protected async _handle(payload: Payload) {
+    const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
     const msgIdPeer = MessageUnique.getMsgIdAndPeerByShortId(parseInt(payload.message_id.toString()));
     if(!msgIdPeer) throw new Error('消息不存在');
     const msg = (await NTQQMsgApi.getMsgsByMsgId(msgIdPeer.Peer, [msgIdPeer.MsgId])).msgList[0];

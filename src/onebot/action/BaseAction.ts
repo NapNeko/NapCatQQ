@@ -5,10 +5,14 @@ import Ajv, { ErrorObject, ValidateFunction } from 'ajv';
 import { NapCatCore } from '@/core';
 
 class BaseAction<PayloadType, ReturnDataType> {
-  actionName!: ActionName;
-  CoreContext!: NapCatCore;
+  actionName: ActionName = ActionName.Unknown;
+  CoreContext: NapCatCore;
   private validate: undefined | ValidateFunction<any> = undefined;
   PayloadSchema: any = undefined;
+  constructor(context: NapCatCore) {
+    //注入上下文
+    this.CoreContext = context;
+  }
   protected async check(payload: PayloadType): Promise<BaseCheckResult> {
     if (this.PayloadSchema) {
       this.validate = new Ajv({ allowUnionTypes: true }).compile(this.PayloadSchema);
