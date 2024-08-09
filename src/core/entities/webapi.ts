@@ -1,9 +1,24 @@
 export enum WebHonorType {
     ALL = 'all',
-    TALKACTIVE = 'talkative',
-    PERFROMER = 'performer',
+    /**
+     * 群聊之火
+     */
+    TALKATIVE = 'talkative',
+    /**
+     * 群聊炽焰
+     */
+    PERFORMER = 'performer',
+    /**
+     * 龙王
+     */
     LEGEND = 'legend',
-    STORONGE_NEWBI = 'strong_newbie',
+    /**
+     * 冒尖小春笋（R.I.P）
+     */
+    STRONG_NEWBIE = 'strong_newbie',
+    /**
+     * 快乐源泉
+     */
     EMOTION = 'emotion'
 }
 export interface WebApiGroupMember {

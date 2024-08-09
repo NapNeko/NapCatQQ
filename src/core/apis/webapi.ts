@@ -194,7 +194,7 @@ export class NTQQWebApi {
 
         const HonorInfo: any = { group_id: groupCode };
 
-        if (getType === WebHonorType.TALKACTIVE || getType === WebHonorType.ALL) {
+        if (getType === WebHonorType.TALKATIVE || getType === WebHonorType.ALL) {
             try {
                 const RetInternal = await getDataInternal(groupCode, 1);
                 if (!RetInternal) {
@@ -221,7 +221,7 @@ export class NTQQWebApi {
                 this.context.logger.logDebug(e);
             }
         }
-        if (getType === WebHonorType.PERFROMER || getType === WebHonorType.ALL) {
+        if (getType === WebHonorType.PERFORMER || getType === WebHonorType.ALL) {
             try {
                 const RetInternal = await getDataInternal(groupCode, 2);
                 if (!RetInternal) {
@@ -240,7 +240,7 @@ export class NTQQWebApi {
                 this.context.logger.logDebug(e);
             }
         }
-        if (getType === WebHonorType.PERFROMER || getType === WebHonorType.ALL) {
+        if (getType === WebHonorType.PERFORMER || getType === WebHonorType.ALL) {
             try {
                 const RetInternal = await getDataInternal(groupCode, 3);
                 if (!RetInternal) {
