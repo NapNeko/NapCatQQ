@@ -36,7 +36,7 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
       this.CoreContext.context.logger.logDebug('群成员详细信息结果', info);
       Object.assign(member, info);
     } catch (e) {
-      this.CoreContext.context.loggerlogDebug('获取群成员详细信息失败, 只能返回基础信息', e);
+      this.CoreContext.context.logger.logDebug('获取群成员详细信息失败, 只能返回基础信息', e);
     }
     const date = Math.round(Date.now() / 1000);
     const retMember = OB11Constructor.groupMember(payload.group_id.toString(), member);
@@ -57,7 +57,7 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
           }
         }
       } else {
-        const LastestMsgList = await NTQQGroupApi.getLastestMsg(payload.group_id.toString(), [payload.user_id.toString()]);
+        const LastestMsgList = await NTQQGroupApi.getLatestMsg(payload.group_id.toString(), [payload.user_id.toString()]);
         if (LastestMsgList?.msgList?.length && LastestMsgList?.msgList?.length > 0) {
           const last_send_time = LastestMsgList.msgList[0].msgTime;
           if (last_send_time && last_send_time != '0' && last_send_time != '') {

@@ -1,9 +1,7 @@
-import { DeviceList } from '@/onebot11/main';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { checkFileReceived, uri2local } from '@/common/utils/file';
-import { NTQQSystemApi } from '@/core';
 import fs from 'fs';
 
 const SchemaData = {
