@@ -3,7 +3,6 @@ import { resolve } from 'node:path';
 import * as net from 'node:net';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { logError } from '@/common/utils/log';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -96,7 +95,7 @@ class WebUiConfigWrapper {
         try {
             defaultconfig.token = Math.random().toString(36).slice(2); //生成随机密码
         } catch (e) {
-            logError('随机密码生成失败', e);
+            console.log('随机密码生成失败', e);
         }
         try {
             const configPath = resolve(__dirname, './config/webui.json');
@@ -118,14 +117,14 @@ class WebUiConfigWrapper {
             // 查询主机地址是否可用
             const [host_err, host] = await tryUseHost(parsedConfig.host).then(data => [null, data as string]).catch(err => [err, null]);
             if (host_err) {
-                logError('host不可用', host_err);
+                console.log('host不可用', host_err);
                 parsedConfig.port = 0; // 设置为0，禁用WebUI
             } else {
                 parsedConfig.host = host;
                 // 修正端口占用情况
                 const [port_err, port] = await tryUsePort(parsedConfig.port, parsedConfig.host).then(data => [null, data as number]).catch(err => [err, null]);
                 if (port_err) {
-                    logError('port不可用', port_err);
+                    console.log('port不可用', port_err);
                     parsedConfig.port = 0; // 设置为0，禁用WebUI
                 } else {
                     parsedConfig.port = port;
@@ -134,7 +133,7 @@ class WebUiConfigWrapper {
             this.WebUiConfigData = parsedConfig;
             return this.WebUiConfigData;
         } catch (e) {
-            logError('读取配置文件失败', e);
+            console.log('读取配置文件失败', e);
         }
         return defaultconfig; // 理论上这行代码到不了，到了只能返回默认配置了
     }
