@@ -6,5 +6,5 @@ interface ReturnType {
 }
 
 export default class CanSendImage extends CanSendRecord {
-  actionName = ActionName.CanSendImage;
+    actionName = ActionName.CanSendImage;
 }

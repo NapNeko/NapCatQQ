@@ -10,7 +10,7 @@ export enum EventType {
 
 
 export abstract class OB11BaseEvent {
-  time = Math.floor(Date.now() / 1000);
-  self_id = parseInt(selfInfo.uin);
-  post_type: EventType = EventType.META;
+    time = Math.floor(Date.now() / 1000);
+    self_id = parseInt(selfInfo.uin);
+    post_type: EventType = EventType.META;
 }

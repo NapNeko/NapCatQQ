@@ -8,9 +8,9 @@ interface Payload{
 }
 
 export class GoCQHTTPHandleQuickAction extends BaseAction<Payload, null>{
-  actionName = ActionName.GoCQHTTP_HandleQuickAction;
-  protected async _handle(payload: Payload): Promise<null> {
-    handleQuickOperation(payload.context, payload.operation,this.CoreContext).then().catch(this.CoreContext.context.logger.logError);
-    return null;
-  }
+    actionName = ActionName.GoCQHTTP_HandleQuickAction;
+    protected async _handle(payload: Payload): Promise<null> {
+        handleQuickOperation(payload.context, payload.operation,this.CoreContext).then().catch(this.CoreContext.context.logger.logError);
+        return null;
+    }
 }

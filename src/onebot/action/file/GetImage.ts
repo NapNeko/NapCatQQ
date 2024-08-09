@@ -3,5 +3,5 @@ import { ActionName } from '../types';
 
 
 export default class GetImage extends GetFileBase {
-  actionName = ActionName.GetImage;
+    actionName = ActionName.GetImage;
 }

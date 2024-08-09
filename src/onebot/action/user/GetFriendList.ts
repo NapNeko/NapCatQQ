@@ -6,19 +6,19 @@ import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
 // no_cache get时传字符串
 const SchemaData = {
-  type: 'object',
-  properties: {
-    no_cache: { type: ['boolean', 'string'] },
-  }
+    type: 'object',
+    properties: {
+        no_cache: { type: ['boolean', 'string'] },
+    }
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
 export default class GetFriendList extends BaseAction<Payload, OB11User[]> {
-  actionName = ActionName.GetFriendList;
-  PayloadSchema = SchemaData;
-  protected async _handle(payload: Payload) {
-      //全新逻辑
-      const NTQQFriendApi = this.CoreContext.getApiContext().FriendApi;
-      return OB11Constructor.friendsV2(await NTQQFriendApi.getBuddyV2(payload?.no_cache === true || payload?.no_cache === 'true'));
-  }
+    actionName = ActionName.GetFriendList;
+    PayloadSchema = SchemaData;
+    protected async _handle(payload: Payload) {
+        //全新逻辑
+        const NTQQFriendApi = this.CoreContext.getApiContext().FriendApi;
+        return OB11Constructor.friendsV2(await NTQQFriendApi.getBuddyV2(payload?.no_cache === true || payload?.no_cache === 'true'));
+    }
 }
