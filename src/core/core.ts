@@ -14,7 +14,7 @@ import { NTQQCollectionApi } from "./apis/collection";
 export enum NapCatCoreWorkingEnv {
     Unknown = 0,
     Shell = 1,
-    LiteLoader = 2,
+    Framework = 2,
 }
 
 export function loadQQWrapper(QQVersion: string): WrapperNodeApi {

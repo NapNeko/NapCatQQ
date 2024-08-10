@@ -46,6 +46,7 @@ const FrameworkBaseConfigPlugin: PluginOption[] = [
   cp({
     targets: [
       { src: './manifest.json', dest: 'dist' },
+      { src: './src/framework/liteloader.cjs', dest: 'dist' },
       { src: './src/framework/napcat.cjs', dest: 'dist' },
       { src: './src/framework/preload.cjs', dest: 'dist' },
       { src: './src/framework/renderer.js', dest: 'dist' },

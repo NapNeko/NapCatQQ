@@ -122,9 +122,9 @@ async function NCInit() {
 
     try {
         const { wrapperSession, wrapperLoginService } = await fetchServices();
-        const { NCoreInitLiteLoader } = await import('file://' + path.join(currentPath, './napcat.mjs'));
+        const { NCoreInitFramework } = await import('file://' + path.join(currentPath, './napcat.mjs'));
         //传入LoginService Session 其余自载入
-        await NCoreInitLiteLoader(wrapperSession, wrapperLoginService, registerInitCallback);
+        await NCoreInitFramework(wrapperSession, wrapperLoginService, registerInitCallback);
         //console.log("[NapCat] [Info] NapCat初始化完成");
     } catch (error) {
         console.error("[NapCat] [Error] 初始化NapCat失败", error);
