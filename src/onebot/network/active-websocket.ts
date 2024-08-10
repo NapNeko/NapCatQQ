@@ -1,4 +1,4 @@
-import { IOB11NetworkAdapter } from '@/onebot/network/index';
+import { IOB11NetworkAdapter, OB11EmitEventContent } from '@/onebot/network/index';
 
 import { WebSocket as NodeWebSocket } from 'ws';
 import BaseAction from '@/onebot/action/BaseAction';
@@ -28,7 +28,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
         this.actionMap.set(action.actionName, action);
     }
 
-    onEvent<T extends OB11BaseEvent>(event: T) {
+    onEvent<T extends OB11EmitEventContent>(event: T) {
         if (this.connection) {
             // this.connection.send(JSON.stringify(event));
             // TODO: wrap the event, and send the wrapped to the server.

@@ -1,4 +1,4 @@
-import { IOB11NetworkAdapter } from './index';
+import { IOB11NetworkAdapter, OB11EmitEventContent } from './index';
 import { OB11BaseEvent } from '@/onebot/event/OB11BaseEvent';
 import BaseAction from '@/onebot/action/BaseAction';
 import express, { Express, Request, Response } from 'express';
@@ -26,7 +26,7 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
         //空心跳
     }
 
-    onEvent<T extends OB11BaseEvent>(event: T) {
+    onEvent<T extends OB11EmitEventContent>(event: T) {
         // 事件处理逻辑可以在这里实现
     }
 

@@ -1,10 +1,13 @@
 import BaseAction from '@/onebot/action/BaseAction';
 import { OB11BaseEvent } from '@/onebot/event/OB11BaseEvent';
+import { OB11Message } from '@/onebot';
+
+export type OB11EmitEventContent = OB11BaseEvent | OB11Message;
 
 export interface IOB11NetworkAdapter {
     registerAction<T extends BaseAction<P, R>, P, R>(action: T): void;
 
-    onEvent<T extends OB11BaseEvent>(event: T): void;
+    onEvent<T extends OB11EmitEventContent>(event: T): void;
 
     open(): void | Promise<void>;
 
@@ -18,7 +21,7 @@ export class OB11NetworkManager {
         return this.adapters;
     }
 
-    async emitEvent(event: OB11BaseEvent) {
+    async emitEvent(event: OB11EmitEventContent) {
         // Mlikiowa V2.0.0 Refactor Todo
         return Promise.all(this.adapters.map(adapter => adapter.onEvent(event)));
     }

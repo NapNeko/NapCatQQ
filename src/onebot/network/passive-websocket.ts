@@ -1,4 +1,4 @@
-import { IOB11NetworkAdapter } from './index';
+import { IOB11NetworkAdapter, OB11EmitEventContent } from './index';
 import { OB11BaseEvent } from '@/onebot/event/OB11BaseEvent';
 import BaseAction from '@/onebot/action/BaseAction';
 import { WebSocket, WebSocketServer } from 'ws';
@@ -54,7 +54,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
         //WS正向心跳
     }
 
-    onEvent<T extends OB11BaseEvent>(event: T) {
+    onEvent<T extends OB11EmitEventContent>(event: T) {
         this.wsClientsMutex.runExclusive(async () => {
             this.wsClients.forEach((wsClient) => {
                 // wsClient.send(JSON.stringify(event));
