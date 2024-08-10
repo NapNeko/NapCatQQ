@@ -1,15 +1,27 @@
 import { IOB11NetworkAdapter } from '@/onebot/network/index';
 import BaseAction from '@/onebot/action/BaseAction';
 import { OB11BaseEvent } from '@/onebot/event/OB11BaseEvent';
-
+import { createHmac } from 'crypto';
+import { LogWrapper } from '@/common/utils/log';
+import { QuickAction, QuickActionEvent } from '../types';
+import { NapCatCore } from '@/core';
+import { NapCatOneBot11Adapter } from '../main';
+import { handleQuickOperation } from '../helper/quick';
 export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     url: string;
     private actionMap: Map<string, BaseAction<any, any>> = new Map();
     heartbeatInterval: number;
-
-    constructor(url: string, heartbeatInterval: number) {
+    secret: string | undefined;
+    coreContext: NapCatCore;
+    onebotContext: NapCatOneBot11Adapter;
+    logger: LogWrapper;
+    constructor(url: string, heartbeatInterval: number, secret: string | undefined, coreContext: NapCatCore, onebotContext: NapCatOneBot11Adapter) {
         this.heartbeatInterval = heartbeatInterval;
         this.url = url;
+        this.secret = secret;
+        this.coreContext = coreContext;
+        this.onebotContext = onebotContext;
+        this.logger = coreContext.context.logger;
     }
     registerHeartBeat() {
         //HttpPost心跳
@@ -20,20 +32,39 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     }
 
     onEvent<T extends OB11BaseEvent>(event: T) {
+        const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+            'x-self-id': this.coreContext.selfInfo.uin
+        };
+        const msgStr = JSON.stringify(event);
+        if (this.secret && this.secret.length > 0) {
+
+            const hmac = createHmac('sha1', this.secret);
+            hmac.update(msgStr);
+            const sig = hmac.digest('hex');
+            headers['x-signature'] = 'sha1=' + sig;
+        }
+
         fetch(this.url, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(event)
+            headers,
+            body: msgStr
+        }).then(async (res) => {
+            let resJson: QuickAction;
+            try {
+                resJson = await res.json();
+                //logDebug('新消息事件HTTP上报返回快速操作: ', JSON.stringify(resJson));
+            } catch (e) {
+                this.logger.logDebug('新消息事件HTTP上报没有返回快速操作，不需要处理');
+                return;
+            }
+            try {
+                handleQuickOperation(this.coreContext, event as QuickActionEvent, resJson).then().catch(this.logger.logError);
+            } catch (e: any) {
+                this.logger.logError('新消息事件HTTP上报返回快速操作失败', e);
+            }
+
         })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Event sent successfully:', data);
-            })
-            .catch(error => {
-                console.error('Failed to send event:', error);
-            });
     }
 
     async open() {
