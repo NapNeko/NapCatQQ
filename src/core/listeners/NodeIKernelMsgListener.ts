@@ -105,7 +105,16 @@ export interface IKernelMsgListener {
 
     onImportOldDbProgressUpdate(importOldDbMsgNotifyInfo: unknown): void;
 
-    onInputStatusPush(inputStatusInfo: unknown): void;
+    onInputStatusPush(inputStatusInfo: {
+        chatType: number;
+        eventType: number;
+        fromUin: string;
+        interval: string;
+        showTime: string;
+        statusText: string;
+        timestamp: string;
+        toUin: string;
+    }): void;
 
     onKickedOffLine(kickedInfo: unknown): void;
 
@@ -341,7 +350,16 @@ export class MsgListener implements IKernelMsgListener {
 
     }
 
-    onInputStatusPush(inputStatusInfo: unknown) {
+    onInputStatusPush(inputStatusInfo: {
+        chatType: number;
+        eventType: number;
+        fromUin: string;
+        interval: string;
+        showTime: string;
+        statusText: string;
+        timestamp: string;
+        toUin: string;
+    }) {
 
     }
 
