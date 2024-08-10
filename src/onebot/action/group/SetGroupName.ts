@@ -16,7 +16,7 @@ export default class SetGroupName extends BaseAction<Payload, null> {
     actionName = ActionName.SetGroupName;
     PayloadSchema = SchemaData;
 
-    protected async _handle(payload: Payload): Promise<null> {
+    async _handle(payload: Payload): Promise<null> {
         const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
         await NTQQGroupApi.setGroupName(payload.group_id.toString(), payload.group_name);
         return null;

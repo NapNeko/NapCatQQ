@@ -147,7 +147,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         return { valid: true };
     }
 
-    protected async _handle(payload: OB11PostSendMsg): Promise<{ message_id: number }> {
+    async _handle(payload: OB11PostSendMsg): Promise<{ message_id: number }> {
         const peer = await createContext(this.CoreContext, payload, this.contextMode);
 
         const messages = normalize(

@@ -5,7 +5,7 @@ import { napcat_version } from '@/common/framework/napcat';
 export default class GetVersionInfo extends BaseAction<any, any> {
     actionName = ActionName.GetVersionInfo;
 
-    protected async _handle(payload: any): Promise<any> {
+    async _handle(payload: any): Promise<any> {
         return {
             app_name: 'NapCat.Onebot',
             protocol_version: 'v11',

@@ -14,11 +14,11 @@ const SchemaData = {
 type Payload = FromSchema<typeof SchemaData>;
 
 
-export class sharePeer extends BaseAction<Payload, any> {
+export class SharePeer extends BaseAction<Payload, any> {
     actionName = ActionName.SharePeer;
     PayloadSchema = SchemaData;
 
-    protected async _handle(payload: Payload) {
+    async _handle(payload: Payload) {
         const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
         const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
         if (payload.group_id) {
@@ -39,11 +39,11 @@ const SchemaDataGroupEx = {
 
 type PayloadGroupEx = FromSchema<typeof SchemaDataGroupEx>;
 
-export class shareGroupEx extends BaseAction<PayloadGroupEx, any> {
+export class ShareGroupEx extends BaseAction<PayloadGroupEx, any> {
     actionName = ActionName.ShareGroupEx;
     PayloadSchema = SchemaDataGroupEx;
 
-    protected async _handle(payload: PayloadGroupEx) {
+    async _handle(payload: PayloadGroupEx) {
         const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
         return await NTQQGroupApi.getArkJsonGroupShare(payload.group_id);
     }

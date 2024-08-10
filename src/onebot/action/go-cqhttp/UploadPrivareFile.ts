@@ -37,7 +37,7 @@ export default class GoCQHTTPUploadPrivateFile extends BaseAction<Payload, null>
         throw '缺少参数 user_id';
     }
 
-    protected async _handle(payload: Payload): Promise<null> {
+    async _handle(payload: Payload): Promise<null> {
         const peer = await this.getPeer(payload);
         let file = payload.file;
         if (fs.existsSync(file)) {

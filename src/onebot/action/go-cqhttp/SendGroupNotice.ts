@@ -21,7 +21,7 @@ type Payload = FromSchema<typeof SchemaData>;
 export class SendGroupNotice extends BaseAction<Payload, null> {
     actionName = ActionName.GoCQHTTP_SendGroupNotice;
 
-    protected async _handle(payload: Payload) {
+    async _handle(payload: Payload) {
         const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
         let UploadImage: { id: string, width: number, height: number } | undefined = undefined;
         if (payload.image) {

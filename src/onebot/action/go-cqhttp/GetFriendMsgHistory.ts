@@ -27,7 +27,7 @@ export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
     actionName = ActionName.GetFriendMsgHistory;
     PayloadSchema = SchemaData;
 
-    protected async _handle(payload: Payload): Promise<Response> {
+    async _handle(payload: Payload): Promise<Response> {
         const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
         const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
         const NTQQFriendApi = this.CoreContext.getApiContext().FriendApi;

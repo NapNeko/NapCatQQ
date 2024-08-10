@@ -18,7 +18,7 @@ export class GetGroupEssence extends BaseAction<Payload, GroupEssenceMsgRet> {
     actionName = ActionName.GoCQHTTP_GetEssenceMsg;
     PayloadSchema = SchemaData;
 
-    protected async _handle(payload: Payload) {
+    async _handle(payload: Payload) {
         const NTQQWebApi = this.CoreContext.getApiContext().WebApi;
         const ret = await NTQQWebApi.getGroupEssenceMsg(payload.group_id.toString(), payload.pages.toString());
         if (!ret) {

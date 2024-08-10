@@ -41,7 +41,7 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
         return { id: element.elementId, element: element.fileElement };
     }
 
-    protected async _handle(payload: GetFilePayload): Promise<GetFileResponse> {
+    async _handle(payload: GetFilePayload): Promise<GetFileResponse> {
         const NTQQFriendApi = this.CoreContext.getApiContext().FriendApi;
         const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
         const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
@@ -225,7 +225,7 @@ export default class GetFile extends GetFileBase {
     actionName = ActionName.GetFile;
     PayloadSchema = GetFile_PayloadSchema;
 
-    protected async _handle(payload: GetFile_Payload): Promise<GetFileResponse> {
+    async _handle(payload: GetFile_Payload): Promise<GetFileResponse> {
         payload.file = payload.file_id;
         return super._handle(payload);
     }

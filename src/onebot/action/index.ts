@@ -62,7 +62,7 @@ import { SetGroupFileFolder } from './file/SetGroupFileFolder';
 import { DelGroupFile } from './file/DelGroupFile';
 import { DelGroupFileFolder } from './file/DelGroupFileFolder';
 import { SetSelfProfile } from './extends/SetSelfProfile';
-import { shareGroupEx, sharePeer } from './extends/sharePeer';
+import { ShareGroupEx, SharePeer } from './extends/ShareContact';
 import { CreateCollection } from './extends/CreateCollection';
 import { SetLongNick } from './extends/SetLongNick';
 import DelEssenceMsg from './group/DelEssenceMsg';
@@ -81,8 +81,8 @@ export function createActionMap(onebotContext: NapCatOneBot11Adapter, coreContex
         new FetchEmojiLike(onebotContext, coreContext),
         new GetFile(onebotContext, coreContext),
         new SetSelfProfile(onebotContext, coreContext),
-        new shareGroupEx(onebotContext, coreContext),
-        new sharePeer(onebotContext, coreContext),
+        new ShareGroupEx(onebotContext, coreContext),
+        new SharePeer(onebotContext, coreContext),
         new CreateCollection(onebotContext, coreContext),
         new SetLongNick(onebotContext, coreContext),
         new ForwardFriendSingleMsg(onebotContext, coreContext),

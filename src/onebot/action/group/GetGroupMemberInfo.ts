@@ -20,7 +20,7 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
     actionName = ActionName.GetGroupMemberInfo;
     PayloadSchema = SchemaData;
 
-    protected async _handle(payload: Payload) {
+    async _handle(payload: Payload) {
         const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
         const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
         const NTQQWebApi = this.CoreContext.getApiContext().WebApi;

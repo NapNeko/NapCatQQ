@@ -18,7 +18,7 @@ export class GetGroupHonorInfo extends BaseAction<Payload, Array<any>> {
     actionName = ActionName.GetGroupHonorInfo;
     PayloadSchema = SchemaData;
 
-    protected async _handle(payload: Payload) {
+    async _handle(payload: Payload) {
         if (!payload.type) {
             payload.type = WebHonorType.ALL;
         }

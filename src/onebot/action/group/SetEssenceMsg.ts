@@ -17,7 +17,7 @@ export default class SetEssenceMsg extends BaseAction<Payload, any> {
     actionName = ActionName.SetEssenceMsg;
     PayloadSchema = SchemaData;
 
-    protected async _handle(payload: Payload): Promise<any> {
+    async _handle(payload: Payload): Promise<any> {
         const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
         const msg = MessageUnique.getMsgIdAndPeerByShortId(parseInt(payload.message_id.toString()));
         if (!msg) {

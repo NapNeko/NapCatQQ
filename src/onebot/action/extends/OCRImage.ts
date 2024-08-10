@@ -18,7 +18,7 @@ export class OCRImage extends BaseAction<Payload, any> {
     actionName = ActionName.OCRImage;
     PayloadSchema = SchemaData;
 
-    protected async _handle(payload: Payload) {
+    async _handle(payload: Payload) {
         const NTQQSystemApi = this.CoreContext.getApiContext().SystemApi;
         const { path, isLocal, errMsg, success } = (await uri2local(this.CoreContext.NapCatTempPath, payload.image));
         if (!success) {
