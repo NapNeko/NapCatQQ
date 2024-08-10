@@ -4,6 +4,8 @@ import { WebSocket as NodeWebSocket } from 'ws';
 import BaseAction from '@/onebot/action/BaseAction';
 import { OB11BaseEvent } from '@/onebot/event/OB11BaseEvent';
 import { sleep } from '@/common/utils/helper';
+import { NapCatOneBot11Adapter } from '../main';
+import { NapCatCore } from '@/core';
 
 export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
     url: string;
@@ -12,8 +14,12 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
 
     private connection: NodeWebSocket | null = null;
     private actionMap: Map<string, BaseAction<any, any>> = new Map();
+    obContext: NapCatOneBot11Adapter;
+    coreContext: NapCatCore;
 
-    constructor(url: string, reconnectIntervalInMillis: number) {
+    constructor(obContext: NapCatOneBot11Adapter, coreContext: NapCatCore, url: string, reconnectIntervalInMillis: number) {
+        this.obContext = obContext;
+        this.coreContext = coreContext
         this.url = url;
         this.reconnectIntervalInMillis = reconnectIntervalInMillis;
     }

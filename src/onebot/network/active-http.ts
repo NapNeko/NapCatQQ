@@ -1,12 +1,18 @@
 import { IOB11NetworkAdapter } from '@/onebot/network/index';
 import BaseAction from '@/onebot/action/BaseAction';
 import { OB11BaseEvent } from '@/onebot/event/OB11BaseEvent';
+import { NapCatOneBot11Adapter } from '../main';
+import { NapCatCore } from '@/core';
 
 export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     url: string;
     private actionMap: Map<string, BaseAction<any, any>> = new Map();
+    obContext: NapCatOneBot11Adapter;
+    coreContext: NapCatCore;
 
-    constructor(url: string) {
+    constructor(obContext: NapCatOneBot11Adapter, coreContext: NapCatCore, url: string) {
+        this.obContext = obContext;
+        this.coreContext = coreContext
         this.url = url;
     }
 
@@ -22,13 +28,13 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
             },
             body: JSON.stringify(event)
         })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Event sent successfully:', data);
-        })
-        .catch(error => {
-            console.error('Failed to send event:', error);
-        });
+            .then(response => response.json())
+            .then(data => {
+                console.log('Event sent successfully:', data);
+            })
+            .catch(error => {
+                console.error('Failed to send event:', error);
+            });
     }
 
     async open() {
