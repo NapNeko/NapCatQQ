@@ -18,7 +18,6 @@ export * as WrapperInterface from './wrapper';
 export * as SessionConfig from './sessionConfig';
 
 export * from './core';
-export * from './service-base';
 
 export let napCatCore: INapCatService;
 

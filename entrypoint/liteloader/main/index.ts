@@ -1,6 +1,6 @@
 import { BuddyListener, GroupListener, GroupMember, injectService, loadMessageUnique, LoginListener, MsgListener, NodeIKernelLoginService, ProfileListener, RawMessage } from '@/core';
 import { NodeIQQNTWrapperSession, WrapperNodeApi } from '@/core/wrapper';
-import { fetchServices } from './proxy';
+import { fetchServices, RegisterInitCallback } from './proxy';
 import { INapCatService } from '@/core';
 import { InitWebUi } from '@/webui';
 import { DeviceList, NapCatOnebot11 } from '@/onebot11/main';
@@ -214,7 +214,8 @@ class NapCatLLPluginImpl extends INapCatService {
     ntLoginListener.onQRCodeLoginSucceed = async arg => {
       selfInfo.uin = arg.uin;
       selfInfo.uid = arg.uid;
-      await sleep(5000);
+      await new Promise<void>((resolve) => { RegisterInitCallback(() => resolve()); });
+      //等待初始化
       this.initDataListener();
       loadMessageUnique().then().catch();
       this.onLoginSuccessFuncList.forEach(func => func(arg.uin, arg.uid));
@@ -241,8 +242,8 @@ async function init() {
     WebUiDataRuntime.setQQLoginStatus(true);
     WebUiDataRuntime.setQQLoginUin(uin.toString());
   });
-
   await InitWebUi();
+  //await new Promise<void>((resolve) => { RegisterInitCallback(() => resolve()); });
   const NapCat_OneBot11 = new NapCatOnebot11();
   await WebUiDataRuntime.setOB11ConfigCall(NapCat_OneBot11.SetConfig);
 }
