@@ -11,14 +11,14 @@ import { WrapperNodeApi, NodeIQQNTWrapperSession } from "@/core/wrapper/wrapper"
 import { NapCatOneBot11Adapter } from "@/onebot/main";
 import { sleep } from "@/common/utils/helper";
 
-//LiteLoader ES入口文件
-export async function NCoreInitLiteLoader(
+//Framework ES入口文件
+export async function NCoreInitFramework(
     session: NodeIQQNTWrapperSession,
     loginService: NodeIKernelLoginService,
     registerInitCallback: (callback: () => void) => void
 ) {
     //在进入本层前是否登录未进行判断
-    console.log("NapCat LiteLoader App Loading...");
+    console.log("NapCat Framework App Loading...");
     const pathWrapper = new NapCatPathWrapper();
     const logger = new LogWrapper(pathWrapper.logsPath);
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
@@ -42,8 +42,8 @@ export async function NCoreInitLiteLoader(
     });
     // 过早进入会导致addKernelMsgListener等Listener添加失败
     // await sleep(2500);
-    // 初始化 NapCatLiteLoader
-    const loaderObject = new NapCatLiteLoader(wrapper, session, logger, loginService, selfInfo, basicInfoWrapper, pathWrapper);
+    // 初始化 NapCatFramework
+    const loaderObject = new NapCatFramework(wrapper, session, logger, loginService, selfInfo, basicInfoWrapper, pathWrapper);
 
     //启动WebUi
 
@@ -51,7 +51,7 @@ export async function NCoreInitLiteLoader(
     new NapCatOneBot11Adapter(loaderObject.core, loaderObject.context, pathWrapper);
 }
 
-export class NapCatLiteLoader {
+export class NapCatFramework {
     public core: NapCatCore;
     context: InstanceContext;
 
@@ -65,7 +65,7 @@ export class NapCatLiteLoader {
         pathWrapper: NapCatPathWrapper
     ) {
         this.context = {
-            workingEnv: NapCatCoreWorkingEnv.LiteLoader,
+            workingEnv: NapCatCoreWorkingEnv.Framework,
             wrapper,
             session,
             logger,
