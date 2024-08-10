@@ -22,7 +22,7 @@ class GetMsg extends BaseAction<Payload, OB11Message> {
     actionName = ActionName.GetMsg;
     PayloadSchema = SchemaData;
 
-    protected async _handle(payload: Payload) {
+    async _handle(payload: Payload) {
         const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
         // log("history msg ids", Object.keys(msgHistory));
         if (!payload.message_id) {

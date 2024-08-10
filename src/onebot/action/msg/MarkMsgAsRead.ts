@@ -31,7 +31,7 @@ class MarkMsgAsRead extends BaseAction<PlayloadType, null> {
         return { chatType: ChatType.group, peerUid: payload.group_id.toString() };
     }
 
-    protected async _handle(payload: PlayloadType): Promise<null> {
+    async _handle(payload: PlayloadType): Promise<null> {
         const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
         // 调用API
         const ret = await NTQQMsgApi.setMsgRead(await this.getPeer(payload));
@@ -61,7 +61,7 @@ interface Payload {
 export class GoCQHTTPMarkMsgAsRead extends BaseAction<Payload, null> {
     actionName = ActionName.GoCQHTTP_MarkMsgAsRead;
 
-    protected async _handle(payload: Payload): Promise<null> {
+    async _handle(payload: Payload): Promise<null> {
         return null;
     }
 }
@@ -69,7 +69,7 @@ export class GoCQHTTPMarkMsgAsRead extends BaseAction<Payload, null> {
 export class MarkAllMsgAsRead extends BaseAction<Payload, null> {
     actionName = ActionName._MarkAllMsgAsRead;
 
-    protected async _handle(payload: Payload): Promise<null> {
+    async _handle(payload: Payload): Promise<null> {
         const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
         await NTQQMsgApi.markallMsgAsRead();
         return null;

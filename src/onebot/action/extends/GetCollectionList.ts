@@ -17,7 +17,7 @@ export class GetCollectionList extends BaseAction<Payload, any> {
     actionName = ActionName.GetCollectionList;
     PayloadSchema = SchemaData;
 
-    protected async _handle(payload: Payload) {
+    async _handle(payload: Payload) {
         const NTQQCollectionApi = this.CoreContext.getApiContext().CollectionApi;
         return await NTQQCollectionApi.getAllCollection(payload.category, payload.count);
     }

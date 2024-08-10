@@ -26,7 +26,7 @@ export default class SetGroupHeader extends BaseAction<Payload, any> {
         };
     }
 
-    protected async _handle(payload: Payload): Promise<any> {
+    async _handle(payload: Payload): Promise<any> {
         const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
         const { path, isLocal, errMsg, success } = (await uri2local(this.CoreContext.NapCatTempPath, payload.file));
         if (!success) {

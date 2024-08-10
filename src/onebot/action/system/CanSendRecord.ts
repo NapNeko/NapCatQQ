@@ -8,7 +8,7 @@ interface ReturnType {
 export default class CanSendRecord extends BaseAction<any, ReturnType> {
     actionName = ActionName.CanSendRecord;
 
-    protected async _handle(_payload: void): Promise<ReturnType> {
+    async _handle(_payload: void): Promise<ReturnType> {
         return {
             yes: true,
         };

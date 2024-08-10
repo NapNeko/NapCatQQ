@@ -19,7 +19,7 @@ export class SetOnlineStatus extends BaseAction<Payload, null> {
     actionName = ActionName.SetOnlineStatus;
     PayloadSchema = SchemaData;
 
-    protected async _handle(payload: Payload) {
+    async _handle(payload: Payload) {
         // 可设置状态
         // { status: 10, extStatus: 1027, batteryStatus: 0 }
         // { status: 30, extStatus: 0, batteryStatus: 0 }

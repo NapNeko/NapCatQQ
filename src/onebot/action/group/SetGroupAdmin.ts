@@ -19,7 +19,7 @@ export default class SetGroupAdmin extends BaseAction<Payload, null> {
     actionName = ActionName.SetGroupAdmin;
     PayloadSchema = SchemaData;
 
-    protected async _handle(payload: Payload): Promise<null> {
+    async _handle(payload: Payload): Promise<null> {
         const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
         const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
         const uid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
