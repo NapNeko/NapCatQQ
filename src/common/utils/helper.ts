@@ -3,6 +3,7 @@ import path from "node:path";
 import fs from "fs";
 import * as fsPromise from "node:fs/promises";
 import os from "node:os";
+import { QQLevel } from "@/core";
 
 //下面这个类是用于将uid+msgid合并的类
 
@@ -151,4 +152,8 @@ export async function deleteOldFiles(directoryPath: string, daysThreshold: numbe
     } catch (error) {
         //console.error('Error deleting files:', error);
     }
+}
+export function calcQQLevel(level: QQLevel) {
+  const { crownNum, sunNum, moonNum, starNum } = level;
+  return crownNum * 64 + sunNum * 16 + moonNum * 4 + starNum;
 }

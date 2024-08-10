@@ -7,8 +7,6 @@ import * as fileType from 'file-type';
 import { randomUUID } from 'crypto';
 import { LogWrapper } from './log';
 
-
-
 export function isGIF(path: string) {
   const buffer = Buffer.alloc(4);
   const fd = fs.openSync(path, 'r');
