@@ -20,7 +20,8 @@ export default class SetGroupCard extends BaseAction<Payload, null> {
 
     async _handle(payload: Payload): Promise<null> {
         const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
-        await NTQQGroupApi.setMemberCard(payload.group_id.toString(), member.uid, payload.card || '');
+        const member = await NTQQGroupApi.getGroupMember(payload.group_id.toString(), payload.user_id.toString());
+        member && await NTQQGroupApi.setMemberCard(payload.group_id.toString(), member.uid, payload.card || '');
         return null;
     }
 }
