@@ -26,7 +26,6 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
     }
 
     registerHeartBeat() {
-        // WS反向心跳
         if (this.connection) {
             this.heartbeatTimer = setInterval(() => {
                 if (this.connection && this.connection.readyState === NodeWebSocket.OPEN) {
@@ -42,8 +41,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
 
     onEvent<T extends OB11EmitEventContent>(event: T) {
         if (this.connection) {
-            const wrappedEvent = this.wrapEvent(event);
-            this.connection.send(JSON.stringify(wrappedEvent));
+            this.connection.send(JSON.stringify(event));
         }
     }
 
@@ -70,7 +68,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
     }
 
     private async tryConnect() {
-        while (!this.connection) {
+        while (!this.connection && !this.isClosed) {
             try {
                 this.connection = new NodeWebSocket(this.url);
                 this.connection.on('message', (data) => {
@@ -101,13 +99,5 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
         } catch (e) {
             console.error('Failed to handle message:', e);
         }
-    }
-
-    private wrapEvent<T extends OB11EmitEventContent>(event: T) {
-        // Wrap the event as needed
-        return {
-            type: 'event',
-            data: event
-        };
     }
 }
