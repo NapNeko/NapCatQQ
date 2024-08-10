@@ -29,6 +29,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             }
             wsClient.on('message', (message) => {
                 // TODO: extract action name and payload from the message, then call the corresponding action.
+                // TODO: consider using a utility function
             });
             wsClient.once('close', () => {
                 this.wsClientsMutex.runExclusive(async () => {
@@ -53,6 +54,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             this.wsClients.forEach((wsClient) => {
                 // wsClient.send(JSON.stringify(event));
                 // TODO: wrap the event, and send the wrapped to the client.
+                // TODO: consider using a utility function
             });
         });
     }
