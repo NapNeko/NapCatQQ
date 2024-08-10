@@ -27,7 +27,9 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
     registerAction<T extends BaseAction<P, R>, P, R>(action: T) {
         this.actionMap.set(action.actionName, action);
     }
-
+    registerActionMap(actionMap: Map<string, BaseAction<any, any>>) {
+        this.actionMap = actionMap;
+    }
     registerHeartBeat() {
         //空心跳
     }
@@ -52,7 +54,7 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
 
         this.app.use(express.json());
 
-        this.app.all('*', this.handleRequest.bind(this));
+        this.app.all('/*', this.handleRequest.bind(this));
 
         this.server.listen(this.port, () => {
             this.coreContext.context.logger.log(`HTTP server listening on port ${this.port}`);

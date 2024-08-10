@@ -1,6 +1,6 @@
+import { OB11Constructor } from '@/onebot/helper/data';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { OB11Constructor } from '@/onebot/helper/constructor';
 
 export class GetFriendWithCategory extends BaseAction<void, any> {
     actionName = ActionName.GetFriendsWithCategory;
