@@ -41,7 +41,7 @@ export async function NCoreInitLiteLoader(
             proxiedListenerOf(loginListener, logger)));
     });
     // 过早进入会导致addKernelMsgListener等Listener添加失败
-    await sleep(2500);
+    // await sleep(2500);
     // 初始化 NapCatLiteLoader
     const loaderObject = new NapCatLiteLoader(wrapper, session, logger, loginService, selfInfo, basicInfoWrapper, pathWrapper);
 
