@@ -5,7 +5,7 @@ import Ajv, { ErrorObject, ValidateFunction } from 'ajv';
 import { NapCatCore } from '@/core';
 import { NapCatOneBot11Adapter } from '../main';
 
-class BaseAction<PayloadType, ReturnDataType> {
+abstract class BaseAction<PayloadType, ReturnDataType> {
     actionName: ActionName = ActionName.Unknown;
     CoreContext: NapCatCore;
     private validate: undefined | ValidateFunction<any> = undefined;
@@ -64,9 +64,7 @@ class BaseAction<PayloadType, ReturnDataType> {
         }
     }
 
-    protected async _handle(payload: PayloadType): Promise<ReturnDataType> {
-        throw `pleas override ${this.actionName} _handle`;
-    }
+    abstract _handle(payload: PayloadType): PromiseLike<ReturnDataType>;
 }
 
 export default BaseAction;
