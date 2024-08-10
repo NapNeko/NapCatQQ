@@ -8,7 +8,7 @@ NapCatQQ 是基于 NTQQ 现代化的Bot协议端实现框架
 ## 项目优势
 - [x] 支持以 无头/LiteLoader插件/仅QQGUI 三种方式启动
 - [x] 代码标准化 滥用变量导出/SetTimeout初始化彻底根除
-- [x] ES出包 跟接近TS可读性更高
+- [x] ES出包 更接近TS可读性更高 报错更可读 日志追踪可靠
 ## 如何使用
 
 可前往 [Release](https://github.com/NapNeko/NapCatQQ/releases/) 页面下载最新版本
