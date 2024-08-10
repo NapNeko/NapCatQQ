@@ -26,7 +26,7 @@
     "@types/jest": "^29.5.12",
     "@types/node": "^22.0.0",
     "@types/qrcode-terminal": "^0.12.2",
-    "@types/ws": "^8.5.10",
+    "@types/ws": "^8.5.12",
     "@typescript-eslint/eslint-plugin": "^7.4.0",
     "@typescript-eslint/parser": "^7.4.0",
     "eslint": "^8.57.0",
@@ -46,6 +46,7 @@
   },
   "dependencies": {
     "ajv": "^8.13.0",
+    "async-mutex": "^0.5.0",
     "chalk": "^5.3.0",
     "commander": "^12.1.0",
     "cors": "^2.8.5",
@@ -59,6 +60,6 @@
     "qrcode-terminal": "^0.12.0",
     "silk-wasm": "^3.6.1",
     "strtok3": "8.0.1",
-    "ws": "^8.16.0"
+    "ws": "^8.18.0"
   }
 }
