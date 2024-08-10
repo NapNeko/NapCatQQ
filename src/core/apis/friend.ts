@@ -1,10 +1,11 @@
-import { FriendV2, User } from '@/core/entities';
+import { Friend, FriendV2, User } from '@/core/entities';
 import { BuddyListReqType, InstanceContext, NapCatCore, NodeIKernelProfileService, OnBuddyChangeParams } from '@/core';
 import { LimitedHashTable } from '@/common/utils/MessageUnique';
 
 export class NTQQFriendApi {
     context: InstanceContext;
     core: NapCatCore;
+    //friends: Map<string, Friend> = new Map<string, FriendV2>();
 
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
