@@ -1,38 +1,90 @@
 import {
     ChatType,
+    Group,
     GroupMember,
+    GroupMemberCache,
     GroupMemberRole,
     GroupNotify,
     GroupRequestOperateTypes,
     MemberExtSourceType,
 } from '../entities';
 import { GeneralCallResult, InstanceContext, NapCatCore, NodeIKernelGroupService } from '@/core';
-import { runAllWithTimeout } from '@/common/utils/helper';
+import { isNumeric, runAllWithTimeout } from '@/common/utils/helper';
 import { NodeIKernelGroupListener } from '../listeners';
 
 export class NTQQGroupApi {
     context: InstanceContext;
     core: NapCatCore;
-
+    public groupMembers: Map<string, Map<string, GroupMember>> = new Map<string, Map<string, GroupMember>>();
+    public groups: Map<string, Group> = new Map<string, Group>();
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
         this.core = core;
     }
-
     async setGroupAvatar(gc: string, filePath: string) {
         return this.context.session.getGroupService().setHeader(gc, filePath);
     }
 
+    async getGroup(qq: string | number): Promise<Group | undefined> {
+        let group = this.groups.get(qq.toString());
+        if (!group) {
+            try {
+                const _groups = await this.getGroups();
+                if (_groups.length) {
+                    _groups.forEach(g => {
+                        this.groups.set(g.groupCode, g);
+                    });
+                }
+            } catch (e) {
+                return undefined;
+            }
+        }
+        group = this.groups.get(qq.toString());
+        return group;
+    }
+
+    async getGroupMember(groupQQ: string | number, memberUinOrUid: string | number) {
+        groupQQ = groupQQ.toString();
+        memberUinOrUid = memberUinOrUid.toString();
+        let members = this.groupMembers.get(groupQQ);
+        if (!members) {
+            try {
+                members = await this.getGroupMembers(groupQQ);
+                // 更新群成员列表
+                this.groupMembers.set(groupQQ, members);
+            }
+            catch (e) {
+                return null;
+            }
+        }
+        // log('getGroupMember', members);
+        const getMember = () => {
+            let member: GroupMember | undefined = undefined;
+            if (isNumeric(memberUinOrUid)) {
+                member = Array.from(members!.values()).find(member => member.uin === memberUinOrUid);
+            } else {
+                member = members!.get(memberUinOrUid);
+            }
+            return member;
+        };
+        let member = getMember();
+        if (!member) {
+            members = await this.getGroupMembers(groupQQ);
+            member = getMember();
+        }
+        return member;
+    }
+
     async getGroups(forced = false) {
         type ListenerType = NodeIKernelGroupListener['onGroupListUpdate'];
-        const [_retData, _updateType, groupList] = await this.core.eventWrapper.CallNormalEvent <(force: boolean) => Promise<any>, ListenerType>
+        const [_retData, _updateType, groupList] = await this.core.eventWrapper.CallNormalEvent<(force: boolean) => Promise<any>, ListenerType>
             (
-            'NodeIKernelGroupService/getGroupList',
-            'NodeIKernelGroupListener/onGroupListUpdate',
-            1,
-            5000,
-            (updateType) => true,
-            forced,
+                'NodeIKernelGroupService/getGroupList',
+                'NodeIKernelGroupListener/onGroupListUpdate',
+                1,
+                5000,
+                (updateType) => true,
+                forced,
             );
         return groupList;
     }
@@ -172,16 +224,16 @@ export class NTQQGroupApi {
     }
 
     async getSingleScreenNotifies(num: number) {
-        const [_retData, _doubt, _seq, notifies] = await this.core.eventWrapper.CallNormalEvent <(arg1: boolean, arg2: string, arg3: number) => Promise<any>, (doubt: boolean, seq: string, notifies: GroupNotify[]) => void>
+        const [_retData, _doubt, _seq, notifies] = await this.core.eventWrapper.CallNormalEvent<(arg1: boolean, arg2: string, arg3: number) => Promise<any>, (doubt: boolean, seq: string, notifies: GroupNotify[]) => void>
             (
-            'NodeIKernelGroupService/getSingleScreenNotifies',
-            'NodeIKernelGroupListener/onGroupSingleScreenNotifies',
-            1,
-            5000,
-            () => true,
-            false,
-            '',
-            num,
+                'NodeIKernelGroupService/getSingleScreenNotifies',
+                'NodeIKernelGroupListener/onGroupSingleScreenNotifies',
+                1,
+                5000,
+                () => true,
+                false,
+                '',
+                num,
             );
         return notifies;
     }
@@ -191,17 +243,17 @@ export class NTQQGroupApi {
         type EventType = NodeIKernelGroupService['getMemberInfo'];
         // NTEventDispatch.CreatListenerFunction('NodeIKernelGroupListener/onGroupMemberInfoUpdate', 
         //return napCatCore.session.getGroupService().getMemberInfo(GroupCode, [uid], forced);
-        const [ret, _groupCode, _changeType, _members] = await this.core.eventWrapper.CallNormalEvent <EventType, ListenerType>
-        (
-            'NodeIKernelGroupService/getMemberInfo',
-            'NodeIKernelGroupListener/onMemberInfoChange',
-            1,
-            5000,
-            (groupCode: string, changeType: number, members: Map<string, GroupMember>) => {
-                return groupCode == GroupCode && members.has(uid);
-            },
-            GroupCode, [uid], forced,
-        );
+        const [ret, _groupCode, _changeType, _members] = await this.core.eventWrapper.CallNormalEvent<EventType, ListenerType>
+            (
+                'NodeIKernelGroupService/getMemberInfo',
+                'NodeIKernelGroupListener/onMemberInfoChange',
+                1,
+                5000,
+                (groupCode: string, changeType: number, members: Map<string, GroupMember>) => {
+                    return groupCode == GroupCode && members.has(uid);
+                },
+                GroupCode, [uid], forced,
+            );
         return _members.get(uid);
     }
 
@@ -244,7 +296,7 @@ export class NTQQGroupApi {
             'NodeIKernelGroupService/getGroupRecommendContactArkJson',
             5000,
             GroupCode,
-            );
+        );
         return ret.arkJson;
     }
 
