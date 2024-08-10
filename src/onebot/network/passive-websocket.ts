@@ -3,6 +3,8 @@ import { OB11BaseEvent } from '@/onebot/event/OB11BaseEvent';
 import BaseAction from '@/onebot/action/BaseAction';
 import { WebSocket, WebSocketServer } from 'ws';
 import { Mutex } from 'async-mutex';
+import { NapCatOneBot11Adapter } from '../main';
+import { NapCatCore } from '@/core';
 
 export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     wsServer: WebSocketServer;
@@ -10,10 +12,13 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     wsClientsMutex = new Mutex();
     isOpen: boolean = false;
     hasBeenClosed: boolean = false;
-
+    obContext: NapCatOneBot11Adapter;
+    coreContext: NapCatCore;
     private actionMap: Map<string, BaseAction<any, any>> = new Map();
 
-    constructor(ip: string, port: number, token: string) {
+    constructor(obContext: NapCatOneBot11Adapter, coreContext: NapCatCore,ip: string, port: number, token: string) {
+        this.obContext = obContext;
+        this.coreContext = coreContext
         this.wsServer = new WebSocketServer({ port: port, host: ip });
         this.wsServer.on('connection', async (wsClient) => {
             if (!this.isOpen) {

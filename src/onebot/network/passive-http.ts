@@ -3,6 +3,8 @@ import { OB11BaseEvent } from '@/onebot/event/OB11BaseEvent';
 import BaseAction from '@/onebot/action/BaseAction';
 import express, { Express, Request, Response } from 'express';
 import http from 'http';
+import { NapCatOneBot11Adapter } from '../main';
+import { NapCatCore } from '@/core';
 
 export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
     private app: Express | undefined;
@@ -11,8 +13,12 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
     private hasBeenClosed: boolean = false;
     private actionMap: Map<string, BaseAction<any, any>> = new Map();
     private port: number;
+    obContext: NapCatOneBot11Adapter;
+    coreContext: NapCatCore;
 
-    constructor(port: number) {
+    constructor(obContext: NapCatOneBot11Adapter, coreContext: NapCatCore, port: number) {
+        this.obContext = obContext;
+        this.coreContext = coreContext
         this.port = port;
     }
 
