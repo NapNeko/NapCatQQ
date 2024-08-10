@@ -1,4 +1,5 @@
 import { OB11BaseNoticeEvent } from './OB11BaseNoticeEvent';
+import { NapCatCore } from '@/core';
 
 //输入状态事件 初步完成 Mlikio wa Todo 需要做一些过滤
 export class OB11InputStatusEvent extends OB11BaseNoticeEvent {
@@ -9,8 +10,8 @@ export class OB11InputStatusEvent extends OB11BaseNoticeEvent {
     user_id = 0;
     group_id = 0;
 
-    constructor(user_id: number, eventType: number, status_text: string) {
-        super();
+    constructor(core: NapCatCore, user_id: number, eventType: number, status_text: string) {
+        super(core);
         this.user_id = user_id;
         this.eventType = eventType;
         this.status_text = status_text;
