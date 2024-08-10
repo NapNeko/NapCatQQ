@@ -12,7 +12,11 @@ import { NapCatOneBot11Adapter } from "@/onebot/main";
 import { sleep } from "@/common/utils/helper";
 
 //LiteLoader ES入口文件
-export async function NCoreInitLiteLoader(session: NodeIQQNTWrapperSession, loginService: NodeIKernelLoginService) {
+export async function NCoreInitLiteLoader(
+    session: NodeIQQNTWrapperSession,
+    loginService: NodeIKernelLoginService,
+    registerInitCallback: (callback: () => void) => void
+) {
     //在进入本层前是否登录未进行判断
     console.log("NapCat LiteLoader App Loading...");
     const pathWrapper = new NapCatPathWrapper();
@@ -20,14 +24,19 @@ export async function NCoreInitLiteLoader(session: NodeIQQNTWrapperSession, logi
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
     //直到登录成功后，执行下一步
-    const selfInfo = await new Promise<SelfInfo>((resolve) => {
+    const selfInfo = await new Promise<SelfInfo>((resolveSelfInfo) => {
         const loginListener = new LoginListener();
-        loginListener.onQRCodeLoginSucceed = async (loginResult) => resolve({
-            uid: loginResult.uid,
-            uin: loginResult.uin,
-            nick: '', // 获取不到
-            online: true
-        });
+        loginListener.onQRCodeLoginSucceed = async (loginResult) => {
+            await new Promise<void>(resolvePendingInit => {
+                registerInitCallback(() => resolvePendingInit());
+            });
+            resolveSelfInfo({
+                uid: loginResult.uid,
+                uin: loginResult.uin,
+                nick: '', // 获取不到
+                online: true,
+            });
+        };
         loginService.addKernelLoginListener(new wrapper.NodeIKernelLoginListener(
             proxiedListenerOf(loginListener, logger)));
     });
