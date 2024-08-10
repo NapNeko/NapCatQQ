@@ -6,11 +6,14 @@ import viteZipPack from 'unplugin-zip-pack/vite';
 import PluginManifest from './entrypoint/liteloader/manifest.json';
 import babel from 'vite-plugin-babel';
 import nodeResolve from '@rollup/plugin-node-resolve';
+import { builtinModules } from 'node:module';
 
 const SRC_DIR = resolve(__dirname, './entrypoint');
 const OUTPUT_DIR = resolve(__dirname, './dist/plugin');
 
 const corePath = resolve(__dirname, 'src', 'core', 'src');
+const external = ['silk-wasm', 'ws', 'express', 'fluent-ffmpeg', 'log4js', 'qrcode-terminal'];
+const nodeModules = [...builtinModules, builtinModules.map(m => `node:${m}`)].flat();
 
 const BaseConfig = defineViteConfig({
   root: __dirname,
@@ -46,9 +49,12 @@ const ConfigBuilder = (type: 'main' | 'preload') => defineViteConfig({
     outDir: resolve(OUTPUT_DIR, `./${type}`),
     lib: {
       entry: resolve(SRC_DIR, `./liteloader/${type}/index.ts`),
-      formats: [ 'cjs' ],
+      formats: ['cjs'],
       fileName: () => 'index.js',
     },
+    rollupOptions: {
+      external: [...nodeModules, ...external]
+    }
   },
 });
 
@@ -61,7 +67,6 @@ export default defineConfig({
     plugins: [
       viteCp({
         targets: [
-          // ...external.map(genCpModule),
           { src: './src/napcat.json', dest: join(OUTPUT_DIR, 'config') },
           { src: './static', dest: join(OUTPUT_DIR, 'main', 'static'), flatten: false },
           { src: './src/onebot11/onebot11.json', dest: join(OUTPUT_DIR, 'config') },
@@ -81,7 +86,7 @@ export default defineConfig({
       outDir: resolve(OUTPUT_DIR, './renderer'),
       lib: {
         entry: resolve(SRC_DIR, './liteloader/renderer/index.ts'),
-        formats: [ 'es' ],
+        formats: ['es'],
         fileName: () => 'index.js',
       },
       rollupOptions: {
