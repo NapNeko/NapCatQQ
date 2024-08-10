@@ -20,7 +20,7 @@ const SchemaData = {
 type Payload = FromSchema<typeof SchemaData>;
 
 export class FetchEmojiLike extends BaseAction<Payload, any> {
-    actionName = ActionName.FetchEmojioLike;
+    actionName = ActionName.FetchEmojiLike;
     PayloadSchema = SchemaData;
     protected async _handle(payload: Payload) {
         const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
