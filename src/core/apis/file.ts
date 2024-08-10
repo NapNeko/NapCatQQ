@@ -37,7 +37,7 @@ export class NTQQFileApi {
     }
 
     async copyFile(filePath: string, destPath: string) {
-        await this.context.wrapper.util.copyFile(filePath, destPath);
+        await this.core.util.copyFile(filePath, destPath);
     }
 
     async getFileSize(filePath: string): Promise<number> {

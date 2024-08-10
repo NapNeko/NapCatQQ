@@ -28,6 +28,7 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
         this.actionMap.set(action.actionName, action);
     }
     registerActionMap(actionMap: Map<string, BaseAction<any, any>>) {
+
         this.actionMap = actionMap;
     }
     registerHeartBeat() {
@@ -53,8 +54,8 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
         this.server = http.createServer(this.app);
 
         this.app.use(express.json());
-
-        this.app.all('/*', this.handleRequest.bind(this));
+        this.app.use(express.urlencoded({ extended: false }));
+        this.app.use('/', (req, res) => this.handleRequest(req, res));
 
         this.server.listen(this.port, () => {
             this.coreContext.context.logger.log(`HTTP server listening on port ${this.port}`);
@@ -85,5 +86,6 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
         this.isOpen = false;
         this.hasBeenClosed = true;
         this.server?.close();
+        this.app = undefined;
     }
 }
