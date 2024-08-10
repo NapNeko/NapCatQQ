@@ -127,7 +127,7 @@ async function NCInit() {
         await NCoreInitFramework(wrapperSession, wrapperLoginService, registerInitCallback);
         //console.log("[NapCat] [Info] NapCat初始化完成");
     } catch (error) {
-        console.error('[NapCat] [Error] 初始化NapCat失败', error);
+        console.log('[NapCat] [Error] 初始化NapCat失败', error);
     }
 }
 
