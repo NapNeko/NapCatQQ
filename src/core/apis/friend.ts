@@ -10,6 +10,9 @@ export class NTQQFriendApi {
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
         this.core = core;
+        // if (!this.context.basicInfoWrapper.requireMinNTQQBuild('26702')) {
+        //     this.getFriends(true);
+        // }
     }
 
     async getBuddyV2(refresh = false): Promise<FriendV2[]> {
@@ -80,12 +83,12 @@ export class NTQQFriendApi {
     async getFriends(forced = false): Promise<User[]> {
         const [_retData, _BuddyArg] = await this.core.eventWrapper.CallNormalEvent<(force: boolean) => Promise<any>, (arg: OnBuddyChangeParams) => void>
             (
-            'NodeIKernelBuddyService/getBuddyList',
-            'NodeIKernelBuddyListener/onBuddyListChange',
-            1,
-            5000,
-            () => true,
-            forced,
+                'NodeIKernelBuddyService/getBuddyList',
+                'NodeIKernelBuddyListener/onBuddyListChange',
+                1,
+                5000,
+                () => true,
+                forced,
             );
         const friends: User[] = [];
         for (const categoryItem of _BuddyArg) {
