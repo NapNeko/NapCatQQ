@@ -24,7 +24,9 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
         this.coreContext = coreContext;
         this.onebotContext = onebotContext;
     }
-
+    registerActionMap(actionMap: Map<string, BaseAction<any, any>>) {
+        this.actionMap = actionMap;
+    }
     registerHeartBeat() {
         if (this.connection) {
             this.heartbeatTimer = setInterval(() => {
