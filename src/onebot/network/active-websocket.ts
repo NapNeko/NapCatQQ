@@ -2,6 +2,9 @@ import { IOB11NetworkAdapter, OB11EmitEventContent } from '@/onebot/network/inde
 import { WebSocket as NodeWebSocket } from 'ws';
 import BaseAction from '@/onebot/action/BaseAction';
 import { sleep } from '@/common/utils/helper';
+import { OB11HeartbeatEvent } from '../event/meta/OB11HeartbeatEvent';
+import { NapCatCore } from '@/core';
+import { NapCatOneBot11Adapter } from '../main';
 
 export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
     url: string;
@@ -11,11 +14,15 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
     private actionMap: Map<string, BaseAction<any, any>> = new Map();
     heartbeatInterval: number;
     private heartbeatTimer: NodeJS.Timeout | null = null;
+    onebotContext: NapCatOneBot11Adapter;
+    coreContext: NapCatCore;
 
-    constructor(url: string, reconnectIntervalInMillis: number, heartbeatInterval: number) {
+    constructor(url: string, reconnectIntervalInMillis: number, heartbeatInterval: number, coreContext: NapCatCore, onebotContext: NapCatOneBot11Adapter) {
         this.url = url;
         this.heartbeatInterval = heartbeatInterval;
         this.reconnectIntervalInMillis = reconnectIntervalInMillis;
+        this.coreContext = coreContext;
+        this.onebotContext = onebotContext;
     }
 
     registerHeartBeat() {
@@ -23,7 +30,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
         if (this.connection) {
             this.heartbeatTimer = setInterval(() => {
                 if (this.connection && this.connection.readyState === NodeWebSocket.OPEN) {
-                    this.connection.ping();
+                    this.connection.ping(JSON.stringify(new OB11HeartbeatEvent(this.coreContext, this.heartbeatInterval, this.coreContext.selfInfo.online, true)));
                 }
             }, this.heartbeatInterval);
         }
