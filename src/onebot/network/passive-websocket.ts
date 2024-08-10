@@ -29,8 +29,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
                 }
             }
             wsClient.on('message', (message) => {
-                // TODO: extract action name and payload from the message, then call the corresponding action.
-                // TODO: consider using a utility function
+                this.handleMessage(message);
             });
             wsClient.once('close', () => {
                 this.wsClientsMutex.runExclusive(async () => {
@@ -51,15 +50,22 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     }
 
     registerHeartBeat() {
-        //WS正向心跳
+        setInterval(() => {
+            this.wsClientsMutex.runExclusive(async () => {
+                this.wsClients.forEach((wsClient) => {
+                    if (wsClient.readyState === WebSocket.OPEN) {
+                        wsClient.ping();
+                    }
+                });
+            });
+        }, this.heartbeatInterval);
     }
 
     onEvent<T extends OB11EmitEventContent>(event: T) {
         this.wsClientsMutex.runExclusive(async () => {
             this.wsClients.forEach((wsClient) => {
-                // wsClient.send(JSON.stringify(event));
-                // TODO: wrap the event, and send the wrapped to the client.
-                // TODO: consider using a utility function
+                const wrappedEvent = this.wrapEvent(event);
+                wsClient.send(JSON.stringify(wrappedEvent));
             });
         });
     }
@@ -76,4 +82,24 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
         this.hasBeenClosed = true;
         this.wsServer.close();
     }
+
+    private handleMessage(message: any) {
+        try {
+            const parsedMessage = JSON.parse(message);
+            const action = this.actionMap.get(parsedMessage.actionName);
+            if (action) {
+                action.handle(parsedMessage.payload);
+            }
+        } catch (e) {
+            console.error('Failed to handle message:', e);
+        }
+    }
+
+    private wrapEvent<T extends OB11EmitEventContent>(event: T) {
+        return {
+            type: 'event',
+            data: event
+        };
+    }
 }
+
