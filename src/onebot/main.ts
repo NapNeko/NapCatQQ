@@ -25,9 +25,28 @@ export class NapCatOneBot11Adapter {
             FriendApi: new OneBotFriendApi(this, core),
         };
         this.networkManager = new OB11NetworkManager();
+        this.InitOneBot();
     }
+    async InitOneBot() {
+        let NTQQUserApi = this.core.getApiContext().UserApi;
+        let selfInfo = this.core.selfInfo;
+        let ob11Config = this.config.configData;
+        const serviceInfo = `
+    HTTP服务 ${ob11Config.http.enable ? '已启动' : '未启动'}, ${ob11Config.http.host}:${ob11Config.http.port}
+    HTTP上报服务 ${ob11Config.http.enablePost ? '已启动' : '未启动'}, 上报地址: ${ob11Config.http.postUrls}
+    WebSocket服务 ${ob11Config.ws.enable ? '已启动' : '未启动'}, ${ob11Config.ws.host}:${ob11Config.ws.port}
+    WebSocket反向服务 ${ob11Config.reverseWs.enable ? '已启动' : '未启动'}, 反向地址: ${ob11Config.reverseWs.urls}
+    `;
+        NTQQUserApi.getUserDetailInfo(selfInfo.uid).then(user => {
+            selfInfo.nick = user.nick;
+            this.context.logger.setLogSelfInfo(selfInfo);
+        }).catch(this.context.logger.logError);
+        this.context.logger.log(`[Notice] [OneBot11] ${serviceInfo}`);
+        // Todo 开始启动NetWork
+        await this.initMsgListener();
 
-    private initMsgListener() {
+    }
+    async initMsgListener() {
         const msgListener = new MsgListener();
 
         msgListener.onInputStatusPush = async data => {
