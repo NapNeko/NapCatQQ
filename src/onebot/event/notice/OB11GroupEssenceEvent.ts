@@ -8,7 +8,7 @@ export class OB11GroupEssenceEvent extends OB11GroupNoticeEvent {
     sub_type: 'add' | 'delete' = 'add';
 
     constructor(core: NapCatCore, groupId: number, message_id: number, sender_id: number) {
-        super(core);
+        super(core, groupId, sender_id);
         this.group_id = groupId;
         this.message_id = message_id;
         this.sender_id = sender_id;

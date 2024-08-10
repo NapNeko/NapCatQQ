@@ -9,7 +9,7 @@ export class OB11GroupIncreaseEvent extends OB11GroupNoticeEvent {
     sub_type: GroupIncreaseSubType;
 
     constructor(core: NapCatCore, groupId: number, userId: number, operatorId: number, subType: GroupIncreaseSubType = 'approve') {
-        super(core);
+        super(core, groupId, userId);
         this.group_id = groupId;
         this.operator_id = operatorId;
         this.user_id = userId;
