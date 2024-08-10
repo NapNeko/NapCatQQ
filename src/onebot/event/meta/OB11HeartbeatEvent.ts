@@ -1,4 +1,5 @@
 import { OB11BaseMetaEvent } from './OB11BaseMetaEvent';
+import { NapCatCore } from '@/core';
 
 interface HeartbeatStatus {
     online: boolean | null,
@@ -10,8 +11,8 @@ export class OB11HeartbeatEvent extends OB11BaseMetaEvent {
     status: HeartbeatStatus;
     interval: number;
 
-    public constructor(isOnline: boolean, isGood: boolean, interval: number) {
-        super();
+    public constructor(core: NapCatCore, interval: number, isOnline: boolean | null, isGood: boolean) {
+        super(core);
         this.interval = interval;
         this.status = {
             online: isOnline,

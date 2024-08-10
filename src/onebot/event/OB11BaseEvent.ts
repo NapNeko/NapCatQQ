@@ -1,4 +1,4 @@
-import { selfInfo } from '@/core/data';
+import { InstanceContext, NapCatCore } from '@/core';
 
 export enum EventType {
     META = 'meta_event',
@@ -8,9 +8,12 @@ export enum EventType {
     MESSAGE_SENT = 'message_sent',
 }
 
-
 export abstract class OB11BaseEvent {
     time = Math.floor(Date.now() / 1000);
-    self_id = parseInt(selfInfo.uin);
-    post_type: EventType = EventType.META;
+    self_id: number;
+    abstract post_type: EventType;
+
+    constructor(core: NapCatCore) {
+        this.self_id = parseInt(core.selfInfo.uin);
+    }
 }

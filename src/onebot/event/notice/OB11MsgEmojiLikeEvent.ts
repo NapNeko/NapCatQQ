@@ -1,4 +1,5 @@
 import { OB11GroupNoticeEvent } from './OB11GroupNoticeEvent';
+import { NapCatCore } from '@/core';
 
 export interface MsgEmojiLike {
     emoji_id: string,
@@ -10,8 +11,8 @@ export class OB11GroupMsgEmojiLikeEvent extends OB11GroupNoticeEvent {
     message_id: number;
     likes: MsgEmojiLike[];
 
-    constructor(groupId: number, userId: number, messageId: number, likes: MsgEmojiLike[]) {
-        super();
+    constructor(core: NapCatCore, groupId: number, userId: number, messageId: number, likes: MsgEmojiLike[]) {
+        super(core, groupId, userId);
         this.group_id = groupId;
         this.user_id = userId;  // 可为空，表示是对别人的消息操作，如果是对bot自己的消息则不为空
         this.message_id = messageId;

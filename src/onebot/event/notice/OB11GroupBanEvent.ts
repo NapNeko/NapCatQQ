@@ -1,4 +1,5 @@
 import { OB11GroupNoticeEvent } from './OB11GroupNoticeEvent';
+import { NapCatCore } from '@/core';
 
 export class OB11GroupBanEvent extends OB11GroupNoticeEvent {
     notice_type = 'group_ban';
@@ -6,8 +7,8 @@ export class OB11GroupBanEvent extends OB11GroupNoticeEvent {
     duration: number;
     sub_type: 'ban' | 'lift_ban';
 
-    constructor(groupId: number, userId: number, operatorId: number, duration: number, sub_type: 'ban' | 'lift_ban') {
-        super();
+    constructor(core: NapCatCore, groupId: number, userId: number, operatorId: number, duration: number, sub_type: 'ban' | 'lift_ban') {
+        super(core);
         this.group_id = groupId;
         this.operator_id = operatorId;
         this.user_id = userId;
