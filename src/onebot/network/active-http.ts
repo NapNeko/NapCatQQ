@@ -1,4 +1,4 @@
-import { IOB11NetworkAdapter } from '@/onebot/network/index';
+import { IOB11NetworkAdapter, OB11EmitEventContent } from '@/onebot/network/index';
 import BaseAction from '@/onebot/action/BaseAction';
 import { OB11BaseEvent } from '@/onebot/event/OB11BaseEvent';
 import { createHmac } from 'crypto';
@@ -33,7 +33,7 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
         // Passive http adapter does not need to register actions
     }
 
-    onEvent<T extends OB11BaseEvent>(event: T) {
+    onEvent<T extends OB11EmitEventContent>(event: T) {
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
             'x-self-id': this.coreContext.selfInfo.uin,
