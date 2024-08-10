@@ -34,9 +34,8 @@ export interface OB11Config {
 }
 
 export class OB11Config extends ConfigBase<OB11Config> {
-    name = 'onebot11';
-
-    protected getKeys(): string[] | null {
-        return null;
+    getConfigName() {
+        return 'onebot11';
     }
+
 }
