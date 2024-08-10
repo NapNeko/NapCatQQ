@@ -17,7 +17,7 @@ export default class GetFriendList extends BaseAction<Payload, OB11User[]> {
     actionName = ActionName.GetFriendList;
     PayloadSchema = SchemaData;
 
-    protected async _handle(payload: Payload) {
+    async _handle(payload: Payload) {
         //全新逻辑
         const NTQQFriendApi = this.CoreContext.getApiContext().FriendApi;
         return OB11Constructor.friendsV2(await NTQQFriendApi.getBuddyV2(payload?.no_cache === true || payload?.no_cache === 'true'));

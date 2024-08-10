@@ -18,7 +18,7 @@ class GetGroupInfo extends BaseAction<Payload, OB11Group> {
     actionName = ActionName.GetGroupInfo;
     PayloadSchema = SchemaData;
 
-    protected async _handle(payload: Payload) {
+    async _handle(payload: Payload) {
         const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
         const group = (await NTQQGroupApi.getGroups()).find(e => e.groupCode == payload.group_id.toString());
         if (group) {

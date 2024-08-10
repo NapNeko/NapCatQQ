@@ -23,7 +23,7 @@ export default class SetAvatar extends BaseAction<Payload, null> {
         };
     }
 
-    protected async _handle(payload: Payload): Promise<null> {
+    async _handle(payload: Payload): Promise<null> {
         const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
         const { path, isLocal, errMsg, success } = (await uri2local(this.CoreContext.NapCatTempPath, payload.file));
         if (!success) {

@@ -13,7 +13,7 @@ const SchemaData = {
 export class GetOnlineClient extends BaseAction<void, Array<any>> {
     actionName = ActionName.GetOnlineClient;
 
-    protected async _handle(payload: void) {
+    async _handle(payload: void) {
         //注册监听
         const NTQQSystemApi = this.CoreContext.getApiContext().SystemApi;
         NTQQSystemApi.getOnlineDev();

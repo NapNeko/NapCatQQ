@@ -23,7 +23,7 @@ class DeleteMsg extends BaseAction<Payload, void> {
     actionName = ActionName.DeleteMsg;
     PayloadSchema = SchemaData;
 
-    protected async _handle(payload: Payload) {
+    async _handle(payload: Payload) {
         const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
         const msg = MessageUnique.getMsgIdAndPeerByShortId(Number(payload.message_id));
         if (msg) {

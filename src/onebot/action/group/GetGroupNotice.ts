@@ -32,7 +32,7 @@ export class GetGroupNotice extends BaseAction<Payload, GroupNotice[]> {
     actionName = ActionName.GoCQHTTP_GetGroupNotice;
     PayloadSchema = SchemaData;
 
-    protected async _handle(payload: Payload) {
+    async _handle(payload: Payload) {
         const NTQQWebApi = this.CoreContext.getApiContext().WebApi;
 
         const group = payload.group_id.toString();
