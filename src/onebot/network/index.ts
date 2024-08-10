@@ -8,12 +8,20 @@ export interface IOB11NetworkAdapter {
     close(): void | Promise<void>;
 }
 export class OB11NetworkManager {
-    private adapters: IOB11NetworkAdapter[] = [];
+    adapters: IOB11NetworkAdapter[] = [];
 
-    registerAdapter(adapter: IOB11NetworkAdapter) {
-        this.adapters.push(adapter);
+    async getAllAdapters() {
+        return this.adapters;
     }
-    async closeAll() {
+    async registerAdapter(adapter: IOB11NetworkAdapter) {
+        return this.adapters.push(adapter);
+    }
+    async closeSomeAdapters(adapters: IOB11NetworkAdapter[]) {
+        this.adapters = this.adapters.filter(adapter => !adapters.includes(adapter));
+        await Promise.all(adapters.map(adapter => adapter.close()));
+    }
+    async closeAllAdapters() {
+        this.adapters = [];
         await Promise.all(this.adapters.map(adapter => adapter.close()));
     }
 }
