@@ -7,3 +7,22 @@ export interface IOB11NetworkAdapter {
     open(): void | Promise<void>;
     close(): void | Promise<void>;
 }
+export class OB11NetworkManager {
+    private adapters: IOB11NetworkAdapter[] = [];
+
+    registerAdapter(adapter: IOB11NetworkAdapter) {
+        this.adapters.push(adapter);
+    }
+
+    async open() {
+        await Promise.all(this.adapters.map(adapter => adapter.open()));
+    }
+
+    async close() {
+        await Promise.all(this.adapters.map(adapter => adapter.close()));
+    }
+}
+export * from './active-http';
+export * from './active-websocket';
+export * from './passive-http';
+export * from './passive-websocket';

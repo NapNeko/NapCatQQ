@@ -48,7 +48,9 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     registerAction<T extends BaseAction<P, R>, P, R>(action: T) {
         this.actionMap.set(action.actionName, action);
     }
-
+    registerHeartBeat() {
+        //WS正向心跳
+    }
     onEvent<T extends OB11BaseEvent>(event: T) {
         this.wsClientsMutex.runExclusive(async () => {
             this.wsClients.forEach((wsClient) => {
