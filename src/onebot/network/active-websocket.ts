@@ -18,6 +18,10 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
         this.reconnectIntervalInMillis = reconnectIntervalInMillis;
     }
 
+    registerHeartBeat() {
+        //WS反向心跳
+    }
+    
     registerAction<T extends BaseAction<P, R>, P, R>(action: T) {
         this.actionMap.set(action.actionName, action);
     }

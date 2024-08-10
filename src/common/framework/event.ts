@@ -1,5 +1,4 @@
 import type { NodeIQQNTWrapperSession, WrapperNodeApi } from "@/core/wrapper/wrapper";
-import { randomUUID } from "node:crypto";
 import EventEmitter from "node:events";
 
 export type ListenerClassBase = Record<string, string>;

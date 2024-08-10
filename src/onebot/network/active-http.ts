@@ -9,6 +9,9 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     constructor(url: string) {
         this.url = url;
     }
+    registerHeartBeat() {
+        //HttpPost心跳
+    }
 
     registerAction<T extends BaseAction<P, R>, P, R>(action: T) {
         this.actionMap.set(action.actionName, action);
@@ -22,13 +25,13 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
             },
             body: JSON.stringify(event)
         })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Event sent successfully:', data);
-        })
-        .catch(error => {
-            console.error('Failed to send event:', error);
-        });
+            .then(response => response.json())
+            .then(data => {
+                console.log('Event sent successfully:', data);
+            })
+            .catch(error => {
+                console.error('Failed to send event:', error);
+            });
     }
 
     async open() {
