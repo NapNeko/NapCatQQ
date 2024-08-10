@@ -16,7 +16,7 @@ export default class GetRecentContact extends BaseAction<Payload, any> {
     actionName = ActionName.GetRecentContact;
     PayloadSchema = SchemaData;
 
-    protected async _handle(payload: Payload) {
+    async _handle(payload: Payload) {
         const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
         const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
         const ret = await NTQQUserApi.getRecentContactListSnapShot(parseInt((payload.count || 10).toString()));

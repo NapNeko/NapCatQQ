@@ -23,7 +23,7 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
     actionName = ActionName.GoCQHTTP_GetForwardMsg;
     PayloadSchema = SchemaData;
 
-    protected async _handle(payload: Payload): Promise<any> {
+    async _handle(payload: Payload): Promise<any> {
         const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
         const msgId = payload.message_id || payload.id;
         if (!msgId) {

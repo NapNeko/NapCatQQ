@@ -8,7 +8,7 @@ interface Payload extends GetFilePayload {
 export default class GetRecord extends GetFileBase {
     actionName = ActionName.GetRecord;
 
-    protected async _handle(payload: Payload): Promise<GetFileResponse> {
+    async _handle(payload: Payload): Promise<GetFileResponse> {
         const res = super._handle(payload);
         return res;
     }

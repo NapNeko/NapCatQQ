@@ -25,7 +25,7 @@ export default class GoCQHTTPUploadGroupFile extends BaseAction<Payload, null> {
     actionName = ActionName.GoCQHTTP_UploadGroupFile;
     PayloadSchema = SchemaData;
 
-    protected async _handle(payload: Payload): Promise<null> {
+    async _handle(payload: Payload): Promise<null> {
         let file = payload.file;
         if (fs.existsSync(file)) {
             file = `file://${file}`;

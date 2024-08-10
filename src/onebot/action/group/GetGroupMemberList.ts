@@ -19,7 +19,7 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
     actionName = ActionName.GetGroupMemberList;
     PayloadSchema = SchemaData;
 
-    protected async _handle(payload: Payload) {
+    async _handle(payload: Payload) {
         const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
         const NTQQWebApi = this.CoreContext.getApiContext().WebApi;
         const isNocache = payload.no_cache == true || payload.no_cache === 'true';

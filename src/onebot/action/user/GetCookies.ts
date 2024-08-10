@@ -21,7 +21,7 @@ export class GetCookies extends BaseAction<Payload, Response> {
     actionName = ActionName.GetCookies;
     PayloadSchema = SchemaData;
 
-    protected async _handle(payload: Payload) {
+    async _handle(payload: Payload) {
         const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
         const NTQQWebApi = this.CoreContext.getApiContext().WebApi;
         // if (!payload.domain) {

@@ -29,7 +29,7 @@ class ForwardSingleMsg extends BaseAction<Payload, null> {
         return { chatType: ChatType.group, peerUid: payload.group_id!.toString() };
     }
 
-    protected async _handle(payload: Payload): Promise<null> {
+    async _handle(payload: Payload): Promise<null> {
         const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
         const msg = MessageUnique.getMsgIdAndPeerByShortId(payload.message_id);
         if (!msg) {

@@ -17,7 +17,7 @@ export class DelGroupFile extends BaseAction<Payload, any> {
     actionName = ActionName.DelGroupFile;
     PayloadSchema = SchemaData;
 
-    protected async _handle(payload: Payload) {
+    async _handle(payload: Payload) {
         const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
         return await NTQQGroupApi.DelGroupFile(payload.group_id.toString(), [payload.file_id]);
     }

@@ -32,7 +32,7 @@ export default class GoCQHTTPDownloadFile extends BaseAction<Payload, FileRespon
     actionName = ActionName.GoCQHTTP_DownloadFile;
     PayloadSchema = SchemaData;
 
-    protected async _handle(payload: Payload): Promise<FileResponse> {
+    async _handle(payload: Payload): Promise<FileResponse> {
         const isRandomName = !payload.name;
         const name = payload.name || randomUUID();
         const filePath = joinPath(this.CoreContext.NapCatTempPath, name);
