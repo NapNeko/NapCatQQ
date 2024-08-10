@@ -33,11 +33,11 @@ export class NapCatOneBot11Adapter {
         msgListener.onInputStatusPush = async data => {
             const uin = await this.core.ApiContext.UserApi.getUinByUidV2(data.fromUin);
             this.context.logger.log(`[Notice] [输入状态] ${uin} ${data.statusText}`);
-            this.networkManager.emitEvent(new OB11InputStatusEvent(
-                parseInt(uin),
-                data.eventType,
-                data.statusText
-            ));
+            // this.networkManager.emitEvent(new OB11InputStatusEvent(
+            //     parseInt(uin),
+            //     data.eventType,
+            //     data.statusText
+            // ));
         };
     }
 }

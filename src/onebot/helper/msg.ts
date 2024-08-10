@@ -21,7 +21,7 @@ import {
 import { promises as fs } from 'node:fs';
 import ffmpeg from 'fluent-ffmpeg';
 import { calculateFileMD5, isGIF } from '@/common/utils/file';
-import { defaultVideoThumb, getVideoInfo } from '@/common/utils/video';
+import { getVideoInfo } from '@/common/utils/video';
 import { encodeSilk } from '@/common/utils/audio';
 import faceConfig from '@/core/external/face_config.json';
 import * as pathLib from 'node:path';
@@ -166,7 +166,7 @@ export class SendMsgElementConstructor {
         } catch (e) {
             logger.logError('获取视频信息失败', e);
         }
-        const createThumb = new Promise<string>((resolve, reject) => {
+        const createThumb = new Promise<string | undefined>((resolve, reject) => {
             const thumbFileName = `${md5}_0.png`;
             const thumbPath = pathLib.join(thumb, thumbFileName);
             ffmpeg(filePath)
@@ -179,9 +179,7 @@ export class SendMsgElementConstructor {
                             resolve(thumbPath);
                         }).catch(reject);
                     } else {
-                        fs.writeFile(thumbPath, defaultVideoThumb).then(() => {
-                            resolve(thumbPath);
-                        }).catch(reject);
+                        resolve(undefined);
                     }
                 })
                 .screenshots({
@@ -195,10 +193,10 @@ export class SendMsgElementConstructor {
         });
         const thumbPath = new Map();
         const _thumbPath = await createThumb;
-        const thumbSize = (await fs.stat(_thumbPath)).size;
+        const thumbSize = _thumbPath ? (await fs.stat(_thumbPath)).size : 0;
         // log("生成缩略图", _thumbPath)
         thumbPath.set(0, _thumbPath);
-        const thumbMd5 = await calculateFileMD5(_thumbPath);
+        const thumbMd5 = _thumbPath ? await calculateFileMD5(_thumbPath) : "";
         const element: SendVideoElement = {
             elementType: ElementType.VIDEO,
             elementId: '',
