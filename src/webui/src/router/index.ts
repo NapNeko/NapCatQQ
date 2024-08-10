@@ -1,11 +1,12 @@
-import { Router } from 'express';
+import { NextFunction, Request, Response, Router } from 'express';
 import { AuthHelper } from '../../src/helper/SignToken';
-import { NextFunction, Request, Response } from 'express';
 import { QQLoginRouter } from './QQLogin';
 import { AuthRouter } from './auth';
 import { OB11ConfigRouter } from './OB11Config';
 import { WebUiConfig } from '../helper/config';
+
 const router = Router();
+
 export async function AuthApi(req: Request, res: Response, next: NextFunction) {
     //判断当前url是否为/login 如果是跳过鉴权
     if (req.url == '/auth/login') {
@@ -52,6 +53,7 @@ export async function AuthApi(req: Request, res: Response, next: NextFunction) {
     });
     return;
 }
+
 router.use(AuthApi);
 router.all('/test', (req, res) => {
     res.json({

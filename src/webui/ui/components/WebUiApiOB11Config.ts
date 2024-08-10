@@ -1,42 +1,45 @@
 export interface OB11Config {
-  [key: string]: any;
-  http: {
-    enable: boolean;
-    host: '';
-    port: number;
-    secret: '';
-    enableHeart: boolean;
-    enablePost: boolean;
-    postUrls: string[];
-  };
-  ws: {
-    enable: boolean;
-    host: '';
-    port: number;
-  };
-  reverseWs: {
-    enable: boolean;
-    urls: string[];
-  };
-  GroupLocalTime: {
-    Record: boolean,
-    RecordList: Array<string>
-  };
-  debug: boolean;
-  heartInterval: number;
-  messagePostFormat: 'array' | 'string';
-  enableLocalFile2Url: boolean;
-  musicSignUrl: '';
-  reportSelfMessage: boolean;
-  token: '';
+    [key: string]: any;
+
+    http: {
+        enable: boolean;
+        host: '';
+        port: number;
+        secret: '';
+        enableHeart: boolean;
+        enablePost: boolean;
+        postUrls: string[];
+    };
+    ws: {
+        enable: boolean;
+        host: '';
+        port: number;
+    };
+    reverseWs: {
+        enable: boolean;
+        urls: string[];
+    };
+    GroupLocalTime: {
+        Record: boolean,
+        RecordList: Array<string>
+    };
+    debug: boolean;
+    heartInterval: number;
+    messagePostFormat: 'array' | 'string';
+    enableLocalFile2Url: boolean;
+    musicSignUrl: '';
+    reportSelfMessage: boolean;
+    token: '';
 
 }
 
 class WebUiApiOB11ConfigWrapper {
     private retCredential: string = '';
+
     async Init(Credential: string) {
         this.retCredential = Credential;
     }
+
     async GetOB11Config(): Promise<OB11Config> {
         const ConfigResponse = await fetch('../api/OB11Config/GetConfig', {
             method: 'POST',
@@ -53,6 +56,7 @@ class WebUiApiOB11ConfigWrapper {
         }
         return {} as OB11Config;
     }
+
     async SetOB11Config(config: OB11Config): Promise<boolean> {
         const ConfigResponse = await fetch('../api/OB11Config/SetConfig', {
             method: 'POST',
@@ -71,4 +75,5 @@ class WebUiApiOB11ConfigWrapper {
         return false;
     }
 }
+
 export const OB11ConfigWrapper = new WebUiApiOB11ConfigWrapper();

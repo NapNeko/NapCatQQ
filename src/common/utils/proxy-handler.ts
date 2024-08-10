@@ -1,4 +1,4 @@
-import { LogWrapper } from "./log";
+import { LogWrapper } from './log';
 
 export function proxyHandlerOf(logger: LogWrapper) {
     return {
@@ -12,7 +12,7 @@ export function proxyHandlerOf(logger: LogWrapper) {
             }
             // 如果方法存在，正常返回
             return Reflect.get(target, prop, receiver);
-        }
+        },
     };
 }
 

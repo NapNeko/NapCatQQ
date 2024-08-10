@@ -1,6 +1,7 @@
 import https from 'node:https';
 import http from 'node:http';
 import { readFileSync } from 'node:fs';
+
 export class RequestUtil {
     // 适用于获取服务器下发cookies时获取，仅GET
     static async HttpsGetCookies(url: string): Promise<{ [key: string]: string }> {
@@ -27,7 +28,8 @@ export class RequestUtil {
                         resolve(cookies);
                     }
                 };
-                res.on('data', () => { }); // Necessary to consume the stream
+                res.on('data', () => {
+                }); // Necessary to consume the stream
                 res.on('end', () => {
                     handleRedirect(res);
                 });
@@ -45,14 +47,15 @@ export class RequestUtil {
             });
             req.on('error', (error: any) => {
                 reject(error);
-            }); 
+            });
         });
     }
 
 
-
     // 请求和回复都是JSON data传原始内容 自动编码json
-    static async HttpGetJson<T>(url: string, method: string = 'GET', data?: any, headers: { [key: string]: string } = {}, isJsonRet: boolean = true, isArgJson: boolean = true): Promise<T> {
+    static async HttpGetJson<T>(url: string, method: string = 'GET', data?: any, headers: {
+        [key: string]: string
+    } = {}, isJsonRet: boolean = true, isArgJson: boolean = true): Promise<T> {
         const option = new URL(url);
         const protocol = url.startsWith('https://') ? https : http;
         const options = {
@@ -60,7 +63,7 @@ export class RequestUtil {
             port: option.port,
             path: option.href,
             method: method,
-            headers: headers
+            headers: headers,
         };
         // headers: {
         //       'Content-Type': 'application/json',
@@ -119,7 +122,7 @@ export class RequestUtil {
         const formDataParts = [
             `------${boundary}\r\n`,
             `Content-Disposition: form-data; name="share_image"; filename="${filePath}"\r\n`,
-            'Content-Type: ' + type + '\r\n\r\n'
+            'Content-Type: ' + type + '\r\n\r\n',
         ];
 
         const fileContent = readFileSync(filePath);
@@ -127,65 +130,65 @@ export class RequestUtil {
         return Buffer.concat([
             Buffer.from(formDataParts.join(''), 'utf8'),
             fileContent,
-            Buffer.from(footer, 'utf8')
+            Buffer.from(footer, 'utf8'),
         ]);
     }
 
-    static async uploadImageForOpenPlatform(filePath: string,cookies:string): Promise<string> {
+    static async uploadImageForOpenPlatform(filePath: string, cookies: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
-      type retType = { retcode: number, result?: { url: string } };
-      try {
-          const options = {
-              hostname: 'cgi.connect.qq.com',
-              port: 443,
-              path: '/qqconnectopen/upload_share_image',
-              method: 'POST',
-              headers: {
-                  'Referer': 'https://cgi.connect.qq.com',
-                  'Cookie': cookies,
-                  'Accept': '*/*',
-                  'Connection': 'keep-alive',
-                  'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW'
-              }
-          };
-          const req = https.request(options, async (res) => {
-              let responseBody = '';
+            type retType = { retcode: number, result?: { url: string } };
+            try {
+                const options = {
+                    hostname: 'cgi.connect.qq.com',
+                    port: 443,
+                    path: '/qqconnectopen/upload_share_image',
+                    method: 'POST',
+                    headers: {
+                        'Referer': 'https://cgi.connect.qq.com',
+                        'Cookie': cookies,
+                        'Accept': '*/*',
+                        'Connection': 'keep-alive',
+                        'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
+                    },
+                };
+                const req = https.request(options, async (res) => {
+                    let responseBody = '';
 
-              res.on('data', (chunk: string | Buffer) => {
-                  responseBody += chunk.toString();
-              });
+                    res.on('data', (chunk: string | Buffer) => {
+                        responseBody += chunk.toString();
+                    });
 
-              res.on('end', () => {
-                  try {
-                      if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
-                          const responseJson = JSON.parse(responseBody) as retType;
-                          resolve(responseJson.result!.url!);
-                      } else {
-                          reject(new Error(`Unexpected status code: ${res.statusCode}`));
-                      }
-                  } catch (parseError) {
-                      reject(parseError);
-                  }
+                    res.on('end', () => {
+                        try {
+                            if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
+                                const responseJson = JSON.parse(responseBody) as retType;
+                                resolve(responseJson.result!.url!);
+                            } else {
+                                reject(new Error(`Unexpected status code: ${res.statusCode}`));
+                            }
+                        } catch (parseError) {
+                            reject(parseError);
+                        }
 
-              });
+                    });
 
-          });
+                });
 
-          req.on('error', (error) => {
-              reject(error);
-              console.error('Error during upload:', error);
-          });
+                req.on('error', (error) => {
+                    reject(error);
+                    console.error('Error during upload:', error);
+                });
 
-          const body = await RequestUtil.createFormData('WebKitFormBoundary7MA4YWxkTrZu0gW', filePath);
-          // req.setHeader('Content-Length', Buffer.byteLength(body));
-          // console.log(`Prepared data size: ${Buffer.byteLength(body)} bytes`);
-          req.write(body);
-          req.end();
-          return;
-      } catch (error) {
-          reject(error);
-      }
-      return undefined;
+                const body = await RequestUtil.createFormData('WebKitFormBoundary7MA4YWxkTrZu0gW', filePath);
+                // req.setHeader('Content-Length', Buffer.byteLength(body));
+                // console.log(`Prepared data size: ${Buffer.byteLength(body)} bytes`);
+                req.write(body);
+                req.end();
+                return;
+            } catch (error) {
+                reject(error);
+            }
+            return undefined;
         });
     }
 }

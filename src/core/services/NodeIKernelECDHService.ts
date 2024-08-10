@@ -1,3 +1,3 @@
-export interface NodeIKernelECDHService{
-    
+export interface NodeIKernelECDHService {
+
 }

@@ -71,7 +71,7 @@ export class NTQQWebApi {
                 end: '40',
                 sort: '1',
                 gc: GroupCode,
-                bkn: this.getBknFromCookie(cookieObject)
+                bkn: this.getBknFromCookie(cookieObject),
             }).toString()
         }`, 'POST', '', { 'Cookie': this.cookieToString(cookieObject) });
         if (!fastRet?.count || fastRet?.errcode !== 0 || !fastRet?.mems) {
@@ -92,7 +92,7 @@ export class NTQQWebApi {
                     end: (i * 40).toString(),
                     sort: '1',
                     gc: GroupCode,
-                    bkn: this.getBknFromCookie(cookieObject)
+                    bkn: this.getBknFromCookie(cookieObject),
                 }).toString()
             }`, 'POST', '', { 'Cookie': this.cookieToString(cookieObject) });
             retList.push(ret);
@@ -288,10 +288,10 @@ export class NTQQWebApi {
     private cookieToString(cookieObject: any) {
         return Object.entries(cookieObject).map(([key, value]) => `${key}=${value}`).join('; ');
     }
-    
+
     public getBknFromCookie(cookieObject: any) {
         const sKey = cookieObject.skey as string;
-        
+
         let hash = 5381;
         for (let i = 0; i < sKey.length; i++) {
             const code = sKey.charCodeAt(i);

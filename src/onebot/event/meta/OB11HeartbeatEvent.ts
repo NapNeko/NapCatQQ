@@ -15,7 +15,7 @@ export class OB11HeartbeatEvent extends OB11BaseMetaEvent {
         this.interval = interval;
         this.status = {
             online: isOnline,
-            good: isGood
+            good: isGood,
         };
     }
 }

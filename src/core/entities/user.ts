@@ -3,12 +3,14 @@ export enum Sex {
     female = 2,
     unknown = 255,
 }
+
 export interface BuddyCategoryType {
     categoryId: number;
     categroyName: string;
     categroyMbCount: number;
     buddyList: User[];
 }
+
 export interface CoreInfo {
     uid: string;
     uin: string;
@@ -173,20 +175,23 @@ export interface SimpleInfo {
     otherFlags: any | null;
     intimate: any | null;
 }
+
 export interface FriendV2 extends SimpleInfo {
     categoryId?: number;
     categroyName?: string;
 }
+
 export interface SelfStatusInfo {
-    uid: string
-    status: number
-    extStatus: number
-    termType: number
-    netType: number
-    iconType: number
-    customStatus: any
-    setTime: string
-  }
+    uid: string;
+    status: number;
+    extStatus: number;
+    termType: number;
+    netType: number;
+    iconType: number;
+    customStatus: any;
+    setTime: string;
+}
+
 export interface UserDetailInfoListenerArg {
     uid: string;
     uin: string;
@@ -194,6 +199,7 @@ export interface UserDetailInfoListenerArg {
     commonExt: CommonExt;
     photoWall: PhotoWall;
 }
+
 export interface ModifyProfileParams {
     nick: string,
     longNick: string,
@@ -212,11 +218,12 @@ export interface BuddyProfileLikeReq {
     start: number;
     limit: number;
 }
+
 export interface QQLevel {
     crownNum: number;
     sunNum: number;
     moonNum: number;
-    starNum: number
+    starNum: number;
 }
 
 export interface User {
@@ -228,7 +235,7 @@ export interface User {
     remark?: string;
     sex?: Sex;
     qqLevel?: QQLevel;
-    qid?: string
+    qid?: string;
     birthday_year?: number;
     birthday_month?: number;
     birthday_day?: number;
@@ -239,7 +246,7 @@ export interface User {
     homeTown?: string; //"0-0-0";
     makeFriendCareer?: number;
     pos?: string;
-    eMail?: string
+    eMail?: string;
     phoneNum?: string;
     college?: string;
     country?: string;
@@ -281,12 +288,14 @@ export interface SelfInfo extends User {
     online?: boolean;
 }
 
-export interface Friend extends User { }
+export interface Friend extends User {
+}
 
 export enum BizKey {
     KPRIVILEGEICON,
     KPHOTOWALL
 }
+
 export interface UserDetailInfoByUinV2 {
     result: number,
     errMsg: string,
@@ -298,6 +307,7 @@ export interface UserDetailInfoByUinV2 {
         photoWall: null
     }
 }
+
 export interface UserDetailInfoByUin {
     result: number,
     errMsg: string,

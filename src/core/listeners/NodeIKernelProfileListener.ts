@@ -1,26 +1,29 @@
 import { User, UserDetailInfoListenerArg } from '@/core/entities';
 
 interface IProfileListener {
-  onProfileSimpleChanged(...args: unknown[]): void;
-  onUserDetailInfoChanged(arg: UserDetailInfoListenerArg): void;
-  onProfileDetailInfoChanged(profile: User): void;
+    onProfileSimpleChanged(...args: unknown[]): void;
 
-  onStatusUpdate(...args: unknown[]): void;
+    onUserDetailInfoChanged(arg: UserDetailInfoListenerArg): void;
 
-  onSelfStatusChanged(...args: unknown[]): void;
+    onProfileDetailInfoChanged(profile: User): void;
 
-  onStrangerRemarkChanged(...args: unknown[]): void;
+    onStatusUpdate(...args: unknown[]): void;
+
+    onSelfStatusChanged(...args: unknown[]): void;
+
+    onStrangerRemarkChanged(...args: unknown[]): void;
 }
 
 export interface NodeIKernelProfileListener extends IProfileListener {
-  // eslint-disable-next-line @typescript-eslint/no-misused-new
-  new(listener: IProfileListener): NodeIKernelProfileListener;
+    // eslint-disable-next-line @typescript-eslint/no-misused-new
+    new(listener: IProfileListener): NodeIKernelProfileListener;
 }
 
 export class ProfileListener implements IProfileListener {
     onUserDetailInfoChanged(arg: UserDetailInfoListenerArg): void {
-    
+
     }
+
     onProfileSimpleChanged(...args: unknown[]) {
 
     }

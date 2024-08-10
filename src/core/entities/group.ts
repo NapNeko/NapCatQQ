@@ -1,10 +1,12 @@
 import { QQLevel, Sex } from './user';
+
 export enum GroupListUpdateType {
     REFRESHALL,
     GETALL,
     MODIFIED,
     REMOVE
 }
+
 export interface Group {
     groupCode: string,
     createTime?: string,//高版本才有
@@ -56,8 +58,8 @@ export interface GroupMember {
     uid: string; // 加密的字符串
     uin: string; // QQ号
     isRobot: boolean;
-    sex?: Sex
-    qqLevel?: QQLevel
+    sex?: Sex;
+    qqLevel?: QQLevel;
     isChangeRole: boolean;
     joinTime: string;
     lastSpeakTime: string;

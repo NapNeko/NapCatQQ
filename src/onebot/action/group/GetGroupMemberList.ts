@@ -1,16 +1,16 @@
-
 import { OB11GroupMember } from '../../types';
 import { OB11Constructor } from '../../helper/data';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+
 const SchemaData = {
     type: 'object',
     properties: {
         group_id: { type: ['number', 'string'] },
         no_cache: { type: ['boolean', 'string'] },
     },
-    required: ['group_id']
+    required: ['group_id'],
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
@@ -18,6 +18,7 @@ type Payload = FromSchema<typeof SchemaData>;
 class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
     actionName = ActionName.GetGroupMemberList;
     PayloadSchema = SchemaData;
+
     protected async _handle(payload: Payload) {
         const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
         const NTQQWebApi = this.CoreContext.getApiContext().WebApi;
@@ -31,7 +32,9 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
         const groupMembers = await NTQQGroupApi.getGroupMembers(payload.group_id.toString());
         const groupMembersArr = Array.from(groupMembers.values());
         const groupMembersUids = groupMembersArr.map(e => e.uid);
-        let _groupMembers = groupMembersArr.map(item => { return OB11Constructor.groupMember(group.groupCode, item); });
+        let _groupMembers = groupMembersArr.map(item => {
+            return OB11Constructor.groupMember(group.groupCode, item);
+        });
 
         const MemberMap: Map<number, OB11GroupMember> = new Map<number, OB11GroupMember>();
         // 转为Map 方便索引

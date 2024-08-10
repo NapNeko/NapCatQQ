@@ -1,5 +1,3 @@
-
-
 export interface IKernelRobotListener {
     onRobotFriendListChanged(...args: unknown[]): void;
 
@@ -14,15 +12,15 @@ export interface NodeIKernelRobotListener extends IKernelRobotListener {
 }
 
 export class KernelRobotListener implements IKernelRobotListener {
-    onRobotFriendListChanged(...args: unknown[]){
+    onRobotFriendListChanged(...args: unknown[]) {
 
     }
 
-    onRobotListChanged(...args: unknown[]){
+    onRobotListChanged(...args: unknown[]) {
 
     }
 
-    onRobotProfileChanged(...args: unknown[]){
-        
+    onRobotProfileChanged(...args: unknown[]) {
+
     }
 }

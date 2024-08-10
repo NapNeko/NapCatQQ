@@ -1,5 +1,6 @@
 import { Peer } from '@/core';
 import crypto from 'crypto';
+
 export class LimitedHashTable<K, V> {
     private keyToValue: Map<K, V> = new Map();
     private valueToKey: Map<V, K> = new Map();
@@ -8,15 +9,16 @@ export class LimitedHashTable<K, V> {
     constructor(maxSize: number) {
         this.maxSize = maxSize;
     }
+
     resize(count: number) {
         this.maxSize = count;
     }
 
     set(key: K, value: V): void {
-    // const isExist = this.keyToValue.get(key);
-    // if (isExist && isExist === value) {
-    //   return;
-    // }
+        // const isExist = this.keyToValue.get(key);
+        // if (isExist && isExist === value) {
+        //   return;
+        // }
         this.keyToValue.set(key, value);
         this.valueToKey.set(value, key);
         while (this.keyToValue.size !== this.valueToKey.size) {
@@ -63,6 +65,7 @@ export class LimitedHashTable<K, V> {
     getKeyList(): K[] {
         return Array.from(this.keyToValue.keys());
     }
+
     //获取最近刚写入的几个值
     getHeads(size: number): { key: K; value: V }[] | undefined {
         const keyList = this.getKeyList();
@@ -82,10 +85,12 @@ export class LimitedHashTable<K, V> {
 class MessageUniqueWrapper {
     private msgDataMap: LimitedHashTable<string, number>;
     private msgIdMap: LimitedHashTable<string, number>;
+
     constructor(maxMap: number = 1000) {
         this.msgIdMap = new LimitedHashTable<string, number>(maxMap);
         this.msgDataMap = new LimitedHashTable<string, number>(maxMap);
     }
+
     getRecentMsgIds(Peer: Peer, size: number): string[] {
         const heads = this.msgIdMap.getHeads(size);
         if (!heads) {
@@ -95,6 +100,7 @@ class MessageUniqueWrapper {
         const ret = data.filter((t) => t?.Peer.chatType === Peer.chatType && t?.Peer.peerUid === Peer.peerUid);
         return ret.map((t) => t?.MsgId).filter((t) => t !== undefined);
     }
+
     createMsg(peer: Peer, msgId: string): number | undefined {
         const key = `${msgId}|${peer.chatType}|${peer.peerUid}`;
         const hash = crypto.createHash('md5').update(key).digest();
@@ -128,11 +134,13 @@ class MessageUniqueWrapper {
     getShortIdByMsgId(msgId: string): number | undefined {
         return this.msgIdMap.getValue(msgId);
     }
+
     getPeerByMsgId(msgId: string) {
         const shortId = this.msgIdMap.getValue(msgId);
         if (!shortId) return undefined;
         return this.getMsgIdAndPeerByShortId(shortId);
     }
+
     resize(maxSize: number): void {
         this.msgIdMap.resize(maxSize);
         this.msgDataMap.resize(maxSize);

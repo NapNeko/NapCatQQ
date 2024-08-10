@@ -1,10 +1,8 @@
-import { LogWrapper } from "@/common/utils/log";
-import { QQBasicInfoWrapper } from "@/common/utils/QQBasicInfo";
-import { NapCatCoreWorkingEnv } from "@/core";
-import { NodeIKernelLoginService } from '@/core';
-import { WrapperNodeApi, NodeIQQNTWrapperSession } from "@/core";
-import { NTQQFileApi, NTQQFriendApi, NTQQGroupApi, NTQQMsgApi, NTQQSystemApi, NTQQUserApi, NTQQWebApi } from "../apis";
-import { NTQQCollectionApi } from "../apis/collection";
+import { LogWrapper } from '@/common/utils/log';
+import { QQBasicInfoWrapper } from '@/common/utils/QQBasicInfo';
+import { NapCatCoreWorkingEnv, NodeIKernelLoginService, NodeIQQNTWrapperSession, WrapperNodeApi } from '@/core';
+import { NTQQFileApi, NTQQFriendApi, NTQQGroupApi, NTQQMsgApi, NTQQSystemApi, NTQQUserApi, NTQQWebApi } from '../apis';
+import { NTQQCollectionApi } from '../apis/collection';
 import { NapCatPathWrapper } from '@/common/framework/napcat';
 
 export interface InstanceContext {

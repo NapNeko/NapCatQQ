@@ -2,7 +2,7 @@ import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 
 interface ReturnType {
-  yes: boolean
+    yes: boolean;
 }
 
 export default class CanSendRecord extends BaseAction<any, ReturnType> {
@@ -10,7 +10,7 @@ export default class CanSendRecord extends BaseAction<any, ReturnType> {
 
     protected async _handle(_payload: void): Promise<ReturnType> {
         return {
-            yes: true
+            yes: true,
         };
     }
 }

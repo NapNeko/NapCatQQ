@@ -6,7 +6,7 @@ export class OB11GroupBanEvent extends OB11GroupNoticeEvent {
     duration: number;
     sub_type: 'ban' | 'lift_ban';
 
-    constructor(groupId: number, userId: number, operatorId: number, duration: number, sub_type:  'ban' | 'lift_ban') {
+    constructor(groupId: number, userId: number, operatorId: number, duration: number, sub_type: 'ban' | 'lift_ban') {
         super();
         this.group_id = groupId;
         this.operator_id = operatorId;

@@ -1,16 +1,15 @@
-import { NTApiContext, WrapperNodeApi } from "@/core/wrapper";
-import path from "node:path";
-import fs from "node:fs";
-import { InstanceContext } from "./wrapper";
-import { NTEventChannel } from "@/common/framework/event";
-import { proxiedListenerOf } from "@/common/utils/proxy-handler";
-import { MsgListener, ProfileListener } from "./listeners";
-import { sleep } from "@/common/utils/helper";
-import { SelfInfo, LineDevice, SelfStatusInfo } from "./entities";
-import { LegacyNTEventWrapper } from "@/common/framework/event-legacy";
-import { NTQQFileApi, NTQQFriendApi, NTQQGroupApi, NTQQMsgApi, NTQQSystemApi, NTQQUserApi, NTQQWebApi } from "./apis";
-import os from "node:os";
-import { NTQQCollectionApi } from "./apis/collection";
+import { NTApiContext, WrapperNodeApi } from '@/core/wrapper';
+import path from 'node:path';
+import fs from 'node:fs';
+import { InstanceContext } from './wrapper';
+import { proxiedListenerOf } from '@/common/utils/proxy-handler';
+import { MsgListener, ProfileListener } from './listeners';
+import { SelfInfo, SelfStatusInfo } from './entities';
+import { LegacyNTEventWrapper } from '@/common/framework/event-legacy';
+import { NTQQFileApi, NTQQFriendApi, NTQQGroupApi, NTQQMsgApi, NTQQSystemApi, NTQQUserApi, NTQQWebApi } from './apis';
+import os from 'node:os';
+import { NTQQCollectionApi } from './apis/collection';
+
 export enum NapCatCoreWorkingEnv {
     Unknown = 0,
     Shell = 1,
@@ -36,6 +35,7 @@ export class NapCatCore {
     NapCatTempPath: string;
     // runtime info, not readonly
     selfInfo: SelfInfo;
+
     // 通过构造器递过去的 runtime info 应该尽量少
     constructor(context: InstanceContext, selfInfo: SelfInfo) {
         this.selfInfo = selfInfo;
@@ -50,7 +50,7 @@ export class NapCatCore {
             FriendApi: new NTQQFriendApi(this.context, this),
             MsgApi: new NTQQMsgApi(this.context, this),
             UserApi: new NTQQUserApi(this.context, this),
-            GroupApi: new NTQQGroupApi(this.context, this)
+            GroupApi: new NTQQGroupApi(this.context, this),
         };
         this.NapCatDataPath = path.join(this.dataPath, 'NapCat');
         fs.mkdirSync(this.NapCatDataPath, { recursive: true });
@@ -60,9 +60,11 @@ export class NapCatCore {
             fs.mkdirSync(this.NapCatTempPath, { recursive: true });
         }
     }
+
     getApiContext() {
         return this.ApiContext;
     }
+
     get dataPath(): string {
         let result = this.context.wrapper.util.getNTUserDataInfoConfig();
         if (!result) {
@@ -76,11 +78,11 @@ export class NapCatCore {
     async initNapCatCoreListeners() {
         const msgListener = new MsgListener();
         msgListener.onRecvMsg = (msg) => {
-            console.log("RecvMsg", msg);
+            console.log('RecvMsg', msg);
         };
         //await sleep(2500);
         this.context.session.getMsgService().addKernelMsgListener(
-            new this.context.wrapper.NodeIKernelMsgListener(proxiedListenerOf(msgListener, this.context.logger))
+            new this.context.wrapper.NodeIKernelMsgListener(proxiedListenerOf(msgListener, this.context.logger)),
         );
 
         const profileListener = new ProfileListener();
@@ -95,7 +97,7 @@ export class NapCatCore {
             // }
         };
         this.context.session.getProfileService().addKernelProfileListener(
-            new this.context.wrapper.NodeIKernelProfileListener(proxiedListenerOf(profileListener, this.context.logger))
+            new this.context.wrapper.NodeIKernelProfileListener(proxiedListenerOf(profileListener, this.context.logger)),
         );
     }
 }

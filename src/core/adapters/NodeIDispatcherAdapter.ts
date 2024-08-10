@@ -1,14 +1,14 @@
 interface IDispatcherAdapter {
-  dispatchRequest(arg: unknown): void;
+    dispatchRequest(arg: unknown): void;
 
-  dispatchCall(arg: unknown): void;
+    dispatchCall(arg: unknown): void;
 
-  dispatchCallWithJson(arg: unknown): void;
+    dispatchCallWithJson(arg: unknown): void;
 }
 
 export interface NodeIDispatcherAdapter extends IDispatcherAdapter {
-  // eslint-disable-next-line @typescript-eslint/no-misused-new
-  new(adapter: IDispatcherAdapter): NodeIDispatcherAdapter;
+    // eslint-disable-next-line @typescript-eslint/no-misused-new
+    new(adapter: IDispatcherAdapter): NodeIDispatcherAdapter;
 }
 
 export class DispatcherAdapter implements IDispatcherAdapter {

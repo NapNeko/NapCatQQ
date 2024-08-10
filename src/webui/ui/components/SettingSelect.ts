@@ -1,7 +1,7 @@
 import { SettingOption } from './SettingOption';
 
 interface MouseEventExtend extends MouseEvent {
-  target: HTMLElement
+    target: HTMLElement;
 }
 
 // <ob-setting-select>

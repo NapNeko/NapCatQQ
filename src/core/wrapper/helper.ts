@@ -1,7 +1,7 @@
-import path from "node:path";
-import fs from "node:fs";
-import { PlatformType, VendorType, WrapperSessionInitConfig } from "./wrapper";
-import { getMachineId, hostname, systemName, systemVersion } from "@/common/utils/system";
+import path from 'node:path';
+import fs from 'node:fs';
+import { PlatformType, VendorType, WrapperSessionInitConfig } from './wrapper';
+import { getMachineId, hostname, systemName, systemVersion } from '@/common/utils/system';
 
 export async function genSessionConfig(QQVersionAppid: string, QQVersion: string, selfUin: string, selfUid: string, account_path: string): Promise<WrapperSessionInitConfig> {
     const downloadPath = path.join(account_path, 'NapCat', 'temp');
@@ -11,7 +11,7 @@ export async function genSessionConfig(QQVersionAppid: string, QQVersion: string
         selfUin,
         selfUid,
         desktopPathConfig: {
-            account_path // 可以通过NodeQQNTWrapperUtil().getNTUserDataInfoConfig()获取
+            account_path, // 可以通过NodeQQNTWrapperUtil().getNTUserDataInfoConfig()获取
         },
         clientVer: QQVersion,  // 9.9.8-22355
         a2: '',
@@ -34,7 +34,7 @@ export async function genSessionConfig(QQVersionAppid: string, QQVersion: string
             osVersion: '',
             bundleId: '',
             serverUrl: '',
-            fixedAfterHitKeys: ['']
+            fixedAfterHitKeys: [''],
         },
         defaultFileDownloadPath: downloadPath,
         deviceInfo: {
@@ -47,9 +47,9 @@ export async function genSessionConfig(QQVersionAppid: string, QQVersion: string
             osVer: systemVersion,
             vendorOsName: systemName,
             setMute: false,
-            vendorType: VendorType.KNOSETONIOS
+            vendorType: VendorType.KNOSETONIOS,
         },
-        deviceConfig: '{"appearance":{"isSplitViewMode":true},"msg":{}}'
+        deviceConfig: '{"appearance":{"isSplitViewMode":true},"msg":{}}',
     };
     return config;
 }

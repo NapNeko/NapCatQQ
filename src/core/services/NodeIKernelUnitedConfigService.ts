@@ -1,6 +1,6 @@
-export interface NodeIKernelUnitedConfigService{
+export interface NodeIKernelUnitedConfigService {
     addKernelUnitedConfigListener(...args: any[]): unknown;// needs 1 arguments
-    
+
     removeKernelUnitedConfigListener(...args: any[]): unknown;// needs 1 arguments
 
     fetchUnitedCommendConfig(...args: any[]): unknown;// needs 1 arguments

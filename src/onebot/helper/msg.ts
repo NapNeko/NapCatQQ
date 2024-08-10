@@ -1,38 +1,43 @@
 import {
     AtType,
-    ElementType, FaceIndex, FaceType, NapCatCore, PicElement,
+    ElementType,
+    FaceIndex,
+    FaceType,
+    NapCatCore,
     PicType,
     SendArkElement,
     SendFaceElement,
-    SendFileElement, SendMarkdownElement, SendMarketFaceElement,
+    SendFileElement,
+    SendMarkdownElement,
+    SendMarketFaceElement,
     SendPicElement,
     SendPttElement,
     SendReplyElement,
     sendShareLocationElement,
     SendTextElement,
     SendVideoElement,
-    viedo_type
+    viedo_type,
 } from '@/core';
 import { promises as fs } from 'node:fs';
 import ffmpeg from 'fluent-ffmpeg';
-import { NTQQFileApi } from '@/core/apis/file';
 import { calculateFileMD5, isGIF } from '@/common/utils/file';
 import { defaultVideoThumb, getVideoInfo } from '@/common/utils/video';
 import { encodeSilk } from '@/common/utils/audio';
-import { isNull } from '@/common/utils/helper';
 import faceConfig from '@/core/external/face_config.json';
 import * as pathLib from 'node:path';
+
 export class SendMsgElementConstructor {
     static location(CoreContext: NapCatCore): sendShareLocationElement {
         return {
             elementType: ElementType.SHARELOCATION,
             elementId: '',
             shareLocationElement: {
-                text: "测试",
-                ext: ""
-            }
+                text: '测试',
+                ext: '',
+            },
         };
     }
+
     static text(CoreContext: NapCatCore, content: string): SendTextElement {
         return {
             elementType: ElementType.TEXT,
@@ -70,7 +75,7 @@ export class SendMsgElementConstructor {
                 replayMsgId: msgId,  // raw.msgId
                 senderUin: senderUin,
                 senderUinStr: senderUinStr,
-            }
+            },
         };
     }
 
@@ -99,7 +104,7 @@ export class SendMsgElementConstructor {
             fileUuid: '',
             fileSubId: '',
             thumbFileSize: 0,
-            summary
+            summary,
         };
         //logDebug('图片信息', picElement);
         return {
@@ -128,7 +133,7 @@ export class SendMsgElementConstructor {
                 folderId: folderId,
                 'filePath': path!,
                 'fileSize': (fileSize).toString(),
-            }
+            },
         };
 
         return element;
@@ -153,7 +158,7 @@ export class SendMsgElementConstructor {
             time: 15,
             format: 'mp4',
             size: fileSize,
-            filePath
+            filePath,
         };
         try {
             videoInfo = await getVideoInfo(path, logger);
@@ -183,7 +188,7 @@ export class SendMsgElementConstructor {
                     timestamps: [0],
                     filename: thumbFileName,
                     folder: thumb,
-                    size: videoInfo.width + 'x' + videoInfo.height
+                    size: videoInfo.width + 'x' + videoInfo.height,
                 }).on('end', () => {
                     resolve(thumbPath);
                 });
@@ -219,7 +224,7 @@ export class SendMsgElementConstructor {
                 // fileFormat: 2,
                 // import_rich_media_context: null,
                 // sourceVideoCodecFormat: 2
-            }
+            },
         };
         return element;
     }
@@ -231,7 +236,11 @@ export class SendMsgElementConstructor {
         const NTQQMsgApi = coreContext.getApiContext().MsgApi;
         const NTQQFriendApi = coreContext.getApiContext().FriendApi;
         const logger = coreContext.context.logger;
-        const { converted, path: silkPath, duration } = await encodeSilk(pttPath, coreContext.NapCatTempPath, coreContext.context.logger);
+        const {
+            converted,
+            path: silkPath,
+            duration,
+        } = await encodeSilk(pttPath, coreContext.NapCatTempPath, coreContext.context.logger);
         // log("生成语音", silkPath, duration);
         if (!silkPath) {
             throw '语音转换失败, 请检查语音文件是否正常';
@@ -263,9 +272,10 @@ export class SendMsgElementConstructor {
                 fileSubId: '',
                 playState: 1,
                 autoConvertText: 0,
-            }
+            },
         };
     }
+
     // NodeIQQNTWrapperSession sendMsg  [
     //   "0",
     //   {
@@ -289,7 +299,7 @@ export class SendMsgElementConstructor {
     //   {}
     // ]
     static face(CoreContext: NapCatCore, faceId: number): SendFaceElement {
-    // 从face_config.json中获取表情名称
+        // 从face_config.json中获取表情名称
         const sysFaces = faceConfig.sysface;
         const emojiFaces = faceConfig.emoji;
         const face: any = sysFaces.find((face) => face.QSid === faceId.toString());
@@ -330,7 +340,7 @@ export class SendMsgElementConstructor {
     }
 
     static dice(CoreContext: NapCatCore, resultId: number | null): SendFaceElement {
-    // 实际测试并不能控制结果
+        // 实际测试并不能控制结果
 
         // 随机1到6
         // if (isNull(resultId)) resultId = Math.floor(Math.random() * 6) + 1;
@@ -348,14 +358,14 @@ export class SendMsgElementConstructor {
                 // resultId: resultId.toString(),
                 'surpriseId': '',
                 // "randomType": 1,
-            }
+            },
         };
     }
 
     // 猜拳(石头剪刀布)表情
     static rps(CoreContext: NapCatCore, resultId: number | null): SendFaceElement {
-    // 实际测试并不能控制结果
-    // if (isNull(resultId)) resultId = Math.floor(Math.random() * 3) + 1;
+        // 实际测试并不能控制结果
+        // if (isNull(resultId)) resultId = Math.floor(Math.random() * 3) + 1;
         return {
             elementType: ElementType.FACE,
             elementId: '',
@@ -370,7 +380,7 @@ export class SendMsgElementConstructor {
                 // 'resultId': resultId.toString(),
                 'surpriseId': '',
                 // "randomType": 1,
-            }
+            },
         };
     }
 
@@ -384,8 +394,8 @@ export class SendMsgElementConstructor {
             arkElement: {
                 bytesData: data,
                 linkInfo: null,
-                subElementType: null
-            }
+                subElementType: null,
+            },
         };
     }
 
@@ -394,8 +404,8 @@ export class SendMsgElementConstructor {
             elementType: ElementType.MARKDOWN,
             elementId: '',
             markdownElement: {
-                content
-            }
+                content,
+            },
         };
     }
 }

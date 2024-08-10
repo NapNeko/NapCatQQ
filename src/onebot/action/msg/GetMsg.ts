@@ -13,7 +13,7 @@ const SchemaData = {
     properties: {
         message_id: { type: ['number', 'string'] },
     },
-    required: ['message_id']
+    required: ['message_id'],
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
@@ -21,6 +21,7 @@ type Payload = FromSchema<typeof SchemaData>;
 class GetMsg extends BaseAction<Payload, OB11Message> {
     actionName = ActionName.GetMsg;
     PayloadSchema = SchemaData;
+
     protected async _handle(payload: Payload) {
         const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
         // log("history msg ids", Object.keys(msgHistory));
@@ -36,7 +37,7 @@ class GetMsg extends BaseAction<Payload, OB11Message> {
         const msg = await NTQQMsgApi.getMsgsByMsgId(
             peer,
             [msgIdWithPeer?.MsgId || payload.message_id.toString()]);
-        const retMsg = await OB11Constructor.message(this.CoreContext, msg.msgList[0], "array");
+        const retMsg = await OB11Constructor.message(this.CoreContext, msg.msgList[0], 'array');
         try {
             retMsg.message_id = MessageUnique.createMsg(peer, msg.msgList[0].msgId)!;
             retMsg.message_seq = retMsg.message_id;

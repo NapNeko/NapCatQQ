@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { LoginHandler, LogoutHandler, checkHandler } from '../api/Auth';
+import { checkHandler, LoginHandler, LogoutHandler } from '../api/Auth';
 
 const router = Router();
 

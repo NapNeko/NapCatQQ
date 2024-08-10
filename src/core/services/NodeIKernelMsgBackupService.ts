@@ -22,6 +22,6 @@ export interface NodeIKernelMsgBackupService {
     start(...args: any[]): unknown;// needs 1 arguments
 
     stop(...args: any[]): unknown;// needs 1 arguments
-    
+
     pause(...args: any[]): unknown;// needs 2 arguments
 }

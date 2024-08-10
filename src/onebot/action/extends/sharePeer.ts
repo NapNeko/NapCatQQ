@@ -17,6 +17,7 @@ type Payload = FromSchema<typeof SchemaData>;
 export class sharePeer extends BaseAction<Payload, any> {
     actionName = ActionName.SharePeer;
     PayloadSchema = SchemaData;
+
     protected async _handle(payload: Payload) {
         const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
         const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
@@ -27,18 +28,21 @@ export class sharePeer extends BaseAction<Payload, any> {
         }
     }
 }
+
 const SchemaDataGroupEx = {
     type: 'object',
     properties: {
         group_id: { type: 'string' },
     },
-    required: ['group_id']
+    required: ['group_id'],
 } as const satisfies JSONSchema;
 
 type PayloadGroupEx = FromSchema<typeof SchemaDataGroupEx>;
+
 export class shareGroupEx extends BaseAction<PayloadGroupEx, any> {
     actionName = ActionName.ShareGroupEx;
     PayloadSchema = SchemaDataGroupEx;
+
     protected async _handle(payload: PayloadGroupEx) {
         const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
         return await NTQQGroupApi.getArkJsonGroupShare(payload.group_id);

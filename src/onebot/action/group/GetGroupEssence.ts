@@ -6,10 +6,10 @@ import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 const SchemaData = {
     type: 'object',
     properties: {
-        group_id: { type: [ 'number' , 'string' ] },
+        group_id: { type: ['number', 'string'] },
         pages: { type: 'number' },
     },
-    required: ['group_id', 'pages']
+    required: ['group_id', 'pages'],
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
@@ -17,6 +17,7 @@ type Payload = FromSchema<typeof SchemaData>;
 export class GetGroupEssence extends BaseAction<Payload, GroupEssenceMsgRet> {
     actionName = ActionName.GoCQHTTP_GetEssenceMsg;
     PayloadSchema = SchemaData;
+
     protected async _handle(payload: Payload) {
         const NTQQWebApi = this.CoreContext.getApiContext().WebApi;
         const ret = await NTQQWebApi.getGroupEssenceMsg(payload.group_id.toString(), payload.pages.toString());

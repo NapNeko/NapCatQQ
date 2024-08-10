@@ -1,4 +1,3 @@
-
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
@@ -8,7 +7,7 @@ const SchemaData = {
     properties: {
         nick: { type: 'string' },
         longNick: { type: 'string' },
-        sex: { type: 'number' }//传Sex值？建议传0 
+        sex: { type: 'number' },//传Sex值？建议传0
     },
     required: ['nick', 'longNick', 'sex'],
 } as const satisfies JSONSchema;
@@ -18,6 +17,7 @@ type Payload = FromSchema<typeof SchemaData>;
 export class SetSelfProfile extends BaseAction<Payload, any | null> {
     actionName = ActionName.SetSelfProfile;
     PayloadSchema = SchemaData;
+
     protected async _handle(payload: Payload) {
         const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
         const ret = await NTQQUserApi.modifySelfProfile({
@@ -25,7 +25,7 @@ export class SetSelfProfile extends BaseAction<Payload, any | null> {
             longNick: payload.longNick,
             sex: payload.sex,
             birthday: { birthday_year: '', birthday_month: '', birthday_day: '' },
-            location: undefined
+            location: undefined,
         });
         return ret;
     }

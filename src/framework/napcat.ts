@@ -1,24 +1,23 @@
-import { NapCatPathWrapper } from "@/common/framework/napcat";
-import { LogWrapper } from "@/common/utils/log";
-import { proxiedListenerOf } from "@/common/utils/proxy-handler";
-import { QQBasicInfoWrapper } from "@/common/utils/QQBasicInfo";
-import { NapCatCore, NapCatCoreWorkingEnv, loadQQWrapper } from "@/core/core";
-import { InstanceContext } from "@/core";
-import { SelfInfo } from "@/core/entities";
-import { LoginListener } from "@/core/listeners";
-import { NodeIKernelLoginService } from "@/core/services";
-import { WrapperNodeApi, NodeIQQNTWrapperSession } from "@/core/wrapper/wrapper";
-import { NapCatOneBot11Adapter } from "@/onebot/main";
-import { sleep } from "@/common/utils/helper";
+import { NapCatPathWrapper } from '@/common/framework/napcat';
+import { LogWrapper } from '@/common/utils/log';
+import { proxiedListenerOf } from '@/common/utils/proxy-handler';
+import { QQBasicInfoWrapper } from '@/common/utils/QQBasicInfo';
+import { loadQQWrapper, NapCatCore, NapCatCoreWorkingEnv } from '@/core/core';
+import { InstanceContext } from '@/core';
+import { SelfInfo } from '@/core/entities';
+import { LoginListener } from '@/core/listeners';
+import { NodeIKernelLoginService } from '@/core/services';
+import { NodeIQQNTWrapperSession, WrapperNodeApi } from '@/core/wrapper/wrapper';
+import { NapCatOneBot11Adapter } from '@/onebot/main';
 
 //Framework ES入口文件
 export async function NCoreInitFramework(
     session: NodeIQQNTWrapperSession,
     loginService: NodeIKernelLoginService,
-    registerInitCallback: (callback: () => void) => void
+    registerInitCallback: (callback: () => void) => void,
 ) {
     //在进入本层前是否登录未进行判断
-    console.log("NapCat Framework App Loading...");
+    console.log('NapCat Framework App Loading...');
     const pathWrapper = new NapCatPathWrapper();
     const logger = new LogWrapper(pathWrapper.logsPath);
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
@@ -62,7 +61,7 @@ export class NapCatFramework {
         loginService: NodeIKernelLoginService,
         selfInfo: SelfInfo,
         basicInfoWrapper: QQBasicInfoWrapper,
-        pathWrapper: NapCatPathWrapper
+        pathWrapper: NapCatPathWrapper,
     ) {
         this.context = {
             workingEnv: NapCatCoreWorkingEnv.Framework,
@@ -71,7 +70,7 @@ export class NapCatFramework {
             logger,
             loginService,
             basicInfoWrapper,
-            pathWrapper
+            pathWrapper,
         };
         this.core = new NapCatCore(this.context, selfInfo);
     }

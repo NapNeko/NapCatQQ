@@ -2,7 +2,7 @@ import { ActionName } from '../types';
 import CanSendRecord from './CanSendRecord';
 
 interface ReturnType {
-  yes: boolean
+    yes: boolean;
 }
 
 export default class CanSendImage extends CanSendRecord {

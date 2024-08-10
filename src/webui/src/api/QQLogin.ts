@@ -1,12 +1,12 @@
 import { RequestHandler } from 'express';
 import { WebUiDataRuntime } from '../helper/Data';
-import { sleep } from '@/common/utils/helper';
+
 const isEmpty = (data: any) => data === undefined || data === null || data === '';
 export const QQGetQRcodeHandler: RequestHandler = async (req, res) => {
     if (await WebUiDataRuntime.getQQLoginStatus()) {
         res.send({
             code: -1,
-            message: 'QQ Is Logined'
+            message: 'QQ Is Logined',
         });
         return;
     }
@@ -14,7 +14,7 @@ export const QQGetQRcodeHandler: RequestHandler = async (req, res) => {
     if (isEmpty(qrcodeUrl)) {
         res.send({
             code: -1,
-            message: 'QRCode Get Error'
+            message: 'QRCode Get Error',
         });
         return;
     }
@@ -22,8 +22,8 @@ export const QQGetQRcodeHandler: RequestHandler = async (req, res) => {
         code: 0,
         message: 'success',
         data: {
-            qrcode: qrcodeUrl
-        }
+            qrcode: qrcodeUrl,
+        },
     });
     return;
 };
@@ -32,8 +32,8 @@ export const QQCheckLoginStatusHandler: RequestHandler = async (req, res) => {
         code: 0,
         message: 'success',
         data: {
-            isLogin: await WebUiDataRuntime.getQQLoginStatus()
-        }
+            isLogin: await WebUiDataRuntime.getQQLoginStatus(),
+        },
     });
 };
 export const QQSetQuickLoginHandler: RequestHandler = async (req, res) => {
@@ -42,14 +42,14 @@ export const QQSetQuickLoginHandler: RequestHandler = async (req, res) => {
     if (isLogin) {
         res.send({
             code: -1,
-            message: 'QQ Is Logined'
+            message: 'QQ Is Logined',
         });
         return;
     }
     if (isEmpty(uin)) {
         res.send({
             code: -1,
-            message: 'uin is empty'
+            message: 'uin is empty',
         });
         return;
     }
@@ -57,7 +57,7 @@ export const QQSetQuickLoginHandler: RequestHandler = async (req, res) => {
     if (!result) {
         res.send({
             code: -1,
-            message: message
+            message: message,
         });
         return;
     }
@@ -65,13 +65,13 @@ export const QQSetQuickLoginHandler: RequestHandler = async (req, res) => {
     //isLogin = await WebUiDataRuntime.getQQLoginStatus();
     res.send({
         code: 0,
-        message: 'success'
+        message: 'success',
     });
 };
 export const QQGetQuickLoginListHandler: RequestHandler = async (req, res) => {
     const quickLoginList = await WebUiDataRuntime.getQQQuickLoginList();
     res.send({
         code: 0,
-        data: quickLoginList
+        data: quickLoginList,
     });
 };

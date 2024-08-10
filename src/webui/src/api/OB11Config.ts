@@ -1,9 +1,8 @@
 import { RequestHandler } from 'express';
 import { WebUiDataRuntime } from '../helper/Data';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
 import { OB11Config } from '@/webui/ui/components/WebUiApiOB11Config';
-import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 
@@ -29,7 +28,7 @@ export const OB11GetConfigHandler: RequestHandler = async (req, res) => {
         data = JSON.parse(
             existsSync(configFilePath)
                 ? readFileSync(configFilePath).toString()
-                : readFileSync(resolve(__dirname, './config/onebot11.json')).toString()
+                : readFileSync(resolve(__dirname, './config/onebot11.json')).toString(),
         );
     } catch (e) {
         data = {} as OB11Config;

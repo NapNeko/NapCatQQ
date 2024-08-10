@@ -11,10 +11,12 @@ class BaseAction<PayloadType, ReturnDataType> {
     private validate: undefined | ValidateFunction<any> = undefined;
     PayloadSchema: any = undefined;
     OneBotContext: NapCatOneBot11Adapter;
-    constructor(onebotContext:NapCatOneBot11Adapter,coreContext: NapCatCore) {
+
+    constructor(onebotContext: NapCatOneBot11Adapter, coreContext: NapCatCore) {
         this.OneBotContext = onebotContext;
         this.CoreContext = coreContext;
     }
+
     protected async check(payload: PayloadType): Promise<BaseCheckResult> {
         if (this.PayloadSchema) {
             this.validate = new Ajv({ allowUnionTypes: true }).compile(this.PayloadSchema);
@@ -26,11 +28,11 @@ class BaseAction<PayloadType, ReturnDataType> {
             });
             return {
                 valid: false,
-                message: errorMessages.join('\n') as string || '未知错误'
+                message: errorMessages.join('\n') as string || '未知错误',
             };
         }
         return {
-            valid: true
+            valid: true,
         };
     }
 

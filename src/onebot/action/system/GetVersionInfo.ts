@@ -9,7 +9,7 @@ export default class GetVersionInfo extends BaseAction<any, any> {
         return {
             app_name: 'NapCat.Onebot',
             protocol_version: 'v11',
-            app_version: napcat_version
+            app_version: napcat_version,
         };
     }
 }

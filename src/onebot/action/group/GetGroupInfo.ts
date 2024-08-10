@@ -9,7 +9,7 @@ const SchemaData = {
     properties: {
         group_id: { type: ['number', 'string'] },
     },
-    required: ['group_id']
+    required: ['group_id'],
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
@@ -17,6 +17,7 @@ type Payload = FromSchema<typeof SchemaData>;
 class GetGroupInfo extends BaseAction<Payload, OB11Group> {
     actionName = ActionName.GetGroupInfo;
     PayloadSchema = SchemaData;
+
     protected async _handle(payload: Payload) {
         const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
         const group = (await NTQQGroupApi.getGroups()).find(e => e.groupCode == payload.group_id.toString());

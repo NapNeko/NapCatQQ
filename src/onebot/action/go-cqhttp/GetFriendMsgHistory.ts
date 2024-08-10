@@ -1,14 +1,13 @@
 import BaseAction from '../BaseAction';
-import { OB11Message, OB11User } from '../../types';
+import { OB11Message } from '../../types';
 import { ActionName } from '../types';
 import { ChatType, RawMessage } from '@/core/entities';
-import { NTQQMsgApi } from '@/core/apis/msg';
 import { OB11Constructor } from '../../helper/data';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/utils/MessageUnique';
 
 interface Response {
-  messages: OB11Message[];
+    messages: OB11Message[];
 }
 
 const SchemaData = {
@@ -17,9 +16,9 @@ const SchemaData = {
         user_id: { type: ['number', 'string'] },
         message_seq: { type: 'number' },
         count: { type: 'number' },
-        reverseOrder: { type: 'boolean' }
+        reverseOrder: { type: 'boolean' },
     },
-    required: ['user_id']
+    required: ['user_id'],
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
@@ -27,6 +26,7 @@ type Payload = FromSchema<typeof SchemaData>;
 export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
     actionName = ActionName.GetFriendMsgHistory;
     PayloadSchema = SchemaData;
+
     protected async _handle(payload: Payload): Promise<Response> {
         const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
         const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
@@ -53,7 +53,7 @@ export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
             msg.id = MessageUnique.createMsg({ guildId: '', chatType: msg.chatType, peerUid: msg.peerUid }, msg.msgId);
         }));
         //转换消息
-        const ob11MsgList = await Promise.all(msgList.map(msg => OB11Constructor.message(this.CoreContext, msg, "array")));
+        const ob11MsgList = await Promise.all(msgList.map(msg => OB11Constructor.message(this.CoreContext, msg, 'array')));
         return { 'messages': ob11MsgList };
     }
 }

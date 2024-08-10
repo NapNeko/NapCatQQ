@@ -1,6 +1,7 @@
 import SendMsg, { normalize } from '../msg/SendMsg';
 import { OB11PostSendMsg } from '../../types';
 import { ActionName } from '../types';
+
 // 未验证
 export class GoCQHTTPSendForwardMsg extends SendMsg {
     actionName = ActionName.GoCQHTTP_SendForwardMsg;

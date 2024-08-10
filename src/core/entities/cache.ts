@@ -12,12 +12,12 @@ export interface CacheScanResult {
         string, // 「缓存数据」大小
         string, // 「其他数据」大小
         string, // 未知
-    ]
+    ];
 }
 
 export interface ChatCacheList {
     pageCount: number;
-    infos: ChatCacheListItem[]
+    infos: ChatCacheListItem[];
 }
 
 export interface ChatCacheListItem {

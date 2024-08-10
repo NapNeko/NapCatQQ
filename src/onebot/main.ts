@@ -1,8 +1,8 @@
-import { NapCatCore, InstanceContext } from "@/core";
-import { OB11Config } from "./helper/config";
-import { NapCatPathWrapper } from "@/common/framework/napcat";
-import { OneBotApiContextType } from "./types/adapter";
-import { OneBotFriendApi, OneBotGroupApi, OneBotUserApi } from "./api";
+import { InstanceContext, NapCatCore } from '@/core';
+import { OB11Config } from './helper/config';
+import { NapCatPathWrapper } from '@/common/framework/napcat';
+import { OneBotApiContextType } from './types/adapter';
+import { OneBotFriendApi, OneBotGroupApi, OneBotUserApi } from './api';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -10,6 +10,7 @@ export class NapCatOneBot11Adapter {
     readonly context: InstanceContext;
     config: OB11Config;
     apiContext: OneBotApiContextType;
+
     constructor(core: NapCatCore, context: InstanceContext, pathWrapper: NapCatPathWrapper) {
         this.core = core;
         this.context = context;
@@ -17,7 +18,7 @@ export class NapCatOneBot11Adapter {
         this.apiContext = {
             GroupApi: new OneBotGroupApi(this, core),
             UserApi: new OneBotUserApi(this, core),
-            FriendApi: new OneBotFriendApi(this, core)
+            FriendApi: new OneBotFriendApi(this, core),
         };
     }
 }

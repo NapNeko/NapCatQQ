@@ -1,10 +1,9 @@
-
 import {
     OB11MessageData,
     OB11MessageDataType,
     OB11MessageMixType,
     OB11MessageNode,
-    OB11PostSendMsg
+    OB11PostSendMsg,
 } from '@/onebot/types';
 import { ActionName, BaseCheckResult } from '@/onebot/action/types';
 import fs from 'node:fs';
@@ -17,13 +16,15 @@ import BaseAction from '../../BaseAction';
 import { handleForwardNode } from './handle-forward-node';
 
 export interface ReturnDataType {
-  message_id: number;
+    message_id: number;
 }
+
 export enum ContextMode {
-  Normal = 0,
-  Private = 1,
-  Group = 2
+    Normal = 0,
+    Private = 1,
+    Group = 2
 }
+
 // Normalizes a mixed type (CQCode/a single segment/segment array) into a segment array.
 export function normalize(message: OB11MessageMixType, autoEscape = false): OB11MessageData[] {
     return typeof message === 'string' ? (
@@ -68,12 +69,18 @@ export async function sendMsg(coreContext: NapCatCore, peer: Peer, sendElements:
     }
     const returnMsg = await NTQQMsgApi.sendMsg(peer, sendElements, waitComplete, timeout);
     try {
-    returnMsg!.id = MessageUnique.createMsg({ chatType: peer.chatType, guildId: '', peerUid: peer.peerUid }, returnMsg!.msgId);
+        returnMsg!.id = MessageUnique.createMsg({
+            chatType: peer.chatType,
+            guildId: '',
+            peerUid: peer.peerUid,
+        }, returnMsg!.msgId);
     } catch (e: any) {
         logger.logDebug('发送消息id获取失败', e);
-    returnMsg!.id = 0;
+        returnMsg!.id = 0;
     }
-    deleteAfterSentFiles.map((f) => { fsPromise.unlink(f).then().catch(e => logger.logError('发送消息删除文件失败', e)); });
+    deleteAfterSentFiles.map((f) => {
+        fsPromise.unlink(f).then().catch(e => logger.logError('发送消息删除文件失败', e));
+    });
     return returnMsg;
 }
 
@@ -88,7 +95,7 @@ async function createContext(coreContext: NapCatCore, payload: OB11PostSendMsg, 
         const group = (await NTQQGroupApi.getGroups()).find(e => e.groupCode == payload.group_id?.toString());
         return {
             chatType: ChatType.group,
-            peerUid: payload.group_id.toString()
+            peerUid: payload.group_id.toString(),
         };
     }
     if ((contextMode === ContextMode.Private || contextMode === ContextMode.Normal) && payload.user_id) {
@@ -97,7 +104,7 @@ async function createContext(coreContext: NapCatCore, payload: OB11PostSendMsg, 
         //console.log("[调试代码] UIN:", payload.user_id, " UID:", Uid, " IsBuddy:", isBuddy);
         return {
             chatType: isBuddy ? ChatType.friend : ChatType.temp,
-            peerUid: Uid!
+            peerUid: Uid!,
         };
     }
     throw '请指定 group_id 或 user_id';
@@ -121,7 +128,10 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         const messages = normalize(payload.message);
         const nodeElementLength = getSpecialMsgNum(payload, OB11MessageDataType.node);
         if (nodeElementLength > 0 && nodeElementLength != messages.length) {
-            return { valid: false, message: '转发消息不能和普通消息混在一起发送,转发需要保证message只有type为node的元素' };
+            return {
+                valid: false,
+                message: '转发消息不能和普通消息混在一起发送,转发需要保证message只有type为node的元素',
+            };
         }
         // if (payload.message_type !== 'private' && payload.group_id && !(await getGroup(payload.group_id))) {
         //   return { valid: false, message: `群${payload.group_id}不存在` };
@@ -142,13 +152,17 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
 
         const messages = normalize(
             payload.message,
-            payload.auto_escape === true || payload.auto_escape === 'true'
+            payload.auto_escape === true || payload.auto_escape === 'true',
         );
 
         if (getSpecialMsgNum(payload, OB11MessageDataType.node)) {
-            const returnMsg = await handleForwardNode(this.CoreContext,peer, messages as OB11MessageNode[]);
+            const returnMsg = await handleForwardNode(this.CoreContext, peer, messages as OB11MessageNode[]);
             if (returnMsg) {
-                const msgShortId = MessageUnique.createMsg({ guildId: '', peerUid: peer.peerUid, chatType: peer.chatType }, returnMsg!.msgId);
+                const msgShortId = MessageUnique.createMsg({
+                    guildId: '',
+                    peerUid: peer.peerUid,
+                    chatType: peer.chatType,
+                }, returnMsg!.msgId);
                 return { message_id: msgShortId! };
             } else {
                 throw Error('发送转发消息失败');

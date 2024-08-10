@@ -6,16 +6,23 @@ import { AtType, CustomMusicSignPostData, IdMusicSignPostData, NapCatCore, Peer,
 import { SendMsgElementConstructor } from '@/onebot/helper/msg';
 
 export type MessageContext = {
-  deleteAfterSentFiles: string[],
-  peer: Peer
+    deleteAfterSentFiles: string[],
+    peer: Peer
 }
+
 async function handleOb11FileLikeMessage(
     coreContext: NapCatCore,
     { data: inputdata }: OB11MessageFileBase,
-    { deleteAfterSentFiles }: MessageContext
+    { deleteAfterSentFiles }: MessageContext,
 ) {
     //有的奇怪的框架将url作为参数 而不是file 此时优先url 同时注意可能传入的是非file://开头的目录 By Mlikiowa
-    const { path, isLocal, fileName, errMsg, success } = (await uri2local(coreContext.NapCatTempPath, inputdata?.url || inputdata.file));
+    const {
+        path,
+        isLocal,
+        fileName,
+        errMsg,
+        success,
+    } = (await uri2local(coreContext.NapCatTempPath, inputdata?.url || inputdata.file));
 
     if (!success) {
         coreContext.context.logger.logError('文件下载失败', errMsg);
@@ -30,13 +37,13 @@ async function handleOb11FileLikeMessage(
 }
 
 const _handlers: {
-  [Key in OB11MessageDataType]: (
-    CoreContext: NapCatCore,
-    sendMsg: Extract<OB11MessageData, { type: Key }>,
-    // This picks the correct message type out
-    // How great the type system of TypeScript is!
-    context: MessageContext
-  ) => Promise<SendMessageElement | undefined>
+    [Key in OB11MessageDataType]: (
+        CoreContext: NapCatCore,
+        sendMsg: Extract<OB11MessageData, { type: Key }>,
+        // This picks the correct message type out
+        // How great the type system of TypeScript is!
+        context: MessageContext,
+    ) => Promise<SendMessageElement | undefined>
 } = {
     [OB11MessageDataType.text]: async (coreContext, { data: { text } }) => SendMsgElementConstructor.text(coreContext, text),
 
@@ -49,7 +56,7 @@ const _handlers: {
         // Mlikiowa V2.0.0 Refactor Todo
         const uid = await coreContext.getApiContext().UserApi.getUidByUin(atQQ);
         if (!uid) throw new Error('Get Uid Error');
-        return SendMsgElementConstructor.at(coreContext, atQQ, uid, AtType.atUser, "");
+        return SendMsgElementConstructor.at(coreContext, atQQ, uid, AtType.atUser, '');
     },
     [OB11MessageDataType.reply]: async (coreContext, { data: { id } }) => {
         const replyMsgM = MessageUnique.getMsgIdAndPeerByShortId(parseInt(id));
@@ -69,8 +76,8 @@ const _handlers: {
 
     [OB11MessageDataType.mface]: async (coreContext, {
         data: {
-            emoji_package_id, emoji_id, key, summary
-        }
+            emoji_package_id, emoji_id, key, summary,
+        },
     }) => SendMsgElementConstructor.mface(coreContext, emoji_package_id, emoji_id, key, summary),
 
     // File service
@@ -79,7 +86,7 @@ const _handlers: {
             coreContext,
             (await handleOb11FileLikeMessage(coreContext, sendMsg, context)).path,
             sendMsg.data.summary || '',
-            sendMsg.data.subType || 0
+            sendMsg.data.subType || 0,
         );
         context.deleteAfterSentFiles.push(PicEle.picElement.sourcePath);
         return PicEle;
@@ -119,7 +126,7 @@ const _handlers: {
     [OB11MessageDataType.markdown]: async (coreContext, { data: { content } }) => SendMsgElementConstructor.markdown(coreContext, content),
 
     [OB11MessageDataType.music]: async (coreContext, { data }) => {
-    // 保留, 直到...找到更好的解决方案
+        // 保留, 直到...找到更好的解决方案
         if (data.type === 'custom') {
             if (!data.url) {
                 coreContext.context.logger.logError('自定义音卡缺少参数url');
@@ -152,7 +159,7 @@ const _handlers: {
             postData = data;
         }
         // Mlikiowa V2.0.0 Refactor Todo
-        const signUrl = "";
+        const signUrl = '';
         if (!signUrl) {
             if (data.type === 'qq') {
                 //const musicJson = (await SignMusicWrapper(data.id.toString())).data.arkResult.slice(0, -1);
@@ -179,24 +186,24 @@ const _handlers: {
     [OB11MessageDataType.Location]: async (coreContext) => {
         return SendMsgElementConstructor.location(coreContext);
     },
-    [OB11MessageDataType.miniapp]: function (CoreContext: NapCatCore, sendMsg: never, context: MessageContext): Promise<SendMessageElement | undefined> {
+    [OB11MessageDataType.miniapp]: function(CoreContext: NapCatCore, sendMsg: never, context: MessageContext): Promise<SendMessageElement | undefined> {
         throw new Error('Function not implemented.');
-    }
+    },
 };
 
 const handlers = <{
-  [Key in OB11MessageDataType]: (
-    coreContext: NapCatCore,
-    sendMsg: OB11MessageData,
-    context: MessageContext
-  ) => Promise<SendMessageElement | undefined>
+    [Key in OB11MessageDataType]: (
+        coreContext: NapCatCore,
+        sendMsg: OB11MessageData,
+        context: MessageContext,
+    ) => Promise<SendMessageElement | undefined>
 }>_handlers;
 
 export default async function createSendElements(
     CoreContext: NapCatCore,
     messageData: OB11MessageData[],
     peer: Peer,
-    ignoreTypes: OB11MessageDataType[] = []
+    ignoreTypes: OB11MessageDataType[] = [],
 ) {
     const deleteAfterSentFiles: string[] = [];
     const callResultList: Array<Promise<SendMessageElement | undefined>> = [];
@@ -207,7 +214,7 @@ export default async function createSendElements(
         const callResult = handlers[sendMsg.type](
             CoreContext,
             sendMsg,
-            { peer, deleteAfterSentFiles }
+            { peer, deleteAfterSentFiles },
         )?.catch(undefined);
         callResultList.push(callResult);
     }
@@ -220,19 +227,19 @@ export async function createSendElementsParallel(
     CoreContext: NapCatCore,
     messageData: OB11MessageData[],
     peer: Peer,
-    ignoreTypes: OB11MessageDataType[] = []
+    ignoreTypes: OB11MessageDataType[] = [],
 ) {
     const deleteAfterSentFiles: string[] = [];
     const sendElements = <SendMessageElement[]>(
-    await Promise.all(
-        messageData.map(async sendMsg => ignoreTypes.includes(sendMsg.type) ?
-            undefined :
-            handlers[sendMsg.type](CoreContext, sendMsg, { peer, deleteAfterSentFiles }))
-    ).then(
-        results => results.filter(
-            element => element !== undefined
+        await Promise.all(
+            messageData.map(async sendMsg => ignoreTypes.includes(sendMsg.type) ?
+                undefined :
+                handlers[sendMsg.type](CoreContext, sendMsg, { peer, deleteAfterSentFiles })),
+        ).then(
+            results => results.filter(
+                element => element !== undefined,
+            ),
         )
-    )
-  );
+    );
     return { sendElements, deleteAfterSentFiles };
 }

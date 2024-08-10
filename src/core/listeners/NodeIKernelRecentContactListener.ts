@@ -18,15 +18,15 @@ export interface NodeIKernelRecentContactListener extends IKernelRecentContactLi
 }
 
 export class KernelRecentContactListener implements IKernelRecentContactListener {
-    onDeletedContactsNotify(...args: unknown[]) { 
+    onDeletedContactsNotify(...args: unknown[]) {
 
     }
 
-    onRecentContactNotification(...args: unknown[]) { 
+    onRecentContactNotification(...args: unknown[]) {
 
     }
 
-    onMsgUnreadCountUpdate(...args: unknown[]) { 
+    onMsgUnreadCountUpdate(...args: unknown[]) {
 
     }
 
@@ -34,11 +34,11 @@ export class KernelRecentContactListener implements IKernelRecentContactListener
 
     }
 
-    onRecentContactListChanged(...args: unknown[]) { 
+    onRecentContactListChanged(...args: unknown[]) {
 
     }
 
-    onRecentContactListChangedVer2(...args: unknown[]) { 
+    onRecentContactListChangedVer2(...args: unknown[]) {
 
     }
 }

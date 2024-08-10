@@ -1,4 +1,5 @@
 import { OB11GroupNoticeEvent } from './OB11GroupNoticeEvent';
+
 export class OB11GroupEssenceEvent extends OB11GroupNoticeEvent {
     notice_type = 'essence';
     message_id: number;

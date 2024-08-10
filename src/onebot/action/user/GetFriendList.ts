@@ -9,13 +9,14 @@ const SchemaData = {
     type: 'object',
     properties: {
         no_cache: { type: ['boolean', 'string'] },
-    }
+    },
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
 export default class GetFriendList extends BaseAction<Payload, OB11User[]> {
     actionName = ActionName.GetFriendList;
     PayloadSchema = SchemaData;
+
     protected async _handle(payload: Payload) {
         //全新逻辑
         const NTQQFriendApi = this.CoreContext.getApiContext().FriendApi;

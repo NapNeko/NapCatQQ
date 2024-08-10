@@ -1,21 +1,21 @@
 export type BaseCheckResult = ValidCheckResult | InvalidCheckResult
 
 export interface ValidCheckResult {
-    valid: true
+    valid: true;
 
-    [k: string | number]: any
+    [k: string | number]: any;
 }
 
 export interface InvalidCheckResult {
-    valid: false
-    message: string
+    valid: false;
+    message: string;
 
-    [k: string | number]: any
+    [k: string | number]: any;
 }
 
 export enum ActionName {
     // 以下为扩展napcat扩展
-    Unknown = "unknown",
+    Unknown = 'unknown',
     SharePeer = 'ArkShareGroup',
     ShareGroupEx = 'ArkSharePeer',
     RebootNormal = 'reboot_normal',//无快速登录重新启动

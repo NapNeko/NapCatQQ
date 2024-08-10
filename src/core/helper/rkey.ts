@@ -2,23 +2,25 @@ import { LogWrapper } from '@/common/utils/log';
 import { RequestUtil } from '@/common/utils/request';
 
 interface ServerRkeyData {
-  group_rkey: string;
-  private_rkey: string;
-  expired_time: number;
+    group_rkey: string;
+    private_rkey: string;
+    expired_time: number;
 }
 
 export class RkeyManager {
     serverUrl: string = '';
+    logger: LogWrapper;
     private rkeyData: ServerRkeyData = {
         group_rkey: '',
         private_rkey: '',
-        expired_time: 0
+        expired_time: 0,
     };
-    logger: LogWrapper;
+
     constructor(serverUrl: string, logger: LogWrapper) {
         this.logger = logger;
         this.serverUrl = serverUrl;
     }
+
     async getRkey() {
         if (this.isExpired()) {
             try {
@@ -35,8 +37,9 @@ export class RkeyManager {
         // console.log(`now: ${now}, expired_time: ${this.rkeyData.expired_time}`);
         return now > this.rkeyData.expired_time;
     }
+
     async refreshRkey(): Promise<any> {
-    //刷新rkey
+        //刷新rkey
         this.rkeyData = await RequestUtil.HttpGetJson<ServerRkeyData>(this.serverUrl, 'GET');
     }
 }

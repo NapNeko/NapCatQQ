@@ -10,6 +10,7 @@ export interface IStorageCleanListener {
     onChatCleanDone(args: unknown): void;
 
 }
+
 export interface NodeIKernelStorageCleanListener extends IStorageCleanListener {
     // eslint-disable-next-line @typescript-eslint/no-misused-new
     new(adapter: IStorageCleanListener): NodeIKernelStorageCleanListener;
@@ -27,6 +28,7 @@ export class StorageCleanListener implements IStorageCleanListener {
     onCleanCacheStorageChanged(args: unknown) {
 
     }
+
     onFinishScan(args: unknown) {
 
     }

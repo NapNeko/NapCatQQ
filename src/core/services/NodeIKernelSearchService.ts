@@ -1,4 +1,4 @@
-import { ChatType } from "../entities";
+import { ChatType } from '../entities';
 
 export interface NodeIKernelSearchService {
     addKernelSearchListener(...args: any[]): unknown;// needs 1 arguments
@@ -90,8 +90,7 @@ export interface NodeIKernelSearchService {
                         hasModifyConfGroupName: boolean,
                         groupName: string,
                         remark: string
-                    }>
-                ,
+                    }>,
                 dataLineChatInfo: [],
                 tmpChatInfo: [],
                 msgId: string,

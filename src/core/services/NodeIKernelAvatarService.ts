@@ -4,7 +4,7 @@ export interface NodeIKernelAvatarService {
     removeAvatarListener(arg: unknown): unknown;
 
     getAvatarPath(arg1: unknown, arg2: unknown): unknown;
-      
+
     forceDownloadAvatar(uid: string, useCache: number): Promise<unknown>;
 
     getGroupAvatarPath(arg1: unknown, arg2: unknown): unknown;

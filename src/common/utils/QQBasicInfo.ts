@@ -1,9 +1,9 @@
-import path from "node:path";
-import fs from "node:fs";
-import { systemPlatform } from "@/common/utils/system";
-import { getDefaultQQVersionConfigInfo, getQQVersionConfigPath } from "./helper";
-import AppidTable from "@/core/external/appid.json";
-import { LogWrapper } from "./log";
+import path from 'node:path';
+import fs from 'node:fs';
+import { systemPlatform } from '@/common/utils/system';
+import { getDefaultQQVersionConfigInfo, getQQVersionConfigPath } from './helper';
+import AppidTable from '@/core/external/appid.json';
+import { LogWrapper } from './log';
 
 export class QQBasicInfoWrapper {
     QQMainPath: string | undefined;
@@ -20,7 +20,7 @@ export class QQBasicInfoWrapper {
         //基础目录获取
         this.context = context;
         this.QQMainPath = process.execPath;
-        this.QQPackageInfoPath = path.join(path.dirname(this.QQMainPath), "resources", "app", "package.json");
+        this.QQPackageInfoPath = path.join(path.dirname(this.QQMainPath), 'resources', 'app', 'package.json');
         this.QQVersionConfigPath = getQQVersionConfigPath(this.QQMainPath);
 
         //基础信息获取 无快更则启用默认模板填充
@@ -40,27 +40,29 @@ export class QQBasicInfoWrapper {
     }
 
     getFullQQVesion() {
-        const version =  this.isQuickUpdate ? this.QQVersionConfig?.curVersion : this.QQPackageInfo?.version;
-        if(!version) throw new Error("QQ版本获取失败");
+        const version = this.isQuickUpdate ? this.QQVersionConfig?.curVersion : this.QQPackageInfo?.version;
+        if (!version) throw new Error('QQ版本获取失败');
         return version;
     }
 
     requireMinNTQQBuild(buildStr: string) {
-        const currentBuild = parseInt(this.getQQBuildStr() || "0");
-        if (currentBuild == 0) throw new Error("QQBuildStr获取失败");
+        const currentBuild = parseInt(this.getQQBuildStr() || '0');
+        if (currentBuild == 0) throw new Error('QQBuildStr获取失败');
         return currentBuild >= parseInt(buildStr);
     }
+
     //此方法不要直接使用
     getQUAInternal() {
-        return systemPlatform === "linux"
+        return systemPlatform === 'linux'
             ? `V1_LNX_NQ_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`
             : `V1_WIN_NQ_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
     }
+
     getAppidV2(): { appid: string; qua: string } {
         const appidTbale = AppidTable as unknown as QQAppidTableType;
         try {
             const fullVersion = this.getFullQQVesion();
-            if (!fullVersion) throw new Error("QQ版本获取失败");
+            if (!fullVersion) throw new Error('QQ版本获取失败');
             const data = appidTbale[fullVersion];
             if (data) {
                 return data;
@@ -70,9 +72,10 @@ export class QQBasicInfoWrapper {
         }
         // 以下是兜底措施
         this.context.logger.log(
-            `[QQ版本兼容性检测] ${this.getFullQQVesion()} 版本兼容性不佳，可能会导致一些功能无法正常使用`
+            `[QQ版本兼容性检测] ${this.getFullQQVesion()} 版本兼容性不佳，可能会导致一些功能无法正常使用`,
         );
-        return { appid: systemPlatform === "linux" ? "537237950" : "537237765", qua: this.getQUAInternal() };
+        return { appid: systemPlatform === 'linux' ? '537237950' : '537237765', qua: this.getQUAInternal() };
     }
 }
+
 export let QQBasicInfo: QQBasicInfoWrapper | undefined;

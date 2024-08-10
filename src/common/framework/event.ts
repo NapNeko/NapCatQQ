@@ -1,5 +1,5 @@
-import type { NodeIQQNTWrapperSession, WrapperNodeApi } from "@/core/wrapper/wrapper";
-import EventEmitter from "node:events";
+import type { NodeIQQNTWrapperSession, WrapperNodeApi } from '@/core/wrapper/wrapper';
+import EventEmitter from 'node:events';
 
 export type ListenerClassBase = Record<string, string>;
 
@@ -12,9 +12,11 @@ export class NTEventChannel extends EventEmitter {
     private wrapperApi: WrapperNodeApi;
     private wrapperSession: NodeIQQNTWrapperSession;
     private listenerRefStorage = new Map<string, ListenerIBase>();
+
     constructor(WrapperApi: WrapperNodeApi, WrapperSession: NodeIQQNTWrapperSession) {
         super();
-        this.on('error', () => { });
+        this.on('error', () => {
+        });
         this.wrapperApi = WrapperApi;
         this.wrapperSession = WrapperSession;
     }
@@ -31,7 +33,7 @@ export class NTEventChannel extends EventEmitter {
                 return (...args: any[]) => {
                     current.dispatcherListener.apply(current, [ListenerMainName + '/' + prop, ...args]);
                 };
-            }
+            },
         });
     }
 
@@ -109,7 +111,7 @@ export class NTEventChannel extends EventEmitter {
             //console.log('2', eventName);
             const services = (this.wrapperSession as unknown as eventType)[serviceName]();
             const event = services[eventName]
-            //重新绑定this
+                //重新绑定this
                 .bind(services);
             if (event) {
                 return event as T;
@@ -134,4 +136,5 @@ export class NTEventChannel extends EventEmitter {
         });
     }
 }
+
 //NTEvent2.0

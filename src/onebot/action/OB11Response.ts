@@ -10,7 +10,7 @@ export class OB11Response {
             data: data,
             message: message,
             wording: message,
-            echo: null
+            echo: null,
         };
     }
 

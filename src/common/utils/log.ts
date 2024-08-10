@@ -2,13 +2,15 @@ import log4js, { Configuration } from 'log4js';
 import { truncateString } from '@/common/utils/helper';
 import path from 'node:path';
 import chalk from 'chalk';
+
 export enum LogLevel {
-  DEBUG = 'debug',
-  INFO = 'info',
-  WARN = 'warn',
-  ERROR = 'error',
-  FATAL = 'fatal',
+    DEBUG = 'debug',
+    INFO = 'info',
+    WARN = 'warn',
+    ERROR = 'error',
+    FATAL = 'fatal',
 }
+
 function getFormattedTimestamp() {
     const now = new Date();
     const year = now.getFullYear();
@@ -20,6 +22,7 @@ function getFormattedTimestamp() {
     const milliseconds = now.getMilliseconds().toString().padStart(3, '0');
     return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}.${milliseconds}`;
 }
+
 export class LogWrapper {
     fileLogEnabled = true;
     consoleLogEnabled = true;
@@ -29,8 +32,9 @@ export class LogWrapper {
     loggerDefault: log4js.Logger;
     // eslint-disable-next-line no-control-regex
     colorEscape = /\x1B[@-_][0-?]*[ -/]*[@-~]/g;
+
     constructor(logDir: string) {
-    // logDir = path.join(path.resolve(__dirname), 'logs');
+        // logDir = path.join(path.resolve(__dirname), 'logs');
         const filename = `${getFormattedTimestamp()}.log`;
         const logPath = path.join(logDir, filename);
         this.logConfig = {
@@ -41,22 +45,22 @@ export class LogWrapper {
                     maxLogSize: 10485760, // 日志文件的最大大小（单位：字节），这里设置为10MB
                     layout: {
                         type: 'pattern',
-                        pattern: '%d{yyyy-MM-dd hh:mm:ss} [%p] %X{userInfo} | %m'
-                    }
+                        pattern: '%d{yyyy-MM-dd hh:mm:ss} [%p] %X{userInfo} | %m',
+                    },
                 },
                 ConsoleAppender: { // 输出到控制台的appender
                     type: 'console',
                     layout: {
                         type: 'pattern',
-                        pattern: `%d{yyyy-MM-dd hh:mm:ss} [%[%p%]] ${chalk.magenta('%X{userInfo}')} | %m`
-                    }
-                }
+                        pattern: `%d{yyyy-MM-dd hh:mm:ss} [%[%p%]] ${chalk.magenta('%X{userInfo}')} | %m`,
+                    },
+                },
             },
             categories: {
                 default: { appenders: ['FileAppender', 'ConsoleAppender'], level: 'debug' }, // 默认情况下同时输出到文件和控制台
                 file: { appenders: ['FileAppender'], level: 'debug' },
-                console: { appenders: ['ConsoleAppender'], level: 'debug' }
-            }
+                console: { appenders: ['ConsoleAppender'], level: 'debug' },
+            },
         };
         log4js.configure(this.logConfig);
         this.loggerConsole = log4js.getLogger('console');
@@ -64,6 +68,7 @@ export class LogWrapper {
         this.loggerDefault = log4js.getLogger('default');
         this.setLogSelfInfo({ nick: '', uin: '', uid: '' });
     }
+
     setLogLevel(fileLogLevel: LogLevel, consoleLogLevel: LogLevel) {
         this.logConfig.categories.file.level = fileLogLevel;
         this.logConfig.categories.console.level = consoleLogLevel;
@@ -81,6 +86,7 @@ export class LogWrapper {
     enableFileLog(enable: boolean) {
         this.fileLogEnabled = enable;
     }
+
     enableConsoleLog(enable: boolean) {
         this.consoleLogEnabled = enable;
     }
@@ -102,7 +108,6 @@ export class LogWrapper {
     }
 
 
-
     _log(level: LogLevel, ...args: any[]) {
         if (this.consoleLogEnabled) {
             this.loggerConsole[level](this.formatMsg(args));
@@ -113,7 +118,7 @@ export class LogWrapper {
     }
 
     log(...args: any[]) {
-    // info 等级
+        // info 等级
         this._log(LogLevel.INFO, ...args);
     }
 

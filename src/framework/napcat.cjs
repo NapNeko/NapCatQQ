@@ -27,9 +27,9 @@ process.dlopen = (module, filename, flags = os.constants.dlopen.RTLD_LAZY) => {
                         if (args[ArgIndex] instanceof Object) {
                             let HookArg = {};
                             for (let ListenerName in args[ArgIndex]) {
-                                HookArg[ListenerName] = function (...ListenerData) {
+                                HookArg[ListenerName] = function(...ListenerData) {
                                     try {
-                                        if (ListenerName === "onSessionInitComplete") {
+                                        if (ListenerName === 'onSessionInitComplete') {
                                             //回调成功
                                             initCallBack.forEach((cb) => cb(...ListenerData));
                                             clearHook();
@@ -110,15 +110,15 @@ async function fetchServices(timeout = 10000) {
         pollForNTInitializationCheck(),
         new Promise((resolve) => {
             setTimeout(() => resolve(false), timeout);
-        })
+        }),
     ]).then(result => result ?
         { wrapperSession, wrapperNodeApi, wrapperLoginService } :
-        Promise.reject()
+        Promise.reject(),
     );
 }
 
 async function NCInit() {
-    console.log("[NapCat] [Info] 开始初始化NapCat");
+    console.log('[NapCat] [Info] 开始初始化NapCat');
 
     try {
         const { wrapperSession, wrapperLoginService } = await fetchServices();
@@ -127,7 +127,7 @@ async function NCInit() {
         await NCoreInitFramework(wrapperSession, wrapperLoginService, registerInitCallback);
         //console.log("[NapCat] [Info] NapCat初始化完成");
     } catch (error) {
-        console.error("[NapCat] [Error] 初始化NapCat失败", error);
+        console.error('[NapCat] [Error] 初始化NapCat失败', error);
     }
 }
 
