@@ -28,7 +28,7 @@ if (process.env.NAPCAT_BUILDSYS == 'linux') {
 } else {
   startScripts = ['./script/BootWay05.bat', './script/BootWay05.utf8.bat', './script/dbghelp.dll', './script/BootWay05.ps1', './script/napcat.sh', './script/napcat.ps1', './script/napcat.bat', './script/napcat-utf8.bat', './script/napcat-utf8.ps1', './script/napcat-log.ps1', './script/napcat-9912.ps1', './script/napcat-9912-utf8.ps1', './script/napcat-9912.bat', './script/napcat-9912-utf8.bat'];
 }
-const LLBaseConfigPlugin: PluginOption[] = [
+const FrameworkBaseConfigPlugin: PluginOption[] = [
   // PreprocessorDirectives(),
   babel({
     filter: /.*\.(ts|js)$/,
@@ -46,9 +46,9 @@ const LLBaseConfigPlugin: PluginOption[] = [
   cp({
     targets: [
       { src: './manifest.json', dest: 'dist' },
-      { src: './src/liteloader/napcat.cjs', dest: 'dist' },
-      { src: './src/liteloader/preload.cjs', dest: 'dist' },
-      { src: './src/liteloader/renderer.js', dest: 'dist' },
+      { src: './src/framework/napcat.cjs', dest: 'dist' },
+      { src: './src/framework/preload.cjs', dest: 'dist' },
+      { src: './src/framework/renderer.js', dest: 'dist' },
       { src: './package.json', dest: 'dist' },
       { src: './logo.png', dest: 'dist' },
       //...external.map(genCpModule)
@@ -112,7 +112,7 @@ const ShellBaseConfig = () => defineConfig({
   },
 });
 
-const LLBaseConfig = () => defineConfig({
+const FrameworkBaseConfig = () => defineConfig({
   resolve: {
     conditions: ['node', 'default'],
     alias: {
@@ -126,7 +126,7 @@ const LLBaseConfig = () => defineConfig({
     target: 'esnext',
     minify: false,
     lib: {
-      entry: "src/liteloader/napcat.ts",
+      entry: "src/framework/napcat.ts",
       formats: ['es'],
       fileName: () => 'napcat.mjs',
     },
@@ -144,8 +144,8 @@ export default defineConfig(({ mode }): UserConfig => {
     };
   } else {
     return {
-      ...LLBaseConfig(),
-      plugins: [...LLBaseConfigPlugin],
+      ...FrameworkBaseConfig(),
+      plugins: [...FrameworkBaseConfigPlugin],
     };
   }
 });

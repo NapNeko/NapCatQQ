@@ -9,7 +9,7 @@
 
 <body>
     <script>
-         async function CheckQQLoginStatus(retCredential) {
+        async function CheckQQLoginStatus(retCredential) {
             let QQLoginResponse = await fetch('../api/QQLogin/CheckLoginStatus', {
                 method: 'POST',
                 headers: {
@@ -46,6 +46,12 @@
             return false;
         }
         async function InitPage() {
+            //查找URL参数是否有token
+            let url = new URL(window.location.href);
+            let token = url.searchParams.get("token");
+            if (token) {
+                localStorage.setItem('auth', token);
+            }
             let authData = localStorage.getItem('auth');
             let isLogined = await CheckWebUiLogined(authData);
             if (authData && isLogined) {

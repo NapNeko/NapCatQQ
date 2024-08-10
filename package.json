@@ -4,7 +4,7 @@
   "type": "module",
   "version": "1.8.3",
   "scripts": {
-    "build:liteloader": "vite build --mode liteloader",
+    "build:framework": "vite build --mode framework",
     "build:shell": "vite build --mode shell",
     "build:webui": "cd ./src/webui && vite build",
     "lint": "eslint --fix src/**/*.{js,ts}",
