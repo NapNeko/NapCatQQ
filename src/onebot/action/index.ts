@@ -35,7 +35,6 @@ import GetImage from './file/GetImage';
 import GetRecord from './file/GetRecord';
 import { GoCQHTTPMarkMsgAsRead, MarkAllMsgAsRead, MarkGroupMsgAsRead, MarkPrivateMsgAsRead } from './msg/MarkMsgAsRead';
 import GoCQHTTPUploadGroupFile from './go-cqhttp/UploadGroupFile';
-import GetGroupAddRequest from '@/onebot/action/extends/GetGroupAddRequest';
 import SetQQAvatar from '@/onebot/action/extends/SetQQAvatar';
 import GoCQHTTPDownloadFile from './go-cqhttp/DownloadFile';
 import GoCQHTTPGetGroupMsgHistory from './go-cqhttp/GetGroupMsgHistory';
@@ -73,13 +72,13 @@ import { GetProfileLike } from './extends/GetProfileLike';
 import SetGroupHeader from './extends/SetGroupHeader';
 import { FetchCustomFace } from './extends/FetchCustomFace';
 import GoCQHTTPUploadPrivateFile from './go-cqhttp/UploadPrivareFile';
-import { FetchEmojioLike } from './extends/FetchEmojioLike';
+import { FetchEmojiLike } from './extends/FetchEmojiLike';
 import { NapCatCore } from '@/core';
 import { NapCatOneBot11Adapter } from '../main';
 
 export function createActionMap(onebotContext: NapCatOneBot11Adapter, coreContext: NapCatCore) {
     const actionHandlers = [
-        new FetchEmojioLike(onebotContext,coreContext),
+        new FetchEmojiLike(onebotContext,coreContext),
         new GetFile(onebotContext,coreContext),
         new SetSelfProfile(onebotContext,coreContext),
         new shareGroupEx(onebotContext,coreContext),

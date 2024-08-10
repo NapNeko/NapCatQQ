@@ -3,6 +3,7 @@ import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { MessageUnique } from '@/common/utils/MessageUnique';
+
 const SchemaData = {
     type: 'object',
     properties: {
@@ -18,7 +19,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export class FetchEmojioLike extends BaseAction<Payload, any> {
+export class FetchEmojiLike extends BaseAction<Payload, any> {
     actionName = ActionName.FetchEmojioLike;
     PayloadSchema = SchemaData;
     protected async _handle(payload: Payload) {
@@ -26,7 +27,6 @@ export class FetchEmojioLike extends BaseAction<Payload, any> {
         const msgIdPeer = MessageUnique.getMsgIdAndPeerByShortId(parseInt(payload.message_id.toString()));
         if(!msgIdPeer) throw new Error('消息不存在');
         const msg = (await NTQQMsgApi.getMsgsByMsgId(msgIdPeer.Peer, [msgIdPeer.MsgId])).msgList[0];
-        const ret = await NTQQMsgApi.getMsgEmojiLikesList(msgIdPeer.Peer,msg.msgSeq,payload.emojiId,payload.emojiType,payload.count);
-        return ret;
+        return await NTQQMsgApi.getMsgEmojiLikesList(msgIdPeer.Peer, msg.msgSeq, payload.emojiId, payload.emojiType, payload.count);
     }
 }
