@@ -28,7 +28,8 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     registerHeartBeat() {
         // HttpPost 心跳
     }
-
+    registerActionMap(actionMap: Map<string, BaseAction<any, any>>) {
+    }
     registerAction<T extends BaseAction<P, R>, P, R>(action: T) {
         // Passive http adapter does not need to register actions
     }

@@ -3,12 +3,13 @@ import { OB11Config } from './helper/config';
 import { NapCatPathWrapper } from '@/common/framework/napcat';
 import { OneBotApiContextType } from './types/adapter';
 import { OneBotFriendApi, OneBotGroupApi, OneBotUserApi } from './api';
-import { OB11NetworkManager } from '@/onebot/network';
+import { OB11NetworkManager, OB11PassiveHttpAdapter } from '@/onebot/network';
 import { OB11InputStatusEvent } from '@/onebot/event/notice/OB11InputStatusEvent';
 import { MessageUnique } from '@/common/utils/MessageUnique';
 import { OB11Constructor } from '@/onebot/helper/data';
 import { logOB11Message } from '@/onebot/helper/log';
 import { proxiedListenerOf } from '@/common/utils/proxy-handler';
+import { createActionMap } from './action';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -50,6 +51,11 @@ export class NapCatOneBot11Adapter {
             this.context.logger.setLogSelfInfo(selfInfo);
         }).catch(this.context.logger.logError);
         this.context.logger.log(`[Notice] [OneBot11] ${serviceInfo}`);
+        let actions = createActionMap(this, this.core);
+        let OB11NetworkManagerWrap = new OB11NetworkManager();
+        OB11NetworkManagerWrap.registerAdapter(new OB11PassiveHttpAdapter(ob11Config.http.port, ob11Config.token, this.core, this));
+        OB11NetworkManagerWrap.registerAllActions(actions);
+        OB11NetworkManagerWrap.openAllAdapters();
         // Todo 开始启动NetWork
         await this.initMsgListener();
 

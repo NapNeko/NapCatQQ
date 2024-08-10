@@ -3,6 +3,8 @@ import { OB11BaseEvent } from '@/onebot/event/OB11BaseEvent';
 import BaseAction from '@/onebot/action/BaseAction';
 import express, { Express, Request, Response } from 'express';
 import http from 'http';
+import { NapCatCore } from '@/core';
+import { NapCatOneBot11Adapter } from '../main';
 
 export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
     private app: Express | undefined;
@@ -12,16 +14,22 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
     private actionMap: Map<string, BaseAction<any, any>> = new Map();
     private port: number;
     token: string;
+    coreContext: NapCatCore;
+    onebotContext: NapCatOneBot11Adapter;
 
-    constructor(port: number, token: string) {
+    constructor(port: number, token: string, coreContext: NapCatCore, onebotContext: NapCatOneBot11Adapter) {
         this.port = port;
         this.token = token;
+        this.coreContext = coreContext;
+        this.onebotContext = onebotContext;
     }
 
     registerAction<T extends BaseAction<P, R>, P, R>(action: T) {
         this.actionMap.set(action.actionName, action);
     }
-
+    registerActionMap(actionMap: Map<string, BaseAction<any, any>>) {
+        this.actionMap = actionMap;
+    }
     registerHeartBeat() {
         //空心跳
     }
@@ -32,7 +40,7 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
 
     open() {
         if (this.hasBeenClosed) {
-            throw new Error('Cannot open a closed HTTP server');
+            this.coreContext.context.logger.logError('Cannot open a closed HTTP server');
         }
         if (!this.isOpen) {
             this.initializeServer();
@@ -46,10 +54,10 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
 
         this.app.use(express.json());
 
-        this.app.all('*', this.handleRequest.bind(this));
+        this.app.all('/*', this.handleRequest.bind(this));
 
         this.server.listen(this.port, () => {
-            console.log(`HTTP server listening on port ${this.port}`);
+            this.coreContext.context.logger.log(`HTTP server listening on port ${this.port}`);
         });
     }
 

@@ -7,6 +7,8 @@ export type OB11EmitEventContent = OB11BaseEvent | OB11Message;
 export interface IOB11NetworkAdapter {
     registerAction<T extends BaseAction<P, R>, P, R>(action: T): void;
 
+    registerActionMap(actionMap: Map<string, BaseAction<any, any>>): void;
+
     onEvent<T extends OB11EmitEventContent>(event: T): void;
 
     open(): void | Promise<void>;
@@ -16,11 +18,15 @@ export interface IOB11NetworkAdapter {
 
 export class OB11NetworkManager {
     adapters: IOB11NetworkAdapter[] = [];
-
     async getAllAdapters() {
         return this.adapters;
     }
-
+    async openAllAdapters() {
+        return Promise.all(this.adapters.map(adapter => adapter.open()));
+    }
+    async registerAllActions(actions: Map<string,BaseAction<any, any>>) {
+        return Promise.all(this.adapters.map(adapter => adapter.registerActionMap(actions)));
+    }
     async emitEvent(event: OB11EmitEventContent) {
         // Mlikiowa V2.0.0 Refactor Todo
         return Promise.all(this.adapters.map(adapter => adapter.onEvent(event)));
