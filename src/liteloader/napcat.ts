@@ -43,7 +43,7 @@ export async function NCoreInitLiteLoader(
     // 过早进入会导致addKernelMsgListener等Listener添加失败
     await sleep(2500);
     // 初始化 NapCatLiteLoader
-    const loaderObject = new NapCatLiteLoader(wrapper, session, logger, loginService, selfInfo, basicInfoWrapper);
+    const loaderObject = new NapCatLiteLoader(wrapper, session, logger, loginService, selfInfo, basicInfoWrapper, pathWrapper);
 
     //启动WebUi
 
@@ -62,6 +62,7 @@ export class NapCatLiteLoader {
         loginService: NodeIKernelLoginService,
         selfInfo: SelfInfo,
         basicInfoWrapper: QQBasicInfoWrapper,
+        pathWrapper: NapCatPathWrapper
     ) {
         this.context = {
             workingEnv: NapCatCoreWorkingEnv.LiteLoader,
@@ -69,7 +70,8 @@ export class NapCatLiteLoader {
             session,
             logger,
             loginService,
-            basicInfoWrapper
+            basicInfoWrapper,
+            pathWrapper
         };
         this.core = new NapCatCore(this.context, selfInfo);
     }
