@@ -1,18 +1,21 @@
 import {
     ChatType,
+    Group,
     GroupMember,
     GroupMemberRole,
     GroupNotify,
     GroupRequestOperateTypes,
     MemberExtSourceType,
-} from '../entities';
+    NodeIKernelGroupListener,
+} from '@/core';
 import { GeneralCallResult, InstanceContext, NapCatCore, NodeIKernelGroupService } from '@/core';
-import { runAllWithTimeout } from '@/common/utils/helper';
-import { NodeIKernelGroupListener } from '../listeners';
+import { isNumeric, runAllWithTimeout } from '@/common/utils/helper';
 
 export class NTQQGroupApi {
     context: InstanceContext;
     core: NapCatCore;
+    groupCache: Map<string, Group> = new Map<string, Group>();
+    groupMemberCache: Map<string, Map<string, GroupMember>> = new Map<string, Map<string, GroupMember>>();
 
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
@@ -31,10 +34,28 @@ export class NTQQGroupApi {
             'NodeIKernelGroupListener/onGroupListUpdate',
             1,
             5000,
-            (updateType) => true,
+            () => true,
             forced,
             );
         return groupList;
+    }
+
+    async getGroup(groupCode: string, forced = false) {
+        let group = this.groupCache.get(groupCode.toString());
+        if (!group) {
+            try {
+                const groupList = await this.getGroups(forced);
+                if (groupList.length) {
+                    groupList.forEach(g => {
+                        this.groupCache.set(g.groupCode, g);
+                    });
+                }
+            } catch (e) {
+                return undefined;
+            }
+        }
+        group = this.groupCache.get(groupCode.toString());
+        return group;
     }
 
     async getGroupMemberLatestSendTimeCache(GroupCode: string, uids: string[]) {
@@ -44,6 +65,7 @@ export class NTQQGroupApi {
     /**
      * 通过QQ自带数据库获取群成员最后发言时间(仅返回有效数据 且消耗延迟大 需要进行缓存)
      * @param GroupCode 群号
+     * @param uids QQ号
      * @returns Map<string, string> key: uin value: sendTime
      * @example
      * let ret = await NTQQGroupApi.getGroupMemberLastestSendTime('123456');
@@ -77,7 +99,7 @@ export class NTQQGroupApi {
     }
 
     async getLatestMsgByUids(GroupCode: string, uids: string[]) {
-        const ret = await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {
+        return await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {
             chatInfo: {
                 peerUid: GroupCode,
                 chatType: ChatType.group,
@@ -90,11 +112,44 @@ export class NTQQGroupApi {
             isIncludeCurrent: true,
             pageLimit: 1,
         });
-        return ret;
     }
 
     async getGroupMemberAll(GroupCode: string, forced = false) {
         return this.context.session.getGroupService().getAllMemberList(GroupCode, forced);
+    }
+
+    async getGroupMember(groupCode: string | number, memberUinOrUid: string | number) {
+        const groupCodeStr = groupCode.toString();
+        const memberUinOrUidStr = memberUinOrUid.toString();
+        let members = this.groupMemberCache.get(groupCodeStr);
+        if (!members) {
+            try {
+                members = await this.getGroupMembers(groupCodeStr);
+                // 更新群成员列表
+                this.groupMemberCache.set(groupCodeStr, members);
+            }
+            catch (e) {
+                return null;
+            }
+        }
+
+        // log('getGroupMember', members);
+        function getMember() {
+            let member: GroupMember | undefined;
+            if (isNumeric(memberUinOrUidStr)) {
+                member = Array.from(members!.values()).find(member => member.uin === memberUinOrUidStr);
+            } else {
+                member = members!.get(memberUinOrUidStr);
+            }
+            return member;
+        }
+
+        let member = getMember();
+        if (!member) {
+            members = await this.getGroupMembers(groupCodeStr);
+            member = getMember();
+        }
+        return member;
     }
 
     async getLatestMsg(GroupCode: string, uins: string[]) {
@@ -105,7 +160,7 @@ export class NTQQGroupApi {
                 uids.push(uid);
             }
         }
-        const ret = await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {
+        return await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {
             chatInfo: {
                 peerUid: GroupCode,
                 chatType: ChatType.group,
@@ -118,7 +173,6 @@ export class NTQQGroupApi {
             isIncludeCurrent: true,
             pageLimit: 1,
         });
-        return ret;
     }
 
     async getGroupRecommendContactArkJson(GroupCode: string) {
@@ -191,7 +245,7 @@ export class NTQQGroupApi {
         type EventType = NodeIKernelGroupService['getMemberInfo'];
         // NTEventDispatch.CreatListenerFunction('NodeIKernelGroupListener/onGroupMemberInfoUpdate', 
         //return napCatCore.session.getGroupService().getMemberInfo(GroupCode, [uid], forced);
-        const [ret, _groupCode, _changeType, _members] = await this.core.eventWrapper.CallNormalEvent <EventType, ListenerType>
+        const [,,, _members] = await this.core.eventWrapper.CallNormalEvent<EventType, ListenerType>
         (
             'NodeIKernelGroupService/getMemberInfo',
             'NodeIKernelGroupListener/onMemberInfoChange',
@@ -303,9 +357,11 @@ export class NTQQGroupApi {
     }
 
     // 头衔不可用
+    /*
     async setGroupTitle(groupQQ: string, uid: string, title: string) {
 
     }
+     */
 
     async publishGroupBulletin(groupQQ: string, content: string, picInfo: {
         id: string,
