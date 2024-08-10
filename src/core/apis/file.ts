@@ -41,7 +41,7 @@ export class NTQQFileApi {
     }
 
     async getFileSize(filePath: string): Promise<number> {
-        return await this.context.wrapper.util.getFileSize(filePath);
+        return await this.core.util.getFileSize(filePath);
     }
 
     async getVideoUrl(peer: Peer, msgId: string, elementId: string) {

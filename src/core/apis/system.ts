@@ -10,7 +10,7 @@ export class NTQQSystemApi {
     }
 
     async hasOtherRunningQQProcess() {
-        return this.context.wrapper.util.hasOtherRunningQQProcess();
+        return this.core.util.hasOtherRunningQQProcess();
     }
 
     async ORCImage(filePath: string) {
