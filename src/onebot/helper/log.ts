@@ -6,7 +6,7 @@ const spSegColor = chalk.blue;// for special segment
 const spColor = chalk.cyan;// for special
 
 // todo: 应该放到core去用RawMessage解析打印
-export async function logMessage(coreContext: NapCatCore, ob11Message: OB11Message) {
+export async function logOB11Message(coreContext: NapCatCore, ob11Message: OB11Message) {
     const isSelfSent = ob11Message.sender.user_id.toString() === coreContext.selfInfo.uin;
     let prefix = '';
     let group: Group | undefined;
@@ -21,21 +21,21 @@ export async function logMessage(coreContext: NapCatCore, ob11Message: OB11Messa
     }
     if (ob11Message.message_type === 'group') {
         if (ob11Message.group_id == 284840486) {
-            group = await getGroup(ob11Message.group_id!);
+            // group = await coreContext.ApiContext.GroupApi.getGroup(ob11Message.group_id!.toString());
             prefix += '转发消息[外部来源] ';
         } else {
-            group = await getGroup(ob11Message.group_id!);
+            group = await coreContext.ApiContext.GroupApi.getGroup(ob11Message.group_id!.toString());
             prefix += `群[${group?.groupName}(${ob11Message.group_id})] `;
         }
     }
-    let msgChain = '';
+    let msgChain: string;
     if (Array.isArray(ob11Message.message)) {
         const msgParts = [];
         for (const segment of ob11Message.message) {
             if (segment.type === 'text') {
                 msgParts.push(segment.data.text);
             } else if (segment.type === 'at') {
-                const groupMember = await getGroupMember(ob11Message.group_id!, segment.data.qq!);
+                const groupMember = await coreContext.ApiContext.GroupApi.getGroupMember(ob11Message.group_id!, segment.data.qq!);
                 msgParts.push(spSegColor(`[@${groupMember?.cardName || groupMember?.nick}(${segment.data.qq})]`));
             } else if (segment.type === 'reply') {
                 msgParts.push(spSegColor(`[回复消息|id:${segment.data.id}]`));
@@ -59,7 +59,7 @@ export async function logMessage(coreContext: NapCatCore, ob11Message: OB11Messa
             } else if (segment.type === 'forward') {
                 msgParts.push(spSegColor(`[转发|${segment.data.id}|消息开始]`));
                 segment.data.content.forEach((msg) => {
-                    logMessage(coreContext, msg);
+                    logOB11Message(coreContext, msg);
                 });
                 msgParts.push(spSegColor(`[转发|${segment.data.id}|消息结束]`));
             } else {
@@ -77,10 +77,10 @@ export async function logMessage(coreContext: NapCatCore, ob11Message: OB11Messa
     coreContext.context.logger.log(msgString);
 }
 
-export async function logNotice(coreContext: NapCatCore, ob11Notice: any) {
+export async function logOB11Notice(coreContext: NapCatCore, ob11Notice: any) {
     coreContext.context.logger.log(spColor('[Notice]'), ob11Notice);
 }
 
-export async function logRequest(coreContext: NapCatCore, ob11Request: any) {
+export async function logOB11Request(coreContext: NapCatCore, ob11Request: any) {
     coreContext.context.logger.log(spColor('[Request]'), ob11Request);
 }
