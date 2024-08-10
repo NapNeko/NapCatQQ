@@ -13,6 +13,10 @@ export class OB11NetworkManager {
     async getAllAdapters() {
         return this.adapters;
     }
+    async PostEvent(event: OB11BaseEvent) {
+        // Mlikiowa V2.0.0 Refactor Todo
+        return Promise.all(this.adapters.map(adapter => adapter.onEvent(event)));
+    }
     async registerAdapter(adapter: IOB11NetworkAdapter) {
         return this.adapters.push(adapter);
     }
