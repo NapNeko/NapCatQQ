@@ -12,6 +12,7 @@ export class ConfigBase<T> {
     constructor(coreContext: NapCatCore, configPath: string) {
         this.coreContext = coreContext;
         this.configPath = configPath;
+        fs.mkdirSync(this.configPath, { recursive: true });
         this.read();
     }
 
@@ -20,21 +21,16 @@ export class ConfigBase<T> {
         return null;
     }
 
-    getConfigDir() {
-        const configDir = path.resolve(this.configPath, 'config');
-        fs.mkdirSync(configDir, { recursive: true });
-        return configDir;
-    }
 
     getConfigPath(pathName: string | null): string {
         const suffix = pathName ? `_${pathName}` : '';
         const filename = `${this.name}${suffix}.json`;
-        return path.join(this.getConfigDir(), filename);
+        return path.join(this.configPath, filename);
     }
 
     read() {
         // 尝试加载当前账号配置
-        if (this.read_from_file(this.coreContext.selfInfo.uin, false)) return this;
+        if (this.read_from_file(this.coreContext.selfInfo.uin, false)) return this.config;
         // 尝试加载默认配置
         return this.read_from_file('', true);
     }
