@@ -1,18 +1,16 @@
 import { IOB11NetworkAdapter, OB11EmitEventContent } from '@/onebot/network/index';
-
 import { WebSocket as NodeWebSocket } from 'ws';
 import BaseAction from '@/onebot/action/BaseAction';
-import { OB11BaseEvent } from '@/onebot/event/OB11BaseEvent';
 import { sleep } from '@/common/utils/helper';
 
 export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
     url: string;
     reconnectIntervalInMillis: number;
     isClosed: boolean = false;
-
     private connection: NodeWebSocket | null = null;
     private actionMap: Map<string, BaseAction<any, any>> = new Map();
     heartbeatInterval: number;
+    private heartbeatTimer: NodeJS.Timeout | null = null;
 
     constructor(url: string, reconnectIntervalInMillis: number, heartbeatInterval: number) {
         this.url = url;
@@ -21,7 +19,14 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
     }
 
     registerHeartBeat() {
-        //WS反向心跳
+        // WS反向心跳
+        if (this.connection) {
+            this.heartbeatTimer = setInterval(() => {
+                if (this.connection && this.connection.readyState === NodeWebSocket.OPEN) {
+                    this.connection.ping();
+                }
+            }, this.heartbeatInterval);
+        }
     }
 
     registerAction<T extends BaseAction<P, R>, P, R>(action: T) {
@@ -30,9 +35,8 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
 
     onEvent<T extends OB11EmitEventContent>(event: T) {
         if (this.connection) {
-            // this.connection.send(JSON.stringify(event));
-            // TODO: wrap the event, and send the wrapped to the server.
-            // TODO: consider using a utility function
+            const wrappedEvent = this.wrapEvent(event);
+            this.connection.send(JSON.stringify(wrappedEvent));
         }
     }
 
@@ -44,13 +48,17 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
     }
 
     close() {
-        this.isClosed = true;
         if (this.isClosed) {
             throw new Error('Cannot close a closed WebSocket connection');
         }
+        this.isClosed = true;
         if (this.connection) {
             this.connection.close();
             this.connection = null;
+        }
+        if (this.heartbeatTimer) {
+            clearInterval(this.heartbeatTimer);
+            this.heartbeatTimer = null;
         }
     }
 
@@ -58,23 +66,41 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
         while (!this.connection) {
             try {
                 this.connection = new NodeWebSocket(this.url);
+                this.connection.on('message', (data) => {
+                    this.handleMessage(data);
+                });
+                this.connection.once('close', () => {
+                    if (!this.isClosed) {
+                        this.connection = null;
+                        setTimeout(() => this.tryConnect(), this.reconnectIntervalInMillis);
+                    }
+                });
+                this.registerHeartBeat();
             } catch (e) {
                 this.connection = null;
                 console.error('Failed to connect to the server, retrying in 5 seconds...');
                 await sleep(5000);
             }
         }
+    }
 
-        this.connection.on('message', (data) => {
-            // TODO: extract action name and payload from the message, then call the corresponding action.
-            // TODO: consider using a utility function
-        });
-
-        this.connection.once('close', () => {
-            if (!this.isClosed) {
-                this.connection = new NodeWebSocket(this.url);
-                this.tryConnect();
+    private handleMessage(data: any) {
+        try {
+            const message = JSON.parse(data);
+            const action = this.actionMap.get(message.actionName);
+            if (action) {
+                action.handle(message.payload);
             }
-        });
+        } catch (e) {
+            console.error('Failed to handle message:', e);
+        }
+    }
+
+    private wrapEvent<T extends OB11EmitEventContent>(event: T) {
+        // Wrap the event as needed
+        return {
+            type: 'event',
+            data: event
+        };
     }
 }
