@@ -98,7 +98,7 @@ function pollForNTInitializationCheck() {
     });
 }
 
-export function registerInitCallback(callback) {
+function registerInitCallback(callback) {
     if (initCallBack === undefined) {
         initCallBack = [];
     }
