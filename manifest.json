@@ -27,7 +27,7 @@
   ],
   "injects": {
     "renderer": "./renderer.js",
-    "main": "./liteloader.cjs",
+    "main": "./napcat.cjs",
     "preload": "./preload.cjs"
   }
 }
