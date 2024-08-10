@@ -11,9 +11,11 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
     private hasBeenClosed: boolean = false;
     private actionMap: Map<string, BaseAction<any, any>> = new Map();
     private port: number;
+    token: string;
 
-    constructor(port: number) {
+    constructor(port: number,token: string) {
         this.port = port;
+        this.token = token;
     }
 
     registerAction<T extends BaseAction<P, R>, P, R>(action: T) {

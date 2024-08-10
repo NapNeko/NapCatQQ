@@ -13,12 +13,7 @@ export class OB11NetworkManager {
     registerAdapter(adapter: IOB11NetworkAdapter) {
         this.adapters.push(adapter);
     }
-
-    async open() {
-        await Promise.all(this.adapters.map(adapter => adapter.open()));
-    }
-
-    async close() {
+    async closeAll() {
         await Promise.all(this.adapters.map(adapter => adapter.close()));
     }
 }

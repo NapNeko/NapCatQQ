@@ -10,10 +10,11 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     wsClientsMutex = new Mutex();
     isOpen: boolean = false;
     hasBeenClosed: boolean = false;
-
+    heartbeatInterval:number = 0;
     private actionMap: Map<string, BaseAction<any, any>> = new Map();
 
-    constructor(ip: string, port: number, token: string) {
+    constructor(ip: string, port: number, heartbeatInterval: number, token: string) {
+        this.heartbeatInterval = heartbeatInterval;
         this.wsServer = new WebSocketServer({ port: port, host: ip });
         this.wsServer.on('connection', async (wsClient) => {
             if (!this.isOpen) {

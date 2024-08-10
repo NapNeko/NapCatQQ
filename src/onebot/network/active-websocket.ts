@@ -12,16 +12,18 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
 
     private connection: NodeWebSocket | null = null;
     private actionMap: Map<string, BaseAction<any, any>> = new Map();
+    heartbeatInterval: number;
 
-    constructor(url: string, reconnectIntervalInMillis: number) {
+    constructor(url: string, reconnectIntervalInMillis: number, heartbeatInterval: number) {
         this.url = url;
+        this.heartbeatInterval = heartbeatInterval;
         this.reconnectIntervalInMillis = reconnectIntervalInMillis;
     }
 
     registerHeartBeat() {
         //WS反向心跳
     }
-    
+
     registerAction<T extends BaseAction<P, R>, P, R>(action: T) {
         this.actionMap.set(action.actionName, action);
     }

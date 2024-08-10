@@ -5,8 +5,10 @@ import { OB11BaseEvent } from '@/onebot/event/OB11BaseEvent';
 export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     url: string;
     private actionMap: Map<string, BaseAction<any, any>> = new Map();
+    heartbeatInterval: number;
 
-    constructor(url: string) {
+    constructor(url: string, heartbeatInterval: number) {
+        this.heartbeatInterval = heartbeatInterval;
         this.url = url;
     }
     registerHeartBeat() {
