@@ -35,7 +35,7 @@ async function handleMsg(coreContext: NapCatCore, msg: OB11Message, quickAction:
         let replyMessage: OB11MessageData[] = [];
 
         if (msg.message_type == 'group') {
-            group = await getGroup(msg.group_id!.toString());
+            group = await coreContext.getApiContext().GroupApi.getGroup(msg.group_id!.toString());
             replyMessage.push({
                 type: 'reply',
                 data: {
