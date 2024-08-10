@@ -1,4 +1,4 @@
-import { NTApiContext, WrapperNodeApi } from '@/core/wrapper';
+import { NodeQQNTWrapperUtil, NTApiContext, WrapperNodeApi } from '@/core/wrapper';
 import path from 'node:path';
 import fs from 'node:fs';
 import { InstanceContext } from './wrapper';
@@ -35,11 +35,13 @@ export class NapCatCore {
     NapCatTempPath: string;
     // runtime info, not readonly
     selfInfo: SelfInfo;
+    util: NodeQQNTWrapperUtil;
 
     // 通过构造器递过去的 runtime info 应该尽量少
     constructor(context: InstanceContext, selfInfo: SelfInfo) {
         this.selfInfo = selfInfo;
         this.context = context;
+        this.util = new this.context.wrapper.NodeQQNTWrapperUtil();
         this.eventWrapper = new LegacyNTEventWrapper(context.wrapper, context.session);
         this.initNapCatCoreListeners().then().catch(console.error);
         this.ApiContext = {
@@ -66,7 +68,7 @@ export class NapCatCore {
     }
 
     get dataPath(): string {
-        let result = this.context.wrapper.util.getNTUserDataInfoConfig();
+        let result = this.util.getNTUserDataInfoConfig();
         if (!result) {
             result = path.resolve(os.homedir(), './.config/QQ');
             fs.mkdirSync(result, { recursive: true });
