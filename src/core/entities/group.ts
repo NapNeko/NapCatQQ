@@ -6,7 +6,13 @@ export enum GroupListUpdateType {
     MODIFIED,
     REMOVE
 }
-
+export interface GroupMemberCache {
+    group: {
+        data: GroupMember[];
+        isExpired: boolean;
+    }
+    isExpired: boolean;
+}
 export interface Group {
     groupCode: string,
     createTime?: string,//高版本才有
