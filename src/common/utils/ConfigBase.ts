@@ -1,6 +1,6 @@
 import path from 'node:path';
 import fs from 'node:fs';
-import { NapCatCore } from '@/core';
+import type { NapCatCore } from '@/core';
 export class ConfigBase<T> {
   public name: string = 'default_config';
   private pathName: string | null = null; // 本次读取的文件路径

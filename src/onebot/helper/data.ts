@@ -32,7 +32,7 @@ import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
 import { OB11GroupBanEvent } from '../event/notice/OB11GroupBanEvent';
 import { OB11GroupUploadNoticeEvent } from '../event/notice/OB11GroupUploadNoticeEvent';
 import { OB11GroupNoticeEvent } from '../event/notice/OB11GroupNoticeEvent';
-import { calcQQLevel } from '@/common/utils/qqlevel';
+import { calcQQLevel } from '@/common/utils/helper';
 import { sleep, UUIDConverter } from '@/common/utils/helper';
 import { OB11GroupTitleEvent } from '../event/notice/OB11GroupTitleEvent';
 import { OB11GroupCardEvent } from '../event/notice/OB11GroupCardEvent';
