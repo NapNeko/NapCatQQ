@@ -44,7 +44,9 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             });
         });
     }
-
+    registerActionMap(actionMap: Map<string, BaseAction<any, any>>) {
+        this.actionMap = actionMap;
+    }
     registerAction<T extends BaseAction<P, R>, P, R>(action: T) {
         this.actionMap.set(action.actionName, action);
     }
