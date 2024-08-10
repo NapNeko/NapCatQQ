@@ -46,6 +46,8 @@ const FrameworkBaseConfigPlugin: PluginOption[] = [
   cp({
     targets: [
       { src: './manifest.json', dest: 'dist' },
+      { src: './src/external/napcat.json', dest: 'dist/config/' },
+      { src: './src/external/onebot.json', dest: 'dist/config/' },
       { src: './src/framework/liteloader.cjs', dest: 'dist' },
       { src: './src/framework/napcat.cjs', dest: 'dist' },
       { src: './src/framework/preload.cjs', dest: 'dist' },
@@ -78,7 +80,9 @@ const ShellBaseConfigPlugin: PluginOption[] = [
       // { src: './src/napcat.json', dest: 'dist/config/' },
       // { src: './static/', dest: 'dist/static/', flatten: false },
       // { src: './src/onebot11/onebot11.json', dest: 'dist/config/' },
-       { src: './package.json', dest: 'dist' },
+      { src: './src/external/napcat.json', dest: 'dist/config/' },
+      { src: './src/external/onebot.json', dest: 'dist/config/' },
+      { src: './package.json', dest: 'dist' },
       // { src: './README.md', dest: 'dist' },
       // { src: './logo.png', dest: 'dist/logs' },
       // ...(startScripts.map((startScript) => {
