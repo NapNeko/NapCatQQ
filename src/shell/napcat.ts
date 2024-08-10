@@ -171,7 +171,6 @@ export async function NCoreInitShell() {
             new wrapper.NodeIDispatcherAdapter(new DispatcherAdapter()),
             new wrapper.NodeIKernelSessionListener(sessionListener),
         );
-        logger.log('debug init')
         try {
             session.startNT(0);
         } catch (_) { /* Empty */
