@@ -1,4 +1,3 @@
-
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { OB11Constructor } from '@/onebot/helper/constructor';

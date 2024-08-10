@@ -6,14 +6,15 @@ import { sendMsg } from '@/onebot/action/msg/SendMsg';
 import { uri2local } from '@/common/utils/file';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { SendMsgElementConstructor } from '@/onebot/helper/msg';
+
 const SchemaData = {
     type: 'object',
     properties: {
         user_id: { type: ['number', 'string'] },
         file: { type: 'string' },
-        name: { type: 'string' }
+        name: { type: 'string' },
     },
-    required: ['user_id', 'file', 'name']
+    required: ['user_id', 'file', 'name'],
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
@@ -21,6 +22,7 @@ type Payload = FromSchema<typeof SchemaData>;
 export default class GoCQHTTPUploadPrivateFile extends BaseAction<Payload, null> {
     actionName = ActionName.GOCQHTTP_UploadPrivateFile;
     PayloadSchema = SchemaData;
+
     async getPeer(payload: Payload): Promise<Peer> {
         const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
         const NTQQFriendApi = this.CoreContext.getApiContext().FriendApi;
@@ -34,6 +36,7 @@ export default class GoCQHTTPUploadPrivateFile extends BaseAction<Payload, null>
         }
         throw '缺少参数 user_id';
     }
+
     protected async _handle(payload: Payload): Promise<null> {
         const peer = await this.getPeer(payload);
         let file = payload.file;

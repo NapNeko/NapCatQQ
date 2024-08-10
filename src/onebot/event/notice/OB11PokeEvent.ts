@@ -9,6 +9,7 @@ class OB11PokeEvent extends OB11BaseNoticeEvent {
 
 export class OB11FriendPokeEvent extends OB11PokeEvent {
     raw_info: any;
+
     //raw_message nb等框架标准为string
     constructor(user_id: number, target_id: number, raw_message: any) {
         super();
@@ -21,6 +22,7 @@ export class OB11FriendPokeEvent extends OB11PokeEvent {
 export class OB11GroupPokeEvent extends OB11PokeEvent {
     group_id: number;
     raw_info: any;
+
     //raw_message nb等框架标准为string
     constructor(group_id: number, user_id: number = 0, target_id: number = 0, raw_message: any) {
         super();

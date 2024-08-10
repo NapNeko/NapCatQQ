@@ -275,9 +275,11 @@ export class NTQQUserApi {
         }
         return uid;
     }
-    
+
     async getUinByUidV1(Uid: string) {
-        const ret = await this.core.eventWrapper.callNoListenerEvent<(Uin: string[]) => Promise<{ uinInfo: Map<string, string> }>>
+        const ret = await this.core.eventWrapper.callNoListenerEvent<(Uin: string[]) => Promise<{
+            uinInfo: Map<string, string>
+        }>>
             ('NodeIKernelUixConvertService/getUin', 5000, [Uid]);
         let uin = ret.uinInfo.get(Uid);
         if (!uin) {
@@ -317,6 +319,7 @@ export class NTQQUserApi {
         return this.core.eventWrapper.callNoListenerEvent<(Uin: string) => Promise<UserDetailInfoByUin>>
             ('NodeIKernelProfileService/getUserDetailInfoByUin', 5000, Uin);
     }
+
     async forceFetchClientKey() {
         return await this.context.session.getTicketService().forceFetchClientKey('');
     }

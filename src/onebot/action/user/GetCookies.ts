@@ -1,17 +1,18 @@
-
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+
 interface Response {
-  cookies: string,
-  bkn: string
+    cookies: string,
+    bkn: string
 }
+
 const SchemaData = {
     type: 'object',
     properties: {
-        domain: { type: 'string' }
+        domain: { type: 'string' },
     },
-    required: ['domain']
+    required: ['domain'],
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
@@ -19,6 +20,7 @@ type Payload = FromSchema<typeof SchemaData>;
 export class GetCookies extends BaseAction<Payload, Response> {
     actionName = ActionName.GetCookies;
     PayloadSchema = SchemaData;
+
     protected async _handle(payload: Payload) {
         const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
         const NTQQWebApi = this.CoreContext.getApiContext().WebApi;

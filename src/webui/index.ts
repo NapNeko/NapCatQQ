@@ -1,13 +1,11 @@
 import express from 'express';
-import { NextFunction, Request, Response } from 'express';
-import { AuthHelper } from './src/helper/SignToken';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import { ALLRouter } from './src/router';
 import { WebUiConfig } from './src/helper/config';
-const app = express();
-import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { log } from '@/common/utils/log';
+
+const app = express();
 
 
 const __filename = fileURLToPath(import.meta.url);

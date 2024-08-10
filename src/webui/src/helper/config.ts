@@ -1,7 +1,6 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import * as net from 'node:net';
-import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 
@@ -73,14 +72,17 @@ export interface WebUiConfigType {
     port: number;
     prefix: string;
     token: string;
-    loginRate: number
+    loginRate: number;
 }
+
 // 读取当前目录下名为 webui.json 的配置文件，如果不存在则创建初始化配置文件
 class WebUiConfigWrapper {
     WebUiConfigData: WebUiConfigType | undefined = undefined;
+
     private applyDefaults<T>(obj: Partial<T>, defaults: T): T {
         return { ...defaults, ...obj };
     }
+
     async GetWebUIConfig(): Promise<WebUiConfigType> {
         if (this.WebUiConfigData) {
             return this.WebUiConfigData;
@@ -90,7 +92,7 @@ class WebUiConfigWrapper {
             port: 6099,
             prefix: '',
             token: '', // 默认先填空，空密码无法登录
-            loginRate: 3
+            loginRate: 3,
         };
         try {
             defaultconfig.token = Math.random().toString(36).slice(2); //生成随机密码
@@ -138,4 +140,5 @@ class WebUiConfigWrapper {
         return defaultconfig; // 理论上这行代码到不了，到了只能返回默认配置了
     }
 }
+
 export const WebUiConfig = new WebUiConfigWrapper();

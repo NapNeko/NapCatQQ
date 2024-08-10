@@ -4,12 +4,13 @@ import { OB11Constructor } from '../../helper/data';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { calcQQLevel } from '@/common/utils/helper';
+
 const SchemaData = {
     type: 'object',
     properties: {
         user_id: { type: ['number', 'string'] },
     },
-    required: ['user_id']
+    required: ['user_id'],
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
@@ -32,7 +33,7 @@ export default class GoCQHTTPGetStrangerInfo extends BaseAction<Payload, OB11Use
                 qid: extendData.info.qid,
                 level: extendData.info.qqLevel && calcQQLevel(extendData.info.qqLevel) || 0,
                 login_days: 0,
-                uid: ''
+                uid: '',
             };
             return ret;
         }

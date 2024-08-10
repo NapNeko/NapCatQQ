@@ -5,7 +5,7 @@ import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 const SchemaData = {
     type: 'object',
     properties: {
-        group_id: { type: ['number', 'string'] }
+        group_id: { type: ['number', 'string'] },
     },
 } as const satisfies JSONSchema;
 
@@ -13,6 +13,7 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export class GetGroupSystemMsg extends BaseAction<void, any> {
     actionName = ActionName.GetGroupSystemMsg;
+
     protected async _handle(payload: void) {
         const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
         const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;

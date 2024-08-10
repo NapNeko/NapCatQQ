@@ -2,11 +2,12 @@ import { ChatType, ElementType, NapCatCore, Peer, RawMessage, SendMessageElement
 import { MessageUnique } from '@/common/utils/MessageUnique';
 import { OB11MessageDataType, OB11MessageNode } from '@/onebot/types';
 import createSendElements from './create-send-elements';
-import { normalize, sendMsg } from "../SendMsg/index";
+import { normalize, sendMsg } from '../SendMsg/index';
+
 async function cloneMsg(coreContext: NapCatCore, msg: RawMessage): Promise<RawMessage | undefined> {
     const selfPeer = {
         chatType: ChatType.friend,
-        peerUid: coreContext.selfInfo.uid
+        peerUid: coreContext.selfInfo.uid,
     };
     const logger = coreContext.context.logger;
     const NTQQMsgApi = coreContext.getApiContext().MsgApi;
@@ -33,7 +34,7 @@ export async function handleForwardNode(coreContext: NapCatCore, destPeer: Peer,
     const NTQQMsgApi = coreContext.getApiContext().MsgApi;
     const selfPeer = {
         chatType: ChatType.friend,
-        peerUid: coreContext.selfInfo.uid
+        peerUid: coreContext.selfInfo.uid,
     };
     let nodeMsgIds: string[] = [];
     const logger = coreContext.context.logger;
@@ -54,20 +55,28 @@ export async function handleForwardNode(coreContext: NapCatCore, destPeer: Peer,
                 //筛选node消息
                 const isNodeMsg = OB11Data.filter(e => e.type === OB11MessageDataType.node).length;//找到子转发消息
                 if (isNodeMsg !== 0) {
-                    if (isNodeMsg !== OB11Data.length) { logger.logError('子消息中包含非node消息 跳过不合法部分'); continue; }
+                    if (isNodeMsg !== OB11Data.length) {
+                        logger.logError('子消息中包含非node消息 跳过不合法部分');
+                        continue;
+                    }
                     const nodeMsg = await handleForwardNode(coreContext, selfPeer, OB11Data.filter(e => e.type === OB11MessageDataType.node));
-                    if (nodeMsg) { nodeMsgIds.push(nodeMsg.msgId); MessageUnique.createMsg(selfPeer, nodeMsg.msgId); }
+                    if (nodeMsg) {
+                        nodeMsgIds.push(nodeMsg.msgId);
+                        MessageUnique.createMsg(selfPeer, nodeMsg.msgId);
+                    }
                     //完成子卡片生成跳过后续
                     continue;
                 }
-                const { sendElements } = await createSendElements(coreContext,OB11Data, destPeer);
+                const { sendElements } = await createSendElements(coreContext, OB11Data, destPeer);
                 //拆分消息
                 const MixElement = sendElements.filter(element => element.elementType !== ElementType.FILE && element.elementType !== ElementType.VIDEO);
                 const SingleElement = sendElements.filter(element => element.elementType === ElementType.FILE || element.elementType === ElementType.VIDEO).map(e => [e]);
                 const AllElement: SendMessageElement[][] = [MixElement, ...SingleElement].filter(e => e !== undefined && e.length !== 0);
                 const MsgNodeList: Promise<RawMessage | undefined>[] = [];
                 for (const sendElementsSplitElement of AllElement) {
-                    MsgNodeList.push(sendMsg(coreContext,selfPeer, sendElementsSplitElement, [], true).catch(e => new Promise((resolve, reject) => { resolve(undefined); })));
+                    MsgNodeList.push(sendMsg(coreContext, selfPeer, sendElementsSplitElement, [], true).catch(e => new Promise((resolve, reject) => {
+                        resolve(undefined);
+                    })));
                 }
                 (await Promise.allSettled(MsgNodeList)).map((result) => {
                     if (result.status === 'fulfilled' && result.value) {

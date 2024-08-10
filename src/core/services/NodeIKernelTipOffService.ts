@@ -1,4 +1,4 @@
-import { GeneralCallResult } from "./common";
+import { GeneralCallResult } from './common';
 
 export interface NodeIKernelTipOffService {
 
@@ -8,7 +8,9 @@ export interface NodeIKernelTipOffService {
 
     tipOffSendJsData(args: unknown[]): Promise<unknown>;//2
 
-    getPskey(domainList: string[], nocache: boolean): Promise<GeneralCallResult & { domainPskeyMap: Map<string, string> }>;//2
+    getPskey(domainList: string[], nocache: boolean): Promise<GeneralCallResult & {
+        domainPskeyMap: Map<string, string>
+    }>;//2
 
     tipOffSendJsData(args: unknown[]): Promise<unknown>;//2
 

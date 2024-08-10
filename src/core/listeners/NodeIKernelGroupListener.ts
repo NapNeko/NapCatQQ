@@ -1,64 +1,65 @@
 import { Group, GroupListUpdateType, GroupMember, GroupNotify } from '@/core/entities';
 
 interface IGroupListener {
-  onGroupListUpdate(updateType: GroupListUpdateType, groupList: Group[]): void;
+    onGroupListUpdate(updateType: GroupListUpdateType, groupList: Group[]): void;
 
-  onGroupExtListUpdate(...args: unknown[]): void;
+    onGroupExtListUpdate(...args: unknown[]): void;
 
-  onGroupSingleScreenNotifies(doubt: boolean, seq: string, notifies: GroupNotify[]): void;
+    onGroupSingleScreenNotifies(doubt: boolean, seq: string, notifies: GroupNotify[]): void;
 
-  onGroupNotifiesUpdated(dboubt: boolean, notifies: GroupNotify[]): void;
+    onGroupNotifiesUpdated(dboubt: boolean, notifies: GroupNotify[]): void;
 
-  onGroupNotifiesUnreadCountUpdated(...args: unknown[]): void;
+    onGroupNotifiesUnreadCountUpdated(...args: unknown[]): void;
 
-  onGroupDetailInfoChange(...args: unknown[]): void;
+    onGroupDetailInfoChange(...args: unknown[]): void;
 
-  onGroupAllInfoChange(...args: unknown[]): void;
+    onGroupAllInfoChange(...args: unknown[]): void;
 
-  onGroupsMsgMaskResult(...args: unknown[]): void;
+    onGroupsMsgMaskResult(...args: unknown[]): void;
 
-  onGroupConfMemberChange(...args: unknown[]): void;
+    onGroupConfMemberChange(...args: unknown[]): void;
 
-  onGroupBulletinChange(...args: unknown[]): void;
+    onGroupBulletinChange(...args: unknown[]): void;
 
-  onGetGroupBulletinListResult(...args: unknown[]): void;
+    onGetGroupBulletinListResult(...args: unknown[]): void;
 
-  onMemberListChange(arg: {
-    sceneId: string,
-    ids: string[],
-    infos: Map<string, GroupMember>,
-    finish: boolean,
-    hasRobot: boolean
-  }): void;
+    onMemberListChange(arg: {
+        sceneId: string,
+        ids: string[],
+        infos: Map<string, GroupMember>,
+        finish: boolean,
+        hasRobot: boolean
+    }): void;
 
-  onMemberInfoChange(groupCode: string, changeType: number, members: Map<string, GroupMember>): void;
+    onMemberInfoChange(groupCode: string, changeType: number, members: Map<string, GroupMember>): void;
 
-  onSearchMemberChange(...args: unknown[]): void;
+    onSearchMemberChange(...args: unknown[]): void;
 
-  onGroupBulletinRichMediaDownloadComplete(...args: unknown[]): void;
+    onGroupBulletinRichMediaDownloadComplete(...args: unknown[]): void;
 
-  onGroupBulletinRichMediaProgressUpdate(...args: unknown[]): void;
+    onGroupBulletinRichMediaProgressUpdate(...args: unknown[]): void;
 
-  onGroupStatisticInfoChange(...args: unknown[]): void;
+    onGroupStatisticInfoChange(...args: unknown[]): void;
 
-  onJoinGroupNotify(...args: unknown[]): void;
+    onJoinGroupNotify(...args: unknown[]): void;
 
-  onShutUpMemberListChanged(...args: unknown[]): void;
+    onShutUpMemberListChanged(...args: unknown[]): void;
 
-  onGroupBulletinRemindNotify(...args: unknown[]): void;
+    onGroupBulletinRemindNotify(...args: unknown[]): void;
 
-  onGroupFirstBulletinNotify(...args: unknown[]): void;
+    onGroupFirstBulletinNotify(...args: unknown[]): void;
 
-  onJoinGroupNoVerifyFlag(...args: unknown[]): void;
+    onJoinGroupNoVerifyFlag(...args: unknown[]): void;
 
-  onGroupArkInviteStateResult(...args: unknown[]): void;
-  // 发现于Win 9.9.9 23159
-  onGroupMemberLevelInfoChange(...args: unknown[]): void;
+    onGroupArkInviteStateResult(...args: unknown[]): void;
+
+    // 发现于Win 9.9.9 23159
+    onGroupMemberLevelInfoChange(...args: unknown[]): void;
 }
 
 export interface NodeIKernelGroupListener extends IGroupListener {
-  // eslint-disable-next-line @typescript-eslint/no-misused-new
-  new(listener: IGroupListener): NodeIKernelGroupListener;
+    // eslint-disable-next-line @typescript-eslint/no-misused-new
+    new(listener: IGroupListener): NodeIKernelGroupListener;
 }
 
 export class GroupListener implements IGroupListener {
@@ -66,6 +67,7 @@ export class GroupListener implements IGroupListener {
     onGroupMemberLevelInfoChange(...args: unknown[]): void {
 
     }
+
     onGetGroupBulletinListResult(...args: unknown[]) {
     }
 
@@ -127,12 +129,12 @@ export class GroupListener implements IGroupListener {
     }
 
     onMemberListChange(arg: {
-    sceneId: string,
-    ids: string[],
-    infos: Map<string, GroupMember>, // uid -> GroupMember
-    finish: boolean,
-    hasRobot: boolean
-  }) {
+        sceneId: string,
+        ids: string[],
+        infos: Map<string, GroupMember>, // uid -> GroupMember
+        finish: boolean,
+        hasRobot: boolean
+    }) {
     }
 
     onSearchMemberChange(...args: unknown[]) {
@@ -146,6 +148,7 @@ export class DebugGroupListener implements IGroupListener {
     onGroupMemberLevelInfoChange(...args: unknown[]): void {
         console.log('onGroupMemberLevelInfoChange:', ...args);
     }
+
     onGetGroupBulletinListResult(...args: unknown[]) {
         console.log('onGetGroupBulletinListResult:', ...args);
     }

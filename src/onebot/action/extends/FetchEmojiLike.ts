@@ -12,9 +12,9 @@ const SchemaData = {
         emojiId: { type: 'string' },
         emojiType: { type: 'string' },
         message_id: { type: ['string', 'number'] },
-        count: { type: 'number' }
+        count: { type: 'number' },
     },
-    required: ['emojiId', 'emojiType', 'message_id']
+    required: ['emojiId', 'emojiType', 'message_id'],
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
@@ -22,10 +22,11 @@ type Payload = FromSchema<typeof SchemaData>;
 export class FetchEmojiLike extends BaseAction<Payload, any> {
     actionName = ActionName.FetchEmojiLike;
     PayloadSchema = SchemaData;
+
     protected async _handle(payload: Payload) {
         const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
         const msgIdPeer = MessageUnique.getMsgIdAndPeerByShortId(parseInt(payload.message_id.toString()));
-        if(!msgIdPeer) throw new Error('消息不存在');
+        if (!msgIdPeer) throw new Error('消息不存在');
         const msg = (await NTQQMsgApi.getMsgsByMsgId(msgIdPeer.Peer, [msgIdPeer.MsgId])).msgList[0];
         return await NTQQMsgApi.getMsgEmojiLikesList(msgIdPeer.Peer, msg.msgSeq, payload.emojiId, payload.emojiType, payload.count);
     }

@@ -2,25 +2,26 @@ import { WebApiGroupNoticeFeed } from '@/core';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+
 interface GroupNotice {
-  sender_id: number
-  publish_time: number
-  message: {
-    text: string
-    image: Array<{
-      height: string
-      width: string
-      id: string
-    }>
-  }
+    sender_id: number;
+    publish_time: number;
+    message: {
+        text: string
+        image: Array<{
+            height: string
+            width: string
+            id: string
+        }>
+    };
 }
 
 const SchemaData = {
     type: 'object',
     properties: {
-        group_id: { type: [ 'number' , 'string' ] },
+        group_id: { type: ['number', 'string'] },
     },
-    required: ['group_id']
+    required: ['group_id'],
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
@@ -30,6 +31,7 @@ type ApiGroupNotice = GroupNotice & WebApiGroupNoticeFeed;
 export class GetGroupNotice extends BaseAction<Payload, GroupNotice[]> {
     actionName = ActionName.GoCQHTTP_GetGroupNotice;
     PayloadSchema = SchemaData;
+
     protected async _handle(payload: Payload) {
         const NTQQWebApi = this.CoreContext.getApiContext().WebApi;
 
@@ -49,8 +51,8 @@ export class GetGroupNotice extends BaseAction<Payload, GroupNotice[]> {
                     text: retApiNotice.msg.text,
                     image: retApiNotice.msg.pics?.map((pic) => {
                         return { id: pic.id, height: pic.h, width: pic.w };
-                    }) || []
-                }
+                    }) || [],
+                },
             };
             retNotices.push(retNotice);
         }

@@ -1,4 +1,3 @@
-
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
@@ -7,9 +6,9 @@ const SchemaData = {
     type: 'object',
     properties: {
         user_id: { type: ['number', 'string'] },
-        times: { type: ['number', 'string'] }
+        times: { type: ['number', 'string'] },
     },
-    required: ['user_id', 'times']
+    required: ['user_id', 'times'],
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
@@ -17,6 +16,7 @@ type Payload = FromSchema<typeof SchemaData>;
 export default class SendLike extends BaseAction<Payload, null> {
     actionName = ActionName.SendLike;
     PayloadSchema = SchemaData;
+
     protected async _handle(payload: Payload): Promise<null> {
         const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
         //logDebug('点赞参数', payload);

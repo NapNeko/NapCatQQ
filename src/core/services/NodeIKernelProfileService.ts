@@ -1,103 +1,109 @@
 import { AnyCnameRecord } from 'node:dns';
-import { BaseInfo, BizKey, CoreInfo, ModifyProfileParams, SimpleInfo, UserDetailInfoByUin } from '../entities';
+import { BizKey, ModifyProfileParams, SimpleInfo, UserDetailInfoByUin } from '../entities';
 import { NodeIKernelProfileListener } from '../listeners';
 import { GeneralCallResult } from '@/core/services/common';
+
 export enum UserDetailSource {
-  KDB,
-  KSERVER
+    KDB,
+    KSERVER
 }
+
 export enum ProfileBizType {
-  KALL,
-  KBASEEXTEND,
-  KVAS,
-  KQZONE,
-  KOTHER
+    KALL,
+    KBASEEXTEND,
+    KVAS,
+    KQZONE,
+    KOTHER
 }
+
 export interface NodeIKernelProfileService {
 
-  getUidByUin(callfrom: string, uin: Array<string>): Promise<Map<string,string>>;//uin->uid
+    getUidByUin(callfrom: string, uin: Array<string>): Promise<Map<string, string>>;//uin->uid
 
-  getUinByUid(callfrom: string, uid: Array<string>): Promise<Map<string,string>>;
-  // {
-  //   coreInfo: CoreInfo,
-  //   baseInfo: BaseInfo,
-  //   status: null,
-  //   vasInfo: null,
-  //   relationFlags: null,
-  //   otherFlags: null,
-  //   intimate: null
-  // }
-  getCoreAndBaseInfo(callfrom: string, uids: string[]): Promise<Map<string, SimpleInfo>>;
+    getUinByUid(callfrom: string, uid: Array<string>): Promise<Map<string, string>>;
 
-  fetchUserDetailInfo(trace: string, uids: string[], arg2: number, arg3: number[]): Promise<unknown>;
+    // {
+    //   coreInfo: CoreInfo,
+    //   baseInfo: BaseInfo,
+    //   status: null,
+    //   vasInfo: null,
+    //   relationFlags: null,
+    //   otherFlags: null,
+    //   intimate: null
+    // }
+    getCoreAndBaseInfo(callfrom: string, uids: string[]): Promise<Map<string, SimpleInfo>>;
 
-  addKernelProfileListener(listener: NodeIKernelProfileListener): number;
+    fetchUserDetailInfo(trace: string, uids: string[], arg2: number, arg3: number[]): Promise<unknown>;
 
-  removeKernelProfileListener(listenerId: number): void;
+    addKernelProfileListener(listener: NodeIKernelProfileListener): number;
 
-  prepareRegionConfig(...args: unknown[]): unknown;
+    removeKernelProfileListener(listenerId: number): void;
 
-  getLocalStrangerRemark(): Promise<AnyCnameRecord>;
+    prepareRegionConfig(...args: unknown[]): unknown;
 
-  enumCountryOptions(): Array<string>;
+    getLocalStrangerRemark(): Promise<AnyCnameRecord>;
 
-  enumProvinceOptions(Country: string): Array<string>;
+    enumCountryOptions(): Array<string>;
 
-  enumCityOptions(Country: string, Province: string): unknown;
+    enumProvinceOptions(Country: string): Array<string>;
 
-  enumAreaOptions(...args: unknown[]): unknown;
+    enumCityOptions(Country: string, Province: string): unknown;
 
-  //SimpleInfo
-  // this.uid = "";
-  // this.uid = str;
-  // this.uin = j2;
-  // this.isBuddy = z;
-  // this.coreInfo = coreInfo;
-  // this.baseInfo = baseInfo;
-  // this.status = statusInfo;
-  // this.vasInfo = vasInfo;
-  // this.relationFlags = relationFlag;
-  // this.otherFlags = otherFlag;
-  // this.intimate = intimate;
+    enumAreaOptions(...args: unknown[]): unknown;
 
-  modifySelfProfile(...args: unknown[]): Promise<unknown>;
+    //SimpleInfo
+    // this.uid = "";
+    // this.uid = str;
+    // this.uin = j2;
+    // this.isBuddy = z;
+    // this.coreInfo = coreInfo;
+    // this.baseInfo = baseInfo;
+    // this.status = statusInfo;
+    // this.vasInfo = vasInfo;
+    // this.relationFlags = relationFlag;
+    // this.otherFlags = otherFlag;
+    // this.intimate = intimate;
 
-  modifyDesktopMiniProfile(param: ModifyProfileParams): Promise<GeneralCallResult>;
+    modifySelfProfile(...args: unknown[]): Promise<unknown>;
 
-  setNickName(NickName: string): Promise<unknown>;
+    modifyDesktopMiniProfile(param: ModifyProfileParams): Promise<GeneralCallResult>;
 
-  setLongNick(longNick: string): Promise<unknown>;
+    setNickName(NickName: string): Promise<unknown>;
 
-  setBirthday(...args: unknown[]): Promise<unknown>;
+    setLongNick(longNick: string): Promise<unknown>;
 
-  setGander(...args: unknown[]): Promise<unknown>;
+    setBirthday(...args: unknown[]): Promise<unknown>;
 
-  setHeader(arg: string): Promise<unknown>;
+    setGander(...args: unknown[]): Promise<unknown>;
 
-  setRecommendImgFlag(...args: unknown[]): Promise<unknown>;
+    setHeader(arg: string): Promise<unknown>;
 
-  getUserSimpleInfo(force: boolean, uids: string[],): Promise<unknown>;
+    setRecommendImgFlag(...args: unknown[]): Promise<unknown>;
 
-  getUserDetailInfo(uid: string): Promise<unknown>;
+    getUserSimpleInfo(force: boolean, uids: string[]): Promise<unknown>;
 
-  getUserDetailInfoWithBizInfo(uid: string, Biz: BizKey[]): Promise<GeneralCallResult>;
+    getUserDetailInfo(uid: string): Promise<unknown>;
 
-  getUserDetailInfoByUin(uin: string): Promise<UserDetailInfoByUin>;
+    getUserDetailInfoWithBizInfo(uid: string, Biz: BizKey[]): Promise<GeneralCallResult>;
 
-  getZplanAvatarInfos(args: string[]): Promise<unknown>;
+    getUserDetailInfoByUin(uin: string): Promise<UserDetailInfoByUin>;
 
-  getStatus(uid: string): Promise<unknown>;
+    getZplanAvatarInfos(args: string[]): Promise<unknown>;
 
-  startStatusPolling(isForceReset: boolean): Promise<unknown>;
+    getStatus(uid: string): Promise<unknown>;
 
-  getSelfStatus(): Promise<unknown>;
-  //
-  setdisableEmojiShortCuts(...args: unknown[]): unknown;
+    startStatusPolling(isForceReset: boolean): Promise<unknown>;
 
-  getProfileQzonePicInfo(uid: string, type: number, force: boolean): Promise<unknown>;
+    getSelfStatus(): Promise<unknown>;
 
-  //profileService.getCoreInfo("UserRemarkServiceImpl::getStrangerRemarkByUid", arrayList);
-  getCoreInfo(name: string, arg: any[]): unknown;
-  //m429253e12.getOtherFlag("FriendListInfoCache_getKernelDataAndPutCache", new ArrayList<>());
-  isNull(): boolean;
+    //
+    setdisableEmojiShortCuts(...args: unknown[]): unknown;
+
+    getProfileQzonePicInfo(uid: string, type: number, force: boolean): Promise<unknown>;
+
+    //profileService.getCoreInfo("UserRemarkServiceImpl::getStrangerRemarkByUid", arrayList);
+    getCoreInfo(name: string, arg: any[]): unknown;
+
+    //m429253e12.getOtherFlag("FriendListInfoCache_getKernelDataAndPutCache", new ArrayList<>());
+    isNull(): boolean;
 }

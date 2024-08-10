@@ -11,6 +11,7 @@ export interface CustomMusicSignPostData {
     image?: string,
     singer?: string
 }
+
 export interface MiniAppLuaJsonType {
     prompt: string,
     title: string,
@@ -20,4 +21,4 @@ export interface MiniAppLuaJsonType {
     tagIcon: string,
     source: string,
     sourcelogo: string,
-  }
+}

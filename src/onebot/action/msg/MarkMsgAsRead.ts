@@ -1,15 +1,14 @@
 import { ChatType, Peer } from '@/core/entities';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { NTQQFriendApi, NTQQMsgApi, NTQQUserApi } from '@/core/apis';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
 const SchemaData = {
     type: 'object',
     properties: {
         user_id: { type: ['number', 'string'] },
-        group_id: { type: ['number', 'string'] }
-    }
+        group_id: { type: ['number', 'string'] },
+    },
 } as const satisfies JSONSchema;
 
 type PlayloadType = FromSchema<typeof SchemaData>;
@@ -31,6 +30,7 @@ class MarkMsgAsRead extends BaseAction<PlayloadType, null> {
         }
         return { chatType: ChatType.group, peerUid: payload.group_id.toString() };
     }
+
     protected async _handle(payload: PlayloadType): Promise<null> {
         const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
         // 调用API
@@ -41,11 +41,13 @@ class MarkMsgAsRead extends BaseAction<PlayloadType, null> {
         return null;
     }
 }
+
 // 以下为非标准实现
 export class MarkPrivateMsgAsRead extends MarkMsgAsRead {
     PayloadSchema = SchemaData;
     actionName = ActionName.MarkPrivateMsgAsRead;
 }
+
 export class MarkGroupMsgAsRead extends MarkMsgAsRead {
     PayloadSchema = SchemaData;
     actionName = ActionName.MarkGroupMsgAsRead;
@@ -53,7 +55,7 @@ export class MarkGroupMsgAsRead extends MarkMsgAsRead {
 
 
 interface Payload {
-  message_id: number
+    message_id: number;
 }
 
 export class GoCQHTTPMarkMsgAsRead extends BaseAction<Payload, null> {

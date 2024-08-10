@@ -1,6 +1,6 @@
 import { OB11GroupNoticeEvent } from './OB11GroupNoticeEvent';
 
-export interface GroupUploadFile{
+export interface GroupUploadFile {
     id: string,
     name: string,
     size: number,

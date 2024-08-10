@@ -1,43 +1,42 @@
-import path from "node:path";
-import fs from "node:fs";
-import { NodeIDependsAdapter, NodeIDispatcherAdapter, NodeIGlobalAdapter } from "../adapters";
+import { NodeIDependsAdapter, NodeIDispatcherAdapter, NodeIGlobalAdapter } from '../adapters';
 import {
-    NodeIKernelSessionListener,
-    NodeIKernelMsgListener,
-    NodeIKernelLoginListener,
     NodeIKernelBuddyListener,
     NodeIKernelGroupListener,
+    NodeIKernelLoginListener,
+    NodeIKernelMsgListener,
     NodeIKernelProfileListener,
-} from "../listeners";
+    NodeIKernelSessionListener,
+} from '../listeners';
 import {
-    NodeIKernelLoginService,
-    NodeIKernelMsgService,
+    NodeIKernelAvatarService,
     NodeIKernelBuddyService,
     NodeIKernelGroupService,
-    NodeIKernelProfileService,
+    NodeIKernelLoginService,
+    NodeIKernelMsgService,
     NodeIKernelProfileLikeService,
+    NodeIKernelProfileService,
+    NodeIKernelRichMediaService,
     NodeIKernelTicketService,
     NodeIKernelTipOffService,
-    NodeIKernelRichMediaService,
-    NodeIKernelAvatarService,
-} from "../services";
-import { NodeIKernelStorageCleanService } from "../services/NodeIKernelStorageCleanService";
-import { NodeIKernelRobotService } from "../services/NodeIKernelRobotService";
-import { NodeIKernelNodeMiscService } from "../services/NodeIKernelNodeMiscService";
-import { NodeIKernelUixConvertService } from "../services/NodeIKernelUixConvertService";
-import { NodeIKernelMsgBackupService } from "../services/NodeIKernelMsgBackupService";
-import { NodeIKernelAlbumService } from "../services/NodeIKernelAlbumService";
-import { NodeIKernelTianShuService } from "../services/NodeIKernelTianShuService";
-import { NodeIKernelUnitedConfigService } from "../services/NodeIKernelUnitedConfigService";
-import { NodeIKernelSearchService } from "../services/NodeIKernelSearchService";
-import { NodeIKernelCollectionService } from "../services/NodeIKernelCollectionService";
-import { NodeIKernelRecentContactService } from "../services/NodeIKernelRecentContactService";
-import { NodeIKernelMSFService } from "../services/NodeIKernelMSFService";
-import { NodeIkernelTestPerformanceService } from "../services/NodeIkernelTestPerformanceService";
-import { NodeIKernelECDHService } from "../services/NodeIKernelECDHService";
+} from '../services';
+import { NodeIKernelStorageCleanService } from '../services/NodeIKernelStorageCleanService';
+import { NodeIKernelRobotService } from '../services/NodeIKernelRobotService';
+import { NodeIKernelNodeMiscService } from '../services/NodeIKernelNodeMiscService';
+import { NodeIKernelUixConvertService } from '../services/NodeIKernelUixConvertService';
+import { NodeIKernelMsgBackupService } from '../services/NodeIKernelMsgBackupService';
+import { NodeIKernelAlbumService } from '../services/NodeIKernelAlbumService';
+import { NodeIKernelTianShuService } from '../services/NodeIKernelTianShuService';
+import { NodeIKernelUnitedConfigService } from '../services/NodeIKernelUnitedConfigService';
+import { NodeIKernelSearchService } from '../services/NodeIKernelSearchService';
+import { NodeIKernelCollectionService } from '../services/NodeIKernelCollectionService';
+import { NodeIKernelRecentContactService } from '../services/NodeIKernelRecentContactService';
+import { NodeIKernelMSFService } from '../services/NodeIKernelMSFService';
+import { NodeIkernelTestPerformanceService } from '../services/NodeIkernelTestPerformanceService';
+import { NodeIKernelECDHService } from '../services/NodeIKernelECDHService';
+
 export interface NodeQQNTWrapperUtil {
     // eslint-disable-next-line @typescript-eslint/no-misused-new
-    new (): NodeQQNTWrapperUtil;
+    new(): NodeQQNTWrapperUtil;
 
     getNTUserDataInfoConfig(): string;
 
@@ -110,7 +109,7 @@ export interface NodeQQNTWrapperUtil {
         arg1: unknown,
         arg2: unknown,
         arg3: number,
-        arg4: number
+        arg4: number,
     ): unknown;
 
     reportCountIndicators(
@@ -118,7 +117,7 @@ export interface NodeQQNTWrapperUtil {
         arg1: Map<unknown, unknown>,
         arg2: string,
         arg3: number,
-        arg4: boolean
+        arg4: boolean,
     ): unknown;
 
     reportValueIndicators(
@@ -126,7 +125,7 @@ export interface NodeQQNTWrapperUtil {
         arg1: Map<unknown, unknown>,
         arg2: string,
         arg3: boolean,
-        arg4: number
+        arg4: number,
     ): unknown;
 
     checkNewUserDataSaveDirAvailable(arg0: string): unknown;
@@ -150,13 +149,13 @@ export interface NodeQQNTWrapperUtil {
 
 export interface NodeIQQNTWrapperSession {
     // eslint-disable-next-line @typescript-eslint/no-misused-new
-    new (): NodeIQQNTWrapperSession;
+    new(): NodeIQQNTWrapperSession;
 
     init(
         wrapperSessionInitConfig: WrapperSessionInitConfig,
         nodeIDependsAdapter: NodeIDependsAdapter,
         nodeIDispatcherAdapter: NodeIDispatcherAdapter,
-        nodeIKernelSessionListener: NodeIKernelSessionListener
+        nodeIKernelSessionListener: NodeIKernelSessionListener,
     ): void;
 
     startNT(n: 0): void;
@@ -270,7 +269,8 @@ export interface EnginInitDesktopConfig {
 
 export interface NodeIQQNTWrapperEngine {
     // eslint-disable-next-line @typescript-eslint/no-misused-new
-    new (): NodeIQQNTWrapperEngine;
+    new(): NodeIQQNTWrapperEngine;
+
     initWithDeskTopConfig(config: EnginInitDesktopConfig, nodeIGlobalAdapter: NodeIGlobalAdapter): void;
 }
 
@@ -292,6 +292,7 @@ export interface WrapperNodeApi {
     NodeIKernelProfileService: NodeIKernelProfileService;
     NodeIKernelProfileListener: NodeIKernelProfileListener;
 }
+
 export enum PlatformType {
     KUNKNOWN,
     KANDROID,
@@ -299,12 +300,14 @@ export enum PlatformType {
     KWINDOWS,
     KMAC,
 }
+
 export enum DeviceType {
     KUNKNOWN,
     KPHONE,
     KPAD,
     KCOMPUTER,
 }
+
 //推送类型
 export enum VendorType {
     KNOSETONIOS = 0,
@@ -315,6 +318,7 @@ export enum VendorType {
     KSUPPORTVIVOPUSH = 5,
     KUNSUPPORTANDROIDPUSH = 1,
 }
+
 export interface WrapperSessionInitConfig {
     selfUin: string;
     selfUid: string;

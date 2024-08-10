@@ -5,9 +5,11 @@ import { join as joinPath } from 'node:path';
 import { calculateFileMD5, httpDownload } from '@/common/utils/file';
 import { randomUUID } from 'crypto';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+
 interface FileResponse {
-  file: string;
+    file: string;
 }
+
 const SchemaData = {
     type: 'object',
     properties: {
@@ -18,9 +20,9 @@ const SchemaData = {
         headers: {
             type: ['string', 'array'],
             items: {
-                type: 'string'
-            }
-        }
+                type: 'string',
+            },
+        },
     },
 } as const satisfies JSONSchema;
 
@@ -29,6 +31,7 @@ type Payload = FromSchema<typeof SchemaData>;
 export default class GoCQHTTPDownloadFile extends BaseAction<Payload, FileResponse> {
     actionName = ActionName.GoCQHTTP_DownloadFile;
     PayloadSchema = SchemaData;
+
     protected async _handle(payload: Payload): Promise<FileResponse> {
         const isRandomName = !payload.name;
         const name = payload.name || randomUUID();

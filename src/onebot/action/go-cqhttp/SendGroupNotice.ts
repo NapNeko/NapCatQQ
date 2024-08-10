@@ -3,6 +3,7 @@ import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { unlink } from 'node:fs';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+
 const SchemaData = {
     type: 'object',
     properties: {
@@ -10,21 +11,27 @@ const SchemaData = {
         content: { type: 'string' },
         image: { type: 'string' },
         pinned: { type: 'number' },
-        confirmRequired: { type: 'number' }
+        confirmRequired: { type: 'number' },
     },
-    required: ['group_id', 'content']
+    required: ['group_id', 'content'],
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
 
 export class SendGroupNotice extends BaseAction<Payload, null> {
     actionName = ActionName.GoCQHTTP_SendGroupNotice;
+
     protected async _handle(payload: Payload) {
         const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
         let UploadImage: { id: string, width: number, height: number } | undefined = undefined;
         if (payload.image) {
             //公告图逻辑
-            const { errMsg, path, isLocal, success } = (await uri2local(this.CoreContext.NapCatTempPath,payload.image));
+            const {
+                errMsg,
+                path,
+                isLocal,
+                success,
+            } = (await uri2local(this.CoreContext.NapCatTempPath, payload.image));
             if (!success) {
                 throw `群公告${payload.image}设置失败,image字段可能格式不正确`;
             }
@@ -37,7 +44,8 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
                 throw `群公告${payload.image}设置失败,图片上传失败`;
             }
             if (!isLocal) {
-                unlink(path, () => { });
+                unlink(path, () => {
+                });
             }
             UploadImage = ImageUploadResult.picInfo;
         }

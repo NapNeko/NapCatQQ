@@ -1,4 +1,4 @@
-import { OneBotFriendApi, OneBotGroupApi, OneBotUserApi } from "../api";
+import { OneBotFriendApi, OneBotGroupApi, OneBotUserApi } from '../api';
 
 export interface OneBotApiContextType {
     FriendApi: OneBotFriendApi;

@@ -1,11 +1,10 @@
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { NTQQGroupApi } from '@/core/apis/group';
 
 interface OB11GroupRequestNotify {
-  group_id: number,
-  user_id: number,
-  flag: string
+    group_id: number,
+    user_id: number,
+    flag: string
 }
 
 export default class GetGroupAddRequest extends BaseAction<null, OB11GroupRequestNotify[] | null> {

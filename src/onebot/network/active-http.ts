@@ -36,7 +36,7 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     onEvent<T extends OB11BaseEvent>(event: T) {
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
-            'x-self-id': this.coreContext.selfInfo.uin
+            'x-self-id': this.coreContext.selfInfo.uin,
         };
         const msgStr = JSON.stringify(event);
         if (this.secret && this.secret.length > 0) {
@@ -48,7 +48,7 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
         fetch(this.url, {
             method: 'POST',
             headers,
-            body: msgStr
+            body: msgStr,
         }).then(async (res) => {
             let resJson: QuickAction;
             try {

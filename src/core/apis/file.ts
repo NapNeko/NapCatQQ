@@ -3,7 +3,11 @@ import {
     CacheFileType,
     ChatCacheListItemBasic,
     ChatType,
-    ElementType, IMAGE_HTTP_HOST, IMAGE_HTTP_HOST_NT, Peer, PicElement
+    ElementType,
+    IMAGE_HTTP_HOST,
+    IMAGE_HTTP_HOST_NT,
+    Peer,
+    PicElement,
 } from '@/core/entities';
 import path from 'path';
 import fs from 'fs';
@@ -21,11 +25,13 @@ export class NTQQFileApi {
     context: InstanceContext;
     core: NapCatCore;
     rkeyManager: RkeyManager;
+
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
         this.core = core;
         this.rkeyManager = new RkeyManager('http://napcat-sign.wumiao.wang:2082/rkey', this.context.logger);
     }
+
     async getFileType(filePath: string) {
         return fileType.fileTypeFromFile(filePath);
     }
@@ -37,12 +43,17 @@ export class NTQQFileApi {
     async getFileSize(filePath: string): Promise<number> {
         return await this.context.wrapper.util.getFileSize(filePath);
     }
+
     async getVideoUrl(peer: Peer, msgId: string, elementId: string) {
-        return (await this.context.session.getRichMediaService().getVideoPlayUrlV2(peer, msgId, elementId, 0, { downSourceType: 1, triggerType: 1 })).urlResult.domainUrl;
+        return (await this.context.session.getRichMediaService().getVideoPlayUrlV2(peer, msgId, elementId, 0, {
+            downSourceType: 1,
+            triggerType: 1,
+        })).urlResult.domainUrl;
     }
+
     // 上传文件到QQ的文件夹
     async uploadFile(filePath: string, elementType: ElementType = ElementType.PIC, elementSubType: number = 0) {
-    // napCatCore.wrapper.util.
+        // napCatCore.wrapper.util.
         const fileMd5 = await calculateFileMD5(filePath);
         let ext: string = (await this.getFileType(filePath))?.ext as string || '';
         if (ext) {
@@ -60,7 +71,7 @@ export class NTQQFileApi {
             thumbSize: 0,
             needCreate: true,
             downloadType: 1,
-            file_uuid: ''
+            file_uuid: '',
         });
         await this.copyFile(filePath, mediaPath!);
         const fileSize = await this.getFileSize(filePath);
@@ -69,76 +80,78 @@ export class NTQQFileApi {
             fileName,
             path: mediaPath,
             fileSize,
-            ext
+            ext,
         };
     }
+
     async downloadMediaByUuid() {
-    //napCatCore.session.getRichMediaService().downloadFileForFileUuid();
+        //napCatCore.session.getRichMediaService().downloadFileForFileUuid();
     }
+
     async downloadMedia(msgId: string, chatType: ChatType, peerUid: string, elementId: string, thumbPath: string, sourcePath: string, timeout = 1000 * 60 * 2, force: boolean = false) {
-      //logDebug('receive downloadMedia task', msgId, chatType, peerUid, elementId, thumbPath, sourcePath, timeout, force);
-      // 用于下载收到的消息中的图片等
-      if (sourcePath && fs.existsSync(sourcePath)) {
-        if (force) {
-          try {
-            await fsPromises.unlink(sourcePath);
-          } catch (e) {
-            //
-          }
-        } else {
-          return sourcePath;
+        //logDebug('receive downloadMedia task', msgId, chatType, peerUid, elementId, thumbPath, sourcePath, timeout, force);
+        // 用于下载收到的消息中的图片等
+        if (sourcePath && fs.existsSync(sourcePath)) {
+            if (force) {
+                try {
+                    await fsPromises.unlink(sourcePath);
+                } catch (e) {
+                    //
+                }
+            } else {
+                return sourcePath;
+            }
         }
-      }
-      const data = await this.core.eventWrapper.CallNormalEvent<
-        (
-          params: {
-            fileModelId: string,
-            downloadSourceType: number,
-            triggerType: number,
-            msgId: string,
-            chatType: ChatType,
-            peerUid: string,
-            elementId: string,
-            thumbSize: number,
-            downloadType: number,
-            filePath: string
-          }) => Promise<unknown>,
-        (fileTransNotifyInfo: OnRichMediaDownloadCompleteParams) => void
-      >(
-        'NodeIKernelMsgService/downloadRichMedia',
-        'NodeIKernelMsgListener/onRichMediaDownloadComplete',
-        1,
-        timeout,
-        (arg: OnRichMediaDownloadCompleteParams) => {
-          if (arg.msgId === msgId) {
-            return true;
-          }
-          return false;
-        },
-        {
-          fileModelId: '0',
-          downloadSourceType: 0,
-          triggerType: 1,
-          msgId: msgId,
-          chatType: chatType,
-          peerUid: peerUid,
-          elementId: elementId,
-          thumbSize: 0,
-          downloadType: 1,
-          filePath: thumbPath
+        const data = await this.core.eventWrapper.CallNormalEvent<
+            (
+                params: {
+                    fileModelId: string,
+                    downloadSourceType: number,
+                    triggerType: number,
+                    msgId: string,
+                    chatType: ChatType,
+                    peerUid: string,
+                    elementId: string,
+                    thumbSize: number,
+                    downloadType: number,
+                    filePath: string
+                }) => Promise<unknown>,
+            (fileTransNotifyInfo: OnRichMediaDownloadCompleteParams) => void
+                >(
+                'NodeIKernelMsgService/downloadRichMedia',
+                'NodeIKernelMsgListener/onRichMediaDownloadComplete',
+                1,
+                timeout,
+                (arg: OnRichMediaDownloadCompleteParams) => {
+                    if (arg.msgId === msgId) {
+                        return true;
+                    }
+                    return false;
+                },
+                {
+                    fileModelId: '0',
+                    downloadSourceType: 0,
+                    triggerType: 1,
+                    msgId: msgId,
+                    chatType: chatType,
+                    peerUid: peerUid,
+                    elementId: elementId,
+                    thumbSize: 0,
+                    downloadType: 1,
+                    filePath: thumbPath,
+                },
+                );
+        let filePath = data[1].filePath;
+        if (filePath.startsWith('\\')) {
+            // log('filePath start with \\');
+            // Mlikiowa V2.0.0 Refactor Todo
+            //const downloadPath = sessionConfig.defaultFileDownloadPath;
+            //logDebug('downloadPath', downloadPath);
+            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            filePath = path.join('', filePath);
+            // 下载路径是下载文件夹的相对路径
         }
-      );
-      let filePath = data[1].filePath;
-      if (filePath.startsWith('\\')) {
-        // log('filePath start with \\');
-        // Mlikiowa V2.0.0 Refactor Todo
-        //const downloadPath = sessionConfig.defaultFileDownloadPath;
-        //logDebug('downloadPath', downloadPath);
-        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        filePath = path.join("", filePath);
-        // 下载路径是下载文件夹的相对路径
-      }
-      return filePath;
+        return filePath;
     }
 
     async getImageSize(filePath: string): Promise<ISizeCalculationResult | undefined> {
@@ -152,25 +165,26 @@ export class NTQQFileApi {
             });
         });
     }
+
     async addFileCache(peer: Peer, msgId: string, msgSeq: string, senderUid: string, elemId: string, elemType: string, fileSize: string, fileName: string) {
         let GroupData;
         let BuddyData;
         if (peer.chatType === ChatType.group) {
             GroupData =
-        [{
-            groupCode: peer.peerUid,
-            isConf: false,
-            hasModifyConfGroupFace: true,
-            hasModifyConfGroupName: true,
-            groupName: "NapCat.Cached",
-            remark: "NapCat.Cached"
-        }];
+                [{
+                    groupCode: peer.peerUid,
+                    isConf: false,
+                    hasModifyConfGroupFace: true,
+                    hasModifyConfGroupName: true,
+                    groupName: 'NapCat.Cached',
+                    remark: 'NapCat.Cached',
+                }];
         } else if (peer.chatType === ChatType.friend) {
             BuddyData = [{
                 category_name: 'NapCat.Cached',
                 peerUid: peer.peerUid,
                 peerUin: peer.peerUid,
-                remark: 'NapCat.Cached'
+                remark: 'NapCat.Cached',
             }];
         } else {
             return undefined;
@@ -204,65 +218,68 @@ export class NTQQFileApi {
                     fileName: fileName,
                     hits: [{
                         start: 12,
-                        end: 14
-                    }]
-                }
-            ]
+                        end: 14,
+                    }],
+                },
+            ],
         });
     }
+
     async searchfile(keys: string[]) {
-    type EventType = NodeIKernelSearchService['searchFileWithKeywords'];
-    interface OnListener {
-      searchId: string,
-      hasMore: boolean,
-      resultItems: {
-        chatType: ChatType,
-        buddyChatInfo: any[],
-        discussChatInfo: any[],
-        groupChatInfo:
-        {
-          groupCode: string,
-          isConf: boolean,
-          hasModifyConfGroupFace: boolean,
-          hasModifyConfGroupName: boolean,
-          groupName: string,
-          remark: string
-        }[]
-        ,
-        dataLineChatInfo: any[],
-        tmpChatInfo: any[],
-        msgId: string,
-        msgSeq: string,
-        msgTime: string,
-        senderUid: string,
-        senderNick: string,
-        senderRemark: string,
-        senderCard: string,
-        elemId: string,
-        elemType: number,
-        fileSize: string,
-        filePath: string,
-        fileName: string,
-        hits:
-        {
-          start: number,
-          end: number
-        }[]
-      }[]
+        type EventType = NodeIKernelSearchService['searchFileWithKeywords'];
+
+        interface OnListener {
+            searchId: string,
+            hasMore: boolean,
+            resultItems: {
+                chatType: ChatType,
+                buddyChatInfo: any[],
+                discussChatInfo: any[],
+                groupChatInfo:
+                    {
+                        groupCode: string,
+                        isConf: boolean,
+                        hasModifyConfGroupFace: boolean,
+                        hasModifyConfGroupName: boolean,
+                        groupName: string,
+                        remark: string
+                    }[],
+                dataLineChatInfo: any[],
+                tmpChatInfo: any[],
+                msgId: string,
+                msgSeq: string,
+                msgTime: string,
+                senderUid: string,
+                senderNick: string,
+                senderRemark: string,
+                senderCard: string,
+                elemId: string,
+                elemType: number,
+                fileSize: string,
+                filePath: string,
+                fileName: string,
+                hits:
+                    {
+                        start: number,
+                        end: number
+                    }[]
+            }[]
+        }
+
+        const Event = this.core.eventWrapper.createEventFunction<EventType>('NodeIKernelSearchService/searchFileWithKeywords');
+        let id = '';
+        const Listener = this.core.eventWrapper.RegisterListen<(params: OnListener) => void>
+            (
+            'NodeIKernelSearchListener/onSearchFileKeywordsResult',
+            1,
+            20000,
+            (params) => id !== '' && params.searchId == id,
+            );
+        id = await Event!(keys, 12);
+        const [ret] = (await Listener);
+        return ret;
     }
-    const Event = this.core.eventWrapper.createEventFunction<EventType>('NodeIKernelSearchService/searchFileWithKeywords');
-    let id = '';
-    const Listener = this.core.eventWrapper.RegisterListen<(params: OnListener) => void>
-        (
-        'NodeIKernelSearchListener/onSearchFileKeywordsResult',
-        1,
-        20000,
-        (params) => id !== '' && params.searchId == id
-        );
-    id = await Event!(keys, 12);
-    const [ret] = (await Listener);
-    return ret;
-    }
+
     async getImageUrl(element: PicElement) {
         if (!element) {
             return '';
@@ -300,10 +317,12 @@ export class NTQQFileApi {
 export class NTQQFileCacheApi {
     context: InstanceContext;
     core: NapCatCore;
+
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
         this.core = core;
     }
+
     async setCacheSilentScan(isSilent: boolean = true) {
         return '';
     }
@@ -313,7 +332,7 @@ export class NTQQFileCacheApi {
     }
 
     clearCache(cacheKeys: Array<string> = ['tmp', 'hotUpdate']) {
-    // 参数未验证
+        // 参数未验证
         return this.context.session.getStorageCleanService().clearCacheDataByKeys(cacheKeys);
     }
 
@@ -322,16 +341,16 @@ export class NTQQFileCacheApi {
     }
 
     scanCache() {
-    //return (await this.context.session.getStorageCleanService().scanCache()).size;
+        //return (await this.context.session.getStorageCleanService().scanCache()).size;
     }
 
     getHotUpdateCachePath() {
-    // 未实现
+        // 未实现
         return '';
     }
 
     getDesktopTmpPath() {
-    // 未实现
+        // 未实现
         return '';
     }
 
@@ -341,8 +360,8 @@ export class NTQQFileCacheApi {
 
     getFileCacheInfo(fileType: CacheFileType, pageSize: number = 1000, lastRecord?: CacheFileListItem) {
         const _lastRecord = lastRecord ? lastRecord : { fileType: fileType };
-    //需要五个参数
-    //return napCatCore.session.getStorageCleanService().getFileCacheInfo();
+        //需要五个参数
+        //return napCatCore.session.getStorageCleanService().getFileCacheInfo();
     }
 
     async clearChatCache(chats: ChatCacheListItemBasic[] = [], fileKeys: string[] = []) {

@@ -5,12 +5,12 @@ import { LoginListener, SessionListener } from '@/core/listeners';
 import { DependsAdapter, DispatcherAdapter, GlobalAdapter } from '@/core/adapters';
 import { NapCatPathWrapper } from '@/common/framework/napcat';
 import {
-    NapCatCoreWorkingEnv,
+    InstanceContext,
     loadQQWrapper,
     NapCatCore,
-    InstanceContext,
-    WrapperNodeApi,
+    NapCatCoreWorkingEnv,
     NodeIQQNTWrapperSession,
+    WrapperNodeApi,
 } from '@/core';
 import { QQBasicInfoWrapper } from '@/common/utils/QQBasicInfo';
 import { hostname, systemVersion } from '@/common/utils/system';
@@ -209,7 +209,7 @@ export class NapCatShell {
         loginService: NodeIKernelLoginService,
         selfInfo: SelfInfo,
         basicInfoWrapper: QQBasicInfoWrapper,
-        pathWrapper: NapCatPathWrapper
+        pathWrapper: NapCatPathWrapper,
     ) {
         this.context = {
             workingEnv: NapCatCoreWorkingEnv.Shell,
@@ -218,7 +218,7 @@ export class NapCatShell {
             logger,
             loginService,
             basicInfoWrapper,
-            pathWrapper
+            pathWrapper,
         };
         this.core = new NapCatCore(this.context, selfInfo);
 

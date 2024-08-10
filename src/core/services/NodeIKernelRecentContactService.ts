@@ -1,6 +1,7 @@
-import { ChatType, Peer } from "../entities";
-import { NodeIKernelRecentContactListener } from "../listeners/NodeIKernelRecentContactListener";
-import { GeneralCallResult } from "./common";
+import { ChatType, Peer } from '../entities';
+import { NodeIKernelRecentContactListener } from '../listeners/NodeIKernelRecentContactListener';
+import { GeneralCallResult } from './common';
+
 export interface FSABRecentContactParams {
     anchorPointContact: {
         contactId: string;
@@ -12,6 +13,7 @@ export interface FSABRecentContactParams {
     count: number;
     fetchOld: boolean;
 }
+
 // {
 //     "anchorPointContact": {
 //       "contactId": "",
@@ -34,16 +36,17 @@ export interface NodeIKernelRecentContactService {
 
     enterOrExitMsgList(...args: unknown[]): unknown; // 1 arguments
 
-    /*!---!*/getRecentContactListSnapShot(count: number): Promise<GeneralCallResult & {
+    /*!---!*/
+    getRecentContactListSnapShot(count: number): Promise<GeneralCallResult & {
         info: {
             errCode: number,
             errMsg: string,
             sortedContactList: Array<number>,
             changedList: Array<{
-              remark: any;
-              peerName: any;
-              sendMemberName: any;
-              sendNickName: any;
+                remark: any;
+                peerName: any;
+                sendMemberName: any;
+                sendNickName: any;
                 peerUid: string; peerUin: string, msgTime: string, chatType: ChatType, msgId: string
             }>
         }
@@ -55,7 +58,8 @@ export interface NodeIKernelRecentContactService {
 
     jumpToSpecifyRecentContact(...args: unknown[]): unknown; // 1 arguments
 
-    /*!---!*/fetchAndSubscribeABatchOfRecentContact(params: FSABRecentContactParams): unknown; // 1 arguments
+    /*!---!*/
+    fetchAndSubscribeABatchOfRecentContact(params: FSABRecentContactParams): unknown; // 1 arguments
 
     addRecentContact(peer: Peer): unknown;
 

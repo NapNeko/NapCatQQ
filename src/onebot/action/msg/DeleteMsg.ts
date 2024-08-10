@@ -10,11 +10,11 @@ const SchemaData = {
         message_id: {
             oneOf: [
                 { type: 'number' },
-                { type: 'string' }
-            ]
-        }
+                { type: 'string' },
+            ],
+        },
     },
-    required: ['message_id']
+    required: ['message_id'],
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
@@ -22,6 +22,7 @@ type Payload = FromSchema<typeof SchemaData>;
 class DeleteMsg extends BaseAction<Payload, void> {
     actionName = ActionName.DeleteMsg;
     PayloadSchema = SchemaData;
+
     protected async _handle(payload: Payload) {
         const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
         const msg = MessageUnique.getMsgIdAndPeerByShortId(Number(payload.message_id));
@@ -36,8 +37,10 @@ class DeleteMsg extends BaseAction<Payload, void> {
                         return true;
                     }
                     return false;
-                }
-            ).catch(e => new Promise<undefined>((resolve, reject) => { resolve(undefined); }));
+                },
+            ).catch(e => new Promise<undefined>((resolve, reject) => {
+                resolve(undefined);
+            }));
             await NTQQMsgApi.recallMsg(msg.Peer, [msg.MsgId]);
             const data = await ret;
             if (!data) {

@@ -8,7 +8,7 @@ export default class GetStatus extends BaseAction<any, any> {
         return {
             online: !!this.CoreContext.selfInfo.online,
             good: true,
-            stat:{}
+            stat: {},
         };
     }
 }

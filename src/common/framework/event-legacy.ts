@@ -1,5 +1,5 @@
-import { NodeIQQNTWrapperSession } from "@/core/wrapper/wrapper";
-import { randomUUID } from "crypto";
+import { NodeIQQNTWrapperSession } from '@/core/wrapper/wrapper';
+import { randomUUID } from 'crypto';
 
 interface Internal_MapKey {
     timeout: number;
@@ -23,7 +23,7 @@ export class LegacyNTEventWrapper {
 
     constructor(
         listenerMapping: Record<string, ListenerIBase>,
-        wrapperSession: NodeIQQNTWrapperSession
+        wrapperSession: NodeIQQNTWrapperSession,
     ) {
         this.listenerMapping = listenerMapping;
         this.WrapperSession = wrapperSession;
@@ -37,7 +37,7 @@ export class LegacyNTEventWrapper {
             {
                 get(target: any, prop: any, receiver: any) {
                     // console.log('get', prop, typeof target[prop]);
-                    if (typeof target[prop] === "undefined") {
+                    if (typeof target[prop] === 'undefined') {
                         // 如果方法不存在，返回一个函数，这个函数调用existentMethod
                         return (...args: any[]) => {
                             current.dispatcherListener.apply(current, [ListenerMainName, prop, ...args]).then();
@@ -46,17 +46,17 @@ export class LegacyNTEventWrapper {
                     // 如果方法存在，正常返回
                     return Reflect.get(target, prop, receiver);
                 },
-            }
+            },
         );
     }
 
     createEventFunction<T extends (...args: any) => any>(eventName: string): T | undefined {
-        const eventNameArr = eventName.split("/");
+        const eventNameArr = eventName.split('/');
         type eventType = {
             [key: string]: () => { [key: string]: (...params: Parameters<T>) => Promise<ReturnType<T>> };
         };
         if (eventNameArr.length > 1) {
-            const serviceName = "get" + eventNameArr[0].replace("NodeIKernel", "");
+            const serviceName = 'get' + eventNameArr[0].replace('NodeIKernel', '');
             const eventName = eventNameArr[1];
             //getNodeIKernelGroupListener,GroupService
             //console.log('2', eventName);
@@ -71,13 +71,13 @@ export class LegacyNTEventWrapper {
         }
     }
 
-    createListenerFunction<T>(listenerMainName: string, uniqueCode: string = ""): T {
+    createListenerFunction<T>(listenerMainName: string, uniqueCode: string = ''): T {
         const ListenerType = this.listenerMapping![listenerMainName];
         let Listener = this.listenerManager.get(listenerMainName + uniqueCode);
         if (!Listener && ListenerType) {
             Listener = new ListenerType(this.createProxyDispatch(listenerMainName));
             const ServiceSubName = listenerMainName.match(/^NodeIKernel(.*?)Listener$/)![1];
-            const Service = "NodeIKernel" + ServiceSubName + "Service/addKernel" + ServiceSubName + "Listener";
+            const Service = 'NodeIKernel' + ServiceSubName + 'Service/addKernel' + ServiceSubName + 'Listener';
             const addfunc = this.createEventFunction<(listener: T) => number>(Service);
             addfunc!(Listener as T);
             //console.log(addfunc!(Listener as T));
@@ -104,7 +104,7 @@ export class LegacyNTEventWrapper {
     }
 
     async callNoListenerEvent<EventType extends (...args: any[]) => Promise<any> | any>(
-        EventName = "",
+        EventName = '',
         timeout: number = 3000,
         ...args: Parameters<EventType>
     ) {
@@ -113,7 +113,7 @@ export class LegacyNTEventWrapper {
             let complete = false;
             setTimeout(() => {
                 if (!complete) {
-                    reject(new Error("NTEvent EventName:" + EventName + " timeout"));
+                    reject(new Error('NTEvent EventName:' + EventName + ' timeout'));
                 }
             }, timeout);
             const retData = await EventFunc!(...args);
@@ -123,13 +123,13 @@ export class LegacyNTEventWrapper {
     }
 
     async RegisterListen<ListenerType extends (...args: any[]) => void>(
-        ListenerName = "",
+        ListenerName = '',
         waitTimes = 1,
         timeout = 5000,
-        checker: (...args: Parameters<ListenerType>) => boolean
+        checker: (...args: Parameters<ListenerType>) => boolean,
     ) {
         return new Promise<Parameters<ListenerType>>((resolve, reject) => {
-            const ListenerNameList = ListenerName.split("/");
+            const ListenerNameList = ListenerName.split('/');
             const ListenerMainName = ListenerNameList[0];
             const ListenerSubName = ListenerNameList[1];
             const id = randomUUID();
@@ -137,7 +137,7 @@ export class LegacyNTEventWrapper {
             let retData: Parameters<ListenerType> | undefined = undefined;
             const databack = () => {
                 if (complete == 0) {
-                    reject(new Error(" ListenerName:" + ListenerName + " timeout"));
+                    reject(new Error(' ListenerName:' + ListenerName + ' timeout'));
                 } else {
                     resolve(retData!);
                 }
@@ -166,12 +166,13 @@ export class LegacyNTEventWrapper {
             this.createListenerFunction(ListenerMainName);
         });
     }
+
     async CallNormalEvent<
         EventType extends (...args: any[]) => Promise<any>,
         ListenerType extends (...args: any[]) => void
     >(
-        EventName = "",
-        ListenerName = "",
+        EventName = '',
+        ListenerName = '',
         waitTimes = 1,
         timeout: number = 3000,
         checker: (...args: Parameters<ListenerType>) => boolean,
@@ -187,21 +188,21 @@ export class LegacyNTEventWrapper {
                     if (complete == 0) {
                         reject(
                             new Error(
-                                "Timeout: NTEvent EventName:" +
-                                    EventName +
-                                    " ListenerName:" +
-                                    ListenerName +
-                                    " EventRet:\n" +
-                                    JSON.stringify(retEvent, null, 4) +
-                                    "\n"
-                            )
+                                'Timeout: NTEvent EventName:' +
+                                EventName +
+                                ' ListenerName:' +
+                                ListenerName +
+                                ' EventRet:\n' +
+                                JSON.stringify(retEvent, null, 4) +
+                                '\n',
+                            ),
                         );
                     } else {
                         resolve([retEvent as Awaited<ReturnType<EventType>>, ...retData!]);
                     }
                 };
 
-                const ListenerNameList = ListenerName.split("/");
+                const ListenerNameList = ListenerName.split('/');
                 const ListenerMainName = ListenerNameList[0];
                 const ListenerSubName = ListenerNameList[1];
 
@@ -231,7 +232,7 @@ export class LegacyNTEventWrapper {
                 this.createListenerFunction(ListenerMainName);
                 const EventFunc = this.createEventFunction<EventType>(EventName);
                 retEvent = await EventFunc!(...(args as any[]));
-            }
+            },
         );
     }
 }

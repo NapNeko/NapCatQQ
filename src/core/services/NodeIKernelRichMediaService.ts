@@ -1,5 +1,6 @@
-import { GetFileListParam, MessageElement, Peer, SendMessageElement } from "../entities";
-import { GeneralCallResult } from "./common";
+import { GetFileListParam, MessageElement, Peer } from '../entities';
+import { GeneralCallResult } from './common';
+
 export enum UrlFileDownloadType {
     KUNKNOWN,
     KURLFILEDOWNLOADPRIVILEGEICON,
@@ -8,6 +9,7 @@ export enum UrlFileDownloadType {
     KURLFILEDOWNLOADCOMMON,
     KURLFILEDOWNLOADINSTALLAPP
 }
+
 export enum RMBizTypeEnum {
     KUNKNOWN,
     KC2CFILE,
@@ -25,6 +27,7 @@ export enum RMBizTypeEnum {
     KGUILDPTT,
     KGUILDVIDEO
 }
+
 export interface CommonFileInfo {
     bizType: number;
     chatType: number;
@@ -39,12 +42,13 @@ export interface CommonFileInfo {
     msgTime: string;
     parent: string;
     peerUid: string;
-    picThumbPath: Array<string>
+    picThumbPath: Array<string>;
     sha: string;
     sha3: string;
     subId: string;
     uuid: string;
 }
+
 export interface NodeIKernelRichMediaService {
     //getVideoPlayUrl(peer, msgId, elemId, videoCodecFormat, VideoRequestWay.KHAND, cb);
     // public enum VideoCodecFormatType {
@@ -77,7 +81,10 @@ export interface NodeIKernelRichMediaService {
     // public static final int KTRIGGERTYPEAUTO = 1;
     // public static final int KTRIGGERTYPEMANUAL = 0;
 
-    getVideoPlayUrlV2(peer: Peer, msgId: string, elemId: string, videoCodecFormat: number, exParams: { downSourceType: number, triggerType: number }): Promise<GeneralCallResult & {
+    getVideoPlayUrlV2(peer: Peer, msgId: string, elemId: string, videoCodecFormat: number, exParams: {
+        downSourceType: number,
+        triggerType: number
+    }): Promise<GeneralCallResult & {
         urlResult: {
             v4IpUrl: [],
             v6IpUrl: [],
@@ -127,7 +134,9 @@ export interface NodeIKernelRichMediaService {
     //arg双端number
     isFileExpired(arg: number): unknown;
 
-    deleteGroupFolder(GroupCode: string, FolderId: string): Promise<GeneralCallResult & { groupFileCommonResult: { retCode: number, retMsg: string, clientWording: string } }>;
+    deleteGroupFolder(GroupCode: string, FolderId: string): Promise<GeneralCallResult & {
+        groupFileCommonResult: { retCode: number, retMsg: string, clientWording: string }
+    }>;
 
     //参数与getVideoPlayUrlInVisit一样
     downloadRichMediaInVisit(arg: {
@@ -144,8 +153,10 @@ export interface NodeIKernelRichMediaService {
         ele: MessageElement,
         useHttps: boolean
     }): unknown;
+
     //arg3为“”
     downloadFileForModelId(peer: Peer, ModelId: string[], arg3: string): unknown;
+
     //第三个参数 Array<Type>
     // this.fileId = "";
     // this.fileName = "";
@@ -165,7 +176,9 @@ export interface NodeIKernelRichMediaService {
 
     downloadFileForFileInfo(fileInfo: CommonFileInfo[], savePath: string): unknown;
 
-    createGroupFolder(GroupCode: string, FolderName: string): Promise<GeneralCallResult & { resultWithGroupItem: { result: any, groupItem: Array<any> } }>
+    createGroupFolder(GroupCode: string, FolderName: string): Promise<GeneralCallResult & {
+        resultWithGroupItem: { result: any, groupItem: Array<any> }
+    }>;
 
     downloadFile(commonFile: CommonFileInfo, arg2: unknown, arg3: unknown, savePath: string): unknown;
 
@@ -218,6 +231,7 @@ export interface NodeIKernelRichMediaService {
             sortType: number,
             groupNames: Array<string>
         }): Promise<unknown>;
+
     searchGroupFileByWord(arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown, arg5: unknown): unknown;
 
     deleteGroupFile(GroupCode: string, params: Array<number>, Files: Array<string>): Promise<GeneralCallResult & {
@@ -232,7 +246,10 @@ export interface NodeIKernelRichMediaService {
 
     getScreenOCR(path: string): Promise<unknown>;
 
-    batchGetGroupFileCount(Gids: Array<string>): Promise<GeneralCallResult & { groupCodes: Array<string>, groupFileCounts: Array<number> }>;
+    batchGetGroupFileCount(Gids: Array<string>): Promise<GeneralCallResult & {
+        groupCodes: Array<string>,
+        groupFileCounts: Array<number>
+    }>;
 
     queryPicDownloadSize(arg: unknown): unknown;
 

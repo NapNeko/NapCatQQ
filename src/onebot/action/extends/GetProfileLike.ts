@@ -1,7 +1,9 @@
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
+
 export class GetProfileLike extends BaseAction<void, any> {
     actionName = ActionName.GetProfileLike;
+
     protected async _handle(payload: void) {
         const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
         const ret = await NTQQUserApi.getProfileLike(this.CoreContext.selfInfo.uid);

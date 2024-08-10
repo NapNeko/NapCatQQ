@@ -1,128 +1,131 @@
-import { Friend } from '@/core/entities';
 import { GeneralCallResult } from '@/core/services/common';
 import { NodeIKernelBuddyListener } from '@/core/listeners';
+
 export enum BuddyListReqType {
-  KNOMAL,
-  KLETTER
+    KNOMAL,
+    KLETTER
 }
+
 export interface NodeIKernelBuddyService {
-  // 26702 以上
-  getBuddyListV2(callFrom: string, reqType: BuddyListReqType): Promise<GeneralCallResult & {
-    data: Array<{
-      categoryId: number,
-      categorySortId: number,
-      categroyName: string,
-      categroyMbCount: number,
-      onlineCount: number,
-      buddyUids: Array<string>
-    }>
-  }>;
-  //26702 以上
-  getBuddyListFromCache(callFrom: string): Promise<Array<
-    {
-      categoryId: number,//9999应该跳过 那是兜底数据吧
-      categorySortId: number,//排序方式
-      categroyName: string,//分类名
-      categroyMbCount: number,//不懂
-      onlineCount: number,//在线数目
-      buddyUids: Array<string>//Uids
-    }>>;
-  // 以下为原生方法
-  addKernelBuddyListener(listener: NodeIKernelBuddyListener): number;
+    // 26702 以上
+    getBuddyListV2(callFrom: string, reqType: BuddyListReqType): Promise<GeneralCallResult & {
+        data: Array<{
+            categoryId: number,
+            categorySortId: number,
+            categroyName: string,
+            categroyMbCount: number,
+            onlineCount: number,
+            buddyUids: Array<string>
+        }>
+    }>;
 
-  getAllBuddyCount(): number;
+    //26702 以上
+    getBuddyListFromCache(callFrom: string): Promise<Array<
+        {
+            categoryId: number,//9999应该跳过 那是兜底数据吧
+            categorySortId: number,//排序方式
+            categroyName: string,//分类名
+            categroyMbCount: number,//不懂
+            onlineCount: number,//在线数目
+            buddyUids: Array<string>//Uids
+        }>>;
 
-  removeKernelBuddyListener(listener: unknown): void;
+    // 以下为原生方法
+    addKernelBuddyListener(listener: NodeIKernelBuddyListener): number;
 
-  /**
-   * @deprecated
-   * @param nocache 使用缓存
-   */
-  getBuddyList(nocache: boolean): Promise<GeneralCallResult>;
+    getAllBuddyCount(): number;
 
-  getBuddyNick(uid: number): string;
+    removeKernelBuddyListener(listener: unknown): void;
 
-  getBuddyRemark(uid: number): string;
+    /**
+     * @deprecated
+     * @param nocache 使用缓存
+     */
+    getBuddyList(nocache: boolean): Promise<GeneralCallResult>;
 
-  setBuddyRemark(uid: number, remark: string): void;
+    getBuddyNick(uid: number): string;
 
-  getAvatarUrl(uid: number): string;
+    getBuddyRemark(uid: number): string;
 
-  isBuddy(uid: string): boolean;
+    setBuddyRemark(uid: number, remark: string): void;
 
-  getCategoryNameWithUid(uid: number): string;
+    getAvatarUrl(uid: number): string;
 
-  getTargetBuddySetting(uid: number): unknown;
+    isBuddy(uid: string): boolean;
 
-  getTargetBuddySettingByType(uid: number, type: number): unknown;
+    getCategoryNameWithUid(uid: number): string;
 
-  getBuddyReqUnreadCnt(): number;
+    getTargetBuddySetting(uid: number): unknown;
 
-  getBuddyReq(): unknown;
+    getTargetBuddySettingByType(uid: number, type: number): unknown;
 
-  delBuddyReq(uid: number): void;
+    getBuddyReqUnreadCnt(): number;
 
-  clearBuddyReqUnreadCnt(): void;
+    getBuddyReq(): unknown;
 
-  reqToAddFriends(uid: number, msg: string): void;
+    delBuddyReq(uid: number): void;
 
-  setSpacePermission(uid: number, permission: number): void;
+    clearBuddyReqUnreadCnt(): void;
 
-  approvalFriendRequest(arg: {
-    friendUid: string;
-    reqTime: string;
-    accept: boolean;
-  }): Promise<void>;
+    reqToAddFriends(uid: number, msg: string): void;
 
-  delBuddy(uid: number): void;
+    setSpacePermission(uid: number, permission: number): void;
 
-  delBatchBuddy(uids: number[]): void;
+    approvalFriendRequest(arg: {
+        friendUid: string;
+        reqTime: string;
+        accept: boolean;
+    }): Promise<void>;
 
-  getSmartInfos(uid: number): unknown;
+    delBuddy(uid: number): void;
 
-  setBuddyCategory(uid: number, category: number): void;
+    delBatchBuddy(uids: number[]): void;
 
-  setBatchBuddyCategory(uids: number[], category: number): void;
+    getSmartInfos(uid: number): unknown;
 
-  addCategory(category: string): void;
+    setBuddyCategory(uid: number, category: number): void;
 
-  delCategory(category: string): void;
+    setBatchBuddyCategory(uids: number[], category: number): void;
 
-  renameCategory(oldCategory: string, newCategory: string): void;
+    addCategory(category: string): void;
 
-  resortCategory(categorys: string[]): void;
+    delCategory(category: string): void;
 
-  pullCategory(uid: number, category: string): void;
+    renameCategory(oldCategory: string, newCategory: string): void;
 
-  setTop(uid: number, isTop: boolean): void;
+    resortCategory(categorys: string[]): void;
 
-  SetSpecialCare(uid: number, isSpecialCare: boolean): void;
+    pullCategory(uid: number, category: string): void;
 
-  setMsgNotify(uid: number, isNotify: boolean): void;
+    setTop(uid: number, isTop: boolean): void;
 
-  hasBuddyList(): boolean;
+    SetSpecialCare(uid: number, isSpecialCare: boolean): void;
 
-  setBlock(uid: number, isBlock: boolean): void;
+    setMsgNotify(uid: number, isNotify: boolean): void;
 
-  isBlocked(uid: number): boolean;
+    hasBuddyList(): boolean;
 
-  modifyAddMeSetting(setting: unknown): void;
+    setBlock(uid: number, isBlock: boolean): void;
 
-  getAddMeSetting(): unknown;
+    isBlocked(uid: number): boolean;
 
-  getDoubtBuddyReq(): unknown;
+    modifyAddMeSetting(setting: unknown): void;
 
-  getDoubtBuddyUnreadNum(): number;
+    getAddMeSetting(): unknown;
 
-  approvalDoubtBuddyReq(uid: number, isAgree: boolean): void;
+    getDoubtBuddyReq(): unknown;
 
-  delDoubtBuddyReq(uid: number): void;
+    getDoubtBuddyUnreadNum(): number;
 
-  delAllDoubtBuddyReq(): void;
+    approvalDoubtBuddyReq(uid: number, isAgree: boolean): void;
 
-  reportDoubtBuddyReqUnread(): void;
+    delDoubtBuddyReq(uid: number): void;
 
-  getBuddyRecommendContactArkJson(uid: string, phoneNumber: string): Promise<unknown>;
+    delAllDoubtBuddyReq(): void;
 
-  isNull(): boolean;
+    reportDoubtBuddyReqUnread(): void;
+
+    getBuddyRecommendContactArkJson(uid: string, phoneNumber: string): Promise<unknown>;
+
+    isNull(): boolean;
 }

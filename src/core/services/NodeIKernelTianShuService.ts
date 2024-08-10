@@ -6,5 +6,5 @@ export interface NodeIKernelTianShuService {
     requesTianShuNumeralRe(...args: any[]): unknown;//d needs 1 arguments
 
     reportTianShuNumeralRed(...args: any[]): unknown;// needs 1 arguments
-    
+
 }

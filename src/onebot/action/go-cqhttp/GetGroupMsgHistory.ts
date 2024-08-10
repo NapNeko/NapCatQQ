@@ -5,8 +5,9 @@ import { ChatType, Peer, RawMessage } from '@/core/entities';
 import { OB11Constructor } from '../../helper/data';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/utils/MessageUnique';
+
 interface Response {
-  messages: OB11Message[];
+    messages: OB11Message[];
 }
 
 const SchemaData = {
@@ -15,9 +16,9 @@ const SchemaData = {
         group_id: { type: ['number', 'string'] },
         message_seq: { type: 'number' },
         count: { type: 'number' },
-        reverseOrder: { type: 'boolean' }
+        reverseOrder: { type: 'boolean' },
     },
-    required: ['group_id']
+    required: ['group_id'],
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
@@ -25,6 +26,7 @@ type Payload = FromSchema<typeof SchemaData>;
 export default class GoCQHTTPGetGroupMsgHistory extends BaseAction<Payload, Response> {
     actionName = ActionName.GoCQHTTP_GetGroupMsgHistory;
     PayloadSchema = SchemaData;
+
     protected async _handle(payload: Payload): Promise<Response> {
         const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
         //处理参数
@@ -46,7 +48,7 @@ export default class GoCQHTTPGetGroupMsgHistory extends BaseAction<Payload, Resp
         }));
 
         //转换消息
-        const ob11MsgList = await Promise.all(msgList.map(msg => OB11Constructor.message(this.CoreContext, msg, "array")));
+        const ob11MsgList = await Promise.all(msgList.map(msg => OB11Constructor.message(this.CoreContext, msg, 'array')));
         return { 'messages': ob11MsgList };
     }
 }

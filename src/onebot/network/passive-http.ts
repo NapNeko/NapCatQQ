@@ -13,7 +13,7 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
     private port: number;
     token: string;
 
-    constructor(port: number,token: string) {
+    constructor(port: number, token: string) {
         this.port = port;
         this.token = token;
     }
@@ -21,9 +21,11 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
     registerAction<T extends BaseAction<P, R>, P, R>(action: T) {
         this.actionMap.set(action.actionName, action);
     }
+
     registerHeartBeat() {
         //空心跳
     }
+
     onEvent<T extends OB11BaseEvent>(event: T) {
         // 事件处理逻辑可以在这里实现
     }

@@ -3,6 +3,7 @@ import { OB11Constructor } from '../../helper/data';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+
 const SchemaData = {
     type: 'object',
     properties: {
@@ -10,7 +11,7 @@ const SchemaData = {
         user_id: { type: ['number', 'string'] },
         no_cache: { type: ['boolean', 'string'] },
     },
-    required: ['group_id', 'user_id']
+    required: ['group_id', 'user_id'],
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
@@ -18,6 +19,7 @@ type Payload = FromSchema<typeof SchemaData>;
 class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
     actionName = ActionName.GetGroupMemberInfo;
     PayloadSchema = SchemaData;
+
     protected async _handle(payload: Payload) {
         const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
         const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
@@ -74,4 +76,5 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
         return retMember;
     }
 }
+
 export default GetGroupMemberInfo;

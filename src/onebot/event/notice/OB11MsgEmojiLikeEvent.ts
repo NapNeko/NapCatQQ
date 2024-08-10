@@ -1,8 +1,8 @@
 import { OB11GroupNoticeEvent } from './OB11GroupNoticeEvent';
 
 export interface MsgEmojiLike {
-  emoji_id: string,
-  count: number
+    emoji_id: string,
+    count: number
 }
 
 export class OB11GroupMsgEmojiLikeEvent extends OB11GroupNoticeEvent {

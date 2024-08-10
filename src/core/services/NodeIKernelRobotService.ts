@@ -1,4 +1,4 @@
-import { NodeIKernelRobotListener } from "@/core/listeners";
+import { NodeIKernelRobotListener } from '@/core/listeners';
 
 export interface NodeIKernelRobotService {
     fetchGroupRobotStoreDiscovery(arg: unknown): unknown;
@@ -29,7 +29,7 @@ export interface NodeIKernelRobotService {
 
     setRobotPickTts(arg1: unknown, arg2: unknown): unknown;
 
-    getRobotUinRange(data: any): Promise<{ response: { robotUinRanges: any } }>
+    getRobotUinRange(data: any): Promise<{ response: { robotUinRanges: any } }>;
 
     isNull(): boolean;
 }

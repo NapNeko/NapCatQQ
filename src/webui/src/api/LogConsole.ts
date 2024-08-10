@@ -14,7 +14,7 @@ export const GetLogFileListHandler: RequestHandler = async (req, res) => {
         const LogFiles = await readdir(LogsPath);
         res.json({
             code: 0,
-            data: LogFiles
+            data: LogFiles,
         });
     } catch (error) {
         res.json({ code: -1, msg: 'Failed to retrieve log file list.' });

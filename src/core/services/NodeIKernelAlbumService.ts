@@ -42,5 +42,5 @@ export interface NodeIKernelAlbumService {
     doQunLike(...args: any[]): unknown;// needs 5 arguments
 
     getRedPoints(...args: any[]): unknown;// needs 3 arguments
-    
+
 }
