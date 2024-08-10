@@ -7,14 +7,15 @@ import { QuickAction, QuickActionEvent } from '../types';
 import { NapCatCore } from '@/core';
 import { NapCatOneBot11Adapter } from '../main';
 import { handleQuickOperation } from '../helper/quick';
+
 export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     url: string;
-    private actionMap: Map<string, BaseAction<any, any>> = new Map();
     heartbeatInterval: number;
     secret: string | undefined;
     coreContext: NapCatCore;
     onebotContext: NapCatOneBot11Adapter;
     logger: LogWrapper;
+
     constructor(url: string, heartbeatInterval: number, secret: string | undefined, coreContext: NapCatCore, onebotContext: NapCatOneBot11Adapter) {
         this.heartbeatInterval = heartbeatInterval;
         this.url = url;
@@ -23,12 +24,13 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
         this.onebotContext = onebotContext;
         this.logger = coreContext.context.logger;
     }
+
     registerHeartBeat() {
-        //HttpPost心跳
+        // HttpPost 心跳
     }
 
     registerAction<T extends BaseAction<P, R>, P, R>(action: T) {
-        this.actionMap.set(action.actionName, action);
+        // Passive http adapter does not need to register actions
     }
 
     onEvent<T extends OB11BaseEvent>(event: T) {
@@ -38,13 +40,11 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
         };
         const msgStr = JSON.stringify(event);
         if (this.secret && this.secret.length > 0) {
-
             const hmac = createHmac('sha1', this.secret);
             hmac.update(msgStr);
             const sig = hmac.digest('hex');
             headers['x-signature'] = 'sha1=' + sig;
         }
-
         fetch(this.url, {
             method: 'POST',
             headers,
@@ -63,8 +63,7 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
             } catch (e: any) {
                 this.logger.logError('新消息事件HTTP上报返回快速操作失败', e);
             }
-
-        })
+        });
     }
 
     async open() {
