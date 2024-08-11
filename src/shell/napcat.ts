@@ -23,6 +23,7 @@ import os from 'os';
 import { NodeIKernelLoginService } from '@/core/services';
 import { program } from 'commander';
 import qrcode from 'qrcode-terminal';
+import { NapCatOneBot11Adapter } from '@/onebot';
 
 program.option('-q, --qq [number]', 'QQ号').parse(process.argv);
 const cmdOptions = program.opts();
@@ -106,7 +107,7 @@ export async function NCoreInitShell() {
             const realBase64 = pngBase64QrcodeData.replace(/^data:image\/\w+;base64,/, '');
             const buffer = Buffer.from(realBase64, 'base64');
             logger.logWarn('请扫描下面的二维码，然后在手Q上授权登录：');
-            const qrcodePath = path.join(dataPath, 'qrcode.png');
+            const qrcodePath = path.join(pathWrapper.binaryPath, 'qrcode.png');
             qrcode.generate(qrcodeUrl, { small: true }, (res) => {
                 logger.logWarn([
                     '\n',
@@ -138,9 +139,8 @@ export async function NCoreInitShell() {
         } else {
             logger.log('没有 -q 指令指定快速登录，或未曾登录过这个 QQ，将使用二维码登录方式');
             if (historyLoginList.length > 0) {
-                logger.log(`可用于快速登录的 QQ：\n${
-                    historyLoginList.map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`).join('\n')
-                }`);
+                logger.log(`可用于快速登录的 QQ：\n${historyLoginList.map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`).join('\n')
+                    }`);
             }
             loginService.getQRCodePicture();
         }
@@ -224,7 +224,7 @@ export class NapCatShell {
         this.core = new NapCatCore(this.context, selfInfo);
 
         // TODO: complete ob11 adapter initialization logic
-        // new NapCatOneBot11Adapter(this.core, this.context);
+        new NapCatOneBot11Adapter(this.core, this.context, pathWrapper);
     }
 }
 
