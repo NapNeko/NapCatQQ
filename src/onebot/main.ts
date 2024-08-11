@@ -55,7 +55,7 @@ export class NapCatOneBot11Adapter {
             FriendApi: new OneBotFriendApi(this, core),
         };
         this.networkManager = new OB11NetworkManager();
-        this.InitOneBot();
+        this.InitOneBot().then().catch(e => this.context.logger.logError('初始化OneBot失败', e));
     }
 
     async InitOneBot() {
