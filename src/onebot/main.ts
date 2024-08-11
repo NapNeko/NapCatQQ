@@ -72,7 +72,7 @@ export class NapCatOneBot11Adapter {
             let OBPassiveWebSocketAdapter = new OB11PassiveWebSocketAdapter(
                 ob11Config.ws.host, ob11Config.ws.port, ob11Config.heartInterval, ob11Config.token, this.core, this
             )
-           await this.networkManager.registerAdapter(OBPassiveWebSocketAdapter);
+            await this.networkManager.registerAdapter(OBPassiveWebSocketAdapter);
         }
         if (ob11Config.reverseWs.enable) {
             ob11Config.reverseWs.urls.forEach(async url => {
@@ -87,6 +87,9 @@ export class NapCatOneBot11Adapter {
         await this.initMsgListener();
         WebUiDataRuntime.setQQLoginUin(selfInfo.uin.toString());
         WebUiDataRuntime.setQQLoginStatus(true);
+        WebUiDataRuntime.setOB11ConfigCall(async (ob11: OB11Config) => {
+            this.config.save(ob11);
+        });
         InitWebUi(this.context.logger, this.context.pathWrapper).then().catch(this.context.logger.logError);
     }
 
