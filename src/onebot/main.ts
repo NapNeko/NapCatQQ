@@ -125,13 +125,13 @@ export class NapCatOneBot11Adapter {
                     },
                     m.msgId
                 );
-                await this.postReceiveMsg(m)
+                await this.emitMsg(m)
                     .catch(e => this.context.logger.logError('处理消息失败', e));
             }
         };
 
         msgListener.onMsgInfoListUpdate = async msgList => {
-            this.postRecallMsg(msgList);
+            this.emitRecallMsg(msgList);
             for (const msg of msgList.filter(e => e.senderUin == this.core.selfInfo.uin)) {
                 //  console.log(msg);
                 if (msg.sendStatus == 2) {
@@ -141,7 +141,7 @@ export class NapCatOneBot11Adapter {
                             ob11Msg.target_id = parseInt(msg.peerUin);
                             if (this.config.reportSelfMessage) {
                                 msg.id = MessageUnique.createMsg({ chatType: msg.chatType, peerUid: msg.peerUid, guildId: '' }, msg.msgId);
-                                this.postReceiveMsg(msg);
+                                this.emitMsg(msg);
                             } else {
                                 logOB11Message(this.core, ob11Msg);
                             }
@@ -155,7 +155,7 @@ export class NapCatOneBot11Adapter {
         );
     }
 
-    async postReceiveMsg(message: RawMessage) {
+    private async emitMsg(message: RawMessage) {
         const { debug, reportSelfMessage } = this.config;
         this.context.logger.logDebug('收到新消息', message);
         OB11Constructor.message(this.core, message, this.config.messagePostFormat).then((ob11Msg) => {
@@ -194,7 +194,7 @@ export class NapCatOneBot11Adapter {
         }).catch(e => this.context.logger.logError('constructPrivateEvent error: ', e));
     }
 
-    async postRecallMsg(msgList: RawMessage[]) {
+    private async emitRecallMsg(msgList: RawMessage[]) {
         for (const message of msgList) {
             // log("message update", message.sendStatus, message.msgId, message.msgSeq)
             if (message.recallTime != '0') { //todo: 这个判断方法不太好，应该使用灰色消息元素来判断?
