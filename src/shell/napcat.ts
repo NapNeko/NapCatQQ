@@ -111,7 +111,7 @@ export async function NCoreInitShell() {
         loginListener.onQRCodeGetPicture = ({ pngBase64QrcodeData, qrcodeUrl }) => {
             //设置WebuiQrcode
             WebUiDataRuntime.setQQLoginQrcodeURL(qrcodeUrl);
-            
+
             const realBase64 = pngBase64QrcodeData.replace(/^data:image\/\w+;base64,/, '');
             const buffer = Buffer.from(realBase64, 'base64');
             logger.logWarn('请扫描下面的二维码，然后在手Q上授权登录：');
@@ -129,14 +129,16 @@ export async function NCoreInitShell() {
             });
         };
         loginListener.onQRCodeSessionFailed = (errType: number, errCode: number, errMsg: string) => {
-            logger.logError('登录失败(onQRCodeSessionFailed)', errMsg);
+            //logger.logError('登录失败(onQRCodeSessionFailed)', errCode, errMsg);
+            logger.logError('[Core] [Login] Login Error,ErrCode: ', errCode, " ErrMsg:", errMsg);
             if (errType == 1 && errCode == 3) {
                 // 二维码过期刷新
             }
             loginService.getQRCodePicture();
         };
         loginListener.onLoginFailed = (args) => {
-            logger.logError('登录失败(onLoginFailed)', args);
+            //logger.logError('登录失败(onLoginFailed)', args);
+            logger.logError('[Core] [Login] Login Error , ErrInfo: ', args);
         };
 
         loginService.addKernelLoginListener(new wrapper.NodeIKernelLoginListener(
