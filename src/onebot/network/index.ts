@@ -18,22 +18,28 @@ export interface IOB11NetworkAdapter {
 
 export class OB11NetworkManager {
     adapters: IOB11NetworkAdapter[] = [];
+
     async getAllAdapters() {
         return this.adapters;
     }
+
     async openAllAdapters() {
         return Promise.all(this.adapters.map(adapter => adapter.open()));
     }
-    async registerAllActions(actions: Map<string,BaseAction<any, any>>) {
+
+    async registerAllActions(actions: Map<string, BaseAction<any, any>>) {
         return Promise.all(this.adapters.map(adapter => adapter.registerActionMap(actions)));
     }
+
     async emitEvent(event: OB11EmitEventContent) {
-        // Mlikiowa V2.0.0 Refactor Todo
+        console.log('adapters', this.adapters.length);
         return Promise.all(this.adapters.map(adapter => adapter.onEvent(event)));
     }
 
     async registerAdapter(adapter: IOB11NetworkAdapter) {
-        return this.adapters.push(adapter);
+        console.log('Registering adapter:', adapter);
+        this.adapters.push(adapter);
+        console.log('Current adapters:', this.adapters.length);
     }
 
     async closeSomeAdapters(adapters: IOB11NetworkAdapter[]) {
@@ -42,8 +48,10 @@ export class OB11NetworkManager {
     }
 
     async closeAllAdapters() {
-        this.adapters = [];
+        console.log('Closing all adapters');
         await Promise.all(this.adapters.map(adapter => adapter.close()));
+        this.adapters = [];
+        console.log('All adapters closed. Current adapters:', this.adapters.length);
     }
 }
 
