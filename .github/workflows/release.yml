@@ -30,7 +30,7 @@ jobs:
               ls
               node ./script/checkVersion.cjs
               sh ./checkVersion.sh
-  build-Liteloader:
+  Build-LiteLoader:
     needs: [check-version]
     runs-on: ubuntu-latest
     steps:
@@ -56,9 +56,9 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: NapCat.Liteloader
+        name: NapCat.LiteLoader
         path: dist
-  build-Shell:
+  Build-Shell:
     runs-on: ubuntu-latest
     needs: [check-version]
     steps:
@@ -75,7 +75,7 @@ jobs:
           with:
               node-version: 20.x
           
-        - name: Build NuCat Linux
+        - name: Build NuCat Shell
           run: |
                 npm i 
                 npm run build:prod
@@ -90,7 +90,7 @@ jobs:
               path: dist
 
   release-napcat:
-    needs: [build-Liteloader,build-Shell]
+    needs: [Build-LiteLoader,Build-Shell]
     runs-on: ubuntu-latest
     steps:
     - name: Download All Artifact
@@ -116,7 +116,7 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         body_path: CHANGELOG.md
         files: |
-          NapCat.Liteloader.zip
+          NapCat.LiteLoader.zip
           NapCat.Shell.zip
 #          NapCat.darwin.x64.zip
 #          NapCat.darwin.arm64.zip
