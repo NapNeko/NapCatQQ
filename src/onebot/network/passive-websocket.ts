@@ -18,27 +18,15 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     isOpen: boolean = false;
     hasBeenClosed: boolean = false;
     heartbeatInterval: number = 0;
-    private actionMap: Map<string, BaseAction<any, any>> = new Map();
-    onebotContext: NapCatOneBot11Adapter;
+    obContext: NapCatOneBot11Adapter;
     coreContext: NapCatCore;
     logger: LogWrapper;
+    private actionMap: Map<string, BaseAction<any, any>> = new Map();
     private heartbeatIntervalId: NodeJS.Timeout | null = null;
-
-    authorize(token: string | undefined, wsClient: WebSocket, wsReq: IncomingMessage) {
-        if (!token || token.length == 0) return;//客户端未设置密钥
-        let QueryClientToken = urlParse.parse(wsReq?.url || "", true).query.access_token;
-        let HeaderClientToken = wsReq.headers.authorization?.split('Bearer ').pop() || '';
-        let ClientToken = typeof (QueryClientToken) === 'string' && QueryClientToken !== "" ? QueryClientToken : HeaderClientToken;
-        if (ClientToken === token) {
-            return;
-        }
-        wsClient.send(JSON.stringify(OB11Response.res(null, 'failed', 1403, 'token验证失败')));
-        wsClient.close();
-    }
 
     constructor(ip: string, port: number, heartbeatInterval: number, token: string, coreContext: NapCatCore, onebotContext: NapCatOneBot11Adapter) {
         this.coreContext = coreContext;
-        this.onebotContext = onebotContext;
+        this.obContext = onebotContext;
         this.logger = coreContext.context.logger;
 
         this.heartbeatInterval = heartbeatInterval;
@@ -76,18 +64,6 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
         this.actionMap.set(action.actionName, action);
     }
 
-    registerHeartBeat() {
-        this.heartbeatIntervalId = setInterval(() => {
-            this.wsClientsMutex.runExclusive(async () => {
-                this.wsClients.forEach((wsClient) => {
-                    if (wsClient.readyState === WebSocket.OPEN) {
-                        wsClient.send(JSON.stringify(new OB11HeartbeatEvent(this.coreContext, this.heartbeatInterval, this.coreContext.selfInfo.online, true)));
-                    }
-                });
-            });
-        }, this.heartbeatInterval);
-    }
-
     onEvent<T extends OB11EmitEventContent>(event: T) {
         this.wsClientsMutex.runExclusive(async () => {
             this.wsClients.forEach((wsClient) => {
@@ -117,17 +93,39 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
         }
     }
 
-    async WsReplyAll<T>(data: T) {
-        this.wsClientsMutex.runExclusive(async () => {
+    private registerHeartBeat() {
+        this.heartbeatIntervalId = setInterval(() => {
+            this.wsClientsMutex.runExclusive(async () => {
+                this.wsClients.forEach((wsClient) => {
+                    if (wsClient.readyState === WebSocket.OPEN) {
+                        wsClient.send(JSON.stringify(new OB11HeartbeatEvent(this.coreContext, this.heartbeatInterval, this.coreContext.selfInfo.online, true)));
+                    }
+                });
+            });
+        }, this.heartbeatInterval);
+    }
+
+    private authorize(token: string | undefined, wsClient: WebSocket, wsReq: IncomingMessage) {
+        if (!token || token.length == 0) return;//客户端未设置密钥
+        const QueryClientToken = urlParse.parse(wsReq?.url || '', true).query.access_token;
+        const HeaderClientToken = wsReq.headers.authorization?.split('Bearer ').pop() || '';
+        const ClientToken = typeof (QueryClientToken) === 'string' && QueryClientToken !== '' ? QueryClientToken : HeaderClientToken;
+        if (ClientToken === token) {
+            return;
+        }
+        wsClient.send(JSON.stringify(OB11Response.res(null, 'failed', 1403, 'token验证失败')));
+        wsClient.close();
+    }
+
+    private async checkStateAndAnnounce<T>(data: T) {
+        await this.wsClientsMutex.runExclusive(async () => {
             this.wsClients.forEach((wsClient) => {
-                if (wsClient.readyState === WebSocket.OPEN) {
-                    wsClient.send(JSON.stringify(data));
-                }
+                this.checkStateAndReply(data, wsClient);
             });
         });
     }
 
-    async WsReply<T>(data: T, wsClient: WebSocket) {
+    private checkStateAndReply<T>(data: T, wsClient: WebSocket) {
         if (wsClient.readyState === WebSocket.OPEN) {
             wsClient.send(JSON.stringify(data));
         }
@@ -142,21 +140,21 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
                 echo = receiveData.echo;
                 this.logger.logDebug('收到正向Websocket消息', receiveData);
             } catch (e) {
-                this.WsReply<any>(OB11Response.error('json解析失败,请检查数据格式', 1400, echo), wsClient);
+                this.checkStateAndReply<any>(OB11Response.error('json解析失败,请检查数据格式', 1400, echo), wsClient);
             }
             receiveData.params = (receiveData?.params) ? receiveData.params : {};//兼容类型验证
-            let retdata = await this.actionMap.get(receiveData.action)?.websocketHandle(receiveData.params, echo || "");
+            const retdata = await this.actionMap.get(receiveData.action)?.websocketHandle(receiveData.params, echo || '');
             const packet = Object.assign({}, retdata);
-            this.WsReply<any>(packet, wsClient);
+            this.checkStateAndReply<any>(packet, wsClient);
         } catch (e) {
-            this.WsReply<any>(OB11Response.error('不支持的api ' + receiveData.action, 1404, echo), wsClient);
+            this.checkStateAndReply<any>(OB11Response.error('不支持的api ' + receiveData.action, 1404, echo), wsClient);
         }
     }
 
     private wrapEvent<T extends OB11EmitEventContent>(event: T) {
         return {
             type: 'event',
-            data: event
+            data: event,
         };
     }
 }
