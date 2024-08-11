@@ -283,7 +283,7 @@
 
         function generateQrCode(data, canvas) {
             QRCode.toCanvas(canvas, data, function (error) {
-                if (error) console.error(error);
+                if (error) console.log(error);
                 console.log('QR Code generated!');
             });
         }

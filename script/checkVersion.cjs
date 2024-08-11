@@ -11,7 +11,7 @@ try {
 
   // 验证 targetVersion 格式
   if (!targetVersion || typeof targetVersion !== 'string') {
-    console.error("[NapCat] [CheckVersion] 目标版本格式不正确或未设置！");
+    console.log("[NapCat] [CheckVersion] 目标版本格式不正确或未设置！");
     return;
   }
 
@@ -38,5 +38,5 @@ try {
     writeScriptToFile(safeScriptContent);
   }
 } catch (error) {
-  console.error("[NapCat] [CheckVersion] 检测过程中发生错误：", error);
+  console.log("[NapCat] [CheckVersion] 检测过程中发生错误：", error);
 }
