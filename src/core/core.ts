@@ -56,7 +56,7 @@ export class NapCatCore {
             UserApi: new NTQQUserApi(this.context, this),
             GroupApi: new NTQQGroupApi(this.context, this),
         };
-        this.config = new NapCatConfig(this,this.context.pathWrapper.cachePath);
+        this.config = new NapCatConfig(this,this.context.pathWrapper.configPath);
         this.NapCatDataPath = path.join(this.dataPath, 'NapCat');
         fs.mkdirSync(this.NapCatDataPath, { recursive: true });
         this.NapCatTempPath = path.join(this.NapCatDataPath, 'temp');
