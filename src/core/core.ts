@@ -3,8 +3,8 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { InstanceContext } from './wrapper';
 import { proxiedListenerOf } from '@/common/utils/proxy-handler';
-import { MsgListener, ProfileListener } from './listeners';
-import { SelfInfo, SelfStatusInfo } from './entities';
+import { GroupListener, MsgListener, ProfileListener } from './listeners';
+import { GroupMember, SelfInfo, SelfStatusInfo } from './entities';
 import { LegacyNTEventWrapper } from '@/common/framework/event-legacy';
 import { NTQQFileApi, NTQQFriendApi, NTQQGroupApi, NTQQMsgApi, NTQQSystemApi, NTQQUserApi, NTQQWebApi } from './apis';
 import os from 'node:os';
@@ -101,5 +101,93 @@ export class NapCatCore {
         this.context.session.getProfileService().addKernelProfileListener(
             new this.context.wrapper.NodeIKernelProfileListener(proxiedListenerOf(profileListener, this.context.logger)),
         );
+
+        // 群相关
+        const groupListener = new GroupListener();
+        groupListener.onGroupListUpdate = (updateType, groupList) => {
+            // console.log("onGroupListUpdate", updateType, groupList)
+            groupList.map(g => {
+                const existGroup = this.ApiContext.GroupApi.groupCache.get(g.groupCode);
+                //群成员数量变化 应该刷新缓存
+                if (existGroup && g.memberCount === existGroup.memberCount) {
+                    Object.assign(existGroup, g);
+                }
+                else {
+                    this.ApiContext.GroupApi.groupCache.set(g.groupCode, g);
+                    // 获取群成员
+                }
+                const sceneId = this.context.session.getGroupService().createMemberListScene(g.groupCode, 'groupMemberList_MainWindow');
+                this.context.session.getGroupService().getNextMemberList(sceneId!, undefined, 3000).then(r => {
+                    // console.log(`get group ${g.groupCode} members`, r);
+                    // r.result.infos.forEach(member => {
+                    // });
+                    // groupMembers.set(g.groupCode, r.result.infos);
+                });
+            });
+        };
+        groupListener.onMemberListChange = (arg) => {
+            // todo: 应该加一个内部自己维护的成员变动callback，用于判断成员变化通知
+            const groupCode = arg.sceneId.split('_')[0];
+            if (this.ApiContext.GroupApi.groupMemberCache.has(groupCode)) {
+                const existMembers = this.ApiContext.GroupApi.groupMemberCache.get(groupCode)!;
+                arg.infos.forEach((member, uid) => {
+                    //console.log('onMemberListChange', member);
+                    const existMember = existMembers.get(uid);
+                    if (existMember) {
+                        Object.assign(existMember, member);
+                    }
+                    else {
+                        existMembers!.set(uid, member);
+                    }
+                    //移除成员
+                    if (member.isDelete) {
+                        existMembers.delete(uid);
+                    }
+                });
+            }
+            else {
+                this.ApiContext.GroupApi.groupMemberCache.set(groupCode, arg.infos);
+            }
+            // console.log('onMemberListChange', groupCode, arg);
+        };
+        groupListener.onMemberInfoChange = (groupCode, changeType, members) => {
+            //console.log('onMemberInfoChange', groupCode, changeType, members);
+            if (changeType === 0 && members.get(this.selfInfo.uid)?.isDelete) {
+                // 自身退群或者被踢退群 5s用于Api操作 之后不再出现
+                setTimeout(() => {
+                    this.ApiContext.GroupApi.groupCache.delete(groupCode);
+                }, 5000);
+
+            }
+            const existMembers = this.ApiContext.GroupApi.groupMemberCache.get(groupCode);
+            if (existMembers) {
+                members.forEach((member, uid) => {
+                    const existMember = existMembers.get(uid);
+                    if (existMember) {
+                        // 检查管理变动
+                        member.isChangeRole = this.checkAdminEvent(groupCode, member, existMember);
+                        // 更新成员信息
+                        Object.assign(existMember, member);
+                    }
+                    else {
+                        existMembers.set(uid, member);
+                    }
+                    //移除成员
+                    if (member.isDelete) {
+                        existMembers.delete(uid);
+                    }
+                });
+            }
+            else {
+                this.ApiContext.GroupApi.groupMemberCache.set(groupCode, members);
+            }
+        };
     }
+    checkAdminEvent(groupCode: string, memberNew: GroupMember, memberOld: GroupMember | undefined): boolean {
+        if (memberNew.role !== memberOld?.role) {
+          this.context.logger.log(`群 ${groupCode} ${memberNew.nick} 角色变更为 ${memberNew.role === 3 ? '管理员' : '群员'}`);
+          return true;
+        }
+        return false;
+      }
 }
