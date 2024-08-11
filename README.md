@@ -20,6 +20,9 @@ NapCatQQ 是基于 NTQQ 现代化的Bot协议端实现框架
 
 [Telegram Link](https://t.me/+nLZEnpne-pQ1OWFl)
 
+## 代码许可
+任何使用本仓库代码的地方都应当严格遵守本仓库开源许可
+
 ## 鸣谢名单
 
 [Lagrange](https://github.com/LagrangeDev/Lagrange.Core)
