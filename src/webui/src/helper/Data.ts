@@ -1,4 +1,5 @@
-import { OB11Config } from '@/onebot11/config';
+import { OB11Config } from "@/onebot/helper/config";
+
 
 interface LoginRuntimeType {
     LoginCurrentTime: number;

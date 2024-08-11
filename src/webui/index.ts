@@ -1,15 +1,11 @@
 import express from 'express';
-import { dirname, resolve } from 'node:path';
+import { resolve } from 'node:path';
 import { ALLRouter } from './src/router';
-import { WebUiConfig } from './src/helper/config';
-import { fileURLToPath } from 'node:url';
-import { log } from '@/common/utils/log';
+import { LogWrapper } from '@/common/utils/log';
+import { NapCatPathWrapper } from '@/common/framework/napcat';
+import { WebUiConfigWrapper } from './src/helper/config';
 
 const app = express();
-
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 /**
  * 初始化并启动WebUI服务。
@@ -17,7 +13,10 @@ const __dirname = dirname(__filename);
  * 无需参数。
  * @returns {Promise<void>} 无返回值。
  */
-export async function InitWebUi() {
+export let WebUiConfig:WebUiConfigWrapper;
+export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapper) {
+    WebUiConfig = new WebUiConfigWrapper();
+    let log = logger.log;
     const config = await WebUiConfig.GetWebUIConfig();
     if (config.port == 0) {
         log('[NapCat] [WebUi] Current WebUi is not run.');
@@ -32,7 +31,7 @@ export async function InitWebUi() {
         });
     });
     // 配置静态文件服务，提供./static目录下的文件服务，访问路径为/webui
-    app.use(config.prefix + '/webui', express.static(resolve(__dirname, './static')));
+    app.use(config.prefix + '/webui', express.static(resolve(pathWrapper.staticPath, './static')));
     //挂载API接口
     app.use(config.prefix + '/api', ALLRouter);
     app.listen(config.port, config.host, async () => {

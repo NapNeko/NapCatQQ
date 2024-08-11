@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { AuthHelper } from '../helper/SignToken';
-import { WebUiConfig } from '../helper/config';
 import { WebUiDataRuntime } from '../helper/Data';
+import { WebUiConfig } from '@/webui';
 
 const isEmpty = (data: any) => data === undefined || data === null || data === '';
 export const LoginHandler: RequestHandler = async (req, res) => {
