@@ -24,9 +24,9 @@ if (process.env.NAPCAT_BUILDSYS == 'linux') {
 } else if (process.env.NAPCAT_BUILDSYS == 'win32') {
   if (process.env.NAPCAT_BUILDARCH == 'x64') {
   }
-  startScripts = ['./script/BootWay05.bat', './script/BootWay05.utf8.bat', './script/dbghelp.dll', './script/BootWay05.ps1', './script/napcat-9912.ps1', './script/napcat-9912-utf8.ps1', './script/napcat-9912.bat', './script/napcat-9912-utf8.bat'];
+  startScripts = ['./script/BootWay05.ps1', './script/dbghelp.dll'];
 } else {
-  startScripts = ['./script/BootWay05.bat', './script/BootWay05.utf8.bat', './script/dbghelp.dll', './script/BootWay05.ps1', './script/napcat.sh', './script/napcat.ps1', './script/napcat.bat', './script/napcat-utf8.bat', './script/napcat-utf8.ps1', './script/napcat-log.ps1', './script/napcat-9912.ps1', './script/napcat-9912-utf8.ps1', './script/napcat-9912.bat', './script/napcat-9912-utf8.bat'];
+  startScripts = ['./script/BootWay05.ps1', './script/dbghelp.dll'];
 }
 const FrameworkBaseConfigPlugin: PluginOption[] = [
   // PreprocessorDirectives(),
@@ -79,16 +79,16 @@ const ShellBaseConfigPlugin: PluginOption[] = [
     targets: [
       // ...external.map(genCpModule),
       // { src: './src/napcat.json', dest: 'dist/config/' },
-       { src: './static/', dest: 'dist/static/', flatten: false },
+      { src: './static/', dest: 'dist/static/', flatten: false },
       // { src: './src/onebot11/onebot11.json', dest: 'dist/config/' },
       { src: './src/external/napcat.json', dest: 'dist/config/' },
       { src: './src/external/onebot11.json', dest: 'dist/config/' },
       { src: './package.json', dest: 'dist' },
       // { src: './README.md', dest: 'dist' },
       // { src: './logo.png', dest: 'dist/logs' },
-      // ...(startScripts.map((startScript) => {
-      //   return { src: startScript, dest: 'dist' };
-      // })),
+      ...(startScripts.map((startScript) => {
+        return { src: startScript, dest: 'dist' };
+      })),
     ]
   }),
   nodeResolve(),
