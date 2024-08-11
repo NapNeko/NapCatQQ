@@ -16,9 +16,11 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
     private heartbeatTimer: NodeJS.Timeout | null = null;
     onebotContext: NapCatOneBot11Adapter;
     coreContext: NapCatCore;
+    token: string;
 
-    constructor(url: string, reconnectIntervalInMillis: number, heartbeatInterval: number, coreContext: NapCatCore, onebotContext: NapCatOneBot11Adapter) {
+    constructor(url: string, reconnectIntervalInMillis: number, heartbeatInterval: number, token:string, coreContext: NapCatCore, onebotContext: NapCatOneBot11Adapter) {
         this.url = url;
+        this.token = token;
         this.heartbeatInterval = heartbeatInterval;
         this.reconnectIntervalInMillis = reconnectIntervalInMillis;
         this.coreContext = coreContext;
@@ -72,7 +74,14 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
     private async tryConnect() {
         while (!this.connection && !this.isClosed) {
             try {
-                this.connection = new NodeWebSocket(this.url);
+                this.connection = new NodeWebSocket(this.url, {
+                    headers: {
+                        'X-Self-ID': this.coreContext.selfInfo.uin,
+                        'Authorization': `Bearer ${this.token}`,
+                        'x-client-role': 'Universal',  // koishi-adapter-onebot 需要这个字段
+                        'User-Agent': 'OneBot/11',
+                    }
+                });
                 this.connection.on('message', (data) => {
                     this.handleMessage(data);
                 });
