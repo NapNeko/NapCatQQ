@@ -174,17 +174,7 @@ async function onSettingWindowCreated(view: Element) {
                     'https://github.com/NapNeko/NapCatQQ',
                     SettingButton('点个星星', 'open-github'),
                 ),
-                SettingItem('NapCat 文档', '', SettingButton('看看文档', 'open-docs')),
-                SettingItem(
-                    'Telegram 群',
-                    'https://t.me/+nLZEnpne-pQ1OWFl',
-                    SettingButton('进去逛逛', 'open-telegram'),
-                ),
-                SettingItem(
-                    'QQ 群',
-                    '545402644',
-                    SettingButton('我要进去', 'open-qq-group'),
-                ),
+                SettingItem('NapCat 文档', '', SettingButton('看看文档', 'open-docs'))
             ]),
             '</div>',
         ].join(''),
@@ -197,9 +187,6 @@ async function onSettingWindowCreated(view: Element) {
     });
     doc.querySelector('#open-telegram')?.addEventListener('click', () => {
         window.open('https://t.me/+nLZEnpne-pQ1OWFl');
-    });
-    doc.querySelector('#open-qq-group')?.addEventListener('click', () => {
-        window.open('https://qm.qq.com/q/bDnHRG38aI');
     });
     doc.querySelector('#open-docs')?.addEventListener('click', () => {
         window.open('https://napneko.github.io/', '_blank');
