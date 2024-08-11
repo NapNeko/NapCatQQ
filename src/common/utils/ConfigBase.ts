@@ -3,12 +3,13 @@ import fs from 'node:fs';
 import type { NapCatCore } from '@/core';
 
 export abstract class ConfigBase<T> {
-    abstract name: string;
+    name: string;
     coreContext: NapCatCore;
     configPath: string;
     configData: T = {} as T;
 
-    constructor(coreContext: NapCatCore, configPath: string) {
+    protected constructor(name: string, coreContext: NapCatCore, configPath: string) {
+        this.name = name;
         this.coreContext = coreContext;
         this.configPath = configPath;
         fs.mkdirSync(this.configPath, { recursive: true });
