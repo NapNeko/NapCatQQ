@@ -9,8 +9,7 @@ import { LegacyNTEventWrapper } from '@/common/framework/event-legacy';
 import { NTQQFileApi, NTQQFriendApi, NTQQGroupApi, NTQQMsgApi, NTQQSystemApi, NTQQUserApi, NTQQWebApi } from './apis';
 import os from 'node:os';
 import { NTQQCollectionApi } from './apis/collection';
-import { OB11Config } from '@/onebot/helper/config';
-import { NapCatConfig } from './helper/config';
+import { NapCatConfigLoader } from './helper/config';
 
 export enum NapCatCoreWorkingEnv {
     Unknown = 0,
@@ -38,7 +37,7 @@ export class NapCatCore {
     // runtime info, not readonly
     selfInfo: SelfInfo;
     util: NodeQQNTWrapperUtil;
-    config: any;
+    configLoader: NapCatConfigLoader;
 
     // 通过构造器递过去的 runtime info 应该尽量少
     constructor(context: InstanceContext, selfInfo: SelfInfo) {
@@ -56,7 +55,7 @@ export class NapCatCore {
             UserApi: new NTQQUserApi(this.context, this),
             GroupApi: new NTQQGroupApi(this.context, this),
         };
-        this.config = new NapCatConfig(this,this.context.pathWrapper.configPath);
+        this.configLoader = new NapCatConfigLoader(this,this.context.pathWrapper.configPath);
         this.NapCatDataPath = path.join(this.dataPath, 'NapCat');
         fs.mkdirSync(this.NapCatDataPath, { recursive: true });
         this.NapCatTempPath = path.join(this.NapCatDataPath, 'temp');
@@ -185,9 +184,9 @@ export class NapCatCore {
     }
     checkAdminEvent(groupCode: string, memberNew: GroupMember, memberOld: GroupMember | undefined): boolean {
         if (memberNew.role !== memberOld?.role) {
-          this.context.logger.log(`群 ${groupCode} ${memberNew.nick} 角色变更为 ${memberNew.role === 3 ? '管理员' : '群员'}`);
-          return true;
+            this.context.logger.log(`群 ${groupCode} ${memberNew.nick} 角色变更为 ${memberNew.role === 3 ? '管理员' : '群员'}`);
+            return true;
         }
         return false;
-      }
+    }
 }
