@@ -33,6 +33,7 @@ import { OB11FriendRequestEvent } from '@/onebot/event/request/OB11FriendRequest
 import { OB11GroupAdminNoticeEvent } from '@/onebot/event/notice/OB11GroupAdminNoticeEvent';
 import { GroupDecreaseSubType, OB11GroupDecreaseEvent } from '@/onebot/event/notice/OB11GroupDecreaseEvent';
 import { OB11GroupRequestEvent } from '@/onebot/event/request/OB11GroupRequest';
+import { sleep } from '@/common/utils/helper';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -59,6 +60,15 @@ export class NapCatOneBot11Adapter {
     }
 
     async InitOneBot() {
+        // 这个延迟对个别 API 的初始化很重要
+        // 例如，如果没有这个延迟，则 getGroupMembers 只能返回空列表
+        // 反向（Active）WebSocket 在初始化后立即连接，如果 QQ 初始化没完成，
+        // 而连接的对方在初始化逻辑中用到这个 getGroupMembers，
+        // 则会导致 getGroupMembers 返回空列表，进而导致初始化失败
+        // 初始化完成的标准尚不明确！
+        // TODO: 弄清楚初始化完成的标志，并试着用监听器回调解决
+        await sleep(2500);
+
         const NTQQUserApi = this.core.apis.UserApi;
         const selfInfo = this.core.selfInfo;
         const ob11Config = this.configLoader.configData;
