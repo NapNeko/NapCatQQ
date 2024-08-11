@@ -308,6 +308,19 @@ export enum PicSubType {
     face = 1  // 表情包小图
 }
 
+export enum NTMsgAtType {
+    ATTYPEALL = 1,
+    ATTYPECATEGORY = 512,
+    ATTYPECHANNEL = 16,
+    ATTYPEME = 4,
+    ATTYPEONE = 2,
+    ATTYPEONLINE = 64,
+    ATTYPEROLE = 8,
+    ATTYPESUMMON = 32,
+    ATTYPESUMMONONLINE = 128,
+    ATTYPESUMMONROLE = 256,
+    ATTYPEUNKNOWN = 0
+}
 export interface SendPicElement {
     elementType: ElementType.PIC;
     elementId: string;
