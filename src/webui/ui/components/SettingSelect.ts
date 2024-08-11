@@ -32,21 +32,23 @@ window.customElements.define(
             this.attachShadow({ mode: 'open' });
             this.shadowRoot?.append(SelectTemplate.content.cloneNode(true));
 
-            this._button = this.shadowRoot.querySelector('div[part="button"]');
-            this._text = this.shadowRoot.querySelector('input[part="current-text"]');
-            this._context = this.shadowRoot.querySelector('ul[part="option-list"]');
+            this._button = this.shadowRoot!.querySelector('div[part="button"]')!;
+            this._text = this.shadowRoot!.querySelector('input[part="current-text"]')!;
+            this._context = this.shadowRoot!.querySelector('ul[part="option-list"]')!;
 
             const buttonClick = () => {
                 const isHidden = this._context.classList.toggle('hidden');
                 window[`${isHidden ? 'remove' : 'add'}EventListener`]('pointerdown', windowPointerDown);
             };
 
-            const windowPointerDown = ({ target }) => {
+            const windowPointerDown = ({ target }: any) => {
                 if (!this.contains(target)) buttonClick();
             };
 
             this._button.addEventListener('click', buttonClick);
-            this._context.addEventListener('click', ({ target }: MouseEventExtend) => {
+            this._context.addEventListener('click', (event) => {
+                const { target } = event as MouseEventExtend;
+
                 if (target.tagName !== 'SETTING-OPTION') return;
                 buttonClick();
 
