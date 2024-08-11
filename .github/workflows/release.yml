@@ -30,14 +30,9 @@ jobs:
               ls
               node ./script/checkVersion.cjs
               sh ./checkVersion.sh
-  build-linux:
+  build-Liteloader:
     needs: [check-version]
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        target_platform: [linux]
-        target_arch: [x64, arm64]
     steps:
     - name: Clone Main Repository
       uses: actions/checkout@v4
@@ -51,28 +46,21 @@ jobs:
       with:
           node-version: 20.x
 
-    - name: Build NuCat Linux
+    - name: Build NuCat LiteLoader
       run: |
-          export NAPCAT_BUILDSYS=${{ matrix.target_platform }} 
-          export NAPCAT_BUILDARCH=${{ matrix.target_arch }} 
-          npm i --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
-          npm run build:prod
+          npm i
+          npm run build:liteloader
           cd dist
-          npm i --omit=dev --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
+          npm i --omit=dev
           cd ..
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: NapCat.${{ matrix.target_platform }}.${{ matrix.target_arch }}
+        name: NapCat.Liteloader
         path: dist
-  build-win32:
+  build-Shell:
     runs-on: ubuntu-latest
     needs: [check-version]
-    strategy:
-      fail-fast: false
-      matrix:
-        target_platform: [win32]
-        target_arch: [x64,ia32]
     steps:
         - name: Clone Main Repository
           uses: actions/checkout@v4
@@ -89,22 +77,20 @@ jobs:
           
         - name: Build NuCat Linux
           run: |
-                export NAPCAT_BUILDSYS=${{ matrix.target_platform }} 
-                export NAPCAT_BUILDARCH=${{ matrix.target_arch }} 
-                npm i --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
+                npm i 
                 npm run build:prod
                 cd dist
-                npm i --omit=dev --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
+                npm i --omit=dev
                 cd ..
 
         - name: Upload Artifact
           uses: actions/upload-artifact@v4
           with:
-              name: NapCat.${{ matrix.target_platform }}.${{ matrix.target_arch }}
+              name: NapCat.Shell
               path: dist
 
   release-napcat:
-    needs: [build-win32,build-linux]
+    needs: [build-Liteloader,build-Shell]
     runs-on: ubuntu-latest
     steps:
     - name: Download All Artifact
@@ -130,10 +116,8 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         body_path: CHANGELOG.md
         files: |
-          NapCat.win32.ia32.zip
-          NapCat.win32.x64.zip
-          NapCat.linux.x64.zip
-          NapCat.linux.arm64.zip
+          NapCat.Liteloader.zip
+          NapCat.Shell.zip
 #          NapCat.darwin.x64.zip
 #          NapCat.darwin.arm64.zip
         draft: true
