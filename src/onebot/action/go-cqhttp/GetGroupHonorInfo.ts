@@ -22,7 +22,7 @@ export class GetGroupHonorInfo extends BaseAction<Payload, Array<any>> {
         if (!payload.type) {
             payload.type = WebHonorType.ALL;
         }
-        const NTQQWebApi = this.CoreContext.getApiContext().WebApi;
+        const NTQQWebApi = this.CoreContext.apis.WebApi;
         return await NTQQWebApi.getGroupHonorInfo(payload.group_id.toString(), payload.type);
     }
 }

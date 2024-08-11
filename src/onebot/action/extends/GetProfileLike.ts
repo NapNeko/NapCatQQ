@@ -5,7 +5,7 @@ export class GetProfileLike extends BaseAction<void, any> {
     actionName = ActionName.GetProfileLike;
 
     async _handle(payload: void) {
-        const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
+        const NTQQUserApi = this.CoreContext.apis.UserApi;
         const ret = await NTQQUserApi.getProfileLike(this.CoreContext.selfInfo.uid);
         const listdata: any[] = ret.info.userLikeInfos[0].favoriteInfo.userInfos;
         for (let i = 0; i < listdata.length; i++) {

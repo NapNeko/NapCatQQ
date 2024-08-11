@@ -23,7 +23,7 @@ class GetMsg extends BaseAction<Payload, OB11Message> {
     PayloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
+        const NTQQMsgApi = this.CoreContext.apis.MsgApi;
         // log("history msg ids", Object.keys(msgHistory));
         if (!payload.message_id) {
             throw Error('参数message_id不能为空');

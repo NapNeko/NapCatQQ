@@ -20,7 +20,7 @@ export default class SetGroupAddRequest extends BaseAction<Payload, null> {
     PayloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
-        const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
+        const NTQQGroupApi = this.CoreContext.apis.GroupApi;
         const flag = payload.flag.toString();
         const approve = payload.approve?.toString() !== 'false';
         await NTQQGroupApi.handleGroupRequest(flag,

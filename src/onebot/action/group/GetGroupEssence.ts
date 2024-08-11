@@ -19,7 +19,7 @@ export class GetGroupEssence extends BaseAction<Payload, GroupEssenceMsgRet> {
     PayloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQWebApi = this.CoreContext.getApiContext().WebApi;
+        const NTQQWebApi = this.CoreContext.apis.WebApi;
         const ret = await NTQQWebApi.getGroupEssenceMsg(payload.group_id.toString(), payload.pages.toString());
         if (!ret) {
             throw new Error('获取失败');

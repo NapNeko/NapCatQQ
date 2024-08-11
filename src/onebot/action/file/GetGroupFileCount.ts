@@ -17,7 +17,7 @@ export class GetGroupFileCount extends BaseAction<Payload, { count: number }> {
     PayloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
+        const NTQQGroupApi = this.CoreContext.apis.GroupApi;
         const ret = await NTQQGroupApi.GetGroupFileCount([payload.group_id?.toString()]);
         return { count: ret.groupFileCounts[0] };
     }

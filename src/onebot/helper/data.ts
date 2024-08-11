@@ -46,10 +46,10 @@ import { NapCatCore } from '@/core';
 
 export class OB11Constructor {
     static async message(core: NapCatCore, msg: RawMessage, messagePostFormat: any): Promise<OB11Message> {
-        const NTQQGroupApi = core.getApiContext().GroupApi;
-        const NTQQUserApi = core.getApiContext().UserApi;
-        const NTQQFileApi = core.getApiContext().FileApi;
-        const NTQQMsgApi = core.getApiContext().MsgApi;
+        const NTQQGroupApi = core.apis.GroupApi;
+        const NTQQUserApi = core.apis.UserApi;
+        const NTQQFileApi = core.apis.FileApi;
+        const NTQQMsgApi = core.apis.MsgApi;
         const logger = core.context.logger;
         const resMsg: OB11Message = {
             self_id: parseInt(core.selfInfo.uin),
@@ -362,7 +362,7 @@ export class OB11Constructor {
     }
 
     static async PrivateEvent(core: NapCatCore, msg: RawMessage): Promise<OB11BaseNoticeEvent | undefined> {
-        const NTQQUserApi = core.getApiContext().UserApi;
+        const NTQQUserApi = core.apis.UserApi;
         if (msg.chatType !== ChatType.friend) {
             return;
         }
@@ -400,9 +400,9 @@ export class OB11Constructor {
     }
 
     static async GroupEvent(core: NapCatCore, msg: RawMessage): Promise<OB11GroupNoticeEvent | undefined> {
-        const NTQQGroupApi = core.getApiContext().GroupApi;
-        const NTQQUserApi = core.getApiContext().UserApi;
-        const NTQQMsgApi = core.getApiContext().MsgApi;
+        const NTQQGroupApi = core.apis.GroupApi;
+        const NTQQUserApi = core.apis.UserApi;
+        const NTQQMsgApi = core.apis.MsgApi;
         const logger = core.context.logger;
         if (msg.chatType !== ChatType.group) {
             return;

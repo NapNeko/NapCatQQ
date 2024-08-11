@@ -19,7 +19,7 @@ export class SetSelfProfile extends BaseAction<Payload, any | null> {
     PayloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
+        const NTQQUserApi = this.CoreContext.apis.UserApi;
         const ret = await NTQQUserApi.modifySelfProfile({
             nick: payload.nick,
             longNick: payload.longNick,

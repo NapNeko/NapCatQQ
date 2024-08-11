@@ -20,7 +20,7 @@ async function handleMsg(coreContext: NapCatCore, msg: OB11Message, quickAction:
     const reply = quickAction.reply;
     const peer: Peer = {
         chatType: ChatType.friend,
-        peerUid: await coreContext.getApiContext().UserApi.getUidByUin(msg.user_id.toString()) as string,
+        peerUid: await coreContext.apis.UserApi.getUidByUin(msg.user_id.toString()) as string,
     };
     if (msg.message_type == 'private') {
         if (msg.sub_type === 'group') {
@@ -35,7 +35,7 @@ async function handleMsg(coreContext: NapCatCore, msg: OB11Message, quickAction:
         let replyMessage: OB11MessageData[] = [];
 
         if (msg.message_type == 'group') {
-            group = await coreContext.getApiContext().GroupApi.getGroup(msg.group_id!.toString());
+            group = await coreContext.apis.GroupApi.getGroup(msg.group_id!.toString());
             replyMessage.push({
                 type: 'reply',
                 data: {
@@ -59,7 +59,7 @@ async function handleMsg(coreContext: NapCatCore, msg: OB11Message, quickAction:
 
 async function handleGroupRequest(coreContext: NapCatCore, request: OB11GroupRequestEvent, quickAction: QuickActionGroupRequest) {
     if (!isNull(quickAction.approve)) {
-        coreContext.getApiContext().GroupApi.handleGroupRequest(
+        coreContext.apis.GroupApi.handleGroupRequest(
             request.flag,
             quickAction.approve ? GroupRequestOperateTypes.approve : GroupRequestOperateTypes.reject,
             quickAction.reason,
@@ -69,7 +69,7 @@ async function handleGroupRequest(coreContext: NapCatCore, request: OB11GroupReq
 
 async function handleFriendRequest(coreContext: NapCatCore, request: OB11FriendRequestEvent, quickAction: QuickActionFriendRequest) {
     if (!isNull(quickAction.approve)) {
-        coreContext.getApiContext().FriendApi.handleFriendRequest(request.flag, !!quickAction.approve).then().catch(coreContext.context.logger.logError);
+        coreContext.apis.FriendApi.handleFriendRequest(request.flag, !!quickAction.approve).then().catch(coreContext.context.logger.logError);
     }
 }
 

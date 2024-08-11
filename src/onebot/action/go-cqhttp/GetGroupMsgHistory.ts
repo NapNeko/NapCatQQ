@@ -28,7 +28,7 @@ export default class GoCQHTTPGetGroupMsgHistory extends BaseAction<Payload, Resp
     PayloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<Response> {
-        const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
+        const NTQQMsgApi = this.CoreContext.apis.MsgApi;
         //处理参数
         const isReverseOrder = payload.reverseOrder || true;
         const MsgCount = payload.count || 20;

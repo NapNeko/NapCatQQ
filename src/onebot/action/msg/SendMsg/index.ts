@@ -37,7 +37,7 @@ export function normalize(message: OB11MessageMixType, autoEscape = false): OB11
 export { createSendElements };
 
 export async function sendMsg(coreContext: NapCatCore, peer: Peer, sendElements: SendMessageElement[], deleteAfterSentFiles: string[], waitComplete = true) {
-    const NTQQMsgApi = coreContext.getApiContext().MsgApi;
+    const NTQQMsgApi = coreContext.apis.MsgApi;
     const logger = coreContext.context.logger;
     if (!sendElements.length) {
         throw ('消息体无法解析, 请检查是否发送了不支持的消息类型');
@@ -88,9 +88,9 @@ async function createContext(coreContext: NapCatCore, payload: OB11PostSendMsg, 
     // This function determines the type of message by the existence of user_id / group_id,
     // not message_type.
     // This redundant design of Ob11 here should be blamed.
-    const NTQQGroupApi = coreContext.getApiContext().GroupApi;
-    const NTQQFriendApi = coreContext.getApiContext().FriendApi;
-    const NTQQUserApi = coreContext.getApiContext().UserApi;
+    const NTQQGroupApi = coreContext.apis.GroupApi;
+    const NTQQFriendApi = coreContext.apis.FriendApi;
+    const NTQQUserApi = coreContext.apis.UserApi;
     if ((contextMode === ContextMode.Group || contextMode === ContextMode.Normal) && payload.group_id) {
         const group = (await NTQQGroupApi.getGroups()).find(e => e.groupCode == payload.group_id?.toString());
         return {
@@ -122,9 +122,9 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
     contextMode = ContextMode.Normal;
 
     protected async check(payload: OB11PostSendMsg): Promise<BaseCheckResult> {
-        const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
-        const NTQQFriendApi = this.CoreContext.getApiContext().FriendApi;
-        const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
+        const NTQQGroupApi = this.CoreContext.apis.GroupApi;
+        const NTQQFriendApi = this.CoreContext.apis.FriendApi;
+        const NTQQUserApi = this.CoreContext.apis.UserApi;
         const messages = normalize(payload.message);
         const nodeElementLength = getSpecialMsgNum(payload, OB11MessageDataType.node);
         if (nodeElementLength > 0 && nodeElementLength != messages.length) {

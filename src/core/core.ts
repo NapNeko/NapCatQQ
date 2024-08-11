@@ -28,7 +28,7 @@ export function loadQQWrapper(QQVersion: string): WrapperNodeApi {
 
 export class NapCatCore {
     readonly context: InstanceContext;
-    readonly ApiContext: NTApiContext;
+    readonly apis: NTApiContext;
     readonly eventWrapper: LegacyNTEventWrapper;
     // readonly eventChannel: NTEventChannel;
     NapCatDataPath: string;
@@ -43,7 +43,7 @@ export class NapCatCore {
         this.context = context;
         this.util = new this.context.wrapper.NodeQQNTWrapperUtil();
         this.eventWrapper = new LegacyNTEventWrapper(context.wrapper, context.session);
-        this.ApiContext = {
+        this.apis = {
             FileApi: new NTQQFileApi(this.context, this),
             SystemApi: new NTQQSystemApi(this.context, this),
             CollectionApi: new NTQQCollectionApi(this.context, this),
@@ -61,10 +61,6 @@ export class NapCatCore {
             fs.mkdirSync(this.NapCatTempPath, { recursive: true });
         }
         this.initNapCatCoreListeners().then().catch(this.context.logger.logError);
-    }
-
-    getApiContext() {
-        return this.ApiContext;
     }
 
     get dataPath(): string {
@@ -107,13 +103,13 @@ export class NapCatCore {
         groupListener.onGroupListUpdate = (updateType, groupList) => {
             // console.log("onGroupListUpdate", updateType, groupList)
             groupList.map(g => {
-                const existGroup = this.ApiContext.GroupApi.groupCache.get(g.groupCode);
+                const existGroup = this.apis.GroupApi.groupCache.get(g.groupCode);
                 //群成员数量变化 应该刷新缓存
                 if (existGroup && g.memberCount === existGroup.memberCount) {
                     Object.assign(existGroup, g);
                 }
                 else {
-                    this.ApiContext.GroupApi.groupCache.set(g.groupCode, g);
+                    this.apis.GroupApi.groupCache.set(g.groupCode, g);
                     // 获取群成员
                 }
                 const sceneId = this.context.session.getGroupService().createMemberListScene(g.groupCode, 'groupMemberList_MainWindow');
@@ -128,8 +124,8 @@ export class NapCatCore {
         groupListener.onMemberListChange = (arg) => {
             // todo: 应该加一个内部自己维护的成员变动callback，用于判断成员变化通知
             const groupCode = arg.sceneId.split('_')[0];
-            if (this.ApiContext.GroupApi.groupMemberCache.has(groupCode)) {
-                const existMembers = this.ApiContext.GroupApi.groupMemberCache.get(groupCode)!;
+            if (this.apis.GroupApi.groupMemberCache.has(groupCode)) {
+                const existMembers = this.apis.GroupApi.groupMemberCache.get(groupCode)!;
                 arg.infos.forEach((member, uid) => {
                     //console.log('onMemberListChange', member);
                     const existMember = existMembers.get(uid);
@@ -146,7 +142,7 @@ export class NapCatCore {
                 });
             }
             else {
-                this.ApiContext.GroupApi.groupMemberCache.set(groupCode, arg.infos);
+                this.apis.GroupApi.groupMemberCache.set(groupCode, arg.infos);
             }
             // console.log('onMemberListChange', groupCode, arg);
         };
@@ -155,11 +151,11 @@ export class NapCatCore {
             if (changeType === 0 && members.get(this.selfInfo.uid)?.isDelete) {
                 // 自身退群或者被踢退群 5s用于Api操作 之后不再出现
                 setTimeout(() => {
-                    this.ApiContext.GroupApi.groupCache.delete(groupCode);
+                    this.apis.GroupApi.groupCache.delete(groupCode);
                 }, 5000);
 
             }
-            const existMembers = this.ApiContext.GroupApi.groupMemberCache.get(groupCode);
+            const existMembers = this.apis.GroupApi.groupMemberCache.get(groupCode);
             if (existMembers) {
                 members.forEach((member, uid) => {
                     const existMember = existMembers.get(uid);
@@ -179,7 +175,7 @@ export class NapCatCore {
                 });
             }
             else {
-                this.ApiContext.GroupApi.groupMemberCache.set(groupCode, members);
+                this.apis.GroupApi.groupMemberCache.set(groupCode, members);
             }
         };
     }

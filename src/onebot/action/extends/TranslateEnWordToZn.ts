@@ -20,7 +20,7 @@ export class TranslateEnWordToZn extends BaseAction<Payload, Array<any> | null> 
     PayloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQSystemApi = this.CoreContext.getApiContext().SystemApi;
+        const NTQQSystemApi = this.CoreContext.apis.SystemApi;
         const ret = await NTQQSystemApi.translateEnWordToZn(payload.words);
         if (ret.result !== 0) {
             throw new Error('翻译失败');

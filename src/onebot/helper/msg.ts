@@ -80,11 +80,11 @@ export class SendMsgElementConstructor {
     }
 
     static async pic(coreContext: NapCatCore, picPath: string, summary: string = '', subType: 0 | 1 = 0): Promise<SendPicElement> {
-        const NTQQGroupApi = coreContext.getApiContext().GroupApi;
-        const NTQQUserApi = coreContext.getApiContext().UserApi;
-        const NTQQFileApi = coreContext.getApiContext().FileApi;
-        const NTQQMsgApi = coreContext.getApiContext().MsgApi;
-        const NTQQFriendApi = coreContext.getApiContext().FriendApi;
+        const NTQQGroupApi = coreContext.apis.GroupApi;
+        const NTQQUserApi = coreContext.apis.UserApi;
+        const NTQQFileApi = coreContext.apis.FileApi;
+        const NTQQMsgApi = coreContext.apis.MsgApi;
+        const NTQQFriendApi = coreContext.apis.FriendApi;
         const logger = coreContext.context.logger;
         const { md5, fileName, path, fileSize } = await NTQQFileApi.uploadFile(picPath, ElementType.PIC, subType);
         if (fileSize === 0) {
@@ -115,11 +115,11 @@ export class SendMsgElementConstructor {
     }
 
     static async file(coreContext: NapCatCore, filePath: string, fileName: string = '', folderId: string = ''): Promise<SendFileElement> {
-        const NTQQGroupApi = coreContext.getApiContext().GroupApi;
-        const NTQQUserApi = coreContext.getApiContext().UserApi;
-        const NTQQFileApi = coreContext.getApiContext().FileApi;
-        const NTQQMsgApi = coreContext.getApiContext().MsgApi;
-        const NTQQFriendApi = coreContext.getApiContext().FriendApi;
+        const NTQQGroupApi = coreContext.apis.GroupApi;
+        const NTQQUserApi = coreContext.apis.UserApi;
+        const NTQQFileApi = coreContext.apis.FileApi;
+        const NTQQMsgApi = coreContext.apis.MsgApi;
+        const NTQQFriendApi = coreContext.apis.FriendApi;
         const logger = coreContext.context.logger;
         const { md5, fileName: _fileName, path, fileSize } = await NTQQFileApi.uploadFile(filePath, ElementType.FILE);
         if (fileSize === 0) {
@@ -140,11 +140,11 @@ export class SendMsgElementConstructor {
     }
 
     static async video(coreContext: NapCatCore, filePath: string, fileName: string = '', diyThumbPath: string = '', videotype: viedo_type = viedo_type.VIDEO_FORMAT_MP4): Promise<SendVideoElement> {
-        const NTQQGroupApi = coreContext.getApiContext().GroupApi;
-        const NTQQUserApi = coreContext.getApiContext().UserApi;
-        const NTQQFileApi = coreContext.getApiContext().FileApi;
-        const NTQQMsgApi = coreContext.getApiContext().MsgApi;
-        const NTQQFriendApi = coreContext.getApiContext().FriendApi;
+        const NTQQGroupApi = coreContext.apis.GroupApi;
+        const NTQQUserApi = coreContext.apis.UserApi;
+        const NTQQFileApi = coreContext.apis.FileApi;
+        const NTQQMsgApi = coreContext.apis.MsgApi;
+        const NTQQFriendApi = coreContext.apis.FriendApi;
         const logger = coreContext.context.logger;
         const { fileName: _fileName, path, fileSize, md5 } = await NTQQFileApi.uploadFile(filePath, ElementType.VIDEO);
         if (fileSize === 0) {
@@ -228,11 +228,11 @@ export class SendMsgElementConstructor {
     }
 
     static async ptt(coreContext: NapCatCore, pttPath: string): Promise<SendPttElement> {
-        const NTQQGroupApi = coreContext.getApiContext().GroupApi;
-        const NTQQUserApi = coreContext.getApiContext().UserApi;
-        const NTQQFileApi = coreContext.getApiContext().FileApi;
-        const NTQQMsgApi = coreContext.getApiContext().MsgApi;
-        const NTQQFriendApi = coreContext.getApiContext().FriendApi;
+        const NTQQGroupApi = coreContext.apis.GroupApi;
+        const NTQQUserApi = coreContext.apis.UserApi;
+        const NTQQFileApi = coreContext.apis.FileApi;
+        const NTQQMsgApi = coreContext.apis.MsgApi;
+        const NTQQFriendApi = coreContext.apis.FriendApi;
         const logger = coreContext.context.logger;
         const {
             converted,

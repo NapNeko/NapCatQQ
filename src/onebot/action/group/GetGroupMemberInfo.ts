@@ -21,9 +21,9 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
     PayloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
-        const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
-        const NTQQWebApi = this.CoreContext.getApiContext().WebApi;
+        const NTQQUserApi = this.CoreContext.apis.UserApi;
+        const NTQQGroupApi = this.CoreContext.apis.GroupApi;
+        const NTQQWebApi = this.CoreContext.apis.WebApi;
         const isNocache = payload.no_cache == true || payload.no_cache === 'true';
         const uid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
         if (!uid) {

@@ -10,7 +10,7 @@ async function cloneMsg(coreContext: NapCatCore, msg: RawMessage): Promise<RawMe
         peerUid: coreContext.selfInfo.uid,
     };
     const logger = coreContext.context.logger;
-    const NTQQMsgApi = coreContext.getApiContext().MsgApi;
+    const NTQQMsgApi = coreContext.apis.MsgApi;
     //logDebug('克隆的目标消息', msg);
 
     const sendElements: SendMessageElement[] = [];
@@ -31,7 +31,7 @@ async function cloneMsg(coreContext: NapCatCore, msg: RawMessage): Promise<RawMe
 }
 
 export async function handleForwardNode(coreContext: NapCatCore, destPeer: Peer, messageNodes: OB11MessageNode[]): Promise<RawMessage | null> {
-    const NTQQMsgApi = coreContext.getApiContext().MsgApi;
+    const NTQQMsgApi = coreContext.apis.MsgApi;
     const selfPeer = {
         chatType: ChatType.friend,
         peerUid: coreContext.selfInfo.uid,

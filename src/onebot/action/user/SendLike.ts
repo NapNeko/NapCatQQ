@@ -18,7 +18,7 @@ export default class SendLike extends BaseAction<Payload, null> {
     PayloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
-        const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
+        const NTQQUserApi = this.CoreContext.apis.UserApi;
         //logDebug('点赞参数', payload);
         try {
             const qq = payload.user_id.toString();

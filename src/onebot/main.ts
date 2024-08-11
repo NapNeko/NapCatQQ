@@ -2,7 +2,8 @@ import {
     BuddyListener,
     BuddyReqType,
     ChatType,
-    GroupListener, GroupNotifyTypes,
+    GroupListener,
+    GroupNotifyTypes,
     InstanceContext,
     MsgListener,
     NapCatCore,
@@ -12,7 +13,13 @@ import { OB11Config } from './helper/config';
 import { NapCatPathWrapper } from '@/common/framework/napcat';
 import { OneBotApiContextType } from '@/onebot/types';
 import { OneBotFriendApi, OneBotGroupApi, OneBotUserApi } from './api';
-import { OB11ActiveHttpAdapter, OB11ActiveWebSocketAdapter, OB11NetworkManager, OB11PassiveHttpAdapter, OB11PassiveWebSocketAdapter } from '@/onebot/network';
+import {
+    OB11ActiveHttpAdapter,
+    OB11ActiveWebSocketAdapter,
+    OB11NetworkManager,
+    OB11PassiveHttpAdapter,
+    OB11PassiveWebSocketAdapter,
+} from '@/onebot/network';
 import { OB11InputStatusEvent } from '@/onebot/event/notice/OB11InputStatusEvent';
 import { MessageUnique } from '@/common/utils/MessageUnique';
 import { OB11Constructor } from '@/onebot/helper/data';
@@ -53,7 +60,7 @@ export class NapCatOneBot11Adapter {
     }
 
     async InitOneBot() {
-        const NTQQUserApi = this.core.getApiContext().UserApi;
+        const NTQQUserApi = this.core.apis.UserApi;
         const selfInfo = this.core.selfInfo;
         const ob11Config = this.config.configData;
 
@@ -117,7 +124,7 @@ export class NapCatOneBot11Adapter {
         const msgListener = new MsgListener();
 
         msgListener.onInputStatusPush = async data => {
-            const uin = await this.core.ApiContext.UserApi.getUinByUidV2(data.fromUin);
+            const uin = await this.core.apis.UserApi.getUinByUidV2(data.fromUin);
             this.context.logger.log(`[Notice] [输入状态] ${uin} ${data.statusText}`);
             await this.networkManager.emitEvent(new OB11InputStatusEvent(
                 this.core,
@@ -181,7 +188,7 @@ export class NapCatOneBot11Adapter {
                     return;
                 }
                 try {
-                    const requesterUin = await this.core.ApiContext.UserApi.getUinByUidV2(req.friendUid);
+                    const requesterUin = await this.core.apis.UserApi.getUinByUidV2(req.friendUid);
                     await this.networkManager.emitEvent(new OB11FriendRequestEvent(
                         this.core,
                         parseInt(requesterUin!),
@@ -230,7 +237,7 @@ export class NapCatOneBot11Adapter {
                         GroupNotifyTypes.ADMIN_UNSET,
                         GroupNotifyTypes.ADMIN_UNSET_OTHER
                     ].includes(notify.type)) {
-                        const member1 = await this.core.ApiContext.GroupApi.getGroupMember(notify.group.groupCode, notify.user1.uid);
+                        const member1 = await this.core.apis.GroupApi.getGroupMember(notify.group.groupCode, notify.user1.uid);
                         this.context.logger.logDebug('有管理员变动通知');
                         // refreshGroupMembers(notify.group.groupCode).then();
 
@@ -248,16 +255,16 @@ export class NapCatOneBot11Adapter {
                             this.networkManager.emitEvent(groupAdminNoticeEvent)
                                 .catch(e => this.context.logger.logError('处理群管理员变动失败', e));
                         } else {
-                            this.context.logger.logDebug('获取群通知的成员信息失败', notify, this.core.ApiContext.GroupApi.getGroup(notify.group.groupCode));
+                            this.context.logger.logDebug('获取群通知的成员信息失败', notify, this.core.apis.GroupApi.getGroup(notify.group.groupCode));
                         }
                     } else if (notify.type == GroupNotifyTypes.MEMBER_EXIT || notify.type == GroupNotifyTypes.KICK_MEMBER) {
                         this.context.logger.logDebug('有成员退出通知', notify);
-                        const member1Uin = (await this.core.ApiContext.UserApi.getUinByUidV2(notify.user1.uid))!;
+                        const member1Uin = (await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid))!;
                         let operatorId = member1Uin;
                         let subType: GroupDecreaseSubType = 'leave';
                         if (notify.user2.uid) {
                             // 是被踢的
-                            const member2Uin = await this.core.ApiContext.UserApi.getUinByUidV2(notify.user2.uid);
+                            const member2Uin = await this.core.apis.UserApi.getUinByUidV2(notify.user2.uid);
                             if (member2Uin) {
                                 operatorId = member2Uin;
                             }
@@ -278,9 +285,9 @@ export class NapCatOneBot11Adapter {
                     ].includes(notify.type) && notify.status == 1) {
                         this.context.logger.logDebug('有加群请求');
                         try {
-                            let requestUin = (await this.core.ApiContext.UserApi.getUinByUidV2(notify.user1.uid))!;
+                            let requestUin = (await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid))!;
                             if (isNaN(parseInt(requestUin))) {
-                                requestUin = (await this.core.ApiContext.UserApi.getUserDetailInfo(notify.user1.uid)).uin;
+                                requestUin = (await this.core.apis.UserApi.getUserDetailInfo(notify.user1.uid)).uin;
                             }
                             const groupRequestEvent = new OB11GroupRequestEvent(
                                 this.core,
@@ -377,7 +384,7 @@ export class NapCatOneBot11Adapter {
                     let operatorId = message.senderUin;
                     for (const element of message.elements) {
                         const operatorUid = element.grayTipElement?.revokeElement.operatorUid;
-                        const operator = await this.core.ApiContext.GroupApi.getGroupMember(message.peerUin, operatorUid);
+                        const operator = await this.core.apis.GroupApi.getGroupMember(message.peerUin, operatorUid);
                         operatorId = operator?.uin || message.senderUin;
                     }
                     const groupRecallEvent = new OB11GroupRecallNoticeEvent(
