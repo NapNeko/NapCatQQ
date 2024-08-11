@@ -9,7 +9,7 @@ import {
     NapCatCore,
     RawMessage,
 } from '@/core';
-import { OB11Config } from './helper/config';
+import { OB11Config, OB11ConfigLoader } from './helper/config';
 import { NapCatPathWrapper } from '@/common/framework/napcat';
 import { OneBotApiContextType } from '@/onebot/types';
 import { OneBotFriendApi, OneBotGroupApi, OneBotUserApi } from './api';
@@ -39,7 +39,7 @@ export class NapCatOneBot11Adapter {
     readonly core: NapCatCore;
     readonly context: InstanceContext;
 
-    config: OB11Config;
+    configLoader: OB11ConfigLoader;
     apiContext: OneBotApiContextType;
     networkManager: OB11NetworkManager;
 
@@ -48,7 +48,7 @@ export class NapCatOneBot11Adapter {
     constructor(core: NapCatCore, context: InstanceContext, pathWrapper: NapCatPathWrapper) {
         this.core = core;
         this.context = context;
-        this.config = new OB11Config(core, pathWrapper.configPath);
+        this.configLoader = new OB11ConfigLoader(core, pathWrapper.configPath);
         this.apiContext = {
             GroupApi: new OneBotGroupApi(this, core),
             UserApi: new OneBotUserApi(this, core),
@@ -61,7 +61,7 @@ export class NapCatOneBot11Adapter {
     async InitOneBot() {
         const NTQQUserApi = this.core.apis.UserApi;
         const selfInfo = this.core.selfInfo;
-        const ob11Config = this.config.configData;
+        const ob11Config = this.configLoader.configData;
 
         const serviceInfo = `
     HTTP服务 ${ob11Config.http.enable ? '已启动' : '未启动'}, ${ob11Config.http.host}:${ob11Config.http.port}
@@ -113,7 +113,7 @@ export class NapCatOneBot11Adapter {
         await WebUiDataRuntime.setQQLoginUin(selfInfo.uin.toString());
         await WebUiDataRuntime.setQQLoginStatus(true);
         await WebUiDataRuntime.setOB11ConfigCall(async (ob11: OB11Config) => {
-            this.config.save(ob11);
+            this.configLoader.save(ob11);
         });
     }
 
@@ -157,10 +157,10 @@ export class NapCatOneBot11Adapter {
                 //  console.log(msg);
                 if (msg.sendStatus == 2) {
                     // 完成后再post
-                    OB11Constructor.message(this.core, msg, this.config.messagePostFormat)
+                    OB11Constructor.message(this.core, msg, this.configLoader.configData.messagePostFormat)
                         .then((ob11Msg) => {
                             ob11Msg.target_id = parseInt(msg.peerUin);
-                            if (this.config.reportSelfMessage) {
+                            if (this.configLoader.configData.reportSelfMessage) {
                                 msg.id = MessageUnique.createMsg({ chatType: msg.chatType, peerUid: msg.peerUid, guildId: '' }, msg.msgId);
                                 this.emitMsg(msg);
                             } else {
@@ -322,9 +322,9 @@ export class NapCatOneBot11Adapter {
     }
 
     private async emitMsg(message: RawMessage) {
-        const { debug, reportSelfMessage } = this.config;
+        const { debug, reportSelfMessage, messagePostFormat } = this.configLoader.configData;
         this.context.logger.logDebug('收到新消息', message);
-        OB11Constructor.message(this.core, message, this.config.messagePostFormat).then((ob11Msg) => {
+        OB11Constructor.message(this.core, message, messagePostFormat).then((ob11Msg) => {
             this.context.logger.logDebug('收到消息: ', ob11Msg);
             if (debug) {
                 ob11Msg.raw = message;
