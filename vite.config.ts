@@ -47,6 +47,7 @@ const FrameworkBaseConfigPlugin: PluginOption[] = [
     targets: [
       { src: './manifest.json', dest: 'dist' },
       { src: './src/external/napcat.json', dest: 'dist/config/' },
+      { src: './static/', dest: 'dist/static/', flatten: false },
       { src: './src/external/onebot11.json', dest: 'dist/config/' },
       { src: './src/framework/liteloader.cjs', dest: 'dist' },
       { src: './src/framework/napcat.cjs', dest: 'dist' },
@@ -78,7 +79,7 @@ const ShellBaseConfigPlugin: PluginOption[] = [
     targets: [
       // ...external.map(genCpModule),
       // { src: './src/napcat.json', dest: 'dist/config/' },
-      // { src: './static/', dest: 'dist/static/', flatten: false },
+       { src: './static/', dest: 'dist/static/', flatten: false },
       // { src: './src/onebot11/onebot11.json', dest: 'dist/config/' },
       { src: './src/external/napcat.json', dest: 'dist/config/' },
       { src: './src/external/onebot11.json', dest: 'dist/config/' },

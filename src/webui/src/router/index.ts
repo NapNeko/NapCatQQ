@@ -3,7 +3,7 @@ import { AuthHelper } from '../../src/helper/SignToken';
 import { QQLoginRouter } from './QQLogin';
 import { AuthRouter } from './auth';
 import { OB11ConfigRouter } from './OB11Config';
-import { WebUiConfig } from '../helper/config';
+import { WebUiConfig } from '@/webui';
 
 const router = Router();
 

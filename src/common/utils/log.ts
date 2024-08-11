@@ -34,7 +34,6 @@ export class LogWrapper {
     colorEscape = /\x1B[@-_][0-?]*[ -/]*[@-~]/g;
 
     constructor(logDir: string) {
-        // logDir = path.join(path.resolve(__dirname), 'logs');
         const filename = `${getFormattedTimestamp()}.log`;
         const logPath = path.join(logDir, filename);
         this.logConfig = {

@@ -13,8 +13,11 @@ const app = express();
  * 无需参数。
  * @returns {Promise<void>} 无返回值。
  */
-export let WebUiConfig:WebUiConfigWrapper;
+export let WebUiConfig: WebUiConfigWrapper;
+export let webUiPathWrapper: NapCatPathWrapper;
+
 export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapper) {
+    webUiPathWrapper = pathWrapper;
     WebUiConfig = new WebUiConfigWrapper();
     let log = logger.log;
     const config = await WebUiConfig.GetWebUIConfig();
@@ -31,7 +34,7 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
         });
     });
     // 配置静态文件服务，提供./static目录下的文件服务，访问路径为/webui
-    app.use(config.prefix + '/webui', express.static(resolve(pathWrapper.staticPath, './static')));
+    app.use(config.prefix + '/webui', express.static(pathWrapper.staticPath));
     //挂载API接口
     app.use(config.prefix + '/api', ALLRouter);
     app.listen(config.port, config.host, async () => {
