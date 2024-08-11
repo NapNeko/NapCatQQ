@@ -10,6 +10,7 @@ import { NTQQFileApi, NTQQFriendApi, NTQQGroupApi, NTQQMsgApi, NTQQSystemApi, NT
 import os from 'node:os';
 import { NTQQCollectionApi } from './apis/collection';
 import { NapCatConfigLoader } from './helper/config';
+import { LogLevel } from '@/common/utils/log';
 
 export enum NapCatCoreWorkingEnv {
     Unknown = 0,
@@ -55,7 +56,7 @@ export class NapCatCore {
             UserApi: new NTQQUserApi(this.context, this),
             GroupApi: new NTQQGroupApi(this.context, this),
         };
-        this.configLoader = new NapCatConfigLoader(this,this.context.pathWrapper.configPath);
+        this.configLoader = new NapCatConfigLoader(this, this.context.pathWrapper.configPath);
         this.NapCatDataPath = path.join(this.dataPath, 'NapCat');
         fs.mkdirSync(this.NapCatDataPath, { recursive: true });
         this.NapCatTempPath = path.join(this.NapCatDataPath, 'temp');
@@ -64,6 +65,17 @@ export class NapCatCore {
             fs.mkdirSync(this.NapCatTempPath, { recursive: true });
         }
         this.initNapCatCoreListeners().then().catch(this.context.logger.logError);
+
+        this.context.logger.setFileLogEnabled(
+            this.configLoader.configData.fileLog,
+        );
+        this.context.logger.setConsoleLogEnabled(
+            this.configLoader.configData.consoleLog,
+        );
+        this.context.logger.setFileAndConsoleLogLevel(
+            this.configLoader.configData.fileLogLevel as LogLevel,
+            this.configLoader.configData.consoleLogLevel as LogLevel,
+        );
     }
 
     get dataPath(): string {

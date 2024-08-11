@@ -68,7 +68,7 @@ export class LogWrapper {
         this.setLogSelfInfo({ nick: '', uin: '', uid: '' });
     }
 
-    setLogLevel(fileLogLevel: LogLevel, consoleLogLevel: LogLevel) {
+    setFileAndConsoleLogLevel(fileLogLevel: LogLevel, consoleLogLevel: LogLevel) {
         this.logConfig.categories.file.level = fileLogLevel;
         this.logConfig.categories.console.level = consoleLogLevel;
         log4js.configure(this.logConfig);
@@ -81,13 +81,12 @@ export class LogWrapper {
         this.loggerDefault.addContext('userInfo', userInfo);
     }
 
-
-    enableFileLog(enable: boolean) {
-        this.fileLogEnabled = enable;
+    setFileLogEnabled(isEnabled: boolean) {
+        this.fileLogEnabled = isEnabled;
     }
 
-    enableConsoleLog(enable: boolean) {
-        this.consoleLogEnabled = enable;
+    setConsoleLogEnabled(isEnabled: boolean) {
+        this.consoleLogEnabled = isEnabled;
     }
 
     formatMsg(msg: any[]) {
