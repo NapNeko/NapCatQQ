@@ -5,6 +5,9 @@ import { sleep } from '@/common/utils/helper';
 import { OB11HeartbeatEvent } from '../event/meta/OB11HeartbeatEvent';
 import { NapCatCore } from '@/core';
 import { NapCatOneBot11Adapter } from '../main';
+import { OB11Response } from '../action/OB11Response';
+import { LogWrapper } from '@/common/utils/log';
+import { ActionName } from '../action/types';
 
 export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
     url: string;
@@ -17,9 +20,11 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
     onebotContext: NapCatOneBot11Adapter;
     coreContext: NapCatCore;
     token: string;
+    logger: LogWrapper;
 
-    constructor(url: string, reconnectIntervalInMillis: number, heartbeatInterval: number, token:string, coreContext: NapCatCore, onebotContext: NapCatOneBot11Adapter) {
+    constructor(url: string, reconnectIntervalInMillis: number, heartbeatInterval: number, token: string, coreContext: NapCatCore, onebotContext: NapCatOneBot11Adapter) {
         this.url = url;
+        this.logger = coreContext.context.logger;
         this.token = token;
         this.heartbeatInterval = heartbeatInterval;
         this.reconnectIntervalInMillis = reconnectIntervalInMillis;
@@ -99,16 +104,28 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
             }
         }
     }
-
-    private handleMessage(data: any) {
+    WsReply(data: any) {
+        if (this.connection?.readyState === NodeWebSocket.OPEN) {
+            this.connection?.send(JSON.stringify(data));
+        }
+    }
+    private async handleMessage(message: any) {
+        let receiveData: { action: ActionName, params?: any, echo?: any } = { action: ActionName.Unknown, params: {} };
+        let echo = undefined;
         try {
-            const message = JSON.parse(data);
-            const action = this.actionMap.get(message.actionName);
-            if (action) {
-                action.handle(message.payload);
+            try {
+                receiveData = JSON.parse(message.toString());
+                echo = receiveData.echo;
+                this.logger.logDebug('收到正向Websocket消息', receiveData);
+            } catch (e) {
+                this.WsReply(OB11Response.error('json解析失败,请检查数据格式', 1400, echo));
             }
+            receiveData.params = (receiveData?.params) ? receiveData.params : {};//兼容类型验证
+            let retdata = await this.actionMap.get(receiveData.action)?.websocketHandle(receiveData.params, echo || "");
+            const packet = Object.assign({}, retdata);
+            this.WsReply(packet);
         } catch (e) {
-            console.error('Failed to handle message:', e);
+            this.WsReply(OB11Response.error('不支持的api ' + receiveData.action, 1404, echo));
         }
     }
 }
