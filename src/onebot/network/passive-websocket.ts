@@ -10,6 +10,7 @@ import { NapCatCore } from '@/core';
 import { NapCatOneBot11Adapter } from '..';
 import { LogWrapper } from '@/common/utils/log';
 import { OB11HeartbeatEvent } from '../event/meta/OB11HeartbeatEvent';
+import { IncomingMessage } from 'http';
 
 export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     wsServer: WebSocketServer;
@@ -24,32 +25,16 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     logger: LogWrapper;
     private heartbeatIntervalId: NodeJS.Timeout | null = null;
 
-    authorize(token: string, wsClient: WebSocket, wsReq: any) {
-        if (token && token.length > 0) {
-            const url = wsClient.url!.split('?').shift();
-            this.logger.log('ws connect', url);
-            let clientToken: string = '';
-            const authHeader = wsReq.headers['authorization'];
-            if (authHeader) {
-                clientToken = authHeader.split('Bearer ').pop() || '';
-                this.logger.log('receive ws header token', clientToken);
-            } else {
-                const parsedUrl = urlParse.parse(wsClient.url || '/', true);
-                const urlToken = parsedUrl.query.access_token;
-                if (urlToken) {
-                    if (Array.isArray(urlToken)) {
-                        clientToken = urlToken[0];
-                    } else {
-                        clientToken = urlToken;
-                    }
-                    this.logger.log('receive ws url token', clientToken);
-                }
-            }
-            if (clientToken != token) {
-                wsClient.send(JSON.stringify(OB11Response.res(null, 'failed', 1403, 'token验证失败')));
-                return wsClient.close();
-            }
+    authorize(token: string | undefined, wsClient: WebSocket, wsReq: IncomingMessage) {
+        if (!token || token.length == 0) return;//客户端未设置密钥
+        let QueryClientToken = urlParse.parse(wsReq?.url || "", true).query.access_token;
+        let HeaderClientToken = wsReq.headers.authorization?.split('Bearer ').pop() || '';
+        let ClientToken = typeof (QueryClientToken) === 'string' && QueryClientToken !== "" ? QueryClientToken : HeaderClientToken;
+        if (ClientToken === token) {
+            return;
         }
+        wsClient.send(JSON.stringify(OB11Response.res(null, 'failed', 1403, 'token验证失败')));
+        wsClient.close();
     }
 
     constructor(ip: string, port: number, heartbeatInterval: number, token: string, coreContext: NapCatCore, onebotContext: NapCatOneBot11Adapter) {
