@@ -1,7 +1,7 @@
-import { InstanceContext, MsgListener, NapCatCore, RawMessage } from '@/core';
+import { ChatType, InstanceContext, MsgListener, NapCatCore, RawMessage } from '@/core';
 import { OB11Config } from './helper/config';
 import { NapCatPathWrapper } from '@/common/framework/napcat';
-import { OneBotApiContextType } from './types/adapter';
+import { OneBotApiContextType } from '@/onebot/types';
 import { OneBotFriendApi, OneBotGroupApi, OneBotUserApi } from './api';
 import { OB11ActiveHttpAdapter, OB11ActiveWebSocketAdapter, OB11NetworkManager, OB11PassiveHttpAdapter, OB11PassiveWebSocketAdapter } from '@/onebot/network';
 import { OB11InputStatusEvent } from '@/onebot/event/notice/OB11InputStatusEvent';
@@ -12,6 +12,8 @@ import { proxiedListenerOf } from '@/common/utils/proxy-handler';
 import { createActionMap } from './action';
 import { InitWebUi } from '@/webui';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
+import { OB11FriendRecallNoticeEvent } from '@/onebot/event/notice/OB11FriendRecallNoticeEvent';
+import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecallNoticeEvent';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -55,28 +57,28 @@ export class NapCatOneBot11Adapter {
         this.context.logger.log(`[Notice] [OneBot11] ${serviceInfo}`);
 
         //创建NetWork服务
-        let actions = createActionMap(this, this.core);
+        const actions = createActionMap(this, this.core);
         if (ob11Config.http.enable) {
             await this.networkManager.registerAdapter(new OB11PassiveHttpAdapter(
                 ob11Config.http.port, ob11Config.token, this.core, this
             ));
         }
         if (ob11Config.http.enablePost) {
-            ob11Config.http.postUrls.forEach(async url => {
-                await this.networkManager.registerAdapter(new OB11ActiveHttpAdapter(
+            ob11Config.http.postUrls.forEach(url => {
+                this.networkManager.registerAdapter(new OB11ActiveHttpAdapter(
                     url, ob11Config.heartInterval, ob11Config.token, this.core, this
                 ));
             });
         }
         if (ob11Config.ws.enable) {
-            let OBPassiveWebSocketAdapter = new OB11PassiveWebSocketAdapter(
+            const OBPassiveWebSocketAdapter = new OB11PassiveWebSocketAdapter(
                 ob11Config.ws.host, ob11Config.ws.port, ob11Config.heartInterval, ob11Config.token, this.core, this
-            )
+            );
             await this.networkManager.registerAdapter(OBPassiveWebSocketAdapter);
         }
         if (ob11Config.reverseWs.enable) {
-            ob11Config.reverseWs.urls.forEach(async url => {
-                await this.networkManager.registerAdapter(new OB11ActiveWebSocketAdapter(
+            ob11Config.reverseWs.urls.forEach(url => {
+                this.networkManager.registerAdapter(new OB11ActiveWebSocketAdapter(
                     url, 5000, ob11Config.heartInterval, this.core, this
                 ));
             });
@@ -128,6 +130,26 @@ export class NapCatOneBot11Adapter {
             }
         };
 
+        msgListener.onMsgInfoListUpdate = async msgList => {
+            this.postRecallMsg(msgList);
+            for (const msg of msgList.filter(e => e.senderUin == this.core.selfInfo.uin)) {
+                //  console.log(msg);
+                if (msg.sendStatus == 2) {
+                    // 完成后再post
+                    OB11Constructor.message(this.core, msg, this.config.messagePostFormat)
+                        .then((ob11Msg) => {
+                            ob11Msg.target_id = parseInt(msg.peerUin);
+                            if (this.config.reportSelfMessage) {
+                                msg.id = MessageUnique.createMsg({ chatType: msg.chatType, peerUid: msg.peerUid, guildId: '' }, msg.msgId);
+                                this.postReceiveMsg(msg);
+                            } else {
+                                logOB11Message(this.core, ob11Msg);
+                            }
+                        });
+                }
+            }
+        };
+
         this.context.session.getMsgService().addKernelMsgListener(
             new this.context.wrapper.NodeIKernelMsgListener(proxiedListenerOf(msgListener, this.context.logger)),
         );
@@ -154,21 +176,57 @@ export class NapCatOneBot11Adapter {
             if (isSelfMsg) {
                 ob11Msg.target_id = parseInt(message.peerUin);
             }
-            this.networkManager.emitEvent(ob11Msg).then().catch(e => this.context.logger.logError('emitEvent error: ', e));
+            this.networkManager.emitEvent(ob11Msg);
         }).catch(e => this.context.logger.logError('constructMessage error: ', e));
 
         OB11Constructor.GroupEvent(this.core, message).then(groupEvent => {
             if (groupEvent) {
                 // log("post group event", groupEvent);
-                this.networkManager.emitEvent(groupEvent).then().catch(e => this.context.logger.logError('emitEvent error: ', e));
+                this.networkManager.emitEvent(groupEvent);
             }
         }).catch(e => this.context.logger.logError('constructGroupEvent error: ', e));
 
         OB11Constructor.PrivateEvent(this.core, message).then(privateEvent => {
             if (privateEvent) {
                 // log("post private event", privateEvent);
-                this.networkManager.emitEvent(privateEvent).then().catch(e => this.context.logger.logError('emitEvent error: ', e));
+                this.networkManager.emitEvent(privateEvent);
             }
-        });
+        }).catch(e => this.context.logger.logError('constructPrivateEvent error: ', e));
+    }
+
+    async postRecallMsg(msgList: RawMessage[]) {
+        for (const message of msgList) {
+            // log("message update", message.sendStatus, message.msgId, message.msgSeq)
+            if (message.recallTime != '0') { //todo: 这个判断方法不太好，应该使用灰色消息元素来判断?
+                // 撤回消息上报
+                const oriMessageId = await MessageUnique.getShortIdByMsgId(message.msgId);
+                if (!oriMessageId) {
+                    continue;
+                }
+                if (message.chatType == ChatType.friend) {
+                    const friendRecallEvent = new OB11FriendRecallNoticeEvent(
+                        this.core,
+                        parseInt(message!.senderUin),
+                        oriMessageId
+                    );
+                    this.networkManager.emitEvent(friendRecallEvent);
+                } else if (message.chatType == ChatType.group) {
+                    let operatorId = message.senderUin;
+                    for (const element of message.elements) {
+                        const operatorUid = element.grayTipElement?.revokeElement.operatorUid;
+                        const operator = await this.core.ApiContext.GroupApi.getGroupMember(message.peerUin, operatorUid);
+                        operatorId = operator?.uin || message.senderUin;
+                    }
+                    const groupRecallEvent = new OB11GroupRecallNoticeEvent(
+                        this.core,
+                        parseInt(message.peerUin),
+                        parseInt(message.senderUin),
+                        parseInt(operatorId),
+                        oriMessageId
+                    );
+                    this.networkManager.emitEvent(groupRecallEvent);
+                }
+            }
+        }
     }
 }
