@@ -1,40 +1,37 @@
 import { IOB11NetworkAdapter, OB11EmitEventContent } from '@/onebot/network/index';
-import { WebSocket as NodeWebSocket } from 'ws';
+import { WebSocket, WebSocket as NodeWebSocket } from 'ws';
 import BaseAction from '@/onebot/action/BaseAction';
 import { sleep } from '@/common/utils/helper';
 import { OB11HeartbeatEvent } from '../event/meta/OB11HeartbeatEvent';
 import { NapCatCore } from '@/core';
 import { NapCatOneBot11Adapter } from '../main';
+import { ActionName } from '@/onebot/action/types';
+import { OB11Response } from '@/onebot/action/OB11Response';
+import { LogWrapper } from '@/common/utils/log';
 
 export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
     url: string;
     reconnectIntervalInMillis: number;
     isClosed: boolean = false;
+    heartbeatInterval: number;
+    obContext: NapCatOneBot11Adapter;
+    coreContext: NapCatCore;
+    logger: LogWrapper;
     private connection: NodeWebSocket | null = null;
     private actionMap: Map<string, BaseAction<any, any>> = new Map();
-    heartbeatInterval: number;
     private heartbeatTimer: NodeJS.Timeout | null = null;
-    onebotContext: NapCatOneBot11Adapter;
-    coreContext: NapCatCore;
 
     constructor(url: string, reconnectIntervalInMillis: number, heartbeatInterval: number, coreContext: NapCatCore, onebotContext: NapCatOneBot11Adapter) {
         this.url = url;
         this.heartbeatInterval = heartbeatInterval;
         this.reconnectIntervalInMillis = reconnectIntervalInMillis;
         this.coreContext = coreContext;
-        this.onebotContext = onebotContext;
+        this.obContext = onebotContext;
+        this.logger = coreContext.context.logger;
     }
+
     registerActionMap(actionMap: Map<string, BaseAction<any, any>>) {
         this.actionMap = actionMap;
-    }
-    registerHeartBeat() {
-        if (this.connection) {
-            this.heartbeatTimer = setInterval(() => {
-                if (this.connection && this.connection.readyState === NodeWebSocket.OPEN) {
-                    this.connection.send(JSON.stringify(new OB11HeartbeatEvent(this.coreContext, this.heartbeatInterval, this.coreContext.selfInfo.online, true)));
-                }
-            }, this.heartbeatInterval);
-        }
     }
 
     registerAction<T extends BaseAction<P, R>, P, R>(action: T) {
@@ -69,6 +66,22 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
         }
     }
 
+    private registerHeartBeat() {
+        if (this.connection) {
+            this.heartbeatTimer = setInterval(() => {
+                if (this.connection && this.connection.readyState === NodeWebSocket.OPEN) {
+                    this.connection.send(JSON.stringify(new OB11HeartbeatEvent(this.coreContext, this.heartbeatInterval, this.coreContext.selfInfo.online, true)));
+                }
+            }, this.heartbeatInterval);
+        }
+    }
+
+    private checkStateAndReply<T>(data: T) {
+        if (this.connection && this.connection.readyState === WebSocket.OPEN) {
+            this.connection.send(JSON.stringify(data));
+        }
+    }
+
     private async tryConnect() {
         while (!this.connection && !this.isClosed) {
             try {
@@ -91,15 +104,24 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
         }
     }
 
-    private handleMessage(data: any) {
+    private async handleMessage(message: any) {
+        let receiveData: { action: ActionName, params?: any, echo?: any } = { action: ActionName.Unknown, params: {} };
+        let echo = undefined;
         try {
-            const message = JSON.parse(data);
-            const action = this.actionMap.get(message.actionName);
-            if (action) {
-                action.handle(message.payload);
+            try {
+                receiveData = JSON.parse(message.toString());
+                echo = receiveData.echo;
+                this.logger.logDebug('收到正向Websocket消息', receiveData);
+            } catch (e) {
+                this.checkStateAndReply<any>(OB11Response.error('json解析失败,请检查数据格式', 1400, echo));
             }
+            receiveData.params = (receiveData?.params) ? receiveData.params : {};//兼容类型验证
+            const retdata = await this.actionMap.get(receiveData.action)
+                ?.websocketHandle(receiveData.params, echo || '');
+            const packet = Object.assign({}, retdata);
+            this.checkStateAndReply<any>(packet);
         } catch (e) {
-            console.error('Failed to handle message:', e);
+            this.checkStateAndReply<any>(OB11Response.error('不支持的api ' + receiveData.action, 1404, echo));
         }
     }
 }
