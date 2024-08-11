@@ -1,4 +1,13 @@
-import { BuddyListener, BuddyReqType, ChatType, InstanceContext, MsgListener, NapCatCore, RawMessage } from '@/core';
+import {
+    BuddyListener,
+    BuddyReqType,
+    ChatType,
+    GroupListener, GroupNotifyTypes,
+    InstanceContext,
+    MsgListener,
+    NapCatCore,
+    RawMessage,
+} from '@/core';
 import { OB11Config } from './helper/config';
 import { NapCatPathWrapper } from '@/common/framework/napcat';
 import { OneBotApiContextType } from '@/onebot/types';
@@ -15,6 +24,9 @@ import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { OB11FriendRecallNoticeEvent } from '@/onebot/event/notice/OB11FriendRecallNoticeEvent';
 import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecallNoticeEvent';
 import { OB11FriendRequestEvent } from '@/onebot/event/request/OB11FriendRequest';
+import { OB11GroupAdminNoticeEvent } from '@/onebot/event/notice/OB11GroupAdminNoticeEvent';
+import { GroupDecreaseSubType, OB11GroupDecreaseEvent } from '@/onebot/event/notice/OB11GroupDecreaseEvent';
+import { OB11GroupRequestEvent } from '@/onebot/event/request/OB11GroupRequest';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -90,12 +102,13 @@ export class NapCatOneBot11Adapter {
 
         this.initMsgListener();
         this.initBuddyListener();
+        this.initGroupListener();
 
         // 未对shell版本兼容
         // Mlikiowa V2.0.0 Refactor Todo
-        WebUiDataRuntime.setQQLoginUin(selfInfo.uin.toString());
-        WebUiDataRuntime.setQQLoginStatus(true);
-        WebUiDataRuntime.setOB11ConfigCall(async (ob11: OB11Config) => {
+        await WebUiDataRuntime.setQQLoginUin(selfInfo.uin.toString());
+        await WebUiDataRuntime.setQQLoginStatus(true);
+        await WebUiDataRuntime.setOB11ConfigCall(async (ob11: OB11Config) => {
             this.config.save(ob11);
         });
         InitWebUi(this.context.logger, this.context.pathWrapper).then().catch(this.context.logger.logError);
@@ -183,6 +196,124 @@ export class NapCatOneBot11Adapter {
 
         this.context.session.getBuddyService().addKernelBuddyListener(
             new this.context.wrapper.NodeIBuddyListener(proxiedListenerOf(buddyListener, this.context.logger)),
+        );
+    }
+
+    private initGroupListener() {
+        const groupListener = new GroupListener();
+
+        groupListener.onGroupNotifiesUpdated = async (_, notifies) => {
+            //console.log('ob11 onGroupNotifiesUpdated', notifies[0]);
+            if (![
+                GroupNotifyTypes.ADMIN_SET,
+                GroupNotifyTypes.ADMIN_UNSET,
+                GroupNotifyTypes.ADMIN_UNSET_OTHER
+            ].includes(notifies[0]?.type)) {
+                for (const notify of notifies) {
+                    notify.time = Date.now();
+                    const notifyTime = parseInt(notify.seq) / 1000 / 1000;
+                    // log(`群通知时间${notifyTime}`, `启动时间${this.bootTime}`);
+                    if (notifyTime < this.bootTime) {
+                        continue;
+                    }
+
+                    const flag = notify.group.groupCode + '|' + notify.seq + '|' + notify.type;
+                    this.context.logger.logDebug('收到群通知', notify);
+
+                    // let member2: GroupMember;
+                    // if (notify.user2.uid) {
+                    //     member2 = await getGroupMember(notify.group.groupCode, null, notify.user2.uid);
+                    // }
+
+                    if ([
+                        GroupNotifyTypes.ADMIN_SET,
+                        GroupNotifyTypes.ADMIN_UNSET,
+                        GroupNotifyTypes.ADMIN_UNSET_OTHER
+                    ].includes(notify.type)) {
+                        const member1 = await this.core.ApiContext.GroupApi.getGroupMember(notify.group.groupCode, notify.user1.uid);
+                        this.context.logger.logDebug('有管理员变动通知');
+                        // refreshGroupMembers(notify.group.groupCode).then();
+
+                        this.context.logger.logDebug('开始获取变动的管理员');
+                        if (member1) {
+                            this.context.logger.logDebug('变动管理员获取成功');
+                            // member1.role = notify.type == GroupNotifyTypes.ADMIN_SET ? GroupMemberRole.admin : GroupMemberRole.normal;
+
+                            const groupAdminNoticeEvent = new OB11GroupAdminNoticeEvent(
+                                this.core,
+                                parseInt(notify.group.groupCode),
+                                parseInt(member1.uin),
+                                [GroupNotifyTypes.ADMIN_UNSET, GroupNotifyTypes.ADMIN_UNSET_OTHER].includes(notify.type) ? 'unset' : 'set'
+                            );
+                            this.networkManager.emitEvent(groupAdminNoticeEvent);
+                        } else {
+                            this.context.logger.logDebug('获取群通知的成员信息失败', notify, this.core.ApiContext.GroupApi.getGroup(notify.group.groupCode));
+                        }
+                    } else if (notify.type == GroupNotifyTypes.MEMBER_EXIT || notify.type == GroupNotifyTypes.KICK_MEMBER) {
+                        this.context.logger.logDebug('有成员退出通知', notify);
+                        try {
+                            const member1Uin = (await this.core.ApiContext.UserApi.getUinByUidV2(notify.user1.uid))!;
+                            let operatorId = member1Uin;
+                            let subType: GroupDecreaseSubType = 'leave';
+                            if (notify.user2.uid) {
+                                // 是被踢的
+                                const member2Uin = await this.core.ApiContext.UserApi.getUinByUidV2(notify.user2.uid);
+                                if (member2Uin) {
+                                    operatorId = member2Uin;
+                                }
+                                subType = 'kick';
+                            }
+                            const groupDecreaseEvent = new OB11GroupDecreaseEvent(
+                                this.core,
+                                parseInt(notify.group.groupCode),
+                                parseInt(member1Uin),
+                                parseInt(operatorId),
+                                subType
+                            );
+                            this.networkManager.emitEvent(groupDecreaseEvent);
+                        } catch (e: any) {
+                            this.context.logger.logError('获取群通知的成员信息失败', notify, e.stack.toString());
+                        }
+                        // notify.status == 1 表示未处理 2表示处理完成
+                    } else if ([
+                        GroupNotifyTypes.JOIN_REQUEST
+                    ].includes(notify.type) && notify.status == 1) {
+                        this.context.logger.logDebug('有加群请求');
+                        try {
+                            let requestUin = (await this.core.ApiContext.UserApi.getUinByUidV2(notify.user1.uid))!;
+                            if (isNaN(parseInt(requestUin))) {
+                                requestUin = (await this.core.ApiContext.UserApi.getUserDetailInfo(notify.user1.uid)).uin;
+                            }
+                            const groupRequestEvent = new OB11GroupRequestEvent(
+                                this.core,
+                                parseInt(notify.group.groupCode),
+                                parseInt(requestUin),
+                                'add',
+                                notify.postscript,
+                                flag
+                            );
+                            this.networkManager.emitEvent(groupRequestEvent);
+                        } catch (e) {
+                            this.context.logger.logError('获取加群人QQ号失败 Uid:', notify.user1.uid, e);
+                        }
+                    } else if (notify.type == GroupNotifyTypes.INVITE_ME) {
+                        this.context.logger.logDebug(`收到邀请我加群通知:${notify}`);
+                        const groupInviteEvent = new OB11GroupRequestEvent(
+                            this.core,
+                            parseInt(notify.group.groupCode),
+                            parseInt(notify.user1.uid),
+                            'invite',
+                            notify.postscript,
+                            flag
+                        );
+                        this.networkManager.emitEvent(groupInviteEvent);
+                    }
+                }
+            }
+        };
+
+        this.context.session.getGroupService().addKernelGroupListener(
+            new this.context.wrapper.NodeIGroupListener(proxiedListenerOf(groupListener, this.context.logger)),
         );
     }
 
