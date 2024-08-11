@@ -26,7 +26,6 @@ import qrcode from 'qrcode-terminal';
 import { NapCatOneBot11Adapter } from '@/onebot';
 import { InitWebUi } from '@/webui';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
-import { promisify } from 'util';
 
 program.option('-q, --qq [number]', 'QQ号').parse(process.argv);
 const cmdOptions = program.opts();
@@ -151,7 +150,7 @@ export async function NCoreInitShell() {
         });
 
         WebUiDataRuntime.setQQQuickLoginCall(async (uin: string) => {
-            const QuickLogin: Promise<{ result: boolean, message: string }> = new Promise((resolve, reject) => {
+            return await new Promise((resolve) => {
                 if (uin) {
                     logger.log('正在快速登录 ', uin);
                     loginService.quickLoginWithUin(uin).then(res => {
@@ -167,8 +166,6 @@ export async function NCoreInitShell() {
                     resolve({ result: false, message: '快速登录失败' });
                 }
             });
-            const result = await QuickLogin;
-            return result;
         });
 
         if (quickLoginUin && historyLoginList.some(u => u.uin === quickLoginUin)) {
@@ -186,9 +183,11 @@ export async function NCoreInitShell() {
         } else {
             logger.log('没有 -q 指令指定快速登录，或未曾登录过这个 QQ，将使用二维码登录方式');
             if (historyLoginList.length > 0) {
-                logger.log(`可用于快速登录的 QQ：\n${historyLoginList.map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
-                    .join('\n')
-                    }`);
+                logger.log(`可用于快速登录的 QQ：\n${
+                    historyLoginList
+                        .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
+                        .join('\n')
+                }`);
             }
             loginService.getQRCodePicture();
         }
