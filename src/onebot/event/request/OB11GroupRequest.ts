@@ -9,10 +9,12 @@ export class OB11GroupRequestEvent extends OB11GroupNoticeEvent {
     user_id: number;
     comment: string;
     flag: string;
+    sub_type: string;
 
-    constructor(core: NapCatCore, groupId: number, userId: number, comment: string, flag: string) {
+    constructor(core: NapCatCore, groupId: number, userId: number, sub_type: string, comment: string, flag: string) {
         super(core, groupId, userId);
         this.user_id = userId;
+        this.sub_type = sub_type;
         this.comment = comment;
         this.flag = flag;
     }
