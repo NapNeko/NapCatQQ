@@ -99,7 +99,7 @@ export class NapCatOneBot11Adapter {
         if (ob11Config.reverseWs.enable) {
             ob11Config.reverseWs.urls.forEach(url => {
                 this.networkManager.registerAdapter(new OB11ActiveWebSocketAdapter(
-                    url, 5000, ob11Config.heartInterval, this.core, this
+                    url, 5000, ob11Config.heartInterval, ob11Config.token, this.core, this
                 ));
             });
         }
