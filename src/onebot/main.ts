@@ -1,4 +1,4 @@
-import { ChatType, InstanceContext, MsgListener, NapCatCore, RawMessage } from '@/core';
+import { BuddyListener, BuddyReqType, ChatType, InstanceContext, MsgListener, NapCatCore, RawMessage } from '@/core';
 import { OB11Config } from './helper/config';
 import { NapCatPathWrapper } from '@/common/framework/napcat';
 import { OneBotApiContextType } from '@/onebot/types';
@@ -14,6 +14,7 @@ import { InitWebUi } from '@/webui';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { OB11FriendRecallNoticeEvent } from '@/onebot/event/notice/OB11FriendRecallNoticeEvent';
 import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecallNoticeEvent';
+import { OB11FriendRequestEvent } from '@/onebot/event/request/OB11FriendRequest';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -86,7 +87,10 @@ export class NapCatOneBot11Adapter {
 
         await this.networkManager.registerAllActions(actions);
         await this.networkManager.openAllAdapters();
-        await this.initMsgListener();
+
+        this.initMsgListener();
+        this.initBuddyListener();
+
         // 未对shell版本兼容
         // Mlikiowa V2.0.0 Refactor Todo
         WebUiDataRuntime.setQQLoginUin(selfInfo.uin.toString());
@@ -97,7 +101,7 @@ export class NapCatOneBot11Adapter {
         InitWebUi(this.context.logger, this.context.pathWrapper).then().catch(this.context.logger.logError);
     }
 
-    async initMsgListener() {
+    private initMsgListener() {
         const msgListener = new MsgListener();
 
         msgListener.onInputStatusPush = async data => {
@@ -152,6 +156,33 @@ export class NapCatOneBot11Adapter {
 
         this.context.session.getMsgService().addKernelMsgListener(
             new this.context.wrapper.NodeIKernelMsgListener(proxiedListenerOf(msgListener, this.context.logger)),
+        );
+    }
+
+    private initBuddyListener() {
+        const buddyListener = new BuddyListener();
+
+        buddyListener.onBuddyReqChange = reqs => {
+            reqs.buddyReqs.forEach(async req => {
+                if (!!req.isInitiator || (req.isDecide && req.reqType !== BuddyReqType.KMEINITIATORWAITPEERCONFIRM)) {
+                    return;
+                }
+                try {
+                    const requesterUin = await this.core.ApiContext.UserApi.getUinByUidV2(req.friendUid);
+                    await this.networkManager.emitEvent(new OB11FriendRequestEvent(
+                        this.core,
+                        parseInt(requesterUin!),
+                        req.friendUid + '|' + req.reqTime,
+                        req.extWords
+                    ));
+                } catch (e) {
+                    this.context.logger.logDebug('获取加好友者QQ号失败', e);
+                }
+            });
+        };
+
+        this.context.session.getBuddyService().addKernelBuddyListener(
+            new this.context.wrapper.NodeIBuddyListener(proxiedListenerOf(buddyListener, this.context.logger)),
         );
     }
 
