@@ -88,6 +88,14 @@ export class OB11Constructor {
             //resMsg.sender.nickname = user.info.nick;
         } else if (msg.chatType == ChatType.temp) {
             resMsg.sub_type = 'group';
+            let ret = await NTQQMsgApi.getTempChatInfo(ChatType.temp, msg.senderUid);
+            if (ret.result === 0) {
+                resMsg.group_id = parseInt(ret.tmpChatInfo!.groupCode);
+                resMsg.sender.nickname = ret.tmpChatInfo!.fromNick;
+            } else {
+                resMsg.group_id = 284840486;//兜底数据
+                resMsg.sender.nickname = "临时会话";
+            }
         }
         for (const element of msg.elements) {
             let message_data: OB11MessageData = {
@@ -270,13 +278,13 @@ export class OB11Constructor {
                     chatType: msg.chatType,
                     guildId: '',
                 },
-                msg.msgId,
-                msg.msgSeq,
-                msg.senderUid,
-                element.elementId,
-                element.elementType.toString(),
-                element.pttElement.fileSize || '0',
-                element.pttElement.fileUuid || '',
+                    msg.msgId,
+                    msg.msgSeq,
+                    msg.senderUid,
+                    element.elementId,
+                    element.elementType.toString(),
+                    element.pttElement.fileSize || '0',
+                    element.pttElement.fileUuid || '',
                 );
                 //以uuid作为文件名
             } else if (element.arkElement) {
