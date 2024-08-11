@@ -37,5 +37,4 @@ export class OB11Config extends ConfigBase<OB11Config> {
     getConfigName() {
         return 'onebot11';
     }
-
 }
