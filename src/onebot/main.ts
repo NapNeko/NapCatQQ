@@ -201,7 +201,7 @@ export class NapCatOneBot11Adapter {
         };
 
         this.context.session.getBuddyService().addKernelBuddyListener(
-            new this.context.wrapper.NodeIBuddyListener(proxiedListenerOf(buddyListener, this.context.logger)),
+            new this.context.wrapper.NodeIKernelBuddyListener(proxiedListenerOf(buddyListener, this.context.logger)),
         );
     }
 
