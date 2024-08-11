@@ -12,28 +12,30 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     heartbeatInterval: number;
     secret: string | undefined;
     coreContext: NapCatCore;
-    onebotContext: NapCatOneBot11Adapter;
+    obContext: NapCatOneBot11Adapter;
     logger: LogWrapper;
+    isOpen: boolean = false;
 
     constructor(url: string, heartbeatInterval: number, secret: string | undefined, coreContext: NapCatCore, onebotContext: NapCatOneBot11Adapter) {
         this.heartbeatInterval = heartbeatInterval;
         this.url = url;
         this.secret = secret;
         this.coreContext = coreContext;
-        this.onebotContext = onebotContext;
+        this.obContext = onebotContext;
         this.logger = coreContext.context.logger;
     }
 
-    registerHeartBeat() {
-        // HttpPost 心跳
-    }
     registerActionMap(actionMap: Map<string, BaseAction<any, any>>) {
     }
+
     registerAction<T extends BaseAction<P, R>, P, R>(action: T) {
         // Passive http adapter does not need to register actions
     }
 
     onEvent<T extends OB11EmitEventContent>(event: T) {
+        if (!this.isOpen) {
+            return;
+        }
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
             'x-self-id': this.coreContext.selfInfo.uin,
@@ -66,13 +68,11 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
         });
     }
 
-    async open() {
-        // HTTP adapter does not need to establish a persistent connection
-        //console.log('HTTP adapter is ready to send events.');
+    open() {
+        this.isOpen = true;
     }
 
     close() {
-        // HTTP adapter does not need to close a persistent connection
-        // console.log('HTTP adapter does not maintain a persistent connection.');
+        this.isOpen = false;
     }
 }
