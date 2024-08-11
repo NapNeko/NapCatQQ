@@ -85,7 +85,7 @@ export class NapCatOneBot11Adapter {
         await this.networkManager.registerAllActions(actions);
         await this.networkManager.openAllAdapters();
         await this.initMsgListener();
-        //未对shell版本兼容
+        // 未对shell版本兼容
         // Mlikiowa V2.0.0 Refactor Todo
         WebUiDataRuntime.setQQLoginUin(selfInfo.uin.toString());
         WebUiDataRuntime.setQQLoginStatus(true);
