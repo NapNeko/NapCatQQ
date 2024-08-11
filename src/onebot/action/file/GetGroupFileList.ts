@@ -19,7 +19,7 @@ export class GetGroupFileList extends BaseAction<Payload, { FileList: Array<any>
     PayloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
+        const NTQQMsgApi = this.CoreContext.apis.MsgApi;
         const ret = await NTQQMsgApi.getGroupFileList(payload.group_id.toString(), {
             sortType: 1,
             fileCount: payload.file_count,

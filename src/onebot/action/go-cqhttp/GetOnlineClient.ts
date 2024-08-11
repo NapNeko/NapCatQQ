@@ -15,7 +15,7 @@ export class GetOnlineClient extends BaseAction<void, Array<any>> {
 
     async _handle(payload: void) {
         //注册监听
-        const NTQQSystemApi = this.CoreContext.getApiContext().SystemApi;
+        const NTQQSystemApi = this.CoreContext.apis.SystemApi;
         NTQQSystemApi.getOnlineDev();
         await sleep(500);
 

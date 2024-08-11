@@ -19,7 +19,7 @@ export class OCRImage extends BaseAction<Payload, any> {
     PayloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQSystemApi = this.CoreContext.getApiContext().SystemApi;
+        const NTQQSystemApi = this.CoreContext.apis.SystemApi;
         const { path, isLocal, errMsg, success } = (await uri2local(this.CoreContext.NapCatTempPath, payload.image));
         if (!success) {
             throw `OCR ${payload.image}失败,image字段可能格式不正确`;

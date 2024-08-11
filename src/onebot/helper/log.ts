@@ -24,7 +24,7 @@ export async function logOB11Message(coreContext: NapCatCore, ob11Message: OB11M
             // group = await coreContext.ApiContext.GroupApi.getGroup(ob11Message.group_id!.toString());
             prefix += '转发消息[外部来源] ';
         } else {
-            group = await coreContext.ApiContext.GroupApi.getGroup(ob11Message.group_id!.toString());
+            group = await coreContext.apis.GroupApi.getGroup(ob11Message.group_id!.toString());
             prefix += `群[${group?.groupName}(${ob11Message.group_id})] `;
         }
     }
@@ -35,7 +35,7 @@ export async function logOB11Message(coreContext: NapCatCore, ob11Message: OB11M
             if (segment.type === 'text') {
                 msgParts.push(segment.data.text);
             } else if (segment.type === 'at') {
-                const groupMember = await coreContext.ApiContext.GroupApi.getGroupMember(ob11Message.group_id!, segment.data.qq!);
+                const groupMember = await coreContext.apis.GroupApi.getGroupMember(ob11Message.group_id!, segment.data.qq!);
                 msgParts.push(spSegColor(`[@${groupMember?.cardName || groupMember?.nick}(${segment.data.qq})]`));
             } else if (segment.type === 'reply') {
                 msgParts.push(spSegColor(`[回复消息|id:${segment.data.id}]`));

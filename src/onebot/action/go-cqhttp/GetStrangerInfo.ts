@@ -19,7 +19,7 @@ export default class GoCQHTTPGetStrangerInfo extends BaseAction<Payload, OB11Use
     actionName = ActionName.GoCQHTTP_GetStrangerInfo;
 
     async _handle(payload: Payload): Promise<OB11User> {
-        const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
+        const NTQQUserApi = this.CoreContext.apis.UserApi;
         const user_id = payload.user_id.toString();
         const extendData = await NTQQUserApi.getUserDetailInfoByUin(user_id);
         const uid = (await NTQQUserApi.getUidByUin(user_id))!;

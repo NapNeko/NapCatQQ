@@ -24,8 +24,8 @@ export default class GoCQHTTPUploadPrivateFile extends BaseAction<Payload, null>
     PayloadSchema = SchemaData;
 
     async getPeer(payload: Payload): Promise<Peer> {
-        const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
-        const NTQQFriendApi = this.CoreContext.getApiContext().FriendApi;
+        const NTQQUserApi = this.CoreContext.apis.UserApi;
+        const NTQQFriendApi = this.CoreContext.apis.FriendApi;
         if (payload.user_id) {
             const peerUid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
             if (!peerUid) {

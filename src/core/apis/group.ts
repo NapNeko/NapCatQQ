@@ -1,14 +1,17 @@
 import {
     ChatType,
+    GeneralCallResult,
     Group,
     GroupMember,
     GroupMemberRole,
     GroupNotify,
     GroupRequestOperateTypes,
+    InstanceContext,
     MemberExtSourceType,
+    NapCatCore,
     NodeIKernelGroupListener,
+    NodeIKernelGroupService,
 } from '@/core';
-import { GeneralCallResult, InstanceContext, NapCatCore, NodeIKernelGroupService } from '@/core';
 import { isNumeric, runAllWithTimeout } from '@/common/utils/helper';
 
 export class NTQQGroupApi {
@@ -164,7 +167,7 @@ export class NTQQGroupApi {
     async getLatestMsg(GroupCode: string, uins: string[]) {
         const uids: Array<string> = [];
         for (const uin of uins) {
-            const uid = await this.core.getApiContext().UserApi.getUidByUin(uin);
+            const uid = await this.core.apis.UserApi.getUidByUin(uin);
             if (uid) {
                 uids.push(uid);
             }
@@ -313,7 +316,7 @@ export class NTQQGroupApi {
 
     //需要异常处理
     async uploadGroupBulletinPic(GroupCode: string, imageurl: string) {
-        const _Pskey = (await this.core.getApiContext().UserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com')!;
+        const _Pskey = (await this.core.apis.UserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com')!;
         return this.context.session.getGroupService().uploadGroupBulletinPic(GroupCode, _Pskey, imageurl);
     }
 
@@ -377,7 +380,7 @@ export class NTQQGroupApi {
         width: number,
         height: number
     } | undefined = undefined, pinned: number = 0, confirmRequired: number = 0) {
-        const _Pskey = (await this.core.getApiContext().UserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com');
+        const _Pskey = (await this.core.apis.UserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com');
         //text是content内容url编码
         const data = {
             text: encodeURI(content),

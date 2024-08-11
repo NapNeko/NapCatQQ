@@ -22,8 +22,8 @@ export class GetCookies extends BaseAction<Payload, Response> {
     PayloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
-        const NTQQWebApi = this.CoreContext.getApiContext().WebApi;
+        const NTQQUserApi = this.CoreContext.apis.UserApi;
+        const NTQQWebApi = this.CoreContext.apis.WebApi;
         // if (!payload.domain) {
         //   throw new Error('缺少参数 domain');
         // }

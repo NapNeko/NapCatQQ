@@ -19,7 +19,7 @@ export default class GetFriendList extends BaseAction<Payload, OB11User[]> {
 
     async _handle(payload: Payload) {
         //全新逻辑
-        const NTQQFriendApi = this.CoreContext.getApiContext().FriendApi;
+        const NTQQFriendApi = this.CoreContext.apis.FriendApi;
         return OB11Constructor.friendsV2(await NTQQFriendApi.getBuddyV2(payload?.no_cache === true || payload?.no_cache === 'true'));
     }
 }

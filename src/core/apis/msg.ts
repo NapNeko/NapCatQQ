@@ -210,7 +210,7 @@ export class NTQQMsgApi {
     async sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
         //唉？ ！我有个想法
         if (peer.chatType === ChatType.temp && peer.guildId && peer.guildId !== '') {
-            let member = await this.core.ApiContext.GroupApi.getGroupMember(peer.guildId, peer.peerUid!);
+            let member = await this.core.apis.GroupApi.getGroupMember(peer.guildId, peer.peerUid!);
             if (member) {
                 await this.PrepareTempChat(peer.peerUid, peer.guildId, member.nick);
             }

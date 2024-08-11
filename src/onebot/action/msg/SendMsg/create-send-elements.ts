@@ -54,7 +54,7 @@ const _handlers: {
 
         // then the qq is a group member
         // Mlikiowa V2.0.0 Refactor Todo
-        const uid = await coreContext.getApiContext().UserApi.getUidByUin(atQQ);
+        const uid = await coreContext.apis.UserApi.getUidByUin(atQQ);
         if (!uid) throw new Error('Get Uid Error');
         return SendMsgElementConstructor.at(coreContext, atQQ, uid, AtType.atUser, '');
     },
@@ -64,7 +64,7 @@ const _handlers: {
             coreContext.context.logger.logWarn('回复消息不存在', id);
             return undefined;
         }
-        const NTQQMsgApi = coreContext.getApiContext().MsgApi;
+        const NTQQMsgApi = coreContext.apis.MsgApi;
         const replyMsg = (await NTQQMsgApi.getMsgsByMsgId(
             replyMsgM.Peer, [replyMsgM.MsgId!])).msgList[0];
         return replyMsg ?

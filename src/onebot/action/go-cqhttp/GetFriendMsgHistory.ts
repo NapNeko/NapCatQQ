@@ -28,9 +28,9 @@ export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
     PayloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<Response> {
-        const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
-        const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
-        const NTQQFriendApi = this.CoreContext.getApiContext().FriendApi;
+        const NTQQUserApi = this.CoreContext.apis.UserApi;
+        const NTQQMsgApi = this.CoreContext.apis.MsgApi;
+        const NTQQFriendApi = this.CoreContext.apis.FriendApi;
         //处理参数
         const uid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
         const MsgCount = payload.count || 20;

@@ -20,8 +20,8 @@ export default class SetGroupAdmin extends BaseAction<Payload, null> {
     PayloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
-        const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
-        const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
+        const NTQQGroupApi = this.CoreContext.apis.GroupApi;
+        const NTQQUserApi = this.CoreContext.apis.UserApi;
         const uid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
         if (!uid) throw new Error('get Uid Error');
         await NTQQGroupApi.setMemberRole(payload.group_id.toString(), uid, payload.enable ? GroupMemberRole.admin : GroupMemberRole.normal);

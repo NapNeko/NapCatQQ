@@ -15,8 +15,8 @@ type PlayloadType = FromSchema<typeof SchemaData>;
 
 class MarkMsgAsRead extends BaseAction<PlayloadType, null> {
     async getPeer(payload: PlayloadType): Promise<Peer> {
-        const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
-        const NTQQFriendApi = this.CoreContext.getApiContext().FriendApi;
+        const NTQQUserApi = this.CoreContext.apis.UserApi;
+        const NTQQFriendApi = this.CoreContext.apis.FriendApi;
         if (payload.user_id) {
             const peerUid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
             if (!peerUid) {
@@ -32,7 +32,7 @@ class MarkMsgAsRead extends BaseAction<PlayloadType, null> {
     }
 
     async _handle(payload: PlayloadType): Promise<null> {
-        const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
+        const NTQQMsgApi = this.CoreContext.apis.MsgApi;
         // 调用API
         const ret = await NTQQMsgApi.setMsgRead(await this.getPeer(payload));
         if (ret.result != 0) {
@@ -70,7 +70,7 @@ export class MarkAllMsgAsRead extends BaseAction<Payload, null> {
     actionName = ActionName._MarkAllMsgAsRead;
 
     async _handle(payload: Payload): Promise<null> {
-        const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
+        const NTQQMsgApi = this.CoreContext.apis.MsgApi;
         await NTQQMsgApi.markallMsgAsRead();
         return null;
     }

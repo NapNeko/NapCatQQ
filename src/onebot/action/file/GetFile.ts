@@ -42,11 +42,11 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
     }
 
     async _handle(payload: GetFilePayload): Promise<GetFileResponse> {
-        const NTQQFriendApi = this.CoreContext.getApiContext().FriendApi;
-        const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
-        const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
-        const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
-        const NTQQFileApi = this.CoreContext.getApiContext().FileApi;
+        const NTQQFriendApi = this.CoreContext.apis.FriendApi;
+        const NTQQUserApi = this.CoreContext.apis.UserApi;
+        const NTQQMsgApi = this.CoreContext.apis.MsgApi;
+        const NTQQGroupApi = this.CoreContext.apis.GroupApi;
+        const NTQQFileApi = this.CoreContext.apis.FileApi;
         let UuidData: {
             high: string;
             low: string;

@@ -19,7 +19,7 @@ export class NTQQWebApi {
     }
 
     async shareDigest(groupCode: string, msgSeq: string, msgRandom: string, targetGroupCode: string) {
-        const cookieObject = await this.core.getApiContext().UserApi.getCookies('qun.qq.com');
+        const cookieObject = await this.core.apis.UserApi.getCookies('qun.qq.com');
         const url = `https://qun.qq.com/cgi-bin/group_digest/share_digest?${
             new URLSearchParams({
                 bkn: this.getBknFromCookie(cookieObject),
@@ -37,7 +37,7 @@ export class NTQQWebApi {
     }
 
     async getGroupEssenceMsg(GroupCode: string, page_start: string) {
-        const cookieObject = await this.core.getApiContext().UserApi.getCookies('qun.qq.com');
+        const cookieObject = await this.core.apis.UserApi.getCookies('qun.qq.com');
         const url = `https://qun.qq.com/cgi-bin/group_digest/digest_list?${
             new URLSearchParams({
                 bkn: this.getBknFromCookie(cookieObject),
@@ -62,7 +62,7 @@ export class NTQQWebApi {
     async getGroupMembers(GroupCode: string, cached: boolean = true): Promise<WebApiGroupMember[]> {
         //logDebug('webapi 获取群成员', GroupCode);
         const memberData: Array<WebApiGroupMember> = new Array<WebApiGroupMember>();
-        const cookieObject = await this.core.getApiContext().UserApi.getCookies('qun.qq.com');
+        const cookieObject = await this.core.apis.UserApi.getCookies('qun.qq.com');
         const retList: Promise<WebApiGroupMemberRet>[] = [];
         const fastRet = await RequestUtil.HttpGetJson<WebApiGroupMemberRet>
         (`https://qun.qq.com/cgi-bin/qun_mgr/search_group_members?${
@@ -123,7 +123,7 @@ export class NTQQWebApi {
     // }
 
     async setGroupNotice(GroupCode: string, Content: string) {
-        const cookieObject = await this.core.getApiContext().UserApi.getCookies('qun.qq.com');
+        const cookieObject = await this.core.apis.UserApi.getCookies('qun.qq.com');
         let ret: any = undefined;
         try {
             ret = await RequestUtil.HttpGetJson<any>
@@ -144,7 +144,7 @@ export class NTQQWebApi {
     }
 
     async getGroupNotice(GroupCode: string): Promise<undefined | WebApiGroupNoticeRet> {
-        const cookieObject = await this.core.getApiContext().UserApi.getCookies('qun.qq.com');
+        const cookieObject = await this.core.apis.UserApi.getCookies('qun.qq.com');
         let ret: WebApiGroupNoticeRet | undefined = undefined;
         try {
             ret = await RequestUtil.HttpGetJson<WebApiGroupNoticeRet>(`https://web.qun.qq.com/cgi-bin/announce/get_t_list?${
@@ -166,7 +166,7 @@ export class NTQQWebApi {
     }
 
     async getGroupHonorInfo(groupCode: string, getType: WebHonorType) {
-        const cookieObject = await this.core.getApiContext().UserApi.getCookies('qun.qq.com');
+        const cookieObject = await this.core.apis.UserApi.getCookies('qun.qq.com');
         const getDataInternal = async (Internal_groupCode: string, Internal_type: number) => {
             const url = `https://qun.qq.com/interactive/honorlist?${
                 new URLSearchParams({

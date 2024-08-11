@@ -24,7 +24,7 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
     PayloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<any> {
-        const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
+        const NTQQMsgApi = this.CoreContext.apis.MsgApi;
         const msgId = payload.message_id || payload.id;
         if (!msgId) {
             throw Error('message_id is required');

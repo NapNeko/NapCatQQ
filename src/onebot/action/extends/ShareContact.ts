@@ -19,8 +19,8 @@ export class SharePeer extends BaseAction<Payload, any> {
     PayloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQUserApi = this.CoreContext.getApiContext().UserApi;
-        const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
+        const NTQQUserApi = this.CoreContext.apis.UserApi;
+        const NTQQGroupApi = this.CoreContext.apis.GroupApi;
         if (payload.group_id) {
             return await NTQQGroupApi.getGroupRecommendContactArkJson(payload.group_id);
         } else if (payload.user_id) {
@@ -44,7 +44,7 @@ export class ShareGroupEx extends BaseAction<PayloadGroupEx, any> {
     PayloadSchema = SchemaDataGroupEx;
 
     async _handle(payload: PayloadGroupEx) {
-        const NTQQGroupApi = this.CoreContext.getApiContext().GroupApi;
+        const NTQQGroupApi = this.CoreContext.apis.GroupApi;
         return await NTQQGroupApi.getArkJsonGroupShare(payload.group_id);
     }
 }

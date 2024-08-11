@@ -24,7 +24,7 @@ class DeleteMsg extends BaseAction<Payload, void> {
     PayloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQMsgApi = this.CoreContext.getApiContext().MsgApi;
+        const NTQQMsgApi = this.CoreContext.apis.MsgApi;
         const msg = MessageUnique.getMsgIdAndPeerByShortId(Number(payload.message_id));
         if (msg) {
             const ret = this.CoreContext.eventWrapper.RegisterListen<NodeIKernelMsgListener['onMsgInfoListUpdate']>
