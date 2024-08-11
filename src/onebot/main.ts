@@ -10,6 +10,8 @@ import { OB11Constructor } from '@/onebot/helper/data';
 import { logOB11Message } from '@/onebot/helper/log';
 import { proxiedListenerOf } from '@/common/utils/proxy-handler';
 import { createActionMap } from './action';
+import { InitWebUi } from '@/webui';
+import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -82,9 +84,10 @@ export class NapCatOneBot11Adapter {
 
         await this.networkManager.registerAllActions(actions);
         await this.networkManager.openAllAdapters();
-        // Todo 开始启动NetWork
         await this.initMsgListener();
-
+        WebUiDataRuntime.setQQLoginUin(selfInfo.uin.toString());
+        WebUiDataRuntime.setQQLoginStatus(true);
+        InitWebUi(this.context.logger, this.context.pathWrapper).then().catch(this.context.logger.logError);
     }
 
     async initMsgListener() {

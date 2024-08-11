@@ -1,3 +1,4 @@
+import { webUiPathWrapper } from '@/webui';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import * as net from 'node:net';
 import { resolve } from 'node:path';
@@ -96,7 +97,7 @@ export class WebUiConfigWrapper {
             console.log('随机密码生成失败', e);
         }
         try {
-            const configPath = resolve(__dirname, './config/webui.json');
+            const configPath = resolve(webUiPathWrapper.configPath, './webui.json');
 
             if (!existsSync(configPath)) {
                 writeFileSync(configPath, JSON.stringify(defaultconfig, null, 4));

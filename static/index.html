@@ -50,8 +50,22 @@
             let url = new URL(window.location.href);
             let token = url.searchParams.get("token");
             if (token) {
-                localStorage.setItem('auth', token);
+                let loginResponse = await fetch('../api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ token: token })
+                });
+                const loginResponseJson = await loginResponse.json();
+                let retCode = loginResponseJson.code;
+                if (retCode === 0) {
+                    //登录成功
+                    let retCredential = loginResponseJson.data.Credential;
+                    localStorage.setItem('auth', retCredential);
+                }
             }
+
             let authData = localStorage.getItem('auth');
             let isLogined = await CheckWebUiLogined(authData);
             if (authData && isLogined) {
