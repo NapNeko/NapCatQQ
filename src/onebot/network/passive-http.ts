@@ -1,5 +1,4 @@
 import { IOB11NetworkAdapter, OB11EmitEventContent } from './index';
-import { OB11BaseEvent } from '@/onebot/event/OB11BaseEvent';
 import BaseAction from '@/onebot/action/BaseAction';
 import express, { Express, Request, Response } from 'express';
 import http from 'http';
