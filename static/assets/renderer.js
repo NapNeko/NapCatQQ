@@ -69,7 +69,8 @@ window.customElements.define(
         if (!this.contains(target)) buttonClick();
       };
       this._button.addEventListener("click", buttonClick);
-      this._context.addEventListener("click", ({ target }) => {
+      this._context.addEventListener("click", (event) => {
+        const { target } = event;
         if (target.tagName !== "SETTING-OPTION") return;
         buttonClick();
         if (target.hasAttribute("is-selected")) return;
@@ -163,7 +164,7 @@ async function onSettingWindowCreated(view) {
         SettingItem(
           '<span id="napcat-update-title">Napcat</span>',
           void 0,
-          SettingButton("V1.8.6", "napcat-update-button", "secondary")
+          SettingButton("V1.8.3", "napcat-update-button", "secondary")
         )
       ]),
       SettingList([
@@ -313,9 +314,6 @@ async function onSettingWindowCreated(view) {
   );
   doc.querySelector("#open-github")?.addEventListener("click", () => {
     window.open("https://github.com/NapNeko/NapCatQQ", "_blank");
-  });
-  doc.querySelector("#open-telegram")?.addEventListener("click", () => {
-    window.open("https://t.me/+nLZEnpne-pQ1OWFl");
   });
   doc.querySelector("#open-docs")?.addEventListener("click", () => {
     window.open("https://napneko.github.io/", "_blank");
