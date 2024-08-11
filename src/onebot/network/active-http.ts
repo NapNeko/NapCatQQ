@@ -14,6 +14,7 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     coreContext: NapCatCore;
     obContext: NapCatOneBot11Adapter;
     logger: LogWrapper;
+    isOpen: boolean = false;
 
     constructor(url: string, heartbeatInterval: number, secret: string | undefined, coreContext: NapCatCore, onebotContext: NapCatOneBot11Adapter) {
         this.heartbeatInterval = heartbeatInterval;
@@ -32,6 +33,9 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     }
 
     onEvent<T extends OB11EmitEventContent>(event: T) {
+        if (!this.isOpen) {
+            return;
+        }
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
             'x-self-id': this.coreContext.selfInfo.uin,
@@ -64,13 +68,11 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
         });
     }
 
-    async open() {
-        // HTTP adapter does not need to establish a persistent connection
-        //console.log('HTTP adapter is ready to send events.');
+    open() {
+        this.isOpen = true;
     }
 
     close() {
-        // HTTP adapter does not need to close a persistent connection
-        // console.log('HTTP adapter does not maintain a persistent connection.');
+        this.isOpen = false;
     }
 }
