@@ -104,8 +104,7 @@ export class NapCatOneBot11Adapter {
         this.initBuddyListener();
         this.initGroupListener();
 
-        // 未对shell版本兼容
-        // Mlikiowa V2.0.0 Refactor Todo
+        // TODO: 兼容 Shell - MliKiowa
         await WebUiDataRuntime.setQQLoginUin(selfInfo.uin.toString());
         await WebUiDataRuntime.setQQLoginStatus(true);
         await WebUiDataRuntime.setOB11ConfigCall(async (ob11: OB11Config) => {
@@ -148,7 +147,8 @@ export class NapCatOneBot11Adapter {
         };
 
         msgListener.onMsgInfoListUpdate = async msgList => {
-            this.emitRecallMsg(msgList);
+            this.emitRecallMsg(msgList)
+                .catch(e => this.context.logger.logError('处理消息失败', e));
             for (const msg of msgList.filter(e => e.senderUin == this.core.selfInfo.uin)) {
                 //  console.log(msg);
                 if (msg.sendStatus == 2) {
@@ -245,35 +245,33 @@ export class NapCatOneBot11Adapter {
                                 parseInt(member1.uin),
                                 [GroupNotifyTypes.ADMIN_UNSET, GroupNotifyTypes.ADMIN_UNSET_OTHER].includes(notify.type) ? 'unset' : 'set'
                             );
-                            this.networkManager.emitEvent(groupAdminNoticeEvent);
+                            this.networkManager.emitEvent(groupAdminNoticeEvent)
+                                .catch(e => this.context.logger.logError('处理群管理员变动失败', e));
                         } else {
                             this.context.logger.logDebug('获取群通知的成员信息失败', notify, this.core.ApiContext.GroupApi.getGroup(notify.group.groupCode));
                         }
                     } else if (notify.type == GroupNotifyTypes.MEMBER_EXIT || notify.type == GroupNotifyTypes.KICK_MEMBER) {
                         this.context.logger.logDebug('有成员退出通知', notify);
-                        try {
-                            const member1Uin = (await this.core.ApiContext.UserApi.getUinByUidV2(notify.user1.uid))!;
-                            let operatorId = member1Uin;
-                            let subType: GroupDecreaseSubType = 'leave';
-                            if (notify.user2.uid) {
-                                // 是被踢的
-                                const member2Uin = await this.core.ApiContext.UserApi.getUinByUidV2(notify.user2.uid);
-                                if (member2Uin) {
-                                    operatorId = member2Uin;
-                                }
-                                subType = 'kick';
+                        const member1Uin = (await this.core.ApiContext.UserApi.getUinByUidV2(notify.user1.uid))!;
+                        let operatorId = member1Uin;
+                        let subType: GroupDecreaseSubType = 'leave';
+                        if (notify.user2.uid) {
+                            // 是被踢的
+                            const member2Uin = await this.core.ApiContext.UserApi.getUinByUidV2(notify.user2.uid);
+                            if (member2Uin) {
+                                operatorId = member2Uin;
                             }
-                            const groupDecreaseEvent = new OB11GroupDecreaseEvent(
-                                this.core,
-                                parseInt(notify.group.groupCode),
-                                parseInt(member1Uin),
-                                parseInt(operatorId),
-                                subType
-                            );
-                            this.networkManager.emitEvent(groupDecreaseEvent);
-                        } catch (e: any) {
-                            this.context.logger.logError('获取群通知的成员信息失败', notify, e.stack.toString());
+                            subType = 'kick';
                         }
+                        const groupDecreaseEvent = new OB11GroupDecreaseEvent(
+                            this.core,
+                            parseInt(notify.group.groupCode),
+                            parseInt(member1Uin),
+                            parseInt(operatorId),
+                            subType
+                        );
+                        this.networkManager.emitEvent(groupDecreaseEvent)
+                            .catch(e => this.context.logger.logError('处理群成员退出失败', e));
                         // notify.status == 1 表示未处理 2表示处理完成
                     } else if ([
                         GroupNotifyTypes.JOIN_REQUEST
@@ -292,7 +290,8 @@ export class NapCatOneBot11Adapter {
                                 notify.postscript,
                                 flag
                             );
-                            this.networkManager.emitEvent(groupRequestEvent);
+                            this.networkManager.emitEvent(groupRequestEvent)
+                                .catch(e => this.context.logger.logError('处理加群请求失败', e));
                         } catch (e) {
                             this.context.logger.logError('获取加群人QQ号失败 Uid:', notify.user1.uid, e);
                         }
@@ -306,7 +305,8 @@ export class NapCatOneBot11Adapter {
                             notify.postscript,
                             flag
                         );
-                        this.networkManager.emitEvent(groupInviteEvent);
+                        this.networkManager.emitEvent(groupInviteEvent)
+                            .catch(e => this.context.logger.logError('处理邀请本人加群失败', e));
                     }
                 }
             }
@@ -361,7 +361,7 @@ export class NapCatOneBot11Adapter {
             // log("message update", message.sendStatus, message.msgId, message.msgSeq)
             if (message.recallTime != '0') { //todo: 这个判断方法不太好，应该使用灰色消息元素来判断?
                 // 撤回消息上报
-                const oriMessageId = await MessageUnique.getShortIdByMsgId(message.msgId);
+                const oriMessageId = MessageUnique.getShortIdByMsgId(message.msgId);
                 if (!oriMessageId) {
                     continue;
                 }
@@ -371,7 +371,8 @@ export class NapCatOneBot11Adapter {
                         parseInt(message!.senderUin),
                         oriMessageId
                     );
-                    this.networkManager.emitEvent(friendRecallEvent);
+                    this.networkManager.emitEvent(friendRecallEvent)
+                        .catch(e => this.context.logger.logError('处理好友消息撤回失败', e));
                 } else if (message.chatType == ChatType.group) {
                     let operatorId = message.senderUin;
                     for (const element of message.elements) {
@@ -386,7 +387,8 @@ export class NapCatOneBot11Adapter {
                         parseInt(operatorId),
                         oriMessageId
                     );
-                    this.networkManager.emitEvent(groupRecallEvent);
+                    this.networkManager.emitEvent(groupRecallEvent)
+                        .catch(e => this.context.logger.logError('处理群消息撤回失败', e));
                 }
             }
         }
