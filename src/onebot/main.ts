@@ -69,7 +69,7 @@ export class NapCatOneBot11Adapter {
         }
         if (ob11Config.ws.enable) {
             OB11NetworkManagerWrap.registerAdapter(new OB11PassiveWebSocketAdapter(
-                ob11Config.ws.host, ob11Config.ws.port, ob11Config.heartInterval, ob11Config.token
+                ob11Config.ws.host, ob11Config.ws.port, ob11Config.heartInterval, ob11Config.token, this.core, this
             ));
         }
         if (ob11Config.reverseWs.enable) {
