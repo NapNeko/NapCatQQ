@@ -24,16 +24,16 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
         const NTQQWebApi = this.CoreContext.apis.WebApi;
         const isNocache = payload.no_cache == true || payload.no_cache === 'true';
 
-        const GroupList = await NTQQGroupApi.getGroups(isNocache);
-        const group = GroupList.find(item => item.groupCode == payload.group_id);
-        if (!group) {
-            throw (`群${payload.group_id}不存在`);
-        }
+        // const GroupList = await NTQQGroupApi.getGroups(isNocache);
+        // const group = GroupList.find(item => item.groupCode == payload.group_id);
+        // if (!group) {
+        //     throw (`群${payload.group_id}不存在`);
+        // }
         const groupMembers = await NTQQGroupApi.getGroupMembers(payload.group_id.toString());
         const groupMembersArr = Array.from(groupMembers.values());
         const groupMembersUids = groupMembersArr.map(e => e.uid);
         let _groupMembers = groupMembersArr.map(item => {
-            return OB11Constructor.groupMember(group.groupCode, item);
+            return OB11Constructor.groupMember(payload.group_id.toString(), item);
         });
 
         const MemberMap: Map<number, OB11GroupMember> = new Map<number, OB11GroupMember>();
