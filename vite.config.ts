@@ -8,7 +8,6 @@ import babel from 'vite-plugin-babel';
 //依赖排除
 const external = ['silk-wasm', 'ws', 'express', 'fluent-ffmpeg', 'log4js', 'qrcode-terminal'];
 const nodeModules = [...builtinModules, builtinModules.map(m => `node:${m}`)].flat();
-
 function genCpModule(module: string) {
     return { src: `./node_modules/${module}`, dest: `dist/node_modules/${module}`, flatten: false };
 }
