@@ -176,7 +176,7 @@ export class RequestUtil {
 
                 req.on('error', (error) => {
                     reject(error);
-                    console.error('Error during upload:', error);
+                    console.log('Error during upload:', error);
                 });
 
                 const body = await RequestUtil.createFormData('WebKitFormBoundary7MA4YWxkTrZu0gW', filePath);

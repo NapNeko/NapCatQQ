@@ -109,6 +109,7 @@ export async function NCoreInitShell() {
             const qrcodePath = path.join(dataPath, 'qrcode.png');
             qrcode.generate(qrcodeUrl, { small: true }, (res) => {
                 logger.logWarn([
+                    '\n',
                     res,
                     '二维码解码URL: ' + qrcodeUrl,
                     '如果控制台二维码无法扫码，可以复制解码url到二维码生成网站生成二维码再扫码，也可以打开下方的二维码路径图片进行扫码。',

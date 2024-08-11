@@ -85,7 +85,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
                 this.registerHeartBeat();
             } catch (e) {
                 this.connection = null;
-                console.error('Failed to connect to the server, retrying in 5 seconds...');
+                console.log('Failed to connect to the server, retrying in 5 seconds...');
                 await sleep(5000);
             }
         }
