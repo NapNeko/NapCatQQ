@@ -319,7 +319,7 @@ export class NapCatOneBot11Adapter {
         };
 
         this.context.session.getGroupService().addKernelGroupListener(
-            new this.context.wrapper.NodeIGroupListener(proxiedListenerOf(groupListener, this.context.logger)),
+            new this.context.wrapper.NodeIKernelGroupListener(proxiedListenerOf(groupListener, this.context.logger)),
         );
     }
 
