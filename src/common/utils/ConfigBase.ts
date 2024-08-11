@@ -4,7 +4,6 @@ import type { NapCatCore } from '@/core';
 
 export abstract class ConfigBase<T> {
     abstract name: string;
-    pathName: string | null = null; // 本次读取的文件路径
     coreContext: NapCatCore;
     configPath: string;
     configData: T = {} as T;
@@ -31,7 +30,6 @@ export abstract class ConfigBase<T> {
         const logger = this.coreContext.context.logger;
         const configPath = this.getConfigPath(this.coreContext.selfInfo.uin);
         if (!fs.existsSync(configPath)) {
-            this.pathName = configPath; // 记录有效的设置文件
             try {
                 fs.writeFileSync(configPath, fs.readFileSync(this.getConfigPath(undefined), 'utf-8'));
                 logger.log(`配置文件${configPath}创建成功!\n`);
