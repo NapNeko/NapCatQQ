@@ -6,32 +6,29 @@ import { NapCatCore } from '@/core';
 import { NapCatOneBot11Adapter } from '../main';
 
 export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
+    token: string;
+    coreContext: NapCatCore;
+    obContext: NapCatOneBot11Adapter;
     private app: Express | undefined;
     private server: http.Server | undefined;
     private isOpen: boolean = false;
     private hasBeenClosed: boolean = false;
     private actionMap: Map<string, BaseAction<any, any>> = new Map();
     private port: number;
-    token: string;
-    coreContext: NapCatCore;
-    onebotContext: NapCatOneBot11Adapter;
 
     constructor(port: number, token: string, coreContext: NapCatCore, onebotContext: NapCatOneBot11Adapter) {
         this.port = port;
         this.token = token;
         this.coreContext = coreContext;
-        this.onebotContext = onebotContext;
+        this.obContext = onebotContext;
     }
 
     registerAction<T extends BaseAction<P, R>, P, R>(action: T) {
         this.actionMap.set(action.actionName, action);
     }
-    registerActionMap(actionMap: Map<string, BaseAction<any, any>>) {
 
+    registerActionMap(actionMap: Map<string, BaseAction<any, any>>) {
         this.actionMap = actionMap;
-    }
-    registerHeartBeat() {
-        //空心跳
     }
 
     onEvent<T extends OB11EmitEventContent>(event: T) {
@@ -46,6 +43,13 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
             this.initializeServer();
             this.isOpen = true;
         }
+    }
+
+    async close() {
+        this.isOpen = false;
+        this.hasBeenClosed = true;
+        this.server?.close();
+        this.app = undefined;
     }
 
     private initializeServer() {
@@ -79,12 +83,5 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
         } else {
             res.status(404).send('Action not found');
         }
-    }
-
-    async close() {
-        this.isOpen = false;
-        this.hasBeenClosed = true;
-        this.server?.close();
-        this.app = undefined;
     }
 }
