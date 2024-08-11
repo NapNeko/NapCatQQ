@@ -12,7 +12,6 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
     private app: Express | undefined;
     private server: http.Server | undefined;
     private isOpen: boolean = false;
-    private hasBeenClosed: boolean = false;
     private actionMap: Map<string, BaseAction<any, any>> = new Map();
     private port: number;
 
@@ -36,8 +35,9 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
     }
 
     open() {
-        if (this.hasBeenClosed) {
+        if (this.isOpen) {
             this.coreContext.context.logger.logError('Cannot open a closed HTTP server');
+            return;
         }
         if (!this.isOpen) {
             this.initializeServer();
@@ -47,7 +47,6 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
 
     async close() {
         this.isOpen = false;
-        this.hasBeenClosed = true;
         this.server?.close();
         this.app = undefined;
     }
@@ -58,11 +57,24 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
 
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: false }));
+        this.app.use((req, res, next) => this.authorize(this.token, req, res, next));
         this.app.use('/', (req, res) => this.handleRequest(req, res));
 
         this.server.listen(this.port, () => {
-            this.coreContext.context.logger.log(`HTTP server listening on port ${this.port}`);
+            this.coreContext.context.logger.log(`[OneBot] [HTTP Adapter] Start On Port ${this.port}`);
         });
+    }
+
+    private authorize(token: string | undefined, req: Request, res: Response, next: any) {
+        if (!token || token.length == 0) return;//客户端未设置密钥
+        const HeaderClientToken = req.headers.authorization?.split('Bearer ').pop() || '';
+        const QueryClientToken = req.query.access_token;
+        const ClientToken = typeof (QueryClientToken) === 'string' && QueryClientToken !== '' ? QueryClientToken : HeaderClientToken;
+        if (ClientToken === token) {
+            next();
+        } else {
+            res.status(403).send(JSON.stringify({ message: 'token verify failed!' }));
+        }
     }
 
     private async handleRequest(req: Request, res: Response) {
