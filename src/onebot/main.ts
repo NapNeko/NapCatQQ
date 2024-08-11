@@ -3,7 +3,7 @@ import { OB11Config } from './helper/config';
 import { NapCatPathWrapper } from '@/common/framework/napcat';
 import { OneBotApiContextType } from './types/adapter';
 import { OneBotFriendApi, OneBotGroupApi, OneBotUserApi } from './api';
-import { OB11NetworkManager, OB11PassiveHttpAdapter } from '@/onebot/network';
+import { OB11ActiveHttpAdapter, OB11ActiveWebSocketAdapter, OB11NetworkManager, OB11PassiveHttpAdapter, OB11PassiveWebSocketAdapter } from '@/onebot/network';
 import { OB11InputStatusEvent } from '@/onebot/event/notice/OB11InputStatusEvent';
 import { MessageUnique } from '@/common/utils/MessageUnique';
 import { OB11Constructor } from '@/onebot/helper/data';
@@ -51,9 +51,35 @@ export class NapCatOneBot11Adapter {
             this.context.logger.setLogSelfInfo(selfInfo);
         }).catch(this.context.logger.logError);
         this.context.logger.log(`[Notice] [OneBot11] ${serviceInfo}`);
+
+        //创建NetWork服务
         let actions = createActionMap(this, this.core);
         let OB11NetworkManagerWrap = new OB11NetworkManager();
-        OB11NetworkManagerWrap.registerAdapter(new OB11PassiveHttpAdapter(ob11Config.http.port, ob11Config.token, this.core, this));
+        if (ob11Config.http.enable) {
+            OB11NetworkManagerWrap.registerAdapter(new OB11PassiveHttpAdapter(
+                ob11Config.http.port, ob11Config.token, this.core, this
+            ));
+        }
+        if (ob11Config.http.enablePost) {
+            ob11Config.http.postUrls.forEach(url => {
+                OB11NetworkManagerWrap.registerAdapter(new OB11ActiveHttpAdapter(
+                    url, ob11Config.heartInterval, ob11Config.token, this.core, this
+                ));
+            });
+        }
+        if (ob11Config.ws.enable) {
+            OB11NetworkManagerWrap.registerAdapter(new OB11PassiveWebSocketAdapter(
+                ob11Config.ws.host, ob11Config.ws.port, ob11Config.heartInterval, ob11Config.token
+            ));
+        }
+        if (ob11Config.reverseWs.enable) {
+            ob11Config.reverseWs.urls.forEach(url => {
+                OB11NetworkManagerWrap.registerAdapter(new OB11ActiveWebSocketAdapter(
+                    url, 5000, ob11Config.heartInterval, this.core, this
+                ));
+            });
+        }
+
         OB11NetworkManagerWrap.registerAllActions(actions);
         OB11NetworkManagerWrap.openAllAdapters();
         // Todo 开始启动NetWork
