@@ -36,7 +36,5 @@ export interface OB11Config {
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class OB11Config extends ConfigBase<OB11Config> {
-    getConfigName() {
-        return 'onebot11';
-    }
+    name = 'onebot11';
 }

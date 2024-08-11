@@ -1,5 +1,4 @@
-import { OB11Config } from "@/onebot/helper/config";
-
+import { OB11Config } from '@/onebot/helper/config';
 
 interface LoginRuntimeType {
     LoginCurrentTime: number;
@@ -30,6 +29,7 @@ const LoginRuntime: LoginRuntimeType = {
         QQLoginList: [],
     },
 };
+
 export const WebUiDataRuntime = {
     checkLoginRate: async function(RateLimit: number): Promise<boolean> {
         LoginRuntime.LoginCurrentRate++;
