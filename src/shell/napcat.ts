@@ -139,8 +139,10 @@ export async function NCoreInitShell() {
         } else {
             logger.log('没有 -q 指令指定快速登录，或未曾登录过这个 QQ，将使用二维码登录方式');
             if (historyLoginList.length > 0) {
-                logger.log(`可用于快速登录的 QQ：\n${historyLoginList.map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`).join('\n')
-                    }`);
+                logger.log(`可用于快速登录的 QQ：\n${
+                    historyLoginList.map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
+                        .join('\n')
+                }`);
             }
             loginService.getQRCodePicture();
         }
