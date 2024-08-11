@@ -2,16 +2,12 @@ import path from 'node:path';
 import fs from 'node:fs';
 import type { NapCatCore } from '@/core';
 
-export class ConfigBase<T> {
-    name: string = this.getConfigName();
+export abstract class ConfigBase<T> {
+    abstract name: string;
     pathName: string | null = null; // 本次读取的文件路径
     coreContext: NapCatCore;
     configPath: string;
     configData: T = {} as T;
-
-    getConfigName() {
-        return this.constructor.name
-    }
 
     constructor(coreContext: NapCatCore, configPath: string) {
         this.coreContext = coreContext;
@@ -24,7 +20,6 @@ export class ConfigBase<T> {
         // 决定 key 在json配置文件中的顺序
         return null;
     }
-
 
     getConfigPath(pathName: string | undefined): string {
         const suffix = pathName ? `_${pathName}` : '';
