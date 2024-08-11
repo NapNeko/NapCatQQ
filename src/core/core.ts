@@ -80,7 +80,7 @@ export class NapCatCore {
     async initNapCatCoreListeners() {
         const msgListener = new MsgListener();
         msgListener.onRecvMsg = (msg) => {
-            console.log('RecvMsg', msg);
+            //console.log('RecvMsg', msg);
         };
         //await sleep(2500);
         this.context.session.getMsgService().addKernelMsgListener(

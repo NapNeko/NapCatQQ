@@ -22,7 +22,7 @@ export class LimitedHashTable<K, V> {
         this.keyToValue.set(key, value);
         this.valueToKey.set(value, key);
         while (this.keyToValue.size !== this.valueToKey.size) {
-            console.log('keyToValue.size !== valueToKey.size Error Atom');
+            //console.log('keyToValue.size !== valueToKey.size Error Atom');
             this.keyToValue.clear();
             this.valueToKey.clear();
         }

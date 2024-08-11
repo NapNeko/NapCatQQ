@@ -32,14 +32,14 @@ export class OB11NetworkManager {
     }
 
     async emitEvent(event: OB11EmitEventContent) {
-        console.log('adapters', this.adapters.length);
+        //console.log('adapters', this.adapters.length);
         return Promise.all(this.adapters.map(adapter => adapter.onEvent(event)));
     }
 
     async registerAdapter(adapter: IOB11NetworkAdapter) {
-        console.log('Registering adapter:', adapter);
+        //console.log('Registering adapter:', adapter);
         this.adapters.push(adapter);
-        console.log('Current adapters:', this.adapters.length);
+        //console.log('Current adapters:', this.adapters.length);
     }
 
     async closeSomeAdapters(adapters: IOB11NetworkAdapter[]) {
@@ -48,10 +48,10 @@ export class OB11NetworkManager {
     }
 
     async closeAllAdapters() {
-        console.log('Closing all adapters');
+        //console.log('Closing all adapters');
         await Promise.all(this.adapters.map(adapter => adapter.close()));
         this.adapters = [];
-        console.log('All adapters closed. Current adapters:', this.adapters.length);
+        //console.log('All adapters closed. Current adapters:', this.adapters.length);
     }
 }
 
