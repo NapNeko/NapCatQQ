@@ -39,6 +39,8 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             //鉴权
             this.authorize(token, wsClient, wsReq);
 
+            wsClient.on('error', (err) => this.logger.log('[OneBot] [WebSocket Server] Client Error:', err.message));
+
             wsClient.on('message', (message) => {
                 this.handleMessage(wsClient, message).then().catch(this.logger.logError);
             });
@@ -53,7 +55,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             await this.wsClientsMutex.runExclusive(async () => {
                 this.wsClients.push(wsClient);
             });
-        });
+        }).on('error', (err) => this.logger.log('[OneBot] [WebSocket Server] Server Error:', err.message));
     }
 
     registerActionMap(actionMap: Map<string, BaseAction<any, any>>) {
@@ -67,25 +69,25 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     onEvent<T extends OB11EmitEventContent>(event: T) {
         this.wsClientsMutex.runExclusive(async () => {
             this.wsClients.forEach((wsClient) => {
-                const wrappedEvent = this.wrapEvent(event);
-                wsClient.send(JSON.stringify(wrappedEvent));
+                wsClient.send(JSON.stringify(event));
             });
         });
     }
 
     open() {
-        if (this.hasBeenClosed) {
-            this.logger.logError('Cannot open a closed WebSocket server');
+        if (this.isOpen) {
+            this.logger.logError('[OneBot] [WebSocket Server] Cannot open a opened WebSocket server');
             return;
         }
-        this.logger.log('WebSocket server started', this.wsServer.address());
+        let addressInfo = this.wsServer.address();
+        this.logger.log('[OneBot] [WebSocket Server] Server Started', typeof (addressInfo) === 'string' ? addressInfo : addressInfo?.address + ':' + addressInfo?.port);
+        
         this.isOpen = true;
         this.registerHeartBeat();
     }
 
     async close() {
         this.isOpen = false;
-        this.hasBeenClosed = true;
         this.wsServer.close();
         if (this.heartbeatIntervalId) {
             clearInterval(this.heartbeatIntervalId);
@@ -117,14 +119,6 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
         wsClient.close();
     }
 
-    private async checkStateAndAnnounce<T>(data: T) {
-        await this.wsClientsMutex.runExclusive(async () => {
-            this.wsClients.forEach((wsClient) => {
-                this.checkStateAndReply(data, wsClient);
-            });
-        });
-    }
-
     private checkStateAndReply<T>(data: T, wsClient: WebSocket) {
         if (wsClient.readyState === WebSocket.OPEN) {
             wsClient.send(JSON.stringify(data));
@@ -138,7 +132,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             try {
                 receiveData = JSON.parse(message.toString());
                 echo = receiveData.echo;
-                this.logger.logDebug('收到正向Websocket消息', receiveData);
+                //this.logger.logDebug('收到正向Websocket消息', receiveData);
             } catch (e) {
                 this.checkStateAndReply<any>(OB11Response.error('json解析失败,请检查数据格式', 1400, echo), wsClient);
             }
@@ -151,11 +145,5 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
         }
     }
 
-    private wrapEvent<T extends OB11EmitEventContent>(event: T) {
-        return {
-            type: 'event',
-            data: event,
-        };
-    }
 }
 
