@@ -117,7 +117,6 @@ export class NapCatOneBot11Adapter {
         await WebUiDataRuntime.setOB11ConfigCall(async (ob11: OB11Config) => {
             this.config.save(ob11);
         });
-        InitWebUi(this.context.logger, this.context.pathWrapper).then().catch(this.context.logger.logError);
     }
 
     private initMsgListener() {
