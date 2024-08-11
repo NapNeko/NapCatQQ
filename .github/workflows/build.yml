@@ -29,6 +29,7 @@ jobs:
           npm run build:framework
           cd dist
           npm i --omit=dev 
+          rm package-lock.json
           cd ..
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
@@ -56,6 +57,7 @@ jobs:
                 npm run build:shell
                 cd dist
                 npm i --omit=dev
+                rm package-lock.json
                 cd ..
         - name: Upload Artifact
           uses: actions/upload-artifact@v4
