@@ -8,7 +8,7 @@ on:
 permissions: write-all
 
 jobs:
-  build-liteloader:
+  Build-LiteLoader:
     if: ${{ startsWith(github.event.head_commit.message, 'build:') }}
     runs-on: ubuntu-latest
     steps:
@@ -23,7 +23,7 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: 20.x
-    - name: Build NuCat Linux
+    - name: Build NuCat LiteLoader
       run: |
           npm i
           npm run build:prod
@@ -35,7 +35,7 @@ jobs:
       with:
         name: NapCat.LiteLoader
         path: dist
-  build-shell:
+  Build-Shell:
     if: ${{ startsWith(github.event.head_commit.message, 'build:') }}
     runs-on: ubuntu-latest
     steps:
