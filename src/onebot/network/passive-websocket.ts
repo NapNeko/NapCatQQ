@@ -3,6 +3,11 @@ import { OB11BaseEvent } from '@/onebot/event/OB11BaseEvent';
 import BaseAction from '@/onebot/action/BaseAction';
 import { WebSocket, WebSocketServer } from 'ws';
 import { Mutex } from 'async-mutex';
+import { OB11Response } from '../action/OB11Response';
+import { ActionName } from '../action/types';
+import { NapCatCore } from '@/core';
+import { NapCatOneBot11Adapter } from '..';
+import { LogWrapper } from '@/common/utils/log';
 
 export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     wsServer: WebSocketServer;
@@ -12,8 +17,15 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     hasBeenClosed: boolean = false;
     heartbeatInterval: number = 0;
     private actionMap: Map<string, BaseAction<any, any>> = new Map();
+    onebotContext: NapCatOneBot11Adapter;
+    coreContext: NapCatCore;
+    logger: LogWrapper;
 
-    constructor(ip: string, port: number, heartbeatInterval: number, token: string) {
+    constructor(ip: string, port: number, heartbeatInterval: number, token: string, coreContext: NapCatCore, onebotContext: NapCatOneBot11Adapter) {
+        this.coreContext = coreContext;
+        this.onebotContext = onebotContext;
+        this.logger = coreContext.context.logger;
+
         this.heartbeatInterval = heartbeatInterval;
         this.wsServer = new WebSocketServer({ port: port, host: ip });
         this.wsServer.on('connection', async (wsClient) => {
@@ -29,7 +41,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
                 }
             }
             wsClient.on('message', (message) => {
-                this.handleMessage(message);
+                this.handleMessage(wsClient, message);
             });
             wsClient.once('close', () => {
                 this.wsClientsMutex.runExclusive(async () => {
@@ -74,7 +86,8 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
 
     open() {
         if (this.hasBeenClosed) {
-            throw new Error('Cannot open a closed WebSocket server');
+            // throw new Error('Cannot open a closed WebSocket server');
+            this.logger.logError('Cannot open a closed WebSocket server');
         }
         this.isOpen = true;
     }
@@ -84,16 +97,34 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
         this.hasBeenClosed = true;
         this.wsServer.close();
     }
-
-    private handleMessage(message: any) {
+    async WsReplyAll<T>(data: T) {
+        this.wsClientsMutex.runExclusive(async () => {
+            this.wsClients.forEach((wsClient) => {
+                if (wsClient.readyState === WebSocket.OPEN) {
+                    wsClient.send(JSON.stringify(data));
+                }
+            });
+        });
+    }
+    async WsReply<T>(data: T, wsClient: WebSocket) {
+        if (wsClient.readyState === WebSocket.OPEN) {
+            wsClient.send(JSON.stringify(data));
+        }
+    }
+    private handleMessage(wsClient: WebSocket, message: any) {
+        let receiveData: { action: ActionName, params?: any, echo?: any } = { action: ActionName.Unknown, params: {} };
+        let echo = null;
         try {
-            const parsedMessage = JSON.parse(message);
-            const action = this.actionMap.get(parsedMessage.actionName);
-            if (action) {
-                action.handle(parsedMessage.payload);
+            try {
+                receiveData = JSON.parse(message.toString());
+                echo = receiveData.echo;
+                this.logger.logDebug('收到正向Websocket消息', receiveData);
+            } catch (e) {
+                this.WsReply<any>(OB11Response.error('json解析失败，请检查数据格式', 1400, echo),wsClient);
             }
+            receiveData.params = (receiveData?.params) ? receiveData.params : {};//兼容类型验证
         } catch (e) {
-            console.error('Failed to handle message:', e);
+            this.WsReply<any>(OB11Response.error('不支持的api ' + receiveData.action, 1404, echo),wsClient);
         }
     }
 
