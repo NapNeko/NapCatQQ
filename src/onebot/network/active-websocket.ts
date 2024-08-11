@@ -1,5 +1,5 @@
 import { IOB11NetworkAdapter, OB11EmitEventContent } from '@/onebot/network/index';
-import { WebSocket, WebSocket as NodeWebSocket } from 'ws';
+import { WebSocket } from 'ws';
 import BaseAction from '@/onebot/action/BaseAction';
 import { sleep } from '@/common/utils/helper';
 import { OB11HeartbeatEvent } from '../event/meta/OB11HeartbeatEvent';
@@ -17,12 +17,14 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
     obContext: NapCatOneBot11Adapter;
     coreContext: NapCatCore;
     logger: LogWrapper;
-    private connection: NodeWebSocket | null = null;
+    private connection: WebSocket | null = null;
     private actionMap: Map<string, BaseAction<any, any>> = new Map();
     private heartbeatTimer: NodeJS.Timeout | null = null;
-
-    constructor(url: string, reconnectIntervalInMillis: number, heartbeatInterval: number, coreContext: NapCatCore, onebotContext: NapCatOneBot11Adapter) {
+    private readonly token: string;
+    
+    constructor(url: string, reconnectIntervalInMillis: number, heartbeatInterval: number, token:string, coreContext: NapCatCore, onebotContext: NapCatOneBot11Adapter) {
         this.url = url;
+        this.token = token;
         this.heartbeatInterval = heartbeatInterval;
         this.reconnectIntervalInMillis = reconnectIntervalInMillis;
         this.coreContext = coreContext;
@@ -85,7 +87,14 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
     private async tryConnect() {
         while (!this.connection && !this.isClosed) {
             try {
-                this.connection = new NodeWebSocket(this.url);
+                this.connection = new WebSocket(this.url, {
+                    headers: {
+                        'X-Self-ID': this.coreContext.selfInfo.uin,
+                        'Authorization': `Bearer ${this.token}`,
+                        'x-client-role': 'Universal',  // koishi-adapter-onebot 需要这个字段
+                        'User-Agent': 'OneBot/11',
+                    }
+                });
                 this.connection.on('message', (data) => {
                     this.handleMessage(data);
                 });
