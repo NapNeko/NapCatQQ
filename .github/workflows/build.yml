@@ -23,17 +23,17 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: 20.x
-    - name: Build NuCat LiteLoader
+    - name: Build NuCat Framework
       run: |
           npm i
-          npm run build:liteloader
+          npm run build:framework
           cd dist
           npm i --omit=dev 
           cd ..
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: NapCat.LiteLoader
+        name: NapCat.Framework
         path: dist
   Build-Shell:
     if: ${{ startsWith(github.event.head_commit.message, 'build:') }}
