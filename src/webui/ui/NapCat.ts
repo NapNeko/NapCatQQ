@@ -185,9 +185,6 @@ async function onSettingWindowCreated(view: Element) {
     doc.querySelector('#open-github')?.addEventListener('click', () => {
         window.open('https://github.com/NapNeko/NapCatQQ', '_blank');
     });
-    doc.querySelector('#open-telegram')?.addEventListener('click', () => {
-        window.open('https://t.me/+nLZEnpne-pQ1OWFl');
-    });
     doc.querySelector('#open-docs')?.addEventListener('click', () => {
         window.open('https://napneko.github.io/', '_blank');
     });
