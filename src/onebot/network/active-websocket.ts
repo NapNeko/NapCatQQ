@@ -63,7 +63,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
 
     close() {
         if (this.isClosed) {
-            throw new Error('Cannot close a closed WebSocket connection');
+            this.logger.logError('Cannot close a closed WebSocket connection');
         }
         this.isClosed = true;
         if (this.connection) {
@@ -105,7 +105,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
         }
     }
     WsReply(data: any) {
-        if (this.connection?.readyState === NodeWebSocket.OPEN) {
+        if (this.connection?.readyState === NodeWebSocket.OPEN && !this.isClosed) {
             this.connection?.send(JSON.stringify(data));
         }
     }
