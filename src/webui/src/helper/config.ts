@@ -1,11 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
 import * as net from 'node:net';
-import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 // 限制尝试端口的次数，避免死循环
 const MAX_PORT_TRY = 100;
@@ -76,7 +72,7 @@ export interface WebUiConfigType {
 }
 
 // 读取当前目录下名为 webui.json 的配置文件，如果不存在则创建初始化配置文件
-class WebUiConfigWrapper {
+export class WebUiConfigWrapper {
     WebUiConfigData: WebUiConfigType | undefined = undefined;
 
     private applyDefaults<T>(obj: Partial<T>, defaults: T): T {
@@ -141,4 +137,3 @@ class WebUiConfigWrapper {
     }
 }
 
-export const WebUiConfig = new WebUiConfigWrapper();
