@@ -26,7 +26,6 @@ import { OB11Constructor } from '@/onebot/helper/data';
 import { logOB11Message } from '@/onebot/helper/log';
 import { proxiedListenerOf } from '@/common/utils/proxy-handler';
 import { createActionMap } from './action';
-import { InitWebUi } from '@/webui';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { OB11FriendRecallNoticeEvent } from '@/onebot/event/notice/OB11FriendRecallNoticeEvent';
 import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecallNoticeEvent';
@@ -111,7 +110,6 @@ export class NapCatOneBot11Adapter {
         this.initBuddyListener();
         this.initGroupListener();
 
-        // TODO: 兼容 Shell - MliKiowa
         await WebUiDataRuntime.setQQLoginUin(selfInfo.uin.toString());
         await WebUiDataRuntime.setQQLoginStatus(true);
         await WebUiDataRuntime.setOB11ConfigCall(async (ob11: OB11Config) => {
