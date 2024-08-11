@@ -68,7 +68,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             this.authorize(token, wsClient, wsReq);
 
             wsClient.on('message', (message) => {
-                this.handleMessage(wsClient, message);
+                this.handleMessage(wsClient, message).then().catch(this.logger.logError);
             });
             wsClient.once('close', () => {
                 this.wsClientsMutex.runExclusive(async () => {
@@ -118,6 +118,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             this.logger.logError('Cannot open a closed WebSocket server');
             return;
         }
+        this.logger.log('WebSocket server started', this.wsServer.address());
         this.isOpen = true;
         this.registerHeartBeat();
     }
@@ -148,9 +149,9 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
         }
     }
 
-    private handleMessage(wsClient: WebSocket, message: any) {
+    private async handleMessage(wsClient: WebSocket, message: any) {
         let receiveData: { action: ActionName, params?: any, echo?: any } = { action: ActionName.Unknown, params: {} };
-        let echo = null;
+        let echo = undefined;
         try {
             try {
                 receiveData = JSON.parse(message.toString());
@@ -160,6 +161,9 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
                 this.WsReply<any>(OB11Response.error('json解析失败,请检查数据格式', 1400, echo), wsClient);
             }
             receiveData.params = (receiveData?.params) ? receiveData.params : {};//兼容类型验证
+            let retdata = await this.actionMap.get(receiveData.action)?.websocketHandle(receiveData.params, echo || "");
+            const packet = Object.assign({}, retdata);
+            this.WsReply<any>(packet, wsClient);
         } catch (e) {
             this.WsReply<any>(OB11Response.error('不支持的api ' + receiveData.action, 1404, echo), wsClient);
         }
