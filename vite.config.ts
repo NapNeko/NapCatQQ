@@ -42,9 +42,9 @@ const FrameworkBaseConfigPlugin: PluginOption[] = [
     cp({
         targets: [
             { src: './manifest.json', dest: 'dist' },
-            { src: './src/external/napcat.json', dest: 'dist/config/' },
+            { src: './src/core/external/napcat.json', dest: 'dist/config/' },
             { src: './static/', dest: 'dist/static/', flatten: false },
-            { src: './src/external/onebot11.json', dest: 'dist/config/' },
+            { src: './src/onebot/external/onebot11.json', dest: 'dist/config/' },
             { src: './src/framework/liteloader.cjs', dest: 'dist' },
             { src: './src/framework/napcat.cjs', dest: 'dist' },
             { src: './src/framework/preload.cjs', dest: 'dist' },
