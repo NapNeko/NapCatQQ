@@ -1,5 +1,6 @@
 import { IOB11NetworkAdapter, OB11EmitEventContent } from './index';
 import { OB11BaseEvent } from '@/onebot/event/OB11BaseEvent';
+import urlParse from 'url';
 import BaseAction from '@/onebot/action/BaseAction';
 import { WebSocket, WebSocketServer } from 'ws';
 import { Mutex } from 'async-mutex';
@@ -23,6 +24,34 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     logger: LogWrapper;
     private heartbeatIntervalId: NodeJS.Timeout | null = null;
 
+    authorize(token: string, wsClient: WebSocket, wsReq: any) {
+        if (token && token.length > 0) {
+            const url = wsClient.url!.split('?').shift();
+            this.logger.log('ws connect', url);
+            let clientToken: string = '';
+            const authHeader = wsReq.headers['authorization'];
+            if (authHeader) {
+                clientToken = authHeader.split('Bearer ').pop() || '';
+                this.logger.log('receive ws header token', clientToken);
+            } else {
+                const parsedUrl = urlParse.parse(wsClient.url || '/', true);
+                const urlToken = parsedUrl.query.access_token;
+                if (urlToken) {
+                    if (Array.isArray(urlToken)) {
+                        clientToken = urlToken[0];
+                    } else {
+                        clientToken = urlToken;
+                    }
+                    this.logger.log('receive ws url token', clientToken);
+                }
+            }
+            if (clientToken != token) {
+                wsClient.send(JSON.stringify(OB11Response.res(null, 'failed', 1403, 'token验证失败')));
+                return wsClient.close();
+            }
+        }
+    }
+
     constructor(ip: string, port: number, heartbeatInterval: number, token: string, coreContext: NapCatCore, onebotContext: NapCatOneBot11Adapter) {
         this.coreContext = coreContext;
         this.onebotContext = onebotContext;
@@ -30,18 +59,14 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
 
         this.heartbeatInterval = heartbeatInterval;
         this.wsServer = new WebSocketServer({ port: port, host: ip });
-        this.wsServer.on('connection', async (wsClient) => {
+        this.wsServer.on('connection', async (wsClient, wsReq) => {
             if (!this.isOpen) {
                 wsClient.close();
                 return;
             }
-            if (token) {
-                const incomingToken = wsClient.url.split('?')[1]?.split('=')[1];
-                if (incomingToken !== token) {
-                    wsClient.close();
-                    return;
-                }
-            }
+            //鉴权
+            this.authorize(token, wsClient, wsReq);
+
             wsClient.on('message', (message) => {
                 this.handleMessage(wsClient, message);
             });
@@ -132,7 +157,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
                 echo = receiveData.echo;
                 this.logger.logDebug('收到正向Websocket消息', receiveData);
             } catch (e) {
-                this.WsReply<any>(OB11Response.error('json解析失败，请检查数据格式', 1400, echo), wsClient);
+                this.WsReply<any>(OB11Response.error('json解析失败,请检查数据格式', 1400, echo), wsClient);
             }
             receiveData.params = (receiveData?.params) ? receiveData.params : {};//兼容类型验证
         } catch (e) {
