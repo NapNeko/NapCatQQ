@@ -8,14 +8,9 @@ on:
 permissions: write-all
 
 jobs:
-  build-linux:
+  build-liteloader:
     if: ${{ startsWith(github.event.head_commit.message, 'build:') }}
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        target_platform: [linux]
-        target_arch: [x64, arm64]
     steps:
     - name: Clone Main Repository
       uses: actions/checkout@v4
@@ -30,24 +25,19 @@ jobs:
         node-version: 20.x
     - name: Build NuCat Linux
       run: |
-          npm i --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
+          npm i
           npm run build:prod
           cd dist
-          npm i --omit=dev --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
+          npm i --omit=dev 
           cd ..
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: NapCat.${{ matrix.target_platform }}.${{ matrix.target_arch }}
+        name: NapCat.LiteLoader
         path: dist
-  build-win32:
+  build-shell:
     if: ${{ startsWith(github.event.head_commit.message, 'build:') }}
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        target_platform: [win32]
-        target_arch: [x64,ia32]
     steps:
         - name: Clone Main Repository
           uses: actions/checkout@v4
@@ -62,13 +52,13 @@ jobs:
               node-version: 20.x
         - name: Build NuCat Linux
           run: |
-                npm i --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
-                npm run build:prod
+                npm i
+                npm run build:shell
                 cd dist
-                npm i --omit=dev --arch=${{ matrix.target_arch }} --platform=${{ matrix.target_platform }} 
+                npm i --omit=dev
                 cd ..
         - name: Upload Artifact
           uses: actions/upload-artifact@v4
           with:
-              name: NapCat.${{ matrix.target_platform }}.${{ matrix.target_arch }}
+              name: NapCat.Shell
               path: dist
