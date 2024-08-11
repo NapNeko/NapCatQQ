@@ -54,34 +54,34 @@ export class NapCatOneBot11Adapter {
 
         //创建NetWork服务
         let actions = createActionMap(this, this.core);
-        let OB11NetworkManagerWrap = new OB11NetworkManager();
         if (ob11Config.http.enable) {
-            OB11NetworkManagerWrap.registerAdapter(new OB11PassiveHttpAdapter(
+            await this.networkManager.registerAdapter(new OB11PassiveHttpAdapter(
                 ob11Config.http.port, ob11Config.token, this.core, this
             ));
         }
         if (ob11Config.http.enablePost) {
-            ob11Config.http.postUrls.forEach(url => {
-                OB11NetworkManagerWrap.registerAdapter(new OB11ActiveHttpAdapter(
+            ob11Config.http.postUrls.forEach(async url => {
+                await this.networkManager.registerAdapter(new OB11ActiveHttpAdapter(
                     url, ob11Config.heartInterval, ob11Config.token, this.core, this
                 ));
             });
         }
         if (ob11Config.ws.enable) {
-            OB11NetworkManagerWrap.registerAdapter(new OB11PassiveWebSocketAdapter(
+            let OBPassiveWebSocketAdapter = new OB11PassiveWebSocketAdapter(
                 ob11Config.ws.host, ob11Config.ws.port, ob11Config.heartInterval, ob11Config.token, this.core, this
-            ));
+            )
+           await this.networkManager.registerAdapter(OBPassiveWebSocketAdapter);
         }
         if (ob11Config.reverseWs.enable) {
-            ob11Config.reverseWs.urls.forEach(url => {
-                OB11NetworkManagerWrap.registerAdapter(new OB11ActiveWebSocketAdapter(
+            ob11Config.reverseWs.urls.forEach(async url => {
+                await this.networkManager.registerAdapter(new OB11ActiveWebSocketAdapter(
                     url, 5000, ob11Config.heartInterval, this.core, this
                 ));
             });
         }
 
-        OB11NetworkManagerWrap.registerAllActions(actions);
-        OB11NetworkManagerWrap.openAllAdapters();
+        await this.networkManager.registerAllActions(actions);
+        await this.networkManager.openAllAdapters();
         // Todo 开始启动NetWork
         await this.initMsgListener();
 
@@ -146,20 +146,20 @@ export class NapCatOneBot11Adapter {
             if (isSelfMsg) {
                 ob11Msg.target_id = parseInt(message.peerUin);
             }
-            this.networkManager.emitEvent(ob11Msg);
+            this.networkManager.emitEvent(ob11Msg).then().catch(e => this.context.logger.logError('emitEvent error: ', e));
         }).catch(e => this.context.logger.logError('constructMessage error: ', e));
 
         OB11Constructor.GroupEvent(this.core, message).then(groupEvent => {
             if (groupEvent) {
                 // log("post group event", groupEvent);
-                this.networkManager.emitEvent(groupEvent);
+                this.networkManager.emitEvent(groupEvent).then().catch(e => this.context.logger.logError('emitEvent error: ', e));
             }
         }).catch(e => this.context.logger.logError('constructGroupEvent error: ', e));
 
         OB11Constructor.PrivateEvent(this.core, message).then(privateEvent => {
             if (privateEvent) {
                 // log("post private event", privateEvent);
-                this.networkManager.emitEvent(privateEvent);
+                this.networkManager.emitEvent(privateEvent).then().catch(e => this.context.logger.logError('emitEvent error: ', e));
             }
         });
     }
