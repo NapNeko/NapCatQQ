@@ -4,6 +4,7 @@ import express, { Express, Request, Response } from 'express';
 import http from 'http';
 import { NapCatCore } from '@/core';
 import { NapCatOneBot11Adapter } from '../main';
+import { OB11Response } from '../action/OB11Response';
 
 export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
     token: string;
@@ -12,7 +13,6 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
     private app: Express | undefined;
     private server: http.Server | undefined;
     private isOpen: boolean = false;
-    private hasBeenClosed: boolean = false;
     private actionMap: Map<string, BaseAction<any, any>> = new Map();
     private port: number;
 
@@ -36,18 +36,23 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
     }
 
     open() {
-        if (this.hasBeenClosed) {
-            this.coreContext.context.logger.logError('Cannot open a closed HTTP server');
+        try {
+            if (this.isOpen) {
+                this.coreContext.context.logger.logError('Cannot open a closed HTTP server');
+                return;
+            }
+            if (!this.isOpen) {
+                this.initializeServer();
+                this.isOpen = true;
+            }
+        } catch (e) {
+            this.coreContext.context.logger.logError(`[OneBot] [HTTP Server Adapter] Boot Error: ${e}`);
         }
-        if (!this.isOpen) {
-            this.initializeServer();
-            this.isOpen = true;
-        }
+
     }
 
     async close() {
         this.isOpen = false;
-        this.hasBeenClosed = true;
         this.server?.close();
         this.app = undefined;
     }
@@ -58,30 +63,51 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
 
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: false }));
+        this.app.use((req, res, next) => this.authorize(this.token, req, res, next));
         this.app.use('/', (req, res) => this.handleRequest(req, res));
 
         this.server.listen(this.port, () => {
-            this.coreContext.context.logger.log(`HTTP server listening on port ${this.port}`);
+            this.coreContext.context.logger.log(`[OneBot] [HTTP Server Adapter] Start On Port ${this.port}`);
         });
+    }
+
+    private authorize(token: string | undefined, req: Request, res: Response, next: any) {
+        if (!token || token.length == 0) return;//客户端未设置密钥
+        const HeaderClientToken = req.headers.authorization?.split('Bearer ').pop() || '';
+        const QueryClientToken = req.query.access_token;
+        const ClientToken = typeof (QueryClientToken) === 'string' && QueryClientToken !== '' ? QueryClientToken : HeaderClientToken;
+        if (ClientToken === token) {
+            next();
+        } else {
+            res.status(403).send(JSON.stringify({ message: 'token verify failed!' }));
+        }
     }
 
     private async handleRequest(req: Request, res: Response) {
         if (!this.isOpen) {
-            res.status(503).send('Server is closed');
+            this.coreContext.context.logger.log(`[OneBot] [HTTP Server Adapter] Server is closed`);
+            res.json(OB11Response.error('Server is closed', 200));
             return;
+        }
+
+        let payload = req.body;
+        if (req.method == 'get') {
+            payload = req.query;
+        } else if (req.query) {
+            payload = { ...req.query, ...req.body };
         }
 
         const actionName = req.path.split('/')[1];
         const action = this.actionMap.get(actionName);
         if (action) {
             try {
-                const result = await action.handle(req.body);
+                const result = await action.handle(payload);
                 res.json(result);
-            } catch (error) {
-                res.status(500).send('Internal Server Error');
+            } catch (error: any) {
+                res.json(OB11Response.error(error?.stack?.toString() || error?.message || 'Error Handle', 200));
             }
         } else {
-            res.status(404).send('Action not found');
+            res.json(OB11Response.error('不支持的api ' + actionName, 200));
         }
     }
 }
