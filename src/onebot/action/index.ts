@@ -77,7 +77,9 @@ import { NapCatCore } from '@/core';
 
 import { NapCatOneBot11Adapter } from '@/onebot';
 
-export function createActionMap(onebotContext: NapCatOneBot11Adapter, coreContext: NapCatCore) {
+export type ActionMap = Map<string, BaseAction<any, any>>;
+
+export function createActionMap(onebotContext: NapCatOneBot11Adapter, coreContext: NapCatCore): ActionMap {
     const actionHandlers = [
         new FetchEmojiLike(onebotContext, coreContext),
         new GetFile(onebotContext, coreContext),
