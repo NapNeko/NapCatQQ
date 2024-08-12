@@ -26,36 +26,70 @@ export interface GetFileListParam {
 
 export enum ElementType {
     UNKNOWN = 0,
+
     TEXT = 1,
+
     PIC = 2,
+
     FILE = 3,
+
     PTT = 4,
+
     VIDEO = 5,
+
     FACE = 6,
+
     REPLY = 7,
+
     WALLET = 9,
-    GreyTip = 8,//Poke别叫戳一搓了 官方名字拍一拍 戳一戳是另一个名字
+
+    /**
+     * “小灰条”，包括拍一拍 (Poke)、撤回提示等
+     */
+    GreyTip = 8,
+
     ARK = 10,
+
     MFACE = 11,
+
     LIVEGIFT = 12,
+
     STRUCTLONGMSG = 13,
+
     MARKDOWN = 14,
+
     GIPHY = 15,
+
     MULTIFORWARD = 16,
+
     INLINEKEYBOARD = 17,
+
     INTEXTGIFT = 18,
+
     CALENDAR = 19,
+
     YOLOGAMERESULT = 20,
+
     AVRECORD = 21,
+
     FEED = 22,
+
     TOFURECORD = 23,
+
     ACEBUBBLE = 24,
+
     ACTIVITY = 25,
+
     TOFU = 26,
+
     FACEBUBBLE = 27,
+
     SHARELOCATION = 28,
+
     TASKTOPMSG = 29,
+
     RECOMMENDEDMSG = 43,
+
     ACTIONBAR = 44
 }
 
@@ -844,56 +878,142 @@ export enum NTSubMsgType {
 }
 export interface RawMessage {
     parentMsgPeer: Peer;
-    parentMsgIdList: string[];
-    id?: number;//扩展字段 用于处理OB11 ID
-    guildId: string;
-    msgRandom: string;
 
+    parentMsgIdList: string[];
+
+    /**
+     * 扩展字段，与 Ob11 msg ID 有关
+     */
+    id?: number;
+
+    guildId: string;
+
+    msgRandom: string;
 
     msgId: string;
 
-    // 时间戳，秒
+    /**
+     * 消息时间戳（秒）
+     */
     msgTime: string;
 
     msgSeq: string;
+
     msgType: NTMsgType;
+
     subMsgType: NTSubMsgType;
+
     senderUid: string;
-    senderUin: string; // 发送者QQ号
-    peerUid: string; // 群号 或者 QQ uid
-    peerUin: string; // 群号 或者 发送者QQ号
+
+    /**
+     * 发送者 QQ 号
+     */
+    senderUin: string;
+
+    /**
+     * 群号 / 用户 UID
+     */
+    peerUid: string;
+
+    /**
+     * 群号 / 用户 QQ 号
+     */
+    peerUin: string;
+
+    /**
+     * 发送者昵称（如果是好友消息）
+     */
     sendNickName: string;
-    sendMemberName?: string; // 发送者群名片
+
+    /**
+     * 发送者群名片（如果是群消息）
+     */
+    sendMemberName?: string;
+
     chatType: ChatType;
-    sendStatus?: number;  // 消息状态，别人发的2是已撤回，自己发的2是已发送
-    recallTime: string; // 撤回时间, "0"是没有撤回
+
+    /**
+     * 消息状态，别人发的 2 是已撤回，自己发的 2 是已发送
+     */
+    sendStatus?: number;
+
+    /**
+     * 撤回时间，"0" 是没有撤回
+     */
+    recallTime: string;
+
     records: RawMessage[];
-    elements: {
-        elementId: string;
-        elementType: ElementType;
-        replyElement: {
-            sourceMsgIdInRecords: string;
-            senderUid: string; // 原消息发送者QQ号
-            sourceMsgIsIncPic: boolean; // 原消息是否有图片
-            sourceMsgText: string;
-            replayMsgSeq: string; // 源消息的msgSeq，可以通过这个找到源消息的msgId
-        };
-        textElement: {
-            atType: AtType;
-            atUid: string; // QQ号
-            content: string;
-            atNtUid: string; // uid号
-        };
-        picElement: PicElement;
-        pttElement: PttElement;
-        arkElement: ArkElement;
-        grayTipElement: GrayTipElement;
-        faceElement: FaceElement;
-        videoElement: VideoElement;
-        fileElement: FileElement;
-        marketFaceElement: MarketFaceElement;
-        inlineKeyboardElement: InlineKeyboardElement;
-        markdownElement: MarkdownElement;
-        multiForwardMsgElement: MultiForwardMsgElement;
-    }[];
+
+    elements: ElementWrapper[];
+}
+
+/**
+ * 并非原生接口类型，故以 type 包装
+ */
+export type ElementWrapper = {
+    elementId: string;
+
+    elementType: ElementType;
+
+    replyElement?: {
+        sourceMsgIdInRecords: string;
+
+        /**
+         * 源消息发送者 QQ 号
+         */
+        senderUid: string;
+
+        /**
+         * 源消息是否有图片
+         */
+        sourceMsgIsIncPic: boolean;
+
+        /**
+         * 源消息文本
+         */
+        sourceMsgText: string;
+
+        /**
+         * 源消息的 msgSeq，可以通过这个找到源消息的 msgId
+         */
+        replayMsgSeq: string;
+    };
+
+    textElement?: {
+        atType: AtType;
+
+        /**
+         * 被 @ 的 QQ 号
+         */
+        atUid: string;
+
+        content: string;
+
+        /**
+         * 被 @ 的 UID（从这里可以看出来 UID 的概念是 NT 才引入的）
+         */
+        atNtUid: string;
+    };
+
+    picElement?: PicElement;
+
+    pttElement?: PttElement;
+
+    arkElement?: ArkElement;
+
+    grayTipElement?: GrayTipElement;
+
+    faceElement?: FaceElement;
+
+    videoElement?: VideoElement;
+
+    fileElement?: FileElement;
+
+    marketFaceElement?: MarketFaceElement;
+
+    inlineKeyboardElement?: InlineKeyboardElement;
+
+    markdownElement?: MarkdownElement;
+
+    multiForwardMsgElement?: MultiForwardMsgElement;
 }
