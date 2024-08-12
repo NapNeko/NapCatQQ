@@ -113,9 +113,95 @@ export class NapCatOneBot11Adapter {
 
         await WebUiDataRuntime.setQQLoginUin(selfInfo.uin.toString());
         await WebUiDataRuntime.setQQLoginStatus(true);
-        await WebUiDataRuntime.setOnOB11ConfigChanged(async (ob11: OB11Config) => {
-            this.configLoader.save(ob11);
+        await WebUiDataRuntime.setOnOB11ConfigChanged(async (newConfig: OB11Config) => {
+            const prev = this.configLoader.configData;
+            this.configLoader.save(newConfig);
+            await this.reloadNetwork(prev, newConfig);
         });
+    }
+
+    private async reloadNetwork(prev: OB11Config, now: OB11Config) {
+        // check difference in passive http (Http)
+        if (prev.http.enable !== now.http.enable) {
+            if (now.http.enable) {
+                await this.networkManager.registerAdapter(new OB11PassiveHttpAdapter(
+                    now.http.port, now.token, this.core, this,
+                ));
+            } else {
+                await this.networkManager.closeAdapterByPredicate(adapter => adapter instanceof OB11PassiveHttpAdapter,);
+            }
+        }
+
+        // check difference in active http (HttpPost)
+        if (prev.http.enablePost !== now.http.enablePost) {
+            if (now.http.enablePost) {
+                now.http.postUrls.forEach(url => {
+                    this.networkManager.registerAdapter(new OB11ActiveHttpAdapter(
+                        url, now.heartInterval, now.token, this.core, this,
+                    ));
+                });
+            } else {
+                await this.networkManager.closeAdapterByPredicate(adapter => adapter instanceof OB11ActiveHttpAdapter);
+            }
+        } else {
+            if (now.http.enablePost) {
+                const { added, removed } = this.findDifference<string>(prev.http.postUrls, now.http.postUrls);
+                for (const url of added) {
+                    await this.networkManager.registerAdapter(new OB11ActiveHttpAdapter(
+                        url, now.heartInterval, now.token, this.core, this,
+                    ));
+                }
+                await this.networkManager.closeAdapterByPredicate(
+                    adapter => adapter instanceof OB11ActiveHttpAdapter && removed.includes(adapter.url),
+                );
+            }
+        }
+
+        // check difference in passive websocket (Ws)
+        if (prev.ws.enable !== now.ws.enable) {
+            if (now.ws.enable) {
+                await this.networkManager.registerAdapter(new OB11PassiveWebSocketAdapter(
+                    now.ws.host, now.ws.port, now.heartInterval, now.token, this.core, this,
+                ));
+            } else {
+                await this.networkManager.closeAdapterByPredicate(
+                    adapter => adapter instanceof OB11PassiveWebSocketAdapter
+                );
+            }
+        }
+
+        // check difference in active websocket (ReverseWs)
+        if (prev.reverseWs.enable !== now.reverseWs.enable) {
+            if (now.reverseWs.enable) {
+                now.reverseWs.urls.forEach(url => {
+                    this.networkManager.registerAdapter(new OB11ActiveWebSocketAdapter(
+                        url, 5000, now.heartInterval, now.token, this.core, this,
+                    ));
+                });
+            } else {
+                await this.networkManager.closeAdapterByPredicate(
+                    adapter => adapter instanceof OB11ActiveWebSocketAdapter
+                );
+            }
+        } else {
+            if (now.reverseWs.enable) {
+                const { added, removed } = this.findDifference<string>(prev.reverseWs.urls, now.reverseWs.urls);
+                for (const url of added) {
+                    await this.networkManager.registerAdapter(new OB11ActiveWebSocketAdapter(
+                        url, 5000, now.heartInterval, now.token, this.core, this,
+                    ));
+                }
+                await this.networkManager.closeAdapterByPredicate(
+                    adapter => adapter instanceof OB11ActiveWebSocketAdapter && removed.includes(adapter.url),
+                );
+            }
+        }
+    }
+
+    private findDifference<T>(prev: T[], now: T[]): { added: T[], removed: T[] } {
+        const added = now.filter(item => !prev.includes(item));
+        const removed = prev.filter(item => !now.includes(item));
+        return { added, removed };
     }
 
     private initMsgListener() {

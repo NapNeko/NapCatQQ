@@ -42,9 +42,16 @@ export class OB11NetworkManager {
         //console.log('Current adapters:', this.adapters.length);
     }
 
-    async closeSomeAdapters(adapters: IOB11NetworkAdapter[]) {
-        this.adapters = this.adapters.filter(adapter => !adapters.includes(adapter));
-        await Promise.all(adapters.map(adapter => adapter.close()));
+    async closeSomeAdapters(adaptersToClose: IOB11NetworkAdapter[]) {
+        this.adapters = this.adapters.filter(adapter => !adaptersToClose.includes(adapter));
+        await Promise.all(adaptersToClose.map(adapter => adapter.close()));
+    }
+
+    /**
+     * Close all adapters that satisfy the predicate.
+     */
+    async closeAdapterByPredicate(closeFilter: (adapter: IOB11NetworkAdapter) => boolean) {
+        await this.closeSomeAdapters(this.adapters.filter(closeFilter));
     }
 
     async closeAllAdapters() {
