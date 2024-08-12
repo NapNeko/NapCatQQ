@@ -250,10 +250,8 @@ export class NapCatOneBot11Adapter {
                 .catch(e => this.context.logger.logError('处理消息失败', e));
 
             for (const msg of msgList.filter(e => e.senderUin == this.core.selfInfo.uin)) {
-                //  console.log(msg);
-                if (msgIdSend.get(msg.msgId)) continue;
-                msgIdSend.put(msg.msgId, true);
-                if (msg.sendStatus == 2) {
+                if (msg.sendStatus == 2 && !msgIdSend.get(msg.msgId)) {
+                    msgIdSend.put(msg.msgId, true);
                     // 完成后再post
                     OB11Constructor.message(this.core, msg, this.configLoader.configData.messagePostFormat)
                         .then((ob11Msg) => {
