@@ -88,7 +88,7 @@ export class OB11Constructor {
             //resMsg.sender.nickname = user.info.nick;
         } else if (msg.chatType == ChatType.temp) {
             resMsg.sub_type = 'group';
-            let ret = await NTQQMsgApi.getTempChatInfo(ChatType.temp, msg.senderUid);
+            const ret = await NTQQMsgApi.getTempChatInfo(ChatType.temp, msg.senderUid);
             if (ret.result === 0) {
                 resMsg.group_id = parseInt(ret.tmpChatInfo!.groupCode);
                 resMsg.sender.nickname = ret.tmpChatInfo!.fromNick;
@@ -278,13 +278,13 @@ export class OB11Constructor {
                     chatType: msg.chatType,
                     guildId: '',
                 },
-                    msg.msgId,
-                    msg.msgSeq,
-                    msg.senderUid,
-                    element.elementId,
-                    element.elementType.toString(),
-                    element.pttElement.fileSize || '0',
-                    element.pttElement.fileUuid || '',
+                msg.msgId,
+                msg.msgSeq,
+                msg.senderUid,
+                element.elementId,
+                element.elementType.toString(),
+                element.pttElement.fileSize || '0',
+                element.pttElement.fileUuid || '',
                 );
                 //以uuid作为文件名
             } else if (element.arkElement) {
@@ -477,7 +477,7 @@ export class OB11Constructor {
                     logger.logDebug(`收到我被踢出或退群提示, 群${msg.peerUid}`, groupElement);
                     NTQQGroupApi.quitGroup(msg.peerUid).then();
                     try {
-                        const adminUin = (await NTQQGroupApi.getGroupMember(msg.peerUid, groupElement.adminUid))?.uin || (await NTQQUserApi.getUidByUin(groupElement.adminUid));
+                        const adminUin = (await NTQQGroupApi.getGroupMember(msg.peerUid, groupElement.adminUid))?.uin || (await NTQQUserApi.getUidByUinV2(groupElement.adminUid));
                         if (adminUin) {
                             return new OB11GroupDecreaseEvent(
                                 core,

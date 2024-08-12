@@ -18,7 +18,7 @@ class MarkMsgAsRead extends BaseAction<PlayloadType, null> {
         const NTQQUserApi = this.CoreContext.apis.UserApi;
         const NTQQFriendApi = this.CoreContext.apis.FriendApi;
         if (payload.user_id) {
-            const peerUid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
+            const peerUid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());
             if (!peerUid) {
                 throw `私聊${payload.user_id}不存在`;
             }
