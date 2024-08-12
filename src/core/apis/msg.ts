@@ -296,7 +296,7 @@ export class NTQQMsgApi {
             if (!arkElement) {
                 continue;
             }
-            const forwardData: any = JSON.parse(arkElement.arkElement.bytesData);
+            const forwardData: any = JSON.parse(arkElement.arkElement?.bytesData || "");
             if (forwardData.app != 'com.tencent.multimsg') {
                 continue;
             }
