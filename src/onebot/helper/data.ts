@@ -42,8 +42,6 @@ import { OB11BaseNoticeEvent } from '../event/notice/OB11BaseNoticeEvent';
 import { OB11GroupEssenceEvent } from '../event/notice/OB11GroupEssenceEvent';
 import { MessageUnique } from '@/common/utils/MessageUnique';
 import { NapCatCore } from '@/core';
-import { c } from 'vite/dist/node/types.d-aGj9QkWt';
-
 
 export class OB11Constructor {
     static async message(core: NapCatCore, msg: RawMessage, messagePostFormat: any): Promise<OB11Message | undefined> {
