@@ -12,13 +12,6 @@ NapCatQQ 是现代化的基于 NTQQ 的 Bot 协议端实现。
 - [x] **低占用**：无头模式占用资源极低，适合在服务器上运行
 - [x] **WebUI**：自带 WebUI 支持，远程管理更加便捷
 
-### V2 Roadmap
-
-- **依赖注入**：彻底理清模块间依赖，明确加载顺序，根除滥用变量导出、`setTimeout` 初始化
-- **ES 出包**：可读性更高，报错更可读
-- **代码优化**：减少代码冗余，提高代码质量
-- **输出标准化**：统一控制台输出格式
-
 ## 如何使用
 
 可前往 [Release](https://github.com/NapNeko/NapCatQQ/releases/) 页面下载最新版本
@@ -29,13 +22,12 @@ NapCatQQ 是现代化的基于 NTQQ 的 Bot 协议端实现。
 
 [Telegram Link](https://t.me/+nLZEnpne-pQ1OWFl)
 
-## 鸣谢名单
+## 附加协议
+禁止未授权任何项目使用Core部分代码用于二次开发与分发
 
-[Lagrange](https://github.com/LagrangeDev/Lagrange.Core)
+## 鸣谢名单
+感谢 [LLOneBot](https://github.com/LLOneBot/LLOneBot) 提供初始版本基础
+感谢 [Lagrange](https://github.com/LagrangeDev/Lagrange.Core) 对本项目的大力支持
 
 ---
-
 **任何使用本仓库代码的地方，都应当严格遵守[本仓库开源许可](./LICENSE)。**
-
-## 附加协议
-禁止任何项目使用core部分代码用于二次开发与分发
