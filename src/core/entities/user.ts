@@ -176,10 +176,7 @@ export interface SimpleInfo {
     intimate: any | null;
 }
 
-export interface FriendV2 extends SimpleInfo {
-    categoryId?: number;
-    categroyName?: string;
-}
+export type FriendV2 = SimpleInfo;
 
 export interface SelfStatusInfo {
     uid: string;
