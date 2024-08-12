@@ -1,42 +1,27 @@
 import { IOB11NetworkAdapter, OB11EmitEventContent } from '@/onebot/network/index';
 import { WebSocket } from 'ws';
-import BaseAction from '@/onebot/action/BaseAction';
 import { OB11HeartbeatEvent } from '../event/meta/OB11HeartbeatEvent';
 import { NapCatCore } from '@/core';
 import { ActionName } from '@/onebot/action/types';
 import { OB11Response } from '@/onebot/action/OB11Response';
 import { LogWrapper } from '@/common/utils/log';
-import { NapCatOneBot11Adapter } from '@/onebot';
+import { ActionMap } from '@/onebot/action';
 
 export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
-    url: string;
-    reconnectIntervalInMillis: number;
     isClosed: boolean = false;
-    heartbeatInterval: number;
-    obContext: NapCatOneBot11Adapter;
-    coreContext: NapCatCore;
     logger: LogWrapper;
     private connection: WebSocket | null = null;
-    private actionMap: Map<string, BaseAction<any, any>> = new Map();
     private heartbeatRef: NodeJS.Timeout | null = null;
-    private readonly token: string;
-    
-    constructor(url: string, reconnectIntervalInMillis: number, heartbeatInterval: number, token:string, coreContext: NapCatCore, onebotContext: NapCatOneBot11Adapter) {
-        this.url = url;
-        this.token = token;
-        this.heartbeatInterval = heartbeatInterval;
-        this.reconnectIntervalInMillis = reconnectIntervalInMillis;
-        this.coreContext = coreContext;
-        this.obContext = onebotContext;
+
+    constructor(
+        public url: string,
+        public reconnectIntervalInMillis: number,
+        public heartbeatIntervalInMillis: number,
+        private token: string,
+        public coreContext: NapCatCore,
+        public actions: ActionMap,
+    ) {
         this.logger = coreContext.context.logger;
-    }
-
-    registerActionMap(actionMap: Map<string, BaseAction<any, any>>) {
-        this.actionMap = actionMap;
-    }
-
-    registerAction<T extends BaseAction<P, R>, P, R>(action: T) {
-        this.actionMap.set(action.actionName, action);
     }
 
     onEvent<T extends OB11EmitEventContent>(event: T) {
@@ -51,9 +36,9 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
         }
         this.heartbeatRef = setInterval(() => {
             if (this.connection && this.connection.readyState === WebSocket.OPEN) {
-                this.connection.send(JSON.stringify(new OB11HeartbeatEvent(this.coreContext, this.heartbeatInterval, this.coreContext.selfInfo.online, true)));
+                this.connection.send(JSON.stringify(new OB11HeartbeatEvent(this.coreContext, this.heartbeatIntervalInMillis, this.coreContext.selfInfo.online, true)));
             }
-        }, this.heartbeatInterval);
+        }, this.heartbeatIntervalInMillis);
         await this.tryConnect();
     }
 
@@ -61,7 +46,6 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
         if (this.isClosed) {
             this.logger.logDebug('Cannot close a closed WebSocket connection');
             return;
-            //throw new Error('Cannot close a closed WebSocket connection');
         }
         this.isClosed = true;
         if (this.connection) {
@@ -130,7 +114,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
                 this.checkStateAndReply<any>(OB11Response.error('json解析失败,请检查数据格式', 1400, echo));
             }
             receiveData.params = (receiveData?.params) ? receiveData.params : {};//兼容类型验证
-            const retdata = await this.actionMap.get(receiveData.action)
+            const retdata = await this.actions.get(receiveData.action)
                 ?.websocketHandle(receiveData.params, echo || '');
             const packet = Object.assign({}, retdata);
             this.checkStateAndReply<any>(packet);
