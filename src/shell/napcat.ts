@@ -178,7 +178,7 @@ export async function NCoreInitShell() {
                             reject();
                         }
                     })
-                    .catch(e => reject(e));
+                    .catch();
             }, 1000);
         } else {
             logger.log('没有 -q 指令指定快速登录，或未曾登录过这个 QQ，将使用二维码登录方式');
