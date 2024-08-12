@@ -175,6 +175,7 @@ export async function NCoreInitShell() {
                     .then(result => {
                         if (result.loginErrorInfo.errMsg) {
                             logger.logError('快速登录错误：', result.loginErrorInfo.errMsg);
+                            loginService.getQRCodePicture();
                         }
                     })
                     .catch();
