@@ -23,7 +23,6 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
         const NTQQGroupApi = this.CoreContext.apis.GroupApi;
         const NTQQWebApi = this.CoreContext.apis.WebApi;
         const isNocache = payload.no_cache == true || payload.no_cache === 'true';
-
         // const GroupList = await NTQQGroupApi.getGroups(isNocache);
         // const group = GroupList.find(item => item.groupCode == payload.group_id);
         // if (!group) {
