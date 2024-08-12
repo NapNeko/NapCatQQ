@@ -3,10 +3,10 @@ import { WebSocket } from 'ws';
 import BaseAction from '@/onebot/action/BaseAction';
 import { OB11HeartbeatEvent } from '../event/meta/OB11HeartbeatEvent';
 import { NapCatCore } from '@/core';
-import { NapCatOneBot11Adapter } from '../main';
 import { ActionName } from '@/onebot/action/types';
 import { OB11Response } from '@/onebot/action/OB11Response';
 import { LogWrapper } from '@/common/utils/log';
+import { NapCatOneBot11Adapter } from '@/onebot';
 
 export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
     url: string;

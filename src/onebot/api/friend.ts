@@ -1,5 +1,6 @@
 import { NapCatCore } from '@/core';
-import { NapCatOneBot11Adapter } from '../main';
+
+import { NapCatOneBot11Adapter } from '@/onebot';
 
 export class OneBotFriendApi {
     obContext: NapCatOneBot11Adapter;

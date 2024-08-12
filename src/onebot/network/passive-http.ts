@@ -3,8 +3,8 @@ import BaseAction from '@/onebot/action/BaseAction';
 import express, { Express, Request, Response } from 'express';
 import http from 'http';
 import { NapCatCore } from '@/core';
-import { NapCatOneBot11Adapter } from '../main';
 import { OB11Response } from '../action/OB11Response';
+import { NapCatOneBot11Adapter } from '@/onebot';
 
 export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
     token: string;

@@ -8,8 +8,8 @@ import { SelfInfo } from '@/core/entities';
 import { LoginListener } from '@/core/listeners';
 import { NodeIKernelLoginService } from '@/core/services';
 import { NodeIQQNTWrapperSession, WrapperNodeApi } from '@/core/wrapper/wrapper';
-import { NapCatOneBot11Adapter } from '@/onebot/main';
 import { InitWebUi } from '@/webui';
+import { NapCatOneBot11Adapter } from '@/onebot';
 
 //Framework ES入口文件
 export async function NCoreInitFramework(
