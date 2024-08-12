@@ -27,6 +27,7 @@ NapCatQQ 是现代化的基于 NTQQ 的 Bot 协议端实现。
 
 ## 鸣谢名单
 感谢 [LLOneBot](https://github.com/LLOneBot/LLOneBot) 提供初始版本基础
+
 感谢 [Lagrange](https://github.com/LagrangeDev/Lagrange.Core) 对本项目的大力支持
 
 ---
