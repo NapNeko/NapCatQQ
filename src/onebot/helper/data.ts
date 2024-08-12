@@ -656,8 +656,6 @@ export class OB11Constructor {
                 remark: friend.coreInfo.nick,
                 sex: sexValue,
                 level: 0,
-                categroyName: friend.categroyName,
-                categoryId: friend.categoryId,
             });
         });
         return data;
