@@ -1,5 +1,4 @@
 import express from 'express';
-import { resolve } from 'node:path';
 import { ALLRouter } from './src/router';
 import { LogWrapper } from '@/common/utils/log';
 import { NapCatPathWrapper } from '@/common/framework/napcat';
@@ -19,7 +18,7 @@ export let webUiPathWrapper: NapCatPathWrapper;
 export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapper) {
     webUiPathWrapper = pathWrapper;
     WebUiConfig = new WebUiConfigWrapper();
-    let log = logger.log.bind(logger);
+    const log = logger.log.bind(logger);
     const config = await WebUiConfig.GetWebUIConfig();
     if (config.port == 0) {
         log('[NapCat] [WebUi] Current WebUi is not run.');
@@ -38,8 +37,12 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
     //挂载API接口
     app.use(config.prefix + '/api', ALLRouter);
     app.listen(config.port, config.host, async () => {
-        log(`[NapCat] [WebUi] Current WebUi is running at http://${config.host}:${config.port}${config.prefix}`);
-        log(`[NapCat] [WebUi] Login URL is http://${config.host}:${config.port}${config.prefix}/webui`);
+        log(`[NapCat] [WebUi] Current WebUi is running at http://${
+            config.host === '0.0.0.0' ? 'localhost' : config.host
+        }:${config.port}${config.prefix}`);
+        log(`[NapCat] [WebUi] Login URL is http://${
+            config.host === '0.0.0.0' ? 'localhost' : config.host
+        }:${config.port}${config.prefix}/webui`);
         log(`[NapCat] [WebUi] Login Token is ${config.token}`);
     });
 }
