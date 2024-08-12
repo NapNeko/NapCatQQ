@@ -38,6 +38,7 @@ class GetMsg extends BaseAction<Payload, OB11Message> {
             peer,
             [msgIdWithPeer?.MsgId || payload.message_id.toString()]);
         const retMsg = await OB11Constructor.message(this.CoreContext, msg.msgList[0], 'array');
+        if(!retMsg) throw Error('消息为空');
         try {
             retMsg.message_id = MessageUnique.createMsg(peer, msg.msgList[0].msgId)!;
             retMsg.message_seq = retMsg.message_id;

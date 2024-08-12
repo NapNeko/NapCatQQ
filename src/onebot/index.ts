@@ -255,6 +255,7 @@ export class NapCatOneBot11Adapter {
                     // 完成后再post
                     OB11Constructor.message(this.core, msg, this.configLoader.configData.messagePostFormat)
                         .then((ob11Msg) => {
+                            if(!ob11Msg) return;
                             ob11Msg.target_id = parseInt(msg.peerUin);
                             if (this.configLoader.configData.reportSelfMessage) {
                                 msg.id = MessageUnique.createMsg({
@@ -425,6 +426,7 @@ export class NapCatOneBot11Adapter {
         const { debug, reportSelfMessage, messagePostFormat } = this.configLoader.configData;
         this.context.logger.logDebug('收到新消息 RawMessage', message);
         OB11Constructor.message(this.core, message, messagePostFormat).then((ob11Msg) => {
+            if(!ob11Msg) return;
             this.context.logger.logDebug('转化为 OB11Message', ob11Msg);
             if (debug) {
                 ob11Msg.raw = message;

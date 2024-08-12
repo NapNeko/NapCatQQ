@@ -42,10 +42,14 @@ import { OB11BaseNoticeEvent } from '../event/notice/OB11BaseNoticeEvent';
 import { OB11GroupEssenceEvent } from '../event/notice/OB11GroupEssenceEvent';
 import { MessageUnique } from '@/common/utils/MessageUnique';
 import { NapCatCore } from '@/core';
+import { c } from 'vite/dist/node/types.d-aGj9QkWt';
 
 
 export class OB11Constructor {
-    static async message(core: NapCatCore, msg: RawMessage, messagePostFormat: any): Promise<OB11Message> {
+    static async message(core: NapCatCore, msg: RawMessage, messagePostFormat: any): Promise<OB11Message | undefined> {
+        if (msg.senderUin == "0") return;
+        if (msg.peerUin == "0") return;
+        //跳过空消息
         const NTQQGroupApi = core.apis.GroupApi;
         const NTQQUserApi = core.apis.UserApi;
         const NTQQFileApi = core.apis.FileApi;
@@ -141,7 +145,7 @@ export class OB11Constructor {
                 message_data['type'] = OB11MessageDataType.reply;
                 //log("收到回复消息", element.replyElement);
                 try {
-                    const records = msg.records.find(msgRecord => msgRecord.msgId === element.replyElement.sourceMsgIdInRecords);
+                    const records = msg.records.find(msgRecord => msgRecord.msgId === element?.replyElement?.sourceMsgIdInRecords);
                     const peer = {
                         chatType: msg.chatType,
                         peerUid: msg.peerUid,
@@ -278,13 +282,13 @@ export class OB11Constructor {
                     chatType: msg.chatType,
                     guildId: '',
                 },
-                msg.msgId,
-                msg.msgSeq,
-                msg.senderUid,
-                element.elementId,
-                element.elementType.toString(),
-                element.pttElement.fileSize || '0',
-                element.pttElement.fileUuid || '',
+                    msg.msgId,
+                    msg.msgSeq,
+                    msg.senderUid,
+                    element.elementId,
+                    element.elementType.toString(),
+                    element.pttElement.fileSize || '0',
+                    element.pttElement.fileUuid || '',
                 );
                 //以uuid作为文件名
             } else if (element.arkElement) {
@@ -343,6 +347,7 @@ export class OB11Constructor {
                     MultiMsg.parentMsgIdList = msg.parentMsgIdList;
                     MultiMsg.id = MessageUnique.createMsg(ParentMsgPeer, MultiMsg.msgId);//该ID仅用查看 无法调用
                     const msgList = await OB11Constructor.message(core, MultiMsg, 'array');
+                    if (!msgList) continue;
                     message_data['data']['content'].push(msgList);
                     //console.log("合并消息", msgList);
                 }
