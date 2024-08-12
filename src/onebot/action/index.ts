@@ -74,7 +74,8 @@ import { FetchCustomFace } from './extends/FetchCustomFace';
 import GoCQHTTPUploadPrivateFile from './go-cqhttp/UploadPrivareFile';
 import { FetchEmojiLike } from './extends/FetchEmojiLike';
 import { NapCatCore } from '@/core';
-import { NapCatOneBot11Adapter } from '../main';
+
+import { NapCatOneBot11Adapter } from '@/onebot';
 
 export function createActionMap(onebotContext: NapCatOneBot11Adapter, coreContext: NapCatCore) {
     const actionHandlers = [

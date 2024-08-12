@@ -4,8 +4,8 @@ import { createHmac } from 'crypto';
 import { LogWrapper } from '@/common/utils/log';
 import { QuickAction, QuickActionEvent } from '../types';
 import { NapCatCore } from '@/core';
-import { NapCatOneBot11Adapter } from '../main';
 import { handleQuickOperation } from '../helper/quick';
+import { NapCatOneBot11Adapter } from '@/onebot';
 
 export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     url: string;
