@@ -108,26 +108,16 @@ export class LogWrapper {
 
 
     _log(level: LogLevel, ...args: any[]) {
-        try {
-            if (this.consoleLogEnabled) {
-                this.loggerConsole[level](this.formatMsg(args));
-            }
-            if (this.fileLogEnabled) {
-                this.loggerFile[level](this.formatMsg(args).replace(this.colorEscape, ''));
-            }
-        } catch (error) {
-            if (error.code === 'EPIPE') {
-                console.error('EPIPE error occurred. Reconfiguring log4js.');
-                log4js.shutdown(() => {
-                    log4js.configure(this.logConfig);
-                });
-            } else {
-                throw error;
-            }
+        if (this.consoleLogEnabled) {
+            this.loggerConsole[level](this.formatMsg(args));
+        }
+        if (this.fileLogEnabled) {
+            this.loggerFile[level](this.formatMsg(args).replace(this.colorEscape, ''));
         }
     }
 
     log(...args: any[]) {
+        // info 等级
         this._log(LogLevel.INFO, ...args);
     }
 
@@ -149,7 +139,9 @@ export class LogWrapper {
 
     logMessage(msg: RawMessage, selfInfo: SelfInfo) {
         const isSelfSent = msg.senderUin === selfInfo.uin;
-        this.log(`${isSelfSent ? '发送 ->' : '接收 <-'} ${rawMessageToText(msg)}`);
+        this.log(`${
+            isSelfSent ? '发送 ->' : '接收 <-'
+        } ${rawMessageToText(msg)}`);
     }
 }
 
@@ -166,9 +158,11 @@ export function rawMessageToText(msg: RawMessage, recursiveLevel = 0): string {
         tokens.push(`群聊 (群 ${msg.peerUin} 的 ${msg.senderUin})`);
     } else if (msg.chatType == ChatType.chatDevice) {
         tokens.push('移动设备');
-    } else {
+    } else /* temp */ {
         tokens.push(`临时消息 (${msg.peerUin})`);
     }
+
+    // message content
 
     function msgElementToText(element: ElementWrapper) {
         if (element.textElement) {
@@ -180,47 +174,60 @@ export function rawMessageToText(msg: RawMessage, recursiveLevel = 0): string {
                 return `${element.textElement.content} (${element.textElement.atUid})`;
             }
         }
+
         if (element.replyElement) {
             const recordMsgOrNull = msg.records.find(
                 record => element.replyElement!.sourceMsgIdInRecords === record.msgId
             );
             return `[回复消息 ${
                 recordMsgOrNull &&
-                recordMsgOrNull.peerUin != '284840486'
-                    ? rawMessageToText(recordMsgOrNull, recursiveLevel + 1)
-                    : `未找到消息记录 (MsgId = ${element.replyElement.sourceMsgIdInRecords})`
+                recordMsgOrNull.peerUin != '284840486' // 非转发消息; 否则定位不到
+                    ? 
+                    rawMessageToText(recordMsgOrNull, recursiveLevel + 1) :
+                    `未找到消息记录 (MsgId = ${element.replyElement.sourceMsgIdInRecords})`
             }]`;
         }
+
         if (element.picElement) {
             return `[图片 ${element.picElement.fileName}]`;
         }
+
         if (element.fileElement) {
             return `[文件 ${element.fileElement.fileName}]`;
         }
+
         if (element.videoElement) {
             return `[视频 ${element.videoElement.fileName}]`;
         }
+
         if (element.pttElement) {
             return `[语音 ${element.pttElement.duration}s]`;
         }
+
         if (element.arkElement) {
             return `[卡片消息 ${element.arkElement.bytesData}]`;
         }
+
         if (element.faceElement) {
             return `[表情 ${element.faceElement.faceText ?? ''}]`;
         }
+
         if (element.marketFaceElement) {
             return `[商城表情 ${element.marketFaceElement.faceName}]`;
         }
+
         if (element.markdownElement) {
             return `[Markdown ${element.markdownElement.content}]`;
         }
+
         if (element.multiForwardMsgElement) {
             return `[转发消息]`;
         }
+
         if (element.elementType === ElementType.GreyTip) {
-            return `[灰条消息]`;
+            return `[灰条消息]`; // TODO: resolve the text
         }
+
         return `[未实现 (ElementType = ${element.elementType})]`;
     }
 
