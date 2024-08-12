@@ -4,7 +4,7 @@
   "name": "NapCat",
   "slug": "NapCat",
   "description": "OneBot v11 protocol implementation with NapCat logic",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "icon": "./logo.png",
   "authors": [
     {

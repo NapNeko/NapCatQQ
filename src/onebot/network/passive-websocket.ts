@@ -11,6 +11,7 @@ import { LogWrapper } from '@/common/utils/log';
 import { OB11HeartbeatEvent } from '../event/meta/OB11HeartbeatEvent';
 import { IncomingMessage } from 'http';
 import { ActionMap } from '@/onebot/action';
+import { LifeCycleSubType, OB11LifeCycleEvent } from '../event/meta/OB11LifeCycleEvent';
 
 export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     wsServer: WebSocketServer;
@@ -36,6 +37,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
 
         this.heartbeatInterval = heartbeatInterval;
         this.wsServer = new WebSocketServer({ port: port, host: ip });
+        let core = coreContext;
         this.wsServer.on('connection', async (wsClient, wsReq) => {
             if (!this.isOpen) {
                 wsClient.close();
@@ -43,9 +45,8 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             }
             //鉴权
             this.authorize(token, wsClient, wsReq);
-
+            this.connectEvent(core, wsClient);
             wsClient.on('error', (err) => this.logger.log('[OneBot] [WebSocket Server] Client Error:', err.message));
-
             wsClient.on('message', (message) => {
                 this.handleMessage(wsClient, message).then().catch(this.logger.logError);
             });
@@ -61,6 +62,14 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
                 this.wsClients.push(wsClient);
             });
         }).on('error', (err) => this.logger.log('[OneBot] [WebSocket Server] Server Error:', err.message));
+    }
+    
+    connectEvent(core: NapCatCore, wsClient: WebSocket) {
+        try {
+            this.checkStateAndReply<any>(new OB11LifeCycleEvent(core, LifeCycleSubType.CONNECT), wsClient);
+        } catch (e) {
+            this.logger.logError('[OneBot] [WebSocket Server] 发送生命周期失败', e);
+        }
     }
 
     onEvent<T extends OB11EmitEventContent>(event: T) {
@@ -82,7 +91,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
         }
         const addressInfo = this.wsServer.address();
         this.logger.log('[OneBot] [WebSocket Server] Server Started', typeof (addressInfo) === 'string' ? addressInfo : addressInfo?.address + ':' + addressInfo?.port);
-        
+
         this.isOpen = true;
         this.registerHeartBeat();
     }

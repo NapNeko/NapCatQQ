@@ -6,6 +6,7 @@ import { ActionName } from '@/onebot/action/types';
 import { OB11Response } from '@/onebot/action/OB11Response';
 import { LogWrapper } from '@/common/utils/log';
 import { ActionMap } from '@/onebot/action';
+import { LifeCycleSubType, OB11LifeCycleEvent } from '../event/meta/OB11LifeCycleEvent';
 
 export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
     isClosed: boolean = false;
@@ -77,13 +78,21 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
                 },
 
             });
+            this.connection.on('open', () => {
+                try{
+                    this.connectEvent(this.coreContext);
+                }catch(e){
+                    this.logger.logError('[OneBot] [WebSocket Client] 发送连接生命周期失败', e);
+                }
+                
+            });
             this.connection.on('message', (data) => {
                 this.handleMessage(data);
             });
             this.connection.once('close', () => {
                 if (!isClosedByError) {
-                    this.logger.logError(`反向WebSocket (${this.url}) 连接意外关闭`);
-                    this.logger.logError(`在 ${Math.floor(this.reconnectIntervalInMillis / 1000)} 秒后尝试重新连接`);
+                    this.logger.logError(`[OneBot] [WebSocket Client] 反向WebSocket (${this.url}) 连接意外关闭`);
+                    this.logger.logError(`[OneBot] [WebSocket Client] 在 ${Math.floor(this.reconnectIntervalInMillis / 1000)} 秒后尝试重新连接`);
                     if (!this.isClosed) {
                         this.connection = null;
                         setTimeout(() => this.tryConnect(), this.reconnectIntervalInMillis);
@@ -92,8 +101,8 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
             });
             this.connection.on('error', (err) => {
                 isClosedByError = true;
-                this.logger.logError(`反向WebSocket (${this.url}) 连接错误`, err);
-                this.logger.logError(`在 ${Math.floor(this.reconnectIntervalInMillis / 1000)} 秒后尝试重新连接`);
+                this.logger.logError(`[OneBot] [WebSocket Client] 反向WebSocket (${this.url}) 连接错误`, err);
+                this.logger.logError(`[OneBot] [WebSocket Client] 在 ${Math.floor(this.reconnectIntervalInMillis / 1000)} 秒后尝试重新连接`);
                 if (!this.isClosed) {
                     this.connection = null;
                     setTimeout(() => this.tryConnect(), this.reconnectIntervalInMillis);
@@ -101,7 +110,13 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
             });
         }
     }
-
+    connectEvent(core: NapCatCore) {
+        try {
+            this.checkStateAndReply<any>(new OB11LifeCycleEvent(core, LifeCycleSubType.CONNECT));
+        } catch (e) {
+            this.logger.logError('[OneBot] [WebSocket Client] 发送生命周期失败', e);
+        }
+    }
     private async handleMessage(message: any) {
         let receiveData: { action: ActionName, params?: any, echo?: any } = { action: ActionName.Unknown, params: {} };
         let echo = undefined;
@@ -109,7 +124,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
             try {
                 receiveData = JSON.parse(message.toString());
                 echo = receiveData.echo;
-                this.logger.logDebug('收到正向Websocket消息', receiveData);
+                this.logger.logDebug('[OneBot] [WebSocket Client] 收到正向Websocket消息', receiveData);
             } catch (e) {
                 this.checkStateAndReply<any>(OB11Response.error('json解析失败,请检查数据格式', 1400, echo));
             }
