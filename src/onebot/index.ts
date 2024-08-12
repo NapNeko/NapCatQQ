@@ -481,6 +481,7 @@ export class NapCatOneBot11Adapter {
                     let operatorId = message.senderUin;
                     for (const element of message.elements) {
                         const operatorUid = element.grayTipElement?.revokeElement.operatorUid;
+                        if(!operatorUid) return;
                         const operator = await this.core.apis.GroupApi.getGroupMember(message.peerUin, operatorUid);
                         operatorId = operator?.uin || message.senderUin;
                     }
