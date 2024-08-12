@@ -25,7 +25,6 @@ import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { OB11InputStatusEvent } from '@/onebot/event/notice/OB11InputStatusEvent';
 import { MessageUnique } from '@/common/utils/MessageUnique';
 import { OB11Constructor } from '@/onebot/helper/data';
-import { logOB11Message } from '@/onebot/helper/log';
 import { proxiedListenerOf } from '@/common/utils/proxy-handler';
 import { OB11FriendRequestEvent } from '@/onebot/event/request/OB11FriendRequest';
 import { OB11GroupAdminNoticeEvent } from '@/onebot/event/notice/OB11GroupAdminNoticeEvent';
@@ -252,7 +251,7 @@ export class NapCatOneBot11Adapter {
 
             for (const msg of msgList.filter(e => e.senderUin == this.core.selfInfo.uin)) {
                 //  console.log(msg);
-                if (!!msgIdSend.get(msg.msgId)) continue;
+                if (msgIdSend.get(msg.msgId)) continue;
                 msgIdSend.put(msg.msgId, true);
                 if (msg.sendStatus == 2) {
                     // 完成后再post
@@ -267,7 +266,7 @@ export class NapCatOneBot11Adapter {
                                 }, msg.msgId);
                                 this.emitMsg(msg);
                             } else {
-                                logOB11Message(this.core, ob11Msg);
+                                // logOB11Message(this.core, ob11Msg);
                             }
                         });
                 }
@@ -426,9 +425,9 @@ export class NapCatOneBot11Adapter {
 
     private async emitMsg(message: RawMessage) {
         const { debug, reportSelfMessage, messagePostFormat } = this.configLoader.configData;
-        this.context.logger.logDebug('收到新消息', message);
+        this.context.logger.logDebug('收到新消息 RawMessage', message);
         OB11Constructor.message(this.core, message, messagePostFormat).then((ob11Msg) => {
-            this.context.logger.logDebug('收到消息: ', ob11Msg);
+            this.context.logger.logDebug('转化为 OB11Message', ob11Msg);
             if (debug) {
                 ob11Msg.raw = message;
             } else {
@@ -436,8 +435,8 @@ export class NapCatOneBot11Adapter {
                     return;
                 }
             }
-            logOB11Message(this.core, ob11Msg)
-                .catch(e => this.context.logger.logError('logMessage error: ', e));
+            // logOB11Message(this.core, ob11Msg)
+            //    .catch(e => this.context.logger.logError('logMessage error: ', e));
             const isSelfMsg = ob11Msg.user_id.toString() == this.core.selfInfo.uin;
             if (isSelfMsg && !reportSelfMessage) {
                 return;

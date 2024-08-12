@@ -2,6 +2,7 @@ import log4js, { Configuration } from 'log4js';
 import { truncateString } from '@/common/utils/helper';
 import path from 'node:path';
 import chalk from 'chalk';
+import { AtType, ChatType, ElementType, ElementWrapper, RawMessage, SelfInfo } from '@/core';
 
 export enum LogLevel {
     DEBUG = 'debug',
@@ -135,4 +136,104 @@ export class LogWrapper {
     logFatal(...args: any[]) {
         this._log(LogLevel.FATAL, ...args);
     }
+
+    logMessage(msg: RawMessage, selfInfo: SelfInfo) {
+        const isSelfSent = msg.senderUin === selfInfo.uin;
+        this.log(`${
+            isSelfSent ? '发送 ->' : '接收 <-'
+        } ${rawMessageToText(msg)}`);
+    }
+}
+
+export function rawMessageToText(msg: RawMessage, recursiveLevel = 0): string {
+    if (recursiveLevel > 2) {
+        return '...';
+    }
+
+    const tokens: string[] = [];
+
+    if (msg.chatType == ChatType.friend) {
+        tokens.push(`私聊 (${msg.peerUin})`);
+    } else if (msg.chatType == ChatType.group) {
+        tokens.push(`群聊 (群 ${msg.peerUin} 的 ${msg.senderUin})`);
+    } else if (msg.chatType == ChatType.chatDevice) {
+        tokens.push('移动设备');
+    } else /* temp */ {
+        tokens.push(`临时消息 (${msg.peerUin})`);
+    }
+
+    // message content
+
+    function msgElementToText(element: ElementWrapper) {
+        if (element.textElement) {
+            if (element.textElement.atType === AtType.notAt) {
+                return element.textElement.content;
+            } else if (element.textElement.atType === AtType.atAll) {
+                return `@全体成员`;
+            } else if (element.textElement.atType === AtType.atUser) {
+                return `${element.textElement.content} (${element.textElement.atUid})`;
+            }
+        }
+
+        if (element.replyElement) {
+            const recordMsgOrNull = msg.records.find(
+                record => element.replyElement!.sourceMsgIdInRecords === record.msgId
+            );
+            return `[回复消息 ${
+                recordMsgOrNull &&
+                recordMsgOrNull.peerUin != '284840486' // 非转发消息; 否则定位不到
+                    ? 
+                    rawMessageToText(recordMsgOrNull, recursiveLevel + 1) :
+                    `未找到消息记录 (MsgId = ${element.replyElement.sourceMsgIdInRecords})`
+            }]`;
+        }
+
+        if (element.picElement) {
+            return `[图片 ${element.picElement.fileName}]`;
+        }
+
+        if (element.fileElement) {
+            return `[文件 ${element.fileElement.fileName}]`;
+        }
+
+        if (element.videoElement) {
+            return `[视频 ${element.videoElement.fileName}]`;
+        }
+
+        if (element.pttElement) {
+            return `[语音 ${element.pttElement.duration}s]`;
+        }
+
+        if (element.arkElement) {
+            return `[卡片消息 ${element.arkElement.bytesData}]`;
+        }
+
+        if (element.faceElement) {
+            return `[表情 ${element.faceElement.faceText ?? ''}]`;
+        }
+
+        if (element.marketFaceElement) {
+            return `[商城表情 ${element.marketFaceElement.faceName}]`;
+        }
+
+        if (element.markdownElement) {
+            return `[Markdown ${element.markdownElement.content}]`;
+        }
+
+        if (element.multiForwardMsgElement) {
+            return `[转发消息]`;
+        }
+
+        if (element.elementType === ElementType.GreyTip) {
+            return `[灰条消息]`; // TODO: resolve the text
+        }
+
+        return `[未实现 (ElementType = ${element.elementType})]`;
+    }
+
+    for (const element of msg.elements) {
+        tokens.push(msgElementToText(element));
+    }
+
+    return tokens.join(' ');
 }
