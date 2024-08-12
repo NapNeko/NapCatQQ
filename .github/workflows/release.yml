@@ -78,7 +78,7 @@ jobs:
         - name: Build NuCat Shell
           run: |
                 npm i 
-                npm run build:Shell
+                npm run build:shell
                 cd dist
                 npm i --omit=dev
                 cd ..
