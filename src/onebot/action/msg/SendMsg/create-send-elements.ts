@@ -4,6 +4,7 @@ import { RequestUtil } from '@/common/utils/request';
 import { MessageUnique } from '@/common/utils/MessageUnique';
 import { AtType, CustomMusicSignPostData, IdMusicSignPostData, NapCatCore, Peer, SendMessageElement } from '@/core';
 import { SendMsgElementConstructor } from '@/onebot/helper/msg';
+import { NapCatOneBot11Adapter } from '@/onebot';
 
 export type MessageContext = {
     deleteAfterSentFiles: string[],
@@ -12,6 +13,7 @@ export type MessageContext = {
 
 async function handleOb11FileLikeMessage(
     coreContext: NapCatCore,
+    obContext: NapCatOneBot11Adapter,
     { data: inputdata }: OB11MessageFileBase,
     { deleteAfterSentFiles }: MessageContext,
 ) {
@@ -39,15 +41,16 @@ async function handleOb11FileLikeMessage(
 const _handlers: {
     [Key in OB11MessageDataType]: (
         CoreContext: NapCatCore,
+        obContext: NapCatOneBot11Adapter,
         sendMsg: Extract<OB11MessageData, { type: Key }>,
         // This picks the correct message type out
         // How great the type system of TypeScript is!
         context: MessageContext,
     ) => Promise<SendMessageElement | undefined>
 } = {
-    [OB11MessageDataType.text]: async (coreContext, { data: { text } }) => SendMsgElementConstructor.text(coreContext, text),
+    [OB11MessageDataType.text]: async (coreContext, obContext: NapCatOneBot11Adapter, { data: { text } }) => SendMsgElementConstructor.text(coreContext, text),
 
-    [OB11MessageDataType.at]: async (coreContext, { data: { qq: atQQ } }, context) => {
+    [OB11MessageDataType.at]: async (coreContext, obContext: NapCatOneBot11Adapter, { data: { qq: atQQ } }, context) => {
         if (!context.peer) return undefined;
 
         if (atQQ === 'all') return SendMsgElementConstructor.at(coreContext, atQQ, atQQ, AtType.atAll, '全体成员');
@@ -58,7 +61,7 @@ const _handlers: {
         if (!uid) throw new Error('Get Uid Error');
         return SendMsgElementConstructor.at(coreContext, atQQ, uid, AtType.atUser, '');
     },
-    [OB11MessageDataType.reply]: async (coreContext, { data: { id } }) => {
+    [OB11MessageDataType.reply]: async (coreContext, obContext: NapCatOneBot11Adapter, { data: { id } }) => {
         const replyMsgM = MessageUnique.getMsgIdAndPeerByShortId(parseInt(id));
         if (!replyMsgM) {
             coreContext.context.logger.logWarn('回复消息不存在', id);
@@ -72,27 +75,27 @@ const _handlers: {
             undefined;
     },
 
-    [OB11MessageDataType.face]: async (coreContext, { data: { id } }) => SendMsgElementConstructor.face(coreContext, parseInt(id)),
+    [OB11MessageDataType.face]: async (coreContext, obContext: NapCatOneBot11Adapter, { data: { id } }) => SendMsgElementConstructor.face(coreContext, parseInt(id)),
 
-    [OB11MessageDataType.mface]: async (coreContext, {
+    [OB11MessageDataType.mface]: async (coreContext, obContext: NapCatOneBot11Adapter, {
         data: {
             emoji_package_id, emoji_id, key, summary,
         },
     }) => SendMsgElementConstructor.mface(coreContext, emoji_package_id, emoji_id, key, summary),
 
     // File service
-    [OB11MessageDataType.image]: async (coreContext, sendMsg, context) => {
+    [OB11MessageDataType.image]: async (coreContext, obContext: NapCatOneBot11Adapter, sendMsg, context) => {
         const PicEle = await SendMsgElementConstructor.pic(
             coreContext,
-            (await handleOb11FileLikeMessage(coreContext, sendMsg, context)).path,
+            (await handleOb11FileLikeMessage(coreContext, obContext, sendMsg, context)).path,
             sendMsg.data.summary || '',
             sendMsg.data.subType || 0,
         );
         context.deleteAfterSentFiles.push(PicEle.picElement.sourcePath);
         return PicEle;
     }, // currently not supported
-    [OB11MessageDataType.file]: async (coreContext, sendMsg, context) => {
-        const { path, fileName } = await handleOb11FileLikeMessage(coreContext, sendMsg, context);
+    [OB11MessageDataType.file]: async (coreContext, obContext: NapCatOneBot11Adapter, sendMsg, context) => {
+        const { path, fileName } = await handleOb11FileLikeMessage(coreContext, obContext, sendMsg, context);
         //logDebug('发送文件', path, fileName);
         const FileEle = await SendMsgElementConstructor.file(coreContext, path, fileName);
         // 清除Upload的应该
@@ -100,8 +103,8 @@ const _handlers: {
         return FileEle;
     },
 
-    [OB11MessageDataType.video]: async (coreContext, sendMsg, context) => {
-        const { path, fileName } = await handleOb11FileLikeMessage(coreContext, sendMsg, context);
+    [OB11MessageDataType.video]: async (coreContext, obContext, sendMsg, context) => {
+        const { path, fileName } = await handleOb11FileLikeMessage(coreContext, obContext, sendMsg, context);
 
         //logDebug('发送视频', path, fileName);
         let thumb = sendMsg.data.thumb;
@@ -115,17 +118,17 @@ const _handlers: {
         return videoEle;
     },
 
-    [OB11MessageDataType.voice]: async (coreContext, sendMsg, context) => SendMsgElementConstructor.ptt(coreContext, (await handleOb11FileLikeMessage(coreContext, sendMsg, context)).path),
+    [OB11MessageDataType.voice]: async (coreContext, obContext: NapCatOneBot11Adapter, sendMsg, context) => SendMsgElementConstructor.ptt(coreContext, (await handleOb11FileLikeMessage(coreContext, obContext, sendMsg, context)).path),
 
-    [OB11MessageDataType.json]: async (coreContext, { data: { data } }) => SendMsgElementConstructor.ark(coreContext, data),
+    [OB11MessageDataType.json]: async (coreContext, obContext: NapCatOneBot11Adapter, { data: { data } }) => SendMsgElementConstructor.ark(coreContext, data),
 
-    [OB11MessageDataType.dice]: async (coreContext, { data: { result } }) => SendMsgElementConstructor.dice(coreContext, result),
+    [OB11MessageDataType.dice]: async (coreContext, obContext: NapCatOneBot11Adapter, { data: { result } }) => SendMsgElementConstructor.dice(coreContext, result),
 
-    [OB11MessageDataType.RPS]: async (coreContext, { data: { result } }) => SendMsgElementConstructor.rps(coreContext, result),
+    [OB11MessageDataType.RPS]: async (coreContext, obContext: NapCatOneBot11Adapter, { data: { result } }) => SendMsgElementConstructor.rps(coreContext, result),
 
-    [OB11MessageDataType.markdown]: async (coreContext, { data: { content } }) => SendMsgElementConstructor.markdown(coreContext, content),
+    [OB11MessageDataType.markdown]: async (coreContext, obContext: NapCatOneBot11Adapter, { data: { content } }) => SendMsgElementConstructor.markdown(coreContext, content),
 
-    [OB11MessageDataType.music]: async (coreContext, { data }) => {
+    [OB11MessageDataType.music]: async (coreContext, obContext: NapCatOneBot11Adapter, { data }) => {
         // 保留, 直到...找到更好的解决方案
         if (data.type === 'custom') {
             if (!data.url) {
@@ -159,7 +162,7 @@ const _handlers: {
             postData = data;
         }
         // Mlikiowa V2.0.0 Refactor Todo
-        const signUrl = '';
+        const signUrl = obContext.configLoader.configData.musicSignUrl;
         if (!signUrl) {
             if (data.type === 'qq') {
                 //const musicJson = (await SignMusicWrapper(data.id.toString())).data.arkResult.slice(0, -1);
@@ -175,18 +178,18 @@ const _handlers: {
         }
     },
 
-    [OB11MessageDataType.node]: async (coreContext) => undefined,
+    [OB11MessageDataType.node]: async (coreContext, obContext: NapCatOneBot11Adapter) => undefined,
 
-    [OB11MessageDataType.forward]: async (coreContext) => undefined,
+    [OB11MessageDataType.forward]: async (coreContext, obContext: NapCatOneBot11Adapter) => undefined,
 
-    [OB11MessageDataType.xml]: async (coreContext) => undefined,
+    [OB11MessageDataType.xml]: async (coreContext, obContext: NapCatOneBot11Adapter) => undefined,
 
-    [OB11MessageDataType.poke]: async (coreContext) => undefined,
+    [OB11MessageDataType.poke]: async (coreContext, obContext: NapCatOneBot11Adapter) => undefined,
 
-    [OB11MessageDataType.Location]: async (coreContext) => {
+    [OB11MessageDataType.Location]: async (coreContext, obContext: NapCatOneBot11Adapter) => {
         return SendMsgElementConstructor.location(coreContext);
     },
-    [OB11MessageDataType.miniapp]: function(CoreContext: NapCatCore, sendMsg: never, context: MessageContext): Promise<SendMessageElement | undefined> {
+    [OB11MessageDataType.miniapp]: function (CoreContext: NapCatCore, obContext: NapCatOneBot11Adapter, sendMsg: never, context: MessageContext): Promise<SendMessageElement | undefined> {
         throw new Error('Function not implemented.');
     },
 };
@@ -194,6 +197,7 @@ const _handlers: {
 const handlers = <{
     [Key in OB11MessageDataType]: (
         coreContext: NapCatCore,
+        obContext: NapCatOneBot11Adapter,
         sendMsg: OB11MessageData,
         context: MessageContext,
     ) => Promise<SendMessageElement | undefined>
@@ -201,6 +205,7 @@ const handlers = <{
 
 export default async function createSendElements(
     CoreContext: NapCatCore,
+    obContext: NapCatOneBot11Adapter,
     messageData: OB11MessageData[],
     peer: Peer,
     ignoreTypes: OB11MessageDataType[] = [],
@@ -213,6 +218,7 @@ export default async function createSendElements(
         }
         const callResult = handlers[sendMsg.type](
             CoreContext,
+            obContext,
             sendMsg,
             { peer, deleteAfterSentFiles },
         )?.catch(undefined);
@@ -225,6 +231,7 @@ export default async function createSendElements(
 
 export async function createSendElementsParallel(
     CoreContext: NapCatCore,
+    obContext: NapCatOneBot11Adapter,
     messageData: OB11MessageData[],
     peer: Peer,
     ignoreTypes: OB11MessageDataType[] = [],
@@ -234,7 +241,7 @@ export async function createSendElementsParallel(
         await Promise.all(
             messageData.map(async sendMsg => ignoreTypes.includes(sendMsg.type) ?
                 undefined :
-                handlers[sendMsg.type](CoreContext, sendMsg, { peer, deleteAfterSentFiles })),
+                handlers[sendMsg.type](CoreContext, obContext, sendMsg, { peer, deleteAfterSentFiles })),
         ).then(
             results => results.filter(
                 element => element !== undefined,

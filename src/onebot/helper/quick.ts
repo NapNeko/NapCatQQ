@@ -14,8 +14,9 @@ import {
 } from '../types';
 import { isNull } from '@/common/utils/helper';
 import { createSendElements, normalize, sendMsg } from '../action/msg/SendMsg';
+import { NapCatOneBot11Adapter } from '..';
 
-async function handleMsg(coreContext: NapCatCore, msg: OB11Message, quickAction: QuickAction) {
+async function handleMsg(coreContext: NapCatCore, obContext: NapCatOneBot11Adapter, msg: OB11Message, quickAction: QuickAction) {
     msg = msg as OB11Message;
     const reply = quickAction.reply;
     const peer: Peer = {
@@ -52,7 +53,7 @@ async function handleMsg(coreContext: NapCatCore, msg: OB11Message, quickAction:
             }
         }
         replyMessage = replyMessage.concat(normalize(reply, quickAction.auto_escape));
-        const { sendElements, deleteAfterSentFiles } = await createSendElements(coreContext, replyMessage, peer);
+        const { sendElements, deleteAfterSentFiles } = await createSendElements(coreContext, obContext, replyMessage, peer);
         sendMsg(coreContext, peer, sendElements, deleteAfterSentFiles, false).then().catch(coreContext.context.logger.logError);
     }
 }
@@ -73,9 +74,9 @@ async function handleFriendRequest(coreContext: NapCatCore, request: OB11FriendR
     }
 }
 
-export async function handleQuickOperation(coreContext: NapCatCore, context: QuickActionEvent, quickAction: QuickAction) {
+export async function handleQuickOperation(coreContext: NapCatCore, obContext: NapCatOneBot11Adapter, context: QuickActionEvent, quickAction: QuickAction) {
     if (context.post_type === 'message') {
-        handleMsg(coreContext, context as OB11Message, quickAction).then().catch(coreContext.context.logger.logError);
+        handleMsg(coreContext, obContext, context as OB11Message, quickAction).then().catch(coreContext.context.logger.logError);
     }
     if (context.post_type === 'request') {
         const friendRequest = context as OB11FriendRequestEvent;
