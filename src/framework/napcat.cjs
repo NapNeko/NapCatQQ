@@ -27,7 +27,7 @@ process.dlopen = (module, filename, flags = os.constants.dlopen.RTLD_LAZY) => {
                         if (args[ArgIndex] instanceof Object) {
                             let HookArg = {};
                             for (let ListenerName in args[ArgIndex]) {
-                                HookArg[ListenerName] = function(...ListenerData) {
+                                HookArg[ListenerName] = function (...ListenerData) {
                                     try {
                                         if (ListenerName === 'onSessionInitComplete') {
                                             //回调成功
@@ -116,13 +116,14 @@ async function fetchServices(timeout = 10000) {
         Promise.reject(),
     );
 }
-
+let getWebUiUrlFunc = undefined;
 async function NCInit() {
     console.log('[NapCat] [Info] 开始初始化NapCat');
 
     try {
         const { wrapperSession, wrapperLoginService } = await fetchServices();
-        const { NCoreInitFramework } = await import('file://' + path.join(currentPath, './napcat.mjs'));
+        const { NCoreInitFramework, getWebUiUrl } = await import('file://' + path.join(currentPath, './napcat.mjs'));
+        getWebUiUrlFunc = getWebUiUrl;
         //传入LoginService Session 其余自载入
         await NCoreInitFramework(wrapperSession, wrapperLoginService, registerInitCallback);
         //console.log("[NapCat] [Info] NapCat初始化完成");
@@ -132,3 +133,12 @@ async function NCInit() {
 }
 
 NCInit();
+module.exports = {
+    NCgetWebUiUrl: async () => {
+        if (getWebUiUrlFunc === undefined) {
+            console.log('[NapCat] [Error] 未初始化完成');
+            return '';
+        }
+        return await getWebUiUrlFunc();
+    }
+};
