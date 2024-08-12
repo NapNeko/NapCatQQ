@@ -87,7 +87,7 @@ export class NapCatOneBot11Adapter {
         if (ob11Config.http.enablePost) {
             ob11Config.http.postUrls.forEach(url => {
                 this.networkManager.registerAdapter(new OB11ActiveHttpAdapter(
-                    url, ob11Config.token, this.core
+                    url, ob11Config.token, this.core, this
                 ));
             });
         }
@@ -116,7 +116,7 @@ export class NapCatOneBot11Adapter {
         await WebUiDataRuntime.setOnOB11ConfigChanged(async (newConfig: OB11Config) => {
             const prev = this.configLoader.configData;
             this.configLoader.save(newConfig);
-            this.context.logger.log(`OneBot11 配置更改：${JSON.stringify(prev)} -> ${JSON.stringify(newConfig)}`)
+            this.context.logger.log(`OneBot11 配置更改：${JSON.stringify(prev)} -> ${JSON.stringify(newConfig)}`);
             await this.reloadNetwork(prev, newConfig);
         });
     }
@@ -145,7 +145,7 @@ export class NapCatOneBot11Adapter {
             if (now.http.enablePost) {
                 now.http.postUrls.forEach(url => {
                     this.networkManager.registerAdapterAndOpen(new OB11ActiveHttpAdapter(
-                        url, now.token, this.core
+                        url, now.token, this.core, this
                     ));
                 });
             } else {
@@ -159,7 +159,7 @@ export class NapCatOneBot11Adapter {
                 );
                 for (const url of added) {
                     await this.networkManager.registerAdapterAndOpen(new OB11ActiveHttpAdapter(
-                        url, now.token, this.core
+                        url, now.token, this.core, this
                     ));
                 }
             }
