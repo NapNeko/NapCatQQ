@@ -54,21 +54,21 @@ export class NTQQFriendApi {
         uids.push(
             ...buddyListV2.flatMap(item => {
                 item.buddyUids.forEach(uid => {
-                    categoryMap.set(uid, { categoryId: item.categoryId, categroyName: item.categroyName });
+                    categoryMap.set(uid, { categoryId: item.categoryId, categoryName: item.categroyName });
                 });
                 return item.buddyUids;
             }));
         const data = await this.core.eventWrapper.callNoListenerEvent<NodeIKernelProfileService['getCoreAndBaseInfo']>(
             'NodeIKernelProfileService/getCoreAndBaseInfo', 5000, 'nodeStore', uids,
         );
-        return Array.from(data).map(([key, value]) => {
-            const category = categoryMap.get(key);
-            return category ? {
-                ...value,
-                categoryId: category.categoryId,
-                categroyName: category.categroyName,
-            } : value;
-        });
+        return buddyListV2.map(category => ({
+            categoryId: category.categoryId,
+            categorySortId: category.categorySortId,
+            categoryName: category.categroyName,
+            categoryMbCount: category.categroyMbCount,
+            onlineCount: category.onlineCount,
+            buddyList: category.buddyUids.map(uid => data.get(uid)!).filter(value => value),
+        }));
     }
 
     async isBuddy(uid: string) {
