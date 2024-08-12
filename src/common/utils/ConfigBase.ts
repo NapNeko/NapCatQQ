@@ -53,12 +53,13 @@ export abstract class ConfigBase<T> {
     }
 
 
-    save(configData: T = this.configData as T) {
+    save(newConfigData: T = this.configData as T) {
         const logger = this.coreContext.context.logger;
         const selfInfo = this.coreContext.selfInfo;
+        this.configData = newConfigData;
         const configPath = this.getConfigPath(selfInfo.uin);
         try {
-            fs.writeFileSync(configPath, JSON.stringify(configData, this.getKeys(), 2));
+            fs.writeFileSync(configPath, JSON.stringify(newConfigData, this.getKeys(), 2));
         } catch (e: any) {
             logger.logError(`保存配置文件 ${configPath} 时发生错误:`, e.message);
         }

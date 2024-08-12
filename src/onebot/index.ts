@@ -116,6 +116,7 @@ export class NapCatOneBot11Adapter {
         await WebUiDataRuntime.setOnOB11ConfigChanged(async (newConfig: OB11Config) => {
             const prev = this.configLoader.configData;
             this.configLoader.save(newConfig);
+            this.context.logger.log(`OneBot11 配置更改：${JSON.stringify(prev)} -> ${JSON.stringify(newConfig)}`)
             await this.reloadNetwork(prev, newConfig);
         });
     }
@@ -126,7 +127,7 @@ export class NapCatOneBot11Adapter {
     HTTP上报服务 ${now.http.enablePost ? '已启动' : '未启动'}, 上报地址: ${now.http.postUrls}
     WebSocket服务 ${now.ws.enable ? '已启动' : '未启动'}, ${now.ws.host}:${now.ws.port}
     WebSocket反向服务 ${now.reverseWs.enable ? '已启动' : '未启动'}, 反向地址: ${now.reverseWs.urls}`;
-        this.context.logger.log(`[Notice] [OneBot11] 热重载完成 ${serviceInfo}`);
+        this.context.logger.log(`[Notice] [OneBot11] 热重载 ${serviceInfo}`);
 
         // check difference in passive http (Http)
         if (prev.http.enable !== now.http.enable) {
@@ -153,14 +154,14 @@ export class NapCatOneBot11Adapter {
         } else {
             if (now.http.enablePost) {
                 const { added, removed } = this.findDifference<string>(prev.http.postUrls, now.http.postUrls);
-                added.forEach(url => {
-                    this.networkManager.registerAdapterAndOpen(new OB11ActiveHttpAdapter(
-                        url, now.token, this.core
-                    ));
-                });
                 await this.networkManager.closeAdapterByPredicate(
                     adapter => adapter instanceof OB11ActiveHttpAdapter && removed.includes(adapter.url),
                 );
+                for (const url of added) {
+                    await this.networkManager.registerAdapterAndOpen(new OB11ActiveHttpAdapter(
+                        url, now.token, this.core
+                    ));
+                }
             }
         }
 
@@ -193,14 +194,15 @@ export class NapCatOneBot11Adapter {
         } else {
             if (now.reverseWs.enable) {
                 const { added, removed } = this.findDifference<string>(prev.reverseWs.urls, now.reverseWs.urls);
-                added.forEach(url => {
-                    this.networkManager.registerAdapterAndOpen(new OB11ActiveWebSocketAdapter(
-                        url, 5000, now.heartInterval, now.token, this.core, this.actions
-                    ));
-                });
+                console.log('rev ws', added, removed);
                 await this.networkManager.closeAdapterByPredicate(
                     adapter => adapter instanceof OB11ActiveWebSocketAdapter && removed.includes(adapter.url),
                 );
+                for (const url of added) {
+                    await this.networkManager.registerAdapterAndOpen(new OB11ActiveWebSocketAdapter(
+                        url, 5000, now.heartInterval, now.token, this.core, this.actions
+                    ));
+                }
             }
         }
     }
