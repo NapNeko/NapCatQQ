@@ -26,7 +26,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
     }
 
     onEvent<T extends OB11EmitEventContent>(event: T) {
-        if (this.connection) {
+        if (this.connection && this.connection.readyState === WebSocket.OPEN) {
             this.connection.send(JSON.stringify(event));
         }
     }
