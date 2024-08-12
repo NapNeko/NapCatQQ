@@ -4,6 +4,7 @@ import { LogWrapper } from '@/common/utils/log';
 import { QuickAction, QuickActionEvent } from '../types';
 import { NapCatCore } from '@/core';
 import { handleQuickOperation } from '../helper/quick';
+import { NapCatOneBot11Adapter } from '..';
 
 export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     logger: LogWrapper;
@@ -12,7 +13,8 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     constructor(
         public url: string,
         public secret: string | undefined,
-        public coreContext: NapCatCore
+        public coreContext: NapCatCore,
+        public obContext: NapCatOneBot11Adapter
     ) {
         this.logger = coreContext.context.logger;
     }
@@ -46,7 +48,7 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
                 return;
             }
             try {
-                handleQuickOperation(this.coreContext, event as QuickActionEvent, resJson).then().catch(this.logger.logError);
+                handleQuickOperation(this.coreContext, this.obContext, event as QuickActionEvent, resJson).then().catch(this.logger.logError);
             } catch (e: any) {
                 this.logger.logError('新消息事件HTTP上报返回快速操作失败', e);
             }

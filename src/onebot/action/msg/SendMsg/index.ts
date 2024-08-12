@@ -156,7 +156,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         );
 
         if (getSpecialMsgNum(payload, OB11MessageDataType.node)) {
-            const returnMsg = await handleForwardNode(this.CoreContext, peer, messages as OB11MessageNode[]);
+            const returnMsg = await handleForwardNode(this.CoreContext, this.OneBotContext, peer, messages as OB11MessageNode[]);
             if (returnMsg) {
                 const msgShortId = MessageUnique.createMsg({
                     guildId: '',
@@ -176,7 +176,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         }
         // log("send msg:", peer, sendElements)
 
-        const { sendElements, deleteAfterSentFiles } = await createSendElements(this.CoreContext, messages, peer);
+        const { sendElements, deleteAfterSentFiles } = await createSendElements(this.CoreContext, this.OneBotContext, messages, peer);
         //console.log(peer, JSON.stringify(sendElements,null,2));
         const returnMsg = await sendMsg(this.CoreContext, peer, sendElements, deleteAfterSentFiles);
         return { message_id: returnMsg!.id! };
