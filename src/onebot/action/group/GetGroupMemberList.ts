@@ -83,7 +83,7 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
                 }
             }
         } else {
-            // Mlikiowa V2.0.5 Refactor Todo
+            // Mlikiowa V2.0.6 Refactor Todo
             // _groupMembers.forEach(async item => {
             //   item.last_sent_time = parseInt((await getGroupMember(payload.group_id.toString(), item.user_id))?.lastSpeakTime || date.toString());
             //   item.join_time = parseInt((await getGroupMember(payload.group_id.toString(), item.user_id))?.joinTime || date.toString());
