@@ -55,7 +55,8 @@ export class NapCatOneBot11Adapter {
             FriendApi: new OneBotFriendApi(this, core),
         };
         this.networkManager = new OB11NetworkManager();
-        this.InitOneBot().then().catch(e => this.context.logger.logError('初始化OneBot失败', e));
+        this.InitOneBot()
+            .catch(e => this.context.logger.logError('初始化OneBot失败', e));
     }
 
     async InitOneBot() {
@@ -112,7 +113,7 @@ export class NapCatOneBot11Adapter {
 
         await WebUiDataRuntime.setQQLoginUin(selfInfo.uin.toString());
         await WebUiDataRuntime.setQQLoginStatus(true);
-        await WebUiDataRuntime.setOB11ConfigCall(async (ob11: OB11Config) => {
+        await WebUiDataRuntime.setOnOB11ConfigChanged(async (ob11: OB11Config) => {
             this.configLoader.save(ob11);
         });
     }

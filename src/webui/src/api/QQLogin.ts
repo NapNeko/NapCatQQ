@@ -53,7 +53,7 @@ export const QQSetQuickLoginHandler: RequestHandler = async (req, res) => {
         });
         return;
     }
-    const { result, message } = await WebUiDataRuntime.getQQQuickLogin(uin);
+    const { result, message } = await WebUiDataRuntime.requestQuickLogin(uin);
     if (!result) {
         res.send({
             code: -1,
