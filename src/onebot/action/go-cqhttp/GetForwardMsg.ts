@@ -39,15 +39,16 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
             throw Error('找不到相关的聊天记录' + data?.errMsg);
         }
         const msgList = data.msgList;
-        const messages = await Promise.all(msgList.map(async msg => {
+        const messages = (await Promise.all(msgList.map(async msg => {
             const resMsg = await OB11Constructor.message(this.CoreContext, msg, 'array');
+            if (!resMsg) return;
             resMsg.message_id = MessageUnique.createMsg({
                 guildId: '',
                 chatType: msg.chatType,
                 peerUid: msg.peerUid,
             }, msg.msgId)!;
             return resMsg;
-        }));
+        }))).filter(msg => !!msg);
         messages.map(msg => {
             (<OB11ForwardMessage>msg).content = msg.message;
             delete (<any>msg).message;
