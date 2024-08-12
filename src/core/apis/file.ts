@@ -117,40 +117,50 @@ export class NTQQFileApi {
                     filePath: string
                 }) => Promise<unknown>,
             (fileTransNotifyInfo: OnRichMediaDownloadCompleteParams) => void
-                >(
-                'NodeIKernelMsgService/downloadRichMedia',
-                'NodeIKernelMsgListener/onRichMediaDownloadComplete',
-                1,
-                timeout,
-                (arg: OnRichMediaDownloadCompleteParams) => {
-                    if (arg.msgId === msgId) {
-                        return true;
-                    }
-                    return false;
-                },
-                {
-                    fileModelId: '0',
-                    downloadSourceType: 0,
-                    triggerType: 1,
-                    msgId: msgId,
-                    chatType: chatType,
-                    peerUid: peerUid,
-                    elementId: elementId,
-                    thumbSize: 0,
-                    downloadType: 1,
-                    filePath: thumbPath,
-                },
-                );
-        let filePath = data[1].filePath;
-        if (filePath.startsWith('\\')) {
-            // log('filePath start with \\');
-            // Mlikiowa V2.0.0 Refactor Todo
-            //const downloadPath = sessionConfig.defaultFileDownloadPath;
-            //logDebug('downloadPath', downloadPath);
-            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            filePath = path.join('', filePath);
-            // 下载路径是下载文件夹的相对路径
+        >(
+            'NodeIKernelMsgService/downloadRichMedia',
+            'NodeIKernelMsgListener/onRichMediaDownloadComplete',
+            1,
+            timeout,
+            (arg: OnRichMediaDownloadCompleteParams) => {
+                if (arg.msgId === msgId) {
+                    return true;
+                }
+                return false;
+            },
+            {
+                fileModelId: '0',
+                downloadSourceType: 0,
+                triggerType: 1,
+                msgId: msgId,
+                chatType: chatType,
+                peerUid: peerUid,
+                elementId: elementId,
+                thumbSize: 0,
+                downloadType: 1,
+                filePath: thumbPath,
+            },
+        );
+        let msg = await this.core.apis.MsgApi.getMsgsByMsgId({
+            guildId: '',
+            chatType: chatType,
+            peerUid: peerUid,
+        }, [msgId]);
+        if (msg.msgList.length === 0) {
+            return data[1].filePath;
         }
+        //获取原始消息
+        let FileElements = msg?.msgList[0]?.elements?.find(e => e.elementId === elementId);
+        if (!FileElements) {
+            //失败则就乱来 Todo
+            return data[1].filePath;
+        }
+        //从原始消息获取文件路径
+        let filePath =
+            FileElements?.fileElement?.filePath ||
+            FileElements?.pttElement?.filePath ||
+            FileElements?.videoElement?.filePath ||
+            FileElements?.picElement?.sourcePath;
         return filePath;
     }
 
@@ -236,14 +246,14 @@ export class NTQQFileApi {
                 buddyChatInfo: any[],
                 discussChatInfo: any[],
                 groupChatInfo:
-                    {
-                        groupCode: string,
-                        isConf: boolean,
-                        hasModifyConfGroupFace: boolean,
-                        hasModifyConfGroupName: boolean,
-                        groupName: string,
-                        remark: string
-                    }[],
+                {
+                    groupCode: string,
+                    isConf: boolean,
+                    hasModifyConfGroupFace: boolean,
+                    hasModifyConfGroupName: boolean,
+                    groupName: string,
+                    remark: string
+                }[],
                 dataLineChatInfo: any[],
                 tmpChatInfo: any[],
                 msgId: string,
@@ -259,10 +269,10 @@ export class NTQQFileApi {
                 filePath: string,
                 fileName: string,
                 hits:
-                    {
-                        start: number,
-                        end: number
-                    }[]
+                {
+                    start: number,
+                    end: number
+                }[]
             }[]
         }
 
@@ -270,10 +280,10 @@ export class NTQQFileApi {
         let id = '';
         const Listener = this.core.eventWrapper.RegisterListen<(params: OnListener) => void>
             (
-            'NodeIKernelSearchListener/onSearchFileKeywordsResult',
-            1,
-            20000,
-            (params) => id !== '' && params.searchId == id,
+                'NodeIKernelSearchListener/onSearchFileKeywordsResult',
+                1,
+                20000,
+                (params) => id !== '' && params.searchId == id,
             );
         id = await Event!(keys, 12);
         const [ret] = (await Listener);
