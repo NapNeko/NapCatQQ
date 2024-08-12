@@ -8,6 +8,7 @@ export const onSettingWindowCreated = async (view) => {
     iframe.height = "100%";
     iframe.style.border = "none";
     //去掉iframe滚动条
-    iframe.scrolling = "no";
+    //iframe.scrolling = "no";
+    //有滚动条何尝不是一种美
     view.appendChild(iframe);
 };
