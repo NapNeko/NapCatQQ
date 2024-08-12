@@ -7,8 +7,8 @@ interface LoginRuntimeType {
     QQQRCodeURL: string;
     QQLoginUin: string;
     NapCatHelper: {
-        CoreQuickLoginCall: (uin: string) => Promise<{ result: boolean, message: string }>;
-        SetOb11ConfigCall: (ob11: OB11Config) => Promise<void>;
+        onQuickLoginRequested: (uin: string) => Promise<{ result: boolean, message: string }>;
+        onOB11ConfigChanged: (ob11: OB11Config) => Promise<void>;
         QQLoginList: string[]
     };
 }
@@ -20,10 +20,10 @@ const LoginRuntime: LoginRuntimeType = {
     QQQRCodeURL: '',
     QQLoginUin: '',
     NapCatHelper: {
-        SetOb11ConfigCall: async (ob11: OB11Config) => {
+        onOB11ConfigChanged: async () => {
             return;
         },
-        CoreQuickLoginCall: async (uin: string) => {
+        onQuickLoginRequested: async () => {
             return { result: false, message: '' };
         },
         QQLoginList: [],
@@ -39,51 +39,54 @@ export const WebUiDataRuntime = {
             LoginRuntime.LoginCurrentTime = Date.now();
             return true;
         }
-        if (LoginRuntime.LoginCurrentRate <= RateLimit) {
-            return true;
-        }
-        return false;
-    }
-    ,
+        return LoginRuntime.LoginCurrentRate <= RateLimit;
+    },
+
     getQQLoginStatus: async function(): Promise<boolean> {
         return LoginRuntime.QQLoginStatus;
-    }
-    ,
+    },
+
     setQQLoginStatus: async function(status: boolean): Promise<void> {
         LoginRuntime.QQLoginStatus = status;
-    }
-    ,
+    },
+
     setQQLoginQrcodeURL: async function(url: string): Promise<void> {
         LoginRuntime.QQQRCodeURL = url;
-    }
-    ,
+    },
+
     getQQLoginQrcodeURL: async function(): Promise<string> {
         return LoginRuntime.QQQRCodeURL;
-    }
-    ,
+    },
+
     setQQLoginUin: async function(uin: string): Promise<void> {
         LoginRuntime.QQLoginUin = uin;
-    }
-    ,
+    },
+
     getQQLoginUin: async function(): Promise<string> {
         return LoginRuntime.QQLoginUin;
     },
+
     getQQQuickLoginList: async function(): Promise<any[]> {
         return LoginRuntime.NapCatHelper.QQLoginList;
     },
+
     setQQQuickLoginList: async function(list: string[]): Promise<void> {
         LoginRuntime.NapCatHelper.QQLoginList = list;
     },
-    setQQQuickLoginCall(func: (uin: string) => Promise<{ result: boolean, message: string }>): void {
-        LoginRuntime.NapCatHelper.CoreQuickLoginCall = func;
+
+    setQuickLoginCall(func: (uin: string) => Promise<{ result: boolean, message: string }>): void {
+        LoginRuntime.NapCatHelper.onQuickLoginRequested = func;
     },
-    getQQQuickLogin: async function(uin: string): Promise<{ result: boolean, message: string }> {
-        return await LoginRuntime.NapCatHelper.CoreQuickLoginCall(uin);
+
+    requestQuickLogin: async function(uin: string): Promise<{ result: boolean, message: string }> {
+        return await LoginRuntime.NapCatHelper.onQuickLoginRequested(uin);
     },
-    setOB11ConfigCall: async function(func: (ob11: OB11Config) => Promise<void>): Promise<void> {
-        LoginRuntime.NapCatHelper.SetOb11ConfigCall = func;
+
+    setOnOB11ConfigChanged: async function(func: (ob11: OB11Config) => Promise<void>): Promise<void> {
+        LoginRuntime.NapCatHelper.onOB11ConfigChanged = func;
     },
+
     setOB11Config: async function(ob11: OB11Config): Promise<void> {
-        await LoginRuntime.NapCatHelper.SetOb11ConfigCall(ob11);
+        await LoginRuntime.NapCatHelper.onOB11ConfigChanged(ob11);
     },
 };

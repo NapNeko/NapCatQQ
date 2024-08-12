@@ -149,7 +149,7 @@ export async function NCoreInitShell() {
             WebUiDataRuntime.setQQQuickLoginList(res.LocalLoginInfoList.filter((item) => item.isQuickLogin).map((item) => item.uin.toString()));
         });
 
-        WebUiDataRuntime.setQQQuickLoginCall(async (uin: string) => {
+        WebUiDataRuntime.setQuickLoginCall(async (uin: string) => {
             return await new Promise((resolve) => {
                 if (uin) {
                     logger.log('正在快速登录 ', uin);
