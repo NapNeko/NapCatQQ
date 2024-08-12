@@ -33,6 +33,7 @@ import { GroupDecreaseSubType, OB11GroupDecreaseEvent } from '@/onebot/event/not
 import { OB11GroupRequestEvent } from '@/onebot/event/request/OB11GroupRequest';
 import { OB11FriendRecallNoticeEvent } from '@/onebot/event/notice/OB11FriendRecallNoticeEvent';
 import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecallNoticeEvent';
+import { LRUCache } from '@/common/utils/LRU';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -215,7 +216,6 @@ export class NapCatOneBot11Adapter {
 
     private initMsgListener() {
         const msgListener = new MsgListener();
-
         msgListener.onInputStatusPush = async data => {
             const uin = await this.core.apis.UserApi.getUinByUidV2(data.fromUin);
             this.context.logger.log(`[Notice] [输入状态] ${uin} ${data.statusText}`);
@@ -245,12 +245,15 @@ export class NapCatOneBot11Adapter {
                     .catch(e => this.context.logger.logError('处理消息失败', e));
             }
         };
-
+        const msgIdSend = new LRUCache<string, boolean>(100);
         msgListener.onMsgInfoListUpdate = async msgList => {
             this.emitRecallMsg(msgList)
                 .catch(e => this.context.logger.logError('处理消息失败', e));
+
             for (const msg of msgList.filter(e => e.senderUin == this.core.selfInfo.uin)) {
                 //  console.log(msg);
+                if (!!msgIdSend.get(msg.msgId)) continue;
+                msgIdSend.put(msg.msgId, true);
                 if (msg.sendStatus == 2) {
                     // 完成后再post
                     OB11Constructor.message(this.core, msg, this.configLoader.configData.messagePostFormat)
