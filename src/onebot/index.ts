@@ -121,6 +121,13 @@ export class NapCatOneBot11Adapter {
     }
 
     private async reloadNetwork(prev: OB11Config, now: OB11Config) {
+        const serviceInfo = `
+    HTTP服务 ${now.http.enable ? '已启动' : '未启动'}, ${now.http.host}:${now.http.port}
+    HTTP上报服务 ${now.http.enablePost ? '已启动' : '未启动'}, 上报地址: ${now.http.postUrls}
+    WebSocket服务 ${now.ws.enable ? '已启动' : '未启动'}, ${now.ws.host}:${now.ws.port}
+    WebSocket反向服务 ${now.reverseWs.enable ? '已启动' : '未启动'}, 反向地址: ${now.reverseWs.urls}`;
+        this.context.logger.log(`[Notice] [OneBot11] 热重载完成 ${serviceInfo}`);
+
         // check difference in passive http (Http)
         if (prev.http.enable !== now.http.enable) {
             if (now.http.enable) {
