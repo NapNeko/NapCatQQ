@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import { InstanceContext } from './wrapper';
 import { proxiedListenerOf } from '@/common/utils/proxy-handler';
 import { GroupListener, MsgListener, ProfileListener } from './listeners';
-import { GroupMember, SelfInfo, SelfStatusInfo } from './entities';
+import { GroupMember, SelfInfo } from './entities';
 import { LegacyNTEventWrapper } from '@/common/framework/event-legacy';
 import { NTQQFileApi, NTQQFriendApi, NTQQGroupApi, NTQQMsgApi, NTQQSystemApi, NTQQUserApi, NTQQWebApi } from './apis';
 import os from 'node:os';
@@ -90,8 +90,8 @@ export class NapCatCore {
     // Renamed from 'InitDataListener'
     async initNapCatCoreListeners() {
         const msgListener = new MsgListener();
-        msgListener.onRecvMsg = (msg) => {
-            //console.log('RecvMsg', msg);
+        msgListener.onRecvMsg = (msgs) => {
+            msgs.forEach(msg => this.context.logger.logMessage(msg, this.selfInfo));
         };
         //await sleep(2500);
         this.context.session.getMsgService().addKernelMsgListener(
@@ -104,7 +104,7 @@ export class NapCatCore {
                 Object.assign(this.selfInfo, profile);
             }
         };
-        profileListener.onSelfStatusChanged = (Info: SelfStatusInfo) => {
+        profileListener.onSelfStatusChanged = (/* Info: SelfStatusInfo */) => {
             // if (Info.status == 20) {
             //   log("账号状态变更为离线")
             // }
@@ -128,12 +128,12 @@ export class NapCatCore {
                     // 获取群成员
                 }
                 const sceneId = this.context.session.getGroupService().createMemberListScene(g.groupCode, 'groupMemberList_MainWindow');
-                this.context.session.getGroupService().getNextMemberList(sceneId!, undefined, 3000).then(r => {
+                this.context.session.getGroupService().getNextMemberList(sceneId!, undefined, 3000).then( /* r => {
                     // console.log(`get group ${g.groupCode} members`, r);
                     // r.result.infos.forEach(member => {
                     // });
                     // groupMembers.set(g.groupCode, r.result.infos);
-                });
+                } */);
             });
         };
         groupListener.onMemberListChange = (arg) => {
