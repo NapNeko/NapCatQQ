@@ -44,7 +44,7 @@ class DeleteMsg extends BaseAction<Payload, void> {
             await NTQQMsgApi.recallMsg(msg.Peer, [msg.MsgId]);
             const data = await ret;
             if (!data) {
-                throw new Error('Recall failed');
+                //throw new Error('Recall failed');
             }
             //await sleep(100);
             //await NTQQMsgApi.getMsgsByMsgId(msg.Peer, [msg.MsgId]);
