@@ -20,7 +20,7 @@ import {
 } from '@/onebot/network';
 import { NapCatPathWrapper } from '@/common/framework/napcat';
 import { OneBotFriendApi, OneBotGroupApi, OneBotUserApi } from '@/onebot/api';
-import { createActionMap } from '@/onebot/action';
+import { ActionMap, createActionMap } from '@/onebot/action';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { OB11InputStatusEvent } from '@/onebot/event/notice/OB11InputStatusEvent';
 import { MessageUnique } from '@/common/utils/MessageUnique';
@@ -42,6 +42,7 @@ export class NapCatOneBot11Adapter {
     configLoader: OB11ConfigLoader;
     apiContext: OneBotApiContextType;
     networkManager: OB11NetworkManager;
+    actions: ActionMap;
 
     private bootTime = Date.now() / 1000;
 
@@ -54,6 +55,7 @@ export class NapCatOneBot11Adapter {
             UserApi: new OneBotUserApi(this, core),
             FriendApi: new OneBotFriendApi(this, core),
         };
+        this.actions = createActionMap(this, core);
         this.networkManager = new OB11NetworkManager();
         this.InitOneBot()
             .catch(e => this.context.logger.logError('初始化OneBot失败', e));
@@ -77,34 +79,32 @@ export class NapCatOneBot11Adapter {
         this.context.logger.log(`[Notice] [OneBot11] ${serviceInfo}`);
 
         //创建NetWork服务
-        const actions = createActionMap(this, this.core);
         if (ob11Config.http.enable) {
-            await this.networkManager.registerAdapter(new OB11PassiveHttpAdapter(
-                ob11Config.http.port, ob11Config.token, this.core, this,
+            this.networkManager.registerAdapter(new OB11PassiveHttpAdapter(
+                ob11Config.http.port, ob11Config.token, this.core, this.actions
             ));
         }
         if (ob11Config.http.enablePost) {
             ob11Config.http.postUrls.forEach(url => {
                 this.networkManager.registerAdapter(new OB11ActiveHttpAdapter(
-                    url, ob11Config.heartInterval, ob11Config.token, this.core, this,
+                    url, ob11Config.token, this.core
                 ));
             });
         }
         if (ob11Config.ws.enable) {
             const OBPassiveWebSocketAdapter = new OB11PassiveWebSocketAdapter(
-                ob11Config.ws.host, ob11Config.ws.port, ob11Config.heartInterval, ob11Config.token, this.core, this,
+                ob11Config.ws.host, ob11Config.ws.port, ob11Config.heartInterval, ob11Config.token, this.core, this.actions,
             );
-            await this.networkManager.registerAdapter(OBPassiveWebSocketAdapter);
+            this.networkManager.registerAdapter(OBPassiveWebSocketAdapter);
         }
         if (ob11Config.reverseWs.enable) {
             ob11Config.reverseWs.urls.forEach(url => {
                 this.networkManager.registerAdapter(new OB11ActiveWebSocketAdapter(
-                    url, 5000, ob11Config.heartInterval, ob11Config.token, this.core, this,
+                    url, 5000, ob11Config.heartInterval, ob11Config.token, this.core, this.actions
                 ));
             });
         }
 
-        await this.networkManager.registerAllActions(actions);
         await this.networkManager.openAllAdapters();
 
         this.initMsgListener();
@@ -131,8 +131,8 @@ export class NapCatOneBot11Adapter {
         // check difference in passive http (Http)
         if (prev.http.enable !== now.http.enable) {
             if (now.http.enable) {
-                await this.networkManager.registerAdapter(new OB11PassiveHttpAdapter(
-                    now.http.port, now.token, this.core, this,
+                await this.networkManager.registerAdapterAndOpen(new OB11PassiveHttpAdapter(
+                    now.http.port, now.token, this.core, this.actions
                 ));
             } else {
                 await this.networkManager.closeAdapterByPredicate(adapter => adapter instanceof OB11PassiveHttpAdapter,);
@@ -143,8 +143,8 @@ export class NapCatOneBot11Adapter {
         if (prev.http.enablePost !== now.http.enablePost) {
             if (now.http.enablePost) {
                 now.http.postUrls.forEach(url => {
-                    this.networkManager.registerAdapter(new OB11ActiveHttpAdapter(
-                        url, now.heartInterval, now.token, this.core, this,
+                    this.networkManager.registerAdapterAndOpen(new OB11ActiveHttpAdapter(
+                        url, now.token, this.core
                     ));
                 });
             } else {
@@ -153,11 +153,11 @@ export class NapCatOneBot11Adapter {
         } else {
             if (now.http.enablePost) {
                 const { added, removed } = this.findDifference<string>(prev.http.postUrls, now.http.postUrls);
-                for (const url of added) {
-                    await this.networkManager.registerAdapter(new OB11ActiveHttpAdapter(
-                        url, now.heartInterval, now.token, this.core, this,
+                added.forEach(url => {
+                    this.networkManager.registerAdapterAndOpen(new OB11ActiveHttpAdapter(
+                        url, now.token, this.core
                     ));
-                }
+                });
                 await this.networkManager.closeAdapterByPredicate(
                     adapter => adapter instanceof OB11ActiveHttpAdapter && removed.includes(adapter.url),
                 );
@@ -167,8 +167,8 @@ export class NapCatOneBot11Adapter {
         // check difference in passive websocket (Ws)
         if (prev.ws.enable !== now.ws.enable) {
             if (now.ws.enable) {
-                await this.networkManager.registerAdapter(new OB11PassiveWebSocketAdapter(
-                    now.ws.host, now.ws.port, now.heartInterval, now.token, this.core, this,
+                await this.networkManager.registerAdapterAndOpen(new OB11PassiveWebSocketAdapter(
+                    now.ws.host, now.ws.port, now.heartInterval, now.token, this.core, this.actions,
                 ));
             } else {
                 await this.networkManager.closeAdapterByPredicate(
@@ -181,8 +181,8 @@ export class NapCatOneBot11Adapter {
         if (prev.reverseWs.enable !== now.reverseWs.enable) {
             if (now.reverseWs.enable) {
                 now.reverseWs.urls.forEach(url => {
-                    this.networkManager.registerAdapter(new OB11ActiveWebSocketAdapter(
-                        url, 5000, now.heartInterval, now.token, this.core, this,
+                    this.networkManager.registerAdapterAndOpen(new OB11ActiveWebSocketAdapter(
+                        url, 5000, now.heartInterval, now.token, this.core, this.actions
                     ));
                 });
             } else {
@@ -193,11 +193,11 @@ export class NapCatOneBot11Adapter {
         } else {
             if (now.reverseWs.enable) {
                 const { added, removed } = this.findDifference<string>(prev.reverseWs.urls, now.reverseWs.urls);
-                for (const url of added) {
-                    await this.networkManager.registerAdapter(new OB11ActiveWebSocketAdapter(
-                        url, 5000, now.heartInterval, now.token, this.core, this,
+                added.forEach(url => {
+                    this.networkManager.registerAdapterAndOpen(new OB11ActiveWebSocketAdapter(
+                        url, 5000, now.heartInterval, now.token, this.core, this.actions
                     ));
-                }
+                });
                 await this.networkManager.closeAdapterByPredicate(
                     adapter => adapter instanceof OB11ActiveWebSocketAdapter && removed.includes(adapter.url),
                 );

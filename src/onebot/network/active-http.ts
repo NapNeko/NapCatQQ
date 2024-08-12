@@ -1,35 +1,20 @@
 import { IOB11NetworkAdapter, OB11EmitEventContent } from '@/onebot/network/index';
-import BaseAction from '@/onebot/action/BaseAction';
 import { createHmac } from 'crypto';
 import { LogWrapper } from '@/common/utils/log';
 import { QuickAction, QuickActionEvent } from '../types';
 import { NapCatCore } from '@/core';
 import { handleQuickOperation } from '../helper/quick';
-import { NapCatOneBot11Adapter } from '@/onebot';
 
 export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
-    url: string;
-    heartbeatInterval: number;
-    secret: string | undefined;
-    coreContext: NapCatCore;
-    obContext: NapCatOneBot11Adapter;
     logger: LogWrapper;
     isOpen: boolean = false;
 
-    constructor(url: string, heartbeatInterval: number, secret: string | undefined, coreContext: NapCatCore, onebotContext: NapCatOneBot11Adapter) {
-        this.heartbeatInterval = heartbeatInterval;
-        this.url = url;
-        this.secret = secret;
-        this.coreContext = coreContext;
-        this.obContext = onebotContext;
+    constructor(
+        public url: string,
+        public secret: string | undefined,
+        public coreContext: NapCatCore
+    ) {
         this.logger = coreContext.context.logger;
-    }
-
-    registerActionMap(actionMap: Map<string, BaseAction<any, any>>) {
-    }
-
-    registerAction<T extends BaseAction<P, R>, P, R>(action: T) {
-        // Passive http adapter does not need to register actions
     }
 
     onEvent<T extends OB11EmitEventContent>(event: T) {

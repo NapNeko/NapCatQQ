@@ -1,13 +1,12 @@
 import BaseAction from '@/onebot/action/BaseAction';
 import { OB11BaseEvent } from '@/onebot/event/OB11BaseEvent';
 import { OB11Message } from '@/onebot';
+import { ActionMap } from '@/onebot/action';
 
 export type OB11EmitEventContent = OB11BaseEvent | OB11Message;
 
 export interface IOB11NetworkAdapter {
-    registerAction<T extends BaseAction<P, R>, P, R>(action: T): void;
-
-    registerActionMap(actionMap: Map<string, BaseAction<any, any>>): void;
+    actions?: ActionMap;
 
     onEvent<T extends OB11EmitEventContent>(event: T): void;
 
@@ -19,16 +18,8 @@ export interface IOB11NetworkAdapter {
 export class OB11NetworkManager {
     adapters: IOB11NetworkAdapter[] = [];
 
-    async getAllAdapters() {
-        return this.adapters;
-    }
-
     async openAllAdapters() {
         return Promise.all(this.adapters.map(adapter => adapter.open()));
-    }
-
-    async registerAllActions(actions: Map<string, BaseAction<any, any>>) {
-        return Promise.all(this.adapters.map(adapter => adapter.registerActionMap(actions)));
     }
 
     async emitEvent(event: OB11EmitEventContent) {
@@ -36,10 +27,13 @@ export class OB11NetworkManager {
         return Promise.all(this.adapters.map(adapter => adapter.onEvent(event)));
     }
 
-    async registerAdapter(adapter: IOB11NetworkAdapter) {
-        //console.log('Registering adapter:', adapter);
+    registerAdapter(adapter: IOB11NetworkAdapter) {
         this.adapters.push(adapter);
-        //console.log('Current adapters:', this.adapters.length);
+    }
+
+    async registerAdapterAndOpen(adapter: IOB11NetworkAdapter) {
+        this.registerAdapter(adapter);
+        await adapter.open();
     }
 
     async closeSomeAdapters(adaptersToClose: IOB11NetworkAdapter[]) {
@@ -55,10 +49,8 @@ export class OB11NetworkManager {
     }
 
     async closeAllAdapters() {
-        //console.log('Closing all adapters');
         await Promise.all(this.adapters.map(adapter => adapter.close()));
         this.adapters = [];
-        //console.log('All adapters closed. Current adapters:', this.adapters.length);
     }
 }
 

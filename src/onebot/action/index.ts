@@ -162,7 +162,7 @@ export function createActionMap(onebotContext: NapCatOneBot11Adapter, coreContex
         new FetchCustomFace(onebotContext, coreContext),
         new GoCQHTTPUploadPrivateFile(onebotContext, coreContext),
     ];
-    const actionMap = new Map<string, BaseAction<any, any>>();
+    const actionMap = new Map();
     for (const action of actionHandlers) {
         actionMap.set(action.actionName, action);
         actionMap.set(action.actionName + '_async', action);

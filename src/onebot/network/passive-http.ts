@@ -1,38 +1,25 @@
 import { IOB11NetworkAdapter, OB11EmitEventContent } from './index';
-import BaseAction from '@/onebot/action/BaseAction';
 import express, { Express, Request, Response } from 'express';
 import http from 'http';
 import { NapCatCore } from '@/core';
 import { OB11Response } from '../action/OB11Response';
-import { NapCatOneBot11Adapter } from '@/onebot';
+import { ActionMap } from '@/onebot/action';
 
 export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
-    token: string;
-    coreContext: NapCatCore;
-    obContext: NapCatOneBot11Adapter;
     private app: Express | undefined;
     private server: http.Server | undefined;
     private isOpen: boolean = false;
-    private actionMap: Map<string, BaseAction<any, any>> = new Map();
-    private port: number;
 
-    constructor(port: number, token: string, coreContext: NapCatCore, onebotContext: NapCatOneBot11Adapter) {
-        this.port = port;
-        this.token = token;
-        this.coreContext = coreContext;
-        this.obContext = onebotContext;
+    constructor(
+        public port: number,
+        public token: string,
+        public coreContext: NapCatCore,
+        public actions: ActionMap,
+    ) {
     }
 
-    registerAction<T extends BaseAction<P, R>, P, R>(action: T) {
-        this.actionMap.set(action.actionName, action);
-    }
-
-    registerActionMap(actionMap: Map<string, BaseAction<any, any>>) {
-        this.actionMap = actionMap;
-    }
-
-    onEvent<T extends OB11EmitEventContent>(event: T) {
-        // 事件处理逻辑可以在这里实现
+    onEvent() {
+        // http server is passive, no need to emit event
     }
 
     open() {
@@ -97,7 +84,7 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
         }
 
         const actionName = req.path.split('/')[1];
-        const action = this.actionMap.get(actionName);
+        const action = this.actions.get(actionName);
         if (action) {
             try {
                 const result = await action.handle(payload);

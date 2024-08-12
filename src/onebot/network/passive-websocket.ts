@@ -10,6 +10,7 @@ import { NapCatOneBot11Adapter } from '..';
 import { LogWrapper } from '@/common/utils/log';
 import { OB11HeartbeatEvent } from '../event/meta/OB11HeartbeatEvent';
 import { IncomingMessage } from 'http';
+import { ActionMap } from '@/onebot/action';
 
 export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     wsServer: WebSocketServer;
@@ -18,15 +19,19 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     isOpen: boolean = false;
     hasBeenClosed: boolean = false;
     heartbeatInterval: number = 0;
-    obContext: NapCatOneBot11Adapter;
     coreContext: NapCatCore;
     logger: LogWrapper;
-    private actionMap: Map<string, BaseAction<any, any>> = new Map();
     private heartbeatIntervalId: NodeJS.Timeout | null = null;
 
-    constructor(ip: string, port: number, heartbeatInterval: number, token: string, coreContext: NapCatCore, onebotContext: NapCatOneBot11Adapter) {
+    constructor(
+        ip: string,
+        port: number,
+        heartbeatInterval: number,
+        token: string,
+        coreContext: NapCatCore,
+        public actions: ActionMap
+    ) {
         this.coreContext = coreContext;
-        this.obContext = onebotContext;
         this.logger = coreContext.context.logger;
 
         this.heartbeatInterval = heartbeatInterval;
@@ -58,14 +63,6 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
         }).on('error', (err) => this.logger.log('[OneBot] [WebSocket Server] Server Error:', err.message));
     }
 
-    registerActionMap(actionMap: Map<string, BaseAction<any, any>>) {
-        this.actionMap = actionMap;
-    }
-
-    registerAction<T extends BaseAction<P, R>, P, R>(action: T) {
-        this.actionMap.set(action.actionName, action);
-    }
-
     onEvent<T extends OB11EmitEventContent>(event: T) {
         this.wsClientsMutex.runExclusive(async () => {
             this.wsClients.forEach((wsClient) => {
@@ -79,7 +76,11 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             this.logger.logError('[OneBot] [WebSocket Server] Cannot open a opened WebSocket server');
             return;
         }
-        let addressInfo = this.wsServer.address();
+        if (this.hasBeenClosed) {
+            this.logger.logError('[OneBot] [WebSocket Server] Cannot open a WebSocket server that has been closed');
+            return;
+        }
+        const addressInfo = this.wsServer.address();
         this.logger.log('[OneBot] [WebSocket Server] Server Started', typeof (addressInfo) === 'string' ? addressInfo : addressInfo?.address + ':' + addressInfo?.port);
         
         this.isOpen = true;
@@ -137,7 +138,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
                 this.checkStateAndReply<any>(OB11Response.error('json解析失败,请检查数据格式', 1400, echo), wsClient);
             }
             receiveData.params = (receiveData?.params) ? receiveData.params : {};//兼容类型验证
-            const retdata = await this.actionMap.get(receiveData.action)?.websocketHandle(receiveData.params, echo || '');
+            const retdata = await this.actions.get(receiveData.action)?.websocketHandle(receiveData.params, echo || '');
             const packet = Object.assign({}, retdata);
             this.checkStateAndReply<any>(packet, wsClient);
         } catch (e) {
