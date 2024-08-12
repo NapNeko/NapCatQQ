@@ -99,7 +99,7 @@ async function createContext(coreContext: NapCatCore, payload: OB11PostSendMsg, 
         };
     }
     if ((contextMode === ContextMode.Private || contextMode === ContextMode.Normal) && payload.user_id) {
-        const Uid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
+        const Uid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());
         const isBuddy = await NTQQFriendApi.isBuddy(Uid!);
         //console.log("[调试代码] UIN:", payload.user_id, " UID:", Uid, " IsBuddy:", isBuddy);
         return {
@@ -137,7 +137,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         //   return { valid: false, message: `群${payload.group_id}不存在` };
         // }
         if (payload.user_id && payload.message_type !== 'group') {
-            const uid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
+            const uid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());
             const isBuddy = await NTQQFriendApi.isBuddy(uid!);
             // 此处有问题
             if (!isBuddy) {

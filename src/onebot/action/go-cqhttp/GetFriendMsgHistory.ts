@@ -32,7 +32,7 @@ export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
         const NTQQMsgApi = this.CoreContext.apis.MsgApi;
         const NTQQFriendApi = this.CoreContext.apis.FriendApi;
         //处理参数
-        const uid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
+        const uid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());
         const MsgCount = payload.count || 20;
         const isReverseOrder = payload.reverseOrder || true;
         if (!uid) throw `记录${payload.user_id}不存在`;

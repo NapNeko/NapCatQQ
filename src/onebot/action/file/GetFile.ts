@@ -62,7 +62,7 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
                 if (isGroup) {
                     peer = { chatType: ChatType.group, peerUid: peerUin };
                 }
-                const PeerUid = await NTQQUserApi.getUidByUin(peerUin);
+                const PeerUid = await NTQQUserApi.getUidByUinV2(peerUin);
                 if (PeerUid) {
                     const isBuddy = await NTQQFriendApi.isBuddy(PeerUid);
                     if (isBuddy) {

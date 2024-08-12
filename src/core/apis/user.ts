@@ -231,13 +231,13 @@ export class NTQQUserApi {
 
     //后期改成流水线处理
     async getUidByUinV2(Uin: string) {
-        let uid = (await this.context.session.getProfileService().getUidByUin('FriendsServiceImpl', [Uin])).get(Uin);
+        let uid = (await this.context.session.getProfileService().getUidByUinV2('FriendsServiceImpl', [Uin])).get(Uin);
         if (uid) return uid;
         uid = (await this.context.session.getGroupService().getUidByUins([Uin])).uids.get(Uin);
         if (uid) return uid;
         uid = (await this.context.session.getUixConvertService().getUid([Uin])).uidInfo.get(Uin);
         if (uid) return uid;
-       // console.log((await this.core.getApiContext().FriendApi.getBuddyIdMapCache(true)));
+        // console.log((await this.core.getApiContext().FriendApi.getBuddyIdMapCache(true)));
         uid = (await this.core.apis.FriendApi.getBuddyIdMapCache(true)).getValue(Uin);//从Buddy缓存获取Uid
         if (uid) return uid;
         uid = (await this.core.apis.FriendApi.getBuddyIdMap(true)).getValue(Uin);

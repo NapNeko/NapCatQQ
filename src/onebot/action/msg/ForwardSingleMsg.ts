@@ -20,7 +20,7 @@ class ForwardSingleMsg extends BaseAction<Payload, null> {
     protected async getTargetPeer(payload: Payload): Promise<Peer> {
         const NTQQUserApi = this.CoreContext.apis.UserApi;
         if (payload.user_id) {
-            const peerUid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
+            const peerUid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());
             if (!peerUid) {
                 throw new Error(`无法找到私聊对象${payload.user_id}`);
             }

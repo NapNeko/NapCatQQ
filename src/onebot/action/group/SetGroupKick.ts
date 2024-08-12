@@ -23,7 +23,7 @@ export default class SetGroupKick extends BaseAction<Payload, null> {
         const NTQQGroupApi = this.CoreContext.apis.GroupApi;
         const NTQQUserApi = this.CoreContext.apis.UserApi;
         const rejectReq = payload.reject_add_request?.toString() == 'true';
-        const uid = await NTQQUserApi.getUidByUin(payload.user_id.toString());
+        const uid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());
         if (!uid) throw new Error('get Uid Error');
         await NTQQGroupApi.kickMember(payload.group_id.toString(), [uid], rejectReq);
         return null;
