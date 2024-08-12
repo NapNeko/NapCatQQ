@@ -176,6 +176,16 @@ async function onSettingWindowCreated(view: Element) {
                 ),
                 SettingItem('NapCat 文档', '', SettingButton('看看文档', 'open-docs'))
             ]),
+            SettingItem(
+                'Telegram 群',
+                'https://t.me/+nLZEnpne-pQ1OWFl',
+                SettingButton('进去逛逛', 'open-telegram')
+              ),
+              SettingItem(
+                'QQ 群',
+                '518662028',
+                SettingButton('我要进去', 'open-qq-group')
+              ),
             '</div>',
         ].join(''),
         'text/html',
@@ -187,6 +197,12 @@ async function onSettingWindowCreated(view: Element) {
     });
     doc.querySelector('#open-docs')?.addEventListener('click', () => {
         window.open('https://napneko.github.io/', '_blank');
+    });
+    doc.querySelector('#open-telegram')?.addEventListener('click', () => {
+        window.open('https://t.me/+nLZEnpne-pQ1OWFl', '_blank');
+    });
+    doc.querySelector('#open-qq-group')?.addEventListener('click', () => {
+        window.open('https://qm.qq.com/q/VfjAq5HIMS', '_blank');
     });
     // 生成反向地址列表
     const buildHostListItem = (
