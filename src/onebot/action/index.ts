@@ -76,6 +76,7 @@ import { FetchEmojiLike } from './extends/FetchEmojiLike';
 import { NapCatCore } from '@/core';
 
 import { NapCatOneBot11Adapter } from '@/onebot';
+import GetGuildProfile from './guild/GetGuildProfile';
 
 export type ActionMap = Map<string, BaseAction<any, any>>;
 
