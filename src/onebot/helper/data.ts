@@ -77,8 +77,8 @@ export class OB11Constructor {
             resMsg.sub_type = 'normal'; // 这里go-cqhttp是group，而onebot11标准是normal, 蛋疼
             resMsg.group_id = parseInt(msg.peerUin);
             //直接去QQNative取
-            const memberList = await NTQQGroupApi.getGroupMembers(msg.peerUin);
-            const member = memberList.get(msg.senderUin!);
+            let member = await NTQQGroupApi.getGroupMember(msg.peerUin, msg.senderUin);
+            if (!member) member = await NTQQGroupApi.getGroupMember(msg.peerUin, msg.senderUin);
             if (member) {
                 resMsg.sender.role = OB11Constructor.groupMemberRole(member.role);
                 resMsg.sender.nickname = member.nick;
