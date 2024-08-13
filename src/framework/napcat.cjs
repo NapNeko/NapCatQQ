@@ -87,13 +87,12 @@ function pollForNTInitializationCheck() {
             try {
                 if (ntIsInitialized_Internal()) {
                     isSolve = true;
+                    clearInterval(intervalRef);
                     resolve(true);
                 }
             } catch (error) {
                 reject(error);
-            } finally {
-                clearInterval(intervalRef);
-            }
+            }  
         }, 500);
     });
 }
