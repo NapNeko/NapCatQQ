@@ -286,13 +286,13 @@ export class OB11Constructor {
                     chatType: msg.chatType,
                     guildId: '',
                 },
-                    msg.msgId,
-                    msg.msgSeq,
-                    msg.senderUid,
-                    element.elementId,
-                    element.elementType.toString(),
-                    element.pttElement.fileSize || '0',
-                    element.pttElement.fileUuid || '',
+                msg.msgId,
+                msg.msgSeq,
+                msg.senderUid,
+                element.elementId,
+                element.elementType.toString(),
+                element.pttElement.fileSize || '0',
+                element.pttElement.fileUuid || '',
                 );
                 //以uuid作为文件名
             } else if (element.arkElement) {
