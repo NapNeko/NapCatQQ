@@ -105,6 +105,7 @@ async function createContext(coreContext: NapCatCore, payload: OB11PostSendMsg, 
         return {
             chatType: isBuddy ? ChatType.friend : ChatType.temp,
             peerUid: Uid!,
+            guildId: payload.group_id?.toString() || '',
         };
     }
     throw '请指定 group_id 或 user_id';
