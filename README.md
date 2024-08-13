@@ -19,6 +19,7 @@ NapCatQQ 是现代化的基于 NTQQ 的 Bot 协议端实现。
 **首次使用**请务必前往[官方文档](https://napneko.github.io/)查看使用教程。
 
 ## 相关链接
+[QQ Group](https://qm.qq.com/q/VfjAq5HIMS)
 
 [Telegram Link](https://t.me/+nLZEnpne-pQ1OWFl)
 
