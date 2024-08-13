@@ -13,7 +13,7 @@ export const onSettingWindowCreated = async (view) => {
     // //iframe.scrolling = "no";
     // //有滚动条何尝不是一种美
     // view.appendChild(iframe);
-    let webui = await window.napcat.getWebUiUrl()
+    let webui = await window.napcat.getWebUiUrl();
     let panel = `
     <setting-section data-title="">
     <setting-panel>

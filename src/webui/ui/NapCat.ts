@@ -180,12 +180,12 @@ async function onSettingWindowCreated(view: Element) {
                 'Telegram 群',
                 'https://t.me/+nLZEnpne-pQ1OWFl',
                 SettingButton('进去逛逛', 'open-telegram')
-              ),
-              SettingItem(
+            ),
+            SettingItem(
                 'QQ 群',
                 '518662028',
                 SettingButton('我要进去', 'open-qq-group')
-              ),
+            ),
             '</div>',
         ].join(''),
         'text/html',

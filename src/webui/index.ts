@@ -19,7 +19,7 @@ export let webUiPathWrapper: NapCatPathWrapper;
 export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapper) {
     webUiPathWrapper = pathWrapper;
     WebUiConfig = new WebUiConfigWrapper();
-    let log = logger.log.bind(logger);
+    const log = logger.log.bind(logger);
     const config = await WebUiConfig.GetWebUIConfig();
     if (config.port == 0) {
         log('[NapCat] [WebUi] Current WebUi is not run.');

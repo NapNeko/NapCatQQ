@@ -156,8 +156,8 @@ export class NTQQUserApi {
     async getCookies(domain: string) {
         const ClientKeyData = await this.forceFetchClientKey();
         const requestUrl = 'https://ssl.ptlogin2.qq.com/jump?ptlang=1033&clientuin=' + this.core.selfInfo.uin +
-            '&clientkey=' + ClientKeyData.clientKey + '&u1=https%3A%2F%2F' + domain + '%2F' + this.core.selfInfo.uin + '%2Finfocenter&keyindex=19%27'
-        let cookies: { [key: string]: string; } = await RequestUtil.HttpsGetCookies(requestUrl);
+            '&clientkey=' + ClientKeyData.clientKey + '&u1=https%3A%2F%2F' + domain + '%2F' + this.core.selfInfo.uin + '%2Finfocenter&keyindex=19%27';
+        const cookies: { [key: string]: string; } = await RequestUtil.HttpsGetCookies(requestUrl);
         return cookies;
     }
 
