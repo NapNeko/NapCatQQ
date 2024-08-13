@@ -20,9 +20,7 @@ export default class DelEssenceMsg extends BaseAction<Payload, any> {
     async _handle(payload: Payload): Promise<any> {
         const NTQQGroupApi = this.CoreContext.apis.GroupApi;
         const msg = MessageUnique.getMsgIdAndPeerByShortId(parseInt(payload.message_id.toString()));
-        if (!msg) {
-            throw new Error('msg not found');
-        }
+        if (!msg) throw new Error('msg not found');
         return await NTQQGroupApi.removeGroupEssence(
             msg.Peer.peerUid,
             msg.MsgId,
