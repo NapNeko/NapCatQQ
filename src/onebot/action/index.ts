@@ -23,7 +23,7 @@ import GoCQHTTPGetStrangerInfo from './go-cqhttp/GetStrangerInfo';
 import SendLike from './user/SendLike';
 import SetGroupAddRequest from './group/SetGroupAddRequest';
 import SetGroupLeave from './group/SetGroupLeave';
-import GetGuildList from './group/GetGuildList';
+import GetGuildList from './guild/GetGuildList';
 import SetFriendAddRequest from './user/SetFriendAddRequest';
 import SetGroupWholeBan from './group/SetGroupWholeBan';
 import SetGroupName from './group/SetGroupName';
@@ -161,6 +161,7 @@ export function createActionMap(onebotContext: NapCatOneBot11Adapter, coreContex
         new SetGroupHeader(onebotContext, coreContext),
         new FetchCustomFace(onebotContext, coreContext),
         new GoCQHTTPUploadPrivateFile(onebotContext, coreContext),
+        new GetGuildProfile(onebotContext, coreContext)
     ];
     const actionMap = new Map();
     for (const action of actionHandlers) {
