@@ -112,7 +112,7 @@ async function fetchServices(timeout = 10000) {
         }),
     ]).then(result => result ?
         { wrapperSession, wrapperNodeApi, wrapperLoginService } :
-        Promise.reject(),
+        Promise.reject("fetchServices Timeout!"),
     );
 }
 let getWebUiUrlFunc = undefined;
