@@ -77,6 +77,7 @@ import { NapCatCore } from '@/core';
 
 import { NapCatOneBot11Adapter } from '@/onebot';
 import GetGuildProfile from './guild/GetGuildProfile';
+import SetModelShow from './go-cqhttp/SetModelShow';
 
 export type ActionMap = Map<string, BaseAction<any, any>>;
 
@@ -162,7 +163,8 @@ export function createActionMap(onebotContext: NapCatOneBot11Adapter, coreContex
         new SetGroupHeader(onebotContext, coreContext),
         new FetchCustomFace(onebotContext, coreContext),
         new GoCQHTTPUploadPrivateFile(onebotContext, coreContext),
-        new GetGuildProfile(onebotContext, coreContext)
+        new GetGuildProfile(onebotContext, coreContext),
+        new SetModelShow(onebotContext, coreContext),
     ];
     const actionMap = new Map();
     for (const action of actionHandlers) {
