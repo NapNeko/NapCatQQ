@@ -417,7 +417,7 @@ export class OB11Constructor {
             return;
         }
         //log("group msg", msg);
-        // Mlikiowa V2.0.15 Refactor Todo
+        // Mlikiowa V2.0.16 Refactor Todo
         // if (msg.senderUin && msg.senderUin !== '0') {
         //   const member = await getGroupMember(msg.peerUid, msg.senderUin);
         //   if (member && member.cardName !== msg.sendMemberName) {
