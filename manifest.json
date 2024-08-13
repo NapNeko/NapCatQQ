@@ -4,7 +4,7 @@
   "name": "NapCat",
   "slug": "NapCat",
   "description": "现代化的 OneBot 11 协议实现",
-  "version": "2.0.11",
+  "version": "2.0.12",
   "icon": "./logo.png",
   "authors": [
     {
