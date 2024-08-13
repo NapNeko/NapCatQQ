@@ -48,7 +48,7 @@ export default class GoCQHTTPGetGroupMsgHistory extends BaseAction<Payload, Resp
         }));
 
         //转换消息
-        const ob11MsgList = (await Promise.all(msgList.map(msg => OB11Constructor.message(this.CoreContext, msg, 'array')))).filter(msg => !!msg);
+        const ob11MsgList = (await Promise.all(msgList.map(msg => OB11Constructor.message(this.CoreContext, this.OneBotContext, msg)))).filter(msg => !!msg);
         return { 'messages': ob11MsgList };
     }
 }
