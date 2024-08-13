@@ -28,19 +28,6 @@ const GetFileBase_PayloadSchema = {
 export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
     PayloadSchema: any = GetFileBase_PayloadSchema;
 
-    private getElement(msg: RawMessage): { id: string, element: VideoElement | FileElement } {
-        let element = msg.elements.find(e => e.fileElement);
-        if (!element) {
-            element = msg.elements.find(e => e.videoElement);
-            if (element) {
-                return { id: element.elementId, element: element.videoElement };
-            } else {
-                throw new Error('找不到文件');
-            }
-        }
-        return { id: element.elementId, element: element.fileElement };
-    }
-
     async _handle(payload: GetFilePayload): Promise<GetFileResponse> {
         const NTQQFriendApi = this.CoreContext.apis.FriendApi;
         const NTQQUserApi = this.CoreContext.apis.UserApi;
@@ -92,7 +79,7 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
                     file_size: fileSize,
                     file_name: fileName,
                 };
-                if (true/*enableLocalFile2Url*/) {
+                if (true/*enableLocalFile2Url*/ && downloadPath) {
                     try {
                         res.base64 = await fs.readFile(downloadPath, 'base64');
                     } catch (e) {
@@ -132,7 +119,7 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
                 file_size: NTSearchNameResult[0].fileSize.toString(),
                 file_name: NTSearchNameResult[0].fileName,
             };
-            if (true/*enableLocalFile2Url*/) {
+            if (true/*enableLocalFile2Url*/ && downloadPath) {
                 try {
                     res.base64 = await fs.readFile(downloadPath, 'base64');
                 } catch (e) {
