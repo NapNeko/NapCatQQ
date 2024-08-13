@@ -168,20 +168,24 @@ export async function NCoreInitShell() {
             });
         });
 
-        if (quickLoginUin && historyLoginList.some(u => u.uin === quickLoginUin)) {
-            logger.log('正在快速登录 ', quickLoginUin);
-            setTimeout(() => {
-                loginService.quickLoginWithUin(quickLoginUin)
-                    .then(result => {
-                        if (result.loginErrorInfo.errMsg) {
-                            logger.logError('快速登录错误：', result.loginErrorInfo.errMsg);
-                            loginService.getQRCodePicture();
-                        }
-                    })
-                    .catch();
-            }, 1000);
+        if (quickLoginUin) {
+            if (historyLoginList.some(u => u.uin === quickLoginUin)) {
+                logger.log('正在快速登录 ', quickLoginUin);
+                setTimeout(() => {
+                    loginService.quickLoginWithUin(quickLoginUin)
+                        .then(result => {
+                            if (result.loginErrorInfo.errMsg) {
+                                logger.logError('快速登录错误：', result.loginErrorInfo.errMsg);
+                                loginService.getQRCodePicture();
+                            }
+                        })
+                        .catch();
+                }, 1000);
+            } else {
+                logger.logError('快速登录失败，未找到该 QQ 历史登录记录，将使用二维码登录方式');
+            }
         } else {
-            logger.log('没有 -q 指令指定快速登录，或未曾登录过这个 QQ，将使用二维码登录方式');
+            logger.log('没有 -q 指令指定快速登录，将使用二维码登录方式');
             if (historyLoginList.length > 0) {
                 logger.log(`可用于快速登录的 QQ：\n${
                     historyLoginList
