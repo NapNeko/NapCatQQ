@@ -107,7 +107,13 @@ function registerInitCallback(callback) {
 
 async function fetchServices(timeout = 10000) {
     return Promise.race([
-        pollForNTInitializationCheck(),
+        new Promise((resolve) => {
+            setTimeout(() => {
+                pollForNTInitializationCheck().then(() => {
+                    resolve(true);
+                });
+            });
+        }),
         new Promise((resolve) => {
             setTimeout(() => resolve(false), timeout);
         }),
