@@ -253,9 +253,9 @@ export class NapCatOneBot11Adapter {
                 if (msg.sendStatus == 2 && !msgIdSend.get(msg.msgId)) {
                     msgIdSend.put(msg.msgId, true);
                     // 完成后再post
-                    OB11Constructor.message(this.core, msg, this.configLoader.configData.messagePostFormat)
+                    OB11Constructor.message(this.core, this, msg)
                         .then((ob11Msg) => {
-                            if(!ob11Msg) return;
+                            if (!ob11Msg) return;
                             ob11Msg.target_id = parseInt(msg.peerUin);
                             if (this.configLoader.configData.reportSelfMessage) {
                                 msg.id = MessageUnique.createMsg({
@@ -425,8 +425,8 @@ export class NapCatOneBot11Adapter {
     private async emitMsg(message: RawMessage) {
         const { debug, reportSelfMessage, messagePostFormat } = this.configLoader.configData;
         this.context.logger.logDebug('收到新消息 RawMessage', message);
-        OB11Constructor.message(this.core, message, messagePostFormat).then((ob11Msg) => {
-            if(!ob11Msg) return;
+        OB11Constructor.message(this.core, this, message, messagePostFormat).then((ob11Msg) => {
+            if (!ob11Msg) return;
             this.context.logger.logDebug('转化为 OB11Message', ob11Msg);
             if (debug) {
                 ob11Msg.raw = message;
@@ -483,7 +483,7 @@ export class NapCatOneBot11Adapter {
                     let operatorId = message.senderUin;
                     for (const element of message.elements) {
                         const operatorUid = element.grayTipElement?.revokeElement.operatorUid;
-                        if(!operatorUid) return;
+                        if (!operatorUid) return;
                         const operator = await this.core.apis.GroupApi.getGroupMember(message.peerUin, operatorUid);
                         operatorId = operator?.uin || message.senderUin;
                     }

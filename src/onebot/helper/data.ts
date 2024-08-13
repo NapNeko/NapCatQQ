@@ -42,9 +42,15 @@ import { OB11BaseNoticeEvent } from '../event/notice/OB11BaseNoticeEvent';
 import { OB11GroupEssenceEvent } from '../event/notice/OB11GroupEssenceEvent';
 import { MessageUnique } from '@/common/utils/MessageUnique';
 import { NapCatCore } from '@/core';
+import { NapCatOneBot11Adapter } from '..';
 
 export class OB11Constructor {
-    static async message(core: NapCatCore, msg: RawMessage, messagePostFormat: any): Promise<OB11Message | undefined> {
+    static async message(
+        core: NapCatCore,
+        obcore: NapCatOneBot11Adapter,
+        msg: RawMessage,
+        messagePostFormat: string = obcore.configLoader.configData.messagePostFormat
+    ): Promise<OB11Message | undefined> {
         if (msg.senderUin == "0") return;
         if (msg.peerUin == "0") return;
         //跳过空消息
@@ -344,7 +350,7 @@ export class OB11Constructor {
                     MultiMsg.parentMsgPeer = ParentMsgPeer;
                     MultiMsg.parentMsgIdList = msg.parentMsgIdList;
                     MultiMsg.id = MessageUnique.createMsg(ParentMsgPeer, MultiMsg.msgId);//该ID仅用查看 无法调用
-                    const msgList = await OB11Constructor.message(core, MultiMsg, 'array');
+                    const msgList = await OB11Constructor.message(core, obcore, MultiMsg, messagePostFormat);
                     if (!msgList) continue;
                     message_data['data']['content'].push(msgList);
                     //console.log("合并消息", msgList);
@@ -411,7 +417,7 @@ export class OB11Constructor {
             return;
         }
         //log("group msg", msg);
-        // Mlikiowa V2.0.12 Refactor Todo
+        // Mlikiowa V2.0.13 Refactor Todo
         // if (msg.senderUin && msg.senderUin !== '0') {
         //   const member = await getGroupMember(msg.peerUid, msg.senderUin);
         //   if (member && member.cardName !== msg.sendMemberName) {
