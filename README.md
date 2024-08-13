@@ -22,13 +22,13 @@ NapCatQQ 是现代化的基于 NTQQ 的 Bot 协议端实现。
 
 [Telegram Link](https://t.me/+nLZEnpne-pQ1OWFl)
 
-## 附加协议
-禁止未授权任何项目使用Core部分代码用于二次开发与分发
-
 ## 鸣谢名单
 感谢 [LLOneBot](https://github.com/LLOneBot/LLOneBot) 提供初始版本基础
 
 感谢 [Lagrange](https://github.com/LagrangeDev/Lagrange.Core) 对本项目的大力支持
 
 ---
-**任何使用本仓库代码的地方，都应当严格遵守[本仓库开源许可](./LICENSE)。**
+
+## 使用许可
+
+任何使用本仓库代码的地方，都应当严格遵守[本仓库开源许可](./LICENSE)。**此外，禁止任何项目未经授权二次分发或基于 [core](./src/core) 部分代码开发。**
