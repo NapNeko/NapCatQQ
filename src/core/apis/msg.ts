@@ -37,7 +37,6 @@ export class NTQQMsgApi {
         emojiId = emojiId.toString();
         return this.context.session.getMsgService().setMsgEmojiLikes(peer, msgSeq, emojiId, emojiId.length > 3 ? '2' : '1', set);
     }
-
     async getMultiMsg(peer: Peer, rootMsgId: string, parentMsgId: string): Promise<GeneralCallResult & {
         msgList: RawMessage[]
     } | undefined> {
@@ -197,10 +196,6 @@ export class NTQQMsgApi {
 
     async getServerTime() {
         return this.context.session.getMSFService().getServerTime();
-    }
-
-    async getServerTimeV2() {
-        return this.core.eventWrapper.callNoListenerEvent<() => string>('NodeIKernelMsgService/getServerTime', 5000);
     }
 
     async forwardMsg(srcPeer: Peer, destPeer: Peer, msgIds: string[]) {

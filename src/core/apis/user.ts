@@ -203,26 +203,6 @@ export class NTQQUserApi {
         return skey;
     }
 
-    /**
-     * @deprecated
-     */
-    async getUidByUin(Uin: string) {
-        if (this.context.basicInfoWrapper.requireMinNTQQBuild('26702')) {
-            return await this.getUidByUinV2(Uin);
-        }
-        return await this.getUidByUinV1(Uin);
-    }
-
-    /**
-     * @deprecated
-     */
-    async getUinByUid(Uid: string) {
-        if (this.context.basicInfoWrapper.requireMinNTQQBuild('26702')) {
-            return await this.getUinByUidV2(Uid);
-        }
-        return await this.getUinByUidV1(Uid);
-    }
-
     //后期改成流水线处理
     async getUidByUinV2(Uin: string) {
         let uid = (await this.context.session.getProfileService().getUidByUin('FriendsServiceImpl', [Uin])).get(Uin);
@@ -248,36 +228,6 @@ export class NTQQUserApi {
         uin = (await this.core.apis.FriendApi.getBuddyIdMap(true)).getKey(Uid);
         if (uin) return uin;
         uin = (await this.getUserDetailInfo(Uid)).uin; //从QQ Native 转换
-        return uin;
-    }
-
-    async getUidByUinV1(Uin: string) {
-        // 通用转换开始尝试
-        let uid = (await this.context.session.getUixConvertService().getUid([Uin])).uidInfo.get(Uin);
-        if (!uid) {
-            const unveifyUid = (await this.getUserDetailInfoByUin(Uin)).info.uid;//从QQ Native 特殊转换 方法三
-            if (unveifyUid.indexOf('*') == -1) {
-                uid = unveifyUid;
-            }
-        }
-        return uid;
-    }
-
-    async getUinByUidV1(Uid: string) {
-        const ret = await this.core.eventWrapper.callNoListenerEvent<(Uin: string[]) => Promise<{
-            uinInfo: Map<string, string>
-        }>>
-            ('NodeIKernelUixConvertService/getUin', 5000, [Uid]);
-        let uin = ret.uinInfo.get(Uid);
-        if (!uin) {
-            uin = (await this.getUserDetailInfo(Uid)).uin; //从QQ Native 转换
-        }
-        // if (!uin) {
-        //   uin = (await NTQQFriendApi.getFriends(false)).find((t) => { t.uid == Uid })?.uin;  //从QQ Native 缓存转换
-        // }
-        // if (!uin) {
-        //   uin = (await NTQQFriendApi.getFriends(true)).find((t) => { t.uid == Uid })?.uin;  //从QQ Native 非缓存转换
-        // }
         return uin;
     }
 
