@@ -70,6 +70,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
             let isClosedByError = false;
 
             this.connection = new WebSocket(this.url, {
+                maxPayload: 1024 * 1024 * 1024,
                 headers: {
                     'X-Self-ID': this.coreContext.selfInfo.uin,
                     'Authorization': `Bearer ${this.token}`,
@@ -79,12 +80,12 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
 
             });
             this.connection.on('open', () => {
-                try{
+                try {
                     this.connectEvent(this.coreContext);
-                }catch(e){
+                } catch (e) {
                     this.logger.logError('[OneBot] [WebSocket Client] 发送连接生命周期失败', e);
                 }
-                
+
             });
             this.connection.on('message', (data) => {
                 this.handleMessage(data);
