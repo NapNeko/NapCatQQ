@@ -6,7 +6,7 @@ const SchemaData = {
     type: 'object',
     properties: {
         group_id: { type: ['number', 'string'] },
-        is_dismiss: { type: 'boolean' },
+        is_dismiss: { type: ['boolean', 'string'] },
     },
     required: ['group_id'],
 } as const satisfies JSONSchema;
