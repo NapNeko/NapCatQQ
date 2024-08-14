@@ -26,10 +26,6 @@ export class NTQQFriendApi {
         return Array.from(data.values());
     }
 
-    async getBuddyIdMapCache(refresh = false): Promise<LimitedHashTable<string, string>> {
-        return await this.getBuddyIdMap(refresh);
-    }
-
     async getBuddyIdMap(refresh = false): Promise<LimitedHashTable<string, string>> {
         const uids: string[] = [];
         const retMap: LimitedHashTable<string, string> = new LimitedHashTable<string, string>(5000);
