@@ -13,7 +13,7 @@ interface FileResponse {
 const SchemaData = {
     type: 'object',
     properties: {
-        thread_count: { type: 'number' },
+        thread_count: { type: ['number', 'string'] },
         url: { type: 'string' },
         base64: { type: 'string' },
         name: { type: 'string' },

@@ -7,7 +7,7 @@ import { MessageUnique } from '@/common/utils/MessageUnique';
 const SchemaData = {
     type: 'object',
     properties: {
-        message_id: { type: 'number' },
+        message_id: { type: ['number', 'string'] },
         group_id: { type: ['number', 'string'] },
         user_id: { type: ['number', 'string'] },
     },
@@ -31,7 +31,7 @@ class ForwardSingleMsg extends BaseAction<Payload, null> {
 
     async _handle(payload: Payload): Promise<null> {
         const NTQQMsgApi = this.CoreContext.apis.MsgApi;
-        const msg = MessageUnique.getMsgIdAndPeerByShortId(payload.message_id);
+        const msg = MessageUnique.getMsgIdAndPeerByShortId(parseInt(payload.message_id.toString()));
         if (!msg) {
             throw new Error(`无法找到消息${payload.message_id}`);
         }
