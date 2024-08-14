@@ -43,13 +43,34 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
         this.server?.close();
         this.app = undefined;
     }
-
+    cors(): any {
+        return (req: Request, res: Response, next: any) => {
+            if (req.method === 'OPTIONS') {
+                res.setHeader('Access-Control-Allow-Origin', '*');
+                res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+                res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+            }
+            next();
+        };
+    }
     private initializeServer() {
         this.app = express();
         this.server = http.createServer(this.app);
 
-        this.app.use(express.json());
-        this.app.use(express.urlencoded({ extended: false }));
+        this.app.use(this.cors());
+        this.app.use(express.urlencoded({ extended: true, limit: '5000mb' }));
+        this.app.use((req, res, next) => {
+            // 兼容处理没有带content-type的请求
+            req.headers['content-type'] = 'application/json';
+            const originalJson = express.json({ limit: '5000mb' });
+            originalJson(req, res, (err) => {
+                if (err) {
+                    return res.status(400).send('Invalid JSON');
+                }
+                next();
+            });
+        });
+        
         this.app.use((req, res, next) => this.authorize(this.token, req, res, next));
         this.app.use((req, res) => this.handleRequest(req, res));
 
