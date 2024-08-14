@@ -52,7 +52,7 @@ export class OB11Constructor {
         messagePostFormat: string = obcore.configLoader.configData.messagePostFormat
     ): Promise<OB11Message | undefined> {
         if (msg.senderUin == "0" || msg.senderUin == "") return;
-        if (msg.peerUin == "0" || msg.peerUin) return;
+        if (msg.peerUin == "0" || msg.peerUin == "") return;
         //跳过空消息
         const NTQQGroupApi = core.apis.GroupApi;
         const NTQQUserApi = core.apis.UserApi;
