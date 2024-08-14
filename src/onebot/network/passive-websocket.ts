@@ -36,7 +36,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
         this.logger = coreContext.context.logger;
 
         this.heartbeatInterval = heartbeatInterval;
-        this.wsServer = new WebSocketServer({ port: port, host: ip });
+        this.wsServer = new WebSocketServer({ port: port, host: ip, maxPayload: 1024 * 1024 * 1024, });
         const core = coreContext;
         this.wsServer.on('connection', async (wsClient, wsReq) => {
             if (!this.isOpen) {
@@ -63,7 +63,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             });
         }).on('error', (err) => this.logger.log('[OneBot] [WebSocket Server] Server Error:', err.message));
     }
-    
+
     connectEvent(core: NapCatCore, wsClient: WebSocket) {
         try {
             this.checkStateAndReply<any>(new OB11LifeCycleEvent(core, LifeCycleSubType.CONNECT), wsClient);
