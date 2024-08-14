@@ -231,11 +231,6 @@ export class NTQQUserApi {
         if (uid) return uid;
         uid = (await this.context.session.getUixConvertService().getUid([Uin])).uidInfo.get(Uin);
         if (uid) return uid;
-        // console.log((await this.core.getApiContext().FriendApi.getBuddyIdMapCache(true)));
-        uid = (await this.core.apis.FriendApi.getBuddyIdMapCache(true)).getValue(Uin);//从Buddy缓存获取Uid
-        if (uid) return uid;
-        uid = (await this.core.apis.FriendApi.getBuddyIdMap(true)).getValue(Uin);
-        if (uid) return uid;
         const unveifyUid = (await this.getUserDetailInfoByUinV2(Uin)).detail.uid;//从QQ Native 特殊转换
         if (unveifyUid.indexOf('*') == -1) uid = unveifyUid;
         //if (uid) return uid;
@@ -249,8 +244,6 @@ export class NTQQUserApi {
         uin = (await this.context.session.getGroupService().getUinByUids([Uid])).uins.get(Uid);
         if (uin) return uin;
         uin = (await this.context.session.getUixConvertService().getUin([Uid])).uinInfo.get(Uid);
-        if (uin) return uin;
-        uin = (await this.core.apis.FriendApi.getBuddyIdMapCache(true)).getKey(Uid);//从Buddy缓存获取Uin
         if (uin) return uin;
         uin = (await this.core.apis.FriendApi.getBuddyIdMap(true)).getKey(Uid);
         if (uin) return uin;
