@@ -5,8 +5,8 @@ import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 const SchemaData = {
     type: 'object',
     properties: {
-        category: { type: 'number' },
-        count: { type: 'number' },
+        category: { type: ['number', 'string'] },
+        count: { type: ['number', 'string'] },
     },
     required: ['category', 'count'],
 } as const satisfies JSONSchema;
@@ -18,6 +18,6 @@ export class GetCollectionList extends BaseAction<Payload, any> {
     PayloadSchema = SchemaData;
     async _handle(payload: Payload) {
         const NTQQCollectionApi = this.CoreContext.apis.CollectionApi;
-        return await NTQQCollectionApi.getAllCollection(payload.category, payload.count);
+        return await NTQQCollectionApi.getAllCollection(parseInt(payload.category.toString()), parseInt(payload.count.toString()));
     }
 }

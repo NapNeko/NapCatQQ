@@ -7,7 +7,7 @@ const SchemaData = {
     properties: {
         nick: { type: 'string' },
         longNick: { type: 'string' },
-        sex: { type: 'number' },//传Sex值？建议传0
+        sex: { type: ['number', 'string'] },//传Sex值？建议传0
     },
     required: ['nick', 'longNick', 'sex'],
 } as const satisfies JSONSchema;
@@ -23,7 +23,7 @@ export class SetSelfProfile extends BaseAction<Payload, any | null> {
         const ret = await NTQQUserApi.modifySelfProfile({
             nick: payload.nick,
             longNick: payload.longNick,
-            sex: payload.sex,
+            sex: parseInt(payload.sex.toString()),
             birthday: { birthday_year: '', birthday_month: '', birthday_day: '' },
             location: undefined,
         });
