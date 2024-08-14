@@ -1,9 +1,9 @@
 {
   "manifest_version": 4,
   "type": "extension",
-  "name": "NapCat",
-  "slug": "NapCat",
-  "description": "现代化的 OneBot 11 协议实现",
+  "name": "NapCatQQ",
+  "slug": "NapCat.LiteLoader",
+  "description": "高性能的 OneBot 11 协议实现",
   "version": "2.0.20",
   "icon": "./logo.png",
   "authors": [
