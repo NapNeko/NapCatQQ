@@ -24,7 +24,7 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
         const NTQQUserApi = this.CoreContext.apis.UserApi;
         const NTQQGroupApi = this.CoreContext.apis.GroupApi;
         const NTQQWebApi = this.CoreContext.apis.WebApi;
-        const isNocache = payload.no_cache == true || payload.no_cache === 'true';
+        const isNocache = typeof payload.no_cache === 'string' ? payload.no_cache === 'true' : !!payload.no_cache;
         const uid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());
         if (!uid) throw (`Uin2Uid Error ${payload.user_id}不存在`);
         const member = await NTQQGroupApi.getGroupMemberV2(payload.group_id.toString(), uid, isNocache);

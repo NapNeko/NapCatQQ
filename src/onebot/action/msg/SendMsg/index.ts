@@ -153,7 +153,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
 
         const messages = normalize(
             payload.message,
-            payload.auto_escape === true || payload.auto_escape === 'true',
+            typeof payload.auto_escape === 'string' ? payload.auto_escape === 'true' : !!payload.auto_escape
         );
 
         if (getSpecialMsgNum(payload, OB11MessageDataType.node)) {
