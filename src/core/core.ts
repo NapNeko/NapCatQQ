@@ -93,6 +93,9 @@ export class NapCatCore {
         msgListener.onRecvMsg = (msgs) => {
             msgs.forEach(msg => this.context.logger.logMessage(msg, this.selfInfo));
         };
+        msgListener.onAddSendMsg = (msg) => {
+            this.context.logger.logMessage(msg, this.selfInfo);
+        };
         //await sleep(2500);
         this.context.session.getMsgService().addKernelMsgListener(
             new this.context.wrapper.NodeIKernelMsgListener(proxiedListenerOf(msgListener, this.context.logger)),

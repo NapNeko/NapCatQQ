@@ -3,7 +3,6 @@ import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { checkFileReceived, uri2local } from '@/common/utils/file';
 import fs from 'fs';
-
 const SchemaData = {
     type: 'object',
     properties: {

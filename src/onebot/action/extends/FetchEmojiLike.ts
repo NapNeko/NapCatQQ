@@ -22,7 +22,6 @@ type Payload = FromSchema<typeof SchemaData>;
 export class FetchEmojiLike extends BaseAction<Payload, any> {
     actionName = ActionName.FetchEmojiLike;
     PayloadSchema = SchemaData;
-
     async _handle(payload: Payload) {
         const NTQQMsgApi = this.CoreContext.apis.MsgApi;
         const msgIdPeer = MessageUnique.getMsgIdAndPeerByShortId(parseInt(payload.message_id.toString()));
