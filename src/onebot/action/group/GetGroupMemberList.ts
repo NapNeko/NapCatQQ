@@ -22,7 +22,6 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
     async _handle(payload: Payload) {
         const NTQQGroupApi = this.CoreContext.apis.GroupApi;
         const NTQQWebApi = this.CoreContext.apis.WebApi;
-        //const isNocache = payload.no_cache == true || payload.no_cache === 'true';//已强制无缓存
         const groupMembers = await NTQQGroupApi.getGroupMembers(payload.group_id.toString());
         const groupMembersArr = Array.from(groupMembers.values());
 

@@ -20,7 +20,7 @@ export default class SetGroupAdmin extends BaseAction<Payload, null> {
     PayloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
-        const enable = typeof payload.enable === 'string' ? payload.enable === 'true' : payload.enable;
+        const enable = typeof payload.enable === 'string' ? payload.enable === 'true' : !!payload.enable;
         const NTQQGroupApi = this.CoreContext.apis.GroupApi;
         const NTQQUserApi = this.CoreContext.apis.UserApi;
         const uid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());

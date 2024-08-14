@@ -20,7 +20,7 @@ class GetGroupList extends BaseAction<Payload, OB11Group[]> {
 
     async _handle(payload: Payload) {
         const NTQQGroupApi = this.CoreContext.apis.GroupApi;
-        const groupList: Group[] = await NTQQGroupApi.getGroups(payload?.no_cache === true || payload.no_cache === 'true');
+        const groupList: Group[] = await NTQQGroupApi.getGroups(typeof payload.no_cache === 'string' ? payload.no_cache === 'true' : !!payload.no_cache);
         return OB11Constructor.groups(groupList);
     }
 }
