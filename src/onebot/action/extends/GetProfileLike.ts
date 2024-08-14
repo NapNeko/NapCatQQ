@@ -9,7 +9,7 @@ export class GetProfileLike extends BaseAction<void, any> {
         const ret = await NTQQUserApi.getProfileLike(this.CoreContext.selfInfo.uid);
         const listdata: any[] = ret.info.userLikeInfos[0].favoriteInfo.userInfos;
         for (let i = 0; i < listdata.length; i++) {
-            listdata[i].uin = parseInt((await NTQQUserApi.getUinByUid(listdata[i].uid)) || '');
+            listdata[i].uin = parseInt((await NTQQUserApi.getUinByUidV2(listdata[i].uid)) || '');
         }
         return listdata;
     }

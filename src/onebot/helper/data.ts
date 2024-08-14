@@ -119,7 +119,7 @@ export class OB11Constructor {
                     const { atNtUid, content } = element.textElement;
                     let atQQ = element.textElement.atUid;
                     if (!atQQ || atQQ === '0') {
-                        atQQ = await NTQQUserApi.getUinByUid(atNtUid);
+                        atQQ = await NTQQUserApi.getUinByUidV2(atNtUid);
                     }
                     if (atQQ) {
                         qq = atQQ as `${number}`;
