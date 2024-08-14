@@ -57,7 +57,7 @@ const _handlers: {
 
         // then the qq is a group member
         // Mlikiowa V2.0.19 Refactor Todo
-        const uid = await coreContext.apis.UserApi.getUidByUinV2(atQQ);
+        const uid = await coreContext.apis.UserApi.getUidByUinV2(`${atQQ}`);
         if (!uid) throw new Error('Get Uid Error');
         return SendMsgElementConstructor.at(coreContext, atQQ, uid, AtType.atUser, '');
     },
