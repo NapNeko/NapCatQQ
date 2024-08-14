@@ -183,6 +183,7 @@ export async function NCoreInitShell() {
                 }, 1000);
             } else {
                 logger.logError('快速登录失败，未找到该 QQ 历史登录记录，将使用二维码登录方式');
+                loginService.getQRCodePicture();
             }
         } else {
             logger.log('没有 -q 指令指定快速登录，将使用二维码登录方式');
