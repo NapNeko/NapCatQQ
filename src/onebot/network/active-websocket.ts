@@ -135,6 +135,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
             const packet = Object.assign({}, retdata);
             this.checkStateAndReply<any>(packet);
         } catch (e) {
+            this.logger.logError('[OneBot] [WebSocket Client] 发生错误', e);
             this.checkStateAndReply<any>(OB11Response.error('不支持的api ' + receiveData.action, 1404, echo));
         }
     }
