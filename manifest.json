@@ -2,7 +2,7 @@
   "manifest_version": 4,
   "type": "extension",
   "name": "NapCatQQ",
-  "slug": "NapCat.LiteLoader",
+  "slug": "NapCat.Framework",
   "description": "高性能的 OneBot 11 协议实现",
   "version": "2.0.20",
   "icon": "./logo.png",
