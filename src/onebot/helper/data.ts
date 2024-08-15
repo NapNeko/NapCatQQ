@@ -15,9 +15,9 @@ import {
     FaceIndex,
     Friend,
     FriendV2,
-    GrayTipElementSubType,
     Group,
     GroupMember,
+    NTGrayTipElementSubTypeV2,
     Peer,
     RawMessage,
     SelfInfo,
@@ -377,7 +377,7 @@ export class OB11Constructor {
         }
         for (const element of msg.elements) {
             if (element.grayTipElement) {
-                if (element.grayTipElement.subElementType == GrayTipElementSubType.MEMBER_NEW_TITLE) {
+                if (element.grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
                     const json = JSON.parse(element.grayTipElement.jsonGrayTipElement.jsonStr);
 
                     if (element.grayTipElement.jsonGrayTipElement.busiId == 1061) {
@@ -398,7 +398,7 @@ export class OB11Constructor {
                     }
                     //下面得改 上面也是错的grayTipElement.subElementType == GrayTipElementSubType.MEMBER_NEW_TITLE
                 }
-                if (element.grayTipElement.subElementType == GrayTipElementSubType.INVITE_NEW_MEMBER) {
+                if (element.grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_XMLMSG) {
                     //好友添加成功事件
                     if (element.grayTipElement.xmlElement.templId === '10229' && msg.peerUin !== '') {
                         return new OB11FriendAddNoticeEvent(core, parseInt(msg.peerUin));
@@ -556,7 +556,7 @@ export class OB11Constructor {
                         logger.logError('解析表情回应消息失败', e.stack);
                     }
                 }
-                if (grayTipElement.subElementType == GrayTipElementSubType.INVITE_NEW_MEMBER) {
+                if (grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_XMLMSG) {
                     logger.logDebug('收到新人被邀请进群消息', grayTipElement);
                     const xmlElement = grayTipElement.xmlElement;
                     if (xmlElement?.content) {
@@ -582,7 +582,7 @@ export class OB11Constructor {
                     }
                 }
                 //代码歧义 GrayTipElementSubType.MEMBER_NEW_TITLE
-                else if (grayTipElement.subElementType == GrayTipElementSubType.MEMBER_NEW_TITLE) {
+                else if (grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
                     const json = JSON.parse(grayTipElement.jsonGrayTipElement.jsonStr);
                     if (grayTipElement.jsonGrayTipElement.busiId == 1061) {
                         //判断业务类型
