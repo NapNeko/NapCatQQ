@@ -98,7 +98,7 @@ jobs:
     
     - name: Compress subdirectories
       run: |
-        ls
+        ls NapCat.Shell
         zip -r NapCat.Framework.zip ./NapCat.Framework/NapCat.Framework/*
         zip -r NapCat.Shell.zip ./NapCat.Shell/NapCat.Shell/*
     
