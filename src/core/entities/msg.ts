@@ -891,6 +891,12 @@ export enum NTSubMsgType {
     KMSGSUBTYPEMIXTEXT = 0,
     KMSGSUBTYPETENCENTDOC = 6
 }
+export enum SendStatusType {
+    KSEND_STATUS_FAILED = 0,
+    KSEND_STATUS_SENDING = 1,
+    KSEND_STATUS_SUCCESS = 2,
+    KSEND_STATUS_SUCCESS_NOSEQ = 3
+}
 export interface RawMessage {
     parentMsgPeer: Peer;
 
@@ -950,7 +956,7 @@ export interface RawMessage {
     /**
      * 消息状态，别人发的 2 是已撤回，自己发的 2 是已发送
      */
-    sendStatus?: number;
+    sendStatus?: SendStatusType;
 
     /**
      * 撤回时间，"0" 是没有撤回

@@ -8,6 +8,7 @@ import {
     MsgListener,
     NapCatCore,
     RawMessage,
+    SendStatusType,
 } from '@/core';
 import { OB11Config, OB11ConfigLoader } from '@/onebot/helper/config';
 import { OneBotApiContextType } from '@/onebot/types';
@@ -250,7 +251,7 @@ export class NapCatOneBot11Adapter {
                 .catch(e => this.context.logger.logError('处理消息失败', e));
 
             for (const msg of msgList.filter(e => e.senderUin == this.core.selfInfo.uin)) {
-                if (msg.sendStatus == 2 && !msgIdSend.get(msg.msgId)) {
+                if (msg.sendStatus == SendStatusType.KSEND_STATUS_SUCCESS && !msgIdSend.get(msg.msgId)) {
                     msgIdSend.put(msg.msgId, true);
                     // 完成后再post
                     OB11Constructor.message(this.core, this, msg)
