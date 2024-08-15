@@ -614,10 +614,6 @@ export interface PicElement {
     originImageUrl?: string;  // http url, 没有host，host是https://gchat.qpic.cn/, 带download参数的是https://multimedia.nt.qq.com.cn
 }
 
-export enum GrayTipElementSubType {
-    INVITE_NEW_MEMBER = 12,
-    MEMBER_NEW_TITLE = 17
-}
 export enum NTGrayTipElementSubTypeV2 {
     GRAYTIP_ELEMENT_SUBTYPE_AIOOP = 15,
     GRAYTIP_ELEMENT_SUBTYPE_BLOCK = 14,
