@@ -161,7 +161,7 @@ export class OB11Constructor {
                         peerUid: msg.peerUid,
                         guildId: '',
                         chatType: msg.chatType,
-                    }, element.replyElement.replayMsgSeq, 1, true, true)).msgList[0];
+                    }, element.replyElement.replayMsgSeq, 1, true, true)).msgList.find(msg => msg.msgRandom === records.msgRandom);
                     if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
                         replyMsg = (await NTQQMsgApi.getSingleMsg(peer, element.replyElement.replayMsgSeq)).msgList[0];
                     }
@@ -286,13 +286,13 @@ export class OB11Constructor {
                     chatType: msg.chatType,
                     guildId: '',
                 },
-                msg.msgId,
-                msg.msgSeq,
-                msg.senderUid,
-                element.elementId,
-                element.elementType.toString(),
-                element.pttElement.fileSize || '0',
-                element.pttElement.fileUuid || '',
+                    msg.msgId,
+                    msg.msgSeq,
+                    msg.senderUid,
+                    element.elementId,
+                    element.elementType.toString(),
+                    element.pttElement.fileSize || '0',
+                    element.pttElement.fileUuid || '',
                 );
                 //以uuid作为文件名
             } else if (element.arkElement) {
