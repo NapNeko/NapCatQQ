@@ -100,7 +100,7 @@ jobs:
       run: |
        for dir in */; do
           base=$(basename "$dir")
-          zip -r "${base}.zip" "$dir"
+          zip -r "$base.zip" "$dir"/*
         done 
     
     - name: Extract version from tag
@@ -118,6 +118,4 @@ jobs:
         files: |
           NapCat.Framework.zip
           NapCat.Shell.zip
-#          NapCat.darwin.x64.zip
-#          NapCat.darwin.arm64.zip
         draft: true
