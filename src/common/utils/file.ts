@@ -165,118 +165,98 @@ type Uri2LocalRes = {
     path: string,
     isLocal: boolean
 }
-
-export async function uri2local(TempDir: string, UriOrPath: string, fileName: string | null = null): Promise<Uri2LocalRes> {
-    const res = {
-        success: false,
-        errMsg: '',
-        fileName: '',
-        ext: '',
-        path: '',
-        isLocal: false,
-    };
-    if (!fileName) fileName = randomUUID();
-    let filePath = path.join(TempDir, fileName);//临时目录
-    let url = null;
-    //区分path和uri
+export async function checkFileV2(filePath: string) {
     try {
-        if (fs.existsSync(UriOrPath)) url = new URL('file://' + UriOrPath);
-    } catch (error: any) {
+        const ext: string | undefined = (await fileType.fileTypeFromFile(filePath))?.ext;
+        if (ext) {
+            fs.renameSync(filePath, filePath + `.${ext}`);
+            filePath += `.${ext}`;
+            return { success: true, ext: ext, path: filePath };
+        }
+    } catch (e) {
+        // log("获取文件类型失败", filePath,e.stack)
+    }
+    return { success: false, ext: '', path: filePath };
+}
+export enum FileUriType {
+    Unknown = 0,
+    Local = 1,
+    Remote = 2,
+    Base64 = 3
+}
+export async function checkUriType(Uri: string) {
+    //先判断是否是本地文件
+    try {
+        if (fs.existsSync(Uri)) return { Uri: Uri, Type: FileUriType.Local };
+    } catch (error) {
     }
     try {
-        url = new URL(UriOrPath);
-    } catch (error: any) {
-    }
-
-    //验证url
-    if (!url) {
-        res.errMsg = `UriOrPath ${UriOrPath} 解析失败,可能${UriOrPath}不存在`;
-        return res;
-    }
-
-    if (url.protocol == 'base64:') {
-        // base64转成文件
-        const base64Data = UriOrPath.split('base64://')[1];
-        try {
-            const buffer = Buffer.from(base64Data, 'base64');
-            fs.writeFileSync(filePath, buffer);
-        } catch (e: any) {
-            res.errMsg = 'base64文件下载失败,' + e.toString();
-            return res;
+        //再判断是否是Http
+        if (Uri.startsWith('http://') || Uri.startsWith('https://')) {
+            return { Uri: Uri, Type: FileUriType.Remote };
         }
-    } else if (url.protocol == 'http:' || url.protocol == 'https:') {
-        // 下载文件
-        let buffer: Buffer | null = null;
-        try {
-            buffer = await httpDownload(UriOrPath);
-        } catch (e: any) {
-            res.errMsg = `${url}下载失败,` + e.toString();
-            return res;
+        //再判断是否是Base64
+        if (Uri.startsWith('base64://')) {
+            return { Uri: Uri, Type: FileUriType.Base64 };
         }
-        try {
-            const pathInfo = path.parse(decodeURIComponent(url.pathname));
-            if (pathInfo.name) {
-                fileName = pathInfo.name;
-                if (pathInfo.ext) {
-                    fileName += pathInfo.ext;
-                    // res.ext = pathInfo.ext
-                }
-            }
-            fileName = fileName.replace(/[/\\:*?"<>|]/g, '_');
-            res.fileName = fileName;
-            filePath = path.join(TempDir, randomUUID() + fileName);
-            fs.writeFileSync(filePath, buffer);
-        } catch (e: any) {
-            res.errMsg = `${url}下载失败,` + e.toString();
-            return res;
-        }
-    } else {
-        let pathname: string;
-        if (url.protocol === 'file:') {
+        if (Uri.startsWith('file://')) {
+            let pathname: string;
+            let filePath: string;
             // await fs.copyFile(url.pathname, filePath);
-            pathname = decodeURIComponent(url.pathname);
+            pathname = decodeURIComponent(new URL(Uri).pathname);
             if (process.platform === 'win32') {
                 filePath = pathname.slice(1);
             } else {
                 filePath = pathname;
             }
-        } else {
-            // 26702执行forword file文件操作 不应该在这里乱来
-            // const cache = await dbUtil.getFileCacheByName(uri);
-            // if (cache) {
-            //   filePath = cache.path;
-            // } else {
-            //   filePath = uri;
-            // }
+            return { Uri: filePath, Type: FileUriType.Local };
         }
-        res.isLocal = true;
+    } catch (error) {
     }
-    // else{
-    //     res.errMsg = `不支持的file协议,` + url.protocol
-    //     return res
-    // }
-    // if (isGIF(filePath) && !res.isLocal) {
-    //     await fs.rename(filePath, filePath + ".gif");
-    //     filePath += ".gif";
-    // }
-    if (!res.isLocal && !res.ext) {
-        try {
-            const ext: string | undefined = (await fileType.fileTypeFromFile(filePath))?.ext;
-            if (ext) {
-                fs.renameSync(filePath, filePath + `.${ext}`);
-                filePath += `.${ext}`;
-                res.fileName += `.${ext}`;
-                res.ext = ext;
-            }
-        } catch (e) {
-            // log("获取文件类型失败", filePath,e.stack)
-        }
-    }
-    res.success = true;
-    res.path = filePath;
-    return res;
+    return { Uri: Uri, Type: FileUriType.Unknown };
 }
+export async function uri2local(dir: string, uri: string, filename: string | undefined = undefined): Promise<Uri2LocalRes> {
+    let { Uri: HandledUri, Type: UriType } = await checkUriType(uri);
+    //解析失败
 
+    if (UriType == FileUriType.Unknown) {
+        return { success: false, errMsg: '未知文件类型', fileName: '', ext: '', path: '', isLocal: false };
+    }
+    //解析File协议和本地文件
+    if (UriType == FileUriType.Local) {
+        const fileExt = path.extname(HandledUri);
+        const filename = path.basename(HandledUri, fileExt);
+        return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: HandledUri, isLocal: true };
+    }
+    //接下来都要有文件名
+    if (!filename) filename = randomUUID();
+    //解析Http和Https协议
+    if (UriType == FileUriType.Remote) {
+        const fileExt = path.extname(HandledUri);
+
+        const fileName = filename + fileExt;
+        const filePath = path.join(dir, fileName);
+        const buffer = await httpDownload(HandledUri);
+        fs.writeFileSync(filePath, buffer);
+        return { success: true, errMsg: '', fileName: fileName, ext: fileExt, path: filePath, isLocal: true };
+    }
+    //解析Base64
+    if (UriType == FileUriType.Base64) {
+        const base64 = HandledUri.replace(/^base64:\/\//, '');
+        const buffer = Buffer.from(base64, 'base64');
+        let filePath = path.join(dir, filename);
+        let fileExt = '';
+        fs.writeFileSync(filePath, buffer);
+        const { success, ext, path: fileTypePath } = await checkFileV2(filePath);
+        if (success) {
+            filePath = fileTypePath;
+            fileExt = ext;
+            filename = path.basename(filePath, fileExt);
+        }
+        return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath, isLocal: true };
+    }
+    return { success: false, errMsg: '未知文件类型', fileName: '', ext: '', path: '', isLocal: false };
+}
 export async function copyFolder(sourcePath: string, destPath: string, logger: LogWrapper) {
     try {
         const entries = await fsPromise.readdir(sourcePath, { withFileTypes: true });
