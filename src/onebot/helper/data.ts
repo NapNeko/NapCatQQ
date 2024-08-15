@@ -536,12 +536,13 @@ export class OB11Constructor {
                             guildId: '',
                             peerUid: msg.peerUid,
                         }, msgSeq, 1, true, true)).msgList;
+                        console.log("表情回应消息长度检测", replyMsgList.length)
                         if (replyMsgList.length < 1) {
                             return;
                         }
 
-                        const replyMsg = replyMsgList[0];
-                        console.log('表情回应消息', msgSeq, ' 结算ID', replyMsg.msgId);
+                        const replyMsg = replyMsgList.reverse()[0];//获取最顶层消息
+                        //console.log('表情回应消息', msgSeq, ' 结算ID', replyMsg.msgId);
                         return new OB11GroupMsgEmojiLikeEvent(
                             core,
                             parseInt(msg.peerUid),
