@@ -106,8 +106,8 @@ jobs:
         cd ..
         rm ./NapCat.Shell.zip -rf
         rm ./NapCat.Framework.zip -rf
-        mv ./NapCat.Shell/NapCat.Shell.zip ../
-        mv ./NapCat.Framework/NapCat.Framework.zip ../
+        mv ./NapCat.Shell/NapCat.Shell.zip ./
+        mv ./NapCat.Framework/NapCat.Framework.zip ./
     - name: Extract version from tag
       run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
       
