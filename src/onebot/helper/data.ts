@@ -530,13 +530,18 @@ export class OB11Constructor {
                         const senderUin = emojiLikeData.gtip.qq.jp;
                         const msgSeq = emojiLikeData.gtip.url.msgseq;
                         const emojiId = emojiLikeData.gtip.face.id;
-
-                        const replyMsgList = (await NTQQMsgApi.getMsgsBySeqAndCount({
+                        const peer = {
                             chatType: ChatType.group,
                             guildId: '',
-                            peerUid: msg.peerUid,
-                        }, msgSeq, 1, true, true)).msgList;
-                        console.log("表情回应消息长度检测", replyMsgList.length)
+                            peerUid: msg.peerUid
+                        }
+                        // const replyMsgList = (await NTQQMsgApi.getMsgsBySeqAndCount({
+                        //     chatType: ChatType.group,
+                        //     guildId: '',
+                        //     peerUid: msg.peerUid,
+                        // }, msgSeq, 1, true, true)).msgList;
+                        const replyMsgList = (await NTQQMsgApi.getMsgExBySeq(peer, msgSeq)).msgList;
+                        //console.log("表情回应消息长度检测", replyMsgList.length)
                         if (replyMsgList.length < 1) {
                             return;
                         }
