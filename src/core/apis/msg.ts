@@ -1,4 +1,4 @@
-import { ChatType, GetFileListParam, Peer, RawMessage, SendMessageElement } from '@/core/entities';
+import { ChatType, GetFileListParam, Peer, RawMessage, SendMessageElement, SendStatusType } from '@/core/entities';
 import { InstanceContext, NapCatCore } from '@/core';
 import { onGroupFileInfoUpdateParamType } from '@/core/listeners';
 import { GeneralCallResult } from '@/core/services/common';
@@ -171,7 +171,7 @@ export class NTQQMsgApi {
                 timeout,
                 (msgRecords: RawMessage[]) => {
                     for (const msgRecord of msgRecords) {
-                        if (msgRecord.guildId === msgId && msgRecord.sendStatus === 2) {
+                        if (msgRecord.guildId === msgId && msgRecord.sendStatus === SendStatusType.KSEND_STATUS_SUCCESS) {
                             return true;
                         }
                     }
