@@ -1,10 +1,9 @@
 import fs from 'fs';
-import fsPromise, { stat } from 'fs/promises';
+import { stat } from 'fs/promises';
 import crypto, { randomUUID } from 'crypto';
 import util from 'util';
 import path from 'node:path';
 import * as fileType from 'file-type';
-import { LogWrapper } from './log';
 
 export function isGIF(path: string) {
     const buffer = Buffer.alloc(4);
@@ -13,7 +12,6 @@ export function isGIF(path: string) {
     fs.closeSync(fd);
     return buffer.toString() === 'GIF8';
 }
-
 // 定义一个异步函数来检查文件是否存在
 export function checkFileReceived(path: string, timeout: number = 3000): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -94,7 +92,6 @@ export async function file2base64(path: string) {
     return result;
 }
 
-
 export function calculateFileMD5(filePath: string): Promise<string> {
     return new Promise((resolve, reject) => {
         // 创建一个流式读取器
@@ -165,6 +162,7 @@ type Uri2LocalRes = {
     path: string,
     isLocal: boolean
 }
+
 export async function checkFileV2(filePath: string) {
     try {
         const ext: string | undefined = (await fileType.fileTypeFromFile(filePath))?.ext;
@@ -178,12 +176,14 @@ export async function checkFileV2(filePath: string) {
     }
     return { success: false, ext: '', path: filePath };
 }
+
 export enum FileUriType {
     Unknown = 0,
     Local = 1,
     Remote = 2,
     Base64 = 3
 }
+
 export async function checkUriType(Uri: string) {
     //先判断是否是本地文件
     try {
@@ -215,8 +215,9 @@ export async function checkUriType(Uri: string) {
     }
     return { Uri: Uri, Type: FileUriType.Unknown };
 }
+
 export async function uri2local(dir: string, uri: string, filename: string | undefined = undefined): Promise<Uri2LocalRes> {
-    let { Uri: HandledUri, Type: UriType } = await checkUriType(uri);
+    const { Uri: HandledUri, Type: UriType } = await checkUriType(uri);
     //解析失败
 
     if (UriType == FileUriType.Unknown) {
@@ -256,26 +257,4 @@ export async function uri2local(dir: string, uri: string, filename: string | und
         return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath, isLocal: true };
     }
     return { success: false, errMsg: '未知文件类型', fileName: '', ext: '', path: '', isLocal: false };
-}
-export async function copyFolder(sourcePath: string, destPath: string, logger: LogWrapper) {
-    try {
-        const entries = await fsPromise.readdir(sourcePath, { withFileTypes: true });
-        await fsPromise.mkdir(destPath, { recursive: true });
-        for (const entry of entries) {
-            const srcPath = path.join(sourcePath, entry.name);
-            const dstPath = path.join(destPath, entry.name);
-            if (entry.isDirectory()) {
-                await copyFolder(srcPath, dstPath, logger);
-            } else {
-                try {
-                    await fsPromise.copyFile(srcPath, dstPath);
-                } catch (error) {
-                    logger.logError(`无法复制文件 '${srcPath}' 到 '${dstPath}': ${error}`);
-                    // 这里可以决定是否要继续复制其他文件
-                }
-            }
-        }
-    } catch (error) {
-        logger.logError('复制文件夹时出错:', error);
-    }
 }

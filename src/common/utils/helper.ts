@@ -53,12 +53,6 @@ export async function runAllWithTimeout<T>(tasks: Promise<T>[], timeout: number)
         .map((result) => (result as { status: 'fulfilled'; value: T }).value);
 }
 
-export function getMd5(s: string) {
-    const h = crypto.createHash('md5');
-    h.update(s);
-    return h.digest('hex');
-}
-
 export function isNull(value: any) {
     return value === undefined || value === null;
 }
@@ -135,28 +129,6 @@ export function getQQVersionConfigPath(exePath: string = ''): string | undefined
         return undefined;
     }
     return configVersionInfoPath;
-}
-
-export async function deleteOldFiles(directoryPath: string, daysThreshold: number) {
-    try {
-        const files = await fsPromise.readdir(directoryPath);
-
-        for (const file of files) {
-            const filePath = path.join(directoryPath, file);
-            const stats = await fsPromise.stat(filePath);
-            const lastModifiedTime = stats.mtimeMs;
-            const currentTime = Date.now();
-            const timeDifference = currentTime - lastModifiedTime;
-            const daysDifference = timeDifference / (1000 * 60 * 60 * 24);
-
-            if (daysDifference > daysThreshold) {
-                await fsPromise.unlink(filePath); // Delete the file
-                //console.log(`Deleted: ${filePath}`);
-            }
-        }
-    } catch (error) {
-        //console.error('Error deleting files:', error);
-    }
 }
 
 export function calcQQLevel(level: QQLevel) {
