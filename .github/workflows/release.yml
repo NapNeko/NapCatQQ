@@ -104,8 +104,8 @@ jobs:
         cd ./NapCat.Framework/
         zip -q -r NapCat.Framework.zip *
         cd ..
-        rm ./NapCat.Shell -rf
-        rm ./NapCat.Framework -rf
+        rm ./NapCat.Shell.zip -rf
+        rm ./NapCat.Framework.zip -rf
         mv ./NapCat.Shell/NapCat.Shell.zip ../
         mv ./NapCat.Framework/NapCat.Framework.zip ../
     - name: Extract version from tag
