@@ -326,11 +326,6 @@ export class NapCatOneBot11Adapter {
                     const flag = notify.group.groupCode + '|' + notify.seq + '|' + notify.type;
                     this.context.logger.logDebug('收到群通知', notify);
 
-                    // let member2: GroupMember;
-                    // if (notify.user2.uid) {
-                    //     member2 = await getGroupMember(notify.group.groupCode, null, notify.user2.uid);
-                    // }
-
                     if ([
                         GroupNotifyTypes.ADMIN_SET,
                         GroupNotifyTypes.ADMIN_UNSET,
@@ -406,7 +401,7 @@ export class NapCatOneBot11Adapter {
                         const groupInviteEvent = new OB11GroupRequestEvent(
                             this.core,
                             parseInt(notify.group.groupCode),
-                            parseInt(notify.user1.uid),
+                            parseInt(await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid)),
                             'invite',
                             notify.postscript,
                             flag,
