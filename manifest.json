@@ -4,7 +4,7 @@
   "name": "NapCatQQ",
   "slug": "NapCat.Framework",
   "description": "高性能的 OneBot 11 协议实现",
-  "version": "2.0.22",
+  "version": "2.0.23",
   "icon": "./logo.png",
   "authors": [
     {
