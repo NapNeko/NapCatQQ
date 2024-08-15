@@ -99,8 +99,8 @@ jobs:
     - name: Compress subdirectories
       run: |
         ls
-        zip -r NapCat.Framework.zip ./NapCat.Framework/*
-        zip -r NapCat.Shell.zip ./NapCat.Shell/*
+        zip -r NapCat.Framework.zip ./NapCat.Framework/NapCat.Framework/*
+        zip -r NapCat.Shell.zip ./NapCat.Shell/NapCat.Shell/*
     
     - name: Extract version from tag
       run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
