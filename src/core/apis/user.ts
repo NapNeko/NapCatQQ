@@ -127,25 +127,7 @@ export class NTQQUserApi {
     }
 
     async getUserDetailInfo(uid: string) {
-        if (this.context.basicInfoWrapper.requireMinNTQQBuild('26702')) {
-            return this.fetchUserDetailInfo(uid);
-        }
-        return this.getUserDetailInfoOld(uid);
-    }
-
-    async getUserDetailInfoOld(uid: string) {
-        type EventService = NodeIKernelProfileService['getUserDetailInfoWithBizInfo'];
-        type EventListener = NodeIKernelProfileListener['onProfileDetailInfoChanged'];
-        const [_retData, profile] = await this.core.eventWrapper.CallNormalEvent<EventService, EventListener>(
-            'NodeIKernelProfileService/getUserDetailInfoWithBizInfo',
-            'NodeIKernelProfileListener/onProfileDetailInfoChanged',
-            2,
-            5000,
-            (profile) => profile.uid === uid,
-            uid,
-            [0],
-        );
-        return profile;
+        return this.fetchUserDetailInfo(uid);
     }
 
     async modifySelfProfile(param: ModifyProfileParams) {
