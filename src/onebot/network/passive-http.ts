@@ -4,6 +4,7 @@ import http from 'http';
 import { NapCatCore } from '@/core';
 import { OB11Response } from '../action/OB11Response';
 import { ActionMap } from '@/onebot/action';
+import cors from 'cors';
 
 export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
     private app: Express | undefined;
@@ -43,21 +44,11 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
         this.server?.close();
         this.app = undefined;
     }
-    cors(): any {
-        return (req: Request, res: Response, next: any) => {
-            if (req.method === 'OPTIONS') {
-                res.setHeader('Access-Control-Allow-Origin', '*');
-                res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-                res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-            }
-            next();
-        };
-    }
     private initializeServer() {
         this.app = express();
         this.server = http.createServer(this.app);
 
-        this.app.use(this.cors());
+        this.app.use(cors());
         this.app.use(express.urlencoded({ extended: true, limit: '5000mb' }));
         this.app.use((req, res, next) => {
             // 兼容处理没有带content-type的请求
@@ -70,7 +61,7 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
                 next();
             });
         });
-        
+
         this.app.use((req, res, next) => this.authorize(this.token, req, res, next));
         this.app.use((req, res) => this.handleRequest(req, res));
 
