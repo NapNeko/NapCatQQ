@@ -232,14 +232,21 @@ export async function uri2local(dir: string, uri: string, filename: string | und
     //接下来都要有文件名
     if (!filename) filename = randomUUID();
     //解析Http和Https协议
+    
     if (UriType == FileUriType.Remote) {
+        const pathInfo = path.parse(decodeURIComponent(new URL(HandledUri).pathname));
+        if (pathInfo.name) {
+            filename = pathInfo.name;
+          if (pathInfo.ext) {
+            filename += pathInfo.ext;
+          }
+        }
+        filename = filename.replace(/[/\\:*?"<>|]/g, '_');
         const fileExt = path.extname(HandledUri);
-
-        const fileName = filename + fileExt;
-        const filePath = path.join(dir, fileName);
+        const filePath = path.join(dir, filename);
         const buffer = await httpDownload(HandledUri);
         fs.writeFileSync(filePath, buffer);
-        return { success: true, errMsg: '', fileName: fileName, ext: fileExt, path: filePath, isLocal: true };
+        return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath, isLocal: true };
     }
     //解析Base64
     if (UriType == FileUriType.Base64) {
