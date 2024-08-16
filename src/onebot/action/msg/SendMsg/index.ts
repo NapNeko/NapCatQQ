@@ -88,11 +88,9 @@ async function createContext(coreContext: NapCatCore, payload: OB11PostSendMsg, 
     // This function determines the type of message by the existence of user_id / group_id,
     // not message_type.
     // This redundant design of Ob11 here should be blamed.
-    const NTQQGroupApi = coreContext.apis.GroupApi;
     const NTQQFriendApi = coreContext.apis.FriendApi;
     const NTQQUserApi = coreContext.apis.UserApi;
     if ((contextMode === ContextMode.Group || contextMode === ContextMode.Normal) && payload.group_id) {
-        const group = (await NTQQGroupApi.getGroups()).find(e => e.groupCode == payload.group_id?.toString());
         return {
             chatType: ChatType.group,
             peerUid: payload.group_id.toString(),
