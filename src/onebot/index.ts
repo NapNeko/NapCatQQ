@@ -396,12 +396,12 @@ export class NapCatOneBot11Adapter {
                         } catch (e) {
                             this.context.logger.logError('获取加群人QQ号失败 Uid:', notify.user1.uid, e);
                         }
-                    } else if (notify.type == GroupNotifyTypes.INVITE_ME) {
+                    } else if (notify.type == GroupNotifyTypes.INVITE_ME && notify.status == 1) {
                         this.context.logger.logDebug(`收到邀请我加群通知:${notify}`);
                         const groupInviteEvent = new OB11GroupRequestEvent(
                             this.core,
                             parseInt(notify.group.groupCode),
-                            parseInt(await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid)),
+                            parseInt(await this.core.apis.UserApi.getUinByUidV2(notify.user2.uid)),
                             'invite',
                             notify.postscript,
                             flag,
