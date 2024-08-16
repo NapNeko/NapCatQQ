@@ -134,16 +134,10 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                 message: '转发消息不能和普通消息混在一起发送,转发需要保证message只有type为node的元素',
             };
         }
-        // if (payload.message_type !== 'private' && payload.group_id && !(await getGroup(payload.group_id))) {
-        //   return { valid: false, message: `群${payload.group_id}不存在` };
-        // }
         if (payload.user_id && payload.message_type !== 'group') {
             const uid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());
             const isBuddy = await NTQQFriendApi.isBuddy(uid!);
-            // 此处有问题
-            if (!isBuddy) {
-                //return { valid: false, message: '异常消息' };
-            }
+            if (!isBuddy) {}
         }
         return { valid: true };
     }
