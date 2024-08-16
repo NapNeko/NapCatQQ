@@ -16,6 +16,9 @@ export class NTQQMsgApi {
         return this.context.session.getMsgService().fetchLongMsg(peer, msgId);
     }
 
+    async sendShowInputStatusReq(peer: Peer, eventType: number) {
+        return this.context.session.getMsgService().sendShowInputStatusReq(peer.chatType, eventType, peer.peerUid);
+    }
     async getMsgEmojiLikesList(peer: Peer, msgSeq: string, emojiId: string, emojiType: string, count: number = 20) {
         //console.log(peer, msgSeq, emojiId, emojiType, count);
         //注意此处emojiType 可选值一般为1-2 2好像是unicode表情dec值 大部分情况 Taged M likiowa
