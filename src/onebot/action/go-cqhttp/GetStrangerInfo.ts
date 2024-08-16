@@ -34,7 +34,7 @@ export default class GoCQHTTPGetStrangerInfo extends BaseAction<Payload, OB11Use
                 sex: OB11UserSex.unknown,
                 age: extendData.detail.simpleInfo.baseInfo.age || 0,
                 qid: extendData.detail.simpleInfo.baseInfo.qid,
-                level: calcQQLevel(extendData.detail.commonExt.qqLevel) || 0,
+                level: calcQQLevel(extendData.detail.commonExt?.qqLevel ?? 0) || 0,
                 login_days: 0,
                 uid: ''
               };
