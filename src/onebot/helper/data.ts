@@ -417,7 +417,7 @@ export class OB11Constructor {
             return;
         }
         //log("group msg", msg);
-        // Mlikiowa V2.0.26 Refactor Todo
+        // Mlikiowa V2.0.27 Refactor Todo
         // if (msg.senderUin && msg.senderUin !== '0') {
         //   const member = await getGroupMember(msg.peerUid, msg.senderUin);
         //   if (member && member.cardName !== msg.sendMemberName) {
@@ -535,19 +535,13 @@ export class OB11Constructor {
                             guildId: '',
                             peerUid: msg.peerUid
                         }
-                        // const replyMsgList = (await NTQQMsgApi.getMsgsBySeqAndCount({
-                        //     chatType: ChatType.group,
-                        //     guildId: '',
-                        //     peerUid: msg.peerUid,
-                        // }, msgSeq, 1, true, true)).msgList;
                         const replyMsgList = (await NTQQMsgApi.getMsgExBySeq(peer, msgSeq)).msgList;
-                        //console.log("表情回应消息长度检测", replyMsgList.length)
                         if (replyMsgList.length < 1) {
                             return;
                         }
-
-                        const replyMsg = replyMsgList.reverse()[0];//获取最顶层消息
-                        //console.log('表情回应消息', msgSeq, ' 结算ID', replyMsg.msgId);
+                        const replyMsg = replyMsgList.filter(e => e.msgSeq == msgSeq).sort((a, b) => parseInt(a.msgTime) - parseInt(b.msgTime))[0];
+                        //console.log("表情回应消息长度检测", msgSeq, replyMsg.elements);
+                        if (!replyMsg) throw new Error('找不到回应消息');
                         return new OB11GroupMsgEmojiLikeEvent(
                             core,
                             parseInt(msg.peerUid),
