@@ -291,8 +291,8 @@ export class NapCatOneBot11Adapter {
                     await this.networkManager.emitEvent(new OB11FriendRequestEvent(
                         this.core,
                         parseInt(requesterUin!),
-                        req.friendUid + '|' + req.reqTime,
                         req.extWords,
+                        req.friendUid + '|' + req.reqTime,
                     ));
                 } catch (e) {
                     this.context.logger.logDebug('获取加好友者QQ号失败', e);
