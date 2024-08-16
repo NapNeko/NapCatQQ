@@ -106,5 +106,6 @@ export enum ActionName {
     TestApi01 = 'test_api_01',
     FetchEmojiLike = 'fetch_emoji_like',
     GetGuildProfile = "get_guild_service_profile",
-    SetModelShow = "_set_model_show"
+    SetModelShow = "_set_model_show",
+    SetInputStatus = "set_input_status"
 }
