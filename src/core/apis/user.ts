@@ -234,11 +234,6 @@ export class NTQQUserApi {
             ('NodeIKernelProfileService/getUserDetailInfoByUin', 5000, Uin);
     }
 
-    async getUserDetailInfoByUin(Uin: string) {
-        return this.core.eventWrapper.callNoListenerEvent<(Uin: string) => Promise<UserDetailInfoByUin>>
-            ('NodeIKernelProfileService/getUserDetailInfoByUin', 5000, Uin);
-    }
-
     async forceFetchClientKey() {
         return await this.context.session.getTicketService().forceFetchClientKey('');
     }
