@@ -18,10 +18,11 @@ import {
     SendVideoElement,
     viedo_type,
 } from '@/core';
+import * as fsnormal from 'node:fs';
 import { promises as fs } from 'node:fs';
 import ffmpeg from 'fluent-ffmpeg';
 import { calculateFileMD5, isGIF } from '@/common/utils/file';
-import { getVideoInfo } from '@/common/utils/video';
+import { defaultVideoThumbB64, getVideoInfo } from '@/common/utils/video';
 import { encodeSilk } from '@/common/utils/audio';
 import faceConfig from '@/core/external/face_config.json';
 import * as pathLib from 'node:path';
@@ -140,11 +141,7 @@ export class SendMsgElementConstructor {
     }
 
     static async video(coreContext: NapCatCore, filePath: string, fileName: string = '', diyThumbPath: string = '', videotype: viedo_type = viedo_type.VIDEO_FORMAT_MP4): Promise<SendVideoElement> {
-        const NTQQGroupApi = coreContext.apis.GroupApi;
-        const NTQQUserApi = coreContext.apis.UserApi;
         const NTQQFileApi = coreContext.apis.FileApi;
-        const NTQQMsgApi = coreContext.apis.MsgApi;
-        const NTQQFriendApi = coreContext.apis.FriendApi;
         const logger = coreContext.context.logger;
         const { fileName: _fileName, path, fileSize, md5 } = await NTQQFileApi.uploadFile(filePath, ElementType.VIDEO);
         if (fileSize === 0) {
@@ -179,7 +176,8 @@ export class SendMsgElementConstructor {
                             resolve(thumbPath);
                         }).catch(reject);
                     } else {
-                        resolve(undefined);
+                        fsnormal.writeFileSync(thumbPath, Buffer.from(defaultVideoThumbB64, 'base64'));
+                        resolve(thumbPath);
                     }
                 })
                 .screenshots({
@@ -224,6 +222,21 @@ export class SendMsgElementConstructor {
                 // sourceVideoCodecFormat: 2
             },
         };
+        // "fileElement": {
+        //     "fileMd5": "",
+        //     "fileName": "1.mp4",
+        //     "filePath": "C:\\Users\\nanae\\OneDrive\\Desktop\\1.mp4",
+        //     "fileSize": "1847007",
+        //     "picHeight": 1280,
+        //     "picWidth": 720,
+        //     "picThumbPath": {},
+        //     "file10MMd5": "",
+        //     "fileSha": "",
+        //     "fileSha3": "",
+        //     "fileUuid": "",
+        //     "fileSubId": "",
+        //     "thumbFileSize": 750
+        //   }
         return element;
     }
 
