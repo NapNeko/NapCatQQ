@@ -21,20 +21,23 @@ export default class GoCQHTTPGetStrangerInfo extends BaseAction<Payload, OB11Use
     async _handle(payload: Payload): Promise<OB11User> {
         const NTQQUserApi = this.CoreContext.apis.UserApi;
         const user_id = payload.user_id.toString();
-        const extendData = await NTQQUserApi.getUserDetailInfoByUin(user_id);
+        const extendData = await NTQQUserApi.getUserDetailInfoByUinV2(user_id);
         const uid = (await NTQQUserApi.getUidByUinV2(user_id))!;
         if (!uid || uid.indexOf('*') != -1) {
             const ret = {
-                ...extendData,
-                user_id: parseInt(extendData.info.uin) || 0,
-                nickname: extendData.info.nick,
+                ...extendData.detail.simpleInfo.coreInfo,
+                ...extendData.detail.commonExt,
+                ...extendData.detail.simpleInfo.baseInfo,
+                ...extendData.detail.simpleInfo.relationFlags,
+                user_id: parseInt(extendData.detail.uin) || 0,
+                nickname: extendData.detail.simpleInfo.coreInfo.nick,
                 sex: OB11UserSex.unknown,
-                age: (extendData.info.birthday_year == 0) ? 0 : new Date().getFullYear() - extendData.info.birthday_year,
-                qid: extendData.info.qid,
-                level: extendData.info.qqLevel && calcQQLevel(extendData.info.qqLevel) || 0,
+                age: extendData.detail.simpleInfo.baseInfo.age || 0,
+                qid: extendData.detail.simpleInfo.baseInfo.qid,
+                level: calcQQLevel(extendData.detail.commonExt.qqLevel) || 0,
                 login_days: 0,
-                uid: '',
-            };
+                uid: ''
+              };
             return ret;
         }
         const data = { ...extendData, ...(await NTQQUserApi.getUserDetailInfo(uid)) };
