@@ -149,6 +149,8 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
     }
 
     async _handle(payload: OB11PostSendMsg): Promise<{ message_id: number }> {
+        if (payload.message_type === 'group') this.contextMode = ContextMode.Group;
+        if (payload.message_type === 'private') this.contextMode = ContextMode.Private;
         const peer = await createContext(this.CoreContext, payload, this.contextMode);
 
         const messages = normalize(
