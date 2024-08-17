@@ -43,12 +43,12 @@ export async function NCoreInitShell() {
 
     // from constructor
     const engine = new wrapper.NodeIQQNTWrapperEngine();
-    const util = new wrapper.NodeQQNTWrapperUtil();
+    //const util = new wrapper.NodeQQNTWrapperUtil();
     const loginService = new wrapper.NodeIKernelLoginService();
     const session = new wrapper.NodeIQQNTWrapperSession();
 
     // from get dataPath
-    let dataPath = util.getNTUserDataInfoConfig();
+    let dataPath = wrapper.NodeQQNTWrapperUtil.getNTUserDataInfoConfig();
     if (!dataPath) {
         dataPath = path.resolve(os.homedir(), './.config/QQ');
         fs.mkdirSync(dataPath, { recursive: true });
