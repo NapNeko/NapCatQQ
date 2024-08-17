@@ -187,9 +187,9 @@ export class NTQQUserApi {
 
     //后期改成流水线处理
     async getUidByUinV2(Uin: string) {
-        let uid = (await this.context.session.getProfileService().getUidByUin('FriendsServiceImpl', [Uin])).get(Uin);
+        let uid = (await this.context.session.getGroupService().getUidByUins([Uin])).uids.get(Uin);
         if (uid) return uid;
-        uid = (await this.context.session.getGroupService().getUidByUins([Uin])).uids.get(Uin);
+        uid = (await this.context.session.getProfileService().getUidByUin('FriendsServiceImpl', [Uin])).get(Uin);
         if (uid) return uid;
         uid = (await this.context.session.getUixConvertService().getUid([Uin])).uidInfo.get(Uin);
         if (uid) return uid;
