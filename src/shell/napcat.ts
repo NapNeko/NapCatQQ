@@ -43,7 +43,7 @@ export async function NCoreInitShell() {
 
     // from constructor
     const engine = new wrapper.NodeIQQNTWrapperEngine();
-    //const util = new wrapper.NodeQQNTWrapperUtil();
+    const util = wrapper.NodeQQNTWrapperUtil.get();
     const loginService = new wrapper.NodeIKernelLoginService();
     const session = new wrapper.NodeIQQNTWrapperSession();
 
@@ -188,11 +188,10 @@ export async function NCoreInitShell() {
         } else {
             logger.log('没有 -q 指令指定快速登录，将使用二维码登录方式');
             if (historyLoginList.length > 0) {
-                logger.log(`可用于快速登录的 QQ：\n${
-                    historyLoginList
+                logger.log(`可用于快速登录的 QQ：\n${historyLoginList
                         .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
                         .join('\n')
-                }`);
+                    }`);
             }
             loginService.getQRCodePicture();
         }
