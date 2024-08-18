@@ -232,11 +232,6 @@ export class LegacyNTEventWrapper {
                 this.createListenerFunction(ListenerMainName);
                 const EventFunc = this.createEventFunction<EventType>(EventName);
                 retEvent = await EventFunc!(...(args as any[]));
-                // 120271006: TaskGetGroupMemberList 0x899_EMPTY_RSP_BODY  查找群内不存在的成员返回
-                if (typeof retEvent === 'object' && retEvent?.result !== 0) {
-                    clearTimeout(Timeouter);
-                    databack();
-                };
             },
         );
     }
