@@ -711,7 +711,7 @@ export class OB11Constructor {
             nickname: member.nick,
             card: member.cardName,
             sex: OB11Constructor.sex(member.sex!),
-            age: 0,
+            age: member.age ?? 0,
             area: '',
             level: '0',
             qq_level: member.qqLevel && calcQQLevel(member.qqLevel) || 0,
