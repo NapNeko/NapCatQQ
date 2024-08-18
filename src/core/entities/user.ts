@@ -231,6 +231,7 @@ export interface User {
     longNick?: string; // 签名
     remark?: string;
     sex?: Sex;
+    age?: number;
     qqLevel?: QQLevel;
     qid?: string;
     birthday_year?: number;

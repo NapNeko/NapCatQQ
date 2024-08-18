@@ -1,4 +1,4 @@
-import { QQLevel, Sex } from './user';
+import { QQLevel, Sex, User } from './user';
 
 export enum GroupListUpdateType {
     REFRESHALL,
@@ -65,6 +65,7 @@ export interface GroupMember {
     uin: string; // QQ号
     isRobot: boolean;
     sex?: Sex;
+    age?: number;
     qqLevel?: QQLevel;
     isChangeRole: boolean;
     joinTime: string;
