@@ -149,6 +149,7 @@ export class OB11Constructor {
                 message_data['type'] = OB11MessageDataType.reply;
                 //log("收到回复消息", element.replyElement);
                 try {
+                    let oldMsgFlag = false;
                     const records = msg.records.find(msgRecord => msgRecord.msgId === element?.replyElement?.sourceMsgIdInRecords);
                     const peer = {
                         chatType: msg.chatType,
@@ -163,12 +164,13 @@ export class OB11Constructor {
                         chatType: msg.chatType,
                     }, element.replyElement.replayMsgSeq, 1, true, true)).msgList.find(msg => msg.msgRandom === records.msgRandom);
                     if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
+                        if (!replyMsg && records.msgRandom === '0') oldMsgFlag = true;
                         replyMsg = (await NTQQMsgApi.getSingleMsg(peer, element.replyElement.replayMsgSeq)).msgList[0];
                     }
                     if (msg.peerUin == '284840486') {
                         //合并消息内侧 消息具体定位不到
                     }
-                    if ((!replyMsg || records.msgRandom !== replyMsg.msgRandom) && msg.peerUin !== '284840486') {
+                    if ((!replyMsg || (records.msgRandom !== replyMsg.msgRandom && !oldMsgFlag || (oldMsgFlag && records.msgSeq !== replyMsg.msgSeq))) && msg.peerUin !== '284840486') {
                         throw new Error('回复消息消息验证失败');
                     }
                     message_data['data']['id'] = MessageUnique.createMsg({
@@ -709,7 +711,7 @@ export class OB11Constructor {
             nickname: member.nick,
             card: member.cardName,
             sex: OB11Constructor.sex(member.sex!),
-            age: 0,
+            age: member.age ?? 0,
             area: '',
             level: '0',
             qq_level: member.qqLevel && calcQQLevel(member.qqLevel) || 0,

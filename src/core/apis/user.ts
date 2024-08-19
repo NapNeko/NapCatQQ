@@ -100,7 +100,7 @@ export class NTQQUserApi {
         return retData;
     }
 
-    async fetchUserDetailInfo(uid: string) {
+    async fetchUserDetailInfo(uid: string, mode: UserDetailSource = UserDetailSource.KDB) {
         type EventService = NodeIKernelProfileService['fetchUserDetailInfo'];
         type EventListener = NodeIKernelProfileListener['onUserDetailInfoChanged'];
         const [_retData, profile] = await this.core.eventWrapper.CallNormalEvent<EventService, EventListener>(
@@ -111,7 +111,7 @@ export class NTQQUserApi {
             (profile) => profile.uid === uid,
             'BuddyProfileStore',
             [uid],
-            UserDetailSource.KSERVER,
+            mode,
             [ProfileBizType.KALL],
         );
         const RetUser: User = {
@@ -121,13 +121,19 @@ export class NTQQUserApi {
             ...profile.commonExt,
             ...profile.simpleInfo.baseInfo,
             qqLevel: profile.commonExt.qqLevel,
+            age: profile.simpleInfo.baseInfo.age,
             pendantId: '',
         };
         return RetUser;
     }
 
     async getUserDetailInfo(uid: string) {
-        return this.fetchUserDetailInfo(uid);
+        const ret = await this.fetchUserDetailInfo(uid, UserDetailSource.KDB);
+        if (ret.uin === '0') {
+            console.log('[NapCat] [Mark] getUserDetailInfo Mode1 Failed.')
+            return await this.fetchUserDetailInfo(uid, UserDetailSource.KSERVER);
+        }
+        return ret;
     }
 
     async modifySelfProfile(param: ModifyProfileParams) {
