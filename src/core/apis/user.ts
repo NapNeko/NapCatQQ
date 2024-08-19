@@ -120,7 +120,7 @@ export class NTQQUserApi {
             ...profile.simpleInfo.vasInfo,
             ...profile.commonExt,
             ...profile.simpleInfo.baseInfo,
-            qqLevel: profile.commonExt.qqLevel,
+            qqLevel: profile.commonExt?.qqLevel,
             age: profile.simpleInfo.baseInfo.age,
             pendantId: '',
         };
@@ -130,7 +130,7 @@ export class NTQQUserApi {
     async getUserDetailInfo(uid: string) {
         const ret = await this.fetchUserDetailInfo(uid, UserDetailSource.KDB);
         if (ret.uin === '0') {
-            console.log('[NapCat] [Mark] getUserDetailInfo Mode1 Failed.')
+            this.context.logger.logDebug('[NapCat] [Mark] getUserDetailInfo Mode1 Failed.')
             return await this.fetchUserDetailInfo(uid, UserDetailSource.KSERVER);
         }
         return ret;
@@ -207,9 +207,9 @@ export class NTQQUserApi {
 
     //后期改成流水线处理
     async getUinByUidV2(Uid: string) {
-        let uin = (await this.context.session.getProfileService().getUinByUid('FriendsServiceImpl', [Uid])).get(Uid);
+        let uin = (await this.context.session.getGroupService().getUinByUids([Uid])).uins.get(Uid);
         if (uin) return uin;
-        uin = (await this.context.session.getGroupService().getUinByUids([Uid])).uins.get(Uid);
+        uin = (await this.context.session.getProfileService().getUinByUid('FriendsServiceImpl', [Uid])).get(Uid);
         if (uin) return uin;
         uin = (await this.context.session.getUixConvertService().getUin([Uid])).uinInfo.get(Uid);
         if (uin) return uin;
