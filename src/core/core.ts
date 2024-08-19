@@ -79,7 +79,7 @@ export class NapCatCore {
     }
 
     get dataPath(): string {
-        let result = this.util.getNTUserDataInfoConfig();
+        let result = this.context.wrapper.NodeQQNTWrapperUtil.getNTUserDataInfoConfig();
         if (!result) {
             result = path.resolve(os.homedir(), './.config/QQ');
             fs.mkdirSync(result, { recursive: true });

@@ -188,8 +188,8 @@ export async function NCoreInitShell() {
             logger.log('没有 -q 指令指定快速登录，将使用二维码登录方式');
             if (historyLoginList.length > 0) {
                 logger.log(`可用于快速登录的 QQ：\n${historyLoginList
-                        .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
-                        .join('\n')
+                    .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
+                    .join('\n')
                     }`);
             }
             loginService.getQRCodePicture();
@@ -218,9 +218,9 @@ export async function NCoreInitShell() {
         };
         session.init(
             sessionConfig,
-            new wrapper.NodeIDependsAdapter(new DependsAdapter()),
-            new wrapper.NodeIDispatcherAdapter(new DispatcherAdapter()),
-            new wrapper.NodeIKernelSessionListener(sessionListener),
+            new DependsAdapter() as any,
+            new DispatcherAdapter() as any,
+            sessionListener as any,
         );
         try {
             session.startNT(0);
