@@ -100,7 +100,7 @@ export class NTQQUserApi {
         return retData;
     }
 
-    async fetchUserDetailInfo(uid: string) {
+    async fetchUserDetailInfo(uid: string, mode: UserDetailSource = UserDetailSource.KDB) {
         type EventService = NodeIKernelProfileService['fetchUserDetailInfo'];
         type EventListener = NodeIKernelProfileListener['onUserDetailInfoChanged'];
         const [_retData, profile] = await this.core.eventWrapper.CallNormalEvent<EventService, EventListener>(
@@ -111,7 +111,7 @@ export class NTQQUserApi {
             (profile) => profile.uid === uid,
             'BuddyProfileStore',
             [uid],
-            UserDetailSource.KSERVER,
+            mode,
             [ProfileBizType.KALL],
         );
         const RetUser: User = {
@@ -120,14 +120,20 @@ export class NTQQUserApi {
             ...profile.simpleInfo.vasInfo,
             ...profile.commonExt,
             ...profile.simpleInfo.baseInfo,
-            qqLevel: profile.commonExt.qqLevel,
+            qqLevel: profile.commonExt?.qqLevel,
+            age: profile.simpleInfo.baseInfo.age,
             pendantId: '',
         };
         return RetUser;
     }
 
     async getUserDetailInfo(uid: string) {
-        return this.fetchUserDetailInfo(uid);
+        const ret = await this.fetchUserDetailInfo(uid, UserDetailSource.KDB);
+        if (ret.uin === '0') {
+            this.context.logger.logDebug('[NapCat] [Mark] getUserDetailInfo Mode1 Failed.')
+            return await this.fetchUserDetailInfo(uid, UserDetailSource.KSERVER);
+        }
+        return ret;
     }
 
     async modifySelfProfile(param: ModifyProfileParams) {
@@ -187,9 +193,9 @@ export class NTQQUserApi {
 
     //后期改成流水线处理
     async getUidByUinV2(Uin: string) {
-        let uid = (await this.context.session.getProfileService().getUidByUin('FriendsServiceImpl', [Uin])).get(Uin);
+        let uid = (await this.context.session.getGroupService().getUidByUins([Uin])).uids.get(Uin);
         if (uid) return uid;
-        uid = (await this.context.session.getGroupService().getUidByUins([Uin])).uids.get(Uin);
+        uid = (await this.context.session.getProfileService().getUidByUin('FriendsServiceImpl', [Uin])).get(Uin);
         if (uid) return uid;
         uid = (await this.context.session.getUixConvertService().getUid([Uin])).uidInfo.get(Uin);
         if (uid) return uid;
@@ -201,9 +207,9 @@ export class NTQQUserApi {
 
     //后期改成流水线处理
     async getUinByUidV2(Uid: string) {
-        let uin = (await this.context.session.getProfileService().getUinByUid('FriendsServiceImpl', [Uid])).get(Uid);
+        let uin = (await this.context.session.getGroupService().getUinByUids([Uid])).uins.get(Uid);
         if (uin) return uin;
-        uin = (await this.context.session.getGroupService().getUinByUids([Uid])).uins.get(Uid);
+        uin = (await this.context.session.getProfileService().getUinByUid('FriendsServiceImpl', [Uid])).get(Uid);
         if (uin) return uin;
         uin = (await this.context.session.getUixConvertService().getUin([Uid])).uinInfo.get(Uid);
         if (uin) return uin;
