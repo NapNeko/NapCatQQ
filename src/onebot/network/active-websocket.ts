@@ -79,6 +79,12 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
                 },
 
             });
+            this.connection.on('ping', () => {
+                this.connection?.pong();
+            });
+            this.connection.on('pong', () => {
+                //this.logger.logDebug('[OneBot] [WebSocket Client] 收到pong');
+            });
             this.connection.on('open', () => {
                 try {
                     this.connectEvent(this.coreContext);
