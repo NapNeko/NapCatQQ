@@ -1,6 +1,6 @@
 import { Group, GroupListUpdateType, GroupMember, GroupNotify } from '@/core/entities';
 
-interface IGroupListener {
+export interface IGroupListener {
     onGroupListUpdate(updateType: GroupListUpdateType, groupList: Group[]): void;
 
     onGroupExtListUpdate(...args: unknown[]): void;

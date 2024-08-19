@@ -274,7 +274,7 @@ export class NapCatOneBot11Adapter {
         };
 
         this.context.session.getMsgService().addKernelMsgListener(
-            new this.context.wrapper.NodeIKernelMsgListener(proxiedListenerOf(msgListener, this.context.logger)),
+            proxiedListenerOf(msgListener, this.context.logger) as any
         );
     }
 
@@ -301,7 +301,7 @@ export class NapCatOneBot11Adapter {
         };
 
         this.context.session.getBuddyService().addKernelBuddyListener(
-            new this.context.wrapper.NodeIKernelBuddyListener(proxiedListenerOf(buddyListener, this.context.logger)),
+            proxiedListenerOf(buddyListener, this.context.logger) as any
         );
     }
 
@@ -414,7 +414,7 @@ export class NapCatOneBot11Adapter {
         };
 
         this.context.session.getGroupService().addKernelGroupListener(
-            new this.context.wrapper.NodeIKernelGroupListener(proxiedListenerOf(groupListener, this.context.logger)),
+            proxiedListenerOf(groupListener, this.context.logger)
         );
     }
 
