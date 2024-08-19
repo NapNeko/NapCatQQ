@@ -50,6 +50,12 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             wsClient.on('message', (message) => {
                 this.handleMessage(wsClient, message).then().catch(this.logger.logError);
             });
+            wsClient.on('ping', () => {
+                wsClient.pong();
+            });
+            wsClient.on('pong', () => {
+                //this.logger.logDebug('[OneBot] [WebSocket Server] Pong received');
+            });
             wsClient.once('close', () => {
                 this.wsClientsMutex.runExclusive(async () => {
                     const index = this.wsClients.indexOf(wsClient);
