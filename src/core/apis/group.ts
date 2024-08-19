@@ -261,7 +261,7 @@ export class NTQQGroupApi {
         (
             'NodeIKernelGroupListener/onMemberInfoChange',
             1,
-            forced ? 5000 : 500,
+            forced ? 5000 : 250,
             (params) => {
                 return params === GroupCode;
             },
@@ -269,7 +269,7 @@ export class NTQQGroupApi {
         const EventFunc = this.core.eventWrapper.createEventFunction<EventType>('NodeIKernelGroupService/getMemberInfo');
         const retData = await EventFunc!(GroupCode, [uid], forced);
         if (retData.result !== 0) {
-            throw new Error(`获取群成员信息失败: ${retData.errMsg}`);
+            throw new Error(`${retData.errMsg}`);
         }
         const result = await Listener as unknown;
         let member: GroupMember | undefined;
