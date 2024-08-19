@@ -1,4 +1,4 @@
-import { NodeIKernelGroupListener } from '@/core/listeners/NodeIKernelGroupListener';
+import { IGroupListener, NodeIKernelGroupListener } from '@/core/listeners/NodeIKernelGroupListener';
 import {
     GroupExtParam,
     GroupMember,
@@ -104,7 +104,7 @@ export interface NodeIKernelGroupService {
 
     setHeader(uid: string, path: string): unknown;
 
-    addKernelGroupListener(listener: NodeIKernelGroupListener): number;
+    addKernelGroupListener(listener: IGroupListener): number;
 
     removeKernelGroupListener(listenerId: unknown): void;
 

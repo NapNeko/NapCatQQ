@@ -43,7 +43,7 @@ export async function NCoreInitShell() {
 
     // from constructor
     const engine = new wrapper.NodeIQQNTWrapperEngine();
-    const util = wrapper.NodeQQNTWrapperUtil.get();
+    //const util = wrapper.NodeQQNTWrapperUtil.get();
     const loginService = new wrapper.NodeIKernelLoginService();
     const session = new wrapper.NodeIQQNTWrapperSession();
 
@@ -70,7 +70,7 @@ export async function NCoreInitShell() {
             },
             thumb_config: { maxSide: 324, minSide: 48, longLimit: 6, density: 2 },
         },
-        new wrapper.NodeIGlobalAdapter(new GlobalAdapter()),
+        new GlobalAdapter() as any,
     );
     loginService.initConfig({
         machineId: '',
@@ -140,8 +140,7 @@ export async function NCoreInitShell() {
             logger.logError('[Core] [Login] Login Error , ErrInfo: ', args);
         };
 
-        loginService.addKernelLoginListener(new wrapper.NodeIKernelLoginListener(
-            proxiedListenerOf(loginListener, logger)));
+        loginService.addKernelLoginListener(proxiedListenerOf(loginListener, logger) as any);
 
         // 实现WebUi快速登录
         loginService.getLoginList().then((res) => {
