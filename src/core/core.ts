@@ -44,7 +44,7 @@ export class NapCatCore {
     constructor(context: InstanceContext, selfInfo: SelfInfo) {
         this.selfInfo = selfInfo;
         this.context = context;
-        this.util = new this.context.wrapper.NodeQQNTWrapperUtil();
+        this.util = this.context.wrapper.NodeQQNTWrapperUtil;
         this.eventWrapper = new LegacyNTEventWrapper(context.session);
         this.apis = {
             FileApi: new NTQQFileApi(this.context, this),
