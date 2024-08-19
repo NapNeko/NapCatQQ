@@ -196,6 +196,9 @@ export class NapCatCore {
                 this.apis.GroupApi.groupMemberCache.set(groupCode, members);
             }
         };
+        this.context.session.getGroupService().addKernelGroupListener(
+            new this.context.wrapper.NodeIKernelGroupListener(proxiedListenerOf(groupListener, this.context.logger)),
+        );
     }
     checkAdminEvent(groupCode: string, memberNew: GroupMember, memberOld: GroupMember | undefined): boolean {
         if (memberNew.role !== memberOld?.role) {
