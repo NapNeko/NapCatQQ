@@ -38,22 +38,6 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
         }
         const date = Math.round(Date.now() / 1000);
         const retMember = OB11Constructor.groupMember(payload.group_id.toString(), member);
-        const SelfInfoInGroup = await NTQQGroupApi.getGroupMemberV2(payload.group_id.toString(), this.CoreContext.selfInfo.uid, isNocache);
-        let isPrivilege = false;
-        if (SelfInfoInGroup) {
-            isPrivilege = SelfInfoInGroup.role === 3 || SelfInfoInGroup.role === 4;
-        }
-        if (isPrivilege) {
-            const webGroupMembers = await NTQQWebApi.getGroupMembers(payload.group_id.toString());
-            for (let i = 0, len = webGroupMembers.length; i < len; i++) {
-                if (webGroupMembers[i]?.uin && webGroupMembers[i].uin === retMember.user_id) {
-                    retMember.join_time = webGroupMembers[i]?.join_time;
-                    retMember.last_sent_time = webGroupMembers[i]?.last_speak_time;
-                    retMember.qage = webGroupMembers[i]?.qage;
-                    retMember.level = webGroupMembers[i]?.lv.level.toString();
-                }
-            }
-        }
         retMember.last_sent_time = parseInt((await this.CoreContext.apis.GroupApi.getGroupMember(payload.group_id.toString(), retMember.user_id))?.lastSpeakTime || date.toString());
         retMember.join_time = parseInt((await this.CoreContext.apis.GroupApi.getGroupMember(payload.group_id.toString(), retMember.user_id))?.joinTime || date.toString());
         return retMember;
