@@ -253,22 +253,45 @@ export class NTQQGroupApi {
     }
 
     async getGroupMemberV2(GroupCode: string, uid: string, forced = false) {
-        type ListenerType = NodeIKernelGroupListener['onMemberInfoChange'];
+        //type ListenerType = NodeIKernelGroupListener['onMemberInfoChange'];
         type EventType = NodeIKernelGroupService['getMemberInfo'];
         // NTEventDispatch.CreatListenerFunction('NodeIKernelGroupListener/onGroupMemberInfoUpdate', 
         //return napCatCore.session.getGroupService().getMemberInfo(GroupCode, [uid], forced);
-        const [, , , _members] = await this.core.eventWrapper.CallNormalEvent<EventType, ListenerType>
+        const Listener = this.core.eventWrapper.RegisterListen<(params: any) => void>
         (
-            'NodeIKernelGroupService/getMemberInfo',
             'NodeIKernelGroupListener/onMemberInfoChange',
             1,
-            5000,
-            (groupCode: string, changeType: number, members: Map<string, GroupMember>) => {
-                return groupCode == GroupCode && members.has(uid);
+            forced ? 5000 : 250,
+            (params) => {
+                return params === GroupCode;
             },
-            GroupCode, [uid], forced,
         );
-        return _members.get(uid);
+        const EventFunc = this.core.eventWrapper.createEventFunction<EventType>('NodeIKernelGroupService/getMemberInfo');
+        const retData = await EventFunc!(GroupCode, [uid], forced);
+        if (retData.result !== 0) {
+            throw new Error(`${retData.errMsg}`);
+        }
+        const result = await Listener as unknown;
+        let member: GroupMember | undefined;
+        if (Array.isArray(result) && result?.[2] instanceof Map) {
+            let members = result[2] as Map<string, GroupMember>;
+            member = members.get(uid);
+        };
+        return member;
+
+        // 原本的方法: (no_cache 下效率很高, cache 下效率一致)
+        // const [, , , _members] = await this.core.eventWrapper.CallNormalEvent<EventType, ListenerType>
+        // (
+        //     'NodeIKernelGroupService/getMemberInfo',
+        //     'NodeIKernelGroupListener/onMemberInfoChange',
+        //     1,
+        //     5000,
+        //     (groupCode: string, changeType: number, members: Map<string, GroupMember>) => {
+        //         return groupCode == GroupCode && members.has(uid);
+        //     },
+        //     GroupCode, [uid], forced,
+        // );
+        // return _members.get(uid);
     }
 
     async getGroupMembers(groupQQ: string, num = 3000): Promise<Map<string, GroupMember>> {
