@@ -259,7 +259,7 @@ export async function uri2local(dir: string, uri: string, filename: string | und
         if (success) {
             filePath = fileTypePath;
             fileExt = ext;
-            filename = path.basename(filePath, fileExt);
+            filename = filename + '.' + ext;
         }
         return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath, isLocal: true };
     }
