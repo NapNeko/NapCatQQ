@@ -91,7 +91,7 @@ export enum ActionName {
     GetOnlineClient = 'get_online_clients',
     OCRImage = 'ocr_image',
     IOCRImage = '.ocr_image',
-    SetSelfProfile = 'set_self_profile',
+    SetQQProfile = 'set_qq_profile',
     CreateCollection = 'create_collection',
     GetCollectionList = 'get_collection_list',
     SetLongNick = 'set_self_longnick',

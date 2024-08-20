@@ -61,7 +61,7 @@ import { TranslateEnWordToZn } from './extends/TranslateEnWordToZn';
 import { SetGroupFileFolder } from './file/SetGroupFileFolder';
 import { DelGroupFile } from './file/DelGroupFile';
 import { DelGroupFileFolder } from './file/DelGroupFileFolder';
-import { SetSelfProfile } from './extends/SetSelfProfile';
+import { SetQQProfile } from './go-cqhttp/SetQQProfile'
 import { ShareGroupEx, SharePeer } from './extends/ShareContact';
 import { CreateCollection } from './extends/CreateCollection';
 import { SetLongNick } from './extends/SetLongNick';
@@ -86,7 +86,7 @@ export function createActionMap(onebotContext: NapCatOneBot11Adapter, coreContex
     const actionHandlers = [
         new FetchEmojiLike(onebotContext, coreContext),
         new GetFile(onebotContext, coreContext),
-        new SetSelfProfile(onebotContext, coreContext),
+        new SetQQProfile(onebotContext, coreContext),
         new ShareGroupEx(onebotContext, coreContext),
         new SharePeer(onebotContext, coreContext),
         new CreateCollection(onebotContext, coreContext),
