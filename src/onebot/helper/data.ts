@@ -30,6 +30,7 @@ import { EventType } from '../event/OB11BaseEvent';
 import { encodeCQCode } from './cqcode';
 import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
 import { OB11GroupBanEvent } from '../event/notice/OB11GroupBanEvent';
+import { OB11GroupCardEvent } from '../event/notice/OB11GroupCardEvent';
 import { OB11GroupUploadNoticeEvent } from '../event/notice/OB11GroupUploadNoticeEvent';
 import { OB11GroupNoticeEvent } from '../event/notice/OB11GroupNoticeEvent';
 import { calcQQLevel, sleep, UUIDConverter } from '@/common/utils/helper';
@@ -149,7 +150,6 @@ export class OB11Constructor {
                 message_data['type'] = OB11MessageDataType.reply;
                 //log("收到回复消息", element.replyElement);
                 try {
-                    let oldMsgFlag = false;
                     const records = msg.records.find(msgRecord => msgRecord.msgId === element?.replyElement?.sourceMsgIdInRecords);
                     const peer = {
                         chatType: msg.chatType,
@@ -164,14 +164,17 @@ export class OB11Constructor {
                         chatType: msg.chatType,
                     }, element.replyElement.replayMsgSeq, 1, true, true)).msgList.find(msg => msg.msgRandom === records.msgRandom);
                     if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
-                        if (!replyMsg && records.msgRandom === '0') oldMsgFlag = true;
                         replyMsg = (await NTQQMsgApi.getSingleMsg(peer, element.replyElement.replayMsgSeq)).msgList[0];
                     }
                     if (msg.peerUin == '284840486') {
                         //合并消息内侧 消息具体定位不到
                     }
-                    if ((!replyMsg || (records.msgRandom !== replyMsg.msgRandom && !oldMsgFlag || (oldMsgFlag && records.msgSeq !== replyMsg.msgSeq))) && msg.peerUin !== '284840486') {
-                        throw new Error('回复消息消息验证失败');
+                    if ((!replyMsg || records.msgRandom !== replyMsg.msgRandom) && msg.peerUin !== '284840486') {
+                        const replyMsgList = (await NTQQMsgApi.getMsgExBySeq(peer, records.msgSeq)).msgList;
+                        if (replyMsgList.length < 1) {
+                            throw new Error('回复消息消息验证失败');
+                        }
+                        replyMsg = replyMsgList.filter(e => e.msgSeq == records.msgSeq).sort((a, b) => parseInt(a.msgTime) - parseInt(b.msgTime))[0];
                     }
                     message_data['data']['id'] = MessageUnique.createMsg({
                         peerUid: msg.peerUid,
@@ -419,16 +422,15 @@ export class OB11Constructor {
             return;
         }
         //log("group msg", msg);
-        // Mlikiowa V2.0.34 Refactor Todo
-        // if (msg.senderUin && msg.senderUin !== '0') {
-        //   const member = await getGroupMember(msg.peerUid, msg.senderUin);
-        //   if (member && member.cardName !== msg.sendMemberName) {
-        //     const newCardName = msg.sendMemberName || '';
-        //     const event = new OB11GroupCardEvent(parseInt(msg.peerUid), parseInt(msg.senderUin), newCardName, member.cardName);
-        //     member.cardName = newCardName;
-        //     return event;
-        //   }
-        // }
+        if (msg.senderUin && msg.senderUin !== '0') {
+          const member = await NTQQGroupApi.getGroupMember(msg.peerUid, msg.senderUin);
+          if (member && member.cardName !== msg.sendMemberName) {
+            const newCardName = msg.sendMemberName || '';
+            const event = new OB11GroupCardEvent(core, parseInt(msg.peerUid), parseInt(msg.senderUin), newCardName, member.cardName);
+            member.cardName = newCardName;
+            return event;
+          }
+        }
 
         for (const element of msg.elements) {
             const grayTipElement = element.grayTipElement;

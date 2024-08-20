@@ -127,13 +127,16 @@ export class NTQQUserApi {
         return RetUser;
     }
 
-    async getUserDetailInfo(uid: string) {
-        const ret = await this.fetchUserDetailInfo(uid, UserDetailSource.KDB);
-        if (ret.uin === '0') {
-            this.context.logger.logDebug('[NapCat] [Mark] getUserDetailInfo Mode1 Failed.')
-            return await this.fetchUserDetailInfo(uid, UserDetailSource.KSERVER);
+    async getUserDetailInfo(uid: string): Promise<User> {
+        try {
+            let retUser = await this.fetchUserDetailInfo(uid, UserDetailSource.KDB);
+            if (retUser.uin !== '0') {
+                return retUser;
+            }
+        } catch (e) {
         }
-        return ret;
+        this.context.logger.logDebug('[NapCat] [Mark] getUserDetailInfo Mode1 Failed.');
+        return this.fetchUserDetailInfo(uid, UserDetailSource.KSERVER);
     }
 
     async modifySelfProfile(param: ModifyProfileParams) {
