@@ -9,6 +9,7 @@ import {
     NapCatCore,
     RawMessage,
     SendStatusType,
+    GroupMemberRole,
 } from '@/core';
 import { OB11Config, OB11ConfigLoader } from '@/onebot/helper/config';
 import { OneBotApiContextType } from '@/onebot/types';
@@ -410,6 +411,29 @@ export class NapCatOneBot11Adapter {
                             .catch(e => this.context.logger.logError('处理邀请本人加群失败', e));
                     }
                 }
+            }
+        };
+
+        groupListener.onMemberInfoChange = async (groupCode, changeType, members) => {
+            //this.context.logger.logDebug('收到群成员信息变动通知', groupCode, changeType);
+            if (changeType === 0) {
+                const existMembers = this.core.apis.GroupApi.groupMemberCache.get(groupCode);
+                if (!existMembers) return;
+                members.forEach((member) => {
+                    const existMember = existMembers.get(member.uid);
+                    if (!existMember?.isChangeRole) return;
+                    this.context.logger.logDebug('变动管理员获取成功');
+                    const groupAdminNoticeEvent = new OB11GroupAdminNoticeEvent(
+                        this.core,
+                        parseInt(groupCode),
+                        parseInt(member.uin),
+                        member.role === GroupMemberRole.admin ? 'set' : 'unset',
+                    );
+                    this.networkManager.emitEvent(groupAdminNoticeEvent)
+                    .catch(e => this.context.logger.logError('处理群管理员变动失败', e));
+                    existMember.isChangeRole = false;
+                    this.context.logger.logDebug('群管理员变动处理完毕');
+                });
             }
         };
 
