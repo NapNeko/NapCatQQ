@@ -151,6 +151,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
                 //this.logger.logDebug('收到正向Websocket消息', receiveData);
             } catch (e) {
                 this.checkStateAndReply<any>(OB11Response.error('json解析失败,请检查数据格式', 1400, echo), wsClient);
+                return;
             }
             receiveData.params = (receiveData?.params) ? receiveData.params : {};//兼容类型验证
             const retdata = await this.actions.get(receiveData.action)?.websocketHandle(receiveData.params, echo || '');

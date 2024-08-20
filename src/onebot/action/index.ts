@@ -79,6 +79,7 @@ import { NapCatOneBot11Adapter } from '@/onebot';
 import GetGuildProfile from './guild/GetGuildProfile';
 import SetModelShow from './go-cqhttp/SetModelShow';
 import { SetInputStatus } from './extends/SetInputStatus';
+import { GetCSRF } from './system/GetCSRF';
 
 export type ActionMap = Map<string, BaseAction<any, any>>;
 
@@ -167,6 +168,7 @@ export function createActionMap(onebotContext: NapCatOneBot11Adapter, coreContex
         new GetGuildProfile(onebotContext, coreContext),
         new SetModelShow(onebotContext, coreContext),
         new SetInputStatus(onebotContext, coreContext),
+        new GetCSRF(onebotContext, coreContext),
     ];
     const actionMap = new Map();
     for (const action of actionHandlers) {
