@@ -61,7 +61,7 @@ import { TranslateEnWordToZn } from './extends/TranslateEnWordToZn';
 import { SetGroupFileFolder } from './file/SetGroupFileFolder';
 import { DelGroupFile } from './file/DelGroupFile';
 import { DelGroupFileFolder } from './file/DelGroupFileFolder';
-import { SetSelfProfile } from './extends/SetSelfProfile';
+import { SetQQProfile } from './go-cqhttp/SetQQProfile'
 import { ShareGroupEx, SharePeer } from './extends/ShareContact';
 import { CreateCollection } from './extends/CreateCollection';
 import { SetLongNick } from './extends/SetLongNick';
@@ -69,7 +69,7 @@ import DelEssenceMsg from './group/DelEssenceMsg';
 import SetEssenceMsg from './group/SetEssenceMsg';
 import GetRecentContact from './user/GetRecentContact';
 import { GetProfileLike } from './extends/GetProfileLike';
-import SetGroupHeader from './extends/SetGroupHeader';
+import SetGroupPortrait from './go-cqhttp/SetGroupPortrait';
 import { FetchCustomFace } from './extends/FetchCustomFace';
 import GoCQHTTPUploadPrivateFile from './go-cqhttp/UploadPrivareFile';
 import { FetchEmojiLike } from './extends/FetchEmojiLike';
@@ -86,7 +86,7 @@ export function createActionMap(onebotContext: NapCatOneBot11Adapter, coreContex
     const actionHandlers = [
         new FetchEmojiLike(onebotContext, coreContext),
         new GetFile(onebotContext, coreContext),
-        new SetSelfProfile(onebotContext, coreContext),
+        new SetQQProfile(onebotContext, coreContext),
         new ShareGroupEx(onebotContext, coreContext),
         new SharePeer(onebotContext, coreContext),
         new CreateCollection(onebotContext, coreContext),
@@ -161,7 +161,7 @@ export function createActionMap(onebotContext: NapCatOneBot11Adapter, coreContex
         new GetRecentContact(onebotContext, coreContext),
         new MarkAllMsgAsRead(onebotContext, coreContext),
         new GetProfileLike(onebotContext, coreContext),
-        new SetGroupHeader(onebotContext, coreContext),
+        new SetGroupPortrait(onebotContext, coreContext),
         new FetchCustomFace(onebotContext, coreContext),
         new GoCQHTTPUploadPrivateFile(onebotContext, coreContext),
         new GetGuildProfile(onebotContext, coreContext),
