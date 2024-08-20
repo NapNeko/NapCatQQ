@@ -56,7 +56,7 @@ const _handlers: {
         if (atQQ === 'all') return SendMsgElementConstructor.at(coreContext, atQQ, atQQ, AtType.atAll, '全体成员');
 
         // then the qq is a group member
-        // Mlikiowa V2.0.35 Refactor Todo
+        // Mlikiowa V2.0.36 Refactor Todo
         const uid = await coreContext.apis.UserApi.getUidByUinV2(`${atQQ}`);
         if (!uid) throw new Error('Get Uid Error');
         return SendMsgElementConstructor.at(coreContext, atQQ, uid, AtType.atUser, '');
@@ -161,7 +161,7 @@ const _handlers: {
         } else {
             postData = data;
         }
-        // Mlikiowa V2.0.35 Refactor Todo
+        // Mlikiowa V2.0.36 Refactor Todo
         const signUrl = obContext.configLoader.configData.musicSignUrl;
         if (!signUrl) {
             if (data.type === 'qq') {
