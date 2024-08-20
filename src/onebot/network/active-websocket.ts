@@ -71,6 +71,8 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
 
             this.connection = new WebSocket(this.url, {
                 maxPayload: 1024 * 1024 * 1024,
+                handshakeTimeout: 2000,
+                perMessageDeflate: false,
                 headers: {
                     'X-Self-ID': this.coreContext.selfInfo.uin,
                     'Authorization': `Bearer ${this.token}`,
