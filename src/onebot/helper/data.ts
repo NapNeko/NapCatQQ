@@ -30,6 +30,7 @@ import { EventType } from '../event/OB11BaseEvent';
 import { encodeCQCode } from './cqcode';
 import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
 import { OB11GroupBanEvent } from '../event/notice/OB11GroupBanEvent';
+import { OB11GroupCardEvent } from '../event/notice/OB11GroupCardEvent';
 import { OB11GroupUploadNoticeEvent } from '../event/notice/OB11GroupUploadNoticeEvent';
 import { OB11GroupNoticeEvent } from '../event/notice/OB11GroupNoticeEvent';
 import { calcQQLevel, sleep, UUIDConverter } from '@/common/utils/helper';
@@ -421,16 +422,15 @@ export class OB11Constructor {
             return;
         }
         //log("group msg", msg);
-        // Mlikiowa V2.0.34 Refactor Todo
-        // if (msg.senderUin && msg.senderUin !== '0') {
-        //   const member = await getGroupMember(msg.peerUid, msg.senderUin);
-        //   if (member && member.cardName !== msg.sendMemberName) {
-        //     const newCardName = msg.sendMemberName || '';
-        //     const event = new OB11GroupCardEvent(parseInt(msg.peerUid), parseInt(msg.senderUin), newCardName, member.cardName);
-        //     member.cardName = newCardName;
-        //     return event;
-        //   }
-        // }
+        if (msg.senderUin && msg.senderUin !== '0') {
+          const member = await NTQQGroupApi.getGroupMember(msg.peerUid, msg.senderUin);
+          if (member && member.cardName !== msg.sendMemberName) {
+            const newCardName = msg.sendMemberName || '';
+            const event = new OB11GroupCardEvent(core, parseInt(msg.peerUid), parseInt(msg.senderUin), newCardName, member.cardName);
+            member.cardName = newCardName;
+            return event;
+          }
+        }
 
         for (const element of msg.elements) {
             const grayTipElement = element.grayTipElement;
