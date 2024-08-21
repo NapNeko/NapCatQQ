@@ -96,19 +96,25 @@ jobs:
     steps:
     - name: Download All Artifact
       uses: actions/download-artifact@v4
-    
     - name: Compress subdirectories
       run: |
         cd ./NapCat.Shell/
         zip -q -r NapCat.Shell.zip *
         cd ..
-        cd ./NapCat.Framework/
-        zip -q -r NapCat.Framework.zip *
-        cd ..
         rm ./NapCat.Shell.zip -rf
-        rm ./NapCat.Framework.zip -rf
         mv ./NapCat.Shell/NapCat.Shell.zip ./
-        mv ./NapCat.Framework/NapCat.Framework.zip ./
+    # - name: Compress subdirectories
+    #   run: |
+    #     cd ./NapCat.Shell/
+    #     zip -q -r NapCat.Shell.zip *
+    #     cd ..
+    #     cd ./NapCat.Framework/
+    #     zip -q -r NapCat.Framework.zip *
+    #     cd ..
+    #     rm ./NapCat.Shell.zip -rf
+    #     rm ./NapCat.Framework.zip -rf
+    #     mv ./NapCat.Shell/NapCat.Shell.zip ./
+    #     mv ./NapCat.Framework/NapCat.Framework.zip ./
     - name: Extract version from tag
       run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
       
