@@ -43,12 +43,12 @@ export async function NCoreInitShell() {
 
     // from constructor
     const engine = new wrapper.NodeIQQNTWrapperEngine();
-    const util = new wrapper.NodeQQNTWrapperUtil();
+    //const util = wrapper.NodeQQNTWrapperUtil.get();
     const loginService = new wrapper.NodeIKernelLoginService();
     const session = new wrapper.NodeIQQNTWrapperSession();
 
     // from get dataPath
-    let dataPath = util.getNTUserDataInfoConfig();
+    let dataPath = wrapper.NodeQQNTWrapperUtil.getNTUserDataInfoConfig();
     if (!dataPath) {
         dataPath = path.resolve(os.homedir(), './.config/QQ');
         fs.mkdirSync(dataPath, { recursive: true });
@@ -70,7 +70,7 @@ export async function NCoreInitShell() {
             },
             thumb_config: { maxSide: 324, minSide: 48, longLimit: 6, density: 2 },
         },
-        new wrapper.NodeIGlobalAdapter(new GlobalAdapter()),
+        new GlobalAdapter() as any,
     );
     loginService.initConfig({
         machineId: '',
@@ -140,8 +140,7 @@ export async function NCoreInitShell() {
             logger.logError('[Core] [Login] Login Error , ErrInfo: ', args);
         };
 
-        loginService.addKernelLoginListener(new wrapper.NodeIKernelLoginListener(
-            proxiedListenerOf(loginListener, logger)));
+        loginService.addKernelLoginListener(proxiedListenerOf(loginListener, logger) as any);
 
         // 实现WebUi快速登录
         loginService.getLoginList().then((res) => {
@@ -188,11 +187,10 @@ export async function NCoreInitShell() {
         } else {
             logger.log('没有 -q 指令指定快速登录，将使用二维码登录方式');
             if (historyLoginList.length > 0) {
-                logger.log(`可用于快速登录的 QQ：\n${
-                    historyLoginList
-                        .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
-                        .join('\n')
-                }`);
+                logger.log(`可用于快速登录的 QQ：\n${historyLoginList
+                    .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
+                    .join('\n')
+                    }`);
             }
             loginService.getQRCodePicture();
         }
@@ -220,9 +218,9 @@ export async function NCoreInitShell() {
         };
         session.init(
             sessionConfig,
-            new wrapper.NodeIDependsAdapter(new DependsAdapter()),
-            new wrapper.NodeIDispatcherAdapter(new DispatcherAdapter()),
-            new wrapper.NodeIKernelSessionListener(sessionListener),
+            new DependsAdapter() as any,
+            new DispatcherAdapter() as any,
+            sessionListener as any,
         );
         try {
             session.startNT(0);

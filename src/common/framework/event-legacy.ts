@@ -16,16 +16,13 @@ export interface ListenerIBase {
 }
 
 export class LegacyNTEventWrapper {
-    private listenerMapping: Record<string, ListenerIBase>; //ListenerName-Unique -> Listener构造函数
     private WrapperSession: NodeIQQNTWrapperSession | undefined; //WrapperSession
     private listenerManager: Map<string, ListenerClassBase> = new Map<string, ListenerClassBase>(); //ListenerName-Unique -> Listener实例
     private EventTask = new Map<string, Map<string, Map<string, Internal_MapKey>>>(); //tasks ListenerMainName -> ListenerSubName-> uuid -> {timeout,createtime,func}
 
     constructor(
-        listenerMapping: Record<string, ListenerIBase>,
-        wrapperSession: NodeIQQNTWrapperSession,
+        wrapperSession: NodeIQQNTWrapperSession
     ) {
-        this.listenerMapping = listenerMapping;
         this.WrapperSession = wrapperSession;
     }
 
@@ -72,18 +69,17 @@ export class LegacyNTEventWrapper {
     }
 
     createListenerFunction<T>(listenerMainName: string, uniqueCode: string = ''): T {
-        const ListenerType = this.listenerMapping![listenerMainName];
-        let Listener = this.listenerManager.get(listenerMainName + uniqueCode);
-        if (!Listener && ListenerType) {
-            Listener = new ListenerType(this.createProxyDispatch(listenerMainName));
+        let existListener = this.listenerManager.get(listenerMainName + uniqueCode);
+        if (!existListener) {
+            let Listener = this.createProxyDispatch(listenerMainName);
             const ServiceSubName = listenerMainName.match(/^NodeIKernel(.*?)Listener$/)![1];
             const Service = 'NodeIKernel' + ServiceSubName + 'Service/addKernel' + ServiceSubName + 'Listener';
             const addfunc = this.createEventFunction<(listener: T) => number>(Service);
             addfunc!(Listener as T);
-            //console.log(addfunc!(Listener as T));
             this.listenerManager.set(listenerMainName + uniqueCode, Listener);
+            return Listener as T;
         }
-        return Listener as T;
+        return existListener as T;
     }
 
     //统一回调清理事件
