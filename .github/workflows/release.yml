@@ -30,34 +30,34 @@ jobs:
               ls
               node ./script/checkVersion.cjs
               sh ./checkVersion.sh
-  Build-LiteLoader:
-    needs: [check-version]
-    runs-on: ubuntu-latest
-    steps:
-    - name: Clone Main Repository
-      uses: actions/checkout@v4
-      with:
-          repository: 'NapNeko/NapCatQQ'
-          submodules: true
-          ref: main
-          token: ${{ secrets.NAPCAT_BUILD }}
-    - name: Use Node.js 20.X
-      uses: actions/setup-node@v4
-      with:
-          node-version: 20.x
+  # Build-LiteLoader:
+  #   needs: [check-version]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Clone Main Repository
+  #     uses: actions/checkout@v4
+  #     with:
+  #         repository: 'NapNeko/NapCatQQ'
+  #         submodules: true
+  #         ref: main
+  #         token: ${{ secrets.NAPCAT_BUILD }}
+  #   - name: Use Node.js 20.X
+  #     uses: actions/setup-node@v4
+  #     with:
+  #         node-version: 20.x
 
-    - name: Build NuCat Framework
-      run: |
-          npm i
-          npm run build:framework
-          cd dist
-          npm i --omit=dev
-          cd ..
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: NapCat.Framework
-        path: dist
+  #   - name: Build NuCat Framework
+  #     run: |
+  #         npm i
+  #         npm run build:framework
+  #         cd dist
+  #         npm i --omit=dev
+  #         cd ..
+  #   - name: Upload Artifact
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: NapCat.Framework
+  #       path: dist
   Build-Shell:
     runs-on: ubuntu-latest
     needs: [check-version]
@@ -90,7 +90,8 @@ jobs:
               path: dist
 
   release-napcat:
-    needs: [Build-LiteLoader,Build-Shell]
+    needs: [Build-Shell]
+    # needs: [Build-LiteLoader,Build-Shell]
     runs-on: ubuntu-latest
     steps:
     - name: Download All Artifact
@@ -121,6 +122,5 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         body_path: CHANGELOG.md
         files: |
-          NapCat.Framework.zip
           NapCat.Shell.zip
         draft: true
