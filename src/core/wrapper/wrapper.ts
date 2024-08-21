@@ -35,6 +35,7 @@ import { NodeIkernelTestPerformanceService } from '../services/NodeIkernelTestPe
 import { NodeIKernelECDHService } from '../services/NodeIKernelECDHService';
 
 export interface NodeQQNTWrapperUtil {
+    get(): unknown;
     // eslint-disable-next-line @typescript-eslint/no-misused-new
     new(): NodeQQNTWrapperUtil;
 

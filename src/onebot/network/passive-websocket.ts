@@ -36,7 +36,11 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
         this.logger = coreContext.context.logger;
 
         this.heartbeatInterval = heartbeatInterval;
-        this.wsServer = new WebSocketServer({ port: port, host: ip, maxPayload: 1024 * 1024 * 1024, });
+        this.wsServer = new WebSocketServer({
+            port: port,
+            host: ip,
+            maxPayload: 1024 * 1024 * 1024,
+        });
         const core = coreContext;
         this.wsServer.on('connection', async (wsClient, wsReq) => {
             if (!this.isOpen) {

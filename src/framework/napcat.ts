@@ -41,8 +41,7 @@ export async function NCoreInitFramework(
                 online: true,
             });
         };
-        loginService.addKernelLoginListener(new wrapper.NodeIKernelLoginListener(
-            proxiedListenerOf(loginListener, logger)));
+        loginService.addKernelLoginListener(proxiedListenerOf(loginListener, logger) as any);
     });
     // 过早进入会导致addKernelMsgListener等Listener添加失败
     // await sleep(2500);

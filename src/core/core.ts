@@ -44,8 +44,8 @@ export class NapCatCore {
     constructor(context: InstanceContext, selfInfo: SelfInfo) {
         this.selfInfo = selfInfo;
         this.context = context;
-        this.util = new this.context.wrapper.NodeQQNTWrapperUtil();
-        this.eventWrapper = new LegacyNTEventWrapper(context.wrapper, context.session);
+        this.util = this.context.wrapper.NodeQQNTWrapperUtil;
+        this.eventWrapper = new LegacyNTEventWrapper(context.session);
         this.apis = {
             FileApi: new NTQQFileApi(this.context, this),
             SystemApi: new NTQQSystemApi(this.context, this),
@@ -79,7 +79,7 @@ export class NapCatCore {
     }
 
     get dataPath(): string {
-        let result = this.util.getNTUserDataInfoConfig();
+        let result = this.context.wrapper.NodeQQNTWrapperUtil.getNTUserDataInfoConfig();
         if (!result) {
             result = path.resolve(os.homedir(), './.config/QQ');
             fs.mkdirSync(result, { recursive: true });
@@ -98,7 +98,7 @@ export class NapCatCore {
         };
         //await sleep(2500);
         this.context.session.getMsgService().addKernelMsgListener(
-            new this.context.wrapper.NodeIKernelMsgListener(proxiedListenerOf(msgListener, this.context.logger)),
+            proxiedListenerOf(msgListener, this.context.logger) as any
         );
 
         const profileListener = new ProfileListener();
@@ -113,7 +113,7 @@ export class NapCatCore {
             // }
         };
         this.context.session.getProfileService().addKernelProfileListener(
-            new this.context.wrapper.NodeIKernelProfileListener(proxiedListenerOf(profileListener, this.context.logger)),
+            proxiedListenerOf(profileListener, this.context.logger),
         );
 
         // 群相关
@@ -197,7 +197,7 @@ export class NapCatCore {
             }
         };
         this.context.session.getGroupService().addKernelGroupListener(
-            new this.context.wrapper.NodeIKernelGroupListener(proxiedListenerOf(groupListener, this.context.logger)),
+            proxiedListenerOf(profileListener, this.context.logger) as any
         );
     }
     checkAdminEvent(groupCode: string, memberNew: GroupMember, memberOld: GroupMember | undefined): boolean {
