@@ -1,9 +1,4 @@
-import fastXmlParser from 'fast-xml-parser';
-import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
-import { OB11GroupBanEvent } from '../event/notice/OB11GroupBanEvent';
-import { sleep, UUIDConverter } from '@/common/utils/helper';
-import { OB11GroupMsgEmojiLikeEvent } from '@/onebot/event/notice/OB11MsgEmojiLikeEvent';
-import { OB11FriendPokeEvent } from '../event/notice/OB11PokeEvent';
+import { UUIDConverter } from '@/common/utils/helper';
 import { NapCatOneBot11Adapter, OB11Message, OB11MessageData, OB11MessageDataType } from '..';
 import { AtType, ChatType, FaceIndex, NapCatCore, RawMessage, VideoElement } from '@/core';
 import { EventType } from '../event/OB11BaseEvent';
@@ -78,115 +73,41 @@ export async function RawNTMsg2Onebot(
             type: 'unknown' as any,
         };
         if (element.textElement && element.textElement?.atType !== AtType.notAt) {
-            let textAtMsgData = await obcore.apiContext.MsgApi.paseTextElemntWithAt(msg, element.textElement);
+            let textAtMsgData = await obcore.apiContext.MsgApi.parseTextElemntWithAt(msg, element);
             if (textAtMsgData) message_data = textAtMsgData
         } else if (element.textElement) {
-            let textMsgData = await obcore.apiContext.MsgApi.parseTextElement(msg, element.textElement);
+            let textMsgData = await obcore.apiContext.MsgApi.parseTextElement(msg, element);
             if (textMsgData) message_data = textMsgData;
         } else if (element.replyElement) {
-            let replyMsgData = await obcore.apiContext.MsgApi.parseReplyElement(msg, element.replyElement);
+            let replyMsgData = await obcore.apiContext.MsgApi.parseReplyElement(msg, element);
             if (replyMsgData) message_data = replyMsgData;
-
         } else if (element.picElement) {
-            let PicMsgData = await obcore.apiContext.MsgApi.parsePicElement(msg, element.picElement);
+            let PicMsgData = await obcore.apiContext.MsgApi.parsePicElement(msg, element);
             if (PicMsgData) message_data = PicMsgData;
-
         } else if (element.fileElement) {
-            const FileElement = element.fileElement;
-            message_data['type'] = OB11MessageDataType.file;
-            message_data['data']['file'] = FileElement.fileName;
-            message_data['data']['path'] = FileElement.filePath;
-            message_data['data']['url'] = FileElement.filePath;
-            message_data['data']['file_id'] = UUIDConverter.encode(msg.peerUin, msg.msgId);
-            message_data['data']['file_size'] = FileElement.fileSize;
-            await NTQQFileApi.addFileCache(
-                {
-                    peerUid: msg.peerUid,
-                    chatType: msg.chatType,
-                    guildId: '',
-                },
-                msg.msgId,
-                msg.msgSeq,
-                msg.senderUid,
-                element.elementId,
-                element.elementType.toString(),
-                FileElement.fileSize,
-                FileElement.fileName
-            );
+            let FileMsgData = await obcore.apiContext.MsgApi.parseFileElement(msg, element);
+            if (FileMsgData) message_data = FileMsgData;
         } else if (element.videoElement) {
-            let videoMsgData = await obcore.apiContext.MsgApi.parseVideoElement(msg, element.elementId, element.elementType, element.videoElement);
+            let videoMsgData = await obcore.apiContext.MsgApi.parseVideoElement(msg, element);
             if (videoMsgData) message_data = videoMsgData;
         } else if (element.pttElement) {
-            message_data['type'] = OB11MessageDataType.voice;
-            message_data['data']['file'] = element.pttElement.fileName;
-            message_data['data']['path'] = element.pttElement.filePath;
-            //message_data['data']['file_id'] = element.pttElement.fileUuid;
-            message_data['data']['file_id'] = UUIDConverter.encode(msg.peerUin, msg.msgId);
-            message_data['data']['file_size'] = element.pttElement.fileSize;
-            await NTQQFileApi.addFileCache({
-                peerUid: msg.peerUid,
-                chatType: msg.chatType,
-                guildId: '',
-            },
-                msg.msgId,
-                msg.msgSeq,
-                msg.senderUid,
-                element.elementId,
-                element.elementType.toString(),
-                element.pttElement.fileSize || '0',
-                element.pttElement.fileUuid || ''
-            );
-            //以uuid作为文件名
+            let pttMsgData = await obcore.apiContext.MsgApi.parsePTTElement(msg, element);
+            if (pttMsgData) message_data = pttMsgData;
         } else if (element.arkElement) {
-            message_data['type'] = OB11MessageDataType.json;
-            message_data['data']['data'] = element.arkElement.bytesData;
+            let arkMsgData = await obcore.apiContext.MsgApi.parseArkElement(msg, element);
+            if (arkMsgData) message_data = arkMsgData;
         } else if (element.faceElement) {
-            const faceId = element.faceElement.faceIndex;
-            if (faceId === FaceIndex.dice) {
-                message_data['type'] = OB11MessageDataType.dice;
-                message_data['data']['result'] = element.faceElement.resultId;
-            } else if (faceId === FaceIndex.RPS) {
-                message_data['type'] = OB11MessageDataType.RPS;
-                message_data['data']['result'] = element.faceElement.resultId;
-            } else {
-                message_data['type'] = OB11MessageDataType.face;
-                message_data['data']['id'] = element.faceElement.faceIndex.toString();
-            }
+            let faceMsgData = await obcore.apiContext.MsgApi.parseFaceElement(msg, element);
+            if (faceMsgData) message_data = faceMsgData;
         } else if (element.marketFaceElement) {
-            let marketFaceMsgData = await obcore.apiContext.MsgApi.parseMarketFaceElement(msg, element.elementId, element.elementType, element.marketFaceElement);
+            let marketFaceMsgData = await obcore.apiContext.MsgApi.parseMarketFaceElement(msg, element);
             if (marketFaceMsgData) message_data = marketFaceMsgData;
         } else if (element.markdownElement) {
             message_data['type'] = OB11MessageDataType.markdown;
             message_data['data']['data'] = element.markdownElement.content;
         } else if (element.multiForwardMsgElement) {
-            message_data['type'] = OB11MessageDataType.forward;
-            message_data['data']['id'] = msg.msgId;
-            const ParentMsgPeer = msg.parentMsgPeer ?? {
-                chatType: msg.chatType,
-                guildId: '',
-                peerUid: msg.peerUid,
-            };
-            //判断是否在合并消息内
-            msg.parentMsgIdList = msg.parentMsgIdList ?? [];
-            //首次列表不存在则开始创建
-            msg.parentMsgIdList.push(msg.msgId);
-            //let parentMsgId = msg.parentMsgIdList[msg.parentMsgIdList.length - 2 < 0 ? 0 : msg.parentMsgIdList.length - 2];
-            //加入自身MsgId
-            const MultiMsgs = (await NTQQMsgApi.getMultiMsg(ParentMsgPeer, msg.parentMsgIdList[0], msg.msgId))?.msgList;
-            //拉取下级消息
-            if (!MultiMsgs) continue;
-            //拉取失败则跳过
-            message_data['data']['content'] = [];
-            for (const MultiMsg of MultiMsgs) {
-                //对每条拉取的消息传递ParentMsgPeer修正Peer
-                MultiMsg.parentMsgPeer = ParentMsgPeer;
-                MultiMsg.parentMsgIdList = msg.parentMsgIdList;
-                MultiMsg.id = MessageUnique.createMsg(ParentMsgPeer, MultiMsg.msgId); //该ID仅用查看 无法调用
-                const msgList = await RawNTMsg2Onebot(core, obcore, MultiMsg, messagePostFormat);
-                if (!msgList) continue;
-                message_data['data']['content'].push(msgList);
-                //console.log("合并消息", msgList);
-            }
+            let multiForwardMsgData = await obcore.apiContext.MsgApi.parseMultForwardElement(msg, element, messagePostFormat);
+            if (multiForwardMsgData) message_data = multiForwardMsgData;
         }
         if ((message_data.type as string) !== 'unknown' && message_data.data) {
             const cqCode = encodeCQCode(message_data);
