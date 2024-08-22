@@ -1,8 +1,8 @@
 import { UUIDConverter } from '@/common/utils/helper';
 import { MessageUnique } from '@/common/utils/MessageUnique';
-import { AtType, ElementType, MarketFaceElement, NapCatCore, PicElement, RawMessage, ReplyElement, TextElement, VideoElement } from '@/core';
-
+import { AtType, FaceIndex, MessageElement, NapCatCore, RawMessage } from '@/core';
 import { NapCatOneBot11Adapter, OB11MessageData, OB11MessageDataType } from '@/onebot';
+import { RawNTMsg2Onebot } from '../helper';
 
 export class OneBotMsgApi {
     obContext: NapCatOneBot11Adapter;
@@ -12,7 +12,39 @@ export class OneBotMsgApi {
         this.obContext = obContext;
         this.coreContext = coreContext;
     }
-    async paseTextElemntWithAt(msg: RawMessage, textElement: TextElement) {
+    async parseFileElement(msg: RawMessage, element: MessageElement) {
+        const fileElement = element.fileElement;
+        if (!fileElement) return undefined;
+        const NTQQFileApi = this.coreContext.apis.FileApi;
+        let message_data: OB11MessageData = {
+            data: {} as any,
+            type: 'unknown' as any,
+        };
+        message_data['type'] = OB11MessageDataType.file;
+        message_data['data']['file'] = fileElement.fileName;
+        message_data['data']['path'] = fileElement.filePath;
+        message_data['data']['url'] = fileElement.filePath;
+        message_data['data']['file_id'] = UUIDConverter.encode(msg.peerUin, msg.msgId);
+        message_data['data']['file_size'] = fileElement.fileSize;
+        await NTQQFileApi.addFileCache(
+            {
+                peerUid: msg.peerUid,
+                chatType: msg.chatType,
+                guildId: '',
+            },
+            msg.msgId,
+            msg.msgSeq,
+            msg.senderUid,
+            element.elementId,
+            element.elementType.toString(),
+            fileElement.fileSize,
+            fileElement.fileName
+        );
+        return message_data;
+    }
+    async parseTextElemntWithAt(msg: RawMessage, element: MessageElement) {
+        const textElement = element.textElement;
+        if (!textElement) return undefined;
         const NTQQUserApi = this.coreContext.apis.UserApi;
         let message_data: OB11MessageData = {
             data: {} as any,
@@ -42,7 +74,9 @@ export class OneBotMsgApi {
         };
         return message_data;
     }
-    async parseTextElement(msg: RawMessage, textElement: TextElement) {
+    async parseTextElement(msg: RawMessage, element: MessageElement) {
+        const textElement = element.textElement;
+        if (!textElement) return undefined;
         let message_data: OB11MessageData = {
             data: {} as any,
             type: 'unknown' as any,
@@ -60,7 +94,9 @@ export class OneBotMsgApi {
         message_data['data']['text'] = text;
         return message_data;
     }
-    async parsePicElement(msg: RawMessage, picElement: PicElement) {
+    async parsePicElement(msg: RawMessage, element: MessageElement) {
+        const picElement = element.picElement;
+        if (!picElement) return undefined;
         const NTQQFileApi = this.coreContext.apis.FileApi;
         let message_data: OB11MessageData = {
             data: {} as any,
@@ -82,7 +118,7 @@ export class OneBotMsgApi {
         message_data['data']['file_size'] = picElement.fileSize;
         return message_data;
     }
-    async parseMarketFaceElement(msg: RawMessage, elementId: string, elementType: ElementType, marketFaceElement: MarketFaceElement) {
+    async parseMarketFaceElement(msg: RawMessage, element: MessageElement) {
         const NTQQFileApi = this.coreContext.apis.FileApi;
         let message_data: OB11MessageData = {
             data: {} as any,
@@ -91,8 +127,8 @@ export class OneBotMsgApi {
         message_data['type'] = OB11MessageDataType.image;
         message_data['data']['file'] = 'marketface';
         message_data['data']['file_id'] = UUIDConverter.encode(msg.peerUin, msg.msgId);
-        message_data['data']['path'] = elementId;
-        message_data['data']['url'] = elementId;
+        message_data['data']['path'] = element.elementId;
+        message_data['data']['url'] = element.elementId;
         await NTQQFileApi.addFileCache(
             {
                 peerUid: msg.peerUid,
@@ -102,14 +138,16 @@ export class OneBotMsgApi {
             msg.msgId,
             msg.msgSeq,
             msg.senderUid,
-            elementId,
-            elementType.toString(),
+            element.elementId,
+            element.elementType.toString(),
             '0',
             'marketface'
         );
         return message_data;
     }
-    async parseReplyElement(msg: RawMessage, replyElement: ReplyElement) {
+    async parseReplyElement(msg: RawMessage, element: MessageElement) {
+        const replyElement = element.replyElement;
+        if (!replyElement) return undefined;
         const NTQQMsgApi = this.coreContext.apis.MsgApi;
         let message_data: OB11MessageData = {
             data: {} as any,
@@ -158,7 +196,9 @@ export class OneBotMsgApi {
         }
         return message_data;
     }
-    async parseVideoElement(msg: RawMessage, elementId: string, elementType: ElementType, videoElement: VideoElement) {
+    async parseVideoElement(msg: RawMessage, element: MessageElement) {
+        const videoElement = element.videoElement;
+        if (!videoElement) return undefined;
         const NTQQFileApi = this.coreContext.apis.FileApi;
         let message_data: OB11MessageData = {
             data: {} as any,
@@ -175,7 +215,7 @@ export class OneBotMsgApi {
                 chatType: msg.chatType,
                 peerUid: msg.peerUid,
                 guildId: '0',
-            }, msg.msgId, elementId);
+            }, msg.msgId, element.elementId);
         } catch (error) {
             videoUrl = undefined;
         }
@@ -210,11 +250,111 @@ export class OneBotMsgApi {
             msg.msgId,
             msg.msgSeq,
             msg.senderUid,
-            elementId,
-            elementType.toString(),
+            element.elementId,
+            element.elementType.toString(),
             videoElement.fileSize || '0',
             videoElement.fileName
         );
+        return message_data;
+    }
+    async parsePTTElement(msg: RawMessage, element: MessageElement) {
+        const pttElement = element.pttElement;
+        if (!pttElement) return undefined;
+        const NTQQFileApi = this.coreContext.apis.FileApi;
+        let message_data: OB11MessageData = {
+            data: {} as any,
+            type: 'unknown' as any,
+        };
+
+        message_data['type'] = OB11MessageDataType.voice;
+        message_data['data']['file'] = pttElement.fileName;
+        message_data['data']['path'] = pttElement.filePath;
+        //message_data['data']['file_id'] = element.pttElement.fileUuid;
+        message_data['data']['file_id'] = UUIDConverter.encode(msg.peerUin, msg.msgId);
+        message_data['data']['file_size'] = pttElement.fileSize;
+        await NTQQFileApi.addFileCache({
+            peerUid: msg.peerUid,
+            chatType: msg.chatType,
+            guildId: '',
+        },
+            msg.msgId,
+            msg.msgSeq,
+            msg.senderUid,
+            element.elementId,
+            element.elementType.toString(),
+            pttElement.fileSize || '0',
+            pttElement.fileUuid || ''
+        );
+        //以uuid作为文件名
+        return message_data;
+    }
+    async parseFaceElement(msg: RawMessage, element: MessageElement) {
+        const faceElement = element.faceElement;
+        if (!faceElement) return undefined;
+        let message_data: OB11MessageData = {
+            data: {} as any,
+            type: 'unknown' as any,
+        };
+        const faceId = faceElement.faceIndex;
+        if (faceId === FaceIndex.dice) {
+            message_data['type'] = OB11MessageDataType.dice;
+            message_data['data']['result'] = faceElement.resultId;
+        } else if (faceId === FaceIndex.RPS) {
+            message_data['type'] = OB11MessageDataType.RPS;
+            message_data['data']['result'] = faceElement.resultId;
+        } else {
+            message_data['type'] = OB11MessageDataType.face;
+            message_data['data']['id'] = faceElement.faceIndex.toString();
+        }
+        return message_data;
+    }
+    async parseMultForwardElement(msg: RawMessage, element: MessageElement, messagePostFormat: any) {
+        const NTQQMsgApi = this.coreContext.apis.MsgApi;
+        const faceElement = element.multiForwardMsgElement;
+        if (!faceElement) return undefined;
+        let message_data: OB11MessageData = {
+            data: {} as any,
+            type: 'unknown' as any,
+        };
+        message_data['type'] = OB11MessageDataType.forward;
+        message_data['data']['id'] = msg.msgId;
+        const ParentMsgPeer = msg.parentMsgPeer ?? {
+            chatType: msg.chatType,
+            guildId: '',
+            peerUid: msg.peerUid,
+        };
+        //判断是否在合并消息内
+        msg.parentMsgIdList = msg.parentMsgIdList ?? [];
+        //首次列表不存在则开始创建
+        msg.parentMsgIdList.push(msg.msgId);
+        //let parentMsgId = msg.parentMsgIdList[msg.parentMsgIdList.length - 2 < 0 ? 0 : msg.parentMsgIdList.length - 2];
+        //加入自身MsgId
+        const MultiMsgs = (await NTQQMsgApi.getMultiMsg(ParentMsgPeer, msg.parentMsgIdList[0], msg.msgId))?.msgList;
+        //拉取下级消息
+        if (!MultiMsgs) return undefined;
+        //拉取失败则跳过
+        message_data['data']['content'] = [];
+        for (const MultiMsg of MultiMsgs) {
+            //对每条拉取的消息传递ParentMsgPeer修正Peer
+            MultiMsg.parentMsgPeer = ParentMsgPeer;
+            MultiMsg.parentMsgIdList = msg.parentMsgIdList;
+            MultiMsg.id = MessageUnique.createMsg(ParentMsgPeer, MultiMsg.msgId); //该ID仅用查看 无法调用
+            const msgList = await RawNTMsg2Onebot(this.coreContext, this.obContext, MultiMsg, messagePostFormat);
+            if (!msgList) continue;
+            message_data['data']['content'].push(msgList);
+            //console.log("合并消息", msgList);
+        }
+        return message_data;
+    }
+    async parseArkElement(msg: RawMessage, element: MessageElement) {
+        const arkElement = element.arkElement;
+        if (!arkElement) return undefined;
+        let message_data: OB11MessageData = {
+            data: {} as any,
+            type: 'unknown' as any,
+        };
+        message_data['type'] = OB11MessageDataType.json;
+        message_data['data']['data'] = arkElement.bytesData;
         return message_data;
     }
 }
