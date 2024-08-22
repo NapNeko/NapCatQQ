@@ -17,14 +17,21 @@ async function handleOb11FileLikeMessage(
     { data: inputdata }: OB11MessageFileBase,
     { deleteAfterSentFiles }: MessageContext,
 ) {
-    //有的奇怪的框架将url作为参数 而不是file 此时优先url 同时注意可能传入的是非file://开头的目录 By Mlikiowa
+    //inputdata?.url || inputdata.file
+    const isBlankUrl = !inputdata.url || inputdata.url === '';
+    const isBlankFile = !inputdata.file || inputdata.file === '';
+    if (isBlankUrl && isBlankFile) {
+        coreContext.context.logger.logError('文件消息缺少参数', inputdata);
+        throw Error('文件消息缺少参数');
+    }
+    const fileOrUrl = (isBlankUrl ? inputdata.file : inputdata.url) || "";
     const {
         path,
         isLocal,
         fileName,
         errMsg,
         success,
-    } = (await uri2local(coreContext.NapCatTempPath, inputdata?.url || inputdata.file));
+    } = (await uri2local(coreContext.NapCatTempPath, fileOrUrl));
 
     if (!success) {
         coreContext.context.logger.logError('文件下载失败', errMsg);
