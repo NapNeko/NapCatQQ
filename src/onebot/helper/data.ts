@@ -454,40 +454,8 @@ export class OB11Constructor {
             }
             if (element.grayTipElement) {
                 if (element.grayTipElement.xmlElement?.templId === '10382') {
-                    const emojiLikeData = new fastXmlParser.XMLParser({
-                        ignoreAttributes: false,
-                        attributeNamePrefix: '',
-                    }).parse(element.grayTipElement.xmlElement.content);
-                    logger.logDebug('收到表情回应我的消息', emojiLikeData);
-                    try {
-                        const senderUin = emojiLikeData.gtip.qq.jp;
-                        const msgSeq = emojiLikeData.gtip.url.msgseq;
-                        const emojiId = emojiLikeData.gtip.face.id;
-                        const peer = {
-                            chatType: ChatType.group,
-                            guildId: '',
-                            peerUid: msg.peerUid
-                        }
-                        const replyMsgList = (await NTQQMsgApi.getMsgExBySeq(peer, msgSeq)).msgList;
-                        if (replyMsgList.length < 1) {
-                            return;
-                        }
-                        const replyMsg = replyMsgList.filter(e => e.msgSeq == msgSeq).sort((a, b) => parseInt(a.msgTime) - parseInt(b.msgTime))[0];
-                        //console.log("表情回应消息长度检测", msgSeq, replyMsg.elements);
-                        if (!replyMsg) throw new Error('找不到回应消息');
-                        return new OB11GroupMsgEmojiLikeEvent(
-                            core,
-                            parseInt(msg.peerUid),
-                            parseInt(senderUin),
-                            MessageUnique.getShortIdByMsgId(replyMsg.msgId)!,
-                            [{
-                                emoji_id: emojiId,
-                                count: 1,
-                            }],
-                        );
-                    } catch (e: any) {
-                        logger.logError('解析表情回应消息失败', e.stack);
-                    }
+                    let emojiLikeEvent = await obContext.apiContext.GroupApi.parseGroupEmjioLikeEvent(msg.peerUid, element.grayTipElement);
+                    if (emojiLikeEvent) return emojiLikeEvent;
                 }
                 if (element.grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_XMLMSG) {
                     logger.logDebug('收到新人被邀请进群消息', element.grayTipElement);
@@ -567,16 +535,6 @@ export class OB11Constructor {
                 }
             }
         }
-    }
-
-    static friend(friend: User): OB11User {
-        return {
-            user_id: parseInt(friend.uin),
-            nickname: friend.nick,
-            remark: friend.remark,
-            sex: OB11Constructor.sex(friend.sex!),
-            level: friend.qqLevel && calcQQLevel(friend.qqLevel) || 0,
-        };
     }
 
     static selfInfo(selfInfo: SelfInfo): OB11User {
