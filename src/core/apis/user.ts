@@ -129,7 +129,7 @@ export class NTQQUserApi {
 
     async getUserDetailInfo(uid: string): Promise<User> {
         try {
-            let retUser = await this.fetchUserDetailInfo(uid, UserDetailSource.KDB);
+            const retUser = await this.fetchUserDetailInfo(uid, UserDetailSource.KDB);
             if (retUser.uin !== '0') {
                 return retUser;
             }

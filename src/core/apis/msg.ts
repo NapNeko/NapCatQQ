@@ -120,18 +120,18 @@ export class NTQQMsgApi {
         const data = await this.core.eventWrapper.CallNormalEvent<
             (GroupCode: string, params: GetFileListParam) => Promise<unknown>,
             (groupFileListResult: onGroupFileInfoUpdateParamType) => void
-        >(
-            'NodeIKernelRichMediaService/getGroupFileList',
-            'NodeIKernelMsgListener/onGroupFileInfoUpdate',
-            1,
-            5000,
-            (groupFileListResult: onGroupFileInfoUpdateParamType) => {
+                >(
+                'NodeIKernelRichMediaService/getGroupFileList',
+                'NodeIKernelMsgListener/onGroupFileInfoUpdate',
+                1,
+                5000,
+                (groupFileListResult: onGroupFileInfoUpdateParamType) => {
                 //Developer Mlikiowa Todo: 此处有问题 无法判断是否成功
-                return true;
-            },
-            GroupCode,
-            params,
-        );
+                    return true;
+                },
+                GroupCode,
+                params,
+                );
         return data[1].item;
     }
 
@@ -182,24 +182,24 @@ export class NTQQMsgApi {
         const data = await this.core.eventWrapper.CallNormalEvent<
             (msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<any, any>) => Promise<unknown>,
             (msgList: RawMessage[]) => void
-        >(
-            'NodeIKernelMsgService/sendMsg',
-            'NodeIKernelMsgListener/onMsgInfoListUpdate',
-            1,
-            timeout,
-            (msgRecords: RawMessage[]) => {
-                for (const msgRecord of msgRecords) {
-                    if (msgRecord.guildId === msgId && msgRecord.sendStatus === SendStatusType.KSEND_STATUS_SUCCESS) {
-                        return true;
+                >(
+                'NodeIKernelMsgService/sendMsg',
+                'NodeIKernelMsgListener/onMsgInfoListUpdate',
+                1,
+                timeout,
+                (msgRecords: RawMessage[]) => {
+                    for (const msgRecord of msgRecords) {
+                        if (msgRecord.guildId === msgId && msgRecord.sendStatus === SendStatusType.KSEND_STATUS_SUCCESS) {
+                            return true;
+                        }
                     }
-                }
-                return false;
-            },
-            '0',
-            peer,
-            msgElements,
-            new Map(),
-        );
+                    return false;
+                },
+                '0',
+                peer,
+                msgElements,
+                new Map(),
+                );
         const retMsg = data[1].find(msgRecord => {
             if (msgRecord.guildId === msgId) {
                 return true;
@@ -227,25 +227,25 @@ export class NTQQMsgApi {
         const data = await this.core.eventWrapper.CallNormalEvent<
             (msgInfo: typeof msgInfos, srcPeer: Peer, destPeer: Peer, comment: Array<any>, attr: Map<any, any>) => Promise<unknown>,
             (msgList: RawMessage[]) => void
-        >(
-            'NodeIKernelMsgService/multiForwardMsgWithComment',
-            'NodeIKernelMsgListener/onMsgInfoListUpdate',
-            1,
-            5000,
-            (msgRecords: RawMessage[]) => {
-                for (const msgRecord of msgRecords) {
-                    if (msgRecord.peerUid == destPeer.peerUid && msgRecord.senderUid == this.core.selfInfo.uid) {
-                        return true;
+                >(
+                'NodeIKernelMsgService/multiForwardMsgWithComment',
+                'NodeIKernelMsgListener/onMsgInfoListUpdate',
+                1,
+                5000,
+                (msgRecords: RawMessage[]) => {
+                    for (const msgRecord of msgRecords) {
+                        if (msgRecord.peerUid == destPeer.peerUid && msgRecord.senderUid == this.core.selfInfo.uid) {
+                            return true;
+                        }
                     }
-                }
-                return false;
-            },
-            msgInfos,
-            srcPeer,
-            destPeer,
-            [],
-            new Map(),
-        );
+                    return false;
+                },
+                msgInfos,
+                srcPeer,
+                destPeer,
+                [],
+                new Map(),
+                );
         for (const msg of data[1]) {
             const arkElement = msg.elements.find(ele => ele.arkElement);
             if (!arkElement) {

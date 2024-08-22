@@ -37,7 +37,7 @@ export default class GoCQHTTPGetStrangerInfo extends BaseAction<Payload, OB11Use
                 level: calcQQLevel(extendData.detail.commonExt?.qqLevel ?? 0) || 0,
                 login_days: 0,
                 uid: ''
-              };
+            };
             return ret;
         }
         const data = { ...extendData, ...(await NTQQUserApi.getUserDetailInfo(uid)) };

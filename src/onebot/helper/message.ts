@@ -12,7 +12,7 @@ import { OB11Constructor } from './converter';
 import { encodeCQCode } from './cqcode';
 
 
- export async function RawNTMsg2Onebot(
+export async function RawNTMsg2Onebot(
     core: NapCatCore,
     obcore: NapCatOneBot11Adapter,
     msg: RawMessage,
@@ -256,13 +256,13 @@ import { encodeCQCode } from './cqcode';
                 chatType: msg.chatType,
                 guildId: '',
             },
-                msg.msgId,
-                msg.msgSeq,
-                msg.senderUid,
-                element.elementId,
-                element.elementType.toString(),
-                element.pttElement.fileSize || '0',
-                element.pttElement.fileUuid || ''
+            msg.msgId,
+            msg.msgSeq,
+            msg.senderUid,
+            element.elementId,
+            element.elementType.toString(),
+            element.pttElement.fileSize || '0',
+            element.pttElement.fileUuid || ''
             );
             //以uuid作为文件名
         } else if (element.arkElement) {

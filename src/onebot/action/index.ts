@@ -61,7 +61,7 @@ import { TranslateEnWordToZn } from './extends/TranslateEnWordToZn';
 import { SetGroupFileFolder } from './file/SetGroupFileFolder';
 import { DelGroupFile } from './file/DelGroupFile';
 import { DelGroupFileFolder } from './file/DelGroupFileFolder';
-import { SetQQProfile } from './go-cqhttp/SetQQProfile'
+import { SetQQProfile } from './go-cqhttp/SetQQProfile';
 import { ShareGroupEx, SharePeer } from './extends/ShareContact';
 import { CreateCollection } from './extends/CreateCollection';
 import { SetLongNick } from './extends/SetLongNick';
