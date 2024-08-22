@@ -258,14 +258,14 @@ export class NTQQGroupApi {
         // NTEventDispatch.CreatListenerFunction('NodeIKernelGroupListener/onGroupMemberInfoUpdate', 
         //return napCatCore.session.getGroupService().getMemberInfo(GroupCode, [uid], forced);
         const Listener = this.core.eventWrapper.RegisterListen<(params: any) => void>
-        (
+            (
             'NodeIKernelGroupListener/onMemberInfoChange',
             1,
             forced ? 5000 : 250,
             (params) => {
                 return params === GroupCode;
             },
-        );
+            );
         const EventFunc = this.core.eventWrapper.createEventFunction<EventType>('NodeIKernelGroupService/getMemberInfo');
         const retData = await EventFunc!(GroupCode, [uid], forced);
         if (retData.result !== 0) {
@@ -274,9 +274,9 @@ export class NTQQGroupApi {
         const result = await Listener as unknown;
         let member: GroupMember | undefined;
         if (Array.isArray(result) && result?.[2] instanceof Map) {
-            let members = result[2] as Map<string, GroupMember>;
+            const members = result[2] as Map<string, GroupMember>;
             member = members.get(uid);
-        };
+        }
         return member;
 
         // 原本的方法: (no_cache 下效率很高, cache 下效率一致)

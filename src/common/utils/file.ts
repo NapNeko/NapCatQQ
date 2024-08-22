@@ -237,9 +237,9 @@ export async function uri2local(dir: string, uri: string, filename: string | und
         const pathInfo = path.parse(decodeURIComponent(new URL(HandledUri).pathname));
         if (pathInfo.name) {
             filename = pathInfo.name;
-          if (pathInfo.ext) {
-            filename += pathInfo.ext;
-          }
+            if (pathInfo.ext) {
+                filename += pathInfo.ext;
+            }
         }
         filename = filename.replace(/[/\\:*?"<>|]/g, '_');
         const fileExt = path.extname(HandledUri);

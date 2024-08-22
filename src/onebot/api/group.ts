@@ -73,7 +73,7 @@ export class OneBotGroupApi {
     }
     async parseGroupMemberIncreaseEvent(GroupCode: string, grayTipElement: GrayTipElement) {
         const NTQQGroupApi = this.coreContext.apis.GroupApi;
-        let groupElement = grayTipElement?.groupElement;
+        const groupElement = grayTipElement?.groupElement;
         if (!groupElement) return undefined;
         const member = await NTQQGroupApi.getGroupMember(GroupCode, groupElement.memberUid);
         const memberUin = member?.uin;
@@ -92,7 +92,7 @@ export class OneBotGroupApi {
     async parseGroupKickEvent(GroupCode: string, grayTipElement: GrayTipElement) {
         const NTQQGroupApi = this.coreContext.apis.GroupApi;
         const NTQQUserApi = this.coreContext.apis.UserApi;
-        let groupElement = grayTipElement?.groupElement;
+        const groupElement = grayTipElement?.groupElement;
         if (!groupElement) return undefined;
         const adminUin = (await NTQQGroupApi.getGroupMember(GroupCode, groupElement.adminUid))?.uin || (await NTQQUserApi.getUidByUinV2(groupElement.adminUid));
         if (adminUin) {
@@ -121,7 +121,7 @@ export class OneBotGroupApi {
                 chatType: ChatType.group,
                 guildId: '',
                 peerUid: GroupCode
-            }
+            };
             const replyMsgList = (await NTQQMsgApi.getMsgExBySeq(peer, msgSeq)).msgList;
             if (replyMsgList.length < 1) {
                 return;

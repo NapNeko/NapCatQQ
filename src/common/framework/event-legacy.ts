@@ -69,9 +69,9 @@ export class LegacyNTEventWrapper {
     }
 
     createListenerFunction<T>(listenerMainName: string, uniqueCode: string = ''): T {
-        let existListener = this.listenerManager.get(listenerMainName + uniqueCode);
+        const existListener = this.listenerManager.get(listenerMainName + uniqueCode);
         if (!existListener) {
-            let Listener = this.createProxyDispatch(listenerMainName);
+            const Listener = this.createProxyDispatch(listenerMainName);
             const ServiceSubName = listenerMainName.match(/^NodeIKernel(.*?)Listener$/)![1];
             const Service = 'NodeIKernel' + ServiceSubName + 'Service/addKernel' + ServiceSubName + 'Listener';
             const addfunc = this.createEventFunction<(listener: T) => number>(Service);
