@@ -35,7 +35,7 @@ import { OB11GroupRequestEvent } from '@/onebot/event/request/OB11GroupRequest';
 import { OB11FriendRecallNoticeEvent } from '@/onebot/event/notice/OB11FriendRecallNoticeEvent';
 import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecallNoticeEvent';
 import { LRUCache } from '@/common/utils/LRU';
-import { RawNTMsg2Onebot } from './helper';
+import { NT2GroupEvent, NT2PrivateEvent, RawNTMsg2Onebot } from './helper';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -468,14 +468,14 @@ export class NapCatOneBot11Adapter {
             this.networkManager.emitEvent(ob11Msg);
         }).catch(e => this.context.logger.logError('constructMessage error: ', e));
 
-        OB11Constructor.GroupEvent(this.core, this, message).then(groupEvent => {
+        NT2GroupEvent(this.core, this, message).then(groupEvent => {
             if (groupEvent) {
                 // log("post group event", groupEvent);
                 this.networkManager.emitEvent(groupEvent);
             }
         }).catch(e => this.context.logger.logError('constructGroupEvent error: ', e));
 
-        OB11Constructor.PrivateEvent(this.core, this, message).then(privateEvent => {
+        NT2PrivateEvent(this.core, this, message).then(privateEvent => {
             if (privateEvent) {
                 // log("post private event", privateEvent);
                 this.networkManager.emitEvent(privateEvent);
