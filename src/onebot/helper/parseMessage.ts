@@ -78,97 +78,19 @@ export async function RawNTMsg2Onebot(
             type: 'unknown' as any,
         };
         if (element.textElement && element.textElement?.atType !== AtType.notAt) {
-            let qq: `${number}` | 'all';
-            let name: string | undefined;
-            if (element.textElement.atType == AtType.atAll) {
-                qq = 'all';
-            } else {
-                const { atNtUid, content } = element.textElement;
-                let atQQ = element.textElement.atUid;
-                if (!atQQ || atQQ === '0') {
-                    atQQ = await NTQQUserApi.getUinByUidV2(atNtUid);
-                }
-                if (atQQ) {
-                    qq = atQQ as `${number}`;
-                    name = content.replace('@', '');
-                }
-            }
-            message_data = {
-                type: OB11MessageDataType.at,
-                data: {
-                    qq: qq!,
-                    name,
-                },
-            };
+            let textAtMsgData = await obcore.apiContext.MsgApi.paseTextElemntWithAt(msg, element.textElement);
+            if (textAtMsgData) message_data = textAtMsgData
         } else if (element.textElement) {
-            message_data['type'] = OB11MessageDataType.text;
-
-            let text = element.textElement.content;
-            if (!text.trim()) {
-                continue;
-            }
-            // 兼容 9.7.x 换行符
-            if (text.indexOf('\n') === -1 && text.indexOf('\r\n') === -1) {
-                text = text.replace(/\r/g, '\n');
-            }
-            message_data['data']['text'] = text;
+            let textMsgData = await obcore.apiContext.MsgApi.parseTextElement(msg, element.textElement);
+            if (textMsgData) message_data = textMsgData;
         } else if (element.replyElement) {
-            message_data['type'] = OB11MessageDataType.reply;
-            //log("收到回复消息", element.replyElement);
-            try {
-                const records = msg.records.find(msgRecord => msgRecord.msgId === element?.replyElement?.sourceMsgIdInRecords);
-                const peer = {
-                    chatType: msg.chatType,
-                    peerUid: msg.peerUid,
-                    guildId: '',
-                };
-                let replyMsg: RawMessage | undefined;
-                if (!records) throw new Error('找不到回复消息');
-                replyMsg = (await NTQQMsgApi.getMsgsBySeqAndCount({
-                    peerUid: msg.peerUid,
-                    guildId: '',
-                    chatType: msg.chatType,
-                }, element.replyElement.replayMsgSeq, 1, true, true)).msgList.find(msg => msg.msgRandom === records.msgRandom);
-                if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
-                    replyMsg = (await NTQQMsgApi.getSingleMsg(peer, element.replyElement.replayMsgSeq)).msgList[0];
-                }
-                if (msg.peerUin == '284840486') {
-                    //合并消息内侧 消息具体定位不到
-                }
-                if ((!replyMsg || records.msgRandom !== replyMsg.msgRandom) && msg.peerUin !== '284840486') {
-                    const replyMsgList = (await NTQQMsgApi.getMsgExBySeq(peer, records.msgSeq)).msgList;
-                    if (replyMsgList.length < 1) {
-                        throw new Error('回复消息消息验证失败');
-                    }
-                    replyMsg = replyMsgList.filter(e => e.msgSeq == records.msgSeq).sort((a, b) => parseInt(a.msgTime) - parseInt(b.msgTime))[0];
-                }
-                message_data['data']['id'] = MessageUnique.createMsg({
-                    peerUid: msg.peerUid,
-                    guildId: '',
-                    chatType: msg.chatType,
-                }, replyMsg.msgId)?.toString();
-                //log("找到回复消息", message_data['data']['id'], replyMsg.msgList[0].msgId)
-            } catch (e: any) {
-                message_data['type'] = 'unknown' as any;
-                message_data['data'] = undefined;
-                logger.logError('获取不到引用的消息', e.stack, element.replyElement.replayMsgSeq);
-            }
+            let replyMsgData = await obcore.apiContext.MsgApi.parseReplyElement(msg, element.replyElement);
+            if (replyMsgData) message_data = replyMsgData;
 
         } else if (element.picElement) {
-            message_data['type'] = OB11MessageDataType.image;
-            // message_data["data"]["file"] = element.picElement.sourcePath
-            message_data['data']['file'] = element.picElement.fileName;
-            message_data['data']['subType'] = element.picElement.picSubType;
-            message_data['data']['file_id'] = UUIDConverter.encode(msg.peerUin, msg.msgId);
-            // message_data["data"]["path"] = element.picElement.sourcePath
-            try {
-                message_data['data']['url'] = await NTQQFileApi.getImageUrl(element.picElement);
-            } catch (e: any) {
-                logger.logError('获取图片url失败', e.stack);
-            }
-            //console.log(message_data['data']['url'])
-            // message_data["data"]["file_id"] = element.picElement.fileUuid
-            message_data['data']['file_size'] = element.picElement.fileSize;
+            let PicMsgData = await obcore.apiContext.MsgApi.parsePicElement(msg, element.picElement);
+            if (PicMsgData) message_data = PicMsgData
+            ;
         } else if (element.fileElement) {
             const FileElement = element.fileElement;
             message_data['type'] = OB11MessageDataType.file;
@@ -256,13 +178,13 @@ export async function RawNTMsg2Onebot(
                 chatType: msg.chatType,
                 guildId: '',
             },
-            msg.msgId,
-            msg.msgSeq,
-            msg.senderUid,
-            element.elementId,
-            element.elementType.toString(),
-            element.pttElement.fileSize || '0',
-            element.pttElement.fileUuid || ''
+                msg.msgId,
+                msg.msgSeq,
+                msg.senderUid,
+                element.elementId,
+                element.elementType.toString(),
+                element.pttElement.fileSize || '0',
+                element.pttElement.fileUuid || ''
             );
             //以uuid作为文件名
         } else if (element.arkElement) {

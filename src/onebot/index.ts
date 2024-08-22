@@ -21,7 +21,7 @@ import {
     OB11PassiveWebSocketAdapter,
 } from '@/onebot/network';
 import { NapCatPathWrapper } from '@/common/framework/napcat';
-import { OneBotFriendApi, OneBotGroupApi, OneBotUserApi } from '@/onebot/api';
+import { OneBotFriendApi, OneBotGroupApi, OneBotMsgApi, OneBotUserApi } from '@/onebot/api';
 import { ActionMap, createActionMap } from '@/onebot/action';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { OB11InputStatusEvent } from '@/onebot/event/notice/OB11InputStatusEvent';
@@ -57,6 +57,7 @@ export class NapCatOneBot11Adapter {
             GroupApi: new OneBotGroupApi(this, core),
             UserApi: new OneBotUserApi(this, core),
             FriendApi: new OneBotFriendApi(this, core),
+            MsgApi: new OneBotMsgApi(this, core),
         };
         this.actions = createActionMap(this, core);
         this.networkManager = new OB11NetworkManager();
