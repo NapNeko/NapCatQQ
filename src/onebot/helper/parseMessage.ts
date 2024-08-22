@@ -1,8 +1,6 @@
-import { UUIDConverter } from '@/common/utils/helper';
 import { NapCatOneBot11Adapter, OB11Message, OB11MessageData, OB11MessageDataType } from '..';
-import { AtType, ChatType, FaceIndex, NapCatCore, RawMessage, VideoElement } from '@/core';
+import { AtType, ChatType, NapCatCore, RawMessage } from '@/core';
 import { EventType } from '../event/OB11BaseEvent';
-import { MessageUnique } from '@/common/utils/MessageUnique';
 import { OB11Constructor } from './converter';
 import { encodeCQCode } from './cqcode';
 
@@ -18,9 +16,7 @@ export async function RawNTMsg2Onebot(
     //跳过空消息
     const NTQQGroupApi = core.apis.GroupApi;
     const NTQQUserApi = core.apis.UserApi;
-    const NTQQFileApi = core.apis.FileApi;
     const NTQQMsgApi = core.apis.MsgApi;
-    const logger = core.context.logger;
     const resMsg: OB11Message = {
         self_id: parseInt(core.selfInfo.uin),
         user_id: parseInt(msg.senderUin!),
@@ -44,7 +40,6 @@ export async function RawNTMsg2Onebot(
     if (msg.chatType == ChatType.KCHATTYPEGROUP) {
         resMsg.sub_type = 'normal'; // 这里go-cqhttp是group，而onebot11标准是normal, 蛋疼
         resMsg.group_id = parseInt(msg.peerUin);
-        //直接去QQNative取
         let member = await NTQQGroupApi.getGroupMember(msg.peerUin, msg.senderUin);
         if (!member) member = await NTQQGroupApi.getGroupMember(msg.peerUin, msg.senderUin);
         if (member) {
@@ -54,8 +49,6 @@ export async function RawNTMsg2Onebot(
     } else if (msg.chatType == ChatType.KCHATTYPEC2C) {
         resMsg.sub_type = 'friend';
         resMsg.sender.nickname = (await NTQQUserApi.getUserDetailInfo(msg.senderUid)).nick;
-        //const user = await NTQQUserApi.getUserDetailInfoByUin(msg.senderUin!);
-        //resMsg.sender.nickname = user.info.nick;
     } else if (msg.chatType == ChatType.KCHATTYPETEMPC2CFROMGROUP) {
         resMsg.sub_type = 'group';
         const ret = await NTQQMsgApi.getTempChatInfo(ChatType.KCHATTYPETEMPC2CFROMGROUP, msg.senderUid);
