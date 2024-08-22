@@ -12,7 +12,7 @@ import { OB11GroupTitleEvent } from "../event/notice/OB11GroupTitleEvent";
 import { NapCatCore, RawMessage, ChatType, NTGrayTipElementSubTypeV2, TipGroupElementType, Peer } from '@/core';
 
 export async function NT2PrivateEvent(core: NapCatCore, obContext: NapCatOneBot11Adapter, msg: RawMessage): Promise<OB11BaseNoticeEvent | undefined> {
-    if (msg.chatType !== ChatType.friend) {
+    if (msg.chatType !== ChatType.KCHATTYPEC2C) {
         return;
     }
     for (const element of msg.elements) {
@@ -38,7 +38,7 @@ export async function NT2GroupEvent(core: NapCatCore, obContext: NapCatOneBot11A
     const NTQQUserApi = core.apis.UserApi;
     const NTQQMsgApi = core.apis.MsgApi;
     const logger = core.context.logger;
-    if (msg.chatType !== ChatType.group) {
+    if (msg.chatType !== ChatType.KCHATTYPEGROUP) {
         return;
     }
     //log("group msg", msg);
@@ -124,7 +124,7 @@ export async function NT2GroupEvent(core: NapCatCore, obContext: NapCatOneBot11A
                     // const businessId = searchParams.get('businessid');
                     const Peer: Peer = {
                         guildId: '',
-                        chatType: ChatType.group,
+                        chatType: ChatType.KCHATTYPEGROUP,
                         peerUid: Group!,
                     };
                     const msgData = await NTQQMsgApi.getMsgsBySeqAndCount(Peer, msgSeq.toString(), 1, true, true);

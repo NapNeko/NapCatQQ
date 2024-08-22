@@ -118,7 +118,7 @@ export class OneBotGroupApi {
             const msgSeq = emojiLikeData.gtip.url.msgseq;
             const emojiId = emojiLikeData.gtip.face.id;
             const peer = {
-                chatType: ChatType.group,
+                chatType: ChatType.KCHATTYPEGROUP,
                 guildId: '',
                 peerUid: GroupCode
             };

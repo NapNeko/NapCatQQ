@@ -179,7 +179,7 @@ export class NTQQFileApi {
     async addFileCache(peer: Peer, msgId: string, msgSeq: string, senderUid: string, elemId: string, elemType: string, fileSize: string, fileName: string) {
         let GroupData;
         let BuddyData;
-        if (peer.chatType === ChatType.group) {
+        if (peer.chatType === ChatType.KCHATTYPEGROUP) {
             GroupData =
                 [{
                     groupCode: peer.peerUid,
@@ -189,7 +189,7 @@ export class NTQQFileApi {
                     groupName: 'NapCat.Cached',
                     remark: 'NapCat.Cached',
                 }];
-        } else if (peer.chatType === ChatType.friend) {
+        } else if (peer.chatType === ChatType.KCHATTYPEC2C) {
             BuddyData = [{
                 category_name: 'NapCat.Cached',
                 peerUid: peer.peerUid,

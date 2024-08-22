@@ -7,7 +7,7 @@ import { NapCatOneBot11Adapter } from '@/onebot';
 
 async function cloneMsg(coreContext: NapCatCore, msg: RawMessage): Promise<RawMessage | undefined> {
     const selfPeer = {
-        chatType: ChatType.friend,
+        chatType: ChatType.KCHATTYPEC2C,
         peerUid: coreContext.selfInfo.uid,
     };
     const logger = coreContext.context.logger;
@@ -34,7 +34,7 @@ async function cloneMsg(coreContext: NapCatCore, msg: RawMessage): Promise<RawMe
 export async function handleForwardNode(coreContext: NapCatCore, obContext: NapCatOneBot11Adapter, destPeer: Peer, messageNodes: OB11MessageNode[]): Promise<RawMessage | null> {
     const NTQQMsgApi = coreContext.apis.MsgApi;
     const selfPeer = {
-        chatType: ChatType.friend,
+        chatType: ChatType.KCHATTYPEC2C,
         peerUid: coreContext.selfInfo.uid,
     };
     let nodeMsgIds: string[] = [];

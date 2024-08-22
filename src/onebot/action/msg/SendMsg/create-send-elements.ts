@@ -58,7 +58,7 @@ const _handlers: {
     [OB11MessageDataType.text]: async (coreContext, obContext: NapCatOneBot11Adapter, { data: { text } }) => SendMsgElementConstructor.text(coreContext, text),
 
     [OB11MessageDataType.at]: async (coreContext, obContext: NapCatOneBot11Adapter, { data: { qq: atQQ } }, context) => {
-        if (!context.peer || context.peer.chatType == ChatType.friend) return undefined;
+        if (!context.peer || context.peer.chatType == ChatType.KCHATTYPEGROUP) return undefined;
         if (atQQ === 'all') return SendMsgElementConstructor.at(coreContext, atQQ, atQQ, AtType.atAll, '全体成员');
         const NTQQGroupApi = coreContext.apis.GroupApi;
         const NTQQUserApi = coreContext.apis.UserApi;

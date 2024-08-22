@@ -28,7 +28,7 @@ export async function RawNTMsg2Onebot(
         message_id: msg.id!,
         message_seq: msg.id!,
         real_id: msg.id!,
-        message_type: msg.chatType == ChatType.group ? 'group' : 'private',
+        message_type: msg.chatType == ChatType.KCHATTYPEGROUP ? 'group' : 'private',
         sender: {
             user_id: parseInt(msg.senderUin || '0'),
             nickname: msg.sendNickName,
@@ -41,7 +41,7 @@ export async function RawNTMsg2Onebot(
         message_format: messagePostFormat === 'string' ? 'string' : 'array',
         post_type: core.selfInfo.uin == msg.senderUin ? EventType.MESSAGE_SENT : EventType.MESSAGE,
     };
-    if (msg.chatType == ChatType.group) {
+    if (msg.chatType == ChatType.KCHATTYPEGROUP) {
         resMsg.sub_type = 'normal'; // 这里go-cqhttp是group，而onebot11标准是normal, 蛋疼
         resMsg.group_id = parseInt(msg.peerUin);
         //直接去QQNative取
@@ -51,14 +51,14 @@ export async function RawNTMsg2Onebot(
             resMsg.sender.role = OB11Constructor.groupMemberRole(member.role);
             resMsg.sender.nickname = member.nick;
         }
-    } else if (msg.chatType == ChatType.friend) {
+    } else if (msg.chatType == ChatType.KCHATTYPEC2C) {
         resMsg.sub_type = 'friend';
         resMsg.sender.nickname = (await NTQQUserApi.getUserDetailInfo(msg.senderUid)).nick;
         //const user = await NTQQUserApi.getUserDetailInfoByUin(msg.senderUin!);
         //resMsg.sender.nickname = user.info.nick;
-    } else if (msg.chatType == ChatType.temp) {
+    } else if (msg.chatType == ChatType.KCHATTYPETEMPC2CFROMGROUP) {
         resMsg.sub_type = 'group';
-        const ret = await NTQQMsgApi.getTempChatInfo(ChatType.temp, msg.senderUid);
+        const ret = await NTQQMsgApi.getTempChatInfo(ChatType.KCHATTYPETEMPC2CFROMGROUP, msg.senderUid);
         if (ret.result === 0) {
             resMsg.group_id = parseInt(ret.tmpChatInfo!.groupCode);
             resMsg.sender.nickname = ret.tmpChatInfo!.fromNick;

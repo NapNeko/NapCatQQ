@@ -47,15 +47,15 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
                 let peer: Peer | undefined;
                 //识别Peer
                 if (isGroup) {
-                    peer = { chatType: ChatType.group, peerUid: peerUin };
+                    peer = { chatType: ChatType.KCHATTYPEGROUP, peerUid: peerUin };
                 }
                 const PeerUid = await NTQQUserApi.getUidByUinV2(peerUin);
                 if (PeerUid) {
                     const isBuddy = await NTQQFriendApi.isBuddy(PeerUid);
                     if (isBuddy) {
-                        peer = { chatType: ChatType.friend, peerUid: PeerUid };
+                        peer = { chatType: ChatType.KCHATTYPEC2C, peerUid: PeerUid };
                     } else {
-                        peer = { chatType: ChatType.temp, peerUid: PeerUid };
+                        peer = { chatType: ChatType.KCHATTYPETEMPC2CFROMGROUP, peerUid: PeerUid };
                     }
                 }
                 if (!peer) {
@@ -97,8 +97,8 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
         if (NTSearchNameResult.length !== 0) {
             const MsgId = NTSearchNameResult[0].msgId;
             let peer: Peer | undefined = undefined;
-            if (NTSearchNameResult[0].chatType == ChatType.group) {
-                peer = { chatType: ChatType.group, peerUid: NTSearchNameResult[0].groupChatInfo[0].groupCode };
+            if (NTSearchNameResult[0].chatType == ChatType.KCHATTYPEGROUP) {
+                peer = { chatType: ChatType.KCHATTYPEGROUP, peerUid: NTSearchNameResult[0].groupChatInfo[0].groupCode };
             }
             if (!peer) {
                 throw new Error('chattype not support');

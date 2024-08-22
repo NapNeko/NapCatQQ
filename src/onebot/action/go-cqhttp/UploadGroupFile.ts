@@ -36,7 +36,7 @@ export default class GoCQHTTPUploadGroupFile extends BaseAction<Payload, null> {
         }
         const sendFileEle: SendFileElement = await SendMsgElementConstructor.file(this.CoreContext, downloadResult.path, payload.name, payload.folder_id);
         await sendMsg(this.CoreContext, {
-            chatType: ChatType.group,
+            chatType: ChatType.KCHATTYPEGROUP,
             peerUid: payload.group_id.toString(),
         }, [sendFileEle], [], true);
         return null;
