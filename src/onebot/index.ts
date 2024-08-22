@@ -430,7 +430,7 @@ export class NapCatOneBot11Adapter {
                         member.role === GroupMemberRole.admin ? 'set' : 'unset',
                     );
                     this.networkManager.emitEvent(groupAdminNoticeEvent)
-                    .catch(e => this.context.logger.logError('处理群管理员变动失败', e));
+                        .catch(e => this.context.logger.logError('处理群管理员变动失败', e));
                     existMember.isChangeRole = false;
                     this.context.logger.logDebug('群管理员变动处理完毕');
                 });
@@ -467,14 +467,14 @@ export class NapCatOneBot11Adapter {
             this.networkManager.emitEvent(ob11Msg);
         }).catch(e => this.context.logger.logError('constructMessage error: ', e));
 
-        OB11Constructor.GroupEvent(this.core, message).then(groupEvent => {
+        OB11Constructor.GroupEvent(this.core, this, message).then(groupEvent => {
             if (groupEvent) {
                 // log("post group event", groupEvent);
                 this.networkManager.emitEvent(groupEvent);
             }
         }).catch(e => this.context.logger.logError('constructGroupEvent error: ', e));
 
-        OB11Constructor.PrivateEvent(this.core, message).then(privateEvent => {
+        OB11Constructor.PrivateEvent(this.core, this, message).then(privateEvent => {
             if (privateEvent) {
                 // log("post private event", privateEvent);
                 this.networkManager.emitEvent(privateEvent);

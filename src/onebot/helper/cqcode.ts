@@ -80,7 +80,3 @@ export function encodeCQCode(data: OB11MessageData) {
     result += ']';
     return result;
 }
-
-// const result = parseCQCode("[CQ:at,qq=114514]早上好啊[CQ:image,file=http://baidu.com/1.jpg,type=show,id=40004]")
-// const result = parseCQCode("好好好")
-// console.log(JSON.stringify(result))

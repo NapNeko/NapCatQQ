@@ -1,6 +1,7 @@
-import { NapCatCore } from '@/core';
+import { GrayTipElement, NapCatCore } from '@/core';
 
 import { NapCatOneBot11Adapter } from '@/onebot';
+import { OB11FriendPokeEvent } from '../event/notice/OB11PokeEvent';
 
 export class OneBotFriendApi {
     obContext: NapCatOneBot11Adapter;
@@ -9,5 +10,23 @@ export class OneBotFriendApi {
     constructor(obContext: NapCatOneBot11Adapter, coreContext: NapCatCore) {
         this.obContext = obContext;
         this.coreContext = coreContext;
+    }
+    //使用前预先判断 busiId 1061
+    async parsePrivatePokeEvent(grayTipElement: GrayTipElement) {
+        const NTQQUserApi = this.coreContext.apis.UserApi;
+        const json = JSON.parse(grayTipElement.jsonGrayTipElement.jsonStr);
+        let pokedetail: any[] = json.items;
+        //筛选item带有uid的元素
+        pokedetail = pokedetail.filter(item => item.uid);
+        //console.log("[NapCat] 群拍一拍 群:", pokedetail, parseInt(msg.peerUid), " ", await NTQQUserApi.getUinByUid(pokedetail[0].uid), "拍了拍", await NTQQUserApi.getUinByUid(pokedetail[1].uid));
+        if (pokedetail.length == 2) {
+            return new OB11FriendPokeEvent(
+                this.coreContext,
+                parseInt((await NTQQUserApi.getUinByUidV2(pokedetail[0].uid))!),
+                parseInt((await NTQQUserApi.getUinByUidV2(pokedetail[1].uid))!),
+                pokedetail
+            );
+        }
+        return undefined;
     }
 }

@@ -375,33 +375,17 @@ export class OB11Constructor {
         return resMsg;
     }
 
-    static async PrivateEvent(core: NapCatCore, msg: RawMessage): Promise<OB11BaseNoticeEvent | undefined> {
-        const NTQQUserApi = core.apis.UserApi;
+    static async PrivateEvent(core: NapCatCore, obContext: NapCatOneBot11Adapter, msg: RawMessage): Promise<OB11BaseNoticeEvent | undefined> {
         if (msg.chatType !== ChatType.friend) {
             return;
         }
         for (const element of msg.elements) {
             if (element.grayTipElement) {
                 if (element.grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
-                    const json = JSON.parse(element.grayTipElement.jsonGrayTipElement.jsonStr);
-
                     if (element.grayTipElement.jsonGrayTipElement.busiId == 1061) {
-                        //判断业务类型
-                        //Poke事件
-                        let pokedetail: any[] = json.items;
-                        //筛选item带有uid的元素
-                        pokedetail = pokedetail.filter(item => item.uid);
-                        //console.log("[NapCat] 群拍一拍 群:", pokedetail, parseInt(msg.peerUid), " ", await NTQQUserApi.getUinByUid(pokedetail[0].uid), "拍了拍", await NTQQUserApi.getUinByUid(pokedetail[1].uid));
-                        if (pokedetail.length == 2) {
-                            return new OB11FriendPokeEvent(
-                                core,
-                                parseInt((await NTQQUserApi.getUinByUidV2(pokedetail[0].uid))!),
-                                parseInt((await NTQQUserApi.getUinByUidV2(pokedetail[1].uid))!),
-                                pokedetail
-                            );
-                        }
+                        let PokeEvent = await obContext.apiContext.FriendApi.parsePrivatePokeEvent(element.grayTipElement);
+                        if (PokeEvent) return PokeEvent;
                     }
-                    //下面得改 上面也是错的grayTipElement.subElementType == GrayTipElementSubType.MEMBER_NEW_TITLE
                 }
                 if (element.grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_XMLMSG) {
                     //好友添加成功事件
@@ -413,7 +397,7 @@ export class OB11Constructor {
         }
     }
 
-    static async GroupEvent(core: NapCatCore, msg: RawMessage): Promise<OB11GroupNoticeEvent | undefined> {
+    static async GroupEvent(core: NapCatCore, obContext: NapCatOneBot11Adapter, msg: RawMessage): Promise<OB11GroupNoticeEvent | undefined> {
         const NTQQGroupApi = core.apis.GroupApi;
         const NTQQUserApi = core.apis.UserApi;
         const NTQQMsgApi = core.apis.MsgApi;
@@ -423,69 +407,26 @@ export class OB11Constructor {
         }
         //log("group msg", msg);
         if (msg.senderUin && msg.senderUin !== '0') {
-          const member = await NTQQGroupApi.getGroupMember(msg.peerUid, msg.senderUin);
-          if (member && member.cardName !== msg.sendMemberName) {
-            const newCardName = msg.sendMemberName || '';
-            const event = new OB11GroupCardEvent(core, parseInt(msg.peerUid), parseInt(msg.senderUin), newCardName, member.cardName);
-            member.cardName = newCardName;
-            return event;
-          }
+            const member = await NTQQGroupApi.getGroupMember(msg.peerUid, msg.senderUin);
+            if (member && member.cardName !== msg.sendMemberName) {
+                const newCardName = msg.sendMemberName || '';
+                const event = new OB11GroupCardEvent(core, parseInt(msg.peerUid), parseInt(msg.senderUin), newCardName, member.cardName);
+                member.cardName = newCardName;
+                return event;
+            }
         }
 
         for (const element of msg.elements) {
             const grayTipElement = element.grayTipElement;
             const groupElement = grayTipElement?.groupElement;
+            if (!element.grayTipElement) continue;
             if (groupElement) {
-                // log("收到群提示消息", groupElement)
                 if (groupElement.type == TipGroupElementType.memberIncrease) {
-                    logger.logDebug('收到群成员增加消息', groupElement);
-                    await sleep(1000);
-                    const member = await NTQQGroupApi.getGroupMember(msg.peerUid, groupElement.memberUid);
-                    const memberUin = member?.uin;
-                    // if (!memberUin) {
-                    //     memberUin = (await NTQQUserApi.getUserDetailInfo(groupElement.memberUid)).uin
-                    // }
-                    // log("获取新群成员QQ", memberUin)
-                    const adminMember = await NTQQGroupApi.getGroupMember(msg.peerUid, groupElement.adminUid);
-                    // log("获取同意新成员入群的管理员", adminMember)
-                    if (memberUin) {
-                        const operatorUin = adminMember?.uin || memberUin;
-                        // log("构造群增加事件", event)
-                        return new OB11GroupIncreaseEvent(
-                            core,
-                            parseInt(msg.peerUid),
-                            parseInt(memberUin),
-                            parseInt(operatorUin)
-                        );
-                    }
+                    let MemberIncreaseEvent = await obContext.apiContext.GroupApi.parseGroupMemberIncreaseEvent(msg.peerUid, element.grayTipElement);
+                    if (MemberIncreaseEvent) return MemberIncreaseEvent;
                 } else if (groupElement.type === TipGroupElementType.ban) {
-                    logger.logDebug('收到群群员禁言提示', groupElement);
-                    const memberUid = groupElement.shutUp!.member.uid;
-                    const adminUid = groupElement.shutUp!.admin.uid;
-                    let memberUin: string = '';
-                    let duration = parseInt(groupElement.shutUp!.duration);
-                    const subType: 'ban' | 'lift_ban' = duration > 0 ? 'ban' : 'lift_ban';
-                    // log('OB11被禁言事件', adminUid);
-                    if (memberUid) {
-                        memberUin = (await NTQQGroupApi.getGroupMember(msg.peerUid, memberUid))?.uin || ''; // || (await NTQQUserApi.getUserDetailInfo(memberUid))?.uin
-                    } else {
-                        memberUin = '0';  // 0表示全员禁言
-                        if (duration > 0) {
-                            duration = -1;
-                        }
-                    }
-                    const adminUin = (await NTQQGroupApi.getGroupMember(msg.peerUid, adminUid))?.uin; // || (await NTQQUserApi.getUserDetailInfo(adminUid))?.uin
-                    // log('OB11被禁言事件', memberUin, adminUin, duration, subType);
-                    if (memberUin && adminUin) {
-                        return new OB11GroupBanEvent(
-                            core,
-                            parseInt(msg.peerUid),
-                            parseInt(memberUin),
-                            parseInt(adminUin),
-                            duration,
-                            subType
-                        );
-                    }
+                    let BanEvent = await obContext.apiContext.GroupApi.parseGroupBanEvent(msg.peerUid, element.grayTipElement);
+                    if (BanEvent) return BanEvent;
                 } else if (groupElement.type == TipGroupElementType.kicked) {
                     logger.logDebug(`收到我被踢出或退群提示, 群${msg.peerUid}`, groupElement);
                     NTQQGroupApi.quitGroup(msg.peerUid).then();
@@ -523,7 +464,6 @@ export class OB11Constructor {
                 );
             }
             if (grayTipElement) {
-                //console.log('收到群提示消息', grayTipElement);
                 if (grayTipElement.xmlElement?.templId === '10382') {
                     const emojiLikeData = new fastXmlParser.XMLParser({
                         ignoreAttributes: false,
