@@ -235,7 +235,7 @@ export default async function createSendElements(
         callResultList.push(callResult);
     }
     const ret = await Promise.all(callResultList);
-    const sendElements: SendMessageElement[] = ret.filter(ele => ele) as SendMessageElement[];
+    const sendElements: SendMessageElement[] = ret.filter(ele => !!ele);
     return { sendElements, deleteAfterSentFiles };
 }
 
