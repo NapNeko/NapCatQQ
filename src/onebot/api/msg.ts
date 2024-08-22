@@ -1,6 +1,6 @@
 import { UUIDConverter } from '@/common/utils/helper';
 import { MessageUnique } from '@/common/utils/MessageUnique';
-import { AtType, ElementWrapper, MessageElement, NapCatCore, PicElement, RawMessage, ReplyElement, TextElement } from '@/core';
+import { AtType, ElementType, MarketFaceElement, NapCatCore, PicElement, RawMessage, ReplyElement, TextElement, VideoElement } from '@/core';
 
 import { NapCatOneBot11Adapter, OB11MessageData, OB11MessageDataType } from '@/onebot';
 
@@ -82,6 +82,33 @@ export class OneBotMsgApi {
         message_data['data']['file_size'] = picElement.fileSize;
         return message_data;
     }
+    async parseMarketFaceElement(msg: RawMessage, elementId: string, elementType: ElementType, marketFaceElement: MarketFaceElement) {
+        const NTQQFileApi = this.coreContext.apis.FileApi;
+        let message_data: OB11MessageData = {
+            data: {} as any,
+            type: 'unknown' as any,
+        };
+        message_data['type'] = OB11MessageDataType.image;
+        message_data['data']['file'] = 'marketface';
+        message_data['data']['file_id'] = UUIDConverter.encode(msg.peerUin, msg.msgId);
+        message_data['data']['path'] = elementId;
+        message_data['data']['url'] = elementId;
+        await NTQQFileApi.addFileCache(
+            {
+                peerUid: msg.peerUid,
+                chatType: msg.chatType,
+                guildId: '',
+            },
+            msg.msgId,
+            msg.msgSeq,
+            msg.senderUid,
+            elementId,
+            elementType.toString(),
+            '0',
+            'marketface'
+        );
+        return message_data;
+    }
     async parseReplyElement(msg: RawMessage, replyElement: ReplyElement) {
         const NTQQMsgApi = this.coreContext.apis.MsgApi;
         let message_data: OB11MessageData = {
@@ -129,6 +156,65 @@ export class OneBotMsgApi {
             this.coreContext.context.logger.logError('获取不到引用的消息', e.stack, replyElement.replayMsgSeq);
             return undefined;
         }
+        return message_data;
+    }
+    async parseVideoElement(msg: RawMessage, elementId: string, elementType: ElementType, videoElement: VideoElement) {
+        const NTQQFileApi = this.coreContext.apis.FileApi;
+        let message_data: OB11MessageData = {
+            data: {} as any,
+            type: 'unknown' as any,
+        };
+        //读取视频链接并兜底
+        let videoUrl; //Array
+        if (msg.peerUin === '284840486') {
+            //合并消息内部 应该进行特殊处理 可能需要重写peer 待测试与研究 Mlikiowa Taged TODO
+        }
+        try {
+
+            videoUrl = await NTQQFileApi.getVideoUrl({
+                chatType: msg.chatType,
+                peerUid: msg.peerUid,
+                guildId: '0',
+            }, msg.msgId, elementId);
+        } catch (error) {
+            videoUrl = undefined;
+        }
+        //读取在线URL
+        let videoDownUrl = undefined;
+
+        if (videoUrl) {
+            const videoDownUrlTemp = videoUrl.find((url) => {
+                return !!url.url;
+            });
+            if (videoDownUrlTemp) {
+                videoDownUrl = videoDownUrlTemp.url;
+            }
+        }
+        //开始兜底
+        if (!videoDownUrl) {
+            videoDownUrl = videoElement.filePath;
+        }
+        message_data['type'] = OB11MessageDataType.video;
+        message_data['data']['file'] = videoElement.fileName;
+        message_data['data']['path'] = videoDownUrl;
+        message_data['data']['url'] = videoDownUrl;
+        message_data['data']['file_id'] = UUIDConverter.encode(msg.peerUin, msg.msgId);
+        message_data['data']['file_size'] = videoElement.fileSize;
+
+        await NTQQFileApi.addFileCache(
+            {
+                peerUid: msg.peerUid,
+                chatType: msg.chatType,
+                guildId: '',
+            },
+            msg.msgId,
+            msg.msgSeq,
+            msg.senderUid,
+            elementId,
+            elementType.toString(),
+            videoElement.fileSize || '0',
+            videoElement.fileName
+        );
         return message_data;
     }
 }
