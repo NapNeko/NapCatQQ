@@ -2,6 +2,7 @@ import { GrayTipElement, NapCatCore } from '@/core';
 import { NapCatOneBot11Adapter } from '@/onebot';
 import { OB11GroupBanEvent } from '../event/notice/OB11GroupBanEvent';
 import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
+import { OB11GroupDecreaseEvent } from '../event/notice/OB11GroupDecreaseEvent';
 
 export class OneBotGroupApi {
     obContext: NapCatOneBot11Adapter;
@@ -55,6 +56,23 @@ export class OneBotGroupApi {
                 parseInt(GroupCode),
                 parseInt(memberUin),
                 parseInt(operatorUin)
+            );
+        }
+        return undefined;
+    }
+    async parseGroupKickEvent(GroupCode: string, grayTipElement: GrayTipElement) {
+        const NTQQGroupApi = this.coreContext.apis.GroupApi;
+        const NTQQUserApi = this.coreContext.apis.UserApi;
+        let groupElement = grayTipElement?.groupElement;
+        if (!groupElement) return undefined;
+        const adminUin = (await NTQQGroupApi.getGroupMember(GroupCode, groupElement.adminUid))?.uin || (await NTQQUserApi.getUidByUinV2(groupElement.adminUid));
+        if (adminUin) {
+            return new OB11GroupDecreaseEvent(
+                this.coreContext,
+                parseInt(GroupCode),
+                parseInt(this.coreContext.selfInfo.uin),
+                parseInt(adminUin),
+                'kick_me'
             );
         }
         return undefined;
