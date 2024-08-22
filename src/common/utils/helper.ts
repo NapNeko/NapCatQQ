@@ -1,7 +1,5 @@
-import crypto from 'node:crypto';
 import path from 'node:path';
 import fs from 'fs';
-import * as fsPromise from 'node:fs/promises';
 import os from 'node:os';
 import { QQLevel } from '@/core';
 

@@ -2,7 +2,7 @@ import log4js, { Configuration } from 'log4js';
 import { truncateString } from '@/common/utils/helper';
 import path from 'node:path';
 import chalk from 'chalk';
-import { AtType, ChatType, ElementType, ElementWrapper, RawMessage, SelfInfo } from '@/core';
+import { AtType, ChatType, ElementType, ElementWrapper, MessageElement, RawMessage, SelfInfo } from '@/core';
 
 export enum LogLevel {
     DEBUG = 'debug',
@@ -164,7 +164,7 @@ export function rawMessageToText(msg: RawMessage, recursiveLevel = 0): string {
 
     // message content
 
-    function msgElementToText(element: ElementWrapper) {
+    function msgElementToText(element: MessageElement) {
         if (element.textElement) {
             if (element.textElement.atType === AtType.notAt) {
                 return element.textElement.content;
