@@ -500,7 +500,7 @@ export class NapCatOneBot11Adapter {
                     );
                     this.networkManager.emitEvent(friendRecallEvent)
                         .catch(e => this.context.logger.logError('处理好友消息撤回失败', e));
-                } else if (message.chatType == ChatType.KCHATTYPETEMPC2CFROMGROUP) {
+                } else if (message.chatType == ChatType.KCHATTYPEGROUP) {
                     let operatorId = message.senderUin;
                     for (const element of message.elements) {
                         const operatorUid = element.grayTipElement?.revokeElement.operatorUid;
