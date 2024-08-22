@@ -362,6 +362,7 @@ export interface SendPicElement {
 }
 
 export interface ReplyElement {
+    sourceMsgIdInRecords?: string;
     replayMsgSeq: string;
     replayMsgId: string;
     senderUin: string;
@@ -476,7 +477,7 @@ export interface MessageElement {
     extBufForUI: string,//"0x",
     textElement?: TextElement;
     faceElement?: FaceElement,
-    marketFaceElement?: MarkdownElement,
+    marketFaceElement?: MarketFaceElement,
     replyElement?: ReplyElement,
     picElement?: PicElement,
     pttElement?: PttElement,
@@ -965,7 +966,7 @@ export interface RawMessage {
 
     records: RawMessage[];
 
-    elements: ElementWrapper[];
+    elements: MessageElement[];
 }
 
 /**
