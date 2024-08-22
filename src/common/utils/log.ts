@@ -2,7 +2,7 @@ import log4js, { Configuration } from 'log4js';
 import { truncateString } from '@/common/utils/helper';
 import path from 'node:path';
 import chalk from 'chalk';
-import { AtType, ChatType, ElementType, ElementWrapper, MessageElement, RawMessage, SelfInfo } from '@/core';
+import { AtType, ChatType, ElementType, MessageElement, RawMessage, SelfInfo } from '@/core';
 
 export enum LogLevel {
     DEBUG = 'debug',
