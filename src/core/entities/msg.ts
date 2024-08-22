@@ -511,17 +511,8 @@ export enum AtType {
     atAll = 1,
     atUser = 2
 }
-
-export enum ChatType {
-    friend = 1,
-    group = 2,
-    chatDevice = 8, //移动设备?
-    temp = 100
-
-}
-
 // 来自Android分析
-export enum ChatType2 {
+export enum ChatType {
     KCHATTYPEADELIE = 42,
     KCHATTYPEBUDDYNOTIFY = 5,
     KCHATTYPEC2C = 1,

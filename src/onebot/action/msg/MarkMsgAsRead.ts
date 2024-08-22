@@ -23,12 +23,12 @@ class MarkMsgAsRead extends BaseAction<PlayloadType, null> {
                 throw `私聊${payload.user_id}不存在`;
             }
             const isBuddy = await NTQQFriendApi.isBuddy(peerUid);
-            return { chatType: isBuddy ? ChatType.friend : ChatType.temp, peerUid };
+            return { chatType: isBuddy ? ChatType.KCHATTYPEC2C : ChatType.KCHATTYPETEMPC2CFROMGROUP, peerUid };
         }
         if (!payload.group_id) {
             throw '缺少参数 group_id 或 user_id';
         }
-        return { chatType: ChatType.group, peerUid: payload.group_id.toString() };
+        return { chatType: ChatType.KCHATTYPEGROUP, peerUid: payload.group_id.toString() };
     }
 
     async _handle(payload: PlayloadType): Promise<null> {

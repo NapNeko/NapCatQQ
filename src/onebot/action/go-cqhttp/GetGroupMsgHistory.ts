@@ -33,7 +33,7 @@ export default class GoCQHTTPGetGroupMsgHistory extends BaseAction<Payload, Resp
         //处理参数
         const isReverseOrder = payload.reverseOrder || true;
         const MsgCount = payload.count || 20;
-        const peer: Peer = { chatType: ChatType.group, peerUid: payload.group_id.toString() };
+        const peer: Peer = { chatType: ChatType.KCHATTYPEGROUP, peerUid: payload.group_id.toString() };
         //拉取消息
         let msgList: RawMessage[];
         if (!payload.message_seq || payload.message_seq == 0) {

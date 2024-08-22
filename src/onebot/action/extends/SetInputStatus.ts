@@ -24,14 +24,14 @@ export class SetInputStatus extends BaseAction<Payload, any> {
         let peer: Peer;
         if (payload.group_id) {
             peer = {
-                chatType: ChatType.group,
+                chatType: ChatType.KCHATTYPEGROUP,
                 peerUid: payload.group_id
             };
         } else if (payload.user_id) {
             const uid = await NTQQUserApi.getUidByUinV2(payload.user_id);
             if (!uid) throw new Error('uid is empty');
             peer = {
-                chatType: ChatType.friend,
+                chatType: ChatType.KCHATTYPEC2C,
                 peerUid: uid
             };
         } else {

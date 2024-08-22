@@ -38,7 +38,7 @@ export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
         const isReverseOrder = payload.reverseOrder || true;
         if (!uid) throw `记录${payload.user_id}不存在`;
         const friend = await NTQQFriendApi.isBuddy(uid);
-        const peer = { chatType: friend ? ChatType.friend : ChatType.temp, peerUid: uid };
+        const peer = { chatType: friend ? ChatType.KCHATTYPEC2C : ChatType.KCHATTYPETEMPC2CFROMGROUP, peerUid: uid };
 
         //拉取消息
         let msgList: RawMessage[];

@@ -92,7 +92,7 @@ async function createContext(coreContext: NapCatCore, payload: OB11PostSendMsg, 
     const NTQQUserApi = coreContext.apis.UserApi;
     if ((contextMode === ContextMode.Group || contextMode === ContextMode.Normal) && payload.group_id) {
         return {
-            chatType: ChatType.group,
+            chatType: ChatType.KCHATTYPEGROUP,
             peerUid: payload.group_id.toString(),
         };
     }
@@ -101,7 +101,7 @@ async function createContext(coreContext: NapCatCore, payload: OB11PostSendMsg, 
         const isBuddy = await NTQQFriendApi.isBuddy(Uid!);
         //console.log("[调试代码] UIN:", payload.user_id, " UID:", Uid, " IsBuddy:", isBuddy);
         return {
-            chatType: isBuddy ? ChatType.friend : ChatType.temp,
+            chatType: isBuddy ? ChatType.KCHATTYPEC2C : ChatType.KCHATTYPETEMPC2CFROMGROUP,
             peerUid: Uid!,
             guildId: payload.group_id?.toString() || '',
         };

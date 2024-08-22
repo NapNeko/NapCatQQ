@@ -20,15 +20,15 @@ async function handleMsg(coreContext: NapCatCore, obContext: NapCatOneBot11Adapt
     msg = msg as OB11Message;
     const reply = quickAction.reply;
     const peer: Peer = {
-        chatType: ChatType.friend,
+        chatType: ChatType.KCHATTYPEC2C,
         peerUid: await coreContext.apis.UserApi.getUidByUinV2(msg.user_id.toString()) as string,
     };
     if (msg.message_type == 'private') {
         if (msg.sub_type === 'group') {
-            peer.chatType = ChatType.temp;
+            peer.chatType = ChatType.KCHATTYPETEMPC2CFROMGROUP;
         }
     } else {
-        peer.chatType = ChatType.group;
+        peer.chatType = ChatType.KCHATTYPETEMPC2CFROMGROUP;
         peer.peerUid = msg.group_id!.toString();
     }
     if (reply) {

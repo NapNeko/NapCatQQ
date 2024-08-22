@@ -114,7 +114,7 @@ export class NTQQGroupApi {
         return await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {
             chatInfo: {
                 peerUid: GroupCode,
-                chatType: ChatType.group,
+                chatType: ChatType.KCHATTYPEGROUP,
             },
             filterMsgType: [],
             filterSendersUid: uids,
@@ -175,7 +175,7 @@ export class NTQQGroupApi {
         return await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {
             chatInfo: {
                 peerUid: GroupCode,
-                chatType: ChatType.group,
+                chatType: ChatType.KCHATTYPEGROUP,
             },
             filterMsgType: [],
             filterSendersUid: uids,

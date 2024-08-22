@@ -152,11 +152,11 @@ export function rawMessageToText(msg: RawMessage, recursiveLevel = 0): string {
 
     const tokens: string[] = [];
 
-    if (msg.chatType == ChatType.friend) {
+    if (msg.chatType == ChatType.KCHATTYPEC2C) {
         tokens.push(`私聊 (${msg.peerUin})`);
-    } else if (msg.chatType == ChatType.group) {
+    } else if (msg.chatType == ChatType.KCHATTYPEGROUP) {
         tokens.push(`群聊 (群 ${msg.peerUin} 的 ${msg.senderUin})`);
-    } else if (msg.chatType == ChatType.chatDevice) {
+    } else if (msg.chatType == ChatType.KCHATTYPEDATALINE) {
         tokens.push('移动设备');
     } else /* temp */ {
         tokens.push(`临时消息 (${msg.peerUin})`);

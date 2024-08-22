@@ -156,7 +156,7 @@ export class NTQQMsgApi {
             peerOpenId: "",
         };
         return this.context.session.getMsgService().prepareTempChat({
-            chatType: ChatType.temp,
+            chatType: ChatType.KCHATTYPETEMPC2CFROMGROUP,
             peerUid: toUserUid,
             peerNickname: nickname,
             fromGroupCode: GroupCode,
@@ -171,7 +171,7 @@ export class NTQQMsgApi {
     }
     async sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
         //唉？ ！我有个想法
-        if (peer.chatType === ChatType.temp && peer.guildId && peer.guildId !== '') {
+        if (peer.chatType === ChatType.KCHATTYPETEMPC2CFROMGROUP && peer.guildId && peer.guildId !== '') {
             const member = await this.core.apis.GroupApi.getGroupMember(peer.guildId, peer.peerUid!);
             if (member) {
                 await this.PrepareTempChat(peer.peerUid, peer.guildId, member.nick);

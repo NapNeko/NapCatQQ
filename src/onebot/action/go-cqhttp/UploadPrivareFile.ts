@@ -32,7 +32,7 @@ export default class GoCQHTTPUploadPrivateFile extends BaseAction<Payload, null>
                 throw `私聊${payload.user_id}不存在`;
             }
             const isBuddy = await NTQQFriendApi.isBuddy(peerUid);
-            return { chatType: isBuddy ? ChatType.friend : ChatType.temp, peerUid };
+            return { chatType: isBuddy ? ChatType.KCHATTYPEC2C : ChatType.KCHATTYPETEMPC2CFROMGROUP, peerUid };
         }
         throw '缺少参数 user_id';
     }

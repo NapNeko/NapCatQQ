@@ -24,9 +24,9 @@ class ForwardSingleMsg extends BaseAction<Payload, null> {
             if (!peerUid) {
                 throw new Error(`无法找到私聊对象${payload.user_id}`);
             }
-            return { chatType: ChatType.friend, peerUid };
+            return { chatType: ChatType.KCHATTYPEC2C, peerUid };
         }
-        return { chatType: ChatType.group, peerUid: payload.group_id!.toString() };
+        return { chatType: ChatType.KCHATTYPEGROUP, peerUid: payload.group_id!.toString() };
     }
 
     async _handle(payload: Payload): Promise<null> {
