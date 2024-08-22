@@ -89,8 +89,8 @@ export async function RawNTMsg2Onebot(
 
         } else if (element.picElement) {
             let PicMsgData = await obcore.apiContext.MsgApi.parsePicElement(msg, element.picElement);
-            if (PicMsgData) message_data = PicMsgData
-            ;
+            if (PicMsgData) message_data = PicMsgData;
+
         } else if (element.fileElement) {
             const FileElement = element.fileElement;
             message_data['type'] = OB11MessageDataType.file;
@@ -114,58 +114,8 @@ export async function RawNTMsg2Onebot(
                 FileElement.fileName
             );
         } else if (element.videoElement) {
-            const videoElement: VideoElement = element.videoElement;
-            //读取视频链接并兜底
-            let videoUrl; //Array
-            if (msg.peerUin === '284840486') {
-                //合并消息内部 应该进行特殊处理 可能需要重写peer 待测试与研究 Mlikiowa Taged TODO
-            }
-            try {
-
-                videoUrl = await NTQQFileApi.getVideoUrl({
-                    chatType: msg.chatType,
-                    peerUid: msg.peerUid,
-                    guildId: '0',
-                }, msg.msgId, element.elementId);
-            } catch (error) {
-                videoUrl = undefined;
-            }
-            //读取在线URL
-            let videoDownUrl = undefined;
-
-            if (videoUrl) {
-                const videoDownUrlTemp = videoUrl.find((url) => {
-                    return !!url.url;
-                });
-                if (videoDownUrlTemp) {
-                    videoDownUrl = videoDownUrlTemp.url;
-                }
-            }
-            //开始兜底
-            if (!videoDownUrl) {
-                videoDownUrl = videoElement.filePath;
-            }
-            message_data['type'] = OB11MessageDataType.video;
-            message_data['data']['file'] = videoElement.fileName;
-            message_data['data']['path'] = videoDownUrl;
-            message_data['data']['url'] = videoDownUrl;
-            message_data['data']['file_id'] = UUIDConverter.encode(msg.peerUin, msg.msgId);
-            message_data['data']['file_size'] = videoElement.fileSize;
-
-            await NTQQFileApi.addFileCache(
-                {
-                    peerUid: msg.peerUid,
-                    chatType: msg.chatType,
-                    guildId: '',
-                },
-                msg.msgId,
-                msg.msgSeq,
-                msg.senderUid,
-                element.elementId,
-                element.elementType.toString(),
-                videoElement.fileSize || '0',
-                videoElement.fileName
-            );
+            let videoMsgData = await obcore.apiContext.MsgApi.parseVideoElement(msg, element.elementId, element.elementType, element.videoElement);
+            if (videoMsgData) message_data = videoMsgData;
         } else if (element.pttElement) {
             message_data['type'] = OB11MessageDataType.voice;
             message_data['data']['file'] = element.pttElement.fileName;
@@ -203,18 +153,8 @@ export async function RawNTMsg2Onebot(
                 message_data['data']['id'] = element.faceElement.faceIndex.toString();
             }
         } else if (element.marketFaceElement) {
-            message_data['type'] = OB11MessageDataType.mface;
-            message_data['data']['summary'] = element.marketFaceElement.faceName;
-            const md5 = element.marketFaceElement.emojiId;
-            // 取md5的前两位
-            const dir = md5.substring(0, 2);
-            // 获取组装url
-            // const url = `https://p.qpic.cn/CDN_STATIC/0/data/imgcache/htdocs/club/item/parcel/item/${dir}/${md5}/300x300.gif?max_age=31536000`;
-            message_data['data']['url'] = `https://gxh.vip.qq.com/club/item/parcel/item/${dir}/${md5}/raw300.gif`;
-            message_data['data']['emoji_id'] = element.marketFaceElement.emojiId;
-            message_data['data']['emoji_package_id'] = String(element.marketFaceElement.emojiPackageId);
-            message_data['data']['key'] = element.marketFaceElement.key;
-            //mFaceCache.set(md5, element.marketFaceElement.faceName);
+            let marketFaceMsgData = await obcore.apiContext.MsgApi.parseMarketFaceElement(msg, element.elementId, element.elementType, element.marketFaceElement);
+            if (marketFaceMsgData) message_data = marketFaceMsgData;
         } else if (element.markdownElement) {
             message_data['type'] = OB11MessageDataType.markdown;
             message_data['data']['data'] = element.markdownElement.content;

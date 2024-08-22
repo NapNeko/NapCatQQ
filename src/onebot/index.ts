@@ -26,7 +26,6 @@ import { ActionMap, createActionMap } from '@/onebot/action';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { OB11InputStatusEvent } from '@/onebot/event/notice/OB11InputStatusEvent';
 import { MessageUnique } from '@/common/utils/MessageUnique';
-import { OB11Constructor } from './helper/converter';
 import { proxiedListenerOf } from '@/common/utils/proxy-handler';
 import { OB11FriendRequestEvent } from '@/onebot/event/request/OB11FriendRequest';
 import { OB11GroupAdminNoticeEvent } from '@/onebot/event/notice/OB11GroupAdminNoticeEvent';
