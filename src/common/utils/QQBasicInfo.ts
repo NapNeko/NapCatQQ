@@ -74,7 +74,7 @@ export class QQBasicInfoWrapper {
         this.context.logger.log(
             `[QQ版本兼容性检测] ${this.getFullQQVesion()} 版本兼容性不佳，可能会导致一些功能无法正常使用`,
         );
-        return { appid: systemPlatform === 'linux' ? '537240645' : '537240610', qua: this.getQUAInternal() };
+        return { appid: systemPlatform === 'linux' ? '537240795' : '537240709', qua: this.getQUAInternal() };
     }
 }
 
