@@ -26,7 +26,7 @@ import { ActionMap, createActionMap } from '@/onebot/action';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { OB11InputStatusEvent } from '@/onebot/event/notice/OB11InputStatusEvent';
 import { MessageUnique } from '@/common/utils/MessageUnique';
-import { OB11Constructor } from '@/onebot/helper/data';
+import { OB11Constructor } from './helper/converter';
 import { proxiedListenerOf } from '@/common/utils/proxy-handler';
 import { OB11FriendRequestEvent } from '@/onebot/event/request/OB11FriendRequest';
 import { OB11GroupAdminNoticeEvent } from '@/onebot/event/notice/OB11GroupAdminNoticeEvent';
@@ -35,6 +35,7 @@ import { OB11GroupRequestEvent } from '@/onebot/event/request/OB11GroupRequest';
 import { OB11FriendRecallNoticeEvent } from '@/onebot/event/notice/OB11FriendRecallNoticeEvent';
 import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecallNoticeEvent';
 import { LRUCache } from '@/common/utils/LRU';
+import { RawNTMsg2Onebot } from './helper';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -255,7 +256,7 @@ export class NapCatOneBot11Adapter {
                 if (msg.sendStatus == SendStatusType.KSEND_STATUS_SUCCESS && !msgIdSend.get(msg.msgId)) {
                     msgIdSend.put(msg.msgId, true);
                     // 完成后再post
-                    OB11Constructor.message(this.core, this, msg)
+                    RawNTMsg2Onebot(this.core, this, msg)
                         .then((ob11Msg) => {
                             if (!ob11Msg) return;
                             ob11Msg.target_id = parseInt(msg.peerUin);
@@ -445,7 +446,7 @@ export class NapCatOneBot11Adapter {
     private async emitMsg(message: RawMessage) {
         const { debug, reportSelfMessage, messagePostFormat } = this.configLoader.configData;
         this.context.logger.logDebug('收到新消息 RawMessage', message);
-        OB11Constructor.message(this.core, this, message, messagePostFormat).then((ob11Msg) => {
+        RawNTMsg2Onebot(this.core, this, message, messagePostFormat).then((ob11Msg) => {
             if (!ob11Msg) return;
             this.context.logger.logDebug('转化为 OB11Message', ob11Msg);
             if (debug) {

@@ -1,9 +1,10 @@
 import BaseAction from '../BaseAction';
 import { OB11ForwardMessage, OB11Message, OB11MessageData } from '../../types';
-import { OB11Constructor } from '../../helper/data';
+import { OB11Constructor } from '@/onebot/helper/converter';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/utils/MessageUnique';
+import { RawNTMsg2Onebot } from '@/onebot/helper';
 
 const SchemaData = {
     type: 'object',
@@ -40,7 +41,7 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
         }
         const msgList = data.msgList;
         const messages = (await Promise.all(msgList.map(async msg => {
-            const resMsg = await OB11Constructor.message(this.CoreContext, this.OneBotContext, msg);
+            const resMsg = await RawNTMsg2Onebot(this.CoreContext, this.OneBotContext, msg);
             if (!resMsg) return;
             resMsg.message_id = MessageUnique.createMsg({
                 guildId: '',

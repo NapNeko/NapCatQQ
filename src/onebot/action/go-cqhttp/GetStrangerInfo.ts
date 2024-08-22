@@ -1,6 +1,6 @@
 import BaseAction from '../BaseAction';
 import { OB11User, OB11UserSex } from '../../types';
-import { OB11Constructor } from '../../helper/data';
+import { OB11Constructor } from '@/onebot/helper/converter';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { calcQQLevel } from '@/common/utils/helper';
