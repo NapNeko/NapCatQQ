@@ -1,5 +1,5 @@
 import { OB11Group } from '../../types';
-import { OB11Constructor } from '../../helper/data';
+import { OB11Constructor } from '@/onebot/helper/converter';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { Group } from '@/core/entities';

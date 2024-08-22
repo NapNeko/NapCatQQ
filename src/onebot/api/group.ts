@@ -45,6 +45,32 @@ export class OneBotGroupApi {
         }
         return undefined;
     }
+    async parseGroupIncreaseEvent(GroupCode: string, grayTipElement: GrayTipElement) {
+        this.coreContext.context.logger.logDebug('收到新人被邀请进群消息', grayTipElement);
+        const xmlElement = grayTipElement.xmlElement;
+        if (xmlElement?.content) {
+            const regex = /jp="(\d+)"/g;
+
+            const matches = [];
+            let match = null;
+
+            while ((match = regex.exec(xmlElement.content)) !== null) {
+                matches.push(match[1]);
+            }
+            // log("新人进群匹配到的QQ号", matches)
+            if (matches.length === 2) {
+                const [inviter, invitee] = matches;
+                return new OB11GroupIncreaseEvent(
+                    this.coreContext,
+                    parseInt(GroupCode),
+                    parseInt(invitee),
+                    parseInt(inviter),
+                    'invite'
+                );
+            }
+        }
+        return undefined;
+    }
     async parseGroupMemberIncreaseEvent(GroupCode: string, grayTipElement: GrayTipElement) {
         const NTQQGroupApi = this.coreContext.apis.GroupApi;
         let groupElement = grayTipElement?.groupElement;
