@@ -2,7 +2,7 @@ import { OB11MessageData, OB11MessageDataType, OB11MessageFileBase } from '@/one
 import { uri2local } from '@/common/utils/file';
 import { RequestUtil } from '@/common/utils/request';
 import { MessageUnique } from '@/common/utils/MessageUnique';
-import { AtType, CustomMusicSignPostData, IdMusicSignPostData, NapCatCore, Peer, SendMessageElement } from '@/core';
+import { AtType, ChatType, CustomMusicSignPostData, IdMusicSignPostData, NapCatCore, Peer, SendMessageElement } from '@/core';
 import { SendMsgElementConstructor } from '@/onebot/helper/genMessage';
 import { NapCatOneBot11Adapter } from '@/onebot';
 
@@ -58,15 +58,18 @@ const _handlers: {
     [OB11MessageDataType.text]: async (coreContext, obContext: NapCatOneBot11Adapter, { data: { text } }) => SendMsgElementConstructor.text(coreContext, text),
 
     [OB11MessageDataType.at]: async (coreContext, obContext: NapCatOneBot11Adapter, { data: { qq: atQQ } }, context) => {
-        if (!context.peer) return undefined;
-
+        if (!context.peer || context.peer.chatType == ChatType.friend) return undefined;
         if (atQQ === 'all') return SendMsgElementConstructor.at(coreContext, atQQ, atQQ, AtType.atAll, '全体成员');
-
-        // then the qq is a group member
-        // Mlikiowa V2.1.0 Refactor Todo
-        const uid = await coreContext.apis.UserApi.getUidByUinV2(`${atQQ}`);
+        const NTQQGroupApi = coreContext.apis.GroupApi;
+        const NTQQUserApi = coreContext.apis.UserApi;
+        const atMember = await NTQQGroupApi.getGroupMember(context.peer.peerUid, atQQ);
+        if (atMember) {
+            return SendMsgElementConstructor.at(coreContext, atQQ, atMember.uid, AtType.atUser, atMember.nick || atMember.cardName);
+        }
+        const uid = await NTQQUserApi.getUidByUinV2(`${atQQ}`);
         if (!uid) throw new Error('Get Uid Error');
-        return SendMsgElementConstructor.at(coreContext, atQQ, uid, AtType.atUser, '');
+        let info = await NTQQUserApi.getUserDetailInfo(uid);
+        return SendMsgElementConstructor.at(coreContext, atQQ, uid, AtType.atUser, info.nick || '');
     },
     [OB11MessageDataType.reply]: async (coreContext, obContext: NapCatOneBot11Adapter, { data: { id } }) => {
         const replyMsgM = MessageUnique.getMsgIdAndPeerByShortId(parseInt(id));
