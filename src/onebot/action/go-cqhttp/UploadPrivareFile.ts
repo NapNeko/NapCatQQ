@@ -5,7 +5,7 @@ import fs from 'fs';
 import { sendMsg } from '@/onebot/action/msg/SendMsg';
 import { uri2local } from '@/common/utils/file';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import { SendMsgElementConstructor } from '@/onebot/helper/msg';
+import { SendMsgElementConstructor } from '@/onebot/helper/genMessage';
 
 const SchemaData = {
     type: 'object',

@@ -3,7 +3,7 @@ import { uri2local } from '@/common/utils/file';
 import { RequestUtil } from '@/common/utils/request';
 import { MessageUnique } from '@/common/utils/MessageUnique';
 import { AtType, CustomMusicSignPostData, IdMusicSignPostData, NapCatCore, Peer, SendMessageElement } from '@/core';
-import { SendMsgElementConstructor } from '@/onebot/helper/msg';
+import { SendMsgElementConstructor } from '@/onebot/helper/genMessage';
 import { NapCatOneBot11Adapter } from '@/onebot';
 
 export type MessageContext = {
