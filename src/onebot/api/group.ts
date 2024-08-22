@@ -1,8 +1,11 @@
-import { GrayTipElement, NapCatCore } from '@/core';
+import { ChatType, GrayTipElement, NapCatCore } from '@/core';
 import { NapCatOneBot11Adapter } from '@/onebot';
 import { OB11GroupBanEvent } from '../event/notice/OB11GroupBanEvent';
 import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
 import { OB11GroupDecreaseEvent } from '../event/notice/OB11GroupDecreaseEvent';
+import fastXmlParser from 'fast-xml-parser';
+import { OB11GroupMsgEmojiLikeEvent } from '../event/notice/OB11MsgEmojiLikeEvent';
+import { MessageUnique } from '@/common/utils/MessageUnique';
 
 export class OneBotGroupApi {
     obContext: NapCatOneBot11Adapter;
@@ -74,6 +77,44 @@ export class OneBotGroupApi {
                 parseInt(adminUin),
                 'kick_me'
             );
+        }
+        return undefined;
+    }
+    async parseGroupEmjioLikeEvent(GroupCode: string, grayTipElement: GrayTipElement) {
+        const NTQQMsgApi = this.coreContext.apis.MsgApi;
+        const emojiLikeData = new fastXmlParser.XMLParser({
+            ignoreAttributes: false,
+            attributeNamePrefix: '',
+        }).parse(grayTipElement.xmlElement.content);
+        this.coreContext.context.logger.logDebug('收到表情回应我的消息', emojiLikeData);
+        try {
+            const senderUin = emojiLikeData.gtip.qq.jp;
+            const msgSeq = emojiLikeData.gtip.url.msgseq;
+            const emojiId = emojiLikeData.gtip.face.id;
+            const peer = {
+                chatType: ChatType.group,
+                guildId: '',
+                peerUid: GroupCode
+            }
+            const replyMsgList = (await NTQQMsgApi.getMsgExBySeq(peer, msgSeq)).msgList;
+            if (replyMsgList.length < 1) {
+                return;
+            }
+            const replyMsg = replyMsgList.filter(e => e.msgSeq == msgSeq).sort((a, b) => parseInt(a.msgTime) - parseInt(b.msgTime))[0];
+            //console.log("表情回应消息长度检测", msgSeq, replyMsg.elements);
+            if (!replyMsg) throw new Error('找不到回应消息');
+            return new OB11GroupMsgEmojiLikeEvent(
+                this.coreContext,
+                parseInt(GroupCode),
+                parseInt(senderUin),
+                MessageUnique.getShortIdByMsgId(replyMsg.msgId)!,
+                [{
+                    emoji_id: emojiId,
+                    count: 1,
+                }],
+            );
+        } catch (e: any) {
+            this.coreContext.context.logger.logError('解析表情回应消息失败', e.stack);
         }
         return undefined;
     }
