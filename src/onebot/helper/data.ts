@@ -417,10 +417,8 @@ export class OB11Constructor {
         }
 
         for (const element of msg.elements) {
-            const grayTipElement = element.grayTipElement;
-            const groupElement = grayTipElement?.groupElement;
-            if (!element.grayTipElement) continue;
-            if (groupElement) {
+            if (element.grayTipElement && element.grayTipElement.groupElement) {
+                const groupElement = element.grayTipElement.groupElement;
                 if (groupElement.type == TipGroupElementType.memberIncrease) {
                     let MemberIncreaseEvent = await obContext.apiContext.GroupApi.parseGroupMemberIncreaseEvent(msg.peerUid, element.grayTipElement);
                     if (MemberIncreaseEvent) return MemberIncreaseEvent;
@@ -428,19 +426,10 @@ export class OB11Constructor {
                     let BanEvent = await obContext.apiContext.GroupApi.parseGroupBanEvent(msg.peerUid, element.grayTipElement);
                     if (BanEvent) return BanEvent;
                 } else if (groupElement.type == TipGroupElementType.kicked) {
-                    logger.logDebug(`收到我被踢出或退群提示, 群${msg.peerUid}`, groupElement);
                     NTQQGroupApi.quitGroup(msg.peerUid).then();
                     try {
-                        const adminUin = (await NTQQGroupApi.getGroupMember(msg.peerUid, groupElement.adminUid))?.uin || (await NTQQUserApi.getUidByUinV2(groupElement.adminUid));
-                        if (adminUin) {
-                            return new OB11GroupDecreaseEvent(
-                                core,
-                                parseInt(msg.peerUid),
-                                parseInt(core.selfInfo.uin),
-                                parseInt(adminUin),
-                                'kick_me'
-                            );
-                        }
+                        let KickEvent = await obContext.apiContext.GroupApi.parseGroupKickEvent(msg.peerUid, element.grayTipElement);
+                        if (KickEvent) return KickEvent;
                     } catch (e) {
                         return new OB11GroupDecreaseEvent(
                             core,
@@ -463,12 +452,12 @@ export class OB11Constructor {
                     }
                 );
             }
-            if (grayTipElement) {
-                if (grayTipElement.xmlElement?.templId === '10382') {
+            if (element.grayTipElement) {
+                if (element.grayTipElement.xmlElement?.templId === '10382') {
                     const emojiLikeData = new fastXmlParser.XMLParser({
                         ignoreAttributes: false,
                         attributeNamePrefix: '',
-                    }).parse(grayTipElement.xmlElement.content);
+                    }).parse(element.grayTipElement.xmlElement.content);
                     logger.logDebug('收到表情回应我的消息', emojiLikeData);
                     try {
                         const senderUin = emojiLikeData.gtip.qq.jp;
@@ -500,9 +489,9 @@ export class OB11Constructor {
                         logger.logError('解析表情回应消息失败', e.stack);
                     }
                 }
-                if (grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_XMLMSG) {
-                    logger.logDebug('收到新人被邀请进群消息', grayTipElement);
-                    const xmlElement = grayTipElement.xmlElement;
+                if (element.grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_XMLMSG) {
+                    logger.logDebug('收到新人被邀请进群消息', element.grayTipElement);
+                    const xmlElement = element.grayTipElement.xmlElement;
                     if (xmlElement?.content) {
                         const regex = /jp="(\d+)"/g;
 
@@ -526,9 +515,9 @@ export class OB11Constructor {
                     }
                 }
                 //代码歧义 GrayTipElementSubType.MEMBER_NEW_TITLE
-                else if (grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
-                    const json = JSON.parse(grayTipElement.jsonGrayTipElement.jsonStr);
-                    if (grayTipElement.jsonGrayTipElement.busiId == 1061) {
+                else if (element.grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
+                    const json = JSON.parse(element.grayTipElement.jsonGrayTipElement.jsonStr);
+                    if (element.grayTipElement.jsonGrayTipElement.busiId == 1061) {
                         //判断业务类型
                         //Poke事件
                         const pokedetail: any[] = json.items;
@@ -544,7 +533,7 @@ export class OB11Constructor {
                             );
                         }
                     }
-                    if (grayTipElement.jsonGrayTipElement.busiId == 2401) {
+                    if (element.grayTipElement.jsonGrayTipElement.busiId == 2401) {
                         const searchParams = new URL(json.items[0].jp).searchParams;
                         const msgSeq = searchParams.get('msgSeq')!;
                         const Group = searchParams.get('groupCode');
@@ -563,7 +552,7 @@ export class OB11Constructor {
                         );
                         // 获取MsgSeq+Peer可获取具体消息
                     }
-                    if (grayTipElement.jsonGrayTipElement.busiId == 2407) {
+                    if (element.grayTipElement.jsonGrayTipElement.busiId == 2407) {
                         //下面得改 上面也是错的grayTipElement.subElementType == GrayTipElementSubType.MEMBER_NEW_TITLE
                         const memberUin = json.items[1].param[0];
                         const title = json.items[3].txt;
