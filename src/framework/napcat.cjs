@@ -1,4 +1,8 @@
-// 此代码禁止除NapCat外任何地方使用 使用需获取许可
+/**
+ * @description 此代码禁止除NapCat外任何地方使用 使用需获取许可
+ *@author: Mlikiowa
+ *@date: 2024-08-23
+ */
 
 let Process = require('process');
 let os = require('os');
@@ -8,14 +12,12 @@ Process.dlopenOrig = Process.dlopen;
 let RealWrapper;
 let loginService;
 
-//Fuck LoginService
 class LoginService {
     constructor() {
         console.log('[NapCat] Fuck LoginService Loading...');
     }
 }
 
-//NapCat 专有逻辑
 let initCallBack;
 let wrapperSession;
 let wrapperLoginService;
@@ -31,13 +33,6 @@ function CreateFuckService(ServiceName) {
                         get: function (target, ClassFunName, receiver) {
                             return function () {
                                 let ret = loginService[ClassFunName](...arguments);
-                                // if (ret instanceof Promise) {
-                                //     ret.then((data) => {
-                                //         console.log("Called ", '实例方法 NodeIKernelLoginService/' + ClassFunName, ' 参数:', ...arguments, '返回:', data);
-                                //     });
-                                // } else {
-                                //     console.log("Called ", '实例方法 NodeIKernelLoginService/' + ClassFunName, ' 参数:', ...arguments, '返回:', ret);
-                                // }
                                 return ret;
                             }
 
@@ -60,21 +55,12 @@ function CreateFuckService(ServiceName) {
                                     if (ClassFunName == 'init') {
                                         let origin = arguments[3].onSessionInitComplete;
                                         arguments[3].onSessionInitComplete = function () {
-                                            //console.log("Listner ", '注册方法 NodeIKernelSessionListener/onSessionInitComplete', ' 参数:', ...arguments);
                                             origin(...arguments);
                                             initCallBack.forEach((cb) => cb(...arguments));
                                             clearHook();
                                         }
                                     }
                                     let ret = Session[ClassFunName](...arguments);
-                                    // if (ret instanceof Promise) {
-                                    //     ret.then((data) => {
-                                    //         console.log("Called ", '实例方法 NodeIQQNTWrapperSession/' + ClassFunName, ' 参数:', ...arguments, '返回:', data);
-                                    //     });
-                                    // } else {
-                                    //     console.log("Called ", '实例方法 NodeIQQNTWrapperSession/' + ClassFunName, ' 参数:', ...arguments, '返回:', ret);
-                                    // }
-
                                     return ret;
                                 }
 
@@ -91,12 +77,9 @@ function CreateFuckService(ServiceName) {
 Process.dlopen = function (module, filename, flags = os.constants.dlopen.RTLD_LAZY) {
     let dlopenRet = this.dlopenOrig(module, filename, flags);
     if (filename.indexOf('wrapper.node') == -1) return dlopenRet;
-    //仅对Wrapper.node进行处理
     RealWrapper = module.exports;
-    //先行获取LoginService操作权
     loginService = new RealWrapper.NodeIKernelLoginService();
     wrapperLoginService = loginService;
-    //开始针对性处理
     module.exports = new Proxy({}, {
         get: function (target, ServiceName, receiver) {
             if (ServiceName == 'NodeIKernelLoginService') return CreateFuckService(ServiceName);
@@ -104,11 +87,8 @@ Process.dlopen = function (module, filename, flags = os.constants.dlopen.RTLD_LA
             return RealWrapper[ServiceName];
         }
     });
-    //返回预先构造的对象
     return dlopenRet;
 };
-
-//辅助函数
 function clearHook() {
     initCallBack = [];
     process.dlopen = dlopenOrig;
