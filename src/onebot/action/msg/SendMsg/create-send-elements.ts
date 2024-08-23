@@ -171,7 +171,7 @@ const _handlers: {
         } else {
             postData = data;
         }
-        // Mlikiowa V2.2.0 Refactor Todo
+        // Mlikiowa V2.2.1 Refactor Todo
         const signUrl = obContext.configLoader.configData.musicSignUrl;
         if (!signUrl) {
             if (data.type === 'qq') {

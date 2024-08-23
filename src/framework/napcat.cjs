@@ -1,4 +1,5 @@
-// 用于 NapCat 对QQ流程分析
+// 此代码禁止除NapCat外任何地方使用 使用需获取许可
+
 let Process = require('process');
 let os = require('os');
 let path = require('path');
