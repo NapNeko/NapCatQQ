@@ -69,7 +69,7 @@ export class OneBotMsgApi {
             type: OB11MessageDataType.at,
             data: {
                 qq: qq!,
-                name,
+                //name,
             },
         };
         return message_data;
