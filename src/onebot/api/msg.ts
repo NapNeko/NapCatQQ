@@ -65,6 +65,7 @@ export class OneBotMsgApi {
                 name = content.replace('@', '');
             }
         }
+        
         message_data = {
             type: OB11MessageDataType.at,
             data: {
