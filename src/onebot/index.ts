@@ -327,7 +327,6 @@ export class NapCatOneBot11Adapter {
                 GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_ADMIN,
             ].includes(notifies[0]?.type)) {
                 for (const notify of notifies) {
-                    notify.time = Date.now();
                     const notifyTime = parseInt(notify.seq) / 1000 / 1000;
                     // log(`群通知时间${notifyTime}`, `启动时间${this.bootTime}`);
                     if (notifyTime < this.bootTime) {
