@@ -61,7 +61,7 @@ export interface NodeIKernelBuddyService {
 
     getBuddyReqUnreadCnt(): number;
 
-    getBuddyReq(): unknown;
+    getBuddyReq(): Promise<GeneralCallResult>;
 
     delBuddyReq(uid: number): void;
 
