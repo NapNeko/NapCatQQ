@@ -2,7 +2,7 @@ import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 
-export const napcat_version = '2.2.5';
+export const napcat_version = '2.2.6';
 
 export class NapCatPathWrapper {
     binaryPath: string;
