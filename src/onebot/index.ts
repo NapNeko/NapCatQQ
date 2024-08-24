@@ -3,13 +3,13 @@ import {
     BuddyReqType,
     ChatType,
     GroupListener,
-    GroupNotifyTypes,
     InstanceContext,
     MsgListener,
     NapCatCore,
     RawMessage,
     SendStatusType,
     GroupMemberRole,
+    GroupNotifyMsgType,
 } from '@/core';
 import { OB11Config, OB11ConfigLoader } from '@/onebot/helper/config';
 import { OneBotApiContextType } from '@/onebot/types';
@@ -321,9 +321,9 @@ export class NapCatOneBot11Adapter {
         groupListener.onGroupNotifiesUpdated = async (_, notifies) => {
             //console.log('ob11 onGroupNotifiesUpdated', notifies[0]);
             if (![
-                GroupNotifyTypes.ADMIN_SET,
-                GroupNotifyTypes.ADMIN_UNSET,
-                GroupNotifyTypes.ADMIN_UNSET_OTHER,
+                GroupNotifyMsgType.SET_ADMIN,
+                GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_CANCELED,
+                GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_ADMIN,
             ].includes(notifies[0]?.type)) {
                 for (const notify of notifies) {
                     notify.time = Date.now();
@@ -337,9 +337,9 @@ export class NapCatOneBot11Adapter {
                     this.context.logger.logDebug('收到群通知', notify);
 
                     if ([
-                        GroupNotifyTypes.ADMIN_SET,
-                        GroupNotifyTypes.ADMIN_UNSET,
-                        GroupNotifyTypes.ADMIN_UNSET_OTHER,
+                        GroupNotifyMsgType.SET_ADMIN,
+                        GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_CANCELED,
+                        GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_ADMIN,
                     ].includes(notify.type)) {
                         const member1 = await this.core.apis.GroupApi.getGroupMember(notify.group.groupCode, notify.user1.uid);
                         this.context.logger.logDebug('有管理员变动通知');
@@ -348,20 +348,21 @@ export class NapCatOneBot11Adapter {
                         this.context.logger.logDebug('开始获取变动的管理员');
                         if (member1) {
                             this.context.logger.logDebug('变动管理员获取成功');
-                            // member1.role = notify.type == GroupNotifyTypes.ADMIN_SET ? GroupMemberRole.admin : GroupMemberRole.normal;
-
                             const groupAdminNoticeEvent = new OB11GroupAdminNoticeEvent(
                                 this.core,
                                 parseInt(notify.group.groupCode),
                                 parseInt(member1.uin),
-                                [GroupNotifyTypes.ADMIN_UNSET, GroupNotifyTypes.ADMIN_UNSET_OTHER].includes(notify.type) ? 'unset' : 'set',
+                                [
+                                    GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_CANCELED,
+                                    GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_ADMIN
+                                ].includes(notify.type) ? 'unset' : 'set',
                             );
                             this.networkManager.emitEvent(groupAdminNoticeEvent)
                                 .catch(e => this.context.logger.logError('处理群管理员变动失败', e));
                         } else {
                             this.context.logger.logDebug('获取群通知的成员信息失败', notify, this.core.apis.GroupApi.getGroup(notify.group.groupCode));
                         }
-                    } else if (notify.type == GroupNotifyTypes.MEMBER_EXIT || notify.type == GroupNotifyTypes.KICK_MEMBER) {
+                    } else if (notify.type == GroupNotifyMsgType.MEMBER_LEAVE_NOTIFY_ADMIN || notify.type == GroupNotifyMsgType.KICK_MEMBER_NOTIFY_ADMIN) {
                         this.context.logger.logDebug('有成员退出通知', notify);
                         const member1Uin = (await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid))!;
                         let operatorId = member1Uin;
@@ -385,7 +386,7 @@ export class NapCatOneBot11Adapter {
                             .catch(e => this.context.logger.logError('处理群成员退出失败', e));
                         // notify.status == 1 表示未处理 2表示处理完成
                     } else if ([
-                        GroupNotifyTypes.JOIN_REQUEST,
+                        GroupNotifyMsgType.REQUEST_JOIN_NEED_ADMINI_STRATOR_PASS,
                     ].includes(notify.type) && notify.status == 1) {
                         this.context.logger.logDebug('有加群请求');
                         try {
@@ -406,7 +407,7 @@ export class NapCatOneBot11Adapter {
                         } catch (e) {
                             this.context.logger.logError('获取加群人QQ号失败 Uid:', notify.user1.uid, e);
                         }
-                    } else if (notify.type == GroupNotifyTypes.INVITE_ME && notify.status == 1) {
+                    } else if (notify.type == GroupNotifyMsgType.INVITED_BY_MEMBER && notify.status == 1) {
                         this.context.logger.logDebug(`收到邀请我加群通知:${notify}`);
                         const groupInviteEvent = new OB11GroupRequestEvent(
                             this.core,
