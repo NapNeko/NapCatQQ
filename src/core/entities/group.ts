@@ -1,5 +1,17 @@
 import { QQLevel, Sex, User } from './user';
-
+export interface KickMemberInfo {
+    optFlag: number,
+    optOperate: number,
+    optMemberUid: string,
+    optBytesMsg: string,
+}
+export interface  kickMemberV2Req{
+    groupCode: string,
+    kickFlag: number,
+    kickList: Array<KickMemberInfo>,
+    kickListUids: Array<string>,
+    kickMsg: string
+}
 export enum GroupListUpdateType {
     REFRESHALL,
     GETALL,

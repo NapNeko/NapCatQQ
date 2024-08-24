@@ -7,6 +7,8 @@ import {
     GroupNotify,
     GroupRequestOperateTypes,
     InstanceContext,
+    KickMemberInfo,
+    kickMemberV2Req,
     MemberExtSourceType,
     NapCatCore,
     NodeIKernelGroupListener,
@@ -218,6 +220,9 @@ export class NTQQGroupApi {
         };
         // GetMsgByShoretID(ShoretID); -> MsgService.getMsgs(Peer,MsgId,1,false); -> 组出参数
         return this.context.session.getGroupService().addGroupEssence(param);
+    }
+    async kickMemberV2Inner(param: kickMemberV2Req) {
+        return this.context.session.getGroupService().kickMemberV2(param);
     }
     async quitGroupV2(GroupCode: string, needDeleteLocalMsg: boolean) {
         let param = {
