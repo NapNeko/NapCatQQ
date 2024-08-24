@@ -64,6 +64,7 @@ export enum BuddyReqType {
 }
 
 export interface FriendRequest {
+    isBuddy?: boolean;
     isInitiator?: boolean;
     isDecide: boolean;
     friendUid: string;

@@ -70,7 +70,9 @@ export class NTQQFriendApi {
     async isBuddy(uid: string) {
         return this.context.session.getBuddyService().isBuddy(uid);
     }
-
+    async clearBuddyReqUnreadCnt(){
+        return this.context.session.getBuddyService().clearBuddyReqUnreadCnt();
+    }
     /**
      * @deprecated
      * @param forced

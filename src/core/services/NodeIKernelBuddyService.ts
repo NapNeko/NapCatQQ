@@ -65,7 +65,7 @@ export interface NodeIKernelBuddyService {
 
     delBuddyReq(uid: number): void;
 
-    clearBuddyReqUnreadCnt(): void;
+    clearBuddyReqUnreadCnt(): Promise<GeneralCallResult>;
 
     reqToAddFriends(uid: number, msg: string): void;
 
