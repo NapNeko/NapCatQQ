@@ -29,6 +29,17 @@ export enum GroupNotifyMsgStatus {
     KREFUSED,//拒绝
     KIGNORED//忽略
 }
+export enum GroupInviteStatus {
+    INIT,
+    WAIT_TO_APPROVE,
+    JOINED,
+    REFUSED_BY_ADMINI_STRATOR
+}
+export enum GroupInviteType {
+    BYBUDDY,
+    BYGROUPMEMBER,
+    BYDISCUSSMEMBER
+}
 export interface GroupNotify {
     time: number;  // 自己添加的字段，时间戳，毫秒, 用于判断收到短时间内收到重复的notify
     seq: string; // 唯一标识符，转成数字再除以1000应该就是时间戳？
@@ -40,8 +51,9 @@ export interface GroupNotify {
     actionUser: { uid: string; nickName: string }; //未知
     actionTime: string;
     invitationExt: {
-        srcType: number;  // 0?未知
-        groupCode: string; waitStatus: number
+        srcType: GroupInviteType;  // 邀请来源
+        groupCode: string;
+        waitStatus: GroupInviteStatus
     };
     postscript: string;  // 加群用户填写的验证信息
     repeatSeqs: [];
