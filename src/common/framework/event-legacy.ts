@@ -162,7 +162,89 @@ export class LegacyNTEventWrapper {
             this.createListenerFunction(ListenerMainName);
         });
     }
+    async CallNormalEventV2<
+        EventType extends (...args: any[]) => Promise<any>,
+        ListenerType extends (...args: any[]) => void
+    >(
+        EventName = '',
+        ListenerName = '',
+        waitTimes = 1,
+        timeout: number = 3000,
+        checkerEvent: (ret: Awaited<ReturnType<EventType>>) => boolean = () => true,
+        checkerListener: (...args: Parameters<ListenerType>) => boolean = () => true,
+        ...args: Parameters<EventType>
+    ) {
+        return new Promise<[EventRet: Awaited<ReturnType<EventType>>, ...Parameters<ListenerType>]>(
+            async (resolve, reject) => {
+                const id = randomUUID();
+                let complete = 0;
+                let retData: Parameters<ListenerType> | undefined = undefined;
+                let retEvent: any = {};
+                const databack = () => {
+                    if (complete == 0) {
+                        reject(
+                            new Error(
+                                'Timeout: NTEvent EventName:' +
+                                EventName +
+                                ' ListenerName:' +
+                                ListenerName +
+                                ' EventRet:\n' +
+                                JSON.stringify(retEvent, null, 4) +
+                                '\n',
+                            ),
+                        );
+                    } else {
+                        resolve([retEvent as Awaited<ReturnType<EventType>>, ...retData!]);
+                    }
+                };
 
+                const ListenerNameList = ListenerName.split('/');
+                const ListenerMainName = ListenerNameList[0];
+                const ListenerSubName = ListenerNameList[1];
+
+                const Timeouter = setTimeout(databack, timeout);
+
+                const eventCallbak = {
+                    timeout: timeout,
+                    createtime: Date.now(),
+                    checker: checkerListener,
+                    func: (...args: any[]) => {
+                        complete++;
+                        //console.log('func', ...args);
+                        retData = args as Parameters<ListenerType>;
+                        if (complete >= waitTimes) {
+                            clearTimeout(Timeouter);
+                            databack();
+                        }
+                    },
+                };
+                if (!this.EventTask.get(ListenerMainName)) {
+                    this.EventTask.set(ListenerMainName, new Map());
+                }
+                if (!this.EventTask.get(ListenerMainName)?.get(ListenerSubName)) {
+                    this.EventTask.get(ListenerMainName)?.set(ListenerSubName, new Map());
+                }
+                this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.set(id, eventCallbak);
+                this.createListenerFunction(ListenerMainName);
+                const EventFunc = this.createEventFunction<EventType>(EventName);
+                retEvent = await EventFunc!(...(args as any[]));
+                if(!checkerEvent(retEvent)){
+                    clearTimeout(Timeouter);
+                    reject(
+                        new Error(
+                            'EventChecker Failed: NTEvent EventName:' +
+                            EventName +
+                            ' ListenerName:' +
+                            ListenerName +
+                            ' EventRet:\n' +
+                            JSON.stringify(retEvent, null, 4) +
+                            '\n',
+                        ),
+                    );
+                }
+            },
+        );
+    }
     async CallNormalEvent<
         EventType extends (...args: any[]) => Promise<any>,
         ListenerType extends (...args: any[]) => void

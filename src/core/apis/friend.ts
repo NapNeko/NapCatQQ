@@ -1,5 +1,5 @@
 import { Friend, FriendV2, User } from '@/core/entities';
-import { BuddyListReqType, InstanceContext, NapCatCore, NodeIKernelProfileService, OnBuddyChangeParams } from '@/core';
+import { BuddyListReqType, InstanceContext, NapCatCore, NodeIKernelBuddyListener, NodeIKernelBuddyService, NodeIKernelProfileService, OnBuddyChangeParams } from '@/core';
 import { LimitedHashTable } from '@/common/utils/MessageUnique';
 
 export class NTQQFriendApi {
@@ -70,31 +70,14 @@ export class NTQQFriendApi {
     async isBuddy(uid: string) {
         return this.context.session.getBuddyService().isBuddy(uid);
     }
-    async clearBuddyReqUnreadCnt(){
+    async clearBuddyReqUnreadCnt() {
         return this.context.session.getBuddyService().clearBuddyReqUnreadCnt();
     }
-    /**
-     * @deprecated
-     * @param forced
-     * @returns
-     */
-    async getFriends(forced = false): Promise<User[]> {
-        const [_retData, _BuddyArg] = await this.core.eventWrapper.CallNormalEvent<(force: boolean) => Promise<any>, (arg: OnBuddyChangeParams) => void>
-            (
-            'NodeIKernelBuddyService/getBuddyList',
-            'NodeIKernelBuddyListener/onBuddyListChange',
-            1,
-            5000,
-            () => true,
-            forced,
-            );
-        const friends: User[] = [];
-        for (const categoryItem of _BuddyArg) {
-            for (const friend of categoryItem.buddyList) {
-                friends.push(friend);
-            }
-        }
-        return friends;
+    async getBuddyReq() {
+        const [, ret] = await this.core.eventWrapper.CallNormalEventV2
+            <NodeIKernelBuddyService['getBuddyReq'], NodeIKernelBuddyListener['onBuddyReqChange']>
+            ('NodeIKernelBuddyService/getBuddyReq', 'NodeIKernelBuddyListener/onBuddyReqChange', 1, 5000);
+        return ret;
     }
 
     async handleFriendRequest(flag: string, accept: boolean) {
