@@ -65,11 +65,12 @@ export class OneBotMsgApi {
                 name = content.replace('@', '');
             }
         }
+        
         message_data = {
             type: OB11MessageDataType.at,
             data: {
                 qq: qq!,
-                name,
+                //name,
             },
         };
         return message_data;

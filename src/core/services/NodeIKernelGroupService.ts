@@ -3,7 +3,7 @@ import {
     GroupExtParam,
     GroupMember,
     GroupMemberRole,
-    GroupNotifyTypes,
+    GroupNotifyMsgType,
     GroupRequestOperateTypes,
 } from '@/core/entities';
 import { GeneralCallResult } from '@/core/services/common';
@@ -195,7 +195,7 @@ export interface NodeIKernelGroupService {
             operateType: GroupRequestOperateTypes, // 2 拒绝
             targetMsg: {
                 seq: string,  // 通知序列号
-                type: GroupNotifyTypes,
+                type: GroupNotifyMsgType,
                 groupCode: string,
                 postscript: string
             }
