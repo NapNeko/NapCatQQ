@@ -41,8 +41,7 @@ export enum GroupInviteType {
     BYDISCUSSMEMBER
 }
 export interface GroupNotify {
-    time: number;  // 自己添加的字段，时间戳，毫秒, 用于判断收到短时间内收到重复的notify
-    seq: string; // 唯一标识符，转成数字再除以1000应该就是时间戳？
+    seq: string; // 通知序列号
     type: GroupNotifyMsgType;
     status: GroupNotifyMsgStatus;
     group: { groupCode: string; groupName: string };
