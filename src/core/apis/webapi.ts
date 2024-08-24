@@ -20,15 +20,14 @@ export class NTQQWebApi {
 
     async shareDigest(groupCode: string, msgSeq: string, msgRandom: string, targetGroupCode: string) {
         const cookieObject = await this.core.apis.UserApi.getCookies('qun.qq.com');
-        const url = `https://qun.qq.com/cgi-bin/group_digest/share_digest?${
-            new URLSearchParams({
-                bkn: this.getBknFromCookie(cookieObject),
-                group_code: groupCode,
-                msg_seq: msgSeq,
-                msg_random: msgRandom,
-                target_group_code: targetGroupCode,
-            }).toString()
-        }`;
+        const url = `https://qun.qq.com/cgi-bin/group_digest/share_digest?${new URLSearchParams({
+            bkn: this.getBknFromCookie(cookieObject),
+            group_code: groupCode,
+            msg_seq: msgSeq,
+            msg_random: msgRandom,
+            target_group_code: targetGroupCode,
+        }).toString()
+            }`;
         try {
             return RequestUtil.HttpGetText(url, 'GET', '', { 'Cookie': this.cookieToString(cookieObject) });
         } catch (e) {
@@ -38,18 +37,17 @@ export class NTQQWebApi {
 
     async getGroupEssenceMsg(GroupCode: string, page_start: string) {
         const cookieObject = await this.core.apis.UserApi.getCookies('qun.qq.com');
-        const url = `https://qun.qq.com/cgi-bin/group_digest/digest_list?${
-            new URLSearchParams({
-                bkn: this.getBknFromCookie(cookieObject),
-                group_code: GroupCode,
-                page_start,
-                page_limit: '20',
-            }).toString()
-        }`;
+        const url = `https://qun.qq.com/cgi-bin/group_digest/digest_list?${new URLSearchParams({
+            bkn: this.getBknFromCookie(cookieObject),
+            group_code: GroupCode,
+            page_start,
+            page_limit: '20',
+        }).toString()
+            }`;
         let ret;
         try {
             ret = await RequestUtil.HttpGetJson<GroupEssenceMsgRet>
-            (url, 'GET', '', { 'Cookie': this.cookieToString(cookieObject) });
+                (url, 'GET', '', { 'Cookie': this.cookieToString(cookieObject) });
         } catch {
             return undefined;
         }
@@ -65,15 +63,14 @@ export class NTQQWebApi {
         const cookieObject = await this.core.apis.UserApi.getCookies('qun.qq.com');
         const retList: Promise<WebApiGroupMemberRet>[] = [];
         const fastRet = await RequestUtil.HttpGetJson<WebApiGroupMemberRet>
-        (`https://qun.qq.com/cgi-bin/qun_mgr/search_group_members?${
-            new URLSearchParams({
+            (`https://qun.qq.com/cgi-bin/qun_mgr/search_group_members?${new URLSearchParams({
                 st: '0',
                 end: '40',
                 sort: '1',
                 gc: GroupCode,
                 bkn: this.getBknFromCookie(cookieObject),
             }).toString()
-        }`, 'POST', '', { 'Cookie': this.cookieToString(cookieObject) });
+                }`, 'POST', '', { 'Cookie': this.cookieToString(cookieObject) });
         if (!fastRet?.count || fastRet?.errcode !== 0 || !fastRet?.mems) {
             return [];
         } else {
@@ -86,15 +83,14 @@ export class NTQQWebApi {
         //遍历批量请求
         for (let i = 2; i <= PageNum; i++) {
             const ret = RequestUtil.HttpGetJson<WebApiGroupMemberRet>
-            (`https://qun.qq.com/cgi-bin/qun_mgr/search_group_members?${
-                new URLSearchParams({
+                (`https://qun.qq.com/cgi-bin/qun_mgr/search_group_members?${new URLSearchParams({
                     st: ((i - 1) * 40).toString(),
                     end: (i * 40).toString(),
                     sort: '1',
                     gc: GroupCode,
                     bkn: this.getBknFromCookie(cookieObject),
                 }).toString()
-            }`, 'POST', '', { 'Cookie': this.cookieToString(cookieObject) });
+                    }`, 'POST', '', { 'Cookie': this.cookieToString(cookieObject) });
             retList.push(ret);
         }
         //批量等待
@@ -127,8 +123,7 @@ export class NTQQWebApi {
         let ret: any = undefined;
         try {
             ret = await RequestUtil.HttpGetJson<any>
-            (`https://web.qun.qq.com/cgi-bin/announce/add_qun_notice${
-                new URLSearchParams({
+                (`https://web.qun.qq.com/cgi-bin/announce/add_qun_notice${new URLSearchParams({
                     bkn: this.getBknFromCookie(cookieObject),
                     qid: GroupCode,
                     text: Content,
@@ -136,7 +131,7 @@ export class NTQQWebApi {
                     type: '1',
                     settings: '{"is_show_edit_card":1,"tip_window_type":1,"confirm_required":1}',
                 }).toString()
-            }`, 'GET', '', { 'Cookie': this.cookieToString(cookieObject) });
+                    }`, 'GET', '', { 'Cookie': this.cookieToString(cookieObject) });
             return ret;
         } catch (e) {
             return undefined;
@@ -147,15 +142,10 @@ export class NTQQWebApi {
         const cookieObject = await this.core.apis.UserApi.getCookies('qun.qq.com');
         let ret: WebApiGroupNoticeRet | undefined = undefined;
         try {
-            ret = await RequestUtil.HttpGetJson<WebApiGroupNoticeRet>(`https://web.qun.qq.com/cgi-bin/announce/get_t_list?${
-                new URLSearchParams({
-                    bkn: this.getBknFromCookie(cookieObject),
-                    qid: GroupCode,
-                    type: '1',
-                    start: '0',
-                    num: '1',
-                }).toString()
-            }`, 'GET', '', { 'Cookie': this.cookieToString(cookieObject) });
+            const url = 'https://web.qun.qq.com/cgi-bin/announce/get_t_list?bkn=' +
+                this.getBknFromCookie(cookieObject) + '&qid=' + GroupCode + '&ft=23&ni=1&n=1&i=1&log_read=1&platform=1&s=-1&n=20';
+
+            ret = await RequestUtil.HttpGetJson<WebApiGroupNoticeRet>(url, 'GET', '', { 'Cookie': this.cookieToString(cookieObject) });
             if (ret?.ec !== 0) {
                 return undefined;
             }
@@ -168,12 +158,11 @@ export class NTQQWebApi {
     async getGroupHonorInfo(groupCode: string, getType: WebHonorType) {
         const cookieObject = await this.core.apis.UserApi.getCookies('qun.qq.com');
         const getDataInternal = async (Internal_groupCode: string, Internal_type: number) => {
-            const url = `https://qun.qq.com/interactive/honorlist?${
-                new URLSearchParams({
-                    gc: Internal_groupCode,
-                    type: Internal_type.toString(),
-                }).toString()
-            }`;
+            const url = `https://qun.qq.com/interactive/honorlist?${new URLSearchParams({
+                gc: Internal_groupCode,
+                type: Internal_type.toString(),
+            }).toString()
+                }`;
             let resJson;
             try {
                 const res = await RequestUtil.HttpGetText(url, 'GET', '', { 'Cookie': this.cookieToString(cookieObject) });
