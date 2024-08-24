@@ -7,6 +7,8 @@ import {
     GroupNotify,
     GroupRequestOperateTypes,
     InstanceContext,
+    KickMemberInfo,
+    kickMemberV2Req,
     MemberExtSourceType,
     NapCatCore,
     NodeIKernelGroupListener,
@@ -42,12 +44,12 @@ export class NTQQGroupApi {
         type ListenerType = NodeIKernelGroupListener['onGroupListUpdate'];
         const [_retData, _updateType, groupList] = await this.core.eventWrapper.CallNormalEvent<(force: boolean) => Promise<any>, ListenerType>
             (
-            'NodeIKernelGroupService/getGroupList',
-            'NodeIKernelGroupListener/onGroupListUpdate',
-            1,
-            5000,
-            () => true,
-            forced,
+                'NodeIKernelGroupService/getGroupList',
+                'NodeIKernelGroupListener/onGroupListUpdate',
+                1,
+                5000,
+                () => true,
+                forced,
             );
         return groupList;
     }
@@ -219,7 +221,17 @@ export class NTQQGroupApi {
         // GetMsgByShoretID(ShoretID); -> MsgService.getMsgs(Peer,MsgId,1,false); -> 组出参数
         return this.context.session.getGroupService().addGroupEssence(param);
     }
-
+    async kickMemberV2Inner(param: kickMemberV2Req) {
+        return this.context.session.getGroupService().kickMemberV2(param);
+    }
+    async quitGroupV2(GroupCode: string, needDeleteLocalMsg: boolean) {
+        let param = {
+            groupCode: GroupCode,
+            needDeleteLocalMsg: needDeleteLocalMsg
+        };
+        //应该是直接返回不需要Listener的 未经测试 需测试再发布
+        return this.context.session.getGroupService().quitGroupV2(param);
+    }
     async removeGroupEssence(GroupCode: string, msgId: string) {
         // 代码没测过
         // 需要 ob11msgid->msgId + (peer) -> msgSeq + msgRandom
@@ -240,14 +252,14 @@ export class NTQQGroupApi {
     async getSingleScreenNotifies(num: number) {
         const [_retData, _doubt, _seq, notifies] = await this.core.eventWrapper.CallNormalEvent<(arg1: boolean, arg2: string, arg3: number) => Promise<any>, (doubt: boolean, seq: string, notifies: GroupNotify[]) => void>
             (
-            'NodeIKernelGroupService/getSingleScreenNotifies',
-            'NodeIKernelGroupListener/onGroupSingleScreenNotifies',
-            1,
-            5000,
-            () => true,
-            false,
-            '',
-            num,
+                'NodeIKernelGroupService/getSingleScreenNotifies',
+                'NodeIKernelGroupListener/onGroupSingleScreenNotifies',
+                1,
+                5000,
+                () => true,
+                false,
+                '',
+                num,
             );
         return notifies;
     }
@@ -259,12 +271,12 @@ export class NTQQGroupApi {
         //return napCatCore.session.getGroupService().getMemberInfo(GroupCode, [uid], forced);
         const Listener = this.core.eventWrapper.RegisterListen<(params: any) => void>
             (
-            'NodeIKernelGroupListener/onMemberInfoChange',
-            1,
-            forced ? 5000 : 250,
-            (params) => {
-                return params === GroupCode;
-            },
+                'NodeIKernelGroupListener/onMemberInfoChange',
+                1,
+                forced ? 5000 : 250,
+                (params) => {
+                    return params === GroupCode;
+                },
             );
         const EventFunc = this.core.eventWrapper.createEventFunction<EventType>('NodeIKernelGroupService/getMemberInfo');
         const retData = await EventFunc!(GroupCode, [uid], forced);
@@ -333,7 +345,7 @@ export class NTQQGroupApi {
             'NodeIKernelGroupService/getGroupRecommendContactArkJson',
             5000,
             GroupCode,
-            );
+        );
         return ret.arkJson;
     }
 
