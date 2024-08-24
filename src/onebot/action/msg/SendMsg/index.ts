@@ -102,7 +102,6 @@ async function createContext(coreContext: NapCatCore, payload: OB11PostSendMsg, 
         if (!Uid) throw '无法获取用户信息';
         const isBuddy = await NTQQFriendApi.isBuddy(Uid);
         if (!isBuddy) {
-            //筛选被动C2CGroup临时会话
             const ret = await NTQQMsgApi.getTempChatInfo(ChatType.KCHATTYPETEMPC2CFROMGROUP, Uid);
             if (ret.tmpChatInfo?.groupCode) {
                 return {
@@ -111,7 +110,6 @@ async function createContext(coreContext: NapCatCore, payload: OB11PostSendMsg, 
                     guildId: '',
                 };
             }
-            //带有group_id的C2CGroup主动临时会话
             if (payload.group_id) {
                 return {
                     chatType: ChatType.KCHATTYPETEMPC2CFROMGROUP,
@@ -119,14 +117,12 @@ async function createContext(coreContext: NapCatCore, payload: OB11PostSendMsg, 
                     guildId: payload.group_id.toString(),
                 };
             }
-            //非好友的C2C 用于识别单向会话
             return {
                 chatType: ChatType.KCHATTYPEC2C,
                 peerUid: Uid!,
-                guildId: payload.group_id?.toString() || '',
+                guildId: '',
             };
         }
-        //好友的C2C
         return {
             chatType: ChatType.KCHATTYPEC2C,
             peerUid: Uid!,
