@@ -10,6 +10,7 @@ import {
     SendStatusType,
     GroupMemberRole,
     GroupNotifyMsgType,
+    GroupNotifyMsgStatus,
 } from '@/core';
 import { OB11Config, OB11ConfigLoader } from '@/onebot/helper/config';
 import { OneBotApiContextType } from '@/onebot/types';
@@ -387,7 +388,7 @@ export class NapCatOneBot11Adapter {
                         // notify.status == 1 表示未处理 2表示处理完成
                     } else if ([
                         GroupNotifyMsgType.REQUEST_JOIN_NEED_ADMINI_STRATOR_PASS,
-                    ].includes(notify.type) && notify.status == 1) {
+                    ].includes(notify.type) && notify.status == GroupNotifyMsgStatus.KUNHANDLE) {
                         this.context.logger.logDebug('有加群请求');
                         try {
                             let requestUin = (await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid))!;
@@ -407,7 +408,7 @@ export class NapCatOneBot11Adapter {
                         } catch (e) {
                             this.context.logger.logError('获取加群人QQ号失败 Uid:', notify.user1.uid, e);
                         }
-                    } else if (notify.type == GroupNotifyMsgType.INVITED_BY_MEMBER && notify.status == 1) {
+                    } else if (notify.type == GroupNotifyMsgType.INVITED_BY_MEMBER && notify.status == GroupNotifyMsgStatus.KUNHANDLE) {
                         this.context.logger.logDebug(`收到邀请我加群通知:${notify}`);
                         const groupInviteEvent = new OB11GroupRequestEvent(
                             this.core,

@@ -1,3 +1,4 @@
+import { GroupNotifyMsgStatus } from '@/core';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
@@ -28,7 +29,7 @@ export class GetGroupSystemMsg extends BaseAction<void, any> {
                     invitor_nick: SSNotify.user1?.nickName,
                     group_id: SSNotify.group?.groupCode,
                     group_name: SSNotify.group?.groupName,
-                    checked: SSNotify.status === 1 ? false : true,
+                    checked: SSNotify.status === GroupNotifyMsgStatus.KUNHANDLE ? false : true,
                     actor: await NTQQUserApi.getUinByUidV2(SSNotify.user2?.uid) || 0,
                 });
             } else if (SSNotify.type == 7) {
@@ -38,7 +39,7 @@ export class GetGroupSystemMsg extends BaseAction<void, any> {
                     requester_nick: SSNotify.user1?.nickName,
                     group_id: SSNotify.group?.groupCode,
                     group_name: SSNotify.group?.groupName,
-                    checked: SSNotify.status === 1 ? false : true,
+                    checked: SSNotify.status === GroupNotifyMsgStatus.KUNHANDLE ? false : true,
                     actor: await NTQQUserApi.getUinByUidV2(SSNotify.user2?.uid) || 0,
                 });
             }
