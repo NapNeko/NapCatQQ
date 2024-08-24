@@ -11,6 +11,8 @@ import { GeneralCallResult } from '@/core/services/common';
 //高版本的接口不应该随意使用 使用应该严格进行pr审核 同时部分ipc中未出现的接口不要过于依赖 应该做好数据兜底
 
 export interface NodeIKernelGroupService {
+    quitGroupV2(param: { groupCode: string; needDeleteLocalMsg: boolean; }): Promise<GeneralCallResult>;
+    
     getMemberCommonInfo(Req: {
         groupCode: string,
         startUin: string,
