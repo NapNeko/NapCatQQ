@@ -283,8 +283,16 @@ export class NapCatOneBot11Adapter {
     private initBuddyListener() {
         const buddyListener = new BuddyListener();
 
-        buddyListener.onBuddyReqChange = reqs => {
-            reqs.buddyReqs.forEach(async req => {
+        buddyListener.onBuddyReqChange = async reqs => {
+            this.core.apis.FriendApi.clearBuddyReqUnreadCnt();
+            for (let i = 0; i < reqs.unreadNums; i++) {
+                const req = reqs.buddyReqs[i];
+                //req.isBuddy === false是单向好友 null为常规情况
+                // if (req.isBuddy === false && ) {
+                //     const NTQQFriendApi = this.core.apis.FriendApi;
+                //     await NTQQFriendApi.handleFriendRequest(req.friendUid + '|' + req.reqTime, true);
+                // }
+
                 if (!!req.isInitiator || (req.isDecide && req.reqType !== BuddyReqType.KMEINITIATORWAITPEERCONFIRM)) {
                     return;
                 }
@@ -299,7 +307,7 @@ export class NapCatOneBot11Adapter {
                 } catch (e) {
                     this.context.logger.logDebug('获取加好友者QQ号失败', e);
                 }
-            });
+            }
         };
 
         this.context.session.getBuddyService().addKernelBuddyListener(
