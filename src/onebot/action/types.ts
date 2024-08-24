@@ -109,4 +109,5 @@ export enum ActionName {
     SetModelShow = "_set_model_show",
     SetInputStatus = "set_input_status",
     GetCSRF = "get_csrf_token",
+    DelGroupNotice = "_del_group_notice",
 }
