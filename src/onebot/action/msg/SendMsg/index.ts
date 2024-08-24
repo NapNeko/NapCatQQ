@@ -90,6 +90,7 @@ async function createContext(coreContext: NapCatCore, payload: OB11PostSendMsg, 
     // This redundant design of Ob11 here should be blamed.
     const NTQQFriendApi = coreContext.apis.FriendApi;
     const NTQQUserApi = coreContext.apis.UserApi;
+    const NTQQMsgApi = coreContext.apis.MsgApi;
     if ((contextMode === ContextMode.Group || contextMode === ContextMode.Normal) && payload.group_id) {
         return {
             chatType: ChatType.KCHATTYPEGROUP,
@@ -98,12 +99,38 @@ async function createContext(coreContext: NapCatCore, payload: OB11PostSendMsg, 
     }
     if ((contextMode === ContextMode.Private || contextMode === ContextMode.Normal) && payload.user_id) {
         const Uid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());
-        const isBuddy = await NTQQFriendApi.isBuddy(Uid!);
-        //console.log("[调试代码] UIN:", payload.user_id, " UID:", Uid, " IsBuddy:", isBuddy);
+        if (!Uid) throw '无法获取用户信息';
+        const isBuddy = await NTQQFriendApi.isBuddy(Uid);
+        if (!isBuddy) {
+            //筛选被动C2CGroup临时会话
+            const ret = await NTQQMsgApi.getTempChatInfo(ChatType.KCHATTYPETEMPC2CFROMGROUP, Uid);
+            if (ret.tmpChatInfo?.groupCode) {
+                return {
+                    chatType: ChatType.KCHATTYPETEMPC2CFROMGROUP,
+                    peerUid: Uid,
+                    guildId: '',
+                };
+            }
+            //带有group_id的C2CGroup主动临时会话
+            if (payload.group_id) {
+                return {
+                    chatType: ChatType.KCHATTYPETEMPC2CFROMGROUP,
+                    peerUid: Uid,
+                    guildId: payload.group_id.toString(),
+                };
+            }
+            //非好友的C2C 用于识别单向会话
+            return {
+                chatType: ChatType.KCHATTYPEC2C,
+                peerUid: Uid!,
+                guildId: payload.group_id?.toString() || '',
+            };
+        }
+        //好友的C2C
         return {
-            chatType: isBuddy ? ChatType.KCHATTYPEC2C : ChatType.KCHATTYPETEMPC2CFROMGROUP,
+            chatType: ChatType.KCHATTYPEC2C,
             peerUid: Uid!,
-            guildId: payload.group_id?.toString() || '',
+            guildId: '',
         };
     }
     throw '请指定 group_id 或 user_id';
@@ -135,7 +162,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         if (payload.user_id && payload.message_type !== 'group') {
             const uid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());
             const isBuddy = await NTQQFriendApi.isBuddy(uid!);
-            if (!isBuddy) {}
+            if (!isBuddy) { }
         }
         return { valid: true };
     }
