@@ -319,30 +319,30 @@ export class NTQQFileApi {
                     filePath: string
                 }) => Promise<unknown>,
             (fileTransNotifyInfo: OnRichMediaDownloadCompleteParams) => void
-        >(
-            'NodeIKernelMsgService/downloadRichMedia',
-            'NodeIKernelMsgListener/onRichMediaDownloadComplete',
-            1,
-            timeout,
-            (arg: OnRichMediaDownloadCompleteParams) => {
-                if (arg.msgId === msgId) {
-                    return true;
-                }
-                return false;
-            },
-            {
-                fileModelId: '0',
-                downloadSourceType: 0,
-                triggerType: 1,
-                msgId: msgId,
-                chatType: chatType,
-                peerUid: peerUid,
-                elementId: elementId,
-                thumbSize: 0,
-                downloadType: 1,
-                filePath: thumbPath,
-            },
-        );
+                >(
+                'NodeIKernelMsgService/downloadRichMedia',
+                'NodeIKernelMsgListener/onRichMediaDownloadComplete',
+                1,
+                timeout,
+                (arg: OnRichMediaDownloadCompleteParams) => {
+                    if (arg.msgId === msgId) {
+                        return true;
+                    }
+                    return false;
+                },
+                {
+                    fileModelId: '0',
+                    downloadSourceType: 0,
+                    triggerType: 1,
+                    msgId: msgId,
+                    chatType: chatType,
+                    peerUid: peerUid,
+                    elementId: elementId,
+                    thumbSize: 0,
+                    downloadType: 1,
+                    filePath: thumbPath,
+                },
+                );
         const msg = await this.core.apis.MsgApi.getMsgsByMsgId({
             guildId: '',
             chatType: chatType,
@@ -482,10 +482,10 @@ export class NTQQFileApi {
         let id = '';
         const Listener = this.core.eventWrapper.RegisterListen<(params: OnListener) => void>
             (
-                'NodeIKernelSearchListener/onSearchFileKeywordsResult',
-                1,
-                20000,
-                (params) => id !== '' && params.searchId == id,
+            'NodeIKernelSearchListener/onSearchFileKeywordsResult',
+            1,
+            20000,
+            (params) => id !== '' && params.searchId == id,
             );
         id = await Event!(keys, 12);
         const [ret] = (await Listener);

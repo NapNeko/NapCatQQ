@@ -18,7 +18,7 @@ export default class GetRecentContact extends BaseAction<Payload, any> {
     async _handle(payload: Payload) {
         const NTQQUserApi = this.CoreContext.apis.UserApi;
         const NTQQMsgApi = this.CoreContext.apis.MsgApi;
-        const ret = await NTQQUserApi.getRecentContactListSnapShot(parseInt((payload.count || 10).toString()));
+        const ret = await NTQQUserApi.getRecentContactListSnapShot(+(payload.count || 10));
         return await Promise.all(ret.info.changedList.map(async (t) => {
             const FastMsg = await NTQQMsgApi.getMsgsByMsgId({ chatType: t.chatType, peerUid: t.peerUid }, [t.msgId]);
             if (FastMsg.msgList.length > 0) {
