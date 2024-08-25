@@ -1,17 +1,4 @@
-interface IDependsAdapter {
-    onMSFStatusChange(arg1: number, arg2: number): void;
-
-    onMSFSsoError(args: unknown): void;
-
-    getGroupCode(args: unknown): void;
-}
-
-export interface NodeIDependsAdapter extends IDependsAdapter {
-    // eslint-disable-next-line @typescript-eslint/no-misused-new
-    new(adapter: IDependsAdapter): NodeIDependsAdapter;
-}
-
-export class DependsAdapter implements IDependsAdapter {
+export class NodeIDependsAdapter {
     onMSFStatusChange(arg1: number, arg2: number) {
         // console.log(arg1, arg2);
         // if (arg1 == 2 && arg2 == 2) {

@@ -24,11 +24,11 @@ export async function getVideoInfo(filePath: string, logger: LogWrapper) {
                 if (videoStream) {
                     logger.log(`视频尺寸: ${videoStream.width}x${videoStream.height}`);
                 } else {
-                    return reject('未找到视频流信息。');
+                    return reject(new Error('未找到视频流信息。'));
                 }
                 resolve({
                     width: videoStream.width!, height: videoStream.height!,
-                    time: parseInt(videoStream.duration!),
+                    time: +(videoStream.duration ?? 10),
                     format: metadata.format.format_name!,
                     size,
                     filePath,
@@ -38,7 +38,7 @@ export async function getVideoInfo(filePath: string, logger: LogWrapper) {
     });
 }
 
-export function checkFfmpeg(newPath: string | null = null, logger: LogWrapper): Promise<boolean> {
+export function checkFfmpeg(logger: LogWrapper,newPath: string | null = null): Promise<boolean> {
     return new Promise((resolve, reject) => {
         logger.log('开始检查ffmpeg', newPath);
         if (newPath) {
