@@ -315,7 +315,7 @@ export class NTQQGroupApi {
         const sceneId = groupService.createMemberListScene(groupQQ, 'groupMemberList_MainWindow');
         const result = await groupService.getNextMemberList(sceneId!, undefined, num);
         if (result.errCode !== 0) {
-            throw ('获取群成员列表出错,' + result.errMsg);
+            throw new Error('获取群成员列表出错,' + result.errMsg);
         }
 
         this.context.logger.logDebug(`获取群(${groupQQ})成员列表结果:`, `members: ${result.result.infos.size}`); //, Array.from(result.result.infos.values()));
