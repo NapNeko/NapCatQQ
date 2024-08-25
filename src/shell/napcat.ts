@@ -2,7 +2,7 @@ import type { SelfInfo } from '@/core/entities';
 
 import { LogWrapper } from '@/common/utils/log';
 import { LoginListener, NodeIKernelSessionListener } from '@/core/listeners';
-import {  NodeIDispatcherAdapter, GlobalAdapter, NodeIDependsAdapter } from '@/core/adapters';
+import { NodeIDispatcherAdapter, NodeIDependsAdapter, NodeIGlobalAdapter } from '@/core/adapters';
 import { NapCatPathWrapper } from '@/common/framework/napcat';
 import {
     InstanceContext,
@@ -70,7 +70,7 @@ export async function NCoreInitShell() {
             },
             thumb_config: { maxSide: 324, minSide: 48, longLimit: 6, density: 2 },
         },
-        new GlobalAdapter() as any,
+        new NodeIGlobalAdapter(),
     );
     loginService.initConfig({
         machineId: '',
@@ -190,7 +190,7 @@ export async function NCoreInitShell() {
                 logger.log(`可用于快速登录的 QQ：\n${historyLoginList
                     .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
                     .join('\n')
-                }`);
+                    }`);
             }
             loginService.getQRCodePicture();
         }
