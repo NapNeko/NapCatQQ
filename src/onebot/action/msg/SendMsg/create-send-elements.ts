@@ -68,7 +68,7 @@ const _handlers: {
         }
         const uid = await NTQQUserApi.getUidByUinV2(`${atQQ}`);
         if (!uid) throw new Error('Get Uid Error');
-        let info = await NTQQUserApi.getUserDetailInfo(uid);
+        const info = await NTQQUserApi.getUserDetailInfo(uid);
         return SendMsgElementConstructor.at(coreContext, atQQ, uid, AtType.atUser, info.nick || '');
     },
     [OB11MessageDataType.reply]: async (coreContext, obContext: NapCatOneBot11Adapter, { data: { id } }) => {
