@@ -3,6 +3,7 @@ import { NodeIKernelProfileListener } from '@/core/listeners';
 import { RequestUtil } from '@/common/utils/request';
 import { NodeIKernelProfileService, ProfileBizType, UserDetailSource } from '@/core/services';
 import { InstanceContext, NapCatCore } from '..';
+import { solveAsyncProblem } from '@/common/utils/helper';
 
 export class NTQQUserApi {
     context: InstanceContext;
@@ -128,12 +129,9 @@ export class NTQQUserApi {
     }
 
     async getUserDetailInfo(uid: string): Promise<User> {
-        try {
-            const retUser = await this.fetchUserDetailInfo(uid, UserDetailSource.KDB);
-            if (retUser.uin !== '0') {
-                return retUser;
-            }
-        } catch (e) {
+        const retUser = await solveAsyncProblem(async (uid) => this.fetchUserDetailInfo(uid, UserDetailSource.KDB));
+        if (retUser && retUser.uin !== '0') {
+            return retUser;
         }
         this.context.logger.logDebug('[NapCat] [Mark] getUserDetailInfo Mode1 Failed.');
         return this.fetchUserDetailInfo(uid, UserDetailSource.KSERVER);

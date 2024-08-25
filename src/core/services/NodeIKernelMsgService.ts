@@ -37,7 +37,7 @@ export interface NodeIKernelMsgService {
 
     recallMsg(peer: Peer, msgIds: string[]): Promise<GeneralCallResult>;
 
-    addKernelMsgImportToolListener(arg: Object): unknown;
+    addKernelMsgImportToolListener(arg: unknown): unknown;
 
     removeKernelMsgListener(args: unknown): unknown;
 
@@ -51,7 +51,7 @@ export interface NodeIKernelMsgService {
 
     getOnLineDev(): void;
 
-    kickOffLine(DevInfo: Object): unknown;
+    kickOffLine(DevInfo: unknown): unknown;
 
     setStatus(args: { status: number, extStatus: number, batteryStatus: number }): Promise<GeneralCallResult>;
 
@@ -80,11 +80,11 @@ export interface NodeIKernelMsgService {
     // this.voipToken = bArr2;
     // this.profileId = str;
 
-    setToken(arg: Object): unknown;
+    setToken(arg: unknown): unknown;
 
     switchForeGround(): unknown;
 
-    switchBackGround(arg: Object): unknown;
+    switchBackGround(arg: unknown): unknown;
 
     //hex
     setTokenForMqq(token: string): unknown;
@@ -384,7 +384,7 @@ export interface NodeIKernelMsgService {
     getFileThumbSavePath(...args: unknown[]): unknown;
 
     //猜测居多
-    translatePtt2Text(MsgId: string, Peer: {}, MsgElement: {}): unknown;
+    translatePtt2Text(MsgId: string, Peer: Peer, MsgElement: unknown): unknown;
 
     setPttPlayedState(...args: unknown[]): unknown;
 
@@ -668,7 +668,7 @@ export interface NodeIKernelMsgService {
 
     recordEmoji(...args: unknown[]): unknown;
 
-    fetchGetHitEmotionsByWord(args: Object): Promise<unknown>;//表情推荐？
+    fetchGetHitEmotionsByWord(args: unknown): Promise<unknown>;//表情推荐？
 
     deleteAllRoamMsgs(...args: unknown[]): unknown;//漫游消息？
 

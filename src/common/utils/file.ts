@@ -4,6 +4,7 @@ import crypto, { randomUUID } from 'crypto';
 import util from 'util';
 import path from 'node:path';
 import * as fileType from 'file-type';
+import { solveAsyncProblem, solveProblem } from './helper';
 
 export function isGIF(path: string) {
     const buffer = Buffer.alloc(4);
@@ -185,12 +186,11 @@ export enum FileUriType {
 }
 
 export async function checkUriType(Uri: string) {
-    //先判断是否是本地文件
-    try {
-        if (fs.existsSync(Uri)) return { Uri: Uri, Type: FileUriType.Local };
-    } catch (error) {
-    }
-    try {
+
+    const LocalFileRet = await solveProblem((Uri) => { if (fs.existsSync(Uri)) return { Uri: Uri, Type: FileUriType.Local }; });
+    if (LocalFileRet) return LocalFileRet;
+    
+    const OtherFileRet = await solveProblem((Uri) => {
         //再判断是否是Http
         if (Uri.startsWith('http://') || Uri.startsWith('https://')) {
             return { Uri: Uri, Type: FileUriType.Remote };
@@ -200,10 +200,9 @@ export async function checkUriType(Uri: string) {
             return { Uri: Uri, Type: FileUriType.Base64 };
         }
         if (Uri.startsWith('file://')) {
-            let pathname: string;
             let filePath: string;
             // await fs.copyFile(url.pathname, filePath);
-            pathname = decodeURIComponent(new URL(Uri).pathname);
+            const pathname = decodeURIComponent(new URL(Uri).pathname);
             if (process.platform === 'win32') {
                 filePath = pathname.slice(1);
             } else {
@@ -211,8 +210,9 @@ export async function checkUriType(Uri: string) {
             }
             return { Uri: filePath, Type: FileUriType.Local };
         }
-    } catch (error) {
-    }
+    });
+    if (OtherFileRet) return OtherFileRet;
+    
     return { Uri: Uri, Type: FileUriType.Unknown };
 }
 
@@ -232,7 +232,7 @@ export async function uri2local(dir: string, uri: string, filename: string | und
     //接下来都要有文件名
     if (!filename) filename = randomUUID();
     //解析Http和Https协议
-    
+
     if (UriType == FileUriType.Remote) {
         const pathInfo = path.parse(decodeURIComponent(new URL(HandledUri).pathname));
         if (pathInfo.name) {

@@ -3,8 +3,28 @@ import fs from 'fs';
 import os from 'node:os';
 import { QQLevel } from '@/core';
 
-//下面这个类是用于将uid+msgid合并的类
+export async function solveProblem<T extends (...arg: any[]) => any>(func: T): Promise<ReturnType<T> | undefined> {
+    return new Promise<ReturnType<T> | undefined>(async (resolve) => {
+        try {
+            const result = func();
+            resolve(result);
+        } catch (e) {
+            resolve(undefined);
+        }
+    });
+}
 
+export async function solveAsyncProblem<T extends (...arg: any[]) => Promise<any>>(func: T): Promise<Awaited<ReturnType<T>> | undefined> {
+    return new Promise<Awaited<ReturnType<T>> | undefined>(async (resolve) => {
+        try {
+            const result = await func();
+            resolve(result);
+        } catch (e) {
+            resolve(undefined);
+        }
+    });
+}
+//下面这个类是用于将uid+msgid合并的类
 export class UUIDConverter {
     static encode(highStr: string, lowStr: string): string {
         const high = BigInt(highStr);

@@ -69,9 +69,9 @@ export interface NodeQQNTWrapperUtil {
 
     genFileShaAndMd5Hex(path: string, unknown: number): unknown; //可能是错的
 
-    setTraceInfo(unknown: Object): unknown;
+    setTraceInfo(unknown: unknown): unknown;
 
-    encodeOffLine(unknown: Object): unknown;
+    encodeOffLine(unknown: unknown): unknown;
 
     decodeOffLine(arg: string): unknown; //可能是错的 传递hex
 
@@ -89,7 +89,7 @@ export interface NodeQQNTWrapperUtil {
 
     runProcessArgs(arg0: string, arg1: { [key: string]: string }, arg2: boolean): unknown;
 
-    calcThumbSize(arg0: number, arg1: number, arg2: Object): unknown;
+    calcThumbSize(arg0: number, arg1: number, arg2: unknown): unknown;
 
     fullWordToHalfWord(arg0: string): unknown;
 
