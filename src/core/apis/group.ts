@@ -331,7 +331,6 @@ export class NTQQGroupApi {
             arkJson: string
         }>>(
             'NodeIKernelGroupService/getGroupRecommendContactArkJson',
-            5000,
             GroupCode,
             );
         return ret.arkJson;
