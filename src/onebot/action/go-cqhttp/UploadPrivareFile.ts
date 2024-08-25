@@ -5,7 +5,6 @@ import fs from 'fs';
 import { sendMsg } from '@/onebot/action/msg/SendMsg';
 import { uri2local } from '@/common/utils/file';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import { SendMsgElementConstructor } from '@/onebot/helper/genMessage';
 
 const SchemaData = {
     type: 'object',
@@ -47,7 +46,7 @@ export default class GoCQHTTPUploadPrivateFile extends BaseAction<Payload, null>
         if (!downloadResult.success) {
             throw new Error(downloadResult.errMsg);
         }
-        const sendFileEle: SendFileElement = await SendMsgElementConstructor.file(this.CoreContext, downloadResult.path, payload.name);
+        const sendFileEle: SendFileElement = await this.CoreContext.apis.FileApi.createValidSendFileElement(this.CoreContext, downloadResult.path, payload.name);
         await sendMsg(this.CoreContext, peer, [sendFileEle], [], true);
         return null;
     }

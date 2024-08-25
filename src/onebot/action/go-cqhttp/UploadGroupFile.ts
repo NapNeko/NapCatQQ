@@ -1,11 +1,10 @@
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { ChatType, SendFileElement } from '@/core/entities';
+import { ChatType } from '@/core/entities';
 import fs from 'fs';
 import { sendMsg } from '@/onebot/action/msg/SendMsg';
 import { uri2local } from '@/common/utils/file';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import { SendMsgElementConstructor } from '@/onebot/helper/genMessage';
 
 const SchemaData = {
     type: 'object',
@@ -34,7 +33,7 @@ export default class GoCQHTTPUploadGroupFile extends BaseAction<Payload, null> {
         if (!downloadResult.success) {
             throw new Error(downloadResult.errMsg);
         }
-        const sendFileEle: SendFileElement = await SendMsgElementConstructor.file(this.CoreContext, downloadResult.path, payload.name, payload.folder_id);
+        const sendFileEle = await this.CoreContext.apis.FileApi.createValidSendFileElement(downloadResult.path, payload.name, payload.folder_id);
         await sendMsg(this.CoreContext, {
             chatType: ChatType.KCHATTYPEGROUP,
             peerUid: payload.group_id.toString(),
