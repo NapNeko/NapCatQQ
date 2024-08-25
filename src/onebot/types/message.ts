@@ -94,7 +94,7 @@ export interface OB11MessageImage extends OB11MessageFileBase {
     type: OB11MessageDataType.image
     data: OB11MessageFileBase['data'] & {
         summary?: string; // 图片摘要
-        subType?: PicSubType
+        sub_type?: PicSubType
     },
 }
 
@@ -113,7 +113,7 @@ export interface OB11MessageVideo extends OB11MessageFileBase {
 export interface OB11MessageAt {
     type: OB11MessageDataType.at;
     data: {
-        qq: `${number}` | 'all'
+        qq: string, // `${number}` | 'all'
         name?: string
     };
 }
@@ -162,14 +162,14 @@ export interface OB11MessageJson {
 export interface OB11MessageDice {
     type: OB11MessageDataType.dice,
     data: {
-        result: number
+        result: number /* intended */ | string /* in fact */
     }
 }
 
 export interface OB11MessageRPS {
     type: OB11MessageDataType.RPS,
     data: {
-        result: number
+        result: number | string
     }
 }
 
