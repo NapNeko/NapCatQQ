@@ -109,8 +109,8 @@ export class NTQQFileApi {
             fileElement: {
                 fileName: fileName || _fileName,
                 folderId: folderId,
-                'filePath': path!,
-                'fileSize': (fileSize).toString(),
+                filePath: path,
+                fileSize: (fileSize).toString(),
             },
         };
     }
