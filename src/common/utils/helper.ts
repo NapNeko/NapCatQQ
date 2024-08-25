@@ -16,15 +16,11 @@ export async function solveProblem<T extends (...arg: any[]) => any>(func: T, ..
 
 export async function solveAsyncProblem<T extends (...args: any[]) => Promise<any>>(func: T, ...args: Parameters<T>): Promise<Awaited<ReturnType<T>> | undefined> {
     return new Promise<Awaited<ReturnType<T>> | undefined>((resolve) => {
-        try {
-            func(...args).then((result) => {
-                resolve(result);
-            }).catch((e) => {
-                resolve(undefined);
-            });
-        } catch (e) {
+        func(...args).then((result) => {
+            resolve(result);
+        }).catch((e) => {
             resolve(undefined);
-        }
+        });
     });
 }
 //下面这个类是用于将uid+msgid合并的类
