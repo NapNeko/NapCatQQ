@@ -26,12 +26,12 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
         const NTQQGroupApi = this.CoreContext.apis.GroupApi;
         const isNocache = typeof payload.no_cache === 'string' ? payload.no_cache === 'true' : !!payload.no_cache;
         const uid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());
-        if (!uid) throw (`Uin2Uid Error ${payload.user_id}不存在`);
+        if (!uid) throw new Error (`Uin2Uid Error ${payload.user_id}不存在`);
         const [member, info] = await Promise.allSettled([
             NTQQGroupApi.getGroupMemberV2(payload.group_id.toString(), uid, isNocache),
             NTQQUserApi.getUserDetailInfo(uid),
         ]);
-        if (member.status !== 'fulfilled') throw (`群(${payload.group_id})成员${payload.user_id}不存在 ${member.reason}`);
+        if (member.status !== 'fulfilled') throw new Error (`群(${payload.group_id})成员${payload.user_id}不存在 ${member.reason}`);
         if (info.status === 'fulfilled') {
             this.CoreContext.context.logger.logDebug("群成员详细信息结果", info.value);
             Object.assign(member, info.value);

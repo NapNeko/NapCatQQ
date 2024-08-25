@@ -40,7 +40,7 @@ export async function sendMsg(coreContext: NapCatCore, peer: Peer, sendElements:
     const NTQQMsgApi = coreContext.apis.MsgApi;
     const logger = coreContext.context.logger;
     if (!sendElements.length) {
-        throw ('消息体无法解析, 请检查是否发送了不支持的消息类型');
+        throw new Error ('消息体无法解析, 请检查是否发送了不支持的消息类型');
     }
     let totalSize = 0;
     let timeout = 10000;

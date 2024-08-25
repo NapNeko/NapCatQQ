@@ -36,7 +36,7 @@ class MarkMsgAsRead extends BaseAction<PlayloadType, null> {
         // 调用API
         const ret = await NTQQMsgApi.setMsgRead(await this.getPeer(payload));
         if (ret.result != 0) {
-            throw ('设置已读失败,' + ret.errMsg);
+            throw new Error('设置已读失败,' + ret.errMsg);
         }
         return null;
     }
