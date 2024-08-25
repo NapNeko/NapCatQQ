@@ -717,7 +717,7 @@ export class OneBotMsgApi {
         const msgSegments = (await Promise.all(msg.elements.map(
             async (element) => {
                 for (const key in element) {
-                    if (keyCanBeParsed(key, this.rawToOb11Converters)) {
+                    if (keyCanBeParsed(key, this.rawToOb11Converters) && this.rawToOb11Converters[key]) {
                         return await this.rawToOb11Converters[key]?.(
                             // eslint-disable-next-line
                             // @ts-ignore
