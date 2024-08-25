@@ -438,7 +438,7 @@ export class OneBotMsgApi {
             }
             const NTQQMsgApi = this.coreContext.apis.MsgApi;
             const replyMsg = (await NTQQMsgApi.getMsgsByMsgId(
-                replyMsgM.Peer, [replyMsgM.MsgId!])).msgList[0];
+                replyMsgM.Peer, [replyMsgM.MsgId])).msgList[0];
             return replyMsg ?
                 {
                     elementType: ElementType.REPLY,
@@ -457,10 +457,8 @@ export class OneBotMsgApi {
             let parsedFaceId = parseInt(id);
             // 从face_config.json中获取表情名称
             const sysFaces = faceConfig.sysface;
-            // const emojiFaces = faceConfig.emoji;
             const face: any = sysFaces.find((systemFace) => systemFace.QSid === parsedFaceId.toString());
             parsedFaceId = parseInt(parsedFaceId.toString());
-            // let faceType = parseInt(parsedFaceId.toString().substring(0, 1));
             let faceType = 1;
             if (parsedFaceId >= 222) {
                 faceType = 2;
@@ -510,8 +508,6 @@ export class OneBotMsgApi {
 
         [OB11MessageDataType.file]: async (sendMsg, context) => {
             const { path, fileName } = await this.handleOb11FileLikeMessage(sendMsg, context);
-            //logDebug('发送文件', path, fileName);
-            // context.deleteAfterSentFiles.push(fileName || FileEle.fileElement.filePath);
             return await this.coreContext.apis.FileApi.createValidSendFileElement(path, fileName);
         },
 
@@ -617,13 +613,8 @@ export class OneBotMsgApi {
             } else {
                 postData = data;
             }
-            // Mlikiowa V2.2.7 Refactor Todo
             const signUrl = this.obContext.configLoader.configData.musicSignUrl;
             if (!signUrl) {
-                if (data.type === 'qq') {
-                    //const musicJson = (await SignMusicWrapper(data.id.toString())).data.arkResult.slice(0, -1);
-                    //return SendMsgElementConstructor.ark(musicJson);
-                }
                 throw Error('音乐消息签名地址未配置');
             }
             try {
@@ -774,7 +765,7 @@ export class OneBotMsgApi {
             this.coreContext.context.logger.logError('文件消息缺少参数', inputdata);
             throw Error('文件消息缺少参数');
         }
-        const fileOrUrl = (isBlankUrl ? inputdata.file : inputdata.url) || "";
+        const fileOrUrl = (isBlankUrl ? inputdata.file : inputdata.url) ?? "";
         const {
             path,
             isLocal,
