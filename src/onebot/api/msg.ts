@@ -12,7 +12,7 @@ import {
     NapCatCore,
     Peer,
     RawMessage,
-    SendMessageElement,
+    SendMessageElement, SendTextElement,
 } from '@/core';
 import faceConfig from '@/core/external/face_config.json';
 import {
@@ -22,7 +22,7 @@ import {
     OB11MessageDataType,
     OB11MessageFileBase,
 } from '@/onebot';
-import { OB11Constructor, SendMsgElementConstructor } from '../helper';
+import { OB11Constructor } from '../helper';
 import { EventType } from '@/onebot/event/OB11BaseEvent';
 import { encodeCQCode } from '@/onebot/helper/cqcode';
 import { uri2local } from '@/common/utils/file';
@@ -402,18 +402,32 @@ export class OneBotMsgApi {
         }),
 
         [OB11MessageDataType.at]: async ({ data: { qq: atQQ } }, context) => {
+            function at(atUid: string, atNtUid: string, atType: AtType, atName: string): SendTextElement {
+                return {
+                    elementType: ElementType.TEXT,
+                    elementId: '',
+                    textElement: {
+                        content: `@${atName}`,
+                        atType,
+                        atUid,
+                        atTinyId: '',
+                        atNtUid,
+                    },
+                };
+            }
+
             if (!context.peer || context.peer.chatType == ChatType.KCHATTYPEC2C) return undefined;
-            if (atQQ === 'all') return SendMsgElementConstructor.at(this.coreContext, atQQ, atQQ, AtType.atAll, '全体成员');
+            if (atQQ === 'all') return at(atQQ, atQQ, AtType.atAll, '全体成员');
             const NTQQGroupApi = this.coreContext.apis.GroupApi;
             const NTQQUserApi = this.coreContext.apis.UserApi;
             const atMember = await NTQQGroupApi.getGroupMember(context.peer.peerUid, atQQ);
             if (atMember) {
-                return SendMsgElementConstructor.at(this.coreContext, atQQ, atMember.uid, AtType.atUser, atMember.nick || atMember.cardName);
+                return at(atQQ, atMember.uid, AtType.atUser, atMember.nick || atMember.cardName);
             }
             const uid = await NTQQUserApi.getUidByUinV2(`${atQQ}`);
             if (!uid) throw new Error('Get Uid Error');
             const info = await NTQQUserApi.getUserDetailInfo(uid);
-            return SendMsgElementConstructor.at(this.coreContext, atQQ, uid, AtType.atUser, info.nick || '');
+            return at(atQQ, uid, AtType.atUser, info.nick || '');
         },
 
         [OB11MessageDataType.reply]: async ({ data: { id } }) => {
@@ -426,7 +440,16 @@ export class OneBotMsgApi {
             const replyMsg = (await NTQQMsgApi.getMsgsByMsgId(
                 replyMsgM.Peer, [replyMsgM.MsgId!])).msgList[0];
             return replyMsg ?
-                SendMsgElementConstructor.reply(this.coreContext, replyMsg.msgSeq, replyMsg.msgId, replyMsg.senderUin!, replyMsg.senderUin!) :
+                {
+                    elementType: ElementType.REPLY,
+                    elementId: '',
+                    replyElement: {
+                        replayMsgSeq: replyMsg.msgSeq, // raw.msgSeq
+                        replayMsgId: replyMsg.msgId,  // raw.msgId
+                        senderUin: replyMsg.senderUin!,
+                        senderUinStr: replyMsg.senderUin!,
+                    },
+                } :
                 undefined;
         },
 
