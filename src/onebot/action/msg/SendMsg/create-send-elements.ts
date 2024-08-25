@@ -99,7 +99,7 @@ const _handlers: {
             coreContext,
             (await handleOb11FileLikeMessage(coreContext, obContext, sendMsg, context)).path,
             sendMsg.data.summary || '',
-            sendMsg.data.subType || 0,
+            sendMsg.data.sub_type || 0,
         );
         context.deleteAfterSentFiles.push(PicEle.picElement.sourcePath);
         return PicEle;
