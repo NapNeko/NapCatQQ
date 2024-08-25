@@ -27,8 +27,7 @@ export class LegacyNTEventWrapper {
     }
 
     createProxyDispatch(ListenerMainName: string) {
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const current = this;
+        const dispatcherListenerFunc = this.dispatcherListener.bind(this);
         return new Proxy(
             {},
             {
@@ -36,7 +35,7 @@ export class LegacyNTEventWrapper {
                     if (typeof target[prop] === 'undefined') {
                         // 如果方法不存在，返回一个函数，这个函数调用existentMethod
                         return (...args: any[]) => {
-                            current.dispatcherListener.apply(current, [ListenerMainName, prop, ...args]).then();
+                            dispatcherListenerFunc(ListenerMainName, prop, ...args).then();
                         };
                     }
                     // 如果方法存在，正常返回
@@ -54,8 +53,6 @@ export class LegacyNTEventWrapper {
         if (eventNameArr.length > 1) {
             const serviceName = 'get' + eventNameArr[0].replace('NodeIKernel', '');
             const eventName = eventNameArr[1];
-            //getNodeIKernelGroupListener,GroupService
-            //console.log('2', eventName);
             const services = (this.WrapperSession as unknown as eventType)[serviceName]();
             let event = services[eventName];
             //重新绑定this
@@ -207,7 +204,6 @@ export class LegacyNTEventWrapper {
                     checker: checkerListener,
                     func: (...args: any[]) => {
                         complete++;
-                        //console.log('func', ...args);
                         retData = args as Parameters<ListenerType>;
                         if (complete >= waitTimes) {
                             clearTimeout(Timeouter);
@@ -311,28 +307,3 @@ export class LegacyNTEventWrapper {
         );
     }
 }
-
-// 示例代码 快速创建事件
-// let NTEvent = new NTEventWrapper();
-// let TestEvent = NTEvent.CreatEventFunction<(force: boolean) => Promise<Number>>('NodeIKernelProfileLikeService/GetTest');
-// if (TestEvent) {
-//     TestEvent(true);
-// }
-
-// 示例代码 快速创建监听Listener类
-// let NTEvent = new NTEventWrapper();
-// NTEvent.CreatListenerFunction<NodeIKernelMsgListener>('NodeIKernelMsgListener', 'core')
-
-// 调用接口
-//let NTEvent = new NTEventWrapper();
-//let ret = await NTEvent.CallNormalEvent<(force: boolean) => Promise<Number>, (data1: string, data2: number) => void>('NodeIKernelProfileLikeService/GetTest', 'NodeIKernelMsgListener/onAddSendMsg', 1, 3000, true);
-
-// 注册监听 解除监听
-// NTEventDispatch.RigisterListener('NodeIKernelMsgListener/onAddSendMsg','core',cb);
-// NTEventDispatch.UnRigisterListener('NodeIKernelMsgListener/onAddSendMsg','core');
-
-// let GetTest = NTEventDispatch.CreatEvent('NodeIKernelProfileLikeService/GetTest','NodeIKernelMsgListener/onAddSendMsg',Mode);
-// GetTest('test');
-
-// always模式
-// NTEventDispatch.CreatEvent('NodeIKernelProfileLikeService/GetTest','NodeIKernelMsgListener/onAddSendMsg',Mode,(...args:any[])=>{ console.log(args) });
