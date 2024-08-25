@@ -8,6 +8,11 @@ import {
     IMAGE_HTTP_HOST_NT,
     Peer,
     PicElement,
+    PicType,
+    SendFileElement,
+    SendPicElement,
+    SendPttElement,
+    SendVideoElement,
 } from '@/core/entities';
 import path from 'path';
 import fs from 'fs';
@@ -18,7 +23,12 @@ import imageSize from 'image-size';
 import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 import { NodeIKernelSearchService } from '../services/NodeIKernelSearchService';
 import { RkeyManager } from '../helper/rkey';
-import { calculateFileMD5 } from '@/common/utils/file';
+import { calculateFileMD5, isGIF } from '@/common/utils/file';
+import pathLib from 'node:path';
+import { defaultVideoThumbB64, getVideoInfo } from '@/common/utils/video';
+import ffmpeg from 'fluent-ffmpeg';
+import fsnormal from 'node:fs';
+import { encodeSilk } from '@/common/utils/audio';
 
 
 export class NTQQFileApi {
@@ -81,6 +91,200 @@ export class NTQQFileApi {
             path: mediaPath,
             fileSize,
             ext,
+        };
+    }
+
+    async createValidSendFileElement(
+        filePath: string,
+        fileName: string = '',
+        folderId: string = ''
+    ): Promise<SendFileElement> {
+        const { fileName: _fileName, path, fileSize } = await this.core.apis.FileApi.uploadFile(filePath, ElementType.FILE);
+        if (fileSize === 0) {
+            throw '文件异常，大小为0';
+        }
+        return {
+            elementType: ElementType.FILE,
+            elementId: '',
+            fileElement: {
+                fileName: fileName || _fileName,
+                folderId: folderId,
+                'filePath': path!,
+                'fileSize': (fileSize).toString(),
+            },
+        };
+    }
+
+    async createValidSendPicElement(
+        picPath: string,
+        summary: string = '',
+        subType: 0 | 1 = 0
+    ): Promise<SendPicElement> {
+        const { md5, fileName, path, fileSize } = await this.core.apis.FileApi.uploadFile(picPath, ElementType.PIC, subType);
+        if (fileSize === 0) {
+            throw '文件异常，大小为0';
+        }
+        const imageSize = await this.core.apis.FileApi.getImageSize(picPath);
+        const picElement: any = {
+            md5HexStr: md5,
+            fileSize: fileSize.toString(),
+            picWidth: imageSize?.width,
+            picHeight: imageSize?.height,
+            fileName: fileName,
+            sourcePath: path,
+            original: true,
+            picType: isGIF(picPath) ? PicType.gif : PicType.jpg,
+            picSubType: subType,
+            fileUuid: '',
+            fileSubId: '',
+            thumbFileSize: 0,
+            summary,
+        };
+        return {
+            elementType: ElementType.PIC,
+            elementId: '',
+            picElement,
+        };
+    }
+
+    async createValidSendVideoElement(
+        filePath: string,
+        fileName: string = '',
+        diyThumbPath: string = '',
+    ): Promise<SendVideoElement> {
+        const logger = this.core.context.logger;
+        const { fileName: _fileName, path, fileSize, md5 } = await this.core.apis.FileApi.uploadFile(filePath, ElementType.VIDEO);
+        if (fileSize === 0) {
+            throw '文件异常，大小为0';
+        }
+        let thumb = path.replace(`${pathLib.sep}Ori${pathLib.sep}`, `${pathLib.sep}Thumb${pathLib.sep}`);
+        thumb = pathLib.dirname(thumb);
+        // log("thumb 目录", thumb)
+        let videoInfo = {
+            width: 1920, height: 1080,
+            time: 15,
+            format: 'mp4',
+            size: fileSize,
+            filePath,
+        };
+        try {
+            videoInfo = await getVideoInfo(path, logger);
+            //logDebug('视频信息', videoInfo);
+        } catch (e) {
+            logger.logError('获取视频信息失败', e);
+        }
+        const createThumb = new Promise<string | undefined>((resolve, reject) => {
+            const thumbFileName = `${md5}_0.png`;
+            const thumbPath = pathLib.join(thumb, thumbFileName);
+            ffmpeg(filePath)
+                .on('error', (err) => {
+                    logger.logDebug('获取视频封面失败，使用默认封面', err);
+                    if (diyThumbPath) {
+                        fsPromises.copyFile(diyThumbPath, thumbPath).then(() => {
+                            resolve(thumbPath);
+                        }).catch(reject);
+                    } else {
+                        fsnormal.writeFileSync(thumbPath, Buffer.from(defaultVideoThumbB64, 'base64'));
+                        resolve(thumbPath);
+                    }
+                })
+                .screenshots({
+                    timestamps: [0],
+                    filename: thumbFileName,
+                    folder: thumb,
+                    size: videoInfo.width + 'x' + videoInfo.height,
+                }).on('end', () => {
+                    resolve(thumbPath);
+                });
+        });
+        const thumbPath = new Map();
+        const _thumbPath = await createThumb;
+        const thumbSize = _thumbPath ? (await fsPromises.stat(_thumbPath)).size : 0;
+        // log("生成缩略图", _thumbPath)
+        thumbPath.set(0, _thumbPath);
+        const thumbMd5 = _thumbPath ? await calculateFileMD5(_thumbPath) : "";
+        // "fileElement": {
+        //     "fileMd5": "",
+        //     "fileName": "1.mp4",
+        //     "filePath": "C:\\Users\\nanae\\OneDrive\\Desktop\\1.mp4",
+        //     "fileSize": "1847007",
+        //     "picHeight": 1280,
+        //     "picWidth": 720,
+        //     "picThumbPath": {},
+        //     "file10MMd5": "",
+        //     "fileSha": "",
+        //     "fileSha3": "",
+        //     "fileUuid": "",
+        //     "fileSubId": "",
+        //     "thumbFileSize": 750
+        // }
+        return {
+            elementType: ElementType.VIDEO,
+            elementId: '',
+            videoElement: {
+                fileName: fileName || _fileName,
+                filePath: path,
+                videoMd5: md5,
+                thumbMd5,
+                fileTime: videoInfo.time,
+                thumbPath: thumbPath,
+                thumbSize,
+                thumbWidth: videoInfo.width,
+                thumbHeight: videoInfo.height,
+                fileSize: '' + fileSize,
+                // fileFormat: videotype
+                // fileUuid: "",
+                // transferStatus: 0,
+                // progress: 0,
+                // invalidState: 0,
+                // fileSubId: "",
+                // fileBizId: null,
+                // originVideoMd5: "",
+                // fileFormat: 2,
+                // import_rich_media_context: null,
+                // sourceVideoCodecFormat: 2
+            },
+        };
+    }
+
+    async createValidSendPttElement(pttPath: string): Promise<SendPttElement> {
+        const {
+            converted,
+            path: silkPath,
+            duration,
+        } = await encodeSilk(pttPath, this.core.NapCatTempPath, this.core.context.logger);
+        // log("生成语音", silkPath, duration);
+        if (!silkPath) {
+            throw '语音转换失败, 请检查语音文件是否正常';
+        }
+        const { md5, fileName, path, fileSize } = await this.core.apis.FileApi.uploadFile(silkPath!, ElementType.PTT);
+        if (fileSize === 0) {
+            throw '文件异常，大小为0';
+        }
+        if (converted) {
+            fsPromises.unlink(silkPath);
+        }
+        return {
+            elementType: ElementType.PTT,
+            elementId: '',
+            pttElement: {
+                fileName: fileName,
+                filePath: path,
+                md5HexStr: md5,
+                fileSize: fileSize,
+                // duration: Math.max(1, Math.round(fileSize / 1024 / 3)), // 一秒钟大概是3kb大小, 小于1秒的按1秒算
+                duration: duration || 1,
+                formatType: 1,
+                voiceType: 1,
+                voiceChangeType: 0,
+                canConvert2Text: true,
+                waveAmplitudes: [
+                    0, 18, 9, 23, 16, 17, 16, 15, 44, 17, 24, 20, 14, 15, 17,
+                ],
+                fileSubId: '',
+                playState: 1,
+                autoConvertText: 0,
+            },
         };
     }
 

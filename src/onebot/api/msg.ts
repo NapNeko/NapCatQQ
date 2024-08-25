@@ -1,10 +1,32 @@
 import { UUIDConverter } from '@/common/utils/helper';
 import { MessageUnique } from '@/common/utils/MessageUnique';
-import { AtType, ChatType, FaceIndex, MessageElement, NapCatCore, RawMessage } from '@/core';
-import { NapCatOneBot11Adapter, OB11Message, OB11MessageData, OB11MessageDataType } from '@/onebot';
-import { OB11Constructor } from '../helper';
+import {
+    AtType,
+    ChatType,
+    CustomMusicSignPostData,
+    ElementType,
+    FaceIndex,
+    FaceType,
+    IdMusicSignPostData,
+    MessageElement,
+    NapCatCore,
+    Peer,
+    RawMessage,
+    SendMessageElement,
+} from '@/core';
+import faceConfig from '@/core/external/face_config.json';
+import {
+    NapCatOneBot11Adapter,
+    OB11Message,
+    OB11MessageData,
+    OB11MessageDataType,
+    OB11MessageFileBase,
+} from '@/onebot';
+import { OB11Constructor, SendMsgElementConstructor } from '../helper';
 import { EventType } from '@/onebot/event/OB11BaseEvent';
 import { encodeCQCode } from '@/onebot/helper/cqcode';
+import { uri2local } from '@/common/utils/file';
+import { RequestUtil } from '@/common/utils/request';
 
 type RawToOb11Converters = {
     [Key in keyof MessageElement as Key extends `${string}Element` ? Key : never]: (
@@ -12,6 +34,18 @@ type RawToOb11Converters = {
         msg: RawMessage,
         elementWrapper: MessageElement
     ) => PromiseLike<OB11MessageData | null>
+}
+
+type Ob11ToRawConverters = {
+    [Key in OB11MessageDataType]: (
+        sendMsg: Extract<OB11MessageData, { type: Key }>,
+        context: MessageContext,
+    ) => Promise<SendMessageElement | undefined>
+}
+
+export type MessageContext = {
+    deleteAfterSentFiles: string[],
+    peer: Peer
 }
 
 function keyCanBeParsed(key: string, parser: RawToOb11Converters): key is keyof RawToOb11Converters {
@@ -354,6 +388,249 @@ export class OneBotMsgApi {
         }
     };
 
+    ob11ToRawConverters: Ob11ToRawConverters = {
+        [OB11MessageDataType.text]: async ({ data: { text } }) => ({
+            elementType: ElementType.TEXT,
+            elementId: '',
+            textElement: {
+                content: text,
+                atType: AtType.notAt,
+                atUid: '',
+                atTinyId: '',
+                atNtUid: '',
+            },
+        }),
+
+        [OB11MessageDataType.at]: async ({ data: { qq: atQQ } }, context) => {
+            if (!context.peer || context.peer.chatType == ChatType.KCHATTYPEC2C) return undefined;
+            if (atQQ === 'all') return SendMsgElementConstructor.at(this.coreContext, atQQ, atQQ, AtType.atAll, '全体成员');
+            const NTQQGroupApi = this.coreContext.apis.GroupApi;
+            const NTQQUserApi = this.coreContext.apis.UserApi;
+            const atMember = await NTQQGroupApi.getGroupMember(context.peer.peerUid, atQQ);
+            if (atMember) {
+                return SendMsgElementConstructor.at(this.coreContext, atQQ, atMember.uid, AtType.atUser, atMember.nick || atMember.cardName);
+            }
+            const uid = await NTQQUserApi.getUidByUinV2(`${atQQ}`);
+            if (!uid) throw new Error('Get Uid Error');
+            const info = await NTQQUserApi.getUserDetailInfo(uid);
+            return SendMsgElementConstructor.at(this.coreContext, atQQ, uid, AtType.atUser, info.nick || '');
+        },
+
+        [OB11MessageDataType.reply]: async ({ data: { id } }) => {
+            const replyMsgM = MessageUnique.getMsgIdAndPeerByShortId(parseInt(id));
+            if (!replyMsgM) {
+                this.coreContext.context.logger.logWarn('回复消息不存在', id);
+                return undefined;
+            }
+            const NTQQMsgApi = this.coreContext.apis.MsgApi;
+            const replyMsg = (await NTQQMsgApi.getMsgsByMsgId(
+                replyMsgM.Peer, [replyMsgM.MsgId!])).msgList[0];
+            return replyMsg ?
+                SendMsgElementConstructor.reply(this.coreContext, replyMsg.msgSeq, replyMsg.msgId, replyMsg.senderUin!, replyMsg.senderUin!) :
+                undefined;
+        },
+
+        [OB11MessageDataType.face]: async ({ data: { id } }) => {
+            let parsedFaceId = parseInt(id);
+            // 从face_config.json中获取表情名称
+            const sysFaces = faceConfig.sysface;
+            // const emojiFaces = faceConfig.emoji;
+            const face: any = sysFaces.find((systemFace) => systemFace.QSid === parsedFaceId.toString());
+            parsedFaceId = parseInt(parsedFaceId.toString());
+            // let faceType = parseInt(parsedFaceId.toString().substring(0, 1));
+            let faceType = 1;
+            if (parsedFaceId >= 222) {
+                faceType = 2;
+            }
+            if (face.AniStickerType) {
+                faceType = 3;
+            }
+            return {
+                elementType: ElementType.FACE,
+                elementId: '',
+                faceElement: {
+                    faceIndex: parsedFaceId,
+                    faceType,
+                    faceText: face.QDes,
+                    stickerId: face.AniStickerId,
+                    stickerType: face.AniStickerType,
+                    packId: face.AniStickerPackId,
+                    sourceType: 1,
+                },
+            };
+        },
+
+        [OB11MessageDataType.mface]: async ({
+            data: {
+                emoji_package_id, emoji_id, key, summary,
+            },
+        }) => ({
+            elementType: ElementType.MFACE,
+            marketFaceElement: {
+                emojiPackageId: emoji_package_id,
+                emojiId: emoji_id,
+                key,
+                faceName: summary || '[商城表情]',
+            },
+        }),
+
+        // File service
+        [OB11MessageDataType.image]: async (sendMsg, context) => {
+            const sendPicElement = await this.coreContext.apis.FileApi.createValidSendPicElement(
+                (await this.handleOb11FileLikeMessage(sendMsg, context)).path,
+                sendMsg.data.summary,
+                sendMsg.data.sub_type,
+            );
+            context.deleteAfterSentFiles.push(sendPicElement.picElement.sourcePath);
+            return sendPicElement;
+        },
+
+        [OB11MessageDataType.file]: async (sendMsg, context) => {
+            const { path, fileName } = await this.handleOb11FileLikeMessage(sendMsg, context);
+            //logDebug('发送文件', path, fileName);
+            // context.deleteAfterSentFiles.push(fileName || FileEle.fileElement.filePath);
+            return await this.coreContext.apis.FileApi.createValidSendFileElement(path, fileName);
+        },
+
+        [OB11MessageDataType.video]: async (sendMsg, context) => {
+            const { path, fileName } = await this.handleOb11FileLikeMessage(sendMsg, context);
+
+            let thumb = sendMsg.data.thumb;
+            if (thumb) {
+                const uri2LocalRes = await uri2local(this.coreContext.NapCatTempPath, thumb);
+                if (uri2LocalRes.success) thumb = uri2LocalRes.path;
+            }
+            const videoEle = await this.coreContext.apis.FileApi.createValidSendVideoElement(path, fileName, thumb);
+
+            context.deleteAfterSentFiles.push(videoEle.videoElement.filePath);
+            return videoEle;
+        },
+
+        [OB11MessageDataType.voice]: async (sendMsg, context) =>
+            this.coreContext.apis.FileApi.createValidSendPttElement(
+                (await this.handleOb11FileLikeMessage(sendMsg, context)).path),
+
+        [OB11MessageDataType.json]: async ({ data: { data } }) => ({
+            elementType: ElementType.ARK,
+            elementId: '',
+            arkElement: {
+                bytesData: typeof data === 'string' ? data : JSON.stringify(data),
+                linkInfo: null,
+                subElementType: null,
+            },
+        }),
+
+        [OB11MessageDataType.dice]: async () => ({
+            elementType: ElementType.FACE,
+            elementId: '',
+            faceElement: {
+                faceIndex: FaceIndex.dice,
+                faceType: FaceType.dice,
+                'faceText': '[骰子]',
+                'packId': '1',
+                'stickerId': '33',
+                'sourceType': 1,
+                'stickerType': 2,
+                // resultId: resultId.toString(),
+                'surpriseId': '',
+                // "randomType": 1,
+            },
+        }),
+
+        [OB11MessageDataType.RPS]: async () => ({
+            elementType: ElementType.FACE,
+            elementId: '',
+            faceElement: {
+                'faceIndex': FaceIndex.RPS,
+                'faceText': '[包剪锤]',
+                'faceType': 3,
+                'packId': '1',
+                'stickerId': '34',
+                'sourceType': 1,
+                'stickerType': 2,
+                // 'resultId': resultId.toString(),
+                'surpriseId': '',
+                // "randomType": 1,
+            },
+        }),
+
+        // Need signing
+        [OB11MessageDataType.markdown]: async ({ data: { content } }) => ({
+            elementType: ElementType.MARKDOWN,
+            elementId: '',
+            markdownElement: { content },
+        }),
+
+        [OB11MessageDataType.music]: async ({ data }, context) => {
+            // 保留, 直到...找到更好的解决方案
+            if (data.type === 'custom') {
+                if (!data.url) {
+                    this.coreContext.context.logger.logError('自定义音卡缺少参数url');
+                    return undefined;
+                }
+                if (!data.audio) {
+                    this.coreContext.context.logger.logError('自定义音卡缺少参数audio');
+                    return undefined;
+                }
+                if (!data.title) {
+                    this.coreContext.context.logger.logError('自定义音卡缺少参数title');
+                    return undefined;
+                }
+            } else {
+                if (!['qq', '163'].includes(data.type)) {
+                    this.coreContext.context.logger.logError('音乐卡片type错误, 只支持qq、163、custom，当前type:', data.type);
+                    return undefined;
+                }
+                if (!data.id) {
+                    this.coreContext.context.logger.logError('音乐卡片缺少参数id');
+                    return undefined;
+                }
+            }
+
+            let postData: IdMusicSignPostData | CustomMusicSignPostData;
+            if (data.type === 'custom' && data.content) {
+                const { content, ...others } = data;
+                postData = { singer: content, ...others };
+            } else {
+                postData = data;
+            }
+            // Mlikiowa V2.2.7 Refactor Todo
+            const signUrl = this.obContext.configLoader.configData.musicSignUrl;
+            if (!signUrl) {
+                if (data.type === 'qq') {
+                    //const musicJson = (await SignMusicWrapper(data.id.toString())).data.arkResult.slice(0, -1);
+                    //return SendMsgElementConstructor.ark(musicJson);
+                }
+                throw Error('音乐消息签名地址未配置');
+            }
+            try {
+                const musicJson = await RequestUtil.HttpGetJson<any>(signUrl, 'POST', postData);
+                return this.ob11ToRawConverters.json(musicJson, context);
+            } catch (e) {
+                this.coreContext.context.logger.logError('生成音乐消息失败', e);
+            }
+        },
+
+        [OB11MessageDataType.node]: async () => undefined,
+
+        [OB11MessageDataType.forward]: async () => undefined,
+
+        [OB11MessageDataType.xml]: async () => undefined,
+
+        [OB11MessageDataType.poke]: async () => undefined,
+
+        [OB11MessageDataType.Location]: async () => ({
+            elementType: ElementType.SHARELOCATION,
+            elementId: '',
+            shareLocationElement: {
+                text: '测试',
+                ext: '',
+            },
+        }),
+
+        [OB11MessageDataType.miniapp]: async () => undefined,
+    };
+
     constructor(obContext: NapCatOneBot11Adapter, coreContext: NapCatCore) {
         this.obContext = obContext;
         this.coreContext = coreContext;
@@ -438,5 +715,60 @@ export class OneBotMsgApi {
             resMsg.raw_message = msgAsCQCode;
         }
         return resMsg;
+    }
+
+    async createSendElements(
+        messageData: OB11MessageData[],
+        peer: Peer,
+        ignoreTypes: OB11MessageDataType[] = [],
+    ) {
+        const deleteAfterSentFiles: string[] = [];
+        const callResultList: Array<Promise<SendMessageElement | undefined>> = [];
+        for (const sendMsg of messageData) {
+            if (ignoreTypes.includes(sendMsg.type)) {
+                continue;
+            }
+            const callResult = this.ob11ToRawConverters[sendMsg.type](
+                // eslint-disable-next-line
+                // @ts-ignore
+                sendMsg,
+                { peer, deleteAfterSentFiles },
+            )?.catch(undefined);
+            callResultList.push(callResult);
+        }
+        const ret = await Promise.all(callResultList);
+        const sendElements: SendMessageElement[] = ret.filter(ele => !!ele);
+        return { sendElements, deleteAfterSentFiles };
+    }
+
+    private async handleOb11FileLikeMessage(
+        { data: inputdata }: OB11MessageFileBase,
+        { deleteAfterSentFiles }: MessageContext,
+    ) {
+        const isBlankUrl = !inputdata.url || inputdata.url === '';
+        const isBlankFile = !inputdata.file || inputdata.file === '';
+        if (isBlankUrl && isBlankFile) {
+            this.coreContext.context.logger.logError('文件消息缺少参数', inputdata);
+            throw Error('文件消息缺少参数');
+        }
+        const fileOrUrl = (isBlankUrl ? inputdata.file : inputdata.url) || "";
+        const {
+            path,
+            isLocal,
+            fileName,
+            errMsg,
+            success,
+        } = (await uri2local(this.coreContext.NapCatTempPath, fileOrUrl));
+
+        if (!success) {
+            this.coreContext.context.logger.logError('文件下载失败', errMsg);
+            throw Error('文件下载失败' + errMsg);
+        }
+
+        if (!isLocal) { // 只删除http和base64转过来的文件
+            deleteAfterSentFiles.push(path);
+        }
+
+        return { path, fileName: inputdata.name || fileName };
     }
 }
