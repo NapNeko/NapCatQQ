@@ -253,7 +253,7 @@ export class OneBotMsgApi {
                 msg.senderUid,
                 elementWrapper.elementId,
                 elementWrapper.elementType.toString(),
-                element.fileSize || '0',
+                element.fileSize ?? '0',
                 element.fileName,
             );
             
