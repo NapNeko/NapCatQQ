@@ -53,7 +53,7 @@ export abstract class ConfigBase<T> {
     }
 
 
-    save(newConfigData: T = this.configData as T) {
+    save(newConfigData: T = this.configData) {
         const logger = this.coreContext.context.logger;
         const selfInfo = this.coreContext.selfInfo;
         this.configData = newConfigData;
