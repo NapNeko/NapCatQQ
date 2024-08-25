@@ -1,8 +1,8 @@
 import type { SelfInfo } from '@/core/entities';
 
 import { LogWrapper } from '@/common/utils/log';
-import { LoginListener, SessionListener } from '@/core/listeners';
-import { DependsAdapter, DispatcherAdapter, GlobalAdapter } from '@/core/adapters';
+import { LoginListener, NodeIKernelSessionListener } from '@/core/listeners';
+import {  NodeIDispatcherAdapter, GlobalAdapter, NodeIDependsAdapter } from '@/core/adapters';
 import { NapCatPathWrapper } from '@/common/framework/napcat';
 import {
     InstanceContext,
@@ -208,7 +208,7 @@ export async function NCoreInitShell() {
             selfInfo.uid,
             dataPath,
         );
-        const sessionListener = new SessionListener();
+        const sessionListener = new NodeIKernelSessionListener();
         sessionListener.onSessionInitComplete = (r: unknown) => {
             if (r === 0) {
                 resolve();
@@ -218,8 +218,8 @@ export async function NCoreInitShell() {
         };
         session.init(
             sessionConfig,
-            new DependsAdapter() as any,
-            new DispatcherAdapter() as any,
+            new NodeIDependsAdapter(),
+            new NodeIDispatcherAdapter(),
             sessionListener as any,
         );
         try {

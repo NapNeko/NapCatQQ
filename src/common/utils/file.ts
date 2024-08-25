@@ -4,7 +4,7 @@ import crypto, { randomUUID } from 'crypto';
 import util from 'util';
 import path from 'node:path';
 import * as fileType from 'file-type';
-import { solveAsyncProblem, solveProblem } from './helper';
+import { solveProblem } from './helper';
 
 export function isGIF(path: string) {
     const buffer = Buffer.alloc(4);
@@ -194,7 +194,7 @@ export async function checkUriType(Uri: string) {
         return undefined;
     }, Uri);
     if (LocalFileRet) return LocalFileRet;
-    
+
     const OtherFileRet = await solveProblem((uri: string) => {
         //再判断是否是Http
         if (uri.startsWith('http://') || uri.startsWith('https://')) {
@@ -217,7 +217,7 @@ export async function checkUriType(Uri: string) {
         }
     }, Uri);
     if (OtherFileRet) return OtherFileRet;
-    
+
     return { Uri: Uri, Type: FileUriType.Unknown };
 }
 
