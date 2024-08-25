@@ -46,7 +46,7 @@ export class NTEventChannel extends EventEmitter {
             Listener = new ListenerType(this.createProxyDispatch(listenerMainName));
             if (!Listener) throw new Error('Init Listener failed');
             //实例化NTQQ Listener外包装
-            const ServiceSubName = listenerMainName.match(/^NodeIKernel(.*?)Listener$/)![1];
+            const ServiceSubName = /^NodeIKernel(.*?)Listener$/.exec(listenerMainName)![1];
             const Service = 'NodeIKernel' + ServiceSubName + 'Service/addKernel' + ServiceSubName + 'Listener';
             const addfunc = this.createEventFunction<(listener: T) => number>(Service);
             //添加Listener到NTQQ
