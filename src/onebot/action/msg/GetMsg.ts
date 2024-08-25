@@ -30,7 +30,7 @@ class GetMsg extends BaseAction<Payload, OB11Message> {
         const MsgShortId = MessageUnique.getShortIdByMsgId(payload.message_id.toString());
         const msgIdWithPeer = MessageUnique.getMsgIdAndPeerByShortId(MsgShortId || parseInt(payload.message_id.toString()));
         if (!msgIdWithPeer) {
-            throw ('消息不存在');
+            throw new Error('消息不存在');
         }
         const peer = { guildId: '', peerUid: msgIdWithPeer?.Peer.peerUid, chatType: msgIdWithPeer.Peer.chatType };
         const msg = await NTQQMsgApi.getMsgsByMsgId(

@@ -8,7 +8,7 @@ export interface GeneralCallResult {
     errMsg: string
 }
 
-export interface forceFetchClientKeyRetType extends GeneralCallResult {
+export interface ForceFetchClientKeyRetType extends GeneralCallResult {
     url: string;
     keyIndex: string;
     clientKey: string;
