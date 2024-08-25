@@ -75,7 +75,7 @@ export class OneBotGroupApi {
         const NTQQGroupApi = this.coreContext.apis.GroupApi;
         const groupElement = grayTipElement?.groupElement;
         if (!groupElement) return undefined;
-        const member = await NTQQGroupApi.getGroupMember(GroupCode, groupElement.memberUid);
+        const member = await NTQQGroupApi.getGroupMemberV2(GroupCode, groupElement.memberUid);
         const memberUin = member?.uin;
         const adminMember = await NTQQGroupApi.getGroupMember(GroupCode, groupElement.adminUid);
         if (memberUin) {
