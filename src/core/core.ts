@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import { InstanceContext } from './wrapper';
 import { proxiedListenerOf } from '@/common/utils/proxy-handler';
 import { GroupListener, MsgListener, ProfileListener } from './listeners';
-import { GroupMember, SelfInfo } from './entities';
+import { DataSource, GroupMember, SelfInfo } from './entities';
 import { LegacyNTEventWrapper } from '@/common/framework/event-legacy';
 import { NTQQFileApi, NTQQFriendApi, NTQQGroupApi, NTQQMsgApi, NTQQSystemApi, NTQQUserApi, NTQQWebApi } from './apis';
 import os from 'node:os';
@@ -164,9 +164,9 @@ export class NapCatCore {
             }
             // console.log('onMemberListChange', groupCode, arg);
         };
-        groupListener.onMemberInfoChange = (groupCode, changeType, members) => {
+        groupListener.onMemberInfoChange = (groupCode, dataSource, members) => {
             //console.log('onMemberInfoChange', groupCode, changeType, members);
-            if (changeType === 0 && members.get(this.selfInfo.uid)?.isDelete) {
+            if (dataSource === DataSource.LOCAL && members.get(this.selfInfo.uid)?.isDelete) {
                 // 自身退群或者被踢退群 5s用于Api操作 之后不再出现
                 setTimeout(() => {
                     this.apis.GroupApi.groupCache.delete(groupCode);

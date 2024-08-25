@@ -11,6 +11,7 @@ import {
     GroupMemberRole,
     GroupNotifyMsgType,
     GroupNotifyMsgStatus,
+    DataSource,
 } from '@/core';
 import { OB11Config, OB11ConfigLoader } from '@/onebot/helper/config';
 import { OneBotApiContextType } from '@/onebot/types';
@@ -425,9 +426,9 @@ export class NapCatOneBot11Adapter {
             }
         };
 
-        groupListener.onMemberInfoChange = async (groupCode, changeType, members) => {
+        groupListener.onMemberInfoChange = async (groupCode, dataSource, members) => {
             //this.context.logger.logDebug('收到群成员信息变动通知', groupCode, changeType);
-            if (changeType === 0) {
+            if (dataSource === DataSource.LOCAL) {
                 const existMembers = this.core.apis.GroupApi.groupMemberCache.get(groupCode);
                 if (!existMembers) return;
                 members.forEach((member) => {
