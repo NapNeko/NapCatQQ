@@ -5,7 +5,7 @@ export interface KickMemberInfo {
     optMemberUid: string,
     optBytesMsg: string,
 }
-export interface  kickMemberV2Req{
+export interface  KickMemberV2Req{
     groupCode: string,
     kickFlag: number,
     kickList: Array<KickMemberInfo>,

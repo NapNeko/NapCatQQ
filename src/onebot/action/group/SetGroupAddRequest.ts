@@ -25,7 +25,7 @@ export default class SetGroupAddRequest extends BaseAction<Payload, null> {
         const approve = payload.approve?.toString() !== 'false';
         await NTQQGroupApi.handleGroupRequest(flag,
             approve ? GroupRequestOperateTypes.approve : GroupRequestOperateTypes.reject,
-            payload.reason || ' ',
+            payload.reason ?? ' ',
         );
         return null;
     }

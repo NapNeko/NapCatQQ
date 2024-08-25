@@ -23,7 +23,7 @@ export interface OnRichMediaDownloadCompleteParams {
     userUsedSpacePerDay: unknown | null
 }
 
-export interface onGroupFileInfoUpdateParamType {
+export interface GroupFileInfoUpdateParamType {
     retCode: number;
     retMsg: string;
     clientWording: string;
@@ -83,7 +83,7 @@ export interface IKernelMsgListener {
 
     onGroupFileInfoAdd(groupItem: unknown): void;
 
-    onGroupFileInfoUpdate(groupFileListResult: onGroupFileInfoUpdateParamType): void;
+    onGroupFileInfoUpdate(groupFileListResult: GroupFileInfoUpdateParamType): void;
 
     onGroupGuildUpdate(groupGuildNotifyInfo: unknown): void;
 
@@ -305,7 +305,7 @@ export class MsgListener implements IKernelMsgListener {
 
     }
 
-    onGroupFileInfoUpdate(groupFileListResult: onGroupFileInfoUpdateParamType) {
+    onGroupFileInfoUpdate(groupFileListResult: GroupFileInfoUpdateParamType) {
 
     }
 

@@ -7,8 +7,7 @@ import {
     GroupNotify,
     GroupRequestOperateTypes,
     InstanceContext,
-    KickMemberInfo,
-    kickMemberV2Req,
+    KickMemberV2Req,
     MemberExtSourceType,
     NapCatCore,
     NodeIKernelGroupListener,
@@ -223,7 +222,7 @@ export class NTQQGroupApi {
         // GetMsgByShoretID(ShoretID); -> MsgService.getMsgs(Peer,MsgId,1,false); -> 组出参数
         return this.context.session.getGroupService().addGroupEssence(param);
     }
-    async kickMemberV2Inner(param: kickMemberV2Req) {
+    async kickMemberV2Inner(param: KickMemberV2Req) {
         return this.context.session.getGroupService().kickMemberV2(param);
     }
     async deleteGroupBulletin(GroupCode: string, feedId: string) {
@@ -358,7 +357,7 @@ export class NTQQGroupApi {
                     'seq': seq,  // 通知序列号
                     'type': type,
                     'groupCode': groupCode,
-                    'postscript': reason || ' ', // 仅传空值可能导致处理失败，故默认给个空格
+                    'postscript': reason ?? ' ', // 仅传空值可能导致处理失败，故默认给个空格
                 },
             });
     }
