@@ -156,7 +156,7 @@ export interface OB11MessageCustomMusic {
 
 export interface OB11MessageJson {
     type: OB11MessageDataType.json;
-    data: { config: { token: string } } & any;
+    data: { config: { token: string }, data: string };
 }
 
 export interface OB11MessageDice {

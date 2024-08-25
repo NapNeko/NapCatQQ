@@ -77,5 +77,3 @@ export class QQBasicInfoWrapper {
         return { appid: systemPlatform === 'linux' ? '537240795' : '537240709', qua: this.getQUAInternal() };
     }
 }
-
-export let QQBasicInfo: QQBasicInfoWrapper | undefined;
