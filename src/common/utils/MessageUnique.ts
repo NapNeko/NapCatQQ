@@ -15,23 +15,13 @@ export class LimitedHashTable<K, V> {
     }
 
     set(key: K, value: V): void {
-        // const isExist = this.keyToValue.get(key);
-        // if (isExist && isExist === value) {
-        //   return;
-        // }
         this.keyToValue.set(key, value);
         this.valueToKey.set(value, key);
         while (this.keyToValue.size !== this.valueToKey.size) {
-            //console.log('keyToValue.size !== valueToKey.size Error Atom');
             this.keyToValue.clear();
             this.valueToKey.clear();
         }
-        // console.log('---------------');
-        // console.log(this.keyToValue);
-        // console.log(this.valueToKey);
-        // console.log('---------------');
         while (this.keyToValue.size > this.maxSize || this.valueToKey.size > this.maxSize) {
-            //console.log(this.keyToValue.size > this.maxSize, this.valueToKey.size > this.maxSize);
             const oldestKey = this.keyToValue.keys().next().value;
             this.valueToKey.delete(this.keyToValue.get(oldestKey)!);
             this.keyToValue.delete(oldestKey);
@@ -108,10 +98,6 @@ class MessageUniqueWrapper {
         hash[0] &= 0x7f;
         const shortId = hash.readInt32BE(0);
         //减少性能损耗
-        // const isExist = this.msgIdMap.getKey(shortId);
-        // if (isExist && isExist === msgId) {
-        //   return shortId;
-        // }
         this.msgIdMap.set(msgId, shortId);
         this.msgDataMap.set(key, shortId);
         return shortId;

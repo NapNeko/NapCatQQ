@@ -6,6 +6,7 @@ export type ListenerClassBase = Record<string, string>;
 export interface ListenerIBase {
     // eslint-disable-next-line @typescript-eslint/no-misused-new
     new(listener: any): ListenerClassBase;
+    [key: string]: any;
 }
 
 export class NTEventChannel extends EventEmitter {
