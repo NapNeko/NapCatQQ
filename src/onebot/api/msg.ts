@@ -21,8 +21,7 @@ import {
     OB11MessageData,
     OB11MessageDataType,
     OB11MessageFileBase,
-    OB11MessageForward,
-    OB11MessageReply,
+    OB11MessageForward
 } from '@/onebot';
 import { OB11Constructor } from '../helper';
 import { EventType } from '@/onebot/event/OB11BaseEvent';
@@ -447,8 +446,8 @@ export class OneBotMsgApi {
                     replyElement: {
                         replayMsgSeq: replyMsg.msgSeq, // raw.msgSeq
                         replayMsgId: replyMsg.msgId,  // raw.msgId
-                        senderUin: replyMsg.senderUin!,
-                        senderUinStr: replyMsg.senderUin!,
+                        senderUin: replyMsg.senderUin,
+                        senderUinStr: replyMsg.senderUin,
                     },
                 } :
                 undefined;
@@ -793,6 +792,6 @@ export class OneBotMsgApi {
             deleteAfterSentFiles.push(path);
         }
 
-        return { path, fileName: inputdata.name || fileName };
+        return { path, fileName: inputdata.name ?? fileName };
     }
 }
