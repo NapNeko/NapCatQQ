@@ -1,18 +1,18 @@
-import { IGroupListener, NodeIKernelGroupListener } from '@/core/listeners/NodeIKernelGroupListener';
+import { IGroupListener } from '@/core/listeners/NodeIKernelGroupListener';
 import {
     GroupExtParam,
     GroupMember,
     GroupMemberRole,
     GroupNotifyMsgType,
     GroupRequestOperateTypes,
-    kickMemberV2Req,
+    KickMemberV2Req
 } from '@/core/entities';
 import { GeneralCallResult } from '@/core/services/common';
 
 //高版本的接口不应该随意使用 使用应该严格进行pr审核 同时部分ipc中未出现的接口不要过于依赖 应该做好数据兜底
 
 export interface NodeIKernelGroupService {
-    kickMemberV2(param: kickMemberV2Req): Promise<GeneralCallResult>;
+    kickMemberV2(param: KickMemberV2Req): Promise<GeneralCallResult>;
     quitGroupV2(param: { groupCode: string; needDeleteLocalMsg: boolean; }): Promise<GeneralCallResult>;
 
     getMemberCommonInfo(Req: {

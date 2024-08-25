@@ -1,6 +1,6 @@
 import { ChatType, GetFileListParam, Peer, RawMessage, SendMessageElement, SendStatusType } from '@/core/entities';
 import { InstanceContext, NapCatCore } from '@/core';
-import { onGroupFileInfoUpdateParamType } from '@/core/listeners';
+import { GroupFileInfoUpdateParamType } from '@/core/listeners';
 import { GeneralCallResult } from '@/core/services/common';
 
 export class NTQQMsgApi {
@@ -119,13 +119,13 @@ export class NTQQMsgApi {
     async getGroupFileList(GroupCode: string, params: GetFileListParam) {
         const data = await this.core.eventWrapper.CallNormalEvent<
             (GroupCode: string, params: GetFileListParam) => Promise<unknown>,
-            (groupFileListResult: onGroupFileInfoUpdateParamType) => void
+            (groupFileListResult: GroupFileInfoUpdateParamType) => void
                 >(
                 'NodeIKernelRichMediaService/getGroupFileList',
                 'NodeIKernelMsgListener/onGroupFileInfoUpdate',
                 1,
                 5000,
-                (groupFileListResult: onGroupFileInfoUpdateParamType) => {
+                (groupFileListResult: GroupFileInfoUpdateParamType) => {
                 //Developer Mlikiowa Todo: 此处有问题 无法判断是否成功
                     return true;
                 },
@@ -251,7 +251,7 @@ export class NTQQMsgApi {
             if (!arkElement) {
                 continue;
             }
-            const forwardData: any = JSON.parse(arkElement.arkElement?.bytesData || "");
+            const forwardData: any = JSON.parse(arkElement.arkElement?.bytesData ?? "");
             if (forwardData.app != 'com.tencent.multimsg') {
                 continue;
             }

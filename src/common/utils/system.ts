@@ -30,7 +30,7 @@ export async function getMachineId(): Promise<string> {
     if (!machineId) {
         machineId = (async () => {
             const id = await getMacMachineId();
-            return id || randomUUID(); // fallback, generate a UUID
+            return id ?? randomUUID(); // fallback, generate a UUID
         })();
     }
 

@@ -411,7 +411,7 @@ export interface ShareLocationElement {
     ext: string;
 }
 
-export interface sendShareLocationElement {
+export interface SendShareLocationElement {
     elementType: ElementType.SHARELOCATION;
     elementId: string;
     shareLocationElement?: ShareLocationElement;
@@ -461,7 +461,7 @@ export interface SendMarkdownElement {
 
 export type SendMessageElement = SendTextElement | SendPttElement |
     SendPicElement | SendReplyElement | SendFaceElement | SendMarketFaceElement | SendFileElement |
-    SendVideoElement | SendArkElement | SendMarkdownElement | sendShareLocationElement;
+    SendVideoElement | SendArkElement | SendMarkdownElement | SendShareLocationElement;
 
 export interface TextElement {
     content: string;
