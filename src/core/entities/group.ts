@@ -12,6 +12,10 @@ export interface  kickMemberV2Req{
     kickListUids: Array<string>,
     kickMsg: string
 }
+export enum DataSource {
+    LOCAL,
+    REMOTE
+}
 export enum GroupListUpdateType {
     REFRESHALL,
     GETALL,

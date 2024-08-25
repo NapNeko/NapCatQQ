@@ -1,4 +1,4 @@
-import { Group, GroupListUpdateType, GroupMember, GroupNotify } from '@/core/entities';
+import { DataSource, Group, GroupListUpdateType, GroupMember, GroupNotify } from '@/core/entities';
 
 export interface IGroupListener {
     onGroupListUpdate(updateType: GroupListUpdateType, groupList: Group[]): void;
@@ -31,7 +31,7 @@ export interface IGroupListener {
         hasRobot: boolean
     }): void;
 
-    onMemberInfoChange(groupCode: string, changeType: number, members: Map<string, GroupMember>): void;
+    onMemberInfoChange(groupCode: string, dataSource: DataSource, members: Map<string, GroupMember>): void;
 
     onSearchMemberChange(...args: unknown[]): void;
 
@@ -124,8 +124,8 @@ export class GroupListener implements IGroupListener {
 
     onJoinGroupNoVerifyFlag(...args: unknown[]) {
     }
-
-    onMemberInfoChange(groupCode: string, changeType: number, members: Map<string, GroupMember>) {
+    
+    onMemberInfoChange(groupCode: string, dateSource: DataSource, members: Map<string, GroupMember>) {
     }
 
     onMemberListChange(arg: {
@@ -225,8 +225,8 @@ export class DebugGroupListener implements IGroupListener {
         console.log('onJoinGroupNoVerifyFlag:', ...args);
     }
 
-    onMemberInfoChange(groupCode: string, changeType: number, members: Map<string, GroupMember>) {
-        console.log('onMemberInfoChange:', groupCode, changeType, members);
+    onMemberInfoChange(groupCode: string, dataSource: DataSource, members: Map<string, GroupMember>) {
+        console.log('onMemberInfoChange:', groupCode, dataSource, members);
     }
 
     onMemberListChange(...args: unknown[]) {
