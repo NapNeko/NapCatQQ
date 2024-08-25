@@ -21,6 +21,8 @@ import {
     OB11MessageData,
     OB11MessageDataType,
     OB11MessageFileBase,
+    OB11MessageForward,
+    OB11MessageReply,
 } from '@/onebot';
 import { OB11Constructor } from '../helper';
 import { EventType } from '@/onebot/event/OB11BaseEvent';
@@ -290,7 +292,7 @@ export class OneBotMsgApi {
                 element.fileSize ?? '0',
                 element.fileName,
             );
-            
+
             return {
                 type: OB11MessageDataType.video,
                 data: {
@@ -302,7 +304,7 @@ export class OneBotMsgApi {
                 }
             };
         },
-        
+
         pttElement: async (element, msg, elementWrapper) => {
             await this.coreContext.apis.FileApi.addFileCache(
                 {
@@ -331,12 +333,11 @@ export class OneBotMsgApi {
 
         multiForwardMsgElement: async (_, msg) => {
             const NTQQMsgApi = this.coreContext.apis.MsgApi;
-            const message_data: OB11MessageData = {
+            const message_data: OB11MessageForward = {
                 data: {} as any,
-                type: 'unknown' as any,
+                type: OB11MessageDataType.forward,
             };
-            message_data['type'] = OB11MessageDataType.forward;
-            message_data['data']['id'] = msg.msgId;
+            message_data.data.id = msg.msgId;
             const parentMsgPeer = msg.parentMsgPeer ?? {
                 chatType: msg.chatType,
                 guildId: '',
