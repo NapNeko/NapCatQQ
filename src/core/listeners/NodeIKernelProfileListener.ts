@@ -1,25 +1,6 @@
 import { User, UserDetailInfoListenerArg } from '@/core/entities';
 
-interface IProfileListener {
-    onProfileSimpleChanged(...args: unknown[]): void;
-
-    onUserDetailInfoChanged(arg: UserDetailInfoListenerArg): void;
-
-    onProfileDetailInfoChanged(profile: User): void;
-
-    onStatusUpdate(...args: unknown[]): void;
-
-    onSelfStatusChanged(...args: unknown[]): void;
-
-    onStrangerRemarkChanged(...args: unknown[]): void;
-}
-
-export interface NodeIKernelProfileListener extends IProfileListener {
-    // eslint-disable-next-line @typescript-eslint/no-misused-new
-    new(listener: IProfileListener): NodeIKernelProfileListener;
-}
-
-export class ProfileListener implements IProfileListener {
+export class NodeIKernelProfileListener {
     onUserDetailInfoChanged(arg: UserDetailInfoListenerArg): void {
 
     }
@@ -44,47 +25,47 @@ export class ProfileListener implements IProfileListener {
 
     }
 
-    onMemberListChange(...args: unknown[]){
+    onMemberListChange(...args: unknown[]) {
 
     }
 
-    onMemberInfoChange(...args: unknown[]){
+    onMemberInfoChange(...args: unknown[]) {
 
     }
 
-    onGroupListUpdate(...args: unknown[]){
+    onGroupListUpdate(...args: unknown[]) {
 
     }
 
-    onGroupAllInfoChange(...args: unknown[]){
+    onGroupAllInfoChange(...args: unknown[]) {
 
     }
 
-    onGroupDetailInfoChange(...args: unknown[]){
+    onGroupDetailInfoChange(...args: unknown[]) {
 
     }
 
-    onGroupConfMemberChange(...args: unknown[]){
+    onGroupConfMemberChange(...args: unknown[]) {
 
     }
 
-    onGroupExtListUpdate(...args: unknown[]){
+    onGroupExtListUpdate(...args: unknown[]) {
 
     }
 
-    onGroupNotifiesUpdated(...args: unknown[]){
+    onGroupNotifiesUpdated(...args: unknown[]) {
 
     }
 
-    onGroupNotifiesUnreadCountUpdated(...args: unknown[]){
+    onGroupNotifiesUnreadCountUpdated(...args: unknown[]) {
 
     }
 
-    onGroupMemberLevelInfoChange(...args: unknown[]){
+    onGroupMemberLevelInfoChange(...args: unknown[]) {
 
     }
 
-    onGroupBulletinChange(...args: unknown[]){
+    onGroupBulletinChange(...args: unknown[]) {
 
     }
 }

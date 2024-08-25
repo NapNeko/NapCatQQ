@@ -3,7 +3,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { InstanceContext } from './wrapper';
 import { proxiedListenerOf } from '@/common/utils/proxy-handler';
-import { GroupListener, MsgListener, ProfileListener } from './listeners';
+import { NodeIKernelMsgListener, NodeIKernelGroupListener, NodeIKernelProfileListener } from './listeners';
 import { DataSource, GroupMember, SelfInfo } from './entities';
 import { LegacyNTEventWrapper } from '@/common/framework/event-legacy';
 import { NTQQFileApi, NTQQFriendApi, NTQQGroupApi, NTQQMsgApi, NTQQSystemApi, NTQQUserApi, NTQQWebApi } from './apis';
@@ -89,7 +89,7 @@ export class NapCatCore {
 
     // Renamed from 'InitDataListener'
     async initNapCatCoreListeners() {
-        const msgListener = new MsgListener();
+        const msgListener = new NodeIKernelMsgListener();
         msgListener.onRecvMsg = (msgs) => {
             msgs.forEach(msg => this.context.logger.logMessage(msg, this.selfInfo));
         };
@@ -101,7 +101,7 @@ export class NapCatCore {
             proxiedListenerOf(msgListener, this.context.logger) as any
         );
 
-        const profileListener = new ProfileListener();
+        const profileListener = new NodeIKernelProfileListener();
         profileListener.onProfileDetailInfoChanged = (profile) => {
             if (profile.uid === this.selfInfo.uid) {
                 Object.assign(this.selfInfo, profile);
@@ -117,7 +117,7 @@ export class NapCatCore {
         );
 
         // 群相关
-        const groupListener = new GroupListener();
+        const groupListener = new NodeIKernelGroupListener();
         groupListener.onGroupListUpdate = (updateType, groupList) => {
             // console.log("onGroupListUpdate", updateType, groupList)
             groupList.map(g => {

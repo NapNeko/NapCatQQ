@@ -1,21 +1,5 @@
-export interface IKernelFileAssistantListener {
-    onFileStatusChanged(...args: unknown[]): unknown;
 
-    onSessionListChanged(...args: unknown[]): unknown;
-
-    onSessionChanged(...args: unknown[]): unknown;
-
-    onFileListChanged(...args: unknown[]): unknown;
-
-    onFileSearch(...args: unknown[]): unknown;
-}
-
-export interface NodeIKernelFileAssistantListener extends IKernelFileAssistantListener {
-    // eslint-disable-next-line @typescript-eslint/no-misused-new
-    new(adapter: IKernelFileAssistantListener): NodeIKernelFileAssistantListener;
-}
-
-export class KernelFileAssistantListener implements IKernelFileAssistantListener {
+export class NodeIKernelFileAssistantListener {
     onFileStatusChanged(...args: unknown[]) {
     }
 

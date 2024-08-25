@@ -98,7 +98,7 @@ export class LegacyNTEventWrapper {
         ...args: Parameters<EventType>
     ): Promise<Awaited<ReturnType<EventType>>> {
         const EventFunc = this.createEventFunction<EventType>(EventName);
-        return EventFunc!(...args)
+        return EventFunc!(...args);
     }
 
     async RegisterListen<ListenerType extends (...args: any[]) => void>(

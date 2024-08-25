@@ -1,6 +1,6 @@
 import { AnyCnameRecord } from 'node:dns';
 import { BizKey, ModifyProfileParams, SimpleInfo, UserDetailInfoByUin } from '../entities';
-import { NodeIKernelProfileListener, ProfileListener } from '../listeners';
+import {  NodeIKernelProfileListener } from '../listeners';
 import { GeneralCallResult } from '@/core/services/common';
 
 export enum UserDetailSource {
@@ -35,7 +35,7 @@ export interface NodeIKernelProfileService {
 
     fetchUserDetailInfo(trace: string, uids: string[], arg2: number, arg3: number[]): Promise<unknown>;
 
-    addKernelProfileListener(listener: ProfileListener): number;
+    addKernelProfileListener(listener: NodeIKernelProfileListener): number;
 
     removeKernelProfileListener(listenerId: number): void;
 

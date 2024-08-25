@@ -5,7 +5,7 @@ import { QQBasicInfoWrapper } from '@/common/utils/QQBasicInfo';
 import { loadQQWrapper, NapCatCore, NapCatCoreWorkingEnv } from '@/core/core';
 import { InstanceContext } from '@/core';
 import { SelfInfo } from '@/core/entities';
-import { LoginListener } from '@/core/listeners';
+import { NodeIKernelLoginListener } from '@/core/listeners';
 import { NodeIKernelLoginService } from '@/core/services';
 import { NodeIQQNTWrapperSession, WrapperNodeApi } from '@/core/wrapper/wrapper';
 import { InitWebUi, WebUiConfig } from '@/webui';
@@ -29,7 +29,7 @@ export async function NCoreInitFramework(
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
     //直到登录成功后，执行下一步
     const selfInfo = await new Promise<SelfInfo>((resolveSelfInfo) => {
-        const loginListener = new LoginListener();
+        const loginListener = new NodeIKernelLoginListener();
         loginListener.onQRCodeLoginSucceed = async (loginResult) => {
             await new Promise<void>(resolvePendingInit => {
                 registerInitCallback(() => resolvePendingInit());
