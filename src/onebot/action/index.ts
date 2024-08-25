@@ -71,7 +71,7 @@ import GetRecentContact from './user/GetRecentContact';
 import { GetProfileLike } from './extends/GetProfileLike';
 import SetGroupPortrait from './go-cqhttp/SetGroupPortrait';
 import { FetchCustomFace } from './extends/FetchCustomFace';
-import GoCQHTTPUploadPrivateFile from './go-cqhttp/UploadPrivareFile';
+import GoCQHTTPUploadPrivateFile from './go-cqhttp/UploadPrivateFile';
 import { FetchEmojiLike } from './extends/FetchEmojiLike';
 import { NapCatCore } from '@/core';
 

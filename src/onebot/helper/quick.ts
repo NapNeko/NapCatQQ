@@ -13,7 +13,7 @@ import {
     QuickActionGroupRequest,
 } from '../types';
 import { isNull } from '@/common/utils/helper';
-import { createSendElements, normalize, sendMsg } from '../action/msg/SendMsg';
+import { normalize, sendMsg } from '../action/msg/SendMsg';
 import { NapCatOneBot11Adapter } from '..';
 
 async function handleMsg(coreContext: NapCatCore, obContext: NapCatOneBot11Adapter, msg: OB11Message, quickAction: QuickAction) {
@@ -53,7 +53,7 @@ async function handleMsg(coreContext: NapCatCore, obContext: NapCatOneBot11Adapt
             }
         }
         replyMessage = replyMessage.concat(normalize(reply, quickAction.auto_escape));
-        const { sendElements, deleteAfterSentFiles } = await createSendElements(coreContext, obContext, replyMessage, peer);
+        const { sendElements, deleteAfterSentFiles } = await obContext.apiContext.MsgApi.createSendElements(replyMessage, peer);
         sendMsg(coreContext, peer, sendElements, deleteAfterSentFiles, false).then().catch(coreContext.context.logger.logError);
     }
 }
