@@ -46,7 +46,7 @@ export class QQBasicInfoWrapper {
     }
 
     requireMinNTQQBuild(buildStr: string) {
-        const currentBuild = parseInt(this.getQQBuildStr() || '0');
+        const currentBuild = +(this.getQQBuildStr() ?? '0');
         if (currentBuild == 0) throw new Error('QQBuildStr获取失败');
         return currentBuild >= parseInt(buildStr);
     }

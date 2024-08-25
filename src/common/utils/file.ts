@@ -187,22 +187,27 @@ export enum FileUriType {
 
 export async function checkUriType(Uri: string) {
 
-    const LocalFileRet = await solveProblem((Uri) => { if (fs.existsSync(Uri)) return { Uri: Uri, Type: FileUriType.Local }; });
+    const LocalFileRet = await solveProblem((uri: string) => {
+        if (fs.existsSync(uri)) {
+            return { Uri: uri, Type: FileUriType.Local };
+        }
+        return undefined;
+    }, Uri);
     if (LocalFileRet) return LocalFileRet;
     
-    const OtherFileRet = await solveProblem((Uri) => {
+    const OtherFileRet = await solveProblem((uri: string) => {
         //再判断是否是Http
-        if (Uri.startsWith('http://') || Uri.startsWith('https://')) {
-            return { Uri: Uri, Type: FileUriType.Remote };
+        if (uri.startsWith('http://') || uri.startsWith('https://')) {
+            return { Uri: uri, Type: FileUriType.Remote };
         }
         //再判断是否是Base64
-        if (Uri.startsWith('base64://')) {
-            return { Uri: Uri, Type: FileUriType.Base64 };
+        if (uri.startsWith('base64://')) {
+            return { Uri: uri, Type: FileUriType.Base64 };
         }
-        if (Uri.startsWith('file://')) {
+        if (uri.startsWith('file://')) {
             let filePath: string;
             // await fs.copyFile(url.pathname, filePath);
-            const pathname = decodeURIComponent(new URL(Uri).pathname);
+            const pathname = decodeURIComponent(new URL(uri).pathname);
             if (process.platform === 'win32') {
                 filePath = pathname.slice(1);
             } else {
@@ -210,7 +215,7 @@ export async function checkUriType(Uri: string) {
             }
             return { Uri: filePath, Type: FileUriType.Local };
         }
-    });
+    }, Uri);
     if (OtherFileRet) return OtherFileRet;
     
     return { Uri: Uri, Type: FileUriType.Unknown };

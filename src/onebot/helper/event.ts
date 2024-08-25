@@ -94,7 +94,7 @@ export async function NT2GroupEvent(core: NapCatCore, obContext: NapCatOneBot11A
                 if (emojiLikeEvent) return emojiLikeEvent;
             }
             if (element.grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_XMLMSG) {
-                const GroupIncreaseEvent = await obContext.apiContext.GroupApi.parseGroupMemberIncreaseEvent(msg.peerUid, element.grayTipElement);
+                const GroupIncreaseEvent = await obContext.apiContext.GroupApi.parseGroupIncreaseEvent(msg.peerUid, element.grayTipElement);
                 if (GroupIncreaseEvent) return GroupIncreaseEvent;
             }
 
