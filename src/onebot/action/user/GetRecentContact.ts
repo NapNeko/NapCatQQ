@@ -1,8 +1,6 @@
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { OB11Constructor } from '@/onebot/helper/converter';
-import { RawNTMsg2Onebot } from '@/onebot/helper';
 
 const SchemaData = {
     type: 'object',
@@ -21,11 +19,11 @@ export default class GetRecentContact extends BaseAction<Payload, any> {
         const NTQQUserApi = this.CoreContext.apis.UserApi;
         const NTQQMsgApi = this.CoreContext.apis.MsgApi;
         const ret = await NTQQUserApi.getRecentContactListSnapShot(parseInt((payload.count || 10).toString()));
-        const data = await Promise.all(ret.info.changedList.map(async (t) => {
+        return await Promise.all(ret.info.changedList.map(async (t) => {
             const FastMsg = await NTQQMsgApi.getMsgsByMsgId({ chatType: t.chatType, peerUid: t.peerUid }, [t.msgId]);
             if (FastMsg.msgList.length > 0) {
                 //扩展ret.info.changedList
-                const lastestMsg = await RawNTMsg2Onebot(this.CoreContext, this.OneBotContext,FastMsg.msgList[0], 'array');
+                const lastestMsg = await this.OneBotContext.apiContext.MsgApi.parseMessage(FastMsg.msgList[0], 'array');
                 return {
                     lastestMsg: lastestMsg,
                     peerUin: t.peerUin,
@@ -49,6 +47,5 @@ export default class GetRecentContact extends BaseAction<Payload, any> {
                 peerName: t.peerName,
             };
         }));
-        return data;
     }
 }

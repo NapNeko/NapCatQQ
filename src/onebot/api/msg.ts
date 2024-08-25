@@ -1,8 +1,10 @@
 import { UUIDConverter } from '@/common/utils/helper';
 import { MessageUnique } from '@/common/utils/MessageUnique';
-import { AtType, FaceIndex, MessageElement, NapCatCore, RawMessage } from '@/core';
-import { NapCatOneBot11Adapter, OB11MessageData, OB11MessageDataType } from '@/onebot';
-import { RawNTMsg2Onebot } from '../helper';
+import { AtType, ChatType, FaceIndex, MessageElement, NapCatCore, RawMessage } from '@/core';
+import { NapCatOneBot11Adapter, OB11Message, OB11MessageData, OB11MessageDataType } from '@/onebot';
+import { OB11Constructor } from '../helper';
+import { EventType } from '@/onebot/event/OB11BaseEvent';
+import { encodeCQCode } from '@/onebot/helper/cqcode';
 
 export class OneBotMsgApi {
     obContext: NapCatOneBot11Adapter;
@@ -12,11 +14,121 @@ export class OneBotMsgApi {
         this.obContext = obContext;
         this.coreContext = coreContext;
     }
+
+    async parseMessage(
+        msg: RawMessage,
+        messagePostFormat: string = this.obContext.configLoader.configData.messagePostFormat
+    ) {
+        if (msg.senderUin == "0" || msg.senderUin == "") return;
+        if (msg.peerUin == "0" || msg.peerUin == "") return;
+        //跳过空消息
+        const NTQQGroupApi = this.coreContext.apis.GroupApi;
+        const NTQQUserApi = this.coreContext.apis.UserApi;
+        const NTQQMsgApi = this.coreContext.apis.MsgApi;
+        const resMsg: OB11Message = {
+            self_id: parseInt(this.coreContext.selfInfo.uin),
+            user_id: parseInt(msg.senderUin!),
+            time: parseInt(msg.msgTime) || Date.now(),
+            message_id: msg.id!,
+            message_seq: msg.id!,
+            real_id: msg.id!,
+            message_type: msg.chatType == ChatType.KCHATTYPEGROUP ? 'group' : 'private',
+            sender: {
+                user_id: parseInt(msg.senderUin || '0'),
+                nickname: msg.sendNickName,
+                card: msg.sendMemberName || '',
+            },
+            raw_message: '',
+            font: 14,
+            sub_type: 'friend',
+            message: messagePostFormat === 'string' ? '' : [],
+            message_format: messagePostFormat === 'string' ? 'string' : 'array',
+            post_type: this.coreContext.selfInfo.uin == msg.senderUin ? EventType.MESSAGE_SENT : EventType.MESSAGE,
+        };
+        if (msg.chatType == ChatType.KCHATTYPEGROUP) {
+            resMsg.sub_type = 'normal'; // 这里go-cqhttp是group，而onebot11标准是normal, 蛋疼
+            resMsg.group_id = parseInt(msg.peerUin);
+            let member = await NTQQGroupApi.getGroupMember(msg.peerUin, msg.senderUin);
+            if (!member) member = await NTQQGroupApi.getGroupMember(msg.peerUin, msg.senderUin);
+            if (member) {
+                resMsg.sender.role = OB11Constructor.groupMemberRole(member.role);
+                resMsg.sender.nickname = member.nick;
+            }
+        } else if (msg.chatType == ChatType.KCHATTYPEC2C) {
+            resMsg.sub_type = 'friend';
+            resMsg.sender.nickname = (await NTQQUserApi.getUserDetailInfo(msg.senderUid)).nick;
+        } else if (msg.chatType == ChatType.KCHATTYPETEMPC2CFROMGROUP) {
+            resMsg.sub_type = 'group';
+            const ret = await NTQQMsgApi.getTempChatInfo(ChatType.KCHATTYPETEMPC2CFROMGROUP, msg.senderUid);
+            if (ret.result === 0) {
+                resMsg.group_id = parseInt(ret.tmpChatInfo!.groupCode);
+                resMsg.sender.nickname = ret.tmpChatInfo!.fromNick;
+            } else {
+                resMsg.group_id = 284840486; //兜底数据
+                resMsg.sender.nickname = "临时会话";
+            }
+        }
+        for (const element of msg.elements) {
+            let message_data: OB11MessageData = {
+                data: {} as any,
+                type: 'unknown' as any,
+            };
+            if (element.textElement && element.textElement?.atType !== AtType.notAt) {
+                const textAtMsgData = await this.obContext.apiContext.MsgApi.parseTextElemntWithAt(msg, element);
+                if (textAtMsgData) message_data = textAtMsgData;
+            } else if (element.textElement) {
+                const textMsgData = await this.obContext.apiContext.MsgApi.parseTextElement(msg, element);
+                if (textMsgData) message_data = textMsgData;
+            } else if (element.replyElement) {
+                const replyMsgData = await this.obContext.apiContext.MsgApi.parseReplyElement(msg, element);
+                if (replyMsgData) message_data = replyMsgData;
+            } else if (element.picElement) {
+                const PicMsgData = await this.obContext.apiContext.MsgApi.parsePicElement(msg, element);
+                if (PicMsgData) message_data = PicMsgData;
+            } else if (element.fileElement) {
+                const FileMsgData = await this.obContext.apiContext.MsgApi.parseFileElement(msg, element);
+                if (FileMsgData) message_data = FileMsgData;
+            } else if (element.videoElement) {
+                const videoMsgData = await this.obContext.apiContext.MsgApi.parseVideoElement(msg, element);
+                if (videoMsgData) message_data = videoMsgData;
+            } else if (element.pttElement) {
+                const pttMsgData = await this.obContext.apiContext.MsgApi.parsePTTElement(msg, element);
+                if (pttMsgData) message_data = pttMsgData;
+            } else if (element.arkElement) {
+                const arkMsgData = await this.obContext.apiContext.MsgApi.parseArkElement(msg, element);
+                if (arkMsgData) message_data = arkMsgData;
+            } else if (element.faceElement) {
+                const faceMsgData = await this.obContext.apiContext.MsgApi.parseFaceElement(msg, element);
+                if (faceMsgData) message_data = faceMsgData;
+            } else if (element.marketFaceElement) {
+                const marketFaceMsgData = await this.obContext.apiContext.MsgApi.parseMarketFaceElement(msg, element);
+                if (marketFaceMsgData) message_data = marketFaceMsgData;
+            } else if (element.markdownElement) {
+                message_data['type'] = OB11MessageDataType.markdown;
+                message_data['data']['data'] = element.markdownElement.content;
+            } else if (element.multiForwardMsgElement) {
+                const multiForwardMsgData = await this.obContext.apiContext.MsgApi.parseMultForwardElement(msg, element, messagePostFormat);
+                if (multiForwardMsgData) message_data = multiForwardMsgData;
+            }
+            if ((message_data.type as string) !== 'unknown' && message_data.data) {
+                const cqCode = encodeCQCode(message_data);
+
+                if (messagePostFormat === 'string') {
+                    (resMsg.message as string) += cqCode;
+                } else (resMsg.message as OB11MessageData[]).push(message_data);
+                resMsg.raw_message += cqCode;
+            }
+
+        }
+        resMsg.raw_message = resMsg.raw_message.trim();
+        return resMsg;
+    }
+
     async parseFileElement(msg: RawMessage, element: MessageElement) {
         const fileElement = element.fileElement;
         if (!fileElement) return undefined;
         const NTQQFileApi = this.coreContext.apis.FileApi;
-        let message_data: OB11MessageData = {
+        const message_data: OB11MessageData = {
             data: {} as any,
             type: 'unknown' as any,
         };
@@ -46,12 +158,8 @@ export class OneBotMsgApi {
         const textElement = element.textElement;
         if (!textElement) return undefined;
         const NTQQUserApi = this.coreContext.apis.UserApi;
-        let message_data: OB11MessageData = {
-            data: {} as any,
-            type: 'unknown' as any,
-        };
         let qq: `${number}` | 'all';
-        let name: string | undefined;
+        // let name: string | undefined;
         if (textElement.atType == AtType.atAll) {
             qq = 'all';
         } else {
@@ -62,23 +170,22 @@ export class OneBotMsgApi {
             }
             if (atQQ) {
                 qq = atQQ as `${number}`;
-                name = content.replace('@', '');
+                // name = content.replace('@', '');
             }
         }
         
-        message_data = {
+        return {
             type: OB11MessageDataType.at,
             data: {
                 qq: qq!,
-                //name,
+                // name,
             },
         };
-        return message_data;
     }
     async parseTextElement(msg: RawMessage, element: MessageElement) {
         const textElement = element.textElement;
         if (!textElement) return undefined;
-        let message_data: OB11MessageData = {
+        const message_data: OB11MessageData = {
             data: {} as any,
             type: 'unknown' as any,
         };
@@ -99,7 +206,7 @@ export class OneBotMsgApi {
         const picElement = element.picElement;
         if (!picElement) return undefined;
         const NTQQFileApi = this.coreContext.apis.FileApi;
-        let message_data: OB11MessageData = {
+        const message_data: OB11MessageData = {
             data: {} as any,
             type: 'unknown' as any,
         };
@@ -121,7 +228,7 @@ export class OneBotMsgApi {
     }
     async parseMarketFaceElement(msg: RawMessage, element: MessageElement) {
         const NTQQFileApi = this.coreContext.apis.FileApi;
-        let message_data: OB11MessageData = {
+        const message_data: OB11MessageData = {
             data: {} as any,
             type: 'unknown' as any,
         };
@@ -150,7 +257,7 @@ export class OneBotMsgApi {
         const replyElement = element.replyElement;
         if (!replyElement) return undefined;
         const NTQQMsgApi = this.coreContext.apis.MsgApi;
-        let message_data: OB11MessageData = {
+        const message_data: OB11MessageData = {
             data: {} as any,
             type: 'unknown' as any,
         };
@@ -201,7 +308,7 @@ export class OneBotMsgApi {
         const videoElement = element.videoElement;
         if (!videoElement) return undefined;
         const NTQQFileApi = this.coreContext.apis.FileApi;
-        let message_data: OB11MessageData = {
+        const message_data: OB11MessageData = {
             data: {} as any,
             type: 'unknown' as any,
         };
@@ -262,7 +369,7 @@ export class OneBotMsgApi {
         const pttElement = element.pttElement;
         if (!pttElement) return undefined;
         const NTQQFileApi = this.coreContext.apis.FileApi;
-        let message_data: OB11MessageData = {
+        const message_data: OB11MessageData = {
             data: {} as any,
             type: 'unknown' as any,
         };
@@ -278,13 +385,13 @@ export class OneBotMsgApi {
             chatType: msg.chatType,
             guildId: '',
         },
-            msg.msgId,
-            msg.msgSeq,
-            msg.senderUid,
-            element.elementId,
-            element.elementType.toString(),
-            pttElement.fileSize || '0',
-            pttElement.fileUuid || ''
+        msg.msgId,
+        msg.msgSeq,
+        msg.senderUid,
+        element.elementId,
+        element.elementType.toString(),
+        pttElement.fileSize || '0',
+        pttElement.fileUuid || ''
         );
         //以uuid作为文件名
         return message_data;
@@ -292,7 +399,7 @@ export class OneBotMsgApi {
     async parseFaceElement(msg: RawMessage, element: MessageElement) {
         const faceElement = element.faceElement;
         if (!faceElement) return undefined;
-        let message_data: OB11MessageData = {
+        const message_data: OB11MessageData = {
             data: {} as any,
             type: 'unknown' as any,
         };
@@ -313,7 +420,7 @@ export class OneBotMsgApi {
         const NTQQMsgApi = this.coreContext.apis.MsgApi;
         const faceElement = element.multiForwardMsgElement;
         if (!faceElement) return undefined;
-        let message_data: OB11MessageData = {
+        const message_data: OB11MessageData = {
             data: {} as any,
             type: 'unknown' as any,
         };
@@ -340,7 +447,7 @@ export class OneBotMsgApi {
             MultiMsg.parentMsgPeer = ParentMsgPeer;
             MultiMsg.parentMsgIdList = msg.parentMsgIdList;
             MultiMsg.id = MessageUnique.createMsg(ParentMsgPeer, MultiMsg.msgId); //该ID仅用查看 无法调用
-            const msgList = await RawNTMsg2Onebot(this.coreContext, this.obContext, MultiMsg, messagePostFormat);
+            const msgList = await this.parseMessage(MultiMsg, messagePostFormat);
             if (!msgList) continue;
             message_data['data']['content'].push(msgList);
             //console.log("合并消息", msgList);
@@ -350,7 +457,7 @@ export class OneBotMsgApi {
     async parseArkElement(msg: RawMessage, element: MessageElement) {
         const arkElement = element.arkElement;
         if (!arkElement) return undefined;
-        let message_data: OB11MessageData = {
+        const message_data: OB11MessageData = {
             data: {} as any,
             type: 'unknown' as any,
         };
