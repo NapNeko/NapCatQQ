@@ -90,7 +90,7 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
                 return res;
             }
         } catch {
-
+            this.CoreContext.context.logger.logDebug('GetFileBase Mode - 1 Error');
         }
 
         const NTSearchNameResult = (await NTQQFileApi.searchfile([payload.file])).resultItems;

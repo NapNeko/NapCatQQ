@@ -74,9 +74,14 @@ export class NTQQFriendApi {
         return this.context.session.getBuddyService().clearBuddyReqUnreadCnt();
     }
     async getBuddyReq() {
-        const [, ret] = await this.core.eventWrapper.CallNormalEventV2
-            <NodeIKernelBuddyService['getBuddyReq'], NodeIKernelBuddyListener['onBuddyReqChange']>
-            ('NodeIKernelBuddyService/getBuddyReq', 'NodeIKernelBuddyListener/onBuddyReqChange', 1, 5000);
+        const [, ret] = await this.core.eventWrapper.CallNormalEventV2<
+            NodeIKernelBuddyService['getBuddyReq'],
+            NodeIKernelBuddyListener['onBuddyReqChange']
+        >(
+            'NodeIKernelBuddyService/getBuddyReq',
+            'NodeIKernelBuddyListener/onBuddyReqChange',
+            1,
+            5000);
         return ret;
     }
 

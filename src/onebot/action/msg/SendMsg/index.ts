@@ -158,7 +158,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         if (payload.user_id && payload.message_type !== 'group') {
             const uid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());
             const isBuddy = await NTQQFriendApi.isBuddy(uid!);
-            if (!isBuddy) { }
+            //if (!isBuddy) { }
         }
         return { valid: true };
     }

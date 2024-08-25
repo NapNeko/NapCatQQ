@@ -100,7 +100,7 @@ export interface NodeIKernelGroupService {
                 uid: string,
                 index: number//0
             }>,
-            infos: {},
+            infos: unknown,
             finish: true,
             hasRobot: false
         }
