@@ -166,7 +166,7 @@ export class NTQQWebApi {
             let resJson;
             try {
                 const res = await RequestUtil.HttpGetText(url, 'GET', '', { 'Cookie': this.cookieToString(cookieObject) });
-                const match = res.match(/window\.__INITIAL_STATE__=(.*?);/);
+                let match = /window\.__INITIAL_STATE__=(.*?);/.exec(res);
                 if (match) {
                     resJson = JSON.parse(match[1].trim());
                 }
