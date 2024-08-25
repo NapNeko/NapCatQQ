@@ -124,14 +124,7 @@ export class NTEventChannel extends EventEmitter {
         EventName = '', timeout: number = 3000, ...args: Parameters<EventType>) {
         return new Promise<Awaited<ReturnType<EventType>>>(async (resolve, reject) => {
             const EventFunc = this.createEventFunction<EventType>(EventName);
-            let complete = false;
-            const Timeouter = setTimeout(() => {
-                if (!complete) {
-                    reject(new Error('NTEvent EventName:' + EventName + ' timeout'));
-                }
-            }, timeout);
             const retData = await EventFunc!(...args);
-            complete = true;
             resolve(retData);
         });
     }
