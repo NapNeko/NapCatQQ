@@ -110,18 +110,21 @@ export async function handleForwardNode(coreContext: NapCatCore, obContext: NapC
     nodeMsgIds = nodeMsgArray.map(msg => msg.msgId);
     let retMsgIds: string[] = [];
     if (needSendSelf) {
-        for (const [index, msg] of nodeMsgArray.entries()) {
-            if (msg.peerUid === coreContext.selfInfo.uid) continue;
+        for (const [, msg] of nodeMsgArray.entries()) {
+            if (msg.peerUid === coreContext.selfInfo.uid){
+                retMsgIds.push(msg.msgId);
+                continue;
+            }
             const ClonedMsg = await cloneMsg(coreContext, msg);
             if (ClonedMsg) retMsgIds.push(ClonedMsg.msgId);
         }
     } else {
         retMsgIds = nodeMsgIds;
     }
-    if (nodeMsgIds.length === 0) throw Error('转发消息失败，生成节点为空');
+    if (retMsgIds.length === 0) throw Error('转发消息失败，生成节点为空');
     try {
-        logger.logDebug('开发转发', srcPeer, destPeer, nodeMsgIds);
-        return await NTQQMsgApi.multiForwardMsg(srcPeer!, destPeer, nodeMsgIds);
+        logger.logDebug('开发转发', srcPeer, destPeer, retMsgIds);
+        return await NTQQMsgApi.multiForwardMsg(srcPeer!, destPeer, retMsgIds);
     } catch (e) {
         logger.logError('forward failed', e);
         return null;
