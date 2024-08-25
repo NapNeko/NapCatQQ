@@ -167,7 +167,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         );
 
         if (getSpecialMsgNum(payload, OB11MessageDataType.node)) {
-            const returnMsg = await this.handleForwardNode(peer, messages as OB11MessageNode[]);
+            const returnMsg = await this.handleForwardedNodes(peer, messages as OB11MessageNode[]);
             if (returnMsg) {
                 const msgShortId = MessageUnique.createMsg({
                     guildId: '',
@@ -193,7 +193,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         return { message_id: returnMsg!.id! };
     }
 
-    private async handleForwardNode(destPeer: Peer, messageNodes: OB11MessageNode[]): Promise<RawMessage | null> {
+    private async handleForwardedNodes(destPeer: Peer, messageNodes: OB11MessageNode[]): Promise<RawMessage | null> {
         const NTQQMsgApi = this.CoreContext.apis.MsgApi;
         const selfPeer = {
             chatType: ChatType.KCHATTYPEC2C,
@@ -222,7 +222,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                             logger.logError('子消息中包含非node消息 跳过不合法部分');
                             continue;
                         }
-                        const nodeMsg = await this.handleForwardNode(selfPeer, OB11Data.filter(e => e.type === OB11MessageDataType.node));
+                        const nodeMsg = await this.handleForwardedNodes(selfPeer, OB11Data.filter(e => e.type === OB11MessageDataType.node));
                         if (nodeMsg) {
                             nodeMsgIds.push(nodeMsg.msgId);
                             MessageUnique.createMsg(selfPeer, nodeMsg.msgId);
