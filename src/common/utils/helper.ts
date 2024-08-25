@@ -3,10 +3,10 @@ import fs from 'fs';
 import os from 'node:os';
 import { QQLevel } from '@/core';
 
-export async function solveProblem<T extends (...arg: any[]) => any>(func: T): Promise<ReturnType<T> | undefined> {
-    return new Promise<ReturnType<T> | undefined>(async (resolve) => {
+export async function solveProblem<T extends (...arg: any[]) => any>(func: T, ...args: Parameters<T>): Promise<ReturnType<T> | undefined> {
+    return new Promise<ReturnType<T> | undefined>((resolve) => {
         try {
-            const result = func();
+            const result = func(...args);
             resolve(result);
         } catch (e) {
             resolve(undefined);
@@ -14,10 +14,10 @@ export async function solveProblem<T extends (...arg: any[]) => any>(func: T): P
     });
 }
 
-export async function solveAsyncProblem<T extends (...arg: any[]) => Promise<any>>(func: T): Promise<Awaited<ReturnType<T>> | undefined> {
+export async function solveAsyncProblem<T extends (...args: any[]) => Promise<any>>(func: T, ...args: Parameters<T>): Promise<Awaited<ReturnType<T>> | undefined> {
     return new Promise<Awaited<ReturnType<T>> | undefined>(async (resolve) => {
         try {
-            const result = await func();
+            const result = await func(...args);
             resolve(result);
         } catch (e) {
             resolve(undefined);
