@@ -238,9 +238,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                     const AllElement: SendMessageElement[][] = [MixElement, ...SingleElement].filter(e => e !== undefined && e.length !== 0);
                     const MsgNodeList: Promise<RawMessage | undefined>[] = [];
                     for (const sendElementsSplitElement of AllElement) {
-                        MsgNodeList.push(sendMsg(this.CoreContext, selfPeer, sendElementsSplitElement, [], true).catch(_ => new Promise((resolve) => {
-                            resolve(undefined);
-                        })));
+                        MsgNodeList.push(sendMsg(this.CoreContext, selfPeer, sendElementsSplitElement, [], true).catch(_ => undefined));
                     }
                     (await Promise.allSettled(MsgNodeList)).map((result) => {
                         if (result.status === 'fulfilled' && result.value) {
@@ -301,7 +299,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         };
         const logger = this.CoreContext.context.logger;
         const NTQQMsgApi = this.CoreContext.apis.MsgApi;
-        //logDebug('克隆的目标消息', msg);
+        //msg 为待克隆消息
 
         const sendElements: SendMessageElement[] = [];
 
