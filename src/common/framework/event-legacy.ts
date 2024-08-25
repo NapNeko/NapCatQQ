@@ -1,7 +1,7 @@
 import { NodeIQQNTWrapperSession } from '@/core/wrapper/wrapper';
 import { randomUUID } from 'crypto';
 
-interface Internal_MapKey {
+interface InternalMapKey {
     timeout: number;
     createtime: number;
     func: (...arg: any[]) => any;
@@ -11,14 +11,14 @@ interface Internal_MapKey {
 export type ListenerClassBase = Record<string, string>;
 
 export interface ListenerIBase {
-    // eslint-disable-next-line @typescript-eslint/no-misused-new
     new(listener: any): ListenerClassBase;
+    [key: string]: any;
 }
 
 export class LegacyNTEventWrapper {
     private WrapperSession: NodeIQQNTWrapperSession | undefined; //WrapperSession
     private listenerManager: Map<string, ListenerClassBase> = new Map<string, ListenerClassBase>(); //ListenerName-Unique -> Listener实例
-    private EventTask = new Map<string, Map<string, Map<string, Internal_MapKey>>>(); //tasks ListenerMainName -> ListenerSubName-> uuid -> {timeout,createtime,func}
+    private EventTask = new Map<string, Map<string, Map<string, InternalMapKey>>>(); //tasks ListenerMainName -> ListenerSubName-> uuid -> {timeout,createtime,func}
 
     constructor(
         wrapperSession: NodeIQQNTWrapperSession
@@ -33,7 +33,6 @@ export class LegacyNTEventWrapper {
             {},
             {
                 get(target: any, prop: any, receiver: any) {
-                    // console.log('get', prop, typeof target[prop]);
                     if (typeof target[prop] === 'undefined') {
                         // 如果方法不存在，返回一个函数，这个函数调用existentMethod
                         return (...args: any[]) => {
@@ -84,16 +83,14 @@ export class LegacyNTEventWrapper {
 
     //统一回调清理事件
     async dispatcherListener(ListenerMainName: string, ListenerSubName: string, ...args: any[]) {
-        //console.log("[EventDispatcher]",ListenerMainName, ListenerSubName, ...args);
         this.EventTask.get(ListenerMainName)
             ?.get(ListenerSubName)
             ?.forEach((task, uuid) => {
-                //console.log(task.func, uuid, task.createtime, task.timeout);
                 if (task.createtime + task.timeout < Date.now()) {
                     this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.delete(uuid);
                     return;
                 }
-                if (task.checker && task.checker(...args)) {
+                if (task?.checker?.(...args)) {
                     task.func(...args);
                 }
             });
@@ -228,7 +225,7 @@ export class LegacyNTEventWrapper {
                 this.createListenerFunction(ListenerMainName);
                 const EventFunc = this.createEventFunction<EventType>(EventName);
                 retEvent = await EventFunc!(...(args as any[]));
-                if(!checkerEvent(retEvent)){
+                if (!checkerEvent(retEvent)) {
                     clearTimeout(Timeouter);
                     reject(
                         new Error(
