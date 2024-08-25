@@ -249,8 +249,9 @@ export class NapCatOneBot11Adapter {
             }
         };
         const msgIdSend = new LRUCache<string, boolean>(100);
+        const recallMsgs = new LRUCache<string, boolean>(100);
         msgListener.onMsgInfoListUpdate = async msgList => {
-            this.emitRecallMsg(msgList)
+            this.emitRecallMsg(msgList, recallMsgs)
                 .catch(e => this.context.logger.logError('处理消息失败', e));
 
             for (const msg of msgList.filter(e => e.senderUin == this.core.selfInfo.uin)) {
@@ -492,10 +493,11 @@ export class NapCatOneBot11Adapter {
         }).catch(e => this.context.logger.logError('constructPrivateEvent error: ', e));
     }
 
-    private async emitRecallMsg(msgList: RawMessage[]) {
+    private async emitRecallMsg(msgList: RawMessage[], cache: LRUCache<string, boolean>) {
         for (const message of msgList) {
             // log("message update", message.sendStatus, message.msgId, message.msgSeq)
-            if (message.recallTime != '0') { //todo: 这个判断方法不太好，应该使用灰色消息元素来判断?
+            if (message.recallTime != '0'  && !cache.get(message.msgId)) { //todo: 这个判断方法不太好，应该使用灰色消息元素来判断?
+                cache.put(message.msgId, true)
                 // 撤回消息上报
                 const oriMessageId = MessageUnique.getShortIdByMsgId(message.msgId);
                 if (!oriMessageId) {
