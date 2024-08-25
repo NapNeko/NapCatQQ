@@ -36,7 +36,7 @@ export async function sendMsg(coreContext: NapCatCore, peer: Peer, sendElements:
     const NTQQMsgApi = coreContext.apis.MsgApi;
     const logger = coreContext.context.logger;
     if (!sendElements.length) {
-        throw new Error ('消息体无法解析, 请检查是否发送了不支持的消息类型');
+        throw new Error('消息体无法解析, 请检查是否发送了不支持的消息类型');
     }
     let totalSize = 0;
     let timeout = 10000;
@@ -95,7 +95,7 @@ async function createContext(coreContext: NapCatCore, payload: OB11PostSendMsg, 
     }
     if ((contextMode === ContextMode.Private || contextMode === ContextMode.Normal) && payload.user_id) {
         const Uid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());
-        if (!Uid) throw '无法获取用户信息';
+        if (!Uid) throw new Error('无法获取用户信息');
         const isBuddy = await NTQQFriendApi.isBuddy(Uid);
         if (!isBuddy) {
             const ret = await NTQQMsgApi.getTempChatInfo(ChatType.KCHATTYPETEMPC2CFROMGROUP, Uid);
@@ -125,7 +125,7 @@ async function createContext(coreContext: NapCatCore, payload: OB11PostSendMsg, 
             guildId: '',
         };
     }
-    throw '请指定 group_id 或 user_id';
+    throw new Error('请指定 group_id 或 user_id');
 }
 
 function getSpecialMsgNum(payload: OB11PostSendMsg, msgType: OB11MessageDataType): number {
@@ -274,7 +274,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         let retMsgIds: string[] = [];
         if (needSendSelf) {
             for (const [, msg] of nodeMsgArray.entries()) {
-                if (msg.peerUid === this.CoreContext.selfInfo.uid){
+                if (msg.peerUid === this.CoreContext.selfInfo.uid) {
                     retMsgIds.push(msg.msgId);
                     continue;
                 }
