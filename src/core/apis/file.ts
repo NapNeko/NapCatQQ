@@ -159,7 +159,6 @@ export class NTQQFileApi {
         }
         let thumb = path.replace(`${pathLib.sep}Ori${pathLib.sep}`, `${pathLib.sep}Thumb${pathLib.sep}`);
         thumb = pathLib.dirname(thumb);
-        // log("thumb 目录", thumb)
         let videoInfo = {
             width: 1920, height: 1080,
             time: 15,
@@ -169,7 +168,6 @@ export class NTQQFileApi {
         };
         try {
             videoInfo = await getVideoInfo(path, logger);
-            //logDebug('视频信息', videoInfo);
         } catch (e) {
             logger.logError('获取视频信息失败', e);
         }
@@ -253,11 +251,11 @@ export class NTQQFileApi {
             path: silkPath,
             duration,
         } = await encodeSilk(pttPath, this.core.NapCatTempPath, this.core.context.logger);
-        // log("生成语音", silkPath, duration);
+        // 生成语音 Path: silkPath Time: duration
         if (!silkPath) {
             throw '语音转换失败, 请检查语音文件是否正常';
         }
-        const { md5, fileName, path, fileSize } = await this.core.apis.FileApi.uploadFile(silkPath!, ElementType.PTT);
+        const { md5, fileName, path, fileSize } = await this.core.apis.FileApi.uploadFile(silkPath, ElementType.PTT);
         if (fileSize === 0) {
             throw '文件异常，大小为0';
         }
