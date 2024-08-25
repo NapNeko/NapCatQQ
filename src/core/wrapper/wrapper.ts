@@ -1,11 +1,6 @@
 import { NodeIDependsAdapter, NodeIDispatcherAdapter, NodeIGlobalAdapter } from '../adapters';
 import {
-    NodeIKernelBuddyListener,
-    NodeIKernelGroupListener,
-    NodeIKernelLoginListener,
-    NodeIKernelMsgListener,
-    NodeIKernelProfileListener,
-    NodeIKernelSessionListener,
+    NodeIKernelSessionListener
 } from '../listeners';
 import {
     NodeIKernelAvatarService,
@@ -278,20 +273,11 @@ export interface NodeIQQNTWrapperEngine {
 export interface WrapperNodeApi {
     [key: string]: any;
 
-    NodeIKernelBuddyListener: NodeIKernelBuddyListener;
-    NodeIKernelGroupListener: NodeIKernelGroupListener;
     NodeQQNTWrapperUtil: NodeQQNTWrapperUtil;
     NodeIQQNTWrapperSession: NodeIQQNTWrapperSession;
-    NodeIKernelMsgListener: NodeIKernelMsgListener;
     NodeIQQNTWrapperEngine: NodeIQQNTWrapperEngine;
-    NodeIGlobalAdapter: NodeIGlobalAdapter;
-    NodeIDependsAdapter: NodeIDependsAdapter;
-    NodeIDispatcherAdapter: NodeIDispatcherAdapter;
-    NodeIKernelSessionListener: NodeIKernelSessionListener;
     NodeIKernelLoginService: NodeIKernelLoginService;
-    NodeIKernelLoginListener: NodeIKernelLoginListener;
     NodeIKernelProfileService: NodeIKernelProfileService;
-    NodeIKernelProfileListener: NodeIKernelProfileListener;
 }
 
 export enum PlatformType {

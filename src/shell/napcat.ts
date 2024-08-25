@@ -1,7 +1,7 @@
 import type { SelfInfo } from '@/core/entities';
 
 import { LogWrapper } from '@/common/utils/log';
-import { LoginListener, NodeIKernelSessionListener } from '@/core/listeners';
+import { NodeIKernelLoginListener, NodeIKernelSessionListener } from '@/core/listeners';
 import { NodeIDispatcherAdapter, NodeIDependsAdapter, NodeIGlobalAdapter } from '@/core/adapters';
 import { NapCatPathWrapper } from '@/common/framework/napcat';
 import {
@@ -93,7 +93,7 @@ export async function NCoreInitShell() {
     }
 
     const selfInfo = await new Promise<SelfInfo>((resolve, reject) => {
-        const loginListener = new LoginListener();
+        const loginListener = new NodeIKernelLoginListener();
 
         // from constructor
         loginListener.onUserLoggedIn = (userid: string) => {
@@ -190,7 +190,7 @@ export async function NCoreInitShell() {
                 logger.log(`可用于快速登录的 QQ：\n${historyLoginList
                     .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
                     .join('\n')
-                    }`);
+                }`);
             }
             loginService.getQRCodePicture();
         }

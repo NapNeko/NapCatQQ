@@ -9,7 +9,7 @@ export interface LoginInitConfig {
     hostName: string;
 }
 
-export interface passwordLoginRetType {
+export interface PasswordLoginRetType {
     result: string,
     loginErrorInfo: {
         step: number;
@@ -23,7 +23,7 @@ export interface passwordLoginRetType {
     }
 }
 
-export interface passwordLoginArgType {
+export interface PasswordLoginArgType {
     uin: string;
     passwordMd5: string;//passwMD5
     step: number;//猜测是需要二次认证 参数 一次为0
@@ -77,7 +77,7 @@ export interface NodeIKernelLoginService {
 
     quickLoginWithUin(uin: string): Promise<QuickLoginResult>;
 
-    passwordLogin(param: passwordLoginArgType): Promise<any>;
+    passwordLogin(param: PasswordLoginArgType): Promise<any>;
 
     getQRCodePicture(): boolean;
 }

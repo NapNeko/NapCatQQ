@@ -1,10 +1,9 @@
 import {
-    BuddyListener,
+    NodeIKernelBuddyListener,
     BuddyReqType,
     ChatType,
-    GroupListener,
     InstanceContext,
-    MsgListener,
+    NodeIKernelMsgListener,
     NapCatCore,
     RawMessage,
     SendStatusType,
@@ -12,6 +11,7 @@ import {
     GroupNotifyMsgType,
     GroupNotifyMsgStatus,
     DataSource,
+    NodeIKernelGroupListener,
 } from '@/core';
 import { OB11Config, OB11ConfigLoader } from '@/onebot/helper/config';
 import { OneBotApiContextType } from '@/onebot/types';
@@ -219,7 +219,7 @@ export class NapCatOneBot11Adapter {
     }
 
     private initMsgListener() {
-        const msgListener = new MsgListener();
+        const msgListener = new NodeIKernelMsgListener();
         msgListener.onInputStatusPush = async data => {
             const uin = await this.core.apis.UserApi.getUinByUidV2(data.fromUin);
             this.context.logger.log(`[Notice] [输入状态] ${uin} ${data.statusText}`);
@@ -284,7 +284,7 @@ export class NapCatOneBot11Adapter {
     }
 
     private initBuddyListener() {
-        const buddyListener = new BuddyListener();
+        const buddyListener = new NodeIKernelBuddyListener();
 
         buddyListener.onBuddyReqChange = async reqs => {
             this.core.apis.FriendApi.clearBuddyReqUnreadCnt();
@@ -319,7 +319,7 @@ export class NapCatOneBot11Adapter {
     }
 
     private initGroupListener() {
-        const groupListener = new GroupListener();
+        const groupListener = new NodeIKernelGroupListener();
 
         groupListener.onGroupNotifiesUpdated = async (_, notifies) => {
             //console.log('ob11 onGroupNotifiesUpdated', notifies[0]);

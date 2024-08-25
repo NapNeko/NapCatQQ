@@ -1,17 +1,4 @@
-export interface IKernelRobotListener {
-    onRobotFriendListChanged(...args: unknown[]): void;
-
-    onRobotListChanged(...args: unknown[]): void;
-
-    onRobotProfileChanged(...args: unknown[]): void;
-}
-
-export interface NodeIKernelRobotListener extends IKernelRobotListener {
-    // eslint-disable-next-line @typescript-eslint/no-misused-new
-    new(adapter: IKernelRobotListener): NodeIKernelRobotListener;
-}
-
-export class KernelRobotListener implements IKernelRobotListener {
+export class NodeIKernelRobotListener{
     onRobotFriendListChanged(...args: unknown[]) {
 
     }

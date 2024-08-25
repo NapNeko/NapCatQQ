@@ -59,14 +59,14 @@ export class NTEventChannel extends EventEmitter {
     }
 
     async createEventWithListener<EventType extends (...args: any) => any, ListenerType extends (...args: any) => any>
-        (
-            eventName: string,
-            listenerName: string,
-            waitTimes = 1,
-            timeout: number = 3000,
-            checker: (...args: Parameters<ListenerType>) => boolean,
-            ...eventArg: Parameters<EventType>
-        ) {
+    (
+        eventName: string,
+        listenerName: string,
+        waitTimes = 1,
+        timeout: number = 3000,
+        checker: (...args: Parameters<ListenerType>) => boolean,
+        ...eventArg: Parameters<EventType>
+    ) {
         return new Promise<[EventRet: Awaited<ReturnType<EventType>>, ...Parameters<ListenerType>]>(async (resolve, reject) => {
             const ListenerNameList = listenerName.split('/');
             const ListenerMainName = ListenerNameList[0];
