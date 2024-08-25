@@ -59,7 +59,6 @@ export class OneBotMsgApi {
 
     rawToOb11Converters: RawToOb11Converters = {
         textElement: async element => {
-            console.log(element);
             if (element.atType === AtType.notAt) {
                 let text = element.content;
                 if (!text.trim()) {
