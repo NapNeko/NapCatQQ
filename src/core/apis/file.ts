@@ -101,7 +101,7 @@ export class NTQQFileApi {
     ): Promise<SendFileElement> {
         const { fileName: _fileName, path, fileSize } = await this.core.apis.FileApi.uploadFile(filePath, ElementType.FILE);
         if (fileSize === 0) {
-            throw '文件异常，大小为0';
+            throw new Error('文件异常，大小为0');
         }
         return {
             elementType: ElementType.FILE,
@@ -122,7 +122,7 @@ export class NTQQFileApi {
     ): Promise<SendPicElement> {
         const { md5, fileName, path, fileSize } = await this.core.apis.FileApi.uploadFile(picPath, ElementType.PIC, subType);
         if (fileSize === 0) {
-            throw '文件异常，大小为0';
+            throw new Error('文件异常，大小为0');
         }
         const imageSize = await this.core.apis.FileApi.getImageSize(picPath);
         const picElement: any = {
@@ -155,7 +155,7 @@ export class NTQQFileApi {
         const logger = this.core.context.logger;
         const { fileName: _fileName, path, fileSize, md5 } = await this.core.apis.FileApi.uploadFile(filePath, ElementType.VIDEO);
         if (fileSize === 0) {
-            throw '文件异常，大小为0';
+            throw new Error('文件异常，大小为0');
         }
         let thumb = path.replace(`${pathLib.sep}Ori${pathLib.sep}`, `${pathLib.sep}Thumb${pathLib.sep}`);
         thumb = pathLib.dirname(thumb);
@@ -253,11 +253,11 @@ export class NTQQFileApi {
         } = await encodeSilk(pttPath, this.core.NapCatTempPath, this.core.context.logger);
         // 生成语音 Path: silkPath Time: duration
         if (!silkPath) {
-            throw '语音转换失败, 请检查语音文件是否正常';
+            throw new Error('语音转换失败, 请检查语音文件是否正常');
         }
         const { md5, fileName, path, fileSize } = await this.core.apis.FileApi.uploadFile(silkPath, ElementType.PTT);
         if (fileSize === 0) {
-            throw '文件异常，大小为0';
+            throw new Error('文件异常，大小为0');
         }
         if (converted) {
             fsPromises.unlink(silkPath);
