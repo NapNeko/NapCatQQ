@@ -32,7 +32,6 @@ export class NTQQSystemApi {
             arkJson: string
         }>>(
             'NodeIKernelCollectionService/collectionArkShare',
-            5000,
             '1717662698058',
             );
         return ret;
