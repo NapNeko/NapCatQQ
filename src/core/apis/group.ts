@@ -318,7 +318,7 @@ export class NTQQGroupApi {
             throw ('获取群成员列表出错,' + result.errMsg);
         }
 
-        //logDebug(`获取群(${groupQQ})成员列表结果:`, `finish: ${result.result.finish}`); //, Array.from(result.result.infos.values()));
+        this.context.logger.logDebug(`获取群(${groupQQ})成员列表结果:`, `members: ${result.result.infos.size}`); //, Array.from(result.result.infos.values()));
         return result.result.infos;
         /*
         console.log(sceneId);

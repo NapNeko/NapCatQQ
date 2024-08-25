@@ -197,12 +197,12 @@ export class NapCatCore {
             }
         };
         this.context.session.getGroupService().addKernelGroupListener(
-            proxiedListenerOf(profileListener, this.context.logger) as any
+            proxiedListenerOf(groupListener, this.context.logger) as any
         );
     }
     checkAdminEvent(groupCode: string, memberNew: GroupMember, memberOld: GroupMember | undefined): boolean {
         if (memberNew.role !== memberOld?.role) {
-            this.context.logger.log(`群 ${groupCode} ${memberNew.nick} 角色变更为 ${memberNew.role === 3 ? '管理员' : '群员'}`);
+            this.context.logger.logDebug(`群 ${groupCode} ${memberNew.nick} 角色变更为 ${memberNew.role === 3 ? '管理员' : '群员'}`);
             return true;
         }
         return false;
