@@ -724,6 +724,7 @@ export class OneBotMsgApi {
 
         if (messagePostFormat === 'string') {
             resMsg.message = msgAsCQCode;
+            resMsg.raw_message = msgAsCQCode;
         } else {
             resMsg.message = msgSegments;
             resMsg.raw_message = msgAsCQCode;
