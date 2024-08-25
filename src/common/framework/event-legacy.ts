@@ -95,21 +95,10 @@ export class LegacyNTEventWrapper {
 
     async callNoListenerEvent<EventType extends (...args: any[]) => Promise<any> | any>(
         EventName = '',
-        timeout: number = 3000,
         ...args: Parameters<EventType>
-    ) {
-        return new Promise<Awaited<ReturnType<EventType>>>(async (resolve, reject) => {
-            const EventFunc = this.createEventFunction<EventType>(EventName);
-            let complete = false;
-            setTimeout(() => {
-                if (!complete) {
-                    reject(new Error('NTEvent EventName:' + EventName + ' timeout'));
-                }
-            }, timeout);
-            const retData = await EventFunc!(...args);
-            complete = true;
-            resolve(retData);
-        });
+    ): Promise<Awaited<ReturnType<EventType>>> {
+        const EventFunc = this.createEventFunction<EventType>(EventName);
+        return EventFunc!(...args)
     }
 
     async RegisterListen<ListenerType extends (...args: any[]) => void>(
