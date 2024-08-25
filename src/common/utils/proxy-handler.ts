@@ -3,7 +3,6 @@ import { LogWrapper } from './log';
 export function proxyHandlerOf(logger: LogWrapper) {
     return {
         get(target: any, prop: any, receiver: any) {
-            // console.log('get', prop, typeof target[prop]);
             if (typeof target[prop] === 'undefined') {
                 // 如果方法不存在，返回一个函数，这个函数调用existentMethod
                 return (..._args: unknown[]) => {
