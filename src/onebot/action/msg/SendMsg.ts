@@ -11,7 +11,7 @@ import fsPromise from 'node:fs/promises';
 import { decodeCQCode } from '@/onebot/helper/cqcode';
 import { MessageUnique } from '@/common/utils/MessageUnique';
 import { ChatType, ElementType, NapCatCore, Peer, RawMessage, SendMessageElement } from '@/core';
-import BaseAction from '../../BaseAction';
+import BaseAction from '../BaseAction';
 
 export interface ReturnDataType {
     message_id: number;
