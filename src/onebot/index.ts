@@ -35,7 +35,7 @@ import { OB11GroupRequestEvent } from '@/onebot/event/request/OB11GroupRequest';
 import { OB11FriendRecallNoticeEvent } from '@/onebot/event/notice/OB11FriendRecallNoticeEvent';
 import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecallNoticeEvent';
 import { LRUCache } from '@/common/utils/LRU';
-import { NT2GroupEvent, NT2PrivateEvent, RawNTMsg2Onebot } from './helper';
+import { NT2GroupEvent, NT2PrivateEvent } from './helper';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -258,7 +258,7 @@ export class NapCatOneBot11Adapter {
                 if (msg.sendStatus == SendStatusType.KSEND_STATUS_SUCCESS && !msgIdSend.get(msg.msgId)) {
                     msgIdSend.put(msg.msgId, true);
                     // 完成后再post
-                    RawNTMsg2Onebot(this.core, this, msg)
+                    this.apiContext.MsgApi.parseMessage(msg)
                         .then((ob11Msg) => {
                             if (!ob11Msg) return;
                             ob11Msg.target_id = parseInt(msg.peerUin);
@@ -456,7 +456,7 @@ export class NapCatOneBot11Adapter {
     private async emitMsg(message: RawMessage) {
         const { debug, reportSelfMessage, messagePostFormat } = this.configLoader.configData;
         this.context.logger.logDebug('收到新消息 RawMessage', message);
-        RawNTMsg2Onebot(this.core, this, message, messagePostFormat).then((ob11Msg) => {
+        this.apiContext.MsgApi.parseMessage(message, messagePostFormat).then((ob11Msg) => {
             if (!ob11Msg) return;
             this.context.logger.logDebug('转化为 OB11Message', ob11Msg);
             if (debug) {
@@ -497,7 +497,7 @@ export class NapCatOneBot11Adapter {
         for (const message of msgList) {
             // log("message update", message.sendStatus, message.msgId, message.msgSeq)
             if (message.recallTime != '0'  && !cache.get(message.msgId)) { //todo: 这个判断方法不太好，应该使用灰色消息元素来判断?
-                cache.put(message.msgId, true)
+                cache.put(message.msgId, true);
                 // 撤回消息上报
                 const oriMessageId = MessageUnique.getShortIdByMsgId(message.msgId);
                 if (!oriMessageId) {

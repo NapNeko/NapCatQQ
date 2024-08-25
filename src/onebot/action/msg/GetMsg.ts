@@ -1,10 +1,8 @@
-import { OB11Message } from '../../types';
-import { OB11Constructor } from '@/onebot/helper/converter';
+import { OB11Message } from '@/onebot';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/utils/MessageUnique';
-import { RawNTMsg2Onebot } from '@/onebot/helper';
 
 
 export type ReturnDataType = OB11Message
@@ -38,13 +36,14 @@ class GetMsg extends BaseAction<Payload, OB11Message> {
         const msg = await NTQQMsgApi.getMsgsByMsgId(
             peer,
             [msgIdWithPeer?.MsgId || payload.message_id.toString()]);
-        const retMsg = await RawNTMsg2Onebot(this.CoreContext, this.OneBotContext, msg.msgList[0], 'array');
+        const retMsg = await this.OneBotContext.apiContext.MsgApi.parseMessage(msg.msgList[0], 'array');
         if (!retMsg) throw Error('消息为空');
         try {
             retMsg.message_id = MessageUnique.createMsg(peer, msg.msgList[0].msgId)!;
             retMsg.message_seq = retMsg.message_id;
             retMsg.real_id = retMsg.message_id;
         } catch (e) {
+            // ignored
         }
         return retMsg;
     }

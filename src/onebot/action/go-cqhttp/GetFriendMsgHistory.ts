@@ -1,11 +1,9 @@
 import BaseAction from '../BaseAction';
-import { OB11Message } from '../../types';
+import { OB11Message } from '@/onebot';
 import { ActionName } from '../types';
 import { ChatType, RawMessage } from '@/core/entities';
-import { OB11Constructor } from '@/onebot/helper/converter';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/utils/MessageUnique';
-import { RawNTMsg2Onebot } from '@/onebot/helper';
 
 interface Response {
     messages: OB11Message[];
@@ -54,7 +52,9 @@ export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
             msg.id = MessageUnique.createMsg({ guildId: '', chatType: msg.chatType, peerUid: msg.peerUid }, msg.msgId);
         }));
         //转换消息
-        const ob11MsgList = (await Promise.all(msgList.map(msg => RawNTMsg2Onebot(this.CoreContext, this.OneBotContext, msg)))).filter(msg => !!msg);
+        const ob11MsgList = (await Promise.all(
+            msgList.map(msg => this.OneBotContext.apiContext.MsgApi.parseMessage(msg)))
+        ).filter(msg => msg !== undefined);
         return { 'messages': ob11MsgList };
     }
 }
