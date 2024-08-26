@@ -123,10 +123,9 @@ export class NTEventChannel extends EventEmitter {
 
     async callEvent<EventType extends (...args: any[]) => Promise<any> | any>(
         EventName = '', timeout: number = 3000, ...args: Parameters<EventType>) {
-        return new Promise<Awaited<ReturnType<EventType>>>(async (resolve) => {
+        return new Promise<Awaited<ReturnType<EventType>>>((resolve) => {
             const EventFunc = this.createEventFunction<EventType>(EventName);
-            const retData = await EventFunc!(...args);
-            resolve(retData);
+            EventFunc!(...args).then((retData: Awaited<ReturnType<EventType>> | PromiseLike<Awaited<ReturnType<EventType>>>) => resolve(retData));
         });
     }
 }
