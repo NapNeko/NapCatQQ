@@ -622,7 +622,10 @@ export class OneBotMsgApi {
             }
             try {
                 const musicJson = await RequestUtil.HttpGetJson<any>(signUrl, 'POST', postData);
-                return this.ob11ToRawConverters.json(musicJson, context);
+                return this.ob11ToRawConverters.json({
+                    data: { data: musicJson },
+                    type: OB11MessageDataType.json
+                }, context);
             } catch (e) {
                 this.core.context.logger.logError('生成音乐消息失败', e);
             }
