@@ -11,18 +11,13 @@ interface InternalMapKey {
 
 export type ListenerClassBase = Record<string, string>;
 
-export interface ListenerIBase {
-    new(listener: any): ListenerClassBase;
-    [key: string]: any;
-}
-
 export class LegacyNTEventWrapper {
     private WrapperSession: NodeIQQNTWrapperSession | undefined; //WrapperSession
     private listenerManager: Map<string, ListenerClassBase> = new Map<string, ListenerClassBase>(); //ListenerName-Unique -> Listener实例
     private EventTask = new Map<string, Map<string, Map<string, InternalMapKey>>>(); //tasks ListenerMainName -> ListenerSubName-> uuid -> {timeout,createtime,func}
 
     constructor(
-        wrapperSession: NodeIQQNTWrapperSession
+        wrapperSession: NodeIQQNTWrapperSession,
     ) {
         this.WrapperSession = wrapperSession;
     }
@@ -115,15 +110,17 @@ export class LegacyNTEventWrapper {
             const id = randomUUID();
             let complete = 0;
             let retData: Parameters<ListenerType> | undefined = undefined;
-            const databack = () => {
+
+            function sendDataCallback() {
                 if (complete == 0) {
                     reject(new Error(' ListenerName:' + ListenerName + ' timeout'));
                 } else {
                     resolve(retData!);
                 }
-            };
-            const timeoutRef = setTimeout(databack, timeout);
-            const eventCallbak = {
+            }
+
+            const timeoutRef = setTimeout(sendDataCallback, timeout);
+            const eventCallback = {
                 timeout: timeout,
                 createtime: Date.now(),
                 checker: checker,
@@ -132,7 +129,7 @@ export class LegacyNTEventWrapper {
                     retData = args;
                     if (complete >= waitTimes) {
                         clearTimeout(timeoutRef);
-                        databack();
+                        sendDataCallback();
                     }
                 },
             };
@@ -142,7 +139,7 @@ export class LegacyNTEventWrapper {
             if (!this.EventTask.get(ListenerMainName)?.get(ListenerSubName)) {
                 this.EventTask.get(ListenerMainName)?.set(ListenerSubName, new Map());
             }
-            this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.set(id, eventCallbak);
+            this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.set(id, eventCallback);
             this.createListenerFunction(ListenerMainName);
         });
     }
@@ -173,6 +170,7 @@ export class LegacyNTEventWrapper {
                 let complete = 0;
                 let retData: Parameters<ListenerType> | undefined = undefined;
                 let retEvent: any = {};
+
                 function sendDataCallback() {
                     if (complete == 0) {
                         reject(
