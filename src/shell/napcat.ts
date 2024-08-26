@@ -12,7 +12,7 @@ import {
     NodeIQQNTWrapperSession,
     WrapperNodeApi,
 } from '@/core';
-import { QQBasicInfoWrapper } from '@/common/utils/QQBasicInfo';
+import { QQBasicInfoWrapper } from '@/common/utils/qq-basic-info';
 import { hostname, systemVersion } from '@/common/utils/system';
 import { genSessionConfig } from '@/core/wrapper/helper';
 import { proxiedListenerOf } from '@/common/utils/proxy-handler';

@@ -27,7 +27,7 @@ import { OneBotFriendApi, OneBotGroupApi, OneBotMsgApi, OneBotUserApi } from '@/
 import { ActionMap, createActionMap } from '@/onebot/action';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { OB11InputStatusEvent } from '@/onebot/event/notice/OB11InputStatusEvent';
-import { MessageUnique } from '@/common/utils/MessageUnique';
+import { MessageUnique } from '@/common/utils/message-unique';
 import { proxiedListenerOf } from '@/common/utils/proxy-handler';
 import { OB11FriendRequestEvent } from '@/onebot/event/request/OB11FriendRequest';
 import { OB11GroupAdminNoticeEvent } from '@/onebot/event/notice/OB11GroupAdminNoticeEvent';
@@ -35,7 +35,7 @@ import { GroupDecreaseSubType, OB11GroupDecreaseEvent } from '@/onebot/event/not
 import { OB11GroupRequestEvent } from '@/onebot/event/request/OB11GroupRequest';
 import { OB11FriendRecallNoticeEvent } from '@/onebot/event/notice/OB11FriendRecallNoticeEvent';
 import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecallNoticeEvent';
-import { LRUCache } from '@/common/utils/LRU';
+import { LRUCache } from '@/common/utils/lru-cache';
 import { NT2GroupEvent, NT2PrivateEvent } from './helper';
 import { NodeIKernelRecentContactListener } from '@/core/listeners/NodeIKernelRecentContactListener';
 
@@ -135,7 +135,7 @@ export class NapCatOneBot11Adapter {
                     // log("recent contact", msgList, arg0, arg1);
                 }
             });
-        }
+        };
     }
 
     private async reloadNetwork(prev: OB11Config, now: OB11Config) {
@@ -233,7 +233,7 @@ export class NapCatOneBot11Adapter {
         const msgListener = new NodeIKernelMsgListener();
         msgListener.onRecvSysMsg = msg => {
             //console.log('onRecvSysMsg', Buffer.from(msg).toString('hex'));
-        }
+        };
         msgListener.onInputStatusPush = async data => {
             const uin = await this.core.apis.UserApi.getUinByUidV2(data.fromUin);
             this.context.logger.log(`[Notice] [输入状态] ${uin} ${data.statusText}`);

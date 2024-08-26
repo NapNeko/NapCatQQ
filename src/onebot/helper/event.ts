@@ -7,7 +7,7 @@ import { OB11GroupDecreaseEvent } from "../event/notice/OB11GroupDecreaseEvent";
 import { OB11GroupUploadNoticeEvent } from "../event/notice/OB11GroupUploadNoticeEvent";
 import { OB11GroupPokeEvent } from "../event/notice/OB11PokeEvent";
 import { OB11GroupEssenceEvent } from "../event/notice/OB11GroupEssenceEvent";
-import { MessageUnique } from "@/common/utils/MessageUnique";
+import { MessageUnique } from "@/common/utils/message-unique";
 import { OB11GroupTitleEvent } from "../event/notice/OB11GroupTitleEvent";
 import { NapCatCore, RawMessage, ChatType, NTGrayTipElementSubTypeV2, TipGroupElementType, Peer } from '@/core';
 

@@ -1,5 +1,5 @@
 import { UUIDConverter } from '@/common/utils/helper';
-import { MessageUnique } from '@/common/utils/MessageUnique';
+import { MessageUnique } from '@/common/utils/message-unique';
 import {
     AtType,
     ChatType,

@@ -1,7 +1,7 @@
 import { ActionName } from '../types';
 import BaseAction from '../BaseAction';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import { MessageUnique } from '@/common/utils/MessageUnique';
+import { MessageUnique } from '@/common/utils/message-unique';
 import { NodeIKernelMsgListener } from '@/core';
 
 const SchemaData = {
@@ -32,13 +32,8 @@ class DeleteMsg extends BaseAction<Payload, void> {
                 'NodeIKernelMsgListener/onMsgInfoListUpdate',
                 1,
                 5000,
-                (msgs) => {
-                    if (msgs.find(m => m.msgId === msg.MsgId && m.recallTime !== '0')) {
-                        return true;
-                    }
-                    return false;
-                },
-            ).catch(e => new Promise<undefined>((resolve, reject) => {
+                (msgs) => !!msgs.find(m => m.msgId === msg.MsgId && m.recallTime !== '0')
+            ).catch(() => new Promise<undefined>((resolve) => {
                 resolve(undefined);
             }));
             await NTQQMsgApi.recallMsg(msg.Peer, [msg.MsgId]);
