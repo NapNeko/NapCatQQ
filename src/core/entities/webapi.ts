@@ -57,7 +57,7 @@ export interface WebApiGroupMemberRet {
 
 export interface WebApiGroupNoticeFeed {
     u: number;//发送者
-    fid: string;//fid
+    fid: string;//fid,notice_id
     pubt: number;//时间
     msg: {
         text: string
