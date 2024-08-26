@@ -6,7 +6,7 @@ export default class GetStatus extends BaseAction<any, any> {
 
     async _handle(payload: any): Promise<any> {
         return {
-            online: !!this.CoreContext.selfInfo.online,
+            online: !!this.core.selfInfo.online,
             good: true,
             stat: {},
         };

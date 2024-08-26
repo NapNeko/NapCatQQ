@@ -19,11 +19,11 @@ type Payload = FromSchema<typeof SchemaData>;
 
 class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
     actionName = ActionName.GetGroupMemberInfo;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQUserApi = this.CoreContext.apis.UserApi;
-        const NTQQGroupApi = this.CoreContext.apis.GroupApi;
+        const NTQQUserApi = this.core.apis.UserApi;
+        const NTQQGroupApi = this.core.apis.GroupApi;
         const isNocache = typeof payload.no_cache === 'string' ? payload.no_cache === 'true' : !!payload.no_cache;
         const uid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());
         if (!uid) throw new Error (`Uin2Uid Error ${payload.user_id}不存在`);
@@ -33,14 +33,14 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
         ]);
         if (member.status !== 'fulfilled') throw new Error (`群(${payload.group_id})成员${payload.user_id}不存在 ${member.reason}`);
         if (info.status === 'fulfilled') {
-            this.CoreContext.context.logger.logDebug("群成员详细信息结果", info.value);
+            this.core.context.logger.logDebug("群成员详细信息结果", info.value);
             Object.assign(member, info.value);
         } else {
-            this.CoreContext.context.logger.logDebug(`获取群成员详细信息失败, 只能返回基础信息 ${info.reason}`);
+            this.core.context.logger.logDebug(`获取群成员详细信息失败, 只能返回基础信息 ${info.reason}`);
         }
         const date = Math.round(Date.now() / 1000);
         const retMember = OB11Constructor.groupMember(payload.group_id.toString(), member.value as GroupMember);
-        const Member = await this.CoreContext.apis.GroupApi.getGroupMember(payload.group_id.toString(), retMember.user_id);
+        const Member = await this.core.apis.GroupApi.getGroupMember(payload.group_id.toString(), retMember.user_id);
         retMember.last_sent_time = parseInt(Member?.lastSpeakTime || date.toString());
         retMember.join_time = parseInt(Member?.joinTime || date.toString());
         return retMember;

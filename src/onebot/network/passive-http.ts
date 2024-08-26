@@ -14,7 +14,7 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
     constructor(
         public port: number,
         public token: string,
-        public coreContext: NapCatCore,
+        public core: NapCatCore,
         public actions: ActionMap,
     ) {
     }
@@ -26,7 +26,7 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
     open() {
         try {
             if (this.isOpen) {
-                this.coreContext.context.logger.logError('Cannot open a closed HTTP server');
+                this.core.context.logger.logError('Cannot open a closed HTTP server');
                 return;
             }
             if (!this.isOpen) {
@@ -34,7 +34,7 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
                 this.isOpen = true;
             }
         } catch (e) {
-            this.coreContext.context.logger.logError(`[OneBot] [HTTP Server Adapter] Boot Error: ${e}`);
+            this.core.context.logger.logError(`[OneBot] [HTTP Server Adapter] Boot Error: ${e}`);
         }
 
     }
@@ -66,7 +66,7 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
         this.app.use((req, res) => this.handleRequest(req, res));
 
         this.server.listen(this.port, () => {
-            this.coreContext.context.logger.log(`[OneBot] [HTTP Server Adapter] Start On Port ${this.port}`);
+            this.core.context.logger.log(`[OneBot] [HTTP Server Adapter] Start On Port ${this.port}`);
         });
     }
 
@@ -84,7 +84,7 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
 
     private async handleRequest(req: Request, res: Response) {
         if (!this.isOpen) {
-            this.coreContext.context.logger.log(`[OneBot] [HTTP Server Adapter] Server is closed`);
+            this.core.context.logger.log(`[OneBot] [HTTP Server Adapter] Server is closed`);
             return res.json(OB11Response.error('Server is closed', 200));
         }
 

@@ -16,10 +16,10 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export class GetGroupEssence extends BaseAction<Payload, GroupEssenceMsgRet> {
     actionName = ActionName.GoCQHTTP_GetEssenceMsg;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQWebApi = this.CoreContext.apis.WebApi;
+        const NTQQWebApi = this.core.apis.WebApi;
         const ret = await NTQQWebApi.getGroupEssenceMsg(payload.group_id.toString(), (payload.pages || "0").toString());
         if (!ret) {
             throw new Error('获取失败');

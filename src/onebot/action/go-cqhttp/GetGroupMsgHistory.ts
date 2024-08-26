@@ -24,10 +24,10 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export default class GoCQHTTPGetGroupMsgHistory extends BaseAction<Payload, Response> {
     actionName = ActionName.GoCQHTTP_GetGroupMsgHistory;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<Response> {
-        const NTQQMsgApi = this.CoreContext.apis.MsgApi;
+        const NTQQMsgApi = this.core.apis.MsgApi;
         //处理参数
         const isReverseOrder = payload.reverseOrder || true;
         const MsgCount = +(payload.count ?? 20);
@@ -48,7 +48,7 @@ export default class GoCQHTTPGetGroupMsgHistory extends BaseAction<Payload, Resp
 
         //转换消息
         const ob11MsgList = (await Promise.all(
-            msgList.map(msg => this.OneBotContext.apiContext.MsgApi.parseMessage(msg)))
+            msgList.map(msg => this.obContext.apiContext.MsgApi.parseMessage(msg)))
         ).filter(msg => msg !== undefined);
         return { 'messages': ob11MsgList };
     }

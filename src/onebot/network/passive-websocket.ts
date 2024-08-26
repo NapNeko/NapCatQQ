@@ -1,12 +1,10 @@
 import { IOB11NetworkAdapter, OB11EmitEventContent } from './index';
 import urlParse from 'url';
-import BaseAction from '@/onebot/action/BaseAction';
 import { WebSocket, WebSocketServer } from 'ws';
 import { Mutex } from 'async-mutex';
 import { OB11Response } from '../action/OB11Response';
 import { ActionName } from '../action/types';
 import { NapCatCore } from '@/core';
-import { NapCatOneBot11Adapter } from '..';
 import { LogWrapper } from '@/common/utils/log';
 import { OB11HeartbeatEvent } from '../event/meta/OB11HeartbeatEvent';
 import { IncomingMessage } from 'http';
@@ -20,7 +18,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     isOpen: boolean = false;
     hasBeenClosed: boolean = false;
     heartbeatInterval: number = 0;
-    coreContext: NapCatCore;
+    core: NapCatCore;
     logger: LogWrapper;
     private heartbeatIntervalId: NodeJS.Timeout | null = null;
 
@@ -29,11 +27,11 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
         port: number,
         heartbeatInterval: number,
         token: string,
-        coreContext: NapCatCore,
+        core: NapCatCore,
         public actions: ActionMap
     ) {
-        this.coreContext = coreContext;
-        this.logger = coreContext.context.logger;
+        this.core = core;
+        this.logger = core.context.logger;
 
         this.heartbeatInterval = heartbeatInterval;
         this.wsServer = new WebSocketServer({
@@ -41,7 +39,6 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             host: ip,
             maxPayload: 1024 * 1024 * 1024,
         });
-        const core = coreContext;
         this.wsServer.on('connection', async (wsClient, wsReq) => {
             if (!this.isOpen) {
                 wsClient.close();
@@ -120,7 +117,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             this.wsClientsMutex.runExclusive(async () => {
                 this.wsClients.forEach((wsClient) => {
                     if (wsClient.readyState === WebSocket.OPEN) {
-                        wsClient.send(JSON.stringify(new OB11HeartbeatEvent(this.coreContext, this.heartbeatInterval, this.coreContext.selfInfo.online, true)));
+                        wsClient.send(JSON.stringify(new OB11HeartbeatEvent(this.core, this.heartbeatInterval, this.core.selfInfo.online, true)));
                     }
                 });
             });

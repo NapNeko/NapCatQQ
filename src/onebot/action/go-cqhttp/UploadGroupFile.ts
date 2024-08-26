@@ -22,19 +22,19 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export default class GoCQHTTPUploadGroupFile extends BaseAction<Payload, null> {
     actionName = ActionName.GoCQHTTP_UploadGroupFile;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
         let file = payload.file;
         if (fs.existsSync(file)) {
             file = `file://${file}`;
         }
-        const downloadResult = await uri2local(this.CoreContext.NapCatTempPath, file);
+        const downloadResult = await uri2local(this.core.NapCatTempPath, file);
         if (!downloadResult.success) {
             throw new Error(downloadResult.errMsg);
         }
-        const sendFileEle = await this.CoreContext.apis.FileApi.createValidSendFileElement(downloadResult.path, payload.name, payload.folder_id);
-        await sendMsg(this.CoreContext, {
+        const sendFileEle = await this.core.apis.FileApi.createValidSendFileElement(downloadResult.path, payload.name, payload.folder_id);
+        await sendMsg(this.core, {
             chatType: ChatType.KCHATTYPEGROUP,
             peerUid: payload.group_id.toString(),
         }, [sendFileEle], [], true);

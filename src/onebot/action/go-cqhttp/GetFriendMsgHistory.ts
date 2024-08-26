@@ -24,12 +24,12 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
     actionName = ActionName.GetFriendMsgHistory;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<Response> {
-        const NTQQUserApi = this.CoreContext.apis.UserApi;
-        const NTQQMsgApi = this.CoreContext.apis.MsgApi;
-        const NTQQFriendApi = this.CoreContext.apis.FriendApi;
+        const NTQQUserApi = this.core.apis.UserApi;
+        const NTQQMsgApi = this.core.apis.MsgApi;
+        const NTQQFriendApi = this.core.apis.FriendApi;
         //处理参数
         const uid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());
         const MsgCount = +(payload.count ?? 20);
@@ -53,7 +53,7 @@ export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
         }));
         //转换消息
         const ob11MsgList = (await Promise.all(
-            msgList.map(msg => this.OneBotContext.apiContext.MsgApi.parseMessage(msg)))
+            msgList.map(msg => this.obContext.apiContext.MsgApi.parseMessage(msg)))
         ).filter(msg => msg !== undefined);
         return { 'messages': ob11MsgList };
     }

@@ -4,10 +4,10 @@ import { NapCatOneBot11Adapter } from '@/onebot';
 
 export class OneBotUserApi {
     obContext: NapCatOneBot11Adapter;
-    coreContext: NapCatCore;
+    core: NapCatCore;
 
-    constructor(obContext: NapCatOneBot11Adapter, coreContext: NapCatCore) {
+    constructor(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
         this.obContext = obContext;
-        this.coreContext = coreContext;
+        this.core = core;
     }
 }

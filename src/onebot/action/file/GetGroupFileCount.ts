@@ -14,10 +14,10 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export class GetGroupFileCount extends BaseAction<Payload, { count: number }> {
     actionName = ActionName.GetGroupFileCount;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQGroupApi = this.CoreContext.apis.GroupApi;
+        const NTQQGroupApi = this.core.apis.GroupApi;
         const ret = await NTQQGroupApi.GetGroupFileCount([payload.group_id?.toString()]);
         return { count: ret.groupFileCounts[0] };
     }

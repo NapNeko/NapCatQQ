@@ -16,11 +16,11 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export class SetQQProfile extends BaseAction<Payload, any | null> {
     actionName = ActionName.SetQQProfile;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQUserApi = this.CoreContext.apis.UserApi;
-        const self = this.CoreContext.selfInfo;
+        const NTQQUserApi = this.core.apis.UserApi;
+        const self = this.core.selfInfo;
         const OldProfile = await NTQQUserApi.getUserDetailInfo(self.uid);
         const ret = await NTQQUserApi.modifySelfProfile({
             nick: payload.nickname,

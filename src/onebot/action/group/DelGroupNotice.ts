@@ -17,10 +17,10 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export class DelGroupNotice extends BaseAction<Payload, any> {
     actionName = ActionName.DelGroupNotice;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQGroupApi = this.CoreContext.apis.GroupApi;
+        const NTQQGroupApi = this.core.apis.GroupApi;
         const group = payload.group_id.toString();
         const feedId = payload.feed_id;
         return await NTQQGroupApi.deleteGroupBulletin(group, feedId);

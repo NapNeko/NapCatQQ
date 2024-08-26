@@ -22,7 +22,7 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
     actionName = ActionName.GoCQHTTP_SendGroupNotice;
 
     async _handle(payload: Payload) {
-        const NTQQGroupApi = this.CoreContext.apis.GroupApi;
+        const NTQQGroupApi = this.core.apis.GroupApi;
         let UploadImage: { id: string, width: number, height: number } | undefined = undefined;
         if (payload.image) {
             //公告图逻辑
@@ -31,7 +31,7 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
                 path,
                 isLocal,
                 success,
-            } = (await uri2local(this.CoreContext.NapCatTempPath, payload.image));
+            } = (await uri2local(this.core.NapCatTempPath, payload.image));
             if (!success) {
                 throw `群公告${payload.image}设置失败,image字段可能格式不正确`;
             }

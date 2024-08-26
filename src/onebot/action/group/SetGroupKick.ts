@@ -17,11 +17,11 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export default class SetGroupKick extends BaseAction<Payload, null> {
     actionName = ActionName.SetGroupKick;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
-        const NTQQGroupApi = this.CoreContext.apis.GroupApi;
-        const NTQQUserApi = this.CoreContext.apis.UserApi;
+        const NTQQGroupApi = this.core.apis.GroupApi;
+        const NTQQUserApi = this.core.apis.UserApi;
         const rejectReq = payload.reject_add_request?.toString() == 'true';
         const uid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());
         if (!uid) throw new Error('get Uid Error');

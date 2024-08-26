@@ -15,10 +15,10 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export default class DelEssenceMsg extends BaseAction<Payload, any> {
     actionName = ActionName.DelEssenceMsg;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<any> {
-        const NTQQGroupApi = this.CoreContext.apis.GroupApi;
+        const NTQQGroupApi = this.core.apis.GroupApi;
         const msg = MessageUnique.getMsgIdAndPeerByShortId(parseInt(payload.message_id.toString()));
         if (!msg) throw new Error('msg not found');
         return await NTQQGroupApi.removeGroupEssence(

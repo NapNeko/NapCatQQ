@@ -16,10 +16,10 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export default class SetGroupCard extends BaseAction<Payload, null> {
     actionName = ActionName.SetGroupCard;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
-        const NTQQGroupApi = this.CoreContext.apis.GroupApi;
+        const NTQQGroupApi = this.core.apis.GroupApi;
         const member = await NTQQGroupApi.getGroupMember(payload.group_id.toString(), payload.user_id.toString());
         member && await NTQQGroupApi.setMemberCard(payload.group_id.toString(), member.uid, payload.card || '');
         return null;

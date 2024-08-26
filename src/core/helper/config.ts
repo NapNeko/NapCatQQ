@@ -7,7 +7,7 @@ export type NapCatConfig = typeof napCatDefaultConfig;
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class NapCatConfigLoader extends ConfigBase<NapCatConfig> {
-    constructor(coreContext: NapCatCore, configPath: string) {
-        super('napcat', coreContext, configPath);
+    constructor(core: NapCatCore, configPath: string) {
+        super('napcat', core, configPath);
     }
 }

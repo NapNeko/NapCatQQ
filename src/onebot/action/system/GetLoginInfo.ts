@@ -7,7 +7,7 @@ class GetLoginInfo extends BaseAction<null, OB11User> {
     actionName = ActionName.GetLoginInfo;
 
     async _handle(payload: null) {
-        return OB11Constructor.selfInfo(this.CoreContext.selfInfo);
+        return OB11Constructor.selfInfo(this.core.selfInfo);
     }
 }
 

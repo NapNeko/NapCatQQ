@@ -26,14 +26,14 @@ const GetFileBase_PayloadSchema = {
 } as const satisfies JSONSchema;
 
 export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
-    PayloadSchema: any = GetFileBase_PayloadSchema;
+    payloadSchema: any = GetFileBase_PayloadSchema;
 
     async _handle(payload: GetFilePayload): Promise<GetFileResponse> {
-        const NTQQFriendApi = this.CoreContext.apis.FriendApi;
-        const NTQQUserApi = this.CoreContext.apis.UserApi;
-        const NTQQMsgApi = this.CoreContext.apis.MsgApi;
-        const NTQQGroupApi = this.CoreContext.apis.GroupApi;
-        const NTQQFileApi = this.CoreContext.apis.FileApi;
+        const NTQQFriendApi = this.core.apis.FriendApi;
+        const NTQQUserApi = this.core.apis.UserApi;
+        const NTQQMsgApi = this.core.apis.MsgApi;
+        const NTQQGroupApi = this.core.apis.GroupApi;
+        const NTQQFileApi = this.core.apis.FileApi;
         let UuidData: {
             high: string;
             low: string;
@@ -90,7 +90,7 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
                 return res;
             }
         } catch {
-            this.CoreContext.context.logger.logDebug('GetFileBase Mode - 1 Error');
+            this.core.context.logger.logDebug('GetFileBase Mode - 1 Error');
         }
 
         const NTSearchNameResult = (await NTQQFileApi.searchfile([payload.file])).resultItems;
@@ -210,7 +210,7 @@ interface GetFile_Payload extends GetFile_Payload_Internal {
 
 export default class GetFile extends GetFileBase {
     actionName = ActionName.GetFile;
-    PayloadSchema = GetFile_PayloadSchema;
+    payloadSchema = GetFile_PayloadSchema;
 
     async _handle(payload: GetFile_Payload): Promise<GetFileResponse> {
         payload.file = payload.file_id;

@@ -14,10 +14,10 @@ const SchemaData = {
 type Payload = FromSchema<typeof SchemaData>;
 export default class SetGroupName extends BaseAction<Payload, null> {
     actionName = ActionName.SetGroupName;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
-        const NTQQGroupApi = this.CoreContext.apis.GroupApi;
+        const NTQQGroupApi = this.core.apis.GroupApi;
         await NTQQGroupApi.setGroupName(payload.group_id.toString(), payload.group_name);
         return null;
     }

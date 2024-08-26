@@ -15,13 +15,13 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export class CreateCollection extends BaseAction<Payload, any> {
     actionName = ActionName.CreateCollection;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        return await this.CoreContext.apis.CollectionApi.createCollection(
-            this.CoreContext.selfInfo.uin,
-            this.CoreContext.selfInfo.uid,
-            this.CoreContext.selfInfo.nick,
+        return await this.core.apis.CollectionApi.createCollection(
+            this.core.selfInfo.uin,
+            this.core.selfInfo.uid,
+            this.core.selfInfo.nick,
             payload.brief, payload.rawData,
         );
     }

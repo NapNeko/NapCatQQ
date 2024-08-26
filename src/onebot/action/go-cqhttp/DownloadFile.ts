@@ -30,12 +30,12 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export default class GoCQHTTPDownloadFile extends BaseAction<Payload, FileResponse> {
     actionName = ActionName.GoCQHTTP_DownloadFile;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<FileResponse> {
         const isRandomName = !payload.name;
         const name = payload.name || randomUUID();
-        const filePath = joinPath(this.CoreContext.NapCatTempPath, name);
+        const filePath = joinPath(this.core.NapCatTempPath, name);
 
         if (payload.base64) {
             fs.writeFileSync(filePath, payload.base64, 'base64');
@@ -51,7 +51,7 @@ export default class GoCQHTTPDownloadFile extends BaseAction<Payload, FileRespon
             if (isRandomName) {
                 // 默认实现要名称未填写时文件名为文件 md5
                 const md5 = await calculateFileMD5(filePath);
-                const newPath = joinPath(this.CoreContext.NapCatTempPath, md5);
+                const newPath = joinPath(this.core.NapCatTempPath, md5);
                 fs.renameSync(filePath, newPath);
                 return { file: newPath };
             }

@@ -5,7 +5,7 @@ import { NapCatCore } from '@/core';
 export type OB11Config = typeof ob11DefaultConfig;
 
 export class OB11ConfigLoader extends ConfigBase<OB11Config> {
-    constructor(coreContext: NapCatCore, configPath: string) {
-        super('onebot11', coreContext, configPath);
+    constructor(core: NapCatCore, configPath: string) {
+        super('onebot11', core, configPath);
     }
 }

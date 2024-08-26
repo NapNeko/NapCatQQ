@@ -9,15 +9,15 @@ import { MessageUnique } from '@/common/utils/MessageUnique';
 
 export class OneBotGroupApi {
     obContext: NapCatOneBot11Adapter;
-    coreContext: NapCatCore;
+    core: NapCatCore;
     GroupMemberList: Map<string, any> = new Map();//此处作为缓存 group_id->memberUin->info
-    constructor(obContext: NapCatOneBot11Adapter, coreContext: NapCatCore) {
+    constructor(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
         this.obContext = obContext;
-        this.coreContext = coreContext;
+        this.core = core;
     }
     async parseGroupBanEvent(GroupCode: string, grayTipElement: GrayTipElement) {
         const groupElement = grayTipElement?.groupElement;
-        const NTQQGroupApi = this.coreContext.apis.GroupApi;
+        const NTQQGroupApi = this.core.apis.GroupApi;
         if (!groupElement?.shutUp) return undefined;
         const memberUid = groupElement.shutUp!.member.uid;
         const adminUid = groupElement.shutUp!.admin.uid;
@@ -35,7 +35,7 @@ export class OneBotGroupApi {
         const adminUin = (await NTQQGroupApi.getGroupMember(GroupCode, adminUid))?.uin;
         if (memberUin && adminUin) {
             return new OB11GroupBanEvent(
-                this.coreContext,
+                this.core,
                 parseInt(GroupCode),
                 parseInt(memberUin),
                 parseInt(adminUin),
@@ -46,7 +46,7 @@ export class OneBotGroupApi {
         return undefined;
     }
     async parseGroupIncreaseEvent(GroupCode: string, grayTipElement: GrayTipElement) {
-        this.coreContext.context.logger.logDebug('收到新人被邀请进群消息', grayTipElement);
+        this.core.context.logger.logDebug('收到新人被邀请进群消息', grayTipElement);
         const xmlElement = grayTipElement.xmlElement;
         if (xmlElement?.content) {
             const regex = /jp="(\d+)"/g;
@@ -61,7 +61,7 @@ export class OneBotGroupApi {
             if (matches.length === 2) {
                 const [inviter, invitee] = matches;
                 return new OB11GroupIncreaseEvent(
-                    this.coreContext,
+                    this.core,
                     parseInt(GroupCode),
                     parseInt(invitee),
                     parseInt(inviter),
@@ -72,7 +72,7 @@ export class OneBotGroupApi {
         return undefined;
     }
     async parseGroupMemberIncreaseEvent(GroupCode: string, grayTipElement: GrayTipElement) {
-        const NTQQGroupApi = this.coreContext.apis.GroupApi;
+        const NTQQGroupApi = this.core.apis.GroupApi;
         const groupElement = grayTipElement?.groupElement;
         if (!groupElement) return undefined;
         const member = await NTQQGroupApi.getGroupMemberV2(GroupCode, groupElement.memberUid);
@@ -81,7 +81,7 @@ export class OneBotGroupApi {
         if (memberUin) {
             const operatorUin = adminMember?.uin || memberUin;
             return new OB11GroupIncreaseEvent(
-                this.coreContext,
+                this.core,
                 parseInt(GroupCode),
                 parseInt(memberUin),
                 parseInt(operatorUin)
@@ -90,16 +90,16 @@ export class OneBotGroupApi {
         return undefined;
     }
     async parseGroupKickEvent(GroupCode: string, grayTipElement: GrayTipElement) {
-        const NTQQGroupApi = this.coreContext.apis.GroupApi;
-        const NTQQUserApi = this.coreContext.apis.UserApi;
+        const NTQQGroupApi = this.core.apis.GroupApi;
+        const NTQQUserApi = this.core.apis.UserApi;
         const groupElement = grayTipElement?.groupElement;
         if (!groupElement) return undefined;
         const adminUin = (await NTQQGroupApi.getGroupMember(GroupCode, groupElement.adminUid))?.uin || (await NTQQUserApi.getUidByUinV2(groupElement.adminUid));
         if (adminUin) {
             return new OB11GroupDecreaseEvent(
-                this.coreContext,
+                this.core,
                 parseInt(GroupCode),
-                parseInt(this.coreContext.selfInfo.uin),
+                parseInt(this.core.selfInfo.uin),
                 parseInt(adminUin),
                 'kick_me'
             );
@@ -107,12 +107,12 @@ export class OneBotGroupApi {
         return undefined;
     }
     async parseGroupEmjioLikeEvent(GroupCode: string, grayTipElement: GrayTipElement) {
-        const NTQQMsgApi = this.coreContext.apis.MsgApi;
+        const NTQQMsgApi = this.core.apis.MsgApi;
         const emojiLikeData = new fastXmlParser.XMLParser({
             ignoreAttributes: false,
             attributeNamePrefix: '',
         }).parse(grayTipElement.xmlElement.content);
-        this.coreContext.context.logger.logDebug('收到表情回应我的消息', emojiLikeData);
+        this.core.context.logger.logDebug('收到表情回应我的消息', emojiLikeData);
         try {
             const senderUin = emojiLikeData.gtip.qq.jp;
             const msgSeq = emojiLikeData.gtip.url.msgseq;
@@ -130,7 +130,7 @@ export class OneBotGroupApi {
             //console.log("表情回应消息长度检测", msgSeq, replyMsg.elements);
             if (!replyMsg) throw new Error('找不到回应消息');
             return new OB11GroupMsgEmojiLikeEvent(
-                this.coreContext,
+                this.core,
                 parseInt(GroupCode),
                 parseInt(senderUin),
                 MessageUnique.getShortIdByMsgId(replyMsg.msgId)!,
@@ -140,7 +140,7 @@ export class OneBotGroupApi {
                 }],
             );
         } catch (e: any) {
-            this.coreContext.context.logger.logError('解析表情回应消息失败', e.stack);
+            this.core.context.logger.logError('解析表情回应消息失败', e.stack);
         }
         return undefined;
     }

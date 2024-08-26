@@ -13,17 +13,17 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export default class GetRecentContact extends BaseAction<Payload, any> {
     actionName = ActionName.GetRecentContact;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQUserApi = this.CoreContext.apis.UserApi;
-        const NTQQMsgApi = this.CoreContext.apis.MsgApi;
+        const NTQQUserApi = this.core.apis.UserApi;
+        const NTQQMsgApi = this.core.apis.MsgApi;
         const ret = await NTQQUserApi.getRecentContactListSnapShot(+(payload.count || 10));
         return await Promise.all(ret.info.changedList.map(async (t) => {
             const FastMsg = await NTQQMsgApi.getMsgsByMsgId({ chatType: t.chatType, peerUid: t.peerUid }, [t.msgId]);
             if (FastMsg.msgList.length > 0) {
                 //扩展ret.info.changedList
-                const lastestMsg = await this.OneBotContext.apiContext.MsgApi.parseMessage(FastMsg.msgList[0], 'array');
+                const lastestMsg = await this.obContext.apiContext.MsgApi.parseMessage(FastMsg.msgList[0], 'array');
                 return {
                     lastestMsg: lastestMsg,
                     peerUin: t.peerUin,

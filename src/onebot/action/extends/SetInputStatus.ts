@@ -19,8 +19,8 @@ export class SetInputStatus extends BaseAction<Payload, any> {
     actionName = ActionName.SetInputStatus;
 
     async _handle(payload: Payload) {
-        const NTQQUserApi = this.CoreContext.apis.UserApi;
-        const NTQQMsgApi = this.CoreContext.apis.MsgApi;
+        const NTQQUserApi = this.core.apis.UserApi;
+        const NTQQMsgApi = this.core.apis.MsgApi;
         let peer: Peer;
         if (payload.group_id) {
             peer = {
