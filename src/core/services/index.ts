@@ -14,6 +14,8 @@ export * from './NodeIKernelRobotService';
 export * from './NodeIKernelRichMediaService';
 export * from './NodeIKernelDbToolsService';
 export * from './NodeIKernelTipOffService';
+export * from './NodeIKernelSearchService';
+export * from './NodeIKernelCollectionService';
 
 import type {
     NodeIKernelAvatarService,
@@ -31,6 +33,8 @@ import type {
     NodeIKernelStorageCleanService,
     NodeIKernelTicketService,
     NodeIKernelTipOffService,
+    NodeIKernelSearchService,
+    NodeIKernelCollectionService,
 } from '.';
 
 export type ServiceNamingMapping = {
@@ -49,4 +53,6 @@ export type ServiceNamingMapping = {
     NodeIKernelRichMediaService: NodeIKernelRichMediaService;
     NodeIKernelDbToolsService: NodeIKernelDbToolsService;
     NodeIKernelTipOffService: NodeIKernelTipOffService;
+    NodeIKernelSearchService: NodeIKernelSearchService,
+    NodeIKernelCollectionService: NodeIKernelCollectionService;
 };

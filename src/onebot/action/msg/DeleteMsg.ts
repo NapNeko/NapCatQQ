@@ -27,8 +27,7 @@ class DeleteMsg extends BaseAction<Payload, void> {
         const NTQQMsgApi = this.core.apis.MsgApi;
         const msg = MessageUnique.getMsgIdAndPeerByShortId(Number(payload.message_id));
         if (msg) {
-            const ret = this.core.eventWrapper.RegisterListen<NodeIKernelMsgListener['onMsgInfoListUpdate']>
-            (
+            const ret = this.core.eventWrapper.registerListen(
                 'NodeIKernelMsgListener/onMsgInfoListUpdate',
                 1,
                 5000,

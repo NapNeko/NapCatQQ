@@ -1,5 +1,5 @@
 import { AnyCnameRecord } from 'node:dns';
-import { BizKey, ModifyProfileParams, SimpleInfo, UserDetailInfoByUin } from '@/core';
+import { BizKey, ModifyProfileParams, SimpleInfo, UserDetailInfoByUin, UserDetailInfoByUinV2 } from '@/core';
 import { NodeIKernelProfileListener } from '@/core';
 import { GeneralCallResult } from '@/core/services/common';
 
@@ -86,7 +86,7 @@ export interface NodeIKernelProfileService {
 
     getUserDetailInfoWithBizInfo(uid: string, Biz: BizKey[]): Promise<GeneralCallResult>;
 
-    getUserDetailInfoByUin(uin: string): Promise<UserDetailInfoByUin>;
+    getUserDetailInfoByUin(uin: string): Promise<UserDetailInfoByUinV2>;
 
     getZplanAvatarInfos(args: string[]): Promise<unknown>;
 

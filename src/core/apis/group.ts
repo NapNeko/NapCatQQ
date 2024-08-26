@@ -268,17 +268,16 @@ export class NTQQGroupApi {
 
     async getGroupMemberV2(GroupCode: string, uid: string, forced = false) {
         type EventType = NodeIKernelGroupService['getMemberInfo'];
-        const Listener = this.core.eventWrapper.RegisterListen<(params: any) => void>
-            (
+        const Listener = this.core.eventWrapper.registerListen(
             'NodeIKernelGroupListener/onMemberInfoChange',
             1,
             forced ? 5000 : 250,
-            (params) => {
-                return params === GroupCode;
-            },
-            );
-        const EventFunc = this.core.eventWrapper.createEventFunction<EventType>('NodeIKernelGroupService/getMemberInfo');
-        const retData = await EventFunc!(GroupCode, [uid], forced);
+            (params) => params === GroupCode,
+        );
+        const retData = await (
+            this.core.eventWrapper
+                .createEventFunction('NodeIKernelGroupService/getMemberInfo')
+        )!(GroupCode, [uid], forced);
         if (retData.result !== 0) {
             throw new Error(`${retData.errMsg}`);
         }
@@ -324,12 +323,10 @@ export class NTQQGroupApi {
     }
 
     async getArkJsonGroupShare(GroupCode: string) {
-        const ret = await this.core.eventWrapper.callNoListenerEvent<(GroupId: string) => Promise<GeneralCallResult & {
-            arkJson: string
-        }>>(
+        const ret = await this.core.eventWrapper.callNoListenerEvent(
             'NodeIKernelGroupService/getGroupRecommendContactArkJson',
             GroupCode,
-            );
+        ) as GeneralCallResult & { arkJson: string };
         return ret.arkJson;
     }
 
