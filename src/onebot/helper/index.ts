@@ -1,3 +1,3 @@
 export * from './config';
-export * from './converter';
+export * from './entities';
 export * from './event';

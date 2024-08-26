@@ -24,7 +24,7 @@ import {
     OB11MessageFileBase,
     OB11MessageForward,
 } from '@/onebot';
-import { OB11Constructor } from '../helper';
+import { OB11Entities } from '../helper';
 import { EventType } from '@/onebot/event/OB11BaseEvent';
 import { encodeCQCode } from '@/onebot/helper/cqcode';
 import { uri2local } from '@/common/utils/file';
@@ -689,7 +689,7 @@ export class OneBotMsgApi {
             let member = await NTQQGroupApi.getGroupMember(msg.peerUin, msg.senderUin);
             if (!member) member = await NTQQGroupApi.getGroupMember(msg.peerUin, msg.senderUin);
             if (member) {
-                resMsg.sender.role = OB11Constructor.groupMemberRole(member.role);
+                resMsg.sender.role = OB11Entities.groupMemberRole(member.role);
                 resMsg.sender.nickname = member.nick;
             }
         } else if (msg.chatType == ChatType.KCHATTYPEC2C) {

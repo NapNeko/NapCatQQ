@@ -1,5 +1,5 @@
-import { OB11GroupMember } from '../../types';
-import { OB11Constructor } from '@/onebot/helper/converter';
+import { OB11GroupMember } from '@/onebot';
+import { OB11Entities } from '@/onebot/helper/entities';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
@@ -26,7 +26,7 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
         const groupMembersArr = Array.from(groupMembers.values());
 
         let _groupMembers = groupMembersArr.map(item => {
-            return OB11Constructor.groupMember(payload.group_id.toString(), item);
+            return OB11Entities.groupMember(payload.group_id.toString(), item);
         });
 
         const MemberMap: Map<number, OB11GroupMember> = new Map<number, OB11GroupMember>();

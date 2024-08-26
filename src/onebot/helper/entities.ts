@@ -1,9 +1,8 @@
 import { calcQQLevel } from '@/common/utils/helper';
-import { SelfInfo, FriendV2, Friend, Sex, GroupMember, User, Group } from '@/core';
-import { OB11User, OB11GroupMemberRole, OB11UserSex, OB11GroupMember, OB11Group } from '../types';
+import { Friend, FriendV2, Group, GroupMember, SelfInfo, Sex, User } from '@/core';
+import { OB11Group, OB11GroupMember, OB11GroupMemberRole, OB11User, OB11UserSex } from '../types';
 
-
-export class OB11Constructor {
+export class OB11Entities {
     static selfInfo(selfInfo: SelfInfo): OB11User {
         return {
             user_id: parseInt(selfInfo.uin),
@@ -12,35 +11,25 @@ export class OB11Constructor {
     }
 
     static friendsV2(friends: FriendV2[]): OB11User[] {
-        const data: OB11User[] = [];
-        friends.forEach(friend => {
-            const sexValue = this.sex(friend.baseInfo.sex!);
-            data.push({
-                ...friend.baseInfo,
-                ...friend.coreInfo,
-                user_id: parseInt(friend.coreInfo.uin),
-                nickname: friend.coreInfo.nick,
-                remark: friend.coreInfo.nick,
-                sex: sexValue,
-                level: 0,
-            });
-        });
-        return data;
+        return friends.map(rawFriend => ({
+            ...rawFriend.baseInfo,
+            ...rawFriend.coreInfo,
+            user_id: parseInt(rawFriend.coreInfo.uin),
+            nickname: rawFriend.coreInfo.nick,
+            remark: rawFriend.coreInfo.nick,
+            sex: this.sex(rawFriend.baseInfo.sex!),
+            level: 0,
+        }));
     }
 
     static friends(friends: Friend[]): OB11User[] {
-        const data: OB11User[] = [];
-        friends.forEach(friend => {
-            const sexValue = this.sex(friend.sex!);
-            data.push({
-                user_id: parseInt(friend.uin),
-                nickname: friend.nick,
-                remark: friend.remark,
-                sex: sexValue,
-                level: 0,
-            });
-        });
-        return data;
+        return friends.map(rawFriend => ({
+            user_id: parseInt(rawFriend.uin),
+            nickname: rawFriend.nick,
+            remark: rawFriend.remark,
+            sex: this.sex(rawFriend.sex!),
+            level: 0,
+        }));
     }
 
     static groupMemberRole(role: number): OB11GroupMemberRole | undefined {
@@ -52,12 +41,11 @@ export class OB11Constructor {
     }
 
     static sex(sex: Sex): OB11UserSex {
-        const sexMap = {
+        return {
             [Sex.male]: OB11UserSex.male,
             [Sex.female]: OB11UserSex.female,
             [Sex.unknown]: OB11UserSex.unknown,
-        };
-        return sexMap[sex] || OB11UserSex.unknown;
+        }[sex] || OB11UserSex.unknown;
     }
 
     static groupMember(group_id: string, member: GroupMember): OB11GroupMember {
@@ -66,7 +54,7 @@ export class OB11Constructor {
             user_id: parseInt(member.uin),
             nickname: member.nick,
             card: member.cardName,
-            sex: OB11Constructor.sex(member.sex!),
+            sex: OB11Entities.sex(member.sex!),
             age: member.age ?? 0,
             area: '',
             level: '0',
@@ -78,18 +66,17 @@ export class OB11Constructor {
             card_changeable: true,
             is_robot: member.isRobot,
             shut_up_timestamp: member.shutUpTime,
-            role: OB11Constructor.groupMemberRole(member.role),
+            role: OB11Entities.groupMemberRole(member.role),
             title: member.memberSpecialTitle || '',
         };
     }
 
     static stranger(user: User): OB11User {
-        //logDebug('construct ob11 stranger', user);
         return {
             ...user,
             user_id: parseInt(user.uin),
             nickname: user.nick,
-            sex: OB11Constructor.sex(user.sex!),
+            sex: OB11Entities.sex(user.sex!),
             age: 0,
             qid: user.qid,
             login_days: 0,
@@ -108,6 +95,6 @@ export class OB11Constructor {
     }
 
     static groups(groups: Group[]): OB11Group[] {
-        return groups.map(OB11Constructor.group);
+        return groups.map(OB11Entities.group);
     }
 }
