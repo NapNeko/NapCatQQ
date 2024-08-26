@@ -155,7 +155,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
                 return;
             }
             receiveData.params = (receiveData?.params) ? receiveData.params : {};//兼容类型验证
-            const retdata = await this.actions.get(receiveData.action)?.websocketHandle(receiveData.params, echo || '');
+            const retdata = await this.actions.get(receiveData.action)?.websocketHandle(receiveData.params, echo ?? '');
             const packet = Object.assign({}, retdata);
             this.checkStateAndReply<any>(packet, wsClient);
         } catch (e) {
