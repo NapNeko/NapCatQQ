@@ -14,7 +14,6 @@ import {
     NodeIKernelGroupListener,
 } from '@/core';
 import { OB11Config, OB11ConfigLoader } from '@/onebot/helper/config';
-import { StableOneBotApiWrapper } from '@/onebot/types';
 import {
     OB11ActiveHttpAdapter,
     OB11ActiveWebSocketAdapter,
@@ -23,7 +22,14 @@ import {
     OB11PassiveWebSocketAdapter,
 } from '@/onebot/network';
 import { NapCatPathWrapper } from '@/common/framework/napcat';
-import { OneBotFriendApi, OneBotGroupApi, OneBotMsgApi, OneBotUserApi } from '@/onebot/api';
+import {
+    OneBotFriendApi,
+    OneBotGroupApi,
+    OneBotMsgApi,
+    OneBotQuickActionApi,
+    OneBotUserApi,
+    StableOneBotApiWrapper,
+} from '@/onebot/api';
 import { ActionMap, createActionMap } from '@/onebot/action';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { OB11InputStatusEvent } from '@/onebot/event/notice/OB11InputStatusEvent';
@@ -60,6 +66,7 @@ export class NapCatOneBot11Adapter {
             UserApi: new OneBotUserApi(this, core),
             FriendApi: new OneBotFriendApi(this, core),
             MsgApi: new OneBotMsgApi(this, core),
+            QuickActionApi: new OneBotQuickActionApi(this, core),
         };
         this.actions = createActionMap(this, core);
         this.networkManager = new OB11NetworkManager();
@@ -129,7 +136,7 @@ export class NapCatOneBot11Adapter {
     }
     initRecentContactListener() {
         const recentContactListener = new NodeIKernelRecentContactListener();
-        recentContactListener.onRecentContactNotification = function (msgList: any[], arg0: { msgListUnreadCnt: string }, arg1: number) {
+        recentContactListener.onRecentContactNotification = function (msgList: any[], /* arg0: { msgListUnreadCnt: string }, arg1: number */) {
             msgList.forEach((msg) => {
                 if (msg.chatType == ChatType.KCHATTYPEGROUP) {
                     // log("recent contact", msgList, arg0, arg1);
@@ -231,9 +238,9 @@ export class NapCatOneBot11Adapter {
 
     private initMsgListener() {
         const msgListener = new NodeIKernelMsgListener();
-        msgListener.onRecvSysMsg = msg => {
+        /* msgListener.onRecvSysMsg = msg => {
             //console.log('onRecvSysMsg', Buffer.from(msg).toString('hex'));
-        };
+        }; */
         msgListener.onInputStatusPush = async data => {
             const uin = await this.core.apis.UserApi.getUinByUidV2(data.fromUin);
             this.context.logger.log(`[Notice] [输入状态] ${uin} ${data.statusText}`);

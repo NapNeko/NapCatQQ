@@ -21,7 +21,7 @@ export class NTQQMsgApi {
     async getMsgEmojiLikesList(peer: Peer, msgSeq: string, emojiId: string, emojiType: string, count: number = 20) {
         //console.log(peer, msgSeq, emojiId, emojiType, count);
         //注意此处emojiType 可选值一般为1-2 2好像是unicode表情dec值 大部分情况 Taged M likiowa
-        return this.context.session.getMsgService().getMsgEmojiLikesList(peer, msgSeq, emojiId, emojiType, '', false, 20);
+        return this.context.session.getMsgService().getMsgEmojiLikesList(peer, msgSeq, emojiId, emojiType, '', false, count);
     }
 
     //  napCatCore: NapCatCore | null = null;
@@ -50,7 +50,7 @@ export class NTQQMsgApi {
     }
 
     async getLastestMsgByUids(peer: Peer, count: number = 20, isReverseOrder: boolean = false) {
-        const ret = await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {
+        return await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {
             chatInfo: peer,
             filterMsgType: [],
             filterSendersUid: [],
@@ -60,7 +60,6 @@ export class NTQQMsgApi {
             isIncludeCurrent: true,
             pageLimit: count,
         });
-        return ret;
     }
 
     async getMsgsByMsgId(peer: Peer | undefined, msgIds: string[] | undefined) {
@@ -79,7 +78,7 @@ export class NTQQMsgApi {
     }
 
     async queryMsgsWithFilterExWithSeq(peer: Peer, msgSeq: string) {
-        const ret = await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', msgSeq, {
+        return await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', msgSeq, {
             chatInfo: peer,//此处为Peer 为关键查询参数 没有啥也没有 by mlik iowa
             filterMsgType: [],
             filterSendersUid: [],
@@ -89,7 +88,6 @@ export class NTQQMsgApi {
             isIncludeCurrent: true,
             pageLimit: 1,
         });
-        return ret;
     }
 
     async getMsgsBySeqAndCount(peer: Peer, seq: string, count: number, desc: boolean, z: boolean) {
@@ -99,7 +97,7 @@ export class NTQQMsgApi {
         const DateNow = Math.floor(Date.now() / 1000);
         const filterMsgFromTime = (DateNow - 300).toString();
         const filterMsgToTime = DateNow.toString();
-        const ret = await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', msgSeq, {
+        return await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', msgSeq, {
             chatInfo: peer,//此处为Peer 为关键查询参数 没有啥也没有 by mlik iowa
             filterMsgType: [],
             filterSendersUid: [],
@@ -109,24 +107,26 @@ export class NTQQMsgApi {
             isIncludeCurrent: true,
             pageLimit: 100,
         });
-        return ret;
     }
     async setMsgRead(peer: Peer) {
         return this.context.session.getMsgService().setMsgRead(peer);
     }
 
     async getGroupFileList(GroupCode: string, params: GetFileListParam) {
-        const [, groupFileListResult] = await this.core.eventWrapper.callNormalEvent(
+        const [, groupFileListResult] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelRichMediaService/getGroupFileList',
             'NodeIKernelMsgListener/onGroupFileInfoUpdate',
-            1,
-            5000,
+            [
+                GroupCode,
+                params
+            ],
+            () => true,
             ( /* groupFileListResult: GroupFileInfoUpdateParamType */) => {
                 //Developer Mlikiowa Todo: 此处有问题 无法判断是否成功
                 return true;
             },
-            GroupCode,
-            params,
+            1,
+            5000,
         );
         return groupFileListResult.item;
     }
@@ -175,12 +175,17 @@ export class NTQQMsgApi {
         }
         const msgId = await this.generateMsgUniqueId(peer.chatType, await this.getServerTime());
         peer.guildId = msgId;
-        const [, msgList] = await this.core.eventWrapper.callNormalEvent(
+        const [, msgList] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelMsgService/sendMsg',
             'NodeIKernelMsgListener/onMsgInfoListUpdate',
-            1,
-            timeout,
-            (msgRecords: RawMessage[]) => {
+            [
+                '0',
+                peer,
+                msgElements,
+                new Map()
+            ],
+            () => true,
+            msgRecords => {
                 for (const msgRecord of msgRecords) {
                     if (msgRecord.guildId === msgId && msgRecord.sendStatus === SendStatusType.KSEND_STATUS_SUCCESS) {
                         return true;
@@ -188,10 +193,8 @@ export class NTQQMsgApi {
                 }
                 return false;
             },
-            '0',
-            peer,
-            msgElements,
-            new Map(),
+            1,
+            timeout,
         );
         return msgList.find(msgRecord => {
             if (msgRecord.guildId === msgId) {
@@ -216,12 +219,18 @@ export class NTQQMsgApi {
         const msgInfos = msgIds.map(id => {
             return { msgId: id, senderShowName: this.core.selfInfo.nick };
         });
-        const [, msgList] = await this.core.eventWrapper.callNormalEvent(
+        const [, msgList] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelMsgService/multiForwardMsgWithComment',
             'NodeIKernelMsgListener/onMsgInfoListUpdate',
-            1,
-            5000,
-            (msgRecords: RawMessage[]) => {
+            [
+                msgInfos,
+                srcPeer,
+                destPeer,
+                [],
+                new Map(),
+            ],
+            () => true,
+            (msgRecords) => {
                 for (const msgRecord of msgRecords) {
                     if (msgRecord.peerUid == destPeer.peerUid && msgRecord.senderUid == this.core.selfInfo.uid) {
                         return true;
@@ -229,11 +238,6 @@ export class NTQQMsgApi {
                 }
                 return false;
             },
-            msgInfos,
-            srcPeer,
-            destPeer,
-            [],
-            new Map(),
         );
         for (const msg of msgList) {
             const arkElement = msg.elements.find(ele => ele.arkElement);
