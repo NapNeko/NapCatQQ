@@ -22,7 +22,7 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
     async _handle(payload: Payload) {
         const NTQQGroupApi = this.core.apis.GroupApi;
         const NTQQWebApi = this.core.apis.WebApi;
-        const groupMembers = await NTQQGroupApi.getGroupMembers(payload.group_id.toString());
+        const groupMembers = await NTQQGroupApi.getGroupMembersV2(payload.group_id.toString());
         const groupMembersArr = Array.from(groupMembers.values());
 
         let _groupMembers = groupMembersArr.map(item => {
