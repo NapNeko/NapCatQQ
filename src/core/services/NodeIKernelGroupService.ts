@@ -1,5 +1,6 @@
 import { NodeIKernelGroupListener } from '@/core/listeners/NodeIKernelGroupListener';
 import {
+    GroupExt0xEF0InfoFilter,
     GroupExtParam,
     GroupMember,
     GroupMemberRole,
@@ -12,6 +13,8 @@ import { GeneralCallResult } from '@/core/services/common';
 //高版本的接口不应该随意使用 使用应该严格进行pr审核 同时部分ipc中未出现的接口不要过于依赖 应该做好数据兜底
 
 export interface NodeIKernelGroupService {
+    //getGroupExt0xEF0Info(this.$enableGroupCodes, this.$bannedGroupCodes, this.$filter, this.$forceFetch
+    getGroupExt0xEF0Info(enableGroupCodes: string[], bannedGroupCodes: string[], filter: GroupExt0xEF0InfoFilter, forceFetch: boolean): Promise<GeneralCallResult>;
     kickMemberV2(param: KickMemberV2Req): Promise<GeneralCallResult>;
 
     quitGroupV2(param: { groupCode: string; needDeleteLocalMsg: boolean; }): Promise<GeneralCallResult>;

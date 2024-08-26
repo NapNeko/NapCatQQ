@@ -6,6 +6,50 @@ export interface KickMemberInfo {
     optMemberUid: string,
     optBytesMsg: string,
 }
+//getGroupDetailInfo GroupCode,GroupInfoSource
+export enum GroupInfoSource {
+    KUNSPECIFIED,
+    KBIGDATACARD,
+    KDATACARD,
+    KNOTICE,
+    KAIO,
+    KRECENTCONTACT,
+    KMOREPANEL
+}
+export interface GroupExt0xEF0InfoFilter {
+    bindGuildId: number;
+    blacklistExpireTime: number;
+    companyId: number;
+    essentialMsgPrivilege: number;
+    essentialMsgSwitch: number;
+    fullGroupExpansionSeq: number;
+    fullGroupExpansionSwitch: number;
+    gangUpId: number;
+    groupAioBindGuildId: number;
+    groupBindGuildIds: number;
+    groupBindGuildSwitch: number;
+    groupExcludeGuildIds: number;
+    groupExtFlameData: number;
+    groupFlagPro1: number;
+    groupInfoExtSeq: number;
+    groupOwnerId: number;
+    groupSquareSwitch: number;
+    hasGroupCustomPortrait: number;
+    inviteRobotMemberExamine: number;
+    inviteRobotMemberSwitch: number;
+    inviteRobotSwitch: number;
+    isLimitGroupRtc: number;
+    lightCharNum: number;
+    luckyWord: number;
+    luckyWordId: number;
+    msgEventSeq: number;
+    qqMusicMedalSwitch: number;
+    reserve: number;
+    showPlayTogetherSwitch: number;
+    starId: number;
+    todoSeq: number;
+    viewedMsgDisappearTime: number;
+}
 
 export interface KickMemberV2Req {
     groupCode: string,
