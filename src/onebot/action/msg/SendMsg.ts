@@ -6,8 +6,6 @@ import {
     OB11PostSendMsg,
 } from '@/onebot/types';
 import { ActionName, BaseCheckResult } from '@/onebot/action/types';
-import fs from 'node:fs';
-import fsPromise from 'node:fs/promises';
 import { decodeCQCode } from '@/onebot/helper/cqcode';
 import { MessageUnique } from '@/common/utils/MessageUnique';
 import { ChatType, ElementType, NapCatCore, Peer, RawMessage, SendMessageElement } from '@/core';
@@ -30,54 +28,6 @@ export function normalize(message: OB11MessageMixType, autoEscape = false): OB11
             [{ type: OB11MessageDataType.text, data: { text: message } }] :
             decodeCQCode(message)
     ) : Array.isArray(message) ? message : [message];
-}
-
-export async function sendMsg(core: NapCatCore, peer: Peer, sendElements: SendMessageElement[], deleteAfterSentFiles: string[], waitComplete = true) {
-    const NTQQMsgApi = core.apis.MsgApi;
-    const logger = core.context.logger;
-    if (!sendElements.length) {
-        throw new Error('消息体无法解析, 请检查是否发送了不支持的消息类型');
-    }
-    let totalSize = 0;
-    let timeout = 10000;
-    try {
-        for (const fileElement of sendElements) {
-            if (fileElement.elementType === ElementType.PTT) {
-                totalSize += fs.statSync(fileElement.pttElement.filePath).size;
-            }
-            if (fileElement.elementType === ElementType.FILE) {
-                totalSize += fs.statSync(fileElement.fileElement.filePath).size;
-            }
-            if (fileElement.elementType === ElementType.VIDEO) {
-                totalSize += fs.statSync(fileElement.videoElement.filePath).size;
-            }
-            if (fileElement.elementType === ElementType.PIC) {
-                totalSize += fs.statSync(fileElement.picElement.sourcePath).size;
-            }
-        }
-        //且 PredictTime ((totalSize / 1024 / 512) * 1000)不等于Nan
-        const PredictTime = totalSize / 1024 / 256 * 1000;
-        if (!Number.isNaN(PredictTime)) {
-            timeout += PredictTime;// 10S Basic Timeout + PredictTime( For File 512kb/s )
-        }
-    } catch (e) {
-        logger.logError('发送消息计算预计时间异常', e);
-    }
-    const returnMsg = await NTQQMsgApi.sendMsg(peer, sendElements, waitComplete, timeout);
-    try {
-        returnMsg!.id = MessageUnique.createMsg({
-            chatType: peer.chatType,
-            guildId: '',
-            peerUid: peer.peerUid,
-        }, returnMsg!.msgId);
-    } catch (e: any) {
-        logger.logDebug('发送消息id获取失败', e);
-        returnMsg!.id = 0;
-    }
-    deleteAfterSentFiles.map((f) => {
-        fsPromise.unlink(f).then().catch(e => logger.logError('发送消息删除文件失败', e));
-    });
-    return returnMsg;
 }
 
 async function createContext(core: NapCatCore, payload: OB11PostSendMsg, contextMode: ContextMode): Promise<Peer> {
@@ -189,7 +139,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
 
         const { sendElements, deleteAfterSentFiles } = await this.obContext.apiContext.MsgApi
             .createSendElements(messages, peer);
-        const returnMsg = await sendMsg(this.core, peer, sendElements, deleteAfterSentFiles);
+        const returnMsg = await this.obContext.apiContext.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, deleteAfterSentFiles);
         return { message_id: returnMsg!.id! };
     }
 
@@ -238,7 +188,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                     const AllElement: SendMessageElement[][] = [MixElement, ...SingleElement].filter(e => e !== undefined && e.length !== 0);
                     const MsgNodeList: Promise<RawMessage | undefined>[] = [];
                     for (const sendElementsSplitElement of AllElement) {
-                        MsgNodeList.push(sendMsg(this.core, selfPeer, sendElementsSplitElement, [], true).catch(_ => undefined));
+                        MsgNodeList.push(this.obContext.apiContext.MsgApi.sendMsgWithOb11UniqueId(selfPeer, sendElementsSplitElement, [], true).catch(_ => undefined));
                     }
                     (await Promise.allSettled(MsgNodeList)).map((result) => {
                         if (result.status === 'fulfilled' && result.value) {

@@ -2,7 +2,6 @@ import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { ChatType } from '@/core/entities';
 import fs from 'fs';
-import { sendMsg } from '@/onebot/action/msg/SendMsg';
 import { uri2local } from '@/common/utils/file';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
@@ -34,7 +33,7 @@ export default class GoCQHTTPUploadGroupFile extends BaseAction<Payload, null> {
             throw new Error(downloadResult.errMsg);
         }
         const sendFileEle = await this.core.apis.FileApi.createValidSendFileElement(downloadResult.path, payload.name, payload.folder_id);
-        await sendMsg(this.core, {
+        await this.obContext.apiContext.MsgApi.sendMsgWithOb11UniqueId({
             chatType: ChatType.KCHATTYPEGROUP,
             peerUid: payload.group_id.toString(),
         }, [sendFileEle], [], true);

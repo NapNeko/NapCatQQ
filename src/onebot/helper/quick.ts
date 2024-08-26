@@ -1,4 +1,4 @@
-import { ChatType, Group, GroupRequestOperateTypes, NapCatCore, Peer } from '@/core';
+import { ChatType, GroupRequestOperateTypes, NapCatCore, Peer } from '@/core';
 import { OB11FriendRequestEvent } from '../event/request/OB11FriendRequest';
 import { OB11GroupRequestEvent } from '../event/request/OB11GroupRequest';
 import {
@@ -13,7 +13,7 @@ import {
     QuickActionGroupRequest,
 } from '../types';
 import { isNull } from '@/common/utils/helper';
-import { normalize, sendMsg } from '../action/msg/SendMsg';
+import { normalize } from '../action/msg/SendMsg';
 import { NapCatOneBot11Adapter } from '..';
 
 async function handleMsg(core: NapCatCore, obContext: NapCatOneBot11Adapter, msg: OB11Message, quickAction: QuickAction) {
@@ -32,11 +32,11 @@ async function handleMsg(core: NapCatCore, obContext: NapCatOneBot11Adapter, msg
         peer.peerUid = msg.group_id!.toString();
     }
     if (reply) {
-        let group: Group | undefined;
+        // let group: Group | undefined;
         let replyMessage: OB11MessageData[] = [];
 
         if (msg.message_type == 'group') {
-            group = await core.apis.GroupApi.getGroup(msg.group_id!.toString());
+            // group = await core.apis.GroupApi.getGroup(msg.group_id!.toString());
             replyMessage.push({
                 type: 'reply',
                 data: {
@@ -54,7 +54,7 @@ async function handleMsg(core: NapCatCore, obContext: NapCatOneBot11Adapter, msg
         }
         replyMessage = replyMessage.concat(normalize(reply, quickAction.auto_escape));
         const { sendElements, deleteAfterSentFiles } = await obContext.apiContext.MsgApi.createSendElements(replyMessage, peer);
-        sendMsg(core, peer, sendElements, deleteAfterSentFiles, false).then().catch(core.context.logger.logError);
+        obContext.apiContext.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, deleteAfterSentFiles, false).then().catch(core.context.logger.logError);
     }
 }
 
