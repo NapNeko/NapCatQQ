@@ -1,10 +1,14 @@
 import {
     NapCatOneBot11Adapter,
-    OB11Message, OB11MessageAt,
+    OB11Message,
+    OB11MessageAt,
     OB11MessageData,
     OB11MessageReply,
     QuickAction,
-    QuickActionEvent, QuickActionFriendRequest, QuickActionGroupMessage, QuickActionGroupRequest,
+    QuickActionEvent,
+    QuickActionFriendRequest,
+    QuickActionGroupMessage,
+    QuickActionGroupRequest,
 } from '@/onebot';
 import { ChatType, GroupRequestOperateTypes, NapCatCore, Peer } from '@/core';
 import { OB11FriendRequestEvent } from '@/onebot/event/request/OB11FriendRequest';
@@ -15,8 +19,9 @@ import { isNull } from '@/common/utils/helper';
 export class OneBotQuickActionApi {
     constructor(
         public obContext: NapCatOneBot11Adapter,
-        public core: NapCatCore
-    ) {}
+        public core: NapCatCore,
+    ) {
+    }
 
     async handleQuickOperation(eventContext: QuickActionEvent, quickAction: QuickAction) {
         if (eventContext.post_type === 'message') {
@@ -72,7 +77,10 @@ export class OneBotQuickActionApi {
                 }
             }
             replyMessage = replyMessage.concat(normalize(reply, quickAction.auto_escape));
-            const { sendElements, deleteAfterSentFiles } = await this.obContext.apis.MsgApi.createSendElements(replyMessage, peer);
+            const {
+                sendElements,
+                deleteAfterSentFiles,
+            } = await this.obContext.apis.MsgApi.createSendElements(replyMessage, peer);
             this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, deleteAfterSentFiles, false).then().catch(this.core.context.logger.logError);
         }
     }

@@ -1,7 +1,5 @@
 import { NodeIDependsAdapter, NodeIDispatcherAdapter, NodeIGlobalAdapter } from '../adapters';
-import {
-    NodeIKernelSessionListener
-} from '../listeners';
+import { NodeIKernelSessionListener } from '@/core';
 import {
     NodeIKernelAvatarService,
     NodeIKernelBuddyService,
@@ -13,9 +11,9 @@ import {
     NodeIKernelRichMediaService,
     NodeIKernelTicketService,
     NodeIKernelTipOffService,
-} from '../services';
-import { NodeIKernelStorageCleanService } from '../services/NodeIKernelStorageCleanService';
-import { NodeIKernelRobotService } from '../services/NodeIKernelRobotService';
+} from '@/core';
+import { NodeIKernelStorageCleanService } from '@/core';
+import { NodeIKernelRobotService } from '@/core';
 import { NodeIKernelNodeMiscService } from '../services/NodeIKernelNodeMiscService';
 import { NodeIKernelUixConvertService } from '../services/NodeIKernelUixConvertService';
 import { NodeIKernelMsgBackupService } from '../services/NodeIKernelMsgBackupService';
@@ -31,6 +29,7 @@ import { NodeIKernelECDHService } from '../services/NodeIKernelECDHService';
 
 export interface NodeQQNTWrapperUtil {
     get(): unknown;
+
     // eslint-disable-next-line @typescript-eslint/no-misused-new
     new(): NodeQQNTWrapperUtil;
 

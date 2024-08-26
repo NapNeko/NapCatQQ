@@ -36,7 +36,7 @@ type RawToOb11Converters = {
     [Key in keyof MessageElement as Key extends `${string}Element` ? Key : never]: (
         element: Exclude<MessageElement[Key], null | undefined>,
         msg: RawMessage,
-        elementWrapper: MessageElement
+        elementWrapper: MessageElement,
     ) => PromiseLike<OB11MessageData | null>
 }
 
@@ -73,12 +73,12 @@ export class OneBotMsgApi {
                 }
                 return {
                     type: OB11MessageDataType.text,
-                    data: { text }
+                    data: { text },
                 };
             } else {
                 let qq: string = 'all';
                 if (element.atType !== AtType.atAll) {
-                    const { atNtUid, /* content */ } = element;
+                    const { atNtUid /* content */ } = element;
                     let atQQ = element.atUid;
                     if (!atQQ || atQQ === '0') {
                         atQQ = await this.core.apis.UserApi.getUinByUidV2(atNtUid);
@@ -138,7 +138,7 @@ export class OneBotMsgApi {
                     url: element.filePath,
                     file_id: UUIDConverter.encode(msg.peerUin, msg.msgId),
                     file_size: element.fileSize,
-                }
+                },
             };
         },
 
@@ -149,21 +149,21 @@ export class OneBotMsgApi {
                     type: OB11MessageDataType.dice,
                     data: {
                         result: element.resultId!,
-                    }
+                    },
                 };
             } else if (faceIndex === FaceIndex.RPS) {
                 return {
                     type: OB11MessageDataType.RPS,
                     data: {
                         result: element.resultId!,
-                    }
+                    },
                 };
             } else {
                 return {
                     type: OB11MessageDataType.face,
                     data: {
-                        id: element.faceIndex.toString()
-                    }
+                        id: element.faceIndex.toString(),
+                    },
                 };
             }
         },
@@ -190,7 +190,7 @@ export class OneBotMsgApi {
                     file_id: UUIDConverter.encode(msg.peerUin, msg.msgId),
                     path: elementWrapper.elementId,
                     url: elementWrapper.elementId,
-                }
+                },
             };
         },
 
@@ -239,8 +239,8 @@ export class OneBotMsgApi {
                         peerUid: msg.peerUid,
                         guildId: '',
                         chatType: msg.chatType,
-                    }, replyMsg.msgId).toString()
-                }
+                    }, replyMsg.msgId).toString(),
+                },
             };
         },
 
@@ -303,7 +303,7 @@ export class OneBotMsgApi {
                     url: videoDownUrl,
                     file_id: UUIDConverter.encode(msg.peerUin, msg.msgId),
                     file_size: element.fileSize,
-                }
+                },
             };
         },
 
@@ -329,7 +329,7 @@ export class OneBotMsgApi {
                     path: element.filePath,
                     file_id: UUIDConverter.encode(msg.peerUin, msg.msgId),
                     file_size: element.fileSize,
-                }
+                },
             };
         },
 
@@ -366,9 +366,9 @@ export class OneBotMsgApi {
                             multiMsgItem.parentMsgIdList = msg.parentMsgIdList;
                             multiMsgItem.id = MessageUnique.createMsg(parentMsgPeer, multiMsgItem.msgId); //该ID仅用查看 无法调用
                             return await this.parseMessage(multiMsgItem);
-                        }
+                        },
                     ))).filter(item => item !== undefined),
-                }
+                },
             };
         },
 
@@ -376,8 +376,8 @@ export class OneBotMsgApi {
             return {
                 type: OB11MessageDataType.json,
                 data: {
-                    data: element.bytesData
-                }
+                    data: element.bytesData,
+                },
             };
         },
 
@@ -385,10 +385,10 @@ export class OneBotMsgApi {
             return {
                 type: OB11MessageDataType.markdown,
                 data: {
-                    content: element.content
-                }
+                    content: element.content,
+                },
             };
-        }
+        },
     };
 
     ob11ToRawConverters: Ob11ToRawConverters = {
@@ -716,11 +716,11 @@ export class OneBotMsgApi {
                             // @ts-ignore
                             element[key],
                             msg,
-                            element
+                            element,
                         );
                     }
                 }
-            }
+            },
         ))).filter(entry => {
             if (entry.status === 'fulfilled') {
                 return !!entry.value;
@@ -822,7 +822,7 @@ export class OneBotMsgApi {
             this.core.context.logger.logError('文件消息缺少参数', inputdata);
             throw Error('文件消息缺少参数');
         }
-        const fileOrUrl = (isBlankUrl ? inputdata.file : inputdata.url) ?? "";
+        const fileOrUrl = (isBlankUrl ? inputdata.file : inputdata.url) ?? '';
         const {
             path,
             isLocal,

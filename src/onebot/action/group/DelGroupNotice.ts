@@ -1,4 +1,3 @@
-import { WebApiGroupNoticeFeed } from '@/core';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
@@ -10,7 +9,7 @@ const SchemaData = {
         group_id: { type: ['number', 'string'] },
         notice_id: { type: 'string' },
     },
-    required: ['group_id','notice_id'],
+    required: ['group_id', 'notice_id'],
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;

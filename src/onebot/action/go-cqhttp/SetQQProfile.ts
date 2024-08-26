@@ -22,13 +22,16 @@ export class SetQQProfile extends BaseAction<Payload, any | null> {
         const NTQQUserApi = this.core.apis.UserApi;
         const self = this.core.selfInfo;
         const OldProfile = await NTQQUserApi.getUserDetailInfo(self.uid);
-        const ret = await NTQQUserApi.modifySelfProfile({
+        return await NTQQUserApi.modifySelfProfile({
             nick: payload.nickname,
             longNick: (payload?.personal_note ?? OldProfile?.longNick) || '',
             sex: parseInt(payload?.sex ? payload?.sex.toString() : OldProfile?.sex!.toString()),
-            birthday: { birthday_year: OldProfile?.birthday_year!.toString(), birthday_month: OldProfile?.birthday_month!.toString(), birthday_day: OldProfile?.birthday_day!.toString() },
+            birthday: {
+                birthday_year: OldProfile?.birthday_year!.toString(),
+                birthday_month: OldProfile?.birthday_month!.toString(),
+                birthday_day: OldProfile?.birthday_day!.toString(),
+            },
             location: undefined,
         });
-        return ret;
     }
 }

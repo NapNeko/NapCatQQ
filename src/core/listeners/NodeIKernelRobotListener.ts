@@ -1,4 +1,4 @@
-export class NodeIKernelRobotListener{
+export class NodeIKernelRobotListener {
     onRobotFriendListChanged(...args: unknown[]) {
 
     }

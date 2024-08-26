@@ -1,4 +1,4 @@
-import { IOB11NetworkAdapter, OB11EmitEventContent } from './index';
+import { IOB11NetworkAdapter } from './index';
 import express, { Express, Request, Response } from 'express';
 import http from 'http';
 import { NapCatCore } from '@/core';
@@ -44,6 +44,7 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
         this.server?.close();
         this.app = undefined;
     }
+
     private initializeServer() {
         this.app = express();
         this.server = http.createServer(this.app);

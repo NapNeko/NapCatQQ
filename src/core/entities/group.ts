@@ -1,34 +1,40 @@
-import { QQLevel, Sex, User } from './user';
+import { QQLevel, Sex } from './user';
+
 export interface KickMemberInfo {
     optFlag: number,
     optOperate: number,
     optMemberUid: string,
     optBytesMsg: string,
 }
-export interface  KickMemberV2Req{
+
+export interface KickMemberV2Req {
     groupCode: string,
     kickFlag: number,
     kickList: Array<KickMemberInfo>,
     kickListUids: Array<string>,
     kickMsg: string
 }
+
 export enum DataSource {
     LOCAL,
     REMOTE
 }
+
 export enum GroupListUpdateType {
     REFRESHALL,
     GETALL,
     MODIFIED,
     REMOVE
 }
+
 export interface GroupMemberCache {
     group: {
         data: GroupMember[];
         isExpired: boolean;
-    }
+    };
     isExpired: boolean;
 }
+
 export interface Group {
     groupCode: string,
     createTime?: string,//高版本才有

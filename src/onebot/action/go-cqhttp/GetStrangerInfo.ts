@@ -24,7 +24,7 @@ export default class GoCQHTTPGetStrangerInfo extends BaseAction<Payload, OB11Use
         const extendData = await NTQQUserApi.getUserDetailInfoByUinV2(user_id);
         const uid = (await NTQQUserApi.getUidByUinV2(user_id))!;
         if (!uid || uid.indexOf('*') != -1) {
-            const ret = {
+            return {
                 ...extendData.detail.simpleInfo.coreInfo,
                 ...extendData.detail.commonExt,
                 ...extendData.detail.simpleInfo.baseInfo,
@@ -36,9 +36,8 @@ export default class GoCQHTTPGetStrangerInfo extends BaseAction<Payload, OB11Use
                 qid: extendData.detail.simpleInfo.baseInfo.qid,
                 level: calcQQLevel(extendData.detail.commonExt?.qqLevel ?? 0) || 0,
                 login_days: 0,
-                uid: ''
+                uid: '',
             };
-            return ret;
         }
         const data = { ...extendData, ...(await NTQQUserApi.getUserDetailInfo(uid)) };
         return OB11Entities.stranger(data);

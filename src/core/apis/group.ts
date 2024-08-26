@@ -19,6 +19,7 @@ export class NTQQGroupApi {
     groupCache: Map<string, Group> = new Map<string, Group>();
     groupMemberCache: Map<string, Map<string, GroupMember>> = new Map<string, Map<string, GroupMember>>();
     groups: Group[] = [];
+
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
         this.core = core;
@@ -26,6 +27,7 @@ export class NTQQGroupApi {
             this.initCache().then().catch(context.logger.logError);
         });
     }
+
     async initCache() {
         this.groups = await this.getGroups();
         for (const group of this.groups) {
@@ -35,12 +37,13 @@ export class NTQQGroupApi {
         }
         this.context.logger.logDebug(`加载${this.groups.length}个群组缓存完成`);
     }
+
     async setGroupAvatar(gc: string, filePath: string) {
         return this.context.session.getGroupService().setHeader(gc, filePath);
     }
 
     async getGroups(forced = false) {
-        const [,, groupList] = await this.core.eventWrapper.callNormalEventV2(
+        const [, , groupList] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelGroupService/getGroupList',
             'NodeIKernelGroupListener/onGroupListUpdate',
             [forced],
@@ -135,8 +138,7 @@ export class NTQQGroupApi {
                 members = await this.getGroupMembers(groupCodeStr);
                 // 更新群成员列表
                 this.groupMemberCache.set(groupCodeStr, members);
-            }
-            catch (e) {
+            } catch (e) {
                 return null;
             }
         }
@@ -215,21 +217,25 @@ export class NTQQGroupApi {
         // GetMsgByShoretID(ShoretID); -> MsgService.getMsgs(Peer,MsgId,1,false); -> 组出参数
         return this.context.session.getGroupService().addGroupEssence(param);
     }
+
     async kickMemberV2Inner(param: KickMemberV2Req) {
         return this.context.session.getGroupService().kickMemberV2(param);
     }
+
     async deleteGroupBulletin(GroupCode: string, noticeId: string) {
         const _Pskey = (await this.core.apis.UserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com')!;
         return this.context.session.getGroupService().deleteGroupBulletin(GroupCode, _Pskey, noticeId);
     }
+
     async quitGroupV2(GroupCode: string, needDeleteLocalMsg: boolean) {
         const param = {
             groupCode: GroupCode,
-            needDeleteLocalMsg: needDeleteLocalMsg
+            needDeleteLocalMsg: needDeleteLocalMsg,
         };
         //应该是直接返回不需要Listener的 未经测试 需测试再发布
         return this.context.session.getGroupService().quitGroupV2(param);
     }
+
     async removeGroupEssence(GroupCode: string, msgId: string) {
         // 代码没测过
         // 需要 ob11msgid->msgId + (peer) -> msgSeq + msgRandom
@@ -248,13 +254,13 @@ export class NTQQGroupApi {
     }
 
     async getSingleScreenNotifies(num: number) {
-        const [,,, notifies] = await this.core.eventWrapper.callNormalEventV2(
+        const [, , , notifies] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelGroupService/getSingleScreenNotifies',
             'NodeIKernelGroupListener/onGroupSingleScreenNotifies',
             [
                 false,
                 '',
-                num
+                num,
             ],
         );
         return notifies;

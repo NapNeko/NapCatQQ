@@ -6,7 +6,7 @@ import { SettingSelect } from './components/SettingSelect';
 import { OB11Config, OB11ConfigWrapper } from './components/WebUiApiOB11Config';
 
 async function onSettingWindowCreated(view: Element) {
-    const isEmpty = (value: any) => value === undefined || value === undefined || value === '';
+    const isEmpty = (value: any) => value === undefined || false || value === '';
     await OB11ConfigWrapper.Init(localStorage.getItem('auth') as string);
     const ob11Config: OB11Config = await OB11ConfigWrapper.GetOB11Config();
     const setOB11Config = (key: string, value: any) => {
@@ -69,8 +69,7 @@ async function onSettingWindowCreated(view: Element) {
                         <setting-text>HTTP 事件上报密钥</setting-text>
                     </div>
                     <div class="q-input">
-                        <input id="config-ob11-http-secret" class="q-input__inner" data-config-key="ob11.http.secret" type="text" value="${ob11Config.http.secret
-}" placeholder="未设置" />
+                        <input id="config-ob11-http-secret" class="q-input__inner" data-config-key="ob11.http.secret" type="text" value="${ob11Config.http.secret}" placeholder="未设置" />
                     </div>
                 </setting-item>
                 <setting-item data-direction="row">
@@ -174,17 +173,17 @@ async function onSettingWindowCreated(view: Element) {
                     'https://github.com/NapNeko/NapCatQQ',
                     SettingButton('点个星星', 'open-github'),
                 ),
-                SettingItem('NapCat 文档', '', SettingButton('看看文档', 'open-docs'))
+                SettingItem('NapCat 文档', '', SettingButton('看看文档', 'open-docs')),
             ]),
             SettingItem(
                 'Telegram 群',
                 'https://t.me/+nLZEnpne-pQ1OWFl',
-                SettingButton('进去逛逛', 'open-telegram')
+                SettingButton('进去逛逛', 'open-telegram'),
             ),
             SettingItem(
                 'QQ 群',
                 '518662028',
-                SettingButton('我要进去', 'open-qq-group')
+                SettingButton('我要进去', 'open-qq-group'),
             ),
             '</div>',
         ].join(''),

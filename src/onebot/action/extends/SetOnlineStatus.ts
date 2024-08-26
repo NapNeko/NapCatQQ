@@ -24,7 +24,7 @@ export class SetOnlineStatus extends BaseAction<Payload, null> {
         const ret = await NTQQUserApi.setSelfOnlineStatus(
             parseInt(payload.status.toString()),
             parseInt(payload.extStatus.toString()),
-            parseInt(payload.batteryStatus.toString())
+            parseInt(payload.batteryStatus.toString()),
         );
         if (ret.result !== 0) {
             throw new Error('设置在线状态失败');

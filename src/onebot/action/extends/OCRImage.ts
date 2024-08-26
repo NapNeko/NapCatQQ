@@ -3,6 +3,7 @@ import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { checkFileReceived, uri2local } from '@/common/utils/file';
 import fs from 'fs';
+
 const SchemaData = {
     type: 'object',
     properties: {
@@ -19,7 +20,7 @@ export class OCRImage extends BaseAction<Payload, any> {
 
     async _handle(payload: Payload) {
         const NTQQSystemApi = this.core.apis.SystemApi;
-        const { path, isLocal, errMsg, success } = (await uri2local(this.core.NapCatTempPath, payload.image));
+        const { path, isLocal, success } = (await uri2local(this.core.NapCatTempPath, payload.image));
         if (!success) {
             throw `OCR ${payload.image}失败,image字段可能格式不正确`;
         }

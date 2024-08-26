@@ -15,6 +15,7 @@ export class OneBotGroupApi {
         this.obContext = obContext;
         this.core = core;
     }
+
     async parseGroupBanEvent(GroupCode: string, grayTipElement: GrayTipElement) {
         const groupElement = grayTipElement?.groupElement;
         const NTQQGroupApi = this.core.apis.GroupApi;
@@ -40,11 +41,12 @@ export class OneBotGroupApi {
                 parseInt(memberUin),
                 parseInt(adminUin),
                 duration,
-                subType
+                subType,
             );
         }
         return undefined;
     }
+
     async parseGroupIncreaseEvent(GroupCode: string, grayTipElement: GrayTipElement) {
         this.core.context.logger.logDebug('收到新人被邀请进群消息', grayTipElement);
         const xmlElement = grayTipElement.xmlElement;
@@ -65,12 +67,13 @@ export class OneBotGroupApi {
                     parseInt(GroupCode),
                     parseInt(invitee),
                     parseInt(inviter),
-                    'invite'
+                    'invite',
                 );
             }
         }
         return undefined;
     }
+
     async parseGroupMemberIncreaseEvent(GroupCode: string, grayTipElement: GrayTipElement) {
         const NTQQGroupApi = this.core.apis.GroupApi;
         const groupElement = grayTipElement?.groupElement;
@@ -84,11 +87,12 @@ export class OneBotGroupApi {
                 this.core,
                 parseInt(GroupCode),
                 parseInt(memberUin),
-                parseInt(operatorUin)
+                parseInt(operatorUin),
             );
         }
         return undefined;
     }
+
     async parseGroupKickEvent(GroupCode: string, grayTipElement: GrayTipElement) {
         const NTQQGroupApi = this.core.apis.GroupApi;
         const NTQQUserApi = this.core.apis.UserApi;
@@ -101,11 +105,12 @@ export class OneBotGroupApi {
                 parseInt(GroupCode),
                 parseInt(this.core.selfInfo.uin),
                 parseInt(adminUin),
-                'kick_me'
+                'kick_me',
             );
         }
         return undefined;
     }
+
     async parseGroupEmjioLikeEvent(GroupCode: string, grayTipElement: GrayTipElement) {
         const NTQQMsgApi = this.core.apis.MsgApi;
         const emojiLikeData = new fastXmlParser.XMLParser({
@@ -120,7 +125,7 @@ export class OneBotGroupApi {
             const peer = {
                 chatType: ChatType.KCHATTYPEGROUP,
                 guildId: '',
-                peerUid: GroupCode
+                peerUid: GroupCode,
             };
             const replyMsgList = (await NTQQMsgApi.getMsgExBySeq(peer, msgSeq)).msgList;
             if (replyMsgList.length < 1) {

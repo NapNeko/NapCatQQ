@@ -18,6 +18,7 @@ export class NTQQMsgApi {
     async sendShowInputStatusReq(peer: Peer, eventType: number) {
         return this.context.session.getMsgService().sendShowInputStatusReq(peer.chatType, eventType, peer.peerUid);
     }
+
     async getMsgEmojiLikesList(peer: Peer, msgSeq: string, emojiId: string, emojiType: string, count: number = 20) {
         //console.log(peer, msgSeq, emojiId, emojiType, count);
         //注意此处emojiType 可选值一般为1-2 2好像是unicode表情dec值 大部分情况 Taged M likiowa
@@ -39,6 +40,7 @@ export class NTQQMsgApi {
         emojiId = emojiId.toString();
         return this.context.session.getMsgService().setMsgEmojiLikes(peer, msgSeq, emojiId, emojiId.length > 3 ? '2' : '1', set);
     }
+
     async getMultiMsg(peer: Peer, rootMsgId: string, parentMsgId: string): Promise<GeneralCallResult & {
         msgList: RawMessage[]
     } | undefined> {
@@ -93,6 +95,7 @@ export class NTQQMsgApi {
     async getMsgsBySeqAndCount(peer: Peer, seq: string, count: number, desc: boolean, z: boolean) {
         return await this.context.session.getMsgService().getMsgsBySeqAndCount(peer, seq, count, desc, z);
     }
+
     async getMsgExBySeq(peer: Peer, msgSeq: string) {
         const DateNow = Math.floor(Date.now() / 1000);
         const filterMsgFromTime = (DateNow - 300).toString();
@@ -108,6 +111,7 @@ export class NTQQMsgApi {
             pageLimit: 100,
         });
     }
+
     async setMsgRead(peer: Peer) {
         return this.context.session.getMsgService().setMsgRead(peer);
     }
@@ -118,7 +122,7 @@ export class NTQQMsgApi {
             'NodeIKernelMsgListener/onGroupFileInfoUpdate',
             [
                 GroupCode,
-                params
+                params,
             ],
             () => true,
             ( /* groupFileListResult: GroupFileInfoUpdateParamType */) => {
@@ -142,29 +146,32 @@ export class NTQQMsgApi {
             peerUid: peer.peerUid,
         }, msgIds);
     }
+
     async PrepareTempChat(toUserUid: string, GroupCode: string, nickname: string) {
         //By Jadx/Ida Mlikiowa
         const TempGameSession = {
-            nickname: "",
-            gameAppId: "",
-            selfTinyId: "",
-            peerRoleId: "",
-            peerOpenId: "",
+            nickname: '',
+            gameAppId: '',
+            selfTinyId: '',
+            peerRoleId: '',
+            peerOpenId: '',
         };
         return this.context.session.getMsgService().prepareTempChat({
             chatType: ChatType.KCHATTYPETEMPC2CFROMGROUP,
             peerUid: toUserUid,
             peerNickname: nickname,
             fromGroupCode: GroupCode,
-            sig: "",
-            selfPhone: "",
+            sig: '',
+            selfPhone: '',
             selfUid: this.core.selfInfo.uid,
-            gameSession: TempGameSession
+            gameSession: TempGameSession,
         });
     }
+
     async getTempChatInfo(chatType: ChatType, peerUid: string) {
         return this.context.session.getMsgService().getTempChatInfo(chatType, peerUid);
     }
+
     async sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
         //唉？ ！我有个想法
         if (peer.chatType === ChatType.KCHATTYPETEMPC2CFROMGROUP && peer.guildId && peer.guildId !== '') {
@@ -182,7 +189,7 @@ export class NTQQMsgApi {
                 '0',
                 peer,
                 msgElements,
-                new Map()
+                new Map(),
             ],
             () => true,
             msgRecords => {
@@ -244,7 +251,7 @@ export class NTQQMsgApi {
             if (!arkElement) {
                 continue;
             }
-            const forwardData: any = JSON.parse(arkElement.arkElement?.bytesData ?? "");
+            const forwardData: any = JSON.parse(arkElement.arkElement?.bytesData ?? '');
             if (forwardData.app != 'com.tencent.multimsg') {
                 continue;
             }

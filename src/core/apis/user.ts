@@ -73,7 +73,7 @@ export class NTQQUserApi {
                 'BuddyProfileStore',
                 uids,
                 UserDetailSource.KSERVER,
-                [ProfileBizType.KALL]
+                [ProfileBizType.KALL],
             ],
             () => true,
             (profile) => {
@@ -106,7 +106,7 @@ export class NTQQUserApi {
                 'BuddyProfileStore',
                 [uid],
                 mode,
-                [ProfileBizType.KALL]
+                [ProfileBizType.KALL],
             ],
             () => true,
             (profile) => profile.uid === uid,

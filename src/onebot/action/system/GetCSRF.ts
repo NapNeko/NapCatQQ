@@ -6,7 +6,7 @@ export class GetCSRF extends BaseAction<any, any> {
 
     async _handle(payload: any) {
         return {
-            token: "",
+            token: '',
         };
     }
 }

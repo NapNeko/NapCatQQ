@@ -13,6 +13,7 @@ export function isGIF(path: string) {
     fs.closeSync(fd);
     return buffer.toString() === 'GIF8';
 }
+
 // 定义一个异步函数来检查文件是否存在
 export function checkFileReceived(path: string, timeout: number = 3000): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -123,15 +124,14 @@ export interface HttpDownloadOptions {
 }
 
 export async function httpDownload(options: string | HttpDownloadOptions): Promise<Buffer> {
-    const chunks: Buffer[] = [];
+    // const chunks: Buffer[] = [];
     let url: string;
     let headers: Record<string, string> = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.71 Safari/537.36',
     };
     if (typeof options === 'string') {
         url = options;
-        const host = new URL(url).hostname;
-        headers['Host'] = host;
+        headers['Host'] = new URL(url).hostname;
     } else {
         url = options.url;
         if (options.headers) {

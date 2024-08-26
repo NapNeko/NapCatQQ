@@ -2,7 +2,7 @@ import type { SelfInfo } from '@/core/entities';
 
 import { LogWrapper } from '@/common/utils/log';
 import { NodeIKernelLoginListener, NodeIKernelSessionListener } from '@/core/listeners';
-import { NodeIDispatcherAdapter, NodeIDependsAdapter, NodeIGlobalAdapter } from '@/core/adapters';
+import { NodeIDependsAdapter, NodeIDispatcherAdapter, NodeIGlobalAdapter } from '@/core/adapters';
 import { NapCatPathWrapper } from '@/common/framework/napcat';
 import {
     InstanceContext,
@@ -92,7 +92,7 @@ export async function NCoreInitShell() {
         }
     }
 
-    const selfInfo = await new Promise<SelfInfo>((resolve, reject) => {
+    const selfInfo = await new Promise<SelfInfo>((resolve) => {
         const loginListener = new NodeIKernelLoginListener();
 
         // from constructor
@@ -129,7 +129,7 @@ export async function NCoreInitShell() {
         };
         loginListener.onQRCodeSessionFailed = (errType: number, errCode: number, errMsg: string) => {
             //logger.logError('登录失败(onQRCodeSessionFailed)', errCode, errMsg);
-            logger.logError('[Core] [Login] Login Error,ErrCode: ', errCode, " ErrMsg:", errMsg);
+            logger.logError('[Core] [Login] Login Error,ErrCode: ', errCode, ' ErrMsg:', errMsg);
             if (errType == 1 && errCode == 3) {
                 // 二维码过期刷新
             }

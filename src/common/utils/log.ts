@@ -177,12 +177,12 @@ export function rawMessageToText(msg: RawMessage, recursiveLevel = 0): string {
 
         if (element.replyElement) {
             const recordMsgOrNull = msg.records.find(
-                record => element.replyElement!.sourceMsgIdInRecords === record.msgId
+                record => element.replyElement!.sourceMsgIdInRecords === record.msgId,
             );
             return `[回复消息 ${
                 recordMsgOrNull &&
                 recordMsgOrNull.peerUin != '284840486' // 非转发消息; 否则定位不到
-                    ? 
+                    ?
                     rawMessageToText(recordMsgOrNull, recursiveLevel + 1) :
                     `未找到消息记录 (MsgId = ${element.replyElement.sourceMsgIdInRecords})`
             }]`;

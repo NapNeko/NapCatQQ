@@ -28,7 +28,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
         heartbeatInterval: number,
         token: string,
         core: NapCatCore,
-        public actions: ActionMap
+        public actions: ActionMap,
     ) {
         this.core = core;
         this.logger = core.context.logger;
