@@ -211,7 +211,6 @@ export class NapCatOneBot11Adapter {
         } else {
             if (now.reverseWs.enable) {
                 const { added, removed } = this.findDifference<string>(prev.reverseWs.urls, now.reverseWs.urls);
-                console.log('rev ws', added, removed);
                 await this.networkManager.closeAdapterByPredicate(
                     adapter => adapter instanceof OB11ActiveWebSocketAdapter && removed.includes(adapter.url),
                 );
