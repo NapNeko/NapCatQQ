@@ -231,8 +231,7 @@ export class NTQQUserApi {
     }
 
     async getUserDetailInfoByUinV2(Uin: string) {
-        return await this.core.eventWrapper.callNoListenerEvent<(Uin: string) => Promise<UserDetailInfoByUinV2>>
-            ('NodeIKernelProfileService/getUserDetailInfoByUin', Uin);
+        return await this.core.eventWrapper.callNoListenerEvent('NodeIKernelProfileService/getUserDetailInfoByUin', Uin);
     }
 
     async forceFetchClientKey() {

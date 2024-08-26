@@ -41,7 +41,13 @@ export class LegacyNTEventWrapper {
         );
     }
 
-    createEventFunction<T extends (...args: any) => any>(eventName: string): T | undefined {
+    createEventFunction<
+        Service extends keyof ServiceNamingMapping,
+        ServiceMethod extends Exclude<keyof ServiceNamingMapping[Service], symbol>,
+        // eslint-disable-next-line
+        // @ts-ignore
+        T extends (...args: any) => any = ServiceNamingMapping[Service][ServiceMethod],
+    >(eventName: `${Service}/${ServiceMethod}`): T | undefined {
         const eventNameArr = eventName.split('/');
         type eventType = {
             [key: string]: () => { [key: string]: (...params: Parameters<T>) => Promise<ReturnType<T>> };
@@ -65,9 +71,10 @@ export class LegacyNTEventWrapper {
         if (!existListener) {
             const Listener = this.createProxyDispatch(listenerMainName);
             const ServiceSubName = /^NodeIKernel(.*?)Listener$/.exec(listenerMainName)![1];
-            const Service = 'NodeIKernel' + ServiceSubName + 'Service/addKernel' + ServiceSubName + 'Listener';
-            const addfunc = this.createEventFunction<(listener: T) => number>(Service);
-            addfunc!(Listener as T);
+            const Service = `NodeIKernel${ServiceSubName}Service/addKernel${ServiceSubName}Listener`;
+            // eslint-disable-next-line
+            // @ts-ignore
+            this.createEventFunction(Service)(Listener as T);
             this.listenerManager.set(listenerMainName + uniqueCode, Listener);
             return Listener as T;
         }
@@ -89,22 +96,33 @@ export class LegacyNTEventWrapper {
             });
     }
 
-    async callNoListenerEvent<EventType extends (...args: any[]) => Promise<any> | any>(
-        EventName = '',
+    async callNoListenerEvent<
+        Service extends keyof ServiceNamingMapping,
+        ServiceMethod extends Exclude<keyof ServiceNamingMapping[Service], symbol>,
+        // eslint-disable-next-line
+        // @ts-ignore
+        EventType extends (...args: any) => any = ServiceNamingMapping[Service][ServiceMethod],
+    >(
+        serviceAndMethod: `${Service}/${ServiceMethod}`,
         ...args: Parameters<EventType>
     ): Promise<Awaited<ReturnType<EventType>>> {
-        const EventFunc = this.createEventFunction<EventType>(EventName);
-        return EventFunc!(...args);
+        return (this.createEventFunction(serviceAndMethod))!(...args);
     }
 
-    async RegisterListen<ListenerType extends (...args: any[]) => void>(
-        ListenerName = '',
+    async registerListen<
+        Listener extends keyof ListenerNamingMapping,
+        ListenerMethod extends Exclude<keyof ListenerNamingMapping[Listener], symbol>,
+        // eslint-disable-next-line
+        // @ts-ignore
+        ListenerType extends (...args: any) => any = ListenerNamingMapping[Listener][ListenerMethod],
+    >(
+        listenerAndMethod: `${Listener}/${ListenerMethod}`,
         waitTimes = 1,
         timeout = 5000,
         checker: (...args: Parameters<ListenerType>) => boolean,
     ) {
         return new Promise<Parameters<ListenerType>>((resolve, reject) => {
-            const ListenerNameList = ListenerName.split('/');
+            const ListenerNameList = listenerAndMethod.split('/');
             const ListenerMainName = ListenerNameList[0];
             const ListenerSubName = ListenerNameList[1];
             const id = randomUUID();
@@ -113,7 +131,7 @@ export class LegacyNTEventWrapper {
 
             function sendDataCallback() {
                 if (complete == 0) {
-                    reject(new Error(' ListenerName:' + ListenerName + ' timeout'));
+                    reject(new Error(' ListenerName:' + listenerAndMethod + ' timeout'));
                 } else {
                     resolve(retData!);
                 }
@@ -216,7 +234,7 @@ export class LegacyNTEventWrapper {
                 }
                 this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.set(id, eventCallback);
                 this.createListenerFunction(ListenerMainName);
-                const eventFunction = this.createEventFunction<EventType>(serviceAndMethod);
+                const eventFunction = this.createEventFunction(serviceAndMethod);
                 retEvent = await eventFunction!(...(args));
                 if (!checkerEvent(retEvent)) {
                     clearTimeout(timeoutRef);
