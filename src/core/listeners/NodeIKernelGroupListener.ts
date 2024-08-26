@@ -1,6 +1,7 @@
 import { DataSource, Group, GroupListUpdateType, GroupMember, GroupNotify } from '@/core/entities';
 
 export class NodeIKernelGroupListener {
+    onGroupListInited(listEmpty: boolean): void { }
     // 发现于Win 9.9.9 23159
     onGroupMemberLevelInfoChange(...args: unknown[]): void {
 
