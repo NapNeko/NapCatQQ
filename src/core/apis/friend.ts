@@ -21,7 +21,7 @@ export class NTQQFriendApi {
         const buddyService = this.context.session.getBuddyService();
         const buddyListV2 = refresh ? await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL) : await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL);
         uids.push(...buddyListV2.data.flatMap(item => item.buddyUids));
-        const data = await this.core.eventWrapper.callNoListenerEvent<NodeIKernelProfileService['getCoreAndBaseInfo']>(
+        const data = await this.core.eventWrapper.callNoListenerEvent(
             'NodeIKernelProfileService/getCoreAndBaseInfo', 'nodeStore', uids,
         );
         return Array.from(data.values());
@@ -33,7 +33,7 @@ export class NTQQFriendApi {
         const buddyService = this.context.session.getBuddyService();
         const buddyListV2 = refresh ? await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL) : await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL);
         uids.push(...buddyListV2.data.flatMap(item => item.buddyUids));
-        const data = await this.core.eventWrapper.callNoListenerEvent<NodeIKernelProfileService['getCoreAndBaseInfo']>(
+        const data = await this.core.eventWrapper.callNoListenerEvent(
             'NodeIKernelProfileService/getCoreAndBaseInfo', 'nodeStore', uids,
         );
         data.forEach((value) => {
@@ -55,7 +55,7 @@ export class NTQQFriendApi {
                 });
                 return item.buddyUids;
             }));
-        const data = await this.core.eventWrapper.callNoListenerEvent<NodeIKernelProfileService['getCoreAndBaseInfo']>(
+        const data = await this.core.eventWrapper.callNoListenerEvent(
             'NodeIKernelProfileService/getCoreAndBaseInfo', 'nodeStore', uids,
         );
         return buddyListV2.map(category => ({

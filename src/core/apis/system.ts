@@ -28,9 +28,7 @@ export class NTQQSystemApi {
 
     //1-2-162b9b42-65b9-4405-a8ed-2e256ec8aa50
     async getArkJsonCollection(cid: string) {
-        return await this.core.eventWrapper.callNoListenerEvent<(cid: string) => Promise<GeneralCallResult & {
-            arkJson: string
-        }>>('NodeIKernelCollectionService/collectionArkShare', '1717662698058');
+        return await this.core.eventWrapper.callNoListenerEvent('NodeIKernelCollectionService/collectionArkShare', '1717662698058');
     }
 
     async BootMiniApp(appfile: string, params: string) {
