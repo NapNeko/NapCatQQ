@@ -74,10 +74,7 @@ export class NTQQFriendApi {
         return this.context.session.getBuddyService().clearBuddyReqUnreadCnt();
     }
     async getBuddyReq() {
-        const [, ret] = await this.core.eventWrapper.CallNormalEventV2<
-            NodeIKernelBuddyService['getBuddyReq'],
-            NodeIKernelBuddyListener['onBuddyReqChange']
-        >(
+        const [, ret] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelBuddyService/getBuddyReq',
             'NodeIKernelBuddyListener/onBuddyReqChange',
             1,

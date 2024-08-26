@@ -69,9 +69,7 @@ export class NTQQUserApi {
         type EventService = NodeIKernelProfileService['fetchUserDetailInfo'];
         type EventListener = NodeIKernelProfileListener['onUserDetailInfoChanged'];
         const retData: User[] = [];
-        const [_retData, _retListener] = await this.core.eventWrapper.CallNormalEvent<
-            EventService, EventListener
-        >(
+        const [_retData, _retListener] = await this.core.eventWrapper.callNormalEvent(
             'NodeIKernelProfileService/fetchUserDetailInfo',
             'NodeIKernelProfileListener/onUserDetailInfoChanged',
             uids.length,
@@ -102,9 +100,7 @@ export class NTQQUserApi {
     }
 
     async fetchUserDetailInfo(uid: string, mode: UserDetailSource = UserDetailSource.KDB) {
-        type EventService = NodeIKernelProfileService['fetchUserDetailInfo'];
-        type EventListener = NodeIKernelProfileListener['onUserDetailInfoChanged'];
-        const [_retData, profile] = await this.core.eventWrapper.CallNormalEvent<EventService, EventListener>(
+        const [_retData, profile] = await this.core.eventWrapper.callNormalEvent(
             'NodeIKernelProfileService/fetchUserDetailInfo',
             'NodeIKernelProfileListener/onUserDetailInfoChanged',
             1,

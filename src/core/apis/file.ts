@@ -304,66 +304,49 @@ export class NTQQFileApi {
                 return sourcePath;
             }
         }
-        const data = await this.core.eventWrapper.CallNormalEvent<
-            (
-                params: {
-                    fileModelId: string,
-                    downloadSourceType: number,
-                    triggerType: number,
-                    msgId: string,
-                    chatType: ChatType,
-                    peerUid: string,
-                    elementId: string,
-                    thumbSize: number,
-                    downloadType: number,
-                    filePath: string
-                }) => Promise<unknown>,
-            (fileTransNotifyInfo: OnRichMediaDownloadCompleteParams) => void
-                >(
-                'NodeIKernelMsgService/downloadRichMedia',
-                'NodeIKernelMsgListener/onRichMediaDownloadComplete',
-                1,
-                timeout,
-                (arg: OnRichMediaDownloadCompleteParams) => {
-                    if (arg.msgId === msgId) {
-                        return true;
-                    }
-                    return false;
-                },
-                {
-                    fileModelId: '0',
-                    downloadSourceType: 0,
-                    triggerType: 1,
-                    msgId: msgId,
-                    chatType: chatType,
-                    peerUid: peerUid,
-                    elementId: elementId,
-                    thumbSize: 0,
-                    downloadType: 1,
-                    filePath: thumbPath,
-                },
-                );
+        const [, fileTransNotifyInfo] = await this.core.eventWrapper.callNormalEvent(
+            'NodeIKernelMsgService/downloadRichMedia',
+            'NodeIKernelMsgListener/onRichMediaDownloadComplete',
+            1,
+            timeout,
+            (arg: OnRichMediaDownloadCompleteParams) => {
+                if (arg.msgId === msgId) {
+                    return true;
+                }
+                return false;
+            },
+            {
+                fileModelId: '0',
+                downloadSourceType: 0,
+                triggerType: 1,
+                msgId: msgId,
+                chatType: chatType,
+                peerUid: peerUid,
+                elementId: elementId,
+                thumbSize: 0,
+                downloadType: 1,
+                filePath: thumbPath,
+            },
+        );
         const msg = await this.core.apis.MsgApi.getMsgsByMsgId({
             guildId: '',
             chatType: chatType,
             peerUid: peerUid,
         }, [msgId]);
         if (msg.msgList.length === 0) {
-            return data[1].filePath;
+            return fileTransNotifyInfo.filePath;
         }
         //获取原始消息
         const FileElements = msg?.msgList[0]?.elements?.find(e => e.elementId === elementId);
         if (!FileElements) {
             //失败则就乱来 Todo
-            return data[1].filePath;
+            return fileTransNotifyInfo.filePath;
         }
         //从原始消息获取文件路径
-        const filePath =
-            FileElements?.fileElement?.filePath ??
+        return FileElements?.fileElement?.filePath ??
             FileElements?.pttElement?.filePath ??
             FileElements?.videoElement?.filePath ??
             FileElements?.picElement?.sourcePath;
-        return filePath;
     }
 
     async getImageSize(filePath: string): Promise<ISizeCalculationResult | undefined> {

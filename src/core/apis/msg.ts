@@ -1,6 +1,5 @@
 import { ChatType, GetFileListParam, Peer, RawMessage, SendMessageElement, SendStatusType } from '@/core/entities';
 import { InstanceContext, NapCatCore } from '@/core';
-import { GroupFileInfoUpdateParamType } from '@/core/listeners';
 import { GeneralCallResult } from '@/core/services/common';
 
 export class NTQQMsgApi {
@@ -117,22 +116,19 @@ export class NTQQMsgApi {
     }
 
     async getGroupFileList(GroupCode: string, params: GetFileListParam) {
-        const data = await this.core.eventWrapper.CallNormalEvent<
-            (GroupCode: string, params: GetFileListParam) => Promise<unknown>,
-            (groupFileListResult: GroupFileInfoUpdateParamType) => void
-                >(
-                'NodeIKernelRichMediaService/getGroupFileList',
-                'NodeIKernelMsgListener/onGroupFileInfoUpdate',
-                1,
-                5000,
-                (groupFileListResult: GroupFileInfoUpdateParamType) => {
+        const [, groupFileListResult] = await this.core.eventWrapper.callNormalEvent(
+            'NodeIKernelRichMediaService/getGroupFileList',
+            'NodeIKernelMsgListener/onGroupFileInfoUpdate',
+            1,
+            5000,
+            ( /* groupFileListResult: GroupFileInfoUpdateParamType */) => {
                 //Developer Mlikiowa Todo: 此处有问题 无法判断是否成功
-                    return true;
-                },
-                GroupCode,
-                params,
-                );
-        return data[1].item;
+                return true;
+            },
+            GroupCode,
+            params,
+        );
+        return groupFileListResult.item;
     }
 
     async getMsgHistory(peer: Peer, msgId: string, count: number, isReverseOrder: boolean = false) {
@@ -179,33 +175,29 @@ export class NTQQMsgApi {
         }
         const msgId = await this.generateMsgUniqueId(peer.chatType, await this.getServerTime());
         peer.guildId = msgId;
-        const data = await this.core.eventWrapper.CallNormalEvent<
-            (msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<any, any>) => Promise<unknown>,
-            (msgList: RawMessage[]) => void
-                >(
-                'NodeIKernelMsgService/sendMsg',
-                'NodeIKernelMsgListener/onMsgInfoListUpdate',
-                1,
-                timeout,
-                (msgRecords: RawMessage[]) => {
-                    for (const msgRecord of msgRecords) {
-                        if (msgRecord.guildId === msgId && msgRecord.sendStatus === SendStatusType.KSEND_STATUS_SUCCESS) {
-                            return true;
-                        }
+        const [, msgList] = await this.core.eventWrapper.callNormalEvent(
+            'NodeIKernelMsgService/sendMsg',
+            'NodeIKernelMsgListener/onMsgInfoListUpdate',
+            1,
+            timeout,
+            (msgRecords: RawMessage[]) => {
+                for (const msgRecord of msgRecords) {
+                    if (msgRecord.guildId === msgId && msgRecord.sendStatus === SendStatusType.KSEND_STATUS_SUCCESS) {
+                        return true;
                     }
-                    return false;
-                },
-                '0',
-                peer,
-                msgElements,
-                new Map(),
-                );
-        const retMsg = data[1].find(msgRecord => {
+                }
+                return false;
+            },
+            '0',
+            peer,
+            msgElements,
+            new Map(),
+        );
+        return msgList.find(msgRecord => {
             if (msgRecord.guildId === msgId) {
                 return true;
             }
         });
-        return retMsg;
     }
 
     async generateMsgUniqueId(chatType: number, time: string) {
@@ -224,29 +216,26 @@ export class NTQQMsgApi {
         const msgInfos = msgIds.map(id => {
             return { msgId: id, senderShowName: this.core.selfInfo.nick };
         });
-        const data = await this.core.eventWrapper.CallNormalEvent<
-            (msgInfo: typeof msgInfos, srcPeer: Peer, destPeer: Peer, comment: Array<any>, attr: Map<any, any>) => Promise<unknown>,
-            (msgList: RawMessage[]) => void
-                >(
-                'NodeIKernelMsgService/multiForwardMsgWithComment',
-                'NodeIKernelMsgListener/onMsgInfoListUpdate',
-                1,
-                5000,
-                (msgRecords: RawMessage[]) => {
-                    for (const msgRecord of msgRecords) {
-                        if (msgRecord.peerUid == destPeer.peerUid && msgRecord.senderUid == this.core.selfInfo.uid) {
-                            return true;
-                        }
+        const [, msgList] = await this.core.eventWrapper.callNormalEvent(
+            'NodeIKernelMsgService/multiForwardMsgWithComment',
+            'NodeIKernelMsgListener/onMsgInfoListUpdate',
+            1,
+            5000,
+            (msgRecords: RawMessage[]) => {
+                for (const msgRecord of msgRecords) {
+                    if (msgRecord.peerUid == destPeer.peerUid && msgRecord.senderUid == this.core.selfInfo.uid) {
+                        return true;
                     }
-                    return false;
-                },
-                msgInfos,
-                srcPeer,
-                destPeer,
-                [],
-                new Map(),
-                );
-        for (const msg of data[1]) {
+                }
+                return false;
+            },
+            msgInfos,
+            srcPeer,
+            destPeer,
+            [],
+            new Map(),
+        );
+        for (const msg of msgList) {
             const arkElement = msg.elements.find(ele => ele.arkElement);
             if (!arkElement) {
                 continue;
