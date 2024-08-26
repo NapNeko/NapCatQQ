@@ -18,19 +18,19 @@ export class OneBotQuickActionApi {
         public core: NapCatCore
     ) {}
 
-    handleQuickOperation(context: QuickActionEvent, quickAction: QuickAction) {
-        if (context.post_type === 'message') {
-            this.handleMsg(context as OB11Message, quickAction)
+    async handleQuickOperation(eventContext: QuickActionEvent, quickAction: QuickAction) {
+        if (eventContext.post_type === 'message') {
+            await this.handleMsg(eventContext as OB11Message, quickAction)
                 .catch(this.core.context.logger.logError);
         }
-        if (context.post_type === 'request') {
-            const friendRequest = context as OB11FriendRequestEvent;
-            const groupRequest = context as OB11GroupRequestEvent;
+        if (eventContext.post_type === 'request') {
+            const friendRequest = eventContext as OB11FriendRequestEvent;
+            const groupRequest = eventContext as OB11GroupRequestEvent;
             if ((friendRequest).request_type === 'friend') {
-                this.handleFriendRequest(friendRequest, quickAction)
+                await this.handleFriendRequest(friendRequest, quickAction)
                     .catch(this.core.context.logger.logError);
             } else if (groupRequest.request_type === 'group') {
-                this.handleGroupRequest(groupRequest, quickAction)
+                await this.handleGroupRequest(groupRequest, quickAction)
                     .catch(this.core.context.logger.logError);
             }
         }
