@@ -1,9 +1,9 @@
-export class NodeIKernelRecentContactListener  {
+export class NodeIKernelRecentContactListener {
     onDeletedContactsNotify(...args: unknown[]) {
 
     }
 
-    onRecentContactNotification(...args: unknown[]) {
+    onRecentContactNotification(msgList: any, arg0: { msgListUnreadCnt: string }, arg1: number) {
 
     }
 
