@@ -43,15 +43,14 @@ export class NTQQGroupApi {
 
     async getGroups(forced = false) {
         type ListenerType = NodeIKernelGroupListener['onGroupListUpdate'];
-        const [_retData, _updateType, groupList] = await this.core.eventWrapper.CallNormalEvent<(force: boolean) => Promise<any>, ListenerType>
-            (
+        const [,, groupList] = await this.core.eventWrapper.callNormalEvent(
             'NodeIKernelGroupService/getGroupList',
             'NodeIKernelGroupListener/onGroupListUpdate',
             1,
             5000,
             () => true,
             forced,
-            );
+        );
         return groupList;
     }
 
@@ -255,8 +254,7 @@ export class NTQQGroupApi {
     }
 
     async getSingleScreenNotifies(num: number) {
-        const [_retData, _doubt, _seq, notifies] = await this.core.eventWrapper.CallNormalEvent<(arg1: boolean, arg2: string, arg3: number) => Promise<any>, (doubt: boolean, seq: string, notifies: GroupNotify[]) => void>
-            (
+        const [,,, notifies] = await this.core.eventWrapper.callNormalEvent(
             'NodeIKernelGroupService/getSingleScreenNotifies',
             'NodeIKernelGroupListener/onGroupSingleScreenNotifies',
             1,
@@ -265,7 +263,7 @@ export class NTQQGroupApi {
             false,
             '',
             num,
-            );
+        );
         return notifies;
     }
 

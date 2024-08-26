@@ -1,5 +1,6 @@
 import { NodeIQQNTWrapperSession } from '@/core/wrapper/wrapper';
 import { randomUUID } from 'crypto';
+import { ListenerNamingMapping, ServiceNamingMapping } from '@/core';
 
 interface InternalMapKey {
     timeout: number;
@@ -145,12 +146,21 @@ export class LegacyNTEventWrapper {
             this.createListenerFunction(ListenerMainName);
         });
     }
-    async CallNormalEventV2<
-        EventType extends (...args: any[]) => Promise<any>,
-        ListenerType extends (...args: any[]) => void
+
+    async callNormalEventV2<
+        Service extends keyof ServiceNamingMapping,
+        ServiceMethod extends Exclude<keyof ServiceNamingMapping[Service], symbol>,
+        Listener extends keyof ListenerNamingMapping,
+        ListenerMethod extends Exclude<keyof ListenerNamingMapping[Listener], symbol>,
+        // eslint-disable-next-line
+        // @ts-ignore
+        EventType extends (...args: any) => any = ServiceNamingMapping[Service][ServiceMethod],
+        // eslint-disable-next-line
+        // @ts-ignore
+        ListenerType extends (...args: any) => any = ListenerNamingMapping[Listener][ListenerMethod]
     >(
-        EventName = '',
-        ListenerName = '',
+        serviceAndMethod: `${Service}/${ServiceMethod}`,
+        listenerAndMethod: `${Listener}/${ListenerMethod}`,
         waitTimes = 1,
         timeout: number = 3000,
         checkerEvent: (ret: Awaited<ReturnType<EventType>>) => boolean = () => true,
@@ -163,14 +173,14 @@ export class LegacyNTEventWrapper {
                 let complete = 0;
                 let retData: Parameters<ListenerType> | undefined = undefined;
                 let retEvent: any = {};
-                const databack = () => {
+                function sendDataCallback() {
                     if (complete == 0) {
                         reject(
                             new Error(
-                                'Timeout: NTEvent EventName:' +
-                                EventName +
+                                'Timeout: NTEvent serviceAndMethod:' +
+                                serviceAndMethod +
                                 ' ListenerName:' +
-                                ListenerName +
+                                listenerAndMethod +
                                 ' EventRet:\n' +
                                 JSON.stringify(retEvent, null, 4) +
                                 '\n',
@@ -179,15 +189,15 @@ export class LegacyNTEventWrapper {
                     } else {
                         resolve([retEvent as Awaited<ReturnType<EventType>>, ...retData!]);
                     }
-                };
+                }
 
-                const ListenerNameList = ListenerName.split('/');
+                const ListenerNameList = listenerAndMethod.split('/');
                 const ListenerMainName = ListenerNameList[0];
                 const ListenerSubName = ListenerNameList[1];
 
-                const Timeouter = setTimeout(databack, timeout);
+                const timeoutRef = setTimeout(sendDataCallback, timeout);
 
-                const eventCallbak = {
+                const eventCallback = {
                     timeout: timeout,
                     createtime: Date.now(),
                     checker: checkerListener,
@@ -195,8 +205,8 @@ export class LegacyNTEventWrapper {
                         complete++;
                         retData = args as Parameters<ListenerType>;
                         if (complete >= waitTimes) {
-                            clearTimeout(Timeouter);
-                            databack();
+                            clearTimeout(timeoutRef);
+                            sendDataCallback();
                         }
                     },
                 };
@@ -206,18 +216,18 @@ export class LegacyNTEventWrapper {
                 if (!this.EventTask.get(ListenerMainName)?.get(ListenerSubName)) {
                     this.EventTask.get(ListenerMainName)?.set(ListenerSubName, new Map());
                 }
-                this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.set(id, eventCallbak);
+                this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.set(id, eventCallback);
                 this.createListenerFunction(ListenerMainName);
-                const EventFunc = this.createEventFunction<EventType>(EventName);
+                const EventFunc = this.createEventFunction<EventType>(serviceAndMethod);
                 retEvent = await EventFunc!(...(args as any[]));
                 if (!checkerEvent(retEvent)) {
-                    clearTimeout(Timeouter);
+                    clearTimeout(timeoutRef);
                     reject(
                         new Error(
-                            'EventChecker Failed: NTEvent EventName:' +
-                            EventName +
+                            'EventChecker Failed: NTEvent serviceAndMethod:' +
+                            serviceAndMethod +
                             ' ListenerName:' +
-                            ListenerName +
+                            listenerAndMethod +
                             ' EventRet:\n' +
                             JSON.stringify(retEvent, null, 4) +
                             '\n',
@@ -227,12 +237,21 @@ export class LegacyNTEventWrapper {
             },
         );
     }
-    async CallNormalEvent<
-        EventType extends (...args: any[]) => Promise<any>,
-        ListenerType extends (...args: any[]) => void
+
+    async callNormalEvent<
+        Service extends keyof ServiceNamingMapping,
+        ServiceMethod extends Exclude<keyof ServiceNamingMapping[Service], symbol>,
+        Listener extends keyof ListenerNamingMapping,
+        ListenerMethod extends Exclude<keyof ListenerNamingMapping[Listener], symbol>,
+        // eslint-disable-next-line
+        // @ts-ignore
+        EventType extends (...args: any) => any = ServiceNamingMapping[Service][ServiceMethod],
+        // eslint-disable-next-line
+        // @ts-ignore
+        ListenerType extends (...args: any) => any = ListenerNamingMapping[Listener][ListenerMethod]
     >(
-        EventName = '',
-        ListenerName = '',
+        serviceAndMethod: `${Service}/${ServiceMethod}`,
+        listenerAndMethod: `${Listener}/${ListenerMethod}`,
         waitTimes = 1,
         timeout: number = 3000,
         checker: (...args: Parameters<ListenerType>) => boolean,
@@ -249,9 +268,9 @@ export class LegacyNTEventWrapper {
                         reject(
                             new Error(
                                 'Timeout: NTEvent EventName:' +
-                                EventName +
+                                serviceAndMethod +
                                 ' ListenerName:' +
-                                ListenerName +
+                                listenerAndMethod +
                                 ' EventRet:\n' +
                                 JSON.stringify(retEvent, null, 4) +
                                 '\n',
@@ -262,7 +281,7 @@ export class LegacyNTEventWrapper {
                     }
                 };
 
-                const ListenerNameList = ListenerName.split('/');
+                const ListenerNameList = listenerAndMethod.split('/');
                 const ListenerMainName = ListenerNameList[0];
                 const ListenerSubName = ListenerNameList[1];
 
@@ -290,7 +309,7 @@ export class LegacyNTEventWrapper {
                 }
                 this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.set(id, eventCallbak);
                 this.createListenerFunction(ListenerMainName);
-                const EventFunc = this.createEventFunction<EventType>(EventName);
+                const EventFunc = this.createEventFunction<EventType>(serviceAndMethod);
                 retEvent = await EventFunc!(...(args as any[]));
             },
         );
