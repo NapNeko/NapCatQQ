@@ -122,11 +122,11 @@ export function getDefaultQQVersionConfigInfo(): QQVersionConfigType {
         };
     }
     return {
-        baseVersion: '9.9.15-27254',
-        curVersion: '9.9.15-27254',
+        baseVersion: '9.9.15-27391',
+        curVersion: '9.9.15-27391',
         prevVersion: '',
         onErrorVersions: [],
-        buildId: '27254',
+        buildId: '27391',
     };
 }
 
