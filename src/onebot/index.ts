@@ -37,6 +37,7 @@ import { OB11FriendRecallNoticeEvent } from '@/onebot/event/notice/OB11FriendRec
 import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecallNoticeEvent';
 import { LRUCache } from '@/common/utils/LRU';
 import { NT2GroupEvent, NT2PrivateEvent } from './helper';
+import { NodeIKernelRecentContactListener } from '@/core/listeners/NodeIKernelRecentContactListener';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -115,6 +116,7 @@ export class NapCatOneBot11Adapter {
         this.initMsgListener();
         this.initBuddyListener();
         this.initGroupListener();
+        //this.initRecentContactListener();
 
         await WebUiDataRuntime.setQQLoginUin(selfInfo.uin.toString());
         await WebUiDataRuntime.setQQLoginStatus(true);
@@ -124,6 +126,16 @@ export class NapCatOneBot11Adapter {
             this.context.logger.log(`OneBot11 配置更改：${JSON.stringify(prev)} -> ${JSON.stringify(newConfig)}`);
             await this.reloadNetwork(prev, newConfig);
         });
+    }
+    initRecentContactListener() {
+        const recentContactListener = new NodeIKernelRecentContactListener();
+        recentContactListener.onRecentContactNotification = function (msgList: any[], arg0: { msgListUnreadCnt: string }, arg1: number) {
+            msgList.forEach((msg) => {
+                if (msg.chatType == ChatType.KCHATTYPEGROUP) {
+                    // log("recent contact", msgList, arg0, arg1);
+                }
+            });
+        }
     }
 
     private async reloadNetwork(prev: OB11Config, now: OB11Config) {
@@ -220,6 +232,9 @@ export class NapCatOneBot11Adapter {
 
     private initMsgListener() {
         const msgListener = new NodeIKernelMsgListener();
+        msgListener.onRecvSysMsg = msg => {
+            //console.log('onRecvSysMsg', Buffer.from(msg).toString('hex'));
+        }
         msgListener.onInputStatusPush = async data => {
             const uin = await this.core.apis.UserApi.getUinByUidV2(data.fromUin);
             this.context.logger.log(`[Notice] [输入状态] ${uin} ${data.statusText}`);
@@ -497,7 +512,7 @@ export class NapCatOneBot11Adapter {
     private async emitRecallMsg(msgList: RawMessage[], cache: LRUCache<string, boolean>) {
         for (const message of msgList) {
             // log("message update", message.sendStatus, message.msgId, message.msgSeq)
-            if (message.recallTime != '0'  && !cache.get(message.msgId)) { //todo: 这个判断方法不太好，应该使用灰色消息元素来判断?
+            if (message.recallTime != '0' && !cache.get(message.msgId)) { //todo: 这个判断方法不太好，应该使用灰色消息元素来判断?
                 cache.put(message.msgId, true);
                 // 撤回消息上报
                 const oriMessageId = MessageUnique.getShortIdByMsgId(message.msgId);

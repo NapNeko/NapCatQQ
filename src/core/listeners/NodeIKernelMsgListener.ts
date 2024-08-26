@@ -259,7 +259,7 @@ export class NodeIKernelMsgListener {
 
     }
 
-    onRecvSysMsg(arrayList: unknown) {
+    onRecvSysMsg(arrayList: Array<number>) {
 
     }
 
