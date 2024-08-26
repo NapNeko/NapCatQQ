@@ -1,6 +1,6 @@
 import { OB11MessageData } from '../types';
 
-const pattern = /\[CQ:(\w+)((,\w+=[^,\]]*)*)\]/;
+const pattern = /\[CQ:(\w+)((,\w+=[^,\]]*)*)]/;
 
 function unescape(source: string) {
     return String(source)
@@ -49,14 +49,14 @@ export function encodeCQCode(data: OB11MessageData) {
     const CQCodeEscapeText = (text: string) => {
         return text.replace(/&/g, '&amp;')
             .replace(/\[/g, '&#91;')
-            .replace(/\]/g, '&#93;');
+            .replace(/]/g, '&#93;');
 
     };
 
     const CQCodeEscape = (text: string) => {
         return text.replace(/&/g, '&amp;')
             .replace(/\[/g, '&#91;')
-            .replace(/\]/g, '&#93;')
+            .replace(/]/g, '&#93;')
             .replace(/,/g, '&#44;');
     };
 
@@ -66,7 +66,10 @@ export function encodeCQCode(data: OB11MessageData) {
 
     let result = '[CQ:' + data.type;
     for (const name in data.data) {
-        const value = data.data[name];
+        const value =
+            // eslint-disable-next-line
+            // @ts-ignore
+            data.data[name];
         if (value === undefined) {
             continue;
         }
