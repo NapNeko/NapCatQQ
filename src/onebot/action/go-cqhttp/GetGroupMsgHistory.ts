@@ -15,7 +15,7 @@ const SchemaData = {
         group_id: { type: ['number', 'string'] },
         message_seq: { type: 'number' },
         count: { type: ['number', 'string'] },
-        reverseOrder: { type: 'boolean' },
+        reverseOrder: { type: ['boolean', 'string'] },
     },
     required: ['group_id'],
 } as const satisfies JSONSchema;
@@ -29,7 +29,7 @@ export default class GoCQHTTPGetGroupMsgHistory extends BaseAction<Payload, Resp
     async _handle(payload: Payload): Promise<Response> {
         const NTQQMsgApi = this.core.apis.MsgApi;
         //处理参数
-        const isReverseOrder = payload.reverseOrder || true;
+        const isReverseOrder = typeof payload.reverseOrder === 'string' ? payload.reverseOrder === 'true' : !!payload.reverseOrder;
         const MsgCount = +(payload.count ?? 20);
         const peer: Peer = { chatType: ChatType.KCHATTYPEGROUP, peerUid: payload.group_id.toString() };
         //拉取消息

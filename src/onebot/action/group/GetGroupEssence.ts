@@ -7,7 +7,7 @@ const SchemaData = {
     type: 'object',
     properties: {
         group_id: { type: ['number', 'string'] },
-        pages: { type: 'number' },
+        pages: { type: ['number', 'string'] },
     },
     required: ['group_id'],
 } as const satisfies JSONSchema;
@@ -20,7 +20,7 @@ export class GetGroupEssence extends BaseAction<Payload, GroupEssenceMsgRet> {
 
     async _handle(payload: Payload) {
         const NTQQWebApi = this.core.apis.WebApi;
-        const ret = await NTQQWebApi.getGroupEssenceMsg(payload.group_id.toString(), (payload.pages || "0").toString());
+        const ret = await NTQQWebApi.getGroupEssenceMsg(payload.group_id.toString(), (+(payload.pages ?? 0)).toString());
         if (!ret) {
             throw new Error('获取失败');
         }

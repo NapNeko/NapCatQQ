@@ -15,7 +15,7 @@ const SchemaData = {
         user_id: { type: ['number', 'string'] },
         message_seq: { type: 'number' },
         count: { type: ['number', 'string'] },
-        reverseOrder: { type: 'boolean' },
+        reverseOrder: { type: ['boolean', 'string'] },
     },
     required: ['user_id'],
 } as const satisfies JSONSchema;
@@ -33,7 +33,7 @@ export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
         //处理参数
         const uid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());
         const MsgCount = +(payload.count ?? 20);
-        const isReverseOrder = payload.reverseOrder || true;
+        const isReverseOrder = typeof payload.reverseOrder === 'string' ? payload.reverseOrder === 'true' : !!payload.reverseOrder;
         if (!uid) throw `记录${payload.user_id}不存在`;
         const friend = await NTQQFriendApi.isBuddy(uid);
         const peer = { chatType: friend ? ChatType.KCHATTYPEC2C : ChatType.KCHATTYPETEMPC2CFROMGROUP, peerUid: uid };

@@ -3,8 +3,6 @@ import { ActionName, BaseCheckResult } from '../types';
 import * as fs from 'node:fs';
 import { checkFileReceived, uri2local } from '@/common/utils/file';
 
-// import { log } from "../../../common/utils";
-
 interface Payload {
     file: string,
     group_id: number
@@ -42,7 +40,6 @@ export default class SetGroupPortrait extends BaseAction<Payload, any> {
             if (!ret) {
                 throw `头像${payload.file}设置失败,api无返回`;
             }
-            // log(`头像设置返回：${JSON.stringify(ret)}`)
             if (ret['result'] == 1004022) {
                 throw `头像${payload.file}设置失败，文件可能不是图片格式或权限不足`;
             } else if (ret['result'] != 0) {
