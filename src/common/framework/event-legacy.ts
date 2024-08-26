@@ -158,11 +158,11 @@ export class LegacyNTEventWrapper {
     >(
         serviceAndMethod: `${Service}/${ServiceMethod}`,
         listenerAndMethod: `${Listener}/${ListenerMethod}`,
-        waitTimes = 1,
-        timeout: number = 3000,
+        args: Parameters<EventType>,
         checkerEvent: (ret: Awaited<ReturnType<EventType>>) => boolean = () => true,
         checkerListener: (...args: Parameters<ListenerType>) => boolean = () => true,
-        ...args: Parameters<EventType>
+        callbackTimesToWait = 1,
+        timeout = 5000,
     ) {
         return new Promise<[EventRet: Awaited<ReturnType<EventType>>, ...Parameters<ListenerType>]>(
             async (resolve, reject) => {
@@ -202,7 +202,7 @@ export class LegacyNTEventWrapper {
                     func: (...args: any[]) => {
                         complete++;
                         retData = args as Parameters<ListenerType>;
-                        if (complete >= waitTimes) {
+                        if (complete >= callbackTimesToWait) {
                             clearTimeout(timeoutRef);
                             sendDataCallback();
                         }
@@ -216,8 +216,8 @@ export class LegacyNTEventWrapper {
                 }
                 this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.set(id, eventCallback);
                 this.createListenerFunction(ListenerMainName);
-                const EventFunc = this.createEventFunction<EventType>(serviceAndMethod);
-                retEvent = await EventFunc!(...(args as any[]));
+                const eventFunction = this.createEventFunction<EventType>(serviceAndMethod);
+                retEvent = await eventFunction!(...(args));
                 if (!checkerEvent(retEvent)) {
                     clearTimeout(timeoutRef);
                     reject(
@@ -236,6 +236,7 @@ export class LegacyNTEventWrapper {
         );
     }
 
+    /*
     async callNormalEvent<
         Service extends keyof ServiceNamingMapping,
         ServiceMethod extends Exclude<keyof ServiceNamingMapping[Service], symbol>,
@@ -312,4 +313,5 @@ export class LegacyNTEventWrapper {
             },
         );
     }
+     */
 }
