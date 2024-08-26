@@ -1,4 +1,4 @@
-import { NodeQQNTWrapperUtil, NTApiContext, WrapperNodeApi } from '@/core/wrapper';
+import { NodeQQNTWrapperUtil, StableNTApiWrapper, WrapperNodeApi } from '@/core/wrapper';
 import path from 'node:path';
 import fs from 'node:fs';
 import { InstanceContext } from './wrapper';
@@ -30,7 +30,7 @@ export function loadQQWrapper(QQVersion: string): WrapperNodeApi {
 
 export class NapCatCore {
     readonly context: InstanceContext;
-    readonly apis: NTApiContext;
+    readonly apis: StableNTApiWrapper;
     readonly eventWrapper: LegacyNTEventWrapper;
     // readonly eventChannel: NTEventChannel;
     NapCatDataPath: string;

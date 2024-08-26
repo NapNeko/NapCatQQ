@@ -45,7 +45,7 @@ export default class GoCQHTTPUploadPrivateFile extends BaseAction<Payload, null>
             throw new Error(downloadResult.errMsg);
         }
         const sendFileEle: SendFileElement = await this.core.apis.FileApi.createValidSendFileElement(downloadResult.path, payload.name);
-        await this.obContext.apiContext.MsgApi.sendMsgWithOb11UniqueId(await this.getPeer(payload), [sendFileEle], [], true);
+        await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(await this.getPeer(payload), [sendFileEle], [], true);
         return null;
     }
 }

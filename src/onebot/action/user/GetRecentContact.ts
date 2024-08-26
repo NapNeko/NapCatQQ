@@ -23,7 +23,7 @@ export default class GetRecentContact extends BaseAction<Payload, any> {
             const FastMsg = await NTQQMsgApi.getMsgsByMsgId({ chatType: t.chatType, peerUid: t.peerUid }, [t.msgId]);
             if (FastMsg.msgList.length > 0) {
                 //扩展ret.info.changedList
-                const lastestMsg = await this.obContext.apiContext.MsgApi.parseMessage(FastMsg.msgList[0], 'array');
+                const lastestMsg = await this.obContext.apis.MsgApi.parseMessage(FastMsg.msgList[0], 'array');
                 return {
                     lastestMsg: lastestMsg,
                     peerUin: t.peerUin,

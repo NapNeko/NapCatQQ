@@ -33,7 +33,7 @@ export default class GoCQHTTPUploadGroupFile extends BaseAction<Payload, null> {
             throw new Error(downloadResult.errMsg);
         }
         const sendFileEle = await this.core.apis.FileApi.createValidSendFileElement(downloadResult.path, payload.name, payload.folder_id);
-        await this.obContext.apiContext.MsgApi.sendMsgWithOb11UniqueId({
+        await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId({
             chatType: ChatType.KCHATTYPEGROUP,
             peerUid: payload.group_id.toString(),
         }, [sendFileEle], [], true);

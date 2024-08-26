@@ -1,5 +1,5 @@
 import BaseAction from '../BaseAction';
-import { OB11ForwardMessage, OB11Message, OB11MessageData } from '@/onebot';
+import { OB11ForwardMessage } from '@/onebot';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/utils/MessageUnique';
@@ -13,10 +13,6 @@ const SchemaData = {
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
-
-interface Response {
-    messages: (OB11Message & { content: OB11MessageData })[];
-}
 
 export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
     actionName = ActionName.GoCQHTTP_GetForwardMsg;
@@ -39,7 +35,7 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
         }
         const msgList = data.msgList;
         const messages = (await Promise.all(msgList.map(async msg => {
-            const resMsg = await this.obContext.apiContext.MsgApi
+            const resMsg = await this.obContext.apis.MsgApi
                 .parseMessage(msg);
             if (!resMsg) return;
             resMsg.message_id = MessageUnique.createMsg({

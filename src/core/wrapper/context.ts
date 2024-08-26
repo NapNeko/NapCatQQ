@@ -15,7 +15,7 @@ export interface InstanceContext {
     readonly pathWrapper: NapCatPathWrapper;
 }
 
-export interface NTApiContext {
+export interface StableNTApiWrapper {
     FileApi: NTQQFileApi,
     SystemApi: NTQQSystemApi,
     CollectionApi: NTQQCollectionApi,

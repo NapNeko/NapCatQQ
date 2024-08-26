@@ -14,7 +14,7 @@ import {
     NodeIKernelGroupListener,
 } from '@/core';
 import { OB11Config, OB11ConfigLoader } from '@/onebot/helper/config';
-import { OneBotApiContextType } from '@/onebot/types';
+import { StableOneBotApiWrapper } from '@/onebot/types';
 import {
     OB11ActiveHttpAdapter,
     OB11ActiveWebSocketAdapter,
@@ -44,7 +44,7 @@ export class NapCatOneBot11Adapter {
     readonly context: InstanceContext;
 
     configLoader: OB11ConfigLoader;
-    apiContext: OneBotApiContextType;
+    apis: StableOneBotApiWrapper;
     networkManager: OB11NetworkManager;
     actions: ActionMap;
 
@@ -54,7 +54,7 @@ export class NapCatOneBot11Adapter {
         this.core = core;
         this.context = context;
         this.configLoader = new OB11ConfigLoader(core, pathWrapper.configPath);
-        this.apiContext = {
+        this.apis = {
             GroupApi: new OneBotGroupApi(this, core),
             UserApi: new OneBotUserApi(this, core),
             FriendApi: new OneBotFriendApi(this, core),
@@ -259,7 +259,7 @@ export class NapCatOneBot11Adapter {
                 if (msg.sendStatus == SendStatusType.KSEND_STATUS_SUCCESS && !msgIdSend.get(msg.msgId)) {
                     msgIdSend.put(msg.msgId, true);
                     // 完成后再post
-                    this.apiContext.MsgApi.parseMessage(msg)
+                    this.apis.MsgApi.parseMessage(msg)
                         .then((ob11Msg) => {
                             if (!ob11Msg) return;
                             ob11Msg.target_id = parseInt(msg.peerUin);
@@ -457,7 +457,7 @@ export class NapCatOneBot11Adapter {
     private async emitMsg(message: RawMessage) {
         const { debug, reportSelfMessage, messagePostFormat } = this.configLoader.configData;
         this.context.logger.logDebug('收到新消息 RawMessage', message);
-        this.apiContext.MsgApi.parseMessage(message, messagePostFormat).then((ob11Msg) => {
+        this.apis.MsgApi.parseMessage(message, messagePostFormat).then((ob11Msg) => {
             if (!ob11Msg) return;
             this.context.logger.logDebug('转化为 OB11Message', ob11Msg);
             if (debug) {

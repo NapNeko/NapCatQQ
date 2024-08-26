@@ -53,8 +53,8 @@ async function handleMsg(core: NapCatCore, obContext: NapCatOneBot11Adapter, msg
             }
         }
         replyMessage = replyMessage.concat(normalize(reply, quickAction.auto_escape));
-        const { sendElements, deleteAfterSentFiles } = await obContext.apiContext.MsgApi.createSendElements(replyMessage, peer);
-        obContext.apiContext.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, deleteAfterSentFiles, false).then().catch(core.context.logger.logError);
+        const { sendElements, deleteAfterSentFiles } = await obContext.apis.MsgApi.createSendElements(replyMessage, peer);
+        obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, deleteAfterSentFiles, false).then().catch(core.context.logger.logError);
     }
 }
 
