@@ -12,7 +12,8 @@ import {
     NapCatCore,
     Peer,
     RawMessage,
-    SendMessageElement, SendTextElement,
+    SendMessageElement,
+    SendTextElement,
 } from '@/core';
 import faceConfig from '@/core/external/face_config.json';
 import {
@@ -21,13 +22,15 @@ import {
     OB11MessageData,
     OB11MessageDataType,
     OB11MessageFileBase,
-    OB11MessageForward
+    OB11MessageForward,
 } from '@/onebot';
 import { OB11Constructor } from '../helper';
 import { EventType } from '@/onebot/event/OB11BaseEvent';
 import { encodeCQCode } from '@/onebot/helper/cqcode';
 import { uri2local } from '@/common/utils/file';
 import { RequestUtil } from '@/common/utils/request';
+import fs from 'node:fs';
+import fsPromise from 'node:fs/promises';
 
 type RawToOb11Converters = {
     [Key in keyof MessageElement as Key extends `${string}Element` ? Key : never]: (
@@ -754,6 +757,52 @@ export class OneBotMsgApi {
         const ret = await Promise.all(callResultList);
         const sendElements: SendMessageElement[] = ret.filter(ele => !!ele);
         return { sendElements, deleteAfterSentFiles };
+    }
+
+    async sendMsgWithOb11UniqueId(peer: Peer, sendElements: SendMessageElement[], deleteAfterSentFiles: string[], waitComplete = true) {
+        if (!sendElements.length) {
+            throw new Error('消息体无法解析, 请检查是否发送了不支持的消息类型');
+        }
+        let totalSize = 0;
+        let timeout = 10000;
+        try {
+            for (const fileElement of sendElements) {
+                if (fileElement.elementType === ElementType.PTT) {
+                    totalSize += fs.statSync(fileElement.pttElement.filePath).size;
+                }
+                if (fileElement.elementType === ElementType.FILE) {
+                    totalSize += fs.statSync(fileElement.fileElement.filePath).size;
+                }
+                if (fileElement.elementType === ElementType.VIDEO) {
+                    totalSize += fs.statSync(fileElement.videoElement.filePath).size;
+                }
+                if (fileElement.elementType === ElementType.PIC) {
+                    totalSize += fs.statSync(fileElement.picElement.sourcePath).size;
+                }
+            }
+            //且 PredictTime ((totalSize / 1024 / 512) * 1000)不等于Nan
+            const PredictTime = totalSize / 1024 / 256 * 1000;
+            if (!Number.isNaN(PredictTime)) {
+                timeout += PredictTime;// 10S Basic Timeout + PredictTime( For File 512kb/s )
+            }
+        } catch (e) {
+            this.core.context.logger.logError('发送消息计算预计时间异常', e);
+        }
+        const returnMsg = await this.core.apis.MsgApi.sendMsg(peer, sendElements, waitComplete, timeout);
+        try {
+            returnMsg!.id = MessageUnique.createMsg({
+                chatType: peer.chatType,
+                guildId: '',
+                peerUid: peer.peerUid,
+            }, returnMsg!.msgId);
+        } catch (e: any) {
+            this.core.context.logger.logDebug('发送消息id获取失败', e);
+            returnMsg!.id = 0;
+        }
+        deleteAfterSentFiles.forEach(file => {
+            fsPromise.unlink(file).then().catch(e => this.core.context.logger.logError('发送消息删除文件失败', e));
+        });
+        return returnMsg;
     }
 
     private async handleOb11FileLikeMessage(
