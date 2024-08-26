@@ -36,6 +36,7 @@ export enum ActionName {
     SetGroupFileFolder = 'set_group_file_folder',
     DelGroupFile = 'del_group_file',
     DelGroupFileFolder = 'del_group_file_folder',
+    GetGroupInfoAll = 'get_group_info_all',
     // onebot 11
     Reboot = 'set_restart',
     SendLike = 'send_like',

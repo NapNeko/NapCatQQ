@@ -81,6 +81,7 @@ import SetModelShow from './go-cqhttp/SetModelShow';
 import { SetInputStatus } from './extends/SetInputStatus';
 import { GetCSRF } from './system/GetCSRF';
 import { DelGroupNotice } from './group/DelGroupNotice';
+import GetGroupInfoAll from '@/onebot/action/group/GetGroupInfoAll';
 
 export type ActionMap = Map<string, BaseAction<any, any>>;
 
@@ -104,6 +105,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new SetGroupFileFolder(obContext, core),
         new DelGroupFile(obContext, core),
         new DelGroupFileFolder(obContext, core),
+        new GetGroupInfoAll(obContext ,core),
         // onebot11
         new SendLike(obContext, core),
         new GetMsg(obContext, core),

@@ -2,6 +2,7 @@ import { RequestUtil } from '@/common/utils/request';
 import {
     GroupEssenceMsgRet,
     InstanceContext,
+    WebApiGroupInfoAll,
     WebApiGroupMember,
     WebApiGroupMemberRet,
     WebApiGroupNoticeRet,
@@ -55,6 +56,24 @@ export class NTQQWebApi {
             return undefined;
         }
         return ret;
+    }
+
+    async getGroupInfoAll(GroupCode: string) {
+        const cookieObject = await this.core.apis.UserApi.getCookies('qun.qq.com');
+        const url = `https://qun.qq.com/cgi-bin/qun_info/get_group_info_all?${new URLSearchParams({
+            gc: GroupCode,
+            bkn: this.getBknFromCookie(cookieObject)
+        }).toString()
+        }`;
+        let ret;
+        try {
+            ret = await RequestUtil.HttpGetJson<WebApiGroupInfoAll>
+            (url, 'GET', '', { 'Cookie': this.cookieToString(cookieObject) });
+            return ret;
+        } catch (e) {
+            this.context.logger.logDebug('e', e);
+            return undefined;
+        }
     }
 
     async getGroupMembers(GroupCode: string, cached: boolean = true): Promise<WebApiGroupMember[]> {

@@ -105,6 +105,70 @@ export interface WebApiGroupNoticeRet {
     ad: number
 }
 
+interface Tag {
+    u: number;
+    sTid: string;
+    tag: string;
+    md: string;
+}
+
+interface Photo {
+    f: number;
+}
+
+interface Share {
+    f: number;
+}
+
+interface Ns {
+    [key: number]: string;
+}
+
+interface LevelName {
+    [key: string]: string;
+}
+
+export interface WebApiGroupInfoAll {
+    ec: number;
+    errcode: number;
+    em: string;
+    gc: number;
+    gBoard: string;
+    gOwner: number;
+    gName: string;
+    gMemNum: number;
+    gMaxMem: number;
+    gLevel: number;
+    gCrtTime: number;
+    gSpeClass: number;
+    classID: number;
+    flag: number;
+    gtype: number;
+    ac_grade: number;
+    ac_num: number;
+    class: string;
+    gIntro: string;
+    gRIntro: string;
+    conf_mGFace: number;
+    conf_mGName: string;
+    tags: Tag[];
+    pos: string;
+    app_privilege_flag: number;
+    search: number;
+    auth: number;
+    open: number;
+    photo: Photo;
+    share: Share;
+    ac_open: number;
+    edu: number;
+    gAdmins: number[];
+    ns: Ns;
+    levelname: LevelName;
+    level_def: number;
+    user_show: number;
+    sys_show: number;
+}
+
 export interface GroupEssenceMsg {
     group_code: string;
     msg_seq: number;
