@@ -3,7 +3,7 @@ import type { SelfInfo } from '@/core/entities';
 import { LogWrapper } from '@/common/utils/log';
 import { NodeIKernelLoginListener, NodeIKernelSessionListener } from '@/core/listeners';
 import { NodeIDependsAdapter, NodeIDispatcherAdapter, NodeIGlobalAdapter } from '@/core/adapters';
-import { NapCatPathWrapper } from '@/common/framework/napcat';
+import { napcat_version, NapCatPathWrapper } from '@/common/framework/napcat';
 import {
     InstanceContext,
     loadQQWrapper,
@@ -38,7 +38,7 @@ export async function NCoreInitShell() {
     const logger = new LogWrapper(pathWrapper.logsPath);
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
-
+    logger.log(`[NapCat] [Core] NapCat.Core Version: ` + napcat_version);
     InitWebUi(logger, pathWrapper).then().catch(logger.logError);
 
     // from constructor
@@ -190,7 +190,7 @@ export async function NCoreInitShell() {
                 logger.log(`可用于快速登录的 QQ：\n${historyLoginList
                     .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
                     .join('\n')
-                }`);
+                    }`);
             }
             loginService.getQRCodePicture();
         }
