@@ -53,7 +53,7 @@ export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
         }));
         //转换消息
         const ob11MsgList = (await Promise.all(
-            msgList.map(msg => this.obContext.apiContext.MsgApi.parseMessage(msg)))
+            msgList.map(msg => this.obContext.apis.MsgApi.parseMessage(msg)))
         ).filter(msg => msg !== undefined);
         return { 'messages': ob11MsgList };
     }

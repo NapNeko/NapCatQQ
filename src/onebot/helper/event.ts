@@ -19,7 +19,7 @@ export async function NT2PrivateEvent(core: NapCatCore, obContext: NapCatOneBot1
         if (element.grayTipElement) {
             if (element.grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
                 if (element.grayTipElement.jsonGrayTipElement.busiId == 1061) {
-                    const PokeEvent = await obContext.apiContext.FriendApi.parsePrivatePokeEvent(element.grayTipElement);
+                    const PokeEvent = await obContext.apis.FriendApi.parsePrivatePokeEvent(element.grayTipElement);
                     if (PokeEvent) return PokeEvent;
                 }
             }
@@ -56,15 +56,15 @@ export async function NT2GroupEvent(core: NapCatCore, obContext: NapCatOneBot11A
         if (element.grayTipElement && element.grayTipElement.groupElement) {
             const groupElement = element.grayTipElement.groupElement;
             if (groupElement.type == TipGroupElementType.memberIncrease) {
-                const MemberIncreaseEvent = await obContext.apiContext.GroupApi.parseGroupMemberIncreaseEvent(msg.peerUid, element.grayTipElement);
+                const MemberIncreaseEvent = await obContext.apis.GroupApi.parseGroupMemberIncreaseEvent(msg.peerUid, element.grayTipElement);
                 if (MemberIncreaseEvent) return MemberIncreaseEvent;
             } else if (groupElement.type === TipGroupElementType.ban) {
-                const BanEvent = await obContext.apiContext.GroupApi.parseGroupBanEvent(msg.peerUid, element.grayTipElement);
+                const BanEvent = await obContext.apis.GroupApi.parseGroupBanEvent(msg.peerUid, element.grayTipElement);
                 if (BanEvent) return BanEvent;
             } else if (groupElement.type == TipGroupElementType.kicked) {
                 NTQQGroupApi.quitGroup(msg.peerUid).then();
                 try {
-                    const KickEvent = await obContext.apiContext.GroupApi.parseGroupKickEvent(msg.peerUid, element.grayTipElement);
+                    const KickEvent = await obContext.apis.GroupApi.parseGroupKickEvent(msg.peerUid, element.grayTipElement);
                     if (KickEvent) return KickEvent;
                 } catch (e) {
                     return new OB11GroupDecreaseEvent(
@@ -90,11 +90,11 @@ export async function NT2GroupEvent(core: NapCatCore, obContext: NapCatOneBot11A
         }
         if (element.grayTipElement) {
             if (element.grayTipElement.xmlElement?.templId === '10382') {
-                const emojiLikeEvent = await obContext.apiContext.GroupApi.parseGroupEmjioLikeEvent(msg.peerUid, element.grayTipElement);
+                const emojiLikeEvent = await obContext.apis.GroupApi.parseGroupEmjioLikeEvent(msg.peerUid, element.grayTipElement);
                 if (emojiLikeEvent) return emojiLikeEvent;
             }
             if (element.grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_XMLMSG) {
-                const GroupIncreaseEvent = await obContext.apiContext.GroupApi.parseGroupIncreaseEvent(msg.peerUid, element.grayTipElement);
+                const GroupIncreaseEvent = await obContext.apis.GroupApi.parseGroupIncreaseEvent(msg.peerUid, element.grayTipElement);
                 if (GroupIncreaseEvent) return GroupIncreaseEvent;
             }
 

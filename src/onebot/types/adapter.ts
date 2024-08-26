@@ -1,6 +1,6 @@
 import { OneBotFriendApi, OneBotGroupApi, OneBotMsgApi, OneBotUserApi } from '../api';
 
-export interface OneBotApiContextType {
+export interface StableOneBotApiWrapper {
     FriendApi: OneBotFriendApi;
     UserApi: OneBotUserApi;
     GroupApi: OneBotGroupApi;

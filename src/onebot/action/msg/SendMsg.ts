@@ -137,9 +137,9 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         }
         // log("send msg:", peer, sendElements)
 
-        const { sendElements, deleteAfterSentFiles } = await this.obContext.apiContext.MsgApi
+        const { sendElements, deleteAfterSentFiles } = await this.obContext.apis.MsgApi
             .createSendElements(messages, peer);
-        const returnMsg = await this.obContext.apiContext.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, deleteAfterSentFiles);
+        const returnMsg = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, deleteAfterSentFiles);
         return { message_id: returnMsg!.id! };
     }
 
@@ -180,7 +180,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                         //完成子卡片生成跳过后续
                         continue;
                     }
-                    const { sendElements } = await this.obContext.apiContext.MsgApi
+                    const { sendElements } = await this.obContext.apis.MsgApi
                         .createSendElements(OB11Data, destPeer);
                     //拆分消息
                     const MixElement = sendElements.filter(element => element.elementType !== ElementType.FILE && element.elementType !== ElementType.VIDEO);
@@ -188,7 +188,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                     const AllElement: SendMessageElement[][] = [MixElement, ...SingleElement].filter(e => e !== undefined && e.length !== 0);
                     const MsgNodeList: Promise<RawMessage | undefined>[] = [];
                     for (const sendElementsSplitElement of AllElement) {
-                        MsgNodeList.push(this.obContext.apiContext.MsgApi.sendMsgWithOb11UniqueId(selfPeer, sendElementsSplitElement, [], true).catch(_ => undefined));
+                        MsgNodeList.push(this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(selfPeer, sendElementsSplitElement, [], true).catch(_ => undefined));
                     }
                     (await Promise.allSettled(MsgNodeList)).map((result) => {
                         if (result.status === 'fulfilled' && result.value) {
