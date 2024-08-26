@@ -10,8 +10,8 @@ const SchemaData = {
         group_id: { type: ['number', 'string'] },
         content: { type: 'string' },
         image: { type: 'string' },
-        pinned: { type: 'number' },
-        confirmRequired: { type: 'number' },
+        pinned: { type: ['number', 'string'] },
+        confirmRequired: { type: ['number', 'string'] },
     },
     required: ['group_id', 'content'],
 } as const satisfies JSONSchema;
@@ -49,14 +49,8 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
             }
             UploadImage = ImageUploadResult.picInfo;
         }
-        let Notice_Pinned = 0;
-        let Notice_confirmRequired = 0;
-        if (!payload.pinned) {
-            Notice_Pinned = 0;
-        }
-        if (!payload.confirmRequired) {
-            Notice_confirmRequired = 0;
-        }
+        let Notice_Pinned = +(payload.pinned ?? 0);
+        let Notice_confirmRequired = +(payload.confirmRequired ?? 0);
         const PublishGroupBulletinResult = await NTQQGroupApi.publishGroupBulletin(payload.group_id.toString(), payload.content, UploadImage, Notice_Pinned, Notice_confirmRequired);
 
         if (PublishGroupBulletinResult.result != 0) {

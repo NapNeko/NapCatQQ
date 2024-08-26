@@ -45,7 +45,6 @@ export class GetGroupNotice extends BaseAction<Payload, GroupNotice[]> {
         for (const key in ret.feeds) {
             const retApiNotice: WebApiGroupNoticeFeed = ret.feeds[key];
             const retNotice: GroupNotice = {
-                //...ret.feeds[key],
                 notice_id: retApiNotice.fid,
                 sender_id: retApiNotice.u,
                 publish_time: retApiNotice.pubt,
