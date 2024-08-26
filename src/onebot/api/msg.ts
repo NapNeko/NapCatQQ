@@ -707,7 +707,7 @@ export class OneBotMsgApi {
             }
         }
 
-        const msgSegments = (await Promise.all(msg.elements.map(
+        const msgSegments = (await Promise.allSettled(msg.elements.map(
             async (element) => {
                 for (const key in element) {
                     if (keyCanBeParsed(key, this.rawToOb11Converters) && element[key]) {
@@ -721,7 +721,14 @@ export class OneBotMsgApi {
                     }
                 }
             }
-        ))).filter(entry => !!entry);
+        ))).filter(entry => {
+            if (entry.status === 'fulfilled') {
+                return !!entry.value;
+            } else {
+                this.core.context.logger.logError('消息段解析失败', entry.reason);
+                return false;
+            }
+        }).map((entry) => (<PromiseFulfilledResult<OB11MessageData>>entry).value);
 
         const msgAsCQCode = msgSegments.map(msg => encodeCQCode(msg)).join('').trim();
 
