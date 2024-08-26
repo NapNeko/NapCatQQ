@@ -1,5 +1,4 @@
 import express from 'express';
-import { resolve } from 'node:path';
 import { ALLRouter } from './src/router';
 import { LogWrapper } from '@/common/utils/log';
 import { NapCatPathWrapper } from '@/common/framework/napcat';

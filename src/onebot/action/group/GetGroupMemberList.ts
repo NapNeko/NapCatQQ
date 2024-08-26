@@ -63,7 +63,7 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
                 }
             }
         }
-        
+
         _groupMembers = Array.from(MemberMap.values());
         return _groupMembers;
     }

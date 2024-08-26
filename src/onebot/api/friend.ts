@@ -11,6 +11,7 @@ export class OneBotFriendApi {
         this.obContext = obContext;
         this.core = core;
     }
+
     //使用前预先判断 busiId 1061
     async parsePrivatePokeEvent(grayTipElement: GrayTipElement) {
         const NTQQUserApi = this.core.apis.UserApi;
@@ -24,7 +25,7 @@ export class OneBotFriendApi {
                 this.core,
                 parseInt((await NTQQUserApi.getUinByUidV2(pokedetail[0].uid))!),
                 parseInt((await NTQQUserApi.getUinByUidV2(pokedetail[1].uid))!),
-                pokedetail
+                pokedetail,
             );
         }
         return undefined;

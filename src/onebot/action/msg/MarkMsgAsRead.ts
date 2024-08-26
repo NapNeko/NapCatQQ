@@ -26,7 +26,7 @@ class MarkMsgAsRead extends BaseAction<PlayloadType, null> {
             return { chatType: isBuddy ? ChatType.KCHATTYPEC2C : ChatType.KCHATTYPETEMPC2CFROMGROUP, peerUid };
         }
         if (!payload.group_id) {
-            throw new Error( '缺少参数 group_id 或 user_id');
+            throw new Error('缺少参数 group_id 或 user_id');
         }
         return { chatType: ChatType.KCHATTYPEGROUP, peerUid: payload.group_id.toString() };
     }

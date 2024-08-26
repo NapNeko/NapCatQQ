@@ -13,7 +13,7 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
         public url: string,
         public secret: string | undefined,
         public core: NapCatCore,
-        public obContext: NapCatOneBot11Adapter
+        public obContext: NapCatOneBot11Adapter,
     ) {
         this.logger = core.context.logger;
     }

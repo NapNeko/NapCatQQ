@@ -6,6 +6,7 @@ export type ListenerClassBase = Record<string, string>;
 export interface ListenerIBase {
     // eslint-disable-next-line @typescript-eslint/no-misused-new
     new(listener: any): ListenerClassBase;
+
     [key: string]: any;
 }
 
@@ -122,7 +123,7 @@ export class NTEventChannel extends EventEmitter {
 
     async callEvent<EventType extends (...args: any[]) => Promise<any> | any>(
         EventName = '', timeout: number = 3000, ...args: Parameters<EventType>) {
-        return new Promise<Awaited<ReturnType<EventType>>>(async (resolve, reject) => {
+        return new Promise<Awaited<ReturnType<EventType>>>(async (resolve) => {
             const EventFunc = this.createEventFunction<EventType>(EventName);
             const retData = await EventFunc!(...args);
             resolve(retData);

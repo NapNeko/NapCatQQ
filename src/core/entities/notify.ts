@@ -16,6 +16,7 @@ export enum GroupNotifyMsgType {
     TRANSFER_GROUP_NOTIFY_OLDOWNER,
     TRANSFER_GROUP_NOTIFY_ADMIN
 }
+
 export interface GroupNotifies {
     doubt: boolean;
     nextStartSeq: string;
@@ -29,17 +30,20 @@ export enum GroupNotifyMsgStatus {
     KREFUSED,//拒绝
     KIGNORED//忽略
 }
+
 export enum GroupInviteStatus {
     INIT,
     WAIT_TO_APPROVE,
     JOINED,
     REFUSED_BY_ADMINI_STRATOR
 }
+
 export enum GroupInviteType {
     BYBUDDY,
     BYGROUPMEMBER,
     BYDISCUSSMEMBER
 }
+
 export interface GroupNotify {
     seq: string; // 通知序列号
     type: GroupNotifyMsgType;

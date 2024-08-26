@@ -119,6 +119,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
             });
         }
     }
+
     connectEvent(core: NapCatCore) {
         try {
             this.checkStateAndReply<any>(new OB11LifeCycleEvent(core, LifeCycleSubType.CONNECT));
@@ -126,6 +127,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
             this.logger.logError('[OneBot] [WebSocket Client] 发送生命周期失败', e);
         }
     }
+
     private async handleMessage(message: any) {
         let receiveData: { action: ActionName, params?: any, echo?: any } = { action: ActionName.Unknown, params: {} };
         let echo = undefined;

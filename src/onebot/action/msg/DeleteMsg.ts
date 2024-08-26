@@ -32,7 +32,7 @@ class DeleteMsg extends BaseAction<Payload, void> {
                 'NodeIKernelMsgListener/onMsgInfoListUpdate',
                 1,
                 5000,
-                (msgs) => !!msgs.find(m => m.msgId === msg.MsgId && m.recallTime !== '0')
+                (msgs) => !!msgs.find(m => m.msgId === msg.MsgId && m.recallTime !== '0'),
             ).catch(() => new Promise<undefined>((resolve) => {
                 resolve(undefined);
             }));

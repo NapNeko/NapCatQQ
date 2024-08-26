@@ -1,14 +1,14 @@
-import { NapCatOneBot11Adapter } from "..";
-import { OB11BaseNoticeEvent } from "../event/notice/OB11BaseNoticeEvent";
-import { OB11FriendAddNoticeEvent } from "../event/notice/OB11FriendAddNoticeEvent";
-import { OB11GroupNoticeEvent } from "../event/notice/OB11GroupNoticeEvent";
-import { OB11GroupCardEvent } from "../event/notice/OB11GroupCardEvent";
-import { OB11GroupDecreaseEvent } from "../event/notice/OB11GroupDecreaseEvent";
-import { OB11GroupUploadNoticeEvent } from "../event/notice/OB11GroupUploadNoticeEvent";
-import { OB11GroupPokeEvent } from "../event/notice/OB11PokeEvent";
-import { OB11GroupEssenceEvent } from "../event/notice/OB11GroupEssenceEvent";
-import { MessageUnique } from "@/common/utils/message-unique";
-import { OB11GroupTitleEvent } from "../event/notice/OB11GroupTitleEvent";
+import { NapCatOneBot11Adapter } from '..';
+import { OB11BaseNoticeEvent } from '../event/notice/OB11BaseNoticeEvent';
+import { OB11FriendAddNoticeEvent } from '../event/notice/OB11FriendAddNoticeEvent';
+import { OB11GroupNoticeEvent } from '../event/notice/OB11GroupNoticeEvent';
+import { OB11GroupCardEvent } from '../event/notice/OB11GroupCardEvent';
+import { OB11GroupDecreaseEvent } from '../event/notice/OB11GroupDecreaseEvent';
+import { OB11GroupUploadNoticeEvent } from '../event/notice/OB11GroupUploadNoticeEvent';
+import { OB11GroupPokeEvent } from '../event/notice/OB11PokeEvent';
+import { OB11GroupEssenceEvent } from '../event/notice/OB11GroupEssenceEvent';
+import { MessageUnique } from '@/common/utils/message-unique';
+import { OB11GroupTitleEvent } from '../event/notice/OB11GroupTitleEvent';
 import { NapCatCore, RawMessage, ChatType, NTGrayTipElementSubTypeV2, TipGroupElementType, Peer } from '@/core';
 
 export async function NT2PrivateEvent(core: NapCatCore, obContext: NapCatOneBot11Adapter, msg: RawMessage): Promise<OB11BaseNoticeEvent | undefined> {
@@ -72,7 +72,7 @@ export async function NT2GroupEvent(core: NapCatCore, obContext: NapCatOneBot11A
                         parseInt(msg.peerUid),
                         parseInt(core.selfInfo.uin),
                         0,
-                        'leave'
+                        'leave',
                     );
                 }
             }
@@ -85,7 +85,7 @@ export async function NT2GroupEvent(core: NapCatCore, obContext: NapCatOneBot11A
                     name: element.fileElement.fileName,
                     size: parseInt(element.fileElement.fileSize),
                     busid: element.fileElement.fileBizId || 0,
-                }
+                },
             );
         }
         if (element.grayTipElement) {
@@ -113,7 +113,7 @@ export async function NT2GroupEvent(core: NapCatCore, obContext: NapCatOneBot11A
                             parseInt(msg.peerUid),
                             parseInt((await NTQQUserApi.getUinByUidV2(poke_uid[0].uid))!),
                             parseInt((await NTQQUserApi.getUinByUidV2(poke_uid[1].uid))!),
-                            pokedetail
+                            pokedetail,
                         );
                     }
                 }
@@ -132,7 +132,7 @@ export async function NT2GroupEvent(core: NapCatCore, obContext: NapCatOneBot11A
                         core,
                         parseInt(msg.peerUid),
                         MessageUnique.getShortIdByMsgId(msgData.msgList[0].msgId)!,
-                        parseInt(msgData.msgList[0].senderUin)
+                        parseInt(msgData.msgList[0].senderUin),
                     );
                     // 获取MsgSeq+Peer可获取具体消息
                 }
@@ -145,7 +145,7 @@ export async function NT2GroupEvent(core: NapCatCore, obContext: NapCatOneBot11A
                         core,
                         parseInt(msg.peerUid),
                         parseInt(memberUin),
-                        title
+                        title,
                     );
                 }
             }

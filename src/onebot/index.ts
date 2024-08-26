@@ -94,13 +94,13 @@ export class NapCatOneBot11Adapter {
         //创建NetWork服务
         if (ob11Config.http.enable) {
             this.networkManager.registerAdapter(new OB11PassiveHttpAdapter(
-                ob11Config.http.port, ob11Config.token, this.core, this.actions
+                ob11Config.http.port, ob11Config.token, this.core, this.actions,
             ));
         }
         if (ob11Config.http.enablePost) {
             ob11Config.http.postUrls.forEach(url => {
                 this.networkManager.registerAdapter(new OB11ActiveHttpAdapter(
-                    url, ob11Config.token, this.core, this
+                    url, ob11Config.token, this.core, this,
                 ));
             });
         }
@@ -113,7 +113,7 @@ export class NapCatOneBot11Adapter {
         if (ob11Config.reverseWs.enable) {
             ob11Config.reverseWs.urls.forEach(url => {
                 this.networkManager.registerAdapter(new OB11ActiveWebSocketAdapter(
-                    url, 5000, ob11Config.heartInterval, ob11Config.token, this.core, this.actions
+                    url, 5000, ob11Config.heartInterval, ob11Config.token, this.core, this.actions,
                 ));
             });
         }
@@ -134,9 +134,10 @@ export class NapCatOneBot11Adapter {
             await this.reloadNetwork(prev, newConfig);
         });
     }
+
     initRecentContactListener() {
         const recentContactListener = new NodeIKernelRecentContactListener();
-        recentContactListener.onRecentContactNotification = function (msgList: any[], /* arg0: { msgListUnreadCnt: string }, arg1: number */) {
+        recentContactListener.onRecentContactNotification = function(msgList: any[] /* arg0: { msgListUnreadCnt: string }, arg1: number */) {
             msgList.forEach((msg) => {
                 if (msg.chatType == ChatType.KCHATTYPEGROUP) {
                     // log("recent contact", msgList, arg0, arg1);
@@ -157,10 +158,10 @@ export class NapCatOneBot11Adapter {
         if (prev.http.enable !== now.http.enable) {
             if (now.http.enable) {
                 await this.networkManager.registerAdapterAndOpen(new OB11PassiveHttpAdapter(
-                    now.http.port, now.token, this.core, this.actions
+                    now.http.port, now.token, this.core, this.actions,
                 ));
             } else {
-                await this.networkManager.closeAdapterByPredicate(adapter => adapter instanceof OB11PassiveHttpAdapter,);
+                await this.networkManager.closeAdapterByPredicate(adapter => adapter instanceof OB11PassiveHttpAdapter);
             }
         }
 
@@ -169,7 +170,7 @@ export class NapCatOneBot11Adapter {
             if (now.http.enablePost) {
                 now.http.postUrls.forEach(url => {
                     this.networkManager.registerAdapterAndOpen(new OB11ActiveHttpAdapter(
-                        url, now.token, this.core, this
+                        url, now.token, this.core, this,
                     ));
                 });
             } else {
@@ -183,7 +184,7 @@ export class NapCatOneBot11Adapter {
                 );
                 for (const url of added) {
                     await this.networkManager.registerAdapterAndOpen(new OB11ActiveHttpAdapter(
-                        url, now.token, this.core, this
+                        url, now.token, this.core, this,
                     ));
                 }
             }
@@ -197,7 +198,7 @@ export class NapCatOneBot11Adapter {
                 ));
             } else {
                 await this.networkManager.closeAdapterByPredicate(
-                    adapter => adapter instanceof OB11PassiveWebSocketAdapter
+                    adapter => adapter instanceof OB11PassiveWebSocketAdapter,
                 );
             }
         }
@@ -207,12 +208,12 @@ export class NapCatOneBot11Adapter {
             if (now.reverseWs.enable) {
                 now.reverseWs.urls.forEach(url => {
                     this.networkManager.registerAdapterAndOpen(new OB11ActiveWebSocketAdapter(
-                        url, 5000, now.heartInterval, now.token, this.core, this.actions
+                        url, 5000, now.heartInterval, now.token, this.core, this.actions,
                     ));
                 });
             } else {
                 await this.networkManager.closeAdapterByPredicate(
-                    adapter => adapter instanceof OB11ActiveWebSocketAdapter
+                    adapter => adapter instanceof OB11ActiveWebSocketAdapter,
                 );
             }
         } else {
@@ -223,7 +224,7 @@ export class NapCatOneBot11Adapter {
                 );
                 for (const url of added) {
                     await this.networkManager.registerAdapterAndOpen(new OB11ActiveWebSocketAdapter(
-                        url, 5000, now.heartInterval, now.token, this.core, this.actions
+                        url, 5000, now.heartInterval, now.token, this.core, this.actions,
                     ));
                 }
             }
@@ -300,7 +301,7 @@ export class NapCatOneBot11Adapter {
         };
 
         this.context.session.getMsgService().addKernelMsgListener(
-            proxiedListenerOf(msgListener, this.context.logger) as any
+            proxiedListenerOf(msgListener, this.context.logger) as any,
         );
     }
 
@@ -335,7 +336,7 @@ export class NapCatOneBot11Adapter {
         };
 
         this.context.session.getBuddyService().addKernelBuddyListener(
-            proxiedListenerOf(buddyListener, this.context.logger) as any
+            proxiedListenerOf(buddyListener, this.context.logger) as any,
         );
     }
 
@@ -377,7 +378,7 @@ export class NapCatOneBot11Adapter {
                                 parseInt(member1.uin),
                                 [
                                     GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_CANCELED,
-                                    GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_ADMIN
+                                    GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_ADMIN,
                                 ].includes(notify.type) ? 'unset' : 'set',
                             );
                             this.networkManager.emitEvent(groupAdminNoticeEvent)
@@ -471,7 +472,7 @@ export class NapCatOneBot11Adapter {
         };
 
         this.context.session.getGroupService().addKernelGroupListener(
-            proxiedListenerOf(groupListener, this.context.logger)
+            proxiedListenerOf(groupListener, this.context.logger),
         );
     }
 

@@ -16,6 +16,7 @@ type Payload = FromSchema<typeof SchemaData>;
 export class GetCollectionList extends BaseAction<Payload, any> {
     actionName = ActionName.GetCollectionList;
     payloadSchema = SchemaData;
+
     async _handle(payload: Payload) {
         const NTQQCollectionApi = this.core.apis.CollectionApi;
         return await NTQQCollectionApi.getAllCollection(parseInt(payload.category.toString()), +(payload.count ?? 1));

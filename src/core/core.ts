@@ -3,7 +3,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { InstanceContext } from './wrapper';
 import { proxiedListenerOf } from '@/common/utils/proxy-handler';
-import { NodeIKernelMsgListener, NodeIKernelGroupListener, NodeIKernelProfileListener } from './listeners';
+import { NodeIKernelGroupListener, NodeIKernelMsgListener, NodeIKernelProfileListener } from './listeners';
 import { DataSource, GroupMember, SelfInfo } from './entities';
 import { LegacyNTEventWrapper } from '@/common/framework/event-legacy';
 import { NTQQFileApi, NTQQFriendApi, NTQQGroupApi, NTQQMsgApi, NTQQSystemApi, NTQQUserApi, NTQQWebApi } from './apis';
@@ -98,7 +98,7 @@ export class NapCatCore {
         };
         //await sleep(2500);
         this.context.session.getMsgService().addKernelMsgListener(
-            proxiedListenerOf(msgListener, this.context.logger) as any
+            proxiedListenerOf(msgListener, this.context.logger) as any,
         );
 
         const profileListener = new NodeIKernelProfileListener();
@@ -125,8 +125,7 @@ export class NapCatCore {
                 //群成员数量变化 应该刷新缓存
                 if (existGroup && g.memberCount === existGroup.memberCount) {
                     Object.assign(existGroup, g);
-                }
-                else {
+                } else {
                     this.apis.GroupApi.groupCache.set(g.groupCode, g);
                     // 获取群成员
                 }
@@ -149,8 +148,7 @@ export class NapCatCore {
                     const existMember = existMembers.get(uid);
                     if (existMember) {
                         Object.assign(existMember, member);
-                    }
-                    else {
+                    } else {
                         existMembers!.set(uid, member);
                     }
                     //移除成员
@@ -158,8 +156,7 @@ export class NapCatCore {
                         existMembers.delete(uid);
                     }
                 });
-            }
-            else {
+            } else {
                 this.apis.GroupApi.groupMemberCache.set(groupCode, arg.infos);
             }
             // console.log('onMemberListChange', groupCode, arg);
@@ -182,8 +179,7 @@ export class NapCatCore {
                         member.isChangeRole = this.checkAdminEvent(groupCode, member, existMember);
                         // 更新成员信息
                         Object.assign(existMember, member);
-                    }
-                    else {
+                    } else {
                         existMembers.set(uid, member);
                     }
                     //移除成员
@@ -191,15 +187,15 @@ export class NapCatCore {
                         existMembers.delete(uid);
                     }
                 });
-            }
-            else {
+            } else {
                 this.apis.GroupApi.groupMemberCache.set(groupCode, members);
             }
         };
         this.context.session.getGroupService().addKernelGroupListener(
-            proxiedListenerOf(groupListener, this.context.logger) as any
+            proxiedListenerOf(groupListener, this.context.logger) as any,
         );
     }
+
     checkAdminEvent(groupCode: string, memberNew: GroupMember, memberOld: GroupMember | undefined): boolean {
         if (memberNew.role !== memberOld?.role) {
             this.context.logger.logDebug(`群 ${groupCode} ${memberNew.nick} 角色变更为 ${memberNew.role === 3 ? '管理员' : '群员'}`);

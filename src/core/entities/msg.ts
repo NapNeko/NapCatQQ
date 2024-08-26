@@ -1,4 +1,4 @@
-import { GroupMemberRole } from './group';
+import { GroupMemberRole } from '@/core';
 
 export interface Peer {
     chatType: ChatType;
@@ -145,6 +145,7 @@ export interface TaskTopMsgElement {
     iconUrl: string;
     topMsgType: number;
 }
+
 export enum NTMsgType {
     KMSGTYPEARKSTRUCT = 11,
     KMSGTYPEFACEBUBBLE = 24,
@@ -168,6 +169,7 @@ export enum NTMsgType {
     KMSGTYPEVIDEO = 7,
     KMSGTYPEWALLET = 10
 }
+
 export interface SendTaskTopMsgElement {
     elementType: ElementType.TASKTOPMSG;
     elementId: string;
@@ -355,6 +357,7 @@ export enum NTMsgAtType {
     ATTYPESUMMONROLE = 256,
     ATTYPEUNKNOWN = 0
 }
+
 export interface SendPicElement {
     elementType: ElementType.PIC;
     elementId: string;
@@ -511,6 +514,7 @@ export enum AtType {
     atAll = 1,
     atUser = 2
 }
+
 // 来自Android分析
 export enum ChatType {
     KCHATTYPEADELIE = 42,
@@ -626,6 +630,7 @@ export enum NTGrayTipElementSubTypeV2 {
     GRAYTIP_ELEMENT_SUBTYPE_WALLET = 16,
     GRAYTIP_ELEMENT_SUBTYPE_XMLMSG = 12,
 }
+
 export interface GrayTipElement {
     subElementType: NTGrayTipElementSubTypeV2;
     revokeElement: {
@@ -848,12 +853,14 @@ export interface MultiForwardMsgElement {
     resId: string;
     fileName: string;
 }
+
 export enum SendStatusType {
     KSEND_STATUS_FAILED = 0,
     KSEND_STATUS_SENDING = 1,
     KSEND_STATUS_SUCCESS = 2,
     KSEND_STATUS_SUCCESS_NOSEQ = 3
 }
+
 export interface RawMessage {
     parentMsgPeer: Peer;
 

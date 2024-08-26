@@ -97,9 +97,13 @@ export class NTQQFileApi {
     async createValidSendFileElement(
         filePath: string,
         fileName: string = '',
-        folderId: string = ''
+        folderId: string = '',
     ): Promise<SendFileElement> {
-        const { fileName: _fileName, path, fileSize } = await this.core.apis.FileApi.uploadFile(filePath, ElementType.FILE);
+        const {
+            fileName: _fileName,
+            path,
+            fileSize,
+        } = await this.core.apis.FileApi.uploadFile(filePath, ElementType.FILE);
         if (fileSize === 0) {
             throw new Error('文件异常，大小为0');
         }
@@ -118,9 +122,14 @@ export class NTQQFileApi {
     async createValidSendPicElement(
         picPath: string,
         summary: string = '',
-        subType: 0 | 1 = 0
+        subType: 0 | 1 = 0,
     ): Promise<SendPicElement> {
-        const { md5, fileName, path, fileSize } = await this.core.apis.FileApi.uploadFile(picPath, ElementType.PIC, subType);
+        const {
+            md5,
+            fileName,
+            path,
+            fileSize,
+        } = await this.core.apis.FileApi.uploadFile(picPath, ElementType.PIC, subType);
         if (fileSize === 0) {
             throw new Error('文件异常，大小为0');
         }
@@ -153,7 +162,12 @@ export class NTQQFileApi {
         diyThumbPath: string = '',
     ): Promise<SendVideoElement> {
         const logger = this.core.context.logger;
-        const { fileName: _fileName, path, fileSize, md5 } = await this.core.apis.FileApi.uploadFile(filePath, ElementType.VIDEO);
+        const {
+            fileName: _fileName,
+            path,
+            fileSize,
+            md5,
+        } = await this.core.apis.FileApi.uploadFile(filePath, ElementType.VIDEO);
         if (fileSize === 0) {
             throw new Error('文件异常，大小为0');
         }
@@ -200,7 +214,7 @@ export class NTQQFileApi {
         const thumbSize = _thumbPath ? (await fsPromises.stat(_thumbPath)).size : 0;
         // log("生成缩略图", _thumbPath)
         thumbPath.set(0, _thumbPath);
-        const thumbMd5 = _thumbPath ? await calculateFileMD5(_thumbPath) : "";
+        const thumbMd5 = _thumbPath ? await calculateFileMD5(_thumbPath) : '';
         // "fileElement": {
         //     "fileMd5": "",
         //     "fileName": "1.mp4",
@@ -427,14 +441,14 @@ export class NTQQFileApi {
                 buddyChatInfo: any[],
                 discussChatInfo: any[],
                 groupChatInfo:
-                {
-                    groupCode: string,
-                    isConf: boolean,
-                    hasModifyConfGroupFace: boolean,
-                    hasModifyConfGroupName: boolean,
-                    groupName: string,
-                    remark: string
-                }[],
+                    {
+                        groupCode: string,
+                        isConf: boolean,
+                        hasModifyConfGroupFace: boolean,
+                        hasModifyConfGroupName: boolean,
+                        groupName: string,
+                        remark: string
+                    }[],
                 dataLineChatInfo: any[],
                 tmpChatInfo: any[],
                 msgId: string,
@@ -450,22 +464,21 @@ export class NTQQFileApi {
                 filePath: string,
                 fileName: string,
                 hits:
-                {
-                    start: number,
-                    end: number
-                }[]
+                    {
+                        start: number,
+                        end: number
+                    }[]
             }[]
         }
 
         const Event = this.core.eventWrapper.createEventFunction<EventType>('NodeIKernelSearchService/searchFileWithKeywords');
         let id = '';
-        const Listener = this.core.eventWrapper.RegisterListen<(params: OnListener) => void>
-            (
+        const Listener = this.core.eventWrapper.RegisterListen<(params: OnListener) => void>(
             'NodeIKernelSearchListener/onSearchFileKeywordsResult',
-            1,
-            20000,
-            (params) => id !== '' && params.searchId == id,
-            );
+        1,
+        20000,
+        (params) => id !== '' && params.searchId == id,
+        );
         id = await Event!(keys, 12);
         const [ret] = (await Listener);
         return ret;

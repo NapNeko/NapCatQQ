@@ -1,4 +1,3 @@
-
 export class NodeIKernelFileAssistantListener {
     onFileStatusChanged(...args: unknown[]) {
     }

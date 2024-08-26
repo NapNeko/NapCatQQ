@@ -1,4 +1,3 @@
-
 export class NodeIKernelLoginListener {
     onLoginConnected(...args: any[]): void {
     }

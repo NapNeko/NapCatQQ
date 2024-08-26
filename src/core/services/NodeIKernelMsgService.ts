@@ -12,6 +12,7 @@ export interface QueryMsgsParams {
     isReverseOrder: boolean,
     isIncludeCurrent: boolean
 }
+
 export interface TmpChatInfoApi {
     errMsg: string;
     result: number;
@@ -511,11 +512,11 @@ export interface NodeIKernelMsgService {
         result: number,
         errMsg: string,
         emojiLikesList:
-        Array<{
-            tinyId: string,
-            nickName: string,
-            headUrl: string
-        }>,
+            Array<{
+                tinyId: string,
+                nickName: string,
+                headUrl: string
+            }>,
         cookie: string,
         isLastPage: boolean,
         isFirstPage: boolean

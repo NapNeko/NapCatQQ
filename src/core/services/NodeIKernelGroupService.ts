@@ -5,7 +5,7 @@ import {
     GroupMemberRole,
     GroupNotifyMsgType,
     GroupRequestOperateTypes,
-    KickMemberV2Req
+    KickMemberV2Req,
 } from '@/core/entities';
 import { GeneralCallResult } from '@/core/services/common';
 
@@ -13,6 +13,7 @@ import { GeneralCallResult } from '@/core/services/common';
 
 export interface NodeIKernelGroupService {
     kickMemberV2(param: KickMemberV2Req): Promise<GeneralCallResult>;
+
     quitGroupV2(param: { groupCode: string; needDeleteLocalMsg: boolean; }): Promise<GeneralCallResult>;
 
     getMemberCommonInfo(Req: {
