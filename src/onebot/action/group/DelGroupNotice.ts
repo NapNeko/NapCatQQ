@@ -8,9 +8,9 @@ const SchemaData = {
     type: 'object',
     properties: {
         group_id: { type: ['number', 'string'] },
-        feed_id: { type: 'string' },
+        notice_id: { type: 'string' },
     },
-    required: ['group_id','feed_id'],
+    required: ['group_id','notice_id'],
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
@@ -22,7 +22,7 @@ export class DelGroupNotice extends BaseAction<Payload, any> {
     async _handle(payload: Payload) {
         const NTQQGroupApi = this.core.apis.GroupApi;
         const group = payload.group_id.toString();
-        const feedId = payload.feed_id;
-        return await NTQQGroupApi.deleteGroupBulletin(group, feedId);
+        const noticeId = payload.notice_id;
+        return await NTQQGroupApi.deleteGroupBulletin(group, noticeId);
     }
 }

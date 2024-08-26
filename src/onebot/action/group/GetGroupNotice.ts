@@ -6,7 +6,7 @@ import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 interface GroupNotice {
     sender_id: number;
     publish_time: number;
-    feed_id: string;
+    notice_id: string;
     message: {
         text: string
         image: Array<{
@@ -46,7 +46,7 @@ export class GetGroupNotice extends BaseAction<Payload, GroupNotice[]> {
             const retApiNotice: WebApiGroupNoticeFeed = ret.feeds[key];
             const retNotice: GroupNotice = {
                 //...ret.feeds[key],
-                feed_id: retApiNotice.fid,
+                notice_id: retApiNotice.fid,
                 sender_id: retApiNotice.u,
                 publish_time: retApiNotice.pubt,
                 message: {
