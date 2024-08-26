@@ -1,6 +1,6 @@
-import { Friend, FriendV2, User } from '@/core/entities';
-import { BuddyListReqType, InstanceContext, NapCatCore, NodeIKernelBuddyListener, NodeIKernelBuddyService, NodeIKernelProfileService, OnBuddyChangeParams } from '@/core';
-import { LimitedHashTable } from '@/common/utils/MessageUnique';
+import { FriendV2 } from '@/core/entities';
+import { BuddyListReqType, InstanceContext, NapCatCore, NodeIKernelProfileService } from '@/core';
+import { LimitedHashTable } from '@/common/utils/message-unique';
 
 export class NTQQFriendApi {
     context: InstanceContext;
@@ -35,7 +35,7 @@ export class NTQQFriendApi {
         const data = await this.core.eventWrapper.callNoListenerEvent<NodeIKernelProfileService['getCoreAndBaseInfo']>(
             'NodeIKernelProfileService/getCoreAndBaseInfo', 'nodeStore', uids,
         );
-        data.forEach((value, key) => {
+        data.forEach((value) => {
             retMap.set(value.uin!, value.uid!);
         });
         //console.log('getBuddyIdMap', retMap.getValue);

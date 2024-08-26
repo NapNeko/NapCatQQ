@@ -1,4 +1,4 @@
-import { ConfigBase } from "@/common/utils/ConfigBase";
+import { ConfigBase } from "@/common/utils/config-base";
 import napCatDefaultConfig from '@/core/external/napcat.json';
 import { NapCatCore } from '@/core';
 

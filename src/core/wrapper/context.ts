@@ -1,5 +1,5 @@
 import { LogWrapper } from '@/common/utils/log';
-import { QQBasicInfoWrapper } from '@/common/utils/QQBasicInfo';
+import { QQBasicInfoWrapper } from '@/common/utils/qq-basic-info';
 import { NapCatCoreWorkingEnv, NodeIKernelLoginService, NodeIQQNTWrapperSession, WrapperNodeApi } from '@/core';
 import { NTQQFileApi, NTQQFriendApi, NTQQGroupApi, NTQQMsgApi, NTQQSystemApi, NTQQUserApi, NTQQWebApi } from '../apis';
 import { NTQQCollectionApi } from '../apis/collection';

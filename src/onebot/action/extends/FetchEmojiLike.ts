@@ -2,7 +2,7 @@
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { MessageUnique } from '@/common/utils/MessageUnique';
+import { MessageUnique } from '@/common/utils/message-unique';
 
 const SchemaData = {
     type: 'object',

@@ -2,7 +2,7 @@ import { OB11Message } from '@/onebot';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import { MessageUnique } from '@/common/utils/MessageUnique';
+import { MessageUnique } from '@/common/utils/message-unique';
 
 
 export type ReturnDataType = OB11Message

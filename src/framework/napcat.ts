@@ -1,7 +1,7 @@
 import { NapCatPathWrapper } from '@/common/framework/napcat';
 import { LogWrapper } from '@/common/utils/log';
 import { proxiedListenerOf } from '@/common/utils/proxy-handler';
-import { QQBasicInfoWrapper } from '@/common/utils/QQBasicInfo';
+import { QQBasicInfoWrapper } from '@/common/utils/qq-basic-info';
 import { loadQQWrapper, NapCatCore, NapCatCoreWorkingEnv } from '@/core/core';
 import { InstanceContext } from '@/core';
 import { SelfInfo } from '@/core/entities';

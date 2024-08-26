@@ -5,7 +5,7 @@ import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
 import { OB11GroupDecreaseEvent } from '../event/notice/OB11GroupDecreaseEvent';
 import fastXmlParser from 'fast-xml-parser';
 import { OB11GroupMsgEmojiLikeEvent } from '../event/notice/OB11MsgEmojiLikeEvent';
-import { MessageUnique } from '@/common/utils/MessageUnique';
+import { MessageUnique } from '@/common/utils/message-unique';
 
 export class OneBotGroupApi {
     obContext: NapCatOneBot11Adapter;
@@ -21,7 +21,7 @@ export class OneBotGroupApi {
         if (!groupElement?.shutUp) return undefined;
         const memberUid = groupElement.shutUp!.member.uid;
         const adminUid = groupElement.shutUp!.admin.uid;
-        let memberUin: string = '';
+        let memberUin: string;
         let duration = parseInt(groupElement.shutUp!.duration);
         const subType: 'ban' | 'lift_ban' = duration > 0 ? 'ban' : 'lift_ban';
         if (memberUid) {

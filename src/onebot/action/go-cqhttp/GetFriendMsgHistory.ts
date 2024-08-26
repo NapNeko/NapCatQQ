@@ -3,7 +3,7 @@ import { OB11Message } from '@/onebot';
 import { ActionName } from '../types';
 import { ChatType, RawMessage } from '@/core/entities';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import { MessageUnique } from '@/common/utils/MessageUnique';
+import { MessageUnique } from '@/common/utils/message-unique';
 
 interface Response {
     messages: OB11Message[];
