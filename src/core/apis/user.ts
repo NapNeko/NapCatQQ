@@ -1,7 +1,6 @@
-import type { ModifyProfileParams, User, UserDetailInfoByUin, UserDetailInfoByUinV2 } from '@/core/entities';
-import { NodeIKernelProfileListener } from '@/core/listeners';
+import type { ModifyProfileParams, User, UserDetailInfoByUinV2 } from '@/core/entities';
 import { RequestUtil } from '@/common/utils/request';
-import { NodeIKernelProfileService, ProfileBizType, UserDetailSource } from '@/core/services';
+import { ProfileBizType, UserDetailSource } from '@/core/services';
 import { InstanceContext, NapCatCore } from '..';
 import { solveAsyncProblem } from '@/common/utils/helper';
 
@@ -65,15 +64,18 @@ export class NTQQUserApi {
     }
 
     async fetchUserDetailInfos(uids: string[]) {
-        //26702 以上使用新接口 .Dev Mlikiowa
-        type EventService = NodeIKernelProfileService['fetchUserDetailInfo'];
-        type EventListener = NodeIKernelProfileListener['onUserDetailInfoChanged'];
+        // TODO: 26702 以上使用新接口 .Dev MliKiowa
         const retData: User[] = [];
-        const [_retData, _retListener] = await this.core.eventWrapper.callNormalEvent(
+        const [_retData, _retListener] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelProfileService/fetchUserDetailInfo',
             'NodeIKernelProfileListener/onUserDetailInfoChanged',
-            uids.length,
-            5000,
+            [
+                'BuddyProfileStore',
+                uids,
+                UserDetailSource.KSERVER,
+                [ProfileBizType.KALL]
+            ],
+            () => true,
             (profile) => {
                 if (uids.includes(profile.uid)) {
                     const RetUser: User = {
@@ -90,26 +92,24 @@ export class NTQQUserApi {
                 }
                 return false;
             },
-            'BuddyProfileStore',
-            uids,
-            UserDetailSource.KSERVER,
-            [ProfileBizType.KALL],
+            uids.length,
         );
 
         return retData;
     }
 
     async fetchUserDetailInfo(uid: string, mode: UserDetailSource = UserDetailSource.KDB) {
-        const [_retData, profile] = await this.core.eventWrapper.callNormalEvent(
+        const [_retData, profile] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelProfileService/fetchUserDetailInfo',
             'NodeIKernelProfileListener/onUserDetailInfoChanged',
-            1,
-            5000,
+            [
+                'BuddyProfileStore',
+                [uid],
+                mode,
+                [ProfileBizType.KALL]
+            ],
+            () => true,
             (profile) => profile.uid === uid,
-            'BuddyProfileStore',
-            [uid],
-            mode,
-            [ProfileBizType.KALL],
         );
         const RetUser: User = {
             ...profile.simpleInfo.coreInfo,
@@ -142,8 +142,7 @@ export class NTQQUserApi {
         const ClientKeyData = await this.forceFetchClientKey();
         const requestUrl = 'https://ssl.ptlogin2.qq.com/jump?ptlang=1033&clientuin=' + this.core.selfInfo.uin +
             '&clientkey=' + ClientKeyData.clientKey + '&u1=https%3A%2F%2F' + domain + '%2F' + this.core.selfInfo.uin + '%2Finfocenter&keyindex=19%27';
-        const cookies: { [key: string]: string; } = await RequestUtil.HttpsGetCookies(requestUrl);
-        return cookies;
+        return await RequestUtil.HttpsGetCookies(requestUrl);
     }
 
     async getPSkey(domainList: string[]) {
@@ -166,8 +165,7 @@ export class NTQQUserApi {
     async getQzoneCookies() {
         const ClientKeyData = await this.forceFetchClientKey();
         const requestUrl = 'https://ssl.ptlogin2.qq.com/jump?ptlang=1033&clientuin=' + this.core.selfInfo.uin + '&clientkey=' + ClientKeyData.clientKey + '&u1=https%3A%2F%2Fuser.qzone.qq.com%2F' + this.core.selfInfo.uin + '%2Finfocenter&keyindex=19%27';
-        const cookies: { [key: string]: string; } = await RequestUtil.HttpsGetCookies(requestUrl);
-        return cookies;
+        return await RequestUtil.HttpsGetCookies(requestUrl);
     }
 
     //需要异常处理
@@ -178,7 +176,7 @@ export class NTQQUserApi {
             throw new Error('getClientKey Error');
         }
         const clientKey = ClientKeyData.clientKey;
-        const keyIndex = ClientKeyData.keyIndex;
+        // const keyIndex = ClientKeyData.keyIndex;
         const requestUrl = 'https://ssl.ptlogin2.qq.com/jump?ptlang=1033&clientuin=' + this.core.selfInfo.uin + '&clientkey=' + clientKey + '&u1=https%3A%2F%2Fh5.qzone.qq.com%2Fqqnt%2Fqzoneinpcqq%2Ffriend%3Frefresh%3D0%26clientuin%3D0%26darkMode%3D0&keyindex=19%27';
         const cookies: { [key: string]: string; } = await RequestUtil.HttpsGetCookies(requestUrl);
         const skey = cookies['skey'];

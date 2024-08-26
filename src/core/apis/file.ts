@@ -17,7 +17,7 @@ import {
 import path from 'path';
 import fs from 'fs';
 import fsPromises from 'fs/promises';
-import { InstanceContext, NapCatCore, OnRichMediaDownloadCompleteParams } from '@/core';
+import { InstanceContext, NapCatCore } from '@/core';
 import * as fileType from 'file-type';
 import imageSize from 'image-size';
 import { ISizeCalculationResult } from 'image-size/dist/types/interface';
@@ -304,18 +304,10 @@ export class NTQQFileApi {
                 return sourcePath;
             }
         }
-        const [, fileTransNotifyInfo] = await this.core.eventWrapper.callNormalEvent(
+        const [, fileTransNotifyInfo] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelMsgService/downloadRichMedia',
             'NodeIKernelMsgListener/onRichMediaDownloadComplete',
-            1,
-            timeout,
-            (arg: OnRichMediaDownloadCompleteParams) => {
-                if (arg.msgId === msgId) {
-                    return true;
-                }
-                return false;
-            },
-            {
+            [{
                 fileModelId: '0',
                 downloadSourceType: 0,
                 triggerType: 1,
@@ -326,7 +318,11 @@ export class NTQQFileApi {
                 thumbSize: 0,
                 downloadType: 1,
                 filePath: thumbPath,
-            },
+            }],
+            () => true,
+            (arg) => arg.msgId === msgId,
+            1,
+            timeout,
         );
         const msg = await this.core.apis.MsgApi.getMsgsByMsgId({
             guildId: '',
@@ -482,7 +478,7 @@ export class NTQQFileApi {
         const url: string = element.originImageUrl!;  // 没有域名
         const md5HexStr = element.md5HexStr;
         const fileMd5 = element.md5HexStr;
-        const fileUuid = element.fileUuid;
+        // const fileUuid = element.fileUuid;
 
         if (url) {
             const UrlParse = new URL(IMAGE_HTTP_HOST + url);//临时解析拼接
@@ -554,9 +550,9 @@ export class NTQQFileCacheApi {
     }
 
     getFileCacheInfo(fileType: CacheFileType, pageSize: number = 1000, lastRecord?: CacheFileListItem) {
-        const _lastRecord = lastRecord ? lastRecord : { fileType: fileType };
-        //需要五个参数
-        //return napCatCore.session.getStorageCleanService().getFileCacheInfo();
+        // const _lastRecord = lastRecord ? lastRecord : { fileType: fileType };
+        // 需要五个参数
+        // return napCatCore.session.getStorageCleanService().getFileCacheInfo();
     }
 
     async clearChatCache(chats: ChatCacheListItemBasic[] = [], fileKeys: string[] = []) {

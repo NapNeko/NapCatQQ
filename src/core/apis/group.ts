@@ -4,13 +4,11 @@ import {
     Group,
     GroupMember,
     GroupMemberRole,
-    GroupNotify,
     GroupRequestOperateTypes,
     InstanceContext,
     KickMemberV2Req,
     MemberExtSourceType,
     NapCatCore,
-    NodeIKernelGroupListener,
     NodeIKernelGroupService,
 } from '@/core';
 import { isNumeric, runAllWithTimeout, sleep } from '@/common/utils/helper';
@@ -42,14 +40,10 @@ export class NTQQGroupApi {
     }
 
     async getGroups(forced = false) {
-        type ListenerType = NodeIKernelGroupListener['onGroupListUpdate'];
-        const [,, groupList] = await this.core.eventWrapper.callNormalEvent(
+        const [,, groupList] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelGroupService/getGroupList',
             'NodeIKernelGroupListener/onGroupListUpdate',
-            1,
-            5000,
-            () => true,
-            forced,
+            [forced],
         );
         return groupList;
     }
@@ -254,15 +248,14 @@ export class NTQQGroupApi {
     }
 
     async getSingleScreenNotifies(num: number) {
-        const [,,, notifies] = await this.core.eventWrapper.callNormalEvent(
+        const [,,, notifies] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelGroupService/getSingleScreenNotifies',
             'NodeIKernelGroupListener/onGroupSingleScreenNotifies',
-            1,
-            5000,
-            () => true,
-            false,
-            '',
-            num,
+            [
+                false,
+                '',
+                num
+            ],
         );
         return notifies;
     }

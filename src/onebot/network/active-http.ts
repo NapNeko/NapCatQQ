@@ -3,7 +3,6 @@ import { createHmac } from 'crypto';
 import { LogWrapper } from '@/common/utils/log';
 import { QuickAction, QuickActionEvent } from '../types';
 import { NapCatCore } from '@/core';
-import { handleQuickOperation } from '../helper/quick';
 import { NapCatOneBot11Adapter } from '..';
 
 export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
@@ -48,7 +47,9 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
                 return;
             }
             try {
-                handleQuickOperation(this.core, this.obContext, event as QuickActionEvent, resJson).then().catch(this.logger.logError);
+                this.obContext.apis.QuickActionApi
+                    .handleQuickOperation(event as QuickActionEvent, resJson)
+                    .catch(this.logger.logError);
             } catch (e: any) {
                 this.logger.logError('[OneBot] [Http Client] 新消息事件HTTP上报返回快速操作失败', e);
             }

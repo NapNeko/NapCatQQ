@@ -5,7 +5,8 @@ import { LimitedHashTable } from '@/common/utils/message-unique';
 export class NTQQFriendApi {
     context: InstanceContext;
     core: NapCatCore;
-    //friends: Map<string, Friend> = new Map<string, FriendV2>();
+
+    // friends: Map<string, Friend> = new Map<string, FriendV2>();
 
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
@@ -70,15 +71,17 @@ export class NTQQFriendApi {
     async isBuddy(uid: string) {
         return this.context.session.getBuddyService().isBuddy(uid);
     }
+
     async clearBuddyReqUnreadCnt() {
         return this.context.session.getBuddyService().clearBuddyReqUnreadCnt();
     }
+
     async getBuddyReq() {
         const [, ret] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelBuddyService/getBuddyReq',
             'NodeIKernelBuddyListener/onBuddyReqChange',
-            1,
-            5000);
+            [],
+        );
         return ret;
     }
 
