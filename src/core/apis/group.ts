@@ -50,7 +50,47 @@ export class NTQQGroupApi {
         );
         return groupList;
     }
-
+    async getGroupExtFE0Info(GroupCode: string[], forced = true) {
+        return this.context.session.getGroupService().getGroupExt0xEF0Info(
+            GroupCode,
+            [],
+            {
+                bindGuildId: 1,
+                blacklistExpireTime: 1,
+                companyId: 1,
+                essentialMsgPrivilege: 1,
+                essentialMsgSwitch: 1,
+                fullGroupExpansionSeq: 1,
+                fullGroupExpansionSwitch: 1,
+                gangUpId: 1,
+                groupAioBindGuildId: 1,
+                groupBindGuildIds: 1,
+                groupBindGuildSwitch: 1,
+                groupExcludeGuildIds: 1,
+                groupExtFlameData: 1,
+                groupFlagPro1: 1,
+                groupInfoExtSeq: 1,
+                groupOwnerId: 1,
+                groupSquareSwitch: 1,
+                hasGroupCustomPortrait: 1,
+                inviteRobotMemberExamine: 1,
+                inviteRobotMemberSwitch: 1,
+                inviteRobotSwitch: 1,
+                isLimitGroupRtc: 1,
+                lightCharNum: 1,
+                luckyWord: 1,
+                luckyWordId: 1,
+                msgEventSeq: 1,
+                qqMusicMedalSwitch: 1,
+                reserve: 1,
+                showPlayTogetherSwitch: 1,
+                starId: 1,
+                todoSeq: 1,
+                viewedMsgDisappearTime: 1
+            },
+            forced
+        );
+    }
     async getGroup(groupCode: string, forced = false) {
         let group = this.groupCache.get(groupCode.toString());
         if (!group) {
