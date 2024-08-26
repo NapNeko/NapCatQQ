@@ -225,9 +225,9 @@ export class NTQQGroupApi {
     async kickMemberV2Inner(param: KickMemberV2Req) {
         return this.context.session.getGroupService().kickMemberV2(param);
     }
-    async deleteGroupBulletin(GroupCode: string, feedId: string) {
+    async deleteGroupBulletin(GroupCode: string, noticeId: string) {
         const _Pskey = (await this.core.apis.UserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com')!;
-        return this.context.session.getGroupService().deleteGroupBulletin(GroupCode, _Pskey, feedId);
+        return this.context.session.getGroupService().deleteGroupBulletin(GroupCode, _Pskey, noticeId);
     }
     async quitGroupV2(GroupCode: string, needDeleteLocalMsg: boolean) {
         const param = {

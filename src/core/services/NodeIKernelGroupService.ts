@@ -209,7 +209,7 @@ export interface NodeIKernelGroupService {
 
     getGroupBulletin(groupCode: string): unknown;
 
-    deleteGroupBulletin(groupCode: string, seq: string, feedId: string): void;
+    deleteGroupBulletin(groupCode: string, seq: string, noticeId: string): void;
 
     publishGroupBulletin(groupCode: string, pskey: string, data: any): Promise<GeneralCallResult>;
 
