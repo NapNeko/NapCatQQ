@@ -20,9 +20,11 @@ if (process.env.NAPCAT_BUILDSYS == 'linux') {
 } else if (process.env.NAPCAT_BUILDSYS == 'win32') {
     if (process.env.NAPCAT_BUILDARCH == 'x64') {
     }
-    startScripts = ['./script/BootWay05.ps1', './script/dbghelp.dll'];
+    startScripts = ['./script/BootWay05.ps1', './script/dbghelp.dll',
+        './script/BootWay05_init.bat', './script/BootWay05_run.bat', './script/BootWay05_run.utf8.bat', './script/KillQQ.bat'];
 } else {
-    startScripts = ['./script/BootWay05.ps1', './script/dbghelp.dll'];
+    startScripts = ['./script/BootWay05.ps1', './script/dbghelp.dll',
+        './script/BootWay05_init.bat', './script/BootWay05_run.bat', './script/BootWay05_run.utf8.bat', './script/KillQQ.bat'];
 }
 const FrameworkBaseConfigPlugin: PluginOption[] = [
     // PreprocessorDirectives(),
