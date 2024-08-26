@@ -32,9 +32,9 @@ export function normalize(message: OB11MessageMixType, autoEscape = false): OB11
     ) : Array.isArray(message) ? message : [message];
 }
 
-export async function sendMsg(coreContext: NapCatCore, peer: Peer, sendElements: SendMessageElement[], deleteAfterSentFiles: string[], waitComplete = true) {
-    const NTQQMsgApi = coreContext.apis.MsgApi;
-    const logger = coreContext.context.logger;
+export async function sendMsg(core: NapCatCore, peer: Peer, sendElements: SendMessageElement[], deleteAfterSentFiles: string[], waitComplete = true) {
+    const NTQQMsgApi = core.apis.MsgApi;
+    const logger = core.context.logger;
     if (!sendElements.length) {
         throw new Error('消息体无法解析, 请检查是否发送了不支持的消息类型');
     }
@@ -80,13 +80,13 @@ export async function sendMsg(coreContext: NapCatCore, peer: Peer, sendElements:
     return returnMsg;
 }
 
-async function createContext(coreContext: NapCatCore, payload: OB11PostSendMsg, contextMode: ContextMode): Promise<Peer> {
+async function createContext(core: NapCatCore, payload: OB11PostSendMsg, contextMode: ContextMode): Promise<Peer> {
     // This function determines the type of message by the existence of user_id / group_id,
     // not message_type.
     // This redundant design of Ob11 here should be blamed.
-    const NTQQFriendApi = coreContext.apis.FriendApi;
-    const NTQQUserApi = coreContext.apis.UserApi;
-    const NTQQMsgApi = coreContext.apis.MsgApi;
+    const NTQQFriendApi = core.apis.FriendApi;
+    const NTQQUserApi = core.apis.UserApi;
+    const NTQQMsgApi = core.apis.MsgApi;
     if ((contextMode === ContextMode.Group || contextMode === ContextMode.Normal) && payload.group_id) {
         return {
             chatType: ChatType.KCHATTYPEGROUP,
@@ -149,7 +149,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
             };
         }
         if (payload.user_id && payload.message_type !== 'group') {
-            // const uid = await this.CoreContext.apis.UserApi.getUidByUinV2(payload.user_id.toString());
+            // const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
             // const isBuddy = await NTQQFriendApi.isBuddy(uid!);
             // if (!isBuddy) { }
         }
@@ -159,7 +159,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
     async _handle(payload: OB11PostSendMsg): Promise<{ message_id: number }> {
         if (payload.message_type === 'group') this.contextMode = ContextMode.Group;
         if (payload.message_type === 'private') this.contextMode = ContextMode.Private;
-        const peer = await createContext(this.CoreContext, payload, this.contextMode);
+        const peer = await createContext(this.core, payload, this.contextMode);
 
         const messages = normalize(
             payload.message,
@@ -187,20 +187,20 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         }
         // log("send msg:", peer, sendElements)
 
-        const { sendElements, deleteAfterSentFiles } = await this.OneBotContext.apiContext.MsgApi
+        const { sendElements, deleteAfterSentFiles } = await this.obContext.apiContext.MsgApi
             .createSendElements(messages, peer);
-        const returnMsg = await sendMsg(this.CoreContext, peer, sendElements, deleteAfterSentFiles);
+        const returnMsg = await sendMsg(this.core, peer, sendElements, deleteAfterSentFiles);
         return { message_id: returnMsg!.id! };
     }
 
     private async handleForwardedNodes(destPeer: Peer, messageNodes: OB11MessageNode[]): Promise<RawMessage | null> {
-        const NTQQMsgApi = this.CoreContext.apis.MsgApi;
+        const NTQQMsgApi = this.core.apis.MsgApi;
         const selfPeer = {
             chatType: ChatType.KCHATTYPEC2C,
-            peerUid: this.CoreContext.selfInfo.uid,
+            peerUid: this.core.selfInfo.uid,
         };
         let nodeMsgIds: string[] = [];
-        const logger = this.CoreContext.context.logger;
+        const logger = this.core.context.logger;
         for (const messageNode of messageNodes) {
             const nodeId = messageNode.data.id;
             if (nodeId) {
@@ -230,7 +230,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                         //完成子卡片生成跳过后续
                         continue;
                     }
-                    const { sendElements } = await this.OneBotContext.apiContext.MsgApi
+                    const { sendElements } = await this.obContext.apiContext.MsgApi
                         .createSendElements(OB11Data, destPeer);
                     //拆分消息
                     const MixElement = sendElements.filter(element => element.elementType !== ElementType.FILE && element.elementType !== ElementType.VIDEO);
@@ -238,7 +238,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                     const AllElement: SendMessageElement[][] = [MixElement, ...SingleElement].filter(e => e !== undefined && e.length !== 0);
                     const MsgNodeList: Promise<RawMessage | undefined>[] = [];
                     for (const sendElementsSplitElement of AllElement) {
-                        MsgNodeList.push(sendMsg(this.CoreContext, selfPeer, sendElementsSplitElement, [], true).catch(_ => undefined));
+                        MsgNodeList.push(sendMsg(this.core, selfPeer, sendElementsSplitElement, [], true).catch(_ => undefined));
                     }
                     (await Promise.allSettled(MsgNodeList)).map((result) => {
                         if (result.status === 'fulfilled' && result.value) {
@@ -272,7 +272,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         let retMsgIds: string[] = [];
         if (needSendSelf) {
             for (const [, msg] of nodeMsgArray.entries()) {
-                if (msg.peerUid === this.CoreContext.selfInfo.uid) {
+                if (msg.peerUid === this.core.selfInfo.uid) {
                     retMsgIds.push(msg.msgId);
                     continue;
                 }
@@ -295,10 +295,10 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
     async cloneMsg(msg: RawMessage): Promise<RawMessage | undefined> {
         const selfPeer = {
             chatType: ChatType.KCHATTYPEC2C,
-            peerUid: this.CoreContext.selfInfo.uid,
+            peerUid: this.core.selfInfo.uid,
         };
-        const logger = this.CoreContext.context.logger;
-        const NTQQMsgApi = this.CoreContext.apis.MsgApi;
+        const logger = this.core.context.logger;
+        const NTQQMsgApi = this.core.apis.MsgApi;
         //msg 为待克隆消息
 
         const sendElements: SendMessageElement[] = [];

@@ -8,19 +8,19 @@ import { NapCatOneBot11Adapter } from '@/onebot';
 
 abstract class BaseAction<PayloadType, ReturnDataType> {
     actionName: ActionName = ActionName.Unknown;
-    CoreContext: NapCatCore;
+    core: NapCatCore;
     private validate: undefined | ValidateFunction<any> = undefined;
-    PayloadSchema: any = undefined;
-    OneBotContext: NapCatOneBot11Adapter;
+    payloadSchema: any = undefined;
+    obContext: NapCatOneBot11Adapter;
 
-    constructor(onebotContext: NapCatOneBot11Adapter, coreContext: NapCatCore) {
-        this.OneBotContext = onebotContext;
-        this.CoreContext = coreContext;
+    constructor(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
+        this.obContext = obContext;
+        this.core = core;
     }
 
     protected async check(payload: PayloadType): Promise<BaseCheckResult> {
-        if (this.PayloadSchema) {
-            this.validate = new Ajv({ allowUnionTypes: true }).compile(this.PayloadSchema);
+        if (this.payloadSchema) {
+            this.validate = new Ajv({ allowUnionTypes: true }).compile(this.payloadSchema);
         }
         if (this.validate && !this.validate(payload)) {
             const errors = this.validate.errors as ErrorObject[];
@@ -46,7 +46,7 @@ abstract class BaseAction<PayloadType, ReturnDataType> {
             const resData = await this._handle(payload);
             return OB11Response.ok(resData);
         } catch (e: any) {
-            this.CoreContext.context.logger.logError('发生错误', e);
+            this.core.context.logger.logError('发生错误', e);
             return OB11Response.error(e?.toString() || e?.stack?.toString() || '未知错误，可能操作超时', 200);
         }
     }
@@ -60,7 +60,7 @@ abstract class BaseAction<PayloadType, ReturnDataType> {
             const resData = await this._handle(payload);
             return OB11Response.ok(resData, echo);
         } catch (e: any) {
-            this.CoreContext.context.logger.logError('发生错误', e);
+            this.core.context.logger.logError('发生错误', e);
             return OB11Response.error(e.stack?.toString() || e.toString(), 1200, echo);
         }
     }

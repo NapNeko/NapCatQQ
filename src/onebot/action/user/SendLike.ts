@@ -15,10 +15,10 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export default class SendLike extends BaseAction<Payload, null> {
     actionName = ActionName.SendLike;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
-        const NTQQUserApi = this.CoreContext.apis.UserApi;
+        const NTQQUserApi = this.core.apis.UserApi;
         //logDebug('点赞参数', payload);
         try {
             const qq = payload.user_id.toString();

@@ -16,10 +16,10 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export class GetGroupFileList extends BaseAction<Payload, { FileList: Array<any> }> {
     actionName = ActionName.GetGroupFileList;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQMsgApi = this.CoreContext.apis.MsgApi;
+        const NTQQMsgApi = this.core.apis.MsgApi;
         const ret = await NTQQMsgApi.getGroupFileList(payload.group_id.toString(), {
             sortType: 1,
             fileCount: payload.file_count,

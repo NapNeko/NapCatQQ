@@ -19,10 +19,10 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
         public reconnectIntervalInMillis: number,
         public heartbeatIntervalInMillis: number,
         private token: string,
-        public coreContext: NapCatCore,
+        public core: NapCatCore,
         public actions: ActionMap,
     ) {
-        this.logger = coreContext.context.logger;
+        this.logger = core.context.logger;
     }
 
     onEvent<T extends OB11EmitEventContent>(event: T) {
@@ -37,7 +37,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
         }
         this.heartbeatRef = setInterval(() => {
             if (this.connection && this.connection.readyState === WebSocket.OPEN) {
-                this.connection.send(JSON.stringify(new OB11HeartbeatEvent(this.coreContext, this.heartbeatIntervalInMillis, this.coreContext.selfInfo.online, true)));
+                this.connection.send(JSON.stringify(new OB11HeartbeatEvent(this.core, this.heartbeatIntervalInMillis, this.core.selfInfo.online, true)));
             }
         }, this.heartbeatIntervalInMillis);
         await this.tryConnect();
@@ -74,7 +74,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
                 handshakeTimeout: 2000,
                 perMessageDeflate: false,
                 headers: {
-                    'X-Self-ID': this.coreContext.selfInfo.uin,
+                    'X-Self-ID': this.core.selfInfo.uin,
                     'Authorization': `Bearer ${this.token}`,
                     'x-client-role': 'Universal',  // koishi-adapter-onebot 需要这个字段
                     'User-Agent': 'OneBot/11',
@@ -89,7 +89,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
             });
             this.connection.on('open', () => {
                 try {
-                    this.connectEvent(this.coreContext);
+                    this.connectEvent(this.core);
                 } catch (e) {
                     this.logger.logError('[OneBot] [WebSocket Client] 发送连接生命周期失败', e);
                 }

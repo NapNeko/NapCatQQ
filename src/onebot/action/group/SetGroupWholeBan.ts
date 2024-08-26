@@ -15,11 +15,11 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export default class SetGroupWholeBan extends BaseAction<Payload, null> {
     actionName = ActionName.SetGroupWholeBan;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
         const enable = payload.enable?.toString() !== 'false';
-        const NTQQGroupApi = this.CoreContext.apis.GroupApi;
+        const NTQQGroupApi = this.core.apis.GroupApi;
         await NTQQGroupApi.banGroup(payload.group_id.toString(), enable);
         return null;
     }

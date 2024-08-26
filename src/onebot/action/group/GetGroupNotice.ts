@@ -31,10 +31,10 @@ type ApiGroupNotice = GroupNotice & WebApiGroupNoticeFeed;
 
 export class GetGroupNotice extends BaseAction<Payload, GroupNotice[]> {
     actionName = ActionName.GoCQHTTP_GetGroupNotice;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQWebApi = this.CoreContext.apis.WebApi;
+        const NTQQWebApi = this.core.apis.WebApi;
 
         const group = payload.group_id.toString();
         const ret = await NTQQWebApi.getGroupNotice(group);

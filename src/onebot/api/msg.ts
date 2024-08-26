@@ -55,7 +55,7 @@ function keyCanBeParsed(key: string, parser: RawToOb11Converters): key is keyof 
 
 export class OneBotMsgApi {
     obContext: NapCatOneBot11Adapter;
-    coreContext: NapCatCore;
+    core: NapCatCore;
 
     rawToOb11Converters: RawToOb11Converters = {
         textElement: async element => {
@@ -78,7 +78,7 @@ export class OneBotMsgApi {
                     const { atNtUid, /* content */ } = element;
                     let atQQ = element.atUid;
                     if (!atQQ || atQQ === '0') {
-                        atQQ = await this.coreContext.apis.UserApi.getUinByUidV2(atNtUid);
+                        atQQ = await this.core.apis.UserApi.getUinByUidV2(atNtUid);
                     }
                     if (atQQ) {
                         qq = atQQ as `${number}`;
@@ -102,18 +102,18 @@ export class OneBotMsgApi {
                         file: element.fileName,
                         sub_type: element.picSubType,
                         file_id: UUIDConverter.encode(msg.peerUin, msg.msgId),
-                        url: await this.coreContext.apis.FileApi.getImageUrl(element),
+                        url: await this.core.apis.FileApi.getImageUrl(element),
                         file_size: element.fileSize,
                     },
                 };
             } catch (e: any) {
-                this.coreContext.context.logger.logError('获取图片url失败', e.stack);
+                this.core.context.logger.logError('获取图片url失败', e.stack);
                 return null;
             }
         },
 
         fileElement: async (element, msg, elementWrapper) => {
-            await this.coreContext.apis.FileApi.addFileCache(
+            await this.core.apis.FileApi.addFileCache(
                 {
                     peerUid: msg.peerUid,
                     chatType: msg.chatType,
@@ -166,7 +166,7 @@ export class OneBotMsgApi {
         },
 
         marketFaceElement: async (_, msg, elementWrapper) => {
-            await this.coreContext.apis.FileApi.addFileCache(
+            await this.core.apis.FileApi.addFileCache(
                 {
                     peerUid: msg.peerUid,
                     chatType: msg.chatType,
@@ -192,7 +192,7 @@ export class OneBotMsgApi {
         },
 
         replyElement: async (element, msg) => {
-            const NTQQMsgApi = this.coreContext.apis.MsgApi;
+            const NTQQMsgApi = this.core.apis.MsgApi;
             const records = msg.records.find(msgRecord => msgRecord.msgId === element?.sourceMsgIdInRecords);
             const peer = {
                 chatType: msg.chatType,
@@ -200,7 +200,7 @@ export class OneBotMsgApi {
                 guildId: '',
             };
             if (!records) {
-                this.coreContext.context.logger.logError('获取不到引用的消息', element.replayMsgSeq);
+                this.core.context.logger.logError('获取不到引用的消息', element.replayMsgSeq);
                 return null;
             }
             let replyMsg: RawMessage | undefined;
@@ -221,7 +221,7 @@ export class OneBotMsgApi {
                     // Attempt 3
                     const replyMsgList = (await NTQQMsgApi.getMsgExBySeq(peer, records.msgSeq)).msgList;
                     if (replyMsgList.length < 1) {
-                        this.coreContext.context.logger.logError('回复消息消息验证失败', element.replayMsgSeq);
+                        this.core.context.logger.logError('回复消息消息验证失败', element.replayMsgSeq);
                         return null;
                     }
                     replyMsg = replyMsgList.filter(e => e.msgSeq == records.msgSeq)
@@ -242,7 +242,7 @@ export class OneBotMsgApi {
         },
 
         videoElement: async (element, msg, elementWrapper) => {
-            const NTQQFileApi = this.coreContext.apis.FileApi;
+            const NTQQFileApi = this.core.apis.FileApi;
 
             //读取视频链接并兜底
             let videoUrlWrappers: Awaited<ReturnType<typeof NTQQFileApi.getVideoUrl>> | undefined;
@@ -257,7 +257,7 @@ export class OneBotMsgApi {
                     guildId: '0',
                 }, msg.msgId, elementWrapper.elementId);
             } catch (error) {
-                this.coreContext.context.logger.logWarn('获取视频 URL 失败');
+                this.core.context.logger.logWarn('获取视频 URL 失败');
             }
 
             //读取在线URL
@@ -305,7 +305,7 @@ export class OneBotMsgApi {
         },
 
         pttElement: async (element, msg, elementWrapper) => {
-            await this.coreContext.apis.FileApi.addFileCache(
+            await this.core.apis.FileApi.addFileCache(
                 {
                     peerUid: msg.peerUid,
                     chatType: msg.chatType,
@@ -331,7 +331,7 @@ export class OneBotMsgApi {
         },
 
         multiForwardMsgElement: async (_, msg) => {
-            const NTQQMsgApi = this.coreContext.apis.MsgApi;
+            const NTQQMsgApi = this.core.apis.MsgApi;
             const message_data: OB11MessageForward = {
                 data: {} as any,
                 type: OB11MessageDataType.forward,
@@ -418,8 +418,8 @@ export class OneBotMsgApi {
 
             if (!context.peer || context.peer.chatType == ChatType.KCHATTYPEC2C) return undefined;
             if (atQQ === 'all') return at(atQQ, atQQ, AtType.atAll, '全体成员');
-            const NTQQGroupApi = this.coreContext.apis.GroupApi;
-            const NTQQUserApi = this.coreContext.apis.UserApi;
+            const NTQQGroupApi = this.core.apis.GroupApi;
+            const NTQQUserApi = this.core.apis.UserApi;
             const atMember = await NTQQGroupApi.getGroupMember(context.peer.peerUid, atQQ);
             if (atMember) {
                 return at(atQQ, atMember.uid, AtType.atUser, atMember.nick || atMember.cardName);
@@ -433,10 +433,10 @@ export class OneBotMsgApi {
         [OB11MessageDataType.reply]: async ({ data: { id } }) => {
             const replyMsgM = MessageUnique.getMsgIdAndPeerByShortId(parseInt(id));
             if (!replyMsgM) {
-                this.coreContext.context.logger.logWarn('回复消息不存在', id);
+                this.core.context.logger.logWarn('回复消息不存在', id);
                 return undefined;
             }
-            const NTQQMsgApi = this.coreContext.apis.MsgApi;
+            const NTQQMsgApi = this.core.apis.MsgApi;
             const replyMsg = (await NTQQMsgApi.getMsgsByMsgId(
                 replyMsgM.Peer, [replyMsgM.MsgId])).msgList[0];
             return replyMsg ?
@@ -497,7 +497,7 @@ export class OneBotMsgApi {
 
         // File service
         [OB11MessageDataType.image]: async (sendMsg, context) => {
-            const sendPicElement = await this.coreContext.apis.FileApi.createValidSendPicElement(
+            const sendPicElement = await this.core.apis.FileApi.createValidSendPicElement(
                 (await this.handleOb11FileLikeMessage(sendMsg, context)).path,
                 sendMsg.data.summary,
                 sendMsg.data.sub_type,
@@ -508,7 +508,7 @@ export class OneBotMsgApi {
 
         [OB11MessageDataType.file]: async (sendMsg, context) => {
             const { path, fileName } = await this.handleOb11FileLikeMessage(sendMsg, context);
-            return await this.coreContext.apis.FileApi.createValidSendFileElement(path, fileName);
+            return await this.core.apis.FileApi.createValidSendFileElement(path, fileName);
         },
 
         [OB11MessageDataType.video]: async (sendMsg, context) => {
@@ -516,17 +516,17 @@ export class OneBotMsgApi {
 
             let thumb = sendMsg.data.thumb;
             if (thumb) {
-                const uri2LocalRes = await uri2local(this.coreContext.NapCatTempPath, thumb);
+                const uri2LocalRes = await uri2local(this.core.NapCatTempPath, thumb);
                 if (uri2LocalRes.success) thumb = uri2LocalRes.path;
             }
-            const videoEle = await this.coreContext.apis.FileApi.createValidSendVideoElement(path, fileName, thumb);
+            const videoEle = await this.core.apis.FileApi.createValidSendVideoElement(path, fileName, thumb);
 
             context.deleteAfterSentFiles.push(videoEle.videoElement.filePath);
             return videoEle;
         },
 
         [OB11MessageDataType.voice]: async (sendMsg, context) =>
-            this.coreContext.apis.FileApi.createValidSendPttElement(
+            this.core.apis.FileApi.createValidSendPttElement(
                 (await this.handleOb11FileLikeMessage(sendMsg, context)).path),
 
         [OB11MessageDataType.json]: async ({ data: { data } }) => ({
@@ -584,24 +584,24 @@ export class OneBotMsgApi {
             // 保留, 直到...找到更好的解决方案
             if (data.type === 'custom') {
                 if (!data.url) {
-                    this.coreContext.context.logger.logError('自定义音卡缺少参数url');
+                    this.core.context.logger.logError('自定义音卡缺少参数url');
                     return undefined;
                 }
                 if (!data.audio) {
-                    this.coreContext.context.logger.logError('自定义音卡缺少参数audio');
+                    this.core.context.logger.logError('自定义音卡缺少参数audio');
                     return undefined;
                 }
                 if (!data.title) {
-                    this.coreContext.context.logger.logError('自定义音卡缺少参数title');
+                    this.core.context.logger.logError('自定义音卡缺少参数title');
                     return undefined;
                 }
             } else {
                 if (!['qq', '163'].includes(data.type)) {
-                    this.coreContext.context.logger.logError('音乐卡片type错误, 只支持qq、163、custom，当前type:', data.type);
+                    this.core.context.logger.logError('音乐卡片type错误, 只支持qq、163、custom，当前type:', data.type);
                     return undefined;
                 }
                 if (!data.id) {
-                    this.coreContext.context.logger.logError('音乐卡片缺少参数id');
+                    this.core.context.logger.logError('音乐卡片缺少参数id');
                     return undefined;
                 }
             }
@@ -621,7 +621,7 @@ export class OneBotMsgApi {
                 const musicJson = await RequestUtil.HttpGetJson<any>(signUrl, 'POST', postData);
                 return this.ob11ToRawConverters.json(musicJson, context);
             } catch (e) {
-                this.coreContext.context.logger.logError('生成音乐消息失败', e);
+                this.core.context.logger.logError('生成音乐消息失败', e);
             }
         },
 
@@ -645,9 +645,9 @@ export class OneBotMsgApi {
         [OB11MessageDataType.miniapp]: async () => undefined,
     };
 
-    constructor(obContext: NapCatOneBot11Adapter, coreContext: NapCatCore) {
+    constructor(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
         this.obContext = obContext;
-        this.coreContext = coreContext;
+        this.core = core;
     }
 
     async parseMessage(
@@ -657,11 +657,11 @@ export class OneBotMsgApi {
         if (msg.senderUin == '0' || msg.senderUin == '') return;
         if (msg.peerUin == '0' || msg.peerUin == '') return;
         //跳过空消息
-        const NTQQGroupApi = this.coreContext.apis.GroupApi;
-        const NTQQUserApi = this.coreContext.apis.UserApi;
-        const NTQQMsgApi = this.coreContext.apis.MsgApi;
+        const NTQQGroupApi = this.core.apis.GroupApi;
+        const NTQQUserApi = this.core.apis.UserApi;
+        const NTQQMsgApi = this.core.apis.MsgApi;
         const resMsg: OB11Message = {
-            self_id: parseInt(this.coreContext.selfInfo.uin),
+            self_id: parseInt(this.core.selfInfo.uin),
             user_id: parseInt(msg.senderUin!),
             time: parseInt(msg.msgTime) || Date.now(),
             message_id: msg.id!,
@@ -678,7 +678,7 @@ export class OneBotMsgApi {
             sub_type: 'friend',
             message: messagePostFormat === 'string' ? '' : [],
             message_format: messagePostFormat === 'string' ? 'string' : 'array',
-            post_type: this.coreContext.selfInfo.uin == msg.senderUin ? EventType.MESSAGE_SENT : EventType.MESSAGE,
+            post_type: this.core.selfInfo.uin == msg.senderUin ? EventType.MESSAGE_SENT : EventType.MESSAGE,
         };
         if (msg.chatType == ChatType.KCHATTYPEGROUP) {
             resMsg.sub_type = 'normal'; // 这里go-cqhttp是group，而onebot11标准是normal, 蛋疼
@@ -763,7 +763,7 @@ export class OneBotMsgApi {
         const isBlankUrl = !inputdata.url || inputdata.url === '';
         const isBlankFile = !inputdata.file || inputdata.file === '';
         if (isBlankUrl && isBlankFile) {
-            this.coreContext.context.logger.logError('文件消息缺少参数', inputdata);
+            this.core.context.logger.logError('文件消息缺少参数', inputdata);
             throw Error('文件消息缺少参数');
         }
         const fileOrUrl = (isBlankUrl ? inputdata.file : inputdata.url) ?? "";
@@ -773,10 +773,10 @@ export class OneBotMsgApi {
             fileName,
             errMsg,
             success,
-        } = (await uri2local(this.coreContext.NapCatTempPath, fileOrUrl));
+        } = (await uri2local(this.core.NapCatTempPath, fileOrUrl));
 
         if (!success) {
-            this.coreContext.context.logger.logError('文件下载失败', errMsg);
+            this.core.context.logger.logError('文件下载失败', errMsg);
             throw Error('文件下载失败' + errMsg);
         }
 

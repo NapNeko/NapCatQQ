@@ -16,12 +16,12 @@ import { isNull } from '@/common/utils/helper';
 import { normalize, sendMsg } from '../action/msg/SendMsg';
 import { NapCatOneBot11Adapter } from '..';
 
-async function handleMsg(coreContext: NapCatCore, obContext: NapCatOneBot11Adapter, msg: OB11Message, quickAction: QuickAction) {
+async function handleMsg(core: NapCatCore, obContext: NapCatOneBot11Adapter, msg: OB11Message, quickAction: QuickAction) {
     msg = msg as OB11Message;
     const reply = quickAction.reply;
     const peer: Peer = {
         chatType: ChatType.KCHATTYPEC2C,
-        peerUid: await coreContext.apis.UserApi.getUidByUinV2(msg.user_id.toString()) as string,
+        peerUid: await core.apis.UserApi.getUidByUinV2(msg.user_id.toString()) as string,
     };
     if (msg.message_type == 'private') {
         if (msg.sub_type === 'group') {
@@ -36,7 +36,7 @@ async function handleMsg(coreContext: NapCatCore, obContext: NapCatOneBot11Adapt
         let replyMessage: OB11MessageData[] = [];
 
         if (msg.message_type == 'group') {
-            group = await coreContext.apis.GroupApi.getGroup(msg.group_id!.toString());
+            group = await core.apis.GroupApi.getGroup(msg.group_id!.toString());
             replyMessage.push({
                 type: 'reply',
                 data: {
@@ -54,37 +54,37 @@ async function handleMsg(coreContext: NapCatCore, obContext: NapCatOneBot11Adapt
         }
         replyMessage = replyMessage.concat(normalize(reply, quickAction.auto_escape));
         const { sendElements, deleteAfterSentFiles } = await obContext.apiContext.MsgApi.createSendElements(replyMessage, peer);
-        sendMsg(coreContext, peer, sendElements, deleteAfterSentFiles, false).then().catch(coreContext.context.logger.logError);
+        sendMsg(core, peer, sendElements, deleteAfterSentFiles, false).then().catch(core.context.logger.logError);
     }
 }
 
-async function handleGroupRequest(coreContext: NapCatCore, request: OB11GroupRequestEvent, quickAction: QuickActionGroupRequest) {
+async function handleGroupRequest(core: NapCatCore, request: OB11GroupRequestEvent, quickAction: QuickActionGroupRequest) {
     if (!isNull(quickAction.approve)) {
-        coreContext.apis.GroupApi.handleGroupRequest(
+        core.apis.GroupApi.handleGroupRequest(
             request.flag,
             quickAction.approve ? GroupRequestOperateTypes.approve : GroupRequestOperateTypes.reject,
             quickAction.reason,
-        ).then().catch(coreContext.context.logger.logError);
+        ).then().catch(core.context.logger.logError);
     }
 }
 
-async function handleFriendRequest(coreContext: NapCatCore, request: OB11FriendRequestEvent, quickAction: QuickActionFriendRequest) {
+async function handleFriendRequest(core: NapCatCore, request: OB11FriendRequestEvent, quickAction: QuickActionFriendRequest) {
     if (!isNull(quickAction.approve)) {
-        coreContext.apis.FriendApi.handleFriendRequest(request.flag, !!quickAction.approve).then().catch(coreContext.context.logger.logError);
+        core.apis.FriendApi.handleFriendRequest(request.flag, !!quickAction.approve).then().catch(core.context.logger.logError);
     }
 }
 
-export async function handleQuickOperation(coreContext: NapCatCore, obContext: NapCatOneBot11Adapter, context: QuickActionEvent, quickAction: QuickAction) {
+export async function handleQuickOperation(core: NapCatCore, obContext: NapCatOneBot11Adapter, context: QuickActionEvent, quickAction: QuickAction) {
     if (context.post_type === 'message') {
-        handleMsg(coreContext, obContext, context as OB11Message, quickAction).then().catch(coreContext.context.logger.logError);
+        handleMsg(core, obContext, context as OB11Message, quickAction).then().catch(core.context.logger.logError);
     }
     if (context.post_type === 'request') {
         const friendRequest = context as OB11FriendRequestEvent;
         const groupRequest = context as OB11GroupRequestEvent;
         if ((friendRequest).request_type === 'friend') {
-            handleFriendRequest(coreContext, friendRequest, quickAction).then().catch(coreContext.context.logger.logError);
+            handleFriendRequest(core, friendRequest, quickAction).then().catch(core.context.logger.logError);
         } else if (groupRequest.request_type === 'group') {
-            handleGroupRequest(coreContext, groupRequest, quickAction).then().catch(coreContext.context.logger.logError);
+            handleGroupRequest(core, groupRequest, quickAction).then().catch(core.context.logger.logError);
         }
     }
 }

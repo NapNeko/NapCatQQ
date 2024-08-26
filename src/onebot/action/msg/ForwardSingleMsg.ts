@@ -18,7 +18,7 @@ type Payload = FromSchema<typeof SchemaData>;
 
 class ForwardSingleMsg extends BaseAction<Payload, null> {
     protected async getTargetPeer(payload: Payload): Promise<Peer> {
-        const NTQQUserApi = this.CoreContext.apis.UserApi;
+        const NTQQUserApi = this.core.apis.UserApi;
         if (payload.user_id) {
             const peerUid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());
             if (!peerUid) {
@@ -30,7 +30,7 @@ class ForwardSingleMsg extends BaseAction<Payload, null> {
     }
 
     async _handle(payload: Payload): Promise<null> {
-        const NTQQMsgApi = this.CoreContext.apis.MsgApi;
+        const NTQQMsgApi = this.core.apis.MsgApi;
         const msg = MessageUnique.getMsgIdAndPeerByShortId(parseInt(payload.message_id.toString()));
         if (!msg) {
             throw new Error(`无法找到消息${payload.message_id}`);
@@ -48,11 +48,11 @@ class ForwardSingleMsg extends BaseAction<Payload, null> {
 }
 
 export class ForwardFriendSingleMsg extends ForwardSingleMsg {
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
     actionName = ActionName.ForwardFriendSingleMsg;
 }
 
 export class ForwardGroupSingleMsg extends ForwardSingleMsg {
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
     actionName = ActionName.ForwardGroupSingleMsg;
 }

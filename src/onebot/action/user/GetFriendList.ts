@@ -15,11 +15,11 @@ const SchemaData = {
 type Payload = FromSchema<typeof SchemaData>;
 export default class GetFriendList extends BaseAction<Payload, OB11User[]> {
     actionName = ActionName.GetFriendList;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         //全新逻辑
-        const NTQQFriendApi = this.CoreContext.apis.FriendApi;
+        const NTQQFriendApi = this.core.apis.FriendApi;
         return OB11Constructor.friendsV2(await NTQQFriendApi.getBuddyV2(typeof payload.no_cache === 'string' ? payload.no_cache === 'true' : !!payload.no_cache));
     }
 }

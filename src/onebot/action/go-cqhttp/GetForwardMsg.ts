@@ -20,10 +20,10 @@ interface Response {
 
 export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
     actionName = ActionName.GoCQHTTP_GetForwardMsg;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<any> {
-        const NTQQMsgApi = this.CoreContext.apis.MsgApi;
+        const NTQQMsgApi = this.core.apis.MsgApi;
         const msgId = payload.message_id || payload.id;
         if (!msgId) {
             throw Error('message_id is required');
@@ -39,7 +39,7 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
         }
         const msgList = data.msgList;
         const messages = (await Promise.all(msgList.map(async msg => {
-            const resMsg = await this.OneBotContext.apiContext.MsgApi
+            const resMsg = await this.obContext.apiContext.MsgApi
                 .parseMessage(msg);
             if (!resMsg) return;
             resMsg.message_id = MessageUnique.createMsg({

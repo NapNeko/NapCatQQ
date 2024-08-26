@@ -16,10 +16,10 @@ type Payload = FromSchema<typeof SchemaData>;
 
 class GetGroupInfo extends BaseAction<Payload, OB11Group> {
     actionName = ActionName.GetGroupInfo;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQGroupApi = this.CoreContext.apis.GroupApi;
+        const NTQQGroupApi = this.core.apis.GroupApi;
         const group = (await NTQQGroupApi.getGroups()).find(e => e.groupCode == payload.group_id.toString());
         if (!group) throw `群${payload.group_id}不存在`;
         return OB11Constructor.group(group);

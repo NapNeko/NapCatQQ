@@ -27,8 +27,8 @@ export default class SetGroupPortrait extends BaseAction<Payload, any> {
     }
 
     async _handle(payload: Payload): Promise<any> {
-        const NTQQGroupApi = this.CoreContext.apis.GroupApi;
-        const { path, isLocal, errMsg, success } = (await uri2local(this.CoreContext.NapCatTempPath, payload.file));
+        const NTQQGroupApi = this.core.apis.GroupApi;
+        const { path, isLocal, errMsg, success } = (await uri2local(this.core.NapCatTempPath, payload.file));
         if (!success) {
             throw `头像${payload.file}设置失败,file字段可能格式不正确`;
         }

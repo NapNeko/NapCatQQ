@@ -14,10 +14,10 @@ const SchemaData = {
 type Payload = FromSchema<typeof SchemaData>;
 export default class SetGroupLeave extends BaseAction<Payload, any> {
     actionName = ActionName.SetGroupLeave;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<any> {
-        const NTQQGroupApi = this.CoreContext.apis.GroupApi;
+        const NTQQGroupApi = this.core.apis.GroupApi;
         await NTQQGroupApi.quitGroup(payload.group_id.toString());
     }
 }

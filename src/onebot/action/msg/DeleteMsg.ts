@@ -21,13 +21,13 @@ type Payload = FromSchema<typeof SchemaData>;
 
 class DeleteMsg extends BaseAction<Payload, void> {
     actionName = ActionName.DeleteMsg;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQMsgApi = this.CoreContext.apis.MsgApi;
+        const NTQQMsgApi = this.core.apis.MsgApi;
         const msg = MessageUnique.getMsgIdAndPeerByShortId(Number(payload.message_id));
         if (msg) {
-            const ret = this.CoreContext.eventWrapper.RegisterListen<NodeIKernelMsgListener['onMsgInfoListUpdate']>
+            const ret = this.core.eventWrapper.RegisterListen<NodeIKernelMsgListener['onMsgInfoListUpdate']>
             (
                 'NodeIKernelMsgListener/onMsgInfoListUpdate',
                 1,

@@ -16,13 +16,13 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export class GetGroupHonorInfo extends BaseAction<Payload, Array<any>> {
     actionName = ActionName.GetGroupHonorInfo;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         if (!payload.type) {
             payload.type = WebHonorType.ALL;
         }
-        const NTQQWebApi = this.CoreContext.apis.WebApi;
+        const NTQQWebApi = this.core.apis.WebApi;
         return await NTQQWebApi.getGroupHonorInfo(payload.group_id.toString(), payload.type);
     }
 }

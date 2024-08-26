@@ -17,10 +17,10 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export class SetOnlineStatus extends BaseAction<Payload, null> {
     actionName = ActionName.SetOnlineStatus;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQUserApi = this.CoreContext.apis.UserApi;
+        const NTQQUserApi = this.core.apis.UserApi;
         const ret = await NTQQUserApi.setSelfOnlineStatus(
             parseInt(payload.status.toString()),
             parseInt(payload.extStatus.toString()),

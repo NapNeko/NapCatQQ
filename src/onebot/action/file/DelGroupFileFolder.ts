@@ -15,10 +15,10 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export class DelGroupFileFolder extends BaseAction<Payload, any> {
     actionName = ActionName.DelGroupFileFolder;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQGroupApi = this.CoreContext.apis.GroupApi;
+        const NTQQGroupApi = this.core.apis.GroupApi;
         return (await NTQQGroupApi.DelGroupFileFolder(payload.group_id.toString(), payload.folder_id)).groupFileCommonResult;
     }
 }

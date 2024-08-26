@@ -16,10 +16,10 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export class SetMsgEmojiLike extends BaseAction<Payload, any> {
     actionName = ActionName.SetMsgEmojiLike;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQMsgApi = this.CoreContext.apis.MsgApi;
+        const NTQQMsgApi = this.core.apis.MsgApi;
         const msg = MessageUnique.getMsgIdAndPeerByShortId(parseInt(payload.message_id.toString()));
         if (!msg) {
             throw new Error('msg not found');

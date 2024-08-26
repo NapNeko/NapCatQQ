@@ -16,10 +16,10 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export default class SetFriendAddRequest extends BaseAction<Payload, null> {
     actionName = ActionName.SetFriendAddRequest;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
-        const NTQQFriendApi = this.CoreContext.apis.FriendApi;
+        const NTQQFriendApi = this.core.apis.FriendApi;
         const approve = payload.approve?.toString() !== 'false';
         await NTQQFriendApi.handleFriendRequest(payload.flag, approve);
         return null;

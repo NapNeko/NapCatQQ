@@ -17,11 +17,11 @@ type Payload = FromSchema<typeof SchemaData>;
 
 class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
     actionName = ActionName.GetGroupMemberList;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQGroupApi = this.CoreContext.apis.GroupApi;
-        const NTQQWebApi = this.CoreContext.apis.WebApi;
+        const NTQQGroupApi = this.core.apis.GroupApi;
+        const NTQQWebApi = this.core.apis.WebApi;
         const groupMembers = await NTQQGroupApi.getGroupMembers(payload.group_id.toString());
         const groupMembersArr = Array.from(groupMembers.values());
 
@@ -39,7 +39,7 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
             MemberMap.set(_groupMembers[i].user_id, _groupMembers[i]);
         }
 
-        const selfRole = groupMembers.get(this.CoreContext.selfInfo.uid)?.role;
+        const selfRole = groupMembers.get(this.core.selfInfo.uid)?.role;
         const isPrivilege = selfRole === 3 || selfRole === 4;
 
         _groupMembers.forEach(item => {

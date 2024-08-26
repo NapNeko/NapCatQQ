@@ -19,10 +19,10 @@ type Payload = FromSchema<typeof SchemaData>;
 
 class GetMsg extends BaseAction<Payload, OB11Message> {
     actionName = ActionName.GetMsg;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQMsgApi = this.CoreContext.apis.MsgApi;
+        const NTQQMsgApi = this.core.apis.MsgApi;
         // log("history msg ids", Object.keys(msgHistory));
         if (!payload.message_id) {
             throw Error('参数message_id不能为空');
@@ -36,7 +36,7 @@ class GetMsg extends BaseAction<Payload, OB11Message> {
         const msg = await NTQQMsgApi.getMsgsByMsgId(
             peer,
             [msgIdWithPeer?.MsgId || payload.message_id.toString()]);
-        const retMsg = await this.OneBotContext.apiContext.MsgApi.parseMessage(msg.msgList[0], 'array');
+        const retMsg = await this.obContext.apiContext.MsgApi.parseMessage(msg.msgList[0], 'array');
         if (!retMsg) throw Error('消息为空');
         try {
             retMsg.message_id = MessageUnique.createMsg(peer, msg.msgList[0].msgId)!;

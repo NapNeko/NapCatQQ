@@ -14,10 +14,10 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export class SetLongNick extends BaseAction<Payload, any> {
     actionName = ActionName.SetLongNick;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQUserApi = this.CoreContext.apis.UserApi;
+        const NTQQUserApi = this.core.apis.UserApi;
         const ret = await NTQQUserApi.setLongNick(payload.longNick);
         return ret;
     }

@@ -20,11 +20,11 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export default class GoCQHTTPUploadPrivateFile extends BaseAction<Payload, null> {
     actionName = ActionName.GOCQHTTP_UploadPrivateFile;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async getPeer(payload: Payload): Promise<Peer> {
-        const NTQQUserApi = this.CoreContext.apis.UserApi;
-        const NTQQFriendApi = this.CoreContext.apis.FriendApi;
+        const NTQQUserApi = this.core.apis.UserApi;
+        const NTQQFriendApi = this.core.apis.FriendApi;
         if (payload.user_id) {
             const peerUid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());
             if (!peerUid) {
@@ -42,12 +42,12 @@ export default class GoCQHTTPUploadPrivateFile extends BaseAction<Payload, null>
         if (fs.existsSync(file)) {
             file = `file://${file}`;
         }
-        const downloadResult = await uri2local(this.CoreContext.NapCatTempPath, file);
+        const downloadResult = await uri2local(this.core.NapCatTempPath, file);
         if (!downloadResult.success) {
             throw new Error(downloadResult.errMsg);
         }
-        const sendFileEle: SendFileElement = await this.CoreContext.apis.FileApi.createValidSendFileElement(downloadResult.path, payload.name);
-        await sendMsg(this.CoreContext, peer, [sendFileEle], [], true);
+        const sendFileEle: SendFileElement = await this.core.apis.FileApi.createValidSendFileElement(downloadResult.path, payload.name);
+        await sendMsg(this.core, peer, [sendFileEle], [], true);
         return null;
     }
 }

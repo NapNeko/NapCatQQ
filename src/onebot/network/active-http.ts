@@ -13,10 +13,10 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     constructor(
         public url: string,
         public secret: string | undefined,
-        public coreContext: NapCatCore,
+        public core: NapCatCore,
         public obContext: NapCatOneBot11Adapter
     ) {
-        this.logger = coreContext.context.logger;
+        this.logger = core.context.logger;
     }
 
     onEvent<T extends OB11EmitEventContent>(event: T) {
@@ -25,7 +25,7 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
         }
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
-            'x-self-id': this.coreContext.selfInfo.uin,
+            'x-self-id': this.core.selfInfo.uin,
         };
         const msgStr = JSON.stringify(event);
         if (this.secret && this.secret.length > 0) {
@@ -48,7 +48,7 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
                 return;
             }
             try {
-                handleQuickOperation(this.coreContext, this.obContext, event as QuickActionEvent, resJson).then().catch(this.logger.logError);
+                handleQuickOperation(this.core, this.obContext, event as QuickActionEvent, resJson).then().catch(this.logger.logError);
             } catch (e: any) {
                 this.logger.logError('[OneBot] [Http Client] 新消息事件HTTP上报返回快速操作失败', e);
             }

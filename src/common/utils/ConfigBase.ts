@@ -4,13 +4,13 @@ import type { NapCatCore } from '@/core';
 
 export abstract class ConfigBase<T> {
     name: string;
-    coreContext: NapCatCore;
+    core: NapCatCore;
     configPath: string;
     configData: T = {} as T;
 
-    protected constructor(name: string, coreContext: NapCatCore, configPath: string) {
+    protected constructor(name: string, core: NapCatCore, configPath: string) {
         this.name = name;
-        this.coreContext = coreContext;
+        this.core = core;
         this.configPath = configPath;
         fs.mkdirSync(this.configPath, { recursive: true });
         this.read();
@@ -28,8 +28,8 @@ export abstract class ConfigBase<T> {
     }
 
     read(): T {
-        const logger = this.coreContext.context.logger;
-        const configPath = this.getConfigPath(this.coreContext.selfInfo.uin);
+        const logger = this.core.context.logger;
+        const configPath = this.getConfigPath(this.core.selfInfo.uin);
         if (!fs.existsSync(configPath)) {
             try {
                 fs.writeFileSync(configPath, fs.readFileSync(this.getConfigPath(undefined), 'utf-8'));
@@ -54,8 +54,8 @@ export abstract class ConfigBase<T> {
 
 
     save(newConfigData: T = this.configData) {
-        const logger = this.coreContext.context.logger;
-        const selfInfo = this.coreContext.selfInfo;
+        const logger = this.core.context.logger;
+        const selfInfo = this.core.selfInfo;
         this.configData = newConfigData;
         const configPath = this.getConfigPath(selfInfo.uin);
         try {

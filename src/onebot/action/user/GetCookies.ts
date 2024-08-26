@@ -19,11 +19,11 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export class GetCookies extends BaseAction<Payload, Response> {
     actionName = ActionName.GetCookies;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQUserApi = this.CoreContext.apis.UserApi;
-        const NTQQWebApi = this.CoreContext.apis.WebApi;
+        const NTQQUserApi = this.core.apis.UserApi;
+        const NTQQWebApi = this.core.apis.WebApi;
         // if (!payload.domain) {
         //   throw new Error('缺少参数 domain');
         // }

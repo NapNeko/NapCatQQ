@@ -17,10 +17,10 @@ type Payload = FromSchema<typeof SchemaData>;
 
 export default class SetGroupAddRequest extends BaseAction<Payload, null> {
     actionName = ActionName.SetGroupAddRequest;
-    PayloadSchema = SchemaData;
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
-        const NTQQGroupApi = this.CoreContext.apis.GroupApi;
+        const NTQQGroupApi = this.core.apis.GroupApi;
         const flag = payload.flag.toString();
         const approve = payload.approve?.toString() !== 'false';
         await NTQQGroupApi.handleGroupRequest(flag,
