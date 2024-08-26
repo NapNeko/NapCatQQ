@@ -80,4 +80,7 @@ export class NodeIKernelGroupListener {
 
     onShutUpMemberListChanged(...args: unknown[]) {
     }
+
+    onGroupListInited(...args: unknown[]) {
+    }
 }

@@ -130,12 +130,13 @@ export class NapCatCore {
                     // 获取群成员
                 }
                 const sceneId = this.context.session.getGroupService().createMemberListScene(g.groupCode, 'groupMemberList_MainWindow');
-                this.context.session.getGroupService().getNextMemberList(sceneId!, undefined, 3000).then( /* r => {
+                this.context.session.getGroupService().getNextMemberList(sceneId, undefined, 3000).then( /* r => {
                     // console.log(`get group ${g.groupCode} members`, r);
                     // r.result.infos.forEach(member => {
                     // });
                     // groupMembers.set(g.groupCode, r.result.infos);
                 } */);
+                this.context.session.getGroupService().destroyMemberListScene(sceneId);
             });
         };
         groupListener.onMemberListChange = (arg) => {
@@ -159,10 +160,10 @@ export class NapCatCore {
             } else {
                 this.apis.GroupApi.groupMemberCache.set(groupCode, arg.infos);
             }
-            // console.log('onMemberListChange', groupCode, arg);
+            //console.log('onMemberListChange', groupCode, arg.infos.size);
         };
         groupListener.onMemberInfoChange = (groupCode, dataSource, members) => {
-            //console.log('onMemberInfoChange', groupCode, changeType, members);
+            //console.log('onMemberInfoChange', groupCode, dataSource, members.size);
             if (dataSource === DataSource.LOCAL && members.get(this.selfInfo.uid)?.isDelete) {
                 // 自身退群或者被踢退群 5s用于Api操作 之后不再出现
                 setTimeout(() => {
