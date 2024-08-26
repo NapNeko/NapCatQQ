@@ -11,7 +11,7 @@ const SchemaData = {
         content: { type: 'string' },
         image: { type: 'string' },
         pinned: { type: ['number', 'string'] },
-        confirmRequired: { type: ['number', 'string'] },
+        confirm_required: { type: ['number', 'string'] },
     },
     required: ['group_id', 'content'],
 } as const satisfies JSONSchema;
@@ -49,12 +49,12 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
             }
             UploadImage = ImageUploadResult.picInfo;
         }
-        let Notice_Pinned = +(payload.pinned ?? 0);
-        let Notice_confirmRequired = +(payload.confirmRequired ?? 0);
-        const PublishGroupBulletinResult = await NTQQGroupApi.publishGroupBulletin(payload.group_id.toString(), payload.content, UploadImage, Notice_Pinned, Notice_confirmRequired);
+        let noticePinned = +(payload.pinned ?? 0);
+        let noticeConfirmRequired = +(payload.confirm_required ?? 0);
+        const publishGroupBulletinResult = await NTQQGroupApi.publishGroupBulletin(payload.group_id.toString(), payload.content, UploadImage, noticePinned, noticeConfirmRequired);
 
-        if (PublishGroupBulletinResult.result != 0) {
-            throw `设置群公告失败,错误信息:${PublishGroupBulletinResult.errMsg}`;
+        if (publishGroupBulletinResult.result != 0) {
+            throw `设置群公告失败,错误信息:${publishGroupBulletinResult.errMsg}`;
         }
         return null;
     }
