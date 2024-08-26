@@ -1,5 +1,5 @@
-import { OB11Group } from '../../types';
-import { OB11Constructor } from '@/onebot/helper/converter';
+import { OB11Group } from '@/onebot';
+import { OB11Entities } from '@/onebot/helper/entities';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { Group } from '@/core/entities';
@@ -21,7 +21,7 @@ class GetGroupList extends BaseAction<Payload, OB11Group[]> {
     async _handle(payload: Payload) {
         const NTQQGroupApi = this.core.apis.GroupApi;
         const groupList: Group[] = await NTQQGroupApi.getGroups(typeof payload.no_cache === 'string' ? payload.no_cache === 'true' : !!payload.no_cache);
-        return OB11Constructor.groups(groupList);
+        return OB11Entities.groups(groupList);
     }
 }
 

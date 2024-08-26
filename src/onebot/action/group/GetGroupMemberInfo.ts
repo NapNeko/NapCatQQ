@@ -1,5 +1,5 @@
-import { OB11GroupMember } from '../../types';
-import { OB11Constructor } from '@/onebot/helper/converter';
+import { OB11GroupMember } from '@/onebot';
+import { OB11Entities } from '@/onebot/helper/entities';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
@@ -39,7 +39,7 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
             this.core.context.logger.logDebug(`获取群成员详细信息失败, 只能返回基础信息 ${info.reason}`);
         }
         const date = Math.round(Date.now() / 1000);
-        const retMember = OB11Constructor.groupMember(payload.group_id.toString(), member.value as GroupMember);
+        const retMember = OB11Entities.groupMember(payload.group_id.toString(), member.value as GroupMember);
         const Member = await this.core.apis.GroupApi.getGroupMember(payload.group_id.toString(), retMember.user_id);
         retMember.last_sent_time = parseInt(Member?.lastSpeakTime || date.toString());
         retMember.join_time = parseInt(Member?.joinTime || date.toString());

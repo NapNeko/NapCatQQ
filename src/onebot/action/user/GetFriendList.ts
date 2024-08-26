@@ -1,5 +1,5 @@
-import { OB11User } from '../../types';
-import { OB11Constructor } from '@/onebot/helper/converter';
+import { OB11User } from '@/onebot';
+import { OB11Entities } from '@/onebot/helper/entities';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
@@ -20,6 +20,6 @@ export default class GetFriendList extends BaseAction<Payload, OB11User[]> {
     async _handle(payload: Payload) {
         //全新逻辑
         const NTQQFriendApi = this.core.apis.FriendApi;
-        return OB11Constructor.friendsV2(await NTQQFriendApi.getBuddyV2(typeof payload.no_cache === 'string' ? payload.no_cache === 'true' : !!payload.no_cache));
+        return OB11Entities.friendsV2(await NTQQFriendApi.getBuddyV2(typeof payload.no_cache === 'string' ? payload.no_cache === 'true' : !!payload.no_cache));
     }
 }

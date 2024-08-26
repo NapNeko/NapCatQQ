@@ -1,6 +1,6 @@
 import BaseAction from '../BaseAction';
-import { OB11User, OB11UserSex } from '../../types';
-import { OB11Constructor } from '@/onebot/helper/converter';
+import { OB11User, OB11UserSex } from '@/onebot';
+import { OB11Entities } from '@/onebot/helper/entities';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { calcQQLevel } from '@/common/utils/helper';
@@ -41,6 +41,6 @@ export default class GoCQHTTPGetStrangerInfo extends BaseAction<Payload, OB11Use
             return ret;
         }
         const data = { ...extendData, ...(await NTQQUserApi.getUserDetailInfo(uid)) };
-        return OB11Constructor.stranger(data);
+        return OB11Entities.stranger(data);
     }
 }

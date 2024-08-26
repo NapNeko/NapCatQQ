@@ -1,5 +1,5 @@
-import { OB11Group } from '../../types';
-import { OB11Constructor } from '@/onebot/helper/converter';
+import { OB11Group } from '@/onebot';
+import { OB11Entities } from '@/onebot/helper/entities';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
@@ -22,7 +22,7 @@ class GetGroupInfo extends BaseAction<Payload, OB11Group> {
         const NTQQGroupApi = this.core.apis.GroupApi;
         const group = (await NTQQGroupApi.getGroups()).find(e => e.groupCode == payload.group_id.toString());
         if (!group) throw `群${payload.group_id}不存在`;
-        return OB11Constructor.group(group);
+        return OB11Entities.group(group);
     }
 }
 
