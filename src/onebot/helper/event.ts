@@ -9,7 +9,7 @@ import { OB11GroupPokeEvent } from '../event/notice/OB11PokeEvent';
 import { OB11GroupEssenceEvent } from '../event/notice/OB11GroupEssenceEvent';
 import { MessageUnique } from '@/common/message-unique';
 import { OB11GroupTitleEvent } from '../event/notice/OB11GroupTitleEvent';
-import { NapCatCore, RawMessage, ChatType, NTGrayTipElementSubTypeV2, TipGroupElementType, Peer } from '@/core';
+import { ChatType, NapCatCore, NTGrayTipElementSubTypeV2, Peer, RawMessage, TipGroupElementType } from '@/core';
 
 export async function NT2PrivateEvent(core: NapCatCore, obContext: NapCatOneBot11Adapter, msg: RawMessage): Promise<OB11BaseNoticeEvent | undefined> {
     if (msg.chatType !== ChatType.KCHATTYPEC2C) {

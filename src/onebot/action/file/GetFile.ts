@@ -2,7 +2,7 @@ import BaseAction from '../BaseAction';
 import fs from 'fs/promises';
 import { UUIDConverter } from '@/common/helper';
 import { ActionName } from '../types';
-import { ChatType, ElementType, FileElement, Peer, RawMessage, VideoElement } from '@/core/entities';
+import { ChatType, ElementType, Peer, RawMessage } from '@/core/entities';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
 export interface GetFilePayload {

@@ -1,4 +1,3 @@
-import BaseAction from '@/onebot/action/BaseAction';
 import { OB11BaseEvent } from '@/onebot/event/OB11BaseEvent';
 import { OB11Message } from '@/onebot';
 import { ActionMap } from '@/onebot/action';

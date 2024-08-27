@@ -21,7 +21,6 @@ import { InstanceContext, NapCatCore } from '@/core';
 import * as fileType from 'file-type';
 import imageSize from 'image-size';
 import { ISizeCalculationResult } from 'image-size/dist/types/interface';
-import { NodeIKernelSearchService } from '../services/NodeIKernelSearchService';
 import { RkeyManager } from '../helper/rkey';
 import { calculateFileMD5, isGIF } from '@/common/file';
 import pathLib from 'node:path';

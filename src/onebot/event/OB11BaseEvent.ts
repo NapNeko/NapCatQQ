@@ -1,4 +1,4 @@
-import { InstanceContext, NapCatCore } from '@/core';
+import { NapCatCore } from '@/core';
 
 export enum EventType {
     META = 'meta_event',

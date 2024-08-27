@@ -53,6 +53,5 @@ export default class SetGroupPortrait extends BaseAction<Payload, any> {
             }
             throw `头像${payload.file}设置失败,无法获取头像,文件可能不存在`;
         }
-        return null;
     }
 }
