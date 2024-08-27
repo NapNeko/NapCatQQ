@@ -1,5 +1,5 @@
 import log4js, { Configuration } from 'log4js';
-import { truncateString } from '@/common/utils/helper';
+import { truncateString } from '@/common/helper';
 import path from 'node:path';
 import chalk from 'chalk';
 import { AtType, ChatType, ElementType, MessageElement, RawMessage, SelfInfo } from '@/core';

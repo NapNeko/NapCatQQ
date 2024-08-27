@@ -1,4 +1,4 @@
-import { calcQQLevel } from '@/common/utils/helper';
+import { calcQQLevel } from '@/common/helper';
 import { Friend, FriendV2, Group, GroupMember, SelfInfo, Sex, User } from '@/core';
 import { OB11Group, OB11GroupMember, OB11GroupMemberRole, OB11User, OB11UserSex } from '../types';
 
