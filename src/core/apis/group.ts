@@ -9,9 +9,8 @@ import {
     KickMemberV2Req,
     MemberExtSourceType,
     NapCatCore,
-    NodeIKernelGroupService,
 } from '@/core';
-import { isNumeric, runAllWithTimeout, sleep } from '@/common/helper';
+import { isNumeric, runAllWithTimeout } from '@/common/helper';
 
 export class NTQQGroupApi {
     context: InstanceContext;
@@ -30,8 +29,6 @@ export class NTQQGroupApi {
         this.groups = await this.getGroups();
         for (const group of this.groups) {
             this.groupCache.set(group.groupCode, group);
-            //const data = await this.getGroupMembers(group.groupCode, 3000);
-            //this.groupMemberCache.set(group.groupCode, data);
         }
         this.context.logger.logDebug(`加载${this.groups.length}个群组缓存完成`);
     }
