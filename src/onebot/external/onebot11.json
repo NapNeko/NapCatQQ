@@ -1,6 +1,6 @@
 {
     "http": {
-        "enable": false,
+        "enable": true,
         "host": "",
         "port": 3000,
         "secret": "",
