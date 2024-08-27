@@ -27,7 +27,6 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
         if (payload.image) {
             //公告图逻辑
             const {
-                errMsg,
                 path,
                 isLocal,
                 success,
@@ -49,8 +48,8 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
             }
             UploadImage = ImageUploadResult.picInfo;
         }
-        let noticePinned = +(payload.pinned ?? 0);
-        let noticeConfirmRequired = +(payload.confirm_required ?? 0);
+        const noticePinned = +(payload.pinned ?? 0);
+        const noticeConfirmRequired = +(payload.confirm_required ?? 0);
         const publishGroupBulletinResult = await NTQQGroupApi.publishGroupBulletin(payload.group_id.toString(), payload.content, UploadImage, noticePinned, noticeConfirmRequired);
 
         if (publishGroupBulletinResult.result != 0) {
