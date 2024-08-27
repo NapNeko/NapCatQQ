@@ -5,7 +5,7 @@ import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
 import { OB11GroupDecreaseEvent } from '../event/notice/OB11GroupDecreaseEvent';
 import fastXmlParser from 'fast-xml-parser';
 import { OB11GroupMsgEmojiLikeEvent } from '../event/notice/OB11MsgEmojiLikeEvent';
-import { MessageUnique } from '@/common/utils/message-unique';
+import { MessageUnique } from '@/common/message-unique';
 
 export class OneBotGroupApi {
     obContext: NapCatOneBot11Adapter;

@@ -1,9 +1,9 @@
 import type { SelfInfo } from '@/core/entities';
 
-import { LogWrapper } from '@/common/utils/log';
+import { LogWrapper } from '@/common/log';
 import { NodeIKernelLoginListener, NodeIKernelSessionListener } from '@/core/listeners';
 import { NodeIDependsAdapter, NodeIDispatcherAdapter, NodeIGlobalAdapter } from '@/core/adapters';
-import { napcat_version, NapCatPathWrapper } from '@/common/framework/napcat';
+import { napcat_version, NapCatPathWrapper } from '@/common/path';
 import {
     InstanceContext,
     loadQQWrapper,
@@ -12,10 +12,10 @@ import {
     NodeIQQNTWrapperSession,
     WrapperNodeApi,
 } from '@/core';
-import { QQBasicInfoWrapper } from '@/common/utils/qq-basic-info';
-import { hostname, systemVersion } from '@/common/utils/system';
+import { QQBasicInfoWrapper } from '@/common/qq-basic-info';
+import { hostname, systemVersion } from '@/common/system';
 import { genSessionConfig } from '@/core/wrapper/helper';
-import { proxiedListenerOf } from '@/common/utils/proxy-handler';
+import { proxiedListenerOf } from '@/common/proxy-handler';
 
 import path from 'path';
 import fs from 'fs';

@@ -1,7 +1,7 @@
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import { MessageUnique } from '@/common/utils/message-unique';
+import { MessageUnique } from '@/common/message-unique';
 
 const SchemaData = {
     type: 'object',

@@ -1,4 +1,4 @@
-import { RequestUtil } from '@/common/utils/request';
+import { RequestUtil } from '@/common/request';
 import {
     GroupEssenceMsgRet,
     InstanceContext,
