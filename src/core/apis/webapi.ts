@@ -184,11 +184,8 @@ export class NTQQWebApi {
         const HonorInfo: any = { group_id: groupCode };
 
         if (getType === WebHonorType.TALKATIVE || getType === WebHonorType.ALL) {
-            try {
-                const RetInternal = await getDataInternal(groupCode, 1);
-                if (!RetInternal) {
-                    throw new Error('获取龙王信息失败');
-                }
+            const RetInternal = await getDataInternal(groupCode, 1);
+            if (RetInternal) {
                 HonorInfo.current_talkative = {
                     user_id: RetInternal[0]?.uin,
                     avatar: RetInternal[0]?.avatar,
@@ -206,16 +203,13 @@ export class NTQQWebApi {
                         nickname: talkative_ele?.name,
                     });
                 }
-            } catch (e) {
-                this.context.logger.logDebug(e);
+            } else {
+                this.context.logger.logError('获取龙王信息失败');
             }
         }
         if (getType === WebHonorType.PERFORMER || getType === WebHonorType.ALL) {
-            try {
-                const RetInternal = await getDataInternal(groupCode, 2);
-                if (!RetInternal) {
-                    throw new Error('获取群聊之火失败');
-                }
+            const RetInternal = await getDataInternal(groupCode, 2);
+            if (RetInternal) {
                 HonorInfo.performer_list = [];
                 for (const performer_ele of RetInternal) {
                     HonorInfo.performer_list.push({
@@ -225,16 +219,13 @@ export class NTQQWebApi {
                         description: performer_ele?.desc,
                     });
                 }
-            } catch (e) {
-                this.context.logger.logDebug(e);
+            } else {
+                this.context.logger.logError('获取群聊之火失败');
             }
         }
         if (getType === WebHonorType.PERFORMER || getType === WebHonorType.ALL) {
-            try {
-                const RetInternal = await getDataInternal(groupCode, 3);
-                if (!RetInternal) {
-                    throw new Error('获取群聊炽焰失败');
-                }
+            const RetInternal = await getDataInternal(groupCode, 3);
+            if (RetInternal) {
                 HonorInfo.legend_list = [];
                 for (const legend_ele of RetInternal) {
                     HonorInfo.legend_list.push({
@@ -244,16 +235,13 @@ export class NTQQWebApi {
                         desc: legend_ele?.description,
                     });
                 }
-            } catch (e) {
-                this.context.logger.logDebug('获取群聊炽焰失败', e);
+            } else {
+                this.context.logger.logError('获取群聊炽焰失败');
             }
         }
         if (getType === WebHonorType.EMOTION || getType === WebHonorType.ALL) {
-            try {
-                const RetInternal = await getDataInternal(groupCode, 6);
-                if (!RetInternal) {
-                    throw new Error('获取快乐源泉失败');
-                }
+            const RetInternal = await getDataInternal(groupCode, 6);
+            if (RetInternal) {
                 HonorInfo.emotion_list = [];
                 for (const emotion_ele of RetInternal) {
                     HonorInfo.emotion_list.push({
@@ -263,11 +251,11 @@ export class NTQQWebApi {
                         desc: emotion_ele.description,
                     });
                 }
-            } catch (e) {
-                this.context.logger.logDebug('获取快乐源泉失败', e);
+            } else {
+                this.context.logger.logError('获取快乐源泉失败');
             }
         }
-        //冒尖小春笋好像已经被tx扬了
+        // 冒尖小春笋好像已经被tx扬了 R.I.P.
         if (getType === WebHonorType.EMOTION || getType === WebHonorType.ALL) {
             HonorInfo.strong_newbie_list = [];
         }
