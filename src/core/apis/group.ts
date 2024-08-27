@@ -23,17 +23,15 @@ export class NTQQGroupApi {
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
         this.core = core;
-        sleep(1000).then(() => {
-            this.initCache().then().catch(context.logger.logError);
-        });
+        this.initCache().then().catch(context.logger.logError);
     }
 
     async initCache() {
         this.groups = await this.getGroups();
         for (const group of this.groups) {
             this.groupCache.set(group.groupCode, group);
-            const data = await this.getGroupMembers(group.groupCode, 3000);
-            this.groupMemberCache.set(group.groupCode, data);
+            //const data = await this.getGroupMembers(group.groupCode, 3000);
+            //this.groupMemberCache.set(group.groupCode, data);
         }
         this.context.logger.logDebug(`加载${this.groups.length}个群组缓存完成`);
     }
@@ -175,7 +173,7 @@ export class NTQQGroupApi {
         let members = this.groupMemberCache.get(groupCodeStr);
         if (!members) {
             try {
-                members = await this.getGroupMembers(groupCodeStr);
+                members = await this.getGroupMembersV2(groupCodeStr);
                 // 更新群成员列表
                 this.groupMemberCache.set(groupCodeStr, members);
             } catch (e) {
@@ -196,7 +194,7 @@ export class NTQQGroupApi {
 
         let member = getMember();
         if (!member) {
-            members = await this.getGroupMembers(groupCodeStr);
+            members = await this.getGroupMembersV2(groupCodeStr);
             member = getMember();
         }
         return member;
@@ -307,7 +305,6 @@ export class NTQQGroupApi {
     }
 
     async getGroupMemberV2(GroupCode: string, uid: string, forced = false) {
-        type EventType = NodeIKernelGroupService['getMemberInfo'];
         const Listener = this.core.eventWrapper.registerListen(
             'NodeIKernelGroupListener/onMemberInfoChange',
             1,
@@ -330,6 +327,38 @@ export class NTQQGroupApi {
         return member;
     }
 
+    async getGroupMembersV2(groupQQ: string, num = 3000): Promise<Map<string, GroupMember>> {
+        const groupService = this.context.session.getGroupService();
+        const sceneId = groupService.createMemberListScene(groupQQ, 'groupMemberList_MainWindow');
+        const listener = this.core.eventWrapper.registerListen(
+            'NodeIKernelGroupListener/onMemberListChange',
+            1,
+            500,
+            (params) => params.sceneId === sceneId,
+        );
+        try {
+            const [membersFromFunc, membersFromListener] = await Promise.allSettled([
+                groupService.getNextMemberList(sceneId, undefined, num),
+                listener,
+            ]);
+            if (membersFromFunc.status === 'fulfilled' && membersFromListener.status === 'fulfilled') {
+                return new Map([
+                    ...membersFromFunc.value.result.infos, 
+                    ...membersFromListener.value[0].infos
+                ]);
+            }
+            if (membersFromFunc.status === 'fulfilled') {
+                return membersFromFunc.value.result.infos;
+            }
+            if (membersFromListener.status === 'fulfilled') {
+                return membersFromListener.value[0].infos;
+            }
+            throw new Error('获取群成员列表失败');
+        } finally {
+            groupService.destroyMemberListScene(sceneId);
+        }
+    }
+    
     async getGroupMembers(groupQQ: string, num = 3000): Promise<Map<string, GroupMember>> {
         const groupService = this.context.session.getGroupService();
         const sceneId = groupService.createMemberListScene(groupQQ, 'groupMemberList_MainWindow');
