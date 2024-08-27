@@ -1,6 +1,7 @@
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { napcat_version } from '@/common/path';
+
+import { napCatVersion } from '@/common/version';
 
 export default class GetVersionInfo extends BaseAction<any, any> {
     actionName = ActionName.GetVersionInfo;
@@ -9,7 +10,7 @@ export default class GetVersionInfo extends BaseAction<any, any> {
         return {
             app_name: 'NapCat.Onebot',
             protocol_version: 'v11',
-            app_version: napcat_version,
+            app_version: napCatVersion,
         };
     }
 }

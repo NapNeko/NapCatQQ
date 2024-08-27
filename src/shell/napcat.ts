@@ -3,7 +3,7 @@ import type { SelfInfo } from '@/core/entities';
 import { LogWrapper } from '@/common/log';
 import { NodeIKernelLoginListener, NodeIKernelSessionListener } from '@/core/listeners';
 import { NodeIDependsAdapter, NodeIDispatcherAdapter, NodeIGlobalAdapter } from '@/core/adapters';
-import { napcat_version, NapCatPathWrapper } from '@/common/path';
+import { NapCatPathWrapper } from '@/common/path';
 import {
     InstanceContext,
     loadQQWrapper,
@@ -26,6 +26,7 @@ import qrcode from 'qrcode-terminal';
 import { NapCatOneBot11Adapter } from '@/onebot';
 import { InitWebUi } from '@/webui';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
+import { napCatVersion } from '@/common/version';
 
 program.option('-q, --qq [number]', 'QQ号').parse(process.argv);
 const cmdOptions = program.opts();
@@ -38,7 +39,7 @@ export async function NCoreInitShell() {
     const logger = new LogWrapper(pathWrapper.logsPath);
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
-    logger.log(`[NapCat] [Core] NapCat.Core Version: ` + napcat_version);
+    logger.log(`[NapCat] [Core] NapCat.Core Version: ` + napCatVersion);
     InitWebUi(logger, pathWrapper).then().catch(logger.logError);
 
     // from constructor
