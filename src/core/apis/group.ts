@@ -305,7 +305,6 @@ export class NTQQGroupApi {
     }
 
     async getGroupMemberV2(GroupCode: string, uid: string, forced = false) {
-        type EventType = NodeIKernelGroupService['getMemberInfo'];
         const Listener = this.core.eventWrapper.registerListen(
             'NodeIKernelGroupListener/onMemberInfoChange',
             1,
