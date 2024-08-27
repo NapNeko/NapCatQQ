@@ -160,10 +160,8 @@ export class NapCatCore {
             } else {
                 this.apis.GroupApi.groupMemberCache.set(groupCode, arg.infos);
             }
-            //console.log('onMemberListChange', groupCode, arg.infos.size);
         };
         groupListener.onMemberInfoChange = (groupCode, dataSource, members) => {
-            //console.log('onMemberInfoChange', groupCode, dataSource, members.size);
             if (dataSource === DataSource.LOCAL && members.get(this.selfInfo.uid)?.isDelete) {
                 // 自身退群或者被踢退群 5s用于Api操作 之后不再出现
                 setTimeout(() => {
