@@ -1,5 +1,5 @@
-import { UUIDConverter } from '@/common/utils/helper';
-import { MessageUnique } from '@/common/utils/message-unique';
+import { UUIDConverter } from '@/common/helper';
+import { MessageUnique } from '@/common/message-unique';
 import {
     AtType,
     ChatType,
@@ -27,8 +27,8 @@ import {
 import { OB11Entities } from '../helper';
 import { EventType } from '@/onebot/event/OB11BaseEvent';
 import { encodeCQCode } from '@/onebot/helper/cqcode';
-import { uri2local } from '@/common/utils/file';
-import { RequestUtil } from '@/common/utils/request';
+import { uri2local } from '@/common/file';
+import { RequestUtil } from '@/common/request';
 import fs from 'node:fs';
 import fsPromise from 'node:fs/promises';
 

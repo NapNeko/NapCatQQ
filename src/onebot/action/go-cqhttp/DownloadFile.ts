@@ -2,7 +2,7 @@ import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import fs from 'fs';
 import { join as joinPath } from 'node:path';
-import { calculateFileMD5, httpDownload } from '@/common/utils/file';
+import { calculateFileMD5, httpDownload } from '@/common/file';
 import { randomUUID } from 'crypto';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 

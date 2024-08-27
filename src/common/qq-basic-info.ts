@@ -1,6 +1,6 @@
 import path from 'node:path';
 import fs from 'node:fs';
-import { systemPlatform } from '@/common/utils/system';
+import { systemPlatform } from '@/common/system';
 import { getDefaultQQVersionConfigInfo, getQQVersionConfigPath } from './helper';
 import AppidTable from '@/core/external/appid.json';
 import { LogWrapper } from './log';

@@ -11,7 +11,7 @@ import {
     NapCatCore,
     NodeIKernelGroupService,
 } from '@/core';
-import { isNumeric, runAllWithTimeout, sleep } from '@/common/utils/helper';
+import { isNumeric, runAllWithTimeout, sleep } from '@/common/helper';
 
 export class NTQQGroupApi {
     context: InstanceContext;

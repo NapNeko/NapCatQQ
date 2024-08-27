@@ -21,7 +21,7 @@ import {
     OB11PassiveHttpAdapter,
     OB11PassiveWebSocketAdapter,
 } from '@/onebot/network';
-import { NapCatPathWrapper } from '@/common/framework/napcat';
+import { NapCatPathWrapper } from '@/common/path';
 import {
     OneBotFriendApi,
     OneBotGroupApi,
@@ -33,15 +33,15 @@ import {
 import { ActionMap, createActionMap } from '@/onebot/action';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { OB11InputStatusEvent } from '@/onebot/event/notice/OB11InputStatusEvent';
-import { MessageUnique } from '@/common/utils/message-unique';
-import { proxiedListenerOf } from '@/common/utils/proxy-handler';
+import { MessageUnique } from '@/common/message-unique';
+import { proxiedListenerOf } from '@/common/proxy-handler';
 import { OB11FriendRequestEvent } from '@/onebot/event/request/OB11FriendRequest';
 import { OB11GroupAdminNoticeEvent } from '@/onebot/event/notice/OB11GroupAdminNoticeEvent';
 import { GroupDecreaseSubType, OB11GroupDecreaseEvent } from '@/onebot/event/notice/OB11GroupDecreaseEvent';
 import { OB11GroupRequestEvent } from '@/onebot/event/request/OB11GroupRequest';
 import { OB11FriendRecallNoticeEvent } from '@/onebot/event/notice/OB11FriendRecallNoticeEvent';
 import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecallNoticeEvent';
-import { LRUCache } from '@/common/utils/lru-cache';
+import { LRUCache } from '@/common/lru-cache';
 import { NT2GroupEvent, NT2PrivateEvent } from './helper';
 import { NodeIKernelRecentContactListener } from '@/core/listeners/NodeIKernelRecentContactListener';
 

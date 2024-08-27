@@ -5,7 +5,7 @@ import { Mutex } from 'async-mutex';
 import { OB11Response } from '../action/OB11Response';
 import { ActionName } from '../action/types';
 import { NapCatCore } from '@/core';
-import { LogWrapper } from '@/common/utils/log';
+import { LogWrapper } from '@/common/log';
 import { OB11HeartbeatEvent } from '../event/meta/OB11HeartbeatEvent';
 import { IncomingMessage } from 'http';
 import { ActionMap } from '@/onebot/action';

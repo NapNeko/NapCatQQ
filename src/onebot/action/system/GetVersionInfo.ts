@@ -1,6 +1,6 @@
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { napcat_version } from '@/common/framework/napcat';
+import { napcat_version } from '@/common/path';
 
 export default class GetVersionInfo extends BaseAction<any, any> {
     actionName = ActionName.GetVersionInfo;

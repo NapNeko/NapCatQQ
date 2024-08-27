@@ -7,7 +7,7 @@ import {
 } from '@/onebot/types';
 import { ActionName, BaseCheckResult } from '@/onebot/action/types';
 import { decodeCQCode } from '@/onebot/helper/cqcode';
-import { MessageUnique } from '@/common/utils/message-unique';
+import { MessageUnique } from '@/common/message-unique';
 import { ChatType, ElementType, NapCatCore, Peer, RawMessage, SendMessageElement } from '@/core';
 import BaseAction from '../BaseAction';
 

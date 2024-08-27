@@ -1,7 +1,7 @@
 import express from 'express';
 import { ALLRouter } from './src/router';
-import { LogWrapper } from '@/common/utils/log';
-import { NapCatPathWrapper } from '@/common/framework/napcat';
+import { LogWrapper } from '@/common/log';
+import { NapCatPathWrapper } from '@/common/path';
 import { WebUiConfigWrapper } from './src/helper/config';
 
 const app = express();

@@ -1,8 +1,8 @@
 import type { ModifyProfileParams, User, UserDetailInfoByUinV2 } from '@/core/entities';
-import { RequestUtil } from '@/common/utils/request';
+import { RequestUtil } from '@/common/request';
 import { ProfileBizType, UserDetailSource } from '@/core/services';
 import { InstanceContext, NapCatCore } from '..';
-import { solveAsyncProblem } from '@/common/utils/helper';
+import { solveAsyncProblem } from '@/common/helper';
 
 export class NTQQUserApi {
     context: InstanceContext;

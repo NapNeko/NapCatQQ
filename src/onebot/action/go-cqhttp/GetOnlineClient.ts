@@ -1,7 +1,7 @@
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { JSONSchema } from 'json-schema-to-ts';
-import { sleep } from '@/common/utils/helper';
+import { sleep } from '@/common/helper';
 
 const SchemaData = {
     type: 'object',

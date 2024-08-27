@@ -23,12 +23,12 @@ import imageSize from 'image-size';
 import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 import { NodeIKernelSearchService } from '../services/NodeIKernelSearchService';
 import { RkeyManager } from '../helper/rkey';
-import { calculateFileMD5, isGIF } from '@/common/utils/file';
+import { calculateFileMD5, isGIF } from '@/common/file';
 import pathLib from 'node:path';
-import { defaultVideoThumbB64, getVideoInfo } from '@/common/utils/video';
+import { defaultVideoThumbB64, getVideoInfo } from '@/common/video';
 import ffmpeg from 'fluent-ffmpeg';
 import fsnormal from 'node:fs';
-import { encodeSilk } from '@/common/utils/audio';
+import { encodeSilk } from '@/common/audio';
 
 
 export class NTQQFileApi {

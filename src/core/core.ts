@@ -2,15 +2,15 @@ import { NodeQQNTWrapperUtil, StableNTApiWrapper, WrapperNodeApi } from '@/core/
 import path from 'node:path';
 import fs from 'node:fs';
 import { InstanceContext } from './wrapper';
-import { proxiedListenerOf } from '@/common/utils/proxy-handler';
+import { proxiedListenerOf } from '@/common/proxy-handler';
 import { NodeIKernelGroupListener, NodeIKernelMsgListener, NodeIKernelProfileListener } from './listeners';
 import { DataSource, GroupMember, SelfInfo } from './entities';
-import { NTEventWrapper } from '@/common/framework/event';
+import { NTEventWrapper } from '@/common/event';
 import { NTQQFileApi, NTQQFriendApi, NTQQGroupApi, NTQQMsgApi, NTQQSystemApi, NTQQUserApi, NTQQWebApi } from './apis';
 import os from 'node:os';
 import { NTQQCollectionApi } from './apis/collection';
 import { NapCatConfigLoader } from './helper/config';
-import { LogLevel } from '@/common/utils/log';
+import { LogLevel } from '@/common/log';
 
 export enum NapCatCoreWorkingEnv {
     Unknown = 0,
