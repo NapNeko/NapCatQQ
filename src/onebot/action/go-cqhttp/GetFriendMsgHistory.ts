@@ -1,7 +1,7 @@
 import BaseAction from '../BaseAction';
 import { OB11Message } from '@/onebot';
 import { ActionName } from '../types';
-import { ChatType, Peer, RawMessage } from '@/core/entities';
+import { ChatType } from '@/core/entities';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/message-unique';
 
@@ -40,7 +40,7 @@ export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
         const hasMessageSeq = !payload.message_seq ? !!payload.message_seq : !(payload.message_seq?.toString() === '' || payload.message_seq?.toString() === '0');
         //拉取消息
         const startMsgId = hasMessageSeq ? (MessageUnique.getMsgIdAndPeerByShortId(+payload.message_seq!)?.MsgId ?? payload.message_seq!.toString()) : '0';
-        let msgList = hasMessageSeq ?
+        const msgList = hasMessageSeq ?
             (await NTQQMsgApi.getMsgHistory(peer, startMsgId, MsgCount)).msgList : (await NTQQMsgApi.getAioFirstViewLatestMsgs(peer, MsgCount)).msgList;
         if (msgList.length === 0) throw `消息${payload.message_seq}不存在`;
         //翻转消息
