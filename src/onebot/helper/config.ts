@@ -1,4 +1,4 @@
-import { ConfigBase } from '@/common/utils/config-base';
+import { ConfigBase } from '@/common/config-base';
 import ob11DefaultConfig from '@/onebot/external/onebot11.json';
 import { NapCatCore } from '@/core';
 

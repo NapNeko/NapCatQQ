@@ -2,15 +2,15 @@ import { NodeQQNTWrapperUtil, StableNTApiWrapper, WrapperNodeApi } from '@/core/
 import path from 'node:path';
 import fs from 'node:fs';
 import { InstanceContext } from './wrapper';
-import { proxiedListenerOf } from '@/common/utils/proxy-handler';
+import { proxiedListenerOf } from '@/common/proxy-handler';
 import { NodeIKernelGroupListener, NodeIKernelMsgListener, NodeIKernelProfileListener } from './listeners';
 import { DataSource, GroupMember, SelfInfo } from './entities';
-import { LegacyNTEventWrapper } from '@/common/framework/event-legacy';
+import { NTEventWrapper } from '@/common/event';
 import { NTQQFileApi, NTQQFriendApi, NTQQGroupApi, NTQQMsgApi, NTQQSystemApi, NTQQUserApi, NTQQWebApi } from './apis';
 import os from 'node:os';
 import { NTQQCollectionApi } from './apis/collection';
 import { NapCatConfigLoader } from './helper/config';
-import { LogLevel } from '@/common/utils/log';
+import { LogLevel } from '@/common/log';
 
 export enum NapCatCoreWorkingEnv {
     Unknown = 0,
@@ -31,7 +31,7 @@ export function loadQQWrapper(QQVersion: string): WrapperNodeApi {
 export class NapCatCore {
     readonly context: InstanceContext;
     readonly apis: StableNTApiWrapper;
-    readonly eventWrapper: LegacyNTEventWrapper;
+    readonly eventWrapper: NTEventWrapper;
     // readonly eventChannel: NTEventChannel;
     NapCatDataPath: string;
     NapCatTempPath: string;
@@ -45,7 +45,7 @@ export class NapCatCore {
         this.selfInfo = selfInfo;
         this.context = context;
         this.util = this.context.wrapper.NodeQQNTWrapperUtil;
-        this.eventWrapper = new LegacyNTEventWrapper(context.session);
+        this.eventWrapper = new NTEventWrapper(context.session);
         this.apis = {
             FileApi: new NTQQFileApi(this.context, this),
             SystemApi: new NTQQSystemApi(this.context, this),

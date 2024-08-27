@@ -1,6 +1,6 @@
 import { OB11Return } from '../types';
 
-import { isNull } from '../../common/utils/helper';
+import { isNull } from '../../common/helper';
 
 export class OB11Response {
     static res<T>(data: T, status: string, retcode: number, message: string = ''): OB11Return<T> {

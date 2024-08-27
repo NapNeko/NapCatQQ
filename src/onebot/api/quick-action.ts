@@ -14,7 +14,7 @@ import { ChatType, GroupRequestOperateTypes, NapCatCore, Peer } from '@/core';
 import { OB11FriendRequestEvent } from '@/onebot/event/request/OB11FriendRequest';
 import { OB11GroupRequestEvent } from '@/onebot/event/request/OB11GroupRequest';
 import { normalize } from '@/onebot/action/msg/SendMsg';
-import { isNull } from '@/common/utils/helper';
+import { isNull } from '@/common/helper';
 
 export class OneBotQuickActionApi {
     constructor(

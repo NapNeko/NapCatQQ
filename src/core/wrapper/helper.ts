@@ -1,7 +1,7 @@
 import path from 'node:path';
 import fs from 'node:fs';
 import { PlatformType, VendorType, WrapperSessionInitConfig } from './wrapper';
-import { getMachineId, hostname, systemName, systemVersion } from '@/common/utils/system';
+import { getMachineId, hostname, systemName, systemVersion } from '@/common/system';
 
 export async function genSessionConfig(QQVersionAppid: string, QQVersion: string, selfUin: string, selfUid: string, account_path: string): Promise<WrapperSessionInitConfig> {
     const downloadPath = path.join(account_path, 'NapCat', 'temp');

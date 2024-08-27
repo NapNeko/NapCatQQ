@@ -10,7 +10,7 @@ export interface ListenerIBase {
     [key: string]: any;
 }
 
-export class NTEventChannel extends EventEmitter {
+export class NTEventWrapperV2 extends EventEmitter {
     private wrapperApi: WrapperNodeApi;
     private wrapperSession: NodeIQQNTWrapperSession;
     private listenerRefStorage = new Map<string, ListenerIBase>();

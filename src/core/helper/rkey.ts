@@ -1,5 +1,5 @@
-import { LogWrapper } from '@/common/utils/log';
-import { RequestUtil } from '@/common/utils/request';
+import { LogWrapper } from '@/common/log';
+import { RequestUtil } from '@/common/request';
 
 interface ServerRkeyData {
     group_rkey: string;

@@ -2,7 +2,7 @@ import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { ChatType, Peer, SendFileElement } from '@/core/entities';
 import fs from 'fs';
-import { uri2local } from '@/common/utils/file';
+import { uri2local } from '@/common/file';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
 const SchemaData = {
