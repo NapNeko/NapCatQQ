@@ -1,5 +1,5 @@
 import { FriendV2 } from '@/core/entities';
-import { BuddyListReqType, InstanceContext, NapCatCore, NodeIKernelProfileService } from '@/core';
+import { BuddyListReqType, InstanceContext, NapCatCore } from '@/core';
 import { LimitedHashTable } from '@/common/message-unique';
 
 export class NTQQFriendApi {

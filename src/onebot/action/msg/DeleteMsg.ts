@@ -2,7 +2,6 @@ import { ActionName } from '../types';
 import BaseAction from '../BaseAction';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/message-unique';
-import { NodeIKernelMsgListener } from '@/core';
 
 const SchemaData = {
     type: 'object',

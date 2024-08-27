@@ -1,5 +1,4 @@
 import { NodeIDependsAdapter, NodeIDispatcherAdapter, NodeIGlobalAdapter } from '../adapters';
-import { NodeIKernelSessionListener } from '@/core';
 import {
     NodeIKernelAvatarService,
     NodeIKernelBuddyService,
@@ -9,11 +8,12 @@ import {
     NodeIKernelProfileLikeService,
     NodeIKernelProfileService,
     NodeIKernelRichMediaService,
+    NodeIKernelRobotService,
+    NodeIKernelSessionListener,
+    NodeIKernelStorageCleanService,
     NodeIKernelTicketService,
     NodeIKernelTipOffService,
 } from '@/core';
-import { NodeIKernelStorageCleanService } from '@/core';
-import { NodeIKernelRobotService } from '@/core';
 import { NodeIKernelNodeMiscService } from '../services/NodeIKernelNodeMiscService';
 import { NodeIKernelUixConvertService } from '../services/NodeIKernelUixConvertService';
 import { NodeIKernelMsgBackupService } from '../services/NodeIKernelMsgBackupService';

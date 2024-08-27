@@ -19,10 +19,10 @@ import type {
     NodeIKernelMsgListener,
     NodeIKernelProfileListener,
     NodeIKernelRobotListener,
+    NodeIKernelSearchListener_Polyfill,
     NodeIKernelSessionListener,
     NodeIKernelStorageCleanListener,
     NodeIKernelTicketListener,
-    NodeIKernelSearchListener_Polyfill,
 } from '.';
 
 export type ListenerNamingMapping = {

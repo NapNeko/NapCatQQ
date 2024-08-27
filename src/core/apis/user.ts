@@ -1,4 +1,4 @@
-import type { ModifyProfileParams, User, UserDetailInfoByUinV2 } from '@/core/entities';
+import type { ModifyProfileParams, User } from '@/core/entities';
 import { RequestUtil } from '@/common/request';
 import { ProfileBizType, UserDetailSource } from '@/core/services';
 import { InstanceContext, NapCatCore } from '..';

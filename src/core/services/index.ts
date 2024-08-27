@@ -20,6 +20,7 @@ export * from './NodeIKernelCollectionService';
 import type {
     NodeIKernelAvatarService,
     NodeIKernelBuddyService,
+    NodeIKernelCollectionService,
     NodeIKernelDbToolsService,
     NodeIKernelFileAssistantService,
     NodeIKernelGroupService,
@@ -30,11 +31,10 @@ import type {
     NodeIKernelProfileService,
     NodeIKernelRichMediaService,
     NodeIKernelRobotService,
+    NodeIKernelSearchService,
     NodeIKernelStorageCleanService,
     NodeIKernelTicketService,
     NodeIKernelTipOffService,
-    NodeIKernelSearchService,
-    NodeIKernelCollectionService,
 } from '.';
 
 export type ServiceNamingMapping = {
