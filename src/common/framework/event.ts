@@ -11,7 +11,7 @@ interface InternalMapKey {
 
 export type ListenerClassBase = Record<string, string>;
 
-export class LegacyNTEventWrapper {
+export class NTEventWrapper {
     private WrapperSession: NodeIQQNTWrapperSession | undefined; //WrapperSession
     private listenerManager: Map<string, ListenerClassBase> = new Map<string, ListenerClassBase>(); //ListenerName-Unique -> Listener实例
     private EventTask = new Map<string, Map<string, Map<string, InternalMapKey>>>(); //tasks ListenerMainName -> ListenerSubName-> uuid -> {timeout,createtime,func}
