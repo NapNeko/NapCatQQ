@@ -167,11 +167,17 @@ export interface NodeIKernelMsgService {
 
     getAllOnlineFileMsgs(...args: unknown[]): unknown;
 
-    getLatestDbMsgs(peer: Peer, cnt: number): Promise<unknown>;
+    getLatestDbMsgs(peer: Peer, cnt: number): Promise<GeneralCallResult & {
+        msgList: RawMessage[]
+    }>;
 
-    getLastMessageList(peer: Peer[]): Promise<unknown>;
+    getLastMessageList(peer: Peer[]): Promise<GeneralCallResult & {
+        msgList: RawMessage[]
+    }>;
 
-    getAioFirstViewLatestMsgs(peer: Peer, num: number): unknown;
+    getAioFirstViewLatestMsgs(peer: Peer, num: number): Promise<GeneralCallResult & {
+        msgList: RawMessage[]
+    }>;
 
     getMsgs(peer: Peer, msgId: string, count: unknown, queryOrder: boolean): Promise<unknown>;
 
@@ -512,11 +518,11 @@ export interface NodeIKernelMsgService {
         result: number,
         errMsg: string,
         emojiLikesList:
-            Array<{
-                tinyId: string,
-                nickName: string,
-                headUrl: string
-            }>,
+        Array<{
+            tinyId: string,
+            nickName: string,
+            headUrl: string
+        }>,
         cookie: string,
         isLastPage: boolean,
         isFirstPage: boolean
