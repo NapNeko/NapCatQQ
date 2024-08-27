@@ -13,9 +13,9 @@ import {
 import { ChatType, GroupRequestOperateTypes, NapCatCore, Peer } from '@/core';
 import { OB11FriendRequestEvent } from '@/onebot/event/request/OB11FriendRequest';
 import { OB11GroupRequestEvent } from '@/onebot/event/request/OB11GroupRequest';
-import { normalize } from '@/onebot/action/msg/SendMsg';
+import { ContextMode, normalize } from '@/onebot/action/msg/SendMsg';
 import { isNull } from '@/common/helper';
-
+import { createContext } from '@/onebot/action/msg/SendMsg';
 export class OneBotQuickActionApi {
     constructor(
         public obContext: NapCatOneBot11Adapter,
@@ -24,37 +24,34 @@ export class OneBotQuickActionApi {
     }
 
     async handleQuickOperation(eventContext: QuickActionEvent, quickAction: QuickAction) {
+        const logger = this.core.context.logger;
         if (eventContext.post_type === 'message') {
             await this.handleMsg(eventContext as OB11Message, quickAction)
-                .catch(this.core.context.logger.logError);
+                .catch(logger.logError.bind(logger));
         }
         if (eventContext.post_type === 'request') {
             const friendRequest = eventContext as OB11FriendRequestEvent;
             const groupRequest = eventContext as OB11GroupRequestEvent;
             if ((friendRequest).request_type === 'friend') {
                 await this.handleFriendRequest(friendRequest, quickAction)
-                    .catch(this.core.context.logger.logError);
+                    .catch(logger.logError.bind(logger));
             } else if (groupRequest.request_type === 'group') {
                 await this.handleGroupRequest(groupRequest, quickAction)
-                    .catch(this.core.context.logger.logError);
+                    .catch(logger.logError.bind(logger));
             }
         }
     }
 
     async handleMsg(msg: OB11Message, quickAction: QuickAction) {
         const reply = quickAction.reply;
-        const peer: Peer = {
-            chatType: ChatType.KCHATTYPEC2C,
-            peerUid: await this.core.apis.UserApi.getUidByUinV2(msg.user_id.toString()) as string,
-        };
-        if (msg.message_type == 'private') {
-            if (msg.sub_type === 'group') {
-                peer.chatType = ChatType.KCHATTYPETEMPC2CFROMGROUP;
-            }
-        } else {
-            peer.chatType = ChatType.KCHATTYPETEMPC2CFROMGROUP;
-            peer.peerUid = msg.group_id!.toString();
-        }
+        const peerContextMode = msg.message_type == 'private' ? ContextMode.Private : ContextMode.Group;
+
+        const peer: Peer = await createContext(this.core, {
+            message: "",
+            group_id: msg.group_id?.toString(),
+            user_id: msg.user_id?.toString(),
+        }, peerContextMode);
+        
         if (reply) {
             // let group: Group | undefined;
             let replyMessage: OB11MessageData[] = [];

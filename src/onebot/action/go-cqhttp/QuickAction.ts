@@ -13,7 +13,7 @@ export class GoCQHTTPHandleQuickAction extends BaseAction<Payload, null> {
     async _handle(payload: Payload): Promise<null> {
         this.obContext.apis.QuickActionApi
             .handleQuickOperation(payload.context, payload.operation)
-            .catch(this.core.context.logger.logError);
+            .catch(this.core.context.logger.logError.bind(this.core.context.logger));
         return null;
     }
 }
