@@ -89,8 +89,9 @@ export class OneBotGroupApi {
                 parseInt(memberUin),
                 parseInt(operatorUin),
             );
+        } else {
+            return undefined;
         }
-        return undefined;
     }
 
     async parseGroupKickEvent(GroupCode: string, grayTipElement: GrayTipElement) {
@@ -118,35 +119,33 @@ export class OneBotGroupApi {
             attributeNamePrefix: '',
         }).parse(grayTipElement.xmlElement.content);
         this.core.context.logger.logDebug('收到表情回应我的消息', emojiLikeData);
-        try {
-            const senderUin = emojiLikeData.gtip.qq.jp;
-            const msgSeq = emojiLikeData.gtip.url.msgseq;
-            const emojiId = emojiLikeData.gtip.face.id;
-            const peer = {
-                chatType: ChatType.KCHATTYPEGROUP,
-                guildId: '',
-                peerUid: GroupCode,
-            };
-            const replyMsgList = (await NTQQMsgApi.getMsgExBySeq(peer, msgSeq)).msgList;
-            if (replyMsgList.length < 1) {
-                return;
-            }
-            const replyMsg = replyMsgList.filter(e => e.msgSeq == msgSeq).sort((a, b) => parseInt(a.msgTime) - parseInt(b.msgTime))[0];
-            //console.log("表情回应消息长度检测", msgSeq, replyMsg.elements);
-            if (!replyMsg) throw new Error('找不到回应消息');
-            return new OB11GroupMsgEmojiLikeEvent(
-                this.core,
-                parseInt(GroupCode),
-                parseInt(senderUin),
-                MessageUnique.getShortIdByMsgId(replyMsg.msgId)!,
-                [{
-                    emoji_id: emojiId,
-                    count: 1,
-                }],
-            );
-        } catch (e: any) {
-            this.core.context.logger.logError('解析表情回应消息失败', e.stack);
+        const senderUin = emojiLikeData.gtip.qq.jp;
+        const msgSeq = emojiLikeData.gtip.url.msgseq;
+        const emojiId = emojiLikeData.gtip.face.id;
+        const peer = {
+            chatType: ChatType.KCHATTYPEGROUP,
+            guildId: '',
+            peerUid: GroupCode,
+        };
+        const replyMsgList = (await NTQQMsgApi.getMsgExBySeq(peer, msgSeq)).msgList;
+        if (replyMsgList.length < 1) {
+            return;
         }
-        return undefined;
+        const replyMsg = replyMsgList.filter(e => e.msgSeq == msgSeq).sort((a, b) => parseInt(a.msgTime) - parseInt(b.msgTime))[0];
+        //console.log("表情回应消息长度检测", msgSeq, replyMsg.elements);
+        if (!replyMsg) {
+            this.core.context.logger.logError('解析表情回应消息失败: 未找到回应消息');
+            return undefined;
+        }
+        return new OB11GroupMsgEmojiLikeEvent(
+            this.core,
+            parseInt(GroupCode),
+            parseInt(senderUin),
+            MessageUnique.getShortIdByMsgId(replyMsg.msgId)!,
+            [{
+                emoji_id: emojiId,
+                count: 1,
+            }],
+        );
     }
 }

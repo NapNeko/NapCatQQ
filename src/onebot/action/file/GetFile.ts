@@ -34,61 +34,55 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
         const NTQQMsgApi = this.core.apis.MsgApi;
         const NTQQGroupApi = this.core.apis.GroupApi;
         const NTQQFileApi = this.core.apis.FileApi;
-        let UuidData: {
-            high: string;
-            low: string;
-        } | undefined;
         try {
-            UuidData = UUIDConverter.decode(payload.file);
-            if (UuidData) {
-                const peerUin = UuidData.high;
-                const msgId = UuidData.low;
-                const isGroup: boolean = !!(await NTQQGroupApi.getGroups(false)).find(e => e.groupCode == peerUin);
-                let peer: Peer | undefined;
-                //识别Peer
-                if (isGroup) {
-                    peer = { chatType: ChatType.KCHATTYPEGROUP, peerUid: peerUin };
-                }
-                const PeerUid = await NTQQUserApi.getUidByUinV2(peerUin);
-                if (PeerUid) {
-                    const isBuddy = await NTQQFriendApi.isBuddy(PeerUid);
-                    if (isBuddy) {
-                        peer = { chatType: ChatType.KCHATTYPEC2C, peerUid: PeerUid };
-                    } else {
-                        peer = { chatType: ChatType.KCHATTYPETEMPC2CFROMGROUP, peerUid: PeerUid };
-                    }
-                }
-                if (!peer) {
-                    throw new Error('chattype not support');
-                }
-                const msgList = await NTQQMsgApi.getMsgsByMsgId(peer, [msgId]);
-                if (msgList.msgList.length == 0) {
-                    throw new Error('msg not found');
-                }
-                const msg = msgList.msgList[0];
-                const findEle = msg.elements.find(e => e.elementType == ElementType.VIDEO || e.elementType == ElementType.FILE || e.elementType == ElementType.PTT);
-                if (!findEle) {
-                    throw new Error('element not found');
-                }
-                const downloadPath = await NTQQFileApi.downloadMedia(msgId, msg.chatType, msg.peerUid, findEle.elementId, '', '');
-                const fileSize = findEle?.videoElement?.fileSize || findEle?.fileElement?.fileSize || findEle?.pttElement?.fileSize || '0';
-                const fileName = findEle?.videoElement?.fileName || findEle?.fileElement?.fileName || findEle?.pttElement?.fileName || '';
-                const res: GetFileResponse = {
-                    file: downloadPath,
-                    url: downloadPath,
-                    file_size: fileSize,
-                    file_name: fileName,
-                };
-                if (true/*enableLocalFile2Url*/ && downloadPath) {
-                    try {
-                        res.base64 = await fs.readFile(downloadPath, 'base64');
-                    } catch (e) {
-                        throw new Error('文件下载失败. ' + e);
-                    }
-                }
-                //不手动删除？文件持久化了
-                return res;
+            const uuidData = UUIDConverter.decode(payload.file);
+            const peerUin = uuidData.high;
+            const msgId = uuidData.low;
+            const isGroup: boolean = !!(await NTQQGroupApi.getGroups(false)).find(e => e.groupCode == peerUin);
+            let peer: Peer | undefined;
+            //识别Peer
+            if (isGroup) {
+                peer = { chatType: ChatType.KCHATTYPEGROUP, peerUid: peerUin };
             }
+            const PeerUid = await NTQQUserApi.getUidByUinV2(peerUin);
+            if (PeerUid) {
+                const isBuddy = await NTQQFriendApi.isBuddy(PeerUid);
+                if (isBuddy) {
+                    peer = { chatType: ChatType.KCHATTYPEC2C, peerUid: PeerUid };
+                } else {
+                    peer = { chatType: ChatType.KCHATTYPETEMPC2CFROMGROUP, peerUid: PeerUid };
+                }
+            }
+            if (!peer) {
+                throw new Error('chattype not support');
+            }
+            const msgList = await NTQQMsgApi.getMsgsByMsgId(peer, [msgId]);
+            if (msgList.msgList.length == 0) {
+                throw new Error('msg not found');
+            }
+            const msg = msgList.msgList[0];
+            const findEle = msg.elements.find(e => e.elementType == ElementType.VIDEO || e.elementType == ElementType.FILE || e.elementType == ElementType.PTT);
+            if (!findEle) {
+                throw new Error('element not found');
+            }
+            const downloadPath = await NTQQFileApi.downloadMedia(msgId, msg.chatType, msg.peerUid, findEle.elementId, '', '');
+            const fileSize = findEle?.videoElement?.fileSize || findEle?.fileElement?.fileSize || findEle?.pttElement?.fileSize || '0';
+            const fileName = findEle?.videoElement?.fileName || findEle?.fileElement?.fileName || findEle?.pttElement?.fileName || '';
+            const res: GetFileResponse = {
+                file: downloadPath,
+                url: downloadPath,
+                file_size: fileSize,
+                file_name: fileName,
+            };
+            if (/* enableLocalFile2Url && */ downloadPath) {
+                try {
+                    res.base64 = await fs.readFile(downloadPath, 'base64');
+                } catch (e) {
+                    throw new Error('文件下载失败. ' + e);
+                }
+            }
+            //不手动删除？文件持久化了
+            return res;
         } catch {
             this.core.context.logger.logDebug('GetFileBase Mode - 1 Error');
         }
@@ -119,7 +113,7 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
                 file_size: NTSearchNameResult[0].fileSize.toString(),
                 file_name: NTSearchNameResult[0].fileName,
             };
-            if (true/*enableLocalFile2Url*/ && downloadPath) {
+            if (/* enableLocalFile2Url && */ downloadPath) {
                 try {
                     res.base64 = await fs.readFile(downloadPath, 'base64');
                 } catch (e) {
@@ -130,66 +124,6 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
             return res;
         }
         throw new Error('file not found');
-        // let cache = await dbUtil.getFileCacheByName(payload.file);
-        // if (!cache) {
-        //   cache = await dbUtil.getFileCacheByUuid(payload.file);
-        // }
-        // if (!cache) {
-        //   throw new Error('file not found');
-        // }
-        // const { enableLocalFile2Url } = ob11Config;
-        // try {
-        //   await fs.access(cache.path, fs.constants.F_OK);
-        // } catch (e) {
-        //   logDebug('local file not found, start download...');
-        //   // if (cache.url) {
-        //   //   const downloadResult = await uri2local(cache.url);
-        //   //   if (downloadResult.success) {
-        //   //     cache.path = downloadResult.path;
-        //   //     dbUtil.updateFileCache(cache).then();
-        //   //   } else {
-        //   //     throw new Error('file download failed. ' + downloadResult.errMsg);
-        //   //   }
-        //   // } else {
-        //   //   // 没有url的可能是私聊文件或者群文件，需要自己下载
-        //   //   log('需要调用 NTQQ 下载文件api');
-        //   let peer = MessageUnique.getPeerByMsgId(cache.msgId);
-        //   let msg = await NTQQMsgApi.getMsgsByMsgId(peer?.Peer!,cache.msgId);
-        //   // log('文件 msg', msg);
-        //   if (msg) {
-        //     // 构建下载函数
-        //     const downloadPath = await NTQQFileApi.downloadMedia(msg.msgId, msg.chatType, msg.peerUid,
-        //       cache.elementId, '', '');
-        //     // await sleep(1000);
-
-        //     // log('download result', downloadPath);
-        //     let peer = MessageUnique.getPeerByMsgId(cache.msgId);
-        //     msg = await NTQQMsgApi.getMsgsByMsgId(peer?.Peer!,cache.msgId);
-        //     // log('下载完成后的msg', msg);
-        //     cache.path = downloadPath!;
-        //     dbUtil.updateFileCache(cache).then();
-        //     // log('下载完成后的msg', msg);
-        //     // }
-        //   }
-
-        // }
-        // // log('file found', cache);
-        // const res: GetFileResponse = {
-        //   file: cache.path,
-        //   url: cache.url,
-        //   file_size: cache.size.toString(),
-        //   file_name: cache.name
-        // };
-        // if (enableLocalFile2Url) {
-        //   if (!cache.url) {
-        //     try {
-        //       res.base64 = await fs.readFile(cache.path, 'base64');
-        //     } catch (e) {
-        //       throw new Error('文件下载失败. ' + e);
-        //     }
-        //   }
-        // }
-        //return res;
     }
 }
 
