@@ -18,13 +18,46 @@ type Payload = FromSchema<typeof SchemaData>;
 export class GetGroupEssence extends BaseAction<Payload, any> {
     actionName = ActionName.GoCQHTTP_GetEssenceMsg;
     payloadSchema = SchemaData;
+    async parseEssenceMsgImage(ele: any) {
+        return {
+            type: 'image',
+            data: {
+                url: ele?.image_url,
+            }
+        };
+    }
+    async parseEssenceMsgText(ele: any) {
+        return {
+            type: 'text',
+            data: {
+                text: ele?.text
+            }
+        };
+    }
+    async parseEssenceMsg(msgs: any) {
+        let handledMsg: any[] = [];
+        for (let msg of msgs) {
+            switch (msg.msg_type) {
+                case 2:
+                    handledMsg.push(await this.parseEssenceMsgText(msg));
+                    break;
+                case 3:
+                    handledMsg.push(await this.parseEssenceMsgImage(msg));
+                    break;
+            }
+        }
+        return handledMsg;
+    }
     async msgSeqToMsgId(peer: Peer, msgSeq: string, msgRandom: string) {
         const NTQQMsgApi = this.core.apis.MsgApi;
         const replyMsgList = (await NTQQMsgApi.getMsgsBySeqAndCount(peer, msgSeq, 1, true, true)).msgList.find((msg) => msg.msgSeq === msgSeq && msg.msgRandom === msgRandom);
         if (!replyMsgList) {
-            return 0;
+            return undefined;
         }
-        return MessageUnique.createUniqueMsgId(peer, replyMsgList.msgId);
+        return {
+            id: MessageUnique.createUniqueMsgId(peer, replyMsgList.msgId),
+            msg: replyMsgList
+        }
     }
     async _handle(payload: Payload) {
         const NTQQWebApi = this.core.apis.WebApi;
@@ -40,20 +73,31 @@ export class GetGroupEssence extends BaseAction<Payload, any> {
             throw new Error('获取失败');
         }
         const Ob11Ret = await Promise.all(ret.data.msg_list.map(async (msg) => {
-            let message_id = await this.msgSeqToMsgId(peer, msg.msg_seq.toString(), msg.msg_random.toString());
-            if (message_id === 0) {
-                const data = JSON.stringify({
-                    msg_seq: msg.msg_seq.toString(),
-                    msg_random: msg.msg_random.toString(),
-                    group_id: payload.group_id.toString(),
-                });
-                const hash = crypto.createHash('md5').update(data).digest();
-                //设置第一个bit为0 保证shortId为正数
-                hash[0] &= 0x7f;
-                const shortId = hash.readInt32BE(0);
-                NTQQGroupApi.essenceLRU.set(shortId, data);
-                message_id = shortId;
+            let msgOriginData = await this.msgSeqToMsgId(peer, msg.msg_seq.toString(), msg.msg_random.toString());
+            if (msgOriginData) {
+                const { id: message_id, msg: rawMessage } = msgOriginData;
+                return {
+                    msg_seq: msg.msg_seq,
+                    msg_random: msg.msg_random,
+                    sender_id: +msg.sender_uin,
+                    sender_nick: msg.sender_nick,
+                    operator_id: +msg.add_digest_uin,
+                    operator_nick: msg.add_digest_nick,
+                    message_id: message_id,
+                    operator_time: msg.add_digest_time,
+                    content: await this.obContext.apis.MsgApi.parseMessage(rawMessage, 'array')
+                };
             }
+            const msgTempData = JSON.stringify({
+                msg_seq: msg.msg_seq.toString(),
+                msg_random: msg.msg_random.toString(),
+                group_id: payload.group_id.toString(),
+            });
+            const hash = crypto.createHash('md5').update(msgTempData).digest();
+            //设置第一个bit为0 保证shortId为正数
+            hash[0] &= 0x7f;
+            const shortId = hash.readInt32BE(0);
+            NTQQGroupApi.essenceLRU.set(shortId, msgTempData);
             return {
                 msg_seq: msg.msg_seq,
                 msg_random: msg.msg_random,
@@ -61,8 +105,9 @@ export class GetGroupEssence extends BaseAction<Payload, any> {
                 sender_nick: msg.sender_nick,
                 operator_id: +msg.add_digest_uin,
                 operator_nick: msg.add_digest_nick,
-                message_id: message_id,
+                message_id: shortId,
                 operator_time: msg.add_digest_time,
+                content: await this.parseEssenceMsg(msg.msg_content)
             };
         }));
         return Ob11Ret;
