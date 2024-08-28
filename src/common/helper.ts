@@ -1,7 +1,7 @@
 import path from 'node:path';
 import fs from 'fs';
 import os from 'node:os';
-import { QQLevel } from '@/core';
+import { Peer, QQLevel } from '@/core';
 
 export async function solveProblem<T extends (...arg: any[]) => any>(func: T, ...args: Parameters<T>): Promise<ReturnType<T> | undefined> {
     return new Promise<ReturnType<T> | undefined>((resolve) => {
@@ -45,7 +45,29 @@ export class UUIDConverter {
         return { high: high.toString(), low: low.toString() };
     }
 }
-
+export class FileNapCatOneBotUUID {
+    static encode(peer: Peer, msgId: string, elementId: string): string {
+        return `NapCatOneBot-File-${peer.chatType}-${peer.peerUid}-${msgId}-${elementId}`;
+    }
+    static decode(uuid: string): undefined | {
+        peer: Peer,
+        msgId: string,
+        elementId: string
+    } {
+        if (!uuid.startsWith('NapCatOneBot-File-')) return undefined;
+        const data = uuid.split('-');
+        if (data.length !== 6) return undefined;
+        const [, , chatType, peerUid, msgId, elementId] = data;
+        return {
+            peer: {
+                chatType: chatType as any,
+                peerUid: peerUid
+            },
+            msgId,
+            elementId,
+        };
+    }
+}
 export function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
