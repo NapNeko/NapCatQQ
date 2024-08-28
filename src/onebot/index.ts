@@ -367,10 +367,10 @@ export class NapCatOneBot11Adapter {
 
     private initGroupListener() {
         const groupListener = new NodeIKernelGroupListener();
-
+        
         groupListener.onGroupNotifiesUpdated = async (_, notifies) => {
             //console.log('ob11 onGroupNotifiesUpdated', notifies[0]);
-            //await this.core.apis.GroupApi.getGroupNotifiesUnreadCount();
+            await this.core.apis.GroupApi.clearGroupNotifiesUnreadCount(false);
             if (![
                 GroupNotifyMsgType.SET_ADMIN,
                 GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_CANCELED,
