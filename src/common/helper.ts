@@ -1,7 +1,7 @@
 import path from 'node:path';
 import fs from 'fs';
 import os from 'node:os';
-import { QQLevel } from '@/core';
+import { Peer, QQLevel } from '@/core';
 
 export async function solveProblem<T extends (...arg: any[]) => any>(func: T, ...args: Parameters<T>): Promise<ReturnType<T> | undefined> {
     return new Promise<ReturnType<T> | undefined>((resolve) => {
@@ -23,29 +23,48 @@ export async function solveAsyncProblem<T extends (...args: any[]) => Promise<an
         });
     });
 }
-
-//下面这个类是用于将uid+msgid合并的类
-export class UUIDConverter {
-    static encode(highStr: string, lowStr: string): string {
-        const high = BigInt(highStr);
-        const low = BigInt(lowStr);
-        const highHex = high.toString(16).padStart(16, '0');
-        const lowHex = low.toString(16).padStart(16, '0');
-        const combinedHex = highHex + lowHex;
-        return `${combinedHex.substring(0, 8)}-${combinedHex.substring(8, 12)}-${combinedHex.substring(
-            12,
-            16,
-        )}-${combinedHex.substring(16, 20)}-${combinedHex.substring(20)}`;
+export class FileNapCatOneBotUUID {
+    static encodeModelId(peer: Peer, modelId: string): string {
+        return `NapCatOneBot-ModeldFile-${peer.chatType}-${peer.peerUid}-${modelId}`;
     }
-
-    static decode(uuid: string): { high: string; low: string } {
-        const hex = uuid.replace(/-/g, '');
-        const high = BigInt('0x' + hex.substring(0, 16));
-        const low = BigInt('0x' + hex.substring(16));
-        return { high: high.toString(), low: low.toString() };
+    static decodeModelId(uuid: string): undefined | {
+        peer: Peer,
+        modelId: string
+    } {
+        if (!uuid.startsWith('NapCatOneBot-ModeldFile-')) return undefined;
+        const data = uuid.split('-');
+        if (data.length !== 5) return undefined;
+        const [, , chatType, peerUid, modelId] = data;
+        return {
+            peer: {
+                chatType: chatType as any,
+                peerUid: peerUid
+            },
+            modelId,
+        };
+    }
+    static encode(peer: Peer, msgId: string, elementId: string): string {
+        return `NapCatOneBot-MsgFile-${peer.chatType}-${peer.peerUid}-${msgId}-${elementId}`;
+    }
+    static decode(uuid: string): undefined | {
+        peer: Peer,
+        msgId: string,
+        elementId: string
+    } {
+        if (!uuid.startsWith('NapCatOneBot-File-')) return undefined;
+        const data = uuid.split('-');
+        if (data.length !== 6) return undefined;
+        const [, , chatType, peerUid, msgId, elementId] = data;
+        return {
+            peer: {
+                chatType: chatType as any,
+                peerUid: peerUid
+            },
+            msgId,
+            elementId,
+        };
     }
 }
-
 export function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }

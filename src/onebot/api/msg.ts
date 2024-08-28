@@ -1,4 +1,4 @@
-import { UUIDConverter } from '@/common/helper';
+import { FileNapCatOneBotUUID } from '@/common/helper';
 import { MessageUnique } from '@/common/message-unique';
 import {
     AtType,
@@ -98,14 +98,19 @@ export class OneBotMsgApi {
             }
         },
 
-        picElement: async (element, msg) => {
+        picElement: async (element, msg, elementWrapper) => {
             try {
+                const peer = {
+                    chatType: msg.chatType,
+                    peerUid: msg.peerUid,
+                    guildId: '',
+                };
                 return {
                     type: OB11MessageDataType.image,
                     data: {
                         file: element.fileName,
                         sub_type: element.picSubType,
-                        file_id: UUIDConverter.encode(msg.peerUin, msg.msgId),
+                        file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId),
                         url: await this.core.apis.FileApi.getImageUrl(element),
                         file_size: element.fileSize,
                     },
@@ -117,6 +122,11 @@ export class OneBotMsgApi {
         },
 
         fileElement: async (element, msg, elementWrapper) => {
+            const peer = {
+                chatType: msg.chatType,
+                peerUid: msg.peerUid,
+                guildId: '',
+            };
             await this.core.apis.FileApi.addFileCache(
                 {
                     peerUid: msg.peerUid,
@@ -137,7 +147,7 @@ export class OneBotMsgApi {
                     file: element.fileName,
                     path: element.filePath,
                     url: element.filePath,
-                    file_id: UUIDConverter.encode(msg.peerUin, msg.msgId),
+                    file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId),
                     file_size: element.fileSize,
                 },
             };
@@ -184,11 +194,16 @@ export class OneBotMsgApi {
                 '0',
                 'marketface',
             );
+            const peer = {
+                chatType: msg.chatType,
+                peerUid: msg.peerUid,
+                guildId: '',
+            };
             return {
                 type: OB11MessageDataType.image,
                 data: {
                     file: 'marketface',
-                    file_id: UUIDConverter.encode(msg.peerUin, msg.msgId),
+                    file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId),
                     path: elementWrapper.elementId,
                     url: elementWrapper.elementId,
                 },
@@ -207,13 +222,21 @@ export class OneBotMsgApi {
                 this.core.context.logger.logError('获取不到引用的消息', element.replayMsgSeq);
                 return null;
             }
+
+            const createReplyData = (msgId: string): OB11MessageData => ({
+                type: OB11MessageDataType.reply,
+                data: {
+                    id: MessageUnique.createUniqueMsgId(peer, msgId).toString(),
+                },
+            });
+
+            if (records.peerUin === '284840486') {
+                return createReplyData(records.msgId);
+            }
+
             let replyMsg: RawMessage | undefined;
             // Attempt 1
-            replyMsg = (await NTQQMsgApi.getMsgsBySeqAndCount({
-                peerUid: msg.peerUid,
-                guildId: '',
-                chatType: msg.chatType,
-            }, element.replayMsgSeq, 1, true, true))
+            replyMsg = (await NTQQMsgApi.getMsgsBySeqAndCount(peer,element.replayMsgSeq, 1, true, true))
                 .msgList
                 .find(msg => msg.msgRandom === records.msgRandom);
 
@@ -221,7 +244,7 @@ export class OneBotMsgApi {
                 // Attempt 2
                 replyMsg = (await NTQQMsgApi.getSingleMsg(peer, element.replayMsgSeq)).msgList[0];
 
-                if ((!replyMsg || records.msgRandom !== replyMsg.msgRandom) && msg.peerUin !== '284840486') {
+                if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
                     // Attempt 3
                     const replyMsgList = (await NTQQMsgApi.getMsgExBySeq(peer, records.msgSeq)).msgList;
                     if (replyMsgList.length < 1) {
@@ -233,21 +256,16 @@ export class OneBotMsgApi {
                 }
             }
 
-            return {
-                type: OB11MessageDataType.reply,
-                data: {
-                    id: MessageUnique.createUniqueMsgId({
-                        peerUid: msg.peerUid,
-                        guildId: '',
-                        chatType: msg.chatType,
-                    }, replyMsg.msgId).toString(),
-                },
-            };
+            return createReplyData(replyMsg.msgId);
         },
 
         videoElement: async (element, msg, elementWrapper) => {
             const NTQQFileApi = this.core.apis.FileApi;
-
+            const peer = {
+                chatType: msg.chatType,
+                peerUid: msg.peerUid,
+                guildId: '',
+            };
             //读取视频链接并兜底
             let videoUrlWrappers: Awaited<ReturnType<typeof NTQQFileApi.getVideoUrl>> | undefined;
 
@@ -302,13 +320,18 @@ export class OneBotMsgApi {
                     file: element.fileName,
                     path: videoDownUrl,
                     url: videoDownUrl,
-                    file_id: UUIDConverter.encode(msg.peerUin, msg.msgId),
+                    file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId),
                     file_size: element.fileSize,
                 },
             };
         },
 
         pttElement: async (element, msg, elementWrapper) => {
+            const peer = {
+                chatType: msg.chatType,
+                peerUid: msg.peerUid,
+                guildId: '',
+            };
             await this.core.apis.FileApi.addFileCache(
                 {
                     peerUid: msg.peerUid,
@@ -328,7 +351,7 @@ export class OneBotMsgApi {
                 data: {
                     file: element.fileName,
                     path: element.filePath,
-                    file_id: UUIDConverter.encode(msg.peerUin, msg.msgId),
+                    file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId),
                     file_size: element.fileSize,
                 },
             };

@@ -155,7 +155,7 @@ export interface NodeIKernelRichMediaService {
     }): unknown;
 
     //arg3为“”
-    downloadFileForModelId(peer: Peer, ModelId: string[], arg3: string): unknown;
+    downloadFileForModelId(peer: Peer, ModelId: string[]): Promise<unknown>;
 
     //第三个参数 Array<Type>
     // this.fileId = "";
