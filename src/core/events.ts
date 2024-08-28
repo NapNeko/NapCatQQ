@@ -29,7 +29,8 @@ type NapCatInternalEvents = {
     'buddy/poke': (initiatorUin: string, targetUin: string, displayMsg: string,
                    xMsg: RawMessage) => PromiseLike<void>;
 
-    'buddy/recall': (uin: string, messageId: string, msg: RawMessage) => PromiseLike<void>;
+    'buddy/recall': (uin: string, messageId: string,
+                     xMsg: RawMessage /* This is not the message that is recalled */) => PromiseLike<void>;
 
     'buddy/input-status': (data: Parameters<NodeIKernelMsgListener['onInputStatusPush']>[0]) => PromiseLike<void>;
 
