@@ -12,6 +12,7 @@ import {
     NapCatCore,
 } from '@/core';
 import { isNumeric, runAllWithTimeout } from '@/common/helper';
+import { LimitedHashTable } from '@/common/message-unique';
 
 export class NTQQGroupApi {
     context: InstanceContext;
@@ -19,6 +20,7 @@ export class NTQQGroupApi {
     groupCache: Map<string, Group> = new Map<string, Group>();
     groupMemberCache: Map<string, Map<string, GroupMember>> = new Map<string, Map<string, GroupMember>>();
     groups: Group[] = [];
+    essenceLRU = new LimitedHashTable<number, string>(1000);
 
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
@@ -32,6 +34,14 @@ export class NTQQGroupApi {
             this.groupCache.set(group.groupCode, group);
         }
         this.context.logger.logDebug(`加载${this.groups.length}个群组缓存完成`);
+    }
+    async fetchGroupEssenceList(groupCode: string) {
+        const pskey = (await this.core.apis.UserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com')!;
+        return this.context.session.getGroupService().fetchGroupEssenceList({
+            groupCode: groupCode,
+            pageStart: 0,
+            pageLimit: 300
+        }, pskey);
     }
     async clearGroupNotifiesUnreadCount(unk: boolean) {
         return this.context.session.getGroupService().clearGroupNotifiesUnreadCount(unk);
@@ -273,7 +283,15 @@ export class NTQQGroupApi {
         //应该是直接返回不需要Listener的 未经测试 需测试再发布
         return this.context.session.getGroupService().quitGroupV2(param);
     }
-
+    async removeGroupEssenceBySeq(GroupCode: string, msgRandom: string, msgSeq: string) {
+        const param = {
+            groupCode: GroupCode,
+            msgRandom: parseInt(msgRandom),
+            msgSeq: parseInt(msgSeq),
+        };
+        // GetMsgByShoretID(ShoretID); -> MsgService.getMsgs(Peer,MsgId,1,false); -> 组出参数
+        return this.context.session.getGroupService().removeGroupEssence(param);
+    }
     async removeGroupEssence(GroupCode: string, msgId: string) {
         // 代码没测过
         // 需要 ob11msgid->msgId + (peer) -> msgSeq + msgRandom
