@@ -24,9 +24,9 @@ import {
     OB11MessageFileBase,
     OB11MessageForward,
 } from '@/onebot';
-import { OB11Entities } from '../helper';
+import { OB11Entities } from '@/onebot/entities';
 import { EventType } from '@/onebot/event/OB11BaseEvent';
-import { encodeCQCode } from '@/onebot/helper/cqcode';
+import { encodeCQCode } from '@/onebot/cqcode';
 import { uri2local } from '@/common/file';
 import { RequestUtil } from '@/common/request';
 import fs from 'node:fs';

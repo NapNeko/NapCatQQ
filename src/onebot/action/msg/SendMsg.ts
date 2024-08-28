@@ -6,7 +6,7 @@ import {
     OB11PostSendMsg,
 } from '@/onebot/types';
 import { ActionName, BaseCheckResult } from '@/onebot/action/types';
-import { decodeCQCode } from '@/onebot/helper/cqcode';
+import { decodeCQCode } from '@/onebot/cqcode';
 import { MessageUnique } from '@/common/message-unique';
 import { ChatType, ElementType, NapCatCore, Peer, RawMessage, SendMessageElement } from '@/core';
 import BaseAction from '../BaseAction';
