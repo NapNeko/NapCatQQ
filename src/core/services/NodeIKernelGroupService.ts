@@ -2,6 +2,7 @@ import { NodeIKernelGroupListener } from '@/core/listeners/NodeIKernelGroupListe
 import {
     GroupExt0xEF0InfoFilter,
     GroupExtParam,
+    GroupInfoSource,
     GroupMember,
     GroupMemberRole,
     GroupNotifyMsgType,
@@ -15,7 +16,7 @@ import { GeneralCallResult } from '@/core/services/common';
 export interface NodeIKernelGroupService {
     //getGroupExt0xEF0Info(this.$enableGroupCodes, this.$bannedGroupCodes, this.$filter, this.$forceFetch
     getGroupExt0xEF0Info(enableGroupCodes: string[], bannedGroupCodes: string[], filter: GroupExt0xEF0InfoFilter, forceFetch: boolean):
-        Promise<GeneralCallResult & { result: { groupExtInfos: Map<string, any> }}>;
+        Promise<GeneralCallResult & { result: { groupExtInfos: Map<string, any> } }>;
     kickMemberV2(param: KickMemberV2Req): Promise<GeneralCallResult>;
 
     quitGroupV2(param: { groupCode: string; needDeleteLocalMsg: boolean; }): Promise<GeneralCallResult>;
@@ -151,7 +152,7 @@ export interface NodeIKernelGroupService {
 
     getGroupExtList(force: boolean): Promise<GeneralCallResult>;
 
-    getGroupDetailInfo(groupCode: string): unknown;
+    getGroupDetailInfo(groupCode: string, groupInfoSource: GroupInfoSource): unknown;
 
     getMemberExtInfo(param: GroupExtParam): Promise<unknown>;//req
 

@@ -2,6 +2,7 @@ import {
     ChatType,
     GeneralCallResult,
     Group,
+    GroupInfoSource,
     GroupMember,
     GroupMemberRole,
     GroupRequestOperateTypes,
@@ -32,7 +33,11 @@ export class NTQQGroupApi {
         }
         this.context.logger.logDebug(`加载${this.groups.length}个群组缓存完成`);
     }
-
+    async getGroupInfoEx(groupCode: string) {
+        const groupDetail = await this.context.session.getGroupService().getGroupDetailInfo(groupCode, GroupInfoSource.KDATACARD);
+        const groupExtInfo = await this.getGroupExtFE0Info([groupCode]);
+        return { groupDetail, groupExtInfo };
+    }
     async setGroupAvatar(gc: string, filePath: string) {
         return this.context.session.getGroupService().setHeader(gc, filePath);
     }
@@ -340,7 +345,7 @@ export class NTQQGroupApi {
             ]);
             if (membersFromFunc.status === 'fulfilled' && membersFromListener.status === 'fulfilled') {
                 return new Map([
-                    ...membersFromFunc.value.result.infos, 
+                    ...membersFromFunc.value.result.infos,
                     ...membersFromListener.value[0].infos
                 ]);
             }
@@ -355,7 +360,7 @@ export class NTQQGroupApi {
             groupService.destroyMemberListScene(sceneId);
         }
     }
-    
+
     async getGroupMembers(groupQQ: string, num = 3000): Promise<Map<string, GroupMember>> {
         const groupService = this.context.session.getGroupService();
         const sceneId = groupService.createMemberListScene(groupQQ, 'groupMemberList_MainWindow');
