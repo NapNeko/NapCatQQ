@@ -5,10 +5,11 @@ import {
     FriendRequest,
     GrayTipElement,
     GroupNotify,
+    GroupNotifyMsgType,
     RawMessage,
-    SendStatusType,
+    SendStatusType, TipGroupElement,
 } from '@/core/entities';
-import { NodeIKernelBuddyListener, NodeIKernelMsgListener } from '@/core/listeners';
+import { NodeIKernelBuddyListener, NodeIKernelGroupListener, NodeIKernelMsgListener } from '@/core/listeners';
 import EventEmitter from 'node:events';
 import TypedEmitter from 'typed-emitter/rxjs';
 import { NapCatCore } from '@/core/index';
@@ -39,10 +40,11 @@ type NapCatInternalEvents = {
     'group/request': (request: GroupNotify) => PromiseLike<void>;
 
     'group/admin': (groupCode: string, targetUin: string, operation: 'set' | 'unset',
-                    // If it comes from onMemberInfoChange
-                    xDataSource?: RawMessage, xMsg?: RawMessage,
                     // If it comes from onGroupNotifiesUpdated
-                    xGroupNotify?: GroupNotify) => PromiseLike<void>;
+                    xGroupNotify?: GroupNotify,
+                    // If it comes from onMemberInfoChange
+                    xDataSource?: RawMessage, xMsg?: RawMessage) => PromiseLike<void>;
+
 
     'group/mute': (groupCode: string, targetUin: string, duration: number, operation: 'mute' | 'unmute',
                    xGrayTipElement: GrayTipElement, xMsg: RawMessage) => PromiseLike<void>;
@@ -53,8 +55,20 @@ type NapCatInternalEvents = {
     'group/member-increase': (groupCode: string, targetUin: string, operatorUin: string, reason: 'invite' | 'approve' | 'unknown',
                               xGrayTipElement: GrayTipElement, xMsg: RawMessage) => PromiseLike<void>;
 
-    'group/member-decrease': (groupCode: string, targetUin: string, operatorUin: string, reason: 'leave' | 'kick' | 'unknown',
-                              xGrayTipElement: GrayTipElement, xMsg: RawMessage) => PromiseLike<void>;
+    'group/member-decrease/kicked': (groupCode: string, leftMemberUin: string, operatorUin: string,
+                                     xGroupNotify: GroupNotify) => PromiseLike<void>;
+
+    'group/member-decrease/self-kicked': (groupCode: string, operatorUin: string,
+                                          xTipGroupElement: TipGroupElement, xMsg: RawMessage) => PromiseLike<void>;
+
+    'group/member-decrease/leave': (groupCode: string, leftMemberUin: string,
+                                    xGroupNotify: GroupNotify) => PromiseLike<void>;
+
+    'group/member-decrease/unknown': (groupCode: string, leftMemberUin: string,
+                                      // If it comes from onGroupNotifiesUpdated
+                                      xGroupNotify?: GroupNotify,
+                                      // If it comes from onRecvSysMsg
+                                      xGrayTipElement?: GrayTipElement, xMsg?: RawMessage) => PromiseLike<void>;
 
     'group/essence': (groupCode: string, messageId: string, senderUin: string, operation: 'add' | 'delete',
                       xGrayTipElement: GrayTipElement,
@@ -89,6 +103,7 @@ export class NapCatEventChannel extends
 
         this.initMsgListener();
         this.initBuddyListener();
+        this.initGroupListener();
     }
 
     private initMsgListener() {
@@ -158,5 +173,81 @@ export class NapCatEventChannel extends
         this.core.context.session.getBuddyService().addKernelBuddyListener(
             proxiedListenerOf(buddyListener, this.core.context.logger) as any,
         );
+    }
+
+    private initGroupListener() {
+        const groupListener = new NodeIKernelGroupListener();
+
+        groupListener.onGroupNotifiesUpdated = async (_, notifies) => {
+            for (const notify of notifies) {
+                try {
+                    if (notify.type === GroupNotifyMsgType.SET_ADMIN) {
+                        this.core.context.logger.logDebug('设置管理员', notify);
+                        const member = await this.core.apis.GroupApi.getGroupMember(notify.group.groupCode, notify.user1.uid);
+                        this.emit(
+                            'group/admin',
+                            notify.group.groupCode, member!.uin,
+                            'set',
+                            notify,
+                        );
+                        continue;
+                    }
+                    if (
+                        notify.type === GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_ADMIN ||
+                        notify.type === GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_CANCELED
+                    ) {
+                        this.core.context.logger.logDebug('取消管理员', notify);
+                        const member = await this.core.apis.GroupApi.getGroupMember(notify.group.groupCode, notify.user1.uid);
+                        this.emit(
+                            'group/admin',
+                            notify.group.groupCode, member!.uin,
+                            'unset',
+                            notify,
+                        );
+                        continue;
+                    }
+                } catch (e) {
+                    this.core.context.logger.logError('处理群管理员变动失败', e);
+                }
+
+                try {
+                    if (notify.type === GroupNotifyMsgType.MEMBER_LEAVE_NOTIFY_ADMIN) {
+                        this.core.context.logger.logDebug('群成员离开', notify);
+                        const leftMemberUin = await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid);
+                        if (notify.user2.uid) {
+                            // Has an operator, indicates that the member is kicked
+                            const operatorUin = await this.core.apis.UserApi.getUinByUidV2(notify.user2.uid);
+                            if (!operatorUin) {
+                                this.core.context.logger.logError('获取操作者 QQ 号失败');
+                                this.emit(
+                                    'group/member-decrease/unknown',
+                                    notify.group.groupCode,
+                                    leftMemberUin,
+                                    notify,
+                                );
+                                continue;
+                            }
+                            this.emit(
+                                'group/member-decrease/kicked',
+                                notify.group.groupCode,
+                                leftMemberUin,
+                                operatorUin,
+                                notify
+                            );
+                        } else {
+                            // No operator, indicates that the member leaves
+                            this.emit(
+                                'group/member-decrease/leave',
+                                notify.group.groupCode,
+                                leftMemberUin,
+                                notify
+                            );
+                        }
+                    }
+                } catch (e) {
+                    this.core.context.logger.logError('处理退群消息失败', e);
+                }
+            }
+        };
     }
 }
