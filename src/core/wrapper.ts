@@ -1,4 +1,4 @@
-import { NodeIDependsAdapter, NodeIDispatcherAdapter, NodeIGlobalAdapter } from '../adapters';
+import { NodeIDependsAdapter, NodeIDispatcherAdapter, NodeIGlobalAdapter } from './adapters';
 import {
     NodeIKernelAvatarService,
     NodeIKernelBuddyService,
@@ -13,19 +13,19 @@ import {
     NodeIKernelStorageCleanService,
     NodeIKernelTicketService,
     NodeIKernelTipOffService,
-} from '@/core';
-import { NodeIKernelNodeMiscService } from '../services/NodeIKernelNodeMiscService';
-import { NodeIKernelUixConvertService } from '../services/NodeIKernelUixConvertService';
-import { NodeIKernelMsgBackupService } from '../services/NodeIKernelMsgBackupService';
-import { NodeIKernelAlbumService } from '../services/NodeIKernelAlbumService';
-import { NodeIKernelTianShuService } from '../services/NodeIKernelTianShuService';
-import { NodeIKernelUnitedConfigService } from '../services/NodeIKernelUnitedConfigService';
-import { NodeIKernelSearchService } from '../services/NodeIKernelSearchService';
-import { NodeIKernelCollectionService } from '../services/NodeIKernelCollectionService';
-import { NodeIKernelRecentContactService } from '../services/NodeIKernelRecentContactService';
-import { NodeIKernelMSFService } from '../services/NodeIKernelMSFService';
-import { NodeIkernelTestPerformanceService } from '../services/NodeIkernelTestPerformanceService';
-import { NodeIKernelECDHService } from '../services/NodeIKernelECDHService';
+} from '@/core/index';
+import { NodeIKernelNodeMiscService } from './services/NodeIKernelNodeMiscService';
+import { NodeIKernelUixConvertService } from './services/NodeIKernelUixConvertService';
+import { NodeIKernelMsgBackupService } from './services/NodeIKernelMsgBackupService';
+import { NodeIKernelAlbumService } from './services/NodeIKernelAlbumService';
+import { NodeIKernelTianShuService } from './services/NodeIKernelTianShuService';
+import { NodeIKernelUnitedConfigService } from './services/NodeIKernelUnitedConfigService';
+import { NodeIKernelSearchService } from './services/NodeIKernelSearchService';
+import { NodeIKernelCollectionService } from './services/NodeIKernelCollectionService';
+import { NodeIKernelRecentContactService } from './services/NodeIKernelRecentContactService';
+import { NodeIKernelMSFService } from './services/NodeIKernelMSFService';
+import { NodeIkernelTestPerformanceService } from './services/NodeIkernelTestPerformanceService';
+import { NodeIKernelECDHService } from './services/NodeIKernelECDHService';
 
 export interface NodeQQNTWrapperUtil {
     get(): unknown;

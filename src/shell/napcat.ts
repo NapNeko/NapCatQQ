@@ -6,6 +6,7 @@ import { NodeIDependsAdapter, NodeIDispatcherAdapter, NodeIGlobalAdapter } from 
 import { NapCatPathWrapper } from '@/common/path';
 import {
     InstanceContext,
+    genSessionConfig,
     loadQQWrapper,
     NapCatCore,
     NapCatCoreWorkingEnv,
@@ -14,7 +15,6 @@ import {
 } from '@/core';
 import { QQBasicInfoWrapper } from '@/common/qq-basic-info';
 import { hostname, systemVersion } from '@/common/system';
-import { genSessionConfig } from '@/core/wrapper/helper';
 import { proxiedListenerOf } from '@/common/proxy-handler';
 
 import path from 'path';

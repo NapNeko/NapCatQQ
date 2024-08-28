@@ -2,12 +2,12 @@ import { NapCatPathWrapper } from '@/common/path';
 import { LogWrapper } from '@/common/log';
 import { proxiedListenerOf } from '@/common/proxy-handler';
 import { QQBasicInfoWrapper } from '@/common/qq-basic-info';
-import { loadQQWrapper, NapCatCore, NapCatCoreWorkingEnv } from '@/core/core';
+import { loadQQWrapper, NapCatCore, NapCatCoreWorkingEnv } from '@/core';
 import { InstanceContext } from '@/core';
 import { SelfInfo } from '@/core/entities';
 import { NodeIKernelLoginListener } from '@/core/listeners';
 import { NodeIKernelLoginService } from '@/core/services';
-import { NodeIQQNTWrapperSession, WrapperNodeApi } from '@/core/wrapper/wrapper';
+import { NodeIQQNTWrapperSession, WrapperNodeApi } from '@/core/wrapper';
 import { InitWebUi, WebUiConfig } from '@/webui';
 import { NapCatOneBot11Adapter } from '@/onebot';
 
