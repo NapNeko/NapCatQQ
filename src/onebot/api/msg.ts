@@ -208,27 +208,20 @@ export class OneBotMsgApi {
                 return null;
             }
 
-            // 合并转发直接返回
+            const createReplyData = (msgId: string): OB11MessageData => ({
+                type: OB11MessageDataType.reply,
+                data: {
+                    id: MessageUnique.createUniqueMsgId(peer, msgId).toString(),
+                },
+            });
+
             if (records.peerUin === '284840486') {
-                return {
-                    type: OB11MessageDataType.reply,
-                    data: {
-                        id: MessageUnique.createUniqueMsgId({
-                            peerUid: msg.peerUid,
-                            guildId: '',
-                            chatType: msg.chatType,
-                        }, records.msgId).toString(),
-                    },
-                };
+                return createReplyData(records.msgId);
             }
 
             let replyMsg: RawMessage | undefined;
             // Attempt 1
-            replyMsg = (await NTQQMsgApi.getMsgsBySeqAndCount({
-                peerUid: msg.peerUid,
-                guildId: '',
-                chatType: msg.chatType,
-            }, element.replayMsgSeq, 1, true, true))
+            replyMsg = (await NTQQMsgApi.getMsgsBySeqAndCount(peer,element.replayMsgSeq, 1, true, true))
                 .msgList
                 .find(msg => msg.msgRandom === records.msgRandom);
 
@@ -248,16 +241,7 @@ export class OneBotMsgApi {
                 }
             }
 
-            return {
-                type: OB11MessageDataType.reply,
-                data: {
-                    id: MessageUnique.createUniqueMsgId({
-                        peerUid: msg.peerUid,
-                        guildId: '',
-                        chatType: msg.chatType,
-                    }, replyMsg.msgId).toString(),
-                },
-            };
+            return createReplyData(replyMsg.msgId);
         },
 
         videoElement: async (element, msg, elementWrapper) => {
