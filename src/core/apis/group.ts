@@ -33,8 +33,8 @@ export class NTQQGroupApi {
         }
         this.context.logger.logDebug(`加载${this.groups.length}个群组缓存完成`);
     }
-    async clearGroupNotifiesUnreadCount(){
-        return this.context.session.getGroupService().clearGroupNotifiesUnreadCount(true);
+    async clearGroupNotifiesUnreadCount(unk: boolean) {
+        return this.context.session.getGroupService().clearGroupNotifiesUnreadCount(unk);
     }
     async setGroupAvatar(gc: string, filePath: string) {
         return this.context.session.getGroupService().setHeader(gc, filePath);
