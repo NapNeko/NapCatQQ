@@ -114,7 +114,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         if (getSpecialMsgNum(payload, OB11MessageDataType.node)) {
             const returnMsg = await this.handleForwardedNodes(peer, messages as OB11MessageNode[]);
             if (returnMsg) {
-                const msgShortId = MessageUnique.createMsg({
+                const msgShortId = MessageUnique.createUniqueMsgId({
                     guildId: '',
                     peerUid: peer.peerUid,
                     chatType: peer.chatType,
@@ -170,7 +170,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                         const nodeMsg = await this.handleForwardedNodes(selfPeer, OB11Data.filter(e => e.type === OB11MessageDataType.node));
                         if (nodeMsg) {
                             nodeMsgIds.push(nodeMsg.msgId);
-                            MessageUnique.createMsg(selfPeer, nodeMsg.msgId);
+                            MessageUnique.createUniqueMsgId(selfPeer, nodeMsg.msgId);
                         }
                         //完成子卡片生成跳过后续
                         continue;
@@ -188,7 +188,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                     (await Promise.allSettled(MsgNodeList)).map((result) => {
                         if (result.status === 'fulfilled' && result.value) {
                             nodeMsgIds.push(result.value.msgId);
-                            MessageUnique.createMsg(selfPeer, result.value.msgId);
+                            MessageUnique.createUniqueMsgId(selfPeer, result.value.msgId);
                         }
                     });
                 } catch (e) {

@@ -38,7 +38,7 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
             const resMsg = await this.obContext.apis.MsgApi
                 .parseMessage(msg);
             if (!resMsg) return;
-            resMsg.message_id = MessageUnique.createMsg({
+            resMsg.message_id = MessageUnique.createUniqueMsgId({
                 guildId: '',
                 chatType: msg.chatType,
                 peerUid: msg.peerUid,

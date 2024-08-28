@@ -39,7 +39,7 @@ class GetMsg extends BaseAction<Payload, OB11Message> {
         const retMsg = await this.obContext.apis.MsgApi.parseMessage(msg.msgList[0], 'array');
         if (!retMsg) throw Error('消息为空');
         try {
-            retMsg.message_id = MessageUnique.createMsg(peer, msg.msgList[0].msgId)!;
+            retMsg.message_id = MessageUnique.createUniqueMsgId(peer, msg.msgList[0].msgId)!;
             retMsg.message_seq = retMsg.message_id;
             retMsg.real_id = retMsg.message_id;
         } catch (e) {
