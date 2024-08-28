@@ -47,7 +47,7 @@ export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
         if (isReverseOrder) msgList.reverse();
         //转换序号
         await Promise.all(msgList.map(async msg => {
-            msg.id = MessageUnique.createMsg({ guildId: '', chatType: msg.chatType, peerUid: msg.peerUid }, msg.msgId);
+            msg.id = MessageUnique.createUniqueMsgId({ guildId: '', chatType: msg.chatType, peerUid: msg.peerUid }, msg.msgId);
         }));
         //烘焙消息
         const ob11MsgList = (await Promise.all(

@@ -261,6 +261,7 @@ export class NapCatOneBot11Adapter {
                         emojiLikeToOthers.msgSpec!.msgSeq.toString(),
                         emojiLikeToOthers.attributes!.emojiId,
                     );
+                    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
                     eventOrEmpty && await this.networkManager.emitEvent(eventOrEmpty);
                 }
             }
@@ -283,7 +284,7 @@ export class NapCatOneBot11Adapter {
                     this.context.logger.logDebug(`消息时间${m.msgTime}早于启动时间${this.bootTime}，忽略上报`);
                     continue;
                 }
-                m.id = MessageUnique.createMsg(
+                m.id = MessageUnique.createUniqueMsgId(
                     {
                         chatType: m.chatType,
                         peerUid: m.peerUid,
@@ -311,7 +312,7 @@ export class NapCatOneBot11Adapter {
                             if (!ob11Msg) return;
                             ob11Msg.target_id = parseInt(msg.peerUin);
                             if (this.configLoader.configData.reportSelfMessage) {
-                                msg.id = MessageUnique.createMsg({
+                                msg.id = MessageUnique.createUniqueMsgId({
                                     chatType: msg.chatType,
                                     peerUid: msg.peerUid,
                                     guildId: '',

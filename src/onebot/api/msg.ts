@@ -236,7 +236,7 @@ export class OneBotMsgApi {
             return {
                 type: OB11MessageDataType.reply,
                 data: {
-                    id: MessageUnique.createMsg({
+                    id: MessageUnique.createUniqueMsgId({
                         peerUid: msg.peerUid,
                         guildId: '',
                         chatType: msg.chatType,
@@ -365,7 +365,7 @@ export class OneBotMsgApi {
                         async multiMsgItem => {
                             multiMsgItem.parentMsgPeer = parentMsgPeer;
                             multiMsgItem.parentMsgIdList = msg.parentMsgIdList;
-                            multiMsgItem.id = MessageUnique.createMsg(parentMsgPeer, multiMsgItem.msgId); //该ID仅用查看 无法调用
+                            multiMsgItem.id = MessageUnique.createUniqueMsgId(parentMsgPeer, multiMsgItem.msgId); //该ID仅用查看 无法调用
                             return await this.parseMessage(multiMsgItem);
                         },
                     ))).filter(item => item !== undefined),
@@ -823,7 +823,7 @@ export class OneBotMsgApi {
         }
         const returnMsg = await this.core.apis.MsgApi.sendMsg(peer, sendElements, waitComplete, timeout);
         if (!returnMsg) throw new Error('发送消息失败');
-        returnMsg.id = MessageUnique.createMsg({
+        returnMsg.id = MessageUnique.createUniqueMsgId({
             chatType: peer.chatType,
             guildId: '',
             peerUid: peer.peerUid,
