@@ -1,9 +1,9 @@
 import {
     BuddyReqType,
-    ChatType,
+    ChatType, DataSource,
     FileElement,
     FriendRequest,
-    GrayTipElement,
+    GrayTipElement, GroupMemberRole,
     GroupNotify,
     GroupNotifyMsgStatus,
     GroupNotifyMsgType,
@@ -297,5 +297,27 @@ export class NapCatEventChannel extends
                 }
             }
         };
+
+        groupListener.onMemberInfoChange = async (groupCode, dataSource, members) => {
+            if (dataSource === DataSource.LOCAL) {
+                const existMembers = this.core.apis.GroupApi.groupMemberCache.get(groupCode);
+                if (!existMembers) return;
+                members.forEach(member => {
+                    const existMember = existMembers.get(member.uid);
+                    if (!existMember?.isChangeRole) return;
+                    this.core.context.logger.logDebug('变动管理员', member);
+                    this.emit(
+                        'group/admin',
+                        groupCode,
+                        member.uin,
+                        member.role === GroupMemberRole.admin ? 'set' : 'unset',
+                    );
+                });
+            }
+        };
+
+        this.core.context.session.getGroupService().addKernelGroupListener(
+            proxiedListenerOf(groupListener, this.core.context.logger),
+        );
     }
 }
