@@ -9,7 +9,7 @@ import {
     FaceType,
     IdMusicSignPostData,
     MessageElement,
-    NapCatCore,
+    NapCatCore, NTGrayTipElementSubTypeV2,
     Peer,
     RawMessage,
     SendMessageElement,
@@ -31,6 +31,7 @@ import { uri2local } from '@/common/file';
 import { RequestUtil } from '@/common/request';
 import fs from 'node:fs';
 import fsPromise from 'node:fs/promises';
+import { OB11FriendAddNoticeEvent } from '@/onebot/event/notice/OB11FriendAddNoticeEvent';
 
 type RawToOb11Converters = {
     [Key in keyof MessageElement as Key extends `${string}Element` ? Key : never]: (
@@ -654,6 +655,28 @@ export class OneBotMsgApi {
     constructor(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
         this.obContext = obContext;
         this.core = core;
+    }
+
+    async parsePrivateMsgEvent(msg: RawMessage) {
+        if (msg.chatType !== ChatType.KCHATTYPEC2C) {
+            return;
+        }
+        for (const element of msg.elements) {
+            if (element.grayTipElement) {
+                if (element.grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
+                    if (element.grayTipElement.jsonGrayTipElement.busiId == 1061) {
+                        const PokeEvent = await this.obContext.apis.FriendApi.parsePrivatePokeEvent(element.grayTipElement);
+                        if (PokeEvent) return PokeEvent;
+                    }
+                }
+                if (element.grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_XMLMSG) {
+                    //好友添加成功事件
+                    if (element.grayTipElement.xmlElement.templId === '10229' && msg.peerUin !== '') {
+                        return new OB11FriendAddNoticeEvent(this.core, parseInt(msg.peerUin));
+                    }
+                }
+            }
+        }
     }
 
     async parseMessage(
