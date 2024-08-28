@@ -1,15 +1,18 @@
 import {
     BuddyReqType,
-    ChatType, DataSource,
+    ChatType,
+    DataSource,
     FileElement,
     FriendRequest,
-    GrayTipElement, GroupMemberRole,
+    GrayTipElement,
+    GroupMemberRole,
     GroupNotify,
     GroupNotifyMsgStatus,
     GroupNotifyMsgType,
+    NTGrayTipElementSubTypeV2,
     RawMessage,
     SendStatusType,
-    TipGroupElement,
+    TipGroupElementType,
 } from '@/core/entities';
 import { NodeIKernelBuddyListener, NodeIKernelGroupListener, NodeIKernelMsgListener } from '@/core/listeners';
 import EventEmitter from 'node:events';
@@ -17,6 +20,7 @@ import TypedEmitter from 'typed-emitter/rxjs';
 import { NapCatCore } from '@/core/index';
 import { LRUCache } from '@/common/lru-cache';
 import { proxiedListenerOf } from '@/common/proxy-handler';
+import fastXmlParser from 'fast-xml-parser';
 
 type NapCatInternalEvents = {
     'message/receive': (msg: RawMessage) => PromiseLike<void>;
@@ -28,10 +32,10 @@ type NapCatInternalEvents = {
                       xRequest: FriendRequest) => PromiseLike<void>;
 
     'buddy/add': (uin: string,
-                  xMsg: RawMessage) => PromiseLike<void>;
+                  xGrayTipElement: GrayTipElement, xMsg: RawMessage) => PromiseLike<void>;
 
-    'buddy/poke': (initiatorUin: string, targetUin: string, displayMsg: string,
-                   xMsg: RawMessage) => PromiseLike<void>;
+    'buddy/poke': (initiatorUin: string, targetUin: string,
+                   xGrayTipElement: GrayTipElement, xMsg: RawMessage) => PromiseLike<void>;
 
     'buddy/recall': (uin: string, messageId: string,
                      xMsg: RawMessage /* This is not the message that is recalled */) => PromiseLike<void>;
@@ -52,20 +56,32 @@ type NapCatInternalEvents = {
                     xDataSource?: RawMessage, xMsg?: RawMessage) => PromiseLike<void>;
 
 
-    'group/mute': (groupCode: string, targetUin: string, duration: number, operation: 'mute' | 'unmute',
+    'group/mute': (groupCode: string, targetUin: string, operatorUin: string, duration: number,
                    xGrayTipElement: GrayTipElement, xMsg: RawMessage) => PromiseLike<void>;
+
+    'group/unmute': (groupCode: string, targetUin: string, operatorUin: string,
+                     xGrayTipElement: GrayTipElement, xMsg: RawMessage) => PromiseLike<void>;
+
+    'group/mute-all': (groupCode: string, operatorUin: string,
+                       xGrayTipElement: GrayTipElement, xMsg: RawMessage) => PromiseLike<void>;
+
+    'group/unmute-all': (groupCode: string, operatorUin: string,
+                         xGrayTipElement: GrayTipElement, xMsg: RawMessage) => PromiseLike<void>;
 
     'group/card-change': (groupCode: string, changedUin: string, newCard: string, oldCard: string,
                           xMsg: RawMessage) => PromiseLike<void>;
 
-    'group/member-increase': (groupCode: string, targetUin: string, operatorUin: string, reason: 'invite' | 'approve' | 'unknown',
-                              xGrayTipElement: GrayTipElement, xMsg: RawMessage) => PromiseLike<void>;
+    'group/member-increase/invite': (groupCode: string, newMemberUin: string, invitorUin: string,
+                                     xGrayTipElement: GrayTipElement, xMsg: RawMessage) => PromiseLike<void>;
 
-    'group/member-decrease/kicked': (groupCode: string, leftMemberUin: string, operatorUin: string,
-                                     xGroupNotify: GroupNotify) => PromiseLike<void>;
+    'group/member-increase/active': (groupCode: string, newMemberUin: string, approvalUin: string | undefined,
+                                     xGrayTipElement: GrayTipElement, xMsg: RawMessage) => PromiseLike<void>;
+
+    'group/member-decrease/kick': (groupCode: string, leftMemberUin: string, operatorUin: string,
+                                   xGroupNotify: GroupNotify) => PromiseLike<void>;
 
     'group/member-decrease/self-kicked': (groupCode: string, operatorUin: string,
-                                          xTipGroupElement: TipGroupElement, xMsg: RawMessage) => PromiseLike<void>;
+                                          xGrayTipElement: GrayTipElement, xMsg: RawMessage) => PromiseLike<void>;
 
     'group/member-decrease/leave': (groupCode: string, leftMemberUin: string,
                                     xGroupNotify: GroupNotify) => PromiseLike<void>;
@@ -76,7 +92,7 @@ type NapCatInternalEvents = {
                                       // If it comes from onRecvSysMsg
                                       xGrayTipElement?: GrayTipElement, xMsg?: RawMessage) => PromiseLike<void>;
 
-    'group/essence': (groupCode: string, messageId: string, senderUin: string, operation: 'add' | 'delete',
+    'group/essence': (groupCode: string, messageId: string, operation: 'add' | 'delete',
                       xGrayTipElement: GrayTipElement,
                       xGrayTipSourceMsg: RawMessage /* this is not the message that is set to be essence msg */) => PromiseLike<void>;
 
@@ -84,7 +100,7 @@ type NapCatInternalEvents = {
                      xGrayTipSourceMsg: RawMessage /* This is not the message that is recalled */) => PromiseLike<void>;
 
     'group/title': (groupCode: string, targetUin: string, newTitle: string,
-                    xMsg: RawMessage) => PromiseLike<void>;
+                    xGrayTipElement: GrayTipElement, xMsg: RawMessage) => PromiseLike<void>;
 
     'group/upload': (groupCode: string, uploaderUin: string, fileElement: FileElement,
                      xMsg: RawMessage) => PromiseLike<void>;
@@ -95,7 +111,7 @@ type NapCatInternalEvents = {
                          // If it comes from onRecvSysMsg
                          xSysMsg?: number[]) => PromiseLike<void>;
 
-    'group/poke': (groupCode: string, initiatorUin: string, targetUin: string, displayMsg: string,
+    'group/poke': (groupCode: string, initiatorUin: string, targetUin: string,
                    xGrayTipElement: GrayTipElement, xMsg: RawMessage) => PromiseLike<void>;
 }
 
@@ -115,10 +131,11 @@ export class NapCatEventChannel extends
     private initMsgListener() {
         const msgListener = new NodeIKernelMsgListener();
 
-        msgListener.onRecvMsg = msgList => {
+        msgListener.onRecvMsg = async msgList => {
             for (const msg of msgList) {
                 if (msg.senderUin !== this.core.selfInfo.uin) {
-                    this.emit('message/receive', msg);
+                    const handled = await this.parseRawMsgToEventAndEmit(msg);
+                    if (!handled) this.emit('message/receive', msg);
                 }
             }
         };
@@ -142,12 +159,14 @@ export class NapCatEventChannel extends
                         }
                         this.emit('group/recall', msg.peerUin, operatorId, msg.msgId, msg);
                     }
+                    continue;
                 }
 
                 // Handle message send
                 if (msg.sendStatus === SendStatusType.KSEND_STATUS_SUCCESS && !msgIdSentCache.get(msg.msgId)) {
                     msgIdSentCache.put(msg.msgId, true);
-                    this.emit('message/send', msg);
+                    const handled = await this.parseRawMsgToEventAndEmit(msg);
+                    if (!handled) this.emit('message/send', msg);
                 }
             }
         };
@@ -155,6 +174,290 @@ export class NapCatEventChannel extends
         this.core.context.session.getMsgService().addKernelMsgListener(
             proxiedListenerOf(msgListener, this.core.context.logger) as any,
         );
+    }
+
+    private async parseRawMsgToEventAndEmit(msg: RawMessage) {
+        let handled = false;
+
+        if (msg.chatType === ChatType.KCHATTYPEC2C) {
+            for (const element of msg.elements) {
+                if (element.grayTipElement) {
+                    if (element.grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
+                        try {
+                            if (element.grayTipElement.jsonGrayTipElement.busiId == 1061) {
+                                const json = JSON.parse(element.grayTipElement.jsonGrayTipElement.jsonStr);
+                                const pokeDetail = (json.items as any[]).filter(item => item.uid);
+                                if (pokeDetail.length == 2) {
+                                    this.emit(
+                                        'buddy/poke',
+                                        await this.core.apis.UserApi.getUinByUidV2(pokeDetail[0].uid),
+                                        await this.core.apis.UserApi.getUinByUidV2(pokeDetail[1].uid)!,
+                                        element.grayTipElement, msg,
+                                    );
+                                    handled = true;
+                                }
+                            }
+                        } catch (e) {
+                            this.core.context.logger.logError('解析 Poke 消息失败', e);
+                        }
+                    }
+
+                    if (element.grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_XMLMSG) {
+                        try {
+                            if (element.grayTipElement.xmlElement.templId === '10229' && msg.peerUin !== '') {
+                                this.emit(
+                                    'buddy/add',
+                                    msg.peerUin,
+                                    element.grayTipElement, msg,
+                                );
+                                handled = true;
+                            }
+                        } catch (e) {
+                            this.core.context.logger.logError('解析好友增加消息失败', e);
+                        }
+                    }
+                }
+            }
+        } else if (msg.chatType === ChatType.KCHATTYPEGROUP) {
+            for (const element of msg.elements) {
+                if (element.grayTipElement) {
+                    if (element.grayTipElement.groupElement) {
+                        /*
+                         * Events that are included in groupElements:
+                         * - group/member-increase/active
+                         * - group/mute, ...
+                         * - group/member-decrease/...
+                         */
+
+                        const groupElement = element.grayTipElement.groupElement;
+                        const groupCode = msg.peerUin;
+
+                        try {
+                            if (groupElement.type === TipGroupElementType.memberIncrease) {
+                                const member = await this.core.apis.GroupApi.getGroupMember(groupCode, groupElement.memberUid);
+                                const adminMemberOrEmpty = groupElement.adminUid ?
+                                    await this.core.apis.GroupApi.getGroupMember(groupCode, groupElement.adminUid) :
+                                    undefined;
+                                this.emit(
+                                    'group/member-increase/active',
+                                    groupCode,
+                                    member!.uin,
+                                    adminMemberOrEmpty?.uin,
+                                    element.grayTipElement, msg,
+                                );
+                                handled = true;
+                            }
+                        } catch (e) {
+                            this.core.context.logger.logError('解析群成员增加消息失败', e);
+                        }
+
+                        try {
+                            if (groupElement.type === TipGroupElementType.ban) {
+                                const shutUpAttr = groupElement.shutUp!;
+                                const durationOrLiftBan = parseInt(shutUpAttr.duration);
+                                if (shutUpAttr.member?.uid) {
+                                    if (durationOrLiftBan > 0) {
+                                        this.emit(
+                                            'group/mute',
+                                            groupCode,
+                                            (await this.core.apis.GroupApi.getGroupMember(groupCode, shutUpAttr.member.uid))!.uin,
+                                            (await this.core.apis.GroupApi.getGroupMember(groupCode, shutUpAttr.admin.uid))!.uin,
+                                            durationOrLiftBan,
+                                            element.grayTipElement, msg,
+                                        );
+                                    } else {
+                                        this.emit(
+                                            'group/unmute',
+                                            groupCode,
+                                            (await this.core.apis.GroupApi.getGroupMember(groupCode, shutUpAttr.member.uid))!.uin,
+                                            (await this.core.apis.GroupApi.getGroupMember(groupCode, shutUpAttr.admin.uid))!.uin,
+                                            element.grayTipElement, msg,
+                                        );
+                                    }
+                                } else {
+                                    if (durationOrLiftBan > 0) {
+                                        this.emit(
+                                            'group/mute-all',
+                                            groupCode,
+                                            (await this.core.apis.GroupApi.getGroupMember(groupCode, shutUpAttr.admin.uid))!.uin,
+                                            element.grayTipElement, msg,
+                                        );
+                                    } else {
+                                        this.emit(
+                                            'group/unmute-all',
+                                            groupCode,
+                                            (await this.core.apis.GroupApi.getGroupMember(groupCode, shutUpAttr.admin.uid))!.uin,
+                                            element.grayTipElement, msg,
+                                        );
+                                    }
+                                }
+                                handled = true;
+                            }
+                        } catch (e) {
+                            this.core.context.logger.logError('解析群禁言消息失败', e);
+                        }
+
+                        try {
+                            if (groupElement.type == TipGroupElementType.kicked) {
+                                await this.core.apis.GroupApi.quitGroup(groupCode);
+                                const adminUin =
+                                    (await this.core.apis.GroupApi.getGroupMember(groupCode, groupElement.adminUid))?.uin ??
+                                    (await this.core.apis.UserApi.getUinByUidV2(groupElement.adminUid));
+                                if (adminUin) {
+                                    this.emit(
+                                        'group/member-decrease/self-kicked',
+                                        groupCode,
+                                        adminUin,
+                                        element.grayTipElement, msg,
+                                    );
+                                } else {
+                                    this.emit(
+                                        'group/member-decrease/unknown',
+                                        groupCode,
+                                        this.core.selfInfo.uin,
+                                        undefined,
+                                        element.grayTipElement, msg,
+                                    );
+                                }
+                                handled = true;
+                            }
+                        } catch (e) {
+                            this.core.context.logger.logError('解析退群消息失败', e);
+                        }
+                    }
+
+                    if (element.grayTipElement.xmlElement) {
+                        /*
+                         * Events that are included in xmlElement:
+                         * - group/emoji-like
+                         * - group/member-increase/invite
+                         */
+                        if (element.grayTipElement.xmlElement.templId === '10382') {
+                            const emojiLikeData = new fastXmlParser.XMLParser({
+                                ignoreAttributes: false,
+                                attributeNamePrefix: '',
+                            }).parse(element.grayTipElement.xmlElement.content);
+                            const groupCode = msg.peerUin;
+                            const senderUin = emojiLikeData.gtip.qq.jp;
+                            const msgSeq = emojiLikeData.gtip.url.msgseq;
+                            const emojiId = emojiLikeData.gtip.face.id;
+                            const likedMsgId = await this.findMsgIdForEmojiLikeEventByMsgSeq(groupCode, msgSeq);
+                            if (!likedMsgId) {
+                                this.core.context.logger.logError('解析表情回应消息失败: 未找到回应消息');
+                            } else {
+                                this.emit(
+                                    'group/emoji-like',
+                                    groupCode,
+                                    senderUin,
+                                    likedMsgId,
+                                    [{ emojiId, count: 1 }],
+                                    element.grayTipElement, msg,
+                                );
+                                handled = true;
+                            }
+                        }
+
+                        // Todo: What is the temp id for group member increase?
+                        try {
+                            const groupCode = msg.peerUin;
+                            const memberUin = element.grayTipElement.xmlElement.content.match(/uin="(\d+)"/)![1];
+                            const invitorUin = element.grayTipElement.xmlElement.content.match(/uin="(\d+)"/)![1];
+                            this.emit(
+                                'group/member-increase/invite',
+                                groupCode,
+                                memberUin,
+                                invitorUin,
+                                element.grayTipElement, msg,
+                            );
+                            handled = true;
+                        } catch (e) {
+                            this.core.context.logger.logError('解析群邀请消息失败', e);
+                        }
+                    }
+
+                    if (element.grayTipElement.subElementType === NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
+                        /*
+                         * Events that are included in jsonGrayTipElement:
+                         * - group/poke
+                         * - group/essence
+                         * - group/title
+                         */
+
+                        const json = JSON.parse(element.grayTipElement.jsonGrayTipElement.jsonStr);
+
+                        try {
+                            if (element.grayTipElement.jsonGrayTipElement.busiId === 1061) {
+                                const pokeDetail = (json.items as any[]).filter(item => item.uid);
+                                if (pokeDetail.length == 2) {
+                                    this.emit(
+                                        'group/poke',
+                                        msg.peerUin,
+                                        await this.core.apis.UserApi.getUinByUidV2(pokeDetail[0].uid),
+                                        await this.core.apis.UserApi.getUinByUidV2(pokeDetail[1].uid)!,
+                                        element.grayTipElement, msg,
+                                    );
+                                }
+                                handled = true;
+                            }
+                        } catch (e) {
+                            this.core.context.logger.logError('解析群拍一拍消息失败', e);
+                        }
+
+                        try {
+                            if (element.grayTipElement.jsonGrayTipElement.busiId === 2401) {
+                                const searchParams = new URL(json.items[0].jp).searchParams;
+                                const msgSeq = searchParams.get('msgSeq')!;
+                                const Group = searchParams.get('groupCode');
+                                const msgData = await this.core.apis.MsgApi.getMsgsBySeqAndCount({
+                                    guildId: '',
+                                    chatType: ChatType.KCHATTYPEGROUP,
+                                    peerUid: Group!,
+                                }, msgSeq.toString(), 1, true, true);
+                                this.emit(
+                                    'group/essence',
+                                    msg.peerUid,
+                                    msgData.msgList[0].msgId,
+                                    'add',
+                                    element.grayTipElement, msg,
+                                );
+                                handled = true;
+                            }
+                        } catch (e) {
+                            this.core.context.logger.logError('解析群精华消息失败', e);
+                        }
+
+                        try {
+                            if (element.grayTipElement.jsonGrayTipElement.busiId === 2407) {
+                                const memberUin = json.items[1].param[0];
+                                const title = json.items[3].txt;
+                                this.emit(
+                                    'group/title',
+                                    msg.peerUin,
+                                    memberUin,
+                                    title,
+                                    element.grayTipElement, msg,
+                                );
+                                handled = true;
+                            }
+                        } catch (e) {
+                            this.core.context.logger.logError('解析群头衔消息失败', e);
+                        }
+                    }
+                }
+
+                if (element.fileElement) {
+                    this.emit(
+                        'group/upload',
+                        msg.peerUin,
+                        msg.senderUin,
+                        element.fileElement,
+                        msg,
+                    );
+                }
+            }
+        }
+
+        return handled;
     }
 
     private initBuddyListener() {
@@ -234,7 +537,7 @@ export class NapCatEventChannel extends
                                 continue;
                             }
                             this.emit(
-                                'group/member-decrease/kicked',
+                                'group/member-decrease/kick',
                                 notify.group.groupCode,
                                 leftMemberUin,
                                 operatorUin,
@@ -319,5 +622,26 @@ export class NapCatEventChannel extends
         this.core.context.session.getGroupService().addKernelGroupListener(
             proxiedListenerOf(groupListener, this.core.context.logger),
         );
+    }
+
+    private async findMsgIdForEmojiLikeEventByMsgSeq(groupCode: string, msgSeq: string) {
+        const peer = {
+            chatType: ChatType.KCHATTYPEGROUP,
+            guildId: '',
+            peerUid: groupCode,
+        };
+        const replyMsgList = (await this.core.apis.MsgApi.getMsgExBySeq(peer, msgSeq)).msgList;
+        if (replyMsgList.length < 1) {
+            return null;
+        }
+        const replyMsg = replyMsgList
+            .filter(e => e.msgSeq == msgSeq)
+            .sort((a, b) => parseInt(a.msgTime) - parseInt(b.msgTime))[0];
+
+        if (!replyMsg) {
+            this.core.context.logger.logError('解析表情回应消息失败: 未找到回应消息');
+            return null;
+        }
+        return replyMsg.msgId;
     }
 }
