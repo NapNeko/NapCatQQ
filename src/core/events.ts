@@ -21,7 +21,8 @@ type NapCatInternalEvents = {
     'message/send': (msg: RawMessage) => PromiseLike<void>;
 
 
-    'buddy/request': (request: FriendRequest) => PromiseLike<void>;
+    'buddy/request': (uid: string, words: string,
+                      xRequest: FriendRequest) => PromiseLike<void>;
 
     'buddy/add': (uin: string,
                   xMsg: RawMessage) => PromiseLike<void>;
@@ -87,6 +88,7 @@ export class NapCatEventChannel extends
         super();
 
         this.initMsgListener();
+        this.initBuddyListener();
     }
 
     private initMsgListener() {
@@ -131,6 +133,30 @@ export class NapCatEventChannel extends
 
         this.core.context.session.getMsgService().addKernelMsgListener(
             proxiedListenerOf(msgListener, this.core.context.logger) as any,
+        );
+    }
+
+    private initBuddyListener() {
+        const buddyListener = new NodeIKernelBuddyListener();
+
+        buddyListener.onBuddyReqChange = async reqs => {
+            await this.core.apis.FriendApi.clearBuddyReqUnreadCnt();
+            for (let i = 0; i < reqs.unreadNums; i++) {
+                const req = reqs.buddyReqs[i];
+                if (!!req.isInitiator || (req.isDecide && req.reqType !== BuddyReqType.KMEINITIATORWAITPEERCONFIRM)) {
+                    continue;
+                }
+                try {
+                    const reqUin = await this.core.apis.UserApi.getUinByUidV2(req.friendUid);
+                    this.emit('buddy/request', reqUin, req.extWords, req);
+                } catch (e) {
+                    this.core.context.logger.logDebug('获取加好友者 QQ 号失败', e);
+                }
+            }
+        };
+
+        this.core.context.session.getBuddyService().addKernelBuddyListener(
+            proxiedListenerOf(buddyListener, this.core.context.logger) as any,
         );
     }
 }
