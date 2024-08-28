@@ -1,4 +1,4 @@
-import { NodeIQQNTWrapperSession } from '@/core/wrapper/wrapper';
+import { NodeIQQNTWrapperSession } from '@/core/wrapper';
 import { randomUUID } from 'crypto';
 import { ListenerNamingMapping, ServiceNamingMapping } from '@/core';
 

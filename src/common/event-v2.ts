@@ -1,4 +1,4 @@
-import type { NodeIQQNTWrapperSession, WrapperNodeApi } from '@/core/wrapper/wrapper';
+import type { NodeIQQNTWrapperSession, WrapperNodeApi } from '@/core/wrapper';
 import EventEmitter from 'node:events';
 
 export type ListenerClassBase = Record<string, string>;
