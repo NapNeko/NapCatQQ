@@ -110,4 +110,5 @@ export enum ActionName {
     SetInputStatus = 'set_input_status',
     GetCSRF = 'get_csrf_token',
     DelGroupNotice = '_del_group_notice',
+    GetGroupInfoEx = "get_group_info_ex"
 }
