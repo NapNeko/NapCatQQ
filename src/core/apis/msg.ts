@@ -200,7 +200,7 @@ export class NTQQMsgApi {
                 msgElements,
                 new Map(),
             ],
-            () => true,
+            (ret) => ret.result === 0,
             msgRecords => {
                 for (const msgRecord of msgRecords) {
                     if (msgRecord.guildId === msgId && msgRecord.sendStatus === SendStatusType.KSEND_STATUS_SUCCESS) {

@@ -799,16 +799,12 @@ export class OneBotMsgApi {
             this.core.context.logger.logError('发送消息计算预计时间异常', e);
         }
         const returnMsg = await this.core.apis.MsgApi.sendMsg(peer, sendElements, waitComplete, timeout);
-        try {
-            returnMsg!.id = MessageUnique.createMsg({
-                chatType: peer.chatType,
-                guildId: '',
-                peerUid: peer.peerUid,
-            }, returnMsg!.msgId);
-        } catch (e: any) {
-            this.core.context.logger.logDebug('发送消息id获取失败', e);
-            returnMsg!.id = 0;
-        }
+        if (!returnMsg) throw new Error('发送消息失败');
+        returnMsg.id = MessageUnique.createMsg({
+            chatType: peer.chatType,
+            guildId: '',
+            peerUid: peer.peerUid,
+        }, returnMsg.msgId);
         deleteAfterSentFiles.forEach(file => {
             fsPromise.unlink(file).then().catch(e => this.core.context.logger.logError('发送消息删除文件失败', e));
         });
