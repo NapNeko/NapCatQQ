@@ -112,8 +112,10 @@ export class OneBotGroupApi {
         return undefined;
     }
 
-    async parseGroupEmjioLikeEvent(GroupCode: string, grayTipElement: GrayTipElement) {
-        const NTQQMsgApi = this.core.apis.MsgApi;
+    async parseGroupEmojiLikeEventByGrayTip(
+        groupCode: string,
+        grayTipElement: GrayTipElement
+    ) {
         const emojiLikeData = new fastXmlParser.XMLParser({
             ignoreAttributes: false,
             attributeNamePrefix: '',
@@ -122,16 +124,27 @@ export class OneBotGroupApi {
         const senderUin = emojiLikeData.gtip.qq.jp;
         const msgSeq = emojiLikeData.gtip.url.msgseq;
         const emojiId = emojiLikeData.gtip.face.id;
+        return await this.createGroupEmojiLikeEvent(groupCode, senderUin, msgSeq, emojiId);
+    }
+
+    private async createGroupEmojiLikeEvent(
+        groupCode: string,
+        senderUin: string,
+        msgSeq: string,
+        emojiId: string,
+    ) {
         const peer = {
             chatType: ChatType.KCHATTYPEGROUP,
             guildId: '',
-            peerUid: GroupCode,
+            peerUid: groupCode,
         };
-        const replyMsgList = (await NTQQMsgApi.getMsgExBySeq(peer, msgSeq)).msgList;
+        const replyMsgList = (await this.core.apis.MsgApi.getMsgExBySeq(peer, msgSeq)).msgList;
         if (replyMsgList.length < 1) {
             return;
         }
-        const replyMsg = replyMsgList.filter(e => e.msgSeq == msgSeq).sort((a, b) => parseInt(a.msgTime) - parseInt(b.msgTime))[0];
+        const replyMsg = replyMsgList
+            .filter(e => e.msgSeq == msgSeq)
+            .sort((a, b) => parseInt(a.msgTime) - parseInt(b.msgTime))[0];
         //console.log("表情回应消息长度检测", msgSeq, replyMsg.elements);
         if (!replyMsg) {
             this.core.context.logger.logError('解析表情回应消息失败: 未找到回应消息');
@@ -139,7 +152,7 @@ export class OneBotGroupApi {
         }
         return new OB11GroupMsgEmojiLikeEvent(
             this.core,
-            parseInt(GroupCode),
+            parseInt(groupCode),
             parseInt(senderUin),
             MessageUnique.getShortIdByMsgId(replyMsg.msgId)!,
             [{
