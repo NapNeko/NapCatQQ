@@ -38,11 +38,13 @@ export class GetGroupEssence extends BaseAction<Payload, any> {
         let handledMsg: any[] = [];
         for (let msg of msgs) {
             switch (msg.msg_type) {
-                case 2:
+                case 1:
                     handledMsg.push(await this.parseEssenceMsgText(msg));
                     break;
                 case 3:
                     handledMsg.push(await this.parseEssenceMsgImage(msg));
+                    break;
+                default:
                     break;
             }
         }
@@ -85,7 +87,7 @@ export class GetGroupEssence extends BaseAction<Payload, any> {
                     operator_nick: msg.add_digest_nick,
                     message_id: message_id,
                     operator_time: msg.add_digest_time,
-                    content: await this.obContext.apis.MsgApi.parseMessage(rawMessage, 'array')
+                    content: (await this.obContext.apis.MsgApi.parseMessage(rawMessage, 'array'))?.message
                 };
             }
             const msgTempData = JSON.stringify({
