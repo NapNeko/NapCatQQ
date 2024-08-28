@@ -5,9 +5,11 @@ import {
     FriendRequest,
     GrayTipElement,
     GroupNotify,
+    GroupNotifyMsgStatus,
     GroupNotifyMsgType,
     RawMessage,
-    SendStatusType, TipGroupElement,
+    SendStatusType,
+    TipGroupElement,
 } from '@/core/entities';
 import { NodeIKernelBuddyListener, NodeIKernelGroupListener, NodeIKernelMsgListener } from '@/core/listeners';
 import EventEmitter from 'node:events';
@@ -37,7 +39,11 @@ type NapCatInternalEvents = {
     'buddy/input-status': (data: Parameters<NodeIKernelMsgListener['onInputStatusPush']>[0]) => PromiseLike<void>;
 
 
-    'group/request': (request: GroupNotify) => PromiseLike<void>;
+    'group/request': (groupCode: string, requestUin: string, words: string,
+                      xGroupNotify: GroupNotify) => PromiseLike<void>;
+
+    'group/invite': (groupCode: string, invitorUin: string,
+                     xGroupNotify: GroupNotify) => PromiseLike<void>;
 
     'group/admin': (groupCode: string, targetUin: string, operation: 'set' | 'unset',
                     // If it comes from onGroupNotifiesUpdated
@@ -234,6 +240,7 @@ export class NapCatEventChannel extends
                                 operatorUin,
                                 notify
                             );
+                            continue;
                         } else {
                             // No operator, indicates that the member leaves
                             this.emit(
@@ -242,10 +249,51 @@ export class NapCatEventChannel extends
                                 leftMemberUin,
                                 notify
                             );
+                            continue;
                         }
                     }
                 } catch (e) {
                     this.core.context.logger.logError('处理退群消息失败', e);
+                }
+
+                try {
+                    if (
+                        notify.type === GroupNotifyMsgType.REQUEST_JOIN_NEED_ADMINI_STRATOR_PASS &&
+                        notify.status === GroupNotifyMsgStatus.KUNHANDLE
+                    ) {
+                        this.core.context.logger.logDebug('入群请求', notify);
+                        const requesterUin = await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid);
+                        this.emit(
+                            'group/request',
+                            notify.group.groupCode,
+                            requesterUin,
+                            notify.postscript,
+                            notify
+                        );
+                        continue;
+                    }
+                } catch (e) {
+                    this.core.context.logger.logError('处理入群请求失败', e);
+                }
+
+                try {
+                    // Todo: unstable, may need to be in sync with main branch
+                    if (
+                        notify.type == GroupNotifyMsgType.INVITED_BY_MEMBER &&
+                        notify.status == GroupNotifyMsgStatus.KUNHANDLE
+                    ) {
+                        this.core.context.logger.logDebug('入群邀请', notify);
+                        const requesterUin = await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid);
+                        this.emit(
+                            'group/invite',
+                            notify.group.groupCode,
+                            requesterUin,
+                            notify
+                        );
+                        // continue;
+                    }
+                } catch (e) {
+                    this.core.context.logger.logError('处理入群邀请失败', e);
                 }
             }
         };
