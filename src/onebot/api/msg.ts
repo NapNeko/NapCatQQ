@@ -222,13 +222,21 @@ export class OneBotMsgApi {
                 this.core.context.logger.logError('获取不到引用的消息', element.replayMsgSeq);
                 return null;
             }
+
+            const createReplyData = (msgId: string): OB11MessageData => ({
+                type: OB11MessageDataType.reply,
+                data: {
+                    id: MessageUnique.createUniqueMsgId(peer, msgId).toString(),
+                },
+            });
+
+            if (records.peerUin === '284840486') {
+                return createReplyData(records.msgId);
+            }
+
             let replyMsg: RawMessage | undefined;
             // Attempt 1
-            replyMsg = (await NTQQMsgApi.getMsgsBySeqAndCount({
-                peerUid: msg.peerUid,
-                guildId: '',
-                chatType: msg.chatType,
-            }, element.replayMsgSeq, 1, true, true))
+            replyMsg = (await NTQQMsgApi.getMsgsBySeqAndCount(peer,element.replayMsgSeq, 1, true, true))
                 .msgList
                 .find(msg => msg.msgRandom === records.msgRandom);
 
@@ -236,7 +244,7 @@ export class OneBotMsgApi {
                 // Attempt 2
                 replyMsg = (await NTQQMsgApi.getSingleMsg(peer, element.replayMsgSeq)).msgList[0];
 
-                if ((!replyMsg || records.msgRandom !== replyMsg.msgRandom) && msg.peerUin !== '284840486') {
+                if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
                     // Attempt 3
                     const replyMsgList = (await NTQQMsgApi.getMsgExBySeq(peer, records.msgSeq)).msgList;
                     if (replyMsgList.length < 1) {
@@ -248,16 +256,7 @@ export class OneBotMsgApi {
                 }
             }
 
-            return {
-                type: OB11MessageDataType.reply,
-                data: {
-                    id: MessageUnique.createUniqueMsgId({
-                        peerUid: msg.peerUid,
-                        guildId: '',
-                        chatType: msg.chatType,
-                    }, replyMsg.msgId).toString(),
-                },
-            };
+            return createReplyData(replyMsg.msgId);
         },
 
         videoElement: async (element, msg, elementWrapper) => {
