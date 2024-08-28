@@ -345,7 +345,7 @@ export class NapCatOneBot11Adapter {
                 // }
 
                 if (!!req.isInitiator || (req.isDecide && req.reqType !== BuddyReqType.KMEINITIATORWAITPEERCONFIRM)) {
-                    return;
+                    continue;
                 }
                 try {
                     const requesterUin = await this.core.apis.UserApi.getUinByUidV2(req.friendUid);
