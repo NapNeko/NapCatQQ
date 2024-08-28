@@ -1,4 +1,5 @@
 import {
+    BuddyReqType,
     ChatType,
     FileElement,
     FriendRequest,
@@ -7,11 +8,10 @@ import {
     RawMessage,
     SendStatusType,
 } from '@/core/entities';
-import { NodeIKernelMsgListener } from '@/core/listeners';
+import { NodeIKernelBuddyListener, NodeIKernelMsgListener } from '@/core/listeners';
 import EventEmitter from 'node:events';
 import TypedEmitter from 'typed-emitter/rxjs';
 import { NapCatCore } from '@/core/index';
-import { MessageUnique } from '@/common/message-unique';
 import { LRUCache } from '@/common/lru-cache';
 import { proxiedListenerOf } from '@/common/proxy-handler';
 
@@ -29,8 +29,7 @@ type NapCatInternalEvents = {
     'buddy/poke': (initiatorUin: string, targetUin: string, displayMsg: string,
                    xMsg: RawMessage) => PromiseLike<void>;
 
-    'buddy/recall': (uin: string, internalMessageId: number,
-                     xMsg: RawMessage) => PromiseLike<void>;
+    'buddy/recall': (uin: string, messageId: string, msg: RawMessage) => PromiseLike<void>;
 
     'buddy/input-status': (data: Parameters<NodeIKernelMsgListener['onInputStatusPush']>[0]) => PromiseLike<void>;
 
@@ -55,11 +54,11 @@ type NapCatInternalEvents = {
     'group/member-decrease': (groupCode: string, targetUin: string, operatorUin: string, reason: 'leave' | 'kick' | 'unknown',
                               xGrayTipElement: GrayTipElement, xMsg: RawMessage) => PromiseLike<void>;
 
-    'group/essence': (groupCode: string, internalMessageId: number, senderUin: string, operation: 'add' | 'delete',
+    'group/essence': (groupCode: string, messageId: string, senderUin: string, operation: 'add' | 'delete',
                       xGrayTipElement: GrayTipElement,
                       xGrayTipSourceMsg: RawMessage /* this is not the message that is set to be essence msg */) => PromiseLike<void>;
 
-    'group/recall': (groupCode: string, operatorUin: string, internalMessageId: number,
+    'group/recall': (groupCode: string, operatorUin: string, messageId: string,
                      xGrayTipSourceMsg: RawMessage /* This is not the message that is recalled */) => PromiseLike<void>;
 
     'group/title': (groupCode: string, targetUin: string, newTitle: string,
@@ -68,7 +67,7 @@ type NapCatInternalEvents = {
     'group/upload': (groupCode: string, uploaderUin: string, fileElement: FileElement,
                      xMsg: RawMessage) => PromiseLike<void>;
 
-    'group/emoji-like': (groupCode: string, operatorUin: string, internalMessageId: number, likes: { emojiId: string, count: number }[],
+    'group/emoji-like': (groupCode: string, operatorUin: string, messageId: string, likes: { emojiId: string, count: number }[],
                          // If it comes from onRecvMsg
                          xGrayTipElement?: GrayTipElement, xMsg?: RawMessage,
                          // If it comes from onRecvSysMsg
@@ -94,14 +93,6 @@ export class NapCatEventChannel extends
 
         msgListener.onRecvMsg = msgList => {
             for (const msg of msgList) {
-                msg.id = MessageUnique.createUniqueMsgId(
-                    {
-                        chatType: msg.chatType,
-                        peerUid: msg.peerUid,
-                        guildId: '',
-                    },
-                    msg.msgId,
-                );
                 if (msg.senderUin !== this.core.selfInfo.uin) {
                     this.emit('message/receive', msg);
                 }
@@ -115,11 +106,8 @@ export class NapCatEventChannel extends
                 // Handle message recall
                 if (msg.recallTime !== '0' && !recallMsgCache.get(msg.msgId)) {
                     recallMsgCache.put(msg.msgId, true);
-                    const originalMsgId = MessageUnique.getShortIdByMsgId(msg.msgId);
-                    if (!originalMsgId) continue;
-
                     if (msg.chatType === ChatType.KCHATTYPEC2C) {
-                        this.emit('buddy/recall', msg.peerUin, originalMsgId, msg);
+                        this.emit('buddy/recall', msg.peerUin, msg.msgId, msg);
                     } else if (msg.chatType == ChatType.KCHATTYPEGROUP) {
                         let operatorId = msg.senderUin;
                         for (const element of msg.elements) {
@@ -128,18 +116,13 @@ export class NapCatEventChannel extends
                             const operator = await this.core.apis.GroupApi.getGroupMember(msg.peerUin, operatorUid);
                             operatorId = operator?.uin || msg.senderUin;
                         }
-                        this.emit('group/recall', msg.peerUin, operatorId, originalMsgId, msg);
+                        this.emit('group/recall', msg.peerUin, operatorId, msg.msgId, msg);
                     }
                 }
 
                 // Handle message send
                 if (msg.sendStatus === SendStatusType.KSEND_STATUS_SUCCESS && !msgIdSentCache.get(msg.msgId)) {
                     msgIdSentCache.put(msg.msgId, true);
-                    msg.id = MessageUnique.createUniqueMsgId({
-                        chatType: msg.chatType,
-                        peerUid: msg.peerUid,
-                        guildId: '',
-                    }, msg.msgId);
                     this.emit('message/send', msg);
                 }
             }
