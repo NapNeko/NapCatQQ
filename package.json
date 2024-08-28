@@ -60,6 +60,7 @@
     "qrcode-terminal": "^0.12.0",
     "silk-wasm": "^3.6.1",
     "strtok3": "8.0.1",
+    "typed-emitter": "^2.1.0",
     "ws": "^8.18.0"
   }
 }
