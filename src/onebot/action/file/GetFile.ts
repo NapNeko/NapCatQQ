@@ -32,18 +32,18 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
         const NTQQMsgApi = this.core.apis.MsgApi;
         const NTQQFileApi = this.core.apis.FileApi;
 
-        const contextFile = FileNapCatOneBotUUID.decode(payload.file);
+        const contextMsgFile = FileNapCatOneBotUUID.decode(payload.file);
 
         //接收消息标记模式
-        if (contextFile) {
-            const { peer, msgId, elementId } = contextFile;
+        if (contextMsgFile) {
+            const { peer, msgId, elementId } = contextMsgFile;
 
             const downloadPath = await NTQQFileApi.downloadMedia(msgId, peer.chatType, peer.peerUid, elementId, '', '');
 
             const mixElement = (await NTQQMsgApi.getMsgsByMsgId(peer, [msgId]))?.msgList
                 .find(msg => msg.msgId === msgId)?.elements.find(e => e.elementId === elementId);
-            const mixElementInner = mixElement?.videoElement ?? mixElement?.fileElement ?? mixElement?.pttElement ?? mixElement?.picElement ;
-            if(!mixElementInner) throw new Error('element not found');
+            const mixElementInner = mixElement?.videoElement ?? mixElement?.fileElement ?? mixElement?.pttElement ?? mixElement?.picElement;
+            if (!mixElementInner) throw new Error('element not found');
 
             const fileSize = mixElementInner.fileSize?.toString() || '';
             const fileName = mixElementInner.fileName || '';
@@ -65,7 +65,27 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
             return res;
         }
         //群文件模式
-        
+        const contextModelIdFile = FileNapCatOneBotUUID.decodeModelId(payload.file);
+        if (contextModelIdFile) {
+            const { peer, modelId } = contextModelIdFile;
+            const downloadPath = await NTQQFileApi.downloadFileForModelId(peer, modelId);
+            const res: GetFileResponse = {
+                file: downloadPath,
+                url: downloadPath,
+                file_size: '',
+                file_name: '',
+            };
+
+            if (this.obContext.configLoader.configData.enableLocalFile2Url && downloadPath) {
+                try {
+                    res.base64 = await fs.readFile(downloadPath, 'base64');
+                } catch (e) {
+                    throw new Error('文件下载失败. ' + e);
+                }
+            }
+            return res;
+        }
+
         //搜索名字模式
         const NTSearchNameResult = (await NTQQFileApi.searchfile([payload.file])).resultItems;
         if (NTSearchNameResult.length !== 0) {

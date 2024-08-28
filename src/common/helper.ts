@@ -23,31 +23,28 @@ export async function solveAsyncProblem<T extends (...args: any[]) => Promise<an
         });
     });
 }
-
-//下面这个类是用于将uid+msgid合并的类
-export class UUIDConverter {
-    static encode(highStr: string, lowStr: string): string {
-        const high = BigInt(highStr);
-        const low = BigInt(lowStr);
-        const highHex = high.toString(16).padStart(16, '0');
-        const lowHex = low.toString(16).padStart(16, '0');
-        const combinedHex = highHex + lowHex;
-        return `${combinedHex.substring(0, 8)}-${combinedHex.substring(8, 12)}-${combinedHex.substring(
-            12,
-            16,
-        )}-${combinedHex.substring(16, 20)}-${combinedHex.substring(20)}`;
-    }
-
-    static decode(uuid: string): { high: string; low: string } {
-        const hex = uuid.replace(/-/g, '');
-        const high = BigInt('0x' + hex.substring(0, 16));
-        const low = BigInt('0x' + hex.substring(16));
-        return { high: high.toString(), low: low.toString() };
-    }
-}
 export class FileNapCatOneBotUUID {
+    static encodeModelId(peer: Peer, modelId: string): string {
+        return `NapCatOneBot-ModeldFile-${peer.chatType}-${peer.peerUid}-${modelId}`;
+    }
+    static decodeModelId(uuid: string): undefined | {
+        peer: Peer,
+        modelId: string
+    } {
+        if (!uuid.startsWith('NapCatOneBot-ModeldFile-')) return undefined;
+        const data = uuid.split('-');
+        if (data.length !== 5) return undefined;
+        const [, , chatType, peerUid, modelId] = data;
+        return {
+            peer: {
+                chatType: chatType as any,
+                peerUid: peerUid
+            },
+            modelId,
+        };
+    }
     static encode(peer: Peer, msgId: string, elementId: string): string {
-        return `NapCatOneBot-File-${peer.chatType}-${peer.peerUid}-${msgId}-${elementId}`;
+        return `NapCatOneBot-MsgFile-${peer.chatType}-${peer.peerUid}-${msgId}-${elementId}`;
     }
     static decode(uuid: string): undefined | {
         peer: Peer,

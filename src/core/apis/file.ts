@@ -302,7 +302,18 @@ export class NTQQFileApi {
     async downloadMediaByUuid() {
         //napCatCore.session.getRichMediaService().downloadFileForFileUuid();
     }
-
+    async downloadFileForModelId(peer: Peer, modelId: string, timeout = 1000 * 60 * 2) {
+        const [, fileTransNotifyInfo] = await this.core.eventWrapper.callNormalEventV2(
+            'NodeIKernelRichMediaService/downloadFileForModelId',
+            'NodeIKernelMsgListener/onRichMediaDownloadComplete',
+            [peer, [modelId]],
+            () => true,
+            (arg) => arg?.commonFileInfo?.fileModelId === modelId,
+            1,
+            timeout,
+        );
+        return fileTransNotifyInfo.filePath;
+    }
     async downloadMedia(msgId: string, chatType: ChatType, peerUid: string, elementId: string, thumbPath: string, sourcePath: string, timeout = 1000 * 60 * 2, force: boolean = false) {
         //logDebug('receive downloadMedia task', msgId, chatType, peerUid, elementId, thumbPath, sourcePath, timeout, force);
         // 用于下载收到的消息中的图片等
