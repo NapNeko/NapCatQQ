@@ -1,0 +1,36 @@
+syntax = 'proto3';
+package SysMessage;
+
+message SysMessage {
+  repeated SysMessageHeader header = 1;
+  repeated SysMessageMsgSpec msgSpec = 2;
+  SysMessageBodyWrapper bodyWrapper = 3;
+}
+
+message SysMessageHeader {
+  uint32 PeerNumber = 1;
+  string PeerString = 2;
+  uint32 Uin = 5;
+  optional string Uid = 6;
+}
+
+message SysMessageMsgSpec {
+  uint32 msgType = 1;
+  uint32 subType = 2;
+  uint32 subSubType = 3;
+  uint32 msgSeq = 5;
+  uint32 time = 6;
+  uint64 msgId = 12;
+  uint32 other = 13;
+}
+
+message SysMessageBodyWrapper {
+  bytes wrappedBody = 2;
+  // Find the first [08], or ignore the first 7 bytes?
+  // And it becomes another ProtoBuf message.
+}
+
+message KeyValuePair {
+  string key = 1;
+  string value = 2;
+}

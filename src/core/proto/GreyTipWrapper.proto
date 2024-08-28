@@ -1,0 +1,9 @@
+syntax = 'proto3';
+package SysMessage;
+
+message GreyTipWrapper {
+  uint32 subTypeId = 1;
+  uint32 groupCode = 4;
+  uint32 subTypeIdMinusOne = 13;
+  bytes rest = 44;
+}

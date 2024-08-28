@@ -1,0 +1,24 @@
+syntax = 'proto3';
+package SysMessage;
+
+message EmojiLikeToOthersWrapper1 {
+  EmojiLikeToOthersWrapper2 wrapper = 1;
+}
+
+message EmojiLikeToOthersWrapper2 {
+  EmojiLikeToOthersWrapper3 body = 1;
+}
+
+message EmojiLikeToOthersWrapper3 {
+  EmojiLikeToOthersMsgSpec msgSpec = 2;
+  EmojiLikeToOthersAttributes attributes = 3;
+}
+
+message EmojiLikeToOthersMsgSpec {
+  uint32 msgSeq = 1;
+}
+
+message EmojiLikeToOthersAttributes {
+  string emojiId = 1;
+  string senderUid = 4;
+}
