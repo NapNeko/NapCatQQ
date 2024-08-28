@@ -90,7 +90,7 @@ export async function NT2GroupEvent(core: NapCatCore, obContext: NapCatOneBot11A
         }
         if (element.grayTipElement) {
             if (element.grayTipElement.xmlElement?.templId === '10382') {
-                const emojiLikeEvent = await obContext.apis.GroupApi.parseGroupEmjioLikeEvent(msg.peerUid, element.grayTipElement);
+                const emojiLikeEvent = await obContext.apis.GroupApi.parseGroupEmojiLikeEventByGrayTip(msg.peerUid, element.grayTipElement);
                 if (emojiLikeEvent) return emojiLikeEvent;
             }
             if (element.grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_XMLMSG) {
