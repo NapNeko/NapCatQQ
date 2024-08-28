@@ -44,6 +44,9 @@ import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecal
 import { LRUCache } from '@/common/lru-cache';
 import { NT2GroupEvent, NT2PrivateEvent } from './helper';
 import { NodeIKernelRecentContactListener } from '@/core/listeners/NodeIKernelRecentContactListener';
+import { SysMessage } from '@/core/proto/SysMessage';
+import { GreyTipWrapper } from '@/core/proto/GreyTipWrapper';
+import { EmojiLikeToOthersWrapper1 } from '@/core/proto/EmojiLikeToOthers';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -239,9 +242,31 @@ export class NapCatOneBot11Adapter {
 
     private initMsgListener() {
         const msgListener = new NodeIKernelMsgListener();
-        /* msgListener.onRecvSysMsg = msg => {
-            //console.log('onRecvSysMsg', Buffer.from(msg).toString('hex'));
-        }; */
+
+        msgListener.onRecvSysMsg = async msg => {
+            const sysMsg = SysMessage.fromBinary(Uint8Array.from(msg));
+            if (sysMsg.msgSpec.length === 0) {
+                return;
+            }
+            const { msgType, subType, subSubType } = sysMsg.msgSpec[0];
+            if (msgType === 732 && subType === 16 && subSubType === 16 ) {
+                const greyTip = GreyTipWrapper.fromBinary(Uint8Array.from(sysMsg.bodyWrapper!.wrappedBody.slice(7)));
+                if (greyTip.subTypeId === 36) {
+                    const emojiLikeToOthers = EmojiLikeToOthersWrapper1
+                        .fromBinary(greyTip.rest)
+                        .wrapper!
+                        .body!;
+                    const eventOrEmpty = await this.apis.GroupApi.createGroupEmojiLikeEvent(
+                        greyTip.groupCode.toString(),
+                        await this.core.apis.UserApi.getUinByUidV2(emojiLikeToOthers.attributes!.senderUid),
+                        emojiLikeToOthers.msgSpec!.msgSeq.toString(),
+                        emojiLikeToOthers.attributes!.emojiId,
+                    );
+                    eventOrEmpty && await this.networkManager.emitEvent(eventOrEmpty);
+                }
+            }
+        };
+
         msgListener.onInputStatusPush = async data => {
             const uin = await this.core.apis.UserApi.getUinByUidV2(data.fromUin);
             this.context.logger.log(`[Notice] [输入状态] ${uin} ${data.statusText}`);
@@ -271,6 +296,7 @@ export class NapCatOneBot11Adapter {
                     .catch(e => this.context.logger.logError('处理消息失败', e));
             }
         };
+
         const msgIdSend = new LRUCache<string, boolean>(100);
         const recallMsgs = new LRUCache<string, boolean>(100);
         msgListener.onMsgInfoListUpdate = async msgList => {

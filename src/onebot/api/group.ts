@@ -127,7 +127,7 @@ export class OneBotGroupApi {
         return await this.createGroupEmojiLikeEvent(groupCode, senderUin, msgSeq, emojiId);
     }
 
-    private async createGroupEmojiLikeEvent(
+    async createGroupEmojiLikeEvent(
         groupCode: string,
         senderUin: string,
         msgSeq: string,
