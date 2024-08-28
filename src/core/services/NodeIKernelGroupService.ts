@@ -14,9 +14,9 @@ import { GeneralCallResult } from '@/core/services/common';
 //高版本的接口不应该随意使用 使用应该严格进行pr审核 同时部分ipc中未出现的接口不要过于依赖 应该做好数据兜底
 
 export interface NodeIKernelGroupService {
-    //getGroupExt0xEF0Info(this.$enableGroupCodes, this.$bannedGroupCodes, this.$filter, this.$forceFetch
     getGroupExt0xEF0Info(enableGroupCodes: string[], bannedGroupCodes: string[], filter: GroupExt0xEF0InfoFilter, forceFetch: boolean):
         Promise<GeneralCallResult & { result: { groupExtInfos: Map<string, any> } }>;
+
     kickMemberV2(param: KickMemberV2Req): Promise<GeneralCallResult>;
 
     quitGroupV2(param: { groupCode: string; needDeleteLocalMsg: boolean; }): Promise<GeneralCallResult>;
@@ -40,11 +40,11 @@ export interface NodeIKernelGroupService {
         realSpecialTitleFlag: number
     }): Promise<unknown>;
 
-    //26702
     getGroupMemberLevelInfo(groupCode: string): Promise<unknown>;
 
-    //26702
-    getGroupHonorList(groupCodes: Array<string>): unknown;
+    getGroupInfoForJoinGroup(groupCode: string, needPrivilegeFlag: boolean, serviceType: number): Promise<unknown>;
+
+    getGroupHonorList(req: { groupCodes: Array<string> }): Promise<unknown>;
 
     getUinByUids(uins: string[]): Promise<{
         errCode: number,
@@ -58,13 +58,10 @@ export interface NodeIKernelGroupService {
         uids: Map<string, string>
     }>;
 
-    //26702(其实更早 但是我不知道)
     checkGroupMemberCache(arrayList: Array<string>): Promise<unknown>;
 
-    //26702(其实更早 但是我不知道)
     getGroupLatestEssenceList(groupCode: string): Promise<unknown>;
 
-    //26702(其实更早 但是我不知道)
     shareDigest(Req: {
         appId: string,
         appType: number,
@@ -84,20 +81,17 @@ export interface NodeIKernelGroupService {
         }
     }): Promise<unknown>;
 
-    //26702(其实更早 但是我不知道)
+
     isEssenceMsg(Req: { groupCode: string, msgRandom: number, msgSeq: number }): Promise<unknown>;
 
-    //26702(其实更早 但是我不知道)
     queryCachedEssenceMsg(Req: { groupCode: string, msgRandom: number, msgSeq: number }): Promise<unknown>;
 
-    //26702(其实更早 但是我不知道)
     fetchGroupEssenceList(Req: {
         groupCode: string,
         pageStart: number,
         pageLimit: number
     }, Arg: unknown): Promise<unknown>;
 
-    //26702
     getAllMemberList(groupCode: string, forceFetch: boolean): Promise<{
         errCode: number,
         errMsg: string,
@@ -136,8 +130,6 @@ export interface NodeIKernelGroupService {
 
     getMemberInfo(group_id: string, uids: string[], forceFetch: boolean): Promise<GeneralCallResult>;
 
-    //getMemberInfo  [ '56729xxxx', [ 'u_4Nj08cwW5Hxxxxx' ], true ]
-
     kickMember(groupCode: string, memberUids: string[], refuseForever: boolean, kickReason: string): Promise<void>;
 
     modifyMemberRole(groupCode: string, uid: string, role: GroupMemberRole): void;
@@ -152,7 +144,7 @@ export interface NodeIKernelGroupService {
 
     getGroupExtList(force: boolean): Promise<GeneralCallResult>;
 
-    getGroupDetailInfo(groupCode: string, groupInfoSource: GroupInfoSource): unknown;
+    getGroupDetailInfo(groupCode: string, groupInfoSource: GroupInfoSource): Promise<unknown>;
 
     getMemberExtInfo(param: GroupExtParam): Promise<unknown>;//req
 

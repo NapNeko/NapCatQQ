@@ -33,11 +33,6 @@ export class NTQQGroupApi {
         }
         this.context.logger.logDebug(`加载${this.groups.length}个群组缓存完成`);
     }
-    async getGroupInfoEx(groupCode: string) {
-        const groupDetail = await this.context.session.getGroupService().getGroupDetailInfo(groupCode, GroupInfoSource.KDATACARD);
-        const groupExtInfo = await this.getGroupExtFE0Info([groupCode]);
-        return { groupDetail, groupExtInfo };
-    }
     async setGroupAvatar(gc: string, filePath: string) {
         return this.context.session.getGroupService().setHeader(gc, filePath);
     }

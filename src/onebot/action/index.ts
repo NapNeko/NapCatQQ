@@ -81,11 +81,13 @@ import SetModelShow from './go-cqhttp/SetModelShow';
 import { SetInputStatus } from './extends/SetInputStatus';
 import { GetCSRF } from './system/GetCSRF';
 import { DelGroupNotice } from './group/DelGroupNotice';
+import { GetGroupInfoEx } from './extends/GetGroupInfoEx';
 
 export type ActionMap = Map<string, BaseAction<any, any>>;
 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore): ActionMap {
     const actionHandlers = [
+        new GetGroupInfoEx(obContext, core),
         new FetchEmojiLike(obContext, core),
         new GetFile(obContext, core),
         new SetQQProfile(obContext, core),
