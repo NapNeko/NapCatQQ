@@ -13,7 +13,7 @@ import {
     RawMessage,
     SendStatusType,
 } from '@/core';
-import { OB11Config, OB11ConfigLoader } from '@/onebot/helper/config';
+import { OB11Config, OB11ConfigLoader } from '@/onebot/config';
 import {
     OB11ActiveHttpAdapter,
     OB11ActiveWebSocketAdapter,

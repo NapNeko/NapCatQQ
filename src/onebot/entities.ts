@@ -1,6 +1,6 @@
 import { calcQQLevel } from '@/common/helper';
 import { Friend, FriendV2, Group, GroupMember, SelfInfo, Sex, User } from '@/core';
-import { OB11Group, OB11GroupMember, OB11GroupMemberRole, OB11User, OB11UserSex } from '../types';
+import { OB11Group, OB11GroupMember, OB11GroupMemberRole, OB11User, OB11UserSex } from './types';
 
 export class OB11Entities {
     static selfInfo(selfInfo: SelfInfo): OB11User {

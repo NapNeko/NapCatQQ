@@ -1,4 +1,4 @@
-import { OB11MessageData } from '../types';
+import { OB11MessageData } from './types';
 
 const pattern = /\[CQ:(\w+)((,\w+=[^,\]]*)*)]/;
 
