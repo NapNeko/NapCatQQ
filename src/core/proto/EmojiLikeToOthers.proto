@@ -19,6 +19,13 @@ message EmojiLikeToOthersMsgSpec {
 }
 
 message EmojiLikeToOthersAttributes {
+  enum Operation {
+    FALLBACK = 0;
+    LIKE = 1;
+    UNLIKE = 2;
+  }
+
   string emojiId = 1;
   string senderUid = 4;
+  Operation operation = 5;
 }
