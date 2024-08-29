@@ -593,6 +593,7 @@ export const IMAGE_HTTP_HOST_NT = 'https://multimedia.nt.qq.com.cn';
 
 export interface PicElement {
     md5HexStr?: string;
+    filePath?: string;
     fileSize: number | string;//number
     picWidth: number;
     picHeight: number;

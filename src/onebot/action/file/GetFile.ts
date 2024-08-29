@@ -33,20 +33,16 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
         const NTQQFileApi = this.core.apis.FileApi;
 
         const contextMsgFile = FileNapCatOneBotUUID.decode(payload.file);
-
         //接收消息标记模式
         if (contextMsgFile) {
             const { peer, msgId, elementId } = contextMsgFile;
-
             const downloadPath = await NTQQFileApi.downloadMedia(msgId, peer.chatType, peer.peerUid, elementId, '', '');
-
             const mixElement = (await NTQQMsgApi.getMsgsByMsgId(peer, [msgId]))?.msgList
                 .find(msg => msg.msgId === msgId)?.elements.find(e => e.elementId === elementId);
             const mixElementInner = mixElement?.videoElement ?? mixElement?.fileElement ?? mixElement?.pttElement ?? mixElement?.picElement;
             if (!mixElementInner) throw new Error('element not found');
-
-            const fileSize = mixElementInner.fileSize?.toString() || '';
-            const fileName = mixElementInner.fileName || '';
+            const fileSize = mixElementInner.fileSize?.toString() ?? '';
+            const fileName = mixElementInner.fileName ?? '';
 
             const res: GetFileResponse = {
                 file: downloadPath,
