@@ -84,29 +84,14 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
         }
 
         //搜索名字模式
-        const NTSearchNameResult = (await NTQQFileApi.searchfile([payload.file])).resultItems;
-        if (NTSearchNameResult.length !== 0) {
-            const MsgId = NTSearchNameResult[0].msgId;
-            let peer: Peer | undefined = undefined;
-            if (NTSearchNameResult[0].chatType == ChatType.KCHATTYPEGROUP) {
-                peer = { chatType: ChatType.KCHATTYPEGROUP, peerUid: NTSearchNameResult[0].groupChatInfo[0].groupCode };
-            }
-            if (!peer) throw new Error('chattype not support');
-            const msgList: RawMessage[] = (await NTQQMsgApi.getMsgsByMsgId(peer, [MsgId]))?.msgList;
-            if (!msgList || msgList.length == 0) {
-                throw new Error('msg not found');
-            }
-            const msg = msgList[0];
-            const file = msg.elements.filter(e => e.elementType == NTSearchNameResult[0].elemType);
-            if (file.length == 0) {
-                throw new Error('file not found');
-            }
-            const downloadPath = await NTQQFileApi.downloadMedia(msg.msgId, msg.chatType, msg.peerUid, file[0].elementId, '', '');
+        const searchResult = (await NTQQFileApi.searchForFile([payload.file]));
+        if (searchResult) {
+            const downloadPath = await NTQQFileApi.downloadFileById(searchResult.id, parseInt(searchResult.fileSize));
             const res: GetFileResponse = {
                 file: downloadPath,
                 url: downloadPath,
-                file_size: NTSearchNameResult[0].fileSize.toString(),
-                file_name: NTSearchNameResult[0].fileName,
+                file_size: searchResult.fileSize.toString(),
+                file_name: searchResult.fileName,
             };
             if (this.obContext.configLoader.configData.enableLocalFile2Url && downloadPath) {
                 try {
