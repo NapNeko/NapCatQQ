@@ -64,7 +64,7 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
         const contextModelIdFile = FileNapCatOneBotUUID.decodeModelId(payload.file);
         if (contextModelIdFile) {
             const { peer, modelId } = contextModelIdFile;
-            const downloadPath = await NTQQFileApi.downloadFileForModelId(peer, modelId);
+            const downloadPath = await NTQQFileApi.downloadFileForModelId(peer, modelId,' ');
             const res: GetFileResponse = {
                 file: downloadPath,
                 url: downloadPath,

@@ -1,6 +1,7 @@
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
+import { FileNapCatOneBotUUID } from '@/common/helper';
 
 const SchemaData = {
     type: 'object',
@@ -36,6 +37,13 @@ export class GetGroupFileList extends BaseAction<Payload, { FileList: Array<any>
             ...param
         }).catch((e) => {
             return [];
+        });
+        ret.forEach((e) => {
+            let fileModelId = e?.fileInfo?.fileModelId;
+            if (fileModelId) {
+                e.fileModelId = fileModelId;
+            }
+            e.fileId = FileNapCatOneBotUUID.encodeModelId({ chatType: 2, peerUid: payload.group_id.toString() }, fileModelId);
         });
         return { FileList: ret };
     }

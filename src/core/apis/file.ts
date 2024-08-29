@@ -302,13 +302,16 @@ export class NTQQFileApi {
     async downloadMediaByUuid() {
         //napCatCore.session.getRichMediaService().downloadFileForFileUuid();
     }
-    async downloadFileForModelId(peer: Peer, modelId: string, timeout = 1000 * 60 * 2) {
+    async downloadFileForModelId(peer: Peer, modelId: string, unknown: string, timeout = 1000 * 60 * 2) {
         const [, fileTransNotifyInfo] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelRichMediaService/downloadFileForModelId',
             'NodeIKernelMsgListener/onRichMediaDownloadComplete',
-            [peer, [modelId]],
+            [peer, [modelId], unknown],
             () => true,
-            (arg) => arg?.commonFileInfo?.fileModelId === modelId,
+            (arg) => { 
+                console.log(arg);
+                return arg?.commonFileInfo?.fileModelId === modelId 
+            },
             1,
             timeout,
         );
