@@ -17,7 +17,7 @@ import {
 import path from 'path';
 import fs from 'fs';
 import fsPromises from 'fs/promises';
-import { InstanceContext, NapCatCore } from '@/core';
+import { InstanceContext, NapCatCore, SearchResultItem } from '@/core';
 import * as fileType from 'file-type';
 import imageSize from 'image-size';
 import { ISizeCalculationResult } from 'image-size/dist/types/interface';
@@ -438,17 +438,36 @@ export class NTQQFileApi {
         });
     }
 
-    async searchfile(keys: string[]) {
-        const Event = this.core.eventWrapper.createEventFunction('NodeIKernelSearchService/searchFileWithKeywords');
-        const id = await Event!(keys, 12);
-        const Listener = this.core.eventWrapper.registerListen(
-            'NodeIKernelSearchListener/onSearchFileKeywordsResult',
-            1,
-            20000,
-            (params) => id !== '' && params.searchId == id,
+    async searchForFile(keys: string[]): Promise<SearchResultItem | undefined> {
+        const [, searchResult] = await this.core.eventWrapper.callNormalEventV2(
+            'NodeIKernelFileAssistantService/searchFile',
+            'NodeIKernelFileAssistantListener/onFileSearch',
+            [
+                keys,
+                {
+                    resultType: 2,
+                    pageLimit: 1,
+                }
+            ]
         );
-        const [ret] = (await Listener);
-        return ret;
+        return searchResult.resultItems[0];
+    }
+
+    async downloadFileById(
+        fileId: string,
+        fileSize: number = 1024576,
+        estimatedTime: number = (fileSize * 1000 / 1024576) + 5000,
+    ) {
+        const [, ret] = await this.core.eventWrapper.callNormalEventV2(
+            'NodeIKernelFileAssistantService/downloadFile',
+            'NodeIKernelFileAssistantListener/onFileStatusChanged',
+            [[fileId]],
+            ret => ret.result === 0,
+            status => status.fileStatus === 2 && status.fileProgress === '0',
+            1,
+            estimatedTime, // estimate 1MB/s
+        );
+        return ret.filePath!;
     }
 
     async getImageUrl(element: PicElement) {
