@@ -255,6 +255,9 @@ export class NapCatOneBot11Adapter {
                         .fromBinary(greyTip.rest)
                         .wrapper!
                         .body!;
+                    if (emojiLikeToOthers.attributes?.operation !== 1) { // Un-like
+                        return;
+                    }
                     const eventOrEmpty = await this.apis.GroupApi.createGroupEmojiLikeEvent(
                         greyTip.groupCode.toString(),
                         await this.core.apis.UserApi.getUinByUidV2(emojiLikeToOthers.attributes!.senderUid),
