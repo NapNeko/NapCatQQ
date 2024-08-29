@@ -34,11 +34,21 @@ export class NTQQWebApi {
             return undefined;
         }
     }
-
-    async getGroupEssenceMsg(GroupCode: string) {
+    async getGroupEssenceMsgAll(GroupCode: string) {
+        let ret: GroupEssenceMsgRet[] = [];
+        for (let i = 0; i < 4; i++) {
+            let data = await this.getGroupEssenceMsg(GroupCode, i, 50);
+            if (!data || data?.data.is_end) break;
+            ret.push(data);
+        }
+        return ret;
+    }
+    async getGroupEssenceMsg(GroupCode: string, page_start: number = 0, page_limit: number = 50) {
         const cookieObject = await this.core.apis.UserApi.getCookies('qun.qq.com');
         const url = `https://qun.qq.com/cgi-bin/group_digest/digest_list?${new URLSearchParams({
             bkn: this.getBknFromCookie(cookieObject),
+            page_start: page_start.toString(),
+            page_limit: page_limit.toString(),
             group_code: GroupCode,
         }).toString()
         }`;
