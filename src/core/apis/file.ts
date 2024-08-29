@@ -356,17 +356,15 @@ export class NTQQFileApi {
         if (msg.msgList.length === 0) {
             return fileTransNotifyInfo.filePath;
         }
-        //获取原始消息
-        const FileElements = msg?.msgList[0]?.elements?.find(e => e.elementId === elementId);
-        if (!FileElements) {
-            //失败则就乱来 Todo
-            return fileTransNotifyInfo.filePath;
+        const mixElement = msg.msgList.find((msg) => msg.msgId === msgId)?.elements.find((e) => e.elementId === elementId);
+        const mixElementInner = mixElement?.videoElement ?? mixElement?.fileElement ?? mixElement?.pttElement ?? mixElement?.picElement;
+        let realPath = mixElementInner?.filePath;
+        if (!realPath) {
+            let picThumbPath: Map<number, string> = (mixElementInner as any)?.picThumbPath;
+            let picThumbPathList = Array.from(picThumbPath.values());
+            if (picThumbPathList.length > 0) realPath = picThumbPathList[0];
         }
-        //从原始消息获取文件路径
-        return FileElements?.fileElement?.filePath ??
-            FileElements?.pttElement?.filePath ??
-            FileElements?.videoElement?.filePath ??
-            FileElements?.picElement?.sourcePath;
+        return realPath;
     }
 
     async getImageSize(filePath: string): Promise<ISizeCalculationResult | undefined> {

@@ -51,7 +51,7 @@ export class FileNapCatOneBotUUID {
         msgId: string,
         elementId: string
     } {
-        if (!uuid.startsWith('NapCatOneBot-File-')) return undefined;
+        if (!uuid.startsWith('NapCatOneBot-MsgFile-')) return undefined;
         const data = uuid.split('-');
         if (data.length !== 6) return undefined;
         const [, , chatType, peerUid, msgId, elementId] = data;
