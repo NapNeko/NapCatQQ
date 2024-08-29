@@ -308,10 +308,7 @@ export class NTQQFileApi {
             'NodeIKernelMsgListener/onRichMediaDownloadComplete',
             [peer, [modelId], unknown],
             () => true,
-            (arg) => { 
-                console.log(arg);
-                return arg?.commonFileInfo?.fileModelId === modelId 
-            },
+            (arg) => arg?.commonFileInfo?.fileModelId === modelId,
             1,
             timeout,
         );
@@ -363,8 +360,8 @@ export class NTQQFileApi {
         const mixElementInner = mixElement?.videoElement ?? mixElement?.fileElement ?? mixElement?.pttElement ?? mixElement?.picElement;
         let realPath = mixElementInner?.filePath;
         if (!realPath) {
-            let picThumbPath: Map<number, string> = (mixElementInner as any)?.picThumbPath;
-            let picThumbPathList = Array.from(picThumbPath.values());
+            const picThumbPath: Map<number, string> = (mixElementInner as any)?.picThumbPath;
+            const picThumbPathList = Array.from(picThumbPath.values());
             if (picThumbPathList.length > 0) realPath = picThumbPathList[0];
         }
         return realPath;
