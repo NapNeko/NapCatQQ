@@ -116,18 +116,22 @@ export class OneBotGroupApi {
                         const searchParams = new URL(json.items[0].jp).searchParams;
                         const msgSeq = searchParams.get('msgSeq')!;
                         const Group = searchParams.get('groupCode');
+                        if (!Group) return;
                         // const businessId = searchParams.get('businessid');
                         const Peer = {
                             guildId: '',
                             chatType: ChatType.KCHATTYPEGROUP,
-                            peerUid: Group!,
+                            peerUid: Group,
                         };
                         const msgData = await NTQQMsgApi.getMsgsBySeqAndCount(Peer, msgSeq.toString(), 1, true, true);
+                        let msgList = (await this.core.apis.WebApi.getGroupEssenceMsgAll(Group)).flatMap((e) => e.data.msg_list);
+                        let realMsg = msgList.find((e) => e.msg_seq.toString() == msgSeq);
                         return new OB11GroupEssenceEvent(
                             this.core,
                             parseInt(msg.peerUid),
                             MessageUnique.getShortIdByMsgId(msgData.msgList[0].msgId)!,
                             parseInt(msgData.msgList[0].senderUin),
+                            parseInt(realMsg?.add_digest_uin ?? '0'),
                         );
                         // 获取MsgSeq+Peer可获取具体消息
                     }
