@@ -182,8 +182,7 @@ export interface NodeIKernelGroupService {
 
     destroyGroup(groupCode: string): void;
 
-    //获取单屏群通知列表
-    getSingleScreenNotifies(force: boolean, start_seq: string, num: number): Promise<GeneralCallResult>;
+    getSingleScreenNotifies(doubted: boolean, start_seq: string, num: number): Promise<GeneralCallResult>;
 
     clearGroupNotifies(groupCode: string): void;
 

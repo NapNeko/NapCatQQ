@@ -309,12 +309,12 @@ export class NTQQGroupApi {
         return this.context.session.getGroupService().removeGroupEssence(param);
     }
 
-    async getSingleScreenNotifies(num: number) {
+    async getSingleScreenNotifies(doubt: boolean, num: number) {
         const [, , , notifies] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelGroupService/getSingleScreenNotifies',
             'NodeIKernelGroupListener/onGroupSingleScreenNotifies',
             [
-                false,
+                doubt,
                 '',
                 num,
             ],
