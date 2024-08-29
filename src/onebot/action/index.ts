@@ -52,7 +52,7 @@ import { GetFriendWithCategory } from './extends/GetFriendWithCategory';
 import { SendGroupNotice } from './go-cqhttp/SendGroupNotice';
 import { GetGroupHonorInfo } from './go-cqhttp/GetGroupHonorInfo';
 import { GoCQHTTPHandleQuickAction } from './go-cqhttp/QuickAction';
-import { GetGroupSystemMsg } from './group/GetGroupSystemMsg';
+import { GetGroupIgnoredNotifies } from './group/GetGroupIgnoredNotifies';
 import { GetOnlineClient } from './go-cqhttp/GetOnlineClient';
 import { IOCRImage, OCRImage } from './extends/OCRImage';
 import { GetGroupFileCount } from './file/GetGroupFileCount';
@@ -159,7 +159,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new GoCQHTTPGetForwardMsgAction(obContext, core),
         new GetFriendMsgHistory(obContext, core),
         new GoCQHTTPHandleQuickAction(obContext, core),
-        new GetGroupSystemMsg(obContext, core),
+        new GetGroupIgnoredNotifies(obContext, core),
         new DelEssenceMsg(obContext, core),
         new SetEssenceMsg(obContext, core),
         new GetRecentContact(obContext, core),
