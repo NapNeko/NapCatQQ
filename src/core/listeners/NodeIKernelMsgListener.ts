@@ -1,25 +1,6 @@
 import { ChatType, RawMessage } from '@/core/entities';
-export interface CommonFileInfo {
-    bizType: null;
-    chatType: number;
-    elemId: string;
-    favId: null;
-    fileModelId: string;
-    fileName: string;
-    fileSize: string;
-    md5: string;
-    md510m: string;
-    msgId: string;
-    msgTime: string;
-    parent: null;
-    peerUid: string;
-    picThumbPath: null;
-    sha: string;
-    sha3: string;
-    subId: string;
-    uuid: string;
-    [property: string]: any;
-}
+import { CommonFileInfo } from '@/core';
+
 export interface OnRichMediaDownloadCompleteParams {
     fileModelId: string,
     msgElementId: string,
