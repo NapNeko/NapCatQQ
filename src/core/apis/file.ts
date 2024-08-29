@@ -353,9 +353,6 @@ export class NTQQFileApi {
             chatType: chatType,
             peerUid: peerUid,
         }, [msgId]);
-        if (msg.msgList.length === 0) {
-            return fileTransNotifyInfo.filePath;
-        }
         const mixElement = msg.msgList.find((msg) => msg.msgId === msgId)?.elements.find((e) => e.elementId === elementId);
         const mixElementInner = mixElement?.videoElement ?? mixElement?.fileElement ?? mixElement?.pttElement ?? mixElement?.picElement;
         let realPath = mixElementInner?.filePath;
