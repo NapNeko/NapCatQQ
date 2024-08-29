@@ -19,39 +19,7 @@ export class NodeIKernelFileAssistantListener {
     onFileListChanged(...args: unknown[]) {
     }
 
-    onFileSearch(searchResult: {
-        searchId: number,
-        resultType: number,
-        hasMore: boolean,
-        resultItems: {
-            id: string,
-            fileName: string,
-            fileNameHits: string[],
-            fileStatus: number,
-            fileSize: string,
-            isSend: boolean,
-            source: number,
-            fileTime: string,
-            expTime: string,
-            session: {
-                context: null,
-                uid: string,
-                nick: string,
-                remark: string,
-                memberCard: string,
-                groupCode: string,
-                groupName: string,
-                groupRemark: string,
-                count: number,
-            },
-            thumbPath: string,
-            filePath: string,
-            msgId: string,
-            chatType: number,
-            peerUid: string,
-            fileType: number,
-        }[],
-    }) {
+    onFileSearch(searchResult: SearchResultWrapper) {
     }
 }
 
