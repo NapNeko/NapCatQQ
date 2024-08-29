@@ -33,11 +33,11 @@ export class GetGroupEssence extends BaseAction<Payload, any> {
     async _handle(payload: Payload) {
         const NTQQWebApi = this.core.apis.WebApi;
         const NTQQGroupApi = this.core.apis.GroupApi;
-        const ret = await NTQQWebApi.getGroupEssenceMsg(payload.group_id.toString());
-        if (!ret) {
+        const msglist = (await NTQQWebApi.getGroupEssenceMsgAll(payload.group_id.toString())).flatMap((e) => e.data.msg_list);
+        if (!msglist) {
             throw new Error('获取失败');
         }
-        return await Promise.all(ret.data.msg_list.map(async (msg) => {
+        return await Promise.all(msglist.map(async (msg) => {
             const msgOriginData = await this.msgSeqToMsgId({
                 chatType: ChatType.KCHATTYPEGROUP,
                 peerUid: payload.group_id.toString(),
