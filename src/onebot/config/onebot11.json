@@ -1,6 +1,6 @@
 {
     "http": {
-        "enable": false,
+        "enable": true,
         "host": "",
         "port": 3000,
         "secret": "",
@@ -9,7 +9,7 @@
         "postUrls": []
     },
     "ws": {
-        "enable": false,
+        "enable": true,
         "host": "",
         "port": 3001
     },
