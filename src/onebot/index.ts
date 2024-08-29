@@ -139,7 +139,7 @@ export class NapCatOneBot11Adapter {
 
     initRecentContactListener() {
         const recentContactListener = new NodeIKernelRecentContactListener();
-        recentContactListener.onRecentContactNotification = function(msgList: any[] /* arg0: { msgListUnreadCnt: string }, arg1: number */) {
+        recentContactListener.onRecentContactNotification = function (msgList: any[] /* arg0: { msgListUnreadCnt: string }, arg1: number */) {
             msgList.forEach((msg) => {
                 if (msg.chatType == ChatType.KCHATTYPEGROUP) {
                     // log("recent contact", msgList, arg0, arg1);
@@ -248,7 +248,7 @@ export class NapCatOneBot11Adapter {
                 return;
             }
             const { msgType, subType, subSubType } = sysMsg.msgSpec[0];
-            if (msgType === 732 && subType === 16 && subSubType === 16 ) {
+            if (msgType === 732 && subType === 16 && subSubType === 16) {
                 const greyTip = GreyTipWrapper.fromBinary(Uint8Array.from(sysMsg.bodyWrapper!.wrappedBody.slice(7)));
                 if (greyTip.subTypeId === 36) {
                     const emojiLikeToOthers = EmojiLikeToOthersWrapper1
@@ -371,7 +371,7 @@ export class NapCatOneBot11Adapter {
 
     private initGroupListener() {
         const groupListener = new NodeIKernelGroupListener();
-        
+
         groupListener.onGroupNotifiesUpdated = async (_, notifies) => {
             //console.log('ob11 onGroupNotifiesUpdated', notifies[0]);
             await this.core.apis.GroupApi.clearGroupNotifiesUnreadCount(false);
@@ -463,6 +463,18 @@ export class NapCatOneBot11Adapter {
                         }
                     } else if (notify.type == GroupNotifyMsgType.INVITED_BY_MEMBER && notify.status == GroupNotifyMsgStatus.KUNHANDLE) {
                         this.context.logger.logDebug(`收到邀请我加群通知:${notify}`);
+                        const groupInviteEvent = new OB11GroupRequestEvent(
+                            this.core,
+                            parseInt(notify.group.groupCode),
+                            parseInt(await this.core.apis.UserApi.getUinByUidV2(notify.user2.uid)),
+                            'invite',
+                            notify.postscript,
+                            flag,
+                        );
+                        this.networkManager.emitEvent(groupInviteEvent)
+                            .catch(e => this.context.logger.logError('处理邀请本人加群失败', e));
+                    } else if (notify.type == GroupNotifyMsgType.INVITED_NEED_ADMINI_STRATOR_PASS && notify.status == GroupNotifyMsgStatus.KUNHANDLE) {
+                        this.context.logger.logDebug(`收到群员邀请加群通知:${notify}`);
                         const groupInviteEvent = new OB11GroupRequestEvent(
                             this.core,
                             parseInt(notify.group.groupCode),
