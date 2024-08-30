@@ -23,29 +23,33 @@ export async function solveAsyncProblem<T extends (...args: any[]) => Promise<an
         });
     });
 }
+
 export class FileNapCatOneBotUUID {
     static encodeModelId(peer: Peer, modelId: string): string {
-        return `NapCatOneBot-ModeldFile-${peer.chatType}-${peer.peerUid}-${modelId}`;
+        return `NapCatOneBot-ModelIdFile-${peer.chatType}-${peer.peerUid}-${modelId}`;
     }
+
     static decodeModelId(uuid: string): undefined | {
         peer: Peer,
         modelId: string
     } {
-        if (!uuid.startsWith('NapCatOneBot-ModeldFile-')) return undefined;
+        if (!uuid.startsWith('NapCatOneBot-ModelIdFile-')) return undefined;
         const data = uuid.split('-');
         if (data.length !== 5) return undefined;
         const [, , chatType, peerUid, modelId] = data;
         return {
             peer: {
                 chatType: chatType as any,
-                peerUid: peerUid
+                peerUid: peerUid,
             },
             modelId,
         };
     }
+
     static encode(peer: Peer, msgId: string, elementId: string): string {
         return `NapCatOneBot-MsgFile-${peer.chatType}-${peer.peerUid}-${msgId}-${elementId}`;
     }
+
     static decode(uuid: string): undefined | {
         peer: Peer,
         msgId: string,
@@ -58,13 +62,14 @@ export class FileNapCatOneBotUUID {
         return {
             peer: {
                 chatType: chatType as any,
-                peerUid: peerUid
+                peerUid: peerUid,
             },
             msgId,
             elementId,
         };
     }
 }
+
 export function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }

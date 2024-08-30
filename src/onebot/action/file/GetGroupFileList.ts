@@ -41,7 +41,10 @@ export class GetGroupFileList extends BaseAction<Payload, { FileList: Array<any>
         ret.forEach((e) => {
             const fileModelId = e?.fileInfo?.fileModelId;
             if (fileModelId)
-                e.fileInfo!.fileId = FileNapCatOneBotUUID.encodeModelId({ chatType: 2, peerUid: payload.group_id.toString() }, fileModelId);
+                e.fileInfo!.fileId = FileNapCatOneBotUUID.encodeModelId({
+                    chatType: 2,
+                    peerUid: payload.group_id.toString()
+                }, fileModelId);
         });
         return { FileList: ret };
     }
