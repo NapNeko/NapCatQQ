@@ -436,6 +436,8 @@ export class NTQQFileApi {
     }
 
     async searchForFile(keys: string[]): Promise<SearchResultItem | undefined> {
+        const randomResultId = 100000 + Math.floor(Math.random() * 10000);
+        let searchId = 0;
         const [, searchResult] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelFileAssistantService/searchFile',
             'NodeIKernelFileAssistantListener/onFileSearch',
@@ -444,8 +446,14 @@ export class NTQQFileApi {
                 {
                     resultType: 2,
                     pageLimit: 1,
-                }
-            ]
+                },
+                randomResultId
+            ],
+            (ret) => {
+                searchId = ret;
+                return true;
+            },
+            result => result.searchId === searchId && result.resultId === randomResultId,
         );
         return searchResult.resultItems[0];
     }

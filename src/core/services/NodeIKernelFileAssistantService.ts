@@ -11,7 +11,7 @@ export interface NodeIKernelFileAssistantService {
 
     getFileSessionList(): unknown;
 
-    searchFile(keywords: string[], params: { resultType: number, pageLimit: number }): unknown;
+    searchFile(keywords: string[], params: { resultType: number, pageLimit: number }, resultId: number): number;
 
     resetSearchFileSortType(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
 
