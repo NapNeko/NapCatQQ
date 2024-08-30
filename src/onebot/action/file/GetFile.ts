@@ -2,7 +2,6 @@ import BaseAction from '../BaseAction';
 import fs from 'fs/promises';
 import { FileNapCatOneBotUUID } from '@/common/helper';
 import { ActionName } from '../types';
-import { ChatType, Peer, RawMessage } from '@/core/entities';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
 export interface GetFilePayload {
