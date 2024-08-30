@@ -18,6 +18,7 @@ import { OB11GroupUploadNoticeEvent } from '@/onebot/event/notice/OB11GroupUploa
 import { OB11GroupPokeEvent } from '@/onebot/event/notice/OB11PokeEvent';
 import { OB11GroupEssenceEvent } from '@/onebot/event/notice/OB11GroupEssenceEvent';
 import { OB11GroupTitleEvent } from '@/onebot/event/notice/OB11GroupTitleEvent';
+import { FileNapCatOneBotUUID } from '@/common/helper';
 
 export class OneBotGroupApi {
     obContext: NapCatOneBot11Adapter;
@@ -76,7 +77,10 @@ export class OneBotGroupApi {
                     this.core,
                     parseInt(msg.peerUid), parseInt(msg.senderUin || ''),
                     {
-                        id: element.fileElement.fileUuid!,
+                        id: FileNapCatOneBotUUID.encode({
+                            chatType: ChatType.KCHATTYPEGROUP,
+                            peerUid: msg.peerUid,
+                        }, msg.msgSeq, element.elementId),
                         name: element.fileElement.fileName,
                         size: parseInt(element.fileElement.fileSize),
                         busid: element.fileElement.fileBizId || 0,
@@ -124,8 +128,8 @@ export class OneBotGroupApi {
                             peerUid: Group,
                         };
                         const msgData = await NTQQMsgApi.getMsgsBySeqAndCount(Peer, msgSeq.toString(), 1, true, true);
-                        let msgList = (await this.core.apis.WebApi.getGroupEssenceMsgAll(Group)).flatMap((e) => e.data.msg_list);
-                        let realMsg = msgList.find((e) => e.msg_seq.toString() == msgSeq);
+                        const msgList = (await this.core.apis.WebApi.getGroupEssenceMsgAll(Group)).flatMap((e) => e.data.msg_list);
+                        const realMsg = msgList.find((e) => e.msg_seq.toString() == msgSeq);
                         return new OB11GroupEssenceEvent(
                             this.core,
                             parseInt(msg.peerUid),
