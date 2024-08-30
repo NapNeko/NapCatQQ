@@ -25,7 +25,7 @@ export class NodeIKernelFileAssistantListener {
 
 export type SearchResultWrapper = {
     searchId: number,
-    resultType: number,
+    resultId: number,
     hasMore: boolean,
     resultItems: SearchResultItem[],
 };
