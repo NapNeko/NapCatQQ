@@ -35,15 +35,13 @@ export class GetGroupFileList extends BaseAction<Payload, { FileList: Array<any>
             sortOrder: 2,
             showOnlinedocFolder: 0,
             ...param
-        }).catch((e) => {
+        }).catch(() => {
             return [];
         });
         ret.forEach((e) => {
-            let fileModelId = e?.fileInfo?.fileModelId;
-            if (fileModelId) {
-                e.fileModelId = fileModelId;
-            }
-            e.fileId = FileNapCatOneBotUUID.encodeModelId({ chatType: 2, peerUid: payload.group_id.toString() }, fileModelId);
+            const fileModelId = e?.fileInfo?.fileModelId;
+            if (fileModelId)
+                e.fileInfo!.fileId = FileNapCatOneBotUUID.encodeModelId({ chatType: 2, peerUid: payload.group_id.toString() }, fileModelId);
         });
         return { FileList: ret };
     }

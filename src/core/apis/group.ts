@@ -402,7 +402,7 @@ export class NTQQGroupApi {
 
     }
 
-    async GetGroupFileCount(Gids: Array<string>) {
+    async getGroupFileCount(Gids: Array<string>) {
         return this.context.session.getRichMediaService().batchGetGroupFileCount(Gids);
     }
 
