@@ -2,7 +2,6 @@ import {
     ChatType,
     GeneralCallResult,
     Group,
-    GroupInfoSource,
     GroupMember,
     GroupMemberRole,
     GroupRequestOperateTypes,

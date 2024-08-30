@@ -10,12 +10,12 @@ import {
     QuickActionGroupMessage,
     QuickActionGroupRequest,
 } from '@/onebot';
-import { ChatType, GroupRequestOperateTypes, NapCatCore, Peer } from '@/core';
+import { GroupRequestOperateTypes, NapCatCore, Peer } from '@/core';
 import { OB11FriendRequestEvent } from '@/onebot/event/request/OB11FriendRequest';
 import { OB11GroupRequestEvent } from '@/onebot/event/request/OB11GroupRequest';
-import { ContextMode, normalize } from '@/onebot/action/msg/SendMsg';
+import { ContextMode, createContext, normalize } from '@/onebot/action/msg/SendMsg';
 import { isNull } from '@/common/helper';
-import { createContext } from '@/onebot/action/msg/SendMsg';
+
 export class OneBotQuickActionApi {
     constructor(
         public obContext: NapCatOneBot11Adapter,

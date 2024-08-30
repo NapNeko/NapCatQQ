@@ -5,8 +5,8 @@ import { NodeIKernelLoginListener, NodeIKernelSessionListener } from '@/core/lis
 import { NodeIDependsAdapter, NodeIDispatcherAdapter, NodeIGlobalAdapter } from '@/core/adapters';
 import { NapCatPathWrapper } from '@/common/path';
 import {
-    InstanceContext,
     genSessionConfig,
+    InstanceContext,
     loadQQWrapper,
     NapCatCore,
     NapCatCoreWorkingEnv,
