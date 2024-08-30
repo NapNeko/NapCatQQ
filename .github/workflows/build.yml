@@ -1,15 +1,11 @@
 name: "Build Action"
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
 
 permissions: write-all
 
 jobs:
   Build-LiteLoader:
-    if: ${{ startsWith(github.event.head_commit.message, 'build:') }}
     runs-on: ubuntu-latest
     steps:
     - name: Clone Main Repository
@@ -37,7 +33,6 @@ jobs:
         name: NapCat.Framework
         path: dist
   Build-Shell:
-    if: ${{ startsWith(github.event.head_commit.message, 'build:') }}
     runs-on: ubuntu-latest
     steps:
         - name: Clone Main Repository
