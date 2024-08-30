@@ -478,8 +478,8 @@ export class NapCatOneBot11Adapter {
                         const groupInviteEvent = new OB11GroupRequestEvent(
                             this.core,
                             parseInt(notify.group.groupCode),
-                            parseInt(await this.core.apis.UserApi.getUinByUidV2(notify.user2.uid)),
-                            'invite',
+                            parseInt(await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid)),
+                            'add',
                             notify.postscript,
                             flag,
                         );
