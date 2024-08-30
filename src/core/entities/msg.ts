@@ -22,6 +22,7 @@ export interface GetFileListParam {
     startIndex: number;
     sortOrder: number;
     showOnlinedocFolder: number;
+    folderId?: string;
 }
 
 export enum ElementType {

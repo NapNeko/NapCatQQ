@@ -82,10 +82,22 @@ import { SetInputStatus } from './extends/SetInputStatus';
 import { GetCSRF } from './system/GetCSRF';
 import { DelGroupNotice } from './group/DelGroupNotice';
 import { GetGroupInfoEx } from './extends/GetGroupInfoEx';
+import { DeleteGroupFile } from '@/onebot/action/go-cqhttp/DeleteGroupFile';
+import { CreateGroupFileFolder } from '@/onebot/action/go-cqhttp/CreateGroupFileFolder';
+import { DeleteGroupFileFolder } from '@/onebot/action/go-cqhttp/DeleteGroupFileFolder';
+import { GetGroupFileSystemInfo } from '@/onebot/action/go-cqhttp/GetGroupFileSystemInfo';
+import { GetGroupRootFiles } from '@/onebot/action/go-cqhttp/GetGroupRootFiles';
+import { GetGroupFilesByFolder } from '@/onebot/action/go-cqhttp/GetGroupFilesByFolder';
 
 export type ActionMap = Map<string, BaseAction<any, any>>;
 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore): ActionMap {
+    const ncDelGroupFile = new DelGroupFile(obContext, core);
+    const ncSetGroupFileFolder = new SetGroupFileFolder(obContext, core);
+    const ncDelGroupFileFolder = new DelGroupFileFolder(obContext, core);
+    const ncGetGroupFileCount = new GetGroupFileCount(obContext, core);
+    const goCqHttpGetGroupRootFiles = new GetGroupRootFiles(obContext, core, ncGetGroupFileCount);
+
     const actionHandlers = [
         new GetGroupInfoEx(obContext, core),
         new FetchEmojiLike(obContext, core),
@@ -101,11 +113,11 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new MarkPrivateMsgAsRead(obContext, core),
         new SetQQAvatar(obContext, core),
         new TranslateEnWordToZn(obContext, core),
-        new GetGroupFileCount(obContext, core),
+        ncGetGroupFileCount,
         new GetGroupFileList(obContext, core),
-        new SetGroupFileFolder(obContext, core),
-        new DelGroupFile(obContext, core),
-        new DelGroupFileFolder(obContext, core),
+        ncSetGroupFileFolder,
+        ncDelGroupFile,
+        ncDelGroupFileFolder,
         // onebot11
         new SendLike(obContext, core),
         new GetMsg(obContext, core),
@@ -173,6 +185,12 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new SetInputStatus(obContext, core),
         new GetCSRF(obContext, core),
         new DelGroupNotice(obContext, core),
+        new DeleteGroupFile(obContext, core, ncDelGroupFile),
+        new CreateGroupFileFolder(obContext, core, ncSetGroupFileFolder),
+        new DeleteGroupFileFolder(obContext, core, ncDelGroupFileFolder),
+        new GetGroupFileSystemInfo(obContext, core),
+        goCqHttpGetGroupRootFiles,
+        new GetGroupFilesByFolder(obContext, core, goCqHttpGetGroupRootFiles),
     ];
     const actionMap = new Map();
     for (const action of actionHandlers) {
