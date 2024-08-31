@@ -35,7 +35,7 @@ export class NTQQWebApi {
     }
     async getGroupEssenceMsgAll(GroupCode: string) {
         const ret: GroupEssenceMsgRet[] = [];
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < 20; i++) {
             const data = await this.getGroupEssenceMsg(GroupCode, i, 50);
             if (!data) break;
             ret.push(data);
