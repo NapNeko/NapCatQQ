@@ -14,12 +14,15 @@ export class NTQQMsgApi {
         this.context = context;
         this.core = core;
     }
+
     async getAioFirstViewLatestMsgs(peer: Peer, MsgCount: number) {
         return this.context.session.getMsgService().getAioFirstViewLatestMsgs(peer, MsgCount);
     }
+
     async getLatestDbMsgs(peer: Peer, MsgCount: number) {
         return this.context.session.getMsgService().getLatestDbMsgs(peer, MsgCount);
     }
+
     async FetchLongMsg(peer: Peer, msgId: string) {
         return this.context.session.getMsgService().fetchLongMsg(peer, msgId);
     }
@@ -29,19 +32,10 @@ export class NTQQMsgApi {
     }
 
     async getMsgEmojiLikesList(peer: Peer, msgSeq: string, emojiId: string, emojiType: string, count: number = 20) {
-        //console.log(peer, msgSeq, emojiId, emojiType, count);
         //注意此处emojiType 可选值一般为1-2 2好像是unicode表情dec值 大部分情况 Taged M likiowa
         return this.context.session.getMsgService().getMsgEmojiLikesList(peer, msgSeq, emojiId, emojiType, '', false, count);
     }
 
-    //  napCatCore: NapCatCore | null = null;
-    //   enum BaseEmojiType {
-    //     NORMAL_EMOJI,
-    //     SUPER_EMOJI,
-    //     RANDOM_SUPER_EMOJI,
-    //     CHAIN_SUPER_EMOJI,
-    //     EMOJI_EMOJI
-    // }
     async setEmojiLike(peer: Peer, msgSeq: string, emojiId: string, set: boolean = true) {
         // nt_qq//global//nt_data//Emoji//emoji-resource//sysface_res/apng/ 下可以看到所有QQ表情预览
         // nt_qq\global\nt_data\Emoji\emoji-resource\face_config.json 里面有所有表情的id, 自带表情id是QSid, 标准emoji表情id是QCid
@@ -60,7 +54,7 @@ export class NTQQMsgApi {
         return this.context.session.getMsgService().forwardMsg(msgIds, peer, [peer], new Map());
     }
 
-    async getLastestMsgByUids(peer: Peer, count: number = 20, isReverseOrder: boolean = false) {
+    async getLatestMsgByUids(peer: Peer, count: number = 20, isReverseOrder: boolean = false) {
         return await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {
             chatInfo: peer,
             filterMsgType: [],
@@ -76,7 +70,7 @@ export class NTQQMsgApi {
     async getMsgsByMsgId(peer: Peer | undefined, msgIds: string[] | undefined) {
         if (!peer) throw new Error('peer is not allowed');
         if (!msgIds) throw new Error('msgIds is not allowed');
-        //Mlikiowa： 参数不合规会导致NC异常崩溃 原因是TX未对进入参数判断 对应Android标记@NotNull AndroidJADX分析可得
+        //MliKiowa: 参数不合规会导致NC异常崩溃 原因是TX未对进入参数判断 对应Android标记@NotNull AndroidJADX分析可得
         return await this.context.session.getMsgService().getMsgsByMsgId(peer, msgIds);
     }
 
@@ -90,7 +84,7 @@ export class NTQQMsgApi {
 
     async queryMsgsWithFilterExWithSeq(peer: Peer, msgSeq: string) {
         return await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', msgSeq, {
-            chatInfo: peer,//此处为Peer 为关键查询参数 没有啥也没有 by mlik iowa
+            chatInfo: peer,
             filterMsgType: [],
             filterSendersUid: [],
             filterMsgToTime: '0',
@@ -134,10 +128,7 @@ export class NTQQMsgApi {
                 params,
             ],
             () => true,
-            ( /* groupFileListResult: GroupFileInfoUpdateParamType */) => {
-                //Developer Mlikiowa Todo: 此处有问题 无法判断是否成功
-                return true;
-            },
+            () => true, // Todo: 应当通过 groupFileListResult 判断
             1,
             5000,
         );
@@ -157,14 +148,6 @@ export class NTQQMsgApi {
     }
 
     async PrepareTempChat(toUserUid: string, GroupCode: string, nickname: string) {
-        //By Jadx/Ida Mlikiowa
-        const TempGameSession = {
-            nickname: '',
-            gameAppId: '',
-            selfTinyId: '',
-            peerRoleId: '',
-            peerOpenId: '',
-        };
         return this.context.session.getMsgService().prepareTempChat({
             chatType: ChatType.KCHATTYPETEMPC2CFROMGROUP,
             peerUid: toUserUid,
@@ -173,7 +156,13 @@ export class NTQQMsgApi {
             sig: '',
             selfPhone: '',
             selfUid: this.core.selfInfo.uid,
-            gameSession: TempGameSession,
+            gameSession: {
+                nickname: '',
+                gameAppId: '',
+                selfTinyId: '',
+                peerRoleId: '',
+                peerOpenId: '',
+            },
         });
     }
 
@@ -182,7 +171,7 @@ export class NTQQMsgApi {
     }
 
     async sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
-        //唉？ ！我有个想法
+        //唉？！我有个想法
         if (peer.chatType === ChatType.KCHATTYPETEMPC2CFROMGROUP && peer.guildId && peer.guildId !== '') {
             const member = await this.core.apis.GroupApi.getGroupMember(peer.guildId, peer.peerUid!);
             if (member) {
@@ -212,11 +201,7 @@ export class NTQQMsgApi {
             1,
             timeout,
         );
-        return msgList.find(msgRecord => {
-            if (msgRecord.guildId === msgId) {
-                return true;
-            }
-        });
+        return msgList.find(msgRecord => msgRecord.guildId === msgId);
     }
 
     async generateMsgUniqueId(chatType: number, time: string) {
@@ -246,14 +231,10 @@ export class NTQQMsgApi {
                 new Map(),
             ],
             () => true,
-            (msgRecords) => {
-                for (const msgRecord of msgRecords) {
-                    if (msgRecord.peerUid == destPeer.peerUid && msgRecord.senderUid == this.core.selfInfo.uid) {
-                        return true;
-                    }
-                }
-                return false;
-            },
+            (msgRecords) => msgRecords.some(
+                msgRecord => msgRecord.peerUid === destPeer.peerUid
+                && msgRecord.senderUid === this.core.selfInfo.uid
+            ),
         );
         for (const msg of msgList) {
             const arkElement = msg.elements.find(ele => ele.arkElement);
@@ -271,7 +252,7 @@ export class NTQQMsgApi {
         throw new Error('转发消息超时');
     }
 
-    async markallMsgAsRead() {
+    async markAllMsgAsRead() {
         return this.context.session.getMsgService().setAllC2CAndGroupMsgRead();
     }
 }
