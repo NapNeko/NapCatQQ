@@ -26,9 +26,7 @@ import { calculateFileMD5, isGIF } from '@/common/file';
 import pathLib from 'node:path';
 import { defaultVideoThumbB64, getVideoInfo } from '@/common/video';
 import ffmpeg from 'fluent-ffmpeg';
-import fsnormal from 'node:fs';
 import { encodeSilk } from '@/common/audio';
-
 
 export class NTQQFileApi {
     context: InstanceContext;
@@ -39,10 +37,6 @@ export class NTQQFileApi {
         this.context = context;
         this.core = core;
         this.rkeyManager = new RkeyManager('http://napcat-sign.wumiao.wang:2082/rkey', this.context.logger);
-    }
-
-    async getFileType(filePath: string) {
-        return fileType.fileTypeFromFile(filePath);
     }
 
     async copyFile(filePath: string, destPath: string) {
@@ -60,18 +54,15 @@ export class NTQQFileApi {
         })).urlResult.domainUrl;
     }
 
-    // 上传文件到QQ的文件夹
     async uploadFile(filePath: string, elementType: ElementType = ElementType.PIC, elementSubType: number = 0) {
-        // napCatCore.wrapper.util.
         const fileMd5 = await calculateFileMD5(filePath);
-        let ext: string = (await this.getFileType(filePath))?.ext as string || '';
-        if (ext) {
-            ext = '.' + ext;
-        }
+        const extOrEmpty = (await fileType.fileTypeFromFile(filePath))?.ext;
+        const ext = extOrEmpty ? `.${extOrEmpty}` : '';
         let fileName = `${path.basename(filePath)}`;
         if (fileName.indexOf('.') === -1) {
             fileName += ext;
         }
+
         const mediaPath = this.context.session.getMsgService().getRichMediaFilePathForGuild({
             md5HexStr: fileMd5,
             fileName: fileName,
@@ -82,6 +73,7 @@ export class NTQQFileApi {
             downloadType: 1,
             file_uuid: '',
         });
+
         await this.copyFile(filePath, mediaPath!);
         const fileSize = await this.getFileSize(filePath);
         return {
@@ -93,11 +85,7 @@ export class NTQQFileApi {
         };
     }
 
-    async createValidSendFileElement(
-        filePath: string,
-        fileName: string = '',
-        folderId: string = '',
-    ): Promise<SendFileElement> {
+    async createValidSendFileElement(filePath: string, fileName: string = '', folderId: string = '',): Promise<SendFileElement> {
         const {
             fileName: _fileName,
             path,
@@ -118,55 +106,36 @@ export class NTQQFileApi {
         };
     }
 
-    async createValidSendPicElement(
-        picPath: string,
-        summary: string = '',
-        subType: 0 | 1 = 0,
-    ): Promise<SendPicElement> {
-        const {
-            md5,
-            fileName,
-            path,
-            fileSize,
-        } = await this.core.apis.FileApi.uploadFile(picPath, ElementType.PIC, subType);
+    async createValidSendPicElement(picPath: string, summary: string = '', subType: 0 | 1 = 0,): Promise<SendPicElement> {
+        const { md5, fileName, path, fileSize } = await this.core.apis.FileApi.uploadFile(picPath, ElementType.PIC, subType);
         if (fileSize === 0) {
             throw new Error('文件异常，大小为0');
         }
         const imageSize = await this.core.apis.FileApi.getImageSize(picPath);
-        const picElement: any = {
-            md5HexStr: md5,
-            fileSize: fileSize.toString(),
-            picWidth: imageSize?.width,
-            picHeight: imageSize?.height,
-            fileName: fileName,
-            sourcePath: path,
-            original: true,
-            picType: isGIF(picPath) ? PicType.gif : PicType.jpg,
-            picSubType: subType,
-            fileUuid: '',
-            fileSubId: '',
-            thumbFileSize: 0,
-            summary,
-        };
         return {
             elementType: ElementType.PIC,
             elementId: '',
-            picElement,
+            picElement: {
+                md5HexStr: md5,
+                fileSize: fileSize.toString(),
+                picWidth: imageSize.width,
+                picHeight: imageSize.height,
+                fileName: fileName,
+                sourcePath: path,
+                original: true,
+                picType: isGIF(picPath) ? PicType.gif : PicType.jpg,
+                picSubType: subType,
+                fileUuid: '',
+                fileSubId: '',
+                thumbFileSize: 0,
+                summary,
+            } as PicElement,
         };
     }
 
-    async createValidSendVideoElement(
-        filePath: string,
-        fileName: string = '',
-        diyThumbPath: string = '',
-    ): Promise<SendVideoElement> {
+    async createValidSendVideoElement(filePath: string, fileName: string = '', diyThumbPath: string = ''): Promise<SendVideoElement> {
         const logger = this.core.context.logger;
-        const {
-            fileName: _fileName,
-            path,
-            fileSize,
-            md5,
-        } = await this.core.apis.FileApi.uploadFile(filePath, ElementType.VIDEO);
+        const { fileName: _fileName, path, fileSize, md5 } = await this.core.apis.FileApi.uploadFile(filePath, ElementType.VIDEO);
         if (fileSize === 0) {
             throw new Error('文件异常，大小为0');
         }
@@ -182,9 +151,10 @@ export class NTQQFileApi {
         try {
             videoInfo = await getVideoInfo(path, logger);
         } catch (e) {
-            logger.logError('获取视频信息失败', e);
+            logger.logError('获取视频信息失败，将使用默认值', e);
         }
-        const createThumb = new Promise<string | undefined>((resolve, reject) => {
+        const thumbPath = new Map();
+        const _thumbPath = await new Promise<string | undefined>((resolve, reject) => {
             const thumbFileName = `${md5}_0.png`;
             const thumbPath = pathLib.join(thumb, thumbFileName);
             ffmpeg(filePath)
@@ -195,7 +165,7 @@ export class NTQQFileApi {
                             resolve(thumbPath);
                         }).catch(reject);
                     } else {
-                        fsnormal.writeFileSync(thumbPath, Buffer.from(defaultVideoThumbB64, 'base64'));
+                        fs.writeFileSync(thumbPath, Buffer.from(defaultVideoThumbB64, 'base64'));
                         resolve(thumbPath);
                     }
                 })
@@ -204,31 +174,14 @@ export class NTQQFileApi {
                     filename: thumbFileName,
                     folder: thumb,
                     size: videoInfo.width + 'x' + videoInfo.height,
-                }).on('end', () => {
+                })
+                .on('end', () => {
                     resolve(thumbPath);
                 });
         });
-        const thumbPath = new Map();
-        const _thumbPath = await createThumb;
         const thumbSize = _thumbPath ? (await fsPromises.stat(_thumbPath)).size : 0;
-        // log("生成缩略图", _thumbPath)
         thumbPath.set(0, _thumbPath);
         const thumbMd5 = _thumbPath ? await calculateFileMD5(_thumbPath) : '';
-        // "fileElement": {
-        //     "fileMd5": "",
-        //     "fileName": "1.mp4",
-        //     "filePath": "C:\\Users\\nanae\\OneDrive\\Desktop\\1.mp4",
-        //     "fileSize": "1847007",
-        //     "picHeight": 1280,
-        //     "picWidth": 720,
-        //     "picThumbPath": {},
-        //     "file10MMd5": "",
-        //     "fileSha": "",
-        //     "fileSha3": "",
-        //     "fileUuid": "",
-        //     "fileSubId": "",
-        //     "thumbFileSize": 750
-        // }
         return {
             elementType: ElementType.VIDEO,
             elementId: '',
@@ -243,28 +196,12 @@ export class NTQQFileApi {
                 thumbWidth: videoInfo.width,
                 thumbHeight: videoInfo.height,
                 fileSize: '' + fileSize,
-                // fileFormat: videotype
-                // fileUuid: "",
-                // transferStatus: 0,
-                // progress: 0,
-                // invalidState: 0,
-                // fileSubId: "",
-                // fileBizId: null,
-                // originVideoMd5: "",
-                // fileFormat: 2,
-                // import_rich_media_context: null,
-                // sourceVideoCodecFormat: 2
             },
         };
     }
 
     async createValidSendPttElement(pttPath: string): Promise<SendPttElement> {
-        const {
-            converted,
-            path: silkPath,
-            duration,
-        } = await encodeSilk(pttPath, this.core.NapCatTempPath, this.core.context.logger);
-        // 生成语音 Path: silkPath Time: duration
+        const { converted, path: silkPath, duration } = await encodeSilk(pttPath, this.core.NapCatTempPath, this.core.context.logger);
         if (!silkPath) {
             throw new Error('语音转换失败, 请检查语音文件是否正常');
         }
@@ -283,7 +220,6 @@ export class NTQQFileApi {
                 filePath: path,
                 md5HexStr: md5,
                 fileSize: fileSize,
-                // duration: Math.max(1, Math.round(fileSize / 1024 / 3)), // 一秒钟大概是3kb大小, 小于1秒的按1秒算
                 duration: duration ?? 1,
                 formatType: 1,
                 voiceType: 1,
@@ -299,9 +235,6 @@ export class NTQQFileApi {
         };
     }
 
-    async downloadMediaByUuid() {
-        //napCatCore.session.getRichMediaService().downloadFileForFileUuid();
-    }
     async downloadFileForModelId(peer: Peer, modelId: string, unknown: string, timeout = 1000 * 60 * 2) {
         const [, fileTransNotifyInfo] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelRichMediaService/downloadFileForModelId',
@@ -314,6 +247,7 @@ export class NTQQFileApi {
         );
         return fileTransNotifyInfo.filePath;
     }
+
     async downloadMedia(msgId: string, chatType: ChatType, peerUid: string, elementId: string, thumbPath: string, sourcePath: string, timeout = 1000 * 60 * 2, force: boolean = false) {
         //logDebug('receive downloadMedia task', msgId, chatType, peerUid, elementId, thumbPath, sourcePath, timeout, force);
         // 用于下载收到的消息中的图片等
@@ -328,7 +262,7 @@ export class NTQQFileApi {
                 return sourcePath;
             }
         }
-        const [, fileTransNotifyInfo] = await this.core.eventWrapper.callNormalEventV2(
+        await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelMsgService/downloadRichMedia',
             'NodeIKernelMsgListener/onRichMediaDownloadComplete',
             [{
@@ -348,13 +282,17 @@ export class NTQQFileApi {
             1,
             timeout,
         );
-        const msg = await this.core.apis.MsgApi.getMsgsByMsgId({
+        const mixElement = (await this.core.apis.MsgApi.getMsgsByMsgId({
             guildId: '',
             chatType: chatType,
             peerUid: peerUid,
-        }, [msgId]);
-        const mixElement = msg.msgList.find((msg) => msg.msgId === msgId)?.elements.find((e) => e.elementId === elementId);
-        const mixElementInner = mixElement?.videoElement ?? mixElement?.fileElement ?? mixElement?.pttElement ?? mixElement?.picElement;
+        }, [msgId])).msgList
+            .find((msg) => msg.msgId === msgId)
+            ?.elements.find((e) => e.elementId === elementId);
+        const mixElementInner = mixElement?.videoElement
+            ?? mixElement?.fileElement
+            ?? mixElement?.pttElement
+            ?? mixElement?.picElement;
         let realPath = mixElementInner?.filePath;
         if (!realPath) {
             const picThumbPath: Map<number, string> = (mixElementInner as any)?.picThumbPath;
@@ -364,13 +302,17 @@ export class NTQQFileApi {
         return realPath;
     }
 
-    async getImageSize(filePath: string): Promise<ISizeCalculationResult | undefined> {
+    async getImageSize(filePath: string): Promise<ISizeCalculationResult> {
         return new Promise((resolve, reject) => {
             imageSize(filePath, (err, dimensions) => {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve(dimensions);
+                    if (!dimensions) {
+                        reject(new Error('获取图片尺寸失败'));
+                    } else {
+                        resolve(dimensions);
+                    }
                 }
             });
         });
@@ -443,11 +385,8 @@ export class NTQQFileApi {
             'NodeIKernelFileAssistantListener/onFileSearch',
             [
                 keys,
-                {
-                    resultType: 2,
-                    pageLimit: 1,
-                },
-                randomResultId
+                { resultType: 2, pageLimit: 1 },
+                randomResultId,
             ],
             (ret) => {
                 searchId = ret;
@@ -463,7 +402,7 @@ export class NTQQFileApi {
         fileSize: number = 1024576,
         estimatedTime: number = (fileSize * 1000 / 1024576) + 5000,
     ) {
-        const [, ret] = await this.core.eventWrapper.callNormalEventV2(
+        const [, fileData] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelFileAssistantService/downloadFile',
             'NodeIKernelFileAssistantListener/onFileStatusChanged',
             [[fileId]],
@@ -472,7 +411,7 @@ export class NTQQFileApi {
             1,
             estimatedTime, // estimate 1MB/s
         );
-        return ret.filePath!;
+        return fileData.filePath!;
     }
 
     async getImageUrl(element: PicElement) {
@@ -482,20 +421,19 @@ export class NTQQFileApi {
         const url: string = element.originImageUrl!;  // 没有域名
         const md5HexStr = element.md5HexStr;
         const fileMd5 = element.md5HexStr;
-        // const fileUuid = element.fileUuid;
 
         if (url) {
-            const UrlParse = new URL(IMAGE_HTTP_HOST + url);//临时解析拼接
-            const imageAppid = UrlParse.searchParams.get('appid');
-            const isNewPic = imageAppid && ['1406', '1407'].includes(imageAppid);
-            if (isNewPic) {
-                let UrlRkey = UrlParse.searchParams.get('rkey');
-                if (UrlRkey) {
+            const parsedUrl = new URL(IMAGE_HTTP_HOST + url);//临时解析拼接
+            const imageAppid = parsedUrl.searchParams.get('appid');
+            const isNTFlavoredPic = imageAppid && ['1406', '1407'].includes(imageAppid);
+            if (isNTFlavoredPic) {
+                let rkey = parsedUrl.searchParams.get('rkey');
+                if (rkey) {
                     return IMAGE_HTTP_HOST_NT + url;
                 }
                 const rkeyData = await this.rkeyManager.getRkey();
-                UrlRkey = imageAppid === '1406' ? rkeyData.private_rkey : rkeyData.group_rkey;
-                return IMAGE_HTTP_HOST_NT + url + `${UrlRkey}`;
+                rkey = imageAppid === '1406' ? rkeyData.private_rkey : rkeyData.group_rkey;
+                return IMAGE_HTTP_HOST_NT + url + `${rkey}`;
             } else {
                 // 老的图片url，不需要rkey
                 return IMAGE_HTTP_HOST + url;
