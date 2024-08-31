@@ -30,7 +30,7 @@ async function onSettingWindowCreated(view: Element) {
                 SettingItem(
                     '<span id="napcat-update-title">Napcat</span>',
                     undefined,
-                    SettingButton('V2.2.29', 'napcat-update-button', 'secondary'),
+                    SettingButton('V2.2.30', 'napcat-update-button', 'secondary'),
                 ),
             ]),
             SettingList([
