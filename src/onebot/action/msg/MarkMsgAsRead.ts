@@ -71,7 +71,7 @@ export class MarkAllMsgAsRead extends BaseAction<Payload, null> {
 
     async _handle(payload: Payload): Promise<null> {
         const NTQQMsgApi = this.core.apis.MsgApi;
-        await NTQQMsgApi.markallMsgAsRead();
+        await NTQQMsgApi.markAllMsgAsRead();
         return null;
     }
 }
