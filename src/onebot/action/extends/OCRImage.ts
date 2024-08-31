@@ -26,7 +26,7 @@ export class OCRImage extends BaseAction<Payload, any> {
         }
         if (path) {
             await checkFileReceived(path, 5000); // 文件不存在QQ会崩溃，需要提前判断
-            const ret = await NTQQSystemApi.ORCImage(path);
+            const ret = await NTQQSystemApi.ocrImage(path);
             if (!isLocal) {
                 fs.unlink(path, () => {
                 });
