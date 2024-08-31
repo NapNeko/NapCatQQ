@@ -10,7 +10,7 @@ export class NTQQCollectionApi {
     }
 
     async createCollection(authorUin: string, authorUid: string, authorName: string, brief: string, rawData: string) {
-        const param = {
+        return this.context.session.getCollectionService().createNewCollectionItem({
             commInfo: {
                 bid: 1,
                 category: 2,
@@ -43,12 +43,11 @@ export class NTQQCollectionApi {
                 fileList: [],
             },
             need_share_url: false,
-        };
-        return this.context.session.getCollectionService().createNewCollectionItem(param);
+        });
     }
 
     async getAllCollection(category: number = 0, count: number = 50) {
-        const param = {
+        return this.context.session.getCollectionService().getCollectionItemList({
             category: category,
             groupId: -1,
             forceSync: true,
@@ -56,7 +55,6 @@ export class NTQQCollectionApi {
             timeStamp: '0',
             count: count,
             searchDown: true,
-        };
-        return this.context.session.getCollectionService().getCollectionItemList(param);
+        });
     }
 }
