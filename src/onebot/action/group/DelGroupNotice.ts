@@ -19,9 +19,8 @@ export class DelGroupNotice extends BaseAction<Payload, any> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQGroupApi = this.core.apis.GroupApi;
         const group = payload.group_id.toString();
         const noticeId = payload.notice_id;
-        return await NTQQGroupApi.deleteGroupBulletin(group, noticeId);
+        return await this.core.apis.GroupApi.deleteGroupBulletin(group, noticeId);
     }
 }

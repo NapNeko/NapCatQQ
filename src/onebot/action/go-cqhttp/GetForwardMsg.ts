@@ -19,7 +19,6 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<any> {
-        const NTQQMsgApi = this.core.apis.MsgApi;
         const msgId = payload.message_id || payload.id;
         if (!msgId) {
             throw Error('message_id is required');
@@ -29,7 +28,7 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
         if (!rootMsg) {
             throw Error('msg not found');
         }
-        const data = await NTQQMsgApi.getMultiMsg(rootMsg.Peer, rootMsg.MsgId, rootMsg.MsgId);
+        const data = await this.core.apis.MsgApi.getMultiMsg(rootMsg.Peer, rootMsg.MsgId, rootMsg.MsgId);
         if (!data || data.result !== 0) {
             throw Error('找不到相关的聊天记录' + data?.errMsg);
         }

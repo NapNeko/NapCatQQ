@@ -17,8 +17,6 @@ export class SetLongNick extends BaseAction<Payload, any> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQUserApi = this.core.apis.UserApi;
-        const ret = await NTQQUserApi.setLongNick(payload.longNick);
-        return ret;
+        return await this.core.apis.UserApi.setLongNick(payload.longNick);
     }
 }

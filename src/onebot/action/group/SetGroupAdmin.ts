@@ -21,11 +21,9 @@ export default class SetGroupAdmin extends BaseAction<Payload, null> {
 
     async _handle(payload: Payload): Promise<null> {
         const enable = typeof payload.enable === 'string' ? payload.enable === 'true' : !!payload.enable;
-        const NTQQGroupApi = this.core.apis.GroupApi;
-        const NTQQUserApi = this.core.apis.UserApi;
-        const uid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());
+        const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
         if (!uid) throw new Error('get Uid Error');
-        await NTQQGroupApi.setMemberRole(payload.group_id.toString(), uid, enable ? GroupMemberRole.admin : GroupMemberRole.normal);
+        await this.core.apis.GroupApi.setMemberRole(payload.group_id.toString(), uid, enable ? GroupMemberRole.admin : GroupMemberRole.normal);
         return null;
     }
 }

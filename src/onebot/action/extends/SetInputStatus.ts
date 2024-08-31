@@ -19,8 +19,6 @@ export class SetInputStatus extends BaseAction<Payload, any> {
     actionName = ActionName.SetInputStatus;
 
     async _handle(payload: Payload) {
-        const NTQQUserApi = this.core.apis.UserApi;
-        const NTQQMsgApi = this.core.apis.MsgApi;
         let peer: Peer;
         if (payload.group_id) {
             peer = {
@@ -28,7 +26,7 @@ export class SetInputStatus extends BaseAction<Payload, any> {
                 peerUid: payload.group_id,
             };
         } else if (payload.user_id) {
-            const uid = await NTQQUserApi.getUidByUinV2(payload.user_id);
+            const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id);
             if (!uid) throw new Error('uid is empty');
             peer = {
                 chatType: ChatType.KCHATTYPEC2C,
@@ -38,6 +36,6 @@ export class SetInputStatus extends BaseAction<Payload, any> {
             throw new Error('请指定 group_id 或 user_id');
         }
 
-        return await NTQQMsgApi.sendShowInputStatusReq(peer, parseInt(payload.eventType));
+        return await this.core.apis.MsgApi.sendShowInputStatusReq(peer, parseInt(payload.eventType));
     }
 }

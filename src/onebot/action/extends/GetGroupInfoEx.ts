@@ -17,8 +17,6 @@ export class GetGroupInfoEx extends BaseAction<Payload, any> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQGroupApi = this.core.apis.GroupApi;
-        const groupInfoEx = (await NTQQGroupApi.getGroupExtFE0Info([payload.group_id.toString()])).result.groupExtInfos.get(payload.group_id.toString());
-        return groupInfoEx;
+        return (await this.core.apis.GroupApi.getGroupExtFE0Info([payload.group_id.toString()])).result.groupExtInfos.get(payload.group_id.toString());
     }
 }

@@ -77,7 +77,6 @@ export class NapCatOneBot11Adapter {
     }
 
     async InitOneBot() {
-        const NTQQUserApi = this.core.apis.UserApi;
         const selfInfo = this.core.selfInfo;
         const ob11Config = this.configLoader.configData;
 
@@ -87,7 +86,7 @@ export class NapCatOneBot11Adapter {
     WebSocket服务 ${ob11Config.ws.enable ? '已启动' : '未启动'}, ${ob11Config.ws.host}:${ob11Config.ws.port}
     WebSocket反向服务 ${ob11Config.reverseWs.enable ? '已启动' : '未启动'}, 反向地址: ${ob11Config.reverseWs.urls}`;
 
-        NTQQUserApi.getUserDetailInfo(selfInfo.uid).then(user => {
+        this.core.apis.UserApi.getUserDetailInfo(selfInfo.uid).then(user => {
             selfInfo.nick = user.nick;
             this.context.logger.setLogSelfInfo(selfInfo);
         }).catch(this.context.logger.logError);
@@ -341,12 +340,6 @@ export class NapCatOneBot11Adapter {
             this.core.apis.FriendApi.clearBuddyReqUnreadCnt();
             for (let i = 0; i < reqs.unreadNums; i++) {
                 const req = reqs.buddyReqs[i];
-                //req.isBuddy === false是单向好友 null为常规情况
-                // if (req.isBuddy === false && ) {
-                //     const NTQQFriendApi = this.core.apis.FriendApi;
-                //     await NTQQFriendApi.handleFriendRequest(req.friendUid + '|' + req.reqTime, true);
-                // }
-
                 if (!!req.isInitiator || (req.isDecide && req.reqType !== BuddyReqType.KMEINITIATORWAITPEERCONFIRM)) {
                     continue;
                 }

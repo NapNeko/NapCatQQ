@@ -19,10 +19,9 @@ export default class GoCQHTTPGetStrangerInfo extends BaseAction<Payload, OB11Use
     actionName = ActionName.GoCQHTTP_GetStrangerInfo;
 
     async _handle(payload: Payload): Promise<OB11User> {
-        const NTQQUserApi = this.core.apis.UserApi;
         const user_id = payload.user_id.toString();
-        const extendData = await NTQQUserApi.getUserDetailInfoByUinV2(user_id);
-        const uid = (await NTQQUserApi.getUidByUinV2(user_id))!;
+        const extendData = await this.core.apis.UserApi.getUserDetailInfoByUinV2(user_id);
+        const uid = (await this.core.apis.UserApi.getUidByUinV2(user_id))!;
         if (!uid || uid.indexOf('*') != -1) {
             return {
                 ...extendData.detail.simpleInfo.coreInfo,
@@ -38,7 +37,7 @@ export default class GoCQHTTPGetStrangerInfo extends BaseAction<Payload, OB11Use
                 login_days: 0,
             };
         }
-        const data = { ...extendData, ...(await NTQQUserApi.getUserDetailInfo(uid)) };
+        const data = { ...extendData, ...(await this.core.apis.UserApi.getUserDetailInfo(uid)) };
         return OB11Entities.stranger(data);
     }
 }

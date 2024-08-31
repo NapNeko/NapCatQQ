@@ -19,7 +19,6 @@ export class SetMsgEmojiLike extends BaseAction<Payload, any> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQMsgApi = this.core.apis.MsgApi;
         const msg = MessageUnique.getMsgIdAndPeerByShortId(parseInt(payload.message_id.toString()));
         if (!msg) {
             throw new Error('msg not found');
@@ -27,10 +26,10 @@ export class SetMsgEmojiLike extends BaseAction<Payload, any> {
         if (!payload.emoji_id) {
             throw new Error('emojiId not found');
         }
-        const msgData = (await NTQQMsgApi.getMsgsByMsgId(msg.Peer, [msg.MsgId])).msgList;
+        const msgData = (await this.core.apis.MsgApi.getMsgsByMsgId(msg.Peer, [msg.MsgId])).msgList;
         if (!msgData || msgData.length == 0 || !msgData[0].msgSeq) {
             throw new Error('find msg by msgid error');
         }
-        return await NTQQMsgApi.setEmojiLike(msg.Peer, msgData[0].msgSeq, payload.emoji_id.toString(), true);
+        return await this.core.apis.MsgApi.setEmojiLike(msg.Peer, msgData[0].msgSeq, payload.emoji_id.toString(), true);
     }
 }

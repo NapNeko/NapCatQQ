@@ -17,7 +17,6 @@ export default class SetGroupLeave extends BaseAction<Payload, any> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<any> {
-        const NTQQGroupApi = this.core.apis.GroupApi;
-        await NTQQGroupApi.quitGroup(payload.group_id.toString());
+        await this.core.apis.GroupApi.quitGroup(payload.group_id.toString());
     }
 }

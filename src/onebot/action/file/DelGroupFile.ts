@@ -18,7 +18,6 @@ export class DelGroupFile extends BaseAction<Payload, any> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQGroupApi = this.core.apis.GroupApi;
-        return await NTQQGroupApi.DelGroupFile(payload.group_id.toString(), [payload.file_id]);
+        return await this.core.apis.GroupApi.DelGroupFile(payload.group_id.toString(), [payload.file_id]);
     }
 }
