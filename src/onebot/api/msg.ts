@@ -106,12 +106,13 @@ export class OneBotMsgApi {
                     peerUid: msg.peerUid,
                     guildId: '',
                 };
+                const encodedFileId = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId);
                 return {
                     type: OB11MessageDataType.image,
                     data: {
-                        file: element.fileName,
+                        file: encodedFileId,
                         sub_type: element.picSubType,
-                        file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId),
+                        file_id: encodedFileId,
                         url: await this.core.apis.FileApi.getImageUrl(element),
                         file_size: element.fileSize,
                     },
