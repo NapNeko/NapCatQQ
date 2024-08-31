@@ -80,7 +80,7 @@ export class OneBotGroupApi {
                         id: FileNapCatOneBotUUID.encode({
                             chatType: ChatType.KCHATTYPEGROUP,
                             peerUid: msg.peerUid,
-                        }, msg.msgSeq, element.elementId),
+                        }, msg.msgId, element.elementId),
                         name: element.fileElement.fileName,
                         size: parseInt(element.fileElement.fileSize),
                         busid: element.fileElement.fileBizId || 0,

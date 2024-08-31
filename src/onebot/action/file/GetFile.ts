@@ -31,8 +31,8 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
         const NTQQMsgApi = this.core.apis.MsgApi;
         const NTQQFileApi = this.core.apis.FileApi;
 
-        const contextMsgFile = FileNapCatOneBotUUID.decode(payload.file);
         //接收消息标记模式
+        const contextMsgFile = FileNapCatOneBotUUID.decode(payload.file);
         if (contextMsgFile) {
             const { peer, msgId, elementId } = contextMsgFile;
             const downloadPath = await NTQQFileApi.downloadMedia(msgId, peer.chatType, peer.peerUid, elementId, '', '');
@@ -59,6 +59,7 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
             }
             return res;
         }
+
         //群文件模式
         const contextModelIdFile = FileNapCatOneBotUUID.decodeModelId(payload.file);
         if (contextModelIdFile) {
