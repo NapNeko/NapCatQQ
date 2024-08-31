@@ -15,9 +15,7 @@ export class NTQQUserApi {
 
     async getProfileLike(uid: string) {
         return this.context.session.getProfileLikeService().getBuddyProfileLike({
-            friendUids: [
-                uid,
-            ],
+            friendUids: [uid],
             basic: 1,
             vote: 1,
             favorite: 0,
@@ -61,41 +59,6 @@ export class NTQQUserApi {
 
     async setGroupAvatar(gc: string, filePath: string) {
         return this.context.session.getGroupService().setHeader(gc, filePath);
-    }
-
-    async fetchUserDetailInfos(uids: string[]) {
-        // TODO: 26702 以上使用新接口 .Dev MliKiowa
-        const retData: User[] = [];
-        const [_retData, _retListener] = await this.core.eventWrapper.callNormalEventV2(
-            'NodeIKernelProfileService/fetchUserDetailInfo',
-            'NodeIKernelProfileListener/onUserDetailInfoChanged',
-            [
-                'BuddyProfileStore',
-                uids,
-                UserDetailSource.KSERVER,
-                [ProfileBizType.KALL],
-            ],
-            () => true,
-            (profile) => {
-                if (uids.includes(profile.uid)) {
-                    const RetUser: User = {
-                        ...profile.simpleInfo.coreInfo,
-                        ...profile.simpleInfo.status,
-                        ...profile.simpleInfo.vasInfo,
-                        ...profile.commonExt,
-                        ...profile.simpleInfo.baseInfo,
-                        qqLevel: profile.commonExt.qqLevel,
-                        pendantId: '',
-                    };
-                    retData.push(RetUser);
-                    return true;
-                }
-                return false;
-            },
-            uids.length,
-        );
-
-        return retData;
     }
 
     async fetchUserDetailInfo(uid: string, mode: UserDetailSource = UserDetailSource.KDB) {
@@ -156,7 +119,6 @@ export class NTQQUserApi {
             version: 0,
             aioKeywordVersion: 0,
         });
-        // console.log(robotUinRanges?.response?.robotUinRanges);
         return robotUinRanges?.response?.robotUinRanges;
     }
 
@@ -170,7 +132,7 @@ export class NTQQUserApi {
 
     //需要异常处理
 
-    async getSkey(): Promise<string | undefined> {
+    async getSKey(): Promise<string | undefined> {
         const ClientKeyData = await this.forceFetchClientKey();
         if (ClientKeyData.result !== 0) {
             throw new Error('getClientKey Error');
@@ -181,7 +143,7 @@ export class NTQQUserApi {
         const cookies: { [key: string]: string; } = await RequestUtil.HttpsGetCookies(requestUrl);
         const skey = cookies['skey'];
         if (!skey) {
-            throw new Error('getSkey Skey is Empty');
+            throw new Error('SKey is Empty');
         }
         return skey;
     }
@@ -194,8 +156,8 @@ export class NTQQUserApi {
         if (uid) return uid;
         uid = (await this.context.session.getUixConvertService().getUid([Uin])).uidInfo.get(Uin);
         if (uid) return uid;
-        const unveifyUid = (await this.getUserDetailInfoByUinV2(Uin)).detail.uid;//从QQ Native 特殊转换
-        if (unveifyUid.indexOf('*') == -1) uid = unveifyUid;
+        const unverifiedUid = (await this.getUserDetailInfoByUinV2(Uin)).detail.uid;//从QQ Native 特殊转换
+        if (unverifiedUid.indexOf('*') == -1) uid = unverifiedUid;
         //if (uid) return uid;
         return uid;
     }
@@ -231,7 +193,10 @@ export class NTQQUserApi {
     }
 
     async getUserDetailInfoByUinV2(Uin: string) {
-        return await this.core.eventWrapper.callNoListenerEvent('NodeIKernelProfileService/getUserDetailInfoByUin', Uin);
+        return await this.core.eventWrapper.callNoListenerEvent(
+            'NodeIKernelProfileService/getUserDetailInfoByUin',
+            Uin
+        );
     }
 
     async forceFetchClientKey() {
