@@ -259,7 +259,7 @@ export class NTQQFileApi {
                 return sourcePath;
             }
         }
-        await this.core.eventWrapper.callNormalEventV2(
+        const [, completeRetData] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelMsgService/downloadRichMedia',
             'NodeIKernelMsgListener/onRichMediaDownloadComplete',
             [{
@@ -279,24 +279,7 @@ export class NTQQFileApi {
             1,
             timeout,
         );
-        const mixElement = (await this.core.apis.MsgApi.getMsgsByMsgId({
-            guildId: '',
-            chatType: chatType,
-            peerUid: peerUid,
-        }, [msgId])).msgList
-            .find((msg) => msg.msgId === msgId)
-            ?.elements.find((e) => e.elementId === elementId);
-        const mixElementInner = mixElement?.videoElement
-            ?? mixElement?.fileElement
-            ?? mixElement?.pttElement
-            ?? mixElement?.picElement;
-        let realPath = mixElementInner?.filePath;
-        if (!realPath) {
-            const picThumbPath: Map<number, string> = (mixElementInner as any)?.picThumbPath;
-            const picThumbPathList = Array.from(picThumbPath.values());
-            if (picThumbPathList.length > 0) realPath = picThumbPathList[0];
-        }
-        return realPath;
+        return completeRetData.filePath;
     }
 
     async getImageSize(filePath: string): Promise<ISizeCalculationResult> {
