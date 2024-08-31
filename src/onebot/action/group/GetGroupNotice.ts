@@ -34,10 +34,8 @@ export class GetGroupNotice extends BaseAction<Payload, GroupNotice[]> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQWebApi = this.core.apis.WebApi;
-
         const group = payload.group_id.toString();
-        const ret = await NTQQWebApi.getGroupNotice(group);
+        const ret = await this.core.apis.WebApi.getGroupNotice(group);
         if (!ret) {
             throw new Error('获取公告失败');
         }

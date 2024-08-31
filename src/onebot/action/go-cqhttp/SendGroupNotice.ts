@@ -22,7 +22,6 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
     actionName = ActionName.GoCQHTTP_SendGroupNotice;
 
     async _handle(payload: Payload) {
-        const NTQQGroupApi = this.core.apis.GroupApi;
         let UploadImage: { id: string, width: number, height: number } | undefined = undefined;
         if (payload.image) {
             //公告图逻辑
@@ -38,7 +37,7 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
                 throw `群公告${payload.image}设置失败,获取资源失败`;
             }
             await checkFileReceived(path, 5000); // 文件不存在QQ会崩溃，需要提前判断
-            const ImageUploadResult = await NTQQGroupApi.uploadGroupBulletinPic(payload.group_id.toString(), path);
+            const ImageUploadResult = await this.core.apis.GroupApi.uploadGroupBulletinPic(payload.group_id.toString(), path);
             if (ImageUploadResult.errCode != 0) {
                 throw `群公告${payload.image}设置失败,图片上传失败`;
             }
@@ -50,7 +49,7 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
         }
         const noticePinned = +(payload.pinned ?? 0);
         const noticeConfirmRequired = +(payload.confirm_required ?? 0);
-        const publishGroupBulletinResult = await NTQQGroupApi.publishGroupBulletin(payload.group_id.toString(), payload.content, UploadImage, noticePinned, noticeConfirmRequired);
+        const publishGroupBulletinResult = await this.core.apis.GroupApi.publishGroupBulletin(payload.group_id.toString(), payload.content, UploadImage, noticePinned, noticeConfirmRequired);
 
         if (publishGroupBulletinResult.result != 0) {
             throw `设置群公告失败,错误信息:${publishGroupBulletinResult.errMsg}`;

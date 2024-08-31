@@ -18,11 +18,10 @@ export default class SendLike extends BaseAction<Payload, null> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
-        const NTQQUserApi = this.core.apis.UserApi;
         //logDebug('点赞参数', payload);
         const qq = payload.user_id.toString();
-        const uid: string = await NTQQUserApi.getUidByUinV2(qq) || '';
-        const result = await NTQQUserApi.like(uid, parseInt(payload.times?.toString()) || 1);
+        const uid: string = await this.core.apis.UserApi.getUidByUinV2(qq) || '';
+        const result = await this.core.apis.UserApi.like(uid, parseInt(payload.times?.toString()) || 1);
         //logDebug('点赞结果', result);
         if (result.result !== 0) {
             throw `点赞失败 ${result.errMsg}`;

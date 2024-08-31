@@ -34,9 +34,6 @@ export async function createContext(core: NapCatCore, payload: OB11PostSendMsg, 
     // This function determines the type of message by the existence of user_id / group_id,
     // not message_type.
     // This redundant design of Ob11 here should be blamed.
-    const NTQQFriendApi = core.apis.FriendApi;
-    const NTQQUserApi = core.apis.UserApi;
-    const NTQQMsgApi = core.apis.MsgApi;
     if ((contextMode === ContextMode.Group || contextMode === ContextMode.Normal) && payload.group_id) {
         return {
             chatType: ChatType.KCHATTYPEGROUP,
@@ -44,11 +41,11 @@ export async function createContext(core: NapCatCore, payload: OB11PostSendMsg, 
         };
     }
     if ((contextMode === ContextMode.Private || contextMode === ContextMode.Normal) && payload.user_id) {
-        const Uid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());
+        const Uid = await core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
         if (!Uid) throw new Error('无法获取用户信息');
-        const isBuddy = await NTQQFriendApi.isBuddy(Uid);
+        const isBuddy = await core.apis.FriendApi.isBuddy(Uid);
         if (!isBuddy) {
-            const ret = await NTQQMsgApi.getTempChatInfo(ChatType.KCHATTYPETEMPC2CFROMGROUP, Uid);
+            const ret = await core.apis.MsgApi.getTempChatInfo(ChatType.KCHATTYPETEMPC2CFROMGROUP, Uid);
             if (ret.tmpChatInfo?.groupCode) {
                 return {
                     chatType: ChatType.KCHATTYPETEMPC2CFROMGROUP,
@@ -139,7 +136,6 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
     }
 
     private async handleForwardedNodes(destPeer: Peer, messageNodes: OB11MessageNode[]): Promise<RawMessage | null> {
-        const NTQQMsgApi = this.core.apis.MsgApi;
         const selfPeer = {
             chatType: ChatType.KCHATTYPEC2C,
             peerUid: this.core.selfInfo.uid,
@@ -206,7 +202,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                 logger.logError('转发消息失败，未找到消息', msgId);
                 continue;
             }
-            const nodeMsg = (await NTQQMsgApi.getMsgsByMsgId(nodeMsgPeer.Peer, [msgId])).msgList[0];
+            const nodeMsg = (await this.core.apis.MsgApi.getMsgsByMsgId(nodeMsgPeer.Peer, [msgId])).msgList[0];
             srcPeer = srcPeer ?? { chatType: nodeMsg.chatType, peerUid: nodeMsg.peerUid };
             if (srcPeer.peerUid !== nodeMsg.peerUid) {
                 needSendSelf = true;
@@ -230,7 +226,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         if (retMsgIds.length === 0) throw Error('转发消息失败，生成节点为空');
         try {
             logger.logDebug('开发转发', srcPeer, destPeer, retMsgIds);
-            return await NTQQMsgApi.multiForwardMsg(srcPeer!, destPeer, retMsgIds);
+            return await this.core.apis.MsgApi.multiForwardMsg(srcPeer!, destPeer, retMsgIds);
         } catch (e) {
             logger.logError('forward failed', e);
             return null;
@@ -243,9 +239,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
             peerUid: this.core.selfInfo.uid,
         };
         const logger = this.core.context.logger;
-        const NTQQMsgApi = this.core.apis.MsgApi;
         //msg 为待克隆消息
-
         const sendElements: SendMessageElement[] = [];
 
         for (const element of msg.elements) {
@@ -256,7 +250,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
             logger.logDebug('需要clone的消息无法解析，将会忽略掉', msg);
         }
         try {
-            return await NTQQMsgApi.sendMsg(selfPeer, sendElements, true);
+            return await this.core.apis.MsgApi.sendMsg(selfPeer, sendElements, true);
         } catch (e) {
             logger.logError(e, '克隆转发消息失败,将忽略本条消息', msg);
         }

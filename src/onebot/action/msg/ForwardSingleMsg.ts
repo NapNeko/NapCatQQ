@@ -18,9 +18,8 @@ type Payload = FromSchema<typeof SchemaData>;
 
 class ForwardSingleMsg extends BaseAction<Payload, null> {
     protected async getTargetPeer(payload: Payload): Promise<Peer> {
-        const NTQQUserApi = this.core.apis.UserApi;
         if (payload.user_id) {
-            const peerUid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());
+            const peerUid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
             if (!peerUid) {
                 throw new Error(`无法找到私聊对象${payload.user_id}`);
             }
@@ -30,13 +29,12 @@ class ForwardSingleMsg extends BaseAction<Payload, null> {
     }
 
     async _handle(payload: Payload): Promise<null> {
-        const NTQQMsgApi = this.core.apis.MsgApi;
         const msg = MessageUnique.getMsgIdAndPeerByShortId(parseInt(payload.message_id.toString()));
         if (!msg) {
             throw new Error(`无法找到消息${payload.message_id}`);
         }
         const peer = await this.getTargetPeer(payload);
-        const ret = await NTQQMsgApi.forwardMsg(msg.Peer,
+        const ret = await this.core.apis.MsgApi.forwardMsg(msg.Peer,
             peer,
             [msg.MsgId],
         );

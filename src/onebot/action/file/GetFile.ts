@@ -28,15 +28,12 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
     payloadSchema: any = GetFileBase_PayloadSchema;
 
     async _handle(payload: GetFilePayload): Promise<GetFileResponse> {
-        const NTQQMsgApi = this.core.apis.MsgApi;
-        const NTQQFileApi = this.core.apis.FileApi;
-
         //接收消息标记模式
         const contextMsgFile = FileNapCatOneBotUUID.decode(payload.file);
         if (contextMsgFile) {
             const { peer, msgId, elementId } = contextMsgFile;
-            const downloadPath = await NTQQFileApi.downloadMedia(msgId, peer.chatType, peer.peerUid, elementId, '', '');
-            const mixElement = (await NTQQMsgApi.getMsgsByMsgId(peer, [msgId]))?.msgList
+            const downloadPath = await this.core.apis.FileApi.downloadMedia(msgId, peer.chatType, peer.peerUid, elementId, '', '');
+            const mixElement = (await this.core.apis.MsgApi.getMsgsByMsgId(peer, [msgId]))?.msgList
                 .find(msg => msg.msgId === msgId)?.elements.find(e => e.elementId === elementId);
             const mixElementInner = mixElement?.videoElement ?? mixElement?.fileElement ?? mixElement?.pttElement ?? mixElement?.picElement;
             if (!mixElementInner) throw new Error('element not found');
@@ -64,7 +61,7 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
         const contextModelIdFile = FileNapCatOneBotUUID.decodeModelId(payload.file);
         if (contextModelIdFile) {
             const { peer, modelId } = contextModelIdFile;
-            const downloadPath = await NTQQFileApi.downloadFileForModelId(peer, modelId, '');
+            const downloadPath = await this.core.apis.FileApi.downloadFileForModelId(peer, modelId, '');
             const res: GetFileResponse = {
                 file: downloadPath,
                 url: downloadPath,
@@ -83,9 +80,9 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
         }
 
         //搜索名字模式
-        const searchResult = (await NTQQFileApi.searchForFile([payload.file]));
+        const searchResult = (await this.core.apis.FileApi.searchForFile([payload.file]));
         if (searchResult) {
-            const downloadPath = await NTQQFileApi.downloadFileById(searchResult.id, parseInt(searchResult.fileSize));
+            const downloadPath = await this.core.apis.FileApi.downloadFileById(searchResult.id, parseInt(searchResult.fileSize));
             const res: GetFileResponse = {
                 file: downloadPath,
                 url: downloadPath,

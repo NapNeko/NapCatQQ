@@ -20,8 +20,7 @@ export class SetOnlineStatus extends BaseAction<Payload, null> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQUserApi = this.core.apis.UserApi;
-        const ret = await NTQQUserApi.setSelfOnlineStatus(
+        const ret = await this.core.apis.UserApi.setSelfOnlineStatus(
             parseInt(payload.status.toString()),
             parseInt(payload.ext_status.toString()),
             parseInt(payload.battery_status.toString()),

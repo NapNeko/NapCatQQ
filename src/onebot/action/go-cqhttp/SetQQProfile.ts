@@ -19,10 +19,9 @@ export class SetQQProfile extends BaseAction<Payload, any | null> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQUserApi = this.core.apis.UserApi;
         const self = this.core.selfInfo;
-        const OldProfile = await NTQQUserApi.getUserDetailInfo(self.uid);
-        return await NTQQUserApi.modifySelfProfile({
+        const OldProfile = await this.core.apis.UserApi.getUserDetailInfo(self.uid);
+        return await this.core.apis.UserApi.modifySelfProfile({
             nick: payload.nickname,
             longNick: (payload?.personal_note ?? OldProfile?.longNick) || '',
             sex: parseInt(payload?.sex ? payload?.sex.toString() : OldProfile?.sex!.toString()),

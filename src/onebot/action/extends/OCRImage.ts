@@ -19,14 +19,13 @@ export class OCRImage extends BaseAction<Payload, any> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQSystemApi = this.core.apis.SystemApi;
         const { path, isLocal, success } = (await uri2local(this.core.NapCatTempPath, payload.image));
         if (!success) {
             throw `OCR ${payload.image}失败,image字段可能格式不正确`;
         }
         if (path) {
             await checkFileReceived(path, 5000); // 文件不存在QQ会崩溃，需要提前判断
-            const ret = await NTQQSystemApi.ocrImage(path);
+            const ret = await this.core.apis.SystemApi.ocrImage(path);
             if (!isLocal) {
                 fs.unlink(path, () => {
                 });

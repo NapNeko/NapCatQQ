@@ -22,14 +22,12 @@ export default class GoCQHTTPUploadPrivateFile extends BaseAction<Payload, null>
     payloadSchema = SchemaData;
 
     async getPeer(payload: Payload): Promise<Peer> {
-        const NTQQUserApi = this.core.apis.UserApi;
-        const NTQQFriendApi = this.core.apis.FriendApi;
         if (payload.user_id) {
-            const peerUid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());
+            const peerUid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
             if (!peerUid) {
                 throw `私聊${payload.user_id}不存在`;
             }
-            const isBuddy = await NTQQFriendApi.isBuddy(peerUid);
+            const isBuddy = await this.core.apis.FriendApi.isBuddy(peerUid);
             return { chatType: isBuddy ? ChatType.KCHATTYPEC2C : ChatType.KCHATTYPETEMPC2CFROMGROUP, peerUid };
         }
         throw new Error('缺少参数 user_id');

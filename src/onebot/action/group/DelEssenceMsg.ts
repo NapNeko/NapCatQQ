@@ -18,16 +18,14 @@ export default class DelEssenceMsg extends BaseAction<Payload, any> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<any> {
-        const NTQQGroupApi = this.core.apis.GroupApi;
         const msg = MessageUnique.getMsgIdAndPeerByShortId(+payload.message_id);
-        const NTQQWebApi = this.core.apis.WebApi;
         if (!msg) {
-            const data = NTQQGroupApi.essenceLRU.getValue(+payload.message_id);
+            const data = this.core.apis.GroupApi.essenceLRU.getValue(+payload.message_id);
             if(!data) throw new Error('消息不存在');
             const { msg_seq, msg_random, group_id } = JSON.parse(data) as { msg_seq: string, msg_random: string, group_id: string };
-            return await NTQQGroupApi.removeGroupEssenceBySeq(group_id, msg_seq, msg_random);
+            return await this.core.apis.GroupApi.removeGroupEssenceBySeq(group_id, msg_seq, msg_random);
         }
-        return await NTQQGroupApi.removeGroupEssence(
+        return await this.core.apis.GroupApi.removeGroupEssence(
             msg.Peer.peerUid,
             msg.MsgId,
         );

@@ -21,14 +21,13 @@ export class GetGroupFileList extends BaseAction<Payload, { FileList: Array<any>
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQMsgApi = this.core.apis.MsgApi;
         let param = {};
         if (payload.folder_id) {
             param = {
                 folderId: payload.folder_id.toString(),
             };
         }
-        const ret = await NTQQMsgApi.getGroupFileList(payload.group_id.toString(), {
+        const ret = await this.core.apis.MsgApi.getGroupFileList(payload.group_id.toString(), {
             sortType: 1,
             fileCount: +payload.file_count,
             startIndex: +payload.start_index,

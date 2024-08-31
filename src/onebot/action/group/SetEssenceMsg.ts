@@ -18,12 +18,11 @@ export default class SetEssenceMsg extends BaseAction<Payload, any> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<any> {
-        const NTQQGroupApi = this.core.apis.GroupApi;
         const msg = MessageUnique.getMsgIdAndPeerByShortId(parseInt(payload.message_id.toString()));
         if (!msg) {
             throw new Error('msg not found');
         }
-        return await NTQQGroupApi.addGroupEssence(
+        return await this.core.apis.GroupApi.addGroupEssence(
             msg.Peer.peerUid,
             msg.MsgId,
         );

@@ -19,9 +19,8 @@ export default class SetGroupCard extends BaseAction<Payload, null> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
-        const NTQQGroupApi = this.core.apis.GroupApi;
-        const member = await NTQQGroupApi.getGroupMember(payload.group_id.toString(), payload.user_id.toString());
-        member && await NTQQGroupApi.setMemberCard(payload.group_id.toString(), member.uid, payload.card || '');
+        const member = await this.core.apis.GroupApi.getGroupMember(payload.group_id.toString(), payload.user_id.toString());
+        if (member) await this.core.apis.GroupApi.setMemberCard(payload.group_id.toString(), member.uid, payload.card || '');
         return null;
     }
 }

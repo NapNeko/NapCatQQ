@@ -19,9 +19,8 @@ export default class SetFriendAddRequest extends BaseAction<Payload, null> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
-        const NTQQFriendApi = this.core.apis.FriendApi;
         const approve = payload.approve?.toString() !== 'false';
-        await NTQQFriendApi.handleFriendRequest(payload.flag, approve);
+        await this.core.apis.FriendApi.handleFriendRequest(payload.flag, approve);
         return null;
     }
 }

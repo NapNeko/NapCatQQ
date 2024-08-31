@@ -22,7 +22,6 @@ class GetMsg extends BaseAction<Payload, OB11Message> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQMsgApi = this.core.apis.MsgApi;
         // log("history msg ids", Object.keys(msgHistory));
         if (!payload.message_id) {
             throw Error('参数message_id不能为空');
@@ -33,7 +32,7 @@ class GetMsg extends BaseAction<Payload, OB11Message> {
             throw new Error('消息不存在');
         }
         const peer = { guildId: '', peerUid: msgIdWithPeer?.Peer.peerUid, chatType: msgIdWithPeer.Peer.chatType };
-        const msg = await NTQQMsgApi.getMsgsByMsgId(
+        const msg = await this.core.apis.MsgApi.getMsgsByMsgId(
             peer,
             [msgIdWithPeer?.MsgId || payload.message_id.toString()]);
         const retMsg = await this.obContext.apis.MsgApi.parseMessage(msg.msgList[0], 'array');
