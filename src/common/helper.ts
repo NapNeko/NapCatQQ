@@ -25,26 +25,24 @@ export async function solveAsyncProblem<T extends (...args: any[]) => Promise<an
 }
 
 export class FileNapCatOneBotUUID {
-    static encodeModelId(peer: Peer, modelId: string, fileId: string): string {
-        return `NapCatOneBot-ModelIdFile-${peer.chatType}-${peer.peerUid}-${modelId}-${fileId}`;
+    static encodeModelId(peer: Peer, modelId: string): string {
+        return `NapCatOneBot-ModelIdFile-${peer.chatType}-${peer.peerUid}-${modelId}`;
     }
 
     static decodeModelId(uuid: string): undefined | {
         peer: Peer,
-        modelId: string,
-        fileId: string
+        modelId: string
     } {
         if (!uuid.startsWith('NapCatOneBot-ModelIdFile-')) return undefined;
         const data = uuid.split('-');
-        if (data.length !== 6) return undefined;
-        const [, , chatType, peerUid, modelId, fileId] = data;
+        if (data.length !== 5) return undefined;
+        const [, , chatType, peerUid, modelId] = data;
         return {
             peer: {
                 chatType: chatType as any,
                 peerUid: peerUid,
             },
             modelId,
-            fileId
         };
     }
 
