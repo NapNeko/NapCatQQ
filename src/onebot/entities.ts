@@ -24,7 +24,7 @@ export class OB11Entities {
             ...rawFriend.coreInfo,
             user_id: parseInt(rawFriend.coreInfo.uin),
             nickname: rawFriend.coreInfo.nick,
-            remark: rawFriend.coreInfo.nick,
+            remark: rawFriend.coreInfo.remark ?? rawFriend.coreInfo.nick,
             sex: this.sex(rawFriend.baseInfo.sex!),
             level: 0,
         }));
