@@ -138,19 +138,19 @@ export function isEqual(obj1: any, obj2: any) {
 export function getDefaultQQVersionConfigInfo(): QQVersionConfigType {
     if (os.platform() === 'linux') {
         return {
-            baseVersion: '3.2.12-27254',
-            curVersion: '3.2.12-27254',
+            baseVersion: '3.2.12-27597',
+            curVersion: '3.2.12-27597',
             prevVersion: '',
             onErrorVersions: [],
-            buildId: '27254',
+            buildId: '27597',
         };
     }
     return {
-        baseVersion: '9.9.15-27391',
-        curVersion: '9.9.15-27391',
+        baseVersion: '9.9.15-27597',
+        curVersion: '9.9.15-27597',
         prevVersion: '',
         onErrorVersions: [],
-        buildId: '27391',
+        buildId: '27597',
     };
 }
 

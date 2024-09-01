@@ -71,6 +71,6 @@ export class QQBasicInfoWrapper {
         // else
         this.context.logger.log(`[QQ版本兼容性检测] 获取Appid异常 请检测NapCat/QQNT是否正常`);
         this.context.logger.log(`[QQ版本兼容性检测] ${fullVersion} 版本兼容性不佳，可能会导致一些功能无法正常使用`,);
-        return { appid: systemPlatform === 'linux' ? '537240795' : '537240709', qua: this.getQUAInternal() };
+        return { appid: systemPlatform === 'linux' ? '537243600' : '537243441', qua: this.getQUAInternal() };
     }
 }
