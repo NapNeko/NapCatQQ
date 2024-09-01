@@ -43,10 +43,7 @@ export class GetGroupFileList extends BaseAction<Payload, { FileList: Array<any>
                 e.fileInfo!.fileId = FileNapCatOneBotUUID.encodeModelId({
                     chatType: 2,
                     peerUid: payload.group_id.toString()
-                },
-                    fileModelId,
-                    e.fileInfo!.fileId
-                );
+                }, fileModelId);
         });
         return { FileList: ret };
     }
