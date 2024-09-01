@@ -3,6 +3,7 @@ import fs from 'fs/promises';
 import { FileNapCatOneBotUUID } from '@/common/helper';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { OB11MessageImage, OB11MessageVideo } from '@/onebot/types';
 
 export interface GetFilePayload {
     file: string; // 文件名或者fileUuid
@@ -33,16 +34,27 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
         if (contextMsgFile) {
             const { peer, msgId, elementId } = contextMsgFile;
             const downloadPath = await this.core.apis.FileApi.downloadMedia(msgId, peer.chatType, peer.peerUid, elementId, '', '');
-            const mixElement = (await this.core.apis.MsgApi.getMsgsByMsgId(peer, [msgId]))?.msgList
-                .find(msg => msg.msgId === msgId)?.elements.find(e => e.elementId === elementId);
+            const rawMessage = (await this.core.apis.MsgApi.getMsgsByMsgId(peer, [msgId]))?.msgList
+                .find(msg => msg.msgId === msgId);
+            const mixElement = rawMessage?.elements.find(e => e.elementId === elementId);
             const mixElementInner = mixElement?.videoElement ?? mixElement?.fileElement ?? mixElement?.pttElement ?? mixElement?.picElement;
             if (!mixElementInner) throw new Error('element not found');
             const fileSize = mixElementInner.fileSize?.toString() ?? '';
             const fileName = mixElementInner.fileName ?? '';
-
+            let url = '';
+            if (mixElement?.picElement && rawMessage) {
+                let tempData =
+                    await this.obContext.apis.MsgApi.rawToOb11Converters.picElement?.(mixElement?.picElement, rawMessage, mixElement) as OB11MessageImage | undefined;
+                url = tempData?.data.url ?? '';
+            }
+            if (mixElement?.videoElement && rawMessage) {
+                let tempData =
+                    await this.obContext.apis.MsgApi.rawToOb11Converters.videoElement?.(mixElement?.videoElement, rawMessage, mixElement) as OB11MessageVideo | undefined;
+                url = tempData?.data.url ?? '';
+            }
             const res: GetFileResponse = {
                 file: downloadPath,
-                url: downloadPath,
+                url: url !== '' ? url : downloadPath,
                 file_size: fileSize,
                 file_name: fileName,
             };
