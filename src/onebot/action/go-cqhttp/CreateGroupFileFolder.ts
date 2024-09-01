@@ -1,10 +1,6 @@
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { NapCatOneBot11Adapter } from '@/onebot';
-import { NapCatCore } from '@/core';
-import { SetGroupFileFolder } from '@/onebot/action/file/SetGroupFileFolder';
-
 const SchemaData = {
     type: 'object',
     properties: {
@@ -16,17 +12,10 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export class CreateGroupFileFolder extends BaseAction<Payload, null> {
+export class CreateGroupFileFolder extends  BaseAction<Payload, any>  {
     actionName = ActionName.GoCQHTTP_CreateGroupFileFolder;
     payloadSchema = SchemaData;
-
-    constructor(obContext: NapCatOneBot11Adapter, core: NapCatCore,
-                private ncSetGroupFileFolderImpl: SetGroupFileFolder) {
-        super(obContext, core);
-    }
-
     async _handle(payload: Payload) {
-        await this.ncSetGroupFileFolderImpl._handle(payload);
-        return null;
+        return (await this.core.apis.GroupApi.CreatGroupFileFolder(payload.group_id.toString(), payload.folder_name)).resultWithGroupItem;
     }
 }
