@@ -213,7 +213,7 @@ export class OneBotGroupApi {
     async parseGroupMemberIncreaseEvent(GroupCode: string, grayTipElement: GrayTipElement) {
         const groupElement = grayTipElement?.groupElement;
         if (!groupElement) return undefined;
-        const member = await this.core.apis.GroupApi.getGroupMember(GroupCode, groupElement.memberUid);
+        const member = await this.core.apis.UserApi.getUserDetailInfo(groupElement.memberUid);
         const memberUin = member?.uin;
         const adminMember = await this.core.apis.GroupApi.getGroupMember(GroupCode, groupElement.adminUid);
         if (memberUin) {
