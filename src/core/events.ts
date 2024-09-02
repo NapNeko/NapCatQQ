@@ -56,17 +56,17 @@ type NapCatInternalEvents = {
                     xDataSource?: RawMessage, xMsg?: RawMessage) => PromiseLike<void>;
 
 
-    'group/mute': (groupCode: string, targetUin: string, operatorUin: string, duration: number,
-                   xGrayTipElement: GrayTipElement, xMsg: RawMessage) => PromiseLike<void>;
+    'group/shut-up/put': (groupCode: string, targetUin: string, operatorUin: string, duration: number,
+                          xGrayTipElement: GrayTipElement, xMsg: RawMessage) => PromiseLike<void>;
 
-    'group/unmute': (groupCode: string, targetUin: string, operatorUin: string,
-                     xGrayTipElement: GrayTipElement, xMsg: RawMessage) => PromiseLike<void>;
+    'group/shut-up/lift': (groupCode: string, targetUin: string, operatorUin: string,
+                           xGrayTipElement: GrayTipElement, xMsg: RawMessage) => PromiseLike<void>;
 
-    'group/mute-all': (groupCode: string, operatorUin: string,
-                       xGrayTipElement: GrayTipElement, xMsg: RawMessage) => PromiseLike<void>;
+    'group/shut-up-all/put': (groupCode: string, operatorUin: string,
+                              xGrayTipElement: GrayTipElement, xMsg: RawMessage) => PromiseLike<void>;
 
-    'group/unmute-all': (groupCode: string, operatorUin: string,
-                         xGrayTipElement: GrayTipElement, xMsg: RawMessage) => PromiseLike<void>;
+    'group/shut-up-all/lift': (groupCode: string, operatorUin: string,
+                               xGrayTipElement: GrayTipElement, xMsg: RawMessage) => PromiseLike<void>;
 
     'group/card-change': (groupCode: string, changedUin: string, newCard: string, oldCard: string,
                           xMsg: RawMessage) => PromiseLike<void>;
@@ -262,7 +262,7 @@ export class NapCatEventChannel extends
                                 if (shutUpAttr.member?.uid) {
                                     if (durationOrLiftBan > 0) {
                                         this.emit(
-                                            'group/mute',
+                                            'group/shut-up/put',
                                             groupCode,
                                             (await this.core.apis.GroupApi.getGroupMember(groupCode, shutUpAttr.member.uid))!.uin,
                                             (await this.core.apis.GroupApi.getGroupMember(groupCode, shutUpAttr.admin.uid))!.uin,
@@ -271,7 +271,7 @@ export class NapCatEventChannel extends
                                         );
                                     } else {
                                         this.emit(
-                                            'group/unmute',
+                                            'group/shut-up/lift',
                                             groupCode,
                                             (await this.core.apis.GroupApi.getGroupMember(groupCode, shutUpAttr.member.uid))!.uin,
                                             (await this.core.apis.GroupApi.getGroupMember(groupCode, shutUpAttr.admin.uid))!.uin,
@@ -281,14 +281,14 @@ export class NapCatEventChannel extends
                                 } else {
                                     if (durationOrLiftBan > 0) {
                                         this.emit(
-                                            'group/mute-all',
+                                            'group/shut-up-all/put',
                                             groupCode,
                                             (await this.core.apis.GroupApi.getGroupMember(groupCode, shutUpAttr.admin.uid))!.uin,
                                             element.grayTipElement, msg,
                                         );
                                     } else {
                                         this.emit(
-                                            'group/unmute-all',
+                                            'group/shut-up-all/lift',
                                             groupCode,
                                             (await this.core.apis.GroupApi.getGroupMember(groupCode, shutUpAttr.admin.uid))!.uin,
                                             element.grayTipElement, msg,
