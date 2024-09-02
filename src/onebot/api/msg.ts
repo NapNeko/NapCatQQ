@@ -219,7 +219,7 @@ export class OneBotMsgApi {
                 peerUid: msg.peerUid,
                 guildId: '',
             };
-            if (!records) {
+            if (!records || !element.replyMsgTime || !element.senderUidStr) {
                 this.core.context.logger.logError('获取不到引用的消息', element.replayMsgSeq);
                 return null;
             }
@@ -234,29 +234,13 @@ export class OneBotMsgApi {
             if (records.peerUin === '284840486') {
                 return createReplyData(records.msgId);
             }
-
-            let replyMsg: RawMessage | undefined;
-            // Attempt 1
-            replyMsg = (await this.core.apis.MsgApi.getMsgsBySeqAndCount(peer,element.replayMsgSeq, 1, true, true))
-                .msgList
-                .find(msg => msg.msgRandom === records.msgRandom);
+            let replyMsg = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeqV2(peer, element.replayMsgSeq, element.replyMsgTime, [element.senderUidStr]))
+                .msgList.find(msg => msg.msgRandom === records.msgRandom);
 
             if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
-                // Attempt 2
-                replyMsg = (await this.core.apis.MsgApi.getSingleMsg(peer, element.replayMsgSeq)).msgList[0];
-
-                if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
-                    // Attempt 3
-                    const replyMsgList = (await this.core.apis.MsgApi.getMsgExBySeq(peer, records.msgSeq)).msgList;
-                    if (replyMsgList.length < 1) {
-                        this.core.context.logger.logError('回复消息消息验证失败', element.replayMsgSeq);
-                        return null;
-                    }
-                    replyMsg = replyMsgList.filter(e => e.msgSeq == records.msgSeq)
-                        .sort((a, b) => parseInt(a.msgTime) - parseInt(b.msgTime))[0];
-                }
+                this.core.context.logger.logError('获取不到引用的消息', element.replayMsgSeq);
+                return null;
             }
-
             return createReplyData(replyMsg.msgId);
         },
 

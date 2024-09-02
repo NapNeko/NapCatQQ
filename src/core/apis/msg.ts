@@ -54,19 +54,6 @@ export class NTQQMsgApi {
         return this.context.session.getMsgService().forwardMsg(msgIds, peer, [peer], new Map());
     }
 
-    async getLatestMsgByUids(peer: Peer, count: number = 20, isReverseOrder: boolean = false) {
-        return await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {
-            chatInfo: peer,
-            filterMsgType: [],
-            filterSendersUid: [],
-            filterMsgToTime: '0',
-            filterMsgFromTime: '0',
-            isReverseOrder: isReverseOrder,//此参数有点离谱 注意不是本次查询的排序 而是全部消历史信息的排序 默认false 从新消息拉取到旧消息
-            isIncludeCurrent: true,
-            pageLimit: count,
-        });
-    }
-
     async getMsgsByMsgId(peer: Peer | undefined, msgIds: string[] | undefined) {
         if (!peer) throw new Error('peer is not allowed');
         if (!msgIds) throw new Error('msgIds is not allowed');
@@ -94,11 +81,29 @@ export class NTQQMsgApi {
             pageLimit: 1,
         });
     }
-
+    async queryMsgsWithFilterExWithSeqV2(peer: Peer, msgSeq: string, MsgTime: string, SendersUid: string[]) {
+        return await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', msgSeq, {
+            chatInfo: peer,
+            filterMsgType: [],
+            filterSendersUid: SendersUid,
+            filterMsgToTime: MsgTime,
+            filterMsgFromTime: MsgTime,
+            isReverseOrder: false,
+            isIncludeCurrent: true,
+            pageLimit: 1,
+        });
+    }
     async getMsgsBySeqAndCount(peer: Peer, seq: string, count: number, desc: boolean, z: boolean) {
         return await this.context.session.getMsgService().getMsgsBySeqAndCount(peer, seq, count, desc, z);
     }
-
+    async getMsgBySeqList(peer: Peer, msgSeqList: string[]) {
+        //坏的
+        return await this.context.session.getMsgService().getMsgsBySeqList(peer, msgSeqList);
+    }
+    async getMsgBySeqExFirstMsg(peer: Peer, rootMsgId: string, replyMsgId: string) {
+        let reply = await this.context.session.getMsgService().getSourceOfReplyMsgV2(peer, rootMsgId, replyMsgId);
+        console.log(reply);
+    }
     async getMsgExBySeq(peer: Peer, msgSeq: string) {
         const DateNow = Math.floor(Date.now() / 1000);
         const filterMsgFromTime = (DateNow - 300).toString();
@@ -233,7 +238,7 @@ export class NTQQMsgApi {
             () => true,
             (msgRecords) => msgRecords.some(
                 msgRecord => msgRecord.peerUid === destPeer.peerUid
-                && msgRecord.senderUid === this.core.selfInfo.uid
+                    && msgRecord.senderUid === this.core.selfInfo.uid
             ),
         );
         for (const msg of msgList) {
