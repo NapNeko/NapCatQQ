@@ -1,0 +1,114 @@
+syntax = 'proto3';
+package Laana;
+
+import 'entity/file.proto';
+import 'entity/message.proto';
+import 'entity/user.proto';
+
+message GetGroupMemberUinsPing {
+  string groupCode = 1;
+}
+
+message GetGroupMemberUinsPong {
+  repeated string memberUins = 1;
+}
+
+message GetGroupMemberInfoPing {
+  string groupCode = 1;
+  string memberUin = 2;
+}
+
+message GetGroupMemberInfoPong {
+  UserEntity member = 1;
+}
+
+message GetAllGroupMembersInfoPing {
+  string groupCode = 1;
+}
+
+message GetAllGroupMembersInfoPong {
+  repeated UserEntity members = 1;
+}
+
+message SetGroupNamePing {
+  string groupCode = 1;
+  string name = 2;
+}
+
+message SetGroupAvatarPing {
+  string groupCode = 1;
+  File avatar = 2;
+}
+
+message SetGroupAvatarPong {
+  string avatarCacheId = 1;
+}
+
+message SetGroupAdminPing {
+  enum Operation {
+    SET = 0;
+    UNSET = 1;
+  }
+
+  string groupCode = 1;
+  string memberUin = 2;
+  Operation operation = 3;
+}
+
+message SetGroupMemberCardPing {
+  string groupCode = 1;
+  string memberUin = 2;
+  string card = 3;
+}
+
+message SetGroupMemberSpecialTitlePing {
+  string groupCode = 1;
+  string memberUin = 2;
+  string title = 3;
+}
+
+message SetGroupMemberShutUpPing {
+  string groupCode = 1;
+  string memberUin = 2;
+  oneof operation {
+    uint32 duration = 3;
+    bool lift = 4;
+  }
+}
+
+message SetGroupShutUpAllPing {
+  string groupCode = 1;
+  bool lift = 2;
+}
+
+message KickGroupMemberPing {
+  string groupCode = 1;
+  string memberUin = 2;
+}
+
+message QuitGroupPing {
+  string groupCode = 1;
+}
+
+message GetPaginatedGroupEssenceMessagePing {
+  string groupCode = 1;
+  uint32 startIndex = 2;
+  uint32 maxCount = 3;
+}
+
+message GetPaginatedGroupEssenceMessagePong {
+  repeated Message essenceMessages = 1;
+}
+
+message GetAllGroupsEssenceMessagePing {
+  string groupCode = 1;
+}
+
+message GetAllGroupsEssenceMessagePong {
+  repeated Message essenceMessages = 1;
+}
+
+message SetGroupEssenceMessagePing {
+  string groupCode = 1;
+  string messageId = 2;
+}

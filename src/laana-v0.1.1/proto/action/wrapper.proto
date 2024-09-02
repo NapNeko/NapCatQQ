@@ -1,0 +1,98 @@
+syntax = 'proto3';
+package Laana;
+
+import 'action/message.proto';
+import 'action/contact.proto';
+import 'action/group.proto';
+import 'action/request.proto';
+import 'action/file.proto';
+
+message ActionPing {
+  string clientPingId = 1;
+
+  oneof ping {
+    SendMessagePing sendMessage = 101;
+    SendPackedMessagesPing sendPackedMessages = 102;
+    GetMessagePing getMessage = 103;
+    GetMessagesPing getMessages = 104;
+    GetHistoryMessagesPing getHistoryMessages = 105;
+    WithdrawMessagePing withdrawMessage = 106;
+    MarkPeerMessageAsReadPing markPeerMessageAsRead = 107;
+    ForwardMessagePing forwardMessage = 108;
+
+    GetAllBuddiesPing getAllBuddies = 201;
+    GetAllGroupsPing getAllGroups = 202;
+    GetRecentContactListPing getRecentContactList = 203;
+    GetBuddyInfoPing getBuddyInfo = 204;
+    GetGroupInfoPing getGroupInfo = 205;
+
+    GetGroupMemberUinsPing getGroupMemberUins = 301;
+    GetGroupMemberInfoPing getGroupMemberInfo = 302;
+    GetAllGroupMembersInfoPing getAllGroupMembersInfo = 303;
+    SetGroupNamePing setGroupName = 304;
+    SetGroupAvatarPing setGroupAvatar = 305;
+    SetGroupAdminPing setGroupAdmin = 306;
+    SetGroupMemberCardPing setGroupMemberCard = 307;
+    SetGroupMemberSpecialTitlePing setGroupMemberSpecialTitle = 308;
+    SetGroupMemberShutUpPing setGroupMemberShutUp = 309;
+    SetGroupShutUpAllPing setGroupShutUpAll = 310;
+    KickGroupMemberPing kickGroupMember = 311;
+    QuitGroupPing quitGroup = 312;
+    GetPaginatedGroupEssenceMessagePing getPaginatedGroupEssenceMessage = 313;
+    GetAllGroupsEssenceMessagePing getAllGroupsEssenceMessage = 314;
+    SetGroupEssenceMessagePing setGroupEssenceMessage = 315;
+
+    HandleBuddyAddRequestPing handleBuddyAddRequest = 401;
+    HandleGroupJoinRequestPing handleGroupJoinRequest = 402;
+    HandleGroupInvitationPing handleGroupInvitation = 403;
+
+    UploadCachePing uploadCache = 501;
+    PrepareCacheByUrlPing prepareCacheByUrl = 502;
+    DestroyCachePing destroyCache = 503;
+    GetFileDataPing getFileData = 504;
+    GetGroupFileListPing getGroupFileList = 505;
+    UploadGroupFilePing uploadGroupFile = 506;
+    CreateGroupFolderPing createGroupFolder = 507;
+    DeleteGroupFilePing deleteGroupFile = 508;
+    DeleteGroupFolderPing deleteGroupFolder = 509;
+  }
+}
+
+message ActionPong {
+  message FailedPong {
+    string reason = 1;
+  }
+
+  string clientPingId = 1;
+  oneof pong {
+    FailedPong failed = 11;
+
+    SendMessagePong sendMessage = 101;
+    SendPackedMessagesPong sendPackedMessages = 102;
+    GetMessagePong getMessage = 103;
+    GetMessagesPong getMessages = 104;
+    GetHistoryMessagesPong getHistoryMessages = 105;
+
+    GetAllBuddiesPong getAllBuddies = 201;
+    GetAllGroupsPong getAllGroups = 202;
+    GetRecentContactListPong getRecentContactList = 203;
+    GetBuddyInfoPong getBuddyInfo = 204;
+    GetGroupInfoPong getGroupInfo = 205;
+
+    GetGroupMemberUinsPong getGroupMemberUins = 301;
+    GetGroupMemberInfoPong getGroupMemberInfo = 302;
+    GetAllGroupMembersInfoPong getAllGroupMembersInfo = 303;
+    SetGroupAvatarPong setGroupAvatar = 305;
+    GetPaginatedGroupEssenceMessagePong getPaginatedGroupEssenceMessage = 313;
+    GetAllGroupsEssenceMessagePong getAllGroupsEssenceMessage = 314;
+
+    HandleGroupInvitationPong handleGroupInvitation = 403;
+
+    UploadCachePong uploadCache = 501;
+    PrepareCacheByUrlPong prepareCacheByUrl = 502;
+    GetFileDataPong getFileData = 504;
+    GetGroupFileListPong getGroupFileList = 505;
+    UploadGroupFilePong uploadGroupFile = 506;
+    CreateGroupFolderPong createGroupFolder = 507;
+  }
+}

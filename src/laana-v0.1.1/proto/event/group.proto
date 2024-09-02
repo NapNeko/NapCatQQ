@@ -1,0 +1,96 @@
+syntax = 'proto3';
+package Laana;
+
+message GroupAdminChangeEvent {
+  enum Operation {
+    SET = 0;
+    UNSET = 1;
+  }
+
+  string groupCode = 1;
+  string targetUin = 2;
+  Operation operation = 3;
+}
+
+message GroupEssenceMessageEvent {
+  enum Operation {
+    SET = 0;
+    UNSET = 1;
+  }
+
+  string groupCode = 1;
+  string messageId = 2;
+  Operation operation = 3;
+  string operatorUin = 4;
+}
+
+message GroupMemberCardChangeEvent {
+  string groupCode = 1;
+  string targetUin = 2;
+  string newCard = 3;
+  string oldCard = 4;
+  optional string operatorUin = 5;
+}
+
+message GroupMemberIncreaseEvent {
+  string groupCode = 1;
+  string newMemberUin = 2;
+  optional string operatorUin = 3;
+  optional string invitorUin = 4;
+}
+
+message GroupMemberDecreaseEvent {
+  string groupCode = 1;
+  string oldMemberUin = 2;
+  optional string operatorUin = 3;
+}
+
+message GroupMemberTitleChangeEvent {
+  string groupCode = 1;
+  string targetUin = 2;
+  string newTitle = 3;
+  optional string oldTitle = 4;
+  string operatorUin = 5;
+}
+
+message GroupMessageWithdrawEvent {
+  string groupCode = 1;
+  string messageId = 2;
+  string operatorUin = 3;
+}
+
+message GroupShutUpMemberEvent {
+  string groupCode = 1;
+  string targetUin = 2;
+  uint32 duration = 3;
+  string operatorUin = 4;
+}
+
+message GroupShutUpAllEvent {
+  string groupCode = 1;
+  string operatorUin = 2;
+}
+
+message GroupLiftShutUpMemberEvent {
+  string groupCode = 1;
+  string targetUin = 2;
+  string operatorUin = 3;
+}
+
+message GroupLiftShutUpAllEvent {
+  string groupCode = 1;
+  string operatorUin = 2;
+}
+
+message GroupEmojiLikeEvent {
+  enum Operation {
+    LIKE = 0;
+    DISLIKE = 1;
+  }
+
+  string groupCode = 1;
+  string messageId = 2;
+  string emojiId = 3;
+  Operation operation = 4;
+  string operatorUin = 5;
+}

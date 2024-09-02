@@ -1,0 +1,97 @@
+syntax = 'proto3';
+package Laana;
+
+import 'entity/file.proto';
+import 'entity/message.proto';
+
+message OutgoingMessage {
+  oneof content {
+    Bubble bubble = 11;
+    NormalFile file = 12;
+    SingleImage singleImage = 13;
+    MarketFace marketFace = 14;
+    File video = 15;
+    File voice = 16;
+    // LinkCard linkCard = 17; - unable, needs signature
+    // ContactCard contactCard = 18; - unable, needs signature
+    MusicCard musicCard = 19;
+    // LocationCard locationCard = 20; - unable, needs signature
+    // ForwardMessageRef forwardMsgRef = 21; - unable, use packed messages instead
+    // XmlMessage xmlMessage = 22;
+    // JsonMessage jsonMessage = 23;
+  }
+}
+
+message SendMessagePing {
+  Peer targetPeer = 1;
+  OutgoingMessage message = 2;
+}
+
+message SendMessagePong {
+  string msgId = 1;
+
+  message BubbleSegmentsFileCacheRef {
+    repeated string fileCacheIds = 1;
+  }
+
+  oneof fileCacheId {
+    BubbleSegmentsFileCacheRef fromBubbleSegments = 11;
+    string fromSingleFile = 12;
+  }
+}
+
+message SendPackedMessagesPing {
+  Peer targetPeer = 1;
+  repeated OutgoingMessage messages = 2;
+}
+
+message SendPackedMessagesPong {
+  string packedMsgId = 1;
+  ForwardMessageRef forwardMsgRef = 2;
+  repeated SendMessagePong messagePongs = 3;
+}
+
+message GetMessagePing {
+  string msgId = 1;
+}
+
+message GetMessagePong {
+  Message message = 1;
+}
+
+message GetMessagesPing {
+  repeated string msgIds = 1;
+}
+
+message GetMessagesPong {
+  repeated Message messages = 1;
+}
+
+message GetHistoryMessagesPing {
+  Peer targetPeer = 1;
+  string lastMsgId = 2;
+  uint32 count = 3;
+}
+
+message GetHistoryMessagesPong {
+  repeated Message messages = 1;
+}
+
+message WithdrawMessagePing {
+  string msgId = 1;
+}
+
+message MarkPeerMessageAsReadPing {
+  Peer peer = 1;
+}
+
+message ForwardMessagePing {
+  enum Operation {
+    AS_SINGLETONS = 0;
+    AS_PACKED = 1;
+  }
+
+  Operation operation = 1;
+  repeated string msgIds = 2;
+  Peer targetPeer = 3;
+}

@@ -1,0 +1,141 @@
+syntax = 'proto3';
+package Laana;
+
+import 'entity/file.proto';
+
+message Peer {
+  enum Type {
+    BUDDY = 0;
+    GROUP = 1;
+  }
+
+  Type type = 1;
+  string uin = 2;
+}
+
+message Message {
+  string msgId = 1;
+  uint64 time = 2;
+  string senderUin = 3;
+  Peer peer = 4;
+
+  oneof content {
+    Bubble bubble = 11;
+    NormalFile file = 12;
+    SingleImage singleImage = 13;
+    MarketFace marketFace = 14;
+    Video video = 15;
+    Voice voice = 16;
+    LinkCard linkCard = 17;
+    ContactCard contactCard = 18;
+    MusicCard musicCard = 19;
+    LocationCard locationCard = 20;
+    ForwardMessageRef forwardMsgRef = 21;
+    XmlMessage xmlMessage = 22;
+    JsonMessage jsonMessage = 23;
+  }
+}
+
+message Bubble {
+  message Segment {
+    oneof content {
+      string text = 1;
+      uint32 face = 2;
+      At at = 3;
+      File image = 4;
+    }
+
+    message At {
+      string uin = 1;
+      string groupCode = 2;
+      string name = 3;
+    }
+  }
+
+  repeated Segment segments = 1;
+  optional string repliedMsgId = 2;
+}
+
+message NormalFile {
+  File file = 1;
+  string name = 2;
+  uint64 size = 3;
+}
+
+message SingleImage {
+  File image = 1;
+  string displayText = 2;
+}
+
+message MarketFace {
+  uint32 facePackageId = 1;
+  string faceId = 2;
+  string faceKey = 3;
+
+  string displayText = 11;
+}
+
+message Video {
+  File video = 1;
+  optional uint32 duration = 2;
+}
+
+message Voice {
+  File voice = 1;
+  uint32 duration = 2;
+}
+
+message LinkCard {
+  string url = 1;
+  string title = 2;
+  optional string description = 3;
+  optional File image = 4;
+}
+
+message ContactCard {
+  enum Type {
+    BUDDY = 0;
+    GROUP = 1;
+  }
+
+  Type type = 1;
+  string uin = 2;
+}
+
+message MusicCard {
+  enum Source {
+    QQ_MUSIC = 0;
+    NETEASE_MUSIC = 1;
+    CUSTOM = 2;
+  }
+
+  Source source = 1;
+  string id = 2;
+}
+
+message LocationCard {
+  double latitude = 1;
+  double longitude = 2;
+  string title = 3;
+  string address = 4;
+}
+
+message ForwardMessageRef {
+  string refId = 1;
+
+  string displayText = 11;
+}
+
+message ForwardMessage {
+  string refId = 1;
+
+  repeated Message messages = 11;
+}
+
+message XmlMessage {
+  string xml = 1;
+}
+
+message JsonMessage {
+  string json = 1;
+}

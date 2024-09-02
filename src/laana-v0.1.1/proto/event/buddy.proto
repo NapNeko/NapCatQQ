@@ -1,0 +1,11 @@
+syntax = 'proto3';
+package Laana;
+
+message BuddyAddedEvent {
+  string buddyUin = 1;
+}
+
+message BuddyMessageWithdrawEvent {
+  string messageId = 1;
+  string operatorUin = 2;
+}

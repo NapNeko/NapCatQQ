@@ -1,0 +1,44 @@
+syntax = 'proto3';
+package Laana;
+
+import 'entity/message.proto';
+import 'entity/user.proto';
+import 'entity/group.proto';
+
+message GetAllBuddiesPing {
+}
+
+message GetAllBuddiesPong {
+  repeated string buddyUins = 1;
+}
+
+message GetAllGroupsPing {
+}
+
+message GetAllGroupsPong {
+  repeated string groupCodes = 1;
+}
+
+message GetRecentContactListPing {
+  uint32 maxCount = 1;
+}
+
+message GetRecentContactListPong {
+  repeated Peer recentContacts = 1;
+}
+
+message GetBuddyInfoPing {
+  string buddyUin = 1;
+}
+
+message GetBuddyInfoPong {
+  UserEntity buddy = 1;
+}
+
+message GetGroupInfoPing {
+  string groupCode = 1;
+}
+
+message GetGroupInfoPong {
+  Group group = 1;
+}

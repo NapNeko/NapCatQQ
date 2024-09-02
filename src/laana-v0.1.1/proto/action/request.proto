@@ -1,0 +1,45 @@
+syntax = 'proto3';
+package Laana;
+
+import 'event/request.proto';
+
+message HandleBuddyAddRequestPing {
+  enum Operation {
+    ACCEPT = 0;
+    REJECT = 1;
+    IGNORE = 2;
+  }
+
+  string buddyRequestId = 1;
+  Operation operation = 2;
+
+  optional string rejectionWords = 11;
+}
+
+message HandleGroupJoinRequestPing {
+  enum Operation {
+    ACCEPT = 0;
+    REJECT = 1;
+    IGNORE = 2;
+  }
+
+  string joinRequestId = 1;
+  Operation operation = 2;
+
+  optional string rejectionWords = 11;
+}
+
+message HandleGroupInvitationPing {
+  enum Operation {
+    ACCEPT = 0;
+    REJECT = 1;
+    IGNORE = 2;
+  }
+
+  string invitationId = 1;
+  Operation operation = 2;
+}
+
+message HandleGroupInvitationPong {
+  SelfInvitedToGroupEvent.State nextState = 1;
+}

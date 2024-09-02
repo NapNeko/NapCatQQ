@@ -1,0 +1,33 @@
+syntax = 'proto3';
+package Laana;
+
+import 'event/buddy.proto';
+import 'event/group.proto';
+import 'event/request.proto';
+
+message EventWrapper {
+  string eventId = 1;
+  uint64 time = 2;
+  string botUin = 3;
+  oneof event {
+    BuddyAddedEvent buddyAddedEvent = 101;
+    BuddyMessageWithdrawEvent buddyMessageWithdrawEvent = 102;
+
+    GroupAdminChangeEvent groupAdminChangeEvent = 201;
+    GroupEssenceMessageEvent groupEssenceMessageEvent = 202;
+    GroupMemberCardChangeEvent groupMemberCardChangeEvent = 203;
+    GroupMemberIncreaseEvent groupMemberIncreaseEvent = 204;
+    GroupMemberDecreaseEvent groupMemberDecreaseEvent = 205;
+    GroupMemberTitleChangeEvent groupMemberTitleChangeEvent = 206;
+    GroupMessageWithdrawEvent groupMessageWithdrawEvent = 207;
+    GroupShutUpMemberEvent groupMuteMemberEvent = 208;
+    GroupShutUpAllEvent groupMuteAllEvent = 209;
+    GroupLiftShutUpMemberEvent groupUnmuteMemberEvent = 210;
+    GroupLiftShutUpAllEvent groupUnmuteAllEvent = 211;
+    GroupEmojiLikeEvent groupEmojiLikeEvent = 212;
+
+    SomeoneRequestToAddBuddyEvent someoneRequestToAddBuddyEvent = 301;
+    SomeoneRequestToJoinGroupEvent someoneRequestToJoinGroupEvent = 302;
+    SelfInvitedToGroupEvent selfInvitedToGroupEvent = 303;
+  }
+}

@@ -1,0 +1,11 @@
+syntax = 'proto3';
+package Laana;
+
+message Group {
+  string groupCode = 1;
+  string groupName = 2;
+  uint32 memberCount = 3;
+  uint32 maxMemberCount = 4;
+
+  optional string groupRemark = 11;
+}

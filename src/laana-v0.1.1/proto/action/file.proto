@@ -1,0 +1,94 @@
+syntax = 'proto3';
+package Laana;
+
+import 'entity/file.proto';
+
+message UploadCachePing {
+  bytes data = 1;
+}
+
+message UploadCachePong {
+  string cacheId = 1;
+}
+
+message PrepareCacheByUrlPing {
+  string url = 1;
+}
+
+message PrepareCacheByUrlPong {
+  string cacheId = 1;
+}
+
+message DestroyCachePing {
+  string cacheId = 1;
+}
+
+message GetFileDataPing {
+  string cacheId = 1;
+}
+
+message GetFileDataPong {
+  bytes data = 1;
+}
+
+message GroupFile {
+  string cacheId = 1;
+  string name = 2;
+  uint64 size = 3;
+  uint32 businessId = 4;
+  string uploaderUin = 5;
+  uint32 uploadTime = 6;
+  uint32 modifyTime = 7;
+  uint32 downloadCount = 8;
+  optional uint32 lastModifyTime = 9;
+  optional uint32 expireTime = 10;
+}
+
+message GroupFolder {
+  string folderId = 1;
+  string name = 2;
+  string creatorUin = 5;
+  uint32 createTime = 6;
+  uint32 fileCount = 11;
+}
+
+message GetGroupFileListPing {
+  string groupCode = 1;
+  optional string folderId = 2;
+}
+
+message GetGroupFileListPong {
+  repeated GroupFile files = 1;
+  repeated GroupFolder folders = 2;
+}
+
+message UploadGroupFilePing {
+  string groupCode = 1;
+  File file = 2;
+  optional string folderId = 3;
+}
+
+message UploadGroupFilePong {
+  string cacheId = 1;
+}
+
+message CreateGroupFolderPing {
+  string groupCode = 1;
+  string name = 2;
+  // optional string parentFolderId = 3;
+  // QQ does not allow nested folders
+}
+
+message CreateGroupFolderPong {
+  string folderId = 1;
+}
+
+message DeleteGroupFilePing {
+  string groupCode = 1;
+  string cacheId = 2;
+}
+
+message DeleteGroupFolderPing {
+  string groupCode = 1;
+  string folderId = 2;
+}

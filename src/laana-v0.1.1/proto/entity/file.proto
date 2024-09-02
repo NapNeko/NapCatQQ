@@ -1,0 +1,10 @@
+syntax = 'proto3';
+package Laana;
+
+message File {
+  oneof uri {
+    string url = 1;
+    string cacheId = 2;
+    bytes raw = 3;
+  }
+}

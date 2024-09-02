@@ -1,0 +1,13 @@
+syntax = 'proto3';
+package Laana;
+
+import 'action/wrapper.proto';
+import 'event/wrapper.proto';
+
+message LannaDataWrapper {
+  oneof data {
+    ActionPing actionPing = 1;
+    ActionPong actionPong = 2;
+    EventWrapper event = 3;
+  }
+}

@@ -1,0 +1,42 @@
+syntax = 'proto3';
+package Laana;
+
+message UserEntity {
+  enum Sex {
+    UNKNOWN = 0;
+    MALE = 1;
+    FEMALE = 2;
+  }
+
+  string uin = 1;
+  string nick = 2;
+  string sex = 3;
+  optional uint32 age = 4;
+  optional string qid = 5;
+
+  oneof roleData {
+    BuddyRoleData buddyRoleData = 11;
+    GroupRoleData groupRoleData = 12;
+  }
+}
+
+message BuddyRoleData {
+  optional string remark = 1;
+}
+
+message GroupRoleData {
+  enum PermissionLevel {
+    FALLBACK = 0;
+    NORMAL = 2;
+    ADMIN = 3;
+    OWNER = 4;
+  }
+
+  PermissionLevel permissionLevel = 1;
+  optional string groupNick = 2;
+  optional uint32 joinTime = 3;
+  uint32 lastSpeakTime = 4;
+  uint32 level = 5;
+  uint32 shutUpTime = 6;
+  bool isRobot = 7;
+}

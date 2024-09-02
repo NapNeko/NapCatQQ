@@ -1,0 +1,41 @@
+syntax = 'proto3';
+package Laana;
+
+message SomeoneRequestToAddBuddyEvent {
+  string buddyRequestId = 1;
+  string requesterUin = 2;
+
+  optional string words = 11;
+}
+
+message SomeoneRequestToJoinGroupEvent {
+  string joinRequestId = 1;
+  string groupCode = 2;
+  string requesterUin = 3;
+  optional string invitorUin = 4;
+
+  optional string words = 11;
+}
+
+message SelfInvitedToGroupEvent {
+  enum State {
+    // May need the invitee (the bot itself) to accept the invitation
+    PENDING_AT_INVITEE = 0;
+    // May be accepted by the invitee, but need an admin to approve the invitation
+    PENDING_AT_ADMIN = 1;
+    // May succeed
+    SUCCEEDED = 2;
+
+    // The normal process is: 0 -> 1 -> 2
+    // Some groups may not need an admin to approve the invitation,
+    // and the process may be simplified to: 0 -> 2
+    // Some groups may not even need the invitee to accept the invitation,
+    // and the process may be simplified to: 2
+  }
+
+  string invitationId = 1;
+  string groupCode = 2;
+  string invitorUin = 3;
+
+  optional string words = 11;
+}
