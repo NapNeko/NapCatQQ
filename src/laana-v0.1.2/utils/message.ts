@@ -150,9 +150,32 @@ export class LaanaMessageUtils {
             return { elements, fileCacheIds };
         },
 
-        file: () => { throw 'Unimplemented'; },
+        file: async msgContent => {
+            const cacheId = await this.laana.utils.file.resolveCacheIdFromLaanaFile(msgContent.file!);
+            return {
+                elements: [
+                    await this.core.apis.FileApi.createValidSendFileElement(
+                        this.laana.utils.file.toLocalPath(cacheId),
+                        msgContent.name,
+                    ),
+                ],
+                fileCacheIds: [cacheId],
+            };
+        },
 
-        singleImage: () => { throw 'Unimplemented'; },
+        singleImage: async msgContent => {
+            const cacheId = await this.laana.utils.file.resolveCacheIdFromLaanaFile(msgContent.image!);
+            return {
+                elements: [
+                    await this.core.apis.FileApi.createValidSendPicElement(
+                        this.laana.utils.file.toLocalPath(cacheId),
+                        msgContent.displayText, // TODO: make display text optional
+                        // TODO: add 'sub type' field
+                    )
+                ],
+                fileCacheIds: [cacheId],
+            };
+        },
 
         marketFace: async msgContent => ({
             elements: [{
@@ -167,9 +190,30 @@ export class LaanaMessageUtils {
             fileCacheIds: [],
         }),
 
-        video: () => { throw 'Unimplemented'; },
+        video: async msgContent => {
+            const cacheId = await this.laana.utils.file.resolveCacheIdFromLaanaFile(msgContent);
+            return {
+                elements: [
+                    await this.core.apis.FileApi.createValidSendVideoElement(
+                        this.laana.utils.file.toLocalPath(cacheId),
+                        // TODO: add file name and thumb path
+                    ),
+                ],
+                fileCacheIds: [cacheId],
+            };
+        },
 
-        voice: () => { throw 'Unimplemented'; },
+        voice: async msgContent => {
+            const cacheId = await this.laana.utils.file.resolveCacheIdFromLaanaFile(msgContent);
+            return {
+                elements: [
+                    await this.core.apis.FileApi.createValidSendPttElement(
+                        this.laana.utils.file.toLocalPath(cacheId),
+                    )
+                ],
+                fileCacheIds: [cacheId],
+            };
+        },
 
         musicCard: () => { throw 'Unimplemented'; },
     };
