@@ -121,51 +121,6 @@ export class NTQQGroupApi {
         return group;
     }
 
-    async getGroupMemberLatestSendTimeCache(GroupCode: string, uids: string[]) {
-        return this.getGroupMemberLatestSendTime(GroupCode, uids);
-    }
-
-    async getGroupMemberLatestSendTime(GroupCode: string, uids: string[]) {
-        const getData = async (uid: string) => {
-            const msgListWrapper = await this.getLatestMsgByUids(GroupCode, [uid]);
-            if (msgListWrapper.result !== 0 && msgListWrapper.msgList.length < 1) {
-                return undefined;
-            }
-            return { sendUin: msgListWrapper.msgList[0].senderUin, sendTime: msgListWrapper.msgList[0].msgTime };
-        };
-        const PromiseData: Promise<({
-            sendUin: string;
-            sendTime: string;
-        } | undefined)>[] = [];
-        const ret: Map<string, string> = new Map();
-        for (const uid of uids) {
-            PromiseData.push(getData(uid).catch(() => undefined));
-        }
-        const allRet = await runAllWithTimeout(PromiseData, 2500);
-        for (const PromiseDo of allRet) {
-            if (PromiseDo) {
-                ret.set(PromiseDo.sendUin, PromiseDo.sendTime);
-            }
-        }
-        return ret;
-    }
-
-    async getLatestMsgByUids(GroupCode: string, uids: string[]) {
-        return await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {
-            chatInfo: {
-                peerUid: GroupCode,
-                chatType: ChatType.KCHATTYPEGROUP,
-            },
-            filterMsgType: [],
-            filterSendersUid: uids,
-            filterMsgToTime: '0',
-            filterMsgFromTime: '0',
-            isReverseOrder: false,
-            isIncludeCurrent: true,
-            pageLimit: 1,
-        });
-    }
-
     async getGroupMemberAll(GroupCode: string, forced = false) {
         return this.context.session.getGroupService().getAllMemberList(GroupCode, forced);
     }
@@ -202,30 +157,6 @@ export class NTQQGroupApi {
         }
         return member;
     }
-
-    async getLatestMsg(GroupCode: string, uins: string[]) {
-        const uids: Array<string> = [];
-        for (const uin of uins) {
-            const uid = await this.core.apis.UserApi.getUidByUinV2(uin);
-            if (uid) {
-                uids.push(uid);
-            }
-        }
-        return await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {
-            chatInfo: {
-                peerUid: GroupCode,
-                chatType: ChatType.KCHATTYPEGROUP,
-            },
-            filterMsgType: [],
-            filterSendersUid: uids,
-            filterMsgToTime: '0',
-            filterMsgFromTime: '0',
-            isReverseOrder: false,
-            isIncludeCurrent: true,
-            pageLimit: 1,
-        });
-    }
-
     async getGroupRecommendContactArkJson(GroupCode: string) {
         return this.context.session.getGroupService().getGroupRecommendContactArkJson(GroupCode);
     }

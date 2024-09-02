@@ -370,7 +370,8 @@ export interface ReplyElement {
     replayMsgSeq: string;
     replayMsgId: string;
     senderUin: string;
-    senderUinStr: string;
+    senderUidStr?: string;
+    replyMsgTime?: string;
 }
 
 export interface SendReplyElement {
