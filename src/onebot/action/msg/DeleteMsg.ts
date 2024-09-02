@@ -28,18 +28,14 @@ class DeleteMsg extends BaseAction<Payload, void> {
             const ret = this.core.eventWrapper.registerListen(
                 'NodeIKernelMsgListener/onMsgInfoListUpdate',
                 1,
-                5000,
+                1000,
                 (msgs) => !!msgs.find(m => m.msgId === msg.MsgId && m.recallTime !== '0'),
-            ).catch(() => new Promise<undefined>((resolve) => {
-                resolve(undefined);
-            }));
+            ).catch(() => undefined);
             await this.core.apis.MsgApi.recallMsg(msg.Peer, [msg.MsgId]);
             const data = await ret;
-            if (!data) {
-                //throw new Error('Recall failed');
-            }
-            //await sleep(100);
-            //await NTQQMsgApi.getMsgsByMsgId(msg.Peer, [msg.MsgId]);
+            if (!data) throw new Error('Recall failed');
+        } else {
+            throw new Error('Recall failed');
         }
     }
 }
