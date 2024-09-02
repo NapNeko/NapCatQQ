@@ -4,7 +4,7 @@ package Laana;
 import 'action/wrapper.proto';
 import 'event/wrapper.proto';
 
-message LannaDataWrapper {
+message LaanaDataWrapper {
   oneof data {
     ActionPing actionPing = 1;
     ActionPong actionPong = 2;

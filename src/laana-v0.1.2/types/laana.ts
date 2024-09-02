@@ -14,9 +14,9 @@ import { EventWrapper } from "./event/wrapper";
 import { ActionPong } from "./action/wrapper";
 import { ActionPing } from "./action/wrapper";
 /**
- * @generated from protobuf message Laana.LannaDataWrapper
+ * @generated from protobuf message Laana.LaanaDataWrapper
  */
-export interface LannaDataWrapper {
+export interface LaanaDataWrapper {
     /**
      * @generated from protobuf oneof: data
      */
@@ -43,22 +43,22 @@ export interface LannaDataWrapper {
     };
 }
 // @generated message type with reflection information, may provide speed optimized methods
-class LannaDataWrapper$Type extends MessageType<LannaDataWrapper> {
+class LaanaDataWrapper$Type extends MessageType<LaanaDataWrapper> {
     constructor() {
-        super("Laana.LannaDataWrapper", [
+        super("Laana.LaanaDataWrapper", [
             { no: 1, name: "actionPing", kind: "message", oneof: "data", T: () => ActionPing },
             { no: 2, name: "actionPong", kind: "message", oneof: "data", T: () => ActionPong },
             { no: 3, name: "event", kind: "message", oneof: "data", T: () => EventWrapper }
         ]);
     }
-    create(value?: PartialMessage<LannaDataWrapper>): LannaDataWrapper {
+    create(value?: PartialMessage<LaanaDataWrapper>): LaanaDataWrapper {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.data = { oneofKind: undefined };
         if (value !== undefined)
-            reflectionMergePartial<LannaDataWrapper>(this, message, value);
+            reflectionMergePartial<LaanaDataWrapper>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: LannaDataWrapper): LannaDataWrapper {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: LaanaDataWrapper): LaanaDataWrapper {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
@@ -92,7 +92,7 @@ class LannaDataWrapper$Type extends MessageType<LannaDataWrapper> {
         }
         return message;
     }
-    internalBinaryWrite(message: LannaDataWrapper, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+    internalBinaryWrite(message: LaanaDataWrapper, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
         /* Laana.ActionPing actionPing = 1; */
         if (message.data.oneofKind === "actionPing")
             ActionPing.internalBinaryWrite(message.data.actionPing, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
@@ -109,6 +109,6 @@ class LannaDataWrapper$Type extends MessageType<LannaDataWrapper> {
     }
 }
 /**
- * @generated MessageType for protobuf message Laana.LannaDataWrapper
+ * @generated MessageType for protobuf message Laana.LaanaDataWrapper
  */
-export const LannaDataWrapper = new LannaDataWrapper$Type();
+export const LaanaDataWrapper = new LaanaDataWrapper$Type();
