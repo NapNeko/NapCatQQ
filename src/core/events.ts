@@ -171,6 +171,10 @@ export class NapCatEventChannel extends
             }
         };
 
+        msgListener.onInputStatusPush = async data => {
+            this.emit('buddy/input-status', data);
+        };
+
         this.core.context.session.getMsgService().addKernelMsgListener(
             proxiedListenerOf(msgListener, this.core.context.logger) as any,
         );
