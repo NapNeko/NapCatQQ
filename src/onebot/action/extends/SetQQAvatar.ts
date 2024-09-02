@@ -24,14 +24,13 @@ export default class SetAvatar extends BaseAction<Payload, null> {
     }
 
     async _handle(payload: Payload): Promise<null> {
-        const NTQQUserApi = this.core.apis.UserApi;
-        const { path, isLocal, errMsg, success } = (await uri2local(this.core.NapCatTempPath, payload.file));
+        const { path, isLocal, success } = (await uri2local(this.core.NapCatTempPath, payload.file));
         if (!success) {
             throw `头像${payload.file}设置失败,file字段可能格式不正确`;
         }
         if (path) {
             await checkFileReceived(path, 5000); // 文件不存在QQ会崩溃，需要提前判断
-            const ret = await NTQQUserApi.setQQAvatar(path);
+            const ret = await this.core.apis.UserApi.setQQAvatar(path);
             if (!isLocal) {
                 fs.unlink(path, () => {
                 });

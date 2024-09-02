@@ -18,6 +18,7 @@ import { OB11GroupUploadNoticeEvent } from '@/onebot/event/notice/OB11GroupUploa
 import { OB11GroupPokeEvent } from '@/onebot/event/notice/OB11PokeEvent';
 import { OB11GroupEssenceEvent } from '@/onebot/event/notice/OB11GroupEssenceEvent';
 import { OB11GroupTitleEvent } from '@/onebot/event/notice/OB11GroupTitleEvent';
+import { FileNapCatOneBotUUID } from '@/common/helper';
 
 export class OneBotGroupApi {
     obContext: NapCatOneBot11Adapter;
@@ -29,16 +30,13 @@ export class OneBotGroupApi {
     }
 
     async parseGroupEvent(msg: RawMessage) {
-        const NTQQGroupApi = this.core.apis.GroupApi;
-        const NTQQUserApi = this.core.apis.UserApi;
-        const NTQQMsgApi = this.core.apis.MsgApi;
         const logger = this.core.context.logger;
         if (msg.chatType !== ChatType.KCHATTYPEGROUP) {
             return;
         }
         //log("group msg", msg);
         if (msg.senderUin && msg.senderUin !== '0') {
-            const member = await NTQQGroupApi.getGroupMember(msg.peerUid, msg.senderUin);
+            const member = await this.core.apis.GroupApi.getGroupMember(msg.peerUid, msg.senderUin);
             if (member && member.cardName !== msg.sendMemberName) {
                 const newCardName = msg.sendMemberName || '';
                 const event = new OB11GroupCardEvent(this.core, parseInt(msg.peerUid), parseInt(msg.senderUin), newCardName, member.cardName);
@@ -57,7 +55,7 @@ export class OneBotGroupApi {
                     const BanEvent = await this.obContext.apis.GroupApi.parseGroupBanEvent(msg.peerUid, element.grayTipElement);
                     if (BanEvent) return BanEvent;
                 } else if (groupElement.type == TipGroupElementType.kicked) {
-                    NTQQGroupApi.quitGroup(msg.peerUid).then();
+                    this.core.apis.GroupApi.quitGroup(msg.peerUid).then();
                     try {
                         const KickEvent = await this.obContext.apis.GroupApi.parseGroupKickEvent(msg.peerUid, element.grayTipElement);
                         if (KickEvent) return KickEvent;
@@ -76,7 +74,10 @@ export class OneBotGroupApi {
                     this.core,
                     parseInt(msg.peerUid), parseInt(msg.senderUin || ''),
                     {
-                        id: element.fileElement.fileUuid!,
+                        id: FileNapCatOneBotUUID.encode({
+                            chatType: ChatType.KCHATTYPEGROUP,
+                            peerUid: msg.peerUid,
+                        }, msg.msgId, element.elementId),
                         name: element.fileElement.fileName,
                         size: parseInt(element.fileElement.fileSize),
                         busid: element.fileElement.fileBizId || 0,
@@ -106,8 +107,8 @@ export class OneBotGroupApi {
                             return new OB11GroupPokeEvent(
                                 this.core,
                                 parseInt(msg.peerUid),
-                                parseInt((await NTQQUserApi.getUinByUidV2(poke_uid[0].uid))!),
-                                parseInt((await NTQQUserApi.getUinByUidV2(poke_uid[1].uid))!),
+                                parseInt((await this.core.apis.UserApi.getUinByUidV2(poke_uid[0].uid))!),
+                                parseInt((await this.core.apis.UserApi.getUinByUidV2(poke_uid[1].uid))!),
                                 pokedetail,
                             );
                         }
@@ -116,18 +117,22 @@ export class OneBotGroupApi {
                         const searchParams = new URL(json.items[0].jp).searchParams;
                         const msgSeq = searchParams.get('msgSeq')!;
                         const Group = searchParams.get('groupCode');
+                        if (!Group) return;
                         // const businessId = searchParams.get('businessid');
                         const Peer = {
                             guildId: '',
                             chatType: ChatType.KCHATTYPEGROUP,
-                            peerUid: Group!,
+                            peerUid: Group,
                         };
-                        const msgData = await NTQQMsgApi.getMsgsBySeqAndCount(Peer, msgSeq.toString(), 1, true, true);
+                        const msgData = await this.core.apis.MsgApi.getMsgsBySeqAndCount(Peer, msgSeq.toString(), 1, true, true);
+                        const msgList = (await this.core.apis.WebApi.getGroupEssenceMsgAll(Group)).flatMap((e) => e.data.msg_list);
+                        const realMsg = msgList.find((e) => e.msg_seq.toString() == msgSeq);
                         return new OB11GroupEssenceEvent(
                             this.core,
                             parseInt(msg.peerUid),
                             MessageUnique.getShortIdByMsgId(msgData.msgList[0].msgId)!,
                             parseInt(msgData.msgList[0].senderUin),
+                            parseInt(realMsg?.add_digest_uin ?? '0'),
                         );
                         // 获取MsgSeq+Peer可获取具体消息
                     }
@@ -150,7 +155,6 @@ export class OneBotGroupApi {
 
     async parseGroupBanEvent(GroupCode: string, grayTipElement: GrayTipElement) {
         const groupElement = grayTipElement?.groupElement;
-        const NTQQGroupApi = this.core.apis.GroupApi;
         if (!groupElement?.shutUp) return undefined;
         const memberUid = groupElement.shutUp!.member.uid;
         const adminUid = groupElement.shutUp!.admin.uid;
@@ -158,14 +162,14 @@ export class OneBotGroupApi {
         let duration = parseInt(groupElement.shutUp!.duration);
         const subType: 'ban' | 'lift_ban' = duration > 0 ? 'ban' : 'lift_ban';
         if (memberUid) {
-            memberUin = (await NTQQGroupApi.getGroupMember(GroupCode, memberUid))?.uin || '';
+            memberUin = (await this.core.apis.GroupApi.getGroupMember(GroupCode, memberUid))?.uin || '';
         } else {
             memberUin = '0';  // 0表示全员禁言
             if (duration > 0) {
                 duration = -1;
             }
         }
-        const adminUin = (await NTQQGroupApi.getGroupMember(GroupCode, adminUid))?.uin;
+        const adminUin = (await this.core.apis.GroupApi.getGroupMember(GroupCode, adminUid))?.uin;
         if (memberUin && adminUin) {
             return new OB11GroupBanEvent(
                 this.core,
@@ -207,12 +211,11 @@ export class OneBotGroupApi {
     }
 
     async parseGroupMemberIncreaseEvent(GroupCode: string, grayTipElement: GrayTipElement) {
-        const NTQQGroupApi = this.core.apis.GroupApi;
         const groupElement = grayTipElement?.groupElement;
         if (!groupElement) return undefined;
-        const member = await NTQQGroupApi.getGroupMember(GroupCode, groupElement.memberUid);
+        const member = await this.core.apis.UserApi.getUserDetailInfo(groupElement.memberUid);
         const memberUin = member?.uin;
-        const adminMember = await NTQQGroupApi.getGroupMember(GroupCode, groupElement.adminUid);
+        const adminMember = await this.core.apis.GroupApi.getGroupMember(GroupCode, groupElement.adminUid);
         if (memberUin) {
             const operatorUin = adminMember?.uin || memberUin;
             return new OB11GroupIncreaseEvent(
@@ -227,11 +230,9 @@ export class OneBotGroupApi {
     }
 
     async parseGroupKickEvent(GroupCode: string, grayTipElement: GrayTipElement) {
-        const NTQQGroupApi = this.core.apis.GroupApi;
-        const NTQQUserApi = this.core.apis.UserApi;
         const groupElement = grayTipElement?.groupElement;
         if (!groupElement) return undefined;
-        const adminUin = (await NTQQGroupApi.getGroupMember(GroupCode, groupElement.adminUid))?.uin || (await NTQQUserApi.getUidByUinV2(groupElement.adminUid));
+        const adminUin = (await this.core.apis.GroupApi.getGroupMember(GroupCode, groupElement.adminUid))?.uin || (await this.core.apis.UserApi.getUidByUinV2(groupElement.adminUid));
         if (adminUin) {
             return new OB11GroupDecreaseEvent(
                 this.core,

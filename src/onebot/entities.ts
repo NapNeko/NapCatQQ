@@ -1,6 +1,14 @@
-import { calcQQLevel } from '@/common/helper';
-import { Friend, FriendV2, Group, GroupMember, SelfInfo, Sex, User } from '@/core';
-import { OB11Group, OB11GroupMember, OB11GroupMemberRole, OB11User, OB11UserSex } from './types';
+import { calcQQLevel, FileNapCatOneBotUUID } from '@/common/helper';
+import { Friend, FriendV2, Group, GroupFileInfoUpdateParamType, GroupMember, SelfInfo, Sex, User } from '@/core';
+import {
+    OB11Group,
+    OB11GroupFile,
+    OB11GroupFileFolder,
+    OB11GroupMember,
+    OB11GroupMemberRole,
+    OB11User,
+    OB11UserSex,
+} from './types';
 
 export class OB11Entities {
     static selfInfo(selfInfo: SelfInfo): OB11User {
@@ -16,7 +24,7 @@ export class OB11Entities {
             ...rawFriend.coreInfo,
             user_id: parseInt(rawFriend.coreInfo.uin),
             nickname: rawFriend.coreInfo.nick,
-            remark: rawFriend.coreInfo.nick,
+            remark: rawFriend.coreInfo.remark ?? rawFriend.coreInfo.nick,
             sex: this.sex(rawFriend.baseInfo.sex!),
             level: 0,
         }));
@@ -96,5 +104,33 @@ export class OB11Entities {
 
     static groups(groups: Group[]): OB11Group[] {
         return groups.map(OB11Entities.group);
+    }
+
+    static file(peerId: string, file: Exclude<GroupFileInfoUpdateParamType['item'][0]['fileInfo'], undefined>): OB11GroupFile {
+        return {
+            group_id: parseInt(peerId),
+            file_id: FileNapCatOneBotUUID.encodeModelId({ chatType: 2, peerUid: peerId }, file.fileModelId, file.fileId),
+            file_name: file.fileName,
+            busid: file.busId,
+            size: parseInt(file.fileSize),
+            upload_time: file.uploadTime,
+            dead_time: file.deadTime,
+            modify_time: file.modifyTime,
+            download_times: file.downloadTimes,
+            uploader: parseInt(file.uploaderUin),
+            uploader_name: file.uploaderName,
+        };
+    }
+
+    static folder(peerId: string, folder: Exclude<GroupFileInfoUpdateParamType['item'][0]['folderInfo'], undefined>): OB11GroupFileFolder {
+        return {
+            group_id: parseInt(peerId),
+            folder_id: folder.folderId,
+            folder_name: folder.folderName,
+            create_time: folder.createTime,
+            creator: parseInt(folder.createUin),
+            creator_name: folder.creatorName,
+            total_file_count: folder.totalFileCount,
+        };
     }
 }

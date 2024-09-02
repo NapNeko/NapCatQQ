@@ -63,3 +63,27 @@ export interface OB11Sender {
     level?: string,  // 群等级
     role?: OB11GroupMemberRole
 }
+
+export interface OB11GroupFile {
+    group_id: number,
+    file_id: string,
+    file_name: string,
+    busid: number,
+    size: number,
+    upload_time: number,
+    dead_time: number,
+    modify_time: number,
+    download_times: number,
+    uploader: number,
+    uploader_name: string
+}
+
+export interface OB11GroupFileFolder {
+    group_id: number,
+    folder_id: string,
+    folder_name: string,
+    create_time: number,
+    creator: number,
+    creator_name: string,
+    total_file_count: number,
+}

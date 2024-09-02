@@ -1,7 +1,7 @@
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-
+import { FileNapCatOneBotUUID } from '@/common/helper';
 const SchemaData = {
     type: 'object',
     properties: {
@@ -13,12 +13,12 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export class DelGroupFile extends BaseAction<Payload, any> {
-    actionName = ActionName.DelGroupFile;
+export class DeleteGroupFile extends BaseAction<Payload, any> {
+    actionName = ActionName.GOCQHTTP_DeleteGroupFile;
     payloadSchema = SchemaData;
-
     async _handle(payload: Payload) {
-        const NTQQGroupApi = this.core.apis.GroupApi;
-        return await NTQQGroupApi.DelGroupFile(payload.group_id.toString(), [payload.file_id]);
+        const data = FileNapCatOneBotUUID.decodeModelId(payload.file_id);
+        if (!data) throw new Error('Invalid file_id');
+        return await this.core.apis.GroupApi.DelGroupFile(payload.group_id.toString(), [data.fileId]);
     }
 }

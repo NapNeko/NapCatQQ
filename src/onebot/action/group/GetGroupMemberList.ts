@@ -20,9 +20,7 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQGroupApi = this.core.apis.GroupApi;
-        const NTQQWebApi = this.core.apis.WebApi;
-        const groupMembers = await NTQQGroupApi.getGroupMembersV2(payload.group_id.toString());
+        const groupMembers = await this.core.apis.GroupApi.getGroupMembersV2(payload.group_id.toString());
         const groupMembersArr = Array.from(groupMembers.values());
 
         let _groupMembers = groupMembersArr.map(item => {
@@ -48,7 +46,7 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
         });
 
         if (isPrivilege) {
-            const webGroupMembers = await NTQQWebApi.getGroupMembers(payload.group_id.toString());
+            const webGroupMembers = await this.core.apis.WebApi.getGroupMembers(payload.group_id.toString());
             for (let i = 0, len = webGroupMembers.length; i < len; i++) {
                 if (!webGroupMembers[i]?.uin) {
                     continue;

@@ -16,47 +16,42 @@ export class NTQQFriendApi {
         // }
     }
 
-    async getBuddyV2(refresh = false): Promise<FriendV2[]> {
-        const uids: string[] = [];
+    async getBuddyV2SimpleInfoMap(refresh = false) {
         const buddyService = this.context.session.getBuddyService();
         const buddyListV2 = refresh ? await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL) : await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL);
-        uids.push(...buddyListV2.data.flatMap(item => item.buddyUids));
-        const data = await this.core.eventWrapper.callNoListenerEvent(
-            'NodeIKernelProfileService/getCoreAndBaseInfo', 'nodeStore', uids,
+        const uids = buddyListV2.data.flatMap(item => item.buddyUids);
+        return await this.core.eventWrapper.callNoListenerEvent(
+            'NodeIKernelProfileService/getCoreAndBaseInfo',
+            'nodeStore',
+            uids,
         );
-        return Array.from(data.values());
+    }
+
+    async getBuddyV2(refresh = false): Promise<FriendV2[]> {
+        return Array.from((await this.getBuddyV2SimpleInfoMap(refresh)).values());
     }
 
     async getBuddyIdMap(refresh = false): Promise<LimitedHashTable<string, string>> {
-        const uids: string[] = [];
         const retMap: LimitedHashTable<string, string> = new LimitedHashTable<string, string>(5000);
-        const buddyService = this.context.session.getBuddyService();
-        const buddyListV2 = refresh ? await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL) : await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL);
-        uids.push(...buddyListV2.data.flatMap(item => item.buddyUids));
-        const data = await this.core.eventWrapper.callNoListenerEvent(
-            'NodeIKernelProfileService/getCoreAndBaseInfo', 'nodeStore', uids,
-        );
-        data.forEach((value) => {
-            retMap.set(value.uin!, value.uid!);
-        });
-        //console.log('getBuddyIdMap', retMap.getValue);
+        const data = await this.getBuddyV2SimpleInfoMap(refresh);
+        data.forEach((value) => retMap.set(value.uin!, value.uid!));
         return retMap;
     }
 
     async getBuddyV2ExWithCate(refresh = false) {
-        const uids: string[] = [];
         const categoryMap: Map<string, any> = new Map();
         const buddyService = this.context.session.getBuddyService();
         const buddyListV2 = refresh ? (await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL)).data : (await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL)).data;
-        uids.push(
-            ...buddyListV2.flatMap(item => {
-                item.buddyUids.forEach(uid => {
-                    categoryMap.set(uid, { categoryId: item.categoryId, categoryName: item.categroyName });
-                });
-                return item.buddyUids;
-            }));
+        const uids = buddyListV2.flatMap(item => {
+            item.buddyUids.forEach(uid => {
+                categoryMap.set(uid, { categoryId: item.categoryId, categoryName: item.categroyName });
+            });
+            return item.buddyUids;
+        });
         const data = await this.core.eventWrapper.callNoListenerEvent(
-            'NodeIKernelProfileService/getCoreAndBaseInfo', 'nodeStore', uids,
+            'NodeIKernelProfileService/getCoreAndBaseInfo',
+            'nodeStore',
+            uids,
         );
         return buddyListV2.map(category => ({
             categoryId: category.categoryId,

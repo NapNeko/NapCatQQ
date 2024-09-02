@@ -52,15 +52,10 @@ import { GetFriendWithCategory } from './extends/GetFriendWithCategory';
 import { SendGroupNotice } from './go-cqhttp/SendGroupNotice';
 import { GetGroupHonorInfo } from './go-cqhttp/GetGroupHonorInfo';
 import { GoCQHTTPHandleQuickAction } from './go-cqhttp/QuickAction';
-import { GetGroupSystemMsg } from './group/GetGroupSystemMsg';
+import { GetGroupIgnoredNotifies } from './group/GetGroupIgnoredNotifies';
 import { GetOnlineClient } from './go-cqhttp/GetOnlineClient';
 import { IOCRImage, OCRImage } from './extends/OCRImage';
-import { GetGroupFileCount } from './file/GetGroupFileCount';
-import { GetGroupFileList } from './file/GetGroupFileList';
 import { TranslateEnWordToZn } from './extends/TranslateEnWordToZn';
-import { SetGroupFileFolder } from './file/SetGroupFileFolder';
-import { DelGroupFile } from './file/DelGroupFile';
-import { DelGroupFileFolder } from './file/DelGroupFileFolder';
 import { SetQQProfile } from './go-cqhttp/SetQQProfile';
 import { ShareGroupEx, SharePeer } from './extends/ShareContact';
 import { CreateCollection } from './extends/CreateCollection';
@@ -82,10 +77,17 @@ import { SetInputStatus } from './extends/SetInputStatus';
 import { GetCSRF } from './system/GetCSRF';
 import { DelGroupNotice } from './group/DelGroupNotice';
 import { GetGroupInfoEx } from './extends/GetGroupInfoEx';
+import { DeleteGroupFile } from '@/onebot/action/go-cqhttp/DeleteGroupFile';
+import { CreateGroupFileFolder } from '@/onebot/action/go-cqhttp/CreateGroupFileFolder';
+import { DeleteGroupFileFolder } from '@/onebot/action/go-cqhttp/DeleteGroupFileFolder';
+import { GetGroupFileSystemInfo } from '@/onebot/action/go-cqhttp/GetGroupFileSystemInfo';
+import { GetGroupRootFiles } from '@/onebot/action/go-cqhttp/GetGroupRootFiles';
+import { GetGroupFilesByFolder } from '@/onebot/action/go-cqhttp/GetGroupFilesByFolder';
 
 export type ActionMap = Map<string, BaseAction<any, any>>;
 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore): ActionMap {
+
     const actionHandlers = [
         new GetGroupInfoEx(obContext, core),
         new FetchEmojiLike(obContext, core),
@@ -101,11 +103,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new MarkPrivateMsgAsRead(obContext, core),
         new SetQQAvatar(obContext, core),
         new TranslateEnWordToZn(obContext, core),
-        new GetGroupFileCount(obContext, core),
-        new GetGroupFileList(obContext, core),
-        new SetGroupFileFolder(obContext, core),
-        new DelGroupFile(obContext, core),
-        new DelGroupFileFolder(obContext, core),
+        new GetGroupRootFiles(obContext, core),
         // onebot11
         new SendLike(obContext, core),
         new GetMsg(obContext, core),
@@ -159,7 +157,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new GoCQHTTPGetForwardMsgAction(obContext, core),
         new GetFriendMsgHistory(obContext, core),
         new GoCQHTTPHandleQuickAction(obContext, core),
-        new GetGroupSystemMsg(obContext, core),
+        new GetGroupIgnoredNotifies(obContext, core),
         new DelEssenceMsg(obContext, core),
         new SetEssenceMsg(obContext, core),
         new GetRecentContact(obContext, core),
@@ -173,6 +171,11 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new SetInputStatus(obContext, core),
         new GetCSRF(obContext, core),
         new DelGroupNotice(obContext, core),
+        new DeleteGroupFile(obContext, core),
+        new CreateGroupFileFolder(obContext, core),
+        new DeleteGroupFileFolder(obContext, core),
+        new GetGroupFileSystemInfo(obContext, core),
+        new GetGroupFilesByFolder(obContext, core),
     ];
     const actionMap = new Map();
     for (const action of actionHandlers) {

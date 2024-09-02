@@ -1,5 +1,7 @@
+import { NodeIKernelFileAssistantListener } from '@/core';
+
 export interface NodeIKernelFileAssistantService {
-    addKernelFileAssistantListener(arg1: unknown[]): unknown;
+    addKernelFileAssistantListener(listener: NodeIKernelFileAssistantListener): unknown;
 
     removeKernelFileAssistantListener(arg1: unknown[]): unknown;
 
@@ -9,7 +11,7 @@ export interface NodeIKernelFileAssistantService {
 
     getFileSessionList(): unknown;
 
-    searchFile(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
+    searchFile(keywords: string[], params: { resultType: number, pageLimit: number }, resultId: number): number;
 
     resetSearchFileSortType(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
 
@@ -17,7 +19,7 @@ export interface NodeIKernelFileAssistantService {
 
     cancelSearchFile(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
 
-    downloadFile(arg1: unknown[]): unknown;
+    downloadFile(fileIds: string[]): { result: number, errMsg: string };
 
     forwardFile(arg1: unknown, arg2: unknown, arg3: unknown): unknown;
 

@@ -19,8 +19,7 @@ class GetGroupInfo extends BaseAction<Payload, OB11Group> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQGroupApi = this.core.apis.GroupApi;
-        const group = (await NTQQGroupApi.getGroups()).find(e => e.groupCode == payload.group_id.toString());
+        const group = (await this.core.apis.GroupApi.getGroups()).find(e => e.groupCode == payload.group_id.toString());
         if (!group) throw `群${payload.group_id}不存在`;
         return OB11Entities.group(group);
     }

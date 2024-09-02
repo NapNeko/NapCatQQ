@@ -19,11 +19,9 @@ export default class SetGroupBan extends BaseAction<Payload, null> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
-        const NTQQGroupApi = this.core.apis.GroupApi;
-        const NTQQUserApi = this.core.apis.UserApi;
-        const uid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());
+        const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
         if (!uid) throw new Error('uid error');
-        await NTQQGroupApi.banMember(payload.group_id.toString(),
+        await this.core.apis.GroupApi.banMember(payload.group_id.toString(),
             [{ uid: uid, timeStamp: parseInt(payload.duration.toString()) }]);
         return null;
     }

@@ -31,13 +31,11 @@ export class GetGroupEssence extends BaseAction<Payload, any> {
     }
 
     async _handle(payload: Payload) {
-        const NTQQWebApi = this.core.apis.WebApi;
-        const NTQQGroupApi = this.core.apis.GroupApi;
-        const ret = await NTQQWebApi.getGroupEssenceMsg(payload.group_id.toString());
-        if (!ret) {
+        const msglist = (await this.core.apis.WebApi.getGroupEssenceMsgAll(payload.group_id.toString())).flatMap((e) => e.data.msg_list);
+        if (!msglist) {
             throw new Error('获取失败');
         }
-        return await Promise.all(ret.data.msg_list.map(async (msg) => {
+        return await Promise.all(msglist.map(async (msg) => {
             const msgOriginData = await this.msgSeqToMsgId({
                 chatType: ChatType.KCHATTYPEGROUP,
                 peerUid: payload.group_id.toString(),
@@ -65,7 +63,7 @@ export class GetGroupEssence extends BaseAction<Payload, any> {
             //设置第一个bit为0 保证shortId为正数
             hash[0] &= 0x7f;
             const shortId = hash.readInt32BE(0);
-            NTQQGroupApi.essenceLRU.set(shortId, msgTempData);
+            this.core.apis.GroupApi.essenceLRU.set(shortId, msgTempData);
             return {
                 msg_seq: msg.msg_seq,
                 msg_random: msg.msg_random,

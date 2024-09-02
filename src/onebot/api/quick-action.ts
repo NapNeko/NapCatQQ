@@ -10,12 +10,12 @@ import {
     QuickActionGroupMessage,
     QuickActionGroupRequest,
 } from '@/onebot';
-import { ChatType, GroupRequestOperateTypes, NapCatCore, Peer } from '@/core';
+import { GroupRequestOperateTypes, NapCatCore, Peer } from '@/core';
 import { OB11FriendRequestEvent } from '@/onebot/event/request/OB11FriendRequest';
 import { OB11GroupRequestEvent } from '@/onebot/event/request/OB11GroupRequest';
-import { ContextMode, normalize } from '@/onebot/action/msg/SendMsg';
+import { ContextMode, createContext, normalize } from '@/onebot/action/msg/SendMsg';
 import { isNull } from '@/common/helper';
-import { createContext } from '@/onebot/action/msg/SendMsg';
+
 export class OneBotQuickActionApi {
     constructor(
         public obContext: NapCatOneBot11Adapter,
@@ -78,7 +78,7 @@ export class OneBotQuickActionApi {
                 sendElements,
                 deleteAfterSentFiles,
             } = await this.obContext.apis.MsgApi.createSendElements(replyMessage, peer);
-            this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, deleteAfterSentFiles, false).then().catch(this.core.context.logger.logError);
+            this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, deleteAfterSentFiles, false).then().catch(this.core.context.logger.logError.bind(this.core.context.logger));
         }
     }
 
@@ -88,13 +88,13 @@ export class OneBotQuickActionApi {
                 request.flag,
                 quickAction.approve ? GroupRequestOperateTypes.approve : GroupRequestOperateTypes.reject,
                 quickAction.reason,
-            ).catch(this.core.context.logger.logError);
+            ).catch(this.core.context.logger.logError.bind(this.core.context.logger));
         }
     }
 
     async handleFriendRequest(request: OB11FriendRequestEvent, quickAction: QuickActionFriendRequest) {
         if (!isNull(quickAction.approve)) {
-            this.core.apis.FriendApi.handleFriendRequest(request.flag, !!quickAction.approve).then().catch(this.core.context.logger.logError);
+            this.core.apis.FriendApi.handleFriendRequest(request.flag, !!quickAction.approve).then().catch(this.core.context.logger.logError.bind(this.core.context.logger));
         }
     }
 }

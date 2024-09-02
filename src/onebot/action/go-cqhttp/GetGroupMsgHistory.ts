@@ -27,7 +27,6 @@ export default class GoCQHTTPGetGroupMsgHistory extends BaseAction<Payload, Resp
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<Response> {
-        const NTQQMsgApi = this.core.apis.MsgApi;
         //处理参数
         const isReverseOrder = typeof payload.reverseOrder === 'string' ? payload.reverseOrder === 'true' : !!payload.reverseOrder;
         const MsgCount = +(payload.count ?? 20);
@@ -36,7 +35,7 @@ export default class GoCQHTTPGetGroupMsgHistory extends BaseAction<Payload, Resp
         //拉取消息
         const startMsgId = hasMessageSeq ? (MessageUnique.getMsgIdAndPeerByShortId(+payload.message_seq!)?.MsgId ?? payload.message_seq!.toString()) : '0';
         const msgList = hasMessageSeq ?
-            (await NTQQMsgApi.getMsgHistory(peer, startMsgId, MsgCount)).msgList : (await NTQQMsgApi.getAioFirstViewLatestMsgs(peer, MsgCount)).msgList;
+            (await this.core.apis.MsgApi.getMsgHistory(peer, startMsgId, MsgCount)).msgList : (await this.core.apis.MsgApi.getAioFirstViewLatestMsgs(peer, MsgCount)).msgList;
         if (msgList.length === 0) throw `消息${payload.message_seq}不存在`;
         //翻转消息
         if (isReverseOrder) msgList.reverse();

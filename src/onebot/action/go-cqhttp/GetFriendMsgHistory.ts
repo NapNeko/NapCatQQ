@@ -27,21 +27,17 @@ export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<Response> {
-        const NTQQUserApi = this.core.apis.UserApi;
-        const NTQQMsgApi = this.core.apis.MsgApi;
-        const NTQQFriendApi = this.core.apis.FriendApi;
         //处理参数
-        const uid = await NTQQUserApi.getUidByUinV2(payload.user_id.toString());
+        const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
         const MsgCount = +(payload.count ?? 20);
         const isReverseOrder = typeof payload.reverseOrder === 'string' ? payload.reverseOrder === 'true' : !!payload.reverseOrder;
         if (!uid) throw `记录${payload.user_id}不存在`;
-        const friend = await NTQQFriendApi.isBuddy(uid);
+        const friend = await this.core.apis.FriendApi.isBuddy(uid);
         const peer = { chatType: friend ? ChatType.KCHATTYPEC2C : ChatType.KCHATTYPETEMPC2CFROMGROUP, peerUid: uid };
         const hasMessageSeq = !payload.message_seq ? !!payload.message_seq : !(payload.message_seq?.toString() === '' || payload.message_seq?.toString() === '0');
-        //拉取消息
         const startMsgId = hasMessageSeq ? (MessageUnique.getMsgIdAndPeerByShortId(+payload.message_seq!)?.MsgId ?? payload.message_seq!.toString()) : '0';
         const msgList = hasMessageSeq ?
-            (await NTQQMsgApi.getMsgHistory(peer, startMsgId, MsgCount)).msgList : (await NTQQMsgApi.getAioFirstViewLatestMsgs(peer, MsgCount)).msgList;
+            (await this.core.apis.MsgApi.getMsgHistory(peer, startMsgId, MsgCount)).msgList : (await this.core.apis.MsgApi.getAioFirstViewLatestMsgs(peer, MsgCount)).msgList;
         if (msgList.length === 0) throw `消息${payload.message_seq}不存在`;
         //翻转消息
         if (isReverseOrder) msgList.reverse();

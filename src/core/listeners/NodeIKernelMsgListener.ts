@@ -1,25 +1,6 @@
 import { ChatType, RawMessage } from '@/core/entities';
-export interface CommonFileInfo {
-    bizType: null;
-    chatType: number;
-    elemId: string;
-    favId: null;
-    fileModelId: string;
-    fileName: string;
-    fileSize: string;
-    md5: string;
-    md510m: string;
-    msgId: string;
-    msgTime: string;
-    parent: null;
-    peerUid: string;
-    picThumbPath: null;
-    sha: string;
-    sha3: string;
-    subId: string;
-    uuid: string;
-    [property: string]: any;
-}
+import { CommonFileInfo } from '@/core';
+
 export interface OnRichMediaDownloadCompleteParams {
     fileModelId: string,
     msgElementId: string,
@@ -48,7 +29,47 @@ export interface GroupFileInfoUpdateParamType {
     retMsg: string;
     clientWording: string;
     isEnd: boolean;
-    item: Array<any>;
+    item: Array<{
+        peerId: string;
+        type: number;
+        folderInfo?: {
+            folderId: string;
+            parentFolderId: string;
+            folderName: string;
+            createTime: number;
+            modifyTime: number;
+            createUin: string;
+            creatorName: string;
+            totalFileCount: number;
+            modifyUin: string;
+            modifyName: string;
+            usedSpace: string;
+        },
+        fileInfo?: {
+            fileModelId: string;
+            fileId: string;
+            fileName: string;
+            fileSize: string;
+            busId: number;
+            uploadedSize: string;
+            uploadTime: number;
+            deadTime: number;
+            modifyTime: number;
+            downloadTimes: number;
+            sha: string;
+            sha3: string;
+            md5: string;
+            uploaderLocalPath: string;
+            uploaderName: string;
+            uploaderUin: string;
+            parentFolderId: string;
+            localPath: string;
+            transStatus: number;
+            transType: number;
+            elementId: string;
+            isFolder: boolean;
+        },
+    }>;
     allFileCount: string;
     nextIndex: string;
     reqId: string;

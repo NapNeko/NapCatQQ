@@ -6,3 +6,4 @@ export * from './user';
 export * from './webapi';
 export * from './sign';
 export * from './system';
+export * from './cache';

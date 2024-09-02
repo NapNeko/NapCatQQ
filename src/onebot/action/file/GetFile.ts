@@ -2,8 +2,8 @@ import BaseAction from '../BaseAction';
 import fs from 'fs/promises';
 import { FileNapCatOneBotUUID } from '@/common/helper';
 import { ActionName } from '../types';
-import { ChatType, Peer, RawMessage } from '@/core/entities';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { OB11MessageImage, OB11MessageVideo } from '@/onebot/types';
 
 export interface GetFilePayload {
     file: string; // 文件名或者fileUuid
@@ -29,28 +29,32 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
     payloadSchema: any = GetFileBase_PayloadSchema;
 
     async _handle(payload: GetFilePayload): Promise<GetFileResponse> {
-        const NTQQMsgApi = this.core.apis.MsgApi;
-        const NTQQFileApi = this.core.apis.FileApi;
-
-        const contextMsgFile = FileNapCatOneBotUUID.decode(payload.file);
-
         //接收消息标记模式
+        const contextMsgFile = FileNapCatOneBotUUID.decode(payload.file);
         if (contextMsgFile) {
             const { peer, msgId, elementId } = contextMsgFile;
-
-            const downloadPath = await NTQQFileApi.downloadMedia(msgId, peer.chatType, peer.peerUid, elementId, '', '');
-
-            const mixElement = (await NTQQMsgApi.getMsgsByMsgId(peer, [msgId]))?.msgList
-                .find(msg => msg.msgId === msgId)?.elements.find(e => e.elementId === elementId);
+            const downloadPath = await this.core.apis.FileApi.downloadMedia(msgId, peer.chatType, peer.peerUid, elementId, '', '');
+            const rawMessage = (await this.core.apis.MsgApi.getMsgsByMsgId(peer, [msgId]))?.msgList
+                .find(msg => msg.msgId === msgId);
+            const mixElement = rawMessage?.elements.find(e => e.elementId === elementId);
             const mixElementInner = mixElement?.videoElement ?? mixElement?.fileElement ?? mixElement?.pttElement ?? mixElement?.picElement;
             if (!mixElementInner) throw new Error('element not found');
-
-            const fileSize = mixElementInner.fileSize?.toString() || '';
-            const fileName = mixElementInner.fileName || '';
-
+            const fileSize = mixElementInner.fileSize?.toString() ?? '';
+            const fileName = mixElementInner.fileName ?? '';
+            let url = '';
+            if (mixElement?.picElement && rawMessage) {
+                let tempData =
+                    await this.obContext.apis.MsgApi.rawToOb11Converters.picElement?.(mixElement?.picElement, rawMessage, mixElement) as OB11MessageImage | undefined;
+                url = tempData?.data.url ?? '';
+            }
+            if (mixElement?.videoElement && rawMessage) {
+                let tempData =
+                    await this.obContext.apis.MsgApi.rawToOb11Converters.videoElement?.(mixElement?.videoElement, rawMessage, mixElement) as OB11MessageVideo | undefined;
+                url = tempData?.data.url ?? '';
+            }
             const res: GetFileResponse = {
                 file: downloadPath,
-                url: downloadPath,
+                url: url !== '' ? url : downloadPath,
                 file_size: fileSize,
                 file_name: fileName,
             };
@@ -64,11 +68,12 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
             }
             return res;
         }
+
         //群文件模式
         const contextModelIdFile = FileNapCatOneBotUUID.decodeModelId(payload.file);
         if (contextModelIdFile) {
             const { peer, modelId } = contextModelIdFile;
-            const downloadPath = await NTQQFileApi.downloadFileForModelId(peer, modelId);
+            const downloadPath = await this.core.apis.FileApi.downloadFileForModelId(peer, modelId, '');
             const res: GetFileResponse = {
                 file: downloadPath,
                 url: downloadPath,
@@ -87,29 +92,14 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
         }
 
         //搜索名字模式
-        const NTSearchNameResult = (await NTQQFileApi.searchfile([payload.file])).resultItems;
-        if (NTSearchNameResult.length !== 0) {
-            const MsgId = NTSearchNameResult[0].msgId;
-            let peer: Peer | undefined = undefined;
-            if (NTSearchNameResult[0].chatType == ChatType.KCHATTYPEGROUP) {
-                peer = { chatType: ChatType.KCHATTYPEGROUP, peerUid: NTSearchNameResult[0].groupChatInfo[0].groupCode };
-            }
-            if (!peer) throw new Error('chattype not support');
-            const msgList: RawMessage[] = (await NTQQMsgApi.getMsgsByMsgId(peer, [MsgId]))?.msgList;
-            if (!msgList || msgList.length == 0) {
-                throw new Error('msg not found');
-            }
-            const msg = msgList[0];
-            const file = msg.elements.filter(e => e.elementType == NTSearchNameResult[0].elemType);
-            if (file.length == 0) {
-                throw new Error('file not found');
-            }
-            const downloadPath = await NTQQFileApi.downloadMedia(msg.msgId, msg.chatType, msg.peerUid, file[0].elementId, '', '');
+        const searchResult = (await this.core.apis.FileApi.searchForFile([payload.file]));
+        if (searchResult) {
+            const downloadPath = await this.core.apis.FileApi.downloadFileById(searchResult.id, parseInt(searchResult.fileSize));
             const res: GetFileResponse = {
                 file: downloadPath,
                 url: downloadPath,
-                file_size: NTSearchNameResult[0].fileSize.toString(),
-                file_name: NTSearchNameResult[0].fileName,
+                file_size: searchResult.fileSize.toString(),
+                file_name: searchResult.fileName,
             };
             if (this.obContext.configLoader.configData.enableLocalFile2Url && downloadPath) {
                 try {

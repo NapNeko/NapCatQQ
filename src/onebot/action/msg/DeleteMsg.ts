@@ -23,7 +23,6 @@ class DeleteMsg extends BaseAction<Payload, void> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const NTQQMsgApi = this.core.apis.MsgApi;
         const msg = MessageUnique.getMsgIdAndPeerByShortId(Number(payload.message_id));
         if (msg) {
             const ret = this.core.eventWrapper.registerListen(
@@ -34,7 +33,7 @@ class DeleteMsg extends BaseAction<Payload, void> {
             ).catch(() => new Promise<undefined>((resolve) => {
                 resolve(undefined);
             }));
-            await NTQQMsgApi.recallMsg(msg.Peer, [msg.MsgId]);
+            await this.core.apis.MsgApi.recallMsg(msg.Peer, [msg.MsgId]);
             const data = await ret;
             if (!data) {
                 //throw new Error('Recall failed');

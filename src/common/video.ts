@@ -16,7 +16,8 @@ export async function getVideoInfo(filePath: string, logger: LogWrapper) {
         filePath: string
     }>((resolve, reject) => {
         const ffmpegPath = process.env.FFMPEG_PATH;
-        ffmpegPath && ffmpeg.setFfmpegPath(ffmpegPath);
+        if (ffmpegPath)
+            ffmpeg.setFfmpegPath(ffmpegPath);
         ffmpeg(filePath).ffprobe((err: any, metadata: ffmpeg.FfprobeData) => {
             if (err) {
                 reject(err);

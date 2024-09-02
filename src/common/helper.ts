@@ -23,48 +23,55 @@ export async function solveAsyncProblem<T extends (...args: any[]) => Promise<an
         });
     });
 }
+
 export class FileNapCatOneBotUUID {
-    static encodeModelId(peer: Peer, modelId: string): string {
-        return `NapCatOneBot-ModeldFile-${peer.chatType}-${peer.peerUid}-${modelId}`;
+    static encodeModelId(peer: Peer, modelId: string, fileId: string): string {
+        return `NapCatOneBot|ModelIdFile|${peer.chatType}|${peer.peerUid}|${modelId}|${fileId}`;
     }
+
     static decodeModelId(uuid: string): undefined | {
         peer: Peer,
-        modelId: string
+        modelId: string,
+        fileId: string
     } {
-        if (!uuid.startsWith('NapCatOneBot-ModeldFile-')) return undefined;
-        const data = uuid.split('-');
-        if (data.length !== 5) return undefined;
-        const [, , chatType, peerUid, modelId] = data;
+        if (!uuid.startsWith('NapCatOneBot|ModelIdFile|')) return undefined;
+        const data = uuid.split('|');
+        if (data.length !== 6) return undefined;
+        const [, , chatType, peerUid, modelId,fileId] = data;
         return {
             peer: {
                 chatType: chatType as any,
-                peerUid: peerUid
+                peerUid: peerUid,
             },
             modelId,
+            fileId
         };
     }
+
     static encode(peer: Peer, msgId: string, elementId: string): string {
-        return `NapCatOneBot-MsgFile-${peer.chatType}-${peer.peerUid}-${msgId}-${elementId}`;
+        return `NapCatOneBot|MsgFile|${peer.chatType}|${peer.peerUid}|${msgId}|${elementId}`;
     }
+
     static decode(uuid: string): undefined | {
         peer: Peer,
         msgId: string,
         elementId: string
     } {
-        if (!uuid.startsWith('NapCatOneBot-File-')) return undefined;
-        const data = uuid.split('-');
+        if (!uuid.startsWith('NapCatOneBot|MsgFile|')) return undefined;
+        const data = uuid.split('|');
         if (data.length !== 6) return undefined;
         const [, , chatType, peerUid, msgId, elementId] = data;
         return {
             peer: {
                 chatType: chatType as any,
-                peerUid: peerUid
+                peerUid: peerUid,
             },
             msgId,
             elementId,
         };
     }
 }
+
 export function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -133,19 +140,19 @@ export function isEqual(obj1: any, obj2: any) {
 export function getDefaultQQVersionConfigInfo(): QQVersionConfigType {
     if (os.platform() === 'linux') {
         return {
-            baseVersion: '3.2.12-27254',
-            curVersion: '3.2.12-27254',
+            baseVersion: '3.2.12-27597',
+            curVersion: '3.2.12-27597',
             prevVersion: '',
             onErrorVersions: [],
-            buildId: '27254',
+            buildId: '27597',
         };
     }
     return {
-        baseVersion: '9.9.15-27391',
-        curVersion: '9.9.15-27391',
+        baseVersion: '9.9.15-27597',
+        curVersion: '9.9.15-27597',
         prevVersion: '',
         onErrorVersions: [],
-        buildId: '27391',
+        buildId: '27597',
     };
 }
 

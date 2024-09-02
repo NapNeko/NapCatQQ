@@ -9,7 +9,8 @@ import {
     FaceType,
     IdMusicSignPostData,
     MessageElement,
-    NapCatCore, NTGrayTipElementSubTypeV2,
+    NapCatCore,
+    NTGrayTipElementSubTypeV2,
     Peer,
     RawMessage,
     SendMessageElement,
@@ -105,12 +106,13 @@ export class OneBotMsgApi {
                     peerUid: msg.peerUid,
                     guildId: '',
                 };
+                const encodedFileId = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId);
                 return {
                     type: OB11MessageDataType.image,
                     data: {
-                        file: element.fileName,
+                        file: encodedFileId,
                         sub_type: element.picSubType,
-                        file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId),
+                        file_id: encodedFileId,
                         url: await this.core.apis.FileApi.getImageUrl(element),
                         file_size: element.fileSize,
                     },
@@ -211,7 +213,6 @@ export class OneBotMsgApi {
         },
 
         replyElement: async (element, msg) => {
-            const NTQQMsgApi = this.core.apis.MsgApi;
             const records = msg.records.find(msgRecord => msgRecord.msgId === element?.sourceMsgIdInRecords);
             const peer = {
                 chatType: msg.chatType,
@@ -236,17 +237,17 @@ export class OneBotMsgApi {
 
             let replyMsg: RawMessage | undefined;
             // Attempt 1
-            replyMsg = (await NTQQMsgApi.getMsgsBySeqAndCount(peer,element.replayMsgSeq, 1, true, true))
+            replyMsg = (await this.core.apis.MsgApi.getMsgsBySeqAndCount(peer,element.replayMsgSeq, 1, true, true))
                 .msgList
                 .find(msg => msg.msgRandom === records.msgRandom);
 
             if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
                 // Attempt 2
-                replyMsg = (await NTQQMsgApi.getSingleMsg(peer, element.replayMsgSeq)).msgList[0];
+                replyMsg = (await this.core.apis.MsgApi.getSingleMsg(peer, element.replayMsgSeq)).msgList[0];
 
                 if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
                     // Attempt 3
-                    const replyMsgList = (await NTQQMsgApi.getMsgExBySeq(peer, records.msgSeq)).msgList;
+                    const replyMsgList = (await this.core.apis.MsgApi.getMsgExBySeq(peer, records.msgSeq)).msgList;
                     if (replyMsgList.length < 1) {
                         this.core.context.logger.logError('回复消息消息验证失败', element.replayMsgSeq);
                         return null;
@@ -260,20 +261,19 @@ export class OneBotMsgApi {
         },
 
         videoElement: async (element, msg, elementWrapper) => {
-            const NTQQFileApi = this.core.apis.FileApi;
             const peer = {
                 chatType: msg.chatType,
                 peerUid: msg.peerUid,
                 guildId: '',
             };
             //读取视频链接并兜底
-            let videoUrlWrappers: Awaited<ReturnType<typeof NTQQFileApi.getVideoUrl>> | undefined;
+            let videoUrlWrappers: Awaited<ReturnType<typeof this.core.apis.FileApi.getVideoUrl>> | undefined;
 
             if (msg.peerUin === '284840486') {
                 //TODO: 合并消息内部 应该进行特殊处理 可能需要重写peer 待测试与研究 Mlikiowa Tagged
             }
             try {
-                videoUrlWrappers = await NTQQFileApi.getVideoUrl({
+                videoUrlWrappers = await this.core.apis.FileApi.getVideoUrl({
                     chatType: msg.chatType,
                     peerUid: msg.peerUid,
                     guildId: '0',
@@ -299,7 +299,7 @@ export class OneBotMsgApi {
                 videoDownUrl = element.filePath;
             }
 
-            await NTQQFileApi.addFileCache(
+            await this.core.apis.FileApi.addFileCache(
                 {
                     peerUid: msg.peerUid,
                     chatType: msg.chatType,
@@ -358,7 +358,6 @@ export class OneBotMsgApi {
         },
 
         multiForwardMsgElement: async (_, msg) => {
-            const NTQQMsgApi = this.core.apis.MsgApi;
             const message_data: OB11MessageForward = {
                 data: {} as any,
                 type: OB11MessageDataType.forward,
@@ -375,7 +374,7 @@ export class OneBotMsgApi {
             msg.parentMsgIdList.push(msg.msgId);
             //let parentMsgId = msg.parentMsgIdList[msg.parentMsgIdList.length - 2 < 0 ? 0 : msg.parentMsgIdList.length - 2];
             //加入自身MsgId
-            const multiMsgs = (await NTQQMsgApi.getMultiMsg(parentMsgPeer, msg.parentMsgIdList[0], msg.msgId))?.msgList;
+            const multiMsgs = (await this.core.apis.MsgApi.getMultiMsg(parentMsgPeer, msg.parentMsgIdList[0], msg.msgId))?.msgList;
             //拉取下级消息
             if (!multiMsgs) return null;
             //拉取失败则跳过
@@ -445,15 +444,13 @@ export class OneBotMsgApi {
 
             if (!context.peer || context.peer.chatType == ChatType.KCHATTYPEC2C) return undefined;
             if (atQQ === 'all') return at(atQQ, atQQ, AtType.atAll, '全体成员');
-            const NTQQGroupApi = this.core.apis.GroupApi;
-            const NTQQUserApi = this.core.apis.UserApi;
-            const atMember = await NTQQGroupApi.getGroupMember(context.peer.peerUid, atQQ);
+            const atMember = await this.core.apis.GroupApi.getGroupMember(context.peer.peerUid, atQQ);
             if (atMember) {
                 return at(atQQ, atMember.uid, AtType.atUser, atMember.nick || atMember.cardName);
             }
-            const uid = await NTQQUserApi.getUidByUinV2(`${atQQ}`);
+            const uid = await this.core.apis.UserApi.getUidByUinV2(`${atQQ}`);
             if (!uid) throw new Error('Get Uid Error');
-            const info = await NTQQUserApi.getUserDetailInfo(uid);
+            const info = await this.core.apis.UserApi.getUserDetailInfo(uid);
             return at(atQQ, uid, AtType.atUser, info.nick || '');
         },
 
@@ -463,8 +460,7 @@ export class OneBotMsgApi {
                 this.core.context.logger.logWarn('回复消息不存在', id);
                 return undefined;
             }
-            const NTQQMsgApi = this.core.apis.MsgApi;
-            const replyMsg = (await NTQQMsgApi.getMsgsByMsgId(
+            const replyMsg = (await this.core.apis.MsgApi.getMsgsByMsgId(
                 replyMsgM.Peer, [replyMsgM.MsgId])).msgList[0];
             return replyMsg ?
                 {
@@ -709,9 +705,6 @@ export class OneBotMsgApi {
         if (msg.senderUin == '0' || msg.senderUin == '') return;
         if (msg.peerUin == '0' || msg.peerUin == '') return;
         //跳过空消息
-        const NTQQGroupApi = this.core.apis.GroupApi;
-        const NTQQUserApi = this.core.apis.UserApi;
-        const NTQQMsgApi = this.core.apis.MsgApi;
         const resMsg: OB11Message = {
             self_id: parseInt(this.core.selfInfo.uin),
             user_id: parseInt(msg.senderUin!),
@@ -735,18 +728,18 @@ export class OneBotMsgApi {
         if (msg.chatType == ChatType.KCHATTYPEGROUP) {
             resMsg.sub_type = 'normal'; // 这里go-cqhttp是group，而onebot11标准是normal, 蛋疼
             resMsg.group_id = parseInt(msg.peerUin);
-            let member = await NTQQGroupApi.getGroupMember(msg.peerUin, msg.senderUin);
-            if (!member) member = await NTQQGroupApi.getGroupMember(msg.peerUin, msg.senderUin);
+            let member = await this.core.apis.GroupApi.getGroupMember(msg.peerUin, msg.senderUin);
+            if (!member) member = await this.core.apis.GroupApi.getGroupMember(msg.peerUin, msg.senderUin);
             if (member) {
                 resMsg.sender.role = OB11Entities.groupMemberRole(member.role);
                 resMsg.sender.nickname = member.nick;
             }
         } else if (msg.chatType == ChatType.KCHATTYPEC2C) {
             resMsg.sub_type = 'friend';
-            resMsg.sender.nickname = (await NTQQUserApi.getUserDetailInfo(msg.senderUid)).nick;
+            resMsg.sender.nickname = (await this.core.apis.UserApi.getUserDetailInfo(msg.senderUid)).nick;
         } else if (msg.chatType == ChatType.KCHATTYPETEMPC2CFROMGROUP) {
             resMsg.sub_type = 'group';
-            const ret = await NTQQMsgApi.getTempChatInfo(ChatType.KCHATTYPETEMPC2CFROMGROUP, msg.senderUid);
+            const ret = await this.core.apis.MsgApi.getTempChatInfo(ChatType.KCHATTYPETEMPC2CFROMGROUP, msg.senderUid);
             if (ret.result === 0) {
                 resMsg.group_id = parseInt(ret.tmpChatInfo!.groupCode);
                 resMsg.sender.nickname = ret.tmpChatInfo!.fromNick;
