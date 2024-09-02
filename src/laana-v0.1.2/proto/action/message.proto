@@ -29,15 +29,6 @@ message SendMessagePing {
 
 message SendMessagePong {
   string msgId = 1;
-
-  message BubbleSegmentsFileCacheRef {
-    repeated string fileCacheIds = 1;
-  }
-
-  oneof fileCacheId {
-    BubbleSegmentsFileCacheRef fromBubbleSegments = 11;
-    string fromSingleFile = 12;
-  }
 }
 
 message SendPackedMessagesPing {
@@ -48,7 +39,7 @@ message SendPackedMessagesPing {
 message SendPackedMessagesPong {
   string packedMsgId = 1;
   ForwardMessageRef forwardMsgRef = 2;
-  repeated SendMessagePong messagePongs = 3;
+  repeated string msgIds = 3;
 }
 
 message GetMessagePing {

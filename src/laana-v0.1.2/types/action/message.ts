@@ -99,33 +99,6 @@ export interface SendMessagePong {
      * @generated from protobuf field: string msgId = 1;
      */
     msgId: string;
-    /**
-     * @generated from protobuf oneof: fileCacheId
-     */
-    fileCacheId: {
-        oneofKind: "fromBubbleSegments";
-        /**
-         * @generated from protobuf field: Laana.SendMessagePong.BubbleSegmentsFileCacheRef fromBubbleSegments = 11;
-         */
-        fromBubbleSegments: SendMessagePong_BubbleSegmentsFileCacheRef;
-    } | {
-        oneofKind: "fromSingleFile";
-        /**
-         * @generated from protobuf field: string fromSingleFile = 12;
-         */
-        fromSingleFile: string;
-    } | {
-        oneofKind: undefined;
-    };
-}
-/**
- * @generated from protobuf message Laana.SendMessagePong.BubbleSegmentsFileCacheRef
- */
-export interface SendMessagePong_BubbleSegmentsFileCacheRef {
-    /**
-     * @generated from protobuf field: repeated string fileCacheIds = 1;
-     */
-    fileCacheIds: string[];
 }
 /**
  * @generated from protobuf message Laana.SendPackedMessagesPing
@@ -153,9 +126,9 @@ export interface SendPackedMessagesPong {
      */
     forwardMsgRef?: ForwardMessageRef;
     /**
-     * @generated from protobuf field: repeated Laana.SendMessagePong messagePongs = 3;
+     * @generated from protobuf field: repeated string msgIds = 3;
      */
-    messagePongs: SendMessagePong[];
+    msgIds: string[];
 }
 /**
  * @generated from protobuf message Laana.GetMessagePing
@@ -434,15 +407,12 @@ export const SendMessagePing = new SendMessagePing$Type();
 class SendMessagePong$Type extends MessageType<SendMessagePong> {
     constructor() {
         super("Laana.SendMessagePong", [
-            { no: 1, name: "msgId", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 11, name: "fromBubbleSegments", kind: "message", oneof: "fileCacheId", T: () => SendMessagePong_BubbleSegmentsFileCacheRef },
-            { no: 12, name: "fromSingleFile", kind: "scalar", oneof: "fileCacheId", T: 9 /*ScalarType.STRING*/ }
+            { no: 1, name: "msgId", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<SendMessagePong>): SendMessagePong {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.msgId = "";
-        message.fileCacheId = { oneofKind: undefined };
         if (value !== undefined)
             reflectionMergePartial<SendMessagePong>(this, message, value);
         return message;
@@ -454,18 +424,6 @@ class SendMessagePong$Type extends MessageType<SendMessagePong> {
             switch (fieldNo) {
                 case /* string msgId */ 1:
                     message.msgId = reader.string();
-                    break;
-                case /* Laana.SendMessagePong.BubbleSegmentsFileCacheRef fromBubbleSegments */ 11:
-                    message.fileCacheId = {
-                        oneofKind: "fromBubbleSegments",
-                        fromBubbleSegments: SendMessagePong_BubbleSegmentsFileCacheRef.internalBinaryRead(reader, reader.uint32(), options, (message.fileCacheId as any).fromBubbleSegments)
-                    };
-                    break;
-                case /* string fromSingleFile */ 12:
-                    message.fileCacheId = {
-                        oneofKind: "fromSingleFile",
-                        fromSingleFile: reader.string()
-                    };
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -482,12 +440,6 @@ class SendMessagePong$Type extends MessageType<SendMessagePong> {
         /* string msgId = 1; */
         if (message.msgId !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.msgId);
-        /* Laana.SendMessagePong.BubbleSegmentsFileCacheRef fromBubbleSegments = 11; */
-        if (message.fileCacheId.oneofKind === "fromBubbleSegments")
-            SendMessagePong_BubbleSegmentsFileCacheRef.internalBinaryWrite(message.fileCacheId.fromBubbleSegments, writer.tag(11, WireType.LengthDelimited).fork(), options).join();
-        /* string fromSingleFile = 12; */
-        if (message.fileCacheId.oneofKind === "fromSingleFile")
-            writer.tag(12, WireType.LengthDelimited).string(message.fileCacheId.fromSingleFile);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -498,53 +450,6 @@ class SendMessagePong$Type extends MessageType<SendMessagePong> {
  * @generated MessageType for protobuf message Laana.SendMessagePong
  */
 export const SendMessagePong = new SendMessagePong$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class SendMessagePong_BubbleSegmentsFileCacheRef$Type extends MessageType<SendMessagePong_BubbleSegmentsFileCacheRef> {
-    constructor() {
-        super("Laana.SendMessagePong.BubbleSegmentsFileCacheRef", [
-            { no: 1, name: "fileCacheIds", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ }
-        ]);
-    }
-    create(value?: PartialMessage<SendMessagePong_BubbleSegmentsFileCacheRef>): SendMessagePong_BubbleSegmentsFileCacheRef {
-        const message = globalThis.Object.create((this.messagePrototype!));
-        message.fileCacheIds = [];
-        if (value !== undefined)
-            reflectionMergePartial<SendMessagePong_BubbleSegmentsFileCacheRef>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: SendMessagePong_BubbleSegmentsFileCacheRef): SendMessagePong_BubbleSegmentsFileCacheRef {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* repeated string fileCacheIds */ 1:
-                    message.fileCacheIds.push(reader.string());
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: SendMessagePong_BubbleSegmentsFileCacheRef, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* repeated string fileCacheIds = 1; */
-        for (let i = 0; i < message.fileCacheIds.length; i++)
-            writer.tag(1, WireType.LengthDelimited).string(message.fileCacheIds[i]);
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message Laana.SendMessagePong.BubbleSegmentsFileCacheRef
- */
-export const SendMessagePong_BubbleSegmentsFileCacheRef = new SendMessagePong_BubbleSegmentsFileCacheRef$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class SendPackedMessagesPing$Type extends MessageType<SendPackedMessagesPing> {
     constructor() {
@@ -605,13 +510,13 @@ class SendPackedMessagesPong$Type extends MessageType<SendPackedMessagesPong> {
         super("Laana.SendPackedMessagesPong", [
             { no: 1, name: "packedMsgId", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "forwardMsgRef", kind: "message", T: () => ForwardMessageRef },
-            { no: 3, name: "messagePongs", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => SendMessagePong }
+            { no: 3, name: "msgIds", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<SendPackedMessagesPong>): SendPackedMessagesPong {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.packedMsgId = "";
-        message.messagePongs = [];
+        message.msgIds = [];
         if (value !== undefined)
             reflectionMergePartial<SendPackedMessagesPong>(this, message, value);
         return message;
@@ -627,8 +532,8 @@ class SendPackedMessagesPong$Type extends MessageType<SendPackedMessagesPong> {
                 case /* Laana.ForwardMessageRef forwardMsgRef */ 2:
                     message.forwardMsgRef = ForwardMessageRef.internalBinaryRead(reader, reader.uint32(), options, message.forwardMsgRef);
                     break;
-                case /* repeated Laana.SendMessagePong messagePongs */ 3:
-                    message.messagePongs.push(SendMessagePong.internalBinaryRead(reader, reader.uint32(), options));
+                case /* repeated string msgIds */ 3:
+                    message.msgIds.push(reader.string());
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -648,9 +553,9 @@ class SendPackedMessagesPong$Type extends MessageType<SendPackedMessagesPong> {
         /* Laana.ForwardMessageRef forwardMsgRef = 2; */
         if (message.forwardMsgRef)
             ForwardMessageRef.internalBinaryWrite(message.forwardMsgRef, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
-        /* repeated Laana.SendMessagePong messagePongs = 3; */
-        for (let i = 0; i < message.messagePongs.length; i++)
-            SendMessagePong.internalBinaryWrite(message.messagePongs[i], writer.tag(3, WireType.LengthDelimited).fork(), options).join();
+        /* repeated string msgIds = 3; */
+        for (let i = 0; i < message.msgIds.length; i++)
+            writer.tag(3, WireType.LengthDelimited).string(message.msgIds[i]);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

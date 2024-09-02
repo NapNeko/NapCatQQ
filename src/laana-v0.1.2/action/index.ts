@@ -1,4 +1,4 @@
-import { ActionPing, ActionPong } from '@/laana-v0.1.1/types/action/wrapper';
+import { ActionPing, ActionPong } from '@/laana-v0.1.2/types/action/wrapper';
 
 type ExtractFromPongOrVoid<key> = Extract<ActionPong['pong'], { oneofKind: key; }> extends never ?
     void :
