@@ -13,7 +13,7 @@ type Laana2RawConverters = {
         params: SendMessagePing,
     ) => PromiseLike<{
         elements: SendMessageElement[],
-        fileCacheId?: string[],
+        fileCacheIds: string[],
     }>
 }
 
@@ -40,7 +40,8 @@ export class LaanaMessageUtils {
                 };
             }
 
-            const sendElements: SendMessageElement[] = [];
+            const elements: SendMessageElement[] = [];
+            const fileCacheIds: string[] = [];
 
             if (msgContent.repliedMsgId) {
                 const { msgSeq, msgId, senderUin } = (
@@ -49,7 +50,7 @@ export class LaanaMessageUtils {
                         [msgContent.repliedMsgId]
                     )
                 ).msgList[0];
-                sendElements.push({
+                elements.push({
                     elementType: ElementType.REPLY,
                     elementId: '',
                     replyElement: {
@@ -64,7 +65,7 @@ export class LaanaMessageUtils {
             for (const seg of msgContent.segments) {
                 const content = seg.content;
                 if (content.oneofKind === 'text') {
-                    sendElements.push({
+                    elements.push({
                         elementType: ElementType.TEXT,
                         elementId: '',
                         textElement: {
@@ -81,7 +82,7 @@ export class LaanaMessageUtils {
                     }
 
                     if (content.at.uin === '0') {
-                        sendElements.push(at(
+                        elements.push(at(
                             '0', '0',
                             AtType.atAll,
                             '所有人',
@@ -91,7 +92,7 @@ export class LaanaMessageUtils {
                     const atMember = await this.core.apis.GroupApi
                         .getGroupMember(params.targetPeer.uin, content.at.uin);
                     if (atMember) {
-                        sendElements.push(at(
+                        elements.push(at(
                             content.at.uin,
                             atMember.uid,
                             AtType.atUser,
@@ -103,7 +104,7 @@ export class LaanaMessageUtils {
                             throw '查询用户 UID 失败';
                         }
                         const info = await this.core.apis.UserApi.getUserDetailInfo(uid);
-                        sendElements.push(at(
+                        elements.push(at(
                             content.at.uin,
                             uid,
                             AtType.atUser,
@@ -122,7 +123,7 @@ export class LaanaMessageUtils {
                     const faceType = parsedFaceId >= 222 ?
                         face.AniStickerType ?
                             3 : 2 : 1;
-                    sendElements.push({
+                    elements.push({
                         elementType: ElementType.FACE,
                         elementId: '',
                         faceElement: {
@@ -136,14 +137,17 @@ export class LaanaMessageUtils {
                         },
                     });
                 } else if (content.oneofKind === 'image') {
-                    // TODO: handle file-like messages
-                    throw 'Unimplemented';
+                    const cacheId = await this.laana.utils.file.resolveCacheIdFromLaanaFile(content.image);
+                    elements.push(await this.core.apis.FileApi.createValidSendPicElement(
+                        this.laana.utils.file.toLocalPath(cacheId)
+                    ));
+                    fileCacheIds.push(cacheId);
                 } else {
                     throw '未知的消息内容类型';
                 }
             }
 
-            return { elements: sendElements };
+            return { elements, fileCacheIds };
         },
 
         file: () => { throw 'Unimplemented'; },
@@ -160,6 +164,7 @@ export class LaanaMessageUtils {
                     faceName: msgContent.displayText ?? '[商城表情]',
                 },
             }],
+            fileCacheIds: [],
         }),
 
         video: () => { throw 'Unimplemented'; },
