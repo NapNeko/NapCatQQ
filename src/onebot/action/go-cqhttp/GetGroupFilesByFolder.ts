@@ -2,6 +2,7 @@ import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { OB11Entities } from '@/onebot/entities';
+
 const SchemaData = {
     type: 'object',
     properties: {

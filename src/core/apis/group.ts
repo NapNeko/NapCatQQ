@@ -1,5 +1,4 @@
 import {
-    ChatType,
     GeneralCallResult,
     Group,
     GroupMember,
@@ -10,7 +9,7 @@ import {
     MemberExtSourceType,
     NapCatCore,
 } from '@/core';
-import { isNumeric, runAllWithTimeout } from '@/common/helper';
+import { isNumeric } from '@/common/helper';
 import { LimitedHashTable } from '@/common/message-unique';
 
 export class NTQQGroupApi {
