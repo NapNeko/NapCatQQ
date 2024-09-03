@@ -1,7 +1,6 @@
-import path from 'node:path';
 import fs from 'node:fs';
 import { systemPlatform } from '@/common/system';
-import { getDefaultQQVersionConfigInfo, getQQVersionConfigPath } from './helper';
+import { getDefaultQQVersionConfigInfo, getQQPackageInfoPath, getQQVersionConfigPath } from './helper';
 import AppidTable from '@/core/external/appid.json';
 import { LogWrapper } from './log';
 
@@ -20,7 +19,7 @@ export class QQBasicInfoWrapper {
         //基础目录获取
         this.context = context;
         this.QQMainPath = process.execPath;
-        this.QQPackageInfoPath = path.join(path.dirname(this.QQMainPath), 'resources', 'app', 'package.json');
+        this.QQPackageInfoPath = getQQPackageInfoPath(this.QQMainPath);
         this.QQVersionConfigPath = getQQVersionConfigPath(this.QQMainPath);
 
         //基础信息获取 无快更则启用默认模板填充
@@ -53,9 +52,21 @@ export class QQBasicInfoWrapper {
 
     //此方法不要直接使用
     getQUAInternal() {
-        return systemPlatform === 'linux'
-            ? `V1_LNX_NQ_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`
-            : `V1_WIN_NQ_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
+        switch (systemPlatform) {
+            case 'linux':
+                return `V1_LNX_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;              
+            default:
+                return `V1_WIN_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
+        }
+    }
+
+    getAppidInternal() {
+        switch (systemPlatform) {
+            case 'linux':
+                return '537243600';
+            default:
+                return '537243538';
+        }
     }
 
     getAppidV2(): { appid: string; qua: string } {
@@ -71,6 +82,6 @@ export class QQBasicInfoWrapper {
         // else
         this.context.logger.log(`[QQ版本兼容性检测] 获取Appid异常 请检测NapCat/QQNT是否正常`);
         this.context.logger.log(`[QQ版本兼容性检测] ${fullVersion} 版本兼容性不佳，可能会导致一些功能无法正常使用`,);
-        return { appid: systemPlatform === 'linux' ? '537243600' : '537243441', qua: this.getQUAInternal() };
+        return { appid: this.getAppidInternal(), qua: this.getQUAInternal() };
     }
 }
