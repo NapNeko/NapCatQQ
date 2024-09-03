@@ -314,9 +314,6 @@ export class NTQQGroupApi {
         return this.context.session.getRichMediaService().batchGetGroupFileCount(Gids);
     }
 
-    async getGroupIgnoreNotifies() {
-    }
-
     async getArkJsonGroupShare(GroupCode: string) {
         const ret = await this.core.eventWrapper.callNoListenerEvent(
             'NodeIKernelGroupService/getGroupRecommendContactArkJson',

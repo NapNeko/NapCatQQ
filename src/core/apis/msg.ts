@@ -93,6 +93,18 @@ export class NTQQMsgApi {
             pageLimit: 1,
         });
     }
+    async queryFirstMsgBySeq(peer: Peer, msgSeq: string) {
+        return await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', msgSeq, {
+            chatInfo: peer,
+            filterMsgType: [],
+            filterSendersUid: [],
+            filterMsgToTime: '0',
+            filterMsgFromTime: '0',
+            isReverseOrder: true,
+            isIncludeCurrent: true,
+            pageLimit: 1,
+        });
+    }
     async getMsgsBySeqAndCount(peer: Peer, seq: string, count: number, desc: boolean, z: boolean) {
         return await this.context.session.getMsgService().getMsgsBySeqAndCount(peer, seq, count, desc, z);
     }

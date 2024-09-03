@@ -271,14 +271,11 @@ export class OneBotGroupApi {
             guildId: '',
             peerUid: groupCode,
         };
-        const replyMsgList = (await this.core.apis.MsgApi.getMsgExBySeq(peer, msgSeq)).msgList;
+        const replyMsgList = (await this.core.apis.MsgApi.queryFirstMsgBySeq(peer, msgSeq)).msgList;
         if (replyMsgList.length < 1) {
             return;
         }
-        const replyMsg = replyMsgList
-            .filter(e => e.msgSeq == msgSeq)
-            .sort((a, b) => parseInt(a.msgTime) - parseInt(b.msgTime))[0];
-        //console.log("表情回应消息长度检测", msgSeq, replyMsg.elements);
+        const replyMsg = replyMsgList[0];
         if (!replyMsg) {
             this.core.context.logger.logError('解析表情回应消息失败: 未找到回应消息');
             return undefined;

@@ -173,9 +173,18 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                     }
                     const { sendElements } = await this.obContext.apis.MsgApi
                         .createSendElements(OB11Data, destPeer);
+                        
                     //拆分消息
-                    const MixElement = sendElements.filter(element => element.elementType !== ElementType.FILE && element.elementType !== ElementType.VIDEO);
-                    const SingleElement = sendElements.filter(element => element.elementType === ElementType.FILE || element.elementType === ElementType.VIDEO).map(e => [e]);
+
+                    const MixElement = sendElements.filter(
+                        element =>
+                            element.elementType !== ElementType.FILE && element.elementType !== ElementType.VIDEO && element.elementType !== ElementType.ARK
+                    );
+                    const SingleElement = sendElements.filter(
+                        element =>
+                            element.elementType === ElementType.FILE || element.elementType === ElementType.VIDEO || element.elementType === ElementType.ARK
+                    ).map(e => [e]);
+
                     const AllElement: SendMessageElement[][] = [MixElement, ...SingleElement].filter(e => e !== undefined && e.length !== 0);
                     const MsgNodeList: Promise<RawMessage | undefined>[] = [];
                     for (const sendElementsSplitElement of AllElement) {
