@@ -37,7 +37,7 @@ export class FileNapCatOneBotUUID {
         if (!uuid.startsWith('NapCatOneBot|ModelIdFile|')) return undefined;
         const data = uuid.split('|');
         if (data.length !== 6) return undefined;
-        const [, , chatType, peerUid, modelId,fileId] = data;
+        const [, , chatType, peerUid, modelId, fileId] = data;
         return {
             peer: {
                 chatType: chatType as any,
@@ -156,9 +156,13 @@ export function getDefaultQQVersionConfigInfo(): QQVersionConfigType {
     };
 }
 
+export function getQQPackageInfoPath(exePath: string = ''): string {
+    return path.join(path.dirname(exePath), 'resources', 'app', 'package.json');
+}
+
 export function getQQVersionConfigPath(exePath: string = ''): string | undefined {
     let configVersionInfoPath;
-    if (os.platform() !== 'linux') {
+    if (os.platform() === 'win32') {
         configVersionInfoPath = path.join(path.dirname(exePath), 'resources', 'app', 'versions', 'config.json');
     } else {
         const userPath = os.homedir();

@@ -42,9 +42,11 @@ export enum NapCatCoreWorkingEnv {
 }
 
 export function loadQQWrapper(QQVersion: string): WrapperNodeApi {
-    let wrapperNodePath = path.resolve(path.dirname(process.execPath), './resources/app/wrapper.node');
+    let appPath;
+    appPath = path.resolve(path.dirname(process.execPath), './resources/app');
+    let wrapperNodePath = path.resolve(appPath, 'wrapper.node');
     if (!fs.existsSync(wrapperNodePath)) {
-        wrapperNodePath = path.join(path.dirname(process.execPath), `resources/app/versions/${QQVersion}/wrapper.node`);
+        wrapperNodePath = path.join(appPath, `versions/${QQVersion}/wrapper.node`);
     }
     const nativemodule: any = { exports: {} };
     process.dlopen(nativemodule, wrapperNodePath);
