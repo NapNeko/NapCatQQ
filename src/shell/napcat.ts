@@ -50,6 +50,11 @@ export async function NCoreInitShell() {
 
     // from get dataPath
     const [dataPath, dataPathGlobal] = (() => {
+        if (os.platform() === 'darwin') {
+            const userPath = os.homedir();
+            const appDataPath = path.resolve(userPath, './Library/Application Support/QQ');
+            return [appDataPath, path.join(appDataPath, 'global')];
+        }
         let dataPath = wrapper.NodeQQNTWrapperUtil.getNTUserDataInfoConfig();
         if (!dataPath) {
             dataPath = path.resolve(os.homedir(), './.config/QQ');

@@ -13,7 +13,11 @@ export class NapCatPathWrapper {
     constructor(mainPath: string = dirname(fileURLToPath(import.meta.url))) {
         this.binaryPath = mainPath;
         let writePath: string;
-        writePath = this.binaryPath;
+        if (os.platform() === 'darwin') {
+            writePath = path.join(os.homedir(), 'Library', 'Application Support', 'QQ', 'NapCat');
+        } else {
+            writePath = this.binaryPath;
+        }
         this.logsPath = path.join(writePath, 'logs');
         this.configPath = path.join(writePath, 'config');
         this.cachePath = path.join(writePath, 'cache');
