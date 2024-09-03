@@ -54,7 +54,9 @@ export class QQBasicInfoWrapper {
     getQUAInternal() {
         switch (systemPlatform) {
             case 'linux':
-                return `V1_LNX_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;              
+                return `V1_LNX_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
+            case 'darwin':
+                return `V1_MAC_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;                
             default:
                 return `V1_WIN_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
         }
@@ -64,6 +66,8 @@ export class QQBasicInfoWrapper {
         switch (systemPlatform) {
             case 'linux':
                 return '537243600';
+            case 'darwin':
+                return '537243441';
             default:
                 return '537243538';
         }
