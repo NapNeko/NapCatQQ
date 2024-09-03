@@ -709,6 +709,9 @@ export class OneBotMsgApi {
             message_format: messagePostFormat === 'string' ? 'string' : 'array',
             post_type: this.core.selfInfo.uin == msg.senderUin ? EventType.MESSAGE_SENT : EventType.MESSAGE,
         };
+        if (this.core.selfInfo.uin == msg.senderUin) {
+            resMsg.message_sent_type = 'self';
+        }
         if (msg.chatType == ChatType.KCHATTYPEGROUP) {
             resMsg.sub_type = 'normal'; // 这里go-cqhttp是group，而onebot11标准是normal, 蛋疼
             resMsg.group_id = parseInt(msg.peerUin);
