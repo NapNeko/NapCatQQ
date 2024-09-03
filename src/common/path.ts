@@ -1,6 +1,7 @@
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import os from 'os';
 
 export class NapCatPathWrapper {
     binaryPath: string;
@@ -11,17 +12,23 @@ export class NapCatPathWrapper {
 
     constructor(mainPath: string = dirname(fileURLToPath(import.meta.url))) {
         this.binaryPath = mainPath;
-        this.logsPath = path.join(this.binaryPath, 'logs');
-        this.configPath = path.join(this.binaryPath, 'config');
-        this.cachePath = path.join(this.binaryPath, 'cache');
+        let writePath: string;
+        if (os.platform() === 'darwin') {
+            writePath = path.join(os.homedir(), 'Library', 'Application Support', 'QQ', 'NapCat');
+        } else {
+            writePath = this.binaryPath;
+        }
+        this.logsPath = path.join(writePath, 'logs');
+        this.configPath = path.join(writePath, 'config');
+        this.cachePath = path.join(writePath, 'cache');
         this.staticPath = path.join(this.binaryPath, 'static');
-        if (fs.existsSync(this.logsPath)) {
+        if (!fs.existsSync(this.logsPath)) {
             fs.mkdirSync(this.logsPath, { recursive: true });
         }
-        if (fs.existsSync(this.configPath)) {
+        if (!fs.existsSync(this.configPath)) {
             fs.mkdirSync(this.configPath, { recursive: true });
         }
-        if (fs.existsSync(this.cachePath)) {
+        if (!fs.existsSync(this.cachePath)) {
             fs.mkdirSync(this.cachePath, { recursive: true });
         }
     }

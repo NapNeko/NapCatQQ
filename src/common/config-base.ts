@@ -22,9 +22,14 @@ export abstract class ConfigBase<T> {
     }
 
     getConfigPath(pathName: string | undefined): string {
-        const suffix = pathName ? `_${pathName}` : '';
-        const filename = `${this.name}${suffix}.json`;
-        return path.join(this.configPath, filename);
+        if (!pathName) {
+            const filename = `${this.name}.json`;
+            const mainPath = this.core.context.pathWrapper.binaryPath;
+            return path.join(mainPath, 'config', filename);
+        } else {
+            const filename = `${this.name}_${pathName}.json`;
+            return path.join(this.configPath, filename);
+        }
     }
 
     read(): T {
