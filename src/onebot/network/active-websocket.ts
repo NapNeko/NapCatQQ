@@ -135,7 +135,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
         try {
             receiveData = JSON.parse(message.toString());
             echo = receiveData.echo;
-            this.logger.logDebug('[OneBot] [WebSocket Client] 收到正向Websocket消息', receiveData);
+            //this.logger.logDebug('[OneBot] [WebSocket Client] 收到正向Websocket消息', receiveData);
         } catch (e) {
             this.checkStateAndReply<any>(OB11Response.error('json解析失败,请检查数据格式', 1400, echo));
             return;
@@ -147,7 +147,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
             this.checkStateAndReply<any>(OB11Response.error('不支持的api ' + receiveData.action, 1404, echo));
             return;
         }
-        const retdata = await action?.websocketHandle(receiveData.params, echo ?? '');
+        const retdata = await action.websocketHandle(receiveData.params, echo ?? '');
         const packet = Object.assign({}, retdata);
         this.checkStateAndReply<any>(packet);
     }
