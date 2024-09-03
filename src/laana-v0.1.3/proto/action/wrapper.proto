@@ -58,11 +58,15 @@ message ActionPing {
   }
 }
 
-message ActionPong {
-  message FailedPong {
-    string reason = 1;
-  }
+message GeneralSuccessPong {
+  bool success = 1;
+}
 
+message FailedPong {
+  string reason = 1;
+}
+
+message ActionPong {
   string clientPingId = 1;
   oneof pong {
     FailedPong failed = 11;
@@ -72,6 +76,9 @@ message ActionPong {
     GetMessagePong getMessage = 103;
     GetMessagesPong getMessages = 104;
     GetHistoryMessagesPong getHistoryMessages = 105;
+    GeneralSuccessPong withdrawMessage = 106;
+    GeneralSuccessPong markPeerMessageAsRead = 107;
+    GeneralSuccessPong forwardMessage = 108;
 
     GetAllBuddiesPong getAllBuddies = 201;
     GetAllGroupsPong getAllGroups = 202;
@@ -82,17 +89,31 @@ message ActionPong {
     GetGroupMemberUinsPong getGroupMemberUins = 301;
     GetGroupMemberInfoPong getGroupMemberInfo = 302;
     GetAllGroupMembersInfoPong getAllGroupMembersInfo = 303;
+    GeneralSuccessPong setGroupName = 304;
     SetGroupAvatarPong setGroupAvatar = 305;
+    GeneralSuccessPong setGroupAdmin = 306;
+    GeneralSuccessPong setGroupMemberCard = 307;
+    GeneralSuccessPong setGroupMemberSpecialTitle = 308;
+    GeneralSuccessPong setGroupMemberShutUp = 309;
+    GeneralSuccessPong setGroupShutUpAll = 310;
+    GeneralSuccessPong kickGroupMember = 311;
+    GeneralSuccessPong quitGroup = 312;
     GetPaginatedGroupEssenceMessagePong getPaginatedGroupEssenceMessage = 313;
     GetAllGroupsEssenceMessagePong getAllGroupsEssenceMessage = 314;
+    GeneralSuccessPong setGroupEssenceMessage = 315;
 
+    GeneralSuccessPong handleBuddyAddRequest = 401;
+    GeneralSuccessPong handleGroupJoinRequest = 402;
     HandleGroupInvitationPong handleGroupInvitation = 403;
 
     UploadCachePong uploadCache = 501;
     PrepareCacheByUrlPong prepareCacheByUrl = 502;
+    GeneralSuccessPong destroyCache = 503;
     GetFileDataPong getFileData = 504;
     GetGroupFileListPong getGroupFileList = 505;
     UploadGroupFilePong uploadGroupFile = 506;
     CreateGroupFolderPong createGroupFolder = 507;
+    GeneralSuccessPong deleteGroupFile = 508;
+    GeneralSuccessPong deleteGroupFolder = 509;
   }
 }

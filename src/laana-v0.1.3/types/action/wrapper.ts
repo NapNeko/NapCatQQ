@@ -329,6 +329,24 @@ export interface ActionPing {
     };
 }
 /**
+ * @generated from protobuf message Laana.GeneralSuccessPong
+ */
+export interface GeneralSuccessPong {
+    /**
+     * @generated from protobuf field: bool success = 1;
+     */
+    success: boolean;
+}
+/**
+ * @generated from protobuf message Laana.FailedPong
+ */
+export interface FailedPong {
+    /**
+     * @generated from protobuf field: string reason = 1;
+     */
+    reason: string;
+}
+/**
  * @generated from protobuf message Laana.ActionPong
  */
 export interface ActionPong {
@@ -342,9 +360,9 @@ export interface ActionPong {
     pong: {
         oneofKind: "failed";
         /**
-         * @generated from protobuf field: Laana.ActionPong.FailedPong failed = 11;
+         * @generated from protobuf field: Laana.FailedPong failed = 11;
          */
-        failed: ActionPong_FailedPong;
+        failed: FailedPong;
     } | {
         oneofKind: "sendMessage";
         /**
@@ -375,6 +393,24 @@ export interface ActionPong {
          * @generated from protobuf field: Laana.GetHistoryMessagesPong getHistoryMessages = 105;
          */
         getHistoryMessages: GetHistoryMessagesPong;
+    } | {
+        oneofKind: "withdrawMessage";
+        /**
+         * @generated from protobuf field: Laana.GeneralSuccessPong withdrawMessage = 106;
+         */
+        withdrawMessage: GeneralSuccessPong;
+    } | {
+        oneofKind: "markPeerMessageAsRead";
+        /**
+         * @generated from protobuf field: Laana.GeneralSuccessPong markPeerMessageAsRead = 107;
+         */
+        markPeerMessageAsRead: GeneralSuccessPong;
+    } | {
+        oneofKind: "forwardMessage";
+        /**
+         * @generated from protobuf field: Laana.GeneralSuccessPong forwardMessage = 108;
+         */
+        forwardMessage: GeneralSuccessPong;
     } | {
         oneofKind: "getAllBuddies";
         /**
@@ -424,11 +460,59 @@ export interface ActionPong {
          */
         getAllGroupMembersInfo: GetAllGroupMembersInfoPong;
     } | {
+        oneofKind: "setGroupName";
+        /**
+         * @generated from protobuf field: Laana.GeneralSuccessPong setGroupName = 304;
+         */
+        setGroupName: GeneralSuccessPong;
+    } | {
         oneofKind: "setGroupAvatar";
         /**
          * @generated from protobuf field: Laana.SetGroupAvatarPong setGroupAvatar = 305;
          */
         setGroupAvatar: SetGroupAvatarPong;
+    } | {
+        oneofKind: "setGroupAdmin";
+        /**
+         * @generated from protobuf field: Laana.GeneralSuccessPong setGroupAdmin = 306;
+         */
+        setGroupAdmin: GeneralSuccessPong;
+    } | {
+        oneofKind: "setGroupMemberCard";
+        /**
+         * @generated from protobuf field: Laana.GeneralSuccessPong setGroupMemberCard = 307;
+         */
+        setGroupMemberCard: GeneralSuccessPong;
+    } | {
+        oneofKind: "setGroupMemberSpecialTitle";
+        /**
+         * @generated from protobuf field: Laana.GeneralSuccessPong setGroupMemberSpecialTitle = 308;
+         */
+        setGroupMemberSpecialTitle: GeneralSuccessPong;
+    } | {
+        oneofKind: "setGroupMemberShutUp";
+        /**
+         * @generated from protobuf field: Laana.GeneralSuccessPong setGroupMemberShutUp = 309;
+         */
+        setGroupMemberShutUp: GeneralSuccessPong;
+    } | {
+        oneofKind: "setGroupShutUpAll";
+        /**
+         * @generated from protobuf field: Laana.GeneralSuccessPong setGroupShutUpAll = 310;
+         */
+        setGroupShutUpAll: GeneralSuccessPong;
+    } | {
+        oneofKind: "kickGroupMember";
+        /**
+         * @generated from protobuf field: Laana.GeneralSuccessPong kickGroupMember = 311;
+         */
+        kickGroupMember: GeneralSuccessPong;
+    } | {
+        oneofKind: "quitGroup";
+        /**
+         * @generated from protobuf field: Laana.GeneralSuccessPong quitGroup = 312;
+         */
+        quitGroup: GeneralSuccessPong;
     } | {
         oneofKind: "getPaginatedGroupEssenceMessage";
         /**
@@ -441,6 +525,24 @@ export interface ActionPong {
          * @generated from protobuf field: Laana.GetAllGroupsEssenceMessagePong getAllGroupsEssenceMessage = 314;
          */
         getAllGroupsEssenceMessage: GetAllGroupsEssenceMessagePong;
+    } | {
+        oneofKind: "setGroupEssenceMessage";
+        /**
+         * @generated from protobuf field: Laana.GeneralSuccessPong setGroupEssenceMessage = 315;
+         */
+        setGroupEssenceMessage: GeneralSuccessPong;
+    } | {
+        oneofKind: "handleBuddyAddRequest";
+        /**
+         * @generated from protobuf field: Laana.GeneralSuccessPong handleBuddyAddRequest = 401;
+         */
+        handleBuddyAddRequest: GeneralSuccessPong;
+    } | {
+        oneofKind: "handleGroupJoinRequest";
+        /**
+         * @generated from protobuf field: Laana.GeneralSuccessPong handleGroupJoinRequest = 402;
+         */
+        handleGroupJoinRequest: GeneralSuccessPong;
     } | {
         oneofKind: "handleGroupInvitation";
         /**
@@ -459,6 +561,12 @@ export interface ActionPong {
          * @generated from protobuf field: Laana.PrepareCacheByUrlPong prepareCacheByUrl = 502;
          */
         prepareCacheByUrl: PrepareCacheByUrlPong;
+    } | {
+        oneofKind: "destroyCache";
+        /**
+         * @generated from protobuf field: Laana.GeneralSuccessPong destroyCache = 503;
+         */
+        destroyCache: GeneralSuccessPong;
     } | {
         oneofKind: "getFileData";
         /**
@@ -484,17 +592,20 @@ export interface ActionPong {
          */
         createGroupFolder: CreateGroupFolderPong;
     } | {
+        oneofKind: "deleteGroupFile";
+        /**
+         * @generated from protobuf field: Laana.GeneralSuccessPong deleteGroupFile = 508;
+         */
+        deleteGroupFile: GeneralSuccessPong;
+    } | {
+        oneofKind: "deleteGroupFolder";
+        /**
+         * @generated from protobuf field: Laana.GeneralSuccessPong deleteGroupFolder = 509;
+         */
+        deleteGroupFolder: GeneralSuccessPong;
+    } | {
         oneofKind: undefined;
     };
-}
-/**
- * @generated from protobuf message Laana.ActionPong.FailedPong
- */
-export interface ActionPong_FailedPong {
-    /**
-     * @generated from protobuf field: string reason = 1;
-     */
-    reason: string;
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class ActionPing$Type extends MessageType<ActionPing> {
@@ -945,16 +1056,113 @@ class ActionPing$Type extends MessageType<ActionPing> {
  */
 export const ActionPing = new ActionPing$Type();
 // @generated message type with reflection information, may provide speed optimized methods
+class GeneralSuccessPong$Type extends MessageType<GeneralSuccessPong> {
+    constructor() {
+        super("Laana.GeneralSuccessPong", [
+            { no: 1, name: "success", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
+        ]);
+    }
+    create(value?: PartialMessage<GeneralSuccessPong>): GeneralSuccessPong {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.success = false;
+        if (value !== undefined)
+            reflectionMergePartial<GeneralSuccessPong>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: GeneralSuccessPong): GeneralSuccessPong {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* bool success */ 1:
+                    message.success = reader.bool();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: GeneralSuccessPong, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* bool success = 1; */
+        if (message.success !== false)
+            writer.tag(1, WireType.Varint).bool(message.success);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message Laana.GeneralSuccessPong
+ */
+export const GeneralSuccessPong = new GeneralSuccessPong$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class FailedPong$Type extends MessageType<FailedPong> {
+    constructor() {
+        super("Laana.FailedPong", [
+            { no: 1, name: "reason", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<FailedPong>): FailedPong {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.reason = "";
+        if (value !== undefined)
+            reflectionMergePartial<FailedPong>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: FailedPong): FailedPong {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string reason */ 1:
+                    message.reason = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: FailedPong, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string reason = 1; */
+        if (message.reason !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.reason);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message Laana.FailedPong
+ */
+export const FailedPong = new FailedPong$Type();
+// @generated message type with reflection information, may provide speed optimized methods
 class ActionPong$Type extends MessageType<ActionPong> {
     constructor() {
         super("Laana.ActionPong", [
             { no: 1, name: "clientPingId", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 11, name: "failed", kind: "message", oneof: "pong", T: () => ActionPong_FailedPong },
+            { no: 11, name: "failed", kind: "message", oneof: "pong", T: () => FailedPong },
             { no: 101, name: "sendMessage", kind: "message", oneof: "pong", T: () => SendMessagePong },
             { no: 102, name: "sendPackedMessages", kind: "message", oneof: "pong", T: () => SendPackedMessagesPong },
             { no: 103, name: "getMessage", kind: "message", oneof: "pong", T: () => GetMessagePong },
             { no: 104, name: "getMessages", kind: "message", oneof: "pong", T: () => GetMessagesPong },
             { no: 105, name: "getHistoryMessages", kind: "message", oneof: "pong", T: () => GetHistoryMessagesPong },
+            { no: 106, name: "withdrawMessage", kind: "message", oneof: "pong", T: () => GeneralSuccessPong },
+            { no: 107, name: "markPeerMessageAsRead", kind: "message", oneof: "pong", T: () => GeneralSuccessPong },
+            { no: 108, name: "forwardMessage", kind: "message", oneof: "pong", T: () => GeneralSuccessPong },
             { no: 201, name: "getAllBuddies", kind: "message", oneof: "pong", T: () => GetAllBuddiesPong },
             { no: 202, name: "getAllGroups", kind: "message", oneof: "pong", T: () => GetAllGroupsPong },
             { no: 203, name: "getRecentContactList", kind: "message", oneof: "pong", T: () => GetRecentContactListPong },
@@ -963,16 +1171,30 @@ class ActionPong$Type extends MessageType<ActionPong> {
             { no: 301, name: "getGroupMemberUins", kind: "message", oneof: "pong", T: () => GetGroupMemberUinsPong },
             { no: 302, name: "getGroupMemberInfo", kind: "message", oneof: "pong", T: () => GetGroupMemberInfoPong },
             { no: 303, name: "getAllGroupMembersInfo", kind: "message", oneof: "pong", T: () => GetAllGroupMembersInfoPong },
+            { no: 304, name: "setGroupName", kind: "message", oneof: "pong", T: () => GeneralSuccessPong },
             { no: 305, name: "setGroupAvatar", kind: "message", oneof: "pong", T: () => SetGroupAvatarPong },
+            { no: 306, name: "setGroupAdmin", kind: "message", oneof: "pong", T: () => GeneralSuccessPong },
+            { no: 307, name: "setGroupMemberCard", kind: "message", oneof: "pong", T: () => GeneralSuccessPong },
+            { no: 308, name: "setGroupMemberSpecialTitle", kind: "message", oneof: "pong", T: () => GeneralSuccessPong },
+            { no: 309, name: "setGroupMemberShutUp", kind: "message", oneof: "pong", T: () => GeneralSuccessPong },
+            { no: 310, name: "setGroupShutUpAll", kind: "message", oneof: "pong", T: () => GeneralSuccessPong },
+            { no: 311, name: "kickGroupMember", kind: "message", oneof: "pong", T: () => GeneralSuccessPong },
+            { no: 312, name: "quitGroup", kind: "message", oneof: "pong", T: () => GeneralSuccessPong },
             { no: 313, name: "getPaginatedGroupEssenceMessage", kind: "message", oneof: "pong", T: () => GetPaginatedGroupEssenceMessagePong },
             { no: 314, name: "getAllGroupsEssenceMessage", kind: "message", oneof: "pong", T: () => GetAllGroupsEssenceMessagePong },
+            { no: 315, name: "setGroupEssenceMessage", kind: "message", oneof: "pong", T: () => GeneralSuccessPong },
+            { no: 401, name: "handleBuddyAddRequest", kind: "message", oneof: "pong", T: () => GeneralSuccessPong },
+            { no: 402, name: "handleGroupJoinRequest", kind: "message", oneof: "pong", T: () => GeneralSuccessPong },
             { no: 403, name: "handleGroupInvitation", kind: "message", oneof: "pong", T: () => HandleGroupInvitationPong },
             { no: 501, name: "uploadCache", kind: "message", oneof: "pong", T: () => UploadCachePong },
             { no: 502, name: "prepareCacheByUrl", kind: "message", oneof: "pong", T: () => PrepareCacheByUrlPong },
+            { no: 503, name: "destroyCache", kind: "message", oneof: "pong", T: () => GeneralSuccessPong },
             { no: 504, name: "getFileData", kind: "message", oneof: "pong", T: () => GetFileDataPong },
             { no: 505, name: "getGroupFileList", kind: "message", oneof: "pong", T: () => GetGroupFileListPong },
             { no: 506, name: "uploadGroupFile", kind: "message", oneof: "pong", T: () => UploadGroupFilePong },
-            { no: 507, name: "createGroupFolder", kind: "message", oneof: "pong", T: () => CreateGroupFolderPong }
+            { no: 507, name: "createGroupFolder", kind: "message", oneof: "pong", T: () => CreateGroupFolderPong },
+            { no: 508, name: "deleteGroupFile", kind: "message", oneof: "pong", T: () => GeneralSuccessPong },
+            { no: 509, name: "deleteGroupFolder", kind: "message", oneof: "pong", T: () => GeneralSuccessPong }
         ]);
     }
     create(value?: PartialMessage<ActionPong>): ActionPong {
@@ -991,10 +1213,10 @@ class ActionPong$Type extends MessageType<ActionPong> {
                 case /* string clientPingId */ 1:
                     message.clientPingId = reader.string();
                     break;
-                case /* Laana.ActionPong.FailedPong failed */ 11:
+                case /* Laana.FailedPong failed */ 11:
                     message.pong = {
                         oneofKind: "failed",
-                        failed: ActionPong_FailedPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).failed)
+                        failed: FailedPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).failed)
                     };
                     break;
                 case /* Laana.SendMessagePong sendMessage */ 101:
@@ -1025,6 +1247,24 @@ class ActionPong$Type extends MessageType<ActionPong> {
                     message.pong = {
                         oneofKind: "getHistoryMessages",
                         getHistoryMessages: GetHistoryMessagesPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).getHistoryMessages)
+                    };
+                    break;
+                case /* Laana.GeneralSuccessPong withdrawMessage */ 106:
+                    message.pong = {
+                        oneofKind: "withdrawMessage",
+                        withdrawMessage: GeneralSuccessPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).withdrawMessage)
+                    };
+                    break;
+                case /* Laana.GeneralSuccessPong markPeerMessageAsRead */ 107:
+                    message.pong = {
+                        oneofKind: "markPeerMessageAsRead",
+                        markPeerMessageAsRead: GeneralSuccessPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).markPeerMessageAsRead)
+                    };
+                    break;
+                case /* Laana.GeneralSuccessPong forwardMessage */ 108:
+                    message.pong = {
+                        oneofKind: "forwardMessage",
+                        forwardMessage: GeneralSuccessPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).forwardMessage)
                     };
                     break;
                 case /* Laana.GetAllBuddiesPong getAllBuddies */ 201:
@@ -1075,10 +1315,58 @@ class ActionPong$Type extends MessageType<ActionPong> {
                         getAllGroupMembersInfo: GetAllGroupMembersInfoPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).getAllGroupMembersInfo)
                     };
                     break;
+                case /* Laana.GeneralSuccessPong setGroupName */ 304:
+                    message.pong = {
+                        oneofKind: "setGroupName",
+                        setGroupName: GeneralSuccessPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).setGroupName)
+                    };
+                    break;
                 case /* Laana.SetGroupAvatarPong setGroupAvatar */ 305:
                     message.pong = {
                         oneofKind: "setGroupAvatar",
                         setGroupAvatar: SetGroupAvatarPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).setGroupAvatar)
+                    };
+                    break;
+                case /* Laana.GeneralSuccessPong setGroupAdmin */ 306:
+                    message.pong = {
+                        oneofKind: "setGroupAdmin",
+                        setGroupAdmin: GeneralSuccessPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).setGroupAdmin)
+                    };
+                    break;
+                case /* Laana.GeneralSuccessPong setGroupMemberCard */ 307:
+                    message.pong = {
+                        oneofKind: "setGroupMemberCard",
+                        setGroupMemberCard: GeneralSuccessPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).setGroupMemberCard)
+                    };
+                    break;
+                case /* Laana.GeneralSuccessPong setGroupMemberSpecialTitle */ 308:
+                    message.pong = {
+                        oneofKind: "setGroupMemberSpecialTitle",
+                        setGroupMemberSpecialTitle: GeneralSuccessPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).setGroupMemberSpecialTitle)
+                    };
+                    break;
+                case /* Laana.GeneralSuccessPong setGroupMemberShutUp */ 309:
+                    message.pong = {
+                        oneofKind: "setGroupMemberShutUp",
+                        setGroupMemberShutUp: GeneralSuccessPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).setGroupMemberShutUp)
+                    };
+                    break;
+                case /* Laana.GeneralSuccessPong setGroupShutUpAll */ 310:
+                    message.pong = {
+                        oneofKind: "setGroupShutUpAll",
+                        setGroupShutUpAll: GeneralSuccessPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).setGroupShutUpAll)
+                    };
+                    break;
+                case /* Laana.GeneralSuccessPong kickGroupMember */ 311:
+                    message.pong = {
+                        oneofKind: "kickGroupMember",
+                        kickGroupMember: GeneralSuccessPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).kickGroupMember)
+                    };
+                    break;
+                case /* Laana.GeneralSuccessPong quitGroup */ 312:
+                    message.pong = {
+                        oneofKind: "quitGroup",
+                        quitGroup: GeneralSuccessPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).quitGroup)
                     };
                     break;
                 case /* Laana.GetPaginatedGroupEssenceMessagePong getPaginatedGroupEssenceMessage */ 313:
@@ -1091,6 +1379,24 @@ class ActionPong$Type extends MessageType<ActionPong> {
                     message.pong = {
                         oneofKind: "getAllGroupsEssenceMessage",
                         getAllGroupsEssenceMessage: GetAllGroupsEssenceMessagePong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).getAllGroupsEssenceMessage)
+                    };
+                    break;
+                case /* Laana.GeneralSuccessPong setGroupEssenceMessage */ 315:
+                    message.pong = {
+                        oneofKind: "setGroupEssenceMessage",
+                        setGroupEssenceMessage: GeneralSuccessPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).setGroupEssenceMessage)
+                    };
+                    break;
+                case /* Laana.GeneralSuccessPong handleBuddyAddRequest */ 401:
+                    message.pong = {
+                        oneofKind: "handleBuddyAddRequest",
+                        handleBuddyAddRequest: GeneralSuccessPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).handleBuddyAddRequest)
+                    };
+                    break;
+                case /* Laana.GeneralSuccessPong handleGroupJoinRequest */ 402:
+                    message.pong = {
+                        oneofKind: "handleGroupJoinRequest",
+                        handleGroupJoinRequest: GeneralSuccessPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).handleGroupJoinRequest)
                     };
                     break;
                 case /* Laana.HandleGroupInvitationPong handleGroupInvitation */ 403:
@@ -1109,6 +1415,12 @@ class ActionPong$Type extends MessageType<ActionPong> {
                     message.pong = {
                         oneofKind: "prepareCacheByUrl",
                         prepareCacheByUrl: PrepareCacheByUrlPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).prepareCacheByUrl)
+                    };
+                    break;
+                case /* Laana.GeneralSuccessPong destroyCache */ 503:
+                    message.pong = {
+                        oneofKind: "destroyCache",
+                        destroyCache: GeneralSuccessPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).destroyCache)
                     };
                     break;
                 case /* Laana.GetFileDataPong getFileData */ 504:
@@ -1135,6 +1447,18 @@ class ActionPong$Type extends MessageType<ActionPong> {
                         createGroupFolder: CreateGroupFolderPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).createGroupFolder)
                     };
                     break;
+                case /* Laana.GeneralSuccessPong deleteGroupFile */ 508:
+                    message.pong = {
+                        oneofKind: "deleteGroupFile",
+                        deleteGroupFile: GeneralSuccessPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).deleteGroupFile)
+                    };
+                    break;
+                case /* Laana.GeneralSuccessPong deleteGroupFolder */ 509:
+                    message.pong = {
+                        oneofKind: "deleteGroupFolder",
+                        deleteGroupFolder: GeneralSuccessPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).deleteGroupFolder)
+                    };
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -1150,9 +1474,9 @@ class ActionPong$Type extends MessageType<ActionPong> {
         /* string clientPingId = 1; */
         if (message.clientPingId !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.clientPingId);
-        /* Laana.ActionPong.FailedPong failed = 11; */
+        /* Laana.FailedPong failed = 11; */
         if (message.pong.oneofKind === "failed")
-            ActionPong_FailedPong.internalBinaryWrite(message.pong.failed, writer.tag(11, WireType.LengthDelimited).fork(), options).join();
+            FailedPong.internalBinaryWrite(message.pong.failed, writer.tag(11, WireType.LengthDelimited).fork(), options).join();
         /* Laana.SendMessagePong sendMessage = 101; */
         if (message.pong.oneofKind === "sendMessage")
             SendMessagePong.internalBinaryWrite(message.pong.sendMessage, writer.tag(101, WireType.LengthDelimited).fork(), options).join();
@@ -1168,6 +1492,15 @@ class ActionPong$Type extends MessageType<ActionPong> {
         /* Laana.GetHistoryMessagesPong getHistoryMessages = 105; */
         if (message.pong.oneofKind === "getHistoryMessages")
             GetHistoryMessagesPong.internalBinaryWrite(message.pong.getHistoryMessages, writer.tag(105, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.GeneralSuccessPong withdrawMessage = 106; */
+        if (message.pong.oneofKind === "withdrawMessage")
+            GeneralSuccessPong.internalBinaryWrite(message.pong.withdrawMessage, writer.tag(106, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.GeneralSuccessPong markPeerMessageAsRead = 107; */
+        if (message.pong.oneofKind === "markPeerMessageAsRead")
+            GeneralSuccessPong.internalBinaryWrite(message.pong.markPeerMessageAsRead, writer.tag(107, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.GeneralSuccessPong forwardMessage = 108; */
+        if (message.pong.oneofKind === "forwardMessage")
+            GeneralSuccessPong.internalBinaryWrite(message.pong.forwardMessage, writer.tag(108, WireType.LengthDelimited).fork(), options).join();
         /* Laana.GetAllBuddiesPong getAllBuddies = 201; */
         if (message.pong.oneofKind === "getAllBuddies")
             GetAllBuddiesPong.internalBinaryWrite(message.pong.getAllBuddies, writer.tag(201, WireType.LengthDelimited).fork(), options).join();
@@ -1192,15 +1525,48 @@ class ActionPong$Type extends MessageType<ActionPong> {
         /* Laana.GetAllGroupMembersInfoPong getAllGroupMembersInfo = 303; */
         if (message.pong.oneofKind === "getAllGroupMembersInfo")
             GetAllGroupMembersInfoPong.internalBinaryWrite(message.pong.getAllGroupMembersInfo, writer.tag(303, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.GeneralSuccessPong setGroupName = 304; */
+        if (message.pong.oneofKind === "setGroupName")
+            GeneralSuccessPong.internalBinaryWrite(message.pong.setGroupName, writer.tag(304, WireType.LengthDelimited).fork(), options).join();
         /* Laana.SetGroupAvatarPong setGroupAvatar = 305; */
         if (message.pong.oneofKind === "setGroupAvatar")
             SetGroupAvatarPong.internalBinaryWrite(message.pong.setGroupAvatar, writer.tag(305, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.GeneralSuccessPong setGroupAdmin = 306; */
+        if (message.pong.oneofKind === "setGroupAdmin")
+            GeneralSuccessPong.internalBinaryWrite(message.pong.setGroupAdmin, writer.tag(306, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.GeneralSuccessPong setGroupMemberCard = 307; */
+        if (message.pong.oneofKind === "setGroupMemberCard")
+            GeneralSuccessPong.internalBinaryWrite(message.pong.setGroupMemberCard, writer.tag(307, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.GeneralSuccessPong setGroupMemberSpecialTitle = 308; */
+        if (message.pong.oneofKind === "setGroupMemberSpecialTitle")
+            GeneralSuccessPong.internalBinaryWrite(message.pong.setGroupMemberSpecialTitle, writer.tag(308, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.GeneralSuccessPong setGroupMemberShutUp = 309; */
+        if (message.pong.oneofKind === "setGroupMemberShutUp")
+            GeneralSuccessPong.internalBinaryWrite(message.pong.setGroupMemberShutUp, writer.tag(309, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.GeneralSuccessPong setGroupShutUpAll = 310; */
+        if (message.pong.oneofKind === "setGroupShutUpAll")
+            GeneralSuccessPong.internalBinaryWrite(message.pong.setGroupShutUpAll, writer.tag(310, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.GeneralSuccessPong kickGroupMember = 311; */
+        if (message.pong.oneofKind === "kickGroupMember")
+            GeneralSuccessPong.internalBinaryWrite(message.pong.kickGroupMember, writer.tag(311, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.GeneralSuccessPong quitGroup = 312; */
+        if (message.pong.oneofKind === "quitGroup")
+            GeneralSuccessPong.internalBinaryWrite(message.pong.quitGroup, writer.tag(312, WireType.LengthDelimited).fork(), options).join();
         /* Laana.GetPaginatedGroupEssenceMessagePong getPaginatedGroupEssenceMessage = 313; */
         if (message.pong.oneofKind === "getPaginatedGroupEssenceMessage")
             GetPaginatedGroupEssenceMessagePong.internalBinaryWrite(message.pong.getPaginatedGroupEssenceMessage, writer.tag(313, WireType.LengthDelimited).fork(), options).join();
         /* Laana.GetAllGroupsEssenceMessagePong getAllGroupsEssenceMessage = 314; */
         if (message.pong.oneofKind === "getAllGroupsEssenceMessage")
             GetAllGroupsEssenceMessagePong.internalBinaryWrite(message.pong.getAllGroupsEssenceMessage, writer.tag(314, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.GeneralSuccessPong setGroupEssenceMessage = 315; */
+        if (message.pong.oneofKind === "setGroupEssenceMessage")
+            GeneralSuccessPong.internalBinaryWrite(message.pong.setGroupEssenceMessage, writer.tag(315, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.GeneralSuccessPong handleBuddyAddRequest = 401; */
+        if (message.pong.oneofKind === "handleBuddyAddRequest")
+            GeneralSuccessPong.internalBinaryWrite(message.pong.handleBuddyAddRequest, writer.tag(401, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.GeneralSuccessPong handleGroupJoinRequest = 402; */
+        if (message.pong.oneofKind === "handleGroupJoinRequest")
+            GeneralSuccessPong.internalBinaryWrite(message.pong.handleGroupJoinRequest, writer.tag(402, WireType.LengthDelimited).fork(), options).join();
         /* Laana.HandleGroupInvitationPong handleGroupInvitation = 403; */
         if (message.pong.oneofKind === "handleGroupInvitation")
             HandleGroupInvitationPong.internalBinaryWrite(message.pong.handleGroupInvitation, writer.tag(403, WireType.LengthDelimited).fork(), options).join();
@@ -1210,6 +1576,9 @@ class ActionPong$Type extends MessageType<ActionPong> {
         /* Laana.PrepareCacheByUrlPong prepareCacheByUrl = 502; */
         if (message.pong.oneofKind === "prepareCacheByUrl")
             PrepareCacheByUrlPong.internalBinaryWrite(message.pong.prepareCacheByUrl, writer.tag(502, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.GeneralSuccessPong destroyCache = 503; */
+        if (message.pong.oneofKind === "destroyCache")
+            GeneralSuccessPong.internalBinaryWrite(message.pong.destroyCache, writer.tag(503, WireType.LengthDelimited).fork(), options).join();
         /* Laana.GetFileDataPong getFileData = 504; */
         if (message.pong.oneofKind === "getFileData")
             GetFileDataPong.internalBinaryWrite(message.pong.getFileData, writer.tag(504, WireType.LengthDelimited).fork(), options).join();
@@ -1222,6 +1591,12 @@ class ActionPong$Type extends MessageType<ActionPong> {
         /* Laana.CreateGroupFolderPong createGroupFolder = 507; */
         if (message.pong.oneofKind === "createGroupFolder")
             CreateGroupFolderPong.internalBinaryWrite(message.pong.createGroupFolder, writer.tag(507, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.GeneralSuccessPong deleteGroupFile = 508; */
+        if (message.pong.oneofKind === "deleteGroupFile")
+            GeneralSuccessPong.internalBinaryWrite(message.pong.deleteGroupFile, writer.tag(508, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.GeneralSuccessPong deleteGroupFolder = 509; */
+        if (message.pong.oneofKind === "deleteGroupFolder")
+            GeneralSuccessPong.internalBinaryWrite(message.pong.deleteGroupFolder, writer.tag(509, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -1232,50 +1607,3 @@ class ActionPong$Type extends MessageType<ActionPong> {
  * @generated MessageType for protobuf message Laana.ActionPong
  */
 export const ActionPong = new ActionPong$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class ActionPong_FailedPong$Type extends MessageType<ActionPong_FailedPong> {
-    constructor() {
-        super("Laana.ActionPong.FailedPong", [
-            { no: 1, name: "reason", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
-        ]);
-    }
-    create(value?: PartialMessage<ActionPong_FailedPong>): ActionPong_FailedPong {
-        const message = globalThis.Object.create((this.messagePrototype!));
-        message.reason = "";
-        if (value !== undefined)
-            reflectionMergePartial<ActionPong_FailedPong>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ActionPong_FailedPong): ActionPong_FailedPong {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* string reason */ 1:
-                    message.reason = reader.string();
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: ActionPong_FailedPong, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string reason = 1; */
-        if (message.reason !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.reason);
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message Laana.ActionPong.FailedPong
- */
-export const ActionPong_FailedPong = new ActionPong_FailedPong$Type();

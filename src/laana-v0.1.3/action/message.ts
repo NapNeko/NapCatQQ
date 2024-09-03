@@ -1,6 +1,6 @@
-import { NapCatLaanaAdapter } from '@/laana-v0.1.2';
+import { NapCatLaanaAdapter } from '@/laana-v0.1.3';
 import { NapCatCore } from '@/core';
-import { LaanaActionHandler } from '@/laana-v0.1.2/action/index';
+import { LaanaActionHandler } from '@/laana-v0.1.3/action/index';
 import fs from 'fs';
 
 export class LaanaMessageActionHandler {
