@@ -24,7 +24,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { getMachineId, hostname, systemName, systemVersion } from '@/common/system';
 import { NTEventWrapper } from '@/common/event';
-import { DataSource, GroupMember, SelfInfo } from '@/core/entities';
+import { DataSource, GroupMember, KickedOffLineInfo, SelfInfo, SelfStatusInfo } from '@/core/entities';
 import { NapCatConfigLoader } from '@/core/helper/config';
 import os from 'node:os';
 import { NodeIKernelGroupListener, NodeIKernelMsgListener, NodeIKernelProfileListener } from '@/core/listeners';
@@ -113,6 +113,11 @@ export class NapCatCore {
     // Renamed from 'InitDataListener'
     async initNapCatCoreListeners() {
         const msgListener = new NodeIKernelMsgListener();
+        msgListener.onKickedOffLine = (Info: KickedOffLineInfo) => {
+            // 下线通知
+            this.context.logger.logError('[KickedOffLine] [' + Info.tipsTitle + '] ' + Info.tipsDesc);
+            this.selfInfo.online = false;
+        };
         msgListener.onRecvMsg = (msgs) => {
             msgs.forEach(msg => this.context.logger.logMessage(msg, this.selfInfo));
         };
@@ -130,10 +135,12 @@ export class NapCatCore {
                 Object.assign(this.selfInfo, profile);
             }
         };
-        profileListener.onSelfStatusChanged = (/* Info: SelfStatusInfo */) => {
-            // if (Info.status == 20) {
-            //   log("账号状态变更为离线")
-            // }
+        profileListener.onSelfStatusChanged = (Info: SelfStatusInfo) => {
+            if (Info.status == 20) {
+                this.selfInfo.online = false;
+                this.context.logger.log("账号状态变更为离线");
+            }
+            this.selfInfo.online = true;
         };
         this.context.session.getProfileService().addKernelProfileListener(
             proxiedListenerOf(profileListener, this.context.logger),
