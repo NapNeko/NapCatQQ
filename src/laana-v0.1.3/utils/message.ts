@@ -44,12 +44,16 @@ export class LaanaMessageUtils {
             const fileCacheIds: string[] = [];
 
             if (msgContent.repliedMsgId) {
-                const { msgSeq, msgId, senderUin } = (
+                const replyMsg = (
                     await this.core.apis.MsgApi.getMsgsByMsgId(
                         await this.laanaPeerToRaw(params.targetPeer!),
                         [msgContent.repliedMsgId]
                     )
                 ).msgList[0];
+                if (!replyMsg) {
+                    throw '回复的消息不存在';
+                }
+                const { msgSeq, msgId, senderUin, senderUid } = replyMsg;
                 elements.push({
                     elementType: ElementType.REPLY,
                     elementId: '',
@@ -57,7 +61,7 @@ export class LaanaMessageUtils {
                         replayMsgSeq: msgSeq,
                         replayMsgId: msgId,
                         senderUin: senderUin,
-                        senderUinStr: senderUin,
+                        senderUidStr: senderUid,
                     }
                 });
             }
