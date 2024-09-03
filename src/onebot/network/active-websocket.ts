@@ -147,7 +147,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
             this.checkStateAndReply<any>(OB11Response.error('不支持的api ' + receiveData.action, 1404, echo));
             return;
         }
-        const retdata = await action?.websocketHandle(receiveData.params, echo ?? '');
+        const retdata = await action.websocketHandle(receiveData.params, echo ?? '');
         const packet = Object.assign({}, retdata);
         this.checkStateAndReply<any>(packet);
     }
