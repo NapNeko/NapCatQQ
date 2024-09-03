@@ -43,9 +43,6 @@ import { OB11FriendRecallNoticeEvent } from '@/onebot/event/notice/OB11FriendRec
 import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecallNoticeEvent';
 import { LRUCache } from '@/common/lru-cache';
 import { NodeIKernelRecentContactListener } from '@/core/listeners/NodeIKernelRecentContactListener';
-import { SysMessage } from '@/core/proto/SysMessage';
-import { GreyTipWrapper } from '@/core/proto/GreyTipWrapper';
-import { EmojiLikeToOthersWrapper1 } from '@/core/proto/EmojiLikeToOthers';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -241,7 +238,7 @@ export class NapCatOneBot11Adapter {
     private initMsgListener() {
         const msgListener = new NodeIKernelMsgListener();
 
-        msgListener.onRecvSysMsg = async msg => {
+        msgListener.onRecvSysMsg = async () => {
             // const sysMsg = SysMessage.fromBinary(Uint8Array.from(msg));
             // if (sysMsg.msgSpec.length === 0) {
             //     return;
