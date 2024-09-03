@@ -238,33 +238,35 @@ export class NapCatOneBot11Adapter {
     private initMsgListener() {
         const msgListener = new NodeIKernelMsgListener();
 
+        /*
         msgListener.onRecvSysMsg = async () => {
-            // const sysMsg = SysMessage.fromBinary(Uint8Array.from(msg));
-            // if (sysMsg.msgSpec.length === 0) {
-            //     return;
-            // }
-            // const { msgType, subType, subSubType } = sysMsg.msgSpec[0];
-            // if (msgType === 732 && subType === 16 && subSubType === 16) {
-            //     const greyTip = GreyTipWrapper.fromBinary(Uint8Array.from(sysMsg.bodyWrapper!.wrappedBody.slice(7)));
-            //     if (greyTip.subTypeId === 36) {
-            //         const emojiLikeToOthers = EmojiLikeToOthersWrapper1
-            //             .fromBinary(greyTip.rest)
-            //             .wrapper!
-            //             .body!;
-            //         if (emojiLikeToOthers.attributes?.operation !== 1) { // Un-like
-            //             return;
-            //         }
-            //         const eventOrEmpty = await this.apis.GroupApi.createGroupEmojiLikeEvent(
-            //             greyTip.groupCode.toString(),
-            //             await this.core.apis.UserApi.getUinByUidV2(emojiLikeToOthers.attributes!.senderUid),
-            //             emojiLikeToOthers.msgSpec!.msgSeq.toString(),
-            //             emojiLikeToOthers.attributes!.emojiId,
-            //         );
-            //         // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-            //         eventOrEmpty && await this.networkManager.emitEvent(eventOrEmpty);
-            //     }
-            // }
+            const sysMsg = SysMessage.fromBinary(Uint8Array.from(msg));
+            if (sysMsg.msgSpec.length === 0) {
+                return;
+            }
+            const { msgType, subType, subSubType } = sysMsg.msgSpec[0];
+            if (msgType === 732 && subType === 16 && subSubType === 16) {
+                const greyTip = GreyTipWrapper.fromBinary(Uint8Array.from(sysMsg.bodyWrapper!.wrappedBody.slice(7)));
+                if (greyTip.subTypeId === 36) {
+                    const emojiLikeToOthers = EmojiLikeToOthersWrapper1
+                        .fromBinary(greyTip.rest)
+                        .wrapper!
+                        .body!;
+                    if (emojiLikeToOthers.attributes?.operation !== 1) { // Un-like
+                        return;
+                    }
+                    const eventOrEmpty = await this.apis.GroupApi.createGroupEmojiLikeEvent(
+                        greyTip.groupCode.toString(),
+                        await this.core.apis.UserApi.getUinByUidV2(emojiLikeToOthers.attributes!.senderUid),
+                        emojiLikeToOthers.msgSpec!.msgSeq.toString(),
+                        emojiLikeToOthers.attributes!.emojiId,
+                    );
+                    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+                    eventOrEmpty && await this.networkManager.emitEvent(eventOrEmpty);
+                }
+            }
         };
+         */
 
         msgListener.onInputStatusPush = async data => {
             const uin = await this.core.apis.UserApi.getUinByUidV2(data.fromUin);
