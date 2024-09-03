@@ -131,23 +131,24 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
     private async handleMessage(message: any) {
         let receiveData: { action: ActionName, params?: any, echo?: any } = { action: ActionName.Unknown, params: {} };
         let echo = undefined;
+
         try {
-            try {
-                receiveData = JSON.parse(message.toString());
-                echo = receiveData.echo;
-                this.logger.logDebug('[OneBot] [WebSocket Client] 收到正向Websocket消息', receiveData);
-            } catch (e) {
-                this.checkStateAndReply<any>(OB11Response.error('json解析失败,请检查数据格式', 1400, echo));
-                return;
-            }
-            receiveData.params = (receiveData?.params) ? receiveData.params : {};//兼容类型验证
-            const retdata = await this.actions.get(receiveData.action)
-                ?.websocketHandle(receiveData.params, echo ?? '');
-            const packet = Object.assign({}, retdata);
-            this.checkStateAndReply<any>(packet);
+            receiveData = JSON.parse(message.toString());
+            echo = receiveData.echo;
+            this.logger.logDebug('[OneBot] [WebSocket Client] 收到正向Websocket消息', receiveData);
         } catch (e) {
-            this.logger.logError('[OneBot] [WebSocket Client] 发生错误', e);
-            this.checkStateAndReply<any>(OB11Response.error('不支持的api ' + receiveData.action, 1404, echo));
+            this.checkStateAndReply<any>(OB11Response.error('json解析失败,请检查数据格式', 1400, echo));
+            return;
         }
+        receiveData.params = (receiveData?.params) ? receiveData.params : {};//兼容类型验证
+        const action = this.actions.get(receiveData.action);
+        if (!action) {
+            this.logger.logError('[OneBot] [WebSocket Client] 发生错误', '不支持的api ' + receiveData.action);
+            this.checkStateAndReply<any>(OB11Response.error('不支持的api ' + receiveData.action, 1404, echo));
+            return;
+        }
+        const retdata = await action?.websocketHandle(receiveData.params, echo ?? '');
+        const packet = Object.assign({}, retdata);
+        this.checkStateAndReply<any>(packet);
     }
 }
