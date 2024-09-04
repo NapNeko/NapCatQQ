@@ -247,7 +247,7 @@ export class NTQQGroupApi {
             'NodeIKernelGroupListener/onMemberInfoChange',
             1,
             forced ? 5000 : 250,
-            (params) => params === GroupCode,
+            (params, _, members) => params === GroupCode && members.size > 0,
         );
         const retData = await (
             this.core.eventWrapper
