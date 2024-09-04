@@ -9,7 +9,7 @@ NapCatQQ (aka 猫猫框架) 是现代化的基于 NTQQ 的 Bot 协议端实现�
 ## 猫猫技能
 - [x] **高性能**：1K+ 群聊数目、20 线程并行发送消息毫无压力 
 - [x] **多种启动方式**：支持以无头、LiteLoader 插件、仅 QQ GUI 三种方式启动
-- [x] **多平台支持**: 支持Windows/Linux(可选Docker)/Android Termux覆盖全面
+- [x] **多平台支持**: 支持Windows/Linux(可选Docker)/Android Termux/MacOs覆盖全全平台
 - [x] **安装简单**: 支持一键脚本/程序自动部署/镜像部署等多种覆盖范围
 - [x] **低占用**：无头模式占用资源极低，适合在服务器上运行
 - [x] **超多接口**：实现大部分 OneBot 和 go-cqhttp 接口，超多扩展 API
