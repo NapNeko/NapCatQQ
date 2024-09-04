@@ -11,7 +11,10 @@ const SchemaData = {
         content: { type: 'string' },
         image: { type: 'string' },
         pinned: { type: ['number', 'string'] },
+        type: { type: ['number', 'string'] },
         confirm_required: { type: ['number', 'string'] },
+        is_show_edit_card: { type: ['number', 'string'] },
+        tip_window_type: { type: ['number', 'string'] },
     },
     required: ['group_id', 'content'],
 } as const satisfies JSONSchema;
@@ -22,6 +25,7 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
     actionName = ActionName.GoCQHTTP_SendGroupNotice;
 
     async _handle(payload: Payload) {
+
         let UploadImage: { id: string, width: number, height: number } | undefined = undefined;
         if (payload.image) {
             //公告图逻辑
@@ -47,12 +51,28 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
             }
             UploadImage = ImageUploadResult.picInfo;
         }
-        const noticePinned = +(payload.pinned ?? 0);
-        const noticeConfirmRequired = +(payload.confirm_required ?? 0);
-        const publishGroupBulletinResult = await this.core.apis.GroupApi.publishGroupBulletin(payload.group_id.toString(), payload.content, UploadImage, noticePinned, noticeConfirmRequired);
 
-        if (publishGroupBulletinResult.result != 0) {
-            throw `设置群公告失败,错误信息:${publishGroupBulletinResult.errMsg}`;
+        const noticeType = +(payload.type ?? 1);
+        const noticePinned = +(payload.pinned ?? 0);
+
+        const noticeShowEditCard = +(payload.is_show_edit_card ?? 0);
+        const noticeTipWindowType = +(payload.tip_window_type ?? 0);
+        const noticeConfirmRequired = +(payload.confirm_required ?? 1);
+        //const publishGroupBulletinResult = await this.core.apis.GroupApi.publishGroupBulletin(payload.group_id.toString(), payload.content, UploadImage, noticePinned, noticeConfirmRequired);
+        const publishGroupBulletinResult = await this.core.apis.WebApi.setGroupNotice(
+            payload.group_id.toString(),
+            payload.content,
+            noticePinned,
+            noticeType,
+            noticeShowEditCard,
+            noticeTipWindowType,
+            noticeConfirmRequired,
+            UploadImage?.id,
+            UploadImage?.width,
+            UploadImage?.height
+        );
+        if (!publishGroupBulletinResult || publishGroupBulletinResult.ec != 0) {
+            throw `设置群公告失败,错误信息:${publishGroupBulletinResult?.em}`;
         }
         return null;
     }

@@ -131,20 +131,53 @@ export class NTQQWebApi {
     //   return await res.json();
     // }
 
-    async setGroupNotice(GroupCode: string, Content: string) {
+    async setGroupNotice(
+        GroupCode: string,
+        Content: string,
+        pinned: number = 0,
+        type: number = 1,
+        is_show_edit_card: number = 1,
+        tip_window_type: number = 1,
+        confirm_required: number = 1,
+        picId: string = '',
+        imgWidth: number = 540,
+        imgHeight: number = 300,
+    ) {
+        interface SetNoticeRetSuccess {
+            ec: number;
+            em: string;
+            id: number;
+            ltsm: number;
+            new_fid: string;
+            read_only: number;
+            role: number;
+            srv_code: number;
+        }
+
         const cookieObject = await this.core.apis.UserApi.getCookies('qun.qq.com');
-        let ret: any = undefined;
+
         try {
-            ret = await RequestUtil.HttpGetJson<any>(
-                `https://web.qun.qq.com/cgi-bin/announce/add_qun_notice${new URLSearchParams({
+            let settings = JSON.stringify({
+                is_show_edit_card: is_show_edit_card,
+                tip_window_type: tip_window_type,
+                confirm_required: confirm_required
+            });
+            const externalParam = {
+                pic: picId,
+                imgWidth: imgWidth.toString(),
+                imgHeight: imgHeight.toString(),
+            };
+            let ret: SetNoticeRetSuccess = await RequestUtil.HttpGetJson<SetNoticeRetSuccess>(
+                `https://web.qun.qq.com/cgi-bin/announce/add_qun_notice?${new URLSearchParams({
                     bkn: this.getBknFromCookie(cookieObject),
                     qid: GroupCode,
                     text: Content,
-                    pinned: '0',
-                    type: '1',
-                    settings: '{"is_show_edit_card":1,"tip_window_type":1,"confirm_required":1}',
+                    pinned: pinned.toString(),
+                    type: type.toString(),
+                    settings: settings,
+                    ...(picId === '' ? {} : externalParam)
                 }).toString()}`,
-                'GET',
+                'POST',
                 '',
                 { 'Cookie': this.cookieToString(cookieObject) }
             );
