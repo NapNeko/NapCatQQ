@@ -38,7 +38,7 @@ export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: Log
                         if (code == null || EXIT_CODES.includes(code)) {
                             sampleRate = 24000;
                             const data = fs.readFileSync(pcmPath);
-                            fs.unlinkSync(pcmPath);
+                            fs.unlink(pcmPath, () => {});
                             return resolve(data);
                         }
                         logger.logError(`ffmpeg 处理失败: code=${code ?? 'unknown'} sig=${signal ?? 'unknown'}`);
