@@ -119,9 +119,9 @@ export class NapCatCore {
     // Renamed from 'InitDataListener'
     async initNapCatCoreListeners() {
         const msgListener = new NodeIKernelMsgListener();
-        msgListener.onKickedOffLine = (Info: KickedOffLineInfo) => {
+        msgListener.onKickedOffLine = (info: KickedOffLineInfo) => {
             // 下线通知
-            this.context.logger.logError('[KickedOffLine] [' + Info.tipsTitle + '] ' + Info.tipsDesc);
+            this.context.logger.logError(`当前账户被强制下线: ${info.tipsTitle} ${info.tipsDesc}`);
             this.selfInfo.online = false;
         };
         msgListener.onRecvMsg = (msgs) => {

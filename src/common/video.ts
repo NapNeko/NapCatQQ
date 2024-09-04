@@ -24,9 +24,9 @@ export async function getVideoInfo(filePath: string, logger: LogWrapper) {
             } else {
                 const videoStream = metadata.streams.find((s: FfprobeStream) => s.codec_type === 'video');
                 if (videoStream) {
-                    logger.log(`视频尺寸: ${videoStream.width}x${videoStream.height}`);
+                    logger.logDebug(`视频尺寸: ${videoStream.width}x${videoStream.height}`);
                 } else {
-                    return reject(new Error('未找到视频流信息。'));
+                    return reject(new Error('未找到视频流信息.'));
                 }
                 resolve({
                     width: videoStream.width!, height: videoStream.height!,
@@ -42,17 +42,16 @@ export async function getVideoInfo(filePath: string, logger: LogWrapper) {
 
 export function checkFfmpeg(logger: LogWrapper, newPath: string | null = null): Promise<boolean> {
     return new Promise((resolve) => {
-        logger.log('开始检查ffmpeg', newPath);
+        logger.logDebug('开始检查 ffmpeg', newPath);
         if (newPath) {
             ffmpeg.setFfmpegPath(newPath);
         }
         try {
             ffmpeg.getAvailableFormats((err: any) => {
                 if (err) {
-                    logger.log('ffmpeg is not installed or not found in PATH:', err);
+                    logger.logWarn('未找到 ffmpeg', err);
                     resolve(false);
                 } else {
-                    logger.log('ffmpeg is installed.');
                     resolve(true);
                 }
             });

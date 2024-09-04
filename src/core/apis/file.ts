@@ -148,7 +148,7 @@ export class NTQQFileApi {
         try {
             videoInfo = await getVideoInfo(path, logger);
         } catch (e) {
-            logger.logError('获取视频信息失败，将使用默认值', e);
+            logger.logWarn('获取视频信息失败，将使用默认值', e);
         }
         const thumbPath = new Map();
         const _thumbPath = await new Promise<string | undefined>((resolve, reject) => {

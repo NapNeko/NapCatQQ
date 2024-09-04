@@ -148,7 +148,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                 //对Mgsid和OB11ID混用情况兜底
                 const nodeMsg = MessageUnique.getMsgIdAndPeerByShortId(parseInt(nodeId)) || MessageUnique.getPeerByMsgId(nodeId);
                 if (!nodeMsg) {
-                    logger.logError('转发消息失败，未找到消息', nodeId);
+                    logger.logError(`转发消息失败, 未找到消息 ${nodeId}`);
                     continue;
                 }
                 nodeMsgIds.push(nodeMsg.MsgId);
@@ -160,7 +160,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                     const isNodeMsg = OB11Data.filter(e => e.type === OB11MessageDataType.node).length;//找到子转发消息
                     if (isNodeMsg !== 0) {
                         if (isNodeMsg !== OB11Data.length) {
-                            logger.logError('子消息中包含非node消息 跳过不合法部分');
+                            logger.logWarn('子消息中包含非 node 消息, 跳过不合法部分');
                             continue;
                         }
                         const nodeMsg = await this.handleForwardedNodes(selfPeer, OB11Data.filter(e => e.type === OB11MessageDataType.node));
@@ -256,12 +256,12 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         }
 
         if (sendElements.length === 0) {
-            logger.logDebug('需要clone的消息无法解析，将会忽略掉', msg);
+            logger.logWarn('需要 clone 的消息无法解析, 忽略: ', msg);
         }
         try {
             return await this.core.apis.MsgApi.sendMsg(selfPeer, sendElements, true);
         } catch (e) {
-            logger.logError(e, '克隆转发消息失败,将忽略本条消息', msg);
+            logger.logError('克隆转发消息失败, 将忽略本条消息', e,  msg);
         }
     }
 }
