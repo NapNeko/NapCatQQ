@@ -11,7 +11,6 @@ const nodeModules = [...builtinModules, builtinModules.map(m => `node:${m}`)].fl
 function genCpModule(module: string) {
     return { src: `./node_modules/${module}`, dest: `dist/node_modules/${module}`, flatten: false };
 }
-
 let startScripts: string[] | undefined = undefined;
 if (process.env.NAPCAT_BUILDSYS == 'linux') {
     if (process.env.NAPCAT_BUILDARCH == 'x64') {
@@ -82,6 +81,7 @@ const ShellBaseConfigPlugin: PluginOption[] = [
             { src: './src/core/external/napcat.json', dest: 'dist/config/' },
             { src: './src/onebot/config/onebot11.json', dest: 'dist/config/' },
             { src: './package.json', dest: 'dist' },
+            { src: './launcher/', dest: 'dist', flatten: true },
             // { src: './README.md', dest: 'dist' },
             // { src: './logo.png', dest: 'dist/logs' },
             ...(startScripts.map((startScript) => {
