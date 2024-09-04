@@ -8,18 +8,11 @@ import babel from 'vite-plugin-babel';
 //依赖排除
 const external = ['silk-wasm', 'ws', 'express', 'fluent-ffmpeg', 'log4js', 'qrcode-terminal'];
 const nodeModules = [...builtinModules, builtinModules.map(m => `node:${m}`)].flat();
-function genCpModule(module: string) {
-    return { src: `./node_modules/${module}`, dest: `dist/node_modules/${module}`, flatten: false };
-}
 
-let startScripts: string[] | undefined = undefined;
+let startScripts: string[] | undefined;
 if (process.env.NAPCAT_BUILDSYS == 'linux') {
-    if (process.env.NAPCAT_BUILDARCH == 'x64') {
-    }
     startScripts = ['./script/napcat.sh'];
 } else if (process.env.NAPCAT_BUILDSYS == 'win32') {
-    if (process.env.NAPCAT_BUILDARCH == 'x64') {
-    }
     startScripts = ['./script/BootWay05.ps1', './script/dbghelp.dll',
         './script/BootWay05_init.bat', './script/BootWay05_run.bat', './script/BootWay05_run.utf8.bat', './script/KillQQ.bat'];
 } else {
@@ -108,7 +101,7 @@ const ShellBaseConfig = () => defineConfig({
         lib: {
             entry: 'src/shell/napcat.ts',
             formats: ['es'],
-            fileName: () => 'napcat.mjs',
+            fileName: 'napcat.mjs',
         },
         rollupOptions: {
             external: [...nodeModules, ...external],
@@ -132,7 +125,7 @@ const FrameworkBaseConfig = () => defineConfig({
         lib: {
             entry: 'src/framework/napcat.ts',
             formats: ['es'],
-            fileName: () => 'napcat.mjs',
+            fileName: 'napcat.mjs',
         },
         rollupOptions: {
             external: [...nodeModules, ...external],
