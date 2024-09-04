@@ -75,7 +75,6 @@ export class NTQQUserApi {
             (profile) => profile.uid === uid,
         );
         const RetUser: User = {
-            ...profile.simpleInfo.coreInfo,
             ...profile.simpleInfo.status,
             ...profile.simpleInfo.vasInfo,
             ...profile.commonExt,
@@ -83,17 +82,22 @@ export class NTQQUserApi {
             qqLevel: profile.commonExt?.qqLevel,
             age: profile.simpleInfo.baseInfo.age,
             pendantId: '',
+            ...profile.simpleInfo.coreInfo
         };
         return RetUser;
     }
 
     async getUserDetailInfo(uid: string): Promise<User> {
-        const retUser = await solveAsyncProblem(async (uid) => this.fetchUserDetailInfo(uid, UserDetailSource.KDB), uid);
+        let retUser = await solveAsyncProblem(async (uid) => this.fetchUserDetailInfo(uid, UserDetailSource.KDB), uid);
         if (retUser && retUser.uin !== '0') {
             return retUser;
         }
         this.context.logger.logDebug('[NapCat] [Mark] getUserDetailInfo Mode1 Failed.');
-        return this.fetchUserDetailInfo(uid, UserDetailSource.KSERVER);
+        retUser = await this.fetchUserDetailInfo(uid, UserDetailSource.KSERVER);
+        if (retUser && retUser.uin === '0') {
+            retUser.uin = await this.core.apis.UserApi.getUidByUinV2(uid) ?? '0';
+        }
+        return retUser;
     }
 
     async modifySelfProfile(param: ModifyProfileParams) {
