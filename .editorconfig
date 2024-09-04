@@ -17,5 +17,8 @@ charset = utf-8
 indent_style = space
 indent_size = 4
 
+[*.bat]
+charset = latin1
+
 # Unfortunately, EditorConfig doesn't support space configuration inside import braces directly.
 # You'll need to rely on your linter/formatter like ESLint or Prettier for that.
