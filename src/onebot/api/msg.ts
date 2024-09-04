@@ -234,7 +234,7 @@ export class OneBotMsgApi {
             if (records.peerUin === '284840486') {
                 return createReplyData(records.msgId);
             }
-            const replyMsg = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeqV2(peer, element.replayMsgSeq, element.replyMsgTime, [element.senderUidStr]))
+            let replyMsg = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeqV2(peer, element.replayMsgSeq, element.replyMsgTime, [element.senderUidStr]))
                 .msgList.find(msg => msg.msgRandom === records.msgRandom);
 
             if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
@@ -591,20 +591,25 @@ export class OneBotMsgApi {
             // 保留, 直到...找到更好的解决方案
             if (data.type === 'custom') {
                 if (!data.url) {
-                    throw '自定义音乐卡片缺少参数 url';
+                    this.core.context.logger.logError('自定义音卡缺少参数url');
+                    return undefined;
                 }
                 if (!data.audio) {
-                    throw '自定义音乐卡片缺少参数 audio';
+                    this.core.context.logger.logError('自定义音卡缺少参数audio');
+                    return undefined;
                 }
                 if (!data.title) {
-                    throw '自定义音乐卡片缺少参数 title';
+                    this.core.context.logger.logError('自定义音卡缺少参数title');
+                    return undefined;
                 }
             } else {
                 if (!['qq', '163'].includes(data.type)) {
-                    throw `不支持的 type: ${data.type}`;
+                    this.core.context.logger.logError('音乐卡片type错误, 只支持qq、163、custom，当前type:', data.type);
+                    return undefined;
                 }
                 if (!data.id) {
-                    throw '音乐卡片缺少参数 id';
+                    this.core.context.logger.logError('音乐卡片缺少参数id');
+                    return undefined;
                 }
             }
 

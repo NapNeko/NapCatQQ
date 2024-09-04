@@ -38,9 +38,9 @@ export abstract class ConfigBase<T> {
         if (!fs.existsSync(configPath)) {
             try {
                 fs.writeFileSync(configPath, fs.readFileSync(this.getConfigPath(undefined), 'utf-8'));
-                logger.log(`配置文件 ${this.name} 创建成功\n`);
+                logger.log(`[Core] [Config] 配置文件创建成功!\n`);
             } catch (e: any) {
-                logger.logError(`创建配置文件 ${this.name} 时发生错误:`, e.message);
+                logger.logError(`[Core] [Config] 创建配置文件时发生错误:`, e.message);
             }
         }
         try {
@@ -49,9 +49,9 @@ export abstract class ConfigBase<T> {
             return this.configData;
         } catch (e: any) {
             if (e instanceof SyntaxError) {
-                logger.logError(`配置文件 ${this.name} 格式错误, 请检查配置文件:`, e.message);
+                logger.logError(`[Core] [Config] 配置文件格式错误，请检查配置文件:`, e.message);
             } else {
-                logger.logError(`读取配置文件 ${this.name} 时发生错误:`, e);
+                logger.logError(`[Core] [Config] 读取配置文件时发生错误:`, e.message);
             }
             return {} as T;
         }

@@ -87,7 +87,7 @@ export class NapCatOneBot11Adapter {
             selfInfo.nick = user.nick;
             this.context.logger.setLogSelfInfo(selfInfo);
         }).catch(this.context.logger.logError);
-        this.context.logger.log(`OneBot 服务状态: ${serviceInfo}`);
+        this.context.logger.log(`[Notice] [OneBot11] ${serviceInfo}`);
 
         //创建NetWork服务
         if (ob11Config.http.enable) {
@@ -128,7 +128,7 @@ export class NapCatOneBot11Adapter {
         await WebUiDataRuntime.setOnOB11ConfigChanged(async (newConfig: OB11Config) => {
             const prev = this.configLoader.configData;
             this.configLoader.save(newConfig);
-            this.context.logger.logDebug(`OneBot11 配置更改: ${JSON.stringify(prev)} -> ${JSON.stringify(newConfig)}`);
+            this.context.logger.log(`OneBot11 配置更改：${JSON.stringify(prev)} -> ${JSON.stringify(newConfig)}`);
             await this.reloadNetwork(prev, newConfig);
         });
     }
@@ -150,7 +150,7 @@ export class NapCatOneBot11Adapter {
     HTTP上报服务 ${now.http.enablePost ? '已启动' : '未启动'}, 上报地址: ${now.http.postUrls}
     WebSocket服务 ${now.ws.enable ? '已启动' : '未启动'}, ${now.ws.host}:${now.ws.port}
     WebSocket反向服务 ${now.reverseWs.enable ? '已启动' : '未启动'}, 反向地址: ${now.reverseWs.urls}`;
-        this.context.logger.log(`热重载 - OneBot 服务状态: ${serviceInfo}`);
+        this.context.logger.log(`[Notice] [OneBot11] 热重载 ${serviceInfo}`);
 
         // check difference in passive http (Http)
         if (prev.http.enable !== now.http.enable) {
@@ -270,7 +270,7 @@ export class NapCatOneBot11Adapter {
 
         msgListener.onInputStatusPush = async data => {
             const uin = await this.core.apis.UserApi.getUinByUidV2(data.fromUin);
-            this.context.logger.log(`${uin} 输入状态更新: ${data.statusText}`);
+            this.context.logger.log(`[Notice] [输入状态] ${uin} ${data.statusText}`);
             await this.networkManager.emitEvent(new OB11InputStatusEvent(
                 this.core,
                 parseInt(uin),
