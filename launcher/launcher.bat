@@ -5,7 +5,6 @@ if %errorLevel% == 0 (
     echo Administrator mode detected.
 ) else (
     echo Please run this script in administrator mode.
-    REM 以管理员权限启动脚本 并保留工作目录
     powershell -Command "Start-Process 'wt.exe' -ArgumentList 'cmd /c cd /d \"%cd%\" && \"%~f0\"' -Verb runAs"
     exit
 )
@@ -28,7 +27,6 @@ for %%a in (%RetString%) do (
 
 SET QQPath=%pathWithoutUninstall%QQ.exe
 
-REM 拿不到QQ路径则退出
 if not exist "%QQpath%" (
     echo provided QQ path is invalid: %QQpath%
     pause
