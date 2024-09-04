@@ -26,7 +26,7 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
     open() {
         try {
             if (this.isOpen) {
-                this.core.context.logger.logError('Http 服务已经启动');
+                this.core.context.logger.logError('Cannot open a closed HTTP server');
                 return;
             }
             if (!this.isOpen) {
@@ -34,7 +34,7 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
                 this.isOpen = true;
             }
         } catch (e) {
-            this.core.context.logger.logError('Http 服务启动失败', e);
+            this.core.context.logger.logError(`[OneBot] [HTTP Server Adapter] Boot Error: ${e}`);
         }
 
     }
@@ -67,7 +67,7 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
         this.app.use((req, res) => this.handleRequest(req, res));
 
         this.server.listen(this.port, () => {
-            this.core.context.logger.logDebug(`OneBot 11 Http 服务在 ${this.port} 上启动`);
+            this.core.context.logger.log(`[OneBot] [HTTP Server Adapter] Start On Port ${this.port}`);
         });
     }
 
@@ -85,7 +85,7 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
 
     private async handleRequest(req: Request, res: Response) {
         if (!this.isOpen) {
-            this.core.context.logger.log(`OneBot 11 Http 服务已关闭`);
+            this.core.context.logger.log(`[OneBot] [HTTP Server Adapter] Server is closed`);
             return res.json(OB11Response.error('Server is closed', 200));
         }
 

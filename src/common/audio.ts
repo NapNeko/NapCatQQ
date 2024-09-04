@@ -12,7 +12,7 @@ export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: Log
         let duration = pttFileInfo.size / 1024 / 3;  // 3kb/s
         duration = Math.floor(duration);
         duration = Math.max(1, duration);
-        logger.logDebug('通过文件大小估算语音的时长:', duration);
+        logger.log('通过文件大小估算语音的时长:', duration);
         return duration;
     }
 
@@ -20,7 +20,7 @@ export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: Log
         const file = await fsPromise.readFile(filePath);
         const pttPath = path.join(TEMP_DIR, randomUUID());
         if (!isSilk(file)) {
-            logger.logDebug(`语音文件${filePath}需要转换成silk`);
+            logger.log(`语音文件${filePath}需要转换成silk`);
             const _isWav = isWav(file);
             const pcmPath = pttPath + '.pcm';
             let sampleRate = 0;
@@ -30,7 +30,7 @@ export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: Log
                     const ffmpegPath = process.env.FFMPEG_PATH || 'ffmpeg';
                     const cp = spawn(ffmpegPath, ['-y', '-i', filePath, '-ar', '24000', '-ac', '1', '-f', 's16le', pcmPath]);
                     cp.on('error', err => {
-                        logger.logError('ffmpeg 处理转换出错: ', err.message);
+                        logger.log('FFmpeg处理转换出错: ', err.message);
                         return reject(err);
                     });
                     cp.on('exit', (code, signal) => {
@@ -38,11 +38,12 @@ export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: Log
                         if (code == null || EXIT_CODES.includes(code)) {
                             sampleRate = 24000;
                             const data = fs.readFileSync(pcmPath);
-                            fs.unlinkSync(pcmPath);
+                            fs.unlink(pcmPath, (err) => {
+                            });
                             return resolve(data);
                         }
-                        logger.logError(`ffmpeg 处理失败: code=${code ?? 'unknown'} sig=${signal ?? 'unknown'}`);
-                        reject(Error(`ffmpeg 处理失败: code=${code ?? 'unknown'} sig=${signal ?? 'unknown'}`));
+                        logger.log(`FFmpeg exit: code=${code ?? 'unknown'} sig=${signal ?? 'unknown'}`);
+                        reject(Error('FFmpeg处理转换失败'));
                     });
                 });
             };
@@ -60,7 +61,7 @@ export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: Log
             }
             const silk = await encode(input, sampleRate);
             fs.writeFileSync(pttPath, silk.data);
-            logger.logDebug(`语音文件 ${filePath} 转换成功:`, pttPath, '时长:', silk.duration);
+            logger.log(`语音文件${filePath}转换成功!`, pttPath, '时长:', silk.duration);
             return {
                 converted: true,
                 path: pttPath,
@@ -68,11 +69,11 @@ export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: Log
             };
         } else {
             const silk = file;
-            let duration: number;
+            let duration = 0;
             try {
                 duration = getDuration(silk) / 1000;
             } catch (e: any) {
-                logger.logWarn('获取语音文件时长失败, 使用文件大小推测时长', filePath, e.stack);
+                logger.log('获取语音文件时长失败, 使用文件大小推测时长', filePath, e.stack);
                 duration = await guessDuration(filePath);
             }
 

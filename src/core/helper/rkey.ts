@@ -26,7 +26,7 @@ export class RkeyManager {
             try {
                 await this.refreshRkey();
             } catch (e) {
-                this.logger.logError('获取 rkey 失败', e);
+                this.logger.logError('获取rkey失败', e);
             }
         }
         return this.rkeyData;

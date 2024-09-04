@@ -39,7 +39,7 @@ export async function NCoreInitShell() {
     const logger = new LogWrapper(pathWrapper.logsPath);
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
-    logger.log(`NapCatQQ 版本: ` + napCatVersion);
+    logger.log(`[NapCat] [Core] NapCat.Core Version: ` + napCatVersion);
     InitWebUi(logger, pathWrapper).then().catch(logger.logError);
 
     // from constructor
@@ -125,20 +125,20 @@ export async function NCoreInitShell() {
             logger.logWarn('请扫描下面的二维码，然后在手Q上授权登录：');
             const qrcodePath = path.join(pathWrapper.cachePath, 'qrcode.png');
             qrcode.generate(qrcodeUrl, { small: true }, (res) => {
-                logger.log([
+                logger.logWarn([
                     '\n',
                     res,
                     '二维码解码URL: ' + qrcodeUrl,
                     '如果控制台二维码无法扫码，可以复制解码url到二维码生成网站生成二维码再扫码，也可以打开下方的二维码路径图片进行扫码。',
                 ].join('\n'));
                 fs.writeFile(qrcodePath, buffer, {}, () => {
-                    logger.log(`二维码已保存到 ${qrcodePath}`);
+                    logger.logWarn('二维码已保存到', qrcodePath);
                 });
             });
         };
         loginListener.onQRCodeSessionFailed = (errType: number, errCode: number, errMsg: string) => {
             //logger.logError('登录失败(onQRCodeSessionFailed)', errCode, errMsg);
-            logger.logError(`二维码登录失败(${errCode} - ${errType}): ${errMsg}`);
+            logger.logError('[Core] [Login] Login Error,ErrCode: ', errCode, ' ErrMsg:', errMsg);
             if (errType == 1 && errCode == 3) {
                 // 二维码过期刷新
             }
@@ -146,7 +146,7 @@ export async function NCoreInitShell() {
         };
         loginListener.onLoginFailed = (args) => {
             //logger.logError('登录失败(onLoginFailed)', args);
-            logger.logError('登录失败', args);
+            logger.logError('[Core] [Login] Login Error , ErrInfo: ', args);
         };
 
         loginService.addKernelLoginListener(proxiedListenerOf(loginListener, logger) as any);
@@ -190,7 +190,7 @@ export async function NCoreInitShell() {
                         .catch();
                 }, 1000);
             } else {
-                logger.logError('快速登录失败, 未找到该 QQ 历史登录记录, 将使用二维码登录方式.');
+                logger.logError('快速登录失败，未找到该 QQ 历史登录记录，将使用二维码登录方式');
                 loginService.getQRCodePicture();
             }
         } else {
@@ -199,7 +199,7 @@ export async function NCoreInitShell() {
                 logger.log(`可用于快速登录的 QQ：\n${historyLoginList
                     .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
                     .join('\n')
-                }`);
+                    }`);
             }
             loginService.getQRCodePicture();
         }

@@ -53,23 +53,23 @@ export class QQBasicInfoWrapper {
     //此方法不要直接使用
     getQUAInternal() {
         switch (systemPlatform) {
-        case 'linux':
-            return `V1_LNX_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
-        case 'darwin':
-            return `V1_MAC_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;                
-        default:
-            return `V1_WIN_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
+            case 'linux':
+                return `V1_LNX_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
+            case 'darwin':
+                return `V1_MAC_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;                
+            default:
+                return `V1_WIN_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
         }
     }
 
     getAppidInternal() {
         switch (systemPlatform) {
-        case 'linux':
-            return '537243600';
-        case 'darwin':
-            return '537243441';
-        default:
-            return '537243538';
+            case 'linux':
+                return '537243600';
+            case 'darwin':
+                return '537243441';
+            default:
+                return '537243538';
         }
     }
 
@@ -84,8 +84,8 @@ export class QQBasicInfoWrapper {
         }
 
         // else
-        this.context.logger.logWarn(`获取 AppID 异常, 使用备用 AppID. 请检测 NapCat/QQNT 是否正常`);
-        this.context.logger.logWarn(`${fullVersion} 版本兼容性不佳, 可能会导致一些功能无法正常使用`,);
+        this.context.logger.log(`[QQ版本兼容性检测] 获取Appid异常 请检测NapCat/QQNT是否正常`);
+        this.context.logger.log(`[QQ版本兼容性检测] ${fullVersion} 版本兼容性不佳，可能会导致一些功能无法正常使用`,);
         return { appid: this.getAppidInternal(), qua: this.getQUAInternal() };
     }
 }
