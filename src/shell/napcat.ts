@@ -49,12 +49,20 @@ export async function NCoreInitShell() {
     const session = new wrapper.NodeIQQNTWrapperSession();
 
     // from get dataPath
-    let dataPath = wrapper.NodeQQNTWrapperUtil.getNTUserDataInfoConfig();
-    if (!dataPath) {
-        dataPath = path.resolve(os.homedir(), './.config/QQ');
-        fs.mkdirSync(dataPath, { recursive: true });
-    }
-    const dataPathGlobal = path.resolve(dataPath, './nt_qq/global');
+    const [dataPath, dataPathGlobal] = (() => {
+        if (os.platform() === 'darwin') {
+            const userPath = os.homedir();
+            const appDataPath = path.resolve(userPath, './Library/Application Support/QQ');
+            return [appDataPath, path.join(appDataPath, 'global')];
+        }
+        let dataPath = wrapper.NodeQQNTWrapperUtil.getNTUserDataInfoConfig();
+        if (!dataPath) {
+            dataPath = path.resolve(os.homedir(), './.config/QQ');
+            fs.mkdirSync(dataPath, { recursive: true });
+        }
+        const dataPathGlobal = path.resolve(dataPath, './nt_qq/global');
+        return [dataPath, dataPathGlobal];
+    })();
 
     // from initConfig
     engine.initWithDeskTopConfig(
@@ -115,7 +123,7 @@ export async function NCoreInitShell() {
             const realBase64 = pngBase64QrcodeData.replace(/^data:image\/\w+;base64,/, '');
             const buffer = Buffer.from(realBase64, 'base64');
             logger.logWarn('请扫描下面的二维码，然后在手Q上授权登录：');
-            const qrcodePath = path.join(pathWrapper.binaryPath, 'qrcode.png');
+            const qrcodePath = path.join(pathWrapper.cachePath, 'qrcode.png');
             qrcode.generate(qrcodeUrl, { small: true }, (res) => {
                 logger.logWarn([
                     '\n',
@@ -191,7 +199,7 @@ export async function NCoreInitShell() {
                 logger.log(`可用于快速登录的 QQ：\n${historyLoginList
                     .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
                     .join('\n')
-                }`);
+                    }`);
             }
             loginService.getQRCodePicture();
         }

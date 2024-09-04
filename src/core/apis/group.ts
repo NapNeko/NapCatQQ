@@ -1,5 +1,4 @@
 import {
-    ChatType,
     GeneralCallResult,
     Group,
     GroupMember,
@@ -10,7 +9,7 @@ import {
     MemberExtSourceType,
     NapCatCore,
 } from '@/core';
-import { isNumeric, runAllWithTimeout } from '@/common/helper';
+import { isNumeric } from '@/common/helper';
 import { LimitedHashTable } from '@/common/message-unique';
 
 export class NTQQGroupApi {
@@ -248,7 +247,7 @@ export class NTQQGroupApi {
             'NodeIKernelGroupListener/onMemberInfoChange',
             1,
             forced ? 5000 : 250,
-            (params) => params === GroupCode,
+            (params, _, members) => params === GroupCode && members.size > 0,
         );
         const retData = await (
             this.core.eventWrapper
