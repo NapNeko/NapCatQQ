@@ -298,65 +298,6 @@ export class NTQQFileApi {
         });
     }
 
-    async addFileCache(peer: Peer, msgId: string, msgSeq: string, senderUid: string, elemId: string, elemType: string, fileSize: string, fileName: string) {
-        let GroupData;
-        let BuddyData;
-        if (peer.chatType === ChatType.KCHATTYPEGROUP) {
-            GroupData =
-                [{
-                    groupCode: peer.peerUid,
-                    isConf: false,
-                    hasModifyConfGroupFace: true,
-                    hasModifyConfGroupName: true,
-                    groupName: 'NapCat.Cached',
-                    remark: 'NapCat.Cached',
-                }];
-        } else if (peer.chatType === ChatType.KCHATTYPEC2C) {
-            BuddyData = [{
-                category_name: 'NapCat.Cached',
-                peerUid: peer.peerUid,
-                peerUin: peer.peerUid,
-                remark: 'NapCat.Cached',
-            }];
-        } else {
-            return undefined;
-        }
-
-        return this.context.session.getSearchService().addSearchHistory({
-            type: 4,
-            contactList: [],
-            id: -1,
-            groupInfos: [],
-            msgs: [],
-            fileInfos: [
-                {
-                    chatType: peer.chatType,
-                    buddyChatInfo: BuddyData || [],
-                    discussChatInfo: [],
-                    groupChatInfo: GroupData || [],
-                    dataLineChatInfo: [],
-                    tmpChatInfo: [],
-                    msgId: msgId,
-                    msgSeq: msgSeq,
-                    msgTime: Math.floor(Date.now() / 1000).toString(),
-                    senderUid: senderUid,
-                    senderNick: 'NapCat.Cached',
-                    senderRemark: 'NapCat.Cached',
-                    senderCard: 'NapCat.Cached',
-                    elemId: elemId,
-                    elemType: elemType,
-                    fileSize: fileSize,
-                    filePath: '',
-                    fileName: fileName,
-                    hits: [{
-                        start: 12,
-                        end: 14,
-                    }],
-                },
-            ],
-        });
-    }
-
     async searchForFile(keys: string[]): Promise<SearchResultItem | undefined> {
         const randomResultId = 100000 + Math.floor(Math.random() * 10000);
         let searchId = 0;
