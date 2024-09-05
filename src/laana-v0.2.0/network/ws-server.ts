@@ -1,7 +1,7 @@
-import { ILaanaNetworkAdapter } from '@/laana-v0.1.3/network/index';
-import { NapCatLaanaAdapter } from '@/laana-v0.1.3';
-import { LaanaDataWrapper } from '@/laana-v0.1.3/types/laana';
-import { EventWrapper } from '@/laana-v0.1.3/types/event/wrapper';
+import { ILaanaNetworkAdapter } from '../network/index';
+import { NapCatLaanaAdapter } from '..';
+import { LaanaDataWrapper } from '../types/laana';
+import { EventWrapper } from '../types/event/wrapper';
 import { RawData, WebSocket, WebSocketServer } from 'ws';
 import { Mutex } from 'async-mutex';
 import { NapCatCore } from '@/core';

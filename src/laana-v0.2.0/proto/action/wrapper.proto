@@ -55,7 +55,14 @@ message ActionPing {
     CreateGroupFolderPing createGroupFolder = 507;
     DeleteGroupFilePing deleteGroupFile = 508;
     DeleteGroupFolderPing deleteGroupFolder = 509;
+
+    ExtendedActionPing extendedAction = 9999;
   }
+}
+
+message ExtendedActionPing {
+  string actionName = 1;
+  bytes actionData = 2;
 }
 
 message GeneralSuccessPong {
@@ -115,5 +122,12 @@ message ActionPong {
     CreateGroupFolderPong createGroupFolder = 507;
     GeneralSuccessPong deleteGroupFile = 508;
     GeneralSuccessPong deleteGroupFolder = 509;
+
+    ExtendedActionPong extendedAction = 9999;
   }
+}
+
+message ExtendedActionPong {
+  string actionName = 1;
+  bytes pongData = 2;
 }

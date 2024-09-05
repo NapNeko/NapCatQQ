@@ -1,6 +1,7 @@
 syntax = 'proto3';
 package Laana;
 
+import 'entity/message.proto';
 import 'action/wrapper.proto';
 import 'event/wrapper.proto';
 
@@ -9,5 +10,13 @@ message LaanaDataWrapper {
     ActionPing actionPing = 1;
     ActionPong actionPong = 2;
     EventWrapper event = 3;
+    Message message = 4;
+
+    ExtendedData extendedData = 99;
   }
+}
+
+message ExtendedData {
+  string key = 1;
+  bytes value = 2;
 }

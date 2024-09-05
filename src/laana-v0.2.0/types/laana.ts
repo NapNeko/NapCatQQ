@@ -10,6 +10,7 @@ import { UnknownFieldHandler } from "@protobuf-ts/runtime";
 import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
+import { Message } from "./entity/message";
 import { EventWrapper } from "./event/wrapper";
 import { ActionPong } from "./action/wrapper";
 import { ActionPing } from "./action/wrapper";
@@ -39,8 +40,33 @@ export interface LaanaDataWrapper {
          */
         event: EventWrapper;
     } | {
+        oneofKind: "message";
+        /**
+         * @generated from protobuf field: Laana.Message message = 4;
+         */
+        message: Message;
+    } | {
+        oneofKind: "extendedData";
+        /**
+         * @generated from protobuf field: Laana.ExtendedData extendedData = 99;
+         */
+        extendedData: ExtendedData;
+    } | {
         oneofKind: undefined;
     };
+}
+/**
+ * @generated from protobuf message Laana.ExtendedData
+ */
+export interface ExtendedData {
+    /**
+     * @generated from protobuf field: string key = 1;
+     */
+    key: string;
+    /**
+     * @generated from protobuf field: bytes value = 2;
+     */
+    value: Uint8Array;
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class LaanaDataWrapper$Type extends MessageType<LaanaDataWrapper> {
@@ -48,7 +74,9 @@ class LaanaDataWrapper$Type extends MessageType<LaanaDataWrapper> {
         super("Laana.LaanaDataWrapper", [
             { no: 1, name: "actionPing", kind: "message", oneof: "data", T: () => ActionPing },
             { no: 2, name: "actionPong", kind: "message", oneof: "data", T: () => ActionPong },
-            { no: 3, name: "event", kind: "message", oneof: "data", T: () => EventWrapper }
+            { no: 3, name: "event", kind: "message", oneof: "data", T: () => EventWrapper },
+            { no: 4, name: "message", kind: "message", oneof: "data", T: () => Message },
+            { no: 99, name: "extendedData", kind: "message", oneof: "data", T: () => ExtendedData }
         ]);
     }
     create(value?: PartialMessage<LaanaDataWrapper>): LaanaDataWrapper {
@@ -81,6 +109,18 @@ class LaanaDataWrapper$Type extends MessageType<LaanaDataWrapper> {
                         event: EventWrapper.internalBinaryRead(reader, reader.uint32(), options, (message.data as any).event)
                     };
                     break;
+                case /* Laana.Message message */ 4:
+                    message.data = {
+                        oneofKind: "message",
+                        message: Message.internalBinaryRead(reader, reader.uint32(), options, (message.data as any).message)
+                    };
+                    break;
+                case /* Laana.ExtendedData extendedData */ 99:
+                    message.data = {
+                        oneofKind: "extendedData",
+                        extendedData: ExtendedData.internalBinaryRead(reader, reader.uint32(), options, (message.data as any).extendedData)
+                    };
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -102,6 +142,12 @@ class LaanaDataWrapper$Type extends MessageType<LaanaDataWrapper> {
         /* Laana.EventWrapper event = 3; */
         if (message.data.oneofKind === "event")
             EventWrapper.internalBinaryWrite(message.data.event, writer.tag(3, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.Message message = 4; */
+        if (message.data.oneofKind === "message")
+            Message.internalBinaryWrite(message.data.message, writer.tag(4, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.ExtendedData extendedData = 99; */
+        if (message.data.oneofKind === "extendedData")
+            ExtendedData.internalBinaryWrite(message.data.extendedData, writer.tag(99, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -112,3 +158,58 @@ class LaanaDataWrapper$Type extends MessageType<LaanaDataWrapper> {
  * @generated MessageType for protobuf message Laana.LaanaDataWrapper
  */
 export const LaanaDataWrapper = new LaanaDataWrapper$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class ExtendedData$Type extends MessageType<ExtendedData> {
+    constructor() {
+        super("Laana.ExtendedData", [
+            { no: 1, name: "key", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "value", kind: "scalar", T: 12 /*ScalarType.BYTES*/ }
+        ]);
+    }
+    create(value?: PartialMessage<ExtendedData>): ExtendedData {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.key = "";
+        message.value = new Uint8Array(0);
+        if (value !== undefined)
+            reflectionMergePartial<ExtendedData>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ExtendedData): ExtendedData {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string key */ 1:
+                    message.key = reader.string();
+                    break;
+                case /* bytes value */ 2:
+                    message.value = reader.bytes();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: ExtendedData, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string key = 1; */
+        if (message.key !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.key);
+        /* bytes value = 2; */
+        if (message.value.length)
+            writer.tag(2, WireType.LengthDelimited).bytes(message.value);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message Laana.ExtendedData
+ */
+export const ExtendedData = new ExtendedData$Type();

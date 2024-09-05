@@ -1,6 +1,6 @@
 import { NapCatCore } from '@/core';
 import { NapCatLaanaAdapter } from '..';
-import { File as LaanaFile } from '@/laana-v0.1.3/types/entity/file';
+import { File as LaanaFile } from '../types/entity/file';
 import path from 'path';
 import fs from 'fs';
 import fsPromises from 'fs/promises';

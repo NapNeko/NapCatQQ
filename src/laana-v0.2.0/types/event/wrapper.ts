@@ -149,8 +149,27 @@ export interface EventWrapper {
          */
         selfInvitedToGroupEvent: SelfInvitedToGroupEvent;
     } | {
+        oneofKind: "extendedEvent";
+        /**
+         * @generated from protobuf field: Laana.ExtendedEvent extendedEvent = 9999;
+         */
+        extendedEvent: ExtendedEvent;
+    } | {
         oneofKind: undefined;
     };
+}
+/**
+ * @generated from protobuf message Laana.ExtendedEvent
+ */
+export interface ExtendedEvent {
+    /**
+     * @generated from protobuf field: string eventName = 1;
+     */
+    eventName: string;
+    /**
+     * @generated from protobuf field: bytes eventData = 2;
+     */
+    eventData: Uint8Array;
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class EventWrapper$Type extends MessageType<EventWrapper> {
@@ -175,7 +194,8 @@ class EventWrapper$Type extends MessageType<EventWrapper> {
             { no: 212, name: "groupEmojiLikeEvent", kind: "message", oneof: "event", T: () => GroupEmojiLikeEvent },
             { no: 301, name: "someoneRequestToAddBuddyEvent", kind: "message", oneof: "event", T: () => SomeoneRequestToAddBuddyEvent },
             { no: 302, name: "someoneRequestToJoinGroupEvent", kind: "message", oneof: "event", T: () => SomeoneRequestToJoinGroupEvent },
-            { no: 303, name: "selfInvitedToGroupEvent", kind: "message", oneof: "event", T: () => SelfInvitedToGroupEvent }
+            { no: 303, name: "selfInvitedToGroupEvent", kind: "message", oneof: "event", T: () => SelfInvitedToGroupEvent },
+            { no: 9999, name: "extendedEvent", kind: "message", oneof: "event", T: () => ExtendedEvent }
         ]);
     }
     create(value?: PartialMessage<EventWrapper>): EventWrapper {
@@ -304,6 +324,12 @@ class EventWrapper$Type extends MessageType<EventWrapper> {
                         selfInvitedToGroupEvent: SelfInvitedToGroupEvent.internalBinaryRead(reader, reader.uint32(), options, (message.event as any).selfInvitedToGroupEvent)
                     };
                     break;
+                case /* Laana.ExtendedEvent extendedEvent */ 9999:
+                    message.event = {
+                        oneofKind: "extendedEvent",
+                        extendedEvent: ExtendedEvent.internalBinaryRead(reader, reader.uint32(), options, (message.event as any).extendedEvent)
+                    };
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -376,6 +402,9 @@ class EventWrapper$Type extends MessageType<EventWrapper> {
         /* Laana.SelfInvitedToGroupEvent selfInvitedToGroupEvent = 303; */
         if (message.event.oneofKind === "selfInvitedToGroupEvent")
             SelfInvitedToGroupEvent.internalBinaryWrite(message.event.selfInvitedToGroupEvent, writer.tag(303, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.ExtendedEvent extendedEvent = 9999; */
+        if (message.event.oneofKind === "extendedEvent")
+            ExtendedEvent.internalBinaryWrite(message.event.extendedEvent, writer.tag(9999, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -386,3 +415,58 @@ class EventWrapper$Type extends MessageType<EventWrapper> {
  * @generated MessageType for protobuf message Laana.EventWrapper
  */
 export const EventWrapper = new EventWrapper$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class ExtendedEvent$Type extends MessageType<ExtendedEvent> {
+    constructor() {
+        super("Laana.ExtendedEvent", [
+            { no: 1, name: "eventName", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "eventData", kind: "scalar", T: 12 /*ScalarType.BYTES*/ }
+        ]);
+    }
+    create(value?: PartialMessage<ExtendedEvent>): ExtendedEvent {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.eventName = "";
+        message.eventData = new Uint8Array(0);
+        if (value !== undefined)
+            reflectionMergePartial<ExtendedEvent>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ExtendedEvent): ExtendedEvent {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string eventName */ 1:
+                    message.eventName = reader.string();
+                    break;
+                case /* bytes eventData */ 2:
+                    message.eventData = reader.bytes();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: ExtendedEvent, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string eventName = 1; */
+        if (message.eventName !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.eventName);
+        /* bytes eventData = 2; */
+        if (message.eventData.length)
+            writer.tag(2, WireType.LengthDelimited).bytes(message.eventData);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message Laana.ExtendedEvent
+ */
+export const ExtendedEvent = new ExtendedEvent$Type();

@@ -325,8 +325,27 @@ export interface ActionPing {
          */
         deleteGroupFolder: DeleteGroupFolderPing;
     } | {
+        oneofKind: "extendedAction";
+        /**
+         * @generated from protobuf field: Laana.ExtendedActionPing extendedAction = 9999;
+         */
+        extendedAction: ExtendedActionPing;
+    } | {
         oneofKind: undefined;
     };
+}
+/**
+ * @generated from protobuf message Laana.ExtendedActionPing
+ */
+export interface ExtendedActionPing {
+    /**
+     * @generated from protobuf field: string actionName = 1;
+     */
+    actionName: string;
+    /**
+     * @generated from protobuf field: bytes actionData = 2;
+     */
+    actionData: Uint8Array;
 }
 /**
  * @generated from protobuf message Laana.GeneralSuccessPong
@@ -604,8 +623,27 @@ export interface ActionPong {
          */
         deleteGroupFolder: GeneralSuccessPong;
     } | {
+        oneofKind: "extendedAction";
+        /**
+         * @generated from protobuf field: Laana.ExtendedActionPong extendedAction = 9999;
+         */
+        extendedAction: ExtendedActionPong;
+    } | {
         oneofKind: undefined;
     };
+}
+/**
+ * @generated from protobuf message Laana.ExtendedActionPong
+ */
+export interface ExtendedActionPong {
+    /**
+     * @generated from protobuf field: string actionName = 1;
+     */
+    actionName: string;
+    /**
+     * @generated from protobuf field: bytes pongData = 2;
+     */
+    pongData: Uint8Array;
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class ActionPing$Type extends MessageType<ActionPing> {
@@ -651,7 +689,8 @@ class ActionPing$Type extends MessageType<ActionPing> {
             { no: 506, name: "uploadGroupFile", kind: "message", oneof: "ping", T: () => UploadGroupFilePing },
             { no: 507, name: "createGroupFolder", kind: "message", oneof: "ping", T: () => CreateGroupFolderPing },
             { no: 508, name: "deleteGroupFile", kind: "message", oneof: "ping", T: () => DeleteGroupFilePing },
-            { no: 509, name: "deleteGroupFolder", kind: "message", oneof: "ping", T: () => DeleteGroupFolderPing }
+            { no: 509, name: "deleteGroupFolder", kind: "message", oneof: "ping", T: () => DeleteGroupFolderPing },
+            { no: 9999, name: "extendedAction", kind: "message", oneof: "ping", T: () => ExtendedActionPing }
         ]);
     }
     create(value?: PartialMessage<ActionPing>): ActionPing {
@@ -910,6 +949,12 @@ class ActionPing$Type extends MessageType<ActionPing> {
                         deleteGroupFolder: DeleteGroupFolderPing.internalBinaryRead(reader, reader.uint32(), options, (message.ping as any).deleteGroupFolder)
                     };
                     break;
+                case /* Laana.ExtendedActionPing extendedAction */ 9999:
+                    message.ping = {
+                        oneofKind: "extendedAction",
+                        extendedAction: ExtendedActionPing.internalBinaryRead(reader, reader.uint32(), options, (message.ping as any).extendedAction)
+                    };
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -1045,6 +1090,9 @@ class ActionPing$Type extends MessageType<ActionPing> {
         /* Laana.DeleteGroupFolderPing deleteGroupFolder = 509; */
         if (message.ping.oneofKind === "deleteGroupFolder")
             DeleteGroupFolderPing.internalBinaryWrite(message.ping.deleteGroupFolder, writer.tag(509, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.ExtendedActionPing extendedAction = 9999; */
+        if (message.ping.oneofKind === "extendedAction")
+            ExtendedActionPing.internalBinaryWrite(message.ping.extendedAction, writer.tag(9999, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -1055,6 +1103,61 @@ class ActionPing$Type extends MessageType<ActionPing> {
  * @generated MessageType for protobuf message Laana.ActionPing
  */
 export const ActionPing = new ActionPing$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class ExtendedActionPing$Type extends MessageType<ExtendedActionPing> {
+    constructor() {
+        super("Laana.ExtendedActionPing", [
+            { no: 1, name: "actionName", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "actionData", kind: "scalar", T: 12 /*ScalarType.BYTES*/ }
+        ]);
+    }
+    create(value?: PartialMessage<ExtendedActionPing>): ExtendedActionPing {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.actionName = "";
+        message.actionData = new Uint8Array(0);
+        if (value !== undefined)
+            reflectionMergePartial<ExtendedActionPing>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ExtendedActionPing): ExtendedActionPing {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string actionName */ 1:
+                    message.actionName = reader.string();
+                    break;
+                case /* bytes actionData */ 2:
+                    message.actionData = reader.bytes();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: ExtendedActionPing, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string actionName = 1; */
+        if (message.actionName !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.actionName);
+        /* bytes actionData = 2; */
+        if (message.actionData.length)
+            writer.tag(2, WireType.LengthDelimited).bytes(message.actionData);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message Laana.ExtendedActionPing
+ */
+export const ExtendedActionPing = new ExtendedActionPing$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class GeneralSuccessPong$Type extends MessageType<GeneralSuccessPong> {
     constructor() {
@@ -1194,7 +1297,8 @@ class ActionPong$Type extends MessageType<ActionPong> {
             { no: 506, name: "uploadGroupFile", kind: "message", oneof: "pong", T: () => UploadGroupFilePong },
             { no: 507, name: "createGroupFolder", kind: "message", oneof: "pong", T: () => CreateGroupFolderPong },
             { no: 508, name: "deleteGroupFile", kind: "message", oneof: "pong", T: () => GeneralSuccessPong },
-            { no: 509, name: "deleteGroupFolder", kind: "message", oneof: "pong", T: () => GeneralSuccessPong }
+            { no: 509, name: "deleteGroupFolder", kind: "message", oneof: "pong", T: () => GeneralSuccessPong },
+            { no: 9999, name: "extendedAction", kind: "message", oneof: "pong", T: () => ExtendedActionPong }
         ]);
     }
     create(value?: PartialMessage<ActionPong>): ActionPong {
@@ -1459,6 +1563,12 @@ class ActionPong$Type extends MessageType<ActionPong> {
                         deleteGroupFolder: GeneralSuccessPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).deleteGroupFolder)
                     };
                     break;
+                case /* Laana.ExtendedActionPong extendedAction */ 9999:
+                    message.pong = {
+                        oneofKind: "extendedAction",
+                        extendedAction: ExtendedActionPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).extendedAction)
+                    };
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -1597,6 +1707,9 @@ class ActionPong$Type extends MessageType<ActionPong> {
         /* Laana.GeneralSuccessPong deleteGroupFolder = 509; */
         if (message.pong.oneofKind === "deleteGroupFolder")
             GeneralSuccessPong.internalBinaryWrite(message.pong.deleteGroupFolder, writer.tag(509, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.ExtendedActionPong extendedAction = 9999; */
+        if (message.pong.oneofKind === "extendedAction")
+            ExtendedActionPong.internalBinaryWrite(message.pong.extendedAction, writer.tag(9999, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -1607,3 +1720,58 @@ class ActionPong$Type extends MessageType<ActionPong> {
  * @generated MessageType for protobuf message Laana.ActionPong
  */
 export const ActionPong = new ActionPong$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class ExtendedActionPong$Type extends MessageType<ExtendedActionPong> {
+    constructor() {
+        super("Laana.ExtendedActionPong", [
+            { no: 1, name: "actionName", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "pongData", kind: "scalar", T: 12 /*ScalarType.BYTES*/ }
+        ]);
+    }
+    create(value?: PartialMessage<ExtendedActionPong>): ExtendedActionPong {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.actionName = "";
+        message.pongData = new Uint8Array(0);
+        if (value !== undefined)
+            reflectionMergePartial<ExtendedActionPong>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ExtendedActionPong): ExtendedActionPong {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string actionName */ 1:
+                    message.actionName = reader.string();
+                    break;
+                case /* bytes pongData */ 2:
+                    message.pongData = reader.bytes();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: ExtendedActionPong, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string actionName = 1; */
+        if (message.actionName !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.actionName);
+        /* bytes pongData = 2; */
+        if (message.pongData.length)
+            writer.tag(2, WireType.LengthDelimited).bytes(message.pongData);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message Laana.ExtendedActionPong
+ */
+export const ExtendedActionPong = new ExtendedActionPong$Type();

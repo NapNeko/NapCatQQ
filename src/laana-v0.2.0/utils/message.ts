@@ -1,7 +1,7 @@
 import { AtType, ChatType, ElementType, NapCatCore, Peer, SendMessageElement, SendTextElement } from '@/core';
 import { NapCatLaanaAdapter } from '..';
-import { OutgoingMessage, SendMessagePing } from '@/laana-v0.1.3/types/action/message';
-import { Peer as LaanaPeer, Peer_Type } from '@/laana-v0.1.3/types/entity/message';
+import { OutgoingMessage, SendMessagePing } from '../types/action/message';
+import { Peer as LaanaPeer, Peer_Type } from '../types/entity/message';
 import faceConfig from '@/core/external/face_config.json';
 
 type Laana2RawConverters = {

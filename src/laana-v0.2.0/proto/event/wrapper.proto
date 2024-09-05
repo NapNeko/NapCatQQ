@@ -29,5 +29,12 @@ message EventWrapper {
     SomeoneRequestToAddBuddyEvent someoneRequestToAddBuddyEvent = 301;
     SomeoneRequestToJoinGroupEvent someoneRequestToJoinGroupEvent = 302;
     SelfInvitedToGroupEvent selfInvitedToGroupEvent = 303;
+
+    ExtendedEvent extendedEvent = 9999;
   }
+}
+
+message ExtendedEvent {
+  string eventName = 1;
+  bytes eventData = 2;
 }

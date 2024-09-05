@@ -1,5 +1,5 @@
-import { NapCatLaanaAdapter } from '@/laana-v0.1.3';
-import { EventWrapper } from '@/laana-v0.1.3/types/event/wrapper';
+import { NapCatLaanaAdapter } from '..';
+import { EventWrapper } from '../types/event/wrapper';
 import { randomUUID } from 'crypto';
 
 export interface ILaanaNetworkAdapter {

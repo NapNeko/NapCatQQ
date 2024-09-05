@@ -31,27 +31,6 @@ message GetFileDataPong {
   bytes data = 1;
 }
 
-message GroupFile {
-  string cacheId = 1;
-  string name = 2;
-  uint64 size = 3;
-  uint32 businessId = 4;
-  string uploaderUin = 5;
-  uint32 uploadTime = 6;
-  uint32 modifyTime = 7;
-  uint32 downloadCount = 8;
-  optional uint32 lastModifyTime = 9;
-  optional uint32 expireTime = 10;
-}
-
-message GroupFolder {
-  string folderId = 1;
-  string name = 2;
-  string creatorUin = 5;
-  uint32 createTime = 6;
-  uint32 fileCount = 11;
-}
-
 message GetGroupFileListPing {
   string groupCode = 1;
   optional string folderId = 2;
