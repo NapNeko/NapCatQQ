@@ -21,7 +21,8 @@ for /f "tokens=2*" %%a in ('reg query "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\M
 )
 
 :napcat_boot
-for %%a in (%RetString%) do (
+:: %RetString% 增加引号，解决QQ目录包含空格的问题，比如安装在：C:\Program Files\Tencent\QQNT
+for %%a in ("%RetString%") do (
     set "pathWithoutUninstall=%%~dpa"
 )
 
