@@ -8,6 +8,7 @@ export enum OB11MessageType {
 }
 
 export interface OB11Message {
+    temp_source?: number;
     message_sent_type?: string;
     target_id?: number;  // 自己发送的消息才有此字段
     self_id?: number,
