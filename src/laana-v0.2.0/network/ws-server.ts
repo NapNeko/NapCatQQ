@@ -5,6 +5,7 @@ import { EventWrapper } from '../types/event/wrapper';
 import { RawData, WebSocket, WebSocketServer } from 'ws';
 import { Mutex } from 'async-mutex';
 import { NapCatCore } from '@/core';
+import { Message as LaanaMessage } from '../types/entity/message';
 
 export class LaanaWsServerAdapter implements ILaanaNetworkAdapter {
     wsServer: WebSocketServer;
@@ -114,6 +115,19 @@ export class LaanaWsServerAdapter implements ILaanaNetworkAdapter {
                 }), wsClient);
             });
         }).catch((e) => this.core.context.logger.logError('事件发送失败', e));
+    }
+
+    onMessage(message: LaanaMessage) {
+        this.wsClientsMutex.runExclusive(() => {
+            this.wsClients.forEach(wsClient => {
+                this.checkStateAndReply(LaanaDataWrapper.toBinary({
+                    data: {
+                        oneofKind: 'message',
+                        message: message,
+                    },
+                }), wsClient);
+            });
+        }).catch((e) => this.core.context.logger.logError('消息发送失败', e));
     }
 
     open() {
