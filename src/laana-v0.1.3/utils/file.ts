@@ -20,7 +20,7 @@ export class LaanaFileUtils {
         if (laanaFile.uri.oneofKind === 'cacheId') {
             const cacheFilePath = path.join(this.cacheDir, laanaFile.uri.cacheId);
             if (!fs.existsSync(cacheFilePath)) {
-                throw `请求的缓存不存在: ${laanaFile.uri.cacheId}`;
+                throw Error(`请求的缓存不存在: ${laanaFile.uri.cacheId}`);
             }
             return laanaFile.uri.cacheId;
         } else if (laanaFile.uri.oneofKind === 'url') {
@@ -28,7 +28,7 @@ export class LaanaFileUtils {
         } else if (laanaFile.uri.oneofKind === 'raw') {
             return this.createCacheFromBytes(laanaFile.uri.raw);
         } else {
-            throw '不支持的缓存类型';
+            throw Error('不支持的缓存类型');
         }
     }
 

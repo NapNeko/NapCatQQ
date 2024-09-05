@@ -51,7 +51,7 @@ export class LaanaMessageUtils {
                     )
                 ).msgList[0];
                 if (!replyMsg) {
-                    throw '回复的消息不存在';
+                    throw Error('回复的消息不存在');
                 }
                 const { msgSeq, msgId, senderUin, senderUid } = replyMsg;
                 elements.push({
@@ -82,7 +82,7 @@ export class LaanaMessageUtils {
                     });
                 } else if (content.oneofKind === 'at') {
                     if (params.targetPeer?.type !== Peer_Type.GROUP) {
-                        throw '试图在私聊会话中使用 At';
+                        throw Error('试图在私聊会话中使用 At');
                     }
 
                     if (content.at.uin === '0') {
@@ -105,7 +105,7 @@ export class LaanaMessageUtils {
                     } else {
                         const uid = await this.core.apis.UserApi.getUidByUinV2(content.at.uin);
                         if (!uid) {
-                            throw '查询用户 UID 失败';
+                            throw Error('查询用户 UID 失败');
                         }
                         const info = await this.core.apis.UserApi.getUserDetailInfo(uid);
                         elements.push(at(
@@ -121,7 +121,7 @@ export class LaanaMessageUtils {
                     const sysFaces = faceConfig.sysface;
                     const face = sysFaces.find((systemFace) => systemFace.QSid === parsedFaceId.toString());
                     if (!face) {
-                        throw '未知的表情 ID';
+                        throw Error('未知的表情 ID');
                     }
 
                     const faceType = parsedFaceId >= 222 ?
@@ -147,7 +147,7 @@ export class LaanaMessageUtils {
                     ));
                     fileCacheIds.push(cacheId);
                 } else {
-                    throw '未知的消息内容类型';
+                    throw Error('未知的消息内容类型');
                 }
             }
 
@@ -219,13 +219,13 @@ export class LaanaMessageUtils {
             };
         },
 
-        musicCard: () => { throw 'Unimplemented'; },
+        musicCard: () => { throw Error('Unimplemented'); },
     };
 
     async laanaPeerToRaw(peer: LaanaPeer): Promise<Peer> {
         const peerUid = await this.core.apis.UserApi.getUidByUinV2(peer.uin);
         if (!peerUid) {
-            throw '查询用户 UID 失败';
+            throw Error('查询用户 UID 失败');
         }
         return {
             chatType: peer.type === Peer_Type.GROUP ? ChatType.KCHATTYPEGROUP : ChatType.KCHATTYPEC2C,
@@ -236,7 +236,7 @@ export class LaanaMessageUtils {
 
     async laanaMessageToRaw(msg: OutgoingMessage, params: SendMessagePing) {
         if (!msg.content.oneofKind) {
-            throw '消息内容类型未知';
+            throw Error('消息内容类型未知');
         }
         return this.l2r[msg.content.oneofKind](
             // eslint-disable-next-line

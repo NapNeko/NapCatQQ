@@ -31,7 +31,7 @@ export class LaanaMessageActionHandler {
                 estimatedSendMsgTimeout,
             );
             if (!sentMsg) {
-                throw '消息发送失败';
+                throw Error('消息发送失败');
             }
             return {
                 msgId: sentMsg.msgId
