@@ -115,6 +115,7 @@ export class OneBotMsgApi {
                         file_id: encodedFileId,
                         url: await this.core.apis.FileApi.getImageUrl(element),
                         file_size: element.fileSize,
+                        file_unique: element.fileName
                     },
                 };
             } catch (e: any) {
@@ -129,20 +130,6 @@ export class OneBotMsgApi {
                 peerUid: msg.peerUid,
                 guildId: '',
             };
-            await this.core.apis.FileApi.addFileCache(
-                {
-                    peerUid: msg.peerUid,
-                    chatType: msg.chatType,
-                    guildId: '',
-                },
-                msg.msgId,
-                msg.msgSeq,
-                msg.senderUid,
-                elementWrapper.elementId,
-                elementWrapper.elementType.toString(),
-                element.fileSize,
-                element.fileName,
-            );
             return {
                 type: OB11MessageDataType.file,
                 data: {
@@ -151,6 +138,7 @@ export class OneBotMsgApi {
                     url: element.filePath,
                     file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId),
                     file_size: element.fileSize,
+                    file_unique: element.fileName,
                 },
             };
         },
@@ -182,20 +170,6 @@ export class OneBotMsgApi {
         },
 
         marketFaceElement: async (_, msg, elementWrapper) => {
-            await this.core.apis.FileApi.addFileCache(
-                {
-                    peerUid: msg.peerUid,
-                    chatType: msg.chatType,
-                    guildId: '',
-                },
-                msg.msgId,
-                msg.msgSeq,
-                msg.senderUid,
-                elementWrapper.elementId,
-                elementWrapper.elementType.toString(),
-                '0',
-                'marketface',
-            );
             const peer = {
                 chatType: msg.chatType,
                 peerUid: msg.peerUid,
@@ -208,6 +182,7 @@ export class OneBotMsgApi {
                     file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId),
                     path: elementWrapper.elementId,
                     url: elementWrapper.elementId,
+                    file_unique: _.key
                 },
             };
         },
@@ -283,21 +258,6 @@ export class OneBotMsgApi {
                 videoDownUrl = element.filePath;
             }
 
-            await this.core.apis.FileApi.addFileCache(
-                {
-                    peerUid: msg.peerUid,
-                    chatType: msg.chatType,
-                    guildId: '',
-                },
-                msg.msgId,
-                msg.msgSeq,
-                msg.senderUid,
-                elementWrapper.elementId,
-                elementWrapper.elementType.toString(),
-                element.fileSize ?? '0',
-                element.fileName,
-            );
-
             return {
                 type: OB11MessageDataType.video,
                 data: {
@@ -306,6 +266,7 @@ export class OneBotMsgApi {
                     url: videoDownUrl,
                     file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId),
                     file_size: element.fileSize,
+                    file_unique: element.fileName,
                 },
             };
         },
@@ -316,20 +277,6 @@ export class OneBotMsgApi {
                 peerUid: msg.peerUid,
                 guildId: '',
             };
-            await this.core.apis.FileApi.addFileCache(
-                {
-                    peerUid: msg.peerUid,
-                    chatType: msg.chatType,
-                    guildId: '',
-                },
-                msg.msgId,
-                msg.msgSeq,
-                msg.senderUid,
-                elementWrapper.elementId,
-                elementWrapper.elementType.toString(),
-                element.fileSize || '0',
-                element.fileUuid || '',
-            );
             return {
                 type: OB11MessageDataType.voice,
                 data: {
