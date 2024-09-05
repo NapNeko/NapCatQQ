@@ -13,9 +13,13 @@ insert_final_newline = true
 charset = utf-8
 
 # 2 space indentation
-[*.{cjs,mjs,js,jsx,ts,tsx,css,scss,sass,html,json}]
+[*.{cjs,mjs,js,jsx,ts,tsx,css,scss,sass,html}]
 indent_style = space
 indent_size = 4
+
+[*.json]
+indent_style = space
+indent_size = 2
 
 [*.bat]
 charset = latin1
