@@ -677,8 +677,10 @@ export class OneBotMsgApi {
             if (ret.result === 0) {
                 resMsg.group_id = parseInt(ret.tmpChatInfo!.groupCode);
                 resMsg.sender.nickname = ret.tmpChatInfo!.fromNick;
+                resMsg.temp_source = resMsg.group_id;
             } else {
                 resMsg.group_id = 284840486; //兜底数据
+                resMsg.temp_source = resMsg.group_id;
                 resMsg.sender.nickname = '临时会话';
             }
         }
