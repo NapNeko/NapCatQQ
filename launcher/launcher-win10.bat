@@ -21,13 +21,12 @@ for /f "tokens=2*" %%a in ('reg query "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\M
 )
 
 :napcat_boot
-for %%a in (%RetString%) do (
+for %%a in ("%RetString%") do (
     set "pathWithoutUninstall=%%~dpa"
 )
 
 SET QQPath=%pathWithoutUninstall%QQ.exe
 
-REM 拿不到QQ路径则退出
 if not exist "%QQpath%" (
     echo provided QQ path is invalid: %QQpath%
     pause
