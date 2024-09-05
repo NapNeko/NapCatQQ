@@ -17,12 +17,12 @@ export class LaanaWsServerAdapter implements ILaanaNetworkAdapter {
     constructor(
         public ip: string,
         public port: number,
+        public enableHeartbeat: boolean,
         public heartbeatInterval: number,
         public token: string,
         public core: NapCatCore,
         public laana: NapCatLaanaAdapter,
     ) {
-        this.heartbeatInterval = heartbeatInterval;
         this.wsServer = new WebSocketServer({
             port: port,
             host: ip,
