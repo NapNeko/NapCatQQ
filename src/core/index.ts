@@ -29,6 +29,7 @@ import { NapCatConfigLoader } from '@/core/helper/config';
 import os from 'node:os';
 import { NodeIKernelGroupListener, NodeIKernelMsgListener, NodeIKernelProfileListener } from '@/core/listeners';
 import { proxiedListenerOf } from '@/common/proxy-handler';
+import { NapCatEventChannel } from '@/core/events';
 
 export * from './wrapper';
 export * from './entities';
@@ -69,6 +70,8 @@ export class NapCatCore {
     util: NodeQQNTWrapperUtil;
     configLoader: NapCatConfigLoader;
 
+    eventChannel: NapCatEventChannel;
+
     // 通过构造器递过去的 runtime info 应该尽量少
     constructor(context: InstanceContext, selfInfo: SelfInfo) {
         this.selfInfo = selfInfo;
@@ -105,6 +108,8 @@ export class NapCatCore {
             this.configLoader.configData.fileLogLevel as LogLevel,
             this.configLoader.configData.consoleLogLevel as LogLevel,
         );
+
+        this.eventChannel = new NapCatEventChannel(this);
     }
 
     get dataPath(): string {
