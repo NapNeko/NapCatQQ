@@ -98,7 +98,7 @@ export class NapCatOneBot11Adapter {
         if (ob11Config.http.enablePost) {
             ob11Config.http.postUrls.forEach(url => {
                 this.networkManager.registerAdapter(new OB11ActiveHttpAdapter(
-                    url, ob11Config.token, this.core, this,
+                    url, ob11Config.http.secret, this.core, this,
                 ));
             });
         }
@@ -168,7 +168,7 @@ export class NapCatOneBot11Adapter {
             if (now.http.enablePost) {
                 now.http.postUrls.forEach(url => {
                     this.networkManager.registerAdapterAndOpen(new OB11ActiveHttpAdapter(
-                        url, now.token, this.core, this,
+                        url, now.http.secret, this.core, this,
                     ));
                 });
             } else {
@@ -182,7 +182,7 @@ export class NapCatOneBot11Adapter {
                 );
                 for (const url of added) {
                     await this.networkManager.registerAdapterAndOpen(new OB11ActiveHttpAdapter(
-                        url, now.token, this.core, this,
+                        url, now.http.secret, this.core, this,
                     ));
                 }
             }
