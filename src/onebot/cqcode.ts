@@ -66,10 +66,7 @@ export function encodeCQCode(data: OB11MessageData) {
 
     let result = '[CQ:' + data.type;
     for (const name in data.data) {
-        const value =
-            // eslint-disable-next-line
-            // @ts-ignore
-            data.data[name];
+        const value = (data.data as any)[name];
         if (value === undefined) {
             continue;
         }
