@@ -1,7 +1,7 @@
 import { NapCatLaanaAdapter } from '..';
 import { EventWrapper } from '../types/event/wrapper';
 import { randomUUID } from 'crypto';
-import { Message as LaanaMessage } from '@/laana-v0.2.0/types/entity/message';
+import { Message as LaanaMessage } from '../types/entity/message';
 
 export interface ILaanaNetworkAdapter {
     laana: NapCatLaanaAdapter;
