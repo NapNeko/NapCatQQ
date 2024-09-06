@@ -464,6 +464,13 @@ export class LaanaMessageUtils {
                         displayText: firstElement.multiForwardMsgElement.xmlContent,
                     }
                 };
+            } else if (firstElement.arkElement) {
+                return {
+                    oneofKind: 'arkMessage',
+                    arkMessage: {
+                        json: firstElement.arkElement.bytesData,
+                    }
+                };
             } else {
                 this.core.context.logger.logWarn('未知的消息元素类型', firstElement.elementType);
                 return {
