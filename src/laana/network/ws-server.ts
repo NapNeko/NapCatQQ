@@ -61,23 +61,41 @@ export class LaanaWsServerAdapter implements ILaanaNetworkAdapter {
                             this.core.context.logger.logError('未实现的动作名', actionName);
                             return;
                         }
-                        // eslint-disable-next-line
-                        // @ts-ignore
-                        const ret = actionHandler(data.data.actionPing.ping[actionName]);
-                        this.checkStateAndReply(LaanaDataWrapper.toBinary({
-                            data: {
-                                oneofKind: 'actionPong',
-                                actionPong: {
-                                    clientPingId: data.data.actionPing.clientPingId,
-                                    // eslint-disable-next-line
-                                    // @ts-ignore
-                                    pong: {
-                                        oneofKind: actionName,
-                                        [actionName]: ret,
-                                    }
+                        try {
+                            // eslint-disable-next-line
+                            // @ts-ignore
+                            const ret = await actionHandler(data.data.actionPing.ping[actionName]);
+                            this.checkStateAndReply(LaanaDataWrapper.toBinary({
+                                data: {
+                                    oneofKind: 'actionPong',
+                                    actionPong: {
+                                        clientPingId: data.data.actionPing.clientPingId,
+                                        // eslint-disable-next-line
+                                        // @ts-ignore
+                                        pong: {
+                                            oneofKind: actionName,
+                                            [actionName]: ret,
+                                        },
+                                    },
                                 },
-                            },
-                        }), wsClient);
+                            }), wsClient);
+                        } catch (e: any) {
+                            this.core.context.logger.logError('处理动作时出现错误', e);
+                            this.checkStateAndReply(LaanaDataWrapper.toBinary({
+                                data: {
+                                    oneofKind: 'actionPong',
+                                    actionPong: {
+                                        clientPingId: data.data.actionPing.clientPingId,
+                                        pong: {
+                                            oneofKind: 'failed',
+                                            failed: {
+                                                reason: e.toString(),
+                                            }
+                                        },
+                                    },
+                                },
+                            }), wsClient);
+                        }
                     } else {
                         this.core.context.logger.logWarn('未知的数据包类型', data.data.oneofKind);
                     }
