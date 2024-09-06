@@ -27,6 +27,7 @@ import { NapCatOneBot11Adapter } from '@/onebot';
 import { InitWebUi } from '@/webui';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { napCatVersion } from '@/common/version';
+import { NapCatLaanaAdapter } from '@/laana-v0.2.0';
 
 program.option('-q, --qq [number]', 'QQ号').parse(process.argv);
 const cmdOptions = program.opts();
@@ -282,8 +283,7 @@ export class NapCatShell {
         };
         this.core = new NapCatCore(this.context, selfInfo);
 
-        // TODO: complete ob11 adapter initialization logic
-        new NapCatOneBot11Adapter(this.core, this.context, pathWrapper);
+        new NapCatLaanaAdapter(this.core, this.context, pathWrapper);
     }
 }
 

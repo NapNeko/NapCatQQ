@@ -9,6 +9,7 @@ import { NodeIKernelLoginService } from '@/core/services';
 import { NodeIQQNTWrapperSession, WrapperNodeApi } from '@/core/wrapper';
 import { InitWebUi, WebUiConfig } from '@/webui';
 import { NapCatOneBot11Adapter } from '@/onebot';
+import { NapCatLaanaAdapter } from '@/laana-v0.2.0';
 
 //Framework ES入口文件
 export async function getWebUiUrl() {
@@ -51,7 +52,7 @@ export async function NCoreInitFramework(
     //启动WebUi
     InitWebUi(logger, pathWrapper).then().catch(logger.logError);
     //初始化LLNC的Onebot实现
-    new NapCatOneBot11Adapter(loaderObject.core, loaderObject.context, pathWrapper);
+    new NapCatLaanaAdapter(loaderObject.core, loaderObject.context, pathWrapper);
 }
 
 export class NapCatFramework {
