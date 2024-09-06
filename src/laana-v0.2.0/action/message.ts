@@ -15,7 +15,7 @@ export class LaanaMessageActionHandler {
             let cacheSize = 0;
             try {
                 for (const cacheId of fileCacheIds) {
-                    cacheSize += fs.statSync(this.laana.utils.file.toLocalPath(cacheId)).size;
+                    cacheSize += fs.statSync(await this.laana.utils.file.toLocalPath(cacheId)).size;
                 }
             } catch (e) {
                 this.core.context.logger.logWarn('文件缓存大小计算失败', e);
