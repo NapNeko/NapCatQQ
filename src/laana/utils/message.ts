@@ -4,7 +4,8 @@ import {
     ElementType,
     NapCatCore,
     Peer,
-    RawMessage, ReplyElement,
+    RawMessage,
+    ReplyElement,
     SendMessageElement,
     SendTextElement,
 } from '@/core';
@@ -232,7 +233,9 @@ export class LaanaMessageUtils {
     };
 
     async laanaPeerToRaw(peer: LaanaPeer): Promise<Peer> {
-        const peerUid = await this.core.apis.UserApi.getUidByUinV2(peer.uin);
+        const peerUid = peer.type === Peer_Type.BUDDY ?
+            await this.core.apis.UserApi.getUidByUinV2(peer.uin) :
+            peer.uin;
         if (!peerUid) {
             throw Error('查询用户 UID 失败');
         }
