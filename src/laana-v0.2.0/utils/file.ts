@@ -1,4 +1,4 @@
-import { ChatType, FileElement, NapCatCore } from '@/core';
+import { ChatType, NapCatCore } from '@/core';
 import { NapCatLaanaAdapter } from '..';
 import { File as LaanaFile } from '../types/entity/file';
 import path from 'path';
