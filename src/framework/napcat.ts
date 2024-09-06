@@ -9,7 +9,7 @@ import { NodeIKernelLoginService } from '@/core/services';
 import { NodeIQQNTWrapperSession, WrapperNodeApi } from '@/core/wrapper';
 import { InitWebUi, WebUiConfig } from '@/webui';
 import { NapCatOneBot11Adapter } from '@/onebot';
-import { NapCatLaanaAdapter } from '@/laana-v0.2.0';
+import { NapCatLaanaAdapter } from '@/laana';
 
 //Framework ES入口文件
 export async function getWebUiUrl() {

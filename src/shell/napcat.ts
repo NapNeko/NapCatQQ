@@ -27,7 +27,7 @@ import { NapCatOneBot11Adapter } from '@/onebot';
 import { InitWebUi } from '@/webui';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { napCatVersion } from '@/common/version';
-import { NapCatLaanaAdapter } from '@/laana-v0.2.0';
+import { NapCatLaanaAdapter } from '@/laana';
 
 program.option('-q, --qq [number]', 'QQ号').parse(process.argv);
 const cmdOptions = program.opts();
