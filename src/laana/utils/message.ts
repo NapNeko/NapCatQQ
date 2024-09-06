@@ -258,11 +258,8 @@ export class LaanaMessageUtils {
         );
     }
 
-    async rawMessageToLaana(msg: RawMessage): Promise<LaanaMessage | null> {
-        const msgContentOrNull = await this.createLaanaMessageContent(msg);
-        if (!msgContentOrNull) {
-            return null;
-        }
+    async rawMessageToLaana(msg: RawMessage): Promise<LaanaMessage> {
+        const msgContent = await this.createLaanaMessageContent(msg);
         return {
             msgId: msg.msgId,
             time: BigInt(msg.msgTime),
@@ -272,15 +269,20 @@ export class LaanaMessageUtils {
                 type: msg.chatType === ChatType.KCHATTYPEGROUP ?
                     Peer_Type.GROUP : Peer_Type.BUDDY,
             },
-            content: msgContentOrNull,
+            content: msgContent,
         };
     }
 
-    private async createLaanaMessageContent(msg: RawMessage): Promise<LaanaMessage['content'] | null> {
+    private async createLaanaMessageContent(msg: RawMessage): Promise<LaanaMessage['content']> {
         const firstElement = msg.elements[0];
 
         if (!firstElement) {
-            throw Error('消息内容为空');
+            return {
+                oneofKind: 'unknownMessage',
+                unknownMessage: {
+                    rawContent: '',
+                }
+            };
         }
 
         if (
@@ -357,10 +359,6 @@ export class LaanaMessageUtils {
             }
             return { oneofKind: 'bubble', bubble };
         } else {
-            if (msg.elements.length > 1) {
-                this.core.context.logger.logWarn('意外的消息链长度', msg.elements.length, '将只解析第一个元素');
-            }
-
             if (firstElement.fileElement) {
                 return {
                     oneofKind: 'file',
@@ -463,13 +461,17 @@ export class LaanaMessageUtils {
                     oneofKind: 'forwardMsgRef',
                     forwardMsgRef: {
                         refId: msg.msgId,
-                        // TODO: remove this field, since it is redundant to query forwarded msg with another refId
                         displayText: firstElement.multiForwardMsgElement.xmlContent,
                     }
                 };
             } else {
                 this.core.context.logger.logWarn('未知的消息元素类型', firstElement.elementType);
-                return null; // TODO: add 'extended' message content type
+                return {
+                    oneofKind: 'unknownMessage',
+                    unknownMessage: {
+                        rawContent: JSON.stringify(msg.elements),
+                    }
+                };
             }
         }
     }
