@@ -1,7 +1,7 @@
 import { AtType, ChatType, ElementType, NapCatCore, Peer, SendMessageElement, SendTextElement } from '@/core';
 import { NapCatLaanaAdapter } from '..';
 import { OutgoingMessage, SendMessagePing } from '../types/action/message';
-import { Peer as LaanaPeer, Peer_Type } from '../types/entity/message';
+import { Bubble, Message as LaanaMessage, Peer as LaanaPeer, Peer_Type } from '../types/entity/message';
 import faceConfig from '@/core/external/face_config.json';
 
 type Laana2RawConverters = {
@@ -143,7 +143,7 @@ export class LaanaMessageUtils {
                 } else if (content.oneofKind === 'image') {
                     const cacheId = await this.laana.utils.file.resolveCacheIdFromLaanaFile(content.image);
                     elements.push(await this.core.apis.FileApi.createValidSendPicElement(
-                        this.laana.utils.file.toLocalPath(cacheId)
+                        await this.laana.utils.file.toLocalPath(cacheId)
                     ));
                     fileCacheIds.push(cacheId);
                 } else {
@@ -159,7 +159,7 @@ export class LaanaMessageUtils {
             return {
                 elements: [
                     await this.core.apis.FileApi.createValidSendFileElement(
-                        this.laana.utils.file.toLocalPath(cacheId),
+                        await this.laana.utils.file.toLocalPath(cacheId),
                         msgContent.name,
                     ),
                 ],
@@ -172,7 +172,7 @@ export class LaanaMessageUtils {
             return {
                 elements: [
                     await this.core.apis.FileApi.createValidSendPicElement(
-                        this.laana.utils.file.toLocalPath(cacheId),
+                        await this.laana.utils.file.toLocalPath(cacheId),
                         msgContent.displayText, // TODO: make display text optional
                         // TODO: add 'sub type' field
                     )
@@ -199,7 +199,7 @@ export class LaanaMessageUtils {
             return {
                 elements: [
                     await this.core.apis.FileApi.createValidSendVideoElement(
-                        this.laana.utils.file.toLocalPath(cacheId),
+                        await this.laana.utils.file.toLocalPath(cacheId),
                         // TODO: add file name and thumb path
                     ),
                 ],
@@ -212,7 +212,7 @@ export class LaanaMessageUtils {
             return {
                 elements: [
                     await this.core.apis.FileApi.createValidSendPttElement(
-                        this.laana.utils.file.toLocalPath(cacheId),
+                        await this.laana.utils.file.toLocalPath(cacheId),
                     )
                 ],
                 fileCacheIds: [cacheId],

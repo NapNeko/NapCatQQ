@@ -1,4 +1,4 @@
-import { NapCatCore } from '@/core';
+import { ChatType, FileElement, NapCatCore } from '@/core';
 import { NapCatLaanaAdapter } from '..';
 import { File as LaanaFile } from '../types/entity/file';
 import path from 'path';
@@ -18,10 +18,6 @@ export class LaanaFileUtils {
 
     async resolveCacheIdFromLaanaFile(laanaFile: LaanaFile) {
         if (laanaFile.uri.oneofKind === 'cacheId') {
-            const cacheFilePath = path.join(this.cacheDir, laanaFile.uri.cacheId);
-            if (!fs.existsSync(cacheFilePath)) {
-                throw Error(`请求的缓存不存在: ${laanaFile.uri.cacheId}`);
-            }
             return laanaFile.uri.cacheId;
         } else if (laanaFile.uri.oneofKind === 'url') {
             return this.createCacheFromUrl(laanaFile.uri.url);
@@ -32,7 +28,24 @@ export class LaanaFileUtils {
         }
     }
 
-    toLocalPath(cacheId: string) {
+    async toLocalPath(cacheId: string, forceRevalidate = false) {
+        const cacheFilePath = path.join(this.cacheDir, cacheId);
+        if (!fs.existsSync(cacheFilePath) || forceRevalidate) {
+            if (cacheId.startsWith('@QQFileElement')) {
+                const { msgId, chatType, peerUid, fileElementId } = this.decodeFileElementCacheId(cacheId);
+                const downloadPath = await this.core.apis.FileApi.downloadMedia(
+                    msgId,
+                    chatType,
+                    peerUid,
+                    fileElementId,
+                    '',
+                    '',
+                );
+                await fsPromises.symlink(downloadPath, cacheFilePath);
+            } else {
+                throw Error(`请求的缓存不存在: ${cacheId}`);
+            }
+        }
         return path.join(this.cacheDir, cacheId);
     }
 
@@ -47,5 +60,27 @@ export class LaanaFileUtils {
 
     async createCacheFromUrl(url: string) {
         return this.createCacheFromBytes(await httpDownload({ url }));
+    }
+
+    encodeFileElementToCacheId(
+        msgId: string,
+        chatType: ChatType,
+        peerUid: string,
+        fileElementId: string
+    ) {
+        return `QQFileElement@${msgId}@${chatType}@${peerUid}@${fileElementId}`;
+    }
+
+    decodeFileElementCacheId(cacheId: string) {
+        if (!cacheId.startsWith('QQFileElement')) {
+            throw Error('不支持的缓存 ID');
+        }
+        const [, msgId, chatType, peerUid, fileElementId] = cacheId.split('@');
+        return {
+            msgId,
+            chatType: parseInt(chatType),
+            peerUid,
+            fileElementId
+        };
     }
 }
