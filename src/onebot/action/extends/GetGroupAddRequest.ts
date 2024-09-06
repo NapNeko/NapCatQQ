@@ -11,7 +11,7 @@ export default class GetGroupAddRequest extends BaseAction<null, OB11GroupReques
     actionName = ActionName.GetGroupIgnoreAddRequest;
 
     async _handle(payload: null): Promise<OB11GroupRequestNotify[] | null> {
-        const data = await this.core.apis.GroupApi.getGroupIgnoreNotifies();
+        // const data = await this.core.apis.GroupApi.getGroupIgnoreNotifies();
         // log(data);
         // const notifies: GroupNotify[] = data.notifies.filter(notify => notify.status === GroupNotifyStatus.WAIT_HANDLE);
         // const returnData: OB11GroupRequestNotify[] = [];
