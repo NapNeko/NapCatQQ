@@ -86,3 +86,11 @@ message ForwardMessagePing {
   repeated string msgIds = 2;
   Peer targetPeer = 3;
 }
+
+message GetForwardedMessagesPing {
+  string refId = 1;
+}
+
+message GetForwardedMessagesPong {
+  ForwardMessage forwardMessage = 1;
+}

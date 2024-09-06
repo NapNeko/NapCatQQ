@@ -133,11 +133,23 @@ export interface Message {
          */
         xmlMessage: XmlMessage;
     } | {
-        oneofKind: "jsonMessage";
+        oneofKind: "arkMessage";
         /**
-         * @generated from protobuf field: Laana.JsonMessage jsonMessage = 23;
+         * @generated from protobuf field: Laana.ArkMessage arkMessage = 23;
          */
-        jsonMessage: JsonMessage;
+        arkMessage: ArkMessage;
+    } | {
+        oneofKind: "unknownMessage";
+        /**
+         * @generated from protobuf field: Laana.UnknownMessage unknownMessage = 98;
+         */
+        unknownMessage: UnknownMessage;
+    } | {
+        oneofKind: "extendedMessage";
+        /**
+         * @generated from protobuf field: Laana.ExtendedMessage extendedMessage = 99;
+         */
+        extendedMessage: ExtendedMessage;
     } | {
         oneofKind: undefined;
     };
@@ -418,13 +430,39 @@ export interface XmlMessage {
     xml: string;
 }
 /**
- * @generated from protobuf message Laana.JsonMessage
+ * @generated from protobuf message Laana.ArkMessage
  */
-export interface JsonMessage {
+export interface ArkMessage {
     /**
      * @generated from protobuf field: string json = 1;
      */
     json: string;
+}
+/**
+ * @generated from protobuf message Laana.UnknownMessage
+ */
+export interface UnknownMessage {
+    /**
+     * @generated from protobuf field: string rawContent = 1;
+     */
+    rawContent: string;
+    /**
+     * @generated from protobuf field: optional string typeIdentifier = 2;
+     */
+    typeIdentifier?: string;
+}
+/**
+ * @generated from protobuf message Laana.ExtendedMessage
+ */
+export interface ExtendedMessage {
+    /**
+     * @generated from protobuf field: string type = 1;
+     */
+    type: string;
+    /**
+     * @generated from protobuf field: bytes content = 2;
+     */
+    content: Uint8Array;
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class Peer$Type extends MessageType<Peer> {
@@ -501,7 +539,9 @@ class Message$Type extends MessageType<Message> {
             { no: 20, name: "locationCard", kind: "message", oneof: "content", T: () => LocationCard },
             { no: 21, name: "forwardMsgRef", kind: "message", oneof: "content", T: () => ForwardMessageRef },
             { no: 22, name: "xmlMessage", kind: "message", oneof: "content", T: () => XmlMessage },
-            { no: 23, name: "jsonMessage", kind: "message", oneof: "content", T: () => JsonMessage }
+            { no: 23, name: "arkMessage", kind: "message", oneof: "content", T: () => ArkMessage },
+            { no: 98, name: "unknownMessage", kind: "message", oneof: "content", T: () => UnknownMessage },
+            { no: 99, name: "extendedMessage", kind: "message", oneof: "content", T: () => ExtendedMessage }
         ]);
     }
     create(value?: PartialMessage<Message>): Message {
@@ -603,10 +643,22 @@ class Message$Type extends MessageType<Message> {
                         xmlMessage: XmlMessage.internalBinaryRead(reader, reader.uint32(), options, (message.content as any).xmlMessage)
                     };
                     break;
-                case /* Laana.JsonMessage jsonMessage */ 23:
+                case /* Laana.ArkMessage arkMessage */ 23:
                     message.content = {
-                        oneofKind: "jsonMessage",
-                        jsonMessage: JsonMessage.internalBinaryRead(reader, reader.uint32(), options, (message.content as any).jsonMessage)
+                        oneofKind: "arkMessage",
+                        arkMessage: ArkMessage.internalBinaryRead(reader, reader.uint32(), options, (message.content as any).arkMessage)
+                    };
+                    break;
+                case /* Laana.UnknownMessage unknownMessage */ 98:
+                    message.content = {
+                        oneofKind: "unknownMessage",
+                        unknownMessage: UnknownMessage.internalBinaryRead(reader, reader.uint32(), options, (message.content as any).unknownMessage)
+                    };
+                    break;
+                case /* Laana.ExtendedMessage extendedMessage */ 99:
+                    message.content = {
+                        oneofKind: "extendedMessage",
+                        extendedMessage: ExtendedMessage.internalBinaryRead(reader, reader.uint32(), options, (message.content as any).extendedMessage)
                     };
                     break;
                 default:
@@ -669,9 +721,15 @@ class Message$Type extends MessageType<Message> {
         /* Laana.XmlMessage xmlMessage = 22; */
         if (message.content.oneofKind === "xmlMessage")
             XmlMessage.internalBinaryWrite(message.content.xmlMessage, writer.tag(22, WireType.LengthDelimited).fork(), options).join();
-        /* Laana.JsonMessage jsonMessage = 23; */
-        if (message.content.oneofKind === "jsonMessage")
-            JsonMessage.internalBinaryWrite(message.content.jsonMessage, writer.tag(23, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.ArkMessage arkMessage = 23; */
+        if (message.content.oneofKind === "arkMessage")
+            ArkMessage.internalBinaryWrite(message.content.arkMessage, writer.tag(23, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.UnknownMessage unknownMessage = 98; */
+        if (message.content.oneofKind === "unknownMessage")
+            UnknownMessage.internalBinaryWrite(message.content.unknownMessage, writer.tag(98, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.ExtendedMessage extendedMessage = 99; */
+        if (message.content.oneofKind === "extendedMessage")
+            ExtendedMessage.internalBinaryWrite(message.content.extendedMessage, writer.tag(99, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -1581,20 +1639,20 @@ class XmlMessage$Type extends MessageType<XmlMessage> {
  */
 export const XmlMessage = new XmlMessage$Type();
 // @generated message type with reflection information, may provide speed optimized methods
-class JsonMessage$Type extends MessageType<JsonMessage> {
+class ArkMessage$Type extends MessageType<ArkMessage> {
     constructor() {
-        super("Laana.JsonMessage", [
+        super("Laana.ArkMessage", [
             { no: 1, name: "json", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
-    create(value?: PartialMessage<JsonMessage>): JsonMessage {
+    create(value?: PartialMessage<ArkMessage>): ArkMessage {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.json = "";
         if (value !== undefined)
-            reflectionMergePartial<JsonMessage>(this, message, value);
+            reflectionMergePartial<ArkMessage>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: JsonMessage): JsonMessage {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ArkMessage): ArkMessage {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
@@ -1613,7 +1671,7 @@ class JsonMessage$Type extends MessageType<JsonMessage> {
         }
         return message;
     }
-    internalBinaryWrite(message: JsonMessage, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+    internalBinaryWrite(message: ArkMessage, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
         /* string json = 1; */
         if (message.json !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.json);
@@ -1624,6 +1682,115 @@ class JsonMessage$Type extends MessageType<JsonMessage> {
     }
 }
 /**
- * @generated MessageType for protobuf message Laana.JsonMessage
+ * @generated MessageType for protobuf message Laana.ArkMessage
  */
-export const JsonMessage = new JsonMessage$Type();
+export const ArkMessage = new ArkMessage$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class UnknownMessage$Type extends MessageType<UnknownMessage> {
+    constructor() {
+        super("Laana.UnknownMessage", [
+            { no: 1, name: "rawContent", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "typeIdentifier", kind: "scalar", opt: true, T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<UnknownMessage>): UnknownMessage {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.rawContent = "";
+        if (value !== undefined)
+            reflectionMergePartial<UnknownMessage>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: UnknownMessage): UnknownMessage {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string rawContent */ 1:
+                    message.rawContent = reader.string();
+                    break;
+                case /* optional string typeIdentifier */ 2:
+                    message.typeIdentifier = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: UnknownMessage, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string rawContent = 1; */
+        if (message.rawContent !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.rawContent);
+        /* optional string typeIdentifier = 2; */
+        if (message.typeIdentifier !== undefined)
+            writer.tag(2, WireType.LengthDelimited).string(message.typeIdentifier);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message Laana.UnknownMessage
+ */
+export const UnknownMessage = new UnknownMessage$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class ExtendedMessage$Type extends MessageType<ExtendedMessage> {
+    constructor() {
+        super("Laana.ExtendedMessage", [
+            { no: 1, name: "type", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "content", kind: "scalar", T: 12 /*ScalarType.BYTES*/ }
+        ]);
+    }
+    create(value?: PartialMessage<ExtendedMessage>): ExtendedMessage {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.type = "";
+        message.content = new Uint8Array(0);
+        if (value !== undefined)
+            reflectionMergePartial<ExtendedMessage>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ExtendedMessage): ExtendedMessage {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string type */ 1:
+                    message.type = reader.string();
+                    break;
+                case /* bytes content */ 2:
+                    message.content = reader.bytes();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: ExtendedMessage, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string type = 1; */
+        if (message.type !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.type);
+        /* bytes content = 2; */
+        if (message.content.length)
+            writer.tag(2, WireType.LengthDelimited).bytes(message.content);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message Laana.ExtendedMessage
+ */
+export const ExtendedMessage = new ExtendedMessage$Type();

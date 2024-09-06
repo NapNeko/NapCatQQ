@@ -32,7 +32,10 @@ message Message {
     LocationCard locationCard = 20;
     ForwardMessageRef forwardMsgRef = 21;
     XmlMessage xmlMessage = 22;
-    JsonMessage jsonMessage = 23;
+    ArkMessage arkMessage = 23;
+
+    UnknownMessage unknownMessage = 98;
+    ExtendedMessage extendedMessage = 99;
   }
 }
 
@@ -136,6 +139,16 @@ message XmlMessage {
   string xml = 1;
 }
 
-message JsonMessage {
+message ArkMessage {
   string json = 1;
+}
+
+message UnknownMessage {
+  string rawContent = 1;
+  optional string typeIdentifier = 2;
+}
+
+message ExtendedMessage {
+  string type = 1;
+  bytes content = 2;
 }

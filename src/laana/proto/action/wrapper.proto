@@ -19,6 +19,7 @@ message ActionPing {
     WithdrawMessagePing withdrawMessage = 106;
     MarkPeerMessageAsReadPing markPeerMessageAsRead = 107;
     ForwardMessagePing forwardMessage = 108;
+    GetForwardedMessagesPing getForwardedMessages = 109;
 
     GetAllBuddiesPing getAllBuddies = 201;
     GetAllGroupsPing getAllGroups = 202;
@@ -86,6 +87,7 @@ message ActionPong {
     GeneralSuccessPong withdrawMessage = 106;
     GeneralSuccessPong markPeerMessageAsRead = 107;
     GeneralSuccessPong forwardMessage = 108;
+    GetForwardedMessagesPong getForwardedMessages = 109;
 
     GetAllBuddiesPong getAllBuddies = 201;
     GetAllGroupsPong getAllGroups = 202;

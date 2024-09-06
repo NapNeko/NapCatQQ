@@ -10,6 +10,7 @@ import { UnknownFieldHandler } from "@protobuf-ts/runtime";
 import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
+import { ForwardMessage } from "../entity/message";
 import { Message } from "../entity/message";
 import { ForwardMessageRef } from "../entity/message";
 import { Peer } from "../entity/message";
@@ -239,6 +240,24 @@ export enum ForwardMessagePing_Operation {
      * @generated from protobuf enum value: AS_PACKED = 1;
      */
     AS_PACKED = 1
+}
+/**
+ * @generated from protobuf message Laana.GetForwardedMessagesPing
+ */
+export interface GetForwardedMessagesPing {
+    /**
+     * @generated from protobuf field: string refId = 1;
+     */
+    refId: string;
+}
+/**
+ * @generated from protobuf message Laana.GetForwardedMessagesPong
+ */
+export interface GetForwardedMessagesPong {
+    /**
+     * @generated from protobuf field: Laana.ForwardMessage forwardMessage = 1;
+     */
+    forwardMessage?: ForwardMessage;
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class OutgoingMessage$Type extends MessageType<OutgoingMessage> {
@@ -1017,3 +1036,96 @@ class ForwardMessagePing$Type extends MessageType<ForwardMessagePing> {
  * @generated MessageType for protobuf message Laana.ForwardMessagePing
  */
 export const ForwardMessagePing = new ForwardMessagePing$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class GetForwardedMessagesPing$Type extends MessageType<GetForwardedMessagesPing> {
+    constructor() {
+        super("Laana.GetForwardedMessagesPing", [
+            { no: 1, name: "refId", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<GetForwardedMessagesPing>): GetForwardedMessagesPing {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.refId = "";
+        if (value !== undefined)
+            reflectionMergePartial<GetForwardedMessagesPing>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: GetForwardedMessagesPing): GetForwardedMessagesPing {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string refId */ 1:
+                    message.refId = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: GetForwardedMessagesPing, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string refId = 1; */
+        if (message.refId !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.refId);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message Laana.GetForwardedMessagesPing
+ */
+export const GetForwardedMessagesPing = new GetForwardedMessagesPing$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class GetForwardedMessagesPong$Type extends MessageType<GetForwardedMessagesPong> {
+    constructor() {
+        super("Laana.GetForwardedMessagesPong", [
+            { no: 1, name: "forwardMessage", kind: "message", T: () => ForwardMessage }
+        ]);
+    }
+    create(value?: PartialMessage<GetForwardedMessagesPong>): GetForwardedMessagesPong {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        if (value !== undefined)
+            reflectionMergePartial<GetForwardedMessagesPong>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: GetForwardedMessagesPong): GetForwardedMessagesPong {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* Laana.ForwardMessage forwardMessage */ 1:
+                    message.forwardMessage = ForwardMessage.internalBinaryRead(reader, reader.uint32(), options, message.forwardMessage);
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: GetForwardedMessagesPong, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* Laana.ForwardMessage forwardMessage = 1; */
+        if (message.forwardMessage)
+            ForwardMessage.internalBinaryWrite(message.forwardMessage, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message Laana.GetForwardedMessagesPong
+ */
+export const GetForwardedMessagesPong = new GetForwardedMessagesPong$Type();

@@ -28,6 +28,7 @@ import { GetBuddyInfoPong } from "./contact";
 import { GetRecentContactListPong } from "./contact";
 import { GetAllGroupsPong } from "./contact";
 import { GetAllBuddiesPong } from "./contact";
+import { GetForwardedMessagesPong } from "./message";
 import { GetHistoryMessagesPong } from "./message";
 import { GetMessagesPong } from "./message";
 import { GetMessagePong } from "./message";
@@ -65,6 +66,7 @@ import { GetBuddyInfoPing } from "./contact";
 import { GetRecentContactListPing } from "./contact";
 import { GetAllGroupsPing } from "./contact";
 import { GetAllBuddiesPing } from "./contact";
+import { GetForwardedMessagesPing } from "./message";
 import { ForwardMessagePing } from "./message";
 import { MarkPeerMessageAsReadPing } from "./message";
 import { WithdrawMessagePing } from "./message";
@@ -132,6 +134,12 @@ export interface ActionPing {
          * @generated from protobuf field: Laana.ForwardMessagePing forwardMessage = 108;
          */
         forwardMessage: ForwardMessagePing;
+    } | {
+        oneofKind: "getForwardedMessages";
+        /**
+         * @generated from protobuf field: Laana.GetForwardedMessagesPing getForwardedMessages = 109;
+         */
+        getForwardedMessages: GetForwardedMessagesPing;
     } | {
         oneofKind: "getAllBuddies";
         /**
@@ -431,6 +439,12 @@ export interface ActionPong {
          */
         forwardMessage: GeneralSuccessPong;
     } | {
+        oneofKind: "getForwardedMessages";
+        /**
+         * @generated from protobuf field: Laana.GetForwardedMessagesPong getForwardedMessages = 109;
+         */
+        getForwardedMessages: GetForwardedMessagesPong;
+    } | {
         oneofKind: "getAllBuddies";
         /**
          * @generated from protobuf field: Laana.GetAllBuddiesPong getAllBuddies = 201;
@@ -658,6 +672,7 @@ class ActionPing$Type extends MessageType<ActionPing> {
             { no: 106, name: "withdrawMessage", kind: "message", oneof: "ping", T: () => WithdrawMessagePing },
             { no: 107, name: "markPeerMessageAsRead", kind: "message", oneof: "ping", T: () => MarkPeerMessageAsReadPing },
             { no: 108, name: "forwardMessage", kind: "message", oneof: "ping", T: () => ForwardMessagePing },
+            { no: 109, name: "getForwardedMessages", kind: "message", oneof: "ping", T: () => GetForwardedMessagesPing },
             { no: 201, name: "getAllBuddies", kind: "message", oneof: "ping", T: () => GetAllBuddiesPing },
             { no: 202, name: "getAllGroups", kind: "message", oneof: "ping", T: () => GetAllGroupsPing },
             { no: 203, name: "getRecentContactList", kind: "message", oneof: "ping", T: () => GetRecentContactListPing },
@@ -755,6 +770,12 @@ class ActionPing$Type extends MessageType<ActionPing> {
                     message.ping = {
                         oneofKind: "forwardMessage",
                         forwardMessage: ForwardMessagePing.internalBinaryRead(reader, reader.uint32(), options, (message.ping as any).forwardMessage)
+                    };
+                    break;
+                case /* Laana.GetForwardedMessagesPing getForwardedMessages */ 109:
+                    message.ping = {
+                        oneofKind: "getForwardedMessages",
+                        getForwardedMessages: GetForwardedMessagesPing.internalBinaryRead(reader, reader.uint32(), options, (message.ping as any).getForwardedMessages)
                     };
                     break;
                 case /* Laana.GetAllBuddiesPing getAllBuddies */ 201:
@@ -994,6 +1015,9 @@ class ActionPing$Type extends MessageType<ActionPing> {
         /* Laana.ForwardMessagePing forwardMessage = 108; */
         if (message.ping.oneofKind === "forwardMessage")
             ForwardMessagePing.internalBinaryWrite(message.ping.forwardMessage, writer.tag(108, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.GetForwardedMessagesPing getForwardedMessages = 109; */
+        if (message.ping.oneofKind === "getForwardedMessages")
+            GetForwardedMessagesPing.internalBinaryWrite(message.ping.getForwardedMessages, writer.tag(109, WireType.LengthDelimited).fork(), options).join();
         /* Laana.GetAllBuddiesPing getAllBuddies = 201; */
         if (message.ping.oneofKind === "getAllBuddies")
             GetAllBuddiesPing.internalBinaryWrite(message.ping.getAllBuddies, writer.tag(201, WireType.LengthDelimited).fork(), options).join();
@@ -1266,6 +1290,7 @@ class ActionPong$Type extends MessageType<ActionPong> {
             { no: 106, name: "withdrawMessage", kind: "message", oneof: "pong", T: () => GeneralSuccessPong },
             { no: 107, name: "markPeerMessageAsRead", kind: "message", oneof: "pong", T: () => GeneralSuccessPong },
             { no: 108, name: "forwardMessage", kind: "message", oneof: "pong", T: () => GeneralSuccessPong },
+            { no: 109, name: "getForwardedMessages", kind: "message", oneof: "pong", T: () => GetForwardedMessagesPong },
             { no: 201, name: "getAllBuddies", kind: "message", oneof: "pong", T: () => GetAllBuddiesPong },
             { no: 202, name: "getAllGroups", kind: "message", oneof: "pong", T: () => GetAllGroupsPong },
             { no: 203, name: "getRecentContactList", kind: "message", oneof: "pong", T: () => GetRecentContactListPong },
@@ -1369,6 +1394,12 @@ class ActionPong$Type extends MessageType<ActionPong> {
                     message.pong = {
                         oneofKind: "forwardMessage",
                         forwardMessage: GeneralSuccessPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).forwardMessage)
+                    };
+                    break;
+                case /* Laana.GetForwardedMessagesPong getForwardedMessages */ 109:
+                    message.pong = {
+                        oneofKind: "getForwardedMessages",
+                        getForwardedMessages: GetForwardedMessagesPong.internalBinaryRead(reader, reader.uint32(), options, (message.pong as any).getForwardedMessages)
                     };
                     break;
                 case /* Laana.GetAllBuddiesPong getAllBuddies */ 201:
@@ -1611,6 +1642,9 @@ class ActionPong$Type extends MessageType<ActionPong> {
         /* Laana.GeneralSuccessPong forwardMessage = 108; */
         if (message.pong.oneofKind === "forwardMessage")
             GeneralSuccessPong.internalBinaryWrite(message.pong.forwardMessage, writer.tag(108, WireType.LengthDelimited).fork(), options).join();
+        /* Laana.GetForwardedMessagesPong getForwardedMessages = 109; */
+        if (message.pong.oneofKind === "getForwardedMessages")
+            GetForwardedMessagesPong.internalBinaryWrite(message.pong.getForwardedMessages, writer.tag(109, WireType.LengthDelimited).fork(), options).join();
         /* Laana.GetAllBuddiesPong getAllBuddies = 201; */
         if (message.pong.oneofKind === "getAllBuddies")
             GetAllBuddiesPong.internalBinaryWrite(message.pong.getAllBuddies, writer.tag(201, WireType.LengthDelimited).fork(), options).join();
