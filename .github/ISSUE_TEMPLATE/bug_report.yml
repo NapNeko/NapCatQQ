@@ -10,6 +10,7 @@ body:
         在提交新的 Bug 反馈前，请确保您：
         * 已经搜索了现有的 issues，并且没有找到可以解决您问题的方法
         * 不与现有的某一 issue 重复
+        * 不涉及[已经停止维护的特性](https://github.com/NapNeko/NapCatQQ?tab=readme-ov-file#挥别昨日)，例如 CQ 码
   - type: input
     id: system-version
     attributes:
