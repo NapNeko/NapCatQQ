@@ -1,4 +1,13 @@
-import { AtType, ChatType, ElementType, NapCatCore, Peer, SendMessageElement, SendTextElement } from '@/core';
+import {
+    AtType,
+    ChatType,
+    ElementType,
+    NapCatCore,
+    Peer,
+    RawMessage, ReplyElement,
+    SendMessageElement,
+    SendTextElement,
+} from '@/core';
 import { NapCatLaanaAdapter } from '..';
 import { OutgoingMessage, SendMessagePing } from '../types/action/message';
 import { Bubble, Message as LaanaMessage, Peer as LaanaPeer, Peer_Type } from '../types/entity/message';
@@ -244,5 +253,256 @@ export class LaanaMessageUtils {
             msg.content[msg.content.oneofKind],
             params
         );
+    }
+
+    async rawMessageToLaana(msg: RawMessage): Promise<LaanaMessage | null> {
+        const msgContentOrNull = await this.createLaanaMessageContent(msg);
+        if (!msgContentOrNull) {
+            return null;
+        }
+        return {
+            msgId: msg.msgId,
+            time: BigInt(msg.msgTime),
+            senderUin: msg.senderUin,
+            peer: {
+                uin: msg.peerUin,
+                type: msg.chatType === ChatType.KCHATTYPEGROUP ?
+                    Peer_Type.GROUP : Peer_Type.BUDDY,
+            },
+            content: msgContentOrNull,
+        };
+    }
+
+    private async createLaanaMessageContent(msg: RawMessage): Promise<LaanaMessage['content'] | null> {
+        const firstElement = msg.elements[0];
+
+        if (!firstElement) {
+            throw Error('消息内容为空');
+        }
+
+        if (
+            // 图文混排消息
+            firstElement.textElement ||
+            firstElement.faceElement ||
+            firstElement.replyElement ||
+            (firstElement.picElement && msg.elements.length > 1)
+        ) {
+            let repliedMsgId: string | undefined;
+            let startingIndex = 0;
+
+            if (firstElement.replyElement) {
+                repliedMsgId = await this.getRepliedMsgId(firstElement.replyElement, msg);
+                startingIndex = 1;
+            }
+            const bubble: Bubble = { segments: [], repliedMsgId };
+            for (let i = startingIndex; i < msg.elements.length; i++) {
+                const element = msg.elements[i];
+                if (element.textElement) {
+                    const textElement = element.textElement;
+                    if (textElement.atType === AtType.notAt) {
+                        bubble.segments.push({
+                            content: {
+                                oneofKind: 'text',
+                                text: textElement.content.replace(/\r/g, '\n'),
+                            },
+                        });
+                    } else if (textElement.atType === AtType.atUser) {
+                        bubble.segments.push({
+                            content: {
+                                oneofKind: 'at',
+                                at: {
+                                    groupCode: msg.peerUin,
+                                    uin: textElement.atUid,
+                                    name: textElement.content.slice(1),
+                                }
+                            },
+                        });
+                    } else { // atAll
+                        bubble.segments.push({
+                            content: {
+                                oneofKind: 'at',
+                                at: {
+                                    groupCode: msg.peerUin,
+                                    uin: '0',
+                                    name: '全体成员',
+                                }
+                            },
+                        });
+                    }
+                } else if (element.faceElement) {
+                    bubble.segments.push({
+                        content: {
+                            oneofKind: 'face',
+                            face: element.faceElement.faceIndex,
+                        },
+                    });
+                } else if (element.picElement) {
+                    bubble.segments.push({
+                        content: {
+                            oneofKind: 'image',
+                            image: {
+                                uri: {
+                                    oneofKind: 'url',
+                                    url: await this.core.apis.FileApi.getImageUrl(element.picElement),
+                                }
+                            }
+                        },
+                    });
+                } else {
+                    this.core.context.logger.logWarn('未知的消息元素类型', element.elementType);
+                }
+            }
+            return { oneofKind: 'bubble', bubble };
+        } else {
+            if (msg.elements.length > 1) {
+                this.core.context.logger.logWarn('意外的消息链长度', msg.elements.length, '将只解析第一个元素');
+            }
+
+            if (firstElement.fileElement) {
+                return {
+                    oneofKind: 'file',
+                    file: {
+                        file: {
+                            uri: {
+                                oneofKind: 'cacheId',
+                                cacheId: this.laana.utils.file
+                                    .encodeFileElementToCacheId(
+                                        msg.msgId,
+                                        msg.chatType,
+                                        msg.peerUid,
+                                        firstElement.elementId
+                                    ),
+                            }
+                        },
+                        name: firstElement.fileElement.fileName,
+                        size: BigInt(firstElement.fileElement.fileSize),
+                    },
+                };
+            } else if (firstElement.picElement) {
+                return {
+                    oneofKind: 'singleImage',
+                    singleImage: {
+                        image: {
+                            uri: {
+                                oneofKind: 'url',
+                                url: await this.core.apis.FileApi.getImageUrl(firstElement.picElement),
+                            }
+                        },
+                        displayText: firstElement.picElement.summary || '[图片]',
+                    }
+                };
+            } else if (firstElement.marketFaceElement) {
+                return {
+                    oneofKind: 'marketFace',
+                    marketFace: {
+                        faceId: firstElement.marketFaceElement.emojiId,
+                        faceKey: firstElement.marketFaceElement.key,
+                        facePackageId: firstElement.marketFaceElement.emojiPackageId,
+                        displayText: firstElement.marketFaceElement.faceName,
+                    }
+                };
+            } else if (firstElement.videoElement) {
+                let cacheId = '';
+                const urls = await this.core.apis.FileApi.getVideoUrl(
+                    {
+                        chatType: msg.chatType,
+                        guildId: msg.guildId,
+                        peerUid: msg.peerUid,
+                    },
+                    msg.msgId,
+                    firstElement.elementId
+                );
+                const urlOrEmpty = urls.find(urlWrapper => urlWrapper.url !== '')?.url;
+                if (!urlOrEmpty) {
+                    this.core.context.logger.logWarn('视频链接获取失败', msg.msgId);
+                    cacheId = this.laana.utils.file.encodeFileElementToCacheId(
+                        msg.msgId,
+                        msg.chatType,
+                        msg.peerUid,
+                        firstElement.elementId
+                    );
+                }
+
+                return {
+                    oneofKind: 'video',
+                    video: {
+                        video: {
+                            uri: urlOrEmpty ? {
+                                oneofKind: 'url',
+                                url: urlOrEmpty,
+                            } : {
+                                oneofKind: 'cacheId',
+                                cacheId,
+                            }
+                        },
+                    }
+                };
+            } else if (firstElement.pttElement) {
+                return {
+                    oneofKind: 'voice',
+                    voice: {
+                        voice: {
+                            uri: {
+                                oneofKind: 'cacheId',
+                                cacheId: this.laana.utils.file.encodeFileElementToCacheId(
+                                    msg.msgId,
+                                    msg.chatType,
+                                    msg.peerUid,
+                                    firstElement.elementId
+                                ),
+                            }
+                        },
+                        duration: 5 // TODO: implement duration field, or... delete it?
+                    }
+                };
+            } else if (firstElement.multiForwardMsgElement) {
+                return {
+                    oneofKind: 'forwardMsgRef',
+                    forwardMsgRef: {
+                        refId: msg.msgId,
+                        // TODO: remove this field, since it is redundant to query forwarded msg with another refId
+                        displayText: firstElement.multiForwardMsgElement.xmlContent,
+                    }
+                };
+            } else {
+                this.core.context.logger.logWarn('未知的消息元素类型', firstElement.elementType);
+                return null; // TODO: add 'extended' message content type
+            }
+        }
+    }
+
+    async getRepliedMsgId(element: ReplyElement, msg: RawMessage) {
+        const record = msg.records.find(
+            msgRecord => msgRecord.msgId === element.sourceMsgIdInRecords
+        );
+
+        if (!(record && element.replyMsgTime && element.senderUidStr)) {
+            this.core.context.logger.logWarn('获取不到引用的消息', element.replayMsgId);
+            return undefined;
+        }
+
+        if (record.peerUin === '284840486') {
+            return record.msgId;
+        }
+
+        const repliedMsgOrEmpty = (await this.core.apis.MsgApi
+            .queryMsgsWithFilterExWithSeqV2(
+                {
+                    chatType: msg.chatType,
+                    guildId: msg.guildId,
+                    peerUid: record.peerUid,
+                },
+                element.replayMsgSeq,
+                element.replyMsgTime,
+                [element.senderUidStr]
+            )
+        ).msgList.find(msg => msg.msgRandom === record.msgRandom);
+
+        if (!repliedMsgOrEmpty) {
+            this.core.context.logger.logWarn('获取不到引用的消息', element.replayMsgId);
+            return undefined;
+        }
+
+        return repliedMsgOrEmpty.msgId;
     }
 }
