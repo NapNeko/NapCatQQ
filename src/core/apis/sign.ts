@@ -214,11 +214,6 @@ export class NTQQMusicSignApi {
         //console.log(MusicReal);
         return { ...MusicReal.data, mid: signedMid };
     }
-
-    async CreateMusicThirdWay1(id: string = '', mid: string = '') {
-
-    }
-
     //转换外域名为 https://qq.ugcimg.cn/v1/cpqcbu4b8870i61bde6k7cbmjgejq8mr3in82qir4qi7ielffv5slv8ck8g42novtmev26i233ujtuab6tvu2l2sjgtupfr389191v00s1j5oh5325j5eqi40774jv1i/khovifoh7jrqd6eahoiv7koh8o
     //https://cgi.connect.qq.com/qqconnectopen/openapi/change_image_url?url=https://th.bing.com/th?id=OSK.b8ed36f1fb1889de6dc84fd81c187773&w=46&h=46&c=11&rs=1&qlt=80&o=6&dpr=2&pid=SANGAM
 

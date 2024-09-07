@@ -17,7 +17,6 @@ export interface QuickActionGroupMessage extends QuickActionPrivateMessage {
     kick?: boolean;
     ban?: boolean;
     ban_duration?: number;
-    //
 }
 
 export interface QuickActionFriendRequest {

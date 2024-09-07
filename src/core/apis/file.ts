@@ -339,12 +339,12 @@ export class NTQQFileApi {
         if (!element) {
             return '';
         }
-        const url: string = element.originImageUrl!;  // 没有域名
+        const url: string = element.originImageUrl ?? '';
         const md5HexStr = element.md5HexStr;
         const fileMd5 = element.md5HexStr;
 
         if (url) {
-            const parsedUrl = new URL(IMAGE_HTTP_HOST + url);//临时解析拼接
+            const parsedUrl = new URL(IMAGE_HTTP_HOST + url);
             const imageAppid = parsedUrl.searchParams.get('appid');
             const isNTFlavoredPic = imageAppid && ['1406', '1407'].includes(imageAppid);
             if (isNTFlavoredPic) {

@@ -19,27 +19,16 @@ export class NTQQMsgApi {
         return this.context.session.getMsgService().getAioFirstViewLatestMsgs(peer, MsgCount);
     }
 
-    async getLatestDbMsgs(peer: Peer, MsgCount: number) {
-        return this.context.session.getMsgService().getLatestDbMsgs(peer, MsgCount);
-    }
-
-    async FetchLongMsg(peer: Peer, msgId: string) {
-        return this.context.session.getMsgService().fetchLongMsg(peer, msgId);
-    }
-
     async sendShowInputStatusReq(peer: Peer, eventType: number) {
         return this.context.session.getMsgService().sendShowInputStatusReq(peer.chatType, eventType, peer.peerUid);
     }
 
     async getMsgEmojiLikesList(peer: Peer, msgSeq: string, emojiId: string, emojiType: string, count: number = 20) {
-        //注意此处emojiType 可选值一般为1-2 2好像是unicode表情dec值 大部分情况 Taged M likiowa
+        //注意此处emojiType 可选值一般为1-2 2好像是unicode表情dec值 大部分情况 Taged Mlikiowa
         return this.context.session.getMsgService().getMsgEmojiLikesList(peer, msgSeq, emojiId, emojiType, '', false, count);
     }
 
     async setEmojiLike(peer: Peer, msgSeq: string, emojiId: string, set: boolean = true) {
-        // nt_qq//global//nt_data//Emoji//emoji-resource//sysface_res/apng/ 下可以看到所有QQ表情预览
-        // nt_qq\global\nt_data\Emoji\emoji-resource\face_config.json 里面有所有表情的id, 自带表情id是QSid, 标准emoji表情id是QCid
-        // 其实以官方文档为准是最好的，https://bot.q.qq.com/wiki/develop/api-v2/openapi/emoji/model.html#EmojiType
         emojiId = emojiId.toString();
         return this.context.session.getMsgService().setMsgEmojiLikes(peer, msgSeq, emojiId, emojiId.length > 3 ? '2' : '1', set);
     }
@@ -107,14 +96,6 @@ export class NTQQMsgApi {
     }
     async getMsgsBySeqAndCount(peer: Peer, seq: string, count: number, desc: boolean, z: boolean) {
         return await this.context.session.getMsgService().getMsgsBySeqAndCount(peer, seq, count, desc, z);
-    }
-    async getMsgBySeqList(peer: Peer, msgSeqList: string[]) {
-        //坏的
-        return await this.context.session.getMsgService().getMsgsBySeqList(peer, msgSeqList);
-    }
-    async getMsgBySeqExFirstMsg(peer: Peer, rootMsgId: string, replyMsgId: string) {
-        const reply = await this.context.session.getMsgService().getSourceOfReplyMsgV2(peer, rootMsgId, replyMsgId);
-        console.log(reply);
     }
     async getMsgExBySeq(peer: Peer, msgSeq: string) {
         const DateNow = Math.floor(Date.now() / 1000);
@@ -200,7 +181,7 @@ export class NTQQMsgApi {
                 await this.PrepareTempChat(peer.peerUid, peer.guildId, member.nick);
             }
         }
-        const msgId = await this.generateMsgUniqueId(peer.chatType, await this.getServerTime());
+        const msgId = await this.generateMsgUniqueId(peer.chatType);
         peer.guildId = msgId;
         const [, msgList] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelMsgService/sendMsg',
@@ -226,12 +207,8 @@ export class NTQQMsgApi {
         return msgList.find(msgRecord => msgRecord.guildId === msgId);
     }
 
-    async generateMsgUniqueId(chatType: number, time: string) {
-        return this.context.session.getMsgService().generateMsgUniqueId(chatType, time);
-    }
-
-    async getServerTime() {
-        return this.context.session.getMSFService().getServerTime();
+    async generateMsgUniqueId(chatType: number) {
+        return this.context.session.getMsgService().generateMsgUniqueId(chatType, this.context.session.getMSFService().getServerTime());
     }
 
     async forwardMsg(srcPeer: Peer, destPeer: Peer, msgIds: string[]) {

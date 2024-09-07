@@ -44,8 +44,8 @@ export class NTQQGroupApi {
         }, pskey);
     }
 
-    async clearGroupNotifiesUnreadCount(unk: boolean) {
-        return this.context.session.getGroupService().clearGroupNotifiesUnreadCount(unk);
+    async clearGroupNotifiesUnreadCount(uk: boolean) {
+        return this.context.session.getGroupService().clearGroupNotifiesUnreadCount(uk);
     }
 
     async setGroupAvatar(gc: string, filePath: string) {
@@ -61,9 +61,9 @@ export class NTQQGroupApi {
         return groupList;
     }
 
-    async getGroupExtFE0Info(GroupCode: string[], forced = true) {
+    async getGroupExtFE0Info(groupCode: string[], forced = true) {
         return this.context.session.getGroupService().getGroupExt0xEF0Info(
-            GroupCode,
+            groupCode,
             [],
             {
                 bindGuildId: 1,
@@ -121,8 +121,8 @@ export class NTQQGroupApi {
         return group;
     }
 
-    async getGroupMemberAll(GroupCode: string, forced = false) {
-        return this.context.session.getGroupService().getAllMemberList(GroupCode, forced);
+    async getGroupMemberAll(groupCode: string, forced = false) {
+        return this.context.session.getGroupService().getAllMemberList(groupCode, forced);
     }
 
     async getGroupMember(groupCode: string | number, memberUinOrUid: string | number) {
@@ -157,8 +157,8 @@ export class NTQQGroupApi {
         }
         return member;
     }
-    async getGroupRecommendContactArkJson(GroupCode: string) {
-        return this.context.session.getGroupService().getGroupRecommendContactArkJson(GroupCode);
+    async getGroupRecommendContactArkJson(groupCode: string) {
+        return this.context.session.getGroupService().getGroupRecommendContactArkJson(groupCode);
     }
 
     async CreatGroupFileFolder(groupCode: string, folderName: string) {
@@ -174,7 +174,6 @@ export class NTQQGroupApi {
     }
 
     async addGroupEssence(GroupCode: string, msgId: string) {
-        // 需要 ob11msgId -> msgId + (peer) -> msgSeq + msgRandom
         const MsgData = await this.context.session.getMsgService().getMsgsIncludeSelf({
             chatType: 2,
             guildId: '',
@@ -185,7 +184,6 @@ export class NTQQGroupApi {
             msgRandom: parseInt(MsgData.msgList[0].msgRandom),
             msgSeq: parseInt(MsgData.msgList[0].msgSeq),
         };
-        // GetMsgByShortID(shortID); -> MsgService.getMsgs(Peer,MsgId,1,false); -> 组出参数
         return this.context.session.getGroupService().addGroupEssence(param);
     }
 
@@ -203,7 +201,6 @@ export class NTQQGroupApi {
             groupCode: GroupCode,
             needDeleteLocalMsg: needDeleteLocalMsg,
         };
-        //应该是直接返回不需要Listener的 未经测试 需测试再发布
         return this.context.session.getGroupService().quitGroupV2(param);
     }
 
@@ -325,8 +322,7 @@ export class NTQQGroupApi {
         if (result.errCode !== 0) {
             throw new Error('获取群成员列表出错,' + result.errMsg);
         }
-
-        this.context.logger.logDebug(`获取群(${groupQQ})成员列表结果:`, `members: ${result.result.infos.size}`); //, Array.from(result.result.infos.values()));
+        this.context.logger.logDebug(`获取群(${groupQQ})成员列表结果:`, `members: ${result.result.infos.size}`);
         return result.result.infos;
     }
 
@@ -357,12 +353,12 @@ export class NTQQGroupApi {
         return this.context.session.getGroupService().operateSysNotify(
             false,
             {
-                'operateType': operateType, // 2 拒绝
-                'targetMsg': {
-                    'seq': seq,  // 通知序列号
-                    'type': type,
-                    'groupCode': groupCode,
-                    'postscript': reason ?? ' ', // 仅传空值可能导致处理失败，故默认给个空格
+                operateType: operateType, // 2 拒绝
+                targetMsg: {
+                    seq: seq,  // 通知序列号
+                    type: type,
+                    groupCode: groupCode,
+                    postscript: reason ?? ' ', // 仅传空值可能导致处理失败，故默认给个空格
                 },
             });
     }
@@ -418,7 +414,6 @@ export class NTQQGroupApi {
     }
 
     async getMemberExtInfo(groupCode: string, uin: string) {
-        // 仅NTQQ 9.9.11 24568测试 容易炸开谨慎使用
         return this.context.session.getGroupService().getMemberExtInfo(
             {
                 groupCode: groupCode,
