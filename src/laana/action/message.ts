@@ -49,6 +49,26 @@ export class LaanaMessageActionHandler {
                     sentMsgOrEmpty.peerUid,
                 ),
             };
-        }
+        },
+
+        getMessage: async (params) => {
+            const { msgId, chatType, peerUid } = this.laana.utils.msg.decodeLaanaMsgId(params.msgId);
+            const msg = await this.core.apis.MsgApi.getMsgsByMsgId(
+                {
+                    chatType,
+                    peerUid,
+                    guildId: '',
+                },
+                [msgId],
+            );
+
+            if (msg.msgList.length === 0) {
+                throw new Error('消息不存在');
+            }
+
+            return {
+                message: await this.laana.utils.msg.rawMessageToLaana(msg.msgList[0]),
+            };
+        },
     };
 }
