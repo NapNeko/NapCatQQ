@@ -10,5 +10,6 @@
         "interval": 30000
       }
     }
-  }
+  },
+  "reportSelfMessage": false
 }

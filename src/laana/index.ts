@@ -47,11 +47,13 @@ export class NapCatLaanaAdapter {
 
     registerEvents() {
         this.core.eventChannel.on('message/receive', async (msg) => {
-            const msgOrEmpty = await this.utils.msg.rawMessageToLaana(msg);
-            if (!msgOrEmpty) {
-                return;
+            await this.networkManager.emitMessage(await this.utils.msg.rawMessageToLaana(msg));
+        });
+
+        this.core.eventChannel.on('message/send', async (msg) => {
+            if (this.configLoader.configData.reportSelfMessage) {
+                await this.networkManager.emitMessage(await this.utils.msg.rawMessageToLaana(msg));
             }
-            await this.networkManager.emitMessage(msgOrEmpty);
         });
     }
 }
