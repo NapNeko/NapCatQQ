@@ -2,34 +2,12 @@ import { AnyCnameRecord } from 'node:dns';
 import { BizKey, ModifyProfileParams, NodeIKernelProfileListener, SimpleInfo, UserDetailInfoByUinV2 } from '@/core';
 import { GeneralCallResult } from '@/core/services/common';
 
-export enum UserDetailSource {
-    KDB,
-    KSERVER
-}
-
-export enum ProfileBizType {
-    KALL,
-    KBASEEXTEND,
-    KVAS,
-    KQZONE,
-    KOTHER
-}
-
 export interface NodeIKernelProfileService {
 
-    getUidByUin(callfrom: string, uin: Array<string>): Promise<Map<string, string>>;//uin->uid
+    getUidByUin(callfrom: string, uin: Array<string>): Promise<Map<string, string>>;
 
     getUinByUid(callfrom: string, uid: Array<string>): Promise<Map<string, string>>;
 
-    // {
-    //   coreInfo: CoreInfo,
-    //   baseInfo: BaseInfo,
-    //   status: null,
-    //   vasInfo: null,
-    //   relationFlags: null,
-    //   otherFlags: null,
-    //   intimate: null
-    // }
     getCoreAndBaseInfo(callfrom: string, uids: string[]): Promise<Map<string, SimpleInfo>>;
 
     fetchUserDetailInfo(trace: string, uids: string[], arg2: number, arg3: number[]): Promise<unknown>;
@@ -50,24 +28,11 @@ export interface NodeIKernelProfileService {
 
     enumAreaOptions(...args: unknown[]): unknown;
 
-    //SimpleInfo
-    // this.uid = "";
-    // this.uid = str;
-    // this.uin = j2;
-    // this.isBuddy = z;
-    // this.coreInfo = coreInfo;
-    // this.baseInfo = baseInfo;
-    // this.status = statusInfo;
-    // this.vasInfo = vasInfo;
-    // this.relationFlags = relationFlag;
-    // this.otherFlags = otherFlag;
-    // this.intimate = intimate;
-
     modifySelfProfile(...args: unknown[]): Promise<unknown>;
 
     modifyDesktopMiniProfile(param: ModifyProfileParams): Promise<GeneralCallResult>;
 
-    setNickName(NickName: string): Promise<unknown>;
+    setNickName(nickName: string): Promise<unknown>;
 
     setLongNick(longNick: string): Promise<unknown>;
 
@@ -95,14 +60,12 @@ export interface NodeIKernelProfileService {
 
     getSelfStatus(): Promise<unknown>;
 
-    //
     setdisableEmojiShortCuts(...args: unknown[]): unknown;
 
     getProfileQzonePicInfo(uid: string, type: number, force: boolean): Promise<unknown>;
 
-    //profileService.getCoreInfo("UserRemarkServiceImpl::getStrangerRemarkByUid", arrayList);
-    getCoreInfo(name: string, arg: any[]): unknown;
+    // UserRemarkServiceImpl::getStrangerRemarkByUid []
+    getCoreInfo(sceneId: string, arg: any[]): unknown;
 
-    //m429253e12.getOtherFlag("FriendListInfoCache_getKernelDataAndPutCache", new ArrayList<>());
     isNull(): boolean;
 }
