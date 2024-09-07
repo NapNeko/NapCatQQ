@@ -43,7 +43,11 @@ export class LaanaMessageActionHandler {
                 throw Error('消息发送失败');
             }
             return {
-                msgId: sentMsgOrEmpty.msgId
+                msgId: this.laana.utils.msg.encodeMsgToLaanaMsgId(
+                    sentMsgOrEmpty.msgId,
+                    sentMsgOrEmpty.chatType,
+                    sentMsgOrEmpty.peerUid,
+                ),
             };
         }
     };

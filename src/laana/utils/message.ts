@@ -282,7 +282,7 @@ export class LaanaMessageUtils {
     async rawMessageToLaana(msg: RawMessage): Promise<LaanaMessage> {
         const msgContent = await this.createLaanaMessageContent(msg);
         return {
-            msgId: msg.msgId,
+            msgId: this.encodeMsgToLaanaMsgId(msg.msgId, msg.chatType, msg.peerUid),
             time: BigInt(msg.msgTime),
             senderUin: msg.senderUin,
             peer: {
@@ -502,6 +502,19 @@ export class LaanaMessageUtils {
                 };
             }
         }
+    }
+
+    encodeMsgToLaanaMsgId(msgId: string, chatType: ChatType, peerUid: string) {
+        return `LaanaMsgId@${msgId}@${chatType}@${peerUid}`;
+    }
+
+    decodeLaanaMsgId(laanaMsgId: string) {
+        const [msgId, chatType, peerUid] = laanaMsgId.split('@').slice(1);
+        return {
+            msgId,
+            chatType: parseInt(chatType),
+            peerUid,
+        };
     }
 
     async getRepliedMsgId(element: ReplyElement, msg: RawMessage) {
