@@ -113,7 +113,7 @@ export class NTQQMsgApi {
         return await this.context.session.getMsgService().getMsgsBySeqList(peer, msgSeqList);
     }
     async getMsgBySeqExFirstMsg(peer: Peer, rootMsgId: string, replyMsgId: string) {
-        let reply = await this.context.session.getMsgService().getSourceOfReplyMsgV2(peer, rootMsgId, replyMsgId);
+        const reply = await this.context.session.getMsgService().getSourceOfReplyMsgV2(peer, rootMsgId, replyMsgId);
         console.log(reply);
     }
     async getMsgExBySeq(peer: Peer, msgSeq: string) {
