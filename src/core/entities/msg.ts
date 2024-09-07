@@ -1,4 +1,4 @@
-import { GroupMemberRole } from '@/core';
+import { GroupMemberRole, Peer } from '@/core';
 
 export interface Peer {
     chatType: ChatType;
@@ -933,4 +933,29 @@ export interface RawMessage {
     records: RawMessage[];
 
     elements: MessageElement[];
+}
+export interface QueryMsgsParams {
+    chatInfo: Peer;
+    filterMsgType: [];
+    filterSendersUid: string[];
+    filterMsgFromTime: string;
+    filterMsgToTime: string;
+    pageLimit: number;
+    isReverseOrder: boolean;
+    isIncludeCurrent: boolean;
+}
+
+export interface TmpChatInfoApi {
+    errMsg: string;
+    result: number;
+    tmpChatInfo?: TmpChatInfo;
+}
+
+export interface TmpChatInfo {
+    chatType: number;
+    fromNick: string;
+    groupCode: string;
+    peerUid: string;
+    sessionType: number;
+    sig: string;
 }
