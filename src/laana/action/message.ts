@@ -96,5 +96,24 @@ export class LaanaMessageActionHandler {
                 }
             };
         },
+
+        getHistoryMessages: async (params) => { // TODO: add 'reverseOrder' field
+            const { msgId } = this.laana.utils.msg.decodeLaanaMsgId(params.lastMsgId);
+            const msgListWrapper = await this.core.apis.MsgApi.getMsgHistory(
+                await this.laana.utils.msg.laanaPeerToRaw(params.targetPeer!),
+                msgId,
+                params.count,
+            );
+            if (msgListWrapper.msgList.length === 0) {
+                this.core.context.logger.logWarn('获取历史消息失败', params.targetPeer!.uin);
+            }
+            return { // TODO: check order
+                messages: await Promise.all(
+                    msgListWrapper.msgList.map(async msg => {
+                        return await this.laana.utils.msg.rawMessageToLaana(msg);
+                    }),
+                ),
+            };
+        },
     };
 }
