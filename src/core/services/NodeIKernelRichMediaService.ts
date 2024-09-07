@@ -99,23 +99,6 @@ export interface NodeIKernelRichMediaService {
 
     getRichMediaFileDir(elementType: number, downType: number, isTemp: boolean): unknown;
 
-    // this.senderUid = "";
-    // this.peerUid = "";
-    // this.guildId = "";
-    // this.elem = new MsgElement();
-    // this.downloadType = i2;
-    // this.thumbSize = i3;
-    // this.msgId = j2;
-    // this.msgRandom = j3;
-    // this.msgSeq = j4;
-    // this.msgTime = j5;
-    // this.chatType = i4;
-    // this.senderUid = str;
-    // this.peerUid = str2;
-    // this.guildId = str3;
-    // this.elem = msgElement;
-    // this.useHttps = num;
-
     getVideoPlayUrlInVisit(arg: {
         downloadType: number,
         thumbSize: number,
@@ -131,7 +114,6 @@ export interface NodeIKernelRichMediaService {
         useHttps: boolean
     }): Promise<unknown>;
 
-    //arg双端number
     isFileExpired(arg: number): unknown;
 
     deleteGroupFolder(GroupCode: string, FolderId: string): Promise<GeneralCallResult & {
@@ -154,7 +136,6 @@ export interface NodeIKernelRichMediaService {
         useHttps: boolean
     }): unknown;
 
-    //arg3为“”
     downloadFileForModelId(peer: Peer, ModelId: string[], unknown: string): Promise<unknown>;
 
     //第三个参数 Array<Type>
