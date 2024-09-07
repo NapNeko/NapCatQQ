@@ -42,18 +42,6 @@ export class NapCatLaanaAdapter {
             );
         }
 
-        this.registerEvents();
-    }
-
-    registerEvents() {
-        this.core.eventChannel.on('message/receive', async (msg) => {
-            await this.networkManager.emitMessage(await this.utils.msg.rawMessageToLaana(msg));
-        });
-
-        this.core.eventChannel.on('message/send', async (msg) => {
-            if (this.configLoader.configData.reportSelfMessage) {
-                await this.networkManager.emitMessage(await this.utils.msg.rawMessageToLaana(msg));
-            }
-        });
+        this.utils.msg.installEventListeners();
     }
 }

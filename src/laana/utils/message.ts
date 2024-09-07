@@ -253,6 +253,18 @@ export class LaanaMessageUtils {
         musicCard: () => { throw Error('Unimplemented'); },
     };
 
+    installEventListeners() {
+        this.core.eventChannel.on('message/receive', async (msg) => {
+            await this.laana.networkManager.emitMessage(await this.rawMessageToLaana(msg));
+        });
+
+        this.core.eventChannel.on('message/send', async (msg) => {
+            if (this.laana.configLoader.configData.reportSelfMessage) {
+                await this.laana.networkManager.emitMessage(await this.rawMessageToLaana(msg));
+            }
+        });
+    }
+
     async laanaPeerToRaw(peer: LaanaPeer): Promise<Peer> {
         const peerUid = peer.type === Peer_Type.BUDDY ?
             await this.core.apis.UserApi.getUidByUinV2(peer.uin) :
