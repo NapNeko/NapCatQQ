@@ -1,4 +1,5 @@
 export interface NodeIKernelAlbumService {
+    
     setAlbumServiceInfo(...args: any[]): unknown;// needs 3 arguments
 
     getMainPage(...args: any[]): unknown;// needs 2 arguments

@@ -1,5 +1,5 @@
 import { AnyCnameRecord } from 'node:dns';
-import { BizKey, ModifyProfileParams, NodeIKernelProfileListener, SimpleInfo, UserDetailInfoByUinV2 } from '@/core';
+import { BizKey, ModifyProfileParams, NodeIKernelProfileListener, ProfileBizType, SimpleInfo, UserDetailInfoByUinV2, UserDetailSource } from '@/core';
 import { GeneralCallResult } from '@/core/services/common';
 
 export interface NodeIKernelProfileService {
@@ -10,7 +10,7 @@ export interface NodeIKernelProfileService {
 
     getCoreAndBaseInfo(callfrom: string, uids: string[]): Promise<Map<string, SimpleInfo>>;
 
-    fetchUserDetailInfo(trace: string, uids: string[], arg2: number, arg3: number[]): Promise<unknown>;
+    fetchUserDetailInfo(trace: string, uids: string[], source: UserDetailSource, bizType: ProfileBizType[]): Promise<GeneralCallResult>;
 
     addKernelProfileListener(listener: NodeIKernelProfileListener): number;
 
@@ -22,9 +22,9 @@ export interface NodeIKernelProfileService {
 
     enumCountryOptions(): Array<string>;
 
-    enumProvinceOptions(Country: string): Array<string>;
+    enumProvinceOptions(country: string): Array<string>;
 
-    enumCityOptions(Country: string, Province: string): unknown;
+    enumCityOptions(country: string, province: string): unknown;
 
     enumAreaOptions(...args: unknown[]): unknown;
 
