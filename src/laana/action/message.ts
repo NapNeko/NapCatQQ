@@ -53,7 +53,7 @@ export class LaanaMessageActionHandler {
 
         getMessage: async (params) => {
             const { msgId, chatType, peerUid } = this.laana.utils.msg.decodeLaanaMsgId(params.msgId);
-            const msg = await this.core.apis.MsgApi.getMsgsByMsgId(
+            const msgListWrapper = await this.core.apis.MsgApi.getMsgsByMsgId(
                 {
                     chatType,
                     peerUid,
@@ -61,13 +61,12 @@ export class LaanaMessageActionHandler {
                 },
                 [msgId],
             );
-
-            if (msg.msgList.length === 0) {
+            if (msgListWrapper.msgList.length === 0) {
                 throw new Error('消息不存在');
             }
-
+            const msg = msgListWrapper.msgList[0];
             return {
-                message: await this.laana.utils.msg.rawMessageToLaana(msg.msgList[0]),
+                message: await this.laana.utils.msg.rawMessageToLaana(msg),
             };
         },
     };

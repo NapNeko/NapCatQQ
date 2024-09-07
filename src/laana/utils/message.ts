@@ -481,7 +481,7 @@ export class LaanaMessageUtils {
                 return {
                     oneofKind: 'forwardMsgRef',
                     forwardMsgRef: {
-                        refId: msg.msgId,
+                        refId: this.encodeMsgToLaanaMsgId(msg.msgId, msg.chatType, msg.peerUid),
                         displayText: firstElement.multiForwardMsgElement.xmlContent,
                     }
                 };
