@@ -229,7 +229,7 @@ export async function NCoreInitShell() {
             sessionConfig,
             new NodeIDependsAdapter(),
             new NodeIDispatcherAdapter(),
-            sessionListener as any,
+            sessionListener,
         );
         try {
             session.startNT(0);
