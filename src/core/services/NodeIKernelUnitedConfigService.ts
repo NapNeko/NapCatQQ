@@ -1,7 +1,8 @@
 export interface NodeIKernelUnitedConfigService {
-    addKernelUnitedConfigListener(...args: any[]): unknown;// needs 1 arguments
 
-    removeKernelUnitedConfigListener(...args: any[]): unknown;// needs 1 arguments
+    addKernelUnitedConfigListener(listener:unknown): number;
+
+    removeKernelUnitedConfigListener(listenerId:number): void;
 
     fetchUnitedCommendConfig(...args: any[]): unknown;// needs 1 arguments
 
@@ -12,4 +13,5 @@ export interface NodeIKernelUnitedConfigService {
     isUnitedConfigSwitchOn(...args: any[]): unknown;// needs 1 arguments
 
     registerUnitedConfigPushGroupList(...args: any[]): unknown;// needs 1 arguments
+
 }

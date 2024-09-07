@@ -1,6 +1,7 @@
 import { MessageElement, Peer } from '../entities';
 
 export interface NodeIkernelTestPerformanceService {
+
     insertMsg(MsgParam: {
         peer: Peer
         msgTime: string

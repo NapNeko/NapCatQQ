@@ -1,6 +1,5 @@
 export enum GeneralCallResultStatus {
-    OK = 0,
-    // ERROR = 1,
+    OK = 0
 }
 
 export interface GeneralCallResult {

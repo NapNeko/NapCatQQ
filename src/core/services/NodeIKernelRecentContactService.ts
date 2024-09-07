@@ -1,30 +1,8 @@
 import { ChatType, Peer } from '../entities';
 import { NodeIKernelRecentContactListener } from '../listeners/NodeIKernelRecentContactListener';
 import { GeneralCallResult } from './common';
+import { FSABRecentContactParams } from '../entities/contact';
 
-export interface FSABRecentContactParams {
-    anchorPointContact: {
-        contactId: string;
-        sortField: string;
-        pos: number;
-    },
-    relativeMoveCount: number;
-    listType: number;
-    count: number;
-    fetchOld: boolean;
-}
-
-// {
-//     "anchorPointContact": {
-//       "contactId": "",
-//       "sortField": "",
-//       "pos": 0
-//     },
-//     "relativeMoveCount": 0,
-//     "listType": 1,
-//     "count": 200,
-//     "fetchOld": true
-//   }
 export interface NodeIKernelRecentContactService {
     setGuildDisplayStatus(...args: unknown[]): unknown; // 2 arguments
 
@@ -36,7 +14,6 @@ export interface NodeIKernelRecentContactService {
 
     enterOrExitMsgList(...args: unknown[]): unknown; // 1 arguments
 
-    /*!---!*/
     getRecentContactListSnapShot(count: number): Promise<GeneralCallResult & {
         info: {
             errCode: number,
@@ -58,7 +35,6 @@ export interface NodeIKernelRecentContactService {
 
     jumpToSpecifyRecentContact(...args: unknown[]): unknown; // 1 arguments
 
-    /*!---!*/
     fetchAndSubscribeABatchOfRecentContact(params: FSABRecentContactParams): unknown; // 1 arguments
 
     addRecentContact(peer: Peer): unknown;

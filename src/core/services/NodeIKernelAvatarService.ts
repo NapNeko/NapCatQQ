@@ -1,7 +1,7 @@
 export interface NodeIKernelAvatarService {
-    addAvatarListener(arg: unknown): unknown;
+    addAvatarListener(listener: unknown): void;
 
-    removeAvatarListener(arg: unknown): unknown;
+    removeAvatarListener(listenerId: number): void;
 
     getAvatarPath(arg1: unknown, arg2: unknown): unknown;
 

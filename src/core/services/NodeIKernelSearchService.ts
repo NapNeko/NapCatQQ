@@ -1,11 +1,12 @@
 import { ChatType } from '../entities';
 
 export interface NodeIKernelSearchService {
-    addKernelSearchListener(...args: any[]): unknown;// needs 1 arguments
 
-    removeKernelSearchListener(...args: any[]): unknown;// needs 1 arguments
+    addKernelSearchListener(listener: unknown): number;
 
-    searchStranger(...args: any[]): unknown;// needs 3 arguments
+    removeKernelSearchListener(listenerId: number): void;
+
+    searchStranger(unknown: string, searchStranger: unknown, searchParams: unknown): Promise<unknown>;
 
     searchGroup(...args: any[]): unknown;// needs 1 arguments
 
@@ -125,4 +126,5 @@ export interface NodeIKernelSearchService {
     searchCache(...args: any[]): unknown;// needs 3 arguments
 
     clearSearchCache(...args: any[]): unknown;// needs 1 arguments
+
 }

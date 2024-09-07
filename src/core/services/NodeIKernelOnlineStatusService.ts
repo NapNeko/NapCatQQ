@@ -1,8 +1,8 @@
 export interface NodeIKernelOnlineStatusService {
 
-    addKernelOnlineStatusListener(listener: unknown): void;
+    addKernelOnlineStatusListener(listener: unknown): number;
 
-    removeKernelOnlineStatusListener(listenerId: unknown): void;
+    removeKernelOnlineStatusListener(listenerId: number): void;
 
     getShouldShowAIOStatusAnimation(arg: unknown): unknown;
 

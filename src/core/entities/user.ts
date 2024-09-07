@@ -375,4 +375,8 @@ export enum ProfileBizType {
     KVAS,
     KQZONE,
     KOTHER
+}export enum BuddyListReqType {
+    KNOMAL,
+    KLETTER
 }
+

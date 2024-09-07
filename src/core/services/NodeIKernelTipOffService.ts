@@ -2,7 +2,7 @@ import { GeneralCallResult } from './common';
 
 export interface NodeIKernelTipOffService {
 
-    addKernelTipOffListener(listener: unknown): void;
+    addKernelTipOffListener(listener: unknown): number;
 
     removeKernelTipOffListener(listenerId: unknown): void;
 
@@ -10,7 +10,7 @@ export interface NodeIKernelTipOffService {
 
     getPskey(domainList: string[], nocache: boolean): Promise<GeneralCallResult & {
         domainPskeyMap: Map<string, string>
-    }>;//2
+    }>;
 
     tipOffSendJsData(args: unknown[]): Promise<unknown>;//2
 
