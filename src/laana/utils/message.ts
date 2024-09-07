@@ -12,7 +12,13 @@ import {
 import { NapCatLaanaAdapter } from '..';
 import { OutgoingMessage, SendMessagePing } from '../types/action/message';
 import { Bubble, Message as LaanaMessage, Peer as LaanaPeer, Peer_Type } from '../types/entity/message';
+import { File } from '../types/entity/file';
 import faceConfig from '@/core/external/face_config.json';
+
+export type SentMessageFileCacheRecord = {
+    originalType: File['uri']['oneofKind'],
+    cacheId: string,
+};
 
 type Laana2RawConverters = {
     [key in Exclude<OutgoingMessage['content']['oneofKind'], undefined>]:
@@ -23,7 +29,7 @@ type Laana2RawConverters = {
         params: SendMessagePing,
     ) => PromiseLike<{
         elements: SendMessageElement[],
-        fileCacheIds: string[],
+        fileCacheRecords: SentMessageFileCacheRecord[],
     }>
 }
 
@@ -51,7 +57,7 @@ export class LaanaMessageUtils {
             }
 
             const elements: SendMessageElement[] = [];
-            const fileCacheIds: string[] = [];
+            const fileCacheRecords: SentMessageFileCacheRecord[] = [];
 
             if (msgContent.repliedMsgId) {
                 const replyMsg = (
@@ -155,13 +161,16 @@ export class LaanaMessageUtils {
                     elements.push(await this.core.apis.FileApi.createValidSendPicElement(
                         await this.laana.utils.file.toLocalPath(cacheId)
                     ));
-                    fileCacheIds.push(cacheId);
+                    fileCacheRecords.push({
+                        originalType: content.image.uri.oneofKind,
+                        cacheId,
+                    });
                 } else {
                     throw Error('未知的消息内容类型');
                 }
             }
 
-            return { elements, fileCacheIds };
+            return { elements, fileCacheRecords };
         },
 
         file: async msgContent => {
@@ -173,7 +182,10 @@ export class LaanaMessageUtils {
                         msgContent.name,
                     ),
                 ],
-                fileCacheIds: [cacheId],
+                fileCacheRecords: [{
+                    originalType: msgContent.file!.uri.oneofKind,
+                    cacheId,
+                }],
             };
         },
 
@@ -187,7 +199,10 @@ export class LaanaMessageUtils {
                         // TODO: add 'sub type' field
                     )
                 ],
-                fileCacheIds: [cacheId],
+                fileCacheRecords: [{
+                    originalType: msgContent.image!.uri.oneofKind,
+                    cacheId,
+                }],
             };
         },
 
@@ -201,7 +216,7 @@ export class LaanaMessageUtils {
                     faceName: msgContent.displayText ?? '[商城表情]',
                 },
             }],
-            fileCacheIds: [],
+            fileCacheRecords: [],
         }),
 
         video: async msgContent => {
@@ -213,7 +228,10 @@ export class LaanaMessageUtils {
                         // TODO: add file name and thumb path
                     ),
                 ],
-                fileCacheIds: [cacheId],
+                fileCacheRecords: [{
+                    originalType: msgContent.uri.oneofKind,
+                    cacheId,
+                }],
             };
         },
 
@@ -225,7 +243,10 @@ export class LaanaMessageUtils {
                         await this.laana.utils.file.toLocalPath(cacheId),
                     )
                 ],
-                fileCacheIds: [cacheId],
+                fileCacheRecords: [{
+                    originalType: msgContent.uri.oneofKind,
+                    cacheId,
+                }],
             };
         },
 

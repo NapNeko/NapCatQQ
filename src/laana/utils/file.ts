@@ -83,4 +83,17 @@ export class LaanaFileUtils {
             fileElementId
         };
     }
+
+    async destroyCache(cacheId: string) {
+        const cachePath = path.join(this.cacheDir, cacheId);
+        const stat = await fsPromises.stat(cachePath);
+        if (stat.isFile()) {
+            await fsPromises.unlink(cachePath);
+        } else if (stat.isSymbolicLink()) {
+            await fsPromises.unlink(cachePath);
+            await fsPromises.unlink(await fsPromises.readlink(cachePath));
+        } else {
+            throw Error('不支持的缓存类型');
+        }
+    }
 }
