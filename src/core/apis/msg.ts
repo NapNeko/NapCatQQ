@@ -164,6 +164,18 @@ export class NTQQMsgApi {
         }, msgIds);
     }
 
+    async recallMsgV2(peer: Peer, msgId: string) {
+        await this.core.eventWrapper.callNormalEventV2(
+            'NodeIKernelMsgService/recallMsg',
+            'NodeIKernelMsgListener/onMsgInfoListUpdate',
+            [peer, [msgId]],
+            () => true,
+            (updatedList) => updatedList.find(m => m.msgId === msgId && m.recallTime !== '0') !== undefined,
+            1,
+            1000,
+        );
+    }
+
     async PrepareTempChat(toUserUid: string, GroupCode: string, nickname: string) {
         return this.context.session.getMsgService().prepareTempChat({
             chatType: ChatType.KCHATTYPETEMPC2CFROMGROUP,
