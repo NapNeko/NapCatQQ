@@ -26,7 +26,7 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
         const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
         if (!uid) throw new Error(`Uin2Uid Error ${payload.user_id}不存在`);
         const [member, info] = await Promise.allSettled([
-            this.core.apis.GroupApi.getGroupMemberV2(payload.group_id.toString(), uid, isNocache),
+            this.core.apis.GroupApi.getGroupMemberEx(payload.group_id.toString(), uid, isNocache),
             this.core.apis.UserApi.getUserDetailInfo(uid),
         ]);
         if (member.status !== 'fulfilled') throw new Error(`群(${payload.group_id})成员${payload.user_id}获取失败 ${member.reason}`);

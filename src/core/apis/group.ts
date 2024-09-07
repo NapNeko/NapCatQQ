@@ -9,8 +9,9 @@ import {
     MemberExtSourceType,
     NapCatCore,
 } from '@/core';
-import { isNumeric } from '@/common/helper';
+import { isNumeric, solveAsyncProblem } from '@/common/helper';
 import { LimitedHashTable } from '@/common/message-unique';
+import { NTEventWrapper } from '@/common/event';
 
 export class NTQQGroupApi {
     context: InstanceContext;
@@ -264,7 +265,27 @@ export class NTQQGroupApi {
         }
         return member;
     }
-
+    async getGroupMemberEx(GroupCode: string, uid: string, forced = false, retry = 2) {
+        let data = await solveAsyncProblem((eventWrapper: NTEventWrapper, GroupCode: string, uid: string, forced = false) => {
+            return eventWrapper.callNormalEventV2(
+                'NodeIKernelGroupService/getMemberInfo',
+                'NodeIKernelGroupListener/onMemberInfoChange',
+                [GroupCode, [uid], forced],
+                (ret) => ret.result === 0,
+                (params, _, members) => params === GroupCode && members.size > 0 && members.has(uid),
+                1,
+                forced ? 2500 : 250
+            );
+        }, this.core.eventWrapper, GroupCode, uid, forced);
+        if (data && data[3] instanceof Map && data[3].has(uid)) {
+            return data[3].get(uid);
+        }
+        if (retry > 0) {
+            let trydata = await this.getGroupMemberEx(GroupCode, uid, true, retry - 1) as GroupMember | undefined;
+            if (trydata) return trydata;
+        }
+        return undefined;
+    }
     async getGroupMembersV2(groupQQ: string, num = 3000): Promise<Map<string, GroupMember>> {
         const groupService = this.context.session.getGroupService();
         const sceneId = groupService.createMemberListScene(groupQQ, 'groupMemberList_MainWindow');
