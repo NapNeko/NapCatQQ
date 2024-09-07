@@ -292,7 +292,7 @@ export class NTQQGroupApi {
         const listener = this.core.eventWrapper.registerListen(
             'NodeIKernelGroupListener/onMemberListChange',
             1,
-            500,
+            5000,
             (params) => params.sceneId === sceneId,
         );
         try {

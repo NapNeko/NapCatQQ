@@ -25,15 +25,7 @@ class DeleteMsg extends BaseAction<Payload, void> {
     async _handle(payload: Payload) {
         const msg = MessageUnique.getMsgIdAndPeerByShortId(Number(payload.message_id));
         if (msg) {
-            const ret = this.core.eventWrapper.registerListen(
-                'NodeIKernelMsgListener/onMsgInfoListUpdate',
-                1,
-                1000,
-                (msgs) => !!msgs.find(m => m.msgId === msg.MsgId && m.recallTime !== '0'),
-            ).catch(() => undefined);
-            await this.core.apis.MsgApi.recallMsg(msg.Peer, [msg.MsgId]);
-            const data = await ret;
-            if (!data) throw new Error('Recall failed');
+            await this.core.apis.MsgApi.recallMsg(msg.Peer, msg.MsgId);
         } else {
             throw new Error('Recall failed');
         }

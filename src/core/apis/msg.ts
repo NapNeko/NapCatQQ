@@ -113,7 +113,7 @@ export class NTQQMsgApi {
         return await this.context.session.getMsgService().getMsgsBySeqList(peer, msgSeqList);
     }
     async getMsgBySeqExFirstMsg(peer: Peer, rootMsgId: string, replyMsgId: string) {
-        let reply = await this.context.session.getMsgService().getSourceOfReplyMsgV2(peer, rootMsgId, replyMsgId);
+        const reply = await this.context.session.getMsgService().getSourceOfReplyMsgV2(peer, rootMsgId, replyMsgId);
         console.log(reply);
     }
     async getMsgExBySeq(peer: Peer, msgSeq: string) {
@@ -157,11 +157,16 @@ export class NTQQMsgApi {
         return this.context.session.getMsgService().getMsgsIncludeSelf(peer, msgId, count, isReverseOrder);
     }
 
-    async recallMsg(peer: Peer, msgIds: string[]) {
-        await this.context.session.getMsgService().recallMsg({
-            chatType: peer.chatType,
-            peerUid: peer.peerUid,
-        }, msgIds);
+    async recallMsg(peer: Peer, msgId: string) {
+        await this.core.eventWrapper.callNormalEventV2(
+            'NodeIKernelMsgService/recallMsg',
+            'NodeIKernelMsgListener/onMsgInfoListUpdate',
+            [peer, [msgId]],
+            () => true,
+            (updatedList) => updatedList.find(m => m.msgId === msgId && m.recallTime !== '0') !== undefined,
+            1,
+            1000,
+        );
     }
 
     async PrepareTempChat(toUserUid: string, GroupCode: string, nickname: string) {
