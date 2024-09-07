@@ -115,5 +115,24 @@ export class LaanaMessageActionHandler {
                 ),
             };
         },
+
+        withdrawMessage: async (params) => {
+            const { msgId, chatType, peerUid } = this.laana.utils.msg.decodeLaanaMsgId(params.msgId);
+            try {
+                await this.core.apis.MsgApi.recallMsg(
+                    {
+                        chatType,
+                        peerUid,
+                        guildId: '',
+                    },
+                    msgId,
+                );
+            } catch (e) {
+                throw new Error(`消息撤回失败: ${e}`);
+            }
+            return {
+                success: true,
+            };
+        },
     };
 }
