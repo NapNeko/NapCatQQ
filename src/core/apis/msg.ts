@@ -157,14 +157,7 @@ export class NTQQMsgApi {
         return this.context.session.getMsgService().getMsgsIncludeSelf(peer, msgId, count, isReverseOrder);
     }
 
-    async recallMsg(peer: Peer, msgIds: string[]) {
-        await this.context.session.getMsgService().recallMsg({
-            chatType: peer.chatType,
-            peerUid: peer.peerUid,
-        }, msgIds);
-    }
-
-    async recallMsgV2(peer: Peer, msgId: string) {
+    async recallMsg(peer: Peer, msgId: string) {
         await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelMsgService/recallMsg',
             'NodeIKernelMsgListener/onMsgInfoListUpdate',
