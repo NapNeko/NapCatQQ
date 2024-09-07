@@ -6,6 +6,7 @@ import fs from 'fs';
 import fsPromises from 'fs/promises';
 import { httpDownload } from '@/common/file';
 import { randomUUID } from 'crypto';
+import fsExtra from 'fs-extra';
 
 export class LaanaFileUtils {
     cacheDir = path.join(this.laana.pathWrapper.cachePath, 'laana');
@@ -14,6 +15,7 @@ export class LaanaFileUtils {
         public core: NapCatCore,
         public laana: NapCatLaanaAdapter,
     ) {
+        fsExtra.ensureDirSync(this.cacheDir);
     }
 
     async resolveCacheIdFromLaanaFile(laanaFile: LaanaFile) {
