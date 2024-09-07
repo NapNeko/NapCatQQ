@@ -167,7 +167,8 @@ export function rawMessageToText(msg: RawMessage, recursiveLevel = 0): string {
     function msgElementToText(element: MessageElement) {
         if (element.textElement) {
             if (element.textElement.atType === AtType.notAt) {
-                return element.textElement.content;
+                const originalContentLines = element.textElement.content.split('\n');
+                return `${originalContentLines[0]}${originalContentLines.length > 1 ? ' ...' : ''}`;
             } else if (element.textElement.atType === AtType.atAll) {
                 return `@全体成员`;
             } else if (element.textElement.atType === AtType.atUser) {
@@ -189,7 +190,7 @@ export function rawMessageToText(msg: RawMessage, recursiveLevel = 0): string {
         }
 
         if (element.picElement) {
-            return `[图片 ${element.picElement.fileName}]`;
+            return '[图片]';
         }
 
         if (element.fileElement) {
@@ -197,7 +198,7 @@ export function rawMessageToText(msg: RawMessage, recursiveLevel = 0): string {
         }
 
         if (element.videoElement) {
-            return `[视频 ${element.videoElement.fileName}]`;
+            return '[视频]';
         }
 
         if (element.pttElement) {
@@ -205,7 +206,7 @@ export function rawMessageToText(msg: RawMessage, recursiveLevel = 0): string {
         }
 
         if (element.arkElement) {
-            return `[卡片消息 ${element.arkElement.bytesData}]`;
+            return '[卡片消息]';
         }
 
         if (element.faceElement) {
@@ -213,19 +214,19 @@ export function rawMessageToText(msg: RawMessage, recursiveLevel = 0): string {
         }
 
         if (element.marketFaceElement) {
-            return `[商城表情 ${element.marketFaceElement.faceName}]`;
+            return element.marketFaceElement.faceName;
         }
 
         if (element.markdownElement) {
-            return `[Markdown ${element.markdownElement.content}]`;
+            return '[Markdown 消息]';
         }
 
         if (element.multiForwardMsgElement) {
-            return `[转发消息]`;
+            return '[转发消息]';
         }
 
         if (element.elementType === ElementType.GreyTip) {
-            return `[灰条消息]`; // TODO: resolve the text
+            return '[灰条消息]';
         }
 
         return `[未实现 (ElementType = ${element.elementType})]`;
