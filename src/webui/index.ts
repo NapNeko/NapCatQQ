@@ -3,6 +3,7 @@ import { ALLRouter } from './src/router';
 import { LogWrapper } from '@/common/log';
 import { NapCatPathWrapper } from '@/common/path';
 import { WebUiConfigWrapper } from './src/helper/config';
+import { RequestUtil } from '@/common/request';
 
 const app = express();
 
@@ -38,7 +39,23 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
     app.use(config.prefix + '/api', ALLRouter);
     app.listen(config.port, config.host, async () => {
         log(`[NapCat] [WebUi] Current WebUi is running at http://${config.host}:${config.port}${config.prefix}`);
-        log(`[NapCat] [WebUi] Login URL is http://${config.host}:${config.port}${config.prefix}/webui`);
         log(`[NapCat] [WebUi] Login Token is ${config.token}`);
+        log(`[NapCat] [WebUi] WebUi User  Panel Url: http://${config.host}:${config.port}${config.prefix}/webui?token=${config.token}`);
+        log(`[NapCat] [WebUi] WebUi Local Panel Url: http://127.0.0.1:${config.port}${config.prefix}/webui?token=${config.token}`);
+        //获取上网Ip
+        //https://www.ip.cn/api/index?ip&type=0
+        RequestUtil.HttpGetJson<{ IP: {IP:string} }>(
+            'https://ip.011102.xyz/',
+            'GET',
+            {},
+            {},
+            true,
+            true
+        ).then((data) => {
+            log(`[NapCat] [WebUi] WebUi Publish Panel Url: http://${data.IP.IP}:${config.port}${config.prefix}/webui/?token=${config.token}`);
+        }).catch((err) => {
+            logger.logError(`[NapCat] [WebUi] Get Publish Panel Url Error: ${err}`);
+        });
+
     });
 }
