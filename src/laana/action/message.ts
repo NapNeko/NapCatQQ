@@ -69,5 +69,32 @@ export class LaanaMessageActionHandler {
                 message: await this.laana.utils.msg.rawMessageToLaana(msg),
             };
         },
+
+        getForwardedMessages: async (params) => {
+            const { rootMsgLaanaId, currentMsgId } = this.laana.utils.msg.decodeLaanaForwardMsgRefId(params.refId);
+            const decodedRootMsgId = this.laana.utils.msg.decodeLaanaMsgId(rootMsgLaanaId);
+            const rawForwardedMessages = await this.core.apis.MsgApi.getMultiMsg(
+                {
+                    chatType: decodedRootMsgId.chatType,
+                    peerUid: decodedRootMsgId.peerUid,
+                    guildId: '',
+                },
+                decodedRootMsgId.msgId,
+                currentMsgId,
+            );
+            if (!rawForwardedMessages || rawForwardedMessages.result !== 0 || rawForwardedMessages.msgList.length === 0) {
+                throw new Error('获取转发消息失败');
+            }
+            return {
+                forwardMessage: {
+                    refId: params.refId,
+                    messages: await Promise.all(
+                        rawForwardedMessages.msgList.map(async msg => {
+                            return await this.laana.utils.msg.rawMessageToLaana(msg, rootMsgLaanaId);
+                        }),
+                    ),
+                }
+            };
+        },
     };
 }

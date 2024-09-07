@@ -279,8 +279,7 @@ export class LaanaMessageUtils {
         );
     }
 
-    async rawMessageToLaana(msg: RawMessage): Promise<LaanaMessage> {
-        const msgContent = await this.createLaanaMessageContent(msg);
+    async rawMessageToLaana(msg: RawMessage, rootForwardMsgId?: string): Promise<LaanaMessage> {
         return {
             msgId: this.encodeMsgToLaanaMsgId(msg.msgId, msg.chatType, msg.peerUid),
             time: BigInt(msg.msgTime),
@@ -290,11 +289,11 @@ export class LaanaMessageUtils {
                 type: msg.chatType === ChatType.KCHATTYPEGROUP ?
                     Peer_Type.GROUP : Peer_Type.BUDDY,
             },
-            content: msgContent,
+            content: await this.createLaanaMessageContent(msg, rootForwardMsgId),
         };
     }
 
-    private async createLaanaMessageContent(msg: RawMessage): Promise<LaanaMessage['content']> {
+    private async createLaanaMessageContent(msg: RawMessage, rootForwardMsgId?: string): Promise<LaanaMessage['content']> {
         const firstElement = msg.elements[0];
 
         if (!firstElement) {
@@ -481,7 +480,10 @@ export class LaanaMessageUtils {
                 return {
                     oneofKind: 'forwardMsgRef',
                     forwardMsgRef: {
-                        refId: this.encodeMsgToLaanaMsgId(msg.msgId, msg.chatType, msg.peerUid),
+                        refId: this.encodeMsgToForwardMsgRefId(
+                            rootForwardMsgId ?? this.encodeMsgToLaanaMsgId(msg.msgId, msg.chatType, msg.peerUid),
+                            msg.msgId,
+                        ),
                         displayText: firstElement.multiForwardMsgElement.xmlContent,
                     }
                 };
@@ -509,11 +511,32 @@ export class LaanaMessageUtils {
     }
 
     decodeLaanaMsgId(laanaMsgId: string) {
+        if (!laanaMsgId.startsWith('LaanaMsgId@')) {
+            throw Error('不合法的 LaanaMsgId');
+        }
         const [msgId, chatType, peerUid] = laanaMsgId.split('@').slice(1);
         return {
             msgId,
             chatType: parseInt(chatType),
             peerUid,
+        };
+    }
+
+    encodeMsgToForwardMsgRefId(
+        rootMsgLaanaId: string,
+        currentMsgId: string,
+    ) {
+        return `LaanaForwardMsgRefId|${rootMsgLaanaId}|${currentMsgId}`;
+    }
+
+    decodeLaanaForwardMsgRefId(laanaForwardMsgId: string) {
+        if (!laanaForwardMsgId.startsWith('LaanaForwardMsgRefId|')) {
+            throw Error('不合法的 LaanaForwardMsgRefId');
+        }
+        const [rootMsgLaanaId, currentMsgId] = laanaForwardMsgId.split('|').slice(1);
+        return {
+            rootMsgLaanaId,
+            currentMsgId,
         };
     }
 
