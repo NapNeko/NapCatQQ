@@ -153,7 +153,10 @@ interface CommonExt {
     labels: any[];
     qqLevel: QQLevel;
 }
-
+export enum BuddyListReqType {
+    KNOMAL,
+    KLETTER
+}
 interface Pic {
     picId: string;
     picTime: number;
@@ -375,8 +378,4 @@ export enum ProfileBizType {
     KVAS,
     KQZONE,
     KOTHER
-}export enum BuddyListReqType {
-    KNOMAL,
-    KLETTER
 }
-
