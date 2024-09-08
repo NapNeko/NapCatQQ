@@ -131,13 +131,22 @@ export class NapCatEventChannel extends
     private initMsgListener() {
         const msgListener = new NodeIKernelMsgListener();
 
-        msgListener.onRecvMsg = async msgList => {
-            for (const msg of msgList) {
-                if (msg.senderUin !== this.core.selfInfo.uin) {
-                    const handled = await this.parseRawMsgToEventAndEmit(msg);
-                    if (!handled) this.emit('message/receive', msg);
-                }
-            }
+        msgListener.onRecvMsg = msgList => {
+            Promise.allSettled(
+                msgList.filter(msg => msg.senderUin !== this.core.selfInfo.uin)
+                    .map(msg => {
+                        this.parseRawMsgToEventAndEmit(msg)
+                            .then(handled => {
+                                if (!handled) this.emit('message/receive', msg);
+                            });
+                    }),
+            ).then(callRes => {
+                callRes.forEach(res => {
+                    if (res.status === 'rejected') {
+                        this.core.context.logger.logError('处理消息失败', res.reason);
+                    }
+                });
+            });
         };
 
         const msgIdSentCache = new LRUCache<string, boolean>(100);
