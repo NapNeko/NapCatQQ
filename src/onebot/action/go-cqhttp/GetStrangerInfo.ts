@@ -28,6 +28,7 @@ export default class GoCQHTTPGetStrangerInfo extends BaseAction<Payload, OB11Use
                 ...extendData.detail.commonExt,
                 ...extendData.detail.simpleInfo.baseInfo,
                 ...extendData.detail.simpleInfo.relationFlags,
+                ...extendData.detail.simpleInfo.status,
                 user_id: parseInt(extendData.detail.uin) || 0,
                 nickname: extendData.detail.simpleInfo.coreInfo.nick,
                 sex: OB11UserSex.unknown,
