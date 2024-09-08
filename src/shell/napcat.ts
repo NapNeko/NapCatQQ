@@ -150,7 +150,12 @@ export async function NCoreInitShell() {
         };
 
         loginService.addKernelLoginListener(proxiedListenerOf(loginListener, logger) as any);
-
+        let isConnect = loginService.connect();
+        if (!isConnect) {
+            logger.logError('核心登录服务连接失败!');
+            return;
+        }
+        logger.log('核心登录服务连接成功!');
         // 实现WebUi快速登录
         loginService.getLoginList().then((res) => {
             // 遍历 res.LocalLoginInfoList[x].isQuickLogin是否可以 res.LocalLoginInfoList[x].uin 转为string 加入string[] 最后遍历完成调用WebUiDataRuntime.setQQQuickLoginList
@@ -199,7 +204,7 @@ export async function NCoreInitShell() {
                 logger.log(`可用于快速登录的 QQ：\n${historyLoginList
                     .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
                     .join('\n')
-                }`);
+                    }`);
             }
             loginService.getQRCodePicture();
         }
