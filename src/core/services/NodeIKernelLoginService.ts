@@ -59,6 +59,7 @@ export interface QuickLoginResult {
 }
 
 export interface NodeIKernelLoginService {
+    connect(): boolean;
     // eslint-disable-next-line @typescript-eslint/no-misused-new
     new(): NodeIKernelLoginService;
 
