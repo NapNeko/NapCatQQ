@@ -43,12 +43,12 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
             const fileName = mixElementInner.fileName ?? '';
             let url = '';
             if (mixElement?.picElement && rawMessage) {
-                let tempData =
+                const tempData =
                     await this.obContext.apis.MsgApi.rawToOb11Converters.picElement?.(mixElement?.picElement, rawMessage, mixElement) as OB11MessageImage | undefined;
                 url = tempData?.data.url ?? '';
             }
             if (mixElement?.videoElement && rawMessage) {
-                let tempData =
+                const tempData =
                     await this.obContext.apis.MsgApi.rawToOb11Converters.videoElement?.(mixElement?.videoElement, rawMessage, mixElement) as OB11MessageVideo | undefined;
                 url = tempData?.data.url ?? '';
             }
