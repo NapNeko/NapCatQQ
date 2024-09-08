@@ -14,7 +14,7 @@ export interface NodeIKernelBuddyService {
         }>
     }>;
 
-    getBuddyListFromCache(callFrom: string): Promise<Array<
+    getBuddyListFromCache(reqType: BuddyListReqType): Promise<Array<
         {
             categoryId: number,//9999应该跳过 那是兜底数据吧
             categorySortId: number,//排序方式
@@ -23,7 +23,7 @@ export interface NodeIKernelBuddyService {
             onlineCount: number,//在线数目
             buddyUids: Array<string>//Uids
         }>>;
-        
+
     addKernelBuddyListener(listener: NodeIKernelBuddyListener): number;
 
     getAllBuddyCount(): number;
