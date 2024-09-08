@@ -1,13 +1,8 @@
 import { GeneralCallResult } from '@/core/services/common';
 import { NodeIKernelBuddyListener } from '@/core/listeners';
-
-export enum BuddyListReqType {
-    KNOMAL,
-    KLETTER
-}
+import { BuddyListReqType } from '../entities/user';
 
 export interface NodeIKernelBuddyService {
-    // 26702 以上
     getBuddyListV2(callFrom: string, reqType: BuddyListReqType): Promise<GeneralCallResult & {
         data: Array<{
             categoryId: number,
@@ -19,7 +14,6 @@ export interface NodeIKernelBuddyService {
         }>
     }>;
 
-    //26702 以上
     getBuddyListFromCache(callFrom: string): Promise<Array<
         {
             categoryId: number,//9999应该跳过 那是兜底数据吧
@@ -29,19 +23,14 @@ export interface NodeIKernelBuddyService {
             onlineCount: number,//在线数目
             buddyUids: Array<string>//Uids
         }>>;
-
-    // 以下为原生方法
+        
     addKernelBuddyListener(listener: NodeIKernelBuddyListener): number;
 
     getAllBuddyCount(): number;
 
-    removeKernelBuddyListener(listener: unknown): void;
+    removeKernelBuddyListener(listenerId: number): void;
 
-    /**
-     * @deprecated
-     * @param nocache 使用缓存
-     */
-    getBuddyList(nocache: boolean): Promise<GeneralCallResult>;
+    //getBuddyList(nocache: boolean): Promise<GeneralCallResult>;
 
     getBuddyNick(uid: number): string;
 

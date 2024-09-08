@@ -1,5 +1,5 @@
-// public interface IYellowFaceForManagerService extends QRouteApi {
-//     void download(@NotNull String resourceConfigJson, @NotNull String resourceDir, @NotNull String cacheDir, boolean force, @NotNull IKernelYellowFaceDownloadCallback callback);
+export interface NodeIYellowFaceService {
+    download(resourceConfigJson: string, resourceDir: string, cacheDir: string, force: boolean): void;
 
-//     void setHistory(@NotNull String fullMd5, @NotNull IOperateCallback callback);
-// }
+    setHistory(fullMd5: string): void;
+}
