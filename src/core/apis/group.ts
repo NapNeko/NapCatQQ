@@ -263,7 +263,7 @@ export class NTQQGroupApi {
         return member;
     }
     async getGroupMemberEx(GroupCode: string, uid: string, forced = false, retry = 2) {
-        let data = await solveAsyncProblem((eventWrapper: NTEventWrapper, GroupCode: string, uid: string, forced = false) => {
+        const data = await solveAsyncProblem((eventWrapper: NTEventWrapper, GroupCode: string, uid: string, forced = false) => {
             return eventWrapper.callNormalEventV2(
                 'NodeIKernelGroupService/getMemberInfo',
                 'NodeIKernelGroupListener/onMemberInfoChange',
@@ -278,7 +278,7 @@ export class NTQQGroupApi {
             return data[3].get(uid);
         }
         if (retry > 0) {
-            let trydata = await this.getGroupMemberEx(GroupCode, uid, true, retry - 1) as GroupMember | undefined;
+            const trydata = await this.getGroupMemberEx(GroupCode, uid, true, retry - 1) as GroupMember | undefined;
             if (trydata) return trydata;
         }
         return undefined;

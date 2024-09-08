@@ -26,9 +26,9 @@ export async function solveAsyncProblem<T extends (...args: any[]) => Promise<an
 
 export class FileNapCatOneBotUUID {
     static encodeModelId(peer: Peer, modelId: string, fileId: string, endString: string = ""): string {
-        let data = `NapCatOneBot|ModelIdFile|${peer.chatType}|${peer.peerUid}|${modelId}|${fileId}`;
+        const data = `NapCatOneBot|ModelIdFile|${peer.chatType}|${peer.peerUid}|${modelId}|${fileId}`;
         //前四个字节塞data长度
-        let length = Buffer.alloc(4 + data.length);
+        const length = Buffer.alloc(4 + data.length);
         length.writeUInt32BE(data.length, 0);
         length.write(data, 4);
         return length.toString('hex') + endString;
@@ -40,9 +40,9 @@ export class FileNapCatOneBotUUID {
         fileId: string
     } {
         //前四个字节是data长度
-        let length = Buffer.from(uuid.slice(0, 8), 'hex').readUInt32BE(0);
+        const length = Buffer.from(uuid.slice(0, 8), 'hex').readUInt32BE(0);
         //根据length计算需要读取的长度
-        let dataId = uuid.slice(8, 8 + length);
+        const dataId = uuid.slice(8, 8 + length);
         //hex还原为string
         const realData = Buffer.from(dataId, 'hex').toString();
         if (!realData.startsWith('NapCatOneBot|ModelIdFile|')) return undefined;

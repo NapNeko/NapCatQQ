@@ -209,7 +209,7 @@ export class OneBotMsgApi {
             if (records.peerUin === '284840486') {
                 return createReplyData(records.msgId);
             }
-            let replyMsg = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeqV2(peer, element.replayMsgSeq, element.replyMsgTime, [element.senderUidStr]))
+            const replyMsg = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeqV2(peer, element.replayMsgSeq, element.replyMsgTime, [element.senderUidStr]))
                 .msgList.find(msg => msg.msgRandom === records.msgRandom);
 
             if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
