@@ -65,7 +65,7 @@ export class FileNapCatOneBotUUID {
         const length = Buffer.alloc(4 + data.length);
         length.writeUInt32BE(data.length, 0);
         length.write(data, 4);
-        return length.toString('hex');
+        return length.toString('hex') + endString;
     }
 
     static decode(uuid: string): undefined | {
