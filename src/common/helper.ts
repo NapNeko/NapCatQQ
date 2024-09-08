@@ -29,7 +29,7 @@ export class FileNapCatOneBotUUID {
         const data = `NapCatOneBot|ModelIdFile|${peer.chatType}|${peer.peerUid}|${modelId}|${fileId}`;
         //前四个字节塞data长度
         const length = Buffer.alloc(4 + data.length);
-        length.writeUInt32BE(data.length, 0);
+        length.writeUInt32BE(data.length * 2, 0);//储存data的hex长度
         length.write(data, 4);
         return length.toString('hex') + endString;
     }
@@ -62,8 +62,9 @@ export class FileNapCatOneBotUUID {
     static encode(peer: Peer, msgId: string, elementId: string, endString: string = ""): string {
         const data = `NapCatOneBot|MsgFile|${peer.chatType}|${peer.peerUid}|${msgId}|${elementId}`;
         //前四个字节塞data长度
+        //一个字节8位 一个ascii字符1字节 一个hex字符4位 表示一个ascii字符需要两个hex字符
         const length = Buffer.alloc(4 + data.length);
-        length.writeUInt32BE(data.length, 0);
+        length.writeUInt32BE(data.length * 2, 0);
         length.write(data, 4);
         return length.toString('hex') + endString;
     }
