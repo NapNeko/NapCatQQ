@@ -3,7 +3,11 @@ import { BizKey, ModifyProfileParams, NodeIKernelProfileListener, ProfileBizType
 import { GeneralCallResult } from '@/core/services/common';
 
 export interface NodeIKernelProfileService {
-    getRelationFlag(callfrom: string, uids: string[]): Promise<Map<string, number>>;
+    getOtherFlag(callfrom: string, uids: string[]): Promise<Map<string, any>>;
+    
+    getVasInfo(callfrom: string, uids: string[]): Promise<Map<string, any>>;
+
+    getRelationFlag(callfrom: string, uids: string[]): Promise<Map<string, any>>;
 
     getUidByUin(callfrom: string, uin: Array<string>): Promise<Map<string, string>>;
 
