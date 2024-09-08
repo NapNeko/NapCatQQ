@@ -215,6 +215,10 @@ export async function checkUriType(Uri: string) {
             }
             return { Uri: filePath, Type: FileUriType.Local };
         }
+        if (uri.startsWith('data:')) {
+            let data = uri.split(',')[1];
+            if (data) return { Uri: data, Type: FileUriType.Base64 };
+        }
     }, Uri);
     if (OtherFileRet) return OtherFileRet;
 
@@ -231,7 +235,8 @@ export async function uri2local(dir: string, uri: string, filename: string | und
     //解析File协议和本地文件
     if (UriType == FileUriType.Local) {
         const fileExt = path.extname(HandledUri);
-        const filename = path.basename(HandledUri, fileExt);
+        let filename = path.basename(HandledUri, fileExt);
+        filename += fileExt;
         return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: HandledUri, isLocal: true };
     }
     //接下来都要有文件名
@@ -251,7 +256,7 @@ export async function uri2local(dir: string, uri: string, filename: string | und
         const filePath = path.join(dir, filename);
         const buffer = await httpDownload(HandledUri);
         fs.writeFileSync(filePath, buffer);
-        return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath, isLocal: true };
+        return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath, isLocal: false };
     }
     //解析Base64
     if (UriType == FileUriType.Base64) {
@@ -266,7 +271,7 @@ export async function uri2local(dir: string, uri: string, filename: string | und
             fileExt = ext;
             filename = filename + '.' + ext;
         }
-        return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath, isLocal: true };
+        return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath, isLocal: false };
     }
     return { success: false, errMsg: '未知文件类型', fileName: '', ext: '', path: '', isLocal: false };
 }
