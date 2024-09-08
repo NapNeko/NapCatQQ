@@ -1,9 +1,9 @@
 import { GeneralCallResult } from './common';
 
 export interface NodeIKernelCollectionService {
-    addKernelCollectionListener(...args: any[]): unknown;//needs 1 arguments
+    addKernelCollectionListener(...args: any[]): void;//needs 1 arguments
 
-    removeKernelCollectionListener(...args: any[]): unknown;//needs 1 arguments
+    removeKernelCollectionListener(listenerId: number): void;
 
     getCollectionItemList(param: {
         category: number,
@@ -14,46 +14,46 @@ export interface NodeIKernelCollectionService {
         count: number,
         searchDown: boolean
     }): Promise<GeneralCallResult &
-        {
-            collectionSearchList: {
-                collectionItemList: Array<
-                    {
-                        cid: string,
+    {
+        collectionSearchList: {
+            collectionItemList: Array<
+                {
+                    cid: string,
+                    type: number,
+                    status: number,
+                    author: {
                         type: number,
-                        status: number,
-                        author: {
-                            type: number,
-                            numId: string,
-                            strId: string,
-                            groupId: string,
-                            groupName: string,
-                            uid: string
-                        },
-                        bid: number,
-                        category: number,
-                        createTime: string,
-                        collectTime: string,
-                        modifyTime: string,
-                        sequence: string,
-                        shareUrl: string,
-                        customGroupId: number,
-                        securityBeat: boolean,
-                        summary: {
-                            textSummary: unknown,
-                            linkSummary: unknown,
-                            gallerySummary: unknown,
-                            audioSummary: unknown,
-                            videoSummary: unknown,
-                            fileSummary: unknown,
-                            locationSummary: unknown,
-                            richMediaSummary: unknown,
-                        }
-                    }>,
-                hasMore: boolean,
-                bottomTimeStamp: string
-            }
+                        numId: string,
+                        strId: string,
+                        groupId: string,
+                        groupName: string,
+                        uid: string
+                    },
+                    bid: number,
+                    category: number,
+                    createTime: string,
+                    collectTime: string,
+                    modifyTime: string,
+                    sequence: string,
+                    shareUrl: string,
+                    customGroupId: number,
+                    securityBeat: boolean,
+                    summary: {
+                        textSummary: unknown,
+                        linkSummary: unknown,
+                        gallerySummary: unknown,
+                        audioSummary: unknown,
+                        videoSummary: unknown,
+                        fileSummary: unknown,
+                        locationSummary: unknown,
+                        richMediaSummary: unknown,
+                    }
+                }>,
+            hasMore: boolean,
+            bottomTimeStamp: string
         }
-    >;//needs 1 arguments
+    }
+    >;
 
     getCollectionContent(...args: any[]): unknown;//needs 5 arguments
 

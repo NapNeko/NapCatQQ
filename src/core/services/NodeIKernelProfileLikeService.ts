@@ -1,17 +1,17 @@
 import { BuddyProfileLikeReq, GeneralCallResult } from '@/core';
 
 export interface NodeIKernelProfileLikeService {
-    addKernelProfileLikeListener(listener: NodeIKernelProfileLikeService): void;
+    addKernelProfileLikeListener(listener: unknown): number;
 
-    removeKernelProfileLikeListener(listener: unknown): void;
+    removeKernelProfileLikeListener(listenerId: unknown): void;
 
     setBuddyProfileLike(...args: unknown[]): { result: number, errMsg: string, succCounts: number };
 
     getBuddyProfileLike(req: BuddyProfileLikeReq): Promise<GeneralCallResult & {
-        'info': {
-            'userLikeInfos': Array<any>,
-            'friendMaxVotes': number,
-            'start': number
+        info: {
+            userLikeInfos: Array<any>,
+            friendMaxVotes: number,
+            start: number
         }
     }>;
 

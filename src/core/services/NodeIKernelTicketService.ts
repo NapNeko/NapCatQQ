@@ -2,9 +2,9 @@ import { ForceFetchClientKeyRetType } from './common';
 
 export interface NodeIKernelTicketService {
 
-    addKernelTicketListener(listener: unknown): void;
+    addKernelTicketListener(listener: unknown): number;
 
-    removeKernelTicketListener(listenerId: unknown): void;
+    removeKernelTicketListener(listenerId: number): void;
 
     forceFetchClientKey(arg: string): Promise<ForceFetchClientKeyRetType>;
 

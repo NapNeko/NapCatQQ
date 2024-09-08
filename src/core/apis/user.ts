@@ -1,7 +1,6 @@
-import type { ModifyProfileParams, User } from '@/core/entities';
+import { ModifyProfileParams, User, UserDetailSource } from '@/core/entities';
 import { RequestUtil } from '@/common/request';
-import { ProfileBizType, UserDetailSource } from '@/core/services';
-import { InstanceContext, NapCatCore } from '..';
+import { InstanceContext, NapCatCore, ProfileBizType } from '..';
 import { solveAsyncProblem } from '@/common/helper';
 
 export class NTQQUserApi {

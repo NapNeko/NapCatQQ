@@ -6,14 +6,9 @@ export class NTQQFriendApi {
     context: InstanceContext;
     core: NapCatCore;
 
-    // friends: Map<string, Friend> = new Map<string, FriendV2>();
-
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
         this.core = core;
-        // if (!this.context.basicInfoWrapper.requireMinNTQQBuild('26702')) {
-        //     this.getFriends(true);
-        // }
     }
 
     async getBuddyV2SimpleInfoMap(refresh = false) {
