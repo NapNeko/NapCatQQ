@@ -21,7 +21,7 @@ export default class GetRecentContact extends BaseAction<Payload, any> {
             const FastMsg = await this.core.apis.MsgApi.getMsgsByMsgId({ chatType: t.chatType, peerUid: t.peerUid }, [t.msgId]);
             if (FastMsg.msgList.length > 0) {
                 //扩展ret.info.changedList
-                const lastestMsg = await this.obContext.apis.MsgApi.parseMessage(FastMsg.msgList[0], 'array');
+                const lastestMsg = await this.obContext.apis.MsgApi.parseMessage(FastMsg.msgList[0]);
                 return {
                     lastestMsg: lastestMsg,
                     peerUin: t.peerUin,

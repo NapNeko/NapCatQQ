@@ -137,7 +137,7 @@ export class OneBotMsgApi {
                 data: {
                     file: element.fileName,
                     path: element.filePath,
-                    url: pathToFileURL(element.filePath),
+                    url: pathToFileURL(element.filePath).href,
                     file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "."+element.fileName),
                     file_size: element.fileSize,
                     file_unique: element.fileName,
@@ -177,9 +177,9 @@ export class OneBotMsgApi {
                 peerUid: msg.peerUid,
                 guildId: '',
             };
-        const { emojiId } = _;
-        const dir = emojiId.substring(0, 2);
-        const url = `https://gxh.vip.qq.com/club/item/parcel/item/${dir}/${emojiId}/raw300.gif`
+            const { emojiId } = _;
+            const dir = emojiId.substring(0, 2);
+            const url = `https://gxh.vip.qq.com/club/item/parcel/item/${dir}/${emojiId}/raw300.gif`;
             return {
                 type: OB11MessageDataType.image,
                 data: {
@@ -262,13 +262,13 @@ export class OneBotMsgApi {
             if (!videoDownUrl) {
                 videoDownUrl = element.filePath;
             }
-            const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "."+element.fileName)
+            const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "."+element.fileName);
             return {
                 type: OB11MessageDataType.video,
                 data: {
                     file: fileCode,
                     path: videoDownUrl,
-                    url: videoDownUrl ?? pathToFileURL(element.filePath),
+                    url: videoDownUrl ?? pathToFileURL(element.filePath).href,
                     file_id: fileCode,
                     file_size: element.fileSize,
                     file_unique: element.fileName,
@@ -288,7 +288,7 @@ export class OneBotMsgApi {
                 data: {
                     file: fileCode,
                     path: element.filePath,
-                    url: pathToFileURL(element.filePath),
+                    url: pathToFileURL(element.filePath).href,
                     file_id: fileCode,
                     file_size: element.fileSize,
                     file_unique: element.fileName

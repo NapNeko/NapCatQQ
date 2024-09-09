@@ -51,7 +51,7 @@ export class GetGroupEssence extends BaseAction<Payload, any> {
                     operator_nick: msg.add_digest_nick,
                     message_id: message_id,
                     operator_time: msg.add_digest_time,
-                    content: (await this.obContext.apis.MsgApi.parseMessage(rawMessage, 'array'))?.message
+                    content: (await this.obContext.apis.MsgApi.parseMessage(rawMessage))?.message
                 };
             }
             const msgTempData = JSON.stringify({

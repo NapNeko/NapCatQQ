@@ -150,7 +150,7 @@ export async function NCoreInitShell() {
         };
 
         loginService.addKernelLoginListener(proxiedListenerOf(loginListener, logger) as any);
-        let isConnect = loginService.connect();
+        const isConnect = loginService.connect();
         if (!isConnect) {
             logger.logError('核心登录服务连接失败!');
             return;
@@ -204,7 +204,7 @@ export async function NCoreInitShell() {
                 logger.log(`可用于快速登录的 QQ：\n${historyLoginList
                     .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
                     .join('\n')
-                    }`);
+                }`);
             }
             loginService.getQRCodePicture();
         }
