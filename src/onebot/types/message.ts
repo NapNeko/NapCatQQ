@@ -84,6 +84,7 @@ export interface OB11MessageText {
 
 export interface OB11MessageFileBase {
     data: {
+        file_unique?:string,
         path?: string;
         thumb?: string;
         name?: string;

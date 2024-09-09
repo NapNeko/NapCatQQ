@@ -35,7 +35,7 @@ class GetMsg extends BaseAction<Payload, OB11Message> {
         const msg = await this.core.apis.MsgApi.getMsgsByMsgId(
             peer,
             [msgIdWithPeer?.MsgId || payload.message_id.toString()]);
-        const retMsg = await this.obContext.apis.MsgApi.parseMessage(msg.msgList[0], 'array');
+        const retMsg = await this.obContext.apis.MsgApi.parseMessage(msg.msgList[0]);
         if (!retMsg) throw Error('消息为空');
         try {
             retMsg.message_id = MessageUnique.createUniqueMsgId(peer, msg.msgList[0].msgId)!;

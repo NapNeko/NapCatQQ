@@ -216,7 +216,7 @@ export async function checkUriType(Uri: string) {
             return { Uri: filePath, Type: FileUriType.Local };
         }
         if (uri.startsWith('data:')) {
-            let data = uri.split(',')[1];
+            const data = uri.split(',')[1];
             if (data) return { Uri: data, Type: FileUriType.Base64 };
         }
     }, Uri);
