@@ -83,6 +83,7 @@ import { DeleteGroupFileFolder } from '@/onebot/action/go-cqhttp/DeleteGroupFile
 import { GetGroupFileSystemInfo } from '@/onebot/action/go-cqhttp/GetGroupFileSystemInfo';
 import { GetGroupRootFiles } from '@/onebot/action/go-cqhttp/GetGroupRootFiles';
 import { GetGroupFilesByFolder } from '@/onebot/action/go-cqhttp/GetGroupFilesByFolder';
+import { GetGroupSystemMsg } from './system/GetSystemMsg';
 
 export type ActionMap = Map<string, BaseAction<any, any>>;
 
@@ -176,6 +177,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new DeleteGroupFileFolder(obContext, core),
         new GetGroupFileSystemInfo(obContext, core),
         new GetGroupFilesByFolder(obContext, core),
+        new GetGroupSystemMsg(obContext, core),
     ];
     const actionMap = new Map();
     for (const action of actionHandlers) {

@@ -107,7 +107,7 @@ export class OneBotMsgApi {
                     peerUid: msg.peerUid,
                     guildId: '',
                 };
-                const encodedFileId = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "."+element.fileName);
+                const encodedFileId = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "." + element.fileName);
                 return {
                     type: OB11MessageDataType.image,
                     data: {
@@ -138,7 +138,7 @@ export class OneBotMsgApi {
                     file: element.fileName,
                     path: element.filePath,
                     url: pathToFileURL(element.filePath).href,
-                    file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "."+element.fileName),
+                    file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "." + element.fileName),
                     file_size: element.fileSize,
                     file_unique: element.fileName,
                 },
@@ -184,7 +184,7 @@ export class OneBotMsgApi {
                 type: OB11MessageDataType.image,
                 data: {
                     file: 'marketface',
-                    file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "."+_.key+".jpg"),
+                    file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "." + _.key + ".jpg"),
                     path: elementWrapper.elementId,
                     url: url,
                     file_unique: _.key
@@ -262,7 +262,7 @@ export class OneBotMsgApi {
             if (!videoDownUrl) {
                 videoDownUrl = element.filePath;
             }
-            const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "."+element.fileName);
+            const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "." + element.fileName);
             return {
                 type: OB11MessageDataType.video,
                 data: {
@@ -282,7 +282,7 @@ export class OneBotMsgApi {
                 peerUid: msg.peerUid,
                 guildId: '',
             };
-            const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "."+element.fileName);
+            const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "." + element.fileName);
             return {
                 type: OB11MessageDataType.voice,
                 data: {
@@ -798,15 +798,11 @@ export class OneBotMsgApi {
         { data: inputdata }: OB11MessageFileBase,
         { deleteAfterSentFiles }: MessageContext,
     ) {
-        const isBlankUrl = !inputdata.url || inputdata.url === '';
-        const isBlankFile = !inputdata.file || inputdata.file === '';
-        const isBlankPath = !inputdata.path || inputdata.path === '';
-        if (isBlankUrl && isBlankFile) {
+        const realUri = inputdata.url || inputdata.file || inputdata.path || '';
+        if (realUri.length === 0) {
             this.core.context.logger.logError('文件消息缺少参数', inputdata);
             throw Error('文件消息缺少参数');
         }
-        //path->url->file
-        const realUri = (!isBlankUrl ? inputdata.url :(!isBlankPath ? inputdata.path:inputdata.file  ))??'';
         const {
             path,
             isLocal,
