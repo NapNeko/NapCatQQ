@@ -1,5 +1,6 @@
 import { FileNapCatOneBotUUID } from '@/common/helper';
 import { MessageUnique } from '@/common/message-unique';
+import { pathToFileURL } from 'node:url';
 import {
     AtType,
     ChatType,
@@ -106,7 +107,7 @@ export class OneBotMsgApi {
                     peerUid: msg.peerUid,
                     guildId: '',
                 };
-                const encodedFileId = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, element.fileName);
+                const encodedFileId = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "."+element.fileName);
                 return {
                     type: OB11MessageDataType.image,
                     data: {
@@ -114,6 +115,7 @@ export class OneBotMsgApi {
                         sub_type: element.picSubType,
                         file_id: encodedFileId,
                         url: await this.core.apis.FileApi.getImageUrl(element),
+                        path: element.filePath,
                         file_size: element.fileSize,
                         file_unique: element.fileName
                     },
@@ -135,8 +137,8 @@ export class OneBotMsgApi {
                 data: {
                     file: element.fileName,
                     path: element.filePath,
-                    url: element.filePath,
-                    file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, element.fileName),
+                    url: pathToFileURL(element.filePath),
+                    file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "."+element.fileName),
                     file_size: element.fileSize,
                     file_unique: element.fileName,
                 },
@@ -175,13 +177,16 @@ export class OneBotMsgApi {
                 peerUid: msg.peerUid,
                 guildId: '',
             };
+        const { emojiId } = _;
+        const dir = emojiId.substring(0, 2);
+        const url = `https://gxh.vip.qq.com/club/item/parcel/item/${dir}/${emojiId}/raw300.gif`
             return {
                 type: OB11MessageDataType.image,
                 data: {
                     file: 'marketface',
-                    file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, ".jpg"),
+                    file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "."+_.key+".jpg"),
                     path: elementWrapper.elementId,
-                    url: elementWrapper.elementId,
+                    url: url,
                     file_unique: _.key
                 },
             };
@@ -257,14 +262,14 @@ export class OneBotMsgApi {
             if (!videoDownUrl) {
                 videoDownUrl = element.filePath;
             }
-
+            const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "."+element.fileName)
             return {
                 type: OB11MessageDataType.video,
                 data: {
-                    file: element.fileName,
+                    file: fileCode,
                     path: videoDownUrl,
-                    url: videoDownUrl,
-                    file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, element.fileName),
+                    url: videoDownUrl ?? pathToFileURL(element.filePath),
+                    file_id: fileCode,
                     file_size: element.fileSize,
                     file_unique: element.fileName,
                 },
@@ -277,14 +282,16 @@ export class OneBotMsgApi {
                 peerUid: msg.peerUid,
                 guildId: '',
             };
-            const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, element.fileName);
+            const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "."+element.fileName);
             return {
                 type: OB11MessageDataType.voice,
                 data: {
                     file: fileCode,
                     path: element.filePath,
+                    url: pathToFileURL(element.filePath),
                     file_id: fileCode,
                     file_size: element.fileSize,
+                    file_unique: element.fileName
                 },
             };
         },
@@ -793,18 +800,20 @@ export class OneBotMsgApi {
     ) {
         const isBlankUrl = !inputdata.url || inputdata.url === '';
         const isBlankFile = !inputdata.file || inputdata.file === '';
+        const isBlankPath = !inputdata.path || inputdata.path === '';
         if (isBlankUrl && isBlankFile) {
             this.core.context.logger.logError('文件消息缺少参数', inputdata);
             throw Error('文件消息缺少参数');
         }
-        const fileOrUrl = (isBlankUrl ? inputdata.file : inputdata.url) ?? '';
+        //path->url->file
+        const realUri = (!isBlankUrl ? inputdata.url :(!isBlankPath ? inputdata.path:inputdata.file  ))??'';
         const {
             path,
             isLocal,
             fileName,
             errMsg,
             success,
-        } = (await uri2local(this.core.NapCatTempPath, fileOrUrl));
+        } = (await uri2local(this.core.NapCatTempPath, realUri));
 
         if (!success) {
             this.core.context.logger.logError('文件下载失败', errMsg);

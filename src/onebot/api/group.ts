@@ -19,6 +19,7 @@ import { OB11GroupPokeEvent } from '@/onebot/event/notice/OB11PokeEvent';
 import { OB11GroupEssenceEvent } from '@/onebot/event/notice/OB11GroupEssenceEvent';
 import { OB11GroupTitleEvent } from '@/onebot/event/notice/OB11GroupTitleEvent';
 import { FileNapCatOneBotUUID } from '@/common/helper';
+import { pathToFileURL } from 'node:url';
 
 export class OneBotGroupApi {
     obContext: NapCatOneBot11Adapter;
@@ -77,7 +78,8 @@ export class OneBotGroupApi {
                         id: FileNapCatOneBotUUID.encode({
                             chatType: ChatType.KCHATTYPEGROUP,
                             peerUid: msg.peerUid,
-                        }, msg.msgId, element.elementId, element.fileElement.fileName),
+                        }, msg.msgId, element.elementId, "."+element.fileElement.fileName),
+                        url: pathToFileURL(element.fileElement.filePath),
                         name: element.fileElement.fileName,
                         size: parseInt(element.fileElement.fileSize),
                         busid: element.fileElement.fileBizId || 0,
