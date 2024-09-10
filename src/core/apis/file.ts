@@ -207,7 +207,9 @@ export class NTQQFileApi {
             throw new Error('文件异常，大小为0');
         }
         if (converted) {
-            fsPromises.unlink(silkPath);
+            fsPromises.unlink(silkPath).then().catch(
+                (e) => this.context.logger.logError('删除临时文件失败', e)
+            );
         }
         return {
             elementType: ElementType.PTT,
