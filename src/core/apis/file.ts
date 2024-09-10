@@ -248,7 +248,6 @@ export class NTQQFileApi {
     }
 
     async downloadMedia(msgId: string, chatType: ChatType, peerUid: string, elementId: string, thumbPath: string, sourcePath: string, timeout = 1000 * 60 * 2, force: boolean = false) {
-        //logDebug('receive downloadMedia task', msgId, chatType, peerUid, elementId, thumbPath, sourcePath, timeout, force);
         // 用于下载收到的消息中的图片等
         if (sourcePath && fs.existsSync(sourcePath)) {
             if (force) {
@@ -361,7 +360,6 @@ export class NTQQFileApi {
                 return IMAGE_HTTP_HOST + url;
             }
         } else if (fileMd5 || md5HexStr) {
-            // 没有url，需要自己拼接
             return `${IMAGE_HTTP_HOST}/gchatpic_new/0/0-0-${(fileMd5 ?? md5HexStr)!.toUpperCase()}/0`;
         }
         this.context.logger.logDebug('图片url获取失败', element);
