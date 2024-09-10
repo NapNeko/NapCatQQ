@@ -1,0 +1,22 @@
+syntax = 'proto3';
+package SysMessage;
+
+message ProfileLikeTip {
+  ProfileLikeDetail profile_like_detail = 203;
+}
+
+message ProfileLikeDetail {
+  LikeDetail like_detail = 14;
+}
+
+message LikeDetail {
+  int32 times = 1;
+  int32 time = 2;
+  TextTip text_tip = 3;
+}
+
+message TextTip {
+  string txt = 1;
+  int64 qq = 2;
+  string nick = 3;
+}

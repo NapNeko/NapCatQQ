@@ -43,6 +43,10 @@ import { OB11FriendRecallNoticeEvent } from '@/onebot/event/notice/OB11FriendRec
 import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecallNoticeEvent';
 import { LRUCache } from '@/common/lru-cache';
 import { NodeIKernelRecentContactListener } from '@/core/listeners/NodeIKernelRecentContactListener';
+import { SysMessage } from '@/core/proto/SysMessage';
+import { ProfileLikeTip } from '@/core/proto/ProfileLikeTip';
+import util from 'util';
+import { time } from 'console';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -238,35 +242,45 @@ export class NapCatOneBot11Adapter {
     private initMsgListener() {
         const msgListener = new NodeIKernelMsgListener();
 
-        /*
-        msgListener.onRecvSysMsg = async () => {
+        msgListener.onRecvSysMsg = async (msg) => {
+            console.log('收到系统消息', util.inspect(msg, { depth: null, maxArrayLength: null }));
             const sysMsg = SysMessage.fromBinary(Uint8Array.from(msg));
             if (sysMsg.msgSpec.length === 0) {
                 return;
             }
+            console.log( '收到系统消息:Uint8Array:', util.inspect(Uint8Array.from(msg), { depth: null, maxArrayLength: null }));
             const { msgType, subType, subSubType } = sysMsg.msgSpec[0];
-            if (msgType === 732 && subType === 16 && subSubType === 16) {
-                const greyTip = GreyTipWrapper.fromBinary(Uint8Array.from(sysMsg.bodyWrapper!.wrappedBody.slice(7)));
-                if (greyTip.subTypeId === 36) {
-                    const emojiLikeToOthers = EmojiLikeToOthersWrapper1
-                        .fromBinary(greyTip.rest)
-                        .wrapper!
-                        .body!;
-                    if (emojiLikeToOthers.attributes?.operation !== 1) { // Un-like
-                        return;
-                    }
-                    const eventOrEmpty = await this.apis.GroupApi.createGroupEmojiLikeEvent(
-                        greyTip.groupCode.toString(),
-                        await this.core.apis.UserApi.getUinByUidV2(emojiLikeToOthers.attributes!.senderUid),
-                        emojiLikeToOthers.msgSpec!.msgSeq.toString(),
-                        emojiLikeToOthers.attributes!.emojiId,
-                    );
-                    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-                    eventOrEmpty && await this.networkManager.emitEvent(eventOrEmpty);
+            this.core.context.logger.log('收到系统消息类型', msgType, subType, subSubType);
+            if (msgType === 528 && subType === 39 && subSubType === 39) {
+                console.log(util.inspect(sysMsg.bodyWrapper!.wrappedBody, { depth: null, maxArrayLength: null }));
+                const profileLikeTip = ProfileLikeTip.fromBinary(Uint8Array.from(sysMsg.bodyWrapper!.wrappedBody));
+                console.log("点赞提示: ", profileLikeTip);
+                if (profileLikeTip.profileLikeDetail?.likeDetail) {
+                    const detail = profileLikeTip.profileLikeDetail.likeDetail.textTip;
+                    console.log("点赞详情: ", detail, "时间: ", Date.parse(profileLikeTip.profileLikeDetail.likeDetail.time.toString()));
                 }
-            }
+            };
+            // if (msgType === 732 && subType === 16 && subSubType === 16) {
+            //     const greyTip = GreyTipWrapper.fromBinary(Uint8Array.from(sysMsg.bodyWrapper!.wrappedBody.slice(7)));
+            //     if (greyTip.subTypeId === 36) {
+            //         const emojiLikeToOthers = EmojiLikeToOthersWrapper1
+            //             .fromBinary(greyTip.rest)
+            //             .wrapper!
+            //             .body!;
+            //         if (emojiLikeToOthers.attributes?.operation !== 1) { // Un-like
+            //             return;
+            //         }
+            //         const eventOrEmpty = await this.apis.GroupApi.createGroupEmojiLikeEvent(
+            //             greyTip.groupCode.toString(),
+            //             await this.core.apis.UserApi.getUinByUidV2(emojiLikeToOthers.attributes!.senderUid),
+            //             emojiLikeToOthers.msgSpec!.msgSeq.toString(),
+            //             emojiLikeToOthers.attributes!.emojiId,
+            //         );
+            //         // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+            //         eventOrEmpty && await this.networkManager.emitEvent(eventOrEmpty);
+            //     }
+            // }
         };
-         */
 
         msgListener.onInputStatusPush = async data => {
             const uin = await this.core.apis.UserApi.getUinByUidV2(data.fromUin);
