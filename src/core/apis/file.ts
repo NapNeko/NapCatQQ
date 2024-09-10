@@ -33,7 +33,7 @@ export class NTQQFileApi {
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
         this.core = core;
-        this.rkeyManager = new RkeyManager('http://napcat-sign.wumiao.wang:2082/rkey', this.context.logger);
+        this.rkeyManager = new RkeyManager('https://llob.linyuchen.net/rkey', this.context.logger);
     }
 
     async copyFile(filePath: string, destPath: string) {
@@ -346,8 +346,8 @@ export class NTQQFileApi {
         if (url) {
             const parsedUrl = new URL(IMAGE_HTTP_HOST + url);
             const imageAppid = parsedUrl.searchParams.get('appid');
-            const isNTFlavoredPic = imageAppid && ['1406', '1407'].includes(imageAppid);
-            if (isNTFlavoredPic) {
+            const isNTV2 = imageAppid && ['1406', '1407'].includes(imageAppid);
+            if (isNTV2) {
                 let rkey = parsedUrl.searchParams.get('rkey');
                 if (rkey) {
                     return IMAGE_HTTP_HOST_NT + url;
@@ -356,7 +356,6 @@ export class NTQQFileApi {
                 rkey = imageAppid === '1406' ? rkeyData.private_rkey : rkeyData.group_rkey;
                 return IMAGE_HTTP_HOST_NT + url + `${rkey}`;
             } else {
-                // 老的图片url，不需要rkey
                 return IMAGE_HTTP_HOST + url;
             }
         } else if (fileMd5 || md5HexStr) {
