@@ -1,7 +1,7 @@
 import * as pb from 'protobufjs';
 
 // Proto: from src/core/proto/ProfileLike.proto
-// Auther: Mlikiowa
+// Author: Mlikiowa
 
 export interface LikeDetailType {
     txt: string;
