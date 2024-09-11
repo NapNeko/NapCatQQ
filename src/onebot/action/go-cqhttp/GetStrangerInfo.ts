@@ -20,7 +20,7 @@ export default class GoCQHTTPGetStrangerInfo extends BaseAction<Payload, OB11Use
 
     async _handle(payload: Payload): Promise<OB11User> {
         const user_id = payload.user_id.toString();
-        const extendData = await this.core.apis.UserApi.getUserDetailInfoByUinV2(user_id);
+        const extendData = await this.core.apis.UserApi.getUserDetailInfoByUin(user_id);
         const uid = (await this.core.apis.UserApi.getUidByUinV2(user_id))!;
         if (!uid || uid.indexOf('*') != -1) {
             return {
