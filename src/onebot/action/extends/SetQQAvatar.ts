@@ -24,17 +24,16 @@ export default class SetAvatar extends BaseAction<Payload, null> {
     }
 
     async _handle(payload: Payload): Promise<null> {
-        const { path, isLocal, success } = (await uri2local(this.core.NapCatTempPath, payload.file));
+        const { path, success } = (await uri2local(this.core.NapCatTempPath, payload.file));
         if (!success) {
             throw `头像${payload.file}设置失败,file字段可能格式不正确`;
         }
         if (path) {
             await checkFileReceived(path, 5000); // 文件不存在QQ会崩溃，需要提前判断
             const ret = await this.core.apis.UserApi.setQQAvatar(path);
-            if (!isLocal) {
-                fs.unlink(path, () => {
-                });
-            }
+            fs.unlink(path, () => {
+            });
+
             if (!ret) {
                 throw `头像${payload.file}设置失败,api无返回`;
             }
@@ -45,10 +44,8 @@ export default class SetAvatar extends BaseAction<Payload, null> {
                 throw `头像${payload.file}设置失败,未知的错误,${ret['result']}:${ret['errMsg']}`;
             }
         } else {
-            if (!isLocal) {
-                fs.unlink(path, () => {
-                });
-            }
+            fs.unlink(path, () => { });
+
             throw `头像${payload.file}设置失败,无法获取头像,文件可能不存在`;
         }
         return null;

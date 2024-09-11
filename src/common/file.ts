@@ -160,8 +160,7 @@ type Uri2LocalRes = {
     errMsg: string,
     fileName: string,
     ext: string,
-    path: string,
-    isLocal: boolean
+    path: string
 }
 
 export async function checkFileV2(filePath: string) {
@@ -194,7 +193,6 @@ export async function checkUriType(Uri: string) {
         return undefined;
     }, Uri);
     if (LocalFileRet) return LocalFileRet;
-
     const OtherFileRet = await solveProblem((uri: string) => {
         //再判断是否是Http
         if (uri.startsWith('http://') || uri.startsWith('https://')) {
@@ -206,13 +204,13 @@ export async function checkUriType(Uri: string) {
         }
         if (uri.startsWith('file://')) {
             let filePath: string;
-            // await fs.copyFile(url.pathname, filePath);
             const pathname = decodeURIComponent(new URL(uri).pathname);
             if (process.platform === 'win32') {
                 filePath = pathname.slice(1);
             } else {
                 filePath = pathname;
             }
+            
             return { Uri: filePath, Type: FileUriType.Local };
         }
         if (uri.startsWith('data:')) {
@@ -228,20 +226,26 @@ export async function checkUriType(Uri: string) {
 export async function uri2local(dir: string, uri: string, filename: string | undefined = undefined): Promise<Uri2LocalRes> {
     const { Uri: HandledUri, Type: UriType } = await checkUriType(uri);
     //解析失败
+    const tempName = randomUUID();
+    if (!filename) filename = randomUUID();
+    //解析Http和Https协议
 
     if (UriType == FileUriType.Unknown) {
-        return { success: false, errMsg: '未知文件类型', fileName: '', ext: '', path: '', isLocal: false };
+        return { success: false, errMsg: '未知文件类型', fileName: '', ext: '', path: '' };
     }
     //解析File协议和本地文件
     if (UriType == FileUriType.Local) {
         const fileExt = path.extname(HandledUri);
         let filename = path.basename(HandledUri, fileExt);
         filename += fileExt;
-        return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: HandledUri, isLocal: true };
+        //复制文件到临时文件并保持后缀
+        const filenameTemp = tempName + fileExt;
+        const filePath = path.join(dir, filenameTemp);
+        fs.copyFileSync(HandledUri, filePath);
+        console.log('复制文件到临时文件', HandledUri, filePath);
+        return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath };
     }
     //接下来都要有文件名
-    if (!filename) filename = randomUUID();
-    //解析Http和Https协议
 
     if (UriType == FileUriType.Remote) {
         const pathInfo = path.parse(decodeURIComponent(new URL(HandledUri).pathname));
@@ -253,10 +257,10 @@ export async function uri2local(dir: string, uri: string, filename: string | und
         }
         filename = filename.replace(/[/\\:*?"<>|]/g, '_');
         const fileExt = path.extname(HandledUri);
-        const filePath = path.join(dir, filename);
+        const filePath = path.join(dir, tempName + fileExt);
         const buffer = await httpDownload(HandledUri);
         fs.writeFileSync(filePath, buffer);
-        return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath, isLocal: false };
+        return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath };
     }
     //解析Base64
     if (UriType == FileUriType.Base64) {
@@ -271,7 +275,7 @@ export async function uri2local(dir: string, uri: string, filename: string | und
             fileExt = ext;
             filename = filename + '.' + ext;
         }
-        return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath, isLocal: false };
+        return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath };
     }
-    return { success: false, errMsg: '未知文件类型', fileName: '', ext: '', path: '', isLocal: false };
+    return { success: false, errMsg: '未知文件类型', fileName: '', ext: '', path: '' };
 }
