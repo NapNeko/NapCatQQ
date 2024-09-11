@@ -71,7 +71,7 @@ export class NTQQFileApi {
             file_uuid: '',
         });
 
-        await this.copyFile(filePath, mediaPath!);
+        await this.copyFile(filePath, mediaPath);
         const fileSize = await this.getFileSize(filePath);
         return {
             md5: fileMd5,

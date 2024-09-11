@@ -805,7 +805,6 @@ export class OneBotMsgApi {
         }
         const {
             path,
-            isLocal,
             fileName,
             errMsg,
             success,
@@ -816,9 +815,7 @@ export class OneBotMsgApi {
             throw Error('文件下载失败' + errMsg);
         }
 
-        if (!isLocal) { // 只删除http和base64转过来的文件
-            deleteAfterSentFiles.push(path);
-        }
+        deleteAfterSentFiles.push(path);
 
         return { path, fileName: inputdata.name ?? fileName };
     }

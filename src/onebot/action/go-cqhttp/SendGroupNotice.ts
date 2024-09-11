@@ -31,7 +31,6 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
             //公告图逻辑
             const {
                 path,
-                isLocal,
                 success,
             } = (await uri2local(this.core.NapCatTempPath, payload.image));
             if (!success) {
@@ -45,10 +44,10 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
             if (ImageUploadResult.errCode != 0) {
                 throw `群公告${payload.image}设置失败,图片上传失败`;
             }
-            if (!isLocal) {
-                unlink(path, () => {
-                });
-            }
+
+            unlink(path, () => {
+            });
+
             UploadImage = ImageUploadResult.picInfo;
         }
 

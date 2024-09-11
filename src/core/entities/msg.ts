@@ -1,4 +1,4 @@
-import { GroupMemberRole, Peer } from '@/core';
+import { GroupMemberRole } from '@/core';
 
 export interface Peer {
     chatType: ChatType;
