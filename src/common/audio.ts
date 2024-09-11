@@ -60,7 +60,6 @@ export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: Log
             const silk = await encode(input, 24000);
             await fsPromise.writeFile(pttPath, silk.data);
             logger.log(`语音文件${filePath}转换成功!`, pttPath, '时长:', silk.duration);
-            console.log('【Debug】文件处理为Slik格式，返回', pttPath, silk.duration / 1000);
             return {
                 converted: true,
                 path: pttPath,
@@ -74,7 +73,6 @@ export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: Log
                 logger.log('获取语音文件时长失败, 使用文件大小推测时长', filePath, e.stack);
                 duration = await guessDuration(filePath, logger);
             }
-            console.log('【Debug】文件处理非Slik格式，直接返回', filePath, duration);
             return {
                 converted: false,
                 path: filePath,

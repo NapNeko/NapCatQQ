@@ -819,7 +819,6 @@ export class OneBotMsgApi {
         if (!isLocal) { // 只删除http和base64转过来的文件
             deleteAfterSentFiles.push(path);
         }
-        console.log('【Debug】文件路径 处理', path, isLocal);
 
         return { path, fileName: inputdata.name ?? fileName };
     }
