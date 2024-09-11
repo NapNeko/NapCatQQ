@@ -208,3 +208,8 @@ export interface OB11PostSendMsg {
     messages?: OB11MessageMixType;  // 兼容 go-cqhttp
     auto_escape?: boolean | string
 }
+export interface OB11PostContext {
+    message_type?: 'private' | 'group'
+    user_id?: string,
+    group_id?: string,
+}

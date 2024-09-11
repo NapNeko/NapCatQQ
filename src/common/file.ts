@@ -210,7 +210,7 @@ export async function checkUriType(Uri: string) {
             } else {
                 filePath = pathname;
             }
-            
+
             return { Uri: filePath, Type: FileUriType.Local };
         }
         if (uri.startsWith('data:')) {
@@ -242,7 +242,7 @@ export async function uri2local(dir: string, uri: string, filename: string | und
         const filenameTemp = tempName + fileExt;
         const filePath = path.join(dir, filenameTemp);
         fs.copyFileSync(HandledUri, filePath);
-        console.log('复制文件到临时文件', HandledUri, filePath);
+        //console.log('复制文件到临时文件', HandledUri, filePath);
         return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath };
     }
     //接下来都要有文件名
@@ -250,7 +250,7 @@ export async function uri2local(dir: string, uri: string, filename: string | und
     if (UriType == FileUriType.Remote) {
         const pathInfo = path.parse(decodeURIComponent(new URL(HandledUri).pathname));
         if (pathInfo.name) {
-            filename = pathInfo.name;
+            filename = pathInfo.name.substring(0, 50);//过长截断
             if (pathInfo.ext) {
                 filename += pathInfo.ext;
             }
