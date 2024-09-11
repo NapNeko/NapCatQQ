@@ -135,24 +135,29 @@ export class NTQQFileApi {
 
     async createValidSendVideoElement(context: MessageContext, filePath: string, fileName: string = '', diyThumbPath: string = ''): Promise<SendVideoElement> {
         const logger = this.core.context.logger;
-        const { fileName: _fileName, path, fileSize, md5 } = await this.core.apis.FileApi.uploadFile(filePath, ElementType.VIDEO);
-        if (fileSize === 0) {
-            throw new Error('文件异常，大小为0');
-        }
-        let thumb = path.replace(`${pathLib.sep}Ori${pathLib.sep}`, `${pathLib.sep}Thumb${pathLib.sep}`);
-        thumb = pathLib.dirname(thumb);
         let videoInfo = {
             width: 1920, height: 1080,
             time: 15,
             format: 'mp4',
-            size: fileSize,
+            size: 0,
             filePath,
         };
         try {
-            videoInfo = await getVideoInfo(path, logger);
+            videoInfo = await getVideoInfo(filePath, logger);
         } catch (e) {
             logger.logError('获取视频信息失败，将使用默认值', e);
         }
+        let newFilePath = filePath + '.mp4';
+        fs.renameSync(filePath, newFilePath);
+        filePath = newFilePath;
+        const { fileName: _fileName, path, fileSize, md5 } = await this.core.apis.FileApi.uploadFile(filePath, ElementType.VIDEO);
+        if (fileSize === 0) {
+            throw new Error('文件异常，大小为0');
+        }
+        videoInfo.size = fileSize;
+        let thumb = path.replace(`${pathLib.sep}Ori${pathLib.sep}`, `${pathLib.sep}Thumb${pathLib.sep}`);
+        thumb = pathLib.dirname(thumb);
+
         const thumbPath = new Map();
         const _thumbPath = await new Promise<string | undefined>((resolve, reject) => {
             const thumbFileName = `${md5}_0.png`;
