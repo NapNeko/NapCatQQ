@@ -460,6 +460,7 @@ export class OneBotMsgApi {
         // File service
         [OB11MessageDataType.image]: async (sendMsg, context) => {
             const sendPicElement = await this.core.apis.FileApi.createValidSendPicElement(
+                context,
                 (await this.handleOb11FileLikeMessage(sendMsg, context)).path,
                 sendMsg.data.summary,
                 sendMsg.data.sub_type,
@@ -470,7 +471,7 @@ export class OneBotMsgApi {
 
         [OB11MessageDataType.file]: async (sendMsg, context) => {
             const { path, fileName } = await this.handleOb11FileLikeMessage(sendMsg, context);
-            return await this.core.apis.FileApi.createValidSendFileElement(path, fileName);
+            return await this.core.apis.FileApi.createValidSendFileElement(context, path, fileName);
         },
 
         [OB11MessageDataType.video]: async (sendMsg, context) => {
@@ -481,7 +482,7 @@ export class OneBotMsgApi {
                 const uri2LocalRes = await uri2local(this.core.NapCatTempPath, thumb);
                 if (uri2LocalRes.success) thumb = uri2LocalRes.path;
             }
-            const videoEle = await this.core.apis.FileApi.createValidSendVideoElement(path, fileName, thumb);
+            const videoEle = await this.core.apis.FileApi.createValidSendVideoElement(context, path, fileName, thumb);
 
             context.deleteAfterSentFiles.push(videoEle.videoElement.filePath);
             return videoEle;
