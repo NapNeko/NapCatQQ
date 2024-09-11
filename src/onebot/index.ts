@@ -262,26 +262,28 @@ export class NapCatOneBot11Adapter {
                     likeTip.msg.time,
                 )).catch(e => this.context.logger.logError('处理被点赞事件失败', e));
             };
-            // if (msgType === 732 && subType === 16 && subSubType === 16) {
-            //     const greyTip = GreyTipWrapper.fromBinary(Uint8Array.from(sysMsg.bodyWrapper!.wrappedBody.slice(7)));
-            //     if (greyTip.subTypeId === 36) {
-            //         const emojiLikeToOthers = EmojiLikeToOthersWrapper1
-            //             .fromBinary(greyTip.rest)
-            //             .wrapper!
-            //             .body!;
-            //         if (emojiLikeToOthers.attributes?.operation !== 1) { // Un-like
-            //             return;
-            //         }
-            //         const eventOrEmpty = await this.apis.GroupApi.createGroupEmojiLikeEvent(
-            //             greyTip.groupCode.toString(),
-            //             await this.core.apis.UserApi.getUinByUidV2(emojiLikeToOthers.attributes!.senderUid),
-            //             emojiLikeToOthers.msgSpec!.msgSeq.toString(),
-            //             emojiLikeToOthers.attributes!.emojiId,
-            //         );
-            //         // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-            //         eventOrEmpty && await this.networkManager.emitEvent(eventOrEmpty);
-            //     }
-            // }
+            /*
+            if (msgType === 732 && subType === 16 && subSubType === 16) {
+                const greyTip = GreyTipWrapper.fromBinary(Uint8Array.from(sysMsg.bodyWrapper!.wrappedBody.slice(7)));
+                if (greyTip.subTypeId === 36) {
+                    const emojiLikeToOthers = EmojiLikeToOthersWrapper1
+                        .fromBinary(greyTip.rest)
+                        .wrapper!
+                        .body!;
+                    if (emojiLikeToOthers.attributes?.operation !== 1) { // Un-like
+                        return;
+                    }
+                    const eventOrEmpty = await this.apis.GroupApi.createGroupEmojiLikeEvent(
+                        greyTip.groupCode.toString(),
+                        await this.core.apis.UserApi.getUinByUidV2(emojiLikeToOthers.attributes!.senderUid),
+                        emojiLikeToOthers.msgSpec!.msgSeq.toString(),
+                        emojiLikeToOthers.attributes!.emojiId,
+                    );
+                    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+                    eventOrEmpty && await this.networkManager.emitEvent(eventOrEmpty);
+                }
+            }
+            */
         };
 
         msgListener.onInputStatusPush = async data => {
