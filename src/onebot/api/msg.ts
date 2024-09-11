@@ -483,8 +483,6 @@ export class OneBotMsgApi {
                 if (uri2LocalRes.success) thumb = uri2LocalRes.path;
             }
             const videoEle = await this.core.apis.FileApi.createValidSendVideoElement(context, path, fileName, thumb);
-
-            context.deleteAfterSentFiles.push(videoEle.videoElement.filePath);
             return videoEle;
         },
 
