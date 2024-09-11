@@ -8,7 +8,7 @@ interface ServerRkeyData {
 }
 
 export class RkeyManager {
-    serverUrl: string = '';
+    serverUrl: string[] = [];
     logger: LogWrapper;
     private rkeyData: ServerRkeyData = {
         group_rkey: '',
@@ -16,7 +16,7 @@ export class RkeyManager {
         expired_time: 0,
     };
 
-    constructor(serverUrl: string, logger: LogWrapper) {
+    constructor(serverUrl: string[], logger: LogWrapper) {
         this.logger = logger;
         this.serverUrl = serverUrl;
     }
@@ -40,6 +40,13 @@ export class RkeyManager {
 
     async refreshRkey(): Promise<any> {
         //刷新rkey
-        this.rkeyData = await RequestUtil.HttpGetJson<ServerRkeyData>(this.serverUrl, 'GET');
+        for (let url of this.serverUrl) {
+            try {
+                this.rkeyData = await RequestUtil.HttpGetJson<ServerRkeyData>(url, 'GET');
+            } catch (e) {
+                this.logger.logError(`[Rkey] Get Rkey ${url} Error `, e);
+            }
+        }
+
     }
 }

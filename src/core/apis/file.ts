@@ -33,7 +33,7 @@ export class NTQQFileApi {
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
         this.core = core;
-        this.rkeyManager = new RkeyManager('https://llob.linyuchen.net/rkey', this.context.logger);
+        this.rkeyManager = new RkeyManager(['https://llob.linyuchen.net/rkey', 'http://napcat-sign.wumiao.wang:2082/rkey'], this.context.logger);
     }
 
     async copyFile(filePath: string, destPath: string) {
