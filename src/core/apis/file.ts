@@ -70,7 +70,7 @@ export class NTQQFileApi {
             downloadType: 1,
             file_uuid: '',
         });
-        console.log('【Debug】文件路径Upload 处理', mediaPath);
+
         await this.copyFile(filePath, mediaPath!);
         const fileSize = await this.getFileSize(filePath);
         return {
