@@ -44,9 +44,7 @@ import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecal
 import { LRUCache } from '@/common/lru-cache';
 import { NodeIKernelRecentContactListener } from '@/core/listeners/NodeIKernelRecentContactListener';
 import { OB11ProfileLikeEvent } from './event/notice/OB11ProfileLikeEvent';
-import { profileLikeTip, ProfileLikeTipType, SysMessage, SysMessageMsgSpecType, SysMessageType } from '@/core/proto/ProfileLike';
-import { Message } from 'protobufjs';
-
+import { profileLikeTip, ProfileLikeTipType, SysMessage, SysMessageType } from '@/core/proto/ProfileLike';
 //OneBot实现类
 export class NapCatOneBot11Adapter {
     readonly core: NapCatCore;
@@ -247,20 +245,9 @@ export class NapCatOneBot11Adapter {
             }
             const { msgType, subType, subSubType } = sysMsg.msgSpec[0];
             if (msgType === 528 && subType === 39 && subSubType === 39) {
-                const likeTip = profileLikeTip.decode(Uint8Array.from(sysMsg.bodyWrapper.wrappedBody.slice(12))) as unknown as ProfileLikeTipType;
-                this.core.context.logger.logDebug("收到点赞通知消息");
-                const likeMsg = likeTip.msg;
-                if (!likeMsg) return;
-                const detail = likeMsg.detail;
-                if (!detail) return;
-                const times = detail.txt.match(/\d+/) ?? "0";
-                await this.networkManager.emitEvent(new OB11ProfileLikeEvent(
-                    this.core,
-                    Number(detail.uin),
-                    detail.nickname,
-                    parseInt(times[0], 10),
-                    likeMsg.time,
-                )).catch(e => this.context.logger.logError('处理被点赞事件失败', e));
+                if (!sysMsg.bodyWrapper) return;
+                let event = await this.apis.UserApi.parseLikeEvent(sysMsg.bodyWrapper.wrappedBody);
+                if (event) await this.networkManager.emitEvent(event);
             };
             /*
             if (msgType === 732 && subType === 16 && subSubType === 16) {
