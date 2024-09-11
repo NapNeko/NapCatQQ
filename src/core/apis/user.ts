@@ -159,7 +159,7 @@ export class NTQQUserApi {
         if (uid) return uid;
         uid = (await this.context.session.getUixConvertService().getUid([Uin])).uidInfo.get(Uin);
         if (uid) return uid;
-        const unverifiedUid = (await this.getUserDetailInfoByUinV2(Uin)).detail.uid;//从QQ Native 特殊转换
+        const unverifiedUid = (await this.getUserDetailInfoByUin(Uin)).detail.uid;//从QQ Native 特殊转换
         if (unverifiedUid.indexOf('*') == -1) uid = unverifiedUid;
         //if (uid) return uid;
         return uid;
@@ -195,7 +195,7 @@ export class NTQQUserApi {
         return await this.context.session.getRecentContactService().getRecentContactList();
     }
 
-    async getUserDetailInfoByUinV2(Uin: string) {
+    async getUserDetailInfoByUin(Uin: string) {
         return await this.core.eventWrapper.callNoListenerEvent(
             'NodeIKernelProfileService/getUserDetailInfoByUin',
             Uin
