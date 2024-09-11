@@ -24,6 +24,7 @@ import pathLib from 'node:path';
 import { defaultVideoThumbB64, getVideoInfo } from '@/common/video';
 import ffmpeg from 'fluent-ffmpeg';
 import { encodeSilk } from '@/common/audio';
+import { MessageContext } from '@/onebot/api';
 
 export class NTQQFileApi {
     context: InstanceContext;
@@ -82,7 +83,7 @@ export class NTQQFileApi {
         };
     }
 
-    async createValidSendFileElement(filePath: string, fileName: string = '', folderId: string = '',): Promise<SendFileElement> {
+    async createValidSendFileElement(context: MessageContext, filePath: string, fileName: string = '', folderId: string = '',): Promise<SendFileElement> {
         const {
             fileName: _fileName,
             path,
@@ -91,6 +92,7 @@ export class NTQQFileApi {
         if (fileSize === 0) {
             throw new Error('文件异常，大小为0');
         }
+        context.deleteAfterSentFiles.push(path);
         return {
             elementType: ElementType.FILE,
             elementId: '',
@@ -103,12 +105,13 @@ export class NTQQFileApi {
         };
     }
 
-    async createValidSendPicElement(picPath: string, summary: string = '', subType: 0 | 1 = 0,): Promise<SendPicElement> {
+    async createValidSendPicElement(context: MessageContext, picPath: string, summary: string = '', subType: 0 | 1 = 0,): Promise<SendPicElement> {
         const { md5, fileName, path, fileSize } = await this.core.apis.FileApi.uploadFile(picPath, ElementType.PIC, subType);
         if (fileSize === 0) {
             throw new Error('文件异常，大小为0');
         }
         const imageSize = await this.core.apis.FileApi.getImageSize(picPath);
+        context.deleteAfterSentFiles.push(path);
         return {
             elementType: ElementType.PIC,
             elementId: '',
@@ -130,7 +133,7 @@ export class NTQQFileApi {
         };
     }
 
-    async createValidSendVideoElement(filePath: string, fileName: string = '', diyThumbPath: string = ''): Promise<SendVideoElement> {
+    async createValidSendVideoElement(context: MessageContext, filePath: string, fileName: string = '', diyThumbPath: string = ''): Promise<SendVideoElement> {
         const logger = this.core.context.logger;
         const { fileName: _fileName, path, fileSize, md5 } = await this.core.apis.FileApi.uploadFile(filePath, ElementType.VIDEO);
         if (fileSize === 0) {
@@ -179,6 +182,7 @@ export class NTQQFileApi {
         const thumbSize = _thumbPath ? (await fsPromises.stat(_thumbPath)).size : 0;
         thumbPath.set(0, _thumbPath);
         const thumbMd5 = _thumbPath ? await calculateFileMD5(_thumbPath) : '';
+        context.deleteAfterSentFiles.push(path);
         return {
             elementType: ElementType.VIDEO,
             elementId: '',

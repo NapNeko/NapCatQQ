@@ -1,9 +1,10 @@
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { ChatType } from '@/core/entities';
+import { ChatType, Peer } from '@/core/entities';
 import fs from 'fs';
 import { uri2local } from '@/common/file';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { MessageContext } from '@/onebot/api';
 
 const SchemaData = {
     type: 'object',
@@ -29,14 +30,19 @@ export default class GoCQHTTPUploadGroupFile extends BaseAction<Payload, null> {
             file = `file://${file}`;
         }
         const downloadResult = await uri2local(this.core.NapCatTempPath, file);
+        const peer: Peer = {
+            chatType: ChatType.KCHATTYPEGROUP,
+            peerUid: payload.group_id.toString(),
+        };
         if (!downloadResult.success) {
             throw new Error(downloadResult.errMsg);
         }
-        const sendFileEle = await this.core.apis.FileApi.createValidSendFileElement(downloadResult.path, payload.name, payload.folder_id);
-        await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId({
-            chatType: ChatType.KCHATTYPEGROUP,
-            peerUid: payload.group_id.toString(),
-        }, [sendFileEle], [], true);
+        let msgContext: MessageContext = {
+            peer: peer,
+            deleteAfterSentFiles: []
+        }
+        const sendFileEle = await this.core.apis.FileApi.createValidSendFileElement(msgContext, downloadResult.path, payload.name, payload.folder_id);
+        await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, [sendFileEle], [], true);
         return null;
     }
 }
