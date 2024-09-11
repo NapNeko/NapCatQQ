@@ -44,9 +44,8 @@ import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecal
 import { LRUCache } from '@/common/lru-cache';
 import { NodeIKernelRecentContactListener } from '@/core/listeners/NodeIKernelRecentContactListener';
 import { SysMessage } from '@/core/proto/SysMessage';
-import { ProfileLikeTip } from '@/core/proto/ProfileLikeTip';
-import util from 'util';
-import { time } from 'console';
+import { profileLikeTip } from '@/core/proto/ProfileLikeTip';
+import { OB11ProfileLikeEvent } from './event/notice/OB11ProfileLikeEvent';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -243,22 +242,25 @@ export class NapCatOneBot11Adapter {
         const msgListener = new NodeIKernelMsgListener();
 
         msgListener.onRecvSysMsg = async (msg) => {
-            console.log('收到系统消息', util.inspect(msg, { depth: null, maxArrayLength: null }));
             const sysMsg = SysMessage.fromBinary(Uint8Array.from(msg));
             if (sysMsg.msgSpec.length === 0) {
                 return;
             }
-            console.log( '收到系统消息:Uint8Array:', util.inspect(Uint8Array.from(msg), { depth: null, maxArrayLength: null }));
             const { msgType, subType, subSubType } = sysMsg.msgSpec[0];
-            this.core.context.logger.log('收到系统消息类型', msgType, subType, subSubType);
             if (msgType === 528 && subType === 39 && subSubType === 39) {
-                console.log(util.inspect(sysMsg.bodyWrapper!.wrappedBody, { depth: null, maxArrayLength: null }));
-                const profileLikeTip = ProfileLikeTip.fromBinary(Uint8Array.from(sysMsg.bodyWrapper!.wrappedBody));
-                console.log("点赞提示: ", profileLikeTip);
-                if (profileLikeTip.profileLikeDetail?.likeDetail) {
-                    const detail = profileLikeTip.profileLikeDetail.likeDetail.textTip;
-                    console.log("点赞详情: ", detail, "时间: ", Date.parse(profileLikeTip.profileLikeDetail.likeDetail.time.toString()));
-                }
+                const likeTip = profileLikeTip.fromBinary(Uint8Array.from(sysMsg.bodyWrapper!.wrappedBody.slice(12)));
+                this.core.context.logger.logDebug("收到点赞通知消息");
+                if (!likeTip.msg) return;
+                const detail = likeTip.msg.detail;
+                if (!detail) return;
+                const times = detail.txt.match(/\d+/) ?? "0";
+                await this.networkManager.emitEvent(new OB11ProfileLikeEvent(
+                    this.core,
+                    Number(detail.uin),
+                    detail.nickname,
+                    parseInt(times[0], 10),
+                    likeTip.msg.time,
+                )).catch(e => this.context.logger.logError('处理被点赞事件失败', e));
             };
             // if (msgType === 732 && subType === 16 && subSubType === 16) {
             //     const greyTip = GreyTipWrapper.fromBinary(Uint8Array.from(sysMsg.bodyWrapper!.wrappedBody.slice(7)));
