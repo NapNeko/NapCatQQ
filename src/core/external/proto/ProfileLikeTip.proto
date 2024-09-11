@@ -1,0 +1,18 @@
+syntax = "proto3";
+package SysMessage;
+
+message likeDetail {
+    string txt = 1;
+    int64 uin = 3;
+    string nickname = 5;
+}
+
+message likeMsg {
+    int32 times = 1;
+    int32 time = 2;
+    likeDetail detail = 3;
+}
+
+message profileLikeTip {
+    likeMsg msg = 14;
+}
