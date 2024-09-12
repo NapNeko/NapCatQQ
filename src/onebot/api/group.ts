@@ -142,22 +142,22 @@ export class OneBotGroupApi {
                         //下面得改 上面也是错的grayTipElement.subElementType == GrayTipElementSubType.MEMBER_NEW_TITLE
                         const type = json.items[json.items.length - 1]?.txt;
                         switch (type) {
-                            case "头衔": {
-                                const memberUin = json.items[1].param[0];
-                                const title = json.items[3].txt;
-                                logger.logDebug('收到群成员新头衔消息', json);
-                                return new OB11GroupTitleEvent(
-                                    this.core,
-                                    parseInt(msg.peerUid),
-                                    parseInt(memberUin),
-                                    title,
-                                );
-                            };
-                            case "移出":
-                                logger.logDebug('收到机器人被踢消息', json);
-                                return;
-                            default:
-                                logger.logWarn('收到未知的灰条消息', json);
+                        case "头衔": {
+                            const memberUin = json.items[1].param[0];
+                            const title = json.items[3].txt;
+                            logger.logDebug('收到群成员新头衔消息', json);
+                            return new OB11GroupTitleEvent(
+                                this.core,
+                                parseInt(msg.peerUid),
+                                parseInt(memberUin),
+                                title,
+                            );
+                        }
+                        case "移出":
+                            logger.logDebug('收到机器人被踢消息', json);
+                            return;
+                        default:
+                            logger.logWarn('收到未知的灰条消息', json);
                         }
                     }
                 }

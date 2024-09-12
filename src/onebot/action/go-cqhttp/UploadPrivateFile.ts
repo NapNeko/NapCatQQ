@@ -45,13 +45,13 @@ export default class GoCQHTTPUploadPrivateFile extends BaseAction<Payload, null>
             throw new Error(downloadResult.errMsg);
         }
 
-        let msgContext: MessageContext = {
+        const msgContext: MessageContext = {
             peer: await createContext(this.core, {
                 user_id: payload.user_id.toString(),
                 group_id: undefined,
             }, ContextMode.Private),
             deleteAfterSentFiles: []
-        }
+        };
         const sendFileEle: SendFileElement = await this.core.apis.FileApi.createValidSendFileElement(msgContext, downloadResult.path, payload.name);
         await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(await this.getPeer(payload), [sendFileEle], [], true);
         return null;
