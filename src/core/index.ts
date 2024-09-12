@@ -145,7 +145,6 @@ export class NapCatCore {
             if (Info.status == 20) {
                 this.selfInfo.online = false;
                 this.context.logger.log("账号状态变更为离线");
-                return;
             } else {
                 this.selfInfo.online = true;
             }

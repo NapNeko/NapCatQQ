@@ -1,4 +1,3 @@
-import fs from 'fs';
 import fsPromise from 'fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'crypto';
@@ -12,7 +11,7 @@ const FFMPEG_PATH = process.env.FFMPEG_PATH || 'ffmpeg';
 
 async function guessDuration(pttPath: string, logger: LogWrapper) {
     const pttFileInfo = await fsPromise.stat(pttPath);
-    let duration = Math.max(1, Math.floor(pttFileInfo.size / 1024 / 3));  // 3kb/s
+    const duration = Math.max(1, Math.floor(pttFileInfo.size / 1024 / 3));  // 3kb/s
     logger.log('通过文件大小估算语音的时长:', duration);
     return duration;
 }
@@ -20,7 +19,7 @@ async function guessDuration(pttPath: string, logger: LogWrapper) {
 async function convert(filePath: string, pcmPath: string, logger: LogWrapper): Promise<Buffer> {
     return new Promise<Buffer>((resolve, reject) => {
         const cp = spawn(FFMPEG_PATH, ['-y', '-i', filePath, '-ar', '24000', '-ac', '1', '-f', 's16le', pcmPath]);
-        cp.on('error', err => {
+        cp.on('error', (err: Error) => {
             logger.log('FFmpeg处理转换出错: ', err.message);
             reject(err);
         });
