@@ -262,6 +262,23 @@ export class NTQQGroupApi {
         }
         return member;
     }
+    async searchGroup(groupCode: string) {
+        const [, ret] = await this.core.eventWrapper.callNormalEventV2(
+            'NodeIKernelSearchService/searchGroup',
+            'NodeIKernelSearchListener/onSearchGroupResult',
+            [{
+                keyWords: groupCode,
+                groupNum: 25,
+                exactSearch: false,
+                penetrate: ''
+            }],
+            (ret) => ret.result === 0,
+            (params) => !!params.groupInfos.find(g => g.groupCode === groupCode),
+            1,
+            5000
+        );
+        return ret.groupInfos.find(g => g.groupCode === groupCode);
+    }
     async getGroupMemberEx(GroupCode: string, uid: string, forced = false, retry = 2) {
         const data = await solveAsyncProblem((eventWrapper: NTEventWrapper, GroupCode: string, uid: string, forced = false) => {
             return eventWrapper.callNormalEventV2(

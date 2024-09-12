@@ -9,7 +9,7 @@ export * from './NodeIKernelProfileListener';
 export * from './NodeIKernelTicketListener';
 export * from './NodeIKernelStorageCleanListener';
 export * from './NodeIKernelFileAssistantListener';
-export * from './NodeIKernelSearchListener_Polyfill';
+export * from './NodeIKernelSearchListener';
 
 import type {
     NodeIKernelBuddyListener,
@@ -19,11 +19,11 @@ import type {
     NodeIKernelMsgListener,
     NodeIKernelProfileListener,
     NodeIKernelRobotListener,
-    NodeIKernelSearchListener_Polyfill,
     NodeIKernelSessionListener,
     NodeIKernelStorageCleanListener,
     NodeIKernelTicketListener,
 } from '.';
+import { NodeIKernelSearchListener } from './NodeIKernelSearchListener';
 
 export type ListenerNamingMapping = {
     NodeIKernelSessionListener: NodeIKernelSessionListener;
@@ -36,5 +36,5 @@ export type ListenerNamingMapping = {
     NodeIKernelTicketListener: NodeIKernelTicketListener;
     NodeIKernelStorageCleanListener: NodeIKernelStorageCleanListener;
     NodeIKernelFileAssistantListener: NodeIKernelFileAssistantListener;
-    NodeIKernelSearchListener: NodeIKernelSearchListener_Polyfill;
+    NodeIKernelSearchListener: NodeIKernelSearchListener;
 };

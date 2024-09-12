@@ -1,4 +1,5 @@
 import { ChatType } from '../entities';
+import { GeneralCallResult } from './common';
 
 export interface NodeIKernelSearchService {
 
@@ -8,7 +9,12 @@ export interface NodeIKernelSearchService {
 
     searchStranger(unknown: string, searchStranger: unknown, searchParams: unknown): Promise<unknown>;
 
-    searchGroup(...args: any[]): unknown;// needs 1 arguments
+    searchGroup(param: {
+        keyWords: string,
+        groupNum: number,
+        exactSearch: boolean,
+        penetrate: string
+    }): Promise<GeneralCallResult>;// needs 1 arguments
 
     searchLocalInfo(keywords: string, unknown: number/*4*/): unknown;
 
