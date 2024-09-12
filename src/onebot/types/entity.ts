@@ -81,6 +81,7 @@ export interface OB11GroupFile {
 export interface OB11GroupFileFolder {
     group_id: number,
     folder_id: string,
+    folder: string,
     folder_name: string,
     create_time: number,
     creator: number,

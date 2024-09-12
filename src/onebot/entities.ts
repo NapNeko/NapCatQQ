@@ -126,6 +126,7 @@ export class OB11Entities {
         return {
             group_id: parseInt(peerId),
             folder_id: folder.folderId,
+            folder:folder.folderId,
             folder_name: folder.folderName,
             create_time: folder.createTime,
             creator: parseInt(folder.createUin),
