@@ -20,7 +20,17 @@ class GetGroupInfo extends BaseAction<Payload, OB11Group> {
 
     async _handle(payload: Payload) {
         const group = (await this.core.apis.GroupApi.getGroups()).find(e => e.groupCode == payload.group_id.toString());
-        if (!group) throw `群${payload.group_id}不存在`;
+        if (!group) {
+            const data = await this.core.apis.GroupApi.searchGroup(payload.group_id.toString());
+            if (!data) throw new Error('Group not found');
+            return {
+                ...data.searchGroupInfo,
+                group_id: +payload.group_id,
+                group_name: data.searchGroupInfo.groupName,
+                member_count: data.searchGroupInfo.memberNum,
+                max_member_count: data.searchGroupInfo.maxMemberNum,
+            }
+        }
         return OB11Entities.group(group);
     }
 }
