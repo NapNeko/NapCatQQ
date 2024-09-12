@@ -242,7 +242,6 @@ export async function uri2local(dir: string, uri: string, filename: string | und
         const filenameTemp = tempName + fileExt;
         const filePath = path.join(dir, filenameTemp);
         fs.copyFileSync(HandledUri, filePath);
-        //console.log('复制文件到临时文件', HandledUri, filePath);
         return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath };
     }
     //接下来都要有文件名
@@ -250,7 +249,7 @@ export async function uri2local(dir: string, uri: string, filename: string | und
     if (UriType == FileUriType.Remote) {
         const pathInfo = path.parse(decodeURIComponent(new URL(HandledUri).pathname));
         if (pathInfo.name) {
-            let pathlen = 200 - dir.length - pathInfo.name.length;
+            const pathlen = 200 - dir.length - pathInfo.name.length;
             filename = pathlen > 0 ? pathInfo.name.substring(0, pathlen) : pathInfo.name.substring(pathInfo.name.length, pathInfo.name.length - 10);//过长截断
             if (pathInfo.ext) {
                 filename += pathInfo.ext;
@@ -260,7 +259,6 @@ export async function uri2local(dir: string, uri: string, filename: string | und
         const fileExt = path.extname(HandledUri).replace(/[/\\:*?"<>|]/g, '_').substring(0, 10);
         const filePath = path.join(dir, tempName + fileExt);
         const buffer = await httpDownload(HandledUri);
-        //fs.writeFileSync(filePath, buffer);
         //没有文件就创建
         fs.writeFileSync(filePath, buffer, { flag: 'wx' });
         return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath };

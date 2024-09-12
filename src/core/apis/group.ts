@@ -32,10 +32,6 @@ export class NTQQGroupApi {
         for (const group of this.groups) {
             this.groupCache.set(group.groupCode, group);
         }
-        // let text = await this.context.session.getMsgService().sendSsoCmdReqByContend(
-        //     'LightAppSvc.mini_app_share.AdaptShareInfo',
-        //     JSON.stringify({ data: 'test' }));
-        // console.log(text);
         this.context.logger.logDebug(`加载${this.groups.length}个群组缓存完成`);
     }
 
