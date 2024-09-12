@@ -24,7 +24,18 @@ export class NTQQUserApi {
             limit: 20,
         });
     }
-
+    async fetchOtherProfileLike(uid: string) {
+        return this.context.session.getProfileLikeService().getBuddyProfileLike({
+            friendUids: [uid],
+            basic: 1,
+            vote: 1,
+            favorite: 0,
+            userProfile: 0,
+            type: 1,
+            start: 0,
+            limit: 20,
+        });
+    }
     async setLongNick(longNick: string) {
         return this.context.session.getProfileService().setLongNick(longNick);
     }

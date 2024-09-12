@@ -216,7 +216,7 @@ export interface BuddyProfileLikeReq {
     userProfile: number;
     type: number;
     start: number;
-    limit: number;
+    limit?: number;
 }
 
 export interface QQLevel {
