@@ -29,7 +29,7 @@ class GetGroupInfo extends BaseAction<Payload, OB11Group> {
                 group_name: data.searchGroupInfo.groupName,
                 member_count: data.searchGroupInfo.memberNum,
                 max_member_count: data.searchGroupInfo.maxMemberNum,
-            }
+            };
         }
         return OB11Entities.group(group);
     }
