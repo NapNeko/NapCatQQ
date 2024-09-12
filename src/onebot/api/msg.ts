@@ -34,6 +34,7 @@ import { RequestUtil } from '@/common/request';
 import fs from 'node:fs';
 import fsPromise from 'node:fs/promises';
 import { OB11FriendAddNoticeEvent } from '@/onebot/event/notice/OB11FriendAddNoticeEvent';
+import { SysMessage, SysMessageType } from '@/core/proto/ProfileLike';
 
 type RawToOb11Converters = {
     [Key in keyof MessageElement as Key extends `${string}Element` ? Key : never]: (
@@ -817,5 +818,39 @@ export class OneBotMsgApi {
         deleteAfterSentFiles.push(path);
 
         return { path, fileName: inputdata.name ?? fileName };
+    }
+     async parseSysMessage(msg: number[]) {
+        const sysMsg = SysMessage.decode(Uint8Array.from(msg)) as unknown as SysMessageType;
+        if (sysMsg.msgSpec.length === 0) {
+            return;
+        }
+        const { msgType, subType, subSubType } = sysMsg.msgSpec[0];
+        if (msgType === 528 && subType === 39 && subSubType === 39) {
+            if (!sysMsg.bodyWrapper) return;
+            let event = await this.obContext.apis.UserApi.parseLikeEvent(sysMsg.bodyWrapper.wrappedBody);
+            return event;
+        };
+        /*
+        if (msgType === 732 && subType === 16 && subSubType === 16) {
+            const greyTip = GreyTipWrapper.fromBinary(Uint8Array.from(sysMsg.bodyWrapper!.wrappedBody.slice(7)));
+            if (greyTip.subTypeId === 36) {
+                const emojiLikeToOthers = EmojiLikeToOthersWrapper1
+                    .fromBinary(greyTip.rest)
+                    .wrapper!
+                    .body!;
+                if (emojiLikeToOthers.attributes?.operation !== 1) { // Un-like
+                    return;
+                }
+                const eventOrEmpty = await this.apis.GroupApi.createGroupEmojiLikeEvent(
+                    greyTip.groupCode.toString(),
+                    await this.core.apis.UserApi.getUinByUidV2(emojiLikeToOthers.attributes!.senderUid),
+                    emojiLikeToOthers.msgSpec!.msgSeq.toString(),
+                    emojiLikeToOthers.attributes!.emojiId,
+                );
+                // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+                eventOrEmpty && await this.networkManager.emitEvent(eventOrEmpty);
+            }
+        }
+        */
     }
 }
