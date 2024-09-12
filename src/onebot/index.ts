@@ -238,39 +238,10 @@ export class NapCatOneBot11Adapter {
 
     private initMsgListener() {
         const msgListener = new NodeIKernelMsgListener();
-        msgListener.onRecvSysMsg = async (msg) => {
-            const sysMsg = SysMessage.decode(Uint8Array.from(msg)) as unknown as SysMessageType;
-            if (sysMsg.msgSpec.length === 0) {
-                return;
-            }
-            const { msgType, subType, subSubType } = sysMsg.msgSpec[0];
-            if (msgType === 528 && subType === 39 && subSubType === 39) {
-                if (!sysMsg.bodyWrapper) return;
-                let event = await this.apis.UserApi.parseLikeEvent(sysMsg.bodyWrapper.wrappedBody);
-                if (event) await this.networkManager.emitEvent(event);
-            };
-            /*
-            if (msgType === 732 && subType === 16 && subSubType === 16) {
-                const greyTip = GreyTipWrapper.fromBinary(Uint8Array.from(sysMsg.bodyWrapper!.wrappedBody.slice(7)));
-                if (greyTip.subTypeId === 36) {
-                    const emojiLikeToOthers = EmojiLikeToOthersWrapper1
-                        .fromBinary(greyTip.rest)
-                        .wrapper!
-                        .body!;
-                    if (emojiLikeToOthers.attributes?.operation !== 1) { // Un-like
-                        return;
-                    }
-                    const eventOrEmpty = await this.apis.GroupApi.createGroupEmojiLikeEvent(
-                        greyTip.groupCode.toString(),
-                        await this.core.apis.UserApi.getUinByUidV2(emojiLikeToOthers.attributes!.senderUid),
-                        emojiLikeToOthers.msgSpec!.msgSeq.toString(),
-                        emojiLikeToOthers.attributes!.emojiId,
-                    );
-                    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-                    eventOrEmpty && await this.networkManager.emitEvent(eventOrEmpty);
-                }
-            }
-            */
+        msgListener.onRecvSysMsg = (msg) => {
+            this.apis.MsgApi.parseSysMessage(msg).then((event) => {
+                if (event) this.networkManager.emitEvent(event);
+            }).catch(e => this.context.logger.logError('constructSysMessage error: ', e));
         };
 
         msgListener.onInputStatusPush = async data => {
