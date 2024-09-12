@@ -5,7 +5,7 @@ if %errorLevel% == 0 (
     echo Administrator mode detected.
 ) else (
     echo Please run this script in administrator mode.
-    powershell -Command "Start-Process 'wt.exe' -ArgumentList 'cmd /c cd /d \"%cd%\" && \"%~f0\"' -Verb runAs"
+    powershell -Command "Start-Process 'wt.exe' -ArgumentList 'cmd /c cd /d \"%cd%\" && \"%~f0\" %1' -Verb runAs"
     exit
 )
 
@@ -36,6 +36,4 @@ if not exist "%QQpath%" (
 set NAPCAT_MAIN_PATH=%NAPCAT_MAIN_PATH:\=/%
 echo (async () =^> {await import("file:///%NAPCAT_MAIN_PATH%")})() > %NAPCAT_LOAD_PATH%
 
-"%NAPCAT_LAUNCHER_PATH%" "%QQPath%" "%NAPCAT_INJECT_PATH%"
-
-REM "%NAPCAT_LAUNCHER_PATH%" "%QQPath%" "%NAPCAT_INJECT_PATH%" 123456
+"%NAPCAT_LAUNCHER_PATH%" "%QQPath%" "%NAPCAT_INJECT_PATH%" %1
