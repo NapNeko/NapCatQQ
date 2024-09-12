@@ -37,10 +37,10 @@ export default class GoCQHTTPUploadGroupFile extends BaseAction<Payload, null> {
         if (!downloadResult.success) {
             throw new Error(downloadResult.errMsg);
         }
-        let msgContext: MessageContext = {
+        const msgContext: MessageContext = {
             peer: peer,
             deleteAfterSentFiles: []
-        }
+        };
         const sendFileEle = await this.core.apis.FileApi.createValidSendFileElement(msgContext, downloadResult.path, payload.name, payload.folder_id);
         await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, [sendFileEle], [], true);
         return null;

@@ -819,7 +819,7 @@ export class OneBotMsgApi {
 
         return { path, fileName: inputdata.name ?? fileName };
     }
-     async parseSysMessage(msg: number[]) {
+    async parseSysMessage(msg: number[]) {
         const sysMsg = SysMessage.decode(Uint8Array.from(msg)) as unknown as SysMessageType;
         if (sysMsg.msgSpec.length === 0) {
             return;
@@ -827,9 +827,9 @@ export class OneBotMsgApi {
         const { msgType, subType, subSubType } = sysMsg.msgSpec[0];
         if (msgType === 528 && subType === 39 && subSubType === 39) {
             if (!sysMsg.bodyWrapper) return;
-            let event = await this.obContext.apis.UserApi.parseLikeEvent(sysMsg.bodyWrapper.wrappedBody);
+            const event = await this.obContext.apis.UserApi.parseLikeEvent(sysMsg.bodyWrapper.wrappedBody);
             return event;
-        };
+        }
         /*
         if (msgType === 732 && subType === 16 && subSubType === 16) {
             const greyTip = GreyTipWrapper.fromBinary(Uint8Array.from(sysMsg.bodyWrapper!.wrappedBody.slice(7)));

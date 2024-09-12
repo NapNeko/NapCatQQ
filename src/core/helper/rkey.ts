@@ -40,7 +40,7 @@ export class RkeyManager {
 
     async refreshRkey(): Promise<any> {
         //刷新rkey
-        for (let url of this.serverUrl) {
+        for (const url of this.serverUrl) {
             try {
                 this.rkeyData = await RequestUtil.HttpGetJson<ServerRkeyData>(url, 'GET');
             } catch (e) {
