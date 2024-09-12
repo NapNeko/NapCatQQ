@@ -186,7 +186,7 @@ export class OneBotMsgApi {
                 data: {
                     file: 'marketface',
                     file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "." + _.key + ".jpg"),
-                    path: elementWrapper.elementId,
+                    path: url,
                     url: url,
                     file_unique: _.key
                 },
