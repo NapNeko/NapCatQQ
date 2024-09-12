@@ -148,7 +148,8 @@ export class NTQQFileApi {
             logger.logError('获取视频信息失败，将使用默认值', e);
         }
         const newFilePath = filePath + '.mp4';
-        fs.renameSync(filePath, newFilePath);
+        fs.copyFileSync(filePath, newFilePath);
+        context.deleteAfterSentFiles.push(newFilePath);
         filePath = newFilePath;
         const { fileName: _fileName, path, fileSize, md5 } = await this.core.apis.FileApi.uploadFile(filePath, ElementType.VIDEO);
         if (fileSize === 0) {
