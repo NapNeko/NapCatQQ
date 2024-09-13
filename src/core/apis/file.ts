@@ -201,7 +201,7 @@ export class NTQQFileApi {
             elementType: ElementType.VIDEO,
             elementId: '',
             videoElement: {
-                fileName: fileName || _fileName,
+                fileName: (fileName || _fileName).replace(/\.[^/.]+$/, '.mp4'),
                 filePath: path,
                 videoMd5: md5,
                 thumbMd5,
