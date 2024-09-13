@@ -14,8 +14,14 @@ export interface LikeMsgType {
     detail: LikeDetailType;
 }
 
-export interface ProfileLikeTipType {
+export interface profileLikeSubTipType {
     msg: LikeMsgType;
+}
+
+export interface ProfileLikeTipType {
+    msgType: number;
+    subType: number;
+    content: profileLikeSubTipType;
 }
 export interface SysMessageHeaderType {
     id: string;
@@ -78,6 +84,12 @@ export const likeMsg = new pb.Type("likeMsg")
     .add(new pb.Field("time", 2, "int32"))
     .add(new pb.Field("detail", 3, "likeDetail"));
 
-export const profileLikeTip = new pb.Type("profileLikeTip")
+export const profileLikeSubTip = new pb.Type("profileLikeSubTip")
     .add(likeMsg)
-    .add(new pb.Field("msg", 14, "likeMsg"));
+    .add(new pb.Field("msg", 14, "likeMsg"))
+
+export const profileLikeTip = new pb.Type("profileLikeTip")
+    .add(profileLikeSubTip)
+    .add(new pb.Field("msgType", 1, "int32"))
+    .add(new pb.Field("subType", 2, "int32"))
+    .add(new pb.Field("content", 203, "profileLikeSubTip"));
