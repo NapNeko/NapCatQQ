@@ -1,7 +1,7 @@
 import { ElementType, MessageElement, Peer, RawMessage, SendMessageElement } from '@/core/entities';
 import { NodeIKernelMsgListener } from '@/core/listeners/NodeIKernelMsgListener';
 import { GeneralCallResult } from '@/core/services/common';
-import { QueryMsgsParams, TmpChatInfoApi } from '../entities/msg';
+import { MsgReqType, QueryMsgsParams, TmpChatInfoApi } from '../entities/msg';
 
 export interface NodeIKernelMsgService {
 
@@ -147,12 +147,14 @@ export interface NodeIKernelMsgService {
         msgList: RawMessage[]
     }>;
 
+    //@deprecated
     getMsgs(peer: Peer, msgId: string, count: unknown, queryOrder: boolean): Promise<unknown>;
 
+    //@deprecated
     getMsgsIncludeSelf(peer: Peer, msgId: string, count: number, queryOrder: boolean): Promise<GeneralCallResult & {
         msgList: RawMessage[]
     }>;
-
+    //@deprecated
     getMsgsWithMsgTimeAndClientSeqForC2C(...args: unknown[]): Promise<GeneralCallResult & { msgList: RawMessage[] }>;
 
     getMsgsWithStatus(params: {
@@ -168,7 +170,7 @@ export interface NodeIKernelMsgService {
     getMsgsBySeqRange(peer: Peer, startSeq: string, endSeq: string): Promise<GeneralCallResult & {
         msgList: RawMessage[]
     }>;
-
+    //@deprecated
     getMsgsBySeqAndCount(peer: Peer, seq: string, count: number, desc: boolean, unknownArg: boolean): Promise<GeneralCallResult & {
         msgList: RawMessage[]
     }>;
@@ -178,6 +180,8 @@ export interface NodeIKernelMsgService {
     getRecallMsgsByMsgId(peer: Peer, MsgId: string[]): Promise<unknown>;
 
     getMsgsBySeqList(peer: Peer, seqList: string[]): Promise<GeneralCallResult & { msgList: RawMessage[] }>;
+
+    getMsgsExt(msgReq: MsgReqType): Promise<GeneralCallResult & { msgList: RawMessage[] }>;
 
     getSingleMsg(Peer: Peer, msgSeq: string): Promise<GeneralCallResult & { msgList: RawMessage[] }>;
 
@@ -318,7 +322,7 @@ export interface NodeIKernelMsgService {
 
     getFileThumbSavePath(...args: unknown[]): unknown;
 
-    translatePtt2Text(msgId: string, peer: Peer, msgElement: unknown): unknown;
+    translatePtt2Text(msgId: string, peer: Peer, msgElement: MessageElement): unknown;
 
     setPttPlayedState(...args: unknown[]): unknown;
 
@@ -518,7 +522,7 @@ export interface NodeIKernelMsgService {
 
     canImportOldDbMsg(...args: unknown[]): unknown;
 
-    setPowerStatus(z: boolean): unknown;
+    setPowerStatus(isPowerOn: boolean): unknown;
 
     canProcessDataMigration(...args: unknown[]): unknown;
 

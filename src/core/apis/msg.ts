@@ -94,6 +94,7 @@ export class NTQQMsgApi {
             pageLimit: 1,
         });
     }
+    //@deprecated
     async getMsgsBySeqAndCount(peer: Peer, seq: string, count: number, desc: boolean, z: boolean) {
         return await this.context.session.getMsgService().getMsgsBySeqAndCount(peer, seq, count, desc, z);
     }
