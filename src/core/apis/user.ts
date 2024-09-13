@@ -11,6 +11,10 @@ export class NTQQUserApi {
         this.context = context;
         this.core = core;
     }
+    //self_tind格式
+    async createUidFromTinyId(tinyId: string) {
+        return this.context.session.getMsgService().createUidFromTinyId(this.core.selfInfo.uin, tinyId);
+    }
     async getStatusByUid(uid: string) {
         return this.context.session.getProfileService().getStatus(uid);
     }
