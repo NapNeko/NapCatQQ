@@ -1,4 +1,5 @@
 export interface OB11User {
+    [key: string]: any;
     user_id: number;
     nickname: string;
     remark?: string;

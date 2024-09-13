@@ -209,7 +209,8 @@ export function getQQVersionConfigPath(exePath: string = ''): string | undefined
     return configVersionInfoPath;
 }
 
-export function calcQQLevel(level: QQLevel) {
+export function calcQQLevel(level?: QQLevel) {
+    if (!level) return 0;
     const { crownNum, sunNum, moonNum, starNum } = level;
     return crownNum * 64 + sunNum * 16 + moonNum * 4 + starNum;
 }
