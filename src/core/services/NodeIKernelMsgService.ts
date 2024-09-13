@@ -154,6 +154,7 @@ export interface NodeIKernelMsgService {
     getMsgsIncludeSelf(peer: Peer, msgId: string, count: number, queryOrder: boolean): Promise<GeneralCallResult & {
         msgList: RawMessage[]
     }>;
+
     //@deprecated
     getMsgsWithMsgTimeAndClientSeqForC2C(...args: unknown[]): Promise<GeneralCallResult & { msgList: RawMessage[] }>;
 
@@ -395,7 +396,12 @@ export interface NodeIKernelMsgService {
 
     getEmojiResourcePath(...args: unknown[]): unknown;
 
-    JoinDragonGroupEmoji(JoinDragonGroupEmojiReq: any/*joinDragonGroupEmojiReq*/): unknown;
+    JoinDragonGroupEmoji(JoinDragonGroupEmojiReq: {
+        latestMsgSeq: string,
+        manageEmojiId: number,
+        manageMsgSeq: string,
+        peerContact: Peer
+    }): Promise<unknown>;
 
     getMsgAbstracts(...args: unknown[]): unknown;
 
