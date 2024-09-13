@@ -24,9 +24,9 @@ export default class GoCQHTTPGetStrangerInfo extends BaseAction<Payload, OB11Use
         let uid = (await this.core.apis.UserApi.getUidByUinV2(user_id));
         if (!uid) uid = extendData.detail.uid;
         const info = (await this.core.apis.UserApi.getUserDetailInfo(uid));
-
         return {
             user_id: parseInt(extendData.detail.uin) ?? 0,
+            uid: info.uid ?? uid,
             nickname: extendData.detail.simpleInfo.coreInfo.nick,
             age: extendData.detail.simpleInfo.baseInfo.age ?? info.age,
             qid: extendData.detail.simpleInfo.baseInfo.qid,
@@ -38,7 +38,8 @@ export default class GoCQHTTPGetStrangerInfo extends BaseAction<Payload, OB11Use
             is_years_vip: extendData.detail.simpleInfo.vasInfo?.yearVipFlag,
             vip_level: extendData.detail.simpleInfo.vasInfo?.vipLevel,
             remark: extendData.detail.simpleInfo.coreInfo.remark ?? info.remark,
-            status: extendData.detail.simpleInfo.status?.status ?? info.status
+            status: extendData.detail.simpleInfo.status?.status ?? info.status,
+            login_days: 0,//失效
         };
     }
 }

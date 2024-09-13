@@ -11,7 +11,9 @@ export class NTQQUserApi {
         this.context = context;
         this.core = core;
     }
-
+    async getStatusByUid(uid: string) {
+        return this.context.session.getProfileService().getStatus(uid);
+    }
     async getProfileLike(uid: string) {
         return this.context.session.getProfileLikeService().getBuddyProfileLike({
             friendUids: [uid],
