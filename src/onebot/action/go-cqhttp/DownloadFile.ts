@@ -73,7 +73,7 @@ export default class GoCQHTTPDownloadFile extends BaseAction<Payload, FileRespon
                     headers[headerItem] = '';
                 } else {
                     const key = headerItem.substring(0, spilt);
-                    headers[key] = headerItem.substring(0, spilt + 1);
+                    headers[key] = headerItem.substring(spilt + 1);
                 }
             }
         }
