@@ -147,7 +147,7 @@ export class NTQQFileApi {
         } catch (e) {
             logger.logError('获取视频信息失败，将使用默认值', e);
         }
-        
+
         let fileExt = 'mp4';
         try {
             const tempExt = (await fileType.fileTypeFromFile(filePath))?.ext;
@@ -155,7 +155,7 @@ export class NTQQFileApi {
         } catch (e) {
             this.context.logger.logError('获取文件类型失败', e);
         }
-        const newFilePath = filePath + '.'+fileExt;
+        const newFilePath = filePath + '.' + fileExt;
         fs.copyFileSync(filePath, newFilePath);
         context.deleteAfterSentFiles.push(newFilePath);
         filePath = newFilePath;
@@ -197,11 +197,12 @@ export class NTQQFileApi {
         thumbPath.set(0, _thumbPath);
         const thumbMd5 = _thumbPath ? await calculateFileMD5(_thumbPath) : '';
         context.deleteAfterSentFiles.push(path);
+        const uploadName = (fileName || _fileName).toLocaleLowerCase().endsWith('.' + fileExt.toLocaleLowerCase()) ? (fileName || _fileName) : (fileName || _fileName) + '.' + fileExt;
         return {
             elementType: ElementType.VIDEO,
             elementId: '',
             videoElement: {
-                fileName: (fileName || _fileName).replace(/\.[^/.]+$/, '.mp4'),
+                fileName: uploadName,
                 filePath: path,
                 videoMd5: md5,
                 thumbMd5,
