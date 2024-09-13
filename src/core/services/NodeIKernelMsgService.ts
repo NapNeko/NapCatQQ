@@ -617,7 +617,7 @@ export interface NodeIKernelMsgService {
     setIKernelPublicAccountAdapter(...args: unknown[]): unknown;
 
     //tempChatGameSession有关
-    createUidFromTinyId(fromTinyId: string, toTinyId: string): unknown;
+    createUidFromTinyId(fromTinyId: string, toTinyId: string): string;
 
     dataMigrationGetDataAvaiableContactList(...args: unknown[]): unknown;
 
