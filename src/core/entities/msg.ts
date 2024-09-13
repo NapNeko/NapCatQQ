@@ -959,3 +959,18 @@ export interface TmpChatInfo {
     sessionType: number;
     sig: string;
 }
+export interface MsgReqType {
+    peer: Peer,
+    byType: number,
+    msgId: string,
+    msgSeq: string,
+    msgTime: string,
+    clientSeq: string,
+    cnt: number,
+    queryOrder: boolean,
+    includeSelf: boolean,
+    includeDeleteMsg: boolean,
+    extraCnt: number
+}
+//getMsgsIncludeSelf Peer必须 byType 1
+//getMsgsWithMsgTimeAndClientSeqForC2C Peer必须 byType 3
