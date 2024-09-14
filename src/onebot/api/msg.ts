@@ -466,7 +466,6 @@ export class OneBotMsgApi {
                 sendMsg.data.summary,
                 sendMsg.data.sub_type,
             );
-            context.deleteAfterSentFiles.push(sendPicElement.picElement.sourcePath);
             return sendPicElement;
         },
 
