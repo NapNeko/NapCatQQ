@@ -40,12 +40,14 @@ async function convert(filePath: string, pcmPath: string, logger: LogWrapper): P
     });
 }
 
-async function handleWavFile(file: Buffer, filePath: string, pcmPath: string, logger: LogWrapper): Promise<Buffer> {
+async function handleWavFile(
+    file: Buffer, filePath: string, pcmPath: string, logger: LogWrapper
+): Promise<{input: Buffer, sampleRate: number}> {
     const { fmt } = getWavFileInfo(file);
     if (!ALLOW_SAMPLE_RATE.includes(fmt.sampleRate)) {
-        return await convert(filePath, pcmPath, logger);
+        return {input: await convert(filePath, pcmPath, logger), sampleRate: 24000};
     }
-    return file;
+    return {input: file, sampleRate: fmt.sampleRate};
 }
 
 export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: LogWrapper) {
@@ -55,8 +57,10 @@ export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: Log
         if (!isSilk(file)) {
             logger.log(`语音文件${filePath}需要转换成silk`);
             const pcmPath = `${pttPath}.pcm`;
-            const input = isWav(file) ? await handleWavFile(file, filePath, pcmPath, logger) : await convert(filePath, pcmPath, logger);
-            const silk = await encode(input, 24000);
+            const { input, sampleRate } = isWav(file)
+                ? (await handleWavFile(file, filePath, pcmPath, logger))
+                : {input: await convert(filePath, pcmPath, logger), sampleRate: 24000};
+            const silk = await encode(input, sampleRate);
             await fsPromise.writeFile(pttPath, silk.data);
             logger.log(`语音文件${filePath}转换成功!`, pttPath, '时长:', silk.duration);
             return {
