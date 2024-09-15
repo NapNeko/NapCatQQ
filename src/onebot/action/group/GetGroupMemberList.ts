@@ -24,7 +24,7 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
         const groupMembers = await this.core.apis.GroupApi.getGroupMembersV2(payload.group_id.toString());
         const groupMembersArr = Array.from(groupMembers.values());
         let uids = groupMembersArr.map(item => item.uid);
-        let CoreAndBase = await this.core.apis.GroupApi.getCoreAndBaseInfo(uids)
+        //let CoreAndBase = await this.core.apis.GroupApi.getCoreAndBaseInfo(uids)
         let _groupMembers = groupMembersArr.map(item => {
             return OB11Entities.groupMember(payload.group_id.toString(), item);
         });
@@ -37,9 +37,6 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
             const Member = await this.core.apis.GroupApi.getGroupMember(payload.group_id.toString(), _groupMembers[i].user_id);
             _groupMembers[i].join_time = +(Member?.joinTime ?? date);
             _groupMembers[i].last_sent_time = +(Member?.lastSpeakTime ?? date);
-            _groupMembers[i].qq_level = calcQQLevel(Member?.qqLevel);
-            _groupMembers[i].sex = OB11Entities.sex(CoreAndBase.get(_groupMembers[i].user_id.toString())?.baseInfo.sex);
-            _groupMembers[i].age = CoreAndBase.get(_groupMembers[i].user_id.toString())?.baseInfo.age ?? 0;
             MemberMap.set(_groupMembers[i].user_id, _groupMembers[i]);
         }
 
