@@ -47,7 +47,7 @@ export class OneBotQuickActionApi {
         const peerContextMode = msg.message_type == 'private' ? ContextMode.Private : ContextMode.Group;
 
         const peer: Peer = await createContext(this.core, {
-            message: "",
+            message_type: undefined,
             group_id: msg.group_id?.toString(),
             user_id: msg.user_id?.toString(),
         }, peerContextMode);
