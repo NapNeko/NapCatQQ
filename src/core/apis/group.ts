@@ -34,7 +34,13 @@ export class NTQQGroupApi {
         }
         this.context.logger.logDebug(`加载${this.groups.length}个群组缓存完成`);
     }
-
+    async getCoreAndBaseInfo(uids: string[]) {
+        return await this.core.eventWrapper.callNoListenerEvent(
+            'NodeIKernelProfileService/getCoreAndBaseInfo',
+            'nodeStore',
+            uids,
+        );
+    }
     async fetchGroupEssenceList(groupCode: string) {
         const pskey = (await this.core.apis.UserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com')!;
         return this.context.session.getGroupService().fetchGroupEssenceList({
