@@ -9,7 +9,7 @@ if %errorLevel% == 0 (
     exit
 )
 
-set NAPCAT_PATCH_PATH=%cd%\patchNapCat.js
+set NAPCAT_PATCH_PACKAGE=%cd%\qqnt.json
 set NAPCAT_LOAD_PATH=%cd%\loadNapCat.js
 set NAPCAT_INJECT_PATH=%cd%\NapCatWinBootHook.dll
 set NAPCAT_LAUNCHER_PATH=%cd%\NapCatWinBootMain.exe
