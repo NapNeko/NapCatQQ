@@ -179,18 +179,18 @@ export function getDefaultQQVersionConfigInfo(): QQVersionConfigType {
     };
 }
 
-export function getQQPackageInfoPath(exePath: string = ''): string {
+export function getQQPackageInfoPath(exePath: string = '', version: string): string {
     if (os.platform() === 'darwin') {
         return path.join(path.dirname(exePath), '..', 'Resources', 'app', 'package.json');
     } else {
-        return path.join(path.dirname(exePath), 'resources', 'app', 'package.json');
+        return path.join(path.dirname(exePath), './versions/9.9.15-28060/resources/app/package.json');
     }
 }
 
 export function getQQVersionConfigPath(exePath: string = ''): string | undefined {
     let configVersionInfoPath;
     if (os.platform() === 'win32') {
-        configVersionInfoPath = path.join(path.dirname(exePath), 'resources', 'app', 'versions', 'config.json');
+        configVersionInfoPath = path.join(path.dirname(exePath), 'versions', 'config.json');
     } else if (os.platform() === 'darwin') {
         const userPath = os.homedir();
         const appDataPath = path.resolve(userPath, './Library/Application Support/QQ');
