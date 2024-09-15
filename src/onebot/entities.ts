@@ -48,7 +48,8 @@ export class OB11Entities {
         }[role];
     }
 
-    static sex(sex: Sex): OB11UserSex {
+    static sex(sex?: Sex): OB11UserSex {
+        if (!sex) return OB11UserSex.unknown;
         return {
             [Sex.male]: OB11UserSex.male,
             [Sex.female]: OB11UserSex.female,
@@ -126,7 +127,7 @@ export class OB11Entities {
         return {
             group_id: parseInt(peerId),
             folder_id: folder.folderId,
-            folder:folder.folderId,
+            folder: folder.folderId,
             folder_name: folder.folderName,
             create_time: folder.createTime,
             creator: parseInt(folder.createUin),
