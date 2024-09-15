@@ -3,6 +3,7 @@ import { OB11Entities } from '@/onebot/entities';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { calcQQLevel } from '@/common/helper';
 
 const SchemaData = {
     type: 'object',
@@ -22,7 +23,8 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
     async _handle(payload: Payload) {
         const groupMembers = await this.core.apis.GroupApi.getGroupMembersV2(payload.group_id.toString());
         const groupMembersArr = Array.from(groupMembers.values());
-
+        let uids = groupMembersArr.map(item => item.uid);
+        let CoreAndBase = await this.core.apis.GroupApi.getCoreAndBaseInfo(uids)
         let _groupMembers = groupMembersArr.map(item => {
             return OB11Entities.groupMember(payload.group_id.toString(), item);
         });
@@ -32,18 +34,19 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
 
         for (let i = 0, len = _groupMembers.length; i < len; i++) {
             // 保证基础数据有这个 同时避免群管插件过于依赖这个杀了
-            _groupMembers[i].join_time = date;
-            _groupMembers[i].last_sent_time = date;
+            const Member = await this.core.apis.GroupApi.getGroupMember(payload.group_id.toString(), _groupMembers[i].user_id);
+            _groupMembers[i].join_time = +(Member?.joinTime ?? date);
+            _groupMembers[i].last_sent_time = +(Member?.lastSpeakTime ?? date);
+            _groupMembers[i].qq_level = calcQQLevel(Member?.qqLevel);
+            _groupMembers[i].sex = OB11Entities.sex(CoreAndBase.get(_groupMembers[i].user_id.toString())?.baseInfo.sex);
+            _groupMembers[i].age = CoreAndBase.get(_groupMembers[i].user_id.toString())?.baseInfo.age ?? 0;
             MemberMap.set(_groupMembers[i].user_id, _groupMembers[i]);
         }
+
 
         const selfRole = groupMembers.get(this.core.selfInfo.uid)?.role;
         const isPrivilege = selfRole === 3 || selfRole === 4;
 
-        _groupMembers.forEach(item => {
-            item.last_sent_time = date;
-            item.join_time = date;
-        });
 
         if (isPrivilege) {
             try {
