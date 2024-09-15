@@ -103,18 +103,21 @@ export async function NCoreInitShell() {
 
     const selfInfo = await new Promise<SelfInfo>((resolve) => {
         const loginListener = new NodeIKernelLoginListener();
-
+        let isLogined = false;
         // from constructor
         loginListener.onUserLoggedIn = (userid: string) => {
             logger.logError(`当前账号(${userid})已登录,无法重复登录`);
         };
 
-        loginListener.onQRCodeLoginSucceed = async (loginResult) => resolve({
-            uid: loginResult.uid,
-            uin: loginResult.uin,
-            nick: '', // 获取不到
-            online: true,
-        });
+        loginListener.onQRCodeLoginSucceed = async (loginResult) => {
+            isLogined = true;
+            resolve({
+                uid: loginResult.uid,
+                uin: loginResult.uin,
+                nick: '', // 获取不到
+                online: true,
+            });
+        }
 
         loginListener.onQRCodeGetPicture = ({ pngBase64QrcodeData, qrcodeUrl }) => {
             //设置WebuiQrcode
@@ -142,7 +145,7 @@ export async function NCoreInitShell() {
             if (errType == 1 && errCode == 3) {
                 // 二维码过期刷新
             }
-            loginService.getQRCodePicture();
+            if (!isLogined) loginService.getQRCodePicture();
         };
         loginListener.onLoginFailed = (args) => {
             //logger.logError('登录失败(onLoginFailed)', args);
@@ -189,14 +192,14 @@ export async function NCoreInitShell() {
                         .then(result => {
                             if (result.loginErrorInfo.errMsg) {
                                 logger.logError('快速登录错误：', result.loginErrorInfo.errMsg);
-                                loginService.getQRCodePicture();
+                                if (!isLogined) loginService.getQRCodePicture();
                             }
                         })
                         .catch();
                 }, 1000);
             } else {
                 logger.logError('快速登录失败，未找到该 QQ 历史登录记录，将使用二维码登录方式');
-                loginService.getQRCodePicture();
+                if (!isLogined) loginService.getQRCodePicture();
             }
         } else {
             logger.log('没有 -q 指令指定快速登录，将使用二维码登录方式');
@@ -204,7 +207,7 @@ export async function NCoreInitShell() {
                 logger.log(`可用于快速登录的 QQ：\n${historyLoginList
                     .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
                     .join('\n')
-                }`);
+                    }`);
             }
             loginService.getQRCodePicture();
         }
