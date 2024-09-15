@@ -141,11 +141,13 @@ export async function NCoreInitShell() {
         };
         loginListener.onQRCodeSessionFailed = (errType: number, errCode: number, errMsg: string) => {
             //logger.logError('登录失败(onQRCodeSessionFailed)', errCode, errMsg);
-            logger.logError('[Core] [Login] Login Error,ErrCode: ', errCode, ' ErrMsg:', errMsg);
-            if (errType == 1 && errCode == 3) {
-                // 二维码过期刷新
+            if (!isLogined) {
+                logger.logError('[Core] [Login] Login Error,ErrCode: ', errCode, ' ErrMsg:', errMsg);
+                if (errType == 1 && errCode == 3) {
+                    // 二维码过期刷新
+                }
+                loginService.getQRCodePicture();
             }
-            if (!isLogined) loginService.getQRCodePicture();
         };
         loginListener.onLoginFailed = (args) => {
             //logger.logError('登录失败(onLoginFailed)', args);
