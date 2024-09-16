@@ -191,8 +191,10 @@ export function getDefaultQQVersionConfigInfo(): QQVersionConfigType {
 export function getQQPackageInfoPath(exePath: string = '', version: string): string {
     if (os.platform() === 'darwin') {
         return path.join(path.dirname(exePath), '..', 'Resources', 'app', 'package.json');
+    } else if (os.platform() === 'linux') {
+        return path.join(path.dirname(exePath), './resources/app/package.json');
     } else {
-        return path.join(path.dirname(exePath), './versions/9.9.15-28060/resources/app/package.json');
+        return path.join(path.dirname(exePath), './versions/' + version + '/resources/app/package.json');
     }
 }
 
