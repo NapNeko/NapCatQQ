@@ -163,8 +163,17 @@ export function isEqual(obj1: any, obj2: any) {
 export function getDefaultQQVersionConfigInfo(): QQVersionConfigType {
     if (os.platform() === 'linux') {
         return {
-            baseVersion: '3.2.12-27597',
-            curVersion: '3.2.12-27597',
+            baseVersion: '3.2.12.27254',
+            curVersion: '3.2.12.27254',
+            prevVersion: '',
+            onErrorVersions: [],
+            buildId: '27254',
+        };
+    }
+    if (os.platform() === 'darwin') {
+        return {
+            baseVersion: '6.9.53.27597',
+            curVersion: '6.9.53.27597',
             prevVersion: '',
             onErrorVersions: [],
             buildId: '27597',
