@@ -67,9 +67,9 @@ export class QQBasicInfoWrapper {
     getAppidInternal() {
         switch (systemPlatform) {
             case 'linux':
-                return '537243600';
+                return '537246140';
             case 'darwin':
-                return '537243538';
+                return '537246140';
             default:
                 return '537246092';
         }
