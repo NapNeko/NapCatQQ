@@ -69,9 +69,9 @@ export class QQBasicInfoWrapper {
             case 'linux':
                 return '537243600';
             case 'darwin':
-                return '537243441';
-            default:
                 return '537243538';
+            default:
+                return '537246092';
         }
     }
 
