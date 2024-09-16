@@ -61,12 +61,6 @@ export class QQBasicInfoWrapper {
                 return `V1_MAC_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
             default:
                 return `V1_WIN_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
-            case 'linux':
-                return `V1_LNX_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
-            case 'darwin':
-                return `V1_MAC_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
-            default:
-                return `V1_WIN_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
         }
     }
 
