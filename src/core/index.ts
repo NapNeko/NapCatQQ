@@ -45,12 +45,14 @@ export function loadQQWrapper(QQVersion: string): WrapperNodeApi {
     let appPath;
     if (os.platform() === 'darwin') {
         appPath = path.resolve(path.dirname(process.execPath), '../Resources/app');
-    } else {
+    } else if (os.platform() === 'linux') {
         appPath = path.resolve(path.dirname(process.execPath), './resources/app');
+    } else {
+        appPath = path.resolve(path.dirname(process.execPath), `./versions/${QQVersion}/`);
     }
     let wrapperNodePath = path.resolve(appPath, 'wrapper.node');
     if (!fs.existsSync(wrapperNodePath)) {
-        wrapperNodePath = path.join(appPath, `versions/${QQVersion}/wrapper.node`);
+        wrapperNodePath = path.join(appPath, `./resources/app/wrapper.node`);
     }
     const nativemodule: any = { exports: {} };
     process.dlopen(nativemodule, wrapperNodePath);

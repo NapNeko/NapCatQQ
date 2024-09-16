@@ -114,7 +114,7 @@ export interface NodeIKernelBuddyService {
 
     reportDoubtBuddyReqUnread(): void;
 
-    getBuddyRecommendContactArkJson(uid: string, phoneNumber: string): Promise<unknown>;
+    getBuddyRecommendContactArkJson(uid: string, phoneNumber: string): Promise<GeneralCallResult & { arkMsg: string }>;
 
     isNull(): boolean;
 }
