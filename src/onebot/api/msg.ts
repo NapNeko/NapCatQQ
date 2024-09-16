@@ -607,6 +607,14 @@ export class OneBotMsgApi {
         }),
 
         [OB11MessageDataType.miniapp]: async () => undefined,
+
+        [OB11MessageDataType.contact]: async ({ data }, context) => {
+            let arkJson = await this.core.apis.UserApi.getBuddyRecommendContactArkJson(data.qq, '');
+            return this.ob11ToRawConverters.json({
+                data: { data: arkJson.arkMsg },
+                type: OB11MessageDataType.json
+            }, context);
+        }
     };
 
     constructor(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
