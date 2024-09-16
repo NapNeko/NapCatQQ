@@ -84,7 +84,7 @@ import { GetGroupFileSystemInfo } from '@/onebot/action/go-cqhttp/GetGroupFileSy
 import { GetGroupRootFiles } from '@/onebot/action/go-cqhttp/GetGroupRootFiles';
 import { GetGroupFilesByFolder } from '@/onebot/action/go-cqhttp/GetGroupFilesByFolder';
 import { GetGroupSystemMsg } from './system/GetSystemMsg';
-import { FetchOtherProfileLike } from './extends/fetchOtherProfileLike';
+import { FetchOtherProfileLike } from '@/onebot/action/extends/fetchOtherProfileLike';
 
 export type ActionMap = Map<string, BaseAction<any, any>>;
 
