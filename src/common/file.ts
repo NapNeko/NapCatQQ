@@ -123,12 +123,11 @@ export interface HttpDownloadOptions {
     headers?: Record<string, string> | string;
 }
 
-export async function httpDownload(options: string | HttpDownloadOptions): Promise<Buffer> {
+async function tryDownload(options: string | HttpDownloadOptions, useReferer: boolean = false): Promise<Response> {
     // const chunks: Buffer[] = [];
     let url: string;
     let headers: Record<string, string> = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.71 Safari/537.36',
-        'referer': typeof options === 'string' ? options : options.url,
     };
     if (typeof options === 'string') {
         url = options;
@@ -143,15 +142,26 @@ export async function httpDownload(options: string | HttpDownloadOptions): Promi
             }
         }
     }
+    if (useReferer && !headers['Referer']) {
+        headers['Referer'] = url;
+    };
     const fetchRes = await fetch(url, { headers }).catch((err) => {
         if (err.cause) {
             throw err.cause;
         }
         throw err;
     });
-    if (!fetchRes.ok) throw new Error(`下载文件失败: ${fetchRes.statusText}`);
+    return fetchRes;
+}
 
-    const blob = await fetchRes.blob();
+export async function httpDownload(options: string | HttpDownloadOptions): Promise<Buffer> {
+    const useReferer = typeof options === 'string';
+    let resp = await tryDownload(options);
+    if (resp.status === 403 && useReferer) {
+        resp = await tryDownload(options, true);
+    }
+    if (!resp.ok) throw new Error(`下载文件失败: ${resp.statusText}`);
+    const blob = await resp.blob();
     const buffer = await blob.arrayBuffer();
     return Buffer.from(buffer);
 }
