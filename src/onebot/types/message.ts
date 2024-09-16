@@ -85,7 +85,7 @@ export interface OB11MessageText {
 export interface OB11MessageContext {
     type: OB11MessageDataType.contact,
     data: {
-        qq: string,
+        id: string,
     }
 }
 export interface OB11MessageFileBase {

@@ -609,7 +609,7 @@ export class OneBotMsgApi {
         [OB11MessageDataType.miniapp]: async () => undefined,
 
         [OB11MessageDataType.contact]: async ({ data }, context) => {
-            let arkJson = await this.core.apis.UserApi.getBuddyRecommendContactArkJson(data.qq, '');
+            let arkJson = await this.core.apis.UserApi.getBuddyRecommendContactArkJson(data.id.toString(), '');
             return this.ob11ToRawConverters.json({
                 data: { data: arkJson.arkMsg },
                 type: OB11MessageDataType.json
