@@ -118,5 +118,5 @@ export enum ActionName {
     DelGroupNotice = '_del_group_notice',
     GetGroupInfoEx = "get_group_info_ex",
     GetGroupSystemMsg = 'get_group_system_msg',
-    FetchOtherProfileLike = "fetch_other_profile_like",
+    FetchUserProfileLike = "fetch_user_profile_like",
 }
