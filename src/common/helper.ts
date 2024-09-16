@@ -163,8 +163,8 @@ export function isEqual(obj1: any, obj2: any) {
 export function getDefaultQQVersionConfigInfo(): QQVersionConfigType {
     if (os.platform() === 'linux') {
         return {
-            baseVersion: '3.2.12.27254',
-            curVersion: '3.2.12.27254',
+            baseVersion: '3.2.12.28060',
+            curVersion: '3.2.12.28060',
             prevVersion: '',
             onErrorVersions: [],
             buildId: '27254',
@@ -172,34 +172,36 @@ export function getDefaultQQVersionConfigInfo(): QQVersionConfigType {
     }
     if (os.platform() === 'darwin') {
         return {
-            baseVersion: '6.9.53.27597',
-            curVersion: '6.9.53.27597',
+            baseVersion: '6.9.53.28060',
+            curVersion: '6.9.53.28060',
             prevVersion: '',
             onErrorVersions: [],
-            buildId: '27597',
+            buildId: '28060',
         };
     }
     return {
-        baseVersion: '9.9.15-27597',
-        curVersion: '9.9.15-27597',
+        baseVersion: '9.9.15-28060',
+        curVersion: '9.9.15-28060',
         prevVersion: '',
         onErrorVersions: [],
-        buildId: '27597',
+        buildId: '28060',
     };
 }
 
-export function getQQPackageInfoPath(exePath: string = ''): string {
+export function getQQPackageInfoPath(exePath: string = '', version: string): string {
     if (os.platform() === 'darwin') {
         return path.join(path.dirname(exePath), '..', 'Resources', 'app', 'package.json');
+    } else if (os.platform() === 'linux') {
+        return path.join(path.dirname(exePath), './resources/app/package.json');
     } else {
-        return path.join(path.dirname(exePath), 'resources', 'app', 'package.json');
+        return path.join(path.dirname(exePath), './versions/' + version + '/resources/app/package.json');
     }
 }
 
 export function getQQVersionConfigPath(exePath: string = ''): string | undefined {
     let configVersionInfoPath;
     if (os.platform() === 'win32') {
-        configVersionInfoPath = path.join(path.dirname(exePath), 'resources', 'app', 'versions', 'config.json');
+        configVersionInfoPath = path.join(path.dirname(exePath), 'versions', 'config.json');
     } else if (os.platform() === 'darwin') {
         const userPath = os.homedir();
         const appDataPath = path.resolve(userPath, './Library/Application Support/QQ');
