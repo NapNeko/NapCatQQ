@@ -607,6 +607,14 @@ export class OneBotMsgApi {
         }),
 
         [OB11MessageDataType.miniapp]: async () => undefined,
+
+        [OB11MessageDataType.contact]: async ({ data }, context) => {
+            let arkJson = await this.core.apis.UserApi.getBuddyRecommendContactArkJson(data.id.toString(), '');
+            return this.ob11ToRawConverters.json({
+                data: { data: arkJson.arkMsg },
+                type: OB11MessageDataType.json
+            }, context);
+        }
     };
 
     constructor(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
@@ -629,7 +637,7 @@ export class OneBotMsgApi {
                 if (element.grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_XMLMSG) {
                     //好友添加成功事件
                     if (element.grayTipElement.xmlElement.templId === '10229' && msg.peerUin !== '') {
-                        return new OB11FriendAddNoticeEvent(this.core, parseInt(msg.peerUin || await this.core.apis.UserApi.getUinByUidV2(msg.peerUid)));
+                        return new OB11FriendAddNoticeEvent(this.core, parseInt(msg.peerUin) || Number(await this.core.apis.UserApi.getUinByUidV2(msg.peerUid)));
                     }
                 }
             }

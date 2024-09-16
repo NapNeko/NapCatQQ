@@ -68,8 +68,8 @@ import SetGroupPortrait from './go-cqhttp/SetGroupPortrait';
 import { FetchCustomFace } from './extends/FetchCustomFace';
 import GoCQHTTPUploadPrivateFile from './go-cqhttp/UploadPrivateFile';
 import { FetchEmojiLike } from './extends/FetchEmojiLike';
+import { FetchUserProfileLike } from './extends/FetchUserProfileLike';
 import { NapCatCore } from '@/core';
-
 import { NapCatOneBot11Adapter } from '@/onebot';
 import GetGuildProfile from './guild/GetGuildProfile';
 import SetModelShow from './go-cqhttp/SetModelShow';
@@ -84,6 +84,7 @@ import { GetGroupFileSystemInfo } from '@/onebot/action/go-cqhttp/GetGroupFileSy
 import { GetGroupRootFiles } from '@/onebot/action/go-cqhttp/GetGroupRootFiles';
 import { GetGroupFilesByFolder } from '@/onebot/action/go-cqhttp/GetGroupFilesByFolder';
 import { GetGroupSystemMsg } from './system/GetSystemMsg';
+
 
 export type ActionMap = Map<string, BaseAction<any, any>>;
 
@@ -178,6 +179,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new GetGroupFileSystemInfo(obContext, core),
         new GetGroupFilesByFolder(obContext, core),
         new GetGroupSystemMsg(obContext, core),
+        new FetchUserProfileLike(obContext, core),
     ];
     const actionMap = new Map();
     for (const action of actionHandlers) {
