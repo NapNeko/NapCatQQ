@@ -1,4 +1,3 @@
-// import PreprocessorDirectives from 'unplugin-preprocessor-directives/vite';
 import cp from 'vite-plugin-cp';
 import { defineConfig, PluginOption, UserConfig } from 'vite';
 import { resolve } from 'path';
@@ -35,25 +34,18 @@ const FrameworkBaseConfigPlugin: PluginOption[] = [
             { src: './src/framework/renderer.js', dest: 'dist' },
             { src: './package.json', dest: 'dist' },
             { src: './logo.png', dest: 'dist' },
-            //...external.map(genCpModule)
         ],
     }),
     nodeResolve(),
 ];
 const ShellBaseConfigPlugin: PluginOption[] = [
-    // PreprocessorDirectives(),
     cp({
         targets: [
-            // ...external.map(genCpModule),
-            // { src: './src/napcat.json', dest: 'dist/config/' },
             { src: './static/', dest: 'dist/static/', flatten: false },
-            // { src: './src/onebot11/onebot11.json', dest: 'dist/config/' },
             { src: './src/core/external/napcat.json', dest: 'dist/config/' },
             { src: './src/onebot/config/onebot11.json', dest: 'dist/config/' },
             { src: './package.json', dest: 'dist' },
             { src: './launcher/', dest: 'dist', flatten: true },
-            // { src: './README.md', dest: 'dist' },
-            // { src: './logo.png', dest: 'dist/logs' },
             ...(startScripts.map((startScript) => {
                 return { src: startScript, dest: 'dist' };
             })),

@@ -54,6 +54,10 @@ export function loadQQWrapper(QQVersion: string): WrapperNodeApi {
     if (!fs.existsSync(wrapperNodePath)) {
         wrapperNodePath = path.join(appPath, `./resources/app/wrapper.node`);
     }
+    //老版本兼容 未来去掉
+    if (!fs.existsSync(wrapperNodePath)) {
+        wrapperNodePath = path.join(path.dirname(process.execPath), `./resources/app/versions/${QQVersion}/wrapper.node`);
+    }
     const nativemodule: any = { exports: {} };
     process.dlopen(nativemodule, wrapperNodePath);
     return nativemodule.exports;
