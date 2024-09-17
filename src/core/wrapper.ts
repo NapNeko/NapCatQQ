@@ -253,7 +253,7 @@ export interface EnginInitDesktopConfig {
     app_type: 4;
     app_version: string;
     os_version: string;
-    use_xlog: true;
+    use_xlog: boolean;
     qua: string;
     global_path_config: {
         desktopGlobalPath: string;
@@ -283,6 +283,7 @@ export enum PlatformType {
     KIOS,
     KWINDOWS,
     KMAC,
+    KLINUX
 }
 
 export enum DeviceType {
