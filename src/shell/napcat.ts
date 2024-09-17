@@ -11,6 +11,7 @@ import {
     NapCatCore,
     NapCatCoreWorkingEnv,
     NodeIQQNTWrapperSession,
+    PlatformType,
     WrapperNodeApi,
 } from '@/core';
 import { QQBasicInfoWrapper } from '@/common/qq-basic-info';
@@ -43,7 +44,7 @@ export async function NCoreInitShell() {
     InitWebUi(logger, pathWrapper).then().catch(logger.logError);
 
     // from constructor
-    const engine = new wrapper.NodeIQQNTWrapperEngine();
+    const engine = wrapper.NodeIQQNTWrapperEngine.get();
     //const util = wrapper.NodeQQNTWrapperUtil.get();
     const loginService = wrapper.NodeIKernelLoginService.get();
     const session = wrapper.NodeIQQNTWrapperSession.create();
@@ -63,17 +64,29 @@ export async function NCoreInitShell() {
         const dataPathGlobal = path.resolve(dataPath, './nt_qq/global');
         return [dataPath, dataPathGlobal];
     })();
-
+    let systemPlatform = PlatformType.KWINDOWS;
+    switch (os.platform()) {
+        case 'win32':
+            systemPlatform = PlatformType.KWINDOWS;
+            break;
+        case 'darwin':
+            systemPlatform = PlatformType.KMAC;
+            break;
+        case 'linux':
+            systemPlatform = PlatformType.KANDROID; //Android 怎么不算Linux!
+            break;
+    }
+    if (!basicInfoWrapper.QQVersionAppid || !basicInfoWrapper.QQVersionQua) throw new Error('QQVersionAppid or QQVersionQua  is not defined');
     // from initConfig
     engine.initWithDeskTopConfig(
         {
             base_path_prefix: '',
-            platform_type: 3,
+            platform_type: systemPlatform,
             app_type: 4,
             app_version: basicInfoWrapper.getFullQQVesion(),
-            os_version: 'Windows 10 Pro',
+            os_version: systemVersion,
             use_xlog: true,
-            qua: basicInfoWrapper.QQVersionQua!,
+            qua: basicInfoWrapper.QQVersionQua,
             global_path_config: {
                 desktopGlobalPath: dataPathGlobal,
             },
@@ -83,7 +96,7 @@ export async function NCoreInitShell() {
     );
     loginService.initConfig({
         machineId: '',
-        appid: basicInfoWrapper.QQVersionAppid!,
+        appid: basicInfoWrapper.QQVersionAppid,
         platVer: systemVersion,
         commonPath: dataPathGlobal,
         clientVer: basicInfoWrapper.getFullQQVesion(),
@@ -209,7 +222,7 @@ export async function NCoreInitShell() {
                 logger.log(`可用于快速登录的 QQ：\n${historyLoginList
                     .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
                     .join('\n')
-                }`);
+                    }`);
             }
             loginService.getQRCodePicture();
         }

@@ -144,7 +144,7 @@ export interface NodeQQNTWrapperUtil {
 
 export interface NodeIQQNTWrapperSession {
     create(): NodeIQQNTWrapperSession;
-    
+
     init(
         wrapperSessionInitConfig: WrapperSessionInitConfig,
         nodeIDependsAdapter: NodeIDependsAdapter,
@@ -249,7 +249,7 @@ export interface NodeIQQNTWrapperSession {
 
 export interface EnginInitDesktopConfig {
     base_path_prefix: string;
-    platform_type: 3;
+    platform_type: PlatformType;
     app_type: 4;
     app_version: string;
     os_version: string;
@@ -262,8 +262,7 @@ export interface EnginInitDesktopConfig {
 }
 
 export interface NodeIQQNTWrapperEngine {
-    // eslint-disable-next-line @typescript-eslint/no-misused-new
-    new(): NodeIQQNTWrapperEngine;
+    get(): NodeIQQNTWrapperEngine;
 
     initWithDeskTopConfig(config: EnginInitDesktopConfig, nodeIGlobalAdapter: NodeIGlobalAdapter): void;
 }
