@@ -55,23 +55,23 @@ export class QQBasicInfoWrapper {
     //此方法不要直接使用
     getQUAInternal() {
         switch (systemPlatform) {
-            case 'linux':
-                return `V1_LNX_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
-            case 'darwin':
-                return `V1_MAC_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
-            default:
-                return `V1_WIN_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
+        case 'linux':
+            return `V1_LNX_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
+        case 'darwin':
+            return `V1_MAC_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
+        default:
+            return `V1_WIN_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
         }
     }
 
     getAppidInternal() {
         switch (systemPlatform) {
-            case 'linux':
-                return '537246140';
-            case 'darwin':
-                return '537246140';
-            default:
-                return '537246092';
+        case 'linux':
+            return '537246140';
+        case 'darwin':
+            return '537246140';
+        default:
+            return '537246092';
         }
     }
 
