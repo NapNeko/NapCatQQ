@@ -4,7 +4,6 @@ import { defineConfig, PluginOption, UserConfig } from 'vite';
 import { resolve } from 'path';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import { builtinModules } from 'module';
-import babel from 'vite-plugin-babel';
 //依赖排除
 const external = ['silk-wasm', 'ws', 'express', 'fluent-ffmpeg', 'log4js', 'qrcode-terminal'];
 const nodeModules = [...builtinModules, builtinModules.map(m => `node:${m}`)].flat();
@@ -24,20 +23,6 @@ if (process.env.NAPCAT_BUILDSYS == 'linux') {
     startScripts = ['./script/KillQQ.bat'];
 }
 const FrameworkBaseConfigPlugin: PluginOption[] = [
-    // PreprocessorDirectives(),
-    babel({
-        filter: /.*\.(ts|js)$/,
-        babelConfig: {
-            babelrc: false,
-            configFile: false,
-            presets: ['@babel/preset-typescript'],
-            plugins: [
-                //'2018-09', decoratorsBeforeExport: true
-                ['@babel/plugin-proposal-decorators', { legacy: true }],
-                '@babel/plugin-proposal-class-properties',
-            ],
-        },
-    }),
     cp({
         targets: [
             { src: './manifest.json', dest: 'dist' },
@@ -57,19 +42,6 @@ const FrameworkBaseConfigPlugin: PluginOption[] = [
 ];
 const ShellBaseConfigPlugin: PluginOption[] = [
     // PreprocessorDirectives(),
-    babel({
-        filter: /.*\.(ts|js)$/,
-        babelConfig: {
-            babelrc: false,
-            configFile: false,
-            presets: ['@babel/preset-typescript'],
-            plugins: [
-                //'2018-09', decoratorsBeforeExport: true
-                ['@babel/plugin-proposal-decorators', { legacy: true }],
-                '@babel/plugin-proposal-class-properties',
-            ],
-        },
-    }),
     cp({
         targets: [
             // ...external.map(genCpModule),
