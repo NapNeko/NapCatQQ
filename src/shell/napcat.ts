@@ -45,8 +45,8 @@ export async function NCoreInitShell() {
     // from constructor
     const engine = new wrapper.NodeIQQNTWrapperEngine();
     //const util = wrapper.NodeQQNTWrapperUtil.get();
-    const loginService = new wrapper.NodeIKernelLoginService();
-    const session = new wrapper.NodeIQQNTWrapperSession();
+    const loginService = wrapper.NodeIKernelLoginService.get();
+    const session = wrapper.NodeIQQNTWrapperSession.create();
 
     // from get dataPath
     const [dataPath, dataPathGlobal] = (() => {
