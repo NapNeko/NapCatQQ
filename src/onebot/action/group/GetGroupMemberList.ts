@@ -23,7 +23,7 @@ class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
     async _handle(payload: Payload) {
         const groupMembers = await this.core.apis.GroupApi.getGroupMembersV2(payload.group_id.toString());
         const groupMembersArr = Array.from(groupMembers.values());
-        let uids = groupMembersArr.map(item => item.uid);
+        const uids = groupMembersArr.map(item => item.uid);
         //let CoreAndBase = await this.core.apis.GroupApi.getCoreAndBaseInfo(uids)
         let _groupMembers = groupMembersArr.map(item => {
             return OB11Entities.groupMember(payload.group_id.toString(), item);

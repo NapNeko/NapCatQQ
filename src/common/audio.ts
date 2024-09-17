@@ -45,9 +45,9 @@ async function handleWavFile(
 ): Promise<{input: Buffer, sampleRate: number}> {
     const { fmt } = getWavFileInfo(file);
     if (!ALLOW_SAMPLE_RATE.includes(fmt.sampleRate)) {
-        return {input: await convert(filePath, pcmPath, logger), sampleRate: 24000};
+        return { input: await convert(filePath, pcmPath, logger), sampleRate: 24000 };
     }
-    return {input: file, sampleRate: fmt.sampleRate};
+    return { input: file, sampleRate: fmt.sampleRate };
 }
 
 export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: LogWrapper) {
@@ -59,7 +59,7 @@ export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: Log
             const pcmPath = `${pttPath}.pcm`;
             const { input, sampleRate } = isWav(file)
                 ? (await handleWavFile(file, filePath, pcmPath, logger))
-                : {input: await convert(filePath, pcmPath, logger), sampleRate: 24000};
+                : { input: await convert(filePath, pcmPath, logger), sampleRate: 24000 };
             const silk = await encode(input, sampleRate);
             await fsPromise.writeFile(pttPath, silk.data);
             logger.log(`语音文件${filePath}转换成功!`, pttPath, '时长:', silk.duration);

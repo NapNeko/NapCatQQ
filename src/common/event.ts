@@ -187,7 +187,7 @@ export class NTEventWrapper {
                 const id = randomUUID();
                 let complete = 0;
                 let retData: Parameters<ListenerType> | undefined = undefined;
-                let retEvent: any = {};
+                const retEvent: any = {};
 
                 function sendDataCallback() {
                     if (complete == 0) {

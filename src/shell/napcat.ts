@@ -117,7 +117,7 @@ export async function NCoreInitShell() {
                 nick: '', // 获取不到
                 online: true,
             });
-        }
+        };
 
         loginListener.onQRCodeGetPicture = ({ pngBase64QrcodeData, qrcodeUrl }) => {
             //设置WebuiQrcode
@@ -209,7 +209,7 @@ export async function NCoreInitShell() {
                 logger.log(`可用于快速登录的 QQ：\n${historyLoginList
                     .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
                     .join('\n')
-                    }`);
+                }`);
             }
             loginService.getQRCodePicture();
         }
