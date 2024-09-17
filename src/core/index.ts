@@ -261,7 +261,7 @@ export async function genSessionConfig(QQVersionAppid: string, QQVersion: string
             systemPlatform = PlatformType.KMAC;
             break;
         case 'linux':
-            systemPlatform = PlatformType.KANDROID; //Android 怎么不算Linux!
+            systemPlatform = PlatformType.KLINUX;
             break;
     }
     return {

@@ -73,7 +73,7 @@ export async function NCoreInitShell() {
             systemPlatform = PlatformType.KMAC;
             break;
         case 'linux':
-            systemPlatform = PlatformType.KANDROID; //Android 怎么不算Linux!
+            systemPlatform = PlatformType.KLINUX;
             break;
     }
     if (!basicInfoWrapper.QQVersionAppid || !basicInfoWrapper.QQVersionQua) throw new Error('QQVersionAppid or QQVersionQua  is not defined');
