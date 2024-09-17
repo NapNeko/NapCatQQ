@@ -574,9 +574,10 @@ export class OneBotMsgApi {
             } else {
                 postData = data;
             }
-            const signUrl = this.obContext.configLoader.configData.musicSignUrl;
+            let signUrl = this.obContext.configLoader.configData.musicSignUrl;
             if (!signUrl) {
-                throw Error('音乐消息签名地址未配置');
+                signUrl = 'https://ss.xingzhige.com/music_card/card';//感谢思思！
+                //throw Error('音乐消息签名地址未配置');
             }
             try {
                 const musicJson = await RequestUtil.HttpGetJson<any>(signUrl, 'POST', postData);
