@@ -28,7 +28,7 @@ export class QQBasicInfoWrapper {
             ? JSON.parse(fs.readFileSync(this.QQVersionConfigPath!).toString())
             : getDefaultQQVersionConfigInfo();
 
-        this.QQPackageInfoPath = getQQPackageInfoPath(this.QQMainPath, this.QQVersionConfig?.curVersion!);
+        this.QQPackageInfoPath = getQQPackageInfoPath(this.QQMainPath, this.QQVersionConfig?.curVersion);
         this.QQPackageInfo = JSON.parse(fs.readFileSync(this.QQPackageInfoPath).toString());
         const { appid: IQQVersionAppid, qua: IQQVersionQua } = this.getAppidV2();
         this.QQVersionAppid = IQQVersionAppid;

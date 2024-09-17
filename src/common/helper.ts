@@ -188,14 +188,20 @@ export function getDefaultQQVersionConfigInfo(): QQVersionConfigType {
     };
 }
 
-export function getQQPackageInfoPath(exePath: string = '', version: string): string {
+export function getQQPackageInfoPath(exePath: string = '', version?: string): string {
+    let packagePath;
     if (os.platform() === 'darwin') {
-        return path.join(path.dirname(exePath), '..', 'Resources', 'app', 'package.json');
+        packagePath = path.join(path.dirname(exePath), '..', 'Resources', 'app', 'package.json');
     } else if (os.platform() === 'linux') {
-        return path.join(path.dirname(exePath), './resources/app/package.json');
+        packagePath = path.join(path.dirname(exePath), './resources/app/package.json');
     } else {
-        return path.join(path.dirname(exePath), './versions/' + version + '/resources/app/package.json');
+        packagePath = path.join(path.dirname(exePath), './versions/' + version + '/resources/app/package.json');
     }
+    //下面是老版本兼容 未来去掉
+    if (!fs.existsSync(packagePath)) {
+        packagePath = path.join(path.dirname(exePath), './resources/app/versions/' + version + '/package.json');
+    }
+    return packagePath;
 }
 
 export function getQQVersionConfigPath(exePath: string = ''): string | undefined {
@@ -213,6 +219,10 @@ export function getQQVersionConfigPath(exePath: string = ''): string | undefined
     }
     if (typeof configVersionInfoPath !== 'string') {
         return undefined;
+    }
+    //老版本兼容 未来去掉
+    if (!fs.existsSync(configVersionInfoPath)) {
+        configVersionInfoPath = path.join(path.dirname(exePath), './resources/app/versions/config.json');
     }
     if (!fs.existsSync(configVersionInfoPath)) {
         return undefined;
