@@ -48,8 +48,8 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             //鉴权
             this.authorize(token, wsClient, wsReq);
             const paramUrl = wsReq.url?.indexOf('?') !== -1 ? wsReq.url?.substring(0, wsReq.url?.indexOf('?')) : wsReq.url;
-            const isEventConnect = paramUrl === '/event' || paramUrl === '' || paramUrl === '/';
-            if (isEventConnect) {
+            const isApiConnect = paramUrl === '/api' || paramUrl ===  '/api/';
+            if (!isApiConnect) {
                 this.connectEvent(core, wsClient);
             }
 
@@ -77,7 +77,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
                 });
             });
             await this.wsClientsMutex.runExclusive(async () => {
-                if(isEventConnect){
+                if(!isApiConnect){
                     this.wsClientWithEvent.push(wsClient);
                 }
                 this.wsClients.push(wsClient);
