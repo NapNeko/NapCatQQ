@@ -251,18 +251,31 @@ export async function genSessionConfig(QQVersionAppid: string, QQVersion: string
     const downloadPath = path.join(account_path, 'NapCat', 'temp');
     fs.mkdirSync(downloadPath, { recursive: true });
     const guid: string = await getMachineId();//26702 支持JS获取guid值 在LoginService中获取 TODO mlikiow a
+    //os.platform() 
+    let systemPlatform = PlatformType.KWINDOWS;
+    switch (os.platform()) {
+        case 'win32':
+            systemPlatform = PlatformType.KWINDOWS;
+            break;
+        case 'darwin':
+            systemPlatform = PlatformType.KMAC;
+            break;
+        case 'linux':
+            systemPlatform = PlatformType.KANDROID; //Android 怎么不算Linux!
+            break;
+    }
     return {
         selfUin,
         selfUid,
         desktopPathConfig: {
             account_path, // 可以通过NodeQQNTWrapperUtil().getNTUserDataInfoConfig()获取
         },
-        clientVer: QQVersion,  // 9.9.8-22355
+        clientVer: QQVersion,
         a2: '',
         d2: '',
         d2Key: '',
         machineId: '',
-        platform: PlatformType.KWINDOWS,  // 3是Windows?
+        platform: systemPlatform,  // 3是Windows? 
         platVer: systemVersion,  // 系统版本号, 应该可以固定
         appid: QQVersionAppid,
         rdeliveryConfig: {
@@ -270,7 +283,7 @@ export async function genSessionConfig(QQVersionAppid: string, QQVersion: string
             systemId: 0,
             appId: '',
             logicEnvironment: '',
-            platform: PlatformType.KWINDOWS,
+            platform: systemPlatform,
             language: '',
             sdkVersion: '',
             userId: '',
