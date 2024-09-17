@@ -143,9 +143,8 @@ export interface NodeQQNTWrapperUtil {
 }
 
 export interface NodeIQQNTWrapperSession {
-    // eslint-disable-next-line @typescript-eslint/no-misused-new
-    new(): NodeIQQNTWrapperSession;
-
+    create(): NodeIQQNTWrapperSession;
+    
     init(
         wrapperSessionInitConfig: WrapperSessionInitConfig,
         nodeIDependsAdapter: NodeIDependsAdapter,

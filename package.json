@@ -2,7 +2,7 @@
   "name": "napcat",
   "private": true,
   "type": "module",
-  "version": "2.5.5",
+  "version": "2.6.0",
   "scripts": {
     "build:framework": "vite build --mode framework",
     "build:shell": "vite build --mode shell",
@@ -11,9 +11,6 @@
     "depend": "cd dist && npm install --omit=dev"
   },
   "devDependencies": {
-    "@babel/core": "^7.24.7",
-    "@babel/plugin-proposal-class-properties": "^7.18.6",
-    "@babel/plugin-proposal-decorators": "^7.24.7",
     "@babel/preset-typescript": "^7.24.7",
     "@log4js-node/log4js-api": "^1.0.2",
     "@protobuf-ts/plugin": "^2.9.4",
@@ -21,9 +18,7 @@
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
-    "@types/figlet": "^1.5.8",
     "@types/fluent-ffmpeg": "^2.1.24",
-    "@types/jest": "^29.5.12",
     "@types/node": "^22.0.1",
     "@types/qrcode-terminal": "^0.12.2",
     "@types/ws": "^8.5.12",
@@ -32,14 +27,8 @@
     "eslint": "^8.57.0",
     "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-import": "^2.29.1",
-    "i": "^0.3.7",
-    "javascript-obfuscator": "^4.1.0",
-    "rollup": "^4.13.2",
-    "rollup-plugin-dts": "^6.1.0",
-    "rollup-plugin-obfuscator": "^1.1.0",
     "typescript": "^5.3.3",
     "vite": "^5.2.6",
-    "vite-plugin-babel": "^1.2.0",
     "vite-plugin-cp": "^4.0.8",
     "vite-plugin-dts": "^3.8.2",
     "vite-tsconfig-paths": "^4.3.2"
