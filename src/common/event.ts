@@ -183,7 +183,7 @@ export class NTEventWrapper {
         timeout = 5000,
     ) {
         return new Promise<[EventRet: Awaited<ReturnType<EventType>>, ...Parameters<ListenerType>]>(
-            async (resolve, reject) => {
+            (resolve, reject) => {
                 const id = randomUUID();
                 let complete = 0;
                 let retData: Parameters<ListenerType> | undefined = undefined;
@@ -235,21 +235,22 @@ export class NTEventWrapper {
                 this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.set(id, eventCallback);
                 this.createListenerFunction(ListenerMainName);
                 const eventFunction = this.createEventFunction(serviceAndMethod);
-                retEvent = await eventFunction!(...(args));
-                if (!checkerEvent(retEvent)) {
-                    clearTimeout(timeoutRef);
-                    reject(
-                        new Error(
-                            'EventChecker Failed: NTEvent serviceAndMethod:' +
-                            serviceAndMethod +
-                            ' ListenerName:' +
-                            listenerAndMethod +
-                            ' EventRet:\n' +
-                            JSON.stringify(retEvent, null, 4) +
-                            '\n',
-                        ),
-                    );
-                }
+                if (eventFunction) eventFunction(...(args)).then((retEvent: Awaited<ReturnType<EventType>>) => {
+                    if (!checkerEvent(retEvent) && timeoutRef.hasRef()) {
+                        clearTimeout(timeoutRef);
+                        reject(
+                            new Error(
+                                'EventChecker Failed: NTEvent serviceAndMethod:' +
+                                serviceAndMethod +
+                                ' ListenerName:' +
+                                listenerAndMethod +
+                                ' EventRet:\n' +
+                                JSON.stringify(retEvent, null, 4) +
+                                '\n',
+                            ),
+                        );
+                    }
+                });
             },
         );
     }
