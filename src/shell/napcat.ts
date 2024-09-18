@@ -243,7 +243,7 @@ export async function NCoreInitShell() {
 
     let guid = loginService.getMachineGuid();
     guid = guid.slice(0, 8) + '-' + guid.slice(8, 12) + '-' + guid.slice(12, 16) + '-' + guid.slice(16, 20) + '-' + guid.slice(20);
-    console.log('guid:', guid);
+    //console.log('guid:', guid);
     // from initSession
     await new Promise<void>(async (resolve, reject) => {
         const sessionConfig = await genSessionConfig(
