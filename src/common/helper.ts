@@ -180,11 +180,11 @@ export function getDefaultQQVersionConfigInfo(): QQVersionConfigType {
         };
     }
     return {
-        baseVersion: '9.9.15-28060',
-        curVersion: '9.9.15-28060',
+        baseVersion: '9.9.15-28131',
+        curVersion: '9.9.15-28131',
         prevVersion: '',
         onErrorVersions: [],
-        buildId: '28060',
+        buildId: '28131',
     };
 }
 
