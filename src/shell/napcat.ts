@@ -28,6 +28,7 @@ import { NapCatOneBot11Adapter } from '@/onebot';
 import { InitWebUi } from '@/webui';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { napCatVersion } from '@/common/version';
+import { NodeIO3MiscListener } from '@/core/listeners/NodeIO3MiscListener';
 
 program.option('-q, --qq [number]', 'QQ号').parse(process.argv);
 const cmdOptions = program.opts();
@@ -40,6 +41,10 @@ export async function NCoreInitShell() {
     const logger = new LogWrapper(pathWrapper.logsPath);
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
+
+    const o3Service = wrapper.NodeIO3MiscService.get();
+    o3Service.addO3MiscListener(new NodeIO3MiscListener());
+
     logger.log(`[NapCat] [Core] NapCat.Core Version: ` + napCatVersion);
     InitWebUi(logger, pathWrapper).then().catch(logger.logError);
 
@@ -228,7 +233,8 @@ export async function NCoreInitShell() {
         }
     });
     // BEFORE LOGGING IN
-
+    let amgomDataPiece = 'eb1fd6ac257461580dc7438eb099f23aae04ca679f4d88f53072dc56e3bb1129';
+    o3Service.setAmgomDataPiece(basicInfoWrapper.QQVersionAppid, new Uint8Array(Buffer.from(amgomDataPiece, 'hex')));
     // AFTER LOGGING IN
 
     // from initSession

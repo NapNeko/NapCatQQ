@@ -1,4 +1,4 @@
-export class NodeIKernelO3MiscListener {
+export class NodeIO3MiscListener {
     getOnAmgomDataPiece(...arg: unknown[]) {
 
     }

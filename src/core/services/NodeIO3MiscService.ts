@@ -1,5 +1,9 @@
+import { NodeIO3MiscListener } from "../listeners/NodeIO3MiscListener";
+
 export interface NodeIO3MiscService {
-    addO3MiscListener(listeners: NodeIO3MiscService): number;
+    get(): NodeIO3MiscService;
+
+    addO3MiscListener(listeners: NodeIO3MiscListener): number;
 
     setAmgomDataPiece(appid: string, dataPiece: Uint8Array): void;
 }
