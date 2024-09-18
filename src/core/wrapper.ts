@@ -276,7 +276,6 @@ export interface WrapperNodeApi {
     NodeIKernelLoginService: NodeIKernelLoginService;
     NodeIKernelProfileService: NodeIKernelProfileService;
 }
-
 export enum PlatformType {
     KUNKNOWN,
     KANDROID,
