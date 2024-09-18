@@ -22,7 +22,7 @@ import { QQBasicInfoWrapper } from '@/common/qq-basic-info';
 import { NapCatPathWrapper } from '@/common/path';
 import path from 'node:path';
 import fs from 'node:fs';
-import { getMachineId, hostname, systemName, systemVersion } from '@/common/system';
+import { hostname, systemName, systemVersion } from '@/common/system';
 import { NTEventWrapper } from '@/common/event';
 import { DataSource, GroupMember, KickedOffLineInfo, SelfInfo, SelfStatusInfo } from '@/core/entities';
 import { NapCatConfigLoader } from '@/core/helper/config';
@@ -247,10 +247,16 @@ export class NapCatCore {
     }
 }
 
-export async function genSessionConfig(QQVersionAppid: string, QQVersion: string, selfUin: string, selfUid: string, account_path: string): Promise<WrapperSessionInitConfig> {
+export async function genSessionConfig(
+    guid:string,
+    QQVersionAppid: string,
+    QQVersion: string,
+    selfUin: string,
+    selfUid: string,
+    account_path: string
+): Promise<WrapperSessionInitConfig> {
     const downloadPath = path.join(account_path, 'NapCat', 'temp');
     fs.mkdirSync(downloadPath, { recursive: true });
-    const guid: string = await getMachineId();//26702 支持JS获取guid值 在LoginService中获取 TODO mlikiow a
     //os.platform() 
     let systemPlatform = PlatformType.KWINDOWS;
     switch (os.platform()) {

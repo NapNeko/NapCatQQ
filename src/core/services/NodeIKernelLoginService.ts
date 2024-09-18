@@ -59,6 +59,8 @@ export interface QuickLoginResult {
 }
 
 export interface NodeIKernelLoginService {
+    getMachineGuid(): string;
+
     get(): NodeIKernelLoginService;
 
     connect(): boolean;
