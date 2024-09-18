@@ -26,6 +26,7 @@ import { NodeIKernelRecentContactService } from './services/NodeIKernelRecentCon
 import { NodeIKernelMSFService } from './services/NodeIKernelMSFService';
 import { NodeIkernelTestPerformanceService } from './services/NodeIkernelTestPerformanceService';
 import { NodeIKernelECDHService } from './services/NodeIKernelECDHService';
+import { NodeIO3MiscService } from './services/NodeIO3MiscService';
 
 export interface NodeQQNTWrapperUtil {
     get(): unknown;
@@ -268,13 +269,12 @@ export interface NodeIQQNTWrapperEngine {
 }
 
 export interface WrapperNodeApi {
-    [key: string]: any;
-
+    NodeIO3MiscService: NodeIO3MiscService;
     NodeQQNTWrapperUtil: NodeQQNTWrapperUtil;
     NodeIQQNTWrapperSession: NodeIQQNTWrapperSession;
     NodeIQQNTWrapperEngine: NodeIQQNTWrapperEngine;
     NodeIKernelLoginService: NodeIKernelLoginService;
-    NodeIKernelProfileService: NodeIKernelProfileService;
+
 }
 export enum PlatformType {
     KUNKNOWN,
