@@ -91,7 +91,7 @@ export async function NCoreInitShell() {
             app_type: 4,
             app_version: basicInfoWrapper.getFullQQVesion(),
             os_version: systemVersion,
-            use_xlog: true,
+            use_xlog: false,
             qua: basicInfoWrapper.QQVersionQua,
             global_path_config: {
                 desktopGlobalPath: dataPathGlobal,
