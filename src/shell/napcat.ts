@@ -52,6 +52,7 @@ export async function NCoreInitShell() {
     const engine = wrapper.NodeIQQNTWrapperEngine.get();
     //const util = wrapper.NodeQQNTWrapperUtil.get();
     const loginService = wrapper.NodeIKernelLoginService.get();
+
     const session = wrapper.NodeIQQNTWrapperSession.create();
 
     // from get dataPath
@@ -237,10 +238,16 @@ export async function NCoreInitShell() {
     let amgomDataPiece = 'eb1fd6ac257461580dc7438eb099f23aae04ca679f4d88f53072dc56e3bb1129';
     o3Service.setAmgomDataPiece(basicInfoWrapper.QQVersionAppid, new Uint8Array(Buffer.from(amgomDataPiece, 'hex')));
     // AFTER LOGGING IN
+    //99b15bdb4c984fc69d5aa1feb9aa16xx --> 99b15bdb-4c98-4fc6-9d5a-a1feb9aa16xx
+    //把guid从左向右转换为guid格式 loginService.getMachineGuid()
 
+    let guid = loginService.getMachineGuid();
+    guid = guid.slice(0, 8) + '-' + guid.slice(8, 12) + '-' + guid.slice(12, 16) + '-' + guid.slice(16, 20) + '-' + guid.slice(20);
+    console.log('guid:', guid);
     // from initSession
     await new Promise<void>(async (resolve, reject) => {
         const sessionConfig = await genSessionConfig(
+            guid,
             basicInfoWrapper.QQVersionAppid!,
             basicInfoWrapper.getFullQQVesion(),
             selfInfo.uin,
