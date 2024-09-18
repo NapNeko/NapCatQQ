@@ -118,7 +118,8 @@ export async function NCoreInitShell() {
             quickLoginUin = '';
         }
     }
-
+    let dataTimestape = new Date().getTime().toString();
+    o3Service.reportAmgomWeather('login', 'a1', [dataTimestape, '0', '0']);
     const selfInfo = await new Promise<SelfInfo>((resolve) => {
         const loginListener = new NodeIKernelLoginListener();
         let isLogined = false;
