@@ -705,36 +705,46 @@ export class OneBotMsgApi {
             }
         }
 
-        const msgSegments = (await Promise.allSettled(msg.elements.map(
+        // 处理消息段
+        const msgSegments = await Promise.allSettled(msg.elements.map(
             async (element) => {
                 for (const key in element) {
                     if (keyCanBeParsed(key, this.rawToOb11Converters) && element[key]) {
-                        return await this.rawToOb11Converters[key]?.(
+                        const parsedElement = await this.rawToOb11Converters[key]?.(
                             // eslint-disable-next-line
                             // @ts-ignore
                             element[key],
                             msg,
                             element,
                         );
+                        // 对于 face 类型的消息，检查是否存在
+                        if (key === 'faceElement' && !parsedElement) {
+                            return null; // 如果没有找到对应的表情，返回 null
+                        }
+
+                        return parsedElement;
                     }
                 }
             },
-        ))).filter(entry => {
+        ));
+
+        // 过滤掉无效的消息段
+        const validSegments = msgSegments.filter(entry => {
             if (entry.status === 'fulfilled') {
                 return !!entry.value;
             } else {
                 this.core.context.logger.logError('消息段解析失败', entry.reason);
                 return false;
             }
-        }).map((entry) => (<PromiseFulfilledResult<OB11MessageData>>entry).value);
+        }).map((entry) => (<PromiseFulfilledResult<OB11MessageData>>entry).value).filter(value => value != null);
 
-        const msgAsCQCode = msgSegments.map(msg => encodeCQCode(msg)).join('').trim();
+        const msgAsCQCode = validSegments.map(msg => encodeCQCode(msg)).join('').trim();
 
         if (messagePostFormat === 'string') {
             resMsg.message = msgAsCQCode;
             resMsg.raw_message = msgAsCQCode;
         } else {
-            resMsg.message = msgSegments;
+            resMsg.message = validSegments;
             resMsg.raw_message = msgAsCQCode;
         }
         return resMsg;
