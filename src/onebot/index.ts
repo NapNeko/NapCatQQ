@@ -40,6 +40,7 @@ import { OB11GroupAdminNoticeEvent } from '@/onebot/event/notice/OB11GroupAdminN
 import { GroupDecreaseSubType, OB11GroupDecreaseEvent } from '@/onebot/event/notice/OB11GroupDecreaseEvent';
 import { OB11GroupRequestEvent } from '@/onebot/event/request/OB11GroupRequest';
 import { OB11FriendRecallNoticeEvent } from '@/onebot/event/notice/OB11FriendRecallNoticeEvent';
+import { OB11FriendAddNoticeEvent } from '@/onebot/event/notice/OB11FriendAddNoticeEvent';
 import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecallNoticeEvent';
 import { LRUCache } from '@/common/lru-cache';
 import { NodeIKernelRecentContactListener } from '@/core/listeners/NodeIKernelRecentContactListener';
@@ -310,8 +311,17 @@ export class NapCatOneBot11Adapter {
 
     private initBuddyListener() {
         const buddyListener = new NodeIKernelBuddyListener();
+        let buddyPendingReqs: string[] = [];
 
         buddyListener.onBuddyReqChange = async reqs => {
+            for(const req of reqs.buddyReqs){
+                if (req.isDecide && !req.isInitiator && req.reqType === BuddyReqType.KMEAGREEDANDADDED && buddyPendingReqs.includes(req.friendUid)) {
+                    buddyPendingReqs = buddyPendingReqs.filter(item => item !== req.friendUid);
+                    const friendAddNoticeEvent = new OB11FriendAddNoticeEvent(this.core, Number(await this.core.apis.UserApi.getUinByUidV2(req.friendUid)));
+                    await this.networkManager.emitEvent(friendAddNoticeEvent);
+                }
+            }
+
             this.core.apis.FriendApi.clearBuddyReqUnreadCnt();
             for (let i = 0; i < reqs.unreadNums; i++) {
                 const req = reqs.buddyReqs[i];
@@ -320,6 +330,7 @@ export class NapCatOneBot11Adapter {
                 }
                 try {
                     const requesterUin = await this.core.apis.UserApi.getUinByUidV2(req.friendUid);
+                    buddyPendingReqs.push(req.friendUid);
                     await this.networkManager.emitEvent(new OB11FriendRequestEvent(
                         this.core,
                         parseInt(requesterUin!),
