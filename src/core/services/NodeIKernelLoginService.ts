@@ -1,4 +1,5 @@
 import { NodeIKernelLoginListener } from '@/core/listeners/NodeIKernelLoginListener';
+import { GeneralCallResult } from './common';
 
 export interface LoginInitConfig {
     machineId: '';
@@ -59,6 +60,7 @@ export interface QuickLoginResult {
 }
 
 export interface NodeIKernelLoginService {
+    setLoginMiscData(arg0: string, value: string): unknown;
     getMachineGuid(): string;
 
     get(): NodeIKernelLoginService;
@@ -71,7 +73,7 @@ export interface NodeIKernelLoginService {
 
     initConfig(config: LoginInitConfig): void;
 
-    getLoginMiscData(cb: (r: unknown) => void): void;
+    getLoginMiscData(data: string): Promise<GeneralCallResult & { value: string }>;
 
     getLoginList(): Promise<{
         result: number,  // 0是ok
