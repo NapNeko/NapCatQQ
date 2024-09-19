@@ -421,6 +421,10 @@ export class OneBotMsgApi {
             // 从face_config.json中获取表情名称
             const sysFaces = faceConfig.sysface;
             const face: any = sysFaces.find((systemFace) => systemFace.QSid === parsedFaceId.toString());
+            if (!face) {
+                this.core.context.logger.logError('不支持的ID', id);
+                return undefined;
+            }
             parsedFaceId = parseInt(parsedFaceId.toString());
             let faceType = 1;
             if (parsedFaceId >= 222) {
