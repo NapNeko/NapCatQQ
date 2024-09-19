@@ -186,7 +186,14 @@ export async function NCoreInitShell() {
             // 遍历 res.LocalLoginInfoList[x].isQuickLogin是否可以 res.LocalLoginInfoList[x].uin 转为string 加入string[] 最后遍历完成调用WebUiDataRuntime.setQQQuickLoginList
             WebUiDataRuntime.setQQQuickLoginList(res.LocalLoginInfoList.filter((item) => item.isQuickLogin).map((item) => item.uin.toString()));
         });
-
+        if (basicInfoWrapper.QQVersionConfig?.curVersion) {
+            loginService.getLoginMiscData('hotUpdateSign').then((res) => {
+                if (res.result === 0) {
+                    loginService.setLoginMiscData('hotUpdateSign', res.value);
+                }
+            });
+            session.getNodeMiscService().writeVersionToRegistry(basicInfoWrapper.QQVersionConfig?.curVersion);
+        }
         WebUiDataRuntime.setQuickLoginCall(async (uin: string) => {
             return await new Promise((resolve) => {
                 if (uin) {
@@ -244,6 +251,11 @@ export async function NCoreInitShell() {
     let guid = loginService.getMachineGuid();
     guid = guid.slice(0, 8) + '-' + guid.slice(8, 12) + '-' + guid.slice(12, 16) + '-' + guid.slice(16, 20) + '-' + guid.slice(20);
     //console.log('guid:', guid);
+    //NodeIO3MiscService/reportAmgomWeather  login a6 [ '1726748166943', '184', '329' ]
+    o3Service.reportAmgomWeather('login', 'a6', [dataTimestape, '184', '329']);
+    // if(session.getUnitedConfigService()){
+    //     session.getUnitedConfigService().fetchUnitedCommendConfig([]);
+    // }
     // from initSession
     await new Promise<void>(async (resolve, reject) => {
         const sessionConfig = await genSessionConfig(
