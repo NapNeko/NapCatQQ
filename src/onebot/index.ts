@@ -311,14 +311,13 @@ export class NapCatOneBot11Adapter {
 
     private initBuddyListener() {
         const buddyListener = new NodeIKernelBuddyListener();
-        let buddyPendingReqs: string[] = [];
+        const buddyPendingReqs: string[] = [];
 
         buddyListener.onBuddyReqChange = async reqs => {
-            for(const req of reqs.buddyReqs){
-                if (req.isDecide && !req.isInitiator && req.reqType === BuddyReqType.KMEAGREEDANDADDED && buddyPendingReqs.includes(req.friendUid)) {
-                    buddyPendingReqs = buddyPendingReqs.filter(item => item !== req.friendUid);
-                    const friendAddNoticeEvent = new OB11FriendAddNoticeEvent(this.core, Number(await this.core.apis.UserApi.getUinByUidV2(req.friendUid)));
-                    await this.networkManager.emitEvent(friendAddNoticeEvent);
+            for (const buddyUid of buddyPendingReqs) {
+                if (this.context.session.getBuddyService().isBuddy(buddyUid)) {
+                    buddyPendingReqs.splice(buddyPendingReqs.indexOf(buddyUid), 1);
+                    await this.networkManager.emitEvent(new OB11FriendAddNoticeEvent(this.core, Number(await this.core.apis.UserApi.getUinByUidV2(buddyUid))));
                 }
             }
 
