@@ -123,7 +123,7 @@ export interface HttpDownloadOptions {
     headers?: Record<string, string> | string;
 }
 
-export async function httpDownload(options: string | HttpDownloadOptions): Promise<Buffer> {
+async function tryDownload(options: string | HttpDownloadOptions, useReferer: boolean = false): Promise<Response> {
     // const chunks: Buffer[] = [];
     let url: string;
     let headers: Record<string, string> = {
@@ -142,15 +142,26 @@ export async function httpDownload(options: string | HttpDownloadOptions): Promi
             }
         }
     }
+    if (useReferer && !headers['Referer']) {
+        headers['Referer'] = url;
+    }
     const fetchRes = await fetch(url, { headers }).catch((err) => {
         if (err.cause) {
             throw err.cause;
         }
         throw err;
     });
-    if (!fetchRes.ok) throw new Error(`下载文件失败: ${fetchRes.statusText}`);
+    return fetchRes;
+}
 
-    const blob = await fetchRes.blob();
+export async function httpDownload(options: string | HttpDownloadOptions): Promise<Buffer> {
+    const useReferer = typeof options === 'string';
+    let resp = await tryDownload(options);
+    if (resp.status === 403 && useReferer) {
+        resp = await tryDownload(options, true);
+    }
+    if (!resp.ok) throw new Error(`下载文件失败: ${resp.statusText}`);
+    const blob = await resp.blob();
     const buffer = await blob.arrayBuffer();
     return Buffer.from(buffer);
 }
@@ -160,8 +171,7 @@ type Uri2LocalRes = {
     errMsg: string,
     fileName: string,
     ext: string,
-    path: string,
-    isLocal: boolean
+    path: string
 }
 
 export async function checkFileV2(filePath: string) {
@@ -194,7 +204,6 @@ export async function checkUriType(Uri: string) {
         return undefined;
     }, Uri);
     if (LocalFileRet) return LocalFileRet;
-
     const OtherFileRet = await solveProblem((uri: string) => {
         //再判断是否是Http
         if (uri.startsWith('http://') || uri.startsWith('https://')) {
@@ -206,14 +215,18 @@ export async function checkUriType(Uri: string) {
         }
         if (uri.startsWith('file://')) {
             let filePath: string;
-            // await fs.copyFile(url.pathname, filePath);
             const pathname = decodeURIComponent(new URL(uri).pathname);
             if (process.platform === 'win32') {
                 filePath = pathname.slice(1);
             } else {
                 filePath = pathname;
             }
+
             return { Uri: filePath, Type: FileUriType.Local };
+        }
+        if (uri.startsWith('data:')) {
+            const data = uri.split(',')[1];
+            if (data) return { Uri: data, Type: FileUriType.Base64 };
         }
     }, Uri);
     if (OtherFileRet) return OtherFileRet;
@@ -224,34 +237,42 @@ export async function checkUriType(Uri: string) {
 export async function uri2local(dir: string, uri: string, filename: string | undefined = undefined): Promise<Uri2LocalRes> {
     const { Uri: HandledUri, Type: UriType } = await checkUriType(uri);
     //解析失败
+    const tempName = randomUUID();
+    if (!filename) filename = randomUUID();
+    //解析Http和Https协议
 
     if (UriType == FileUriType.Unknown) {
-        return { success: false, errMsg: '未知文件类型', fileName: '', ext: '', path: '', isLocal: false };
+        return { success: false, errMsg: '未知文件类型', fileName: '', ext: '', path: '' };
     }
     //解析File协议和本地文件
     if (UriType == FileUriType.Local) {
         const fileExt = path.extname(HandledUri);
-        const filename = path.basename(HandledUri, fileExt);
-        return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: HandledUri, isLocal: true };
+        let filename = path.basename(HandledUri, fileExt);
+        filename += fileExt;
+        //复制文件到临时文件并保持后缀
+        const filenameTemp = tempName + fileExt;
+        const filePath = path.join(dir, filenameTemp);
+        fs.copyFileSync(HandledUri, filePath);
+        return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath };
     }
     //接下来都要有文件名
-    if (!filename) filename = randomUUID();
-    //解析Http和Https协议
 
     if (UriType == FileUriType.Remote) {
         const pathInfo = path.parse(decodeURIComponent(new URL(HandledUri).pathname));
         if (pathInfo.name) {
-            filename = pathInfo.name;
+            const pathlen = 200 - dir.length - pathInfo.name.length;
+            filename = pathlen > 0 ? pathInfo.name.substring(0, pathlen) : pathInfo.name.substring(pathInfo.name.length, pathInfo.name.length - 10);//过长截断
             if (pathInfo.ext) {
                 filename += pathInfo.ext;
             }
         }
         filename = filename.replace(/[/\\:*?"<>|]/g, '_');
-        const fileExt = path.extname(HandledUri);
-        const filePath = path.join(dir, filename);
+        const fileExt = path.extname(HandledUri).replace(/[/\\:*?"<>|]/g, '_').substring(0, 10);
+        const filePath = path.join(dir, tempName + fileExt);
         const buffer = await httpDownload(HandledUri);
-        fs.writeFileSync(filePath, buffer);
-        return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath, isLocal: true };
+        //没有文件就创建
+        fs.writeFileSync(filePath, buffer, { flag: 'wx' });
+        return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath };
     }
     //解析Base64
     if (UriType == FileUriType.Base64) {
@@ -266,7 +287,7 @@ export async function uri2local(dir: string, uri: string, filename: string | und
             fileExt = ext;
             filename = filename + '.' + ext;
         }
-        return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath, isLocal: true };
+        return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath };
     }
-    return { success: false, errMsg: '未知文件类型', fileName: '', ext: '', path: '', isLocal: false };
+    return { success: false, errMsg: '未知文件类型', fileName: '', ext: '', path: '' };
 }

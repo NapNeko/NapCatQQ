@@ -3,9 +3,9 @@ import { GeneralCallResult } from './common';
 
 export interface NodeIKernelStorageCleanService {
 
-    addKernelStorageCleanListener(Listener: NodeIKernelStorageCleanListener): number;
+    addKernelStorageCleanListener(listener: NodeIKernelStorageCleanListener): number;
 
-    removeKernelStorageCleanListener(ListenerId: number): void;
+    removeKernelStorageCleanListener(listenerId: number): void;
 
     addCacheScanedPaths(arg: unknown): unknown;
 

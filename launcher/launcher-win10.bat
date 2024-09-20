@@ -5,11 +5,11 @@ if %errorLevel% == 0 (
     echo Administrator mode detected.
 ) else (
     echo Please run this script in administrator mode.
-    powershell -Command "Start-Process 'cmd.exe' -ArgumentList '/c cd /d \"%cd%\" && \"%~f0\"' -Verb runAs" 
+    powershell -Command "Start-Process 'cmd.exe' -ArgumentList '/c cd /d \"%cd%\" && \"%~f0\" %1' -Verb runAs" 
     exit
 )
 
-set NAPCAT_PATCH_PATH=%cd%\patchNapCat.js
+set NAPCAT_PATCH_PACKAGE=%cd%\qqnt.json
 set NAPCAT_LOAD_PATH=%cd%\loadNapCat.js
 set NAPCAT_INJECT_PATH=%cd%\NapCatWinBootHook.dll
 set NAPCAT_LAUNCHER_PATH=%cd%\NapCatWinBootMain.exe
@@ -35,6 +35,6 @@ if not exist "%QQpath%" (
 set NAPCAT_MAIN_PATH=%NAPCAT_MAIN_PATH:\=/%
 echo (async () =^> {await import("file:///%NAPCAT_MAIN_PATH%")})() > %NAPCAT_LOAD_PATH%
 
-"%NAPCAT_LAUNCHER_PATH%" "%QQPath%" "%NAPCAT_INJECT_PATH%"
+"%NAPCAT_LAUNCHER_PATH%" "%QQPath%" "%NAPCAT_INJECT_PATH%" %1
 
 REM "%NAPCAT_LAUNCHER_PATH%" "%QQPath%" "%NAPCAT_INJECT_PATH%" 123456

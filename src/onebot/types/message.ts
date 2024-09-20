@@ -62,6 +62,7 @@ export enum OB11MessageDataType {
     dice = 'dice',
     RPS = 'rps',
     miniapp = 'miniapp',//json类
+    contact = 'contact',
     Location = 'location'
 }
 
@@ -81,9 +82,16 @@ export interface OB11MessageText {
         text: string, // 纯文本
     }
 }
-
+export interface OB11MessageContext {
+    type: OB11MessageDataType.contact,
+    data: {
+        id: string,
+    }
+}
 export interface OB11MessageFileBase {
     data: {
+        file_unique?: string,
+        path?: string;
         thumb?: string;
         name?: string;
         file: string,
@@ -196,7 +204,7 @@ export type OB11MessageData =
     OB11MessageAt | OB11MessageReply |
     OB11MessageImage | OB11MessageRecord | OB11MessageFile | OB11MessageVideo |
     OB11MessageNode | OB11MessageIdMusic | OB11MessageCustomMusic | OB11MessageJson |
-    OB11MessageDice | OB11MessageRPS | OB11MessageMarkdown | OB11MessageForward
+    OB11MessageDice | OB11MessageRPS | OB11MessageMarkdown | OB11MessageForward | OB11MessageContext
 
 export interface OB11PostSendMsg {
     message_type?: 'private' | 'group'
@@ -205,4 +213,9 @@ export interface OB11PostSendMsg {
     message: OB11MessageMixType;
     messages?: OB11MessageMixType;  // 兼容 go-cqhttp
     auto_escape?: boolean | string
+}
+export interface OB11PostContext {
+    message_type?: 'private' | 'group'
+    user_id?: string,
+    group_id?: string,
 }

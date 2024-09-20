@@ -11,6 +11,7 @@ import {
     NapCatCore,
     NapCatCoreWorkingEnv,
     NodeIQQNTWrapperSession,
+    PlatformType,
     WrapperNodeApi,
 } from '@/core';
 import { QQBasicInfoWrapper } from '@/common/qq-basic-info';
@@ -27,6 +28,7 @@ import { NapCatOneBot11Adapter } from '@/onebot';
 import { InitWebUi } from '@/webui';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { napCatVersion } from '@/common/version';
+import { NodeIO3MiscListener } from '@/core/listeners/NodeIO3MiscListener';
 import { NapCatLaanaAdapter } from '@/laana';
 
 program.option('-q, --qq [number]', 'QQ号').parse(process.argv);
@@ -40,14 +42,19 @@ export async function NCoreInitShell() {
     const logger = new LogWrapper(pathWrapper.logsPath);
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
+
+    const o3Service = wrapper.NodeIO3MiscService.get();
+    o3Service.addO3MiscListener(new NodeIO3MiscListener());
+
     logger.log(`[NapCat] [Core] NapCat.Core Version: ` + napCatVersion);
     InitWebUi(logger, pathWrapper).then().catch(logger.logError);
 
     // from constructor
-    const engine = new wrapper.NodeIQQNTWrapperEngine();
+    const engine = wrapper.NodeIQQNTWrapperEngine.get();
     //const util = wrapper.NodeQQNTWrapperUtil.get();
-    const loginService = new wrapper.NodeIKernelLoginService();
-    const session = new wrapper.NodeIQQNTWrapperSession();
+    const loginService = wrapper.NodeIKernelLoginService.get();
+
+    const session = wrapper.NodeIQQNTWrapperSession.create();
 
     // from get dataPath
     const [dataPath, dataPathGlobal] = (() => {
@@ -64,17 +71,29 @@ export async function NCoreInitShell() {
         const dataPathGlobal = path.resolve(dataPath, './nt_qq/global');
         return [dataPath, dataPathGlobal];
     })();
-
+    let systemPlatform = PlatformType.KWINDOWS;
+    switch (os.platform()) {
+        case 'win32':
+            systemPlatform = PlatformType.KWINDOWS;
+            break;
+        case 'darwin':
+            systemPlatform = PlatformType.KMAC;
+            break;
+        case 'linux':
+            systemPlatform = PlatformType.KLINUX;
+            break;
+    }
+    if (!basicInfoWrapper.QQVersionAppid || !basicInfoWrapper.QQVersionQua) throw new Error('QQVersionAppid or QQVersionQua  is not defined');
     // from initConfig
     engine.initWithDeskTopConfig(
         {
             base_path_prefix: '',
-            platform_type: 3,
+            platform_type: systemPlatform,
             app_type: 4,
             app_version: basicInfoWrapper.getFullQQVesion(),
-            os_version: 'Windows 10 Pro',
-            use_xlog: true,
-            qua: basicInfoWrapper.QQVersionQua!,
+            os_version: systemVersion,
+            use_xlog: false,
+            qua: basicInfoWrapper.QQVersionQua,
             global_path_config: {
                 desktopGlobalPath: dataPathGlobal,
             },
@@ -84,7 +103,7 @@ export async function NCoreInitShell() {
     );
     loginService.initConfig({
         machineId: '',
-        appid: basicInfoWrapper.QQVersionAppid!,
+        appid: basicInfoWrapper.QQVersionAppid,
         platVer: systemVersion,
         commonPath: dataPathGlobal,
         clientVer: basicInfoWrapper.getFullQQVesion(),
@@ -101,21 +120,25 @@ export async function NCoreInitShell() {
             quickLoginUin = '';
         }
     }
-
+    let dataTimestape = new Date().getTime().toString();
+    o3Service.reportAmgomWeather('login', 'a1', [dataTimestape, '0', '0']);
     const selfInfo = await new Promise<SelfInfo>((resolve) => {
         const loginListener = new NodeIKernelLoginListener();
-
+        let isLogined = false;
         // from constructor
         loginListener.onUserLoggedIn = (userid: string) => {
             logger.logError(`当前账号(${userid})已登录,无法重复登录`);
         };
 
-        loginListener.onQRCodeLoginSucceed = async (loginResult) => resolve({
-            uid: loginResult.uid,
-            uin: loginResult.uin,
-            nick: '', // 获取不到
-            online: true,
-        });
+        loginListener.onQRCodeLoginSucceed = async (loginResult) => {
+            isLogined = true;
+            resolve({
+                uid: loginResult.uid,
+                uin: loginResult.uin,
+                nick: '', // 获取不到
+                online: true,
+            });
+        };
 
         loginListener.onQRCodeGetPicture = ({ pngBase64QrcodeData, qrcodeUrl }) => {
             //设置WebuiQrcode
@@ -139,11 +162,13 @@ export async function NCoreInitShell() {
         };
         loginListener.onQRCodeSessionFailed = (errType: number, errCode: number, errMsg: string) => {
             //logger.logError('登录失败(onQRCodeSessionFailed)', errCode, errMsg);
-            logger.logError('[Core] [Login] Login Error,ErrCode: ', errCode, ' ErrMsg:', errMsg);
-            if (errType == 1 && errCode == 3) {
-                // 二维码过期刷新
+            if (!isLogined) {
+                logger.logError('[Core] [Login] Login Error,ErrCode: ', errCode, ' ErrMsg:', errMsg);
+                if (errType == 1 && errCode == 3) {
+                    // 二维码过期刷新
+                }
+                loginService.getQRCodePicture();
             }
-            loginService.getQRCodePicture();
         };
         loginListener.onLoginFailed = (args) => {
             //logger.logError('登录失败(onLoginFailed)', args);
@@ -151,13 +176,25 @@ export async function NCoreInitShell() {
         };
 
         loginService.addKernelLoginListener(proxiedListenerOf(loginListener, logger) as any);
-
+        const isConnect = loginService.connect();
+        if (!isConnect) {
+            logger.logError('核心登录服务连接失败!');
+            return;
+        }
+        logger.log('核心登录服务连接成功!');
         // 实现WebUi快速登录
         loginService.getLoginList().then((res) => {
             // 遍历 res.LocalLoginInfoList[x].isQuickLogin是否可以 res.LocalLoginInfoList[x].uin 转为string 加入string[] 最后遍历完成调用WebUiDataRuntime.setQQQuickLoginList
             WebUiDataRuntime.setQQQuickLoginList(res.LocalLoginInfoList.filter((item) => item.isQuickLogin).map((item) => item.uin.toString()));
         });
-
+        if (basicInfoWrapper.QQVersionConfig?.curVersion) {
+            loginService.getLoginMiscData('hotUpdateSign').then((res) => {
+                if (res.result === 0) {
+                    loginService.setLoginMiscData('hotUpdateSign', res.value);
+                }
+            });
+            session.getNodeMiscService().writeVersionToRegistry(basicInfoWrapper.QQVersionConfig?.curVersion);
+        }
         WebUiDataRuntime.setQuickLoginCall(async (uin: string) => {
             return await new Promise((resolve) => {
                 if (uin) {
@@ -185,14 +222,14 @@ export async function NCoreInitShell() {
                         .then(result => {
                             if (result.loginErrorInfo.errMsg) {
                                 logger.logError('快速登录错误：', result.loginErrorInfo.errMsg);
-                                loginService.getQRCodePicture();
+                                if (!isLogined) loginService.getQRCodePicture();
                             }
                         })
                         .catch();
                 }, 1000);
             } else {
                 logger.logError('快速登录失败，未找到该 QQ 历史登录记录，将使用二维码登录方式');
-                loginService.getQRCodePicture();
+                if (!isLogined) loginService.getQRCodePicture();
             }
         } else {
             logger.log('没有 -q 指令指定快速登录，将使用二维码登录方式');
@@ -206,12 +243,24 @@ export async function NCoreInitShell() {
         }
     });
     // BEFORE LOGGING IN
-
+    let amgomDataPiece = 'eb1fd6ac257461580dc7438eb099f23aae04ca679f4d88f53072dc56e3bb1129';
+    o3Service.setAmgomDataPiece(basicInfoWrapper.QQVersionAppid, new Uint8Array(Buffer.from(amgomDataPiece, 'hex')));
     // AFTER LOGGING IN
+    //99b15bdb4c984fc69d5aa1feb9aa16xx --> 99b15bdb-4c98-4fc6-9d5a-a1feb9aa16xx
+    //把guid从左向右转换为guid格式 loginService.getMachineGuid()
 
+    let guid = loginService.getMachineGuid();
+    guid = guid.slice(0, 8) + '-' + guid.slice(8, 12) + '-' + guid.slice(12, 16) + '-' + guid.slice(16, 20) + '-' + guid.slice(20);
+    //console.log('guid:', guid);
+    //NodeIO3MiscService/reportAmgomWeather  login a6 [ '1726748166943', '184', '329' ]
+    o3Service.reportAmgomWeather('login', 'a6', [dataTimestape, '184', '329']);
+    // if(session.getUnitedConfigService()){
+    //     session.getUnitedConfigService().fetchUnitedCommendConfig([]);
+    // }
     // from initSession
     await new Promise<void>(async (resolve, reject) => {
         const sessionConfig = await genSessionConfig(
+            guid,
             basicInfoWrapper.QQVersionAppid!,
             basicInfoWrapper.getFullQQVesion(),
             selfInfo.uin,
@@ -230,7 +279,7 @@ export async function NCoreInitShell() {
             sessionConfig,
             new NodeIDependsAdapter(),
             new NodeIDispatcherAdapter(),
-            sessionListener as any,
+            sessionListener,
         );
         try {
             session.startNT(0);

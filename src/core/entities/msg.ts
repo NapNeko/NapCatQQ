@@ -934,3 +934,43 @@ export interface RawMessage {
 
     elements: MessageElement[];
 }
+export interface QueryMsgsParams {
+    chatInfo: Peer;
+    filterMsgType: [];
+    filterSendersUid: string[];
+    filterMsgFromTime: string;
+    filterMsgToTime: string;
+    pageLimit: number;
+    isReverseOrder: boolean;
+    isIncludeCurrent: boolean;
+}
+
+export interface TmpChatInfoApi {
+    errMsg: string;
+    result: number;
+    tmpChatInfo?: TmpChatInfo;
+}
+
+export interface TmpChatInfo {
+    chatType: number;
+    fromNick: string;
+    groupCode: string;
+    peerUid: string;
+    sessionType: number;
+    sig: string;
+}
+export interface MsgReqType {
+    peer: Peer,
+    byType: number,
+    msgId: string,
+    msgSeq: string,
+    msgTime: string,
+    clientSeq: string,
+    cnt: number,
+    queryOrder: boolean,
+    includeSelf: boolean,
+    includeDeleteMsg: boolean,
+    extraCnt: number
+}
+//getMsgsIncludeSelf Peer必须 byType 1
+//getMsgsWithMsgTimeAndClientSeqForC2C Peer必须 byType 3

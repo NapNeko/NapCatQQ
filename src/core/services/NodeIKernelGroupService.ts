@@ -11,8 +11,6 @@ import {
 } from '@/core/entities';
 import { GeneralCallResult } from '@/core/services/common';
 
-//高版本的接口不应该随意使用 使用应该严格进行pr审核 同时部分ipc中未出现的接口不要过于依赖 应该做好数据兜底
-
 export interface NodeIKernelGroupService {
     getGroupExt0xEF0Info(enableGroupCodes: string[], bannedGroupCodes: string[], filter: GroupExt0xEF0InfoFilter, forceFetch: boolean):
         Promise<GeneralCallResult & { result: { groupExtInfos: Map<string, any> } }>;
@@ -82,11 +80,11 @@ export interface NodeIKernelGroupService {
     }): Promise<unknown>;
 
 
-    isEssenceMsg(Req: { groupCode: string, msgRandom: number, msgSeq: number }): Promise<unknown>;
+    isEssenceMsg(req: { groupCode: string, msgRandom: number, msgSeq: number }): Promise<unknown>;
 
-    queryCachedEssenceMsg(Req: { groupCode: string, msgRandom: number, msgSeq: number }): Promise<unknown>;
+    queryCachedEssenceMsg(req: { groupCode: string, msgRandom: number, msgSeq: number }): Promise<unknown>;
 
-    fetchGroupEssenceList(Req: {
+    fetchGroupEssenceList(req: {
         groupCode: string,
         pageStart: number,
         pageLimit: number
@@ -110,13 +108,12 @@ export interface NodeIKernelGroupService {
 
     addKernelGroupListener(listener: NodeIKernelGroupListener): number;
 
-    removeKernelGroupListener(listenerId: unknown): void;
+    removeKernelGroupListener(listenerId: number): void;
 
     createMemberListScene(groupCode: string, scene: string): string;
 
     destroyMemberListScene(SceneId: string): void;
 
-    //About Arg (a) name: lastId 根据手Q来看为object {index:?(number),uid:string}
     getNextMemberList(sceneId: string, a: undefined, num: number): Promise<{
         errCode: number, errMsg: string,
         result: { ids: string[], infos: Map<string, GroupMember>, finish: boolean, hasRobot: boolean }
@@ -247,14 +244,12 @@ export interface NodeIKernelGroupService {
 
     modifyGroupExtInfo(groupCode: string, arg: unknown): void;
 
-    //需要提前判断是否存在 高版本新增
     addGroupEssence(param: {
         groupCode: string
         msgRandom: number,
         msgSeq: number
     }): Promise<unknown>;
 
-    //需要提前判断是否存在 高版本新增
     removeGroupEssence(param: {
         groupCode: string
         msgRandom: number,

@@ -3,6 +3,7 @@ import {
     OB11MessageDataType,
     OB11MessageMixType,
     OB11MessageNode,
+    OB11PostContext,
     OB11PostSendMsg,
 } from '@/onebot/types';
 import { ActionName, BaseCheckResult } from '@/onebot/action/types';
@@ -30,7 +31,7 @@ export function normalize(message: OB11MessageMixType, autoEscape = false): OB11
     ) : Array.isArray(message) ? message : [message];
 }
 
-export async function createContext(core: NapCatCore, payload: OB11PostSendMsg, contextMode: ContextMode): Promise<Peer> {
+export async function createContext(core: NapCatCore, payload: OB11PostContext, contextMode: ContextMode): Promise<Peer> {
     // This function determines the type of message by the existence of user_id / group_id,
     // not message_type.
     // This redundant design of Ob11 here should be blamed.

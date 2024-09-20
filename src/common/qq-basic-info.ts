@@ -19,14 +19,16 @@ export class QQBasicInfoWrapper {
         //基础目录获取
         this.context = context;
         this.QQMainPath = process.execPath;
-        this.QQPackageInfoPath = getQQPackageInfoPath(this.QQMainPath);
         this.QQVersionConfigPath = getQQVersionConfigPath(this.QQMainPath);
+
 
         //基础信息获取 无快更则启用默认模板填充
         this.isQuickUpdate = !!this.QQVersionConfigPath;
         this.QQVersionConfig = this.isQuickUpdate
             ? JSON.parse(fs.readFileSync(this.QQVersionConfigPath!).toString())
             : getDefaultQQVersionConfigInfo();
+
+        this.QQPackageInfoPath = getQQPackageInfoPath(this.QQMainPath, this.QQVersionConfig?.curVersion);
         this.QQPackageInfo = JSON.parse(fs.readFileSync(this.QQPackageInfoPath).toString());
         const { appid: IQQVersionAppid, qua: IQQVersionQua } = this.getAppidV2();
         this.QQVersionAppid = IQQVersionAppid;
@@ -53,23 +55,23 @@ export class QQBasicInfoWrapper {
     //此方法不要直接使用
     getQUAInternal() {
         switch (systemPlatform) {
-            case 'linux':
-                return `V1_LNX_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
-            case 'darwin':
-                return `V1_MAC_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;                
-            default:
-                return `V1_WIN_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
+        case 'linux':
+            return `V1_LNX_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
+        case 'darwin':
+            return `V1_MAC_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
+        default:
+            return `V1_WIN_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
         }
     }
 
     getAppidInternal() {
         switch (systemPlatform) {
-            case 'linux':
-                return '537243600';
-            case 'darwin':
-                return '537243441';
-            default:
-                return '537243538';
+        case 'linux':
+            return '537246140';
+        case 'darwin':
+            return '537246140';
+        default:
+            return '537246092';
         }
     }
 

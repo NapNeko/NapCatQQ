@@ -24,6 +24,7 @@ import pathLib from 'node:path';
 import { defaultVideoThumbB64, getVideoInfo } from '@/common/video';
 import ffmpeg from 'fluent-ffmpeg';
 import { encodeSilk } from '@/common/audio';
+import { MessageContext } from '@/onebot/api';
 
 export class NTQQFileApi {
     context: InstanceContext;
@@ -33,7 +34,7 @@ export class NTQQFileApi {
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
         this.core = core;
-        this.rkeyManager = new RkeyManager('http://napcat-sign.wumiao.wang:2082/rkey', this.context.logger);
+        this.rkeyManager = new RkeyManager(['https://llob.linyuchen.net/rkey', 'http://napcat-sign.wumiao.wang:2082/rkey'], this.context.logger);
     }
 
     async copyFile(filePath: string, destPath: string) {
@@ -71,7 +72,7 @@ export class NTQQFileApi {
             file_uuid: '',
         });
 
-        await this.copyFile(filePath, mediaPath!);
+        await this.copyFile(filePath, mediaPath);
         const fileSize = await this.getFileSize(filePath);
         return {
             md5: fileMd5,
@@ -82,7 +83,7 @@ export class NTQQFileApi {
         };
     }
 
-    async createValidSendFileElement(filePath: string, fileName: string = '', folderId: string = '',): Promise<SendFileElement> {
+    async createValidSendFileElement(context: MessageContext, filePath: string, fileName: string = '', folderId: string = '',): Promise<SendFileElement> {
         const {
             fileName: _fileName,
             path,
@@ -91,6 +92,7 @@ export class NTQQFileApi {
         if (fileSize === 0) {
             throw new Error('文件异常，大小为0');
         }
+        context.deleteAfterSentFiles.push(path);
         return {
             elementType: ElementType.FILE,
             elementId: '',
@@ -103,12 +105,13 @@ export class NTQQFileApi {
         };
     }
 
-    async createValidSendPicElement(picPath: string, summary: string = '', subType: 0 | 1 = 0,): Promise<SendPicElement> {
+    async createValidSendPicElement(context: MessageContext, picPath: string, summary: string = '', subType: 0 | 1 = 0,): Promise<SendPicElement> {
         const { md5, fileName, path, fileSize } = await this.core.apis.FileApi.uploadFile(picPath, ElementType.PIC, subType);
         if (fileSize === 0) {
             throw new Error('文件异常，大小为0');
         }
         const imageSize = await this.core.apis.FileApi.getImageSize(picPath);
+        context.deleteAfterSentFiles.push(path);
         return {
             elementType: ElementType.PIC,
             elementId: '',
@@ -130,26 +133,40 @@ export class NTQQFileApi {
         };
     }
 
-    async createValidSendVideoElement(filePath: string, fileName: string = '', diyThumbPath: string = ''): Promise<SendVideoElement> {
+    async createValidSendVideoElement(context: MessageContext, filePath: string, fileName: string = '', diyThumbPath: string = ''): Promise<SendVideoElement> {
         const logger = this.core.context.logger;
-        const { fileName: _fileName, path, fileSize, md5 } = await this.core.apis.FileApi.uploadFile(filePath, ElementType.VIDEO);
-        if (fileSize === 0) {
-            throw new Error('文件异常，大小为0');
-        }
-        let thumb = path.replace(`${pathLib.sep}Ori${pathLib.sep}`, `${pathLib.sep}Thumb${pathLib.sep}`);
-        thumb = pathLib.dirname(thumb);
         let videoInfo = {
             width: 1920, height: 1080,
             time: 15,
             format: 'mp4',
-            size: fileSize,
+            size: 0,
             filePath,
         };
         try {
-            videoInfo = await getVideoInfo(path, logger);
+            videoInfo = await getVideoInfo(filePath, logger);
         } catch (e) {
             logger.logError('获取视频信息失败，将使用默认值', e);
         }
+
+        let fileExt = 'mp4';
+        try {
+            const tempExt = (await fileType.fileTypeFromFile(filePath))?.ext;
+            if (tempExt) fileExt = tempExt;
+        } catch (e) {
+            this.context.logger.logError('获取文件类型失败', e);
+        }
+        const newFilePath = filePath + '.' + fileExt;
+        fs.copyFileSync(filePath, newFilePath);
+        context.deleteAfterSentFiles.push(newFilePath);
+        filePath = newFilePath;
+        const { fileName: _fileName, path, fileSize, md5 } = await this.core.apis.FileApi.uploadFile(filePath, ElementType.VIDEO);
+        if (fileSize === 0) {
+            throw new Error('文件异常，大小为0');
+        }
+        videoInfo.size = fileSize;
+        let thumb = path.replace(`${pathLib.sep}Ori${pathLib.sep}`, `${pathLib.sep}Thumb${pathLib.sep}`);
+        thumb = pathLib.dirname(thumb);
+
         const thumbPath = new Map();
         const _thumbPath = await new Promise<string | undefined>((resolve, reject) => {
             const thumbFileName = `${md5}_0.png`;
@@ -179,11 +196,13 @@ export class NTQQFileApi {
         const thumbSize = _thumbPath ? (await fsPromises.stat(_thumbPath)).size : 0;
         thumbPath.set(0, _thumbPath);
         const thumbMd5 = _thumbPath ? await calculateFileMD5(_thumbPath) : '';
+        context.deleteAfterSentFiles.push(path);
+        const uploadName = (fileName || _fileName).toLocaleLowerCase().endsWith('.' + fileExt.toLocaleLowerCase()) ? (fileName || _fileName) : (fileName || _fileName) + '.' + fileExt;
         return {
             elementType: ElementType.VIDEO,
             elementId: '',
             videoElement: {
-                fileName: fileName || _fileName,
+                fileName: uploadName,
                 filePath: path,
                 videoMd5: md5,
                 thumbMd5,
@@ -207,7 +226,9 @@ export class NTQQFileApi {
             throw new Error('文件异常，大小为0');
         }
         if (converted) {
-            fsPromises.unlink(silkPath);
+            fsPromises.unlink(silkPath).then().catch(
+                (e) => this.context.logger.logError('删除临时文件失败', e)
+            );
         }
         return {
             elementType: ElementType.PTT,
@@ -246,7 +267,6 @@ export class NTQQFileApi {
     }
 
     async downloadMedia(msgId: string, chatType: ChatType, peerUid: string, elementId: string, thumbPath: string, sourcePath: string, timeout = 1000 * 60 * 2, force: boolean = false) {
-        //logDebug('receive downloadMedia task', msgId, chatType, peerUid, elementId, thumbPath, sourcePath, timeout, force);
         // 用于下载收到的消息中的图片等
         if (sourcePath && fs.existsSync(sourcePath)) {
             if (force) {
@@ -339,15 +359,15 @@ export class NTQQFileApi {
         if (!element) {
             return '';
         }
-        const url: string = element.originImageUrl!;  // 没有域名
+        const url: string = element.originImageUrl ?? '';
         const md5HexStr = element.md5HexStr;
         const fileMd5 = element.md5HexStr;
 
         if (url) {
-            const parsedUrl = new URL(IMAGE_HTTP_HOST + url);//临时解析拼接
+            const parsedUrl = new URL(IMAGE_HTTP_HOST + url);
             const imageAppid = parsedUrl.searchParams.get('appid');
-            const isNTFlavoredPic = imageAppid && ['1406', '1407'].includes(imageAppid);
-            if (isNTFlavoredPic) {
+            const isNTV2 = imageAppid && ['1406', '1407'].includes(imageAppid);
+            if (isNTV2) {
                 let rkey = parsedUrl.searchParams.get('rkey');
                 if (rkey) {
                     return IMAGE_HTTP_HOST_NT + url;
@@ -356,11 +376,9 @@ export class NTQQFileApi {
                 rkey = imageAppid === '1406' ? rkeyData.private_rkey : rkeyData.group_rkey;
                 return IMAGE_HTTP_HOST_NT + url + `${rkey}`;
             } else {
-                // 老的图片url，不需要rkey
                 return IMAGE_HTTP_HOST + url;
             }
         } else if (fileMd5 || md5HexStr) {
-            // 没有url，需要自己拼接
             return `${IMAGE_HTTP_HOST}/gchatpic_new/0/0-0-${(fileMd5 ?? md5HexStr)!.toUpperCase()}/0`;
         }
         this.context.logger.logDebug('图片url获取失败', element);

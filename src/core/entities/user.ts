@@ -153,7 +153,10 @@ interface CommonExt {
     labels: any[];
     qqLevel: QQLevel;
 }
-
+export enum BuddyListReqType {
+    KNOMAL,
+    KLETTER
+}
 interface Pic {
     picId: string;
     picTime: number;
@@ -213,7 +216,7 @@ export interface BuddyProfileLikeReq {
     userProfile: number;
     type: number;
     start: number;
-    limit: number;
+    limit?: number;
 }
 
 export interface QQLevel {
@@ -294,7 +297,7 @@ export enum BizKey {
     KPHOTOWALL
 }
 
-export interface UserDetailInfoByUinV2 {
+export interface UserDetailInfoByUin {
     result: number,
     errMsg: string,
     detail: {
@@ -305,62 +308,15 @@ export interface UserDetailInfoByUinV2 {
         photoWall: null
     }
 }
+export enum UserDetailSource {
+    KDB,
+    KSERVER
+}
 
-export interface UserDetailInfoByUin {
-    result: number,
-    errMsg: string,
-    info: {
-        uid: string,//这个没办法用
-        qid: string,
-        uin: string,
-        nick: string,
-        remark: string,
-        longNick: string,
-        avatarUrl: string,
-        birthday_year: number,
-        birthday_month: number,
-        birthday_day: number,
-        sex: number,//0
-        topTime: string,
-        constellation: number,
-        shengXiao: number,
-        kBloodType: number,
-        homeTown: string,
-        makeFriendCareer: number,
-        pos: string,
-        eMail: string,
-        phoneNum: string,
-        college: string,
-        country: string,
-        province: string,
-        city: string,
-        postCode: string,
-        address: string,
-        isBlock: boolean,
-        isSpecialCareOpen: boolean,
-        isSpecialCareZone: boolean,
-        ringId: string,
-        regTime: number,
-        interest: string,
-        termType: number,
-        labels: any[],
-        qqLevel: { crownNum: number, sunNum: number, moonNum: number, starNum: number },
-        isHideQQLevel: number,
-        privilegeIcon: { jumpUrl: string, openIconList: any[], closeIconList: any[] },
-        isHidePrivilegeIcon: number,
-        photoWall: { picList: any[] },
-        vipFlag: boolean,
-        yearVipFlag: boolean,
-        svipFlag: boolean,
-        vipLevel: number,
-        status: number,
-        qidianMasterFlag: number,
-        qidianCrewFlag: number,
-        qidianCrewFlag2: number,
-        extStatus: number,
-        recommendImgFlag: number,
-        disableEmojiShortCuts: number,
-        pendantId: string,
-        vipNameColorId: string
-    }
+export enum ProfileBizType {
+    KALL,
+    KBASEEXTEND,
+    KVAS,
+    KQZONE,
+    KOTHER
 }

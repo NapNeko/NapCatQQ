@@ -31,7 +31,6 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
             //公告图逻辑
             const {
                 path,
-                isLocal,
                 success,
             } = (await uri2local(this.core.NapCatTempPath, payload.image));
             if (!success) {
@@ -45,10 +44,10 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
             if (ImageUploadResult.errCode != 0) {
                 throw `群公告${payload.image}设置失败,图片上传失败`;
             }
-            if (!isLocal) {
-                unlink(path, () => {
-                });
-            }
+
+            unlink(path, () => {
+            });
+
             UploadImage = ImageUploadResult.picInfo;
         }
 
@@ -58,7 +57,6 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
         const noticeShowEditCard = +(payload.is_show_edit_card ?? 0);
         const noticeTipWindowType = +(payload.tip_window_type ?? 0);
         const noticeConfirmRequired = +(payload.confirm_required ?? 1);
-        //const publishGroupBulletinResult = await this.core.apis.GroupApi.publishGroupBulletin(payload.group_id.toString(), payload.content, UploadImage, noticePinned, noticeConfirmRequired);
         const publishGroupBulletinResult = await this.core.apis.WebApi.setGroupNotice(
             payload.group_id.toString(),
             payload.content,
@@ -72,7 +70,7 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
             UploadImage?.height
         );
         if (!publishGroupBulletinResult || publishGroupBulletinResult.ec != 0) {
-            throw `设置群公告失败,错误信息:${publishGroupBulletinResult?.em}`;
+            throw new Error(`设置群公告失败,错误信息:${publishGroupBulletinResult?.em}`);
         }
         return null;
     }

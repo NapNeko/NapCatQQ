@@ -21,6 +21,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     core: NapCatCore;
     logger: LogWrapper;
     private heartbeatIntervalId: NodeJS.Timeout | null = null;
+    wsClientWithEvent: WebSocket[] = [];
 
     constructor(
         ip: string,
@@ -46,7 +47,12 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             }
             //鉴权
             this.authorize(token, wsClient, wsReq);
-            this.connectEvent(core, wsClient);
+            const paramUrl = wsReq.url?.indexOf('?') !== -1 ? wsReq.url?.substring(0, wsReq.url?.indexOf('?')) : wsReq.url;
+            const isApiConnect = paramUrl === '/api' || paramUrl === '/api/';
+            if (!isApiConnect) {
+                this.connectEvent(core, wsClient);
+            }
+
             wsClient.on('error', (err) => this.logger.log('[OneBot] [WebSocket Server] Client Error:', err.message));
             wsClient.on('message', (message) => {
                 this.handleMessage(wsClient, message).then().catch(this.logger.logError);
@@ -59,13 +65,21 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             });
             wsClient.once('close', () => {
                 this.wsClientsMutex.runExclusive(async () => {
-                    const index = this.wsClients.indexOf(wsClient);
-                    if (index !== -1) {
-                        this.wsClients.splice(index, 1);
+                    const NormolIndex = this.wsClients.indexOf(wsClient);
+                    if (NormolIndex !== -1) {
+                        this.wsClients.splice(NormolIndex, 1);
                     }
+                    const EventIndex = this.wsClientWithEvent.indexOf(wsClient);
+                    if (EventIndex !== -1) {
+                        this.wsClientWithEvent.splice(EventIndex, 1);
+                    }
+
                 });
             });
             await this.wsClientsMutex.runExclusive(async () => {
+                if (!isApiConnect) {
+                    this.wsClientWithEvent.push(wsClient);
+                }
                 this.wsClients.push(wsClient);
             });
         }).on('error', (err) => this.logger.log('[OneBot] [WebSocket Server] Server Error:', err.message));
@@ -81,7 +95,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
 
     onEvent<T extends OB11EmitEventContent>(event: T) {
         this.wsClientsMutex.runExclusive(async () => {
-            this.wsClients.forEach((wsClient) => {
+            this.wsClientWithEvent.forEach((wsClient) => {
                 wsClient.send(JSON.stringify(event));
             });
         });

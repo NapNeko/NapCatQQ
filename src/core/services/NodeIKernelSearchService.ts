@@ -1,13 +1,20 @@
 import { ChatType } from '../entities';
+import { GeneralCallResult } from './common';
 
 export interface NodeIKernelSearchService {
-    addKernelSearchListener(...args: any[]): unknown;// needs 1 arguments
 
-    removeKernelSearchListener(...args: any[]): unknown;// needs 1 arguments
+    addKernelSearchListener(listener: unknown): number;
 
-    searchStranger(...args: any[]): unknown;// needs 3 arguments
+    removeKernelSearchListener(listenerId: number): void;
 
-    searchGroup(...args: any[]): unknown;// needs 1 arguments
+    searchStranger(unknown: string, searchStranger: unknown, searchParams: unknown): Promise<unknown>;
+
+    searchGroup(param: {
+        keyWords: string,
+        groupNum: number,
+        exactSearch: boolean,
+        penetrate: string
+    }): Promise<GeneralCallResult>;// needs 1 arguments
 
     searchLocalInfo(keywords: string, unknown: number/*4*/): unknown;
 
@@ -125,4 +132,5 @@ export interface NodeIKernelSearchService {
     searchCache(...args: any[]): unknown;// needs 3 arguments
 
     clearSearchCache(...args: any[]): unknown;// needs 1 arguments
+
 }

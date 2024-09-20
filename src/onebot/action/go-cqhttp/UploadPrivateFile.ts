@@ -4,6 +4,8 @@ import { ChatType, Peer, SendFileElement } from '@/core/entities';
 import fs from 'fs';
 import { uri2local } from '@/common/file';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { MessageContext } from '@/onebot/api';
+import { ContextMode, createContext } from '../msg/SendMsg';
 
 const SchemaData = {
     type: 'object',
@@ -42,7 +44,15 @@ export default class GoCQHTTPUploadPrivateFile extends BaseAction<Payload, null>
         if (!downloadResult.success) {
             throw new Error(downloadResult.errMsg);
         }
-        const sendFileEle: SendFileElement = await this.core.apis.FileApi.createValidSendFileElement(downloadResult.path, payload.name);
+
+        const msgContext: MessageContext = {
+            peer: await createContext(this.core, {
+                user_id: payload.user_id.toString(),
+                group_id: undefined,
+            }, ContextMode.Private),
+            deleteAfterSentFiles: []
+        };
+        const sendFileEle: SendFileElement = await this.core.apis.FileApi.createValidSendFileElement(msgContext, downloadResult.path, payload.name);
         await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(await this.getPeer(payload), [sendFileEle], [], true);
         return null;
     }

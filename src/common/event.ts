@@ -183,11 +183,11 @@ export class NTEventWrapper {
         timeout = 5000,
     ) {
         return new Promise<[EventRet: Awaited<ReturnType<EventType>>, ...Parameters<ListenerType>]>(
-            async (resolve, reject) => {
+            (resolve, reject) => {
                 const id = randomUUID();
                 let complete = 0;
                 let retData: Parameters<ListenerType> | undefined = undefined;
-                let retEvent: any = {};
+                const retEvent: any = {};
 
                 function sendDataCallback() {
                     if (complete == 0) {
@@ -235,56 +235,12 @@ export class NTEventWrapper {
                 this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.set(id, eventCallback);
                 this.createListenerFunction(ListenerMainName);
                 const eventFunction = this.createEventFunction(serviceAndMethod);
-                retEvent = await eventFunction!(...(args));
-                if (!checkerEvent(retEvent)) {
-                    clearTimeout(timeoutRef);
-                    reject(
-                        new Error(
-                            'EventChecker Failed: NTEvent serviceAndMethod:' +
-                            serviceAndMethod +
-                            ' ListenerName:' +
-                            listenerAndMethod +
-                            ' EventRet:\n' +
-                            JSON.stringify(retEvent, null, 4) +
-                            '\n',
-                        ),
-                    );
-                }
-            },
-        );
-    }
-
-    /*
-    async callNormalEvent<
-        Service extends keyof ServiceNamingMapping,
-        ServiceMethod extends Exclude<keyof ServiceNamingMapping[Service], symbol>,
-        Listener extends keyof ListenerNamingMapping,
-        ListenerMethod extends Exclude<keyof ListenerNamingMapping[Listener], symbol>,
-        // eslint-disable-next-line
-        // @ts-ignore
-        EventType extends (...args: any) => any = ServiceNamingMapping[Service][ServiceMethod],
-        // eslint-disable-next-line
-        // @ts-ignore
-        ListenerType extends (...args: any) => any = ListenerNamingMapping[Listener][ListenerMethod]
-    >(
-        serviceAndMethod: `${Service}/${ServiceMethod}`,
-        listenerAndMethod: `${Listener}/${ListenerMethod}`,
-        waitTimes = 1,
-        timeout: number = 3000,
-        checker: (...args: Parameters<ListenerType>) => boolean,
-        ...args: Parameters<EventType>
-    ) {
-        return new Promise<[EventRet: Awaited<ReturnType<EventType>>, ...Parameters<ListenerType>]>(
-            async (resolve, reject) => {
-                const id = randomUUID();
-                let complete = 0;
-                let retData: Parameters<ListenerType> | undefined = undefined;
-                let retEvent: any = {};
-                const databack = () => {
-                    if (complete == 0) {
+                if (eventFunction) eventFunction(...(args)).then((retEvent: Awaited<ReturnType<EventType>>) => {
+                    if (!checkerEvent(retEvent) && timeoutRef.hasRef()) {
+                        clearTimeout(timeoutRef);
                         reject(
                             new Error(
-                                'Timeout: NTEvent EventName:' +
+                                'EventChecker Failed: NTEvent serviceAndMethod:' +
                                 serviceAndMethod +
                                 ' ListenerName:' +
                                 listenerAndMethod +
@@ -293,43 +249,9 @@ export class NTEventWrapper {
                                 '\n',
                             ),
                         );
-                    } else {
-                        resolve([retEvent as Awaited<ReturnType<EventType>>, ...retData!]);
                     }
-                };
-
-                const ListenerNameList = listenerAndMethod.split('/');
-                const ListenerMainName = ListenerNameList[0];
-                const ListenerSubName = ListenerNameList[1];
-
-                const Timeouter = setTimeout(databack, timeout);
-
-                const eventCallbak = {
-                    timeout: timeout,
-                    createtime: Date.now(),
-                    checker: checker,
-                    func: (...args: any[]) => {
-                        complete++;
-                        //console.log('func', ...args);
-                        retData = args as Parameters<ListenerType>;
-                        if (complete >= waitTimes) {
-                            clearTimeout(Timeouter);
-                            databack();
-                        }
-                    },
-                };
-                if (!this.EventTask.get(ListenerMainName)) {
-                    this.EventTask.set(ListenerMainName, new Map());
-                }
-                if (!this.EventTask.get(ListenerMainName)?.get(ListenerSubName)) {
-                    this.EventTask.get(ListenerMainName)?.set(ListenerSubName, new Map());
-                }
-                this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.set(id, eventCallbak);
-                this.createListenerFunction(ListenerMainName);
-                const EventFunc = this.createEventFunction<EventType>(serviceAndMethod);
-                retEvent = await EventFunc!(...(args as any[]));
+                });
             },
         );
     }
-     */
 }

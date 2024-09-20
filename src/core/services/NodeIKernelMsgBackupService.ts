@@ -1,7 +1,7 @@
 export interface NodeIKernelMsgBackupService {
-    addKernelMsgBackupListener(...args: any[]): unknown;// needs 1 arguments
+    addKernelMsgBackupListener(listener: unknown): number;
 
-    removeKernelMsgBackupListener(...args: any[]): unknown;// needs 1 arguments
+    removeKernelMsgBackupListener(listenerId: number): void;
 
     getMsgBackupLocation(...args: any[]): unknown;// needs 0 arguments
 

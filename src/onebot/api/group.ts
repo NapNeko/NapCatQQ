@@ -19,6 +19,7 @@ import { OB11GroupPokeEvent } from '@/onebot/event/notice/OB11PokeEvent';
 import { OB11GroupEssenceEvent } from '@/onebot/event/notice/OB11GroupEssenceEvent';
 import { OB11GroupTitleEvent } from '@/onebot/event/notice/OB11GroupTitleEvent';
 import { FileNapCatOneBotUUID } from '@/common/helper';
+import { pathToFileURL } from 'node:url';
 
 export class OneBotGroupApi {
     obContext: NapCatOneBot11Adapter;
@@ -77,7 +78,8 @@ export class OneBotGroupApi {
                         id: FileNapCatOneBotUUID.encode({
                             chatType: ChatType.KCHATTYPEGROUP,
                             peerUid: msg.peerUid,
-                        }, msg.msgId, element.elementId),
+                        }, msg.msgId, element.elementId, "." + element.fileElement.fileName),
+                        url: pathToFileURL(element.fileElement.filePath).href,
                         name: element.fileElement.fileName,
                         size: parseInt(element.fileElement.fileSize),
                         busid: element.fileElement.fileBizId || 0,
@@ -138,15 +140,25 @@ export class OneBotGroupApi {
                     }
                     if (element.grayTipElement.jsonGrayTipElement.busiId == 2407) {
                         //下面得改 上面也是错的grayTipElement.subElementType == GrayTipElementSubType.MEMBER_NEW_TITLE
-                        const memberUin = json.items[1].param[0];
-                        const title = json.items[3].txt;
-                        logger.logDebug('收到群成员新头衔消息', json);
-                        return new OB11GroupTitleEvent(
-                            this.core,
-                            parseInt(msg.peerUid),
-                            parseInt(memberUin),
-                            title,
-                        );
+                        const type = json.items[json.items.length - 1]?.txt;
+                        switch (type) {
+                        case "头衔": {
+                            const memberUin = json.items[1].param[0];
+                            const title = json.items[3].txt;
+                            logger.logDebug('收到群成员新头衔消息', json);
+                            return new OB11GroupTitleEvent(
+                                this.core,
+                                parseInt(msg.peerUid),
+                                parseInt(memberUin),
+                                title,
+                            );
+                        }
+                        case "移出":
+                            logger.logDebug('收到机器人被踢消息', json);
+                            return;
+                        default:
+                            logger.logWarn('收到未知的灰条消息', json);
+                        }
                     }
                 }
             }

@@ -8,9 +8,10 @@ const SchemaData = {
     properties: {
         group_id: { type: ['string', 'number'] },
         folder_id: { type: 'string' },
+        folder: { type: 'string' },
         file_count: { type: ['string', 'number'] },
     },
-    required: ['group_id', 'folder_id'],
+    required: ['group_id'],
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
@@ -26,7 +27,7 @@ export class GetGroupFilesByFolder extends BaseAction<any, any> {
             startIndex: 0,
             sortOrder: 2,
             showOnlinedocFolder: 0,
-            folderId: payload.folder_id,
+            folderId: payload.folder ?? payload.folder_id ?? '',
         }).catch(() => []);
         return {
             files: ret.filter(item => item.fileInfo)

@@ -26,6 +26,7 @@ import { NodeIKernelRecentContactService } from './services/NodeIKernelRecentCon
 import { NodeIKernelMSFService } from './services/NodeIKernelMSFService';
 import { NodeIkernelTestPerformanceService } from './services/NodeIkernelTestPerformanceService';
 import { NodeIKernelECDHService } from './services/NodeIKernelECDHService';
+import { NodeIO3MiscService } from './services/NodeIO3MiscService';
 
 export interface NodeQQNTWrapperUtil {
     get(): unknown;
@@ -143,8 +144,7 @@ export interface NodeQQNTWrapperUtil {
 }
 
 export interface NodeIQQNTWrapperSession {
-    // eslint-disable-next-line @typescript-eslint/no-misused-new
-    new(): NodeIQQNTWrapperSession;
+    create(): NodeIQQNTWrapperSession;
 
     init(
         wrapperSessionInitConfig: WrapperSessionInitConfig,
@@ -250,11 +250,11 @@ export interface NodeIQQNTWrapperSession {
 
 export interface EnginInitDesktopConfig {
     base_path_prefix: string;
-    platform_type: 3;
+    platform_type: PlatformType;
     app_type: 4;
     app_version: string;
     os_version: string;
-    use_xlog: true;
+    use_xlog: boolean;
     qua: string;
     global_path_config: {
         desktopGlobalPath: string;
@@ -263,28 +263,26 @@ export interface EnginInitDesktopConfig {
 }
 
 export interface NodeIQQNTWrapperEngine {
-    // eslint-disable-next-line @typescript-eslint/no-misused-new
-    new(): NodeIQQNTWrapperEngine;
+    get(): NodeIQQNTWrapperEngine;
 
     initWithDeskTopConfig(config: EnginInitDesktopConfig, nodeIGlobalAdapter: NodeIGlobalAdapter): void;
 }
 
 export interface WrapperNodeApi {
-    [key: string]: any;
-
+    NodeIO3MiscService: NodeIO3MiscService;
     NodeQQNTWrapperUtil: NodeQQNTWrapperUtil;
     NodeIQQNTWrapperSession: NodeIQQNTWrapperSession;
     NodeIQQNTWrapperEngine: NodeIQQNTWrapperEngine;
     NodeIKernelLoginService: NodeIKernelLoginService;
-    NodeIKernelProfileService: NodeIKernelProfileService;
-}
 
+}
 export enum PlatformType {
     KUNKNOWN,
     KANDROID,
     KIOS,
     KWINDOWS,
     KMAC,
+    KLINUX
 }
 
 export enum DeviceType {

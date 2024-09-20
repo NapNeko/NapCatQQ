@@ -48,7 +48,8 @@ export class OB11Entities {
         }[role];
     }
 
-    static sex(sex: Sex): OB11UserSex {
+    static sex(sex?: Sex): OB11UserSex {
+        if (!sex) return OB11UserSex.unknown;
         return {
             [Sex.male]: OB11UserSex.male,
             [Sex.female]: OB11UserSex.female,
@@ -109,7 +110,7 @@ export class OB11Entities {
     static file(peerId: string, file: Exclude<GroupFileInfoUpdateParamType['item'][0]['fileInfo'], undefined>): OB11GroupFile {
         return {
             group_id: parseInt(peerId),
-            file_id: FileNapCatOneBotUUID.encodeModelId({ chatType: 2, peerUid: peerId }, file.fileModelId, file.fileId),
+            file_id: FileNapCatOneBotUUID.encodeModelId({ chatType: 2, peerUid: peerId }, file.fileModelId, file.fileId, file.fileName),
             file_name: file.fileName,
             busid: file.busId,
             size: parseInt(file.fileSize),
@@ -126,6 +127,7 @@ export class OB11Entities {
         return {
             group_id: parseInt(peerId),
             folder_id: folder.folderId,
+            folder: folder.folderId,
             folder_name: folder.folderName,
             create_time: folder.createTime,
             creator: parseInt(folder.createUin),

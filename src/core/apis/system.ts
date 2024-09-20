@@ -22,7 +22,7 @@ export class NTQQSystemApi {
     }
 
     async getOnlineDev() {
-        return this.context.session.getMsgService().getOnLineDev();
+        this.context.session.getMsgService().getOnLineDev();
     }
 
     async getArkJsonCollection(cid: string) {

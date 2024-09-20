@@ -1,7 +1,6 @@
-import type { ModifyProfileParams, User } from '@/core/entities';
+import { ModifyProfileParams, User, UserDetailSource } from '@/core/entities';
 import { RequestUtil } from '@/common/request';
-import { ProfileBizType, UserDetailSource } from '@/core/services';
-import { InstanceContext, NapCatCore } from '..';
+import { InstanceContext, NapCatCore, ProfileBizType } from '..';
 import { solveAsyncProblem } from '@/common/helper';
 
 export class NTQQUserApi {
@@ -12,7 +11,13 @@ export class NTQQUserApi {
         this.context = context;
         this.core = core;
     }
-
+    //self_tind格式
+    async createUidFromTinyId(tinyId: string) {
+        return this.context.session.getMsgService().createUidFromTinyId(this.core.selfInfo.uin, tinyId);
+    }
+    async getStatusByUid(uid: string) {
+        return this.context.session.getProfileService().getStatus(uid);
+    }
     async getProfileLike(uid: string) {
         return this.context.session.getProfileLikeService().getBuddyProfileLike({
             friendUids: [uid],
@@ -25,7 +30,18 @@ export class NTQQUserApi {
             limit: 20,
         });
     }
-
+    async fetchOtherProfileLike(uid: string) {
+        return this.context.session.getProfileLikeService().getBuddyProfileLike({
+            friendUids: [uid],
+            basic: 1,
+            vote: 1,
+            favorite: 0,
+            userProfile: 0,
+            type: 1,
+            start: 0,
+            limit: 20,
+        });
+    }
     async setLongNick(longNick: string) {
         return this.context.session.getProfileService().setLongNick(longNick);
     }
@@ -160,7 +176,7 @@ export class NTQQUserApi {
         if (uid) return uid;
         uid = (await this.context.session.getUixConvertService().getUid([Uin])).uidInfo.get(Uin);
         if (uid) return uid;
-        const unverifiedUid = (await this.getUserDetailInfoByUinV2(Uin)).detail.uid;//从QQ Native 特殊转换
+        const unverifiedUid = (await this.getUserDetailInfoByUin(Uin)).detail.uid;//从QQ Native 特殊转换
         if (unverifiedUid.indexOf('*') == -1) uid = unverifiedUid;
         //if (uid) return uid;
         return uid;
@@ -196,7 +212,7 @@ export class NTQQUserApi {
         return await this.context.session.getRecentContactService().getRecentContactList();
     }
 
-    async getUserDetailInfoByUinV2(Uin: string) {
+    async getUserDetailInfoByUin(Uin: string) {
         return await this.core.eventWrapper.callNoListenerEvent(
             'NodeIKernelProfileService/getUserDetailInfoByUin',
             Uin

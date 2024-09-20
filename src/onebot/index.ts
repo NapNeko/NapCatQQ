@@ -43,7 +43,8 @@ import { OB11FriendRecallNoticeEvent } from '@/onebot/event/notice/OB11FriendRec
 import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecallNoticeEvent';
 import { LRUCache } from '@/common/lru-cache';
 import { NodeIKernelRecentContactListener } from '@/core/listeners/NodeIKernelRecentContactListener';
-
+import { OB11ProfileLikeEvent } from './event/notice/OB11ProfileLikeEvent';
+import { profileLikeTip, ProfileLikeTipType, SysMessage, SysMessageType } from '@/core/proto/ProfileLike';
 //OneBot实现类
 export class NapCatOneBot11Adapter {
     readonly core: NapCatCore;
@@ -237,36 +238,11 @@ export class NapCatOneBot11Adapter {
 
     private initMsgListener() {
         const msgListener = new NodeIKernelMsgListener();
-
-        /*
-        msgListener.onRecvSysMsg = async () => {
-            const sysMsg = SysMessage.fromBinary(Uint8Array.from(msg));
-            if (sysMsg.msgSpec.length === 0) {
-                return;
-            }
-            const { msgType, subType, subSubType } = sysMsg.msgSpec[0];
-            if (msgType === 732 && subType === 16 && subSubType === 16) {
-                const greyTip = GreyTipWrapper.fromBinary(Uint8Array.from(sysMsg.bodyWrapper!.wrappedBody.slice(7)));
-                if (greyTip.subTypeId === 36) {
-                    const emojiLikeToOthers = EmojiLikeToOthersWrapper1
-                        .fromBinary(greyTip.rest)
-                        .wrapper!
-                        .body!;
-                    if (emojiLikeToOthers.attributes?.operation !== 1) { // Un-like
-                        return;
-                    }
-                    const eventOrEmpty = await this.apis.GroupApi.createGroupEmojiLikeEvent(
-                        greyTip.groupCode.toString(),
-                        await this.core.apis.UserApi.getUinByUidV2(emojiLikeToOthers.attributes!.senderUid),
-                        emojiLikeToOthers.msgSpec!.msgSeq.toString(),
-                        emojiLikeToOthers.attributes!.emojiId,
-                    );
-                    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-                    eventOrEmpty && await this.networkManager.emitEvent(eventOrEmpty);
-                }
-            }
+        msgListener.onRecvSysMsg = (msg) => {
+            this.apis.MsgApi.parseSysMessage(msg).then((event) => {
+                if (event) this.networkManager.emitEvent(event);
+            }).catch(e => this.context.logger.logError('constructSysMessage error: ', e));
         };
-         */
 
         msgListener.onInputStatusPush = async data => {
             const uin = await this.core.apis.UserApi.getUinByUidV2(data.fromUin);

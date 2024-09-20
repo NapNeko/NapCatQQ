@@ -22,7 +22,7 @@ import { QQBasicInfoWrapper } from '@/common/qq-basic-info';
 import { NapCatPathWrapper } from '@/common/path';
 import path from 'node:path';
 import fs from 'node:fs';
-import { getMachineId, hostname, systemName, systemVersion } from '@/common/system';
+import { hostname, systemName, systemVersion } from '@/common/system';
 import { NTEventWrapper } from '@/common/event';
 import { DataSource, GroupMember, KickedOffLineInfo, SelfInfo, SelfStatusInfo } from '@/core/entities';
 import { NapCatConfigLoader } from '@/core/helper/config';
@@ -46,12 +46,18 @@ export function loadQQWrapper(QQVersion: string): WrapperNodeApi {
     let appPath;
     if (os.platform() === 'darwin') {
         appPath = path.resolve(path.dirname(process.execPath), '../Resources/app');
-    } else {
+    } else if (os.platform() === 'linux') {
         appPath = path.resolve(path.dirname(process.execPath), './resources/app');
+    } else {
+        appPath = path.resolve(path.dirname(process.execPath), `./versions/${QQVersion}/`);
     }
     let wrapperNodePath = path.resolve(appPath, 'wrapper.node');
     if (!fs.existsSync(wrapperNodePath)) {
-        wrapperNodePath = path.join(appPath, `versions/${QQVersion}/wrapper.node`);
+        wrapperNodePath = path.join(appPath, `./resources/app/wrapper.node`);
+    }
+    //老版本兼容 未来去掉
+    if (!fs.existsSync(wrapperNodePath)) {
+        wrapperNodePath = path.join(path.dirname(process.execPath), `./resources/app/versions/${QQVersion}/wrapper.node`);
     }
     const nativemodule: any = { exports: {} };
     process.dlopen(nativemodule, wrapperNodePath);
@@ -150,8 +156,9 @@ export class NapCatCore {
             if (Info.status == 20) {
                 this.selfInfo.online = false;
                 this.context.logger.log("账号状态变更为离线");
+            } else {
+                this.selfInfo.online = true;
             }
-            this.selfInfo.online = true;
         };
         this.context.session.getProfileService().addKernelProfileListener(
             proxiedListenerOf(profileListener, this.context.logger),
@@ -245,22 +252,41 @@ export class NapCatCore {
     }
 }
 
-export async function genSessionConfig(QQVersionAppid: string, QQVersion: string, selfUin: string, selfUid: string, account_path: string): Promise<WrapperSessionInitConfig> {
+export async function genSessionConfig(
+    guid:string,
+    QQVersionAppid: string,
+    QQVersion: string,
+    selfUin: string,
+    selfUid: string,
+    account_path: string
+): Promise<WrapperSessionInitConfig> {
     const downloadPath = path.join(account_path, 'NapCat', 'temp');
     fs.mkdirSync(downloadPath, { recursive: true });
-    const guid: string = await getMachineId();//26702 支持JS获取guid值 在LoginService中获取 TODO mlikiow a
+    //os.platform() 
+    let systemPlatform = PlatformType.KWINDOWS;
+    switch (os.platform()) {
+        case 'win32':
+            systemPlatform = PlatformType.KWINDOWS;
+            break;
+        case 'darwin':
+            systemPlatform = PlatformType.KMAC;
+            break;
+        case 'linux':
+            systemPlatform = PlatformType.KLINUX;
+            break;
+    }
     return {
         selfUin,
         selfUid,
         desktopPathConfig: {
             account_path, // 可以通过NodeQQNTWrapperUtil().getNTUserDataInfoConfig()获取
         },
-        clientVer: QQVersion,  // 9.9.8-22355
+        clientVer: QQVersion,
         a2: '',
         d2: '',
         d2Key: '',
         machineId: '',
-        platform: PlatformType.KWINDOWS,  // 3是Windows?
+        platform: systemPlatform,  // 3是Windows? 
         platVer: systemVersion,  // 系统版本号, 应该可以固定
         appid: QQVersionAppid,
         rdeliveryConfig: {
@@ -268,7 +294,7 @@ export async function genSessionConfig(QQVersionAppid: string, QQVersion: string
             systemId: 0,
             appId: '',
             logicEnvironment: '',
-            platform: PlatformType.KWINDOWS,
+            platform: systemPlatform,
             language: '',
             sdkVersion: '',
             userId: '',

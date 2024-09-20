@@ -25,8 +25,13 @@ export async function solveAsyncProblem<T extends (...args: any[]) => Promise<an
 }
 
 export class FileNapCatOneBotUUID {
-    static encodeModelId(peer: Peer, modelId: string, fileId: string): string {
-        return `NapCatOneBot|ModelIdFile|${peer.chatType}|${peer.peerUid}|${modelId}|${fileId}`;
+    static encodeModelId(peer: Peer, modelId: string, fileId: string, endString: string = ""): string {
+        const data = `NapCatOneBot|ModelIdFile|${peer.chatType}|${peer.peerUid}|${modelId}|${fileId}`;
+        //前四个字节塞data长度
+        const length = Buffer.alloc(4 + data.length);
+        length.writeUInt32BE(data.length * 2, 0);//储存data的hex长度
+        length.write(data, 4);
+        return length.toString('hex') + endString;
     }
 
     static decodeModelId(uuid: string): undefined | {
@@ -34,8 +39,14 @@ export class FileNapCatOneBotUUID {
         modelId: string,
         fileId: string
     } {
-        if (!uuid.startsWith('NapCatOneBot|ModelIdFile|')) return undefined;
-        const data = uuid.split('|');
+        //前四个字节是data长度
+        const length = Buffer.from(uuid.slice(0, 8), 'hex').readUInt32BE(0);
+        //根据length计算需要读取的长度
+        const dataId = uuid.slice(8, 8 + length);
+        //hex还原为string
+        const realData = Buffer.from(dataId, 'hex').toString();
+        if (!realData.startsWith('NapCatOneBot|ModelIdFile|')) return undefined;
+        const data = realData.split('|');
         if (data.length !== 6) return undefined;
         const [, , chatType, peerUid, modelId, fileId] = data;
         return {
@@ -48,8 +59,14 @@ export class FileNapCatOneBotUUID {
         };
     }
 
-    static encode(peer: Peer, msgId: string, elementId: string): string {
-        return `NapCatOneBot|MsgFile|${peer.chatType}|${peer.peerUid}|${msgId}|${elementId}`;
+    static encode(peer: Peer, msgId: string, elementId: string, endString: string = ""): string {
+        const data = `NapCatOneBot|MsgFile|${peer.chatType}|${peer.peerUid}|${msgId}|${elementId}`;
+        //前四个字节塞data长度
+        //一个字节8位 一个ascii字符1字节 一个hex字符4位 表示一个ascii字符需要两个hex字符
+        const length = Buffer.alloc(4 + data.length);
+        length.writeUInt32BE(data.length * 2, 0);
+        length.write(data, 4);
+        return length.toString('hex') + endString;
     }
 
     static decode(uuid: string): undefined | {
@@ -57,8 +74,14 @@ export class FileNapCatOneBotUUID {
         msgId: string,
         elementId: string
     } {
-        if (!uuid.startsWith('NapCatOneBot|MsgFile|')) return undefined;
-        const data = uuid.split('|');
+        //前四个字节是data长度
+        const length = Buffer.from(uuid.slice(0, 8), 'hex').readUInt32BE(0);
+        //根据length计算需要读取的长度
+        const dataId = uuid.slice(8, 8 + length);
+        //hex还原为string
+        const realData = Buffer.from(dataId, 'hex').toString();
+        if (!realData.startsWith('NapCatOneBot|MsgFile|')) return undefined;
+        const data = realData.split('|');
         if (data.length !== 6) return undefined;
         const [, , chatType, peerUid, msgId, elementId] = data;
         return {
@@ -140,34 +163,51 @@ export function isEqual(obj1: any, obj2: any) {
 export function getDefaultQQVersionConfigInfo(): QQVersionConfigType {
     if (os.platform() === 'linux') {
         return {
-            baseVersion: '3.2.12-27597',
-            curVersion: '3.2.12-27597',
+            baseVersion: '3.2.12.28060',
+            curVersion: '3.2.12.28060',
             prevVersion: '',
             onErrorVersions: [],
-            buildId: '27597',
+            buildId: '27254',
+        };
+    }
+    if (os.platform() === 'darwin') {
+        return {
+            baseVersion: '6.9.53.28060',
+            curVersion: '6.9.53.28060',
+            prevVersion: '',
+            onErrorVersions: [],
+            buildId: '28060',
         };
     }
     return {
-        baseVersion: '9.9.15-27597',
-        curVersion: '9.9.15-27597',
+        baseVersion: '9.9.15-28131',
+        curVersion: '9.9.15-28131',
         prevVersion: '',
         onErrorVersions: [],
-        buildId: '27597',
+        buildId: '28131',
     };
 }
 
-export function getQQPackageInfoPath(exePath: string = ''): string {
+export function getQQPackageInfoPath(exePath: string = '', version?: string): string {
+    let packagePath;
     if (os.platform() === 'darwin') {
-        return path.join(path.dirname(exePath), '..', 'Resources', 'app', 'package.json');
+        packagePath = path.join(path.dirname(exePath), '..', 'Resources', 'app', 'package.json');
+    } else if (os.platform() === 'linux') {
+        packagePath = path.join(path.dirname(exePath), './resources/app/package.json');
     } else {
-        return path.join(path.dirname(exePath), 'resources', 'app', 'package.json');
+        packagePath = path.join(path.dirname(exePath), './versions/' + version + '/resources/app/package.json');
     }
+    //下面是老版本兼容 未来去掉
+    if (!fs.existsSync(packagePath)) {
+        packagePath = path.join(path.dirname(exePath), './resources/app/versions/' + version + '/package.json');
+    }
+    return packagePath;
 }
 
 export function getQQVersionConfigPath(exePath: string = ''): string | undefined {
     let configVersionInfoPath;
     if (os.platform() === 'win32') {
-        configVersionInfoPath = path.join(path.dirname(exePath), 'resources', 'app', 'versions', 'config.json');
+        configVersionInfoPath = path.join(path.dirname(exePath), 'versions', 'config.json');
     } else if (os.platform() === 'darwin') {
         const userPath = os.homedir();
         const appDataPath = path.resolve(userPath, './Library/Application Support/QQ');
@@ -180,13 +220,18 @@ export function getQQVersionConfigPath(exePath: string = ''): string | undefined
     if (typeof configVersionInfoPath !== 'string') {
         return undefined;
     }
+    //老版本兼容 未来去掉
+    if (!fs.existsSync(configVersionInfoPath)) {
+        configVersionInfoPath = path.join(path.dirname(exePath), './resources/app/versions/config.json');
+    }
     if (!fs.existsSync(configVersionInfoPath)) {
         return undefined;
     }
     return configVersionInfoPath;
 }
 
-export function calcQQLevel(level: QQLevel) {
+export function calcQQLevel(level?: QQLevel) {
+    if (!level) return 0;
     const { crownNum, sunNum, moonNum, starNum } = level;
     return crownNum * 64 + sunNum * 16 + moonNum * 4 + starNum;
 }

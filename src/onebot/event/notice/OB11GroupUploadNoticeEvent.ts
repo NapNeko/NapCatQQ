@@ -6,6 +6,7 @@ export interface GroupUploadFile {
     name: string,
     size: number,
     busid: number,
+    url:string;
 }
 
 export class OB11GroupUploadNoticeEvent extends OB11GroupNoticeEvent {

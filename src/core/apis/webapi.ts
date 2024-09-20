@@ -157,7 +157,7 @@ export class NTQQWebApi {
         const cookieObject = await this.core.apis.UserApi.getCookies('qun.qq.com');
 
         try {
-            let settings = JSON.stringify({
+            const settings = JSON.stringify({
                 is_show_edit_card: is_show_edit_card,
                 tip_window_type: tip_window_type,
                 confirm_required: confirm_required
@@ -167,7 +167,7 @@ export class NTQQWebApi {
                 imgWidth: imgWidth.toString(),
                 imgHeight: imgHeight.toString(),
             };
-            let ret: SetNoticeRetSuccess = await RequestUtil.HttpGetJson<SetNoticeRetSuccess>(
+            const ret: SetNoticeRetSuccess = await RequestUtil.HttpGetJson<SetNoticeRetSuccess>(
                 `https://web.qun.qq.com/cgi-bin/announce/add_qun_notice?${new URLSearchParams({
                     bkn: this.getBknFromCookie(cookieObject),
                     qid: GroupCode,
