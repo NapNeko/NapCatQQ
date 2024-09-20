@@ -33,7 +33,6 @@ import { uri2local } from '@/common/file';
 import { RequestUtil } from '@/common/request';
 import fs from 'node:fs';
 import fsPromise from 'node:fs/promises';
-import { OB11FriendAddNoticeEvent } from '@/onebot/event/notice/OB11FriendAddNoticeEvent';
 import { SysMessage, SysMessageType } from '@/core/proto/ProfileLike';
 
 type RawToOb11Converters = {
@@ -632,18 +631,10 @@ export class OneBotMsgApi {
             return;
         }
         for (const element of msg.elements) {
-            if (element.grayTipElement) {
-                if (element.grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
-                    if (element.grayTipElement.jsonGrayTipElement.busiId == 1061) {
-                        const PokeEvent = await this.obContext.apis.FriendApi.parsePrivatePokeEvent(element.grayTipElement);
-                        if (PokeEvent) return PokeEvent;
-                    }
-                }
-                if (element.grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_XMLMSG) {
-                    //好友添加成功事件
-                    if (element.grayTipElement.xmlElement.templId === '10229' && msg.peerUin !== '') {
-                        return new OB11FriendAddNoticeEvent(this.core, parseInt(msg.peerUin) || Number(await this.core.apis.UserApi.getUinByUidV2(msg.peerUid)));
-                    }
+            if (element.grayTipElement && element.grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
+                if (element.grayTipElement.jsonGrayTipElement.busiId == 1061) {
+                    const PokeEvent = await this.obContext.apis.FriendApi.parsePrivatePokeEvent(element.grayTipElement);
+                    if (PokeEvent) return PokeEvent;
                 }
             }
         }
