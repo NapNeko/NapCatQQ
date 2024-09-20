@@ -33,7 +33,6 @@ import { uri2local } from '@/common/file';
 import { RequestUtil } from '@/common/request';
 import fs from 'node:fs';
 import fsPromise from 'node:fs/promises';
-import { OB11FriendAddNoticeEvent } from '@/onebot/event/notice/OB11FriendAddNoticeEvent';
 import { SysMessage, SysMessageType } from '@/core/proto/ProfileLike';
 
 type RawToOb11Converters = {
