@@ -6,7 +6,7 @@
 
 ## Roadmap: Migrate to Laana
 
-我们正在计划一个新的协议 [Laana](https://github.com/LaanaProto/Laana)，它基于 Protobuf，将会是一个更加高效而现代化的协议，更契合 QQNT 的内部实现。我们将会在未来的版本中逐步迁移至 Laana，以提供更好的性能和稳定性。同样，我们也将为 NoneBot2 和 Koishi 编写 Laana 的适配器，以便现有的机器人社区尽快迁移至新的协议。一旦协议稳定，我们将会停止对 OneBot 11 协议的维护，不再支持新的 QQNT 特性和修复相关 Bug。
+目前的 OneBot 11 协议存在众多难以克服的深层次问题，并且，该协议的社区及其设计者对协议端开发者的态度**一言难尽**。鉴于此，我们正在计划一个新的协议 [Laana](https://github.com/LaanaProto/Laana)，它基于 Protobuf，将会是一个更加高效而现代化的协议，更契合 QQNT 的内部实现。我们将会在未来的版本中逐步迁移至 Laana，以提供更好的性能和稳定性。同样，我们也将为 NoneBot2 和 Koishi 编写 Laana 的适配器，以便现有的机器人社区尽快迁移至新的协议。一旦协议稳定，我们将会停止对 OneBot 11 协议的维护，不再支持新的 QQNT 特性和修复相关 Bug。
 
 ---
 ## 欢迎回来
