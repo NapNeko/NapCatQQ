@@ -5,7 +5,7 @@ export interface IdMusicSignPostData {
 
 export interface CustomMusicSignPostData {
     type: 'qq' | '163' | 'kugou' | 'migu' | 'kuwo' | 'custom',
-    id:undefined,
+    id: undefined,
     url: string,
     audio?: string,
     title?: string,
