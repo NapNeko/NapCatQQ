@@ -1,7 +1,8 @@
 import { GeneralCallResult } from './common';
 
 export interface NodeIKernelNodeMiscService {
-    writeVersionToRegistry: any;
+    writeVersionToRegistry(version: string): void;
+
     getMiniAppPath(): unknown;
 
     setMiniAppVersion(version: string): unknown;

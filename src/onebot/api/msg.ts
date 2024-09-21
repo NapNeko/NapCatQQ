@@ -576,7 +576,7 @@ export class OneBotMsgApi {
             }
             let signUrl = this.obContext.configLoader.configData.musicSignUrl;
             if (!signUrl) {
-                signUrl = 'https://ss.xingzhige.com/music_card/card';//感谢思思！
+                signUrl = 'https://ss.xingzhige.com/music_card/card';//感谢思思！已获思思许可 其余地方使用请自行询问
                 //throw Error('音乐消息签名地址未配置');
             }
             try {
