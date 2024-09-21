@@ -547,32 +547,28 @@ export class OneBotMsgApi {
 
         [OB11MessageDataType.music]: async ({ data }, context) => {
             // 保留, 直到...找到更好的解决方案
-            if (data.type === 'custom') {
+            if (data.id !== undefined) {
+                if (!['qq', '163', 'kugou', 'kuwo', 'migu'].includes(data.type)) {
+                    this.core.context.logger.logError('音乐卡片type错误, 只支持qq、163、kugou、kuwo、migu，当前type:', data.type);
+                    return undefined;
+                }
+            } else {
+                if (!['qq', '163', 'kugou', 'kuwo', 'migu', 'custom'].includes(data.type)) {
+                    this.core.context.logger.logError('音乐卡片type错误, 只支持qq、163、kugou、kuwo、migu、custom，当前type:', data.type);
+                    return undefined;
+                }
                 if (!data.url) {
                     this.core.context.logger.logError('自定义音卡缺少参数url');
                     return undefined;
                 }
-                if (!data.audio) {
-                    this.core.context.logger.logError('自定义音卡缺少参数audio');
-                    return undefined;
-                }
-                if (!data.title) {
-                    this.core.context.logger.logError('自定义音卡缺少参数title');
-                    return undefined;
-                }
-            } else {
-                if (!['qq', '163'].includes(data.type)) {
-                    this.core.context.logger.logError('音乐卡片type错误, 只支持qq、163、custom，当前type:', data.type);
-                    return undefined;
-                }
-                if (!data.id) {
-                    this.core.context.logger.logError('音乐卡片缺少参数id');
+                if (!data.image) {
+                    this.core.context.logger.logError('自定义音卡缺少参数image');
                     return undefined;
                 }
             }
 
             let postData: IdMusicSignPostData | CustomMusicSignPostData;
-            if (data.type === 'custom' && data.content) {
+            if (data.id === undefined && data.content) {
                 const { content, ...others } = data;
                 postData = { singer: content, ...others };
             } else {

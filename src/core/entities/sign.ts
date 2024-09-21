@@ -1,14 +1,15 @@
 export interface IdMusicSignPostData {
-    type: 'qq' | '163',
+    type: 'qq' | '163' | 'kugou' | 'migu' | 'kuwo',
     id: string | number,
 }
 
 export interface CustomMusicSignPostData {
-    type: 'custom',
+    type: 'qq' | '163' | 'kugou' | 'migu' | 'kuwo' | 'custom',
+    id: undefined,
     url: string,
-    audio: string,
-    title: string,
-    image?: string,
+    audio?: string,
+    title?: string,
+    image: string,
     singer?: string
 }
 
