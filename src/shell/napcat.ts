@@ -46,7 +46,7 @@ export async function NCoreInitShell() {
     o3Service.addO3MiscListener(new NodeIO3MiscListener());
 
     logger.log(`[NapCat] [Core] NapCat.Core Version: ` + napCatVersion);
-    InitWebUi(logger, pathWrapper).then().catch(logger.logError);
+    InitWebUi(logger, pathWrapper).then().catch(logger.logError.bind(logger));
 
     // from constructor
     const engine = wrapper.NodeIQQNTWrapperEngine.get();
@@ -126,7 +126,7 @@ export async function NCoreInitShell() {
         let isLogined = false;
         // from constructor
         loginListener.onUserLoggedIn = (userid: string) => {
-            logger.logError(`当前账号(${userid})已登录,无法重复登录`);
+            logger.logError.bind(logger)(`当前账号(${userid})已登录,无法重复登录`);
         };
 
         loginListener.onQRCodeLoginSucceed = async (loginResult) => {
@@ -160,9 +160,8 @@ export async function NCoreInitShell() {
             });
         };
         loginListener.onQRCodeSessionFailed = (errType: number, errCode: number, errMsg: string) => {
-            //logger.logError('登录失败(onQRCodeSessionFailed)', errCode, errMsg);
             if (!isLogined) {
-                logger.logError('[Core] [Login] Login Error,ErrCode: ', errCode, ' ErrMsg:', errMsg);
+                logger.logError.bind(logger)('[Core] [Login] Login Error,ErrCode: ', errCode, ' ErrMsg:', errMsg);
                 if (errType == 1 && errCode == 3) {
                     // 二维码过期刷新
                 }
@@ -170,14 +169,13 @@ export async function NCoreInitShell() {
             }
         };
         loginListener.onLoginFailed = (args) => {
-            //logger.logError('登录失败(onLoginFailed)', args);
-            logger.logError('[Core] [Login] Login Error , ErrInfo: ', args);
+            logger.logError.bind(logger)('[Core] [Login] Login Error , ErrInfo: ', args);
         };
 
         loginService.addKernelLoginListener(proxiedListenerOf(loginListener, logger) as any);
         const isConnect = loginService.connect();
         if (!isConnect) {
-            logger.logError('核心登录服务连接失败!');
+            logger.logError.bind(logger)('核心登录服务连接失败!');
             return;
         }
         logger.log('核心登录服务连接成功!');
@@ -197,14 +195,14 @@ export async function NCoreInitShell() {
         WebUiDataRuntime.setQuickLoginCall(async (uin: string) => {
             return await new Promise((resolve) => {
                 if (uin) {
-                    logger.log('正在快速登录 ', uin);
+                    logger.log.bind(logger)('正在快速登录 ', uin);
                     loginService.quickLoginWithUin(uin).then(res => {
                         if (res.loginErrorInfo.errMsg) {
                             resolve({ result: false, message: res.loginErrorInfo.errMsg });
                         }
                         resolve({ result: true, message: '' });
                     }).catch((e) => {
-                        logger.logError(e);
+                        logger.logError.bind(logger)(e);
                         resolve({ result: false, message: '快速登录发生错误' });
                     });
                 } else {
@@ -220,14 +218,14 @@ export async function NCoreInitShell() {
                     loginService.quickLoginWithUin(quickLoginUin)
                         .then(result => {
                             if (result.loginErrorInfo.errMsg) {
-                                logger.logError('快速登录错误：', result.loginErrorInfo.errMsg);
+                                logger.logError.bind(logger)('快速登录错误：', result.loginErrorInfo.errMsg);
                                 if (!isLogined) loginService.getQRCodePicture();
                             }
                         })
                         .catch();
                 }, 1000);
             } else {
-                logger.logError('快速登录失败，未找到该 QQ 历史登录记录，将使用二维码登录方式');
+                logger.logError.bind(logger)('快速登录失败，未找到该 QQ 历史登录记录，将使用二维码登录方式');
                 if (!isLogined) loginService.getQRCodePicture();
             }
         } else {

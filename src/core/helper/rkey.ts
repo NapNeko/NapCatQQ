@@ -26,7 +26,7 @@ export class RkeyManager {
             try {
                 await this.refreshRkey();
             } catch (e) {
-                this.logger.logError('获取rkey失败', e);
+                this.logger.logError.bind(this.logger)('获取rkey失败', e);
             }
         }
         return this.rkeyData;
@@ -44,7 +44,7 @@ export class RkeyManager {
             try {
                 this.rkeyData = await RequestUtil.HttpGetJson<ServerRkeyData>(url, 'GET');
             } catch (e) {
-                this.logger.logError(`[Rkey] Get Rkey ${url} Error `, e);
+                this.logger.logError.bind(this.logger)(`[Rkey] Get Rkey ${url} Error `, e);
             }
         }
 
