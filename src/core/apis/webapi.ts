@@ -264,7 +264,7 @@ export class NTQQWebApi {
                     });
                 }
             } else {
-                this.context.logger.logError('获取龙王信息失败');
+                this.context.logger.logError.bind(this.context.logger)('获取龙王信息失败');
             }
         }
         if (getType === WebHonorType.PERFORMER || getType === WebHonorType.ALL) {
@@ -280,7 +280,7 @@ export class NTQQWebApi {
                     });
                 }
             } else {
-                this.context.logger.logError('获取群聊之火失败');
+                this.context.logger.logError.bind(this.context.logger)('获取群聊之火失败');
             }
         }
         if (getType === WebHonorType.PERFORMER || getType === WebHonorType.ALL) {
@@ -296,7 +296,7 @@ export class NTQQWebApi {
                     });
                 }
             } else {
-                this.context.logger.logError('获取群聊炽焰失败');
+                this.context.logger.logError.bind(this.context.logger)('获取群聊炽焰失败');
             }
         }
         if (getType === WebHonorType.EMOTION || getType === WebHonorType.ALL) {
@@ -312,7 +312,7 @@ export class NTQQWebApi {
                     });
                 }
             } else {
-                this.context.logger.logError('获取快乐源泉失败');
+                this.context.logger.logError.bind(this.context.logger)('获取快乐源泉失败');
             }
         }
 

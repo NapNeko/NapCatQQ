@@ -54,7 +54,7 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
         ).then((data) => {
             log(`[NapCat] [WebUi] WebUi Publish Panel Url: http://${data.IP.IP}:${config.port}${config.prefix}/webui/?token=${config.token}`);
         }).catch((err) => {
-            logger.logError(`[NapCat] [WebUi] Get Publish Panel Url Error: ${err}`);
+            logger.logError.bind(logger)(`[NapCat] [WebUi] Get Publish Panel Url Error: ${err}`);
         });
 
     });

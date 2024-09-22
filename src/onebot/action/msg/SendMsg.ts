@@ -149,7 +149,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                 //对Mgsid和OB11ID混用情况兜底
                 const nodeMsg = MessageUnique.getMsgIdAndPeerByShortId(parseInt(nodeId)) || MessageUnique.getPeerByMsgId(nodeId);
                 if (!nodeMsg) {
-                    logger.logError('转发消息失败，未找到消息', nodeId);
+                    logger.logError.bind(this.core.context.logger)('转发消息失败，未找到消息', nodeId);
                     continue;
                 }
                 nodeMsgIds.push(nodeMsg.MsgId);
@@ -161,7 +161,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                     const isNodeMsg = OB11Data.filter(e => e.type === OB11MessageDataType.node).length;//找到子转发消息
                     if (isNodeMsg !== 0) {
                         if (isNodeMsg !== OB11Data.length) {
-                            logger.logError('子消息中包含非node消息 跳过不合法部分');
+                            logger.logError.bind(this.core.context.logger)('子消息中包含非node消息 跳过不合法部分');
                             continue;
                         }
                         const nodeMsg = await this.handleForwardedNodes(selfPeer, OB11Data.filter(e => e.type === OB11MessageDataType.node));
@@ -209,7 +209,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         for (const msgId of nodeMsgIds) {
             const nodeMsgPeer = MessageUnique.getPeerByMsgId(msgId);
             if (!nodeMsgPeer) {
-                logger.logError('转发消息失败，未找到消息', msgId);
+                logger.logError.bind(this.core.context.logger)('转发消息失败，未找到消息', msgId);
                 continue;
             }
             const nodeMsg = (await this.core.apis.MsgApi.getMsgsByMsgId(nodeMsgPeer.Peer, [msgId])).msgList[0];
@@ -238,7 +238,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
             logger.logDebug('开发转发', srcPeer, destPeer, retMsgIds);
             return await this.core.apis.MsgApi.multiForwardMsg(srcPeer!, destPeer, retMsgIds);
         } catch (e) {
-            logger.logError('forward failed', e);
+            logger.logError.bind(this.core.context.logger)('forward failed', e);
             return null;
         }
     }
@@ -262,7 +262,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         try {
             return await this.core.apis.MsgApi.sendMsg(selfPeer, sendElements, true);
         } catch (e) {
-            logger.logError(e, '克隆转发消息失败,将忽略本条消息', msg);
+            logger.logError.bind(this.core.context.logger)(e, '克隆转发消息失败,将忽略本条消息', msg);
         }
     }
 }

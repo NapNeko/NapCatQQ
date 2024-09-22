@@ -145,7 +145,7 @@ export class NTQQFileApi {
         try {
             videoInfo = await getVideoInfo(filePath, logger);
         } catch (e) {
-            logger.logError('获取视频信息失败，将使用默认值', e);
+            logger.logError.bind(logger)('获取视频信息失败，将使用默认值', e);
         }
 
         let fileExt = 'mp4';
@@ -153,7 +153,7 @@ export class NTQQFileApi {
             const tempExt = (await fileType.fileTypeFromFile(filePath))?.ext;
             if (tempExt) fileExt = tempExt;
         } catch (e) {
-            this.context.logger.logError('获取文件类型失败', e);
+            this.context.logger.logError.bind(logger)('获取文件类型失败', e);
         }
         const newFilePath = filePath + '.' + fileExt;
         fs.copyFileSync(filePath, newFilePath);
@@ -227,7 +227,7 @@ export class NTQQFileApi {
         }
         if (converted) {
             fsPromises.unlink(silkPath).then().catch(
-                (e) => this.context.logger.logError('删除临时文件失败', e)
+                (e) => this.context.logger.logError.bind(this.context.logger)('删除临时文件失败', e)
             );
         }
         return {

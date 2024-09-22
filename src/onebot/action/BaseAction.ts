@@ -46,7 +46,7 @@ abstract class BaseAction<PayloadType, ReturnDataType> {
             const resData = await this._handle(payload);
             return OB11Response.ok(resData);
         } catch (e: any) {
-            this.core.context.logger.logError('发生错误', e);
+            this.core.context.logger.logError.bind(this.core.context.logger)('发生错误', e);
             return OB11Response.error(e?.toString() || e?.stack?.toString() || '未知错误，可能操作超时', 200);
         }
     }
@@ -60,7 +60,7 @@ abstract class BaseAction<PayloadType, ReturnDataType> {
             const resData = await this._handle(payload);
             return OB11Response.ok(resData, echo);
         } catch (e: any) {
-            this.core.context.logger.logError('发生错误', e);
+            this.core.context.logger.logError.bind(this.core.context.logger)('发生错误', e);
             return OB11Response.error(e.stack?.toString() || e.toString(), 1200, echo);
         }
     }

@@ -49,12 +49,12 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
             try {
                 this.obContext.apis.QuickActionApi
                     .handleQuickOperation(event as QuickActionEvent, resJson)
-                    .catch(this.logger.logError);
+                    .catch(this.logger.logError.bind(this.logger));
             } catch (e: any) {
-                this.logger.logError('[OneBot] [Http Client] 新消息事件HTTP上报返回快速操作失败', e);
+                this.logger.logError.bind(this.logger)('[OneBot] [Http Client] 新消息事件HTTP上报返回快速操作失败', e);
             }
         }).catch((e) => {
-            this.logger.logError('[OneBot] [Http Client] 新消息事件HTTP上报失败', e);
+            this.logger.logError.bind(this.logger)('[OneBot] [Http Client] 新消息事件HTTP上报失败', e);
         });
     }
 

@@ -122,7 +122,7 @@ export class OneBotMsgApi {
                     },
                 };
             } catch (e: any) {
-                this.core.context.logger.logError('获取图片url失败', e.stack);
+                this.core.context.logger.logError.bind(this.core.context.logger)('获取图片url失败', e.stack);
                 return null;
             }
         },
@@ -201,7 +201,7 @@ export class OneBotMsgApi {
                 guildId: '',
             };
             if (!records || !element.replyMsgTime || !element.senderUidStr) {
-                this.core.context.logger.logError('获取不到引用的消息', element.replayMsgSeq);
+                this.core.context.logger.logError.bind(this.core.context.logger)('获取不到引用的消息', element.replayMsgSeq);
                 return null;
             }
 
@@ -219,7 +219,7 @@ export class OneBotMsgApi {
                 .msgList.find(msg => msg.msgRandom === records.msgRandom);
 
             if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
-                this.core.context.logger.logError('获取不到引用的消息', element.replayMsgSeq);
+                this.core.context.logger.logError.bind(this.core.context.logger)('获取不到引用的消息', element.replayMsgSeq);
                 return null;
             }
             return createReplyData(replyMsg.msgId);
@@ -422,7 +422,7 @@ export class OneBotMsgApi {
             const sysFaces = faceConfig.sysface;
             const face: any = sysFaces.find((systemFace) => systemFace.QSid === parsedFaceId.toString());
             if (!face) {
-                this.core.context.logger.logError('不支持的ID', id);
+                this.core.context.logger.logError.bind(this.core.context.logger)('不支持的ID', id);
                 return undefined;
             }
             parsedFaceId = parseInt(parsedFaceId.toString());
@@ -549,20 +549,20 @@ export class OneBotMsgApi {
             // 保留, 直到...找到更好的解决方案
             if (data.id !== undefined) {
                 if (!['qq', '163', 'kugou', 'kuwo', 'migu'].includes(data.type)) {
-                    this.core.context.logger.logError('音乐卡片type错误, 只支持qq、163、kugou、kuwo、migu，当前type:', data.type);
+                    this.core.context.logger.logError.bind(this.core.context.logger)('音乐卡片type错误, 只支持qq、163、kugou、kuwo、migu，当前type:', data.type);
                     return undefined;
                 }
             } else {
                 if (!['qq', '163', 'kugou', 'kuwo', 'migu', 'custom'].includes(data.type)) {
-                    this.core.context.logger.logError('音乐卡片type错误, 只支持qq、163、kugou、kuwo、migu、custom，当前type:', data.type);
+                    this.core.context.logger.logError.bind(this.core.context.logger)('音乐卡片type错误, 只支持qq、163、kugou、kuwo、migu、custom，当前type:', data.type);
                     return undefined;
                 }
                 if (!data.url) {
-                    this.core.context.logger.logError('自定义音卡缺少参数url');
+                    this.core.context.logger.logError.bind(this.core.context.logger)('自定义音卡缺少参数url');
                     return undefined;
                 }
                 if (!data.image) {
-                    this.core.context.logger.logError('自定义音卡缺少参数image');
+                    this.core.context.logger.logError.bind(this.core.context.logger)('自定义音卡缺少参数image');
                     return undefined;
                 }
             }
@@ -586,7 +586,7 @@ export class OneBotMsgApi {
                     type: OB11MessageDataType.json
                 }, context);
             } catch (e) {
-                this.core.context.logger.logError('生成音乐消息失败', e);
+                this.core.context.logger.logError.bind(this.core.context.logger)('生成音乐消息失败', e);
             }
         },
 
@@ -725,7 +725,7 @@ export class OneBotMsgApi {
             if (entry.status === 'fulfilled') {
                 return !!entry.value;
             } else {
-                this.core.context.logger.logError('消息段解析失败', entry.reason);
+                this.core.context.logger.logError.bind(this.core.context.logger)('消息段解析失败', entry.reason);
                 return false;
             }
         }).map((entry) => (<PromiseFulfilledResult<OB11MessageData>>entry).value).filter(value => value != null);
@@ -793,7 +793,7 @@ export class OneBotMsgApi {
                 timeout += PredictTime;// 10S Basic Timeout + PredictTime( For File 512kb/s )
             }
         } catch (e) {
-            this.core.context.logger.logError('发送消息计算预计时间异常', e);
+            this.core.context.logger.logError.bind(this.core.context.logger)('发送消息计算预计时间异常', e);
         }
         const returnMsg = await this.core.apis.MsgApi.sendMsg(peer, sendElements, waitComplete, timeout);
         if (!returnMsg) throw new Error('发送消息失败');
@@ -803,7 +803,7 @@ export class OneBotMsgApi {
             peerUid: peer.peerUid,
         }, returnMsg.msgId);
         deleteAfterSentFiles.forEach(file => {
-            fsPromise.unlink(file).then().catch(e => this.core.context.logger.logError('发送消息删除文件失败', e));
+            fsPromise.unlink(file).then().catch(e => this.core.context.logger.logError.bind(this.core.context.logger)('发送消息删除文件失败', e));
         });
         return returnMsg;
     }
@@ -814,7 +814,7 @@ export class OneBotMsgApi {
     ) {
         const realUri = inputdata.url || inputdata.file || inputdata.path || '';
         if (realUri.length === 0) {
-            this.core.context.logger.logError('文件消息缺少参数', inputdata);
+            this.core.context.logger.logError.bind(this.core.context.logger)('文件消息缺少参数', inputdata);
             throw Error('文件消息缺少参数');
         }
         const {
@@ -825,7 +825,7 @@ export class OneBotMsgApi {
         } = (await uri2local(this.core.NapCatTempPath, realUri));
 
         if (!success) {
-            this.core.context.logger.logError('文件下载失败', errMsg);
+            this.core.context.logger.logError.bind(this.core.context.logger)('文件下载失败', errMsg);
             throw Error('文件下载失败' + errMsg);
         }
 

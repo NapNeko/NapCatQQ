@@ -99,7 +99,7 @@ export class NapCatCore {
         if (!fs.existsSync(this.NapCatTempPath)) {
             fs.mkdirSync(this.NapCatTempPath, { recursive: true });
         }
-        this.initNapCatCoreListeners().then().catch(this.context.logger.logError);
+        this.initNapCatCoreListeners().then().catch(this.context.logger.logError.bind(this.context.logger));
 
         this.context.logger.setFileLogEnabled(
             this.configLoader.configData.fileLog,
@@ -127,7 +127,7 @@ export class NapCatCore {
         const msgListener = new NodeIKernelMsgListener();
         msgListener.onKickedOffLine = (Info: KickedOffLineInfo) => {
             // 下线通知
-            this.context.logger.logError('[KickedOffLine] [' + Info.tipsTitle + '] ' + Info.tipsDesc);
+            this.context.logger.logError.bind(this.context.logger)('[KickedOffLine] [' + Info.tipsTitle + '] ' + Info.tipsDesc);
             this.selfInfo.online = false;
         };
         msgListener.onRecvMsg = (msgs) => {

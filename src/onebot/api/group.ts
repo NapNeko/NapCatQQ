@@ -289,7 +289,7 @@ export class OneBotGroupApi {
         }
         const replyMsg = replyMsgList[0];
         if (!replyMsg) {
-            this.core.context.logger.logError('解析表情回应消息失败: 未找到回应消息');
+            this.core.context.logger.logError.bind(this.core.context.logger)('解析表情回应消息失败: 未找到回应消息');
             return undefined;
         }
         return new OB11GroupMsgEmojiLikeEvent(
