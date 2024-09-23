@@ -118,7 +118,7 @@ jobs:
         mv ./NapCat.Shell/NapCat.Shell.zip ./
         mv ./NapCat.Framework/NapCat.Framework.zip ./
         mkdir ./NapCat.Framework.Windows.Once
-        unzip -q ./external/LiteLoaderWrapper.zip -d ./NapCat.Framework.Windows.Once
+        unzip -q ./external/LiteLoaderWrapper.zip -d ./
         ls ./NapCat.Framework.Windows.Once
         mkdir -p ./NapCat.Framerwork.Windows.Once/LL/plugins/NapCatQQ 
         unzip -q ./NapCat.Framework.zip -d ./NapCat.Framerwork.Windows.Once/LL/plugins/NapCatQQ
