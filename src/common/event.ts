@@ -183,11 +183,11 @@ export class NTEventWrapper {
         timeout = 5000,
     ) {
         return new Promise<[EventRet: Awaited<ReturnType<EventType>>, ...Parameters<ListenerType>]>(
-            (resolve, reject) => {
+            async (resolve, reject) => {
                 const id = randomUUID();
                 let complete = 0;
                 let retData: Parameters<ListenerType> | undefined = undefined;
-                const retEvent: any = {};
+                let retEvent: any = {};
 
                 function sendDataCallback() {
                     if (complete == 0) {
@@ -235,22 +235,22 @@ export class NTEventWrapper {
                 this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.set(id, eventCallback);
                 this.createListenerFunction(ListenerMainName);
                 const eventFunction = this.createEventFunction(serviceAndMethod);
-                if (eventFunction) eventFunction(...(args)).then((retEvent: Awaited<ReturnType<EventType>>) => {
-                    if (!checkerEvent(retEvent) && timeoutRef.hasRef()) {
-                        clearTimeout(timeoutRef);
-                        reject(
-                            new Error(
-                                'EventChecker Failed: NTEvent serviceAndMethod:' +
-                                serviceAndMethod +
-                                ' ListenerName:' +
-                                listenerAndMethod +
-                                ' EventRet:\n' +
-                                JSON.stringify(retEvent, null, 4) +
-                                '\n',
-                            ),
-                        );
-                    }
-                });
+                retEvent = await eventFunction!(...(args));
+                if (!checkerEvent(retEvent) && timeoutRef.hasRef()) {
+                    clearTimeout(timeoutRef);
+                    reject(
+                        new Error(
+                            'EventChecker Failed: NTEvent serviceAndMethod:' +
+                            serviceAndMethod +
+                            ' ListenerName:' +
+                            listenerAndMethod +
+                            ' EventRet:\n' +
+                            JSON.stringify(retEvent, null, 4) +
+                            '\n',
+                        ),
+                    );
+                }
+
             },
         );
     }
