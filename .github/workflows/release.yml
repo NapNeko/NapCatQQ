@@ -120,7 +120,7 @@ jobs:
         mkdir ./NapCat.Framework.Windows.Once
         unzip -q ./external/LiteLoaderWrapper.zip -d ./NapCat.Framework.Windows.Once
         ls ./NapCat.Framework.Windows.Once
-        mkdir -r ./NapCat.Framerwork.Windows.Once/LL/plugins/NapCatQQ 
+        mkdir -p ./NapCat.Framerwork.Windows.Once/LL/plugins/NapCatQQ 
         unzip -q ./NapCat.Framework.zip -d ./NapCat.Framerwork.Windows.Once/LL/plugins/NapCatQQ
         zip -q -r NapCat.Framework.Windows.Once.zip ./NapCat.Framework.Windows.Once
     - name: Extract version from tag
