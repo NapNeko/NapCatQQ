@@ -95,13 +95,15 @@ jobs:
     steps:
     - name: Download All Artifact
       uses: actions/download-artifact@v4
-    # - name: Compress subdirectories
-    #   run: |
-    #     cd ./NapCat.Shell/
-    #     zip -q -r NapCat.Shell.zip *
-    #     cd ..
-    #     rm ./NapCat.Shell.zip -rf
-    #     mv ./NapCat.Shell/NapCat.Shell.zip ./
+
+    - name: Clone Main Repository
+      uses: actions/checkout@v4
+      with:
+            repository: 'NapNeko/NapCatQQ'
+            submodules: true
+            ref: main
+            token: ${{ secrets.NAPCAT_BUILD }}
+
     - name: Compress subdirectories
       run: |
         cd ./NapCat.Shell/
@@ -114,6 +116,11 @@ jobs:
         rm ./NapCat.Framework.zip -rf
         mv ./NapCat.Shell/NapCat.Shell.zip ./
         mv ./NapCat.Framework/NapCat.Framework.zip ./
+        mkdir ./NapCat.Framework.Windows.Once
+        unzip -q ./external/LiteLoaderWrapper.zip -d ./NapCat.Framework.Windows.Once
+        mkdir ./NapCat.Framerwork.Windows.Once/LL/plugins/NapCatQQ 
+        unzip -q ./NapCat.Framework.zip -d ./NapCat.Framerwork.Windows.Once/LL/plugins/NapCatQQ
+        zip -q -r NapCat.Framework.Windows.Once.zip ./NapCat.Framework.Windows.Once
     - name: Extract version from tag
       run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
       
@@ -129,4 +136,5 @@ jobs:
         files: |
           NapCat.Framework.zip
           NapCat.Shell.zip
+          NapCat.Framework.Windows.Once.zip
         draft: true
