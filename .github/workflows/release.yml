@@ -93,8 +93,6 @@ jobs:
     needs: [Build-LiteLoader,Build-Shell]
     runs-on: ubuntu-latest
     steps:
-    - name: Download All Artifact
-      uses: actions/download-artifact@v4
 
     - name: Clone Main Repository
       uses: actions/checkout@v4
@@ -103,7 +101,10 @@ jobs:
             submodules: true
             ref: main
             token: ${{ secrets.NAPCAT_BUILD }}
-
+            
+    - name: Download All Artifact
+      uses: actions/download-artifact@v4
+      
     - name: Compress subdirectories
       run: |
         cd ./NapCat.Shell/
