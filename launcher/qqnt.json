@@ -1,6 +1,7 @@
 {
   "name": "qq-chat",
   "version": "9.9.15-28131",
+  "verHash": "0f14ef6e",
   "type": "module",
   "private": true,
   "description": "QQ",
