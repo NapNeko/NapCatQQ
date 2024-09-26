@@ -457,7 +457,17 @@ export class OneBotMsgApi {
                 },
             };
         },
-
+        // {
+        //     elementId: '0',
+        //     elementType: 6,
+        //     faceElement: {
+        //       faceIndex: 0,
+        //       faceType: 5,
+        //       msgType: 0,
+        //       pokeType: 1,
+        //       pokeStrength: 0
+        //     }
+        //   }
         [OB11MessageDataType.mface]: async ({
             data: {
                 emoji_package_id, emoji_id, key, summary,
