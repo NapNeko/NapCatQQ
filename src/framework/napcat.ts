@@ -9,6 +9,7 @@ import { NodeIKernelLoginService } from '@/core/services';
 import { NodeIQQNTWrapperSession, WrapperNodeApi } from '@/core/wrapper';
 import { InitWebUi, WebUiConfig } from '@/webui';
 import { NapCatOneBot11Adapter } from '@/onebot';
+import { mkdir, mkdirSync } from 'fs';
 
 //Framework ES入口文件
 export async function getWebUiUrl() {
@@ -26,8 +27,12 @@ export async function NCoreInitFramework(
     let dataPath: string | undefined;
     try {
         dataPath = (global as any).LiteLoader.plugins['NapCatQQ'].path.data;
+        if (dataPath) {
+            mkdirSync(dataPath, { recursive: true });
+        }
     } catch (error) {
         dataPath = undefined;
+
     }
 
     const pathWrapper = new NapCatPathWrapper(dataPath);
