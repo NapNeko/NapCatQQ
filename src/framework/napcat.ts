@@ -23,14 +23,7 @@ export async function NCoreInitFramework(
 ) {
     //在进入本层前是否登录未进行判断
     console.log('NapCat Framework App Loading...');
-    let dataPath: string | undefined;
-    try {
-        dataPath = (global as any).LiteLoader.plugins['NapCatQQ'].path.data;
-    } catch (error) {
-        dataPath = undefined;
-    }
-
-    const pathWrapper = new NapCatPathWrapper(dataPath);
+    const pathWrapper = new NapCatPathWrapper();
     const logger = new LogWrapper(pathWrapper.logsPath);
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
