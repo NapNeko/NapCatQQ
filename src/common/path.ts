@@ -21,7 +21,8 @@ export class NapCatPathWrapper {
         this.logsPath = path.join(writePath, 'logs');
         this.configPath = path.join(writePath, 'config');
         this.cachePath = path.join(writePath, 'cache');
-        this.staticPath = path.join(this.binaryPath, 'static');
+        //这个必然和本体一起
+        this.staticPath = path.join(dirname(fileURLToPath(import.meta.url)), 'static');
         if (!fs.existsSync(this.logsPath)) {
             fs.mkdirSync(this.logsPath, { recursive: true });
         }
