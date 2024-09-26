@@ -260,15 +260,15 @@ export async function genSessionConfig(
     //os.platform() 
     let systemPlatform = PlatformType.KWINDOWS;
     switch (os.platform()) {
-        case 'win32':
-            systemPlatform = PlatformType.KWINDOWS;
-            break;
-        case 'darwin':
-            systemPlatform = PlatformType.KMAC;
-            break;
-        case 'linux':
-            systemPlatform = PlatformType.KLINUX;
-            break;
+    case 'win32':
+        systemPlatform = PlatformType.KWINDOWS;
+        break;
+    case 'darwin':
+        systemPlatform = PlatformType.KMAC;
+        break;
+    case 'linux':
+        systemPlatform = PlatformType.KLINUX;
+        break;
     }
     return {
         selfUin,

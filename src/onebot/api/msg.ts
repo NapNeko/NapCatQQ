@@ -457,17 +457,6 @@ export class OneBotMsgApi {
                 },
             };
         },
-        // {
-        //     elementId: '0',
-        //     elementType: 6,
-        //     faceElement: {
-        //       faceIndex: 0,
-        //       faceType: 5,
-        //       msgType: 0,
-        //       pokeType: 1,
-        //       pokeStrength: 0
-        //     }
-        //   }
         [OB11MessageDataType.mface]: async ({
             data: {
                 emoji_package_id, emoji_id, key, summary,
@@ -530,13 +519,12 @@ export class OneBotMsgApi {
             faceElement: {
                 faceIndex: FaceIndex.dice,
                 faceType: FaceType.dice,
-                'faceText': '[骰子]',
-                'packId': '1',
-                'stickerId': '33',
-                'sourceType': 1,
-                'stickerType': 2,
-                // resultId: resultId.toString(),
-                'surpriseId': '',
+                faceText: '[骰子]',
+                packId: '1',
+                stickerId: '33',
+                sourceType: 1,
+                stickerType: 2,
+                surpriseId: '',
                 // "randomType": 1,
             },
         }),
@@ -545,15 +533,14 @@ export class OneBotMsgApi {
             elementType: ElementType.FACE,
             elementId: '',
             faceElement: {
-                'faceIndex': FaceIndex.RPS,
-                'faceText': '[包剪锤]',
-                'faceType': 3,
-                'packId': '1',
-                'stickerId': '34',
-                'sourceType': 1,
-                'stickerType': 2,
-                // 'resultId': resultId.toString(),
-                'surpriseId': '',
+                faceIndex: FaceIndex.RPS,
+                faceText: '[包剪锤]',
+                faceType: 3,
+                packId: '1',
+                stickerId: '34',
+                sourceType: 1,
+                stickerType: 2,
+                surpriseId: '',
                 // "randomType": 1,
             },
         }),
