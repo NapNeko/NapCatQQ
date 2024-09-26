@@ -30,7 +30,6 @@
     "typescript": "^5.3.3",
     "vite": "^5.2.6",
     "vite-plugin-cp": "^4.0.8",
-    "vite-plugin-dts": "^3.8.2",
     "vite-tsconfig-paths": "^4.3.2"
   },
   "dependencies": {
@@ -49,7 +48,6 @@
     "protobufjs": "~7.4.0",
     "qrcode-terminal": "^0.12.0",
     "silk-wasm": "^3.6.1",
-    "strtok3": "8.0.1",
     "ws": "^8.18.0"
   }
 }
