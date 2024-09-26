@@ -140,7 +140,7 @@ export class LogWrapper {
     logMessage(msg: RawMessage, selfInfo: SelfInfo) {
         const isSelfSent = msg.senderUin === selfInfo.uin;
         this.log(`${isSelfSent ? '发送 ->' : '接收 <-'
-            } ${rawMessageToText(msg)}`);
+        } ${rawMessageToText(msg)}`);
     }
 }
 
@@ -181,10 +181,10 @@ export function rawMessageToText(msg: RawMessage, recursiveLevel = 0): string {
             );
             return `[回复消息 ${recordMsgOrNull &&
                     recordMsgOrNull.peerUin != '284840486' && recordMsgOrNull.peerUin != '1094950020'// 非转发消息; 否则定位不到
-                    ?
-                    rawMessageToText(recordMsgOrNull, recursiveLevel + 1) :
-                    `未找到消息记录 (MsgId = ${element.replyElement.sourceMsgIdInRecords})`
-                }]`;
+                ?
+                rawMessageToText(recordMsgOrNull, recursiveLevel + 1) :
+                `未找到消息记录 (MsgId = ${element.replyElement.sourceMsgIdInRecords})`
+            }]`;
         }
 
         if (element.picElement) {
