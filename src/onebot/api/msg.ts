@@ -212,7 +212,7 @@ export class OneBotMsgApi {
                 },
             });
 
-            if (records.peerUin === '284840486') {
+            if (records.peerUin === '284840486' || records.peerUin === '1094950020') {
                 return createReplyData(records.msgId);
             }
             const replyMsg = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeqV2(peer, element.replayMsgSeq, element.replyMsgTime, [element.senderUidStr]))
@@ -234,7 +234,7 @@ export class OneBotMsgApi {
             //读取视频链接并兜底
             let videoUrlWrappers: Awaited<ReturnType<typeof this.core.apis.FileApi.getVideoUrl>> | undefined;
 
-            if (msg.peerUin === '284840486') {
+            if (msg.peerUin === '284840486' || msg.peerUin === '1094950020') {
                 //TODO: 合并消息内部 应该进行特殊处理 可能需要重写peer 待测试与研究 Mlikiowa Tagged
             }
             try {
