@@ -235,17 +235,27 @@ export class OneBotMsgApi {
             let videoUrlWrappers: Awaited<ReturnType<typeof this.core.apis.FileApi.getVideoUrl>> | undefined;
 
             if (msg.peerUin === '284840486' || msg.peerUin === '1094950020') {
-                //TODO: 合并消息内部 应该进行特殊处理 可能需要重写peer 待测试与研究 Mlikiowa Tagged
+                try {
+                    videoUrlWrappers = await this.core.apis.FileApi.getVideoUrl({
+                        chatType: msg.chatType,
+                        peerUid: msg.peerUid,
+                        guildId: '0',
+                    }, msg.parentMsgIdList[0] ?? msg.msgId, elementWrapper.elementId);
+                } catch (error) {
+                    this.core.context.logger.logWarn('合并获取视频 URL 失败');
+                }
+            } else {
+                try {
+                    videoUrlWrappers = await this.core.apis.FileApi.getVideoUrl({
+                        chatType: msg.chatType,
+                        peerUid: msg.peerUid,
+                        guildId: '0',
+                    }, msg.msgId, elementWrapper.elementId);
+                } catch (error) {
+                    this.core.context.logger.logWarn('获取视频 URL 失败');
+                }
             }
-            try {
-                videoUrlWrappers = await this.core.apis.FileApi.getVideoUrl({
-                    chatType: msg.chatType,
-                    peerUid: msg.peerUid,
-                    guildId: '0',
-                }, msg.msgId, elementWrapper.elementId);
-            } catch (error) {
-                this.core.context.logger.logWarn('获取视频 URL 失败');
-            }
+
 
             //读取在线URL
             let videoDownUrl: string | undefined;
