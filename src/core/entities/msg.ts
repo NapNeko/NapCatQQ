@@ -659,7 +659,8 @@ export interface GrayTipElement {
 export enum FaceType {
     normal = 1, // 小黄脸
     normal2 = 2, // 新小黄脸, 从faceIndex 222开始？
-    dice = 3  // 骰子
+    dice = 3,  // 骰子
+    poke = 5  // 拍一拍
 }
 
 export enum FaceIndex {
