@@ -212,7 +212,7 @@ export class OneBotMsgApi {
                 },
             });
 
-            if (records.peerUin === '284840486') {
+            if (records.peerUin === '284840486' || records.peerUin === '1094950020') {
                 return createReplyData(records.msgId);
             }
             const replyMsg = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeqV2(peer, element.replayMsgSeq, element.replyMsgTime, [element.senderUidStr]))
@@ -234,18 +234,28 @@ export class OneBotMsgApi {
             //读取视频链接并兜底
             let videoUrlWrappers: Awaited<ReturnType<typeof this.core.apis.FileApi.getVideoUrl>> | undefined;
 
-            if (msg.peerUin === '284840486') {
-                //TODO: 合并消息内部 应该进行特殊处理 可能需要重写peer 待测试与研究 Mlikiowa Tagged
+            if (msg.peerUin === '284840486' || msg.peerUin === '1094950020') {
+                try {
+                    videoUrlWrappers = await this.core.apis.FileApi.getVideoUrl({
+                        chatType: msg.chatType,
+                        peerUid: msg.peerUid,
+                        guildId: '0',
+                    }, msg.parentMsgIdList[0] ?? msg.msgId, elementWrapper.elementId);
+                } catch (error) {
+                    this.core.context.logger.logWarn('合并获取视频 URL 失败');
+                }
+            } else {
+                try {
+                    videoUrlWrappers = await this.core.apis.FileApi.getVideoUrl({
+                        chatType: msg.chatType,
+                        peerUid: msg.peerUid,
+                        guildId: '0',
+                    }, msg.msgId, elementWrapper.elementId);
+                } catch (error) {
+                    this.core.context.logger.logWarn('获取视频 URL 失败');
+                }
             }
-            try {
-                videoUrlWrappers = await this.core.apis.FileApi.getVideoUrl({
-                    chatType: msg.chatType,
-                    peerUid: msg.peerUid,
-                    guildId: '0',
-                }, msg.msgId, elementWrapper.elementId);
-            } catch (error) {
-                this.core.context.logger.logWarn('获取视频 URL 失败');
-            }
+
 
             //读取在线URL
             let videoDownUrl: string | undefined;
@@ -447,7 +457,6 @@ export class OneBotMsgApi {
                 },
             };
         },
-
         [OB11MessageDataType.mface]: async ({
             data: {
                 emoji_package_id, emoji_id, key, summary,
@@ -510,13 +519,12 @@ export class OneBotMsgApi {
             faceElement: {
                 faceIndex: FaceIndex.dice,
                 faceType: FaceType.dice,
-                'faceText': '[骰子]',
-                'packId': '1',
-                'stickerId': '33',
-                'sourceType': 1,
-                'stickerType': 2,
-                // resultId: resultId.toString(),
-                'surpriseId': '',
+                faceText: '[骰子]',
+                packId: '1',
+                stickerId: '33',
+                sourceType: 1,
+                stickerType: 2,
+                surpriseId: '',
                 // "randomType": 1,
             },
         }),
@@ -525,15 +533,14 @@ export class OneBotMsgApi {
             elementType: ElementType.FACE,
             elementId: '',
             faceElement: {
-                'faceIndex': FaceIndex.RPS,
-                'faceText': '[包剪锤]',
-                'faceType': 3,
-                'packId': '1',
-                'stickerId': '34',
-                'sourceType': 1,
-                'stickerType': 2,
-                // 'resultId': resultId.toString(),
-                'surpriseId': '',
+                faceIndex: FaceIndex.RPS,
+                faceText: '[包剪锤]',
+                faceType: 3,
+                packId: '1',
+                stickerId: '34',
+                sourceType: 1,
+                stickerType: 2,
+                surpriseId: '',
                 // "randomType": 1,
             },
         }),

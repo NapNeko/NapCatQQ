@@ -72,15 +72,15 @@ export async function NCoreInitShell() {
     })();
     let systemPlatform = PlatformType.KWINDOWS;
     switch (os.platform()) {
-        case 'win32':
-            systemPlatform = PlatformType.KWINDOWS;
-            break;
-        case 'darwin':
-            systemPlatform = PlatformType.KMAC;
-            break;
-        case 'linux':
-            systemPlatform = PlatformType.KLINUX;
-            break;
+    case 'win32':
+        systemPlatform = PlatformType.KWINDOWS;
+        break;
+    case 'darwin':
+        systemPlatform = PlatformType.KMAC;
+        break;
+    case 'linux':
+        systemPlatform = PlatformType.KLINUX;
+        break;
     }
     if (!basicInfoWrapper.QQVersionAppid || !basicInfoWrapper.QQVersionQua) throw new Error('QQVersionAppid or QQVersionQua  is not defined');
     // from initConfig
@@ -119,7 +119,7 @@ export async function NCoreInitShell() {
             quickLoginUin = '';
         }
     }
-    let dataTimestape = new Date().getTime().toString();
+    const dataTimestape = new Date().getTime().toString();
     o3Service.reportAmgomWeather('login', 'a1', [dataTimestape, '0', '0']);
     const selfInfo = await new Promise<SelfInfo>((resolve) => {
         const loginListener = new NodeIKernelLoginListener();
@@ -234,13 +234,13 @@ export async function NCoreInitShell() {
                 logger.log(`可用于快速登录的 QQ：\n${historyLoginList
                     .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
                     .join('\n')
-                    }`);
+                }`);
             }
             loginService.getQRCodePicture();
         }
     });
     // BEFORE LOGGING IN
-    let amgomDataPiece = 'eb1fd6ac257461580dc7438eb099f23aae04ca679f4d88f53072dc56e3bb1129';
+    const amgomDataPiece = 'eb1fd6ac257461580dc7438eb099f23aae04ca679f4d88f53072dc56e3bb1129';
     o3Service.setAmgomDataPiece(basicInfoWrapper.QQVersionAppid, new Uint8Array(Buffer.from(amgomDataPiece, 'hex')));
     // AFTER LOGGING IN
     //99b15bdb4c984fc69d5aa1feb9aa16xx --> 99b15bdb-4c98-4fc6-9d5a-a1feb9aa16xx

@@ -240,7 +240,12 @@ export interface NodeIKernelGroupService {
 
     getGroupRecommendContactArkJson(groupCode: string): unknown;
 
-    getJoinGroupLink(groupCode: string): unknown;
+    getJoinGroupLink(param: {
+        groupCode: string,
+        srcId: number,//73
+        needShortUrl: boolean,//true
+        additionalParam: string//''
+    }): Promise<GeneralCallResult & { url?: string }>;
 
     modifyGroupExtInfo(groupCode: string, arg: unknown): void;
 
