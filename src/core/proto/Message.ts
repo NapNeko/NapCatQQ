@@ -22,6 +22,7 @@ export const Message = new pb.Type("Message")
 export const SubDetail = new pb.Type("SubDetail")
     .add(new pb.Field("msgSeq", 1, "uint32"))
     .add(new pb.Field("msgTime", 2, "uint32"))
+    .add(new pb.Field("senderUid", 6, "string"))
 
 export const RecallDetails = new pb.Type("RecallDetails")
     .add(SubDetail)
