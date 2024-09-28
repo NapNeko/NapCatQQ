@@ -20,16 +20,15 @@ import { LogLevel, LogWrapper } from '@/common/log';
 import { NodeIKernelLoginService } from '@/core/services';
 import { QQBasicInfoWrapper } from '@/common/qq-basic-info';
 import { NapCatPathWrapper } from '@/common/path';
-import path from 'node:path';
+import path, { resolve } from 'node:path';
 import fs from 'node:fs';
 import { hostname, systemName, systemVersion } from '@/common/system';
 import { NTEventWrapper } from '@/common/event';
-import { DataSource, GroupMember, KickedOffLineInfo, SelfInfo, SelfStatusInfo } from '@/core/entities';
+import { ChatType, DataSource, GroupMember, KickedOffLineInfo, Peer, SelfInfo, SelfStatusInfo } from '@/core/entities';
 import { NapCatConfigLoader } from '@/core/helper/config';
 import os from 'node:os';
 import { NodeIKernelGroupListener, NodeIKernelMsgListener, NodeIKernelProfileListener } from '@/core/listeners';
 import { proxiedListenerOf } from '@/common/proxy-handler';
-
 export * from './wrapper';
 export * from './entities';
 export * from './services';
@@ -99,6 +98,7 @@ export class NapCatCore {
         if (!fs.existsSync(this.NapCatTempPath)) {
             fs.mkdirSync(this.NapCatTempPath, { recursive: true });
         }
+       
         this.initNapCatCoreListeners().then().catch(this.context.logger.logError.bind(this.context.logger));
 
         this.context.logger.setFileLogEnabled(
@@ -248,7 +248,7 @@ export class NapCatCore {
 }
 
 export async function genSessionConfig(
-    guid:string,
+    guid: string,
     QQVersionAppid: string,
     QQVersion: string,
     selfUin: string,
@@ -260,15 +260,15 @@ export async function genSessionConfig(
     //os.platform() 
     let systemPlatform = PlatformType.KWINDOWS;
     switch (os.platform()) {
-    case 'win32':
-        systemPlatform = PlatformType.KWINDOWS;
-        break;
-    case 'darwin':
-        systemPlatform = PlatformType.KMAC;
-        break;
-    case 'linux':
-        systemPlatform = PlatformType.KLINUX;
-        break;
+        case 'win32':
+            systemPlatform = PlatformType.KWINDOWS;
+            break;
+        case 'darwin':
+            systemPlatform = PlatformType.KMAC;
+            break;
+        case 'linux':
+            systemPlatform = PlatformType.KLINUX;
+            break;
     }
     return {
         selfUin,

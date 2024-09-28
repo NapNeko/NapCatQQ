@@ -54,7 +54,6 @@ export async function NCoreInitShell() {
     const loginService = wrapper.NodeIKernelLoginService.get();
 
     const session = wrapper.NodeIQQNTWrapperSession.create();
-
     // from get dataPath
     const [dataPath, dataPathGlobal] = (() => {
         if (os.platform() === 'darwin') {
