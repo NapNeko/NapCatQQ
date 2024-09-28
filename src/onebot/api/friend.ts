@@ -15,14 +15,14 @@ export class OneBotFriendApi {
     //使用前预先判断 busiId 1061
     async parsePrivatePokeEvent(grayTipElement: GrayTipElement) {
         const json = JSON.parse(grayTipElement.jsonGrayTipElement.jsonStr);
-        let pokedetail: any[] = json.items;
+        let pokedetail: Array<{ uid: string }> = json.items;
         //筛选item带有uid的元素
         pokedetail = pokedetail.filter(item => item.uid);
         if (pokedetail.length == 2) {
             return new OB11FriendPokeEvent(
                 this.core,
-                parseInt((await this.core.apis.UserApi.getUinByUidV2(pokedetail[0].uid))!),
-                parseInt((await this.core.apis.UserApi.getUinByUidV2(pokedetail[1].uid))!),
+                parseInt((await this.core.apis.UserApi.getUinByUidV2(pokedetail[0].uid))),
+                parseInt((await this.core.apis.UserApi.getUinByUidV2(pokedetail[1].uid))),
                 pokedetail,
             );
         }
