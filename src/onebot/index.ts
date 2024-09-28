@@ -95,6 +95,7 @@ export class NapCatOneBot11Adapter {
                     let peer: Peer = { chatType: ChatType.KCHATTYPEGROUP, peerUid: uid.toString() };
                     context.logger.log("[Native] 群消息撤回 Peer: " + uid.toString() + " / MsgSeq:" + seq);
                     let msgs = await core.apis.MsgApi.queryMsgsWithFilterExWithSeq(peer, seq.toString());
+
                     let ob11 = await this.apis.MsgApi.parseMessage(msgs.msgList[0], 'array')
                     if (ob11) {
                         const { sendElements, deleteAfterSentFiles } = await this.apis.MsgApi.createSendElements(ob11.message as OB11MessageData[], peer);
@@ -115,7 +116,7 @@ export class NapCatOneBot11Adapter {
                     // }]);
                 }
             } catch (error: any) {
-                context.logger.logWarn("[appNative]", (error as Error).message);
+                context.logger.logWarn("[Native] Error:", (error as Error).message,' HEX:',Buffer.from(hex, 'hex'));
             }
         });
     }
