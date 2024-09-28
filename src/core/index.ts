@@ -24,11 +24,14 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { hostname, systemName, systemVersion } from '@/common/system';
 import { NTEventWrapper } from '@/common/event';
-import { DataSource, GroupMember, KickedOffLineInfo, SelfInfo, SelfStatusInfo } from '@/core/entities';
+import { ChatType, DataSource, GroupMember, KickedOffLineInfo, Peer, SelfInfo, SelfStatusInfo } from '@/core/entities';
 import { NapCatConfigLoader } from '@/core/helper/config';
 import os from 'node:os';
 import { NodeIKernelGroupListener, NodeIKernelMsgListener, NodeIKernelProfileListener } from '@/core/listeners';
 import { proxiedListenerOf } from '@/common/proxy-handler';
+import { Native } from '@/native';
+import { buffer } from 'stream/consumers';
+import { Message, MsgHead, RecallGroup } from './proto/Message';
 
 export * from './wrapper';
 export * from './entities';
@@ -77,6 +80,7 @@ export class NapCatCore {
 
     // 通过构造器递过去的 runtime info 应该尽量少
     constructor(context: InstanceContext, selfInfo: SelfInfo) {
+        let appNative = new Native(context.pathWrapper.binaryPath);
         this.selfInfo = selfInfo;
         this.context = context;
         this.util = this.context.wrapper.NodeQQNTWrapperUtil;
@@ -99,6 +103,38 @@ export class NapCatCore {
         if (!fs.existsSync(this.NapCatTempPath)) {
             fs.mkdirSync(this.NapCatTempPath, { recursive: true });
         }
+        appNative.MoeHooExport.exports.registMsgPush(async (hex: string) => {
+            try {
+                let data = Message.decode(Buffer.from(hex, 'hex')) as any;
+                //data.MsgHead.BodyInner.MsgType SubType
+                let bodyInner = data.msgHead.bodyInner;
+                //context.logger.log("[appNative] Parse MsgType:" + bodyInner.msgType + " / SubType:" + bodyInner.subType);
+                if (bodyInner.msgType == 732 && bodyInner.subType == 17) {
+                    let RecallData = Buffer.from(data.msgHead.noifyData.innerData);
+                    //跳过 4字节 群号  + 不知道的1字节 +2字节 长度
+                    let uid = RecallData.readUint32BE();
+                    const buffer = Buffer.from(RecallData.toString('hex').slice(14), 'hex');
+                    let seq: number = (RecallGroup.decode(buffer) as any).msgSeq;
+                    let peer: Peer = { chatType: ChatType.KCHATTYPEGROUP, peerUid: uid.toString() };
+                    context.logger.log("[Native] 群消息撤回 Peer: " + uid.toString() + " / MsgSeq:" + seq);
+                    let msgs = await this.apis.MsgApi.queryMsgsWithFilterExWithSeq(peer, seq.toString())
+                    console.log(JSON.stringify(msgs, null, 4));
+                    // this.apis.MsgApi.sendMsg(peer, [{
+                    //     elementType: 1,
+                    //     elementId: '',
+                    //     textElement: {
+                    //         content: "[Native] 群消息撤回 Peer: " + uid.toString() + " / MsgSeq:" + seq,
+                    //         atType: 0,
+                    //         atUid: '',
+                    //         atTinyId: '',
+                    //         atNtUid: '',
+                    //     },
+                    // }]);
+                }
+            } catch (error: any) {
+                //context.logger.logWarn("[appNative]", (error as Error).message);
+            }
+        });
         this.initNapCatCoreListeners().then().catch(this.context.logger.logError.bind(this.context.logger));
 
         this.context.logger.setFileLogEnabled(
@@ -248,7 +284,7 @@ export class NapCatCore {
 }
 
 export async function genSessionConfig(
-    guid:string,
+    guid: string,
     QQVersionAppid: string,
     QQVersion: string,
     selfUin: string,
@@ -260,15 +296,15 @@ export async function genSessionConfig(
     //os.platform() 
     let systemPlatform = PlatformType.KWINDOWS;
     switch (os.platform()) {
-    case 'win32':
-        systemPlatform = PlatformType.KWINDOWS;
-        break;
-    case 'darwin':
-        systemPlatform = PlatformType.KMAC;
-        break;
-    case 'linux':
-        systemPlatform = PlatformType.KLINUX;
-        break;
+        case 'win32':
+            systemPlatform = PlatformType.KWINDOWS;
+            break;
+        case 'darwin':
+            systemPlatform = PlatformType.KMAC;
+            break;
+        case 'linux':
+            systemPlatform = PlatformType.KLINUX;
+            break;
     }
     return {
         selfUin,
