@@ -3,6 +3,7 @@ import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/message-unique';
+import { RawMessage } from '@/core';
 
 
 export type ReturnDataType = OB11Message
@@ -32,13 +33,17 @@ class GetMsg extends BaseAction<Payload, OB11Message> {
             throw new Error('消息不存在');
         }
         const peer = { guildId: '', peerUid: msgIdWithPeer?.Peer.peerUid, chatType: msgIdWithPeer.Peer.chatType };
-        const msg = await this.core.apis.MsgApi.getMsgsByMsgId(
-            peer,
-            [msgIdWithPeer?.MsgId || payload.message_id.toString()]);
-        const retMsg = await this.obContext.apis.MsgApi.parseMessage(msg.msgList[0]);
+        let orimsg = this.obContext.recallMsgCache.get(msgIdWithPeer.MsgId);
+        let msg: RawMessage;
+        if (orimsg) {
+            msg = orimsg;
+        } else {
+            msg = (await this.core.apis.MsgApi.getMsgsByMsgId(peer, [msgIdWithPeer?.MsgId || payload.message_id.toString()])).msgList[0];
+        }
+        const retMsg = await this.obContext.apis.MsgApi.parseMessage(msg);
         if (!retMsg) throw Error('消息为空');
         try {
-            retMsg.message_id = MessageUnique.createUniqueMsgId(peer, msg.msgList[0].msgId)!;
+            retMsg.message_id = MessageUnique.createUniqueMsgId(peer, msg.msgId)!;
             retMsg.message_seq = retMsg.message_id;
             retMsg.real_id = retMsg.message_id;
         } catch (e) {
