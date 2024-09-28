@@ -29,6 +29,7 @@ import { InitWebUi } from '@/webui';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { napCatVersion } from '@/common/version';
 import { NodeIO3MiscListener } from '@/core/listeners/NodeIO3MiscListener';
+import { Native } from '@/native';
 
 program.option('-q, --qq [number]', 'QQ号').parse(process.argv);
 const cmdOptions = program.opts();
@@ -55,6 +56,11 @@ export async function NCoreInitShell() {
 
     const session = wrapper.NodeIQQNTWrapperSession.create();
 
+    let appNative = new Native(pathWrapper.binaryPath);
+    appNative.MoeHooExport.exports.registMsgPush((...args: any[]) => {
+        console.log(args);
+    });
+    console.log(appNative);
     // from get dataPath
     const [dataPath, dataPathGlobal] = (() => {
         if (os.platform() === 'darwin') {
