@@ -1,6 +1,7 @@
 import { constants } from "node:os";
 import path from "path";
 import { dlopen } from "process";
+import fs from "fs";
 export class Native {
     platform: string;
     supportedPlatforms = ['win32'];
@@ -11,13 +12,22 @@ export class Native {
         if (!this.supportedPlatforms.includes(this.platform)) {
             throw new Error(`Platform ${this.platform} is not supported`);
         }
-        dlopen(this.MoeHooExport, path.join(nodePath, './native/MoeHoo.win32.node'), constants.dlopen.RTLD_LAZY);
+        let nativeNode = path.join(nodePath, './native/MoeHoo.win32.node');
+        if (fs.existsSync(nativeNode)) {
+            dlopen(this.MoeHooExport, nativeNode, constants.dlopen.RTLD_LAZY);
+        }
     }
     isSetReCallEnabled(): boolean {
         return this.recallHookEnabled;
     }
     registerRecallCallback(callback: (hex: string) => any): void {
-        this.recallHookEnabled = true;
-        return this.MoeHooExport.exports.registMsgPush(callback);
+        try {
+            if (this.MoeHooExport.exports?.registMsgPush) {
+                this.MoeHooExport.exports.registMsgPush(callback);
+                this.recallHookEnabled = true;
+            }
+        } catch (error) {
+            this.recallHookEnabled = false;
+        }
     }
 }
