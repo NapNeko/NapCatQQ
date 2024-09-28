@@ -91,7 +91,7 @@ export class NapCatOneBot11Adapter {
                     //跳过 4字节 群号  + 不知道的1字节 +2字节 长度
                     let uid = RecallData.readUint32BE();
                     const buffer = Buffer.from(RecallData.toString('hex').slice(14), 'hex');
-                    let seq: number = (RecallGroup.decode(buffer) as any).msgSeq;
+                    let seq: number = (RecallGroup.decode(buffer) as any).recallDetails.subDetail.msgSeq;
                     let peer: Peer = { chatType: ChatType.KCHATTYPEGROUP, peerUid: uid.toString() };
                     context.logger.log("[Native] 群消息撤回 Peer: " + uid.toString() + " / MsgSeq:" + seq);
                     let msgs = await core.apis.MsgApi.queryMsgsWithFilterExWithSeq(peer, seq.toString());
