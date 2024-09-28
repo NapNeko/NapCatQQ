@@ -41,6 +41,7 @@ const FrameworkBaseConfigPlugin: PluginOption[] = [
 const ShellBaseConfigPlugin: PluginOption[] = [
     cp({
         targets: [
+            { src: './src/native/external', dest: 'dist/native', flatten: false },
             { src: './static/', dest: 'dist/static/', flatten: false },
             { src: './src/core/external/napcat.json', dest: 'dist/config/' },
             { src: './src/onebot/config/onebot11.json', dest: 'dist/config/' },
