@@ -46,7 +46,6 @@ import { LRUCache } from '@/common/lru-cache';
 import { NodeIKernelRecentContactListener } from '@/core/listeners/NodeIKernelRecentContactListener';
 import { Native } from '@/native';
 import { Message, RecallGroup } from '@/core/proto/Message';
-import { OB11MessageData } from './types';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -57,8 +56,9 @@ export class NapCatOneBot11Adapter {
     apis: StableOneBotApiWrapper;
     networkManager: OB11NetworkManager;
     actions: ActionMap;
-
+    nativeCore: Native | undefined;
     private bootTime = Date.now() / 1000;
+    recallMsgCache = new LRUCache<string, RawMessage>(100);
 
     constructor(core: NapCatCore, context: InstanceContext, pathWrapper: NapCatPathWrapper) {
         this.core = core;
@@ -73,14 +73,14 @@ export class NapCatOneBot11Adapter {
         };
         this.actions = createActionMap(this, core);
         this.networkManager = new OB11NetworkManager();
-        this.registerNative(core,context).then().catch();
+        this.registerNative(core, context).then().catch();
         this.InitOneBot()
             .catch(e => this.context.logger.logError.bind(this.context.logger)('初始化OneBot失败', e));
 
     }
     async registerNative(core: NapCatCore, context: InstanceContext) {
-        let appNative = new Native(context.pathWrapper.binaryPath);
-        appNative.MoeHooExport.exports.registMsgPush(async (hex: string) => {
+        this.nativeCore = new Native(context.pathWrapper.binaryPath);
+        this.nativeCore.registerRecallCallback(async (hex: string) => {
             try {
                 let data = Message.decode(Buffer.from(hex, 'hex')) as any;
                 //data.MsgHead.BodyInner.MsgType SubType
@@ -95,12 +95,13 @@ export class NapCatOneBot11Adapter {
                     let peer: Peer = { chatType: ChatType.KCHATTYPEGROUP, peerUid: uid.toString() };
                     context.logger.log("[Native] 群消息撤回 Peer: " + uid.toString() + " / MsgSeq:" + seq);
                     let msgs = await core.apis.MsgApi.queryMsgsWithFilterExWithSeq(peer, seq.toString());
-
-                    let ob11 = await this.apis.MsgApi.parseMessage(msgs.msgList[0], 'array')
-                    if (ob11) {
-                        const { sendElements, deleteAfterSentFiles } = await this.apis.MsgApi.createSendElements(ob11.message as OB11MessageData[], peer);
-                        this.apis.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, deleteAfterSentFiles);
-                    }
+                    this.recallMsgCache.put(msgs.msgList[0].msgId, msgs.msgList[0]);
+                    // let ob11 = await this.apis.MsgApi.parseMessage(msgs.msgList[0], 'array')
+                    // .catch(e => this.context.logger.logError.bind(this.context.logger)('处理消息失败', e));
+                    // if (ob11) {
+                    //     const { sendElements, deleteAfterSentFiles } = await this.apis.MsgApi.createSendElements(ob11.message as OB11MessageData[], peer);
+                    //     this.apis.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, deleteAfterSentFiles);
+                    // }
 
 
                     // this.apis.MsgApi.sendMsg(peer, [{
@@ -116,7 +117,7 @@ export class NapCatOneBot11Adapter {
                     // }]);
                 }
             } catch (error: any) {
-                context.logger.logWarn("[Native] Error:", (error as Error).message,' HEX:',Buffer.from(hex, 'hex'));
+                context.logger.logWarn("[Native] Error:", (error as Error).message, ' HEX:', hex);
             }
         });
     }
@@ -569,7 +570,6 @@ export class NapCatOneBot11Adapter {
             }
         }).catch(e => this.context.logger.logError.bind(this.context.logger)('constructPrivateEvent error: ', e));
     }
-
     private async emitRecallMsg(msgList: RawMessage[], cache: LRUCache<string, boolean>) {
         for (const message of msgList) {
             // log("message update", message.sendStatus, message.msgId, message.msgSeq)
@@ -601,7 +601,7 @@ export class NapCatOneBot11Adapter {
                         parseInt(message.peerUin),
                         parseInt(message.senderUin),
                         parseInt(operatorId),
-                        oriMessageId,
+                        oriMessageId
                     );
                     this.networkManager.emitEvent(groupRecallEvent)
                         .catch(e => this.context.logger.logError.bind(this.context.logger)('处理群消息撤回失败', e));
