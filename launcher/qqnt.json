@@ -2,6 +2,8 @@
   "name": "qq-chat",
   "version": "9.9.15-28418",
   "verHash": "512caf78",
+  "linuxVersion": "3.2.12-28327",
+  "linuxVerHash": "f60e8252",
   "type": "module",
   "private": true,
   "description": "QQ",

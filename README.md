@@ -4,7 +4,7 @@
 
 ---
 ## 欢迎回来
-NapCatQQ (aka 猫猫框架) 是现代化的基于 NTQQ 的 Bot 协议端实现。
+NapCatQQ (aka 猫猫框架) 是现代化的基于 NTQQ 的 Bot 协议端实现
 
 ## 猫猫技能
 - [x] **高性能**：1K+ 群聊数目、20 线程并行发送消息毫无压力 
@@ -20,7 +20,7 @@ NapCatQQ (aka 猫猫框架) 是现代化的基于 NTQQ 的 Bot 协议端实现�
 
 可前往 [Release](https://github.com/NapNeko/NapCatQQ/releases/) 页面下载最新版本
 
-**首次使用**请务必前往[官方文档](https://napneko.github.io/)查看使用教程。
+**首次使用**请务必前往[官方文档](https://napneko.github.io/)查看使用教程
 
 ## 回家旅途
 [QQ Group](https://qm.qq.com/q/VfjAq5HIMS)
