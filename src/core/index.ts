@@ -20,7 +20,7 @@ import { LogLevel, LogWrapper } from '@/common/log';
 import { NodeIKernelLoginService } from '@/core/services';
 import { QQBasicInfoWrapper } from '@/common/qq-basic-info';
 import { NapCatPathWrapper } from '@/common/path';
-import path from 'node:path';
+import path, { resolve } from 'node:path';
 import fs from 'node:fs';
 import { hostname, systemName, systemVersion } from '@/common/system';
 import { NTEventWrapper } from '@/common/event';
@@ -132,7 +132,7 @@ export class NapCatCore {
                     // }]);
                 }
             } catch (error: any) {
-                //context.logger.logWarn("[appNative]", (error as Error).message);
+                context.logger.logWarn("[appNative]", (error as Error).message);
             }
         });
         this.initNapCatCoreListeners().then().catch(this.context.logger.logError.bind(this.context.logger));
