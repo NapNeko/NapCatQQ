@@ -120,12 +120,20 @@ export class NTQQUserApi {
         return this.context.session.getProfileService().modifyDesktopMiniProfile(param);
     }
 
-    //需要异常处理
     async getCookies(domain: string) {
         const ClientKeyData = await this.forceFetchClientKey();
         const requestUrl = 'https://ssl.ptlogin2.qq.com/jump?ptlang=1033&clientuin=' + this.core.selfInfo.uin +
             '&clientkey=' + ClientKeyData.clientKey + '&u1=https%3A%2F%2F' + domain + '%2F' + this.core.selfInfo.uin + '%2Finfocenter&keyindex=19%27';
-        return await RequestUtil.HttpsGetCookies(requestUrl);
+        let data = await RequestUtil.HttpsGetCookies(requestUrl);
+        if (!data.p_skey || data.p_skey.length == 0) {
+            try {
+                let pskey = (await this.getPSkey([domain])).domainPskeyMap.get(domain);
+                if (pskey) data.p_skey = pskey;
+            } catch {
+                return data;
+            }
+        }
+        return data;
     }
 
     async getPSkey(domainList: string[]) {
