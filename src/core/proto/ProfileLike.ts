@@ -1,95 +1,59 @@
-import * as pb from 'protobufjs';
+import { MessageType, BinaryReader, RepeatType } from '@protobuf-ts/runtime';
 
-// Proto: from src/core/proto/ProfileLike.proto
-// Author: Mlikiowa
+export const LikeDetailType = new MessageType("LikeDetailType", [
+    { no: 1, name: "txt", kind: "scalar", T: 9 /* string */ },
+    { no: 2, name: "uin", kind: "scalar", T: 3 /* int64 */ },
+    { no: 3, name: "nickname", kind: "scalar", T: 9 /* string */ }
+]);
 
-export interface LikeDetailType {
-    txt: string;
-    uin: pb.Long;
-    nickname: string;
+export const LikeMsgType = new MessageType("LikeMsgType", [
+    { no: 1, name: "times", kind: "scalar", T: 5 /* int32 */ },
+    { no: 2, name: "time", kind: "scalar", T: 5 /* int32 */ },
+    { no: 3, name: "detail", kind: "message", T: () => LikeDetailType }
+]);
+
+export const ProfileLikeSubTipType = new MessageType("ProfileLikeSubTipType", [
+    { no: 1, name: "msg", kind: "message", T: () => LikeMsgType }
+]);
+
+export const ProfileLikeTipType = new MessageType("ProfileLikeTipType", [
+    { no: 1, name: "msgType", kind: "scalar", T: 5 /* int32 */ },
+    { no: 2, name: "subType", kind: "scalar", T: 5 /* int32 */ },
+    { no: 3, name: "content", kind: "message", T: () => ProfileLikeSubTipType }
+]);
+
+export const SysMessageHeaderType = new MessageType("SysMessageHeaderType", [
+    { no: 1, name: "id", kind: "scalar", T: 9 /* string */ },
+    { no: 2, name: "timestamp", kind: "scalar", T: 5 /* int32 */ },
+    { no: 3, name: "sender", kind: "scalar", T: 9 /* string */ }
+]);
+
+export const SysMessageMsgSpecType = new MessageType("SysMessageMsgSpecType", [
+    { no: 1, name: "msgType", kind: "scalar", T: 5 /* int32 */ },
+    { no: 2, name: "subType", kind: "scalar", T: 5 /* int32 */ },
+    { no: 3, name: "subSubType", kind: "scalar", T: 5 /* int32 */ },
+    { no: 4, name: "msgSeq", kind: "scalar", T: 5 /* int32 */ },
+    { no: 5, name: "time", kind: "scalar", T: 5 /* int32 */ },
+    { no: 6, name: "msgId", kind: "scalar", T: 3 /* int64 */ },
+    { no: 7, name: "other", kind: "scalar", T: 5 /* int32 */ }
+]);
+
+export const SysMessageBodyWrapperType = new MessageType("SysMessageBodyWrapperType", [
+    { no: 1, name: "wrappedBody", kind: "scalar", T: 12 /* bytes */ }
+]);
+
+export const SysMessageType = new MessageType("SysMessageType", [
+    { no: 1, name: "header", kind: "message", T: () => SysMessageHeaderType, repeat: RepeatType.PACKED },
+    { no: 2, name: "msgSpec", kind: "message", T: () => SysMessageMsgSpecType, repeat: RepeatType.PACKED },
+    { no: 3, name: "bodyWrapper", kind: "message", T: () => SysMessageBodyWrapperType }
+]);
+
+export function decodeProfileLikeTip(buffer: Uint8Array): any {
+    const reader = new BinaryReader(buffer);
+    return ProfileLikeTipType.internalBinaryRead(reader, reader.len, { readUnknownField: true, readerFactory: () => new BinaryReader(buffer) });
 }
-export interface LikeMsgType {
-    times: number;
-    time: number;
-    detail: LikeDetailType;
+
+export function decodeSysMessage(buffer: Uint8Array): any {
+    const reader = new BinaryReader(buffer);
+    return SysMessageType.internalBinaryRead(reader, reader.len, { readUnknownField: true, readerFactory: () => new BinaryReader(buffer) });
 }
-
-export interface profileLikeSubTipType {
-    msg: LikeMsgType;
-}
-
-export interface ProfileLikeTipType {
-    msgType: number;
-    subType: number;
-    content: profileLikeSubTipType;
-}
-export interface SysMessageHeaderType {
-    id: string;
-    timestamp: number;
-    sender: string;
-}
-
-export interface SysMessageMsgSpecType {
-    msgType: number;
-    subType: number;
-    subSubType: number;
-    msgSeq: number;
-    time: number;
-    msgId: pb.Long;
-    other: number;
-}
-export interface SysMessageBodyWrapperType {
-    wrappedBody: Uint8Array;
-}
-export interface SysMessageType {
-    header: SysMessageHeaderType[];
-    msgSpec: SysMessageMsgSpecType[];
-    bodyWrapper: SysMessageBodyWrapperType;
-}
-
-export const SysMessageHeader = new pb.Type("SysMessageHeader")
-    .add(new pb.Field("PeerNumber", 1, "uint32"))
-    .add(new pb.Field("PeerString", 2, "string"))
-    .add(new pb.Field("Uin", 5, "uint32"))
-    .add(new pb.Field("Uid", 6, "string", "optional"));
-
-export const SysMessageMsgSpec = new pb.Type("SysMessageMsgSpec")
-    .add(new pb.Field("msgType", 1, "uint32"))
-    .add(new pb.Field("subType", 2, "uint32"))
-    .add(new pb.Field("subSubType", 3, "uint32"))
-    .add(new pb.Field("msgSeq", 5, "uint32"))
-    .add(new pb.Field("time", 6, "uint32"))
-    .add(new pb.Field("msgId", 12, "uint64"))
-    .add(new pb.Field("other", 13, "uint32"));
-
-export const SysMessageBodyWrapper = new pb.Type("SysMessageBodyWrapper")
-    .add(new pb.Field("wrappedBody", 2, "bytes"));
-
-export const SysMessage = new pb.Type("SysMessage")
-    .add(SysMessageHeader)
-    .add(SysMessageMsgSpec)
-    .add(SysMessageBodyWrapper)
-    .add(new pb.Field("header", 1, "SysMessageHeader", "repeated"))
-    .add(new pb.Field("msgSpec", 2, "SysMessageMsgSpec", "repeated"))
-    .add(new pb.Field("bodyWrapper", 3, "SysMessageBodyWrapper"));
-
-export const likeDetail = new pb.Type("likeDetail")
-    .add(new pb.Field("txt", 1, "string"))
-    .add(new pb.Field("uin", 3, "int64"))
-    .add(new pb.Field("nickname", 5, "string"));
-
-export const likeMsg = new pb.Type("likeMsg")
-    .add(likeDetail)
-    .add(new pb.Field("times", 1, "int32"))
-    .add(new pb.Field("time", 2, "int32"))
-    .add(new pb.Field("detail", 3, "likeDetail"));
-
-export const profileLikeSubTip = new pb.Type("profileLikeSubTip")
-    .add(likeMsg)
-    .add(new pb.Field("msg", 14, "likeMsg"))
-
-export const profileLikeTip = new pb.Type("profileLikeTip")
-    .add(profileLikeSubTip)
-    .add(new pb.Field("msgType", 1, "int32"))
-    .add(new pb.Field("subType", 2, "int32"))
-    .add(new pb.Field("content", 203, "profileLikeSubTip"));
