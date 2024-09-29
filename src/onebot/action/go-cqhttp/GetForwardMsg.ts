@@ -46,8 +46,7 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
             for (const msgdata of message.message) {
                 if ((msgdata as OB11MessageData).type === OB11MessageDataType.forward) {
                     const newNode = this.createTemplateNode(message);
-                    console.log(msgdata);
-                    newNode.data.content = await this.parseForward((msgdata as OB11MessageForward).data.content);
+                    newNode.data.message = await this.parseForward((msgdata as OB11MessageForward).data.content);
 
                     templateNode.data.message.push(newNode);
                 } else {
@@ -71,33 +70,23 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
         if (!rootMsg) {
             throw new Error('msg not found');
         }
+        const data = await this.core.apis.MsgApi.getMsgsByMsgId(rootMsg.Peer, [rootMsg.MsgId]);
 
-        const data = await this.core.apis.MsgApi.getMultiMsg(rootMsg.Peer, rootMsg.MsgId, rootMsg.MsgId);
         if (!data || data.result !== 0) {
             throw new Error('找不到相关的聊天记录' + data?.errMsg);
         }
 
-        const msgList = data.msgList;
-        const messages = (await Promise.all(msgList.map(async msg => {
-            const resMsg = await this.obContext.apis.MsgApi.parseMessage(msg);
-            if (!resMsg) return null;
-            resMsg.message_id = MessageUnique.createUniqueMsgId({
-                guildId: '',
-                chatType: msg.chatType,
-                peerUid: msg.peerUid,
-            }, msg.msgId)!;
-            return resMsg;
-        }))).filter(msg => !!msg);
-
+        const singleMsg = data.msgList[0];
+        const resMsg = await this.obContext.apis.MsgApi.parseMessage(singleMsg);
+        if (!resMsg) {
+            throw new Error('找不到相关的聊天记录');
+        }
         if (this.obContext.configLoader.configData.messagePostFormat === 'array') {
-            return { message: await this.parseForward(messages) };
+            //提取
+            let realmsg = ((await this.parseForward([resMsg]))[0].data.message as OB11MessageNode[])[0].data.message;
+            return { message: realmsg };
         }
 
-        messages.forEach(msg => {
-            (msg as OB11ForwardMessage).content = msg.message;
-            delete (msg as any).message;
-        });
-
-        return { messages };
+        return { message: resMsg };
     }
 }
