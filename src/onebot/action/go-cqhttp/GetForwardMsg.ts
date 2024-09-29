@@ -46,7 +46,9 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
             for (const msgdata of message.message) {
                 if ((msgdata as OB11MessageData).type === OB11MessageDataType.forward) {
                     const newNode = this.createTemplateNode(message);
+                    console.log(msgdata);
                     newNode.data.content = await this.parseForward((msgdata as OB11MessageForward).data.content);
+
                     templateNode.data.message.push(newNode);
                 } else {
                     templateNode.data.message.push(msgdata as OB11MessageData);
@@ -88,7 +90,7 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
         }))).filter(msg => !!msg);
 
         if (this.obContext.configLoader.configData.messagePostFormat === 'array') {
-            return await this.parseForward(messages);
+            return { message: await this.parseForward(messages) };
         }
 
         messages.forEach(msg => {
