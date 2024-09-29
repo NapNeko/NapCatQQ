@@ -1,5 +1,5 @@
 import BaseAction from '../BaseAction';
-import { OB11ForwardMessage } from '@/onebot';
+import { OB11ForwardMessage, OB11Message, OB11MessageData, OB11MessageDataType, OB11MessageNode } from '@/onebot';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/message-unique';
@@ -17,7 +17,40 @@ type Payload = FromSchema<typeof SchemaData>;
 export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
     actionName = ActionName.GoCQHTTP_GetForwardMsg;
     payloadSchema = SchemaData;
+    async parseForward(msg: OB11Message[]) {
+        let retMsg: Array<OB11MessageNode & {
+            data: { message: Array<OB11MessageData> }
+        }> = [];
 
+        for (let message of msg) {
+            let templateNode: OB11MessageNode & {
+                data: { message: Array<OB11MessageData> }
+            } = {
+                type: OB11MessageDataType.node,
+                data: {
+                    user_id: 10001,
+                    nickname: "QQ用户",
+                    message: [],
+                    content: []
+                }
+            };
+
+            templateNode.data.nickname = message.sender.nickname;
+            templateNode.data.user_id = message.user_id;
+
+            for (let msgdata of message.message) {
+                if (typeof msgdata !== 'string' && msgdata.type === OB11MessageDataType.forward) {
+                    templateNode.data.message.push(...(await this.parseForward(msgdata.data.content)));
+                }
+                if (typeof msgdata !== 'string') {
+                    templateNode.data.message.push(msgdata);
+                }
+            }
+            retMsg.push(templateNode);
+        }
+        return retMsg;
+
+    }
     async _handle(payload: Payload): Promise<any> {
         const msgId = payload.message_id || payload.id;
         if (!msgId) {
@@ -48,6 +81,11 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
             (<OB11ForwardMessage>msg).content = msg.message;
             delete (<any>msg).message;
         });
+        //遍历合并的所有消息
+        if (this.obContext.configLoader.configData.messagePostFormat == 'array') {
+            return await this.parseForward(messages);
+        }
+
         return { messages };
     }
 }
