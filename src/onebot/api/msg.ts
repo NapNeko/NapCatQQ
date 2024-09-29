@@ -34,7 +34,7 @@ import { RequestUtil } from '@/common/request';
 import fs from 'node:fs';
 import fsPromise from 'node:fs/promises';
 import { OB11FriendAddNoticeEvent } from '@/onebot/event/notice/OB11FriendAddNoticeEvent';
-import { SysMessage, SysMessageType } from '@/core/proto/ProfileLike';
+import { decodeSysMessage } from '@/core/proto/ProfileLike';
 
 type RawToOb11Converters = {
     [Key in keyof MessageElement as Key extends `${string}Element` ? Key : never]: (
@@ -841,7 +841,7 @@ export class OneBotMsgApi {
         return { path, fileName: inputdata.name ?? fileName };
     }
     async parseSysMessage(msg: number[]) {
-        const sysMsg = SysMessage.decode(Uint8Array.from(msg)) as unknown as SysMessageType;
+        const sysMsg = decodeSysMessage(Uint8Array.from(msg));
         if (sysMsg.msgSpec.length === 0) {
             return;
         }

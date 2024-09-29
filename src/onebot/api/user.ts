@@ -1,5 +1,5 @@
 import { NapCatCore } from '@/core';
-import { profileLikeTip, ProfileLikeTipType } from '@/core/proto/ProfileLike';
+import { decodeProfileLikeTip } from '@/core/proto/ProfileLike';
 
 import { NapCatOneBot11Adapter } from '@/onebot';
 import { OB11ProfileLikeEvent } from '../event/notice/OB11ProfileLikeEvent';
@@ -13,7 +13,7 @@ export class OneBotUserApi {
         this.core = core;
     }
     async parseLikeEvent(wrappedBody: Uint8Array): Promise<OB11ProfileLikeEvent | undefined> {
-        const likeTip = profileLikeTip.decode(Uint8Array.from(wrappedBody)) as unknown as ProfileLikeTipType;
+        const likeTip = decodeProfileLikeTip(Uint8Array.from(wrappedBody));
         if (likeTip?.msgType !== 0 || likeTip?.subType !== 203) return;
         this.core.context.logger.logDebug("收到点赞通知消息");
         const likeMsg = likeTip.content.msg;

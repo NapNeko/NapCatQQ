@@ -1,37 +1,46 @@
-import * as pb from 'protobufjs';
+import { MessageType, BinaryReader } from '@protobuf-ts/runtime';
 
+export const BodyInner = new MessageType("BodyInner", [
+    { no: 1, name: "msgType", kind: "scalar", T: 13 /* uint32 */, opt: true },
+    { no: 2, name: "subType", kind: "scalar", T: 13 /* uint32 */, opt: true }
+]);
 
-export const BodyInner = new pb.Type("BodyInner")
-    .add(new pb.Field("msgType", 1, "uint32", "optional"))
-    .add(new pb.Field("subType", 2, "uint32", "optional"))
+export const NoifyData = new MessageType("NoifyData", [
+    { no: 1, name: "skip", kind: "scalar", T: 12 /* bytes */, opt: true },
+    { no: 2, name: "innerData", kind: "scalar", T: 12 /* bytes */, opt: true }
+]);
 
-export const NoifyData = new pb.Type("NoifyData")
-    .add(new pb.Field("skip", 1, "bytes", "optional"))
-    .add(new pb.Field("innerData", 2, "bytes", "optional"))
+export const MsgHead = new MessageType("MsgHead", [
+    { no: 2, name: "bodyInner", kind: "message", T: () => BodyInner, opt: true },
+    { no: 3, name: "noifyData", kind: "message", T: () => NoifyData, opt: true }
+]);
 
-export const MsgHead = new pb.Type("MsgHead")
-    .add(BodyInner)
-    .add(NoifyData)
-    .add(new pb.Field("bodyInner", 2, "BodyInner", "optional"))
-    .add(new pb.Field("noifyData", 3, "NoifyData", "optional"));
+export const Message = new MessageType("Message", [
+    { no: 1, name: "msgHead", kind: "message", T: () => MsgHead }
+]);
 
-export const Message = new pb.Type("Message")
-    .add(MsgHead)
-    .add(new pb.Field("msgHead", 1, "MsgHead"))
+export const SubDetail = new MessageType("SubDetail", [
+    { no: 1, name: "msgSeq", kind: "scalar", T: 13 /* uint32 */ },
+    { no: 2, name: "msgTime", kind: "scalar", T: 13 /* uint32 */ },
+    { no: 6, name: "senderUid", kind: "scalar", T: 9 /* string */ }
+]);
 
-export const SubDetail = new pb.Type("SubDetail")
-    .add(new pb.Field("msgSeq", 1, "uint32"))
-    .add(new pb.Field("msgTime", 2, "uint32"))
-    .add(new pb.Field("senderUid", 6, "string"))
+export const RecallDetails = new MessageType("RecallDetails", [
+    { no: 1, name: "operatorUid", kind: "scalar", T: 9 /* string */ },
+    { no: 3, name: "subDetail", kind: "message", T: () => SubDetail }
+]);
 
-export const RecallDetails = new pb.Type("RecallDetails")
-    .add(SubDetail)
-    .add(new pb.Field("operatorUid", 1, "string"))
-    .add(new pb.Field("subDetail", 3, "SubDetail"))
-
-export const RecallGroup = new pb.Type("RecallGroup")
-    .add(RecallDetails)
-    .add(new pb.Field("type", 1, "int32"))
-    .add(new pb.Field("peerUid", 4, "uint32"))
-    .add(new pb.Field("recallDetails", 11, "RecallDetails"))
-    .add(new pb.Field("grayTipsSeq", 37, "uint32"))
+export const RecallGroup = new MessageType("RecallGroup", [
+    { no: 1, name: "type", kind: "scalar", T: 5 /* int32 */ },
+    { no: 4, name: "peerUid", kind: "scalar", T: 13 /* uint32 */ },
+    { no: 11, name: "recallDetails", kind: "message", T: () => RecallDetails },
+    { no: 37, name: "grayTipsSeq", kind: "scalar", T: 13 /* uint32 */ }
+]);
+export function decodeMessage(buffer: Uint8Array): any {
+    const reader = new BinaryReader(buffer);
+    return Message.internalBinaryRead(reader, reader.len, { readUnknownField: true, readerFactory: () => new BinaryReader(buffer) });
+}
+export function decodeRecallGroup(buffer: Uint8Array): any {
+    const reader = new BinaryReader(buffer);
+    return RecallGroup.internalBinaryRead(reader, reader.len, { readUnknownField: true, readerFactory: () => new BinaryReader(buffer) });
+}
