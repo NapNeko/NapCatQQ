@@ -1,59 +1,60 @@
 import { MessageType, BinaryReader, ScalarType, RepeatType } from '@protobuf-ts/runtime';
 
-export const LikeDetailType = new MessageType("LikeDetailType", [
+export const LikeDetail = new MessageType("LikeDetail", [
     { no: 1, name: "txt", kind: "scalar", T: ScalarType.STRING /* string */ },
     { no: 2, name: "uin", kind: "scalar", T: ScalarType.INT64 /* int64 */ },
     { no: 3, name: "nickname", kind: "scalar", T: ScalarType.STRING /* string */ }
 ]);
 
-export const LikeMsgType = new MessageType("LikeMsgType", [
+export const LikeMsg = new MessageType("LikeMsg", [
     { no: 1, name: "times", kind: "scalar", T: ScalarType.INT32 /* int32 */ },
     { no: 2, name: "time", kind: "scalar", T: ScalarType.INT32 /* int32 */ },
-    { no: 3, name: "detail", kind: "message", T: () => LikeDetailType }
+    { no: 3, name: "detail", kind: "message", T: () => LikeDetail }
 ]);
 
-export const ProfileLikeSubTipType = new MessageType("ProfileLikeSubTipType", [
-    { no: 1, name: "msg", kind: "message", T: () => LikeMsgType }
+export const ProfileLikeSubTip = new MessageType("ProfileLikeSubTip", [
+    { no: 14, name: "msg", kind: "message", T: () => LikeMsg }
 ]);
 
-export const ProfileLikeTipType = new MessageType("ProfileLikeTipType", [
+export const ProfileLikeTip = new MessageType("ProfileLikeTip", [
     { no: 1, name: "msgType", kind: "scalar", T: ScalarType.INT32 /* int32 */ },
     { no: 2, name: "subType", kind: "scalar", T: ScalarType.INT32 /* int32 */ },
-    { no: 3, name: "content", kind: "message", T: () => ProfileLikeSubTipType }
+    { no: 203, name: "content", kind: "message", T: () => ProfileLikeSubTip }
 ]);
 
-export const SysMessageHeaderType = new MessageType("SysMessageHeaderType", [
-    { no: 1, name: "id", kind: "scalar", T: ScalarType.STRING /* string */ },
-    { no: 2, name: "timestamp", kind: "scalar", T: ScalarType.INT32 /* int32 */ },
-    { no: 3, name: "sender", kind: "scalar", T: ScalarType.STRING /* string */ }
+export const SysMessageHeader = new MessageType("SysMessageHeader", [
+    { no: 1, name: "PeerNumber", kind: "scalar", T: ScalarType.UINT32 /* uin32 */ },
+    { no: 2, name: "PeerString", kind: "scalar", T: ScalarType.STRING /* string */ },
+    { no: 5, name: "Uin", kind: "scalar", T: ScalarType.UINT32 /* uin32 */ },
+    { no: 6, name: "Uid", kind: "scalar", T: ScalarType.STRING /* string */, opt: true }
 ]);
 
-export const SysMessageMsgSpecType = new MessageType("SysMessageMsgSpecType", [
-    { no: 1, name: "msgType", kind: "scalar", T: ScalarType.INT32 /* int32 */ },
-    { no: 2, name: "subType", kind: "scalar", T: ScalarType.INT32 /* int32 */ },
-    { no: 3, name: "subSubType", kind: "scalar", T: ScalarType.INT32 /* int32 */ },
-    { no: 4, name: "msgSeq", kind: "scalar", T: ScalarType.INT32 /* int32 */ },
-    { no: 5, name: "time", kind: "scalar", T: ScalarType.INT32 /* int32 */ },
-    { no: 6, name: "msgId", kind: "scalar", T: ScalarType.INT64 /* int64 */ },
-    { no: 7, name: "other", kind: "scalar", T: ScalarType.INT32 /* int32 */ }
+export const SysMessageMsgSpec = new MessageType("SysMessageMsgSpec", [
+    { no: 1, name: "msgType", kind: "scalar", T: ScalarType.UINT32 /* uint32 */ },
+    { no: 2, name: "subType", kind: "scalar", T: ScalarType.UINT32 /* uint32 */ },
+    { no: 3, name: "subSubType", kind: "scalar", T: ScalarType.UINT32 /* uint32 */ },
+    { no: 5, name: "msgSeq", kind: "scalar", T: ScalarType.UINT32 /* uint32 */ },
+    { no: 6, name: "time", kind: "scalar", T: ScalarType.UINT32 /* uint32 */ },
+    { no: 12, name: "msgId", kind: "scalar", T: ScalarType.UINT64 /* uint64 */ },
+    { no: 13, name: "other", kind: "scalar", T: ScalarType.UINT32 /* uint32 */ }
 ]);
 
-export const SysMessageBodyWrapperType = new MessageType("SysMessageBodyWrapperType", [
-    { no: 1, name: "wrappedBody", kind: "scalar", T: ScalarType.BYTES /* bytes */ }
+export const SysMessageBodyWrapper = new MessageType("SysMessageBodyWrapper", [
+    { no: 2, name: "wrappedBody", kind: "scalar", T: ScalarType.BYTES /* bytes */ }
 ]);
 
-export const SysMessageType = new MessageType("SysMessageType", [
-    { no: 1, name: "header", kind: "message", T: () => SysMessageHeaderType, repeat: RepeatType.PACKED },
-    { no: 2, name: "msgSpec", kind: "message", T: () => SysMessageMsgSpecType, repeat: RepeatType.PACKED },
-    { no: 3, name: "bodyWrapper", kind: "message", T: () => SysMessageBodyWrapperType }
+export const SysMessage = new MessageType("SysMessage", [
+    { no: 1, name: "header", kind: "message", T: () => SysMessageHeader, repeat: RepeatType.UNPACKED },
+    { no: 2, name: "msgSpec", kind: "message", T: () => SysMessageMsgSpec, repeat: RepeatType.UNPACKED },
+    { no: 3, name: "bodyWrapper", kind: "message", T: () => SysMessageBodyWrapper }
 ]);
 
 export function decodeProfileLikeTip(buffer: Uint8Array): any {
     const reader = new BinaryReader(buffer);
-    return ProfileLikeTipType.internalBinaryRead(reader, reader.len, { readUnknownField: true, readerFactory: () => new BinaryReader(buffer) });
+    return ProfileLikeTip.internalBinaryRead(reader, reader.len, { readUnknownField: true, readerFactory: () => new BinaryReader(buffer) });
 }
 
 export function decodeSysMessage(buffer: Uint8Array): any {
     const reader = new BinaryReader(buffer);
-    return SysMessageType.internalBinaryRead(reader, reader.len, { readUnknownField: true, readerFactory: () => new BinaryReader(buffer) });
+    return SysMessage.internalBinaryRead(reader, reader.len, { readUnknownField: true, readerFactory: () => new BinaryReader(buffer) });
 }
