@@ -73,7 +73,7 @@ export class NapCatOneBot11Adapter {
         };
         this.actions = createActionMap(this, core);
         this.networkManager = new OB11NetworkManager();
-        this.registerNative(core, context).then().catch();
+        this.registerNative(core, context).catch(e => this.context.logger.logWarn.bind(this.context.logger)('初始化Native失败', e)).then();
         this.InitOneBot()
             .catch(e => this.context.logger.logError.bind(this.context.logger)('初始化OneBot失败', e));
 
