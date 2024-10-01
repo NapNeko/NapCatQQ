@@ -139,8 +139,13 @@ export class LogWrapper {
 
     logMessage(msg: RawMessage, selfInfo: SelfInfo) {
         const isSelfSent = msg.senderUin === selfInfo.uin;
-        this.log(`${isSelfSent ? '发送 ->' : '接收 <-'
-        } ${rawMessageToText(msg)}`);
+
+        // Intercept grey tip
+        if (msg.elements[0]?.elementType === ElementType.GreyTip) {
+            return;
+        }
+
+        this.log(`${isSelfSent ? '发送 ->' : '接收 <-' } ${rawMessageToText(msg)}`);
     }
 }
 
@@ -154,7 +159,12 @@ export function rawMessageToText(msg: RawMessage, recursiveLevel = 0): string {
     if (msg.chatType == ChatType.KCHATTYPEC2C) {
         tokens.push(`私聊 (${msg.peerUin})`);
     } else if (msg.chatType == ChatType.KCHATTYPEGROUP) {
-        tokens.push(`群聊 (群 ${msg.peerUin} 的 ${msg.senderUin})`);
+        if (recursiveLevel < 1) {
+            tokens.push(`群聊 [${msg.peerName}(${msg.peerUin})]`);
+        }
+        if (msg.senderUin !== '0') {
+            tokens.push(`[${msg.sendMemberName || msg.sendRemarkName || msg.sendNickName}(${msg.senderUin})]`);
+        }
     } else if (msg.chatType == ChatType.KCHATTYPEDATALINE) {
         tokens.push('移动设备');
     } else /* temp */ {

@@ -910,9 +910,24 @@ export interface RawMessage {
     peerUin: string;
 
     /**
+     * 好友备注（如果是好友消息）
+     */
+    remark?: string;
+
+    /**
+     * 群名（如果是群消息）
+     */
+    peerName: string;
+
+    /**
      * 发送者昵称（如果是好友消息）
      */
     sendNickName: string;
+
+    /**
+     * 发送者好友备注（如果是群消息并且有发送者好友）
+     */
+    sendRemarkName: string;
 
     /**
      * 发送者群名片（如果是群消息）
