@@ -13,6 +13,7 @@
   "devDependencies": {
     "@babel/preset-typescript": "^7.24.7",
     "@log4js-node/log4js-api": "^1.0.2",
+    "@protobuf-ts/runtime": "^2.9.4",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/cors": "^2.8.17",
