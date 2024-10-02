@@ -365,22 +365,41 @@ export class NTQQFileApi {
 
         if (url) {
             const parsedUrl = new URL(IMAGE_HTTP_HOST + url);
+            const urlRkey = parsedUrl.searchParams.get('rkey');
             const imageAppid = parsedUrl.searchParams.get('appid');
             const isNTV2 = imageAppid && ['1406', '1407'].includes(imageAppid);
-            if (isNTV2) {
-                let rkey = parsedUrl.searchParams.get('rkey');
-                if (rkey) {
-                    return IMAGE_HTTP_HOST_NT + url;
-                }
-                const rkeyData = await this.rkeyManager.getRkey();
-                rkey = imageAppid === '1406' ? rkeyData.private_rkey : rkeyData.group_rkey;
-                return IMAGE_HTTP_HOST_NT + url + `${rkey}`;
-            } else {
-                return IMAGE_HTTP_HOST + url;
+            const imageFileId = parsedUrl.searchParams.get('fileid');
+
+            let rkeyData = {
+                private_rkey: 'CAQSKAB6JWENi5LM_xp9vumLbuThJSaYf-yzMrbZsuq7Uz2qEc3Rbib9LP4',
+                group_rkey: 'CAQSKAB6JWENi5LM_xp9vumLbuThJSaYf-yzMrbZsuq7Uz2qffcqm614gds',
+                online_rkey: false
+            };
+
+            try {
+                let tempRkeyData = await this.rkeyManager.getRkey();
+                rkeyData.group_rkey = tempRkeyData.group_rkey;
+                rkeyData.private_rkey = tempRkeyData.private_rkey;
+                rkeyData.online_rkey = tempRkeyData.expired_time > Date.now() / 1000;
+            } catch (e) {
+                this.context.logger.logError.bind(this.context.logger)('获取rkey失败 Fallback Old Mode', e);
             }
+
+
+            if (isNTV2 && urlRkey) {
+                return IMAGE_HTTP_HOST_NT + urlRkey;
+            } else if (isNTV2 && rkeyData.online_rkey) {
+                let rkey = imageAppid === '1406' ? rkeyData.private_rkey : rkeyData.group_rkey;
+                return IMAGE_HTTP_HOST_NT + url + `&rkey=${rkey}`;
+            } else if (isNTV2 && imageFileId) {
+                let rkey = imageAppid === '1406' ? rkeyData.private_rkey : rkeyData.group_rkey;
+                return IMAGE_HTTP_HOST + `/download?appid=${imageAppid}&fileid=${imageFileId}&rkey=${rkey}`;
+            }
+
         } else if (fileMd5 || md5HexStr) {
             return `${IMAGE_HTTP_HOST}/gchatpic_new/0/0-0-${(fileMd5 ?? md5HexStr)!.toUpperCase()}/0`;
         }
+
         this.context.logger.logDebug('图片url获取失败', element);
         return '';
     }
