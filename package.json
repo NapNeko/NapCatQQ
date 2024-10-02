@@ -13,7 +13,6 @@
   "devDependencies": {
     "@babel/preset-typescript": "^7.24.7",
     "@log4js-node/log4js-api": "^1.0.2",
-    "@protobuf-ts/runtime": "^2.9.4",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/cors": "^2.8.17",
@@ -30,22 +29,23 @@
     "typescript": "^5.3.3",
     "vite": "^5.2.6",
     "vite-plugin-cp": "^4.0.8",
-    "vite-tsconfig-paths": "^4.3.2"
-  },
-  "dependencies": {
+    "vite-tsconfig-paths": "^4.3.2",
+    "@protobuf-ts/runtime": "^2.9.4",
     "ajv": "^8.13.0",
-    "async-mutex": "^0.5.0",
+    "fast-xml-parser": "^4.3.6",
     "chalk": "^5.3.0",
     "commander": "^12.1.0",
-    "cors": "^2.8.5",
-    "express": "^5.0.0-beta.2",
-    "fast-xml-parser": "^4.3.6",
+    "async-mutex": "^0.5.0",
     "file-type": "^19.0.0",
-    "fluent-ffmpeg": "^2.1.2",
-    "image-size": "^1.1.1",
     "json-schema-to-ts": "^3.1.0",
-    "log4js": "^6.9.1",
+    "image-size": "^1.1.1",
+    "cors": "^2.8.5"
+  },
+  "dependencies": {
     "qrcode-terminal": "^0.12.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "express": "^5.0.0-beta.2",
+    "log4js": "^6.9.1",
     "silk-wasm": "^3.6.1",
     "ws": "^8.18.0"
   }
