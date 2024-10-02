@@ -275,7 +275,7 @@ export class NapCatOneBot11Adapter {
         msgListener.onRecvSysMsg = (msg) => {
             this.apis.MsgApi.parseSysMessage(msg).then((event) => {
                 if (event) this.networkManager.emitEvent(event);
-            }).catch(e => this.context.logger.logError.bind(this.context.logger)('constructSysMessage error: ', e));
+            }).catch(e => this.context.logger.logError.bind(this.context.logger)('constructSysMessage error: ', e, '\n Parse Hex:', Buffer.from(msg).toString('hex')));
         };
 
         msgListener.onInputStatusPush = async data => {
