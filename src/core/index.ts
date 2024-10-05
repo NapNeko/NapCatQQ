@@ -20,11 +20,11 @@ import { LogLevel, LogWrapper } from '@/common/log';
 import { NodeIKernelLoginService } from '@/core/services';
 import { QQBasicInfoWrapper } from '@/common/qq-basic-info';
 import { NapCatPathWrapper } from '@/common/path';
-import path, { resolve } from 'node:path';
+import path from 'node:path';
 import fs from 'node:fs';
 import { hostname, systemName, systemVersion } from '@/common/system';
 import { NTEventWrapper } from '@/common/event';
-import { ChatType, DataSource, GroupMember, KickedOffLineInfo, Peer, SelfInfo, SelfStatusInfo } from '@/core/entities';
+import { DataSource, GroupMember, KickedOffLineInfo, SelfInfo, SelfStatusInfo } from '@/core/entities';
 import { NapCatConfigLoader } from '@/core/helper/config';
 import os from 'node:os';
 import { NodeIKernelGroupListener, NodeIKernelMsgListener, NodeIKernelProfileListener } from '@/core/listeners';
@@ -257,19 +257,12 @@ export async function genSessionConfig(
 ): Promise<WrapperSessionInitConfig> {
     const downloadPath = path.join(account_path, 'NapCat', 'temp');
     fs.mkdirSync(downloadPath, { recursive: true });
-    //os.platform() 
-    let systemPlatform = PlatformType.KWINDOWS;
-    switch (os.platform()) {
-        case 'win32':
-            systemPlatform = PlatformType.KWINDOWS;
-            break;
-        case 'darwin':
-            systemPlatform = PlatformType.KMAC;
-            break;
-        case 'linux':
-            systemPlatform = PlatformType.KLINUX;
-            break;
-    }
+    const platformMapping: Partial<Record<NodeJS.Platform, PlatformType>> = {
+        win32: PlatformType.KWINDOWS,
+        darwin: PlatformType.KMAC,
+        linux: PlatformType.KLINUX,
+    };
+    const systemPlatform = platformMapping[os.platform()] ?? PlatformType.KWINDOWS;
     return {
         selfUin,
         selfUid,
