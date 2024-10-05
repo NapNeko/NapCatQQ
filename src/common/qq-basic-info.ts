@@ -53,26 +53,22 @@ export class QQBasicInfoWrapper {
     }
 
     //此方法不要直接使用
-    getQUAInternal() {
-        switch (systemPlatform) {
-        case 'linux':
-            return `V1_LNX_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
-        case 'darwin':
-            return `V1_MAC_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
-        default:
-            return `V1_WIN_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`;
-        }
+    getQUAFallback() {
+        const platformMapping: Partial<Record<NodeJS.Platform, string>> = {
+            win32: `V1_WIN_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`,
+            darwin: `V1_MAC_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`,
+            linux: `V1_LNX_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`,
+        };
+        return platformMapping[systemPlatform] ?? (platformMapping.win32)!;
     }
 
-    getAppidInternal() {
-        switch (systemPlatform) {
-        case 'linux':
-            return '537246140';
-        case 'darwin':
-            return '537246140';
-        default:
-            return '537246092';
-        }
+    getAppIdFallback() {
+        const platformMapping: Partial<Record<NodeJS.Platform, string>> = {
+            win32: '537246092',
+            darwin: '537246140',
+            linux: '537246140',
+        };
+        return platformMapping[systemPlatform] ?? '537246092';
     }
 
     getAppidV2(): { appid: string; qua: string } {
@@ -88,6 +84,6 @@ export class QQBasicInfoWrapper {
         // else
         this.context.logger.log(`[QQ版本兼容性检测] 获取Appid异常 请检测NapCat/QQNT是否正常`);
         this.context.logger.log(`[QQ版本兼容性检测] ${fullVersion} 版本兼容性不佳，可能会导致一些功能无法正常使用`,);
-        return { appid: this.getAppidInternal(), qua: this.getQUAInternal() };
+        return { appid: this.getAppIdFallback(), qua: this.getQUAFallback() };
     }
 }

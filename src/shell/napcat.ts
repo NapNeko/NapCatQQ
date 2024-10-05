@@ -69,18 +69,12 @@ export async function NCoreInitShell() {
         const dataPathGlobal = path.resolve(dataPath, './nt_qq/global');
         return [dataPath, dataPathGlobal];
     })();
-    let systemPlatform = PlatformType.KWINDOWS;
-    switch (os.platform()) {
-    case 'win32':
-        systemPlatform = PlatformType.KWINDOWS;
-        break;
-    case 'darwin':
-        systemPlatform = PlatformType.KMAC;
-        break;
-    case 'linux':
-        systemPlatform = PlatformType.KLINUX;
-        break;
-    }
+    const platformMapping: Partial<Record<NodeJS.Platform, PlatformType>> = {
+        win32: PlatformType.KWINDOWS,
+        darwin: PlatformType.KMAC,
+        linux: PlatformType.KLINUX,
+    };
+    const systemPlatform = platformMapping[os.platform()] ?? PlatformType.KWINDOWS;
     if (!basicInfoWrapper.QQVersionAppid || !basicInfoWrapper.QQVersionQua) throw new Error('QQVersionAppid or QQVersionQua  is not defined');
     // from initConfig
     engine.initWithDeskTopConfig(
