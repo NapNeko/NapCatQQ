@@ -396,7 +396,9 @@ export class NTQQFileApi {
                 return IMAGE_HTTP_HOST + `/download?appid=${imageAppid}&fileid=${imageFileId}&rkey=${rkey}`;
             }
 
-        } else if (fileMd5 || md5HexStr) {
+        }
+        //到这里说明可能是旧客户端
+        if (fileMd5 || md5HexStr) {
             return `${IMAGE_HTTP_HOST}/gchatpic_new/0/0-0-${(fileMd5 ?? md5HexStr)!.toUpperCase()}/0`;
         }
 
