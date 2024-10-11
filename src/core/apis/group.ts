@@ -9,9 +9,12 @@ import {
     MemberExtSourceType,
     NapCatCore,
 } from '@/core';
-import { isNumeric, solveAsyncProblem } from '@/common/helper';
+import { isNumeric, sleep, solveAsyncProblem } from '@/common/helper';
 import { LimitedHashTable } from '@/common/message-unique';
 import { NTEventWrapper } from '@/common/event';
+import { encodeGroupPoke } from '../proto/Poke';
+import { randomUUID } from 'crypto';
+import { RequestUtil } from '@/common/request';
 
 export class NTQQGroupApi {
     context: InstanceContext;
@@ -20,6 +23,7 @@ export class NTQQGroupApi {
     groupMemberCache: Map<string, Map<string, GroupMember>> = new Map<string, Map<string, GroupMember>>();
     groups: Group[] = [];
     essenceLRU = new LimitedHashTable<number, string>(1000);
+    session: any;
 
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
@@ -33,6 +37,14 @@ export class NTQQGroupApi {
             this.groupCache.set(group.groupCode, group);
         }
         this.context.logger.logDebug(`加载${this.groups.length}个群组缓存完成`);
+        console.log('pid', process.pid);
+        // this.session = await frida.attach(process.pid);
+        // setTimeout(async () => {
+        //     let data = Buffer.from('089601', 'hex').toString('utf-8');//optional int32 a = 1;
+        //     console.log('data', Buffer.from(data).toString('hex'));
+        //     let ret = await this.core.context.session.getMsgService().sendSsoCmdReqByContend("OidbSvcTrpcTcp.0xfe1_2", data);
+        //     console.log('sendSsoCmdReqByContend', ret);
+        // }, 20000);
     }
     async getCoreAndBaseInfo(uids: string[]) {
         return await this.core.eventWrapper.callNoListenerEvent(
@@ -40,6 +52,15 @@ export class NTQQGroupApi {
             'nodeStore',
             uids,
         );
+    }
+    async sendPacketPoke(group: string, peer: string) {
+        let data = encodeGroupPoke(group, peer);
+        let hex = Buffer.from(data).toString('hex');
+        let retdata = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0xed3_1', hex);
+        //await RequestUtil.HttpGetJson('http://127.0.0.1:8086/send', 'POST', { data: hex }, { 'Content-Type': 'application/json' }, false, true);
+        //let ret = await this.core.context.session.getMsgService().sendSsoCmdReqByContend('LightAppSvc.mini_app_i', hex.slice(0, hex.length / 2));
+        // let ret = await this.core.context.session.getMsgService().sendSsoCmdReqByContend('OidbSvcTrpcTcp.0xfe1_2', hex.toString('hex'));
+        console.log('sendPacketPoke', retdata);
     }
     async fetchGroupEssenceList(groupCode: string) {
         const pskey = (await this.core.apis.UserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com')!;

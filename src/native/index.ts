@@ -4,7 +4,7 @@ import { dlopen } from "process";
 import fs from "fs";
 export class Native {
     platform: string;
-    supportedPlatforms = ['win32'];
+    supportedPlatforms = [''];
     MoeHooExport: any = { exports: {} };
     recallHookEnabled: boolean = false;
     inited = true;
