@@ -61,7 +61,7 @@ export class RequestUtil {
         const options = {
             hostname: option.hostname,
             port: option.port,
-            path: option.href,
+            path: option.pathname + option.search,
             method: method,
             headers: headers,
         };

@@ -21,6 +21,7 @@ import { OB11GroupTitleEvent } from '@/onebot/event/notice/OB11GroupTitleEvent';
 import { FileNapCatOneBotUUID } from '@/common/helper';
 import { pathToFileURL } from 'node:url';
 
+
 export class OneBotGroupApi {
     obContext: NapCatOneBot11Adapter;
     core: NapCatCore;

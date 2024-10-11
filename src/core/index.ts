@@ -29,6 +29,7 @@ import { NapCatConfigLoader } from '@/core/helper/config';
 import os from 'node:os';
 import { NodeIKernelGroupListener, NodeIKernelMsgListener, NodeIKernelProfileListener } from '@/core/listeners';
 import { proxiedListenerOf } from '@/common/proxy-handler';
+import { NTQQPacketApi } from './apis/packet';
 export * from './wrapper';
 export * from './entities';
 export * from './services';
@@ -84,6 +85,7 @@ export class NapCatCore {
             FileApi: new NTQQFileApi(this.context, this),
             SystemApi: new NTQQSystemApi(this.context, this),
             CollectionApi: new NTQQCollectionApi(this.context, this),
+            PacketApi: new NTQQPacketApi(this.context, this),
             WebApi: new NTQQWebApi(this.context, this),
             FriendApi: new NTQQFriendApi(this.context, this),
             MsgApi: new NTQQMsgApi(this.context, this),
@@ -322,6 +324,7 @@ export interface InstanceContext {
 export interface StableNTApiWrapper {
     FileApi: NTQQFileApi,
     SystemApi: NTQQSystemApi,
+    PacketApi: NTQQPacketApi,
     CollectionApi: NTQQCollectionApi,
     WebApi: NTQQWebApi,
     FriendApi: NTQQFriendApi,
