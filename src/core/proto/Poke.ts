@@ -14,11 +14,11 @@ export const OidbSvcTrpcTcp0XED3_1 = new MessageType("oidb_svc_trpctcp_0xed3_1",
     { no: 6, name: "ext", kind: "scalar", T: ScalarType.UINT32 }
 ]);
 
-export function encodeGroupPoke(groupUin: string, PeerUin: string) {
+export function encodeGroupPoke(groupUin: number, PeerUin: number) {
     let Body = OidbSvcTrpcTcp0XED3_1.toBinary
         ({
-            uin: parseInt(PeerUin),
-            groupuin: parseInt(groupUin),
+            uin: PeerUin,
+            groupuin: groupUin,
             ext: 0
         });
     //console.log(Body)
