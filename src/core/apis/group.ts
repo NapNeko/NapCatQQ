@@ -56,10 +56,7 @@ export class NTQQGroupApi {
     async sendPacketPoke(group: string, peer: string) {
         let data = encodeGroupPoke(group, peer);
         let hex = Buffer.from(data).toString('hex');
-        let retdata = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0xed3_1', hex);
-        //await RequestUtil.HttpGetJson('http://127.0.0.1:8086/send', 'POST', { data: hex }, { 'Content-Type': 'application/json' }, false, true);
-        //let ret = await this.core.context.session.getMsgService().sendSsoCmdReqByContend('LightAppSvc.mini_app_i', hex.slice(0, hex.length / 2));
-        // let ret = await this.core.context.session.getMsgService().sendSsoCmdReqByContend('OidbSvcTrpcTcp.0xfe1_2', hex.toString('hex'));
+        let retdata = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0xed3_1', hex, true);
         console.log('sendPacketPoke', retdata);
     }
     async fetchGroupEssenceList(groupCode: string) {
