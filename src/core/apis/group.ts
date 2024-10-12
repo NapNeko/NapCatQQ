@@ -12,11 +12,11 @@ import {
 import { isNumeric, sleep, solveAsyncProblem } from '@/common/helper';
 import { LimitedHashTable } from '@/common/message-unique';
 import { NTEventWrapper } from '@/common/event';
-import { encodeGroupPoke } from '../proto/Poke';
 import { randomUUID } from 'crypto';
 import { RequestUtil } from '@/common/request';
-interface recvPacket 
-{
+import { NapProtoMsg } from '../proto/NapProto';
+import { OidbSvcTrpcTcp0XED3_1, OidbSvcTrpcTcpBaseProto } from '../proto/OidbBase';
+interface recvPacket {
     type: string,//仅recv
     trace_id_md5?: string,
     data: {
@@ -65,10 +65,18 @@ export class NTQQGroupApi {
         //console.log('ret: ', ret);
     }
     async sendPacketPoke(group: number, peer: number) {
-        let data = encodeGroupPoke(group, peer);
-        let hex = Buffer.from(data).toString('hex');
+        let oidb_0xed3 = new NapProtoMsg(OidbSvcTrpcTcp0XED3_1).encode({
+            uin: peer,
+            groupUin: group,
+            ext: 0
+        });
+        let oidb_packet = new NapProtoMsg(OidbSvcTrpcTcpBaseProto).encode({
+            command: 0xed3,
+            subCommand: 1,
+            body: oidb_0xed3
+        });
+        let hex = Buffer.from(oidb_packet).toString('hex');
         let retdata = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0xed3_1', hex, false);
-        //console.log('sendPacketPoke', retdata);
     }
     async fetchGroupEssenceList(groupCode: string) {
         const pskey = (await this.core.apis.UserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com')!;
