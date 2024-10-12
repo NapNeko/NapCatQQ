@@ -17,6 +17,7 @@ export class PacketClient {
             this.logger.log.bind(this.logger)(`Attempting to connect to ${this.url}`);
             this.websocket = new WebSocket(this.url);
             this.websocket.on('error', (err) => this.logger.logError.bind(this.logger)('[Core] [Packet Server] Error:', err.message));
+            
             this.websocket.onopen = () => {
                 this.isConnected = true;
                 this.reconnectAttempts = 0;
@@ -44,12 +45,16 @@ export class PacketClient {
     }
 
     private attemptReconnect(): void {
-        if (this.reconnectAttempts < this.maxReconnectAttempts) {
-            this.reconnectAttempts++;
-            this.logger.logError.bind(this.logger)(`Reconnecting attempt ${this.reconnectAttempts}`);
-            setTimeout(() => this.connect().then().catch(), 1000 * this.reconnectAttempts);
-        } else {
-            this.logger.logError.bind(this.logger)(`Max reconnect attempts reached. Could not reconnect to ${this.url}`);
+        try {
+            if (this.reconnectAttempts < this.maxReconnectAttempts) {
+                this.reconnectAttempts++;
+                this.logger.logError.bind(this.logger)(`Reconnecting attempt ${this.reconnectAttempts}`);
+                setTimeout(() => this.connect().then().catch(), 1000 * this.reconnectAttempts);
+            } else {
+                this.logger.logError.bind(this.logger)(`Max reconnect attempts reached. Could not reconnect to ${this.url}`);
+            }
+        } catch (error) {
+            this.logger.logError.bind(this.logger)(`Error attempting to reconnect: ${error}`);
         }
     }
     async registerCallback(trace_id: string, type: string, callback: any): Promise<void> {
