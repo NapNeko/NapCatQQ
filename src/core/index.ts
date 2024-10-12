@@ -81,6 +81,7 @@ export class NapCatCore {
         this.context = context;
         this.util = this.context.wrapper.NodeQQNTWrapperUtil;
         this.eventWrapper = new NTEventWrapper(context.session);
+        this.configLoader = new NapCatConfigLoader(this, this.context.pathWrapper.configPath);
         this.apis = {
             FileApi: new NTQQFileApi(this.context, this),
             SystemApi: new NTQQSystemApi(this.context, this),
@@ -92,7 +93,6 @@ export class NapCatCore {
             UserApi: new NTQQUserApi(this.context, this),
             GroupApi: new NTQQGroupApi(this.context, this),
         };
-        this.configLoader = new NapCatConfigLoader(this, this.context.pathWrapper.configPath);
         this.NapCatDataPath = path.join(this.dataPath, 'NapCat');
         fs.mkdirSync(this.NapCatDataPath, { recursive: true });
         this.NapCatTempPath = path.join(this.NapCatDataPath, 'temp');
