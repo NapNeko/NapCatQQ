@@ -4,7 +4,7 @@ import WebSocket from "ws";
 
 export class PacketClient {
     private websocket: WebSocket | undefined;
-    private isConnected: boolean = false;
+    public isConnected: boolean = false;
     private reconnectAttempts: number = 0;
     private maxReconnectAttempts: number = 5;
     private cb = new LRUCache<string, { type: string, callback: any }>(500);
