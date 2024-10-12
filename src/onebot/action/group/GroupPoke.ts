@@ -14,7 +14,7 @@ const SchemaData = {
 type Payload = FromSchema<typeof SchemaData>;
 
 export class GroupPoke extends BaseAction<Payload, any> {
-    actionName = ActionName.GetGroupList;
+    actionName = ActionName.GroupPoke;
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
