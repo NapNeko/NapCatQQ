@@ -51,9 +51,9 @@ type ProtoMessageType = {
     [key: string]: ProtoFieldType;
 };
 
-function ProtoField<T extends ScalarType, O extends boolean = false, R extends O extends true ? false : boolean = false>(no: number, type: T, repeated?: R, optional?: O): ScalarProtoFieldType<T, O, R>;
-function ProtoField<T extends () => ProtoMessageType, O extends boolean = false, R extends O extends true ? false : boolean = false>(no: number, type: T, repeated?: R, optional?: O): MessageProtoFieldType<T, O, R>;
-function ProtoField(no: number, type: ScalarType | (() => ProtoMessageType), repeated?: boolean, optional?: boolean): ProtoFieldType {
+export function ProtoField<T extends ScalarType, O extends boolean = false, R extends O extends true ? false : boolean = false>(no: number, type: T, repeated?: R, optional?: O): ScalarProtoFieldType<T, O, R>;
+export function ProtoField<T extends () => ProtoMessageType, O extends boolean = false, R extends O extends true ? false : boolean = false>(no: number, type: T, repeated?: R, optional?: O): MessageProtoFieldType<T, O, R>;
+export function ProtoField(no: number, type: ScalarType | (() => ProtoMessageType), repeated?: boolean, optional?: boolean): ProtoFieldType {
     if (typeof type === 'function') {
         return { kind: 'message', no: no, type: type, repeated: repeated ?? false, optional: optional ?? false };
     } else {
@@ -89,7 +89,7 @@ type ProtoStructType<T> = RequiredFieldsType<T> & OptionalFieldsType<T>;
 
 const NapProtoMsgCache = new Map<ProtoMessageType, MessageType<ProtoStructType<ProtoMessageType>>>();
 
-class NapProtoMsg<T extends ProtoMessageType> {
+export class NapProtoMsg<T extends ProtoMessageType> {
     private readonly _msg: T;
     private readonly _field: PartialFieldInfo[];
     private readonly _proto_msg: MessageType<ProtoStructType<T>>;
