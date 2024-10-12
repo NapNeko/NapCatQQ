@@ -46,11 +46,11 @@ export class NTQQGroupApi {
             this.groupCache.set(group.groupCode, group);
         }
         this.context.logger.logDebug(`加载${this.groups.length}个群组缓存完成`);
-        console.log('pid', process.pid);
+        //console.log('pid', process.pid);
         // this.session = await frida.attach(process.pid);
-        setTimeout(async () => {
-            this.sendPocketRkey();
-        }, 10000);
+        // setTimeout(async () => {
+        //     this.sendPocketRkey();
+        // }, 10000);
     }
     async getCoreAndBaseInfo(uids: string[]) {
         return await this.core.eventWrapper.callNoListenerEvent(
@@ -62,7 +62,7 @@ export class NTQQGroupApi {
     async sendPocketRkey() {
         let hex = '08E7A00210CA01221D0A130A05080110CA011206A80602B006011A0208022206080A081408022A006001';
         let ret = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0x9067_202', hex, true);
-        console.log('ret: ', ret);
+        //console.log('ret: ', ret);
     }
     async sendPacketPoke(group: number, peer: number) {
         let data = encodeGroupPoke(group, peer);
