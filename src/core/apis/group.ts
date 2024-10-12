@@ -56,8 +56,8 @@ export class NTQQGroupApi {
     async sendPacketPoke(group: string, peer: string) {
         let data = encodeGroupPoke(group, peer);
         let hex = Buffer.from(data).toString('hex');
-        let retdata = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0xed3_1', hex, true);
-        console.log('sendPacketPoke', retdata);
+        let retdata = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0xed3_1', hex, false);
+        //console.log('sendPacketPoke', retdata);
     }
     async fetchGroupEssenceList(groupCode: string) {
         const pskey = (await this.core.apis.UserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com')!;

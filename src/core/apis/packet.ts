@@ -51,7 +51,22 @@ export class NTQQPacketApi {
         return text;
     }
     async sendPacket(cmd: string, data: string, rsp = false) {
-        return new Promise((resolve, reject) => {
+        // wtfk tx
+        // 校验失败和异常 可能返回undefined
+        return new Promise<undefined | {
+            type: string,//仅recv含有data
+            trace_id: string,
+            data: {
+                trace_id: string,
+                seq: number,
+                hex_data: string,
+                cmd: string
+            }
+        }>((resolve, reject) => {
+            if (!this.isInit || !this.PacketClient?.isConnected) {
+                this.core.context.logger.logError('PacketClient is not init');
+                return undefined;
+            }
             let md5 = crypto.createHash('md5').update(data).digest('hex');
             let trace_id = (this.randText(4) + md5 + data).slice(0, data.length / 2);
             this.PacketClient?.sendCommand(cmd, data, trace_id, rsp, 5000, async () => {
