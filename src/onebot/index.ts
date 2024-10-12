@@ -540,6 +540,10 @@ export class NapCatOneBot11Adapter {
             if (isSelfMsg) {
                 ob11Msg.target_id = parseInt(message.peerUin);
             }
+            // if(ob11Msg.raw_message.startsWith('!poke')){
+            //     console.log('poke',message.peerUin, message.senderUin);
+            //     this.core.apis.GroupApi.sendPacketPoke(message.peerUin, message.senderUin);
+            // }
             this.networkManager.emitEvent(ob11Msg);
         }).catch(e => this.context.logger.logError.bind(this.context.logger)('constructMessage error: ', e));
 
