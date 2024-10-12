@@ -24,7 +24,9 @@ export class LRUCache<K, V> {
         } else if (this.cache.size >= this.capacity) {
             // If the cache is full, remove the least recently used key (the first one in the map)
             const firstKey = this.cache.keys().next().value;
-            this.cache.delete(firstKey);
+            if (firstKey !== undefined) {
+                this.cache.delete(firstKey);
+            }
         }
         this.cache.set(key, value);
     }
