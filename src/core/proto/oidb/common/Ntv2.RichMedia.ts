@@ -1,7 +1,6 @@
 import { ScalarType } from "@protobuf-ts/runtime";
 import { ProtoField } from "../../NapProto";
 
-
 export const NTV2RichMediaReq = {
     ReqHead: ProtoField(1, ScalarType.BYTES),
     DownloadRKeyReq: ProtoField(4, ScalarType.BYTES),

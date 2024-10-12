@@ -63,6 +63,7 @@ export class NTQQGroupApi {
         let oidb_0xed3 = new NapProtoMsg(OidbSvcTrpcTcp0XED3_1).encode({
             uin: peer,
             groupUin: group,
+            friendUin: group,
             ext: 0
         });
         let oidb_packet = new NapProtoMsg(OidbSvcTrpcTcpBase).encode({
