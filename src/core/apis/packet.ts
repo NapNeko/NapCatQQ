@@ -3,6 +3,9 @@ import { RequestUtil } from '@/common/request';
 import offset from '@/core/external/offset.json';
 import * as crypto from 'crypto';
 import { PacketClient } from '../helper/packet';
+import { NapProtoMsg } from '../proto/NapProto';
+import { OidbSvcTrpcTcp0X9067_202 } from '../proto/oidb/Oidb.0x9067_202';
+import { OidbSvcTrpcTcpBase } from '../proto/oidb/OidbBase';
 
 interface OffsetType {
     [key: string]: {
@@ -64,5 +67,30 @@ export class NTQQPacketApi {
                 await this.core.context.session.getMsgService().sendSsoCmdReqByContend(cmd, trace_id);
             }).then((res) => resolve(res)).catch((e) => reject(e));
         });
+    }
+    async sendRkeyPacket() {
+        let oidb_0x9067_202 = new NapProtoMsg(OidbSvcTrpcTcp0X9067_202).encode({
+            reqHead: {
+                common: {
+                    requestId: 1,
+                    command: 2
+                },
+                scene: {
+                    requestType: 2,
+                    businessType: 1,
+                    sceneType: 0
+                },
+                clent: {
+                    agentType: 2
+                }
+            },
+            downloadRKeyReq: Buffer.from('080a08140802', 'hex'),
+        });
+        let oidb_packet = new NapProtoMsg(OidbSvcTrpcTcpBase).encode({
+            command: 0x9067,
+            subCommand: 202,
+            body: oidb_0x9067_202
+        });
+        return oidb_0x9067_202;
     }
 }
