@@ -45,7 +45,7 @@ import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecal
 import { LRUCache } from '@/common/lru-cache';
 import { NodeIKernelRecentContactListener } from '@/core/listeners/NodeIKernelRecentContactListener';
 import { Native } from '@/native';
-import { decodeMessage, decodeRecallGroup, Message, RecallGroup } from '@/core/proto/Message';
+import { decodeMessage, decodeRecallGroup, Message, RecallGroup } from '@/core/proto/old/Message';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
