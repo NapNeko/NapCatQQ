@@ -53,7 +53,7 @@ export class NTQQGroupApi {
             uids,
         );
     }
-    async sendPacketPoke(group: string, peer: string) {
+    async sendPacketPoke(group: number, peer: number) {
         let data = encodeGroupPoke(group, peer);
         let hex = Buffer.from(data).toString('hex');
         let retdata = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0xed3_1', hex, false);
