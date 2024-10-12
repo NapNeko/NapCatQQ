@@ -14,7 +14,7 @@ export class PacketClient {
         return new Promise((resolve, reject) => {
             this.logger.log.bind(this.logger)(`Attempting to connect to ${this.url}`);
             this.websocket = new WebSocket(this.url);
-
+            this.websocket.on('error', (err) => this.logger.logError.bind(this.logger)('[Core] [Packet Server] Error:', err.message));
             this.websocket.onopen = () => {
                 this.isConnected = true;
                 this.reconnectAttempts = 0;
@@ -45,7 +45,7 @@ export class PacketClient {
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
             this.reconnectAttempts++;
             this.logger.logError.bind(this.logger)(`Reconnecting attempt ${this.reconnectAttempts}`);
-            setTimeout(() => this.connect(), 1000 * this.reconnectAttempts);
+            setTimeout(() => this.connect().then().catch(), 1000 * this.reconnectAttempts);
         } else {
             this.logger.logError.bind(this.logger)(`Max reconnect attempts reached. Could not reconnect to ${this.url}`);
         }
@@ -81,16 +81,17 @@ export class PacketClient {
             };
 
             this.websocket.send(JSON.stringify(commandMessage));
+            if (rsp) {
+                this.registerCallback(trace_id, 'recv', (json: any) => {
+                    clearTimeout(timeoutHandle);
+                    resolve(json);
+                });
+            }
             this.registerCallback(trace_id, 'send', (json: any) => {
                 sendcb(json);
                 if (!rsp) {
                     clearTimeout(timeoutHandle);
                     resolve(json);
-                } else {
-                    this.registerCallback(trace_id, 'recv', (json: any) => {
-                        clearTimeout(timeoutHandle);
-                        resolve(json);
-                    });
                 }
             });
             const timeoutHandle = setTimeout(() => {

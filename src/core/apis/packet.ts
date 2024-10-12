@@ -22,15 +22,20 @@ export class NTQQPacketApi {
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
         this.core = core;
-        this.InitSendPacket('127.0.0.1:8086', '9.9.15-28418', '1001').then().catch(this.core.context.logger.logError.bind(this.core.context.logger));
+        let config = this.core.configLoader.configData;
+        if (config && config.packetServer && config.packetServer.length > 0) {
+            let serverurl = this.core.configLoader.configData.packetServer ?? '127.0.0.1:8086';
+            this.InitSendPacket(serverurl, this.context.basicInfoWrapper.getFullQQVesion())
+                .then()
+                .catch(this.core.context.logger.logError.bind(this.core.context.logger));
+        }
     }
-    async InitSendPacket(serverUrl: string, qqversion: string, uin: string) {
+    async InitSendPacket(serverUrl: string, qqversion: string) {
         this.serverUrl = serverUrl;
         this.qqversion = qqversion;
         let offsetTable: OffsetType = offset;
         if (!offsetTable[qqversion]) return false;
         let url = 'ws://' + this.serverUrl + '/ws';
-        // let postdata = { recv: offsetTable[qqversion].recv, send: offsetTable[qqversion].send, qqver: qqversion, uin: uin, pid: process.pid };
         this.PacketClient = new PacketClient(url, this.core.context.logger);
         await this.PacketClient.connect();
         await this.PacketClient.init(process.pid, offsetTable[qqversion].recv, offsetTable[qqversion].send);
