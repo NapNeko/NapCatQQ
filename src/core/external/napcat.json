@@ -2,5 +2,6 @@
     "fileLog": true,
     "consoleLog": true,
     "fileLogLevel": "debug",
-    "consoleLogLevel": "info"
+    "consoleLogLevel": "info",
+    "packetServer": ""
 }
