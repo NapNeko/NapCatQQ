@@ -15,7 +15,16 @@ import { NTEventWrapper } from '@/common/event';
 import { encodeGroupPoke } from '../proto/Poke';
 import { randomUUID } from 'crypto';
 import { RequestUtil } from '@/common/request';
-
+interface recvPacket 
+{
+    type: string,//仅recv
+    trace_id_md5?: string,
+    data: {
+        seq: number,
+        hex_data: string,
+        cmd: string
+    }
+}
 export class NTQQGroupApi {
     context: InstanceContext;
     core: NapCatCore;
@@ -39,12 +48,9 @@ export class NTQQGroupApi {
         this.context.logger.logDebug(`加载${this.groups.length}个群组缓存完成`);
         console.log('pid', process.pid);
         // this.session = await frida.attach(process.pid);
-        // setTimeout(async () => {
-        //     let data = Buffer.from('089601', 'hex').toString('utf-8');//optional int32 a = 1;
-        //     console.log('data', Buffer.from(data).toString('hex'));
-        //     let ret = await this.core.context.session.getMsgService().sendSsoCmdReqByContend("OidbSvcTrpcTcp.0xfe1_2", data);
-        //     console.log('sendSsoCmdReqByContend', ret);
-        // }, 20000);
+        setTimeout(async () => {
+            this.sendPocketRkey();
+        }, 10000);
     }
     async getCoreAndBaseInfo(uids: string[]) {
         return await this.core.eventWrapper.callNoListenerEvent(
@@ -52,6 +58,11 @@ export class NTQQGroupApi {
             'nodeStore',
             uids,
         );
+    }
+    async sendPocketRkey() {
+        let hex = '08E7A00210CA01221D0A130A05080110CA011206A80602B006011A0208022206080A081408022A006001';
+        let ret = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0x9067_202', hex, true);
+        console.log('ret: ', ret);
     }
     async sendPacketPoke(group: number, peer: number) {
         let data = encodeGroupPoke(group, peer);

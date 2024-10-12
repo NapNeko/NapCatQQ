@@ -1,13 +1,15 @@
 import { LogWrapper } from "@/common/log";
 import { LRUCache } from "@/common/lru-cache";
 import WebSocket from "ws";
+import { createHash } from "crypto";
 
 export class PacketClient {
     private websocket: WebSocket | undefined;
     public isConnected: boolean = false;
     private reconnectAttempts: number = 0;
     private maxReconnectAttempts: number = 5;
-    private cb = new LRUCache<string, { type: string, callback: any }>(500);
+    //trace_id-type callback
+    private cb = new LRUCache<string, any>(500);
     constructor(private url: string, public logger: LogWrapper) { }
 
     connect(): Promise<void> {
@@ -51,7 +53,7 @@ export class PacketClient {
         }
     }
     async registerCallback(trace_id: string, type: string, callback: any): Promise<void> {
-        this.cb.put(trace_id, { type: type, callback: callback });
+        this.cb.put(createHash('md5').update(trace_id).digest('hex') + type, callback);
     }
 
     async init(pid: number, recv: string, send: string): Promise<void> {
@@ -79,7 +81,6 @@ export class PacketClient {
                 data: data,
                 trace_id: trace_id
             };
-
             this.websocket.send(JSON.stringify(commandMessage));
             if (rsp) {
                 this.registerCallback(trace_id, 'recv', (json: any) => {
@@ -103,10 +104,11 @@ export class PacketClient {
         try {
 
             let json = JSON.parse(message.toString());
-            let trace_id = json.trace_id;
-            let event = this.cb.get(trace_id);
-            if (event?.type == 'all' || event?.type == json.type) {
-                await event?.callback(json.data);
+            let trace_id_md5 = json.trace_id_md5;
+            let action = json?.type ?? 'init';
+            let event = this.cb.get(trace_id_md5 + action);
+            if (event) {
+                await event(json.data);
             }
             //console.log("Received message:", json);
         } catch (error) {
