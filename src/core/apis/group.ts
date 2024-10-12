@@ -12,10 +12,9 @@ import {
 import { isNumeric, sleep, solveAsyncProblem } from '@/common/helper';
 import { LimitedHashTable } from '@/common/message-unique';
 import { NTEventWrapper } from '@/common/event';
-import { randomUUID } from 'crypto';
-import { RequestUtil } from '@/common/request';
 import { NapProtoMsg } from '../proto/NapProto';
-import { OidbSvcTrpcTcp0XED3_1, OidbSvcTrpcTcpBaseProto } from '../proto/OidbBase';
+import {  OidbSvcTrpcTcpBase } from '../proto/oidb/OidbBase';
+import { OidbSvcTrpcTcp0XED3_1 } from '../proto/oidb/Oidb.ed3_1';
 interface recvPacket {
     type: string,//仅recv
     trace_id_md5?: string,
@@ -46,11 +45,7 @@ export class NTQQGroupApi {
             this.groupCache.set(group.groupCode, group);
         }
         this.context.logger.logDebug(`加载${this.groups.length}个群组缓存完成`);
-        //console.log('pid', process.pid);
-        // this.session = await frida.attach(process.pid);
-        // setTimeout(async () => {
-        //     this.sendPocketRkey();
-        // }, 10000);
+        // process.pid 调试点
     }
     async getCoreAndBaseInfo(uids: string[]) {
         return await this.core.eventWrapper.callNoListenerEvent(
@@ -70,7 +65,7 @@ export class NTQQGroupApi {
             groupUin: group,
             ext: 0
         });
-        let oidb_packet = new NapProtoMsg(OidbSvcTrpcTcpBaseProto).encode({
+        let oidb_packet = new NapProtoMsg(OidbSvcTrpcTcpBase).encode({
             command: 0xed3,
             subCommand: 1,
             body: oidb_0xed3
