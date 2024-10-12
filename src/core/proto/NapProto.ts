@@ -32,7 +32,7 @@ interface BaseProtoFieldType<T, O extends boolean, R extends O extends true ? fa
     no: number;
     type: T;
     optional: O;
-    repeated: R;
+    repeat: R;
 }
 
 interface ScalarProtoFieldType<T extends ScalarType, O extends boolean, R extends O extends true ? false : boolean> extends BaseProtoFieldType<T, O, R> {
@@ -51,55 +51,55 @@ type ProtoMessageType = {
     [key: string]: ProtoFieldType;
 };
 
-export function ProtoField<T extends ScalarType, O extends boolean = false, R extends O extends true ? false : boolean = false>(no: number, type: T, repeated?: R, optional?: O): ScalarProtoFieldType<T, O, R>;
-export function ProtoField<T extends () => ProtoMessageType, O extends boolean = false, R extends O extends true ? false : boolean = false>(no: number, type: T, repeated?: R, optional?: O): MessageProtoFieldType<T, O, R>;
-export function ProtoField(no: number, type: ScalarType | (() => ProtoMessageType), repeated?: boolean, optional?: boolean): ProtoFieldType {
+export function ProtoField<T extends ScalarType, O extends boolean = false, R extends O extends true ? false : boolean = false>(no: number, type: T, optional?: O, repeat?: R): ScalarProtoFieldType<T, O, R>;
+export function ProtoField<T extends () => ProtoMessageType, O extends boolean = false, R extends O extends true ? false : boolean = false>(no: number, type: T, optional?: O, repeat?: R): MessageProtoFieldType<T, O, R>;
+export function ProtoField(no: number, type: ScalarType | (() => ProtoMessageType), optional?: boolean, repeat?: boolean): ProtoFieldType {
     if (typeof type === 'function') {
-        return { kind: 'message', no: no, type: type, repeated: repeated ?? false, optional: optional ?? false };
+        return { kind: 'message', no: no, type: type, optional: optional ?? false, repeat: repeat ?? false };
     } else {
-        return { kind: 'scalar', no: no, type: type, repeated: repeated ?? false, optional: optional ?? false };
+        return { kind: 'scalar', no: no, type: type, optional: optional ?? false, repeat: repeat ?? false };
     }
 }
 
-type ProtoFieldReturnType<T> = T extends ScalarProtoFieldType<infer S, infer R, infer O>
+type ProtoFieldReturnType<T extends unknown, E extends boolean> = NonNullable<T> extends ScalarProtoFieldType<infer S, infer O, infer R>
     ? ScalarTypeToTsType<S>
-    : T extends MessageProtoFieldType<infer S, infer R, infer O>
-    ? ProtoStructType<ReturnType<S>>
+    : T extends NonNullable<MessageProtoFieldType<infer S, infer O, infer R>>
+    ? NonNullable<ProtoStructType<ReturnType<S>, E>>
     : never;
 
-type RequiredFieldsType<T> = {
-    [K in keyof T as T[K] extends {
-        optional: true
-    } | MessageProtoFieldType<any, any, any> ? never : LowerCamelCase<K & string>]
-    : T[K] extends { repeated: true }
-    ? ProtoFieldReturnType<T[K]>[]
-    : ProtoFieldReturnType<T[K]>
-};
+type RequiredFieldsBaseType<T extends unknown, E extends boolean> = {
+    [K in keyof T as T[K] extends { optional: true } ? never : LowerCamelCase<K & string>]:
+    T[K] extends { repeat: true }
+    ? ProtoFieldReturnType<T[K], E>[]
+    : ProtoFieldReturnType<T[K], E>
+}
 
-type OptionalFieldsType<T> = {
-    [K in keyof T as T[K] extends {
-        optional: true
-    } | MessageProtoFieldType<any, any, any> ? LowerCamelCase<K & string> : never]?:
-    T[K] extends { repeated: true }
-    ? ProtoFieldReturnType<T[K]>[]
-    : ProtoFieldReturnType<T[K]>
-};
+type OptionalFieldsBaseType<T extends unknown, E extends boolean> = {
+    [K in keyof T as T[K] extends { optional: true } ? LowerCamelCase<K & string> : never]?:
+    T[K] extends { repeat: true }
+    ? ProtoFieldReturnType<T[K], E>[]
+    : ProtoFieldReturnType<T[K], E>
+}
 
-type ProtoStructType<T> = RequiredFieldsType<T> & OptionalFieldsType<T>;
+type RequiredFieldsType<T extends unknown, E extends boolean> = E extends true ? Partial<RequiredFieldsBaseType<T, E>> : RequiredFieldsBaseType<T, E>;
 
-const NapProtoMsgCache = new Map<ProtoMessageType, MessageType<ProtoStructType<ProtoMessageType>>>();
+type OptionalFieldsType<T extends unknown, E extends boolean> = E extends true ? Partial<OptionalFieldsBaseType<T, E>> : OptionalFieldsBaseType<T, E>;
+
+type ProtoStructType<T extends unknown, E extends boolean> = RequiredFieldsType<T, E> & OptionalFieldsType<T, E>;
+
+const NapProtoMsgCache = new Map<ProtoMessageType, MessageType<ProtoStructType<ProtoMessageType, boolean>>>();
 
 export class NapProtoMsg<T extends ProtoMessageType> {
     private readonly _msg: T;
     private readonly _field: PartialFieldInfo[];
-    private readonly _proto_msg: MessageType<ProtoStructType<T>>;
+    private readonly _proto_msg: MessageType<ProtoStructType<T, boolean>>;
 
     constructor(fields: T) {
         this._msg = fields;
         this._field = Object.keys(fields).map(key => {
             const field = fields[key];
             if (field.kind === 'scalar') {
-                const repeatType = field.repeated
+                const repeatType = field.repeat
                     ? [ScalarType.STRING, ScalarType.BYTES].includes(field.type)
                         ? RepeatType.UNPACKED
                         : RepeatType.PACKED
@@ -122,19 +122,19 @@ export class NapProtoMsg<T extends ProtoMessageType> {
                     no: field.no,
                     name: key,
                     kind: 'message',
-                    repeat: field.repeated ? RepeatType.PACKED : RepeatType.NO,
+                    repeat: field.repeat ? RepeatType.PACKED : RepeatType.NO,
                     T: () => rt,
                 };
             }
         }) as PartialFieldInfo[];
-        this._proto_msg = new MessageType<ProtoStructType<T>>('nya', this._field);
+        this._proto_msg = new MessageType<ProtoStructType<T, boolean>>('nya', this._field);
     }
 
-    encode(data: ProtoStructType<T>): Uint8Array {
-        return this._proto_msg.toBinary(data);
+    encode(data: ProtoStructType<T, true>): Uint8Array {
+        return this._proto_msg.toBinary(data)
     }
 
-    decode(data: Uint8Array): ProtoStructType<T> {
-        return this._proto_msg.fromBinary(data);
+    decode(data: Uint8Array): ProtoStructType<T, false> {
+        return this._proto_msg.fromBinary(data) as ProtoStructType<T, false>;
     }
 }
