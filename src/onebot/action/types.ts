@@ -69,7 +69,7 @@ export enum ActionName {
     GetRecord = 'get_record',
     CleanCache = 'clean_cache',
     GetCookies = 'get_cookies',
-    // 以下为go-cqhttp api 
+    // 以下为go-cqhttp api
     GoCQHTTP_HandleQuickAction = '.handle_quick_operation',
     GetGroupHonorInfo = 'get_group_honor_info',
     GoCQHTTP_GetEssenceMsg = 'get_essence_msg_list',
@@ -123,4 +123,5 @@ export enum ActionName {
     GetUserStatus = "nc_get_user_status",
     GetRkey = "nc_get_rkey",
     SetSpecialTittle = "set_group_special_title",
+    UploadForwardMsg = "upload_forward_msg",
 }

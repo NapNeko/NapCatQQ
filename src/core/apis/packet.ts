@@ -8,6 +8,7 @@ import {NapProtoMsg} from '../proto/NapProto';
 import {OidbSvcTrpcTcp0X9067_202_Rsp_Body} from '../proto/oidb/Oidb.0x9067_202';
 import {OidbSvcTrpcTcpBase, OidbSvcTrpcTcpBaseRsp} from '../proto/oidb/OidbBase';
 import {OidbSvcTrpcTcp0XFE1_2RSP} from '../proto/oidb/Oidb.fe1_2';
+import {PacketForwardNode} from "@/core/helper/packet/msg/builder";
 
 interface OffsetType {
     [key: string]: {
@@ -117,5 +118,11 @@ export class NTQQPacketApi {
     async sendSetSpecialTittlePacket(groupCode: string, uid: string, tittle: string) {
         let data = this.packetPacker.packSetSpecialTittlePacket(groupCode, uid, tittle);
         let ret = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0x8fc_2', data, true);
+    }
+
+    async sendUploadForwardMsg(msg: PacketForwardNode[], groupUin: number = 0){
+        let data = this.packetPacker.packUploadForwardMsg(this.core.selfInfo.uid, msg, groupUin);
+        let ret = await this.core.apis.PacketApi.sendPacket('trpc.group.long_msg_interface.MsgService.SsoSendLongMsg', data, true);
+        console.log(JSON.stringify(ret));
     }
 }

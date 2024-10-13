@@ -88,6 +88,7 @@ import { GroupPoke } from './group/GroupPoke';
 import { GetUserStatus } from './extends/GetUserStatus';
 import { GetRkey } from './extends/GetRkey';
 import { SetSpecialTittle } from './extends/SetSpecialTittle';
+import { UploadForwardMsg } from "@/onebot/action/extends/UploadForwardMsg";
 
 
 export type ActionMap = Map<string, BaseAction<any, any>>;
@@ -188,6 +189,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new GetUserStatus(obContext, core),
         new GetRkey(obContext, core),
         new SetSpecialTittle(obContext, core),
+        new UploadForwardMsg(obContext, core),
     ];
     const actionMap = new Map();
     for (const action of actionHandlers) {
