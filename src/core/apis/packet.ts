@@ -7,6 +7,7 @@ import { NapProtoMsg } from '../proto/NapProto';
 import { OidbSvcTrpcTcp0X9067_202 } from '../proto/oidb/Oidb.0x9067_202';
 import { OidbSvcTrpcTcpBase } from '../proto/oidb/OidbBase';
 import { OidbSvcTrpcTcp0XFE1_2, OidbSvcTrpcTcp0XFE1_2RSP } from '../proto/oidb/Oidb.fe1_2';
+import { OidbSvcTrpcTcp0X8FC_2, OidbSvcTrpcTcp0X8FC_2_Body } from '../proto/oidb/Oidb.0x8FC_2';
 
 interface OffsetType {
     [key: string]: {
@@ -92,6 +93,24 @@ export class NTQQPacketApi {
             subCommand: 202,
             body: oidb_0x9067_202,
             isReserved: 1
+        });
+        return oidb_packet;
+    }
+    async buildSetSpecialTittlePacket(groupCode: string, uid: string, tittle: string) {
+        let oidb_0x8FC_2_body = new NapProtoMsg(OidbSvcTrpcTcp0X8FC_2_Body).encode({
+            targetUid: uid,
+            specialTitle: tittle,
+            expiredTime: -1,
+            uinName: tittle
+        });
+        let oidb_0x8FC_2 = new NapProtoMsg(OidbSvcTrpcTcp0X8FC_2).encode({
+            groupUin: +groupCode,
+            body: oidb_0x8FC_2_body
+        });
+        let oidb_packet = new NapProtoMsg(OidbSvcTrpcTcpBase).encode({
+            command: 0x8FC,
+            subCommand: 2,
+            body: oidb_0x8FC_2,
         });
         return oidb_packet;
     }
