@@ -64,7 +64,7 @@ export function ProtoField(no: number, type: ScalarType | (() => ProtoMessageTyp
 type ProtoFieldReturnType<T extends unknown, E extends boolean> = NonNullable<T> extends ScalarProtoFieldType<infer S, infer O, infer R>
     ? ScalarTypeToTsType<S>
     : T extends NonNullable<MessageProtoFieldType<infer S, infer O, infer R>>
-    ? NonNullable<ProtoStructType<ReturnType<S>, E>>
+    ? NonNullable<NapProtoStructType<ReturnType<S>, E>>
     : never;
 
 type RequiredFieldsBaseType<T extends unknown, E extends boolean> = {
@@ -85,14 +85,18 @@ type RequiredFieldsType<T extends unknown, E extends boolean> = E extends true ?
 
 type OptionalFieldsType<T extends unknown, E extends boolean> = E extends true ? Partial<OptionalFieldsBaseType<T, E>> : OptionalFieldsBaseType<T, E>;
 
-type ProtoStructType<T extends unknown, E extends boolean> = RequiredFieldsType<T, E> & OptionalFieldsType<T, E>;
+type NapProtoStructType<T extends unknown, E extends boolean> = RequiredFieldsType<T, E> & OptionalFieldsType<T, E>;
 
-const NapProtoMsgCache = new Map<ProtoMessageType, MessageType<ProtoStructType<ProtoMessageType, boolean>>>();
+export type NapProtoEncodeStructType<T extends unknown> = NapProtoStructType<T, true>;
+
+export type NapProtoDecodeStructType<T extends unknown> = NapProtoStructType<T, false>;
+
+const NapProtoMsgCache = new Map<ProtoMessageType, MessageType<NapProtoStructType<ProtoMessageType, boolean>>>();
 
 export class NapProtoMsg<T extends ProtoMessageType> {
     private readonly _msg: T;
     private readonly _field: PartialFieldInfo[];
-    private readonly _proto_msg: MessageType<ProtoStructType<T, boolean>>;
+    private readonly _proto_msg: MessageType<NapProtoStructType<T, boolean>>;
 
     constructor(fields: T) {
         this._msg = fields;
@@ -127,14 +131,14 @@ export class NapProtoMsg<T extends ProtoMessageType> {
                 };
             }
         }) as PartialFieldInfo[];
-        this._proto_msg = new MessageType<ProtoStructType<T, boolean>>('nya', this._field);
+        this._proto_msg = new MessageType<NapProtoStructType<T, boolean>>('nya', this._field);
     }
 
-    encode(data: ProtoStructType<T, true>): Uint8Array {
-        return this._proto_msg.toBinary(this._proto_msg.create(data as PartialMessage<ProtoStructType<T, boolean>>));
+    encode(data: NapProtoEncodeStructType<T>): Uint8Array {
+        return this._proto_msg.toBinary(this._proto_msg.create(data as PartialMessage<NapProtoEncodeStructType<T>>));
     }
 
-    decode(data: Uint8Array): ProtoStructType<T, false> {
-        return this._proto_msg.fromBinary(data) as ProtoStructType<T, false>;
+    decode(data: Uint8Array): NapProtoDecodeStructType<T> {
+        return this._proto_msg.fromBinary(data) as NapProtoDecodeStructType<T>;
     }
 }
