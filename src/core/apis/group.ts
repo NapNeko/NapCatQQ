@@ -9,12 +9,10 @@ import {
     MemberExtSourceType,
     NapCatCore,
 } from '@/core';
-import { isNumeric, sleep, solveAsyncProblem } from '@/common/helper';
-import { LimitedHashTable } from '@/common/message-unique';
-import { NTEventWrapper } from '@/common/event';
-import { NapProtoMsg } from '../proto/NapProto';
-import { OidbSvcTrpcTcpBase } from '../proto/oidb/OidbBase';
-import { OidbSvcTrpcTcp0XED3_1 } from '../proto/oidb/Oidb.ed3_1';
+import {isNumeric, solveAsyncProblem} from '@/common/helper';
+import {LimitedHashTable} from '@/common/message-unique';
+import {NTEventWrapper} from '@/common/event';
+
 interface recvPacket {
     type: string,//仅recv
     trace_id_md5?: string,
@@ -24,6 +22,7 @@ interface recvPacket {
         cmd: string
     }
 }
+
 export class NTQQGroupApi {
     context: InstanceContext;
     core: NapCatCore;
@@ -47,6 +46,7 @@ export class NTQQGroupApi {
         this.context.logger.logDebug(`加载${this.groups.length}个群组缓存完成`);
         // process.pid 调试点
     }
+
     async getCoreAndBaseInfo(uids: string[]) {
         return await this.core.eventWrapper.callNoListenerEvent(
             'NodeIKernelProfileService/getCoreAndBaseInfo',
@@ -54,26 +54,13 @@ export class NTQQGroupApi {
             uids,
         );
     }
-    async sendPocketRkey() {
-        let u8 = await this.core.apis.PacketApi.buildRkeyPacket()
-        let ret = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0x9067_202', Buffer.from(u8).toString('hex'), true);
+
+    async sendPacketRkey() {
+        let data = this.core.apis.PacketApi.packetPacker.packRkeyPacket()
+        let ret = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0x9067_202', data, true);
         //console.log('ret: ', ret);
     }
-    async sendPacketPoke(group: number, peer: number) {
-        let oidb_0xed3 = new NapProtoMsg(OidbSvcTrpcTcp0XED3_1).encode({
-            uin: peer,
-            groupUin: group,
-            friendUin: group,
-            ext: 0
-        });
-        let oidb_packet = new NapProtoMsg(OidbSvcTrpcTcpBase).encode({
-            command: 0xed3,
-            subCommand: 1,
-            body: oidb_0xed3
-        });
-        let hex = Buffer.from(oidb_packet).toString('hex');
-        let retdata = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0xed3_1', hex, false);
-    }
+
     async fetchGroupEssenceList(groupCode: string) {
         const pskey = (await this.core.apis.UserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com')!;
         return this.context.session.getGroupService().fetchGroupEssenceList({
@@ -196,6 +183,7 @@ export class NTQQGroupApi {
         }
         return member;
     }
+
     async getGroupRecommendContactArkJson(groupCode: string) {
         return this.context.session.getGroupService().getGroupRecommendContactArkJson(groupCode);
     }
@@ -301,6 +289,7 @@ export class NTQQGroupApi {
         }
         return member;
     }
+
     async searchGroup(groupCode: string) {
         const [, ret] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelSearchService/searchGroup',
@@ -318,6 +307,7 @@ export class NTQQGroupApi {
         );
         return ret.groupInfos.find(g => g.groupCode === groupCode);
     }
+
     async getGroupMemberEx(GroupCode: string, uid: string, forced = false, retry = 2) {
         const data = await solveAsyncProblem((eventWrapper: NTEventWrapper, GroupCode: string, uid: string, forced = false) => {
             return eventWrapper.callNormalEventV2(
@@ -339,6 +329,7 @@ export class NTQQGroupApi {
         }
         return undefined;
     }
+
     async getGroupMembersV2(groupQQ: string, num = 3000): Promise<Map<string, GroupMember>> {
         const groupService = this.context.session.getGroupService();
         const sceneId = groupService.createMemberListScene(groupQQ, 'groupMemberList_MainWindow');
