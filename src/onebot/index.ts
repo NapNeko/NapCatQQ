@@ -46,6 +46,7 @@ import { LRUCache } from '@/common/lru-cache';
 import { NodeIKernelRecentContactListener } from '@/core/listeners/NodeIKernelRecentContactListener';
 import { Native } from '@/native';
 import { decodeMessage, decodeRecallGroup, Message, RecallGroup } from '@/core/proto/old/Message';
+import { OB11MessageDataType } from './types';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -540,10 +541,26 @@ export class NapCatOneBot11Adapter {
             if (isSelfMsg) {
                 ob11Msg.target_id = parseInt(message.peerUin);
             }
-            // if(ob11Msg.raw_message.startsWith('!poke')){
-            //     console.log('poke',message.peerUin, message.senderUin);
-            //     this.core.apis.GroupApi.sendPacketPoke(message.peerUin, message.senderUin);
-            // }
+            if (ob11Msg.raw_message.startsWith('!status')) {
+                console.log('status', message.peerUin, message.senderUin);
+                let delMsg: string[] = [];
+                let peer = {
+                    peerUid: message.peerUin,
+                    chatType: 2,
+                };
+                this.core.apis.PacketApi.sendStatusPacket(+message.senderUin).then(async e => {
+                    if (e) {
+                        const { sendElements } = await this.apis.MsgApi.createSendElements([{
+                            type: OB11MessageDataType.text,
+                            data: {
+                                text: 'status ' + JSON.stringify(e, null, 2),
+                            }
+                        }], peer)
+
+                        this.apis.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, delMsg)
+                    }
+                })
+            }
             this.networkManager.emitEvent(ob11Msg);
         }).catch(e => this.context.logger.logError.bind(this.context.logger)('constructMessage error: ', e));
 
