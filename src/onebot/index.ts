@@ -541,26 +541,26 @@ export class NapCatOneBot11Adapter {
             if (isSelfMsg) {
                 ob11Msg.target_id = parseInt(message.peerUin);
             }
-            if (ob11Msg.raw_message.startsWith('!status')) {
-                console.log('status', message.peerUin, message.senderUin);
-                let delMsg: string[] = [];
-                let peer = {
-                    peerUid: message.peerUin,
-                    chatType: 2,
-                };
-                this.core.apis.PacketApi.sendStatusPacket(+message.senderUin).then(async e => {
-                    if (e) {
-                        const { sendElements } = await this.apis.MsgApi.createSendElements([{
-                            type: OB11MessageDataType.text,
-                            data: {
-                                text: 'status ' + JSON.stringify(e, null, 2),
-                            }
-                        }], peer)
+            // if (ob11Msg.raw_message.startsWith('!status')) {
+            //     console.log('status', message.peerUin, message.senderUin);
+            //     let delMsg: string[] = [];
+            //     let peer = {
+            //         peerUid: message.peerUin,
+            //         chatType: 2,
+            //     };
+            //     this.core.apis.PacketApi.sendStatusPacket(+message.senderUin).then(async e => {
+            //         if (e) {
+            //             const { sendElements } = await this.apis.MsgApi.createSendElements([{
+            //                 type: OB11MessageDataType.text,
+            //                 data: {
+            //                     text: 'status ' + JSON.stringify(e, null, 2),
+            //                 }
+            //             }], peer)
 
-                        this.apis.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, delMsg)
-                    }
-                })
-            }
+            //             this.apis.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, delMsg)
+            //         }
+            //     })
+            // }
             this.networkManager.emitEvent(ob11Msg);
         }).catch(e => this.context.logger.logError.bind(this.context.logger)('constructMessage error: ', e));
 
