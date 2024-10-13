@@ -39,11 +39,12 @@ export class NTQQPacketApi {
         this.serverUrl = serverUrl;
         this.qqversion = qqversion;
         let offsetTable: OffsetType = offset;
-        if (!offsetTable[qqversion + '-' + os.arch()]) return false;
+        let table = offsetTable[qqversion + '-' + os.arch()];
+        if (!table) return false;
         let url = 'ws://' + this.serverUrl + '/ws';
         this.PacketClient = new PacketClient(url, this.core.context.logger);
         await this.PacketClient.connect();
-        await this.PacketClient.init(process.pid, offsetTable[qqversion].recv, offsetTable[qqversion].send);
+        await this.PacketClient.init(process.pid, table.recv, table.send);
         this.isInit = true;
         return this.isInit;
     }
