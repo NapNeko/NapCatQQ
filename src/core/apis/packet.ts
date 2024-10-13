@@ -96,10 +96,12 @@ export class NTQQPacketApi {
         return oidb_packet;
     }
     async buildStatusPacket(uin: number) {
+
         let oidb_0xfe1_2 = new NapProtoMsg(OidbSvcTrpcTcp0XFE1_2).encode({
             uin: uin,
             key: [27372]
         });
+        console.log(oidb_0xfe1_2);
         let oidb_packet = new NapProtoMsg(OidbSvcTrpcTcpBase).encode({
             command: 0xfe1,
             subCommand: 2,
