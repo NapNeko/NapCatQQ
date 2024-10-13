@@ -6,6 +6,7 @@ import { PacketClient } from '../helper/packet';
 import { NapProtoMsg } from '../proto/NapProto';
 import { OidbSvcTrpcTcp0X9067_202 } from '../proto/oidb/Oidb.0x9067_202';
 import { OidbSvcTrpcTcpBase } from '../proto/oidb/OidbBase';
+import { OidbSvcTrpcTcp0XFE1_2 } from '../proto/oidb/Oidb.fe1_2';
 
 interface OffsetType {
     [key: string]: {
@@ -68,7 +69,7 @@ export class NTQQPacketApi {
             }).then((res) => resolve(res)).catch((e) => reject(e));
         });
     }
-    async sendRkeyPacket() {
+    async buildRkeyPacket() {
         let oidb_0x9067_202 = new NapProtoMsg(OidbSvcTrpcTcp0X9067_202).encode({
             reqHead: {
                 common: {
@@ -84,13 +85,27 @@ export class NTQQPacketApi {
                     agentType: 2
                 }
             },
-            downloadRKeyReq: Buffer.from('080a08140802', 'hex'),
+            downloadRKeyReq: [10, 20, 2],
         });
         let oidb_packet = new NapProtoMsg(OidbSvcTrpcTcpBase).encode({
             command: 0x9067,
             subCommand: 202,
-            body: oidb_0x9067_202
+            body: oidb_0x9067_202,
+            isReserved: 1
         });
-        return oidb_0x9067_202;
+        return oidb_packet;
+    }
+    async buildStatusPacket(uin: number) {
+        let oidb_0xfe1_2 = new NapProtoMsg(OidbSvcTrpcTcp0XFE1_2).encode({
+            uin: uin,
+            key: [27327]
+        })
+        let oidb_packet = new NapProtoMsg(OidbSvcTrpcTcpBase).encode({
+            command: 0xfe1,
+            subCommand: 2,
+            body: oidb_0xfe1_2,
+            isReserved: 1
+        });
+        return oidb_packet;
     }
 }

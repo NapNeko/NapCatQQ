@@ -3,7 +3,7 @@ import {ProtoField} from "../NapProto";
 
 export const OidbSvcTrpcTcp0XFE1_2 = {
     uid: ProtoField(1, ScalarType.STRING, true),
-    field2: ProtoField(2, ScalarType.UINT32),
+    uin: ProtoField(2, ScalarType.UINT32),
     key: ProtoField(3, () => OidbSvcTrpcTcp0XFE1_2Key, false, true),
 }
 
