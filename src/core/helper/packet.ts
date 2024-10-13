@@ -33,7 +33,7 @@ export class PacketClient {
             this.websocket.onmessage = (event) => {
                 // const message = JSON.parse(event.data.toString());
                 // console.log("Received message:", message);
-                this.handleMessage(event.data);
+                this.handleMessage(event.data).then().catch();
             };
 
             this.websocket.onclose = () => {
@@ -49,12 +49,16 @@ export class PacketClient {
             if (this.reconnectAttempts < this.maxReconnectAttempts) {
                 this.reconnectAttempts++;
                 this.logger.logError.bind(this.logger)(`Reconnecting attempt ${this.reconnectAttempts}`);
-                setTimeout(() => this.connect().then().catch(), 1000 * this.reconnectAttempts);
+                setTimeout(() => {
+                    this.connect().catch((error) => {
+                        this.logger.logError.bind(this.logger)(`Reconnect attempt failed: ${error.message}`);
+                    });
+                }, 5000 * this.reconnectAttempts);
             } else {
                 this.logger.logError.bind(this.logger)(`Max reconnect attempts reached. Could not reconnect to ${this.url}`);
             }
-        } catch (error) {
-            this.logger.logError.bind(this.logger)(`Error attempting to reconnect: ${error}`);
+        } catch (error: any) {
+            this.logger.logError.bind(this.logger)(`Error attempting to reconnect: ${error.message}`);
         }
     }
     async registerCallback(trace_id: string, type: string, callback: any): Promise<void> {
