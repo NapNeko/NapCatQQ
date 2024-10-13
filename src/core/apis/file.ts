@@ -30,6 +30,7 @@ export class NTQQFileApi {
     context: InstanceContext;
     core: NapCatCore;
     rkeyManager: RkeyManager;
+    packetRkey: Array<{ rkey: string; time: number; type: number; }> | undefined;
 
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
@@ -375,14 +376,21 @@ export class NTQQFileApi {
                 group_rkey: 'CAQSKAB6JWENi5LM_xp9vumLbuThJSaYf-yzMrbZsuq7Uz2qffcqm614gds',
                 online_rkey: false
             };
-            if (this.core.apis.PacketApi.PacketClient?.isConnected) {
-                let rkeylist = await this.core.apis.PacketApi.sendRkeyPacket();
-                if (rkeylist.length > 0) {
-                    rkeyData.group_rkey = rkeylist[0].rkey;
-                    rkeyData.private_rkey = rkeylist[1].rkey;
-                    rkeyData.online_rkey = true;
+            try {
+                if (this.core.apis.PacketApi.PacketClient?.isConnected) {
+                    if ((!this.packetRkey || this.packetRkey[0].time < Date.now() / 1000)) {
+                        this.packetRkey = await this.core.apis.PacketApi.sendRkeyPacket();
+                    }
+                    if (this.packetRkey.length > 0) {
+                        rkeyData.group_rkey = this.packetRkey[1].rkey;
+                        rkeyData.private_rkey = this.packetRkey[0].rkey;
+                        rkeyData.online_rkey = true;
+                    }
                 }
+            } catch (error) {
+
             }
+
             if (!rkeyData.online_rkey) {
                 try {
                     let tempRkeyData = await this.rkeyManager.getRkey();
