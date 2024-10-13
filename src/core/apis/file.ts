@@ -35,7 +35,6 @@ export class NTQQFileApi {
         this.context = context;
         this.core = core;
         this.rkeyManager = new RkeyManager(['https://llob.linyuchen.net/rkey', 'http://napcat-sign.wumiao.wang:2082/rkey'], this.context.logger);
-
     }
 
     async copyFile(filePath: string, destPath: string) {
@@ -376,9 +375,14 @@ export class NTQQFileApi {
                 group_rkey: 'CAQSKAB6JWENi5LM_xp9vumLbuThJSaYf-yzMrbZsuq7Uz2qffcqm614gds',
                 online_rkey: false
             };
-
-
-
+            if (this.core.apis.PacketApi.PacketClient?.isConnected) {
+                let rkeylist = await this.core.apis.PacketApi.sendRkeyPacket();
+                if (rkeylist.length > 0) {
+                    rkeyData.group_rkey = rkeylist[0].rkey;
+                    rkeyData.private_rkey = rkeylist[1].rkey;
+                    rkeyData.online_rkey = true;
+                }
+            }
             if (!rkeyData.online_rkey) {
                 try {
                     let tempRkeyData = await this.rkeyManager.getRkey();
