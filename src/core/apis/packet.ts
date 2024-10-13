@@ -101,7 +101,6 @@ export class NTQQPacketApi {
         try {
             let packet = this.packetPacker.packStatusPacket(uin);
             let ret = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0xfe1_2', packet, true);
-            console.log('ret: ', ret);
             let data = Buffer.from(ret.hex_data, 'hex');
             let ext = new NapProtoMsg(OidbSvcTrpcTcp0XFE1_2RSP).decode(new NapProtoMsg(OidbSvcTrpcTcpBase).decode(data).body).data.status.value;
             // ext & 0xff00 + ext >> 16 & 0xff
@@ -118,6 +117,5 @@ export class NTQQPacketApi {
     async sendSetSpecialTittlePacket(groupCode: string, uid: string, tittle: string) {
         let data = this.packetPacker.packSetSpecialTittlePacket(groupCode, uid, tittle);
         let ret = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0x8fc_2', data, true);
-        console.log('ret: ', ret);
     }
 }
