@@ -13,7 +13,7 @@ import { isNumeric, sleep, solveAsyncProblem } from '@/common/helper';
 import { LimitedHashTable } from '@/common/message-unique';
 import { NTEventWrapper } from '@/common/event';
 import { NapProtoMsg } from '../proto/NapProto';
-import {  OidbSvcTrpcTcpBase } from '../proto/oidb/OidbBase';
+import { OidbSvcTrpcTcpBase } from '../proto/oidb/OidbBase';
 import { OidbSvcTrpcTcp0XED3_1 } from '../proto/oidb/Oidb.ed3_1';
 interface recvPacket {
     type: string,//仅recv
