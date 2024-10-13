@@ -122,4 +122,5 @@ export enum ActionName {
     FetchUserProfileLike = "fetch_user_profile_like",
     GetUserStatus = "nc_get_user_status",
     GetRkey = "nc_get_rkey",
+    SetSpecialTittle = "set_group_special_title",
 }
