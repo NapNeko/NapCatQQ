@@ -1,13 +1,22 @@
+import * as zlib from "node:zlib";
 import { NapProtoMsg } from "@/core/proto/NapProto";
 import { OidbSvcTrpcTcpBase } from "@/core/proto/oidb/OidbBase";
 import { OidbSvcTrpcTcp0X9067_202 } from "@/core/proto/oidb/Oidb.0x9067_202";
 import { OidbSvcTrpcTcp0X8FC_2, OidbSvcTrpcTcp0X8FC_2_Body } from "@/core/proto/oidb/Oidb.0x8FC_2";
 import { OidbSvcTrpcTcp0XFE1_2 } from "@/core/proto/oidb/Oidb.fe1_2";
 import { OidbSvcTrpcTcp0XED3_1 } from "@/core/proto/oidb/Oidb.ed3_1";
+import {LongMsgResult, SendLongMsgReq} from "@/core/proto/message/action";
+import {PacketForwardNode, PacketMsgBuilder} from "@/core/helper/packet/msg/builder";
 
 export type PacketHexStr = string & { readonly hexNya: unique symbol };
 
 export class PacketPacker {
+    private packetBuilder: PacketMsgBuilder
+
+    constructor() {
+        this.packetBuilder = new PacketMsgBuilder();
+    }
+
     private toHexStr(byteArray: Uint8Array): PacketHexStr {
         return Buffer.from(byteArray).toString('hex') as PacketHexStr;
     }
@@ -74,5 +83,40 @@ export class PacketPacker {
             key: [{ key: 27372 }]
         });
         return this.toHexStr(this.packOidbPacket(0xfe1, 2, oidb_0xfe1_2));
+    }
+
+    packUploadForwardMsg(selfUid: string, msg: PacketForwardNode[], groupUin: number = 0) : PacketHexStr {
+        // console.log("packUploadForwardMsg START!!!", selfUid, msg, groupUin);
+        const msgBody = this.packetBuilder.buildFakeMsg(selfUid, msg);
+        const longMsgResultData = new NapProtoMsg(LongMsgResult).encode(
+            {
+                action: {
+                    actionCommand: "MultiMsg",
+                    actionData: {
+                        msgBody: msgBody
+                    }
+                }
+            }
+        )
+        // console.log("packUploadForwardMsg LONGMSGRESULT!!!", this.toHexStr(longMsgResultData));
+        const payload = zlib.gzipSync(Buffer.from(longMsgResultData));
+        // console.log("packUploadForwardMsg PAYLOAD!!!", payload);
+        const req = new NapProtoMsg(SendLongMsgReq).encode(
+            {
+                info: {
+                    type: groupUin === 0 ? 1 : 3,
+                    uid: {
+                        uid: groupUin === 0 ? selfUid : groupUin.toString(),
+                    },
+                    groupUin: groupUin,
+                    payload: payload
+                },
+                settings: {
+                    field1: 4, field2: 1, field3: 7, field4: 0
+                }
+            }
+        )
+        // console.log("packUploadForwardMsg REQ!!!", req);
+        return this.toHexStr(req);
     }
 }
