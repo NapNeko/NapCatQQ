@@ -1,5 +1,5 @@
-import {ScalarType} from "@protobuf-ts/runtime";
-import {ProtoField} from "../NapProto";
+import { ScalarType } from "@protobuf-ts/runtime";
+import { ProtoField } from "../NapProto";
 
 export const OidbSvcTrpcTcp0XFE1_2 = {
     uin: ProtoField(1, ScalarType.UINT32),
@@ -8,4 +8,16 @@ export const OidbSvcTrpcTcp0XFE1_2 = {
 
 export const OidbSvcTrpcTcp0XFE1_2Key = {
     key: ProtoField(1, ScalarType.UINT32)
+}
+export const OidbSvcTrpcTcp0XFE1_2RSP_Status = {
+    key: ProtoField(1, ScalarType.UINT32),
+    value: ProtoField(2, ScalarType.UINT64)
+}
+
+export const OidbSvcTrpcTcp0XFE1_2RSP_Data = {
+    status: ProtoField(2, () => OidbSvcTrpcTcp0XFE1_2RSP_Status)
+}
+
+export const OidbSvcTrpcTcp0XFE1_2RSP = {
+    data: ProtoField(1, () => OidbSvcTrpcTcp0XFE1_2RSP_Data)
 }

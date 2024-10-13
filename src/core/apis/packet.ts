@@ -6,7 +6,7 @@ import { PacketClient } from '../helper/packet';
 import { NapProtoMsg } from '../proto/NapProto';
 import { OidbSvcTrpcTcp0X9067_202 } from '../proto/oidb/Oidb.0x9067_202';
 import { OidbSvcTrpcTcpBase } from '../proto/oidb/OidbBase';
-import { OidbSvcTrpcTcp0XFE1_2 } from '../proto/oidb/Oidb.fe1_2';
+import { OidbSvcTrpcTcp0XFE1_2, OidbSvcTrpcTcp0XFE1_2RSP } from '../proto/oidb/Oidb.fe1_2';
 
 interface OffsetType {
     [key: string]: {
@@ -54,7 +54,7 @@ export class NTQQPacketApi {
         }
         return text;
     }
-    async sendPacket(cmd: string, data: string, rsp = false) {
+    async sendPacket(cmd: string, data: string, rsp = false): Promise<any> {
         // wtfk tx
         // 校验失败和异常 可能返回undefined
         return new Promise((resolve, reject) => {
@@ -108,5 +108,25 @@ export class NTQQPacketApi {
             isReserved: 1
         });
         return oidb_packet;
+    }
+    async sendStatusPacket(uin: number): Promise<{ status: number; ext_status: number; } | undefined> {
+        let status = 0;
+        try {
+            let packet = Buffer.from(await this.core.apis.PacketApi.buildStatusPacket(uin)).toString('hex');
+            let ret = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0xfe1_2', packet, true);
+            console.log('ret: ', ret);
+            let data = Buffer.from(ret.hex_data, 'hex');
+            let ext = new NapProtoMsg(OidbSvcTrpcTcp0XFE1_2RSP).decode(new NapProtoMsg(OidbSvcTrpcTcpBase).decode(data).body).data.status.value;
+            // ext & 0xff00 + ext >> 16 & 0xff
+            let extBigInt = BigInt(ext); // 转换为 BigInt
+            if (extBigInt <= 10n) {
+                return { status: Number(extBigInt) * 10, ext_status: 0 };
+            }
+            status = Number((extBigInt & 0xff00n) + ((extBigInt >> 16n) & 0xffn)); // 使用 BigInt 操作符
+            return { status: 10, ext_status: status };
+        } catch (error) {
+            return undefined
+        }
+        return { status: status, ext_status: 0 };
     }
 }
