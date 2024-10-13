@@ -1,4 +1,4 @@
-import { MessageType, RepeatType, ScalarType } from '@protobuf-ts/runtime';
+import { MessageType, PartialMessage, RepeatType, ScalarType } from '@protobuf-ts/runtime';
 import { PartialFieldInfo } from "@protobuf-ts/runtime/build/types/reflection-info";
 
 type LowerCamelCase<S extends string> = CamelCaseHelper<S, false, true>;
@@ -122,7 +122,7 @@ export class NapProtoMsg<T extends ProtoMessageType> {
                     no: field.no,
                     name: key,
                     kind: 'message',
-                    repeat: field.repeat ? RepeatType.UNPACKED : RepeatType.NO,
+                    repeat: field.repeat ? RepeatType.PACKED : RepeatType.NO,
                     T: () => rt,
                 };
             }
@@ -131,7 +131,7 @@ export class NapProtoMsg<T extends ProtoMessageType> {
     }
 
     encode(data: ProtoStructType<T, true>): Uint8Array {
-        return this._proto_msg.toBinary(data)
+        return this._proto_msg.toBinary(this._proto_msg.create(data as PartialMessage<ProtoStructType<T, boolean>>));
     }
 
     decode(data: Uint8Array): ProtoStructType<T, false> {

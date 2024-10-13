@@ -8,7 +8,7 @@ export const NTV2RichMediaReq = {
 export const MultiMediaReqHead = {
     Common: ProtoField(1, () => CommonHead),
     Scene: ProtoField(2, () => SceneInfo),
-    Clent: ProtoField(3, () => ClientMeta),
+    Client: ProtoField(3, () => ClientMeta),
 }
 export const CommonHead = {
     RequestId: ProtoField(1, ScalarType.UINT32),
@@ -19,15 +19,15 @@ export const SceneInfo = {
     BusinessType: ProtoField(102, ScalarType.UINT32),
     SceneType: ProtoField(200, ScalarType.UINT32),
 }
+export const ClientMeta = {
+    AgentType: ProtoField(1, ScalarType.UINT32),
+}
 export const C2CUserInfo = {
     AccountType: ProtoField(1, ScalarType.UINT32),
     TargetUid: ProtoField(2, ScalarType.STRING),
 }
 export const GroupInfo = {
     GroupUin: ProtoField(1, ScalarType.UINT32),
-}
-export const ClientMeta = {
-    AgentType: ProtoField(1, ScalarType.UINT32),
 }
 export const DownloadReq = {
     Node: ProtoField(1, ScalarType.BYTES),

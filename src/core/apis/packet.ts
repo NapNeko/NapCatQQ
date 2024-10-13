@@ -76,18 +76,20 @@ export class NTQQPacketApi {
             reqHead: {
                 common: {
                     requestId: 1,
-                    command: 2
+                    command: 202
                 },
                 scene: {
                     requestType: 2,
                     businessType: 1,
                     sceneType: 0
                 },
-                clent: {
+                client: {
                     agentType: 2
                 }
             },
-            downloadRKeyReq: [[{ key: 10 }, { key: 20 }], { key: 2 }],
+            downloadRKeyReq: {
+                key: [10, 20, 2]
+            },
         });
         let oidb_packet = new NapProtoMsg(OidbSvcTrpcTcpBase).encode({
             command: 0x9067,
