@@ -1,5 +1,5 @@
 import { InstanceContext, NapCatCore } from '..';
-import { RequestUtil } from '@/common/request';
+import * as os from 'os';
 import offset from '@/core/external/offset.json';
 import * as crypto from 'crypto';
 import { PacketClient } from '../helper/packet';
@@ -39,7 +39,7 @@ export class NTQQPacketApi {
         this.serverUrl = serverUrl;
         this.qqversion = qqversion;
         let offsetTable: OffsetType = offset;
-        if (!offsetTable[qqversion]) return false;
+        if (!offsetTable[qqversion + '-' + os.arch()]) return false;
         let url = 'ws://' + this.serverUrl + '/ws';
         this.PacketClient = new PacketClient(url, this.core.context.logger);
         await this.PacketClient.connect();
