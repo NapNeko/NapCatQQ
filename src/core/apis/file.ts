@@ -375,17 +375,24 @@ export class NTQQFileApi {
                 group_rkey: 'CAQSKAB6JWENi5LM_xp9vumLbuThJSaYf-yzMrbZsuq7Uz2qffcqm614gds',
                 online_rkey: false
             };
-
-            try {
-                let tempRkeyData = await this.rkeyManager.getRkey();
-                rkeyData.group_rkey = tempRkeyData.group_rkey;
-                rkeyData.private_rkey = tempRkeyData.private_rkey;
-                rkeyData.online_rkey = tempRkeyData.expired_time > Date.now() / 1000;
-            } catch (e) {
-                this.context.logger.logError.bind(this.context.logger)('获取rkey失败 Fallback Old Mode', e);
+            if (this.core.apis.PacketApi.PacketClient?.isConnected) {
+                let rkeylist = await this.core.apis.PacketApi.sendRkeyPacket();
+                if (rkeylist.length > 0) {
+                    rkeyData.group_rkey = rkeylist[0].rkey;
+                    rkeyData.private_rkey = rkeylist[1].rkey;
+                    rkeyData.online_rkey = true;
+                }
             }
-
-
+            if (!rkeyData.online_rkey) {
+                try {
+                    let tempRkeyData = await this.rkeyManager.getRkey();
+                    rkeyData.group_rkey = tempRkeyData.group_rkey;
+                    rkeyData.private_rkey = tempRkeyData.private_rkey;
+                    rkeyData.online_rkey = tempRkeyData.expired_time > Date.now() / 1000;
+                } catch (e) {
+                    this.context.logger.logError.bind(this.context.logger)('获取rkey失败 Fallback Old Mode', e);
+                }
+            }
             if (isNTV2 && urlRkey) {
                 return IMAGE_HTTP_HOST_NT + urlRkey;
             } else if (isNTV2 && rkeyData.online_rkey) {
