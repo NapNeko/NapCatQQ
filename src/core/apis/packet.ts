@@ -46,7 +46,18 @@ export class NTQQPacketApi {
         await this.PacketClient.connect();
         await this.PacketClient.init(process.pid, table.recv, table.send);
         this.isInit = true;
+        this.InitOtherServer()
         return this.isInit;
+    }
+    async InitOtherServer() {
+        this.core.apis.FileApi.rkeyManager.regOutputRkey(
+            async () => {
+                let rkeylist = await this.core.apis.PacketApi.sendRkeyPacket();
+                if (rkeylist.length > 0) {
+                    return rkeylist;
+                }
+                return undefined;
+            });
     }
     randText(len: number) {
         let text = '';
@@ -74,8 +85,8 @@ export class NTQQPacketApi {
     async sendRkeyPacket() {
         let u8 = await this.core.apis.PacketApi.buildRkeyPacket()
         let ret = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0x9067_202', Buffer.from(u8).toString('hex'), true);
-        if(!ret?.hex_data) return []
-        let body = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(Buffer.from(ret.hex_data,'hex')).body;
+        if (!ret?.hex_data) return []
+        let body = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(Buffer.from(ret.hex_data, 'hex')).body;
         //console.log('ret: ', Buffer.from(body).toString('hex'));
         let retdata = new NapProtoMsg(OidbSvcTrpcTcp0X9067_202_Rsp_Body).decode(body)
         //console.log('ret: ', JSON.stringify(retdata.data.rkeyList));
