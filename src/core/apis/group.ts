@@ -55,8 +55,8 @@ export class NTQQGroupApi {
         );
     }
     async sendPocketRkey() {
-        let hex = '08E7A00210CA01221D0A130A05080110CA011206A80602B006011A0208022206080A081408022A006001';
-        let ret = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0x9067_202', hex, true);
+        let u8 = await this.core.apis.PacketApi.buildRkeyPacket()
+        let ret = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0x9067_202', Buffer.from(u8).toString('hex'), true);
         //console.log('ret: ', ret);
     }
     async sendPacketPoke(group: number, peer: number) {
