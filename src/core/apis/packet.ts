@@ -115,4 +115,9 @@ export class NTQQPacketApi {
             return undefined
         }
     }
+    async sendSetSpecialTittlePacket(groupCode: string, uid: string, tittle: string) {
+        let data = this.packetPacker.packSetSpecialTittlePacket(groupCode, uid, tittle);
+        let ret = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0x8fc_2', data, true);
+        console.log('ret: ', ret);
+    }
 }
