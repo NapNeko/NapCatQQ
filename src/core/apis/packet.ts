@@ -4,8 +4,8 @@ import offset from '@/core/external/offset.json';
 import * as crypto from 'crypto';
 import { PacketClient } from '../helper/packet';
 import { NapProtoMsg } from '../proto/NapProto';
-import { OidbSvcTrpcTcp0X9067_202 } from '../proto/oidb/Oidb.0x9067_202';
-import { OidbSvcTrpcTcpBase } from '../proto/oidb/OidbBase';
+import { OidbSvcTrpcTcp0X9067_202, OidbSvcTrpcTcp0X9067_202_Rsp_Body } from '../proto/oidb/Oidb.0x9067_202';
+import { OidbSvcTrpcTcpBase, OidbSvcTrpcTcpBaseRsp } from '../proto/oidb/OidbBase';
 import { OidbSvcTrpcTcp0XFE1_2, OidbSvcTrpcTcp0XFE1_2RSP } from '../proto/oidb/Oidb.fe1_2';
 import { OidbSvcTrpcTcp0X8FC_2, OidbSvcTrpcTcp0X8FC_2_Body } from '../proto/oidb/Oidb.0x8FC_2';
 
@@ -70,6 +70,16 @@ export class NTQQPacketApi {
                 await this.core.context.session.getMsgService().sendSsoCmdReqByContend(cmd, trace_id);
             }).then((res) => resolve(res)).catch((e) => reject(e));
         });
+    }
+    async sendRkeyPacket() {
+        let u8 = await this.core.apis.PacketApi.buildRkeyPacket()
+        let ret = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0x9067_202', Buffer.from(u8).toString('hex'), true);
+        if(!ret?.hex_data) return []
+        let body = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(Buffer.from(ret.hex_data,'hex')).body;
+        //console.log('ret: ', Buffer.from(body).toString('hex'));
+        let retdata = new NapProtoMsg(OidbSvcTrpcTcp0X9067_202_Rsp_Body).decode(body)
+        //console.log('ret: ', JSON.stringify(retdata.data.rkeyList));
+        return retdata.data.rkeyList;
     }
     async buildRkeyPacket() {
         let oidb_0x9067_202 = new NapProtoMsg(OidbSvcTrpcTcp0X9067_202).encode({
