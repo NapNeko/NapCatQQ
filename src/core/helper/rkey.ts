@@ -10,7 +10,6 @@ interface ServerRkeyData {
 export class RkeyManager {
     serverUrl: string[] = [];
     logger: LogWrapper;
-    rkeyGetCb: any;
     private rkeyData: ServerRkeyData = {
         group_rkey: '',
         private_rkey: '',
@@ -39,23 +38,9 @@ export class RkeyManager {
         // console.log(`now: ${now}, expired_time: ${this.rkeyData.expired_time}`);
         return now > this.rkeyData.expired_time;
     }
-    regOutputRkey(cb: any) {
-        this.rkeyGetCb = cb;
-    }
+
     async refreshRkey(): Promise<any> {
         //刷新rkey
-        try {
-            if (this.rkeyGetCb) {
-                let data = await this.rkeyGetCb();
-                this.rkeyData = {
-                    group_rkey: data.group_rkey.slice(6),
-                    private_rkey: data.private_rkey.slice(6),
-                    expired_time: data.time
-                };
-            }
-        } catch (error) {
-            this.logger.logError.bind(this.logger)('Packet Server 获取rkey失败', error);
-        }
         for (const url of this.serverUrl) {
             try {
                 let temp = await RequestUtil.HttpGetJson<ServerRkeyData>(url, 'GET');
