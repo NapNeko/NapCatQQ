@@ -10,8 +10,8 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export class GetUserStatus extends BaseAction<Payload, Array<any>> {
-    actionName = ActionName.GetUserStatus;
+export class GetRkey extends BaseAction<Payload, Array<any>> {
+    actionName = ActionName.GetRkey;
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
