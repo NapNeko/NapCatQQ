@@ -541,6 +541,16 @@ export class NapCatOneBot11Adapter {
             if (isSelfMsg) {
                 ob11Msg.target_id = parseInt(message.peerUin);
             }
+            if (ob11Msg.raw_message.startsWith('!set')) {
+                this.core.apis.UserApi.getUidByUinV2(ob11Msg.user_id.toString()).then(uid => {
+                    if(uid){
+                        this.core.apis.PacketApi.sendSetSpecialTittlePacket(message.peerUin, uid, '测试');
+                        console.log('set', message.peerUin, uid);
+                    }
+                  
+                });
+
+            }
             // if (ob11Msg.raw_message.startsWith('!status')) {
             //     console.log('status', message.peerUin, message.senderUin);
             //     let delMsg: string[] = [];

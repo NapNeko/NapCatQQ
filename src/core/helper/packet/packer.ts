@@ -75,4 +75,17 @@ export class PacketPacker {
         });
         return this.toHexStr(this.packOidbPacket(0xfe1, 2, oidb_0xfe1_2));
     }
+    packSetSpecialTittle(groupCode: string, uid: string, tittle: string): PacketHexStr {
+        const oidb_0x8FC_2_body = new NapProtoMsg(OidbSvcTrpcTcp0X8FC_2_Body).encode({
+            targetUid: uid,
+            specialTitle: tittle,
+            expiredTime: -1,
+            uinName: tittle
+        });
+        const oidb_0x8FC_2 = new NapProtoMsg(OidbSvcTrpcTcp0X8FC_2).encode({
+            groupUin: +groupCode,
+            body: oidb_0x8FC_2_body
+        });
+        return this.toHexStr(this.packOidbPacket(0x8FC, 2, oidb_0x8FC_2));
+    }
 }
