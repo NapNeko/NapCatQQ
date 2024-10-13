@@ -120,4 +120,5 @@ export enum ActionName {
     GetGroupInfoEx = "get_group_info_ex",
     GetGroupSystemMsg = 'get_group_system_msg',
     FetchUserProfileLike = "fetch_user_profile_like",
+    GetUserStatus = "nc_get_user_status",
 }

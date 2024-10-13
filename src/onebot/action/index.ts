@@ -85,6 +85,7 @@ import { GetGroupRootFiles } from '@/onebot/action/go-cqhttp/GetGroupRootFiles';
 import { GetGroupFilesByFolder } from '@/onebot/action/go-cqhttp/GetGroupFilesByFolder';
 import { GetGroupSystemMsg } from './system/GetSystemMsg';
 import { GroupPoke } from './group/GroupPoke';
+import { GetUserStatus } from './extends/GetUserStatus';
 
 
 export type ActionMap = Map<string, BaseAction<any, any>>;
@@ -182,6 +183,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new GetGroupSystemMsg(obContext, core),
         new FetchUserProfileLike(obContext, core),
         new GroupPoke(obContext, core),
+        new GetUserStatus(obContext, core),
     ];
     const actionMap = new Map();
     for (const action of actionHandlers) {
