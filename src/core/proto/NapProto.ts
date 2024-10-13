@@ -122,7 +122,7 @@ export class NapProtoMsg<T extends ProtoMessageType> {
                     no: field.no,
                     name: key,
                     kind: 'message',
-                    repeat: field.repeat ? RepeatType.PACKED : RepeatType.NO,
+                    repeat: field.repeat ? RepeatType.UNPACKED : RepeatType.NO,
                     T: () => rt,
                 };
             }

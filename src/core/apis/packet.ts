@@ -85,7 +85,7 @@ export class NTQQPacketApi {
                     agentType: 2
                 }
             },
-            downloadRKeyReq: [10, 20, 2],
+            downloadRKeyReq: [[{ key: 10 }, { key: 20 }], { key: 2 }],
         });
         let oidb_packet = new NapProtoMsg(OidbSvcTrpcTcpBase).encode({
             command: 0x9067,
@@ -99,9 +99,8 @@ export class NTQQPacketApi {
 
         let oidb_0xfe1_2 = new NapProtoMsg(OidbSvcTrpcTcp0XFE1_2).encode({
             uin: uin,
-            key: [27372]
+            key: [{ key: 27372 }]
         });
-        console.log(oidb_0xfe1_2);
         let oidb_packet = new NapProtoMsg(OidbSvcTrpcTcpBase).encode({
             command: 0xfe1,
             subCommand: 2,
