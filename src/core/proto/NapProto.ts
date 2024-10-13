@@ -117,17 +117,12 @@ export class NapProtoMsg<T extends ProtoMessageType> {
                     repeat: repeatType,
                 };
             } else if (field.kind === 'message') {
-                const rt = NapProtoMsgCache.get(field.type()) ?? (() => {
-                    const msg = new NapProtoMsg(field.type());
-                    NapProtoMsgCache.set(field.type(), msg._proto_msg);
-                    return msg._proto_msg;
-                })();
                 return {
                     no: field.no,
                     name: key,
                     kind: 'message',
                     repeat: field.repeat ? RepeatType.PACKED : RepeatType.NO,
-                    T: () => rt,
+                    T: () => new NapProtoMsg(field.type())._proto_msg,
                 };
             }
         }) as PartialFieldInfo[];
