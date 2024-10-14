@@ -18,7 +18,7 @@ export class SetSpecialTittle extends BaseAction<Payload, any> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        if (!this.core.apis.PacketApi.packetClient?.isConnected) {
+        if (!this.core.apis.PacketApi.packetClient?.available) {
             throw new Error('PacketClient is not init');
         }
         let uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());

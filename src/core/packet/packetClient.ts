@@ -5,19 +5,23 @@ import { createHash } from "crypto";
 
 export class PacketClient {
     private websocket: WebSocket | undefined;
-    public isConnected: boolean = false;
+    private isConnected: boolean = false;
     private reconnectAttempts: number = 0;
     private maxReconnectAttempts: number = 5;
     //trace_id-type callback
     private cb = new LRUCache<string, any>(500);
     constructor(private url: string, public logger: LogWrapper) { }
 
+    get available(): boolean {
+        return this.isConnected && this.websocket !== undefined;
+    }
+
     connect(): Promise<void> {
         return new Promise((resolve, reject) => {
             this.logger.log.bind(this.logger)(`Attempting to connect to ${this.url}`);
             this.websocket = new WebSocket(this.url);
             this.websocket.on('error', (err) => this.logger.logError.bind(this.logger)('[Core] [Packet Server] Error:', err.message));
-            
+
             this.websocket.onopen = () => {
                 this.isConnected = true;
                 this.reconnectAttempts = 0;

@@ -69,7 +69,7 @@ export class NTQQPacketApi {
         // wtfk tx
         // 校验失败和异常 可能返回undefined
         return new Promise((resolve, reject) => {
-            if (!this.isInit || !this.packetClient?.isConnected) {
+            if (!this.isInit || !this.packetClient?.available) {
                 this.core.context.logger.logError('packetClient is not init');
                 return undefined;
             }

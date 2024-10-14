@@ -17,7 +17,7 @@ export class GetUserStatus extends BaseAction<Payload, { status: number; ext_sta
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        if (!this.core.apis.PacketApi.packetClient?.isConnected) {
+        if (!this.core.apis.PacketApi.packetClient?.available) {
             throw new Error('packetClient is not init');
         }
         return await this.core.apis.PacketApi.sendStatusPacket(+payload.user_id);
