@@ -112,6 +112,7 @@ export class OneBotMsgApi {
                 return {
                     type: OB11MessageDataType.image,
                     data: {
+                        summary: element.summary,
                         file: encodedFileId,
                         sub_type: element.picSubType,
                         file_id: encodedFileId,
@@ -166,7 +167,7 @@ export class OneBotMsgApi {
                 return {
                     type: OB11MessageDataType.face,
                     data: {
-                        id: element.faceIndex.toString(),
+                        id: element.faceIndex.toString()
                     },
                 };
             }
@@ -184,6 +185,7 @@ export class OneBotMsgApi {
             return {
                 type: OB11MessageDataType.image,
                 data: {
+                    summary: _.faceName, // 商城表情名称
                     file: 'marketface',
                     file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "." + _.key + ".jpg"),
                     path: url,
