@@ -1,6 +1,6 @@
 import { ScalarType } from "@protobuf-ts/runtime";
 import { ProtoField } from "../NapProto";
-import { Elem } from "@/core/proto/message/element";
+import { Elem } from "@/core/packet/proto/message/element";
 
 export const Attr = {
     codePage: ProtoField(1, ScalarType.INT32),

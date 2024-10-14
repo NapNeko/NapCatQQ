@@ -2,13 +2,14 @@ import {InstanceContext, NapCatCore} from '..';
 import * as os from 'os';
 import offset from '@/core/external/offset.json';
 import * as crypto from 'crypto';
-import {PacketClient} from '../helper/packet/client';
-import {PacketHexStr, PacketPacker} from "@/core/helper/packet/packer";
-import {NapProtoMsg} from '../proto/NapProto';
-import {OidbSvcTrpcTcp0X9067_202_Rsp_Body} from '../proto/oidb/Oidb.0x9067_202';
-import {OidbSvcTrpcTcpBase, OidbSvcTrpcTcpBaseRsp} from '../proto/oidb/OidbBase';
-import {OidbSvcTrpcTcp0XFE1_2RSP} from '../proto/oidb/Oidb.fe1_2';
-import {PacketForwardNode} from "@/core/helper/packet/msg/builder";
+import {PacketClient} from '@/core/packet/packetClient';
+import {PacketHexStr, PacketPacker} from "@/core/packet/packetPacker";
+import {NapProtoMsg} from '@/core/packet/proto/NapProto';
+import {OidbSvcTrpcTcp0X9067_202_Rsp_Body} from '@/core/packet/proto/oidb/Oidb.0x9067_202';
+import {OidbSvcTrpcTcpBase, OidbSvcTrpcTcpBaseRsp} from '@/core/packet/proto/oidb/OidbBase';
+import {OidbSvcTrpcTcp0XFE1_2RSP} from '@/core/packet/proto/oidb/Oidb.fe1_2';
+
+import {PacketForwardNode} from "@/core/packet/msg/entity/forward";
 
 interface OffsetType {
     [key: string]: {

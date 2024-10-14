@@ -1,16 +1,7 @@
-import {PushMsgBody} from "@/core/proto/message/message";
-import {NapProtoEncodeStructType} from "@/core/proto/NapProto";
-import {SendMessageElement} from "@/core";
+import {PushMsgBody} from "@/core/packet/proto/message/message";
+import {NapProtoEncodeStructType} from "@/core/packet/proto/NapProto";
 import * as crypto from "crypto";
-import {IPacketMsgElement} from "@/core/helper/packet/msg/element";
-
-export interface PacketForwardNode {
-    groupId?: number
-    senderId: number
-    senderName: string
-    time: number
-    msg: IPacketMsgElement<SendMessageElement>[]
-}
+import {PacketForwardNode} from "@/core/packet/msg/entity/forward";
 
 export class PacketMsgBuilder {
     buildFakeMsg(selfUid: string, element: PacketForwardNode[]): NapProtoEncodeStructType<typeof PushMsgBody>[] {
