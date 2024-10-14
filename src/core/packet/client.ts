@@ -96,7 +96,7 @@ export class PacketClient {
         }
     }
 
-    async registerCallback(trace_id: string, type: string, callback: (json: RecvPacketData) => Promise<void>): Promise<void> {
+    private async registerCallback(trace_id: string, type: string, callback: (json: RecvPacketData) => Promise<void>): Promise<void> {
         this.cb.put(createHash('md5').update(trace_id).digest('hex') + type, callback);
     }
 
@@ -113,7 +113,7 @@ export class PacketClient {
         this.websocket.send(JSON.stringify(initMessage));
     }
 
-    async sendCommand(cmd: string, data: string, trace_id: string, rsp: boolean = false, timeout: number = 5000, sendcb: (json: RecvPacketData) => void = () => {
+    private async sendCommand(cmd: string, data: string, trace_id: string, rsp: boolean = false, timeout: number = 5000, sendcb: (json: RecvPacketData) => void = () => {
     }): Promise<RecvPacketData> {
         return new Promise<RecvPacketData>((resolve, reject) => {
             if (!this.isConnected || !this.websocket) {
