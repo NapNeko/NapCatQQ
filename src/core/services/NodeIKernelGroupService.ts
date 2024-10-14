@@ -145,7 +145,7 @@ export interface NodeIKernelGroupService {
 
     getMemberExtInfo(param: GroupExtParam): Promise<unknown>;//req
 
-    getGroupAllInfo(): unknown;
+    getGroupAllInfo(groupId: string, sourceId: number): Promise<any>;
 
     getDiscussExistInfo(): unknown;
 
@@ -234,7 +234,7 @@ export interface NodeIKernelGroupService {
 
     setGroupShutUp(groupCode: string, shutUp: boolean): void;
 
-    getGroupShutUpMemberList(groupCode: string): unknown[];
+    getGroupShutUpMemberList(groupCode: string): Promise<any>;
 
     setMemberShutUp(groupCode: string, memberTimes: { uid: string, timeStamp: number }[]): Promise<void>;
 

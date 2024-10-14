@@ -59,7 +59,9 @@ export class NTQQGroupApi {
             pageLimit: 300,
         }, pskey);
     }
-
+    async getGroupShutUpMemberList(groupCode: string) {
+        return this.context.session.getGroupService().getGroupShutUpMemberList(groupCode);
+    }
     async clearGroupNotifiesUnreadCount(uk: boolean) {
         return this.context.session.getGroupService().clearGroupNotifiesUnreadCount(uk);
     }
