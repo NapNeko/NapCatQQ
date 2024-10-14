@@ -1,3 +1,4 @@
+// TODO: refactor with NapProto
 import { MessageType, BinaryReader, ScalarType, RepeatType } from '@protobuf-ts/runtime';
 
 export const LikeDetail = new MessageType("likeDetail", [
