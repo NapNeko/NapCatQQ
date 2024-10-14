@@ -1,6 +1,6 @@
 import {ScalarType} from "@protobuf-ts/runtime";
 import {ProtoField} from "../NapProto";
-import {PushMsgBody} from "@/core/proto/message/message";
+import {PushMsgBody} from "@/core/packet/proto/message/message";
 
 export const LongMsgResult = {
     action: ProtoField(2, () => LongMsgAction)

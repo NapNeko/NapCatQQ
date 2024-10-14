@@ -45,7 +45,7 @@ import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecal
 import { LRUCache } from '@/common/lru-cache';
 import { NodeIKernelRecentContactListener } from '@/core/listeners/NodeIKernelRecentContactListener';
 import { Native } from '@/native';
-import { decodeMessage, decodeRecallGroup, Message, RecallGroup } from '@/core/proto/old/Message';
+import { decodeMessage, decodeRecallGroup, Message, RecallGroup } from '@/core/packet/proto/old/Message';
 import { OB11MessageDataType } from './types';
 
 //OneBot实现类
@@ -547,7 +547,7 @@ export class NapCatOneBot11Adapter {
             //             this.core.apis.PacketApi.sendSetSpecialTittlePacket(message.peerUin, uid, '测试');
             //             console.log('set', message.peerUin, uid);
             //         }
-                  
+
             //     });
 
             // }

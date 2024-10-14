@@ -1,12 +1,13 @@
 import * as zlib from "node:zlib";
-import { NapProtoMsg } from "@/core/proto/NapProto";
-import { OidbSvcTrpcTcpBase } from "@/core/proto/oidb/OidbBase";
-import { OidbSvcTrpcTcp0X9067_202 } from "@/core/proto/oidb/Oidb.0x9067_202";
-import { OidbSvcTrpcTcp0X8FC_2, OidbSvcTrpcTcp0X8FC_2_Body } from "@/core/proto/oidb/Oidb.0x8FC_2";
-import { OidbSvcTrpcTcp0XFE1_2 } from "@/core/proto/oidb/Oidb.fe1_2";
-import { OidbSvcTrpcTcp0XED3_1 } from "@/core/proto/oidb/Oidb.ed3_1";
-import {LongMsgResult, SendLongMsgReq} from "@/core/proto/message/action";
-import {PacketForwardNode, PacketMsgBuilder} from "@/core/helper/packet/msg/builder";
+import { NapProtoMsg } from "@/core/packet/proto/NapProto";
+import { OidbSvcTrpcTcpBase } from "@/core/packet/proto/oidb/OidbBase";
+import { OidbSvcTrpcTcp0X9067_202 } from "@/core/packet/proto/oidb/Oidb.0x9067_202";
+import { OidbSvcTrpcTcp0X8FC_2, OidbSvcTrpcTcp0X8FC_2_Body } from "@/core/packet/proto/oidb/Oidb.0x8FC_2";
+import { OidbSvcTrpcTcp0XFE1_2 } from "@/core/packet/proto/oidb/Oidb.fe1_2";
+import { OidbSvcTrpcTcp0XED3_1 } from "@/core/packet/proto/oidb/Oidb.ed3_1";
+import {LongMsgResult, SendLongMsgReq} from "@/core/packet/proto/message/action";
+import {PacketMsgBuilder} from "@/core/packet/msg/builder";
+import {PacketForwardNode} from "@/core/packet/msg/entity/forward";
 
 export type PacketHexStr = string & { readonly hexNya: unique symbol };
 

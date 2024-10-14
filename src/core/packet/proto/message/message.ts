@@ -1,8 +1,8 @@
 import { ScalarType } from "@protobuf-ts/runtime";
 import { ProtoField } from "../NapProto";
-import {ForwardHead, Grp, GrpTmp, ResponseForward, ResponseGrp, Trans0X211, WPATmp} from "@/core/proto/message/routing";
-import {RichText} from "@/core/proto/message/component";
-import {C2C} from "@/core/proto/message/c2c";
+import {ForwardHead, Grp, GrpTmp, ResponseForward, ResponseGrp, Trans0X211, WPATmp} from "@/core/packet/proto/message/routing";
+import {RichText} from "@/core/packet/proto/message/component";
+import {C2C} from "@/core/packet/proto/message/c2c";
 
 export const ContentHead = {
     type: ProtoField(1, ScalarType.UINT32),

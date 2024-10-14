@@ -1,5 +1,5 @@
-import {NapProtoEncodeStructType, NapProtoMsg} from "@/core/proto/NapProto";
-import {Elem, MentionExtra} from "@/core/proto/message/element";
+import {NapProtoEncodeStructType, NapProtoMsg} from "@/core/packet/proto/NapProto";
+import {Elem, MentionExtra} from "@/core/packet/proto/message/element";
 import {
     AtType,
     SendArkElement,
