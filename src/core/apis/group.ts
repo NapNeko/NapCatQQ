@@ -13,16 +13,6 @@ import {isNumeric, solveAsyncProblem} from '@/common/helper';
 import {LimitedHashTable} from '@/common/message-unique';
 import {NTEventWrapper} from '@/common/event';
 
-interface recvPacket {
-    type: string,//仅recv
-    trace_id_md5?: string,
-    data: {
-        seq: number,
-        hex_data: string,
-        cmd: string
-    }
-}
-
 export class NTQQGroupApi {
     context: InstanceContext;
     core: NapCatCore;
