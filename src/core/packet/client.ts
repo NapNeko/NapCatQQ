@@ -1,14 +1,26 @@
 import {LogWrapper} from "@/common/log";
 import {LRUCache} from "@/common/lru-cache";
-import WebSocket from "ws";
+import WebSocket, {Data} from "ws";
 import {createHash} from "crypto";
+
+export interface RecvPacket {
+    type: string, // 仅recv
+    trace_id_md5?: string,
+    data: RecvPacketData
+}
+
+export interface RecvPacketData {
+    seq: number
+    cmd: string
+    hex_data: string
+}
 
 export class PacketClient {
     private websocket: WebSocket | undefined;
     private isConnected: boolean = false;
     private reconnectAttempts: number = 0;
     private maxReconnectAttempts: number = 5;
-    private cb = new LRUCache<string, any>(500); // trace_id-type callback
+    private cb = new LRUCache<string, (json: RecvPacketData) => Promise<void>>(500); // trace_id-type callback
     private readonly clientUrl: string = '';
     private readonly logger: LogWrapper;
 
@@ -71,7 +83,7 @@ export class PacketClient {
         }
     }
 
-    async registerCallback(trace_id: string, type: string, callback: any): Promise<void> {
+    async registerCallback(trace_id: string, type: string, callback: (json: RecvPacketData) => Promise<void>): Promise<void> {
         this.cb.put(createHash('md5').update(trace_id).digest('hex') + type, callback);
     }
 
@@ -89,9 +101,9 @@ export class PacketClient {
         this.websocket.send(JSON.stringify(initMessage));
     }
 
-    async sendCommand(cmd: string, data: string, trace_id: string, rsp: boolean = false, timeout: number = 5000, sendcb: any = () => {
-    }): Promise<any> {
-        return new Promise<any>((resolve, reject) => {
+    async sendCommand(cmd: string, data: string, trace_id: string, rsp: boolean = false, timeout: number = 5000, sendcb: (json: RecvPacketData) => void = () => {
+    }): Promise<RecvPacketData> {
+        return new Promise<RecvPacketData>((resolve, reject) => {
             if (!this.isConnected || !this.websocket) {
                 throw new Error("WebSocket is not connected");
             }
@@ -103,12 +115,12 @@ export class PacketClient {
             };
             this.websocket.send(JSON.stringify(commandMessage));
             if (rsp) {
-                this.registerCallback(trace_id, 'recv', (json: any) => {
+                this.registerCallback(trace_id, 'recv', async (json: RecvPacketData) => {
                     clearTimeout(timeoutHandle);
                     resolve(json);
                 });
             }
-            this.registerCallback(trace_id, 'send', (json: any) => {
+            this.registerCallback(trace_id, 'send', async (json: RecvPacketData) => {
                 sendcb(json);
                 if (!rsp) {
                     clearTimeout(timeoutHandle);
@@ -121,9 +133,9 @@ export class PacketClient {
         });
     }
 
-    private async handleMessage(message: any): Promise<void> {
+    private async handleMessage(message: Data): Promise<void> {
         try {
-            let json = JSON.parse(message.toString());
+            let json: RecvPacket = JSON.parse(message.toString());
             let trace_id_md5 = json.trace_id_md5;
             let action = json?.type ?? 'init';
             let event = this.cb.get(trace_id_md5 + action);

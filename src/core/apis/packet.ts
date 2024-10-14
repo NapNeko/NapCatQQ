@@ -2,8 +2,8 @@ import * as os from 'os';
 import * as crypto from 'crypto';
 import {InstanceContext, NapCatCore} from '..';
 import offset from '@/core/external/offset.json';
-import {PacketClient} from '@/core/packet/packetClient';
-import {PacketHexStr, PacketPacker} from "@/core/packet/packetPacker";
+import {PacketClient, RecvPacketData} from '@/core/packet/client';
+import {PacketHexStr, PacketPacker} from "@/core/packet/packer";
 import {NapProtoMsg} from '@/core/packet/proto/NapProto';
 import {OidbSvcTrpcTcp0X9067_202_Rsp_Body} from '@/core/packet/proto/oidb/Oidb.0x9067_202';
 import {OidbSvcTrpcTcpBase, OidbSvcTrpcTcpBaseRsp} from '@/core/packet/proto/oidb/OidbBase';
@@ -65,12 +65,12 @@ export class NTQQPacketApi {
         return text;
     }
 
-    async sendPacket(cmd: string, data: PacketHexStr, rsp = false): Promise<any> {
+    async sendPacket(cmd: string, data: PacketHexStr, rsp = false): Promise<RecvPacketData> {
         // wtfk tx
         // 校验失败和异常 可能返回undefined
         return new Promise((resolve, reject) => {
             if (!this.isInit || !this.packetClient?.available) {
-                this.core.context.logger.logError('packetClient is not init');
+                this.core.context.logger.logError('PacketClient is not init');
                 return undefined;
             }
             let md5 = crypto.createHash('md5').update(data).digest('hex');
