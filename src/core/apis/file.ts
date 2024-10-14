@@ -377,7 +377,7 @@ export class NTQQFileApi {
                 online_rkey: false
             };
             try {
-                if (this.core.apis.PacketApi.packetClient?.available) {
+                if (this.core.apis.PacketApi.available) {
                     if ((!this.packetRkey || this.packetRkey[0].time > Date.now() / 1000)) {
                         this.packetRkey = await this.core.apis.PacketApi.sendRkeyPacket();
                     }

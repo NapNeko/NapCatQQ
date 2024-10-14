@@ -20,7 +20,7 @@ export class UploadForwardMsg extends BaseAction<Payload, any> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        if (!this.core.apis.PacketApi.packetClient?.available) {
+        if (!this.core.apis.PacketApi.available) {
             throw new Error('PacketClient is not init');
         }
         throw new Error('Not implemented');
