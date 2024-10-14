@@ -116,12 +116,13 @@ export class NTQQPacketApi {
             return undefined
         }
     }
+
     async sendSetSpecialTittlePacket(groupCode: string, uid: string, tittle: string) {
         let data = this.packetPacker.packSetSpecialTittlePacket(groupCode, uid, tittle);
         let ret = await this.sendPacket('OidbSvcTrpcTcp.0x8fc_2', data, true);
     }
 
-    async sendUploadForwardMsg(msg: PacketForwardNode[], groupUin: number = 0){
+    async sendUploadForwardMsg(msg: PacketForwardNode[], groupUin: number = 0) {
         let data = this.packetPacker.packUploadForwardMsg(this.core.selfInfo.uid, msg, groupUin);
         let ret = await this.sendPacket('trpc.group.long_msg_interface.MsgService.SsoSendLongMsg', data, true);
         console.log(JSON.stringify(ret));
