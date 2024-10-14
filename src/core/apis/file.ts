@@ -382,8 +382,8 @@ export class NTQQFileApi {
                         this.packetRkey = await this.core.apis.PacketApi.sendRkeyPacket();
                     }
                     if (this.packetRkey.length > 0) {
-                        rkeyData.group_rkey = this.packetRkey[1].rkey.slice(6);
-                        rkeyData.private_rkey = this.packetRkey[0].rkey.slice(6);
+                        rkeyData.group_rkey = this.packetRkey[0].rkey.slice(6);
+                        rkeyData.private_rkey = this.packetRkey[1].rkey.slice(6);
                         rkeyData.online_rkey = true;
                     }
                 }
