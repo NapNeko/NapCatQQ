@@ -591,12 +591,13 @@ export class NapCatOneBot11Adapter {
     private async emitRecallMsg(msgList: RawMessage[], cache: LRUCache<string, boolean>) {
         for (const message of msgList) {
             // log("message update", message.sendStatus, message.msgId, message.msgSeq)
+            const peer: Peer = { chatType: message.chatType, peerUid: message.peerUid, guildId: '' };
             if (message.recallTime != '0' && !cache.get(message.msgId)) { //todo: 这个判断方法不太好，应该使用灰色消息元素来判断?
                 cache.put(message.msgId, true);
                 // 撤回消息上报
-                const oriMessageId = MessageUnique.getShortIdByMsgId(message.msgId);
+                let oriMessageId = MessageUnique.getShortIdByMsgId(message.msgId);
                 if (!oriMessageId) {
-                    continue;
+                    oriMessageId = MessageUnique.createUniqueMsgId(peer, message.msgId);
                 }
                 if (message.chatType == ChatType.KCHATTYPEC2C) {
                     const friendRecallEvent = new OB11FriendRecallNoticeEvent(
