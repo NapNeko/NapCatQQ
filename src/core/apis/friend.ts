@@ -10,7 +10,9 @@ export class NTQQFriendApi {
         this.context = context;
         this.core = core;
     }
-
+    async setBuddyRemark(uid: string, remark: string) {
+        return this.context.session.getBuddyService().setBuddyRemark(uid, remark);
+    }
     async getBuddyV2SimpleInfoMap(refresh = false) {
         const buddyService = this.context.session.getBuddyService();
         const buddyListV2 = refresh ? await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL) : await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL);
