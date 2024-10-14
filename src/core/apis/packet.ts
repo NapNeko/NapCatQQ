@@ -1,14 +1,13 @@
 import * as os from 'os';
-import * as crypto from 'crypto';
 import {InstanceContext, NapCatCore} from '..';
 import offset from '@/core/external/offset.json';
 import {PacketClient, RecvPacketData} from '@/core/packet/client';
+import {PacketSession} from "@/core/packet/session";
 import {PacketHexStr, PacketPacker} from "@/core/packet/packer";
 import {NapProtoMsg} from '@/core/packet/proto/NapProto';
 import {OidbSvcTrpcTcp0X9067_202_Rsp_Body} from '@/core/packet/proto/oidb/Oidb.0x9067_202';
 import {OidbSvcTrpcTcpBase, OidbSvcTrpcTcpBaseRsp} from '@/core/packet/proto/oidb/OidbBase';
 import {OidbSvcTrpcTcp0XFE1_2RSP} from '@/core/packet/proto/oidb/Oidb.fe1_2';
-
 import {PacketForwardNode} from "@/core/packet/msg/entity/forward";
 
 interface OffsetType {
@@ -25,21 +24,27 @@ export class NTQQPacketApi {
     core: NapCatCore;
     serverUrl: string | undefined;
     qqVersion: string | undefined;
-    isInit: boolean = false;
     packetPacker: PacketPacker;
-    packetClient: PacketClient | undefined;
+    packetSession: PacketSession | undefined;
 
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
         this.core = core;
         this.packetPacker = new PacketPacker();
+        this.packetSession = undefined;
         let config = this.core.configLoader.configData;
         if (config && config.packetServer && config.packetServer.length > 0) {
             let serverUrl = this.core.configLoader.configData.packetServer ?? '127.0.0.1:8086';
             this.InitSendPacket(serverUrl, this.context.basicInfoWrapper.getFullQQVesion())
                 .then()
                 .catch(this.core.context.logger.logError.bind(this.core.context.logger));
+        } else {
+            this.core.context.logger.logWarn('PacketServer is not set, will not init NapCat.Packet!');
         }
+    }
+
+    get available(): boolean {
+        return this.packetSession?.client.available ?? false;
     }
 
     async InitSendPacket(serverUrl: string, qqversion: string) {
@@ -49,40 +54,18 @@ export class NTQQPacketApi {
         let table = offsetTable[qqversion + '-' + os.arch()];
         if (!table) return false;
         let url = 'ws://' + this.serverUrl + '/ws';
-        this.packetClient = new PacketClient(url, this.core.context.logger);
-        await this.packetClient.connect();
-        await this.packetClient.init(process.pid, table.recv, table.send);
-        this.isInit = true;
-        return this.isInit;
-    }
-
-    randText(len: number) {
-        let text = '';
-        let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        for (let i = 0; i < len; i++) {
-            text += possible.charAt(Math.floor(Math.random() * possible.length));
-        }
-        return text;
+        this.packetSession = new PacketSession(this.core.context.logger, new PacketClient(url, this.core));
+        await this.packetSession.client.connect();
+        await this.packetSession.client.init(process.pid, table.recv, table.send);
+        return true;
     }
 
     async sendPacket(cmd: string, data: PacketHexStr, rsp = false): Promise<RecvPacketData> {
-        // wtfk tx
-        // 校验失败和异常 可能返回undefined
-        return new Promise((resolve, reject) => {
-            if (!this.isInit || !this.packetClient?.available) {
-                this.core.context.logger.logError('PacketClient is not init');
-                return undefined;
-            }
-            let md5 = crypto.createHash('md5').update(data).digest('hex');
-            let trace_id = (this.randText(4) + md5 + data).slice(0, data.length / 2);
-            this.packetClient?.sendCommand(cmd, data, trace_id, rsp, 5000, async () => {
-                await this.core.context.session.getMsgService().sendSsoCmdReqByContend(cmd, trace_id);
-            }).then((res) => resolve(res)).catch((e) => reject(e));
-        });
+        return this.packetSession!.client!.sendPacket(cmd, data, rsp);
     }
 
     async sendPokePacket(group: number, peer: number) {
-        let data = this.core.apis.PacketApi.packetPacker.packPokePacket(group, peer);
+        let data = this.packetPacker.packPokePacket(group, peer);
         let ret = await this.sendPacket('OidbSvcTrpcTcp.0xed3_1', data, false);
         //console.log('ret: ', ret);
     }

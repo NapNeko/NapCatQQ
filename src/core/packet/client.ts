@@ -1,7 +1,9 @@
 import {LogWrapper} from "@/common/log";
 import {LRUCache} from "@/common/lru-cache";
 import WebSocket, {Data} from "ws";
-import {createHash} from "crypto";
+import crypto, {createHash} from "crypto";
+import {NapCatCore} from "@/core";
+import {PacketHexStr} from "@/core/packet/packer";
 
 export interface RecvPacket {
     type: string, // 仅recv
@@ -22,15 +24,26 @@ export class PacketClient {
     private maxReconnectAttempts: number = 5;
     private cb = new LRUCache<string, (json: RecvPacketData) => Promise<void>>(500); // trace_id-type callback
     private readonly clientUrl: string = '';
+    private readonly napCatCore: NapCatCore
     private readonly logger: LogWrapper;
 
-    constructor(url: string, logger: LogWrapper) {
+    constructor(url: string, core: NapCatCore) {
         this.clientUrl = url;
-        this.logger = logger;
+        this.napCatCore = core;
+        this.logger = core.context.logger;
     }
 
     get available(): boolean {
         return this.isConnected && this.websocket !== undefined;
+    }
+
+    private randText(len: number) {
+        let text = '';
+        let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        for (let i = 0; i < len; i++) {
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+        }
+        return text;
     }
 
     connect(): Promise<void> {
@@ -91,7 +104,6 @@ export class PacketClient {
         if (!this.isConnected || !this.websocket) {
             throw new Error("WebSocket is not connected");
         }
-
         const initMessage = {
             action: 'init',
             pid: pid,
@@ -146,5 +158,21 @@ export class PacketClient {
         } catch (error) {
             this.logger.logError.bind(this.logger)(`Error parsing message: ${error}`);
         }
+    }
+
+    async sendPacket(cmd: string, data: PacketHexStr, rsp = false): Promise<RecvPacketData> {
+        // wtfk tx
+        // 校验失败和异常 可能返回undefined
+        return new Promise((resolve, reject) => {
+            if (!this.available) {
+                this.logger.logError('NapCat.Packet is not init');
+                return undefined;
+            }
+            let md5 = crypto.createHash('md5').update(data).digest('hex');
+            let trace_id = (this.randText(4) + md5 + data).slice(0, data.length / 2);
+            this.sendCommand(cmd, data, trace_id, rsp, 5000, async () => {
+                await this.napCatCore.context.session.getMsgService().sendSsoCmdReqByContend(cmd, trace_id);
+            }).then((res) => resolve(res)).catch((e) => reject(e));
+        });
     }
 }

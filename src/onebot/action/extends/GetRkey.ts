@@ -15,7 +15,7 @@ export class GetRkey extends BaseAction<Payload, Array<any>> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        if (!this.core.apis.PacketApi.packetClient?.available) {
+        if (!this.core.apis.PacketApi.available) {
             throw new Error('PacketClient is not init');
         }
         return await this.core.apis.PacketApi.sendRkeyPacket();
