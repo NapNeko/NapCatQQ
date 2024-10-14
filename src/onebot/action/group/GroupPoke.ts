@@ -18,7 +18,7 @@ export class GroupPoke extends BaseAction<Payload, any> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        if (!this.core.apis.PacketApi.packetClient?.isConnected) {
+        if (!this.core.apis.PacketApi.packetClient?.available) {
             throw new Error('packetClient is not init');
         }
         await this.core.apis.PacketApi.sendPokePacket(+payload.group_id, +payload.user_id);
