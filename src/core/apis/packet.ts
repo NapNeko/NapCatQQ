@@ -1,7 +1,7 @@
-import {InstanceContext, NapCatCore} from '..';
 import * as os from 'os';
-import offset from '@/core/external/offset.json';
 import * as crypto from 'crypto';
+import {InstanceContext, NapCatCore} from '..';
+import offset from '@/core/external/offset.json';
 import {PacketClient} from '@/core/packet/packetClient';
 import {PacketHexStr, PacketPacker} from "@/core/packet/packetPacker";
 import {NapProtoMsg} from '@/core/packet/proto/NapProto';
@@ -24,7 +24,7 @@ export class NTQQPacketApi {
     context: InstanceContext;
     core: NapCatCore;
     serverUrl: string | undefined;
-    qqversion: string | undefined;
+    qqVersion: string | undefined;
     isInit: boolean = false;
     packetPacker: PacketPacker;
     packetClient: PacketClient | undefined;
@@ -35,8 +35,8 @@ export class NTQQPacketApi {
         this.packetPacker = new PacketPacker();
         let config = this.core.configLoader.configData;
         if (config && config.packetServer && config.packetServer.length > 0) {
-            let serverurl = this.core.configLoader.configData.packetServer ?? '127.0.0.1:8086';
-            this.InitSendPacket(serverurl, this.context.basicInfoWrapper.getFullQQVesion())
+            let serverUrl = this.core.configLoader.configData.packetServer ?? '127.0.0.1:8086';
+            this.InitSendPacket(serverUrl, this.context.basicInfoWrapper.getFullQQVesion())
                 .then()
                 .catch(this.core.context.logger.logError.bind(this.core.context.logger));
         }
@@ -44,7 +44,7 @@ export class NTQQPacketApi {
 
     async InitSendPacket(serverUrl: string, qqversion: string) {
         this.serverUrl = serverUrl;
-        this.qqversion = qqversion;
+        this.qqVersion = qqversion;
         let offsetTable: OffsetType = offset;
         let table = offsetTable[qqversion + '-' + os.arch()];
         if (!table) return false;
@@ -83,13 +83,13 @@ export class NTQQPacketApi {
 
     async sendPokePacket(group: number, peer: number) {
         let data = this.core.apis.PacketApi.packetPacker.packPokePacket(group, peer);
-        let ret = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0xed3_1', data, false);
+        let ret = await this.sendPacket('OidbSvcTrpcTcp.0xed3_1', data, false);
         //console.log('ret: ', ret);
     }
 
     async sendRkeyPacket() {
         let packet = this.packetPacker.packRkeyPacket();
-        let ret = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0x9067_202', packet, true);
+        let ret = await this.sendPacket('OidbSvcTrpcTcp.0x9067_202', packet, true);
         if (!ret?.hex_data) return []
         let body = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(Buffer.from(ret.hex_data, 'hex')).body;
         //console.log('ret: ', Buffer.from(body).toString('hex'));
@@ -102,7 +102,7 @@ export class NTQQPacketApi {
         let status = 0;
         try {
             let packet = this.packetPacker.packStatusPacket(uin);
-            let ret = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0xfe1_2', packet, true);
+            let ret = await this.sendPacket('OidbSvcTrpcTcp.0xfe1_2', packet, true);
             let data = Buffer.from(ret.hex_data, 'hex');
             let ext = new NapProtoMsg(OidbSvcTrpcTcp0XFE1_2RSP).decode(new NapProtoMsg(OidbSvcTrpcTcpBase).decode(data).body).data.status.value;
             // ext & 0xff00 + ext >> 16 & 0xff
@@ -118,12 +118,12 @@ export class NTQQPacketApi {
     }
     async sendSetSpecialTittlePacket(groupCode: string, uid: string, tittle: string) {
         let data = this.packetPacker.packSetSpecialTittlePacket(groupCode, uid, tittle);
-        let ret = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0x8fc_2', data, true);
+        let ret = await this.sendPacket('OidbSvcTrpcTcp.0x8fc_2', data, true);
     }
 
     async sendUploadForwardMsg(msg: PacketForwardNode[], groupUin: number = 0){
         let data = this.packetPacker.packUploadForwardMsg(this.core.selfInfo.uid, msg, groupUin);
-        let ret = await this.core.apis.PacketApi.sendPacket('trpc.group.long_msg_interface.MsgService.SsoSendLongMsg', data, true);
+        let ret = await this.sendPacket('trpc.group.long_msg_interface.MsgService.SsoSendLongMsg', data, true);
         console.log(JSON.stringify(ret));
     }
 }
