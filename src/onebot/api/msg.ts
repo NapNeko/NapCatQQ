@@ -696,8 +696,9 @@ export class OneBotMsgApi {
             resMsg.sub_type = 'group';
             const ret = await this.core.apis.MsgApi.getTempChatInfo(ChatType.KCHATTYPETEMPC2CFROMGROUP, msg.senderUid);
             if (ret.result === 0) {
+                let member = await this.core.apis.GroupApi.getGroupMember(msg.peerUin, msg.senderUin);
                 resMsg.group_id = parseInt(ret.tmpChatInfo!.groupCode);
-                resMsg.sender.nickname = ret.tmpChatInfo!.fromNick;
+                resMsg.sender.nickname = member?.nick ?? member?.cardName ?? '临时会话';
                 resMsg.temp_source = resMsg.group_id;
             } else {
                 resMsg.group_id = 284840486; //兜底数据
