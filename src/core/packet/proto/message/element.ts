@@ -20,7 +20,7 @@ export const Elem = {
     srcMsg: ProtoField(45, () => SrcMsg, true),
     lightAppElem: ProtoField(51, () => LightAppElem, true),
     commonElem: ProtoField(53, () => CommonElem, true),
-}
+};
 
 export const Text = {
     str: ProtoField(1, ScalarType.STRING, true),
@@ -29,7 +29,7 @@ export const Text = {
     attr7Buf: ProtoField(4, ScalarType.BYTES, true),
     buf: ProtoField(11, ScalarType.BYTES, true),
     pbReserve: ProtoField(12, ScalarType.BYTES, true),
-}
+};
 
 export const Face = {
     index: ProtoField(1, ScalarType.INT32, true),
@@ -41,7 +41,7 @@ export const OnlineImage = {
     guid: ProtoField(1, ScalarType.BYTES),
     filePath: ProtoField(2, ScalarType.BYTES),
     oldVerSendFile: ProtoField(3, ScalarType.BYTES),
-}
+};
 
 export const NotOnlineImage = {
     filePath: ProtoField(1, ScalarType.STRING),
@@ -73,7 +73,7 @@ export const NotOnlineImage = {
     x400Width: ProtoField(27, ScalarType.INT32),
     x400Height: ProtoField(28, ScalarType.INT32),
     pbRes: ProtoField(29, () => NotOnlineImage_PbReserve),
-}
+};
 
 export const NotOnlineImage_PbReserve = {
     subType: ProtoField(1, ScalarType.INT32),
@@ -84,7 +84,7 @@ export const NotOnlineImage_PbReserve = {
     field20: ProtoField(20, () => NotOnlineImage_PbReserve2),
     url: ProtoField(30, ScalarType.STRING),
     md5Str: ProtoField(31, ScalarType.STRING),
-}
+};
 
 export const NotOnlineImage_PbReserve2 = {
     field1: ProtoField(1, ScalarType.INT32),
@@ -93,12 +93,12 @@ export const NotOnlineImage_PbReserve2 = {
     field4: ProtoField(4, ScalarType.INT32),
     field5: ProtoField(5, ScalarType.INT32),
     field7: ProtoField(7, ScalarType.STRING),
-}
+};
 
 export const TransElem = {
     elemType: ProtoField(1, ScalarType.INT32),
     elemValue: ProtoField(2, ScalarType.BYTES),
-}
+};
 
 export const MarketFace = {
     faceName: ProtoField(1, ScalarType.BYTES),
@@ -114,7 +114,7 @@ export const MarketFace = {
     imageHeight: ProtoField(11, ScalarType.INT32),
     mobileparam: ProtoField(12, ScalarType.BYTES),
     pbReserve: ProtoField(13, ScalarType.BYTES),
-}
+};
 
 export const CustomFace = {
     guid: ProtoField(1, ScalarType.BYTES),
@@ -151,12 +151,12 @@ export const CustomFace = {
     x400Width: ProtoField(32, ScalarType.INT32),
     x400Height: ProtoField(33, ScalarType.INT32),
     pbRes: ProtoField(34, () => CustomFace_PbReserve, true),
-}
+};
 
 export const CustomFace_PbReserve = {
     subType: ProtoField(1, ScalarType.INT32),
     summary: ProtoField(9, ScalarType.STRING),
-}
+};
 
 export const ElemFlags2 = {
     colorTextId: ProtoField(1, ScalarType.UINT32),
@@ -173,7 +173,7 @@ export const ElemFlags2 = {
     customFont: ProtoField(12, ScalarType.UINT32),
     pcSupportDef: ProtoField(13, () => PcSupportDef),
     crmFlags: ProtoField(14, ScalarType.UINT32, true),
-}
+};
 
 export const PcSupportDef = {
     pcPtlBegin: ProtoField(1, ScalarType.UINT32),
@@ -182,12 +182,12 @@ export const PcSupportDef = {
     macPtlEnd: ProtoField(4, ScalarType.UINT32),
     ptlsSupport: ProtoField(5, ScalarType.INT32, false, true),
     ptlsNotSupport: ProtoField(6, ScalarType.UINT32, false, true),
-}
+};
 
 export const Instance = {
     appId: ProtoField(1, ScalarType.UINT32),
     instId: ProtoField(2, ScalarType.UINT32),
-}
+};
 
 export const RichMsg = {
     template1: ProtoField(1, ScalarType.BYTES, true),
@@ -195,7 +195,7 @@ export const RichMsg = {
     msgResId: ProtoField(3, ScalarType.BYTES, true),
     rand: ProtoField(4, ScalarType.INT32, true),
     seq: ProtoField(5, ScalarType.UINT32, true),
-}
+};
 
 export const GroupFile = {
     filename: ProtoField(1, ScalarType.BYTES),
@@ -208,7 +208,7 @@ export const GroupFile = {
     batchItemId: ProtoField(8, ScalarType.BYTES),
     feedMsgTime: ProtoField(9, ScalarType.INT32),
     pbReserve: ProtoField(10, ScalarType.BYTES),
-}
+};
 
 export const ExtraInfo = {
     nick: ProtoField(1, ScalarType.BYTES),
@@ -223,7 +223,7 @@ export const ExtraInfo = {
     msgStateFlag: ProtoField(10, ScalarType.INT32),
     apnsSoundType: ProtoField(11, ScalarType.INT32),
     newGroupFlag: ProtoField(12, ScalarType.INT32),
-}
+};
 
 export const VideoFile = {
     fileUuid: ProtoField(1, ScalarType.STRING),
@@ -250,7 +250,7 @@ export const VideoFile = {
     thumbDownloadFlag: ProtoField(22, ScalarType.INT32),
     videoDownloadFlag: ProtoField(23, ScalarType.INT32),
     pbReserve: ProtoField(24, ScalarType.BYTES),
-}
+};
 
 export const AnonymousGroupMessage = {
     flags: ProtoField(1, ScalarType.INT32),
@@ -260,7 +260,7 @@ export const AnonymousGroupMessage = {
     expireTime: ProtoField(5, ScalarType.INT32),
     bubbleId: ProtoField(6, ScalarType.INT32),
     rankColor: ProtoField(7, ScalarType.BYTES),
-}
+};
 
 export const CustomElem = {
     desc: ProtoField(1, ScalarType.BYTES),
@@ -268,7 +268,7 @@ export const CustomElem = {
     enumType: ProtoField(3, ScalarType.INT32),
     ext: ProtoField(4, ScalarType.BYTES),
     sound: ProtoField(5, ScalarType.BYTES),
-}
+};
 
 export const GeneralFlags = {
     bubbleDiyTextId: ProtoField(1, ScalarType.INT32),
@@ -304,29 +304,29 @@ export const SrcMsg = {
     sourceMsg: ProtoField(9, ScalarType.BYTES, true),
     toUin: ProtoField(10, ScalarType.UINT64, true),
     troopName: ProtoField(11, ScalarType.BYTES, true),
-}
+};
 
 export const LightAppElem = {
     data: ProtoField(1, ScalarType.BYTES),
     msgResid: ProtoField(2, ScalarType.BYTES, true),
-}
+};
 
 export const CommonElem = {
     serviceType: ProtoField(1, ScalarType.INT32),
     pbElem: ProtoField(2, ScalarType.BYTES),
     businessType: ProtoField(3, ScalarType.UINT32),
-}
+};
 
 export const FaceExtra = {
     faceId: ProtoField(1, ScalarType.INT32, true),
-}
+};
 
 export const MentionExtra = {
     type: ProtoField(3, ScalarType.INT32, true),
     uin: ProtoField(4, ScalarType.UINT32, true),
     field5: ProtoField(5, ScalarType.INT32, true),
     uid: ProtoField(9, ScalarType.STRING, true),
-}
+};
 
 export const QFaceExtra = {
     field1: ProtoField(1, ScalarType.STRING, true),
@@ -337,10 +337,10 @@ export const QFaceExtra = {
     field6: ProtoField(6, ScalarType.STRING, true),
     preview: ProtoField(7, ScalarType.STRING, true),
     field9: ProtoField(9, ScalarType.INT32, true),
-}
+};
 
 export const QSmallFaceExtra = {
     faceId: ProtoField(1, ScalarType.UINT32),
     preview: ProtoField(2, ScalarType.STRING),
     preview2: ProtoField(3, ScalarType.STRING),
-}
+};

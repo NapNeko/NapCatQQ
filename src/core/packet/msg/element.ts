@@ -1,5 +1,5 @@
-import {NapProtoEncodeStructType, NapProtoMsg} from "@/core/packet/proto/NapProto";
-import {Elem, MentionExtra} from "@/core/packet/proto/message/element";
+import { NapProtoEncodeStructType, NapProtoMsg } from "@/core/packet/proto/NapProto";
+import { Elem, MentionExtra } from "@/core/packet/proto/message/element";
 import {
     AtType,
     SendArkElement,
@@ -54,23 +54,23 @@ export class PacketMsgAtElement extends PacketMsgTextElement {
     constructor(element: SendTextElement) {
         super(element);
         this.targetUid = element.textElement.atNtUid;
-        this.atAll = element.textElement.atType === AtType.atAll
+        this.atAll = element.textElement.atType === AtType.atAll;
     }
 
     buildElement(): NapProtoEncodeStructType<typeof Elem> {
         const res = new NapProtoMsg(MentionExtra).encode({
-                type: this.atAll ? 1 : 2,
-                uin: 0,
-                field5: 0,
-                uid: this.targetUid,
-            }
-        )
+            type: this.atAll ? 1 : 2,
+            uin: 0,
+            field5: 0,
+            uid: this.targetUid,
+        }
+        );
         return {
             text: {
                 str: this.text,
                 pbReserve: res
             }
-        }
+        };
     }
 }
 

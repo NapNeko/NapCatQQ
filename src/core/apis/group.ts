@@ -9,9 +9,9 @@ import {
     MemberExtSourceType,
     NapCatCore,
 } from '@/core';
-import {isNumeric, solveAsyncProblem} from '@/common/helper';
-import {LimitedHashTable} from '@/common/message-unique';
-import {NTEventWrapper} from '@/common/event';
+import { isNumeric, solveAsyncProblem } from '@/common/helper';
+import { LimitedHashTable } from '@/common/message-unique';
+import { NTEventWrapper } from '@/common/event';
 
 export class NTQQGroupApi {
     context: InstanceContext;
@@ -46,8 +46,8 @@ export class NTQQGroupApi {
     }
 
     async sendPacketRkey() {
-        let data = this.core.apis.PacketApi.packetPacker.packRkeyPacket()
-        let ret = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0x9067_202', data, true);
+        const data = this.core.apis.PacketApi.packetPacker.packRkeyPacket();
+        const ret = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0x9067_202', data, true);
         //console.log('ret: ', ret);
     }
 

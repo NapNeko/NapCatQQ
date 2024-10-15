@@ -1,5 +1,5 @@
-import {IPacketMsgElement} from "@/core/packet/msg/element";
-import {SendMessageElement} from "@/core";
+import { IPacketMsgElement } from "@/core/packet/msg/element";
+import { SendMessageElement } from "@/core";
 
 export interface PacketForwardNode {
     groupId?: number

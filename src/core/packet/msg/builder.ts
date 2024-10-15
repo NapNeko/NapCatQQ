@@ -1,12 +1,12 @@
-import {PushMsgBody} from "@/core/packet/proto/message/message";
-import {NapProtoEncodeStructType} from "@/core/packet/proto/NapProto";
+import { PushMsgBody } from "@/core/packet/proto/message/message";
+import { NapProtoEncodeStructType } from "@/core/packet/proto/NapProto";
 import * as crypto from "crypto";
-import {PacketForwardNode} from "@/core/packet/msg/entity/forward";
+import { PacketForwardNode } from "@/core/packet/msg/entity/forward";
 
 export class PacketMsgBuilder {
     buildFakeMsg(selfUid: string, element: PacketForwardNode[]): NapProtoEncodeStructType<typeof PushMsgBody>[] {
         return element.map((node): NapProtoEncodeStructType<typeof PushMsgBody> => {
-            const avatar = `https://q.qlogo.cn/headimg_dl?dst_uin=${node.senderId}&spec=640&img_type=jpg`
+            const avatar = `https://q.qlogo.cn/headimg_dl?dst_uin=${node.senderId}&spec=640&img_type=jpg`;
             return {
                 responseHead: {
                     fromUid: "",
@@ -46,7 +46,7 @@ export class PacketMsgBuilder {
                         )
                     }
                 }
-            }
+            };
         });
     }
 }
