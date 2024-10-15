@@ -45,12 +45,6 @@ export class NTQQGroupApi {
         );
     }
 
-    async sendPacketRkey() {
-        const data = this.core.apis.PacketApi.packetPacker.packRkeyPacket();
-        const ret = await this.core.apis.PacketApi.sendPacket('OidbSvcTrpcTcp.0x9067_202', data, true);
-        //console.log('ret: ', ret);
-    }
-
     async fetchGroupEssenceList(groupCode: string) {
         const pskey = (await this.core.apis.UserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com')!;
         return this.context.session.getGroupService().fetchGroupEssenceList({

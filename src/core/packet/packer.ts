@@ -12,7 +12,7 @@ import { PacketForwardNode } from "@/core/packet/msg/entity/forward";
 export type PacketHexStr = string & { readonly hexNya: unique symbol };
 
 export class PacketPacker {
-    private packetBuilder: PacketMsgBuilder;
+    private readonly packetBuilder: PacketMsgBuilder;
 
     constructor() {
         this.packetBuilder = new PacketMsgBuilder();

@@ -45,8 +45,7 @@ import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecal
 import { LRUCache } from '@/common/lru-cache';
 import { NodeIKernelRecentContactListener } from '@/core/listeners/NodeIKernelRecentContactListener';
 import { Native } from '@/native';
-import { decodeMessage, decodeRecallGroup, Message, RecallGroup } from '@/core/packet/proto/old/Message';
-import { OB11MessageDataType } from './types';
+import { decodeMessage, decodeRecallGroup } from '@/core/packet/proto/old/Message';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -85,7 +84,7 @@ export class NapCatOneBot11Adapter {
             if (!this.nativeCore.inited) throw new Error('Native Not Init');
             this.nativeCore.registerRecallCallback(async (hex: string) => {
                 try {
-                    const data = decodeMessage(Buffer.from(hex, 'hex')) as any;
+                    const data = decodeMessage(Buffer.from(hex, 'hex'));
                     //data.MsgHead.BodyInner.MsgType SubType
                     const bodyInner = data.msgHead?.bodyInner;
                     //context.logger.log("[appNative] Parse MsgType:" + bodyInner.msgType + " / SubType:" + bodyInner.subType);

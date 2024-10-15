@@ -5,7 +5,7 @@ import { LogWrapper } from "@/common/log";
 export class PacketSession {
     readonly logger: LogWrapper;
     readonly client: PacketClient;
-    private highwayClient: PacketHighwayClient;
+    private readonly highwayClient: PacketHighwayClient;
 
     constructor(logger: LogWrapper, client: PacketClient) {
         this.logger = logger;
