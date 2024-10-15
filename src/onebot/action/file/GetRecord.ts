@@ -58,7 +58,7 @@ export default class GetRecord extends GetFileBase {
                 }
             });
 
-            ffmpeg.on('error', (error) => {
+            ffmpeg.on('error', (error: Error) => {
                 reject(error);
             });
         });

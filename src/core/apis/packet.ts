@@ -61,13 +61,12 @@ export class NTQQPacketApi {
     }
 
     async sendPacket(cmd: string, data: PacketHexStr, rsp = false): Promise<RecvPacketData> {
-        return this.packetSession!.client!.sendPacket(cmd, data, rsp);
+        return this.packetSession!.client.sendPacket(cmd, data, rsp);
     }
 
     async sendPokePacket(group: number, peer: number) {
         const data = this.packetPacker.packPokePacket(group, peer);
-        const ret = await this.sendPacket('OidbSvcTrpcTcp.0xed3_1', data, false);
-        //console.log('ret: ', ret);
+        await this.sendPacket('OidbSvcTrpcTcp.0xed3_1', data, false);
     }
 
     async sendRkeyPacket() {
@@ -102,7 +101,7 @@ export class NTQQPacketApi {
 
     async sendSetSpecialTittlePacket(groupCode: string, uid: string, tittle: string) {
         const data = this.packetPacker.packSetSpecialTittlePacket(groupCode, uid, tittle);
-        const ret = await this.sendPacket('OidbSvcTrpcTcp.0x8fc_2', data, true);
+        await this.sendPacket('OidbSvcTrpcTcp.0x8fc_2', data, true);
     }
 
     async sendUploadForwardMsg(msg: PacketForwardNode[], groupUin: number = 0) {

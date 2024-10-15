@@ -21,8 +21,8 @@ export class PacketClient {
     private websocket: WebSocket | undefined;
     private isConnected: boolean = false;
     private reconnectAttempts: number = 0;
-    private maxReconnectAttempts: number = 5;
-    private cb = new LRUCache<string, (json: RecvPacketData) => Promise<void>>(500); // trace_id-type callback
+    private readonly maxReconnectAttempts: number = 5;//现在暂时不可配置
+    private readonly cb = new LRUCache<string, (json: RecvPacketData) => Promise<void>>(500); // trace_id-type callback
     private readonly clientUrl: string = '';
     private readonly napCatCore: NapCatCore;
     private readonly logger: LogWrapper;
@@ -61,7 +61,7 @@ export class PacketClient {
 
             this.websocket.onerror = (error) => {
                 this.logger.logError.bind(this.logger)(`WebSocket error: ${error}`);
-                reject(error);
+                reject(new Error(`${error.message}`));
             };
 
             this.websocket.onmessage = (event) => {
@@ -172,7 +172,7 @@ export class PacketClient {
             const trace_id = (this.randText(4) + md5 + data).slice(0, data.length / 2);
             this.sendCommand(cmd, data, trace_id, rsp, 5000, async () => {
                 await this.napCatCore.context.session.getMsgService().sendSsoCmdReqByContend(cmd, trace_id);
-            }).then((res) => resolve(res)).catch((e) => reject(e));
+            }).then((res) => resolve(res)).catch((e: Error) => reject(e));
         });
     }
 }
