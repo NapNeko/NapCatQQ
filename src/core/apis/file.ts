@@ -387,8 +387,8 @@ export class NTQQFileApi {
                         rkeyData.online_rkey = true;
                     }
                 }
-            } catch (error) {
-
+            } catch (error: any) {
+                this.context.logger.logError.bind(this.context.logger)('获取rkey失败', error.message);
             }
 
             if (!rkeyData.online_rkey) {

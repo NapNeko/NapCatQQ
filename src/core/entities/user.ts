@@ -288,9 +288,9 @@ export interface User {
 export interface SelfInfo extends User {
     online?: boolean;
 }
+export type Friend = User;
 
-export interface Friend extends User {
-}
+// 本来是 Friend extends User  现在用不到
 
 export enum BizKey {
     KPRIVILEGEICON,
