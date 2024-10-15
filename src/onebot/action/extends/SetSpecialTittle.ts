@@ -21,8 +21,8 @@ export class SetSpecialTittle extends BaseAction<Payload, any> {
         if (!this.core.apis.PacketApi.available) {
             throw new Error('PacketClient is not init');
         }
-        let uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
+        const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
         if(!uid) throw new Error('User not found');
-         await this.core.apis.PacketApi.sendSetSpecialTittlePacket(payload.group_id.toString(), uid, payload.special_title);
+        await this.core.apis.PacketApi.sendSetSpecialTittlePacket(payload.group_id.toString(), uid, payload.special_title);
     }
 }

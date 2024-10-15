@@ -7,4 +7,4 @@ export const OidbSvcTrpcTcp0XED3_1 = {
     groupUin: ProtoField(2, ScalarType.UINT32),
     friendUin: ProtoField(5, ScalarType.UINT32),
     ext: ProtoField(6, ScalarType.UINT32, true)
-}
+};

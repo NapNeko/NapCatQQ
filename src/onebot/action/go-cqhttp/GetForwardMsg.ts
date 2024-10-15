@@ -83,7 +83,7 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
         }
         //if (this.obContext.configLoader.configData.messagePostFormat === 'array') {
         //提取
-        let realmsg = ((await this.parseForward([resMsg]))[0].data.message as OB11MessageNode[])[0].data.message;
+        const realmsg = ((await this.parseForward([resMsg]))[0].data.message as OB11MessageNode[])[0].data.message;
         //里面都是offline消息 id都是0 没得说话
         return { message: realmsg };
         //}

@@ -5,14 +5,14 @@ import { OidbSvcTrpcTcp0X9067_202 } from "@/core/packet/proto/oidb/Oidb.0x9067_2
 import { OidbSvcTrpcTcp0X8FC_2, OidbSvcTrpcTcp0X8FC_2_Body } from "@/core/packet/proto/oidb/Oidb.0x8FC_2";
 import { OidbSvcTrpcTcp0XFE1_2 } from "@/core/packet/proto/oidb/Oidb.fe1_2";
 import { OidbSvcTrpcTcp0XED3_1 } from "@/core/packet/proto/oidb/Oidb.ed3_1";
-import {LongMsgResult, SendLongMsgReq} from "@/core/packet/proto/message/action";
-import {PacketMsgBuilder} from "@/core/packet/msg/builder";
-import {PacketForwardNode} from "@/core/packet/msg/entity/forward";
+import { LongMsgResult, SendLongMsgReq } from "@/core/packet/proto/message/action";
+import { PacketMsgBuilder } from "@/core/packet/msg/builder";
+import { PacketForwardNode } from "@/core/packet/msg/entity/forward";
 
 export type PacketHexStr = string & { readonly hexNya: unique symbol };
 
 export class PacketPacker {
-    private packetBuilder: PacketMsgBuilder
+    private packetBuilder: PacketMsgBuilder;
 
     constructor() {
         this.packetBuilder = new PacketMsgBuilder();
@@ -79,7 +79,7 @@ export class PacketPacker {
     }
 
     packStatusPacket(uin: number): PacketHexStr {
-        let oidb_0xfe1_2 = new NapProtoMsg(OidbSvcTrpcTcp0XFE1_2).encode({
+        const oidb_0xfe1_2 = new NapProtoMsg(OidbSvcTrpcTcp0XFE1_2).encode({
             uin: uin,
             key: [{ key: 27372 }]
         });
@@ -98,7 +98,7 @@ export class PacketPacker {
                     }
                 }
             }
-        )
+        );
         // console.log("packUploadForwardMsg LONGMSGRESULT!!!", this.toHexStr(longMsgResultData));
         const payload = zlib.gzipSync(Buffer.from(longMsgResultData));
         // console.log("packUploadForwardMsg PAYLOAD!!!", payload);
@@ -116,7 +116,7 @@ export class PacketPacker {
                     field1: 4, field2: 1, field3: 7, field4: 0
                 }
             }
-        )
+        );
         // console.log("packUploadForwardMsg REQ!!!", req);
         return this.toHexStr(req);
     }

@@ -7,7 +7,7 @@ export const OidbSvcTrpcTcpBase = {
     body: ProtoField(4, ScalarType.BYTES),
     errorMsg: ProtoField(5, ScalarType.STRING, true),
     isReserved: ProtoField(12, ScalarType.UINT32)
-}
+};
 export const OidbSvcTrpcTcpBaseRsp = {
     body: ProtoField(4, ScalarType.BYTES)
-}
+};
