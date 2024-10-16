@@ -3,7 +3,6 @@ import GetLoginInfo from './system/GetLoginInfo';
 import GetFriendList from './user/GetFriendList';
 import GetGroupList from './group/GetGroupList';
 import GetGroupInfo from './group/GetGroupInfo';
-import GetGroupMemberList from './group/GetGroupMemberList';
 import GetGroupMemberInfo from './group/GetGroupMemberInfo';
 import SendGroupMsg from './group/SendGroupMsg';
 import SendPrivateMsg from './msg/SendPrivateMsg';
@@ -90,6 +89,7 @@ import { GetRkey } from './extends/GetRkey';
 import { SetSpecialTittle } from './extends/SetSpecialTittle';
 import { UploadForwardMsg } from "@/onebot/action/extends/UploadForwardMsg";
 import { GetGroupShutList } from './group/GetGroupShutList';
+import { GetGroupMemberList } from './group/GetGroupMemberList';
 
 
 export type ActionMap = Map<string, BaseAction<any, any>>;
