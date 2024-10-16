@@ -14,7 +14,7 @@
     "@babel/preset-typescript": "^7.24.7",
     "@log4js-node/log4js-api": "^1.0.2",
     "@rollup/plugin-node-resolve": "^15.2.3",
-    "@rollup/plugin-typescript": "^11.1.6",
+    "@rollup/plugin-typescript": "^12.1.1",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/fluent-ffmpeg": "^2.1.24",
