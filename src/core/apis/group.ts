@@ -143,7 +143,7 @@ export class NTQQGroupApi {
         let members = this.groupMemberCache.get(groupCodeStr);
         if (!members) {
             try {
-                members = await this.getGroupMembersV2(groupCodeStr);
+                members = await this.getGroupMembers(groupCodeStr);
                 // 更新群成员列表
                 this.groupMemberCache.set(groupCodeStr, members);
             } catch (e) {
@@ -164,7 +164,7 @@ export class NTQQGroupApi {
 
         let member = getMember();
         if (!member) {
-            members = await this.getGroupMembersV2(groupCodeStr);
+            members = await this.getGroupMembers(groupCodeStr);
             member = getMember();
         }
         return member;
@@ -317,34 +317,23 @@ export class NTQQGroupApi {
     }
 
     async getGroupMembersV2(groupQQ: string, num = 3000): Promise<Map<string, GroupMember>> {
-        const groupService = this.context.session.getGroupService();
-        const sceneId = groupService.createMemberListScene(groupQQ, 'groupMemberList_MainWindow');
-        const listener = this.core.eventWrapper.registerListen(
-            'NodeIKernelGroupListener/onMemberListChange',
-            1,
-            5000,
-            (params) => params.sceneId === sceneId,
-        );
+        const sceneId = this.context.session.getGroupService().createMemberListScene(groupQQ, 'groupMemberList_MainWindow');
         try {
-            const [membersFromFunc, membersFromListener] = await Promise.allSettled([
-                groupService.getNextMemberList(sceneId, undefined, num),
-                listener,
-            ]);
-            if (membersFromFunc.status === 'fulfilled' && membersFromListener.status === 'fulfilled') {
-                return new Map([
-                    ...membersFromFunc.value.result.infos,
-                    ...membersFromListener.value[0].infos,
-                ]);
-            }
-            if (membersFromFunc.status === 'fulfilled') {
-                return membersFromFunc.value.result.infos;
-            }
-            if (membersFromListener.status === 'fulfilled') {
-                return membersFromListener.value[0].infos;
-            }
-            throw new Error('获取群成员列表失败');
+            const [callback, listener] = await this.core.eventWrapper.callNormalEventV2(
+                'NodeIKernelGroupService/getNextMemberList',
+                'NodeIKernelGroupListener/onMemberListChange',
+                [sceneId, undefined, num],
+                (ret) => ret.errCode === 0,
+                (params) => params.sceneId === sceneId,
+                1,
+                2000
+            );
+            if(callback.result.infos.size === 0) {
+                return listener.infos;
+            } 
+            return callback.result.infos;
         } finally {
-            groupService.destroyMemberListScene(sceneId);
+            this.context.session.getGroupService().destroyMemberListScene(sceneId);
         }
     }
 
