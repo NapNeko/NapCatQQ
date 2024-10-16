@@ -1,6 +1,6 @@
 import { ScalarType } from "@protobuf-ts/runtime";
 import { ProtoField } from "../NapProto";
-import { MultiMediaReqHead } from "./common/Ntv2.RichMedia";
+import { MultiMediaReqHead } from "./common/Ntv2.RichMediaReq";
 
 //Req
 export const OidbSvcTrpcTcp0X9067_202 = {

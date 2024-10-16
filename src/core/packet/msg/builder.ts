@@ -1,12 +1,21 @@
-import { PushMsgBody } from "@/core/packet/proto/message/message";
-import { NapProtoEncodeStructType } from "@/core/packet/proto/NapProto";
 import * as crypto from "crypto";
-import { PacketForwardNode } from "@/core/packet/msg/entity/forward";
+import {PushMsgBody} from "@/core/packet/proto/message/message";
+import {NapProtoEncodeStructType} from "@/core/packet/proto/NapProto";
+import {PacketForwardNode} from "@/core/packet/msg/entity/forward";
+import {LogWrapper} from "@/common/log";
 
 export class PacketMsgBuilder {
+    private logger: LogWrapper;
+
+    constructor(logger: LogWrapper) {
+        this.logger = logger;
+    }
+
     buildFakeMsg(selfUid: string, element: PacketForwardNode[]): NapProtoEncodeStructType<typeof PushMsgBody>[] {
         return element.map((node): NapProtoEncodeStructType<typeof PushMsgBody> => {
             const avatar = `https://q.qlogo.cn/headimg_dl?dst_uin=${node.senderId}&spec=640&img_type=jpg`;
+            const msgElement = node.msg.map((msg) => msg.buildElement() ?? []);
+            // this.logger.logDebug(`NOW MSG ELEMENT: ${JSON.stringify(msgElement)}`);
             return {
                 responseHead: {
                     fromUid: "",
@@ -41,9 +50,7 @@ export class PacketMsgBuilder {
                 },
                 body: {
                     richText: {
-                        elems: node.msg.map(
-                            (msg) => msg.buildElement() ?? []
-                        )
+                        elems: msgElement
                     }
                 }
             };

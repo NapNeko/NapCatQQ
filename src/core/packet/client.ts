@@ -24,7 +24,7 @@ export class PacketClient {
     private readonly maxReconnectAttempts: number = 5;//现在暂时不可配置
     private readonly cb = new LRUCache<string, (json: RecvPacketData) => Promise<void>>(500); // trace_id-type callback
     private readonly clientUrl: string = '';
-    private readonly napCatCore: NapCatCore;
+    readonly napCatCore: NapCatCore;
     private readonly logger: LogWrapper;
 
     constructor(url: string, core: NapCatCore) {
