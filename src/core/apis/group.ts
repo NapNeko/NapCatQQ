@@ -328,23 +328,6 @@ export class NTQQGroupApi {
             return (await once)[0].infos;
         }
         return result.result.infos;
-        // try {
-        //     const [callback, listener] = await this.core.eventWrapper.callNormalEventV2(
-        //         'NodeIKernelGroupService/getNextMemberList',
-        //         'NodeIKernelGroupListener/onMemberListChange',
-        //         [sceneId, undefined, num],
-        //         (ret) => ret.errCode === 0,
-        //         (params) => params.sceneId === sceneId,
-        //         1,
-        //         2000
-        //     );
-        //     if (callback.result.infos.size === 0) {
-        //         return listener.infos;
-        //     }
-        //     return callback.result.infos;
-        // } finally {
-        //     this.context.session.getGroupService().destroyMemberListScene(sceneId);
-        // }
     }
 
     async getGroupMembers(groupQQ: string, num = 3000): Promise<Map<string, GroupMember>> {
