@@ -117,6 +117,7 @@ export enum GroupMemberRole {
 }
 
 export interface GroupMember {
+    memberRealLevel: string | undefined;
     memberSpecialTitle?: string;
     avatarPath: string;
     cardName: string;
