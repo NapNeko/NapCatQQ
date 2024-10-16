@@ -318,23 +318,33 @@ export class NTQQGroupApi {
 
     async getGroupMembersV2(groupQQ: string, num = 3000): Promise<Map<string, GroupMember>> {
         const sceneId = this.context.session.getGroupService().createMemberListScene(groupQQ, 'groupMemberList_MainWindow');
-        try {
-            const [callback, listener] = await this.core.eventWrapper.callNormalEventV2(
-                'NodeIKernelGroupService/getNextMemberList',
-                'NodeIKernelGroupListener/onMemberListChange',
-                [sceneId, undefined, num],
-                (ret) => ret.errCode === 0,
-                (params) => params.sceneId === sceneId,
-                1,
-                2000
-            );
-            if(callback.result.infos.size === 0) {
-                return listener.infos;
-            } 
-            return callback.result.infos;
-        } finally {
-            this.context.session.getGroupService().destroyMemberListScene(sceneId);
+        let once = this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onMemberListChange', 1, 2000, (params) => params.sceneId === sceneId)
+            .catch();
+        const result = await this.context.session.getGroupService().getNextMemberList(sceneId!, undefined, num);
+        if (result.errCode !== 0) {
+            throw new Error('获取群成员列表出错,' + result.errMsg);
         }
+        if (result.result.infos.size === 0) {
+            return (await once)[0].infos;
+        }
+        return result.result.infos;
+        // try {
+        //     const [callback, listener] = await this.core.eventWrapper.callNormalEventV2(
+        //         'NodeIKernelGroupService/getNextMemberList',
+        //         'NodeIKernelGroupListener/onMemberListChange',
+        //         [sceneId, undefined, num],
+        //         (ret) => ret.errCode === 0,
+        //         (params) => params.sceneId === sceneId,
+        //         1,
+        //         2000
+        //     );
+        //     if (callback.result.infos.size === 0) {
+        //         return listener.infos;
+        //     }
+        //     return callback.result.infos;
+        // } finally {
+        //     this.context.session.getGroupService().destroyMemberListScene(sceneId);
+        // }
     }
 
     async getGroupMembers(groupQQ: string, num = 3000): Promise<Map<string, GroupMember>> {
