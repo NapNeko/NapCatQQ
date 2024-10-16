@@ -1,15 +1,15 @@
 import { PacketClient } from "@/core/packet/client";
-import { PacketHighwayClient } from "@/core/packet/highway/highwayClient";
+import { PacketHighwaySession } from "@/core/packet/highway/session";
 import { LogWrapper } from "@/common/log";
 
 export class PacketSession {
     readonly logger: LogWrapper;
     readonly client: PacketClient;
-    private readonly highwayClient: PacketHighwayClient;
+    readonly highwaySession: PacketHighwaySession;
 
     constructor(logger: LogWrapper, client: PacketClient) {
         this.logger = logger;
         this.client = client;
-        this.highwayClient = new PacketHighwayClient(this.logger, this.client);
+        this.highwaySession = new PacketHighwaySession(this.logger, this.client);
     }
 }

@@ -9,6 +9,7 @@ import { OidbSvcTrpcTcp0X9067_202_Rsp_Body } from '@/core/packet/proto/oidb/Oidb
 import { OidbSvcTrpcTcpBase, OidbSvcTrpcTcpBaseRsp } from '@/core/packet/proto/oidb/OidbBase';
 import { OidbSvcTrpcTcp0XFE1_2RSP } from '@/core/packet/proto/oidb/Oidb.fe1_2';
 import { PacketForwardNode } from "@/core/packet/msg/entity/forward";
+import {LogWrapper} from "@/common/log";
 
 interface OffsetType {
     [key: string]: {
@@ -22,6 +23,7 @@ const typedOffset: OffsetType = offset;
 export class NTQQPacketApi {
     context: InstanceContext;
     core: NapCatCore;
+    logger: LogWrapper
     serverUrl: string | undefined;
     qqVersion: string | undefined;
     packetPacker: PacketPacker;
@@ -30,7 +32,8 @@ export class NTQQPacketApi {
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
         this.core = core;
-        this.packetPacker = new PacketPacker();
+        this.logger = core.context.logger;
+        this.packetPacker = new PacketPacker(this.logger);
         this.packetSession = undefined;
         const config = this.core.configLoader.configData;
         if (config && config.packetServer && config.packetServer.length > 0) {
