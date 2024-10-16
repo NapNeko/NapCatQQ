@@ -1,11 +1,11 @@
 import * as fs from "node:fs";
+import {ChatType, Peer} from "@/core";
 import {LogWrapper} from "@/common/log";
 import {PacketClient} from "@/core/packet/client";
 import {PacketPacker} from "@/core/packet/packer";
 import {NapProtoMsg} from "@/core/packet/proto/NapProto";
 import {HttpConn0x6ff_501Response} from "@/core/packet/proto/action/action";
 import {PacketHighwayClient} from "@/core/packet/highway/client";
-import {ChatType, Peer} from "@/core";
 import {NTV2RichMediaResp} from "@/core/packet/proto/oidb/common/Ntv2.RichMediaResp";
 import {OidbSvcTrpcTcpBaseRsp} from "@/core/packet/proto/oidb/OidbBase";
 import {PacketMsgPicElement} from "@/core/packet/msg/element";

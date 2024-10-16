@@ -1,19 +1,18 @@
-import stream from "node:stream";
+import * as net from "node:net";
+import * as crypto from "node:crypto";
+import * as http from "node:http";
+import * as stream from "node:stream";
 import {LogWrapper} from "@/common/log";
 import * as tea from "@/core/packet/utils/crypto/tea";
 import {NapProtoMsg} from "@/core/packet/proto/NapProto";
 import {ReqDataHighwayHead, RespDataHighwayHead} from "@/core/packet/proto/highway/highway";
 import {BlockSize} from "@/core/packet/highway/session";
-import {createHash} from "crypto";
 import {PacketHighwayTrans} from "@/core/packet/highway/client";
-import net from "node:net";
 import {Frame} from "@/core/packet/highway/frame";
-import crypto from "node:crypto";
-import http from "node:http";
 
 abstract class HighwayUploader {
     readonly trans: PacketHighwayTrans;
-    readonly logger : LogWrapper;
+    readonly logger: LogWrapper;
 
     constructor(trans: PacketHighwayTrans, logger: LogWrapper) {
         this.trans = trans;
@@ -75,8 +74,8 @@ class HighwayTcpUploaderTransform extends stream.Transform {
             this.uploader.logger.log(`[Highway] _transform offset = ${offset}, data.length = ${data.length}`);
             const chunkSize = data.length > BlockSize ? BlockSize : data.length;
             this.uploader.logger.log(`[Highway] _transform calced chunkSize = ${chunkSize}`);
-            const chunk = data.slice(offset, offset + chunkSize);
-            const chunkMd5 = createHash('md5').update(chunk).digest();
+            const chunk = data.subarray(offset, offset + chunkSize);
+            const chunkMd5 = crypto.createHash('md5').update(chunk).digest();
             const head = this.uploader.buildHead(offset, chunk.length, chunkMd5);
             this.uploader.logger.log(`[Highway] _transform: ${offset} | ${data.length} | ${chunkMd5.toString('hex')}`);
             offset += chunk.length;
@@ -97,14 +96,13 @@ export class HighwayTcpUploader extends HighwayUploader {
                 const rsp = new NapProtoMsg(RespDataHighwayHead).decode(header);
                 if (rsp.errorCode !== 0) {
                     this.logger.logWarn(`highway upload failed (code: ${rsp.errorCode})`);
-                } else {
-                    const percent = ((Number(rsp.msgSegHead?.dataOffset) + Number(rsp.msgSegHead?.dataLength)) / Number(rsp.msgSegHead?.filesize)).toFixed(2);
-                    this.logger.log(`[Highway] ${rsp.errorCode} | ${percent} | ${Buffer.from(header).toString('hex')}`);
-                    if (Number(rsp.msgSegHead?.dataOffset) + Number(rsp.msgSegHead?.dataLength) >= Number(rsp.msgSegHead?.filesize)) {
-                        this.logger.log('[Highway] tcpUpload finished.');
-                        socket.end();
-                        resolve();
-                    }
+                }
+                const percent = ((Number(rsp.msgSegHead?.dataOffset) + Number(rsp.msgSegHead?.dataLength)) / Number(rsp.msgSegHead?.filesize)).toFixed(2);
+                this.logger.log(`[Highway] ${rsp.errorCode} | ${percent} | ${Buffer.from(header).toString('hex')}`);
+                if (Number(rsp.msgSegHead?.dataOffset) + Number(rsp.msgSegHead?.dataLength) >= Number(rsp.msgSegHead?.filesize)) {
+                    this.logger.log('[Highway] tcpUpload finished.');
+                    socket.end();
+                    resolve();
                 }
             };
             socket.on('data', (chunk: Buffer) => {
@@ -158,7 +156,7 @@ export class HighwayHttpUploader extends HighwayUploader {
         const isEnd = offset + block.length === this.trans.size;
         const chunkMD5 = crypto.createHash('md5').update(block).digest();
         const payload = this.buildHead(offset, block.length, chunkMD5);
-        this.logger.log(`[Highway] httpUploadBlock: payload = ${Buffer.from(payload).toString('hex')}`);
+        // this.logger.log(`[Highway] httpUploadBlock: payload = ${Buffer.from(payload).toString('hex')}`);
         const frame = Frame.pack(Buffer.from(payload), block)
         this.logger.log(`[Highway] httpUploadBlock: ${offset} | ${block.length} | ${Buffer.from(chunkMD5).toString('hex')}`);
         const resp = await this.httpPostHighwayContent(frame, `http://${this.trans.ip}:${this.trans.port}/cgi-bin/httpconn?htcmd=0x6FF0087&uin=${this.trans.uin}`, isEnd);
@@ -188,7 +186,7 @@ export class HighwayHttpUploader extends HighwayUploader {
                         data = Buffer.concat([data, chunk]);
                     });
                     res.on('end', () => {
-                        console.log(`[Highway] postHighwayContent: ${data.toString('hex')}`);
+                        // console.log(`[Highway] postHighwayContent: ${data.toString('hex')}`);
                         resolve(data);
                     });
                 });
