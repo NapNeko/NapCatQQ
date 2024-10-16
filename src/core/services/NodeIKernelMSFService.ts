@@ -1,3 +1,5 @@
+import { GeneralCallResult } from "./common";
+
 export interface NodeIKernelMSFService {
     getServerTime(): string;
     setNetworkProxy(param: {
@@ -8,7 +10,7 @@ export interface NodeIKernelMSFService {
         proxyType: number,
         domain: string,
         isSocket: boolean
-    }): void;
+    }): Promise<GeneralCallResult>;
     //http
     //     userName: '',
     //     userPwd: '',
