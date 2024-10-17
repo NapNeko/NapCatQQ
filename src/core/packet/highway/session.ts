@@ -87,8 +87,11 @@ export class PacketHighwaySession {
         await this.checkAvailable();
         if (peer.chatType === ChatType.KCHATTYPEGROUP) {
             await this.uploadGroupImageReq(Number(peer.peerUid), img);
+        } else if (peer.chatType === ChatType.KCHATTYPEC2C) {
+            await this.uploadC2CImageReq(peer.peerUid, img);
+        } else {
+            throw new Error(`[Highway] unsupported chatType: ${peer.chatType}`);
         }
-        // TODO: handle c2c pic upload
     }
 
     private async uploadGroupImageReq(groupUin: number, img: PacketMsgPicElement): Promise<void> {
@@ -128,5 +131,41 @@ export class PacketHighwaySession {
         }
         img.msgInfo = preRespData.upload.msgInfo;
         // img.groupPicExt = new NapProtoMsg(CustomFace).decode(preRespData.tcpUpload.compatQMsg)
+    }
+
+    private async uploadC2CImageReq(peerUid: string, img: PacketMsgPicElement): Promise<void> {
+        const preReq = await this.packer.packUploadC2CImgReq(peerUid, img);
+        const preRespRaw = await this.packetClient.sendPacket('OidbSvcTrpcTcp.0x11c5_100', preReq, true);
+        const preResp = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(
+            Buffer.from(preRespRaw.hex_data, 'hex')
+        );
+        const preRespData = new NapProtoMsg(NTV2RichMediaResp).decode(preResp.body);
+        const ukey = preRespData.upload.uKey;
+        if (ukey && ukey != "") {
+            this.logger.logDebug(`[Highway] get upload ukey: ${ukey}, need upload!`);
+            const index = preRespData.upload.msgInfo.msgInfoBody[0].index;
+            const sha1 = Buffer.from(index.info.fileSha1, 'hex');
+            const md5 = Buffer.from(index.info.fileHash, 'hex');
+            const extend = new NapProtoMsg(NTV2RichMediaHighwayExt).encode({
+                fileUuid: index.fileUuid,
+                uKey: ukey,
+                network: {
+                    ipv4S: oidbIpv4s2HighwayIpv4s(preRespData.upload.ipv4S)
+                },
+                msgInfoBody: preRespData.upload.msgInfo.msgInfoBody,
+                blockSize: BlockSize,
+                hash: {
+                    fileSha1: [sha1]
+                }
+            })
+            await this.packetHighwayClient.upload(
+                1003,
+                fs.createReadStream(img.path, {highWaterMark: BlockSize}),
+                img.size,
+                md5,
+                extend
+            );
+        }
+        img.msgInfo = preRespData.upload.msgInfo;
     }
 }

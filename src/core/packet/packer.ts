@@ -215,4 +215,72 @@ export class PacketPacker {
         )
         return this.toHexStr(this.packOidbPacket(0x11c4, 100, req, true, false));
     }
+
+    async packUploadC2CImgReq(peerUin: string, img: PacketMsgPicElement) {
+        const req = new NapProtoMsg(NTV2RichMediaReq).encode({
+                reqHead: {
+                    common: {
+                        requestId: 1,
+                        command: 100
+                    },
+                    scene: {
+                        requestType: 2,
+                        businessType: 1,
+                        sceneType: 1,
+                        c2C: {
+                            accountType: 2,
+                            targetUid: peerUin
+                        },
+                    },
+                    client: {
+                        agentType: 2,
+                    }
+                },
+                upload: {
+                    uploadInfo: [
+                        {
+                            fileInfo: {
+                                fileSize: Number(img.size),
+                                fileHash: img.md5,
+                                fileSha1: this.toHexStr(await calculateSha1(img.path)),
+                                fileName: img.name,
+                                type: {
+                                    type: 1,
+                                    picFormat: img.picType,  //TODO: extend NapCat imgType /cc @MliKiowa
+                                    videoFormat: 0,
+                                    voiceFormat: 0,
+                                },
+                                width: img.width,
+                                height: img.height,
+                                time: 0,
+                                original: 1
+                            },
+                            subFileType: 0,
+                        }
+                    ],
+                    tryFastUploadCompleted: true,
+                    srvSendMsg: false,
+                    clientRandomId: crypto.randomBytes(8).readBigUInt64BE() & BigInt('0x7FFFFFFFFFFFFFFF'),
+                    compatQMsgSceneType: 1,
+                    extBizInfo: {
+                        pic: {
+                            bytesPbReserveTroop: Buffer.from("0800180020004200500062009201009a0100a2010c080012001800200028003a00", 'hex'),
+                            textSummary: "Nya~",  // TODO:
+                        },
+                        video: {
+                            bytesPbReserve: Buffer.alloc(0),
+                        },
+                        ptt: {
+                            bytesPbReserve: Buffer.alloc(0),
+                            bytesReserve: Buffer.alloc(0),
+                            bytesGeneralFlags: Buffer.alloc(0),
+                        }
+                    },
+                    clientSeq: 0,
+                    noNeedCompatMsg: false,
+                }
+            }
+        )
+        return this.toHexStr(this.packOidbPacket(0x11c5, 100, req, true, false));
+    }
 }
