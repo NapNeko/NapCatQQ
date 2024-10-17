@@ -220,12 +220,6 @@ export class PacketMsgFaceElement extends IPacketMsgElement<SendFaceElement> {
     }
 }
 
-export class PacketMsgPttElement extends IPacketMsgElement<SendPttElement> {
-    constructor(element: SendPttElement) {
-        super(element);
-    }
-}
-
 export class PacketMsgVideoElement extends IPacketMsgElement<SendVideoElement> {
     constructor(element: SendVideoElement) {
         super(element);
@@ -234,6 +228,12 @@ export class PacketMsgVideoElement extends IPacketMsgElement<SendVideoElement> {
 
 export class PacketMsgFileElement extends IPacketMsgElement<SendFileElement> {
     constructor(element: SendFileElement) {
+        super(element);
+    }
+}
+
+export class PacketMsgPttElement extends IPacketMsgElement<SendPttElement> {
+    constructor(element: SendPttElement) {
         super(element);
     }
 }
@@ -258,28 +258,28 @@ export class PacketMsgLightAppElement extends IPacketMsgElement<SendArkElement> 
     }
 }
 
+export class PacketMsgMarkDownElement extends IPacketMsgElement<SendMarkdownElement> {
+    content: string;
+
+    constructor(element: SendMarkdownElement) {
+        super(element);
+        this.content = element.markdownElement.content;
+    }
+
+    buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
+        return [{
+            commonElem: {
+                serviceType: 45,
+                pbElem: new NapProtoMsg(MarkdownData).encode({
+                    content: this.content
+                }),
+                businessType: 1
+            }
+        }]
+    }
+}
+
 // TODO:
-// export class PacketMsgMarkDownElement extends IPacketMsgElement<SendMarkdownElement> {
-//     content: string;
-//
-//     constructor(element: SendMarkdownElement) {
-//         super(element);
-//         this.content = element.markdownElement.content;
-//     }
-//
-//     buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
-//         return [{
-//             commonElem: {
-//                 serviceType: 45,
-//                 pbElem: new NapProtoMsg(MarkdownData).encode({
-//                     content: this.content
-//                 }),
-//                 businessType: 1
-//             }
-//         }]
-//     }
-// }
-//
 // export class PacketMsgLongMsgElement extends IPacketMsgElement<SendStructLongMsgElement> {
 //     resid: string;
 //
