@@ -32,6 +32,7 @@ export class PacketHighwaySession {
     protected sig: PacketHighwaySig;
     protected logger: LogWrapper;
     protected packer: PacketPacker;
+    private cachedPrepareReq: Promise<void> | null = null;
 
     constructor(logger: LogWrapper, client: PacketClient) {
         this.packetClient = client;
@@ -53,12 +54,15 @@ export class PacketHighwaySession {
         }
         if (this.sig.sigSession === null || this.sig.sessionKey === null) {
             this.logger.logWarn('[Highway] sigSession or sessionKey not available!');
-            await this.prepareUpload();
+            if (this.cachedPrepareReq === null) {
+                this.cachedPrepareReq = this.prepareUpload().finally(() => {
+                    this.cachedPrepareReq = null;
+                });
+            }
+            await this.cachedPrepareReq;
         }
     }
 
-    // TODO: add signal to auto prepare when ready
-    // TODO: refactor
     private async prepareUpload(): Promise<void> {
         const packet = this.packer.packHttp0x6ff_501();
         const req = await this.packetClient.sendPacket('HttpConn.0x6ff_501', packet, true);
