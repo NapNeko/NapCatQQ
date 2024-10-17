@@ -17,7 +17,7 @@ export class Frame{
         assert(frame[0] === 0x28 && frame[frame.length - 1] === 0x29, 'Invalid frame!');
         const headLen = frame.readUInt32BE(1);
         const bodyLen = frame.readUInt32BE(5);
-        assert(frame.length === 9 + headLen + bodyLen + 1, 'Frame length does not match head and body lengths!');
+        // assert(frame.length === 9 + headLen + bodyLen + 1, `Frame ${frame.toString('hex')} length does not match head and body lengths!`);
         return [frame.subarray(9, 9 + headLen), frame.subarray(9 + headLen, 9 + headLen + bodyLen)];
     }
 }

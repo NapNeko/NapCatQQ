@@ -113,7 +113,7 @@ export class PacketClient {
         this.websocket.send(JSON.stringify(initMessage));
     }
 
-    private async sendCommand(cmd: string, data: string, trace_id: string, rsp: boolean = false, timeout: number = 5000, sendcb: (json: RecvPacketData) => void = () => {
+    private async sendCommand(cmd: string, data: string, trace_id: string, rsp: boolean = false, timeout: number = 20000, sendcb: (json: RecvPacketData) => void = () => {
     }): Promise<RecvPacketData> {
         return new Promise<RecvPacketData>((resolve, reject) => {
             if (!this.isConnected || !this.websocket) {
@@ -140,7 +140,7 @@ export class PacketClient {
                 }
             });
             const timeoutHandle = setTimeout(() => {
-                reject(new Error(`sendCommand timed out after ${timeout} ms`));
+                reject(new Error(`sendCommand timed out after ${timeout} ms for ${cmd} with trace_id ${trace_id}`));
             }, timeout);
         });
     }
@@ -170,7 +170,7 @@ export class PacketClient {
             }
             const md5 = crypto.createHash('md5').update(data).digest('hex');
             const trace_id = (this.randText(4) + md5 + data).slice(0, data.length / 2);
-            this.sendCommand(cmd, data, trace_id, rsp, 5000, async () => {
+            this.sendCommand(cmd, data, trace_id, rsp, 20000, async () => {
                 await this.napCatCore.context.session.getMsgService().sendSsoCmdReqByContend(cmd, trace_id);
             }).then((res) => resolve(res)).catch((e: Error) => reject(e));
         });

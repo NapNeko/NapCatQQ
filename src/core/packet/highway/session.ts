@@ -12,7 +12,7 @@ import {PacketMsgPicElement} from "@/core/packet/msg/element";
 import {NTV2RichMediaHighwayExt} from "@/core/packet/proto/highway/highway";
 import {int32ip2str, oidbIpv4s2HighwayIpv4s} from "@/core/packet/highway/utils";
 
-export const BlockSize = 512 * 1024;
+export const BlockSize = 1024 * 1024;
 
 interface HighwayServerAddr {
     ip: string
@@ -25,8 +25,6 @@ export interface PacketHighwaySig {
     sessionKey: Uint8Array | null
     serverAddr: HighwayServerAddr[]
 }
-
-
 
 export class PacketHighwaySession {
     protected packetClient: PacketClient;
@@ -54,7 +52,7 @@ export class PacketHighwaySession {
             throw new Error('packetClient not available!');
         }
         if (this.sig.sigSession === null || this.sig.sessionKey === null) {
-            this.logger.logError('[Highway] sigSession or sessionKey not available!');
+            this.logger.logWarn('[Highway] sigSession or sessionKey not available!');
             await this.prepareUpload();
         }
     }
@@ -62,7 +60,6 @@ export class PacketHighwaySession {
     // TODO: add signal to auto prepare when ready
     // TODO: refactor
     private async prepareUpload(): Promise<void> {
-        this.logger.logDebug('[Highway] prepareUpload!');
         const packet = this.packer.packHttp0x6ff_501();
         const req = await this.packetClient.sendPacket('HttpConn.0x6ff_501', packet, true);
         const rsp = new NapProtoMsg(HttpConn0x6ff_501Response).decode(
@@ -70,7 +67,6 @@ export class PacketHighwaySession {
         );
         this.sig.sigSession = rsp.httpConn.sigSession
         this.sig.sessionKey = rsp.httpConn.sessionKey
-        this.logger.logDebug(`[Highway] sigSession ${Buffer.from(this.sig.sigSession).toString('hex')}, sessionKey ${Buffer.from(this.sig.sessionKey).toString('hex')}`)
         for (const info of rsp.httpConn.serverInfos) {
             if (info.serviceType !== 1) continue;
             for (const addr of info.serverAddrs) {

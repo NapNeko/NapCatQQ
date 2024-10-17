@@ -110,6 +110,6 @@ export class NTQQPacketApi {
     async sendUploadForwardMsg(msg: PacketForwardNode[], groupUin: number = 0) {
         const data = this.packetPacker.packUploadForwardMsg(this.core.selfInfo.uid, msg, groupUin);
         const ret = await this.sendPacket('trpc.group.long_msg_interface.MsgService.SsoSendLongMsg', data, true);
-        console.log(JSON.stringify(ret));
+        // console.log(JSON.stringify(ret));
     }
 }
