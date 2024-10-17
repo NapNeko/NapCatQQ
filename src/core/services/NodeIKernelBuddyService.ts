@@ -36,7 +36,7 @@ export interface NodeIKernelBuddyService {
 
     getBuddyRemark(uid: number): string;
 
-    setBuddyRemark(uid: number, remark: string): void;
+    setBuddyRemark(uid: string, remark: string): void;
 
     getAvatarUrl(uid: number): string;
 

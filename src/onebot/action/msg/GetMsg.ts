@@ -33,7 +33,7 @@ class GetMsg extends BaseAction<Payload, OB11Message> {
             throw new Error('消息不存在');
         }
         const peer = { guildId: '', peerUid: msgIdWithPeer?.Peer.peerUid, chatType: msgIdWithPeer.Peer.chatType };
-        let orimsg = this.obContext.recallMsgCache.get(msgIdWithPeer.MsgId);
+        const orimsg = this.obContext.recallMsgCache.get(msgIdWithPeer.MsgId);
         let msg: RawMessage;
         if (orimsg) {
             msg = orimsg;
