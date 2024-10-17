@@ -10,6 +10,7 @@ import { OidbSvcTrpcTcpBase, OidbSvcTrpcTcpBaseRsp } from '@/core/packet/proto/o
 import { OidbSvcTrpcTcp0XFE1_2RSP } from '@/core/packet/proto/oidb/Oidb.fe1_2';
 import { PacketForwardNode } from "@/core/packet/msg/entity/forward";
 import {LogWrapper} from "@/common/log";
+import {SendLongMsgResp} from "@/core/packet/proto/message/action";
 
 interface OffsetType {
     [key: string]: {
@@ -110,6 +111,7 @@ export class NTQQPacketApi {
     async sendUploadForwardMsg(msg: PacketForwardNode[], groupUin: number = 0) {
         const data = this.packetPacker.packUploadForwardMsg(this.core.selfInfo.uid, msg, groupUin);
         const ret = await this.sendPacket('trpc.group.long_msg_interface.MsgService.SsoSendLongMsg', data, true);
-        // console.log(JSON.stringify(ret));
+        const resp = new NapProtoMsg(SendLongMsgResp).decode(Buffer.from(ret.hex_data, 'hex'));
+        return resp.result.resId;
     }
 }
