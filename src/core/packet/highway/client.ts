@@ -1,7 +1,7 @@
 import * as stream from 'node:stream';
 import {ReadStream} from "node:fs";
 import {PacketHighwaySig} from "@/core/packet/highway/session";
-import {HighwayHttpUploader} from "@/core/packet/highway/uploader";
+import {HighwayHttpUploader, HighwayTcpUploader} from "@/core/packet/highway/uploader";
 import {LogWrapper} from "@/common/log";
 
 export interface PacketHighwayTrans {
@@ -16,27 +16,27 @@ export interface PacketHighwayTrans {
     ext: Uint8Array;
     encrypt: boolean;
     timeout?: number;
-    ip: string;
+    server: string;
     port: number;
 }
 
 export class PacketHighwayClient {
     sig: PacketHighwaySig;
-    ip: string = 'htdata3.qq.com';
+    server: string = 'htdata3.qq.com';
     port: number = 80;
     logger: LogWrapper;
 
-    constructor(sig: PacketHighwaySig, logger: LogWrapper) {
+    constructor(sig: PacketHighwaySig, logger: LogWrapper, server: string = 'htdata3.qq.com', port: number = 80) {
         this.sig = sig;
         this.logger = logger;
     }
 
     changeServer(server: string, port: number) {
-        this.ip = server;
+        this.server = server;
         this.port = port;
     }
 
-    private buildTrans(cmd: number, data: ReadStream, fileSize: number, md5: Uint8Array, extendInfo: Uint8Array, timeout: number = 3600): PacketHighwayTrans {
+    private buildDataUpTrans(cmd: number, data: ReadStream, fileSize: number, md5: Uint8Array, extendInfo: Uint8Array, timeout: number = 3600): PacketHighwayTrans {
         return {
             uin: this.sig.uin,
             cmd: cmd,
@@ -48,14 +48,25 @@ export class PacketHighwayClient {
             ext: extendInfo,
             encrypt: false,
             timeout: timeout,
-            ip: this.ip,
+            server: this.server,
             port: this.port,
         } as PacketHighwayTrans;
     }
 
     async upload(cmd: number, data: ReadStream, fileSize: number, md5: Uint8Array, extendInfo: Uint8Array): Promise<void> {
-        const trans = this.buildTrans(cmd, data, fileSize, md5, extendInfo);
-        const httpUploader = new HighwayHttpUploader(trans, this.logger);
-        await httpUploader.upload();
+        const trans = this.buildDataUpTrans(cmd, data, fileSize, md5, extendInfo);
+        try {
+            const tcpUploader = new HighwayTcpUploader(trans, this.logger);
+            await tcpUploader.upload();
+        } catch (e) {
+            this.logger.logError(`[Highway] upload failed: ${e}, fallback to http upload`);
+            try {
+                const httpUploader = new HighwayHttpUploader(trans, this.logger);
+                await httpUploader.upload();
+            } catch (e) {
+                this.logger.logError(`[Highway] http upload failed: ${e}`);
+                throw e;
+            }
+        }
     }
 }
