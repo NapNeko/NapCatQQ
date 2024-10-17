@@ -78,9 +78,7 @@ export class NTQQPacketApi {
         const ret = await this.sendPacket('OidbSvcTrpcTcp.0x9067_202', packet, true);
         if (!ret?.hex_data) return [];
         const body = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(Buffer.from(ret.hex_data, 'hex')).body;
-        //console.log('ret: ', Buffer.from(body).toString('hex'));
         const retData = new NapProtoMsg(OidbSvcTrpcTcp0X9067_202_Rsp_Body).decode(body);
-        //console.log('ret: ', JSON.stringify(retData.data.rkeyList));
         return retData.data.rkeyList;
     }
 
