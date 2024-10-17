@@ -127,7 +127,7 @@ export class PacketHighwaySession {
                 extend
             );
         } else {
-            this.logger.logError(`[Highway] get upload invalid ukey ${ukey}, don't need upload!`);
+            this.logger.logDebug(`[Highway] get upload invalid ukey ${ukey}, don't need upload!`);
         }
         img.msgInfo = preRespData.upload.msgInfo;
         // img.groupPicExt = new NapProtoMsg(CustomFace).decode(preRespData.tcpUpload.compatQMsg)

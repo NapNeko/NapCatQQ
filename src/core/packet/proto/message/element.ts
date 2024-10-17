@@ -300,11 +300,18 @@ export const SrcMsg = {
     elems: ProtoField(5, () => Elem, false, true),
     type: ProtoField(6, ScalarType.INT32, true),
     richMsg: ProtoField(7, ScalarType.BYTES, true),
-    pbReserve: ProtoField(8, ScalarType.BYTES, true),
+    pbReserve: ProtoField(8, () => SrcMsgPbRes, true),
     sourceMsg: ProtoField(9, ScalarType.BYTES, true),
     toUin: ProtoField(10, ScalarType.UINT64, true),
     troopName: ProtoField(11, ScalarType.BYTES, true),
 };
+
+export const SrcMsgPbRes = {
+    messageId: ProtoField(3, ScalarType.UINT64),
+    senderUid: ProtoField(6, ScalarType.STRING, true),
+    receiverUid: ProtoField(7, ScalarType.STRING, true),
+    friendSeq: ProtoField(8, ScalarType.UINT32, true),
+}
 
 export const LightAppElem = {
     data: ProtoField(1, ScalarType.BYTES),
@@ -328,12 +335,12 @@ export const MentionExtra = {
     uid: ProtoField(9, ScalarType.STRING, true),
 };
 
-export const QFaceExtra = {
-    field1: ProtoField(1, ScalarType.STRING, true),
-    field2: ProtoField(2, ScalarType.STRING, true),
+export const QBigFaceExtra = {
+    AniStickerPackId: ProtoField(1, ScalarType.STRING, true),
+    AniStickerId: ProtoField(2, ScalarType.STRING, true),
     faceId: ProtoField(3, ScalarType.INT32, true),
-    field4: ProtoField(4, ScalarType.INT32, true),
-    field5: ProtoField(5, ScalarType.INT32, true),
+    Field4: ProtoField(4, ScalarType.INT32, true),
+    AniStickerType: ProtoField(5, ScalarType.INT32, true),
     field6: ProtoField(6, ScalarType.STRING, true),
     preview: ProtoField(7, ScalarType.STRING, true),
     field9: ProtoField(9, ScalarType.INT32, true),
@@ -344,3 +351,7 @@ export const QSmallFaceExtra = {
     preview: ProtoField(2, ScalarType.STRING),
     preview2: ProtoField(3, ScalarType.STRING),
 };
+
+export const MarkdownData = {
+    content: ProtoField(1, ScalarType.STRING)
+}
