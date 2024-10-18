@@ -1,23 +1,11 @@
-import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-// no_cache get时传字符串
-const SchemaData = {
-    type: 'object',
-    properties: {
-    },
-} as const satisfies JSONSchema;
+import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
 
-type Payload = FromSchema<typeof SchemaData>;
 
-export class GetRkey extends BaseAction<Payload, Array<any>> {
+export class GetRkey extends GetPacketStatusDepends<null, Array<any>> {
     actionName = ActionName.GetRkey;
-    payloadSchema = SchemaData;
 
-    async _handle(payload: Payload) {
-        if (!this.core.apis.PacketApi.available) {
-            throw new Error('PacketClient is not init');
-        }
+    async _handle() {
         return await this.core.apis.PacketApi.sendRkeyPacket();
     }
 }

@@ -1,7 +1,7 @@
-import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import {FileNapCatOneBotUUID} from "@/common/helper";
+import { FileNapCatOneBotUUID } from "@/common/helper";
+import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
 
 const SchemaData = {
     type: 'object',
@@ -18,14 +18,11 @@ interface GetGroupFileUrlResponse {
     url?: string;
 }
 
-export class GetGroupFileUrl extends BaseAction<Payload, GetGroupFileUrlResponse> {
+export class GetGroupFileUrl extends GetPacketStatusDepends<Payload, GetGroupFileUrlResponse> {
     actionName = ActionName.GOCQHTTP_GetGroupFileUrl;
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        if (!this.core.apis.PacketApi.available) {
-            throw new Error('PacketClient is not init');
-        }
         const contextMsgFile = FileNapCatOneBotUUID.decode(payload.file_id) || FileNapCatOneBotUUID.decodeModelId(payload.file_id);
         if (contextMsgFile?.fileUUID) {
             return {
