@@ -1,5 +1,7 @@
 import {IPacketMsgElement} from "@/core/packet/msg/element";
-import {SendMessageElement} from "@/core";
+import {SendMessageElement, SendStructLongMsgElement} from "@/core";
+
+export type PacketSendMsgElement = SendMessageElement | SendStructLongMsgElement
 
 export interface PacketMsg {
     seq?: number;
@@ -9,5 +11,5 @@ export interface PacketMsg {
     senderUin: number;
     senderName: string;
     time: number;
-    msg: IPacketMsgElement<SendMessageElement>[]
+    msg: IPacketMsgElement<PacketSendMsgElement>[]
 }
