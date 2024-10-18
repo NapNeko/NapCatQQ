@@ -68,8 +68,7 @@ export class NTQQUserApi {
     }
 
     async setQQAvatar(filePath: string) {
-        type setQQAvatarRet = { result: number, errMsg: string };
-        const ret = await this.context.session.getProfileService().setHeader(filePath) as setQQAvatarRet;
+        const ret = await this.context.session.getProfileService().setHeader(filePath);
         return { result: ret?.result, errMsg: ret?.errMsg };
     }
 
