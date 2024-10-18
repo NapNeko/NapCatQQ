@@ -108,7 +108,7 @@ export class OneBotMsgApi {
                     peerUid: msg.peerUid,
                     guildId: '',
                 };
-                const encodedFileId = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "." + element.fileName);
+                const encodedFileId = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, element.fileUuid, "." + element.fileName);
                 return {
                     type: OB11MessageDataType.image,
                     data: {
@@ -140,7 +140,7 @@ export class OneBotMsgApi {
                     file: element.fileName,
                     path: element.filePath,
                     url: pathToFileURL(element.filePath).href,
-                    file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "." + element.fileName),
+                    file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, element.fileUuid,"." + element.fileName),
                     file_size: element.fileSize,
                     file_unique: element.fileName,
                 },
@@ -187,7 +187,7 @@ export class OneBotMsgApi {
                 data: {
                     summary: _.faceName, // 商城表情名称
                     file: 'marketface',
-                    file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "." + _.key + ".jpg"),
+                    file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "", "." + _.key + ".jpg"),
                     path: url,
                     url: url,
                     file_unique: _.key
@@ -275,7 +275,7 @@ export class OneBotMsgApi {
             if (!videoDownUrl) {
                 videoDownUrl = element.filePath;
             }
-            const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "." + element.fileName);
+            const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "", "." + element.fileName);
             return {
                 type: OB11MessageDataType.video,
                 data: {
@@ -295,7 +295,7 @@ export class OneBotMsgApi {
                 peerUid: msg.peerUid,
                 guildId: '',
             };
-            const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "." + element.fileName);
+            const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "", "." + element.fileName);
             return {
                 type: OB11MessageDataType.voice,
                 data: {
