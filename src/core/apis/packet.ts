@@ -8,9 +8,9 @@ import { NapProtoMsg } from '@/core/packet/proto/NapProto';
 import { OidbSvcTrpcTcp0X9067_202_Rsp_Body } from '@/core/packet/proto/oidb/Oidb.0x9067_202';
 import { OidbSvcTrpcTcpBase, OidbSvcTrpcTcpBaseRsp } from '@/core/packet/proto/oidb/OidbBase';
 import { OidbSvcTrpcTcp0XFE1_2RSP } from '@/core/packet/proto/oidb/Oidb.fe1_2';
-import { PacketForwardNode } from "@/core/packet/msg/entity/forward";
 import {LogWrapper} from "@/common/log";
 import {SendLongMsgResp} from "@/core/packet/proto/message/action";
+import {PacketMsg} from "@/core/packet/msg/message";
 
 interface OffsetType {
     [key: string]: {
@@ -106,7 +106,7 @@ export class NTQQPacketApi {
         await this.sendPacket('OidbSvcTrpcTcp.0x8fc_2', data, true);
     }
 
-    async sendUploadForwardMsg(msg: PacketForwardNode[], groupUin: number = 0) {
+    async sendUploadForwardMsg(msg: PacketMsg[], groupUin: number = 0) {
         const data = this.packetPacker.packUploadForwardMsg(this.core.selfInfo.uid, msg, groupUin);
         const ret = await this.sendPacket('trpc.group.long_msg_interface.MsgService.SsoSendLongMsg', data, true);
         const resp = new NapProtoMsg(SendLongMsgResp).decode(Buffer.from(ret.hex_data, 'hex'));

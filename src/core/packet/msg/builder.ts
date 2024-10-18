@@ -1,8 +1,8 @@
 import * as crypto from "crypto";
 import {PushMsgBody} from "@/core/packet/proto/message/message";
 import {NapProtoEncodeStructType} from "@/core/packet/proto/NapProto";
-import {PacketForwardNode} from "@/core/packet/msg/entity/forward";
 import {LogWrapper} from "@/common/log";
+import {PacketMsg} from "@/core/packet/msg/message";
 
 export class PacketMsgBuilder {
     private logger: LogWrapper;
@@ -11,14 +11,14 @@ export class PacketMsgBuilder {
         this.logger = logger;
     }
 
-    buildFakeMsg(selfUid: string, element: PacketForwardNode[]): NapProtoEncodeStructType<typeof PushMsgBody>[] {
+    buildFakeMsg(selfUid: string, element: PacketMsg[]): NapProtoEncodeStructType<typeof PushMsgBody>[] {
         return element.map((node): NapProtoEncodeStructType<typeof PushMsgBody> => {
-            const avatar = `https://q.qlogo.cn/headimg_dl?dst_uin=${node.senderId}&spec=640&img_type=jpg`;
+            const avatar = `https://q.qlogo.cn/headimg_dl?dst_uin=${node.senderUin}&spec=640&img_type=jpg`;
             const msgElement = node.msg.flatMap(msg => msg.buildElement() ?? []);
             return {
                 responseHead: {
                     fromUid: "",
-                    fromUin: node.senderId,
+                    fromUin: node.senderUin,
                     toUid: node.groupId ? undefined : selfUid,
                     forward: node.groupId ? undefined : {
                         friendName: node.senderName,
