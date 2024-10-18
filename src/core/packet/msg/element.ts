@@ -19,7 +19,6 @@ import {
     SendFileElement,
     SendMarkdownElement,
     SendMarketFaceElement,
-    SendMessageElement,
     SendPicElement,
     SendPttElement,
     SendReplyElement,
@@ -28,13 +27,13 @@ import {
     SendVideoElement
 } from "@/core";
 import {MsgInfo} from "@/core/packet/proto/oidb/common/Ntv2.RichMediaReq";
-import {PacketMsg} from "@/core/packet/msg/message";
+import {PacketMsg, PacketSendMsgElement} from "@/core/packet/msg/message";
 
 // raw <-> packet
 // TODO: check ob11 -> raw impl!
 // TODO: parse to raw element
 // TODO: SendStructLongMsgElement
-export abstract class IPacketMsgElement<T extends SendMessageElement | SendStructLongMsgElement> {
+export abstract class IPacketMsgElement<T extends PacketSendMsgElement> {
     protected constructor(rawElement: T) {
     }
 
@@ -149,6 +148,7 @@ export class PacketMsgReplyElement extends IPacketMsgElement<SendReplyElement> {
     targetUin: number;
     targetUid: string;
     time: number;
+    elems: PacketMsg[];
 
     constructor(element: SendReplyElement) {
         super(element);
@@ -158,6 +158,7 @@ export class PacketMsgReplyElement extends IPacketMsgElement<SendReplyElement> {
         this.targetUin = Number(element.replyElement.senderUin ?? 0);
         this.targetUid = element.replyElement.senderUidStr ?? '';
         this.time = Number(element.replyElement.replyMsgTime ?? 0);
+        this.elems = []; // TODO: in replyElement.sourceMsgTextElems
     }
 
     get isGroupReply(): boolean {
