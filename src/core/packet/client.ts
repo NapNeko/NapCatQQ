@@ -172,7 +172,7 @@ export class PacketClient {
             const md5 = crypto.createHash('md5').update(data).digest('hex');
             const trace_id = (this.randText(4) + md5 + data).slice(0, data.length / 2);
             this.sendCommand(cmd, data, trace_id, rsp, 20000, async () => {
-                await sleep(10);
+                // await sleep(10);
                 await this.napCatCore.context.session.getMsgService().sendSsoCmdReqByContend(cmd, trace_id);
             }).then((res) => resolve(res)).catch((e: Error) => reject(e));
         });
