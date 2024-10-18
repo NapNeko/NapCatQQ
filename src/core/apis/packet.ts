@@ -8,9 +8,10 @@ import { NapProtoMsg } from '@/core/packet/proto/NapProto';
 import { OidbSvcTrpcTcp0X9067_202_Rsp_Body } from '@/core/packet/proto/oidb/Oidb.0x9067_202';
 import { OidbSvcTrpcTcpBase, OidbSvcTrpcTcpBaseRsp } from '@/core/packet/proto/oidb/OidbBase';
 import { OidbSvcTrpcTcp0XFE1_2RSP } from '@/core/packet/proto/oidb/Oidb.0XFE1_2';
-import {LogWrapper} from "@/common/log";
-import {SendLongMsgResp} from "@/core/packet/proto/message/action";
-import {PacketMsg} from "@/core/packet/msg/message";
+import { LogWrapper } from "@/common/log";
+import { SendLongMsgResp } from "@/core/packet/proto/message/action";
+import { PacketMsg } from "@/core/packet/msg/message";
+import { OidbSvcTrpcTcp0x6D6Response } from "@/core/packet/proto/oidb/Oidb.0x6D6";
 
 interface OffsetType {
     [key: string]: {
@@ -111,5 +112,16 @@ export class NTQQPacketApi {
         const ret = await this.sendPacket('trpc.group.long_msg_interface.MsgService.SsoSendLongMsg', data, true);
         const resp = new NapProtoMsg(SendLongMsgResp).decode(Buffer.from(ret.hex_data, 'hex'));
         return resp.result.resId;
+    }
+
+    async sendGroupFileDownloadReq(groupUin: number, fileUUID: string) {
+        const data = this.packetPacker.packGroupFileDownloadReq(groupUin, fileUUID);
+        const ret = await this.sendPacket('OidbSvcTrpcTcp.0x6d6_2', data, true);
+        const body = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(Buffer.from(ret.hex_data, 'hex')).body;
+        const resp = new NapProtoMsg(OidbSvcTrpcTcp0x6D6Response).decode(body);
+        if (resp.download.retCode !== 0){
+            throw new Error(`sendGroupFileDownloadReq error: ${resp.download.clientWording}`);
+        }
+        return `https://${resp.download.downloadDns}/ftn_handler/${Buffer.from(resp.download.downloadUrl).toString('hex')}/?fname=`
     }
 }

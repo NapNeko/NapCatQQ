@@ -85,6 +85,7 @@ export enum ActionName {
     MarkGroupMsgAsRead = 'mark_group_msg_as_read',
     GoCQHTTP_UploadGroupFile = 'upload_group_file',
     GOCQHTTP_DeleteGroupFile = 'delete_group_file',
+    GOCQHTTP_GetGroupFileUrl = 'get_group_file_url',
     GoCQHTTP_CreateGroupFileFolder = 'create_group_file_folder',
     GoCQHTTP_DeleteGroupFileFolder = 'delete_group_file_folder',
     GoCQHTTP_GetGroupFileSystemInfo = 'get_group_file_system_info',

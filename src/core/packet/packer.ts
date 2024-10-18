@@ -288,14 +288,14 @@ export class PacketPacker {
 
     packGroupFileDownloadReq(groupUin: number, fileUUID: string): PacketHexStr {
         return this.toHexStr(
-            new NapProtoMsg(OidbSvcTrpcTcp0x6D6).encode({
+            this.packOidbPacket(0x6D6, 2, new NapProtoMsg(OidbSvcTrpcTcp0x6D6).encode({
                 download: {
                     groupUin: groupUin,
                     appId: 7,
                     busId: 102,
                     fileId: fileUUID
                 }
-            })
+            }), true, false)
         )
     }
 
