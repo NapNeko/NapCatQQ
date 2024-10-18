@@ -121,6 +121,7 @@ export enum ActionName {
     GetGroupInfoEx = "get_group_info_ex",
     GetGroupSystemMsg = 'get_group_system_msg',
     FetchUserProfileLike = "fetch_user_profile_like",
+    GetPacketStatus = 'nc_get_packet_status',
     GetUserStatus = "nc_get_user_status",
     GetRkey = "nc_get_rkey",
     SetSpecialTittle = "set_group_special_title",

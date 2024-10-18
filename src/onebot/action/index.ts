@@ -91,6 +91,7 @@ import { UploadForwardMsg } from "@/onebot/action/extends/UploadForwardMsg";
 import { GetGroupShutList } from './group/GetGroupShutList';
 import { GetGroupMemberList } from './group/GetGroupMemberList';
 import { GetGroupFileUrl } from "@/onebot/action/file/GetGroupFileUrl";
+import {GetPacketStatus} from "@/onebot/action/packet/GetPacketStatus";
 
 
 export type ActionMap = Map<string, BaseAction<any, any>>;
@@ -187,6 +188,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new GetGroupFilesByFolder(obContext, core),
         new GetGroupSystemMsg(obContext, core),
         new FetchUserProfileLike(obContext, core),
+        new GetPacketStatus(obContext, core),
         new GroupPoke(obContext, core),
         new GetUserStatus(obContext, core),
         new GetRkey(obContext, core),
