@@ -1,5 +1,5 @@
-import { ScalarType } from "@protobuf-ts/runtime";
-import { ProtoField } from "../NapProto";
+import {ScalarType} from "@protobuf-ts/runtime";
+import {ProtoField} from "../NapProto";
 
 export const Elem = {
     text: ProtoField(1, () => Text, true),
@@ -101,20 +101,24 @@ export const TransElem = {
 };
 
 export const MarketFace = {
-    faceName: ProtoField(1, ScalarType.BYTES),
+    faceName: ProtoField(1, ScalarType.STRING),
     itemType: ProtoField(2, ScalarType.INT32),
     faceInfo: ProtoField(3, ScalarType.INT32),
     faceId: ProtoField(4, ScalarType.BYTES),
     tabId: ProtoField(5, ScalarType.INT32),
     subType: ProtoField(6, ScalarType.INT32),
-    key: ProtoField(7, ScalarType.BYTES),
+    key: ProtoField(7, ScalarType.STRING),
     param: ProtoField(8, ScalarType.BYTES),
     mediaType: ProtoField(9, ScalarType.INT32),
     imageWidth: ProtoField(10, ScalarType.INT32),
     imageHeight: ProtoField(11, ScalarType.INT32),
     mobileparam: ProtoField(12, ScalarType.BYTES),
-    pbReserve: ProtoField(13, ScalarType.BYTES),
+    pbReserve: ProtoField(13, () => MarketFacePbRes),
 };
+
+export const MarketFacePbRes = {
+    field8: ProtoField(8, ScalarType.INT32)
+}
 
 export const CustomFace = {
     guid: ProtoField(1, ScalarType.BYTES),
