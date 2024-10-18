@@ -1,6 +1,6 @@
-import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import {GetPacketStatusDepends} from "@/onebot/action/packet/GetPacketStatus";
 // no_cache get时传字符串
 const SchemaData = {
     type: 'object',
@@ -13,14 +13,11 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export class GroupPoke extends BaseAction<Payload, any> {
+export class GroupPoke extends GetPacketStatusDepends<Payload, any> {
     actionName = ActionName.GroupPoke;
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        if (!this.core.apis.PacketApi.PacketClient?.isConnected) {
-            throw new Error('PacketClient is not init');
-        }
-        this.core.apis.GroupApi.sendPacketPoke(+payload.group_id, +payload.user_id);
+        await this.core.apis.PacketApi.sendPokePacket(+payload.group_id, +payload.user_id);
     }
 }

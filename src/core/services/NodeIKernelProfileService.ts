@@ -45,7 +45,7 @@ export interface NodeIKernelProfileService {
 
     setGander(...args: unknown[]): Promise<unknown>;
 
-    setHeader(arg: string): Promise<unknown>;
+    setHeader(arg: string): Promise<GeneralCallResult>;
 
     setRecommendImgFlag(...args: unknown[]): Promise<unknown>;
 

@@ -68,8 +68,7 @@ export class NTQQUserApi {
     }
 
     async setQQAvatar(filePath: string) {
-        type setQQAvatarRet = { result: number, errMsg: string };
-        const ret = await this.context.session.getProfileService().setHeader(filePath) as setQQAvatarRet;
+        const ret = await this.context.session.getProfileService().setHeader(filePath);
         return { result: ret?.result, errMsg: ret?.errMsg };
     }
 
@@ -124,10 +123,10 @@ export class NTQQUserApi {
         const ClientKeyData = await this.forceFetchClientKey();
         const requestUrl = 'https://ssl.ptlogin2.qq.com/jump?ptlang=1033&clientuin=' + this.core.selfInfo.uin +
             '&clientkey=' + ClientKeyData.clientKey + '&u1=https%3A%2F%2F' + domain + '%2F' + this.core.selfInfo.uin + '%2Finfocenter&keyindex=19%27';
-        let data = await RequestUtil.HttpsGetCookies(requestUrl);
+        const data = await RequestUtil.HttpsGetCookies(requestUrl);
         if (!data.p_skey || data.p_skey.length == 0) {
             try {
-                let pskey = (await this.getPSkey([domain])).domainPskeyMap.get(domain);
+                const pskey = (await this.getPSkey([domain])).domainPskeyMap.get(domain);
                 if (pskey) data.p_skey = pskey;
             } catch {
                 return data;

@@ -115,7 +115,8 @@ export interface NodeIKernelGroupService {
     destroyMemberListScene(SceneId: string): void;
 
     getNextMemberList(sceneId: string, a: undefined, num: number): Promise<{
-        errCode: number, errMsg: string,
+        errCode: number, 
+        errMsg: string,
         result: { ids: string[], infos: Map<string, GroupMember>, finish: boolean, hasRobot: boolean }
     }>;
 
@@ -145,7 +146,7 @@ export interface NodeIKernelGroupService {
 
     getMemberExtInfo(param: GroupExtParam): Promise<unknown>;//req
 
-    getGroupAllInfo(): unknown;
+    getGroupAllInfo(groupId: string, sourceId: number): Promise<any>;
 
     getDiscussExistInfo(): unknown;
 
@@ -234,7 +235,7 @@ export interface NodeIKernelGroupService {
 
     setGroupShutUp(groupCode: string, shutUp: boolean): void;
 
-    getGroupShutUpMemberList(groupCode: string): unknown[];
+    getGroupShutUpMemberList(groupCode: string): Promise<any>;
 
     setMemberShutUp(groupCode: string, memberTimes: { uid: string, timeStamp: number }[]): Promise<void>;
 

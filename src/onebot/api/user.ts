@@ -1,5 +1,5 @@
 import { NapCatCore } from '@/core';
-import { decodeProfileLikeTip } from '@/core/proto/ProfileLike';
+import { decodeProfileLikeTip } from '@/core/packet/proto/old/ProfileLike';
 
 import { NapCatOneBot11Adapter } from '@/onebot';
 import { OB11ProfileLikeEvent } from '../event/notice/OB11ProfileLikeEvent';

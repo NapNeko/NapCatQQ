@@ -21,6 +21,14 @@ export default class SetFriendAddRequest extends BaseAction<Payload, null> {
     async _handle(payload: Payload): Promise<null> {
         const approve = payload.approve?.toString() !== 'false';
         await this.core.apis.FriendApi.handleFriendRequest(payload.flag, approve);
+        if (payload.remark) {
+            const data = payload.flag.split('|');
+            if (data.length < 2) {
+                throw new Error('Invalid flag');
+            }
+            const friendUid = data[0];
+            await this.core.apis.FriendApi.setBuddyRemark(friendUid, payload.remark);
+        }
         return null;
     }
 }
