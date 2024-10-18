@@ -7,7 +7,7 @@ import { PacketHexStr, PacketPacker } from "@/core/packet/packer";
 import { NapProtoMsg } from '@/core/packet/proto/NapProto';
 import { OidbSvcTrpcTcp0X9067_202_Rsp_Body } from '@/core/packet/proto/oidb/Oidb.0x9067_202';
 import { OidbSvcTrpcTcpBase, OidbSvcTrpcTcpBaseRsp } from '@/core/packet/proto/oidb/OidbBase';
-import { OidbSvcTrpcTcp0XFE1_2RSP } from '@/core/packet/proto/oidb/Oidb.fe1_2';
+import { OidbSvcTrpcTcp0XFE1_2RSP } from '@/core/packet/proto/oidb/Oidb.0XFE1_2';
 import {LogWrapper} from "@/common/log";
 import {SendLongMsgResp} from "@/core/packet/proto/message/action";
 import {PacketMsg} from "@/core/packet/msg/message";
