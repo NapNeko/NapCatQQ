@@ -64,6 +64,7 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
         });
 
         this.app.use((req, res, next) => this.authorize(this.token, req, res, next));
+        // @ts-ignore
         this.app.use((req, res) => this.handleRequest(req, res));
 
         this.server.listen(this.port, () => {

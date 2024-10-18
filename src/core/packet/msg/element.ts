@@ -1,5 +1,6 @@
-import assert from "node:assert";
+import * as assert from "node:assert";
 import * as zlib from "node:zlib";
+import * as crypto from "node:crypto";
 import {NapProtoEncodeStructType, NapProtoMsg} from "@/core/packet/proto/NapProto";
 import {
     CustomFace,
@@ -26,6 +27,7 @@ import {
     SendVideoElement
 } from "@/core";
 import {MsgInfo} from "@/core/packet/proto/oidb/common/Ntv2.RichMediaReq";
+import {PacketMsg} from "@/core/packet/msg/message";
 
 // raw <-> packet
 // TODO: check ob11 -> raw impl!
@@ -41,6 +43,10 @@ export abstract class IPacketMsgElement<T extends SendMessageElement | SendStruc
 
     buildElement(): NapProtoEncodeStructType<typeof Elem>[] | undefined {
         return undefined;
+    }
+
+    toPreview(): string {
+        return '[nya~]';
     }
 }
 
@@ -58,6 +64,10 @@ export class PacketMsgTextElement extends IPacketMsgElement<SendTextElement> {
                 str: this.text
             }
         }];
+    }
+
+    toPreview(): string {
+        return this.text;
     }
 }
 
@@ -84,6 +94,10 @@ export class PacketMsgAtElement extends PacketMsgTextElement {
                 )
             }
         }];
+    }
+
+    toPreview(): string {
+        return `@${this.targetUid} ${this.text}`;
     }
 }
 
@@ -120,6 +134,10 @@ export class PacketMsgPicElement extends IPacketMsgElement<SendPicElement> {
                 businessType: 10,
             }
         }]
+    }
+
+    toPreview(): string {
+        return "[图片]";
     }
 }
 
@@ -168,6 +186,10 @@ export class PacketMsgReplyElement extends IPacketMsgElement<SendReplyElement> {
                 }),
             } : undefined,
         }]
+    }
+
+    toPreview(): string {
+        return "[回复]";
     }
 }
 
@@ -218,6 +240,10 @@ export class PacketMsgFaceElement extends IPacketMsgElement<SendFaceElement> {
             }]
         }
     }
+
+    toPreview(): string {
+        return "[表情]";
+    }
 }
 
 export class PacketMsgVideoElement extends IPacketMsgElement<SendVideoElement> {
@@ -256,6 +282,10 @@ export class PacketMsgLightAppElement extends IPacketMsgElement<SendArkElement> 
             }
         }]
     }
+
+    toPreview(): string {
+        return "[小程序]";
+    }
 }
 
 export class PacketMsgMarkDownElement extends IPacketMsgElement<SendMarkdownElement> {
@@ -277,23 +307,67 @@ export class PacketMsgMarkDownElement extends IPacketMsgElement<SendMarkdownElem
             }
         }]
     }
+
+    toPreview(): string {
+        return this.content;
+    }
 }
 
-// TODO:
-// export class PacketMsgLongMsgElement extends IPacketMsgElement<SendStructLongMsgElement> {
-//     resid: string;
-//
-//     constructor(element: SendStructLongMsgElement) {
-//         super(element);
-//         this.resid = element.structLongMsgElement.resId;
-//     }
-//
-//     buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
-//         return [{
-//             generalFlags: {
-//                 longTextResId: this.resid,
-//                 longTextFlag: 1
-//             }
-//         }]
-//     }
-// }
+export class PacketMultiMsgElement extends IPacketMsgElement<SendStructLongMsgElement> {
+    resid: string;
+    message: PacketMsg[];
+
+    constructor(rawElement: SendStructLongMsgElement)
+    constructor(rawElement: SendStructLongMsgElement, message?: PacketMsg[]) {
+        super(rawElement);
+        this.resid = rawElement.structLongMsgElement.resId;
+        this.message = message ?? [];
+    }
+
+    buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
+        const id = crypto.randomUUID();
+        const elementJson = {
+            app: "com.tencent.multimsg",
+            config: {
+                autosize: 1,
+                forward: 1,
+                round: 1,
+                type: "normal",
+                width: 300
+            },
+            desc: "[聊天记录]",
+            extra: {
+                filename: id,
+                tsum: this.message.length,
+            },
+            meta: {
+                detail: {
+                    news: this.message.length === 0 ? [{
+                        text: "[Nya~ This message is send from NapCat.Packet!]",
+                    }] : this.message.map(packetMsg => ({
+                        text: `${packetMsg.senderName}: ${packetMsg.msg.map(msg => msg.toPreview()).join('')}`,
+                    })),
+                    resid: this.resid,
+                    source: "聊天记录",
+                    summary: `查看${this.message.length}条转发消息`,
+                    uniseq: id,
+                }
+            },
+            prompt: "[聊天记录]",
+            ver: "0.0.0.5",
+            view: "contact"
+        }
+        return [{
+            lightAppElem: {
+                data: Buffer.concat([
+                    Buffer.from([0x01]),
+                    zlib.deflateSync(Buffer.from(JSON.stringify(elementJson), 'utf-8'))
+                ])
+            }
+        }]
+    }
+
+    toPreview(): string {
+        return "[聊天记录]";
+    }
+}

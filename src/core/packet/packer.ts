@@ -11,9 +11,9 @@ import {NTV2RichMediaReq} from "@/core/packet/proto/oidb/common/Ntv2.RichMediaRe
 import {HttpConn0x6ff_501} from "@/core/packet/proto/action/action";
 import {LongMsgResult, SendLongMsgReq} from "@/core/packet/proto/message/action";
 import {PacketMsgBuilder} from "@/core/packet/msg/builder";
-import {PacketForwardNode} from "@/core/packet/msg/entity/forward";
 import {PacketMsgPicElement} from "@/core/packet/msg/element";
 import {LogWrapper} from "@/common/log";
+import {PacketMsg} from "@/core/packet/msg/message";
 
 export type PacketHexStr = string & { readonly hexNya: unique symbol };
 
@@ -94,7 +94,7 @@ export class PacketPacker {
         return this.toHexStr(this.packOidbPacket(0xfe1, 2, oidb_0xfe1_2));
     }
 
-    packUploadForwardMsg(selfUid: string, msg: PacketForwardNode[], groupUin: number = 0): PacketHexStr {
+    packUploadForwardMsg(selfUid: string, msg: PacketMsg[], groupUin: number = 0): PacketHexStr {
         // this.logger.logDebug("packUploadForwardMsg START!!!", selfUid, msg, groupUin);
         const msgBody = this.packetBuilder.buildFakeMsg(selfUid, msg);
         const longMsgResultData = new NapProtoMsg(LongMsgResult).encode(
