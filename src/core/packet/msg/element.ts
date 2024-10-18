@@ -1,4 +1,4 @@
-import * as assert from "node:assert";
+import assert from "node:assert";
 import * as zlib from "node:zlib";
 import * as crypto from "node:crypto";
 import {NapProtoEncodeStructType, NapProtoMsg} from "@/core/packet/proto/NapProto";
@@ -18,6 +18,7 @@ import {
     SendFaceElement,
     SendFileElement,
     SendMarkdownElement,
+    SendMarketFaceElement,
     SendMessageElement,
     SendPicElement,
     SendPttElement,
@@ -243,6 +244,44 @@ export class PacketMsgFaceElement extends IPacketMsgElement<SendFaceElement> {
 
     toPreview(): string {
         return "[表情]";
+    }
+}
+
+export class PacketMarkFaceElement extends IPacketMsgElement<SendMarketFaceElement> {
+    emojiName: string;
+    emojiId: string;
+    emojiPackageId: number;
+    emojiKey: string;
+
+    constructor(element: SendMarketFaceElement) {
+        super(element);
+        this.emojiName = element.marketFaceElement.faceName;
+        this.emojiId = element.marketFaceElement.emojiId;
+        this.emojiPackageId = element.marketFaceElement.emojiPackageId;
+        this.emojiKey = element.marketFaceElement.key;
+    }
+
+    buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
+        return [{
+            marketFace: {
+                faceName: this.emojiName,
+                itemType: 6,
+                faceInfo: 1,
+                faceId: Buffer.from(this.emojiId, 'hex'),
+                tabId: this.emojiPackageId,
+                subType: 3,
+                key: this.emojiKey,
+                imageWidth: 300,
+                imageHeight: 300,
+                pbReserve: {
+                    field8: 1
+                }
+            }
+        }]
+    }
+
+    toPreview(): string {
+        return this.emojiName;
     }
 }
 
