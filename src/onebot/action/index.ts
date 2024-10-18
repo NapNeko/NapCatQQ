@@ -90,6 +90,7 @@ import { SetSpecialTittle } from './extends/SetSpecialTittle';
 import { UploadForwardMsg } from "@/onebot/action/extends/UploadForwardMsg";
 import { GetGroupShutList } from './group/GetGroupShutList';
 import { GetGroupMemberList } from './group/GetGroupMemberList';
+import { GetGroupFileUrl } from "@/onebot/action/file/GetGroupFileUrl";
 
 
 export type ActionMap = Map<string, BaseAction<any, any>>;
@@ -192,6 +193,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new SetSpecialTittle(obContext, core),
         new UploadForwardMsg(obContext, core),
         new GetGroupShutList(obContext, core),
+        new GetGroupFileUrl(obContext, core),
     ];
     const actionMap = new Map();
     for (const action of actionHandlers) {
