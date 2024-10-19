@@ -49,7 +49,7 @@ export class PacketClient {
 
     connect(): Promise<void> {
         return new Promise((resolve, reject) => {
-            this.logger.log.bind(this.logger)(`[Core] [Packet Server] Attempting to connect to ${this.clientUrl}`);
+            //this.logger.log.bind(this.logger)(`[Core] [Packet Server] Attempting to connect to ${this.clientUrl}`);
             this.websocket = new WebSocket(this.clientUrl);
             this.websocket.on('error', (err) => this.logger.logError.bind(this.logger)('[Core] [Packet Server] Error:', err.message));
 
@@ -73,7 +73,7 @@ export class PacketClient {
 
             this.websocket.onclose = () => {
                 this.isConnected = false;
-                this.logger.logWarn.bind(this.logger)(`[Core] [Packet Server] Disconnected from ${this.clientUrl}`);
+                //this.logger.logWarn.bind(this.logger)(`[Core] [Packet Server] Disconnected from ${this.clientUrl}`);
                 this.attemptReconnect();
             };
         });
