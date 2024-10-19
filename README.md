@@ -20,7 +20,14 @@ NapCatQQ (aka 猫猫框架) 是现代化的基于 NTQQ 的 Bot 协议端实现
 
 可前往 [Release](https://github.com/NapNeko/NapCatQQ/releases/) 页面下载最新版本
 
-**首次使用**请务必前往[官方文档](https://napneko.github.io/)查看使用教程
+**首次使用**请务必查看如下文档看使用教程
+
+### 文档地址
+[Github.IO](https://napneko.github.io/)
+
+[Cloudflare.Worker](https://doc.napneko.icu/)
+
+[Cloudflare.HKServer](https://doc.napneko.icu/)
 
 ## 回家旅途
 [QQ Group](https://qm.qq.com/q/VfjAq5HIMS)
