@@ -16,16 +16,22 @@ import {LogWrapper} from "@/common/log";
 import {PacketMsg} from "@/core/packet/msg/message";
 import {OidbSvcTrpcTcp0x6D6} from "@/core/packet/proto/oidb/Oidb.0x6D6";
 import {OidbSvcTrpcTcp0XE37_1200} from "@/core/packet/proto/oidb/Oidb.0xE37_1200";
+import {PacketMsgConverter} from "@/core/packet/msg/converter";
+import {PacketClient} from "@/core/packet/client";
 
 export type PacketHexStr = string & { readonly hexNya: unique symbol };
 
 export class PacketPacker {
-    private readonly logger: LogWrapper;
-    private readonly packetBuilder: PacketMsgBuilder;
+    readonly logger: LogWrapper;
+    readonly client: PacketClient;
+    readonly packetBuilder: PacketMsgBuilder;
+    readonly packetConverter: PacketMsgConverter;
 
-    constructor(logger: LogWrapper) {
+    constructor(logger: LogWrapper, client: PacketClient) {
         this.logger = logger;
+        this.client = client;
         this.packetBuilder = new PacketMsgBuilder(logger);
+        this.packetConverter = new PacketMsgConverter(logger);
     }
 
     private toHexStr(byteArray: Uint8Array): PacketHexStr {
@@ -96,8 +102,7 @@ export class PacketPacker {
         return this.toHexStr(this.packOidbPacket(0xfe1, 2, oidb_0xfe1_2));
     }
 
-    packUploadForwardMsg(selfUid: string, msg: PacketMsg[], groupUin: number = 0): PacketHexStr {
-        // this.logger.logDebug("packUploadForwardMsg START!!!", selfUid, msg, groupUin);
+    async packUploadForwardMsg(selfUid: string, msg: PacketMsg[], groupUin: number = 0): Promise<PacketHexStr> {
         const msgBody = this.packetBuilder.buildFakeMsg(selfUid, msg);
         const longMsgResultData = new NapProtoMsg(LongMsgResult).encode(
             {

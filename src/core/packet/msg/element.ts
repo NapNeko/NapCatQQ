@@ -248,7 +248,7 @@ export class PacketMsgFaceElement extends IPacketMsgElement<SendFaceElement> {
     }
 }
 
-export class PacketMarkFaceElement extends IPacketMsgElement<SendMarketFaceElement> {
+export class PacketMsgMarkFaceElement extends IPacketMsgElement<SendMarketFaceElement> {
     emojiName: string;
     emojiId: string;
     emojiPackageId: number;
@@ -357,16 +357,15 @@ export class PacketMultiMsgElement extends IPacketMsgElement<SendStructLongMsgEl
     resid: string;
     message: PacketMsg[];
 
-    constructor(rawElement: SendStructLongMsgElement)
     constructor(rawElement: SendStructLongMsgElement, message?: PacketMsg[]) {
         super(rawElement);
         this.resid = rawElement.structLongMsgElement.resId;
         this.message = message ?? [];
     }
 
-    buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
+    get JSON() {
         const id = crypto.randomUUID();
-        const elementJson = {
+        return {
             app: "com.tencent.multimsg",
             config: {
                 autosize: 1,
@@ -388,20 +387,23 @@ export class PacketMultiMsgElement extends IPacketMsgElement<SendStructLongMsgEl
                         text: `${packetMsg.senderName}: ${packetMsg.msg.map(msg => msg.toPreview()).join('')}`,
                     })),
                     resid: this.resid,
-                    source: "聊天记录",
+                    source: "聊天记录",  // TODO:
                     summary: `查看${this.message.length}条转发消息`,
                     uniseq: id,
                 }
             },
             prompt: "[聊天记录]",
             ver: "0.0.0.5",
-            view: "contact"
+            view: "contact",
         }
+    }
+
+    buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
         return [{
             lightAppElem: {
                 data: Buffer.concat([
                     Buffer.from([0x01]),
-                    zlib.deflateSync(Buffer.from(JSON.stringify(elementJson), 'utf-8'))
+                    zlib.deflateSync(Buffer.from(JSON.stringify(this.JSON), 'utf-8'))
                 ])
             }
         }]

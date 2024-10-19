@@ -1,17 +1,18 @@
 import * as os from 'os';
-import { InstanceContext, NapCatCore } from '..';
+import {ChatType, InstanceContext, NapCatCore} from '..';
 import offset from '@/core/external/offset.json';
-import { PacketClient, RecvPacketData } from '@/core/packet/client';
-import { PacketSession } from "@/core/packet/session";
-import { PacketHexStr, PacketPacker } from "@/core/packet/packer";
-import { NapProtoMsg } from '@/core/packet/proto/NapProto';
-import { OidbSvcTrpcTcp0X9067_202_Rsp_Body } from '@/core/packet/proto/oidb/Oidb.0x9067_202';
-import { OidbSvcTrpcTcpBase, OidbSvcTrpcTcpBaseRsp } from '@/core/packet/proto/oidb/OidbBase';
-import { OidbSvcTrpcTcp0XFE1_2RSP } from '@/core/packet/proto/oidb/Oidb.0XFE1_2';
-import { LogWrapper } from "@/common/log";
-import { SendLongMsgResp } from "@/core/packet/proto/message/action";
-import { PacketMsg } from "@/core/packet/msg/message";
-import { OidbSvcTrpcTcp0x6D6Response } from "@/core/packet/proto/oidb/Oidb.0x6D6";
+import {PacketClient, RecvPacketData} from '@/core/packet/client';
+import {PacketSession} from "@/core/packet/session";
+import {PacketHexStr} from "@/core/packet/packer";
+import {NapProtoMsg} from '@/core/packet/proto/NapProto';
+import {OidbSvcTrpcTcp0X9067_202_Rsp_Body} from '@/core/packet/proto/oidb/Oidb.0x9067_202';
+import {OidbSvcTrpcTcpBase, OidbSvcTrpcTcpBaseRsp} from '@/core/packet/proto/oidb/OidbBase';
+import {OidbSvcTrpcTcp0XFE1_2RSP} from '@/core/packet/proto/oidb/Oidb.0XFE1_2';
+import {LogWrapper} from "@/common/log";
+import {SendLongMsgResp} from "@/core/packet/proto/message/action";
+import {PacketMsg} from "@/core/packet/msg/message";
+import {OidbSvcTrpcTcp0x6D6Response} from "@/core/packet/proto/oidb/Oidb.0x6D6";
+import {PacketMsgPicElement} from "@/core/packet/msg/element";
 
 interface OffsetType {
     [key: string]: {
@@ -28,14 +29,12 @@ export class NTQQPacketApi {
     logger: LogWrapper
     serverUrl: string | undefined;
     qqVersion: string | undefined;
-    packetPacker: PacketPacker;
     packetSession: PacketSession | undefined;
 
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
         this.core = core;
         this.logger = core.context.logger;
-        this.packetPacker = new PacketPacker(this.logger);
         this.packetSession = undefined;
         const config = this.core.configLoader.configData;
         if (config && config.packetServer && config.packetServer.length > 0) {
@@ -70,13 +69,13 @@ export class NTQQPacketApi {
     }
 
     async sendPokePacket(group: number, peer: number) {
-        const data = this.packetPacker.packPokePacket(group, peer);
-        await this.sendPacket('OidbSvcTrpcTcp.0xed3_1', data, false);
+        const data = this.packetSession?.packer.packPokePacket(group, peer);
+        await this.sendPacket('OidbSvcTrpcTcp.0xed3_1', data!, false);
     }
 
     async sendRkeyPacket() {
-        const packet = this.packetPacker.packRkeyPacket();
-        const ret = await this.sendPacket('OidbSvcTrpcTcp.0x9067_202', packet, true);
+        const packet = this.packetSession?.packer.packRkeyPacket();
+        const ret = await this.sendPacket('OidbSvcTrpcTcp.0x9067_202', packet!, true);
         if (!ret?.hex_data) return [];
         const body = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(Buffer.from(ret.hex_data, 'hex')).body;
         const retData = new NapProtoMsg(OidbSvcTrpcTcp0X9067_202_Rsp_Body).decode(body);
@@ -86,8 +85,8 @@ export class NTQQPacketApi {
     async sendStatusPacket(uin: number): Promise<{ status: number; ext_status: number; } | undefined> {
         let status = 0;
         try {
-            const packet = this.packetPacker.packStatusPacket(uin);
-            const ret = await this.sendPacket('OidbSvcTrpcTcp.0xfe1_2', packet, true);
+            const packet = this.packetSession?.packer.packStatusPacket(uin);
+            const ret = await this.sendPacket('OidbSvcTrpcTcp.0xfe1_2', packet!, true);
             const data = Buffer.from(ret.hex_data, 'hex');
             const ext = new NapProtoMsg(OidbSvcTrpcTcp0XFE1_2RSP).decode(new NapProtoMsg(OidbSvcTrpcTcpBase).decode(data).body).data.status.value;
             // ext & 0xff00 + ext >> 16 & 0xff
@@ -103,20 +102,37 @@ export class NTQQPacketApi {
     }
 
     async sendSetSpecialTittlePacket(groupCode: string, uid: string, tittle: string) {
-        const data = this.packetPacker.packSetSpecialTittlePacket(groupCode, uid, tittle);
-        await this.sendPacket('OidbSvcTrpcTcp.0x8fc_2', data, true);
+        const data = this.packetSession?.packer.packSetSpecialTittlePacket(groupCode, uid, tittle);
+        await this.sendPacket('OidbSvcTrpcTcp.0x8fc_2', data!, true);
+    }
+
+    private async uploadResources(msg: PacketMsg[], groupUin: number = 0){
+        const reqList = []
+        for (const m of msg){
+            for (const e of m.msg){
+                if (e instanceof PacketMsgPicElement){
+                    reqList.push(this.packetSession?.highwaySession.uploadImage({
+                        chatType: groupUin ? ChatType.KCHATTYPEGROUP : ChatType.KCHATTYPEC2C,
+                        peerUid: String(groupUin) ? String(groupUin) : this.core.selfInfo.uid
+                    }, e));
+                }
+            }
+        }
+        return Promise.all(reqList);
     }
 
     async sendUploadForwardMsg(msg: PacketMsg[], groupUin: number = 0) {
-        const data = this.packetPacker.packUploadForwardMsg(this.core.selfInfo.uid, msg, groupUin);
-        const ret = await this.sendPacket('trpc.group.long_msg_interface.MsgService.SsoSendLongMsg', data, true);
+        await this.uploadResources(msg, groupUin);
+        const data = await this.packetSession?.packer.packUploadForwardMsg(this.core.selfInfo.uid, msg, groupUin);
+        const ret = await this.sendPacket('trpc.group.long_msg_interface.MsgService.SsoSendLongMsg', data!, true);
+        this.logger.logDebug('sendUploadForwardMsg', ret);
         const resp = new NapProtoMsg(SendLongMsgResp).decode(Buffer.from(ret.hex_data, 'hex'));
         return resp.result.resId;
     }
 
     async sendGroupFileDownloadReq(groupUin: number, fileUUID: string) {
-        const data = this.packetPacker.packGroupFileDownloadReq(groupUin, fileUUID);
-        const ret = await this.sendPacket('OidbSvcTrpcTcp.0x6d6_2', data, true);
+        const data = this.packetSession?.packer.packGroupFileDownloadReq(groupUin, fileUUID);
+        const ret = await this.sendPacket('OidbSvcTrpcTcp.0x6d6_2', data!, true);
         const body = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(Buffer.from(ret.hex_data, 'hex')).body;
         const resp = new NapProtoMsg(OidbSvcTrpcTcp0x6D6Response).decode(body);
         if (resp.download.retCode !== 0){
