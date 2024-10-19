@@ -114,9 +114,7 @@ export class PacketPacker {
                 }
             }
         );
-        this.logger.logDebug("packUploadForwardMsg LONGMSGRESULT!!!", this.toHexStr(longMsgResultData));
         const payload = zlib.gzipSync(Buffer.from(longMsgResultData));
-        // this.logger.logDebug("packUploadForwardMsg PAYLOAD!!!", payload);
         const req = new NapProtoMsg(SendLongMsgReq).encode(
             {
                 info: {
