@@ -38,6 +38,7 @@ export default class SetAvatar extends BaseAction<Payload, null> {
                 throw `头像${payload.file}设置失败,api无返回`;
             }
             // log(`头像设置返回：${JSON.stringify(ret)}`)
+            // @ts-ignore
             if (ret['result'] == 1004022) {
                 throw `头像${payload.file}设置失败，文件可能不是图片格式`;
             } else if (ret['result'] != 0) {

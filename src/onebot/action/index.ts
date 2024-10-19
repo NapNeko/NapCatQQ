@@ -3,7 +3,6 @@ import GetLoginInfo from './system/GetLoginInfo';
 import GetFriendList from './user/GetFriendList';
 import GetGroupList from './group/GetGroupList';
 import GetGroupInfo from './group/GetGroupInfo';
-import GetGroupMemberList from './group/GetGroupMemberList';
 import GetGroupMemberInfo from './group/GetGroupMemberInfo';
 import SendGroupMsg from './group/SendGroupMsg';
 import SendPrivateMsg from './msg/SendPrivateMsg';
@@ -85,6 +84,13 @@ import { GetGroupRootFiles } from '@/onebot/action/go-cqhttp/GetGroupRootFiles';
 import { GetGroupFilesByFolder } from '@/onebot/action/go-cqhttp/GetGroupFilesByFolder';
 import { GetGroupSystemMsg } from './system/GetSystemMsg';
 import { GroupPoke } from './group/GroupPoke';
+import { GetUserStatus } from './extends/GetUserStatus';
+import { GetRkey } from './extends/GetRkey';
+import { SetSpecialTittle } from './extends/SetSpecialTittle';
+import { GetGroupShutList } from './group/GetGroupShutList';
+import { GetGroupMemberList } from './group/GetGroupMemberList';
+import { GetGroupFileUrl } from "@/onebot/action/file/GetGroupFileUrl";
+import {GetPacketStatus} from "@/onebot/action/packet/GetPacketStatus";
 
 
 export type ActionMap = Map<string, BaseAction<any, any>>;
@@ -181,7 +187,14 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new GetGroupFilesByFolder(obContext, core),
         new GetGroupSystemMsg(obContext, core),
         new FetchUserProfileLike(obContext, core),
+        new GetPacketStatus(obContext, core),
         new GroupPoke(obContext, core),
+        new GetUserStatus(obContext, core),
+        new GetRkey(obContext, core),
+        new SetSpecialTittle(obContext, core),
+        // new UploadForwardMsg(obContext, core),
+        new GetGroupShutList(obContext, core),
+        new GetGroupFileUrl(obContext, core),
     ];
     const actionMap = new Map();
     for (const action of actionHandlers) {

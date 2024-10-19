@@ -45,7 +45,7 @@ import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecal
 import { LRUCache } from '@/common/lru-cache';
 import { NodeIKernelRecentContactListener } from '@/core/listeners/NodeIKernelRecentContactListener';
 import { Native } from '@/native';
-import { decodeMessage, decodeRecallGroup, Message, RecallGroup } from '@/core/proto/Message';
+import { decodeMessage, decodeRecallGroup } from '@/core/packet/proto/old/Message';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -84,19 +84,19 @@ export class NapCatOneBot11Adapter {
             if (!this.nativeCore.inited) throw new Error('Native Not Init');
             this.nativeCore.registerRecallCallback(async (hex: string) => {
                 try {
-                    let data = decodeMessage(Buffer.from(hex, 'hex')) as any;
+                    const data = decodeMessage(Buffer.from(hex, 'hex'));
                     //data.MsgHead.BodyInner.MsgType SubType
-                    let bodyInner = data.msgHead?.bodyInner;
+                    const bodyInner = data.msgHead?.bodyInner;
                     //context.logger.log("[appNative] Parse MsgType:" + bodyInner.msgType + " / SubType:" + bodyInner.subType);
                     if (bodyInner && bodyInner.msgType == 732 && bodyInner.subType == 17) {
-                        let RecallData = Buffer.from(data.msgHead.noifyData.innerData);
+                        const RecallData = Buffer.from(data.msgHead.noifyData.innerData);
                         //跳过 4字节 群号  + 不知道的1字节 +2字节 长度
-                        let uid = RecallData.readUint32BE();
+                        const uid = RecallData.readUint32BE();
                         const buffer = Buffer.from(RecallData.toString('hex').slice(14), 'hex');
-                        let seq: number = decodeRecallGroup(buffer).recallDetails.subDetail.msgSeq;
-                        let peer: Peer = { chatType: ChatType.KCHATTYPEGROUP, peerUid: uid.toString() };
+                        const seq: number = decodeRecallGroup(buffer).recallDetails.subDetail.msgSeq;
+                        const peer: Peer = { chatType: ChatType.KCHATTYPEGROUP, peerUid: uid.toString() };
                         context.logger.log("[Native] 群消息撤回 Peer: " + uid.toString() + " / MsgSeq:" + seq);
-                        let msgs = await core.apis.MsgApi.queryMsgsWithFilterExWithSeq(peer, seq.toString());
+                        const msgs = await core.apis.MsgApi.queryMsgsWithFilterExWithSeq(peer, seq.toString());
                         this.recallMsgCache.put(msgs.msgList[0].msgId, msgs.msgList[0]);
                     }
                 } catch (error: any) {
@@ -540,9 +540,35 @@ export class NapCatOneBot11Adapter {
             if (isSelfMsg) {
                 ob11Msg.target_id = parseInt(message.peerUin);
             }
-            // if(ob11Msg.raw_message.startsWith('!poke')){
-            //     console.log('poke',message.peerUin, message.senderUin);
-            //     this.core.apis.GroupApi.sendPacketPoke(message.peerUin, message.senderUin);
+            // if (ob11Msg.raw_message.startsWith('!set')) {
+            //     this.core.apis.UserApi.getUidByUinV2(ob11Msg.user_id.toString()).then(uid => {
+            //         if(uid){
+            //             this.core.apis.PacketApi.sendSetSpecialTittlePacket(message.peerUin, uid, '测试');
+            //             console.log('set', message.peerUin, uid);
+            //         }
+
+            //     });
+
+            // }
+            // if (ob11Msg.raw_message.startsWith('!status')) {
+            //     console.log('status', message.peerUin, message.senderUin);
+            //     let delMsg: string[] = [];
+            //     let peer = {
+            //         peerUid: message.peerUin,
+            //         chatType: 2,
+            //     };
+            //     this.core.apis.PacketApi.sendStatusPacket(+message.senderUin).then(async e => {
+            //         if (e) {
+            //             const { sendElements } = await this.apis.MsgApi.createSendElements([{
+            //                 type: OB11MessageDataType.text,
+            //                 data: {
+            //                     text: 'status ' + JSON.stringify(e, null, 2),
+            //                 }
+            //             }], peer)
+
+            //             this.apis.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, delMsg)
+            //         }
+            //     })
             // }
             this.networkManager.emitEvent(ob11Msg);
         }).catch(e => this.context.logger.logError.bind(this.context.logger)('constructMessage error: ', e));
@@ -564,12 +590,13 @@ export class NapCatOneBot11Adapter {
     private async emitRecallMsg(msgList: RawMessage[], cache: LRUCache<string, boolean>) {
         for (const message of msgList) {
             // log("message update", message.sendStatus, message.msgId, message.msgSeq)
+            const peer: Peer = { chatType: message.chatType, peerUid: message.peerUid, guildId: '' };
             if (message.recallTime != '0' && !cache.get(message.msgId)) { //todo: 这个判断方法不太好，应该使用灰色消息元素来判断?
                 cache.put(message.msgId, true);
                 // 撤回消息上报
-                const oriMessageId = MessageUnique.getShortIdByMsgId(message.msgId);
+                let oriMessageId = MessageUnique.getShortIdByMsgId(message.msgId);
                 if (!oriMessageId) {
-                    continue;
+                    oriMessageId = MessageUnique.createUniqueMsgId(peer, message.msgId);
                 }
                 if (message.chatType == ChatType.KCHATTYPEC2C) {
                     const friendRecallEvent = new OB11FriendRecallNoticeEvent(

@@ -14,7 +14,7 @@ export class Native {
             if (!this.supportedPlatforms.includes(this.platform)) {
                 throw new Error(`Platform ${this.platform} is not supported`);
             }
-            let nativeNode = path.join(nodePath, './native/MoeHoo.win32.node');
+            const nativeNode = path.join(nodePath, './native/MoeHoo.win32.node');
             if (fs.existsSync(nativeNode)) {
                 dlopen(this.MoeHooExport, nativeNode, constants.dlopen.RTLD_LAZY);
             }
