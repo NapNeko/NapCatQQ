@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://socialify.git.ci/NapNeko/NapCatQQ/image?description=1&font=Jost&language=1&logo=https%3A%2F%2Fnapneko.github.io%2Fassets%2Flogo.png&name=1&owner=1&stargazers=1&theme=Auto" alt="NapCatQQ" width="640" height="320" />
+  <img src="https://socialify.git.ci/NapNeko/NapCatQQ/image?font=Jost&logo=https%3A%2F%2Fnapneko.github.io%2Fassets%2Flogo.png&name=1&owner=1&pattern=Diagonal%20Stripes&stargazers=1&theme=Auto" alt="NapCatQQ" width="640" height="320" />
 </div>
 
 ---
