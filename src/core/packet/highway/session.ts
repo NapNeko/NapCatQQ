@@ -34,16 +34,16 @@ export class PacketHighwaySession {
     protected packer: PacketPacker;
     private cachedPrepareReq: Promise<void> | null = null;
 
-    constructor(logger: LogWrapper, client: PacketClient) {
+    constructor(logger: LogWrapper, client: PacketClient, packer: PacketPacker) {
         this.packetClient = client;
         this.logger = logger;
-        this.packer = new PacketPacker(logger);
         this.sig = {
             uin: this.packetClient.napCatCore.selfInfo.uin,
             sigSession: null,
             sessionKey: null,
             serverAddr: [],
         }
+        this.packer = packer;
         this.packetHighwayClient = new PacketHighwayClient(this.sig, this.logger);
     }
 

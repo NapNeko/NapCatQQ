@@ -26,15 +26,15 @@ import {
     OB11MessageFileBase,
     OB11MessageForward,
 } from '@/onebot';
-import { OB11Entities } from '@/onebot/entities';
-import { EventType } from '@/onebot/event/OB11BaseEvent';
-import { encodeCQCode } from '@/onebot/cqcode';
-import { uri2local } from '@/common/file';
-import { RequestUtil } from '@/common/request';
+import {OB11Entities} from '@/onebot/entities';
+import {EventType} from '@/onebot/event/OB11BaseEvent';
+import {encodeCQCode} from '@/onebot/cqcode';
+import {uri2local} from '@/common/file';
+import {RequestUtil} from '@/common/request';
 import fs from 'node:fs';
 import fsPromise from 'node:fs/promises';
-import { OB11FriendAddNoticeEvent } from '@/onebot/event/notice/OB11FriendAddNoticeEvent';
-import { decodeSysMessage } from '@/core/packet/proto/old/ProfileLike';
+import {OB11FriendAddNoticeEvent} from '@/onebot/event/notice/OB11FriendAddNoticeEvent';
+import {decodeSysMessage} from '@/core/packet/proto/old/ProfileLike';
 
 type RawToOb11Converters = {
     [Key in keyof MessageElement as Key extends `${string}Element` ? Key : never]: (
@@ -497,8 +497,7 @@ export class OneBotMsgApi {
                 const uri2LocalRes = await uri2local(this.core.NapCatTempPath, thumb);
                 if (uri2LocalRes.success) thumb = uri2LocalRes.path;
             }
-            const videoEle = await this.core.apis.FileApi.createValidSendVideoElement(context, path, fileName, thumb);
-            return videoEle;
+            return await this.core.apis.FileApi.createValidSendVideoElement(context, path, fileName, thumb);
         },
 
         [OB11MessageDataType.voice]: async (sendMsg, context) =>

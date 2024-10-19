@@ -87,7 +87,6 @@ import { GroupPoke } from './group/GroupPoke';
 import { GetUserStatus } from './extends/GetUserStatus';
 import { GetRkey } from './extends/GetRkey';
 import { SetSpecialTittle } from './extends/SetSpecialTittle';
-import { UploadForwardMsg } from "@/onebot/action/extends/UploadForwardMsg";
 import { GetGroupShutList } from './group/GetGroupShutList';
 import { GetGroupMemberList } from './group/GetGroupMemberList';
 import { GetGroupFileUrl } from "@/onebot/action/file/GetGroupFileUrl";
@@ -193,7 +192,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new GetUserStatus(obContext, core),
         new GetRkey(obContext, core),
         new SetSpecialTittle(obContext, core),
-        new UploadForwardMsg(obContext, core),
+        // new UploadForwardMsg(obContext, core),
         new GetGroupShutList(obContext, core),
         new GetGroupFileUrl(obContext, core),
     ];
