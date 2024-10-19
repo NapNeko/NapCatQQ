@@ -43,7 +43,7 @@ export class RkeyManager {
         //刷新rkey
         for (const url of this.serverUrl) {
             try {
-                let temp = await RequestUtil.HttpGetJson<ServerRkeyData>(url, 'GET');
+                const temp = await RequestUtil.HttpGetJson<ServerRkeyData>(url, 'GET');
                 this.rkeyData = {
                     group_rkey: temp.group_rkey.slice(6),
                     private_rkey: temp.private_rkey.slice(6),

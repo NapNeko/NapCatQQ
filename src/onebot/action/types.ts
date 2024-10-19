@@ -69,7 +69,7 @@ export enum ActionName {
     GetRecord = 'get_record',
     CleanCache = 'clean_cache',
     GetCookies = 'get_cookies',
-    // 以下为go-cqhttp api 
+    // 以下为go-cqhttp api
     GoCQHTTP_HandleQuickAction = '.handle_quick_operation',
     GetGroupHonorInfo = 'get_group_honor_info',
     GoCQHTTP_GetEssenceMsg = 'get_essence_msg_list',
@@ -85,6 +85,7 @@ export enum ActionName {
     MarkGroupMsgAsRead = 'mark_group_msg_as_read',
     GoCQHTTP_UploadGroupFile = 'upload_group_file',
     GOCQHTTP_DeleteGroupFile = 'delete_group_file',
+    GOCQHTTP_GetGroupFileUrl = 'get_group_file_url',
     GoCQHTTP_CreateGroupFileFolder = 'create_group_file_folder',
     GoCQHTTP_DeleteGroupFileFolder = 'delete_group_file_folder',
     GoCQHTTP_GetGroupFileSystemInfo = 'get_group_file_system_info',
@@ -120,4 +121,10 @@ export enum ActionName {
     GetGroupInfoEx = "get_group_info_ex",
     GetGroupSystemMsg = 'get_group_system_msg',
     FetchUserProfileLike = "fetch_user_profile_like",
+    GetPacketStatus = 'nc_get_packet_status',
+    GetUserStatus = "nc_get_user_status",
+    GetRkey = "nc_get_rkey",
+    SetSpecialTittle = "set_group_special_title",
+    // UploadForwardMsg = "upload_forward_msg",
+    GetGroupShutList = "get_goup_shut_list",
 }

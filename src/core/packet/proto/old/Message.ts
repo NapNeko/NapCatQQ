@@ -1,3 +1,4 @@
+// TODO: refactor with NapProto
 import { MessageType, BinaryReader, ScalarType } from '@protobuf-ts/runtime';
 
 export const BodyInner = new MessageType("BodyInner", [

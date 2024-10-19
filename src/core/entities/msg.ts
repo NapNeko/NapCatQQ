@@ -372,6 +372,7 @@ export interface ReplyElement {
     senderUin: string;
     senderUidStr?: string;
     replyMsgTime?: string;
+    replyMsgClientSeq?: string;
 }
 
 export interface SendReplyElement {
@@ -391,7 +392,7 @@ export interface SendMarketFaceElement {
     marketFaceElement: MarketFaceElement;
 }
 
-export interface SendstructLongMsgElement {
+export interface SendStructLongMsgElement {
     elementType: ElementType.STRUCTLONGMSG;
     elementId: string;
     structLongMsgElement: StructLongMsgElement;

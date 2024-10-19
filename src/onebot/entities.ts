@@ -66,10 +66,10 @@ export class OB11Entities {
             sex: OB11Entities.sex(member.sex!),
             age: member.age ?? 0,
             area: '',
-            level: '0',
+            level: member.memberRealLevel ?? '0',
             qq_level: member.qqLevel && calcQQLevel(member.qqLevel) || 0,
-            join_time: 0, // 暂时没法获取
-            last_sent_time: 0, // 暂时没法获取
+            join_time: +member.joinTime,
+            last_sent_time: +member.lastSpeakTime,
             title_expire_time: 0,
             unfriendly: false,
             card_changeable: true,
@@ -77,6 +77,7 @@ export class OB11Entities {
             shut_up_timestamp: member.shutUpTime,
             role: OB11Entities.groupMemberRole(member.role),
             title: member.memberSpecialTitle || '',
+
         };
     }
 

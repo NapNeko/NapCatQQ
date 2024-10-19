@@ -23,7 +23,9 @@ export class LimitedHashTable<K, V> {
         }
         while (this.keyToValue.size > this.maxSize || this.valueToKey.size > this.maxSize) {
             const oldestKey = this.keyToValue.keys().next().value;
+            // @ts-ignore
             this.valueToKey.delete(this.keyToValue.get(oldestKey)!);
+            // @ts-ignore
             this.keyToValue.delete(oldestKey);
         }
     }
