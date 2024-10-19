@@ -4,7 +4,7 @@ import WebSocket, { Data } from "ws";
 import crypto, { createHash } from "crypto";
 import { NapCatCore } from "@/core";
 import { PacketHexStr } from "@/core/packet/packer";
-import {sleep} from "@/common/helper";
+import { sleep } from "@/common/helper";
 
 export interface RecvPacket {
     type: string, // 仅recv
@@ -49,20 +49,20 @@ export class PacketClient {
 
     connect(): Promise<void> {
         return new Promise((resolve, reject) => {
-            this.logger.log.bind(this.logger)(`Attempting to connect to ${this.clientUrl}`);
+            this.logger.log.bind(this.logger)(`[Core] [Packet Server] Attempting to connect to ${this.clientUrl}`);
             this.websocket = new WebSocket(this.clientUrl);
             this.websocket.on('error', (err) => this.logger.logError.bind(this.logger)('[Core] [Packet Server] Error:', err.message));
 
             this.websocket.onopen = () => {
                 this.isConnected = true;
                 this.reconnectAttempts = 0;
-                this.logger.log.bind(this.logger)(`Connected to ${this.clientUrl}`);
+                this.logger.log.bind(this.logger)(`[Core] [Packet Server] Connected to ${this.clientUrl}`);
                 resolve();
             };
 
             this.websocket.onerror = (error) => {
                 //this.logger.logError.bind(this.logger)(`WebSocket error: ${error}`);
-                reject(new Error(`${error.message}`));
+                reject(new Error(`WebSocket error: ${error.message}`));
             };
 
             this.websocket.onmessage = (event) => {
@@ -73,7 +73,7 @@ export class PacketClient {
 
             this.websocket.onclose = () => {
                 this.isConnected = false;
-                this.logger.logWarn.bind(this.logger)(`Disconnected from ${this.clientUrl}`);
+                this.logger.logWarn.bind(this.logger)(`[Core] [Packet Server] Disconnected from ${this.clientUrl}`);
                 this.attemptReconnect();
             };
         });
@@ -83,14 +83,13 @@ export class PacketClient {
         try {
             if (this.reconnectAttempts < this.maxReconnectAttempts) {
                 this.reconnectAttempts++;
-                this.logger.logError.bind(this.logger)(`Reconnecting attempt ${this.reconnectAttempts}`);
                 setTimeout(() => {
                     this.connect().catch((error) => {
-                        this.logger.logError.bind(this.logger)(`Reconnect attempt failed: ${error.message}`);
+                        this.logger.logError.bind(this.logger)(`[Core] [Packet Server] Reconnecting attempt failed: ${error.message}`);
                     });
                 }, 5000 * this.reconnectAttempts);
             } else {
-                this.logger.logError.bind(this.logger)(`Max reconnect attempts reached. Could not reconnect to ${this.clientUrl}`);
+                this.logger.logError.bind(this.logger)(`[Core] [Packet Server] Max reconnect attempts reached. ${this.clientUrl}`);
             }
         } catch (error: any) {
             this.logger.logError.bind(this.logger)(`Error attempting to reconnect: ${error.message}`);
