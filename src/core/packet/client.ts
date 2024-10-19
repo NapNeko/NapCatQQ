@@ -51,7 +51,7 @@ export class PacketClient {
         return new Promise((resolve, reject) => {
             //this.logger.log.bind(this.logger)(`[Core] [Packet Server] Attempting to connect to ${this.clientUrl}`);
             this.websocket = new WebSocket(this.clientUrl);
-            this.websocket.on('error', (err) => this.logger.logError.bind(this.logger)('[Core] [Packet Server] Error:', err.message));
+            this.websocket.on('error', (err) => /*this.logger.logError.bind(this.logger)('[Core] [Packet Server] Error:', err.message)*/);
 
             this.websocket.onopen = () => {
                 this.isConnected = true;
@@ -62,7 +62,7 @@ export class PacketClient {
 
             this.websocket.onerror = (error) => {
                 //this.logger.logError.bind(this.logger)(`WebSocket error: ${error}`);
-                reject(new Error(`WebSocket error: ${error.message}`));
+                reject(new Error(`${error.message}`));
             };
 
             this.websocket.onmessage = (event) => {
@@ -85,7 +85,7 @@ export class PacketClient {
                 this.reconnectAttempts++;
                 setTimeout(() => {
                     this.connect().catch((error) => {
-                        this.logger.logError.bind(this.logger)(`[Core] [Packet Server] Reconnecting attempt failed: ${error.message}`);
+                        this.logger.logError.bind(this.logger)(`[Core] [Packet Server] Reconnecting attempt failed,${error.message}`);
                     });
                 }, 5000 * this.reconnectAttempts);
             } else {
