@@ -154,6 +154,13 @@ export interface OB11MessageNode {
     };
 }
 
+export type OB11MessageNodePlain = OB11MessageNode & {
+    data: {
+        content?: Array<OB11MessageData>;
+        message: Array<OB11MessageData>;
+    };
+};
+
 export interface OB11MessageIdMusic {
     type: OB11MessageDataType.music;
     data: IdMusicSignPostData;

@@ -1,15 +1,10 @@
 import BaseAction from '../BaseAction';
-import { OB11Message, OB11MessageData, OB11MessageDataType, OB11MessageForward, OB11MessageNode as OriginalOB11MessageNode } from '@/onebot';
+import { OB11Message, OB11MessageData, OB11MessageDataType, OB11MessageForward, OB11MessageNodePlain as OB11MessageNode} from '@/onebot';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/message-unique';
 
-type OB11MessageNode = OriginalOB11MessageNode & {
-    data: {
-        content?: Array<OB11MessageData>;
-        message: Array<OB11MessageData>;
-    };
-};
+
 
 const SchemaData = {
     type: 'object',
