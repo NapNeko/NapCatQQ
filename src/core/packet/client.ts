@@ -61,7 +61,7 @@ export class PacketClient {
             };
 
             this.websocket.onerror = (error) => {
-                this.logger.logError.bind(this.logger)(`WebSocket error: ${error}`);
+                //this.logger.logError.bind(this.logger)(`WebSocket error: ${error}`);
                 reject(new Error(`${error.message}`));
             };
 
