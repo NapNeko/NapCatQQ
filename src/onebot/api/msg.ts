@@ -35,6 +35,7 @@ import fs from 'node:fs';
 import fsPromise from 'node:fs/promises';
 import {OB11FriendAddNoticeEvent} from '@/onebot/event/notice/OB11FriendAddNoticeEvent';
 import {decodeSysMessage} from '@/core/packet/proto/old/ProfileLike';
+import {ForwardMsgBuilder} from "@/common/forward-msg-builder";
 
 type RawToOb11Converters = {
     [Key in keyof MessageElement as Key extends `${string}Element` ? Key : never]: (
@@ -600,7 +601,13 @@ export class OneBotMsgApi {
 
         [OB11MessageDataType.node]: async () => undefined,
 
-        [OB11MessageDataType.forward]: async () => undefined,
+        [OB11MessageDataType.forward]: async ({ data }, context) => {
+            const jsonData = ForwardMsgBuilder.fromResId(data.id)
+            return this.ob11ToRawConverters.json({
+                data: { data: JSON.stringify(jsonData) },
+                type: OB11MessageDataType.json
+            }, context);
+        },
 
         [OB11MessageDataType.xml]: async () => undefined,
 

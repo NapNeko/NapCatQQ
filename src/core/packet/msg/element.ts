@@ -28,6 +28,7 @@ import {
 } from "@/core";
 import {MsgInfo} from "@/core/packet/proto/oidb/common/Ntv2.RichMediaReq";
 import {PacketMsg, PacketSendMsgElement} from "@/core/packet/msg/message";
+import {ForwardMsgBuilder} from "@/common/forward-msg-builder";
 
 // raw <-> packet
 // TODO: check ob11 -> raw impl!
@@ -282,7 +283,7 @@ export class PacketMsgMarkFaceElement extends IPacketMsgElement<SendMarketFaceEl
     }
 
     toPreview(): string {
-        return this.emojiName;
+        return `[${this.emojiName}]`;
     }
 }
 
@@ -324,7 +325,7 @@ export class PacketMsgLightAppElement extends IPacketMsgElement<SendArkElement> 
     }
 
     toPreview(): string {
-        return "[小程序]";
+        return "[卡片消息]";
     }
 }
 
@@ -349,7 +350,7 @@ export class PacketMsgMarkDownElement extends IPacketMsgElement<SendMarkdownElem
     }
 
     toPreview(): string {
-        return this.content;
+        return `[Markdown消息 ${this.content}]`;
     }
 }
 
@@ -363,55 +364,12 @@ export class PacketMultiMsgElement extends IPacketMsgElement<SendStructLongMsgEl
         this.message = message ?? [];
     }
 
-    get isGroupMsg(): boolean {
-        return this.message.some(msg => msg.groupId !== undefined);
-    }
-
-    get JSON() {
-        const id = crypto.randomUUID();
-        return {
-            app: "com.tencent.multimsg",
-            config: {
-                autosize: 1,
-                forward: 1,
-                round: 1,
-                type: "normal",
-                width: 300
-            },
-            desc: "[聊天记录]",
-            extra: {
-                filename: id,
-                tsum: this.message.length,
-            },
-            meta: {
-                detail: {
-                    news: this.message.length === 0 ? [{
-                        text: "[Nya~ This message is send from NapCat.Packet!]",
-                    }] : this.message.map(packetMsg => ({
-                        text: `${packetMsg.senderName}: ${packetMsg.msg.map(msg => msg.toPreview()).join('')}`,
-                    })),
-                    resid: this.resid,
-                    source: this.isGroupMsg ? "群聊的聊天记录" :
-                        this.message.length
-                            ? Array.from(new Set(this.message.map(msg => msg.senderName)))
-                            .join('和') + '的聊天记录'
-                            : '聊天记录',
-                    summary: `查看${this.message.length}条转发消息`,
-                    uniseq: id,
-                }
-            },
-            prompt: "[聊天记录]",
-            ver: "0.0.0.5",
-            view: "contact",
-        }
-    }
-
     buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
         return [{
             lightAppElem: {
                 data: Buffer.concat([
                     Buffer.from([0x01]),
-                    zlib.deflateSync(Buffer.from(JSON.stringify(this.JSON), 'utf-8'))
+                    zlib.deflateSync(Buffer.from(JSON.stringify(ForwardMsgBuilder.fromPacketMsg(this.resid, this.message)), 'utf-8'))
                 ])
             }
         }]
