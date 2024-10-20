@@ -1,6 +1,5 @@
 import assert from "node:assert";
 import * as zlib from "node:zlib";
-import * as crypto from "node:crypto";
 import {NapProtoEncodeStructType, NapProtoMsg} from "@/core/packet/proto/NapProto";
 import {
     CustomFace,
@@ -31,8 +30,6 @@ import {PacketMsg, PacketSendMsgElement} from "@/core/packet/msg/message";
 import {ForwardMsgBuilder} from "@/common/forward-msg-builder";
 
 // raw <-> packet
-// TODO: check ob11 -> raw impl!
-// TODO: parse to raw element
 // TODO: SendStructLongMsgElement
 export abstract class IPacketMsgElement<T extends PacketSendMsgElement> {
     protected constructor(rawElement: T) {
