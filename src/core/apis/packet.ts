@@ -1,18 +1,19 @@
 import * as os from 'os';
-import {ChatType, InstanceContext, NapCatCore} from '..';
+import { ChatType, InstanceContext, NapCatCore } from '..';
 import offset from '@/core/external/offset.json';
-import {PacketClient, RecvPacketData} from '@/core/packet/client';
-import {PacketSession} from "@/core/packet/session";
-import {PacketHexStr} from "@/core/packet/packer";
-import {NapProtoMsg} from '@/core/packet/proto/NapProto';
-import {OidbSvcTrpcTcp0X9067_202_Rsp_Body} from '@/core/packet/proto/oidb/Oidb.0x9067_202';
-import {OidbSvcTrpcTcpBase, OidbSvcTrpcTcpBaseRsp} from '@/core/packet/proto/oidb/OidbBase';
-import {OidbSvcTrpcTcp0XFE1_2RSP} from '@/core/packet/proto/oidb/Oidb.0XFE1_2';
-import {LogWrapper} from "@/common/log";
-import {SendLongMsgResp} from "@/core/packet/proto/message/action";
-import {PacketMsg} from "@/core/packet/msg/message";
-import {OidbSvcTrpcTcp0x6D6Response} from "@/core/packet/proto/oidb/Oidb.0x6D6";
-import {PacketMsgPicElement} from "@/core/packet/msg/element";
+import { PacketClient, RecvPacketData } from '@/core/packet/client';
+import { PacketSession } from "@/core/packet/session";
+import { PacketHexStr } from "@/core/packet/packer";
+import { NapProtoMsg } from '@/core/packet/proto/NapProto';
+import { OidbSvcTrpcTcp0X9067_202_Rsp_Body } from '@/core/packet/proto/oidb/Oidb.0x9067_202';
+import { OidbSvcTrpcTcpBase, OidbSvcTrpcTcpBaseRsp } from '@/core/packet/proto/oidb/OidbBase';
+import { OidbSvcTrpcTcp0XFE1_2RSP } from '@/core/packet/proto/oidb/Oidb.0XFE1_2';
+import { LogWrapper } from "@/common/log";
+import { SendLongMsgResp } from "@/core/packet/proto/message/action";
+import { PacketMsg } from "@/core/packet/msg/message";
+import { OidbSvcTrpcTcp0x6D6Response } from "@/core/packet/proto/oidb/Oidb.0x6D6";
+import { PacketMsgPicElement } from "@/core/packet/msg/element";
+import { c } from 'vite/dist/node/types.d-aGj9QkWt';
 
 interface OffsetType {
     [key: string]: {
@@ -59,8 +60,12 @@ export class NTQQPacketApi {
         if (!table) return false;
         const url = 'ws://' + this.serverUrl + '/ws';
         this.packetSession = new PacketSession(this.core.context.logger, new PacketClient(url, this.core));
-        await this.packetSession.client.connect();
-        await this.packetSession.client.init(process.pid, table.recv, table.send);
+        const cb = () => {
+            if (this.packetSession && this.packetSession.client) {
+                this.packetSession.client.init(process.pid, table.recv, table.send).then().catch(this.logger.logError.bind(this.logger));
+            }
+        }
+        await this.packetSession.client.connect(cb);
         return true;
     }
 
@@ -106,11 +111,11 @@ export class NTQQPacketApi {
         await this.sendPacket('OidbSvcTrpcTcp.0x8fc_2', data!, true);
     }
 
-    private async uploadResources(msg: PacketMsg[], groupUin: number = 0){
+    private async uploadResources(msg: PacketMsg[], groupUin: number = 0) {
         const reqList = []
-        for (const m of msg){
-            for (const e of m.msg){
-                if (e instanceof PacketMsgPicElement){
+        for (const m of msg) {
+            for (const e of m.msg) {
+                if (e instanceof PacketMsgPicElement) {
                     reqList.push(this.packetSession?.highwaySession.uploadImage({
                         chatType: groupUin ? ChatType.KCHATTYPEGROUP : ChatType.KCHATTYPEC2C,
                         peerUid: String(groupUin) ? String(groupUin) : this.core.selfInfo.uid
@@ -135,7 +140,7 @@ export class NTQQPacketApi {
         const ret = await this.sendPacket('OidbSvcTrpcTcp.0x6d6_2', data!, true);
         const body = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(Buffer.from(ret.hex_data, 'hex')).body;
         const resp = new NapProtoMsg(OidbSvcTrpcTcp0x6D6Response).decode(body);
-        if (resp.download.retCode !== 0){
+        if (resp.download.retCode !== 0) {
             throw new Error(`sendGroupFileDownloadReq error: ${resp.download.clientWording}`);
         }
         return `https://${resp.download.downloadDns}/ftn_handler/${Buffer.from(resp.download.downloadUrl).toString('hex')}/?fname=`
