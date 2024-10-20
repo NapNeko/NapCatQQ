@@ -575,9 +575,7 @@ export class NapCatOneBot11Adapter {
             // }
             this.networkManager.emitEvent(ob11Msg);
         }).catch(e => this.context.logger.logError.bind(this.context.logger)('constructMessage error: ', e));
-
-        console.log('message', message);
-
+        
         this.apis.GroupApi.parseGroupEvent(message).then(groupEvent => {
             if (groupEvent) {
                 // log("post group event", groupEvent);
