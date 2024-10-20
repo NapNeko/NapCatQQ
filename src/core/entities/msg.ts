@@ -517,6 +517,12 @@ export enum AtType {
     atAll = 1,
     atUser = 2
 }
+export enum MsgSourceType {
+    K_DOWN_SOURCETYPE_AIOINNER = 1,
+    K_DOWN_SOURCETYPE_BIGSCREEN = 2,
+    K_DOWN_SOURCETYPE_HISTORY = 3,
+    K_DOWN_SOURCETYPE_UNKNOWN = 0
+}
 
 // 来自Android分析
 export enum ChatType {
@@ -874,6 +880,8 @@ export interface RawMessage {
     /**
      * 扩展字段，与 Ob11 msg ID 有关
      */
+
+
     id?: number;
 
     guildId: string;
@@ -950,6 +958,8 @@ export interface RawMessage {
     records: RawMessage[];
 
     elements: MessageElement[];
+
+    sourceType: MsgSourceType;
 }
 export interface QueryMsgsParams {
     chatInfo: Peer;
