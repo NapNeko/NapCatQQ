@@ -363,6 +363,10 @@ export class PacketMultiMsgElement extends IPacketMsgElement<SendStructLongMsgEl
         this.message = message ?? [];
     }
 
+    get isGroupMsg(): boolean {
+        return this.message.some(msg => msg.groupId !== undefined);
+    }
+
     get JSON() {
         const id = crypto.randomUUID();
         return {
@@ -387,7 +391,11 @@ export class PacketMultiMsgElement extends IPacketMsgElement<SendStructLongMsgEl
                         text: `${packetMsg.senderName}: ${packetMsg.msg.map(msg => msg.toPreview()).join('')}`,
                     })),
                     resid: this.resid,
-                    source: "聊天记录",  // TODO:
+                    source: this.isGroupMsg ? "群聊的聊天记录" :
+                        this.message.length
+                            ? Array.from(new Set(this.message.map(msg => msg.senderName)))
+                            .join('和') + '的聊天记录'
+                            : '聊天记录',
                     summary: `查看${this.message.length}条转发消息`,
                     uniseq: id,
                 }
