@@ -17,6 +17,7 @@ export enum ActionName {
     // 以下为扩展napcat扩展
     Unknown = 'unknown',
     GroupPoke = 'group_poke',
+    FriendPoke = 'friend_poke',
     SharePeer = 'ArkSharePeer',
     ShareGroupEx = 'ArkShareGroup',
     RebootNormal = 'reboot_normal',//无快速登录重新启动
