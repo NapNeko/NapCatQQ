@@ -13,7 +13,7 @@ import {ChatType, ElementType, NapCatCore, Peer, RawMessage, SendArkElement, Sen
 import BaseAction from '../BaseAction';
 import {rawMsgWithSendMsg} from "@/core/packet/msg/converter";
 import {PacketMsg} from "@/core/packet/msg/message";
-import {PacketMultiMsgElement} from "@/core/packet/msg/element";
+import {ForwardMsgBuilder} from "@/common/forward-msg-builder";
 
 export interface ReturnDataType {
     message_id: number;
@@ -126,6 +126,8 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                     chatType: peer.chatType,
                 }, (returnMsgAndResId.message)!.msgId);
                 return {message_id: msgShortId!, res_id: returnMsgAndResId.res_id};
+            } else if (returnMsgAndResId.res_id && !returnMsgAndResId.message) {
+                throw Error(`发送转发消息（res_id：${returnMsgAndResId.res_id} 失败`);
             }
             throw Error('发送转发消息失败');
         } else {
@@ -143,6 +145,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         return {message_id: returnMsg!.id!};
     }
 
+    // TODO: recursively handle forwarded nodes
     private async handleForwardedNodesPacket(msgPeer: Peer, messageNodes: OB11MessageNode[]): Promise<{
         message: RawMessage | null,
         res_id?: string
@@ -169,14 +172,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
             }
         }
         const resid = await this.core.apis.PacketApi.sendUploadForwardMsg(packetMsg, msgPeer.chatType === ChatType.KCHATTYPEGROUP ? +msgPeer.peerUid : 0);
-        const forwardJson = new PacketMultiMsgElement({
-            elementType: ElementType.STRUCTLONGMSG,
-            elementId: "",
-            structLongMsgElement: {
-                xmlContent: "",
-                resId: resid
-            }
-        }, packetMsg).JSON;
+        const forwardJson = ForwardMsgBuilder.fromPacketMsg(resid, packetMsg);
         const finallySendElements = {
             elementType: ElementType.ARK,
             elementId: "",
@@ -184,7 +180,12 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                 bytesData: JSON.stringify(forwardJson),
             },
         } as SendArkElement
-        const returnMsg = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(msgPeer, [finallySendElements], [], true).catch(_ => undefined)
+        let returnMsg: RawMessage | undefined;
+        try {
+            returnMsg = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(msgPeer, [finallySendElements], [], true).catch(_ => undefined)
+        } catch (e) {
+            logger.logWarn("发送伪造合并转发消息失败！", e);
+        }
         return {message: returnMsg ?? null, res_id: resid};
     }
 
