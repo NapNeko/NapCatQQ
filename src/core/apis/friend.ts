@@ -11,7 +11,7 @@ export class NTQQFriendApi {
         this.core = core;
     }
     async setBuddyRemark(uid: string, remark: string) {
-        return this.context.session.getBuddyService().setBuddyRemark(uid, remark);
+        return this.context.session.getBuddyService().setBuddyRemark({ uid, remark });
     }
     async getBuddyV2SimpleInfoMap(refresh = false) {
         const buddyService = this.context.session.getBuddyService();
