@@ -22,7 +22,7 @@ export class PacketClient {
     private websocket: WebSocket | undefined;
     private isConnected: boolean = false;
     private reconnectAttempts: number = 0;
-    private readonly maxReconnectAttempts: number = 5;//现在暂时不可配置
+    private readonly maxReconnectAttempts: number = 60;//现在暂时不可配置
     private readonly cb = new LRUCache<string, (json: RecvPacketData) => Promise<void>>(500); // trace_id-type callback
     private readonly clientUrl: string = '';
     readonly napCatCore: NapCatCore;
@@ -47,16 +47,17 @@ export class PacketClient {
         return text;
     }
 
-    connect(): Promise<void> {
+    connect(cb: any): Promise<void> {
         return new Promise((resolve, reject) => {
             //this.logger.log.bind(this.logger)(`[Core] [Packet Server] Attempting to connect to ${this.clientUrl}`);
             this.websocket = new WebSocket(this.clientUrl);
-            this.websocket.on('error', (err) => {}/*this.logger.logError.bind(this.logger)('[Core] [Packet Server] Error:', err.message)*/);
+            this.websocket.on('error', (err) => { }/*this.logger.logError.bind(this.logger)('[Core] [Packet Server] Error:', err.message)*/);
 
             this.websocket.onopen = () => {
                 this.isConnected = true;
                 this.reconnectAttempts = 0;
                 this.logger.log.bind(this.logger)(`[Core] [Packet Server] Connected to ${this.clientUrl}`);
+                cb();
                 resolve();
             };
 
@@ -74,17 +75,17 @@ export class PacketClient {
             this.websocket.onclose = () => {
                 this.isConnected = false;
                 //this.logger.logWarn.bind(this.logger)(`[Core] [Packet Server] Disconnected from ${this.clientUrl}`);
-                this.attemptReconnect();
+                this.attemptReconnect(cb);
             };
         });
     }
 
-    private attemptReconnect(): void {
+    private attemptReconnect(cb: any): void {
         try {
             if (this.reconnectAttempts < this.maxReconnectAttempts) {
                 this.reconnectAttempts++;
                 setTimeout(() => {
-                    this.connect().catch((error) => {
+                    this.connect(cb).catch((error) => {
                         this.logger.logError.bind(this.logger)(`[Core] [Packet Server] Reconnecting attempt failed,${error.message}`);
                     });
                 }, 5000 * this.reconnectAttempts);
