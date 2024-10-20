@@ -304,10 +304,10 @@ export class NapCatOneBot11Adapter {
                     },
                     m.msgId,
                 );
-                if (m.sourceType == MsgSourceType.K_DOWN_SOURCETYPE_AIOINNER) {
+                // if (m.sourceType == MsgSourceType.K_DOWN_SOURCETYPE_AIOINNER) {
                     await this.emitMsg(m)
                         .catch(e => this.context.logger.logError.bind(this.context.logger)('处理消息失败', e));
-                }
+                // }
             }
         };
 
@@ -575,7 +575,7 @@ export class NapCatOneBot11Adapter {
             // }
             this.networkManager.emitEvent(ob11Msg);
         }).catch(e => this.context.logger.logError.bind(this.context.logger)('constructMessage error: ', e));
-        
+
         this.apis.GroupApi.parseGroupEvent(message).then(groupEvent => {
             if (groupEvent) {
                 // log("post group event", groupEvent);
