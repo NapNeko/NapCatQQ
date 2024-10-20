@@ -47,11 +47,11 @@ export class PacketPacker {
         });
     }
 
-    packPokePacket(group: number, peer: number): PacketHexStr {
+    packPokePacket(peer: number, group?: number): PacketHexStr {
         const oidb_0xed3 = new NapProtoMsg(OidbSvcTrpcTcp0XED3_1).encode({
             uin: peer,
             groupUin: group,
-            friendUin: group,
+            friendUin: group ?? peer,
             ext: 0
         });
         return this.toHexStr(this.packOidbPacket(0xed3, 1, oidb_0xed3));
