@@ -126,5 +126,5 @@ export enum ActionName {
     GetRkey = "nc_get_rkey",
     SetSpecialTittle = "set_group_special_title",
     // UploadForwardMsg = "upload_forward_msg",
-    GetGroupShutList = "get_goup_shut_list",
+    GetGroupShutList = "get_group_shut_list",
 }

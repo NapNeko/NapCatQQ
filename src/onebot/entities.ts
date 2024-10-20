@@ -111,7 +111,7 @@ export class OB11Entities {
     static file(peerId: string, file: Exclude<GroupFileInfoUpdateParamType['item'][0]['fileInfo'], undefined>): OB11GroupFile {
         return {
             group_id: parseInt(peerId),
-            file_id: FileNapCatOneBotUUID.encodeModelId({ chatType: 2, peerUid: peerId }, file.fileModelId, file.fileId, file.fileName),
+            file_id: FileNapCatOneBotUUID.encodeModelId({ chatType: 2, peerUid: peerId }, file.fileModelId, file.fileId, file.fileId ?? ''),
             file_name: file.fileName,
             busid: file.busId,
             size: parseInt(file.fileSize),
