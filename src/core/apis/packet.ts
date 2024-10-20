@@ -73,8 +73,8 @@ export class NTQQPacketApi {
         return this.packetSession!.client.sendPacket(cmd, data, rsp);
     }
 
-    async sendPokePacket(group: number, peer: number) {
-        const data = this.packetSession?.packer.packPokePacket(group, peer);
+    async sendPokePacket(peer: number, group?: number) {
+        const data = this.packetSession?.packer.packPokePacket(peer, group);
         await this.sendPacket('OidbSvcTrpcTcp.0xed3_1', data!, false);
     }
 
