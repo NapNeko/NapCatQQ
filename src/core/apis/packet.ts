@@ -13,7 +13,7 @@ import { SendLongMsgResp } from "@/core/packet/proto/message/action";
 import { PacketMsg } from "@/core/packet/msg/message";
 import { OidbSvcTrpcTcp0x6D6Response } from "@/core/packet/proto/oidb/Oidb.0x6D6";
 import { PacketMsgPicElement } from "@/core/packet/msg/element";
-import { c } from 'vite/dist/node/types.d-aGj9QkWt';
+
 
 interface OffsetType {
     [key: string]: {
