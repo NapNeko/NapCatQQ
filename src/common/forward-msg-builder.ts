@@ -1,4 +1,4 @@
-import {PacketMsg} from "@/core/packet/msg/message";
+import { PacketMsg } from "@/core/packet/msg/message";
 import * as crypto from "node:crypto";
 
 interface ForwardMsgJson {
@@ -78,7 +78,7 @@ export class ForwardMsgBuilder {
                     source: isGroupMsg ? "群聊的聊天记录" :
                         msg.length
                             ? Array.from(new Set(msg.map(m => m.senderName)))
-                            .join('和') + '的聊天记录'
+                                .join('和') + '的聊天记录'
                             : '聊天记录',
                     summary: `查看${msg.length}条转发消息`,
                     uniseq: id,
@@ -87,11 +87,11 @@ export class ForwardMsgBuilder {
             prompt: "[聊天记录]",
             ver: "0.0.0.5",
             view: "contact",
-        }
+        };
     }
 
     static fromResId(resId: string): ForwardMsgJson {
-        return this.build(resId, [])
+        return this.build(resId, []);
     }
 
     static fromPacketMsg(resId: string, packetMsg: PacketMsg[]): ForwardMsgJson {
@@ -101,6 +101,6 @@ export class ForwardMsgBuilder {
             msg: msg.msg.map(m => ({
                 preview: m.toPreview(),
             }))
-        })))
+        })));
     }
 }

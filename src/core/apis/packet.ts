@@ -27,7 +27,7 @@ const typedOffset: OffsetType = offset;
 export class NTQQPacketApi {
     context: InstanceContext;
     core: NapCatCore;
-    logger: LogWrapper
+    logger: LogWrapper;
     serverUrl: string | undefined;
     qqVersion: string | undefined;
     packetSession: PacketSession | undefined;
@@ -64,7 +64,7 @@ export class NTQQPacketApi {
             if (this.packetSession && this.packetSession.client) {
                 this.packetSession.client.init(process.pid, table.recv, table.send).then().catch(this.logger.logError.bind(this.logger));
             }
-        }
+        };
         await this.packetSession.client.connect(cb);
         return true;
     }
@@ -112,7 +112,7 @@ export class NTQQPacketApi {
     }
 
     private async uploadResources(msg: PacketMsg[], groupUin: number = 0) {
-        const reqList = []
+        const reqList = [];
         for (const m of msg) {
             for (const e of m.msg) {
                 if (e instanceof PacketMsgPicElement) {
@@ -143,6 +143,6 @@ export class NTQQPacketApi {
         if (resp.download.retCode !== 0) {
             throw new Error(`sendGroupFileDownloadReq error: ${resp.download.clientWording}`);
         }
-        return `https://${resp.download.downloadDns}/ftn_handler/${Buffer.from(resp.download.downloadUrl).toString('hex')}/?fname=`
+        return `https://${resp.download.downloadDns}/ftn_handler/${Buffer.from(resp.download.downloadUrl).toString('hex')}/?fname=`;
     }
 }

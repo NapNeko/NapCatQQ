@@ -318,7 +318,7 @@ export class NTQQGroupApi {
 
     async getGroupMembersV2(groupQQ: string, num = 3000): Promise<Map<string, GroupMember>> {
         const sceneId = this.context.session.getGroupService().createMemberListScene(groupQQ, 'groupMemberList_MainWindow');
-        let once = this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onMemberListChange', 1, 2000, (params) => params.sceneId === sceneId)
+        const once = this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onMemberListChange', 1, 2000, (params) => params.sceneId === sceneId)
             .catch();
         const result = await this.context.session.getGroupService().getNextMemberList(sceneId!, undefined, num);
         if (result.errCode !== 0) {

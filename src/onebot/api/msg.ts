@@ -26,16 +26,16 @@ import {
     OB11MessageFileBase,
     OB11MessageForward,
 } from '@/onebot';
-import {OB11Entities} from '@/onebot/entities';
-import {EventType} from '@/onebot/event/OB11BaseEvent';
-import {encodeCQCode} from '@/onebot/cqcode';
-import {uri2local} from '@/common/file';
-import {RequestUtil} from '@/common/request';
+import { OB11Entities } from '@/onebot/entities';
+import { EventType } from '@/onebot/event/OB11BaseEvent';
+import { encodeCQCode } from '@/onebot/cqcode';
+import { uri2local } from '@/common/file';
+import { RequestUtil } from '@/common/request';
 import fs from 'node:fs';
 import fsPromise from 'node:fs/promises';
-import {OB11FriendAddNoticeEvent} from '@/onebot/event/notice/OB11FriendAddNoticeEvent';
-import {decodeSysMessage} from '@/core/packet/proto/old/ProfileLike';
-import {ForwardMsgBuilder} from "@/common/forward-msg-builder";
+import { OB11FriendAddNoticeEvent } from '@/onebot/event/notice/OB11FriendAddNoticeEvent';
+import { decodeSysMessage } from '@/core/packet/proto/old/ProfileLike';
+import { ForwardMsgBuilder } from "@/common/forward-msg-builder";
 
 type RawToOb11Converters = {
     [Key in keyof MessageElement as Key extends `${string}Element` ? Key : never]: (
@@ -602,7 +602,7 @@ export class OneBotMsgApi {
         [OB11MessageDataType.node]: async () => undefined,
 
         [OB11MessageDataType.forward]: async ({ data }, context) => {
-            const jsonData = ForwardMsgBuilder.fromResId(data.id)
+            const jsonData = ForwardMsgBuilder.fromResId(data.id);
             return this.ob11ToRawConverters.json({
                 data: { data: JSON.stringify(jsonData) },
                 type: OB11MessageDataType.json

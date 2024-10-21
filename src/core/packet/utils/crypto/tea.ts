@@ -76,7 +76,7 @@ export function decrypt(encrypted: Buffer, key: Buffer) {
         encrypted.writeInt32BE(r1, i);
         encrypted.writeInt32BE(r2, i + 4);
     }
-    if (Buffer.compare(encrypted.subarray(encrypted.length - 7), BUF7) !== 0) throw ERROR_ENCRYPTED_ILLEGAL
+    if (Buffer.compare(encrypted.subarray(encrypted.length - 7), BUF7) !== 0) throw ERROR_ENCRYPTED_ILLEGAL;
     // if (Buffer.compare(encrypted.slice(encrypted.length - 7), BUF7) !== 0) throw ERROR_ENCRYPTED_ILLEGAL;
     return encrypted.subarray((encrypted[0] & 0x07) + 3, encrypted.length - 7);
     // return encrypted.slice((encrypted[0] & 0x07) + 3, encrypted.length - 7);

@@ -1,23 +1,23 @@
 import * as zlib from "node:zlib";
 import * as crypto from "node:crypto";
-import {calculateSha1} from "@/core/packet/utils/crypto/hash"
-import {NapProtoMsg} from "@/core/packet/proto/NapProto";
-import {OidbSvcTrpcTcpBase} from "@/core/packet/proto/oidb/OidbBase";
-import {OidbSvcTrpcTcp0X9067_202} from "@/core/packet/proto/oidb/Oidb.0x9067_202";
-import {OidbSvcTrpcTcp0X8FC_2, OidbSvcTrpcTcp0X8FC_2_Body} from "@/core/packet/proto/oidb/Oidb.0x8FC_2";
-import {OidbSvcTrpcTcp0XFE1_2} from "@/core/packet/proto/oidb/Oidb.0XFE1_2";
-import {OidbSvcTrpcTcp0XED3_1} from "@/core/packet/proto/oidb/Oidb.0xED3_1";
-import {NTV2RichMediaReq} from "@/core/packet/proto/oidb/common/Ntv2.RichMediaReq";
-import {HttpConn0x6ff_501} from "@/core/packet/proto/action/action";
-import {LongMsgResult, SendLongMsgReq} from "@/core/packet/proto/message/action";
-import {PacketMsgBuilder} from "@/core/packet/msg/builder";
-import {PacketMsgPicElement} from "@/core/packet/msg/element";
-import {LogWrapper} from "@/common/log";
-import {PacketMsg} from "@/core/packet/msg/message";
-import {OidbSvcTrpcTcp0x6D6} from "@/core/packet/proto/oidb/Oidb.0x6D6";
-import {OidbSvcTrpcTcp0XE37_1200} from "@/core/packet/proto/oidb/Oidb.0xE37_1200";
-import {PacketMsgConverter} from "@/core/packet/msg/converter";
-import {PacketClient} from "@/core/packet/client";
+import { calculateSha1 } from "@/core/packet/utils/crypto/hash";
+import { NapProtoMsg } from "@/core/packet/proto/NapProto";
+import { OidbSvcTrpcTcpBase } from "@/core/packet/proto/oidb/OidbBase";
+import { OidbSvcTrpcTcp0X9067_202 } from "@/core/packet/proto/oidb/Oidb.0x9067_202";
+import { OidbSvcTrpcTcp0X8FC_2, OidbSvcTrpcTcp0X8FC_2_Body } from "@/core/packet/proto/oidb/Oidb.0x8FC_2";
+import { OidbSvcTrpcTcp0XFE1_2 } from "@/core/packet/proto/oidb/Oidb.0XFE1_2";
+import { OidbSvcTrpcTcp0XED3_1 } from "@/core/packet/proto/oidb/Oidb.0xED3_1";
+import { NTV2RichMediaReq } from "@/core/packet/proto/oidb/common/Ntv2.RichMediaReq";
+import { HttpConn0x6ff_501 } from "@/core/packet/proto/action/action";
+import { LongMsgResult, SendLongMsgReq } from "@/core/packet/proto/message/action";
+import { PacketMsgBuilder } from "@/core/packet/msg/builder";
+import { PacketMsgPicElement } from "@/core/packet/msg/element";
+import { LogWrapper } from "@/common/log";
+import { PacketMsg } from "@/core/packet/msg/message";
+import { OidbSvcTrpcTcp0x6D6 } from "@/core/packet/proto/oidb/Oidb.0x6D6";
+import { OidbSvcTrpcTcp0XE37_1200 } from "@/core/packet/proto/oidb/Oidb.0xE37_1200";
+import { PacketMsgConverter } from "@/core/packet/msg/converter";
+import { PacketClient } from "@/core/packet/client";
 
 export type PacketHexStr = string & { readonly hexNya: unique symbol };
 
@@ -97,7 +97,7 @@ export class PacketPacker {
     packStatusPacket(uin: number): PacketHexStr {
         const oidb_0xfe1_2 = new NapProtoMsg(OidbSvcTrpcTcp0XFE1_2).encode({
             uin: uin,
-            key: [{key: 27372}]
+            key: [{ key: 27372 }]
         });
         return this.toHexStr(this.packOidbPacket(0xfe1, 2, oidb_0xfe1_2));
     }
@@ -217,75 +217,75 @@ export class PacketPacker {
                     noNeedCompatMsg: false,
                 }
             }
-        )
+        );
         return this.toHexStr(this.packOidbPacket(0x11c4, 100, req, true, false));
     }
 
     async packUploadC2CImgReq(peerUin: string, img: PacketMsgPicElement): Promise<PacketHexStr> {
         const req = new NapProtoMsg(NTV2RichMediaReq).encode({
-                reqHead: {
-                    common: {
-                        requestId: 1,
-                        command: 100
+            reqHead: {
+                common: {
+                    requestId: 1,
+                    command: 100
+                },
+                scene: {
+                    requestType: 2,
+                    businessType: 1,
+                    sceneType: 1,
+                    c2C: {
+                        accountType: 2,
+                        targetUid: peerUin
                     },
-                    scene: {
-                        requestType: 2,
-                        businessType: 1,
-                        sceneType: 1,
-                        c2C: {
-                            accountType: 2,
-                            targetUid: peerUin
+                },
+                client: {
+                    agentType: 2,
+                }
+            },
+            upload: {
+                uploadInfo: [
+                    {
+                        fileInfo: {
+                            fileSize: Number(img.size),
+                            fileHash: img.md5,
+                            fileSha1: this.toHexStr(await calculateSha1(img.path)),
+                            fileName: img.name,
+                            type: {
+                                type: 1,
+                                picFormat: img.picType,  //TODO: extend NapCat imgType /cc @MliKiowa
+                                videoFormat: 0,
+                                voiceFormat: 0,
+                            },
+                            width: img.width,
+                            height: img.height,
+                            time: 0,
+                            original: 1
                         },
+                        subFileType: 0,
+                    }
+                ],
+                tryFastUploadCompleted: true,
+                srvSendMsg: false,
+                clientRandomId: crypto.randomBytes(8).readBigUInt64BE() & BigInt('0x7FFFFFFFFFFFFFFF'),
+                compatQMsgSceneType: 1,
+                extBizInfo: {
+                    pic: {
+                        bytesPbReserveTroop: Buffer.from("0800180020004200500062009201009a0100a2010c080012001800200028003a00", 'hex'),
+                        textSummary: "Nya~",  // TODO:
                     },
-                    client: {
-                        agentType: 2,
+                    video: {
+                        bytesPbReserve: Buffer.alloc(0),
+                    },
+                    ptt: {
+                        bytesPbReserve: Buffer.alloc(0),
+                        bytesReserve: Buffer.alloc(0),
+                        bytesGeneralFlags: Buffer.alloc(0),
                     }
                 },
-                upload: {
-                    uploadInfo: [
-                        {
-                            fileInfo: {
-                                fileSize: Number(img.size),
-                                fileHash: img.md5,
-                                fileSha1: this.toHexStr(await calculateSha1(img.path)),
-                                fileName: img.name,
-                                type: {
-                                    type: 1,
-                                    picFormat: img.picType,  //TODO: extend NapCat imgType /cc @MliKiowa
-                                    videoFormat: 0,
-                                    voiceFormat: 0,
-                                },
-                                width: img.width,
-                                height: img.height,
-                                time: 0,
-                                original: 1
-                            },
-                            subFileType: 0,
-                        }
-                    ],
-                    tryFastUploadCompleted: true,
-                    srvSendMsg: false,
-                    clientRandomId: crypto.randomBytes(8).readBigUInt64BE() & BigInt('0x7FFFFFFFFFFFFFFF'),
-                    compatQMsgSceneType: 1,
-                    extBizInfo: {
-                        pic: {
-                            bytesPbReserveTroop: Buffer.from("0800180020004200500062009201009a0100a2010c080012001800200028003a00", 'hex'),
-                            textSummary: "Nya~",  // TODO:
-                        },
-                        video: {
-                            bytesPbReserve: Buffer.alloc(0),
-                        },
-                        ptt: {
-                            bytesPbReserve: Buffer.alloc(0),
-                            bytesReserve: Buffer.alloc(0),
-                            bytesGeneralFlags: Buffer.alloc(0),
-                        }
-                    },
-                    clientSeq: 0,
-                    noNeedCompatMsg: false,
-                }
+                clientSeq: 0,
+                noNeedCompatMsg: false,
             }
-        )
+        }
+        );
         return this.toHexStr(this.packOidbPacket(0x11c5, 100, req, true, false));
     }
 
@@ -299,7 +299,7 @@ export class PacketPacker {
                     fileId: fileUUID
                 }
             }), true, false)
-        )
+        );
     }
 
     packC2CFileDownloadReq(selfUid: string, fileUUID: string, fileHash: string): PacketHexStr {
@@ -319,6 +319,6 @@ export class PacketPacker {
                 field200: 1,
                 field99999: Buffer.from([0xc0, 0x85, 0x2c, 0x01])
             })
-        )
+        );
     }
 }

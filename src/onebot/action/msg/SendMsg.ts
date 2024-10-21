@@ -6,14 +6,14 @@ import {
     OB11PostContext,
     OB11PostSendMsg,
 } from '@/onebot/types';
-import {ActionName, BaseCheckResult} from '@/onebot/action/types';
-import {decodeCQCode} from '@/onebot/cqcode';
-import {MessageUnique} from '@/common/message-unique';
-import {ChatType, ElementType, NapCatCore, Peer, RawMessage, SendArkElement, SendMessageElement} from '@/core';
+import { ActionName, BaseCheckResult } from '@/onebot/action/types';
+import { decodeCQCode } from '@/onebot/cqcode';
+import { MessageUnique } from '@/common/message-unique';
+import { ChatType, ElementType, NapCatCore, Peer, RawMessage, SendArkElement, SendMessageElement } from '@/core';
 import BaseAction from '../BaseAction';
-import {rawMsgWithSendMsg} from "@/core/packet/msg/converter";
-import {PacketMsg} from "@/core/packet/msg/message";
-import {ForwardMsgBuilder} from "@/common/forward-msg-builder";
+import { rawMsgWithSendMsg } from "@/core/packet/msg/converter";
+import { PacketMsg } from "@/core/packet/msg/message";
+import { ForwardMsgBuilder } from "@/common/forward-msg-builder";
 
 export interface ReturnDataType {
     message_id: number;
@@ -30,7 +30,7 @@ export enum ContextMode {
 export function normalize(message: OB11MessageMixType, autoEscape = false): OB11MessageData[] {
     return typeof message === 'string' ? (
         autoEscape ?
-            [{type: OB11MessageDataType.text, data: {text: message}}] :
+            [{ type: OB11MessageDataType.text, data: { text: message } }] :
             decodeCQCode(message)
     ) : Array.isArray(message) ? message : [message];
 }
@@ -100,7 +100,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                 message: '转发消息不能和普通消息混在一起发送,转发需要保证message只有type为node的元素',
             };
         }
-        return {valid: true};
+        return { valid: true };
     }
 
     async _handle(payload: OB11PostSendMsg): Promise<ReturnDataType> {
@@ -115,7 +115,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         );
 
         if (getSpecialMsgNum(payload, OB11MessageDataType.node)) {
-            const packetMode = this.core.apis.PacketApi.available
+            const packetMode = this.core.apis.PacketApi.available;
             const returnMsgAndResId = packetMode
                 ? await this.handleForwardedNodesPacket(peer, messages as OB11MessageNode[])
                 : await this.handleForwardedNodes(peer, messages as OB11MessageNode[]);
@@ -125,7 +125,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                     peerUid: peer.peerUid,
                     chatType: peer.chatType,
                 }, (returnMsgAndResId.message)!.msgId);
-                return {message_id: msgShortId!, res_id: returnMsgAndResId.res_id};
+                return { message_id: msgShortId!, res_id: returnMsgAndResId.res_id };
             } else if (returnMsgAndResId.res_id && !returnMsgAndResId.message) {
                 throw Error(`发送转发消息（res_id：${returnMsgAndResId.res_id} 失败`);
             }
@@ -139,10 +139,10 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         }
         // log("send msg:", peer, sendElements)
 
-        const {sendElements, deleteAfterSentFiles} = await this.obContext.apis.MsgApi
+        const { sendElements, deleteAfterSentFiles } = await this.obContext.apis.MsgApi
             .createSendElements(messages, peer);
         const returnMsg = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, deleteAfterSentFiles);
-        return {message_id: returnMsg!.id!};
+        return { message_id: returnMsg!.id! };
     }
 
     // TODO: recursively handle forwarded nodes
@@ -155,14 +155,14 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         for (const node of messageNodes) {
             if ((node.data.id && typeof node.data.content !== "string") || !node.data.id) {
                 const OB11Data = normalize(node.data.content);
-                const {sendElements} = await this.obContext.apis.MsgApi.createSendElements(OB11Data, msgPeer);
+                const { sendElements } = await this.obContext.apis.MsgApi.createSendElements(OB11Data, msgPeer);
                 const packetMsgElements: rawMsgWithSendMsg = {
                     senderUin: node.data.user_id ?? +this.core.selfInfo.uin,
                     senderName: node.data.nickname,
                     groupId: msgPeer.chatType === ChatType.KCHATTYPEGROUP ? +msgPeer.peerUid : undefined,
                     time: Date.now(),
                     msg: sendElements,
-                }
+                };
                 logger.logDebug(`handleForwardedNodesPacket 开始转换 ${JSON.stringify(packetMsgElements)}`);
                 const transformedMsg = this.core.apis.PacketApi.packetSession?.packer.packetConverter.rawMsgWithSendMsgToPacketMsg(packetMsgElements);
                 logger.logDebug(`handleForwardedNodesPacket 转换为 ${JSON.stringify(transformedMsg)}`);
@@ -179,14 +179,14 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
             arkElement: {
                 bytesData: JSON.stringify(forwardJson),
             },
-        } as SendArkElement
+        } as SendArkElement;
         let returnMsg: RawMessage | undefined;
         try {
-            returnMsg = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(msgPeer, [finallySendElements], [], true).catch(_ => undefined)
+            returnMsg = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(msgPeer, [finallySendElements], [], true).catch(_ => undefined);
         } catch (e) {
             logger.logWarn("发送伪造合并转发消息失败！", e);
         }
-        return {message: returnMsg ?? null, res_id: resid};
+        return { message: returnMsg ?? null, res_id: resid };
     }
 
     private async handleForwardedNodes(destPeer: Peer, messageNodes: OB11MessageNode[]): Promise<{
@@ -228,7 +228,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                         //完成子卡片生成跳过后续
                         continue;
                     }
-                    const {sendElements} = await this.obContext.apis.MsgApi
+                    const { sendElements } = await this.obContext.apis.MsgApi
                         .createSendElements(OB11Data, destPeer);
 
                     //拆分消息
@@ -269,7 +269,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                 continue;
             }
             const nodeMsg = (await this.core.apis.MsgApi.getMsgsByMsgId(nodeMsgPeer.Peer, [msgId])).msgList[0];
-            srcPeer = srcPeer ?? {chatType: nodeMsg.chatType, peerUid: nodeMsg.peerUid};
+            srcPeer = srcPeer ?? { chatType: nodeMsg.chatType, peerUid: nodeMsg.peerUid };
             if (srcPeer.peerUid !== nodeMsg.peerUid) {
                 needSendSelf = true;
             }

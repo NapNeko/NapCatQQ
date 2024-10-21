@@ -1,5 +1,5 @@
-import {ScalarType} from "@protobuf-ts/runtime";
-import {ProtoField} from "../../NapProto";
+import { ScalarType } from "@protobuf-ts/runtime";
+import { ProtoField } from "../../NapProto";
 
 export const NTV2RichMediaReq = {
     ReqHead: ProtoField(1, () => MultiMediaReqHead),
@@ -160,7 +160,7 @@ export const PicUrlExtInfo = {
 
 export const VideoExtInfo = {
     VideoCodecFormat: ProtoField(1, ScalarType.UINT32),
-}
+};
 
 export const ExtBizInfo = {
     Pic: ProtoField(1, () => PicExtBizInfo),

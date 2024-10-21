@@ -28,8 +28,8 @@ import {
     PacketMsgVideoElement,
     PacketMultiMsgElement
 } from "@/core/packet/msg/element";
-import {PacketMsg, PacketSendMsgElement} from "@/core/packet/msg/message";
-import {LogWrapper} from "@/common/log";
+import { PacketMsg, PacketSendMsgElement } from "@/core/packet/msg/message";
+import { LogWrapper } from "@/common/log";
 
 type SendMessageElementMap = {
     textElement: SendTextElement,
@@ -82,50 +82,50 @@ export class PacketMsgConverter {
                 );
                 if (key) {
                     const elementData = (element as any)[key];  // TODO:
-                    if (elementData) return this.rawToPacketMsgConverters[key](element as any)
+                    if (elementData) return this.rawToPacketMsgConverters[key](element as any);
                 }
                 return null;
             }).filter((e) => e !== null)
-        }
+        };
     }
 
     private rawToPacketMsgConverters: RawToPacketMsgConverters = {
         textElement: (element: SendTextElement) => {
             if (element.textElement.atType) {
-                return new PacketMsgAtElement(element)
+                return new PacketMsgAtElement(element);
             }
-            return new PacketMsgTextElement(element)
+            return new PacketMsgTextElement(element);
         },
         picElement: (element: SendPicElement) => {
-            return new PacketMsgPicElement(element)
+            return new PacketMsgPicElement(element);
         },
         replyElement: (element: SendReplyElement) => {
-            return new PacketMsgReplyElement(element)
+            return new PacketMsgReplyElement(element);
         },
         faceElement: (element: SendFaceElement) => {
-            return new PacketMsgFaceElement(element)
+            return new PacketMsgFaceElement(element);
         },
         marketFaceElement: (element: SendMarketFaceElement) => {
-            return new PacketMsgMarkFaceElement(element)
+            return new PacketMsgMarkFaceElement(element);
         },
         videoElement: (element: SendVideoElement) => {
-            return new PacketMsgVideoElement(element)
+            return new PacketMsgVideoElement(element);
         },
         fileElement: (element: SendFileElement) => {
-            return new PacketMsgFileElement(element)
+            return new PacketMsgFileElement(element);
         },
         pttElement: (element: SendPttElement) => {
-            return new PacketMsgPttElement(element)
+            return new PacketMsgPttElement(element);
         },
         arkElement: (element: SendArkElement) => {
-            return new PacketMsgLightAppElement(element)
+            return new PacketMsgLightAppElement(element);
         },
         markdownElement: (element: SendMarkdownElement) => {
-            return new PacketMsgMarkDownElement(element)
+            return new PacketMsgMarkDownElement(element);
         },
         // TODO: check this logic, move it in arkElement?
         structLongMsgElement: (element: SendStructLongMsgElement) => {
-            return new PacketMultiMsgElement(element)
+            return new PacketMultiMsgElement(element);
         }
-    }
+    };
 }

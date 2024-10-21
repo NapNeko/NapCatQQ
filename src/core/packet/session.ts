@@ -1,7 +1,7 @@
 import { PacketClient } from "@/core/packet/client";
 import { PacketHighwaySession } from "@/core/packet/highway/session";
 import { LogWrapper } from "@/common/log";
-import {PacketPacker} from "@/core/packet/packer";
+import { PacketPacker } from "@/core/packet/packer";
 
 export class PacketSession {
     readonly logger: LogWrapper;

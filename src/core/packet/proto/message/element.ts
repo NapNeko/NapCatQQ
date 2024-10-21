@@ -1,5 +1,5 @@
-import {ScalarType} from "@protobuf-ts/runtime";
-import {ProtoField} from "../NapProto";
+import { ScalarType } from "@protobuf-ts/runtime";
+import { ProtoField } from "../NapProto";
 
 export const Elem = {
     text: ProtoField(1, () => Text, true),
@@ -118,7 +118,7 @@ export const MarketFace = {
 
 export const MarketFacePbRes = {
     field8: ProtoField(8, ScalarType.INT32)
-}
+};
 
 export const CustomFace = {
     guid: ProtoField(1, ScalarType.BYTES),
@@ -315,7 +315,7 @@ export const SrcMsgPbRes = {
     senderUid: ProtoField(6, ScalarType.STRING, true),
     receiverUid: ProtoField(7, ScalarType.STRING, true),
     friendSeq: ProtoField(8, ScalarType.UINT32, true),
-}
+};
 
 export const LightAppElem = {
     data: ProtoField(1, ScalarType.BYTES),
@@ -358,4 +358,4 @@ export const QSmallFaceExtra = {
 
 export const MarkdownData = {
     content: ProtoField(1, ScalarType.STRING)
-}
+};

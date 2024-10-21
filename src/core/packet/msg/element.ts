@@ -1,6 +1,6 @@
 import assert from "node:assert";
 import * as zlib from "node:zlib";
-import {NapProtoEncodeStructType, NapProtoMsg} from "@/core/packet/proto/NapProto";
+import { NapProtoEncodeStructType, NapProtoMsg } from "@/core/packet/proto/NapProto";
 import {
     CustomFace,
     Elem,
@@ -25,9 +25,9 @@ import {
     SendTextElement,
     SendVideoElement
 } from "@/core";
-import {MsgInfo} from "@/core/packet/proto/oidb/common/Ntv2.RichMediaReq";
-import {PacketMsg, PacketSendMsgElement} from "@/core/packet/msg/message";
-import {ForwardMsgBuilder} from "@/common/forward-msg-builder";
+import { MsgInfo } from "@/core/packet/proto/oidb/common/Ntv2.RichMediaReq";
+import { PacketMsg, PacketSendMsgElement } from "@/core/packet/msg/message";
+import { ForwardMsgBuilder } from "@/common/forward-msg-builder";
 
 // raw <-> packet
 // TODO: SendStructLongMsgElement
@@ -84,11 +84,11 @@ export class PacketMsgAtElement extends PacketMsgTextElement {
             text: {
                 str: this.text,
                 pbReserve: new NapProtoMsg(MentionExtra).encode({
-                        type: this.atAll ? 1 : 2,
-                        uin: 0,
-                        field5: 0,
-                        uid: this.targetUid,
-                    }
+                    type: this.atAll ? 1 : 2,
+                    uin: 0,
+                    field5: 0,
+                    uid: this.targetUid,
+                }
                 )
             }
         }];
@@ -101,7 +101,7 @@ export class PacketMsgAtElement extends PacketMsgTextElement {
 
 export class PacketMsgPicElement extends IPacketMsgElement<SendPicElement> {
     path: string;
-    name: string
+    name: string;
     size: number;
     md5: string;
     width: number;
@@ -131,7 +131,7 @@ export class PacketMsgPicElement extends IPacketMsgElement<SendPicElement> {
                 pbElem: new NapProtoMsg(MsgInfo).encode(this.msgInfo),
                 businessType: 10,
             }
-        }]
+        }];
     }
 
     toPreview(): string {
@@ -185,7 +185,7 @@ export class PacketMsgReplyElement extends IPacketMsgElement<SendReplyElement> {
                     uid: String(this.targetUid),
                 }),
             } : undefined,
-        }]
+        }];
     }
 
     toPreview(): string {
@@ -219,7 +219,7 @@ export class PacketMsgFaceElement extends IPacketMsgElement<SendFaceElement> {
                     }),
                     businessType: 1
                 }
-            }]
+            }];
         } else if (this.faceId < 260) {
             return [{
                 face: {
@@ -237,7 +237,7 @@ export class PacketMsgFaceElement extends IPacketMsgElement<SendFaceElement> {
                     }),
                     businessType: 1
                 }
-            }]
+            }];
         }
     }
 
@@ -276,7 +276,7 @@ export class PacketMsgMarkFaceElement extends IPacketMsgElement<SendMarketFaceEl
                     field8: 1
                 }
             }
-        }]
+        }];
     }
 
     toPreview(): string {
@@ -318,7 +318,7 @@ export class PacketMsgLightAppElement extends IPacketMsgElement<SendArkElement> 
                     zlib.deflateSync(Buffer.from(this.payload, 'utf-8'))
                 ])
             }
-        }]
+        }];
     }
 
     toPreview(): string {
@@ -343,7 +343,7 @@ export class PacketMsgMarkDownElement extends IPacketMsgElement<SendMarkdownElem
                 }),
                 businessType: 1
             }
-        }]
+        }];
     }
 
     toPreview(): string {
@@ -369,7 +369,7 @@ export class PacketMultiMsgElement extends IPacketMsgElement<SendStructLongMsgEl
                     zlib.deflateSync(Buffer.from(JSON.stringify(ForwardMsgBuilder.fromPacketMsg(this.resid, this.message)), 'utf-8'))
                 ])
             }
-        }]
+        }];
     }
 
     toPreview(): string {
