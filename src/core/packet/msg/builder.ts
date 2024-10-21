@@ -1,8 +1,8 @@
 import * as crypto from "crypto";
-import {PushMsgBody} from "@/core/packet/proto/message/message";
-import {NapProtoEncodeStructType} from "@/core/packet/proto/NapProto";
-import {LogWrapper} from "@/common/log";
-import {PacketMsg} from "@/core/packet/msg/message";
+import { PushMsgBody } from "@/core/packet/proto/message/message";
+import { NapProtoEncodeStructType } from "@/core/packet/proto/NapProto";
+import { LogWrapper } from "@/common/log";
+import { PacketMsg } from "@/core/packet/msg/message";
 
 export class PacketMsgBuilder {
     private logger: LogWrapper;

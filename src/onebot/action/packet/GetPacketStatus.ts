@@ -1,5 +1,5 @@
 import BaseAction from '../BaseAction';
-import {ActionName, BaseCheckResult} from '../types';
+import { ActionName, BaseCheckResult } from '../types';
 
 
 export abstract class GetPacketStatusDepends<PT, RT> extends BaseAction<PT, RT> {
@@ -10,16 +10,16 @@ export abstract class GetPacketStatusDepends<PT, RT> extends BaseAction<PT, RT> 
             return {
                 valid: false,
                 message: "packetServer不可用，请参照文档 https://napneko.github.io/config/advanced 检查packetServer状态或进行配置！",
-            }
+            };
         }
         return {
             valid: true,
-        }
+        };
     }
 }
 
 export class GetPacketStatus extends GetPacketStatusDepends<any, null> {
     async _handle(payload: any) {
-        return null
+        return null;
     }
 }

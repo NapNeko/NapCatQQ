@@ -1,16 +1,16 @@
 import * as fs from "node:fs";
-import {ChatType, Peer} from "@/core";
-import {LogWrapper} from "@/common/log";
-import {PacketClient} from "@/core/packet/client";
-import {PacketPacker} from "@/core/packet/packer";
-import {NapProtoMsg} from "@/core/packet/proto/NapProto";
-import {HttpConn0x6ff_501Response} from "@/core/packet/proto/action/action";
-import {PacketHighwayClient} from "@/core/packet/highway/client";
-import {NTV2RichMediaResp} from "@/core/packet/proto/oidb/common/Ntv2.RichMediaResp";
-import {OidbSvcTrpcTcpBaseRsp} from "@/core/packet/proto/oidb/OidbBase";
-import {PacketMsgPicElement} from "@/core/packet/msg/element";
-import {NTV2RichMediaHighwayExt} from "@/core/packet/proto/highway/highway";
-import {int32ip2str, oidbIpv4s2HighwayIpv4s} from "@/core/packet/highway/utils";
+import { ChatType, Peer } from "@/core";
+import { LogWrapper } from "@/common/log";
+import { PacketClient } from "@/core/packet/client";
+import { PacketPacker } from "@/core/packet/packer";
+import { NapProtoMsg } from "@/core/packet/proto/NapProto";
+import { HttpConn0x6ff_501Response } from "@/core/packet/proto/action/action";
+import { PacketHighwayClient } from "@/core/packet/highway/client";
+import { NTV2RichMediaResp } from "@/core/packet/proto/oidb/common/Ntv2.RichMediaResp";
+import { OidbSvcTrpcTcpBaseRsp } from "@/core/packet/proto/oidb/OidbBase";
+import { PacketMsgPicElement } from "@/core/packet/msg/element";
+import { NTV2RichMediaHighwayExt } from "@/core/packet/proto/highway/highway";
+import { int32ip2str, oidbIpv4s2HighwayIpv4s } from "@/core/packet/highway/utils";
 
 export const BlockSize = 1024 * 1024;
 
@@ -42,7 +42,7 @@ export class PacketHighwaySession {
             sigSession: null,
             sessionKey: null,
             serverAddr: [],
-        }
+        };
         this.packer = packer;
         this.packetHighwayClient = new PacketHighwayClient(this.sig, this.logger);
     }
@@ -69,8 +69,8 @@ export class PacketHighwaySession {
         const rsp = new NapProtoMsg(HttpConn0x6ff_501Response).decode(
             Buffer.from(req.hex_data, 'hex')
         );
-        this.sig.sigSession = rsp.httpConn.sigSession
-        this.sig.sessionKey = rsp.httpConn.sessionKey
+        this.sig.sigSession = rsp.httpConn.sigSession;
+        this.sig.sessionKey = rsp.httpConn.sessionKey;
         for (const info of rsp.httpConn.serverInfos) {
             if (info.serviceType !== 1) continue;
             for (const addr of info.serverAddrs) {
@@ -78,7 +78,7 @@ export class PacketHighwaySession {
                 this.sig.serverAddr.push({
                     ip: int32ip2str(addr.ip),
                     port: addr.port
-                })
+                });
             }
         }
     }
@@ -118,10 +118,10 @@ export class PacketHighwaySession {
                 hash: {
                     fileSha1: [sha1]
                 }
-            })
+            });
             await this.packetHighwayClient.upload(
                 1004,
-                fs.createReadStream(img.path, {highWaterMark: BlockSize}),
+                fs.createReadStream(img.path, { highWaterMark: BlockSize }),
                 img.size,
                 md5,
                 extend
@@ -157,10 +157,10 @@ export class PacketHighwaySession {
                 hash: {
                     fileSha1: [sha1]
                 }
-            })
+            });
             await this.packetHighwayClient.upload(
                 1003,
-                fs.createReadStream(img.path, {highWaterMark: BlockSize}),
+                fs.createReadStream(img.path, { highWaterMark: BlockSize }),
                 img.size,
                 md5,
                 extend

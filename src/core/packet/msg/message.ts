@@ -1,5 +1,5 @@
-import {IPacketMsgElement} from "@/core/packet/msg/element";
-import {SendMessageElement, SendStructLongMsgElement} from "@/core";
+import { IPacketMsgElement } from "@/core/packet/msg/element";
+import { SendMessageElement, SendStructLongMsgElement } from "@/core";
 
 export type PacketSendMsgElement = SendMessageElement | SendStructLongMsgElement
 

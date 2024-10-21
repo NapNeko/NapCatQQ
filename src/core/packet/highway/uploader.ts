@@ -2,13 +2,13 @@ import * as net from "node:net";
 import * as crypto from "node:crypto";
 import * as http from "node:http";
 import * as stream from "node:stream";
-import {LogWrapper} from "@/common/log";
+import { LogWrapper } from "@/common/log";
 import * as tea from "@/core/packet/utils/crypto/tea";
-import {NapProtoMsg} from "@/core/packet/proto/NapProto";
-import {ReqDataHighwayHead, RespDataHighwayHead} from "@/core/packet/proto/highway/highway";
-import {BlockSize} from "@/core/packet/highway/session";
-import {PacketHighwayTrans} from "@/core/packet/highway/client";
-import {Frame} from "@/core/packet/highway/frame";
+import { NapProtoMsg } from "@/core/packet/proto/NapProto";
+import { ReqDataHighwayHead, RespDataHighwayHead } from "@/core/packet/proto/highway/highway";
+import { BlockSize } from "@/core/packet/highway/session";
+import { PacketHighwayTrans } from "@/core/packet/highway/client";
+import { Frame } from "@/core/packet/highway/frame";
 
 abstract class HighwayUploader {
     readonly trans: PacketHighwayTrans;
@@ -53,7 +53,7 @@ abstract class HighwayUploader {
                 uint32LoginSigType: 8,
                 appId: 1600001604,
             }
-        })
+        });
     }
 
     abstract upload(): Promise<void>;
@@ -89,8 +89,8 @@ export class HighwayTcpUploader extends HighwayUploader {
         const highwayTransForm = new HighwayTcpUploaderTransform(this);
         const upload = new Promise<void>((resolve, _) => {
             const socket = net.connect(this.trans.port, this.trans.server, () => {
-                this.trans.data.pipe(highwayTransForm).pipe(socket, {end: false});
-            })
+                this.trans.data.pipe(highwayTransForm).pipe(socket, { end: false });
+            });
             const handleRspHeader = (header: Buffer) => {
                 const rsp = new NapProtoMsg(RespDataHighwayHead).decode(header);
                 if (rsp.errorCode !== 0) {
@@ -111,25 +111,25 @@ export class HighwayTcpUploader extends HighwayUploader {
                 } catch (e) {
                     this.logger.logError(`[Highway] tcpUpload parse response error: ${e}`);
                 }
-            })
+            });
             socket.on('close', () => {
                 this.logger.logDebug('[Highway] tcpUpload socket closed.');
                 resolve();
-            })
+            });
             socket.on('error', (err) => {
                 this.logger.logError('[Highway] tcpUpload socket.on error:', err);
-            })
+            });
             this.trans.data.on('error', (err) => {
                 this.logger.logError('[Highway] tcpUpload readable error:', err);
                 socket.end();
-            })
-        })
+            });
+        });
         const timeout = new Promise<void>((_, reject) => {
             setTimeout(() => {
-                reject(new Error(`[Highway] tcpUpload timeout after ${this.trans.timeout}s`))
+                reject(new Error(`[Highway] tcpUpload timeout after ${this.trans.timeout}s`));
             }, (this.trans.timeout ?? Infinity) * 1000
-            )
-        })
+            );
+        });
         await Promise.race([upload, timeout]);
     }
 }
@@ -139,7 +139,7 @@ export class HighwayHttpUploader extends HighwayUploader {
     async upload(): Promise<void> {
         let offset = 0;
         for await (const chunk of this.trans.data) {
-            let block = chunk as Buffer;
+            const block = chunk as Buffer;
             try {
                 await this.uploadBlock(block, offset);
             } catch (err) {
@@ -153,7 +153,7 @@ export class HighwayHttpUploader extends HighwayUploader {
     private async uploadBlock(block: Buffer, offset: number): Promise<void> {
         const chunkMD5 = crypto.createHash('md5').update(block).digest();
         const payload = this.buildPicUpHead(offset, block.length, chunkMD5);
-        const frame = Frame.pack(Buffer.from(payload), block)
+        const frame = Frame.pack(Buffer.from(payload), block);
         const resp = await this.httpPostHighwayContent(frame, `http://${this.trans.server}:${this.trans.port}/cgi-bin/httpconn?htcmd=0x6FF0087&uin=${this.trans.uin}`);
         const [head, body] = Frame.unpack(resp);
         const headData = new NapProtoMsg(RespDataHighwayHead).decode(head);

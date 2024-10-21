@@ -90,8 +90,8 @@ import { SetSpecialTittle } from './extends/SetSpecialTittle';
 import { GetGroupShutList } from './group/GetGroupShutList';
 import { GetGroupMemberList } from './group/GetGroupMemberList';
 import { GetGroupFileUrl } from "@/onebot/action/file/GetGroupFileUrl";
-import {GetPacketStatus} from "@/onebot/action/packet/GetPacketStatus";
-import {FriendPoke} from "@/onebot/action/user/FriendPoke";
+import { GetPacketStatus } from "@/onebot/action/packet/GetPacketStatus";
+import { FriendPoke } from "@/onebot/action/user/FriendPoke";
 
 
 export type ActionMap = Map<string, BaseAction<any, any>>;

@@ -1,8 +1,8 @@
 import * as stream from 'node:stream';
-import {ReadStream} from "node:fs";
-import {PacketHighwaySig} from "@/core/packet/highway/session";
-import {HighwayHttpUploader, HighwayTcpUploader} from "@/core/packet/highway/uploader";
-import {LogWrapper} from "@/common/log";
+import { ReadStream } from "node:fs";
+import { PacketHighwaySig } from "@/core/packet/highway/session";
+import { HighwayHttpUploader, HighwayTcpUploader } from "@/core/packet/highway/uploader";
+import { LogWrapper } from "@/common/log";
 
 export interface PacketHighwayTrans {
     uin: string;

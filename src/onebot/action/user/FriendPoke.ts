@@ -1,6 +1,6 @@
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import {GetPacketStatusDepends} from "@/onebot/action/packet/GetPacketStatus";
+import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
 
 const SchemaData = {
     type: 'object',
