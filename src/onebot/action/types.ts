@@ -52,7 +52,7 @@ export enum ActionName {
     GetStatus = 'get_status',
     GetVersionInfo = 'get_version_info',
     // Reboot = 'set_restart',
-    CleanCache = 'clean_cache',
+    // CleanCache = 'clean_cache',
 
     // go-cqhttp
     SetQQProfile = 'set_qq_profile',
