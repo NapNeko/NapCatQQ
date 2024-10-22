@@ -316,18 +316,46 @@ export class NTQQGroupApi {
         return undefined;
     }
 
-    async getGroupMembersV2(groupQQ: string, num = 3000): Promise<Map<string, GroupMember>> {
-        const sceneId = this.context.session.getGroupService().createMemberListScene(groupQQ, 'groupMemberList_MainWindow');
-        const once = this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onMemberListChange', 1, 2000, (params) => params.sceneId === sceneId)
+    async tryGetGroupMembersV2(modeListener = false, groupQQ: string, num = 30, timeout = 500): Promise<any> {
+        const sceneId = this.context.session.getGroupService().createMemberListScene(groupQQ, 'groupMemberList_MainWindow_1');
+        const once = this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onMemberListChange', 1, timeout, (params) => params.sceneId === sceneId)
             .catch();
-        const result = await this.context.session.getGroupService().getNextMemberList(sceneId!, undefined, num);
+        const result = await this.context.session.getGroupService().getNextMemberList(sceneId, undefined, num);
+        let resMode2;
         if (result.errCode !== 0) {
             throw new Error('获取群成员列表出错,' + result.errMsg);
         }
-        if (result.result.infos.size === 0) {
-            return (await once)[0].infos;
+        if (modeListener) {
+            const ret = (await once);
+            resMode2 = ret[0];
         }
-        return result.result.infos;
+        this.context.session.getGroupService().destroyMemberListScene(sceneId);
+        return modeListener ? resMode2 : result.result;
+    }
+
+    async getGroupMembersV2(groupQQ: string): Promise<Map<string, GroupMember>> {
+        type Ret = {
+            infos: Map<string, GroupMember>;
+            finish: boolean;
+            hasNext: boolean;
+        }
+        let result = await this.tryGetGroupMembersV2(false, groupQQ) as unknown as Ret;
+        const retOneSize = result.infos.size;
+        if (result.infos.size === 0 && result.finish === true) {
+            result = await this.tryGetGroupMembersV2(true, groupQQ);
+            if (result.hasNext === true) {
+                result = await this.tryGetGroupMembersV2(false, groupQQ, 3000);
+            }
+            return result.infos;
+        }
+        if (result.finish === false) {
+            result = await this.tryGetGroupMembersV2(false, groupQQ, 3000);
+            if (result.finish === true && result.infos.size === retOneSize) {
+                const retListener = await this.tryGetGroupMembersV2(true, groupQQ, 3000, 5000);
+                result.infos = new Map([...retListener.infos,...result.infos]);
+            }
+        }
+        return result.infos;
     }
 
     async getGroupMembers(groupQQ: string, num = 3000): Promise<Map<string, GroupMember>> {
