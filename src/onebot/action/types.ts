@@ -105,11 +105,6 @@ export enum ActionName {
     ForwardFriendSingleMsg = 'forward_friend_single_msg',
     ForwardGroupSingleMsg = 'forward_group_single_msg',
     TranslateEnWordToZn = 'translate_en2zh',
-    GetGroupFileCount = 'get_group_file_count',
-    GetGroupFileList = 'get_group_file_list',
-    SetGroupFileFolder = 'set_group_file_folder',
-    DelGroupFile = 'del_group_file',
-    DelGroupFileFolder = 'del_group_file_folder',
     SetMsgEmojiLike = 'set_msg_emoji_like',
     GoCQHTTP_SendForwardMsg = 'send_forward_msg',
     MarkPrivateMsgAsRead = 'mark_private_msg_as_read',
@@ -125,7 +120,7 @@ export enum ActionName {
     FetchEmojiLike = 'fetch_emoji_like',
     SetInputStatus = 'set_input_status',
     GetGroupInfoEx = 'get_group_info_ex',
-    GetGroupIgnoredNotifies = 'get_group_ignored_notifies',
+    GetGroupIgnoreAddRequest = 'get_group_ignore_add_request',
     DelGroupNotice = '_del_group_notice',
     FetchUserProfileLike = 'fetch_user_profile_like',
     FriendPoke = 'friend_poke',
@@ -137,8 +132,7 @@ export enum ActionName {
 
     GetGuildList = 'get_guild_list',
     GetGuildProfile = 'get_guild_service_profile',
-    GetGroupIgnoreAddRequest = 'get_group_ignore_add_request',
-    // Debug = 'debug',
-    // TestApi01 = 'test_api_01',
+
+    GetGroupIgnoredNotifies = 'get_group_ignored_notifies',
     // UploadForwardMsg = "upload_forward_msg",
 }
