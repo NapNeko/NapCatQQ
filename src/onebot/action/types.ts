@@ -59,7 +59,7 @@ export enum ActionName {
     // QidianGetAccountInfo = 'qidian_get_account_info',
     // GetModelShow = '_get_model_show',
     // SetModelShow = '_set_model_show',
-    // GetOnlineClient = 'get_online_clients',
+    GetOnlineClient = 'get_online_clients',
     // GetUnidirectionalFriendList = 'get_unidirectional_friend_list',
     // DeleteFriend = 'delete_friend',
     // DeleteUnidirectionalFriendList = 'delete_unidirectional_friend',
@@ -134,7 +134,6 @@ export enum ActionName {
     GetUserStatus = 'nc_get_user_status',
     GetRkey = 'nc_get_rkey',
     GetGroupShutList = 'get_group_shut_list',
-    GetOnlineClient = "get_online_clients",
 
     // GetGroupIgnoreAddRequest = 'get_group_ignore_add_request',
     // GetConfig = 'get_config',
