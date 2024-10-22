@@ -30,7 +30,7 @@ export class NTQQFileApi {
     context: InstanceContext;
     core: NapCatCore;
     rkeyManager: RkeyManager;
-    packetRkey: Array<{ rkey: string; time: number; type: number; }> | undefined;
+    packetRkey: Array<{ rkey: string; time: number; type: number; ttl: bigint }> | undefined;
 
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
@@ -378,10 +378,12 @@ export class NTQQFileApi {
             };
             try {
                 if (this.core.apis.PacketApi.available) {
-                    if ((!this.packetRkey || this.packetRkey[0].time > Date.now() / 1000)) {
+                    let rkey_expired_private = !this.packetRkey || this.packetRkey[0].time + Number(this.packetRkey[0].ttl) < Date.now() / 1000;
+                    let rkey_expired_group = !this.packetRkey || this.packetRkey[0].time + Number(this.packetRkey[0].ttl) < Date.now() / 1000;
+                    if (rkey_expired_private || rkey_expired_group) {
                         this.packetRkey = await this.core.apis.PacketApi.sendRkeyPacket();
                     }
-                    if (this.packetRkey.length > 0) {
+                    if (this.packetRkey && this.packetRkey.length > 0) {
                         rkeyData.group_rkey = this.packetRkey[1].rkey.slice(6);
                         rkeyData.private_rkey = this.packetRkey[0].rkey.slice(6);
                         rkeyData.online_rkey = true;
