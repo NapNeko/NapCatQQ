@@ -1,7 +1,7 @@
 import { ChatType, Peer } from '@/core/entities';
+import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
 const SchemaData = {
     type: 'object',
@@ -49,23 +49,14 @@ export class MarkGroupMsgAsRead extends MarkMsgAsRead {
     actionName = ActionName.MarkGroupMsgAsRead;
 }
 
-
-interface Payload {
-    message_id: number;
-}
-
-export class GoCQHTTPMarkMsgAsRead extends BaseAction<Payload, null> {
+export class GoCQHTTPMarkMsgAsRead extends MarkMsgAsRead {
     actionName = ActionName.GoCQHTTP_MarkMsgAsRead;
-
-    async _handle(payload: Payload): Promise<null> {
-        return null;
-    }
 }
 
-export class MarkAllMsgAsRead extends BaseAction<Payload, null> {
+export class MarkAllMsgAsRead extends BaseAction<any, null> {
     actionName = ActionName._MarkAllMsgAsRead;
 
-    async _handle(payload: Payload): Promise<null> {
+    async _handle(): Promise<null> {
         await this.core.apis.MsgApi.markAllMsgAsRead();
         return null;
     }
