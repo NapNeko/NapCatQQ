@@ -92,6 +92,7 @@ import { GetGroupMemberList } from './group/GetGroupMemberList';
 import { GetGroupFileUrl } from "@/onebot/action/file/GetGroupFileUrl";
 import { GetPacketStatus } from "@/onebot/action/packet/GetPacketStatus";
 import { FriendPoke } from "@/onebot/action/user/FriendPoke";
+import { GetCredentials } from './system/GetCredentials';
 
 
 export type ActionMap = Map<string, BaseAction<any, any>>;
@@ -180,6 +181,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new SetModelShow(obContext, core),
         new SetInputStatus(obContext, core),
         new GetCSRF(obContext, core),
+        new GetCredentials(obContext, core),
         new DelGroupNotice(obContext, core),
         new DeleteGroupFile(obContext, core),
         new CreateGroupFileFolder(obContext, core),
