@@ -44,7 +44,7 @@ export abstract class IPacketMsgElement<T extends PacketSendMsgElement> {
     }
 
     toPreview(): string {
-        return '[nya~]';
+        return '[暂不支持该消息类型喵~]';
     }
 }
 
@@ -84,18 +84,14 @@ export class PacketMsgAtElement extends PacketMsgTextElement {
             text: {
                 str: this.text,
                 pbReserve: new NapProtoMsg(MentionExtra).encode({
-                    type: this.atAll ? 1 : 2,
-                    uin: 0,
-                    field5: 0,
-                    uid: this.targetUid,
-                }
+                        type: this.atAll ? 1 : 2,
+                        uin: 0,
+                        field5: 0,
+                        uid: this.targetUid,
+                    }
                 )
             }
         }];
-    }
-
-    toPreview(): string {
-        return `@${this.targetUid} ${this.text}`;
     }
 }
 
@@ -189,7 +185,7 @@ export class PacketMsgReplyElement extends IPacketMsgElement<SendReplyElement> {
     }
 
     toPreview(): string {
-        return "[回复]";
+        return "[回复消息]";
     }
 }
 
@@ -285,8 +281,41 @@ export class PacketMsgMarkFaceElement extends IPacketMsgElement<SendMarketFaceEl
 }
 
 export class PacketMsgVideoElement extends IPacketMsgElement<SendVideoElement> {
+    fileSize?: string;
+    filePath?: string;
+    thumbSize?: number;
+    thumbPath?: string;
+    fileMd5?: string;
+    thumbMd5?: string;
+    thumbWidth?: number;
+    thumbHeight?: number;
+    msgInfo: NapProtoEncodeStructType<typeof MsgInfo> | null = null;
+
     constructor(element: SendVideoElement) {
         super(element);
+        this.fileSize = element.videoElement.fileSize;
+        this.filePath = element.videoElement.filePath;
+        this.thumbSize = element.videoElement.thumbSize;
+        this.thumbPath = element.videoElement.thumbPath?.get(0);
+        this.fileMd5 = element.videoElement.videoMd5
+        this.thumbMd5 = element.videoElement.thumbMd5;
+        this.thumbWidth = element.videoElement.thumbWidth;
+        this.thumbHeight = element.videoElement.thumbHeight;
+    }
+
+    buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
+        assert(this.msgInfo !== null, 'msgInfo is null, expected not null');
+        return [{
+            commonElem: {
+                serviceType: 48,
+                pbElem: new NapProtoMsg(MsgInfo).encode(this.msgInfo),
+                businessType: 21,
+            }
+        }];
+    }
+
+    toPreview(): string {
+        return "[视频]";
     }
 }
 

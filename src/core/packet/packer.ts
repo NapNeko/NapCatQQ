@@ -11,7 +11,7 @@ import { NTV2RichMediaReq } from "@/core/packet/proto/oidb/common/Ntv2.RichMedia
 import { HttpConn0x6ff_501 } from "@/core/packet/proto/action/action";
 import { LongMsgResult, SendLongMsgReq } from "@/core/packet/proto/message/action";
 import { PacketMsgBuilder } from "@/core/packet/msg/builder";
-import { PacketMsgPicElement } from "@/core/packet/msg/element";
+import { PacketMsgPicElement, PacketMsgVideoElement } from "@/core/packet/msg/element";
 import { LogWrapper } from "@/common/log";
 import { PacketMsg } from "@/core/packet/msg/message";
 import { OidbSvcTrpcTcp0x6D6 } from "@/core/packet/proto/oidb/Oidb.0x6D6";
@@ -287,6 +287,183 @@ export class PacketPacker {
         }
         );
         return this.toHexStr(this.packOidbPacket(0x11c5, 100, req, true, false));
+    }
+
+    async packUploadGroupVideoReq(groupUin: number, video: PacketMsgVideoElement): Promise<PacketHexStr> {
+        if (!video.filePath || !video.thumbPath) throw new Error("video.filePath or video.thumbPath is empty");
+        if (!video.fileSize || !video.thumbSize) throw new Error("video.fileSize or video.thumbSize is empty");
+        const videoSha1 = await calculateSha1(video.filePath ?? "");
+        const videoThumbSha1 = await calculateSha1(video.thumbPath ?? "");
+        const req = new NapProtoMsg(NTV2RichMediaReq).encode({
+            reqHead: {
+                common: {
+                    requestId: 3,
+                    command: 100
+                },
+                scene: {
+                    requestType: 2,
+                    businessType: 2,
+                    sceneType: 2,
+                    group: {
+                        groupUin: groupUin
+                    },
+                },
+                client: {
+                    agentType: 2
+                }
+            },
+            upload: {
+                uploadInfo: [
+                    {
+                        fileInfo: {
+                            fileSize: +video.fileSize,
+                            fileHash: video.fileMd5,
+                            fileSha1: this.toHexStr(videoSha1),
+                            fileName: "nya.mp4",
+                            type: {
+                                type: 2,
+                                picFormat: 0,
+                                videoFormat: 0,
+                                voiceFormat: 0
+                            },
+                            height: 0,
+                            width: 0,
+                            time: 0,
+                            original: 0
+                        },
+                        subFileType: 0
+                    }, {
+                        fileInfo: {
+                            fileSize: +video.thumbSize,
+                            fileHash: video.thumbMd5,
+                            fileSha1: this.toHexStr(videoThumbSha1),
+                            fileName: "nya.jpg",
+                            type: {
+                                type: 1,
+                                picFormat: 0,
+                                videoFormat: 0,
+                                voiceFormat: 0
+                            },
+                            height: video.thumbHeight,
+                            width: video.thumbWidth,
+                            time: 0,
+                            original: 0
+                        },
+                        subFileType: 100
+                    }
+                ],
+                tryFastUploadCompleted: true,
+                srvSendMsg: false,
+                clientRandomId: crypto.randomBytes(8).readBigUInt64BE() & BigInt('0x7FFFFFFFFFFFFFFF'),
+                compatQMsgSceneType: 2,
+                extBizInfo: {
+                    pic : {
+                        bizType: 0,
+                        textSummary: "Nya~",
+                    },
+                    video: {
+                        bytesPbReserve: Buffer.from([0x80, 0x01, 0x00]),
+                    },
+                    ptt: {
+                        bytesPbReserve: Buffer.alloc(0),
+                        bytesReserve: Buffer.alloc(0),
+                        bytesGeneralFlags: Buffer.alloc(0),
+                    }
+                },
+                clientSeq: 0,
+                noNeedCompatMsg: false
+            }
+        });
+        return this.toHexStr(this.packOidbPacket(0x11EA, 100, req, true, false));
+    }
+
+    async packUploadC2CVideoReq(peerUin: string, video: PacketMsgVideoElement): Promise<PacketHexStr> {
+        if (!video.filePath || !video.thumbPath) throw new Error("video.filePath or video.thumbPath is empty");
+        if (!video.fileSize || !video.thumbSize) throw new Error("video.fileSize or video.thumbSize is empty");
+        const videoSha1 = await calculateSha1(video.filePath ?? "");
+        const videoThumbSha1 = await calculateSha1(video.thumbPath ?? "");
+        const req = new NapProtoMsg(NTV2RichMediaReq).encode({
+            reqHead: {
+                common: {
+                    requestId: 3,
+                    command: 100
+                },
+                scene: {
+                    requestType: 2,
+                    businessType: 2,
+                    sceneType: 1,
+                    c2C: {
+                        accountType: 2,
+                        targetUid: peerUin
+                    }
+                },
+                client: {
+                    agentType: 2
+                }
+            },
+            upload: {
+                uploadInfo: [
+                    {
+                        fileInfo: {
+                            fileSize: +video.fileSize,
+                            fileHash: video.fileMd5,
+                            fileSha1: this.toHexStr(videoSha1),
+                            fileName: "nya.mp4",
+                            type: {
+                                type: 2,
+                                picFormat: 0,
+                                videoFormat: 0,
+                                voiceFormat: 0
+                            },
+                            height: 0,
+                            width: 0,
+                            time: 0,
+                            original: 0
+                        },
+                        subFileType: 0
+                    }, {
+                        fileInfo: {
+                            fileSize: +video.thumbSize,
+                            fileHash: video.thumbMd5,
+                            fileSha1: this.toHexStr(videoThumbSha1),
+                            fileName: "nya.jpg",
+                            type: {
+                                type: 1,
+                                picFormat: 0,
+                                videoFormat: 0,
+                                voiceFormat: 0
+                            },
+                            height: video.thumbHeight,
+                            width: video.thumbWidth,
+                            time: 0,
+                            original: 0
+                        },
+                        subFileType: 100
+                    }
+                ],
+                tryFastUploadCompleted: true,
+                srvSendMsg: false,
+                clientRandomId: crypto.randomBytes(8).readBigUInt64BE() & BigInt('0x7FFFFFFFFFFFFFFF'),
+                compatQMsgSceneType: 2,
+                extBizInfo: {
+                    pic : {
+                        bizType: 0,
+                        textSummary: "Nya~",
+                    },
+                    video: {
+                        bytesPbReserve: Buffer.from([0x80, 0x01, 0x00]),
+                    },
+                    ptt: {
+                        bytesPbReserve: Buffer.alloc(0),
+                        bytesReserve: Buffer.alloc(0),
+                        bytesGeneralFlags: Buffer.alloc(0),
+                    }
+                },
+                clientSeq: 0,
+                noNeedCompatMsg: false
+            }
+        });
+        return this.toHexStr(this.packOidbPacket(0x11E9, 100, req, true, false));
     }
 
     packGroupFileDownloadReq(groupUin: number, fileUUID: string): PacketHexStr {

@@ -12,7 +12,7 @@ import { LogWrapper } from "@/common/log";
 import { SendLongMsgResp } from "@/core/packet/proto/message/action";
 import { PacketMsg } from "@/core/packet/msg/message";
 import { OidbSvcTrpcTcp0x6D6Response } from "@/core/packet/proto/oidb/Oidb.0x6D6";
-import { PacketMsgPicElement } from "@/core/packet/msg/element";
+import { PacketMsgPicElement, PacketMsgVideoElement } from "@/core/packet/msg/element";
 
 
 interface OffsetType {
@@ -118,7 +118,13 @@ export class NTQQPacketApi {
                 if (e instanceof PacketMsgPicElement) {
                     reqList.push(this.packetSession?.highwaySession.uploadImage({
                         chatType: groupUin ? ChatType.KCHATTYPEGROUP : ChatType.KCHATTYPEC2C,
-                        peerUid: String(groupUin) ? String(groupUin) : this.core.selfInfo.uid
+                        peerUid: groupUin ? String(groupUin) : this.core.selfInfo.uid
+                    }, e));
+                }
+                if (e instanceof PacketMsgVideoElement) {
+                    reqList.push(this.packetSession?.highwaySession.uploadVideo({
+                        chatType: groupUin ? ChatType.KCHATTYPEGROUP : ChatType.KCHATTYPEC2C,
+                        peerUid: groupUin ? String(groupUin) : this.core.selfInfo.uid
                     }, e));
                 }
             }
