@@ -5,9 +5,9 @@ import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { OB11MessageImage, OB11MessageVideo } from '@/onebot/types';
 
-export interface GetFilePayload {
-    file: string; // 文件名或者fileUuid
-}
+//  interface GetFilePayload {
+//     file: string; // 文件名或者fileUuid
+// }
 
 export interface GetFileResponse {
     file?: string;  // path
@@ -16,19 +16,25 @@ export interface GetFileResponse {
     file_name?: string;
     base64?: string;
 }
-
 const GetFileBase_PayloadSchema = {
     type: 'object',
     properties: {
         file: { type: 'string' },
+        file_id: { type: 'string' }
     },
-    required: ['file'],
+    oneOf: [
+        { required: ['file'] },
+        { required: ['file_id'] }
+    ]
 } as const satisfies JSONSchema;
 
+export type GetFilePayload = FromSchema<typeof GetFileBase_PayloadSchema>;
+
 export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
-    payloadSchema: any = GetFileBase_PayloadSchema;
+    payloadSchema = GetFileBase_PayloadSchema;
 
     async _handle(payload: GetFilePayload): Promise<GetFileResponse> {
+        payload.file ||= payload.file_id || '';
         //接收消息标记模式
         const contextMsgFile = FileNapCatOneBotUUID.decode(payload.file);
         if (contextMsgFile) {
@@ -115,27 +121,6 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
     }
 }
 
-const GetFile_PayloadSchema = {
-    type: 'object',
-    properties: {
-        file_id: { type: 'string' },
-        file: { type: 'string' },
-    },
-    required: ['file_id'],
-} as const satisfies JSONSchema;
-
-type GetFile_Payload_Internal = FromSchema<typeof GetFile_PayloadSchema>;
-
-interface GetFile_Payload extends GetFile_Payload_Internal {
-    file: string;
-}
-
 export default class GetFile extends GetFileBase {
     actionName = ActionName.GetFile;
-    payloadSchema = GetFile_PayloadSchema;
-
-    async _handle(payload: GetFile_Payload): Promise<GetFileResponse> {
-        payload.file = payload.file_id;
-        return super._handle(payload);
-    }
 }
