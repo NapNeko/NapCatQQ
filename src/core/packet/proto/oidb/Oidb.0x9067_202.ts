@@ -14,6 +14,7 @@ export const OidbSvcTrpcTcp0X9067_202Key = {
 //Rsp
 export const OidbSvcTrpcTcp0X9067_202_RkeyList = {
     rkey: ProtoField(1, ScalarType.STRING),
+    ttl: ProtoField(2, ScalarType.UINT64),
     time: ProtoField(4, ScalarType.UINT32),
     type: ProtoField(5, ScalarType.UINT32),
 
