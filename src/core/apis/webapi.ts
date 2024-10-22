@@ -338,4 +338,12 @@ export class NTQQWebApi {
         }
         return (hash & 0x7FFFFFFF).toString();
     }
+    public getBknFromSKey(sKey: string) {
+        let hash = 5381;
+        for (let i = 0; i < sKey.length; i++) {
+            const code = sKey.charCodeAt(i);
+            hash = hash + (hash << 5) + code;
+        }
+        return (hash & 0x7FFFFFFF).toString();
+    }
 }
