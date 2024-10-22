@@ -134,6 +134,7 @@ export enum ActionName {
     GetUserStatus = 'nc_get_user_status',
     GetRkey = 'nc_get_rkey',
     GetGroupShutList = 'get_group_shut_list',
+    GetOnlineClient = "get_online_clients",
 
     // GetGroupIgnoreAddRequest = 'get_group_ignore_add_request',
     // GetConfig = 'get_config',
