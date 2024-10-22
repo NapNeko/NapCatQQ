@@ -135,12 +135,10 @@ export enum ActionName {
     GetRkey = 'nc_get_rkey',
     GetGroupShutList = 'get_group_shut_list',
 
+    GetGuildList = 'get_guild_list',
+    GetGuildProfile = 'get_guild_service_profile',
     // GetGroupIgnoreAddRequest = 'get_group_ignore_add_request',
-    // GetConfig = 'get_config',
-    // SetConfig = 'set_config',
     // Debug = 'debug',
-    // GetGuildList = 'get_guild_list',
     // TestApi01 = 'test_api_01',
-    // GetGuildProfile = 'get_guild_service_profile',
     // UploadForwardMsg = "upload_forward_msg",
 }
