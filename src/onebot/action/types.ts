@@ -137,7 +137,7 @@ export enum ActionName {
 
     GetGuildList = 'get_guild_list',
     GetGuildProfile = 'get_guild_service_profile',
-    // GetGroupIgnoreAddRequest = 'get_group_ignore_add_request',
+    GetGroupIgnoreAddRequest = 'get_group_ignore_add_request',
     // Debug = 'debug',
     // TestApi01 = 'test_api_01',
     // UploadForwardMsg = "upload_forward_msg",
