@@ -2,7 +2,7 @@
   "name": "napcat",
   "private": true,
   "type": "module",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "scripts": {
     "build:framework": "vite build --mode framework",
     "build:shell": "vite build --mode shell",
@@ -37,7 +37,7 @@
     "commander": "^12.1.0",
     "async-mutex": "^0.5.0",
     "file-type": "^19.0.0",
-    "json-schema-to-ts": "^3.1.1",
+    "json-schema-to-ts": "^3.1.2",
     "image-size": "^1.1.1",
     "cors": "^2.8.5"
   },
