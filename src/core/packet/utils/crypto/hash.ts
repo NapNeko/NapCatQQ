@@ -11,9 +11,21 @@ function sha1Stream(readable: stream.Readable) {
     }) as Promise<Buffer>;
 }
 
+function md5Stream(readable: stream.Readable) {
+    return new Promise((resolve, reject) => {
+        readable.on('error', reject);
+        readable.pipe(crypto.createHash('md5').on('error', reject).on('data', resolve));
+    }) as Promise<Buffer>;
+}
+
 export function calculateSha1(filePath: string): Promise<Buffer> {
     const readable = fs.createReadStream(filePath);
     return sha1Stream(readable);
+}
+
+export function computeMd5AndLengthWithLimit(filePath: string, limit?: number): Promise<Buffer> {
+    const readStream = fs.createReadStream(filePath, limit ? { start: 0, end: limit - 1 } : {});
+    return md5Stream(readStream);
 }
 
 export function calculateSha1StreamBytes(filePath: string): Promise<Buffer[]> {

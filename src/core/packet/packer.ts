@@ -1,6 +1,6 @@
 import * as zlib from "node:zlib";
 import * as crypto from "node:crypto";
-import { calculateSha1 } from "@/core/packet/utils/crypto/hash";
+import { calculateSha1, computeMd5AndLengthWithLimit } from "@/core/packet/utils/crypto/hash";
 import { NapProtoMsg } from "@/core/packet/proto/NapProto";
 import { OidbSvcTrpcTcpBase } from "@/core/packet/proto/oidb/OidbBase";
 import { OidbSvcTrpcTcp0X9067_202 } from "@/core/packet/proto/oidb/Oidb.0x9067_202";
@@ -11,13 +11,20 @@ import { NTV2RichMediaReq } from "@/core/packet/proto/oidb/common/Ntv2.RichMedia
 import { HttpConn0x6ff_501 } from "@/core/packet/proto/action/action";
 import { LongMsgResult, SendLongMsgReq } from "@/core/packet/proto/message/action";
 import { PacketMsgBuilder } from "@/core/packet/msg/builder";
-import { PacketMsgPicElement, PacketMsgPttElement, PacketMsgVideoElement } from "@/core/packet/msg/element";
+import {
+    PacketMsgFileElement,
+    PacketMsgPicElement,
+    PacketMsgPttElement,
+    PacketMsgVideoElement
+} from "@/core/packet/msg/element";
 import { LogWrapper } from "@/common/log";
 import { PacketMsg } from "@/core/packet/msg/message";
 import { OidbSvcTrpcTcp0x6D6 } from "@/core/packet/proto/oidb/Oidb.0x6D6";
 import { OidbSvcTrpcTcp0XE37_1200 } from "@/core/packet/proto/oidb/Oidb.0xE37_1200";
 import { PacketMsgConverter } from "@/core/packet/msg/converter";
 import { PacketClient } from "@/core/packet/client";
+import { OidbSvcTrpcTcp0XE37_1700 } from "@/core/packet/proto/oidb/Oidb.0xE37_1700";
+import { OidbSvcTrpcTcp0XE37_800 } from "@/core/packet/proto/oidb/Oidb.0XE37_800";
 
 export type PacketHexStr = string & { readonly hexNya: unique symbol };
 
@@ -594,6 +601,65 @@ export class PacketPacker {
             }
         })
         return this.toHexStr(this.packOidbPacket(0x126D, 100, req, true, false));
+    }
+
+    async packUploadGroupFileReq(groupUin: number, file: PacketMsgFileElement): Promise<PacketHexStr> {
+        const body = new NapProtoMsg(OidbSvcTrpcTcp0x6D6).encode({
+            file: {
+                groupUin: groupUin,
+                appId: 4,
+                busId: 102,
+                entrance: 6,
+                targetDirectory: '/',  // TODO:
+                fileName: file.fileName,
+                localDirectory: `/${file.fileName}`,
+                fileSize: BigInt(file.fileSize),
+                fileMd5: file.fileMd5,
+                fileSha1: await calculateSha1(file.filePath),
+                fileSha3: Buffer.alloc(0),
+                field15: true
+            }
+        });
+        return this.toHexStr(this.packOidbPacket(0x6D6, 0, body, true, false));
+    }
+
+    async packUploadC2CFileReq(selfUid: string, peerUid: string, file: PacketMsgFileElement): Promise<PacketHexStr> {
+        const body = new NapProtoMsg(OidbSvcTrpcTcp0XE37_1700).encode({
+            command: 1700,
+            seq: 0,
+            upload: {
+                senderUid: selfUid,
+                receiverUid: peerUid,
+                fileSize: file.fileSize,
+                fileName: file.fileName,
+                md510MCheckSum: await computeMd5AndLengthWithLimit(file.filePath, 10*1024*1024),
+                sha1CheckSum: file.fileSha1,
+                localPath: "/",
+                md5CheckSum: file.fileMd5,
+                sha3CheckSum: Buffer.alloc(0)
+            },
+            businessId: 3,
+            clientType: 1,
+            flagSupportMediaPlatform: 1
+        })
+        return this.toHexStr(this.packOidbPacket(0xE37, 1700, body, false, false));
+    }
+
+    packOfflineFileDownloadReq(fileUUID: string, fileHash: string, senderUid: string, receiverUid: string): PacketHexStr {
+        const req = this.packOidbPacket(0xE37, 800, new NapProtoMsg(OidbSvcTrpcTcp0XE37_800).encode({
+            subCommand: 800,
+            field2: 0,
+            body: {
+                senderUid: senderUid,
+                receiverUid: receiverUid,
+                fileUuid: fileUUID,
+                fileHash: fileHash,
+            },
+            field101: 3,
+            field102: 1,
+            field200: 1,
+        }), false, false);
+        return this.toHexStr(req);
     }
 
     packGroupFileDownloadReq(groupUin: number, fileUUID: string): PacketHexStr {

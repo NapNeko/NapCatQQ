@@ -28,6 +28,8 @@ import {
 import {MsgInfo} from "@/core/packet/proto/oidb/common/Ntv2.RichMediaReq";
 import {PacketMsg, PacketSendMsgElement} from "@/core/packet/msg/message";
 import {ForwardMsgBuilder} from "@/common/forward-msg-builder";
+import { FileExtra, GroupFileExtra } from "@/core/packet/proto/message/component";
+import { OidbSvcTrpcTcp0XE37_800Response } from "@/core/packet/proto/oidb/Oidb.0XE37_800";
 
 // raw <-> packet
 // TODO: SendStructLongMsgElement
@@ -39,8 +41,8 @@ export abstract class IPacketMsgElement<T extends PacketSendMsgElement> {
         return undefined;
     }
 
-    buildElement(): NapProtoEncodeStructType<typeof Elem>[] | undefined {
-        return undefined;
+    buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
+        return [];
     }
 
     toPreview(): string {
@@ -351,8 +353,85 @@ export class PacketMsgPttElement extends IPacketMsgElement<SendPttElement> {
 }
 
 export class PacketMsgFileElement extends IPacketMsgElement<SendFileElement> {
+    fileName: string;
+    filePath: string;
+    fileSize: number;
+    fileSha1?: Uint8Array;
+    fileMd5?: Uint8Array;
+    fileUuid?: string;
+    fileHash?: string;
+    isGroupFile?: boolean;
+    _private_send_uid?: string;
+    _private_recv_uid?: string;
+    _e37_800_rsp?: NapProtoEncodeStructType<typeof OidbSvcTrpcTcp0XE37_800Response>
+
     constructor(element: SendFileElement) {
         super(element);
+        this.fileName = element.fileElement.fileName;
+        this.filePath = element.fileElement.filePath;
+        this.fileSize = +element.fileElement.fileSize;
+    }
+
+    buildContent(): Uint8Array | undefined {
+        if (this.isGroupFile) return undefined;
+        return new NapProtoMsg(FileExtra).encode({
+            file: {
+                fileType: 0,
+                fileUuid: this.fileUuid,
+                fileMd5: this.fileMd5,
+                fileName: this.fileName,
+                fileSize: BigInt(this.fileSize),
+                subcmd: 1,
+                dangerEvel: 0,
+                expireTime: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60,
+                fileHash: this.fileHash,
+            },
+            field6: {
+                field2: {
+                    field1: this._e37_800_rsp?.body?.field30?.field110,
+                    fileUuid: this.fileUuid,
+                    fileName: this.fileName,
+                    field6: this._e37_800_rsp?.body?.field30?.field3,
+                    field7: this._e37_800_rsp?.body?.field30?.field101,
+                    field8: this._e37_800_rsp?.body?.field30?.field100,
+                    timestamp1: this._e37_800_rsp?.body?.field30?.timestamp1,
+                    fileHash: this.fileHash,
+                    selfUid: this._private_send_uid,
+                    destUid: this._private_recv_uid,
+                }
+            }
+        })
+    }
+
+    buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
+        if (!this.isGroupFile) return [];
+        const lb = Buffer.alloc(2);
+        const transElemVal = new NapProtoMsg(GroupFileExtra).encode({
+            field1: 6,
+            fileName: this.fileName,
+            inner: {
+                info: {
+                    busId: 102,
+                    fileId: this.fileUuid,
+                    fileSize: BigInt(this.fileSize),
+                    fileName: this.fileName,
+                    fileSha: this.fileSha1,
+                    extInfoString: "",
+                    fileMd5: this.fileMd5,
+                }
+            }
+        })
+        lb.writeUInt16BE(transElemVal.length);
+        return [{
+            transElem: {
+                elemType: 24,
+                elemValue: Buffer.concat([Buffer.from([0x01]), lb, transElemVal]) // TLV
+            }
+        }];
+    }
+
+    toPreview(): string {
+        return `[文件]${this.fileName}`;
     }
 }
 
