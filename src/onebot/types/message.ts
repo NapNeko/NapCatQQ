@@ -85,6 +85,7 @@ export interface OB11MessageText {
 export interface OB11MessageContext {
     type: OB11MessageDataType.contact,
     data: {
+        type:"qq"|"group",
         id: string,
     }
 }
