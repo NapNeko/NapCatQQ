@@ -34,6 +34,7 @@ export class PacketPacker {
         this.packetConverter = new PacketMsgConverter(logger);
     }
 
+    // TODO: 一步到位多好ww
     private toHexStr(byteArray: Uint8Array): PacketHexStr {
         return Buffer.from(byteArray).toString('hex') as PacketHexStr;
     }

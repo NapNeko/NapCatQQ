@@ -94,6 +94,7 @@ export class HighwayTcpUploader extends HighwayUploader {
             const handleRspHeader = (header: Buffer) => {
                 const rsp = new NapProtoMsg(RespDataHighwayHead).decode(header);
                 if (rsp.errorCode !== 0) {
+                    // TODO: immediately reject promise if error code is not 0
                     this.logger.logWarn(`[Highway] tcpUpload failed (code: ${rsp.errorCode})`);
                 }
                 const percent = ((Number(rsp.msgSegHead?.dataOffset) + Number(rsp.msgSegHead?.dataLength)) / Number(rsp.msgSegHead?.filesize)).toFixed(2);
@@ -159,6 +160,7 @@ export class HighwayHttpUploader extends HighwayUploader {
         const headData = new NapProtoMsg(RespDataHighwayHead).decode(head);
         this.logger.logDebug(`[Highway] httpUploadBlock: ${headData.errorCode} | ${headData.msgSegHead?.retCode} | ${headData.bytesRspExtendInfo} | ${head.toString('hex')} | ${body.toString('hex')}`);
         if (headData.errorCode !== 0) {
+            // TODO: immediately throw error if error code is not 0
             this.logger.logError(`[Highway] httpUploadBlock failed (code=${headData.errorCode})`);
         }
     }
