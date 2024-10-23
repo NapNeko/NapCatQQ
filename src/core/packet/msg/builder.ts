@@ -2,7 +2,8 @@ import * as crypto from "crypto";
 import { PushMsgBody } from "@/core/packet/proto/message/message";
 import { NapProtoEncodeStructType } from "@/core/packet/proto/NapProto";
 import { LogWrapper } from "@/common/log";
-import { PacketMsg } from "@/core/packet/msg/message";
+import { PacketMsg, PacketSendMsgElement } from "@/core/packet/msg/message";
+import { IPacketMsgElement } from "@/core/packet/msg/element";
 
 export class PacketMsgBuilder {
     private logger: LogWrapper;
@@ -14,6 +15,9 @@ export class PacketMsgBuilder {
     buildFakeMsg(selfUid: string, element: PacketMsg[]): NapProtoEncodeStructType<typeof PushMsgBody>[] {
         return element.map((node): NapProtoEncodeStructType<typeof PushMsgBody> => {
             const avatar = `https://q.qlogo.cn/headimg_dl?dst_uin=${node.senderUin}&spec=640&img_type=jpg`;
+            const msgContent = node.msg.reduceRight((acc: undefined | Uint8Array, msg: IPacketMsgElement<PacketSendMsgElement>) => {
+                return acc !== undefined ? acc : msg.buildContent();
+            }, undefined);
             const msgElement = node.msg.flatMap(msg => msg.buildElement() ?? []);
             return {
                 responseHead: {
@@ -50,7 +54,8 @@ export class PacketMsgBuilder {
                 body: {
                     richText: {
                         elems: msgElement
-                    }
+                    },
+                    msgContent: msgContent,
                 }
             };
         });
