@@ -111,6 +111,7 @@ export class NTQQPacketApi {
         await this.sendPacket('OidbSvcTrpcTcp.0x8fc_2', data!, true);
     }
 
+    // TODO: can simplify this
     async uploadResources(msg: PacketMsg[], groupUin: number = 0) {
         const reqList = [];
         for (const m of msg) {
@@ -135,7 +136,7 @@ export class NTQQPacketApi {
                 }
             }
         }
-        return Promise.all(reqList);
+        return Promise.all(reqList);  // TODO: use promise.allSettled
     }
 
     async sendUploadForwardMsg(msg: PacketMsg[], groupUin: number = 0) {
