@@ -282,7 +282,6 @@ export class PacketHighwaySession {
     private async uploadC2CVideoReq(peerUid: string, video: PacketMsgVideoElement): Promise<void> {
         const preReq = await this.packer.packUploadC2CVideoReq(peerUid, video);
         const preRespRaw = await this.packetClient.sendPacket('OidbSvcTrpcTcp.0x11e9_100', preReq, true);
-        console.log(preRespRaw);
         const preResp = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(
             Buffer.from(preRespRaw.hex_data, 'hex')
         );
@@ -496,7 +495,6 @@ export class PacketHighwaySession {
         const preResp = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(
             Buffer.from(preRespRaw.hex_data, 'hex')
         );
-        console.log("OidbSvcTrpcTcp.0xe37_1700", preRespRaw);
         const preRespData = new NapProtoMsg(OidbSvcTrpcTcp0XE37Response).decode(preResp.body);
         if (!preRespData.upload?.boolFileExist) {
             this.logger.logDebug(`[Highway] uploadC2CFileReq file not exist, need upload!`);
@@ -552,7 +550,6 @@ export class PacketHighwaySession {
         file.fileHash = preRespData.upload?.fileAddon;
         const FetchExistFileReq = this.packer.packOfflineFileDownloadReq(file.fileUuid!, file.fileHash!, this.sig.uid, peerUid);
         const resp = await this.packetClient.sendPacket('OidbSvcTrpcTcp.0xe37_800', FetchExistFileReq, true);
-        console.log("OidbSvcTrpcTcp.0xe37_800", resp);
         const oidb_resp = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(Buffer.from(resp.hex_data, 'hex'));
         file._e37_800_rsp = new NapProtoMsg(OidbSvcTrpcTcp0XE37_800Response).decode(oidb_resp.body);
         file._private_send_uid = this.sig.uid;
