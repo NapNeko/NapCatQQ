@@ -8,7 +8,7 @@ import { HttpConn0x6ff_501Response } from "@/core/packet/proto/action/action";
 import { PacketHighwayClient } from "@/core/packet/highway/client";
 import { NTV2RichMediaResp } from "@/core/packet/proto/oidb/common/Ntv2.RichMediaResp";
 import { OidbSvcTrpcTcpBaseRsp } from "@/core/packet/proto/oidb/OidbBase";
-import { PacketMsgPicElement, PacketMsgVideoElement } from "@/core/packet/msg/element";
+import { PacketMsgPicElement, PacketMsgPttElement, PacketMsgVideoElement } from "@/core/packet/msg/element";
 import { NTV2RichMediaHighwayExt } from "@/core/packet/proto/highway/highway";
 import { int32ip2str, oidbIpv4s2HighwayIpv4s } from "@/core/packet/highway/utils";
 import { calculateSha1StreamBytes } from "@/core/packet/utils/crypto/hash";
@@ -101,6 +101,17 @@ export class PacketHighwaySession {
             await this.uploadGroupVideoReq(Number(peer.peerUid), video);
         } else if (peer.chatType === ChatType.KCHATTYPEC2C) {
             await this.uploadC2CVideoReq(peer.peerUid, video);
+        } else {
+            throw new Error(`[Highway] unsupported chatType: ${peer.chatType}`);
+        }
+    }
+
+    async uploadPtt(peer: Peer, ptt: PacketMsgPttElement): Promise<void> {
+        await this.checkAvailable();
+        if (peer.chatType === ChatType.KCHATTYPEGROUP) {
+            await this.uploadGroupPttReq(Number(peer.peerUid), ptt);
+        } else if (peer.chatType === ChatType.KCHATTYPEC2C) {
+            await this.uploadC2CPttReq(peer.peerUid, ptt);
         } else {
             throw new Error(`[Highway] unsupported chatType: ${peer.chatType}`);
         }
@@ -312,5 +323,81 @@ export class PacketHighwaySession {
             this.logger.logDebug(`[Highway] uploadC2CVideoReq get upload invalid thumb ukey ${subFile.uKey}, don't need upload!`);
         }
         video.msgInfo = preRespData.upload.msgInfo;
+    }
+
+    private async uploadGroupPttReq(groupUin: number, ptt: PacketMsgPttElement): Promise<void> {
+        const preReq = await this.packer.packUploadGroupPttReq(groupUin, ptt);
+        const preRespRaw = await this.packetClient.sendPacket('OidbSvcTrpcTcp.0x126e_100', preReq, true);
+        const preResp = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(
+            Buffer.from(preRespRaw.hex_data, 'hex')
+        );
+        const preRespData = new NapProtoMsg(NTV2RichMediaResp).decode(preResp.body);
+        const ukey = preRespData.upload.uKey;
+        if (ukey && ukey != "") {
+            this.logger.logDebug(`[Highway] uploadGroupPttReq get upload ptt ukey: ${ukey}, need upload!`);
+            const index = preRespData.upload.msgInfo.msgInfoBody[0].index;
+            const md5 = Buffer.from(index.info.fileHash, 'hex');
+            const sha1 = Buffer.from(index.info.fileSha1, 'hex');
+            const extend = new NapProtoMsg(NTV2RichMediaHighwayExt).encode({
+                fileUuid: index.fileUuid,
+                uKey: ukey,
+                network: {
+                    ipv4S: oidbIpv4s2HighwayIpv4s(preRespData.upload.ipv4S)
+                },
+                msgInfoBody: preRespData.upload.msgInfo.msgInfoBody,
+                blockSize: BlockSize,
+                hash: {
+                    fileSha1: [sha1]
+                }
+            })
+            await this.packetHighwayClient.upload(
+                1008,
+                fs.createReadStream(ptt.filePath, {highWaterMark: BlockSize}),
+                ptt.fileSize,
+                md5,
+                extend
+            );
+        } else {
+            this.logger.logDebug(`[Highway] uploadGroupPttReq get upload invalid ukey ${ukey}, don't need upload!`);
+        }
+        ptt.msgInfo = preRespData.upload.msgInfo;
+    }
+
+    private async uploadC2CPttReq(peerUid: string, ptt: PacketMsgPttElement): Promise<void> {
+        const preReq = await this.packer.packUploadC2CPttReq(peerUid, ptt);
+        const preRespRaw = await this.packetClient.sendPacket('OidbSvcTrpcTcp.0x126d_100', preReq, true);
+        const preResp = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(
+            Buffer.from(preRespRaw.hex_data, 'hex')
+        );
+        const preRespData = new NapProtoMsg(NTV2RichMediaResp).decode(preResp.body);
+        const ukey = preRespData.upload.uKey;
+        if (ukey && ukey != "") {
+            this.logger.logDebug(`[Highway] uploadC2CPttReq get upload ptt ukey: ${ukey}, need upload!`);
+            const index = preRespData.upload.msgInfo.msgInfoBody[0].index;
+            const md5 = Buffer.from(index.info.fileHash, 'hex');
+            const sha1 = Buffer.from(index.info.fileSha1, 'hex');
+            const extend = new NapProtoMsg(NTV2RichMediaHighwayExt).encode({
+                fileUuid: index.fileUuid,
+                uKey: ukey,
+                network: {
+                    ipv4S: oidbIpv4s2HighwayIpv4s(preRespData.upload.ipv4S)
+                },
+                msgInfoBody: preRespData.upload.msgInfo.msgInfoBody,
+                blockSize: BlockSize,
+                hash: {
+                    fileSha1: [sha1]
+                }
+            })
+            await this.packetHighwayClient.upload(
+                1007,
+                fs.createReadStream(ptt.filePath, {highWaterMark: BlockSize}),
+                ptt.fileSize,
+                md5,
+                extend
+            );
+        } else {
+            this.logger.logDebug(`[Highway] uploadC2CPttReq get upload invalid ukey ${ukey}, don't need upload!`);
+        }
+        ptt.msgInfo = preRespData.upload.msgInfo;
     }
 }

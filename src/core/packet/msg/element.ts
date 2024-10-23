@@ -25,9 +25,9 @@ import {
     SendTextElement,
     SendVideoElement
 } from "@/core";
-import { MsgInfo } from "@/core/packet/proto/oidb/common/Ntv2.RichMediaReq";
-import { PacketMsg, PacketSendMsgElement } from "@/core/packet/msg/message";
-import { ForwardMsgBuilder } from "@/common/forward-msg-builder";
+import {MsgInfo} from "@/core/packet/proto/oidb/common/Ntv2.RichMediaReq";
+import {PacketMsg, PacketSendMsgElement} from "@/core/packet/msg/message";
+import {ForwardMsgBuilder} from "@/common/forward-msg-builder";
 
 // raw <-> packet
 // TODO: SendStructLongMsgElement
@@ -319,14 +319,39 @@ export class PacketMsgVideoElement extends IPacketMsgElement<SendVideoElement> {
     }
 }
 
-export class PacketMsgFileElement extends IPacketMsgElement<SendFileElement> {
-    constructor(element: SendFileElement) {
+export class PacketMsgPttElement extends IPacketMsgElement<SendPttElement> {
+    filePath: string;
+    fileSize: number;
+    fileMd5: string;
+    fileDuration: number;
+    msgInfo: NapProtoEncodeStructType<typeof MsgInfo> | null = null;
+
+    constructor(element: SendPttElement) {
         super(element);
+        this.filePath = element.pttElement.filePath;
+        this.fileSize = +element.pttElement.fileSize; // TODO: cc
+        this.fileMd5 = element.pttElement.md5HexStr;
+        this.fileDuration = Math.round(element.pttElement.duration); // TODO: cc
+    }
+
+    buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
+        assert(this.msgInfo !== null, 'msgInfo is null, expected not null');
+        return [{
+            commonElem: {
+                serviceType: 48,
+                pbElem: new NapProtoMsg(MsgInfo).encode(this.msgInfo),
+                businessType: 22,
+            }
+        }];
+    }
+
+    toPreview(): string {
+        return "[语音]";
     }
 }
 
-export class PacketMsgPttElement extends IPacketMsgElement<SendPttElement> {
-    constructor(element: SendPttElement) {
+export class PacketMsgFileElement extends IPacketMsgElement<SendFileElement> {
+    constructor(element: SendFileElement) {
         super(element);
     }
 }

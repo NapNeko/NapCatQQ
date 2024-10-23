@@ -11,7 +11,7 @@ import { NTV2RichMediaReq } from "@/core/packet/proto/oidb/common/Ntv2.RichMedia
 import { HttpConn0x6ff_501 } from "@/core/packet/proto/action/action";
 import { LongMsgResult, SendLongMsgReq } from "@/core/packet/proto/message/action";
 import { PacketMsgBuilder } from "@/core/packet/msg/builder";
-import { PacketMsgPicElement, PacketMsgVideoElement } from "@/core/packet/msg/element";
+import { PacketMsgPicElement, PacketMsgPttElement, PacketMsgVideoElement } from "@/core/packet/msg/element";
 import { LogWrapper } from "@/common/log";
 import { PacketMsg } from "@/core/packet/msg/message";
 import { OidbSvcTrpcTcp0x6D6 } from "@/core/packet/proto/oidb/Oidb.0x6D6";
@@ -97,7 +97,7 @@ export class PacketPacker {
     packStatusPacket(uin: number): PacketHexStr {
         const oidb_0xfe1_2 = new NapProtoMsg(OidbSvcTrpcTcp0XFE1_2).encode({
             uin: uin,
-            key: [{ key: 27372 }]
+            key: [{key: 27372}]
         });
         return this.toHexStr(this.packOidbPacket(0xfe1, 2, oidb_0xfe1_2));
     }
@@ -357,7 +357,7 @@ export class PacketPacker {
                 clientRandomId: crypto.randomBytes(8).readBigUInt64BE() & BigInt('0x7FFFFFFFFFFFFFFF'),
                 compatQMsgSceneType: 2,
                 extBizInfo: {
-                    pic : {
+                    pic: {
                         bizType: 0,
                         textSummary: "Nya~",
                     },
@@ -446,7 +446,7 @@ export class PacketPacker {
                 clientRandomId: crypto.randomBytes(8).readBigUInt64BE() & BigInt('0x7FFFFFFFFFFFFFFF'),
                 compatQMsgSceneType: 2,
                 extBizInfo: {
-                    pic : {
+                    pic: {
                         bizType: 0,
                         textSummary: "Nya~",
                     },
@@ -464,6 +464,135 @@ export class PacketPacker {
             }
         });
         return this.toHexStr(this.packOidbPacket(0x11E9, 100, req, true, false));
+    }
+
+    async packUploadGroupPttReq(groupUin: number, ptt: PacketMsgPttElement): Promise<PacketHexStr> {
+        const pttSha1 = await calculateSha1(ptt.filePath);
+        const req = new NapProtoMsg(NTV2RichMediaReq).encode({
+            reqHead: {
+                common: {
+                    requestId: 1,
+                    command: 100
+                },
+                scene: {
+                    requestType: 2,
+                    businessType: 3,
+                    sceneType: 2,
+                    group: {
+                        groupUin: groupUin
+                    }
+                },
+                client: {
+                    agentType: 2
+                }
+            },
+            upload: {
+                uploadInfo: [
+                    {
+                        fileInfo: {
+                            fileSize: ptt.fileSize,
+                            fileHash: ptt.fileMd5,
+                            fileSha1: this.toHexStr(pttSha1),
+                            fileName: `${ptt.fileMd5}.amr`,
+                            type: {
+                                type: 3,
+                                picFormat: 0,
+                                videoFormat: 0,
+                                voiceFormat: 1
+                            },
+                            height: 0,
+                            width: 0,
+                            time: ptt.fileDuration,
+                            original: 0
+                        },
+                        subFileType: 0
+                    }
+                ],
+                tryFastUploadCompleted: true,
+                srvSendMsg: false,
+                clientRandomId: crypto.randomBytes(8).readBigUInt64BE() & BigInt('0x7FFFFFFFFFFFFFFF'),
+                compatQMsgSceneType: 2,
+                extBizInfo: {
+                    pic: {
+                        textSummary: "Nya~",
+                    },
+                    video: {
+                        bytesPbReserve: Buffer.alloc(0),
+                    },
+                    ptt: {
+                        bytesPbReserve: Buffer.alloc(0),
+                        bytesReserve: Buffer.from([0x08, 0x00, 0x38, 0x00]),
+                        bytesGeneralFlags: Buffer.from([0x9a, 0x01, 0x07, 0xaa, 0x03, 0x04, 0x08, 0x08, 0x12, 0x00]),
+                    }
+                },
+                clientSeq: 0,
+                noNeedCompatMsg: false
+            }
+        })
+        return this.toHexStr(this.packOidbPacket(0x126E, 100, req, true, false));
+    }
+
+    async packUploadC2CPttReq(peerUin: string, ptt: PacketMsgPttElement): Promise<PacketHexStr> {
+        const pttSha1 = await calculateSha1(ptt.filePath);
+        const req = new NapProtoMsg(NTV2RichMediaReq).encode({
+            reqHead: {
+                common: {
+                    requestId: 4,
+                    command: 100
+                },
+                scene: {
+                    requestType: 2,
+                    businessType: 3,
+                    sceneType: 1,
+                    c2C: {
+                        accountType: 2,
+                        targetUid: peerUin
+                    }
+                },
+                client: {
+                    agentType: 2
+                }
+            },
+            upload: {
+                uploadInfo: [
+                    {
+                        fileInfo: {
+                            fileSize: ptt.fileSize,
+                            fileHash: ptt.fileMd5,
+                            fileSha1: this.toHexStr(pttSha1),
+                            fileName: `${ptt.fileMd5}.amr`,
+                            type: {
+                                type: 3,
+                                picFormat: 0,
+                                videoFormat: 0,
+                                voiceFormat: 1
+                            },
+                            height: 0,
+                            width: 0,
+                            time: ptt.fileDuration,
+                            original: 0
+                        },
+                        subFileType: 0
+                    }
+                ],
+                tryFastUploadCompleted: true,
+                srvSendMsg: false,
+                clientRandomId: crypto.randomBytes(8).readBigUInt64BE() & BigInt('0x7FFFFFFFFFFFFFFF'),
+                compatQMsgSceneType: 1,
+                extBizInfo: {
+                    pic: {
+                        textSummary: "Nya~",
+                    },
+                    ptt: {
+                        bytesReserve: Buffer.from([0x08, 0x00, 0x38, 0x00]),
+                        bytesGeneralFlags: Buffer.from([0x9a, 0x01, 0x0b, 0xaa, 0x03, 0x08, 0x08, 0x04, 0x12, 0x04, 0x00, 0x00, 0x00, 0x00]),
+                    }
+                },
+                clientSeq: 0,
+                noNeedCompatMsg: false
+            }
+        })
+        return this.toHexStr(this.packOidbPacket(0x126D, 100, req, true, false));
     }
 
     packGroupFileDownloadReq(groupUin: number, fileUUID: string): PacketHexStr {

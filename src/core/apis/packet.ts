@@ -12,7 +12,7 @@ import { LogWrapper } from "@/common/log";
 import { SendLongMsgResp } from "@/core/packet/proto/message/action";
 import { PacketMsg } from "@/core/packet/msg/message";
 import { OidbSvcTrpcTcp0x6D6Response } from "@/core/packet/proto/oidb/Oidb.0x6D6";
-import { PacketMsgPicElement, PacketMsgVideoElement } from "@/core/packet/msg/element";
+import { PacketMsgPicElement, PacketMsgPttElement, PacketMsgVideoElement } from "@/core/packet/msg/element";
 
 
 interface OffsetType {
@@ -111,7 +111,7 @@ export class NTQQPacketApi {
         await this.sendPacket('OidbSvcTrpcTcp.0x8fc_2', data!, true);
     }
 
-    private async uploadResources(msg: PacketMsg[], groupUin: number = 0) {
+    async uploadResources(msg: PacketMsg[], groupUin: number = 0) {
         const reqList = [];
         for (const m of msg) {
             for (const e of m.msg) {
@@ -123,6 +123,12 @@ export class NTQQPacketApi {
                 }
                 if (e instanceof PacketMsgVideoElement) {
                     reqList.push(this.packetSession?.highwaySession.uploadVideo({
+                        chatType: groupUin ? ChatType.KCHATTYPEGROUP : ChatType.KCHATTYPEC2C,
+                        peerUid: groupUin ? String(groupUin) : this.core.selfInfo.uid
+                    }, e));
+                }
+                if (e instanceof PacketMsgPttElement) {
+                    reqList.push(this.packetSession?.highwaySession.uploadPtt({
                         chatType: groupUin ? ChatType.KCHATTYPEGROUP : ChatType.KCHATTYPEC2C,
                         peerUid: groupUin ? String(groupUin) : this.core.selfInfo.uid
                     }, e));
