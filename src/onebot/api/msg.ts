@@ -624,12 +624,20 @@ export class OneBotMsgApi {
 
         [OB11MessageDataType.miniapp]: async () => undefined,
 
-        [OB11MessageDataType.contact]: async ({ data }, context) => {
-            const arkJson = await this.core.apis.UserApi.getBuddyRecommendContactArkJson(data.id.toString(), '');
-            return this.ob11ToRawConverters.json({
-                data: { data: arkJson.arkMsg },
-                type: OB11MessageDataType.json
-            }, context);
+        [OB11MessageDataType.contact]: async ({ data: { type = "qq", id } }, context) => {
+            if(type === "qq"){
+                const arkJson = await this.core.apis.UserApi.getBuddyRecommendContactArkJson(id.toString(), '');
+                return this.ob11ToRawConverters.json({
+                    data: { data: arkJson.arkMsg },
+                    type: OB11MessageDataType.json
+                }, context);
+            }else if(type === "group"){
+                const arkJson = await this.core.apis.GroupApi.getGroupRecommendContactArkJson(id.toString());
+                return this.ob11ToRawConverters.json({
+                    data: { data: arkJson.arkJson },
+                    type: OB11MessageDataType.json
+                }, context);
+            }
         }
     };
 
