@@ -188,7 +188,7 @@ export class PacketPacker {
                             fileInfo: {
                                 fileSize: +img.size,
                                 fileHash: img.md5,
-                                fileSha1: this.toHexStr(await calculateSha1(img.path)),
+                                fileSha1: img.sha1!,
                                 fileName: img.name,
                                 type: {
                                     type: 1,
@@ -256,7 +256,7 @@ export class PacketPacker {
                         fileInfo: {
                             fileSize: +img.size,
                             fileHash: img.md5,
-                            fileSha1: this.toHexStr(await calculateSha1(img.path)),
+                            fileSha1: img.sha1!,
                             fileName: img.name,
                             type: {
                                 type: 1,
@@ -299,10 +299,7 @@ export class PacketPacker {
     }
 
     async packUploadGroupVideoReq(groupUin: number, video: PacketMsgVideoElement): Promise<PacketHexStr> {
-        if (!video.filePath || !video.thumbPath) throw new Error("video.filePath or video.thumbPath is empty");
         if (!video.fileSize || !video.thumbSize) throw new Error("video.fileSize or video.thumbSize is empty");
-        const videoSha1 = await calculateSha1(video.filePath ?? "");
-        const videoThumbSha1 = await calculateSha1(video.thumbPath ?? "");
         const req = new NapProtoMsg(NTV2RichMediaReq).encode({
             reqHead: {
                 common: {
@@ -327,7 +324,7 @@ export class PacketPacker {
                         fileInfo: {
                             fileSize: +video.fileSize,
                             fileHash: video.fileMd5,
-                            fileSha1: this.toHexStr(videoSha1),
+                            fileSha1: video.fileSha1,
                             fileName: "nya.mp4",
                             type: {
                                 type: 2,
@@ -345,7 +342,7 @@ export class PacketPacker {
                         fileInfo: {
                             fileSize: +video.thumbSize,
                             fileHash: video.thumbMd5,
-                            fileSha1: this.toHexStr(videoThumbSha1),
+                            fileSha1: video.thumbSha1,
                             fileName: "nya.jpg",
                             type: {
                                 type: 1,
@@ -387,10 +384,7 @@ export class PacketPacker {
     }
 
     async packUploadC2CVideoReq(peerUin: string, video: PacketMsgVideoElement): Promise<PacketHexStr> {
-        if (!video.filePath || !video.thumbPath) throw new Error("video.filePath or video.thumbPath is empty");
         if (!video.fileSize || !video.thumbSize) throw new Error("video.fileSize or video.thumbSize is empty");
-        const videoSha1 = await calculateSha1(video.filePath ?? "");
-        const videoThumbSha1 = await calculateSha1(video.thumbPath ?? "");
         const req = new NapProtoMsg(NTV2RichMediaReq).encode({
             reqHead: {
                 common: {
@@ -416,7 +410,7 @@ export class PacketPacker {
                         fileInfo: {
                             fileSize: +video.fileSize,
                             fileHash: video.fileMd5,
-                            fileSha1: this.toHexStr(videoSha1),
+                            fileSha1: video.fileSha1,
                             fileName: "nya.mp4",
                             type: {
                                 type: 2,
@@ -434,7 +428,7 @@ export class PacketPacker {
                         fileInfo: {
                             fileSize: +video.thumbSize,
                             fileHash: video.thumbMd5,
-                            fileSha1: this.toHexStr(videoThumbSha1),
+                            fileSha1: video.thumbSha1,
                             fileName: "nya.jpg",
                             type: {
                                 type: 1,
@@ -476,7 +470,6 @@ export class PacketPacker {
     }
 
     async packUploadGroupPttReq(groupUin: number, ptt: PacketMsgPttElement): Promise<PacketHexStr> {
-        const pttSha1 = await calculateSha1(ptt.filePath);
         const req = new NapProtoMsg(NTV2RichMediaReq).encode({
             reqHead: {
                 common: {
@@ -501,7 +494,7 @@ export class PacketPacker {
                         fileInfo: {
                             fileSize: ptt.fileSize,
                             fileHash: ptt.fileMd5,
-                            fileSha1: this.toHexStr(pttSha1),
+                            fileSha1: ptt.fileSha1,
                             fileName: `${ptt.fileMd5}.amr`,
                             type: {
                                 type: 3,
@@ -542,7 +535,6 @@ export class PacketPacker {
     }
 
     async packUploadC2CPttReq(peerUin: string, ptt: PacketMsgPttElement): Promise<PacketHexStr> {
-        const pttSha1 = await calculateSha1(ptt.filePath);
         const req = new NapProtoMsg(NTV2RichMediaReq).encode({
             reqHead: {
                 common: {
@@ -568,7 +560,7 @@ export class PacketPacker {
                         fileInfo: {
                             fileSize: ptt.fileSize,
                             fileHash: ptt.fileMd5,
-                            fileSha1: this.toHexStr(pttSha1),
+                            fileSha1: ptt.fileSha1,
                             fileName: `${ptt.fileMd5}.amr`,
                             type: {
                                 type: 3,
@@ -616,7 +608,7 @@ export class PacketPacker {
                 localDirectory: `/${file.fileName}`,
                 fileSize: BigInt(file.fileSize),
                 fileMd5: file.fileMd5,
-                fileSha1: await calculateSha1(file.filePath),
+                fileSha1: file.fileSha1,
                 fileSha3: Buffer.alloc(0),
                 field15: true
             }
