@@ -137,6 +137,7 @@ export class PacketHighwaySession {
     }
 
     private async uploadGroupImageReq(groupUin: number, img: PacketMsgPicElement): Promise<void> {
+        img.sha1 = Buffer.from(await calculateSha1(img.path)).toString('hex');
         const preReq = await this.packer.packUploadGroupImgReq(groupUin, img);
         const preRespRaw = await this.packetClient.sendPacket('OidbSvcTrpcTcp.0x11c4_100', preReq, true);
         const preResp = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(
@@ -176,6 +177,7 @@ export class PacketHighwaySession {
     }
 
     private async uploadC2CImageReq(peerUid: string, img: PacketMsgPicElement): Promise<void> {
+        img.sha1 = Buffer.from(await calculateSha1(img.path)).toString('hex');
         const preReq = await this.packer.packUploadC2CImgReq(peerUid, img);
         const preRespRaw = await this.packetClient.sendPacket('OidbSvcTrpcTcp.0x11c5_100', preReq, true);
         const preResp = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(
@@ -214,6 +216,9 @@ export class PacketHighwaySession {
     }
 
     private async uploadGroupVideoReq(groupUin: number, video: PacketMsgVideoElement): Promise<void> {
+        if (!video.filePath || !video.thumbPath) throw new Error("video.filePath or video.thumbPath is empty");
+        video.fileSha1 = Buffer.from(await calculateSha1(video.filePath)).toString('hex');
+        video.thumbSha1 = Buffer.from(await calculateSha1(video.thumbPath)).toString('hex');
         const preReq = await this.packer.packUploadGroupVideoReq(groupUin, video);
         const preRespRaw = await this.packetClient.sendPacket('OidbSvcTrpcTcp.0x11ea_100', preReq, true);
         const preResp = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(
@@ -279,6 +284,9 @@ export class PacketHighwaySession {
     }
 
     private async uploadC2CVideoReq(peerUid: string, video: PacketMsgVideoElement): Promise<void> {
+        if (!video.filePath || !video.thumbPath) throw new Error("video.filePath or video.thumbPath is empty");
+        video.fileSha1 = Buffer.from(await calculateSha1(video.filePath)).toString('hex');
+        video.thumbSha1 = Buffer.from(await calculateSha1(video.thumbPath)).toString('hex');
         const preReq = await this.packer.packUploadC2CVideoReq(peerUid, video);
         const preRespRaw = await this.packetClient.sendPacket('OidbSvcTrpcTcp.0x11e9_100', preReq, true);
         const preResp = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(
@@ -344,6 +352,7 @@ export class PacketHighwaySession {
     }
 
     private async uploadGroupPttReq(groupUin: number, ptt: PacketMsgPttElement): Promise<void> {
+        ptt.fileSha1 = Buffer.from(await calculateSha1(ptt.filePath)).toString('hex');
         const preReq = await this.packer.packUploadGroupPttReq(groupUin, ptt);
         const preRespRaw = await this.packetClient.sendPacket('OidbSvcTrpcTcp.0x126e_100', preReq, true);
         const preResp = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(
@@ -382,6 +391,7 @@ export class PacketHighwaySession {
     }
 
     private async uploadC2CPttReq(peerUid: string, ptt: PacketMsgPttElement): Promise<void> {
+        ptt.fileSha1 = Buffer.from(await calculateSha1(ptt.filePath)).toString('hex');
         const preReq = await this.packer.packUploadC2CPttReq(peerUid, ptt);
         const preRespRaw = await this.packetClient.sendPacket('OidbSvcTrpcTcp.0x126d_100', preReq, true);
         const preResp = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(

@@ -288,7 +288,9 @@ export class PacketMsgVideoElement extends IPacketMsgElement<SendVideoElement> {
     thumbSize?: number;
     thumbPath?: string;
     fileMd5?: string;
+    fileSha1?: string;
     thumbMd5?: string;
+    thumbSha1?: string;
     thumbWidth?: number;
     thumbHeight?: number;
     msgInfo: NapProtoEncodeStructType<typeof MsgInfo> | null = null;
@@ -325,6 +327,7 @@ export class PacketMsgPttElement extends IPacketMsgElement<SendPttElement> {
     filePath: string;
     fileSize: number;
     fileMd5: string;
+    fileSha1?: string;
     fileDuration: number;
     msgInfo: NapProtoEncodeStructType<typeof MsgInfo> | null = null;
 
