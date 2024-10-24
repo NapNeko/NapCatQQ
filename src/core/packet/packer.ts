@@ -25,6 +25,7 @@ import { PacketMsgConverter } from "@/core/packet/msg/converter";
 import { PacketClient } from "@/core/packet/client";
 import { OidbSvcTrpcTcp0XE37_1700 } from "@/core/packet/proto/oidb/Oidb.0xE37_1700";
 import { OidbSvcTrpcTcp0XE37_800 } from "@/core/packet/proto/oidb/Oidb.0XE37_800";
+import { OidbSvcTrpcTcp0XEB7 } from "./proto/oidb/Oidb.0xEB7";
 
 export type PacketHexStr = string & { readonly hexNya: unique symbol };
 
@@ -692,6 +693,19 @@ export class PacketPacker {
                 field200: 1,
                 field99999: Buffer.from([0xc0, 0x85, 0x2c, 0x01])
             })
+        );
+    }
+    packGroupSignReq(uin: string, groupCode: string): PacketHexStr {
+        return this.toHexStr(
+            this.packOidbPacket(0XEB7, 1, new NapProtoMsg(OidbSvcTrpcTcp0XEB7).encode(
+                {
+                    body: {
+                        uin: uin,
+                        groupUin: groupCode,
+                        version: "9.0.90"
+                    }
+                }
+            ), false, false)
         );
     }
 }

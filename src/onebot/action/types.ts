@@ -134,5 +134,7 @@ export enum ActionName {
     GetGuildProfile = 'get_guild_service_profile',
 
     GetGroupIgnoredNotifies = 'get_group_ignored_notifies',
+    
+    SetGroupSign = "set_group_sign",
     // UploadForwardMsg = "upload_forward_msg",
 }
