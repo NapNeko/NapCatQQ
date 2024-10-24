@@ -3,7 +3,7 @@ import { ChatType, InstanceContext, NapCatCore } from '..';
 import offset from '@/core/external/offset.json';
 import { PacketClient, RecvPacketData } from '@/core/packet/client';
 import { PacketSession } from "@/core/packet/session";
-import { PacketHexStr } from "@/core/packet/packer";
+import {OidbPacket, PacketHexStr} from "@/core/packet/packer";
 import { NapProtoMsg } from '@/core/packet/proto/NapProto';
 import { OidbSvcTrpcTcp0X9067_202_Rsp_Body } from '@/core/packet/proto/oidb/Oidb.0x9067_202';
 import { OidbSvcTrpcTcpBase, OidbSvcTrpcTcpBaseRsp } from '@/core/packet/proto/oidb/OidbBase';
@@ -78,14 +78,18 @@ export class NTQQPacketApi {
         return this.packetSession!.client.sendPacket(cmd, data, rsp);
     }
 
+    async sendOidbPacket(pkt: OidbPacket, rsp = false): Promise<RecvPacketData> {
+        return this.sendPacket(pkt.cmd, pkt.data, rsp);
+    }
+
     async sendPokePacket(peer: number, group?: number) {
         const data = this.packetSession?.packer.packPokePacket(peer, group);
-        await this.sendPacket('OidbSvcTrpcTcp.0xed3_1', data!, false);
+        await this.sendOidbPacket(data!, false);
     }
 
     async sendRkeyPacket() {
         const packet = this.packetSession?.packer.packRkeyPacket();
-        const ret = await this.sendPacket('OidbSvcTrpcTcp.0x9067_202', packet!, true);
+        const ret = await this.sendOidbPacket(packet!, true);
         if (!ret?.hex_data) return [];
         const body = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(Buffer.from(ret.hex_data, 'hex')).body;
         const retData = new NapProtoMsg(OidbSvcTrpcTcp0X9067_202_Rsp_Body).decode(body);
@@ -93,13 +97,13 @@ export class NTQQPacketApi {
     }
     async sendGroupSignPacket(groupCode: string) {
         const packet = this.packetSession?.packer.packGroupSignReq(this.core.selfInfo.uin, groupCode);
-        await this.sendPacket('OidbSvcTrpcTcp.0xeb7', packet!, true);
+        await this.sendOidbPacket(packet!, true);
     }
     async sendStatusPacket(uin: number): Promise<{ status: number; ext_status: number; } | undefined> {
         let status = 0;
         try {
             const packet = this.packetSession?.packer.packStatusPacket(uin);
-            const ret = await this.sendPacket('OidbSvcTrpcTcp.0xfe1_2', packet!, true);
+            const ret = await this.sendOidbPacket( packet!, true);
             const data = Buffer.from(ret.hex_data, 'hex');
             const ext = new NapProtoMsg(OidbSvcTrpcTcp0XFE1_2RSP).decode(new NapProtoMsg(OidbSvcTrpcTcpBase).decode(data).body).data.status.value;
             // ext & 0xff00 + ext >> 16 & 0xff
@@ -116,7 +120,7 @@ export class NTQQPacketApi {
 
     async sendSetSpecialTittlePacket(groupCode: string, uid: string, tittle: string) {
         const data = this.packetSession?.packer.packSetSpecialTittlePacket(groupCode, uid, tittle);
-        await this.sendPacket('OidbSvcTrpcTcp.0x8fc_2', data!, true);
+        await this.sendOidbPacket(data!, true);
     }
 
     // TODO: can simplify this
@@ -164,7 +168,7 @@ export class NTQQPacketApi {
 
     async sendGroupFileDownloadReq(groupUin: number, fileUUID: string) {
         const data = this.packetSession?.packer.packGroupFileDownloadReq(groupUin, fileUUID);
-        const ret = await this.sendPacket('OidbSvcTrpcTcp.0x6d6_2', data!, true);
+        const ret = await this.sendOidbPacket(data!, true);
         const body = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(Buffer.from(ret.hex_data, 'hex')).body;
         const resp = new NapProtoMsg(OidbSvcTrpcTcp0x6D6Response).decode(body);
         if (resp.download.retCode !== 0) {

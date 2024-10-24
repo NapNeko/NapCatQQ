@@ -139,7 +139,7 @@ export class PacketHighwaySession {
     private async uploadGroupImageReq(groupUin: number, img: PacketMsgPicElement): Promise<void> {
         img.sha1 = Buffer.from(await calculateSha1(img.path)).toString('hex');
         const preReq = await this.packer.packUploadGroupImgReq(groupUin, img);
-        const preRespRaw = await this.packetClient.sendPacket('OidbSvcTrpcTcp.0x11c4_100', preReq, true);
+        const preRespRaw = await this.packetClient.sendOidbPacket(preReq, true);
         const preResp = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(
             Buffer.from(preRespRaw.hex_data, 'hex')
         );
@@ -179,7 +179,7 @@ export class PacketHighwaySession {
     private async uploadC2CImageReq(peerUid: string, img: PacketMsgPicElement): Promise<void> {
         img.sha1 = Buffer.from(await calculateSha1(img.path)).toString('hex');
         const preReq = await this.packer.packUploadC2CImgReq(peerUid, img);
-        const preRespRaw = await this.packetClient.sendPacket('OidbSvcTrpcTcp.0x11c5_100', preReq, true);
+        const preRespRaw = await this.packetClient.sendOidbPacket(preReq, true);
         const preResp = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(
             Buffer.from(preRespRaw.hex_data, 'hex')
         );
@@ -220,7 +220,7 @@ export class PacketHighwaySession {
         video.fileSha1 = Buffer.from(await calculateSha1(video.filePath)).toString('hex');
         video.thumbSha1 = Buffer.from(await calculateSha1(video.thumbPath)).toString('hex');
         const preReq = await this.packer.packUploadGroupVideoReq(groupUin, video);
-        const preRespRaw = await this.packetClient.sendPacket('OidbSvcTrpcTcp.0x11ea_100', preReq, true);
+        const preRespRaw = await this.packetClient.sendOidbPacket(preReq, true);
         const preResp = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(
             Buffer.from(preRespRaw.hex_data, 'hex')
         );
@@ -288,7 +288,7 @@ export class PacketHighwaySession {
         video.fileSha1 = Buffer.from(await calculateSha1(video.filePath)).toString('hex');
         video.thumbSha1 = Buffer.from(await calculateSha1(video.thumbPath)).toString('hex');
         const preReq = await this.packer.packUploadC2CVideoReq(peerUid, video);
-        const preRespRaw = await this.packetClient.sendPacket('OidbSvcTrpcTcp.0x11e9_100', preReq, true);
+        const preRespRaw = await this.packetClient.sendOidbPacket(preReq, true);
         const preResp = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(
             Buffer.from(preRespRaw.hex_data, 'hex')
         );
@@ -354,7 +354,7 @@ export class PacketHighwaySession {
     private async uploadGroupPttReq(groupUin: number, ptt: PacketMsgPttElement): Promise<void> {
         ptt.fileSha1 = Buffer.from(await calculateSha1(ptt.filePath)).toString('hex');
         const preReq = await this.packer.packUploadGroupPttReq(groupUin, ptt);
-        const preRespRaw = await this.packetClient.sendPacket('OidbSvcTrpcTcp.0x126e_100', preReq, true);
+        const preRespRaw = await this.packetClient.sendOidbPacket(preReq, true);
         const preResp = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(
             Buffer.from(preRespRaw.hex_data, 'hex')
         );
@@ -393,7 +393,7 @@ export class PacketHighwaySession {
     private async uploadC2CPttReq(peerUid: string, ptt: PacketMsgPttElement): Promise<void> {
         ptt.fileSha1 = Buffer.from(await calculateSha1(ptt.filePath)).toString('hex');
         const preReq = await this.packer.packUploadC2CPttReq(peerUid, ptt);
-        const preRespRaw = await this.packetClient.sendPacket('OidbSvcTrpcTcp.0x126d_100', preReq, true);
+        const preRespRaw = await this.packetClient.sendOidbPacket(preReq, true);
         const preResp = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(
             Buffer.from(preRespRaw.hex_data, 'hex')
         );
@@ -434,7 +434,7 @@ export class PacketHighwaySession {
         file.fileMd5 = await computeMd5AndLengthWithLimit(file.filePath);
         file.fileSha1 = await calculateSha1(file.filePath);
         const preReq = await this.packer.packUploadGroupFileReq(groupUin, file);
-        const preRespRaw = await this.packetClient.sendPacket('OidbSvcTrpcTcp.0x6d6_0', preReq, true);
+        const preRespRaw = await this.packetClient.sendOidbPacket(preReq, true);
         const preResp = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(
             Buffer.from(preRespRaw.hex_data, 'hex')
         );
@@ -500,7 +500,7 @@ export class PacketHighwaySession {
         file.fileMd5 = await computeMd5AndLengthWithLimit(file.filePath);
         file.fileSha1 = await calculateSha1(file.filePath);
         const preReq = await this.packer.packUploadC2CFileReq(this.sig.uid, peerUid, file);
-        const preRespRaw = await this.packetClient.sendPacket('OidbSvcTrpcTcp.0xe37_1700', preReq, true);
+        const preRespRaw = await this.packetClient.sendOidbPacket( preReq, true);
         const preResp = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(
             Buffer.from(preRespRaw.hex_data, 'hex')
         );
@@ -558,7 +558,7 @@ export class PacketHighwaySession {
         file.fileUuid = preRespData.upload?.uuid;
         file.fileHash = preRespData.upload?.fileAddon;
         const FetchExistFileReq = this.packer.packOfflineFileDownloadReq(file.fileUuid!, file.fileHash!, this.sig.uid, peerUid);
-        const resp = await this.packetClient.sendPacket('OidbSvcTrpcTcp.0xe37_800', FetchExistFileReq, true);
+        const resp = await this.packetClient.sendOidbPacket(FetchExistFileReq, true);
         const oidb_resp = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(Buffer.from(resp.hex_data, 'hex'));
         file._e37_800_rsp = new NapProtoMsg(OidbSvcTrpcTcp0XE37_800Response).decode(oidb_resp.body);
         file._private_send_uid = this.sig.uid;
