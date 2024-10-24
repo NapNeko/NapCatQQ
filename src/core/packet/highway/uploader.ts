@@ -27,7 +27,7 @@ abstract class HighwayUploader {
     protected timeout(): Promise<void> {
         return new Promise<void>((_, reject) => {
             setTimeout(() => {
-                reject(new Error(`[Highway] tcpUpload timeout after ${this.trans.timeout}s`));
+                reject(new Error(`[Highway] timeout after ${this.trans.timeout}s`));
             }, (this.trans.timeout ?? Infinity) * 1000
             );
         })
@@ -137,9 +137,9 @@ export class HighwayTcpUploader extends HighwayUploader {
                 reject(new Error(`[Highway] tcpUpload readable error: ${err}`));
             });
         });
-        const timeout = this.timeout().then(() => {
+        const timeout = this.timeout().catch((err) => {
             controller.abort();
-            throw new Error('Highway TCP Upload timed out');
+            throw new Error(err.message);
         });
         await Promise.race([upload, timeout]);
     }
@@ -164,9 +164,9 @@ export class HighwayHttpUploader extends HighwayUploader {
                 offset += block.length;
             }
         })();
-        const timeout = this.timeout().then(() => {
+        const timeout = this.timeout().catch((err) => {
             controller.abort();
-            throw new Error('Highway HTTP Upload timed out');
+            throw new Error(err.message);
         });
         await Promise.race([upload, timeout]);
     }
