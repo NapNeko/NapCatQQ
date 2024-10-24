@@ -186,7 +186,7 @@ export class PacketPacker {
                     uploadInfo: [
                         {
                             fileInfo: {
-                                fileSize: Number(img.size),
+                                fileSize: +img.size,
                                 fileHash: img.md5,
                                 fileSha1: this.toHexStr(await calculateSha1(img.path)),
                                 fileName: img.name,
@@ -254,7 +254,7 @@ export class PacketPacker {
                 uploadInfo: [
                     {
                         fileInfo: {
-                            fileSize: Number(img.size),
+                            fileSize: +img.size,
                             fileHash: img.md5,
                             fileSha1: this.toHexStr(await calculateSha1(img.path)),
                             fileName: img.name,

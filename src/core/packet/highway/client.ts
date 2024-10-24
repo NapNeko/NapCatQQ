@@ -36,7 +36,7 @@ export class PacketHighwayClient {
         this.port = port;
     }
 
-    private buildDataUpTrans(cmd: number, data: ReadStream, fileSize: number, md5: Uint8Array, extendInfo: Uint8Array, timeout: number = 3600): PacketHighwayTrans {
+    private buildDataUpTrans(cmd: number, data: ReadStream, fileSize: number, md5: Uint8Array, extendInfo: Uint8Array, timeout: number = 1200): PacketHighwayTrans {
         return {
             uin: this.sig.uin,
             cmd: cmd,

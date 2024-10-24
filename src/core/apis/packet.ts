@@ -150,7 +150,7 @@ export class NTQQPacketApi {
                 }
             }
         }
-        return Promise.all(reqList);  // TODO: use promise.allSettled
+        return Promise.allSettled(reqList);
     }
 
     async sendUploadForwardMsg(msg: PacketMsg[], groupUin: number = 0) {
