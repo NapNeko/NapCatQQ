@@ -59,7 +59,6 @@ export class PacketHighwaySession {
 
     private async checkAvailable() {
         if (!this.packetClient.available) {
-            this.logger.logError('[Highway] packetServer not available!');
             throw new Error('packetServer不可用，请参照文档 https://napneko.github.io/config/advanced 检查packetServer状态或进行配置');
         }
         if (this.sig.sigSession === null || this.sig.sessionKey === null) {
@@ -96,7 +95,7 @@ export class PacketHighwaySession {
     async uploadImage(peer: Peer, img: PacketMsgPicElement): Promise<void> {
         await this.checkAvailable();
         if (peer.chatType === ChatType.KCHATTYPEGROUP) {
-            await this.uploadGroupImageReq(Number(peer.peerUid), img);
+            await this.uploadGroupImageReq(+peer.peerUid, img);
         } else if (peer.chatType === ChatType.KCHATTYPEC2C) {
             await this.uploadC2CImageReq(peer.peerUid, img);
         } else {
@@ -107,7 +106,7 @@ export class PacketHighwaySession {
     async uploadVideo(peer: Peer, video: PacketMsgVideoElement): Promise<void> {
         await this.checkAvailable();
         if (peer.chatType === ChatType.KCHATTYPEGROUP) {
-            await this.uploadGroupVideoReq(Number(peer.peerUid), video);
+            await this.uploadGroupVideoReq(+peer.peerUid, video);
         } else if (peer.chatType === ChatType.KCHATTYPEC2C) {
             await this.uploadC2CVideoReq(peer.peerUid, video);
         } else {
@@ -118,7 +117,7 @@ export class PacketHighwaySession {
     async uploadPtt(peer: Peer, ptt: PacketMsgPttElement): Promise<void> {
         await this.checkAvailable();
         if (peer.chatType === ChatType.KCHATTYPEGROUP) {
-            await this.uploadGroupPttReq(Number(peer.peerUid), ptt);
+            await this.uploadGroupPttReq(+peer.peerUid, ptt);
         } else if (peer.chatType === ChatType.KCHATTYPEC2C) {
             await this.uploadC2CPttReq(peer.peerUid, ptt);
         } else {
@@ -129,7 +128,7 @@ export class PacketHighwaySession {
     async uploadFile(peer: Peer, file: PacketMsgFileElement): Promise<void> {
         await this.checkAvailable();
         if (peer.chatType === ChatType.KCHATTYPEGROUP) {
-            await this.uploadGroupFileReq(Number(peer.peerUid), file);
+            await this.uploadGroupFileReq(+peer.peerUid, file);
         } else if (peer.chatType === ChatType.KCHATTYPEC2C) {
             await this.uploadC2CFileReq(peer.peerUid, file);
         } else {

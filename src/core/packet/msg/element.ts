@@ -114,7 +114,7 @@ export class PacketMsgPicElement extends IPacketMsgElement<SendPicElement> {
         super(element);
         this.path = element.picElement.sourcePath;
         this.name = element.picElement.fileName;
-        this.size = Number(element.picElement.fileSize);
+        this.size = +element.picElement.fileSize;
         this.md5 = element.picElement.md5HexStr ?? '';
         this.width = element.picElement.picWidth;
         this.height = element.picElement.picHeight;
@@ -149,11 +149,11 @@ export class PacketMsgReplyElement extends IPacketMsgElement<SendReplyElement> {
     constructor(element: SendReplyElement) {
         super(element);
         this.messageId = BigInt(element.replyElement.replayMsgId ?? 0);
-        this.messageSeq = Number(element.replyElement.replayMsgSeq ?? 0);
-        this.messageClientSeq = Number(element.replyElement.replyMsgClientSeq ?? 0);
-        this.targetUin = Number(element.replyElement.senderUin ?? 0);
+        this.messageSeq = +(element.replyElement.replayMsgSeq ?? 0);
+        this.messageClientSeq = +(element.replyElement.replyMsgClientSeq ?? 0);
+        this.targetUin = +(element.replyElement.senderUin ?? 0);
         this.targetUid = element.replyElement.senderUidStr ?? '';
-        this.time = Number(element.replyElement.replyMsgTime ?? 0);
+        this.time = +(element.replyElement.replyMsgTime ?? 0);
         this.elems = []; // TODO: in replyElement.sourceMsgTextElems
     }
 
