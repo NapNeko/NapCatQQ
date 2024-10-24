@@ -86,7 +86,10 @@ export class NTQQPacketApi {
         const retData = new NapProtoMsg(OidbSvcTrpcTcp0X9067_202_Rsp_Body).decode(body);
         return retData.data.rkeyList;
     }
-
+    async sendGroupSignPacket(groupCode: string) {
+        const packet = this.packetSession?.packer.packGroupSignReq(this.core.selfInfo.uin, groupCode);
+        await this.sendPacket('OidbSvcTrpcTcp.0xeb7', packet!, true);
+    }
     async sendStatusPacket(uin: number): Promise<{ status: number; ext_status: number; } | undefined> {
         let status = 0;
         try {
