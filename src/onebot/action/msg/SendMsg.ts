@@ -117,7 +117,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         if (getSpecialMsgNum(payload, OB11MessageDataType.node)) {
             const packetMode = this.core.apis.PacketApi.available;
             const returnMsgAndResId = packetMode
-                ? await this.handleForwardedNodesPacket(peer, messages as OB11MessageNode[])
+                ? await this.handleForwardedNodesPacket(peer, messages as OB11MessageNode[], payload.source, payload.news, payload.summary, payload.prompt)
                 : await this.handleForwardedNodes(peer, messages as OB11MessageNode[]);
             if (returnMsgAndResId.message) {
                 const msgShortId = MessageUnique.createUniqueMsgId({
@@ -146,7 +146,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
     }
 
     // TODO: recursively handle forwarded nodes
-    private async handleForwardedNodesPacket(msgPeer: Peer, messageNodes: OB11MessageNode[]): Promise<{
+    private async handleForwardedNodesPacket(msgPeer: Peer, messageNodes: OB11MessageNode[], source?: string, news?: { text: string }[], summary?: string, prompt?: string): Promise<{
         message: RawMessage | null,
         res_id?: string
     }> {
@@ -172,7 +172,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
             }
         }
         const resid = await this.core.apis.PacketApi.sendUploadForwardMsg(packetMsg, msgPeer.chatType === ChatType.KCHATTYPEGROUP ? +msgPeer.peerUid : 0);
-        const forwardJson = ForwardMsgBuilder.fromPacketMsg(resid, packetMsg);
+        const forwardJson = ForwardMsgBuilder.fromPacketMsg(resid, packetMsg, source, news, summary, prompt);
         const finallySendElements = {
             elementType: ElementType.ARK,
             elementId: "",
