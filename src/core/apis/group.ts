@@ -319,18 +319,20 @@ export class NTQQGroupApi {
     async tryGetGroupMembersV2(modeListener = false, groupQQ: string, num = 30, timeout = 500): Promise<any> {
         const sceneId = this.context.session.getGroupService().createMemberListScene(groupQQ, 'groupMemberList_MainWindow_1');
         const once = this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onMemberListChange', 1, timeout, (params) => params.sceneId === sceneId)
-            .catch();
+            .catch(() => {});
         const result = await this.context.session.getGroupService().getNextMemberList(sceneId, undefined, num);
-        let resMode2;
         if (result.errCode !== 0) {
             throw new Error('获取群成员列表出错,' + result.errMsg);
         }
+        let resMode2;
         if (modeListener) {
-            const ret = (await once);
-            resMode2 = ret[0];
+            const ret = (await once)?.[0];
+            if (ret) {
+                resMode2 = ret;
+            }
         }
         this.context.session.getGroupService().destroyMemberListScene(sceneId);
-        return modeListener ? resMode2 : result.result;
+        return resMode2 || result.result;
     }
 
     async getGroupMembersV2(groupQQ: string): Promise<Map<string, GroupMember>> {

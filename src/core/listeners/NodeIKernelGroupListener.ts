@@ -71,7 +71,8 @@ export class NodeIKernelGroupListener {
         sceneId: string,
         ids: string[],
         infos: Map<string, GroupMember>, // uid -> GroupMember
-        finish: boolean,
+        hasPrev: boolean,
+        hasNext: boolean,
         hasRobot: boolean
     }) {
     }
