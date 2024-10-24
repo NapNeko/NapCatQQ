@@ -1,6 +1,6 @@
 import * as zlib from "node:zlib";
 import * as crypto from "node:crypto";
-import { calculateSha1, computeMd5AndLengthWithLimit } from "@/core/packet/utils/crypto/hash";
+import { computeMd5AndLengthWithLimit } from "@/core/packet/utils/crypto/hash";
 import { NapProtoMsg } from "@/core/packet/proto/NapProto";
 import { OidbSvcTrpcTcpBase } from "@/core/packet/proto/oidb/OidbBase";
 import { OidbSvcTrpcTcp0X9067_202 } from "@/core/packet/proto/oidb/Oidb.0x9067_202";
@@ -29,6 +29,11 @@ import { OidbSvcTrpcTcp0XEB7 } from "./proto/oidb/Oidb.0xEB7";
 
 export type PacketHexStr = string & { readonly hexNya: unique symbol };
 
+export interface OidbPacket {
+    cmd: string;
+    data: PacketHexStr
+}
+
 export class PacketPacker {
     readonly logger: LogWrapper;
     readonly client: PacketClient;
@@ -42,31 +47,34 @@ export class PacketPacker {
         this.packetConverter = new PacketMsgConverter(logger);
     }
 
-    // TODO: 一步到位多好ww
-    private toHexStr(byteArray: Uint8Array): PacketHexStr {
+    private packetPacket(byteArray: Uint8Array): PacketHexStr {
         return Buffer.from(byteArray).toString('hex') as PacketHexStr;
     }
 
-    packOidbPacket(cmd: number, subCmd: number, body: Uint8Array, isUid: boolean = true, isLafter: boolean = false): Uint8Array {
-        return new NapProtoMsg(OidbSvcTrpcTcpBase).encode({
+    packOidbPacket(cmd: number, subCmd: number, body: Uint8Array, isUid: boolean = true, isLafter: boolean = false): OidbPacket {
+        const data = new NapProtoMsg(OidbSvcTrpcTcpBase).encode({
             command: cmd,
             subCommand: subCmd,
             body: body,
             isReserved: isUid ? 1 : 0
         });
+        return {
+            cmd: `OidbSvcTrpcTcp.0x${cmd.toString(16).toUpperCase()}_${subCmd}`,
+            data: this.packetPacket(data)
+        }
     }
 
-    packPokePacket(peer: number, group?: number): PacketHexStr {
+    packPokePacket(peer: number, group?: number): OidbPacket {
         const oidb_0xed3 = new NapProtoMsg(OidbSvcTrpcTcp0XED3_1).encode({
             uin: peer,
             groupUin: group,
             friendUin: group ?? peer,
             ext: 0
         });
-        return this.toHexStr(this.packOidbPacket(0xed3, 1, oidb_0xed3));
+        return this.packOidbPacket(0xed3, 1, oidb_0xed3);
     }
 
-    packRkeyPacket(): PacketHexStr {
+    packRkeyPacket(): OidbPacket {
         const oidb_0x9067_202 = new NapProtoMsg(OidbSvcTrpcTcp0X9067_202).encode({
             reqHead: {
                 common: {
@@ -86,10 +94,10 @@ export class PacketPacker {
                 key: [10, 20, 2]
             },
         });
-        return this.toHexStr(this.packOidbPacket(0x9067, 202, oidb_0x9067_202));
+        return this.packOidbPacket(0x9067, 202, oidb_0x9067_202);
     }
 
-    packSetSpecialTittlePacket(groupCode: string, uid: string, tittle: string): PacketHexStr {
+    packSetSpecialTittlePacket(groupCode: string, uid: string, tittle: string): OidbPacket {
         const oidb_0x8FC_2_body = new NapProtoMsg(OidbSvcTrpcTcp0X8FC_2_Body).encode({
             targetUid: uid,
             specialTitle: tittle,
@@ -100,15 +108,15 @@ export class PacketPacker {
             groupUin: +groupCode,
             body: oidb_0x8FC_2_body
         });
-        return this.toHexStr(this.packOidbPacket(0x8FC, 2, oidb_0x8FC_2, false, false));
+        return this.packOidbPacket(0x8FC, 2, oidb_0x8FC_2, false, false);
     }
 
-    packStatusPacket(uin: number): PacketHexStr {
+    packStatusPacket(uin: number): OidbPacket {
         const oidb_0xfe1_2 = new NapProtoMsg(OidbSvcTrpcTcp0XFE1_2).encode({
             uin: uin,
             key: [{key: 27372}]
         });
-        return this.toHexStr(this.packOidbPacket(0xfe1, 2, oidb_0xfe1_2));
+        return this.packOidbPacket(0xfe1, 2, oidb_0xfe1_2);
     }
 
     async packUploadForwardMsg(selfUid: string, msg: PacketMsg[], groupUin: number = 0): Promise<PacketHexStr> {
@@ -140,12 +148,12 @@ export class PacketPacker {
             }
         );
         // this.logger.logDebug("packUploadForwardMsg REQ!!!", req);
-        return this.toHexStr(req);
+        return this.packetPacket(req);
     }
 
     // highway part
     packHttp0x6ff_501(): PacketHexStr {
-        return this.toHexStr(new NapProtoMsg(HttpConn0x6ff_501).encode({
+        return this.packetPacket(new NapProtoMsg(HttpConn0x6ff_501).encode({
             httpConn: {
                 field1: 0,
                 field2: 0,
@@ -162,7 +170,7 @@ export class PacketPacker {
         }));
     }
 
-    async packUploadGroupImgReq(groupUin: number, img: PacketMsgPicElement): Promise<PacketHexStr> {
+    async packUploadGroupImgReq(groupUin: number, img: PacketMsgPicElement): Promise<OidbPacket> {
         const req = new NapProtoMsg(NTV2RichMediaReq).encode(
             {
                 reqHead: {
@@ -227,78 +235,78 @@ export class PacketPacker {
                 }
             }
         );
-        return this.toHexStr(this.packOidbPacket(0x11c4, 100, req, true, false));
+        return this.packOidbPacket(0x11c4, 100, req, true, false);
     }
 
-    async packUploadC2CImgReq(peerUin: string, img: PacketMsgPicElement): Promise<PacketHexStr> {
+    async packUploadC2CImgReq(peerUin: string, img: PacketMsgPicElement): Promise<OidbPacket> {
         const req = new NapProtoMsg(NTV2RichMediaReq).encode({
-            reqHead: {
-                common: {
-                    requestId: 1,
-                    command: 100
-                },
-                scene: {
-                    requestType: 2,
-                    businessType: 1,
-                    sceneType: 1,
-                    c2C: {
-                        accountType: 2,
-                        targetUid: peerUin
+                reqHead: {
+                    common: {
+                        requestId: 1,
+                        command: 100
                     },
-                },
-                client: {
-                    agentType: 2,
-                }
-            },
-            upload: {
-                uploadInfo: [
-                    {
-                        fileInfo: {
-                            fileSize: +img.size,
-                            fileHash: img.md5,
-                            fileSha1: img.sha1!,
-                            fileName: img.name,
-                            type: {
-                                type: 1,
-                                picFormat: img.picType,  //TODO: extend NapCat imgType /cc @MliKiowa
-                                videoFormat: 0,
-                                voiceFormat: 0,
-                            },
-                            width: img.width,
-                            height: img.height,
-                            time: 0,
-                            original: 1
+                    scene: {
+                        requestType: 2,
+                        businessType: 1,
+                        sceneType: 1,
+                        c2C: {
+                            accountType: 2,
+                            targetUid: peerUin
                         },
-                        subFileType: 0,
-                    }
-                ],
-                tryFastUploadCompleted: true,
-                srvSendMsg: false,
-                clientRandomId: crypto.randomBytes(8).readBigUInt64BE() & BigInt('0x7FFFFFFFFFFFFFFF'),
-                compatQMsgSceneType: 1,
-                extBizInfo: {
-                    pic: {
-                        bytesPbReserveTroop: Buffer.from("0800180020004200500062009201009a0100a2010c080012001800200028003a00", 'hex'),
-                        textSummary: "Nya~",  // TODO:
                     },
-                    video: {
-                        bytesPbReserve: Buffer.alloc(0),
-                    },
-                    ptt: {
-                        bytesPbReserve: Buffer.alloc(0),
-                        bytesReserve: Buffer.alloc(0),
-                        bytesGeneralFlags: Buffer.alloc(0),
+                    client: {
+                        agentType: 2,
                     }
                 },
-                clientSeq: 0,
-                noNeedCompatMsg: false,
+                upload: {
+                    uploadInfo: [
+                        {
+                            fileInfo: {
+                                fileSize: +img.size,
+                                fileHash: img.md5,
+                                fileSha1: img.sha1!,
+                                fileName: img.name,
+                                type: {
+                                    type: 1,
+                                    picFormat: img.picType,  //TODO: extend NapCat imgType /cc @MliKiowa
+                                    videoFormat: 0,
+                                    voiceFormat: 0,
+                                },
+                                width: img.width,
+                                height: img.height,
+                                time: 0,
+                                original: 1
+                            },
+                            subFileType: 0,
+                        }
+                    ],
+                    tryFastUploadCompleted: true,
+                    srvSendMsg: false,
+                    clientRandomId: crypto.randomBytes(8).readBigUInt64BE() & BigInt('0x7FFFFFFFFFFFFFFF'),
+                    compatQMsgSceneType: 1,
+                    extBizInfo: {
+                        pic: {
+                            bytesPbReserveTroop: Buffer.from("0800180020004200500062009201009a0100a2010c080012001800200028003a00", 'hex'),
+                            textSummary: "Nya~",  // TODO:
+                        },
+                        video: {
+                            bytesPbReserve: Buffer.alloc(0),
+                        },
+                        ptt: {
+                            bytesPbReserve: Buffer.alloc(0),
+                            bytesReserve: Buffer.alloc(0),
+                            bytesGeneralFlags: Buffer.alloc(0),
+                        }
+                    },
+                    clientSeq: 0,
+                    noNeedCompatMsg: false,
+                }
             }
-        }
         );
-        return this.toHexStr(this.packOidbPacket(0x11c5, 100, req, true, false));
+        return this.packOidbPacket(0x11c5, 100, req, true, false);
     }
 
-    async packUploadGroupVideoReq(groupUin: number, video: PacketMsgVideoElement): Promise<PacketHexStr> {
+    async packUploadGroupVideoReq(groupUin: number, video: PacketMsgVideoElement): Promise<OidbPacket> {
         if (!video.fileSize || !video.thumbSize) throw new Error("video.fileSize or video.thumbSize is empty");
         const req = new NapProtoMsg(NTV2RichMediaReq).encode({
             reqHead: {
@@ -380,10 +388,10 @@ export class PacketPacker {
                 noNeedCompatMsg: false
             }
         });
-        return this.toHexStr(this.packOidbPacket(0x11EA, 100, req, true, false));
+        return this.packOidbPacket(0x11EA, 100, req, true, false);
     }
 
-    async packUploadC2CVideoReq(peerUin: string, video: PacketMsgVideoElement): Promise<PacketHexStr> {
+    async packUploadC2CVideoReq(peerUin: string, video: PacketMsgVideoElement): Promise<OidbPacket> {
         if (!video.fileSize || !video.thumbSize) throw new Error("video.fileSize or video.thumbSize is empty");
         const req = new NapProtoMsg(NTV2RichMediaReq).encode({
             reqHead: {
@@ -466,10 +474,10 @@ export class PacketPacker {
                 noNeedCompatMsg: false
             }
         });
-        return this.toHexStr(this.packOidbPacket(0x11E9, 100, req, true, false));
+        return this.packOidbPacket(0x11E9, 100, req, true, false);
     }
 
-    async packUploadGroupPttReq(groupUin: number, ptt: PacketMsgPttElement): Promise<PacketHexStr> {
+    async packUploadGroupPttReq(groupUin: number, ptt: PacketMsgPttElement): Promise<OidbPacket> {
         const req = new NapProtoMsg(NTV2RichMediaReq).encode({
             reqHead: {
                 common: {
@@ -531,10 +539,10 @@ export class PacketPacker {
                 noNeedCompatMsg: false
             }
         })
-        return this.toHexStr(this.packOidbPacket(0x126E, 100, req, true, false));
+        return this.packOidbPacket(0x126E, 100, req, true, false);
     }
 
-    async packUploadC2CPttReq(peerUin: string, ptt: PacketMsgPttElement): Promise<PacketHexStr> {
+    async packUploadC2CPttReq(peerUin: string, ptt: PacketMsgPttElement): Promise<OidbPacket> {
         const req = new NapProtoMsg(NTV2RichMediaReq).encode({
             reqHead: {
                 common: {
@@ -593,10 +601,10 @@ export class PacketPacker {
                 noNeedCompatMsg: false
             }
         })
-        return this.toHexStr(this.packOidbPacket(0x126D, 100, req, true, false));
+        return this.packOidbPacket(0x126D, 100, req, true, false);
     }
 
-    async packUploadGroupFileReq(groupUin: number, file: PacketMsgFileElement): Promise<PacketHexStr> {
+    async packUploadGroupFileReq(groupUin: number, file: PacketMsgFileElement): Promise<OidbPacket> {
         const body = new NapProtoMsg(OidbSvcTrpcTcp0x6D6).encode({
             file: {
                 groupUin: groupUin,
@@ -613,10 +621,10 @@ export class PacketPacker {
                 field15: true
             }
         });
-        return this.toHexStr(this.packOidbPacket(0x6D6, 0, body, true, false));
+        return this.packOidbPacket(0x6D6, 0, body, true, false);
     }
 
-    async packUploadC2CFileReq(selfUid: string, peerUid: string, file: PacketMsgFileElement): Promise<PacketHexStr> {
+    async packUploadC2CFileReq(selfUid: string, peerUid: string, file: PacketMsgFileElement): Promise<OidbPacket> {
         const body = new NapProtoMsg(OidbSvcTrpcTcp0XE37_1700).encode({
             command: 1700,
             seq: 0,
@@ -625,7 +633,7 @@ export class PacketPacker {
                 receiverUid: peerUid,
                 fileSize: file.fileSize,
                 fileName: file.fileName,
-                md510MCheckSum: await computeMd5AndLengthWithLimit(file.filePath, 10*1024*1024),
+                md510MCheckSum: await computeMd5AndLengthWithLimit(file.filePath, 10 * 1024 * 1024),
                 sha1CheckSum: file.fileSha1,
                 localPath: "/",
                 md5CheckSum: file.fileMd5,
@@ -635,11 +643,11 @@ export class PacketPacker {
             clientType: 1,
             flagSupportMediaPlatform: 1
         })
-        return this.toHexStr(this.packOidbPacket(0xE37, 1700, body, false, false));
+        return this.packOidbPacket(0xE37, 1700, body, false, false);
     }
 
-    packOfflineFileDownloadReq(fileUUID: string, fileHash: string, senderUid: string, receiverUid: string): PacketHexStr {
-        const req = this.packOidbPacket(0xE37, 800, new NapProtoMsg(OidbSvcTrpcTcp0XE37_800).encode({
+    packOfflineFileDownloadReq(fileUUID: string, fileHash: string, senderUid: string, receiverUid: string): OidbPacket {
+        return this.packOidbPacket(0xE37, 800, new NapProtoMsg(OidbSvcTrpcTcp0XE37_800).encode({
             subCommand: 800,
             field2: 0,
             body: {
@@ -652,24 +660,22 @@ export class PacketPacker {
             field102: 1,
             field200: 1,
         }), false, false);
-        return this.toHexStr(req);
     }
 
-    packGroupFileDownloadReq(groupUin: number, fileUUID: string): PacketHexStr {
-        return this.toHexStr(
-            this.packOidbPacket(0x6D6, 2, new NapProtoMsg(OidbSvcTrpcTcp0x6D6).encode({
+    packGroupFileDownloadReq(groupUin: number, fileUUID: string): OidbPacket {
+        return this.packOidbPacket(0x6D6, 2, new NapProtoMsg(OidbSvcTrpcTcp0x6D6).encode({
                 download: {
                     groupUin: groupUin,
                     appId: 7,
                     busId: 102,
                     fileId: fileUUID
                 }
-            }), true, false)
+            }), true, false
         );
     }
 
     packC2CFileDownloadReq(selfUid: string, fileUUID: string, fileHash: string): PacketHexStr {
-        return this.toHexStr(
+        return this.packetPacket(
             new NapProtoMsg(OidbSvcTrpcTcp0XE37_1200).encode({
                 subCommand: 1200,
                 field2: 1,
@@ -687,17 +693,16 @@ export class PacketPacker {
             })
         );
     }
-    packGroupSignReq(uin: string, groupCode: string): PacketHexStr {
-        return this.toHexStr(
-            this.packOidbPacket(0XEB7, 1, new NapProtoMsg(OidbSvcTrpcTcp0XEB7).encode(
-                {
-                    body: {
-                        uin: uin,
-                        groupUin: groupCode,
-                        version: "9.0.90"
-                    }
+
+    packGroupSignReq(uin: string, groupCode: string): OidbPacket {
+        return this.packOidbPacket(0XEB7, 1, new NapProtoMsg(OidbSvcTrpcTcp0XEB7).encode(
+            {
+                body: {
+                    uin: uin,
+                    groupUin: groupCode,
+                    version: "9.0.90"
                 }
-            ), false, false)
-        );
+            }
+        ), false, false);
     }
 }
