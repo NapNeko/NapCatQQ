@@ -50,9 +50,29 @@ interface ForwardAdaptMsgElement {
 }
 
 export class ForwardMsgBuilder {
-    private static build(resId: string, msg: ForwardAdaptMsg[]): ForwardMsgJson {
+    private static build(resId: string, msg: ForwardAdaptMsg[], source?: string, news?: ForwardMsgJsonMetaDetail["news"], summary?: string, prompt?: string): ForwardMsgJson {
         const id = crypto.randomUUID();
         const isGroupMsg = msg.some(m => m.isGroupMsg);
+        if (!source) {
+            source = isGroupMsg ? "群聊的聊天记录" :
+            msg.length
+                ? Array.from(new Set(msg.map(m => m.senderName)))
+                    .join('和') + '的聊天记录'
+                : '聊天记录';
+        }
+        if (!news) {
+            news = msg.length === 0 ? [{
+                text: "Nya~ This message is send from NapCat.Packet!",
+            }] : msg.map(m => ({
+                text: `${m.senderName}: ${m.msg?.map(msg => msg.preview).join('')}`,
+            }));
+        }
+        if (!summary) {
+            summary = `查看${msg.length}条转发消息`;
+        }
+        if (!prompt) {
+            prompt = "[聊天记录]";
+        }
         return {
             app: "com.tencent.multimsg",
             config: {
@@ -62,29 +82,21 @@ export class ForwardMsgBuilder {
                 type: "normal",
                 width: 300
             },
-            desc: "[聊天记录]",
+            desc: prompt,
             extra: {
                 filename: id,
                 tsum: msg.length,
             },
             meta: {
                 detail: {
-                    news: msg.length === 0 ? [{
-                        text: "Nya~ This message is send from NapCat.Packet!",
-                    }] : msg.map(m => ({
-                        text: `${m.senderName}: ${m.msg?.map(msg => msg.preview).join('')}`,
-                    })),
+                    news,
                     resid: resId,
-                    source: isGroupMsg ? "群聊的聊天记录" :
-                        msg.length
-                            ? Array.from(new Set(msg.map(m => m.senderName)))
-                                .join('和') + '的聊天记录'
-                            : '聊天记录',
-                    summary: `查看${msg.length}条转发消息`,
+                    source,
+                    summary,
                     uniseq: id,
                 }
             },
-            prompt: "[聊天记录]",
+            prompt,
             ver: "0.0.0.5",
             view: "contact",
         };
@@ -94,13 +106,13 @@ export class ForwardMsgBuilder {
         return this.build(resId, []);
     }
 
-    static fromPacketMsg(resId: string, packetMsg: PacketMsg[]): ForwardMsgJson {
+    static fromPacketMsg(resId: string, packetMsg: PacketMsg[], source?: string, news?: ForwardMsgJsonMetaDetail["news"], summary?: string, prompt?: string): ForwardMsgJson {
         return this.build(resId, packetMsg.map(msg => ({
             senderName: msg.senderName,
             isGroupMsg: msg.groupId !== undefined,
             msg: msg.msg.map(m => ({
                 preview: m.toPreview(),
             }))
-        })));
+        })), source, news, summary, prompt);
     }
 }
