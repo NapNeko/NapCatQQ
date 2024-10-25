@@ -316,7 +316,10 @@ export class NTQQGroupApi {
         return undefined;
     }
 
-    async tryGetGroupMembersV2(modeListener = false, groupQQ: string, num = 30, timeout = 500): Promise<any> {
+    async tryGetGroupMembersV2(modeListener = false, groupQQ: string, num = 30, timeout = 500): Promise<{
+        infos: Map<string, GroupMember>;
+        finish: boolean;
+    }>{
         const sceneId = this.context.session.getGroupService().createMemberListScene(groupQQ, 'groupMemberList_MainWindow_1');
         const once = this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onMemberListChange', 1, timeout, (params) => params.sceneId === sceneId)
             .catch(() => {});
@@ -332,28 +335,18 @@ export class NTQQGroupApi {
             }
         }
         this.context.session.getGroupService().destroyMemberListScene(sceneId);
-        return resMode2 || result.result;
+        return {
+            infos: resMode2?.infos || result.result.infos,
+            finish: result.result.finish,
+        };
     }
 
     async getGroupMembersV2(groupQQ: string): Promise<Map<string, GroupMember>> {
-        type Ret = {
-            infos: Map<string, GroupMember>;
-            finish: boolean;
-            hasNext: boolean;
-        }
-        let result = await this.tryGetGroupMembersV2(false, groupQQ) as unknown as Ret;
-        const retOneSize = result.infos.size;
-        if (result.infos.size === 0 && result.finish === true) {
-            result = await this.tryGetGroupMembersV2(true, groupQQ);
-            if (result.hasNext === true) {
-                result = await this.tryGetGroupMembersV2(false, groupQQ, 3000);
-            }
-            return result.infos;
-        }
-        if (result.finish === false) {
+        let result = await this.tryGetGroupMembersV2(false, groupQQ);
+        if (result.finish === false || result.infos.size === 0 && result.finish === true) {
             result = await this.tryGetGroupMembersV2(false, groupQQ, 3000);
-            if (result.finish === true && result.infos.size === retOneSize) {
-                const retListener = await this.tryGetGroupMembersV2(true, groupQQ, 3000, 5000);
+            if (result.finish === true && (result.infos.size === 30 || result.infos.size === 0)) {
+                const retListener = await this.tryGetGroupMembersV2(true, groupQQ, 3000);
                 result.infos = new Map([...retListener.infos,...result.infos]);
             }
         }
