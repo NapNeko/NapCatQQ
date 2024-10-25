@@ -154,7 +154,13 @@ export class NTQQPacketApi {
                 }
             }
         }
-        return Promise.allSettled(reqList);
+        const res = await Promise.allSettled(reqList);
+        this.logger.log(`上传资源${res.length}个， 失败${res.filter(r => r.status === 'rejected').length}个`);
+        res.forEach((result, index) => {
+            if (result.status === 'rejected') {
+                this.logger.logError(`第${index + 1}个失败：${result.reason}`);
+            }
+        });
     }
 
     async sendUploadForwardMsg(msg: PacketMsg[], groupUin: number = 0) {
