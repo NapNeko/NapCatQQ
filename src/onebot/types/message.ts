@@ -152,6 +152,10 @@ export interface OB11MessageNode {
         user_id?: number | string  // number
         nickname: string
         content: OB11MessageMixType
+        source?: string,
+        news?: { text: string }[],
+        summary?: string,
+        prompt?: string    
     };
 }
 
