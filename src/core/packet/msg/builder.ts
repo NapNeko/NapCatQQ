@@ -50,7 +50,7 @@ export class PacketMsgBuilder {
                     divSeq: node.groupId ? undefined : 4,
                     msgId: crypto.randomBytes(4).readUInt32LE(0),
                     sequence: crypto.randomBytes(4).readUInt32LE(0),
-                    timeStamp: Math.floor(Date.now() / 1000),
+                    timeStamp: +node.time.toString().substring(0, 10),
                     field7: BigInt(1),
                     field8: 0,
                     field9: 0,
