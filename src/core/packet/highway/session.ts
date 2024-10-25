@@ -105,6 +105,9 @@ export class PacketHighwaySession {
 
     async uploadVideo(peer: Peer, video: PacketMsgVideoElement): Promise<void> {
         await this.checkAvailable();
+        if (+(video.fileSize ?? 0) > 1024 * 1024 * 100) {
+            throw new Error(`[Highway] 视频文件过大: ${(+(video.fileSize ?? 0) / (1024 * 1024)).toFixed(2)} MB > 100 MB，请使用文件上传！`);
+        }
         if (peer.chatType === ChatType.KCHATTYPEGROUP) {
             await this.uploadGroupVideoReq(+peer.peerUid, video);
         } else if (peer.chatType === ChatType.KCHATTYPEC2C) {
