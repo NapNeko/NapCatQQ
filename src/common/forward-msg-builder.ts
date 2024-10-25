@@ -99,7 +99,7 @@ export class ForwardMsgBuilder {
             senderName: msg.senderName,
             isGroupMsg: msg.groupId !== undefined,
             msg: msg.msg.map(m => ({
-                preview: m.toPreview(),
+                preview: m.valid? m.toPreview() : "[该消息类型暂不支持查看]",
             }))
         })));
     }
