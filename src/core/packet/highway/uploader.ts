@@ -19,9 +19,18 @@ abstract class HighwayUploader {
         this.logger = logger;
     }
 
-    encryptTransExt(key: Uint8Array) {
+    private encryptTransExt(key: Uint8Array) {
         if (!this.trans.encrypt) return;
         this.trans.ext = tea.encrypt(Buffer.from(this.trans.ext), Buffer.from(key));
+    }
+
+    protected timeout(): Promise<void> {
+        return new Promise<void>((_, reject) => {
+            setTimeout(() => {
+                reject(new Error(`[Highway] timeout after ${this.trans.timeout}s`));
+            }, (this.trans.timeout ?? Infinity) * 1000
+            );
+        })
     }
 
     buildPicUpHead(offset: number, bodyLength: number, bodyMd5: Uint8Array): Uint8Array {
@@ -86,15 +95,18 @@ class HighwayTcpUploaderTransform extends stream.Transform {
 
 export class HighwayTcpUploader extends HighwayUploader {
     async upload(): Promise<void> {
-        const highwayTransForm = new HighwayTcpUploaderTransform(this);
-        const upload = new Promise<void>((resolve, _) => {
+        const controller = new AbortController();
+        const { signal } = controller;
+        const upload = new Promise<void>((resolve, reject) => {
+            const highwayTransForm = new HighwayTcpUploaderTransform(this);
             const socket = net.connect(this.trans.port, this.trans.server, () => {
-                this.trans.data.pipe(highwayTransForm).pipe(socket, { end: false });
+                this.trans.data.pipe(highwayTransForm).pipe(socket, {end: false});
             });
             const handleRspHeader = (header: Buffer) => {
                 const rsp = new NapProtoMsg(RespDataHighwayHead).decode(header);
                 if (rsp.errorCode !== 0) {
-                    this.logger.logWarn(`[Highway] tcpUpload failed (code: ${rsp.errorCode})`);
+                    socket.end();
+                    reject(new Error(`[Highway] tcpUpload failed (code=${rsp.errorCode})`));
                 }
                 const percent = ((Number(rsp.msgSegHead?.dataOffset) + Number(rsp.msgSegHead?.dataLength)) / Number(rsp.msgSegHead?.filesize)).toFixed(2);
                 this.logger.logDebug(`[Highway] tcpUpload ${rsp.errorCode} | ${percent} | ${Buffer.from(header).toString('hex')}`);
@@ -105,49 +117,58 @@ export class HighwayTcpUploader extends HighwayUploader {
                 }
             };
             socket.on('data', (chunk: Buffer) => {
-                try {
-                    const [head, _] = Frame.unpack(chunk);
-                    handleRspHeader(head);
-                } catch (e) {
-                    this.logger.logError(`[Highway] tcpUpload parse response error: ${e}`);
+                if (signal.aborted) {
+                    socket.end();
+                    reject(new Error('Upload aborted due to timeout'));
                 }
+                const [head, _] = Frame.unpack(chunk);
+                handleRspHeader(head);
             });
             socket.on('close', () => {
                 this.logger.logDebug('[Highway] tcpUpload socket closed.');
                 resolve();
             });
             socket.on('error', (err) => {
-                this.logger.logError('[Highway] tcpUpload socket.on error:', err);
+                socket.end();
+                reject(new Error(`[Highway] tcpUpload socket.on error: ${err}`));
             });
             this.trans.data.on('error', (err) => {
-                this.logger.logError('[Highway] tcpUpload readable error:', err);
                 socket.end();
+                reject(new Error(`[Highway] tcpUpload readable error: ${err}`));
             });
         });
-        const timeout = new Promise<void>((_, reject) => {
-            setTimeout(() => {
-                reject(new Error(`[Highway] tcpUpload timeout after ${this.trans.timeout}s`));
-            }, (this.trans.timeout ?? Infinity) * 1000
-            );
+        const timeout = this.timeout().catch((err) => {
+            controller.abort();
+            throw new Error(err.message);
         });
         await Promise.race([upload, timeout]);
     }
 }
 
-// TODO: timeout impl
 export class HighwayHttpUploader extends HighwayUploader {
     async upload(): Promise<void> {
-        let offset = 0;
-        for await (const chunk of this.trans.data) {
-            const block = chunk as Buffer;
-            try {
-                await this.uploadBlock(block, offset);
-            } catch (err) {
-                this.logger.logError(`[Highway] httpUpload Error uploading block at offset ${offset}: ${err}`);
-                throw err;
+        const controller = new AbortController();
+        const { signal } = controller;
+        const upload = (async () => {
+            let offset = 0;
+            for await (const chunk of this.trans.data) {
+                if (signal.aborted) {
+                    throw new Error('Upload aborted due to timeout');
+                }
+                const block = chunk as Buffer;
+                try {
+                    await this.uploadBlock(block, offset);
+                } catch (err) {
+                    throw new Error(`[Highway] httpUpload Error uploading block at offset ${offset}: ${err}`)
+                }
+                offset += block.length;
             }
-            offset += block.length;
-        }
+        })();
+        const timeout = this.timeout().catch((err) => {
+            controller.abort();
+            throw new Error(err.message);
+        });
+        await Promise.race([upload, timeout]);
     }
 
     private async uploadBlock(block: Buffer, offset: number): Promise<void> {
@@ -158,9 +179,7 @@ export class HighwayHttpUploader extends HighwayUploader {
         const [head, body] = Frame.unpack(resp);
         const headData = new NapProtoMsg(RespDataHighwayHead).decode(head);
         this.logger.logDebug(`[Highway] httpUploadBlock: ${headData.errorCode} | ${headData.msgSegHead?.retCode} | ${headData.bytesRspExtendInfo} | ${head.toString('hex')} | ${body.toString('hex')}`);
-        if (headData.errorCode !== 0) {
-            this.logger.logError(`[Highway] httpUploadBlock failed (code=${headData.errorCode})`);
-        }
+        if (headData.errorCode !== 0) throw new Error(`[Highway] httpUploadBlock failed (code=${headData.errorCode})`);
     }
 
     private async httpPostHighwayContent(frame: Buffer, serverURL: string): Promise<Buffer> {
@@ -176,12 +195,12 @@ export class HighwayHttpUploader extends HighwayUploader {
                     },
                 };
                 const req = http.request(serverURL, options, (res) => {
-                    let data = Buffer.alloc(0);
+                    const data: Buffer[] = [];
                     res.on('data', (chunk) => {
-                        data = Buffer.concat([data, chunk]);
+                        data.push(chunk);
                     });
                     res.on('end', () => {
-                        resolve(data);
+                        resolve(Buffer.concat(data));
                     });
                 });
                 req.write(frame);

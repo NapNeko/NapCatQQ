@@ -113,7 +113,25 @@ export const Permission = {
 
 export const FileExtra = {
     file: ProtoField(1, () => NotOnlineFile),
+    field6: ProtoField(6, () => PrivateFileExtra),
 };
+
+export const PrivateFileExtra = {
+    field2: ProtoField(2, () => PrivateFileExtraField2),
+}
+
+export const PrivateFileExtraField2 = {
+    field1: ProtoField(1, ScalarType.UINT32),
+    fileUuid: ProtoField(4, ScalarType.STRING),
+    fileName: ProtoField(5, ScalarType.STRING),
+    field6: ProtoField(6, ScalarType.UINT32),
+    field7: ProtoField(7, ScalarType.BYTES),
+    field8: ProtoField(8, ScalarType.BYTES),
+    timestamp1: ProtoField(9, ScalarType.UINT32),
+    fileHash: ProtoField(14, ScalarType.STRING),
+    selfUid: ProtoField(15, ScalarType.STRING),
+    destUid: ProtoField(16, ScalarType.STRING),
+}
 
 export const GroupFileExtra = {
     field1: ProtoField(1, ScalarType.UINT32),
@@ -132,8 +150,9 @@ export const GroupFileExtraInfo = {
     fileSize: ProtoField(3, ScalarType.UINT64),
     fileName: ProtoField(4, ScalarType.STRING),
     field5: ProtoField(5, ScalarType.UINT32),
-    field7: ProtoField(7, ScalarType.STRING),
-    fileMd5: ProtoField(8, ScalarType.STRING),
+    fileSha: ProtoField(6, ScalarType.BYTES),
+    extInfoString: ProtoField(7, ScalarType.STRING),
+    fileMd5: ProtoField(8, ScalarType.BYTES),
 };
 
 export const ImageExtraUrl = {

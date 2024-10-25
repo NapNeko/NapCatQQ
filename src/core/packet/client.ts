@@ -3,8 +3,7 @@ import { LRUCache } from "@/common/lru-cache";
 import WebSocket, { Data } from "ws";
 import crypto, { createHash } from "crypto";
 import { NapCatCore } from "@/core";
-import { PacketHexStr } from "@/core/packet/packer";
-import { sleep } from "@/common/helper";
+import { OidbPacket, PacketHexStr } from "@/core/packet/packer";
 
 export interface RecvPacket {
     type: string, // 仅recv
@@ -176,5 +175,9 @@ export class PacketClient {
                 await this.napCatCore.context.session.getMsgService().sendSsoCmdReqByContend(cmd, trace_id);
             }).then((res) => resolve(res)).catch((e: Error) => reject(e));
         });
+    }
+
+    async sendOidbPacket(pkt: OidbPacket, rsp = false): Promise<RecvPacketData> {
+        return this.sendPacket(pkt.cmd, pkt.data, rsp);
     }
 }
