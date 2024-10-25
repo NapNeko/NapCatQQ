@@ -378,8 +378,8 @@ export class NTQQFileApi {
             };
             try {
                 if (this.core.apis.PacketApi.available) {
-                    let rkey_expired_private = !this.packetRkey || this.packetRkey[0].time + Number(this.packetRkey[0].ttl) < Date.now() / 1000;
-                    let rkey_expired_group = !this.packetRkey || this.packetRkey[0].time + Number(this.packetRkey[0].ttl) < Date.now() / 1000;
+                    const rkey_expired_private = !this.packetRkey || this.packetRkey[0].time + Number(this.packetRkey[0].ttl) < Date.now() / 1000;
+                    const rkey_expired_group = !this.packetRkey || this.packetRkey[0].time + Number(this.packetRkey[0].ttl) < Date.now() / 1000;
                     if (rkey_expired_private || rkey_expired_group) {
                         this.packetRkey = await this.core.apis.PacketApi.sendRkeyPacket();
                     }

@@ -116,9 +116,17 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
 
         if (getSpecialMsgNum(payload, OB11MessageDataType.node)) {
             const packetMode = this.core.apis.PacketApi.available;
-            const returnMsgAndResId = packetMode
-                ? await this.handleForwardedNodesPacket(peer, messages as OB11MessageNode[])
-                : await this.handleForwardedNodes(peer, messages as OB11MessageNode[]);
+            let returnMsgAndResId: { message: RawMessage | null, res_id?: string } | null;
+            try {
+                returnMsgAndResId = packetMode
+                    ? await this.handleForwardedNodesPacket(peer, messages as OB11MessageNode[], payload.source, payload.news, payload.summary, payload.prompt)
+                    : await this.handleForwardedNodes(peer, messages as OB11MessageNode[]);
+            } catch (e) {
+                throw Error(packetMode ? `发送伪造合并转发消息失败: ${e}` : `发送合并转发消息失败: ${e}`);
+            }
+            if (!returnMsgAndResId) {
+                throw Error('发送合并转发消息失败：returnMsgAndResId 为空！');
+            }
             if (returnMsgAndResId.message) {
                 const msgShortId = MessageUnique.createUniqueMsgId({
                     guildId: '',
@@ -129,7 +137,6 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
             } else if (returnMsgAndResId.res_id && !returnMsgAndResId.message) {
                 throw Error(`发送转发消息（res_id：${returnMsgAndResId.res_id} 失败`);
             }
-            throw Error('发送转发消息失败');
         } else {
             // if (getSpecialMsgNum(payload, OB11MessageDataType.music)) {
             //   const music: OB11MessageCustomMusic = messages[0] as OB11MessageCustomMusic;
@@ -145,20 +152,40 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         return { message_id: returnMsg!.id! };
     }
 
-    // TODO: recursively handle forwarded nodes
-    private async handleForwardedNodesPacket(msgPeer: Peer, messageNodes: OB11MessageNode[]): Promise<{
-        message: RawMessage | null,
+    private async uploadForwardedNodesPacket(msgPeer: Peer, messageNodes: OB11MessageNode[], source?: string, news?: {
+        text: string
+    }[], summary?: string, prompt?: string, parentMeta?: {
+        user_id: string,
+        nickname: string,
+    }, dp: number = 0): Promise<{
+        finallySendElements: SendArkElement,
         res_id?: string
-    }> {
+    } | null> {
         const logger = this.core.context.logger;
         const packetMsg: PacketMsg[] = [];
         for (const node of messageNodes) {
+            if (dp >= 3) {
+                logger.logWarn('转发消息深度超过3层，将停止解析！');
+                break;
+            }
             if ((node.data.id && typeof node.data.content !== "string") || !node.data.id) {
-                const OB11Data = normalize(node.data.content);
-                const { sendElements } = await this.obContext.apis.MsgApi.createSendElements(OB11Data, msgPeer);
+                const OB11Data = normalize(node.type === OB11MessageDataType.node ? node.data.content : node);
+                let sendElements: SendMessageElement[];
+
+                if (getSpecialMsgNum({message: OB11Data}, OB11MessageDataType.node)) {
+                    const uploadReturnData = await this.uploadForwardedNodesPacket(msgPeer, OB11Data as OB11MessageNode[], node.data.source, node.data.news, node.data.summary, node.data.prompt, {
+                        user_id: node.data.user_id?.toString() ?? parentMeta?.user_id ?? this.core.selfInfo.uin,
+                        nickname: node.data.nickname ?? parentMeta?.nickname ?? "QQ用户",
+                    }, dp + 1);
+                    sendElements = uploadReturnData?.finallySendElements ? [uploadReturnData.finallySendElements] : [];
+                } else {
+                    const sendElementsCreateReturn = await this.obContext.apis.MsgApi.createSendElements(OB11Data, msgPeer);
+                    sendElements = sendElementsCreateReturn.sendElements;
+                }
+
                 const packetMsgElements: rawMsgWithSendMsg = {
-                    senderUin: node.data.user_id ?? +this.core.selfInfo.uin,
-                    senderName: node.data.nickname,
+                    senderUin: Number(node.data.user_id ?? parentMeta?.user_id) || +this.core.selfInfo.uin,
+                    senderName: node.data.nickname ?? parentMeta?.nickname ?? "QQ用户",
                     groupId: msgPeer.chatType === ChatType.KCHATTYPEGROUP ? +msgPeer.peerUid : undefined,
                     time: Date.now(),
                     msg: sendElements,
@@ -171,22 +198,37 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                 logger.logDebug(`handleForwardedNodesPacket 跳过元素 ${JSON.stringify(node)}`);
             }
         }
-        const resid = await this.core.apis.PacketApi.sendUploadForwardMsg(packetMsg, msgPeer.chatType === ChatType.KCHATTYPEGROUP ? +msgPeer.peerUid : 0);
-        const forwardJson = ForwardMsgBuilder.fromPacketMsg(resid, packetMsg);
-        const finallySendElements = {
-            elementType: ElementType.ARK,
-            elementId: "",
-            arkElement: {
-                bytesData: JSON.stringify(forwardJson),
-            },
-        } as SendArkElement;
-        let returnMsg: RawMessage | undefined;
-        try {
-            returnMsg = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(msgPeer, [finallySendElements], [], true).catch(_ => undefined);
-        } catch (e) {
-            logger.logWarn("发送伪造合并转发消息失败！", e);
+        if (packetMsg.length === 0) {
+            logger.logWarn('handleForwardedNodesPacket 元素为空！');
+            return null;
         }
-        return { message: returnMsg ?? null, res_id: resid };
+        const resid = await this.core.apis.PacketApi.sendUploadForwardMsg(packetMsg, msgPeer.chatType === ChatType.KCHATTYPEGROUP ? +msgPeer.peerUid : 0);
+        const forwardJson = ForwardMsgBuilder.fromPacketMsg(resid, packetMsg, source, news, summary, prompt);
+        return {
+            finallySendElements: {
+                elementType: ElementType.ARK,
+                elementId: "",
+                arkElement: {
+                    bytesData: JSON.stringify(forwardJson),
+                },
+            } as SendArkElement,
+            res_id: resid,
+        };
+    }
+
+    private async handleForwardedNodesPacket(msgPeer: Peer, messageNodes: OB11MessageNode[], source?: string, news?: {
+        text: string
+    }[], summary?: string, prompt?: string): Promise<{
+        message: RawMessage | null,
+        res_id?: string
+    }> {
+        let returnMsg: RawMessage | undefined, res_id: string | undefined;
+        const uploadReturnData = await this.uploadForwardedNodesPacket(msgPeer, messageNodes, source, news, summary, prompt);
+        res_id = uploadReturnData?.res_id;
+        const finallySendElements = uploadReturnData?.finallySendElements;
+        if (!finallySendElements) throw Error('转发消息失败，生成节点为空');
+        returnMsg = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(msgPeer, [finallySendElements], [], true).catch(_ => undefined);
+        return {message: returnMsg ?? null, res_id};
     }
 
     private async handleForwardedNodes(destPeer: Peer, messageNodes: OB11MessageNode[]): Promise<{
