@@ -167,7 +167,7 @@ export class PacketHighwaySession {
             });
             await this.packetHighwayClient.upload(
                 1004,
-                fs.createReadStream(img.path, {highWaterMark: BlockSize}),
+                fs.createReadStream(img.path, { highWaterMark: BlockSize }),
                 img.size,
                 md5,
                 extend
@@ -207,7 +207,7 @@ export class PacketHighwaySession {
             });
             await this.packetHighwayClient.upload(
                 1003,
-                fs.createReadStream(img.path, {highWaterMark: BlockSize}),
+                fs.createReadStream(img.path, { highWaterMark: BlockSize }),
                 img.size,
                 md5,
                 extend
@@ -244,10 +244,10 @@ export class PacketHighwaySession {
                 hash: {
                     fileSha1: await calculateSha1StreamBytes(video.filePath!)
                 }
-            })
+            });
             await this.packetHighwayClient.upload(
                 1005,
-                fs.createReadStream(video.filePath!, {highWaterMark: BlockSize}),
+                fs.createReadStream(video.filePath!, { highWaterMark: BlockSize }),
                 +video.fileSize!,
                 md5,
                 extend
@@ -275,7 +275,7 @@ export class PacketHighwaySession {
             });
             await this.packetHighwayClient.upload(
                 1006,
-                fs.createReadStream(video.thumbPath!, {highWaterMark: BlockSize}),
+                fs.createReadStream(video.thumbPath!, { highWaterMark: BlockSize }),
                 +video.thumbSize!,
                 md5,
                 extend
@@ -312,10 +312,10 @@ export class PacketHighwaySession {
                 hash: {
                     fileSha1: await calculateSha1StreamBytes(video.filePath!)
                 }
-            })
+            });
             await this.packetHighwayClient.upload(
                 1001,
-                fs.createReadStream(video.filePath!, {highWaterMark: BlockSize}),
+                fs.createReadStream(video.filePath!, { highWaterMark: BlockSize }),
                 +video.fileSize!,
                 md5,
                 extend
@@ -343,7 +343,7 @@ export class PacketHighwaySession {
             });
             await this.packetHighwayClient.upload(
                 1002,
-                fs.createReadStream(video.thumbPath!, {highWaterMark: BlockSize}),
+                fs.createReadStream(video.thumbPath!, { highWaterMark: BlockSize }),
                 +video.thumbSize!,
                 md5,
                 extend
@@ -379,10 +379,10 @@ export class PacketHighwaySession {
                 hash: {
                     fileSha1: [sha1]
                 }
-            })
+            });
             await this.packetHighwayClient.upload(
                 1008,
-                fs.createReadStream(ptt.filePath, {highWaterMark: BlockSize}),
+                fs.createReadStream(ptt.filePath, { highWaterMark: BlockSize }),
                 ptt.fileSize,
                 md5,
                 extend
@@ -418,10 +418,10 @@ export class PacketHighwaySession {
                 hash: {
                     fileSha1: [sha1]
                 }
-            })
+            });
             await this.packetHighwayClient.upload(
                 1007,
-                fs.createReadStream(ptt.filePath, {highWaterMark: BlockSize}),
+                fs.createReadStream(ptt.filePath, { highWaterMark: BlockSize }),
                 ptt.fileSize,
                 md5,
                 extend
@@ -484,10 +484,10 @@ export class PacketHighwaySession {
                     }
                 },
                 unknown200: 0,
-            })
+            });
             await this.packetHighwayClient.upload(
                 71,
-                fs.createReadStream(file.filePath, {highWaterMark: BlockSize}),
+                fs.createReadStream(file.filePath, { highWaterMark: BlockSize }),
                 file.fileSize,
                 file.fileMd5,
                 ext
@@ -549,10 +549,10 @@ export class PacketHighwaySession {
                 },
                 unknown200: 1,
                 unknown3: 0
-            })
+            });
             await this.packetHighwayClient.upload(
                 95,
-                fs.createReadStream(file.filePath, {highWaterMark: BlockSize}),
+                fs.createReadStream(file.filePath, { highWaterMark: BlockSize }),
                 file.fileSize,
                 file.fileMd5,
                 ext

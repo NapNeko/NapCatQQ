@@ -118,7 +118,7 @@ export const FileExtra = {
 
 export const PrivateFileExtra = {
     field2: ProtoField(2, () => PrivateFileExtraField2),
-}
+};
 
 export const PrivateFileExtraField2 = {
     field1: ProtoField(1, ScalarType.UINT32),
@@ -131,7 +131,7 @@ export const PrivateFileExtraField2 = {
     fileHash: ProtoField(14, ScalarType.STRING),
     selfUid: ProtoField(15, ScalarType.STRING),
     destUid: ProtoField(16, ScalarType.STRING),
-}
+};
 
 export const GroupFileExtra = {
     field1: ProtoField(1, ScalarType.UINT32),

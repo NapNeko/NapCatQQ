@@ -55,10 +55,10 @@ export class ForwardMsgBuilder {
         const isGroupMsg = msg.some(m => m.isGroupMsg);
         if (!source) {
             source = isGroupMsg ? "群聊的聊天记录" :
-            msg.length
-                ? Array.from(new Set(msg.map(m => m.senderName)))
-                    .join('和') + '的聊天记录'
-                : '聊天记录';
+                msg.length
+                    ? Array.from(new Set(msg.map(m => m.senderName)))
+                        .join('和') + '的聊天记录'
+                    : '聊天记录';
         }
         if (!news) {
             news = msg.length === 0 ? [{

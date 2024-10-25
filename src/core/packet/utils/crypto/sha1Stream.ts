@@ -73,7 +73,7 @@ export class Sha1Stream {
 
         this._count[1] = (this._count[1] + (dataLen >>> 29)) >>> 0;
 
-        let partLen = (this.Sha1BlockSize - index) >>> 0;
+        const partLen = (this.Sha1BlockSize - index) >>> 0;
         let i = 0;
 
         if (dataLen >= partLen) {
@@ -100,11 +100,11 @@ export class Sha1Stream {
 
     public final(): Buffer {
         const digest = Buffer.allocUnsafe(this.Sha1DigestSize);
-        const bits = Buffer.allocUnsafe(8)
+        const bits = Buffer.allocUnsafe(8);
         bits.writeUInt32BE(this._count[1], 0);
         bits.writeUInt32BE(this._count[0], 4);
 
-        let index = ((this._count[0] >>> 3) & 0x3F) >>> 0;
+        const index = ((this._count[0] >>> 3) & 0x3F) >>> 0;
         const padLen = ((index < 56) ? (56 - index) : (120 - index)) >>> 0;
         this.update(this._padding, padLen);
         this.update(bits);

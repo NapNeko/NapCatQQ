@@ -89,11 +89,11 @@ export class PacketMsgAtElement extends PacketMsgTextElement {
             text: {
                 str: this.text,
                 pbReserve: new NapProtoMsg(MentionExtra).encode({
-                        type: this.atAll ? 1 : 2,
-                        uin: 0,
-                        field5: 0,
-                        uid: this.targetUid,
-                    }
+                    type: this.atAll ? 1 : 2,
+                    uin: 0,
+                    field5: 0,
+                    uid: this.targetUid,
+                }
                 )
             }
         }];
@@ -308,7 +308,7 @@ export class PacketMsgVideoElement extends IPacketMsgElement<SendVideoElement> {
         this.filePath = element.videoElement.filePath;
         this.thumbSize = element.videoElement.thumbSize;
         this.thumbPath = element.videoElement.thumbPath?.get(0);
-        this.fileMd5 = element.videoElement.videoMd5
+        this.fileMd5 = element.videoElement.videoMd5;
         this.thumbMd5 = element.videoElement.thumbMd5;
         this.thumbWidth = element.videoElement.thumbWidth;
         this.thumbHeight = element.videoElement.thumbHeight;
@@ -355,7 +355,7 @@ export class PacketMsgPttElement extends IPacketMsgElement<SendPttElement> {
     }
 
     buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
-        return []
+        return [];
         // if (!this.msgInfo) return [];
         // return [{
         //     commonElem: {
@@ -382,7 +382,7 @@ export class PacketMsgFileElement extends IPacketMsgElement<SendFileElement> {
     isGroupFile?: boolean;
     _private_send_uid?: string;
     _private_recv_uid?: string;
-    _e37_800_rsp?: NapProtoEncodeStructType<typeof OidbSvcTrpcTcp0XE37_800Response>
+    _e37_800_rsp?: NapProtoEncodeStructType<typeof OidbSvcTrpcTcp0XE37_800Response>;
 
     constructor(element: SendFileElement) {
         super(element);
@@ -423,7 +423,7 @@ export class PacketMsgFileElement extends IPacketMsgElement<SendFileElement> {
                     destUid: this._private_recv_uid,
                 }
             }
-        })
+        });
     }
 
     buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
@@ -443,7 +443,7 @@ export class PacketMsgFileElement extends IPacketMsgElement<SendFileElement> {
                     fileMd5: this.fileMd5,
                 }
             }
-        })
+        });
         lb.writeUInt16BE(transElemVal.length);
         return [{
             transElem: {

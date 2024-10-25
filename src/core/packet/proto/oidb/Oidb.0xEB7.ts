@@ -9,4 +9,4 @@ export const OidbSvcTrpcTcp0XEB7_Body = {
 
 export const OidbSvcTrpcTcp0XEB7 = {
     body: ProtoField(2, () => OidbSvcTrpcTcp0XEB7_Body),
-}
+};

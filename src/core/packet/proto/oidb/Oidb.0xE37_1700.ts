@@ -8,7 +8,7 @@ export const OidbSvcTrpcTcp0XE37_1700 = {
     businessId: ProtoField(101, ScalarType.INT32, true),
     clientType: ProtoField(102, ScalarType.INT32, true),
     flagSupportMediaPlatform: ProtoField(200, ScalarType.INT32, true),
-}
+};
 
 export const ApplyUploadReqV3 = {
     senderUid: ProtoField(10, ScalarType.STRING, true),
@@ -20,4 +20,4 @@ export const ApplyUploadReqV3 = {
     localPath: ProtoField(70, ScalarType.STRING, true),
     md5CheckSum: ProtoField(110, ScalarType.BYTES, true),
     sha3CheckSum: ProtoField(120, ScalarType.BYTES, true),
-}
+};
