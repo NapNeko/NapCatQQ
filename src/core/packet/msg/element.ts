@@ -36,6 +36,10 @@ export abstract class IPacketMsgElement<T extends PacketSendMsgElement> {
     protected constructor(rawElement: T) {
     }
 
+    get valid(): boolean {
+        return true;
+    }
+
     buildContent(): Uint8Array | undefined {
         return undefined;
     }
@@ -265,6 +269,10 @@ export class PacketMsgPicElement extends IPacketMsgElement<SendPicElement> {
         this.picType = element.picElement.picType;
     }
 
+    get valid(): boolean {
+        return !!this.msgInfo;
+    }
+
     buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
         if (!this.msgInfo) return [];
         return [{
@@ -306,6 +314,10 @@ export class PacketMsgVideoElement extends IPacketMsgElement<SendVideoElement> {
         this.thumbHeight = element.videoElement.thumbHeight;
     }
 
+    get valid(): boolean {
+        return !!this.msgInfo;
+    }
+
     buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
         if (!this.msgInfo) return [];
         return [{
@@ -338,15 +350,20 @@ export class PacketMsgPttElement extends IPacketMsgElement<SendPttElement> {
         this.fileDuration = Math.round(element.pttElement.duration); // TODO: cc
     }
 
+    get valid(): boolean {
+        return !!this.msgInfo;
+    }
+
     buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
-        if (!this.msgInfo) return [];
-        return [{
-            commonElem: {
-                serviceType: 48,
-                pbElem: new NapProtoMsg(MsgInfo).encode(this.msgInfo),
-                businessType: 22,
-            }
-        }];
+        return []
+        // if (!this.msgInfo) return [];
+        // return [{
+        //     commonElem: {
+        //         serviceType: 48,
+        //         pbElem: new NapProtoMsg(MsgInfo).encode(this.msgInfo),
+        //         businessType: 22,
+        //     }
+        // }];
     }
 
     toPreview(): string {
@@ -372,6 +389,10 @@ export class PacketMsgFileElement extends IPacketMsgElement<SendFileElement> {
         this.fileName = element.fileElement.fileName;
         this.filePath = element.fileElement.filePath;
         this.fileSize = +element.fileElement.fileSize;
+    }
+
+    get valid(): boolean {
+        return this.isGroupFile || Boolean(this._e37_800_rsp);
     }
 
     buildContent(): Uint8Array | undefined {
