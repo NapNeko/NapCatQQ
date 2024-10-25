@@ -157,7 +157,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                 const OB11Data = normalize(node.data.content);
                 const { sendElements } = await this.obContext.apis.MsgApi.createSendElements(OB11Data, msgPeer);
                 const packetMsgElements: rawMsgWithSendMsg = {
-                    senderUin: node.data.user_id ?? +this.core.selfInfo.uin,
+                    senderUin: Number(node.data.user_id) ?? +this.core.selfInfo.uin,
                     senderName: node.data.nickname,
                     groupId: msgPeer.chatType === ChatType.KCHATTYPEGROUP ? +msgPeer.peerUid : undefined,
                     time: Date.now(),
