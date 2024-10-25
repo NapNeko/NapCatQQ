@@ -187,7 +187,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                     senderUin: Number(node.data.user_id ?? parentMeta?.user_id) || +this.core.selfInfo.uin,
                     senderName: node.data.nickname ?? parentMeta?.nickname ?? "QQ用户",
                     groupId: msgPeer.chatType === ChatType.KCHATTYPEGROUP ? +msgPeer.peerUid : undefined,
-                    time: Date.now(),
+                    time: Number(node.data.time) || Date.now(),
                     msg: sendElements,
                 };
                 logger.logDebug(`handleForwardedNodesPacket 开始转换 ${JSON.stringify(packetMsgElements)}`);
