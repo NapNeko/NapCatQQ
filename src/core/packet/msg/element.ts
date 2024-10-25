@@ -351,7 +351,7 @@ export class PacketMsgPttElement extends IPacketMsgElement<SendPttElement> {
     }
 
     get valid(): boolean {
-        return !!this.msgInfo;
+        return false;
     }
 
     buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
