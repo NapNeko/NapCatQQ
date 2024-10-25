@@ -30,7 +30,7 @@ export const OidbSvcTrpcTcp0XE37_1200ResponseBody = {
     field10: ProtoField(10, ScalarType.UINT32, true),
     state: ProtoField(20, ScalarType.STRING, true),
     result: ProtoField(30, () => OidbSvcTrpcTcp0XE37_1200Result, true),
-    metadata: ProtoField(40, () => OidbSvcTrpcTcp0XE37_1200Metadata, true),
+    metadata: ProtoField(40, () => OidbSvcTrpcTcp0XE37_800_1200Metadata, true),
 };
 
 export const OidbSvcTrpcTcp0XE37_1200Result = {
@@ -43,7 +43,7 @@ export const OidbSvcTrpcTcp0XE37_1200Result = {
     extra: ProtoField(120, ScalarType.BYTES, true),
 };
 
-export const OidbSvcTrpcTcp0XE37_1200Metadata = {
+export const OidbSvcTrpcTcp0XE37_800_1200Metadata = {
     uin: ProtoField(1, ScalarType.UINT32, true),
     field2: ProtoField(2, ScalarType.UINT32, true),
     field3: ProtoField(3, ScalarType.UINT32, true),
