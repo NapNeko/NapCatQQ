@@ -145,9 +145,8 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         return { message_id: returnMsg!.id! };
     }
 
-    // TODO: recursively handle forwarded nodes
-    private async handleForwardedNodesPacket(msgPeer: Peer, messageNodes: OB11MessageNode[], source?: string, news?: { text: string }[], summary?: string, prompt?: string): Promise<{
-        message: RawMessage | null,
+    private async uploadForwardedNodesPacket(msgPeer: Peer, messageNodes: OB11MessageNode[], source?: string, news?: { text: string }[], summary?: string, prompt?: string): Promise<{
+        finallySendElements: SendArkElement,
         res_id?: string
     }> {
         const logger = this.core.context.logger;
@@ -155,7 +154,17 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         for (const node of messageNodes) {
             if ((node.data.id && typeof node.data.content !== "string") || !node.data.id) {
                 const OB11Data = normalize(node.data.content);
-                const { sendElements } = await this.obContext.apis.MsgApi.createSendElements(OB11Data, msgPeer);
+                let sendElements: SendMessageElement[];
+
+                if (getSpecialMsgNum({ message: OB11Data }, OB11MessageDataType.node)) {
+                    const uploadReturnData = await this.uploadForwardedNodesPacket(msgPeer, OB11Data as OB11MessageNode[], node.data.source, node.data.news, node.data.summary, node.data.prompt);
+                    sendElements = [uploadReturnData.finallySendElements];
+                }
+                else {
+                    const sendElementsCreateReturn = await this.obContext.apis.MsgApi.createSendElements(OB11Data, msgPeer);
+                    sendElements = sendElementsCreateReturn.sendElements;
+                }
+
                 const packetMsgElements: rawMsgWithSendMsg = {
                     senderUin: Number(node.data.user_id) ?? +this.core.selfInfo.uin,
                     senderName: node.data.nickname,
@@ -173,20 +182,33 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         }
         const resid = await this.core.apis.PacketApi.sendUploadForwardMsg(packetMsg, msgPeer.chatType === ChatType.KCHATTYPEGROUP ? +msgPeer.peerUid : 0);
         const forwardJson = ForwardMsgBuilder.fromPacketMsg(resid, packetMsg, source, news, summary, prompt);
-        const finallySendElements = {
-            elementType: ElementType.ARK,
-            elementId: "",
-            arkElement: {
-                bytesData: JSON.stringify(forwardJson),
-            },
-        } as SendArkElement;
-        let returnMsg: RawMessage | undefined;
+        return {
+            finallySendElements: {
+                elementType: ElementType.ARK,
+                elementId: "",
+                arkElement: {
+                    bytesData: JSON.stringify(forwardJson),
+                },
+            } as SendArkElement,
+            res_id: resid,
+        };
+    }
+
+    private async handleForwardedNodesPacket(msgPeer: Peer, messageNodes: OB11MessageNode[], source?: string, news?: { text: string }[], summary?: string, prompt?: string): Promise<{
+        message: RawMessage | null,
+        res_id?: string
+    }> {
+        const logger = this.core.context.logger;
+        let returnMsg: RawMessage | undefined, res_id: string | undefined;
         try {
+            const uploadReturnData = await this.uploadForwardedNodesPacket(msgPeer, messageNodes, source, news, summary, prompt);
+            res_id = uploadReturnData.res_id;
+            const finallySendElements = uploadReturnData.finallySendElements;
             returnMsg = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(msgPeer, [finallySendElements], [], true).catch(_ => undefined);
         } catch (e) {
             logger.logWarn("发送伪造合并转发消息失败！", e);
         }
-        return { message: returnMsg ?? null, res_id: resid };
+        return { message: returnMsg ?? null, res_id };
     }
 
     private async handleForwardedNodes(destPeer: Peer, messageNodes: OB11MessageNode[]): Promise<{
