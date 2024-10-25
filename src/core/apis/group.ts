@@ -341,12 +341,12 @@ export class NTQQGroupApi {
         };
     }
 
-    async getGroupMembersV2(groupQQ: string): Promise<Map<string, GroupMember>> {
+    async getGroupMembersV2(groupQQ: string, num = 3000): Promise<Map<string, GroupMember>> {
         let result = await this.tryGetGroupMembersV2(false, groupQQ);
-        if (result.finish === false || result.infos.size === 0 && result.finish === true) {
-            result = await this.tryGetGroupMembersV2(false, groupQQ, 3000);
+        if (result.finish === false || (result.infos.size === 0 && result.finish === true)) {
+            result = await this.tryGetGroupMembersV2(false, groupQQ, num);
             if (result.finish === true && (result.infos.size === 30 || result.infos.size === 0)) {
-                const retListener = await this.tryGetGroupMembersV2(true, groupQQ, 3000);
+                const retListener = await this.tryGetGroupMembersV2(true, groupQQ, num);
                 result.infos = new Map([...retListener.infos,...result.infos]);
             }
         }
