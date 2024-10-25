@@ -221,6 +221,10 @@ export interface OB11PostSendMsg {
     message: OB11MessageMixType;
     messages?: OB11MessageMixType;  // 兼容 go-cqhttp
     auto_escape?: boolean | string
+    source?: string, 
+    news?: { text: string }[], 
+    summary?: string, 
+    prompt?: string
 }
 export interface OB11PostContext {
     message_type?: 'private' | 'group'
