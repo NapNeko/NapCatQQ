@@ -1,6 +1,6 @@
 import { ScalarType } from "@protobuf-ts/runtime";
 import { ProtoField } from "../NapProto";
-import {OidbSvcTrpcTcp0XE37_800_1200Metadata} from "@/core/packet/proto/oidb/Oidb.0xE37_1200";
+import { OidbSvcTrpcTcp0XE37_800_1200Metadata } from "@/core/packet/proto/oidb/Oidb.0xE37_1200";
 
 export const OidbSvcTrpcTcp0XE37_800 = {
     subCommand: ProtoField(1, ScalarType.UINT32),
@@ -59,4 +59,4 @@ export const OidbSvcTrpcTcp0XE37_800Response = {
 export const OidbSvcTrpcTcp0XE37_800ResponseBody = {
     field10: ProtoField(10, ScalarType.UINT32, true),
     field30: ProtoField(30, () => OidbSvcTrpcTcp0XE37_800_1200Metadata, true),
-}
+};

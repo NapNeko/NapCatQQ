@@ -30,7 +30,7 @@ abstract class HighwayUploader {
                 reject(new Error(`[Highway] timeout after ${this.trans.timeout}s`));
             }, (this.trans.timeout ?? Infinity) * 1000
             );
-        })
+        });
     }
 
     buildPicUpHead(offset: number, bodyLength: number, bodyMd5: Uint8Array): Uint8Array {
@@ -100,7 +100,7 @@ export class HighwayTcpUploader extends HighwayUploader {
         const upload = new Promise<void>((resolve, reject) => {
             const highwayTransForm = new HighwayTcpUploaderTransform(this);
             const socket = net.connect(this.trans.port, this.trans.server, () => {
-                this.trans.data.pipe(highwayTransForm).pipe(socket, {end: false});
+                this.trans.data.pipe(highwayTransForm).pipe(socket, { end: false });
             });
             const handleRspHeader = (header: Buffer) => {
                 const rsp = new NapProtoMsg(RespDataHighwayHead).decode(header);
@@ -159,7 +159,7 @@ export class HighwayHttpUploader extends HighwayUploader {
                 try {
                     await this.uploadBlock(block, offset);
                 } catch (err) {
-                    throw new Error(`[Highway] httpUpload Error uploading block at offset ${offset}: ${err}`)
+                    throw new Error(`[Highway] httpUpload Error uploading block at offset ${offset}: ${err}`);
                 }
                 offset += block.length;
             }

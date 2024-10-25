@@ -61,7 +61,7 @@ export class PacketPacker {
         return {
             cmd: `OidbSvcTrpcTcp.0x${cmd.toString(16).toUpperCase()}_${subCmd}`,
             data: this.packetPacket(data)
-        }
+        };
     }
 
     packPokePacket(peer: number, group?: number): OidbPacket {
@@ -114,7 +114,7 @@ export class PacketPacker {
     packStatusPacket(uin: number): OidbPacket {
         const oidb_0xfe1_2 = new NapProtoMsg(OidbSvcTrpcTcp0XFE1_2).encode({
             uin: uin,
-            key: [{key: 27372}]
+            key: [{ key: 27372 }]
         });
         return this.packOidbPacket(0xfe1, 2, oidb_0xfe1_2);
     }
@@ -240,68 +240,68 @@ export class PacketPacker {
 
     async packUploadC2CImgReq(peerUin: string, img: PacketMsgPicElement): Promise<OidbPacket> {
         const req = new NapProtoMsg(NTV2RichMediaReq).encode({
-                reqHead: {
-                    common: {
-                        requestId: 1,
-                        command: 100
+            reqHead: {
+                common: {
+                    requestId: 1,
+                    command: 100
+                },
+                scene: {
+                    requestType: 2,
+                    businessType: 1,
+                    sceneType: 1,
+                    c2C: {
+                        accountType: 2,
+                        targetUid: peerUin
                     },
-                    scene: {
-                        requestType: 2,
-                        businessType: 1,
-                        sceneType: 1,
-                        c2C: {
-                            accountType: 2,
-                            targetUid: peerUin
+                },
+                client: {
+                    agentType: 2,
+                }
+            },
+            upload: {
+                uploadInfo: [
+                    {
+                        fileInfo: {
+                            fileSize: +img.size,
+                            fileHash: img.md5,
+                            fileSha1: img.sha1!,
+                            fileName: img.name,
+                            type: {
+                                type: 1,
+                                picFormat: img.picType,  //TODO: extend NapCat imgType /cc @MliKiowa
+                                videoFormat: 0,
+                                voiceFormat: 0,
+                            },
+                            width: img.width,
+                            height: img.height,
+                            time: 0,
+                            original: 1
                         },
+                        subFileType: 0,
+                    }
+                ],
+                tryFastUploadCompleted: true,
+                srvSendMsg: false,
+                clientRandomId: crypto.randomBytes(8).readBigUInt64BE() & BigInt('0x7FFFFFFFFFFFFFFF'),
+                compatQMsgSceneType: 1,
+                extBizInfo: {
+                    pic: {
+                        bytesPbReserveTroop: Buffer.from("0800180020004200500062009201009a0100a2010c080012001800200028003a00", 'hex'),
+                        textSummary: "Nya~",  // TODO:
                     },
-                    client: {
-                        agentType: 2,
+                    video: {
+                        bytesPbReserve: Buffer.alloc(0),
+                    },
+                    ptt: {
+                        bytesPbReserve: Buffer.alloc(0),
+                        bytesReserve: Buffer.alloc(0),
+                        bytesGeneralFlags: Buffer.alloc(0),
                     }
                 },
-                upload: {
-                    uploadInfo: [
-                        {
-                            fileInfo: {
-                                fileSize: +img.size,
-                                fileHash: img.md5,
-                                fileSha1: img.sha1!,
-                                fileName: img.name,
-                                type: {
-                                    type: 1,
-                                    picFormat: img.picType,  //TODO: extend NapCat imgType /cc @MliKiowa
-                                    videoFormat: 0,
-                                    voiceFormat: 0,
-                                },
-                                width: img.width,
-                                height: img.height,
-                                time: 0,
-                                original: 1
-                            },
-                            subFileType: 0,
-                        }
-                    ],
-                    tryFastUploadCompleted: true,
-                    srvSendMsg: false,
-                    clientRandomId: crypto.randomBytes(8).readBigUInt64BE() & BigInt('0x7FFFFFFFFFFFFFFF'),
-                    compatQMsgSceneType: 1,
-                    extBizInfo: {
-                        pic: {
-                            bytesPbReserveTroop: Buffer.from("0800180020004200500062009201009a0100a2010c080012001800200028003a00", 'hex'),
-                            textSummary: "Nya~",  // TODO:
-                        },
-                        video: {
-                            bytesPbReserve: Buffer.alloc(0),
-                        },
-                        ptt: {
-                            bytesPbReserve: Buffer.alloc(0),
-                            bytesReserve: Buffer.alloc(0),
-                            bytesGeneralFlags: Buffer.alloc(0),
-                        }
-                    },
-                    clientSeq: 0,
-                    noNeedCompatMsg: false,
-                }
+                clientSeq: 0,
+                noNeedCompatMsg: false,
             }
+        }
         );
         return this.packOidbPacket(0x11c5, 100, req, true, false);
     }
@@ -538,7 +538,7 @@ export class PacketPacker {
                 clientSeq: 0,
                 noNeedCompatMsg: false
             }
-        })
+        });
         return this.packOidbPacket(0x126E, 100, req, true, false);
     }
 
@@ -600,7 +600,7 @@ export class PacketPacker {
                 clientSeq: 0,
                 noNeedCompatMsg: false
             }
-        })
+        });
         return this.packOidbPacket(0x126D, 100, req, true, false);
     }
 
@@ -642,7 +642,7 @@ export class PacketPacker {
             businessId: 3,
             clientType: 1,
             flagSupportMediaPlatform: 1
-        })
+        });
         return this.packOidbPacket(0xE37, 1700, body, false, false);
     }
 
@@ -664,13 +664,13 @@ export class PacketPacker {
 
     packGroupFileDownloadReq(groupUin: number, fileUUID: string): OidbPacket {
         return this.packOidbPacket(0x6D6, 2, new NapProtoMsg(OidbSvcTrpcTcp0x6D6).encode({
-                download: {
-                    groupUin: groupUin,
-                    appId: 7,
-                    busId: 102,
-                    fileId: fileUUID
-                }
-            }), true, false
+            download: {
+                groupUin: groupUin,
+                appId: 7,
+                busId: 102,
+                fileId: fileUUID
+            }
+        }), true, false
         );
     }
 

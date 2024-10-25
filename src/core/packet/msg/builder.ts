@@ -15,9 +15,9 @@ export class PacketMsgBuilder {
 
     protected static failBackText = new PacketMsgTextElement(
         {
-            textElement: {content: "[该消息类型暂不支持查看]"}!
+            textElement: { content: "[该消息类型暂不支持查看]" }!
         } as SendTextElement
-    )
+    );
 
     buildFakeMsg(selfUid: string, element: PacketMsg[]): NapProtoEncodeStructType<typeof PushMsgBody>[] {
         return element.map((node): NapProtoEncodeStructType<typeof PushMsgBody> => {
