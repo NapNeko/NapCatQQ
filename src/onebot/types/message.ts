@@ -155,7 +155,8 @@ export interface OB11MessageNode {
         source?: string,
         news?: { text: string }[],
         summary?: string,
-        prompt?: string    
+        prompt?: string
+        time?: string
     };
 }
 
@@ -229,6 +230,7 @@ export interface OB11PostSendMsg {
     news?: { text: string }[],
     summary?: string,
     prompt?: string
+    time?: string
 }
 export interface OB11PostContext {
     message_type?: 'private' | 'group'
