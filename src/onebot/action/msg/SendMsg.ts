@@ -168,7 +168,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                 logger.logWarn('转发消息深度超过3层，将停止解析！');
                 break;
             }
-            if ((node.data.id && typeof node.data.content !== "string") || !node.data.id) {
+            if (!node.data.id) {
                 const OB11Data = normalize(node.type === OB11MessageDataType.node ? node.data.content : node);
                 let sendElements: SendMessageElement[];
 
@@ -190,9 +190,21 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                     time: Number(node.data.time) || Date.now(),
                     msg: sendElements,
                 };
-                logger.logDebug(`handleForwardedNodesPacket 开始转换 ${JSON.stringify(packetMsgElements)}`);
+                logger.logDebug(`handleForwardedNodesPacket[SendRaw] 开始转换 ${JSON.stringify(packetMsgElements)}`);
                 const transformedMsg = this.core.apis.PacketApi.packetSession?.packer.packetConverter.rawMsgWithSendMsgToPacketMsg(packetMsgElements);
-                logger.logDebug(`handleForwardedNodesPacket 转换为 ${JSON.stringify(transformedMsg)}`);
+                logger.logDebug(`handleForwardedNodesPacket[SendRaw] 转换为 ${JSON.stringify(transformedMsg)}`);
+                packetMsg.push(transformedMsg!);
+            } else if (node.data.id) {
+                const id = node.data.id;
+                const nodeMsg = MessageUnique.getMsgIdAndPeerByShortId(+id) || MessageUnique.getPeerByMsgId(id);
+                if (!nodeMsg) {
+                    logger.logError.bind(this.core.context.logger)('转发消息失败，未找到消息', id);
+                    continue;
+                }
+                const msg = (await this.core.apis.MsgApi.getMsgsByMsgId(nodeMsg.Peer, [nodeMsg.MsgId])).msgList[0];
+                logger.logDebug(`handleForwardedNodesPacket[PureRaw] 开始转换 ${JSON.stringify(msg)}`);
+                const transformedMsg = this.core.apis.PacketApi.packetSession?.packer.packetConverter.rawMsgToPacketMsg(msg);
+                logger.logDebug(`handleForwardedNodesPacket[PureRaw] 转换为 ${JSON.stringify(transformedMsg)}`);
                 packetMsg.push(transformedMsg!);
             } else {
                 logger.logDebug(`handleForwardedNodesPacket 跳过元素 ${JSON.stringify(node)}`);
@@ -262,6 +274,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                             logger.logError.bind(this.core.context.logger)('子消息中包含非node消息 跳过不合法部分');
                             continue;
                         }
+                        // @ts-ignore
                         const nodeMsg = await this.handleForwardedNodes(selfPeer, OB11Data.filter(e => e.type === OB11MessageDataType.node));
                         if (nodeMsg) {
                             nodeMsgIds.push(nodeMsg.message!.msgId);
