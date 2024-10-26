@@ -71,7 +71,6 @@ import { FetchUserProfileLike } from './extends/FetchUserProfileLike';
 import { NapCatCore } from '@/core';
 import { NapCatOneBot11Adapter } from '@/onebot';
 import GetGuildProfile from './guild/GetGuildProfile';
-import SetModelShow from './go-cqhttp/SetModelShow';
 import { SetInputStatus } from './extends/SetInputStatus';
 import { GetCSRF } from './system/GetCSRF';
 import { DelGroupNotice } from './group/DelGroupNotice';
@@ -94,6 +93,10 @@ import { GetPacketStatus } from "@/onebot/action/packet/GetPacketStatus";
 import { FriendPoke } from "@/onebot/action/user/FriendPoke";
 import { GetCredentials } from './system/GetCredentials';
 import { SetGroupSign } from './extends/SetGroupSign';
+import { GoCQHTTPGetGroupAtAllRemain } from './go-cqhttp/GetGroupAtAllRemain';
+import { GoCQHTTPCheckUrlSafely } from './go-cqhttp/GoCQHTTPCheckUrlSafely';
+import { GoCQHTTPGetModelShow } from './go-cqhttp/GoCQHTTPGetModelShow';
+import { GoCQHTTPSetModelShow } from './go-cqhttp/GoCQHTTPSetModelShow';
 
 
 export type ActionMap = Map<string, BaseAction<any, any>>;
@@ -151,6 +154,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new GetRobotUinRange(obContext, core),
         new GetFriendWithCategory(obContext, core),
         //以下为go-cqhttp api
+        new GoCQHTTPCheckUrlSafely(obContext, core),
         new GetOnlineClient(obContext, core),
         new OCRImage(obContext, core),
         new IOCRImage(obContext, core),
@@ -158,6 +162,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new SendGroupNotice(obContext, core),
         new GetGroupNotice(obContext, core),
         new GetGroupEssence(obContext, core),
+        new GoCQHTTPGetGroupAtAllRemain(obContext, core),
         new GoCQHTTPSendForwardMsg(obContext, core),
         new GoCQHTTPSendGroupForwardMsg(obContext, core),
         new GoCQHTTPSendPrivateForwardMsg(obContext, core),
@@ -180,7 +185,9 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new FetchCustomFace(obContext, core),
         new GoCQHTTPUploadPrivateFile(obContext, core),
         new GetGuildProfile(obContext, core),
-        new SetModelShow(obContext, core),
+        new GoCQHTTPGetModelShow(obContext, core),
+        new GoCQHTTPSetModelShow(obContext, core),
+        new GoCQHTTPCheckUrlSafely(obContext, core),
         new SetInputStatus(obContext, core),
         new GetCSRF(obContext, core),
         new GetCredentials(obContext, core),
