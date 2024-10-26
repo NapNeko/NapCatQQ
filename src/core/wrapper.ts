@@ -86,7 +86,7 @@ export interface NodeQQNTWrapperUtil {
 
     calcThumbSize(arg0: number, arg1: number, arg2: unknown): unknown;
 
-    fullWordToHalfWord(arg0: string): unknown;
+    fullWordToHalfWord(word: string): unknown;
 
     getNTUserDataInfoConfig(): unknown;
 

@@ -448,7 +448,7 @@ export class NTQQGroupApi {
     }
 
     async getGroupRemainAtTimes(GroupCode: string) {
-        this.context.session.getGroupService().getGroupRemainAtTimes(GroupCode);
+        return this.context.session.getGroupService().getGroupRemainAtTimes(GroupCode);
     }
 
     async getMemberExtInfo(groupCode: string, uin: string) {
