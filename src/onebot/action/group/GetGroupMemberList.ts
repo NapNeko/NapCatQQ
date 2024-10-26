@@ -21,7 +21,14 @@ export class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
 
     async _handle(payload: Payload) {
         const groupIdStr = payload.group_id.toString();
-        const groupMembers = await this.core.apis.GroupApi.getGroupMembersV2(groupIdStr);
+        const noCache = payload.no_cache ? this.stringToBoolean(payload.no_cache) : false;
+        const memberCache = this.core.apis.GroupApi.groupMemberCache;
+        let groupMembers;
+        if (noCache) {
+            groupMembers = await this.core.apis.GroupApi.getGroupMembersV2(groupIdStr);
+        } else {
+            groupMembers = memberCache.get(groupIdStr) ?? await this.core.apis.GroupApi.getGroupMembersV2(groupIdStr);
+        }
 
         const memberPromises = Array.from(groupMembers.values()).map(item =>
             OB11Entities.groupMember(groupIdStr, item)
@@ -29,5 +36,8 @@ export class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
         const _groupMembers = await Promise.all(memberPromises);
         const MemberMap = new Map(_groupMembers.map(member => [member.user_id, member]));
         return Array.from(MemberMap.values());
+    }
+    stringToBoolean(str: string | boolean): boolean {
+        return typeof str === 'boolean' ? str : str.toLowerCase() === "true";
     }
 }
