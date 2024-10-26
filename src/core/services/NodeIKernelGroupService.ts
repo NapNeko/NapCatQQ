@@ -12,6 +12,12 @@ import {
 import { GeneralCallResult } from '@/core/services/common';
 
 export interface NodeIKernelGroupService {
+    // ---> 
+    // 待启用 For Next Version 3.2.0
+    getGroupMemberMaxNum(groupCode: string, serviceType: number): Promise<unknown>;
+
+    getAllGroupPrivilegeFlag(troopUinList: string[], serviceType: number): Promise<unknown>;
+    // <--- 
     getGroupExt0xEF0Info(enableGroupCodes: string[], bannedGroupCodes: string[], filter: GroupExt0xEF0InfoFilter, forceFetch: boolean):
         Promise<GeneralCallResult & { result: { groupExtInfos: Map<string, any> } }>;
 
