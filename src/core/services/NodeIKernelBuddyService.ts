@@ -66,7 +66,11 @@ export interface NodeIKernelBuddyService {
         accept: boolean;
     }): Promise<void>;
 
-    delBuddy(uid: number): void;
+    delBuddy(param: {
+        friendUid: string;
+        tempBlock: boolean;
+        tempBothDel: boolean;
+    }): Promise<unknown>;
 
     delBatchBuddy(uids: number[]): void;
 
