@@ -55,7 +55,7 @@ export class PacketClient {
             this.websocket.onopen = () => {
                 this.isConnected = true;
                 this.reconnectAttempts = 0;
-                this.logger.log.bind(this.logger)(`[Core] [Packet Server] Connected to ${this.clientUrl}`);
+                this.logger.log.bind(this.logger)(`[Core] [Packet Server] 已连接到 ${this.clientUrl}`);
                 cb();
                 resolve();
             };
@@ -85,14 +85,14 @@ export class PacketClient {
                 this.reconnectAttempts++;
                 setTimeout(() => {
                     this.connect(cb).catch((error) => {
-                        this.logger.logError.bind(this.logger)(`[Core] [Packet Server] Reconnecting attempt failed,${error.message}`);
+                        this.logger.logError.bind(this.logger)(`[Core] [Packet Server] 尝试重连失败：${error.message}`);
                     });
                 }, 5000 * this.reconnectAttempts);
             } else {
-                this.logger.logError.bind(this.logger)(`[Core] [Packet Server] Max reconnect attempts reached. ${this.clientUrl}`);
+                this.logger.logError.bind(this.logger)(`[Core] [Packet Server] ${this.clientUrl} 已达到最大重连次数！`);
             }
         } catch (error: any) {
-            this.logger.logError.bind(this.logger)(`Error attempting to reconnect: ${error.message}`);
+            this.logger.logError.bind(this.logger)(`[Core] [Packet Server] 重连时出错: ${error.message}`);
         }
     }
 
@@ -165,7 +165,7 @@ export class PacketClient {
         // 校验失败和异常 可能返回undefined
         return new Promise((resolve, reject) => {
             if (!this.available) {
-                this.logger.logError('NapCat.Packet is not init');
+                this.logger.logError('NapCat.Packet 未初始化！');
                 return undefined;
             }
             const md5 = crypto.createHash('md5').update(data).digest('hex');
