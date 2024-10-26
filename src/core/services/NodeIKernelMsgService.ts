@@ -327,8 +327,7 @@ export interface NodeIKernelMsgService {
 
     setPttPlayedState(...args: unknown[]): unknown;
 
-    //uk1 uk2 true
-    fetchFavEmojiList(str: string, num: number, uk1: boolean, uk2: boolean): Promise<GeneralCallResult & {
+    fetchFavEmojiList(str: string, num: number, backward: boolean, forceRefresh: boolean): Promise<GeneralCallResult & {
         emojiInfoList: Array<{
             uin: string,
             emoId: number,
