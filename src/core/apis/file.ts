@@ -238,7 +238,7 @@ export class NTQQFileApi {
                 fileName: fileName,
                 filePath: path,
                 md5HexStr: md5,
-                fileSize: fileSize,
+                fileSize: fileSize.toString(),
                 duration: duration ?? 1,
                 formatType: 1,
                 voiceType: 1,
