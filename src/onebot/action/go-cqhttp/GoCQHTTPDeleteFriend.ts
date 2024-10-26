@@ -26,7 +26,7 @@ export class GoCQHTTPDeleteFriend extends BaseAction<Payload, any> {
                 message: '好友不存在',
             };
         }
-        let isBuddy = this.core.apis.FriendApi.isBuddy(uid);
+        let isBuddy = await this.core.apis.FriendApi.isBuddy(uid);
         if (!isBuddy) {
             return {
                 valid: false,
