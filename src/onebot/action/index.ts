@@ -97,6 +97,7 @@ import { GoCQHTTPGetGroupAtAllRemain } from './go-cqhttp/GetGroupAtAllRemain';
 import { GoCQHTTPCheckUrlSafely } from './go-cqhttp/GoCQHTTPCheckUrlSafely';
 import { GoCQHTTPGetModelShow } from './go-cqhttp/GoCQHTTPGetModelShow';
 import { GoCQHTTPSetModelShow } from './go-cqhttp/GoCQHTTPSetModelShow';
+import { GoCQHTTPDeleteFriend } from './go-cqhttp/GoCQHTTPDeleteFriend';
 
 
 export type ActionMap = Map<string, BaseAction<any, any>>;
@@ -154,6 +155,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new GetRobotUinRange(obContext, core),
         new GetFriendWithCategory(obContext, core),
         //以下为go-cqhttp api
+        new GoCQHTTPDeleteFriend(obContext, core),
         new GoCQHTTPCheckUrlSafely(obContext, core),
         new GetOnlineClient(obContext, core),
         new OCRImage(obContext, core),
