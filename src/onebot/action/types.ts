@@ -61,7 +61,7 @@ export enum ActionName {
     GoCQHTTP_SetModelShow = '_set_model_show',
     GetOnlineClient = 'get_online_clients',
     // GetUnidirectionalFriendList = 'get_unidirectional_friend_list',
-    // DeleteFriend = 'delete_friend',
+    GoCQHTTP_DeleteFriend = 'delete_friend',
     // DeleteUnidirectionalFriendList = 'delete_unidirectional_friend',
     GoCQHTTP_MarkMsgAsRead = 'mark_msg_as_read',
     GoCQHTTP_SendGroupForwardMsg = 'send_group_forward_msg',
