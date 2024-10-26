@@ -269,25 +269,49 @@ export class NTQQFileApi {
     }
 
     async downloadRawMsgMedia(msg: RawMessage[]) {
-        const res = await Promise.all(msg.map(m =>
-            this.downloadMedia(m.msgId, m.chatType, m.peerUid, m.elements[0].elementId, '', '', 1000 * 60 * 2, true)
-        ));
-        msg.forEach((m, index) => {
-            const element = m.elements[0];
-            switch (element.elementType) {
-                case ElementType.PIC:
-                    element.picElement!.sourcePath = res[index];
-                    break;
-                case ElementType.VIDEO:
-                    element.videoElement!.filePath = res[index];
-                    break;
-                case ElementType.PTT:
-                    element.pttElement!.filePath = res[index];
-                    break;
-                case ElementType.FILE:
-                    element.fileElement!.filePath = res[index];
-                    break;
-            }
+        const res = await Promise.all(
+            msg.map(m =>
+                Promise.all(
+                    m.elements
+                        .filter(element =>
+                            element.elementType === ElementType.PIC ||
+                            element.elementType === ElementType.VIDEO ||
+                            element.elementType === ElementType.PTT ||
+                            element.elementType === ElementType.FILE
+                        )
+                        .map(element =>
+                            this.downloadMedia(m.msgId, m.chatType, m.peerUid, element.elementId, '', '', 1000 * 60 * 2, true)
+                        )
+                )
+            )
+        );
+        msg.forEach((m, msgIndex) => {
+            const elementResults = res[msgIndex];
+            let elementIndex = 0;
+            m.elements.forEach(element => {
+                if (
+                    element.elementType === ElementType.PIC ||
+                    element.elementType === ElementType.VIDEO ||
+                    element.elementType === ElementType.PTT ||
+                    element.elementType === ElementType.FILE
+                ) {
+                    switch (element.elementType) {
+                        case ElementType.PIC:
+                            element.picElement!.sourcePath = elementResults[elementIndex];
+                            break;
+                        case ElementType.VIDEO:
+                            element.videoElement!.filePath = elementResults[elementIndex];
+                            break;
+                        case ElementType.PTT:
+                            element.pttElement!.filePath = elementResults[elementIndex];
+                            break;
+                        case ElementType.FILE:
+                            element.fileElement!.filePath = elementResults[elementIndex];
+                            break;
+                    }
+                    elementIndex++;
+                }
+            });
         });
     }
 
