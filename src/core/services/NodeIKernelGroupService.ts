@@ -120,7 +120,7 @@ export interface NodeIKernelGroupService {
 
     destroyMemberListScene(SceneId: string): void;
 
-    getNextMemberList(sceneId: string, a: undefined, num: number): Promise<{
+    getNextMemberList(sceneId: string, groupMemberInfoListId: { index: number, uid: string } | undefined, num: number): Promise<{
         errCode: number,
         errMsg: string,
         result: { ids: string[], infos: Map<string, GroupMember>, finish: boolean, hasRobot: boolean }
