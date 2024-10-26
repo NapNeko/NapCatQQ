@@ -12,9 +12,9 @@ import {
 import { GeneralCallResult } from '@/core/services/common';
 
 export interface NodeIKernelGroupService {
-    // isTroopMember ? 0 : 111
     // ---> 
     // 待启用 For Next Version 3.2.0
+    // isTroopMember ? 0 : 111
     getGroupMemberMaxNum(groupCode: string, serviceType: number): Promise<unknown>;
 
     getAllGroupPrivilegeFlag(troopUinList: string[], serviceType: number): Promise<unknown>;
