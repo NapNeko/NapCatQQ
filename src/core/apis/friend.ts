@@ -34,7 +34,13 @@ export class NTQQFriendApi {
         data.forEach((value) => retMap.set(value.uin!, value.uid!));
         return retMap;
     }
-
+    async delBuudy(uid: string, tempBlock = false, tempBothDel = false) {
+        return this.context.session.getBuddyService().delBuddy({
+            friendUid: uid,
+            tempBlock: tempBlock,
+            tempBothDel: tempBothDel
+        });
+    }
     async getBuddyV2ExWithCate(refresh = false) {
         const categoryMap: Map<string, any> = new Map();
         const buddyService = this.context.session.getBuddyService();

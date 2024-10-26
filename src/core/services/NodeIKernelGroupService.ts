@@ -115,7 +115,7 @@ export interface NodeIKernelGroupService {
     destroyMemberListScene(SceneId: string): void;
 
     getNextMemberList(sceneId: string, a: undefined, num: number): Promise<{
-        errCode: number, 
+        errCode: number,
         errMsg: string,
         result: { ids: string[], infos: Map<string, GroupMember>, finish: boolean, hasRobot: boolean }
     }>;
@@ -225,7 +225,15 @@ export interface NodeIKernelGroupService {
 
     getGroupStatisticInfo(groupCode: string): unknown;
 
-    getGroupRemainAtTimes(groupCode: string): number;
+    getGroupRemainAtTimes(groupCode: string): Promise<GeneralCallResult & {
+        atInfo: {
+            canAtAll: boolean
+            RemainAtAllCountForUin: number
+            RemainAtAllCountForGroup: number
+            atTimesMsg: string
+            canNotAtAllMsg: ''
+        }
+    }>;
 
     getJoinGroupNoVerifyFlag(groupCode: string): unknown;
 
