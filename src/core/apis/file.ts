@@ -6,6 +6,7 @@ import {
     Peer,
     PicElement,
     PicType,
+    RawMessage,
     SendFileElement,
     SendPicElement,
     SendPttElement,
@@ -265,6 +266,29 @@ export class NTQQFileApi {
             timeout,
         );
         return fileTransNotifyInfo.filePath;
+    }
+
+    async downloadRawMsgMedia(msg: RawMessage[]) {
+        const res = await Promise.all(msg.map(m =>
+            this.downloadMedia(m.msgId, m.chatType, m.peerUid, m.elements[0].elementId, '', '', 1000 * 60 * 2, true)
+        ));
+        msg.forEach((m, index) => {
+            const element = m.elements[0];
+            switch (element.elementType) {
+                case ElementType.PIC:
+                    element.picElement!.sourcePath = res[index];
+                    break;
+                case ElementType.VIDEO:
+                    element.videoElement!.filePath = res[index];
+                    break;
+                case ElementType.PTT:
+                    element.pttElement!.filePath = res[index];
+                    break;
+                case ElementType.FILE:
+                    element.fileElement!.filePath = res[index];
+                    break;
+            }
+        });
     }
 
     async downloadMedia(msgId: string, chatType: ChatType, peerUid: string, elementId: string, thumbPath: string, sourcePath: string, timeout = 1000 * 60 * 2, force: boolean = false) {
