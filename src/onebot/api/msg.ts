@@ -466,6 +466,7 @@ export class OneBotMsgApi {
             },
         }) => ({
             elementType: ElementType.MFACE,
+            elementId: '',
             marketFaceElement: {
                 emojiPackageId: emoji_package_id,
                 emojiId: emoji_id,

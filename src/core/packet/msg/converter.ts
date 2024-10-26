@@ -1,4 +1,6 @@
 import {
+    ChatType,
+    ElementType,
     MessageElement,
     RawMessage,
     SendArkElement,
@@ -28,30 +30,42 @@ import {
     PacketMsgVideoElement,
     PacketMultiMsgElement
 } from "@/core/packet/msg/element";
-import { PacketMsg, PacketSendMsgElement } from "@/core/packet/msg/message";
-import { LogWrapper } from "@/common/log";
+import {PacketMsg, PacketSendMsgElement} from "@/core/packet/msg/message";
+import {LogWrapper} from "@/common/log";
 
-type SendMessageElementMap = {
-    textElement: SendTextElement,
-    picElement: SendPicElement,
-    replyElement: SendReplyElement,
-    faceElement: SendFaceElement,
-    marketFaceElement: SendMarketFaceElement,
-    videoElement: SendVideoElement,
-    fileElement: SendFileElement,
-    pttElement: SendPttElement,
-    arkElement: SendArkElement,
-    markdownElement: SendMarkdownElement,
-    structLongMsgElement: SendStructLongMsgElement
+const SupportedElementTypes = [
+    ElementType.TEXT,
+    ElementType.PIC,
+    ElementType.REPLY,
+    ElementType.FACE,
+    ElementType.MFACE,
+    ElementType.VIDEO,
+    ElementType.FILE,
+    ElementType.PTT,
+    ElementType.ARK,
+    ElementType.MARKDOWN,
+    ElementType.STRUCTLONGMSG
+];
+
+type SendMessageTypeElementMap = {
+    [ElementType.TEXT]: SendTextElement,
+    [ElementType.PIC]: SendPicElement,
+    [ElementType.FILE]: SendFileElement,
+    [ElementType.PTT]: SendPttElement,
+    [ElementType.VIDEO]: SendVideoElement,
+    [ElementType.FACE]: SendFaceElement,
+    [ElementType.REPLY]: SendReplyElement,
+    [ElementType.ARK]: SendArkElement,
+    [ElementType.MFACE]: SendMarketFaceElement,
+    [ElementType.STRUCTLONGMSG]: SendStructLongMsgElement,
+    [ElementType.MARKDOWN]: SendMarkdownElement,
 };
 
-type RawToPacketMsgConverters = {
-    [K in keyof SendMessageElementMap]: (
-        element: SendMessageElementMap[K],
-        msg?: RawMessage,
-        elementWrapper?: MessageElement,
-    ) => IPacketMsgElement<SendMessageElementMap[K]> | null;
-};
+type ElementToPacketMsgConverters = {
+    [K in keyof SendMessageTypeElementMap]: (
+        sendElement: MessageElement
+    ) => IPacketMsgElement<SendMessageTypeElementMap[K]>;
+}
 
 export type rawMsgWithSendMsg = {
     senderUin: number;
@@ -69,6 +83,10 @@ export class PacketMsgConverter {
         this.logger = logger;
     }
 
+    private isValidElementType(type: ElementType): type is keyof ElementToPacketMsgConverters {
+        return SupportedElementTypes.includes(type);
+    }
+
     rawMsgWithSendMsgToPacketMsg(msg: rawMsgWithSendMsg): PacketMsg {
         return {
             senderUid: msg.senderUid ?? '',
@@ -77,55 +95,64 @@ export class PacketMsgConverter {
             groupId: msg.groupId,
             time: msg.time,
             msg: msg.msg.map((element) => {
-                const key = (Object.keys(this.rawToPacketMsgConverters) as Array<keyof SendMessageElementMap>).find(
-                    (k) => (element as any)[k] !== undefined  // TODO:
-                );
-                if (key) {
-                    const elementData = (element as any)[key];  // TODO:
-                    if (elementData) return this.rawToPacketMsgConverters[key](element as any);
-                }
-                return null;
+                if (!this.isValidElementType(element.elementType)) return null;
+                return this.rawToPacketMsgConverters[element.elementType](element as MessageElement);
             }).filter((e) => e !== null)
         };
     }
 
-    private rawToPacketMsgConverters: RawToPacketMsgConverters = {
-        textElement: (element: SendTextElement) => {
-            if (element.textElement.atType) {
-                return new PacketMsgAtElement(element);
+    rawMsgToPacketMsg(msg: RawMessage): PacketMsg {
+        return {
+            seq: +msg.msgSeq,
+            groupId: msg.chatType === ChatType.KCHATTYPEGROUP ? +msg.parentMsgPeer.peerUid : undefined,
+            senderUid: msg.senderUid,
+            senderUin: +msg.senderUin,
+            senderName: msg.sendMemberName ?? msg.sendRemarkName ?? msg.sendNickName ?? 'QQ用户',
+            time: +msg.msgTime,
+            msg: msg.elements.map((element) => {
+                if (!this.isValidElementType(element.elementType)) return null;
+                return this.rawToPacketMsgConverters[element.elementType](element);
+            }).filter((e) => e !== null)
+        }
+    }
+
+    private rawToPacketMsgConverters: ElementToPacketMsgConverters = {
+        [ElementType.TEXT]: (element) => {
+            if (element.textElement?.atType) {
+                return new PacketMsgAtElement(element as SendTextElement);
             }
-            return new PacketMsgTextElement(element);
+            return new PacketMsgTextElement(element as SendTextElement);
         },
-        picElement: (element: SendPicElement) => {
-            return new PacketMsgPicElement(element);
+        [ElementType.PIC]: (element) => {
+            return new PacketMsgPicElement(element as SendPicElement);
         },
-        replyElement: (element: SendReplyElement) => {
-            return new PacketMsgReplyElement(element);
+        [ElementType.REPLY]: (element) => {
+            return new PacketMsgReplyElement(element as SendReplyElement);
         },
-        faceElement: (element: SendFaceElement) => {
-            return new PacketMsgFaceElement(element);
+        [ElementType.FACE]: (element) => {
+            return new PacketMsgFaceElement(element as SendFaceElement);
         },
-        marketFaceElement: (element: SendMarketFaceElement) => {
-            return new PacketMsgMarkFaceElement(element);
+        [ElementType.MFACE]: (element) => {
+            return new PacketMsgMarkFaceElement(element as SendMarketFaceElement);
         },
-        videoElement: (element: SendVideoElement) => {
-            return new PacketMsgVideoElement(element);
+        [ElementType.VIDEO]: (element) => {
+            return new PacketMsgVideoElement(element as SendVideoElement);
         },
-        fileElement: (element: SendFileElement) => {
-            return new PacketMsgFileElement(element);
+        [ElementType.FILE]: (element) => {
+            return new PacketMsgFileElement(element as SendFileElement);
         },
-        pttElement: (element: SendPttElement) => {
-            return new PacketMsgPttElement(element);
+        [ElementType.PTT]: (element) => {
+            return new PacketMsgPttElement(element as SendPttElement);
         },
-        arkElement: (element: SendArkElement) => {
-            return new PacketMsgLightAppElement(element);
+        [ElementType.ARK]: (element) => {
+            return new PacketMsgLightAppElement(element as SendArkElement);
         },
-        markdownElement: (element: SendMarkdownElement) => {
-            return new PacketMsgMarkDownElement(element);
+        [ElementType.MARKDOWN]: (element) => {
+            return new PacketMsgMarkDownElement(element as SendMarkdownElement);
         },
         // TODO: check this logic, move it in arkElement?
-        structLongMsgElement: (element: SendStructLongMsgElement) => {
-            return new PacketMultiMsgElement(element);
+        [ElementType.STRUCTLONGMSG]: (element) => {
+            return new PacketMultiMsgElement(element as SendStructLongMsgElement);
         }
     };
 }
