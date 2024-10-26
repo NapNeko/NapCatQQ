@@ -49,7 +49,7 @@ export class NTQQPacketApi {
                 .then()
                 .catch(this.core.context.logger.logError.bind(this.core.context.logger));
         } else {
-            this.core.context.logger.logWarn('PacketServer is not set, will not init NapCat.Packet!');
+            this.core.context.logger.logWarn('PacketServer未配置，NapCat.Packet将不会加载！');
         }
     }
 
@@ -158,10 +158,10 @@ export class NTQQPacketApi {
             }
         }
         const res = await Promise.allSettled(reqList);
-        this.logger.log(`上传资源${res.length}个， 失败${res.filter(r => r.status === 'rejected').length}个`);
+        this.logger.log(`上传资源${res.length}个，失败${res.filter(r => r.status === 'rejected').length}个`);
         res.forEach((result, index) => {
             if (result.status === 'rejected') {
-                this.logger.logError(`第${index + 1}个失败：${result.reason}`);
+                this.logger.logError(`上传第${index + 1}个资源失败：${result.reason}`);
             }
         });
     }
