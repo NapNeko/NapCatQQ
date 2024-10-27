@@ -344,7 +344,7 @@ export class NTQQFileApi {
                 filePath: thumbPath,
             }],
             () => true,
-            (arg) => arg.msgId === msgId,
+            (arg) => arg.msgElementId === elementId && arg.msgId === msgId,
             1,
             timeout,
         );
