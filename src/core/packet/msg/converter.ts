@@ -1,4 +1,5 @@
 import {
+    Peer,
     ChatType,
     ElementType,
     MessageElement,
@@ -101,13 +102,13 @@ export class PacketMsgConverter {
         };
     }
 
-    rawMsgToPacketMsg(msg: RawMessage): PacketMsg {
+    rawMsgToPacketMsg(msg: RawMessage, ctxPeer: Peer): PacketMsg {
         return {
             seq: +msg.msgSeq,
-            groupId: msg.chatType === ChatType.KCHATTYPEGROUP ? +msg.peerUid : undefined,
+            groupId: ctxPeer.chatType === ChatType.KCHATTYPEGROUP ? +msg.peerUid : undefined,
             senderUid: msg.senderUid,
             senderUin: +msg.senderUin,
-            senderName: msg.sendNickName ?? 'QQ用户',
+            senderName: msg.sendMemberName ?? '' !== '' ? msg.sendMemberName ?? '' : msg.sendNickName ?? '' !== '' ? msg.sendNickName ?? "QQ用户" : "QQ用户",
             time: +msg.msgTime,
             msg: msg.elements.map((element) => {
                 if (!this.isValidElementType(element.elementType)) return null;
