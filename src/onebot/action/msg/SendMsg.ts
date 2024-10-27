@@ -14,6 +14,7 @@ import BaseAction from '../BaseAction';
 import { rawMsgWithSendMsg } from "@/core/packet/msg/converter";
 import { PacketMsg } from "@/core/packet/msg/message";
 import { ForwardMsgBuilder } from "@/common/forward-msg-builder";
+import { stringifyWithBigInt } from "@/common/helper";
 
 export interface ReturnDataType {
     message_id: number;
@@ -190,9 +191,9 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                     time: Number(node.data.time) || Date.now(),
                     msg: sendElements,
                 };
-                logger.logDebug(`handleForwardedNodesPacket[SendRaw] 开始转换 ${JSON.stringify(packetMsgElements)}`);
+                logger.logDebug(`handleForwardedNodesPacket[SendRaw] 开始转换 ${stringifyWithBigInt(packetMsgElements)}`);
                 const transformedMsg = this.core.apis.PacketApi.packetSession?.packer.packetConverter.rawMsgWithSendMsgToPacketMsg(packetMsgElements);
-                logger.logDebug(`handleForwardedNodesPacket[SendRaw] 转换为 ${JSON.stringify(transformedMsg)}`);
+                logger.logDebug(`handleForwardedNodesPacket[SendRaw] 转换为 ${stringifyWithBigInt(transformedMsg)}`);
                 packetMsg.push(transformedMsg!);
             } else if (node.data.id) {
                 const id = node.data.id;
@@ -202,13 +203,13 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                     continue;
                 }
                 const msg = (await this.core.apis.MsgApi.getMsgsByMsgId(nodeMsg.Peer, [nodeMsg.MsgId])).msgList[0];
-                logger.logDebug(`handleForwardedNodesPacket[PureRaw] 开始转换 ${JSON.stringify(msg)}`);
+                logger.logDebug(`handleForwardedNodesPacket[PureRaw] 开始转换 ${stringifyWithBigInt(msg)}`);
                 await this.core.apis.FileApi.downloadRawMsgMedia([msg]);
                 const transformedMsg = this.core.apis.PacketApi.packetSession?.packer.packetConverter.rawMsgToPacketMsg(msg, msgPeer);
-                logger.logDebug(`handleForwardedNodesPacket[PureRaw] 转换为 ${JSON.stringify(transformedMsg)}`);
+                logger.logDebug(`handleForwardedNodesPacket[PureRaw] 转换为 ${stringifyWithBigInt(transformedMsg)}`);
                 packetMsg.push(transformedMsg!);
             } else {
-                logger.logDebug(`handleForwardedNodesPacket 跳过元素 ${JSON.stringify(node)}`);
+                logger.logDebug(`handleForwardedNodesPacket 跳过元素 ${stringifyWithBigInt(node)}`);
             }
         }
         if (packetMsg.length === 0) {
