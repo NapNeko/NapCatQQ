@@ -119,11 +119,25 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
 
     async close() {
         this.isOpen = false;
-        this.wsServer.close();
+        this.wsServer.close((err) => {
+            if (err) {
+                this.logger.logError.bind(this.logger)('[OneBot] [WebSocket Server] Error closing server:', err.message);
+            } else {
+                this.logger.log('[OneBot] [WebSocket Server] Server Closed');
+            }
+
+        });
         if (this.heartbeatIntervalId) {
             clearInterval(this.heartbeatIntervalId);
             this.heartbeatIntervalId = null;
         }
+        await this.wsClientsMutex.runExclusive(async () => {
+            this.wsClients.forEach((wsClient) => {
+                wsClient.close();
+            });
+            this.wsClients = [];
+            this.wsClientWithEvent = [];
+        });
     }
 
     private registerHeartBeat() {
