@@ -2,7 +2,7 @@
   "name": "napcat",
   "private": true,
   "type": "module",
-  "version": "3.3.16",
+  "version": "3.3.17",
   "scripts": {
     "build:framework": "vite build --mode framework",
     "build:shell": "vite build --mode shell",
