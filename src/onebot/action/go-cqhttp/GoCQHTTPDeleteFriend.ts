@@ -18,7 +18,7 @@ export class GoCQHTTPDeleteFriend extends BaseAction<Payload, any> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        let uid = await this.core.apis.UserApi.getUidByUinV2(payload.friend_id.toString());
+        const uid = await this.core.apis.UserApi.getUidByUinV2(payload.friend_id.toString());
 
         if (!uid) {
             return {
@@ -26,7 +26,7 @@ export class GoCQHTTPDeleteFriend extends BaseAction<Payload, any> {
                 message: '好友不存在',
             };
         }
-        let isBuddy = await this.core.apis.FriendApi.isBuddy(uid);
+        const isBuddy = await this.core.apis.FriendApi.isBuddy(uid);
         if (!isBuddy) {
             return {
                 valid: false,

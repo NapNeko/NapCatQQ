@@ -172,7 +172,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                 const OB11Data = normalize(node.type === OB11MessageDataType.node ? node.data.content : node);
                 let sendElements: SendMessageElement[];
 
-                if (getSpecialMsgNum({message: OB11Data}, OB11MessageDataType.node)) {
+                if (getSpecialMsgNum({ message: OB11Data }, OB11MessageDataType.node)) {
                     const uploadReturnData = await this.uploadForwardedNodesPacket(msgPeer, OB11Data as OB11MessageNode[], node.data.source, node.data.news, node.data.summary, node.data.prompt, {
                         user_id: (node.data.user_id || node.data.uin)?.toString() ?? parentMeta?.user_id ?? this.core.selfInfo.uin,
                         nickname: (node.data.nickname || node.data.name) ?? parentMeta?.nickname ?? "QQ用户",
@@ -241,7 +241,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         const finallySendElements = uploadReturnData?.finallySendElements;
         if (!finallySendElements) throw Error('转发消息失败，生成节点为空');
         returnMsg = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(msgPeer, [finallySendElements], [], true).catch(_ => undefined);
-        return {message: returnMsg ?? null, res_id};
+        return { message: returnMsg ?? null, res_id };
     }
 
     private async handleForwardedNodes(destPeer: Peer, messageNodes: OB11MessageNode[]): Promise<{
