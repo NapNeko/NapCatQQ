@@ -127,6 +127,10 @@ jobs:
         zip -q -r NapCat.Framework.Windows.Once.zip *
         cd ..
         mv ./NapCat.Framework.Windows.Once/NapCat.Framework.Windows.Once.zip ./
+        mv ./external/napcat.packet.arm64 ./
+        mv ./external/napcat.packet.exe ./
+        mv ./external/napcat.packet.linux ./
+        mv ./external/napcat.packet.production.py ./
     - name: Extract version from tag
       run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
       
@@ -143,4 +147,8 @@ jobs:
           NapCat.Framework.zip
           NapCat.Shell.zip
           NapCat.Framework.Windows.Once.zip
+          napcat.packet.arm64
+          napcat.packet.exe
+          napcat.packet.linux
+          napcat.packet.production.py
         draft: true
