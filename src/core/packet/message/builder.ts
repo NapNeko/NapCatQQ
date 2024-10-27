@@ -2,8 +2,8 @@ import * as crypto from "crypto";
 import { PushMsgBody } from "@/core/packet/proto/message/message";
 import { NapProtoEncodeStructType } from "@/core/packet/proto/NapProto";
 import { LogWrapper } from "@/common/log";
-import { PacketMsg, PacketSendMsgElement } from "@/core/packet/msg/message";
-import { IPacketMsgElement, PacketMsgTextElement } from "@/core/packet/msg/element";
+import { PacketMsg, PacketSendMsgElement } from "@/core/packet/message/message";
+import { IPacketMsgElement, PacketMsgTextElement } from "@/core/packet/message/element";
 import { SendTextElement } from "@/core";
 
 export class PacketMsgBuilder {

@@ -10,14 +10,14 @@ import { OidbSvcTrpcTcpBase, OidbSvcTrpcTcpBaseRsp } from '@/core/packet/proto/o
 import { OidbSvcTrpcTcp0XFE1_2RSP } from '@/core/packet/proto/oidb/Oidb.0XFE1_2';
 import { LogWrapper } from "@/common/log";
 import { SendLongMsgResp } from "@/core/packet/proto/message/action";
-import { PacketMsg } from "@/core/packet/msg/message";
+import { PacketMsg } from "@/core/packet/message/message";
 import { OidbSvcTrpcTcp0x6D6Response } from "@/core/packet/proto/oidb/Oidb.0x6D6";
 import {
     PacketMsgFileElement,
     PacketMsgPicElement,
     PacketMsgPttElement,
     PacketMsgVideoElement
-} from "@/core/packet/msg/element";
+} from "@/core/packet/message/element";
 
 
 interface OffsetType {
@@ -184,5 +184,9 @@ export class NTQQPacketApi {
             throw new Error(`sendGroupFileDownloadReq error: ${resp.download.clientWording}`);
         }
         return `https://${resp.download.downloadDns}/ftn_handler/${Buffer.from(resp.download.downloadUrl).toString('hex')}/?fname=`;
+    }
+
+    async signMiniAppShareInfo(appid: string, title: string, desc: string, time: number, scene: number, templateType: number, businessType: number, picUrl: string, vidUrl: string, jumpUrl: string, iconUrl: string, verType: number, shareType: number, versionId: string, withShareTicket: number, webURL: string, appidRich: string, template: any, field20: string) {
+
     }
 }

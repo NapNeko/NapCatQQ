@@ -10,18 +10,18 @@ import { OidbSvcTrpcTcp0XED3_1 } from "@/core/packet/proto/oidb/Oidb.0xED3_1";
 import { NTV2RichMediaReq } from "@/core/packet/proto/oidb/common/Ntv2.RichMediaReq";
 import { HttpConn0x6ff_501 } from "@/core/packet/proto/action/action";
 import { LongMsgResult, SendLongMsgReq } from "@/core/packet/proto/message/action";
-import { PacketMsgBuilder } from "@/core/packet/msg/builder";
+import { PacketMsgBuilder } from "@/core/packet/message/builder";
 import {
     PacketMsgFileElement,
     PacketMsgPicElement,
     PacketMsgPttElement,
     PacketMsgVideoElement
-} from "@/core/packet/msg/element";
+} from "@/core/packet/message/element";
 import { LogWrapper } from "@/common/log";
-import { PacketMsg } from "@/core/packet/msg/message";
+import { PacketMsg } from "@/core/packet/message/message";
 import { OidbSvcTrpcTcp0x6D6 } from "@/core/packet/proto/oidb/Oidb.0x6D6";
 import { OidbSvcTrpcTcp0XE37_1200 } from "@/core/packet/proto/oidb/Oidb.0xE37_1200";
-import { PacketMsgConverter } from "@/core/packet/msg/converter";
+import { PacketMsgConverter } from "@/core/packet/message/converter";
 import { PacketClient } from "@/core/packet/client";
 import { OidbSvcTrpcTcp0XE37_1700 } from "@/core/packet/proto/oidb/Oidb.0xE37_1700";
 import { OidbSvcTrpcTcp0XE37_800 } from "@/core/packet/proto/oidb/Oidb.0XE37_800";
