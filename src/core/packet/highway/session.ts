@@ -13,7 +13,7 @@ import {
     PacketMsgPicElement,
     PacketMsgPttElement,
     PacketMsgVideoElement
-} from "@/core/packet/msg/element";
+} from "@/core/packet/message/element";
 import { FileUploadExt, NTV2RichMediaHighwayExt } from "@/core/packet/proto/highway/highway";
 import { int32ip2str, oidbIpv4s2HighwayIpv4s } from "@/core/packet/highway/utils";
 import { calculateSha1, calculateSha1StreamBytes, computeMd5AndLengthWithLimit } from "@/core/packet/utils/crypto/hash";

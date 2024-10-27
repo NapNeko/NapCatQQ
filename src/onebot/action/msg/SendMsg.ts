@@ -11,8 +11,8 @@ import { decodeCQCode } from '@/onebot/cqcode';
 import { MessageUnique } from '@/common/message-unique';
 import { ChatType, ElementType, NapCatCore, Peer, RawMessage, SendArkElement, SendMessageElement } from '@/core';
 import BaseAction from '../BaseAction';
-import { rawMsgWithSendMsg } from "@/core/packet/msg/converter";
-import { PacketMsg } from "@/core/packet/msg/message";
+import { rawMsgWithSendMsg } from "@/core/packet/message/converter";
+import { PacketMsg } from "@/core/packet/message/message";
 import { ForwardMsgBuilder } from "@/common/forward-msg-builder";
 import { stringifyWithBigInt } from "@/common/helper";
 

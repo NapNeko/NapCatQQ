@@ -25,7 +25,7 @@ import {
     SendVideoElement
 } from "@/core";
 import { MsgInfo } from "@/core/packet/proto/oidb/common/Ntv2.RichMediaReq";
-import { PacketMsg, PacketSendMsgElement } from "@/core/packet/msg/message";
+import { PacketMsg, PacketSendMsgElement } from "@/core/packet/message/message";
 import { ForwardMsgBuilder } from "@/common/forward-msg-builder";
 import { FileExtra, GroupFileExtra } from "@/core/packet/proto/message/component";
 import { OidbSvcTrpcTcp0XE37_800Response } from "@/core/packet/proto/oidb/Oidb.0XE37_800";

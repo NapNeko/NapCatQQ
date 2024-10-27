@@ -30,8 +30,8 @@ import {
     PacketMsgTextElement,
     PacketMsgVideoElement,
     PacketMultiMsgElement
-} from "@/core/packet/msg/element";
-import { PacketMsg, PacketSendMsgElement } from "@/core/packet/msg/message";
+} from "@/core/packet/message/element";
+import { PacketMsg, PacketSendMsgElement } from "@/core/packet/message/message";
 import { LogWrapper } from "@/common/log";
 
 const SupportedElementTypes = [

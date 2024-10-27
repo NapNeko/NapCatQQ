@@ -1,4 +1,4 @@
-import { PacketMsg } from "@/core/packet/msg/message";
+import { PacketMsg } from "@/core/packet/message/message";
 import * as crypto from "node:crypto";
 
 interface ForwardMsgJson {
