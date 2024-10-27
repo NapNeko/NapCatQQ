@@ -204,7 +204,7 @@ export class OneBotMsgApi {
                 guildId: '',
             };
             if (!records || !element.replyMsgTime || !element.senderUidStr) {
-                this.core.context.logger.logError.bind(this.core.context.logger)('获取不到引用的消息', element.replayMsgSeq);
+                this.core.context.logger.logError.bind(this.core.context.logger)('似乎是旧版客户端,获取不到引用的消息', element.replayMsgSeq);
                 return null;
             }
 
@@ -218,11 +218,27 @@ export class OneBotMsgApi {
             if (records.peerUin === '284840486' || records.peerUin === '1094950020') {
                 return createReplyData(records.msgId);
             }
-            const replyMsg = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeqV2(peer, element.replayMsgSeq, element.replyMsgTime, [element.senderUidStr]))
-                .msgList.find(msg => msg.msgRandom === records.msgRandom);
-
+            let replyMsgList = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeqV2(peer, element.replayMsgSeq, element.replyMsgTime, [element.senderUidStr])).msgList;
+            let replyMsg = replyMsgList.find(msg => msg.msgRandom === records.msgRandom);
             if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
-                this.core.context.logger.logError.bind(this.core.context.logger)('获取不到引用的消息', element.replayMsgSeq);
+                // 我猜测可能是时间参数未对上 导致找不到引用消息 或者msgList 存在问题
+                this.core.context.logger.logWarn.bind(this.core.context.logger)(
+                    '初次筛选消息失败,获取不到引用的消息 Seq:',
+                    element.replayMsgSeq,
+                    ',消息长度:',
+                    replyMsgList.length
+                );
+                // 再次筛选
+                replyMsgList = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeqV3(peer, element.replayMsgSeq, [element.senderUidStr])).msgList;
+                replyMsg = replyMsgList.find(msg => msg.msgRandom === records.msgRandom);
+            }
+            if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
+                this.core.context.logger.logError.bind(this.core.context.logger)(
+                    '最终筛选结果,筛选消息失败,获取不到引用的消息 Seq: ',
+                    element.replayMsgSeq,
+                    ',消息长度:',
+                    replyMsgList.length
+                );
                 return null;
             }
             return createReplyData(replyMsg.msgId);
