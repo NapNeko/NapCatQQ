@@ -164,7 +164,7 @@ async function onSettingWindowCreated(view) {
         SettingItem(
           '<span id="napcat-update-title">Napcat</span>',
           void 0,
-          SettingButton("V3.3.17", "napcat-update-button", "secondary")
+          SettingButton("V3.3.20", "napcat-update-button", "secondary")
         )
       ]),
       SettingList([
