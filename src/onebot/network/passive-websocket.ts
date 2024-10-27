@@ -123,7 +123,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             if (err) {
                 this.logger.logError.bind(this.logger)('[OneBot] [WebSocket Server] Error closing server:', err.message);
             } else {
-                this.logger.log('[OneBot] [WebSocket Server] Server Closed');
+                this.logger.log.bind(this.logger)('[OneBot] [WebSocket Server] Server Closed');
             }
 
         });
