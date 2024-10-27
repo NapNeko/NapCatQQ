@@ -43,9 +43,9 @@ try {
     git config --global user.email "bot@test.wumiao.wang"
     git config --global user.name "Version"
     sed -i "s/\\\"version\\\": \\\"${currentVersion}\\\"/\\\"version\\\": \\\"${targetVersion}\\\"/g" package.json
-    sed -i "s/\\\"version\\\": \\\"${manifestCurrentVersion}\\\"/\\\"version\\\": \\\"${manifestTargetVersion}\\\"/g" manifest.json
+    sed -i "s/\\\"version\\\": \\\"${manifestCurrentVersion}\\\"/\\\"version\\\": \\\"${targetVersion}\\\"/g" manifest.json
     sed -i "s/napCatVersion = '\\${currentVersion}'/napCatVersion = '\\${targetVersion}'/g" ./src/common/version.ts
-    sed -i 's/SettingButton("V[0-9]\+\.[0-9]\+\.[0-9]\+", "napcat-update-button", "secondary")/SettingButton("'"${NEW_VERSION}"'", "napcat-update-button", "secondary")/g' ./static/assets/renderer.js
+    sed -i 's/SettingButton("V[0-9]\+\.[0-9]\+\.[0-9]\+", "napcat-update-button", "secondary")/SettingButton("'"${targetVersion}"'", "napcat-update-button", "secondary")/g' ./static/assets/renderer.js
     git add .
     git commit -m "chore:version change"
     git push -u origin main`;
