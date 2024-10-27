@@ -40,14 +40,14 @@ try {
     // 更新版本，构建安全的sed命令
     const safeScriptContent = `
     #!/bin/bash
-    git config --global user.email "bot@test.wumiao.wang"
-    git config --global user.name "Version"
+    git config --global user.email "nanaeonn@outlook.com"
+    git config --global user.name "Mlikiowa"
     sed -i "s/\\"version\\": \\"${currentVersion}\\"/\\"version\\": \\"${targetVersion}\\"/g" package.json
     sed -i "s/\\"version\\": \\"${manifestCurrentVersion}\\"/\\"version\\": \\"${targetVersion}\\"/g" manifest.json
     sed -i "s/napCatVersion = '.*'/napCatVersion = '${targetVersion}'/g" ./src/common/version.ts
     sed -i "s/SettingButton(\\"V.*\\", \\"napcat-update-button\\", \\"secondary\\")/SettingButton(\\"V${targetVersion}\\", \\"napcat-update-button\\", \\"secondary\\")/g" ./static/assets/renderer.js
     git add .
-    git commit -m "chore:version change"
+    git commit -m "release: v${targetVersion}"
     git push -u origin main`;
     writeScriptToFile(safeScriptContent);
   }
