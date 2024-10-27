@@ -17,9 +17,6 @@ export class GoCQHTTPGetGroupAtAllRemain extends BaseAction<Payload, any> {
 
     async _handle(payload: Payload) {
         const ret = await this.core.apis.GroupApi.getGroupRemainAtTimes(payload.group_id.toString());
-        if (ret.errCode !== 0) {
-            throw new Error('Not in the group');
-        }
         const data = {
             can_at_all: ret.atInfo.canAtAll,
             remain_at_all_count_for_group: ret.atInfo.RemainAtAllCountForGroup,
