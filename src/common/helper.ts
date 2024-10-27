@@ -239,3 +239,9 @@ export function calcQQLevel(level?: QQLevel) {
     const { crownNum, sunNum, moonNum, starNum } = level;
     return crownNum * 64 + sunNum * 16 + moonNum * 4 + starNum;
 }
+
+export function stringifyWithBigInt(obj: any) {
+    return JSON.stringify(obj, (key, value) =>
+        typeof value === 'bigint' ? value.toString() : value
+    );
+}
