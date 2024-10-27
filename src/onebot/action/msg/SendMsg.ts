@@ -174,8 +174,8 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
 
                 if (getSpecialMsgNum({message: OB11Data}, OB11MessageDataType.node)) {
                     const uploadReturnData = await this.uploadForwardedNodesPacket(msgPeer, OB11Data as OB11MessageNode[], node.data.source, node.data.news, node.data.summary, node.data.prompt, {
-                        user_id: node.data.user_id?.toString() ?? parentMeta?.user_id ?? this.core.selfInfo.uin,
-                        nickname: node.data.nickname ?? parentMeta?.nickname ?? "QQ用户",
+                        user_id: (node.data.user_id || node.data.uin)?.toString() ?? parentMeta?.user_id ?? this.core.selfInfo.uin,
+                        nickname: (node.data.nickname || node.data.name) ?? parentMeta?.nickname ?? "QQ用户",
                     }, dp + 1);
                     sendElements = uploadReturnData?.finallySendElements ? [uploadReturnData.finallySendElements] : [];
                 } else {
@@ -184,8 +184,8 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                 }
 
                 const packetMsgElements: rawMsgWithSendMsg = {
-                    senderUin: Number(node.data.user_id ?? parentMeta?.user_id) || +this.core.selfInfo.uin,
-                    senderName: node.data.nickname ?? parentMeta?.nickname ?? "QQ用户",
+                    senderUin: Number((node.data.user_id || node.data.uin) ?? parentMeta?.user_id) || +this.core.selfInfo.uin,
+                    senderName: (node.data.nickname || node.data.name) ?? parentMeta?.nickname ?? "QQ用户",
                     groupId: msgPeer.chatType === ChatType.KCHATTYPEGROUP ? +msgPeer.peerUid : undefined,
                     time: Number(node.data.time) || Date.now(),
                     msg: sendElements,

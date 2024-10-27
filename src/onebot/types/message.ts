@@ -150,7 +150,9 @@ export interface OB11MessageNode {
     data: {
         id?: string
         user_id?: number | string  // number
+        uin?: number | string  // number, compatible with go-cqhttp
         nickname: string
+        name?: string // compatible with go-cqhttp
         content: OB11MessageMixType
         source?: string,
         news?: { text: string }[],
