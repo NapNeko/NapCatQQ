@@ -232,7 +232,8 @@ export interface NodeIKernelGroupService {
 
     getGroupStatisticInfo(groupCode: string): unknown;
 
-    getGroupRemainAtTimes(groupCode: string): Promise<GeneralCallResult & {
+    getGroupRemainAtTimes(groupCode: string): Promise<Omit<GeneralCallResult, 'result'> & {
+        errMsg: string,
         atInfo: {
             canAtAll: boolean
             RemainAtAllCountForUin: number
