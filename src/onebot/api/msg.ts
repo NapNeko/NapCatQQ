@@ -120,7 +120,7 @@ export class OneBotMsgApi {
                         url: await this.core.apis.FileApi.getImageUrl(element),
                         path: element.filePath,
                         file_size: element.fileSize,
-                        file_unique: element.fileName
+                        file_unique: element.md5HexStr ?? element.fileName,
                     },
                 };
             } catch (e: any) {
@@ -141,9 +141,9 @@ export class OneBotMsgApi {
                     file: element.fileName,
                     path: element.filePath,
                     url: pathToFileURL(element.filePath).href,
-                    file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, element.fileUuid,"." + element.fileName),
+                    file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, element.fileUuid, "." + element.fileName),
                     file_size: element.fileSize,
-                    file_unique: element.fileName,
+                    file_unique: element.fileMd5 ?? element.fileSha ?? element.fileName,
                 },
             };
         },
@@ -285,7 +285,7 @@ export class OneBotMsgApi {
                     url: videoDownUrl ?? pathToFileURL(element.filePath).href,
                     file_id: fileCode,
                     file_size: element.fileSize,
-                    file_unique: element.fileName,
+                    file_unique: element.videoMd5 ?? element.thumbMd5 ?? element.fileName,
                 },
             };
         },
@@ -305,7 +305,7 @@ export class OneBotMsgApi {
                     url: pathToFileURL(element.filePath).href,
                     file_id: fileCode,
                     file_size: element.fileSize,
-                    file_unique: element.fileName
+                    file_unique: element.fileUuid
                 },
             };
         },
@@ -626,13 +626,13 @@ export class OneBotMsgApi {
         [OB11MessageDataType.miniapp]: async () => undefined,
 
         [OB11MessageDataType.contact]: async ({ data: { type = "qq", id } }, context) => {
-            if(type === "qq"){
+            if (type === "qq") {
                 const arkJson = await this.core.apis.UserApi.getBuddyRecommendContactArkJson(id.toString(), '');
                 return this.ob11ToRawConverters.json({
                     data: { data: arkJson.arkMsg },
                     type: OB11MessageDataType.json
                 }, context);
-            }else if(type === "group"){
+            } else if (type === "group") {
                 const arkJson = await this.core.apis.GroupApi.getGroupRecommendContactArkJson(id.toString());
                 return this.ob11ToRawConverters.json({
                     data: { data: arkJson.arkJson },
