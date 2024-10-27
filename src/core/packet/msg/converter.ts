@@ -108,7 +108,11 @@ export class PacketMsgConverter {
             groupId: ctxPeer.chatType === ChatType.KCHATTYPEGROUP ? +msg.peerUid : undefined,
             senderUid: msg.senderUid,
             senderUin: +msg.senderUin,
-            senderName: msg.sendMemberName ?? '' !== '' ? msg.sendMemberName ?? '' : msg.sendNickName ?? '' !== '' ? msg.sendNickName ?? "QQ用户" : "QQ用户",
+            senderName: msg.sendMemberName && msg.sendMemberName !== ''
+                ? msg.sendMemberName
+                : msg.sendNickName && msg.sendNickName !== ''
+                    ? msg.sendNickName
+                    : "QQ用户",
             time: +msg.msgTime,
             msg: msg.elements.map((element) => {
                 if (!this.isValidElementType(element.elementType)) return null;
