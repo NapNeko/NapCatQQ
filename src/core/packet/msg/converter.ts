@@ -31,8 +31,8 @@ import {
     PacketMsgVideoElement,
     PacketMultiMsgElement
 } from "@/core/packet/msg/element";
-import {PacketMsg, PacketSendMsgElement} from "@/core/packet/msg/message";
-import {LogWrapper} from "@/common/log";
+import { PacketMsg, PacketSendMsgElement } from "@/core/packet/msg/message";
+import { LogWrapper } from "@/common/log";
 
 const SupportedElementTypes = [
     ElementType.TEXT,
@@ -118,7 +118,7 @@ export class PacketMsgConverter {
                 if (!this.isValidElementType(element.elementType)) return null;
                 return this.rawToPacketMsgConverters[element.elementType](element);
             }).filter((e) => e !== null)
-        }
+        };
     }
 
     private rawToPacketMsgConverters: ElementToPacketMsgConverters = {
