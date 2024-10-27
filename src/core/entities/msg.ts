@@ -27,71 +27,57 @@ export interface GetFileListParam {
 
 export enum ElementType {
     UNKNOWN = 0,
-
     TEXT = 1,
-
     PIC = 2,
-
     FILE = 3,
-
     PTT = 4,
-
     VIDEO = 5,
-
     FACE = 6,
-
     REPLY = 7,
-
+    GreyTip = 8, // “小灰条”，包括拍一拍 (Poke)、撤回提示等
     WALLET = 9,
-
-    /**
-     * “小灰条”，包括拍一拍 (Poke)、撤回提示等
-     */
-    GreyTip = 8,
-
     ARK = 10,
-
     MFACE = 11,
-
     LIVEGIFT = 12,
-
     STRUCTLONGMSG = 13,
-
     MARKDOWN = 14,
-
     GIPHY = 15,
-
     MULTIFORWARD = 16,
-
     INLINEKEYBOARD = 17,
-
     INTEXTGIFT = 18,
-
     CALENDAR = 19,
-
     YOLOGAMERESULT = 20,
-
     AVRECORD = 21,
-
     FEED = 22,
-
     TOFURECORD = 23,
-
     ACEBUBBLE = 24,
-
     ACTIVITY = 25,
-
     TOFU = 26,
-
     FACEBUBBLE = 27,
-
     SHARELOCATION = 28,
-
     TASKTOPMSG = 29,
-
     RECOMMENDEDMSG = 43,
-
     ACTIONBAR = 44
+}
+
+type ElementFullBase = Omit<MessageElement, 'elementType' | 'elementId' | 'extBufForUI'>;
+
+type ElementBase<
+    K extends keyof ElementFullBase,
+    S extends Partial<{ [P in K]: keyof NonNullable<ElementFullBase[P]> | Array<keyof NonNullable<ElementFullBase[P]>> }> = {}
+> = {
+    [P in K]:
+    S[P] extends Array<infer U>
+        ? Pick<NonNullable<ElementFullBase[P]>, U & keyof NonNullable<ElementFullBase[P]>>
+        : S[P] extends keyof NonNullable<ElementFullBase[P]>
+            ? Pick<NonNullable<ElementFullBase[P]>, S[P]>
+            : NonNullable<ElementFullBase[P]>;
+};
+
+export interface SendElementBase<ET extends ElementType> {
+    elementType: ET;
+    elementId: string;
+    extBufForUI?: string;
 }
 
 export interface ActionBarElement {
@@ -99,22 +85,12 @@ export interface ActionBarElement {
     botAppid: string;
 }
 
-export interface SendActionBarElement {
-    elementType: ElementType.ACTIONBAR;
-    elementId: string;
-    actionBarElement: ActionBarElement;
-}
-
 export interface RecommendedMsgElement {
     rows: InlineKeyboardRow[];
     botAppid: string;
 }
 
-export interface SendRecommendedMsgElement {
-    elementType: ElementType.RECOMMENDEDMSG;
-    elementId: string;
-    recommendedMsgElement: RecommendedMsgElement;
-}
+export type SendRecommendedMsgElement = SendElementBase<ElementType.RECOMMENDEDMSG> & ElementBase<'recommendedMsgElement'>;
 
 export interface InlineKeyboardButton {
     id: string;
@@ -171,11 +147,7 @@ export enum NTMsgType {
     KMSGTYPEWALLET = 10
 }
 
-export interface SendTaskTopMsgElement {
-    elementType: ElementType.TASKTOPMSG;
-    elementId: string;
-    taskTopMsgElement: TaskTopMsgElement;
-}
+export type SendTaskTopMsgElement = SendElementBase<ElementType.TASKTOPMSG> & ElementBase<'taskTopMsgElement'>;
 
 export interface TofuRecordElement {
     type: number;
@@ -194,11 +166,7 @@ export interface TofuRecordElement {
     onscreennotify: boolean;
 }
 
-export interface SendTofuRecordElement {
-    elementType: ElementType.TOFURECORD;
-    elementId: string;
-    tofuRecordElement: TofuRecordElement;
-}
+export type SendTofuRecordElement = SendElementBase<ElementType.TOFURECORD> & ElementBase<'tofuRecordElement'>;
 
 export interface FaceBubbleElement {
     faceCount: number;
@@ -216,12 +184,7 @@ export interface FaceBubbleElement {
     };
 }
 
-export interface SendFaceBubbleElement {
-    elementType: ElementType.FACEBUBBLE;
-    elementId: string;
-    faceBubbleElement: FaceBubbleElement;
-
-}
+export type SendFaceBubbleElement = SendElementBase<ElementType.FACEBUBBLE> & ElementBase<'faceBubbleElement'>;
 
 export interface AvRecordElement {
     type: number;
@@ -232,11 +195,7 @@ export interface AvRecordElement {
     extraType: number;
 }
 
-export interface SendavRecordElement {
-    elementType: ElementType.AVRECORD;
-    elementId: string;
-    avRecordElement: AvRecordElement;
-}
+export type SendAvRecordElement = SendElementBase<ElementType.AVRECORD> & ElementBase<'avRecordElement'>;
 
 export interface YoloUserInfo {
     uid: string;
@@ -245,24 +204,13 @@ export interface YoloUserInfo {
     bizId: string;
 }
 
-export interface SendInlineKeyboardElement {
-    elementType: ElementType.INLINEKEYBOARD;
-    elementId: string;
-    inlineKeyboardElement: {
-        rows: number;
-        botAppid: string;
-    };
-
-}
+export type SendInlineKeyboardElement = SendElementBase<ElementType.INLINEKEYBOARD> & ElementBase<'inlineKeyboardElement'>;
 
 export interface YoloGameResultElement {
     UserInfo: YoloUserInfo[];
 }
 
-export interface SendYoloGameResultElement {
-    elementType: ElementType.YOLOGAMERESULT;
-    yoloGameResultElement: YoloGameResultElement;
-}
+export type SendYoloGameResultElement = SendElementBase<ElementType.YOLOGAMERESULT> & ElementBase<'yoloGameResultElement'>;
 
 export interface GiphyElement {
     id: string;
@@ -271,17 +219,9 @@ export interface GiphyElement {
     height: number;
 }
 
-export interface SendGiphyElement {
-    elementType: ElementType.GIPHY;
-    elementId: string;
-    giphyElement: GiphyElement;
-}
+export type SendGiphyElement = SendElementBase<ElementType.GIPHY> & ElementBase<'giphyElement'>;
 
-export interface SendWalletElement {
-    elementType: ElementType.UNKNOWN;//不做 设置位置
-    elementId: string;
-    walletElement: Record<string, never>;
-}
+export type SendWalletElement = SendElementBase<ElementType.UNKNOWN> & ElementBase<'walletElement'>;
 
 export interface CalendarElement {
     summary: string;
@@ -291,49 +231,16 @@ export interface CalendarElement {
     schema: string;
 }
 
-export interface SendCalendarElement {
-    elementType: ElementType.CALENDAR;
-    elementId: string;
-    calendarElement: CalendarElement;
-}
+export type SendCalendarElement = SendElementBase<ElementType.CALENDAR> & ElementBase<'calendarElement'>;
 
-export interface SendliveGiftElement {
-    elementType: ElementType.LIVEGIFT;
-    elementId: string;
-    liveGiftElement: Record<string, never>;
-}
+export type SendLiveGiftElement = SendElementBase<ElementType.LIVEGIFT> & ElementBase<'liveGiftElement'>;
 
-export interface SendTextElement {
-    elementType: ElementType.TEXT;
-    elementId: string;
-    textElement: {
-        content: string;
-        atType: number;
-        atUid: string;
-        atTinyId: string;
-        atNtUid: string;
-    };
-}
+export type SendTextElement = SendElementBase<ElementType.TEXT> & ElementBase<'textElement'>;
 
-export interface SendPttElement {
-    elementType: ElementType.PTT;
-    elementId: string;
-    pttElement: {
-        fileName: string;
-        filePath: string;
-        md5HexStr: string;
-        fileSize: number;
-        duration: number;  // 单位是秒
-        formatType: number;
-        voiceType: number;
-        voiceChangeType: number;
-        canConvert2Text: boolean;
-        waveAmplitudes: number[];
-        fileSubId: string;
-        playState: number;
-        autoConvertText: number;
-    };
-}
+export type SendPttElement = SendElementBase<ElementType.PTT> & ElementBase<'pttElement', {
+    pttElement: ['fileName', 'filePath', 'md5HexStr', 'fileSize', 'duration', 'formatType', 'voiceType',
+        'voiceChangeType', 'canConvert2Text', 'waveAmplitudes', 'fileSubId', 'playState', 'autoConvertText']
+}>;
 
 export enum PicType {
     gif = 2000,
@@ -359,11 +266,7 @@ export enum NTMsgAtType {
     ATTYPEUNKNOWN = 0
 }
 
-export interface SendPicElement {
-    elementType: ElementType.PIC;
-    elementId: string;
-    picElement: PicElement;
-}
+export type SendPicElement = SendElementBase<ElementType.PIC> & ElementBase<'picElement'>;
 
 export interface ReplyElement {
     sourceMsgIdInRecords?: string;
@@ -375,53 +278,27 @@ export interface ReplyElement {
     replyMsgClientSeq?: string;
 }
 
-export interface SendReplyElement {
-    elementType: ElementType.REPLY;
-    elementId: string;
-    replyElement: ReplyElement;
-}
+export type SendReplyElement = SendElementBase<ElementType.REPLY> & ElementBase<'replyElement'>;
 
-export interface SendFaceElement {
-    elementType: ElementType.FACE;
-    elementId: string;
-    faceElement: FaceElement;
-}
+export type SendFaceElement = SendElementBase<ElementType.FACE> & ElementBase<'faceElement'>;
 
-export interface SendMarketFaceElement {
-    elementType: ElementType.MFACE;
-    marketFaceElement: MarketFaceElement;
-}
+export type SendMarketFaceElement = SendElementBase<ElementType.MFACE> & ElementBase<'marketFaceElement'>;
 
-export interface SendStructLongMsgElement {
-    elementType: ElementType.STRUCTLONGMSG;
-    elementId: string;
-    structLongMsgElement: StructLongMsgElement;
-}
+export type SendStructLongMsgElement = SendElementBase<ElementType.STRUCTLONGMSG> & ElementBase<'structLongMsgElement'>;
 
 export interface StructLongMsgElement {
     xmlContent: string;
     resId: string;
 }
 
-export interface SendactionBarElement {
-    elementType: ElementType.ACTIONBAR;
-    elementId: string;
-    actionBarElement: {
-        rows: number;
-        botAppid: string;
-    };
-}
+export type SendActionBarElement = SendElementBase<ElementType.ACTIONBAR> & ElementBase<'actionBarElement'>;
 
 export interface ShareLocationElement {
     text: string;
     ext: string;
 }
 
-export interface SendShareLocationElement {
-    elementType: ElementType.SHARELOCATION;
-    elementId: string;
-    shareLocationElement?: ShareLocationElement;
-}
+export type SendShareLocationElement = SendElementBase<ElementType.SHARELOCATION> & ElementBase<'shareLocationElement'>;
 
 export interface FileElement {
     fileMd5?: string;
@@ -441,29 +318,13 @@ export interface FileElement {
     fileBizId?: number;
 }
 
-export interface SendFileElement {
-    elementType: ElementType.FILE;
-    elementId: string;
-    fileElement: FileElement;
-}
+export type SendFileElement = SendElementBase<ElementType.FILE> & ElementBase<'fileElement'>;
 
-export interface SendVideoElement {
-    elementType: ElementType.VIDEO;
-    elementId: string;
-    videoElement: VideoElement;
-}
+export type SendVideoElement = SendElementBase<ElementType.VIDEO> & ElementBase<'videoElement'>;
 
-export interface SendArkElement {
-    elementType: ElementType.ARK;
-    elementId: string;
-    arkElement: ArkElement;
-}
+export type SendArkElement = SendElementBase<ElementType.ARK> & ElementBase<'arkElement'>;
 
-export interface SendMarkdownElement {
-    elementType: ElementType.MARKDOWN;
-    elementId: string;
-    markdownElement: MarkdownElement;
-}
+export type SendMarkdownElement = SendElementBase<ElementType.MARKDOWN> & ElementBase<'markdownElement'>;
 
 export type SendMessageElement = SendTextElement | SendPttElement |
     SendPicElement | SendReplyElement | SendFaceElement | SendMarketFaceElement | SendFileElement |
@@ -480,7 +341,7 @@ export interface TextElement {
 export interface MessageElement {
     elementType: ElementType,
     elementId: string,
-    extBufForUI: string,//"0x",
+    extBufForUI?: string, //"0x",
     textElement?: TextElement;
     faceElement?: FaceElement,
     marketFaceElement?: MarketFaceElement,
@@ -509,7 +370,6 @@ export interface MessageElement {
     taskTopMsgElement?: TaskTopMsgElement,
     recommendedMsgElement?: RecommendedMsgElement,
     actionBarElement?: ActionBarElement
-
 }
 
 export enum AtType {
@@ -578,7 +438,7 @@ export interface PttElement {
     fileSize: string; // "4261"
     fileSubId: string; // "0"
     fileUuid: string; // "90j3z7rmRphDPrdVgP9udFBaYar#oK0TWZIV"
-    formatType: string; // 1
+    formatType: number; // 1
     invalidState: number; // 0
     md5HexStr: string; // "e4d09c784d5a2abcb2f9980bdc7acfe6"
     playState: number; // 0
@@ -589,6 +449,7 @@ export interface PttElement {
     voiceChangeType: number; // 0
     voiceType: number; // 0
     waveAmplitudes: number[];
+    autoConvertText: number;
 }
 
 export interface ArkElement {
@@ -794,7 +655,8 @@ export interface InlineKeyboardElementRowButton {
 export interface InlineKeyboardElement {
     rows: [{
         buttons: InlineKeyboardElementRowButton[]
-    }];
+    }],
+    botAppid: string;
 }
 
 export interface TipAioOpGrayTipElement {  // 这是什么提示来着？
