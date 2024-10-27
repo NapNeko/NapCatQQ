@@ -56,7 +56,7 @@ export class ForwardMsgBuilder {
         if (!source) {
             source = isGroupMsg ? "群聊的聊天记录" :
                 msg.length
-                    ? Array.from(new Set(msg.map(m => m.senderName)))
+                    ? Array.from(new Set(msg.slice(0, 4).map(m => m.senderName)))
                         .join('和') + '的聊天记录'
                     : '聊天记录';
         }
