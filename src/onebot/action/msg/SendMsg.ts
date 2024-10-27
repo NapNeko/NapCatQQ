@@ -204,7 +204,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                 const msg = (await this.core.apis.MsgApi.getMsgsByMsgId(nodeMsg.Peer, [nodeMsg.MsgId])).msgList[0];
                 logger.logDebug(`handleForwardedNodesPacket[PureRaw] 开始转换 ${JSON.stringify(msg)}`);
                 await this.core.apis.FileApi.downloadRawMsgMedia([msg]);
-                const transformedMsg = this.core.apis.PacketApi.packetSession?.packer.packetConverter.rawMsgToPacketMsg(msg);
+                const transformedMsg = this.core.apis.PacketApi.packetSession?.packer.packetConverter.rawMsgToPacketMsg(msg, msgPeer);
                 logger.logDebug(`handleForwardedNodesPacket[PureRaw] 转换为 ${JSON.stringify(transformedMsg)}`);
                 packetMsg.push(transformedMsg!);
             } else {
