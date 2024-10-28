@@ -348,7 +348,7 @@ export class NTQQGroupApi {
         if (res.hasNext || !res.finish || res.infos.size === 0) {
             res = await this.tryGetGroupMembersV2(false, groupQQ, num);
         }
-        if ((res.infos.size === 0 || res.infos.size === 30) && res.finish) {
+        if ((res.infos.size === 0 || res.infos.size === 30) && !res.finish) {
             res = await this.tryGetGroupMembersV2(true, groupQQ, num);
         }
         return res.infos;
