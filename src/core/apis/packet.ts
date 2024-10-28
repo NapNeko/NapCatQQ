@@ -18,6 +18,8 @@ import {
     PacketMsgPttElement,
     PacketMsgVideoElement
 } from "@/core/packet/message/element";
+import { MiniAppReqParams, MiniAppRawData } from "@/core/packet/entities/miniApp";
+import { MiniAppAdaptShareInfoResp } from "@/core/packet/proto/action/miniAppAdaptShareInfo";
 
 
 interface OffsetType {
@@ -186,7 +188,10 @@ export class NTQQPacketApi {
         return `https://${resp.download.downloadDns}/ftn_handler/${Buffer.from(resp.download.downloadUrl).toString('hex')}/?fname=`;
     }
 
-    async signMiniAppShareInfo(appid: string, title: string, desc: string, time: number, scene: number, templateType: number, businessType: number, picUrl: string, vidUrl: string, jumpUrl: string, iconUrl: string, verType: number, shareType: number, versionId: string, withShareTicket: number, webURL: string, appidRich: string, template: any, field20: string) {
-
+    async sendMiniAppShareInfoReq(param: MiniAppReqParams) {
+        const data = this.packetSession?.packer.packMiniAppAdaptShareInfo(param);
+        const ret = await this.sendPacket("LightAppSvc.mini_app_share.AdaptShareInfo", data!, true);
+        const body = new NapProtoMsg(MiniAppAdaptShareInfoResp).decode(Buffer.from(ret.hex_data, 'hex'))
+        return JSON.parse(body.content.jsonContent) as MiniAppRawData;
     }
 }

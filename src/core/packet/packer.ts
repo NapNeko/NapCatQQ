@@ -26,6 +26,8 @@ import { PacketClient } from "@/core/packet/client";
 import { OidbSvcTrpcTcp0XE37_1700 } from "@/core/packet/proto/oidb/Oidb.0xE37_1700";
 import { OidbSvcTrpcTcp0XE37_800 } from "@/core/packet/proto/oidb/Oidb.0XE37_800";
 import { OidbSvcTrpcTcp0XEB7 } from "./proto/oidb/Oidb.0xEB7";
+import { MiniAppReqParams } from "@/core/packet/entities/miniApp";
+import { MiniAppAdaptShareInfoReq } from "@/core/packet/proto/action/miniAppAdaptShareInfo";
 
 export type PacketHexStr = string & { readonly hexNya: unique symbol };
 
@@ -704,5 +706,42 @@ export class PacketPacker {
                 }
             }
         ), false, false);
+    }
+
+    packMiniAppAdaptShareInfo(req: MiniAppReqParams): PacketHexStr {
+        return this.packetPacket(
+            new NapProtoMsg(MiniAppAdaptShareInfoReq).encode(
+                {
+                    appId: req.sdkId,
+                    body: {
+                        extInfo: {
+                            field2: Buffer.alloc(0)
+                        },
+                        appid: req.appId,
+                        title: req.title,
+                        desc: req.desc,
+                        time: BigInt(Date.now()),
+                        scene: req.scene,
+                        templateType: req.templateType,
+                        businessType: req.businessType,
+                        picUrl: req.picUrl,
+                        vidUrl: "",
+                        jumpUrl: req.jumpUrl,
+                        iconUrl: req.iconUrl,
+                        verType: req.verType,
+                        shareType: req.shareType,
+                        versionId: req.versionId,
+                        withShareTicket: req.withShareTicket,
+                        webURL: "",
+                        appidRich: Buffer.alloc(0),
+                        template: {
+                            templateId: "",
+                            templateData: ""
+                        },
+                        field20: ""
+                    }
+                }
+            )
+        )
     }
 }

@@ -98,6 +98,7 @@ import { GoCQHTTPCheckUrlSafely } from './go-cqhttp/GoCQHTTPCheckUrlSafely';
 import { GoCQHTTPGetModelShow } from './go-cqhttp/GoCQHTTPGetModelShow';
 import { GoCQHTTPSetModelShow } from './go-cqhttp/GoCQHTTPSetModelShow';
 import { GoCQHTTPDeleteFriend } from './go-cqhttp/GoCQHTTPDeleteFriend';
+import { GetMiniAppArk } from "@/onebot/action/extends/GetMiniAppArk";
 
 
 export type ActionMap = Map<string, BaseAction<any, any>>;
@@ -210,6 +211,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         // new UploadForwardMsg(obContext, core),
         new GetGroupShutList(obContext, core),
         new GetGroupFileUrl(obContext, core),
+        new GetMiniAppArk(obContext, core),
     ];
     const actionMap = new Map();
     for (const action of actionHandlers) {
