@@ -18,7 +18,7 @@ export class NTQQUserApi {
     async getStatusByUid(uid: string) {
         return this.context.session.getProfileService().getStatus(uid);
     }
-    async getProfileLike(uid: string) {
+    async getProfileLike(uid: string, start: number, count: number) {
         return this.context.session.getProfileLikeService().getBuddyProfileLike({
             friendUids: [uid],
             basic: 1,
@@ -26,8 +26,8 @@ export class NTQQUserApi {
             favorite: 0,
             userProfile: 1,
             type: 2,
-            start: 0,
-            limit: 20,
+            start: start,
+            limit: count,
         });
     }
     async fetchOtherProfileLike(uid: string) {
