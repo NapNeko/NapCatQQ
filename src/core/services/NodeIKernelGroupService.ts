@@ -105,7 +105,7 @@ export interface NodeIKernelGroupService {
                 uid: string,
                 index: number//0
             }>,
-            infos: unknown,
+            infos: Map<string, GroupMember>,
             finish: true,
             hasRobot: false
         }
