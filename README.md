@@ -25,7 +25,6 @@ NapCatQQ (aka 猫猫框架) 是现代化的基于 NTQQ 的 Bot 协议端实现
 **首次使用**请务必查看如下文档看使用教程
 
 ### 文档地址
-[Github.IO](https://napneko.github.io/)
 
 [Cloudflare.Worker](https://doc.napneko.icu/)
 
@@ -33,6 +32,7 @@ NapCatQQ (aka 猫猫框架) 是现代化的基于 NTQQ 的 Bot 协议端实现
 
 [Cloudflare.Pages](https://napneko.pages.dev/)
 
+[Github.IO](https://napneko.github.io/)
 ## 回家旅途
 [QQ Group](https://qm.qq.com/q/VfjAq5HIMS)
 
