@@ -12,6 +12,7 @@ import {
 import { isNumeric, solveAsyncProblem } from '@/common/helper';
 import { LimitedHashTable } from '@/common/message-unique';
 import { NTEventWrapper } from '@/common/event';
+import { c } from 'vite/dist/node/types.d-aGj9QkWt';
 
 export class NTQQGroupApi {
     context: InstanceContext;
@@ -320,10 +321,10 @@ export class NTQQGroupApi {
         infos: Map<string, GroupMember>;
         finish: boolean;
         hasNext: boolean | undefined;
-    }>{
+    }> {
         const sceneId = this.context.session.getGroupService().createMemberListScene(groupQQ, 'groupMemberList_MainWindow_1');
         const once = this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onMemberListChange', 0, timeout, (params) => params.sceneId === sceneId)
-            .catch(() => {});
+            .catch(() => { });
         const result = await this.context.session.getGroupService().getNextMemberList(sceneId, undefined, num);
         if (result.errCode !== 0) {
             throw new Error('获取群成员列表出错,' + result.errMsg);
@@ -337,19 +338,20 @@ export class NTQQGroupApi {
         }
         this.context.session.getGroupService().destroyMemberListScene(sceneId);
         return {
-            infos: resMode2?.infos || result.result.infos,
+            infos: new Map([...(resMode2?.infos ?? []), ...result.result.infos]),
             finish: result.result.finish,
             hasNext: resMode2?.hasNext,
         };
     }
 
     async getGroupMembersV2(groupQQ: string, num = 3000): Promise<Map<string, GroupMember>> {
-        let res = await this.tryGetGroupMembersV2(true, groupQQ);
+        console.log("-start-", groupQQ);
+        let res = await this.tryGetGroupMembersV2(true, groupQQ, 3000);
         if (res.hasNext || !res.finish || res.infos.size === 0) {
-            res = await this.tryGetGroupMembersV2(false, groupQQ, num);
+            res = await this.tryGetGroupMembersV2(false, groupQQ, 3000);
         }
-        if ((res.infos.size === 0 || res.infos.size === 30) && !res.finish) {
-            res = await this.tryGetGroupMembersV2(true, groupQQ, num);
+        if (res.infos.size === 0 && res.finish) {
+            res = await this.tryGetGroupMembersV2(true, groupQQ, 3000);
         }
         return res.infos;
     }
