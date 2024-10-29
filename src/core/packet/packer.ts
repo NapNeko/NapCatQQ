@@ -742,6 +742,6 @@ export class PacketPacker {
                     }
                 }
             )
-        )
+        );
     }
 }

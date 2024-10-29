@@ -12,7 +12,6 @@ import {
 import { isNumeric, solveAsyncProblem } from '@/common/helper';
 import { LimitedHashTable } from '@/common/message-unique';
 import { NTEventWrapper } from '@/common/event';
-import { b, c } from 'vite/dist/node/types.d-aGj9QkWt';
 
 export class NTQQGroupApi {
     context: InstanceContext;
