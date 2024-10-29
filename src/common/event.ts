@@ -9,6 +9,15 @@ interface InternalMapKey {
     checker: ((...args: any[]) => boolean) | undefined;
 }
 
+type EnsureFunc<T> = T extends (...args: any) => any ? T : never;
+
+type FuncKeys<T> = Extract<
+    {
+        [K in keyof T]: EnsureFunc<T[K]> extends never ? never : K;
+    }[keyof T],
+    string
+>;
+
 export type ListenerClassBase = Record<string, string>;
 
 export class NTEventWrapper {
@@ -43,10 +52,8 @@ export class NTEventWrapper {
 
     createEventFunction<
         Service extends keyof ServiceNamingMapping,
-        ServiceMethod extends Exclude<keyof ServiceNamingMapping[Service], symbol>,
-        // eslint-disable-next-line
-        // @ts-ignore
-        T extends (...args: any) => any = ServiceNamingMapping[Service][ServiceMethod],
+        ServiceMethod extends FuncKeys<ServiceNamingMapping[Service]>,
+        T extends (...args: any) => any = EnsureFunc<ServiceNamingMapping[Service][ServiceMethod]>,
     >(eventName: `${Service}/${ServiceMethod}`): T | undefined {
         const eventNameArr = eventName.split('/');
         type eventType = {
@@ -98,10 +105,8 @@ export class NTEventWrapper {
 
     async callNoListenerEvent<
         Service extends keyof ServiceNamingMapping,
-        ServiceMethod extends Exclude<keyof ServiceNamingMapping[Service], symbol>,
-        // eslint-disable-next-line
-        // @ts-ignore
-        EventType extends (...args: any) => any = ServiceNamingMapping[Service][ServiceMethod],
+        ServiceMethod extends FuncKeys<ServiceNamingMapping[Service]>,
+        EventType extends (...args: any) => any = EnsureFunc<ServiceNamingMapping[Service][ServiceMethod]>,
     >(
         serviceAndMethod: `${Service}/${ServiceMethod}`,
         ...args: Parameters<EventType>
@@ -111,10 +116,8 @@ export class NTEventWrapper {
 
     async registerListen<
         Listener extends keyof ListenerNamingMapping,
-        ListenerMethod extends Exclude<keyof ListenerNamingMapping[Listener], symbol>,
-        // eslint-disable-next-line
-        // @ts-ignore
-        ListenerType extends (...args: any) => any = ListenerNamingMapping[Listener][ListenerMethod],
+        ListenerMethod extends FuncKeys<ListenerNamingMapping[Listener]>,
+        ListenerType extends (...args: any) => any = EnsureFunc<ListenerNamingMapping[Listener][ListenerMethod]>,
     >(
         listenerAndMethod: `${Listener}/${ListenerMethod}`,
         waitTimes = 1,
@@ -164,15 +167,11 @@ export class NTEventWrapper {
 
     async callNormalEventV2<
         Service extends keyof ServiceNamingMapping,
-        ServiceMethod extends Exclude<keyof ServiceNamingMapping[Service], symbol>,
+        ServiceMethod extends FuncKeys<ServiceNamingMapping[Service]>,
         Listener extends keyof ListenerNamingMapping,
-        ListenerMethod extends Exclude<keyof ListenerNamingMapping[Listener], symbol>,
-        // eslint-disable-next-line
-        // @ts-ignore
-        EventType extends (...args: any) => any = ServiceNamingMapping[Service][ServiceMethod],
-        // eslint-disable-next-line
-        // @ts-ignore
-        ListenerType extends (...args: any) => any = ListenerNamingMapping[Listener][ListenerMethod]
+        ListenerMethod extends FuncKeys<ListenerNamingMapping[Listener]>,
+        EventType extends (...args: any) => any = EnsureFunc<ServiceNamingMapping[Service][ServiceMethod]>,
+        ListenerType extends (...args: any) => any = EnsureFunc<ListenerNamingMapping[Listener][ListenerMethod]>
     >(
         serviceAndMethod: `${Service}/${ServiceMethod}`,
         listenerAndMethod: `${Listener}/${ListenerMethod}`,

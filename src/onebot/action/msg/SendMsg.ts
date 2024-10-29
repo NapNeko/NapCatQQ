@@ -276,7 +276,6 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                             logger.logError.bind(this.core.context.logger)('子消息中包含非node消息 跳过不合法部分');
                             continue;
                         }
-                        // @ts-ignore
                         const nodeMsg = await this.handleForwardedNodes(selfPeer, OB11Data.filter(e => e.type === OB11MessageDataType.node));
                         if (nodeMsg) {
                             nodeMsgIds.push(nodeMsg.message!.msgId);
