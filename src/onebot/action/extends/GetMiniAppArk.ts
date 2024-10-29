@@ -1,8 +1,8 @@
-import {ActionName} from '../types';
-import {FromSchema, JSONSchema} from 'json-schema-to-ts';
-import {GetPacketStatusDepends} from "@/onebot/action/packet/GetPacketStatus";
-import {MiniAppData, MiniAppRawData, MiniAppReqCustomParams, MiniAppReqParams} from "@/core/packet/entities/miniApp";
-import {MiniAppInfo, MiniAppInfoHelper} from "@/core/packet/helper/miniAppHelper";
+import { ActionName } from '../types';
+import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
+import { MiniAppData, MiniAppRawData, MiniAppReqCustomParams, MiniAppReqParams } from "@/core/packet/entities/miniApp";
+import { MiniAppInfo, MiniAppInfoHelper } from "@/core/packet/helper/miniAppHelper";
 
 const SchemaData = {
     type: 'object',
@@ -11,21 +11,21 @@ const SchemaData = {
             type: 'string',
             enum: ['bili', 'weibo']
         },
-        title: {type: 'string'},
-        desc: {type: 'string'},
-        picUrl: {type: 'string'},
-        jumpUrl: {type: 'string'},
-        iconUrl: {type: 'string'},
-        sdkId: {type: 'string'},
-        appId: {type: 'string'},
-        scene: {type: ['number', 'string']},
-        templateType: {type: ['number', 'string']},
-        businessType: {type: ['number', 'string']},
-        verType: {type: ['number', 'string']},
-        shareType: {type: ['number', 'string']},
-        versionId: {type: 'string'},
-        withShareTicket: {type: ['number', 'string']},
-        rawArkData: {type: ['boolean', 'string']}
+        title: { type: 'string' },
+        desc: { type: 'string' },
+        picUrl: { type: 'string' },
+        jumpUrl: { type: 'string' },
+        iconUrl: { type: 'string' },
+        sdkId: { type: 'string' },
+        appId: { type: 'string' },
+        scene: { type: ['number', 'string'] },
+        templateType: { type: ['number', 'string'] },
+        businessType: { type: ['number', 'string'] },
+        verType: { type: ['number', 'string'] },
+        shareType: { type: ['number', 'string'] },
+        versionId: { type: 'string' },
+        withShareTicket: { type: ['number', 'string'] },
+        rawArkData: { type: ['boolean', 'string'] }
     },
     oneOf: [
         {
@@ -75,11 +75,11 @@ export class GetMiniAppArk extends GetPacketStatusDepends<Payload, {
                     versionId: versionId,
                     withShareTicket: +withShareTicket
                 }
-            )
+            );
         }
         const arkData = await this.core.apis.PacketApi.sendMiniAppShareInfoReq(reqParam);
         return {
-            data: Boolean(payload.rawArkData) ? arkData : MiniAppInfoHelper.RawToSend(arkData)
-        }
+            data: payload.rawArkData ? arkData : MiniAppInfoHelper.RawToSend(arkData)
+        };
     }
 }

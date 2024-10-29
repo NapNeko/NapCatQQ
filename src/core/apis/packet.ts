@@ -191,7 +191,7 @@ export class NTQQPacketApi {
     async sendMiniAppShareInfoReq(param: MiniAppReqParams) {
         const data = this.packetSession?.packer.packMiniAppAdaptShareInfo(param);
         const ret = await this.sendPacket("LightAppSvc.mini_app_share.AdaptShareInfo", data!, true);
-        const body = new NapProtoMsg(MiniAppAdaptShareInfoResp).decode(Buffer.from(ret.hex_data, 'hex'))
+        const body = new NapProtoMsg(MiniAppAdaptShareInfoResp).decode(Buffer.from(ret.hex_data, 'hex'));
         return JSON.parse(body.content.jsonContent) as MiniAppRawData;
     }
 }
