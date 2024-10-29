@@ -341,7 +341,7 @@ export class NapCatOneBot11Adapter {
         };
 
         this.context.session.getMsgService().addKernelMsgListener(
-            proxiedListenerOf(msgListener, this.context.logger) as any,
+            proxiedListenerOf(msgListener, this.context.logger),
         );
     }
 
@@ -370,7 +370,7 @@ export class NapCatOneBot11Adapter {
         };
 
         this.context.session.getBuddyService().addKernelBuddyListener(
-            proxiedListenerOf(buddyListener, this.context.logger) as any,
+            proxiedListenerOf(buddyListener, this.context.logger),
         );
     }
 

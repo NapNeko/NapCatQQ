@@ -52,7 +52,7 @@ export class FileNapCatOneBotUUID {
         const [, , chatType, peerUid, modelId, fileId, fileUUID = undefined] = data;
         return {
             peer: {
-                chatType: chatType as any,
+                chatType: +chatType,
                 peerUid: peerUid,
             },
             modelId,
@@ -89,7 +89,7 @@ export class FileNapCatOneBotUUID {
         const [, , chatType, peerUid, msgId, elementId, fileUUID = undefined] = data;
         return {
             peer: {
-                chatType: chatType as any,
+                chatType: +chatType,
                 peerUid: peerUid,
             },
             msgId,

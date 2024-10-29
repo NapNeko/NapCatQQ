@@ -327,11 +327,11 @@ export class OneBotMsgApi {
         },
 
         multiForwardMsgElement: async (_, msg) => {
-            const message_data: OB11MessageForward = {
-                data: {} as any,
-                type: OB11MessageDataType.forward,
-            };
-            message_data.data.id = msg.msgId;
+            // const message_data: OB11MessageForward = {
+            //     data: {} as any,
+            //     type: OB11MessageDataType.forward,
+            // };
+            // message_data.data.id = msg.msgId;
             const parentMsgPeer = msg.parentMsgPeer ?? {
                 chatType: msg.chatType,
                 guildId: '',
