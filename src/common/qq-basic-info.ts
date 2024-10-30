@@ -1,8 +1,9 @@
 import fs from 'node:fs';
 import { systemPlatform } from '@/common/system';
-import { getDefaultQQVersionConfigInfo, getQQPackageInfoPath, getQQVersionConfigPath } from './helper';
+import { getDefaultQQVersionConfigInfo, getQQPackageInfoPath, getQQVersionConfigPath, parseAppidFromMajor } from './helper';
 import AppidTable from '@/core/external/appid.json';
 import { LogWrapper } from './log';
+import { getMajorPath } from '@/core';
 
 export class QQBasicInfoWrapper {
     QQMainPath: string | undefined;
@@ -72,6 +73,7 @@ export class QQBasicInfoWrapper {
     }
 
     getAppidV2(): { appid: string; qua: string } {
+        // 通过已有表 性能好
         const appidTbale = AppidTable as unknown as QQAppidTableType;
         const fullVersion = this.getFullQQVesion();
         if (fullVersion) {
@@ -80,10 +82,22 @@ export class QQBasicInfoWrapper {
                 return data;
             }
         }
-
-        // else
+        // 通过Major拉取 性能差
+        try {
+            let majorAppid = this.getAppidV2ByMajor(fullVersion);
+            if (majorAppid) { return { appid: majorAppid, qua: this.getQUAFallback() }; }
+        } catch (error) {
+            this.context.logger.log(`[QQ版本兼容性检测] 通过Major 获取Appid异常 请检测NapCat/QQNT是否正常`);
+        }
+        // 最终兜底为老版本
         this.context.logger.log(`[QQ版本兼容性检测] 获取Appid异常 请检测NapCat/QQNT是否正常`);
         this.context.logger.log(`[QQ版本兼容性检测] ${fullVersion} 版本兼容性不佳，可能会导致一些功能无法正常使用`,);
         return { appid: this.getAppIdFallback(), qua: this.getQUAFallback() };
     }
+    getAppidV2ByMajor(QQVersion: string) {
+        let majorPath = getMajorPath(QQVersion);
+        let appid = parseAppidFromMajor(majorPath);
+        return appid;
+    }
+
 }
