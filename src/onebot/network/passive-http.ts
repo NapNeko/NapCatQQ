@@ -64,9 +64,9 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
         });
 
         this.app.use((req, res, next) => this.authorize(this.token, req, res, next));
-        // @ts-ignore
-        this.app.use((req, res) => this.handleRequest(req, res));
-
+        this.app.use(async (req, res, _) => {
+            await this.handleRequest(req, res);
+        });
         this.server.listen(this.port, () => {
             this.core.context.logger.log(`[OneBot] [HTTP Server Adapter] Start On Port ${this.port}`);
         });

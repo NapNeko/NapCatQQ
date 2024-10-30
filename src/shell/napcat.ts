@@ -165,7 +165,7 @@ export async function NCoreInitShell() {
             logger.logError.bind(logger)('[Core] [Login] Login Error , ErrInfo: ', args);
         };
 
-        loginService.addKernelLoginListener(proxiedListenerOf(loginListener, logger) as any);
+        loginService.addKernelLoginListener(proxiedListenerOf(loginListener, logger));
         const isConnect = loginService.connect();
         if (!isConnect) {
             logger.logError.bind(logger)('核心登录服务连接失败!');
