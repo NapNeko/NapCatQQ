@@ -217,21 +217,34 @@ export class OneBotMsgApi {
             if (records.peerUin === '284840486' || records.peerUin === '1094950020') {
                 return createReplyData(records.msgId);
             }
-            let replyMsgList = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeqV2(peer, element.replayMsgSeq, element.replyMsgTime, [element.senderUidStr])).msgList;
+            let replyMsgList = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeqV2(peer, element.replayMsgSeq, records.msgTime, [element.senderUidStr])).msgList;
             let replyMsg = replyMsgList.find(msg => msg.msgRandom === records.msgRandom);
+
             if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
-                // 我猜测可能是时间参数未对上 导致找不到引用消息 或者msgList 存在问题
-                this.core.context.logger.logWarn.bind(this.core.context.logger)(
-                    '初次筛选消息失败,获取不到引用的消息 Seq:',
+                this.core.context.logger.logError.bind(this.core.context.logger)(
+                    '筛选结果,筛选消息失败,将使用Fallback-1 Seq: ',
                     element.replayMsgSeq,
                     ',消息长度:',
                     replyMsgList.length
                 );
-                // 再次筛选
-                replyMsgList = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeqV3(peer, element.replayMsgSeq, [element.senderUidStr])).msgList;
-                // console.log(JSON.stringify(replyMsgList, null, 4));
+                replyMsgList = (await this.core.apis.MsgApi.getMsgsBySeqAndCount(peer, element.replayMsgSeq, 1, true, true)).msgList;
                 replyMsg = replyMsgList.find(msg => msg.msgRandom === records.msgRandom);
             }
+
+            if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
+                this.core.context.logger.logWarn.bind(this.core.context.logger)(
+                    '筛选消息失败,将使用Fallback-2 Seq:',
+                    element.replayMsgSeq,
+                    ',消息长度:',
+                    replyMsgList.length
+                );
+                replyMsgList = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeqV3(peer, element.replayMsgSeq, [element.senderUidStr])).msgList;
+                replyMsg = replyMsgList.find(msg => msg.msgRandom === records.msgRandom);
+            }
+
+
+
+            // 丢弃该消息段
             if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
                 this.core.context.logger.logError.bind(this.core.context.logger)(
                     '最终筛选结果,筛选消息失败,获取不到引用的消息 Seq: ',

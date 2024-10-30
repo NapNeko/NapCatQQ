@@ -172,7 +172,7 @@ export interface NodeIKernelMsgService {
         msgList: RawMessage[]
     }>;
     //@deprecated
-    getMsgsBySeqAndCount(peer: Peer, seq: string, count: number, desc: boolean, unknownArg: boolean): Promise<GeneralCallResult & {
+    getMsgsBySeqAndCount(peer: Peer, seq: string, count: number, desc: boolean, isReverseOrder: boolean): Promise<GeneralCallResult & {
         msgList: RawMessage[]
     }>;
 
@@ -186,27 +186,29 @@ export interface NodeIKernelMsgService {
 
     getSingleMsg(Peer: Peer, msgSeq: string): Promise<GeneralCallResult & { msgList: RawMessage[] }>;
 
-    getSourceOfReplyMsg(peer: Peer, MsgId: string, SourceSeq: string): unknown;
+    // 下面的msgid全部不真实
+    getSourceOfReplyMsg(peer: Peer, msgId: string, sourceSeq: string): Promise<GeneralCallResult & { msgList: RawMessage[] }>;
 
-    getSourceOfReplyMsgV2(peer: Peer, RootMsgId: string, ReplyMsgId: string): unknown;
+    //用法和聊天记录一样
+    getSourceOfReplyMsgV2(peer: Peer, rootMsgId: string, replyMsgId: string): Promise<GeneralCallResult & { msgList: RawMessage[] }>;
 
-    getMsgByClientSeqAndTime(peer: Peer, clientSeq: string, time: string): unknown;
+    getMsgByClientSeqAndTime(peer: Peer, clientSeq: string, time: string): Promise<GeneralCallResult & { msgList: RawMessage[] }>;
 
-    getSourceOfReplyMsgByClientSeqAndTime(peer: Peer, clientSeq: string, time: string): unknown;
+    getSourceOfReplyMsgByClientSeqAndTime(peer: Peer, clientSeq: string, time: string, replyMsgId: string): Promise<GeneralCallResult & { msgList: RawMessage[] }>;
 
     getMsgsByTypeFilter(peer: Peer, msgId: string, cnt: unknown, queryOrder: boolean, typeFilter: {
         type: number,
         subtype: Array<number>
-    }): unknown;
+    }): Promise<GeneralCallResult & { msgList: RawMessage[] }>;
 
     getMsgsByTypeFilters(peer: Peer, msgId: string, cnt: unknown, queryOrder: boolean, typeFilters: Array<{
         type: number,
         subtype: Array<number>
-    }>): unknown;
+    }>): Promise<GeneralCallResult & { msgList: RawMessage[] }>;
 
-    getMsgWithAbstractByFilterParam(...args: unknown[]): unknown;
+    getMsgWithAbstractByFilterParam(...args: unknown[]): Promise<GeneralCallResult & { msgList: RawMessage[] }>;
 
-    queryMsgsWithFilter(...args: unknown[]): unknown;
+    queryMsgsWithFilter(...args: unknown[]): Promise<GeneralCallResult & { msgList: RawMessage[] }>;
 
     //queryMsgsWithFilterVer2(MsgId: string, MsgTime: string, param: QueryMsgsParams): Promise<unknown>;
 
