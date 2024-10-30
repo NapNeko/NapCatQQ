@@ -1,3 +1,4 @@
+require('./poke/renderer.js');
 export const onSettingWindowCreated = async (view) => {
     
     // view.style.width = "100%";
