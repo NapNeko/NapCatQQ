@@ -3,6 +3,9 @@ import { InstanceContext, NapCatCore } from '@/core';
 import { GeneralCallResult } from '@/core/services/common';
 
 export class NTQQMsgApi {
+    getMsgByClientSeqAndTime(peer: Peer, replyMsgClientSeq: string, replyMsgTime: string) {
+        return this.context.session.getMsgService().getMsgByClientSeqAndTime(peer, replyMsgClientSeq, replyMsgTime);
+    }
     // nt_qq//global//nt_data//Emoji//emoji-resource//sysface_res/apng/ 下可以看到所有QQ表情预览
     // nt_qq\global\nt_data\Emoji\emoji-resource\face_config.json 里面有所有表情的id, 自带表情id是QSid, 标准emoji表情id是QCid
     // 其实以官方文档为准是最好的，https://bot.q.qq.com/wiki/develop/api-v2/openapi/emoji/model.html#EmojiType
@@ -22,7 +25,9 @@ export class NTQQMsgApi {
     async sendShowInputStatusReq(peer: Peer, eventType: number) {
         return this.context.session.getMsgService().sendShowInputStatusReq(peer.chatType, eventType, peer.peerUid);
     }
-
+    async getSourceOfReplyMsgV2(peer: Peer, clientSeq: string, time: string) {
+        return this.context.session.getMsgService().getSourceOfReplyMsgV2(peer, clientSeq, time);
+    }
     async getMsgEmojiLikesList(peer: Peer, msgSeq: string, emojiId: string, emojiType: string, count: number = 20) {
         //注意此处emojiType 可选值一般为1-2 2好像是unicode表情dec值 大部分情况 Taged Mlikiowa
         return this.context.session.getMsgService().getMsgEmojiLikesList(peer, msgSeq, emojiId, emojiType, '', false, count);
@@ -106,9 +111,9 @@ export class NTQQMsgApi {
             pageLimit: 1,
         });
     }
-    //@deprecated
-    async getMsgsBySeqAndCount(peer: Peer, seq: string, count: number, desc: boolean, z: boolean) {
-        return await this.context.session.getMsgService().getMsgsBySeqAndCount(peer, seq, count, desc, z);
+    // 客户端还在用别慌 
+    async getMsgsBySeqAndCount(peer: Peer, seq: string, count: number, desc: boolean, isReverseOrder: boolean) {
+        return await this.context.session.getMsgService().getMsgsBySeqAndCount(peer, seq, count, desc, isReverseOrder);
     }
     async getMsgExBySeq(peer: Peer, msgSeq: string) {
         const DateNow = Math.floor(Date.now() / 1000);
