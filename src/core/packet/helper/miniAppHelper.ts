@@ -38,7 +38,7 @@ export abstract class MiniAppInfo {
             });
             MiniAppInfo.appMap.set("bili", this);
         }
-    }
+    };
 
     static WeiBo = new class extends MiniAppInfo {
         constructor() {
@@ -56,7 +56,7 @@ export abstract class MiniAppInfo {
             });
             MiniAppInfo.appMap.set("weibo", this);
         }
-    }
+    };
 }
 
 export class MiniAppInfoHelper {

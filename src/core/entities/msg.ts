@@ -64,7 +64,7 @@ type ElementFullBase = Omit<MessageElement, 'elementType' | 'elementId' | 'extBu
 
 type ElementBase<
     K extends keyof ElementFullBase,
-    S extends Partial<{ [P in K]: keyof NonNullable<ElementFullBase[P]> | Array<keyof NonNullable<ElementFullBase[P]>> }> = {}
+    S extends Partial<{ [P in K]: keyof NonNullable<ElementFullBase[P]> | Array<keyof NonNullable<ElementFullBase[P]>> }> = object
 > = {
     [P in K]:
     S[P] extends Array<infer U>

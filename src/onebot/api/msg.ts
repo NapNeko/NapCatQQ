@@ -24,7 +24,6 @@ import {
     OB11MessageData,
     OB11MessageDataType,
     OB11MessageFileBase,
-    OB11MessageForward,
 } from '@/onebot';
 import { OB11Entities } from '@/onebot/entities';
 import { EventType } from '@/onebot/event/OB11BaseEvent';
@@ -743,9 +742,12 @@ export class OneBotMsgApi {
             async (element) => {
                 for (const key in element) {
                     if (keyCanBeParsed(key, this.rawToOb11Converters) && element[key]) {
-                        const parsedElement = await this.rawToOb11Converters[key]?.(
-                            // eslint-disable-next-line
-                            // @ts-ignore
+                        const converters = this.rawToOb11Converters[key] as (
+                            element: Exclude<MessageElement[keyof RawToOb11Converters], null | undefined>,
+                            msg: RawMessage,
+                            elementWrapper: MessageElement,
+                        ) => PromiseLike<OB11MessageData | null>;
+                        const parsedElement = await converters?.(
                             element[key],
                             msg,
                             element,
@@ -794,9 +796,11 @@ export class OneBotMsgApi {
             if (ignoreTypes.includes(sendMsg.type)) {
                 continue;
             }
-            const callResult = this.ob11ToRawConverters[sendMsg.type](
-                // eslint-disable-next-line
-                // @ts-ignore
+            const converter = this.ob11ToRawConverters[sendMsg.type] as (
+                sendMsg: Extract<OB11MessageData, { type: OB11MessageData['type'] }>,
+                context: MessageContext,
+            ) => Promise<SendMessageElement | undefined>;
+            const callResult = converter(
                 sendMsg,
                 { peer, deleteAfterSentFiles },
             )?.catch(undefined);
