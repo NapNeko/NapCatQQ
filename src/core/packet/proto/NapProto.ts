@@ -61,35 +61,35 @@ export function ProtoField(no: number, type: ScalarType | (() => ProtoMessageTyp
     }
 }
 
-type ProtoFieldReturnType<T extends unknown, E extends boolean> = NonNullable<T> extends ScalarProtoFieldType<infer S, infer O, infer R>
+type ProtoFieldReturnType<T, E extends boolean> = NonNullable<T> extends ScalarProtoFieldType<infer S, infer O, infer R>
     ? ScalarTypeToTsType<S>
     : T extends NonNullable<MessageProtoFieldType<infer S, infer O, infer R>>
     ? NonNullable<NapProtoStructType<ReturnType<S>, E>>
     : never;
 
-type RequiredFieldsBaseType<T extends unknown, E extends boolean> = {
+type RequiredFieldsBaseType<T, E extends boolean> = {
     [K in keyof T as T[K] extends { optional: true } ? never : LowerCamelCase<K & string>]:
     T[K] extends { repeat: true }
     ? ProtoFieldReturnType<T[K], E>[]
     : ProtoFieldReturnType<T[K], E>
 }
 
-type OptionalFieldsBaseType<T extends unknown, E extends boolean> = {
+type OptionalFieldsBaseType<T, E extends boolean> = {
     [K in keyof T as T[K] extends { optional: true } ? LowerCamelCase<K & string> : never]?:
     T[K] extends { repeat: true }
     ? ProtoFieldReturnType<T[K], E>[]
     : ProtoFieldReturnType<T[K], E>
 }
 
-type RequiredFieldsType<T extends unknown, E extends boolean> = E extends true ? Partial<RequiredFieldsBaseType<T, E>> : RequiredFieldsBaseType<T, E>;
+type RequiredFieldsType<T, E extends boolean> = E extends true ? Partial<RequiredFieldsBaseType<T, E>> : RequiredFieldsBaseType<T, E>;
 
-type OptionalFieldsType<T extends unknown, E extends boolean> = E extends true ? Partial<OptionalFieldsBaseType<T, E>> : OptionalFieldsBaseType<T, E>;
+type OptionalFieldsType<T, E extends boolean> = E extends true ? Partial<OptionalFieldsBaseType<T, E>> : OptionalFieldsBaseType<T, E>;
 
-type NapProtoStructType<T extends unknown, E extends boolean> = RequiredFieldsType<T, E> & OptionalFieldsType<T, E>;
+type NapProtoStructType<T, E extends boolean> = RequiredFieldsType<T, E> & OptionalFieldsType<T, E>;
 
-export type NapProtoEncodeStructType<T extends unknown> = NapProtoStructType<T, true>;
+export type NapProtoEncodeStructType<T> = NapProtoStructType<T, true>;
 
-export type NapProtoDecodeStructType<T extends unknown> = NapProtoStructType<T, false>;
+export type NapProtoDecodeStructType<T> = NapProtoStructType<T, false>;
 
 const NapProtoMsgCache = new Map<ProtoMessageType, MessageType<NapProtoStructType<ProtoMessageType, boolean>>>();
 

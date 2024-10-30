@@ -100,7 +100,7 @@ export class NapCatCore {
         if (!fs.existsSync(this.NapCatTempPath)) {
             fs.mkdirSync(this.NapCatTempPath, { recursive: true });
         }
-       
+
         this.initNapCatCoreListeners().then().catch(this.context.logger.logError.bind(this.context.logger));
 
         this.context.logger.setFileLogEnabled(
@@ -140,7 +140,7 @@ export class NapCatCore {
         };
         //await sleep(2500);
         this.context.session.getMsgService().addKernelMsgListener(
-            proxiedListenerOf(msgListener, this.context.logger) as any,
+            proxiedListenerOf(msgListener, this.context.logger),
         );
 
         const profileListener = new NodeIKernelProfileListener();
@@ -236,7 +236,7 @@ export class NapCatCore {
             }
         };
         this.context.session.getGroupService().addKernelGroupListener(
-            proxiedListenerOf(groupListener, this.context.logger) as any,
+            proxiedListenerOf(groupListener, this.context.logger),
         );
     }
 
@@ -276,7 +276,7 @@ export async function genSessionConfig(
         d2: '',
         d2Key: '',
         machineId: '',
-        platform: systemPlatform,  // 3是Windows? 
+        platform: systemPlatform,  // 3是Windows?
         platVer: systemVersion,  // 系统版本号, 应该可以固定
         appid: QQVersionAppid,
         rdeliveryConfig: {

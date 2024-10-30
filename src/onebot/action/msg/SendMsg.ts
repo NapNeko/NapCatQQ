@@ -236,12 +236,11 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         message: RawMessage | null,
         res_id?: string
     }> {
-        let returnMsg: RawMessage | undefined, res_id: string | undefined;
         const uploadReturnData = await this.uploadForwardedNodesPacket(msgPeer, messageNodes, source, news, summary, prompt);
-        res_id = uploadReturnData?.res_id;
+        const res_id = uploadReturnData?.res_id;
         const finallySendElements = uploadReturnData?.finallySendElements;
         if (!finallySendElements) throw Error('转发消息失败，生成节点为空');
-        returnMsg = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(msgPeer, [finallySendElements], [], true).catch(_ => undefined);
+        const returnMsg = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(msgPeer, [finallySendElements], [], true).catch(_ => undefined);
         return { message: returnMsg ?? null, res_id };
     }
 
@@ -276,7 +275,6 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                             logger.logError.bind(this.core.context.logger)('子消息中包含非node消息 跳过不合法部分');
                             continue;
                         }
-                        // @ts-ignore
                         const nodeMsg = await this.handleForwardedNodes(selfPeer, OB11Data.filter(e => e.type === OB11MessageDataType.node));
                         if (nodeMsg) {
                             nodeMsgIds.push(nodeMsg.message!.msgId);

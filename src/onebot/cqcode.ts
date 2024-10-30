@@ -68,13 +68,13 @@ export function encodeCQCode(data: OB11MessageData) {
 
     let result = '[CQ:' + data.type;
     for (const name in data.data) {
-        const value = (data.data as any)[name];
+        const value = (data.data as Record<string, unknown>)[name];
         if (value === undefined) {
             continue;
         }
         try {
-            const text = value.toString();
-            result += `,${name}=${CQCodeEscape(text)}`;
+            const text = value?.toString();
+            if (text) result += `,${name}=${CQCodeEscape(text)}`;
         } catch (error) {
             // If it can't be converted, skip this name-value pair
         }
