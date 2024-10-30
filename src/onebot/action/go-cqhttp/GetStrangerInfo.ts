@@ -25,6 +25,11 @@ export default class GoCQHTTPGetStrangerInfo extends BaseAction<Payload, OB11Use
         if (!uid) uid = extendData.detail.uid;
         const info = (await this.core.apis.UserApi.getUserDetailInfo(uid));
         return {
+            ...extendData.detail.simpleInfo.coreInfo,
+            ...extendData.detail.commonExt ?? {},
+            ...extendData.detail.simpleInfo.baseInfo,
+            ...extendData.detail.simpleInfo.relationFlags ?? {},
+            ...extendData.detail.simpleInfo.status ?? {},
             user_id: parseInt(extendData.detail.uin) ?? 0,
             uid: info.uid ?? uid,
             nickname: extendData.detail.simpleInfo.coreInfo.nick,
@@ -33,7 +38,7 @@ export default class GoCQHTTPGetStrangerInfo extends BaseAction<Payload, OB11Use
             qqLevel: calcQQLevel(extendData.detail.commonExt?.qqLevel ?? info.qqLevel),
             sex: OB11Entities.sex(extendData.detail.simpleInfo.baseInfo.sex) ?? OB11UserSex.unknown,
             long_nick: extendData.detail.simpleInfo.baseInfo.longNick ?? info.longNick,
-            reg_time: extendData.detail.commonExt.regTime ?? info.regTime,
+            reg_time: extendData.detail.commonExt?.regTime ?? info.regTime,
             is_vip: extendData.detail.simpleInfo.vasInfo?.svipFlag,
             is_years_vip: extendData.detail.simpleInfo.vasInfo?.yearVipFlag,
             vip_level: extendData.detail.simpleInfo.vasInfo?.vipLevel,
