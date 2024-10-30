@@ -62,7 +62,26 @@ export function loadQQWrapper(QQVersion: string): WrapperNodeApi {
     process.dlopen(nativemodule, wrapperNodePath);
     return nativemodule.exports;
 }
-
+export function getMajorPath(QQVersion: string): string {
+    // major.node
+    let appPath;
+    if (os.platform() === 'darwin') {
+        appPath = path.resolve(path.dirname(process.execPath), '../Resources/app');
+    } else if (os.platform() === 'linux') {
+        appPath = path.resolve(path.dirname(process.execPath), './resources/app');
+    } else {
+        appPath = path.resolve(path.dirname(process.execPath), `./versions/${QQVersion}/`);
+    }
+    let majorPath = path.resolve(appPath, 'major.node');
+    if (!fs.existsSync(majorPath)) {
+        majorPath = path.join(appPath, `./resources/app/major.node`);
+    }
+    //老版本兼容 未来去掉
+    if (!fs.existsSync(majorPath)) {
+        majorPath = path.join(path.dirname(process.execPath), `./resources/app/versions/${QQVersion}/major.node`);
+    }
+    return majorPath;
+}
 export class NapCatCore {
     readonly context: InstanceContext;
     readonly apis: StableNTApiWrapper;

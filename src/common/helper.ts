@@ -245,3 +245,36 @@ export function stringifyWithBigInt(obj: any) {
         typeof value === 'bigint' ? value.toString() : value
     );
 }
+
+export function parseAppidFromMajor(nodeMajor: string): string | undefined {
+    const hexSequence = "A4 09 00 00 00 35";
+    const sequenceBytes = Buffer.from(hexSequence.replace(/ /g, ""), "hex");
+    const filePath = path.resolve(nodeMajor);
+    const fileContent = fs.readFileSync(filePath);
+
+    let searchPosition = 0;
+    while (true) {
+        const index = fileContent.indexOf(sequenceBytes, searchPosition);
+        if (index === -1) {
+            break;
+        }
+
+        const start = index + sequenceBytes.length - 1;
+        const end = fileContent.indexOf(0x00, start);
+        if (end === -1) {
+            break;
+        }
+        const content = fileContent.subarray(start, end);
+        if (!content.every(byte => byte === 0x00)) {
+            try {
+                return content.toString("utf-8");
+            } catch (error) {
+                break;
+            }
+        }
+
+        searchPosition = end + 1;
+    }
+
+    return undefined;
+}

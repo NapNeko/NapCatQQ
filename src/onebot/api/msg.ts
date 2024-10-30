@@ -229,6 +229,7 @@ export class OneBotMsgApi {
                 );
                 // 再次筛选
                 replyMsgList = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeqV3(peer, element.replayMsgSeq, [element.senderUidStr])).msgList;
+                // console.log(JSON.stringify(replyMsgList, null, 4));
                 replyMsg = replyMsgList.find(msg => msg.msgRandom === records.msgRandom);
             }
             if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
