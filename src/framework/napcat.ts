@@ -52,6 +52,7 @@ export async function NCoreInitFramework(
     InitWebUi(logger, pathWrapper).then().catch(logger.logError.bind(logger));
     //初始化LLNC的Onebot实现
     new NapCatOneBot11Adapter(loaderObject.core, loaderObject.context, pathWrapper);
+    return loaderObject;
 }
 
 export class NapCatFramework {

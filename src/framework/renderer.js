@@ -1,6 +1,6 @@
-require('./poke/renderer.js');
+import { injectPokeMenu } from './poke/renderer.js';
 export const onSettingWindowCreated = async (view) => {
-    
+
     // view.style.width = "100%";
     // view.style.height = "100%";
     // //添加iframe
@@ -35,3 +35,27 @@ export const onSettingWindowCreated = async (view) => {
     });
     view.querySelector('.nc_webui').innerText = webui;
 };
+
+function onLoad() {
+    if (location.hash === "#/blank") {
+        navigation.addEventListener("navigatesuccess", updateHash, { once: true });
+    } else {
+        updateHash();
+    }
+
+    function updateHash() {
+        let hash = location.hash;
+        if (hash === "#/blank") {
+            return;
+        }
+        if (hash.includes("#/main/message")) {
+            console.log(location);
+            injectPokeMenu();
+
+        }
+
+    }
+}
+
+
+onLoad();
