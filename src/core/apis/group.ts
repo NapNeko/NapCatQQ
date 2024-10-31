@@ -54,7 +54,9 @@ export class NTQQGroupApi {
         }, pskey);
     }
     async getGroupShutUpMemberList(groupCode: string) {
-        return this.context.session.getGroupService().getGroupShutUpMemberList(groupCode);
+        let data = this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onShutUpMemberListChanged', 1, 1000, (group_id) => group_id === groupCode);
+        this.context.session.getGroupService().getGroupShutUpMemberList(groupCode);
+        return (await data)[1];
     }
     async clearGroupNotifiesUnreadCount(uk: boolean) {
         return this.context.session.getGroupService().clearGroupNotifiesUnreadCount(uk);
