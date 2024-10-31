@@ -143,7 +143,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     private registerHeartBeat() {
         this.heartbeatIntervalId = setInterval(() => {
             this.wsClientsMutex.runExclusive(async () => {
-                this.wsClients.forEach((wsClient) => {
+                this.wsClientWithEvent.forEach((wsClient) => {
                     if (wsClient.readyState === WebSocket.OPEN) {
                         wsClient.send(JSON.stringify(new OB11HeartbeatEvent(this.core, this.heartbeatInterval, this.core.selfInfo.online, true)));
                     }
