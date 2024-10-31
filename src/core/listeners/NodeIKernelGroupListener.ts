@@ -1,4 +1,4 @@
-import { DataSource, Group, GroupListUpdateType, GroupMember, GroupNotify } from '@/core/entities';
+import { DataSource, Group, GroupListUpdateType, GroupMember, GroupNotify, ShutUpGroupMember } from '@/core/entities';
 
 export class NodeIKernelGroupListener {
     onGroupListInited(listEmpty: boolean): void { }
@@ -80,6 +80,6 @@ export class NodeIKernelGroupListener {
     onSearchMemberChange(...args: unknown[]) {
     }
 
-    onShutUpMemberListChanged(...args: unknown[]) {
+    onShutUpMemberListChanged(groupCode: string, members: Array<ShutUpGroupMember>) {
     }
 }

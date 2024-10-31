@@ -13,7 +13,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export class GetGroupShutList extends BaseAction<Payload, OB11Group> {
+export class GetGroupShutList extends BaseAction<Payload, any> {
     actionName = ActionName.GetGroupShutList;
     payloadSchema = SchemaData;
 
