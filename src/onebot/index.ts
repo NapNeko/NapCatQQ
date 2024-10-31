@@ -311,33 +311,51 @@ export class NapCatOneBot11Adapter {
             }
         };
 
-        const msgIdSend = new LRUCache<string, boolean>(100);
+        //const msgIdSend = new LRUCache<string, boolean>(100);
         const recallMsgs = new LRUCache<string, boolean>(100);
+        msgListener.onAddSendMsg = async msg => {
+            if (msg.sendStatus == SendStatusType.KSEND_STATUS_SUCCESS) {
+                this.apis.MsgApi.parseMessage(msg)
+                    .then((ob11Msg) => {
+                        if (!ob11Msg) return;
+                        ob11Msg.target_id = parseInt(msg.peerUin);
+                        if (this.configLoader.configData.reportSelfMessage) {
+                            msg.id = MessageUnique.createUniqueMsgId({
+                                chatType: msg.chatType,
+                                peerUid: msg.peerUid,
+                                guildId: '',
+                            }, msg.msgId);
+                            this.emitMsg(msg);
+                        } else {
+                            // logOB11Message(this.core, ob11Msg);
+                        }
+                    });
+            }
+        };
         msgListener.onMsgInfoListUpdate = async msgList => {
             this.emitRecallMsg(msgList, recallMsgs)
                 .catch(e => this.context.logger.logError.bind(this.context.logger)('处理消息失败', e));
-
-            for (const msg of msgList.filter(e => e.senderUin == this.core.selfInfo.uin)) {
-                if (msg.sendStatus == SendStatusType.KSEND_STATUS_SUCCESS && !msgIdSend.get(msg.msgId)) {
-                    msgIdSend.put(msg.msgId, true);
-                    // 完成后再post
-                    this.apis.MsgApi.parseMessage(msg)
-                        .then((ob11Msg) => {
-                            if (!ob11Msg) return;
-                            ob11Msg.target_id = parseInt(msg.peerUin);
-                            if (this.configLoader.configData.reportSelfMessage) {
-                                msg.id = MessageUnique.createUniqueMsgId({
-                                    chatType: msg.chatType,
-                                    peerUid: msg.peerUid,
-                                    guildId: '',
-                                }, msg.msgId);
-                                this.emitMsg(msg);
-                            } else {
-                                // logOB11Message(this.core, ob11Msg);
-                            }
-                        });
-                }
-            }
+            // for (const msg of msgList.filter(e => e.senderUin == this.core.selfInfo.uin)) {
+            //     if (msg.sendStatus == SendStatusType.KSEND_STATUS_SUCCESS && !msgIdSend.get(msg.msgId)) {
+            //         msgIdSend.put(msg.msgId, true);
+            //         // 完成后再post
+            //         this.apis.MsgApi.parseMessage(msg)
+            //             .then((ob11Msg) => {
+            //                 if (!ob11Msg) return;
+            //                 ob11Msg.target_id = parseInt(msg.peerUin);
+            //                 if (this.configLoader.configData.reportSelfMessage) {
+            //                     msg.id = MessageUnique.createUniqueMsgId({
+            //                         chatType: msg.chatType,
+            //                         peerUid: msg.peerUid,
+            //                         guildId: '',
+            //                     }, msg.msgId);
+            //                     this.emitMsg(msg);
+            //                 } else {
+            //                     // logOB11Message(this.core, ob11Msg);
+            //                 }
+            //             });
+            //     }
+            // }
         };
 
         this.context.session.getMsgService().addKernelMsgListener(
@@ -523,7 +541,7 @@ export class NapCatOneBot11Adapter {
         );
     }
 
-    private async emitMsg(message: RawMessage) {
+    private async emitMsg(message: RawMessage, parseEvent: boolean = true) {
         const { debug, reportSelfMessage, messagePostFormat } = this.configLoader.configData;
         this.context.logger.logDebug('收到新消息 RawMessage', message);
         this.apis.MsgApi.parseMessage(message, messagePostFormat).then((ob11Msg) => {
