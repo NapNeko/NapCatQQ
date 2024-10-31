@@ -822,6 +822,8 @@ export interface RawMessage {
     elements: MessageElement[];
 
     sourceType: MsgSourceType;
+
+    isOnlineMsg: boolean;
 }
 export interface QueryMsgsParams {
     chatInfo: Peer;
