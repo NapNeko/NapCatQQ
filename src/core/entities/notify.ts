@@ -43,6 +43,50 @@ export enum GroupInviteType {
     BYGROUPMEMBER,
     BYDISCUSSMEMBER
 }
+export interface ShutUpGroupHonor {
+    [key: string]: number;
+}
+
+export interface ShutUpGroupMember {
+    uid: string;
+    qid: string;
+    uin: string;
+    nick: string;
+    remark: string;
+    cardType: number;
+    cardName: string;
+    role: number;
+    avatarPath: string;
+    shutUpTime: number;
+    isDelete: boolean;
+    isSpecialConcerned: boolean;
+    isSpecialShield: boolean;
+    isRobot: boolean;
+    groupHonor: ShutUpGroupHonor;
+    memberRealLevel: number;
+    memberLevel: number;
+    globalGroupLevel: number;
+    globalGroupPoint: number;
+    memberTitleId: number;
+    memberSpecialTitle: string;
+    specialTitleExpireTime: string;
+    userShowFlag: number;
+    userShowFlagNew: number;
+    richFlag: number;
+    mssVipType: number;
+    bigClubLevel: number;
+    bigClubFlag: number;
+    autoRemark: string;
+    creditLevel: number;
+    joinTime: number;
+    lastSpeakTime: number;
+    memberFlag: number;
+    memberFlagExt: number;
+    memberMobileFlag: number;
+    memberFlagExt2: number;
+    isSpecialShielded: boolean;
+    cardNameId: number;
+}
 
 export interface GroupNotify {
     seq: string; // 通知序列号
