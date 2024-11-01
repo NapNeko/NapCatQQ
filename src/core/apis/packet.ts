@@ -1,10 +1,11 @@
+import * as crypto from 'crypto';
 import * as os from 'os';
 import { ChatType, InstanceContext, NapCatCore } from '..';
 import offset from '@/core/external/offset.json';
 import { PacketClient, RecvPacketData } from '@/core/packet/client';
 import { PacketSession } from "@/core/packet/session";
 import { OidbPacket, PacketHexStr } from "@/core/packet/packer";
-import { NapProtoMsg } from '@/core/packet/proto/NapProto';
+import { NapProtoEncodeStructType, NapProtoMsg } from '@/core/packet/proto/NapProto';
 import { OidbSvcTrpcTcp0X9067_202_Rsp_Body } from '@/core/packet/proto/oidb/Oidb.0x9067_202';
 import { OidbSvcTrpcTcpBase, OidbSvcTrpcTcpBaseRsp } from '@/core/packet/proto/oidb/OidbBase';
 import { OidbSvcTrpcTcp0XFE1_2RSP } from '@/core/packet/proto/oidb/Oidb.0XFE1_2';
@@ -20,6 +21,10 @@ import {
 } from "@/core/packet/message/element";
 import { MiniAppReqParams, MiniAppRawData } from "@/core/packet/entities/miniApp";
 import { MiniAppAdaptShareInfoResp } from "@/core/packet/proto/action/miniAppAdaptShareInfo";
+import { AIVoiceChatType, AIVoiceItemList } from "@/core/packet/entities/aiChat";
+import { OidbSvcTrpcTcp0X929B_0Resp, OidbSvcTrpcTcp0X929D_0Resp } from "@/core/packet/proto/oidb/Oidb.0x929";
+import { IndexNode, MsgInfo } from "@/core/packet/proto/oidb/common/Ntv2.RichMediaReq";
+import { NTV2RichMediaResp } from "@/core/packet/proto/oidb/common/Ntv2.RichMediaResp";
 
 
 interface OffsetType {
@@ -188,10 +193,54 @@ export class NTQQPacketApi {
         return `https://${resp.download.downloadDns}/ftn_handler/${Buffer.from(resp.download.downloadUrl).toString('hex')}/?fname=`;
     }
 
+    async sendGroupPttFileDownloadReq(groupUin: number, node: NapProtoEncodeStructType<typeof IndexNode>) {
+        const data = this.packetSession?.packer.packGroupPttFileDownloadReq(groupUin, node);
+        const ret = await this.sendOidbPacket(data!, true);
+        const body = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(Buffer.from(ret.hex_data, 'hex')).body;
+        const resp = new NapProtoMsg(NTV2RichMediaResp).decode(body);
+        const info = resp.download.info;
+        return `https://${info.domain}${info.urlPath}${resp.download.rKeyParam}`;
+    }
+
     async sendMiniAppShareInfoReq(param: MiniAppReqParams) {
         const data = this.packetSession?.packer.packMiniAppAdaptShareInfo(param);
         const ret = await this.sendPacket("LightAppSvc.mini_app_share.AdaptShareInfo", data!, true);
         const body = new NapProtoMsg(MiniAppAdaptShareInfoResp).decode(Buffer.from(ret.hex_data, 'hex'));
         return JSON.parse(body.content.jsonContent) as MiniAppRawData;
+    }
+
+    async sendFetchAiVoiceListReq(groupUin: number, chatType: AIVoiceChatType) : Promise<AIVoiceItemList[] | null> {
+        const data = this.packetSession?.packer.packFetchAiVoiceListReq(groupUin, chatType);
+        const ret = await this.sendOidbPacket(data!, true);
+        const body = new NapProtoMsg(OidbSvcTrpcTcpBaseRsp).decode(Buffer.from(ret.hex_data, 'hex')).body;
+        const resp = new NapProtoMsg(OidbSvcTrpcTcp0X929D_0Resp).decode(body);
+        if (!resp.content) return null;
+        return resp.content.map((item) => {
+            return {
+                category: item.category,
+                voices: item.voices
+            };
+        });
+    }
+
+    async sendAiVoiceChatReq(groupUin: number, voiceId: string, text: string, chatType: AIVoiceChatType): Promise<NapProtoEncodeStructType<typeof MsgInfo>> {
+        let reqTime = 0;
+        const reqMaxTime = 30;
+        const sessionId = crypto.randomBytes(4).readUInt32BE(0);
+        while (true) {
+            if (reqTime >= reqMaxTime) {
+                throw new Error(`sendAiVoiceChatReq failed after ${reqMaxTime} times`);
+            }
+            reqTime++;
+            const data = this.packetSession?.packer.packAiVoiceChatReq(groupUin, voiceId, text, chatType, sessionId);
+            const ret = await this.sendOidbPacket(data!, true);
+            const body = new NapProtoMsg(OidbSvcTrpcTcpBase).decode(Buffer.from(ret.hex_data, 'hex'));
+            if (body.errorCode) {
+                throw new Error(`sendAiVoiceChatReq retCode: ${body.errorCode} error: ${body.errorMsg}`);
+            }
+            const resp = new NapProtoMsg(OidbSvcTrpcTcp0X929B_0Resp).decode(body.body);
+            if (!resp.msgInfo) continue;
+            return resp.msgInfo;
+        }
     }
 }
