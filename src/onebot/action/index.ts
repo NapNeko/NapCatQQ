@@ -99,6 +99,9 @@ import { GoCQHTTPGetModelShow } from './go-cqhttp/GoCQHTTPGetModelShow';
 import { GoCQHTTPSetModelShow } from './go-cqhttp/GoCQHTTPSetModelShow';
 import { GoCQHTTPDeleteFriend } from './go-cqhttp/GoCQHTTPDeleteFriend';
 import { GetMiniAppArk } from "@/onebot/action/extends/GetMiniAppArk";
+import { GetAiRecord } from "@/onebot/action/group/GetAiRecord";
+import { SendGroupAiRecord } from "@/onebot/action/group/SendGroupAiRecord";
+import { GetAiCharacters } from "@/onebot/action/extends/GetAiCharacters";
 
 
 export type ActionMap = Map<string, BaseAction<any, any>>;
@@ -212,6 +215,9 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new GetGroupShutList(obContext, core),
         new GetGroupFileUrl(obContext, core),
         new GetMiniAppArk(obContext, core),
+        new GetAiRecord(obContext, core),
+        new SendGroupAiRecord(obContext, core),
+        new GetAiCharacters(obContext, core),
     ];
     const actionMap = new Map();
     for (const action of actionHandlers) {
