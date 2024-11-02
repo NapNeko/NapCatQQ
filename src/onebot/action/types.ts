@@ -138,4 +138,7 @@ export enum ActionName {
     SetGroupSign = "set_group_sign",
     GetMiniAppArk = "get_mini_app_ark",
     // UploadForwardMsg = "upload_forward_msg",
+    GetAiRecord = "get_ai_record",
+    GetAiCharacters = "get_ai_characters",
+    SendGroupAiRecord = "send_group_ai_record",
 }
