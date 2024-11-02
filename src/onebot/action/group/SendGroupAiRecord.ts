@@ -27,7 +27,7 @@ export class SendGroupAiRecord extends GetPacketStatusDepends<Payload, {
 
     async _handle(payload: Payload) {
         const rawRsp = await this.core.apis.PacketApi.sendAiVoiceChatReq(+payload.group_id, payload.character, payload.text, AIVoiceChatType.Sound);
-        const url = await this.core.apis.PacketApi.sendGroupPttFileDownloadReq(+payload.group_id, rawRsp.msgInfoBody![0].index as NapProtoEncodeStructType<typeof IndexNode>);
+        const url = await this.core.apis.PacketApi.sendGroupPttFileDownloadReq(+payload.group_id, rawRsp.msgInfoBody[0].index);
         const { path, fileName, errMsg, success} = (await uri2local(this.core.NapCatTempPath, url));
         if (!success) {
             throw new Error(errMsg);

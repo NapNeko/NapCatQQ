@@ -23,6 +23,6 @@ export class GetAiRecord extends GetPacketStatusDepends<Payload, string> {
 
     async _handle(payload: Payload) {
         const rawRsp = await this.core.apis.PacketApi.sendAiVoiceChatReq(+payload.group_id, payload.character, payload.text, AIVoiceChatType.Sound);
-        return await this.core.apis.PacketApi.sendGroupPttFileDownloadReq(+payload.group_id, rawRsp.msgInfoBody![0].index as NapProtoEncodeStructType<typeof IndexNode>);
+        return await this.core.apis.PacketApi.sendGroupPttFileDownloadReq(+payload.group_id, rawRsp.msgInfoBody[0].index);
     }
 }
