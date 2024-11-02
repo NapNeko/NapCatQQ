@@ -5,7 +5,7 @@ import offset from '@/core/external/offset.json';
 import { PacketClient, RecvPacketData } from '@/core/packet/client';
 import { PacketSession } from "@/core/packet/session";
 import { OidbPacket, PacketHexStr } from "@/core/packet/packer";
-import { NapProtoEncodeStructType, NapProtoMsg } from '@/core/packet/proto/NapProto';
+import { NapProtoEncodeStructType, NapProtoDecodeStructType, NapProtoMsg } from '@/core/packet/proto/NapProto';
 import { OidbSvcTrpcTcp0X9067_202_Rsp_Body } from '@/core/packet/proto/oidb/Oidb.0x9067_202';
 import { OidbSvcTrpcTcpBase, OidbSvcTrpcTcpBaseRsp } from '@/core/packet/proto/oidb/OidbBase';
 import { OidbSvcTrpcTcp0XFE1_2RSP } from '@/core/packet/proto/oidb/Oidb.0XFE1_2';
@@ -223,7 +223,7 @@ export class NTQQPacketApi {
         });
     }
 
-    async sendAiVoiceChatReq(groupUin: number, voiceId: string, text: string, chatType: AIVoiceChatType): Promise<NapProtoEncodeStructType<typeof MsgInfo>> {
+    async sendAiVoiceChatReq(groupUin: number, voiceId: string, text: string, chatType: AIVoiceChatType): Promise<NapProtoDecodeStructType<typeof MsgInfo>> {
         let reqTime = 0;
         const reqMaxTime = 30;
         const sessionId = crypto.randomBytes(4).readUInt32BE(0);
