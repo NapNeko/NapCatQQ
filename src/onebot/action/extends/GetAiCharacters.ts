@@ -1,7 +1,7 @@
-import {ActionName} from '../types';
-import {FromSchema, JSONSchema} from 'json-schema-to-ts';
-import {GetPacketStatusDepends} from "@/onebot/action/packet/GetPacketStatus";
-import {AIVoiceChatType} from "@/core/packet/entities/aiChat";
+import { ActionName } from '../types';
+import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
+import { AIVoiceChatType } from "@/core/packet/entities/aiChat";
 
 const SchemaData = {
     type: 'object',

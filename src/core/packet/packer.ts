@@ -28,8 +28,8 @@ import { OidbSvcTrpcTcp0XE37_800 } from "@/core/packet/proto/oidb/Oidb.0XE37_800
 import { OidbSvcTrpcTcp0XEB7 } from "./proto/oidb/Oidb.0xEB7";
 import { MiniAppReqParams } from "@/core/packet/entities/miniApp";
 import { MiniAppAdaptShareInfoReq } from "@/core/packet/proto/action/miniAppAdaptShareInfo";
-import {AIVoiceChatType} from "@/core/packet/entities/aiChat";
-import {OidbSvcTrpcTcp0X929B_0, OidbSvcTrpcTcp0X929D_0} from "@/core/packet/proto/oidb/Oidb.0x929";
+import { AIVoiceChatType } from "@/core/packet/entities/aiChat";
+import { OidbSvcTrpcTcp0X929B_0, OidbSvcTrpcTcp0X929D_0 } from "@/core/packet/proto/oidb/Oidb.0x929";
 
 export type PacketHexStr = string & { readonly hexNya: unique symbol };
 
