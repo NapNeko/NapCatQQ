@@ -241,7 +241,7 @@ export class PacketMsgMarkFaceElement extends IPacketMsgElement<SendMarketFaceEl
     }
 
     toPreview(): string {
-        return `[${this.emojiName}]`;
+        return `${this.emojiName}`;
     }
 }
 
