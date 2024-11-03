@@ -73,14 +73,12 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
 
         const singleMsg = data.msgList[0];
         const resMsg = await this.obContext.apis.MsgApi.parseMessage(singleMsg, 'array');//强制array 以便处理
-        if (!resMsg) {
+        if (!(resMsg?.message?.[0] as OB11MessageForward)?.data?.content) {
             throw new Error('找不到相关的聊天记录');
         }
-        //if (this.obContext.configLoader.configData.messagePostFormat === 'array') {
-        //提取
-        const realmsg = ((await this.parseForward([resMsg]))[0].data.message as OB11MessageNode[])[0].data.message;
-        //里面都是offline消息 id都是0 没得说话
-        return { message: realmsg };
+        return { 
+            messages: (resMsg?.message?.[0] as OB11MessageForward)?.data?.content
+        };
         //}
 
         // return { message: resMsg };
