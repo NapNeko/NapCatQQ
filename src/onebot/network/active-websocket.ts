@@ -133,7 +133,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
         let echo = undefined;
 
         try {
-            receiveData = JSON.parse(message.toString());
+            receiveData = JSON.parse(message.toString().replace(/\r?\n|\r/g, '\\n'));
             echo = receiveData.echo;
             this.logger.logDebug('[OneBot] [WebSocket Client] 收到正向Websocket消息', receiveData);
         } catch (e) {
