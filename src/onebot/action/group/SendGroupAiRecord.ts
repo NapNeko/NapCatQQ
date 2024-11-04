@@ -4,8 +4,6 @@ import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
 import { AIVoiceChatType } from "@/core/packet/entities/aiChat";
 import { uri2local } from "@/common/file";
 import { ChatType, Peer } from "@/core";
-import { NapProtoEncodeStructType } from "@/core/packet/proto/NapProto";
-import { IndexNode } from "@/core/packet/proto/oidb/common/Ntv2.RichMediaReq";
 
 const SchemaData = {
     type: 'object',
@@ -20,7 +18,7 @@ const SchemaData = {
 type Payload = FromSchema<typeof SchemaData>;
 
 export class SendGroupAiRecord extends GetPacketStatusDepends<Payload, {
-    message_id: string
+    message_id: number
 }> {
     actionName = ActionName.SendGroupAiRecord;
     payloadSchema = SchemaData;
@@ -35,6 +33,6 @@ export class SendGroupAiRecord extends GetPacketStatusDepends<Payload, {
         const peer = { chatType: ChatType.KCHATTYPEGROUP, peerUid: payload.group_id.toString() } as Peer;
         const element = await this.core.apis.FileApi.createValidSendPttElement(path);
         const sendRes = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, [element], [path]);
-        return { message_id: sendRes.msgId };
+        return { message_id: sendRes.id ?? -1 };
     }
 }
