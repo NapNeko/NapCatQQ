@@ -91,15 +91,12 @@ export type NapProtoEncodeStructType<T> = NapProtoStructType<T, true>;
 
 export type NapProtoDecodeStructType<T> = NapProtoStructType<T, false>;
 
-const NapProtoMsgCache = new Map<ProtoMessageType, MessageType<NapProtoStructType<ProtoMessageType, boolean>>>();
-
-export class NapProtoMsg<T extends ProtoMessageType> {
-    private readonly _msg: T;
+class NapProtoRealMsg<T extends ProtoMessageType> {
     private readonly _field: PartialFieldInfo[];
     private readonly _proto_msg: MessageType<NapProtoStructType<T, boolean>>;
+    private static cache = new WeakMap<ProtoMessageType, NapProtoRealMsg<any>>();
 
-    constructor(fields: T) {
-        this._msg = fields;
+    private constructor(fields: T) {
         this._field = Object.keys(fields).map(key => {
             const field = fields[key];
             if (field.kind === 'scalar') {
@@ -122,11 +119,20 @@ export class NapProtoMsg<T extends ProtoMessageType> {
                     name: key,
                     kind: 'message',
                     repeat: field.repeat ? RepeatType.PACKED : RepeatType.NO,
-                    T: () => new NapProtoMsg(field.type())._proto_msg,
+                    T: () => NapProtoRealMsg.getInstance(field.type())._proto_msg,
                 };
             }
         }) as PartialFieldInfo[];
         this._proto_msg = new MessageType<NapProtoStructType<T, boolean>>('nya', this._field);
+    }
+
+    static getInstance<T extends ProtoMessageType>(fields: T): NapProtoRealMsg<T> {
+        let instance = this.cache.get(fields);
+        if (!instance) {
+            instance = new NapProtoRealMsg(fields);
+            this.cache.set(fields, instance);
+        }
+        return instance;
     }
 
     encode(data: NapProtoEncodeStructType<T>): Uint8Array {
@@ -135,5 +141,21 @@ export class NapProtoMsg<T extends ProtoMessageType> {
 
     decode(data: Uint8Array): NapProtoDecodeStructType<T> {
         return this._proto_msg.fromBinary(data) as NapProtoDecodeStructType<T>;
+    }
+}
+
+export class NapProtoMsg<T extends ProtoMessageType> {
+    private realMsg: NapProtoRealMsg<T>;
+
+    constructor(fields: T) {
+        this.realMsg = NapProtoRealMsg.getInstance(fields);
+    }
+
+    encode(data: NapProtoEncodeStructType<T>): Uint8Array {
+        return this.realMsg.encode(data);
+    }
+
+    decode(data: Uint8Array): NapProtoDecodeStructType<T> {
+        return this.realMsg.decode(data);
     }
 }
