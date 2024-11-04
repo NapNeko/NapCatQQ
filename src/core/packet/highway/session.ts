@@ -1,7 +1,6 @@
 import * as fs from "node:fs";
 import { ChatType, Peer } from "@/core";
 import { LogWrapper } from "@/common/log";
-import { PacketClient } from "@/core/packet/client";
 import { PacketPacker } from "@/core/packet/packer";
 import { NapProtoMsg } from "@/core/packet/proto/NapProto";
 import { HttpConn0x6ff_501Response } from "@/core/packet/proto/action/action";
@@ -19,6 +18,7 @@ import { int32ip2str, oidbIpv4s2HighwayIpv4s } from "@/core/packet/highway/utils
 import { calculateSha1, calculateSha1StreamBytes, computeMd5AndLengthWithLimit } from "@/core/packet/utils/crypto/hash";
 import { OidbSvcTrpcTcp0x6D6Response } from "@/core/packet/proto/oidb/Oidb.0x6D6";
 import { OidbSvcTrpcTcp0XE37_800Response, OidbSvcTrpcTcp0XE37Response } from "@/core/packet/proto/oidb/Oidb.0XE37_800";
+import { PacketClient } from "@/core/packet/client/client";
 
 export const BlockSize = 1024 * 1024;
 
