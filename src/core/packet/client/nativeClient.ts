@@ -45,15 +45,16 @@ export class NativePacketClient extends PacketClient {
         const platform = process.platform + '.' + process.arch;
         const moehoo_path = path.join(dirname(fileURLToPath(import.meta.url)), './moehoo/MoeHoo.' + platform + '.node');
         process.dlopen(this.MoeHooExport, moehoo_path, constants.dlopen.RTLD_LAZY);
-        this.MoeHooExport.exports.InitHook?.(recv, send, (type: number, uin: string, seq: number, cmd: string, hex_data: string) => {
-            const callback = this.cb.get(createHash('md5').update(Buffer.from(hex_data, 'hex')).digest('hex') + (type === 0 ? 'send' : 'recv'));
-            if (callback) {
-                callback({ seq, cmd, hex_data });
-            } else {
-                this.logger.logError(`Callback not found for hex_data: ${hex_data}`);
-            }
-            console.log('type:', type, 'uin:', uin, 'seq:', seq, 'cmd:', cmd, 'hex_data:', hex_data);
-        });
+        console.log('MoeHooExport:', this.MoeHooExport);
+        // this.MoeHooExport.exports.InitHook?.(recv, send, (type: number, uin: string, seq: number, cmd: string, hex_data: string) => {
+        //     const callback = this.cb.get(createHash('md5').update(Buffer.from(hex_data, 'hex')).digest('hex') + (type === 0 ? 'send' : 'recv'));
+        //     if (callback) {
+        //         callback({ seq, cmd, hex_data });
+        //     } else {
+        //         this.logger.logError(`Callback not found for hex_data: ${hex_data}`);
+        //     }
+        //     console.log('type:', type, 'uin:', uin, 'seq:', seq, 'cmd:', cmd, 'hex_data:', hex_data);
+        // });
         this.isAvailable = true;
     }
 
