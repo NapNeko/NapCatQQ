@@ -63,14 +63,14 @@ export class NativePacketClient extends PacketClient {
             // } else {
             //     this.logger.logError(`Callback not found for hex_data: ${hex_data}`);
             // }
-            console.log('type:', type, 'cmd:', cmd, 'trace_id:', trace_id);
+            //console.log('type:', type, 'cmd:', cmd, 'trace_id:', trace_id);
         });
         this.isAvailable = true;
     }
 
     sendCommandImpl(cmd: string, data: string, trace_id: string): void {
         const trace_id_md5 = createHash('md5').update(trace_id).digest('hex');
-        console.log('sendCommandImpl:', cmd, data, trace_id_md5);
+        //console.log('sendCommandImpl:', cmd, data, trace_id_md5);
         this.MoeHooExport.exports.SendPacket?.(cmd, data, trace_id_md5);
         this.cb.get(trace_id_md5 + 'send')?.({ seq: 0, cmd, hex_data: '' });
     }
