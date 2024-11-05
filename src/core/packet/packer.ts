@@ -1,7 +1,7 @@
 import * as zlib from "node:zlib";
 import * as crypto from "node:crypto";
 import { computeMd5AndLengthWithLimit } from "@/core/packet/utils/crypto/hash";
-import { NapProtoEncodeStructType, NapProtoMsg } from "@/core/packet/proto/NapProto";
+import { NapProtoEncodeStructType, NapProtoMsg } from "@napneko/nap-proto-core";
 import { OidbSvcTrpcTcpBase } from "@/core/packet/proto/oidb/OidbBase";
 import { OidbSvcTrpcTcp0X9067_202 } from "@/core/packet/proto/oidb/Oidb.0x9067_202";
 import { OidbSvcTrpcTcp0X8FC_2, OidbSvcTrpcTcp0X8FC_2_Body } from "@/core/packet/proto/oidb/Oidb.0x8FC_2";
@@ -22,7 +22,6 @@ import { PacketMsg } from "@/core/packet/message/message";
 import { OidbSvcTrpcTcp0x6D6 } from "@/core/packet/proto/oidb/Oidb.0x6D6";
 import { OidbSvcTrpcTcp0XE37_1200 } from "@/core/packet/proto/oidb/Oidb.0xE37_1200";
 import { PacketMsgConverter } from "@/core/packet/message/converter";
-import { PacketClient } from "@/core/packet/client";
 import { OidbSvcTrpcTcp0XE37_1700 } from "@/core/packet/proto/oidb/Oidb.0xE37_1700";
 import { OidbSvcTrpcTcp0XE37_800 } from "@/core/packet/proto/oidb/Oidb.0XE37_800";
 import { OidbSvcTrpcTcp0XEB7 } from "./proto/oidb/Oidb.0xEB7";
@@ -30,6 +29,7 @@ import { MiniAppReqParams } from "@/core/packet/entities/miniApp";
 import { MiniAppAdaptShareInfoReq } from "@/core/packet/proto/action/miniAppAdaptShareInfo";
 import { AIVoiceChatType } from "@/core/packet/entities/aiChat";
 import { OidbSvcTrpcTcp0X929B_0, OidbSvcTrpcTcp0X929D_0 } from "@/core/packet/proto/oidb/Oidb.0x929";
+import { PacketClient } from "@/core/packet/client/client";
 
 export type PacketHexStr = string & { readonly hexNya: unique symbol };
 

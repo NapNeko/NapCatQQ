@@ -2,10 +2,9 @@ import * as crypto from 'crypto';
 import * as os from 'os';
 import { ChatType, InstanceContext, NapCatCore } from '..';
 import offset from '@/core/external/offset.json';
-import { PacketClient, RecvPacketData } from '@/core/packet/client';
 import { PacketSession } from "@/core/packet/session";
 import { OidbPacket, PacketHexStr } from "@/core/packet/packer";
-import { NapProtoEncodeStructType, NapProtoDecodeStructType, NapProtoMsg } from '@/core/packet/proto/NapProto';
+import { NapProtoMsg, NapProtoEncodeStructType, NapProtoDecodeStructType } from "@napneko/nap-proto-core";
 import { OidbSvcTrpcTcp0X9067_202_Rsp_Body } from '@/core/packet/proto/oidb/Oidb.0x9067_202';
 import { OidbSvcTrpcTcpBase, OidbSvcTrpcTcpBaseRsp } from '@/core/packet/proto/oidb/OidbBase';
 import { OidbSvcTrpcTcp0XFE1_2RSP } from '@/core/packet/proto/oidb/Oidb.0XFE1_2';
@@ -25,6 +24,7 @@ import { AIVoiceChatType, AIVoiceItemList } from "@/core/packet/entities/aiChat"
 import { OidbSvcTrpcTcp0X929B_0Resp, OidbSvcTrpcTcp0X929D_0Resp } from "@/core/packet/proto/oidb/Oidb.0x929";
 import { IndexNode, MsgInfo } from "@/core/packet/proto/oidb/common/Ntv2.RichMediaReq";
 import { NTV2RichMediaResp } from "@/core/packet/proto/oidb/common/Ntv2.RichMediaResp";
+import { RecvPacketData } from "@/core/packet/client/client";
 
 
 interface OffsetType {
@@ -40,7 +40,6 @@ export class NTQQPacketApi {
     context: InstanceContext;
     core: NapCatCore;
     logger: LogWrapper;
-    serverUrl: string | undefined;
     qqVersion: string | undefined;
     packetSession: PacketSession | undefined;
 
@@ -49,32 +48,27 @@ export class NTQQPacketApi {
         this.core = core;
         this.logger = core.context.logger;
         this.packetSession = undefined;
-        const config = this.core.configLoader.configData;
-        if (config && config.packetServer && config.packetServer.length > 0) {
-            const serverUrl = this.core.configLoader.configData.packetServer ?? '127.0.0.1:8086';
-            this.InitSendPacket(serverUrl, this.context.basicInfoWrapper.getFullQQVesion())
-                .then()
-                .catch(this.core.context.logger.logError.bind(this.core.context.logger));
-        } else {
-            this.core.context.logger.logWarn('PacketServer未配置，NapCat.Packet将不会加载！');
-        }
+        this.InitSendPacket(this.context.basicInfoWrapper.getFullQQVesion())
+            .then()
+            .catch(this.core.context.logger.logError.bind(this.core.context.logger));
     }
 
     get available(): boolean {
         return this.packetSession?.client.available ?? false;
     }
 
-    async InitSendPacket(serverUrl: string, qqversion: string) {
-        this.serverUrl = serverUrl;
+    async InitSendPacket(qqversion: string) {
         this.qqVersion = qqversion;
-        const offsetTable: OffsetType = offset;
-        const table = offsetTable[qqversion + '-' + os.arch()];
+        const table = typedOffset[qqversion + '-' + os.arch()];
         if (!table) {
-            this.logger.logError('PacketServer Offset table not found for QQVersion: ', qqversion + '-' + os.arch());
+            this.logger.logError('[Core] [Packet] PacketServer Offset table not found for QQVersion: ', qqversion + '-' + os.arch());
             return false;
         }
-        const url = 'ws://' + this.serverUrl + '/ws';
-        this.packetSession = new PacketSession(this.core.context.logger, new PacketClient(url, this.core));
+        if (this.core.configLoader.configData.packetBackend === 'disable') {
+            this.logger.logWarn('[Core] [Packet] 已禁用Packet后端，NapCat.Packet将不会加载！');
+            return false;
+        }
+        this.packetSession = new PacketSession(this.core);
         const cb = () => {
             if (this.packetSession && this.packetSession.client) {
                 this.packetSession.client.init(process.pid, table.recv, table.send).then().catch(this.logger.logError.bind(this.logger));

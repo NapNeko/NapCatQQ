@@ -1,4 +1,4 @@
-import { NapProtoEncodeStructType } from "@/core/packet/proto/NapProto";
+import { NapProtoEncodeStructType } from "@napneko/nap-proto-core";
 import { IPv4 } from "@/core/packet/proto/oidb/common/Ntv2.RichMediaResp";
 import { NTHighwayIPv4 } from "@/core/packet/proto/highway/highway";
 

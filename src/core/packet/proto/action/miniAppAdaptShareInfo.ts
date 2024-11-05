@@ -1,5 +1,5 @@
 import { ScalarType } from "@protobuf-ts/runtime";
-import { ProtoField } from "../NapProto";
+import { ProtoField } from "@napneko/nap-proto-core";
 
 export const MiniAppAdaptShareInfoReq = {
     appId: ProtoField(2, ScalarType.STRING),

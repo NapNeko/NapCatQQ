@@ -1,5 +1,5 @@
 import { ScalarType } from "@protobuf-ts/runtime";
-import { ProtoField } from "../NapProto";
+import { ProtoField } from "@napneko/nap-proto-core";
 import { PushMsgBody } from "@/core/packet/proto/message/message";
 
 export const LongMsgResult = {

@@ -3,5 +3,6 @@
     "consoleLog": true,
     "fileLogLevel": "debug",
     "consoleLogLevel": "info",
+    "packetBackend": "auto",
     "packetServer": ""
 }
