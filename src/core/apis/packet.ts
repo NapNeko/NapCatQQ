@@ -61,7 +61,11 @@ export class NTQQPacketApi {
         this.qqVersion = qqversion;
         const table = typedOffset[qqversion + '-' + os.arch()];
         if (!table) {
-            this.logger.logError('PacketServer Offset table not found for QQVersion: ', qqversion + '-' + os.arch());
+            this.logger.logError('[Core] [Packet] PacketServer Offset table not found for QQVersion: ', qqversion + '-' + os.arch());
+            return false;
+        }
+        if (this.core.configLoader.configData.packetBackend === 'disable') {
+            this.logger.logWarn('[Core] [Packet] 已禁用Packet后端，NapCat.Packet将不会加载！');
             return false;
         }
         this.packetSession = new PacketSession(this.core);
