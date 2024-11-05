@@ -1,5 +1,5 @@
 import { ScalarType } from "@protobuf-ts/runtime";
-import { ProtoField } from "../NapProto";
+import { ProtoField } from "@napneko/nap-proto-core";
 
 export const OidbSvcTrpcTcp0XEB7_Body = {
     uin: ProtoField(1, ScalarType.STRING),

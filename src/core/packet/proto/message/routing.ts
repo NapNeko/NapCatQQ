@@ -1,5 +1,5 @@
 import { ScalarType } from "@protobuf-ts/runtime";
-import { ProtoField } from "../NapProto";
+import { ProtoField } from "@napneko/nap-proto-core";
 
 export const ForwardHead = {
     field1: ProtoField(1, ScalarType.UINT32, true),

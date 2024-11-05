@@ -1,5 +1,5 @@
 import { ScalarType } from "@protobuf-ts/runtime";
-import { ProtoField } from "../../NapProto";
+import { ProtoField } from "@napneko/nap-proto-core";
 import { CommonHead, MsgInfo, PicUrlExtInfo, VideoExtInfo } from "@/core/packet/proto/oidb/common/Ntv2.RichMediaReq";
 
 export const NTV2RichMediaResp = {
