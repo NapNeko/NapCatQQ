@@ -51,7 +51,7 @@ export class NativePacketClient extends PacketClient {
                 //此时为recv 调用callback
                 const trace_id = this.sendEvent.get(seq);
                 const callback = this.cb.get(trace_id + 'recv');
-                console.log('callback:', callback, trace_id);
+                // console.log('callback:', callback, trace_id);
                 callback?.({ seq, cmd, hex_data });
             }
 
