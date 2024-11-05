@@ -12,7 +12,7 @@ export interface NativePacketExportType {
     SendPacket?: (cmd: string, data: string, trace_id: string) => void;
 }
 export class NativePacketClient extends PacketClient {
-    private readonly supportedPlatforms = ['win32.x64'];
+    private readonly supportedPlatforms = ['win32.x64','linux.x64'];
     private MoeHooExport: { exports: NativePacketExportType } = { exports: {} };
     private sendEvent = new LRUCache<number, string>(500);//seq->trace_id
     constructor(core: NapCatCore) {
