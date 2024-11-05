@@ -32,8 +32,10 @@ export class PacketSession {
         const prefer = core.configLoader.configData.packetBackend;
         switch (prefer) {
         case "native":
+            this.logger.log("[Core] [Packet] 使用指定的 NativePacketClient 作为后端");
             return new NativePacketClient(core);
         case "frida":
+            this.logger.log("[Core] [Packet] 使用指定的 FridaPacketClient 作为后端");
             return new wsPacketClient(core);
         case "auto":
         case undefined:
