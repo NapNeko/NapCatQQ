@@ -1,5 +1,5 @@
 import { ScalarType } from "@protobuf-ts/runtime";
-import { ProtoField } from "../NapProto";
+import { ProtoField } from "@napneko/nap-proto-core";
 import { OidbSvcTrpcTcp0XE37_800_1200Metadata } from "@/core/packet/proto/oidb/Oidb.0xE37_1200";
 
 export const OidbSvcTrpcTcp0XE37_800 = {
