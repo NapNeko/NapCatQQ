@@ -41,9 +41,9 @@ export class PacketSession {
             }
         }
         if (!selectedClient) {
-            throw new Error("No compatible PacketClient found");
+            throw new Error("[Core] [Packet] 无可用的后端，NapCat.Packet将不会加载！");
         }
-        this.logger.log(`[Packet] 自动选择了: ${selectedClient.name}`);
+        this.logger.log(`[Core] [Packet] 自动选择 ${selectedClient.name} 作为后端`);
         return selectedClient.create(core);
     }
 }

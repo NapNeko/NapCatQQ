@@ -27,12 +27,12 @@ export class NativePacketClient extends PacketClient {
     static compatibilityScore(logger: LogWrapper): number {
         const platform = process.platform + '.' + process.arch;
         if (!this.supportedPlatforms.includes(platform)) {
-            logger.logError(`[NativePacketClient] Unsupported platform: ${platform}`);
+            logger.logError(`[Core] [Packet:Native] 不支持的平台: ${platform}`);
             return 0;
         }
         const moehoo_path = path.join(dirname(fileURLToPath(import.meta.url)), './moehoo/MoeHoo.' + platform + '.node');
         if (!fs.existsSync(moehoo_path)) {
-            logger.logError(`[NativePacketClient] Missing moehoo binary: ${moehoo_path}`);
+            logger.logError(`[Core] [Packet:Native] 缺失运行时文件: ${moehoo_path}`);
             return 0;
         }
         return 10;

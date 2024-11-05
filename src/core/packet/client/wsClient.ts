@@ -32,7 +32,7 @@ export class wsPacketClient extends PacketClient {
             this.websocket.onopen = () => {
                 this.isAvailable = true;
                 this.reconnectAttempts = 0;
-                this.logger.log.bind(this.logger)(`[Core] [Packet Server] 已连接到 ${this.clientUrl}`);
+                this.logger.log.bind(this.logger)(`[Core] [Packet:Server] 已连接到 ${this.clientUrl}`);
                 cb();
                 resolve();
             };
@@ -62,14 +62,14 @@ export class wsPacketClient extends PacketClient {
                 this.reconnectAttempts++;
                 setTimeout(() => {
                     this.connect(cb).catch((error) => {
-                        this.logger.logError.bind(this.logger)(`[Core] [Packet Server] 尝试重连失败：${error.message}`);
+                        this.logger.logError.bind(this.logger)(`[Core] [Packet:Server] 尝试重连失败：${error.message}`);
                     });
                 }, 5000 * this.reconnectAttempts);
             } else {
-                this.logger.logError.bind(this.logger)(`[Core] [Packet Server] ${this.clientUrl} 已达到最大重连次数！`);
+                this.logger.logError.bind(this.logger)(`[Core] [Packet:Server] ${this.clientUrl} 已达到最大重连次数！`);
             }
         } catch (error: any) {
-            this.logger.logError.bind(this.logger)(`[Core] [Packet Server] 重连时出错: ${error.message}`);
+            this.logger.logError.bind(this.logger)(`[Core] [Packet:Server] 重连时出错: ${error.message}`);
         }
     }
 

@@ -65,9 +65,6 @@ export abstract class PacketClient {
     private async sendCommand(cmd: string, data: string, trace_id: string, rsp: boolean = false, timeout: number = 20000, sendcb: (json: RecvPacketData) => void = () => {
     }): Promise<RecvPacketData> {
         return new Promise<RecvPacketData>((resolve, reject) => {
-            if (!this.isAvailable) {
-                throw new Error("Packet Service is not available");
-            }
             if (rsp) {
                 this.registerCallback(trace_id, 'recv', async (json: RecvPacketData) => {
                     clearTimeout(timeoutHandle);
