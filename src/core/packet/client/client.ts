@@ -90,7 +90,7 @@ export abstract class PacketClient {
             const trace_id = (this.randText(4) + md5 + data).slice(0, data.length / 2);
 
             this.sendCommand(cmd, data, trace_id, rsp, 20000, async () => {
-                console.log('sendPacket:', cmd, data, trace_id);
+                //console.log('sendPacket:', cmd, data, trace_id);
                 await this.napCatCore.context.session.getMsgService().sendSsoCmdReqByContend(cmd, trace_id);
             }).then((res) => resolve(res)).catch((e: Error) => reject(e));
         });
