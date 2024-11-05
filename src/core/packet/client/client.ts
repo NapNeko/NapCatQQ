@@ -59,6 +59,7 @@ export abstract class PacketClient {
 
     private async registerCallback(trace_id: string, type: string, callback: (json: RecvPacketData) => Promise<void>): Promise<void> {
         this.cb.put(createHash('md5').update(trace_id).digest('hex') + type, callback);
+        console.log(this.cb.cache);
     }
 
     private async sendCommand(cmd: string, data: string, trace_id: string, rsp: boolean = false, timeout: number = 20000, sendcb: (json: RecvPacketData) => void = () => {
@@ -67,7 +68,6 @@ export abstract class PacketClient {
             if (!this.isAvailable) {
                 throw new Error("Packet Service is not available");
             }
-            this.sendCommandImpl(cmd, data, trace_id);
             if (rsp) {
                 this.registerCallback(trace_id, 'recv', async (json: RecvPacketData) => {
                     clearTimeout(timeoutHandle);
@@ -81,6 +81,7 @@ export abstract class PacketClient {
                     resolve(json);
                 }
             });
+            this.sendCommandImpl(cmd, data, trace_id);
             const timeoutHandle = setTimeout(() => {
                 reject(new Error(`sendCommand timed out after ${timeout} ms for ${cmd} with trace_id ${trace_id}`));
             }, timeout);
@@ -98,6 +99,7 @@ export abstract class PacketClient {
             const trace_id = (this.randText(4) + md5 + data).slice(0, data.length / 2);
 
             this.sendCommand(cmd, data, trace_id, rsp, 20000, async () => {
+                console.log('sendPacket:', cmd, data, trace_id);
                 await this.napCatCore.context.session.getMsgService().sendSsoCmdReqByContend(cmd, trace_id);
             }).then((res) => resolve(res)).catch((e: Error) => reject(e));
         });
