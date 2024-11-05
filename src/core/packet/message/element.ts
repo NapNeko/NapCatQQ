@@ -1,5 +1,5 @@
 import * as zlib from "node:zlib";
-import { NapProtoEncodeStructType, NapProtoMsg } from "@/core/packet/proto/NapProto";
+import { NapProtoEncodeStructType, NapProtoMsg } from "@napneko/nap-proto-core";
 import {
     CustomFace,
     Elem,

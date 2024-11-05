@@ -4,7 +4,7 @@ import * as http from "node:http";
 import * as stream from "node:stream";
 import { LogWrapper } from "@/common/log";
 import * as tea from "@/core/packet/utils/crypto/tea";
-import { NapProtoMsg } from "@/core/packet/proto/NapProto";
+import { NapProtoMsg } from "@napneko/nap-proto-core";
 import { ReqDataHighwayHead, RespDataHighwayHead } from "@/core/packet/proto/highway/highway";
 import { BlockSize } from "@/core/packet/highway/session";
 import { PacketHighwayTrans } from "@/core/packet/highway/client";

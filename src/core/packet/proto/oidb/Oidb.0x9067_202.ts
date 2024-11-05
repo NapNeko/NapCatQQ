@@ -1,5 +1,5 @@
 import { ScalarType } from "@protobuf-ts/runtime";
-import { ProtoField } from "../NapProto";
+import { ProtoField } from "@napneko/nap-proto-core";
 import { MultiMediaReqHead } from "./common/Ntv2.RichMediaReq";
 
 //Req

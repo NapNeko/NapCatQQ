@@ -1,7 +1,7 @@
 import * as zlib from "node:zlib";
 import * as crypto from "node:crypto";
 import { computeMd5AndLengthWithLimit } from "@/core/packet/utils/crypto/hash";
-import { NapProtoEncodeStructType, NapProtoMsg } from "@/core/packet/proto/NapProto";
+import { NapProtoEncodeStructType, NapProtoMsg } from "@napneko/nap-proto-core";
 import { OidbSvcTrpcTcpBase } from "@/core/packet/proto/oidb/OidbBase";
 import { OidbSvcTrpcTcp0X9067_202 } from "@/core/packet/proto/oidb/Oidb.0x9067_202";
 import { OidbSvcTrpcTcp0X8FC_2, OidbSvcTrpcTcp0X8FC_2_Body } from "@/core/packet/proto/oidb/Oidb.0x8FC_2";

@@ -4,7 +4,7 @@ import { ChatType, InstanceContext, NapCatCore } from '..';
 import offset from '@/core/external/offset.json';
 import { PacketSession } from "@/core/packet/session";
 import { OidbPacket, PacketHexStr } from "@/core/packet/packer";
-import { NapProtoEncodeStructType, NapProtoDecodeStructType, NapProtoMsg } from '@/core/packet/proto/NapProto';
+import { NapProtoMsg, NapProtoEncodeStructType, NapProtoDecodeStructType } from "@napneko/nap-proto-core";
 import { OidbSvcTrpcTcp0X9067_202_Rsp_Body } from '@/core/packet/proto/oidb/Oidb.0x9067_202';
 import { OidbSvcTrpcTcpBase, OidbSvcTrpcTcpBaseRsp } from '@/core/packet/proto/oidb/OidbBase';
 import { OidbSvcTrpcTcp0XFE1_2RSP } from '@/core/packet/proto/oidb/Oidb.0XFE1_2';

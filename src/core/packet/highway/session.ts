@@ -2,7 +2,7 @@ import * as fs from "node:fs";
 import { ChatType, Peer } from "@/core";
 import { LogWrapper } from "@/common/log";
 import { PacketPacker } from "@/core/packet/packer";
-import { NapProtoMsg } from "@/core/packet/proto/NapProto";
+import { NapProtoMsg } from "@napneko/nap-proto-core";
 import { HttpConn0x6ff_501Response } from "@/core/packet/proto/action/action";
 import { PacketHighwayClient } from "@/core/packet/highway/client";
 import { NTV2RichMediaResp } from "@/core/packet/proto/oidb/common/Ntv2.RichMediaResp";

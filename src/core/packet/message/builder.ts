@@ -1,6 +1,6 @@
 import * as crypto from "crypto";
 import { PushMsgBody } from "@/core/packet/proto/message/message";
-import { NapProtoEncodeStructType } from "@/core/packet/proto/NapProto";
+import { NapProtoEncodeStructType } from "@napneko/nap-proto-core";
 import { LogWrapper } from "@/common/log";
 import { PacketMsg, PacketSendMsgElement } from "@/core/packet/message/message";
 import { IPacketMsgElement, PacketMsgTextElement } from "@/core/packet/message/element";
