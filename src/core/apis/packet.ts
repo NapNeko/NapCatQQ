@@ -48,14 +48,9 @@ export class NTQQPacketApi {
         this.core = core;
         this.logger = core.context.logger;
         this.packetSession = undefined;
-        const config = this.core.configLoader.configData;
-        if (config) {
-            this.InitSendPacket(this.context.basicInfoWrapper.getFullQQVesion())
-                .then()
-                .catch(this.core.context.logger.logError.bind(this.core.context.logger));
-        } else {
-            this.core.context.logger.logWarn('PacketServer未配置，NapCat.Packet将不会加载！');
-        }
+        this.InitSendPacket(this.context.basicInfoWrapper.getFullQQVesion())
+            .then()
+            .catch(this.core.context.logger.logError.bind(this.core.context.logger));
     }
 
     get available(): boolean {
