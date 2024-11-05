@@ -65,7 +65,7 @@ export abstract class PacketClient {
     }): Promise<RecvPacketData> {
         return new Promise<RecvPacketData>((resolve, reject) => {
             if (!this.isAvailable) {
-                throw new Error("WebSocket is not connected");
+                throw new Error("Packet Service is not available");
             }
             this.sendCommandImpl(cmd, data, trace_id);
             if (rsp) {
