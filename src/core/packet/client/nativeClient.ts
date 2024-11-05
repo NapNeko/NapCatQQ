@@ -29,7 +29,7 @@ export class NativePacketClient extends PacketClient {
             logger.logError(`[NativePacketClient] Unsupported platform: ${platform}`);
             return 0;
         }
-        const moehoo_path = path.join(dirname(fileURLToPath(import.meta.url)), './moehoo/moehoo.' + platform + '.node');
+        const moehoo_path = path.join(dirname(fileURLToPath(import.meta.url)), './moehoo/MoeHoo.' + platform + '.node');
         if (!fs.existsSync(moehoo_path)) {
             logger.logError(`[NativePacketClient] Missing moehoo binary: ${moehoo_path}`);
             return 0;
@@ -43,7 +43,7 @@ export class NativePacketClient extends PacketClient {
 
     async init(pid: number, recv: string, send: string): Promise<void> {
         const platform = process.platform + '.' + process.arch;
-        const moehoo_path = path.join(dirname(fileURLToPath(import.meta.url)), './moehoo/moehoo.' + platform + '.node');
+        const moehoo_path = path.join(dirname(fileURLToPath(import.meta.url)), './moehoo/MoeHoo.' + platform + '.node');
         process.dlopen(this.MoeHooExport, moehoo_path, constants.dlopen.RTLD_LAZY);
         this.MoeHooExport.exports?.InitHook(recv, send, (type: number, uin: string, seq: number, cmd: string, hex_data: string) => {
             const callback = this.cb.get(createHash('md5').update(Buffer.from(hex_data, 'hex')).digest('hex') + (type === 0 ? 'send' : 'recv'));
