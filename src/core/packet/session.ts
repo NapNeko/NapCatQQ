@@ -31,15 +31,15 @@ export class PacketSession {
     private newClient(core: NapCatCore): PacketClient {
         const prefer = core.configLoader.configData.packetBackend;
         switch (prefer) {
-            case "native":
-                return new NativePacketClient(core);
-            case "frida":
-                return new wsPacketClient(core);
-            case "auto":
-            case undefined:
-                return this.judgeClient(core);
-            default:
-                throw new Error(`[Core] [Packet] 未知的Packet后端类型 ${prefer}，请检查配置文件！`);
+        case "native":
+            return new NativePacketClient(core);
+        case "frida":
+            return new wsPacketClient(core);
+        case "auto":
+        case undefined:
+            return this.judgeClient(core);
+        default:
+            throw new Error(`[Core] [Packet] 未知的Packet后端类型 ${prefer}，请检查配置文件！`);
         }
     }
 
