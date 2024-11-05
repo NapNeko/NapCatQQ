@@ -8,12 +8,12 @@ import { constants } from "node:os";
 import { LogWrapper } from "@/common/log";
 
 export interface NativePacketExportType {
-    InitHook: (recv: string, send: string, callback: (type: number, uin: string, seq: number, cmd: string, hex_data: string) => void) => boolean;
-    SendPacket: (cmd: string, data: string, trace_id: string) => void;
+    InitHook?: (recv: string, send: string, callback: (type: number, uin: string, seq: number, cmd: string, hex_data: string) => void) => boolean;
+    SendPacket?: (cmd: string, data: string, trace_id: string) => void;
 }
 export class NativePacketClient extends PacketClient {
     static supportedPlatforms = ['win32.x64'];
-    private MoeHooExport: { exports?: NativePacketExportType } = { exports: undefined };
+    private MoeHooExport: { exports: NativePacketExportType } = { exports: {} };
 
     protected constructor(core: NapCatCore) {
         super(core);
@@ -45,7 +45,7 @@ export class NativePacketClient extends PacketClient {
         const platform = process.platform + '.' + process.arch;
         const moehoo_path = path.join(dirname(fileURLToPath(import.meta.url)), './moehoo/MoeHoo.' + platform + '.node');
         process.dlopen(this.MoeHooExport, moehoo_path, constants.dlopen.RTLD_LAZY);
-        this.MoeHooExport.exports?.InitHook(recv, send, (type: number, uin: string, seq: number, cmd: string, hex_data: string) => {
+        this.MoeHooExport.exports.InitHook?.(recv, send, (type: number, uin: string, seq: number, cmd: string, hex_data: string) => {
             const callback = this.cb.get(createHash('md5').update(Buffer.from(hex_data, 'hex')).digest('hex') + (type === 0 ? 'send' : 'recv'));
             if (callback) {
                 callback({ seq, cmd, hex_data });
@@ -58,7 +58,7 @@ export class NativePacketClient extends PacketClient {
     }
 
     sendCommandImpl(cmd: string, data: string, trace_id: string): void {
-        this.MoeHooExport.exports?.SendPacket(cmd, data, crypto.createHash('md5').update(trace_id).digest('hex'));
+        this.MoeHooExport.exports.SendPacket?.(cmd, data, crypto.createHash('md5').update(trace_id).digest('hex'));
     }
 
     connect(cb: () => void): Promise<void> {
