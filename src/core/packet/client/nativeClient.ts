@@ -6,15 +6,16 @@ import fs from "fs";
 import { PacketClient } from "@/core/packet/client/client";
 import { constants } from "node:os";
 import { LogWrapper } from "@/common/log";
-
+import { LRUCache } from "@/common/lru-cache";
+//0 send 1recv
 export interface NativePacketExportType {
-    InitHook?: (recv: string, send: string, callback: (type: number, uin: string, seq: number, cmd: string, hex_data: string) => void) => boolean;
+    InitHook?: (recv: string, send: string, callback: (type: number, uin: string, cmd: string, seq: number, hex_data: string) => void) => boolean;
     SendPacket?: (cmd: string, data: string, trace_id: string) => void;
 }
 export class NativePacketClient extends PacketClient {
     static supportedPlatforms = ['win32.x64'];
     private MoeHooExport: { exports: NativePacketExportType } = { exports: {} };
-
+    private sendEvent = new LRUCache<number, string>(500);//seq->trace_id
     protected constructor(core: NapCatCore) {
         super(core);
     }
@@ -46,21 +47,37 @@ export class NativePacketClient extends PacketClient {
         const moehoo_path = path.join(dirname(fileURLToPath(import.meta.url)), './moehoo/MoeHoo.' + platform + '.node');
         process.dlopen(this.MoeHooExport, moehoo_path, constants.dlopen.RTLD_LAZY);
         console.log('MoeHooExport:', this.MoeHooExport);
-        console.log('recv:', recv, 'send:', );
-        this.MoeHooExport.exports.InitHook?.(send, recv, (type: number, uin: string, seq: number, cmd: string, hex_data: string) => {
-            const callback = this.cb.get(createHash('md5').update(Buffer.from(hex_data, 'hex')).digest('hex') + (type === 0 ? 'send' : 'recv'));
-            if (callback) {
-                callback({ seq, cmd, hex_data });
-            } else {
-                this.logger.logError(`Callback not found for hex_data: ${hex_data}`);
+        console.log('recv:', recv, 'send:',);
+        this.MoeHooExport.exports.InitHook?.(send, recv, (type: number, uin: string, cmd: string, seq: number, hex_data: string) => {
+            const trace_id = createHash('md5').update(Buffer.from(hex_data, 'hex')).digest('hex');
+            if (type === 0 && this.cb.get(trace_id + 'recv')) {
+                //此时为send 提取seq
+                this.sendEvent.put(seq, trace_id);
             }
-            console.log('type:', type, 'uin:', uin, 'seq:', seq, 'cmd:', cmd, 'hex_data:', hex_data);
+            if (type === 1 && this.sendEvent.get(seq)) {
+                //此时为recv 调用callback
+                const trace_id = this.sendEvent.get(seq);
+                const callback = this.cb.get(trace_id + 'recv');
+                console.log('callback:', callback, trace_id);
+                callback?.({ seq, cmd, hex_data });
+            }
+
+            // const callback = this.cb.get(createHash('md5').update(Buffer.from(hex_data, 'hex')).digest('hex') + (type === 0 ? 'send' : 'recv'));
+            // if (callback) {
+            //     callback({ seq, cmd, hex_data });
+            // } else {
+            //     this.logger.logError(`Callback not found for hex_data: ${hex_data}`);
+            // }
+            console.log('type:', type, 'cmd:', cmd, 'trace_id:', trace_id);
         });
         this.isAvailable = true;
     }
 
     sendCommandImpl(cmd: string, data: string, trace_id: string): void {
-        this.MoeHooExport.exports.SendPacket?.(cmd, data, crypto.createHash('md5').update(trace_id).digest('hex'));
+        const trace_id_md5 = createHash('md5').update(trace_id).digest('hex');
+        console.log('sendCommandImpl:', cmd, data, trace_id_md5);
+        this.MoeHooExport.exports.SendPacket?.(cmd, data, trace_id_md5);
+        this.cb.get(trace_id_md5 + 'send')?.({ seq: 0, cmd, hex_data: '' });
     }
 
     connect(cb: () => void): Promise<void> {

@@ -1,6 +1,6 @@
 export class LRUCache<K, V> {
     private capacity: number;
-    private cache: Map<K, V>;
+    public cache: Map<K, V>;
 
     constructor(capacity: number) {
         this.capacity = capacity;
