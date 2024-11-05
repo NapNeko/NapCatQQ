@@ -26,6 +26,7 @@ const FrameworkBaseConfigPlugin: PluginOption[] = [
         targets: [
             { src: './manifest.json', dest: 'dist' },
             { src: './src/core/external/napcat.json', dest: 'dist/config/' },
+            { src: './src/native/packet', dest: 'dist/moehoo', flatten: false },
             { src: './static/', dest: 'dist/static/', flatten: false },
             { src: './src/onebot/config/onebot11.json', dest: 'dist/config/' },
             { src: './src/framework/liteloader.cjs', dest: 'dist' },
@@ -42,6 +43,7 @@ const ShellBaseConfigPlugin: PluginOption[] = [
     cp({
         targets: [
             { src: './src/native/external', dest: 'dist/native', flatten: false },
+            { src: './src/native/packet', dest: 'dist/moehoo', flatten: false },
             { src: './static/', dest: 'dist/static/', flatten: false },
             { src: './src/core/external/napcat.json', dest: 'dist/config/' },
             { src: './src/onebot/config/onebot11.json', dest: 'dist/config/' },
