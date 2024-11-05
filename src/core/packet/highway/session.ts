@@ -59,7 +59,7 @@ export class PacketHighwaySession {
 
     private async checkAvailable() {
         if (!this.packetClient.available) {
-            throw new Error('packetServer不可用，请参照文档 https://napneko.github.io/config/advanced 检查packetServer状态或进行配置');
+            throw new Error('packetBackend不可用，请参照文档 https://napneko.github.io/config/advanced 和启动日志检查packetBackend状态或进行配置！');
         }
         if (this.sig.sigSession === null || this.sig.sessionKey === null) {
             this.logger.logWarn('[Highway] sigSession or sessionKey not available!');
