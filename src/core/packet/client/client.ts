@@ -58,12 +58,9 @@ export abstract class PacketClient {
     private async sendCommand(cmd: string, data: string, trace_id: string, rsp: boolean = false, timeout: number = 20000, sendcb: (json: RecvPacketData) => void = () => {
     }): Promise<RecvPacketData> {
         return new Promise<RecvPacketData>((resolve, reject) => {
-            if (rsp) {
-                this.registerCallback(trace_id, 'recv', async (json: RecvPacketData) => {
-                    clearTimeout(timeoutHandle);
-                    resolve(json);
-                });
-            }
+            const timeoutHandle = setTimeout(() => {
+                reject(new Error(`sendCommand timed out after ${timeout} ms for ${cmd} with trace_id ${trace_id}`));
+            }, timeout);
             this.registerCallback(trace_id, 'send', async (json: RecvPacketData) => {
                 sendcb(json);
                 if (!rsp) {
@@ -71,10 +68,13 @@ export abstract class PacketClient {
                     resolve(json);
                 }
             });
+            if (rsp) {
+                this.registerCallback(trace_id, 'recv', async (json: RecvPacketData) => {
+                    clearTimeout(timeoutHandle);
+                    resolve(json);
+                });
+            }
             this.sendCommandImpl(cmd, data, trace_id);
-            const timeoutHandle = setTimeout(() => {
-                reject(new Error(`sendCommand timed out after ${timeout} ms for ${cmd} with trace_id ${trace_id}`));
-            }, timeout);
         });
     }
 
