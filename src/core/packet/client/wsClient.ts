@@ -1,32 +1,31 @@
 import { Data, WebSocket } from "ws";
 import { NapCatCore } from "@/core";
 import { PacketClient, RecvPacket } from "@/core/packet/client/client";
-import { LogWrapper } from "@/common/log";
 
 export class wsPacketClient extends PacketClient {
     private websocket: WebSocket | undefined;
     private reconnectAttempts: number = 0;
     private readonly maxReconnectAttempts: number = 60; // 现在暂时不可配置
-    private readonly clientUrl: string = '';
+    private readonly clientUrl: string | null = null;
     private clientUrlWrap: (url: string) => string = (url: string) => `ws://${url}/ws`;
 
-    protected constructor(core: NapCatCore) {
+    constructor(core: NapCatCore) {
         super(core);
-        this.clientUrl = this.clientUrlWrap(this.config.packetServer ?? '127.0.0.1:8086');
+        this.clientUrl = this.config.packetServer ? this.clientUrlWrap( this.config.packetServer) : null;
     }
 
-    static compatibilityScore(logger: LogWrapper): number  {
-        return 10;
-    }
-
-    static create(core: NapCatCore): wsPacketClient {
-        return new wsPacketClient(core);
+    check(): boolean {
+        if (!this.clientUrl) {
+            this.logger.logWarn(`[Core] [Packet:Server] 未配置服务器地址`);
+            return false;
+        }
+        return true;
     }
 
     connect(cb: () => void): Promise<void> {
         return new Promise((resolve, reject) => {
             //this.logger.log.bind(this.logger)(`[Core] [Packet Server] Attempting to connect to ${this.clientUrl}`);
-            this.websocket = new WebSocket(this.clientUrl);
+            this.websocket = new WebSocket(this.clientUrl!);
             this.websocket.on('error', (err) => { }/*this.logger.logError.bind(this.logger)('[Core] [Packet Server] Error:', err.message)*/);
 
             this.websocket.onopen = () => {

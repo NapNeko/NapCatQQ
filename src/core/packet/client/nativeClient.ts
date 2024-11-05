@@ -5,7 +5,6 @@ import { fileURLToPath } from "url";
 import fs from "fs";
 import { PacketClient } from "@/core/packet/client/client";
 import { constants } from "node:os";
-import { LogWrapper } from "@/common/log";
 import { LRUCache } from "@/common/lru-cache";
 //0 send 1recv
 export interface NativePacketExportType {
@@ -13,10 +12,10 @@ export interface NativePacketExportType {
     SendPacket?: (cmd: string, data: string, trace_id: string) => void;
 }
 export class NativePacketClient extends PacketClient {
-    static supportedPlatforms = ['win32.x64'];
+    private readonly supportedPlatforms = ['win32.x64'];
     private MoeHooExport: { exports: NativePacketExportType } = { exports: {} };
     private sendEvent = new LRUCache<number, string>(500);//seq->trace_id
-    protected constructor(core: NapCatCore) {
+    constructor(core: NapCatCore) {
         super(core);
     }
 
@@ -24,22 +23,18 @@ export class NativePacketClient extends PacketClient {
         return this.isAvailable;
     }
 
-    static compatibilityScore(logger: LogWrapper): number {
+    check(): boolean {
         const platform = process.platform + '.' + process.arch;
         if (!this.supportedPlatforms.includes(platform)) {
-            logger.logError(`[Core] [Packet:Native] 不支持的平台: ${platform}`);
-            return 0;
+            this.logger.logWarn(`[Core] [Packet:Native] 不支持的平台: ${platform}`);
+            return false;
         }
         const moehoo_path = path.join(dirname(fileURLToPath(import.meta.url)), './moehoo/MoeHoo.' + platform + '.node');
         if (!fs.existsSync(moehoo_path)) {
-            logger.logError(`[Core] [Packet:Native] 缺失运行时文件: ${moehoo_path}`);
-            return 0;
+            this.logger.logWarn(`[Core] [Packet:Native] 缺失运行时文件: ${moehoo_path}`);
+            return false;
         }
-        return 10;
-    }
-
-    static create(core: NapCatCore): NativePacketClient {
-        return new NativePacketClient(core);
+        return true;
     }
 
     async init(pid: number, recv: string, send: string): Promise<void> {

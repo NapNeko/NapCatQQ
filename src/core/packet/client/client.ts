@@ -30,10 +30,6 @@ export abstract class PacketClient {
         this.config = core.configLoader.configData;
     }
 
-    get available(): boolean {
-        return this.isAvailable;
-    }
-
     private randText(len: number): string {
         let text = '';
         const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -43,13 +39,11 @@ export abstract class PacketClient {
         return text;
     }
 
-    static create(core: NapCatCore): PacketClient {
-        throw new Error("Must be implemented by subclasses");
+    get available(): boolean {
+        return this.isAvailable;
     }
 
-    static compatibilityScore(logger: LogWrapper): number {
-        throw new Error("Must be implemented by subclasses");
-    }
+    abstract check(core: NapCatCore): boolean;
 
     abstract init(pid: number, recv: string, send: string): Promise<void>;
 

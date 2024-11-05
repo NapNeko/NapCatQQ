@@ -7,12 +7,12 @@ import { wsPacketClient } from "@/core/packet/client/wsClient";
 import { NapCatCore } from "@/core";
 
 type clientPriority = {
-    [key: number]: typeof PacketClient;
+    [key: number]: (core: NapCatCore) => PacketClient;
 }
 
 const clientPriority: clientPriority = {
-    10: NativePacketClient,
-    1: wsPacketClient,
+    10: (core: NapCatCore) => new NativePacketClient(core),
+    1: (core: NapCatCore) => new wsPacketClient(core),
 };
 
 export class PacketSession {
@@ -29,21 +29,19 @@ export class PacketSession {
     }
 
     private judgeClient(core: NapCatCore): PacketClient {
-        let selectedClient: typeof PacketClient | null = null;
-        let maxScore = -1;
-        for (const key in clientPriority) {
-            const priority = parseInt(key);
-            const ClientClass = clientPriority[priority];
-            const score = priority * ClientClass.compatibilityScore(core.context.logger);
-            if (score > maxScore) {
-                maxScore = score;
-                selectedClient = ClientClass;
-            }
-        }
+        const sortedClients = Object.entries(clientPriority)
+            .map(([priority, clientFactory]) => {
+                const client = clientFactory(core);
+                const score = +priority * +client.check(core);
+                return { client, score };
+            })
+            .filter(({ score }) => score > 0)
+            .sort((a, b) => b.score - a.score);
+        const selectedClient = sortedClients[0]?.client;
         if (!selectedClient) {
             throw new Error("[Core] [Packet] 无可用的后端，NapCat.Packet将不会加载！");
         }
-        this.logger.log(`[Core] [Packet] 自动选择 ${selectedClient.name} 作为后端`);
-        return selectedClient.create(core);
+        this.logger.log(`[Core] [Packet] 自动选择 ${selectedClient.constructor.name} 作为后端`);
+        return selectedClient;
     }
 }
