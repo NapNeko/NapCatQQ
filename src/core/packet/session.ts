@@ -17,7 +17,7 @@ const clientPriority: clientPriority = {
 
 export class PacketSession {
     readonly logger: LogWrapper;
-    readonly client: PacketClient;
+    readonly client: PacketClient ;
     readonly packer: PacketPacker;
     readonly highwaySession: PacketHighwaySession;
 
@@ -30,19 +30,28 @@ export class PacketSession {
 
     private newClient(core: NapCatCore): PacketClient {
         const prefer = core.configLoader.configData.packetBackend;
+        let client: PacketClient | null;
         switch (prefer) {
         case "native":
             this.logger.log("[Core] [Packet] 使用指定的 NativePacketClient 作为后端");
-            return new NativePacketClient(core);
+            client = new NativePacketClient(core);
+            break;
         case "frida":
             this.logger.log("[Core] [Packet] 使用指定的 FridaPacketClient 作为后端");
-            return new wsPacketClient(core);
+            client = new wsPacketClient(core);
+            break;
         case "auto":
         case undefined:
-            return this.judgeClient(core);
+            client = this.judgeClient(core);
+            break;
         default:
-            throw new Error(`[Core] [Packet] 未知的Packet后端类型 ${prefer}，请检查配置文件！`);
+            this.logger.logError(`[Core] [Packet] 未知的Packet后端类型 ${prefer}，请检查配置文件！`);
+            client = null;
         }
+        if (!(client && client.check(core))) {
+            throw new Error("[Core] [Packet] 无可用的后端，NapCat.Packet将不会加载！");
+        }
+        return client;
     }
 
     private judgeClient(core: NapCatCore): PacketClient {
