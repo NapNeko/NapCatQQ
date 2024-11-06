@@ -2,8 +2,6 @@ import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
 import { AIVoiceChatType } from "@/core/packet/entities/aiChat";
-import { NapProtoEncodeStructType } from "@/core/packet/proto/NapProto";
-import { IndexNode } from "@/core/packet/proto/oidb/common/Ntv2.RichMediaReq";
 
 const SchemaData = {
     type: 'object',
