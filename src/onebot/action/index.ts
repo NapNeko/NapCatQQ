@@ -92,7 +92,7 @@ import { GetGroupFileUrl } from "@/onebot/action/file/GetGroupFileUrl";
 import { GetPacketStatus } from "@/onebot/action/packet/GetPacketStatus";
 import { FriendPoke } from "@/onebot/action/user/FriendPoke";
 import { GetCredentials } from './system/GetCredentials';
-import { SetGroupSign } from './extends/SetGroupSign';
+import { SendGroupSign, SetGroupSign } from './extends/SetGroupSign';
 import { GoCQHTTPGetGroupAtAllRemain } from './go-cqhttp/GetGroupAtAllRemain';
 import { GoCQHTTPCheckUrlSafely } from './go-cqhttp/GoCQHTTPCheckUrlSafely';
 import { GoCQHTTPGetModelShow } from './go-cqhttp/GoCQHTTPGetModelShow';
@@ -125,6 +125,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new TranslateEnWordToZn(obContext, core),
         new GetGroupRootFiles(obContext, core),
         new SetGroupSign(obContext, core),
+        new SendGroupSign(obContext, core),
         // onebot11
         new SendLike(obContext, core),
         new GetMsg(obContext, core),

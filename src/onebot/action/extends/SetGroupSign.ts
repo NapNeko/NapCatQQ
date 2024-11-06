@@ -20,3 +20,6 @@ export class SetGroupSign extends BaseAction<Payload, any> {
         return await this.core.apis.PacketApi.sendGroupSignPacket(payload.group_id);
     }
 }
+export class SendGroupSign extends SetGroupSign {
+    actionName = ActionName.SendGroupSign;
+}

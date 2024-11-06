@@ -136,6 +136,8 @@ export enum ActionName {
     GetGroupIgnoredNotifies = 'get_group_ignored_notifies',
 
     SetGroupSign = "set_group_sign",
+    SendGroupSign = "send_group_sign",
+    
     GetMiniAppArk = "get_mini_app_ark",
     // UploadForwardMsg = "upload_forward_msg",
     GetAiRecord = "get_ai_record",
