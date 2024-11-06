@@ -283,7 +283,7 @@ export class NTQQWebApi {
                 this.context.logger.logError.bind(this.context.logger)('获取群聊之火失败');
             }
         }
-        if (getType === WebHonorType.PERFORMER || getType === WebHonorType.ALL) {
+        if (getType === WebHonorType.LEGEND || getType === WebHonorType.ALL) {
             const RetInternal = await getDataInternal(groupCode, 3);
             if (RetInternal) {
                 HonorInfo.legend_list = [];
