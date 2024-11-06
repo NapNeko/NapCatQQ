@@ -6,10 +6,15 @@ const SchemaData = {
     type: 'object',
     properties: {
         friend_id: { type: ['string', 'number'] },
+        user_id: { type: ['string', 'number'] },
         temp_block: { type: 'boolean' },
         temp_both_del: { type: 'boolean' },
     },
-    required: ['friend_id'],
+    oneOf: [
+        { required: ['friend_id'] },
+        { required: ['user_id'] },
+    ],
+
 } as const satisfies JSONSchema;
 type Payload = FromSchema<typeof SchemaData>;
 
@@ -18,7 +23,8 @@ export class GoCQHTTPDeleteFriend extends BaseAction<Payload, any> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const uid = await this.core.apis.UserApi.getUidByUinV2(payload.friend_id.toString());
+        const uin = payload.friend_id ?? payload.user_id ?? '';
+        const uid = await this.core.apis.UserApi.getUidByUinV2(uin.toString());
 
         if (!uid) {
             return {
