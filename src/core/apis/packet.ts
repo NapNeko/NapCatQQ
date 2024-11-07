@@ -25,7 +25,7 @@ import { OidbSvcTrpcTcp0X929B_0Resp, OidbSvcTrpcTcp0X929D_0Resp } from "@/core/p
 import { IndexNode, MsgInfo } from "@/core/packet/proto/oidb/common/Ntv2.RichMediaReq";
 import { NTV2RichMediaResp } from "@/core/packet/proto/oidb/common/Ntv2.RichMediaResp";
 import { RecvPacketData } from "@/core/packet/client/client";
-import {napCatVersion} from "@/common/version";
+import { napCatVersion } from "@/common/version";
 
 
 interface OffsetType {
