@@ -215,7 +215,7 @@ export async function checkUriType(Uri: string) {
         }
         if (uri.startsWith('file://')) {
             let filePath: string;
-            const pathname = decodeURIComponent(new URL(uri).pathname);
+            const pathname = decodeURIComponent(new URL(uri).pathname + new URL(uri).hash);
             if (process.platform === 'win32') {
                 filePath = pathname.slice(1);
             } else {
