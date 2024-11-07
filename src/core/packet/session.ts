@@ -45,7 +45,7 @@ export class PacketSession {
             client = this.judgeClient(core);
             break;
         default:
-            this.logger.logError(`[Core] [Packet] 未知的Packet后端类型 ${prefer}，请检查配置文件！`);
+            this.logger.logError(`[Core] [Packet] 未知的PacketBackend ${prefer}，请检查配置文件！`);
             client = null;
         }
         if (!(client && client.check(core))) {

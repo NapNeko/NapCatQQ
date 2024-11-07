@@ -25,6 +25,7 @@ import { OidbSvcTrpcTcp0X929B_0Resp, OidbSvcTrpcTcp0X929D_0Resp } from "@/core/p
 import { IndexNode, MsgInfo } from "@/core/packet/proto/oidb/common/Ntv2.RichMediaReq";
 import { NTV2RichMediaResp } from "@/core/packet/proto/oidb/common/Ntv2.RichMediaResp";
 import { RecvPacketData } from "@/core/packet/client/client";
+import {napCatVersion} from "@/common/version";
 
 
 interface OffsetType {
@@ -61,11 +62,12 @@ export class NTQQPacketApi {
         this.qqVersion = qqversion;
         const table = typedOffset[qqversion + '-' + os.arch()];
         if (!table) {
-            this.logger.logError('[Core] [Packet] PacketServer Offset table not found for QQVersion: ', qqversion + '-' + os.arch());
+            this.logger.logError(`[Core] [Packet] PacketBackend 不支持当前QQ版本架构：${qqversion}-${os.arch()}，
+            请参照 https://github.com/NapNeko/NapCatQQ/releases/tag/v${napCatVersion} 配置正确的QQ版本！`);
             return false;
         }
         if (this.core.configLoader.configData.packetBackend === 'disable') {
-            this.logger.logWarn('[Core] [Packet] 已禁用Packet后端，NapCat.Packet将不会加载！');
+            this.logger.logWarn('[Core] [Packet] 已禁用PacketBackend，NapCat.Packet将不会加载！');
             return false;
         }
         this.packetSession = new PacketSession(this.core);
