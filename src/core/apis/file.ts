@@ -175,14 +175,18 @@ export class NTQQFileApi {
             const thumbPath = pathLib.join(thumb, thumbFileName);
             ffmpeg(filePath)
                 .on('error', (err) => {
-                    logger.logDebug('获取视频封面失败，使用默认封面', err);
-                    if (diyThumbPath) {
-                        fsPromises.copyFile(diyThumbPath, thumbPath).then(() => {
+                    try {
+                        logger.logDebug('获取视频封面失败，使用默认封面', err);
+                        if (diyThumbPath) {
+                            fsPromises.copyFile(diyThumbPath, thumbPath).then(() => {
+                                resolve(thumbPath);
+                            }).catch(reject);
+                        } else {
+                            fs.writeFileSync(thumbPath, Buffer.from(defaultVideoThumbB64, 'base64'));
                             resolve(thumbPath);
-                        }).catch(reject);
-                    } else {
-                        fs.writeFileSync(thumbPath, Buffer.from(defaultVideoThumbB64, 'base64'));
-                        resolve(thumbPath);
+                        }
+                    } catch (error) {
+                        logger.logError.bind(logger)('获取视频封面失败，使用默认封面失败', error);
                     }
                 })
                 .screenshots({
