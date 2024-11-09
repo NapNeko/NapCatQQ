@@ -375,8 +375,10 @@ export class NTQQGroupApi {
         };
     }
 
-    async getGroupMembersV2(groupQQ: string, num = 3000): Promise<Map<string, GroupMember>> {
-        //console.log('getGroupMembers -->', groupQQ);
+    async getGroupMembersV2(groupQQ: string, num = 3000, no_cache: boolean = false): Promise<Map<string, GroupMember>> {
+        if (no_cache) {
+            return (await this.getGroupMemberAll(groupQQ, true)).result.infos;
+        }
         let res = await this.GetGroupMembersV3(groupQQ, num);
         let ret = res.infos;
         if (res.infos.size === 0 && !res.listenerMode) {
@@ -386,14 +388,13 @@ export class NTQQGroupApi {
         if (res.infos.size === 0) {
             ret = (await this.getGroupMemberAll(groupQQ)).result.infos;
         }
-        //console.log("<---------------")
         return ret;
     }
 
     async getGroupMembers(groupQQ: string, num = 3000): Promise<Map<string, GroupMember>> {
         const groupService = this.context.session.getGroupService();
         const sceneId = groupService.createMemberListScene(groupQQ, 'groupMemberList_MainWindow');
-        const result = await groupService.getNextMemberList(sceneId!, undefined, num);
+        const result = await groupService.getNextMemberList(sceneId, undefined, num);
         if (result.errCode !== 0) {
             throw new Error('获取群成员列表出错,' + result.errMsg);
         }
@@ -401,8 +402,8 @@ export class NTQQGroupApi {
         return result.result.infos;
     }
 
-    async getGroupFileCount(Gids: Array<string>) {
-        return this.context.session.getRichMediaService().batchGetGroupFileCount(Gids);
+    async getGroupFileCount(group_ids: Array<string>) {
+        return this.context.session.getRichMediaService().batchGetGroupFileCount(group_ids);
     }
 
     async getArkJsonGroupShare(GroupCode: string) {

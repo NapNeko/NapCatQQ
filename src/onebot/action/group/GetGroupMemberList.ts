@@ -24,12 +24,11 @@ export class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
         const noCache = payload.no_cache ? this.stringToBoolean(payload.no_cache) : false;
         const memberCache = this.core.apis.GroupApi.groupMemberCache;
         let groupMembers;
-        if (noCache) {
-            groupMembers = await this.core.apis.GroupApi.getGroupMembersV2(groupIdStr);
-        } else {
+        try {
+            groupMembers = await this.core.apis.GroupApi.getGroupMembersV2(groupIdStr, 3000, noCache);
+        } catch (error) {
             groupMembers = memberCache.get(groupIdStr) ?? await this.core.apis.GroupApi.getGroupMembersV2(groupIdStr);
         }
-
         const memberPromises = Array.from(groupMembers.values()).map(item =>
             OB11Entities.groupMember(groupIdStr, item)
         );
