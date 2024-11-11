@@ -2,12 +2,14 @@ import { ChatType, Peer } from '@/core/entities';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
+import { MessageUnique } from '@/common/message-unique';
 
 const SchemaData = {
     type: 'object',
     properties: {
         user_id: { type: ['number', 'string'] },
         group_id: { type: ['number', 'string'] },
+        message_id: { type: ['number', 'string'] },
     },
 } as const satisfies JSONSchema;
 
@@ -15,6 +17,16 @@ type PlayloadType = FromSchema<typeof SchemaData>;
 
 class MarkMsgAsRead extends BaseAction<PlayloadType, null> {
     async getPeer(payload: PlayloadType): Promise<Peer> {
+        if (payload.message_id) {
+            let s_peer = MessageUnique.getMsgIdAndPeerByShortId(+payload.message_id)?.Peer;
+            if (s_peer) {
+                return s_peer;
+            }
+            let l_peer = MessageUnique.getPeerByMsgId(payload.message_id.toString())?.Peer;
+            if (l_peer) {
+                return l_peer;
+            }
+        }
         if (payload.user_id) {
             const peerUid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
             if (!peerUid) {
