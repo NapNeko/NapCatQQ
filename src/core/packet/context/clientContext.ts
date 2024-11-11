@@ -31,9 +31,7 @@ export class PacketClientContext {
     }
 
     async sendOidbPacket(pkt: OidbPacket, rsp = false): Promise<Buffer> {
-        console.log("REQ", pkt.cmd, pkt.data);
         const raw = await this._client.sendOidbPacket(pkt, rsp);
-        console.log("RES", raw.cmd, raw.hex_data);
         return Buffer.from(raw.hex_data, "hex");
     }
 
