@@ -1,21 +1,20 @@
 import * as crypto from "crypto";
-import { PushMsgBody } from "@/core/packet/proto/message/message";
+import { PushMsgBody } from "@/core/packet/transformer/proto";
 import { NapProtoEncodeStructType } from "@napneko/nap-proto-core";
-import { LogWrapper } from "@/common/log";
 import { PacketMsg, PacketSendMsgElement } from "@/core/packet/message/message";
 import { IPacketMsgElement, PacketMsgTextElement } from "@/core/packet/message/element";
 import { SendTextElement } from "@/core";
 
 export class PacketMsgBuilder {
-    private logger: LogWrapper;
-
-    constructor(logger: LogWrapper) {
-        this.logger = logger;
-    }
+    // private logger: LogWrapper;
+    //
+    // constructor(logger: LogWrapper) {
+    //     this.logger = logger;
+    // }
 
     protected static failBackText = new PacketMsgTextElement(
         {
-            textElement: { content: "[该消息类型暂不支持查看]" }!
+            textElement: { content: "[该消息类型暂不支持查看]" }
         } as SendTextElement
     );
 
@@ -27,7 +26,7 @@ export class PacketMsgBuilder {
             }, undefined);
             const msgElement = node.msg.flatMap(msg => msg.buildElement() ?? []);
             if (!msgContent && !msgElement.length) {
-                this.logger.logWarn(`[PacketMsgBuilder] buildFakeMsg: 空的msgContent和msgElement！`);
+                // this.logger.logWarn(`[PacketMsgBuilder] buildFakeMsg: 空的msgContent和msgElement！`);
                 msgElement.push(PacketMsgBuilder.failBackText.buildElement());
             }
             return {

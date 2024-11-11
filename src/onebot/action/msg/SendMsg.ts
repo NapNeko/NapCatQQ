@@ -11,10 +11,10 @@ import { decodeCQCode } from '@/onebot/cqcode';
 import { MessageUnique } from '@/common/message-unique';
 import { ChatType, ElementType, NapCatCore, Peer, RawMessage, SendArkElement, SendMessageElement } from '@/core';
 import BaseAction from '../BaseAction';
-import { rawMsgWithSendMsg } from "@/core/packet/message/converter";
-import { PacketMsg } from "@/core/packet/message/message";
 import { ForwardMsgBuilder } from "@/common/forward-msg-builder";
 import { stringifyWithBigInt } from "@/common/helper";
+import { PacketMsg } from "@/core/packet/message/message";
+import { rawMsgWithSendMsg } from "@/core/packet/message/converter";
 
 export interface ReturnDataType {
     message_id: number;
@@ -192,7 +192,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                     msg: sendElements,
                 };
                 logger.logDebug(`handleForwardedNodesPacket[SendRaw] 开始转换 ${stringifyWithBigInt(packetMsgElements)}`);
-                const transformedMsg = this.core.apis.PacketApi.packetSession?.packer.packetConverter.rawMsgWithSendMsgToPacketMsg(packetMsgElements);
+                const transformedMsg = this.core.apis.PacketApi.pkt.msgConverter.rawMsgWithSendMsgToPacketMsg(packetMsgElements);
                 logger.logDebug(`handleForwardedNodesPacket[SendRaw] 转换为 ${stringifyWithBigInt(transformedMsg)}`);
                 packetMsg.push(transformedMsg!);
             } else if (node.data.id) {
@@ -205,7 +205,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                 const msg = (await this.core.apis.MsgApi.getMsgsByMsgId(nodeMsg.Peer, [nodeMsg.MsgId])).msgList[0];
                 logger.logDebug(`handleForwardedNodesPacket[PureRaw] 开始转换 ${stringifyWithBigInt(msg)}`);
                 await this.core.apis.FileApi.downloadRawMsgMedia([msg]);
-                const transformedMsg = this.core.apis.PacketApi.packetSession?.packer.packetConverter.rawMsgToPacketMsg(msg, msgPeer);
+                const transformedMsg = this.core.apis.PacketApi.pkt.msgConverter.rawMsgToPacketMsg(msg, msgPeer);
                 logger.logDebug(`handleForwardedNodesPacket[PureRaw] 转换为 ${stringifyWithBigInt(transformedMsg)}`);
                 packetMsg.push(transformedMsg!);
             } else {
@@ -216,7 +216,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
             logger.logWarn('handleForwardedNodesPacket 元素为空！');
             return null;
         }
-        const resid = await this.core.apis.PacketApi.sendUploadForwardMsg(packetMsg, msgPeer.chatType === ChatType.KCHATTYPEGROUP ? +msgPeer.peerUid : 0);
+        const resid = await this.core.apis.PacketApi.pkt.operation.UploadForwardMsg(packetMsg, msgPeer.chatType === ChatType.KCHATTYPEGROUP ? +msgPeer.peerUid : 0);
         const forwardJson = ForwardMsgBuilder.fromPacketMsg(resid, packetMsg, source, news, summary, prompt);
         return {
             finallySendElements: {

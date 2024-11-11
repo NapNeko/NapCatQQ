@@ -7,8 +7,12 @@ import {
     MentionExtra,
     NotOnlineImage,
     QBigFaceExtra,
-    QSmallFaceExtra
-} from "@/core/packet/proto/message/element";
+    QSmallFaceExtra,
+    MsgInfo,
+    OidbSvcTrpcTcp0XE37_800Response,
+    FileExtra,
+    GroupFileExtra
+} from "@/core/packet/transformer/proto";
 import {
     AtType,
     PicType,
@@ -24,11 +28,8 @@ import {
     SendTextElement,
     SendVideoElement
 } from "@/core";
-import { MsgInfo } from "@/core/packet/proto/oidb/common/Ntv2.RichMediaReq";
-import { PacketMsg, PacketSendMsgElement } from "@/core/packet/message/message";
 import { ForwardMsgBuilder } from "@/common/forward-msg-builder";
-import { FileExtra, GroupFileExtra } from "@/core/packet/proto/message/component";
-import { OidbSvcTrpcTcp0XE37_800Response } from "@/core/packet/proto/oidb/Oidb.0XE37_800";
+import { PacketMsg, PacketSendMsgElement } from "@/core/packet/message/message";
 
 // raw <-> packet
 // TODO: SendStructLongMsgElement

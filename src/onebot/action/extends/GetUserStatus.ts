@@ -17,6 +17,6 @@ export class GetUserStatus extends GetPacketStatusDepends<Payload, { status: num
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        return await this.core.apis.PacketApi.sendStatusPacket(+payload.user_id);
+        return await this.core.apis.PacketApi.pkt.operation.GetStrangerStatus(+payload.user_id);
     }
 }
