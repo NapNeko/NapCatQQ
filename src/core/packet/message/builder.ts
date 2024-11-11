@@ -6,12 +6,6 @@ import { IPacketMsgElement, PacketMsgTextElement } from "@/core/packet/message/e
 import { SendTextElement } from "@/core";
 
 export class PacketMsgBuilder {
-    // private logger: LogWrapper;
-    //
-    // constructor(logger: LogWrapper) {
-    //     this.logger = logger;
-    // }
-
     protected static failBackText = new PacketMsgTextElement(
         {
             textElement: { content: "[该消息类型暂不支持查看]" }
@@ -26,7 +20,6 @@ export class PacketMsgBuilder {
             }, undefined);
             const msgElement = node.msg.flatMap(msg => msg.buildElement() ?? []);
             if (!msgContent && !msgElement.length) {
-                // this.logger.logWarn(`[PacketMsgBuilder] buildFakeMsg: 空的msgContent和msgElement！`);
                 msgElement.push(PacketMsgBuilder.failBackText.buildElement());
             }
             return {
