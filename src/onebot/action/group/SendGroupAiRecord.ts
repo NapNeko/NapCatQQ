@@ -1,9 +1,9 @@
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
-import { AIVoiceChatType } from "@/core/packet/entities/aiChat";
 import { uri2local } from "@/common/file";
 import { ChatType, Peer } from "@/core";
+import { AIVoiceChatType } from "@/core/packet/entities/aiChat";
 
 const SchemaData = {
     type: 'object',
@@ -24,8 +24,8 @@ export class SendGroupAiRecord extends GetPacketStatusDepends<Payload, {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const rawRsp = await this.core.apis.PacketApi.sendAiVoiceChatReq(+payload.group_id, payload.character, payload.text, AIVoiceChatType.Sound);
-        const url = await this.core.apis.PacketApi.sendGroupPttFileDownloadReq(+payload.group_id, rawRsp.msgInfoBody[0].index);
+        const rawRsp = await this.core.apis.PacketApi.pkt.operation.GetAiVoice(+payload.group_id, payload.character, payload.text, AIVoiceChatType.Sound);
+        const url = await this.core.apis.PacketApi.pkt.operation.GetGroupPttUrl(+payload.group_id, rawRsp.msgInfoBody[0].index);
         const { path, fileName, errMsg, success } = (await uri2local(this.core.NapCatTempPath, url));
         if (!success) {
             throw new Error(errMsg);
