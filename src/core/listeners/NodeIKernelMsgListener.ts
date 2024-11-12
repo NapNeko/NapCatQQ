@@ -1,4 +1,4 @@
-import { ChatType, RawMessage } from '@/core/entities';
+import { ChatType, KickedOffLineInfo, RawMessage } from '@/core/entities';
 import { CommonFileInfo } from '@/core';
 
 export interface OnRichMediaDownloadCompleteParams {
@@ -212,7 +212,7 @@ export class NodeIKernelMsgListener {
 
     }
 
-    onKickedOffLine(kickedInfo: unknown) {
+    onKickedOffLine(kickedInfo: KickedOffLineInfo) {
 
     }
 
