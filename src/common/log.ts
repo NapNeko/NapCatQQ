@@ -1,7 +1,7 @@
 import winston, { format, transports } from 'winston';
 import { truncateString } from '@/common/helper';
 import path from 'node:path';
-import chalk from 'chalk';
+import fs from 'node:fs';
 import { AtType, ChatType, ElementType, MessageElement, RawMessage, SelfInfo } from '@/core';
 
 export enum LogLevel {
@@ -43,12 +43,17 @@ export class LogWrapper {
                 })
             ),
             transports: [
-                new transports.File({ filename: logPath, level: 'debug' }),
+                new transports.File({
+                    filename: logPath,
+                    level: 'debug',
+                    maxsize: 5 * 1024 * 1024, // 5MB
+                    maxFiles: 5
+                }),
                 new transports.Console({
                     format: format.combine(
                         format.colorize(),
                         format.printf(({ timestamp, level, message, ...meta }) => {
-                            const userInfo = meta.userInfo ? `${chalk.magenta(meta.userInfo)} | ` : '';
+                            const userInfo = meta.userInfo ? `${meta.userInfo} | ` : '';
                             return `${timestamp} [${level}] ${userInfo}${message}`;
                         })
                     )
@@ -57,6 +62,39 @@ export class LogWrapper {
         });
 
         this.setLogSelfInfo({ nick: '', uin: '', uid: '' });
+        this.cleanOldLogs(logDir);
+    }
+
+    cleanOldLogs(logDir: string) {
+        const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+        fs.readdir(logDir, (err, files) => {
+            if (err) {
+                this.logger.error('Failed to read log directory', err);
+                return;
+            }
+            files.forEach(file => {
+                const filePath = path.join(logDir, file);
+                fs.stat(filePath, (err, stats) => {
+                    if (err) {
+                        this.logger.error('Failed to get file stats', err);
+                        return;
+                    }
+                    if (stats.mtime.getTime() < oneWeekAgo) {
+                        fs.unlink(filePath, err => {
+                            if (err) {
+                                if (err.code === 'ENOENT') {
+                                    this.logger.warn(`File already deleted: ${file}`);
+                                } else {
+                                    this.logger.error('Failed to delete old log file', err);
+                                }
+                            } else {
+                                this.logger.info(`Deleted old log file: ${file}`);
+                            }
+                        });
+                    }
+                });
+            });
+        });
     }
 
     setFileAndConsoleLogLevel(fileLogLevel: LogLevel, consoleLogLevel: LogLevel) {
@@ -93,19 +131,14 @@ export class LogWrapper {
     }
 
     formatMsg(msg: any[]) {
-        let logMsg = '';
-        for (const msgItem of msg) {
+        return msg.map(msgItem => {
             if (msgItem instanceof Error) {
-                logMsg += msgItem.stack + ' ';
-                continue;
+                return msgItem.stack;
             } else if (typeof msgItem === 'object') {
-                const obj = JSON.parse(JSON.stringify(msgItem, null, 2));
-                logMsg += JSON.stringify(truncateString(obj)) + ' ';
-                continue;
+                return JSON.stringify(truncateString(JSON.parse(JSON.stringify(msgItem, null, 2))));
             }
-            logMsg += msgItem + ' ';
-        }
-        return logMsg;
+            return msgItem;
+        }).join(' ');
     }
 
     _log(level: LogLevel, ...args: any[]) {
@@ -118,7 +151,7 @@ export class LogWrapper {
             this.logger.log(level, message.replace(/\x1B[@-_][0-?]*[ -/]*[@-~]/g, ''));
         }
     }
-    
+
     log(...args: any[]) {
         this._log(LogLevel.INFO, ...args);
     }
@@ -146,7 +179,7 @@ export class LogWrapper {
             return;
         }
 
-        this.log(`${isSelfSent ? '发送 ->' : '接收 <-' } ${rawMessageToText(msg)}`);
+        this.log(`${isSelfSent ? '发送 ->' : '接收 <-'} ${rawMessageToText(msg)}`);
     }
 }
 
@@ -189,11 +222,11 @@ export function rawMessageToText(msg: RawMessage, recursiveLevel = 0): string {
                 record => element.replyElement!.sourceMsgIdInRecords === record.msgId,
             );
             return `[回复消息 ${recordMsgOrNull &&
-                    recordMsgOrNull.peerUin != '284840486' && recordMsgOrNull.peerUin != '1094950020'
+                recordMsgOrNull.peerUin != '284840486' && recordMsgOrNull.peerUin != '1094950020'
                 ?
                 rawMessageToText(recordMsgOrNull, recursiveLevel + 1) :
                 `未找到消息记录 (MsgId = ${element.replyElement.sourceMsgIdInRecords})`
-            }]`;
+                }]`;
         }
 
         if (element.picElement) {
