@@ -148,6 +148,7 @@ export class LogWrapper {
         } else if (this.consoleLogEnabled) {
             this.logger.log(level, message);
         } else if (this.fileLogEnabled) {
+            // eslint-disable-next-line no-control-regex
             this.logger.log(level, message.replace(/\x1B[@-_][0-?]*[ -/]*[@-~]/g, ''));
         }
     }
@@ -226,7 +227,7 @@ export function rawMessageToText(msg: RawMessage, recursiveLevel = 0): string {
                 ?
                 rawMessageToText(recordMsgOrNull, recursiveLevel + 1) :
                 `未找到消息记录 (MsgId = ${element.replyElement.sourceMsgIdInRecords})`
-                }]`;
+            }]`;
         }
 
         if (element.picElement) {

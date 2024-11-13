@@ -4,7 +4,7 @@ import {
     MiniAppRawData,
     MiniAppReqCustomParams,
     MiniAppReqTemplateParams
-} from "@/core/packet/client/entities/miniApp";
+} from "@/core/packet/entities/miniApp";
 
 type MiniAppTemplateNameList = "bili" | "weibo";
 

@@ -83,7 +83,7 @@ export class NapCatOneBot11Adapter {
     async registerNative(core: NapCatCore, context: InstanceContext) {
         try {
             this.nativeCore = new Native(context.pathWrapper.binaryPath);
-            if (!this.nativeCore.inited) throw new Error('Native Not Init');
+            // if (!this.nativeCore.inited) throw new Error('Native Not Init');
             this.nativeCore.registerRecallCallback(async (hex: string) => {
                 try {
                     // TODO: refactor!
@@ -346,10 +346,10 @@ export class NapCatOneBot11Adapter {
             }
         };
         msgListener.onKickedOffLine = async (kick) => {
-            let event = new BotOfflineEvent(this.core, kick.tipsTitle, kick.tipsDesc);
+            const event = new BotOfflineEvent(this.core, kick.tipsTitle, kick.tipsDesc);
             this.networkManager.emitEvent(event)
                 .catch(e => this.context.logger.logError.bind(this.context.logger)('处理Bot掉线失败', e));
-        }
+        };
         this.context.session.getMsgService().addKernelMsgListener(
             proxiedListenerOf(msgListener, this.context.logger),
         );

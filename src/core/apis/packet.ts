@@ -19,34 +19,46 @@ export class NTQQPacketApi {
     core: NapCatCore;
     logger: LogWrapper;
     qqVersion: string | undefined;
-    pkt: PacketClientSession;
+    pkt!: PacketClientSession;
+    errStack: string[] = [];
 
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
         this.core = core;
         this.logger = core.context.logger;
-        this.pkt = new PacketClientSession(core);
         this.InitSendPacket(this.context.basicInfoWrapper.getFullQQVesion())
             .then()
-            .catch(this.core.context.logger.logError.bind(this.core.context.logger));
+            .catch((err) => {
+                this.logger.logError.bind(this.core.context.logger);
+                this.errStack.push(err);
+            });
     }
 
     get available(): boolean {
-        return this.pkt?.available;
+        return this.pkt?.available ?? false;
+    }
+
+    get clientLogStack() {
+        return this.pkt?.clientLogStack + '\n' + this.errStack.join('\n');
     }
 
     async InitSendPacket(qqVer: string) {
         this.qqVersion = qqVer;
         const table = typedOffset[qqVer + '-' + os.arch()];
         if (!table) {
-            this.logger.logError(`[Core] [Packet] PacketBackend 不支持当前QQ版本架构：${qqVer}-${os.arch()}，
-            请参照 https://github.com/NapNeko/NapCatQQ/releases/tag/v${napCatVersion} 配置正确的QQ版本！`);
+            const err = `[Core] [Packet] PacketBackend 不支持当前QQ版本架构：${qqVer}-${os.arch()}，
+            请参照 https://github.com/NapNeko/NapCatQQ/releases/tag/v${napCatVersion} 配置正确的QQ版本！`;
+            this.logger.logError(err);
+            this.errStack.push(err);
             return false;
         }
         if (this.core.configLoader.configData.packetBackend === 'disable') {
-            this.logger.logWarn('[Core] [Packet] 已禁用PacketBackend，NapCat.Packet将不会加载！');
+            const err = '[Core] [Packet] 已禁用PacketBackend，NapCat.Packet将不会加载！';
+            this.logger.logError(err);
+            this.errStack.push(err);
             return false;
         }
+        this.pkt = new PacketClientSession(this.core);
         await this.pkt.init(process.pid, table.recv, table.send);
         return true;
     }
