@@ -191,6 +191,7 @@ export class OneBotMsgApi {
                     path: url,
                     url: url,
                     key: _.key,
+                    emoji_id: _.emojiId,
                     file_unique: _.key
                 },
             };
