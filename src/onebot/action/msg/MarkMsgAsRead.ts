@@ -18,11 +18,11 @@ type PlayloadType = FromSchema<typeof SchemaData>;
 class MarkMsgAsRead extends BaseAction<PlayloadType, null> {
     async getPeer(payload: PlayloadType): Promise<Peer> {
         if (payload.message_id) {
-            let s_peer = MessageUnique.getMsgIdAndPeerByShortId(+payload.message_id)?.Peer;
+            const s_peer = MessageUnique.getMsgIdAndPeerByShortId(+payload.message_id)?.Peer;
             if (s_peer) {
                 return s_peer;
             }
-            let l_peer = MessageUnique.getPeerByMsgId(payload.message_id.toString())?.Peer;
+            const l_peer = MessageUnique.getPeerByMsgId(payload.message_id.toString())?.Peer;
             if (l_peer) {
                 return l_peer;
             }

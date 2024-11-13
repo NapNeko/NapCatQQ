@@ -26,7 +26,7 @@ export class GetGroupFileUrl extends GetPacketStatusDepends<Payload, GetGroupFil
         const contextMsgFile = FileNapCatOneBotUUID.decode(payload.file_id) || FileNapCatOneBotUUID.decodeModelId(payload.file_id);
         if (contextMsgFile?.fileUUID) {
             return {
-                url: await this.core.apis.PacketApi.sendGroupFileDownloadReq(+payload.group_id, contextMsgFile.fileUUID)
+                url: await this.core.apis.PacketApi.pkt.operation.GetGroupFileUrl(+payload.group_id, contextMsgFile.fileUUID)
             };
         }
         throw new Error('real fileUUID not found!');
