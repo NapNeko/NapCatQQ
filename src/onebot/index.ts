@@ -46,6 +46,8 @@ import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecal
 import { LRUCache } from '@/common/lru-cache';
 import { NodeIKernelRecentContactListener } from '@/core/listeners/NodeIKernelRecentContactListener';
 import { Native } from '@/native';
+//import { decodeMessage, decodeRecallGroup } from '@/core/packet/proto/old/Message';
+import { BotOfflineEvent } from './event/notice/BotOfflineEvent';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -343,7 +345,11 @@ export class NapCatOneBot11Adapter {
                 }
             }
         };
-
+        msgListener.onKickedOffLine = async (kick) => {
+            let event = new BotOfflineEvent(this.core, kick.tipsTitle, kick.tipsDesc);
+            this.networkManager.emitEvent(event)
+                .catch(e => this.context.logger.logError.bind(this.context.logger)('处理Bot掉线失败', e));
+        }
         this.context.session.getMsgService().addKernelMsgListener(
             proxiedListenerOf(msgListener, this.context.logger),
         );
