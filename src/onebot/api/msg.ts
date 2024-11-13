@@ -185,6 +185,8 @@ export class OneBotMsgApi {
                     file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "", "." + _.key + ".jpg"),
                     path: url,
                     url: url,
+                    key: _.key,
+                    emoji_id: _.emojiId,
                     file_unique: _.key
                 },
             };
