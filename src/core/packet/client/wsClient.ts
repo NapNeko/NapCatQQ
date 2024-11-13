@@ -1,98 +1,101 @@
 import { Data, WebSocket } from "ws";
-import { NapCatCore } from "@/core";
-import { PacketClient, RecvPacket } from "@/core/packet/client/client";
+import { IPacketClient, RecvPacket } from "@/core/packet/client/baseClient";
+import { PacketContext } from "@/core/packet/context/packetContext";
+import { LogStack } from "@/core/packet/context/clientContext";
 
-export class wsPacketClient extends PacketClient {
-    private websocket: WebSocket | undefined;
+export class wsPacketClient extends IPacketClient {
+    private websocket: WebSocket | null = null;
     private reconnectAttempts: number = 0;
     private readonly maxReconnectAttempts: number = 60; // 现在暂时不可配置
-    private readonly clientUrl: string | null = null;
-    private clientUrlWrap: (url: string) => string = (url: string) => `ws://${url}/ws`;
+    private readonly clientUrl: string;
+    private readonly clientUrlWrap: (url: string) => string = (url: string) => `ws://${url}/ws`;
 
-    constructor(core: NapCatCore) {
-        super(core);
-        this.clientUrl = this.config.packetServer ? this.clientUrlWrap( this.config.packetServer) : null;
+    private isInitialized: boolean = false;
+    private initPayload: { pid: number, recv: string, send: string } | null = null;
+
+    constructor(context: PacketContext, logStack: LogStack) {
+        super(context, logStack);
+        this.clientUrl = this.context.napcore.config.packetServer
+            ? this.clientUrlWrap(this.context.napcore.config.packetServer)
+            : this.clientUrlWrap('127.0.0.1:8083');
     }
 
     check(): boolean {
-        if (!this.clientUrl) {
-            this.logger.logWarn(`[Core] [Packet:Server] 未配置服务器地址`);
+        if (!this.context.napcore.config.packetServer) {
+            this.logStack.pushLogWarn(`wsPacketClient 未配置服务器地址`);
             return false;
         }
         return true;
     }
 
-    connect(cb: () => void): Promise<void> {
-        return new Promise((resolve, reject) => {
-            //this.logger.log.bind(this.logger)(`[Core] [Packet Server] Attempting to connect to ${this.clientUrl}`);
-            this.websocket = new WebSocket(this.clientUrl!);
-            this.websocket.on('error', (err) => { }/*this.logger.logError.bind(this.logger)('[Core] [Packet Server] Error:', err.message)*/);
+    async init(pid: number, recv: string, send: string): Promise<void> {
+        this.initPayload = { pid, recv, send };
+        await this.connectWithRetry();
+    }
 
+    sendCommandImpl(cmd: string, data: string, trace_id: string): void {
+        if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
+            this.websocket.send(JSON.stringify({
+                action: 'send',
+                cmd,
+                data,
+                trace_id
+            }));
+        } else {
+            this.logStack.pushLogWarn(`WebSocket 未连接，无法发送命令: ${cmd}`);
+        }
+    }
+
+    private async connectWithRetry(): Promise<void> {
+        while (this.reconnectAttempts < this.maxReconnectAttempts) {
+            try {
+                await this.connect();
+                return;
+            } catch (error) {
+                this.reconnectAttempts++;
+                this.logStack.pushLogWarn(`第 ${this.reconnectAttempts}/${this.maxReconnectAttempts} 次尝试重连失败！`);
+                await this.delay(5000);
+            }
+        }
+        this.logStack.pushLogError(`wsPacketClient 在 ${this.clientUrl} 达到最大重连次数 (${this.maxReconnectAttempts})！`);
+        throw new Error(`无法连接到 WebSocket 服务器：${this.clientUrl}`);
+    }
+
+    private connect(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.websocket = new WebSocket(this.clientUrl);
             this.websocket.onopen = () => {
-                this.isAvailable = true;
+                this.available = true;
                 this.reconnectAttempts = 0;
-                this.logger.log.bind(this.logger)(`[Core] [Packet:Server] 已连接到 ${this.clientUrl}`);
-                cb();
+                this.context.logger.info(`wsPacketClient 已连接到 ${this.clientUrl}`);
+                if (!this.isInitialized && this.initPayload) {
+                    this.websocket!.send(JSON.stringify({
+                        action: 'init',
+                        ...this.initPayload
+                    }));
+                    this.isInitialized = true;
+                }
                 resolve();
             };
-
-            this.websocket.onerror = (error) => {
-                //this.logger.logError.bind(this.logger)(`WebSocket error: ${error}`);
-                reject(new Error(`${error.message}`));
-            };
-
-            this.websocket.onmessage = (event) => {
-                // const message = JSON.parse(event.data.toString());
-                // console.log("Received message:", message);
-                this.handleMessage(event.data).then().catch();
-            };
-
             this.websocket.onclose = () => {
-                this.isAvailable = false;
-                //this.logger.logWarn.bind(this.logger)(`[Core] [Packet Server] Disconnected from ${this.clientUrl}`);
-                this.attemptReconnect(cb);
+                this.available = false;
+                this.context.logger.warn(`WebSocket 连接关闭，尝试重连...`);
+                reject(new Error('WebSocket 连接关闭'));
+            };
+            this.websocket.onmessage = (event) => this.handleMessage(event.data).catch(err => {
+                this.context.logger.error(`处理消息时出错: ${err}`);
+            });
+            this.websocket.onerror = (error) => {
+                this.available = false;
+                this.context.logger.error(`WebSocket 出错: ${error.message}`);
+                this.websocket?.close();
+                reject(error);
             };
         });
     }
 
-    private attemptReconnect(cb: any): void {
-        try {
-            if (this.reconnectAttempts < this.maxReconnectAttempts) {
-                this.reconnectAttempts++;
-                setTimeout(() => {
-                    this.connect(cb).catch((error) => {
-                        this.logger.logError.bind(this.logger)(`[Core] [Packet:Server] 尝试重连失败：${error.message}`);
-                    });
-                }, 5000 * this.reconnectAttempts);
-            } else {
-                this.logger.logError.bind(this.logger)(`[Core] [Packet:Server] ${this.clientUrl} 已达到最大重连次数！`);
-            }
-        } catch (error: any) {
-            this.logger.logError.bind(this.logger)(`[Core] [Packet:Server] 重连时出错: ${error.message}`);
-        }
-    }
-
-    async init(pid: number, recv: string, send: string): Promise<void> {
-        if (!this.isAvailable || !this.websocket) {
-            throw new Error("WebSocket is not connected");
-        }
-        const initMessage = {
-            action: 'init',
-            pid: pid,
-            recv: recv,
-            send: send
-        };
-        this.websocket.send(JSON.stringify(initMessage));
-    }
-
-    sendCommandImpl(cmd: string, data: string, trace_id: string) : void {
-        const commandMessage = {
-            action: 'send',
-            cmd: cmd,
-            data: data,
-            trace_id: trace_id
-        };
-        this.websocket!.send(JSON.stringify(commandMessage));
+    private delay(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     private async handleMessage(message: Data): Promise<void> {
@@ -100,13 +103,10 @@ export class wsPacketClient extends PacketClient {
             const json: RecvPacket = JSON.parse(message.toString());
             const trace_id_md5 = json.trace_id_md5;
             const action = json?.type ?? 'init';
-            const event = this.cb.get(trace_id_md5 + action);
-            if (event) {
-                await event(json.data);
-            }
-            //console.log("Received message:", json);
+            const event = this.cb.get(`${trace_id_md5}${action}`);
+            if (event) await event(json.data);
         } catch (error) {
-            this.logger.logError.bind(this.logger)(`Error parsing message: ${error}`);
+            this.context.logger.error(`解析ws消息时出错: ${(error as Error).message}`);
         }
     }
 }

@@ -32,7 +32,6 @@ import {
     PacketMultiMsgElement
 } from "@/core/packet/message/element";
 import { PacketMsg, PacketSendMsgElement } from "@/core/packet/message/message";
-import { LogWrapper } from "@/common/log";
 
 const SupportedElementTypes = [
     ElementType.TEXT,
@@ -77,48 +76,10 @@ export type rawMsgWithSendMsg = {
     msg: PacketSendMsgElement[]
 }
 
+// TODO: make it become adapter?
 export class PacketMsgConverter {
-    private logger: LogWrapper;
-
-    constructor(logger: LogWrapper) {
-        this.logger = logger;
-    }
-
     private isValidElementType(type: ElementType): type is keyof ElementToPacketMsgConverters {
         return SupportedElementTypes.includes(type);
-    }
-
-    rawMsgWithSendMsgToPacketMsg(msg: rawMsgWithSendMsg): PacketMsg {
-        return {
-            senderUid: msg.senderUid ?? '',
-            senderUin: msg.senderUin,
-            senderName: msg.senderName,
-            groupId: msg.groupId,
-            time: msg.time,
-            msg: msg.msg.map((element) => {
-                if (!this.isValidElementType(element.elementType)) return null;
-                return this.rawToPacketMsgConverters[element.elementType](element as MessageElement);
-            }).filter((e) => e !== null)
-        };
-    }
-
-    rawMsgToPacketMsg(msg: RawMessage, ctxPeer: Peer): PacketMsg {
-        return {
-            seq: +msg.msgSeq,
-            groupId: ctxPeer.chatType === ChatType.KCHATTYPEGROUP ? +msg.peerUid : undefined,
-            senderUid: msg.senderUid,
-            senderUin: +msg.senderUin,
-            senderName: msg.sendMemberName && msg.sendMemberName !== ''
-                ? msg.sendMemberName
-                : msg.sendNickName && msg.sendNickName !== ''
-                    ? msg.sendNickName
-                    : "QQ用户",
-            time: +msg.msgTime,
-            msg: msg.elements.map((element) => {
-                if (!this.isValidElementType(element.elementType)) return null;
-                return this.rawToPacketMsgConverters[element.elementType](element);
-            }).filter((e) => e !== null)
-        };
     }
 
     private rawToPacketMsgConverters: ElementToPacketMsgConverters = {
@@ -160,4 +121,37 @@ export class PacketMsgConverter {
             return new PacketMultiMsgElement(element as SendStructLongMsgElement);
         }
     };
+
+    rawMsgWithSendMsgToPacketMsg(msg: rawMsgWithSendMsg): PacketMsg {
+        return {
+            senderUid: msg.senderUid ?? '',
+            senderUin: msg.senderUin,
+            senderName: msg.senderName,
+            groupId: msg.groupId,
+            time: msg.time,
+            msg: msg.msg.map((element) => {
+                if (!this.isValidElementType(element.elementType)) return null;
+                return this.rawToPacketMsgConverters[element.elementType](element as MessageElement);
+            }).filter((e) => e !== null)
+        };
+    }
+
+    rawMsgToPacketMsg(msg: RawMessage, ctxPeer: Peer): PacketMsg {
+        return {
+            seq: +msg.msgSeq,
+            groupId: ctxPeer.chatType === ChatType.KCHATTYPEGROUP ? +msg.peerUid : undefined,
+            senderUid: msg.senderUid,
+            senderUin: +msg.senderUin,
+            senderName: msg.sendMemberName && msg.sendMemberName !== ''
+                ? msg.sendMemberName
+                : msg.sendNickName && msg.sendNickName !== ''
+                    ? msg.sendNickName
+                    : "QQ用户",
+            time: +msg.msgTime,
+            msg: msg.elements.map((element) => {
+                if (!this.isValidElementType(element.elementType)) return null;
+                return this.rawToPacketMsgConverters[element.elementType](element);
+            }).filter((e) => e !== null)
+        };
+    }
 }

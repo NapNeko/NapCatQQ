@@ -18,13 +18,7 @@ import {
     SendTextElement,
 } from '@/core';
 import faceConfig from '@/core/external/face_config.json';
-import {
-    NapCatOneBot11Adapter,
-    OB11Message,
-    OB11MessageData,
-    OB11MessageDataType,
-    OB11MessageFileBase,
-} from '@/onebot';
+import { NapCatOneBot11Adapter, OB11Message, OB11MessageData, OB11MessageDataType, OB11MessageFileBase, } from '@/onebot';
 import { OB11Entities } from '@/onebot/entities';
 import { EventType } from '@/onebot/event/OB11BaseEvent';
 import { encodeCQCode } from '@/onebot/cqcode';
@@ -33,8 +27,9 @@ import { RequestUtil } from '@/common/request';
 import fs from 'node:fs';
 import fsPromise from 'node:fs/promises';
 import { OB11FriendAddNoticeEvent } from '@/onebot/event/notice/OB11FriendAddNoticeEvent';
-import { decodeSysMessage } from '@/core/packet/proto/old/ProfileLike';
+// import { decodeSysMessage } from '@/core/packet/proto/old/ProfileLike';
 import { ForwardMsgBuilder } from "@/common/forward-msg-builder";
+import { decodeSysMessage } from "@/core/helper/adaptDecoder";
 
 type RawToOb11Converters = {
     [Key in keyof MessageElement as Key extends `${string}Element` ? Key : never]: (
@@ -508,13 +503,12 @@ export class OneBotMsgApi {
 
         // File service
         [OB11MessageDataType.image]: async (sendMsg, context) => {
-            const sendPicElement = await this.core.apis.FileApi.createValidSendPicElement(
+            return await this.core.apis.FileApi.createValidSendPicElement(
                 context,
                 (await this.handleOb11FileLikeMessage(sendMsg, context)).path,
                 sendMsg.data.summary,
                 sendMsg.data.sub_type,
             );
-            return sendPicElement;
         },
 
         [OB11MessageDataType.file]: async (sendMsg, context) => {
@@ -894,6 +888,7 @@ export class OneBotMsgApi {
 
         return { path, fileName: inputdata.name ?? fileName };
     }
+
     async parseSysMessage(msg: number[]) {
         const sysMsg = decodeSysMessage(Uint8Array.from(msg));
         if (sysMsg.msgSpec.length === 0) {
@@ -902,8 +897,7 @@ export class OneBotMsgApi {
         const { msgType, subType, subSubType } = sysMsg.msgSpec[0];
         if (msgType === 528 && subType === 39 && subSubType === 39) {
             if (!sysMsg.bodyWrapper) return;
-            const event = await this.obContext.apis.UserApi.parseLikeEvent(sysMsg.bodyWrapper.wrappedBody);
-            return event;
+            return await this.obContext.apis.UserApi.parseLikeEvent(sysMsg.bodyWrapper.wrappedBody);
         }
         /*
         if (msgType === 732 && subType === 16 && subSubType === 16) {

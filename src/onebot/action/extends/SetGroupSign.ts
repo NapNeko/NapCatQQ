@@ -17,7 +17,7 @@ export class SetGroupSign extends BaseAction<Payload, any> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        return await this.core.apis.PacketApi.sendGroupSignPacket(payload.group_id.toString());
+        return await this.core.apis.PacketApi.pkt.operation.GroupSign(+payload.group_id);
     }
 }
 export class SendGroupSign extends SetGroupSign {
