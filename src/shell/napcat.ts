@@ -36,7 +36,12 @@ const cmdOptions = program.opts();
 // NapCat Shell App ES 入口文件
 export async function NCoreInitShell() {
     console.log('NapCat Shell App Loading...');
-
+    process.on('uncaughtException', (err) => {
+        console.log('[NapCat] [Error] Unhandled Exception:', err.message);
+    });
+    process.on('unhandledRejection', (reason, promise) => {
+        console.log('[NapCat] [Error] unhandledRejection:', reason);
+    });
     const pathWrapper = new NapCatPathWrapper();
     const logger = new LogWrapper(pathWrapper.logsPath);
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
@@ -227,7 +232,7 @@ export async function NCoreInitShell() {
                 logger.log(`可用于快速登录的 QQ：\n${historyLoginList
                     .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
                     .join('\n')
-                }`);
+                    }`);
             }
             loginService.getQRCodePicture();
         }

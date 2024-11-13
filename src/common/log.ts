@@ -1,4 +1,4 @@
-import log4js, { Configuration } from 'log4js';
+import winston, { format, transports } from 'winston';
 import { truncateString } from '@/common/helper';
 import path from 'node:path';
 import chalk from 'chalk';
@@ -27,76 +27,78 @@ function getFormattedTimestamp() {
 export class LogWrapper {
     fileLogEnabled = true;
     consoleLogEnabled = true;
-    logConfig: Configuration;
-    loggerConsole: log4js.Logger;
-    loggerFile: log4js.Logger;
-    loggerDefault: log4js.Logger;
-    // eslint-disable-next-line no-control-regex
-    colorEscape = /\x1B[@-_][0-?]*[ -/]*[@-~]/g;
+    logger: winston.Logger;
 
     constructor(logDir: string) {
         const filename = `${getFormattedTimestamp()}.log`;
         const logPath = path.join(logDir, filename);
-        this.logConfig = {
-            appenders: {
-                FileAppender: { // 输出到文件的appender
-                    type: 'file',
-                    filename: logPath, // 指定日志文件的位置和文件名
-                    maxLogSize: 10485760, // 日志文件的最大大小（单位：字节），这里设置为10MB
-                    layout: {
-                        type: 'pattern',
-                        pattern: '%d{yyyy-MM-dd hh:mm:ss} [%p] %X{userInfo} | %m',
-                    },
-                },
-                ConsoleAppender: { // 输出到控制台的appender
-                    type: 'console',
-                    layout: {
-                        type: 'pattern',
-                        pattern: `%d{yyyy-MM-dd hh:mm:ss} [%[%p%]] ${chalk.magenta('%X{userInfo}')} | %m`,
-                    },
-                },
-            },
-            categories: {
-                default: { appenders: ['FileAppender', 'ConsoleAppender'], level: 'debug' }, // 默认情况下同时输出到文件和控制台
-                file: { appenders: ['FileAppender'], level: 'debug' },
-                console: { appenders: ['ConsoleAppender'], level: 'debug' },
-            },
-        };
-        log4js.configure(this.logConfig);
-        this.loggerConsole = log4js.getLogger('console');
-        this.loggerFile = log4js.getLogger('file');
-        this.loggerDefault = log4js.getLogger('default');
+
+        this.logger = winston.createLogger({
+            level: 'debug',
+            format: format.combine(
+                format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+                format.printf(({ timestamp, level, message, ...meta }) => {
+                    const userInfo = meta.userInfo ? `${meta.userInfo} | ` : '';
+                    return `${timestamp} [${level}] ${userInfo}${message}`;
+                })
+            ),
+            transports: [
+                new transports.File({ filename: logPath, level: 'debug' }),
+                new transports.Console({
+                    format: format.combine(
+                        format.colorize(),
+                        format.printf(({ timestamp, level, message, ...meta }) => {
+                            const userInfo = meta.userInfo ? `${chalk.magenta(meta.userInfo)} | ` : '';
+                            return `${timestamp} [${level}] ${userInfo}${message}`;
+                        })
+                    )
+                })
+            ]
+        });
+
         this.setLogSelfInfo({ nick: '', uin: '', uid: '' });
     }
 
     setFileAndConsoleLogLevel(fileLogLevel: LogLevel, consoleLogLevel: LogLevel) {
-        this.logConfig.categories.file.level = fileLogLevel;
-        this.logConfig.categories.console.level = consoleLogLevel;
-        log4js.configure(this.logConfig);
+        this.logger.transports.forEach((transport) => {
+            if (transport instanceof transports.File) {
+                transport.level = fileLogLevel;
+            } else if (transport instanceof transports.Console) {
+                transport.level = consoleLogLevel;
+            }
+        });
     }
 
     setLogSelfInfo(selfInfo: { nick: string, uin: string, uid: string }) {
         const userInfo = `${selfInfo.nick}(${selfInfo.uin})`;
-        this.loggerConsole.addContext('userInfo', userInfo);
-        this.loggerFile.addContext('userInfo', userInfo);
-        this.loggerDefault.addContext('userInfo', userInfo);
+        this.logger.defaultMeta = { userInfo };
     }
 
     setFileLogEnabled(isEnabled: boolean) {
         this.fileLogEnabled = isEnabled;
+        this.logger.transports.forEach((transport) => {
+            if (transport instanceof transports.File) {
+                transport.silent = !isEnabled;
+            }
+        });
     }
 
     setConsoleLogEnabled(isEnabled: boolean) {
         this.consoleLogEnabled = isEnabled;
+        this.logger.transports.forEach((transport) => {
+            if (transport instanceof transports.Console) {
+                transport.silent = !isEnabled;
+            }
+        });
     }
 
     formatMsg(msg: any[]) {
         let logMsg = '';
         for (const msgItem of msg) {
-            if (msgItem instanceof Error) { // 判断是否是错误
+            if (msgItem instanceof Error) {
                 logMsg += msgItem.stack + ' ';
                 continue;
-            } else if (typeof msgItem === 'object') { // 判断是否是对象
+            } else if (typeof msgItem === 'object') {
                 const obj = JSON.parse(JSON.stringify(msgItem, null, 2));
                 logMsg += JSON.stringify(truncateString(obj)) + ' ';
                 continue;
@@ -106,18 +108,17 @@ export class LogWrapper {
         return logMsg;
     }
 
-
     _log(level: LogLevel, ...args: any[]) {
+        const message = this.formatMsg(args);
         if (this.consoleLogEnabled) {
-            this.loggerConsole[level](this.formatMsg(args));
+            this.logger.log(level, message);
         }
         if (this.fileLogEnabled) {
-            this.loggerFile[level](this.formatMsg(args).replace(this.colorEscape, ''));
+            this.logger.log(level, message.replace(/\x1B[@-_][0-?]*[ -/]*[@-~]/g, ''));
         }
     }
 
     log(...args: any[]) {
-        // info 等级
         this._log(LogLevel.INFO, ...args);
     }
 
@@ -140,7 +141,6 @@ export class LogWrapper {
     logMessage(msg: RawMessage, selfInfo: SelfInfo) {
         const isSelfSent = msg.senderUin === selfInfo.uin;
 
-        // Intercept grey tip
         if (msg.elements[0]?.elementType === ElementType.GreyTip) {
             return;
         }
@@ -167,11 +167,9 @@ export function rawMessageToText(msg: RawMessage, recursiveLevel = 0): string {
         }
     } else if (msg.chatType == ChatType.KCHATTYPEDATALINE) {
         tokens.push('移动设备');
-    } else /* temp */ {
+    } else {
         tokens.push(`临时消息 (${msg.peerUin})`);
     }
-
-    // message content
 
     function msgElementToText(element: MessageElement) {
         if (element.textElement) {
@@ -190,7 +188,7 @@ export function rawMessageToText(msg: RawMessage, recursiveLevel = 0): string {
                 record => element.replyElement!.sourceMsgIdInRecords === record.msgId,
             );
             return `[回复消息 ${recordMsgOrNull &&
-                    recordMsgOrNull.peerUin != '284840486' && recordMsgOrNull.peerUin != '1094950020'// 非转发消息; 否则定位不到
+                    recordMsgOrNull.peerUin != '284840486' && recordMsgOrNull.peerUin != '1094950020'
                 ?
                 rawMessageToText(recordMsgOrNull, recursiveLevel + 1) :
                 `未找到消息记录 (MsgId = ${element.replyElement.sourceMsgIdInRecords})`
