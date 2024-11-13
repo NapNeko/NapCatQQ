@@ -9,12 +9,12 @@ import { PacketContext } from "@/core/packet/context/packetContext";
 
 // 0 send 1 recv
 export interface NativePacketExportType {
-    InitHook?: (recv: string, send: string, callback: (type: number, uin: string, cmd: string, seq: number, hex_data: string) => void) => boolean;
+    InitHook?: (send: string, recv: string, callback: (type: number, uin: string, cmd: string, seq: number, hex_data: string) => void) => boolean;
     SendPacket?: (cmd: string, data: string, trace_id: string) => void;
 }
 
 export class NativePacketClient extends IPacketClient {
-    private readonly supportedPlatforms = ['win32.x64', 'linux.x64', 'linux.arm64'];
+    private readonly supportedPlatforms = ['win32.x64', 'linux.x64', 'linux.arm64', 'darwin.x64', 'darwin.arm64'];
     private MoeHooExport: { exports: NativePacketExportType } = { exports: {} };
     private sendEvent = new LRUCache<number, string>(500); // seq->trace_id
 
