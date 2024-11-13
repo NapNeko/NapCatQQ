@@ -118,7 +118,6 @@ export class PacketOperationContext {
         return `https://${res.download.downloadDns}/ftn_handler/${Buffer.from(res.download.downloadUrl).toString('hex')}/?fname=`;
     }
 
-    // TODO: why type hint is not working here?
     async GetGroupPttUrl(groupUin: number, node: NapProtoEncodeStructType<typeof IndexNode>) {
         const req = trans.DownloadGroupPtt.build(groupUin, node);
         const resp = await this.context.client.sendOidbPacket(req, true);
