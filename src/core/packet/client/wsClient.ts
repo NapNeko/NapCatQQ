@@ -1,6 +1,7 @@
 import { Data, WebSocket } from "ws";
 import { IPacketClient, RecvPacket } from "@/core/packet/client/baseClient";
 import { PacketContext } from "@/core/packet/context/packetContext";
+import { LogStack } from "@/core/packet/context/clientContext";
 
 export class wsPacketClient extends IPacketClient {
     private websocket: WebSocket | null = null;
@@ -12,8 +13,8 @@ export class wsPacketClient extends IPacketClient {
     private isInitialized: boolean = false;
     private initPayload: { pid: number, recv: string, send: string } | null = null;
 
-    constructor(context: PacketContext) {
-        super(context);
+    constructor(context: PacketContext, logStack: LogStack) {
+        super(context, logStack);
         this.clientUrl = this.context.napcore.config.packetServer
             ? this.clientUrlWrap(this.context.napcore.config.packetServer)
             : this.clientUrlWrap('127.0.0.1:8083');
@@ -21,7 +22,7 @@ export class wsPacketClient extends IPacketClient {
 
     check(): boolean {
         if (!this.context.napcore.config.packetServer) {
-            this.context.logger.warn(`wsPacketClient 未配置服务器地址`);
+            this.logStack.pushLogWarn(`wsPacketClient 未配置服务器地址`);
             return false;
         }
         return true;
@@ -41,7 +42,7 @@ export class wsPacketClient extends IPacketClient {
                 trace_id
             }));
         } else {
-            this.context.logger.warn(`WebSocket 未连接，无法发送命令: ${cmd}`);
+            this.logStack.pushLogWarn(`WebSocket 未连接，无法发送命令: ${cmd}`);
         }
     }
 
@@ -52,11 +53,11 @@ export class wsPacketClient extends IPacketClient {
                 return;
             } catch (error) {
                 this.reconnectAttempts++;
-                this.context.logger.warn(`第 ${this.reconnectAttempts}/${this.maxReconnectAttempts} 次尝试重连失败！`);
+                this.logStack.pushLogWarn(`第 ${this.reconnectAttempts}/${this.maxReconnectAttempts} 次尝试重连失败！`);
                 await this.delay(5000);
             }
         }
-        this.context.logger.error(`wsPacketClient 在 ${this.clientUrl} 达到最大重连次数 (${this.maxReconnectAttempts})！`);
+        this.logStack.pushLogError(`wsPacketClient 在 ${this.clientUrl} 达到最大重连次数 (${this.maxReconnectAttempts})！`);
         throw new Error(`无法连接到 WebSocket 服务器：${this.clientUrl}`);
     }
 

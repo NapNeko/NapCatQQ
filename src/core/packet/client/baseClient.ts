@@ -2,6 +2,7 @@ import { LRUCache } from "@/common/lru-cache";
 import crypto, { createHash } from "crypto";
 import { PacketContext } from "@/core/packet/context/packetContext";
 import { OidbPacket, PacketHexStr } from "@/core/packet/transformer/base";
+import { LogStack } from "@/core/packet/context/clientContext";
 
 export interface RecvPacket {
     type: string, // 仅recv
@@ -24,13 +25,16 @@ function randText(len: number): string {
     return text;
 }
 
+
 export abstract class IPacketClient {
     protected readonly context: PacketContext;
     protected readonly cb = new LRUCache<string, (json: RecvPacketData) => Promise<void>>(500); // trace_id-type callback
+    logStack: LogStack;
     available: boolean = false;
 
-    protected constructor(context: PacketContext) {
+    protected constructor(context: PacketContext, logStack: LogStack) {
         this.context = context;
+        this.logStack = logStack;
     }
 
     abstract check(): boolean;

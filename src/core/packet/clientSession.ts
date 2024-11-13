@@ -12,6 +12,10 @@ export class PacketClientSession {
         return this.context.client.init(pid, recv, send);
     }
 
+    get clientLogStack() {
+        return this.context.client.clientLogStack;
+    }
+
     get available() {
         return this.context.client.available;
     }

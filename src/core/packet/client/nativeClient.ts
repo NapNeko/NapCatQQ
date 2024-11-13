@@ -6,6 +6,7 @@ import { IPacketClient } from "@/core/packet/client/baseClient";
 import { constants } from "node:os";
 import { LRUCache } from "@/common/lru-cache";
 import { PacketContext } from "@/core/packet/context/packetContext";
+import { LogStack } from "@/core/packet/context/clientContext";
 
 // 0 send 1 recv
 export interface NativePacketExportType {
@@ -18,19 +19,19 @@ export class NativePacketClient extends IPacketClient {
     private MoeHooExport: { exports: NativePacketExportType } = { exports: {} };
     private sendEvent = new LRUCache<number, string>(500); // seq->trace_id
 
-    constructor(context: PacketContext) {
-        super(context);
+    constructor(context: PacketContext, logStack: LogStack) {
+        super(context, logStack);
     }
 
     check(): boolean {
         const platform = process.platform + '.' + process.arch;
         if (!this.supportedPlatforms.includes(platform)) {
-            this.context.logger.warn(`不支持的平台: ${platform}`);
+            this.logStack.pushLogWarn(`NativePacketClient: 不支持的平台: ${platform}`);
             return false;
         }
         const moehoo_path = path.join(dirname(fileURLToPath(import.meta.url)), './moehoo/MoeHoo.' + platform + '.node');
         if (!fs.existsSync(moehoo_path)) {
-            this.context.logger.warn(`[Core] [Packet:Native] 缺失运行时文件: ${moehoo_path}`);
+            this.logStack.pushLogWarn(`NativePacketClient: 缺失运行时文件: ${moehoo_path}`);
             return false;
         }
         return true;
