@@ -30,7 +30,6 @@
     "@typescript-eslint/parser": "^8.3.0",
     "ajv": "^8.13.0",
     "async-mutex": "^0.5.0",
-    "chalk": "^5.3.0",
     "commander": "^12.1.0",
     "cors": "^2.8.5",
     "eslint": "^9.14.0",
