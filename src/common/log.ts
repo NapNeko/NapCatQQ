@@ -110,14 +110,15 @@ export class LogWrapper {
 
     _log(level: LogLevel, ...args: any[]) {
         const message = this.formatMsg(args);
-        if (this.consoleLogEnabled) {
+        if (this.consoleLogEnabled && this.fileLogEnabled) {
             this.logger.log(level, message);
-        }
-        if (this.fileLogEnabled) {
+        } else if (this.consoleLogEnabled) {
+            this.logger.log(level, message);
+        } else if (this.fileLogEnabled) {
             this.logger.log(level, message.replace(/\x1B[@-_][0-?]*[ -/]*[@-~]/g, ''));
         }
     }
-
+    
     log(...args: any[]) {
         this._log(LogLevel.INFO, ...args);
     }
