@@ -45,7 +45,8 @@
     "typescript-eslint": "^8.13.0",
     "vite": "^5.2.6",
     "vite-plugin-cp": "^4.0.8",
-    "vite-tsconfig-paths": "^5.1.0"
+    "vite-tsconfig-paths": "^5.1.0",
+    "winston": "^3.17.0"
   },
   "dependencies": {
     "express": "^5.0.0",
