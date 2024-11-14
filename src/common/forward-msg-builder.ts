@@ -54,11 +54,7 @@ export class ForwardMsgBuilder {
         const id = crypto.randomUUID();
         const isGroupMsg = msg.some(m => m.isGroupMsg);
         if (!source) {
-            source = isGroupMsg ? "群聊的聊天记录" :
-                msg.length
-                    ? Array.from(new Set(msg.slice(0, 4).map(m => m.senderName)))
-                        .join('和') + '的聊天记录'
-                    : '聊天记录';
+            source = isGroupMsg ? "群聊的聊天记录" : msg.map(m => m.senderName).filter((v, i, a) => a.indexOf(v) === i).slice(0, 4).join('和') + '的聊天记录';
         }
         if (!news) {
             news = msg.length === 0 ? [{
@@ -111,7 +107,7 @@ export class ForwardMsgBuilder {
             senderName: msg.senderName,
             isGroupMsg: msg.groupId !== undefined,
             msg: msg.msg.map(m => ({
-                preview: m.valid? m.toPreview() : "[该消息类型暂不支持查看]",
+                preview: m.valid ? m.toPreview() : "[该消息类型暂不支持查看]",
             }))
         })), source, news, summary, prompt);
     }

@@ -30,4 +30,13 @@ export class LRUCache<K, V> {
         }
         this.cache.set(key, value);
     }
+    public resetCapacity(newCapacity: number): void {
+        this.capacity = newCapacity;
+        while (this.cache.size > this.capacity) {
+            const firstKey = this.cache.keys().next().value;
+            if (firstKey !== undefined) {
+                this.cache.delete(firstKey);
+            }
+        }
+    }
 }

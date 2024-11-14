@@ -44,13 +44,13 @@
     "vite": "^5.2.6",
     "vite-plugin-cp": "^4.0.8",
     "vite-tsconfig-paths": "^5.1.0",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "fluent-ffmpeg": "^2.1.2"
   },
   "dependencies": {
     "express": "^5.0.0",
-    "fluent-ffmpeg": "^2.1.2",
-    "qrcode-terminal": "^0.12.0",
     "silk-wasm": "^3.6.1",
-    "ws": "^8.18.0"
+    "ws": "^8.18.0",
+    "qrcode-terminal": "^0.12.0"
   }
 }

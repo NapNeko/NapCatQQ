@@ -23,7 +23,7 @@ export async function NCoreInitFramework(
 ) {
     //在进入本层前是否登录未进行判断
     console.log('NapCat Framework App Loading...');
-    
+
     process.on('uncaughtException', (err) => {
         console.log('[NapCat] [Error] Unhandled Exception:', err.message);
     });
@@ -55,11 +55,12 @@ export async function NCoreInitFramework(
     // await sleep(2500);
     // 初始化 NapCatFramework
     const loaderObject = new NapCatFramework(wrapper, session, logger, loginService, selfInfo, basicInfoWrapper, pathWrapper);
+    await loaderObject.core.initCore();
 
     //启动WebUi
     InitWebUi(logger, pathWrapper).then().catch(logger.logError.bind(logger));
     //初始化LLNC的Onebot实现
-    new NapCatOneBot11Adapter(loaderObject.core, loaderObject.context, pathWrapper);
+    await new NapCatOneBot11Adapter(loaderObject.core, loaderObject.context, pathWrapper).InitOneBot();
 }
 
 export class NapCatFramework {

@@ -9,48 +9,47 @@ export class RequestUtil {
         return new Promise((resolve, reject) => {
             const req = client.get(url, (res) => {
                 let cookies: { [key: string]: string } = {};
-                const handleRedirect = (res: http.IncomingMessage) => {
-                    //console.log(res.headers.location);
-                    if (res.statusCode === 301 || res.statusCode === 302) {
-                        if (res.headers.location) {
-                            const redirectUrl = new URL(res.headers.location, url);
-                            RequestUtil.HttpsGetCookies(redirectUrl.href).then((redirectCookies) => {
-                                // 合并重定向过程中的cookies
-                                cookies = { ...cookies, ...redirectCookies };
-                                resolve(cookies);
-                            }).catch((err) => {
-                                reject(err);
-                            });
-                        } else {
-                            resolve(cookies);
-                        }
-                    } else {
-                        resolve(cookies);
-                    }
-                };
-                res.on('data', () => {
-                }); // Necessary to consume the stream
+
+                res.on('data', () => { }); // Necessary to consume the stream
                 res.on('end', () => {
-                    handleRedirect(res);
+                    this.handleRedirect(res, url, cookies)
+                        .then(resolve)
+                        .catch(reject);
                 });
+
                 if (res.headers['set-cookie']) {
-                    //console.log(res.headers['set-cookie']);
-                    res.headers['set-cookie'].forEach((cookie) => {
-                        const parts = cookie.split(';')[0].split('=');
-                        const key = parts[0];
-                        const value = parts[1];
-                        if (key && value && key.length > 0 && value.length > 0) {
-                            cookies[key] = value;
-                        }
-                    });
+                    this.extractCookies(res.headers['set-cookie'], cookies);
                 }
             });
+
             req.on('error', (error: any) => {
                 reject(error);
             });
         });
     }
 
+    private static async handleRedirect(res: http.IncomingMessage, url: string, cookies: { [key: string]: string }): Promise<{ [key: string]: string }> {
+        if (res.statusCode === 301 || res.statusCode === 302) {
+            if (res.headers.location) {
+                const redirectUrl = new URL(res.headers.location, url);
+                const redirectCookies = await this.HttpsGetCookies(redirectUrl.href);
+                // 合并重定向过程中的cookies
+                return { ...cookies, ...redirectCookies };
+            }
+        }
+        return cookies;
+    }
+
+    private static extractCookies(setCookieHeaders: string[], cookies: { [key: string]: string }) {
+        setCookieHeaders.forEach((cookie) => {
+            const parts = cookie.split(';')[0].split('=');
+            const key = parts[0];
+            const value = parts[1];
+            if (key && value && key.length > 0 && value.length > 0) {
+                cookies[key] = value;
+            }
+        });
+    }
 
     // 请求和回复都是JSON data传原始内容 自动编码json
     static async HttpGetJson<T>(url: string, method: string = 'GET', data?: any, headers: {

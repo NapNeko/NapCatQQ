@@ -89,7 +89,7 @@ export interface NodeIKernelGroupService {
 
     isEssenceMsg(req: { groupCode: string, msgRandom: number, msgSeq: number }): Promise<unknown>;
 
-    queryCachedEssenceMsg(req: { groupCode: string, msgRandom: number, msgSeq: number }): Promise<unknown>;
+    queryCachedEssenceMsg(req: { groupCode: string, msgRandom: number, msgSeq: number }): Promise<{ items: Array<unknown> }>;
 
     fetchGroupEssenceList(req: {
         groupCode: string,
