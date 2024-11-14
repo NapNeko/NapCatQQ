@@ -25,9 +25,10 @@ export class NTQQGroupApi {
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
         this.core = core;
-        this.initCache().then().catch(context.logger.logError.bind(context.logger));
     }
-
+    async initApi() {
+        this.initCache().then().catch(this.context.logger.logError.bind(this.context.logger));
+    }
     async initCache() {
         this.groups = await this.getGroups();
         for (const group of this.groups) {
@@ -54,7 +55,7 @@ export class NTQQGroupApi {
         }, pskey);
     }
     async getGroupShutUpMemberList(groupCode: string) {
-        const data = this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onShutUpMemberListChanged', 1, 1000, (group_id) => group_id === groupCode);
+        const data = this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onShutUpMemberListChanged', (group_id) => group_id === groupCode, 1, 1000);
         this.context.session.getGroupService().getGroupShutUpMemberList(groupCode);
         return (await data)[1];
     }
@@ -258,9 +259,9 @@ export class NTQQGroupApi {
     async getGroupMemberV2(GroupCode: string, uid: string, forced = false) {
         const Listener = this.core.eventWrapper.registerListen(
             'NodeIKernelGroupListener/onMemberInfoChange',
+            (params, _, members) => params === GroupCode && members.size > 0,
             1,
             forced ? 5000 : 250,
-            (params, _, members) => params === GroupCode && members.size > 0,
         );
         const retData = await (
             this.core.eventWrapper
@@ -318,13 +319,13 @@ export class NTQQGroupApi {
         return undefined;
     }
 
-    async tryGetGroupMembersV2(modeListener = false, groupQQ: string, num = 30, timeout = 100): Promise<{
+    async tryGetGroupMembersV2(groupQQ: string, modeListener = false, num = 30, timeout = 100): Promise<{
         infos: Map<string, GroupMember>;
         finish: boolean;
         hasNext: boolean | undefined;
     }> {
         const sceneId = this.context.session.getGroupService().createMemberListScene(groupQQ, 'groupMemberList_MainWindow_1');
-        const once = this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onMemberListChange', 0, timeout, (params) => params.sceneId === sceneId)
+        const once = this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onMemberListChange', (params) => params.sceneId === sceneId, 0, timeout)
             .catch(() => { });
         const result = await this.context.session.getGroupService().getNextMemberList(sceneId, undefined, num);
         if (result.errCode !== 0) {
@@ -352,7 +353,7 @@ export class NTQQGroupApi {
         listenerMode: boolean;
     }> {
         const sceneId = this.context.session.getGroupService().createMemberListScene(groupQQ, 'groupMemberList_MainWindow_1');
-        const once = this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onMemberListChange', 0, timeout, (params) => params.sceneId === sceneId)
+        const once = this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onMemberListChange', (params) => params.sceneId === sceneId, 0, timeout)
             .catch(() => { });
         const result = await this.context.session.getGroupService().getNextMemberList(sceneId, undefined, num);
         if (result.errCode !== 0) {
@@ -371,7 +372,7 @@ export class NTQQGroupApi {
             infos: new Map([...(resMode2?.infos ?? []), ...result.result.infos]),
             finish: result.result.finish,
             hasNext: resMode2?.hasNext,
-            listenerMode: resMode2?.hasNext !== undefined ? true : false
+            listenerMode: resMode2?.hasNext !== undefined
         };
     }
 
