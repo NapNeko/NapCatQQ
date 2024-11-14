@@ -121,7 +121,7 @@ export class WebUiConfigWrapper {
             } else {
                 parsedConfig.host = host;
                 // 修正端口占用情况
-                const [port_err, port] = await tryUsePort(parsedConfig.port, parsedConfig.host).then(data => [null, data as number]).catch(err => [err, null]);
+                const [port_err, port] = await tryUsePort(parsedConfig.port, parsedConfig.host).then(data => [null, data]).catch(err => [err, null]);
                 if (port_err) {
                     console.log('port不可用', port_err);
                     parsedConfig.port = 0; // 设置为0，禁用WebUI
