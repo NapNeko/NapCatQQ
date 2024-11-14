@@ -20,7 +20,7 @@ export async function getVideoInfo(filePath: string, logger: LogWrapper) {
             ffmpeg.setFfmpegPath(ffmpegPath);
         ffmpeg(filePath).ffprobe((err: any, metadata: ffmpeg.FfprobeData) => {
             if (err) {
-                reject(err);
+                reject(new Error('无法获取视频信息。'));
             } else {
                 const videoStream = metadata.streams.find((s: FfprobeStream) => s.codec_type === 'video');
                 if (videoStream) {

@@ -6,8 +6,10 @@ export class NodeIDependsAdapter {
     }
 
     onMSFSsoError(args: unknown) {
+
     }
 
     getGroupCode(args: unknown) {
+
     }
 }

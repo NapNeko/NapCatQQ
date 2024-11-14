@@ -22,7 +22,7 @@ export class RequestUtil {
                 }
             });
 
-            req.on('error', (error: any) => {
+            req.on('error', (error: Error) => {
                 reject(error);
             });
         });
@@ -87,8 +87,8 @@ export class RequestUtil {
                         } else {
                             reject(new Error(`Unexpected status code: ${res.statusCode}`));
                         }
-                    } catch (parseError) {
-                        reject(parseError);
+                    } catch (parseError: unknown) {
+                        reject(new Error((parseError as Error).message));
                     }
                 });
             });
@@ -131,63 +131,5 @@ export class RequestUtil {
             fileContent,
             Buffer.from(footer, 'utf8'),
         ]);
-    }
-
-    static async uploadImageForOpenPlatform(filePath: string, cookies: string): Promise<string> {
-        return new Promise(async (resolve, reject) => {
-            type retType = { retcode: number, result?: { url: string } };
-            try {
-                const options = {
-                    hostname: 'cgi.connect.qq.com',
-                    port: 443,
-                    path: '/qqconnectopen/upload_share_image',
-                    method: 'POST',
-                    headers: {
-                        'Referer': 'https://cgi.connect.qq.com',
-                        'Cookie': cookies,
-                        'Accept': '*/*',
-                        'Connection': 'keep-alive',
-                        'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
-                    },
-                };
-                const req = https.request(options, async (res) => {
-                    let responseBody = '';
-
-                    res.on('data', (chunk: string | Buffer) => {
-                        responseBody += chunk.toString();
-                    });
-
-                    res.on('end', () => {
-                        try {
-                            if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
-                                const responseJson = JSON.parse(responseBody) as retType;
-                                resolve(responseJson.result!.url!);
-                            } else {
-                                reject(new Error(`Unexpected status code: ${res.statusCode}`));
-                            }
-                        } catch (parseError) {
-                            reject(parseError);
-                        }
-
-                    });
-
-                });
-
-                req.on('error', (error) => {
-                    reject(error);
-                    console.log('Error during upload:', error);
-                });
-
-                const body = await RequestUtil.createFormData('WebKitFormBoundary7MA4YWxkTrZu0gW', filePath);
-                // req.setHeader('Content-Length', Buffer.byteLength(body));
-                // console.log(`Prepared data size: ${Buffer.byteLength(body)} bytes`);
-                req.write(body);
-                req.end();
-                return;
-            } catch (error) {
-                reject(error);
-            }
-            return undefined;
-        });
     }
 }
