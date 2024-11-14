@@ -26,14 +26,15 @@ export class NTQQPacketApi {
         this.context = context;
         this.core = core;
         this.logger = core.context.logger;
-        this.InitSendPacket(this.context.basicInfoWrapper.getFullQQVesion())
+    }
+    async initApi() {
+        await this.InitSendPacket(this.context.basicInfoWrapper.getFullQQVesion())
             .then()
             .catch((err) => {
                 this.logger.logError.bind(this.core.context.logger);
                 this.errStack.push(err);
             });
     }
-
     get available(): boolean {
         return this.pkt?.available ?? false;
     }
