@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "qrcode": "^1.5.4",
     "tdesign-vue-next": "^1.10.3",
     "vue": "^3.5.12"
   },
