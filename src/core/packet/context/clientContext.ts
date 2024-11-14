@@ -1,7 +1,7 @@
 import { PacketContext } from "@/core/packet/context/packetContext";
 import { IPacketClient } from "@/core/packet/client/baseClient";
 import { NativePacketClient } from "@/core/packet/client/nativeClient";
-import { wsPacketClient } from "@/core/packet/client/wsClient";
+import { WsPacketClient } from "@/core/packet/client/wsClient";
 import { OidbPacket } from "@/core/packet/transformer/base";
 import { PacketLogger } from "@/core/packet/context/loggerContext";
 
@@ -11,7 +11,7 @@ type clientPriority = {
 
 const clientPriority: clientPriority = {
     10: (context: PacketContext, logStack: LogStack) => new NativePacketClient(context, logStack),
-    1: (context: PacketContext, logStack: LogStack) => new wsPacketClient(context, logStack),
+    1: (context: PacketContext, logStack: LogStack) => new WsPacketClient(context, logStack),
 };
 
 export class LogStack {
@@ -88,7 +88,7 @@ export class PacketClientContext {
             break;
         case "frida":
             this.context.logger.info("[Core] [Packet] 使用指定的 FridaPacketClient 作为后端");
-            client = new wsPacketClient(this.context, this.logStack);
+            client = new WsPacketClient(this.context, this.logStack);
             break;
         case "auto":
         case undefined:

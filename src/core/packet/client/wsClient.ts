@@ -3,7 +3,7 @@ import { IPacketClient, RecvPacket } from "@/core/packet/client/baseClient";
 import { PacketContext } from "@/core/packet/context/packetContext";
 import { LogStack } from "@/core/packet/context/clientContext";
 
-export class wsPacketClient extends IPacketClient {
+export class WsPacketClient extends IPacketClient {
     private websocket: WebSocket | null = null;
     private reconnectAttempts: number = 0;
     private readonly maxReconnectAttempts: number = 60; // 现在暂时不可配置
