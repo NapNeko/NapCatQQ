@@ -25,9 +25,10 @@ export class NTQQGroupApi {
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
         this.core = core;
-        this.initCache().then().catch(context.logger.logError.bind(context.logger));
     }
-
+    async initApi() {
+        this.initCache().then().catch(this.context.logger.logError.bind(this.context.logger));
+    }
     async initCache() {
         this.groups = await this.getGroups();
         for (const group of this.groups) {

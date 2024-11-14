@@ -120,7 +120,13 @@ export class NapCatCore {
         if (!fs.existsSync(this.NapCatTempPath)) {
             fs.mkdirSync(this.NapCatTempPath, { recursive: true });
         }
-
+        //遍历this.apis[i].initApi 如果存在该函数进行async 调用 
+        for (const apiKey in this.apis) {
+            const api = this.apis[apiKey as keyof StableNTApiWrapper];
+            if ('initApi' in api && typeof api.initApi === 'function') {
+                await api.initApi();
+            }
+        }
         this.initNapCatCoreListeners().then().catch(this.context.logger.logError.bind(this.context.logger));
 
         this.context.logger.setFileLogEnabled(
