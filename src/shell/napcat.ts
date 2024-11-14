@@ -255,7 +255,7 @@ export async function NCoreInitShell() {
     // from initSession
     const sessionConfig = await genSessionConfig(
         guid,
-        basicInfoWrapper.QQVersionAppid!,
+        basicInfoWrapper.QQVersionAppid,
         basicInfoWrapper.getFullQQVesion(),
         selfInfo.uin,
         selfInfo.uid,

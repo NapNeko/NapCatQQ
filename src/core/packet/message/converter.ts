@@ -82,7 +82,7 @@ export class PacketMsgConverter {
         return SupportedElementTypes.includes(type);
     }
 
-    private rawToPacketMsgConverters: ElementToPacketMsgConverters = {
+    private readonly rawToPacketMsgConverters: ElementToPacketMsgConverters = {
         [ElementType.TEXT]: (element) => {
             if (element.textElement?.atType) {
                 return new PacketMsgAtElement(element as SendTextElement);

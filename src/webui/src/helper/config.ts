@@ -114,7 +114,7 @@ export class WebUiConfigWrapper {
             // 不希望回写的配置放后面
 
             // 查询主机地址是否可用
-            const [host_err, host] = await tryUseHost(parsedConfig.host).then(data => [null, data as string]).catch(err => [err, null]);
+            const [host_err, host] = await tryUseHost(parsedConfig.host).then(data => [null, data]).catch(err => [err, null]);
             if (host_err) {
                 console.log('host不可用', host_err);
                 parsedConfig.port = 0; // 设置为0，禁用WebUI

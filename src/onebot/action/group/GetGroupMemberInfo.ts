@@ -3,7 +3,6 @@ import { OB11Entities } from '@/onebot/entities';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import { GroupMember } from '@/core';
 
 const SchemaData = {
     type: 'object',
