@@ -76,7 +76,7 @@ export class OB11Entities {
             is_robot: member.isRobot,
             shut_up_timestamp: member.shutUpTime,
             role: OB11Entities.groupMemberRole(member.role),
-            title: member.memberSpecialTitle || '',
+            title: member.memberSpecialTitle ?? '',
 
         };
     }

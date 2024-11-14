@@ -706,9 +706,9 @@ export class OneBotMsgApi {
             real_id: msg.id!,
             message_type: msg.chatType == ChatType.KCHATTYPEGROUP ? 'group' : 'private',
             sender: {
-                user_id: parseInt(msg.senderUin || '0'),
+                user_id: +(msg.senderUin ?? 0),
                 nickname: msg.sendNickName,
-                card: msg.sendMemberName || '',
+                card: msg.sendMemberName ?? '',
             },
             raw_message: '',
             font: 14,

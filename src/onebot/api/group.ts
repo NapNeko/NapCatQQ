@@ -40,7 +40,7 @@ export class OneBotGroupApi {
         if (msg.senderUin && msg.senderUin !== '0') {
             const member = await this.core.apis.GroupApi.getGroupMember(msg.peerUid, msg.senderUin);
             if (member && member.cardName !== msg.sendMemberName) {
-                const newCardName = msg.sendMemberName || '';
+                const newCardName = msg.sendMemberName ?? '';
                 const event = new OB11GroupCardEvent(this.core, parseInt(msg.peerUid), parseInt(msg.senderUin), newCardName, member.cardName);
                 member.cardName = newCardName;
                 return event;
@@ -83,7 +83,7 @@ export class OneBotGroupApi {
                         url: pathToFileURL(element.fileElement.filePath).href,
                         name: element.fileElement.fileName,
                         size: parseInt(element.fileElement.fileSize),
-                        busid: element.fileElement.fileBizId || 0,
+                        busid: element.fileElement.fileBizId ?? 0,
                     },
                 );
             }

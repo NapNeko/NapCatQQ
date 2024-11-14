@@ -19,10 +19,10 @@ export default class SendLike extends BaseAction<Payload, null> {
 
     async _handle(payload: Payload): Promise<null> {
         const qq = payload.user_id.toString();
-        const uid: string = await this.core.apis.UserApi.getUidByUinV2(qq) || '';
+        const uid: string = await this.core.apis.UserApi.getUidByUinV2(qq) ?? '';
         const result = await this.core.apis.UserApi.like(uid, parseInt(payload.times?.toString()) || 1);
         if (result.result !== 0) {
-            throw new Error( `点赞失败 ${result.errMsg}`);
+            throw new Error(`点赞失败 ${result.errMsg}`);
         }
         return null;
     }
