@@ -114,10 +114,7 @@ async function handleLogin(
     logger: LogWrapper,
     pathWrapper: NapCatPathWrapper,
     quickLoginUin: string | undefined,
-    historyLoginList: any[],
-    basicInfoWrapper: QQBasicInfoWrapper,
-    o3Service: any,
-    dataTimestape: string
+    historyLoginList: any[]
 ): Promise<SelfInfo> {
     return new Promise<SelfInfo>((resolve) => {
         const loginListener = new NodeIKernelLoginListener();
@@ -299,7 +296,7 @@ export async function NCoreInitShell() {
     const dataTimestape = new Date().getTime().toString();
     o3Service.reportAmgomWeather('login', 'a1', [dataTimestape, '0', '0']);
 
-    const selfInfo = await handleLogin(loginService, logger, pathWrapper, quickLoginUin, historyLoginList, basicInfoWrapper, o3Service, dataTimestape);
+    const selfInfo = await handleLogin(loginService, logger, pathWrapper, quickLoginUin, historyLoginList);
 
     const amgomDataPiece = 'eb1fd6ac257461580dc7438eb099f23aae04ca679f4d88f53072dc56e3bb1129';
     o3Service.setAmgomDataPiece(basicInfoWrapper.QQVersionAppid, new Uint8Array(Buffer.from(amgomDataPiece, 'hex')));
