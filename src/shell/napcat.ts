@@ -300,7 +300,7 @@ export async function NCoreInitShell() {
         selfInfo,
         basicInfoWrapper,
         pathWrapper,
-    );
+    ).InitNapCat();
 }
 
 export class NapCatShell {
