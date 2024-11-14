@@ -60,7 +60,7 @@ export class GetMiniAppArk extends GetPacketStatusDepends<Payload, {
         if (payload.type) {
             reqParam = MiniAppInfoHelper.generateReq(customParams, MiniAppInfo.get(payload.type)!.template);
         } else {
-            const { appId, scene, iconUrl, templateType, businessType, verType, shareType, versionId, withShareTicket } = payload as Required<Payload>;
+            const { appId, scene, iconUrl, templateType, businessType, verType, shareType, versionId, withShareTicket } = payload;
             reqParam = MiniAppInfoHelper.generateReq(
                 customParams,
                 {

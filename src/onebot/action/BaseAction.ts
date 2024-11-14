@@ -29,7 +29,7 @@ abstract class BaseAction<PayloadType, ReturnDataType> {
             });
             return {
                 valid: false,
-                message: errorMessages.join('\n') as string || '未知错误',
+                message: errorMessages.join('\n') ?? '未知错误',
             };
         }
         return {
