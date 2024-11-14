@@ -21,9 +21,9 @@ type FuncKeys<T> = Extract<
 export type ListenerClassBase = Record<string, string>;
 
 export class NTEventWrapper {
-    private WrapperSession: NodeIQQNTWrapperSession | undefined; //WrapperSession
-    private listenerManager: Map<string, ListenerClassBase> = new Map<string, ListenerClassBase>(); //ListenerName-Unique -> Listener实例
-    private EventTask = new Map<string, Map<string, Map<string, InternalMapKey>>>(); //tasks ListenerMainName -> ListenerSubName-> uuid -> {timeout,createtime,func}
+    private readonly WrapperSession: NodeIQQNTWrapperSession | undefined; //WrapperSession
+    private readonly listenerManager: Map<string, ListenerClassBase> = new Map<string, ListenerClassBase>(); //ListenerName-Unique -> Listener实例
+    private readonly EventTask = new Map<string, Map<string, Map<string, InternalMapKey>>>(); //tasks ListenerMainName -> ListenerSubName-> uuid -> {timeout,createtime,func}
 
     constructor(
         wrapperSession: NodeIQQNTWrapperSession,
@@ -120,9 +120,9 @@ export class NTEventWrapper {
         ListenerType extends (...args: any) => any = EnsureFunc<ListenerNamingMapping[Listener][ListenerMethod]>,
     >(
         listenerAndMethod: `${Listener}/${ListenerMethod}`,
+        checker: (...args: Parameters<ListenerType>) => boolean,
         waitTimes = 1,
         timeout = 5000,
-        checker: (...args: Parameters<ListenerType>) => boolean,
     ) {
         return new Promise<Parameters<ListenerType>>((resolve, reject) => {
             const ListenerNameList = listenerAndMethod.split('/');
