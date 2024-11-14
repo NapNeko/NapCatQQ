@@ -45,11 +45,17 @@ export class Sha1Stream {
         let e = this._state[4];
 
         for (let i = 0; i < 80; i++) {
-            const [f, k] = (i < 20) ? [(b & c) | ((~b) & d), 0x5A827999] :
-                (i < 40) ? [b ^ c ^ d, 0x6ED9EBA1] :
-                    (i < 60) ? [(b & c) | (b & d) | (c & d), 0x8F1BBCDC] :
-                        [b ^ c ^ d, 0xCA62C1D6];
-            const temp = (this.rotateLeft(a, 5) + f + k + e + w[i]) >>> 0;
+            let temp;
+            if (i < 20) {
+                temp = ((b & c) | (~b & d)) + 0x5A827999;
+            } else if (i < 40) {
+                temp = (b ^ c ^ d) + 0x6ED9EBA1;
+            } else if (i < 60) {
+                temp = ((b & c) | (b & d) | (c & d)) + 0x8F1BBCDC;
+            } else {
+                temp = (b ^ c ^ d) + 0xCA62C1D6;
+            }
+            temp += ((this.rotateLeft(a, 5) + e + w[i]) >>> 0);
             e = d;
             d = c;
             c = this.rotateLeft(b, 30) >>> 0;
