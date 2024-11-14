@@ -28,7 +28,7 @@ class GetMsg extends BaseAction<Payload, OB11Message> {
             throw Error('参数message_id不能为空');
         }
         const MsgShortId = MessageUnique.getShortIdByMsgId(payload.message_id.toString());
-        const msgIdWithPeer = MessageUnique.getMsgIdAndPeerByShortId(MsgShortId || parseInt(payload.message_id.toString()));
+        const msgIdWithPeer = MessageUnique.getMsgIdAndPeerByShortId(MsgShortId ?? +payload.message_id);
         if (!msgIdWithPeer) {
             throw new Error('消息不存在');
         }
