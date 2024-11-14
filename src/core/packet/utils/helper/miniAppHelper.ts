@@ -9,10 +9,10 @@ import {
 type MiniAppTemplateNameList = "bili" | "weibo";
 
 export abstract class MiniAppInfo {
-    static sdkId: string = "V1_PC_MINISDK_99.99.99_1_APP_A";
+    static readonly sdkId: string = "V1_PC_MINISDK_99.99.99_1_APP_A";
     template: MiniAppReqTemplateParams;
 
-    private static appMap = new Map<MiniAppTemplateNameList, MiniAppInfo>();
+    private static readonly appMap = new Map<MiniAppTemplateNameList, MiniAppInfo>();
 
     protected constructor(template: MiniAppReqTemplateParams) {
         this.template = template;
@@ -22,7 +22,7 @@ export abstract class MiniAppInfo {
         return this.appMap.get(name);
     }
 
-    static Bili = new class extends MiniAppInfo {
+    static readonly Bili = new class extends MiniAppInfo {
         constructor() {
             super({
                 sdkId: MiniAppInfo.sdkId,
@@ -40,7 +40,7 @@ export abstract class MiniAppInfo {
         }
     };
 
-    static WeiBo = new class extends MiniAppInfo {
+    static readonly WeiBo = new class extends MiniAppInfo {
         constructor() {
             super({
                 sdkId: MiniAppInfo.sdkId,
