@@ -228,7 +228,7 @@ export class PacketHighwayContext {
             });
             await this.hwClient.upload(
                 1005,
-                fs.createReadStream(video.filePath!, { highWaterMark: BlockSize }),
+                fs.createReadStream(video.filePath, { highWaterMark: BlockSize }),
                 +video.fileSize!,
                 md5,
                 extend
@@ -256,7 +256,7 @@ export class PacketHighwayContext {
             });
             await this.hwClient.upload(
                 1006,
-                fs.createReadStream(video.thumbPath!, { highWaterMark: BlockSize }),
+                fs.createReadStream(video.thumbPath, { highWaterMark: BlockSize }),
                 +video.thumbSize!,
                 md5,
                 extend
@@ -293,7 +293,7 @@ export class PacketHighwayContext {
             });
             await this.hwClient.upload(
                 1001,
-                fs.createReadStream(video.filePath!, { highWaterMark: BlockSize }),
+                fs.createReadStream(video.filePath, { highWaterMark: BlockSize }),
                 +video.fileSize!,
                 md5,
                 extend
@@ -321,7 +321,7 @@ export class PacketHighwayContext {
             });
             await this.hwClient.upload(
                 1002,
-                fs.createReadStream(video.thumbPath!, { highWaterMark: BlockSize }),
+                fs.createReadStream(video.thumbPath, { highWaterMark: BlockSize }),
                 +video.thumbSize!,
                 md5,
                 extend

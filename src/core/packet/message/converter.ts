@@ -76,7 +76,7 @@ export type rawMsgWithSendMsg = {
     msg: PacketSendMsgElement[]
 }
 
-// TODO: make it become adapter?
+// work:make it become adapter?
 export class PacketMsgConverter {
     private isValidElementType(type: ElementType): type is keyof ElementToPacketMsgConverters {
         return SupportedElementTypes.includes(type);
@@ -116,7 +116,7 @@ export class PacketMsgConverter {
         [ElementType.MARKDOWN]: (element) => {
             return new PacketMsgMarkDownElement(element as SendMarkdownElement);
         },
-        // TODO: check this logic, move it in arkElement?
+        // work:check this logic, move it in arkElement?
         [ElementType.STRUCTLONGMSG]: (element) => {
             return new PacketMultiMsgElement(element as SendStructLongMsgElement);
         }

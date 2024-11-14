@@ -210,7 +210,7 @@ export class NapCatCore {
             });
         };
         groupListener.onMemberListChange = (arg) => {
-            // todo: 应该加一个内部自己维护的成员变动callback，用于判断成员变化通知
+            // work:应该加一个内部自己维护的成员变动callback，用于判断成员变化通知
             const groupCode = arg.sceneId.split('_')[0];
             if (this.apis.GroupApi.groupMemberCache.has(groupCode)) {
                 const existMembers = this.apis.GroupApi.groupMemberCache.get(groupCode)!;

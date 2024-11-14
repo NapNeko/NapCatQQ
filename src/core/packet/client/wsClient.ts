@@ -1,8 +1,7 @@
-import { Data, WebSocket } from "ws";
+import { Data, WebSocket, ErrorEvent } from "ws";
 import { IPacketClient, RecvPacket } from "@/core/packet/client/baseClient";
 import { PacketContext } from "@/core/packet/context/packetContext";
 import { LogStack } from "@/core/packet/context/clientContext";
-import { ErrorEvent } from "ws";
 
 export class WsPacketClient extends IPacketClient {
     private websocket: WebSocket | null = null;
