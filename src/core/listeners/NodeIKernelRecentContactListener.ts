@@ -1,25 +1,25 @@
 export class NodeIKernelRecentContactListener {
-    onDeletedContactsNotify(...args: unknown[]) {
+    onDeletedContactsNotify(...args: unknown[]): any {
 
     }
 
-    onRecentContactNotification(msgList: any, arg0: { msgListUnreadCnt: string }, arg1: number) {
+    onRecentContactNotification(msgList: any, arg0: { msgListUnreadCnt: string }, arg1: number): any {
 
     }
 
-    onMsgUnreadCountUpdate(...args: unknown[]) {
+    onMsgUnreadCountUpdate(...args: unknown[]): any {
 
     }
 
-    onGuildDisplayRecentContactListChanged(...args: unknown[]) {
+    onGuildDisplayRecentContactListChanged(...args: unknown[]): any {
 
     }
 
-    onRecentContactListChanged(...args: unknown[]) {
+    onRecentContactListChanged(...args: unknown[]): any {
 
     }
 
-    onRecentContactListChangedVer2(...args: unknown[]) {
+    onRecentContactListChangedVer2(...args: unknown[]): any {
 
     }
 }

@@ -1,57 +1,57 @@
 export class NodeIKernelLoginListener {
-    onLoginConnected(...args: any[]): void {
+    onLoginConnected(...args: any[]): any {
     }
 
-    onLoginDisConnected(...args: any[]): void {
+    onLoginDisConnected(...args: any[]): any {
     }
 
-    onLoginConnecting(...args: any[]): void {
+    onLoginConnecting(...args: any[]): any {
     }
 
-    onQRCodeGetPicture(arg: { pngBase64QrcodeData: string, qrcodeUrl: string }): void {
+    onQRCodeGetPicture(arg: { pngBase64QrcodeData: string, qrcodeUrl: string }): any {
         // let base64Data: string = arg.pngBase64QrcodeData
         // base64Data = base64Data.split("data:image/png;base64,")[1]
         // let buffer = Buffer.from(base64Data, 'base64')
         // console.log("onQRCodeGetPicture", arg);
     }
 
-    onQRCodeLoginPollingStarted(...args: any[]): void {
+    onQRCodeLoginPollingStarted(...args: any[]): any {
     }
 
-    onQRCodeSessionUserScaned(...args: any[]): void {
+    onQRCodeSessionUserScaned(...args: any[]): any {
     }
 
-    onQRCodeLoginSucceed(arg: QRCodeLoginSucceedResult): void {
+    onQRCodeLoginSucceed(arg: QRCodeLoginSucceedResult): any {
     }
 
-    onQRCodeSessionFailed(...args: any[]): void {
+    onQRCodeSessionFailed(...args: any[]): any {
     }
 
-    onLoginFailed(...args: any[]): void {
+    onLoginFailed(...args: any[]): any {
     }
 
-    onLogoutSucceed(...args: any[]): void {
+    onLogoutSucceed(...args: any[]): any {
     }
 
-    onLogoutFailed(...args: any[]): void {
+    onLogoutFailed(...args: any[]): any {
     }
 
-    onUserLoggedIn(...args: any[]): void {
+    onUserLoggedIn(...args: any[]): any {
     }
 
-    onQRCodeSessionQuickLoginFailed(...args: any[]): void {
+    onQRCodeSessionQuickLoginFailed(...args: any[]): any {
     }
 
-    onPasswordLoginFailed(...args: any[]): void {
+    onPasswordLoginFailed(...args: any[]): any {
     }
 
-    OnConfirmUnusualDeviceFailed(...args: any[]): void {
+    OnConfirmUnusualDeviceFailed(...args: any[]): any {
     }
 
-    onQQLoginNumLimited(...args: any[]): void {
+    onQQLoginNumLimited(...args: any[]): any {
     }
 
-    onLoginState(...args: any[]): void {
+    onLoginState(...args: any[]): any {
     }
 }
 
