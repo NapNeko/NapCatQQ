@@ -319,7 +319,7 @@ export class NTQQGroupApi {
         return undefined;
     }
 
-    async tryGetGroupMembersV2(modeListener = false, groupQQ: string, num = 30, timeout = 100): Promise<{
+    async tryGetGroupMembersV2(groupQQ: string, modeListener = false, num = 30, timeout = 100): Promise<{
         infos: Map<string, GroupMember>;
         finish: boolean;
         hasNext: boolean | undefined;
@@ -372,7 +372,7 @@ export class NTQQGroupApi {
             infos: new Map([...(resMode2?.infos ?? []), ...result.result.infos]),
             finish: result.result.finish,
             hasNext: resMode2?.hasNext,
-            listenerMode: resMode2?.hasNext !== undefined ? true : false
+            listenerMode: resMode2?.hasNext !== undefined
         };
     }
 

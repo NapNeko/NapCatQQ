@@ -15,7 +15,7 @@ export class NTQQFriendApi {
     }
     async getBuddyV2SimpleInfoMap(refresh = false) {
         const buddyService = this.context.session.getBuddyService();
-        const buddyListV2 = refresh ? await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL) : await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL);
+        const buddyListV2 = await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL);
         const uids = buddyListV2.data.flatMap(item => item.buddyUids);
         return await this.core.eventWrapper.callNoListenerEvent(
             'NodeIKernelProfileService/getCoreAndBaseInfo',
@@ -44,7 +44,7 @@ export class NTQQFriendApi {
     async getBuddyV2ExWithCate(refresh = false) {
         const categoryMap: Map<string, any> = new Map();
         const buddyService = this.context.session.getBuddyService();
-        const buddyListV2 = refresh ? (await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL)).data : (await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL)).data;
+        const buddyListV2 = (await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL)).data;
         const uids = buddyListV2.flatMap(item => {
             item.buddyUids.forEach(uid => {
                 categoryMap.set(uid, { categoryId: item.categoryId, categoryName: item.categroyName });

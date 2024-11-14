@@ -357,15 +357,13 @@ export class NTQQFileApi {
 
     async getImageSize(filePath: string): Promise<ISizeCalculationResult> {
         return new Promise((resolve, reject) => {
-            imageSize(filePath, (err, dimensions) => {
+            imageSize(filePath, (err: Error | null, dimensions) => {
                 if (err) {
-                    reject(err);
+                    reject(new Error(err.message));
+                } else if (!dimensions) {
+                    reject(new Error('获取图片尺寸失败'));
                 } else {
-                    if (!dimensions) {
-                        reject(new Error('获取图片尺寸失败'));
-                    } else {
-                        resolve(dimensions);
-                    }
+                    resolve(dimensions);
                 }
             });
         });
