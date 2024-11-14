@@ -39,7 +39,7 @@ export function calculateSha1StreamBytes(filePath: string): Promise<Buffer[]> {
         calculateStreamBytes.on('end', () => {
             resolve(byteArrayList);
         });
-        calculateStreamBytes.on('error', (err) => {
+        calculateStreamBytes.on('error', (err: Error) => {
             reject(err);
         });
         readable.pipe(calculateStreamBytes);
