@@ -232,7 +232,7 @@ export async function NCoreInitShell() {
                 logger.log(`可用于快速登录的 QQ：\n${historyLoginList
                     .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
                     .join('\n')
-                }`);
+                    }`);
             }
             loginService.getQRCodePicture();
         }
@@ -253,21 +253,21 @@ export async function NCoreInitShell() {
     //     session.getUnitedConfigService().fetchUnitedCommendConfig([]);
     // }
     // from initSession
-    await new Promise<void>(async (resolve, reject) => {
-        const sessionConfig = await genSessionConfig(
-            guid,
-            basicInfoWrapper.QQVersionAppid!,
-            basicInfoWrapper.getFullQQVesion(),
-            selfInfo.uin,
-            selfInfo.uid,
-            dataPath,
-        );
+    const sessionConfig = await genSessionConfig(
+        guid,
+        basicInfoWrapper.QQVersionAppid!,
+        basicInfoWrapper.getFullQQVesion(),
+        selfInfo.uin,
+        selfInfo.uid,
+        dataPath,
+    );
+    await new Promise<void>((resolve, reject) => {
         const sessionListener = new NodeIKernelSessionListener();
         sessionListener.onSessionInitComplete = (r: unknown) => {
             if (r === 0) {
                 resolve();
             } else {
-                reject(r);
+                reject(new Error('登录异常' + r?.toString()));
             }
         };
         session.init(
@@ -281,8 +281,8 @@ export async function NCoreInitShell() {
         } catch (_) { /* Empty */
             try {
                 session.startNT();
-            } catch (e) {
-                reject('init failed ' + e);
+            } catch (e: unknown) {
+                reject(new Error('init failed ' + (e as Error).message));
             }
         }
     });
