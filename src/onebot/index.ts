@@ -45,8 +45,6 @@ import { OB11FriendRecallNoticeEvent } from '@/onebot/event/notice/OB11FriendRec
 import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecallNoticeEvent';
 import { LRUCache } from '@/common/lru-cache';
 import { NodeIKernelRecentContactListener } from '@/core/listeners/NodeIKernelRecentContactListener';
-import { Native } from '@/native';
-import { decodeMessage, decodeRecallGroup } from "@/core/helper/adaptSysMessageDecoder";
 import { BotOfflineEvent } from './event/notice/BotOfflineEvent';
 
 //OneBot实现类
@@ -58,7 +56,6 @@ export class NapCatOneBot11Adapter {
     apis: StableOneBotApiWrapper;
     networkManager: OB11NetworkManager;
     actions: ActionMap;
-    nativeCore: Native | undefined;
     private bootTime = Date.now() / 1000;
     recallMsgCache = new LRUCache<string, RawMessage>(100);
 
@@ -79,36 +76,6 @@ export class NapCatOneBot11Adapter {
         this.InitOneBot()
             .catch(e => this.context.logger.logError.bind(this.context.logger)('初始化OneBot失败', e));
 
-    }
-    async registerNative(core: NapCatCore, context: InstanceContext) {
-        try {
-            this.nativeCore = new Native(context.pathWrapper.binaryPath);
-            if (!this.nativeCore.inited) throw new Error('Native Not Init');
-            // this.nativeCore.registerRecallCallback(async (hex: string) => {
-            //     try {
-            //         const data = decodeMessage(Buffer.from(hex, 'hex'));
-            //         //data.MsgHead.BodyInner.MsgType SubType
-            //         const bodyInner = data.msgHead?.bodyInner;
-            //         //context.logger.log("[appNative] Parse MsgType:" + bodyInner.msgType + " / SubType:" + bodyInner.subType);
-            //         if (bodyInner && bodyInner.msgType == 732 && bodyInner.subType == 17 && data?.msgHead?.noifyData?.innerData) {
-            //             const RecallData = Buffer.from(data?.msgHead?.noifyData?.innerData);
-            //             //跳过 4字节 群号  + 不知道的1字节 +2字节 长度
-            //             const uid = RecallData.readUint32BE();
-            //             const buffer = Buffer.from(RecallData.toString('hex').slice(14), 'hex');
-            //             const seq: number = decodeRecallGroup(buffer).recallDetails.subDetail.msgSeq;
-            //             const peer: Peer = { chatType: ChatType.KCHATTYPEGROUP, peerUid: uid.toString() };
-            //             context.logger.log("[Native] 群消息撤回 Peer: " + uid.toString() + " / MsgSeq:" + seq);
-            //             const msgs = await core.apis.MsgApi.queryMsgsWithFilterExWithSeq(peer, seq.toString());
-            //             this.recallMsgCache.put(msgs.msgList[0].msgId, msgs.msgList[0]);
-            //         }
-            //     } catch (error: any) {
-            //         context.logger.logWarn("[Native] Error:", (error as Error).message, ' HEX:', hex);
-            //     }
-            // });
-        } catch (error) {
-            context.logger.logWarn("[Native] Error:", (error as Error).message);
-            return;
-        }
     }
     async InitOneBot() {
         const selfInfo = this.core.selfInfo;
