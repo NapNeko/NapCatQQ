@@ -563,7 +563,7 @@ export class NapCatOneBot11Adapter {
         for (const message of msgList) {
             // log("message update", message.sendStatus, message.msgId, message.msgSeq)
             const peer: Peer = { chatType: message.chatType, peerUid: message.peerUid, guildId: '' };
-            if (message.recallTime != '0' && !cache.get(message.msgId)) { //todo: 这个判断方法不太好，应该使用灰色消息元素来判断?
+            if (message.recallTime != '0' && !cache.get(message.msgId)) { //work:这个判断方法不太好，应该使用灰色消息元素来判断?
                 cache.put(message.msgId, true);
                 // 撤回消息上报
                 let oriMessageId = MessageUnique.getShortIdByMsgId(message.msgId);

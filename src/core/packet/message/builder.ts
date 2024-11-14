@@ -16,7 +16,7 @@ export class PacketMsgBuilder {
         return element.map((node): NapProtoEncodeStructType<typeof PushMsgBody> => {
             const avatar = `https://q.qlogo.cn/headimg_dl?dst_uin=${node.senderUin}&spec=640&img_type=jpg`;
             const msgContent = node.msg.reduceRight((acc: undefined | Uint8Array, msg: IPacketMsgElement<PacketSendMsgElement>) => {
-                return acc !== undefined ? acc : msg.buildContent();
+                return acc ?? msg.buildContent();
             }, undefined);
             const msgElement = node.msg.flatMap(msg => msg.buildElement() ?? []);
             if (!msgContent && !msgElement.length) {

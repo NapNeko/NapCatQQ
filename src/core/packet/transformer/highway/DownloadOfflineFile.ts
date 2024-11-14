@@ -25,7 +25,7 @@ class DownloadOfflineFile extends PacketTransformer<typeof proto.OidbSvcTrpcTcp0
         return OidbBase.build(0xE37, 800, body, false, false);
     }
 
-    // TODO: check
+    // work:check
     parse(data: Buffer) {
         const oidbBody = OidbBase.parse(data).body;
         return new NapProtoMsg(proto.OidbSvcTrpcTcp0XE37Response).decode(oidbBody);

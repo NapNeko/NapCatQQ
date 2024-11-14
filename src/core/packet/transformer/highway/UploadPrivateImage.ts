@@ -40,7 +40,7 @@ class UploadPrivateImage extends PacketTransformer<typeof proto.NTV2RichMediaRes
                             fileName: img.name,
                             type: {
                                 type: 1,
-                                picFormat: img.picType,  //TODO: extend NapCat imgType /cc @MliKiowa
+                                picFormat: img.picType,  //work:extend NapCat imgType /cc @MliKiowa
                                 videoFormat: 0,
                                 voiceFormat: 0,
                             },
