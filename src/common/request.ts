@@ -93,7 +93,7 @@ export class RequestUtil {
                 });
             });
 
-            req.on('error', (error: any) => {
+            req.on('error', (error: Error) => {
                 reject(error);
             });
             if (method === 'POST' || method === 'PUT' || method === 'PATCH') {

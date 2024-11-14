@@ -23,7 +23,7 @@ export interface ChatCacheList {
 export interface ChatCacheListItem {
     chatType: ChatType;
     basicChatCacheInfo: ChatCacheListItemBasic;
-    guildChatCacheInfo: unknown[]; // TODO: 没用过频道所以不知道这里边的详细内容
+    guildChatCacheInfo: unknown[]; // work: 没用过频道所以不知道这里边的详细内容
 }
 
 export interface ChatCacheListItemBasic {

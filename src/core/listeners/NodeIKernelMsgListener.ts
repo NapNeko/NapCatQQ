@@ -20,8 +20,8 @@ export interface OnRichMediaDownloadCompleteParams {
     fileSrvErrCode: string,
     clientMsg: string,
     businessId: number,
-    userTotalSpacePerDay: unknown | null,
-    userUsedSpacePerDay: unknown | null
+    userTotalSpacePerDay: unknown,
+    userUsedSpacePerDay: unknown
 }
 
 export interface GroupFileInfoUpdateParamType {

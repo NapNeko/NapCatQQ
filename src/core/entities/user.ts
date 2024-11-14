@@ -175,8 +175,8 @@ export interface SimpleInfo {
     status: UserStatus | null;
     vasInfo: VasInfo | null;
     relationFlags: RelationFlags | null;
-    otherFlags: any | null;
-    intimate: any | null;
+    otherFlags: any;
+    intimate: any;
 }
 
 export type FriendV2 = SimpleInfo;

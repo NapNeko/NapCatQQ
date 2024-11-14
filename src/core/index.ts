@@ -220,7 +220,7 @@ export class NapCatCore {
                     if (existMember) {
                         Object.assign(existMember, member);
                     } else {
-                        existMembers!.set(uid, member);
+                        existMembers.set(uid, member);
                     }
                     //移除成员
                     if (member.isDelete) {
