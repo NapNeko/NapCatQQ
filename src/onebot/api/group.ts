@@ -171,7 +171,7 @@ export class OneBotGroupApi {
         let duration = parseInt(groupElement.shutUp!.duration);
         const subType: 'ban' | 'lift_ban' = duration > 0 ? 'ban' : 'lift_ban';
         if (memberUid) {
-            memberUin = (await this.core.apis.GroupApi.getGroupMember(GroupCode, memberUid))?.uin || '';
+            memberUin = (await this.core.apis.GroupApi.getGroupMember(GroupCode, memberUid))?.uin ?? '';
         } else {
             memberUin = '0';  // 0表示全员禁言
             if (duration > 0) {
@@ -225,7 +225,7 @@ export class OneBotGroupApi {
         const memberUin = member?.uin;
         const adminMember = await this.core.apis.GroupApi.getGroupMember(GroupCode, groupElement.adminUid);
         if (memberUin) {
-            const operatorUin = adminMember?.uin || memberUin;
+            const operatorUin = adminMember?.uin ?? memberUin;
             return new OB11GroupIncreaseEvent(
                 this.core,
                 parseInt(GroupCode),
@@ -240,7 +240,7 @@ export class OneBotGroupApi {
     async parseGroupKickEvent(GroupCode: string, grayTipElement: GrayTipElement) {
         const groupElement = grayTipElement?.groupElement;
         if (!groupElement) return undefined;
-        const adminUin = (await this.core.apis.GroupApi.getGroupMember(GroupCode, groupElement.adminUid))?.uin || (await this.core.apis.UserApi.getUidByUinV2(groupElement.adminUid));
+        const adminUin = (await this.core.apis.GroupApi.getGroupMember(GroupCode, groupElement.adminUid))?.uin ?? (await this.core.apis.UserApi.getUidByUinV2(groupElement.adminUid));
         if (adminUin) {
             return new OB11GroupDecreaseEvent(
                 this.core,

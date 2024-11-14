@@ -145,7 +145,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             this.wsClientsMutex.runExclusive(async () => {
                 this.wsClientWithEvent.forEach((wsClient) => {
                     if (wsClient.readyState === WebSocket.OPEN) {
-                        wsClient.send(JSON.stringify(new OB11HeartbeatEvent(this.core, this.heartbeatInterval, this.core.selfInfo.online, true)));
+                        wsClient.send(JSON.stringify(new OB11HeartbeatEvent(this.core, this.heartbeatInterval, this.core.selfInfo.online ?? true, true)));
                     }
                 });
             });
@@ -189,8 +189,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             return;
         }
         const retdata = await action.websocketHandle(receiveData.params, echo ?? '');
-        const packet = Object.assign({}, retdata);
-        this.checkStateAndReply<any>(packet, wsClient);
+        this.checkStateAndReply<any>({ ...retdata }, wsClient);
     }
 }
 

@@ -194,7 +194,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                 logger.logDebug(`handleForwardedNodesPacket[SendRaw] 开始转换 ${stringifyWithBigInt(packetMsgElements)}`);
                 const transformedMsg = this.core.apis.PacketApi.pkt.msgConverter.rawMsgWithSendMsgToPacketMsg(packetMsgElements);
                 logger.logDebug(`handleForwardedNodesPacket[SendRaw] 转换为 ${stringifyWithBigInt(transformedMsg)}`);
-                packetMsg.push(transformedMsg!);
+                packetMsg.push(transformedMsg);
             } else if (node.data.id) {
                 const id = node.data.id;
                 const nodeMsg = MessageUnique.getMsgIdAndPeerByShortId(+id) || MessageUnique.getPeerByMsgId(id);
@@ -207,7 +207,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                 await this.core.apis.FileApi.downloadRawMsgMedia([msg]);
                 const transformedMsg = this.core.apis.PacketApi.pkt.msgConverter.rawMsgToPacketMsg(msg, msgPeer);
                 logger.logDebug(`handleForwardedNodesPacket[PureRaw] 转换为 ${stringifyWithBigInt(transformedMsg)}`);
-                packetMsg.push(transformedMsg!);
+                packetMsg.push(transformedMsg);
             } else {
                 logger.logDebug(`handleForwardedNodesPacket 跳过元素 ${stringifyWithBigInt(node)}`);
             }

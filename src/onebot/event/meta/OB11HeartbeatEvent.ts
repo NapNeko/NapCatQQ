@@ -11,11 +11,11 @@ export class OB11HeartbeatEvent extends OB11BaseMetaEvent {
     status: HeartbeatStatus;
     interval: number;
 
-    public constructor(core: NapCatCore, interval: number, isOnline: boolean | undefined, isGood: boolean) {
+    public constructor(core: NapCatCore, interval: number, isOnline: boolean, isGood: boolean) {
         super(core);
         this.interval = interval;
         this.status = {
-            online: isOnline && true,
+            online: isOnline,
             good: isGood,
         };
     }

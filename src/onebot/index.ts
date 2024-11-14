@@ -6,7 +6,6 @@ import {
     GroupNotifyMsgStatus,
     GroupNotifyMsgType,
     InstanceContext,
-    MsgSourceType,
     NapCatCore,
     NodeIKernelBuddyListener,
     NodeIKernelGroupListener,
@@ -269,10 +268,8 @@ export class NapCatOneBot11Adapter {
                     },
                     m.msgId,
                 );
-                // if (m.sourceType == MsgSourceType.K_DOWN_SOURCETYPE_AIOINNER) {
                 await this.emitMsg(m)
                     .catch(e => this.context.logger.logError.bind(this.context.logger)('处理消息失败', e));
-                // }
             }
         };
 
@@ -504,10 +501,9 @@ export class NapCatOneBot11Adapter {
             this.context.logger.logDebug('转化为 OB11Message', ob11Msg);
             if (debug) {
                 ob11Msg.raw = message;
-            } else {
-                if (ob11Msg.message.length === 0) {
-                    return;
-                }
+            } else if (ob11Msg.message.length === 0) {
+                return;
+
             }
             const isSelfMsg = ob11Msg.user_id.toString() == this.core.selfInfo.uin;
             if (isSelfMsg && !reportSelfMessage) {
