@@ -61,7 +61,7 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
         }
 
         const rootMsgId = MessageUnique.getShortIdByMsgId(msgId);
-        const rootMsg = MessageUnique.getMsgIdAndPeerByShortId(rootMsgId || parseInt(msgId));
+        const rootMsg = MessageUnique.getMsgIdAndPeerByShortId(rootMsgId ?? +msgId);
         if (!rootMsg) {
             throw new Error('msg not found');
         }
@@ -76,7 +76,7 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
         if (!(resMsg?.message?.[0] as OB11MessageForward)?.data?.content) {
             throw new Error('找不到相关的聊天记录');
         }
-        return { 
+        return {
             messages: (resMsg?.message?.[0] as OB11MessageForward)?.data?.content
         };
         //}

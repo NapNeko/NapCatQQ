@@ -68,7 +68,7 @@ export async function createContext(core: NapCatCore, payload: OB11PostContext, 
             }
             return {
                 chatType: ChatType.KCHATTYPEC2C,
-                peerUid: Uid!,
+                peerUid: Uid,
                 guildId: '',
             };
         }
@@ -175,7 +175,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
 
                 if (getSpecialMsgNum({ message: OB11Data }, OB11MessageDataType.node)) {
                     const uploadReturnData = await this.uploadForwardedNodesPacket(msgPeer, OB11Data as OB11MessageNode[], node.data.source, node.data.news, node.data.summary, node.data.prompt, {
-                        user_id: (node.data.user_id || node.data.uin)?.toString() ?? parentMeta?.user_id ?? this.core.selfInfo.uin,
+                        user_id: (node.data.user_id ?? node.data.uin)?.toString() ?? parentMeta?.user_id ?? this.core.selfInfo.uin,
                         nickname: (node.data.nickname || node.data.name) ?? parentMeta?.nickname ?? "QQ用户",
                     }, dp + 1);
                     sendElements = uploadReturnData?.finallySendElements ? [uploadReturnData.finallySendElements] : [];
