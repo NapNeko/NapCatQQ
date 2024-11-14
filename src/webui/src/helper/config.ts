@@ -48,10 +48,10 @@ async function tryUsePort(port: number, host: string, tryCount: number = 0): Pro
                         // 使用循环代替递归
                         resolve(tryUsePort(port + 1, host, tryCount + 1));
                     } else {
-                        reject(`端口尝试失败，达到最大尝试次数: ${MAX_PORT_TRY}`);
+                        reject(new Error(`端口尝试失败，达到最大尝试次数: ${MAX_PORT_TRY}`));
                     }
                 } else {
-                    reject(`遇到错误: ${err.code}`);
+                    reject(new Error(`遇到错误: ${err.code}`));
                 }
             });
 
@@ -59,7 +59,7 @@ async function tryUsePort(port: number, host: string, tryCount: number = 0): Pro
             server.listen(port, host);
         } catch (error) {
             // 这里捕获到的错误应该是启动服务器时的同步错误
-            reject(`服务器启动时发生错误: ${error}`);
+            reject(new Error(`服务器启动时发生错误: ${error}`));
         }
     });
 }
