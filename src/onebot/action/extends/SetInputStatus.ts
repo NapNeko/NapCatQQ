@@ -1,7 +1,7 @@
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import BaseAction from '../BaseAction';
-import { ActionName, BaseCheckResult } from '../types';
-import { ChatType, Peer } from '@/core';
+import { ActionName } from '../types';
+import { ChatType } from '@/core';
 
 const SchemaData = {
     type: 'object',
@@ -9,7 +9,7 @@ const SchemaData = {
         event_type: { type: 'number' },
         user_id: { type: ['number', 'string'] },
     },
-    required: ['event_type','user_id'],
+    required: ['event_type', 'user_id'],
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;

@@ -1,5 +1,5 @@
 import BaseAction from '../BaseAction';
-import { ActionName, BaseCheckResult } from '../types';
+import { ActionName } from '../types';
 
 interface Payload {
     start: number,
