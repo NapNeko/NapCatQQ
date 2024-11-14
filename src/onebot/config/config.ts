@@ -1,6 +1,6 @@
 export interface AdapterConfig {
     name: string;
-    enabled: boolean;
+    enable: boolean;
     [key: string]: any;
 }
 
@@ -8,8 +8,8 @@ const createDefaultAdapterConfig = <T extends AdapterConfig>(config: T): T => co
 
 const httpServerDefaultConfigs = createDefaultAdapterConfig({
     name: 'http-server',
-    enabled: false,
-    port: '3000',
+    enable: false,
+    port: 3000,
     host: '0.0.0.0',
     enableCors: true,
     enableWebsocket: true,
@@ -22,7 +22,7 @@ export type HttpServerConfig = typeof httpServerDefaultConfigs;
 
 const httpClientDefaultConfigs = createDefaultAdapterConfig({
     name: 'http-client',
-    enabled: false,
+    enable: false,
     url: 'http://localhost:8080',
     messagePostFormat: 'array',
     reportSelfMessage: false,
@@ -33,9 +33,9 @@ export type HttpClientConfig = typeof httpClientDefaultConfigs;
 
 const websocketServerDefaultConfigs = createDefaultAdapterConfig({
     name: 'websocket-server',
-    enabled: false,
+    enable: false,
     host: '0.0.0.0',
-    port: '3002',
+    port: 3002,
     messagePostFormat: 'array',
     reportSelfMessage: false,
     token: '',
@@ -47,7 +47,7 @@ export type WebsocketServerConfig = typeof websocketServerDefaultConfigs;
 
 const websocketClientDefaultConfigs = createDefaultAdapterConfig({
     name: 'websocket-client',
-    enabled: false,
+    enable: false,
     url: 'ws://localhost:8082',
     messagePostFormat: 'array',
     reportSelfMessage: false,
@@ -71,6 +71,7 @@ export function mergeConfigs<T extends AdapterConfig>(defaultConfig: T, userConf
 export interface OnebotConfig {
     network: NetworkConfig;//网络配置
     musicSignUrl: string;//音乐签名地址
+    enableLocalFile2Url: boolean
 }
 
 const createDefaultConfig = <T>(config: T): T => config;
@@ -82,7 +83,8 @@ export const defaultOnebotConfig = createDefaultConfig<OnebotConfig>({
         websocketServers: [],
         websocketClients: [],
     },
-    musicSignUrl: ""
+    musicSignUrl: "",
+    enableLocalFile2Url: false
 })
 export const mergeNetworkDefaultConfig = {
     httpServers: httpServerDefaultConfigs,

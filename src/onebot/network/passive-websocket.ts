@@ -24,6 +24,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     wsClientWithEvent: WebSocket[] = [];
 
     constructor(
+        public name: string,
         ip: string,
         port: number,
         heartbeatInterval: number,
@@ -188,7 +189,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             this.checkStateAndReply<any>(OB11Response.error('不支持的api ' + receiveData.action, 1404, echo), wsClient);
             return;
         }
-        const retdata = await action.websocketHandle(receiveData.params, echo ?? '');
+        const retdata = await action.websocketHandle(receiveData.params, echo ?? '', this.name);
         this.checkStateAndReply<any>({ ...retdata }, wsClient);
     }
 }

@@ -72,7 +72,7 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
         }
 
         const singleMsg = data.msgList[0];
-        const resMsg = await this.obContext.apis.MsgApi.parseMessage(singleMsg, 'array');//强制array 以便处理
+        const resMsg = (await this.obContext.apis.MsgApi.parseMessageV2(singleMsg))?.arrayMsg;//强制array 以便处理
         if (!(resMsg?.message?.[0] as OB11MessageForward)?.data?.content) {
             throw new Error('找不到相关的聊天记录');
         }
