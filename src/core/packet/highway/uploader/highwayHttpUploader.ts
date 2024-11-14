@@ -64,11 +64,11 @@ export class HighwayHttpUploader extends IHighwayUploader {
                     });
                 });
                 req.write(frame);
-                req.on('error', (error) => {
+                req.on('error', (error: Error) => {
                     reject(error);
                 });
-            } catch (error) {
-                reject(error);
+            } catch (error: unknown) {
+                reject(new Error((error as Error).message));
             }
         });
     }
