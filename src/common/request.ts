@@ -8,7 +8,7 @@ export class RequestUtil {
         const client = url.startsWith('https') ? https : http;
         return new Promise((resolve, reject) => {
             const req = client.get(url, (res) => {
-                let cookies: { [key: string]: string } = {};
+                const cookies: { [key: string]: string } = {};
 
                 res.on('data', () => { }); // Necessary to consume the stream
                 res.on('end', () => {

@@ -82,21 +82,21 @@ export class PacketClientContext {
         const prefer = this.context.napcore.config.packetBackend;
         let client: IPacketClient | null;
         switch (prefer) {
-            case "native":
-                this.context.logger.info("使用指定的 NativePacketClient 作为后端");
-                client = new NativePacketClient(this.context, this.logStack);
-                break;
-            case "frida":
-                this.context.logger.info("[Core] [Packet] 使用指定的 FridaPacketClient 作为后端");
-                client = new WsPacketClient(this.context, this.logStack);
-                break;
-            case "auto":
-            case undefined:
-                client = this.judgeClient();
-                break;
-            default:
-                this.context.logger.error(`未知的PacketBackend ${prefer}，请检查配置文件！`);
-                client = null;
+        case "native":
+            this.context.logger.info("使用指定的 NativePacketClient 作为后端");
+            client = new NativePacketClient(this.context, this.logStack);
+            break;
+        case "frida":
+            this.context.logger.info("[Core] [Packet] 使用指定的 FridaPacketClient 作为后端");
+            client = new WsPacketClient(this.context, this.logStack);
+            break;
+        case "auto":
+        case undefined:
+            client = this.judgeClient();
+            break;
+        default:
+            this.context.logger.error(`未知的PacketBackend ${prefer}，请检查配置文件！`);
+            client = null;
         }
         if (!client?.check()) {
             throw new Error("[Core] [Packet] 无可用的后端，NapCat.Packet将不会加载！");
