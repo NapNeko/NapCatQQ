@@ -2,6 +2,7 @@ import { Data, WebSocket } from "ws";
 import { IPacketClient, RecvPacket } from "@/core/packet/client/baseClient";
 import { PacketContext } from "@/core/packet/context/packetContext";
 import { LogStack } from "@/core/packet/context/clientContext";
+import { ErrorEvent } from "ws";
 
 export class WsPacketClient extends IPacketClient {
     private websocket: WebSocket | null = null;
@@ -85,11 +86,11 @@ export class WsPacketClient extends IPacketClient {
             this.websocket.onmessage = (event) => this.handleMessage(event.data).catch(err => {
                 this.context.logger.error(`处理消息时出错: ${err}`);
             });
-            this.websocket.onerror = (error) => {
+            this.websocket.onerror = (event: ErrorEvent) => {
                 this.available = false;
-                this.context.logger.error(`WebSocket 出错: ${error.message}`);
+                this.context.logger.error(`WebSocket 出错: ${event.message}`);
                 this.websocket?.close();
-                reject(error);
+                reject(new Error(`WebSocket 出错: ${event.message}`));
             };
         });
     }
