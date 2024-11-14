@@ -48,7 +48,7 @@ export class OneBotGroupApi {
         }
 
         for (const element of msg.elements) {
-            if (element.grayTipElement && element.grayTipElement.groupElement) {
+            if (element.grayTipElement?.groupElement) {
                 const groupElement = element.grayTipElement.groupElement;
                 if (groupElement.type == TipGroupElementType.memberIncrease) {
                     const MemberIncreaseEvent = await this.obContext.apis.GroupApi.parseGroupMemberIncreaseEvent(msg.peerUid, element.grayTipElement);
