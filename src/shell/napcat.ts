@@ -292,7 +292,7 @@ export async function NCoreInitShell() {
     fs.mkdirSync(dataPath, { recursive: true });
     logger.logDebug('本账号数据/缓存目录：', accountDataPath);
 
-    new NapCatShell(
+    await new NapCatShell(
         wrapper,
         session,
         logger,
@@ -331,6 +331,7 @@ export class NapCatShell {
 
     }
     async InitNapCat() {
+        await this.core.initCore();
         new NapCatOneBot11Adapter(this.core, this.context, this.context.pathWrapper).InitOneBot()
             .catch(e => this.context.logger.logError.bind(this.context.logger)('初始化OneBot失败', e));
     }

@@ -84,11 +84,10 @@ export function getMajorPath(QQVersion: string): string {
 }
 export class NapCatCore {
     readonly context: InstanceContext;
-    readonly apis: StableNTApiWrapper;
     readonly eventWrapper: NTEventWrapper;
-    // readonly eventChannel: NTEventChannel;
-    NapCatDataPath: string;
-    NapCatTempPath: string;
+    NapCatDataPath: string = '';
+    NapCatTempPath: string = '';
+    apis: StableNTApiWrapper;
     // runtime info, not readonly
     selfInfo: SelfInfo;
     util: NodeQQNTWrapperUtil;
@@ -112,6 +111,8 @@ export class NapCatCore {
             UserApi: new NTQQUserApi(this.context, this),
             GroupApi: new NTQQGroupApi(this.context, this),
         };
+    }
+    async initCore() {
         this.NapCatDataPath = path.join(this.dataPath, 'NapCat');
         fs.mkdirSync(this.NapCatDataPath, { recursive: true });
         this.NapCatTempPath = path.join(this.NapCatDataPath, 'temp');
@@ -133,7 +134,6 @@ export class NapCatCore {
             this.configLoader.configData.consoleLogLevel as LogLevel,
         );
     }
-
     get dataPath(): string {
         let result = this.context.wrapper.NodeQQNTWrapperUtil.getNTUserDataInfoConfig();
         if (!result) {
