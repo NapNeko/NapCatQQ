@@ -18,7 +18,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
         public url: string,
         public reconnectIntervalInMillis: number,
         public heartbeatIntervalInMillis: number,
-        private token: string,
+        private readonly token: string,
         public core: NapCatCore,
         public actions: ActionMap,
     ) {
