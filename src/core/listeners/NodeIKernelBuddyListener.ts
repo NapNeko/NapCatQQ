@@ -6,22 +6,22 @@ export class NodeIKernelBuddyListener {
     onBuddyListChangedV2(arg: unknown): void {
     }
 
-    onAddBuddyNeedVerify(arg: unknown) {
+    onAddBuddyNeedVerify(arg: unknown): any {
     }
 
-    onAddMeSettingChanged(arg: unknown) {
+    onAddMeSettingChanged(arg: unknown): any {
     }
 
-    onAvatarUrlUpdated(arg: unknown) {
+    onAvatarUrlUpdated(arg: unknown): any {
     }
 
-    onBlockChanged(arg: unknown) {
+    onBlockChanged(arg: unknown): any {
     }
 
-    onBuddyDetailInfoChange(arg: unknown) {
+    onBuddyDetailInfoChange(arg: unknown): any {
     }
 
-    onBuddyInfoChange(arg: unknown) {
+    onBuddyInfoChange(arg: unknown): any {
     }
 
     onBuddyListChange(arg: OnBuddyChangeParams): void {

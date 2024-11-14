@@ -7,19 +7,19 @@ export class NodeIKernelFileAssistantListener {
         fileSpeed: number,
         thumbPath: string | null,
         filePath: string | null,
-    }) {
+    }): any {
     }
 
-    onSessionListChanged(...args: unknown[]) {
+    onSessionListChanged(...args: unknown[]): any {
     }
 
-    onSessionChanged(...args: unknown[]) {
+    onSessionChanged(...args: unknown[]): any {
     }
 
-    onFileListChanged(...args: unknown[]) {
+    onFileListChanged(...args: unknown[]): any {
     }
 
-    onFileSearch(searchResult: SearchResultWrapper) {
+    onFileSearch(searchResult: SearchResultWrapper): any {
     }
 }
 

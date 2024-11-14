@@ -5,67 +5,67 @@ export class NodeIKernelProfileListener {
 
     }
 
-    onProfileSimpleChanged(...args: unknown[]) {
+    onProfileSimpleChanged(...args: unknown[]): any {
 
     }
 
-    onProfileDetailInfoChanged(profile: User) {
+    onProfileDetailInfoChanged(profile: User): any {
 
     }
 
-    onStatusUpdate(...args: unknown[]) {
+    onStatusUpdate(...args: unknown[]): any {
 
     }
 
-    onSelfStatusChanged(...args: unknown[]) {
+    onSelfStatusChanged(...args: unknown[]): any {
 
     }
 
-    onStrangerRemarkChanged(...args: unknown[]) {
+    onStrangerRemarkChanged(...args: unknown[]): any {
 
     }
 
-    onMemberListChange(...args: unknown[]) {
+    onMemberListChange(...args: unknown[]): any {
 
     }
 
-    onMemberInfoChange(...args: unknown[]) {
+    onMemberInfoChange(...args: unknown[]): any {
 
     }
 
-    onGroupListUpdate(...args: unknown[]) {
+    onGroupListUpdate(...args: unknown[]): any {
 
     }
 
-    onGroupAllInfoChange(...args: unknown[]) {
+    onGroupAllInfoChange(...args: unknown[]): any {
 
     }
 
-    onGroupDetailInfoChange(...args: unknown[]) {
+    onGroupDetailInfoChange(...args: unknown[]): any {
 
     }
 
-    onGroupConfMemberChange(...args: unknown[]) {
+    onGroupConfMemberChange(...args: unknown[]): any {
 
     }
 
-    onGroupExtListUpdate(...args: unknown[]) {
+    onGroupExtListUpdate(...args: unknown[]): any {
 
     }
 
-    onGroupNotifiesUpdated(...args: unknown[]) {
+    onGroupNotifiesUpdated(...args: unknown[]): any {
 
     }
 
-    onGroupNotifiesUnreadCountUpdated(...args: unknown[]) {
+    onGroupNotifiesUnreadCountUpdated(...args: unknown[]): any {
 
     }
 
-    onGroupMemberLevelInfoChange(...args: unknown[]) {
+    onGroupMemberLevelInfoChange(...args: unknown[]): any {
 
     }
 
-    onGroupBulletinChange(...args: unknown[]) {
+    onGroupBulletinChange(...args: unknown[]): any {
 
     }
 }
