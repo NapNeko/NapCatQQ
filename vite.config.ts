@@ -11,12 +11,8 @@ function genCpModule(module: string) {
 }
 let startScripts: string[] | undefined = undefined;
 if (process.env.NAPCAT_BUILDSYS == 'linux') {
-    if (process.env.NAPCAT_BUILDARCH == 'x64') {
-    }
     startScripts = [];
 } else if (process.env.NAPCAT_BUILDSYS == 'win32') {
-    if (process.env.NAPCAT_BUILDARCH == 'x64') {
-    }
     startScripts = ['./script/KillQQ.bat'];
 } else {
     startScripts = ['./script/KillQQ.bat'];
