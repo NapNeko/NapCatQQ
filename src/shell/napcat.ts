@@ -292,7 +292,7 @@ export async function NCoreInitShell() {
     fs.mkdirSync(dataPath, { recursive: true });
     logger.logDebug('本账号数据/缓存目录：', accountDataPath);
 
-    new NapCatShell(
+    await new NapCatShell(
         wrapper,
         session,
         logger,
@@ -300,7 +300,7 @@ export async function NCoreInitShell() {
         selfInfo,
         basicInfoWrapper,
         pathWrapper,
-    );
+    ).InitNapCat();
 }
 
 export class NapCatShell {
@@ -327,8 +327,13 @@ export class NapCatShell {
         };
         this.core = new NapCatCore(this.context, selfInfo);
 
-        // TODO: complete ob11 adapter initialization logic
-        new NapCatOneBot11Adapter(this.core, this.context, pathWrapper);
+
+
+    }
+    async InitNapCat() {
+        await this.core.initCore();
+        new NapCatOneBot11Adapter(this.core, this.context, this.context.pathWrapper).InitOneBot()
+            .catch(e => this.context.logger.logError.bind(this.context.logger)('初始化OneBot失败', e));
     }
 }
 

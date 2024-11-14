@@ -74,26 +74,30 @@ export class LogWrapper {
             }
             files.forEach(file => {
                 const filePath = path.join(logDir, file);
-                fs.stat(filePath, (err, stats) => {
+                this.deleteOldLogFile(filePath, oneWeekAgo);
+            });
+        });
+    }
+
+    private deleteOldLogFile(filePath: string, oneWeekAgo: number) {
+        fs.stat(filePath, (err, stats) => {
+            if (err) {
+                this.logger.error('Failed to get file stats', err);
+                return;
+            }
+            if (stats.mtime.getTime() < oneWeekAgo) {
+                fs.unlink(filePath, err => {
                     if (err) {
-                        this.logger.error('Failed to get file stats', err);
-                        return;
-                    }
-                    if (stats.mtime.getTime() < oneWeekAgo) {
-                        fs.unlink(filePath, err => {
-                            if (err) {
-                                if (err.code === 'ENOENT') {
-                                    this.logger.warn(`File already deleted: ${file}`);
-                                } else {
-                                    this.logger.error('Failed to delete old log file', err);
-                                }
-                            } else {
-                                this.logger.info(`Deleted old log file: ${file}`);
-                            }
-                        });
+                        if (err.code === 'ENOENT') {
+                            this.logger.warn(`File already deleted: ${filePath}`);
+                        } else {
+                            this.logger.error('Failed to delete old log file', err);
+                        }
+                    } else {
+                        this.logger.info(`Deleted old log file: ${filePath}`);
                     }
                 });
-            });
+            }
         });
     }
 
@@ -198,7 +202,7 @@ export function rawMessageToText(msg: RawMessage, recursiveLevel = 0): string {
             tokens.push(`群聊 [${msg.peerName}(${msg.peerUin})]`);
         }
         if (msg.senderUin !== '0') {
-            tokens.push(`[${msg.sendMemberName || msg.sendRemarkName || msg.sendNickName}(${msg.senderUin})]`);
+            tokens.push(`[${msg.sendMemberName ?? msg.sendRemarkName ?? msg.sendNickName}(${msg.senderUin})]`);
         }
     } else if (msg.chatType == ChatType.KCHATTYPEDATALINE) {
         tokens.push('移动设备');
@@ -206,76 +210,85 @@ export function rawMessageToText(msg: RawMessage, recursiveLevel = 0): string {
         tokens.push(`临时消息 (${msg.peerUin})`);
     }
 
-    function msgElementToText(element: MessageElement) {
-        if (element.textElement) {
-            if (element.textElement.atType === AtType.notAt) {
-                const originalContentLines = element.textElement.content.split('\n');
-                return `${originalContentLines[0]}${originalContentLines.length > 1 ? ' ...' : ''}`;
-            } else if (element.textElement.atType === AtType.atAll) {
-                return `@全体成员`;
-            } else if (element.textElement.atType === AtType.atUser) {
-                return `${element.textElement.content} (${element.textElement.atUid})`;
-            }
-        }
-
-        if (element.replyElement) {
-            const recordMsgOrNull = msg.records.find(
-                record => element.replyElement!.sourceMsgIdInRecords === record.msgId,
-            );
-            return `[回复消息 ${recordMsgOrNull &&
-                recordMsgOrNull.peerUin != '284840486' && recordMsgOrNull.peerUin != '1094950020'
-                ?
-                rawMessageToText(recordMsgOrNull, recursiveLevel + 1) :
-                `未找到消息记录 (MsgId = ${element.replyElement.sourceMsgIdInRecords})`
-            }]`;
-        }
-
-        if (element.picElement) {
-            return '[图片]';
-        }
-
-        if (element.fileElement) {
-            return `[文件 ${element.fileElement.fileName}]`;
-        }
-
-        if (element.videoElement) {
-            return '[视频]';
-        }
-
-        if (element.pttElement) {
-            return `[语音 ${element.pttElement.duration}s]`;
-        }
-
-        if (element.arkElement) {
-            return '[卡片消息]';
-        }
-
-        if (element.faceElement) {
-            return `[表情 ${element.faceElement.faceText ?? ''}]`;
-        }
-
-        if (element.marketFaceElement) {
-            return element.marketFaceElement.faceName;
-        }
-
-        if (element.markdownElement) {
-            return '[Markdown 消息]';
-        }
-
-        if (element.multiForwardMsgElement) {
-            return '[转发消息]';
-        }
-
-        if (element.elementType === ElementType.GreyTip) {
-            return '[灰条消息]';
-        }
-
-        return `[未实现 (ElementType = ${element.elementType})]`;
-    }
-
     for (const element of msg.elements) {
-        tokens.push(msgElementToText(element));
+        tokens.push(msgElementToText(element, msg, recursiveLevel));
     }
 
     return tokens.join(' ');
+}
+
+function msgElementToText(element: MessageElement, msg: RawMessage, recursiveLevel: number): string {
+    if (element.textElement) {
+        return textElementToText(element.textElement);
+    }
+
+    if (element.replyElement) {
+        return replyElementToText(element.replyElement, msg, recursiveLevel);
+    }
+
+    if (element.picElement) {
+        return '[图片]';
+    }
+
+    if (element.fileElement) {
+        return `[文件 ${element.fileElement.fileName}]`;
+    }
+
+    if (element.videoElement) {
+        return '[视频]';
+    }
+
+    if (element.pttElement) {
+        return `[语音 ${element.pttElement.duration}s]`;
+    }
+
+    if (element.arkElement) {
+        return '[卡片消息]';
+    }
+
+    if (element.faceElement) {
+        return `[表情 ${element.faceElement.faceText ?? ''}]`;
+    }
+
+    if (element.marketFaceElement) {
+        return element.marketFaceElement.faceName;
+    }
+
+    if (element.markdownElement) {
+        return '[Markdown 消息]';
+    }
+
+    if (element.multiForwardMsgElement) {
+        return '[转发消息]';
+    }
+
+    if (element.elementType === ElementType.GreyTip) {
+        return '[灰条消息]';
+    }
+
+    return `[未实现 (ElementType = ${element.elementType})]`;
+}
+
+function textElementToText(textElement: any): string {
+    if (textElement.atType === AtType.notAt) {
+        const originalContentLines = textElement.content.split('\n');
+        return `${originalContentLines[0]}${originalContentLines.length > 1 ? ' ...' : ''}`;
+    } else if (textElement.atType === AtType.atAll) {
+        return `@全体成员`;
+    } else if (textElement.atType === AtType.atUser) {
+        return `${textElement.content} (${textElement.atUid})`;
+    }
+    return '';
+}
+
+function replyElementToText(replyElement: any, msg: RawMessage, recursiveLevel: number): string {
+    const recordMsgOrNull = msg.records.find(
+        record => replyElement.sourceMsgIdInRecords === record.msgId,
+    );
+    return `[回复消息 ${recordMsgOrNull &&
+        recordMsgOrNull.peerUin != '284840486' && recordMsgOrNull.peerUin != '1094950020'
+        ?
+        rawMessageToText(recordMsgOrNull, recursiveLevel + 1) :
+        `未找到消息记录 (MsgId = ${replyElement.sourceMsgIdInRecords})`
+        }]`;
 }

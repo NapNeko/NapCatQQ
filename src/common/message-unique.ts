@@ -2,8 +2,8 @@ import { Peer } from '@/core';
 import crypto from 'crypto';
 
 export class LimitedHashTable<K, V> {
-    private keyToValue: Map<K, V> = new Map();
-    private valueToKey: Map<V, K> = new Map();
+    private readonly keyToValue: Map<K, V> = new Map();
+    private readonly valueToKey: Map<V, K> = new Map();
     private maxSize: number;
 
     constructor(maxSize: number) {
@@ -75,8 +75,8 @@ export class LimitedHashTable<K, V> {
 }
 
 class MessageUniqueWrapper {
-    private msgDataMap: LimitedHashTable<string, number>;
-    private msgIdMap: LimitedHashTable<string, number>;
+    private readonly msgDataMap: LimitedHashTable<string, number>;
+    private readonly msgIdMap: LimitedHashTable<string, number>;
 
     constructor(maxMap: number = 1000) {
         this.msgIdMap = new LimitedHashTable<string, number>(maxMap);

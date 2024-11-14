@@ -4,7 +4,7 @@ import { resolve } from 'path';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import { builtinModules } from 'module';
 //依赖排除
-const external = ['silk-wasm', 'ws', 'express', 'fluent-ffmpeg', 'qrcode-terminal'];
+const external = ['silk-wasm', 'ws', 'express', 'qrcode-terminal'];
 const nodeModules = [...builtinModules, builtinModules.map(m => `node:${m}`)].flat();
 function genCpModule(module: string) {
     return { src: `./node_modules/${module}`, dest: `dist/node_modules/${module}`, flatten: false };
@@ -42,7 +42,6 @@ const FrameworkBaseConfigPlugin: PluginOption[] = [
 const ShellBaseConfigPlugin: PluginOption[] = [
     cp({
         targets: [
-            { src: './src/native/external', dest: 'dist/native', flatten: false },
             { src: './src/native/packet', dest: 'dist/moehoo', flatten: false },
             { src: './static/', dest: 'dist/static/', flatten: false },
             { src: './src/core/external/napcat.json', dest: 'dist/config/' },
