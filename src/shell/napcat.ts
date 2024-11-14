@@ -232,7 +232,7 @@ export async function NCoreInitShell() {
                 logger.log(`可用于快速登录的 QQ：\n${historyLoginList
                     .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
                     .join('\n')
-                }`);
+                    }`);
             }
             loginService.getQRCodePicture();
         }
@@ -327,8 +327,12 @@ export class NapCatShell {
         };
         this.core = new NapCatCore(this.context, selfInfo);
 
-        // TODO: complete ob11 adapter initialization logic
-        new NapCatOneBot11Adapter(this.core, this.context, pathWrapper);
+
+
+    }
+    async InitNapCat() {
+        new NapCatOneBot11Adapter(this.core, this.context, this.context.pathWrapper).InitOneBot()
+            .catch(e => this.context.logger.logError.bind(this.context.logger)('初始化OneBot失败', e));
     }
 }
 
