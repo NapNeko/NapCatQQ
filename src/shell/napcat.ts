@@ -290,7 +290,7 @@ export async function NCoreInitShell() {
     await initializeEngine(engine, basicInfoWrapper, dataPathGlobal, systemPlatform, systemVersion);
     await initializeLoginService(loginService, basicInfoWrapper, dataPathGlobal, systemVersion, hostname);
 
-    let quickLoginUin = cmdOptions.qq;
+    const quickLoginUin = cmdOptions.qq;
     const historyLoginList = (await loginService.getLoginList()).LocalLoginInfoList;
 
     const dataTimestape = new Date().getTime().toString();

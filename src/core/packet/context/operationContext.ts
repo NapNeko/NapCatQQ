@@ -65,35 +65,22 @@ export class PacketOperationContext {
     }
 
     async UploadResources(msg: PacketMsg[], groupUin: number = 0) {
-        const reqList = [];
-        for (const m of msg) {
-            for (const e of m.msg) {
+        const chatType = groupUin ? ChatType.KCHATTYPEGROUP : ChatType.KCHATTYPEC2C;
+        const peerUid = groupUin ? String(groupUin) : this.context.napcore.basicInfo.uid;
+        const reqList = msg.flatMap(m =>
+            m.msg.map(e => {
                 if (e instanceof PacketMsgPicElement) {
-                    reqList.push(this.context.highway.uploadImage({
-                        chatType: groupUin ? ChatType.KCHATTYPEGROUP : ChatType.KCHATTYPEC2C,
-                        peerUid: groupUin ? String(groupUin) : this.context.napcore.basicInfo.uid
-                    }, e));
+                    return this.context.highway.uploadImage({ chatType, peerUid }, e);
+                } else if (e instanceof PacketMsgVideoElement) {
+                    return this.context.highway.uploadVideo({ chatType, peerUid }, e);
+                } else if (e instanceof PacketMsgPttElement) {
+                    return this.context.highway.uploadPtt({ chatType, peerUid }, e);
+                } else if (e instanceof PacketMsgFileElement) {
+                    return this.context.highway.uploadFile({ chatType, peerUid }, e);
                 }
-                if (e instanceof PacketMsgVideoElement) {
-                    reqList.push(this.context.highway.uploadVideo({
-                        chatType: groupUin ? ChatType.KCHATTYPEGROUP : ChatType.KCHATTYPEC2C,
-                        peerUid: groupUin ? String(groupUin) : this.context.napcore.basicInfo.uid
-                    }, e));
-                }
-                if (e instanceof PacketMsgPttElement) {
-                    reqList.push(this.context.highway.uploadPtt({
-                        chatType: groupUin ? ChatType.KCHATTYPEGROUP : ChatType.KCHATTYPEC2C,
-                        peerUid: groupUin ? String(groupUin) : this.context.napcore.basicInfo.uid
-                    }, e));
-                }
-                if (e instanceof PacketMsgFileElement) {
-                    reqList.push(this.context.highway.uploadFile({
-                        chatType: groupUin ? ChatType.KCHATTYPEGROUP : ChatType.KCHATTYPEC2C,
-                        peerUid: groupUin ? String(groupUin) : this.context.napcore.basicInfo.uid
-                    }, e));
-                }
-            }
-        }
+                return null;
+            }).filter(Boolean)
+        );
         const res = await Promise.allSettled(reqList);
         this.context.logger.info(`上传资源${res.length}个，失败${res.filter(r => r.status === 'rejected').length}个`);
         res.forEach((result, index) => {
