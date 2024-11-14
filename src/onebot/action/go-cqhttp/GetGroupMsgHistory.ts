@@ -36,7 +36,7 @@ export default class GoCQHTTPGetGroupMsgHistory extends BaseAction<Payload, Resp
         const startMsgId = hasMessageSeq ? (MessageUnique.getMsgIdAndPeerByShortId(+payload.message_seq!)?.MsgId ?? payload.message_seq!.toString()) : '0';
         const msgList = hasMessageSeq ?
             (await this.core.apis.MsgApi.getMsgHistory(peer, startMsgId, MsgCount)).msgList : (await this.core.apis.MsgApi.getAioFirstViewLatestMsgs(peer, MsgCount)).msgList;
-        if (msgList.length === 0) throw `消息${payload.message_seq}不存在`;
+        if (msgList.length === 0) throw new Error(`消息${payload.message_seq}不存在`);
         //翻转消息
         if (isReverseOrder) msgList.reverse();
         //转换序号

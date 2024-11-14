@@ -16,8 +16,8 @@ export interface NativePacketExportType {
 
 export class NativePacketClient extends IPacketClient {
     private readonly supportedPlatforms = ['win32.x64', 'linux.x64', 'linux.arm64', 'darwin.x64', 'darwin.arm64'];
-    private MoeHooExport: { exports: NativePacketExportType } = { exports: {} };
-    private sendEvent = new LRUCache<number, string>(500); // seq->trace_id
+    private readonly MoeHooExport: { exports: NativePacketExportType } = { exports: {} };
+    private readonly sendEvent = new LRUCache<number, string>(500); // seq->trace_id
 
     constructor(context: PacketContext, logStack: LogStack) {
         super(context, logStack);
