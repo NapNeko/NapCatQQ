@@ -8,6 +8,7 @@ const SchemaData = {
     properties: {
         message_id: { type: ['string', 'number'] },
         emoji_id: { type: ['string', 'number'] },
+        set: { type: ['boolean', 'string'] }
     },
     required: ['message_id', 'emoji_id'],
 } as const satisfies JSONSchema;
@@ -26,10 +27,19 @@ export class SetMsgEmojiLike extends BaseAction<Payload, any> {
         if (!payload.emoji_id) {
             throw new Error('emojiId not found');
         }
+        if (!payload.set) {
+            payload.set = true;
+        }
+
         const msgData = (await this.core.apis.MsgApi.getMsgsByMsgId(msg.Peer, [msg.MsgId])).msgList;
         if (!msgData || msgData.length == 0 || !msgData[0].msgSeq) {
             throw new Error('find msg by msgid error');
         }
-        return await this.core.apis.MsgApi.setEmojiLike(msg.Peer, msgData[0].msgSeq, payload.emoji_id.toString(), true);
+        return await this.core.apis.MsgApi.setEmojiLike(
+            msg.Peer,
+            msgData[0].msgSeq,
+            payload.emoji_id.toString(),
+            typeof payload.set == 'string' ? payload.set === 'true' : !!payload
+        );
     }
 }
