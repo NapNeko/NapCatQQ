@@ -174,19 +174,18 @@ export class NapCatOneBot11Adapter {
             } else {
                 await this.networkManager.closeAdapterByPredicate(adapter => adapter instanceof OB11ActiveHttpAdapter);
             }
-        } else {
-            if (now.http.enablePost) {
-                const { added, removed } = this.findDifference<string>(prev.http.postUrls, now.http.postUrls);
-                await this.networkManager.closeAdapterByPredicate(
-                    adapter => adapter instanceof OB11ActiveHttpAdapter && removed.includes(adapter.url),
-                );
-                for (const url of added) {
-                    await this.networkManager.registerAdapterAndOpen(new OB11ActiveHttpAdapter(
-                        url, now.http.secret, this.core, this,
-                    ));
-                }
+        } else if (now.http.enablePost) {
+            const { added, removed } = this.findDifference<string>(prev.http.postUrls, now.http.postUrls);
+            await this.networkManager.closeAdapterByPredicate(
+                adapter => adapter instanceof OB11ActiveHttpAdapter && removed.includes(adapter.url),
+            );
+            for (const url of added) {
+                await this.networkManager.registerAdapterAndOpen(new OB11ActiveHttpAdapter(
+                    url, now.http.secret, this.core, this,
+                ));
             }
         }
+
 
         // check difference in passive websocket (Ws)
         if (prev.ws.enable !== now.ws.enable) {
@@ -214,19 +213,18 @@ export class NapCatOneBot11Adapter {
                     adapter => adapter instanceof OB11ActiveWebSocketAdapter,
                 );
             }
-        } else {
-            if (now.reverseWs.enable) {
-                const { added, removed } = this.findDifference<string>(prev.reverseWs.urls, now.reverseWs.urls);
-                await this.networkManager.closeAdapterByPredicate(
-                    adapter => adapter instanceof OB11ActiveWebSocketAdapter && removed.includes(adapter.url),
-                );
-                for (const url of added) {
-                    await this.networkManager.registerAdapterAndOpen(new OB11ActiveWebSocketAdapter(
-                        url, 5000, now.heartInterval, now.token, this.core, this.actions,
-                    ));
-                }
+        } else if (now.reverseWs.enable) {
+            const { added, removed } = this.findDifference<string>(prev.reverseWs.urls, now.reverseWs.urls);
+            await this.networkManager.closeAdapterByPredicate(
+                adapter => adapter instanceof OB11ActiveWebSocketAdapter && removed.includes(adapter.url),
+            );
+            for (const url of added) {
+                await this.networkManager.registerAdapterAndOpen(new OB11ActiveWebSocketAdapter(
+                    url, 5000, now.heartInterval, now.token, this.core, this.actions,
+                ));
             }
         }
+
     }
 
     private findDifference<T>(prev: T[], now: T[]): { added: T[], removed: T[] } {
@@ -573,7 +571,7 @@ export class NapCatOneBot11Adapter {
                 if (message.chatType == ChatType.KCHATTYPEC2C) {
                     const friendRecallEvent = new OB11FriendRecallNoticeEvent(
                         this.core,
-                        parseInt(message!.senderUin),
+                        +message.senderUin,
                         oriMessageId,
                     );
                     this.networkManager.emitEvent(friendRecallEvent)
@@ -584,13 +582,13 @@ export class NapCatOneBot11Adapter {
                         const operatorUid = element.grayTipElement?.revokeElement.operatorUid;
                         if (!operatorUid) return;
                         const operator = await this.core.apis.GroupApi.getGroupMember(message.peerUin, operatorUid);
-                        operatorId = operator?.uin || message.senderUin;
+                        operatorId = operator?.uin ?? message.senderUin;
                     }
                     const groupRecallEvent = new OB11GroupRecallNoticeEvent(
                         this.core,
-                        parseInt(message.peerUin),
-                        parseInt(message.senderUin),
-                        parseInt(operatorId),
+                        +message.peerUin,
+                        +message.senderUin,
+                        +operatorId,
                         oriMessageId
                     );
                     this.networkManager.emitEvent(groupRecallEvent)
