@@ -406,70 +406,87 @@ export class NTQQFileApi {
         return fileData.filePath!;
     }
 
-    async getImageUrl(element: PicElement) {
+    async getImageUrl(element: PicElement): Promise<string> {
         if (!element) {
             return '';
         }
+    
         const url: string = element.originImageUrl ?? '';
         const md5HexStr = element.md5HexStr;
         const fileMd5 = element.md5HexStr;
-
+    
         if (url) {
             const parsedUrl = new URL(IMAGE_HTTP_HOST + url);
-            const urlRkey = parsedUrl.searchParams.get('rkey');
-            const imageAppid = parsedUrl.searchParams.get('appid');
-            const isNTV2 = imageAppid && ['1406', '1407'].includes(imageAppid);
-            const imageFileId = parsedUrl.searchParams.get('fileid');
-
-            const rkeyData = {
-                private_rkey: 'CAQSKAB6JWENi5LM_xp9vumLbuThJSaYf-yzMrbZsuq7Uz2qEc3Rbib9LP4',
-                group_rkey: 'CAQSKAB6JWENi5LM_xp9vumLbuThJSaYf-yzMrbZsuq7Uz2qffcqm614gds',
-                online_rkey: false
-            };
-            try {
-                if (this.core.apis.PacketApi.available) {
-                    const rkey_expired_private = !this.packetRkey || this.packetRkey[0].time + Number(this.packetRkey[0].ttl) < Date.now() / 1000;
-                    const rkey_expired_group = !this.packetRkey || this.packetRkey[0].time + Number(this.packetRkey[0].ttl) < Date.now() / 1000;
-                    if (rkey_expired_private || rkey_expired_group) {
-                        this.packetRkey = await this.core.apis.PacketApi.pkt.operation.FetchRkey();
-                    }
-                    if (this.packetRkey && this.packetRkey.length > 0) {
-                        rkeyData.group_rkey = this.packetRkey[1].rkey.slice(6);
-                        rkeyData.private_rkey = this.packetRkey[0].rkey.slice(6);
-                        rkeyData.online_rkey = true;
-                    }
-                }
-            } catch (error: any) {
-                this.context.logger.logError.bind(this.context.logger)('获取rkey失败', error.message);
-            }
-
-            if (!rkeyData.online_rkey) {
-                try {
-                    const tempRkeyData = await this.rkeyManager.getRkey();
-                    rkeyData.group_rkey = tempRkeyData.group_rkey;
-                    rkeyData.private_rkey = tempRkeyData.private_rkey;
-                    rkeyData.online_rkey = tempRkeyData.expired_time > Date.now() / 1000;
-                } catch (e) {
-                    this.context.logger.logError.bind(this.context.logger)('获取rkey失败 Fallback Old Mode', e);
-                }
-            }
-            if (isNTV2 && urlRkey) {
-                return IMAGE_HTTP_HOST_NT + urlRkey;
-            } else if (isNTV2 && rkeyData.online_rkey) {
-                const rkey = imageAppid === '1406' ? rkeyData.private_rkey : rkeyData.group_rkey;
-                return IMAGE_HTTP_HOST_NT + url + `&rkey=${rkey}`;
-            } else if (isNTV2 && imageFileId) {
-                const rkey = imageAppid === '1406' ? rkeyData.private_rkey : rkeyData.group_rkey;
-                return IMAGE_HTTP_HOST + `/download?appid=${imageAppid}&fileid=${imageFileId}&rkey=${rkey}`;
-            }
-
+            const rkeyData = await this.getRkeyData();
+            return this.getImageUrlFromParsedUrl(parsedUrl, rkeyData);
         }
-        //到这里说明可能是旧客户端
+    
+        return this.getImageUrlFromMd5(fileMd5, md5HexStr);
+    }
+    
+    private async getRkeyData() {
+        const rkeyData = {
+            private_rkey: 'CAQSKAB6JWENi5LM_xp9vumLbuThJSaYf-yzMrbZsuq7Uz2qEc3Rbib9LP4',
+            group_rkey: 'CAQSKAB6JWENi5LM_xp9vumLbuThJSaYf-yzMrbZsuq7Uz2qffcqm614gds',
+            online_rkey: false
+        };
+    
+        try {
+            if (this.core.apis.PacketApi.available) {
+                const rkey_expired_private = !this.packetRkey || this.packetRkey[0].time + Number(this.packetRkey[0].ttl) < Date.now() / 1000;
+                const rkey_expired_group = !this.packetRkey || this.packetRkey[0].time + Number(this.packetRkey[0].ttl) < Date.now() / 1000;
+                if (rkey_expired_private || rkey_expired_group) {
+                    this.packetRkey = await this.core.apis.PacketApi.pkt.operation.FetchRkey();
+                }
+                if (this.packetRkey && this.packetRkey.length > 0) {
+                    rkeyData.group_rkey = this.packetRkey[1].rkey.slice(6);
+                    rkeyData.private_rkey = this.packetRkey[0].rkey.slice(6);
+                    rkeyData.online_rkey = true;
+                }
+            }
+        } catch (error: any) {
+            this.context.logger.logError.bind(this.context.logger)('获取rkey失败', error.message);
+        }
+    
+        if (!rkeyData.online_rkey) {
+            try {
+                const tempRkeyData = await this.rkeyManager.getRkey();
+                rkeyData.group_rkey = tempRkeyData.group_rkey;
+                rkeyData.private_rkey = tempRkeyData.private_rkey;
+                rkeyData.online_rkey = tempRkeyData.expired_time > Date.now() / 1000;
+            } catch (e) {
+                this.context.logger.logError.bind(this.context.logger)('获取rkey失败 Fallback Old Mode', e);
+            }
+        }
+    
+        return rkeyData;
+    }
+    
+    private getImageUrlFromParsedUrl(parsedUrl: URL, rkeyData: any): string {
+        const urlRkey = parsedUrl.searchParams.get('rkey');
+        const imageAppid = parsedUrl.searchParams.get('appid');
+        const isNTV2 = imageAppid && ['1406', '1407'].includes(imageAppid);
+        const imageFileId = parsedUrl.searchParams.get('fileid');
+    
+        if (isNTV2 && urlRkey) {
+            return IMAGE_HTTP_HOST_NT + urlRkey;
+        } else if (isNTV2 && rkeyData.online_rkey) {
+            const rkey = imageAppid === '1406' ? rkeyData.private_rkey : rkeyData.group_rkey;
+            return IMAGE_HTTP_HOST_NT + parsedUrl.pathname + `&rkey=${rkey}`;
+        } else if (isNTV2 && imageFileId) {
+            const rkey = imageAppid === '1406' ? rkeyData.private_rkey : rkeyData.group_rkey;
+            return IMAGE_HTTP_HOST + `/download?appid=${imageAppid}&fileid=${imageFileId}&rkey=${rkey}`;
+        }
+    
+        return '';
+    }
+    
+    private getImageUrlFromMd5(fileMd5: string | undefined, md5HexStr: string | undefined): string {
         if (fileMd5 || md5HexStr) {
             return `${IMAGE_HTTP_HOST}/gchatpic_new/0/0-0-${(fileMd5 ?? md5HexStr)!.toUpperCase()}/0`;
         }
-
-        this.context.logger.logDebug('图片url获取失败', element);
+    
+        this.context.logger.logDebug('图片url获取失败', { fileMd5, md5HexStr });
         return '';
     }
 }

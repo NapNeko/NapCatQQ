@@ -55,7 +55,7 @@ export class NapCatOneBot11Adapter {
     apis: StableOneBotApiWrapper;
     networkManager: OB11NetworkManager;
     actions: ActionMap;
-    private bootTime = Date.now() / 1000;
+    private readonly bootTime = Date.now() / 1000;
     recallMsgCache = new LRUCache<string, RawMessage>(100);
 
     constructor(core: NapCatCore, context: InstanceContext, pathWrapper: NapCatPathWrapper) {
