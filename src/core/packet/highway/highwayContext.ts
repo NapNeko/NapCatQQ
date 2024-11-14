@@ -33,7 +33,7 @@ export interface PacketHighwaySig {
 }
 
 export class PacketHighwayContext {
-    private context: PacketContext;
+    private readonly context: PacketContext;
     protected sig: PacketHighwaySig;
     protected logger: PacketLogger;
     protected hwClient: PacketHighwayClient;
@@ -223,7 +223,7 @@ export class PacketHighwayContext {
                 msgInfoBody: preRespData.upload.msgInfo.msgInfoBody,
                 blockSize: BlockSize,
                 hash: {
-                    fileSha1: await calculateSha1StreamBytes(video.filePath!)
+                    fileSha1: await calculateSha1StreamBytes(video.filePath)
                 }
             });
             await this.hwClient.upload(
@@ -288,7 +288,7 @@ export class PacketHighwayContext {
                 msgInfoBody: preRespData.upload.msgInfo.msgInfoBody,
                 blockSize: BlockSize,
                 hash: {
-                    fileSha1: await calculateSha1StreamBytes(video.filePath!)
+                    fileSha1: await calculateSha1StreamBytes(video.filePath)
                 }
             });
             await this.hwClient.upload(
