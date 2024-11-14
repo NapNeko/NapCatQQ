@@ -8,7 +8,7 @@ import { resolve } from 'node:path';
 const MAX_PORT_TRY = 100;
 
 async function tryUseHost(host: string): Promise<string> {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
         try {
             const server = net.createServer();
             server.on('listening', () => {
@@ -18,9 +18,9 @@ async function tryUseHost(host: string): Promise<string> {
 
             server.on('error', (err: any) => {
                 if (err.code === 'EADDRNOTAVAIL') {
-                    reject('主机地址验证失败，可能为非本机地址');
+                    reject(new Error('主机地址验证失败，可能为非本机地址'));
                 } else {
-                    reject(`遇到错误: ${err.code}`);
+                    reject(new Error(`遇到错误: ${err.code}`));
                 }
             });
 
@@ -28,13 +28,13 @@ async function tryUseHost(host: string): Promise<string> {
             server.listen(0, host);
         } catch (error) {
             // 这里捕获到的错误应该是启动服务器时的同步错误
-            reject(`服务器启动时发生错误: ${error}`);
+            reject(new Error(`服务器启动时发生错误: ${error}`));
         }
     });
 }
 
 async function tryUsePort(port: number, host: string, tryCount: number = 0): Promise<number> {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
         try {
             const server = net.createServer();
             server.on('listening', () => {
