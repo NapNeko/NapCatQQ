@@ -15,7 +15,7 @@ import { NapProtoDecodeStructType, NapProtoEncodeStructType } from "@napneko/nap
 import { IndexNode, MsgInfo } from "@/core/packet/transformer/proto";
 
 export class PacketOperationContext {
-    private context: PacketContext;
+    private readonly context: PacketContext;
     constructor(context: PacketContext) {
         this.context = context;
     }
