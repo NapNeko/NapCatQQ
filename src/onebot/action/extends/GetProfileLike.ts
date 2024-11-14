@@ -13,9 +13,9 @@ export class GetProfileLike extends BaseAction<Payload, any> {
         const start = payload.start ? Number(payload.start) : 0;
         const count = payload.count ? Number(payload.count) : 10;
         const ret = await this.core.apis.UserApi.getProfileLike(this.core.selfInfo.uid, start, count);
-        const listdata: any[] = ret.info.userLikeInfos[0].voteInfo.userInfos;
-        for (let i = 0; i < listdata.length; i++) {
-            listdata[i].uin = parseInt((await this.core.apis.UserApi.getUinByUidV2(listdata[i].uid)) || '');
+        const listdata = ret.info.userLikeInfos[0].voteInfo.userInfos;
+        for (const item of listdata) {
+            item.uin = parseInt((await this.core.apis.UserApi.getUinByUidV2(item.uid)) || '');
         }
         return ret.info.userLikeInfos[0].voteInfo;
     }
