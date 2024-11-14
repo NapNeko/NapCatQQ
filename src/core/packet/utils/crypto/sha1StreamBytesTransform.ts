@@ -3,7 +3,7 @@ import { Sha1Stream } from "@/core/packet/utils/crypto/sha1Stream";
 
 export class CalculateStreamBytesTransform extends stream.Transform {
     private readonly blockSize = 1024 * 1024;
-    private sha1: Sha1Stream;
+    private readonly sha1: Sha1Stream;
     private buffer: Buffer;
     private bytesRead: number;
     private readonly byteArrayList: Buffer[];
