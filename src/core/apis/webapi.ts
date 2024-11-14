@@ -212,108 +212,65 @@ export class NTQQWebApi {
         }
     }
 
+    private async getDataInternal(cookieObject: any, groupCode: string, type: number) {
+        let resJson;
+        try {
+            const res = await RequestUtil.HttpGetText(
+                `https://qun.qq.com/interactive/honorlist?${new URLSearchParams({
+                    gc: groupCode,
+                    type: type.toString(),
+                }).toString()}`,
+                'GET',
+                '',
+                { 'Cookie': this.cookieToString(cookieObject) }
+            );
+            const match = /window\.__INITIAL_STATE__=(.*?);/.exec(res);
+            if (match) {
+                resJson = JSON.parse(match[1].trim());
+            }
+            return type === 1 ? resJson?.talkativeList : resJson?.actorList;
+        } catch (e) {
+            this.context.logger.logDebug('获取当前群荣耀失败', e);
+            return undefined;
+        }
+    }
+
+    private async getHonorList(cookieObject: any, groupCode: string, type: number) {
+        const data = await this.getDataInternal(cookieObject, groupCode, type);
+        if (!data) {
+            this.context.logger.logError(`获取类型 ${type} 的荣誉信息失败`);
+            return [];
+        }
+        return data.map((item: any) => ({
+            user_id: item?.uin,
+            nickname: item?.name,
+            avatar: item?.avatar,
+            description: item?.desc,
+        }));
+    }
+
     async getGroupHonorInfo(groupCode: string, getType: WebHonorType) {
         const cookieObject = await this.core.apis.UserApi.getCookies('qun.qq.com');
-        const getDataInternal = async (Internal_groupCode: string, Internal_type: number) => {
-            let resJson;
-            try {
-                const res = await RequestUtil.HttpGetText(
-                    `https://qun.qq.com/interactive/honorlist?${new URLSearchParams({
-                        gc: Internal_groupCode,
-                        type: Internal_type.toString(),
-                    }).toString()}`,
-                    'GET',
-                    '',
-                    { 'Cookie': this.cookieToString(cookieObject) }
-                );
-                const match = /window\.__INITIAL_STATE__=(.*?);/.exec(res);
-                if (match) {
-                    resJson = JSON.parse(match[1].trim());
-                }
-                if (Internal_type === 1) {
-                    return resJson?.talkativeList;
-                } else {
-                    return resJson?.actorList;
-                }
-            } catch (e) {
-                this.context.logger.logDebug('获取当前群荣耀失败', e);
-            }
-            return undefined;
-        };
-
         const HonorInfo: any = { group_id: groupCode };
 
         if (getType === WebHonorType.TALKATIVE || getType === WebHonorType.ALL) {
-            const RetInternal = await getDataInternal(groupCode, 1);
-            if (RetInternal) {
-                HonorInfo.current_talkative = {
-                    user_id: RetInternal[0]?.uin,
-                    avatar: RetInternal[0]?.avatar,
-                    nickname: RetInternal[0]?.name,
-                    day_count: 0,
-                    description: RetInternal[0]?.desc,
-                };
-                HonorInfo.talkative_list = [];
-                for (const talkative_ele of RetInternal) {
-                    HonorInfo.talkative_list.push({
-                        user_id: talkative_ele?.uin,
-                        avatar: talkative_ele?.avatar,
-                        description: talkative_ele?.desc,
-                        day_count: 0,
-                        nickname: talkative_ele?.name,
-                    });
-                }
-            } else {
-                this.context.logger.logError.bind(this.context.logger)('获取龙王信息失败');
+            const talkativeList = await this.getHonorList(cookieObject, groupCode, 1);
+            if (talkativeList.length > 0) {
+                HonorInfo.current_talkative = talkativeList[0];
+                HonorInfo.talkative_list = talkativeList;
             }
         }
+
         if (getType === WebHonorType.PERFORMER || getType === WebHonorType.ALL) {
-            const RetInternal = await getDataInternal(groupCode, 2);
-            if (RetInternal) {
-                HonorInfo.performer_list = [];
-                for (const performer_ele of RetInternal) {
-                    HonorInfo.performer_list.push({
-                        user_id: performer_ele?.uin,
-                        nickname: performer_ele?.name,
-                        avatar: performer_ele?.avatar,
-                        description: performer_ele?.desc,
-                    });
-                }
-            } else {
-                this.context.logger.logError.bind(this.context.logger)('获取群聊之火失败');
-            }
+            HonorInfo.performer_list = await this.getHonorList(cookieObject, groupCode, 2);
         }
+
         if (getType === WebHonorType.LEGEND || getType === WebHonorType.ALL) {
-            const RetInternal = await getDataInternal(groupCode, 3);
-            if (RetInternal) {
-                HonorInfo.legend_list = [];
-                for (const legend_ele of RetInternal) {
-                    HonorInfo.legend_list.push({
-                        user_id: legend_ele?.uin,
-                        nickname: legend_ele?.name,
-                        avatar: legend_ele?.avatar,
-                        desc: legend_ele?.description,
-                    });
-                }
-            } else {
-                this.context.logger.logError.bind(this.context.logger)('获取群聊炽焰失败');
-            }
+            HonorInfo.legend_list = await this.getHonorList(cookieObject, groupCode, 3);
         }
+
         if (getType === WebHonorType.EMOTION || getType === WebHonorType.ALL) {
-            const RetInternal = await getDataInternal(groupCode, 6);
-            if (RetInternal) {
-                HonorInfo.emotion_list = [];
-                for (const emotion_ele of RetInternal) {
-                    HonorInfo.emotion_list.push({
-                        user_id: emotion_ele.uin,
-                        nickname: emotion_ele.name,
-                        avatar: emotion_ele.avatar,
-                        desc: emotion_ele.description,
-                    });
-                }
-            } else {
-                this.context.logger.logError.bind(this.context.logger)('获取快乐源泉失败');
-            }
+            HonorInfo.emotion_list = await this.getHonorList(cookieObject, groupCode, 6);
         }
 
         // 冒尖小春笋好像已经被tx扬了 R.I.P.
