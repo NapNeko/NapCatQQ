@@ -185,7 +185,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                 }
 
                 const packetMsgElements: rawMsgWithSendMsg = {
-                    senderUin: Number((node.data.user_id || node.data.uin) ?? parentMeta?.user_id) || +this.core.selfInfo.uin,
+                    senderUin: Number((node.data.user_id ?? node.data.uin) ?? parentMeta?.user_id) || +this.core.selfInfo.uin,
                     senderName: (node.data.nickname || node.data.name) ?? parentMeta?.nickname ?? "QQ用户",
                     groupId: msgPeer.chatType === ChatType.KCHATTYPEGROUP ? +msgPeer.peerUid : undefined,
                     time: Number(node.data.time) || Date.now(),

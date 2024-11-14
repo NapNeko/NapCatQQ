@@ -59,7 +59,7 @@ class UploadGroupImage extends PacketTransformer<typeof proto.NTV2RichMediaResp>
                     extBizInfo: {
                         pic: {
                             bytesPbReserveTroop: Buffer.from("0800180020004200500062009201009a0100a2010c080012001800200028003a00", 'hex'),
-                            textSummary: "Nya~",  // TODO:
+                            textSummary: "Nya~",  // work:
                         },
                         video: {
                             bytesPbReserve: Buffer.alloc(0),
