@@ -29,10 +29,7 @@ import { NodeIKernelECDHService } from './services/NodeIKernelECDHService';
 import { NodeIO3MiscService } from './services/NodeIO3MiscService';
 
 export interface NodeQQNTWrapperUtil {
-    get(): unknown;
-
-    // eslint-disable-next-line @typescript-eslint/no-misused-new
-    new(): NodeQQNTWrapperUtil;
+    get(): NodeQQNTWrapperUtil;
 
     getNTUserDataInfoConfig(): string;
 
