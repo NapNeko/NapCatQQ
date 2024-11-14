@@ -187,6 +187,7 @@ export class OneBotMsgApi {
                     url: url,
                     key: _.key,
                     emoji_id: _.emojiId,
+                    emoji_package_id: _.emojiPackageId,
                     file_unique: _.key
                 },
             };
