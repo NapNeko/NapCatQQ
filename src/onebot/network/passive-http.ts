@@ -12,6 +12,7 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
     private isOpen: boolean = false;
 
     constructor(
+        public name: string,
         public port: number,
         public token: string,
         public core: NapCatCore,
@@ -101,7 +102,7 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
         const action = this.actions.get(actionName);
         if (action) {
             try {
-                const result = await action.handle(payload);
+                const result = await action.handle(payload,this.name);
                 return res.json(result);
             } catch (error: any) {
                 return res.json(OB11Response.error(error?.stack?.toString() || error?.message || 'Error Handle', 200));

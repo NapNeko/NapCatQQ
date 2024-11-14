@@ -24,7 +24,6 @@ const FrameworkBaseConfigPlugin: PluginOption[] = [
             { src: './src/core/external/napcat.json', dest: 'dist/config/' },
             { src: './src/native/packet', dest: 'dist/moehoo', flatten: false },
             { src: './static/', dest: 'dist/static/', flatten: false },
-            { src: './src/onebot/config/onebot11.json', dest: 'dist/config/' },
             { src: './src/framework/liteloader.cjs', dest: 'dist' },
             { src: './src/framework/napcat.cjs', dest: 'dist' },
             { src: './src/framework/preload.cjs', dest: 'dist' },
@@ -41,7 +40,6 @@ const ShellBaseConfigPlugin: PluginOption[] = [
             { src: './src/native/packet', dest: 'dist/moehoo', flatten: false },
             { src: './static/', dest: 'dist/static/', flatten: false },
             { src: './src/core/external/napcat.json', dest: 'dist/config/' },
-            { src: './src/onebot/config/onebot11.json', dest: 'dist/config/' },
             { src: './package.json', dest: 'dist' },
             { src: './launcher/', dest: 'dist', flatten: true },
             ...(startScripts.map((startScript) => {
