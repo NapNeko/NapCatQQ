@@ -109,8 +109,8 @@ export class OneBotGroupApi {
                             return new OB11GroupPokeEvent(
                                 this.core,
                                 parseInt(msg.peerUid),
-                                parseInt((await this.core.apis.UserApi.getUinByUidV2(poke_uid[0].uid))!),
-                                parseInt((await this.core.apis.UserApi.getUinByUidV2(poke_uid[1].uid))!),
+                                +await this.core.apis.UserApi.getUinByUidV2(poke_uid[0].uid),
+                                +await this.core.apis.UserApi.getUinByUidV2(poke_uid[1].uid),
                                 pokedetail,
                             );
                         }
