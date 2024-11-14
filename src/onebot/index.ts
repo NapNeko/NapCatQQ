@@ -327,7 +327,7 @@ export class NapCatOneBot11Adapter {
                     const requesterUin = await this.core.apis.UserApi.getUinByUidV2(req.friendUid);
                     await this.networkManager.emitEvent(new OB11FriendRequestEvent(
                         this.core,
-                        parseInt(requesterUin!),
+                        +requesterUin,
                         req.extWords,
                         req.friendUid + '|' + req.reqTime,
                     ));
@@ -391,7 +391,7 @@ export class NapCatOneBot11Adapter {
                         }
                     } else if (notify.type == GroupNotifyMsgType.MEMBER_LEAVE_NOTIFY_ADMIN || notify.type == GroupNotifyMsgType.KICK_MEMBER_NOTIFY_ADMIN) {
                         this.context.logger.logDebug('有成员退出通知', notify);
-                        const member1Uin = (await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid))!;
+                        const member1Uin = (await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid));
                         let operatorId = member1Uin;
                         let subType: GroupDecreaseSubType = 'leave';
                         if (notify.user2.uid) {
@@ -417,7 +417,7 @@ export class NapCatOneBot11Adapter {
                     ].includes(notify.type) && notify.status == GroupNotifyMsgStatus.KUNHANDLE) {
                         this.context.logger.logDebug('有加群请求');
                         try {
-                            let requestUin = (await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid))!;
+                            let requestUin = (await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid));
                             if (isNaN(parseInt(requestUin))) {
                                 requestUin = (await this.core.apis.UserApi.getUserDetailInfo(notify.user1.uid)).uin;
                             }

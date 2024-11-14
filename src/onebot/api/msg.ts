@@ -700,7 +700,7 @@ export class OneBotMsgApi {
         //跳过空消息
         const resMsg: OB11Message = {
             self_id: parseInt(this.core.selfInfo.uin),
-            user_id: parseInt(msg.senderUin!),
+            user_id: parseInt(msg.senderUin),
             time: parseInt(msg.msgTime) || Date.now(),
             message_id: msg.id!,
             message_seq: msg.id!,

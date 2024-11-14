@@ -133,7 +133,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                     guildId: '',
                     peerUid: peer.peerUid,
                     chatType: peer.chatType,
-                }, (returnMsgAndResId.message)!.msgId);
+                }, (returnMsgAndResId.message).msgId);
                 return { message_id: msgShortId!, res_id: returnMsgAndResId.res_id };
             } else if (returnMsgAndResId.res_id && !returnMsgAndResId.message) {
                 throw Error(`发送转发消息（res_id：${returnMsgAndResId.res_id} 失败`);
@@ -150,7 +150,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         const { sendElements, deleteAfterSentFiles } = await this.obContext.apis.MsgApi
             .createSendElements(messages, peer);
         const returnMsg = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, deleteAfterSentFiles);
-        return { message_id: returnMsg!.id! };
+        return { message_id: returnMsg.id! };
     }
 
     private async uploadForwardedNodesPacket(msgPeer: Peer, messageNodes: OB11MessageNode[], source?: string, news?: {

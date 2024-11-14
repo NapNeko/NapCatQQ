@@ -165,10 +165,10 @@ export class OneBotGroupApi {
     async parseGroupBanEvent(GroupCode: string, grayTipElement: GrayTipElement) {
         const groupElement = grayTipElement?.groupElement;
         if (!groupElement?.shutUp) return undefined;
-        const memberUid = groupElement.shutUp!.member.uid;
-        const adminUid = groupElement.shutUp!.admin.uid;
+        const memberUid = groupElement.shutUp.member.uid;
+        const adminUid = groupElement.shutUp.admin.uid;
         let memberUin: string;
-        let duration = parseInt(groupElement.shutUp!.duration);
+        let duration = parseInt(groupElement.shutUp.duration);
         const subType: 'ban' | 'lift_ban' = duration > 0 ? 'ban' : 'lift_ban';
         if (memberUid) {
             memberUin = (await this.core.apis.GroupApi.getGroupMember(GroupCode, memberUid))?.uin ?? '';
