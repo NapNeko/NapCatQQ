@@ -41,14 +41,10 @@ export class NTQQFriendApi {
             tempBothDel: tempBothDel
         });
     }
-    async getBuddyV2ExWithCate(refresh = false) {
-        const categoryMap: Map<string, any> = new Map();
+    async getBuddyV2ExWithCate() {
         const buddyService = this.context.session.getBuddyService();
         const buddyListV2 = (await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL)).data;
         const uids = buddyListV2.flatMap(item => {
-            item.buddyUids.forEach(uid => {
-                categoryMap.set(uid, { categoryId: item.categoryId, categoryName: item.categroyName });
-            });
             return item.buddyUids;
         });
         const data = await this.core.eventWrapper.callNoListenerEvent(
