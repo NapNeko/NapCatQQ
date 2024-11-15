@@ -20,6 +20,7 @@
 </template>
 
 <script setup>
+import '../css/style.css';
 import '../css/font.css';
 import { reactive, ref } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
