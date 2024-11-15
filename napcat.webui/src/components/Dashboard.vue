@@ -6,6 +6,7 @@
 </template>
 
 <script>
+import '../css/style.css';
 export default {
   name: 'Dashboard'
 };
