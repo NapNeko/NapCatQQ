@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "webui:lint": "eslint . --fix",
-    "webui:dev": "vite --host 127.0.0.1",
+    "webui:dev": "vite",
     "webui:build": "vue-tsc -b && vite build",
     "webui:preview": "vite preview"
   },

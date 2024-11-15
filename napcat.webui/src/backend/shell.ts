@@ -3,9 +3,9 @@ import { OneBotConfig } from '../../../src/onebot/config/config';
 export class QQLoginManager {
     private retCredential: string;
     private readonly apiPrefix: string;
-    // TODO:
+
     //调试时http://127.0.0.1:6099/api 打包时 ../api
-    constructor(retCredential: string, apiPrefix: string = 'http://127.0.0.1:6099/api') {
+    constructor(retCredential: string, apiPrefix: string = '../api') {
         this.retCredential = retCredential;
         this.apiPrefix = apiPrefix;
     }
