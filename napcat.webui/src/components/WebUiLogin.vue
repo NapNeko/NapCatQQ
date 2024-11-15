@@ -1,7 +1,7 @@
 <template>
     <div class="login-container">
         <h2 class="sotheby-font">WebUi Login</h2>
-        <t-form ref="form" :data="formData" :colon="true" :label-width="0" @submit="onSubmit">
+        <t-form ref="form" :data="formData" colon :label-width="0" @submit="onSubmit">
             <t-form-item name="password">
                 <t-input v-model="formData.token" type="password" clearable placeholder="请输入Token">
                     <template #prefix-icon>
@@ -14,32 +14,34 @@
             </t-form-item>
         </t-form>
     </div>
-    <div class="footer">
-        Power By NapCat.WebUi
-    </div>
+    <div class="footer">Power By NapCat.WebUi</div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import '../css/style.css';
 import '../css/font.css';
-import { reactive, ref, onMounted } from 'vue';
+import { reactive, onMounted } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { LockOnIcon } from 'tdesign-icons-vue-next';
 import { useRouter } from 'vue-router';
-import { QQLoginManager } from '../backend/shell';
+import { QQLoginManager } from '@/backend/shell';
 
 const router = useRouter();
 
-const formData = reactive({
+interface FormData {
+    token: string;
+}
+
+const formData: FormData = reactive({
     token: '',
 });
 
-const handleLoginSuccess = async (credential) => {
+const handleLoginSuccess = async (credential: string) => {
     localStorage.setItem('auth', credential);
     await checkLoginStatus();
 };
 
-const handleLoginFailure = (message) => {
+const handleLoginFailure = (message: string) => {
     MessagePlugin.error(message);
 };
 
@@ -63,7 +65,7 @@ const checkLoginStatus = async () => {
     }
 };
 
-const loginWithToken = async (token) => {
+const loginWithToken = async (token: string) => {
     const loginManager = new QQLoginManager('');
     const credential = await loginManager.loginWithToken(token);
     if (credential) {
@@ -75,15 +77,15 @@ const loginWithToken = async (token) => {
 
 onMounted(() => {
     const url = new URL(window.location.href);
-    const token = url.searchParams.get("token");
+    const token = url.searchParams.get('token');
     if (token) {
         loginWithToken(token);
     }
     checkLoginStatus();
 });
 
-const onSubmit = async ({ validateResult }) => {
-    if (validateResult === true) {
+const onSubmit = async ({ validateResult }: { validateResult: boolean }) => {
+    if (validateResult) {
         await loginWithToken(formData.token);
     } else {
         handleLoginFailure('请填写Token');
@@ -131,7 +133,7 @@ const onSubmit = async ({ validateResult }) => {
     font-family: Sotheby, Helvetica, monospace;
     font-size: 3.125rem;
     line-height: 1.2;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, .1);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .footer {

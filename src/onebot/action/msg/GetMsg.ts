@@ -24,8 +24,8 @@ class GetMsg extends BaseAction<Payload, OB11Message> {
 
     async _handle(payload: Payload, adapter: string) {
         // log("history msg ids", Object.keys(msgHistory));
-        let network = Object.values(this.obContext.configLoader.configData.network) as Array<typeof this.obContext.configLoader.configData.network[keyof typeof this.obContext.configLoader.configData.network]>;
-        let msgFormat = network.flat().find(e => e.name === adapter)?.messagePostFormat ?? 'array';
+        const network = Object.values(this.obContext.configLoader.configData.network) as Array<typeof this.obContext.configLoader.configData.network[keyof typeof this.obContext.configLoader.configData.network]>;
+        const msgFormat = network.flat().find(e => e.name === adapter)?.messagePostFormat ?? 'array';
         if (!payload.message_id) {
             throw Error('参数message_id不能为空');
         }

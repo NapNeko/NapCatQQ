@@ -17,9 +17,9 @@ export default class GetRecentContact extends BaseAction<Payload, any> {
 
     async _handle(payload: Payload, adapter: string) {
         const ret = await this.core.apis.UserApi.getRecentContactListSnapShot(+(payload.count || 10));
-        let network = Object.values(this.obContext.configLoader.configData.network) as Array<typeof this.obContext.configLoader.configData.network[keyof typeof this.obContext.configLoader.configData.network]>;
+        const network = Object.values(this.obContext.configLoader.configData.network) as Array<typeof this.obContext.configLoader.configData.network[keyof typeof this.obContext.configLoader.configData.network]>;
         //烘焙消息
-        let msgFormat = network.flat().find(e => e.name === adapter)?.messagePostFormat ?? 'array';
+        const msgFormat = network.flat().find(e => e.name === adapter)?.messagePostFormat ?? 'array';
         return await Promise.all(ret.info.changedList.map(async (t) => {
             const FastMsg = await this.core.apis.MsgApi.getMsgsByMsgId({ chatType: t.chatType, peerUid: t.peerUid }, [t.msgId]);
             if (FastMsg.msgList.length > 0) {

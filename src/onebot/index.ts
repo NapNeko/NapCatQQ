@@ -100,7 +100,7 @@ export class NapCatOneBot11Adapter {
             this.context.logger.setLogSelfInfo(selfInfo);
         }).catch(this.context.logger.logError.bind(this.context.logger));
 
-        let serviceInfo = await this.creatOneBotLog(ob11Config);
+        const serviceInfo = await this.creatOneBotLog(ob11Config);
         this.context.logger.log(`[Notice] [OneBot11] ${serviceInfo}`);
 
         // //创建NetWork服务
@@ -497,14 +497,14 @@ export class NapCatOneBot11Adapter {
     }
 
     private async emitMsg(message: RawMessage) {
-        let network = Object.values(this.configLoader.configData.network) as Array<typeof this.configLoader.configData.network[keyof typeof this.configLoader.configData.network]>;
+        const network = Object.values(this.configLoader.configData.network) as Array<typeof this.configLoader.configData.network[keyof typeof this.configLoader.configData.network]>;
         this.context.logger.logDebug('收到新消息 RawMessage', message);
         this.apis.MsgApi.parseMessageV2(message).then((ob11Msg) => {
             if (!ob11Msg) return;
             const isSelfMsg = ob11Msg.stringMsg.user_id.toString() == this.core.selfInfo.uin || ob11Msg.arrayMsg.user_id.toString() == this.core.selfInfo.uin;
             this.context.logger.logDebug('转化为 OB11Message', ob11Msg);
-            let msgMap: Map<string, OB11Message> = new Map();
-            let enable_client: string[] = [];
+            const msgMap: Map<string, OB11Message> = new Map();
+            const enable_client: string[] = [];
             network.flat().filter(e => e.enable).map(e => {
                 enable_client.push(e.name);
                 if (e.messagePostFormat == 'string') {
@@ -518,7 +518,7 @@ export class NapCatOneBot11Adapter {
                 }
             });
 
-            let debug_network = network.flat().filter(e => e.enable && e.debug);
+            const debug_network = network.flat().filter(e => e.enable && e.debug);
             if (debug_network.length > 0) {
                 for (const adapter of debug_network) {
                     if (adapter.name) {
@@ -534,7 +534,7 @@ export class NapCatOneBot11Adapter {
                 return;
 
             }
-            let notreportSelf_network = network.flat().filter(e => e.enable && !e.reportSelfMessage);
+            const notreportSelf_network = network.flat().filter(e => e.enable && !e.reportSelfMessage);
             if (isSelfMsg) {
                 for (const adapter of notreportSelf_network) {
                     msgMap.delete(adapter.name);

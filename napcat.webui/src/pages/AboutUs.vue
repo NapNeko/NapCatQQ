@@ -3,11 +3,12 @@
         <div>
             <t-divider content="面板关于信息" align="left" />
             <t-alert theme="success" message="NapCat.WebUi is running" />
-
             <t-list class="list">
                 <t-list-item class="list-item">
                     <span class="item-label">开发人员:</span>
-                    <span class="item-content"><t-link href="mailto:nanaeonn@outlook.com">Mlikiowa</t-link></span>
+                    <span class="item-content">
+                        <t-link href="mailto:nanaeonn@outlook.com">Mlikiowa</t-link>
+                    </span>
                 </t-list-item>
                 <t-list-item class="list-item">
                     <span class="item-label">版本信息:</span>
@@ -22,15 +23,11 @@
     </div>
 </template>
 
-<script>
-export default {
-    methods: {
-        joinQQGroup() {
-            // 加入QQ群的逻辑
-            window.open('https://jq.qq.com/?_wv=1027&k=123456789', '_blank');
-        }
-    }
-}
+<script setup lang="ts">
+const joinQQGroup = () => {
+    // 加入QQ群的逻辑
+    window.open('https://jq.qq.com/?_wv=1027&k=123456789', '_blank');
+};
 </script>
 
 <style scoped>
@@ -59,7 +56,7 @@ export default {
     flex: 2;
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-end; /* 添加这一行 */
+    justify-content: flex-end;
 }
 
 .tag-item {

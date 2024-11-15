@@ -45,7 +45,7 @@ export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
         await Promise.all(msgList.map(async msg => {
             msg.id = MessageUnique.createUniqueMsgId({ guildId: '', chatType: msg.chatType, peerUid: msg.peerUid }, msg.msgId);
         }));
-        let network = Object.values(this.obContext.configLoader.configData.network) as Array<typeof this.obContext.configLoader.configData.network[keyof typeof this.obContext.configLoader.configData.network]>;
+        const network = Object.values(this.obContext.configLoader.configData.network) as Array<typeof this.obContext.configLoader.configData.network[keyof typeof this.obContext.configLoader.configData.network]>;
         //烘焙消息
         const ob11MsgList = (await Promise.all(
             msgList.map(msg => this.obContext.apis.MsgApi.parseMessage(msg, network.flat().find(e => e.name === adapter)?.messagePostFormat ?? 'array')))

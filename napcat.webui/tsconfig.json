@@ -1,7 +1,34 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
+    "compilerOptions": {
+        "target": "ESNext",
+        "jsx": "preserve",
+        "jsxImportSource": "vue",
+        "lib": [
+            "DOM",
+            "DOM.Iterable"
+        ],
+        "baseUrl": ".",
+        "module": "esnext",
+        "moduleResolution": "bundler",
+        "paths": {
+            "@/*": [
+                "src/*"
+            ]
+        },
+        "resolveJsonModule": true,
+        "types": [
+            "vite/client"
+        ],
+        "strict": true,
+        "strictNullChecks": true,
+        "noUnusedLocals": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "isolatedModules": true,
+        "experimentalDecorators": true,
+        "useDefineForClassFields": true
+    },
+    "include": ["src"],
+    "exclude": ["node_modules"],
+    "references": [{"path": "./tsconfig.node.json"}]
 }

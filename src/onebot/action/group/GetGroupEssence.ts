@@ -31,8 +31,8 @@ export class GetGroupEssence extends BaseAction<Payload, any> {
     }
 
     async _handle(payload: Payload, adapter: string) {
-        let network = Object.values(this.obContext.configLoader.configData.network) as Array<typeof this.obContext.configLoader.configData.network[keyof typeof this.obContext.configLoader.configData.network]>;
-        let msgFormat = network.flat().find(e => e.name === adapter)?.messagePostFormat ?? 'array';
+        const network = Object.values(this.obContext.configLoader.configData.network) as Array<typeof this.obContext.configLoader.configData.network[keyof typeof this.obContext.configLoader.configData.network]>;
+        const msgFormat = network.flat().find(e => e.name === adapter)?.messagePostFormat ?? 'array';
         const msglist = (await this.core.apis.WebApi.getGroupEssenceMsgAll(payload.group_id.toString())).flatMap((e) => e.data.msg_list);
         if (!msglist) {
             throw new Error('获取失败');
