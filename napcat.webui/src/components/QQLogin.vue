@@ -2,52 +2,41 @@
     <div class="login-container">
         <h2 class="sotheby-font">QQ Login</h2>
         <div class="login-methods">
-            <t-button id="quick-login" class="login-method" :class="{ active: isQuickLoginVisible }" @click="showQuickLogin">Quick Login</t-button>
-            <t-button id="qrcode-login" class="login-method" :class="{ active: isQrCodeVisible }" @click="showQrCodeLogin">QR Code</t-button>
+            <t-button id="quick-login" class="login-method" :class="{ active: loginMethod === 'quick' }"
+                @click="loginMethod = 'quick'">Quick Login</t-button>
+            <t-button id="qrcode-login" class="login-method" :class="{ active: loginMethod === 'qrcode' }"
+                @click="loginMethod = 'qrcode'">QR Code</t-button>
         </div>
-        <div id="quick-login-dropdown" class="login-form" v-show="isQuickLoginVisible">
-            <t-select id="quick-login-select" v-model="selectedAccount" @change="selectAccount">
+        <div id="quick-login-dropdown" class="login-form" v-show="loginMethod === 'quick'">
+            <t-select id="quick-login-select" v-model="selectedAccount" @change="selectAccount"
+                placeholder="Select Account">
                 <t-option v-for="account in quickLoginList" :key="account" :value="account">{{ account }}</t-option>
             </t-select>
         </div>
-        <div id="qrcode" class="qrcode" v-show="isQrCodeVisible">
-            <canvas id="qrcode-canvas"></canvas>
+        <div id="qrcode" class="qrcode" v-show="loginMethod === 'qrcode'">
+            <canvas ref="qrcodeCanvas"></canvas>
         </div>
-        <p id="message">{{ message }}</p>
-    </div>
-    <div class="footer">
-        Power By NapCat.WebUi
     </div>
 </template>
 
 <script setup>
-import '../css/style.css';
 import { ref, onMounted } from 'vue';
-import { Button as TButton, Select as TSelect, Option as TOption, MessagePlugin } from 'tdesign-vue-next';
 import QRCode from 'qrcode';
-import { useRouter, useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
+import { MessagePlugin } from 'tdesign-vue-next';
+import { QQLoginManager } from '../backend/shell.ts';
 
 const router = useRouter();
-const route = useRoute();
-const isQuickLoginVisible = ref(true);
-const isQrCodeVisible = ref(false);
+const loginMethod = ref('quick');
 const quickLoginList = ref([]);
 const selectedAccount = ref('');
-const message = ref('');
-
-const showQuickLogin = () => {
-    isQuickLoginVisible.value = true;
-    isQrCodeVisible.value = false;
-};
-
-const showQrCodeLogin = () => {
-    isQuickLoginVisible.value = false;
-    isQrCodeVisible.value = true;
-};
+const qrcodeCanvas = ref(null);
+const qqLoginManager = new QQLoginManager(localStorage.getItem('auth'));
+let heartBeatTimer = null;
 
 const selectAccount = async (accountName) => {
-    //const { result, errMsg } = await SetQuickLogin(accountName, localStorage.getItem('auth'));
-    if (true) {
+    const { result, errMsg } = await qqLoginManager.setQuickLogin(accountName);
+    if (result) {
         MessagePlugin.success("登录成功即将跳转");
         await router.push({ path: '/dashboard/basic-info' });
     } else {
@@ -62,12 +51,18 @@ const generateQrCode = (data, canvas) => {
     });
 };
 
+const HeartBeat = async () => {
+    let isLogined = await qqLoginManager.checkQQLoginStatus();
+    if (isLogined) {
+        clearInterval(heartBeatTimer);
+        await router.push({ path: '/dashboard/basic-info' });
+    }
+};
+
 const InitPages = async () => {
-    // let QuickLists = await GetQQQucickLoginList(localStorage.getItem('auth'));
-    quickLoginList.value = ['example1', 'example2', 'example3'];
-    // generateQrCode(await GetQQLoginQrcode(localStorage.getItem('auth')), document.querySelector('#qrcode-canvas'));
-    generateQrCode('test', document.querySelector('#qrcode-canvas'));
-    setInterval(HeartBeat, 3000);
+    quickLoginList.value = await qqLoginManager.getQQQuickLoginList();
+    generateQrCode(await qqLoginManager.getQQLoginQrcode(), qrcodeCanvas.value);
+    heartBeatTimer = setInterval(HeartBeat, 3000);
 };
 
 onMounted(() => {

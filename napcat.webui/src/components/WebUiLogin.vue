@@ -22,28 +22,66 @@
 <script setup>
 import '../css/style.css';
 import '../css/font.css';
-import { reactive, ref } from 'vue';
+import { reactive, ref, onMounted } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { LockOnIcon } from 'tdesign-icons-vue-next';
-import { useRouter, useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
+import { QQLoginManager } from '../backend/shell';
 
 const router = useRouter();
-const route = useRoute();
 
 const formData = reactive({
     token: '',
 });
 
-const onSubmit = async ({ validateResult, firstError }) => {
-    if (validateResult === true) {
-        MessagePlugin.success('登录中...');
-        await router.push({ path: '/qqlogin' });
+const handleLoginSuccess = async (credential) => {
+    localStorage.setItem('auth', credential);
+    const loginManager = new QQLoginManager(credential);
+    const isQQLoggedIn = await loginManager.checkQQLoginStatus();
+    if (isQQLoggedIn) {
+        await router.push({ path: '/config' });
     } else {
-        MessagePlugin.error('登录失败');
+        await router.push({ path: '/qqlogin' });
+    }
+    MessagePlugin.success('登录成功');
+};
+
+const handleLoginFailure = (message) => {
+    MessagePlugin.error(message);
+};
+
+const checkLoginStatus = async () => {
+    const storedCredential = localStorage.getItem('auth');
+    if (storedCredential) {
+        const loginManager = new QQLoginManager(storedCredential);
+        const isQQLoggedIn = await loginManager.checkQQLoginStatus();
+        if (isQQLoggedIn) {
+            await router.push({ path: '/dashboard/basic-info' });
+        } else {
+            await router.push({ path: '/qqlogin' });
+        }
     }
 };
 
+onMounted(() => {
+    checkLoginStatus();
+});
+
+const onSubmit = async ({ validateResult }) => {
+    if (validateResult === true) {
+        const loginManager = new QQLoginManager('');
+        const credential = await loginManager.loginWithToken(formData.token);
+        if (credential) {
+            await handleLoginSuccess(credential);
+        } else {
+            handleLoginFailure('登录失败，请检查Token');
+        }
+    } else {
+        handleLoginFailure('请填写Token');
+    }
+};
 </script>
+
 <style scoped>
 .login-container {
     padding: 20px;
@@ -60,11 +98,6 @@ const onSubmit = async ({ validateResult, firstError }) => {
         width: 90%;
         min-width: unset;
     }
-}
-
-.error-message {
-    color: red;
-    margin-top: 5px;
 }
 
 .tdesign-demo-block-column {
