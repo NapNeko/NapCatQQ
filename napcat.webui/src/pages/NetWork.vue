@@ -51,32 +51,39 @@ const setOB11Config = async (config) => {
     return result;
 };
 
+const log = (message, data) => {
+    console.log(message, data);
+};
+
+const generatePanels = (networkConfig) => {
+    const panels = [];
+    Object.keys(networkConfig).forEach((key) => {
+        networkConfig[key].forEach((config, index) => {
+            const component = componentMap[key];
+            if (!component) {
+                console.error(`No component found for key: ${key}`);
+                return;
+            }
+            panels.push({
+                value: `${key}-${index}`,
+                label: `${config.name}`,
+                component,
+                config,
+                removable: true,
+            });
+        });
+    });
+    return panels;
+};
+
 const loadConfig = async () => {
     try {
         const userConfig = await getOB11Config();
         const mergedConfig = mergeOnebotConfigs(defaultOnebotConfig, userConfig);
         const networkConfig = mergedConfig.network;
-        console.log('networkConfig:', networkConfig); // 添加日志输出
-        const panels = [];
-
-        Object.keys(networkConfig).forEach((key) => {
-            networkConfig[key].forEach((config, index) => {
-                const component = componentMap[key];
-                if (!component) {
-                    console.error(`No component found for key: ${key}`);
-                    return;
-                }
-                panels.push({
-                    value: `${key}-${index}`,
-                    label: `${config.name}`,
-                    component,
-                    config,
-                    removable: true,
-                });
-            });
-        });
-
-        console.log('panels:', panels); // 添加日志输出
+        log('networkConfig:', networkConfig);
+        const panels = generatePanels(networkConfig);
+        log('panels:', panels);
         panelData.value = panels;
         if (panels.length > 0) {
             value.value = panels[0].value;
