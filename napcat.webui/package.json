@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "lint": "eslint . --fix",
-    "dev": "vite --host 127.0.0.1",
-    "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "webui:lint": "eslint . --fix",
+    "webui:dev": "vite --host 127.0.0.1",
+    "webui:build": "vue-tsc -b && vite build",
+    "webui:preview": "vite preview"
   },
   "dependencies": {
     "eslint-plugin-prettier": "^5.2.1",
