@@ -140,12 +140,12 @@ export class NapCatOneBot11Adapter {
 
         await WebUiDataRuntime.setQQLoginUin(selfInfo.uin.toString());
         await WebUiDataRuntime.setQQLoginStatus(true);
-        // await WebUiDataRuntime.setOnOB11ConfigChanged(async (newConfig: OB11Config) => {
-        //     const prev = this.configLoader.configData;
-        //     this.configLoader.save(newConfig);
-        //     this.context.logger.log(`OneBot11 配置更改：${JSON.stringify(prev)} -> ${JSON.stringify(newConfig)}`);
-        //     await this.reloadNetwork(prev, newConfig);
-        // });
+        await WebUiDataRuntime.setOnOB11ConfigChanged(async (newConfig) => {
+            const prev = this.configLoader.configData;
+            this.configLoader.save(newConfig);
+            this.context.logger.log(`OneBot11 配置更改：${JSON.stringify(prev)} -> ${JSON.stringify(newConfig)}`);
+            //await this.reloadNetwork(prev, newConfig);
+        });
     }
 
     initRecentContactListener() {
