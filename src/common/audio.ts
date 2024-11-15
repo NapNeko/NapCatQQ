@@ -1,13 +1,19 @@
+import Piscina from 'piscina';
 import fsPromise from 'fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'crypto';
 import { spawn } from 'node:child_process';
-import { encode, getDuration, getWavFileInfo, isSilk, isWav } from 'silk-wasm';
+import { EncodeResult, getDuration, getWavFileInfo, isSilk, isWav } from 'silk-wasm';
 import { LogWrapper } from './log';
+import { EncodeArgs } from "@/common/audio-worker";
 
 const ALLOW_SAMPLE_RATE = [8000, 12000, 16000, 24000, 32000, 44100, 48000];
 const EXIT_CODES = [0, 255];
-const FFMPEG_PATH = process.env.FFMPEG_PATH || 'ffmpeg';
+const FFMPEG_PATH = process.env.FFMPEG_PATH ?? 'ffmpeg';
+
+const piscina = new Piscina<EncodeArgs, EncodeResult>({
+    filename: new URL('./audio-worker.mjs', import.meta.url).href,
+});
 
 async function guessDuration(pttPath: string, logger: LogWrapper) {
     const pttFileInfo = await fsPromise.stat(pttPath);
@@ -41,8 +47,11 @@ async function convert(filePath: string, pcmPath: string, logger: LogWrapper): P
 }
 
 async function handleWavFile(
-    file: Buffer, filePath: string, pcmPath: string, logger: LogWrapper
-): Promise<{input: Buffer, sampleRate: number}> {
+    file: Buffer,
+    filePath: string,
+    pcmPath: string,
+    logger: LogWrapper
+): Promise<{ input: Buffer; sampleRate: number }> {
     const { fmt } = getWavFileInfo(file);
     if (!ALLOW_SAMPLE_RATE.includes(fmt.sampleRate)) {
         return { input: await convert(filePath, pcmPath, logger), sampleRate: 24000 };
@@ -60,8 +69,8 @@ export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: Log
             const { input, sampleRate } = isWav(file)
                 ? (await handleWavFile(file, filePath, pcmPath, logger))
                 : { input: await convert(filePath, pcmPath, logger), sampleRate: 24000 };
-            const silk = await encode(input, sampleRate);
-            await fsPromise.writeFile(pttPath, silk.data);
+            const silk = await piscina.run({ input: input, sampleRate: sampleRate });
+            await fsPromise.writeFile(pttPath, Buffer.from(silk.data));
             logger.log(`语音文件${filePath}转换成功!`, pttPath, '时长:', silk.duration);
             return {
                 converted: true,
