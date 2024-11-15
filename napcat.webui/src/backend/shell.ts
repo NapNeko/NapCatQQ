@@ -1,3 +1,5 @@
+import { OneBotConfig } from '../../../src/onebot/config/config';
+
 export class QQLoginManager {
     private retCredential: string;
     private readonly apiPrefix: string;
@@ -9,7 +11,7 @@ export class QQLoginManager {
     }
 
     // TODO:
-    public async GetOB11Config(): Promise<any> {
+    public async GetOB11Config(): Promise<OneBotConfig> {
         try {
             const ConfigResponse = await fetch(`${this.apiPrefix}/OB11Config/GetConfig`, {
                 method: 'POST',
@@ -21,16 +23,16 @@ export class QQLoginManager {
             if (ConfigResponse.status == 200) {
                 const ConfigResponseJson = await ConfigResponse.json();
                 if (ConfigResponseJson.code == 0) {
-                    return ConfigResponseJson?.data;
+                    return ConfigResponseJson?.data as OneBotConfig;
                 }
             }
         } catch (error) {
             console.error('Error getting OB11 config:', error);
         }
-        return {};
+        return {} as OneBotConfig;
     }
 
-    public async SetOB11Config(config: any): Promise<boolean> {
+    public async SetOB11Config(config: OneBotConfig): Promise<boolean> {
         try {
             const ConfigResponse = await fetch(`${this.apiPrefix}/OB11Config/SetConfig`, {
                 method: 'POST',

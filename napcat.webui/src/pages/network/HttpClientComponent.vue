@@ -22,21 +22,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-
-interface HttpClientConfig {
-    url: string;
-    messagePostFormat: string;
-    reportSelfMessage: boolean;
-    token: string;
-    debug: boolean;
-}
-
-const config = ref<HttpClientConfig>({
-    url: '',
-    messagePostFormat: '',
-    reportSelfMessage: false,
-    token: '',
-    debug: false,
-});
+import { defineProps } from 'vue';
+import { HttpClientConfig } from '../../../../src/onebot/config/config';
+defineProps<{
+    config: HttpClientConfig;
+}>();
 </script>

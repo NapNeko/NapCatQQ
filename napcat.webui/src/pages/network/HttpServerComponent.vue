@@ -31,27 +31,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-
-interface HttpServerConfig {
-    port: number;
-    host: string;
-    enableCors: boolean;
-    enableWebsocket: boolean;
-    messagePostFormat: string;
-    reportSelfMessage: boolean;
-    token: string;
-    debug: boolean;
-}
-
-const config = ref<HttpServerConfig>({
-    port: 8080,
-    host: '',
-    enableCors: false,
-    enableWebsocket: false,
-    messagePostFormat: '',
-    reportSelfMessage: false,
-    token: '',
-    debug: false,
-});
+import { defineProps } from 'vue';
+import { HttpServerConfig } from '../../../../src/onebot/config/config';
+defineProps<{
+    config: HttpServerConfig;
+}>();
 </script>
