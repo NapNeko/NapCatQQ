@@ -6,7 +6,7 @@
   "scripts": {
     "build:framework": "vite build --mode framework",
     "build:shell": "vite build --mode shell",
-    "build:webui": "cd ./napcat.webui && vite build",
+    "build:webui": "cd ./src/webui && vite build",
     "lint": "eslint --fix src/**/*.{js,ts}",
     "depend": "cd dist && npm install --omit=dev"
   },
@@ -48,9 +48,9 @@
   },
   "dependencies": {
     "express": "^5.0.0",
-    "fluent-ffmpeg": "^2.1.2",
-    "qrcode-terminal": "^0.12.0",
     "silk-wasm": "^3.6.1",
-    "ws": "^8.18.0"
+    "ws": "^8.18.0",
+    "qrcode-terminal": "^0.12.0",
+    "fluent-ffmpeg": "^2.1.2"
   }
 }
