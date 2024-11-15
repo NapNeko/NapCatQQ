@@ -36,6 +36,13 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
     // 配置静态文件服务，提供./static目录下的文件服务，访问路径为/webui
     app.use(config.prefix + '/webui', express.static(pathWrapper.staticPath));
     //挂载API接口
+    // 添加CORS支持
+    app.use((req, res, next) => {
+        res.header('Access-Control-Allow-Origin', '*');
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+        next();
+    });
     app.use(config.prefix + '/api', ALLRouter);
     app.listen(config.port, config.host, async () => {
         log(`[NapCat] [WebUi] Current WebUi is running at http://${config.host}:${config.port}${config.prefix}`);
