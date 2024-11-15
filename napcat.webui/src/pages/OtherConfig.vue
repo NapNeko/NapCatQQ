@@ -1,6 +1,7 @@
 <template>
     <div class="other-config">
-        <h1>面板其余配置</h1>
-        <p>这里显示面板的其余配置。</p>
+        <div>
+            <t-divider content="其余配置" align="left" />
+        </div>
     </div>
 </template>
