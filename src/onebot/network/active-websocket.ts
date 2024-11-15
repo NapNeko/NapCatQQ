@@ -36,11 +36,14 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
         if (this.connection) {
             return;
         }
-        this.heartbeatRef = setInterval(() => {
-            if (this.connection && this.connection.readyState === WebSocket.OPEN) {
-                this.connection.send(JSON.stringify(new OB11HeartbeatEvent(this.core, this.heartbeatIntervalInMillis, this.core.selfInfo.online ?? true, true)));
-            }
-        }, this.heartbeatIntervalInMillis);
+        if (this.heartbeatIntervalInMillis > 0) {
+            this.heartbeatRef = setInterval(() => {
+                if (this.connection && this.connection.readyState === WebSocket.OPEN) {
+                    this.connection.send(JSON.stringify(new OB11HeartbeatEvent(this.core, this.heartbeatIntervalInMillis, this.core.selfInfo.online ?? true, true)));
+                }
+            }, this.heartbeatIntervalInMillis);
+        }
+
         await this.tryConnect();
     }
 
