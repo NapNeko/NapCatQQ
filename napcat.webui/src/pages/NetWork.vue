@@ -10,7 +10,7 @@
 </template>
 
 <script setup>
-import { ref, shallowRef, onMounted } from 'vue';
+import { ref, shallowRef, onMounted, watch } from 'vue';
 import { defaultOnebotConfig, mergeOnebotConfigs } from '../../../src/onebot/config/config';
 import { QQLoginManager } from '../backend/shell';
 import HttpServerComponent from './network/HttpServerComponent.vue';
@@ -113,6 +113,23 @@ const removeTab = ({ value: val, index }) => {
         value.value = panelData.value[Math.max(index - 1, 0)].value;
     }
 };
+
+const syncConfig = async () => {
+    const networkConfig = {};
+    panelData.value.forEach(panel => {
+        const key = panel.value.split('-')[0];
+        if (!networkConfig[key]) {
+            networkConfig[key] = [];
+        }
+        networkConfig[key].push(panel.config);
+    });
+    const userConfig = await getOB11Config();
+    const mergedConfig = mergeOnebotConfigs(defaultOnebotConfig, userConfig);
+    mergedConfig.network = networkConfig;
+    await setOB11Config(mergedConfig);
+};
+
+watch(panelData, syncConfig, { deep: true });
 
 onMounted(() => {
     loadConfig();
