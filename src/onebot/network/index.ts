@@ -38,7 +38,7 @@ export class OB11NetworkManager {
         return Promise.all(Array.from(map.entries()).map(([name, event]) => {
             const adapter = this.adapters.get(name);
             if (adapter) {
-            return adapter.onEvent(event);
+                return adapter.onEvent(event);
             }
         }));
     }

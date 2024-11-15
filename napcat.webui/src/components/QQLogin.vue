@@ -2,67 +2,91 @@
     <div class="login-container">
         <h2 class="sotheby-font">QQ Login</h2>
         <div class="login-methods">
-            <t-button id="quick-login" class="login-method" :class="{ active: loginMethod === 'quick' }"
-                @click="loginMethod = 'quick'">Quick Login</t-button>
-            <t-button id="qrcode-login" class="login-method" :class="{ active: loginMethod === 'qrcode' }"
-                @click="loginMethod = 'qrcode'">QR Code</t-button>
+            <t-button
+                id="quick-login"
+                class="login-method"
+                :class="{ active: loginMethod === 'quick' }"
+                @click="loginMethod = 'quick'"
+                >Quick Login</t-button
+            >
+            <t-button
+                id="qrcode-login"
+                class="login-method"
+                :class="{ active: loginMethod === 'qrcode' }"
+                @click="loginMethod = 'qrcode'"
+                >QR Code</t-button
+            >
         </div>
-        <div id="quick-login-dropdown" class="login-form" v-show="loginMethod === 'quick'">
-            <t-select id="quick-login-select" v-model="selectedAccount" @change="selectAccount"
-                placeholder="Select Account">
+        <div v-show="loginMethod === 'quick'" id="quick-login-dropdown" class="login-form">
+            <t-select
+                id="quick-login-select"
+                v-model="selectedAccount"
+                placeholder="Select Account"
+                @change="selectAccount"
+            >
                 <t-option v-for="account in quickLoginList" :key="account" :value="account">{{ account }}</t-option>
             </t-select>
         </div>
-        <div id="qrcode" class="qrcode" v-show="loginMethod === 'qrcode'">
+        <div v-show="loginMethod === 'qrcode'" id="qrcode" class="qrcode">
             <canvas ref="qrcodeCanvas"></canvas>
         </div>
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import QRCode from 'qrcode';
+import * as QRCode from 'qrcode';
 import { useRouter } from 'vue-router';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { QQLoginManager } from '../backend/shell.ts';
+import { QQLoginManager } from '@/backend/shell';
 
 const router = useRouter();
-const loginMethod = ref('quick');
-const quickLoginList = ref([]);
-const selectedAccount = ref('');
-const qrcodeCanvas = ref(null);
-const qqLoginManager = new QQLoginManager(localStorage.getItem('auth'));
-let heartBeatTimer = null;
+const loginMethod = ref<'quick' | 'qrcode'>('quick');
+const quickLoginList = ref<string[]>([]);
+const selectedAccount = ref<string>('');
+const qrcodeCanvas = ref<HTMLCanvasElement | null>(null);
+const qqLoginManager = new QQLoginManager(localStorage.getItem('auth') || '');
+let heartBeatTimer: number | null = null;
 
-const selectAccount = async (accountName) => {
+const selectAccount = async (accountName: string): Promise<void> => {
     const { result, errMsg } = await qqLoginManager.setQuickLogin(accountName);
     if (result) {
-        MessagePlugin.success("登录成功即将跳转");
+        await MessagePlugin.success('登录成功即将跳转');
         await router.push({ path: '/dashboard/basic-info' });
     } else {
-        MessagePlugin.error("登录失败," + errMsg);
+        await MessagePlugin.error('登录失败,' + errMsg);
     }
 };
 
-const generateQrCode = (data, canvas) => {
-    QRCode.toCanvas(canvas, data, function (error) {
-        if (error) console.log(error);
-        console.log('QR Code generated!');
+const generateQrCode = (data: string, canvas: HTMLCanvasElement | null): void => {
+    if (!canvas) {
+        console.error('Canvas element not found');
+        return;
+    }
+    QRCode.toCanvas(canvas, data, function (error: Error | null | undefined) {
+        if (error) {
+            console.error('Error generating QR Code:', error);
+        } else {
+            console.log('QR Code generated!');
+        }
     });
 };
 
-const HeartBeat = async () => {
-    let isLogined = await qqLoginManager.checkQQLoginStatus();
+const HeartBeat = async (): Promise<void> => {
+    const isLogined = await qqLoginManager.checkQQLoginStatus();
     if (isLogined) {
-        clearInterval(heartBeatTimer);
+        if (heartBeatTimer) {
+            clearInterval(heartBeatTimer);
+        }
         await router.push({ path: '/dashboard/basic-info' });
     }
 };
 
-const InitPages = async () => {
+const InitPages = async (): Promise<void> => {
     quickLoginList.value = await qqLoginManager.getQQQuickLoginList();
-    generateQrCode(await qqLoginManager.getQQLoginQrcode(), qrcodeCanvas.value);
-    heartBeatTimer = setInterval(HeartBeat, 3000);
+    const qrcodeData = await qqLoginManager.getQQLoginQrcode();
+    generateQrCode(qrcodeData, qrcodeCanvas.value);
+    heartBeatTimer = window.setInterval(HeartBeat, 3000);
 };
 
 onMounted(() => {
@@ -103,7 +127,7 @@ onMounted(() => {
 
 .login-method.active {
     background-color: #e6f0ff;
-    color: #007BFF;
+    color: #007bff;
 }
 
 .login-form,
@@ -125,7 +149,7 @@ onMounted(() => {
     font-family: Sotheby, Helvetica, monospace;
     font-size: 3.125rem;
     line-height: 1.2;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, .1);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .footer {

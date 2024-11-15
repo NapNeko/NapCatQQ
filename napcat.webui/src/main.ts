@@ -1,5 +1,5 @@
-import { createApp } from 'vue'
-import App from './App.vue'
+import { createApp } from 'vue';
+import App from './App.vue';
 import {
     Button as TButton,
     Input as TInput,
@@ -25,7 +25,7 @@ import {
     Space as TSpace,
     Checkbox as TCheckbox,
     Popup as TPopup,
-    Dialog as TDialog
+    Dialog as TDialog,
 } from 'tdesign-vue-next';
 import { router } from './router';
 import 'tdesign-vue-next/es/style/index.css';

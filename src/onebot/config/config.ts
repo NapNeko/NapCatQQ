@@ -85,7 +85,7 @@ export const defaultOnebotConfig = createDefaultConfig<OnebotConfig>({
     },
     musicSignUrl: "",
     enableLocalFile2Url: false
-})
+});
 export const mergeNetworkDefaultConfig = {
     httpServers: httpServerDefaultConfigs,
     httpClients: httpClientDefaultConfigs,
