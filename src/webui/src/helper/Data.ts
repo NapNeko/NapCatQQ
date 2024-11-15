@@ -1,4 +1,4 @@
-import { OnebotConfig } from '@/onebot/config/config';
+import { OneBotConfig } from '@/onebot/config/config';
 
 interface LoginRuntimeType {
     LoginCurrentTime: number;
@@ -7,9 +7,9 @@ interface LoginRuntimeType {
     QQQRCodeURL: string;
     QQLoginUin: string;
     NapCatHelper: {
-        onQuickLoginRequested: (uin: string) => Promise<{ result: boolean, message: string }>;
-        onOB11ConfigChanged: (ob11: OnebotConfig) => Promise<void>;
-        QQLoginList: string[]
+        onQuickLoginRequested: (uin: string) => Promise<{ result: boolean; message: string }>;
+        onOB11ConfigChanged: (ob11: OneBotConfig) => Promise<void>;
+        QQLoginList: string[];
     };
 }
 
@@ -31,62 +31,62 @@ const LoginRuntime: LoginRuntimeType = {
 };
 
 export const WebUiDataRuntime = {
-    checkLoginRate: async function(RateLimit: number): Promise<boolean> {
+    checkLoginRate: async function (RateLimit: number): Promise<boolean> {
         LoginRuntime.LoginCurrentRate++;
         //console.log(RateLimit, LoginRuntime.LoginCurrentRate, Date.now() - LoginRuntime.LoginCurrentTime);
         if (Date.now() - LoginRuntime.LoginCurrentTime > 1000 * 60) {
-            LoginRuntime.LoginCurrentRate = 0;//超出时间重置限速
+            LoginRuntime.LoginCurrentRate = 0; //超出时间重置限速
             LoginRuntime.LoginCurrentTime = Date.now();
             return true;
         }
         return LoginRuntime.LoginCurrentRate <= RateLimit;
     },
 
-    getQQLoginStatus: async function(): Promise<boolean> {
+    getQQLoginStatus: async function (): Promise<boolean> {
         return LoginRuntime.QQLoginStatus;
     },
 
-    setQQLoginStatus: async function(status: boolean): Promise<void> {
+    setQQLoginStatus: async function (status: boolean): Promise<void> {
         LoginRuntime.QQLoginStatus = status;
     },
 
-    setQQLoginQrcodeURL: async function(url: string): Promise<void> {
+    setQQLoginQrcodeURL: async function (url: string): Promise<void> {
         LoginRuntime.QQQRCodeURL = url;
     },
 
-    getQQLoginQrcodeURL: async function(): Promise<string> {
+    getQQLoginQrcodeURL: async function (): Promise<string> {
         return LoginRuntime.QQQRCodeURL;
     },
 
-    setQQLoginUin: async function(uin: string): Promise<void> {
+    setQQLoginUin: async function (uin: string): Promise<void> {
         LoginRuntime.QQLoginUin = uin;
     },
 
-    getQQLoginUin: async function(): Promise<string> {
+    getQQLoginUin: async function (): Promise<string> {
         return LoginRuntime.QQLoginUin;
     },
 
-    getQQQuickLoginList: async function(): Promise<any[]> {
+    getQQQuickLoginList: async function (): Promise<any[]> {
         return LoginRuntime.NapCatHelper.QQLoginList;
     },
 
-    setQQQuickLoginList: async function(list: string[]): Promise<void> {
+    setQQQuickLoginList: async function (list: string[]): Promise<void> {
         LoginRuntime.NapCatHelper.QQLoginList = list;
     },
 
-    setQuickLoginCall(func: (uin: string) => Promise<{ result: boolean, message: string }>): void {
+    setQuickLoginCall(func: (uin: string) => Promise<{ result: boolean; message: string }>): void {
         LoginRuntime.NapCatHelper.onQuickLoginRequested = func;
     },
 
-    requestQuickLogin: async function(uin: string): Promise<{ result: boolean, message: string }> {
+    requestQuickLogin: async function (uin: string): Promise<{ result: boolean; message: string }> {
         return await LoginRuntime.NapCatHelper.onQuickLoginRequested(uin);
     },
 
-    setOnOB11ConfigChanged: async function(func: (ob11: OnebotConfig) => Promise<void>): Promise<void> {
+    setOnOB11ConfigChanged: async function (func: (ob11: OneBotConfig) => Promise<void>): Promise<void> {
         LoginRuntime.NapCatHelper.onOB11ConfigChanged = func;
     },
 
-    setOB11Config: async function(ob11: OnebotConfig): Promise<void> {
+    setOB11Config: async function (ob11: OneBotConfig): Promise<void> {
         await LoginRuntime.NapCatHelper.onOB11ConfigChanged(ob11);
     },
 };

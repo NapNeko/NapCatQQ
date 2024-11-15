@@ -31,27 +31,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-
-interface WsServerConfig {
-    host: string;
-    port: number;
-    messagePostFormat: string;
-    reportSelfMessage: boolean;
-    token: string;
-    enablePushEvent: boolean;
-    debug: boolean;
-    heartInterval: number;
-}
-
-const config = ref<WsServerConfig>({
-    host: '',
-    port: 8080,
-    messagePostFormat: '',
-    reportSelfMessage: false,
-    token: '',
-    enablePushEvent: false,
-    debug: false,
-    heartInterval: 0,
-});
+import { defineProps } from 'vue';
+import { WebsocketServerConfig } from '../../../../src/onebot/config/config';
+defineProps<{
+    config: WebsocketServerConfig;
+}>();
 </script>

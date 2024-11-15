@@ -25,23 +25,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-
-interface WsClientConfig {
-    url: string;
-    messagePostFormat: string;
-    reportSelfMessage: boolean;
-    token: string;
-    debug: boolean;
-    heartInterval: number;
-}
-
-const config = ref<WsClientConfig>({
-    url: '',
-    messagePostFormat: '',
-    reportSelfMessage: false,
-    token: '',
-    debug: false,
-    heartInterval: 0,
-});
+import { defineProps } from 'vue';
+import { WebsocketClientConfig } from '../../../../src/onebot/config/config';
+defineProps<{
+    config: WebsocketClientConfig;
+}>();
 </script>

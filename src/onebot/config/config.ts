@@ -6,7 +6,7 @@ export interface AdapterConfig {
 
 const createDefaultAdapterConfig = <T extends AdapterConfig>(config: T): T => config;
 
-const httpServerDefaultConfigs = createDefaultAdapterConfig({
+export const httpServerDefaultConfigs = createDefaultAdapterConfig({
     name: 'http-server',
     enable: false,
     port: 3000,
@@ -20,7 +20,7 @@ const httpServerDefaultConfigs = createDefaultAdapterConfig({
 });
 export type HttpServerConfig = typeof httpServerDefaultConfigs;
 
-const httpClientDefaultConfigs = createDefaultAdapterConfig({
+export const httpClientDefaultConfigs = createDefaultAdapterConfig({
     name: 'http-client',
     enable: false,
     url: 'http://localhost:8080',
@@ -31,7 +31,7 @@ const httpClientDefaultConfigs = createDefaultAdapterConfig({
 });
 export type HttpClientConfig = typeof httpClientDefaultConfigs;
 
-const websocketServerDefaultConfigs = createDefaultAdapterConfig({
+export const websocketServerDefaultConfigs = createDefaultAdapterConfig({
     name: 'websocket-server',
     enable: false,
     host: '0.0.0.0',
@@ -45,7 +45,7 @@ const websocketServerDefaultConfigs = createDefaultAdapterConfig({
 });
 export type WebsocketServerConfig = typeof websocketServerDefaultConfigs;
 
-const websocketClientDefaultConfigs = createDefaultAdapterConfig({
+export const websocketClientDefaultConfigs = createDefaultAdapterConfig({
     name: 'websocket-client',
     enable: false,
     url: 'ws://localhost:8082',
@@ -58,34 +58,35 @@ const websocketClientDefaultConfigs = createDefaultAdapterConfig({
 export type WebsocketClientConfig = typeof websocketClientDefaultConfigs;
 
 export interface NetworkConfig {
-    httpServers: Array<HttpServerConfig>,
-    httpClients: Array<HttpClientConfig>,
-    websocketServers: Array<WebsocketServerConfig>,
-    websocketClients: Array<WebsocketClientConfig>,
-};
+    httpServers: Array<HttpServerConfig>;
+    httpClients: Array<HttpClientConfig>;
+    websocketServers: Array<WebsocketServerConfig>;
+    websocketClients: Array<WebsocketClientConfig>;
+}
 
 export function mergeConfigs<T extends AdapterConfig>(defaultConfig: T, userConfig: Partial<T>): T {
     return { ...defaultConfig, ...userConfig };
 }
 
-export interface OnebotConfig {
-    network: NetworkConfig;//网络配置
-    musicSignUrl: string;//音乐签名地址
-    enableLocalFile2Url: boolean
+export interface OneBotConfig {
+    network: NetworkConfig; //网络配置
+    musicSignUrl: string; //音乐签名地址
+    enableLocalFile2Url: boolean;
 }
 
 const createDefaultConfig = <T>(config: T): T => config;
 
-export const defaultOnebotConfig = createDefaultConfig<OnebotConfig>({
+export const defaultOneBotConfigs = createDefaultConfig<OneBotConfig>({
     network: {
         httpServers: [],
         httpClients: [],
         websocketServers: [],
         websocketClients: [],
     },
-    musicSignUrl: "",
-    enableLocalFile2Url: false
+    musicSignUrl: '',
+    enableLocalFile2Url: false,
 });
+
 export const mergeNetworkDefaultConfig = {
     httpServers: httpServerDefaultConfigs,
     httpClients: httpClientDefaultConfigs,
@@ -95,7 +96,8 @@ export const mergeNetworkDefaultConfig = {
 
 type NetworkConfigKeys = keyof typeof mergeNetworkDefaultConfig;
 
-export function mergeOnebotConfigs(defaultConfig: OnebotConfig, userConfig: Partial<OnebotConfig>): OnebotConfig {
+// TODO: wrong type hint in userConfig (aka old userConfig)
+export function mergeOneBotConfigs(defaultConfig: OneBotConfig, userConfig: Partial<OneBotConfig>): OneBotConfig {
     const mergedConfig = { ...defaultConfig };
 
     if (userConfig.network) {
@@ -104,7 +106,9 @@ export function mergeOnebotConfigs(defaultConfig: OnebotConfig, userConfig: Part
             const userNetworkConfig = userConfig.network[key as keyof NetworkConfig];
             const defaultNetworkConfig = mergeNetworkDefaultConfig[key as NetworkConfigKeys];
             if (Array.isArray(userNetworkConfig)) {
-                mergedConfig.network[key as keyof NetworkConfig] = userNetworkConfig.map<any>(e => mergeConfigs(defaultNetworkConfig, e));
+                mergedConfig.network[key as keyof NetworkConfig] = userNetworkConfig.map<any>((e) =>
+                    mergeConfigs(defaultNetworkConfig, e)
+                );
             }
         }
     }
