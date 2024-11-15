@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <SidebarMenu :menuItems="menuItems" />
+  <div class="dashboard-container">
+    <SidebarMenu :menuItems="menuItems" class="sidebar-menu" />
     <div class="content">
       <router-view />
     </div>
@@ -29,14 +29,27 @@ export default {
 </script>
 
 <style scoped>
+.dashboard-container {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+}
+
+.sidebar-menu {
+  position: relative;
+  z-index: 2;
+}
+
 .content {
-  margin-left: 200px; /* 根据侧边栏宽度调整 */
+  flex: 1;
   padding: 20px;
+  overflow: auto;
+  position: relative;
+  z-index: 1;
 }
 
 @media (max-width: 768px) {
   .content {
-    margin-left: 0; /* 移动端侧边栏收起 */
     padding: 10px;
   }
 }
