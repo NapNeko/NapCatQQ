@@ -305,7 +305,7 @@ export class NapCatOneBot11Adapter {
                         peerUid: msg.peerUid,
                         guildId: '',
                     }, msg.msgId);
-                    this.emitMsg(msg, true);
+                    this.emitMsg(msg);
                 }
             }
         };
@@ -377,7 +377,6 @@ export class NapCatOneBot11Adapter {
                         const member1 = await this.core.apis.GroupApi.getGroupMember(notify.group.groupCode, notify.user1.uid);
                         this.context.logger.logDebug('有管理员变动通知');
                         // refreshGroupMembers(notify.group.groupCode).then();
-
                         this.context.logger.logDebug('开始获取变动的管理员');
                         if (member1) {
                             this.context.logger.logDebug('变动管理员获取成功');
@@ -497,7 +496,7 @@ export class NapCatOneBot11Adapter {
         );
     }
 
-    private async emitMsg(message: RawMessage, selfMsg: boolean = true) {
+    private async emitMsg(message: RawMessage) {
         let network = Object.values(this.configLoader.configData.network) as Array<typeof this.configLoader.configData.network[keyof typeof this.configLoader.configData.network]>;
         this.context.logger.logDebug('收到新消息 RawMessage', message);
         this.apis.MsgApi.parseMessageV2(message).then((ob11Msg) => {
