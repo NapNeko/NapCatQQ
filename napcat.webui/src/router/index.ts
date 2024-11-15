@@ -7,6 +7,7 @@ import NetWork from '../pages/NetWork.vue';
 import QQLogin from '../components/QQLogin.vue';
 import WebUiLogin from '../components/WebUiLogin.vue';
 import OtherConfig from '../pages/OtherConfig.vue';
+
 const routes = [
   { path: '/', redirect: '/webui' },
   { path: '/webui', component: WebUiLogin, name: 'WebUiLogin' },
@@ -14,7 +15,6 @@ const routes = [
   {
     path: '/dashboard',
     component: Dashboard,
-    name: 'Dashboard',
     children: [
       { path: '', redirect: 'basic-info' },
       { path: 'basic-info', component: BasicInfo, name: 'BasicInfo' },
