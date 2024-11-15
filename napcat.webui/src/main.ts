@@ -20,7 +20,10 @@ import {
     Alert as TAlert,
     Tag as TTag,
     ListItem as TListItem,
-
+    Tabs as TTabs,
+    TabPanel as TTabPanel,
+    Space as TSpace,
+    Checkbox as TCheckbox,
 } from 'tdesign-vue-next';
 import { router } from './router';
 import 'tdesign-vue-next/es/style/index.css';
@@ -46,4 +49,8 @@ app.use(TList);
 app.use(TAlert);
 app.use(TTag);
 app.use(TListItem);
+app.use(TTabs);
+app.use(TTabPanel);
+app.use(TSpace);
+app.use(TCheckbox);
 app.mount('#app');
