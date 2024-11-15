@@ -11,6 +11,15 @@ import {
     MenuItem as TMenuItem,
     Icon as TIcon,
     Submenu as TSubmenu,
+    Col as TCol,
+    Row as TRow,
+    Card as TCard,
+    Divider as TDivider,
+    Link as TLink,
+    List as TList,
+    Alert as TAlert,
+    Tag as TTag,
+    ListItem as TListItem,
 
 } from 'tdesign-vue-next';
 import { router } from './router';
@@ -27,4 +36,13 @@ app.use(TMenu);
 app.use(TMenuItem);
 app.use(TIcon);
 app.use(TSubmenu);
+app.use(TCol);
+app.use(TRow);
+app.use(TCard);
+app.use(TDivider);
+app.use(TLink);
+app.use(TList);
+app.use(TAlert);
+app.use(TTag);
+app.use(TListItem);
 app.mount('#app');

@@ -49,7 +49,7 @@ const selectAccount = async (accountName) => {
     //const { result, errMsg } = await SetQuickLogin(accountName, localStorage.getItem('auth'));
     if (true) {
         MessagePlugin.success("登录成功即将跳转");
-        await router.push({ path: '/dashboard' });
+        await router.push({ path: '/dashboard/basic-info' });
     } else {
         MessagePlugin.error("登录失败," + errMsg);
     }
