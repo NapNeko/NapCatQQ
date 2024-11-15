@@ -11,7 +11,8 @@
   "dependencies": {
     "qrcode": "^1.5.4",
     "tdesign-vue-next": "^1.10.3",
-    "vue": "^3.5.12"
+    "vue": "^3.5.12",
+    "vue-router": "^4.4.5"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.1.4",

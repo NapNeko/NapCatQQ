@@ -20,7 +20,10 @@
 import { reactive, ref } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { LockOnIcon } from 'tdesign-icons-vue-next';
+import { useRouter, useRoute } from 'vue-router';
 
+const router = useRouter()
+const route = useRoute()
 
 const formData = reactive({
     token: '',
@@ -28,11 +31,13 @@ const formData = reactive({
 
 const onSubmit = async ({ validateResult, firstError }) => {
     if (validateResult === true) {
+        await router.push({ path: '/dashboard' });
         MessagePlugin.success('登录中...');
     } else {
         MessagePlugin.error('登录失败');
     }
 };
+
 </script>
 <style scoped>
 .login-container {
