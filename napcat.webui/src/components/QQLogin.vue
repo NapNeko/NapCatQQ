@@ -21,6 +21,7 @@
 </template>
 
 <script setup>
+import '../css/style.css';
 import { ref, onMounted } from 'vue';
 import { Button as TButton, Select as TSelect, Option as TOption, MessagePlugin } from 'tdesign-vue-next';
 import QRCode from 'qrcode';
