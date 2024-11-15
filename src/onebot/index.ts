@@ -64,7 +64,8 @@ export class NapCatOneBot11Adapter {
         this.core = core;
         this.context = context;
         this.configLoader = new OB11ConfigLoader(core, pathWrapper.configPath);
-        this.configLoader.save(mergeOneBotConfigs(migrateOneBotConfigsV1(this.configLoader.configData)));
+        this.configLoader.save(migrateOneBotConfigsV1(this.configLoader.configData));
+        this.configLoader.save(mergeOneBotConfigs(this.configLoader.configData));
         this.apis = {
             GroupApi: new OneBotGroupApi(this, core),
             UserApi: new OneBotUserApi(this, core),

@@ -124,7 +124,6 @@ export const mergeNetworkDefaultConfig = {
 
 type NetworkConfigKeys = keyof typeof mergeNetworkDefaultConfig;
 
-// TODO: wrong type hint in userConfig (aka old userConfig)
 export function mergeOneBotConfigs(
     userConfig: Partial<OneBotConfig>,
     defaultConfig: OneBotConfig = defaultOneBotConfigs
@@ -149,57 +148,61 @@ export function mergeOneBotConfigs(
     return mergedConfig;
 }
 
-export function migrateOneBotConfigsV1(
-    v1Config: Partial<v1Config>,
-    defaultConfig: OneBotConfig = defaultOneBotConfigs
-): OneBotConfig {
-    const mergedConfig = { ...defaultConfig };
-    if (v1Config.http) {
+function checkIsOneBotConfigV1(v1Config: Partial<v1Config>): boolean {
+    return v1Config.http !== undefined || v1Config.ws !== undefined || v1Config.reverseWs !== undefined;
+}
+
+export function migrateOneBotConfigsV1(config: Partial<v1Config>): OneBotConfig {
+    if (!checkIsOneBotConfigV1(config)) {
+        return config as OneBotConfig;
+    }
+    const mergedConfig = { ...defaultOneBotConfigs };
+    if (config.http) {
         mergedConfig.network.httpServers = [
             mergeConfigs(httpServerDefaultConfigs, {
-                enable: v1Config.http.enable,
-                port: v1Config.http.port,
-                host: v1Config.http.host,
-                token: v1Config.http.secret,
-                debug: v1Config.debug,
-                messagePostFormat: v1Config.messagePostFormat,
-                reportSelfMessage: v1Config.reportSelfMessage,
+                enable: config.http.enable,
+                port: config.http.port,
+                host: config.http.host,
+                token: config.http.secret,
+                debug: config.debug,
+                messagePostFormat: config.messagePostFormat,
+                reportSelfMessage: config.reportSelfMessage,
             }),
         ];
     }
-    if (v1Config.ws) {
+    if (config.ws) {
         mergedConfig.network.websocketServers = [
             mergeConfigs(websocketServerDefaultConfigs, {
-                enable: v1Config.ws.enable,
-                port: v1Config.ws.port,
-                host: v1Config.ws.host,
-                token: v1Config.token,
-                debug: v1Config.debug,
-                messagePostFormat: v1Config.messagePostFormat,
-                reportSelfMessage: v1Config.reportSelfMessage,
+                enable: config.ws.enable,
+                port: config.ws.port,
+                host: config.ws.host,
+                token: config.token,
+                debug: config.debug,
+                messagePostFormat: config.messagePostFormat,
+                reportSelfMessage: config.reportSelfMessage,
             }),
         ];
     }
-    if (v1Config.reverseWs) {
-        mergedConfig.network.websocketClients = v1Config.reverseWs.urls.map((url) =>
+    if (config.reverseWs) {
+        mergedConfig.network.websocketClients = config.reverseWs.urls.map((url) =>
             mergeConfigs(websocketClientDefaultConfigs, {
-                enable: v1Config.reverseWs?.enable,
+                enable: config.reverseWs?.enable,
                 url: url,
-                token: v1Config.token,
-                debug: v1Config.debug,
-                messagePostFormat: v1Config.messagePostFormat,
-                reportSelfMessage: v1Config.reportSelfMessage,
+                token: config.token,
+                debug: config.debug,
+                messagePostFormat: config.messagePostFormat,
+                reportSelfMessage: config.reportSelfMessage,
             })
         );
     }
-    if (v1Config.heartInterval) {
-        mergedConfig.network.websocketServers[0].heartInterval = v1Config.heartInterval;
+    if (config.heartInterval) {
+        mergedConfig.network.websocketServers[0].heartInterval = config.heartInterval;
     }
-    if (v1Config.musicSignUrl) {
-        mergedConfig.musicSignUrl = v1Config.musicSignUrl;
+    if (config.musicSignUrl) {
+        mergedConfig.musicSignUrl = config.musicSignUrl;
     }
-    if (v1Config.enableLocalFile2Url) {
-        mergedConfig.enableLocalFile2Url = v1Config.enableLocalFile2Url;
+    if (config.enableLocalFile2Url) {
+        mergedConfig.enableLocalFile2Url = config.enableLocalFile2Url;
     }
     return mergedConfig;
 }
