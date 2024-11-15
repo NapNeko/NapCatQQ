@@ -24,6 +24,8 @@ import {
     TabPanel as TTabPanel,
     Space as TSpace,
     Checkbox as TCheckbox,
+    Popup as TPopup,
+    Dialog as TDialog
 } from 'tdesign-vue-next';
 import { router } from './router';
 import 'tdesign-vue-next/es/style/index.css';
@@ -53,4 +55,6 @@ app.use(TTabs);
 app.use(TTabPanel);
 app.use(TSpace);
 app.use(TCheckbox);
+app.use(TPopup);
+app.use(TDialog);
 app.mount('#app');

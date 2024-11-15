@@ -1,16 +1,31 @@
 <template>
     <t-space>
-        <t-tabs v-model="value" theme="card" :addable="true" @add="addTab" @remove="removeTab">
+        <t-tabs v-model="value" theme="card" :addable="true" @add="showAddTabDialog" @remove="removeTab">
             <t-tab-panel v-for="data in panelData" :key="data.value" :value="data.value" :label="data.label"
                 :removable="data.removable">
                 <component :is="data.component" :config="data.config" />
             </t-tab-panel>
         </t-tabs>
     </t-space>
+    <t-dialog :visible.sync="isDialogVisible" header="添加新选项卡" @confirm="addTab">
+        <t-form :model="newTab" ref="form">
+            <t-form-item label="名称" name="name" :rules="[{ required: true, message: '请输入名称' }]">
+                <t-input v-model="newTab.name" />
+            </t-form-item>
+            <t-form-item label="类型" name="type" :rules="[{ required: true, message: '请选择类型' }]">
+                <t-select v-model="newTab.type">
+                    <t-option value="httpServers">HTTP 服务器</t-option>
+                    <t-option value="httpClients">HTTP 客户端</t-option>
+                    <t-option value="websocketServers">WebSocket 服务器</t-option>
+                    <t-option value="websocketClients">WebSocket 客户端</t-option>
+                </t-select>
+            </t-form-item>
+        </t-form>
+    </t-dialog>
 </template>
 
 <script setup>
-import { ref, shallowRef, onMounted, watch } from 'vue';
+import { ref, shallowRef, onMounted, watch, nextTick } from 'vue';
 import { defaultOnebotConfig, mergeOnebotConfigs } from '../../../src/onebot/config/config';
 import { QQLoginManager } from '../backend/shell';
 import HttpServerComponent from './network/HttpServerComponent.vue';
@@ -21,6 +36,8 @@ import WebsocketClientComponent from './network/WebsocketClientComponent.vue';
 let id = 0;
 const value = ref('first');
 const panelData = ref([]);
+const isDialogVisible = ref(false);
+const newTab = ref({ name: '', type: '' });
 
 const componentMap = {
     'httpServers': shallowRef(HttpServerComponent),
@@ -93,16 +110,26 @@ const loadConfig = async () => {
     }
 };
 
-const addTab = () => {
+const showAddTabDialog = () => {
+    newTab.value = { name: '', type: '' };
+    isDialogVisible.value = true;
+};
+
+const addTab = async () => {
+    const { name, type } = newTab.value;
+    if (!name || !type) return;
     panelData.value.push({
-        value: `new-${id}`,
-        label: `新选项卡${id + 1}`,
+        value: `${type}-${id}`,
+        label: name,
         removable: true,
-        component: null,
+        component: componentMap[type],
         config: {},
     });
-    value.value = `new-${id}`;
+    value.value = `${type}-${id}`;
     id += 1;
+    isDialogVisible.value = false;
+    await nextTick(); // 确保 DOM 更新完成
+    value.value = `${type}-${id - 1}`; // 强制重新渲染选项卡
 };
 
 const removeTab = ({ value: val, index }) => {
