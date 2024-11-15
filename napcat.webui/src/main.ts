@@ -10,13 +10,14 @@ import {
     Option as TOption
 
 } from 'tdesign-vue-next';
+import { router } from './router';
 
 const app = createApp(App);
+app.use(router);
 app.use(TButton);
 app.use(TInput);
 app.use(TForm);
 app.use(TFormItem);
 app.use(TSelect);
 app.use(TOption);
-
 app.mount('#app');
