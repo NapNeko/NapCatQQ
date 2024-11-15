@@ -45,7 +45,7 @@ import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecal
 import { LRUCache } from '@/common/lru-cache';
 import { NodeIKernelRecentContactListener } from '@/core/listeners/NodeIKernelRecentContactListener';
 import { BotOfflineEvent } from './event/notice/BotOfflineEvent';
-import { defaultOneBotConfigs, mergeOneBotConfigs, OneBotConfig } from './config/config';
+import { mergeOneBotConfigs, migrateOneBotConfigsV1, OneBotConfig } from './config/config';
 import { OB11Message } from './types';
 
 //OneBot实现类
@@ -64,7 +64,7 @@ export class NapCatOneBot11Adapter {
         this.core = core;
         this.context = context;
         this.configLoader = new OB11ConfigLoader(core, pathWrapper.configPath);
-        this.configLoader.save(mergeOneBotConfigs(defaultOneBotConfigs, this.configLoader.configData));
+        this.configLoader.save(mergeOneBotConfigs(migrateOneBotConfigsV1(this.configLoader.configData)));
         this.apis = {
             GroupApi: new OneBotGroupApi(this, core),
             UserApi: new OneBotUserApi(this, core),

@@ -48,7 +48,6 @@ import {
     WebsocketServerConfig,
     NetworkConfig,
     OneBotConfig,
-    defaultOneBotConfigs,
     mergeOneBotConfigs,
 } from '../../../src/onebot/config/config';
 import { QQLoginManager } from '@/backend/shell';
@@ -89,6 +88,7 @@ interface ClientPanel {
 
 type ComponentKey = keyof typeof componentMap;
 
+// TODO: store these state in global store (aka pinia)
 const activeTab = ref<number>(0);
 const isDialogVisible = ref(false);
 const newTab = ref<{ name: string; type: ComponentKey }>({ name: '', type: 'httpServers' });
@@ -151,7 +151,7 @@ const loadConfig = async () => {
     try {
         const userConfig = await getOB11Config();
         if (!userConfig) return;
-        const mergedConfig = mergeOneBotConfigs(defaultOneBotConfigs, userConfig);
+        const mergedConfig = mergeOneBotConfigs(userConfig);
         addConfigDataToPanel(mergedConfig.network);
     } catch (error) {
         console.error('Error loading config:', error);
