@@ -10,7 +10,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, shallowRef, onMounted } from 'vue';
 import { defaultOnebotConfig, mergeOnebotConfigs } from '../../../src/onebot/config/config';
 import { QQLoginManager } from '../backend/shell';
 import HttpServerComponent from './network/HttpServerComponent.vue';
@@ -23,10 +23,10 @@ const value = ref('first');
 const panelData = ref([]);
 
 const componentMap = {
-    'httpServers': HttpServerComponent,
-    'httpClients': HttpClientComponent,
-    'websocketServers': WebsocketServerComponent,
-    'websocketClients': WebsocketClientComponent,
+    'httpServers': shallowRef(HttpServerComponent),
+    'httpClients': shallowRef(HttpClientComponent),
+    'websocketServers': shallowRef(WebsocketServerComponent),
+    'websocketClients': shallowRef(WebsocketClientComponent),
 };
 
 const getOB11Config = async () => {
