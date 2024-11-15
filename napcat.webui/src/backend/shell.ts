@@ -37,6 +37,7 @@ export class QQLoginManager {
             });
             if (LoginResponse.status == 200) {
                 let LoginResponseJson = await LoginResponse.json();
+                //console.log(LoginResponseJson);
                 if (LoginResponseJson.code == 0) {
                     return true;
                 }
