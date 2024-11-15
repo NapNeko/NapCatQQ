@@ -7,7 +7,7 @@
             </t-tab-panel>
         </t-tabs>
     </t-space>
-    <t-dialog :visible.sync="isDialogVisible" header="添加新选项卡" @confirm="addTab">
+    <t-dialog :visible.sync="isDialogVisible" header="添加新选项卡" @confirm="addTab" @close="isDialogVisible = false">
         <t-form :model="newTab" ref="form">
             <t-form-item label="名称" name="name" :rules="[{ required: true, message: '请输入名称' }]">
                 <t-input v-model="newTab.name" />
@@ -123,7 +123,7 @@ const addTab = async () => {
         label: name,
         removable: true,
         component: componentMap[type],
-        config: {},
+        config: { name: name },
     });
     value.value = `${type}-${id}`;
     id += 1;
