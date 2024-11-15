@@ -72,6 +72,16 @@ const log = (message, data) => {
     console.log(message, data);
 };
 
+const createPanel = (type, name, id) => {
+    return {
+        value: `${type}-${id}`,
+        label: name,
+        removable: true,
+        component: componentMap[type],
+        config: { name: name },
+    };
+};
+
 const generatePanels = (networkConfig) => {
     const panels = [];
     Object.keys(networkConfig).forEach((key) => {
@@ -81,13 +91,7 @@ const generatePanels = (networkConfig) => {
                 console.error(`No component found for key: ${key}`);
                 return;
             }
-            panels.push({
-                value: `${key}-${index}`,
-                label: `${config.name}`,
-                component,
-                config,
-                removable: true,
-            });
+            panels.push(createPanel(key, config.name, index));
         });
     });
     return panels;
@@ -118,18 +122,12 @@ const showAddTabDialog = () => {
 const addTab = async () => {
     const { name, type } = newTab.value;
     if (!name || !type) return;
-    panelData.value.push({
-        value: `${type}-${id}`,
-        label: name,
-        removable: true,
-        component: componentMap[type],
-        config: { name: name },
-    });
-    value.value = `${type}-${id}`;
+    const newPanel = createPanel(type, name, id);
+    panelData.value.push(newPanel);
     id += 1;
     isDialogVisible.value = false;
     await nextTick(); // 确保 DOM 更新完成
-    value.value = `${type}-${id - 1}`; // 强制重新渲染选项卡
+    value.value = newPanel.value; // 强制重新渲染选项卡
 };
 
 const removeTab = ({ value: val, index }) => {
