@@ -1,7 +1,7 @@
 export class QQLoginManager {
     private retCredential: string;
     private apiprefix: string;
-
+    //调试时http://127.0.0.1:6099/api 打包时 ../api
     constructor(retCredential: string, apiprefix: string = 'http://127.0.0.1:6099/api') {
         this.retCredential = retCredential;
         this.apiprefix = apiprefix;
