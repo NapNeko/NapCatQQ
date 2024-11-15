@@ -472,7 +472,7 @@ export class NTQQFileApi {
             return IMAGE_HTTP_HOST_NT + urlRkey;
         } else if (isNTV2 && rkeyData.online_rkey) {
             const rkey = imageAppid === '1406' ? rkeyData.private_rkey : rkeyData.group_rkey;
-            return IMAGE_HTTP_HOST_NT + parsedUrl.pathname + `&rkey=${rkey}`;
+            return IMAGE_HTTP_HOST_NT + `/download?appid=${imageAppid}&fileid=${imageFileId}&rkey=${rkey}`;
         } else if (isNTV2 && imageFileId) {
             const rkey = imageAppid === '1406' ? rkeyData.private_rkey : rkeyData.group_rkey;
             return IMAGE_HTTP_HOST + `/download?appid=${imageAppid}&fileid=${imageFileId}&rkey=${rkey}`;
