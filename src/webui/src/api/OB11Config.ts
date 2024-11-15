@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { WebUiDataRuntime } from '../helper/Data';
 import { existsSync, readFileSync } from 'node:fs';
-import { OB11Config } from '@/webui/ui/components/WebUiApiOB11Config';
+import { OnebotConfig } from '@/onebot/config/config';
 import { resolve } from 'node:path';
 import { webUiPathWrapper } from '@/webui';
 
@@ -19,7 +19,7 @@ export const OB11GetConfigHandler: RequestHandler = async (req, res) => {
     const uin = await WebUiDataRuntime.getQQLoginUin();
     const configFilePath = resolve(webUiPathWrapper.configPath, `./onebot11_${uin}.json`);
     //console.log(configFilePath);
-    let data: OB11Config;
+    let data: OnebotConfig;
     try {
         data = JSON.parse(
             existsSync(configFilePath)
@@ -27,7 +27,7 @@ export const OB11GetConfigHandler: RequestHandler = async (req, res) => {
                 : readFileSync(resolve(webUiPathWrapper.configPath, './onebot11.json')).toString(),
         );
     } catch (e) {
-        data = {} as OB11Config;
+        data = {} as OnebotConfig;
         res.send({
             code: -1,
             message: 'Config Get Error',

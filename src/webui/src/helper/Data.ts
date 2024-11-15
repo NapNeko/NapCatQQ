@@ -1,4 +1,4 @@
-import { OB11Config } from '@/onebot/config';
+import { OnebotConfig } from '@/onebot/config/config';
 
 interface LoginRuntimeType {
     LoginCurrentTime: number;
@@ -8,7 +8,7 @@ interface LoginRuntimeType {
     QQLoginUin: string;
     NapCatHelper: {
         onQuickLoginRequested: (uin: string) => Promise<{ result: boolean, message: string }>;
-        onOB11ConfigChanged: (ob11: OB11Config) => Promise<void>;
+        onOB11ConfigChanged: (ob11: OnebotConfig) => Promise<void>;
         QQLoginList: string[]
     };
 }
@@ -82,11 +82,11 @@ export const WebUiDataRuntime = {
         return await LoginRuntime.NapCatHelper.onQuickLoginRequested(uin);
     },
 
-    setOnOB11ConfigChanged: async function(func: (ob11: OB11Config) => Promise<void>): Promise<void> {
+    setOnOB11ConfigChanged: async function(func: (ob11: OnebotConfig) => Promise<void>): Promise<void> {
         LoginRuntime.NapCatHelper.onOB11ConfigChanged = func;
     },
 
-    setOB11Config: async function(ob11: OB11Config): Promise<void> {
+    setOB11Config: async function(ob11: OnebotConfig): Promise<void> {
         await LoginRuntime.NapCatHelper.onOB11ConfigChanged(ob11);
     },
 };
