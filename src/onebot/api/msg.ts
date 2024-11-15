@@ -695,105 +695,10 @@ export class OneBotMsgApi {
         msg: RawMessage,
         messagePostFormat: string,
     ) {
-        if (msg.senderUin == '0' || msg.senderUin == '') return;
-        if (msg.peerUin == '0' || msg.peerUin == '') return;
-        //跳过空消息
-        const resMsg: OB11Message = {
-            self_id: parseInt(this.core.selfInfo.uin),
-            user_id: parseInt(msg.senderUin),
-            time: parseInt(msg.msgTime) || Date.now(),
-            message_id: msg.id!,
-            message_seq: msg.id!,
-            real_id: msg.id!,
-            message_type: msg.chatType == ChatType.KCHATTYPEGROUP ? 'group' : 'private',
-            sender: {
-                user_id: +(msg.senderUin ?? 0),
-                nickname: msg.sendNickName,
-                card: msg.sendMemberName ?? '',
-            },
-            raw_message: '',
-            font: 14,
-            sub_type: 'friend',
-            message: messagePostFormat === 'string' ? '' : [],
-            message_format: messagePostFormat === 'string' ? 'string' : 'array',
-            post_type: this.core.selfInfo.uin == msg.senderUin ? EventType.MESSAGE_SENT : EventType.MESSAGE,
-        };
-        if (this.core.selfInfo.uin == msg.senderUin) {
-            resMsg.message_sent_type = 'self';
-        }
-        if (msg.chatType == ChatType.KCHATTYPEGROUP) {
-            resMsg.sub_type = 'normal'; // 这里go-cqhttp是group，而onebot11标准是normal, 蛋疼
-            resMsg.group_id = parseInt(msg.peerUin);
-            let member = await this.core.apis.GroupApi.getGroupMember(msg.peerUin, msg.senderUin);
-            if (!member) member = await this.core.apis.GroupApi.getGroupMember(msg.peerUin, msg.senderUin);
-            if (member) {
-                resMsg.sender.role = OB11Entities.groupMemberRole(member.role);
-                resMsg.sender.nickname = member.nick;
-            }
-        } else if (msg.chatType == ChatType.KCHATTYPEC2C) {
-            resMsg.sub_type = 'friend';
-            resMsg.sender.nickname = (await this.core.apis.UserApi.getUserDetailInfo(msg.senderUid)).nick;
-        } else if (msg.chatType == ChatType.KCHATTYPETEMPC2CFROMGROUP) {
-            resMsg.sub_type = 'group';
-            const ret = await this.core.apis.MsgApi.getTempChatInfo(ChatType.KCHATTYPETEMPC2CFROMGROUP, msg.senderUid);
-            if (ret.result === 0) {
-                const member = await this.core.apis.GroupApi.getGroupMember(msg.peerUin, msg.senderUin);
-                resMsg.group_id = parseInt(ret.tmpChatInfo!.groupCode);
-                resMsg.sender.nickname = member?.nick ?? member?.cardName ?? '临时会话';
-                resMsg.temp_source = resMsg.group_id;
-            } else {
-                resMsg.group_id = 284840486; //兜底数据
-                resMsg.temp_source = resMsg.group_id;
-                resMsg.sender.nickname = '临时会话';
-            }
-        }
-
-        // 处理消息段
-        const msgSegments = await Promise.allSettled(msg.elements.map(
-            async (element) => {
-                for (const key in element) {
-                    if (keyCanBeParsed(key, this.rawToOb11Converters) && element[key]) {
-                        const converters = this.rawToOb11Converters[key] as (
-                            element: Exclude<MessageElement[keyof RawToOb11Converters], null | undefined>,
-                            msg: RawMessage,
-                            elementWrapper: MessageElement,
-                        ) => PromiseLike<OB11MessageData | null>;
-                        const parsedElement = await converters?.(
-                            element[key],
-                            msg,
-                            element,
-                        );
-                        // 对于 face 类型的消息，检查是否存在
-                        if (key === 'faceElement' && !parsedElement) {
-                            return null; // 如果没有找到对应的表情，返回 null
-                        }
-
-                        return parsedElement;
-                    }
-                }
-            },
-        ));
-
-        // 过滤掉无效的消息段
-        const validSegments = msgSegments.filter(entry => {
-            if (entry.status === 'fulfilled') {
-                return !!entry.value;
-            } else {
-                this.core.context.logger.logError.bind(this.core.context.logger)('消息段解析失败', entry.reason);
-                return false;
-            }
-        }).map((entry) => (<PromiseFulfilledResult<OB11MessageData>>entry).value).filter(value => value != null);
-
-        const msgAsCQCode = validSegments.map(msg => encodeCQCode(msg)).join('').trim();
-
         if (messagePostFormat === 'string') {
-            resMsg.message = msgAsCQCode;
-            resMsg.raw_message = msgAsCQCode;
-        } else {
-            resMsg.message = validSegments;
-            resMsg.raw_message = msgAsCQCode;
+            return (await this.parseMessageV2(msg))?.stringMsg;
         }
-        return resMsg;
+        return (await this.parseMessageV2(msg))?.arrayMsg;
     }
 
     async parseMessageV2(
