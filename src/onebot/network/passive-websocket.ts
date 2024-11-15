@@ -115,7 +115,10 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
         this.logger.log('[OneBot] [WebSocket Server] Server Started', typeof (addressInfo) === 'string' ? addressInfo : addressInfo?.address + ':' + addressInfo?.port);
 
         this.isOpen = true;
-        this.registerHeartBeat();
+        if (this.heartbeatInterval > 0) {
+            this.registerHeartBeat();
+        }
+
     }
 
     async close() {
