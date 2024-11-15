@@ -6,7 +6,7 @@
   "scripts": {
     "build:framework": "vite build --mode framework",
     "build:shell": "vite build --mode shell",
-    "build:webui": "cd ./src/webui && vite build",
+    "build:webui": "cd ./napcat.webui && vite build",
     "lint": "eslint --fix src/**/*.{js,ts}",
     "depend": "cd dist && npm install --omit=dev"
   },
