@@ -41,7 +41,7 @@ const menuItems = ref<MenuItem[]>([
 
 .content {
     flex: 1;
-    padding: 20px;
+    /* padding: 20px; */
     overflow: auto;
     position: relative;
     z-index: 1;
