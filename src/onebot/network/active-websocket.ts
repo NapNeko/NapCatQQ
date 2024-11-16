@@ -7,23 +7,23 @@ import { OB11Response } from '@/onebot/action/OB11Response';
 import { LogWrapper } from '@/common/log';
 import { ActionMap } from '@/onebot/action';
 import { LifeCycleSubType, OB11LifeCycleEvent } from '../event/meta/OB11LifeCycleEvent';
+import { WebsocketClientConfig } from '../config/config';
 
 export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
-    isClosed: boolean = false;
+    isEnable: boolean = false;
     logger: LogWrapper;
     private connection: WebSocket | null = null;
     private heartbeatRef: NodeJS.Timeout | null = null;
+    config: WebsocketClientConfig;
 
     constructor(
         public name: string,
-        public url: string,
-        public reconnectIntervalInMillis: number,
-        public heartbeatIntervalInMillis: number,
-        private readonly token: string,
+        confg: WebsocketClientConfig,
         public core: NapCatCore,
         public actions: ActionMap,
     ) {
         this.logger = core.context.logger;
+        this.config = structuredClone(confg);
     }
 
     onEvent<T extends OB11EmitEventContent>(event: T) {
@@ -36,23 +36,23 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
         if (this.connection) {
             return;
         }
-        if (this.heartbeatIntervalInMillis > 0) {
+        if (this.config.heartInterval > 0) {
             this.heartbeatRef = setInterval(() => {
                 if (this.connection && this.connection.readyState === WebSocket.OPEN) {
-                    this.connection.send(JSON.stringify(new OB11HeartbeatEvent(this.core, this.heartbeatIntervalInMillis, this.core.selfInfo.online ?? true, true)));
+                    this.connection.send(JSON.stringify(new OB11HeartbeatEvent(this.core, this.config.heartInterval, this.core.selfInfo.online ?? true, true)));
                 }
-            }, this.heartbeatIntervalInMillis);
+            }, this.config.heartInterval);
         }
 
         await this.tryConnect();
     }
 
     close() {
-        if (this.isClosed) {
+        if (!this.isEnable) {
             this.logger.logDebug('Cannot close a closed WebSocket connection');
             return;
         }
-        this.isClosed = true;
+        this.isEnable = false;
         if (this.connection) {
             this.connection.close();
             this.connection = null;
@@ -70,16 +70,16 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
     }
 
     private async tryConnect() {
-        if (!this.connection && !this.isClosed) {
+        if (!this.connection && this.isEnable) {
             let isClosedByError = false;
 
-            this.connection = new WebSocket(this.url, {
+            this.connection = new WebSocket(this.config.url, {
                 maxPayload: 1024 * 1024 * 1024,
                 handshakeTimeout: 2000,
                 perMessageDeflate: false,
                 headers: {
                     'X-Self-ID': this.core.selfInfo.uin,
-                    'Authorization': `Bearer ${this.token}`,
+                    'Authorization': `Bearer ${this.config.token}`,
                     'x-client-role': 'Universal',  // koishi-adapter-onebot 需要这个字段
                     'User-Agent': 'OneBot/11',
                 },
@@ -104,21 +104,21 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
             });
             this.connection.once('close', () => {
                 if (!isClosedByError) {
-                    this.logger.logError.bind(this.logger)(`[OneBot] [WebSocket Client] 反向WebSocket (${this.url}) 连接意外关闭`);
-                    this.logger.logError.bind(this.logger)(`[OneBot] [WebSocket Client] 在 ${Math.floor(this.reconnectIntervalInMillis / 1000)} 秒后尝试重新连接`);
-                    if (!this.isClosed) {
+                    this.logger.logError.bind(this.logger)(`[OneBot] [WebSocket Client] 反向WebSocket (${this.config.url}) 连接意外关闭`);
+                    this.logger.logError.bind(this.logger)(`[OneBot] [WebSocket Client] 在 ${Math.floor(this.config.reconnectInterval / 1000)} 秒后尝试重新连接`);
+                    if (this.isEnable) {
                         this.connection = null;
-                        setTimeout(() => this.tryConnect(), this.reconnectIntervalInMillis);
+                        setTimeout(() => this.tryConnect(), this.config.reconnectInterval);
                     }
                 }
             });
             this.connection.on('error', (err) => {
                 isClosedByError = true;
-                this.logger.logError.bind(this.logger)(`[OneBot] [WebSocket Client] 反向WebSocket (${this.url}) 连接错误`, err);
-                this.logger.logError.bind(this.logger)(`[OneBot] [WebSocket Client] 在 ${Math.floor(this.reconnectIntervalInMillis / 1000)} 秒后尝试重新连接`);
-                if (!this.isClosed) {
+                this.logger.logError.bind(this.logger)(`[OneBot] [WebSocket Client] 反向WebSocket (${this.config.url}) 连接错误`, err);
+                this.logger.logError.bind(this.logger)(`[OneBot] [WebSocket Client] 在 ${Math.floor(this.config.reconnectInterval / 1000)} 秒后尝试重新连接`);
+                if (this.isEnable) {
                     this.connection = null;
-                    setTimeout(() => this.tryConnect(), this.reconnectIntervalInMillis);
+                    setTimeout(() => this.tryConnect(), this.config.reconnectInterval);
                 }
             });
         }
@@ -153,5 +153,8 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
         }
         const retdata = await action.websocketHandle(receiveData.params, echo ?? '', this.name);
         this.checkStateAndReply<any>({ ...retdata });
+    }
+    async reload(config: WebsocketClientConfig) {
+
     }
 }

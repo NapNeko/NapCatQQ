@@ -5,23 +5,27 @@ import { QuickAction, QuickActionEvent } from '../types';
 import { NapCatCore } from '@/core';
 import { NapCatOneBot11Adapter } from '..';
 import { RequestUtil } from '@/common/request';
+import { HttpClientConfig } from '../config/config';
+import { ActionMap } from '../action';
 
 export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     logger: LogWrapper;
-    isOpen: boolean = false;
-
+    isEnable: boolean = false;
+    config: HttpClientConfig;
     constructor(
         public name: string,
-        public url: string,
-        public secret: string | undefined,
+        config: HttpClientConfig,
         public core: NapCatCore,
         public obContext: NapCatOneBot11Adapter,
+        public actions: ActionMap,
     ) {
         this.logger = core.context.logger;
+        this.config = structuredClone(config);
     }
+    
 
     onEvent<T extends OB11EmitEventContent>(event: T) {
-        if (!this.isOpen) {
+        if (!this.isEnable) {
             return;
         }
         const headers: Record<string, string> = {
@@ -29,13 +33,13 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
             'x-self-id': this.core.selfInfo.uin,
         };
         const msgStr = JSON.stringify(event);
-        if (this.secret && this.secret.length > 0) {
-            const hmac = createHmac('sha1', this.secret);
+        if (this.config.token && this.config.token.length > 0) {
+            const hmac = createHmac('sha1', this.config.token);
             hmac.update(msgStr);
             const sig = hmac.digest('hex');
             headers['x-signature'] = 'sha1=' + sig;
         }
-        RequestUtil.HttpGetText(this.url, 'POST', msgStr, headers).then(async (res) => {
+        RequestUtil.HttpGetText(this.config.url, 'POST', msgStr, headers).then(async (res) => {
             let resJson: QuickAction;
             try {
                 resJson = JSON.parse(res);
@@ -57,10 +61,13 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     }
 
     open() {
-        this.isOpen = true;
+        this.isEnable = true;
     }
 
     close() {
-        this.isOpen = false;
+        this.isEnable = false;
+    }
+    async reload(config: HttpClientConfig){
+        this.config = structuredClone(config);
     }
 }

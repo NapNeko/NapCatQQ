@@ -110,14 +110,14 @@ export class NapCatOneBot11Adapter {
         for (const key of ob11Config.network.httpServers) {
             if (key.enable) {
                 this.networkManager.registerAdapter(
-                    new OB11PassiveHttpAdapter(key.name, key.port, key.token, this.core, this.actions)
+                    new OB11PassiveHttpAdapter(key.name, key, this.core, this.actions)
                 );
             }
         }
         for (const key of ob11Config.network.httpClients) {
             if (key.enable) {
                 this.networkManager.registerAdapter(
-                    new OB11ActiveHttpAdapter(key.name, key.url, key.token, this.core, this)
+                    new OB11ActiveHttpAdapter(key.name, key, this.core, this, this.actions)
                 );
             }
         }
@@ -126,10 +126,7 @@ export class NapCatOneBot11Adapter {
                 this.networkManager.registerAdapter(
                     new OB11PassiveWebSocketAdapter(
                         key.name,
-                        key.host,
-                        key.port,
-                        key.heartInterval,
-                        key.token,
+                        key,
                         this.core,
                         this.actions
                     )
@@ -141,10 +138,7 @@ export class NapCatOneBot11Adapter {
                 this.networkManager.registerAdapter(
                     new OB11ActiveWebSocketAdapter(
                         key.name,
-                        key.url,
-                        5000,
-                        key.heartInterval,
-                        key.token,
+                        key,
                         this.core,
                         this.actions
                     )
@@ -215,7 +209,7 @@ export class NapCatOneBot11Adapter {
             const prevServer = prev.network.httpServers.find(s => s.name === server.name);
             if (prevServer && prevServer.enable !== server.enable) {
                 if (server.enable) {
-                    let adapter = new OB11PassiveHttpAdapter(server.name, server.port, server.token, this.core, this.actions);
+                    let adapter = new OB11PassiveHttpAdapter(server.name, server, this.core, this.actions);
                     adapter.open();
                     this.networkManager.registerAdapter(
                         adapter
@@ -231,7 +225,7 @@ export class NapCatOneBot11Adapter {
             const prevClient = prev.network.httpClients.find(c => c.name === client.name);
             if (prevClient && prevClient.enable !== client.enable) {
                 if (client.enable) {
-                    let adapter = new OB11ActiveHttpAdapter(client.name, client.url, client.token, this.core, this);
+                    let adapter = new OB11ActiveHttpAdapter(client.name, client, this.core, this,this.actions);
                     adapter.open();
                     this.networkManager.registerAdapter(
                         adapter
@@ -249,10 +243,7 @@ export class NapCatOneBot11Adapter {
                 if (server.enable) {
                     let adapter = new OB11PassiveWebSocketAdapter(
                         server.name,
-                        server.host,
-                        server.port,
-                        server.heartInterval,
-                        server.token,
+                        server,
                         this.core,
                         this.actions
                     );
@@ -273,10 +264,7 @@ export class NapCatOneBot11Adapter {
                 if (client.enable) {
                     let adapter = new OB11ActiveWebSocketAdapter(
                         client.name,
-                        client.url,
-                        5000,
-                        client.heartInterval,
-                        client.token,
+                        client,
                         this.core,
                         this.actions
                     )
@@ -292,7 +280,7 @@ export class NapCatOneBot11Adapter {
         // 注册新的 HTTP 服务器
         for (const server of addedHttpServers) {
             if (server.enable) {
-                let adapter = new OB11PassiveHttpAdapter(server.name, server.port, server.token, this.core, this.actions);
+                let adapter = new OB11PassiveHttpAdapter(server.name, server, this.core, this.actions);
                 adapter.open();
                 this.networkManager.registerAdapter(adapter);
             }
@@ -302,7 +290,7 @@ export class NapCatOneBot11Adapter {
         for (const client of addedHttpClients) {
 
             if (client.enable) {
-                let adapter = new OB11ActiveHttpAdapter(client.name, client.url, client.token, this.core, this);
+                let adapter = new OB11ActiveHttpAdapter(client.name, client, this.core, this,this.actions);
                 adapter.open();
                 this.networkManager.registerAdapter(adapter);
             }
@@ -313,10 +301,7 @@ export class NapCatOneBot11Adapter {
             if (server.enable) {
                 let adapter = new OB11PassiveWebSocketAdapter(
                     server.name,
-                    server.host,
-                    server.port,
-                    server.heartInterval,
-                    server.token,
+                    server,
                     this.core,
                     this.actions
                 );
@@ -330,10 +315,7 @@ export class NapCatOneBot11Adapter {
             if (client.enable) {
                 let adapter = new OB11ActiveWebSocketAdapter(
                     client.name,
-                    client.url,
-                    5000,
-                    client.heartInterval,
-                    client.token,
+                    client,
                     this.core,
                     this.actions
                 )
