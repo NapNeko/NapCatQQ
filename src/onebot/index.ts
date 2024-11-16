@@ -543,76 +543,95 @@ export class NapCatOneBot11Adapter {
     }
 
     private async emitMsg(message: RawMessage) {
-        const network = Object.values(this.configLoader.configData.network) as Array<
-            (typeof this.configLoader.configData.network)[keyof typeof this.configLoader.configData.network]
-        >;
+        const network = Object.values(this.configLoader.configData.network) as Array<NetworkConfigAdapter>;
         this.context.logger.logDebug('收到新消息 RawMessage', message);
-        this.apis.MsgApi.parseMessageV2(message)
-            .then((ob11Msg) => {
-                if (!ob11Msg) return;
-                const isSelfMsg =
-                    ob11Msg.stringMsg.user_id.toString() == this.core.selfInfo.uin ||
-                    ob11Msg.arrayMsg.user_id.toString() == this.core.selfInfo.uin;
-                this.context.logger.logDebug('转化为 OB11Message', ob11Msg);
-                const msgMap: Map<string, OB11Message> = new Map();
-                const enable_client: string[] = [];
-                network
-                    .flat()
-                    .filter((e) => e.enable)
-                    .map((e) => {
-                        enable_client.push(e.name);
-                        if (e.messagePostFormat == 'string') {
-                            msgMap.set(e.name, structuredClone(ob11Msg.stringMsg));
-                        } else {
-                            msgMap.set(e.name, structuredClone(ob11Msg.arrayMsg));
-                        }
-                        if (isSelfMsg) {
-                            ob11Msg.stringMsg.target_id = parseInt(message.peerUin);
-                            ob11Msg.arrayMsg.target_id = parseInt(message.peerUin);
-                        }
-                    });
+        try {
+            const ob11Msg = await this.apis.MsgApi.parseMessageV2(message);
+            if (!ob11Msg) return;
 
-                const debug_network = network.flat().filter((e) => e.enable && e.debug);
-                if (debug_network.length > 0) {
-                    for (const adapter of debug_network) {
-                        if (adapter.name) {
-                            const msg = msgMap.get(adapter.name);
-                            if (msg) {
-                                msg.raw = message;
-                            }
-                        }
-                    }
-                } else if (ob11Msg.stringMsg.message.length === 0 || ob11Msg.arrayMsg.message.length == 0) {
-                    return;
-                }
-                const notreportSelf_network = network.flat().filter((e) => e.enable && (('reportSelfMessage' in e && !e.reportSelfMessage) || !('reportSelfMessage' in e)));
-                if (isSelfMsg) {
-                    for (const adapter of notreportSelf_network) {
-                        msgMap.delete(adapter.name);
-                    }
-                }
+            const isSelfMsg = this.isSelfMessage(ob11Msg);
+            this.context.logger.logDebug('转化为 OB11Message', ob11Msg);
 
-                this.networkManager.emitEventByNames(msgMap);
-            })
-            .catch((e) => this.context.logger.logError.bind(this.context.logger)('constructMessage error: ', e));
+            const msgMap = this.createMsgMap(network, ob11Msg, isSelfMsg, message);
+            this.handleDebugNetwork(network, msgMap, message);
+            this.handleNotReportSelfNetwork(network, msgMap, isSelfMsg);
 
-        this.apis.GroupApi.parseGroupEvent(message)
-            .then((groupEvent) => {
-                if (groupEvent) {
-                    // log("post group event", groupEvent);
-                    this.networkManager.emitEvent(groupEvent);
-                }
-            })
-            .catch((e) => this.context.logger.logError.bind(this.context.logger)('constructGroupEvent error: ', e));
+            this.networkManager.emitEventByNames(msgMap);
+        } catch (e) {
+            this.context.logger.logError('constructMessage error: ', e);
+        }
 
-        this.apis.MsgApi.parsePrivateMsgEvent(message)
-            .then((privateEvent) => {
-                if (privateEvent) {
-                    // log("post private event", privateEvent);
-                    this.networkManager.emitEvent(privateEvent);
+        this.handleGroupEvent(message);
+        this.handlePrivateMsgEvent(message);
+    }
+
+    private isSelfMessage(ob11Msg: {
+        stringMsg: OB11Message;
+        arrayMsg: OB11Message;
+    }): boolean {
+        return ob11Msg.stringMsg.user_id.toString() == this.core.selfInfo.uin ||
+            ob11Msg.arrayMsg.user_id.toString() == this.core.selfInfo.uin;
+    }
+
+    private createMsgMap(network: Array<NetworkConfigAdapter>, ob11Msg: any, isSelfMsg: boolean, message: RawMessage): Map<string, OB11Message> {
+        const msgMap: Map<string, OB11Message> = new Map();
+        network.flat().filter(e => e.enable).forEach(e => {
+            if (e.messagePostFormat == 'string') {
+                msgMap.set(e.name, structuredClone(ob11Msg.stringMsg));
+            } else {
+                msgMap.set(e.name, structuredClone(ob11Msg.arrayMsg));
+            }
+            if (isSelfMsg) {
+                ob11Msg.stringMsg.target_id = parseInt(message.peerUin);
+                ob11Msg.arrayMsg.target_id = parseInt(message.peerUin);
+            }
+        });
+        return msgMap;
+    }
+
+    private handleDebugNetwork(network: Array<NetworkConfigAdapter>, msgMap: Map<string, OB11Message>, message: RawMessage) {
+        const debugNetwork = network.flat().filter(e => e.enable && e.debug);
+        if (debugNetwork.length > 0) {
+            debugNetwork.forEach(adapter => {
+                const msg = msgMap.get(adapter.name);
+                if (msg) {
+                    msg.raw = message;
                 }
-            })
-            .catch((e) => this.context.logger.logError.bind(this.context.logger)('constructPrivateEvent error: ', e));
+            });
+        } else if (msgMap.size === 0) {
+            return;
+        }
+    }
+
+    private handleNotReportSelfNetwork(network: Array<NetworkConfigAdapter>, msgMap: Map<string, OB11Message>, isSelfMsg: boolean) {
+        if (isSelfMsg) {
+            const notReportSelfNetwork = network.flat().filter(e => e.enable && (('reportSelfMessage' in e && !e.reportSelfMessage) || !('reportSelfMessage' in e)));
+            notReportSelfNetwork.forEach(adapter => {
+                msgMap.delete(adapter.name);
+            });
+        }
+    }
+
+    private async handleGroupEvent(message: RawMessage) {
+        try {
+            const groupEvent = await this.apis.GroupApi.parseGroupEvent(message);
+            if (groupEvent) {
+                this.networkManager.emitEvent(groupEvent);
+            }
+        } catch (e) {
+            this.context.logger.logError('constructGroupEvent error: ', e);
+        }
+    }
+
+    private async handlePrivateMsgEvent(message: RawMessage) {
+        try {
+            const privateEvent = await this.apis.MsgApi.parsePrivateMsgEvent(message);
+            if (privateEvent) {
+                this.networkManager.emitEvent(privateEvent);
+            }
+        } catch (e) {
+            this.context.logger.logError('constructPrivateEvent error: ', e);
+        }
     }
     private async emitRecallMsg(msgList: RawMessage[], cache: LRUCache<string, boolean>) {
         for (const message of msgList) {
