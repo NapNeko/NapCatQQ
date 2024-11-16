@@ -175,6 +175,7 @@ const showAddTabDialog = () => {
 const addTab = async () => {
     const { name, type } = newTab.value;
     const defaultConfig = structuredClone(defaultConfigs[type]);
+    defaultConfig.name = name;
     clientPanelData.push({ name, data: defaultConfig, key: type });
     isDialogVisible.value = false;
     await nextTick();

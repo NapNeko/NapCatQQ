@@ -24,10 +24,7 @@
 </template>
 
 <script setup lang="ts">
-const joinQQGroup = () => {
-    // 加入QQ群的逻辑
-    window.open('https://jq.qq.com/?_wv=1027&k=123456789', '_blank');
-};
+
 </script>
 
 <style scoped>
