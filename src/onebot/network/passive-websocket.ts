@@ -1,4 +1,4 @@
-import { IOB11NetworkAdapter, OB11EmitEventContent } from './index';
+import { IOB11NetworkAdapter, OB11EmitEventContent, OB11NetworkReloadType } from './index';
 import urlParse from 'url';
 import { WebSocket, WebSocketServer } from 'ws';
 import { Mutex } from 'async-mutex';
@@ -20,7 +20,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     hasBeenClosed: boolean = false;
     heartbeatInterval: number = 0;
     logger: LogWrapper;
-    config: WebsocketServerConfig;
+    public config: WebsocketServerConfig;
     private heartbeatIntervalId: NodeJS.Timeout | null = null;
     wsClientWithEvent: WebSocket[] = [];
 
@@ -195,8 +195,48 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
         const retdata = await action.websocketHandle(receiveData.params, echo ?? '', this.name);
         this.checkStateAndReply<any>({ ...retdata }, wsClient);
     }
-    async reload(config: WebsocketServerConfig) {
 
+    async reload(newConfig: WebsocketServerConfig) {
+        const wasEnabled = this.isEnable;
+        const oldPort = this.config.port;
+        const oldHost = this.config.host;
+        const oldHeartbeatInterval = this.heartbeatInterval;
+        this.config = newConfig;
+
+        if (newConfig.enable && !wasEnabled) {
+            this.open();
+            return OB11NetworkReloadType.NetWorkOpen;
+        } else if (!newConfig.enable && wasEnabled) {
+            this.close();
+            return OB11NetworkReloadType.NetWorkClose;
+        }
+
+        if (oldPort !== newConfig.port || oldHost !== newConfig.host) {
+            this.close();
+            this.wsServer = new WebSocketServer({
+                port: newConfig.port,
+                host: newConfig.host === '0.0.0.0' ? '' : newConfig.host,
+                maxPayload: 1024 * 1024 * 1024,
+            });
+            if (newConfig.enable) {
+                this.open();
+            }
+            return OB11NetworkReloadType.NetWorkReload;
+        }
+
+        if (oldHeartbeatInterval !== newConfig.heartInterval) {
+            if (this.heartbeatIntervalId) {
+                clearInterval(this.heartbeatIntervalId);
+                this.heartbeatIntervalId = null;
+            }
+            this.heartbeatInterval = newConfig.heartInterval;
+            if (newConfig.heartInterval > 0 && this.isEnable) {
+                this.registerHeartBeat();
+            }
+            return OB11NetworkReloadType.NetWorkReload;
+        }
+
+        return OB11NetworkReloadType.Normal;
     }
 }
 

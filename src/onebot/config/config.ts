@@ -122,6 +122,7 @@ export const mergeNetworkDefaultConfig = {
     websocketClients: websocketClientDefaultConfigs,
 } as const;
 
+export type NetworkConfigAdapter = HttpServerConfig | HttpClientConfig | WebsocketServerConfig | WebsocketClientConfig;
 type NetworkConfigKeys = keyof typeof mergeNetworkDefaultConfig;
 
 export function mergeOneBotConfigs(
