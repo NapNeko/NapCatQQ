@@ -32,7 +32,7 @@ import { ForwardMsgBuilder } from "@/common/forward-msg-builder";
 import { PacketMsg, PacketSendMsgElement } from "@/core/packet/message/message";
 
 // raw <-> packet
-// work:SendStructLongMsgElement
+// TODO: SendStructLongMsgElement
 export abstract class IPacketMsgElement<T extends PacketSendMsgElement> {
     protected constructor(rawElement: T) {
     }
@@ -118,7 +118,7 @@ export class PacketMsgReplyElement extends IPacketMsgElement<SendReplyElement> {
         this.targetUin = +(element.replyElement.senderUin ?? 0);
         this.targetUid = element.replyElement.senderUidStr ?? '';
         this.time = +(element.replyElement.replyMsgTime ?? 0);
-        this.elems = []; // work:in replyElement.sourceMsgTextElems
+        this.elems = []; // TODO: in replyElement.sourceMsgTextElems
     }
 
     get isGroupReply(): boolean {
@@ -131,7 +131,7 @@ export class PacketMsgReplyElement extends IPacketMsgElement<SendReplyElement> {
                 origSeqs: [this.isGroupReply ? this.messageClientSeq : this.messageSeq],
                 senderUin: BigInt(this.targetUin),
                 time: this.time,
-                elems: [], // work:in replyElement.sourceMsgTextElems
+                elems: [], // TODO: in replyElement.sourceMsgTextElems
                 pbReserve: {
                     messageId: this.messageId,
                 },
@@ -346,9 +346,9 @@ export class PacketMsgPttElement extends IPacketMsgElement<SendPttElement> {
     constructor(element: SendPttElement) {
         super(element);
         this.filePath = element.pttElement.filePath;
-        this.fileSize = +element.pttElement.fileSize; // work:cc
+        this.fileSize = +element.pttElement.fileSize; // TODO: cc
         this.fileMd5 = element.pttElement.md5HexStr;
-        this.fileDuration = Math.round(element.pttElement.duration); // work:cc
+        this.fileDuration = Math.round(element.pttElement.duration); // TODO: cc
     }
 
     get valid(): boolean {

@@ -207,7 +207,7 @@ export class NapCatOneBot11Adapter {
         for (const adapterConfig of adapters) {
             const existingAdapter = this.networkManager.findSomeAdapter(adapterConfig.name);
             if (existingAdapter) {
-                let networkChange = await existingAdapter.reload(adapterConfig);
+                const networkChange = await existingAdapter.reload(adapterConfig);
                 if (networkChange === OB11NetworkReloadType.NetWorkClose) {
                     this.networkManager.closeSomeAdapters([existingAdapter]);
 
@@ -638,7 +638,7 @@ export class NapCatOneBot11Adapter {
             // log("message update", message.sendStatus, message.msgId, message.msgSeq)
             const peer: Peer = { chatType: message.chatType, peerUid: message.peerUid, guildId: '' };
             if (message.recallTime != '0' && !cache.get(message.msgId)) {
-                //work:这个判断方法不太好，应该使用灰色消息元素来判断?
+                //TODO: 这个判断方法不太好，应该使用灰色消息元素来判断?
                 cache.put(message.msgId, true);
                 // 撤回消息上报
                 let oriMessageId = MessageUnique.getShortIdByMsgId(message.msgId);

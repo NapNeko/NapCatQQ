@@ -16,7 +16,7 @@ class UploadGroupFile extends PacketTransformer<typeof proto.OidbSvcTrpcTcp0x6D6
                 appId: 4,
                 busId: 102,
                 entrance: 6,
-                targetDirectory: '/',  // work:
+                targetDirectory: '/',  // TODO:
                 fileName: file.fileName,
                 localDirectory: `/${file.fileName}`,
                 fileSize: BigInt(file.fileSize),

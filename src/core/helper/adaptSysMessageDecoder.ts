@@ -1,4 +1,4 @@
-// work:further refactor in NapCat.Packet v2
+// TODO: further refactor in NapCat.Packet v2
 import { NapProtoMsg, ProtoField, ScalarType } from "@napneko/nap-proto-core";
 
 const BodyInner = {

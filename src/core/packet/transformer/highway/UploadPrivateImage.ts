@@ -40,7 +40,7 @@ class UploadPrivateImage extends PacketTransformer<typeof proto.NTV2RichMediaRes
                             fileName: img.name,
                             type: {
                                 type: 1,
-                                picFormat: img.picType,  //work:extend NapCat imgType /cc @MliKiowa
+                                picFormat: img.picType,  //TODO: extend NapCat imgType /cc @MliKiowa
                                 videoFormat: 0,
                                 voiceFormat: 0,
                             },
@@ -59,7 +59,7 @@ class UploadPrivateImage extends PacketTransformer<typeof proto.NTV2RichMediaRes
                 extBizInfo: {
                     pic: {
                         bytesPbReserveTroop: Buffer.from("0800180020004200500062009201009a0100a2010c080012001800200028003a00", 'hex'),
-                        textSummary: "Nya~",  // work:
+                        textSummary: "Nya~",  // TODO:
                     },
                     video: {
                         bytesPbReserve: Buffer.alloc(0),
