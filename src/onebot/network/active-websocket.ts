@@ -70,7 +70,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
     }
 
     private async tryConnect() {
-        if (!this.connection && this.isEnable) {
+        if (!this.connection && !this.isEnable) {
             let isClosedByError = false;
 
             this.connection = new WebSocket(this.config.url, {
