@@ -13,9 +13,11 @@
                 <t-list-item class="list-item">
                     <span class="item-label">版本信息:</span>
                     <span class="item-content">
-                        <t-tag class="tag-item" theme="success"> WebUi: 1.0.0 </t-tag>
-                        <t-tag class="tag-item" theme="success"> NapCat: 4.?.? </t-tag>
-                        <t-tag class="tag-item" theme="success"> Tdesign: 1.10.3 </t-tag>
+                        <t-tag class="tag-item" theme="success"> WebUi: {{ pkg.version }} </t-tag>
+                        <t-tag class="tag-item" theme="success"> NapCat: {{ napCatVersion }} </t-tag>
+                        <t-tag class="tag-item" theme="success">
+                            TDesign: {{ pkg.dependencies['tdesign-vue-next'] }}
+                        </t-tag>
                     </span>
                 </t-list-item>
             </t-list>
@@ -23,7 +25,10 @@
     </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import pkg from '../../package.json';
+import { napCatVersion } from '../../../src/common/version';
+</script>
 
 <style scoped>
 .about-us {
