@@ -183,6 +183,10 @@ const showAddTabDialog = () => {
 
 const addTab = async () => {
     const { name, type } = newTab.value;
+    if (clientPanelData.some(panel => panel.name === name)) {
+        MessagePlugin.error('选项卡名称已存在');
+        return;
+    }
     const defaultConfig = structuredClone(defaultConfigs[type]);
     defaultConfig.name = name;
     clientPanelData.push({ name, data: defaultConfig, key: type });
@@ -192,9 +196,10 @@ const addTab = async () => {
     MessagePlugin.success('选项卡添加成功');
 };
 
-const removeTab = (payload: { value: string; index: number; e: PointerEvent }) => {
+const removeTab = async (payload: { value: string; index: number; e: PointerEvent }) => {
     clientPanelData.splice(payload.index, 1);
     activeTab.value = Math.max(0, activeTab.value - 1);
+    await saveConfig();
 };
 
 onMounted(() => {
@@ -202,6 +207,35 @@ onMounted(() => {
 });
 </script>
 
+<style scoped>
+.full-space {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.full-tabs {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.full-tab-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+</style>
 <style scoped>
 .full-space {
     width: 100%;
