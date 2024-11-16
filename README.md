@@ -41,10 +41,11 @@ NapCatQQ 是现代化的基于 NTQQ 的 Bot 协议端实现
 
 感谢 [Lagrange](https://github.com/LagrangeDev/Lagrange.Core) 对本项目的大力支持 参考部分代码 已获授权
 
+感谢 Tecent WebUi 由 Vue3+Tdesign 强力驱动
+
 不过最最重要的 还是需要感谢屏幕前的你哦~
 
 ---
-
 ## 开源附加
 
 任何使用本仓库代码的地方，都应当严格遵守[本仓库开源许可](./LICENSE)。**此外，禁止任何项目未经仓库主作者授权二次分发或基于 NapCat 代码开发。**
