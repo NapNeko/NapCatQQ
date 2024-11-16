@@ -12,7 +12,7 @@ const EXIT_CODES = [0, 255];
 const FFMPEG_PATH = process.env.FFMPEG_PATH ?? 'ffmpeg';
 
 async function getWorkerPath() {
-    return new URL('./audio-worker.mjs', import.meta.url).href;
+    return new URL(/* @vite-ignore */ './audio-worker.mjs', import.meta.url).href;
 }
 
 const piscina = new Piscina<EncodeArgs, EncodeResult>({
