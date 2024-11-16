@@ -15,7 +15,7 @@ type Payload = FromSchema<typeof SchemaData>;
 export class GetGroupFileSystemInfo extends BaseAction<Payload, {
     file_count: number,
     limit_count: number, // unimplemented
-    used_space: number, // work:unimplemented, but can be implemented later
+    used_space: number, // TODO:unimplemented, but can be implemented later
     total_space: number, // unimplemented, 10 GB by default
 }> {
     actionName = ActionName.GoCQHTTP_GetGroupFileSystemInfo;

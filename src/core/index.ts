@@ -120,7 +120,7 @@ export class NapCatCore {
         if (!fs.existsSync(this.NapCatTempPath)) {
             fs.mkdirSync(this.NapCatTempPath, { recursive: true });
         }
-        //遍历this.apis[i].initApi 如果存在该函数进行async 调用 
+        //遍历this.apis[i].initApi 如果存在该函数进行async 调用
         for (const apiKey in this.apis) {
             const api = this.apis[apiKey as keyof StableNTApiWrapper];
             if ('initApi' in api && typeof api.initApi === 'function') {
@@ -210,7 +210,7 @@ export class NapCatCore {
             });
         };
         groupListener.onMemberListChange = (arg) => {
-            // work:应该加一个内部自己维护的成员变动callback，用于判断成员变化通知
+            // TODO: 应该加一个内部自己维护的成员变动callback，用于判断成员变化通知
             const groupCode = arg.sceneId.split('_')[0];
             if (this.apis.GroupApi.groupMemberCache.has(groupCode)) {
                 const existMembers = this.apis.GroupApi.groupMemberCache.get(groupCode)!;

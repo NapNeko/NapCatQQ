@@ -16,7 +16,7 @@ class FetchSessionKey extends PacketTransformer<typeof proto.HttpConn0x6ff_501Re
                 field4: 1,
                 field6: 3,
                 serviceTypes: [1, 5, 10, 21],
-                // tgt: "",  // work:do we really need tgt? seems not
+                // tgt: "",  // TODO: do we really need tgt? seems not
                 field9: 2,
                 field10: 9,
                 field11: 8,
