@@ -3,6 +3,9 @@
         <div class="form-container">
             <h3>HTTP Client 配置</h3>
             <t-form>
+                <t-form-item label="启用">
+                    <t-checkbox v-model="config.enable" />
+                </t-form-item>
                 <t-form-item label="URL">
                     <t-input v-model="config.url" />
                 </t-form-item>
@@ -17,9 +20,6 @@
                 </t-form-item>
                 <t-form-item label="调试模式">
                     <t-checkbox v-model="config.debug" />
-                </t-form-item>
-                <t-form-item label="启用">
-                    <t-checkbox v-model="config.enable" />
                 </t-form-item>
             </t-form>
         </div>
