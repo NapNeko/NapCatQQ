@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "webui:lint": "eslint . --fix",
+    "webui:lint": "eslint --fix src/**/*.{js,ts,vue}",
     "webui:dev": "vite",
     "webui:build": "vue-tsc -b && vite build",
     "webui:preview": "vite preview"
