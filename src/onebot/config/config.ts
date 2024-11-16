@@ -25,10 +25,13 @@ interface v1Config {
     reportSelfMessage: boolean;
     token: string;
 }
-
-export interface AdapterConfig {
+export interface AdapterConfigInner {
     name: string;
     enable: boolean;
+}
+export type AdapterConfigWrap = AdapterConfigInner & Partial<NetworkConfigAdapter>;
+
+export interface AdapterConfig extends AdapterConfigInner {
     [key: string]: any;
 }
 

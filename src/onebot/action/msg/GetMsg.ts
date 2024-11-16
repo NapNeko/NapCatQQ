@@ -4,6 +4,7 @@ import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/message-unique';
 import { RawMessage } from '@/core';
+import { AdapterConfigWrap } from '@/onebot/config/config';
 
 
 export type ReturnDataType = OB11Message
@@ -24,7 +25,7 @@ class GetMsg extends BaseAction<Payload, OB11Message> {
 
     async _handle(payload: Payload, adapter: string) {
         // log("history msg ids", Object.keys(msgHistory));
-        const network = Object.values(this.obContext.configLoader.configData.network) as Array<typeof this.obContext.configLoader.configData.network[keyof typeof this.obContext.configLoader.configData.network]>;
+        const network = Object.values(this.obContext.configLoader.configData.network) as Array<AdapterConfigWrap>;
         const msgFormat = network.flat().find(e => e.name === adapter)?.messagePostFormat ?? 'array';
         if (!payload.message_id) {
             throw Error('参数message_id不能为空');

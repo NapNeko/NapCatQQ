@@ -1,6 +1,7 @@
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
+import { AdapterConfigWrap } from '@/onebot/config/config';
 
 const SchemaData = {
     type: 'object',
@@ -17,7 +18,7 @@ export default class GetRecentContact extends BaseAction<Payload, any> {
 
     async _handle(payload: Payload, adapter: string) {
         const ret = await this.core.apis.UserApi.getRecentContactListSnapShot(+(payload.count || 10));
-        const network = Object.values(this.obContext.configLoader.configData.network) as Array<typeof this.obContext.configLoader.configData.network[keyof typeof this.obContext.configLoader.configData.network]>;
+        const network = Object.values(this.obContext.configLoader.configData.network) as Array<AdapterConfigWrap>;
         //烘焙消息
         const msgFormat = network.flat().find(e => e.name === adapter)?.messagePostFormat ?? 'array';
         return await Promise.all(ret.info.changedList.map(async (t) => {
