@@ -42,7 +42,6 @@ export const httpServerDefaultConfigs = createDefaultAdapterConfig({
     enableCors: true,
     enableWebsocket: true,
     messagePostFormat: 'array',
-    reportSelfMessage: false,
     token: '',
     debug: false,
 });
@@ -63,13 +62,13 @@ export const websocketServerDefaultConfigs = createDefaultAdapterConfig({
     name: 'websocket-server',
     enable: false as boolean,
     host: '0.0.0.0',
-    port: 3002,
+    port: 3001,
     messagePostFormat: 'array',
     reportSelfMessage: false,
     token: '',
     enablePushEvent: true,
     debug: false,
-    heartInterval: 0,
+    heartInterval: 30000,
 });
 export type WebsocketServerConfig = typeof websocketServerDefaultConfigs;
 
@@ -81,7 +80,7 @@ export const websocketClientDefaultConfigs = createDefaultAdapterConfig({
     reportSelfMessage: false,
     token: '',
     debug: false,
-    heartInterval: 0,
+    heartInterval: 30000,
 });
 export type WebsocketClientConfig = typeof websocketClientDefaultConfigs;
 
@@ -166,7 +165,6 @@ export function migrateOneBotConfigsV1(config: Partial<v1Config>): OneBotConfig 
                 token: config.http.secret,
                 debug: config.debug,
                 messagePostFormat: config.messagePostFormat,
-                reportSelfMessage: config.reportSelfMessage,
             }),
         ];
     }

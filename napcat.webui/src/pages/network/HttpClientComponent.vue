@@ -18,6 +18,9 @@
                 <t-form-item label="调试模式">
                     <t-checkbox v-model="config.debug" />
                 </t-form-item>
+                <t-form-item label="启用">
+                    <t-checkbox v-model="config.enable" />
+                </t-form-item>
             </t-form>
         </div>
     </div>
