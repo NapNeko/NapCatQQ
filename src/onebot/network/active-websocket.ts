@@ -43,7 +43,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
                 }
             }, this.config.heartInterval);
         }
-
+        this.isEnable = true;
         await this.tryConnect();
     }
 
@@ -70,7 +70,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
     }
 
     private async tryConnect() {
-        if (!this.connection && !this.isEnable) {
+        if (!this.connection && this.isEnable) {
             let isClosedByError = false;
 
             this.connection = new WebSocket(this.config.url, {
@@ -106,7 +106,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
                 if (!isClosedByError) {
                     this.logger.logError.bind(this.logger)(`[OneBot] [WebSocket Client] 反向WebSocket (${this.config.url}) 连接意外关闭`);
                     this.logger.logError.bind(this.logger)(`[OneBot] [WebSocket Client] 在 ${Math.floor(this.config.reconnectInterval / 1000)} 秒后尝试重新连接`);
-                    if (!this.isEnable) {
+                    if (this.isEnable) {
                         this.connection = null;
                         setTimeout(() => this.tryConnect(), this.config.reconnectInterval);
                     }
@@ -116,7 +116,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
                 isClosedByError = true;
                 this.logger.logError.bind(this.logger)(`[OneBot] [WebSocket Client] 反向WebSocket (${this.config.url}) 连接错误`, err);
                 this.logger.logError.bind(this.logger)(`[OneBot] [WebSocket Client] 在 ${Math.floor(this.config.reconnectInterval / 1000)} 秒后尝试重新连接`);
-                if (!this.isEnable) {
+                if (this.isEnable) {
                     this.connection = null;
                     setTimeout(() => this.tryConnect(), this.config.reconnectInterval);
                 }
