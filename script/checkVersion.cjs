@@ -45,7 +45,6 @@ try {
     sed -i "s/\\"version\\": \\"${currentVersion}\\"/\\"version\\": \\"${targetVersion}\\"/g" package.json
     sed -i "s/\\"version\\": \\"${manifestCurrentVersion}\\"/\\"version\\": \\"${targetVersion}\\"/g" manifest.json
     sed -i "s/napCatVersion = '.*'/napCatVersion = '${targetVersion}'/g" ./src/common/version.ts
-    sed -i "s/SettingButton(\\"V.*\\", \\"napcat-update-button\\", \\"secondary\\")/SettingButton(\\"V${targetVersion}\\", \\"napcat-update-button\\", \\"secondary\\")/g" ./static/assets/renderer.js
     git add .
     git commit -m "release: v${targetVersion}"
     git push -u origin main`;

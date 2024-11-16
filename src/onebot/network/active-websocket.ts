@@ -15,6 +15,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
     private heartbeatRef: NodeJS.Timeout | null = null;
 
     constructor(
+        public name: string,
         public url: string,
         public reconnectIntervalInMillis: number,
         public heartbeatIntervalInMillis: number,
@@ -35,11 +36,14 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
         if (this.connection) {
             return;
         }
-        this.heartbeatRef = setInterval(() => {
-            if (this.connection && this.connection.readyState === WebSocket.OPEN) {
-                this.connection.send(JSON.stringify(new OB11HeartbeatEvent(this.core, this.heartbeatIntervalInMillis, this.core.selfInfo.online ?? true, true)));
-            }
-        }, this.heartbeatIntervalInMillis);
+        if (this.heartbeatIntervalInMillis > 0) {
+            this.heartbeatRef = setInterval(() => {
+                if (this.connection && this.connection.readyState === WebSocket.OPEN) {
+                    this.connection.send(JSON.stringify(new OB11HeartbeatEvent(this.core, this.heartbeatIntervalInMillis, this.core.selfInfo.online ?? true, true)));
+                }
+            }, this.heartbeatIntervalInMillis);
+        }
+
         await this.tryConnect();
     }
 
@@ -147,7 +151,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
             this.checkStateAndReply<any>(OB11Response.error('不支持的api ' + receiveData.action, 1404, echo));
             return;
         }
-        const retdata = await action.websocketHandle(receiveData.params, echo ?? '');
+        const retdata = await action.websocketHandle(receiveData.params, echo ?? '', this.name);
         this.checkStateAndReply<any>({ ...retdata });
     }
 }

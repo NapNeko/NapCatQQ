@@ -36,26 +36,34 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
     // 配置静态文件服务，提供./static目录下的文件服务，访问路径为/webui
     app.use(config.prefix + '/webui', express.static(pathWrapper.staticPath));
     //挂载API接口
+    // 添加CORS支持
+    // TODO:
+    app.use((req, res, next) => {
+        res.header('Access-Control-Allow-Origin', '*');
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+        next();
+    });
     app.use(config.prefix + '/api', ALLRouter);
     app.listen(config.port, config.host, async () => {
         log(`[NapCat] [WebUi] Current WebUi is running at http://${config.host}:${config.port}${config.prefix}`);
         log(`[NapCat] [WebUi] Login Token is ${config.token}`);
-        log(`[NapCat] [WebUi] WebUi User  Panel Url: http://${config.host}:${config.port}${config.prefix}/webui?token=${config.token}`);
-        log(`[NapCat] [WebUi] WebUi Local Panel Url: http://127.0.0.1:${config.port}${config.prefix}/webui?token=${config.token}`);
+        log(
+            `[NapCat] [WebUi] WebUi User  Panel Url: http://${config.host}:${config.port}${config.prefix}/webui?token=${config.token}`
+        );
+        log(
+            `[NapCat] [WebUi] WebUi Local Panel Url: http://127.0.0.1:${config.port}${config.prefix}/webui?token=${config.token}`
+        );
         //获取上网Ip
         //https://www.ip.cn/api/index?ip&type=0
-        RequestUtil.HttpGetJson<{ IP: {IP:string} }>(
-            'https://ip.011102.xyz/',
-            'GET',
-            {},
-            {},
-            true,
-            true
-        ).then((data) => {
-            log(`[NapCat] [WebUi] WebUi Publish Panel Url: http://${data.IP.IP}:${config.port}${config.prefix}/webui/?token=${config.token}`);
-        }).catch((err) => {
-            logger.logError.bind(logger)(`[NapCat] [WebUi] Get Publish Panel Url Error: ${err}`);
-        });
-
+        RequestUtil.HttpGetJson<{ IP: { IP: string } }>('https://ip.011102.xyz/', 'GET', {}, {}, true, true)
+            .then((data) => {
+                log(
+                    `[NapCat] [WebUi] WebUi Publish Panel Url: http://${data.IP.IP}:${config.port}${config.prefix}/webui/?token=${config.token}`
+                );
+            })
+            .catch((err) => {
+                logger.logError.bind(logger)(`[NapCat] [WebUi] Get Publish Panel Url Error: ${err}`);
+            });
     });
 }

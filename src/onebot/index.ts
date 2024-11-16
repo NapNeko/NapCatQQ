@@ -14,7 +14,7 @@ import {
     RawMessage,
     SendStatusType,
 } from '@/core';
-import { OB11Config, OB11ConfigLoader } from '@/onebot/config';
+import { OB11ConfigLoader } from '@/onebot/config';
 import {
     OB11ActiveHttpAdapter,
     OB11ActiveWebSocketAdapter,
@@ -45,6 +45,8 @@ import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecal
 import { LRUCache } from '@/common/lru-cache';
 import { NodeIKernelRecentContactListener } from '@/core/listeners/NodeIKernelRecentContactListener';
 import { BotOfflineEvent } from './event/notice/BotOfflineEvent';
+import { mergeOneBotConfigs, migrateOneBotConfigsV1, OneBotConfig } from './config/config';
+import { OB11Message } from './types';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -62,6 +64,8 @@ export class NapCatOneBot11Adapter {
         this.core = core;
         this.context = context;
         this.configLoader = new OB11ConfigLoader(core, pathWrapper.configPath);
+        this.configLoader.save(migrateOneBotConfigsV1(this.configLoader.configData));
+        this.configLoader.save(mergeOneBotConfigs(this.configLoader.configData));
         this.apis = {
             GroupApi: new OneBotGroupApi(this, core),
             UserApi: new OneBotUserApi(this, core),
@@ -72,70 +76,102 @@ export class NapCatOneBot11Adapter {
         this.actions = createActionMap(this, core);
         this.networkManager = new OB11NetworkManager();
     }
-
+    async creatOneBotLog(ob11Config: OneBotConfig) {
+        let log = `[network] 配置加载\n`;
+        for (const key of ob11Config.network.httpServers) {
+            log += `HTTP服务: ${key.host}:${key.port}, : ${key.enable ? '已启动' : '未启动'}\n`;
+        }
+        for (const key of ob11Config.network.httpClients) {
+            log += `HTTP上报服务: ${key.url}, : ${key.enable ? '已启动' : '未启动'}\n`;
+        }
+        for (const key of ob11Config.network.websocketServers) {
+            log += `WebSocket服务: ${key.host}:${key.port}, : ${key.enable ? '已启动' : '未启动'}\n`;
+        }
+        for (const key of ob11Config.network.websocketClients) {
+            log += `WebSocket反向服务: ${key.url}, : ${key.enable ? '已启动' : '未启动'}\n`;
+        }
+        return log;
+    }
     async InitOneBot() {
         const selfInfo = this.core.selfInfo;
         const ob11Config = this.configLoader.configData;
 
-        const serviceInfo = `
-    HTTP服务 ${ob11Config.http.enable ? '已启动' : '未启动'}, ${ob11Config.http.host}:${ob11Config.http.port}
-    HTTP上报服务 ${ob11Config.http.enablePost ? '已启动' : '未启动'}, 上报地址: ${ob11Config.http.postUrls}
-    WebSocket服务 ${ob11Config.ws.enable ? '已启动' : '未启动'}, ${ob11Config.ws.host}:${ob11Config.ws.port}
-    WebSocket反向服务 ${ob11Config.reverseWs.enable ? '已启动' : '未启动'}, 反向地址: ${ob11Config.reverseWs.urls}`;
+        this.core.apis.UserApi.getUserDetailInfo(selfInfo.uid)
+            .then((user) => {
+                selfInfo.nick = user.nick;
+                this.context.logger.setLogSelfInfo(selfInfo);
+            })
+            .catch(this.context.logger.logError.bind(this.context.logger));
 
-        this.core.apis.UserApi.getUserDetailInfo(selfInfo.uid).then(user => {
-            selfInfo.nick = user.nick;
-            this.context.logger.setLogSelfInfo(selfInfo);
-        }).catch(this.context.logger.logError.bind(this.context.logger));
+        const serviceInfo = await this.creatOneBotLog(ob11Config);
         this.context.logger.log(`[Notice] [OneBot11] ${serviceInfo}`);
 
-        //创建NetWork服务
-        if (ob11Config.http.enable) {
-            this.networkManager.registerAdapter(new OB11PassiveHttpAdapter(
-                ob11Config.http.port, ob11Config.token, this.core, this.actions,
-            ));
+        // //创建NetWork服务
+        for (const key of ob11Config.network.httpServers) {
+            if (key.enable) {
+                this.networkManager.registerAdapter(
+                    new OB11PassiveHttpAdapter(key.name, key.port, key.token, this.core, this.actions)
+                );
+            }
         }
-        if (ob11Config.http.enablePost) {
-            ob11Config.http.postUrls.forEach(url => {
-                this.networkManager.registerAdapter(new OB11ActiveHttpAdapter(
-                    url, ob11Config.http.secret, this.core, this,
-                ));
-            });
+        for (const key of ob11Config.network.httpClients) {
+            if (key.enable) {
+                this.networkManager.registerAdapter(
+                    new OB11ActiveHttpAdapter(key.name, key.url, key.token, this.core, this)
+                );
+            }
         }
-        if (ob11Config.ws.enable) {
-            const OBPassiveWebSocketAdapter = new OB11PassiveWebSocketAdapter(
-                ob11Config.ws.host, ob11Config.ws.port, ob11Config.heartInterval, ob11Config.token, this.core, this.actions,
-            );
-            this.networkManager.registerAdapter(OBPassiveWebSocketAdapter);
+        for (const key of ob11Config.network.websocketServers) {
+            if (key.enable) {
+                this.networkManager.registerAdapter(
+                    new OB11PassiveWebSocketAdapter(
+                        key.name,
+                        key.host,
+                        key.port,
+                        key.heartInterval,
+                        key.token,
+                        this.core,
+                        this.actions
+                    )
+                );
+            }
         }
-        if (ob11Config.reverseWs.enable) {
-            ob11Config.reverseWs.urls.forEach(url => {
-                this.networkManager.registerAdapter(new OB11ActiveWebSocketAdapter(
-                    url, 5000, ob11Config.heartInterval, ob11Config.token, this.core, this.actions,
-                ));
-            });
+        for (const key of ob11Config.network.websocketClients) {
+            if (key.enable) {
+                this.networkManager.registerAdapter(
+                    new OB11ActiveWebSocketAdapter(
+                        key.name,
+                        key.url,
+                        5000,
+                        key.heartInterval,
+                        key.token,
+                        this.core,
+                        this.actions
+                    )
+                );
+            }
         }
-
         await this.networkManager.openAllAdapters();
 
         this.initMsgListener();
         this.initBuddyListener();
         this.initGroupListener();
-        //this.initRecentContactListener();
 
         await WebUiDataRuntime.setQQLoginUin(selfInfo.uin.toString());
         await WebUiDataRuntime.setQQLoginStatus(true);
-        await WebUiDataRuntime.setOnOB11ConfigChanged(async (newConfig: OB11Config) => {
+        await WebUiDataRuntime.setOnOB11ConfigChanged(async (newConfig) => {
             const prev = this.configLoader.configData;
             this.configLoader.save(newConfig);
             this.context.logger.log(`OneBot11 配置更改：${JSON.stringify(prev)} -> ${JSON.stringify(newConfig)}`);
-            await this.reloadNetwork(prev, newConfig);
+            //await this.reloadNetwork(prev, newConfig);
         });
     }
 
     initRecentContactListener() {
         const recentContactListener = new NodeIKernelRecentContactListener();
-        recentContactListener.onRecentContactNotification = function (msgList: any[] /* arg0: { msgListUnreadCnt: string }, arg1: number */) {
+        recentContactListener.onRecentContactNotification = function (
+            msgList: any[] /* arg0: { msgListUnreadCnt: string }, arg1: number */
+        ) {
             msgList.forEach((msg) => {
                 if (msg.chatType == ChatType.KCHATTYPEGROUP) {
                     // log("recent contact", msgList, arg0, arg1);
@@ -144,115 +180,120 @@ export class NapCatOneBot11Adapter {
         };
     }
 
-    private async reloadNetwork(prev: OB11Config, now: OB11Config) {
-        const serviceInfo = `
-    HTTP服务 ${now.http.enable ? '已启动' : '未启动'}, ${now.http.host}:${now.http.port}
-    HTTP上报服务 ${now.http.enablePost ? '已启动' : '未启动'}, 上报地址: ${now.http.postUrls}
-    WebSocket服务 ${now.ws.enable ? '已启动' : '未启动'}, ${now.ws.host}:${now.ws.port}
-    WebSocket反向服务 ${now.reverseWs.enable ? '已启动' : '未启动'}, 反向地址: ${now.reverseWs.urls}`;
-        this.context.logger.log(`[Notice] [OneBot11] 热重载 ${serviceInfo}`);
+    // private async reloadNetwork(prev: OB11Config, now: OB11Config) {
+    //     const serviceInfo = `
+    // HTTP服务 ${now.http.enable ? '已启动' : '未启动'}, ${now.http.host}:${now.http.port}
+    // HTTP上报服务 ${now.http.enablePost ? '已启动' : '未启动'}, 上报地址: ${now.http.postUrls}
+    // WebSocket服务 ${now.ws.enable ? '已启动' : '未启动'}, ${now.ws.host}:${now.ws.port}
+    // WebSocket反向服务 ${now.reverseWs.enable ? '已启动' : '未启动'}, 反向地址: ${now.reverseWs.urls}`;
+    //     this.context.logger.log(`[Notice] [OneBot11] 热重载 ${serviceInfo}`);
 
-        // check difference in passive http (Http)
-        if (prev.http.enable !== now.http.enable) {
-            if (now.http.enable) {
-                await this.networkManager.registerAdapterAndOpen(new OB11PassiveHttpAdapter(
-                    now.http.port, now.token, this.core, this.actions,
-                ));
-            } else {
-                await this.networkManager.closeAdapterByPredicate(adapter => adapter instanceof OB11PassiveHttpAdapter);
-            }
-        }
+    //     // check difference in passive http (Http)
+    //     if (prev.http.enable !== now.http.enable) {
+    //         if (now.http.enable) {
+    //             await this.networkManager.registerAdapterAndOpen(new OB11PassiveHttpAdapter(
+    //                 now.http.port, now.token, this.core, this.actions,
+    //             ));
+    //         } else {
+    //             await this.networkManager.closeAdapterByPredicate(adapter => adapter instanceof OB11PassiveHttpAdapter);
+    //         }
+    //     }
 
-        // check difference in active http (HttpPost)
-        if (prev.http.enablePost !== now.http.enablePost) {
-            if (now.http.enablePost) {
-                now.http.postUrls.forEach(url => {
-                    this.networkManager.registerAdapterAndOpen(new OB11ActiveHttpAdapter(
-                        url, now.http.secret, this.core, this,
-                    ));
-                });
-            } else {
-                await this.networkManager.closeAdapterByPredicate(adapter => adapter instanceof OB11ActiveHttpAdapter);
-            }
-        } else if (now.http.enablePost) {
-            const { added, removed } = this.findDifference<string>(prev.http.postUrls, now.http.postUrls);
-            await this.networkManager.closeAdapterByPredicate(
-                adapter => adapter instanceof OB11ActiveHttpAdapter && removed.includes(adapter.url),
-            );
-            for (const url of added) {
-                await this.networkManager.registerAdapterAndOpen(new OB11ActiveHttpAdapter(
-                    url, now.http.secret, this.core, this,
-                ));
-            }
-        }
+    //     // check difference in active http (HttpPost)
+    //     if (prev.http.enablePost !== now.http.enablePost) {
+    //         if (now.http.enablePost) {
+    //             now.http.postUrls.forEach(url => {
+    //                 this.networkManager.registerAdapterAndOpen(new OB11ActiveHttpAdapter(
+    //                     url, now.http.secret, this.core, this,
+    //                 ));
+    //             });
+    //         } else {
+    //             await this.networkManager.closeAdapterByPredicate(adapter => adapter instanceof OB11ActiveHttpAdapter);
+    //         }
+    //     } else if (now.http.enablePost) {
+    //         const { added, removed } = this.findDifference<string>(prev.http.postUrls, now.http.postUrls);
+    //         await this.networkManager.closeAdapterByPredicate(
+    //             adapter => adapter instanceof OB11ActiveHttpAdapter && removed.includes(adapter.url),
+    //         );
+    //         for (const url of added) {
+    //             await this.networkManager.registerAdapterAndOpen(new OB11ActiveHttpAdapter(
+    //                 url, now.http.secret, this.core, this,
+    //             ));
+    //         }
+    //     }
 
+    //     // check difference in passive websocket (Ws)
+    //     if (prev.ws.enable !== now.ws.enable) {
+    //         if (now.ws.enable) {
+    //             await this.networkManager.registerAdapterAndOpen(new OB11PassiveWebSocketAdapter(
+    //                 now.ws.host, now.ws.port, now.heartInterval, now.token, this.core, this.actions,
+    //             ));
+    //         } else {
+    //             await this.networkManager.closeAdapterByPredicate(
+    //                 adapter => adapter instanceof OB11PassiveWebSocketAdapter,
+    //             );
+    //         }
+    //     }
 
-        // check difference in passive websocket (Ws)
-        if (prev.ws.enable !== now.ws.enable) {
-            if (now.ws.enable) {
-                await this.networkManager.registerAdapterAndOpen(new OB11PassiveWebSocketAdapter(
-                    now.ws.host, now.ws.port, now.heartInterval, now.token, this.core, this.actions,
-                ));
-            } else {
-                await this.networkManager.closeAdapterByPredicate(
-                    adapter => adapter instanceof OB11PassiveWebSocketAdapter,
-                );
-            }
-        }
+    //     // check difference in active websocket (ReverseWs)
+    //     if (prev.reverseWs.enable !== now.reverseWs.enable) {
+    //         if (now.reverseWs.enable) {
+    //             now.reverseWs.urls.forEach(url => {
+    //                 this.networkManager.registerAdapterAndOpen(new OB11ActiveWebSocketAdapter(
+    //                     url, 5000, now.heartInterval, now.token, this.core, this.actions,
+    //                 ));
+    //             });
+    //         } else {
+    //             await this.networkManager.closeAdapterByPredicate(
+    //                 adapter => adapter instanceof OB11ActiveWebSocketAdapter,
+    //             );
+    //         }
+    //     } else if (now.reverseWs.enable) {
+    //         const { added, removed } = this.findDifference<string>(prev.reverseWs.urls, now.reverseWs.urls);
+    //         await this.networkManager.closeAdapterByPredicate(
+    //             adapter => adapter instanceof OB11ActiveWebSocketAdapter && removed.includes(adapter.url),
+    //         );
+    //         for (const url of added) {
+    //             await this.networkManager.registerAdapterAndOpen(new OB11ActiveWebSocketAdapter(
+    //                 url, 5000, now.heartInterval, now.token, this.core, this.actions,
+    //             ));
+    //         }
+    //     }
 
-        // check difference in active websocket (ReverseWs)
-        if (prev.reverseWs.enable !== now.reverseWs.enable) {
-            if (now.reverseWs.enable) {
-                now.reverseWs.urls.forEach(url => {
-                    this.networkManager.registerAdapterAndOpen(new OB11ActiveWebSocketAdapter(
-                        url, 5000, now.heartInterval, now.token, this.core, this.actions,
-                    ));
-                });
-            } else {
-                await this.networkManager.closeAdapterByPredicate(
-                    adapter => adapter instanceof OB11ActiveWebSocketAdapter,
-                );
-            }
-        } else if (now.reverseWs.enable) {
-            const { added, removed } = this.findDifference<string>(prev.reverseWs.urls, now.reverseWs.urls);
-            await this.networkManager.closeAdapterByPredicate(
-                adapter => adapter instanceof OB11ActiveWebSocketAdapter && removed.includes(adapter.url),
-            );
-            for (const url of added) {
-                await this.networkManager.registerAdapterAndOpen(new OB11ActiveWebSocketAdapter(
-                    url, 5000, now.heartInterval, now.token, this.core, this.actions,
-                ));
-            }
-        }
+    // }
 
-    }
-
-    private findDifference<T>(prev: T[], now: T[]): { added: T[], removed: T[] } {
-        const added = now.filter(item => !prev.includes(item));
-        const removed = prev.filter(item => !now.includes(item));
+    private findDifference<T>(prev: T[], now: T[]): { added: T[]; removed: T[] } {
+        const added = now.filter((item) => !prev.includes(item));
+        const removed = prev.filter((item) => !now.includes(item));
         return { added, removed };
     }
 
     private initMsgListener() {
         const msgListener = new NodeIKernelMsgListener();
         msgListener.onRecvSysMsg = (msg) => {
-            this.apis.MsgApi.parseSysMessage(msg).then((event) => {
-                if (event) this.networkManager.emitEvent(event);
-            }).catch(e => this.context.logger.logError.bind(this.context.logger)('constructSysMessage error: ', e, '\n Parse Hex:', Buffer.from(msg).toString('hex')));
+            this.apis.MsgApi.parseSysMessage(msg)
+                .then((event) => {
+                    if (event) this.networkManager.emitEvent(event);
+                })
+                .catch((e) =>
+                    this.context.logger.logError.bind(this.context.logger)(
+                        'constructSysMessage error: ',
+                        e,
+                        '\n Parse Hex:',
+                        Buffer.from(msg).toString('hex')
+                    )
+                );
         };
 
-        msgListener.onInputStatusPush = async data => {
+        msgListener.onInputStatusPush = async (data) => {
             const uin = await this.core.apis.UserApi.getUinByUidV2(data.fromUin);
             this.context.logger.log(`[Notice] [输入状态] ${uin} ${data.statusText}`);
-            await this.networkManager.emitEvent(new OB11InputStatusEvent(
-                this.core,
-                parseInt(uin),
-                data.eventType,
-                data.statusText,
-            ));
+            await this.networkManager.emitEvent(
+                new OB11InputStatusEvent(this.core, parseInt(uin), data.eventType, data.statusText)
+            );
         };
 
-        msgListener.onRecvMsg = async msg => {
+        msgListener.onRecvMsg = async (msg) => {
             for (const m of msg) {
                 if (this.bootTime > parseInt(m.msgTime)) {
                     this.context.logger.logDebug(`消息时间${m.msgTime}早于启动时间${this.bootTime}，忽略上报`);
@@ -264,59 +305,54 @@ export class NapCatOneBot11Adapter {
                         peerUid: m.peerUid,
                         guildId: '',
                     },
-                    m.msgId,
+                    m.msgId
                 );
-                await this.emitMsg(m)
-                    .catch(e => this.context.logger.logError.bind(this.context.logger)('处理消息失败', e));
+                await this.emitMsg(m).catch((e) =>
+                    this.context.logger.logError.bind(this.context.logger)('处理消息失败', e)
+                );
             }
         };
 
         const msgIdSend = new LRUCache<string, number>(100);
         const recallMsgs = new LRUCache<string, boolean>(100);
-        msgListener.onAddSendMsg = async msg => {
+        msgListener.onAddSendMsg = async (msg) => {
             if (msg.sendStatus == SendStatusType.KSEND_STATUS_SENDING) {
                 msgIdSend.put(msg.msgId, 0);
             }
         };
-        msgListener.onMsgInfoListUpdate = async msgList => {
-            this.emitRecallMsg(msgList, recallMsgs)
-                .catch(e => this.context.logger.logError.bind(this.context.logger)('处理消息失败', e));
-            for (const msg of msgList.filter(e => e.senderUin == this.core.selfInfo.uin)) {
+        msgListener.onMsgInfoListUpdate = async (msgList) => {
+            this.emitRecallMsg(msgList, recallMsgs).catch((e) =>
+                this.context.logger.logError.bind(this.context.logger)('处理消息失败', e)
+            );
+            for (const msg of msgList.filter((e) => e.senderUin == this.core.selfInfo.uin)) {
                 if (msg.sendStatus == SendStatusType.KSEND_STATUS_SUCCESS && msgIdSend.get(msg.msgId) == 0) {
                     msgIdSend.put(msg.msgId, 1);
                     // 完成后再post
-                    this.apis.MsgApi.parseMessage(msg)
-                        .then((ob11Msg) => {
-                            if (!ob11Msg) return;
-                            ob11Msg.target_id = parseInt(msg.peerUin);
-                            if (this.configLoader.configData.reportSelfMessage) {
-                                msg.id = MessageUnique.createUniqueMsgId({
-                                    chatType: msg.chatType,
-                                    peerUid: msg.peerUid,
-                                    guildId: '',
-                                }, msg.msgId);
-                                this.emitMsg(msg);
-                            } else {
-                                // logOB11Message(this.core, ob11Msg);
-                            }
-                        });
+                    msg.id = MessageUnique.createUniqueMsgId(
+                        {
+                            chatType: msg.chatType,
+                            peerUid: msg.peerUid,
+                            guildId: '',
+                        },
+                        msg.msgId
+                    );
+                    this.emitMsg(msg);
                 }
             }
         };
         msgListener.onKickedOffLine = async (kick) => {
             const event = new BotOfflineEvent(this.core, kick.tipsTitle, kick.tipsDesc);
-            this.networkManager.emitEvent(event)
-                .catch(e => this.context.logger.logError.bind(this.context.logger)('处理Bot掉线失败', e));
+            this.networkManager
+                .emitEvent(event)
+                .catch((e) => this.context.logger.logError.bind(this.context.logger)('处理Bot掉线失败', e));
         };
-        this.context.session.getMsgService().addKernelMsgListener(
-            proxiedListenerOf(msgListener, this.context.logger),
-        );
+        this.context.session.getMsgService().addKernelMsgListener(proxiedListenerOf(msgListener, this.context.logger));
     }
 
     private initBuddyListener() {
         const buddyListener = new NodeIKernelBuddyListener();
 
-        buddyListener.onBuddyReqChange = async reqs => {
+        buddyListener.onBuddyReqChange = async (reqs) => {
             this.core.apis.FriendApi.clearBuddyReqUnreadCnt();
             for (let i = 0; i < reqs.unreadNums; i++) {
                 const req = reqs.buddyReqs[i];
@@ -325,21 +361,23 @@ export class NapCatOneBot11Adapter {
                 }
                 try {
                     const requesterUin = await this.core.apis.UserApi.getUinByUidV2(req.friendUid);
-                    await this.networkManager.emitEvent(new OB11FriendRequestEvent(
-                        this.core,
-                        +requesterUin,
-                        req.extWords,
-                        req.friendUid + '|' + req.reqTime,
-                    ));
+                    await this.networkManager.emitEvent(
+                        new OB11FriendRequestEvent(
+                            this.core,
+                            +requesterUin,
+                            req.extWords,
+                            req.friendUid + '|' + req.reqTime
+                        )
+                    );
                 } catch (e) {
                     this.context.logger.logDebug('获取加好友者QQ号失败', e);
                 }
             }
         };
 
-        this.context.session.getBuddyService().addKernelBuddyListener(
-            proxiedListenerOf(buddyListener, this.context.logger),
-        );
+        this.context.session
+            .getBuddyService()
+            .addKernelBuddyListener(proxiedListenerOf(buddyListener, this.context.logger));
     }
 
     private initGroupListener() {
@@ -348,11 +386,13 @@ export class NapCatOneBot11Adapter {
         groupListener.onGroupNotifiesUpdated = async (_, notifies) => {
             //console.log('ob11 onGroupNotifiesUpdated', notifies[0]);
             await this.core.apis.GroupApi.clearGroupNotifiesUnreadCount(false);
-            if (![
-                GroupNotifyMsgType.SET_ADMIN,
-                GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_CANCELED,
-                GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_ADMIN,
-            ].includes(notifies[0]?.type)) {
+            if (
+                ![
+                    GroupNotifyMsgType.SET_ADMIN,
+                    GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_CANCELED,
+                    GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_ADMIN,
+                ].includes(notifies[0]?.type)
+            ) {
                 for (const notify of notifies) {
                     const notifyTime = parseInt(notify.seq) / 1000 / 1000;
                     // log(`群通知时间${notifyTime}`, `启动时间${this.bootTime}`);
@@ -363,15 +403,19 @@ export class NapCatOneBot11Adapter {
                     const flag = notify.group.groupCode + '|' + notify.seq + '|' + notify.type;
                     this.context.logger.logDebug('收到群通知', notify);
 
-                    if ([
-                        GroupNotifyMsgType.SET_ADMIN,
-                        GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_CANCELED,
-                        GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_ADMIN,
-                    ].includes(notify.type)) {
-                        const member1 = await this.core.apis.GroupApi.getGroupMember(notify.group.groupCode, notify.user1.uid);
+                    if (
+                        [
+                            GroupNotifyMsgType.SET_ADMIN,
+                            GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_CANCELED,
+                            GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_ADMIN,
+                        ].includes(notify.type)
+                    ) {
+                        const member1 = await this.core.apis.GroupApi.getGroupMember(
+                            notify.group.groupCode,
+                            notify.user1.uid
+                        );
                         this.context.logger.logDebug('有管理员变动通知');
                         // refreshGroupMembers(notify.group.groupCode).then();
-
                         this.context.logger.logDebug('开始获取变动的管理员');
                         if (member1) {
                             this.context.logger.logDebug('变动管理员获取成功');
@@ -382,16 +426,28 @@ export class NapCatOneBot11Adapter {
                                 [
                                     GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_CANCELED,
                                     GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_ADMIN,
-                                ].includes(notify.type) ? 'unset' : 'set',
+                                ].includes(notify.type)
+                                    ? 'unset'
+                                    : 'set'
                             );
-                            this.networkManager.emitEvent(groupAdminNoticeEvent)
-                                .catch(e => this.context.logger.logError.bind(this.context.logger)('处理群管理员变动失败', e));
+                            this.networkManager
+                                .emitEvent(groupAdminNoticeEvent)
+                                .catch((e) =>
+                                    this.context.logger.logError.bind(this.context.logger)('处理群管理员变动失败', e)
+                                );
                         } else {
-                            this.context.logger.logDebug('获取群通知的成员信息失败', notify, this.core.apis.GroupApi.getGroup(notify.group.groupCode));
+                            this.context.logger.logDebug(
+                                '获取群通知的成员信息失败',
+                                notify,
+                                this.core.apis.GroupApi.getGroup(notify.group.groupCode)
+                            );
                         }
-                    } else if (notify.type == GroupNotifyMsgType.MEMBER_LEAVE_NOTIFY_ADMIN || notify.type == GroupNotifyMsgType.KICK_MEMBER_NOTIFY_ADMIN) {
+                    } else if (
+                        notify.type == GroupNotifyMsgType.MEMBER_LEAVE_NOTIFY_ADMIN ||
+                        notify.type == GroupNotifyMsgType.KICK_MEMBER_NOTIFY_ADMIN
+                    ) {
                         this.context.logger.logDebug('有成员退出通知', notify);
-                        const member1Uin = (await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid));
+                        const member1Uin = await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid);
                         let operatorId = member1Uin;
                         let subType: GroupDecreaseSubType = 'leave';
                         if (notify.user2.uid) {
@@ -407,17 +463,21 @@ export class NapCatOneBot11Adapter {
                             parseInt(notify.group.groupCode),
                             parseInt(member1Uin),
                             parseInt(operatorId),
-                            subType,
+                            subType
                         );
-                        this.networkManager.emitEvent(groupDecreaseEvent)
-                            .catch(e => this.context.logger.logError.bind(this.context.logger)('处理群成员退出失败', e));
+                        this.networkManager
+                            .emitEvent(groupDecreaseEvent)
+                            .catch((e) =>
+                                this.context.logger.logError.bind(this.context.logger)('处理群成员退出失败', e)
+                            );
                         // notify.status == 1 表示未处理 2表示处理完成
-                    } else if ([
-                        GroupNotifyMsgType.REQUEST_JOIN_NEED_ADMINI_STRATOR_PASS,
-                    ].includes(notify.type) && notify.status == GroupNotifyMsgStatus.KUNHANDLE) {
+                    } else if (
+                        [GroupNotifyMsgType.REQUEST_JOIN_NEED_ADMINI_STRATOR_PASS].includes(notify.type) &&
+                        notify.status == GroupNotifyMsgStatus.KUNHANDLE
+                    ) {
                         this.context.logger.logDebug('有加群请求');
                         try {
-                            let requestUin = (await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid));
+                            let requestUin = await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid);
                             if (isNaN(parseInt(requestUin))) {
                                 requestUin = (await this.core.apis.UserApi.getUserDetailInfo(notify.user1.uid)).uin;
                             }
@@ -427,14 +487,24 @@ export class NapCatOneBot11Adapter {
                                 parseInt(requestUin),
                                 'add',
                                 notify.postscript,
-                                flag,
+                                flag
                             );
-                            this.networkManager.emitEvent(groupRequestEvent)
-                                .catch(e => this.context.logger.logError.bind(this.context.logger)('处理加群请求失败', e));
+                            this.networkManager
+                                .emitEvent(groupRequestEvent)
+                                .catch((e) =>
+                                    this.context.logger.logError.bind(this.context.logger)('处理加群请求失败', e)
+                                );
                         } catch (e) {
-                            this.context.logger.logError.bind(this.context.logger)('获取加群人QQ号失败 Uid:', notify.user1.uid, e);
+                            this.context.logger.logError.bind(this.context.logger)(
+                                '获取加群人QQ号失败 Uid:',
+                                notify.user1.uid,
+                                e
+                            );
                         }
-                    } else if (notify.type == GroupNotifyMsgType.INVITED_BY_MEMBER && notify.status == GroupNotifyMsgStatus.KUNHANDLE) {
+                    } else if (
+                        notify.type == GroupNotifyMsgType.INVITED_BY_MEMBER &&
+                        notify.status == GroupNotifyMsgStatus.KUNHANDLE
+                    ) {
                         this.context.logger.logDebug(`收到邀请我加群通知:${notify}`);
                         const groupInviteEvent = new OB11GroupRequestEvent(
                             this.core,
@@ -442,11 +512,17 @@ export class NapCatOneBot11Adapter {
                             parseInt(await this.core.apis.UserApi.getUinByUidV2(notify.user2.uid)),
                             'invite',
                             notify.postscript,
-                            flag,
+                            flag
                         );
-                        this.networkManager.emitEvent(groupInviteEvent)
-                            .catch(e => this.context.logger.logError.bind(this.context.logger)('处理邀请本人加群失败', e));
-                    } else if (notify.type == GroupNotifyMsgType.INVITED_NEED_ADMINI_STRATOR_PASS && notify.status == GroupNotifyMsgStatus.KUNHANDLE) {
+                        this.networkManager
+                            .emitEvent(groupInviteEvent)
+                            .catch((e) =>
+                                this.context.logger.logError.bind(this.context.logger)('处理邀请本人加群失败', e)
+                            );
+                    } else if (
+                        notify.type == GroupNotifyMsgType.INVITED_NEED_ADMINI_STRATOR_PASS &&
+                        notify.status == GroupNotifyMsgStatus.KUNHANDLE
+                    ) {
                         this.context.logger.logDebug(`收到群员邀请加群通知:${notify}`);
                         const groupInviteEvent = new OB11GroupRequestEvent(
                             this.core,
@@ -454,10 +530,13 @@ export class NapCatOneBot11Adapter {
                             parseInt(await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid)),
                             'add',
                             notify.postscript,
-                            flag,
+                            flag
                         );
-                        this.networkManager.emitEvent(groupInviteEvent)
-                            .catch(e => this.context.logger.logError.bind(this.context.logger)('处理邀请本人加群失败', e));
+                        this.networkManager
+                            .emitEvent(groupInviteEvent)
+                            .catch((e) =>
+                                this.context.logger.logError.bind(this.context.logger)('处理邀请本人加群失败', e)
+                            );
                     }
                 }
             }
@@ -476,92 +555,102 @@ export class NapCatOneBot11Adapter {
                         this.core,
                         parseInt(groupCode),
                         parseInt(member.uin),
-                        member.role === GroupMemberRole.admin ? 'set' : 'unset',
+                        member.role === GroupMemberRole.admin ? 'set' : 'unset'
                     );
-                    this.networkManager.emitEvent(groupAdminNoticeEvent)
-                        .catch(e => this.context.logger.logError.bind(this.context.logger)('处理群管理员变动失败', e));
+                    this.networkManager
+                        .emitEvent(groupAdminNoticeEvent)
+                        .catch((e) =>
+                            this.context.logger.logError.bind(this.context.logger)('处理群管理员变动失败', e)
+                        );
                     existMember.isChangeRole = false;
                     this.context.logger.logDebug.bind(this.context.logger)('群管理员变动处理完毕');
                 });
             }
         };
 
-        this.context.session.getGroupService().addKernelGroupListener(
-            proxiedListenerOf(groupListener, this.context.logger),
-        );
+        this.context.session
+            .getGroupService()
+            .addKernelGroupListener(proxiedListenerOf(groupListener, this.context.logger));
     }
 
-    private async emitMsg(message: RawMessage, parseEvent: boolean = true) {
-        const { debug, reportSelfMessage, messagePostFormat } = this.configLoader.configData;
+    private async emitMsg(message: RawMessage) {
+        const network = Object.values(this.configLoader.configData.network) as Array<
+            (typeof this.configLoader.configData.network)[keyof typeof this.configLoader.configData.network]
+        >;
         this.context.logger.logDebug('收到新消息 RawMessage', message);
-        this.apis.MsgApi.parseMessage(message, messagePostFormat).then((ob11Msg) => {
-            if (!ob11Msg) return;
-            this.context.logger.logDebug('转化为 OB11Message', ob11Msg);
-            if (debug) {
-                ob11Msg.raw = message;
-            } else if (ob11Msg.message.length === 0) {
-                return;
+        this.apis.MsgApi.parseMessageV2(message)
+            .then((ob11Msg) => {
+                if (!ob11Msg) return;
+                const isSelfMsg =
+                    ob11Msg.stringMsg.user_id.toString() == this.core.selfInfo.uin ||
+                    ob11Msg.arrayMsg.user_id.toString() == this.core.selfInfo.uin;
+                this.context.logger.logDebug('转化为 OB11Message', ob11Msg);
+                const msgMap: Map<string, OB11Message> = new Map();
+                const enable_client: string[] = [];
+                network
+                    .flat()
+                    .filter((e) => e.enable)
+                    .map((e) => {
+                        enable_client.push(e.name);
+                        if (e.messagePostFormat == 'string') {
+                            msgMap.set(e.name, structuredClone(ob11Msg.stringMsg));
+                        } else {
+                            msgMap.set(e.name, structuredClone(ob11Msg.arrayMsg));
+                        }
+                        if (isSelfMsg) {
+                            ob11Msg.stringMsg.target_id = parseInt(message.peerUin);
+                            ob11Msg.arrayMsg.target_id = parseInt(message.peerUin);
+                        }
+                    });
 
-            }
-            const isSelfMsg = ob11Msg.user_id.toString() == this.core.selfInfo.uin;
-            if (isSelfMsg && !reportSelfMessage) {
-                return;
-            }
-            if (isSelfMsg) {
-                ob11Msg.target_id = parseInt(message.peerUin);
-            }
-            // if (ob11Msg.raw_message.startsWith('!set')) {
-            //     this.core.apis.UserApi.getUidByUinV2(ob11Msg.user_id.toString()).then(uid => {
-            //         if(uid){
-            //             this.core.apis.PacketApi.sendSetSpecialTittlePacket(message.peerUin, uid, '测试');
-            //             console.log('set', message.peerUin, uid);
-            //         }
+                const debug_network = network.flat().filter((e) => e.enable && e.debug);
+                if (debug_network.length > 0) {
+                    for (const adapter of debug_network) {
+                        if (adapter.name) {
+                            const msg = msgMap.get(adapter.name);
+                            if (msg) {
+                                msg.raw = message;
+                            }
+                        }
+                    }
+                } else if (ob11Msg.stringMsg.message.length === 0 || ob11Msg.arrayMsg.message.length == 0) {
+                    return;
+                }
+                const notreportSelf_network = network.flat().filter((e) => e.enable && (('reportSelfMessage' in e && !e.reportSelfMessage) || !('reportSelfMessage' in e)));
+                if (isSelfMsg) {
+                    for (const adapter of notreportSelf_network) {
+                        msgMap.delete(adapter.name);
+                    }
+                }
 
-            //     });
+                this.networkManager.emitEventByNames(msgMap);
+            })
+            .catch((e) => this.context.logger.logError.bind(this.context.logger)('constructMessage error: ', e));
 
-            // }
-            // if (ob11Msg.raw_message.startsWith('!status')) {
-            //     console.log('status', message.peerUin, message.senderUin);
-            //     let delMsg: string[] = [];
-            //     let peer = {
-            //         peerUid: message.peerUin,
-            //         chatType: 2,
-            //     };
-            //     this.core.apis.PacketApi.sendStatusPacket(+message.senderUin).then(async e => {
-            //         if (e) {
-            //             const { sendElements } = await this.apis.MsgApi.createSendElements([{
-            //                 type: OB11MessageDataType.text,
-            //                 data: {
-            //                     text: 'status ' + JSON.stringify(e, null, 2),
-            //                 }
-            //             }], peer)
+        this.apis.GroupApi.parseGroupEvent(message)
+            .then((groupEvent) => {
+                if (groupEvent) {
+                    // log("post group event", groupEvent);
+                    this.networkManager.emitEvent(groupEvent);
+                }
+            })
+            .catch((e) => this.context.logger.logError.bind(this.context.logger)('constructGroupEvent error: ', e));
 
-            //             this.apis.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, delMsg)
-            //         }
-            //     })
-            // }
-            this.networkManager.emitEvent(ob11Msg);
-        }).catch(e => this.context.logger.logError.bind(this.context.logger)('constructMessage error: ', e));
-
-        this.apis.GroupApi.parseGroupEvent(message).then(groupEvent => {
-            if (groupEvent) {
-                // log("post group event", groupEvent);
-                this.networkManager.emitEvent(groupEvent);
-            }
-        }).catch(e => this.context.logger.logError.bind(this.context.logger)('constructGroupEvent error: ', e));
-
-        this.apis.MsgApi.parsePrivateMsgEvent(message).then(privateEvent => {
-            if (privateEvent) {
-                // log("post private event", privateEvent);
-                this.networkManager.emitEvent(privateEvent);
-            }
-        }).catch(e => this.context.logger.logError.bind(this.context.logger)('constructPrivateEvent error: ', e));
+        this.apis.MsgApi.parsePrivateMsgEvent(message)
+            .then((privateEvent) => {
+                if (privateEvent) {
+                    // log("post private event", privateEvent);
+                    this.networkManager.emitEvent(privateEvent);
+                }
+            })
+            .catch((e) => this.context.logger.logError.bind(this.context.logger)('constructPrivateEvent error: ', e));
     }
     private async emitRecallMsg(msgList: RawMessage[], cache: LRUCache<string, boolean>) {
         for (const message of msgList) {
             // log("message update", message.sendStatus, message.msgId, message.msgSeq)
             const peer: Peer = { chatType: message.chatType, peerUid: message.peerUid, guildId: '' };
-            if (message.recallTime != '0' && !cache.get(message.msgId)) { //work:这个判断方法不太好，应该使用灰色消息元素来判断?
+            if (message.recallTime != '0' && !cache.get(message.msgId)) {
+                //work:这个判断方法不太好，应该使用灰色消息元素来判断?
                 cache.put(message.msgId, true);
                 // 撤回消息上报
                 let oriMessageId = MessageUnique.getShortIdByMsgId(message.msgId);
@@ -572,10 +661,13 @@ export class NapCatOneBot11Adapter {
                     const friendRecallEvent = new OB11FriendRecallNoticeEvent(
                         this.core,
                         +message.senderUin,
-                        oriMessageId,
+                        oriMessageId
                     );
-                    this.networkManager.emitEvent(friendRecallEvent)
-                        .catch(e => this.context.logger.logError.bind(this.context.logger)('处理好友消息撤回失败', e));
+                    this.networkManager
+                        .emitEvent(friendRecallEvent)
+                        .catch((e) =>
+                            this.context.logger.logError.bind(this.context.logger)('处理好友消息撤回失败', e)
+                        );
                 } else if (message.chatType == ChatType.KCHATTYPEGROUP) {
                     let operatorId = message.senderUin;
                     for (const element of message.elements) {
@@ -591,8 +683,9 @@ export class NapCatOneBot11Adapter {
                         +operatorId,
                         oriMessageId
                     );
-                    this.networkManager.emitEvent(groupRecallEvent)
-                        .catch(e => this.context.logger.logError.bind(this.context.logger)('处理群消息撤回失败', e));
+                    this.networkManager
+                        .emitEvent(groupRecallEvent)
+                        .catch((e) => this.context.logger.logError.bind(this.context.logger)('处理群消息撤回失败', e));
                 }
             }
         }

@@ -3,14 +3,12 @@ import { defineConfig, PluginOption, UserConfig } from 'vite';
 import { resolve } from 'path';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import { builtinModules } from 'module';
-
+//依赖排除
 const external = ['silk-wasm', 'ws', 'express', 'qrcode-terminal', 'fluent-ffmpeg', 'piscina'];
-const nodeModules = [...builtinModules, builtinModules.map(m => `node:${m}`)].flat();
-
+const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`)].flat();
 function genCpModule(module: string) {
     return { src: `./node_modules/${module}`, dest: `dist/node_modules/${module}`, flatten: false };
 }
-
 let startScripts: string[] | undefined = undefined;
 if (process.env.NAPCAT_BUILDSYS == 'linux') {
     startScripts = [];
@@ -19,15 +17,13 @@ if (process.env.NAPCAT_BUILDSYS == 'linux') {
 } else {
     startScripts = ['./script/KillQQ.bat'];
 }
-
 const FrameworkBaseConfigPlugin: PluginOption[] = [
     cp({
         targets: [
             { src: './manifest.json', dest: 'dist' },
             { src: './src/core/external/napcat.json', dest: 'dist/config/' },
             { src: './src/native/packet', dest: 'dist/moehoo', flatten: false },
-            { src: './static/', dest: 'dist/static/', flatten: false },
-            { src: './src/onebot/config/onebot11.json', dest: 'dist/config/' },
+            { src: './napcat.webui/dist/', dest: 'dist/static/', flatten: false },
             { src: './src/framework/liteloader.cjs', dest: 'dist' },
             { src: './src/framework/napcat.cjs', dest: 'dist' },
             { src: './src/framework/preload.cjs', dest: 'dist' },
@@ -42,14 +38,13 @@ const ShellBaseConfigPlugin: PluginOption[] = [
     cp({
         targets: [
             { src: './src/native/packet', dest: 'dist/moehoo', flatten: false },
-            { src: './static/', dest: 'dist/static/', flatten: false },
+            { src: './napcat.webui/dist/', dest: 'dist/static/', flatten: false },
             { src: './src/core/external/napcat.json', dest: 'dist/config/' },
-            { src: './src/onebot/config/onebot11.json', dest: 'dist/config/' },
             { src: './package.json', dest: 'dist' },
             { src: './launcher/', dest: 'dist', flatten: true },
-            ...(startScripts.map((startScript) => {
+            ...startScripts.map((startScript) => {
                 return { src: startScript, dest: 'dist' };
-            })),
+            }),
         ],
     }),
     nodeResolve(),

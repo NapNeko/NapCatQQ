@@ -8,12 +8,12 @@ export abstract class ConfigBase<T> {
     configPath: string;
     configData: T = {} as T;
 
-    protected constructor(name: string, core: NapCatCore, configPath: string) {
+    protected constructor(name: string, core: NapCatCore, configPath: string, copy_default: boolean = true) {
         this.name = name;
         this.core = core;
         this.configPath = configPath;
         fs.mkdirSync(this.configPath, { recursive: true });
-        this.read();
+        this.read(copy_default);
     }
 
     protected getKeys(): string[] | null {
@@ -32,16 +32,18 @@ export abstract class ConfigBase<T> {
         }
     }
 
-    read(): T {
+    read(copy_default: boolean = true): T {
         const logger = this.core.context.logger;
         const configPath = this.getConfigPath(this.core.selfInfo.uin);
-        if (!fs.existsSync(configPath)) {
+        if (!fs.existsSync(configPath) && copy_default) {
             try {
                 fs.writeFileSync(configPath, fs.readFileSync(this.getConfigPath(undefined), 'utf-8'));
                 logger.log(`[Core] [Config] 配置文件创建成功!\n`);
             } catch (e: any) {
                 logger.logError.bind(logger)(`[Core] [Config] 创建配置文件时发生错误:`, e.message);
             }
+        } else if (!fs.existsSync(configPath) && !copy_default) {
+            fs.writeFileSync(configPath, '{}');
         }
         try {
             this.configData = JSON.parse(fs.readFileSync(configPath, 'utf-8'));

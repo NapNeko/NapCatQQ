@@ -30,7 +30,9 @@ export class GetGroupEssence extends BaseAction<Payload, any> {
         };
     }
 
-    async _handle(payload: Payload) {
+    async _handle(payload: Payload, adapter: string) {
+        const network = Object.values(this.obContext.configLoader.configData.network) as Array<typeof this.obContext.configLoader.configData.network[keyof typeof this.obContext.configLoader.configData.network]>;
+        const msgFormat = network.flat().find(e => e.name === adapter)?.messagePostFormat ?? 'array';
         const msglist = (await this.core.apis.WebApi.getGroupEssenceMsgAll(payload.group_id.toString())).flatMap((e) => e.data.msg_list);
         if (!msglist) {
             throw new Error('获取失败');
@@ -51,7 +53,7 @@ export class GetGroupEssence extends BaseAction<Payload, any> {
                     operator_nick: msg.add_digest_nick,
                     message_id: message_id,
                     operator_time: msg.add_digest_time,
-                    content: (await this.obContext.apis.MsgApi.parseMessage(rawMessage))?.message
+                    content: (await this.obContext.apis.MsgApi.parseMessage(rawMessage, msgFormat))?.message
                 };
             }
             const msgTempData = JSON.stringify({
