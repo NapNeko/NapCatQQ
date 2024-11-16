@@ -4,6 +4,7 @@ import { LogWrapper } from '@/common/log';
 import { QuickAction, QuickActionEvent } from '../types';
 import { NapCatCore } from '@/core';
 import { NapCatOneBot11Adapter } from '..';
+import { RequestUtil } from '@/common/request';
 
 export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     logger: LogWrapper;
@@ -34,14 +35,10 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
             const sig = hmac.digest('hex');
             headers['x-signature'] = 'sha1=' + sig;
         }
-        fetch(this.url, {
-            method: 'POST',
-            headers,
-            body: msgStr,
-        }).then(async (res) => {
+        RequestUtil.HttpGetText(this.url, 'POST', msgStr, headers).then(async (res) => {
             let resJson: QuickAction;
             try {
-                resJson = await res.json();
+                resJson = JSON.parse(res);
                 //logDebug('新消息事件HTTP上报返回快速操作: ', JSON.stringify(resJson));
             } catch (e) {
                 this.logger.logDebug('[OneBot] [Http Client] 新消息事件HTTP上报没有返回快速操作，不需要处理');
