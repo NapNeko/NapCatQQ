@@ -14,8 +14,8 @@
                     <span class="item-label">版本信息:</span>
                     <span class="item-content">
                         <t-tag class="tag-item" theme="success"> WebUi: 1.0.0 </t-tag>
-                        <t-tag class="tag-item" theme="success"> NapCat: 1.0.0 </t-tag>
-                        <t-tag class="tag-item" theme="success"> Tdesign: 1.0.0 </t-tag>
+                        <t-tag class="tag-item" theme="success"> NapCat: 4.?.? </t-tag>
+                        <t-tag class="tag-item" theme="success"> Tdesign: 1.10.3 </t-tag>
                     </span>
                 </t-list-item>
             </t-list>
