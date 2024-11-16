@@ -45,14 +45,17 @@ const props = defineProps<{
 
 const messageFormatOptions = ref([
     { label: 'Array', value: 'array' },
-    { label: 'String', value: 'string' }
+    { label: 'String', value: 'string' },
 ]);
 
-watch(() => props.config.messagePostFormat, (newValue) => {
-    if (newValue !== 'array' && newValue !== 'string') {
-        props.config.messagePostFormat = 'array';
+watch(
+    () => props.config.messagePostFormat,
+    (newValue) => {
+        if (newValue !== 'array' && newValue !== 'string') {
+            props.config.messagePostFormat = 'array';
+        }
     }
-});
+);
 </script>
 
 <style scoped>

@@ -1,6 +1,13 @@
 <template>
     <t-space class="full-space">
-        <t-tabs v-model="activeTab" :addable="true" theme="card" @add="showAddTabDialog" @remove="removeTab" class="full-tabs">
+        <t-tabs
+            v-model="activeTab"
+            :addable="true"
+            theme="card"
+            @add="showAddTabDialog"
+            @remove="removeTab"
+            class="full-tabs"
+        >
             <t-tab-panel
                 v-for="(config, idx) in clientPanelData"
                 :key="idx"
@@ -11,7 +18,7 @@
             >
                 <component :is="resolveDynamicComponent(getComponent(config.key))" :config="config.data" />
                 <div class="button-container">
-                    <t-button @click="saveConfig" style="width: 100px; height: 40px;">保存</t-button>
+                    <t-button @click="saveConfig" style="width: 100px; height: 40px">保存</t-button>
                 </div>
             </t-tab-panel>
         </t-tabs>
@@ -183,7 +190,7 @@ const showAddTabDialog = () => {
 
 const addTab = async () => {
     const { name, type } = newTab.value;
-    if (clientPanelData.some(panel => panel.name === name)) {
+    if (clientPanelData.some((panel) => panel.name === name)) {
         MessagePlugin.error('选项卡名称已存在');
         return;
     }
