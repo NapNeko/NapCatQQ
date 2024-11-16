@@ -1,15 +1,16 @@
 <template>
-    <t-space>
-        <t-tabs v-model="activeTab" :addable="true" theme="card" @add="showAddTabDialog" @remove="removeTab">
+    <t-space class="full-space">
+        <t-tabs v-model="activeTab" :addable="true" theme="card" @add="showAddTabDialog" @remove="removeTab" class="full-tabs">
             <t-tab-panel
                 v-for="(config, idx) in clientPanelData"
                 :key="idx"
                 :label="config.name"
                 :removable="true"
                 :value="idx"
+                class="full-tab-panel"
             >
                 <component :is="resolveDynamicComponent(getComponent(config.key))" :config="config.data" />
-                <t-button @click="saveConfig">保存</t-button>
+                <t-button @click="saveConfig" style="width: 100px; height: 40px;">保存</t-button>
             </t-tab-panel>
         </t-tabs>
         <t-dialog
@@ -37,6 +38,7 @@
 
 <script setup lang="ts">
 import { ref, resolveDynamicComponent, nextTick, Ref, onMounted, reactive, Reactive } from 'vue';
+import { MessagePlugin } from 'tdesign-vue-next';
 import {
     httpServerDefaultConfigs,
     httpClientDefaultConfigs,
@@ -164,7 +166,12 @@ const saveConfig = async () => {
     const userConfig = await getOB11Config();
     if (!userConfig) return;
     userConfig.network = config;
-    await setOB11Config(userConfig);
+    const success = await setOB11Config(userConfig);
+    if (success) {
+        MessagePlugin.success('配置保存成功');
+    } else {
+        MessagePlugin.error('配置保存失败');
+    }
 };
 
 const showAddTabDialog = () => {
@@ -180,6 +187,7 @@ const addTab = async () => {
     isDialogVisible.value = false;
     await nextTick();
     activeTab.value = clientPanelData.length - 1;
+    MessagePlugin.success('选项卡添加成功');
 };
 
 const removeTab = (payload: { value: string; index: number; e: PointerEvent }) => {
@@ -191,3 +199,27 @@ onMounted(() => {
     loadConfig();
 });
 </script>
+
+<style scoped>
+.full-space {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.full-tabs {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.full-tab-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+</style>
