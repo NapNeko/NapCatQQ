@@ -10,47 +10,44 @@ import { OB11HeartbeatEvent } from '../event/meta/OB11HeartbeatEvent';
 import { IncomingMessage } from 'http';
 import { ActionMap } from '@/onebot/action';
 import { LifeCycleSubType, OB11LifeCycleEvent } from '../event/meta/OB11LifeCycleEvent';
+import { WebsocketServerConfig } from '../config/config';
 
 export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     wsServer: WebSocketServer;
     wsClients: WebSocket[] = [];
     wsClientsMutex = new Mutex();
-    isOpen: boolean = false;
+    isEnable: boolean = false;
     hasBeenClosed: boolean = false;
     heartbeatInterval: number = 0;
-    core: NapCatCore;
     logger: LogWrapper;
+    config: WebsocketServerConfig;
     private heartbeatIntervalId: NodeJS.Timeout | null = null;
     wsClientWithEvent: WebSocket[] = [];
 
     constructor(
         public name: string,
-        ip: string,
-        port: number,
-        heartbeatInterval: number,
-        token: string,
-        core: NapCatCore,
+        config: WebsocketServerConfig,
+        public core: NapCatCore,
         public actions: ActionMap,
     ) {
-        this.core = core;
+        this.config = structuredClone(config);
         this.logger = core.context.logger;
-        if (ip === '0.0.0.0') {
+        if (this.config.host === '0.0.0.0') {
             //兼容配置同时处理0.0.0.0逻辑
-            ip = '';
+            this.config.host = '';
         }
-        this.heartbeatInterval = heartbeatInterval;
         this.wsServer = new WebSocketServer({
-            port: port,
-            host: ip,
+            port: this.config.port,
+            host: this.config.host,
             maxPayload: 1024 * 1024 * 1024,
         });
         this.wsServer.on('connection', async (wsClient, wsReq) => {
-            if (!this.isOpen) {
+            if (!this.isEnable) {
                 wsClient.close();
                 return;
             }
             //鉴权
-            this.authorize(token, wsClient, wsReq);
+            this.authorize(this.config.token, wsClient, wsReq);
             const paramUrl = wsReq.url?.indexOf('?') !== -1 ? wsReq.url?.substring(0, wsReq.url?.indexOf('?')) : wsReq.url;
             const isApiConnect = paramUrl === '/api' || paramUrl === '/api/';
             if (!isApiConnect) {
@@ -106,7 +103,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     }
 
     open() {
-        if (this.isOpen) {
+        if (this.isEnable) {
             this.logger.logError.bind(this.logger)('[OneBot] [WebSocket Server] Cannot open a opened WebSocket server');
             return;
         }
@@ -117,7 +114,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
         const addressInfo = this.wsServer.address();
         this.logger.log('[OneBot] [WebSocket Server] Server Started', typeof (addressInfo) === 'string' ? addressInfo : addressInfo?.address + ':' + addressInfo?.port);
 
-        this.isOpen = true;
+        this.isEnable = true;
         if (this.heartbeatInterval > 0) {
             this.registerHeartBeat();
         }
@@ -125,7 +122,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     }
 
     async close() {
-        this.isOpen = false;
+        this.isEnable = false;
         this.wsServer.close((err) => {
             if (err) {
                 this.logger.logError.bind(this.logger)('[OneBot] [WebSocket Server] Error closing server:', err.message);
@@ -197,6 +194,9 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
         }
         const retdata = await action.websocketHandle(receiveData.params, echo ?? '', this.name);
         this.checkStateAndReply<any>({ ...retdata }, wsClient);
+    }
+    async reload(config: WebsocketServerConfig) {
+
     }
 }
 

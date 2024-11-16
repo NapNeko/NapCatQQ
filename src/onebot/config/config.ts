@@ -78,6 +78,7 @@ export const websocketClientDefaultConfigs = createDefaultAdapterConfig({
     url: 'ws://localhost:8082',
     messagePostFormat: 'array',
     reportSelfMessage: false,
+    reconnectInterval: 5000,
     token: '',
     debug: false,
     heartInterval: 30000,

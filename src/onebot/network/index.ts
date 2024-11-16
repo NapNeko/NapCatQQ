@@ -5,14 +5,17 @@ import { ActionMap } from '@/onebot/action';
 export type OB11EmitEventContent = OB11BaseEvent | OB11Message;
 
 export interface IOB11NetworkAdapter {
-    actions?: ActionMap;
+    actions: ActionMap;
     name: string;
+    isEnable: boolean;
 
     onEvent<T extends OB11EmitEventContent>(event: T): void;
 
     open(): void | Promise<void>;
 
     close(): void | Promise<void>;
+
+    reload(config: any): void | Promise<void>;
 }
 
 export class OB11NetworkManager {
@@ -34,7 +37,7 @@ export class OB11NetworkManager {
             }
         }));
     }
-    async emitEventByNames(map:Map<string,OB11EmitEventContent>){
+    async emitEventByNames(map: Map<string, OB11EmitEventContent>) {
         return Promise.all(Array.from(map.entries()).map(([name, event]) => {
             const adapter = this.adapters.get(name);
             if (adapter) {
@@ -70,6 +73,16 @@ export class OB11NetworkManager {
     async closeAllAdapters() {
         await Promise.all(Array.from(this.adapters.values()).map(adapter => adapter.close()));
         this.adapters.clear();
+    }
+
+    async readloadAdapter<T>(name: string, config: T) {
+        const adapter = this.adapters.get(name);
+        if (adapter) {
+            await adapter.reload(config);
+        }
+    }
+    async readloadSomeAdapters<T>(configMap: Map<string, T>) {
+        await Promise.all(Array.from(configMap.entries()).map(([name, config]) => this.readloadAdapter(name, config)));
     }
 }
 
