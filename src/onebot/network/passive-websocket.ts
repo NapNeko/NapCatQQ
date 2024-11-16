@@ -34,7 +34,10 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     ) {
         this.core = core;
         this.logger = core.context.logger;
-
+        if (ip === '0.0.0.0') {
+            //兼容配置同时处理0.0.0.0逻辑
+            ip = '';
+        }
         this.heartbeatInterval = heartbeatInterval;
         this.wsServer = new WebSocketServer({
             port: port,
