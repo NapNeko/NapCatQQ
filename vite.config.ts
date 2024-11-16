@@ -63,19 +63,19 @@ const ShellBaseConfig = () =>
                 './lib-cov/fluent-ffmpeg': './lib/fluent-ffmpeg',
             },
         },
-    },
-    build: {
-        sourcemap: false,
-        target: 'esnext',
-        minify: false,
-        lib: {
-            entry: {
-                'napcat': 'src/shell/napcat.ts',
-                'audio-worker': 'src/common/audio-worker.ts',
-            },
-            formats: ['es'],
-            fileName: (_, entryName) => `${entryName}.mjs`,
-        },
+        build: {
+            sourcemap: false,
+            target: 'esnext',
+            minify: false,
+            lib: {
+                entry: {
+                    'napcat': 'src/shell/napcat.ts',
+                    'audio-worker': 'src/common/audio-worker.ts',
+                },
+                formats: ['es'],
+                fileName: (_, entryName) => `${entryName}.mjs`,
+            }
+        }
     });
 
 const FrameworkBaseConfig = () =>
@@ -88,19 +88,19 @@ const FrameworkBaseConfig = () =>
                 './lib-cov/fluent-ffmpeg': './lib/fluent-ffmpeg',
             },
         },
-    },
-    build: {
-        sourcemap: false,
-        target: 'esnext',
-        minify: false,
-        lib: {
-            entry: {
-                'napcat': 'src/framework/napcat.ts',
-                'audio-worker': 'src/common/audio-worker.ts',
+        build: {
+            sourcemap: false,
+            target: 'esnext',
+            minify: false,
+            lib: {
+                entry: {
+                    'napcat': 'src/framework/napcat.ts',
+                    'audio-worker': 'src/common/audio-worker.ts',
+                },
+                formats: ['es'],
+                fileName: (_, entryName) => `${entryName}.mjs`,
             },
-            formats: ['es'],
-            fileName: (_, entryName) => `${entryName}.mjs`,
-        },
+        }
     });
 
 export default defineConfig(({ mode }): UserConfig => {
