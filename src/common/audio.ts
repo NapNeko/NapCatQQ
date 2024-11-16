@@ -11,8 +11,12 @@ const ALLOW_SAMPLE_RATE = [8000, 12000, 16000, 24000, 32000, 44100, 48000];
 const EXIT_CODES = [0, 255];
 const FFMPEG_PATH = process.env.FFMPEG_PATH ?? 'ffmpeg';
 
+async function getWorkerPath() {
+    return new URL('./audio-worker.mjs', import.meta.url).href;
+}
+
 const piscina = new Piscina<EncodeArgs, EncodeResult>({
-    filename: new URL('./audio-worker.mjs', import.meta.url).href,
+    filename: await getWorkerPath(),
 });
 
 async function guessDuration(pttPath: string, logger: LogWrapper) {
