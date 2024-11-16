@@ -4,7 +4,7 @@ import { resolve } from 'path';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import { builtinModules } from 'module';
 //依赖排除
-const external = ['silk-wasm', 'ws', 'express', 'qrcode-terminal', 'fluent-ffmpeg'];
+const external = ['silk-wasm', 'ws', 'express', 'qrcode-terminal', 'fluent-ffmpeg', 'piscina'];
 const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`)].flat();
 function genCpModule(module: string) {
     return { src: `./node_modules/${module}`, dest: `dist/node_modules/${module}`, flatten: false };
@@ -50,55 +50,59 @@ const ShellBaseConfigPlugin: PluginOption[] = [
     nodeResolve(),
 ];
 
-const ShellBaseConfig = () =>
-    defineConfig({
-        resolve: {
-            conditions: ['node', 'default'],
-            alias: {
-                '@/core': resolve(__dirname, './src/core'),
-                '@': resolve(__dirname, './src'),
-                './lib-cov/fluent-ffmpeg': './lib/fluent-ffmpeg',
-            },
+const ShellBaseConfig = () => defineConfig({
+    resolve: {
+        conditions: ['node', 'default'],
+        alias: {
+            '@/core': resolve(__dirname, './src/core'),
+            '@': resolve(__dirname, './src'),
+            './lib-cov/fluent-ffmpeg': './lib/fluent-ffmpeg',
         },
-        build: {
-            sourcemap: false,
-            target: 'esnext',
-            minify: false,
-            lib: {
-                entry: 'src/shell/napcat.ts',
-                formats: ['es'],
-                fileName: () => 'napcat.mjs',
+    },
+    build: {
+        sourcemap: false,
+        target: 'esnext',
+        minify: false,
+        lib: {
+            entry: {
+                'napcat': 'src/shell/napcat.ts',
+                'audio-worker': 'src/common/audio-worker.ts',
             },
-            rollupOptions: {
-                external: [...nodeModules, ...external],
-            },
+            formats: ['es'],
+            fileName: (_, entryName) => `${entryName}.mjs`,
         },
-    });
+        rollupOptions: {
+            external: [...nodeModules, ...external],
+        },
+    },
+});
 
-const FrameworkBaseConfig = () =>
-    defineConfig({
-        resolve: {
-            conditions: ['node', 'default'],
-            alias: {
-                '@/core': resolve(__dirname, './src/core'),
-                '@': resolve(__dirname, './src'),
-                './lib-cov/fluent-ffmpeg': './lib/fluent-ffmpeg',
-            },
+const FrameworkBaseConfig = () => defineConfig({
+    resolve: {
+        conditions: ['node', 'default'],
+        alias: {
+            '@/core': resolve(__dirname, './src/core'),
+            '@': resolve(__dirname, './src'),
+            './lib-cov/fluent-ffmpeg': './lib/fluent-ffmpeg',
         },
-        build: {
-            sourcemap: false,
-            target: 'esnext',
-            minify: false,
-            lib: {
-                entry: 'src/framework/napcat.ts',
-                formats: ['es'],
-                fileName: () => 'napcat.mjs',
+    },
+    build: {
+        sourcemap: false,
+        target: 'esnext',
+        minify: false,
+        lib: {
+            entry: {
+                'napcat': 'src/framework/napcat.ts',
+                'audio-worker': 'src/common/audio-worker.ts',
             },
-            rollupOptions: {
-                external: [...nodeModules, ...external],
-            },
+            formats: ['es'],
+            fileName: (_, entryName) => `${entryName}.mjs`,
         },
-    });
+        rollupOptions: {
+            external: [...nodeModules, ...external],
+        },
+    },
+});
 
 export default defineConfig(({ mode }): UserConfig => {
     if (mode === 'shell') {
