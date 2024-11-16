@@ -3,12 +3,14 @@ import { defineConfig, PluginOption, UserConfig } from 'vite';
 import { resolve } from 'path';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import { builtinModules } from 'module';
-//依赖排除
-const external = ['silk-wasm', 'ws', 'express', 'qrcode-terminal', 'fluent-ffmpeg'];
-const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`)].flat();
+
+const external = ['silk-wasm', 'ws', 'express', 'qrcode-terminal', 'fluent-ffmpeg', 'piscina'];
+const nodeModules = [...builtinModules, builtinModules.map(m => `node:${m}`)].flat();
+
 function genCpModule(module: string) {
     return { src: `./node_modules/${module}`, dest: `dist/node_modules/${module}`, flatten: false };
 }
+
 let startScripts: string[] | undefined = undefined;
 if (process.env.NAPCAT_BUILDSYS == 'linux') {
     startScripts = [];
@@ -17,6 +19,7 @@ if (process.env.NAPCAT_BUILDSYS == 'linux') {
 } else {
     startScripts = ['./script/KillQQ.bat'];
 }
+
 const FrameworkBaseConfigPlugin: PluginOption[] = [
     cp({
         targets: [
@@ -60,18 +63,18 @@ const ShellBaseConfig = () =>
                 './lib-cov/fluent-ffmpeg': './lib/fluent-ffmpeg',
             },
         },
-        build: {
-            sourcemap: false,
-            target: 'esnext',
-            minify: false,
-            lib: {
-                entry: 'src/shell/napcat.ts',
-                formats: ['es'],
-                fileName: () => 'napcat.mjs',
+    },
+    build: {
+        sourcemap: false,
+        target: 'esnext',
+        minify: false,
+        lib: {
+            entry: {
+                'napcat': 'src/shell/napcat.ts',
+                'audio-worker': 'src/common/audio-worker.ts',
             },
-            rollupOptions: {
-                external: [...nodeModules, ...external],
-            },
+            formats: ['es'],
+            fileName: (_, entryName) => `${entryName}.mjs`,
         },
     });
 
@@ -85,18 +88,18 @@ const FrameworkBaseConfig = () =>
                 './lib-cov/fluent-ffmpeg': './lib/fluent-ffmpeg',
             },
         },
-        build: {
-            sourcemap: false,
-            target: 'esnext',
-            minify: false,
-            lib: {
-                entry: 'src/framework/napcat.ts',
-                formats: ['es'],
-                fileName: () => 'napcat.mjs',
+    },
+    build: {
+        sourcemap: false,
+        target: 'esnext',
+        minify: false,
+        lib: {
+            entry: {
+                'napcat': 'src/framework/napcat.ts',
+                'audio-worker': 'src/common/audio-worker.ts',
             },
-            rollupOptions: {
-                external: [...nodeModules, ...external],
-            },
+            formats: ['es'],
+            fileName: (_, entryName) => `${entryName}.mjs`,
         },
     });
 
