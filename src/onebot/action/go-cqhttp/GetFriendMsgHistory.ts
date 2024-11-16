@@ -26,7 +26,7 @@ export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
     actionName = ActionName.GetFriendMsgHistory;
     payloadSchema = SchemaData;
 
-    async _handle(payload: Payload): Promise<Response> {
+    async _handle(payload: Payload, adapter: string): Promise<Response> {
         //处理参数
         const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
         const MsgCount = +(payload.count ?? 20);
@@ -45,9 +45,10 @@ export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
         await Promise.all(msgList.map(async msg => {
             msg.id = MessageUnique.createUniqueMsgId({ guildId: '', chatType: msg.chatType, peerUid: msg.peerUid }, msg.msgId);
         }));
+        const network = Object.values(this.obContext.configLoader.configData.network) as Array<typeof this.obContext.configLoader.configData.network[keyof typeof this.obContext.configLoader.configData.network]>;
         //烘焙消息
         const ob11MsgList = (await Promise.all(
-            msgList.map(msg => this.obContext.apis.MsgApi.parseMessage(msg)))
+            msgList.map(msg => this.obContext.apis.MsgApi.parseMessage(msg, network.flat().find(e => e.name === adapter)?.messagePostFormat ?? 'array')))
         ).filter(msg => msg !== undefined);
         return { 'messages': ob11MsgList };
     }

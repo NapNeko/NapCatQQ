@@ -10,6 +10,7 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     isOpen: boolean = false;
 
     constructor(
+        public name: string,
         public url: string,
         public secret: string | undefined,
         public core: NapCatCore,

@@ -368,7 +368,7 @@ export class OneBotMsgApi {
                             multiMsgItem.parentMsgPeer = parentMsgPeer;
                             multiMsgItem.parentMsgIdList = msg.parentMsgIdList;
                             multiMsgItem.id = MessageUnique.createUniqueMsgId(parentMsgPeer, multiMsgItem.msgId); //该ID仅用查看 无法调用
-                            return await this.parseMessage(multiMsgItem);
+                            return await this.parseMessage(multiMsgItem, 'array');
                         },
                     ))).filter(item => item !== undefined),
                 },
@@ -693,7 +693,16 @@ export class OneBotMsgApi {
 
     async parseMessage(
         msg: RawMessage,
-        messagePostFormat: string = this.obContext.configLoader.configData.messagePostFormat,
+        messagePostFormat: string,
+    ) {
+        if (messagePostFormat === 'string') {
+            return (await this.parseMessageV2(msg))?.stringMsg;
+        }
+        return (await this.parseMessageV2(msg))?.arrayMsg;
+    }
+
+    async parseMessageV2(
+        msg: RawMessage,
     ) {
         if (msg.senderUin == '0' || msg.senderUin == '') return;
         if (msg.peerUin == '0' || msg.peerUin == '') return;
@@ -714,8 +723,8 @@ export class OneBotMsgApi {
             raw_message: '',
             font: 14,
             sub_type: 'friend',
-            message: messagePostFormat === 'string' ? '' : [],
-            message_format: messagePostFormat === 'string' ? 'string' : 'array',
+            message: [],
+            message_format: 'array',
             post_type: this.core.selfInfo.uin == msg.senderUin ? EventType.MESSAGE_SENT : EventType.MESSAGE,
         };
         if (this.core.selfInfo.uin == msg.senderUin) {
@@ -785,17 +794,17 @@ export class OneBotMsgApi {
         }).map((entry) => (<PromiseFulfilledResult<OB11MessageData>>entry).value).filter(value => value != null);
 
         const msgAsCQCode = validSegments.map(msg => encodeCQCode(msg)).join('').trim();
-
-        if (messagePostFormat === 'string') {
-            resMsg.message = msgAsCQCode;
-            resMsg.raw_message = msgAsCQCode;
-        } else {
-            resMsg.message = validSegments;
-            resMsg.raw_message = msgAsCQCode;
-        }
-        return resMsg;
+        resMsg.message = validSegments;
+        resMsg.raw_message = msgAsCQCode;
+        let stringMsg = structuredClone(resMsg);
+        stringMsg = await this.importArrayTostringMsg(stringMsg);
+        return { stringMsg: stringMsg, arrayMsg: resMsg };
     }
-
+    async importArrayTostringMsg(msg: OB11Message) {
+        msg.message_format = 'string';
+        msg.message = msg.raw_message;
+        return msg;
+    }
     async createSendElements(
         messageData: OB11MessageData[],
         peer: Peer,
