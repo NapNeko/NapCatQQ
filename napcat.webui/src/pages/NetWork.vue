@@ -10,7 +10,9 @@
                 class="full-tab-panel"
             >
                 <component :is="resolveDynamicComponent(getComponent(config.key))" :config="config.data" />
-                <t-button @click="saveConfig" style="width: 100px; height: 40px;">保存</t-button>
+                <div class="button-container">
+                    <t-button @click="saveConfig" style="width: 100px; height: 40px;">保存</t-button>
+                </div>
             </t-tab-panel>
         </t-tabs>
         <t-dialog
@@ -221,5 +223,11 @@ onMounted(() => {
     flex: 1;
     display: flex;
     flex-direction: column;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
 }
 </style>
