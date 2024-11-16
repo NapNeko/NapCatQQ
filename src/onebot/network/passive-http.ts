@@ -1,4 +1,4 @@
-import { IOB11NetworkAdapter } from './index';
+import { IOB11NetworkAdapter, OB11NetworkReloadType } from './index';
 import express, { Express, Request, Response } from 'express';
 import http from 'http';
 import { NapCatCore } from '@/core';
@@ -11,7 +11,7 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
     private app: Express | undefined;
     private server: http.Server | undefined;
     isEnable: boolean = false;
-    config: HttpServerConfig;
+    public config: HttpServerConfig;
 
     constructor(
         public name: string,
@@ -113,7 +113,28 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
             return res.json(OB11Response.error('不支持的api ' + actionName, 200));
         }
     }
-    async reload(config: HttpServerConfig) {
 
+    async reload(newConfig: HttpServerConfig) {
+        const wasEnabled = this.isEnable;
+        const oldPort = this.config.port;
+        this.config = newConfig;
+
+        if (newConfig.enable && !wasEnabled) {
+            this.open();
+            return OB11NetworkReloadType.NetWorkOpen;
+        } else if (!newConfig.enable && wasEnabled) {
+            this.close();
+            return OB11NetworkReloadType.NetWorkClose;
+        }
+
+        if (oldPort !== newConfig.port) {
+            this.close();
+            if (newConfig.enable) {
+                this.open();
+            }
+            return OB11NetworkReloadType.NetWorkReload;
+        }
+
+        return OB11NetworkReloadType.Normal;
     }
 }

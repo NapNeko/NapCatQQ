@@ -1,21 +1,29 @@
 import { OB11BaseEvent } from '@/onebot/event/OB11BaseEvent';
 import { OB11Message } from '@/onebot';
 import { ActionMap } from '@/onebot/action';
+import { NetworkConfigAdapter } from '../config/config';
 
 export type OB11EmitEventContent = OB11BaseEvent | OB11Message;
-
+export enum OB11NetworkReloadType {
+    Normal = 0,
+    ConfigChange = 1,
+    NetWorkReload = 2,
+    NetWorkClose = 3,
+    NetWorkOpen = 4
+}
 export interface IOB11NetworkAdapter {
     actions: ActionMap;
     name: string;
     isEnable: boolean;
-
+    config: NetworkConfigAdapter;
+    
     onEvent<T extends OB11EmitEventContent>(event: T): void;
 
     open(): void | Promise<void>;
 
     close(): void | Promise<void>;
 
-    reload(config: any): void | Promise<void>;
+    reload(config: any): OB11NetworkReloadType | Promise<OB11NetworkReloadType>;
 }
 
 export class OB11NetworkManager {

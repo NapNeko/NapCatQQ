@@ -1,4 +1,4 @@
-import { IOB11NetworkAdapter, OB11EmitEventContent } from '@/onebot/network/index';
+import { IOB11NetworkAdapter, OB11EmitEventContent, OB11NetworkReloadType } from '@/onebot/network/index';
 import { createHmac } from 'crypto';
 import { LogWrapper } from '@/common/log';
 import { QuickAction, QuickActionEvent } from '../types';
@@ -11,7 +11,7 @@ import { ActionMap } from '../action';
 export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     logger: LogWrapper;
     isEnable: boolean = false;
-    config: HttpClientConfig;
+    public config: HttpClientConfig;
     constructor(
         public name: string,
         config: HttpClientConfig,
@@ -22,7 +22,7 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
         this.logger = core.context.logger;
         this.config = structuredClone(config);
     }
-    
+
 
     onEvent<T extends OB11EmitEventContent>(event: T) {
         if (!this.isEnable) {
@@ -67,7 +67,20 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     close() {
         this.isEnable = false;
     }
-    async reload(config: HttpClientConfig){
-        this.config = structuredClone(config);
+    async reload(newconfig: HttpClientConfig) {
+        const wasEnabled = this.isEnable;
+        const oldUrl = this.config.url;
+        this.config = newconfig;
+        if (newconfig.enable && !wasEnabled) {
+            this.open();
+            return OB11NetworkReloadType.NetWorkOpen;
+        } else if (!newconfig.enable && wasEnabled) {
+            this.close();
+            return OB11NetworkReloadType.NetWorkClose;
+        }
+        if (oldUrl !== newconfig.url) {
+            return OB11NetworkReloadType.NetWorkReload;
+        }
+        return OB11NetworkReloadType.Normal;
     }
 }

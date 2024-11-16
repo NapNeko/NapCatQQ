@@ -1,4 +1,4 @@
-import { IOB11NetworkAdapter, OB11EmitEventContent } from '@/onebot/network/index';
+import { IOB11NetworkAdapter, OB11EmitEventContent, OB11NetworkReloadType } from '@/onebot/network/index';
 import { WebSocket } from 'ws';
 import { OB11HeartbeatEvent } from '../event/meta/OB11HeartbeatEvent';
 import { NapCatCore } from '@/core';
@@ -14,7 +14,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
     logger: LogWrapper;
     private connection: WebSocket | null = null;
     private heartbeatRef: NodeJS.Timeout | null = null;
-    config: WebsocketClientConfig;
+    public config: WebsocketClientConfig;
 
     constructor(
         public name: string,
@@ -154,7 +154,43 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
         const retdata = await action.websocketHandle(receiveData.params, echo ?? '', this.name);
         this.checkStateAndReply<any>({ ...retdata });
     }
-    async reload(config: WebsocketClientConfig) {
-
+    async reload(newConfig: WebsocketClientConfig) {
+        const wasEnabled = this.isEnable;
+        const oldUrl = this.config.url;
+        const oldHeartInterval = this.config.heartInterval;
+        this.config = newConfig;
+    
+        if (newConfig.enable && !wasEnabled) {
+            this.open();
+            return OB11NetworkReloadType.NetWorkOpen;
+        } else if (!newConfig.enable && wasEnabled) {
+            this.close();
+            return OB11NetworkReloadType.NetWorkClose;
+        }
+    
+        if (oldUrl !== newConfig.url) {
+            this.close();
+            if (newConfig.enable) {
+                this.open();
+            }
+            return OB11NetworkReloadType.NetWorkReload;
+        }
+    
+        if (oldHeartInterval !== newConfig.heartInterval) {
+            if (this.heartbeatRef) {
+                clearInterval(this.heartbeatRef);
+                this.heartbeatRef = null;
+            }
+            if (newConfig.heartInterval > 0 && this.isEnable) {
+                this.heartbeatRef = setInterval(() => {
+                    if (this.connection && this.connection.readyState === WebSocket.OPEN) {
+                        this.connection.send(JSON.stringify(new OB11HeartbeatEvent(this.core, newConfig.heartInterval, this.core.selfInfo.online ?? true, true)));
+                    }
+                }, newConfig.heartInterval);
+            }
+            return OB11NetworkReloadType.NetWorkReload;
+        }
+    
+        return OB11NetworkReloadType.Normal;
     }
 }
