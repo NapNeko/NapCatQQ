@@ -106,7 +106,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
                 if (!isClosedByError) {
                     this.logger.logError.bind(this.logger)(`[OneBot] [WebSocket Client] 反向WebSocket (${this.config.url}) 连接意外关闭`);
                     this.logger.logError.bind(this.logger)(`[OneBot] [WebSocket Client] 在 ${Math.floor(this.config.reconnectInterval / 1000)} 秒后尝试重新连接`);
-                    if (this.isEnable) {
+                    if (!this.isEnable) {
                         this.connection = null;
                         setTimeout(() => this.tryConnect(), this.config.reconnectInterval);
                     }
@@ -116,7 +116,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
                 isClosedByError = true;
                 this.logger.logError.bind(this.logger)(`[OneBot] [WebSocket Client] 反向WebSocket (${this.config.url}) 连接错误`, err);
                 this.logger.logError.bind(this.logger)(`[OneBot] [WebSocket Client] 在 ${Math.floor(this.config.reconnectInterval / 1000)} 秒后尝试重新连接`);
-                if (this.isEnable) {
+                if (!this.isEnable) {
                     this.connection = null;
                     setTimeout(() => this.tryConnect(), this.config.reconnectInterval);
                 }
@@ -159,7 +159,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
         const oldUrl = this.config.url;
         const oldHeartInterval = this.config.heartInterval;
         this.config = newConfig;
-    
+
         if (newConfig.enable && !wasEnabled) {
             this.open();
             return OB11NetworkReloadType.NetWorkOpen;
@@ -167,7 +167,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
             this.close();
             return OB11NetworkReloadType.NetWorkClose;
         }
-    
+
         if (oldUrl !== newConfig.url) {
             this.close();
             if (newConfig.enable) {
@@ -175,7 +175,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
             }
             return OB11NetworkReloadType.NetWorkReload;
         }
-    
+
         if (oldHeartInterval !== newConfig.heartInterval) {
             if (this.heartbeatRef) {
                 clearInterval(this.heartbeatRef);
@@ -190,7 +190,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
             }
             return OB11NetworkReloadType.NetWorkReload;
         }
-    
+
         return OB11NetworkReloadType.Normal;
     }
 }
