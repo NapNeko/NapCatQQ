@@ -26,6 +26,7 @@ import {
     Checkbox as TCheckbox,
     Popup as TPopup,
     Dialog as TDialog,
+    Switch as TSwitch,
 } from 'tdesign-vue-next';
 import { router } from './router';
 import 'tdesign-vue-next/es/style/index.css';
@@ -57,4 +58,5 @@ app.use(TSpace);
 app.use(TCheckbox);
 app.use(TPopup);
 app.use(TDialog);
+app.use(TSwitch);
 app.mount('#app');
