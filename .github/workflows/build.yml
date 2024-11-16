@@ -25,6 +25,9 @@ jobs:
     - name: Build NuCat Framework
       run: |
           npm i
+          cd napcat.webui
+          npm i
+          cd ..
           npm run build:framework
           cd dist
           npm i --omit=dev 
@@ -52,6 +55,9 @@ jobs:
         - name: Build NuCat LiteLoader
           run: |
                 npm i
+                cd napcat.webui
+                npm i
+                cd ..
                 npm run build:shell
                 cd dist
                 npm i --omit=dev
