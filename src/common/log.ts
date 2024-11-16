@@ -36,7 +36,7 @@ export class LogWrapper {
         this.logger = winston.createLogger({
             level: 'debug',
             format: format.combine(
-                format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+                format.timestamp({ format: 'MM-DD HH:mm:ss' }),
                 format.printf(({ timestamp, level, message, ...meta }) => {
                     const userInfo = meta.userInfo ? `${meta.userInfo} | ` : '';
                     return `${timestamp} [${level}] ${userInfo}${message}`;
@@ -61,7 +61,7 @@ export class LogWrapper {
             ]
         });
 
-        this.setLogSelfInfo({ nick: '', uin: '', uid: '' });
+        this.setLogSelfInfo({ nick: '', uid: '' });
         this.cleanOldLogs(logDir);
     }
 
@@ -111,8 +111,8 @@ export class LogWrapper {
         });
     }
 
-    setLogSelfInfo(selfInfo: { nick: string, uin: string, uid: string }) {
-        const userInfo = `${selfInfo.nick}(${selfInfo.uin})`;
+    setLogSelfInfo(selfInfo: { nick: string, uid: string }) {
+        const userInfo = `${selfInfo.nick}`;
         this.logger.defaultMeta = { userInfo };
     }
 
