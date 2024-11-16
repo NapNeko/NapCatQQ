@@ -18,7 +18,7 @@ jobs:
           node-version: 20.x
       - name: Build NapCat.Framework
         run: |
-          npm i
+          npm i && cd napcat.webui && npm i && cd ..
           npm run build:framework && npm run depend
           rm package-lock.json
       - name: Upload Artifact
@@ -37,7 +37,7 @@ jobs:
           node-version: 20.x
       - name: Build NapCat.Shell
         run: |
-          npm i
+          npm i && cd napcat.webui && npm i && cd ..
           npm run build:shell && npm run depend
           rm package-lock.json
       - name: Upload Artifact
