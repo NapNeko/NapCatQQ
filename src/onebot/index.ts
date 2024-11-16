@@ -225,7 +225,7 @@ export class NapCatOneBot11Adapter {
             const prevClient = prev.network.httpClients.find(c => c.name === client.name);
             if (prevClient && prevClient.enable !== client.enable) {
                 if (client.enable) {
-                    let adapter = new OB11ActiveHttpAdapter(client.name, client, this.core, this,this.actions);
+                    let adapter = new OB11ActiveHttpAdapter(client.name, client, this.core, this, this.actions);
                     adapter.open();
                     this.networkManager.registerAdapter(
                         adapter
@@ -290,7 +290,7 @@ export class NapCatOneBot11Adapter {
         for (const client of addedHttpClients) {
 
             if (client.enable) {
-                let adapter = new OB11ActiveHttpAdapter(client.name, client, this.core, this,this.actions);
+                let adapter = new OB11ActiveHttpAdapter(client.name, client, this.core, this, this.actions);
                 adapter.open();
                 this.networkManager.registerAdapter(adapter);
             }
