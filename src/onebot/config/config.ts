@@ -66,7 +66,7 @@ export const websocketServerDefaultConfigs = createDefaultAdapterConfig({
     messagePostFormat: 'array',
     reportSelfMessage: false,
     token: '',
-    enablePushEvent: true,
+    enableForcePushEvent: true,
     debug: false,
     heartInterval: 30000,
 });

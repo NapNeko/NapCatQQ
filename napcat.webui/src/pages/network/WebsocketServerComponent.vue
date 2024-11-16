@@ -12,14 +12,14 @@
                 <t-form-item label="消息格式">
                     <t-select v-model="config.messagePostFormat" :options="messageFormatOptions" />
                 </t-form-item>
-                <t-form-item label="报告自身消息">
+                <t-form-item label="上报自身消息">
                     <t-checkbox v-model="config.reportSelfMessage" />
                 </t-form-item>
                 <t-form-item label="Token">
                     <t-input v-model="config.token" />
                 </t-form-item>
-                <t-form-item label="启用推送事件">
-                    <t-checkbox v-model="config.enablePushEvent" />
+                <t-form-item label="强制推送事件">
+                    <t-checkbox v-model="config.enableForcePushEvent" />
                 </t-form-item>
                 <t-form-item label="调试模式">
                     <t-checkbox v-model="config.debug" />
