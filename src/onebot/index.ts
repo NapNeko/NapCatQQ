@@ -616,7 +616,7 @@ export class NapCatOneBot11Adapter {
                 } else if (ob11Msg.stringMsg.message.length === 0 || ob11Msg.arrayMsg.message.length == 0) {
                     return;
                 }
-                const notreportSelf_network = network.flat().filter((e) => e.enable && !e.reportSelfMessage);
+                const notreportSelf_network = network.flat().filter((e) => e.enable && (('reportSelfMessage' in e && !e.reportSelfMessage) || !('reportSelfMessage' in e)));
                 if (isSelfMsg) {
                     for (const adapter of notreportSelf_network) {
                         msgMap.delete(adapter.name);
