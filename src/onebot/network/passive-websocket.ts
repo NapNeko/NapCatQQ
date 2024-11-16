@@ -17,7 +17,6 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     wsClients: WebSocket[] = [];
     wsClientsMutex = new Mutex();
     isEnable: boolean = false;
-    hasBeenClosed: boolean = false;
     heartbeatInterval: number = 0;
     logger: LogWrapper;
     public config: WebsocketServerConfig;
@@ -105,10 +104,6 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     open() {
         if (this.isEnable) {
             this.logger.logError.bind(this.logger)('[OneBot] [WebSocket Server] Cannot open a opened WebSocket server');
-            return;
-        }
-        if (this.hasBeenClosed) {
-            this.logger.logError.bind(this.logger)('[OneBot] [WebSocket Server] Cannot open a WebSocket server that has been closed');
             return;
         }
         const addressInfo = this.wsServer.address();
