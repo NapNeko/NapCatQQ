@@ -163,7 +163,7 @@ export class NapCatOneBot11Adapter {
             const prev = this.configLoader.configData;
             this.configLoader.save(newConfig);
             this.context.logger.log(`OneBot11 配置更改：${JSON.stringify(prev)} -> ${JSON.stringify(newConfig)}`);
-            //await this.reloadNetwork(prev, newConfig);
+            await this.reloadNetwork(prev, newConfig);
         });
     }
 
@@ -180,88 +180,87 @@ export class NapCatOneBot11Adapter {
         };
     }
 
-    // private async reloadNetwork(prev: OB11Config, now: OB11Config) {
-    //     const serviceInfo = `
-    // HTTP服务 ${now.http.enable ? '已启动' : '未启动'}, ${now.http.host}:${now.http.port}
-    // HTTP上报服务 ${now.http.enablePost ? '已启动' : '未启动'}, 上报地址: ${now.http.postUrls}
-    // WebSocket服务 ${now.ws.enable ? '已启动' : '未启动'}, ${now.ws.host}:${now.ws.port}
-    // WebSocket反向服务 ${now.reverseWs.enable ? '已启动' : '未启动'}, 反向地址: ${now.reverseWs.urls}`;
-    //     this.context.logger.log(`[Notice] [OneBot11] 热重载 ${serviceInfo}`);
-
-    //     // check difference in passive http (Http)
-    //     if (prev.http.enable !== now.http.enable) {
-    //         if (now.http.enable) {
-    //             await this.networkManager.registerAdapterAndOpen(new OB11PassiveHttpAdapter(
-    //                 now.http.port, now.token, this.core, this.actions,
-    //             ));
-    //         } else {
-    //             await this.networkManager.closeAdapterByPredicate(adapter => adapter instanceof OB11PassiveHttpAdapter);
-    //         }
-    //     }
-
-    //     // check difference in active http (HttpPost)
-    //     if (prev.http.enablePost !== now.http.enablePost) {
-    //         if (now.http.enablePost) {
-    //             now.http.postUrls.forEach(url => {
-    //                 this.networkManager.registerAdapterAndOpen(new OB11ActiveHttpAdapter(
-    //                     url, now.http.secret, this.core, this,
-    //                 ));
-    //             });
-    //         } else {
-    //             await this.networkManager.closeAdapterByPredicate(adapter => adapter instanceof OB11ActiveHttpAdapter);
-    //         }
-    //     } else if (now.http.enablePost) {
-    //         const { added, removed } = this.findDifference<string>(prev.http.postUrls, now.http.postUrls);
-    //         await this.networkManager.closeAdapterByPredicate(
-    //             adapter => adapter instanceof OB11ActiveHttpAdapter && removed.includes(adapter.url),
-    //         );
-    //         for (const url of added) {
-    //             await this.networkManager.registerAdapterAndOpen(new OB11ActiveHttpAdapter(
-    //                 url, now.http.secret, this.core, this,
-    //             ));
-    //         }
-    //     }
-
-    //     // check difference in passive websocket (Ws)
-    //     if (prev.ws.enable !== now.ws.enable) {
-    //         if (now.ws.enable) {
-    //             await this.networkManager.registerAdapterAndOpen(new OB11PassiveWebSocketAdapter(
-    //                 now.ws.host, now.ws.port, now.heartInterval, now.token, this.core, this.actions,
-    //             ));
-    //         } else {
-    //             await this.networkManager.closeAdapterByPredicate(
-    //                 adapter => adapter instanceof OB11PassiveWebSocketAdapter,
-    //             );
-    //         }
-    //     }
-
-    //     // check difference in active websocket (ReverseWs)
-    //     if (prev.reverseWs.enable !== now.reverseWs.enable) {
-    //         if (now.reverseWs.enable) {
-    //             now.reverseWs.urls.forEach(url => {
-    //                 this.networkManager.registerAdapterAndOpen(new OB11ActiveWebSocketAdapter(
-    //                     url, 5000, now.heartInterval, now.token, this.core, this.actions,
-    //                 ));
-    //             });
-    //         } else {
-    //             await this.networkManager.closeAdapterByPredicate(
-    //                 adapter => adapter instanceof OB11ActiveWebSocketAdapter,
-    //             );
-    //         }
-    //     } else if (now.reverseWs.enable) {
-    //         const { added, removed } = this.findDifference<string>(prev.reverseWs.urls, now.reverseWs.urls);
-    //         await this.networkManager.closeAdapterByPredicate(
-    //             adapter => adapter instanceof OB11ActiveWebSocketAdapter && removed.includes(adapter.url),
-    //         );
-    //         for (const url of added) {
-    //             await this.networkManager.registerAdapterAndOpen(new OB11ActiveWebSocketAdapter(
-    //                 url, 5000, now.heartInterval, now.token, this.core, this.actions,
-    //             ));
-    //         }
-    //     }
-
-    // }
-
+    private async reloadNetwork(prev: OneBotConfig, now: OneBotConfig) {
+        const { added: addedHttpServers, removed: removedHttpServers } = this.findDifference(prev.network.httpServers, now.network.httpServers);
+        const { added: addedHttpClients, removed: removedHttpClients } = this.findDifference(prev.network.httpClients, now.network.httpClients);
+        const { added: addedWebSocketServers, removed: removedWebSocketServers } = this.findDifference(prev.network.websocketServers, now.network.websocketServers);
+        const { added: addedWebSocketClients, removed: removedWebSocketClients } = this.findDifference(prev.network.websocketClients, now.network.websocketClients);
+    
+        // 移除旧的 HTTP 服务器
+        for (const server of removedHttpServers) {
+            await this.networkManager.closeAdapterByPredicate((adapter) => adapter.name === server.name);
+        }
+    
+        // 移除旧的 HTTP 客户端
+        for (const client of removedHttpClients) {
+            await this.networkManager.closeAdapterByPredicate((adapter) => adapter.name === client.name);
+        }
+    
+        // 移除旧的 WebSocket 服务器
+        for (const server of removedWebSocketServers) {
+            this.networkManager.closeAdapterByPredicate((adapter) => adapter.name === server.name);
+        }
+    
+        // 移除旧的 WebSocket 客户端
+        for (const client of removedWebSocketClients) {
+            this.networkManager.closeAdapterByPredicate((adapter) => adapter.name === client.name);
+        }
+    
+        // 注册新的 HTTP 服务器
+        for (const server of addedHttpServers) {
+            if (server.enable) {
+                this.networkManager.registerAdapter(
+                    new OB11PassiveHttpAdapter(server.name, server.port, server.token, this.core, this.actions)
+                );
+            }
+        }
+    
+        // 注册新的 HTTP 客户端
+        for (const client of addedHttpClients) {
+            if (client.enable) {
+                this.networkManager.registerAdapter(
+                    new OB11ActiveHttpAdapter(client.name, client.url, client.token, this.core, this)
+                );
+            }
+        }
+    
+        // 注册新的 WebSocket 服务器
+        for (const server of addedWebSocketServers) {
+            if (server.enable) {
+                this.networkManager.registerAdapter(
+                    new OB11PassiveWebSocketAdapter(
+                        server.name,
+                        server.host,
+                        server.port,
+                        server.heartInterval,
+                        server.token,
+                        this.core,
+                        this.actions
+                    )
+                );
+            }
+        }
+    
+        // 注册新的 WebSocket 客户端
+        for (const client of addedWebSocketClients) {
+            if (client.enable) {
+                this.networkManager.registerAdapter(
+                    new OB11ActiveWebSocketAdapter(
+                        client.name,
+                        client.url,
+                        5000,
+                        client.heartInterval,
+                        client.token,
+                        this.core,
+                        this.actions
+                    )
+                );
+            }
+        }
+    
+        // 打开所有新的网络适配器
+        await this.networkManager.openAllAdapters();
+    }
     private findDifference<T>(prev: T[], now: T[]): { added: T[]; removed: T[] } {
         const added = now.filter((item) => !prev.includes(item));
         const removed = prev.filter((item) => !now.includes(item));
