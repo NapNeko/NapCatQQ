@@ -17,6 +17,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { MessagePlugin } from 'tdesign-vue-next';
 import { OneBotConfig } from '../../../src/onebot/config/config';
 import { QQLoginManager } from '@/backend/shell';
 
@@ -63,10 +64,16 @@ const saveConfig = async () => {
         if (userConfig) {
             userConfig.musicSignUrl = otherConfig.value.musicSignUrl || '';
             userConfig.enableLocalFile2Url = otherConfig.value.enableLocalFile2Url ?? false;
-            await setOB11Config(userConfig);
+            const success = await setOB11Config(userConfig);
+            if (success) {
+                MessagePlugin.success('配置保存成功');
+            } else {
+                MessagePlugin.error('配置保存失败');
+            }
         }
     } catch (error) {
         console.error('Error saving config:', error);
+        MessagePlugin.error('配置保存失败');
     }
 };
 
