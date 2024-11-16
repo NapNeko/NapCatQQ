@@ -181,54 +181,73 @@ export class NapCatOneBot11Adapter {
     }
 
     private async reloadNetwork(prev: OneBotConfig, now: OneBotConfig) {
+        const prevLog = await this.creatOneBotLog(prev);
+        const newLog = await this.creatOneBotLog(now);
+        this.context.logger.log(`[Notice] [OneBot11] 配置变更前:\n${prevLog}`);
+        this.context.logger.log(`[Notice] [OneBot11] 配置变更后:\n${newLog}`);
         const { added: addedHttpServers, removed: removedHttpServers } = this.findDifference(prev.network.httpServers, now.network.httpServers);
         const { added: addedHttpClients, removed: removedHttpClients } = this.findDifference(prev.network.httpClients, now.network.httpClients);
         const { added: addedWebSocketServers, removed: removedWebSocketServers } = this.findDifference(prev.network.websocketServers, now.network.websocketServers);
         const { added: addedWebSocketClients, removed: removedWebSocketClients } = this.findDifference(prev.network.websocketClients, now.network.websocketClients);
-    
+
         // 移除旧的 HTTP 服务器
         for (const server of removedHttpServers) {
             await this.networkManager.closeAdapterByPredicate((adapter) => adapter.name === server.name);
         }
-    
+
         // 移除旧的 HTTP 客户端
         for (const client of removedHttpClients) {
             await this.networkManager.closeAdapterByPredicate((adapter) => adapter.name === client.name);
         }
-    
+
         // 移除旧的 WebSocket 服务器
         for (const server of removedWebSocketServers) {
-            this.networkManager.closeAdapterByPredicate((adapter) => adapter.name === server.name);
+            await this.networkManager.closeAdapterByPredicate((adapter) => adapter.name === server.name);
         }
-    
+
         // 移除旧的 WebSocket 客户端
         for (const client of removedWebSocketClients) {
-            this.networkManager.closeAdapterByPredicate((adapter) => adapter.name === client.name);
+            await this.networkManager.closeAdapterByPredicate((adapter) => adapter.name === client.name);
         }
-    
-        // 注册新的 HTTP 服务器
-        for (const server of addedHttpServers) {
-            if (server.enable) {
-                this.networkManager.registerAdapter(
-                    new OB11PassiveHttpAdapter(server.name, server.port, server.token, this.core, this.actions)
-                );
+
+        // 处理 enable 状态变化的 HTTP 服务器
+        for (const server of now.network.httpServers) {
+            const prevServer = prev.network.httpServers.find(s => s.name === server.name);
+            if (prevServer && prevServer.enable !== server.enable) {
+                if (server.enable) {
+                    let adapter = new OB11PassiveHttpAdapter(server.name, server.port, server.token, this.core, this.actions);
+                    adapter.open();
+                    this.networkManager.registerAdapter(
+                        adapter
+                    );
+                } else {
+                    await this.networkManager.closeAdapterByPredicate((adapter) => adapter.name === server.name);
+                }
             }
         }
-    
-        // 注册新的 HTTP 客户端
-        for (const client of addedHttpClients) {
-            if (client.enable) {
-                this.networkManager.registerAdapter(
-                    new OB11ActiveHttpAdapter(client.name, client.url, client.token, this.core, this)
-                );
+
+        // 处理 enable 状态变化的 HTTP 客户端
+        for (const client of now.network.httpClients) {
+            const prevClient = prev.network.httpClients.find(c => c.name === client.name);
+            if (prevClient && prevClient.enable !== client.enable) {
+                if (client.enable) {
+                    let adapter = new OB11ActiveHttpAdapter(client.name, client.url, client.token, this.core, this);
+                    adapter.open();
+                    this.networkManager.registerAdapter(
+                        adapter
+                    );
+                } else {
+                    await this.networkManager.closeAdapterByPredicate((adapter) => adapter.name === client.name);
+                }
             }
         }
-    
-        // 注册新的 WebSocket 服务器
-        for (const server of addedWebSocketServers) {
-            if (server.enable) {
-                this.networkManager.registerAdapter(
-                    new OB11PassiveWebSocketAdapter(
+
+        // 处理 enable 状态变化的 WebSocket 服务器
+        for (const server of now.network.websocketServers) {
+            const prevServer = prev.network.websocketServers.find(s => s.name === server.name);
+            if (prevServer && prevServer.enable !== server.enable) {
+                if (server.enable) {
+                    let adapter = new OB11PassiveWebSocketAdapter(
                         server.name,
                         server.host,
                         server.port,
@@ -236,16 +255,23 @@ export class NapCatOneBot11Adapter {
                         server.token,
                         this.core,
                         this.actions
-                    )
-                );
+                    );
+                    adapter.open();
+                    this.networkManager.registerAdapter(
+                        adapter
+                    );
+                } else {
+                    await this.networkManager.closeAdapterByPredicate((adapter) => adapter.name === server.name);
+                }
             }
         }
-    
-        // 注册新的 WebSocket 客户端
-        for (const client of addedWebSocketClients) {
-            if (client.enable) {
-                this.networkManager.registerAdapter(
-                    new OB11ActiveWebSocketAdapter(
+
+        // 处理 enable 状态变化的 WebSocket 客户端
+        for (const client of now.network.websocketClients) {
+            const prevClient = prev.network.websocketClients.find(c => c.name === client.name);
+            if (prevClient && prevClient.enable !== client.enable) {
+                if (client.enable) {
+                    let adapter = new OB11ActiveWebSocketAdapter(
                         client.name,
                         client.url,
                         5000,
@@ -254,13 +280,69 @@ export class NapCatOneBot11Adapter {
                         this.core,
                         this.actions
                     )
-                );
+                    this.networkManager.registerAdapter(
+                        adapter
+                    );
+                } else {
+                    await this.networkManager.closeAdapterByPredicate((adapter) => adapter.name === client.name);
+                }
             }
         }
-    
-        // 打开所有新的网络适配器
-        await this.networkManager.openAllAdapters();
+
+        // 注册新的 HTTP 服务器
+        for (const server of addedHttpServers) {
+            if (server.enable) {
+                let adapter = new OB11PassiveHttpAdapter(server.name, server.port, server.token, this.core, this.actions);
+                adapter.open();
+                this.networkManager.registerAdapter(adapter);
+            }
+        }
+
+        // 注册新的 HTTP 客户端
+        for (const client of addedHttpClients) {
+
+            if (client.enable) {
+                let adapter = new OB11ActiveHttpAdapter(client.name, client.url, client.token, this.core, this);
+                adapter.open();
+                this.networkManager.registerAdapter(adapter);
+            }
+        }
+
+        // 注册新的 WebSocket 服务器
+        for (const server of addedWebSocketServers) {
+            if (server.enable) {
+                let adapter = new OB11PassiveWebSocketAdapter(
+                    server.name,
+                    server.host,
+                    server.port,
+                    server.heartInterval,
+                    server.token,
+                    this.core,
+                    this.actions
+                );
+                adapter.open();
+                this.networkManager.registerAdapter(adapter);
+            }
+        }
+
+        // 注册新的 WebSocket 客户端
+        for (const client of addedWebSocketClients) {
+            if (client.enable) {
+                let adapter = new OB11ActiveWebSocketAdapter(
+                    client.name,
+                    client.url,
+                    5000,
+                    client.heartInterval,
+                    client.token,
+                    this.core,
+                    this.actions
+                )
+                adapter.open();
+                this.networkManager.registerAdapter(adapter);
+            }
+        }
     }
+
     private findDifference<T>(prev: T[], now: T[]): { added: T[]; removed: T[] } {
         const added = now.filter((item) => !prev.includes(item));
         const removed = prev.filter((item) => !now.includes(item));
