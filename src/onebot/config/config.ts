@@ -206,3 +206,17 @@ export function migrateOneBotConfigsV1(config: Partial<v1Config>): OneBotConfig 
     }
     return mergedConfig;
 }
+export function getConfigBoolKey(
+    configs: Array<NetworkConfigAdapter>,
+    prediction: (config: NetworkConfigAdapter) => boolean
+): { positive: Array<string>, negative: Array<string> } {
+    const result: { positive: string[], negative: string[] } = { positive: [], negative: [] };
+    configs.forEach(config => {
+        if (prediction(config)) {
+            result.positive.push(config.name);
+        } else {
+            result.negative.push(config.name);
+        }
+    });
+    return result;
+}
