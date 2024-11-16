@@ -47,7 +47,7 @@ abstract class BaseAction<PayloadType, ReturnDataType> {
             return OB11Response.ok(resData);
         } catch (e: any) {
             this.core.context.logger.logError.bind(this.core.context.logger)('发生错误', e);
-            return OB11Response.error(e?.toString() || e?.stack?.toString() || '未知错误，可能操作超时', 200);
+            return OB11Response.error(e?.stack?.toString() || e?.toString() || '未知错误，可能操作超时', 200);
         }
     }
 

@@ -122,8 +122,8 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                 returnMsgAndResId = packetMode
                     ? await this.handleForwardedNodesPacket(peer, messages as OB11MessageNode[], payload.source, payload.news, payload.summary, payload.prompt)
                     : await this.handleForwardedNodes(peer, messages as OB11MessageNode[]);
-            } catch (e) {
-                throw Error(packetMode ? `发送伪造合并转发消息失败: ${e}` : `发送合并转发消息失败: ${e}`);
+            } catch (e: any) {
+                throw Error(packetMode ? `发送伪造合并转发消息失败: ${e?.stack}` : `发送合并转发消息失败: ${e?.stack}`);
             }
             if (!returnMsgAndResId) {
                 throw Error('发送合并转发消息失败：returnMsgAndResId 为空！');
@@ -308,8 +308,8 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                             MessageUnique.createUniqueMsgId(selfPeer, result.value.msgId);
                         }
                     });
-                } catch (e) {
-                    logger.logDebug('生成转发消息节点失败', e);
+                } catch (e: any) {
+                    logger.logDebug('生成转发消息节点失败', e?.stack);
                 }
             }
         }
@@ -350,8 +350,8 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
             return {
                 message: await this.core.apis.MsgApi.multiForwardMsg(srcPeer!, destPeer, retMsgIds)
             };
-        } catch (e) {
-            logger.logError.bind(this.core.context.logger)('forward failed', e);
+        } catch (e: any) {
+            logger.logError.bind(this.core.context.logger)('forward failed', e?.stack);
             return {
                 message: null
             };
@@ -376,8 +376,8 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         }
         try {
             return await this.core.apis.MsgApi.sendMsg(selfPeer, sendElements, true);
-        } catch (e) {
-            logger.logError.bind(this.core.context.logger)(e, '克隆转发消息失败,将忽略本条消息', msg);
+        } catch (e: any) {
+            logger.logError.bind(this.core.context.logger)(e?.stack, '克隆转发消息失败,将忽略本条消息', msg);
         }
     }
 }
