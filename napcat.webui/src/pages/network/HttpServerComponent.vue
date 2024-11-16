@@ -10,7 +10,7 @@
                     <t-input v-model.number="config.port" type="number" />
                 </t-form-item>
                 <t-form-item label="消息格式">
-                    <t-input v-model="config.messagePostFormat" />
+                    <t-select v-model="config.messagePostFormat" :options="messageFormatOptions" />
                 </t-form-item>
                 <t-form-item label="报告自身消息">
                     <t-checkbox v-model="config.reportSelfMessage" />
@@ -36,11 +36,23 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue';
+import { defineProps, ref, watch } from 'vue';
 import { WebsocketServerConfig } from '../../../../src/onebot/config/config';
-defineProps<{
+
+const props = defineProps<{
     config: WebsocketServerConfig;
 }>();
+
+const messageFormatOptions = ref([
+    { label: 'Array', value: 'array' },
+    { label: 'String', value: 'string' }
+]);
+
+watch(() => props.config.messagePostFormat, (newValue) => {
+    if (newValue !== 'array' && newValue !== 'string') {
+        props.config.messagePostFormat = 'array';
+    }
+});
 </script>
 
 <style scoped>
