@@ -3,11 +3,11 @@
         <div>
             <t-divider content="其余配置" align="left" />
         </div>
-        <t-form ref="form" :model="otherConfig">
-            <t-form-item label="音乐签名地址" name="musicSignUrl">
+        <t-form ref="form" :model="otherConfig" class="form">
+            <t-form-item label="音乐签名地址" name="musicSignUrl" class="form-item">
                 <t-input v-model="otherConfig.musicSignUrl" />
             </t-form-item>
-            <t-form-item label="启用本地文件到URL" name="enableLocalFile2Url">
+            <t-form-item label="启用本地文件到URL" name="enableLocalFile2Url" class="form-item">
                 <t-switch v-model="otherConfig.enableLocalFile2Url" />
             </t-form-item>
         </t-form>
@@ -74,3 +74,33 @@ onMounted(() => {
     loadConfig();
 });
 </script>
+
+<style scoped>
+.other-config {
+    padding: 20px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+@media (min-width: 768px) {
+    .form-item {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .form-item t-input,
+    .form-item t-switch {
+        flex: 1;
+        margin-left: 20px;
+    }
+}
+</style>
