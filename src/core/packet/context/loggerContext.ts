@@ -1,7 +1,7 @@
 import { LogLevel, LogWrapper } from "@/common/log";
 import { PacketContext } from "@/core/packet/context/packetContext";
 
-// work: check bind?
+// TODO: check bind?
 export class PacketLogger {
     private readonly napLogger: LogWrapper;
 
