@@ -150,7 +150,7 @@ export interface NodeIQQNTWrapperSession {
         nodeIKernelSessionListener: NodeIKernelSessionListener,
     ): void;
 
-    startNT(n: 0): void;
+    startNT(session: number): void;
 
     startNT(): void;
 
