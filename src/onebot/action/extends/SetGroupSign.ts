@@ -1,4 +1,4 @@
-import BaseAction from '../BaseAction';
+import { GetPacketStatusDepends } from '../packet/GetPacketStatus';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
@@ -12,7 +12,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export class SetGroupSign extends BaseAction<Payload, any> {
+export class SetGroupSign extends GetPacketStatusDepends<Payload, any> {
     actionName = ActionName.SetGroupSign;
     payloadSchema = SchemaData;
 
