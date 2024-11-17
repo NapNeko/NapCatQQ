@@ -547,16 +547,14 @@ export class NapCatOneBot11Adapter {
         this.context.logger.logDebug('收到新消息 RawMessage', message);
         try {
             const ob11Msg = await this.apis.MsgApi.parseMessageV2(message);
-            if (!ob11Msg) return;
-
-            const isSelfMsg = this.isSelfMessage(ob11Msg);
-            this.context.logger.logDebug('转化为 OB11Message', ob11Msg);
-
-            const msgMap = this.createMsgMap(network, ob11Msg, isSelfMsg, message);
-            this.handleDebugNetwork(network, msgMap, message);
-            this.handleNotReportSelfNetwork(network, msgMap, isSelfMsg);
-
-            this.networkManager.emitEventByNames(msgMap);
+            if (ob11Msg) {
+                const isSelfMsg = this.isSelfMessage(ob11Msg);
+                this.context.logger.logDebug('转化为 OB11Message', ob11Msg);
+                const msgMap = this.createMsgMap(network, ob11Msg, isSelfMsg, message);
+                this.handleDebugNetwork(network, msgMap, message);
+                this.handleNotReportSelfNetwork(network, msgMap, isSelfMsg);
+                this.networkManager.emitEventByNames(msgMap);
+            }
         } catch (e) {
             this.context.logger.logError('constructMessage error: ', e);
         }
@@ -575,7 +573,7 @@ export class NapCatOneBot11Adapter {
 
     private createMsgMap(network: Array<AdapterConfigWrap>, ob11Msg: any, isSelfMsg: boolean, message: RawMessage): Map<string, OB11Message> {
         const msgMap: Map<string, OB11Message> = new Map();
-        network.flat().filter(e => e.enable).forEach(e => {
+        network.filter(e => e.enable).forEach(e => {
             if (e.messagePostFormat == 'string') {
                 msgMap.set(e.name, structuredClone(ob11Msg.stringMsg));
             } else {
@@ -590,7 +588,7 @@ export class NapCatOneBot11Adapter {
     }
 
     private handleDebugNetwork(network: Array<AdapterConfigWrap>, msgMap: Map<string, OB11Message>, message: RawMessage) {
-        const debugNetwork = network.flat().filter(e => e.enable && e.debug);
+        const debugNetwork = network.filter(e => e.enable && e.debug);
         if (debugNetwork.length > 0) {
             debugNetwork.forEach(adapter => {
                 const msg = msgMap.get(adapter.name);
@@ -605,7 +603,7 @@ export class NapCatOneBot11Adapter {
 
     private handleNotReportSelfNetwork(network: Array<AdapterConfigWrap>, msgMap: Map<string, OB11Message>, isSelfMsg: boolean) {
         if (isSelfMsg) {
-            const notReportSelfNetwork = network.flat().filter(e => e.enable && (('reportSelfMessage' in e && !e.reportSelfMessage) || !('reportSelfMessage' in e)));
+            const notReportSelfNetwork = network.filter(e => e.enable && (('reportSelfMessage' in e && !e.reportSelfMessage) || !('reportSelfMessage' in e)));
             notReportSelfNetwork.forEach(adapter => {
                 msgMap.delete(adapter.name);
             });
