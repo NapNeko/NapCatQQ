@@ -51,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, resolveDynamicComponent, nextTick, Ref, onMounted, reactive, Reactive } from 'vue';
+import { ref, resolveDynamicComponent, nextTick, Ref, onMounted } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import {
     httpServerDefaultConfigs,
@@ -74,44 +74,46 @@ import WebsocketClientComponent from '@/pages/network/WebsocketClientComponent.v
 import EmptyStateComponent from '@/pages/network/EmptyStateComponent.vue';
 
 type ConfigKey = 'httpServers' | 'httpClients' | 'websocketServers' | 'websocketClients';
-
 type ConfigUnion = HttpClientConfig | HttpServerConfig | WebsocketServerConfig | WebsocketClientConfig;
-
-const defaultConfigs: Record<ConfigKey, ConfigUnion> = {
-    httpServers: httpServerDefaultConfigs,
-    httpClients: httpClientDefaultConfigs,
-    websocketServers: websocketServerDefaultConfigs,
-    websocketClients: websocketClientDefaultConfigs,
-};
-
-const componentMap: Record<
-    ConfigKey,
+type ComponentUnion =
     | typeof HttpServerComponent
     | typeof HttpClientComponent
     | typeof WebsocketServerComponent
-    | typeof WebsocketClientComponent
-> = {
+    | typeof WebsocketClientComponent;
+
+const componentMap: Record<ConfigKey, ComponentUnion> = {
     httpServers: HttpServerComponent,
     httpClients: HttpClientComponent,
     websocketServers: WebsocketServerComponent,
     websocketClients: WebsocketClientComponent,
 };
 
-interface ClientPanel {
-    name: string;
-    key: ConfigKey;
-    data: Ref<ConfigUnion>;
+const defaultConfigMap: Record<ConfigKey, ConfigUnion> = {
+    httpServers: httpServerDefaultConfigs,
+    httpClients: httpClientDefaultConfigs,
+    websocketServers: websocketServerDefaultConfigs,
+    websocketClients: websocketClientDefaultConfigs,
+};
+
+interface ConfigMap {
+    httpServers: HttpServerConfig;
+    httpClients: HttpClientConfig;
+    websocketServers: WebsocketServerConfig;
+    websocketClients: WebsocketClientConfig;
 }
 
-type ComponentKey = keyof typeof componentMap;
+interface ClientPanel<K extends ConfigKey = ConfigKey> {
+    name: string;
+    key: K;
+    data: ConfigMap[K];
+}
 
-// TODO: store these state in global store (aka pinia)
 const activeTab = ref<number>(0);
 const isDialogVisible = ref(false);
-const newTab = ref<{ name: string; type: ComponentKey }>({ name: '', type: 'httpServers' });
-const clientPanelData: Reactive<Array<ClientPanel>> = reactive([]);
+const newTab = ref<{ name: string; type: ConfigKey }>({ name: '', type: 'httpServers' });
+const clientPanelData: Ref<ClientPanel[]> = ref([]);
 
-const getComponent = (type: ComponentKey) => {
+const getComponent = (type: ConfigKey) => {
     return componentMap[type];
 };
 
@@ -135,33 +137,27 @@ const setOB11Config = async (config: OneBotConfig): Promise<boolean> => {
     return await loginManager.SetOB11Config(config);
 };
 
-const addToPanel = <T extends ConfigUnion>(configs: T[], key: ConfigKey) => {
-    configs.forEach((config) => clientPanelData.push({ name: config.name, data: config, key: key }));
+const addToPanel = <K extends ConfigKey>(configs: ConfigMap[K][], key: K) => {
+    configs.forEach((config) => clientPanelData.value.push({ name: config.name, data: config, key }));
 };
 
 const addConfigDataToPanel = (data: NetworkConfig) => {
-    Object.entries(data).forEach(([key, configs]) => {
-        if (key in defaultConfigs) {
-            addToPanel(configs as ConfigUnion[], key as ConfigKey);
-        }
+    (Object.keys(data) as ConfigKey[]).forEach((key) => {
+        addToPanel(data[key], key);
     });
 };
 
 const parsePanelData = (): NetworkConfig => {
-    return {
-        websocketClients: clientPanelData
-            .filter((panel) => panel.key === 'websocketClients')
-            .map((panel) => panel.data as WebsocketClientConfig),
-        websocketServers: clientPanelData
-            .filter((panel) => panel.key === 'websocketServers')
-            .map((panel) => panel.data as WebsocketServerConfig),
-        httpClients: clientPanelData
-            .filter((panel) => panel.key === 'httpClients')
-            .map((panel) => panel.data as HttpClientConfig),
-        httpServers: clientPanelData
-            .filter((panel) => panel.key === 'httpServers')
-            .map((panel) => panel.data as HttpServerConfig),
+    const result: NetworkConfig = {
+        httpServers: [],
+        httpClients: [],
+        websocketServers: [],
+        websocketClients: [],
     };
+    clientPanelData.value.forEach((panel) => {
+        (result[panel.key] as Array<typeof panel.data>).push(panel.data);
+    });
+    return result;
 };
 
 const loadConfig = async () => {
@@ -175,11 +171,13 @@ const loadConfig = async () => {
     }
 };
 
-// It's better to "saveConfig" instead of using deep watch
 const saveConfig = async () => {
     const config = parsePanelData();
     const userConfig = await getOB11Config();
-    if (!userConfig) return;
+    if (!userConfig) {
+        await MessagePlugin.error('无法获取配置！');
+        return;
+    }
     userConfig.network = config;
     const success = await setOB11Config(userConfig);
     if (success) {
@@ -196,21 +194,21 @@ const showAddTabDialog = () => {
 
 const addTab = async () => {
     const { name, type } = newTab.value;
-    if (clientPanelData.some((panel) => panel.name === name)) {
+    if (clientPanelData.value.some((panel) => panel.name === name)) {
         await MessagePlugin.error('选项卡名称已存在');
         return;
     }
-    const defaultConfig = structuredClone(defaultConfigs[type]);
+    const defaultConfig = structuredClone(defaultConfigMap[type]);
     defaultConfig.name = name;
-    clientPanelData.push({ name, data: defaultConfig, key: type });
+    clientPanelData.value.push({ name, data: defaultConfig, key: type });
     isDialogVisible.value = false;
     await nextTick();
-    activeTab.value = clientPanelData.length - 1;
+    activeTab.value = clientPanelData.value.length - 1;
     await MessagePlugin.success('选项卡添加成功');
 };
 
 const removeTab = async (payload: { value: string; index: number; e: PointerEvent }) => {
-    clientPanelData.splice(payload.index, 1);
+    clientPanelData.value.splice(payload.index, 1);
     activeTab.value = Math.max(0, activeTab.value - 1);
     await saveConfig();
 };
