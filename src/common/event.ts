@@ -21,9 +21,9 @@ type FuncKeys<T> = Extract<
 export type ListenerClassBase = Record<string, string>;
 
 export class NTEventWrapper {
-    private WrapperSession: NodeIQQNTWrapperSession | undefined; //WrapperSession
-    private listenerManager: Map<string, ListenerClassBase> = new Map<string, ListenerClassBase>(); //ListenerName-Unique -> Listener实例
-    private EventTask = new Map<string, Map<string, Map<string, InternalMapKey>>>(); //tasks ListenerMainName -> ListenerSubName-> uuid -> {timeout,createtime,func}
+    private readonly WrapperSession: NodeIQQNTWrapperSession | undefined; //WrapperSession
+    private readonly listenerManager: Map<string, ListenerClassBase> = new Map<string, ListenerClassBase>(); //ListenerName-Unique -> Listener实例
+    private readonly EventTask = new Map<string, Map<string, Map<string, InternalMapKey>>>(); //tasks ListenerMainName -> ListenerSubName-> uuid -> {timeout,createtime,func}
 
     constructor(
         wrapperSession: NodeIQQNTWrapperSession,
@@ -120,9 +120,9 @@ export class NTEventWrapper {
         ListenerType extends (...args: any) => any = EnsureFunc<ListenerNamingMapping[Listener][ListenerMethod]>,
     >(
         listenerAndMethod: `${Listener}/${ListenerMethod}`,
+        checker: (...args: Parameters<ListenerType>) => boolean,
         waitTimes = 1,
         timeout = 5000,
-        checker: (...args: Parameters<ListenerType>) => boolean,
     ) {
         return new Promise<Parameters<ListenerType>>((resolve, reject) => {
             const ListenerNameList = listenerAndMethod.split('/');
@@ -181,36 +181,36 @@ export class NTEventWrapper {
         callbackTimesToWait = 1,
         timeout = 5000,
     ) {
+        const id = randomUUID();
+        let complete = 0;
+        let retData: Parameters<ListenerType> | undefined = undefined;
+        let retEvent: any = {};
+
+        function sendDataCallback(resolve: any, reject: any) {
+            if (complete == 0) {
+                reject(
+                    new Error(
+                        'Timeout: NTEvent serviceAndMethod:' +
+                        serviceAndMethod +
+                        ' ListenerName:' +
+                        listenerAndMethod +
+                        ' EventRet:\n' +
+                        JSON.stringify(retEvent, null, 4) +
+                        '\n',
+                    ),
+                );
+            } else {
+                resolve([retEvent as Awaited<ReturnType<EventType>>, ...retData!]);
+            }
+        }
+
+        const ListenerNameList = listenerAndMethod.split('/');
+        const ListenerMainName = ListenerNameList[0];
+        const ListenerSubName = ListenerNameList[1];
+
         return new Promise<[EventRet: Awaited<ReturnType<EventType>>, ...Parameters<ListenerType>]>(
-            async (resolve, reject) => {
-                const id = randomUUID();
-                let complete = 0;
-                let retData: Parameters<ListenerType> | undefined = undefined;
-                let retEvent: any = {};
-
-                function sendDataCallback() {
-                    if (complete == 0) {
-                        reject(
-                            new Error(
-                                'Timeout: NTEvent serviceAndMethod:' +
-                                serviceAndMethod +
-                                ' ListenerName:' +
-                                listenerAndMethod +
-                                ' EventRet:\n' +
-                                JSON.stringify(retEvent, null, 4) +
-                                '\n',
-                            ),
-                        );
-                    } else {
-                        resolve([retEvent as Awaited<ReturnType<EventType>>, ...retData!]);
-                    }
-                }
-
-                const ListenerNameList = listenerAndMethod.split('/');
-                const ListenerMainName = ListenerNameList[0];
-                const ListenerSubName = ListenerNameList[1];
-
-                const timeoutRef = setTimeout(sendDataCallback, timeout);
+            (resolve, reject) => {
+                const timeoutRef = setTimeout(() => sendDataCallback(resolve, reject), timeout);
 
                 const eventCallback = {
                     timeout: timeout,
@@ -221,7 +221,7 @@ export class NTEventWrapper {
                         retData = args as Parameters<ListenerType>;
                         if (complete >= callbackTimesToWait) {
                             clearTimeout(timeoutRef);
-                            sendDataCallback();
+                            sendDataCallback(resolve, reject);
                         }
                     },
                 };
@@ -233,23 +233,26 @@ export class NTEventWrapper {
                 }
                 this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.set(id, eventCallback);
                 this.createListenerFunction(ListenerMainName);
-                const eventFunction = this.createEventFunction(serviceAndMethod);
-                retEvent = await eventFunction!(...(args));
-                if (!checkerEvent(retEvent) && timeoutRef.hasRef()) {
-                    clearTimeout(timeoutRef);
-                    reject(
-                        new Error(
-                            'EventChecker Failed: NTEvent serviceAndMethod:' +
-                            serviceAndMethod +
-                            ' ListenerName:' +
-                            listenerAndMethod +
-                            ' EventRet:\n' +
-                            JSON.stringify(retEvent, null, 4) +
-                            '\n',
-                        ),
-                    );
-                }
 
+                this.createEventFunction(serviceAndMethod)!(...(args))
+                    .then((eventResult: any) => {
+                        retEvent = eventResult;
+                        if (!checkerEvent(retEvent) && timeoutRef.hasRef()) {
+                            clearTimeout(timeoutRef);
+                            reject(
+                                new Error(
+                                    'EventChecker Failed: NTEvent serviceAndMethod:' +
+                                    serviceAndMethod +
+                                    ' ListenerName:' +
+                                    listenerAndMethod +
+                                    ' EventRet:\n' +
+                                    JSON.stringify(retEvent, null, 4) +
+                                    '\n',
+                                ),
+                            );
+                        }
+                    })
+                    .catch(reject);
             },
         );
     }

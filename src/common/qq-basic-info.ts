@@ -84,7 +84,7 @@ export class QQBasicInfoWrapper {
         }
         // 通过Major拉取 性能差
         try {
-            let majorAppid = this.getAppidV2ByMajor(fullVersion);
+            const majorAppid = this.getAppidV2ByMajor(fullVersion);
             if (majorAppid) {
                 this.context.logger.log(`[QQ版本兼容性检测] 当前版本Appid未内置 通过Major获取 为了更好的性能请尝试更新NapCat`);
                 return { appid: majorAppid, qua: this.getQUAFallback() };
@@ -98,8 +98,8 @@ export class QQBasicInfoWrapper {
         return { appid: this.getAppIdFallback(), qua: this.getQUAFallback() };
     }
     getAppidV2ByMajor(QQVersion: string) {
-        let majorPath = getMajorPath(QQVersion);
-        let appid = parseAppidFromMajor(majorPath);
+        const majorPath = getMajorPath(QQVersion);
+        const appid = parseAppidFromMajor(majorPath);
         return appid;
     }
 

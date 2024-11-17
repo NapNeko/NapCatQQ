@@ -1,4 +1,3 @@
-import { OB11Group } from '@/onebot';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';

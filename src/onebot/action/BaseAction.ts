@@ -29,7 +29,7 @@ abstract class BaseAction<PayloadType, ReturnDataType> {
             });
             return {
                 valid: false,
-                message: errorMessages.join('\n') as string || '未知错误',
+                message: errorMessages.join('\n') ?? '未知错误',
             };
         }
         return {
@@ -37,27 +37,27 @@ abstract class BaseAction<PayloadType, ReturnDataType> {
         };
     }
 
-    public async handle(payload: PayloadType): Promise<OB11Return<ReturnDataType | null>> {
+    public async handle(payload: PayloadType, adaptername: string): Promise<OB11Return<ReturnDataType | null>> {
         const result = await this.check(payload);
         if (!result.valid) {
             return OB11Response.error(result.message, 400);
         }
         try {
-            const resData = await this._handle(payload);
+            const resData = await this._handle(payload, adaptername);
             return OB11Response.ok(resData);
         } catch (e: any) {
             this.core.context.logger.logError.bind(this.core.context.logger)('发生错误', e);
-            return OB11Response.error(e?.toString() || e?.stack?.toString() || '未知错误，可能操作超时', 200);
+            return OB11Response.error(e?.stack?.toString() || e?.toString() || '未知错误，可能操作超时', 200);
         }
     }
 
-    public async websocketHandle(payload: PayloadType, echo: any): Promise<OB11Return<ReturnDataType | null>> {
+    public async websocketHandle(payload: PayloadType, echo: any, adaptername: string): Promise<OB11Return<ReturnDataType | null>> {
         const result = await this.check(payload);
         if (!result.valid) {
             return OB11Response.error(result.message, 1400, echo);
         }
         try {
-            const resData = await this._handle(payload);
+            const resData = await this._handle(payload, adaptername);
             return OB11Response.ok(resData, echo);
         } catch (e: any) {
             this.core.context.logger.logError.bind(this.core.context.logger)('发生错误', e);
@@ -65,7 +65,7 @@ abstract class BaseAction<PayloadType, ReturnDataType> {
         }
     }
 
-    abstract _handle(payload: PayloadType): PromiseLike<ReturnDataType>;
+    abstract _handle(payload: PayloadType, adaptername: string): PromiseLike<ReturnDataType>;
 }
 
 export default BaseAction;

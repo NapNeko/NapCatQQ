@@ -1,21 +1,14 @@
 import * as crypto from "crypto";
-import { PushMsgBody } from "@/core/packet/proto/message/message";
-import { NapProtoEncodeStructType } from "@/core/packet/proto/NapProto";
-import { LogWrapper } from "@/common/log";
+import { PushMsgBody } from "@/core/packet/transformer/proto";
+import { NapProtoEncodeStructType } from "@napneko/nap-proto-core";
 import { PacketMsg, PacketSendMsgElement } from "@/core/packet/message/message";
 import { IPacketMsgElement, PacketMsgTextElement } from "@/core/packet/message/element";
 import { SendTextElement } from "@/core";
 
 export class PacketMsgBuilder {
-    private logger: LogWrapper;
-
-    constructor(logger: LogWrapper) {
-        this.logger = logger;
-    }
-
     protected static failBackText = new PacketMsgTextElement(
         {
-            textElement: { content: "[该消息类型暂不支持查看]" }!
+            textElement: { content: "[该消息类型暂不支持查看]" }
         } as SendTextElement
     );
 
@@ -23,11 +16,10 @@ export class PacketMsgBuilder {
         return element.map((node): NapProtoEncodeStructType<typeof PushMsgBody> => {
             const avatar = `https://q.qlogo.cn/headimg_dl?dst_uin=${node.senderUin}&spec=640&img_type=jpg`;
             const msgContent = node.msg.reduceRight((acc: undefined | Uint8Array, msg: IPacketMsgElement<PacketSendMsgElement>) => {
-                return acc !== undefined ? acc : msg.buildContent();
+                return acc ?? msg.buildContent();
             }, undefined);
             const msgElement = node.msg.flatMap(msg => msg.buildElement() ?? []);
             if (!msgContent && !msgElement.length) {
-                this.logger.logWarn(`[PacketMsgBuilder] buildFakeMsg: 空的msgContent和msgElement！`);
                 msgElement.push(PacketMsgBuilder.failBackText.buildElement());
             }
             return {

@@ -4,6 +4,7 @@ import { ActionName } from '../types';
 import { ChatType, Peer } from '@/core/entities';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/message-unique';
+import { AdapterConfigWrap } from '@/onebot/config/config';
 
 interface Response {
     messages: OB11Message[];
@@ -26,7 +27,7 @@ export default class GoCQHTTPGetGroupMsgHistory extends BaseAction<Payload, Resp
     actionName = ActionName.GoCQHTTP_GetGroupMsgHistory;
     payloadSchema = SchemaData;
 
-    async _handle(payload: Payload): Promise<Response> {
+    async _handle(payload: Payload, adapter: string): Promise<Response> {
         //处理参数
         const isReverseOrder = typeof payload.reverseOrder === 'string' ? payload.reverseOrder === 'true' : !!payload.reverseOrder;
         const MsgCount = +(payload.count ?? 20);
@@ -36,16 +37,18 @@ export default class GoCQHTTPGetGroupMsgHistory extends BaseAction<Payload, Resp
         const startMsgId = hasMessageSeq ? (MessageUnique.getMsgIdAndPeerByShortId(+payload.message_seq!)?.MsgId ?? payload.message_seq!.toString()) : '0';
         const msgList = hasMessageSeq ?
             (await this.core.apis.MsgApi.getMsgHistory(peer, startMsgId, MsgCount)).msgList : (await this.core.apis.MsgApi.getAioFirstViewLatestMsgs(peer, MsgCount)).msgList;
-        if (msgList.length === 0) throw `消息${payload.message_seq}不存在`;
+        if (msgList.length === 0) throw new Error(`消息${payload.message_seq}不存在`);
         //翻转消息
         if (isReverseOrder) msgList.reverse();
         //转换序号
         await Promise.all(msgList.map(async msg => {
             msg.id = MessageUnique.createUniqueMsgId({ guildId: '', chatType: msg.chatType, peerUid: msg.peerUid }, msg.msgId);
         }));
+        const network = Object.values(this.obContext.configLoader.configData.network) as Array<AdapterConfigWrap>;
         //烘焙消息
+        const msgFormat = network.flat().find(e => e.name === adapter)?.messagePostFormat ?? 'array';
         const ob11MsgList = (await Promise.all(
-            msgList.map(msg => this.obContext.apis.MsgApi.parseMessage(msg)))
+            msgList.map(msg => this.obContext.apis.MsgApi.parseMessage(msg, msgFormat)))
         ).filter(msg => msg !== undefined);
         return { 'messages': ob11MsgList };
     }

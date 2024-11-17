@@ -57,7 +57,7 @@ export interface GroupSearchResult {
 }
 export interface NodeIKernelSearchListener {
     
-    onSearchGroupResult(params: GroupSearchResult): void;
+    onSearchGroupResult(params: GroupSearchResult): any;
 
     onSearchFileKeywordsResult(params: {
         searchId: string,
@@ -93,5 +93,5 @@ export interface NodeIKernelSearchListener {
                 end: number
             }[]
         }[]
-    }): void;
+    }): any;
 }

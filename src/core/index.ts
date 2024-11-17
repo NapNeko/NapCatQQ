@@ -84,11 +84,10 @@ export function getMajorPath(QQVersion: string): string {
 }
 export class NapCatCore {
     readonly context: InstanceContext;
-    readonly apis: StableNTApiWrapper;
     readonly eventWrapper: NTEventWrapper;
-    // readonly eventChannel: NTEventChannel;
-    NapCatDataPath: string;
-    NapCatTempPath: string;
+    NapCatDataPath: string = '';
+    NapCatTempPath: string = '';
+    apis: StableNTApiWrapper;
     // runtime info, not readonly
     selfInfo: SelfInfo;
     util: NodeQQNTWrapperUtil;
@@ -112,6 +111,8 @@ export class NapCatCore {
             UserApi: new NTQQUserApi(this.context, this),
             GroupApi: new NTQQGroupApi(this.context, this),
         };
+    }
+    async initCore() {
         this.NapCatDataPath = path.join(this.dataPath, 'NapCat');
         fs.mkdirSync(this.NapCatDataPath, { recursive: true });
         this.NapCatTempPath = path.join(this.NapCatDataPath, 'temp');
@@ -119,7 +120,13 @@ export class NapCatCore {
         if (!fs.existsSync(this.NapCatTempPath)) {
             fs.mkdirSync(this.NapCatTempPath, { recursive: true });
         }
-
+        //遍历this.apis[i].initApi 如果存在该函数进行async 调用
+        for (const apiKey in this.apis) {
+            const api = this.apis[apiKey as keyof StableNTApiWrapper];
+            if ('initApi' in api && typeof api.initApi === 'function') {
+                await api.initApi();
+            }
+        }
         this.initNapCatCoreListeners().then().catch(this.context.logger.logError.bind(this.context.logger));
 
         this.context.logger.setFileLogEnabled(
@@ -133,7 +140,6 @@ export class NapCatCore {
             this.configLoader.configData.consoleLogLevel as LogLevel,
         );
     }
-
     get dataPath(): string {
         let result = this.context.wrapper.NodeQQNTWrapperUtil.getNTUserDataInfoConfig();
         if (!result) {
@@ -204,7 +210,7 @@ export class NapCatCore {
             });
         };
         groupListener.onMemberListChange = (arg) => {
-            // todo: 应该加一个内部自己维护的成员变动callback，用于判断成员变化通知
+            // TODO: 应该加一个内部自己维护的成员变动callback，用于判断成员变化通知
             const groupCode = arg.sceneId.split('_')[0];
             if (this.apis.GroupApi.groupMemberCache.has(groupCode)) {
                 const existMembers = this.apis.GroupApi.groupMemberCache.get(groupCode)!;
@@ -214,7 +220,7 @@ export class NapCatCore {
                     if (existMember) {
                         Object.assign(existMember, member);
                     } else {
-                        existMembers!.set(uid, member);
+                        existMembers.set(uid, member);
                     }
                     //移除成员
                     if (member.isDelete) {

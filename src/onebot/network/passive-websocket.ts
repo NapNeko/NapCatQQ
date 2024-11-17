@@ -1,4 +1,4 @@
-import { IOB11NetworkAdapter, OB11EmitEventContent } from './index';
+import { IOB11NetworkAdapter, OB11EmitEventContent, OB11NetworkReloadType } from './index';
 import urlParse from 'url';
 import { WebSocket, WebSocketServer } from 'ws';
 import { Mutex } from 'async-mutex';
@@ -10,43 +10,43 @@ import { OB11HeartbeatEvent } from '../event/meta/OB11HeartbeatEvent';
 import { IncomingMessage } from 'http';
 import { ActionMap } from '@/onebot/action';
 import { LifeCycleSubType, OB11LifeCycleEvent } from '../event/meta/OB11LifeCycleEvent';
+import { WebsocketServerConfig } from '../config/config';
 
 export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     wsServer: WebSocketServer;
     wsClients: WebSocket[] = [];
     wsClientsMutex = new Mutex();
-    isOpen: boolean = false;
-    hasBeenClosed: boolean = false;
+    isEnable: boolean = false;
     heartbeatInterval: number = 0;
-    core: NapCatCore;
     logger: LogWrapper;
+    public config: WebsocketServerConfig;
     private heartbeatIntervalId: NodeJS.Timeout | null = null;
     wsClientWithEvent: WebSocket[] = [];
 
     constructor(
-        ip: string,
-        port: number,
-        heartbeatInterval: number,
-        token: string,
-        core: NapCatCore,
+        public name: string,
+        config: WebsocketServerConfig,
+        public core: NapCatCore,
         public actions: ActionMap,
     ) {
-        this.core = core;
+        this.config = structuredClone(config);
         this.logger = core.context.logger;
-
-        this.heartbeatInterval = heartbeatInterval;
+        if (this.config.host === '0.0.0.0') {
+            //兼容配置同时处理0.0.0.0逻辑
+            this.config.host = '';
+        }
         this.wsServer = new WebSocketServer({
-            port: port,
-            host: ip,
+            port: this.config.port,
+            host: this.config.host,
             maxPayload: 1024 * 1024 * 1024,
         });
         this.wsServer.on('connection', async (wsClient, wsReq) => {
-            if (!this.isOpen) {
+            if (!this.isEnable) {
                 wsClient.close();
                 return;
             }
             //鉴权
-            this.authorize(token, wsClient, wsReq);
+            this.authorize(this.config.token, wsClient, wsReq);
             const paramUrl = wsReq.url?.indexOf('?') !== -1 ? wsReq.url?.substring(0, wsReq.url?.indexOf('?')) : wsReq.url;
             const isApiConnect = paramUrl === '/api' || paramUrl === '/api/';
             if (!isApiConnect) {
@@ -102,23 +102,22 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     }
 
     open() {
-        if (this.isOpen) {
+        if (this.isEnable) {
             this.logger.logError.bind(this.logger)('[OneBot] [WebSocket Server] Cannot open a opened WebSocket server');
-            return;
-        }
-        if (this.hasBeenClosed) {
-            this.logger.logError.bind(this.logger)('[OneBot] [WebSocket Server] Cannot open a WebSocket server that has been closed');
             return;
         }
         const addressInfo = this.wsServer.address();
         this.logger.log('[OneBot] [WebSocket Server] Server Started', typeof (addressInfo) === 'string' ? addressInfo : addressInfo?.address + ':' + addressInfo?.port);
 
-        this.isOpen = true;
-        this.registerHeartBeat();
+        this.isEnable = true;
+        if (this.heartbeatInterval > 0) {
+            this.registerHeartBeat();
+        }
+
     }
 
     async close() {
-        this.isOpen = false;
+        this.isEnable = false;
         this.wsServer.close((err) => {
             if (err) {
                 this.logger.logError.bind(this.logger)('[OneBot] [WebSocket Server] Error closing server:', err.message);
@@ -145,7 +144,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             this.wsClientsMutex.runExclusive(async () => {
                 this.wsClientWithEvent.forEach((wsClient) => {
                     if (wsClient.readyState === WebSocket.OPEN) {
-                        wsClient.send(JSON.stringify(new OB11HeartbeatEvent(this.core, this.heartbeatInterval, this.core.selfInfo.online, true)));
+                        wsClient.send(JSON.stringify(new OB11HeartbeatEvent(this.core, this.heartbeatInterval, this.core.selfInfo.online ?? true, true)));
                     }
                 });
             });
@@ -188,9 +187,51 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             this.checkStateAndReply<any>(OB11Response.error('不支持的api ' + receiveData.action, 1404, echo), wsClient);
             return;
         }
-        const retdata = await action.websocketHandle(receiveData.params, echo ?? '');
-        const packet = Object.assign({}, retdata);
-        this.checkStateAndReply<any>(packet, wsClient);
+        const retdata = await action.websocketHandle(receiveData.params, echo ?? '', this.name);
+        this.checkStateAndReply<any>({ ...retdata }, wsClient);
+    }
+
+    async reload(newConfig: WebsocketServerConfig) {
+        const wasEnabled = this.isEnable;
+        const oldPort = this.config.port;
+        const oldHost = this.config.host;
+        const oldHeartbeatInterval = this.heartbeatInterval;
+        this.config = newConfig;
+
+        if (newConfig.enable && !wasEnabled) {
+            this.open();
+            return OB11NetworkReloadType.NetWorkOpen;
+        } else if (!newConfig.enable && wasEnabled) {
+            this.close();
+            return OB11NetworkReloadType.NetWorkClose;
+        }
+
+        if (oldPort !== newConfig.port || oldHost !== newConfig.host) {
+            this.close();
+            this.wsServer = new WebSocketServer({
+                port: newConfig.port,
+                host: newConfig.host === '0.0.0.0' ? '' : newConfig.host,
+                maxPayload: 1024 * 1024 * 1024,
+            });
+            if (newConfig.enable) {
+                this.open();
+            }
+            return OB11NetworkReloadType.NetWorkReload;
+        }
+
+        if (oldHeartbeatInterval !== newConfig.heartInterval) {
+            if (this.heartbeatIntervalId) {
+                clearInterval(this.heartbeatIntervalId);
+                this.heartbeatIntervalId = null;
+            }
+            this.heartbeatInterval = newConfig.heartInterval;
+            if (newConfig.heartInterval > 0 && this.isEnable) {
+                this.registerHeartBeat();
+            }
+            return OB11NetworkReloadType.NetWorkReload;
+        }
+
+        return OB11NetworkReloadType.Normal;
     }
 }
 

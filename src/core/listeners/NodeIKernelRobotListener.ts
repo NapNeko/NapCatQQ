@@ -1,13 +1,13 @@
 export class NodeIKernelRobotListener {
-    onRobotFriendListChanged(...args: unknown[]) {
+    onRobotFriendListChanged(...args: unknown[]): any {
 
     }
 
-    onRobotListChanged(...args: unknown[]) {
+    onRobotListChanged(...args: unknown[]): any {
 
     }
 
-    onRobotProfileChanged(...args: unknown[]) {
+    onRobotProfileChanged(...args: unknown[]): any {
 
     }
 }

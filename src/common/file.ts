@@ -215,7 +215,7 @@ export async function checkUriType(Uri: string) {
         }
         if (uri.startsWith('file://')) {
             let filePath: string;
-            const pathname = decodeURIComponent(new URL(uri).pathname);
+            const pathname = decodeURIComponent(new URL(uri).pathname + new URL(uri).hash);
             if (process.platform === 'win32') {
                 filePath = pathname.slice(1);
             } else {
@@ -242,7 +242,7 @@ export async function uri2local(dir: string, uri: string, filename: string | und
     //解析Http和Https协议
 
     if (UriType == FileUriType.Unknown) {
-        return { success: false, errMsg: '未知文件类型', fileName: '', ext: '', path: '' };
+        return { success: false, errMsg: `未知文件类型, uri= ${uri}`, fileName: '', ext: '', path: '' };
     }
     //解析File协议和本地文件
     if (UriType == FileUriType.Local) {
@@ -289,5 +289,5 @@ export async function uri2local(dir: string, uri: string, filename: string | und
         }
         return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath };
     }
-    return { success: false, errMsg: '未知文件类型', fileName: '', ext: '', path: '' };
+    return { success: false, errMsg: `未知文件类型, uri= ${uri}`, fileName: '', ext: '', path: '' };
 }

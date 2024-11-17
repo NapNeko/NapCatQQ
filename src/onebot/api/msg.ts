@@ -18,13 +18,7 @@ import {
     SendTextElement,
 } from '@/core';
 import faceConfig from '@/core/external/face_config.json';
-import {
-    NapCatOneBot11Adapter,
-    OB11Message,
-    OB11MessageData,
-    OB11MessageDataType,
-    OB11MessageFileBase,
-} from '@/onebot';
+import { NapCatOneBot11Adapter, OB11Message, OB11MessageData, OB11MessageDataType, OB11MessageFileBase, } from '@/onebot';
 import { OB11Entities } from '@/onebot/entities';
 import { EventType } from '@/onebot/event/OB11BaseEvent';
 import { encodeCQCode } from '@/onebot/cqcode';
@@ -33,8 +27,9 @@ import { RequestUtil } from '@/common/request';
 import fs from 'node:fs';
 import fsPromise from 'node:fs/promises';
 import { OB11FriendAddNoticeEvent } from '@/onebot/event/notice/OB11FriendAddNoticeEvent';
-import { decodeSysMessage } from '@/core/packet/proto/old/ProfileLike';
+// import { decodeSysMessage } from '@/core/packet/proto/old/ProfileLike';
 import { ForwardMsgBuilder } from "@/common/forward-msg-builder";
+import { decodeSysMessage } from "@/core/helper/adaptDecoder";
 
 type RawToOb11Converters = {
     [Key in keyof MessageElement as Key extends `${string}Element` ? Key : never]: (
@@ -190,6 +185,9 @@ export class OneBotMsgApi {
                     file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "", "." + _.key + ".jpg"),
                     path: url,
                     url: url,
+                    key: _.key,
+                    emoji_id: _.emojiId,
+                    emoji_package_id: _.emojiPackageId,
                     file_unique: _.key
                 },
             };
@@ -370,7 +368,7 @@ export class OneBotMsgApi {
                             multiMsgItem.parentMsgPeer = parentMsgPeer;
                             multiMsgItem.parentMsgIdList = msg.parentMsgIdList;
                             multiMsgItem.id = MessageUnique.createUniqueMsgId(parentMsgPeer, multiMsgItem.msgId); //该ID仅用查看 无法调用
-                            return await this.parseMessage(multiMsgItem);
+                            return await this.parseMessage(multiMsgItem, 'array');
                         },
                     ))).filter(item => item !== undefined),
                 },
@@ -506,13 +504,12 @@ export class OneBotMsgApi {
 
         // File service
         [OB11MessageDataType.image]: async (sendMsg, context) => {
-            const sendPicElement = await this.core.apis.FileApi.createValidSendPicElement(
+            return await this.core.apis.FileApi.createValidSendPicElement(
                 context,
                 (await this.handleOb11FileLikeMessage(sendMsg, context)).path,
                 sendMsg.data.summary,
                 sendMsg.data.sub_type,
             );
-            return sendPicElement;
         },
 
         [OB11MessageDataType.file]: async (sendMsg, context) => {
@@ -696,29 +693,38 @@ export class OneBotMsgApi {
 
     async parseMessage(
         msg: RawMessage,
-        messagePostFormat: string = this.obContext.configLoader.configData.messagePostFormat,
+        messagePostFormat: string,
+    ) {
+        if (messagePostFormat === 'string') {
+            return (await this.parseMessageV2(msg))?.stringMsg;
+        }
+        return (await this.parseMessageV2(msg))?.arrayMsg;
+    }
+
+    async parseMessageV2(
+        msg: RawMessage,
     ) {
         if (msg.senderUin == '0' || msg.senderUin == '') return;
         if (msg.peerUin == '0' || msg.peerUin == '') return;
         //跳过空消息
         const resMsg: OB11Message = {
             self_id: parseInt(this.core.selfInfo.uin),
-            user_id: parseInt(msg.senderUin!),
+            user_id: parseInt(msg.senderUin),
             time: parseInt(msg.msgTime) || Date.now(),
             message_id: msg.id!,
             message_seq: msg.id!,
             real_id: msg.id!,
             message_type: msg.chatType == ChatType.KCHATTYPEGROUP ? 'group' : 'private',
             sender: {
-                user_id: parseInt(msg.senderUin || '0'),
+                user_id: +(msg.senderUin ?? 0),
                 nickname: msg.sendNickName,
-                card: msg.sendMemberName || '',
+                card: msg.sendMemberName ?? '',
             },
             raw_message: '',
             font: 14,
             sub_type: 'friend',
-            message: messagePostFormat === 'string' ? '' : [],
-            message_format: messagePostFormat === 'string' ? 'string' : 'array',
+            message: [],
+            message_format: 'array',
             post_type: this.core.selfInfo.uin == msg.senderUin ? EventType.MESSAGE_SENT : EventType.MESSAGE,
         };
         if (this.core.selfInfo.uin == msg.senderUin) {
@@ -788,17 +794,17 @@ export class OneBotMsgApi {
         }).map((entry) => (<PromiseFulfilledResult<OB11MessageData>>entry).value).filter(value => value != null);
 
         const msgAsCQCode = validSegments.map(msg => encodeCQCode(msg)).join('').trim();
-
-        if (messagePostFormat === 'string') {
-            resMsg.message = msgAsCQCode;
-            resMsg.raw_message = msgAsCQCode;
-        } else {
-            resMsg.message = validSegments;
-            resMsg.raw_message = msgAsCQCode;
-        }
-        return resMsg;
+        resMsg.message = validSegments;
+        resMsg.raw_message = msgAsCQCode;
+        let stringMsg = structuredClone(resMsg);
+        stringMsg = await this.importArrayTostringMsg(stringMsg);
+        return { stringMsg: stringMsg, arrayMsg: resMsg };
     }
-
+    async importArrayTostringMsg(msg: OB11Message) {
+        msg.message_format = 'string';
+        msg.message = msg.raw_message;
+        return msg;
+    }
     async createSendElements(
         messageData: OB11MessageData[],
         peer: Peer,
@@ -892,6 +898,7 @@ export class OneBotMsgApi {
 
         return { path, fileName: inputdata.name ?? fileName };
     }
+
     async parseSysMessage(msg: number[]) {
         const sysMsg = decodeSysMessage(Uint8Array.from(msg));
         if (sysMsg.msgSpec.length === 0) {
@@ -900,8 +907,7 @@ export class OneBotMsgApi {
         const { msgType, subType, subSubType } = sysMsg.msgSpec[0];
         if (msgType === 528 && subType === 39 && subSubType === 39) {
             if (!sysMsg.bodyWrapper) return;
-            const event = await this.obContext.apis.UserApi.parseLikeEvent(sysMsg.bodyWrapper.wrappedBody);
-            return event;
+            return await this.obContext.apis.UserApi.parseLikeEvent(sysMsg.bodyWrapper.wrappedBody);
         }
         /*
         if (msgType === 732 && subType === 16 && subSubType === 16) {

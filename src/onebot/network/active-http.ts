@@ -1,25 +1,31 @@
-import { IOB11NetworkAdapter, OB11EmitEventContent } from '@/onebot/network/index';
+import { IOB11NetworkAdapter, OB11EmitEventContent, OB11NetworkReloadType } from '@/onebot/network/index';
 import { createHmac } from 'crypto';
 import { LogWrapper } from '@/common/log';
 import { QuickAction, QuickActionEvent } from '../types';
 import { NapCatCore } from '@/core';
 import { NapCatOneBot11Adapter } from '..';
+import { RequestUtil } from '@/common/request';
+import { HttpClientConfig } from '../config/config';
+import { ActionMap } from '../action';
 
 export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     logger: LogWrapper;
-    isOpen: boolean = false;
-
+    isEnable: boolean = false;
+    public config: HttpClientConfig;
     constructor(
-        public url: string,
-        public secret: string | undefined,
+        public name: string,
+        config: HttpClientConfig,
         public core: NapCatCore,
         public obContext: NapCatOneBot11Adapter,
+        public actions: ActionMap,
     ) {
         this.logger = core.context.logger;
+        this.config = structuredClone(config);
     }
 
+
     onEvent<T extends OB11EmitEventContent>(event: T) {
-        if (!this.isOpen) {
+        if (!this.isEnable) {
             return;
         }
         const headers: Record<string, string> = {
@@ -27,20 +33,16 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
             'x-self-id': this.core.selfInfo.uin,
         };
         const msgStr = JSON.stringify(event);
-        if (this.secret && this.secret.length > 0) {
-            const hmac = createHmac('sha1', this.secret);
+        if (this.config.token && this.config.token.length > 0) {
+            const hmac = createHmac('sha1', this.config.token);
             hmac.update(msgStr);
             const sig = hmac.digest('hex');
             headers['x-signature'] = 'sha1=' + sig;
         }
-        fetch(this.url, {
-            method: 'POST',
-            headers,
-            body: msgStr,
-        }).then(async (res) => {
+        RequestUtil.HttpGetText(this.config.url, 'POST', msgStr, headers).then(async (res) => {
             let resJson: QuickAction;
             try {
-                resJson = await res.json();
+                resJson = JSON.parse(res);
                 //logDebug('新消息事件HTTP上报返回快速操作: ', JSON.stringify(resJson));
             } catch (e) {
                 this.logger.logDebug('[OneBot] [Http Client] 新消息事件HTTP上报没有返回快速操作，不需要处理');
@@ -59,10 +61,26 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     }
 
     open() {
-        this.isOpen = true;
+        this.isEnable = true;
     }
 
     close() {
-        this.isOpen = false;
+        this.isEnable = false;
+    }
+    async reload(newconfig: HttpClientConfig) {
+        const wasEnabled = this.isEnable;
+        const oldUrl = this.config.url;
+        this.config = newconfig;
+        if (newconfig.enable && !wasEnabled) {
+            this.open();
+            return OB11NetworkReloadType.NetWorkOpen;
+        } else if (!newconfig.enable && wasEnabled) {
+            this.close();
+            return OB11NetworkReloadType.NetWorkClose;
+        }
+        if (oldUrl !== newconfig.url) {
+            return OB11NetworkReloadType.NetWorkReload;
+        }
+        return OB11NetworkReloadType.Normal;
     }
 }

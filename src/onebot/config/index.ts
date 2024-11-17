@@ -1,11 +1,9 @@
 import { ConfigBase } from '@/common/config-base';
-import ob11DefaultConfig from './onebot11.json';
 import { NapCatCore } from '@/core';
+import { OneBotConfig } from './config';
 
-export type OB11Config = typeof ob11DefaultConfig;
-
-export class OB11ConfigLoader extends ConfigBase<OB11Config> {
+export class OB11ConfigLoader extends ConfigBase<OneBotConfig> {
     constructor(core: NapCatCore, configPath: string) {
-        super('onebot11', core, configPath);
+        super('onebot11', core, configPath, false);
     }
 }

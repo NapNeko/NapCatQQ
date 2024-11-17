@@ -92,13 +92,16 @@ import { GetGroupFileUrl } from "@/onebot/action/file/GetGroupFileUrl";
 import { GetPacketStatus } from "@/onebot/action/packet/GetPacketStatus";
 import { FriendPoke } from "@/onebot/action/user/FriendPoke";
 import { GetCredentials } from './system/GetCredentials';
-import { SetGroupSign } from './extends/SetGroupSign';
+import { SendGroupSign, SetGroupSign } from './extends/SetGroupSign';
 import { GoCQHTTPGetGroupAtAllRemain } from './go-cqhttp/GetGroupAtAllRemain';
 import { GoCQHTTPCheckUrlSafely } from './go-cqhttp/GoCQHTTPCheckUrlSafely';
 import { GoCQHTTPGetModelShow } from './go-cqhttp/GoCQHTTPGetModelShow';
 import { GoCQHTTPSetModelShow } from './go-cqhttp/GoCQHTTPSetModelShow';
 import { GoCQHTTPDeleteFriend } from './go-cqhttp/GoCQHTTPDeleteFriend';
 import { GetMiniAppArk } from "@/onebot/action/extends/GetMiniAppArk";
+import { GetAiRecord } from "@/onebot/action/group/GetAiRecord";
+import { SendGroupAiRecord } from "@/onebot/action/group/SendGroupAiRecord";
+import { GetAiCharacters } from "@/onebot/action/extends/GetAiCharacters";
 
 
 export type ActionMap = Map<string, BaseAction<any, any>>;
@@ -122,6 +125,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new TranslateEnWordToZn(obContext, core),
         new GetGroupRootFiles(obContext, core),
         new SetGroupSign(obContext, core),
+        new SendGroupSign(obContext, core),
         // onebot11
         new SendLike(obContext, core),
         new GetMsg(obContext, core),
@@ -212,6 +216,9 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new GetGroupShutList(obContext, core),
         new GetGroupFileUrl(obContext, core),
         new GetMiniAppArk(obContext, core),
+        new GetAiRecord(obContext, core),
+        new SendGroupAiRecord(obContext, core),
+        new GetAiCharacters(obContext, core),
     ];
     const actionMap = new Map();
     for (const action of actionHandlers) {

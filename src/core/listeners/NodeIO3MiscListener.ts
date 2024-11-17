@@ -1,5 +1,5 @@
 export class NodeIO3MiscListener {
-    getOnAmgomDataPiece(...arg: unknown[]) {
+    getOnAmgomDataPiece(...arg: unknown[]): any {
 
     }
 }

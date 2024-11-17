@@ -1,8 +1,8 @@
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
+import { MiniAppInfo, MiniAppInfoHelper } from "@/core/packet/utils/helper/miniAppHelper";
 import { MiniAppData, MiniAppRawData, MiniAppReqCustomParams, MiniAppReqParams } from "@/core/packet/entities/miniApp";
-import { MiniAppInfo, MiniAppInfoHelper } from "@/core/packet/helper/miniAppHelper";
 
 const SchemaData = {
     type: 'object',
@@ -60,7 +60,7 @@ export class GetMiniAppArk extends GetPacketStatusDepends<Payload, {
         if (payload.type) {
             reqParam = MiniAppInfoHelper.generateReq(customParams, MiniAppInfo.get(payload.type)!.template);
         } else {
-            const { appId, scene, iconUrl, templateType, businessType, verType, shareType, versionId, withShareTicket } = payload as Required<Payload>;
+            const { appId, scene, iconUrl, templateType, businessType, verType, shareType, versionId, withShareTicket } = payload;
             reqParam = MiniAppInfoHelper.generateReq(
                 customParams,
                 {
@@ -77,7 +77,7 @@ export class GetMiniAppArk extends GetPacketStatusDepends<Payload, {
                 }
             );
         }
-        const arkData = await this.core.apis.PacketApi.sendMiniAppShareInfoReq(reqParam);
+        const arkData = await this.core.apis.PacketApi.pkt.operation.GetMiniAppAdaptShareInfo(reqParam);
         return {
             data: payload.rawArkData ? arkData : MiniAppInfoHelper.RawToSend(arkData)
         };

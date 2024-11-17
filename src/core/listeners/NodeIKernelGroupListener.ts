@@ -1,70 +1,70 @@
 import { DataSource, Group, GroupListUpdateType, GroupMember, GroupNotify, ShutUpGroupMember } from '@/core/entities';
 
 export class NodeIKernelGroupListener {
-    onGroupListInited(listEmpty: boolean): void { }
+    onGroupListInited(listEmpty: boolean): any { }
     // 发现于Win 9.9.9 23159
-    onGroupMemberLevelInfoChange(...args: unknown[]): void {
+    onGroupMemberLevelInfoChange(...args: unknown[]): any {
 
     }
 
-    onGetGroupBulletinListResult(...args: unknown[]) {
+    onGetGroupBulletinListResult(...args: unknown[]): any {
     }
 
-    onGroupAllInfoChange(...args: unknown[]) {
+    onGroupAllInfoChange(...args: unknown[]): any {
     }
 
-    onGroupBulletinChange(...args: unknown[]) {
+    onGroupBulletinChange(...args: unknown[]): any {
     }
 
-    onGroupBulletinRemindNotify(...args: unknown[]) {
+    onGroupBulletinRemindNotify(...args: unknown[]): any {
     }
 
-    onGroupArkInviteStateResult(...args: unknown[]) {
+    onGroupArkInviteStateResult(...args: unknown[]): any {
     }
 
-    onGroupBulletinRichMediaDownloadComplete(...args: unknown[]) {
+    onGroupBulletinRichMediaDownloadComplete(...args: unknown[]): any {
     }
 
-    onGroupConfMemberChange(...args: unknown[]) {
+    onGroupConfMemberChange(...args: unknown[]): any {
     }
 
-    onGroupDetailInfoChange(...args: unknown[]) {
+    onGroupDetailInfoChange(...args: unknown[]): any {
     }
 
-    onGroupExtListUpdate(...args: unknown[]) {
+    onGroupExtListUpdate(...args: unknown[]): any {
     }
 
-    onGroupFirstBulletinNotify(...args: unknown[]) {
+    onGroupFirstBulletinNotify(...args: unknown[]): any {
     }
 
-    onGroupListUpdate(updateType: GroupListUpdateType, groupList: Group[]) {
+    onGroupListUpdate(updateType: GroupListUpdateType, groupList: Group[]): any {
     }
 
-    onGroupNotifiesUpdated(dboubt: boolean, notifies: GroupNotify[]) {
+    onGroupNotifiesUpdated(dboubt: boolean, notifies: GroupNotify[]): any {
     }
 
-    onGroupBulletinRichMediaProgressUpdate(...args: unknown[]) {
+    onGroupBulletinRichMediaProgressUpdate(...args: unknown[]): any {
     }
 
-    onGroupNotifiesUnreadCountUpdated(...args: unknown[]) {
+    onGroupNotifiesUnreadCountUpdated(...args: unknown[]): any {
     }
 
-    onGroupSingleScreenNotifies(doubt: boolean, seq: string, notifies: GroupNotify[]) {
+    onGroupSingleScreenNotifies(doubt: boolean, seq: string, notifies: GroupNotify[]): any {
     }
 
-    onGroupsMsgMaskResult(...args: unknown[]) {
+    onGroupsMsgMaskResult(...args: unknown[]): any {
     }
 
-    onGroupStatisticInfoChange(...args: unknown[]) {
+    onGroupStatisticInfoChange(...args: unknown[]): any {
     }
 
-    onJoinGroupNotify(...args: unknown[]) {
+    onJoinGroupNotify(...args: unknown[]): any {
     }
 
-    onJoinGroupNoVerifyFlag(...args: unknown[]) {
+    onJoinGroupNoVerifyFlag(...args: unknown[]): any {
     }
 
-    onMemberInfoChange(groupCode: string, dateSource: DataSource, members: Map<string, GroupMember>) {
+    onMemberInfoChange(groupCode: string, dateSource: DataSource, members: Map<string, GroupMember>): any {
     }
 
     onMemberListChange(arg: {
@@ -74,12 +74,12 @@ export class NodeIKernelGroupListener {
         hasPrev: boolean,
         hasNext: boolean,
         hasRobot: boolean
-    }) {
+    }): any {
     }
 
-    onSearchMemberChange(...args: unknown[]) {
+    onSearchMemberChange(...args: unknown[]): any {
     }
 
-    onShutUpMemberListChanged(groupCode: string, members: Array<ShutUpGroupMember>) {
+    onShutUpMemberListChanged(groupCode: string, members: Array<ShutUpGroupMember>): any {
     }
 }

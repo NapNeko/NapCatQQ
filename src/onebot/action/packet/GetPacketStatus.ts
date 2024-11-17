@@ -9,7 +9,8 @@ export abstract class GetPacketStatusDepends<PT, RT> extends BaseAction<PT, RT> 
         if (!this.core.apis.PacketApi.available) {
             return {
                 valid: false,
-                message: "packetServer不可用，请参照文档 https://napneko.github.io/config/advanced 检查packetServer状态或进行配置！",
+                message: "packetBackend不可用，请参照文档 https://napneko.github.io/config/advanced 和启动日志检查packetBackend状态或进行配置！" +
+                    "错误堆栈信息：" + this.core.apis.PacketApi.clientLogStack,
             };
         }
         return await super.check(payload);

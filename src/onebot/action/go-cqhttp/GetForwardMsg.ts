@@ -61,7 +61,7 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
         }
 
         const rootMsgId = MessageUnique.getShortIdByMsgId(msgId);
-        const rootMsg = MessageUnique.getMsgIdAndPeerByShortId(rootMsgId || parseInt(msgId));
+        const rootMsg = MessageUnique.getMsgIdAndPeerByShortId(rootMsgId ?? +msgId);
         if (!rootMsg) {
             throw new Error('msg not found');
         }
@@ -72,15 +72,13 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
         }
 
         const singleMsg = data.msgList[0];
-        const resMsg = await this.obContext.apis.MsgApi.parseMessage(singleMsg, 'array');//强制array 以便处理
-        if (!resMsg) {
+        const resMsg = (await this.obContext.apis.MsgApi.parseMessageV2(singleMsg))?.arrayMsg;//强制array 以便处理
+        if (!(resMsg?.message?.[0] as OB11MessageForward)?.data?.content) {
             throw new Error('找不到相关的聊天记录');
         }
-        //if (this.obContext.configLoader.configData.messagePostFormat === 'array') {
-        //提取
-        const realmsg = ((await this.parseForward([resMsg]))[0].data.message as OB11MessageNode[])[0].data.message;
-        //里面都是offline消息 id都是0 没得说话
-        return { message: realmsg };
+        return {
+            messages: (resMsg?.message?.[0] as OB11MessageForward)?.data?.content
+        };
         //}
 
         // return { message: resMsg };

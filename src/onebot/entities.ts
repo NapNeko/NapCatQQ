@@ -25,7 +25,7 @@ export class OB11Entities {
             user_id: parseInt(rawFriend.coreInfo.uin),
             nickname: rawFriend.coreInfo.nick,
             remark: rawFriend.coreInfo.remark ?? rawFriend.coreInfo.nick,
-            sex: this.sex(rawFriend.baseInfo.sex!),
+            sex: this.sex(rawFriend.baseInfo.sex),
             level: 0,
         }));
     }
@@ -66,7 +66,7 @@ export class OB11Entities {
             sex: OB11Entities.sex(member.sex!),
             age: member.age ?? 0,
             area: '',
-            level: member.memberRealLevel ?? '0',
+            level: member.memberRealLevel?.toString() ?? '0',
             qq_level: member.qqLevel && calcQQLevel(member.qqLevel) || 0,
             join_time: +member.joinTime,
             last_sent_time: +member.lastSpeakTime,
@@ -76,7 +76,7 @@ export class OB11Entities {
             is_robot: member.isRobot,
             shut_up_timestamp: member.shutUpTime,
             role: OB11Entities.groupMemberRole(member.role),
-            title: member.memberSpecialTitle || '',
+            title: member.memberSpecialTitle ?? '',
 
         };
     }
