@@ -8,6 +8,9 @@ import {
     WebHonorType,
 } from '@/core';
 import { NapCatCore } from '..';
+import { createReadStream, readFileSync, statSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { basename } from 'node:path';
 
 export class NTQQWebApi {
     context: InstanceContext;
@@ -212,108 +215,65 @@ export class NTQQWebApi {
         }
     }
 
+    private async getDataInternal(cookieObject: any, groupCode: string, type: number) {
+        let resJson;
+        try {
+            const res = await RequestUtil.HttpGetText(
+                `https://qun.qq.com/interactive/honorlist?${new URLSearchParams({
+                    gc: groupCode,
+                    type: type.toString(),
+                }).toString()}`,
+                'GET',
+                '',
+                { 'Cookie': this.cookieToString(cookieObject) }
+            );
+            const match = /window\.__INITIAL_STATE__=(.*?);/.exec(res);
+            if (match) {
+                resJson = JSON.parse(match[1].trim());
+            }
+            return type === 1 ? resJson?.talkativeList : resJson?.actorList;
+        } catch (e) {
+            this.context.logger.logDebug('获取当前群荣耀失败', e);
+            return undefined;
+        }
+    }
+
+    private async getHonorList(cookieObject: any, groupCode: string, type: number) {
+        const data = await this.getDataInternal(cookieObject, groupCode, type);
+        if (!data) {
+            this.context.logger.logError(`获取类型 ${type} 的荣誉信息失败`);
+            return [];
+        }
+        return data.map((item: any) => ({
+            user_id: item?.uin,
+            nickname: item?.name,
+            avatar: item?.avatar,
+            description: item?.desc,
+        }));
+    }
+
     async getGroupHonorInfo(groupCode: string, getType: WebHonorType) {
         const cookieObject = await this.core.apis.UserApi.getCookies('qun.qq.com');
-        const getDataInternal = async (Internal_groupCode: string, Internal_type: number) => {
-            let resJson;
-            try {
-                const res = await RequestUtil.HttpGetText(
-                    `https://qun.qq.com/interactive/honorlist?${new URLSearchParams({
-                        gc: Internal_groupCode,
-                        type: Internal_type.toString(),
-                    }).toString()}`,
-                    'GET',
-                    '',
-                    { 'Cookie': this.cookieToString(cookieObject) }
-                );
-                const match = /window\.__INITIAL_STATE__=(.*?);/.exec(res);
-                if (match) {
-                    resJson = JSON.parse(match[1].trim());
-                }
-                if (Internal_type === 1) {
-                    return resJson?.talkativeList;
-                } else {
-                    return resJson?.actorList;
-                }
-            } catch (e) {
-                this.context.logger.logDebug('获取当前群荣耀失败', e);
-            }
-            return undefined;
-        };
-
         const HonorInfo: any = { group_id: groupCode };
 
         if (getType === WebHonorType.TALKATIVE || getType === WebHonorType.ALL) {
-            const RetInternal = await getDataInternal(groupCode, 1);
-            if (RetInternal) {
-                HonorInfo.current_talkative = {
-                    user_id: RetInternal[0]?.uin,
-                    avatar: RetInternal[0]?.avatar,
-                    nickname: RetInternal[0]?.name,
-                    day_count: 0,
-                    description: RetInternal[0]?.desc,
-                };
-                HonorInfo.talkative_list = [];
-                for (const talkative_ele of RetInternal) {
-                    HonorInfo.talkative_list.push({
-                        user_id: talkative_ele?.uin,
-                        avatar: talkative_ele?.avatar,
-                        description: talkative_ele?.desc,
-                        day_count: 0,
-                        nickname: talkative_ele?.name,
-                    });
-                }
-            } else {
-                this.context.logger.logError.bind(this.context.logger)('获取龙王信息失败');
+            const talkativeList = await this.getHonorList(cookieObject, groupCode, 1);
+            if (talkativeList.length > 0) {
+                HonorInfo.current_talkative = talkativeList[0];
+                HonorInfo.talkative_list = talkativeList;
             }
         }
+
         if (getType === WebHonorType.PERFORMER || getType === WebHonorType.ALL) {
-            const RetInternal = await getDataInternal(groupCode, 2);
-            if (RetInternal) {
-                HonorInfo.performer_list = [];
-                for (const performer_ele of RetInternal) {
-                    HonorInfo.performer_list.push({
-                        user_id: performer_ele?.uin,
-                        nickname: performer_ele?.name,
-                        avatar: performer_ele?.avatar,
-                        description: performer_ele?.desc,
-                    });
-                }
-            } else {
-                this.context.logger.logError.bind(this.context.logger)('获取群聊之火失败');
-            }
+            HonorInfo.performer_list = await this.getHonorList(cookieObject, groupCode, 2);
         }
-        if (getType === WebHonorType.PERFORMER || getType === WebHonorType.ALL) {
-            const RetInternal = await getDataInternal(groupCode, 3);
-            if (RetInternal) {
-                HonorInfo.legend_list = [];
-                for (const legend_ele of RetInternal) {
-                    HonorInfo.legend_list.push({
-                        user_id: legend_ele?.uin,
-                        nickname: legend_ele?.name,
-                        avatar: legend_ele?.avatar,
-                        desc: legend_ele?.description,
-                    });
-                }
-            } else {
-                this.context.logger.logError.bind(this.context.logger)('获取群聊炽焰失败');
-            }
+
+        if (getType === WebHonorType.LEGEND || getType === WebHonorType.ALL) {
+            HonorInfo.legend_list = await this.getHonorList(cookieObject, groupCode, 3);
         }
+
         if (getType === WebHonorType.EMOTION || getType === WebHonorType.ALL) {
-            const RetInternal = await getDataInternal(groupCode, 6);
-            if (RetInternal) {
-                HonorInfo.emotion_list = [];
-                for (const emotion_ele of RetInternal) {
-                    HonorInfo.emotion_list.push({
-                        user_id: emotion_ele.uin,
-                        nickname: emotion_ele.name,
-                        avatar: emotion_ele.avatar,
-                        desc: emotion_ele.description,
-                    });
-                }
-            } else {
-                this.context.logger.logError.bind(this.context.logger)('获取快乐源泉失败');
-            }
+            HonorInfo.emotion_list = await this.getHonorList(cookieObject, groupCode, 6);
         }
 
         // 冒尖小春笋好像已经被tx扬了 R.I.P.
@@ -345,5 +305,111 @@ export class NTQQWebApi {
             hash = hash + (hash << 5) + code;
         }
         return (hash & 0x7FFFFFFF).toString();
+    }
+    async createQunAlbumSession(gc: string, sAlbumID: string, sAlbumName: string, path: string, skey: string, pskey: string, uin: string) {
+        const img = readFileSync(path);
+        const img_md5 = createHash('md5').update(img).digest('hex');
+        const img_size = img.length;
+        const img_name = basename(path);
+        const time = Math.floor(Date.now() / 1000);
+        const GTK = this.getBknFromSKey(pskey);
+        const cookie = `p_uin=${uin}; p_skey=${pskey}; skey=${skey}; uin=${uin}`;
+        const body = {
+            control_req: [{
+                uin: uin,
+                token: {
+                    type: 4,
+                    data: pskey,
+                    appid: 5
+                },
+                appid: "qun",
+                checksum: img_md5,
+                check_type: 0,
+                file_len: img_size,
+                env: {
+                    refer: "qzone",
+                    deviceInfo: "h5"
+                },
+                model: 0,
+                biz_req: {
+                    sPicTitle: img_name,
+                    sPicDesc: "",
+                    sAlbumName: sAlbumName,
+                    sAlbumID: sAlbumID,
+                    iAlbumTypeID: 0,
+                    iBitmap: 0,
+                    iUploadType: 0,
+                    iUpPicType: 0,
+                    iBatchID: time,
+                    sPicPath: "",
+                    iPicWidth: 0,
+                    iPicHight: 0,
+                    iWaterType: 0,
+                    iDistinctUse: 0,
+                    iNeedFeeds: 1,
+                    iUploadTime: time,
+                    mapExt: {
+                        appid: "qun",
+                        userid: gc
+                    }
+                },
+                session: "",
+                asy_upload: 0,
+                cmd: "FileUpload"
+            }]
+        };
+        const api = `https://h5.qzone.qq.com/webapp/json/sliceUpload/FileBatchControl/${img_md5}?g_tk=${GTK}`;
+        const post = await RequestUtil.HttpGetJson(api, 'POST', body, {
+            "Cookie": cookie,
+            "Content-Type": "application/json"
+        });
+
+        return post;
+    }
+
+    async uploadQunAlbumSlice(path: string, session: string, skey: string, pskey: string, uin: string, slice_size: number) {
+        const img_size = statSync(path).size;
+        const img_name = basename(path);
+        let seq = 0;
+        let offset = 0;
+        const GTK = this.getBknFromSKey(pskey);
+        const cookie = `p_uin=${uin}; p_skey=${pskey}; skey=${skey}; uin=${uin}`;
+
+        const stream = createReadStream(path, { highWaterMark: slice_size });
+
+        for await (const chunk of stream) {
+            const end = Math.min(offset + chunk.length, img_size);
+            const boundary = `----WebKitFormBoundary${Math.random().toString(36).substring(2)}`;
+            const formData = await RequestUtil.createFormData(boundary, path);
+
+            const api = `https://h5.qzone.qq.com/webapp/json/sliceUpload/FileUpload?seq=${seq}&retry=0&offset=${offset}&end=${end}&total=${img_size}&type=form&g_tk=${GTK}`;
+            const body = {
+                uin: uin,
+                appid: "qun",
+                session: session,
+                offset: offset,
+                data: formData,
+                checksum: "",
+                check_type: 0,
+                retry: 0,
+                seq: seq,
+                end: end,
+                cmd: "FileUpload",
+                slice_size: slice_size,
+                "biz_req.iUploadType": 0
+            };
+
+            const post = await RequestUtil.HttpGetJson(api, 'POST', body, {
+                "Cookie": cookie,
+                "Content-Type": `multipart/form-data; boundary=${boundary}`
+            });
+
+            offset += chunk.length;
+            seq++;
+        }
+    }
+    async uploadQunAlbum(path: string, albumId: string, group: string, skey: string, pskey: string, uin: string) {
+        const session = (await this.createQunAlbumSession(group, albumId, group, path, skey, pskey, uin) as { data: { session: string } }).data.session;
+        return await this.uploadQunAlbumSlice(path, session, skey, pskey, uin, 1024 * 1024);
     }
 }

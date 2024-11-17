@@ -144,7 +144,7 @@ export class NTQQMsgApi {
                 params,
             ],
             () => true,
-            () => true, // Todo: 应当通过 groupFileListResult 判断
+            () => true, // 应当通过 groupFileListResult 判断
             1,
             5000,
         );
@@ -194,7 +194,7 @@ export class NTQQMsgApi {
     async sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
         //唉？！我有个想法
         if (peer.chatType === ChatType.KCHATTYPETEMPC2CFROMGROUP && peer.guildId && peer.guildId !== '') {
-            const member = await this.core.apis.GroupApi.getGroupMember(peer.guildId, peer.peerUid!);
+            const member = await this.core.apis.GroupApi.getGroupMember(peer.guildId, peer.peerUid);
             if (member) {
                 await this.PrepareTempChat(peer.peerUid, peer.guildId, member.nick);
             }

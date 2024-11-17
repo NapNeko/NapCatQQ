@@ -17,6 +17,6 @@ export class FriendPoke extends GetPacketStatusDepends<Payload, any> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        await this.core.apis.PacketApi.sendPokePacket(+payload.user_id);
+        await this.core.apis.PacketApi.pkt.operation.FriendPoke(+payload.user_id);
     }
 }

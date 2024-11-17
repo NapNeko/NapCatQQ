@@ -1,8 +1,9 @@
 import * as stream from 'node:stream';
 import { ReadStream } from "node:fs";
-import { PacketHighwaySig } from "@/core/packet/highway/session";
-import { HighwayHttpUploader, HighwayTcpUploader } from "@/core/packet/highway/uploader";
-import { LogWrapper } from "@/common/log";
+import { HighwayTcpUploader } from "@/core/packet/highway/uploader/highwayTcpUploader";
+import { HighwayHttpUploader } from "@/core/packet/highway/uploader/highwayHttpUploader";
+import { PacketHighwaySig } from "@/core/packet/highway/highwayContext";
+import { PacketLogger } from "@/core/packet/context/loggerContext";
 
 export interface PacketHighwayTrans {
     uin: string;
@@ -24,9 +25,9 @@ export class PacketHighwayClient {
     sig: PacketHighwaySig;
     server: string = 'htdata3.qq.com';
     port: number = 80;
-    logger: LogWrapper;
+    logger: PacketLogger;
 
-    constructor(sig: PacketHighwaySig, logger: LogWrapper, server: string = 'htdata3.qq.com', port: number = 80) {
+    constructor(sig: PacketHighwaySig, logger: PacketLogger, server: string = 'htdata3.qq.com', port: number = 80) {
         this.sig = sig;
         this.logger = logger;
     }
@@ -59,12 +60,12 @@ export class PacketHighwayClient {
             const tcpUploader = new HighwayTcpUploader(trans, this.logger);
             await tcpUploader.upload();
         } catch (e) {
-            this.logger.logError(`[Highway] upload failed: ${e}, fallback to http upload`);
+            this.logger.error(`[Highway] upload failed: ${e}, fallback to http upload`);
             try {
                 const httpUploader = new HighwayHttpUploader(trans, this.logger);
                 await httpUploader.upload();
             } catch (e) {
-                this.logger.logError(`[Highway] http upload failed: ${e}`);
+                this.logger.error(`[Highway] http upload failed: ${e}`);
                 throw e;
             }
         }

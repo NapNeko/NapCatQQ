@@ -3,7 +3,6 @@ import { OB11Entities } from '@/onebot/entities';
 import BaseAction from '../BaseAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import { GroupMember } from '@/core';
 
 const SchemaData = {
     type: 'object',
@@ -44,7 +43,7 @@ class GetGroupMemberInfo extends BaseAction<Payload, OB11GroupMember> {
         } else {
             this.core.context.logger.logDebug(`获取群成员详细信息失败, 只能返回基础信息`);
         }
-        return OB11Entities.groupMember(payload.group_id.toString(), member as GroupMember);
+        return OB11Entities.groupMember(payload.group_id.toString(), member);
     }
 }
 

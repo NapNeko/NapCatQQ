@@ -11,7 +11,7 @@ interface WebUiCredentialJson {
 }
 
 export class AuthHelper {
-    private static secretKey = Math.random().toString(36).slice(2);
+    private static readonly secretKey = Math.random().toString(36).slice(2);
 
     /**
      * 签名凭证方法。

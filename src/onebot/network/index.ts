@@ -1,33 +1,60 @@
 import { OB11BaseEvent } from '@/onebot/event/OB11BaseEvent';
 import { OB11Message } from '@/onebot';
 import { ActionMap } from '@/onebot/action';
+import { NetworkConfigAdapter } from '../config/config';
 
 export type OB11EmitEventContent = OB11BaseEvent | OB11Message;
-
+export enum OB11NetworkReloadType {
+    Normal = 0,
+    ConfigChange = 1,
+    NetWorkReload = 2,
+    NetWorkClose = 3,
+    NetWorkOpen = 4
+}
 export interface IOB11NetworkAdapter {
-    actions?: ActionMap;
-
+    actions: ActionMap;
+    name: string;
+    isEnable: boolean;
+    config: NetworkConfigAdapter;
+    
     onEvent<T extends OB11EmitEventContent>(event: T): void;
 
     open(): void | Promise<void>;
 
     close(): void | Promise<void>;
+
+    reload(config: any): OB11NetworkReloadType | Promise<OB11NetworkReloadType>;
 }
 
 export class OB11NetworkManager {
-    adapters: IOB11NetworkAdapter[] = [];
+    adapters: Map<string, IOB11NetworkAdapter> = new Map();
 
     async openAllAdapters() {
-        return Promise.all(this.adapters.map(adapter => adapter.open()));
+        return Promise.all(Array.from(this.adapters.values()).map(adapter => adapter.open()));
     }
 
     async emitEvent(event: OB11EmitEventContent) {
-        //console.log('adapters', this.adapters.length);
-        return Promise.all(this.adapters.map(adapter => adapter.onEvent(event)));
+        return Promise.all(Array.from(this.adapters.values()).map(adapter => adapter.onEvent(event)));
     }
 
+    async emitEventByName(names: string[], event: OB11EmitEventContent) {
+        return Promise.all(names.map(name => {
+            const adapter = this.adapters.get(name);
+            if (adapter) {
+                return adapter.onEvent(event);
+            }
+        }));
+    }
+    async emitEventByNames(map: Map<string, OB11EmitEventContent>) {
+        return Promise.all(Array.from(map.entries()).map(([name, event]) => {
+            const adapter = this.adapters.get(name);
+            if (adapter) {
+                return adapter.onEvent(event);
+            }
+        }));
+    }
     registerAdapter(adapter: IOB11NetworkAdapter) {
-        this.adapters.push(adapter);
+        this.adapters.set(adapter.name, adapter);
     }
 
     async registerAdapterAndOpen(adapter: IOB11NetworkAdapter) {
@@ -36,20 +63,34 @@ export class OB11NetworkManager {
     }
 
     async closeSomeAdapters(adaptersToClose: IOB11NetworkAdapter[]) {
-        this.adapters = this.adapters.filter(adapter => !adaptersToClose.includes(adapter));
-        await Promise.all(adaptersToClose.map(adapter => adapter.close()));
+        for (const adapter of adaptersToClose) {
+            this.adapters.delete(adapter.name);
+            await adapter.close();
+        }
     }
 
-    /**
-     * Close all adapters that satisfy the predicate.
-     */
+    findSomeAdapter(name: string) {
+        return this.adapters.get(name);
+    }
+
     async closeAdapterByPredicate(closeFilter: (adapter: IOB11NetworkAdapter) => boolean) {
-        await this.closeSomeAdapters(this.adapters.filter(closeFilter));
+        const adaptersToClose = Array.from(this.adapters.values()).filter(closeFilter);
+        await this.closeSomeAdapters(adaptersToClose);
     }
 
     async closeAllAdapters() {
-        await Promise.all(this.adapters.map(adapter => adapter.close()));
-        this.adapters = [];
+        await Promise.all(Array.from(this.adapters.values()).map(adapter => adapter.close()));
+        this.adapters.clear();
+    }
+
+    async readloadAdapter<T>(name: string, config: T) {
+        const adapter = this.adapters.get(name);
+        if (adapter) {
+            await adapter.reload(config);
+        }
+    }
+    async readloadSomeAdapters<T>(configMap: Map<string, T>) {
+        await Promise.all(Array.from(configMap.entries()).map(([name, config]) => this.readloadAdapter(name, config)));
     }
 }
 

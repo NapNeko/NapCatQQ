@@ -4,19 +4,15 @@ import { resolve } from 'path';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import { builtinModules } from 'module';
 //依赖排除
-const external = ['silk-wasm', 'ws', 'express', 'fluent-ffmpeg', 'log4js', 'qrcode-terminal'];
-const nodeModules = [...builtinModules, builtinModules.map(m => `node:${m}`)].flat();
+const external = ['silk-wasm', 'ws', 'express', 'qrcode-terminal', 'fluent-ffmpeg', 'piscina'];
+const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`)].flat();
 function genCpModule(module: string) {
     return { src: `./node_modules/${module}`, dest: `dist/node_modules/${module}`, flatten: false };
 }
 let startScripts: string[] | undefined = undefined;
 if (process.env.NAPCAT_BUILDSYS == 'linux') {
-    if (process.env.NAPCAT_BUILDARCH == 'x64') {
-    }
     startScripts = [];
 } else if (process.env.NAPCAT_BUILDSYS == 'win32') {
-    if (process.env.NAPCAT_BUILDARCH == 'x64') {
-    }
     startScripts = ['./script/KillQQ.bat'];
 } else {
     startScripts = ['./script/KillQQ.bat'];
@@ -26,8 +22,8 @@ const FrameworkBaseConfigPlugin: PluginOption[] = [
         targets: [
             { src: './manifest.json', dest: 'dist' },
             { src: './src/core/external/napcat.json', dest: 'dist/config/' },
-            { src: './static/', dest: 'dist/static/', flatten: false },
-            { src: './src/onebot/config/onebot11.json', dest: 'dist/config/' },
+            { src: './src/native/packet', dest: 'dist/moehoo', flatten: false },
+            { src: './napcat.webui/dist/', dest: 'dist/static/', flatten: false },
             { src: './src/framework/liteloader.cjs', dest: 'dist' },
             { src: './src/framework/napcat.cjs', dest: 'dist' },
             { src: './src/framework/preload.cjs', dest: 'dist' },
@@ -41,15 +37,14 @@ const FrameworkBaseConfigPlugin: PluginOption[] = [
 const ShellBaseConfigPlugin: PluginOption[] = [
     cp({
         targets: [
-            { src: './src/native/external', dest: 'dist/native', flatten: false },
-            { src: './static/', dest: 'dist/static/', flatten: false },
+            { src: './src/native/packet', dest: 'dist/moehoo', flatten: false },
+            { src: './napcat.webui/dist/', dest: 'dist/static/', flatten: false },
             { src: './src/core/external/napcat.json', dest: 'dist/config/' },
-            { src: './src/onebot/config/onebot11.json', dest: 'dist/config/' },
             { src: './package.json', dest: 'dist' },
             { src: './launcher/', dest: 'dist', flatten: true },
-            ...(startScripts.map((startScript) => {
+            ...startScripts.map((startScript) => {
                 return { src: startScript, dest: 'dist' };
-            })),
+            }),
         ],
     }),
     nodeResolve(),
@@ -69,9 +64,12 @@ const ShellBaseConfig = () => defineConfig({
         target: 'esnext',
         minify: false,
         lib: {
-            entry: 'src/shell/napcat.ts',
+            entry: {
+                'napcat': 'src/shell/napcat.ts',
+                'audio-worker': 'src/common/audio-worker.ts',
+            },
             formats: ['es'],
-            fileName: () => 'napcat.mjs',
+            fileName: (_, entryName) => `${entryName}.mjs`,
         },
         rollupOptions: {
             external: [...nodeModules, ...external],
@@ -93,9 +91,12 @@ const FrameworkBaseConfig = () => defineConfig({
         target: 'esnext',
         minify: false,
         lib: {
-            entry: 'src/framework/napcat.ts',
+            entry: {
+                'napcat': 'src/framework/napcat.ts',
+                'audio-worker': 'src/common/audio-worker.ts',
+            },
             formats: ['es'],
-            fileName: () => 'napcat.mjs',
+            fileName: (_, entryName) => `${entryName}.mjs`,
         },
         rollupOptions: {
             external: [...nodeModules, ...external],

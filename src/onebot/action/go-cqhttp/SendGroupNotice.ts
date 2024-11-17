@@ -34,15 +34,15 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
                 success,
             } = (await uri2local(this.core.NapCatTempPath, payload.image));
             if (!success) {
-                throw `群公告${payload.image}设置失败,image字段可能格式不正确`;
+                throw new Error(`群公告${payload.image}设置失败,image字段可能格式不正确`);
             }
             if (!path) {
-                throw `群公告${payload.image}设置失败,获取资源失败`;
+                throw new Error(`群公告${payload.image}设置失败,获取资源失败`);
             }
             await checkFileReceived(path, 5000); // 文件不存在QQ会崩溃，需要提前判断
             const ImageUploadResult = await this.core.apis.GroupApi.uploadGroupBulletinPic(payload.group_id.toString(), path);
             if (ImageUploadResult.errCode != 0) {
-                throw `群公告${payload.image}设置失败,图片上传失败`;
+                throw new Error(`群公告${payload.image}设置失败,图片上传失败`);
             }
 
             unlink(path, () => {

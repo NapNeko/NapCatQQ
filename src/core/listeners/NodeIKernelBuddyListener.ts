@@ -3,57 +3,57 @@ import { BuddyCategoryType, FriendRequestNotify } from '@/core/entities';
 export type OnBuddyChangeParams = BuddyCategoryType[];
 
 export class NodeIKernelBuddyListener {
-    onBuddyListChangedV2(arg: unknown): void {
+    onBuddyListChangedV2(arg: unknown): any {
     }
 
-    onAddBuddyNeedVerify(arg: unknown) {
+    onAddBuddyNeedVerify(arg: unknown): any {
     }
 
-    onAddMeSettingChanged(arg: unknown) {
+    onAddMeSettingChanged(arg: unknown): any {
     }
 
-    onAvatarUrlUpdated(arg: unknown) {
+    onAvatarUrlUpdated(arg: unknown): any {
     }
 
-    onBlockChanged(arg: unknown) {
+    onBlockChanged(arg: unknown): any {
     }
 
-    onBuddyDetailInfoChange(arg: unknown) {
+    onBuddyDetailInfoChange(arg: unknown): any {
     }
 
-    onBuddyInfoChange(arg: unknown) {
+    onBuddyInfoChange(arg: unknown): any {
     }
 
-    onBuddyListChange(arg: OnBuddyChangeParams): void {
+    onBuddyListChange(arg: OnBuddyChangeParams): any {
     }
 
-    onBuddyRemarkUpdated(arg: unknown): void {
+    onBuddyRemarkUpdated(arg: unknown): any {
     }
 
-    onBuddyReqChange(arg: FriendRequestNotify): void {
+    onBuddyReqChange(arg: FriendRequestNotify): any {
     }
 
-    onBuddyReqUnreadCntChange(arg: unknown): void {
+    onBuddyReqUnreadCntChange(arg: unknown): any {
     }
 
-    onCheckBuddySettingResult(arg: unknown): void {
+    onCheckBuddySettingResult(arg: unknown): any {
     }
 
-    onDelBatchBuddyInfos(arg: unknown): void {
+    onDelBatchBuddyInfos(arg: unknown): any {
     }
 
-    onDoubtBuddyReqChange(arg: unknown): void {
+    onDoubtBuddyReqChange(arg: unknown): any {
     }
 
-    onDoubtBuddyReqUnreadNumChange(arg: unknown): void {
+    onDoubtBuddyReqUnreadNumChange(arg: unknown): any {
     }
 
-    onNickUpdated(arg: unknown): void {
+    onNickUpdated(arg: unknown): any {
     }
 
-    onSmartInfos(arg: unknown): void {
+    onSmartInfos(arg: unknown): any {
     }
 
-    onSpacePermissionInfos(arg: unknown): void {
+    onSpacePermissionInfos(arg: unknown): any {
     }
 }

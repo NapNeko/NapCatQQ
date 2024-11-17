@@ -14,7 +14,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export class SetQQProfile extends BaseAction<Payload, any | null> {
+export class SetQQProfile extends BaseAction<Payload, any> {
     actionName = ActionName.SetQQProfile;
     payloadSchema = SchemaData;
 

@@ -21,7 +21,7 @@ export class OCRImage extends BaseAction<Payload, any> {
     async _handle(payload: Payload) {
         const { path, success } = (await uri2local(this.core.NapCatTempPath, payload.image));
         if (!success) {
-            throw `OCR ${payload.image}失败,image字段可能格式不正确`;
+            throw new Error(`OCR ${payload.image}失败,image字段可能格式不正确`);
         }
         if (path) {
             await checkFileReceived(path, 5000); // 文件不存在QQ会崩溃，需要提前判断
@@ -29,12 +29,12 @@ export class OCRImage extends BaseAction<Payload, any> {
             fs.unlink(path, () => { });
 
             if (!ret) {
-                throw `OCR ${payload.file}失败`;
+                throw new Error(`OCR ${payload.file}失败`);
             }
             return ret.result;
         }
         fs.unlink(path, () => { });
-        throw `OCR ${payload.file}失败,文件可能不存在`;
+        throw new Error(`OCR ${payload.file}失败,文件可能不存在`);
     }
 }
 

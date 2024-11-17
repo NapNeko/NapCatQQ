@@ -5,17 +5,17 @@ import * as fs from 'fs';
 import { CalculateStreamBytesTransform } from "@/core/packet/utils/crypto/sha1StreamBytesTransform";
 
 function sha1Stream(readable: stream.Readable) {
-    return new Promise((resolve, reject) => {
+    return new Promise<Buffer>((resolve, reject) => {
         readable.on('error', reject);
         readable.pipe(crypto.createHash('sha1').on('error', reject).on('data', resolve));
-    }) as Promise<Buffer>;
+    });
 }
 
 function md5Stream(readable: stream.Readable) {
-    return new Promise((resolve, reject) => {
+    return new Promise<Buffer>((resolve, reject) => {
         readable.on('error', reject);
         readable.pipe(crypto.createHash('md5').on('error', reject).on('data', resolve));
-    }) as Promise<Buffer>;
+    });
 }
 
 export function calculateSha1(filePath: string): Promise<Buffer> {
@@ -39,7 +39,7 @@ export function calculateSha1StreamBytes(filePath: string): Promise<Buffer[]> {
         calculateStreamBytes.on('end', () => {
             resolve(byteArrayList);
         });
-        calculateStreamBytes.on('error', (err) => {
+        calculateStreamBytes.on('error', (err: Error) => {
             reject(err);
         });
         readable.pipe(calculateStreamBytes);

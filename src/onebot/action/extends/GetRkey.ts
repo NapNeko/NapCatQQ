@@ -6,6 +6,6 @@ export class GetRkey extends GetPacketStatusDepends<null, Array<any>> {
     actionName = ActionName.GetRkey;
 
     async _handle() {
-        return await this.core.apis.PacketApi.sendRkeyPacket();
+        return await this.core.apis.PacketApi.pkt.operation.FetchRkey();
     }
 }

@@ -1,25 +1,25 @@
 export class NodeIKernelSessionListener {
-    onNTSessionCreate(args: unknown) {
+    onNTSessionCreate(args: unknown): any {
 
     }
 
-    onGProSessionCreate(args: unknown) {
+    onGProSessionCreate(args: unknown): any {
 
     }
 
-    onSessionInitComplete(args: unknown) {
+    onSessionInitComplete(args: unknown): any {
 
     }
 
-    onOpentelemetryInit(args: unknown) {
+    onOpentelemetryInit(args: unknown): any {
 
     }
 
-    onUserOnlineResult(args: unknown) {
+    onUserOnlineResult(args: unknown): any {
 
     }
 
-    onGetSelfTinyId(args: unknown) {
+    onGetSelfTinyId(args: unknown): any {
 
     }
 }

@@ -11,10 +11,10 @@ import { decodeCQCode } from '@/onebot/cqcode';
 import { MessageUnique } from '@/common/message-unique';
 import { ChatType, ElementType, NapCatCore, Peer, RawMessage, SendArkElement, SendMessageElement } from '@/core';
 import BaseAction from '../BaseAction';
-import { rawMsgWithSendMsg } from "@/core/packet/message/converter";
-import { PacketMsg } from "@/core/packet/message/message";
 import { ForwardMsgBuilder } from "@/common/forward-msg-builder";
 import { stringifyWithBigInt } from "@/common/helper";
+import { PacketMsg } from "@/core/packet/message/message";
+import { rawMsgWithSendMsg } from "@/core/packet/message/converter";
 
 export interface ReturnDataType {
     message_id: number;
@@ -68,7 +68,7 @@ export async function createContext(core: NapCatCore, payload: OB11PostContext, 
             }
             return {
                 chatType: ChatType.KCHATTYPEC2C,
-                peerUid: Uid!,
+                peerUid: Uid,
                 guildId: '',
             };
         }
@@ -122,8 +122,8 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                 returnMsgAndResId = packetMode
                     ? await this.handleForwardedNodesPacket(peer, messages as OB11MessageNode[], payload.source, payload.news, payload.summary, payload.prompt)
                     : await this.handleForwardedNodes(peer, messages as OB11MessageNode[]);
-            } catch (e) {
-                throw Error(packetMode ? `发送伪造合并转发消息失败: ${e}` : `发送合并转发消息失败: ${e}`);
+            } catch (e: any) {
+                throw Error(packetMode ? `发送伪造合并转发消息失败: ${e?.stack}` : `发送合并转发消息失败: ${e?.stack}`);
             }
             if (!returnMsgAndResId) {
                 throw Error('发送合并转发消息失败：returnMsgAndResId 为空！');
@@ -133,7 +133,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                     guildId: '',
                     peerUid: peer.peerUid,
                     chatType: peer.chatType,
-                }, (returnMsgAndResId.message)!.msgId);
+                }, (returnMsgAndResId.message).msgId);
                 return { message_id: msgShortId!, res_id: returnMsgAndResId.res_id };
             } else if (returnMsgAndResId.res_id && !returnMsgAndResId.message) {
                 throw Error(`发送转发消息（res_id：${returnMsgAndResId.res_id} 失败`);
@@ -150,7 +150,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         const { sendElements, deleteAfterSentFiles } = await this.obContext.apis.MsgApi
             .createSendElements(messages, peer);
         const returnMsg = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, deleteAfterSentFiles);
-        return { message_id: returnMsg!.id! };
+        return { message_id: returnMsg.id! };
     }
 
     private async uploadForwardedNodesPacket(msgPeer: Peer, messageNodes: OB11MessageNode[], source?: string, news?: {
@@ -175,7 +175,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
 
                 if (getSpecialMsgNum({ message: OB11Data }, OB11MessageDataType.node)) {
                     const uploadReturnData = await this.uploadForwardedNodesPacket(msgPeer, OB11Data as OB11MessageNode[], node.data.source, node.data.news, node.data.summary, node.data.prompt, {
-                        user_id: (node.data.user_id || node.data.uin)?.toString() ?? parentMeta?.user_id ?? this.core.selfInfo.uin,
+                        user_id: (node.data.user_id ?? node.data.uin)?.toString() ?? parentMeta?.user_id ?? this.core.selfInfo.uin,
                         nickname: (node.data.nickname || node.data.name) ?? parentMeta?.nickname ?? "QQ用户",
                     }, dp + 1);
                     sendElements = uploadReturnData?.finallySendElements ? [uploadReturnData.finallySendElements] : [];
@@ -185,16 +185,16 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                 }
 
                 const packetMsgElements: rawMsgWithSendMsg = {
-                    senderUin: Number((node.data.user_id || node.data.uin) ?? parentMeta?.user_id) || +this.core.selfInfo.uin,
+                    senderUin: Number((node.data.user_id ?? node.data.uin) ?? parentMeta?.user_id) || +this.core.selfInfo.uin,
                     senderName: (node.data.nickname || node.data.name) ?? parentMeta?.nickname ?? "QQ用户",
                     groupId: msgPeer.chatType === ChatType.KCHATTYPEGROUP ? +msgPeer.peerUid : undefined,
                     time: Number(node.data.time) || Date.now(),
                     msg: sendElements,
                 };
                 logger.logDebug(`handleForwardedNodesPacket[SendRaw] 开始转换 ${stringifyWithBigInt(packetMsgElements)}`);
-                const transformedMsg = this.core.apis.PacketApi.packetSession?.packer.packetConverter.rawMsgWithSendMsgToPacketMsg(packetMsgElements);
+                const transformedMsg = this.core.apis.PacketApi.pkt.msgConverter.rawMsgWithSendMsgToPacketMsg(packetMsgElements);
                 logger.logDebug(`handleForwardedNodesPacket[SendRaw] 转换为 ${stringifyWithBigInt(transformedMsg)}`);
-                packetMsg.push(transformedMsg!);
+                packetMsg.push(transformedMsg);
             } else if (node.data.id) {
                 const id = node.data.id;
                 const nodeMsg = MessageUnique.getMsgIdAndPeerByShortId(+id) || MessageUnique.getPeerByMsgId(id);
@@ -205,9 +205,9 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                 const msg = (await this.core.apis.MsgApi.getMsgsByMsgId(nodeMsg.Peer, [nodeMsg.MsgId])).msgList[0];
                 logger.logDebug(`handleForwardedNodesPacket[PureRaw] 开始转换 ${stringifyWithBigInt(msg)}`);
                 await this.core.apis.FileApi.downloadRawMsgMedia([msg]);
-                const transformedMsg = this.core.apis.PacketApi.packetSession?.packer.packetConverter.rawMsgToPacketMsg(msg, msgPeer);
+                const transformedMsg = this.core.apis.PacketApi.pkt.msgConverter.rawMsgToPacketMsg(msg, msgPeer);
                 logger.logDebug(`handleForwardedNodesPacket[PureRaw] 转换为 ${stringifyWithBigInt(transformedMsg)}`);
-                packetMsg.push(transformedMsg!);
+                packetMsg.push(transformedMsg);
             } else {
                 logger.logDebug(`handleForwardedNodesPacket 跳过元素 ${stringifyWithBigInt(node)}`);
             }
@@ -216,7 +216,7 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
             logger.logWarn('handleForwardedNodesPacket 元素为空！');
             return null;
         }
-        const resid = await this.core.apis.PacketApi.sendUploadForwardMsg(packetMsg, msgPeer.chatType === ChatType.KCHATTYPEGROUP ? +msgPeer.peerUid : 0);
+        const resid = await this.core.apis.PacketApi.pkt.operation.UploadForwardMsg(packetMsg, msgPeer.chatType === ChatType.KCHATTYPEGROUP ? +msgPeer.peerUid : 0);
         const forwardJson = ForwardMsgBuilder.fromPacketMsg(resid, packetMsg, source, news, summary, prompt);
         return {
             finallySendElements: {
@@ -308,8 +308,8 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
                             MessageUnique.createUniqueMsgId(selfPeer, result.value.msgId);
                         }
                     });
-                } catch (e) {
-                    logger.logDebug('生成转发消息节点失败', e);
+                } catch (e: any) {
+                    logger.logDebug('生成转发消息节点失败', e?.stack);
                 }
             }
         }
@@ -350,8 +350,8 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
             return {
                 message: await this.core.apis.MsgApi.multiForwardMsg(srcPeer!, destPeer, retMsgIds)
             };
-        } catch (e) {
-            logger.logError.bind(this.core.context.logger)('forward failed', e);
+        } catch (e: any) {
+            logger.logError.bind(this.core.context.logger)('forward failed', e?.stack);
             return {
                 message: null
             };
@@ -376,8 +376,8 @@ export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
         }
         try {
             return await this.core.apis.MsgApi.sendMsg(selfPeer, sendElements, true);
-        } catch (e) {
-            logger.logError.bind(this.core.context.logger)(e, '克隆转发消息失败,将忽略本条消息', msg);
+        } catch (e: any) {
+            logger.logError.bind(this.core.context.logger)(e?.stack, '克隆转发消息失败,将忽略本条消息', msg);
         }
     }
 }

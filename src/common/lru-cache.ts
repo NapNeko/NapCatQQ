@@ -1,6 +1,6 @@
 export class LRUCache<K, V> {
     private capacity: number;
-    private cache: Map<K, V>;
+    public cache: Map<K, V>;
 
     constructor(capacity: number) {
         this.capacity = capacity;
@@ -29,5 +29,14 @@ export class LRUCache<K, V> {
             }
         }
         this.cache.set(key, value);
+    }
+    public resetCapacity(newCapacity: number): void {
+        this.capacity = newCapacity;
+        while (this.cache.size > this.capacity) {
+            const firstKey = this.cache.keys().next().value;
+            if (firstKey !== undefined) {
+                this.cache.delete(firstKey);
+            }
+        }
     }
 }

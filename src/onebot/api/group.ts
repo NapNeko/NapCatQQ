@@ -40,7 +40,7 @@ export class OneBotGroupApi {
         if (msg.senderUin && msg.senderUin !== '0') {
             const member = await this.core.apis.GroupApi.getGroupMember(msg.peerUid, msg.senderUin);
             if (member && member.cardName !== msg.sendMemberName) {
-                const newCardName = msg.sendMemberName || '';
+                const newCardName = msg.sendMemberName ?? '';
                 const event = new OB11GroupCardEvent(this.core, parseInt(msg.peerUid), parseInt(msg.senderUin), newCardName, member.cardName);
                 member.cardName = newCardName;
                 return event;
@@ -48,7 +48,7 @@ export class OneBotGroupApi {
         }
 
         for (const element of msg.elements) {
-            if (element.grayTipElement && element.grayTipElement.groupElement) {
+            if (element.grayTipElement?.groupElement) {
                 const groupElement = element.grayTipElement.groupElement;
                 if (groupElement.type == TipGroupElementType.memberIncrease) {
                     const MemberIncreaseEvent = await this.obContext.apis.GroupApi.parseGroupMemberIncreaseEvent(msg.peerUid, element.grayTipElement);
@@ -83,7 +83,7 @@ export class OneBotGroupApi {
                         url: pathToFileURL(element.fileElement.filePath).href,
                         name: element.fileElement.fileName,
                         size: parseInt(element.fileElement.fileSize),
-                        busid: element.fileElement.fileBizId || 0,
+                        busid: element.fileElement.fileBizId ?? 0,
                     },
                 );
             }
@@ -109,8 +109,8 @@ export class OneBotGroupApi {
                             return new OB11GroupPokeEvent(
                                 this.core,
                                 parseInt(msg.peerUid),
-                                parseInt((await this.core.apis.UserApi.getUinByUidV2(poke_uid[0].uid))!),
-                                parseInt((await this.core.apis.UserApi.getUinByUidV2(poke_uid[1].uid))!),
+                                +await this.core.apis.UserApi.getUinByUidV2(poke_uid[0].uid),
+                                +await this.core.apis.UserApi.getUinByUidV2(poke_uid[1].uid),
                                 pokedetail,
                             );
                         }
@@ -165,13 +165,13 @@ export class OneBotGroupApi {
     async parseGroupBanEvent(GroupCode: string, grayTipElement: GrayTipElement) {
         const groupElement = grayTipElement?.groupElement;
         if (!groupElement?.shutUp) return undefined;
-        const memberUid = groupElement.shutUp!.member.uid;
-        const adminUid = groupElement.shutUp!.admin.uid;
+        const memberUid = groupElement.shutUp.member.uid;
+        const adminUid = groupElement.shutUp.admin.uid;
         let memberUin: string;
-        let duration = parseInt(groupElement.shutUp!.duration);
+        let duration = parseInt(groupElement.shutUp.duration);
         const subType: 'ban' | 'lift_ban' = duration > 0 ? 'ban' : 'lift_ban';
         if (memberUid) {
-            memberUin = (await this.core.apis.GroupApi.getGroupMember(GroupCode, memberUid))?.uin || '';
+            memberUin = (await this.core.apis.GroupApi.getGroupMember(GroupCode, memberUid))?.uin ?? '';
         } else {
             memberUin = '0';  // 0表示全员禁言
             if (duration > 0) {
@@ -225,7 +225,7 @@ export class OneBotGroupApi {
         const memberUin = member?.uin;
         const adminMember = await this.core.apis.GroupApi.getGroupMember(GroupCode, groupElement.adminUid);
         if (memberUin) {
-            const operatorUin = adminMember?.uin || memberUin;
+            const operatorUin = adminMember?.uin ?? memberUin;
             return new OB11GroupIncreaseEvent(
                 this.core,
                 parseInt(GroupCode),
@@ -240,7 +240,7 @@ export class OneBotGroupApi {
     async parseGroupKickEvent(GroupCode: string, grayTipElement: GrayTipElement) {
         const groupElement = grayTipElement?.groupElement;
         if (!groupElement) return undefined;
-        const adminUin = (await this.core.apis.GroupApi.getGroupMember(GroupCode, groupElement.adminUid))?.uin || (await this.core.apis.UserApi.getUidByUinV2(groupElement.adminUid));
+        const adminUin = (await this.core.apis.GroupApi.getGroupMember(GroupCode, groupElement.adminUid))?.uin ?? (await this.core.apis.UserApi.getUidByUinV2(groupElement.adminUid));
         if (adminUin) {
             return new OB11GroupDecreaseEvent(
                 this.core,

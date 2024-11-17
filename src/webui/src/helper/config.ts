@@ -8,7 +8,7 @@ import { resolve } from 'node:path';
 const MAX_PORT_TRY = 100;
 
 async function tryUseHost(host: string): Promise<string> {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
         try {
             const server = net.createServer();
             server.on('listening', () => {
@@ -18,9 +18,9 @@ async function tryUseHost(host: string): Promise<string> {
 
             server.on('error', (err: any) => {
                 if (err.code === 'EADDRNOTAVAIL') {
-                    reject('主机地址验证失败，可能为非本机地址');
+                    reject(new Error('主机地址验证失败，可能为非本机地址'));
                 } else {
-                    reject(`遇到错误: ${err.code}`);
+                    reject(new Error(`遇到错误: ${err.code}`));
                 }
             });
 
@@ -28,13 +28,13 @@ async function tryUseHost(host: string): Promise<string> {
             server.listen(0, host);
         } catch (error) {
             // 这里捕获到的错误应该是启动服务器时的同步错误
-            reject(`服务器启动时发生错误: ${error}`);
+            reject(new Error(`服务器启动时发生错误: ${error}`));
         }
     });
 }
 
 async function tryUsePort(port: number, host: string, tryCount: number = 0): Promise<number> {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
         try {
             const server = net.createServer();
             server.on('listening', () => {
@@ -48,10 +48,10 @@ async function tryUsePort(port: number, host: string, tryCount: number = 0): Pro
                         // 使用循环代替递归
                         resolve(tryUsePort(port + 1, host, tryCount + 1));
                     } else {
-                        reject(`端口尝试失败，达到最大尝试次数: ${MAX_PORT_TRY}`);
+                        reject(new Error(`端口尝试失败，达到最大尝试次数: ${MAX_PORT_TRY}`));
                     }
                 } else {
-                    reject(`遇到错误: ${err.code}`);
+                    reject(new Error(`遇到错误: ${err.code}`));
                 }
             });
 
@@ -59,7 +59,7 @@ async function tryUsePort(port: number, host: string, tryCount: number = 0): Pro
             server.listen(port, host);
         } catch (error) {
             // 这里捕获到的错误应该是启动服务器时的同步错误
-            reject(`服务器启动时发生错误: ${error}`);
+            reject(new Error(`服务器启动时发生错误: ${error}`));
         }
     });
 }
@@ -114,14 +114,14 @@ export class WebUiConfigWrapper {
             // 不希望回写的配置放后面
 
             // 查询主机地址是否可用
-            const [host_err, host] = await tryUseHost(parsedConfig.host).then(data => [null, data as string]).catch(err => [err, null]);
+            const [host_err, host] = await tryUseHost(parsedConfig.host).then(data => [null, data]).catch(err => [err, null]);
             if (host_err) {
                 console.log('host不可用', host_err);
                 parsedConfig.port = 0; // 设置为0，禁用WebUI
             } else {
                 parsedConfig.host = host;
                 // 修正端口占用情况
-                const [port_err, port] = await tryUsePort(parsedConfig.port, parsedConfig.host).then(data => [null, data as number]).catch(err => [err, null]);
+                const [port_err, port] = await tryUsePort(parsedConfig.port, parsedConfig.host).then(data => [null, data]).catch(err => [err, null]);
                 if (port_err) {
                     console.log('port不可用', port_err);
                     parsedConfig.port = 0; // 设置为0，禁用WebUI
