@@ -545,6 +545,11 @@ export class NapCatOneBot11Adapter {
     private async emitMsg(message: RawMessage) {
         const network = Object.values(this.configLoader.configData.network).flat() as Array<AdapterConfigWrap>;
         this.context.logger.logDebug('收到新消息 RawMessage', message);
+        await this.handleMsg(message, network);
+        await this.handleGroupEvent(message);
+        await this.handlePrivateMsgEvent(message);
+    }
+    private async handleMsg(message: RawMessage, network: Array<AdapterConfigWrap>) {
         try {
             const ob11Msg = await this.apis.MsgApi.parseMessageV2(message);
             if (ob11Msg) {
@@ -559,11 +564,8 @@ export class NapCatOneBot11Adapter {
         } catch (e) {
             this.context.logger.logError('constructMessage error: ', e);
         }
-
-        this.handleGroupEvent(message);
-        this.handlePrivateMsgEvent(message);
     }
-
+    
     private isSelfMessage(ob11Msg: {
         stringMsg: OB11Message;
         arrayMsg: OB11Message;
