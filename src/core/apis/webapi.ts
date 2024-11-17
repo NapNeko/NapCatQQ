@@ -8,6 +8,9 @@ import {
     WebHonorType,
 } from '@/core';
 import { NapCatCore } from '..';
+import { createReadStream, readFileSync, statSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { basename } from 'node:path';
 
 export class NTQQWebApi {
     context: InstanceContext;
@@ -302,5 +305,111 @@ export class NTQQWebApi {
             hash = hash + (hash << 5) + code;
         }
         return (hash & 0x7FFFFFFF).toString();
+    }
+    async createQunAlbumSession(gc: string, sAlbumID: string, sAlbumName: string, path: string, skey: string, pskey: string, uin: string) {
+        const img = readFileSync(path);
+        const img_md5 = createHash('md5').update(img).digest('hex');
+        const img_size = img.length;
+        const img_name = basename(path);
+        const time = Math.floor(Date.now() / 1000);
+        const GTK = this.getBknFromSKey(pskey);
+        const cookie = `p_uin=${uin}; p_skey=${pskey}; skey=${skey}; uin=${uin}`;
+        const body = {
+            control_req: [{
+                uin: uin,
+                token: {
+                    type: 4,
+                    data: pskey,
+                    appid: 5
+                },
+                appid: "qun",
+                checksum: img_md5,
+                check_type: 0,
+                file_len: img_size,
+                env: {
+                    refer: "qzone",
+                    deviceInfo: "h5"
+                },
+                model: 0,
+                biz_req: {
+                    sPicTitle: img_name,
+                    sPicDesc: "",
+                    sAlbumName: sAlbumName,
+                    sAlbumID: sAlbumID,
+                    iAlbumTypeID: 0,
+                    iBitmap: 0,
+                    iUploadType: 0,
+                    iUpPicType: 0,
+                    iBatchID: time,
+                    sPicPath: "",
+                    iPicWidth: 0,
+                    iPicHight: 0,
+                    iWaterType: 0,
+                    iDistinctUse: 0,
+                    iNeedFeeds: 1,
+                    iUploadTime: time,
+                    mapExt: {
+                        appid: "qun",
+                        userid: gc
+                    }
+                },
+                session: "",
+                asy_upload: 0,
+                cmd: "FileUpload"
+            }]
+        };
+        const api = `https://h5.qzone.qq.com/webapp/json/sliceUpload/FileBatchControl/${img_md5}?g_tk=${GTK}`;
+        const post = await RequestUtil.HttpGetJson(api, 'POST', body, {
+            "Cookie": cookie,
+            "Content-Type": "application/json"
+        });
+
+        return post;
+    }
+
+    async uploadQunAlbumSlice(path: string, session: string, skey: string, pskey: string, uin: string, slice_size: number) {
+        const img_size = statSync(path).size;
+        const img_name = basename(path);
+        let seq = 0;
+        let offset = 0;
+        const GTK = this.getBknFromSKey(pskey);
+        const cookie = `p_uin=${uin}; p_skey=${pskey}; skey=${skey}; uin=${uin}`;
+
+        const stream = createReadStream(path, { highWaterMark: slice_size });
+
+        for await (const chunk of stream) {
+            const end = Math.min(offset + chunk.length, img_size);
+            const boundary = `----WebKitFormBoundary${Math.random().toString(36).substring(2)}`;
+            const formData = await RequestUtil.createFormData(boundary, path);
+
+            const api = `https://h5.qzone.qq.com/webapp/json/sliceUpload/FileUpload?seq=${seq}&retry=0&offset=${offset}&end=${end}&total=${img_size}&type=form&g_tk=${GTK}`;
+            const body = {
+                uin: uin,
+                appid: "qun",
+                session: session,
+                offset: offset,
+                data: formData,
+                checksum: "",
+                check_type: 0,
+                retry: 0,
+                seq: seq,
+                end: end,
+                cmd: "FileUpload",
+                slice_size: slice_size,
+                "biz_req.iUploadType": 0
+            };
+
+            const post = await RequestUtil.HttpGetJson(api, 'POST', body, {
+                "Cookie": cookie,
+                "Content-Type": `multipart/form-data; boundary=${boundary}`
+            });
+
+            offset += chunk.length;
+            seq++;
+        }
+    }
+    async uploadQunAlbum(path: string, albumId: string, group: string, skey: string, pskey: string, uin: string) {
+        const session = (await this.createQunAlbumSession(group, albumId, group, path, skey, pskey, uin) as { data: { session: string } }).data.session;
+        return await this.uploadQunAlbumSlice(path, session, skey, pskey, uin, 1024 * 1024);
     }
 }
