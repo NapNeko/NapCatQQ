@@ -8,7 +8,7 @@
 ## 欢迎回家
 NapCatQQ 是现代化的基于 NTQQ 的 Bot 协议端实现
 
-## 碎碎叨叨
+## 特性介绍
 - [x] **安装简单**：就算是笨蛋也能使用
 - [x] **性能友好**：就算是低内存也能使用
 - [x] **接口丰富**：就算是没有也能使用
@@ -26,19 +26,19 @@ NapCatQQ 是现代化的基于 NTQQ 的 Bot 协议端实现
 
 [Cloudflare.HKServer](https://napcat.napneko.icu/)
 
+[Github.IO](https://napneko.github.io/)
+
 [Cloudflare.Pages](https://napneko.pages.dev/)
 
 [Server.China](https://napneko.com/)
 
 [Server.Other](https://napcat.cyou/)
 
-[Github.IO](https://napneko.github.io/)
+
 ## 回家旅途
 [QQ Group](https://qm.qq.com/q/VfjAq5HIMS)
 
 ## 感谢他们
-感谢 [LLOneBot](https://github.com/LLOneBot/LLOneBot) 
-
 感谢 [Lagrange](https://github.com/LagrangeDev/Lagrange.Core) 对本项目的大力支持 参考部分代码 已获授权
 
 感谢 Tencent Tdesign / Vue3 强力驱动 NapCat.WebUi
