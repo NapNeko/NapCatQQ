@@ -28,7 +28,7 @@ export class GetGroupRootFiles extends BaseAction<Payload, {
             startIndex: 0,
             sortOrder: 2,
             showOnlinedocFolder: 0,
-        }).catch(() => []);
+        });
 
         return {
             files: ret.filter(item => item.fileInfo)
