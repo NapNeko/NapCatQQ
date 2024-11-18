@@ -34,7 +34,7 @@ NapCatQQ 是现代化的基于 NTQQ 的 Bot 协议端实现
 
 
 ## 回家旅途
-[QQ Group](https://qm.qq.com/q/VfjAq5HIMS)
+[QQ Group](https://qm.qq.com/q/haLGHixZ74)
 
 ## 感谢他们
 感谢 [Lagrange](https://github.com/LagrangeDev/Lagrange.Core) 对本项目的大力支持 参考部分代码 已获授权
