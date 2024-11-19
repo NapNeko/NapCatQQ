@@ -565,7 +565,7 @@ export class NapCatOneBot11Adapter {
             this.context.logger.logError('constructMessage error: ', e);
         }
     }
-    
+
     private isSelfMessage(ob11Msg: {
         stringMsg: OB11Message;
         arrayMsg: OB11Message;
@@ -577,7 +577,7 @@ export class NapCatOneBot11Adapter {
     private createMsgMap(network: Array<AdapterConfigWrap>, ob11Msg: any, isSelfMsg: boolean, message: RawMessage): Map<string, OB11Message> {
         const msgMap: Map<string, OB11Message> = new Map();
         network.filter(e => e.enable).forEach(e => {
-            if (isSelfMsg) {
+            if (isSelfMsg || message.chatType !== ChatType.KCHATTYPEGROUP) {
                 ob11Msg.stringMsg.target_id = parseInt(message.peerUin);
                 ob11Msg.arrayMsg.target_id = parseInt(message.peerUin);
             }
