@@ -577,15 +577,16 @@ export class NapCatOneBot11Adapter {
     private createMsgMap(network: Array<AdapterConfigWrap>, ob11Msg: any, isSelfMsg: boolean, message: RawMessage): Map<string, OB11Message> {
         const msgMap: Map<string, OB11Message> = new Map();
         network.filter(e => e.enable).forEach(e => {
+            if (isSelfMsg) {
+                ob11Msg.stringMsg.target_id = parseInt(message.peerUin);
+                ob11Msg.arrayMsg.target_id = parseInt(message.peerUin);
+            }
             if (e.messagePostFormat == 'string') {
                 msgMap.set(e.name, structuredClone(ob11Msg.stringMsg));
             } else {
                 msgMap.set(e.name, structuredClone(ob11Msg.arrayMsg));
             }
-            if (isSelfMsg) {
-                ob11Msg.stringMsg.target_id = parseInt(message.peerUin);
-                ob11Msg.arrayMsg.target_id = parseInt(message.peerUin);
-            }
+
         });
         return msgMap;
     }
