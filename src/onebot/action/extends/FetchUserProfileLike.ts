@@ -1,7 +1,7 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 
-export class FetchUserProfileLike extends BaseAction<{ qq: number }, any> {
+export class FetchUserProfileLike extends OneBotAction<{ qq: number }, any> {
     actionName = ActionName.FetchUserProfileLike;
 
     async _handle(payload: { qq: number }) {

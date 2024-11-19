@@ -1,5 +1,5 @@
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 
 const SchemaData = {
@@ -13,7 +13,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export default class SetGroupWholeBan extends BaseAction<Payload, null> {
+export default class SetGroupWholeBan extends OneBotAction<Payload, null> {
     actionName = ActionName.SetGroupWholeBan;
     payloadSchema = SchemaData;
 

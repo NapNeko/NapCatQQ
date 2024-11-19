@@ -1,8 +1,8 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName, BaseCheckResult } from '../types';
 
 
-export abstract class GetPacketStatusDepends<PT, RT> extends BaseAction<PT, RT> {
+export abstract class GetPacketStatusDepends<PT, RT> extends OneBotAction<PT, RT> {
     actionName = ActionName.GetPacketStatus;
 
     protected async check(payload: PT): Promise<BaseCheckResult>{

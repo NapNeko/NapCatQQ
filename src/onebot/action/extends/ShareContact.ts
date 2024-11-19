@@ -1,4 +1,4 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
@@ -14,7 +14,7 @@ const SchemaData = {
 type Payload = FromSchema<typeof SchemaData>;
 
 
-export class SharePeer extends BaseAction<Payload, any> {
+export class SharePeer extends OneBotAction<Payload, any> {
     actionName = ActionName.SharePeer;
     payloadSchema = SchemaData;
 
@@ -37,7 +37,7 @@ const SchemaDataGroupEx = {
 
 type PayloadGroupEx = FromSchema<typeof SchemaDataGroupEx>;
 
-export class ShareGroupEx extends BaseAction<PayloadGroupEx, any> {
+export class ShareGroupEx extends OneBotAction<PayloadGroupEx, any> {
     actionName = ActionName.ShareGroupEx;
     payloadSchema = SchemaDataGroupEx;
 

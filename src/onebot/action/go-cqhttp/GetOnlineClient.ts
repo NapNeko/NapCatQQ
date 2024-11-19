@@ -1,4 +1,4 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import { JSONSchema } from 'json-schema-to-ts';
 import { sleep } from '@/common/helper';
@@ -10,7 +10,7 @@ const SchemaData = {
     },
 } as const satisfies JSONSchema;
 
-export class GetOnlineClient extends BaseAction<void, Array<any>> {
+export class GetOnlineClient extends OneBotAction<void, Array<any>> {
     actionName = ActionName.GetOnlineClient;
 
     async _handle(payload: void) {

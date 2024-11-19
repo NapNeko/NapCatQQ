@@ -1,5 +1,5 @@
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import { ChatType } from '@/core';
 
@@ -14,7 +14,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export class SetInputStatus extends BaseAction<Payload, any> {
+export class SetInputStatus extends OneBotAction<Payload, any> {
     actionName = ActionName.SetInputStatus;
 
     async _handle(payload: Payload) {

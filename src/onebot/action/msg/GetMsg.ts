@@ -1,5 +1,5 @@
 import { OB11Message } from '@/onebot';
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/message-unique';
@@ -19,7 +19,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-class GetMsg extends BaseAction<Payload, OB11Message> {
+class GetMsg extends OneBotAction<Payload, OB11Message> {
     actionName = ActionName.GetMsg;
     payloadSchema = SchemaData;
 

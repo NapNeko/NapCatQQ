@@ -1,4 +1,4 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ChatType, Peer } from '@/core/entities';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
@@ -16,7 +16,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-class ForwardSingleMsg extends BaseAction<Payload, null> {
+class ForwardSingleMsg extends OneBotAction<Payload, null> {
     protected async getTargetPeer(payload: Payload): Promise<Peer> {
         if (payload.user_id) {
             const peerUid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());

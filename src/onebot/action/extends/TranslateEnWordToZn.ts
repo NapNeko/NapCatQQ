@@ -1,4 +1,4 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
@@ -15,7 +15,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export class TranslateEnWordToZn extends BaseAction<Payload, Array<any> | null> {
+export class TranslateEnWordToZn extends OneBotAction<Payload, Array<any> | null> {
     actionName = ActionName.TranslateEnWordToZn;
     payloadSchema = SchemaData;
 

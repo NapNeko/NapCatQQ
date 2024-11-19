@@ -1,4 +1,4 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import { QuickAction, QuickActionEvent } from '@/onebot/types';
 
@@ -7,7 +7,7 @@ interface Payload {
     operation: QuickAction
 }
 
-export class GoCQHTTPHandleQuickAction extends BaseAction<Payload, null> {
+export class GoCQHTTPHandleQuickAction extends OneBotAction<Payload, null> {
     actionName = ActionName.GoCQHTTP_HandleQuickAction;
 
     async _handle(payload: Payload): Promise<null> {

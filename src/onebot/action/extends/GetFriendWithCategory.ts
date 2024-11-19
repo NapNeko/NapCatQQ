@@ -1,8 +1,8 @@
 import { OB11Entities } from '@/onebot/entities';
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 
-export class GetFriendWithCategory extends BaseAction<void, any> {
+export class GetFriendWithCategory extends OneBotAction<void, any> {
     actionName = ActionName.GetFriendsWithCategory;
 
     async _handle(payload: void) {

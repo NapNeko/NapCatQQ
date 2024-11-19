@@ -1,5 +1,5 @@
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 
 const SchemaData = {
@@ -12,7 +12,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export class GetGroupFileSystemInfo extends BaseAction<Payload, {
+export class GetGroupFileSystemInfo extends OneBotAction<Payload, {
     file_count: number,
     limit_count: number, // unimplemented
     used_space: number, // TODO:unimplemented, but can be implemented later

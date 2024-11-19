@@ -10,7 +10,7 @@ import { ActionName, BaseCheckResult } from '@/onebot/action/types';
 import { decodeCQCode } from '@/onebot/cqcode';
 import { MessageUnique } from '@/common/message-unique';
 import { ChatType, ElementType, NapCatCore, Peer, RawMessage, SendArkElement, SendMessageElement } from '@/core';
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ForwardMsgBuilder } from "@/common/forward-msg-builder";
 import { stringifyWithBigInt } from "@/common/helper";
 import { PacketMsg } from "@/core/packet/message/message";
@@ -88,7 +88,7 @@ function getSpecialMsgNum(payload: OB11PostSendMsg, msgType: OB11MessageDataType
     return 0;
 }
 
-export class SendMsg extends BaseAction<OB11PostSendMsg, ReturnDataType> {
+export class SendMsg extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
     actionName = ActionName.SendMsg;
     contextMode = ContextMode.Normal;
 

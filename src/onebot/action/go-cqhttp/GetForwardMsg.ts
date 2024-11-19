@@ -1,4 +1,4 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { OB11Message, OB11MessageData, OB11MessageDataType, OB11MessageForward, OB11MessageNodePlain as OB11MessageNode } from '@/onebot';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
@@ -16,7 +16,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
+export class GoCQHTTPGetForwardMsgAction extends OneBotAction<Payload, any> {
     actionName = ActionName.GoCQHTTP_GetForwardMsg;
     payloadSchema = SchemaData;
 

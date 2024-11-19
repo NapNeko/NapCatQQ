@@ -1,5 +1,5 @@
 import { GroupNotifyMsgStatus } from '@/core';
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
@@ -12,7 +12,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export class GetGroupIgnoredNotifies extends BaseAction<void, any> {
+export class GetGroupIgnoredNotifies extends OneBotAction<void, any> {
     actionName = ActionName.GetGroupIgnoredNotifies;
 
     async _handle(payload: void) {

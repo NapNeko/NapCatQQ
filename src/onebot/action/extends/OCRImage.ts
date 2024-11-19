@@ -1,4 +1,4 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { checkFileReceived, uri2local } from '@/common/file';
@@ -14,7 +14,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export class OCRImage extends BaseAction<Payload, any> {
+export class OCRImage extends OneBotAction<Payload, any> {
     actionName = ActionName.OCRImage;
     payloadSchema = SchemaData;
 

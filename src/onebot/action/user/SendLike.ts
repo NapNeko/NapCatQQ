@@ -1,4 +1,4 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
@@ -13,7 +13,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export default class SendLike extends BaseAction<Payload, null> {
+export default class SendLike extends OneBotAction<Payload, null> {
     actionName = ActionName.SendLike;
     payloadSchema = SchemaData;
 

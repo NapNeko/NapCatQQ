@@ -1,4 +1,4 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
@@ -18,7 +18,7 @@ const SchemaData = {
 } as const satisfies JSONSchema;
 type Payload = FromSchema<typeof SchemaData>;
 
-export class GoCQHTTPDeleteFriend extends BaseAction<Payload, any> {
+export class GoCQHTTPDeleteFriend extends OneBotAction<Payload, any> {
     actionName = ActionName.GoCQHTTP_DeleteFriend;
     payloadSchema = SchemaData;
 

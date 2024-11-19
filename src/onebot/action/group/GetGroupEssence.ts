@@ -1,5 +1,5 @@
 import { ChatType, Peer } from '@/core';
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/message-unique';
@@ -16,7 +16,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export class GetGroupEssence extends BaseAction<Payload, any> {
+export class GetGroupEssence extends OneBotAction<Payload, any> {
     actionName = ActionName.GoCQHTTP_GetEssenceMsg;
     payloadSchema = SchemaData;
 

@@ -2,7 +2,7 @@ import { IOB11NetworkAdapter, OB11EmitEventContent, OB11NetworkReloadType } from
 import urlParse from 'url';
 import { WebSocket, WebSocketServer } from 'ws';
 import { Mutex } from 'async-mutex';
-import { OB11Response } from '../action/OB11Response';
+import { OB11Response } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../action/types';
 import { NapCatCore } from '@/core';
 import { LogWrapper } from '@/common/log';

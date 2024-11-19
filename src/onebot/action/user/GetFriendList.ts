@@ -1,6 +1,6 @@
 import { OB11User } from '@/onebot';
 import { OB11Entities } from '@/onebot/entities';
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
@@ -13,7 +13,7 @@ const SchemaData = {
 } as const satisfies JSONSchema;
 
 type Payload = FromSchema<typeof SchemaData>;
-export default class GetFriendList extends BaseAction<Payload, OB11User[]> {
+export default class GetFriendList extends OneBotAction<Payload, OB11User[]> {
     actionName = ActionName.GetFriendList;
     payloadSchema = SchemaData;
 

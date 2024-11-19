@@ -1,5 +1,5 @@
 import { GroupNotifyMsgStatus } from '@/core';
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 
 interface OB11GroupRequestNotify {
@@ -8,7 +8,7 @@ interface OB11GroupRequestNotify {
     flag: string
 }
 
-export default class GetGroupAddRequest extends BaseAction<null, OB11GroupRequestNotify[] | null> {
+export default class GetGroupAddRequest extends OneBotAction<null, OB11GroupRequestNotify[] | null> {
     actionName = ActionName.GetGroupIgnoreAddRequest;
 
     async _handle(payload: null): Promise<OB11GroupRequestNotify[] | null> {

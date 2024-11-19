@@ -1,15 +1,38 @@
 import { ActionName, BaseCheckResult } from './types';
-import { OB11Response } from './OB11Response';
-import { OB11Return } from '@/onebot/types';
 import Ajv, { ErrorObject, ValidateFunction } from 'ajv';
 import { NapCatCore } from '@/core';
+import { isNull } from '@/common/helper';
+import { NapCatOneBot11Adapter, OB11Return } from '@/onebot';
 
-import { NapCatOneBot11Adapter } from '@/onebot';
+export class OB11Response {
+    private static createResponse<T>(data: T, status: string, retcode: number, message: string = '', echo: any = null): OB11Return<T> {
+        return {
+            status,
+            retcode,
+            data,
+            message,
+            wording: message,
+            echo,
+        };
+    }
 
-abstract class BaseAction<PayloadType, ReturnDataType> {
+    static res<T>(data: T, status: string, retcode: number, message: string = ''): OB11Return<T> {
+        return this.createResponse(data, status, retcode, message);
+    }
+
+    static ok<T>(data: T, echo: any = null): OB11Return<T> {
+        return this.createResponse(data, 'ok', 0, '', echo);
+    }
+
+    static error(err: string, retcode: number, echo: any = null): OB11Return<null> {
+        return this.createResponse(null, 'failed', retcode, err, echo);
+    }
+}
+
+export abstract class OneBotAction<PayloadType, ReturnDataType> {
     actionName: ActionName = ActionName.Unknown;
     core: NapCatCore;
-    private validate: undefined | ValidateFunction<any> = undefined;
+    private validate: ValidateFunction<any> | undefined = undefined;
     payloadSchema: any = undefined;
     obContext: NapCatOneBot11Adapter;
 
@@ -24,17 +47,13 @@ abstract class BaseAction<PayloadType, ReturnDataType> {
         }
         if (this.validate && !this.validate(payload)) {
             const errors = this.validate.errors as ErrorObject[];
-            const errorMessages: string[] = errors.map((e) => {
-                return `Key: ${e.instancePath.split('/').slice(1).join('.')}, Message: ${e.message}`;
-            });
+            const errorMessages = errors.map(e => `Key: ${e.instancePath.split('/').slice(1).join('.')}, Message: ${e.message}`);
             return {
                 valid: false,
                 message: errorMessages.join('\n') ?? '未知错误',
             };
         }
-        return {
-            valid: true,
-        };
+        return { valid: true };
     }
 
     public async handle(payload: PayloadType, adaptername: string): Promise<OB11Return<ReturnDataType | null>> {
@@ -46,8 +65,8 @@ abstract class BaseAction<PayloadType, ReturnDataType> {
             const resData = await this._handle(payload, adaptername);
             return OB11Response.ok(resData);
         } catch (e: any) {
-            this.core.context.logger.logError.bind(this.core.context.logger)('发生错误', e);
-            return OB11Response.error(e?.stack?.toString() || e?.toString() || '未知错误，可能操作超时', 200);
+            this.core.context.logger.logError('发生错误', e);
+            return OB11Response.error(e?.toString() || e?.stack?.toString() || '未知错误，可能操作超时', 200);
         }
     }
 
@@ -60,12 +79,10 @@ abstract class BaseAction<PayloadType, ReturnDataType> {
             const resData = await this._handle(payload, adaptername);
             return OB11Response.ok(resData, echo);
         } catch (e: any) {
-            this.core.context.logger.logError.bind(this.core.context.logger)('发生错误', e);
-            return OB11Response.error(e.stack?.toString() || e.toString(), 1200, echo);
+            this.core.context.logger.logError('发生错误', e);
+            return OB11Response.error(e.toString() || e.stack?.toString(), 1200, echo);
         }
     }
 
     abstract _handle(payload: PayloadType, adaptername: string): PromiseLike<ReturnDataType>;
 }
-
-export default BaseAction;

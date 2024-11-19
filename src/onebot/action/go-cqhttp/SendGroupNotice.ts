@@ -1,5 +1,5 @@
 import { checkFileReceived, uri2local } from '@/common/file';
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import { unlink } from 'node:fs';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
@@ -21,7 +21,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export class SendGroupNotice extends BaseAction<Payload, null> {
+export class SendGroupNotice extends OneBotAction<Payload, null> {
     actionName = ActionName.GoCQHTTP_SendGroupNotice;
 
     async _handle(payload: Payload) {
