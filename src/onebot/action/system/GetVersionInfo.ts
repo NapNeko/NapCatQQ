@@ -1,9 +1,9 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 
 import { napCatVersion } from '@/common/version';
 
-export default class GetVersionInfo extends BaseAction<any, any> {
+export default class GetVersionInfo extends OneBotAction<any, any> {
     actionName = ActionName.GetVersionInfo;
 
     async _handle(payload: any): Promise<any> {

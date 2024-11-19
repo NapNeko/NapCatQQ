@@ -1,4 +1,4 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { OB11Message } from '@/onebot';
 import { ActionName } from '../types';
 import { ChatType } from '@/core/entities';
@@ -23,7 +23,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export default class GetFriendMsgHistory extends BaseAction<Payload, Response> {
+export default class GetFriendMsgHistory extends OneBotAction<Payload, Response> {
     actionName = ActionName.GetFriendMsgHistory;
     payloadSchema = SchemaData;
 

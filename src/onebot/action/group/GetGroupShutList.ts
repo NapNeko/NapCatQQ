@@ -1,4 +1,4 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
@@ -12,7 +12,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export class GetGroupShutList extends BaseAction<Payload, any> {
+export class GetGroupShutList extends OneBotAction<Payload, any> {
     actionName = ActionName.GetGroupShutList;
     payloadSchema = SchemaData;
 

@@ -1,4 +1,4 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/message-unique';
@@ -13,7 +13,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export default class SetEssenceMsg extends BaseAction<Payload, any> {
+export default class SetEssenceMsg extends OneBotAction<Payload, any> {
     actionName = ActionName.SetEssenceMsg;
     payloadSchema = SchemaData;
 

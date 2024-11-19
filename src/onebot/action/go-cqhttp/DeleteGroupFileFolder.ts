@@ -1,6 +1,6 @@
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { ActionName } from '../types';
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 
 const SchemaData = {
     type: 'object',
@@ -14,7 +14,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export class DeleteGroupFileFolder extends BaseAction<Payload, any> {
+export class DeleteGroupFileFolder extends OneBotAction<Payload, any> {
     actionName = ActionName.GoCQHTTP_DeleteGroupFileFolder;
     payloadSchema = SchemaData;
     async _handle(payload: Payload) {

@@ -1,5 +1,5 @@
 import { WebApiGroupNoticeFeed } from '@/core';
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
@@ -29,7 +29,7 @@ type Payload = FromSchema<typeof SchemaData>;
 
 type ApiGroupNotice = GroupNotice & WebApiGroupNoticeFeed;
 
-export class GetGroupNotice extends BaseAction<Payload, GroupNotice[]> {
+export class GetGroupNotice extends OneBotAction<Payload, GroupNotice[]> {
     actionName = ActionName.GoCQHTTP_GetGroupNotice;
     payloadSchema = SchemaData;
 

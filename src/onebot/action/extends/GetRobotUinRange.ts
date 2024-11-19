@@ -1,7 +1,7 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 
-export class GetRobotUinRange extends BaseAction<void, Array<any>> {
+export class GetRobotUinRange extends OneBotAction<void, Array<any>> {
     actionName = ActionName.GetRobotUinRange;
 
     async _handle(payload: void) {

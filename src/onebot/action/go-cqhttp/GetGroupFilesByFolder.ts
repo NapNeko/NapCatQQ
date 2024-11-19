@@ -1,5 +1,5 @@
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import { OB11Entities } from '@/onebot/entities';
 
@@ -16,7 +16,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export class GetGroupFilesByFolder extends BaseAction<any, any> {
+export class GetGroupFilesByFolder extends OneBotAction<any, any> {
     actionName = ActionName.GoCQHTTP_GetGroupFilesByFolder;
     payloadSchema = SchemaData;
     async _handle(payload: Payload) {

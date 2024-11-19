@@ -1,4 +1,4 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 
 interface Payload {
@@ -6,7 +6,7 @@ interface Payload {
     count: number
 }
 
-export class GetProfileLike extends BaseAction<Payload, any> {
+export class GetProfileLike extends OneBotAction<Payload, any> {
     actionName = ActionName.GetProfileLike;
 
     async _handle(payload: Payload) {

@@ -1,9 +1,9 @@
 import { OB11User } from '@/onebot';
 import { OB11Entities } from '@/onebot/entities';
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 
-class GetLoginInfo extends BaseAction<null, OB11User> {
+class GetLoginInfo extends OneBotAction<null, OB11User> {
     actionName = ActionName.GetLoginInfo;
 
     async _handle(payload: null) {

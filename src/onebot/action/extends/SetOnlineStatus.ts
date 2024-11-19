@@ -1,4 +1,4 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 // 设置在线状态
@@ -15,7 +15,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export class SetOnlineStatus extends BaseAction<Payload, null> {
+export class SetOnlineStatus extends OneBotAction<Payload, null> {
     actionName = ActionName.SetOnlineStatus;
     payloadSchema = SchemaData;
 

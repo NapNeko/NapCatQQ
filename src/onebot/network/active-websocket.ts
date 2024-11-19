@@ -3,7 +3,7 @@ import { WebSocket } from 'ws';
 import { OB11HeartbeatEvent } from '../event/meta/OB11HeartbeatEvent';
 import { NapCatCore } from '@/core';
 import { ActionName } from '@/onebot/action/types';
-import { OB11Response } from '@/onebot/action/OB11Response';
+import { OB11Response } from '@/onebot/action/OneBotAction';
 import { LogWrapper } from '@/common/log';
 import { ActionMap } from '@/onebot/action';
 import { LifeCycleSubType, OB11LifeCycleEvent } from '../event/meta/OB11LifeCycleEvent';

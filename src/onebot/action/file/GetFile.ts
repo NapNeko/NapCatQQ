@@ -1,4 +1,4 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import fs from 'fs/promises';
 import { FileNapCatOneBotUUID } from '@/common/helper';
 import { ActionName } from '../types';
@@ -30,7 +30,7 @@ const GetFileBase_PayloadSchema = {
 
 export type GetFilePayload = FromSchema<typeof GetFileBase_PayloadSchema>;
 
-export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
+export class GetFileBase extends OneBotAction<GetFilePayload, GetFileResponse> {
     payloadSchema = GetFileBase_PayloadSchema;
 
     async _handle(payload: GetFilePayload): Promise<GetFileResponse> {

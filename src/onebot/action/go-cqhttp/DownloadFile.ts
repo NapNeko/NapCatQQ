@@ -1,4 +1,4 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import fs from 'fs';
 import { join as joinPath } from 'node:path';
@@ -28,7 +28,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export default class GoCQHTTPDownloadFile extends BaseAction<Payload, FileResponse> {
+export default class GoCQHTTPDownloadFile extends OneBotAction<Payload, FileResponse> {
     actionName = ActionName.GoCQHTTP_DownloadFile;
     payloadSchema = SchemaData;
 

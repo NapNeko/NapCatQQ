@@ -1,5 +1,5 @@
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import { FileNapCatOneBotUUID } from '@/common/helper';
 
@@ -14,7 +14,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export class DeleteGroupFile extends BaseAction<Payload, any> {
+export class DeleteGroupFile extends OneBotAction<Payload, any> {
     actionName = ActionName.GOCQHTTP_DeleteGroupFile;
     payloadSchema = SchemaData;
     async _handle(payload: Payload) {

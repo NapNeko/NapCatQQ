@@ -8,7 +8,7 @@ import SendGroupMsg from './group/SendGroupMsg';
 import SendPrivateMsg from './msg/SendPrivateMsg';
 import SendMsg from './msg/SendMsg';
 import DeleteMsg from './msg/DeleteMsg';
-import BaseAction from './BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import GetVersionInfo from './system/GetVersionInfo';
 import CanSendRecord from './system/CanSendRecord';
 import CanSendImage from './system/CanSendImage';
@@ -104,7 +104,7 @@ import { SendGroupAiRecord } from "@/onebot/action/group/SendGroupAiRecord";
 import { GetAiCharacters } from "@/onebot/action/extends/GetAiCharacters";
 
 
-export type ActionMap = Map<string, BaseAction<any, any>>;
+export type ActionMap = Map<string, OneBotAction<any, any>>;
 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore): ActionMap {
 

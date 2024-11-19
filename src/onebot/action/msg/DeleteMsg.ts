@@ -1,5 +1,5 @@
 import { ActionName } from '../types';
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/message-unique';
 
@@ -18,7 +18,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-class DeleteMsg extends BaseAction<Payload, void> {
+class DeleteMsg extends OneBotAction<Payload, void> {
     actionName = ActionName.DeleteMsg;
     payloadSchema = SchemaData;
 

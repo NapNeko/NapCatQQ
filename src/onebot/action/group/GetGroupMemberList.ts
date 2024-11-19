@@ -1,6 +1,6 @@
 import { OB11GroupMember } from '@/onebot';
 import { OB11Entities } from '@/onebot/entities';
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
@@ -15,7 +15,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
+export class GetGroupMemberList extends OneBotAction<Payload, OB11GroupMember[]> {
     actionName = ActionName.GetGroupMemberList;
     payloadSchema = SchemaData;
 

@@ -1,4 +1,4 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName, BaseCheckResult } from '../types';
 import * as fs from 'node:fs';
 import { checkFileReceived, uri2local } from '@/common/file';
@@ -7,7 +7,7 @@ interface Payload {
     file: string;
 }
 
-export default class SetAvatar extends BaseAction<Payload, null> {
+export default class SetAvatar extends OneBotAction<Payload, null> {
     actionName = ActionName.SetQQAvatar;
 
     // 用不着复杂检测

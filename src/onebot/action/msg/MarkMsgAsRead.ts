@@ -1,6 +1,6 @@
 import { ChatType, Peer } from '@/core/entities';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import { MessageUnique } from '@/common/message-unique';
 
@@ -15,7 +15,7 @@ const SchemaData = {
 
 type PlayloadType = FromSchema<typeof SchemaData>;
 
-class MarkMsgAsRead extends BaseAction<PlayloadType, null> {
+class MarkMsgAsRead extends OneBotAction<PlayloadType, null> {
     async getPeer(payload: PlayloadType): Promise<Peer> {
         if (payload.message_id) {
             const s_peer = MessageUnique.getMsgIdAndPeerByShortId(+payload.message_id)?.Peer;
@@ -65,7 +65,7 @@ export class GoCQHTTPMarkMsgAsRead extends MarkMsgAsRead {
     actionName = ActionName.GoCQHTTP_MarkMsgAsRead;
 }
 
-export class MarkAllMsgAsRead extends BaseAction<any, null> {
+export class MarkAllMsgAsRead extends OneBotAction<any, null> {
     actionName = ActionName._MarkAllMsgAsRead;
 
     async _handle(): Promise<null> {

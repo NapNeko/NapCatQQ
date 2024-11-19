@@ -1,4 +1,4 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import { ChatType, Peer } from '@/core/entities';
 import fs from 'fs';
@@ -20,7 +20,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export default class GoCQHTTPUploadGroupFile extends BaseAction<Payload, null> {
+export default class GoCQHTTPUploadGroupFile extends OneBotAction<Payload, null> {
     actionName = ActionName.GoCQHTTP_UploadGroupFile;
     payloadSchema = SchemaData;
 

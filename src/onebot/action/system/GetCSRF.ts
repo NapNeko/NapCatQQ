@@ -1,7 +1,7 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 
-export class GetCSRF extends BaseAction<any, any> {
+export class GetCSRF extends OneBotAction<any, any> {
     actionName = ActionName.GetCSRF;
 
     async _handle(payload: any) {

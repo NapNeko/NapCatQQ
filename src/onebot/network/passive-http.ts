@@ -2,7 +2,7 @@ import { IOB11NetworkAdapter, OB11NetworkReloadType } from './index';
 import express, { Express, Request, Response } from 'express';
 import http from 'http';
 import { NapCatCore } from '@/core';
-import { OB11Response } from '../action/OB11Response';
+import { OB11Response } from '@/onebot/action/OneBotAction';
 import { ActionMap } from '@/onebot/action';
 import cors from 'cors';
 import { HttpServerConfig } from '../config/config';

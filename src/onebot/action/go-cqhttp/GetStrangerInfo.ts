@@ -1,4 +1,4 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { OB11User, OB11UserSex } from '@/onebot';
 import { OB11Entities } from '@/onebot/entities';
 import { ActionName } from '../types';
@@ -15,7 +15,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export default class GoCQHTTPGetStrangerInfo extends BaseAction<Payload, OB11User> {
+export default class GoCQHTTPGetStrangerInfo extends OneBotAction<Payload, OB11User> {
     actionName = ActionName.GoCQHTTP_GetStrangerInfo;
 
     async _handle(payload: Payload): Promise<OB11User> {

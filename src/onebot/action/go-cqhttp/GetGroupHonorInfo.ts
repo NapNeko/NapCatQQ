@@ -1,4 +1,4 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import { WebHonorType } from '@/core/entities';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
@@ -14,7 +14,7 @@ const SchemaData = {
 // enum是不是有点抽象
 type Payload = FromSchema<typeof SchemaData>;
 
-export class GetGroupHonorInfo extends BaseAction<Payload, Array<any>> {
+export class GetGroupHonorInfo extends OneBotAction<Payload, Array<any>> {
     actionName = ActionName.GetGroupHonorInfo;
     payloadSchema = SchemaData;
 

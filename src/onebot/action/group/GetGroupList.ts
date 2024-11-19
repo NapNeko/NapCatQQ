@@ -1,6 +1,6 @@
 import { OB11Group } from '@/onebot';
 import { OB11Entities } from '@/onebot/entities';
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 // no_cache get时传字符串
@@ -13,7 +13,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-class GetGroupList extends BaseAction<Payload, OB11Group[]> {
+class GetGroupList extends OneBotAction<Payload, OB11Group[]> {
     actionName = ActionName.GetGroupList;
     payloadSchema = SchemaData;
 

@@ -1,5 +1,5 @@
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '../types';
 import { AdapterConfigWrap } from '@/onebot/config/config';
 
@@ -12,7 +12,7 @@ const SchemaData = {
 
 type Payload = FromSchema<typeof SchemaData>;
 
-export default class GetRecentContact extends BaseAction<Payload, any> {
+export default class GetRecentContact extends OneBotAction<Payload, any> {
     actionName = ActionName.GetRecentContact;
     payloadSchema = SchemaData;
 
