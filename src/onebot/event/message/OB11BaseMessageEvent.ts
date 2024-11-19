@@ -1,5 +1,5 @@
-import { EventType, OB11BaseEvent } from '../OB11BaseEvent';
+import { EventType, OneBotEvent } from '../OneBotEvent';
 
-export abstract class OB11BaseMessageEvent extends OB11BaseEvent {
+export abstract class OB11BaseMessageEvent extends OneBotEvent {
     post_type = EventType.MESSAGE;
 }

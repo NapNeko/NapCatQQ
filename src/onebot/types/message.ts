@@ -1,5 +1,5 @@
 import { OB11Sender } from './entity';
-import { EventType } from '@/onebot/event/OB11BaseEvent';
+import { EventType } from '@/onebot/event/OneBotEvent';
 import { CustomMusicSignPostData, IdMusicSignPostData, PicSubType, RawMessage } from '@/core';
 
 export enum OB11MessageType {

@@ -8,7 +8,7 @@ export enum EventType {
     MESSAGE_SENT = 'message_sent',
 }
 
-export abstract class OB11BaseEvent {
+export abstract class OneBotEvent {
     time = Math.floor(Date.now() / 1000);
     self_id: number;
     abstract post_type: EventType;

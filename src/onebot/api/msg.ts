@@ -20,7 +20,7 @@ import {
 import faceConfig from '@/core/external/face_config.json';
 import { NapCatOneBot11Adapter, OB11Message, OB11MessageData, OB11MessageDataType, OB11MessageFileBase, } from '@/onebot';
 import { OB11Entities } from '@/onebot/entities';
-import { EventType } from '@/onebot/event/OB11BaseEvent';
+import { EventType } from '@/onebot/event/OneBotEvent';
 import { encodeCQCode } from '@/onebot/cqcode';
 import { uri2local } from '@/common/file';
 import { RequestUtil } from '@/common/request';
