@@ -2,7 +2,7 @@
   "name": "napcat",
   "private": true,
   "type": "module",
-  "version": "4.17",
+  "version": "4.1.8",
   "scripts": {
     "build:framework": "npm run build:webui && vite build --mode framework",
     "build:shell": "npm run build:webui && vite build --mode shell",
