@@ -1,5 +1,5 @@
 import { OB11GroupNoticeEvent } from '../notice/OB11GroupNoticeEvent';
-import { EventType } from '../OB11BaseEvent';
+import { EventType } from '../OneBotEvent';
 import { NapCatCore } from '@/core';
 
 export class OB11GroupRequestEvent extends OB11GroupNoticeEvent {
