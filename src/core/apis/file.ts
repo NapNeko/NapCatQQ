@@ -36,7 +36,7 @@ export class NTQQFileApi {
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
         this.core = core;
-        this.rkeyManager = new RkeyManager(['https://llob.linyuchen.net/rkey', 'http://napcat-sign.wumiao.wang:2082/rkey'], this.context.logger);
+        this.rkeyManager = new RkeyManager(['https://rkey.napneko.icu/rkeys', 'https://llob.linyuchen.net/rkey', 'http://napcat-sign.wumiao.wang:2082/rkey'], this.context.logger);
     }
 
     async copyFile(filePath: string, destPath: string) {
@@ -300,18 +300,18 @@ export class NTQQFileApi {
                     element.elementType === ElementType.FILE
                 ) {
                     switch (element.elementType) {
-                    case ElementType.PIC:
+                        case ElementType.PIC:
                             element.picElement!.sourcePath = elementResults[elementIndex];
-                        break;
-                    case ElementType.VIDEO:
+                            break;
+                        case ElementType.VIDEO:
                             element.videoElement!.filePath = elementResults[elementIndex];
-                        break;
-                    case ElementType.PTT:
+                            break;
+                        case ElementType.PTT:
                             element.pttElement!.filePath = elementResults[elementIndex];
-                        break;
-                    case ElementType.FILE:
+                            break;
+                        case ElementType.FILE:
                             element.fileElement!.filePath = elementResults[elementIndex];
-                        break;
+                            break;
                     }
                     elementIndex++;
                 }
