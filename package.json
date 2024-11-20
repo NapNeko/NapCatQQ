@@ -4,8 +4,8 @@
   "type": "module",
   "version": "4.1.12",
   "scripts": {
-    "build:framework": "npm run build:webui && vite build --mode framework",
-    "build:shell": "npm run build:webui && vite build --mode shell",
+    "build:framework": "npm run build:webui && vite build --mode framework || exit 1",
+    "build:shell": "npm run build:webui && vite build --mode shell || exit 1",
     "build:webui": "cd napcat.webui && vite build",
     "dev:framework": "vite build --mode framework",
     "dev:shell": "vite build --mode shell",

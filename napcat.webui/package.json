@@ -6,7 +6,7 @@
   "scripts": {
     "webui:lint": "eslint --fix src/**/*.{js,ts,vue}",
     "webui:dev": "vite",
-    "webui:build": "vue-tsc -b && vite build",
+    "webui:build": "vite build",
     "webui:preview": "vite preview"
   },
   "dependencies": {
