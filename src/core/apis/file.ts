@@ -412,15 +412,17 @@ export class NTQQFileApi {
         }
 
         const url: string = element.originImageUrl ?? '';
+
         const md5HexStr = element.md5HexStr;
         const fileMd5 = element.md5HexStr;
-
-        if (url) {
-            const parsedUrl = new URL(IMAGE_HTTP_HOST + url);
+        const parsedUrl = new URL(IMAGE_HTTP_HOST + url);
+        const imageAppid = parsedUrl.searchParams.get('appid');
+        const isNTV2 = imageAppid && ['1406', '1407'].includes(imageAppid);
+        const imageFileId = parsedUrl.searchParams.get('fileid');
+        if (url && isNTV2 && imageFileId) {
             const rkeyData = await this.getRkeyData();
-            return this.getImageUrlFromParsedUrl(parsedUrl, rkeyData);
+            return this.getImageUrlFromParsedUrl(imageFileId, imageAppid, rkeyData);
         }
-
         return this.getImageUrlFromMd5(fileMd5, md5HexStr);
     }
 
@@ -462,19 +464,12 @@ export class NTQQFileApi {
         return rkeyData;
     }
 
-    private getImageUrlFromParsedUrl(parsedUrl: URL, rkeyData: any): string {
-        const imageAppid = parsedUrl.searchParams.get('appid');
-        const isNTV2 = imageAppid && ['1406', '1407'].includes(imageAppid);
-        const imageFileId = parsedUrl.searchParams.get('fileid');
-        if (isNTV2 && rkeyData.online_rkey) {
-            const rkey = imageAppid === '1406' ? rkeyData.private_rkey : rkeyData.group_rkey;
-            return IMAGE_HTTP_HOST_NT + `/download?appid=${imageAppid}&fileid=${imageFileId}&rkey=${rkey}`;
-        } else if (isNTV2 && imageFileId) {
-            const rkey = imageAppid === '1406' ? rkeyData.private_rkey : rkeyData.group_rkey;
-            return IMAGE_HTTP_HOST + `/download?appid=${imageAppid}&fileid=${imageFileId}&rkey=${rkey}`;
+    private getImageUrlFromParsedUrl(imageFileId: string, appid: string, rkeyData: any): string {
+        const rkey = appid === '1406' ? rkeyData.private_rkey : rkeyData.group_rkey;
+        if (rkeyData.online_rkey) {
+            return IMAGE_HTTP_HOST_NT + `/download?appid=${appid}&fileid=${imageFileId}&rkey=${rkey}`;
         }
-
-        return '';
+        return IMAGE_HTTP_HOST + `/download?appid=${appid}&fileid=${imageFileId}&rkey=${rkey}`;
     }
 
     private getImageUrlFromMd5(fileMd5: string | undefined, md5HexStr: string | undefined): string {
