@@ -78,7 +78,11 @@ export class PacketHighwayContext {
                     ip: int32ip2str(addr.ip),
                     port: addr.port
                 });
+                this.hwClient.changeServer(int32ip2str(addr.ip), addr.port);
             }
+        }
+        if (this.sig.serverAddr.length === 0) {
+            this.logger.warn('[Highway PrepareUpload] server addr is empty!');
         }
     }
 
