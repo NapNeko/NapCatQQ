@@ -66,7 +66,6 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
         try {
             const publishUrl = 'https://ip.011102.xyz/';
             const data = await RequestUtil.HttpGetJson<{ IP: { IP: string } }>(publishUrl, 'GET', {}, {}, true, true);
-            log("IP data", data);
             log(`[NapCat] [WebUi] WebUi Publish Panel Url: ${createUrl(data.IP.IP, '/webui', config.token)}`);
         } catch (err) {
             logger.logError(`[NapCat] [WebUi] Get Publish Panel Url Error: ${err}`);
