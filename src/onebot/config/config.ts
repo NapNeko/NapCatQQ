@@ -149,6 +149,9 @@ export function mergeOneBotConfigs(
     if (userConfig.musicSignUrl !== undefined) {
         mergedConfig.musicSignUrl = userConfig.musicSignUrl;
     }
+    if(userConfig.enableLocalFile2Url !== undefined) {
+        mergedConfig.enableLocalFile2Url = userConfig.enableLocalFile2Url;
+    }
     return mergedConfig;
 }
 
