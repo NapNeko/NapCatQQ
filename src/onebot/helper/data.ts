@@ -8,7 +8,7 @@ import {
     OB11GroupMemberRole,
     OB11User,
     OB11UserSex,
-} from '../types';
+} from '@/onebot/types';
 export class OB11Construct {
     static selfInfo(selfInfo: SelfInfo): OB11User {
         return {

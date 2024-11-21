@@ -1,7 +1,7 @@
 import { IOB11NetworkAdapter, OB11EmitEventContent, OB11NetworkReloadType } from '@/onebot/network/index';
 import { createHmac } from 'crypto';
 import { LogWrapper } from '@/common/log';
-import { QuickAction, QuickActionEvent } from '../types';
+import { QuickAction, QuickActionEvent } from '@/onebot/types';
 import { NapCatCore } from '@/core';
 import { NapCatOneBot11Adapter } from '..';
 import { RequestUtil } from '@/common/request';

@@ -1,4 +1,4 @@
-import { ChatType, Peer } from '../types';
+import { ChatType, Peer } from '@/core/types';
 import { NodeIKernelRecentContactListener } from '../listeners/NodeIKernelRecentContactListener';
 import { GeneralCallResult } from './common';
 import { FSABRecentContactParams } from '../types/contact';
