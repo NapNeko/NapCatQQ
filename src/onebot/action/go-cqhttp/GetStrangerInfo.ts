@@ -1,6 +1,6 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { OB11User, OB11UserSex } from '@/onebot';
-import { OB11Entities } from '@/onebot/entities';
+import { OB11Construct } from '@/onebot/helper/data';
 import { ActionName } from '@/onebot/action/router';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { calcQQLevel } from '@/common/helper';
@@ -36,7 +36,7 @@ export default class GoCQHTTPGetStrangerInfo extends OneBotAction<Payload, OB11U
             age: extendData.detail.simpleInfo.baseInfo.age ?? info.age,
             qid: extendData.detail.simpleInfo.baseInfo.qid,
             qqLevel: calcQQLevel(extendData.detail.commonExt?.qqLevel ?? info.qqLevel),
-            sex: OB11Entities.sex(extendData.detail.simpleInfo.baseInfo.sex) ?? OB11UserSex.unknown,
+            sex: OB11Construct.sex(extendData.detail.simpleInfo.baseInfo.sex) ?? OB11UserSex.unknown,
             long_nick: extendData.detail.simpleInfo.baseInfo.longNick ?? info.longNick,
             reg_time: extendData.detail.commonExt?.regTime ?? info.regTime,
             is_vip: extendData.detail.simpleInfo.vasInfo?.svipFlag,

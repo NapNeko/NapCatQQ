@@ -2,7 +2,7 @@ import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { OB11GroupFile, OB11GroupFileFolder } from '@/onebot';
-import { OB11Entities } from '@/onebot/entities';
+import { OB11Construct } from '@/onebot/helper/data';
 
 const SchemaData = {
     type: 'object',
@@ -32,9 +32,9 @@ export class GetGroupRootFiles extends OneBotAction<Payload, {
 
         return {
             files: ret.filter(item => item.fileInfo)
-                .map(item => OB11Entities.file(item.peerId, item.fileInfo!)),
+                .map(item => OB11Construct.file(item.peerId, item.fileInfo!)),
             folders: ret.filter(item => item.folderInfo)
-                .map(item => OB11Entities.folder(item.peerId, item.folderInfo!)),
+                .map(item => OB11Construct.folder(item.peerId, item.folderInfo!)),
         };
     }
 }
