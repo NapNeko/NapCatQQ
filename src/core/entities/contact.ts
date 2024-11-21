@@ -1,4 +1,3 @@
-
 export interface FSABRecentContactParams {
     anchorPointContact: {
         contactId: string;

@@ -2,7 +2,7 @@ import {
     BuddyReqType,
     ChatType,
     DataSource,
-    GroupMemberRole,
+    NTGroupMemberRole,
     GroupNotifyMsgStatus,
     GroupNotifyMsgType,
     InstanceContext,
@@ -524,7 +524,7 @@ export class NapCatOneBot11Adapter {
                         this.core,
                         parseInt(groupCode),
                         parseInt(member.uin),
-                        member.role === GroupMemberRole.admin ? 'set' : 'unset'
+                        member.role === NTGroupMemberRole.KADMIN ? 'set' : 'unset'
                     );
                     this.networkManager
                         .emitEvent(groupAdminNoticeEvent)

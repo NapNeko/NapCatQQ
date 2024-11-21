@@ -2,7 +2,7 @@ import {
     GeneralCallResult,
     Group,
     GroupMember,
-    GroupMemberRole,
+    NTGroupMemberRole,
     GroupRequestOperateTypes,
     InstanceContext,
     KickMemberV2Req,
@@ -457,7 +457,7 @@ export class NTQQGroupApi {
         return this.context.session.getGroupService().modifyMemberCardName(groupQQ, memberUid, cardName);
     }
 
-    async setMemberRole(groupQQ: string, memberUid: string, role: GroupMemberRole) {
+    async setMemberRole(groupQQ: string, memberUid: string, role: NTGroupMemberRole) {
         return this.context.session.getGroupService().modifyMemberRole(groupQQ, memberUid, role);
     }
 
