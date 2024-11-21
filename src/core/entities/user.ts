@@ -25,12 +25,12 @@ export interface CoreInfo {
 export interface BaseInfo {
     qid: string;
     longNick: string;
-    birthdayYear: number;
-    birthdayMonth: number;
-    birthdayDay: number;
+    birthday_year: number;
+    birthday_month: number;
+    birthday_day: number;
     age: number;
     sex: number;
-    email: string;
+    eMail: string;
     phoneNum: string;
     categoryId: number;
     richTime: number;
@@ -227,7 +227,7 @@ export interface ModifyProfileParams {
     nick: string;
     longNick: string;
     sex: Sex;
-    birthday: { birthdayYear: string, birthdayMonth: string, birthdayDay: string };
+    birthday: { birthday_year: string, birthday_month: string, birthday_day: string };
     location: any;
 }
 
@@ -263,9 +263,9 @@ export interface User {
     age?: number;
     qqLevel?: QQLevel;
     qid?: string;
-    birthdayYear?: number;
-    birthdayMonth?: number;
-    birthdayDay?: number;
+    birthday_year?: number;
+    birthday_month?: number;
+    birthday_day?: number;
     topTime?: string;
     constellation?: number;
     shengXiao?: number;
@@ -273,7 +273,7 @@ export interface User {
     homeTown?: string;
     makeFriendCareer?: number;
     pos?: string;
-    email?: string;
+    eMail?: string;
     phoneNum?: string;
     college?: string;
     country?: string;
