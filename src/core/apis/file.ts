@@ -125,7 +125,7 @@ export class NTQQFileApi {
                 fileName: fileName,
                 sourcePath: path,
                 original: true,
-                picType: isGIF(picPath) ? PicType.gif : PicType.jpg,
+                picType: isGIF(picPath) ? PicType.GIF : PicType.JGP,
                 picSubType: subType,
                 fileUuid: '',
                 fileSubId: '',

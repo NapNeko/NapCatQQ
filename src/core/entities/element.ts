@@ -1,4 +1,4 @@
-import { ElementType, FaceType, MessageElement, NTGrayTipElementSubTypeV2, PicSubType, PicType, TipAioOpGrayTipElement, TipGroupElement, viedo_type } from "./msg";
+import { ElementType, FaceType, MessageElement, NTGrayTipElementSubTypeV2, PicSubType, PicType, TipAioOpGrayTipElement, TipGroupElement, NTVideoType } from "./msg";
 
 type ElementFullBase = Omit<MessageElement, 'elementType' | 'elementId' | 'extBufForUI'>;
 
@@ -84,7 +84,7 @@ export interface VideoElement {
     thumbMd5?: string;
     fileTime?: number; // second
     thumbSize?: number; // byte
-    fileFormat?: viedo_type;  // 2表示mp4 参考下面条目
+    fileFormat?: NTVideoType;  // 2表示mp4 参考下面条目
     fileSize?: string;  // byte
     thumbWidth?: number;
     thumbHeight?: number;
