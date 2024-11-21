@@ -12,7 +12,7 @@ export enum OB11MessageType {
 export interface OB11Message {
     temp_source?: number;
     message_sent_type?: string;
-    target_id?: number;  // 自己发送的消息才有此字段
+    target_id?: number;  // 自己发送消息/私聊消息
     self_id?: number;
     time: number;
     message_id: number;
@@ -255,7 +255,7 @@ export interface OB11PostSendMsg {
     user_id?: string;
     group_id?: string;
     message: OB11MessageMixType;
-    messages?: OB11MessageMixType;  // 兼容 go-cqhttp
+    messages?: OB11MessageMixType;
     auto_escape?: boolean | string;
     source?: string;
     news?: { text: string }[];

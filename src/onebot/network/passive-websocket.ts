@@ -180,11 +180,11 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             this.checkStateAndReply<any>(OB11Response.error('json解析失败,请检查数据格式', 1400, echo), wsClient);
             return;
         }
-        receiveData.params = (receiveData?.params) ? receiveData.params : {};//兼容类型验证
+        receiveData.params = (receiveData?.params) ? receiveData.params : {};//兼容类型验证 不然类型校验爆炸
         const action = this.actions.get(receiveData.action);
         if (!action) {
-            this.logger.logError.bind(this.logger)('[OneBot] [WebSocket Client] 发生错误', '不支持的api ' + receiveData.action);
-            this.checkStateAndReply<any>(OB11Response.error('不支持的api ' + receiveData.action, 1404, echo), wsClient);
+            this.logger.logError.bind(this.logger)('[OneBot] [WebSocket Client] 发生错误', '不支持的API ' + receiveData.action);
+            this.checkStateAndReply<any>(OB11Response.error('不支持的API ' + receiveData.action, 1404, echo), wsClient);
             return;
         }
         const retdata = await action.websocketHandle(receiveData.params, echo ?? '', this.name);

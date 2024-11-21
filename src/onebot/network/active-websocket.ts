@@ -80,7 +80,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
                 headers: {
                     'X-Self-ID': this.core.selfInfo.uin,
                     'Authorization': `Bearer ${this.config.token}`,
-                    'x-client-role': 'Universal',  // koishi-adapter-onebot 需要这个字段
+                    'x-client-role': 'Universal',  // 为koishi adpter适配
                     'User-Agent': 'OneBot/11',
                 },
 
@@ -144,11 +144,11 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
             this.checkStateAndReply<any>(OB11Response.error('json解析失败,请检查数据格式', 1400, echo));
             return;
         }
-        receiveData.params = (receiveData?.params) ? receiveData.params : {};//兼容类型验证
+        receiveData.params = (receiveData?.params) ? receiveData.params : {};// 兼容类型验证
         const action = this.actions.get(receiveData.action);
         if (!action) {
-            this.logger.logError.bind(this.logger)('[OneBot] [WebSocket Client] 发生错误', '不支持的api ' + receiveData.action);
-            this.checkStateAndReply<any>(OB11Response.error('不支持的api ' + receiveData.action, 1404, echo));
+            this.logger.logError.bind(this.logger)('[OneBot] [WebSocket Client] 发生错误', '不支持的Api ' + receiveData.action);
+            this.checkStateAndReply<any>(OB11Response.error('不支持的Api ' + receiveData.action, 1404, echo));
             return;
         }
         const retdata = await action.websocketHandle(receiveData.params, echo ?? '', this.name);

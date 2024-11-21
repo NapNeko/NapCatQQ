@@ -1,4 +1,4 @@
-import { checkFileReceived, uri2local } from '@/common/file';
+import { checkFileExist, uri2local } from '@/common/file';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { unlink } from 'node:fs';
@@ -39,7 +39,7 @@ export class SendGroupNotice extends OneBotAction<Payload, null> {
             if (!path) {
                 throw new Error(`群公告${payload.image}设置失败,获取资源失败`);
             }
-            await checkFileReceived(path, 5000); // 文件不存在QQ会崩溃，需要提前判断
+            await checkFileExist(path, 5000);
             const ImageUploadResult = await this.core.apis.GroupApi.uploadGroupBulletinPic(payload.group_id.toString(), path);
             if (ImageUploadResult.errCode != 0) {
                 throw new Error(`群公告${payload.image}设置失败,图片上传失败`);

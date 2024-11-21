@@ -1,7 +1,7 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
-import { ActionName, BaseCheckResult } from '../router';
+import { ActionName, BaseCheckResult } from '@/onebot/action/router';
 import * as fs from 'node:fs';
-import { checkFileReceived, uri2local } from '@/common/file';
+import { checkFileExist, uri2local } from '@/common/file';
 
 interface Payload {
     file: string;
@@ -29,7 +29,7 @@ export default class SetAvatar extends OneBotAction<Payload, null> {
             throw new Error(`头像${payload.file}设置失败,file字段可能格式不正确`);
         }
         if (path) {
-            await checkFileReceived(path, 5000); // 文件不存在QQ会崩溃，需要提前判断
+            await checkFileExist(path, 5000);// 避免崩溃
             const ret = await this.core.apis.UserApi.setQQAvatar(path);
             fs.unlink(path, () => {
             });

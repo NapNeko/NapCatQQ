@@ -114,7 +114,7 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
                 return res.json(OB11Response.error(error?.stack?.toString() || error?.message || 'Error Handle', 200));
             }
         } else {
-            return res.json(OB11Response.error('不支持的api ' + actionName, 200));
+            return res.json(OB11Response.error('不支持的Api ' + actionName, 200));
         }
     }
 

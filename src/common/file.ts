@@ -4,7 +4,20 @@ import crypto, { randomUUID } from 'crypto';
 import util from 'util';
 import path from 'node:path';
 import * as fileType from 'file-type';
-import { solveProblem } from './helper';
+import { solveProblem } from '@/common/helper';
+
+export interface HttpDownloadOptions {
+    url: string;
+    headers?: Record<string, string> | string;
+}
+
+type Uri2LocalRes = {
+    success: boolean,
+    errMsg: string,
+    fileName: string,
+    ext: string,
+    path: string
+}
 
 export function isGIF(path: string) {
     const buffer = Buffer.alloc(4);
@@ -15,7 +28,7 @@ export function isGIF(path: string) {
 }
 
 // 定义一个异步函数来检查文件是否存在
-export function checkFileReceived(path: string, timeout: number = 3000): Promise<void> {
+export function checkFileExist(path: string, timeout: number = 3000): Promise<void> {
     return new Promise((resolve, reject) => {
         const startTime = Date.now();
 
@@ -34,7 +47,7 @@ export function checkFileReceived(path: string, timeout: number = 3000): Promise
 }
 
 // 定义一个异步函数来检查文件是否存在
-export async function checkFileReceived2(path: string, timeout: number = 3000): Promise<void> {
+export async function checkFileExistV2(path: string, timeout: number = 3000): Promise<void> {
     // 使用 Promise.race 来同时进行文件状态检查和超时计时
     // Promise.race 会返回第一个解决（resolve）或拒绝（reject）的 Promise
     await Promise.race([
@@ -75,18 +88,13 @@ export async function file2base64(path: string) {
         data: '',
     };
     try {
-        // 读取文件内容
-        // if (!fs.existsSync(path)){
-        //     path = path.replace("\\Ori\\", "\\Thumb\\");
-        // }
         try {
-            await checkFileReceived(path, 5000);
+            await checkFileExist(path, 5000);
         } catch (e: any) {
             result.err = e.toString();
             return result;
         }
         const data = await readFile(path);
-        // 转换为Base64编码
         result.data = data.toString('base64');
     } catch (err: any) {
         result.err = err.toString();
@@ -118,13 +126,7 @@ export function calculateFileMD5(filePath: string): Promise<string> {
     });
 }
 
-export interface HttpDownloadOptions {
-    url: string;
-    headers?: Record<string, string> | string;
-}
-
 async function tryDownload(options: string | HttpDownloadOptions, useReferer: boolean = false): Promise<Response> {
-    // const chunks: Buffer[] = [];
     let url: string;
     let headers: Record<string, string> = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.71 Safari/537.36',
@@ -164,14 +166,6 @@ export async function httpDownload(options: string | HttpDownloadOptions): Promi
     const blob = await resp.blob();
     const buffer = await blob.arrayBuffer();
     return Buffer.from(buffer);
-}
-
-type Uri2LocalRes = {
-    success: boolean,
-    errMsg: string,
-    fileName: string,
-    ext: string,
-    path: string
 }
 
 export async function checkFileV2(filePath: string) {

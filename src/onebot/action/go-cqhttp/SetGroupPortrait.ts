@@ -1,7 +1,7 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
-import { ActionName, BaseCheckResult } from '../router';
+import { ActionName, BaseCheckResult } from '@/onebot/action/router';
 import * as fs from 'node:fs';
-import { checkFileReceived, uri2local } from '@/common/file';
+import { checkFileExistV2, uri2local } from '@/common/file';
 
 interface Payload {
     file: string,
@@ -30,7 +30,7 @@ export default class SetGroupPortrait extends OneBotAction<Payload, any> {
             throw new Error(`头像${payload.file}设置失败,file字段可能格式不正确`);
         }
         if (path) {
-            await checkFileReceived(path, 5000); // 文件不存在QQ会崩溃，需要提前判断
+            await checkFileExistV2(path, 5000); // 文件不存在QQ会崩溃，需要提前判断
             const ret = await this.core.apis.GroupApi.setGroupAvatar(payload.group_id.toString(), path);
             fs.unlink(path, () => { });
             if (!ret) {
