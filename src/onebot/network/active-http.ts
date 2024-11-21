@@ -23,7 +23,6 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
         this.config = structuredClone(config);
     }
 
-
     onEvent<T extends OB11EmitEventContent>(event: T) {
         if (!this.isEnable) {
             return;

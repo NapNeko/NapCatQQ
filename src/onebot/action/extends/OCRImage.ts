@@ -1,7 +1,7 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import { checkFileReceived, uri2local } from '@/common/file';
+import { checkFileExist, uri2local } from '@/common/file';
 import fs from 'fs';
 
 const SchemaData = {
@@ -24,7 +24,7 @@ export class OCRImage extends OneBotAction<Payload, any> {
             throw new Error(`OCR ${payload.image}失败,image字段可能格式不正确`);
         }
         if (path) {
-            await checkFileReceived(path, 5000); // 文件不存在QQ会崩溃，需要提前判断
+            await checkFileExist(path, 5000); // 避免崩溃
             const ret = await this.core.apis.SystemApi.ocrImage(path);
             fs.unlink(path, () => { });
 
