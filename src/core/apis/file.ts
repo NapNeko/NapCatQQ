@@ -320,7 +320,7 @@ export class NTQQFileApi {
     }
 
     async downloadMedia(msgId: string, chatType: ChatType, peerUid: string, elementId: string, thumbPath: string, sourcePath: string, timeout = 1000 * 60 * 2, force: boolean = false) {
-        // 用于下载收到的消息中的图片等
+        // 用于下载文件
         if (sourcePath && fs.existsSync(sourcePath)) {
             if (force) {
                 try {

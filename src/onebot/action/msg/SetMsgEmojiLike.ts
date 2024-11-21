@@ -27,19 +27,18 @@ export class SetMsgEmojiLike extends OneBotAction<Payload, any> {
         if (!payload.emoji_id) {
             throw new Error('emojiId not found');
         }
-        if (!payload.set) {
-            payload.set = true;
-        }
+        payload.set = payload.set ?? true;
 
         const msgData = (await this.core.apis.MsgApi.getMsgsByMsgId(msg.Peer, [msg.MsgId])).msgList;
-        if (!msgData || msgData.length == 0 || !msgData[0].msgSeq) {
+        if (!msgData || msgData.length === 0 || !msgData[0].msgSeq) {
             throw new Error('find msg by msgid error');
         }
+
         return await this.core.apis.MsgApi.setEmojiLike(
             msg.Peer,
             msgData[0].msgSeq,
             payload.emoji_id.toString(),
-            typeof payload.set == 'string' ? payload.set === 'true' : !!payload
+            typeof payload.set === 'string' ? payload.set === 'true' : !!payload.set
         );
     }
 }

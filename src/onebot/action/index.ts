@@ -22,7 +22,6 @@ import GoCQHTTPGetStrangerInfo from './go-cqhttp/GetStrangerInfo';
 import SendLike from './user/SendLike';
 import SetGroupAddRequest from './group/SetGroupAddRequest';
 import SetGroupLeave from './group/SetGroupLeave';
-import GetGuildList from './guild/GetGuildList';
 import SetFriendAddRequest from './user/SetFriendAddRequest';
 import SetGroupWholeBan from './group/SetGroupWholeBan';
 import SetGroupName from './group/SetGroupName';
@@ -70,7 +69,6 @@ import { FetchEmojiLike } from './extends/FetchEmojiLike';
 import { FetchUserProfileLike } from './extends/FetchUserProfileLike';
 import { NapCatCore } from '@/core';
 import { NapCatOneBot11Adapter } from '@/onebot';
-import GetGuildProfile from './guild/GetGuildProfile';
 import { SetInputStatus } from './extends/SetInputStatus';
 import { GetCSRF } from './system/GetCSRF';
 import { DelGroupNotice } from './group/DelGroupNotice';
@@ -102,6 +100,8 @@ import { GetMiniAppArk } from "@/onebot/action/extends/GetMiniAppArk";
 import { GetAiRecord } from "@/onebot/action/group/GetAiRecord";
 import { SendGroupAiRecord } from "@/onebot/action/group/SendGroupAiRecord";
 import { GetAiCharacters } from "@/onebot/action/extends/GetAiCharacters";
+import { GetGuildList } from './guild/GetGuildList';
+import { GetGuildProfile } from './guild/GetGuildProfile';
 
 
 export type ActionMap = Map<string, OneBotAction<any, any>>;

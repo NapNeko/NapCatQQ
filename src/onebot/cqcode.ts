@@ -24,7 +24,7 @@ function from(source: string) {
     return { type, data, capture };
 }
 
-function h(type: string, data: any) {
+function convert(type: string, data: any) {
     return {
         type,
         data,
@@ -37,31 +37,29 @@ export function decodeCQCode(source: string): OB11MessageData[] {
     while ((result = from(source))) {
         const { type, data, capture } = result;
         if (capture.index) {
-            elements.push(h('text', { text: unescape(source.slice(0, capture.index)) }));
+            elements.push(convert('text', { text: unescape(source.slice(0, capture.index)) }));
         }
-        elements.push(h(type, data));
+        elements.push(convert(type, data));
         source = source.slice(capture.index + capture[0].length);
     }
-    if (source) elements.push(h('text', { text: unescape(source) }));
+    if (source) elements.push(convert('text', { text: unescape(source) }));
     return elements;
 }
 
+function CQCodeEscapeText(text: string) {
+    return text.replace(/&/g, '&amp;')
+        .replace(/\[/g, '&#91;')
+        .replace(/]/g, '&#93;');
+}
+
+function CQCodeEscape(text: string) {
+    return text.replace(/&/g, '&amp;')
+        .replace(/\[/g, '&#91;')
+        .replace(/]/g, '&#93;')
+        .replace(/,/g, '&#44;');
+}
 
 export function encodeCQCode(data: OB11MessageData) {
-    const CQCodeEscapeText = (text: string) => {
-        return text.replace(/&/g, '&amp;')
-            .replace(/\[/g, '&#91;')
-            .replace(/]/g, '&#93;');
-
-    };
-
-    const CQCodeEscape = (text: string) => {
-        return text.replace(/&/g, '&amp;')
-            .replace(/\[/g, '&#91;')
-            .replace(/]/g, '&#93;')
-            .replace(/,/g, '&#44;');
-    };
-
     if (data.type === 'text') {
         return CQCodeEscapeText(data.data.text);
     }
@@ -74,9 +72,11 @@ export function encodeCQCode(data: OB11MessageData) {
         }
         try {
             const text = value?.toString();
-            if (text) result += `,${name}=${CQCodeEscape(text)}`;
+            if (text) {
+                result += `,${name}=${CQCodeEscape(text)}`;
+            }
         } catch (error) {
-            // If it can't be converted, skip this name-value pair
+            console.error(`Error encoding CQCode for ${name}:`, error);
         }
     }
     result += ']';
