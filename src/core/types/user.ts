@@ -322,8 +322,8 @@ export type Friend = User;
 
 // 业务键枚举
 export enum BizKey {
-    KPRIVILEGEICON,
-    KPHOTOWALL
+    KPRIVILEGEICON = 0,
+    KPHOTOWALL = 1
 }
 
 // 根据UIN获取用户详细信息
@@ -347,9 +347,9 @@ export enum UserDetailSource {
 
 // 个人资料业务类型枚举
 export enum ProfileBizType {
-    KALL,
-    KBASEEXTEND,
-    KVAS,
-    KQZONE,
-    KOTHER
+    KALL = 0,
+    KBASEEXTEND = 1,
+    KVAS = 2,
+    KQZONE = 3,
+    KOTHER = 4
 }
