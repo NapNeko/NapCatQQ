@@ -1,4 +1,4 @@
-import type { SelfInfo } from '@/core/entities';
+import type { SelfInfo } from '@/core/types';
 
 import { LogWrapper } from '@/common/log';
 import { NodeIKernelLoginListener, NodeIKernelSessionListener } from '@/core/listeners';

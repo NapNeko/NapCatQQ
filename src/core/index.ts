@@ -24,14 +24,14 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { hostname, systemName, systemVersion } from '@/common/system';
 import { NTEventWrapper } from '@/common/event';
-import { DataSource, GroupMember, KickedOffLineInfo, SelfInfo, SelfStatusInfo } from '@/core/entities';
+import { DataSource, GroupMember, KickedOffLineInfo, SelfInfo, SelfStatusInfo } from '@/core/types';
 import { NapCatConfigLoader } from '@/core/helper/config';
 import os from 'node:os';
 import { NodeIKernelGroupListener, NodeIKernelMsgListener, NodeIKernelProfileListener } from '@/core/listeners';
 import { proxiedListenerOf } from '@/common/proxy-handler';
 import { NTQQPacketApi } from './apis/packet';
 export * from './wrapper';
-export * from './entities';
+export * from './types';
 export * from './services';
 export * from './listeners';
 

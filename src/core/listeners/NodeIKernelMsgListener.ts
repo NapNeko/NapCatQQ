@@ -1,4 +1,4 @@
-import { ChatType, KickedOffLineInfo, RawMessage } from '@/core/entities';
+import { ChatType, KickedOffLineInfo, RawMessage } from '@/core/types';
 import { CommonFileInfo } from '@/core';
 
 export interface OnRichMediaDownloadCompleteParams {

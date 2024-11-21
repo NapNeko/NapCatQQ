@@ -1,4 +1,4 @@
-import { FriendV2 } from '@/core/entities';
+import { FriendV2 } from '@/core/types';
 import { BuddyListReqType, InstanceContext, NapCatCore } from '@/core';
 import { LimitedHashTable } from '@/common/message-unique';
 

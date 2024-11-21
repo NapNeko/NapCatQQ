@@ -1,4 +1,4 @@
-import { ModifyProfileParams, User, UserDetailSource } from '@/core/entities';
+import { ModifyProfileParams, User, UserDetailSource } from '@/core/types';
 import { RequestUtil } from '@/common/request';
 import { InstanceContext, NapCatCore, ProfileBizType } from '..';
 import { solveAsyncProblem } from '@/common/helper';

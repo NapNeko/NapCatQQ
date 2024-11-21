@@ -1,4 +1,4 @@
-import { ChatType, GetFileListParam, Peer, RawMessage, SendMessageElement, SendStatusType } from '@/core/entities';
+import { ChatType, GetFileListParam, Peer, RawMessage, SendMessageElement, SendStatusType } from '@/core/types';
 import { GroupFileInfoUpdateItem, InstanceContext, NapCatCore } from '@/core';
 import { GeneralCallResult } from '@/core/services/common';
 

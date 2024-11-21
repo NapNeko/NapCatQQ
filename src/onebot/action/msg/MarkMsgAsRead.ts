@@ -1,4 +1,4 @@
-import { ChatType, Peer } from '@/core/entities';
+import { ChatType, Peer } from '@/core/types';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';

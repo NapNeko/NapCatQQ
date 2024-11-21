@@ -1,4 +1,4 @@
-import { User, UserDetailInfoListenerArg } from '@/core/entities';
+import { User, UserDetailInfoListenerArg } from '@/core/types';
 
 export class NodeIKernelProfileListener {
     onUserDetailInfoChanged(arg: UserDetailInfoListenerArg): void {
