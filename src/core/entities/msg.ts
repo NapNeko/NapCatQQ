@@ -1,19 +1,22 @@
 import { GroupMemberRole } from '@/core';
+import { ActionBarElement, ArkElement, AvRecordElement, CalendarElement, FaceBubbleElement, FaceElement, FileElement, GiphyElement, GrayTipElement, MarketFaceElement, PicElement, PttElement, RecommendedMsgElement, ReplyElement, ShareLocationElement, StructLongMsgElement, TaskTopMsgElement, TextElement, TofuRecordElement, VideoElement, YoloGameResultElement } from './element';
 
+// 表示对等方的信息
 export interface Peer {
-    chatType: ChatType;
-    peerUid: string;  // 如果是群聊uid为群号，私聊uid就是加密的字符串
-    guildId?: string;
+    chatType: ChatType; // 聊天类型
+    peerUid: string;    // 对等方的唯一标识符
+    guildId?: string;   // 可选的频道ID
 }
 
+// 表示被踢下线的信息
 export interface KickedOffLineInfo {
-    appId: number;
-    instanceId: number;
-    sameDevice: boolean;
-    tipsDesc: string;
-    tipsTitle: string;
-    kickedType: number;
-    securityKickedType: number;
+    appId: number;              // 应用ID
+    instanceId: number;         // 实例ID
+    sameDevice: boolean;        // 是否为同一设备
+    tipsDesc: string;           // 提示描述
+    tipsTitle: string;          // 提示标题
+    kickedType: number;         // 被踢类型
+    securityKickedType: number; // 安全踢出类型
 }
 
 export interface GetFileListParam {
@@ -60,69 +63,6 @@ export enum ElementType {
     ACTIONBAR = 44
 }
 
-type ElementFullBase = Omit<MessageElement, 'elementType' | 'elementId' | 'extBufForUI'>;
-
-type ElementBase<
-    K extends keyof ElementFullBase,
-    S extends Partial<{ [P in K]: keyof NonNullable<ElementFullBase[P]> | Array<keyof NonNullable<ElementFullBase[P]>> }> = object
-> = {
-    [P in K]:
-    S[P] extends Array<infer U>
-        ? Pick<NonNullable<ElementFullBase[P]>, U & keyof NonNullable<ElementFullBase[P]>>
-        : S[P] extends keyof NonNullable<ElementFullBase[P]>
-            ? Pick<NonNullable<ElementFullBase[P]>, S[P]>
-            : NonNullable<ElementFullBase[P]>;
-};
-
-export interface SendElementBase<ET extends ElementType> {
-    elementType: ET;
-    elementId: string;
-    extBufForUI?: string;
-}
-
-export interface ActionBarElement {
-    rows: InlineKeyboardRow[];
-    botAppid: string;
-}
-
-export interface RecommendedMsgElement {
-    rows: InlineKeyboardRow[];
-    botAppid: string;
-}
-
-export type SendRecommendedMsgElement = SendElementBase<ElementType.RECOMMENDEDMSG> & ElementBase<'recommendedMsgElement'>;
-
-export interface InlineKeyboardButton {
-    id: string;
-    label: string;
-    visitedLabel: string;
-    unsupportTips: string;
-    data: string;
-    specifyRoleIds: string[];
-    specifyTinyids: string[];
-    style: number;
-    type: number;
-    clickLimit: number;
-    atBotShowChannelList: boolean;
-    permissionType: number;
-}
-
-export interface InlineKeyboardRow {
-    buttons: InlineKeyboardButton[];
-}
-
-export interface TofuElementContent {
-    color: string;
-    tittle: string;
-}
-
-export interface TaskTopMsgElement {
-    msgTitle: string;
-    msgSummary: string;
-    iconUrl: string;
-    topMsgType: number;
-}
-
 export enum NTMsgType {
     KMSGTYPEARKSTRUCT = 11,
     KMSGTYPEFACEBUBBLE = 24,
@@ -147,109 +87,15 @@ export enum NTMsgType {
     KMSGTYPEWALLET = 10
 }
 
-export type SendTaskTopMsgElement = SendElementBase<ElementType.TASKTOPMSG> & ElementBase<'taskTopMsgElement'>;
-
-export interface TofuRecordElement {
-    type: number;
-    busiid: string;
-    busiuuid: string;
-    descriptionContent: string;
-    contentlist: TofuElementContent[],
-    background: string;
-    icon: string;
-    uinlist: string[],
-    uidlist: string[],
-    busiExtra: string;
-    updateTime: string;
-    dependedmsgid: string;
-    msgtime: string;
-    onscreennotify: boolean;
-}
-
-export type SendTofuRecordElement = SendElementBase<ElementType.TOFURECORD> & ElementBase<'tofuRecordElement'>;
-
-export interface FaceBubbleElement {
-    faceCount: number;
-    faceSummary: string;
-    faceFlag: number;
-    content: string;
-    oldVersionStr: string;
-    faceType: number;
-    others: string;
-    yellowFaceInfo: {
-        index: number;
-        buf: string;
-        compatibleText: string;
-        text: string;
-    };
-}
-
-export type SendFaceBubbleElement = SendElementBase<ElementType.FACEBUBBLE> & ElementBase<'faceBubbleElement'>;
-
-export interface AvRecordElement {
-    type: number;
-    time: string;
-    text: string;
-    mainType: number;
-    hasRead: boolean;
-    extraType: number;
-}
-
-export type SendAvRecordElement = SendElementBase<ElementType.AVRECORD> & ElementBase<'avRecordElement'>;
-
-export interface YoloUserInfo {
-    uid: string;
-    result: number;
-    rank: number;
-    bizId: string;
-}
-
-export type SendInlineKeyboardElement = SendElementBase<ElementType.INLINEKEYBOARD> & ElementBase<'inlineKeyboardElement'>;
-
-export interface YoloGameResultElement {
-    UserInfo: YoloUserInfo[];
-}
-
-export type SendYoloGameResultElement = SendElementBase<ElementType.YOLOGAMERESULT> & ElementBase<'yoloGameResultElement'>;
-
-export interface GiphyElement {
-    id: string;
-    isClip: boolean;
-    width: number;
-    height: number;
-}
-
-export type SendGiphyElement = SendElementBase<ElementType.GIPHY> & ElementBase<'giphyElement'>;
-
-export type SendWalletElement = SendElementBase<ElementType.UNKNOWN> & ElementBase<'walletElement'>;
-
-export interface CalendarElement {
-    summary: string;
-    msg: string;
-    expireTimeMs: string;
-    schemaType: number;
-    schema: string;
-}
-
-export type SendCalendarElement = SendElementBase<ElementType.CALENDAR> & ElementBase<'calendarElement'>;
-
-export type SendLiveGiftElement = SendElementBase<ElementType.LIVEGIFT> & ElementBase<'liveGiftElement'>;
-
-export type SendTextElement = SendElementBase<ElementType.TEXT> & ElementBase<'textElement'>;
-
-export type SendPttElement = SendElementBase<ElementType.PTT> & ElementBase<'pttElement', {
-    pttElement: ['fileName', 'filePath', 'md5HexStr', 'fileSize', 'duration', 'formatType', 'voiceType',
-        'voiceChangeType', 'canConvert2Text', 'waveAmplitudes', 'fileSubId', 'playState', 'autoConvertText']
-}>;
-
 export enum PicType {
     gif = 2000,
     jpg = 1000
 }
 
 export enum PicSubType {
-    normal = 0, // 普通图片，大图
-    face = 1  // 表情包小图
+    Normal = 0, // 普通图片
+    Face = 1  // 表情包小图
+    //...待补全 其余见NT Android
 }
 
 export enum NTMsgAtType {
@@ -264,78 +110,6 @@ export enum NTMsgAtType {
     ATTYPESUMMONONLINE = 128,
     ATTYPESUMMONROLE = 256,
     ATTYPEUNKNOWN = 0
-}
-
-export type SendPicElement = SendElementBase<ElementType.PIC> & ElementBase<'picElement'>;
-
-export interface ReplyElement {
-    sourceMsgIdInRecords?: string;
-    replayMsgSeq: string;
-    replayMsgId: string;
-    senderUin: string;
-    senderUidStr?: string;
-    replyMsgTime?: string;
-    replyMsgClientSeq?: string;
-}
-
-export type SendReplyElement = SendElementBase<ElementType.REPLY> & ElementBase<'replyElement'>;
-
-export type SendFaceElement = SendElementBase<ElementType.FACE> & ElementBase<'faceElement'>;
-
-export type SendMarketFaceElement = SendElementBase<ElementType.MFACE> & ElementBase<'marketFaceElement'>;
-
-export type SendStructLongMsgElement = SendElementBase<ElementType.STRUCTLONGMSG> & ElementBase<'structLongMsgElement'>;
-
-export interface StructLongMsgElement {
-    xmlContent: string;
-    resId: string;
-}
-
-export type SendActionBarElement = SendElementBase<ElementType.ACTIONBAR> & ElementBase<'actionBarElement'>;
-
-export interface ShareLocationElement {
-    text: string;
-    ext: string;
-}
-
-export type SendShareLocationElement = SendElementBase<ElementType.SHARELOCATION> & ElementBase<'shareLocationElement'>;
-
-export interface FileElement {
-    fileMd5?: string;
-    fileName: string;
-    filePath: string;
-    fileSize: string;
-    picHeight?: number;
-    picWidth?: number;
-    folderId?: string;
-    picThumbPath?: Map<number, string>;
-    file10MMd5?: string;
-    fileSha?: string;
-    fileSha3?: string;
-    fileUuid?: string;
-    fileSubId?: string;
-    thumbFileSize?: number;
-    fileBizId?: number;
-}
-
-export type SendFileElement = SendElementBase<ElementType.FILE> & ElementBase<'fileElement'>;
-
-export type SendVideoElement = SendElementBase<ElementType.VIDEO> & ElementBase<'videoElement'>;
-
-export type SendArkElement = SendElementBase<ElementType.ARK> & ElementBase<'arkElement'>;
-
-export type SendMarkdownElement = SendElementBase<ElementType.MARKDOWN> & ElementBase<'markdownElement'>;
-
-export type SendMessageElement = SendTextElement | SendPttElement |
-    SendPicElement | SendReplyElement | SendFaceElement | SendMarketFaceElement | SendFileElement |
-    SendVideoElement | SendArkElement | SendMarkdownElement | SendShareLocationElement;
-
-export interface TextElement {
-    content: string;
-    atType: number;
-    atUid: string;
-    atTinyId: string;
-    atNtUid: string;
 }
 
 export interface MessageElement {
@@ -372,11 +146,6 @@ export interface MessageElement {
     actionBarElement?: ActionBarElement
 }
 
-export enum AtType {
-    notAt = 0,
-    atAll = 1,
-    atUser = 2
-}
 export enum MsgSourceType {
     K_DOWN_SOURCETYPE_AIOINNER = 1,
     K_DOWN_SOURCETYPE_BIGSCREEN = 2,
@@ -428,58 +197,8 @@ export enum ChatType {
     KCHATTYPEWEIYUN = 40,
 }
 
-export interface PttElement {
-    canConvert2Text: boolean;
-    duration: number; // 秒数
-    fileBizId: null;
-    fileId: number; // 0
-    fileName: string; // "e4d09c784d5a2abcb2f9980bdc7acfe6.amr"
-    filePath: string; // "/Users//Library/Containers/com.tencent.qq/Data/Library/Application Support/QQ/nt_qq_a6b15c9820595d25a56c1633ce19ad40/nt_data/Ptt/2023-11/Ori/e4d09c784d5a2abcb2f9980bdc7acfe6.amr"
-    fileSize: string; // "4261"
-    fileSubId: string; // "0"
-    fileUuid: string; // "90j3z7rmRphDPrdVgP9udFBaYar#oK0TWZIV"
-    formatType: number; // 1
-    invalidState: number; // 0
-    md5HexStr: string; // "e4d09c784d5a2abcb2f9980bdc7acfe6"
-    playState: number; // 0
-    progress: number; // 0
-    text: string; // ""
-    transferStatus: number; // 0
-    translateStatus: number; // 0
-    voiceChangeType: number; // 0
-    voiceType: number; // 0
-    waveAmplitudes: number[];
-    autoConvertText: number;
-}
-
-export interface ArkElement {
-    bytesData: string;
-    linkInfo: null;
-    subElementType: null;
-}
-
 export const IMAGE_HTTP_HOST = 'https://gchat.qpic.cn';
 export const IMAGE_HTTP_HOST_NT = 'https://multimedia.nt.qq.com.cn';
-
-export interface PicElement {
-    md5HexStr?: string;
-    filePath?: string;
-    fileSize: number | string;//number
-    picWidth: number;
-    picHeight: number;
-    fileName: string;
-    sourcePath: string;
-    original: boolean;
-    picType: PicType;
-    picSubType?: PicSubType;
-    fileUuid: string;
-    fileSubId: string;
-    thumbFileSize: number;
-    summary: string;
-    thumbPath: Map<number, string>;
-    originImageMd5?: string;
-    originImageUrl?: string;  // http url, 没有host，host是https://gchat.qpic.cn/, 带download参数的是https://multimedia.nt.qq.com.cn
-}
 
 export enum NTGrayTipElementSubTypeV2 {
     GRAYTIP_ELEMENT_SUBTYPE_AIOOP = 15,
@@ -502,27 +221,6 @@ export enum NTGrayTipElementSubTypeV2 {
     GRAYTIP_ELEMENT_SUBTYPE_XMLMSG = 12,
 }
 
-export interface GrayTipElement {
-    subElementType: NTGrayTipElementSubTypeV2;
-    revokeElement: {
-        operatorRole: string;
-        operatorUid: string;
-        operatorNick: string;
-        operatorRemark: string;
-        operatorMemRemark?: string;
-        wording: string;  // 自定义的撤回提示语
-    };
-    aioOpGrayTipElement: TipAioOpGrayTipElement;
-    groupElement: TipGroupElement;
-    xmlElement: {
-        content: string;
-        templId: string;
-    };
-    jsonGrayTipElement: {
-        busiId?: number;
-        jsonStr: string;
-    };
-}
 
 export enum FaceType {
     normal = 1, // 小黄脸
@@ -533,88 +231,9 @@ export enum FaceType {
 
 export enum FaceIndex {
     dice = 358,
-    RPS = 359  // 石头剪刀布
+    rps = 359 
 }
 
-export interface FaceElement {
-    faceIndex: number;
-    faceType: FaceType;
-    faceText?: string;
-    packId?: string;
-    stickerId?: string;
-    sourceType?: number;
-    stickerType?: number;
-    resultId?: string;
-    surpriseId?: string;
-    randomType?: number;
-}
-
-export interface MarketFaceElement {
-    emojiPackageId: number;
-    faceName: string;
-    emojiId: string;
-    key: string;
-}
-
-export interface VideoElement {
-    filePath: string;
-    fileName: string;
-    videoMd5?: string;
-    thumbMd5?: string;
-    fileTime?: number; // second
-    thumbSize?: number; // byte
-    fileFormat?: viedo_type;  // 2表示mp4 参考下面条目
-    fileSize?: string;  // byte
-    thumbWidth?: number;
-    thumbHeight?: number;
-    busiType?: 0; //
-    subBusiType?: 0; // 未知
-    thumbPath?: Map<number, any>;
-    transferStatus?: 0; // 未知
-    progress?: 0;  // 下载进度？
-    invalidState?: 0; // 未知
-    fileUuid?: string;  // 可以用于下载链接？
-    fileSubId?: string;
-    fileBizId?: null;
-    originVideoMd5?: string;
-    import_rich_media_context?: null;
-    sourceVideoCodecFormat?: number;
-}
-
-// export enum busiType{
-//   public static final int CREATOR_SHARE_ADV_XWORLD = 21;
-//   public static final int MINI_APP_MINI_GAME = 11;
-//   public static final int OFFICIAL_ACCOUNT_ADV = 4;
-//   public static final int OFFICIAL_ACCOUNT_ADV_GAME = 8;
-//   public static final int OFFICIAL_ACCOUNT_ADV_SHOP = 9;
-//   public static final int OFFICIAL_ACCOUNT_ADV_VIP = 7;
-//   public static final int OFFICIAL_ACCOUNT_LAYER_MASK_ADV = 14;
-//   public static final int OFFICIAL_ACCOUNT_SPORT = 13;
-//   public static final int OFFICIAL_ACCOUNT_TIAN_QI = 10;
-//   public static final int PC_QQTAB_ADV = 18;
-//   public static final int QIQIAOBAN_SDK = 15;
-//   public static final int QQ_CPS = 16;
-//   public static final int QQ_WALLET_CPS = 17;
-//   public static final int QZONE_FEEDS = 0;
-//   public static final int QZONE_PHOTO_TAIL = 2;
-//   public static final int QZONE_VIDEO_LAYER = 1;
-//   public static final int REWARD_GIFT_ADV = 6;
-//   public static final int REWARD_GROUPGIFT_ADV = 12;
-//   public static final int REWARD_PERSONAL_ADV = 5;
-//   public static final int WEISEE_OFFICIAL_ACCOUNT = 3;
-//   public static final int X_WORLD_CREATOR_ADV = 20;
-//   public static final int X_WORLD_QZONE_LAYER = 22;
-//   public static final int X_WORLD_VIDEO_ADV = 19;
-
-// }
-// export enum CategoryBusiType {
-//   _KCateBusiTypeDefault = 0,
-//   _kCateBusiTypeFaceCluster = 1,
-//   _kCateBusiTypeLabelCluster = 4,
-//   _kCateBusiTypeMonthCluster = 16,
-//   _kCateBusiTypePoiCluster = 2,
-//   _kCateBusiTypeYearCluster = 8,
-// }
 export enum viedo_type {
     VIDEO_FORMAT_AFS = 7,
     VIDEO_FORMAT_AVI = 1,
@@ -734,96 +353,34 @@ export enum SendStatusType {
     KSEND_STATUS_SUCCESS_NOSEQ = 3
 }
 
+// 原始消息
 export interface RawMessage {
-    parentMsgPeer: Peer;
-
-    parentMsgIdList: string[];
-
-    /**
-     * 扩展字段，与 Ob11 msg ID 有关
-     */
-
-
-    id?: number;
-
-    guildId: string;
-
-    msgRandom: string;
-
-    msgId: string;
-
-    /**
-     * 消息时间戳（秒）
-     */
-    msgTime: string;
-
-    msgSeq: string;
-
-    msgType: NTMsgType;
-
-    subMsgType: number;
-
-    senderUid: string;
-
-    /**
-     * 发送者 QQ 号
-     */
-    senderUin: string;
-
-    /**
-     * 群号 / 用户 UID
-     */
-    peerUid: string;
-
-    /**
-     * 群号 / 用户 QQ 号
-     */
-    peerUin: string;
-
-    /**
-     * 好友备注（如果是好友消息）
-     */
-    remark?: string;
-
-    /**
-     * 群名（如果是群消息）
-     */
-    peerName: string;
-
-    /**
-     * 发送者昵称（如果是好友消息）
-     */
-    sendNickName: string;
-
-    /**
-     * 发送者好友备注（如果是群消息并且有发送者好友）
-     */
-    sendRemarkName: string;
-
-    /**
-     * 发送者群名片（如果是群消息）
-     */
-    sendMemberName?: string;
-
-    chatType: ChatType;
-
-    /**
-     * 消息状态，别人发的 2 是已撤回，自己发的 2 是已发送
-     */
-    sendStatus?: SendStatusType;
-
-    /**
-     * 撤回时间，"0" 是没有撤回
-     */
-    recallTime: string;
-
-    records: RawMessage[];
-
-    elements: MessageElement[];
-
-    sourceType: MsgSourceType;
-
-    isOnlineMsg: boolean;
+    parentMsgPeer: Peer; // 父消息的Peer
+    parentMsgIdList: string[];// 父消息 ID 列表
+    id?: number;// 扩展字段，与 Ob11 msg ID 有关
+    guildId: string;// 频道ID
+    msgRandom: string;// 消息ID相关
+    msgId: string;// 雪花ID
+    msgTime: string;// 消息时间戳
+    msgSeq: string;// 消息序列号
+    msgType: NTMsgType;// 消息类型
+    subMsgType: number;// 子消息类型
+    senderUid: string;// 发送者 UID
+    senderUin: string;// 发送者 QQ 号
+    peerUid: string;// 群号 / 用户 UID
+    peerUin: string;// 群号 / 用户 QQ 号
+    remark?: string;// 备注
+    peerName: string;// Peer名称
+    sendNickName: string;// 发送者昵称
+    sendRemarkName: string;// 发送者好友备注
+    sendMemberName?: string;// 发送者群名片（如果是群消息）
+    chatType: ChatType;// 会话类型
+    sendStatus?: SendStatusType;// 消息状态
+    recallTime: string;// 撤回时间，"0" 是没有撤回
+    records: RawMessage[];// 消息记录
+    elements: MessageElement[];// 消息元素
+    sourceType: MsgSourceType;// 消息来源类型
+    isOnlineMsg: boolean;// 是否为在线消息
 }
 export interface QueryMsgsParams {
     chatInfo: Peer;
