@@ -1,4 +1,4 @@
-import { InstanceContext, NapCatCore } from '..';
+import { InstanceContext, NapCatCore } from '@/core';
 
 export class NTQQCollectionApi {
     context: InstanceContext;
