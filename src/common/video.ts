@@ -55,7 +55,7 @@ export async function getVideoInfo(filePath: string, logger: LogWrapper): Promis
 
         logger.log(`视频尺寸: ${videoStream.width}x${videoStream.height}`);
         if (!videoStream.width || !metadata.format.format_name || !videoStream.height) {
-            throw new Error('获取基础信息失败')
+            throw new Error('获取基础信息失败');
         }
         return {
             width: videoStream.width,

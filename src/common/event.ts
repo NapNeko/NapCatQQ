@@ -234,7 +234,7 @@ export class NTEventWrapper {
                 this.EventTask.get(ListenerMainName)?.get(ListenerSubName)?.set(id, eventCallback);
                 this.createListenerFunction(ListenerMainName);
 
-                let eventResult = this.createEventFunction(serviceAndMethod)!(...(args));
+                const eventResult = this.createEventFunction(serviceAndMethod)!(...(args));
 
                 const eventRetHandle = (eventData: any) => {
                     retEvent = eventData;
@@ -252,7 +252,7 @@ export class NTEventWrapper {
                             ),
                         );
                     }
-                }
+                };
                 if (eventResult instanceof Promise) {
                     eventResult.then((eventResult: any) => {
                         eventRetHandle(eventResult);
