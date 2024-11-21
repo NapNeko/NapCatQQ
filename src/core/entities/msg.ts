@@ -104,7 +104,7 @@ export enum NTMsgType {
  * 图片类型枚举
  */
 export enum PicType {
-    NEWPIC_APNG = 2001, 
+    NEWPIC_APNG = 2001,
     NEWPIC_BMP = 1005,
     NEWPIC_GIF = 2000,
     NEWPIC_JPEG = 1000,
@@ -117,9 +117,14 @@ export enum PicType {
  * 图片子类型枚举
  */
 export enum PicSubType {
-    Normal = 0, // 普通图片
-    Face = 1  // 表情包小图
-    //...待补全 其余见NT Android
+    KNORMAL = 0,
+    KCUSTOM = 1,
+    KHOT = 2,
+    KDIPPERCHART = 3,
+    KSMART = 4,
+    KSPACE = 5,
+    KUNKNOW = 6,
+    KRELATED = 7
 }
 /**
  * 消息@类型枚举

@@ -5,6 +5,7 @@ import {
     IMAGE_HTTP_HOST_NT,
     Peer,
     PicElement,
+    PicSubType,
     PicType,
     RawMessage,
     SendFileElement,
@@ -111,7 +112,7 @@ export class NTQQFileApi {
         };
     }
 
-    async createValidSendPicElement(context: MessageContext, picPath: string, summary: string = '', subType: 0 | 1 = 0): Promise<SendPicElement> {
+    async createValidSendPicElement(context: MessageContext, picPath: string, summary: string = '', subType: PicSubType = 0): Promise<SendPicElement> {
         const { md5, fileName, path, fileSize } = await this.core.apis.FileApi.uploadFile(picPath, ElementType.PIC, subType);
         if (fileSize === 0) {
             throw new Error('文件异常，大小为0');
