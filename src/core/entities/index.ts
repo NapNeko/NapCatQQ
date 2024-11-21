@@ -7,3 +7,4 @@ export * from './system';
 export * from './webapi';
 export * from './sign';
 export * from './element';
+export * from './constant';

@@ -1,14 +1,18 @@
 import { GroupMemberRole } from '@/core';
 import { ActionBarElement, ArkElement, AvRecordElement, CalendarElement, FaceBubbleElement, FaceElement, FileElement, GiphyElement, GrayTipElement, MarketFaceElement, PicElement, PttElement, RecommendedMsgElement, ReplyElement, ShareLocationElement, StructLongMsgElement, TaskTopMsgElement, TextElement, TofuRecordElement, VideoElement, YoloGameResultElement } from './element';
 
-// 表示对等方的信息
+/**
+ * 表示对等方的信息
+ */
 export interface Peer {
     chatType: ChatType; // 聊天类型
     peerUid: string;    // 对等方的唯一标识符
     guildId?: string;   // 可选的频道ID
 }
 
-// 表示被踢下线的信息
+/**
+ * 表示被踢下线的信息
+ */
 export interface KickedOffLineInfo {
     appId: number;              // 应用ID
     instanceId: number;         // 实例ID
@@ -19,6 +23,9 @@ export interface KickedOffLineInfo {
     securityKickedType: number; // 安全踢出类型
 }
 
+/**
+ * 获取文件列表的参数
+ */
 export interface GetFileListParam {
     sortType: number;
     fileCount: number;
@@ -28,6 +35,9 @@ export interface GetFileListParam {
     folderId?: string;
 }
 
+/**
+ * 消息元素类型枚举
+ */
 export enum ElementType {
     UNKNOWN = 0,
     TEXT = 1,
@@ -63,6 +73,9 @@ export enum ElementType {
     ACTIONBAR = 44
 }
 
+/**
+ * 消息类型枚举
+ */
 export enum NTMsgType {
     KMSGTYPEARKSTRUCT = 11,
     KMSGTYPEFACEBUBBLE = 24,
@@ -87,17 +100,26 @@ export enum NTMsgType {
     KMSGTYPEWALLET = 10
 }
 
+/**
+ * 图片类型枚举
+ */
 export enum PicType {
-    gif = 2000,
-    jpg = 1000
+    GIF = 2000,
+    JGP = 1000
 }
 
+/**
+ * 图片子类型枚举
+ */
 export enum PicSubType {
     Normal = 0, // 普通图片
     Face = 1  // 表情包小图
     //...待补全 其余见NT Android
 }
 
+/**
+ * 消息@类型枚举
+ */
 export enum NTMsgAtType {
     ATTYPEALL = 1,
     ATTYPECATEGORY = 512,
@@ -112,6 +134,9 @@ export enum NTMsgAtType {
     ATTYPEUNKNOWN = 0
 }
 
+/**
+ * 消息元素接口
+ */
 export interface MessageElement {
     elementType: ElementType,
     elementId: string,
@@ -146,6 +171,9 @@ export interface MessageElement {
     actionBarElement?: ActionBarElement
 }
 
+/**
+ * 消息来源类型枚举
+ */
 export enum MsgSourceType {
     K_DOWN_SOURCETYPE_AIOINNER = 1,
     K_DOWN_SOURCETYPE_BIGSCREEN = 2,
@@ -153,7 +181,9 @@ export enum MsgSourceType {
     K_DOWN_SOURCETYPE_UNKNOWN = 0
 }
 
-// 来自Android分析
+/**
+ * 聊天类型枚举
+ */
 export enum ChatType {
     KCHATTYPEADELIE = 42,
     KCHATTYPEBUDDYNOTIFY = 5,
@@ -197,9 +227,9 @@ export enum ChatType {
     KCHATTYPEWEIYUN = 40,
 }
 
-export const IMAGE_HTTP_HOST = 'https://gchat.qpic.cn';
-export const IMAGE_HTTP_HOST_NT = 'https://multimedia.nt.qq.com.cn';
-
+/**
+ * 灰色提示元素子类型枚举
+ */
 export enum NTGrayTipElementSubTypeV2 {
     GRAYTIP_ELEMENT_SUBTYPE_AIOOP = 15,
     GRAYTIP_ELEMENT_SUBTYPE_BLOCK = 14,
@@ -221,20 +251,28 @@ export enum NTGrayTipElementSubTypeV2 {
     GRAYTIP_ELEMENT_SUBTYPE_XMLMSG = 12,
 }
 
-
+/**
+ * 表情类型枚举
+ */
 export enum FaceType {
     normal = 1, // 小黄脸
-    normal2 = 2, // 新小黄脸, 从faceIndex 222开始？
+    normal2 = 2, // 新小黄脸
     dice = 3,  // 骰子
     poke = 5  // 拍一拍
 }
 
+/**
+ * 表情索引枚举
+ */
 export enum FaceIndex {
     dice = 358,
-    rps = 359 
+    rps = 359
 }
 
-export enum viedo_type {
+/**
+ * 视频类型枚举
+ */
+export enum NTVideoType {
     VIDEO_FORMAT_AFS = 7,
     VIDEO_FORMAT_AVI = 1,
     VIDEO_FORMAT_MKV = 4,
@@ -248,10 +286,16 @@ export enum viedo_type {
     VIDEO_FORMAT_WMV = 3,
 }
 
+/**
+ * Markdown元素接口
+ */
 export interface MarkdownElement {
     content: string;
 }
 
+/**
+ * 内联键盘按钮接口
+ */
 export interface InlineKeyboardElementRowButton {
     id: string;
     label: string;
@@ -271,6 +315,9 @@ export interface InlineKeyboardElementRowButton {
     subscribeDataTemplateIds: [];
 }
 
+/**
+ * 内联键盘元素接口
+ */
 export interface InlineKeyboardElement {
     rows: [{
         buttons: InlineKeyboardElementRowButton[]
@@ -278,31 +325,29 @@ export interface InlineKeyboardElement {
     botAppid: string;
 }
 
-export interface TipAioOpGrayTipElement {  // 这是什么提示来着？
+/**
+ * Aio操作灰色提示元素接口
+ */
+export interface TipAioOpGrayTipElement {
     operateType: number;
     peerUid: string;
     fromGrpCodeOfTmpChat: string;
 }
 
+/**
+ * 群提示元素类型枚举
+ */
 export enum TipGroupElementType {
     memberIncrease = 1,
     kicked = 3, // 被移出群
     ban = 8
 }
 
-// public final class MemberAddShowType {
-//   public static final int KOTHERADD = 0;
-//   public static final int KOTHERADDBYOTHERQRCODE = 2;
-//   public static final int KOTHERADDBYYOURQRCODE = 3;
-//   public static final int KOTHERINVITEOTHER = 5;
-//   public static final int KOTHERINVITEYOU = 6;
-//   public static final int KYOUADD = 1;
-//   public static final int KYOUADDBYOTHERQRCODE = 4;
-//   public static final int KYOUALREADYMEMBER = 8;
-//   public static final int KYOUINVITEOTHER = 7;
-// }
+/**
+ * 群提示元素接口
+ */
 export interface TipGroupElement {
-    type: TipGroupElementType;  // 1是表示有人加入群; 自己加入群也会收到这个
+    type: TipGroupElementType;  // 1表示有人加入群; 自己加入群也会收到这个
     role: 0;  // 暂时不知
     groupName: string;  // 暂时获取不到
     memberUid: string;
@@ -340,12 +385,18 @@ export interface TipGroupElement {
     };
 }
 
+/**
+ * 多条转发消息元素接口
+ */
 export interface MultiForwardMsgElement {
     xmlContent: string;  // xml格式的消息内容
     resId: string;
     fileName: string;
 }
 
+/**
+ * 发送状态类型枚举
+ */
 export enum SendStatusType {
     KSEND_STATUS_FAILED = 0,
     KSEND_STATUS_SENDING = 1,
@@ -353,7 +404,9 @@ export enum SendStatusType {
     KSEND_STATUS_SUCCESS_NOSEQ = 3
 }
 
-// 原始消息
+/**
+ * 原始消息接口
+ */
 export interface RawMessage {
     parentMsgPeer: Peer; // 父消息的Peer
     parentMsgIdList: string[];// 父消息 ID 列表
@@ -382,6 +435,10 @@ export interface RawMessage {
     sourceType: MsgSourceType;// 消息来源类型
     isOnlineMsg: boolean;// 是否为在线消息
 }
+
+/**
+ * 查询消息参数接口
+ */
 export interface QueryMsgsParams {
     chatInfo: Peer;
     filterMsgType: [];
@@ -393,12 +450,18 @@ export interface QueryMsgsParams {
     isIncludeCurrent: boolean;
 }
 
+/**
+ * 临时聊天信息API接口
+ */
 export interface TmpChatInfoApi {
     errMsg: string;
     result: number;
     tmpChatInfo?: TmpChatInfo;
 }
 
+/**
+ * 临时聊天信息接口
+ */
 export interface TmpChatInfo {
     chatType: number;
     fromNick: string;
@@ -407,6 +470,10 @@ export interface TmpChatInfo {
     sessionType: number;
     sig: string;
 }
+
+/**
+ * 消息请求类型接口
+ */
 export interface MsgReqType {
     peer: Peer,
     byType: number,
@@ -420,5 +487,3 @@ export interface MsgReqType {
     includeDeleteMsg: boolean,
     extraCnt: number
 }
-//getMsgsIncludeSelf Peer必须 byType 1
-//getMsgsWithMsgTimeAndClientSeqForC2C Peer必须 byType 3
