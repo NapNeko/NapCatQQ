@@ -135,7 +135,7 @@ export interface GroupMember {
     uid: string;
     uin: string;
     isRobot: boolean;
-    sex?: Sex;
+    sex?: NTSex;
     age?: number;
     qqLevel?: QQLevel;
     isChangeRole: boolean;
