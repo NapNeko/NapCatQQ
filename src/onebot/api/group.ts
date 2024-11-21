@@ -50,13 +50,13 @@ export class OneBotGroupApi {
         for (const element of msg.elements) {
             if (element.grayTipElement?.groupElement) {
                 const groupElement = element.grayTipElement.groupElement;
-                if (groupElement.type == TipGroupElementType.memberIncrease) {
+                if (groupElement.type == TipGroupElementType.KMEMBERADD) {
                     const MemberIncreaseEvent = await this.obContext.apis.GroupApi.parseGroupMemberIncreaseEvent(msg.peerUid, element.grayTipElement);
                     if (MemberIncreaseEvent) return MemberIncreaseEvent;
-                } else if (groupElement.type === TipGroupElementType.ban) {
+                } else if (groupElement.type === TipGroupElementType.KSHUTUP) {
                     const BanEvent = await this.obContext.apis.GroupApi.parseGroupBanEvent(msg.peerUid, element.grayTipElement);
                     if (BanEvent) return BanEvent;
-                } else if (groupElement.type == TipGroupElementType.kicked) {
+                } else if (groupElement.type == TipGroupElementType.KQUITTE) {
                     this.core.apis.GroupApi.quitGroup(msg.peerUid).then();
                     try {
                         const KickEvent = await this.obContext.apis.GroupApi.parseGroupKickEvent(msg.peerUid, element.grayTipElement);
