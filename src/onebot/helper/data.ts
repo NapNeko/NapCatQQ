@@ -1,5 +1,5 @@
 import { calcQQLevel, FileNapCatOneBotUUID } from '@/common/helper';
-import { FriendV2, Group, GroupFileInfoUpdateParamType, GroupMember, SelfInfo, Sex } from '@/core';
+import { FriendV2, Group, GroupFileInfoUpdateParamType, GroupMember, SelfInfo, NTSex } from '@/core';
 import {
     OB11Group,
     OB11GroupFile,
@@ -37,12 +37,13 @@ export class OB11Construct {
         }[role];
     }
 
-    static sex(sex?: Sex): OB11UserSex {
+    static sex(sex?: NTSex): OB11UserSex {
         if (!sex) return OB11UserSex.unknown;
         return {
-            [Sex.male]: OB11UserSex.male,
-            [Sex.female]: OB11UserSex.female,
-            [Sex.unknown]: OB11UserSex.unknown,
+            [NTSex.GENDER_MALE]: OB11UserSex.male,
+            [NTSex.GENDER_FEMALE]: OB11UserSex.female,
+            [NTSex.GENDER_UNKOWN]: OB11UserSex.unknown,
+            [NTSex.GENDER_PRIVACY]: OB11UserSex.unknown,
         }[sex] || OB11UserSex.unknown;
     }
 
