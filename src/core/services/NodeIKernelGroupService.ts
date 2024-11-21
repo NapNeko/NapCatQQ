@@ -4,7 +4,7 @@ import {
     GroupExtParam,
     GroupInfoSource,
     GroupMember,
-    GroupMemberRole,
+    NTGroupMemberRole,
     GroupNotifyMsgType,
     GroupRequestOperateTypes,
     KickMemberV2Req,
@@ -137,7 +137,7 @@ export interface NodeIKernelGroupService {
 
     kickMember(groupCode: string, memberUids: string[], refuseForever: boolean, kickReason: string): Promise<void>;
 
-    modifyMemberRole(groupCode: string, uid: string, role: GroupMemberRole): void;
+    modifyMemberRole(groupCode: string, uid: string, role: NTGroupMemberRole): void;
 
     modifyMemberCardName(groupCode: string, uid: string, cardName: string): void;
 
