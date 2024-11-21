@@ -1,4 +1,4 @@
-import { ActionName } from '../types';
+import { ActionName } from '@/onebot/action/router';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
 import { uri2local } from "@/common/file";

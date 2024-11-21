@@ -1,4 +1,4 @@
-import { ActionName } from '../types';
+import { ActionName } from '@/onebot/action/router';
 import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
 
 

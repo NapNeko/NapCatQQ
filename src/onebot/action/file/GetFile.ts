@@ -1,7 +1,7 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import fs from 'fs/promises';
 import { FileNapCatOneBotUUID } from '@/common/helper';
-import { ActionName } from '../types';
+import { ActionName } from '@/onebot/action/router';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { OB11MessageImage, OB11MessageVideo } from '@/onebot/types';
 

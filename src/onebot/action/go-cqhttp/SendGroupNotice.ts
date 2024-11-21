@@ -1,6 +1,6 @@
 import { checkFileReceived, uri2local } from '@/common/file';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
-import { ActionName } from '../types';
+import { ActionName } from '@/onebot/action/router';
 import { unlink } from 'node:fs';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 

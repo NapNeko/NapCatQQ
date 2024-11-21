@@ -1,5 +1,5 @@
 import { GetPacketStatusDepends } from '../packet/GetPacketStatus';
-import { ActionName } from '../types';
+import { ActionName } from '@/onebot/action/router';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
 const SchemaData = {

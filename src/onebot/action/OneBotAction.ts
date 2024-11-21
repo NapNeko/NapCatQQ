@@ -1,4 +1,4 @@
-import { ActionName, BaseCheckResult } from './types';
+import { ActionName, BaseCheckResult } from './router';
 import Ajv, { ErrorObject, ValidateFunction } from 'ajv';
 import { NapCatCore } from '@/core';
 import { isNull } from '@/common/helper';

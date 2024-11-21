@@ -1,6 +1,6 @@
 import { GroupNotifyMsgStatus } from '@/core';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
-import { ActionName } from '../types';
+import { ActionName } from '@/onebot/action/router';
 
 interface OB11GroupRequestNotify {
     group_id: number,

@@ -1,7 +1,7 @@
 import { OB11Group } from '@/onebot';
 import { OB11Entities } from '@/onebot/entities';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
-import { ActionName } from '../types';
+import { ActionName } from '@/onebot/action/router';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
 const SchemaData = {

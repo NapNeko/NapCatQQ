@@ -1,6 +1,6 @@
 import SendMsg, { normalize } from '../msg/SendMsg';
 import { OB11PostSendMsg } from '../../types';
-import { ActionName } from '../types';
+import { ActionName } from '@/onebot/action/router';
 
 // 未验证
 export class GoCQHTTPSendForwardMsg extends SendMsg {

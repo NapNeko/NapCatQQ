@@ -1,5 +1,5 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
-import { ActionName } from '../types';
+import { ActionName } from '@/onebot/action/router';
 
 export class GetRobotUinRange extends OneBotAction<void, Array<any>> {
     actionName = ActionName.GetRobotUinRange;

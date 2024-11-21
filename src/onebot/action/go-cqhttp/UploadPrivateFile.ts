@@ -1,5 +1,5 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
-import { ActionName } from '../types';
+import { ActionName } from '@/onebot/action/router';
 import { ChatType, Peer, SendFileElement } from '@/core/entities';
 import fs from 'fs';
 import { uri2local } from '@/common/file';

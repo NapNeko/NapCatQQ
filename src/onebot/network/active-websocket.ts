@@ -2,7 +2,7 @@ import { IOB11NetworkAdapter, OB11EmitEventContent, OB11NetworkReloadType } from
 import { WebSocket } from 'ws';
 import { OB11HeartbeatEvent } from '../event/meta/OB11HeartbeatEvent';
 import { NapCatCore } from '@/core';
-import { ActionName } from '@/onebot/action/types';
+import { ActionName } from '@/onebot/action/router';
 import { OB11Response } from '@/onebot/action/OneBotAction';
 import { LogWrapper } from '@/common/log';
 import { ActionMap } from '@/onebot/action';

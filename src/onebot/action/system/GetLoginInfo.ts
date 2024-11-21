@@ -1,7 +1,7 @@
 import { OB11User } from '@/onebot';
 import { OB11Entities } from '@/onebot/entities';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
-import { ActionName } from '../types';
+import { ActionName } from '@/onebot/action/router';
 
 class GetLoginInfo extends OneBotAction<null, OB11User> {
     actionName = ActionName.GetLoginInfo;

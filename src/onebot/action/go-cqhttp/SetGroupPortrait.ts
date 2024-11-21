@@ -1,5 +1,5 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
-import { ActionName, BaseCheckResult } from '../types';
+import { ActionName, BaseCheckResult } from '../router';
 import * as fs from 'node:fs';
 import { checkFileReceived, uri2local } from '@/common/file';
 
