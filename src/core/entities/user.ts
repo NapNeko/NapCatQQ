@@ -1,16 +1,19 @@
+// 性别枚举
 export enum Sex {
     male = 1,
     female = 2,
     unknown = 255,
 }
 
+// 好友分类类型
 export interface BuddyCategoryType {
     categoryId: number;
-    categroyName: string;
-    categroyMbCount: number;
+    categoryName: string;
+    categoryMbCount: number;
     buddyList: User[];
 }
 
+// 核心信息
 export interface CoreInfo {
     uid: string;
     uin: string;
@@ -18,35 +21,40 @@ export interface CoreInfo {
     remark: string;
 }
 
+// 基本信息
 export interface BaseInfo {
     qid: string;
     longNick: string;
-    birthday_year: number;
-    birthday_month: number;
-    birthday_day: number;
+    birthdayYear: number;
+    birthdayMonth: number;
+    birthdayDay: number;
     age: number;
     sex: number;
-    eMail: string;
+    email: string;
     phoneNum: string;
     categoryId: number;
     richTime: number;
     richBuffer: string;
 }
 
+// 音乐信息
 interface MusicInfo {
     buf: string;
 }
 
+// 视频业务信息
 interface VideoBizInfo {
     cid: string;
     tvUrl: string;
     synchType: string;
 }
 
+// 视频信息
 interface VideoInfo {
     name: string;
 }
 
+// 扩展在线业务信息
 interface ExtOnlineBusinessInfo {
     buf: string;
     customStatus: any;
@@ -54,10 +62,12 @@ interface ExtOnlineBusinessInfo {
     videoInfo: VideoInfo;
 }
 
+// 扩展缓冲区
 interface ExtBuffer {
     buf: string;
 }
 
+// 用户状态
 interface UserStatus {
     uid: string;
     uin: string;
@@ -79,12 +89,14 @@ interface UserStatus {
     extBuffer: ExtBuffer;
 }
 
+// 特权图标
 interface PrivilegeIcon {
     jumpUrl: string;
     openIconList: any[];
     closeIconList: any[];
 }
 
+// 增值服务信息
 interface VasInfo {
     vipFlag: boolean;
     yearVipFlag: boolean;
@@ -117,6 +129,7 @@ interface VasInfo {
     privilegeIcon: PrivilegeIcon;
 }
 
+// 关系标志
 interface RelationFlags {
     topTime: string;
     isBlock: boolean;
@@ -134,7 +147,7 @@ interface RelationFlags {
     isHidePrivilegeIcon: number;
 }
 
-
+// 通用扩展信息
 interface CommonExt {
     constellation: number;
     shengXiao: number;
@@ -153,20 +166,26 @@ interface CommonExt {
     labels: any[];
     qqLevel: QQLevel;
 }
+
+// 好友列表请求类型枚举
 export enum BuddyListReqType {
     KNOMAL,
     KLETTER
 }
+
+// 图片信息
 interface Pic {
     picId: string;
     picTime: number;
     picUrlMap: Record<string, string>;
 }
 
+// 照片墙
 interface PhotoWall {
     picList: Pic[];
 }
 
+// 简单信息
 export interface SimpleInfo {
     uid?: string;
     uin?: string;
@@ -179,8 +198,10 @@ export interface SimpleInfo {
     intimate: any;
 }
 
+// 好友类型
 export type FriendV2 = SimpleInfo;
 
+// 自身状态信息
 export interface SelfStatusInfo {
     uid: string;
     status: number;
@@ -192,6 +213,7 @@ export interface SelfStatusInfo {
     setTime: string;
 }
 
+// 用户详细信息监听参数
 export interface UserDetailInfoListenerArg {
     uid: string;
     uin: string;
@@ -200,14 +222,16 @@ export interface UserDetailInfoListenerArg {
     photoWall: PhotoWall;
 }
 
+// 修改个人资料参数
 export interface ModifyProfileParams {
-    nick: string,
-    longNick: string,
-    sex: Sex,
-    birthday: { birthday_year: string, birthday_month: string, birthday_day: string },
-    location: any//undefined
+    nick: string;
+    longNick: string;
+    sex: Sex;
+    birthday: { birthdayYear: string, birthdayMonth: string, birthdayDay: string };
+    location: any;
 }
 
+// 好友资料点赞请求
 export interface BuddyProfileLikeReq {
     friendUids: string[];
     basic: number;
@@ -219,6 +243,7 @@ export interface BuddyProfileLikeReq {
     limit?: number;
 }
 
+// QQ等级信息
 export interface QQLevel {
     crownNum: number;
     sunNum: number;
@@ -226,28 +251,29 @@ export interface QQLevel {
     starNum: number;
 }
 
+// 用户信息
 export interface User {
-    uid: string; // 加密的字符串
-    uin: string; // QQ号
+    uid: string;
+    uin: string;
     nick: string;
     avatarUrl?: string;
-    longNick?: string; // 签名
+    longNick?: string;
     remark?: string;
     sex?: Sex;
     age?: number;
     qqLevel?: QQLevel;
     qid?: string;
-    birthday_year?: number;
-    birthday_month?: number;
-    birthday_day?: number;
+    birthdayYear?: number;
+    birthdayMonth?: number;
+    birthdayDay?: number;
     topTime?: string;
     constellation?: number;
     shengXiao?: number;
     kBloodType?: number;
-    homeTown?: string; //"0-0-0";
+    homeTown?: string;
     makeFriendCareer?: number;
     pos?: string;
-    eMail?: string;
+    email?: string;
     phoneNum?: string;
     college?: string;
     country?: string;
@@ -266,10 +292,10 @@ export interface User {
     privilegeIcon?: {
         jumpUrl: string;
         openIconList: unknown[];
-        closeIconList: unknown[]
+        closeIconList: unknown[];
     };
     photoWall?: {
-        picList: unknown[]
+        picList: unknown[];
     };
     vipFlag?: boolean;
     yearVipFlag?: boolean;
@@ -285,34 +311,40 @@ export interface User {
     pendantId?: string;
 }
 
+// 自身信息
 export interface SelfInfo extends User {
     online?: boolean;
 }
+
+// 好友类型
 export type Friend = User;
 
-// 本来是 Friend extends User  现在用不到
-
+// 业务键枚举
 export enum BizKey {
     KPRIVILEGEICON,
     KPHOTOWALL
 }
 
+// 根据UIN获取用户详细信息
 export interface UserDetailInfoByUin {
-    result: number,
-    errMsg: string,
+    result: number;
+    errMsg: string;
     detail: {
-        uid: string,
-        uin: string,
-        simpleInfo: SimpleInfo,
-        commonExt: CommonExt,
-        photoWall: null
-    }
+        uid: string;
+        uin: string;
+        simpleInfo: SimpleInfo;
+        commonExt: CommonExt;
+        photoWall: null;
+    };
 }
+
+// 用户详细信息来源枚举
 export enum UserDetailSource {
     KDB,
     KSERVER
 }
 
+// 个人资料业务类型枚举
 export enum ProfileBizType {
     KALL,
     KBASEEXTEND,
