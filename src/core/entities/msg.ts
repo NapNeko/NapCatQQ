@@ -361,9 +361,17 @@ export interface TipAioOpGrayTipElement {
  * 群提示元素类型枚举
  */
 export enum TipGroupElementType {
-    memberIncrease = 1,
-    kicked = 3, // 被移出群
-    ban = 8
+    KUNKNOWN = 0,
+    KMEMBERADD = 1,
+    KDISBANDED = 2,
+    KQUITTE = 3,
+    KCREATED = 4,
+    KGROUPNAMEMODIFIED = 5,
+    KBLOCK = 6,
+    KUNBLOCK = 7,
+    KSHUTUP = 8,
+    KBERECYCLED = 9,
+    KDISBANDORBERECYCLED = 10
 }
 
 /**
@@ -380,11 +388,12 @@ export enum MemberAddShowType {
     K_YOU_ALREADY_MEMBER = 8,
     K_YOU_INVITE_OTHER = 7,
 }
+
 /**
  * 群提示元素接口
  */
 export interface TipGroupElement {
-    type: TipGroupElementType;  // 1表示有人加入群; 自己加入群也会收到这个
+    type: TipGroupElementType;
     role: 0;
     groupName: string;
     memberUid: string;
