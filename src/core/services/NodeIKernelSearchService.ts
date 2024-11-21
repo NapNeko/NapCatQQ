@@ -1,4 +1,4 @@
-import { ChatType } from '../types';
+import { ChatType } from '@/core/types';
 import { GeneralCallResult } from './common';
 
 export interface NodeIKernelSearchService {

@@ -1,4 +1,4 @@
-import { MessageElement, Peer } from '../types';
+import { MessageElement, Peer } from '@/core/types';
 
 export interface NodeIkernelTestPerformanceService {
 
