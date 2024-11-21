@@ -24,7 +24,7 @@ export class NTQQFriendApi {
         );
     }
 
-    async getBuddyV2(refresh = false): Promise<FriendV2[]> {
+    async getBuddy(refresh = false): Promise<FriendV2[]> {
         return Array.from((await this.getBuddyV2SimpleInfoMap(refresh)).values());
     }
 
@@ -58,7 +58,7 @@ export class NTQQFriendApi {
             categoryName: category.categroyName,
             categoryMbCount: category.categroyMbCount,
             onlineCount: category.onlineCount,
-            buddyList: category.buddyUids.map(uid => data.get(uid)!).filter(value => value),
+            buddyList: category.buddyUids.map(uid => data.get(uid)).filter(value => !!value),
         }));
     }
 

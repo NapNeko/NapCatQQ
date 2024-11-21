@@ -1,5 +1,5 @@
 import { OB11Group } from '@/onebot';
-import { OB11Entities } from '@/onebot/entities';
+import { OB11Construct } from '@/onebot/helper/data';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
@@ -31,7 +31,7 @@ class GetGroupInfo extends OneBotAction<Payload, OB11Group> {
                 max_member_count: data.searchGroupInfo.maxMemberNum,
             };
         }
-        return OB11Entities.group(group);
+        return OB11Construct.group(group);
     }
 }
 

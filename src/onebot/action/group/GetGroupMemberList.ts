@@ -1,5 +1,5 @@
 import { OB11GroupMember } from '@/onebot';
-import { OB11Entities } from '@/onebot/entities';
+import { OB11Construct } from '@/onebot/helper/data';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
@@ -30,7 +30,7 @@ export class GetGroupMemberList extends OneBotAction<Payload, OB11GroupMember[]>
             groupMembers = memberCache.get(groupIdStr) ?? await this.core.apis.GroupApi.getGroupMembersV2(groupIdStr);
         }
         const memberPromises = Array.from(groupMembers.values()).map(item =>
-            OB11Entities.groupMember(groupIdStr, item)
+            OB11Construct.groupMember(groupIdStr, item)
         );
         const _groupMembers = await Promise.all(memberPromises);
         const MemberMap = new Map(_groupMembers.map(member => [member.user_id, member]));

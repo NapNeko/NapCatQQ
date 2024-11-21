@@ -1,5 +1,5 @@
 import { OB11GroupMember } from '@/onebot';
-import { OB11Entities } from '@/onebot/entities';
+import { OB11Construct } from '@/onebot/helper/data';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
@@ -43,7 +43,7 @@ class GetGroupMemberInfo extends OneBotAction<Payload, OB11GroupMember> {
         } else {
             this.core.context.logger.logDebug(`获取群成员详细信息失败, 只能返回基础信息`);
         }
-        return OB11Entities.groupMember(payload.group_id.toString(), member);
+        return OB11Construct.groupMember(payload.group_id.toString(), member);
     }
 }
 

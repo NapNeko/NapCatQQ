@@ -19,9 +19,9 @@ import {
 } from '@/core';
 import faceConfig from '@/core/external/face_config.json';
 import { NapCatOneBot11Adapter, OB11Message, OB11MessageData, OB11MessageDataType, OB11MessageFileBase, } from '@/onebot';
-import { OB11Entities } from '@/onebot/entities';
+import { OB11Construct } from '@/onebot/helper/data';
 import { EventType } from '@/onebot/event/OneBotEvent';
-import { encodeCQCode } from '@/onebot/cqcode';
+import { encodeCQCode } from '@/onebot/helper/cqcode';
 import { uri2local } from '@/common/file';
 import { RequestUtil } from '@/common/request';
 import fs from 'node:fs';
@@ -736,7 +736,7 @@ export class OneBotMsgApi {
             let member = await this.core.apis.GroupApi.getGroupMember(msg.peerUin, msg.senderUin);
             if (!member) member = await this.core.apis.GroupApi.getGroupMember(msg.peerUin, msg.senderUin);
             if (member) {
-                resMsg.sender.role = OB11Entities.groupMemberRole(member.role);
+                resMsg.sender.role = OB11Construct.groupMemberRole(member.role);
                 resMsg.sender.nickname = member.nick;
             }
         } else if (msg.chatType == ChatType.KCHATTYPEC2C) {
