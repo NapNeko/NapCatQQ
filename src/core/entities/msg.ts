@@ -271,6 +271,20 @@ export enum FaceType {
 }
 
 /**
+ * Poke 类型枚举
+ */
+export enum PokeType {
+    POKE_TYPE_APPROVE = 3,
+    POKE_TYPE_GIVING_HEART = 2,
+    POKE_TYPE_GREAT_MOVE = 6,
+    POKE_TYPE_HEART_BREAK = 4,
+    POKE_TYPE_HI_TOGETHER = 5,
+    POKE_TYPE_POKE = 1,
+    POKE_TYPE_POKE_OLD = 0,
+    POKE_TYPE_VAS_POKE = 126,
+}
+
+/**
  * 表情索引枚举
  */
 export enum FaceIndex {
@@ -353,12 +367,26 @@ export enum TipGroupElementType {
 }
 
 /**
+ * 群加入ShowType
+ */
+export enum MemberAddShowType {
+    K_OTHER_ADD = 0,
+    K_OTHER_ADD_BY_OTHER_QRCODE = 2,
+    K_OTHER_ADD_BY_YOUR_QRCODE = 3,
+    K_OTHER_INVITE_OTHER = 5,
+    K_OTHER_INVITE_YOU = 6,
+    K_YOU_ADD = 1,
+    K_YOU_ADD_BY_OTHER_QRCODE = 4,
+    K_YOU_ALREADY_MEMBER = 8,
+    K_YOU_INVITE_OTHER = 7,
+}
+/**
  * 群提示元素接口
  */
 export interface TipGroupElement {
     type: TipGroupElementType;  // 1表示有人加入群; 自己加入群也会收到这个
-    role: 0;  // 暂时不知
-    groupName: string;  // 暂时获取不到
+    role: 0;
+    groupName: string;
     memberUid: string;
     memberNick: string;
     memberRemark: string;
@@ -367,7 +395,7 @@ export interface TipGroupElement {
     adminRemark: string;
     createGroup: null;
     memberAdd?: {
-        showType: 1;
+        showType: MemberAddShowType;
         otherAdd: null;
         otherAddByOtherQRCode: null;
         otherAddByYourQRCode: null;
