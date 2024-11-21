@@ -290,5 +290,5 @@ function replyElementToText(replyElement: any, msg: RawMessage, recursiveLevel: 
         ?
         rawMessageToText(recordMsgOrNull, recursiveLevel + 1) :
         `未找到消息记录 (MsgId = ${replyElement.sourceMsgIdInRecords})`
-        }]`;
+    }]`;
 }
