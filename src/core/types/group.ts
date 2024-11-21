@@ -63,16 +63,16 @@ export interface KickMemberV2Req {
 
 // 数据来源类型
 export enum DataSource {
-    LOCAL,
-    REMOTE
+    LOCAL = 0,
+    REMOTE = 1
 }
 
 // 群列表更新类型
 export enum GroupListUpdateType {
-    REFRESHALL,
-    GETALL,
-    MODIFIED,
-    REMOVE
+    REFRESHALL = 0,
+    GETALL = 1,
+    MODIFIED = 2,
+    REMOVE = 3
 }
 
 export interface GroupMemberCache {

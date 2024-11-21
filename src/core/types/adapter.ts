@@ -1,11 +1,11 @@
 export enum MsfStatusType {
-    KUNKNOWN,
-    KDISCONNECTED,
-    KCONNECTED
+    KUNKNOWN = 0,
+    KDISCONNECTED = 1,
+    KCONNECTED = 2
 }
 export enum MsfChangeReasonType {
-    KUNKNOWN,
-    KUSERLOGININ,
-    KUSERLOGINOUT,
-    KAUTO
+    KUNKNOWN = 0,
+    KUSERLOGININ = 1,
+    KUSERLOGINOUT = 2,
+    KAUTO = 3
 }
