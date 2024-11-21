@@ -1,4 +1,4 @@
-import { GroupMemberRole } from '@/core';
+import { NTGroupMemberRole } from '@/core';
 import { ActionBarElement, ArkElement, AvRecordElement, CalendarElement, FaceBubbleElement, FaceElement, FileElement, GiphyElement, GrayTipElement, MarketFaceElement, PicElement, PttElement, RecommendedMsgElement, ReplyElement, ShareLocationElement, StructLongMsgElement, TaskTopMsgElement, TextElement, TofuRecordElement, VideoElement, YoloGameResultElement } from './element';
 
 /**
@@ -420,13 +420,13 @@ export interface TipGroupElement {
             uid: string;
             card: string;
             name: string;
-            role: GroupMemberRole
+            role: NTGroupMemberRole
         };
         member: {
             uid: string
             card: string;
             name: string;
-            role: GroupMemberRole
+            role: NTGroupMemberRole
         }
     };
 }

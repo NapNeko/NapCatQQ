@@ -135,7 +135,7 @@ export interface FriendRequest {
     isDecide: boolean;
     friendUid: string;
     reqType: BuddyReqType,
-    reqTime: string;  // 时间戳;秒
+    reqTime: string;  // 时间戳 秒
     extWords: string;  // 申请人填写的验证消息
     isUnread: boolean;
     friendNick: string;

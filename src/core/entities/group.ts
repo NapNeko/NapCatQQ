@@ -113,14 +113,13 @@ export interface Group {
         memberUid: string;
     };
 }
-
-// 群成员角色类型
-export enum GroupMemberRole {
-    normal = 2,
-    admin = 3,
-    owner = 4
+export enum NTGroupMemberRole {
+    KUNSPECIFIED = 0,
+    KSTRANGER = 1,
+    KMEMBER = 2,
+    KADMIN = 3,
+    KOWNER = 4
 }
-
 export interface GroupMember {
     memberRealLevel: number | undefined;
     memberSpecialTitle?: string;
@@ -131,7 +130,7 @@ export interface GroupMember {
     nick: string;
     qid: string;
     remark: string;
-    role: GroupMemberRole;
+    role: NTGroupMemberRole;
     shutUpTime: number; // 禁言时间(S)
     uid: string;
     uin: string;
