@@ -2,7 +2,7 @@ import { FileNapCatOneBotUUID } from '@/common/helper';
 import { MessageUnique } from '@/common/message-unique';
 import { pathToFileURL } from 'node:url';
 import {
-    AtType,
+    NTMsgAtType,
     ChatType,
     CustomMusicSignPostData,
     ElementType,
@@ -61,7 +61,7 @@ export class OneBotMsgApi {
 
     rawToOb11Converters: RawToOb11Converters = {
         textElement: async element => {
-            if (element.atType === AtType.notAt) {
+            if (element.atType === NTMsgAtType.ATTYPEUNKNOWN) {
                 let text = element.content;
                 if (!text.trim()) {
                     return null;
@@ -76,7 +76,7 @@ export class OneBotMsgApi {
                 };
             } else {
                 let qq: string = 'all';
-                if (element.atType !== AtType.atAll) {
+                if (element.atType !== NTMsgAtType.ATTYPEALL) {
                     const { atNtUid /* content */ } = element;
                     let atQQ = element.atUid;
                     if (!atQQ || atQQ === '0') {
@@ -151,9 +151,9 @@ export class OneBotMsgApi {
                         result: element.resultId!,
                     },
                 };
-            } else if (faceIndex === FaceIndex.RPS) {
+            } else if (faceIndex === FaceIndex.rps) {
                 return {
-                    type: OB11MessageDataType.RPS,
+                    type: OB11MessageDataType.rps,
                     data: {
                         result: element.resultId!,
                     },
@@ -400,7 +400,7 @@ export class OneBotMsgApi {
             elementId: '',
             textElement: {
                 content: text,
-                atType: AtType.notAt,
+                atType: NTMsgAtType.ATTYPEUNKNOWN,
                 atUid: '',
                 atTinyId: '',
                 atNtUid: '',
@@ -408,7 +408,7 @@ export class OneBotMsgApi {
         }),
 
         [OB11MessageDataType.at]: async ({ data: { qq: atQQ } }, context) => {
-            function at(atUid: string, atNtUid: string, atType: AtType, atName: string): SendTextElement {
+            function at(atUid: string, atNtUid: string, atType: NTMsgAtType, atName: string): SendTextElement {
                 return {
                     elementType: ElementType.TEXT,
                     elementId: '',
@@ -423,15 +423,15 @@ export class OneBotMsgApi {
             }
 
             if (!context.peer || context.peer.chatType == ChatType.KCHATTYPEC2C) return undefined;
-            if (atQQ === 'all') return at(atQQ, atQQ, AtType.atAll, '全体成员');
+            if (atQQ === 'all') return at(atQQ, atQQ, NTMsgAtType.ATTYPEALL, '全体成员');
             const atMember = await this.core.apis.GroupApi.getGroupMember(context.peer.peerUid, atQQ);
             if (atMember) {
-                return at(atQQ, atMember.uid, AtType.atUser, atMember.nick || atMember.cardName);
+                return at(atQQ, atMember.uid, NTMsgAtType.ATTYPEONE, atMember.nick || atMember.cardName);
             }
             const uid = await this.core.apis.UserApi.getUidByUinV2(`${atQQ}`);
             if (!uid) throw new Error('Get Uid Error');
             const info = await this.core.apis.UserApi.getUserDetailInfo(uid);
-            return at(atQQ, uid, AtType.atUser, info.nick || '');
+            return at(atQQ, uid, NTMsgAtType.ATTYPEONE, info.nick || '');
         },
 
         [OB11MessageDataType.reply]: async ({ data: { id } }) => {
@@ -558,11 +558,11 @@ export class OneBotMsgApi {
             },
         }),
 
-        [OB11MessageDataType.RPS]: async () => ({
+        [OB11MessageDataType.rps]: async () => ({
             elementType: ElementType.FACE,
             elementId: '',
             faceElement: {
-                faceIndex: FaceIndex.RPS,
+                faceIndex: FaceIndex.rps,
                 faceText: '[包剪锤]',
                 faceType: 3,
                 packId: '1',
@@ -640,7 +640,7 @@ export class OneBotMsgApi {
 
         [OB11MessageDataType.poke]: async () => undefined,
 
-        [OB11MessageDataType.Location]: async () => ({
+        [OB11MessageDataType.location]: async () => ({
             elementType: ElementType.SHARELOCATION,
             elementId: '',
             shareLocationElement: {

@@ -2,7 +2,7 @@ import winston, { format, transports } from 'winston';
 import { truncateString } from '@/common/helper';
 import path from 'node:path';
 import fs from 'node:fs';
-import { AtType, ChatType, ElementType, MessageElement, RawMessage, SelfInfo } from '@/core';
+import { NTMsgAtType, ChatType, ElementType, MessageElement, RawMessage, SelfInfo } from '@/core';
 
 export enum LogLevel {
     DEBUG = 'debug',
@@ -270,12 +270,12 @@ function msgElementToText(element: MessageElement, msg: RawMessage, recursiveLev
 }
 
 function textElementToText(textElement: any): string {
-    if (textElement.atType === AtType.notAt) {
+    if (textElement.atType === NTMsgAtType.ATTYPEUNKNOWN) {
         const originalContentLines = textElement.content.split('\n');
         return `${originalContentLines[0]}${originalContentLines.length > 1 ? ' ...' : ''}`;
-    } else if (textElement.atType === AtType.atAll) {
+    } else if (textElement.atType === NTMsgAtType.ATTYPEALL) {
         return `@全体成员`;
-    } else if (textElement.atType === AtType.atUser) {
+    } else if (textElement.atType === NTMsgAtType.ATTYPEONE) {
         return `${textElement.content} (${textElement.atUid})`;
     }
     return '';
@@ -290,5 +290,5 @@ function replyElementToText(replyElement: any, msg: RawMessage, recursiveLevel: 
         ?
         rawMessageToText(recordMsgOrNull, recursiveLevel + 1) :
         `未找到消息记录 (MsgId = ${replyElement.sourceMsgIdInRecords})`
-    }]`;
+        }]`;
 }

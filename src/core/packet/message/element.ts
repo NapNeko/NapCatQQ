@@ -14,7 +14,7 @@ import {
     GroupFileExtra
 } from "@/core/packet/transformer/proto";
 import {
-    AtType,
+    NTMsgAtType,
     PicType,
     SendArkElement,
     SendFaceElement,
@@ -82,7 +82,7 @@ export class PacketMsgAtElement extends PacketMsgTextElement {
     constructor(element: SendTextElement) {
         super(element);
         this.targetUid = element.textElement.atNtUid;
-        this.atAll = element.textElement.atType === AtType.atAll;
+        this.atAll = element.textElement.atType === NTMsgAtType.ATTYPEALL;
     }
 
     buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
