@@ -1,6 +1,6 @@
 import { OB11Entities } from '@/onebot/entities';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
-import { ActionName } from '../types';
+import { ActionName } from '@/onebot/action/router';
 
 export class GetFriendWithCategory extends OneBotAction<void, any> {
     actionName = ActionName.GetFriendsWithCategory;

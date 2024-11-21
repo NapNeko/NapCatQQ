@@ -1,5 +1,5 @@
 import SendMsg, { ContextMode } from './SendMsg';
-import { ActionName, BaseCheckResult } from '../types';
+import { ActionName, BaseCheckResult } from '../router';
 import { OB11PostSendMsg } from '../../types';
 
 // 未检测参数

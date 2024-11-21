@@ -1,5 +1,5 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
-import { ActionName } from '../types';
+import { ActionName } from '@/onebot/action/router';
 
 export class FetchUserProfileLike extends OneBotAction<{ qq: number }, any> {
     actionName = ActionName.FetchUserProfileLike;

@@ -1,5 +1,5 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
-import { ActionName } from '../types';
+import { ActionName } from '@/onebot/action/router';
 import fs from 'fs';
 import { join as joinPath } from 'node:path';
 import { calculateFileMD5, httpDownload } from '@/common/file';

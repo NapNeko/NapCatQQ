@@ -1,6 +1,6 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { OB11Message } from '@/onebot';
-import { ActionName } from '../types';
+import { ActionName } from '@/onebot/action/router';
 import { ChatType, Peer } from '@/core/entities';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/message-unique';

@@ -3,7 +3,7 @@ import urlParse from 'url';
 import { WebSocket, WebSocketServer } from 'ws';
 import { Mutex } from 'async-mutex';
 import { OB11Response } from '@/onebot/action/OneBotAction';
-import { ActionName } from '../action/types';
+import { ActionName } from '../action/router';
 import { NapCatCore } from '@/core';
 import { LogWrapper } from '@/common/log';
 import { OB11HeartbeatEvent } from '../event/meta/OB11HeartbeatEvent';

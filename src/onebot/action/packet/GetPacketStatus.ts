@@ -1,5 +1,5 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
-import { ActionName, BaseCheckResult } from '../types';
+import { ActionName, BaseCheckResult } from '../router';
 
 
 export abstract class GetPacketStatusDepends<PT, RT> extends OneBotAction<PT, RT> {

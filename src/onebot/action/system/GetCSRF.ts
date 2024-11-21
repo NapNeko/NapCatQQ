@@ -1,5 +1,5 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
-import { ActionName } from '../types';
+import { ActionName } from '@/onebot/action/router';
 
 export class GetCSRF extends OneBotAction<any, any> {
     actionName = ActionName.GetCSRF;

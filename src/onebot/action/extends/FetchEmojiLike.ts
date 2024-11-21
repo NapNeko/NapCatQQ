@@ -1,7 +1,7 @@
 //getMsgEmojiLikesList
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
-import { ActionName } from '../types';
+import { ActionName } from '@/onebot/action/router';
 import { MessageUnique } from '@/common/message-unique';
 
 const SchemaData = {

@@ -1,5 +1,5 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
-import { ActionName } from '../types';
+import { ActionName } from '@/onebot/action/router';
 import { WebHonorType } from '@/core/entities';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 

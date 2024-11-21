@@ -1,7 +1,7 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { OB11User, OB11UserSex } from '@/onebot';
 import { OB11Entities } from '@/onebot/entities';
-import { ActionName } from '../types';
+import { ActionName } from '@/onebot/action/router';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { calcQQLevel } from '@/common/helper';
 

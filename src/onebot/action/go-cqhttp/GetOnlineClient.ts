@@ -1,5 +1,5 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
-import { ActionName } from '../types';
+import { ActionName } from '@/onebot/action/router';
 import { JSONSchema } from 'json-schema-to-ts';
 import { sleep } from '@/common/helper';
 

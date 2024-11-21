@@ -1,5 +1,5 @@
 import { GetFileBase } from './GetFile';
-import { ActionName } from '../types';
+import { ActionName } from '@/onebot/action/router';
 
 
 export default class GetImage extends GetFileBase {

@@ -1,5 +1,5 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
-import { ActionName } from '../types';
+import { ActionName } from '@/onebot/action/router';
 
 export class GetGuildList extends OneBotAction<null, null> {
     actionName = ActionName.GetGuildList;
