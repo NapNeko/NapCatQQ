@@ -1,5 +1,5 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
-import { GroupRequestOperateTypes } from '@/core/entities';
+import { NTGroupRequestOperateTypes } from '@/core/entities';
 import { ActionName } from '@/onebot/action/router';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 
@@ -23,7 +23,7 @@ export default class SetGroupAddRequest extends OneBotAction<Payload, null> {
         const flag = payload.flag.toString();
         const approve = payload.approve?.toString() !== 'false';
         await this.core.apis.GroupApi.handleGroupRequest(flag,
-            approve ? GroupRequestOperateTypes.approve : GroupRequestOperateTypes.reject,
+            approve ? NTGroupRequestOperateTypes.KAGREE : NTGroupRequestOperateTypes.KREFUSE,
             payload.reason ?? ' ',
         );
         return null;
