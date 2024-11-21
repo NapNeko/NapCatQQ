@@ -1,8 +1,9 @@
 // 性别枚举
-export enum Sex {
-    male = 1,
-    female = 2,
-    unknown = 255,
+export enum NTSex {
+    GENDER_UNKOWN = 0,
+    GENDER_MALE = 1,
+    GENDER_FEMALE = 2,
+    GENDER_PRIVACY = 255,
 }
 
 // 好友分类类型
@@ -226,7 +227,7 @@ export interface UserDetailInfoListenerArg {
 export interface ModifyProfileParams {
     nick: string;
     longNick: string;
-    sex: Sex;
+    sex: NTSex;
     birthday: { birthday_year: string, birthday_month: string, birthday_day: string };
     location: any;
 }
@@ -259,7 +260,7 @@ export interface User {
     avatarUrl?: string;
     longNick?: string;
     remark?: string;
-    sex?: Sex;
+    sex?: NTSex;
     age?: number;
     qqLevel?: QQLevel;
     qid?: string;

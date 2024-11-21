@@ -1,4 +1,4 @@
-import { QQLevel, Sex } from './user';
+import { QQLevel, NTSex } from './user';
 
 export interface KickMemberInfo {
     optFlag: number;
