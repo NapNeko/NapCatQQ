@@ -1,5 +1,5 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
-import { NTGroupMemberRole } from '@/core/entities';
+import { NTGroupMemberRole } from '@/core/types';
 import { ActionName } from '@/onebot/action/router';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 

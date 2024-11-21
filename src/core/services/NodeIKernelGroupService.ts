@@ -8,7 +8,7 @@ import {
     GroupNotifyMsgType,
     NTGroupRequestOperateTypes,
     KickMemberV2Req,
-} from '@/core/entities';
+} from '@/core/types';
 import { GeneralCallResult } from '@/core/services/common';
 
 export interface NodeIKernelGroupService {

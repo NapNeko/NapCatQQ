@@ -1,4 +1,4 @@
-import { BuddyCategoryType, FriendRequestNotify } from '@/core/entities';
+import { BuddyCategoryType, FriendRequestNotify } from '@/core/types';
 
 export type OnBuddyChangeParams = BuddyCategoryType[];
 

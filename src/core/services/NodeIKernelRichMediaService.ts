@@ -1,4 +1,4 @@
-import { GetFileListParam, MessageElement, Peer } from '../entities';
+import { GetFileListParam, MessageElement, Peer } from '../types';
 import { GeneralCallResult } from './common';
 
 export enum UrlFileDownloadType {

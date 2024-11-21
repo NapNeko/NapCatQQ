@@ -1,6 +1,6 @@
 import { GeneralCallResult } from '@/core/services/common';
 import { NodeIKernelBuddyListener } from '@/core/listeners';
-import { BuddyListReqType } from '../entities/user';
+import { BuddyListReqType } from '../types/user';
 
 export interface NodeIKernelBuddyService {
     getBuddyListV2(callFrom: string, reqType: BuddyListReqType): Promise<GeneralCallResult & {

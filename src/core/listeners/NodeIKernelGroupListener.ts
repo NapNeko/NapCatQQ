@@ -1,4 +1,4 @@
-import { DataSource, Group, GroupListUpdateType, GroupMember, GroupNotify, ShutUpGroupMember } from '@/core/entities';
+import { DataSource, Group, GroupListUpdateType, GroupMember, GroupNotify, ShutUpGroupMember } from '@/core/types';
 
 export class NodeIKernelGroupListener {
     onGroupListInited(listEmpty: boolean): any { }

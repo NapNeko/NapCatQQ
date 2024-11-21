@@ -1,6 +1,6 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { ChatType, Peer } from '@/core/entities';
+import { ChatType, Peer } from '@/core/types';
 import fs from 'fs';
 import { uri2local } from '@/common/file';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';

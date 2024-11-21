@@ -1,7 +1,7 @@
-import { ChatType, Peer } from '../entities';
+import { ChatType, Peer } from '../types';
 import { NodeIKernelRecentContactListener } from '../listeners/NodeIKernelRecentContactListener';
 import { GeneralCallResult } from './common';
-import { FSABRecentContactParams } from '../entities/contact';
+import { FSABRecentContactParams } from '../types/contact';
 
 export interface NodeIKernelRecentContactService {
     setGuildDisplayStatus(...args: unknown[]): unknown; // 2 arguments

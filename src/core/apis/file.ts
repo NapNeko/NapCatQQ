@@ -12,7 +12,7 @@ import {
     SendPicElement,
     SendPttElement,
     SendVideoElement,
-} from '@/core/entities';
+} from '@/core/types';
 import path from 'path';
 import fs from 'fs';
 import fsPromises from 'fs/promises';
