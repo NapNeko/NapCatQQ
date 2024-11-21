@@ -3,7 +3,7 @@ import {
     Group,
     GroupMember,
     NTGroupMemberRole,
-    GroupRequestOperateTypes,
+    NTGroupRequestOperateTypes,
     InstanceContext,
     KickMemberV2Req,
     MemberExtSourceType,
@@ -417,7 +417,7 @@ export class NTQQGroupApi {
         return this.context.session.getGroupService().uploadGroupBulletinPic(GroupCode, _Pskey, imageurl);
     }
 
-    async handleGroupRequest(flag: string, operateType: GroupRequestOperateTypes, reason?: string) {
+    async handleGroupRequest(flag: string, operateType: NTGroupRequestOperateTypes, reason?: string) {
         const flagitem = flag.split('|');
         const groupCode = flagitem[0];
         const seq = flagitem[1];

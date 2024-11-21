@@ -6,7 +6,7 @@ import {
     GroupMember,
     NTGroupMemberRole,
     GroupNotifyMsgType,
-    GroupRequestOperateTypes,
+    NTGroupRequestOperateTypes,
     KickMemberV2Req,
 } from '@/core/entities';
 import { GeneralCallResult } from '@/core/services/common';
@@ -198,9 +198,9 @@ export interface NodeIKernelGroupService {
     operateSysNotify(
         doubt: boolean,
         operateMsg: {
-            operateType: GroupRequestOperateTypes, // 2 拒绝
+            operateType: NTGroupRequestOperateTypes,
             targetMsg: {
-                seq: string,  // 通知序列号
+                seq: string,
                 type: GroupNotifyMsgType,
                 groupCode: string,
                 postscript: string

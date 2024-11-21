@@ -10,7 +10,7 @@ import {
     QuickActionGroupMessage,
     QuickActionGroupRequest,
 } from '@/onebot';
-import { GroupRequestOperateTypes, NapCatCore, Peer } from '@/core';
+import { NTGroupRequestOperateTypes, NapCatCore, Peer } from '@/core';
 import { OB11FriendRequestEvent } from '@/onebot/event/request/OB11FriendRequest';
 import { OB11GroupRequestEvent } from '@/onebot/event/request/OB11GroupRequest';
 import { ContextMode, createContext, normalize } from '@/onebot/action/msg/SendMsg';
@@ -86,7 +86,7 @@ export class OneBotQuickActionApi {
         if (!isNull(quickAction.approve)) {
             this.core.apis.GroupApi.handleGroupRequest(
                 request.flag,
-                quickAction.approve ? GroupRequestOperateTypes.approve : GroupRequestOperateTypes.reject,
+                quickAction.approve ? NTGroupRequestOperateTypes.KAGREE : NTGroupRequestOperateTypes.KREFUSE,
                 quickAction.reason,
             ).catch(this.core.context.logger.logError.bind(this.core.context.logger));
         }

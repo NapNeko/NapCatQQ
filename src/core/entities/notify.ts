@@ -107,9 +107,12 @@ export interface GroupNotify {
     warningTips: string;
 }
 
-export enum GroupRequestOperateTypes {
-    approve = 1,
-    reject = 2
+export enum NTGroupRequestOperateTypes {
+    KUNSPECIFIED = 0,
+    KAGREE = 1,
+    KREFUSE = 2,
+    KIGNORE = 3,
+    KDELETE = 4
 }
 
 export enum BuddyReqType {
