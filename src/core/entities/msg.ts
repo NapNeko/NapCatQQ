@@ -104,10 +104,15 @@ export enum NTMsgType {
  * 图片类型枚举
  */
 export enum PicType {
-    GIF = 2000,
-    JGP = 1000
+    NEWPIC_APNG = 2001, 
+    NEWPIC_BMP = 1005,
+    NEWPIC_GIF = 2000,
+    NEWPIC_JPEG = 1000,
+    NEWPIC_PNG = 1001,
+    NEWPIC_PROGERSSIV_JPEG = 1003,
+    NEWPIC_SHARPP = 1004,
+    NEWPIC_WEBP = 1002
 }
-
 /**
  * 图片子类型枚举
  */
@@ -116,7 +121,6 @@ export enum PicSubType {
     Face = 1  // 表情包小图
     //...待补全 其余见NT Android
 }
-
 /**
  * 消息@类型枚举
  */

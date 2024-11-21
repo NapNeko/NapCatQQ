@@ -36,7 +36,11 @@ export class NTQQFileApi {
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
         this.core = core;
-        this.rkeyManager = new RkeyManager(['https://rkey.napneko.icu/rkeys', 'https://llob.linyuchen.net/rkey', 'http://napcat-sign.wumiao.wang:2082/rkey'], this.context.logger);
+        this.rkeyManager = new RkeyManager([
+            'https://rkey.napneko.icu/rkeys'
+        ],
+            this.context.logger
+        );
     }
 
     async copyFile(filePath: string, destPath: string) {
@@ -102,7 +106,7 @@ export class NTQQFileApi {
                 fileName: fileName || _fileName,
                 folderId: folderId,
                 filePath: path,
-                fileSize: (fileSize).toString(),
+                fileSize: fileSize.toString(),
             },
         };
     }
@@ -125,7 +129,7 @@ export class NTQQFileApi {
                 fileName: fileName,
                 sourcePath: path,
                 original: true,
-                picType: isGIF(picPath) ? PicType.GIF : PicType.JGP,
+                picType: isGIF(picPath) ? PicType.NEWPIC_GIF : PicType.NEWPIC_JPEG,
                 picSubType: subType,
                 fileUuid: '',
                 fileSubId: '',
@@ -138,7 +142,8 @@ export class NTQQFileApi {
     async createValidSendVideoElement(context: MessageContext, filePath: string, fileName: string = '', diyThumbPath: string = ''): Promise<SendVideoElement> {
         const logger = this.core.context.logger;
         let videoInfo = {
-            width: 1920, height: 1080,
+            width: 1920,
+            height: 1080,
             time: 15,
             format: 'mp4',
             size: 0,
@@ -300,18 +305,18 @@ export class NTQQFileApi {
                     element.elementType === ElementType.FILE
                 ) {
                     switch (element.elementType) {
-                    case ElementType.PIC:
+                        case ElementType.PIC:
                             element.picElement!.sourcePath = elementResults[elementIndex];
-                        break;
-                    case ElementType.VIDEO:
+                            break;
+                        case ElementType.VIDEO:
                             element.videoElement!.filePath = elementResults[elementIndex];
-                        break;
-                    case ElementType.PTT:
+                            break;
+                        case ElementType.PTT:
                             element.pttElement!.filePath = elementResults[elementIndex];
-                        break;
-                    case ElementType.FILE:
+                            break;
+                        case ElementType.FILE:
                             element.fileElement!.filePath = elementResults[elementIndex];
-                        break;
+                            break;
                     }
                     elementIndex++;
                 }
