@@ -147,14 +147,11 @@ export class NTQQGroupApi {
         if (!members) {
             try {
                 members = await this.getGroupMembers(groupCodeStr);
-                // 更新群成员列表
                 this.groupMemberCache.set(groupCodeStr, members);
             } catch (e) {
                 return null;
             }
         }
-
-        // log('getGroupMember', members);
         function getMember() {
             let member: GroupMember | undefined;
             if (isNumeric(memberUinOrUidStr)) {
@@ -367,7 +364,6 @@ export class NTQQGroupApi {
             }
         }
         this.context.session.getGroupService().destroyMemberListScene(sceneId);
-        //console.log('GetGroupMembersV3 len :', result.result.infos.size, resMode2?.infos.size, groupQQ);
         return {
             infos: new Map([...(resMode2?.infos ?? []), ...result.result.infos]),
             finish: result.result.finish,
@@ -430,7 +426,7 @@ export class NTQQGroupApi {
         return this.context.session.getGroupService().operateSysNotify(
             false,
             {
-                operateType: operateType, // 2 拒绝
+                operateType: operateType,
                 targetMsg: {
                     seq: seq,  // 通知序列号
                     type: type,
