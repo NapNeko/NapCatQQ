@@ -45,12 +45,8 @@ NapCatQQ 是现代化的基于 NTQQ 的 Bot 协议端实现
 
 ---
 
-## 延缓Native模块与NapCat对新版QQ适配
-为未来持续与高效的使用Native模块 模块代码转为完全非Git仓库的本地保存源码 并进行相关重构
-
-同时为了保证稳定 NapCat 本体通常会在3 Week+的周期进行新版本适配
-
-因此此时推荐使用release指定版本
+## 特殊感谢
+[LLOneBot](https://github.com/LLOneBot/LLOneBot) 相关的开发曾参与本项目
 
 ## 开源附加
 
