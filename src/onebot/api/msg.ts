@@ -144,14 +144,14 @@ export class OneBotMsgApi {
 
         faceElement: async element => {
             const faceIndex = element.faceIndex;
-            if (faceIndex === FaceIndex.dice) {
+            if (faceIndex === FaceIndex.DICE) {
                 return {
                     type: OB11MessageDataType.dice,
                     data: {
                         result: element.resultId!,
                     },
                 };
-            } else if (faceIndex === FaceIndex.rps) {
+            } else if (faceIndex === FaceIndex.RPS) {
                 return {
                     type: OB11MessageDataType.rps,
                     data: {
@@ -546,7 +546,7 @@ export class OneBotMsgApi {
             elementType: ElementType.FACE,
             elementId: '',
             faceElement: {
-                faceIndex: FaceIndex.dice,
+                faceIndex: FaceIndex.DICE,
                 faceType: FaceType.AniSticke,
                 faceText: '[骰子]',
                 packId: '1',
@@ -562,7 +562,7 @@ export class OneBotMsgApi {
             elementType: ElementType.FACE,
             elementId: '',
             faceElement: {
-                faceIndex: FaceIndex.rps,
+                faceIndex: FaceIndex.RPS,
                 faceText: '[包剪锤]',
                 faceType: 3,
                 packId: '1',

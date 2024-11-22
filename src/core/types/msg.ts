@@ -1,6 +1,10 @@
 import { NTGroupMemberRole } from '@/core';
 import { ActionBarElement, ArkElement, AvRecordElement, CalendarElement, FaceBubbleElement, FaceElement, FileElement, GiphyElement, GrayTipElement, MarketFaceElement, PicElement, PttElement, RecommendedMsgElement, ReplyElement, ShareLocationElement, StructLongMsgElement, TaskTopMsgElement, TextElement, TofuRecordElement, VideoElement, YoloGameResultElement } from './element';
 
+/*
+ * 2024/11/22 Refactor Mlikiowa
+ */
+
 /**
  * 表示对等方的信息
  */
@@ -127,7 +131,7 @@ export enum PicSubType {
     KRELATED = 7
 }
 /**
- * 消息@类型枚举
+ * 消息AT类型枚举
  */
 export enum NTMsgAtType {
     ATTYPEALL = 1,
@@ -290,8 +294,8 @@ export enum PokeType {
  * 表情索引枚举
  */
 export enum FaceIndex {
-    dice = 358,
-    rps = 359
+    DICE = 358,
+    RPS = 359
 }
 
 /**
