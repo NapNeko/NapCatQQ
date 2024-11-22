@@ -1,6 +1,7 @@
 import {
     ChatType,
     GrayTipElement,
+    JsonGrayBusiId,
     NapCatCore,
     NTGrayTipElementSubTypeV2,
     RawMessage,
@@ -115,7 +116,7 @@ export class OneBotGroupApi {
                             );
                         }
                     }
-                    if (element.grayTipElement.jsonGrayTipElement.busiId == 2401) {
+                    if (element.grayTipElement.jsonGrayTipElement.busiId == JsonGrayBusiId.AIO_GROUP_ESSENCE_MSG_TIP) {
                         const searchParams = new URL(json.items[0].jp).searchParams;
                         const msgSeq = searchParams.get('msgSeq')!;
                         const Group = searchParams.get('groupCode');
@@ -138,7 +139,7 @@ export class OneBotGroupApi {
                         );
                         // 获取MsgSeq+Peer可获取具体消息
                     }
-                    if (element.grayTipElement.jsonGrayTipElement.busiId == 2407) {
+                    if (element.grayTipElement.jsonGrayTipElement.busiId == JsonGrayBusiId.GROUP_AIO_CONFIGURABLE_GRAY_TIPS) {
                         const type = json.items[json.items.length - 1]?.txt;
                         if (type === "头衔") {
                             const memberUin = json.items[1].param[0];
