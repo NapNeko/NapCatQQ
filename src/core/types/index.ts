@@ -9,3 +9,4 @@ export * from './sign';
 export * from './element';
 export * from './constant';
 export * from './graytip';
+export * from './emoji';

@@ -7,7 +7,6 @@ import {
     CustomMusicSignPostData,
     ElementType,
     FaceIndex,
-    FaceType,
     IdMusicSignPostData,
     MessageElement,
     NapCatCore,
@@ -16,6 +15,7 @@ import {
     RawMessage,
     SendMessageElement,
     SendTextElement,
+    BaseEmojiType,
 } from '@/core';
 import faceConfig from '@/core/external/face_config.json';
 import { NapCatOneBot11Adapter, OB11Message, OB11MessageData, OB11MessageDataType, OB11MessageFileBase, } from '@/onebot';
@@ -547,7 +547,7 @@ export class OneBotMsgApi {
             elementId: '',
             faceElement: {
                 faceIndex: FaceIndex.DICE,
-                faceType: FaceType.AniSticke,
+                faceType: BaseEmojiType.CHAIN_SUPER_EMOJI,
                 faceText: '[骰子]',
                 packId: '1',
                 stickerId: '33',
@@ -564,7 +564,7 @@ export class OneBotMsgApi {
             faceElement: {
                 faceIndex: FaceIndex.RPS,
                 faceText: '[包剪锤]',
-                faceType: 3,
+                faceType: BaseEmojiType.CHAIN_SUPER_EMOJI,
                 packId: '1',
                 stickerId: '34',
                 sourceType: 1,
