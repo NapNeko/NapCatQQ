@@ -1,6 +1,6 @@
 import { NapCatCore } from '@/core';
 import { NapCatOneBot11Adapter } from '@/onebot';
-import { OB11ProfileLikeEvent } from '../event/notice/OB11ProfileLikeEvent';
+import { OB11ProfileLikeEvent } from '@/onebot/event/notice/OB11ProfileLikeEvent';
 import { decodeProfileLikeTip } from "@/core/helper/adaptDecoder";
 
 export class OneBotUserApi {

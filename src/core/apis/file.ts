@@ -20,7 +20,7 @@ import { InstanceContext, NapCatCore, SearchResultItem } from '@/core';
 import * as fileType from 'file-type';
 import imageSize from 'image-size';
 import { ISizeCalculationResult } from 'image-size/dist/types/interface';
-import { RkeyManager } from '../helper/rkey';
+import { RkeyManager } from '@/core/helper/rkey';
 import { calculateFileMD5, isGIF } from '@/common/file';
 import pathLib from 'node:path';
 import { defaultVideoThumbB64, getVideoInfo } from '@/common/video';

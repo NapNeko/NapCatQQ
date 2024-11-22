@@ -5,7 +5,7 @@ import fs from 'fs';
 import { uri2local } from '@/common/file';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageContext } from '@/onebot/api';
-import { ContextMode, createContext } from '../msg/SendMsg';
+import { ContextMode, createContext } from '@/onebot/action/msg/SendMsg';
 
 const SchemaData = {
     type: 'object',

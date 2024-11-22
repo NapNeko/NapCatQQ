@@ -5,7 +5,7 @@ import { NapCatCore } from '@/core';
 import { OB11Response } from '@/onebot/action/OneBotAction';
 import { ActionMap } from '@/onebot/action';
 import cors from 'cors';
-import { HttpServerConfig } from '../config/config';
+import { HttpServerConfig } from '@/onebot/config/config';
 
 export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
     private app: Express | undefined;

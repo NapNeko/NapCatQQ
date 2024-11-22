@@ -8,11 +8,11 @@ import {
     TipGroupElementType,
 } from '@/core';
 import { NapCatOneBot11Adapter } from '@/onebot';
-import { OB11GroupBanEvent } from '../event/notice/OB11GroupBanEvent';
-import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
-import { OB11GroupDecreaseEvent } from '../event/notice/OB11GroupDecreaseEvent';
+import { OB11GroupBanEvent } from '@/onebot/event/notice/OB11GroupBanEvent';
+import { OB11GroupIncreaseEvent } from '@/onebot/event/notice/OB11GroupIncreaseEvent';
+import { OB11GroupDecreaseEvent } from '@/onebot/event/notice/OB11GroupDecreaseEvent';
 import fastXmlParser from 'fast-xml-parser';
-import { OB11GroupMsgEmojiLikeEvent } from '../event/notice/OB11MsgEmojiLikeEvent';
+import { OB11GroupMsgEmojiLikeEvent } from '@/onebot/event/notice/OB11MsgEmojiLikeEvent';
 import { MessageUnique } from '@/common/message-unique';
 import { OB11GroupCardEvent } from '@/onebot/event/notice/OB11GroupCardEvent';
 import { OB11GroupUploadNoticeEvent } from '@/onebot/event/notice/OB11GroupUploadNoticeEvent';
