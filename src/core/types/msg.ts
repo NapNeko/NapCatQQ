@@ -264,10 +264,12 @@ export enum NTGrayTipElementSubTypeV2 {
  * 表情类型枚举
  */
 export enum FaceType {
-    normal = 1, // 小黄脸
-    normal2 = 2, // 新小黄脸
-    dice = 3,  // 骰子
-    poke = 5  // 拍一拍
+    Unknown = 0,
+    OldFace = 1, // 老表情
+    Normal = 2, // 常规表情
+    AniSticke = 3,  // 动画贴纸
+    Lottie = 4,// 新格式表情
+    Poke = 5  // 可变Poke
 }
 
 /**
