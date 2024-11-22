@@ -20,8 +20,7 @@ export enum BaseEmojiType {
     SUPER_EMOJI = 1,
     RANDOM_SUPER_EMOJI = 2,
     CHAIN_SUPER_EMOJI = 3,
-    EMOJI_EMOJI = 4,
-    VAS_POKE = 5
+    EMOJI_EMOJI = 4
 }
 
 export interface GetBaseEmojiPathReq {
