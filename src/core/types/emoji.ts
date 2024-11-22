@@ -45,11 +45,6 @@ export interface DownloadBaseEmojiByUrlReq {
     panelCategory: EmojiPanelCategory;
     downloadInfo: DownloadBaseEmojiInfo;
 }
-// public final class DownloadBaseEmojiByIdReq {
-//     public String groupName;
-//     public EmojiPanelCategory panelCategory;
-//     public String emojiId = "";
-//     public String qzoneCode = "";
 
 export interface DownloadBaseEmojiByIdReq {
     emojiId: string;
