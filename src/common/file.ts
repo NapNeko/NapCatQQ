@@ -19,14 +19,6 @@ type Uri2LocalRes = {
     path: string
 }
 
-export function isGIF(path: string) {
-    const buffer = Buffer.alloc(4);
-    const fd = fs.openSync(path, 'r');
-    fs.readSync(fd, buffer, 0, 4, 0);
-    fs.closeSync(fd);
-    return buffer.toString() === 'GIF8';
-}
-
 // 定义一个异步函数来检查文件是否存在
 export function checkFileExist(path: string, timeout: number = 3000): Promise<void> {
     return new Promise((resolve, reject) => {
