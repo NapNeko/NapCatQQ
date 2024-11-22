@@ -1,6 +1,6 @@
-import { OB11BaseMetaEvent } from '../event/meta/OB11BaseMetaEvent';
-import { OB11BaseNoticeEvent } from '../event/notice/OB11BaseNoticeEvent';
-import { OB11Message } from './message';
+import { OB11BaseMetaEvent } from '@/onebot/event/meta/OB11BaseMetaEvent';
+import { OB11BaseNoticeEvent } from '@/onebot/event/notice/OB11BaseNoticeEvent';
+import { OB11Message } from '@/onebot/types/message';
 
 export type QuickActionEvent = OB11Message | OB11BaseMetaEvent | OB11BaseNoticeEvent;
 export type PostEventType = OB11Message | OB11BaseMetaEvent | OB11BaseNoticeEvent;

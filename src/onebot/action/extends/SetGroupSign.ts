@@ -1,4 +1,4 @@
-import { GetPacketStatusDepends } from '../packet/GetPacketStatus';
+import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
 import { ActionName } from '@/onebot/action/router';
 import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 

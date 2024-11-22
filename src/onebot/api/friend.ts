@@ -1,7 +1,6 @@
 import { GrayTipElement, NapCatCore } from '@/core';
-
 import { NapCatOneBot11Adapter } from '@/onebot';
-import { OB11FriendPokeEvent } from '../event/notice/OB11PokeEvent';
+import { OB11FriendPokeEvent } from '@/onebot/event/notice/OB11PokeEvent';
 
 export class OneBotFriendApi {
     obContext: NapCatOneBot11Adapter;

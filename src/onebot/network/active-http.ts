@@ -5,8 +5,8 @@ import { QuickAction, QuickActionEvent } from '@/onebot/types';
 import { NapCatCore } from '@/core';
 import { NapCatOneBot11Adapter } from '..';
 import { RequestUtil } from '@/common/request';
-import { HttpClientConfig } from '../config/config';
-import { ActionMap } from '../action';
+import { HttpClientConfig } from '@/onebot/config/config';
+import { ActionMap } from '@/onebot/action';
 
 export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     logger: LogWrapper;

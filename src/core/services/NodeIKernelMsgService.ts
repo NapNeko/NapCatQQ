@@ -1,7 +1,7 @@
 import { ElementType, MessageElement, Peer, RawMessage, SendMessageElement } from '@/core/types';
 import { NodeIKernelMsgListener } from '@/core/listeners/NodeIKernelMsgListener';
 import { GeneralCallResult } from '@/core/services/common';
-import { MsgReqType, QueryMsgsParams, TmpChatInfoApi } from '../types/msg';
+import { MsgReqType, QueryMsgsParams, TmpChatInfoApi } from '@/core/types/msg';
 
 export interface NodeIKernelMsgService {
 

@@ -1,5 +1,4 @@
 import { RequestHandler } from 'express';
-import { WebUiDataRuntime } from '../helper/Data';
 
 export const LogFileListHandler: RequestHandler = async (req, res) => {
     res.send({

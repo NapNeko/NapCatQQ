@@ -1,6 +1,6 @@
 import SendMsg, { ContextMode } from './SendMsg';
-import { ActionName, BaseCheckResult } from '../router';
-import { OB11PostSendMsg } from '../../types';
+import { ActionName, BaseCheckResult } from '@/onebot/action/router';
+import { OB11PostSendMsg } from '@/onebot/types';
 
 // 未检测参数
 class SendPrivateMsg extends SendMsg {
