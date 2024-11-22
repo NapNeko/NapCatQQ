@@ -14,6 +14,7 @@ import {
     GroupFileExtra
 } from "@/core/packet/transformer/proto";
 import {
+    BaseEmojiType,
     NTMsgAtType,
     PicType,
     SendArkElement,
@@ -162,7 +163,7 @@ export class PacketMsgFaceElement extends IPacketMsgElement<SendFaceElement> {
     constructor(element: SendFaceElement) {
         super(element);
         this.faceId = element.faceElement.faceIndex;
-        this.isLargeFace = element.faceElement.faceType === 3;
+        this.isLargeFace = element.faceElement.faceType === BaseEmojiType.CHAIN_SUPER_EMOJI;
     }
 
     buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
