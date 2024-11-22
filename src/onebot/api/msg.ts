@@ -16,6 +16,7 @@ import {
     SendMessageElement,
     SendTextElement,
     BaseEmojiType,
+    FaceType,
 } from '@/core';
 import faceConfig from '@/core/external/face_config.json';
 import { NapCatOneBot11Adapter, OB11Message, OB11MessageData, OB11MessageDataType, OB11MessageFileBase, } from '@/onebot';
@@ -547,7 +548,7 @@ export class OneBotMsgApi {
             elementId: '',
             faceElement: {
                 faceIndex: FaceIndex.DICE,
-                faceType: BaseEmojiType.CHAIN_SUPER_EMOJI,
+                faceType: FaceType.AniSticke,
                 faceText: '[骰子]',
                 packId: '1',
                 stickerId: '33',
@@ -564,7 +565,7 @@ export class OneBotMsgApi {
             faceElement: {
                 faceIndex: FaceIndex.RPS,
                 faceText: '[包剪锤]',
-                faceType: BaseEmojiType.CHAIN_SUPER_EMOJI,
+                faceType: FaceType.AniSticke,
                 packId: '1',
                 stickerId: '34',
                 sourceType: 1,

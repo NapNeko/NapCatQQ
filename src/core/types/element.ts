@@ -1,5 +1,4 @@
-import { BaseEmojiType } from "./emoji";
-import { ElementType, MessageElement, NTGrayTipElementSubTypeV2, PicSubType, PicType, TipAioOpGrayTipElement, TipGroupElement, NTVideoType } from "./msg";
+import { ElementType, MessageElement, NTGrayTipElementSubTypeV2, PicSubType, PicType, TipAioOpGrayTipElement, TipGroupElement, NTVideoType, FaceType } from "./msg";
 
 type ElementFullBase = Omit<MessageElement, 'elementType' | 'elementId' | 'extBufForUI'>;
 
@@ -31,7 +30,7 @@ export interface TextElement {
 
 export interface FaceElement {
     faceIndex: number;
-    faceType: BaseEmojiType;
+    faceType: FaceType;
     faceText?: string;
     packId?: string;
     stickerId?: string;
@@ -254,7 +253,7 @@ export interface FaceBubbleElement {
     faceFlag: number;
     content: string;
     oldVersionStr: string;
-    faceType: BaseEmojiType;
+    faceType: FaceType;
     others: string;
     yellowFaceInfo: {
         index: number;
