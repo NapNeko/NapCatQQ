@@ -547,7 +547,7 @@ export class OneBotMsgApi {
             elementId: '',
             faceElement: {
                 faceIndex: FaceIndex.dice,
-                faceType: FaceType.dice,
+                faceType: FaceType.AniSticke,
                 faceText: '[骰子]',
                 packId: '1',
                 stickerId: '33',
