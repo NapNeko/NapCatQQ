@@ -527,3 +527,15 @@ export interface MsgReqType {
     includeDeleteMsg: boolean,
     extraCnt: number
 }
+
+/**
+ * 表情类型枚举
+ */
+export enum FaceType {
+    Unknown = 0,
+    OldFace = 1, // 老表情
+    Normal = 2, // 常规表情
+    AniSticke = 3,  // 动画贴纸
+    Lottie = 4,// 新格式表情
+    Poke = 5  // 可变Poke
+}
