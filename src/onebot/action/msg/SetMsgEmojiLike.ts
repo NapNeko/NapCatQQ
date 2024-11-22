@@ -38,7 +38,11 @@ export class SetMsgEmojiLike extends OneBotAction<Payload, any> {
             msg.Peer,
             msgData[0].msgSeq,
             payload.emoji_id.toString(),
-            typeof payload.set === 'string' ? payload.set === 'true' : !!payload.set
+            typeof payload.set === 'boolean'
+                ? payload.set
+                : (typeof payload.set === 'string'
+                    ? payload.set === 'true'
+                    : !!payload.set)
         );
     }
 }
