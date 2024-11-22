@@ -21,12 +21,13 @@ import * as fileType from 'file-type';
 import imageSize from 'image-size';
 import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 import { RkeyManager } from '@/core/helper/rkey';
-import { calculateFileMD5, isGIF } from '@/common/file';
+import { calculateFileMD5 } from '@/common/file';
 import pathLib from 'node:path';
 import { defaultVideoThumbB64, getVideoInfo } from '@/common/video';
 import ffmpeg from 'fluent-ffmpeg';
 import { encodeSilk } from '@/common/audio';
 import { MessageContext } from '@/onebot/api';
+import { getFileTypeForSendType } from '../helper/msg';
 
 export class NTQQFileApi {
     context: InstanceContext;
@@ -130,7 +131,7 @@ export class NTQQFileApi {
                 fileName: fileName,
                 sourcePath: path,
                 original: true,
-                picType: isGIF(picPath) ? PicType.NEWPIC_GIF : PicType.NEWPIC_JPEG,
+                picType: await getFileTypeForSendType(picPath),
                 picSubType: subType,
                 fileUuid: '',
                 fileSubId: '',
