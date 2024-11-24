@@ -103,6 +103,7 @@ export interface OneBotConfig {
     network: NetworkConfig; // 网络配置
     musicSignUrl: string; // 音乐签名地址
     enableLocalFile2Url: boolean;
+    parseMultMsg: boolean;
 }
 
 const createDefaultConfig = <T>(config: T): T => config;
@@ -116,6 +117,7 @@ export const defaultOneBotConfigs = createDefaultConfig<OneBotConfig>({
     },
     musicSignUrl: '',
     enableLocalFile2Url: false,
+    parseMultMsg: true
 });
 
 export const mergeNetworkDefaultConfig = {
@@ -149,8 +151,11 @@ export function mergeOneBotConfigs(
     if (userConfig.musicSignUrl !== undefined) {
         mergedConfig.musicSignUrl = userConfig.musicSignUrl;
     }
-    if(userConfig.enableLocalFile2Url !== undefined) {
+    if (userConfig.enableLocalFile2Url !== undefined) {
         mergedConfig.enableLocalFile2Url = userConfig.enableLocalFile2Url;
+    }
+    if (userConfig.parseMultMsg !== undefined) {
+        mergedConfig.parseMultMsg = userConfig.parseMultMsg;
     }
     return mergedConfig;
 }
