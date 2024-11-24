@@ -11,6 +11,9 @@
                 <t-form-item label="启用本地文件到URL" name="enableLocalFile2Url" class="form-item">
                     <t-switch v-model="otherConfig.enableLocalFile2Url" />
                 </t-form-item>
+                <t-form-item label="启用上报解析合并消息" name="parseMultMsg" class="form-item">
+                    <t-switch v-model="otherConfig.parseMultMsg" />
+                </t-form-item>
             </t-form>
             <div class="button-container">
                 <t-button @click="saveConfig">保存</t-button>
@@ -28,6 +31,7 @@ import { QQLoginManager } from '@/backend/shell';
 const otherConfig = ref<Partial<OneBotConfig>>({
     musicSignUrl: '',
     enableLocalFile2Url: false,
+    parseMultMsg: true
 });
 
 const getOB11Config = async (): Promise<OneBotConfig | undefined> => {
@@ -68,6 +72,7 @@ const saveConfig = async () => {
         if (userConfig) {
             userConfig.musicSignUrl = otherConfig.value.musicSignUrl || '';
             userConfig.enableLocalFile2Url = otherConfig.value.enableLocalFile2Url ?? false;
+            userConfig.parseMultMsg = otherConfig.value.parseMultMsg ?? true;
             const success = await setOB11Config(userConfig);
             if (success) {
                 MessagePlugin.success('配置保存成功');

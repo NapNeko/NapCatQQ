@@ -236,7 +236,7 @@ export interface OB11MessageForward {
     type: OB11MessageDataType.forward;
     data: {
         id: string;
-        content: OB11Message[];
+        content?: OB11Message[];
     };
 }
 
