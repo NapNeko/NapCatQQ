@@ -27,10 +27,17 @@ import {
     Popup as TPopup,
     Dialog as TDialog,
     Switch as TSwitch,
+    Tooltip as Tooltip,
+    StickyTool as TStickyTool,
+    StickyItem as TStickyItem,
+    Layout as TLayout,
+    Content as TContent,
+    Footer as TFooter,
+    Aside as TAside,
+    Popconfirm as Tpopconfirm,
 } from 'tdesign-vue-next';
 import { router } from './router';
 import 'tdesign-vue-next/es/style/index.css';
-
 const app = createApp(App);
 app.use(router);
 app.use(TButton);
@@ -59,4 +66,12 @@ app.use(TCheckbox);
 app.use(TPopup);
 app.use(TDialog);
 app.use(TSwitch);
+app.use(Tooltip);
+app.use(TStickyTool);
+app.use(TStickyItem);
+app.use(TLayout);
+app.use(TContent);
+app.use(TFooter);
+app.use(TAside);
+app.use(Tpopconfirm);
 app.mount('#app');
