@@ -1,7 +1,6 @@
 import { ActionName, BaseCheckResult } from './router';
 import Ajv, { ErrorObject, ValidateFunction } from 'ajv';
 import { NapCatCore } from '@/core';
-import { isNull } from '@/common/helper';
 import { NapCatOneBot11Adapter, OB11Return } from '@/onebot';
 
 export class OB11Response {
@@ -66,7 +65,7 @@ export abstract class OneBotAction<PayloadType, ReturnDataType> {
             return OB11Response.ok(resData);
         } catch (e: any) {
             this.core.context.logger.logError('发生错误', e);
-            return OB11Response.error(e?.toString() || e?.stack?.toString() || '未知错误，可能操作超时', 200);
+            return OB11Response.error((e as Error).message.toString() || e?.stack?.toString() || '未知错误，可能操作超时', 200);
         }
     }
 
@@ -80,7 +79,7 @@ export abstract class OneBotAction<PayloadType, ReturnDataType> {
             return OB11Response.ok(resData, echo);
         } catch (e: any) {
             this.core.context.logger.logError('发生错误', e);
-            return OB11Response.error(e.toString() || e.stack?.toString(), 1200, echo);
+            return OB11Response.error((e as Error).message.toString() || e.stack?.toString(), 1200, echo);
         }
     }
 
