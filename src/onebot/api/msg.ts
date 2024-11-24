@@ -349,33 +349,20 @@ export class OneBotMsgApi {
                 guildId: '',
                 peerUid: msg.peerUid,
             };
-            //判断是否在合并消息内
-            msg.parentMsgIdList = msg.parentMsgIdList ?? [];
-            //首次列表不存在则开始创建
-            msg.parentMsgIdList.push(msg.msgId);
-            //let parentMsgId = msg.parentMsgIdList[msg.parentMsgIdList.length - 2 < 0 ? 0 : msg.parentMsgIdList.length - 2];
-            //加入自身MsgId
-            const multiMsgs = (await this.core.apis.MsgApi.getMultiMsg(parentMsgPeer, msg.parentMsgIdList[0], msg.msgId))?.msgList;
-            //拉取下级消息
+            const multiMsgs = await this.getMultiMessages(msg, parentMsgPeer);
+            // 拉取失败则跳过
             if (!multiMsgs) return null;
-            //拉取失败则跳过
-            let ret = {
+            const forward: OB11MessageForward = {
                 type: OB11MessageDataType.forward,
-                data: {
-                    id: msg.msgId
-                },
-            } as OB11MessageForward;
-            if (context.parseMultMsg) {
-                ret.data.content = (await Promise.all(multiMsgs.map(
-                    async multiMsgItem => {
-                        multiMsgItem.parentMsgPeer = parentMsgPeer;
-                        multiMsgItem.parentMsgIdList = msg.parentMsgIdList;
-                        multiMsgItem.id = MessageUnique.createUniqueMsgId(parentMsgPeer, multiMsgItem.msgId); //该ID仅用查看 无法调用
-                        return await this.parseMessage(multiMsgItem, 'array', context.parseMultMsg);
-                    },
-                ))).filter(item => item !== undefined)
-            }
-            return ret;
+                data: { id: msg.msgId }
+            };
+            if (!context.parseMultMsg) return forward;
+            forward.data.content = await this.parseMultiMessageContent(
+                multiMsgs,
+                parentMsgPeer,
+                msg.parentMsgIdList
+            );
+            return forward;
         },
 
         arkElement: async (element) => {
@@ -692,6 +679,34 @@ export class OneBotMsgApi {
                 }
             }
         }
+    }
+
+    private async getMultiMessages(msg: RawMessage, parentMsgPeer: Peer) {
+        //判断是否在合并消息内
+        msg.parentMsgIdList = msg.parentMsgIdList ?? [];
+        //首次列表不存在则开始创建
+        msg.parentMsgIdList.push(msg.msgId);
+        //拉取下级消息
+        return (await this.core.apis.MsgApi.getMultiMsg(
+            parentMsgPeer,
+            msg.parentMsgIdList[0],
+            msg.msgId
+        ))?.msgList;
+    }
+
+    private async parseMultiMessageContent(
+        multiMsgs: RawMessage[],
+        parentMsgPeer: Peer,
+        parentMsgIdList: string[]
+    ) {
+        const parsed = await Promise.all(multiMsgs.map(async msg => {
+            msg.parentMsgPeer = parentMsgPeer;
+            msg.parentMsgIdList = parentMsgIdList;
+            msg.id = MessageUnique.createUniqueMsgId(parentMsgPeer, msg.msgId);
+            //该ID仅用查看 无法调用
+            return await this.parseMessage(msg, 'array', true);
+        }));
+        return parsed.filter(item => item !== undefined);
     }
 
     async parseMessage(
