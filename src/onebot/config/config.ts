@@ -154,8 +154,8 @@ export function mergeOneBotConfigs(
     if (userConfig.enableLocalFile2Url !== undefined) {
         mergedConfig.enableLocalFile2Url = userConfig.enableLocalFile2Url;
     }
-    if (userConfig.enableLocalFile2Url !== undefined) {
-        mergedConfig.enableLocalFile2Url = true;
+    if (userConfig.parseMultMsg !== undefined) {
+        mergedConfig.parseMultMsg = userConfig.parseMultMsg;
     }
     return mergedConfig;
 }
