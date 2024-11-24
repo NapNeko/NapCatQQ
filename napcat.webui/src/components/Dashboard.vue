@@ -1,22 +1,25 @@
 <template>
-    <div class="dashboard-container">
-        <SidebarMenu :menu-items="menuItems" class="sidebar-menu" />
-        <div class="content">
-            <router-view />
+    <t-layout class="dashboard-container">
+        <div ref="menuRef">
+            <SidebarMenu :menu-items="menuItems" class="sidebar-menu" />
         </div>
-    </div>
+        <t-layout>
+            <router-view />
+        </t-layout>
+    </t-layout>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import SidebarMenu from './webui/Nav.vue';
-
+import emitter from '@/ts/event-bus';
 interface MenuItem {
     value: string;
     icon: string;
     label: string;
     route: string;
 }
+
 
 const menuItems = ref<MenuItem[]>([
     { value: 'item1', icon: 'dashboard', label: '基础信息', route: '/dashboard/basic-info' },
@@ -25,13 +28,23 @@ const menuItems = ref<MenuItem[]>([
     { value: 'item5', icon: 'system-log', label: '日志查看', route: '/dashboard/log-view' },
     { value: 'item6', icon: 'info-circle', label: '关于我们', route: '/dashboard/about-us' },
 ]);
+const menuRef=ref<any>(null)
+emitter.on('sendMenu', (event) => {
+    emitter.emit('sendWidth',menuRef.value.offsetWidth);
+    localStorage.setItem('menuWidth', menuRef.value.offsetWidth);
+});
+onMounted(() => {
+    localStorage.setItem('menuWidth', menuRef.value.offsetWidth);
+});
 </script>
 
 <style scoped>
+
 .dashboard-container {
     display: flex;
     flex-direction: row;
     height: 100vh;
+    width: 100%;
 }
 
 .sidebar-menu {
@@ -39,13 +52,6 @@ const menuItems = ref<MenuItem[]>([
     z-index: 2;
 }
 
-.content {
-    flex: 1;
-    /* padding: 20px; */
-    overflow: auto;
-    position: relative;
-    z-index: 1;
-}
 
 @media (max-width: 768px) {
     .content {
