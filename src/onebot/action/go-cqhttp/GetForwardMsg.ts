@@ -41,7 +41,7 @@ export class GoCQHTTPGetForwardMsgAction extends OneBotAction<Payload, any> {
             for (const msgdata of message.message) {
                 if ((msgdata as OB11MessageData).type === OB11MessageDataType.forward) {
                     const newNode = this.createTemplateNode(message);
-                    newNode.data.message = await this.parseForward((msgdata as OB11MessageForward).data.content);
+                    newNode.data.message = await this.parseForward((msgdata as OB11MessageForward).data.content ?? []);
 
                     templateNode.data.message.push(newNode);
                 } else {
