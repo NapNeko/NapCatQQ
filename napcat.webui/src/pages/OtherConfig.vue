@@ -60,6 +60,7 @@ const loadConfig = async () => {
         if (userConfig) {
             otherConfig.value.musicSignUrl = userConfig.musicSignUrl;
             otherConfig.value.enableLocalFile2Url = userConfig.enableLocalFile2Url;
+            otherConfig.value.parseMultMsg = userConfig.parseMultMsg;
         }
     } catch (error) {
         console.error('Error loading config:', error);
