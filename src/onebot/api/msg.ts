@@ -19,7 +19,7 @@ import {
     FaceType,
 } from '@/core';
 import faceConfig from '@/core/external/face_config.json';
-import { NapCatOneBot11Adapter, OB11Message, OB11MessageData, OB11MessageDataType, OB11MessageFileBase, } from '@/onebot';
+import { NapCatOneBot11Adapter, OB11Message, OB11MessageData, OB11MessageDataType, OB11MessageFileBase, OB11MessageForward, } from '@/onebot';
 import { OB11Construct } from '@/onebot/helper/data';
 import { EventType } from '@/onebot/event/OneBotEvent';
 import { encodeCQCode } from '@/onebot/helper/cqcode';
@@ -37,19 +37,24 @@ type RawToOb11Converters = {
         element: Exclude<MessageElement[Key], null | undefined>,
         msg: RawMessage,
         elementWrapper: MessageElement,
+        context: RecvMessageContext
     ) => PromiseLike<OB11MessageData | null>
 }
 
 type Ob11ToRawConverters = {
     [Key in OB11MessageDataType]: (
         sendMsg: Extract<OB11MessageData, { type: Key }>,
-        context: MessageContext,
+        context: SendMessageContext,
     ) => Promise<SendMessageElement | undefined>
 }
 
-export type MessageContext = {
+export type SendMessageContext = {
     deleteAfterSentFiles: string[],
     peer: Peer
+}
+
+export type RecvMessageContext = {
+    parseMultMsg: boolean
 }
 
 function keyCanBeParsed(key: string, parser: RawToOb11Converters): key is keyof RawToOb11Converters {
@@ -338,42 +343,26 @@ export class OneBotMsgApi {
             };
         },
 
-        multiForwardMsgElement: async (_, msg) => {
-            // const message_data: OB11MessageForward = {
-            //     data: {} as any,
-            //     type: OB11MessageDataType.forward,
-            // };
-            // message_data.data.id = msg.msgId;
+        multiForwardMsgElement: async (_, msg, wrapper, context) => {
             const parentMsgPeer = msg.parentMsgPeer ?? {
                 chatType: msg.chatType,
                 guildId: '',
                 peerUid: msg.peerUid,
             };
-            //判断是否在合并消息内
-            msg.parentMsgIdList = msg.parentMsgIdList ?? [];
-            //首次列表不存在则开始创建
-            msg.parentMsgIdList.push(msg.msgId);
-            //let parentMsgId = msg.parentMsgIdList[msg.parentMsgIdList.length - 2 < 0 ? 0 : msg.parentMsgIdList.length - 2];
-            //加入自身MsgId
-            const multiMsgs = (await this.core.apis.MsgApi.getMultiMsg(parentMsgPeer, msg.parentMsgIdList[0], msg.msgId))?.msgList;
-            //拉取下级消息
+            const multiMsgs = await this.getMultiMessages(msg, parentMsgPeer);
+            // 拉取失败则跳过
             if (!multiMsgs) return null;
-            //拉取失败则跳过
-
-            return {
+            const forward: OB11MessageForward = {
                 type: OB11MessageDataType.forward,
-                data: {
-                    id: msg.msgId,
-                    content: (await Promise.all(multiMsgs.map(
-                        async multiMsgItem => {
-                            multiMsgItem.parentMsgPeer = parentMsgPeer;
-                            multiMsgItem.parentMsgIdList = msg.parentMsgIdList;
-                            multiMsgItem.id = MessageUnique.createUniqueMsgId(parentMsgPeer, multiMsgItem.msgId); //该ID仅用查看 无法调用
-                            return await this.parseMessage(multiMsgItem, 'array');
-                        },
-                    ))).filter(item => item !== undefined),
-                },
+                data: { id: msg.msgId }
             };
+            if (!context.parseMultMsg) return forward;
+            forward.data.content = await this.parseMultiMessageContent(
+                multiMsgs,
+                parentMsgPeer,
+                msg.parentMsgIdList
+            );
+            return forward;
         },
 
         arkElement: async (element) => {
@@ -692,18 +681,48 @@ export class OneBotMsgApi {
         }
     }
 
+    private async getMultiMessages(msg: RawMessage, parentMsgPeer: Peer) {
+        //判断是否在合并消息内
+        msg.parentMsgIdList = msg.parentMsgIdList ?? [];
+        //首次列表不存在则开始创建
+        msg.parentMsgIdList.push(msg.msgId);
+        //拉取下级消息
+        return (await this.core.apis.MsgApi.getMultiMsg(
+            parentMsgPeer,
+            msg.parentMsgIdList[0],
+            msg.msgId
+        ))?.msgList;
+    }
+
+    private async parseMultiMessageContent(
+        multiMsgs: RawMessage[],
+        parentMsgPeer: Peer,
+        parentMsgIdList: string[]
+    ) {
+        const parsed = await Promise.all(multiMsgs.map(async msg => {
+            msg.parentMsgPeer = parentMsgPeer;
+            msg.parentMsgIdList = parentMsgIdList;
+            msg.id = MessageUnique.createUniqueMsgId(parentMsgPeer, msg.msgId);
+            //该ID仅用查看 无法调用
+            return await this.parseMessage(msg, 'array', true);
+        }));
+        return parsed.filter(item => item !== undefined);
+    }
+
     async parseMessage(
         msg: RawMessage,
         messagePostFormat: string,
+        parseMultMsg: boolean = true
     ) {
         if (messagePostFormat === 'string') {
-            return (await this.parseMessageV2(msg))?.stringMsg;
+            return (await this.parseMessageV2(msg, parseMultMsg))?.stringMsg;
         }
-        return (await this.parseMessageV2(msg))?.arrayMsg;
+        return (await this.parseMessageV2(msg, parseMultMsg))?.arrayMsg;
     }
 
     async parseMessageV2(
         msg: RawMessage,
+        parseMultMsg: boolean = true
     ) {
         if (msg.senderUin == '0' || msg.senderUin == '') return;
         if (msg.peerUin == '0' || msg.peerUin == '') return;
@@ -767,11 +786,15 @@ export class OneBotMsgApi {
                             element: Exclude<MessageElement[keyof RawToOb11Converters], null | undefined>,
                             msg: RawMessage,
                             elementWrapper: MessageElement,
+                            context: RecvMessageContext
                         ) => PromiseLike<OB11MessageData | null>;
                         const parsedElement = await converters?.(
                             element[key],
                             msg,
                             element,
+                            {
+                                parseMultMsg: parseMultMsg
+                            }
                         );
                         // 对于 face 类型的消息，检查是否存在
                         if (key === 'faceElement' && !parsedElement) {
@@ -819,7 +842,7 @@ export class OneBotMsgApi {
             }
             const converter = this.ob11ToRawConverters[sendMsg.type] as (
                 sendMsg: Extract<OB11MessageData, { type: OB11MessageData['type'] }>,
-                context: MessageContext,
+                context: SendMessageContext,
             ) => Promise<SendMessageElement | undefined>;
             const callResult = converter(
                 sendMsg,
@@ -878,7 +901,7 @@ export class OneBotMsgApi {
 
     private async handleOb11FileLikeMessage(
         { data: inputdata }: OB11MessageFileBase,
-        { deleteAfterSentFiles }: MessageContext,
+        { deleteAfterSentFiles }: SendMessageContext,
     ) {
         const realUri = inputdata.url || inputdata.file || inputdata.path || '';
         if (realUri.length === 0) {

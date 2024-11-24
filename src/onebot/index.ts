@@ -551,7 +551,7 @@ export class NapCatOneBot11Adapter {
     }
     private async handleMsg(message: RawMessage, network: Array<AdapterConfigWrap>) {
         try {
-            const ob11Msg = await this.apis.MsgApi.parseMessageV2(message);
+            const ob11Msg = await this.apis.MsgApi.parseMessageV2(message, this.configLoader.configData.parseMultMsg);
             if (ob11Msg) {
                 const isSelfMsg = this.isSelfMessage(ob11Msg);
                 this.context.logger.logDebug('转化为 OB11Message', ob11Msg);
