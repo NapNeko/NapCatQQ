@@ -912,11 +912,19 @@ export class OneBotMsgApi {
             guildId: '',
             peerUid: peer.peerUid,
         }, returnMsg.msgId);
+
         setTimeout(() => {
             deleteAfterSentFiles.forEach(file => {
-                fsPromise.unlink(file).then().catch(e => this.core.context.logger.logError.bind(this.core.context.logger)('发送消息删除文件失败', e));
+                try {
+                    if (fs.existsSync(file)) {
+                        fsPromise.unlink(file).then().catch(e => this.core.context.logger.logError.bind(this.core.context.logger)('发送消息删除文件失败', e));
+                    }
+                } catch (error) {
+                    this.core.context.logger.logError.bind(this.core.context.logger)('发送消息删除文件失败', (e as Error).message)
+                }
             });
         }, 60000);
+        
         return returnMsg;
     }
 
