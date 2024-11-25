@@ -626,14 +626,19 @@ export class NapCatOneBot11Adapter {
 
     private async handlePrivateMsgEvent(message: RawMessage) {
         try {
-            const privateEvent = await this.apis.MsgApi.parsePrivateMsgEvent(message);
-            if (privateEvent) {
-                this.networkManager.emitEvent(privateEvent);
+            if (message.msgType === NTMsgType.KMSGTYPEGRAYTIPS) {
+                // 灰条为单元素消息
+                const grayTipElement = message.elements[0].grayTipElement;
+                if (grayTipElement) {
+                    const event = await this.apis.MsgApi.parsePrivateMsgEvent(message, grayTipElement);
+                    event && await this.networkManager.emitEvent(event);
+                }
             }
         } catch (e) {
             this.context.logger.logError('constructPrivateEvent error: ', e);
         }
     }
+
     private async emitRecallMsg(msgList: RawMessage[], cache: LRUCache<string, boolean>) {
         for (const message of msgList) {
             // log("message update", message.sendStatus, message.msgId, message.msgSeq)

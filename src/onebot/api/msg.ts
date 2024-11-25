@@ -17,6 +17,7 @@ import {
     SendTextElement,
     BaseEmojiType,
     FaceType,
+    GrayTipElement,
 } from '@/core';
 import faceConfig from '@/core/external/face_config.json';
 import { NapCatOneBot11Adapter, OB11Message, OB11MessageData, OB11MessageDataType, OB11MessageFileBase, OB11MessageForward, } from '@/onebot';
@@ -664,20 +665,13 @@ export class OneBotMsgApi {
         this.core = core;
     }
 
-    async parsePrivateMsgEvent(msg: RawMessage) {
-        if (msg.chatType !== ChatType.KCHATTYPEC2C) {
-            return;
-        }
-        for (const element of msg.elements) {
-            if (element.grayTipElement && element.grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
-                if (element.grayTipElement.jsonGrayTipElement.busiId == 1061) {
-                    const PokeEvent = await this.obContext.apis.FriendApi.parsePrivatePokeEvent(element.grayTipElement);
-                    if (PokeEvent) return PokeEvent;
-                }
-                //好友添加成功事件
-                if (element.grayTipElement.jsonGrayTipElement.busiId == 19324 && msg.peerUid !== '') {
-                    return new OB11FriendAddNoticeEvent(this.core, Number(await this.core.apis.UserApi.getUinByUidV2(msg.peerUid)));
-                }
+    async parsePrivateMsgEvent(msg: RawMessage, grayTipElement: GrayTipElement) {
+        if (grayTipElement && grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
+            if (grayTipElement.jsonGrayTipElement.busiId == 1061) {
+                const PokeEvent = await this.obContext.apis.FriendApi.parsePrivatePokeEvent(grayTipElement);
+                if (PokeEvent) return PokeEvent;
+            } else if (grayTipElement.jsonGrayTipElement.busiId == 19324 && msg.peerUid !== '') {
+                return new OB11FriendAddNoticeEvent(this.core, Number(await this.core.apis.UserApi.getUinByUidV2(msg.peerUid)));
             }
         }
     }
@@ -733,7 +727,7 @@ export class OneBotMsgApi {
         if (this.core.selfInfo.uin == msg.senderUin) {
             resMsg.message_sent_type = 'self';
         }
-        
+
         if (msg.chatType == ChatType.KCHATTYPEGROUP) {
             await this.handleGroupMessage(resMsg, msg);
         } else if (msg.chatType == ChatType.KCHATTYPEC2C) {
