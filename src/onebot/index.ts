@@ -181,15 +181,20 @@ export class NapCatOneBot11Adapter {
         const newLog = await this.creatOneBotLog(now);
         this.context.logger.log(`[Notice] [OneBot11] 配置变更前:\n${prevLog}`);
         this.context.logger.log(`[Notice] [OneBot11] 配置变更后:\n${newLog}`);
-    
-        await this.handleConfigChange(now.network.httpServers, OB11PassiveHttpAdapter);
-        await this.handleConfigChange(now.network.httpClients, OB11ActiveHttpAdapter);
-        await this.handleConfigChange(now.network.websocketServers, OB11PassiveWebSocketAdapter);
-        await this.handleConfigChange(now.network.websocketClients, OB11ActiveWebSocketAdapter);
+
+        await this.handleConfigChange(prev.network.httpServers, now.network.httpServers, OB11PassiveHttpAdapter);
+        await this.handleConfigChange(prev.network.httpClients, now.network.httpClients, OB11ActiveHttpAdapter);
+        await this.handleConfigChange(prev.network.websocketServers, now.network.websocketServers, OB11PassiveWebSocketAdapter);
+        await this.handleConfigChange(prev.network.websocketClients, now.network.websocketClients, OB11ActiveWebSocketAdapter);
     }
-    
-    private async handleConfigChange(adapters: NetworkConfigAdapter[], adapterClass: new (...args: any[]) => IOB11NetworkAdapter): Promise<void> {
-        for (const adapterConfig of adapters) {
+
+    private async handleConfigChange(
+        prevConfig: NetworkConfigAdapter[],
+        nowConfig: NetworkConfigAdapter[],
+        adapterClass: new (...args: any[]) => IOB11NetworkAdapter
+    ): Promise<void> {
+        // 通知新配置重载 删除关闭的 加入新开的 
+        for (const adapterConfig of nowConfig) {
             const existingAdapter = this.networkManager.findSomeAdapter(adapterConfig.name);
             if (existingAdapter) {
                 const networkChange = await existingAdapter.reload(adapterConfig);
@@ -199,6 +204,16 @@ export class NapCatOneBot11Adapter {
             } else {
                 const newAdapter = new adapterClass(adapterConfig.name, adapterConfig, this.core, this.actions);
                 await this.networkManager.registerAdapterAndOpen(newAdapter);
+            }
+        }
+        // 比较旧的找不到的回收
+        for (const adapterConfig of prevConfig) {
+            const existingAdapter = nowConfig.find((e) => e.name === adapterConfig.name);
+            if (!existingAdapter) {
+                const existingAdapter = this.networkManager.findSomeAdapter(adapterConfig.name);
+                if (existingAdapter) {
+                    await this.networkManager.closeSomeAdaterWhenOpen([existingAdapter]);
+                }
             }
         }
     }
