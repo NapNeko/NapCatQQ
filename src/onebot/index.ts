@@ -176,65 +176,31 @@ export class NapCatOneBot11Adapter {
         };
     }
 
-    private async reloadNetwork(prev: OneBotConfig, now: OneBotConfig) {
+    private async reloadNetwork(prev: OneBotConfig, now: OneBotConfig): Promise<void> {
         const prevLog = await this.creatOneBotLog(prev);
         const newLog = await this.creatOneBotLog(now);
         this.context.logger.log(`[Notice] [OneBot11] 配置变更前:\n${prevLog}`);
         this.context.logger.log(`[Notice] [OneBot11] 配置变更后:\n${newLog}`);
-
-        const { added: addedHttpServers, removed: removedHttpServers } = this.findDifference(prev.network.httpServers, now.network.httpServers);
-        const { added: addedHttpClients, removed: removedHttpClients } = this.findDifference(prev.network.httpClients, now.network.httpClients);
-        const { added: addedWebSocketServers, removed: removedWebSocketServers } = this.findDifference(prev.network.websocketServers, now.network.websocketServers);
-        const { added: addedWebSocketClients, removed: removedWebSocketClients } = this.findDifference(prev.network.websocketClients, now.network.websocketClients);
-
-        await this.handleRemovedAdapters(removedHttpServers);
-        await this.handleRemovedAdapters(removedHttpClients);
-        await this.handleRemovedAdapters(removedWebSocketServers);
-        await this.handleRemovedAdapters(removedWebSocketClients);
-
-        await this.handlerConfigChange(now.network.httpServers);
-        await this.handlerConfigChange(now.network.httpClients);
-        await this.handlerConfigChange(now.network.websocketServers);
-        await this.handlerConfigChange(now.network.websocketClients);
-
-        await this.handleAddedAdapters(addedHttpServers, OB11PassiveHttpAdapter);
-        await this.handleAddedAdapters(addedHttpClients, OB11ActiveHttpAdapter);
-        await this.handleAddedAdapters(addedWebSocketServers, OB11PassiveWebSocketAdapter);
-        await this.handleAddedAdapters(addedWebSocketClients, OB11ActiveWebSocketAdapter);
+    
+        await this.handleConfigChange(now.network.httpServers, OB11PassiveHttpAdapter);
+        await this.handleConfigChange(now.network.httpClients, OB11ActiveHttpAdapter);
+        await this.handleConfigChange(now.network.websocketServers, OB11PassiveWebSocketAdapter);
+        await this.handleConfigChange(now.network.websocketClients, OB11ActiveWebSocketAdapter);
     }
-
-    private async handlerConfigChange(adapters: Array<NetworkConfigAdapter>) {
+    
+    private async handleConfigChange(adapters: NetworkConfigAdapter[], adapterClass: new (...args: any[]) => IOB11NetworkAdapter): Promise<void> {
         for (const adapterConfig of adapters) {
             const existingAdapter = this.networkManager.findSomeAdapter(adapterConfig.name);
             if (existingAdapter) {
                 const networkChange = await existingAdapter.reload(adapterConfig);
                 if (networkChange === OB11NetworkReloadType.NetWorkClose) {
-                    this.networkManager.closeSomeAdapters([existingAdapter]);
-
+                    await this.networkManager.closeSomeAdaterWhenOpen([existingAdapter]);
                 }
+            } else {
+                const newAdapter = new adapterClass(adapterConfig.name, adapterConfig, this.core, this.actions);
+                await this.networkManager.registerAdapterAndOpen(newAdapter);
             }
         }
-    }
-
-    private async handleRemovedAdapters(adapters: Array<{ name: string }>): Promise<void> {
-        for (const adapter of adapters) {
-            await this.networkManager.closeAdapterByPredicate((existingAdapter) => existingAdapter.name === adapter.name);
-        }
-    }
-
-    private async handleAddedAdapters<T extends new (...args: any[]) => IOB11NetworkAdapter>(addedAdapters: Array<NetworkConfigAdapter>, AdapterClass: T) {
-        for (const adapter of addedAdapters) {
-            if (adapter.enable) {
-                const newAdapter = new AdapterClass(adapter.name, adapter, this.core, this.actions);
-                await newAdapter.open();
-                this.networkManager.registerAdapter(newAdapter);
-            }
-        }
-    }
-    private findDifference<T>(prev: T[], now: T[]): { added: T[]; removed: T[] } {
-        const added = now.filter((item) => !prev.includes(item));
-        const removed = prev.filter((item) => !now.includes(item));
-        return { added, removed };
     }
 
     private initMsgListener() {
