@@ -527,8 +527,11 @@ export class NapCatOneBot11Adapter {
         const network = Object.values(this.configLoader.configData.network).flat() as Array<AdapterConfigWrap>;
         this.context.logger.logDebug('收到新消息 RawMessage', message);
         await this.handleMsg(message, network);
-        await this.handleGroupEvent(message);
-        await this.handlePrivateMsgEvent(message);
+        if (message.chatType == ChatType.KCHATTYPEGROUP) {
+            await this.handleGroupEvent(message);
+        } else {
+            await this.handlePrivateMsgEvent(message);
+        }
     }
     private async handleMsg(message: RawMessage, network: Array<AdapterConfigWrap>) {
         try {
@@ -597,10 +600,10 @@ export class NapCatOneBot11Adapter {
 
     private async handleGroupEvent(message: RawMessage) {
         try {
-            const groupEvent = await this.apis.GroupApi.parseGroupEvent(message);
-            if (groupEvent) {
-                this.networkManager.emitEvent(groupEvent);
-            }
+            const grayTipElement = message.elements.find((element) => element.grayTipElement)?.grayTipElement;
+            if (!grayTipElement) return;
+            const events = await this.apis.GroupApi.parseGrayTipElement(message, grayTipElement);
+            await this.networkManager.emitEvents(events);
         } catch (e) {
             this.context.logger.logError('constructGroupEvent error: ', e);
         }
