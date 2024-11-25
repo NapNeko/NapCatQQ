@@ -2,28 +2,14 @@
     <div class="login-container">
         <h2 class="sotheby-font">QQ Login</h2>
         <div class="login-methods">
-            <t-button
-                id="quick-login"
-                class="login-method"
-                :class="{ active: loginMethod === 'quick' }"
-                @click="loginMethod = 'quick'"
-                >Quick Login</t-button
-            >
-            <t-button
-                id="qrcode-login"
-                class="login-method"
-                :class="{ active: loginMethod === 'qrcode' }"
-                @click="loginMethod = 'qrcode'"
-                >QR Code</t-button
-            >
+            <t-button id="quick-login" class="login-method" :class="{ active: loginMethod === 'quick' }"
+                @click="loginMethod = 'quick'">Quick Login</t-button>
+            <t-button id="qrcode-login" class="login-method" :class="{ active: loginMethod === 'qrcode' }"
+                @click="loginMethod = 'qrcode'">QR Code</t-button>
         </div>
         <div v-show="loginMethod === 'quick'" id="quick-login-dropdown" class="login-form">
-            <t-select
-                id="quick-login-select"
-                v-model="selectedAccount"
-                placeholder="Select Account"
-                @change="selectAccount"
-            >
+            <t-select id="quick-login-select" v-model="selectedAccount" placeholder="Select Account"
+                @change="selectAccount">
                 <t-option v-for="account in quickLoginList" :key="account" :value="account">{{ account }}</t-option>
             </t-select>
         </div>
@@ -47,7 +33,7 @@ const selectedAccount = ref<string>('');
 const qrcodeCanvas = ref<HTMLCanvasElement | null>(null);
 const qqLoginManager = new QQLoginManager(localStorage.getItem('auth') || '');
 let heartBeatTimer: number | null = null;
-
+let qrcodeUrl: string = '';
 const selectAccount = async (accountName: string): Promise<void> => {
     const { result, errMsg } = await qqLoginManager.setQuickLogin(accountName);
     if (result) {
@@ -73,19 +59,26 @@ const generateQrCode = (data: string, canvas: HTMLCanvasElement | null): void =>
 };
 
 const HeartBeat = async (): Promise<void> => {
-    const isLogined = await qqLoginManager.checkQQLoginStatus();
-    if (isLogined) {
+    const isLogined = await qqLoginManager.checkQQLoginStatusWithQrcode();
+    if (isLogined?.isLogin) {
         if (heartBeatTimer) {
             clearInterval(heartBeatTimer);
         }
+        //判断是否已经调转
+        if (router.currentRoute.value.path !== '/dashboard/basic-info') {
+            return;
+        }
         await router.push({ path: '/dashboard/basic-info' });
+    } else if (isLogined?.qrcodeurl && qrcodeUrl !== isLogined.qrcodeurl) {
+        qrcodeUrl = isLogined.qrcodeurl;
+        generateQrCode(qrcodeUrl, qrcodeCanvas.value);
     }
 };
 
 const InitPages = async (): Promise<void> => {
     quickLoginList.value = await qqLoginManager.getQQQuickLoginList();
-    const qrcodeData = await qqLoginManager.getQQLoginQrcode();
-    generateQrCode(qrcodeData, qrcodeCanvas.value);
+    qrcodeUrl = await qqLoginManager.getQQLoginQrcode();
+    generateQrCode(qrcodeUrl, qrcodeCanvas.value);
     heartBeatTimer = window.setInterval(HeartBeat, 3000);
 };
 
