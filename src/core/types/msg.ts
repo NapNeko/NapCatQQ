@@ -393,6 +393,24 @@ export enum NTGroupGrayElementRole {
 }
 
 /**
+ * 群灰色提示成员接口
+ * */
+
+export interface NTGroupGrayMember {
+    serialVersionUID: string;
+    uid: string;
+    name: string;
+}
+/**
+ * 群灰色提示邀请者和被邀请者接口
+ * 
+ * */
+export interface NTGroupGrayInviterAndInvite {
+    invited: NTGroupGrayMember;
+    inviter: NTGroupGrayMember;
+    serialVersionUID: string;
+}
+/**
  * 群提示元素接口
  */
 export interface TipGroupElement {
@@ -408,13 +426,13 @@ export interface TipGroupElement {
     createGroup: null;
     memberAdd?: {
         showType: MemberAddShowType;
-        otherAdd: null;
-        otherAddByOtherQRCode: null;
-        otherAddByYourQRCode: null;
-        youAddByOtherQRCode: null;
-        otherInviteOther: null;
-        otherInviteYou: null;
-        youInviteOther: null
+        otherAdd: NTGroupGrayMember;
+        otherAddByOtherQRCode: NTGroupGrayInviterAndInvite;
+        otherAddByYourQRCode: NTGroupGrayMember;
+        youAddByOtherQRCode: NTGroupGrayMember;
+        otherInviteOther: NTGroupGrayInviterAndInvite;
+        otherInviteYou: NTGroupGrayMember;
+        youInviteOther: NTGroupGrayMember;
     };
     shutUp?: {
         curTime: string;
