@@ -74,6 +74,26 @@ export class QQLoginManager {
         }
         return false;
     }
+    public async checkQQLoginStatusWithQrcode(): Promise<{ qrcodeurl: string, isLogin: string } | undefined> {
+        try {
+            const QQLoginResponse = await fetch(`${this.apiPrefix}/QQLogin/CheckLoginStatus`, {
+                method: 'POST',
+                headers: {
+                    Authorization: 'Bearer ' + this.retCredential,
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (QQLoginResponse.status == 200) {
+                const QQLoginResponseJson = await QQLoginResponse.json();
+                if (QQLoginResponseJson.code == 0) {
+                    return QQLoginResponseJson.data;
+                }
+            }
+        } catch (error) {
+            console.error('Error checking QQ login status:', error);
+        }
+        return undefined;
+    }
 
     public async checkWebUiLogined(): Promise<boolean> {
         try {
