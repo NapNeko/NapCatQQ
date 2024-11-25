@@ -1,10 +1,13 @@
 import {
     ChatType,
+    FileElement,
     GrayTipElement,
     InstanceContext,
     JsonGrayBusiId,
+    MessageElement,
     NapCatCore,
     NTGrayTipElementSubTypeV2,
+    NTMsgType,
     RawMessage,
     TipGroupElement,
     TipGroupElementType,
@@ -21,6 +24,9 @@ import { OB11GroupPokeEvent } from '@/onebot/event/notice/OB11PokeEvent';
 import { OB11GroupEssenceEvent } from '@/onebot/event/notice/OB11GroupEssenceEvent';
 import { OB11GroupTitleEvent } from '@/onebot/event/notice/OB11GroupTitleEvent';
 import { OB11EmitEventContent } from '../network';
+import { OB11GroupUploadNoticeEvent } from '../event/notice/OB11GroupUploadNoticeEvent';
+import { pathToFileURL } from 'node:url';
+import { FileNapCatOneBotUUID } from '@/common/helper';
 
 export class OneBotGroupApi {
     obContext: NapCatOneBot11Adapter;
@@ -246,7 +252,7 @@ export class OneBotGroupApi {
             context.logger.logWarn('收到未知的灰条消息', json);
         }
     }
-    
+
     async parseEssenceMsg(msg: RawMessage, jsonStr: string) {
         const json = JSON.parse(jsonStr);
         const searchParams = new URL(json.items[0].jp).searchParams;
@@ -272,42 +278,55 @@ export class OneBotGroupApi {
         // 获取MsgSeq+Peer可获取具体消息
     }
 
-    // async parseGroupUploadFileEvene() {
-    //     return new OB11GroupUploadNoticeEvent(
-    //         this.core,
-    //         parseInt(msg.peerUid), parseInt(msg.senderUin || ''),
-    //         {
-    //             id: FileNapCatOneBotUUID.encode({
-    //                 chatType: ChatType.KCHATTYPEGROUP,
-    //                 peerUid: msg.peerUid,
-    //             }, msg.msgId, element.elementId, element.fileElement.fileUuid, "." + element.fileElement.fileName),
-    //             url: pathToFileURL(element.fileElement.filePath).href,
-    //             name: element.fileElement.fileName,
-    //             size: parseInt(element.fileElement.fileSize),
-    //             busid: element.fileElement.fileBizId ?? 0,
-    //         },
-    //     );
-    // }
+    async parseGroupUploadFileEvene(msg: RawMessage, element: FileElement, elementWrapper: MessageElement) {
+        return new OB11GroupUploadNoticeEvent(
+            this.core,
+            parseInt(msg.peerUid), parseInt(msg.senderUin || ''),
+            {
+                id: FileNapCatOneBotUUID.encode({
+                    chatType: ChatType.KCHATTYPEGROUP,
+                    peerUid: msg.peerUid,
+                }, msg.msgId, elementWrapper.elementId, elementWrapper?.fileElement?.fileUuid, "." + element.fileName),
+                url: pathToFileURL(element.filePath).href,
+                name: element.fileName,
+                size: parseInt(element.fileSize),
+                busid: element.fileBizId ?? 0,
+            },
+        );
+    }
 
     async parseGrayTipElement(msg: RawMessage, grayTipElement: GrayTipElement) {
         let events: Array<OB11EmitEventContent> = [];
 
-        // 群名片修改事件解析
-
-        const cardChangedEvent = await this.parseCardChangedEvent(msg);
-        if (cardChangedEvent) {
-            events.push(cardChangedEvent);
+        // 群名片修改事件解析 任何都该判断
+        if (msg.senderUin && msg.senderUin !== '0') {
+            const cardChangedEvent = await this.parseCardChangedEvent(msg);
+            if (cardChangedEvent) {
+                events.push(cardChangedEvent);
+            }
         }
 
-        // 解析群组事件
-        if (grayTipElement.groupElement) {
+
+        if (msg.msgType === NTMsgType.KMSGTYPEFILE) {
+            //文件上传事件 文件为单一元素
+            const elementWrapper = msg.elements.find(e => !!e.fileElement);
+            if (elementWrapper && elementWrapper.fileElement) {
+                const uploadGroupFileEvent = await this.parseGroupUploadFileEvene(msg, elementWrapper.fileElement, elementWrapper);
+                if (uploadGroupFileEvent) {
+                    events.push(uploadGroupFileEvent);
+                    return events;//带有file 说明必然不可能是灰条消息
+                }
+            }
+        }
+
+
+        if (grayTipElement.subElementType === NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_GROUP) {
+            // 解析群组事件
             const groupEvent = await this.parseGroupElement(msg, grayTipElement.groupElement, grayTipElement);
             if (groupEvent) {
                 events.push(groupEvent);
             }
-        }
-
-        if (grayTipElement.subElementType === NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_XMLMSG) {
+        } else if (grayTipElement.subElementType === NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_XMLMSG) {
             // 筛选出表情回应 事件
             if (grayTipElement.xmlElement?.templId === '10382') {
                 const emojiLikeEvent = await this.obContext.apis.GroupApi.parseGroupEmojiLikeEventByGrayTip(msg.peerUid, grayTipElement);
@@ -321,6 +340,7 @@ export class OneBotGroupApi {
                 }
             }
         } else if (grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
+            // 解析json事件
             if (grayTipElement.jsonGrayTipElement.busiId == 1061) {
                 const paiYiPaiEvent = await this.parsePaiYiPai(msg, grayTipElement.jsonGrayTipElement.jsonStr);
                 if (paiYiPaiEvent) {
