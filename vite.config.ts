@@ -87,6 +87,7 @@ const FrameworkBaseConfig = () =>
                 '@/core': resolve(__dirname, './src/core'),
                 '@': resolve(__dirname, './src'),
                 './lib-cov/fluent-ffmpeg': './lib/fluent-ffmpeg',
+                '@webapi': resolve(__dirname, './src/webui/src'),
             },
         },
         build: {
