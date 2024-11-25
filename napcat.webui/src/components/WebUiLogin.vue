@@ -1,5 +1,5 @@
 <template>
-    <t-card  class="layout">
+    <t-card class="layout">
         <div class="login-container">
             <h2 class="sotheby-font">WebUi Login</h2>
             <t-form ref="form" :data="formData" colon :label-width="0" @submit="onSubmit">
@@ -96,7 +96,7 @@ const onSubmit = async ({ validateResult }: { validateResult: boolean }) => {
 </script>
 
 <style scoped>
-.layout{
+.layout {
     height: 100vh;
 }
 .login-container {

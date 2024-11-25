@@ -3,20 +3,15 @@
         <router-view />
     </div>
     <div v-if="show">
-        <t-sticky-tool
-            shape="round"
-            placement="right-bottom"
-            :offset="[-50, 10]"
-            @click="changeTheme"
-        >
-            <t-sticky-item label="浅色" popup="切换浅色模式" >
-                <template #icon><sunny-icon/></template>
+        <t-sticky-tool shape="round" placement="right-bottom" :offset="[-50, 10]" @click="changeTheme">
+            <t-sticky-item label="浅色" popup="切换浅色模式">
+                <template #icon><sunny-icon /></template>
             </t-sticky-item>
-            <t-sticky-item label="深色" popup="切换深色模式" >
-                <template #icon><mode-dark-icon/></template>
+            <t-sticky-item label="深色" popup="切换深色模式">
+                <template #icon><mode-dark-icon /></template>
             </t-sticky-item>
-            <t-sticky-item label="自动" popup="跟随系统" >
-                <template #icon><control-platform-icon/></template>
+            <t-sticky-item label="自动" popup="跟随系统">
+                <template #icon><control-platform-icon /></template>
             </t-sticky-item>
         </t-sticky-tool>
     </div>
@@ -40,11 +35,11 @@ enum ThemeMode {
     Auto = 'auto',
 }
 const themeLabelMap: Record<string, ThemeMode> = {
-    '浅色': ThemeMode.Light,
-    '深色': ThemeMode.Dark,
-    '自动': ThemeMode.Auto,
+    浅色: ThemeMode.Light,
+    深色: ThemeMode.Dark,
+    自动: ThemeMode.Auto,
 };
-const show = ref<boolean>(true)
+const show = ref<boolean>(true);
 const createSetThemeAttributeFunction = () => {
     let mediaQueryForAutoTheme: MediaQueryList | null = null;
     return (mode: ThemeMode | null) => {
@@ -64,9 +59,9 @@ const createSetThemeAttributeFunction = () => {
             };
             mediaQueryForAutoTheme.addEventListener('change', handleMediaChange);
             const event = new Event('change');
-            Object.defineProperty(event,'matches', {
+            Object.defineProperty(event, 'matches', {
                 value: mediaQueryForAutoTheme.matches,
-                writable: false
+                writable: false,
             });
             mediaQueryForAutoTheme.dispatchEvent(event);
             onBeforeUnmount(() => {
@@ -107,13 +102,11 @@ const haddingFbars = () => {
 };
 onMounted(() => {
     initTheme();
-    haddingFbars()
+    haddingFbars();
     window.addEventListener('resize', haddingFbars);
 });
 onUnmounted(() => {
     window.removeEventListener('resize', haddingFbars);
 });
 </script>
-<style  scoped>
-
-</style>
+<style scoped></style>

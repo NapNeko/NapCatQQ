@@ -1,10 +1,10 @@
 <template>
-    <t-menu  theme="light" default-value="2-1" :collapsed="collapsed" class="sidebar-menu">
+    <t-menu theme="light" default-value="2-1" :collapsed="collapsed" class="sidebar-menu">
         <template #logo>
             <div class="logo">
                 <img class="logo-img" :width="collapsed ? 35 : 'auto'" src="@/assets/logo_webui.png" alt="logo" />
                 <div class="logo-textBox">
-                    <div class="logo-text">{{ collapsed? '' : 'NapCat' }}</div>
+                    <div class="logo-text">{{ collapsed ? '' : 'NapCat' }}</div>
                 </div>
             </div>
         </template>
@@ -19,7 +19,13 @@
             </t-tooltip>
         </router-link>
         <template #operations>
-            <t-button :disabled="disBtn" class="t-demo-collapse-btn" variant="text" shape="square" @click="changeCollapsed">
+            <t-button
+                :disabled="disBtn"
+                class="t-demo-collapse-btn"
+                variant="text"
+                shape="square"
+                @click="changeCollapsed"
+            >
                 <template #icon><t-icon :name="iconName" /></template>
             </t-button>
         </template>
@@ -51,9 +57,9 @@ const changeCollapsed = (): void => {
     localStorage.setItem('sidebar-collapsed', collapsed.value.toString());
 };
 watch(collapsed, (newValue, oldValue) => {
-    setTimeout(()=>{
+    setTimeout(() => {
         emitter.emit('sendMenu', collapsed.value);
-    },300)
+    }, 300);
 });
 onMounted(() => {
     const mediaQuery = window.matchMedia('(max-width: 800px)');
@@ -65,9 +71,9 @@ onMounted(() => {
     };
     mediaQuery.addEventListener('change', handleMediaChange);
     const event = new Event('change');
-    Object.defineProperty(event,'matches', {
+    Object.defineProperty(event, 'matches', {
         value: mediaQuery.matches,
-        writable: false
+        writable: false,
     });
     mediaQuery.dispatchEvent(event);
     return () => {
@@ -91,17 +97,17 @@ onMounted(() => {
         width: 100px; /* 移动端侧边栏宽度 */
     }
 }
-.logo{
+.logo {
     display: flex;
     width: auto;
     height: 100%;
 }
-.logo-img{
+.logo-img {
     object-fit: contain;
     margin-top: 8px;
     margin-bottom: 8px;
 }
-.logo-textBox{
+.logo-textBox {
     display: flex;
     align-items: center;
     margin-left: 10px;

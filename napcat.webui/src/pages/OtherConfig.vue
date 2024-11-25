@@ -89,16 +89,15 @@ onMounted(() => {
     const handleMediaChange = (e: MediaQueryListEvent) => {
         if (e.matches) {
             labelAlign.value = 'top';
-        }
-        else {
+        } else {
             labelAlign.value = 'left';
         }
     };
     mediaQuery.addEventListener('change', handleMediaChange);
     const event = new Event('change');
-    Object.defineProperty(event,'matches', {
+    Object.defineProperty(event, 'matches', {
         value: mediaQuery.matches,
-        writable: false
+        writable: false,
     });
     mediaQuery.dispatchEvent(event);
     return () => {
@@ -108,10 +107,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.title{
+.title {
     padding: 20px 20px 0 20px;
 }
-.card{
+.card {
     margin: 0 20px;
     padding-top: 20px;
     padding-bottom: 20px;
@@ -140,5 +139,4 @@ onMounted(() => {
     justify-content: center;
     margin-top: 20px;
 }
-
 </style>

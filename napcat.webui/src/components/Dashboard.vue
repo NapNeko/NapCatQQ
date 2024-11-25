@@ -20,7 +20,6 @@ interface MenuItem {
     route: string;
 }
 
-
 const menuItems = ref<MenuItem[]>([
     { value: 'item1', icon: 'dashboard', label: '基础信息', route: '/dashboard/basic-info' },
     { value: 'item3', icon: 'wifi-1', label: '网络配置', route: '/dashboard/network-config' },
@@ -28,9 +27,9 @@ const menuItems = ref<MenuItem[]>([
     { value: 'item5', icon: 'system-log', label: '日志查看', route: '/dashboard/log-view' },
     { value: 'item6', icon: 'info-circle', label: '关于我们', route: '/dashboard/about-us' },
 ]);
-const menuRef=ref<any>(null)
+const menuRef = ref<any>(null);
 emitter.on('sendMenu', (event) => {
-    emitter.emit('sendWidth',menuRef.value.offsetWidth);
+    emitter.emit('sendWidth', menuRef.value.offsetWidth);
     localStorage.setItem('menuWidth', menuRef.value.offsetWidth);
 });
 onMounted(() => {
@@ -39,7 +38,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-
 .dashboard-container {
     display: flex;
     flex-direction: row;
@@ -51,7 +49,6 @@ onMounted(() => {
     position: relative;
     z-index: 2;
 }
-
 
 @media (max-width: 768px) {
     .content {

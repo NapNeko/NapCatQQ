@@ -3,22 +3,22 @@
         <div class="login-container">
             <h2 class="sotheby-font">QQ Login</h2>
             <div class="login-methods">
-                <t-tooltip  content="快速登录" >
+                <t-tooltip content="快速登录">
                     <t-button
                         id="quick-login"
                         class="login-method"
                         :class="{ active: loginMethod === 'quick' }"
                         @click="loginMethod = 'quick'"
-                    >Quick Login</t-button
+                        >Quick Login</t-button
                     >
                 </t-tooltip>
-                <t-tooltip content="二维码登录" >
+                <t-tooltip content="二维码登录">
                     <t-button
                         id="qrcode-login"
                         class="login-method"
                         :class="{ active: loginMethod === 'qrcode' }"
                         @click="loginMethod = 'qrcode'"
-                    >QR Code</t-button
+                        >QR Code</t-button
                     >
                 </t-tooltip>
             </div>
@@ -109,7 +109,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.layout{
+.layout {
     height: 100vh;
 }
 .login-container {
