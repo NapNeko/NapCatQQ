@@ -198,13 +198,11 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             this.open();
             return OB11NetworkReloadType.NetWorkOpen;
         } else if (!newConfig.enable && wasEnabled) {
-            console.log(newConfig.enable, wasEnabled);
             this.close();
             return OB11NetworkReloadType.NetWorkClose;
         }
 
         if (oldPort !== newConfig.port || oldHost !== newConfig.host) {
-            console.log(oldPort, newConfig.port, oldHost, newConfig.host);
             this.close();
             this.wsServer = new WebSocketServer({
                 port: newConfig.port,
