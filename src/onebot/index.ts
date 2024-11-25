@@ -13,6 +13,7 @@ import {
     Peer,
     RawMessage,
     SendStatusType,
+    NTMsgType,
 } from '@/core';
 import { OB11ConfigLoader } from '@/onebot/config';
 import {
@@ -600,10 +601,24 @@ export class NapCatOneBot11Adapter {
 
     private async handleGroupEvent(message: RawMessage) {
         try {
+            // 群名片修改事件解析 任何都该判断
+            if (message.senderUin && message.senderUin !== '0') {
+                const cardChangedEvent = await this.apis.GroupApi.parseCardChangedEvent(message);
+                cardChangedEvent && await this.networkManager.emitEvent(cardChangedEvent);
+            }
+            if (message.msgType === NTMsgType.KMSGTYPEFILE) {
+                //文件上传事件 文件为单一元素
+                const elementWrapper = message.elements.find(e => !!e.fileElement);
+                if (elementWrapper?.fileElement) {
+                    const uploadGroupFileEvent = await this.apis.GroupApi.parseGroupUploadFileEvene(message, elementWrapper.fileElement, elementWrapper);
+                    uploadGroupFileEvent && await this.networkManager.emitEvent(uploadGroupFileEvent);
+                }
+            }
             const grayTipElement = message.elements.find((element) => element.grayTipElement)?.grayTipElement;
-            if (!grayTipElement) return;
-            const events = await this.apis.GroupApi.parseGrayTipElement(message, grayTipElement);
-            await this.networkManager.emitEvents(events);
+            if (grayTipElement) {
+                const event = await this.apis.GroupApi.parseGrayTipElement(message, grayTipElement);
+                event && await this.networkManager.emitEvent(event);
+            }
         } catch (e) {
             this.context.logger.logError('constructGroupEvent error: ', e);
         }

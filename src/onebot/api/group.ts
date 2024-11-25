@@ -174,6 +174,7 @@ export class OneBotGroupApi {
             }],
         );
     }
+
     async parseCardChangedEvent(msg: RawMessage) {
         if (msg.senderUin && msg.senderUin !== '0') {
             const member = await this.core.apis.GroupApi.getGroupMember(msg.peerUid, msg.senderUin);
@@ -296,68 +297,28 @@ export class OneBotGroupApi {
     }
 
     async parseGrayTipElement(msg: RawMessage, grayTipElement: GrayTipElement) {
-        let events: Array<OB11EmitEventContent> = [];
-
-        // 群名片修改事件解析 任何都该判断
-        if (msg.senderUin && msg.senderUin !== '0') {
-            const cardChangedEvent = await this.parseCardChangedEvent(msg);
-            if (cardChangedEvent) {
-                events.push(cardChangedEvent);
-            }
-        }
-
-
-        if (msg.msgType === NTMsgType.KMSGTYPEFILE) {
-            //文件上传事件 文件为单一元素
-            const elementWrapper = msg.elements.find(e => !!e.fileElement);
-            if (elementWrapper && elementWrapper.fileElement) {
-                const uploadGroupFileEvent = await this.parseGroupUploadFileEvene(msg, elementWrapper.fileElement, elementWrapper);
-                if (uploadGroupFileEvent) {
-                    events.push(uploadGroupFileEvent);
-                    return events;//带有file 说明必然不可能是灰条消息
-                }
-            }
-        }
-
-
         if (grayTipElement.subElementType === NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_GROUP) {
             // 解析群组事件
-            const groupEvent = await this.parseGroupElement(msg, grayTipElement.groupElement, grayTipElement);
-            if (groupEvent) {
-                events.push(groupEvent);
-            }
+           return await this.parseGroupElement(msg, grayTipElement.groupElement, grayTipElement);
+
         } else if (grayTipElement.subElementType === NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_XMLMSG) {
             // 筛选出表情回应 事件
             if (grayTipElement.xmlElement?.templId === '10382') {
-                const emojiLikeEvent = await this.obContext.apis.GroupApi.parseGroupEmojiLikeEventByGrayTip(msg.peerUid, grayTipElement);
-                if (emojiLikeEvent) {
-                    events.push(emojiLikeEvent);
-                }
+                return await this.obContext.apis.GroupApi.parseGroupEmojiLikeEventByGrayTip(msg.peerUid, grayTipElement);
+
             } else {
-                const GroupIncreaseEvent = await this.obContext.apis.GroupApi.parseGroupIncreaseEvent(msg.peerUid, grayTipElement);
-                if (GroupIncreaseEvent) {
-                    events.push(GroupIncreaseEvent);
-                }
+                return await this.obContext.apis.GroupApi.parseGroupIncreaseEvent(msg.peerUid, grayTipElement);
             }
         } else if (grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
             // 解析json事件
             if (grayTipElement.jsonGrayTipElement.busiId == 1061) {
-                const paiYiPaiEvent = await this.parsePaiYiPai(msg, grayTipElement.jsonGrayTipElement.jsonStr);
-                if (paiYiPaiEvent) {
-                    events.push(paiYiPaiEvent);
-                }
+                return await this.parsePaiYiPai(msg, grayTipElement.jsonGrayTipElement.jsonStr);
             } else if (grayTipElement.jsonGrayTipElement.busiId == JsonGrayBusiId.AIO_GROUP_ESSENCE_MSG_TIP) {
-                const essenceMsgEvent = await this.parseEssenceMsg(msg, grayTipElement.jsonGrayTipElement.jsonStr);
-                if (essenceMsgEvent) {
-                    events.push(essenceMsgEvent);
-                }
+                return await this.parseEssenceMsg(msg, grayTipElement.jsonGrayTipElement.jsonStr);
             } else {
-                const otherJsonEvent = await this.parseOtherJsonEvent(msg, grayTipElement.jsonGrayTipElement.jsonStr, this.core.context)
-                if (otherJsonEvent) {
-                    events.push(otherJsonEvent);
-                }
+                return await this.parseOtherJsonEvent(msg, grayTipElement.jsonGrayTipElement.jsonStr, this.core.context)
             }
         }
-        return events;
+        return undefined;
     }
 }
