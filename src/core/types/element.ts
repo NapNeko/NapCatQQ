@@ -40,17 +40,18 @@ export interface FaceElement {
     surpriseId?: string;
     randomType?: number;
 }
+export interface GrayTipRovokeElement {
+    operatorRole: string;
+    operatorUid: string;
+    operatorNick: string;
+    operatorRemark: string;
+    operatorMemRemark?: string;
+    wording: string;  // 自定义的撤回提示语
+}
 
 export interface GrayTipElement {
     subElementType: NTGrayTipElementSubTypeV2;
-    revokeElement: {
-        operatorRole: string;
-        operatorUid: string;
-        operatorNick: string;
-        operatorRemark: string;
-        operatorMemRemark?: string;
-        wording: string;  // 自定义的撤回提示语
-    };
+    revokeElement: GrayTipRovokeElement;
     aioOpGrayTipElement: TipAioOpGrayTipElement;
     groupElement: TipGroupElement;
     xmlElement: {
