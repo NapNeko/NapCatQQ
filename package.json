@@ -20,7 +20,6 @@
     "@eslint/js": "^9.14.0",
     "@log4js-node/log4js-api": "^1.0.2",
     "@napneko/nap-proto-core": "^0.0.4",
-    "@protobuf-ts/runtime": "^2.9.4",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/cors": "^2.8.17",
