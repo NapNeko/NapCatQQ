@@ -527,12 +527,10 @@ export class NapCatOneBot11Adapter {
     private async emitMsg(message: RawMessage) {
         const network = Object.values(this.configLoader.configData.network).flat() as Array<AdapterConfigWrap>;
         this.context.logger.logDebug('收到新消息 RawMessage', message);
-        await this.handleMsg(message, network);
-        if (message.chatType == ChatType.KCHATTYPEGROUP) {
-            await this.handleGroupEvent(message);
-        } else {
-            await this.handlePrivateMsgEvent(message);
-        }
+        await Promise.allSettled([
+            this.handleMsg(message, network),
+            message.chatType == ChatType.KCHATTYPEGROUP ? this.handleGroupEvent(message) : this.handlePrivateMsgEvent(message)
+        ]);
     }
     private async handleMsg(message: RawMessage, network: Array<AdapterConfigWrap>) {
         try {
@@ -607,17 +605,19 @@ export class NapCatOneBot11Adapter {
                 cardChangedEvent && await this.networkManager.emitEvent(cardChangedEvent);
             }
             if (message.msgType === NTMsgType.KMSGTYPEFILE) {
-                //文件上传事件 文件为单一元素
+                // 文件为单元素消息
                 const elementWrapper = message.elements.find(e => !!e.fileElement);
                 if (elementWrapper?.fileElement) {
                     const uploadGroupFileEvent = await this.apis.GroupApi.parseGroupUploadFileEvene(message, elementWrapper.fileElement, elementWrapper);
                     uploadGroupFileEvent && await this.networkManager.emitEvent(uploadGroupFileEvent);
                 }
-            }
-            const grayTipElement = message.elements.find((element) => element.grayTipElement)?.grayTipElement;
-            if (grayTipElement) {
-                const event = await this.apis.GroupApi.parseGrayTipElement(message, grayTipElement);
-                event && await this.networkManager.emitEvent(event);
+            } else if (message.msgType === NTMsgType.KMSGTYPEGRAYTIPS) {
+                // 灰条为单元素消息
+                const grayTipElement = message.elements[0].grayTipElement;
+                if (grayTipElement) {
+                    const event = await this.apis.GroupApi.parseGrayTipElement(message, grayTipElement);
+                    event && await this.networkManager.emitEvent(event);
+                }
             }
         } catch (e) {
             this.context.logger.logError('constructGroupEvent error: ', e);
