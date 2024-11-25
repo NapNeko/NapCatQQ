@@ -33,6 +33,7 @@ export const QQCheckLoginStatusHandler: RequestHandler = async (req, res) => {
         message: 'success',
         data: {
             isLogin: await WebUiDataRuntime.getQQLoginStatus(),
+            qrcodeurl: await WebUiDataRuntime.getQQLoginQrcodeURL()
         },
     });
 };

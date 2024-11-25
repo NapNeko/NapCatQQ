@@ -68,6 +68,14 @@ export class OB11NetworkManager {
             await adapter.close();
         }
     }
+    async closeSomeAdaterWhenOpen(adaptersToClose: IOB11NetworkAdapter[]) {
+        for (const adapter of adaptersToClose) {
+            this.adapters.delete(adapter.name);
+            if(adapter.isEnable){
+                await adapter.close();
+            }
+        }
+    }
 
     findSomeAdapter(name: string) {
         return this.adapters.get(name);
