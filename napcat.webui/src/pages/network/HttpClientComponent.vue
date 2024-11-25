@@ -4,7 +4,7 @@
             <t-form-item label="启用">
                 <t-checkbox v-model="config.enable" />
             </t-form-item>
-            <t-form-item label="URL" >
+            <t-form-item label="URL">
                 <t-input v-model="config.url" />
             </t-form-item>
             <t-form-item label="消息格式">
@@ -33,16 +33,17 @@ const props = defineProps<{
 
 const messageFormatOptions = ref([
     { label: 'Array', value: 'array' },
-    { label: 'String', value: 'string' }
+    { label: 'String', value: 'string' },
 ]);
 
-watch(() => props.config.messagePostFormat, (newValue) => {
-    if (newValue !== 'array' && newValue !== 'string') {
-        props.config.messagePostFormat = 'array';
+watch(
+    () => props.config.messagePostFormat,
+    (newValue) => {
+        if (newValue !== 'array' && newValue !== 'string') {
+            props.config.messagePostFormat = 'array';
+        }
     }
-});
+);
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

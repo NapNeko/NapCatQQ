@@ -74,7 +74,7 @@ export class QQLoginManager {
         }
         return false;
     }
-    public async checkQQLoginStatusWithQrcode(): Promise<{ qrcodeurl: string, isLogin: string } | undefined> {
+    public async checkQQLoginStatusWithQrcode(): Promise<{ qrcodeurl: string; isLogin: string } | undefined> {
         try {
             const QQLoginResponse = await fetch(`${this.apiPrefix}/QQLogin/CheckLoginStatus`, {
                 method: 'POST',
