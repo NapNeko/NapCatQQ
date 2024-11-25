@@ -26,7 +26,7 @@ import pathLib from 'node:path';
 import { defaultVideoThumbB64, getVideoInfo } from '@/common/video';
 import ffmpeg from 'fluent-ffmpeg';
 import { encodeSilk } from '@/common/audio';
-import { MessageContext } from '@/onebot/api';
+import { SendMessageContext } from '@/onebot/api';
 import { getFileTypeForSendType } from '../helper/msg';
 
 export class NTQQFileApi {
@@ -91,7 +91,7 @@ export class NTQQFileApi {
         };
     }
 
-    async createValidSendFileElement(context: MessageContext, filePath: string, fileName: string = '', folderId: string = '',): Promise<SendFileElement> {
+    async createValidSendFileElement(context: SendMessageContext, filePath: string, fileName: string = '', folderId: string = '',): Promise<SendFileElement> {
         const {
             fileName: _fileName,
             path,
@@ -113,7 +113,7 @@ export class NTQQFileApi {
         };
     }
 
-    async createValidSendPicElement(context: MessageContext, picPath: string, summary: string = '', subType: PicSubType = 0): Promise<SendPicElement> {
+    async createValidSendPicElement(context: SendMessageContext, picPath: string, summary: string = '', subType: PicSubType = 0): Promise<SendPicElement> {
         const { md5, fileName, path, fileSize } = await this.core.apis.FileApi.uploadFile(picPath, ElementType.PIC, subType);
         if (fileSize === 0) {
             throw new Error('文件异常，大小为0');
@@ -141,7 +141,7 @@ export class NTQQFileApi {
         };
     }
 
-    async createValidSendVideoElement(context: MessageContext, filePath: string, fileName: string = '', diyThumbPath: string = ''): Promise<SendVideoElement> {
+    async createValidSendVideoElement(context: SendMessageContext, filePath: string, fileName: string = '', diyThumbPath: string = ''): Promise<SendVideoElement> {
         const logger = this.core.context.logger;
         let videoInfo = {
             width: 1920,
