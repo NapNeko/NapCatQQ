@@ -384,11 +384,20 @@ export enum MemberAddShowType {
 }
 
 /**
+ * 群提示元素成员角色枚举
+ */
+export enum NTGroupGrayElementRole {
+    KOTHER = 0,
+    KMEMBER = 1,
+    KADMIN = 2
+}
+
+/**
  * 群提示元素接口
  */
 export interface TipGroupElement {
     type: TipGroupElementType;
-    role: 0;
+    role: NTGroupGrayElementRole;
     groupName: string;
     memberUid: string;
     memberNick: string;
