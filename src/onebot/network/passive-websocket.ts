@@ -31,13 +31,9 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     ) {
         this.config = structuredClone(config);
         this.logger = core.context.logger;
-        if (this.config.host === '0.0.0.0') {
-            //兼容配置同时处理0.0.0.0逻辑
-            this.config.host = '';
-        }
         this.wsServer = new WebSocketServer({
             port: this.config.port,
-            host: this.config.host,
+            host: this.config.host === '0.0.0.0' ? '' : this.config.host,
             maxPayload: 1024 * 1024 * 1024,
         });
         this.wsServer.on('connection', async (wsClient, wsReq) => {

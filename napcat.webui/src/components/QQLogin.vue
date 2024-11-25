@@ -54,7 +54,7 @@ const selectedAccount = ref<string>('');
 const qrcodeCanvas = ref<HTMLCanvasElement | null>(null);
 const qqLoginManager = new QQLoginManager(localStorage.getItem('auth') || '');
 let heartBeatTimer: number | null = null;
-
+let qrcodeUrl: string = '';
 const selectAccount = async (accountName: string): Promise<void> => {
     const { result, errMsg } = await qqLoginManager.setQuickLogin(accountName);
     if (result) {
@@ -80,19 +80,26 @@ const generateQrCode = (data: string, canvas: HTMLCanvasElement | null): void =>
 };
 
 const HeartBeat = async (): Promise<void> => {
-    const isLogined = await qqLoginManager.checkQQLoginStatus();
-    if (isLogined) {
+    const isLogined = await qqLoginManager.checkQQLoginStatusWithQrcode();
+    if (isLogined?.isLogin) {
         if (heartBeatTimer) {
             clearInterval(heartBeatTimer);
         }
+        //判断是否已经调转
+        if (router.currentRoute.value.path !== '/dashboard/basic-info') {
+            return;
+        }
         await router.push({ path: '/dashboard/basic-info' });
+    } else if (isLogined?.qrcodeurl && qrcodeUrl !== isLogined.qrcodeurl) {
+        qrcodeUrl = isLogined.qrcodeurl;
+        generateQrCode(qrcodeUrl, qrcodeCanvas.value);
     }
 };
 
 const InitPages = async (): Promise<void> => {
     quickLoginList.value = await qqLoginManager.getQQQuickLoginList();
-    const qrcodeData = await qqLoginManager.getQQLoginQrcode();
-    generateQrCode(qrcodeData, qrcodeCanvas.value);
+    qrcodeUrl = await qqLoginManager.getQQLoginQrcode();
+    generateQrCode(qrcodeUrl, qrcodeCanvas.value);
     heartBeatTimer = window.setInterval(HeartBeat, 3000);
 };
 
