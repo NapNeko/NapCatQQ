@@ -971,15 +971,16 @@ export class OneBotMsgApi {
     }
 
     async parseSysMessage(msg: number[]) {
-        const sysMsg = decodeSysMessage(Uint8Array.from(msg));
-        if (sysMsg.msgSpec.length === 0) {
-            return;
-        }
-        const { msgType, subType, subSubType } = sysMsg.msgSpec[0];
-        if (msgType === 528 && subType === 39 && subSubType === 39) {
-            if (!sysMsg.bodyWrapper) return;
-            return await this.obContext.apis.UserApi.parseLikeEvent(sysMsg.bodyWrapper.wrappedBody);
-        }
+        // Todo Refactor
+        // const sysMsg = decodeSysMessage(Uint8Array.from(msg));
+        // if (sysMsg.msgSpec.length === 0) {
+        //     return;
+        // }
+        // const { msgType, subType, subSubType } = sysMsg.msgSpec[0];
+        // if (msgType === 528 && subType === 39 && subSubType === 39) {
+        //     if (!sysMsg.bodyWrapper) return;
+        //     return await this.obContext.apis.UserApi.parseLikeEvent(sysMsg.bodyWrapper.wrappedBody);
+        // }
         let SysMessage = new NapProtoMsg(PushMsgBody).decode(Uint8Array.from(msg));
         if (SysMessage.contentHead.type == 33 && SysMessage.body?.msgContent) {
             const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
