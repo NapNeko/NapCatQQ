@@ -13,6 +13,8 @@ import {
     Peer,
     RawMessage,
     SendStatusType,
+    NTMsgType,
+    MessageElement,
 } from '@/core';
 import { OB11ConfigLoader } from '@/onebot/config';
 import {
@@ -263,33 +265,45 @@ export class NapCatOneBot11Adapter {
             }
         };
 
-        const msgIdSend = new LRUCache<string, number>(100);
-        const recallMsgs = new LRUCache<string, boolean>(100);
         msgListener.onAddSendMsg = async (msg) => {
             if (msg.sendStatus == SendStatusType.KSEND_STATUS_SENDING) {
-                msgIdSend.put(msg.msgId, 0);
+                await this.core.eventWrapper.registerListen('NodeIKernelMsgListener/onMsgInfoListUpdate', (msgList: RawMessage[]) => {
+                    const report = msgList.find((e) =>
+                        e.senderUin == this.core.selfInfo.uin && e.sendStatus == SendStatusType.KSEND_STATUS_SUCCESS && e.msgId === msg.msgId
+                    );
+                    return !!report;
+                }, 1, 300);
+                msg.id = MessageUnique.createUniqueMsgId(
+                    {
+                        chatType: msg.chatType,
+                        peerUid: msg.peerUid,
+                        guildId: '',
+                    },
+                    msg.msgId
+                );
+                //此时上报的seq不是对的 不过对onebot业务无影响
+                this.emitMsg(msg);
             }
         };
-        msgListener.onMsgInfoListUpdate = async (msgList) => {
-            this.emitRecallMsg(msgList, recallMsgs).catch((e) =>
-                this.context.logger.logError.bind(this.context.logger)('处理消息失败', e)
-            );
-            for (const msg of msgList.filter((e) => e.senderUin == this.core.selfInfo.uin)) {
-                if (msg.sendStatus == SendStatusType.KSEND_STATUS_SUCCESS && msgIdSend.get(msg.msgId) == 0) {
-                    msgIdSend.put(msg.msgId, 1);
-                    // 完成后再post
-                    msg.id = MessageUnique.createUniqueMsgId(
-                        {
-                            chatType: msg.chatType,
-                            peerUid: msg.peerUid,
-                            guildId: '',
-                        },
-                        msg.msgId
-                    );
-                    this.emitMsg(msg);
+        msgListener.onMsgRecall = async (chatType: ChatType, uid: string, msgSeq: string) => {
+            const peer: Peer = {
+                chatType: chatType,
+                peerUid: uid,
+                guildId: ''
+            };
+            let msg = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeq(peer, msgSeq)).msgList.find(e => e.msgType == NTMsgType.KMSGTYPEGRAYTIPS);
+            let element = msg?.elements[0];
+            if (msg && element) {
+                let recallEvent = await this.emitRecallMsg(msg, element);
+                try {
+                    if (recallEvent) {
+                        await this.networkManager.emitEvent(recallEvent);
+                    }
+                } catch (e) {
+                    this.context.logger.logError('处理消息撤回失败', e);
                 }
             }
-        };
+        }
         msgListener.onKickedOffLine = async (kick) => {
             const event = new BotOfflineEvent(this.core, kick.tipsTitle, kick.tipsDesc);
             this.networkManager
@@ -526,10 +540,12 @@ export class NapCatOneBot11Adapter {
     private async emitMsg(message: RawMessage) {
         const network = Object.values(this.configLoader.configData.network).flat() as Array<AdapterConfigWrap>;
         this.context.logger.logDebug('收到新消息 RawMessage', message);
-        await this.handleMsg(message, network);
-        await this.handleGroupEvent(message);
-        await this.handlePrivateMsgEvent(message);
+        await Promise.allSettled([
+            this.handleMsg(message, network),
+            message.chatType == ChatType.KCHATTYPEGROUP ? this.handleGroupEvent(message) : this.handlePrivateMsgEvent(message)
+        ]);
     }
+
     private async handleMsg(message: RawMessage, network: Array<AdapterConfigWrap>) {
         try {
             const ob11Msg = await this.apis.MsgApi.parseMessageV2(message, this.configLoader.configData.parseMultMsg);
@@ -597,9 +613,25 @@ export class NapCatOneBot11Adapter {
 
     private async handleGroupEvent(message: RawMessage) {
         try {
-            const groupEvent = await this.apis.GroupApi.parseGroupEvent(message);
-            if (groupEvent) {
-                this.networkManager.emitEvent(groupEvent);
+            // 群名片修改事件解析 任何都该判断
+            if (message.senderUin && message.senderUin !== '0') {
+                const cardChangedEvent = await this.apis.GroupApi.parseCardChangedEvent(message);
+                cardChangedEvent && await this.networkManager.emitEvent(cardChangedEvent);
+            }
+            if (message.msgType === NTMsgType.KMSGTYPEFILE) {
+                // 文件为单元素消息
+                const elementWrapper = message.elements.find(e => !!e.fileElement);
+                if (elementWrapper?.fileElement) {
+                    const uploadGroupFileEvent = await this.apis.GroupApi.parseGroupUploadFileEvene(message, elementWrapper.fileElement, elementWrapper);
+                    uploadGroupFileEvent && await this.networkManager.emitEvent(uploadGroupFileEvent);
+                }
+            } else if (message.msgType === NTMsgType.KMSGTYPEGRAYTIPS) {
+                // 灰条为单元素消息
+                const grayTipElement = message.elements[0].grayTipElement;
+                if (grayTipElement) {
+                    const event = await this.apis.GroupApi.parseGrayTipElement(message, grayTipElement);
+                    event && await this.networkManager.emitEvent(event);
+                }
             }
         } catch (e) {
             this.context.logger.logError('constructGroupEvent error: ', e);
@@ -608,59 +640,51 @@ export class NapCatOneBot11Adapter {
 
     private async handlePrivateMsgEvent(message: RawMessage) {
         try {
-            const privateEvent = await this.apis.MsgApi.parsePrivateMsgEvent(message);
-            if (privateEvent) {
-                this.networkManager.emitEvent(privateEvent);
+            if (message.msgType === NTMsgType.KMSGTYPEGRAYTIPS) {
+                // 灰条为单元素消息
+                const grayTipElement = message.elements[0].grayTipElement;
+                if (grayTipElement) {
+                    const event = await this.apis.MsgApi.parsePrivateMsgEvent(message, grayTipElement);
+                    event && await this.networkManager.emitEvent(event);
+                }
             }
         } catch (e) {
             this.context.logger.logError('constructPrivateEvent error: ', e);
         }
     }
-    private async emitRecallMsg(msgList: RawMessage[], cache: LRUCache<string, boolean>) {
-        for (const message of msgList) {
-            // log("message update", message.sendStatus, message.msgId, message.msgSeq)
-            const peer: Peer = { chatType: message.chatType, peerUid: message.peerUid, guildId: '' };
-            if (message.recallTime != '0' && !cache.get(message.msgId)) {
-                //TODO: 这个判断方法不太好，应该使用灰色消息元素来判断?
-                cache.put(message.msgId, true);
-                // 撤回消息上报
-                let oriMessageId = MessageUnique.getShortIdByMsgId(message.msgId);
-                if (!oriMessageId) {
-                    oriMessageId = MessageUnique.createUniqueMsgId(peer, message.msgId);
-                }
-                if (message.chatType == ChatType.KCHATTYPEC2C) {
-                    const friendRecallEvent = new OB11FriendRecallNoticeEvent(
-                        this.core,
-                        +message.senderUin,
-                        oriMessageId
-                    );
-                    this.networkManager
-                        .emitEvent(friendRecallEvent)
-                        .catch((e) =>
-                            this.context.logger.logError.bind(this.context.logger)('处理好友消息撤回失败', e)
-                        );
-                } else if (message.chatType == ChatType.KCHATTYPEGROUP) {
-                    let operatorId = message.senderUin;
-                    for (const element of message.elements) {
-                        const operatorUid = element.grayTipElement?.revokeElement.operatorUid;
-                        if (!operatorUid) return;
-                        const operator = await this.core.apis.GroupApi.getGroupMember(message.peerUin, operatorUid);
-                        operatorId = operator?.uin ?? message.senderUin;
-                    }
-                    const groupRecallEvent = new OB11GroupRecallNoticeEvent(
-                        this.core,
-                        +message.peerUin,
-                        +message.senderUin,
-                        +operatorId,
-                        oriMessageId
-                    );
-                    this.networkManager
-                        .emitEvent(groupRecallEvent)
-                        .catch((e) => this.context.logger.logError.bind(this.context.logger)('处理群消息撤回失败', e));
-                }
-            }
+
+    private async emitRecallMsg(message: RawMessage, element: MessageElement) {
+        const peer: Peer = { chatType: message.chatType, peerUid: message.peerUid, guildId: '' };
+        let oriMessageId = MessageUnique.getShortIdByMsgId(message.msgId) ?? MessageUnique.createUniqueMsgId(peer, message.msgId);
+        if (message.chatType == ChatType.KCHATTYPEC2C) {
+            return await this.emitFriendRecallMsg(message, oriMessageId, element);
+        } else if (message.chatType == ChatType.KCHATTYPEGROUP) {
+            return await this.emitGroupRecallMsg(message, oriMessageId, element);
         }
+
     }
+
+    private async emitFriendRecallMsg(message: RawMessage, oriMessageId: number, element: MessageElement) {
+        return new OB11FriendRecallNoticeEvent(
+            this.core,
+            +message.senderUin,
+            oriMessageId
+        );
+    }
+
+    private async emitGroupRecallMsg(message: RawMessage, oriMessageId: number, element: MessageElement) {
+        const operatorUid = element.grayTipElement?.revokeElement.operatorUid;
+        if (!operatorUid) return undefined;
+        let operatorId = message.senderUin ?? await this.core.apis.UserApi.getUinByUidV2(operatorUid);
+        return new OB11GroupRecallNoticeEvent(
+            this.core,
+            +message.peerUin,
+            +message.senderUin,
+            +operatorId,
+            oriMessageId
+        );
+    }
+
 }
 
 export * from './types';
