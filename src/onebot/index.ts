@@ -42,7 +42,7 @@ import { MessageUnique } from '@/common/message-unique';
 import { proxiedListenerOf } from '@/common/proxy-handler';
 import { OB11FriendRequestEvent } from '@/onebot/event/request/OB11FriendRequest';
 import { OB11GroupAdminNoticeEvent } from '@/onebot/event/notice/OB11GroupAdminNoticeEvent';
-import { GroupDecreaseSubType, OB11GroupDecreaseEvent } from '@/onebot/event/notice/OB11GroupDecreaseEvent';
+// import { GroupDecreaseSubType, OB11GroupDecreaseEvent } from '@/onebot/event/notice/OB11GroupDecreaseEvent';
 import { OB11GroupRequestEvent } from '@/onebot/event/request/OB11GroupRequest';
 import { OB11FriendRecallNoticeEvent } from '@/onebot/event/notice/OB11FriendRecallNoticeEvent';
 import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecallNoticeEvent';
@@ -406,36 +406,38 @@ export class NapCatOneBot11Adapter {
                                 this.core.apis.GroupApi.getGroup(notify.group.groupCode)
                             );
                         }
-                    } else if (
-                        notify.type == GroupNotifyMsgType.MEMBER_LEAVE_NOTIFY_ADMIN ||
-                        notify.type == GroupNotifyMsgType.KICK_MEMBER_NOTIFY_ADMIN
-                    ) {
-                        this.context.logger.logDebug('有成员退出通知', notify);
-                        const member1Uin = await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid);
-                        let operatorId = member1Uin;
-                        let subType: GroupDecreaseSubType = 'leave';
-                        if (notify.user2.uid) {
-                            // 是被踢的
-                            const member2Uin = await this.core.apis.UserApi.getUinByUidV2(notify.user2.uid);
-                            if (member2Uin) {
-                                operatorId = member2Uin;
-                            }
-                            subType = 'kick';
-                        }
-                        const groupDecreaseEvent = new OB11GroupDecreaseEvent(
-                            this.core,
-                            parseInt(notify.group.groupCode),
-                            parseInt(member1Uin),
-                            parseInt(operatorId),
-                            subType
-                        );
-                        this.networkManager
-                            .emitEvent(groupDecreaseEvent)
-                            .catch((e) =>
-                                this.context.logger.logError.bind(this.context.logger)('处理群成员退出失败', e)
-                            );
-                        // notify.status == 1 表示未处理 2表示处理完成
-                    } else if (
+                    } else 
+                    // if (
+                    //     notify.type == GroupNotifyMsgType.MEMBER_LEAVE_NOTIFY_ADMIN ||
+                    //     notify.type == GroupNotifyMsgType.KICK_MEMBER_NOTIFY_ADMIN
+                    // ) {
+                    //     this.context.logger.logDebug('有成员退出通知', notify);
+                    //     const member1Uin = await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid);
+                    //     let operatorId = member1Uin;
+                    //     let subType: GroupDecreaseSubType = 'leave';
+                    //     if (notify.user2.uid) {
+                    //         // 是被踢的
+                    //         const member2Uin = await this.core.apis.UserApi.getUinByUidV2(notify.user2.uid);
+                    //         if (member2Uin) {
+                    //             operatorId = member2Uin;
+                    //         }
+                    //         subType = 'kick';
+                    //     }
+                    //     const groupDecreaseEvent = new OB11GroupDecreaseEvent(
+                    //         this.core,
+                    //         parseInt(notify.group.groupCode),
+                    //         parseInt(member1Uin),
+                    //         parseInt(operatorId),
+                    //         subType
+                    //     );
+                    //     this.networkManager
+                    //         .emitEvent(groupDecreaseEvent)
+                    //         .catch((e) =>
+                    //             this.context.logger.logError.bind(this.context.logger)('处理群成员退出失败', e)
+                    //         );
+                    //     // notify.status == 1 表示未处理 2表示处理完成
+                    // } else
+                     if (
                         [GroupNotifyMsgType.REQUEST_JOIN_NEED_ADMINI_STRATOR_PASS].includes(notify.type) &&
                         notify.status == GroupNotifyMsgStatus.KUNHANDLE
                     ) {
