@@ -37,6 +37,10 @@ export class OB11NetworkManager {
         return Promise.all(Array.from(this.adapters.values()).map(adapter => adapter.onEvent(event)));
     }
 
+    async emitEvents(events: OB11EmitEventContent[]) {
+        return Promise.all(events.map(event => this.emitEvent(event)));
+    }
+
     async emitEventByName(names: string[], event: OB11EmitEventContent) {
         return Promise.all(names.map(name => {
             const adapter = this.adapters.get(name);
@@ -71,7 +75,7 @@ export class OB11NetworkManager {
     async closeSomeAdaterWhenOpen(adaptersToClose: IOB11NetworkAdapter[]) {
         for (const adapter of adaptersToClose) {
             this.adapters.delete(adapter.name);
-            if(adapter.isEnable){
+            if (adapter.isEnable) {
                 await adapter.close();
             }
         }

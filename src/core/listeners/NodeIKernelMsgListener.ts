@@ -255,7 +255,7 @@ export class NodeIKernelMsgListener {
 
     }
 
-    onMsgRecall(i2: unknown, str: unknown, j2: unknown): any {
+    onMsgRecall(chatType: ChatType, uid: string, msgSeq: string): any {
 
     }
 
