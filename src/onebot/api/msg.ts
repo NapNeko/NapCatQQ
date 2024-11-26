@@ -17,6 +17,7 @@ import {
     SendTextElement,
     BaseEmojiType,
     FaceType,
+    GrayTipElement,
 } from '@/core';
 import faceConfig from '@/core/external/face_config.json';
 import { NapCatOneBot11Adapter, OB11Message, OB11MessageData, OB11MessageDataType, OB11MessageFileBase, OB11MessageForward, } from '@/onebot';
@@ -664,20 +665,13 @@ export class OneBotMsgApi {
         this.core = core;
     }
 
-    async parsePrivateMsgEvent(msg: RawMessage) {
-        if (msg.chatType !== ChatType.KCHATTYPEC2C) {
-            return;
-        }
-        for (const element of msg.elements) {
-            if (element.grayTipElement && element.grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
-                if (element.grayTipElement.jsonGrayTipElement.busiId == 1061) {
-                    const PokeEvent = await this.obContext.apis.FriendApi.parsePrivatePokeEvent(element.grayTipElement);
-                    if (PokeEvent) return PokeEvent;
-                }
-                //好友添加成功事件
-                if (element.grayTipElement.jsonGrayTipElement.busiId == 19324 && msg.peerUid !== '') {
-                    return new OB11FriendAddNoticeEvent(this.core, Number(await this.core.apis.UserApi.getUinByUidV2(msg.peerUid)));
-                }
+    async parsePrivateMsgEvent(msg: RawMessage, grayTipElement: GrayTipElement) {
+        if (grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
+            if (grayTipElement.jsonGrayTipElement.busiId == 1061) {
+                const PokeEvent = await this.obContext.apis.FriendApi.parsePrivatePokeEvent(grayTipElement);
+                if (PokeEvent) { return PokeEvent };
+            } else if (grayTipElement.jsonGrayTipElement.busiId == 19324 && msg.peerUid !== '') {
+                return new OB11FriendAddNoticeEvent(this.core, Number(await this.core.apis.UserApi.getUinByUidV2(msg.peerUid)));
             }
         }
     }
@@ -727,8 +721,33 @@ export class OneBotMsgApi {
     ) {
         if (msg.senderUin == '0' || msg.senderUin == '') return;
         if (msg.peerUin == '0' || msg.peerUin == '') return;
-        //跳过空消息
-        const resMsg: OB11Message = {
+
+        const resMsg = this.initializeMessage(msg);
+
+        if (this.core.selfInfo.uin == msg.senderUin) {
+            resMsg.message_sent_type = 'self';
+        }
+
+        if (msg.chatType == ChatType.KCHATTYPEGROUP) {
+            await this.handleGroupMessage(resMsg, msg);
+        } else if (msg.chatType == ChatType.KCHATTYPEC2C) {
+            await this.handlePrivateMessage(resMsg, msg);
+        } else if (msg.chatType == ChatType.KCHATTYPETEMPC2CFROMGROUP) {
+            await this.handleTempGroupMessage(resMsg, msg);
+        } else {
+            return undefined;
+        }
+
+        const validSegments = await this.parseMessageSegments(msg, parseMultMsg);
+        resMsg.message = validSegments;
+        resMsg.raw_message = validSegments.map(msg => encodeCQCode(msg)).join('').trim();
+
+        const stringMsg = await this.convertArrayToStringMessage(resMsg);
+        return { stringMsg, arrayMsg: resMsg };
+    }
+
+    private initializeMessage(msg: RawMessage): OB11Message {
+        return {
             self_id: parseInt(this.core.selfInfo.uin),
             user_id: parseInt(msg.senderUin),
             time: parseInt(msg.msgTime) || Date.now(),
@@ -748,37 +767,40 @@ export class OneBotMsgApi {
             message_format: 'array',
             post_type: this.core.selfInfo.uin == msg.senderUin ? EventType.MESSAGE_SENT : EventType.MESSAGE,
         };
-        if (this.core.selfInfo.uin == msg.senderUin) {
-            resMsg.message_sent_type = 'self';
-        }
-        if (msg.chatType == ChatType.KCHATTYPEGROUP) {
-            resMsg.sub_type = 'normal'; // 这里go-cqhttp是group，而onebot11标准是normal, 蛋疼
-            resMsg.group_id = parseInt(msg.peerUin);
-            let member = await this.core.apis.GroupApi.getGroupMember(msg.peerUin, msg.senderUin);
-            if (!member) member = await this.core.apis.GroupApi.getGroupMember(msg.peerUin, msg.senderUin);
-            if (member) {
-                resMsg.sender.role = OB11Construct.groupMemberRole(member.role);
-                resMsg.sender.nickname = member.nick;
-            }
-        } else if (msg.chatType == ChatType.KCHATTYPEC2C) {
-            resMsg.sub_type = 'friend';
-            resMsg.sender.nickname = (await this.core.apis.UserApi.getUserDetailInfo(msg.senderUid)).nick;
-        } else if (msg.chatType == ChatType.KCHATTYPETEMPC2CFROMGROUP) {
-            resMsg.sub_type = 'group';
-            const ret = await this.core.apis.MsgApi.getTempChatInfo(ChatType.KCHATTYPETEMPC2CFROMGROUP, msg.senderUid);
-            if (ret.result === 0) {
-                const member = await this.core.apis.GroupApi.getGroupMember(msg.peerUin, msg.senderUin);
-                resMsg.group_id = parseInt(ret.tmpChatInfo!.groupCode);
-                resMsg.sender.nickname = member?.nick ?? member?.cardName ?? '临时会话';
-                resMsg.temp_source = resMsg.group_id;
-            } else {
-                resMsg.group_id = 284840486; //兜底数据
-                resMsg.temp_source = resMsg.group_id;
-                resMsg.sender.nickname = '临时会话';
-            }
-        }
+    }
 
-        // 处理消息段
+    private async handleGroupMessage(resMsg: OB11Message, msg: RawMessage) {
+        resMsg.sub_type = 'normal';
+        resMsg.group_id = parseInt(msg.peerUin);
+        let member = await this.core.apis.GroupApi.getGroupMember(msg.peerUin, msg.senderUin);
+        if (!member) member = await this.core.apis.GroupApi.getGroupMember(msg.peerUin, msg.senderUin);
+        if (member) {
+            resMsg.sender.role = OB11Construct.groupMemberRole(member.role);
+            resMsg.sender.nickname = member.nick;
+        }
+    }
+
+    private async handlePrivateMessage(resMsg: OB11Message, msg: RawMessage) {
+        resMsg.sub_type = 'friend';
+        resMsg.sender.nickname = (await this.core.apis.UserApi.getUserDetailInfo(msg.senderUid)).nick;
+    }
+
+    private async handleTempGroupMessage(resMsg: OB11Message, msg: RawMessage) {
+        resMsg.sub_type = 'group';
+        const ret = await this.core.apis.MsgApi.getTempChatInfo(ChatType.KCHATTYPETEMPC2CFROMGROUP, msg.senderUid);
+        if (ret.result === 0) {
+            const member = await this.core.apis.GroupApi.getGroupMember(msg.peerUin, msg.senderUin);
+            resMsg.group_id = parseInt(ret.tmpChatInfo!.groupCode);
+            resMsg.sender.nickname = member?.nick ?? member?.cardName ?? '临时会话';
+            resMsg.temp_source = resMsg.group_id;
+        } else {
+            resMsg.group_id = 284840486;
+            resMsg.temp_source = resMsg.group_id;
+            resMsg.sender.nickname = '临时会话';
+        }
+    }
+
+    private async parseMessageSegments(msg: RawMessage, parseMultMsg: boolean): Promise<OB11MessageData[]> {
         const msgSegments = await Promise.allSettled(msg.elements.map(
             async (element) => {
                 for (const key in element) {
@@ -793,43 +815,41 @@ export class OneBotMsgApi {
                             element[key],
                             msg,
                             element,
-                            {
-                                parseMultMsg: parseMultMsg
-                            }
+                            { parseMultMsg }
                         );
-                        // 对于 face 类型的消息，检查是否存在
                         if (key === 'faceElement' && !parsedElement) {
-                            return null; // 如果没有找到对应的表情，返回 null
+                            return null;
                         }
-
                         return parsedElement;
                     }
                 }
             },
         ));
 
-        // 过滤掉无效的消息段
-        const validSegments = msgSegments.filter(entry => {
+        return msgSegments.filter(entry => {
             if (entry.status === 'fulfilled') {
                 return !!entry.value;
             } else {
-                this.core.context.logger.logError.bind(this.core.context.logger)('消息段解析失败', entry.reason);
+                this.core.context.logger.logError('消息段解析失败', entry.reason);
                 return false;
             }
         }).map((entry) => (<PromiseFulfilledResult<OB11MessageData>>entry).value).filter(value => value != null);
-
-        const msgAsCQCode = validSegments.map(msg => encodeCQCode(msg)).join('').trim();
-        resMsg.message = validSegments;
-        resMsg.raw_message = msgAsCQCode;
-        let stringMsg = structuredClone(resMsg);
-        stringMsg = await this.importArrayTostringMsg(stringMsg);
-        return { stringMsg: stringMsg, arrayMsg: resMsg };
     }
-    async importArrayTostringMsg(msg: OB11Message) {
+
+    private async convertArrayToStringMessage(originMsg: OB11Message): Promise<OB11Message> {
+        let msg = structuredClone(originMsg);
         msg.message_format = 'string';
         msg.message = msg.raw_message;
         return msg;
     }
+
+    async importArrayTostringMsg(originMsg: OB11Message) {
+        let msg = structuredClone(originMsg);
+        msg.message_format = 'string';
+        msg.message = msg.raw_message;
+        return msg;
+    }
+
     async createSendElements(
         messageData: OB11MessageData[],
         peer: Peer,
@@ -892,11 +912,19 @@ export class OneBotMsgApi {
             guildId: '',
             peerUid: peer.peerUid,
         }, returnMsg.msgId);
+
         setTimeout(() => {
             deleteAfterSentFiles.forEach(file => {
-                fsPromise.unlink(file).then().catch(e => this.core.context.logger.logError.bind(this.core.context.logger)('发送消息删除文件失败', e));
+                try {
+                    if (fs.existsSync(file)) {
+                        fsPromise.unlink(file).then().catch(e => this.core.context.logger.logError.bind(this.core.context.logger)('发送消息删除文件失败', e));
+                    }
+                } catch (error) {
+                    this.core.context.logger.logError.bind(this.core.context.logger)('发送消息删除文件失败', (error as Error).message)
+                }
             });
         }, 60000);
+
         return returnMsg;
     }
 

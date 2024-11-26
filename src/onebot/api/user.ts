@@ -1,4 +1,4 @@
-import { NapCatCore } from '@/core';
+import { GrayTipRovokeElement, NapCatCore, RawMessage } from '@/core';
 import { NapCatOneBot11Adapter } from '@/onebot';
 import { OB11ProfileLikeEvent } from '@/onebot/event/notice/OB11ProfileLikeEvent';
 import { decodeProfileLikeTip } from "@/core/helper/adaptDecoder";
@@ -11,7 +11,7 @@ export class OneBotUserApi {
         this.obContext = obContext;
         this.core = core;
     }
-    
+
     async parseLikeEvent(wrappedBody: Uint8Array): Promise<OB11ProfileLikeEvent | undefined> {
         const likeTip = decodeProfileLikeTip(Uint8Array.from(wrappedBody));
         if (likeTip?.msgType !== 0 || likeTip?.subType !== 203) return;
