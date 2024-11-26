@@ -32,6 +32,10 @@ import { OB11FriendAddNoticeEvent } from '@/onebot/event/notice/OB11FriendAddNot
 // import { decodeSysMessage } from '@/core/packet/proto/old/ProfileLike';
 import { ForwardMsgBuilder } from "@/common/forward-msg-builder";
 import { decodeSysMessage } from "@/core/helper/adaptDecoder";
+import { GroupChange, PushMsgBody } from "@/core/packet/transformer/proto";
+import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
+import { OB11GroupDecreaseEvent, GroupDecreaseSubType } from '../event/notice/OB11GroupDecreaseEvent';
 
 type RawToOb11Converters = {
     [Key in keyof MessageElement as Key extends `${string}Element` ? Key : never]: (
@@ -953,6 +957,18 @@ export class OneBotMsgApi {
 
         return { path, fileName: inputdata.name ?? fileName };
     }
+    groupChangDecreseType2String(type: number): GroupDecreaseSubType {
+        switch (type) {
+            case 130:
+                return 'kick';
+            case 131:
+                return 'leave';
+            case 3:
+                return 'kick_me';
+            default:
+                return 'kick';
+        }
+    }
 
     async parseSysMessage(msg: number[]) {
         const sysMsg = decodeSysMessage(Uint8Array.from(msg));
@@ -963,6 +979,28 @@ export class OneBotMsgApi {
         if (msgType === 528 && subType === 39 && subSubType === 39) {
             if (!sysMsg.bodyWrapper) return;
             return await this.obContext.apis.UserApi.parseLikeEvent(sysMsg.bodyWrapper.wrappedBody);
+        }
+        let SysMessage = new NapProtoMsg(PushMsgBody).decode(Uint8Array.from(msg));
+        if (SysMessage.contentHead.type == 33 && SysMessage.body?.msgContent) {
+            const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
+            console.log(JSON.stringify(groupChange));
+            return new OB11GroupIncreaseEvent(
+                this.core,
+                groupChange.groupUin,
+                groupChange.memberUid ? +await this.core.apis.UserApi.getUinByUidV2(groupChange.memberUid) : 0,
+                groupChange.operatorUid ? +await this.core.apis.UserApi.getUinByUidV2(groupChange.operatorUid) : 0,
+                groupChange.decreaseType == 131 ? 'invite' : 'approve',
+            );
+        } else if (SysMessage.contentHead.type == 34 && SysMessage.body?.msgContent) {
+            const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
+            // console.log(JSON.stringify(groupChange),JSON.stringify(SysMessage));
+            return new OB11GroupDecreaseEvent(
+                this.core,
+                groupChange.groupUin,
+                +this.core.selfInfo.uin,
+                groupChange.operatorUid ? +await this.core.apis.UserApi.getUinByUidV2(groupChange.operatorUid) : 0,
+                this.groupChangDecreseType2String(groupChange.decreaseType),
+            );
         }
         /*
         if (msgType === 732 && subType === 16 && subSubType === 16) {
