@@ -265,11 +265,24 @@ export class NapCatOneBot11Adapter {
             }
         };
 
-        const msgIdSend = new LRUCache<string, number>(100);
-
         msgListener.onAddSendMsg = async (msg) => {
             if (msg.sendStatus == SendStatusType.KSEND_STATUS_SENDING) {
-                msgIdSend.put(msg.msgId, 0);
+                await this.core.eventWrapper.registerListen('NodeIKernelMsgListener/onMsgInfoListUpdate', (msgList: RawMessage[]) => {
+                    const report = msgList.find((e) =>
+                        e.senderUin == this.core.selfInfo.uin && e.sendStatus == SendStatusType.KSEND_STATUS_SUCCESS && e.msgId === msg.msgId
+                    );
+                    return !!report;
+                }, 1, 300);
+                msg.id = MessageUnique.createUniqueMsgId(
+                    {
+                        chatType: msg.chatType,
+                        peerUid: msg.peerUid,
+                        guildId: '',
+                    },
+                    msg.msgId
+                );
+                //此时上报的seq不是对的 不过对onebot业务无影响
+                this.emitMsg(msg);
             }
         };
         msgListener.onMsgRecall = async (chatType: ChatType, uid: string, msgSeq: string) => {
@@ -291,23 +304,6 @@ export class NapCatOneBot11Adapter {
                 }
             }
         }
-        msgListener.onMsgInfoListUpdate = async (msgList) => {
-            for (const msg of msgList.filter((e) => e.senderUin == this.core.selfInfo.uin)) {
-                if (msg.sendStatus == SendStatusType.KSEND_STATUS_SUCCESS && msgIdSend.get(msg.msgId) == 0) {
-                    msgIdSend.put(msg.msgId, 1);
-                    // 完成后再post
-                    msg.id = MessageUnique.createUniqueMsgId(
-                        {
-                            chatType: msg.chatType,
-                            peerUid: msg.peerUid,
-                            guildId: '',
-                        },
-                        msg.msgId
-                    );
-                    this.emitMsg(msg);
-                }
-            }
-        };
         msgListener.onKickedOffLine = async (kick) => {
             const event = new BotOfflineEvent(this.core, kick.tipsTitle, kick.tipsDesc);
             this.networkManager
@@ -549,7 +545,7 @@ export class NapCatOneBot11Adapter {
             message.chatType == ChatType.KCHATTYPEGROUP ? this.handleGroupEvent(message) : this.handlePrivateMsgEvent(message)
         ]);
     }
-    
+
     private async handleMsg(message: RawMessage, network: Array<AdapterConfigWrap>) {
         try {
             const ob11Msg = await this.apis.MsgApi.parseMessageV2(message, this.configLoader.configData.parseMultMsg);
