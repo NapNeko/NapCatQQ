@@ -9,7 +9,12 @@
         </t-divider>
     </div>
     <div v-if="loadPage" ref="setting" class="setting">
-        <t-tabs ref="tabsRef" :style="{ width: tabsWidth + 'px' }" default-value="all" @change="selectType">
+        <t-tabs
+            ref="tabsRef"
+            :style="{ width: tabsWidth + 'px' }"
+            default-value="all"
+            @change="selectType"
+        >
             <t-tab-panel value="all" label="全部"></t-tab-panel>
             <t-tab-panel value="httpServers" label="HTTP 服务器"></t-tab-panel>
             <t-tab-panel value="httpClients" label="HTTP 客户端"></t-tab-panel>
@@ -22,6 +27,7 @@
             <div v-for="(item, index) in cardConfig" :key="index">
                 <t-card
                     :title="item.name"
+                    :description="item.type"
                     :style="{ width: cardWidth + 'px' }"
                     :header-bordered="true"
                     class="setting-card"
@@ -35,74 +41,70 @@
                         </t-space>
                     </template>
                     <div class="setting-content">
-                        <div>类型：{{ item.type }}</div>
-                        <div class="setting-address">
-                            <div v-if="item.host" class="local">地址：{{ item.host }}</div>
-                            <div v-if="item.url" class="local">地址：{{ item.url }}</div>
-                            <div class="none-box"></div>
-                            <div v-if="item.port" class="port">端口：{{ item.port }}</div>
-                            <div v-if="item.heartInterval && !item.port" class="port">
-                                心跳间隔：{{ item.heartInterval }}
-                            </div>
-                        </div>
-                        <div v-if="item.heartInterval && item.port" class="port">
-                            心跳间隔：{{ item.heartInterval }}
-                        </div>
-                        <div class="setting-address">
-                            <div class="local">Token：{{ item.token }}</div>
-                            <div class="none-box"></div>
-                            <div class="port">消息格式：{{ item.messagePostFormat }}</div>
-                        </div>
-                        <div class="setting-status">
-                            <div class="status-tag">
-                                <div>状态：</div>
-                                <t-tag class="tag-item" :theme="item.enable ? 'success' : 'danger'">
-                                    {{ item.enable ? '启用' : '禁用' }}</t-tag
-                                >
-                            </div>
-                            <div class="none-box"></div>
-                            <div class="status-deBug">
-                                <div>调试：</div>
-                                <t-tag class="tag-item" :theme="item.debug ? 'success' : 'danger'">
-                                    {{ item.debug ? '开启' : '关闭' }}</t-tag
-                                >
-                            </div>
-                        </div>
-                        <div class="setting-status">
-                            <div v-if="item.hasOwnProperty('enableWebsocket')" class="status-tag">
-                                <div>WS ：</div>
-                                <t-tag class="tag-item" :theme="item.enableWebsocket ? 'success' : 'danger'">
-                                    {{ item.enableWebsocket ? '启用' : '禁用' }}</t-tag
-                                >
-                            </div>
-                            <div class="none-box"></div>
-                            <div v-if="item.hasOwnProperty('enableCors')" class="status-deBug">
-                                <div>跨域：</div>
-                                <t-tag class="tag-item" :theme="item.enableCors ? 'success' : 'danger'">
-                                    {{ item.enableCors ? '开启' : '关闭' }}</t-tag
-                                >
-                            </div>
-                        </div>
-                        <div
-                            v-if="item.hasOwnProperty('reportSelfMessage')"
-                            class="status-deBug"
-                            style="margin-top: 2px"
+                        <t-card
+                            class="card-address"
+                            :style="{ borderLeft: '7px solid ' + (item.enable ? 
+                                'var(--td-success-color)' : 
+                                'var(--td-error-color)') }"
                         >
-                            <div>上报自身消息：</div>
-                            <t-tag class="tag-item" :theme="item.reportSelfMessage ? 'success' : 'danger'">
-                                {{ item.reportSelfMessage ? '开启' : '关闭' }}</t-tag
-                            >
-                        </div>
-                        <div
-                            v-if="item.hasOwnProperty('enableForcePushEvent')"
-                            class="status-deBug"
-                            style="margin-top: 2px"
-                        >
-                            <div>强制推送事件：</div>
-                            <t-tag class="tag-item" :theme="item.enableForcePushEvent ? 'success' : 'danger'">
-                                {{ item.enableForcePushEvent ? '开启' : '关闭' }}</t-tag
-                            >
-                        </div>
+                            <server-filled-icon size="20px"></server-filled-icon>
+                            <strong v-if="item.host">{{ item.host }}</strong>
+                            <strong v-if="item.url">{{ item.url }}</strong>
+                            <strong v-if="item.port">:{{ item.port }}</strong>
+                            <div style="flex: 1"></div>
+                            <copy-icon size="20px" @click="copyText(item.host + ':' + item.port)"></copy-icon>
+                        </t-card>
+                        <t-collapse :default-value="[0]" expand-mutex style="margin-top:10px;" class="info-coll">
+                            <t-collapse-panel header="基础信息"> 
+                                <t-descriptions
+                                    size="small"
+                                    :layout="infoOneCol ? 'vertical' : 'horizontal'"
+                                    class="setting-base-info"
+                                >
+                                    <t-descriptions-item v-if="item.token" label="连接密钥">
+                                        <div class="token-view">
+                                            <span>{{ showToken ? item.token : '*******' }}</span>
+                                            <browse-icon v-if="showToken" size="15px" @click="showToken = false"></browse-icon>
+                                            <browse-off-icon v-else size="17px" @click="showToken = true"></browse-off-icon>
+                                        </div>
+                                        </t-descriptions-item>
+                                    <t-descriptions-item label="消息格式">{{ item.messagePostFormat }}</t-descriptions-item>
+                                </t-descriptions>
+                            </t-collapse-panel>
+                            <t-collapse-panel header="状态信息">
+                                <t-descriptions
+                                    size="small"
+                                    :layout="infoOneCol ? 'vertical' : 'horizontal'"
+                                    class="setting-base-info"
+                                >
+                                    <t-descriptions-item v-if="item.token" label="调试日志">
+                                        <t-tag class="tag-item" :theme="item.debug ? 'success' : 'danger'">
+                                            {{ item.debug ? '开启' : '关闭' }}</t-tag
+                                        >
+                                    </t-descriptions-item>
+                                    <t-descriptions-item  v-if="item.hasOwnProperty('enableWebsocket')" label="Websocket 功能">
+                                        <t-tag class="tag-item" :theme="item.enableWebsocket ? 'success' : 'danger'">
+                                            {{ item.enableWebsocket ? '启用' : '禁用' }}</t-tag
+                                        >
+                                    </t-descriptions-item>
+                                    <t-descriptions-item v-if="item.hasOwnProperty('enableCors')" label="跨域放行">
+                                        <t-tag class="tag-item" :theme="item.enableCors ? 'success' : 'danger'">
+                                            {{ item.enableCors ? '开启' : '关闭' }}</t-tag
+                                        >
+                                    </t-descriptions-item>
+                                    <t-descriptions-item v-if="item.hasOwnProperty('enableForcePushEvent')" label="上报自身消息">
+                                        <t-tag class="tag-item" :theme="item.reportSelfMessage ? 'success' : 'danger'">
+                                            {{ item.reportSelfMessage ? '开启' : '关闭' }}</t-tag
+                                        >
+                                    </t-descriptions-item>
+                                    <t-descriptions-item v-if="item.hasOwnProperty('enableForcePushEvent')" label="强制推送事件">
+                                        <t-tag class="tag-item" :theme="item.enableForcePushEvent ? 'success' : 'danger'">
+                                            {{ item.enableForcePushEvent ? '开启' : '关闭' }}</t-tag
+                                        >
+                                    </t-descriptions-item>
+                                </t-descriptions>
+                            </t-collapse-panel>
+                        </t-collapse>
                     </div>
                 </t-card>
             </div>
@@ -155,7 +157,7 @@
 </template>
 
 <script setup lang="ts">
-import { AddIcon, DeleteIcon, Edit2Icon } from 'tdesign-icons-vue-next';
+import { AddIcon, DeleteIcon, Edit2Icon, ServerFilledIcon, CopyIcon, BrowseOffIcon, BrowseIcon } from 'tdesign-icons-vue-next';
 import { onMounted, onUnmounted, ref, resolveDynamicComponent } from 'vue';
 import emitter from '@/ts/event-bus';
 import {
@@ -178,6 +180,8 @@ import WebsocketClientComponent from '@/pages/network/WebsocketClientComponent.v
 import { MessagePlugin } from 'tdesign-vue-next';
 import { QQLoginManager } from '@/backend/shell';
 
+const showToken = ref<boolean>(false);
+const infoOneCol = ref<boolean>(true);
 const tabsWidth = ref<number>(0);
 const menuWidth = ref<number>(0);
 const cardWidth = ref<number>(0);
@@ -389,8 +393,32 @@ const loadConfig = async () => {
         console.error('Error loading config:', error);
     }
 };
+const copyText = (text: string) => {
+    const input = document.createElement('input');
+    input.value = text;
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand('copy');
+    document.body.removeChild(input);
+    MessagePlugin.success('复制成功');
+};
+const getTime = (time: number) => {
+    if (time < 1000) {
+        return time + ' 毫秒';
+    } else if (time < 60000) {
+        return (time / 1000).toFixed(2) + ' 秒';
+    } else {
+        return (time / 60000).toFixed(2) + ' 分钟';
+    }
+};
 
 const handleResize = () => {
+    // 得根据卡片宽度改，懒得改了；先不管了
+    // if(window.innerWidth < 540) {
+    //     infoOneCol.value= true
+    // } else {
+    //     infoOneCol.value= false
+    // }
     tabsWidth.value = window.innerWidth - 40 - menuWidth.value;
     if (mediumScreen.matches) {
         cardWidth.value = (tabsWidth.value - 20) / 2;
@@ -450,6 +478,11 @@ onUnmounted(() => {
     width: 100%;
     text-align: left;
 }
+.card-address svg {
+    fill: var(--td-brand-color);
+    margin-right: 10px;
+    cursor: pointer;
+}
 .setting-address {
     display: flex;
     margin-top: 2px;
@@ -482,6 +515,15 @@ onUnmounted(() => {
 .status-tag {
     display: flex;
     flex: 5.5;
+}
+.token-view {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.token-view span {
+    flex: 1;
+    margin-right: 20%;
 }
 
 @media (max-width: 1024px) {
@@ -516,5 +558,32 @@ onUnmounted(() => {
 ::-webkit-scrollbar {
     width: 0;
     background: transparent;
+}
+</style>
+<style>
+.setting-card .t-card__title {
+    text-align: left !important;
+}
+.setting-card .t-card__description {
+    margin-bottom: 0;
+    font-size: 12px;
+}
+.card-address .t-card__body {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.setting-base-info .t-descriptions__header {
+    font-size: 15px;
+    margin-bottom: 0;
+}
+.setting-base-info .t-descriptions__label {
+    padding: 0 var(--td-comp-paddingLR-l) !important;
+}
+.setting-base-info tr > td:last-child {
+    text-align: right;
+}
+.info-coll .t-collapse-panel__wrapper .t-collapse-panel__content {
+    padding: var(--td-comp-paddingTB-m) var(--td-comp-paddingLR-l);
 }
 </style>
