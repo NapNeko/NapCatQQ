@@ -281,7 +281,14 @@ export class NapCatOneBot11Adapter {
             let msg = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeq(peer, msgSeq)).msgList.find(e => e.msgType == NTMsgType.KMSGTYPEGRAYTIPS);
             let element = msg?.elements[0];
             if (msg && element) {
-                await this.emitRecallMsg(msg, element);
+                let recallEvent = await this.emitRecallMsg(msg, element);
+                try {
+                    if (recallEvent) {
+                        await this.networkManager.emitEvent(recallEvent);
+                    }
+                } catch (e) {
+                    this.context.logger.logError('处理消息撤回失败', e);
+                }
             }
         }
         msgListener.onMsgInfoListUpdate = async (msgList) => {
@@ -542,6 +549,7 @@ export class NapCatOneBot11Adapter {
             message.chatType == ChatType.KCHATTYPEGROUP ? this.handleGroupEvent(message) : this.handlePrivateMsgEvent(message)
         ]);
     }
+    
     private async handleMsg(message: RawMessage, network: Array<AdapterConfigWrap>) {
         try {
             const ob11Msg = await this.apis.MsgApi.parseMessageV2(message, this.configLoader.configData.parseMultMsg);
@@ -653,41 +661,32 @@ export class NapCatOneBot11Adapter {
         const peer: Peer = { chatType: message.chatType, peerUid: message.peerUid, guildId: '' };
         let oriMessageId = MessageUnique.getShortIdByMsgId(message.msgId) ?? MessageUnique.createUniqueMsgId(peer, message.msgId);
         if (message.chatType == ChatType.KCHATTYPEC2C) {
-            await this.emitFriendRecallMsg(message, oriMessageId, element);
+            return await this.emitFriendRecallMsg(message, oriMessageId, element);
         } else if (message.chatType == ChatType.KCHATTYPEGROUP) {
-            await this.emitGroupRecallMsg(message, oriMessageId, element);
+            return await this.emitGroupRecallMsg(message, oriMessageId, element);
         }
+
     }
 
     private async emitFriendRecallMsg(message: RawMessage, oriMessageId: number, element: MessageElement) {
-        const friendRecallEvent = new OB11FriendRecallNoticeEvent(
+        return new OB11FriendRecallNoticeEvent(
             this.core,
             +message.senderUin,
             oriMessageId
         );
-        try {
-            await this.networkManager.emitEvent(friendRecallEvent);
-        } catch (e) {
-            this.context.logger.logError('处理好友消息撤回失败', e);
-        }
     }
 
     private async emitGroupRecallMsg(message: RawMessage, oriMessageId: number, element: MessageElement) {
         const operatorUid = element.grayTipElement?.revokeElement.operatorUid;
-        if (!operatorUid) return;
+        if (!operatorUid) return undefined;
         let operatorId = message.senderUin ?? await this.core.apis.UserApi.getUinByUidV2(operatorUid);
-        const groupRecallEvent = new OB11GroupRecallNoticeEvent(
+        return new OB11GroupRecallNoticeEvent(
             this.core,
             +message.peerUin,
             +message.senderUin,
             +operatorId,
             oriMessageId
         );
-        try {
-            await this.networkManager.emitEvent(groupRecallEvent);
-        } catch (e) {
-            this.context.logger.logError('处理群消息撤回失败', e);
-        }
     }
 
 }
