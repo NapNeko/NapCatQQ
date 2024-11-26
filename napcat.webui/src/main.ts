@@ -19,6 +19,10 @@ import {
     List as TList,
     Alert as TAlert,
     Tag as TTag,
+    Descriptions as TDescriptionsProps,
+    DescriptionsItem as TDescriptionsItem,
+    Collapse as TCollapse,
+    CollapsePanel as TCollapsePanel,
     ListItem as TListItem,
     Tabs as TTabs,
     TabPanel as TTabPanel,
@@ -58,6 +62,10 @@ app.use(TLink);
 app.use(TList);
 app.use(TAlert);
 app.use(TTag);
+app.use(TDescriptionsProps);
+app.use(TDescriptionsItem);
+app.use(TCollapse);
+app.use(TCollapsePanel);
 app.use(TListItem);
 app.use(TTabs);
 app.use(TTabPanel);
