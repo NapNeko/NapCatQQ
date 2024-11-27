@@ -44,7 +44,7 @@
     "json-schema-to-ts": "^3.1.1",
     "typescript": "^5.3.3",
     "typescript-eslint": "^8.13.0",
-    "vite": "^5.2.6",
+    "vite": "^6.0.1",
     "vite-plugin-cp": "^4.0.8",
     "vite-tsconfig-paths": "^5.1.0",
     "winston": "^3.17.0"
