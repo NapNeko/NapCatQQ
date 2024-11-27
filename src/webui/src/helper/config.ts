@@ -3,7 +3,6 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import * as net from 'node:net';
 import { resolve } from 'node:path';
 
-
 // 限制尝试端口的次数，避免死循环
 const MAX_PORT_TRY = 100;
 
@@ -64,14 +63,6 @@ async function tryUsePort(port: number, host: string, tryCount: number = 0): Pro
     });
 }
 
-export interface WebUiConfigType {
-    host: string;
-    port: number;
-    prefix: string;
-    token: string;
-    loginRate: number;
-}
-
 // 读取当前目录下名为 webui.json 的配置文件，如果不存在则创建初始化配置文件
 export class WebUiConfigWrapper {
     WebUiConfigData: WebUiConfigType | undefined = undefined;
@@ -114,14 +105,18 @@ export class WebUiConfigWrapper {
             // 不希望回写的配置放后面
 
             // 查询主机地址是否可用
-            const [host_err, host] = await tryUseHost(parsedConfig.host).then(data => [null, data]).catch(err => [err, null]);
+            const [host_err, host] = await tryUseHost(parsedConfig.host)
+                .then((data) => [null, data])
+                .catch((err) => [err, null]);
             if (host_err) {
                 console.log('host不可用', host_err);
                 parsedConfig.port = 0; // 设置为0，禁用WebUI
             } else {
                 parsedConfig.host = host;
                 // 修正端口占用情况
-                const [port_err, port] = await tryUsePort(parsedConfig.port, parsedConfig.host).then(data => [null, data]).catch(err => [err, null]);
+                const [port_err, port] = await tryUsePort(parsedConfig.port, parsedConfig.host)
+                    .then((data) => [null, data])
+                    .catch((err) => [err, null]);
                 if (port_err) {
                     console.log('port不可用', port_err);
                     parsedConfig.port = 0; // 设置为0，禁用WebUI
@@ -137,4 +132,3 @@ export class WebUiConfigWrapper {
         return defaultconfig; // 理论上这行代码到不了，到了只能返回默认配置了
     }
 }
-

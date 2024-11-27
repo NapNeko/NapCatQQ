@@ -1,79 +1,58 @@
 import { RequestHandler } from 'express';
-import { WebUiDataRuntime } from '../helper/Data';
 import { existsSync, readFileSync } from 'node:fs';
-import { OneBotConfig } from '@/onebot/config/config';
 import { resolve } from 'node:path';
-import { webUiPathWrapper } from '@/webui';
 
-const isEmpty = (data: any) => data === undefined || data === null || data === '';
-export const OB11GetConfigHandler: RequestHandler = async (req, res) => {
+import { OneBotConfig } from '@/onebot/config/config';
+
+import { webUiPathWrapper } from '@/webui';
+import { WebUiDataRuntime } from '@webapi/helper/Data';
+import { sendError, sendSuccess } from '@webapi/utils/response';
+import { isEmpty } from '@webapi/utils/check';
+
+// 获取OneBot11配置
+export const OB11GetConfigHandler: RequestHandler = async (_, res) => {
+    // 获取QQ登录状态
     const isLogin = await WebUiDataRuntime.getQQLoginStatus();
+    // 如果未登录，返回错误
     if (!isLogin) {
-        res.send({
-            code: -1,
-            message: 'Not Login',
-        });
-        return;
+        return sendError(res, 'Not Login');
     }
+    // 获取登录的QQ号
     const uin = await WebUiDataRuntime.getQQLoginUin();
+    // 读取配置文件
     const configFilePath = resolve(webUiPathWrapper.configPath, `./onebot11_${uin}.json`);
-    //console.log(configFilePath);
-    let data: OneBotConfig;
+    // 尝试解析配置文件
     try {
-        data = JSON.parse(
+        // 读取配置文件
+        const data = JSON.parse(
             existsSync(configFilePath)
                 ? readFileSync(configFilePath).toString()
                 : readFileSync(resolve(webUiPathWrapper.configPath, './onebot11.json')).toString()
-        );
+        ) as OneBotConfig;
+        // 返回配置文件
+        return sendSuccess(res, data);
     } catch (e) {
-        data = {} as OneBotConfig;
-        res.send({
-            code: -1,
-            message: 'Config Get Error',
-        });
-        return;
+        return sendError(res, 'Config Get Error');
     }
-    res.send({
-        code: 0,
-        message: 'success',
-        data: data,
-    });
-    return;
 };
+
+// 写入OneBot11配置
 export const OB11SetConfigHandler: RequestHandler = async (req, res) => {
+    // 获取QQ登录状态
     const isLogin = await WebUiDataRuntime.getQQLoginStatus();
+    // 如果未登录，返回错误
     if (!isLogin) {
-        res.send({
-            code: -1,
-            message: 'Not Login',
-        });
-        return;
+        return sendError(res, 'Not Login');
     }
+    // 如果配置为空，返回错误
     if (isEmpty(req.body.config)) {
-        res.send({
-            code: -1,
-            message: 'config is empty',
-        });
-        return;
+        return sendError(res, 'config is empty');
     }
-    let SetResult;
+    // 写入配置
     try {
         await WebUiDataRuntime.setOB11Config(JSON.parse(req.body.config));
-        SetResult = true;
+        return sendSuccess(res, null);
     } catch (e) {
-        SetResult = false;
+        return sendError(res, 'Config Set Error');
     }
-    if (SetResult) {
-        res.send({
-            code: 0,
-            message: 'success',
-        });
-    } else {
-        res.send({
-            code: -1,
-            message: 'Config Set Error',
-        });
-    }
-
-    return;
 };

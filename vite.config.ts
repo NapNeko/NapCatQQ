@@ -50,59 +50,63 @@ const ShellBaseConfigPlugin: PluginOption[] = [
     nodeResolve(),
 ];
 
-const ShellBaseConfig = () => defineConfig({
-    resolve: {
-        conditions: ['node', 'default'],
-        alias: {
-            '@/core': resolve(__dirname, './src/core'),
-            '@': resolve(__dirname, './src'),
-            './lib-cov/fluent-ffmpeg': './lib/fluent-ffmpeg',
-        },
-    },
-    build: {
-        sourcemap: false,
-        target: 'esnext',
-        minify: false,
-        lib: {
-            entry: {
-                'napcat': 'src/shell/napcat.ts',
-                'audio-worker': 'src/common/audio-worker.ts',
+const ShellBaseConfig = () =>
+    defineConfig({
+        resolve: {
+            conditions: ['node', 'default'],
+            alias: {
+                '@/core': resolve(__dirname, './src/core'),
+                '@': resolve(__dirname, './src'),
+                './lib-cov/fluent-ffmpeg': './lib/fluent-ffmpeg',
+                '@webapi': resolve(__dirname, './src/webui/src'),
             },
-            formats: ['es'],
-            fileName: (_, entryName) => `${entryName}.mjs`,
         },
-        rollupOptions: {
-            external: [...nodeModules, ...external],
+        build: {
+            sourcemap: false,
+            target: 'esnext',
+            minify: false,
+            lib: {
+                entry: {
+                    napcat: 'src/shell/napcat.ts',
+                    'audio-worker': 'src/common/audio-worker.ts',
+                },
+                formats: ['es'],
+                fileName: (_, entryName) => `${entryName}.mjs`,
+            },
+            rollupOptions: {
+                external: [...nodeModules, ...external],
+            },
         },
-    },
-});
+    });
 
-const FrameworkBaseConfig = () => defineConfig({
-    resolve: {
-        conditions: ['node', 'default'],
-        alias: {
-            '@/core': resolve(__dirname, './src/core'),
-            '@': resolve(__dirname, './src'),
-            './lib-cov/fluent-ffmpeg': './lib/fluent-ffmpeg',
-        },
-    },
-    build: {
-        sourcemap: false,
-        target: 'esnext',
-        minify: false,
-        lib: {
-            entry: {
-                'napcat': 'src/framework/napcat.ts',
-                'audio-worker': 'src/common/audio-worker.ts',
+const FrameworkBaseConfig = () =>
+    defineConfig({
+        resolve: {
+            conditions: ['node', 'default'],
+            alias: {
+                '@/core': resolve(__dirname, './src/core'),
+                '@': resolve(__dirname, './src'),
+                './lib-cov/fluent-ffmpeg': './lib/fluent-ffmpeg',
+                '@webapi': resolve(__dirname, './src/webui/src'),
             },
-            formats: ['es'],
-            fileName: (_, entryName) => `${entryName}.mjs`,
         },
-        rollupOptions: {
-            external: [...nodeModules, ...external],
+        build: {
+            sourcemap: false,
+            target: 'esnext',
+            minify: false,
+            lib: {
+                entry: {
+                    napcat: 'src/framework/napcat.ts',
+                    'audio-worker': 'src/common/audio-worker.ts',
+                },
+                formats: ['es'],
+                fileName: (_, entryName) => `${entryName}.mjs`,
+            },
+            rollupOptions: {
+                external: [...nodeModules, ...external],
+            },
         },
-    },
-});
+    });
 
 export default defineConfig(({ mode }): UserConfig => {
     if (mode === 'shell') {
