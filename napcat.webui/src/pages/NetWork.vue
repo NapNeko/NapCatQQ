@@ -147,7 +147,7 @@
                 </t-form-item>
                 <div>
                     <component
-                        :is="resolveDynamicComponent(getComponent(newTab.type as ConfigKey))"
+                        :is="resolveDynamicComponent(getComponent(newTab.type as ComponentKey))"
                         :config="newTab.data"
                     />
                 </div>
@@ -161,17 +161,10 @@ import { AddIcon, DeleteIcon, Edit2Icon, ServerFilledIcon, CopyIcon, BrowseOffIc
 import { onMounted, onUnmounted, ref, resolveDynamicComponent } from 'vue';
 import emitter from '@/ts/event-bus';
 import {
-    HttpClientConfig,
-    httpClientDefaultConfigs,
-    HttpServerConfig,
-    httpServerDefaultConfigs,
+    mergeNetworkDefaultConfig,
     mergeOneBotConfigs,
     NetworkConfig,
     OneBotConfig,
-    WebsocketClientConfig,
-    websocketClientDefaultConfigs,
-    WebsocketServerConfig,
-    websocketServerDefaultConfigs,
 } from '../../../src/onebot/config/config';
 import HttpServerComponent from '@/pages/network/HttpServerComponent.vue';
 import HttpClientComponent from '@/pages/network/HttpClientComponent.vue';
@@ -194,19 +187,11 @@ const loadPage = ref<boolean>(false);
 const visibleBody = ref<boolean>(false);
 const newTab = ref<{ name: string; data: any; type: string }>({ name: '', data: {}, type: '' });
 const dialogTitle = ref<string>('');
-type ConfigKey = 'httpServers' | 'httpClients' | 'websocketServers' | 'websocketClients';
 
-type ConfigUnion = HttpClientConfig | HttpServerConfig | WebsocketServerConfig | WebsocketClientConfig;
-
-const defaultConfigs: Record<ConfigKey, ConfigUnion> = {
-    httpServers: httpServerDefaultConfigs,
-    httpClients: httpClientDefaultConfigs,
-    websocketServers: websocketServerDefaultConfigs,
-    websocketClients: websocketClientDefaultConfigs,
-};
+type ComponentKey = keyof typeof mergeNetworkDefaultConfig;
 
 const componentMap: Record<
-    ConfigKey,
+    ComponentKey,
     | typeof HttpServerComponent
     | typeof HttpClientComponent
     | typeof WebsocketServerComponent
@@ -217,7 +202,7 @@ const componentMap: Record<
     websocketServers: WebsocketServerComponent,
     websocketClients: WebsocketClientComponent,
 };
-type ComponentKey = keyof typeof componentMap;
+
 //操作类型
 const operateType = ref<string>('');
 //配置项索引
@@ -299,9 +284,9 @@ const delConfig = (item: any) => {
 const selectType = (key: string) => {
     cardConfig.value = WebConfg.value.get(key);
 };
-const onloadDefault = (key: ConfigKey) => {
+const onloadDefault = (key: ComponentKey) => {
     console.log(key);
-    newTab.value.data = structuredClone(defaultConfigs[key]);
+    newTab.value.data = structuredClone(mergeNetworkDefaultConfig[key]);
 };
 //检测重名
 const checkName = (name: string) => {
@@ -367,7 +352,7 @@ const getAllData = (data: NetworkConfig) => {
     cardConfig.value = [];
     WebConfg.value.set('all', []);
     Object.entries(data).forEach(([key, configs]) => {
-        if (key in defaultConfigs) {
+        if (key in mergeNetworkDefaultConfig) {
             networkConfig[key] = [...configs];
             const newConfigsArray = configs.map((config: any) => ({
                 ...config,
@@ -401,15 +386,6 @@ const copyText = (text: string) => {
     document.execCommand('copy');
     document.body.removeChild(input);
     MessagePlugin.success('复制成功');
-};
-const getTime = (time: number) => {
-    if (time < 1000) {
-        return time + ' 毫秒';
-    } else if (time < 60000) {
-        return (time / 1000).toFixed(2) + ' 秒';
-    } else {
-        return (time / 60000).toFixed(2) + ' 分钟';
-    }
 };
 
 const handleResize = () => {
