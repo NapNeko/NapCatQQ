@@ -175,14 +175,7 @@ const operateType = ref<string>('');
 //配置项索引
 const configIndex = ref<number>(0);
 //保存时所用数据
-interface NetworkConfigType {
-    [key: string]: any;
-    websocketClients: any[];
-    websocketServers: any[];
-    httpClients: any[];
-    httpServers: any[];
-}
-const networkConfig: NetworkConfigType = {
+const networkConfig: NetworkConfig & { [key: string]: any; } = {
     websocketClients: [],
     websocketServers: [],
     httpClients: [],
@@ -199,21 +192,11 @@ const WebConfg = ref(
         ['websocketClients', []],
     ])
 );
-interface TypeChType {
-    [key: string]: string;
-    httpServers: string;
-    httpClients: string;
-    websocketServers: string;
-    websocketClients: string;
-}
 const typeCh: Record<ComponentKey, string> = {
     httpServers: 'HTTP 服务器',
     httpClients: 'HTTP 客户端',
     websocketServers: 'WebSocket 服务器',
     websocketClients: 'WebSocket 客户端',
-};
-const getKeyByValue = (obj: TypeChType, value: string): string | undefined => {
-    return Object.entries(obj).find(([_, v]) => v === value)?.[0];
 };
 const cardConfig = ref<any>([]);
 const getComponent = (type: ComponentKey) => {
@@ -229,7 +212,7 @@ const addConfig = () => {
 
 const editConfig = (item: any) => {
     dialogTitle.value = '修改配置';
-    const type = getKeyByValue(typeCh, item.type);
+    const type = typeCh[item.type as ComponentKey] ?? '';
     if (type) {
         newTab.value = { name: item.name, data: item, type: type };
     }
@@ -238,7 +221,7 @@ const editConfig = (item: any) => {
     visibleBody.value = true;
 };
 const delConfig = (item: any) => {
-    const type = getKeyByValue(typeCh, item.type);
+    const type = typeCh[item.type as ComponentKey] ?? '';
     if (type) {
         newTab.value = { name: item.name, data: item, type: type };
     }
