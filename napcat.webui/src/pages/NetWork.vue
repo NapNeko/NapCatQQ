@@ -148,8 +148,8 @@ const cardWidth = ref<number>(0);
 const cardHeight = ref<number>(0);
 const mediumScreen = window.matchMedia('(min-width: 768px) and (max-width: 1024px)');
 const largeScreen = window.matchMedia('(min-width: 1025px)');
-const headerBox = ref<any>(null);
-const setting = ref<any>(null);
+const headerBox = ref<HTMLDivElement | null>(null);
+const setting = ref<HTMLDivElement | null>(null);
 const loadPage = ref<boolean>(false);
 const visibleBody = ref<boolean>(false);
 const newTab = ref<{ name: string; data: any; type: string }>({ name: '', data: {}, type: '' });
@@ -202,6 +202,9 @@ const cardConfig = ref<any>([]);
 const getComponent = (type: ComponentKey) => {
     return componentMap[type];
 };
+const getKeyByValue = (obj: typeof typeCh, value: string): string | undefined => {
+    return Object.entries(obj).find(([_, v]) => v === value)?.[0];
+};
 
 const addConfig = () => {
     dialogTitle.value = '添加配置';
@@ -212,7 +215,7 @@ const addConfig = () => {
 
 const editConfig = (item: any) => {
     dialogTitle.value = '修改配置';
-    const type = typeCh[item.type as ComponentKey] ?? '';
+    const type =  getKeyByValue(typeCh, item.type);
     if (type) {
         newTab.value = { name: item.name, data: item, type: type };
     }
@@ -221,7 +224,7 @@ const editConfig = (item: any) => {
     visibleBody.value = true;
 };
 const delConfig = (item: any) => {
-    const type = typeCh[item.type as ComponentKey] ?? '';
+    const type =  getKeyByValue(typeCh, item.type);
     if (type) {
         newTab.value = { name: item.name, data: item, type: type };
     }
@@ -361,7 +364,7 @@ const handleResize = () => {
     }
     loadPage.value = true;
     setTimeout(() => {
-        cardHeight.value = window.innerHeight - headerBox.value.offsetHeight - setting.value.offsetHeight - 20;
+        cardHeight.value = window.innerHeight - (headerBox.value?.offsetHeight ?? 0) - (setting.value?.offsetHeight?? 0) - 20;
     }, 300);
 };
 emitter.on('sendWidth', (width) => {
