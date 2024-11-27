@@ -182,7 +182,6 @@ export enum FileUriType {
 }
 
 export async function checkUriType(Uri: string) {
-
     const LocalFileRet = await solveProblem((uri: string) => {
         if (fs.existsSync(uri)) {
             return { Uri: uri, Type: FileUriType.Local };
@@ -200,14 +199,7 @@ export async function checkUriType(Uri: string) {
             return { Uri: uri, Type: FileUriType.Base64 };
         }
         if (uri.startsWith('file://')) {
-            let filePath: string;
-            const pathname = decodeURIComponent(new URL(uri).pathname + new URL(uri).hash);
-            if (process.platform === 'win32') {
-                filePath = pathname.slice(1);
-            } else {
-                filePath = pathname;
-            }
-
+            let filePath: string = uri.slice(7);
             return { Uri: filePath, Type: FileUriType.Local };
         }
         if (uri.startsWith('data:')) {
@@ -222,14 +214,16 @@ export async function checkUriType(Uri: string) {
 
 export async function uri2local(dir: string, uri: string, filename: string | undefined = undefined): Promise<Uri2LocalRes> {
     const { Uri: HandledUri, Type: UriType } = await checkUriType(uri);
+
     //解析失败
     const tempName = randomUUID();
     if (!filename) filename = randomUUID();
-    //解析Http和Https协议
 
+    //解析Http和Https协议
     if (UriType == FileUriType.Unknown) {
         return { success: false, errMsg: `未知文件类型, uri= ${uri}`, fileName: '', ext: '', path: '' };
     }
+
     //解析File协议和本地文件
     if (UriType == FileUriType.Local) {
         const fileExt = path.extname(HandledUri);
@@ -241,8 +235,8 @@ export async function uri2local(dir: string, uri: string, filename: string | und
         fs.copyFileSync(HandledUri, filePath);
         return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath };
     }
+    
     //接下来都要有文件名
-
     if (UriType == FileUriType.Remote) {
         const pathInfo = path.parse(decodeURIComponent(new URL(HandledUri).pathname));
         if (pathInfo.name) {
@@ -260,6 +254,7 @@ export async function uri2local(dir: string, uri: string, filename: string | und
         fs.writeFileSync(filePath, buffer, { flag: 'wx' });
         return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath };
     }
+
     //解析Base64
     if (UriType == FileUriType.Base64) {
         const base64 = HandledUri.replace(/^base64:\/\//, '');
