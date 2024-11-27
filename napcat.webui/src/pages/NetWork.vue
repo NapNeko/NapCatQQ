@@ -4,17 +4,11 @@
         <t-divider align="right">
             <t-button @click="addConfig()">
                 <template #icon><add-icon /></template>
-                添加配置</t-button
-            >
+                添加配置</t-button>
         </t-divider>
     </div>
     <div v-if="loadPage" ref="setting" class="setting">
-        <t-tabs
-            ref="tabsRef"
-            :style="{ width: tabsWidth + 'px' }"
-            default-value="all"
-            @change="selectType"
-        >
+        <t-tabs ref="tabsRef" :style="{ width: tabsWidth + 'px' }" default-value="all" @change="selectType">
             <t-tab-panel value="all" label="全部"></t-tab-panel>
             <t-tab-panel value="httpServers" label="HTTP 服务器"></t-tab-panel>
             <t-tab-panel value="httpClients" label="HTTP 客户端"></t-tab-panel>
@@ -25,13 +19,8 @@
     <div v-if="loadPage" class="card-box" :style="{ width: tabsWidth + 'px' }">
         <div class="setting-box" :style="{ maxHeight: cardHeight + 'px' }" v-if="cardConfig.length > 0">
             <div v-for="(item, index) in cardConfig" :key="index">
-                <t-card
-                    :title="item.name"
-                    :description="item.type"
-                    :style="{ width: cardWidth + 'px' }"
-                    :header-bordered="true"
-                    class="setting-card"
-                >
+                <t-card :title="item.name" :description="item.type" :style="{ width: cardWidth + 'px' }"
+                    :header-bordered="true" class="setting-card">
                     <template #actions>
                         <t-space>
                             <edit2-icon size="20px" @click="editConfig(item)"></edit2-icon>
@@ -41,12 +30,11 @@
                         </t-space>
                     </template>
                     <div class="setting-content">
-                        <t-card
-                            class="card-address"
-                            :style="{ borderLeft: '7px solid ' + (item.enable ? 
-                                'var(--td-success-color)' : 
-                                'var(--td-error-color)') }"
-                        >
+                        <t-card class="card-address" :style="{
+                            borderLeft: '7px solid ' + (item.enable ?
+                                'var(--td-success-color)' :
+                                'var(--td-error-color)')
+                        }">
                             <server-filled-icon size="20px"></server-filled-icon>
                             <strong v-if="item.host">{{ item.host }}</strong>
                             <strong v-if="item.url">{{ item.url }}</strong>
@@ -55,52 +43,47 @@
                             <copy-icon size="20px" @click="copyText(item.host + ':' + item.port)"></copy-icon>
                         </t-card>
                         <t-collapse :default-value="[0]" expand-mutex style="margin-top:10px;" class="info-coll">
-                            <t-collapse-panel header="基础信息"> 
-                                <t-descriptions
-                                    size="small"
-                                    :layout="infoOneCol ? 'vertical' : 'horizontal'"
-                                    class="setting-base-info"
-                                >
+                            <t-collapse-panel header="基础信息">
+                                <t-descriptions size="small" :layout="infoOneCol ? 'vertical' : 'horizontal'"
+                                    class="setting-base-info">
                                     <t-descriptions-item v-if="item.token" label="连接密钥">
                                         <div class="token-view">
                                             <span>{{ showToken ? item.token : '*******' }}</span>
-                                            <browse-icon v-if="showToken" size="15px" @click="showToken = false"></browse-icon>
-                                            <browse-off-icon v-else size="17px" @click="showToken = true"></browse-off-icon>
+                                            <browse-icon v-if="showToken" size="15px"
+                                                @click="showToken = false"></browse-icon>
+                                            <browse-off-icon v-else size="17px"
+                                                @click="showToken = true"></browse-off-icon>
                                         </div>
-                                        </t-descriptions-item>
+                                    </t-descriptions-item>
                                     <t-descriptions-item label="消息格式">{{ item.messagePostFormat }}</t-descriptions-item>
                                 </t-descriptions>
                             </t-collapse-panel>
                             <t-collapse-panel header="状态信息">
-                                <t-descriptions
-                                    size="small"
-                                    :layout="infoOneCol ? 'vertical' : 'horizontal'"
-                                    class="setting-base-info"
-                                >
+                                <t-descriptions size="small" :layout="infoOneCol ? 'vertical' : 'horizontal'"
+                                    class="setting-base-info">
                                     <t-descriptions-item v-if="item.token" label="调试日志">
                                         <t-tag class="tag-item" :theme="item.debug ? 'success' : 'danger'">
-                                            {{ item.debug ? '开启' : '关闭' }}</t-tag
-                                        >
+                                            {{ item.debug ? '开启' : '关闭' }}</t-tag>
                                     </t-descriptions-item>
-                                    <t-descriptions-item  v-if="item.hasOwnProperty('enableWebsocket')" label="Websocket 功能">
+                                    <t-descriptions-item v-if="item.hasOwnProperty('enableWebsocket')"
+                                        label="Websocket 功能">
                                         <t-tag class="tag-item" :theme="item.enableWebsocket ? 'success' : 'danger'">
-                                            {{ item.enableWebsocket ? '启用' : '禁用' }}</t-tag
-                                        >
+                                            {{ item.enableWebsocket ? '启用' : '禁用' }}</t-tag>
                                     </t-descriptions-item>
                                     <t-descriptions-item v-if="item.hasOwnProperty('enableCors')" label="跨域放行">
                                         <t-tag class="tag-item" :theme="item.enableCors ? 'success' : 'danger'">
-                                            {{ item.enableCors ? '开启' : '关闭' }}</t-tag
-                                        >
+                                            {{ item.enableCors ? '开启' : '关闭' }}</t-tag>
                                     </t-descriptions-item>
-                                    <t-descriptions-item v-if="item.hasOwnProperty('enableForcePushEvent')" label="上报自身消息">
+                                    <t-descriptions-item v-if="item.hasOwnProperty('enableForcePushEvent')"
+                                        label="上报自身消息">
                                         <t-tag class="tag-item" :theme="item.reportSelfMessage ? 'success' : 'danger'">
-                                            {{ item.reportSelfMessage ? '开启' : '关闭' }}</t-tag
-                                        >
+                                            {{ item.reportSelfMessage ? '开启' : '关闭' }}</t-tag>
                                     </t-descriptions-item>
-                                    <t-descriptions-item v-if="item.hasOwnProperty('enableForcePushEvent')" label="强制推送事件">
-                                        <t-tag class="tag-item" :theme="item.enableForcePushEvent ? 'success' : 'danger'">
-                                            {{ item.enableForcePushEvent ? '开启' : '关闭' }}</t-tag
-                                        >
+                                    <t-descriptions-item v-if="item.hasOwnProperty('enableForcePushEvent')"
+                                        label="强制推送事件">
+                                        <t-tag class="tag-item"
+                                            :theme="item.enableForcePushEvent ? 'success' : 'danger'">
+                                            {{ item.enableForcePushEvent ? '开启' : '关闭' }}</t-tag>
                                     </t-descriptions-item>
                                 </t-descriptions>
                             </t-collapse-panel>
@@ -114,30 +97,16 @@
             <div class="card-noneText">暂无网络配置</div>
         </t-card>
     </div>
-    <t-dialog
-        v-model:visible="visibleBody"
-        :header="dialogTitle"
-        :destroy-on-close="true"
-        :show-in-attached-element="true"
-        placement="center"
-        :on-confirm="saveConfig"
-    >
+    <t-dialog v-model:visible="visibleBody" :header="dialogTitle" :destroy-on-close="true"
+        :show-in-attached-element="true" placement="center" :on-confirm="saveConfig">
         <div slot="body" class="dialog-body">
             <t-form ref="form" :data="newTab" labelAlign="left" :model="newTab">
-                <t-form-item
-                    style="text-align: left"
-                    :rules="[{ required: true, message: '请输入名称', trigger: 'blur' }]"
-                    label="名称"
-                    name="name"
-                >
+                <t-form-item style="text-align: left" :rules="[{ required: true, message: '请输入名称', trigger: 'blur' }]"
+                    label="名称" name="name">
                     <t-input v-model="newTab.name" />
                 </t-form-item>
-                <t-form-item
-                    style="text-align: left"
-                    :rules="[{ required: true, message: '请选择类型', trigger: 'change' }]"
-                    label="类型"
-                    name="type"
-                >
+                <t-form-item style="text-align: left" :rules="[{ required: true, message: '请选择类型', trigger: 'change' }]"
+                    label="类型" name="type">
                     <t-select v-model="newTab.type" @change="onloadDefault">
                         <t-option value="httpServers">HTTP 服务器</t-option>
                         <t-option value="httpClients">HTTP 客户端</t-option>
@@ -146,10 +115,8 @@
                     </t-select>
                 </t-form-item>
                 <div>
-                    <component
-                        :is="resolveDynamicComponent(getComponent(newTab.type as ComponentKey))"
-                        :config="newTab.data"
-                    />
+                    <component :is="resolveDynamicComponent(getComponent(newTab.type as ComponentKey))"
+                        :config="newTab.data" />
                 </div>
             </t-form>
         </div>
@@ -239,7 +206,7 @@ interface TypeChType {
     websocketServers: string;
     websocketClients: string;
 }
-const typeCh: TypeChType = {
+const typeCh: Record<ComponentKey, string> = {
     httpServers: 'HTTP 服务器',
     httpClients: 'HTTP 客户端',
     websocketServers: 'WebSocket 服务器',
@@ -281,9 +248,11 @@ const delConfig = (item: any) => {
     operateType.value = 'delete';
     saveConfig();
 };
-const selectType = (key: string) => {
+
+const selectType = (key: ComponentKey) => {
     cardConfig.value = WebConfg.value.get(key);
 };
+
 const onloadDefault = (key: ComponentKey) => {
     console.log(key);
     newTab.value.data = structuredClone(mergeNetworkDefaultConfig[key]);
@@ -347,16 +316,18 @@ const setOB11Config = async (config: OneBotConfig): Promise<boolean> => {
     const loginManager = new QQLoginManager(storedCredential);
     return await loginManager.SetOB11Config(config);
 };
+
 //获取卡片数据
 const getAllData = (data: NetworkConfig) => {
     cardConfig.value = [];
     WebConfg.value.set('all', []);
-    Object.entries(data).forEach(([key, configs]) => {
+    for (const key in data) {
+        const configs = data[key as keyof NetworkConfig];
         if (key in mergeNetworkDefaultConfig) {
             networkConfig[key] = [...configs];
             const newConfigsArray = configs.map((config: any) => ({
                 ...config,
-                type: typeCh[key],
+                type: typeCh[key as ComponentKey],
             }));
             WebConfg.value.set(key, newConfigsArray);
             const allConfigs = WebConfg.value.get('all');
@@ -366,8 +337,9 @@ const getAllData = (data: NetworkConfig) => {
             }
             cardConfig.value = WebConfg.value.get('all');
         }
-    });
+    }
 };
+
 const loadConfig = async () => {
     try {
         const userConfig = await getOB11Config();
@@ -378,12 +350,13 @@ const loadConfig = async () => {
         console.error('Error loading config:', error);
     }
 };
-const copyText = (text: string) => {
+
+const copyText = async (text: string) => {
     const input = document.createElement('input');
     input.value = text;
     document.body.appendChild(input);
     input.select();
-    document.execCommand('copy');
+    await navigator.clipboard.writeText(text);
     document.body.removeChild(input);
     MessagePlugin.success('复制成功');
 };
@@ -440,6 +413,7 @@ onUnmounted(() => {
 .setting {
     margin: 0 20px;
 }
+
 .setting-box {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -450,19 +424,23 @@ onUnmounted(() => {
 .setting-card {
     width: 100%;
 }
+
 .setting-content {
     width: 100%;
     text-align: left;
 }
+
 .card-address svg {
     fill: var(--td-brand-color);
     margin-right: 10px;
     cursor: pointer;
 }
+
 .setting-address {
     display: flex;
     margin-top: 2px;
 }
+
 .local {
     flex: 5.5;
     margin-bottom: 1px;
@@ -470,9 +448,11 @@ onUnmounted(() => {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
 .none-box {
     flex: 0.5;
 }
+
 .port {
     flex: 4;
     margin-top: 1px;
@@ -480,23 +460,28 @@ onUnmounted(() => {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
 .setting-status {
     display: flex;
     margin-top: 2px;
 }
+
 .status-deBug {
     display: flex;
     flex: 4;
 }
+
 .status-tag {
     display: flex;
     flex: 5.5;
 }
+
 .token-view {
     display: flex;
     flex-direction: row;
     align-items: center;
 }
+
 .token-view span {
     flex: 1;
     margin-right: 20%;
@@ -512,6 +497,7 @@ onUnmounted(() => {
     .setting-box {
         grid-template-columns: 1fr;
     }
+
     .setting-address {
         display: block;
     }
@@ -520,6 +506,7 @@ onUnmounted(() => {
 .card-box {
     margin: 10px 20px 0 20px;
 }
+
 .card-none {
     line-height: 200px;
 }
@@ -527,10 +514,12 @@ onUnmounted(() => {
 .card-noneText {
     font-size: 16px;
 }
+
 .dialog-body {
     max-height: 60vh;
     overflow-y: auto;
 }
+
 ::-webkit-scrollbar {
     width: 0;
     background: transparent;
@@ -540,25 +529,31 @@ onUnmounted(() => {
 .setting-card .t-card__title {
     text-align: left !important;
 }
+
 .setting-card .t-card__description {
     margin-bottom: 0;
     font-size: 12px;
 }
+
 .card-address .t-card__body {
     display: flex;
     flex-direction: row;
     align-items: center;
 }
+
 .setting-base-info .t-descriptions__header {
     font-size: 15px;
     margin-bottom: 0;
 }
+
 .setting-base-info .t-descriptions__label {
     padding: 0 var(--td-comp-paddingLR-l) !important;
 }
-.setting-base-info tr > td:last-child {
+
+.setting-base-info tr>td:last-child {
     text-align: right;
 }
+
 .info-coll .t-collapse-panel__wrapper .t-collapse-panel__content {
     padding: var(--td-comp-paddingTB-m) var(--td-comp-paddingLR-l);
 }
