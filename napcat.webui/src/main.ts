@@ -39,6 +39,7 @@ import {
     Footer as TFooter,
     Aside as TAside,
     Popconfirm as Tpopconfirm,
+    Empty as TEmpty,
 } from 'tdesign-vue-next';
 import { router } from './router';
 import 'tdesign-vue-next/es/style/index.css';
@@ -82,4 +83,5 @@ app.use(TContent);
 app.use(TFooter);
 app.use(TAside);
 app.use(Tpopconfirm);
+app.use(TEmpty);
 app.mount('#app');

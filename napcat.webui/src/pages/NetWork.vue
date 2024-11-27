@@ -35,24 +35,36 @@
                                 'var(--td-success-color)' :
                                 'var(--td-error-color)')
                         }">
-                            <server-filled-icon size="20px"></server-filled-icon>
-                            <strong v-if="item.host">{{ item.host }}</strong>
-                            <strong v-if="item.url">{{ item.url }}</strong>
-                            <strong v-if="item.port">:{{ item.port }}</strong>
-                            <div style="flex: 1"></div>
-                            <copy-icon size="20px" @click="copyText(item.host + ':' + item.port)"></copy-icon>
+                                <div class="local-box" v-if="item.host&&item.port">
+                                    <server-filled-icon class="local-icon" size="20px"></server-filled-icon>
+                                    <strong class="local">{{ item.host }}:{{ item.port }}</strong>
+                                    <copy-icon class="copy-icon"  size="20px" @click="copyText(item.host + ':' + item.port)"></copy-icon>
+                                </div>
+                                <div  class="local-box" v-if="item.url">
+                                    <server-filled-icon class="local-icon" size="20px"></server-filled-icon>
+                                    <strong  class="local" >{{ item.url }}</strong>
+                                    <copy-icon class="copy-icon"  size="20px" @click="copyText(item.url)"></copy-icon>
+                                </div>
                         </t-card>
                         <t-collapse :default-value="[0]" expand-mutex style="margin-top:10px;" class="info-coll">
                             <t-collapse-panel header="基础信息">
                                 <t-descriptions size="small" :layout="infoOneCol ? 'vertical' : 'horizontal'"
                                     class="setting-base-info">
                                     <t-descriptions-item v-if="item.token" label="连接密钥">
-                                        <div class="token-view">
-                                            <span>{{ showToken ? item.token : '*******' }}</span>
-                                            <browse-icon v-if="showToken" size="15px"
+                                        <div v-if="mediumScreen.matches||largeScreen.matches" class="token-view">
+                                            <span>{{ showToken ? item.token : '******' }}</span>
+                                            <browse-icon class="browse-icon" v-if="showToken" size="18px"
                                                 @click="showToken = false"></browse-icon>
-                                            <browse-off-icon v-else size="17px"
+                                            <browse-off-icon class="browse-icon" v-else size="18px"
                                                 @click="showToken = true"></browse-off-icon>
+                                        </div>
+                                        <div v-else>
+                                            <t-popup :showArrow="true" trigger="click">
+                                                <t-tag theme="primary">点击查看</t-tag>
+                                                <template #content>
+                                                    <div @click="copyText(item.token)">{{item.token}}</div>
+                                                </template>
+                                            </t-popup>
                                         </div>
                                     </t-descriptions-item>
                                     <t-descriptions-item label="消息格式">{{ item.messagePostFormat }}</t-descriptions-item>
@@ -61,7 +73,7 @@
                             <t-collapse-panel header="状态信息">
                                 <t-descriptions size="small" :layout="infoOneCol ? 'vertical' : 'horizontal'"
                                     class="setting-base-info">
-                                    <t-descriptions-item v-if="item.token" label="调试日志">
+                                    <t-descriptions-item v-if="item.hasOwnProperty('debug')" label="调试日志">
                                         <t-tag class="tag-item" :theme="item.debug ? 'success' : 'danger'">
                                             {{ item.debug ? '开启' : '关闭' }}</t-tag>
                                     </t-descriptions-item>
@@ -93,13 +105,13 @@
             </div>
             <div style="height: 20vh"></div>
         </div>
-        <t-card class="card-none" v-else>
-            <div class="card-noneText">暂无网络配置</div>
+        <t-card  v-else>
+            <t-empty class="card-none" title="暂无网络配置"> </t-empty>
         </t-card>
     </div>
     <t-dialog v-model:visible="visibleBody" :header="dialogTitle" :destroy-on-close="true"
-        :show-in-attached-element="true" placement="center" :on-confirm="saveConfig">
-        <div slot="body" class="dialog-body">
+        :show-in-attached-element="true" placement="center" :on-confirm="saveConfig" class=".t-dialog__ctx .t-dialog--defaul">
+        <div slot="body" class="dialog-body" >
             <t-form ref="form" :data="newTab" labelAlign="left" :model="newTab">
                 <t-form-item style="text-align: left" :rules="[{ required: true, message: '请输入名称', trigger: 'blur' }]"
                     label="名称" name="name">
@@ -354,7 +366,7 @@ const handleResize = () => {
     // } else {
     //     infoOneCol.value= false
     // }
-    tabsWidth.value = window.innerWidth - 40 - menuWidth.value;
+    tabsWidth.value = window.innerWidth - 41 - menuWidth.value;
     if (mediumScreen.matches) {
         cardWidth.value = (tabsWidth.value - 20) / 2;
     } else if (largeScreen.matches) {
@@ -364,7 +376,7 @@ const handleResize = () => {
     }
     loadPage.value = true;
     setTimeout(() => {
-        cardHeight.value = window.innerHeight - (headerBox.value?.offsetHeight ?? 0) - (setting.value?.offsetHeight ?? 0) - 20;
+        cardHeight.value = window.innerHeight - (headerBox.value?.offsetHeight ?? 0) - (setting.value?.offsetHeight ?? 0) - 21;
     }, 300);
 };
 emitter.on('sendWidth', (width) => {
@@ -409,70 +421,58 @@ onUnmounted(() => {
 
 .setting-card {
     width: 100%;
+    text-align: left;
 }
 
 .setting-content {
     width: 100%;
-    text-align: left;
 }
 
 .card-address svg {
     fill: var(--td-brand-color);
-    margin-right: 10px;
     cursor: pointer;
 }
 
-.setting-address {
+.local-box {
     display: flex;
     margin-top: 2px;
 }
-
+.local-icon{
+    flex: 1;
+}
 .local {
-    flex: 5.5;
-    margin-bottom: 1px;
+    flex: 6;
+    margin: 0 10px 0 10px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.none-box {
-    flex: 0.5;
+
+.copy-icon {
+    flex: 1;
+    cursor: pointer;
+    flex-direction: row;
 }
 
-.port {
-    flex: 4;
-    margin-top: 1px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.setting-status {
-    display: flex;
-    margin-top: 2px;
-}
-
-.status-deBug {
-    display: flex;
-    flex: 4;
-}
-
-.status-tag {
-    display: flex;
-    flex: 5.5;
-}
 
 .token-view {
     display: flex;
-    flex-direction: row;
     align-items: center;
 }
 
 .token-view span {
-    flex: 1;
-    margin-right: 20%;
+    flex: 5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
-
+.browse-icon{
+    flex: 2;
+}
+:global(.t-dialog__ctx .t-dialog--defaul) {
+    margin: 0 20px;
+}
 @media (max-width: 1024px) {
     .setting-box {
         grid-template-columns: 1fr 1fr;
@@ -484,9 +484,6 @@ onUnmounted(() => {
         grid-template-columns: 1fr;
     }
 
-    .setting-address {
-        display: block;
-    }
 }
 
 .card-box {
@@ -494,12 +491,9 @@ onUnmounted(() => {
 }
 
 .card-none {
-    line-height: 200px;
+    line-height: 400px !important;
 }
 
-.card-noneText {
-    font-size: 16px;
-}
 
 .dialog-body {
     max-height: 60vh;

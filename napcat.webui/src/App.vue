@@ -35,9 +35,9 @@ enum ThemeMode {
     Auto = 'auto',
 }
 const themeLabelMap: Record<string, ThemeMode> = {
-    浅色: ThemeMode.Light,
-    深色: ThemeMode.Dark,
-    自动: ThemeMode.Auto,
+    "浅色": ThemeMode.Light,
+    "深色": ThemeMode.Dark,
+    "自动": ThemeMode.Auto,
 };
 const show = ref<boolean>(true);
 const createSetThemeAttributeFunction = () => {
