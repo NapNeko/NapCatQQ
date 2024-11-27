@@ -23,7 +23,6 @@ import { OB11GroupCardEvent } from '@/onebot/event/notice/OB11GroupCardEvent';
 import { OB11GroupPokeEvent } from '@/onebot/event/notice/OB11PokeEvent';
 import { OB11GroupEssenceEvent } from '@/onebot/event/notice/OB11GroupEssenceEvent';
 import { OB11GroupTitleEvent } from '@/onebot/event/notice/OB11GroupTitleEvent';
-import { OB11EmitEventContent } from '../network';
 import { OB11GroupUploadNoticeEvent } from '../event/notice/OB11GroupUploadNoticeEvent';
 import { pathToFileURL } from 'node:url';
 import { FileNapCatOneBotUUID } from '@/common/helper';
@@ -93,40 +92,40 @@ export class OneBotGroupApi {
         return undefined;
     }
 
-    async parseGroupMemberIncreaseEvent(GroupCode: string, grayTipElement: GrayTipElement) {
-        const groupElement = grayTipElement?.groupElement;
-        if (!groupElement) return undefined;
-        const member = await this.core.apis.UserApi.getUserDetailInfo(groupElement.memberUid);
-        const memberUin = member?.uin;
-        const adminMember = await this.core.apis.GroupApi.getGroupMember(GroupCode, groupElement.adminUid);
-        if (memberUin) {
-            const operatorUin = adminMember?.uin ?? memberUin;
-            return new OB11GroupIncreaseEvent(
-                this.core,
-                parseInt(GroupCode),
-                parseInt(memberUin),
-                parseInt(operatorUin),
-            );
-        } else {
-            return undefined;
-        }
-    }
+    // async parseGroupMemberIncreaseEvent(GroupCode: string, grayTipElement: GrayTipElement) {
+    //     const groupElement = grayTipElement?.groupElement;
+    //     if (!groupElement) return undefined;
+    //     const member = await this.core.apis.UserApi.getUserDetailInfo(groupElement.memberUid);
+    //     const memberUin = member?.uin;
+    //     const adminMember = await this.core.apis.GroupApi.getGroupMember(GroupCode, groupElement.adminUid);
+    //     if (memberUin) {
+    //         const operatorUin = adminMember?.uin ?? memberUin;
+    //         return new OB11GroupIncreaseEvent(
+    //             this.core,
+    //             parseInt(GroupCode),
+    //             parseInt(memberUin),
+    //             parseInt(operatorUin),
+    //         );
+    //     } else {
+    //         return undefined;
+    //     }
+    // }
 
-    async parseGroupKickEvent(GroupCode: string, grayTipElement: GrayTipElement) {
-        const groupElement = grayTipElement?.groupElement;
-        if (!groupElement) return undefined;
-        const adminUin = (await this.core.apis.GroupApi.getGroupMember(GroupCode, groupElement.adminUid))?.uin ?? (await this.core.apis.UserApi.getUidByUinV2(groupElement.adminUid));
-        if (adminUin) {
-            return new OB11GroupDecreaseEvent(
-                this.core,
-                parseInt(GroupCode),
-                parseInt(this.core.selfInfo.uin),
-                parseInt(adminUin),
-                'kick_me',
-            );
-        }
-        return undefined;
-    }
+    // async parseGroupKickEvent(GroupCode: string, grayTipElement: GrayTipElement) {
+    //     const groupElement = grayTipElement?.groupElement;
+    //     if (!groupElement) return undefined;
+    //     const adminUin = (await this.core.apis.GroupApi.getGroupMember(GroupCode, groupElement.adminUid))?.uin ?? (await this.core.apis.UserApi.getUidByUinV2(groupElement.adminUid));
+    //     if (adminUin) {
+    //         return new OB11GroupDecreaseEvent(
+    //             this.core,
+    //             parseInt(GroupCode),
+    //             parseInt(this.core.selfInfo.uin),
+    //             parseInt(adminUin),
+    //             'kick_me',
+    //         );
+    //     }
+    //     return undefined;
+    // }
 
     async parseGroupEmojiLikeEventByGrayTip(
         groupCode: string,
@@ -188,30 +187,30 @@ export class OneBotGroupApi {
         return undefined;
     }
 
-    async parseGroupElement(msg: RawMessage, groupElement: TipGroupElement, elementWrapper: GrayTipElement) {
-        if (groupElement.type == TipGroupElementType.KMEMBERADD) {
-            const MemberIncreaseEvent = await this.obContext.apis.GroupApi.parseGroupMemberIncreaseEvent(msg.peerUid, elementWrapper);
-            if (MemberIncreaseEvent) return MemberIncreaseEvent;
-        } else if (groupElement.type === TipGroupElementType.KSHUTUP) {
-            const BanEvent = await this.obContext.apis.GroupApi.parseGroupBanEvent(msg.peerUid, elementWrapper);
-            if (BanEvent) return BanEvent;
-        } else if (groupElement.type == TipGroupElementType.KQUITTE) {
-            this.core.apis.GroupApi.quitGroup(msg.peerUid).then();
-            try {
-                const KickEvent = await this.obContext.apis.GroupApi.parseGroupKickEvent(msg.peerUid, elementWrapper);
-                if (KickEvent) return KickEvent;
-            } catch (e) {
-                return new OB11GroupDecreaseEvent(
-                    this.core,
-                    parseInt(msg.peerUid),
-                    parseInt(this.core.selfInfo.uin),
-                    0,
-                    'leave',
-                );
-            }
-        }
-        return undefined;
-    }
+    // async parseGroupElement(msg: RawMessage, groupElement: TipGroupElement, elementWrapper: GrayTipElement) {
+    //     if (groupElement.type == TipGroupElementType.KMEMBERADD) {
+    //         const MemberIncreaseEvent = await this.obContext.apis.GroupApi.parseGroupMemberIncreaseEvent(msg.peerUid, elementWrapper);
+    //         if (MemberIncreaseEvent) return MemberIncreaseEvent;
+    //     } else if (groupElement.type === TipGroupElementType.KSHUTUP) {
+    //         const BanEvent = await this.obContext.apis.GroupApi.parseGroupBanEvent(msg.peerUid, elementWrapper);
+    //         if (BanEvent) return BanEvent;
+    //     } else if (groupElement.type == TipGroupElementType.KQUITTE) {
+    //         this.core.apis.GroupApi.quitGroup(msg.peerUid).then();
+    //         try {
+    //             const KickEvent = await this.obContext.apis.GroupApi.parseGroupKickEvent(msg.peerUid, elementWrapper);
+    //             if (KickEvent) return KickEvent;
+    //         } catch (e) {
+    //             return new OB11GroupDecreaseEvent(
+    //                 this.core,
+    //                 parseInt(msg.peerUid),
+    //                 parseInt(this.core.selfInfo.uin),
+    //                 0,
+    //                 'leave',
+    //             );
+    //         }
+    //     }
+    //     return undefined;
+    // }
 
     async parsePaiYiPai(msg: RawMessage, jsonStr: string) {
         const json = JSON.parse(jsonStr);
@@ -298,8 +297,8 @@ export class OneBotGroupApi {
 
     async parseGrayTipElement(msg: RawMessage, grayTipElement: GrayTipElement) {
         if (grayTipElement.subElementType === NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_GROUP) {
-            // 解析群组事件
-           return await this.parseGroupElement(msg, grayTipElement.groupElement, grayTipElement);
+            // 解析群组事件 由sysmsg解析
+            // return await this.parseGroupElement(msg, grayTipElement.groupElement, grayTipElement);
 
         } else if (grayTipElement.subElementType === NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_XMLMSG) {
             // 筛选出表情回应 事件

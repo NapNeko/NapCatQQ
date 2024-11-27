@@ -1,20 +1,22 @@
 <template>
-    <div class="login-container">
-        <h2 class="sotheby-font">WebUi Login</h2>
-        <t-form ref="form" :data="formData" colon :label-width="0" @submit="onSubmit">
-            <t-form-item name="password">
-                <t-input v-model="formData.token" type="password" clearable placeholder="请输入Token">
-                    <template #prefix-icon>
-                        <lock-on-icon />
-                    </template>
-                </t-input>
-            </t-form-item>
-            <t-form-item>
-                <t-button theme="primary" type="submit" block>登录</t-button>
-            </t-form-item>
-        </t-form>
-    </div>
-    <div class="footer">Power By NapCat.WebUi</div>
+    <t-card class="layout">
+        <div class="login-container">
+            <h2 class="sotheby-font">WebUi Login</h2>
+            <t-form ref="form" :data="formData" colon :label-width="0" @submit="onSubmit">
+                <t-form-item name="password">
+                    <t-input v-model="formData.token" type="password" clearable placeholder="请输入Token">
+                        <template #prefix-icon>
+                            <lock-on-icon />
+                        </template>
+                    </t-input>
+                </t-form-item>
+                <t-form-item>
+                    <t-button theme="primary" type="submit" block>登录</t-button>
+                </t-form-item>
+            </t-form>
+        </div>
+        <t-footer class="footer">Power By NapCat.WebUi</t-footer>
+    </t-card>
 </template>
 
 <script setup lang="ts">
@@ -94,14 +96,16 @@ const onSubmit = async ({ validateResult }: { validateResult: boolean }) => {
 </script>
 
 <style scoped>
+.layout {
+    height: 100vh;
+}
 .login-container {
     padding: 20px;
     border-radius: 5px;
-    background-color: white;
     max-width: 400px;
     min-width: 300px;
     position: relative;
-    margin: 0 auto;
+    margin: 50px auto;
 }
 
 @media (max-width: 600px) {
@@ -145,7 +149,5 @@ const onSubmit = async ({ validateResult }: { validateResult: boolean }) => {
     bottom: 20px;
     left: 0;
     right: 0;
-    width: 100%;
-    background-color: white;
 }
 </style>

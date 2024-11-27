@@ -19,6 +19,10 @@ import {
     List as TList,
     Alert as TAlert,
     Tag as TTag,
+    Descriptions as TDescriptionsProps,
+    DescriptionsItem as TDescriptionsItem,
+    Collapse as TCollapse,
+    CollapsePanel as TCollapsePanel,
     ListItem as TListItem,
     Tabs as TTabs,
     TabPanel as TTabPanel,
@@ -27,10 +31,18 @@ import {
     Popup as TPopup,
     Dialog as TDialog,
     Switch as TSwitch,
+    Tooltip as Tooltip,
+    StickyTool as TStickyTool,
+    StickyItem as TStickyItem,
+    Layout as TLayout,
+    Content as TContent,
+    Footer as TFooter,
+    Aside as TAside,
+    Popconfirm as Tpopconfirm,
+    Empty as TEmpty,
 } from 'tdesign-vue-next';
 import { router } from './router';
 import 'tdesign-vue-next/es/style/index.css';
-
 const app = createApp(App);
 app.use(router);
 app.use(TButton);
@@ -51,6 +63,10 @@ app.use(TLink);
 app.use(TList);
 app.use(TAlert);
 app.use(TTag);
+app.use(TDescriptionsProps);
+app.use(TDescriptionsItem);
+app.use(TCollapse);
+app.use(TCollapsePanel);
 app.use(TListItem);
 app.use(TTabs);
 app.use(TTabPanel);
@@ -59,4 +75,13 @@ app.use(TCheckbox);
 app.use(TPopup);
 app.use(TDialog);
 app.use(TSwitch);
+app.use(Tooltip);
+app.use(TStickyTool);
+app.use(TStickyItem);
+app.use(TLayout);
+app.use(TContent);
+app.use(TFooter);
+app.use(TAside);
+app.use(Tpopconfirm);
+app.use(TEmpty);
 app.mount('#app');
