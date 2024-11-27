@@ -58,6 +58,9 @@ let qrcodeUrl: string = '';
 const selectAccount = async (accountName: string): Promise<void> => {
     const { result, errMsg } = await qqLoginManager.setQuickLogin(accountName);
     if (result) {
+        if (heartBeatTimer) {
+            clearInterval(heartBeatTimer);
+        }
         await MessagePlugin.success('登录成功即将跳转');
         await router.push({ path: '/dashboard/basic-info' });
     } else {
@@ -85,10 +88,11 @@ const HeartBeat = async (): Promise<void> => {
         if (heartBeatTimer) {
             clearInterval(heartBeatTimer);
         }
-        //判断是否已经调转
-        if (router.currentRoute.value.path !== '/dashboard/basic-info') {
-            return;
-        }
+        // //判断是否已经调转
+        // if (router.currentRoute.value.path !== '/dashboard/basic-info') {
+        //     return;
+        // }
+        await MessagePlugin.success('登录成功即将跳转');
         await router.push({ path: '/dashboard/basic-info' });
     } else if (isLogined?.qrcodeurl && qrcodeUrl !== isLogined.qrcodeurl) {
         qrcodeUrl = isLogined.qrcodeurl;
