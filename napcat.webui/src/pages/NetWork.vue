@@ -215,7 +215,7 @@ const addConfig = () => {
 
 const editConfig = (item: any) => {
     dialogTitle.value = '修改配置';
-    const type =  getKeyByValue(typeCh, item.type);
+    const type = getKeyByValue(typeCh, item.type);
     if (type) {
         newTab.value = { name: item.name, data: item, type: type };
     }
@@ -224,7 +224,7 @@ const editConfig = (item: any) => {
     visibleBody.value = true;
 };
 const delConfig = (item: any) => {
-    const type =  getKeyByValue(typeCh, item.type);
+    const type = getKeyByValue(typeCh, item.type);
     if (type) {
         newTab.value = { name: item.name, data: item, type: type };
     }
@@ -364,7 +364,7 @@ const handleResize = () => {
     }
     loadPage.value = true;
     setTimeout(() => {
-        cardHeight.value = window.innerHeight - (headerBox.value?.offsetHeight ?? 0) - (setting.value?.offsetHeight?? 0) - 20;
+        cardHeight.value = window.innerHeight - (headerBox.value?.offsetHeight ?? 0) - (setting.value?.offsetHeight ?? 0) - 20;
     }, 300);
 };
 emitter.on('sendWidth', (width) => {
