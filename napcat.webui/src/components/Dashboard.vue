@@ -27,13 +27,13 @@ const menuItems = ref<MenuItem[]>([
     { value: 'item5', icon: 'system-log', label: '日志查看', route: '/dashboard/log-view' },
     { value: 'item6', icon: 'info-circle', label: '关于我们', route: '/dashboard/about-us' },
 ]);
-const menuRef = ref<any>(null);
+const menuRef = ref<HTMLDivElement | null>(null);
 emitter.on('sendMenu', (event) => {
-    emitter.emit('sendWidth', menuRef.value.offsetWidth);
-    localStorage.setItem('menuWidth', menuRef.value.offsetWidth);
+    emitter.emit('sendWidth', menuRef.value?.offsetWidth);
+    localStorage.setItem('menuWidth', menuRef.value?.offsetWidth?.toString() || '0');
 });
 onMounted(() => {
-    localStorage.setItem('menuWidth', menuRef.value.offsetWidth);
+    localStorage.setItem('menuWidth', menuRef.value?.offsetWidth?.toString() || '0');
 });
 </script>
 
