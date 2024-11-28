@@ -96,7 +96,7 @@ export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: Log
             };
         }
     } catch (error: any) {
-        logger.logError.bind(logger)('convert silk failed', error.stack);
+        logger.logError('convert silk failed', error.stack);
         return {};
     }
 }

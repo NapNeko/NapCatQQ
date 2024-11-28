@@ -142,7 +142,6 @@ export class NTQQFileApi {
     }
 
     async createValidSendVideoElement(context: SendMessageContext, filePath: string, fileName: string = '', diyThumbPath: string = ''): Promise<SendVideoElement> {
-        const logger = this.core.context.logger;
         let videoInfo = {
             width: 1920,
             height: 1080,
@@ -152,9 +151,9 @@ export class NTQQFileApi {
             filePath,
         };
         try {
-            videoInfo = await getVideoInfo(filePath, logger);
+            videoInfo = await getVideoInfo(filePath, this.context.logger);
         } catch (e) {
-            logger.logError.bind(logger)('获取视频信息失败，将使用默认值', e);
+            this.context.logger.logError('获取视频信息失败，将使用默认值', e);
         }
 
         let fileExt = 'mp4';
@@ -162,7 +161,7 @@ export class NTQQFileApi {
             const tempExt = (await fileType.fileTypeFromFile(filePath))?.ext;
             if (tempExt) fileExt = tempExt;
         } catch (e) {
-            this.context.logger.logError.bind(logger)('获取文件类型失败', e);
+            this.context.logger.logError('获取文件类型失败', e);
         }
         const newFilePath = filePath + '.' + fileExt;
         fs.copyFileSync(filePath, newFilePath);
@@ -183,7 +182,7 @@ export class NTQQFileApi {
             ffmpeg(filePath)
                 .on('error', (err) => {
                     try {
-                        logger.logDebug('获取视频封面失败，使用默认封面', err);
+                        this.context.logger.logDebug('获取视频封面失败，使用默认封面', err);
                         if (diyThumbPath) {
                             fsPromises.copyFile(diyThumbPath, thumbPath).then(() => {
                                 resolve(thumbPath);
@@ -193,7 +192,7 @@ export class NTQQFileApi {
                             resolve(thumbPath);
                         }
                     } catch (error) {
-                        logger.logError.bind(logger)('获取视频封面失败，使用默认封面失败', error);
+                        this.context.logger.logError('获取视频封面失败，使用默认封面失败', error);
                     }
                 })
                 .screenshots({
@@ -230,6 +229,7 @@ export class NTQQFileApi {
     }
 
     async createValidSendPttElement(pttPath: string): Promise<SendPttElement> {
+
         const { converted, path: silkPath, duration } = await encodeSilk(pttPath, this.core.NapCatTempPath, this.core.context.logger);
         if (!silkPath) {
             throw new Error('语音转换失败, 请检查语音文件是否正常');
@@ -239,8 +239,7 @@ export class NTQQFileApi {
             throw new Error('文件异常，大小为0');
         }
         if (converted) {
-            fsPromises.unlink(silkPath).then().catch(
-                (e) => this.context.logger.logError.bind(this.context.logger)('删除临时文件失败', e)
+            fsPromises.unlink(silkPath).then().catch((e) => this.context.logger.logError('删除临时文件失败', e)
             );
         }
         return {
@@ -454,7 +453,7 @@ export class NTQQFileApi {
                 }
             }
         } catch (error: any) {
-            this.context.logger.logError.bind(this.context.logger)('获取rkey失败', error.message);
+            this.context.logger.logError('获取rkey失败', error.message);
         }
 
         if (!rkeyData.online_rkey) {
@@ -464,7 +463,7 @@ export class NTQQFileApi {
                 rkeyData.private_rkey = tempRkeyData.private_rkey;
                 rkeyData.online_rkey = tempRkeyData.expired_time > Date.now() / 1000;
             } catch (e) {
-                this.context.logger.logError.bind(this.context.logger)('获取rkey失败 Fallback Old Mode', e);
+                this.context.logger.logError('获取rkey失败 Fallback Old Mode', e);
             }
         }
 
