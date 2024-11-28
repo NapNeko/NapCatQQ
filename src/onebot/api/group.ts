@@ -315,7 +315,7 @@ export class OneBotGroupApi {
             } else if (grayTipElement.jsonGrayTipElement.busiId == JsonGrayBusiId.AIO_GROUP_ESSENCE_MSG_TIP) {
                 return await this.parseEssenceMsg(msg, grayTipElement.jsonGrayTipElement.jsonStr);
             } else {
-                return await this.parseOtherJsonEvent(msg, grayTipElement.jsonGrayTipElement.jsonStr, this.core.context)
+                return await this.parseOtherJsonEvent(msg, grayTipElement.jsonGrayTipElement.jsonStr, this.core.context);
             }
         }
         return undefined;

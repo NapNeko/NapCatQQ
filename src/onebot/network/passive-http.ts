@@ -102,7 +102,7 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
         if (req.path === '' || req.path === '/') {
             const hello = OB11Response.ok({});
             hello.message = 'NapCat4 Ss Running';
-            return res.json(hello)
+            return res.json(hello);
         }
         const actionName = req.path.split('/')[1];
         const action = this.actions.get(actionName);
