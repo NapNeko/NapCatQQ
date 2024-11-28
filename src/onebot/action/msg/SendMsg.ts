@@ -162,11 +162,10 @@ export class SendMsg extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
         finallySendElements: SendArkElement,
         res_id?: string
     } | null> {
-        const logger = this.core.context.logger;
         const packetMsg: PacketMsg[] = [];
         for (const node of messageNodes) {
             if (dp >= 3) {
-                logger.logWarn('转发消息深度超过3层，将停止解析！');
+                this.core.context.logger.logWarn('转发消息深度超过3层，将停止解析！');
                 break;
             }
             if (!node.data.id) {
@@ -191,29 +190,29 @@ export class SendMsg extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
                     time: Number(node.data.time) || Date.now(),
                     msg: sendElements,
                 };
-                logger.logDebug(`handleForwardedNodesPacket[SendRaw] 开始转换 ${stringifyWithBigInt(packetMsgElements)}`);
+                this.core.context.logger.logDebug(`handleForwardedNodesPacket[SendRaw] 开始转换 ${stringifyWithBigInt(packetMsgElements)}`);
                 const transformedMsg = this.core.apis.PacketApi.pkt.msgConverter.rawMsgWithSendMsgToPacketMsg(packetMsgElements);
-                logger.logDebug(`handleForwardedNodesPacket[SendRaw] 转换为 ${stringifyWithBigInt(transformedMsg)}`);
+                this.core.context.logger.logDebug(`handleForwardedNodesPacket[SendRaw] 转换为 ${stringifyWithBigInt(transformedMsg)}`);
                 packetMsg.push(transformedMsg);
             } else if (node.data.id) {
                 const id = node.data.id;
                 const nodeMsg = MessageUnique.getMsgIdAndPeerByShortId(+id) || MessageUnique.getPeerByMsgId(id);
                 if (!nodeMsg) {
-                    logger.logError.bind(this.core.context.logger)('转发消息失败，未找到消息', id);
+                    this.core.context.logger.logError('转发消息失败，未找到消息', id);
                     continue;
                 }
                 const msg = (await this.core.apis.MsgApi.getMsgsByMsgId(nodeMsg.Peer, [nodeMsg.MsgId])).msgList[0];
-                logger.logDebug(`handleForwardedNodesPacket[PureRaw] 开始转换 ${stringifyWithBigInt(msg)}`);
+                this.core.context.logger.logDebug(`handleForwardedNodesPacket[PureRaw] 开始转换 ${stringifyWithBigInt(msg)}`);
                 await this.core.apis.FileApi.downloadRawMsgMedia([msg]);
                 const transformedMsg = this.core.apis.PacketApi.pkt.msgConverter.rawMsgToPacketMsg(msg, msgPeer);
-                logger.logDebug(`handleForwardedNodesPacket[PureRaw] 转换为 ${stringifyWithBigInt(transformedMsg)}`);
+                this.core.context.logger.logDebug(`handleForwardedNodesPacket[PureRaw] 转换为 ${stringifyWithBigInt(transformedMsg)}`);
                 packetMsg.push(transformedMsg);
             } else {
-                logger.logDebug(`handleForwardedNodesPacket 跳过元素 ${stringifyWithBigInt(node)}`);
+                this.core.context.logger.logDebug(`handleForwardedNodesPacket 跳过元素 ${stringifyWithBigInt(node)}`);
             }
         }
         if (packetMsg.length === 0) {
-            logger.logWarn('handleForwardedNodesPacket 元素为空！');
+            this.core.context.logger.logWarn('handleForwardedNodesPacket 元素为空！');
             return null;
         }
         const resid = await this.core.apis.PacketApi.pkt.operation.UploadForwardMsg(packetMsg, msgPeer.chatType === ChatType.KCHATTYPEGROUP ? +msgPeer.peerUid : 0);
@@ -253,14 +252,13 @@ export class SendMsg extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
             peerUid: this.core.selfInfo.uid,
         };
         let nodeMsgIds: string[] = [];
-        const logger = this.core.context.logger;
         for (const messageNode of messageNodes) {
             const nodeId = messageNode.data.id;
             if (nodeId) {
                 // 对Msgid和OB11ID混用情况兜底
                 const nodeMsg = MessageUnique.getMsgIdAndPeerByShortId(parseInt(nodeId)) || MessageUnique.getPeerByMsgId(nodeId);
                 if (!nodeMsg) {
-                    logger.logError.bind(this.core.context.logger)('转发消息失败，未找到消息', nodeId);
+                    this.core.context.logger.logError('转发消息失败，未找到消息', nodeId);
                     continue;
                 }
                 nodeMsgIds.push(nodeMsg.MsgId);
@@ -272,7 +270,7 @@ export class SendMsg extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
                     const isNodeMsg = OB11Data.filter(e => e.type === OB11MessageDataType.node).length;//找到子转发消息
                     if (isNodeMsg !== 0) {
                         if (isNodeMsg !== OB11Data.length) {
-                            logger.logError.bind(this.core.context.logger)('子消息中包含非node消息 跳过不合法部分');
+                            this.core.context.logger.logError('子消息中包含非node消息 跳过不合法部分');
                             continue;
                         }
                         const nodeMsg = await this.handleForwardedNodes(selfPeer, OB11Data.filter(e => e.type === OB11MessageDataType.node));
@@ -309,7 +307,7 @@ export class SendMsg extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
                         }
                     });
                 } catch (e: any) {
-                    logger.logDebug('生成转发消息节点失败', e?.stack);
+                    this.core.context.logger.logDebug('生成转发消息节点失败', e?.stack);
                 }
             }
         }
@@ -320,7 +318,7 @@ export class SendMsg extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
         for (const msgId of nodeMsgIds) {
             const nodeMsgPeer = MessageUnique.getPeerByMsgId(msgId);
             if (!nodeMsgPeer) {
-                logger.logError.bind(this.core.context.logger)('转发消息失败，未找到消息', msgId);
+                this.core.context.logger.logError('转发消息失败，未找到消息', msgId);
                 continue;
             }
             const nodeMsg = (await this.core.apis.MsgApi.getMsgsByMsgId(nodeMsgPeer.Peer, [msgId])).msgList[0];
@@ -346,12 +344,12 @@ export class SendMsg extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
         }
         if (retMsgIds.length === 0) throw Error('转发消息失败，生成节点为空');
         try {
-            logger.logDebug('开发转发', srcPeer, destPeer, retMsgIds);
+            this.core.context.logger.logDebug('开发转发', srcPeer, destPeer, retMsgIds);
             return {
                 message: await this.core.apis.MsgApi.multiForwardMsg(srcPeer!, destPeer, retMsgIds)
             };
         } catch (e: any) {
-            logger.logError.bind(this.core.context.logger)('forward failed', e?.stack);
+            this.core.context.logger.logError('forward failed', e?.stack);
             return {
                 message: null
             };
@@ -363,7 +361,6 @@ export class SendMsg extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
             chatType: ChatType.KCHATTYPEC2C,
             peerUid: this.core.selfInfo.uid,
         };
-        const logger = this.core.context.logger;
         //msg 为待克隆消息
         const sendElements: SendMessageElement[] = [];
 
@@ -372,12 +369,12 @@ export class SendMsg extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
         }
 
         if (sendElements.length === 0) {
-            logger.logDebug('需要clone的消息无法解析，将会忽略掉', msg);
+            this.core.context.logger.logDebug('需要clone的消息无法解析，将会忽略掉', msg);
         }
         try {
             return await this.core.apis.MsgApi.sendMsg(selfPeer, sendElements, true);
         } catch (e: any) {
-            logger.logError.bind(this.core.context.logger)(e?.stack, '克隆转发消息失败,将忽略本条消息', msg);
+            this.core.context.logger.logError(e?.stack, '克隆转发消息失败,将忽略本条消息', msg);
         }
     }
 }

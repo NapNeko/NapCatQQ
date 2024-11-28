@@ -1,27 +1,16 @@
 export const onSettingWindowCreated = async (view) => {
-    
-    // view.style.width = "100%";
-    // view.style.height = "100%";
-    // //添加iframe
-    // const iframe = document.createElement("iframe");
-    // iframe.src = await window.napcat.getWebUiUrl();
-    // iframe.width = "100%";
-    // iframe.height = "100%";
-    // iframe.style.border = "none";
-    // //去掉iframe滚动条
-    // //iframe.scrolling = "no";
-    // //有滚动条何尝不是一种美
-    // view.appendChild(iframe);
     let webui = await window.napcat.getWebUiUrl();
     view.innerHTML = `
     <setting-section data-title="">
     <setting-panel>
         <setting-list data-direction="column">
             <setting-item>
-                <setting-button data-type="primary" class="nc_openwebui">打开配置页面</setting-button>
+                <setting-button data-type="primary" class="nc_openwebui">在QQ内打开配置页面</setting-button>
+                <setting-button data-type="primary" class="nc_openwebui_ex">在默认浏览器打开配置页面</setting-button>
             </setting-item>
                 <setting-item>
                 <div>
+                    <setting-text>WebUi远程地址可以点击下方复制哦~</setting-text>
                     <setting-text class="nc_webui">WebUi</setting-text>
                 </div>
             </setting-item>
@@ -32,5 +21,18 @@ export const onSettingWindowCreated = async (view) => {
     view.querySelector('.nc_openwebui').addEventListener('click', () => {
         window.open(webui, '_blank');
     });
+    view.querySelector('.nc_openwebui_ex').addEventListener('click', () => {
+        window.napcat.openExternalUrl(webui);
+    });
     view.querySelector('.nc_webui').innerText = webui;
+
+    // 添加点击复制功能
+    view.querySelector('.nc_webui').addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(webui);
+            alert('WebUi URL 已复制到剪贴板');
+        } catch (err) {
+            console.error('复制到剪贴板失败: ', err);
+        }
+    });
 };

@@ -176,7 +176,7 @@ async function handleLogin(
         }
 
         logger.log('核心登录服务连接成功!');
-        
+
         loginService.getLoginList().then((res) => {
             // 遍历 res.LocalLoginInfoList[x].isQuickLogin是否可以 res.LocalLoginInfoList[x].uin 转为string 加入string[] 最后遍历完成调用WebUiDataRuntime.setQQQuickLoginList
             WebUiDataRuntime.setQQQuickLoginList(res.LocalLoginInfoList.filter((item) => item.isQuickLogin).map((item) => item.uin.toString()));
@@ -276,7 +276,7 @@ export async function NCoreInitShell() {
     o3Service.addO3MiscListener(new NodeIO3MiscListener());
 
     logger.log(`[NapCat] [Core] NapCat.Core Version: ` + napCatVersion);
-    InitWebUi(logger, pathWrapper).then().catch(logger.logError.bind(logger));
+    InitWebUi(logger, pathWrapper).then().catch(e => logger.logError(e));
 
     const engine = wrapper.NodeIQQNTWrapperEngine.get();
     const loginService = wrapper.NodeIKernelLoginService.get();
@@ -362,7 +362,7 @@ export class NapCatShell {
     async InitNapCat() {
         await this.core.initCore();
         new NapCatOneBot11Adapter(this.core, this.context, this.context.pathWrapper).InitOneBot()
-            .catch(e => this.context.logger.logError.bind(this.context.logger)('初始化OneBot失败', e));
+            .catch(e => this.context.logger.logError('初始化OneBot失败', e));
     }
 }
 

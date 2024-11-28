@@ -51,7 +51,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
 
             wsClient.on('error', (err) => this.logger.log('[OneBot] [WebSocket Server] Client Error:', err.message));
             wsClient.on('message', (message) => {
-                this.handleMessage(wsClient, message).then().catch(this.logger.logError.bind(this.logger));
+                this.handleMessage(wsClient, message).then().catch(e => this.logger.logError(e));
             });
             wsClient.on('ping', () => {
                 wsClient.pong();
@@ -85,7 +85,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
         try {
             this.checkStateAndReply<any>(new OB11LifeCycleEvent(core, LifeCycleSubType.CONNECT), wsClient);
         } catch (e) {
-            this.logger.logError.bind(this.logger)('[OneBot] [WebSocket Server] 发送生命周期失败', e);
+            this.logger.logError('[OneBot] [WebSocket Server] 发送生命周期失败', e);
         }
     }
 
@@ -99,7 +99,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
 
     open() {
         if (this.isEnable) {
-            this.logger.logError.bind(this.logger)('[OneBot] [WebSocket Server] Cannot open a opened WebSocket server');
+            this.logger.logError('[OneBot] [WebSocket Server] Cannot open a opened WebSocket server');
             return;
         }
         const addressInfo = this.wsServer.address();
@@ -116,9 +116,9 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
         this.isEnable = false;
         this.wsServer.close((err) => {
             if (err) {
-                this.logger.logError.bind(this.logger)('[OneBot] [WebSocket Server] Error closing server:', err.message);
+                this.logger.logError('[OneBot] [WebSocket Server] Error closing server:', err.message);
             } else {
-                this.logger.log.bind(this.logger)('[OneBot] [WebSocket Server] Server Closed');
+                this.logger.log('[OneBot] [WebSocket Server] Server Closed');
             }
 
         });
@@ -179,7 +179,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
         receiveData.params = (receiveData?.params) ? receiveData.params : {};//兼容类型验证 不然类型校验爆炸
         const action = this.actions.get(receiveData.action);
         if (!action) {
-            this.logger.logError.bind(this.logger)('[OneBot] [WebSocket Client] 发生错误', '不支持的API ' + receiveData.action);
+            this.logger.logError('[OneBot] [WebSocket Client] 发生错误', '不支持的API ' + receiveData.action);
             this.checkStateAndReply<any>(OB11Response.error('不支持的API ' + receiveData.action, 1404, echo), wsClient);
             return;
         }
