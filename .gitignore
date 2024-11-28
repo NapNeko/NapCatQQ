@@ -16,3 +16,5 @@ dist/
 *.db
 checkVersion.sh
 bun.lockb
+
+.DS_Store
