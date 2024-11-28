@@ -10,9 +10,9 @@ import { ErrorBoundary } from 'react-error-boundary'
 
 // import PageLoading from "@/components/Loading/PageLoading";
 import SideBar from '@/components/sidebar'
-import { useTheme } from '@/hooks/use-theme'
 import errorFallbackRender from '@/components/error_fallback'
 import { siteConfig } from '@/config/site'
+import { useLocalStorage } from '@uidotdev/usehooks'
 
 const menus: MenuItem[] = siteConfig.navItems
 
@@ -40,8 +40,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation()
   const contentRef = React.useRef<HTMLDivElement>(null)
   const [openSideBar, setOpenSideBar] = React.useState(true)
-  const { isDark } = useTheme()
-
+  const [b64img] = useLocalStorage('background-image', '')
   React.useEffect(() => {
     contentRef?.current?.scrollTo?.({
       top: 0,
@@ -51,33 +50,25 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const title = React.useMemo(() => {
     return findTitle(menus, location.pathname)
   }, [location.pathname])
-
   return (
     <div
-      className={clsx(
-        'h-screen relative flex',
-        // isDark ? "bg-content1" : "bg-content1-foreground",
-        isDark ? 'bg-black' : 'bg-danger-50'
-      )}
+      className="h-screen relative flex bg-danger-50 dark:bg-black"
+      style={{
+        backgroundImage: `url(${b64img})`,
+        backgroundSize: 'cover'
+      }}
     >
       <SideBar items={menus} open={openSideBar} />
       <div
         ref={contentRef}
         className={clsx(
-          'overflow-y-auto relative flex-1 rounded-md m-1 shadow-inner',
+          'overflow-y-auto relative flex-1 rounded-md m-1 bg-content1 dark:bg-background',
           openSideBar ? 'ml-0' : 'ml-1',
-          isDark
-            ? 'bg-content1 shadow-danger-50'
-            : 'bg-background shadow-danger-200'
+          !b64img && 'shadow-inner shadow-danger-200 dark:shadow-danger-50',
+          b64img && 'bg-opacity-50 backdrop-blur-none'
         )}
       >
-        <div
-          className={clsx(
-            'h-10 flex items-center font-bold text-xl sticky top-0 left-0 backdrop-blur-lg bg-opacity-80 z-20 shadow-sm',
-            isDark ? 'bg-background bg-opacity-30' : 'bg-background',
-            isDark ? 'shadow-danger-100' : 'shadow-danger-50'
-          )}
-        >
+        <div className="h-10 flex items-center font-bold text-xl sticky top-0 left-0 backdrop-blur-lg z-20 shadow-sm bg-opacity-30 bg-background dark:bg-background shadow-danger-50 dark:shadow-danger-100">
           <Button
             isIconOnly
             className="mr-1"

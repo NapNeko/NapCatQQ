@@ -1,4 +1,3 @@
-import clsx from 'clsx'
 import {
   Dropdown,
   DropdownTrigger,
@@ -14,7 +13,8 @@ import {
   WebsocketIcon
 } from './icons'
 
-import { useTheme } from '@/hooks/use-theme'
+import { Button } from '@nextui-org/button'
+import { IoAddCircleOutline } from 'react-icons/io5'
 
 export interface AddButtonProps {
   onOpen: (key: keyof OneBotConfig['network']) => void
@@ -22,28 +22,21 @@ export interface AddButtonProps {
 
 const AddButton: React.FC<AddButtonProps> = (props) => {
   const { onOpen } = props
-  const { isDark } = useTheme()
 
   return (
     <Dropdown
       classNames={{
-        content: 'bg-opacity-10 backdrop-blur-sm'
+        content: 'bg-opacity-30 backdrop-blur-md'
       }}
       placement="right"
     >
       <DropdownTrigger>
-        <div
-          className={clsx(
-            'rounded-lg border-3 border-dotted border-primary-400 flex flex-col justify-center items-center gap-2 py-5 px-14 text-primary-400 transition hover:bg-primary-50 active:bg-primary-100 md:cursor-pointer select-none shadow-md',
-            isDark
-              ? 'bg-primary-50 bg-opacity-30'
-              : 'bg-primary-100 bg-opacity-10'
-          )}
+        <Button
+          color="danger"
+          startContent={<IoAddCircleOutline className="text-2xl" />}
         >
-          <div className="w-10 h-10">
-            <PlusIcon />
-          </div>
-        </div>
+          新建
+        </Button>
       </DropdownTrigger>
       <DropdownMenu
         aria-label="Create Network Config"

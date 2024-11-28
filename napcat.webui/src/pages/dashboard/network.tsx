@@ -6,13 +6,6 @@ import { IoMdRefresh } from 'react-icons/io'
 import { useDisclosure } from '@nextui-org/modal'
 
 import AddButton from '@/components/add_button'
-import {
-  HTTPClientIcon,
-  HTTPServerIcon,
-  PCIcon,
-  WebsocketIcon
-} from '@/components/icons'
-import { title } from '@/components/primitives'
 import useConfig from '@/hooks/use-config'
 import PageLoading from '@/components/page_loading'
 import NetworkFormModal from '@/components/network_edit/modal'
@@ -21,6 +14,7 @@ import useDialog from '@/hooks/use-dialog'
 import HTTPClientDisplayCard from '@/components/display_card/http_client'
 import WebsocketServerDisplayCard from '@/components/display_card/ws_server'
 import WebsocketClientDisplayCard from '@/components/display_card/ws_client'
+import { Tab, Tabs } from '@nextui-org/tabs'
 export interface SectionProps {
   title: string
   color?:
@@ -33,34 +27,6 @@ export interface SectionProps {
     | 'foreground'
   icon: React.ReactNode
   children: React.ReactNode
-}
-
-function Section({
-  title: _title,
-  children,
-  icon,
-  color = 'pink'
-}: SectionProps) {
-  return (
-    <section className="mb-6">
-      <div className="flex items-center gap-2">
-        <div className="h-8 w-8">{icon}</div>
-
-        <h2
-          className={title({
-            color: color,
-            size: 'xs',
-            shadow: true
-          })}
-        >
-          {_title}
-        </h2>
-      </div>
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 justify-start items-stretch gap-x-2 gap-y-4 p-1 md:p-2">
-        {children}
-      </section>
-    </section>
-  )
 }
 
 export interface EmptySectionProps {
@@ -190,6 +156,164 @@ export default function NetworkPage() {
     onOpen()
   }
 
+  const renderCard = <T extends keyof OneBotConfig['network']>(
+    type: T,
+    item: OneBotConfig['network'][T][0],
+    showType = false
+  ) => {
+    switch (type) {
+      case 'httpServers':
+        return (
+          <HTTPServerDisplayCard
+            key={item.name}
+            showType={showType}
+            data={item as OneBotConfig['network']['httpServers'][0]}
+            onDelete={async () => {
+              await onDelete('httpServers', item.name)
+            }}
+            onEdit={() => {
+              onEdit('httpServers', item.name)
+            }}
+            onEnable={async () => {
+              await onEnable('httpServers', item.name)
+            }}
+            onEnableDebug={async () => {
+              await onEnableDebug('httpServers', item.name)
+            }}
+          />
+        )
+      case 'httpClients':
+        return (
+          <HTTPClientDisplayCard
+            key={item.name}
+            showType={showType}
+            data={item as OneBotConfig['network']['httpClients'][0]}
+            onDelete={async () => {
+              await onDelete('httpClients', item.name)
+            }}
+            onEdit={() => {
+              onEdit('httpClients', item.name)
+            }}
+            onEnable={async () => {
+              await onEnable('httpClients', item.name)
+            }}
+            onEnableDebug={async () => {
+              await onEnableDebug('httpClients', item.name)
+            }}
+          />
+        )
+      case 'websocketServers':
+        return (
+          <WebsocketServerDisplayCard
+            key={item.name}
+            showType={showType}
+            data={item as OneBotConfig['network']['websocketServers'][0]}
+            onDelete={async () => {
+              await onDelete('websocketServers', item.name)
+            }}
+            onEdit={() => {
+              onEdit('websocketServers', item.name)
+            }}
+            onEnable={async () => {
+              await onEnable('websocketServers', item.name)
+            }}
+            onEnableDebug={async () => {
+              await onEnableDebug('websocketServers', item.name)
+            }}
+          />
+        )
+      case 'websocketClients':
+        return (
+          <WebsocketClientDisplayCard
+            key={item.name}
+            showType={showType}
+            data={item as OneBotConfig['network']['websocketClients'][0]}
+            onDelete={async () => {
+              await onDelete('websocketClients', item.name)
+            }}
+            onEdit={() => {
+              onEdit('websocketClients', item.name)
+            }}
+            onEnable={async () => {
+              await onEnable('websocketClients', item.name)
+            }}
+            onEnableDebug={async () => {
+              await onEnableDebug('websocketClients', item.name)
+            }}
+          />
+        )
+    }
+  }
+
+  const tabs = [
+    {
+      key: 'all',
+      title: '全部',
+      items: [
+        ...httpServers,
+        ...httpClients,
+        ...websocketServers,
+        ...websocketClients
+      ]
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((item) => {
+          if (httpServers.find((i) => i.name === item.name)) {
+            return renderCard(
+              'httpServers',
+              item as OneBotConfig['network']['httpServers'][0],
+              true
+            )
+          }
+          if (httpClients.find((i) => i.name === item.name)) {
+            return renderCard(
+              'httpClients',
+              item as OneBotConfig['network']['httpClients'][0],
+              true
+            )
+          }
+          if (websocketServers.find((i) => i.name === item.name)) {
+            return renderCard(
+              'websocketServers',
+              item as OneBotConfig['network']['websocketServers'][0],
+              true
+            )
+          }
+          if (websocketClients.find((i) => i.name === item.name)) {
+            return renderCard(
+              'websocketClients',
+              item as OneBotConfig['network']['websocketClients'][0],
+              true
+            )
+          }
+          return null
+        })
+    },
+    {
+      key: 'httpServers',
+      title: 'HTTP服务器',
+      items: httpServers.map((item) => renderCard('httpServers', item))
+    },
+    {
+      key: 'httpClients',
+      title: 'HTTP客户端',
+      items: httpClients.map((item) => renderCard('httpClients', item))
+    },
+    {
+      key: 'websocketServers',
+      title: 'Websocket服务器',
+      items: websocketServers.map((item) =>
+        renderCard('websocketServers', item)
+      )
+    },
+    {
+      key: 'websocketClients',
+      title: 'Websocket客户端',
+      items: websocketClients.map((item) =>
+        renderCard('websocketClients', item)
+      )
+    }
+  ]
+
   useEffect(() => {
     refresh()
   }, [])
@@ -209,97 +333,22 @@ export default function NetworkPage() {
           isIconOnly
           color="primary"
           radius="full"
-          size="lg"
           variant="flat"
           onClick={refresh}
         >
           <IoMdRefresh size={24} />
         </Button>
       </div>
-      <Section color="green" icon={<HTTPServerIcon />} title="HTTP服务器">
-        <EmptySection isEmpty={!httpServers.length} />
-        {httpServers.map((item) => (
-          <HTTPServerDisplayCard
-            key={item.name}
-            data={item}
-            onDelete={async () => {
-              await onDelete('httpServers', item.name)
-            }}
-            onEdit={() => {
-              onEdit('httpServers', item.name)
-            }}
-            onEnable={async () => {
-              await onEnable('httpServers', item.name)
-            }}
-            onEnableDebug={async () => {
-              await onEnableDebug('httpServers', item.name)
-            }}
-          />
-        ))}
-      </Section>
-      <Section color="cyan" icon={<HTTPClientIcon />} title="HTTP客户端">
-        <EmptySection isEmpty={!httpClients.length} />
-        {httpClients.map((item) => (
-          <HTTPClientDisplayCard
-            key={item.name}
-            data={item}
-            onDelete={async () => {
-              await onDelete('httpClients', item.name)
-            }}
-            onEdit={() => {
-              onEdit('httpClients', item.name)
-            }}
-            onEnable={async () => {
-              await onEnable('httpClients', item.name)
-            }}
-            onEnableDebug={async () => {
-              await onEnableDebug('httpClients', item.name)
-            }}
-          />
-        ))}
-      </Section>
-      <Section color="pink" icon={<WebsocketIcon />} title="Websocket服务器">
-        <EmptySection isEmpty={!websocketServers.length} />
-        {websocketServers.map((item) => (
-          <WebsocketServerDisplayCard
-            key={item.name}
-            data={item}
-            onDelete={async () => {
-              await onDelete('websocketServers', item.name)
-            }}
-            onEdit={() => {
-              onEdit('websocketServers', item.name)
-            }}
-            onEnable={async () => {
-              await onEnable('websocketServers', item.name)
-            }}
-            onEnableDebug={async () => {
-              await onEnableDebug('websocketServers', item.name)
-            }}
-          />
-        ))}
-      </Section>
-      <Section color="yellow" icon={<PCIcon />} title="Websocket客户端">
-        <EmptySection isEmpty={!websocketClients.length} />
-        {websocketClients.map((item) => (
-          <WebsocketClientDisplayCard
-            key={item.name}
-            data={item}
-            onDelete={async () => {
-              await onDelete('websocketClients', item.name)
-            }}
-            onEdit={() => {
-              onEdit('websocketClients', item.name)
-            }}
-            onEnable={async () => {
-              await onEnable('websocketClients', item.name)
-            }}
-            onEnableDebug={async () => {
-              await onEnableDebug('websocketClients', item.name)
-            }}
-          />
-        ))}
-      </Section>
+      <Tabs aria-label="Network Configs" items={tabs}>
+        {(item) => (
+          <Tab key={item.key} title={item.title}>
+            <EmptySection isEmpty={!item.items.length} />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 justify-start items-stretch gap-x-2 gap-y-4">
+              {item.items}
+            </div>
+          </Tab>
+        )}
+      </Tabs>
     </div>
   )
 }

@@ -6,17 +6,14 @@ import { FiEdit3 } from 'react-icons/fi'
 import { CgDebug } from 'react-icons/cg'
 import { MdDeleteForever } from 'react-icons/md'
 
-import DisplayCardContainer from './container'
-interface HTTPServerDisplayCardProps {
+import DisplayCardContainer, { DisplayCardProps } from './container'
+interface HTTPServerDisplayCardProps extends DisplayCardProps {
   data: OneBotConfig['network']['httpServers'][0]
-  onEdit: () => void
-  onEnable: () => Promise<void>
-  onDelete: () => Promise<void>
-  onEnableDebug: () => Promise<void>
 }
 
 const HTTPServerDisplayCard: React.FC<HTTPServerDisplayCardProps> = ({
   data,
+  showType,
   onEdit,
   onEnable,
   onDelete,
@@ -87,6 +84,7 @@ const HTTPServerDisplayCard: React.FC<HTTPServerDisplayCardProps> = ({
         />
       }
       title={name}
+      tag={showType && 'HTTP服务器'}
     >
       <div className="grid grid-cols-2 gap-1">
         <div className="flex items-center gap-2">

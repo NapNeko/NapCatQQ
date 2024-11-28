@@ -499,6 +499,8 @@ export const TerminalIcon = (props: IconSvgProps) => (
 
 export const PlusIcon = (props: IconSvgProps) => (
   <svg
+    width="1em"
+    height="1em"
     fill="#000000"
     viewBox="0 0 48 48"
     xmlns="http://www.w3.org/2000/svg"

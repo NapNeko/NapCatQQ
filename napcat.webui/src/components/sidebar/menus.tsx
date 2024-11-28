@@ -6,18 +6,18 @@ import React from 'react'
 import { FaChevronDown } from 'react-icons/fa6'
 import { matchPath, useLocation, useNavigate } from 'react-router-dom'
 
-import { useTheme } from '@/hooks/use-theme'
+import { useLocalStorage } from '@uidotdev/usehooks'
 
 const renderItems = (items: MenuItem[], children = false) => {
   return items?.map((item) => {
     const navigate = useNavigate()
     const locate = useLocation()
     const [open, setOpen] = React.useState(!!item.autoOpen)
-    const { isDark } = useTheme()
     const canOpen = React.useMemo(
       () => item.items && item.items.length > 0,
       [item.items]
     )
+    const [b64img] = useLocalStorage('background-image', '')
     const isActive = React.useMemo(() => {
       if (item.href) {
         return !!matchPath(item.href, locate.pathname)
@@ -46,11 +46,10 @@ const renderItems = (items: MenuItem[], children = false) => {
         <div>
           <Button
             className={clsx(
-              'flex items-center w-full text-left justify-start',
+              'flex items-center w-full text-left justify-start dark:text-white',
               children && 'rounded-l-lg',
               isActive && 'bg-opacity-60',
-              isDark && 'text-white'
-              // isActive ? "text-danger-900" : "text-content1-foreground",
+              b64img && 'backdrop-blur-md text-white'
             )}
             color="danger"
             endContent={
@@ -66,9 +65,7 @@ const renderItems = (items: MenuItem[], children = false) => {
                     'w-3 h-1.5 rounded-full ml-auto shadow-lg',
                     isActive
                       ? 'bg-danger-500 animate-spinner-ease-spin'
-                      : isDark
-                        ? 'bg-white'
-                        : 'bg-red-300'
+                      : 'bg-red-300 dark:bg-white'
                   )}
                 />
               )

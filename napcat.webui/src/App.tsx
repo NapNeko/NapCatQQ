@@ -7,6 +7,7 @@ import WebLoginPage from '@/pages/web_login'
 import IndexPage from '@/pages/index'
 import QQLoginPage from '@/pages/qq_login'
 import store from '@/store'
+
 function App() {
   return (
     <DialogProvider>

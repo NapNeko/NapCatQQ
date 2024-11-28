@@ -10,6 +10,17 @@ import WebUIManager from './controllers/webui_manager'
 
 WebUIManager.checkWebUiLogined()
 
+const token = localStorage.getItem('token')
+const theme = localStorage.getItem('theme')
+
+// 兼容 useLocalStorage
+if (token && !token.startsWith('"')) {
+  localStorage.setItem('token', JSON.stringify(token))
+}
+if (theme && !theme.startsWith('"')) {
+  localStorage.setItem('theme', JSON.stringify(theme))
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <HashRouter>

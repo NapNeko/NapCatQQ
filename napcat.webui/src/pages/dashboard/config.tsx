@@ -7,6 +7,8 @@ import { IoMdRefresh } from 'react-icons/io'
 
 import useConfig from '@/hooks/use-config'
 import SwitchCard from '@/components/switch_card'
+import { useLocalStorage } from '@uidotdev/usehooks'
+import { Image } from '@nextui-org/image'
 export default function ConfigPage() {
   const { config, mergeConfig, refreshConfig } = useConfig()
   const { control, handleSubmit, formState, setValue } = useForm<OneBotConfig>({
@@ -16,7 +18,7 @@ export default function ConfigPage() {
       parseMultMsg: false
     }
   })
-
+  const [b64img, setB64img] = useLocalStorage('background-image', '')
   const reset = () => {
     setValue('musicSignUrl', config.musicSignUrl)
     setValue('enableLocalFile2Url', config.enableLocalFile2Url)
@@ -63,6 +65,34 @@ export default function ConfigPage() {
             />
           )}
         />
+        <div className="bg-background p-3 rounded-md flex flex-col gap-2 justify-center items-center">
+          <div className="flex-shrink-0 w-full">背景图</div>
+          <div className="flex gap-2 items-center">
+            <Input
+              type="file"
+              onChange={async (e) => {
+                const file = e.target.files?.[0]
+                if (file) {
+                  const reader = new FileReader()
+                  reader.onload = async () => {
+                    const base64 = reader.result as string
+                    setB64img(base64)
+                    e.target.value = ''
+                  }
+                  reader.readAsDataURL(file)
+                }
+              }}
+            />
+            <Button
+              onClick={() => {
+                setB64img('')
+              }}
+            >
+              删除背景图
+            </Button>
+          </div>
+          {b64img && <Image src={b64img} alt="background" height={100} />}
+        </div>
         <div className="flex items-center justify-center gap-2 mt-5">
           <Button
             color="default"

@@ -6,17 +6,14 @@ import { FiEdit3 } from 'react-icons/fi'
 import { CgDebug } from 'react-icons/cg'
 import { MdDeleteForever } from 'react-icons/md'
 
-import DisplayCardContainer from './container'
-interface WebsocketClientDisplayCardProps {
+import DisplayCardContainer, { DisplayCardProps } from './container'
+interface WebsocketClientDisplayCardProps extends DisplayCardProps {
   data: OneBotConfig['network']['websocketClients'][0]
-  onEdit: () => void
-  onEnable: () => Promise<void>
-  onDelete: () => Promise<void>
-  onEnableDebug: () => Promise<void>
 }
 
 const WebsocketClientDisplayCard: React.FC<WebsocketClientDisplayCardProps> = ({
   data,
+  showType,
   onEdit,
   onEnable,
   onDelete,
@@ -86,6 +83,7 @@ const WebsocketClientDisplayCard: React.FC<WebsocketClientDisplayCardProps> = ({
           onClick={handleEnable}
         />
       }
+      tag={showType && 'Websocket客户端'}
       title={name}
     >
       <div className="flex items-center gap-2">
