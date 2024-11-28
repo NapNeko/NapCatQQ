@@ -105,7 +105,7 @@ export class NapCatOneBot11Adapter {
                 selfInfo.nick = user.nick;
                 this.context.logger.setLogSelfInfo(selfInfo);
             })
-            .catch(this.context.logger.logError.bind(this.context.logger));
+            .catch(e => this.context.logger.logError(e));
 
         const serviceInfo = await this.creatOneBotLog(ob11Config);
         this.context.logger.log(`[Notice] [OneBot11] ${serviceInfo}`);
@@ -228,7 +228,7 @@ export class NapCatOneBot11Adapter {
                     if (event) this.networkManager.emitEvent(event);
                 })
                 .catch((e) =>
-                    this.context.logger.logError.bind(this.context.logger)(
+                    this.context.logger.logError(
                         'constructSysMessage error: ',
                         e,
                         '\n Parse Hex:',
@@ -260,7 +260,7 @@ export class NapCatOneBot11Adapter {
                     m.msgId
                 );
                 await this.emitMsg(m).catch((e) =>
-                    this.context.logger.logError.bind(this.context.logger)('处理消息失败', e)
+                    this.context.logger.logError('处理消息失败', e)
                 );
             }
         };
@@ -315,7 +315,7 @@ export class NapCatOneBot11Adapter {
             const event = new BotOfflineEvent(this.core, kick.tipsTitle, kick.tipsDesc);
             this.networkManager
                 .emitEvent(event)
-                .catch((e) => this.context.logger.logError.bind(this.context.logger)('处理Bot掉线失败', e));
+                .catch((e) => this.context.logger.logError('处理Bot掉线失败', e));
         };
         this.context.session.getMsgService().addKernelMsgListener(proxiedListenerOf(msgListener, this.context.logger));
     }
@@ -404,7 +404,7 @@ export class NapCatOneBot11Adapter {
                             this.networkManager
                                 .emitEvent(groupAdminNoticeEvent)
                                 .catch((e) =>
-                                    this.context.logger.logError.bind(this.context.logger)('处理群管理员变动失败', e)
+                                    this.context.logger.logError('处理群管理员变动失败', e)
                                 );
                         } else {
                             this.context.logger.logDebug(
@@ -440,7 +440,7 @@ export class NapCatOneBot11Adapter {
                         //     this.networkManager
                         //         .emitEvent(groupDecreaseEvent)
                         //         .catch((e) =>
-                        //             this.context.logger.logError.bind(this.context.logger)('处理群成员退出失败', e)
+                        //             this.context.logger.logError('处理群成员退出失败', e)
                         //         );
                         //     // notify.status == 1 表示未处理 2表示处理完成
                         // } else
@@ -465,10 +465,10 @@ export class NapCatOneBot11Adapter {
                                 this.networkManager
                                     .emitEvent(groupRequestEvent)
                                     .catch((e) =>
-                                        this.context.logger.logError.bind(this.context.logger)('处理加群请求失败', e)
+                                        this.context.logger.logError('处理加群请求失败', e)
                                     );
                             } catch (e) {
-                                this.context.logger.logError.bind(this.context.logger)(
+                                this.context.logger.logError(
                                     '获取加群人QQ号失败 Uid:',
                                     notify.user1.uid,
                                     e
@@ -490,7 +490,7 @@ export class NapCatOneBot11Adapter {
                             this.networkManager
                                 .emitEvent(groupInviteEvent)
                                 .catch((e) =>
-                                    this.context.logger.logError.bind(this.context.logger)('处理邀请本人加群失败', e)
+                                    this.context.logger.logError('处理邀请本人加群失败', e)
                                 );
                         } else if (
                             notify.type == GroupNotifyMsgType.INVITED_NEED_ADMINI_STRATOR_PASS &&
@@ -508,7 +508,7 @@ export class NapCatOneBot11Adapter {
                             this.networkManager
                                 .emitEvent(groupInviteEvent)
                                 .catch((e) =>
-                                    this.context.logger.logError.bind(this.context.logger)('处理邀请本人加群失败', e)
+                                    this.context.logger.logError('处理邀请本人加群失败', e)
                                 );
                         }
                 }
@@ -533,10 +533,10 @@ export class NapCatOneBot11Adapter {
                     this.networkManager
                         .emitEvent(groupAdminNoticeEvent)
                         .catch((e) =>
-                            this.context.logger.logError.bind(this.context.logger)('处理群管理员变动失败', e)
+                            this.context.logger.logError('处理群管理员变动失败', e)
                         );
                     existMember.isChangeRole = false;
-                    this.context.logger.logDebug.bind(this.context.logger)('群管理员变动处理完毕');
+                    this.context.logger.logDebug('群管理员变动处理完毕');
                 });
             }
         };

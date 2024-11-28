@@ -27,7 +27,6 @@ export class RkeyManager {
                 await this.refreshRkey();
             } catch (e) {
                 throw new Error(`获取rkey失败: ${e}`);//外抛
-                //this.logger.logError.bind(this.logger)('获取rkey失败', e);
             }
         }
         return this.rkeyData;
@@ -50,7 +49,7 @@ export class RkeyManager {
                     expired_time: temp.expired_time
                 };
             } catch (e) {
-                this.logger.logError.bind(this.logger)(`[Rkey] Get Rkey ${url} Error `, e);
+                this.logger.logError(`[Rkey] Get Rkey ${url} Error `, e);
                 //是否为最后一个url
                 if (url === this.serverUrl[this.serverUrl.length - 1]) {
                     throw new Error(`获取rkey失败: ${e}`);//外抛

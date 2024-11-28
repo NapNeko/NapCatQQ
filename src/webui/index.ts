@@ -29,10 +29,9 @@ export let webUiPathWrapper: NapCatPathWrapper;
 export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapper) {
     webUiPathWrapper = pathWrapper;
     WebUiConfig = new WebUiConfigWrapper();
-    const log = logger.log.bind(logger);
     const config = await WebUiConfig.GetWebUIConfig();
     if (config.port == 0) {
-        log('[NapCat] [WebUi] Current WebUi is not run.');
+        logger.log('[NapCat] [WebUi] Current WebUi is not run.');
         return;
     }
 
@@ -67,16 +66,16 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
             path = `${config.prefix}/webui`;
 
         // 打印日志（地址、token）
-        log(`[NapCat] [WebUi] Current WebUi is running at http://${config.host}:${config.port}${config.prefix}`);
-        log(`[NapCat] [WebUi] Login Token is ${config.token}`);
-        log(`[NapCat] [WebUi] WebUi User Panel Url: ${createUrl(config.host, port, path, searchParams)}`);
-        log(`[NapCat] [WebUi] WebUi Local Panel Url: ${createUrl('127.0.0.1', port, path, searchParams)}`);
+        logger.log(`[NapCat] [WebUi] Current WebUi is running at http://${config.host}:${config.port}${config.prefix}`);
+        logger.log(`[NapCat] [WebUi] Login Token is ${config.token}`);
+        logger.log(`[NapCat] [WebUi] WebUi User Panel Url: ${createUrl(config.host, port, path, searchParams)}`);
+        logger.log(`[NapCat] [WebUi] WebUi Local Panel Url: ${createUrl('127.0.0.1', port, path, searchParams)}`);
 
         // 获取公网地址
         try {
             const publishUrl = 'https://ip.011102.xyz/';
             const data = await RequestUtil.HttpGetJson<{ IP: { IP: string } }>(publishUrl, 'GET', {}, {}, true, true);
-            log(`[NapCat] [WebUi] WebUi Publish Panel Url: ${createUrl(data.IP.IP, port, path, searchParams)}`);
+            logger.log(`[NapCat] [WebUi] WebUi Publish Panel Url: ${createUrl(data.IP.IP, port, path, searchParams)}`);
         } catch (err) {
             logger.logError(`[NapCat] [WebUi] Get Publish Panel Url Error: ${err}`);
         }
