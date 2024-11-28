@@ -1,41 +1,15 @@
-import { defineConfig } from 'vite';
-import vue from '@vitejs/plugin-vue';
-import legacy from '@vitejs/plugin-legacy';
-import path from 'path';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tsconfigPaths from 'vite-tsconfig-paths'
 
-// https://vite.dev/config/
+// https://vitejs.dev/config/
 export default defineConfig({
-    plugins: [
-        vue(),
-        legacy({
-            targets: ['defaults', 'not IE 11'],
-            modernPolyfills: ['web.structured-clone'],
-        }),
-    ],
-    base: './',
-    resolve: {
-        alias: {
-            '@': path.resolve(__dirname, 'src'),
-        },
-    },
-    server: {
-        proxy: {
-            '/api': 'http://localhost:6099',
-        },
-    },
-    build: {
-        chunkSizeWarningLimit: 4000,
-        rollupOptions: {
-            output: {
-                chunkFileNames: 'static/js/[name]-[hash].js',
-                entryFileNames: 'static/js/[name]-[hash].js',
-                assetFileNames: 'static/[ext]/[name]-[hash].[ext]',
-                manualChunks(id: string) {
-                    if (id.includes('node_modules')) {
-                        return id.toString().split('node_modules/')[1].split('/')[0].toString();
-                    }
-                },
-            },
-        },
-    },
-});
+  plugins: [react(), tsconfigPaths()],
+  base: './',
+  server: {
+    proxy: {
+      // '/api': 'http://192.168.31.196:6099'
+      '/api': 'http://127.0.0.1:6099'
+    }
+  }
+})
