@@ -213,7 +213,7 @@ export class NapCatOneBot11Adapter {
                 if (networkChange === OB11NetworkReloadType.NetWorkClose) {
                     await this.networkManager.closeSomeAdaterWhenOpen([existingAdapter]);
                 }
-            } else if(adapterConfig.enable) {
+            } else if (adapterConfig.enable) {
                 const newAdapter = new adapterClass(adapterConfig.name, adapterConfig, this.core, this.actions);
                 await this.networkManager.registerAdapterAndOpen(newAdapter);
             }
@@ -266,23 +266,30 @@ export class NapCatOneBot11Adapter {
         };
 
         msgListener.onAddSendMsg = async (msg) => {
-            if (msg.sendStatus == SendStatusType.KSEND_STATUS_SENDING) {
-                await this.core.eventWrapper.registerListen('NodeIKernelMsgListener/onMsgInfoListUpdate', (msgList: RawMessage[]) => {
-                    const report = msgList.find((e) =>
-                        e.senderUin == this.core.selfInfo.uin && e.sendStatus == SendStatusType.KSEND_STATUS_SUCCESS && e.msgId === msg.msgId
-                    );
-                    return !!report;
-                }, 1, 300);
-                msg.id = MessageUnique.createUniqueMsgId(
-                    {
-                        chatType: msg.chatType,
-                        peerUid: msg.peerUid,
-                        guildId: '',
-                    },
-                    msg.msgId
-                );
-                //此时上报的seq不是对的 不过对onebot业务无影响
-                this.emitMsg(msg);
+            try {
+                if (msg.sendStatus == SendStatusType.KSEND_STATUS_SENDING) {
+                    const [updatemsgs] = await this.core.eventWrapper.registerListen('NodeIKernelMsgListener/onMsgInfoListUpdate', (msgList: RawMessage[]) => {
+                        const report = msgList.find((e) =>
+                            e.senderUin == this.core.selfInfo.uin && e.sendStatus !== SendStatusType.KSEND_STATUS_SENDING && e.msgId === msg.msgId
+                        );
+                        return !!report;
+                    }, 1, 10 * 60 * 1000);
+                    // 10分钟 超时
+                    const updatemsg = updatemsgs.find((e) => e.msgId === msg.msgId);
+                    if (updatemsg?.sendStatus == SendStatusType.KSEND_STATUS_SUCCESS || updatemsg?.sendStatus == SendStatusType.KSEND_STATUS_SUCCESS_NOSEQ) {
+                        updatemsg.id = MessageUnique.createUniqueMsgId(
+                            {
+                                chatType: updatemsg.chatType,
+                                peerUid: updatemsg.peerUid,
+                                guildId: '',
+                            },
+                            updatemsg.msgId
+                        );
+                        this.emitMsg(updatemsg);
+                    }
+                }
+            } catch (error) {
+                this.context.logger.logError('处理发送消息失败', error);
             }
         };
         msgListener.onMsgRecall = async (chatType: ChatType, uid: string, msgSeq: string) => {
