@@ -62,7 +62,7 @@ export const GroupChange = {
     operatorUid: ProtoField(5, ScalarType.STRING, true),
     increaseType: ProtoField(6, ScalarType.UINT32),
     field7: ProtoField(7, ScalarType.BYTES, true),
-}
+};
 
 export const PushMsgBody = {
     responseHead: ProtoField(1, () => ResponseHead),

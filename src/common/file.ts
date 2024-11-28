@@ -191,7 +191,7 @@ export async function checkUriType(Uri: string) {
     if (LocalFileRet) return LocalFileRet;
     const OtherFileRet = await solveProblem((uri: string) => {
         // 再判断是否是Http
-        if (uri.startsWith('http://') || uri.startsWith('https://')) {
+        if (uri.startsWith('http:') || uri.startsWith('https:')) {
             return { Uri: uri, Type: FileUriType.Remote };
         }
         // 再判断是否是Base64
@@ -199,7 +199,7 @@ export async function checkUriType(Uri: string) {
             return { Uri: uri, Type: FileUriType.Base64 };
         }
         if (uri.startsWith('file:')) {
-            let filePath: string = uri.slice(7);
+            const filePath: string = uri.slice(7);
             // file://C:\1.jpg
             // file:///test/1.jpg
             return { Uri: filePath, Type: FileUriType.Local };

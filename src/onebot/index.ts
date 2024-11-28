@@ -298,10 +298,10 @@ export class NapCatOneBot11Adapter {
                 peerUid: uid,
                 guildId: ''
             };
-            let msg = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeq(peer, msgSeq)).msgList.find(e => e.msgType == NTMsgType.KMSGTYPEGRAYTIPS);
-            let element = msg?.elements[0];
+            const msg = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeq(peer, msgSeq)).msgList.find(e => e.msgType == NTMsgType.KMSGTYPEGRAYTIPS);
+            const element = msg?.elements[0];
             if (msg && element) {
-                let recallEvent = await this.emitRecallMsg(msg, element);
+                const recallEvent = await this.emitRecallMsg(msg, element);
                 try {
                     if (recallEvent) {
                         await this.networkManager.emitEvent(recallEvent);
@@ -310,7 +310,7 @@ export class NapCatOneBot11Adapter {
                     this.context.logger.logError('处理消息撤回失败', e);
                 }
             }
-        }
+        };
         msgListener.onKickedOffLine = async (kick) => {
             const event = new BotOfflineEvent(this.core, kick.tipsTitle, kick.tipsDesc);
             this.networkManager
@@ -664,7 +664,7 @@ export class NapCatOneBot11Adapter {
 
     private async emitRecallMsg(message: RawMessage, element: MessageElement) {
         const peer: Peer = { chatType: message.chatType, peerUid: message.peerUid, guildId: '' };
-        let oriMessageId = MessageUnique.getShortIdByMsgId(message.msgId) ?? MessageUnique.createUniqueMsgId(peer, message.msgId);
+        const oriMessageId = MessageUnique.getShortIdByMsgId(message.msgId) ?? MessageUnique.createUniqueMsgId(peer, message.msgId);
         if (message.chatType == ChatType.KCHATTYPEC2C) {
             return await this.emitFriendRecallMsg(message, oriMessageId, element);
         } else if (message.chatType == ChatType.KCHATTYPEGROUP) {
@@ -684,7 +684,7 @@ export class NapCatOneBot11Adapter {
     private async emitGroupRecallMsg(message: RawMessage, oriMessageId: number, element: MessageElement) {
         const operatorUid = element.grayTipElement?.revokeElement.operatorUid;
         if (!operatorUid) return undefined;
-        let operatorId = message.senderUin ?? await this.core.apis.UserApi.getUinByUidV2(operatorUid);
+        const operatorId = message.senderUin ?? await this.core.apis.UserApi.getUinByUidV2(operatorUid);
         return new OB11GroupRecallNoticeEvent(
             this.core,
             +message.peerUin,

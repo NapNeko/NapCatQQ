@@ -673,7 +673,7 @@ export class OneBotMsgApi {
         if (grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
             if (grayTipElement.jsonGrayTipElement.busiId == 1061) {
                 const PokeEvent = await this.obContext.apis.FriendApi.parsePrivatePokeEvent(grayTipElement);
-                if (PokeEvent) { return PokeEvent };
+                if (PokeEvent) { return PokeEvent; };
             } else if (grayTipElement.jsonGrayTipElement.busiId == 19324 && msg.peerUid !== '') {
                 return new OB11FriendAddNoticeEvent(this.core, Number(await this.core.apis.UserApi.getUinByUidV2(msg.peerUid)));
             }
@@ -841,14 +841,14 @@ export class OneBotMsgApi {
     }
 
     private async convertArrayToStringMessage(originMsg: OB11Message): Promise<OB11Message> {
-        let msg = structuredClone(originMsg);
+        const msg = structuredClone(originMsg);
         msg.message_format = 'string';
         msg.message = msg.raw_message;
         return msg;
     }
 
     async importArrayTostringMsg(originMsg: OB11Message) {
-        let msg = structuredClone(originMsg);
+        const msg = structuredClone(originMsg);
         msg.message_format = 'string';
         msg.message = msg.raw_message;
         return msg;
@@ -924,7 +924,7 @@ export class OneBotMsgApi {
                         fsPromise.unlink(file).then().catch(e => this.core.context.logger.logError.bind(this.core.context.logger)('发送消息删除文件失败', e));
                     }
                 } catch (error) {
-                    this.core.context.logger.logError.bind(this.core.context.logger)('发送消息删除文件失败', (error as Error).message)
+                    this.core.context.logger.logError.bind(this.core.context.logger)('发送消息删除文件失败', (error as Error).message);
                 }
             });
         }, 60000);
@@ -959,20 +959,20 @@ export class OneBotMsgApi {
     }
     groupChangDecreseType2String(type: number): GroupDecreaseSubType {
         switch (type) {
-            case 130:
-                return 'kick';
-            case 131:
-                return 'leave';
-            case 3:
-                return 'kick_me';
-            default:
-                return 'kick';
+        case 130:
+            return 'kick';
+        case 131:
+            return 'leave';
+        case 3:
+            return 'kick_me';
+        default:
+            return 'kick';
         }
     }
 
     async parseSysMessage(msg: number[]) {
         // Todo Refactor
-        let SysMessage = new NapProtoMsg(PushMsgBody).decode(Uint8Array.from(msg));
+        const SysMessage = new NapProtoMsg(PushMsgBody).decode(Uint8Array.from(msg));
         if (SysMessage.contentHead.type == 33 && SysMessage.body?.msgContent) {
             const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
             console.log(JSON.stringify(groupChange));
