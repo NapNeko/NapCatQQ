@@ -66,31 +66,31 @@ export class OneBotGroupApi {
         return undefined;
     }
 
-    async parseGroupIncreaseEvent(GroupCode: string, grayTipElement: GrayTipElement) {
-        this.core.context.logger.logDebug('收到新人被邀请进群消息', grayTipElement);
-        const xmlElement = grayTipElement.xmlElement;
-        if (xmlElement?.content) {
-            const regex = /jp="(\d+)"/g;
+    // async parseGroupIncreaseEvent(GroupCode: string, grayTipElement: GrayTipElement) {
+    //     this.core.context.logger.logDebug('收到新人被邀请进群消息', grayTipElement);
+    //     const xmlElement = grayTipElement.xmlElement;
+    //     if (xmlElement?.content) {
+    //         const regex = /jp="(\d+)"/g;
 
-            const matches = [];
-            let match = null;
+    //         const matches = [];
+    //         let match = null;
 
-            while ((match = regex.exec(xmlElement.content)) !== null) {
-                matches.push(match[1]);
-            }
-            if (matches.length === 2) {
-                const [inviter, invitee] = matches;
-                return new OB11GroupIncreaseEvent(
-                    this.core,
-                    parseInt(GroupCode),
-                    parseInt(invitee),
-                    parseInt(inviter),
-                    'invite',
-                );
-            }
-        }
-        return undefined;
-    }
+    //         while ((match = regex.exec(xmlElement.content)) !== null) {
+    //             matches.push(match[1]);
+    //         }
+    //         if (matches.length === 2) {
+    //             const [inviter, invitee] = matches;
+    //             return new OB11GroupIncreaseEvent(
+    //                 this.core,
+    //                 parseInt(GroupCode),
+    //                 parseInt(invitee),
+    //                 parseInt(inviter),
+    //                 'invite',
+    //             );
+    //         }
+    //     }
+    //     return undefined;
+    // }
 
     // async parseGroupMemberIncreaseEvent(GroupCode: string, grayTipElement: GrayTipElement) {
     //     const groupElement = grayTipElement?.groupElement;
@@ -304,9 +304,8 @@ export class OneBotGroupApi {
             // 筛选出表情回应 事件
             if (grayTipElement.xmlElement?.templId === '10382') {
                 return await this.obContext.apis.GroupApi.parseGroupEmojiLikeEventByGrayTip(msg.peerUid, grayTipElement);
-
             } else {
-                return await this.obContext.apis.GroupApi.parseGroupIncreaseEvent(msg.peerUid, grayTipElement);
+                //return await this.obContext.apis.GroupApi.parseGroupIncreaseEvent(msg.peerUid, grayTipElement);
             }
         } else if (grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
             // 解析json事件
