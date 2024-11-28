@@ -24,20 +24,19 @@ export class OneBotQuickActionApi {
     }
 
     async handleQuickOperation(eventContext: QuickActionEvent, quickAction: QuickAction) {
-        const logger = this.core.context.logger;
         if (eventContext.post_type === 'message') {
             await this.handleMsg(eventContext as OB11Message, quickAction)
-                .catch(logger.logError.bind(logger));
+                .catch(e => this.core.context.logger.logError(e));
         }
         if (eventContext.post_type === 'request') {
             const friendRequest = eventContext as OB11FriendRequestEvent;
             const groupRequest = eventContext as OB11GroupRequestEvent;
             if ((friendRequest).request_type === 'friend') {
                 await this.handleFriendRequest(friendRequest, quickAction)
-                    .catch(logger.logError.bind(logger));
+                    .catch(e => this.core.context.logger.logError(e));
             } else if (groupRequest.request_type === 'group') {
                 await this.handleGroupRequest(groupRequest, quickAction)
-                    .catch(logger.logError.bind(logger));
+                    .catch(e => this.core.context.logger.logError(e));
             }
         }
     }
@@ -51,7 +50,7 @@ export class OneBotQuickActionApi {
             group_id: msg.group_id?.toString(),
             user_id: msg.user_id?.toString(),
         }, peerContextMode);
-        
+
         if (reply) {
             // let group: Group | undefined;
             let replyMessage: OB11MessageData[] = [];
@@ -78,7 +77,7 @@ export class OneBotQuickActionApi {
                 sendElements,
                 deleteAfterSentFiles,
             } = await this.obContext.apis.MsgApi.createSendElements(replyMessage, peer);
-            this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, deleteAfterSentFiles, false).then().catch(this.core.context.logger.logError.bind(this.core.context.logger));
+            this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, deleteAfterSentFiles, false).then().catch(e => this.core.context.logger.logError(e));
         }
     }
 
@@ -88,13 +87,13 @@ export class OneBotQuickActionApi {
                 request.flag,
                 quickAction.approve ? NTGroupRequestOperateTypes.KAGREE : NTGroupRequestOperateTypes.KREFUSE,
                 quickAction.reason,
-            ).catch(this.core.context.logger.logError.bind(this.core.context.logger));
+            ).catch(e => this.core.context.logger.logError(e));
         }
     }
 
     async handleFriendRequest(request: OB11FriendRequestEvent, quickAction: QuickActionFriendRequest) {
         if (!isNull(quickAction.approve)) {
-            this.core.apis.FriendApi.handleFriendRequest(request.flag, !!quickAction.approve).then().catch(this.core.context.logger.logError.bind(this.core.context.logger));
+            this.core.apis.FriendApi.handleFriendRequest(request.flag, !!quickAction.approve).then().catch(e => this.core.context.logger.logError(e));
         }
     }
 }

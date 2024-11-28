@@ -27,7 +27,7 @@ export class NTQQGroupApi {
         this.core = core;
     }
     async initApi() {
-        this.initCache().then().catch(this.context.logger.logError.bind(this.context.logger));
+        this.initCache().then().catch(e => this.context.logger.logError(e));
     }
     async initCache() {
         this.groups = await this.getGroups();
