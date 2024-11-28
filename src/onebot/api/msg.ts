@@ -972,15 +972,6 @@ export class OneBotMsgApi {
 
     async parseSysMessage(msg: number[]) {
         // Todo Refactor
-        // const sysMsg = decodeSysMessage(Uint8Array.from(msg));
-        // if (sysMsg.msgSpec.length === 0) {
-        //     return;
-        // }
-        // const { msgType, subType, subSubType } = sysMsg.msgSpec[0];
-        // if (msgType === 528 && subType === 39 && subSubType === 39) {
-        //     if (!sysMsg.bodyWrapper) return;
-        //     return await this.obContext.apis.UserApi.parseLikeEvent(sysMsg.bodyWrapper.wrappedBody);
-        // }
         let SysMessage = new NapProtoMsg(PushMsgBody).decode(Uint8Array.from(msg));
         if (SysMessage.contentHead.type == 33 && SysMessage.body?.msgContent) {
             const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
@@ -994,7 +985,6 @@ export class OneBotMsgApi {
             );
         } else if (SysMessage.contentHead.type == 34 && SysMessage.body?.msgContent) {
             const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
-            // console.log(JSON.stringify(groupChange),JSON.stringify(SysMessage));
             return new OB11GroupDecreaseEvent(
                 this.core,
                 groupChange.groupUin,
@@ -1002,7 +992,10 @@ export class OneBotMsgApi {
                 groupChange.operatorUid ? +await this.core.apis.UserApi.getUinByUidV2(groupChange.operatorUid) : 0,
                 this.groupChangDecreseType2String(groupChange.decreaseType),
             );
+        } else if (SysMessage.contentHead.type == 528 && SysMessage.contentHead.subType == 39 && SysMessage.body?.msgContent) {
+            return await this.obContext.apis.UserApi.parseLikeEvent(SysMessage.body?.msgContent);
         }
+
         /*
         if (msgType === 732 && subType === 16 && subSubType === 16) {
             const greyTip = GreyTipWrapper.fromBinary(Uint8Array.from(sysMsg.bodyWrapper!.wrappedBody.slice(7)));

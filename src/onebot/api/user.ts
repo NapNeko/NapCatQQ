@@ -13,7 +13,7 @@ export class OneBotUserApi {
     }
 
     async parseLikeEvent(wrappedBody: Uint8Array): Promise<OB11ProfileLikeEvent | undefined> {
-        const likeTip = decodeProfileLikeTip(Uint8Array.from(wrappedBody));
+        const likeTip = decodeProfileLikeTip(wrappedBody);
         if (likeTip?.msgType !== 0 || likeTip?.subType !== 203) return;
         this.core.context.logger.logDebug("收到点赞通知消息");
         const likeMsg = likeTip.content.msg;
