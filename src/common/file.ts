@@ -198,10 +198,19 @@ export async function checkUriType(Uri: string) {
         if (uri.startsWith('base64:')) {
             return { Uri: uri, Type: FileUriType.Base64 };
         }
+        // 默认file://
         if (uri.startsWith('file:')) {
-            const filePath: string = uri.slice(7);
+            // 兼容file:///
+            // file:///C:/1.jpg
+            if (uri.startsWith('file:///') && process.platform === 'win32') {
+                const filePath: string = uri.slice(8);
+                return { Uri: filePath, Type: FileUriType.Local };
+            }
+            // 处理默认规范
             // file://C:\1.jpg
             // file:///test/1.jpg
+            const filePath: string = uri.slice(7);
+
             return { Uri: filePath, Type: FileUriType.Local };
         }
         if (uri.startsWith('data:')) {
