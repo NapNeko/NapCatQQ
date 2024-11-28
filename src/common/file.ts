@@ -190,16 +190,18 @@ export async function checkUriType(Uri: string) {
     }, Uri);
     if (LocalFileRet) return LocalFileRet;
     const OtherFileRet = await solveProblem((uri: string) => {
-        //再判断是否是Http
+        // 再判断是否是Http
         if (uri.startsWith('http://') || uri.startsWith('https://')) {
             return { Uri: uri, Type: FileUriType.Remote };
         }
-        //再判断是否是Base64
-        if (uri.startsWith('base64://')) {
+        // 再判断是否是Base64
+        if (uri.startsWith('base64:')) {
             return { Uri: uri, Type: FileUriType.Base64 };
         }
-        if (uri.startsWith('file://')) {
+        if (uri.startsWith('file:')) {
             let filePath: string = uri.slice(7);
+            // file://C:\1.jpg
+            // file:///test/1.jpg
             return { Uri: filePath, Type: FileUriType.Local };
         }
         if (uri.startsWith('data:')) {
@@ -235,7 +237,7 @@ export async function uri2local(dir: string, uri: string, filename: string | und
         fs.copyFileSync(HandledUri, filePath);
         return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath };
     }
-    
+
     //接下来都要有文件名
     if (UriType == FileUriType.Remote) {
         const pathInfo = path.parse(decodeURIComponent(new URL(HandledUri).pathname));
