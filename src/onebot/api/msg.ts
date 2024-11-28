@@ -959,14 +959,14 @@ export class OneBotMsgApi {
     }
     groupChangDecreseType2String(type: number): GroupDecreaseSubType {
         switch (type) {
-        case 130:
-            return 'kick';
-        case 131:
-            return 'leave';
-        case 3:
-            return 'kick_me';
-        default:
-            return 'kick';
+            case 130:
+                return 'leave';
+            case 131:
+                return 'kick';
+            case 3:
+                return 'kick_me';
+            default:
+                return 'kick';
         }
     }
 
@@ -988,7 +988,7 @@ export class OneBotMsgApi {
             return new OB11GroupDecreaseEvent(
                 this.core,
                 groupChange.groupUin,
-                +this.core.selfInfo.uin,
+                groupChange.memberUid ? +await this.core.apis.UserApi.getUinByUidV2(groupChange.memberUid) : 0,
                 groupChange.operatorUid ? +await this.core.apis.UserApi.getUinByUidV2(groupChange.operatorUid) : 0,
                 this.groupChangDecreseType2String(groupChange.decreaseType),
             );
