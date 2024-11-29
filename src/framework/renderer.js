@@ -1,12 +1,16 @@
 export const onSettingWindowCreated = async (view) => {
     let webui = await window.napcat.getWebUiUrl();
+    let webuiReact = await window.napcat.getWebUiUrlReact();
     view.innerHTML = `
     <setting-section data-title="">
     <setting-panel>
         <setting-list data-direction="column">
             <setting-item>
-                <setting-button data-type="primary" class="nc_openwebui">在QQ内打开配置页面</setting-button>
-                <setting-button data-type="primary" class="nc_openwebui_ex">在默认浏览器打开配置页面</setting-button>
+                <setting-button data-type="primary" class="nc_openwebui">在QQ内打开配置页面(VUE)</setting-button>
+                <setting-button data-type="primary" class="nc_openwebui_ex">在默认浏览器打开配置页面(VUE)</setting-button>
+            </setting-item>
+            <setting-item>
+                <setting-button data-type="primary" class="nc_openwebui_ex_react">在默认浏览器打开配置页面(React)</setting-button>
             </setting-item>
                 <setting-item>
                 <div>
@@ -18,12 +22,18 @@ export const onSettingWindowCreated = async (view) => {
     </setting-panel>
 </setting-section>
     `;
+
     view.querySelector('.nc_openwebui').addEventListener('click', () => {
         window.open(webui, '_blank');
     });
     view.querySelector('.nc_openwebui_ex').addEventListener('click', () => {
         window.napcat.openExternalUrl(webui);
     });
+
+    view.querySelector('.nc_openwebui_ex_react').addEventListener('click', () => {
+        window.napcat.openExternalUrl(webuiReact);
+    });
+
     view.querySelector('.nc_webui').innerText = webui;
 
     // 添加点击复制功能

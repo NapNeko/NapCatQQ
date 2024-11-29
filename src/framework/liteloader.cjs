@@ -8,3 +8,9 @@ ipcMain.handle('napcat_get_webtoken', async (event, arg) => {
 ipcMain.on('open_external_url', (event, url) => {
     shell.openExternal(url);
 });
+ipcMain.handle('napcat_get_reactweb', async (event, arg) => {
+    let url = new URL(await napcat.NCgetWebUiUrl());
+    let port = url.port;
+    let token = url.searchParams.get('token');
+    return `https://napcat.152710.xyz/web_login?back=http://127.0.0.1:${port}&token=${token}`;
+});
