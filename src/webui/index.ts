@@ -69,7 +69,9 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
         logger.log(`[NapCat] [WebUi] Current WebUi is running at http://${config.host}:${config.port}${config.prefix}`);
         logger.log(`[NapCat] [WebUi] Login Token is ${config.token}`);
         logger.log(`[NapCat] [WebUi] WebUi User Panel Url: ${createUrl(config.host, port, path, searchParams)}`);
+        logger.log(`[NapCat] [WebUi] WebUi Local Panel Url: https://napcat.152710.xyz/web_login?back=http://${config.host}:${config.port}${config.prefix}&token=${config.token}`);
         logger.log(`[NapCat] [WebUi] WebUi Local Panel Url: ${createUrl('127.0.0.1', port, path, searchParams)}`);
+        logger.log(`[NapCat] [WebUi] WebUi User Panel Url: https://napcat.152710.xyz/web_login?back=http://127.0.0.1:${config.port}${config.prefix}&token=${config.token}`);
 
         // 获取公网地址
         try {
