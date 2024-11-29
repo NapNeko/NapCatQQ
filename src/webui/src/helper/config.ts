@@ -1,5 +1,5 @@
 import { webUiPathWrapper } from '@/webui';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import * as net from 'node:net';
 import { resolve } from 'node:path';
 
@@ -130,5 +130,27 @@ export class WebUiConfigWrapper {
             console.log('读取配置文件失败', e);
         }
         return defaultconfig; // 理论上这行代码到不了，到了只能返回默认配置了
+    }
+
+    // 获取日志文件夹路径
+    public static async GetLogsPath(): Promise<string> {
+        return resolve(webUiPathWrapper.logsPath);
+    }
+    // 获取日志列表
+    public static GetLogsList(): string[] {
+        if (existsSync(webUiPathWrapper.logsPath)) {
+            return readdirSync(webUiPathWrapper.logsPath)
+                .filter((file) => file.endsWith('.log'))
+                .map((file) => file.replace('.log', ''));
+        }
+        return [];
+    }
+    // 获取指定日志文件内容
+    public static GetLogContent(filename: string): string {
+        const logPath = resolve(webUiPathWrapper.logsPath, `${filename}.log`);
+        if (existsSync(logPath)) {
+            return readFileSync(logPath, 'utf-8');
+        }
+        return '';
     }
 }

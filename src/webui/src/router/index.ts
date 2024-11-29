@@ -10,6 +10,7 @@ import { sendSuccess } from '@webapi/utils/response';
 
 import { QQLoginRouter } from '@webapi/router/QQLogin';
 import { AuthRouter } from '@webapi/router/auth';
+import { LogRouter } from '@webapi/router/Log';
 
 const router = Router();
 
@@ -26,5 +27,7 @@ router.use('/auth', AuthRouter);
 router.use('/QQLogin', QQLoginRouter);
 // router:OB11配置相关路由
 router.use('/OB11Config', OB11ConfigRouter);
+// router:日志相关路由
+router.use('/Log', LogRouter);
 
 export { router as ALLRouter };
