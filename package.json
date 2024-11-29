@@ -4,11 +4,11 @@
   "type": "module",
   "version": "4.2.7",
   "scripts": {
-    "build:onepack": "npm run build:webui && vite build --mode onepack || exit 1",
+    "build:universal": "npm run build:webui && vite build --mode universal || exit 1",
     "build:framework": "npm run build:webui && vite build --mode framework || exit 1",
     "build:shell": "npm run build:webui && vite build --mode shell || exit 1",
     "build:webui": "cd napcat.webui && vite build",
-    "dev:onepack": "vite build --mode onepack",
+    "dev:universal": "vite build --mode universal",
     "dev:framework": "vite build --mode framework",
     "dev:shell": "vite build --mode shell",
     "dev:webui": "cd napcat.webui && npm run webui:dev",

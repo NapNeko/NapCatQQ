@@ -16,7 +16,7 @@ if (process.env.NAPCAT_BUILDSYS == 'linux') {
     startScripts = ['./script/KillQQ.bat'];
 }
 
-const OnePackBaseConfigPlugin: PluginOption[] = [
+const UniversalBaseConfigPlugin: PluginOption[] = [
     cp({
         targets: [
             { src: './manifest.json', dest: 'dist' },
@@ -72,7 +72,7 @@ const ShellBaseConfigPlugin: PluginOption[] = [
     }),
     nodeResolve(),
 ];
-const OnePackBaseConfig = () =>
+const UniversalBaseConfig = () =>
     defineConfig({
         resolve: {
             conditions: ['node', 'default'],
@@ -89,7 +89,7 @@ const OnePackBaseConfig = () =>
             minify: false,
             lib: {
                 entry: {
-                    napcat: 'src/onepack/napcat.ts',
+                    napcat: 'src/universal/napcat.ts',
                     'audio-worker': 'src/common/audio-worker.ts',
                 },
                 formats: ['es'],
@@ -166,10 +166,10 @@ export default defineConfig(({ mode }): UserConfig => {
             ...ShellBaseConfig(),
             plugins: [...ShellBaseConfigPlugin],
         };
-    } else if (mode == 'onepack') {
+    } else if (mode == 'universal') {
         return {
-            ...OnePackBaseConfig(),
-            plugins: [...OnePackBaseConfigPlugin],
+            ...UniversalBaseConfig(),
+            plugins: [...UniversalBaseConfigPlugin],
         };
     } else {
         return {
