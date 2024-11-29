@@ -3,11 +3,8 @@
  */
 
 import express from 'express';
-
 import { LogWrapper } from '@/common/log';
 import { NapCatPathWrapper } from '@/common/path';
-import { RequestUtil } from '@/common/request';
-
 import { WebUiConfigWrapper } from '@webapi/helper/config';
 import { ALLRouter } from '@webapi/router';
 import { cors } from '@webapi/middleware/cors';
@@ -60,27 +57,15 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
     // ------------启动服务------------
     app.listen(config.port, config.host, async () => {
         // 启动后打印出相关地址
-
         const port = config.port.toString(),
             searchParams = { token: config.token },
             path = `${config.prefix}/webui`;
-
-        // 打印日志（地址、token）
-        logger.log(`[NapCat] [WebUi] Current WebUi is running at http://${config.host}:${config.port}${config.prefix}`);
-        logger.log(`[NapCat] [WebUi] Login Token is ${config.token}`);
-        logger.log(`[NapCat] [WebUi] WebUi User Panel Url: ${createUrl(config.host, port, path, searchParams)}`);
-        logger.log(`[NapCat] [WebUi] WebUi Local Panel Url: https://napcat.152710.xyz/web_login?back=http://${config.host}:${config.port}${config.prefix}&token=${config.token}`);
-        logger.log(`[NapCat] [WebUi] WebUi Local Panel Url: ${createUrl('127.0.0.1', port, path, searchParams)}`);
-        logger.log(`[NapCat] [WebUi] WebUi User Panel Url: https://napcat.152710.xyz/web_login?back=http://127.0.0.1:${config.port}${config.prefix}&token=${config.token}`);
-
-        // 获取公网地址
-        try {
-            const publishUrl = 'https://ip.011102.xyz/';
-            const data = await RequestUtil.HttpGetJson<{ IP: { IP: string } }>(publishUrl, 'GET', {}, {}, true, true);
-            logger.log(`[NapCat] [WebUi] WebUi Publish Panel Url: ${createUrl(data.IP.IP, port, path, searchParams)}`);
-        } catch (err) {
-            logger.logError(`[NapCat] [WebUi] Get Publish Panel Url Error: ${err}`);
+        if (config.host !== '' && config.host !== '0.0.0.0') {
+            logger.log(`[NapCat] [WebUi] WebUi User Panel Url: ${createUrl(config.host, port, path, searchParams)}`);
+            logger.log(`[NapCat] [WebUi] WebUi User Panel Url: https://napcat.152710.xyz/web_login?back=http://${config.host}:${config.port}${config.prefix}&token=${config.token}`);
         }
+        logger.log(`[NapCat] [WebUi] WebUi Local Panel Url: ${createUrl('127.0.0.1', port, path, searchParams)}`);
+        logger.log(`[NapCat] [WebUi] WebUi Local Panel Url: https://napcat.152710.xyz/web_login?back=http://127.0.0.1:${config.port}${config.prefix}&token=${config.token}`);
     });
     // ------------Over！------------
 }
