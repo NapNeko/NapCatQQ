@@ -6,9 +6,7 @@ import { builtinModules } from 'module';
 //依赖排除
 const external = ['silk-wasm', 'ws', 'express', 'qrcode-terminal', 'fluent-ffmpeg', 'piscina'];
 const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`)].flat();
-function genCpModule(module: string) {
-    return { src: `./node_modules/${module}`, dest: `dist/node_modules/${module}`, flatten: false };
-}
+
 let startScripts: string[] | undefined = undefined;
 if (process.env.NAPCAT_BUILDSYS == 'linux') {
     startScripts = [];
@@ -17,6 +15,29 @@ if (process.env.NAPCAT_BUILDSYS == 'linux') {
 } else {
     startScripts = ['./script/KillQQ.bat'];
 }
+
+const OnePackBaseConfigPlugin: PluginOption[] = [
+    cp({
+        targets: [
+            { src: './manifest.json', dest: 'dist' },
+            { src: './src/core/external/napcat.json', dest: 'dist/config/' },
+            { src: './src/native/packet', dest: 'dist/moehoo', flatten: false },
+            { src: './napcat.webui/dist/', dest: 'dist/static/', flatten: false },
+            { src: './src/framework/liteloader.cjs', dest: 'dist' },
+            { src: './src/framework/napcat.cjs', dest: 'dist' },
+            { src: './src/framework/preload.cjs', dest: 'dist' },
+            { src: './src/framework/renderer.js', dest: 'dist' },
+            { src: './package.json', dest: 'dist' },
+            { src: './logo.png', dest: 'dist' },
+            { src: './launcher/', dest: 'dist', flatten: true },
+            ...startScripts.map((startScript) => {
+                return { src: startScript, dest: 'dist' };
+            }),
+        ],
+    }),
+    nodeResolve(),
+];
+
 const FrameworkBaseConfigPlugin: PluginOption[] = [
     cp({
         targets: [
@@ -34,6 +55,8 @@ const FrameworkBaseConfigPlugin: PluginOption[] = [
     }),
     nodeResolve(),
 ];
+
+
 const ShellBaseConfigPlugin: PluginOption[] = [
     cp({
         targets: [
@@ -49,6 +72,35 @@ const ShellBaseConfigPlugin: PluginOption[] = [
     }),
     nodeResolve(),
 ];
+const OnePackBaseConfig = () =>
+    defineConfig({
+        resolve: {
+            conditions: ['node', 'default'],
+            alias: {
+                '@/core': resolve(__dirname, './src/core'),
+                '@': resolve(__dirname, './src'),
+                './lib-cov/fluent-ffmpeg': './lib/fluent-ffmpeg',
+                '@webapi': resolve(__dirname, './src/webui/src'),
+            },
+        },
+        build: {
+            sourcemap: false,
+            target: 'esnext',
+            minify: false,
+            lib: {
+                entry: {
+                    napcat: 'src/onepack/napcat.ts',
+                    'audio-worker': 'src/common/audio-worker.ts',
+                },
+                formats: ['es'],
+                fileName: (_, entryName) => `${entryName}.mjs`,
+            },
+            rollupOptions: {
+                external: [...nodeModules, ...external],
+            },
+        },
+    });
+
 
 const ShellBaseConfig = () =>
     defineConfig({
@@ -113,6 +165,11 @@ export default defineConfig(({ mode }): UserConfig => {
         return {
             ...ShellBaseConfig(),
             plugins: [...ShellBaseConfigPlugin],
+        };
+    } else if (mode == 'onepack') {
+        return {
+            ...OnePackBaseConfig(),
+            plugins: [...OnePackBaseConfigPlugin],
         };
     } else {
         return {
