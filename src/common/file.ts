@@ -200,17 +200,7 @@ export async function checkUriType(Uri: string) {
         }
         // 默认file://
         if (uri.startsWith('file:')) {
-            // 兼容file:///
-            // file:///C:/1.jpg
-            if (uri.startsWith('file:///') && process.platform === 'win32') {
-                const filePath: string = uri.slice(8);
-                return { Uri: filePath, Type: FileUriType.Local };
-            }
-            // 处理默认规范
-            // file://C:\1.jpg
-            // file:///test/1.jpg
-            const filePath: string = uri.slice(7);
-
+            const filePath: string = decodeURIComponent(uri.startsWith('file:///') && process.platform === 'win32' ? uri.slice(8) : uri.slice(7));
             return { Uri: filePath, Type: FileUriType.Local };
         }
         if (uri.startsWith('data:')) {
