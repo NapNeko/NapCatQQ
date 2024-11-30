@@ -76,7 +76,7 @@ export class NapCatOneBot11Adapter {
             FriendApi: new OneBotFriendApi(this, core),
             MsgApi: new OneBotMsgApi(this, core),
             QuickActionApi: new OneBotQuickActionApi(this, core),
-        };
+        } as const;
         this.actions = createActionMap(this, core);
         this.networkManager = new OB11NetworkManager();
     }
