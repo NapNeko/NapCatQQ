@@ -24,6 +24,34 @@ function getFormattedTimestamp() {
     return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}.${milliseconds}`;
 }
 
+export type LogListener = (msg: string) => void;
+class Subscription {
+    private listeners: LogListener[] = [];
+    private MAX_HISTORY = 100;
+    public static history: string[] = [];
+
+    subscribe(listener: LogListener) {
+        for (const history of Subscription.history) {
+            listener(history);
+        }
+        this.listeners.push(listener);
+    }
+
+    unsubscribe(listener: LogListener) {
+        this.listeners = this.listeners.filter((l) => l !== listener);
+    }
+
+    notify(msg: string) {
+        this.listeners.forEach((listener) => listener(msg));
+        if (Subscription.history.length >= this.MAX_HISTORY) {
+            Subscription.history.shift();
+        }
+        Subscription.history.push(msg);
+    }
+}
+
+export const logSubscription = new Subscription();
+
 export class LogWrapper {
     fileLogEnabled = true;
     consoleLogEnabled = true;
@@ -47,7 +75,7 @@ export class LogWrapper {
                     filename: logPath,
                     level: 'debug',
                     maxsize: 5 * 1024 * 1024, // 5MB
-                    maxFiles: 5
+                    maxFiles: 5,
                 }),
                 new transports.Console({
                     format: format.combine(
@@ -56,9 +84,9 @@ export class LogWrapper {
                             const userInfo = meta.userInfo ? `${meta.userInfo} | ` : '';
                             return `${timestamp} [${level}] ${userInfo}${message}`;
                         })
-                    )
-                })
-            ]
+                    ),
+                }),
+            ],
         });
 
         this.setLogSelfInfo({ nick: '', uid: '' });
@@ -72,7 +100,7 @@ export class LogWrapper {
                 this.logger.error('Failed to read log directory', err);
                 return;
             }
-            files.forEach(file => {
+            files.forEach((file) => {
                 const filePath = path.join(logDir, file);
                 this.deleteOldLogFile(filePath, oneWeekAgo);
             });
@@ -86,7 +114,7 @@ export class LogWrapper {
                 return;
             }
             if (stats.mtime.getTime() < oneWeekAgo) {
-                fs.unlink(filePath, err => {
+                fs.unlink(filePath, (err) => {
                     if (err) {
                         if (err.code === 'ENOENT') {
                             this.logger.warn(`File already deleted: ${filePath}`);
@@ -111,7 +139,7 @@ export class LogWrapper {
         });
     }
 
-    setLogSelfInfo(selfInfo: { nick: string, uid: string }) {
+    setLogSelfInfo(selfInfo: { nick: string; uid: string }) {
         const userInfo = `${selfInfo.nick}`;
         this.logger.defaultMeta = { userInfo };
     }
@@ -135,14 +163,16 @@ export class LogWrapper {
     }
 
     formatMsg(msg: any[]) {
-        return msg.map(msgItem => {
-            if (msgItem instanceof Error) {
-                return msgItem.stack;
-            } else if (typeof msgItem === 'object') {
-                return JSON.stringify(truncateString(JSON.parse(JSON.stringify(msgItem, null, 2))));
-            }
-            return msgItem;
-        }).join(' ');
+        return msg
+            .map((msgItem) => {
+                if (msgItem instanceof Error) {
+                    return msgItem.stack;
+                } else if (typeof msgItem === 'object') {
+                    return JSON.stringify(truncateString(JSON.parse(JSON.stringify(msgItem, null, 2))));
+                }
+                return msgItem;
+            })
+            .join(' ');
     }
 
     _log(level: LogLevel, ...args: any[]) {
@@ -155,6 +185,7 @@ export class LogWrapper {
             // eslint-disable-next-line no-control-regex
             this.logger.log(level, message.replace(/\x1B[@-_][0-?]*[ -/]*[@-~]/g, ''));
         }
+        logSubscription.notify(message);
     }
 
     log(...args: any[]) {
@@ -282,13 +313,10 @@ function textElementToText(textElement: any): string {
 }
 
 function replyElementToText(replyElement: any, msg: RawMessage, recursiveLevel: number): string {
-    const recordMsgOrNull = msg.records.find(
-        record => replyElement.sourceMsgIdInRecords === record.msgId,
-    );
-    return `[回复消息 ${recordMsgOrNull &&
-        recordMsgOrNull.peerUin != '284840486' && recordMsgOrNull.peerUin != '1094950020'
-        ?
-        rawMessageToText(recordMsgOrNull, recursiveLevel + 1) :
-        `未找到消息记录 (MsgId = ${replyElement.sourceMsgIdInRecords})`
+    const recordMsgOrNull = msg.records.find((record) => replyElement.sourceMsgIdInRecords === record.msgId);
+    return `[回复消息 ${
+        recordMsgOrNull && recordMsgOrNull.peerUin != '284840486' && recordMsgOrNull.peerUin != '1094950020'
+            ? rawMessageToText(recordMsgOrNull, recursiveLevel + 1)
+            : `未找到消息记录 (MsgId = ${replyElement.sourceMsgIdInRecords})`
     }]`;
 }
