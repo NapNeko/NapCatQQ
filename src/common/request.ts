@@ -69,7 +69,7 @@ export class RequestUtil {
         //       'Content-Length': Buffer.byteLength(postData),
         //     },
         return new Promise((resolve, reject) => {
-            const req = protocol.request(options, (res: any) => {
+            const req = protocol.request(options, (res: http.IncomingMessage) => {
                 let responseBody = '';
                 res.on('data', (chunk: string | Buffer) => {
                     responseBody += chunk.toString();
