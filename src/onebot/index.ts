@@ -58,7 +58,7 @@ export class NapCatOneBot11Adapter {
     readonly context: InstanceContext;
 
     configLoader: OB11ConfigLoader;
-    apis: StableOneBotApiWrapper;
+    public readonly apis: StableOneBotApiWrapper;
     networkManager: OB11NetworkManager;
     actions: ActionMap;
     private readonly bootTime = Date.now() / 1000;
@@ -76,7 +76,7 @@ export class NapCatOneBot11Adapter {
             FriendApi: new OneBotFriendApi(this, core),
             MsgApi: new OneBotMsgApi(this, core),
             QuickActionApi: new OneBotQuickActionApi(this, core),
-        };
+        } as const;
         this.actions = createActionMap(this, core);
         this.networkManager = new OB11NetworkManager();
     }

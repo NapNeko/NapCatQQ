@@ -1,8 +1,8 @@
-import { OneBotFriendApi } from '@/onebot/api/friend';
-import { OneBotUserApi } from '@/onebot/api/user';
-import { OneBotGroupApi } from '@/onebot/api/group';
-import { OneBotMsgApi } from '@/onebot/api/msg';
-import { OneBotQuickActionApi } from '@/onebot/api/quick-action';
+import type { OneBotFriendApi } from '@/onebot/api/friend';
+import type { OneBotUserApi } from '@/onebot/api/user';
+import type { OneBotGroupApi } from '@/onebot/api/group';
+import type { OneBotMsgApi } from '@/onebot/api/msg';
+import type { OneBotQuickActionApi } from '@/onebot/api/quick-action';
 
 export * from './friend';
 export * from './group';

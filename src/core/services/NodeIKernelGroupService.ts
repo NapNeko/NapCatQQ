@@ -163,7 +163,7 @@ export interface NodeIKernelGroupService {
 
     getGroupPortrait(): void;
 
-    modifyGroupName(groupCode: string, groupName: string, arg: false): void;
+    modifyGroupName(groupCode: string, groupName: string, isNormalMember: boolean): Promise<GeneralCallResult>;
 
     modifyGroupRemark(groupCode: string, remark: string): void;
 

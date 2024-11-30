@@ -118,7 +118,6 @@ export class OneBotMsgApi {
                 return {
                     type: OB11MessageDataType.image,
                     data: {
-                        pic_type: element.picType,
                         summary: element.summary,
                         file: encodedFileId,
                         sub_type: element.picSubType,
