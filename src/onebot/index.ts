@@ -58,7 +58,7 @@ export class NapCatOneBot11Adapter {
     readonly context: InstanceContext;
 
     configLoader: OB11ConfigLoader;
-    apis: StableOneBotApiWrapper;
+    public readonly apis: StableOneBotApiWrapper;
     networkManager: OB11NetworkManager;
     actions: ActionMap;
     private readonly bootTime = Date.now() / 1000;
