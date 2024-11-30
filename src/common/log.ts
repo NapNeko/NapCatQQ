@@ -3,7 +3,7 @@ import { truncateString } from '@/common/helper';
 import path from 'node:path';
 import fs from 'node:fs';
 import { NTMsgAtType, ChatType, ElementType, MessageElement, RawMessage, SelfInfo } from '@/core';
-
+import EventEmitter from 'node:events';
 export enum LogLevel {
     DEBUG = 'debug',
     INFO = 'info',
@@ -24,26 +24,28 @@ function getFormattedTimestamp() {
     return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}.${milliseconds}`;
 }
 
+const logEmitter = new EventEmitter();
 export type LogListener = (msg: string) => void;
 class Subscription {
-    private listeners: LogListener[] = [];
-    private MAX_HISTORY = 100;
+    public static MAX_HISTORY = 100;
     public static history: string[] = [];
 
     subscribe(listener: LogListener) {
         for (const history of Subscription.history) {
-            listener(history);
+            try {
+                listener(history);
+            } catch (_) {
+                // ignore
+            }
         }
-        this.listeners.push(listener);
+        logEmitter.on('log', listener);
     }
-
     unsubscribe(listener: LogListener) {
-        this.listeners = this.listeners.filter((l) => l !== listener);
+        logEmitter.off('log', listener);
     }
-
     notify(msg: string) {
-        this.listeners.forEach((listener) => listener(msg));
-        if (Subscription.history.length >= this.MAX_HISTORY) {
+        logEmitter.emit('log', msg);
+        if (Subscription.history.length >= Subscription.MAX_HISTORY) {
             Subscription.history.shift();
         }
         Subscription.history.push(msg);

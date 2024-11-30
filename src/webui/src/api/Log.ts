@@ -3,7 +3,6 @@ import { sendError, sendSuccess } from '../utils/response';
 import { WebUiConfigWrapper } from '../helper/config';
 import { logSubscription } from '@/common/log';
 
-
 // 日志记录
 export const LogHandler: RequestHandler = async (req, res) => {
     const filename = req.query.id as string;
@@ -22,7 +21,11 @@ export const LogListHandler: RequestHandler = async (_, res) => {
 // 实时日志（SSE）
 export const LogRealTimeHandler: RequestHandler = async (req, res) => {
     const listener = (log: string) => {
-        res.write(log + '\n');
+        try {
+            res.write(log + '\n');
+        } catch (error) {
+            // ignore
+        }
     };
     logSubscription.subscribe(listener);
     req.on('close', () => {
