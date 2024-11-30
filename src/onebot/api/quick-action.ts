@@ -1,4 +1,4 @@
-import {
+import type {
     NapCatOneBot11Adapter,
     OB11Message,
     OB11MessageAt,
@@ -10,17 +10,19 @@ import {
     QuickActionGroupMessage,
     QuickActionGroupRequest,
 } from '@/onebot';
-import { NTGroupRequestOperateTypes, NapCatCore, Peer } from '@/core';
-import { OB11FriendRequestEvent } from '@/onebot/event/request/OB11FriendRequest';
-import { OB11GroupRequestEvent } from '@/onebot/event/request/OB11GroupRequest';
+import { NTGroupRequestOperateTypes, type NapCatCore, type Peer } from '@/core';
+import type { OB11FriendRequestEvent } from '@/onebot/event/request/OB11FriendRequest';
+import type { OB11GroupRequestEvent } from '@/onebot/event/request/OB11GroupRequest';
+
 import { ContextMode, createContext, normalize } from '@/onebot/action/msg/SendMsg';
 import { isNull } from '@/common/helper';
 
 export class OneBotQuickActionApi {
-    constructor(
-        public obContext: NapCatOneBot11Adapter,
-        public core: NapCatCore,
-    ) {
+    private obContext: NapCatOneBot11Adapter;
+    private core: NapCatCore;
+    constructor(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
+        this.obContext = obContext;
+        this.core = core;
     }
 
     async handleQuickOperation(eventContext: QuickActionEvent, quickAction: QuickAction) {
