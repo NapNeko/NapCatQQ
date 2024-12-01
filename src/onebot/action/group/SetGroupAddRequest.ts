@@ -6,7 +6,7 @@ import { Static, Type } from '@sinclair/typebox';
 const SchemaData = Type.Object({
     flag: Type.String(),
     approve: Type.Optional(Type.Union([Type.Boolean(), Type.String()])),
-    reason: Type.String({ default: ' ' }),
+    reason: Type.Union([Type.String({ default: ' ' }), Type.Null()]),
 });
 
 type Payload = Static<typeof SchemaData>;
@@ -20,7 +20,7 @@ export default class SetGroupAddRequest extends OneBotAction<Payload, null> {
         const approve = payload.approve?.toString() !== 'false';
         await this.core.apis.GroupApi.handleGroupRequest(flag,
             approve ? NTGroupRequestOperateTypes.KAGREE : NTGroupRequestOperateTypes.KREFUSE,
-            payload.reason,
+            payload.reason ?? ' ',
         );
         return null;
     }

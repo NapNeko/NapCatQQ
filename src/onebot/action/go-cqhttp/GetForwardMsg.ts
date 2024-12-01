@@ -5,8 +5,8 @@ import { MessageUnique } from '@/common/message-unique';
 import { Static, Type } from '@sinclair/typebox';
 
 const SchemaData = Type.Object({
-    message_id: Type.Union([Type.Number(), Type.String()]),
-    id: Type.Union([Type.Number(), Type.String()]),
+    message_id: Type.Optional(Type.Union([Type.Number(), Type.String()])),
+    id: Type.Optional(Type.Union([Type.Number(), Type.String()])),
 });
 
 type Payload = Static<typeof SchemaData>;
