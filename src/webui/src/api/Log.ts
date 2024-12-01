@@ -1,6 +1,7 @@
 import type { RequestHandler } from 'express';
 import { sendError, sendSuccess } from '../utils/response';
 import { WebUiConfigWrapper } from '../helper/config';
+import { logSubscription } from '@/common/log';
 
 // 日志记录
 export const LogHandler: RequestHandler = async (req, res) => {
@@ -16,4 +17,18 @@ export const LogHandler: RequestHandler = async (req, res) => {
 export const LogListHandler: RequestHandler = async (_, res) => {
     const logList = WebUiConfigWrapper.GetLogsList();
     return sendSuccess(res, logList);
+};
+// 实时日志（SSE）
+export const LogRealTimeHandler: RequestHandler = async (req, res) => {
+    const listener = (log: string) => {
+        try {
+            res.write(log + '\n');
+        } catch (error) {
+            // ignore
+        }
+    };
+    logSubscription.subscribe(listener);
+    req.on('close', () => {
+        logSubscription.unsubscribe(listener);
+    });
 };
