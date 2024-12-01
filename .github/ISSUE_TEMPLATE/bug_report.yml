@@ -10,13 +10,12 @@ body:
         在提交新的 Bug 反馈前，请确保您：
         * 已经搜索了现有的 issues，并且没有找到可以解决您问题的方法
         * 不与现有的某一 issue 重复
-        * 不涉及[已经停止维护的特性](https://github.com/NapNeko/NapCatQQ?tab=readme-ov-file#挥别昨日)，例如 CQ 码
   - type: input
     id: system-version
     attributes:
       label: 系统版本
       description: 运行 QQNT 的系统版本
-      placeholder: Windows 10 Pro Workstation 22H2
+      placeholder: Windows 11 24H2
     validations:
       required: true
   - type: input
@@ -24,7 +23,7 @@ body:
     attributes:
       label: QQNT 版本
       description: 可在 QQNT 的「关于」的设置页中找到
-      placeholder: 9.9.7-21804
+      placeholder: 9.9.16-29927
     validations:
       required: true
   - type: input
@@ -40,21 +39,21 @@ body:
     attributes:
       label: OneBot 客户端
       description: 连接至 NapCat 的客户端版本信息
-      placeholder: Overflow 2.16.0-2cf7991-SNAPSHOT
+      placeholder: Karin 1.0.0
     validations:
       required: true
   - type: textarea
     id: what-happened
     attributes:
       label: 发生了什么?
-      description: 填写你认为的 NapCat 的不正常行为
+      description: 填写你认为的 NapCat 的异常行为
     validations:
       required: true
   - type: textarea
     id: how-reproduce
     attributes:
       label: 如何复现
-      description: 填写应当如何操作才能触发这个不正常行为
+      description: 填写应当如何操作才能触发这个异常行为
       placeholder: |
         1. xxx
         2. xxx
