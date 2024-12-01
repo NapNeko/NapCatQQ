@@ -187,7 +187,7 @@ export class LogWrapper {
             // eslint-disable-next-line no-control-regex
             this.logger.log(level, message.replace(/\x1B[@-_][0-?]*[ -/]*[@-~]/g, ''));
         }
-        logSubscription.notify(message);
+        logSubscription.notify(JSON.stringify({ level, message }));
     }
 
     log(...args: any[]) {
