@@ -1,18 +1,14 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { checkFileExist, uri2local } from '@/common/file';
 import fs from 'fs';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        image: { type: 'string' },
-    },
-    required: ['image'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    image: Type.String(),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export class OCRImage extends OneBotAction<Payload, any> {
     actionName = ActionName.OCRImage;
@@ -29,12 +25,12 @@ export class OCRImage extends OneBotAction<Payload, any> {
             fs.unlink(path, () => { });
 
             if (!ret) {
-                throw new Error(`OCR ${payload.file}失败`);
+                throw new Error(`OCR ${payload.image}失败`);
             }
             return ret.result;
         }
         fs.unlink(path, () => { });
-        throw new Error(`OCR ${payload.file}失败,文件可能不存在`);
+        throw new Error(`OCR ${payload.image}失败,文件可能不存在`);
     }
 }
 

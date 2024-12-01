@@ -4,6 +4,7 @@ import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
 import { MiniAppInfo, MiniAppInfoHelper } from "@/core/packet/utils/helper/miniAppHelper";
 import { MiniAppData, MiniAppRawData, MiniAppReqCustomParams, MiniAppReqParams } from "@/core/packet/entities/miniApp";
 
+// Todo
 const SchemaData = {
     type: 'object',
     properties: {

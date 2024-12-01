@@ -2,26 +2,24 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { OB11Message } from '@/onebot';
 import { ActionName } from '@/onebot/action/router';
 import { ChatType, Peer } from '@/core/types';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/message-unique';
 import { AdapterConfigWrap } from '@/onebot/config/config';
+import { Static, Type } from '@sinclair/typebox';
 
 interface Response {
     messages: OB11Message[];
 }
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        group_id: { type: ['number', 'string'] },
-        message_seq: { type: ['number', 'string'] },
-        count: { type: ['number', 'string'] },
-        reverseOrder: { type: ['boolean', 'string'] },
-    },
-    required: ['group_id'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
+    message_seq: Type.Optional(Type.Union([Type.Number(), Type.String()])),
+    count: Type.Union([Type.Number(), Type.String()], { default: 20 }),
+    reverseOrder: Type.Optional(Type.Union([Type.Boolean(), Type.String()]))
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+
+type Payload = Static<typeof SchemaData>;
+
 
 export default class GoCQHTTPGetGroupMsgHistory extends OneBotAction<Payload, Response> {
     actionName = ActionName.GoCQHTTP_GetGroupMsgHistory;
@@ -30,13 +28,12 @@ export default class GoCQHTTPGetGroupMsgHistory extends OneBotAction<Payload, Re
     async _handle(payload: Payload, adapter: string): Promise<Response> {
         //处理参数
         const isReverseOrder = typeof payload.reverseOrder === 'string' ? payload.reverseOrder === 'true' : !!payload.reverseOrder;
-        const MsgCount = +(payload.count ?? 20);
         const peer: Peer = { chatType: ChatType.KCHATTYPEGROUP, peerUid: payload.group_id.toString() };
         const hasMessageSeq = !payload.message_seq ? !!payload.message_seq : !(payload.message_seq?.toString() === '' || payload.message_seq?.toString() === '0');
         //拉取消息
         const startMsgId = hasMessageSeq ? (MessageUnique.getMsgIdAndPeerByShortId(+payload.message_seq!)?.MsgId ?? payload.message_seq!.toString()) : '0';
         const msgList = hasMessageSeq ?
-            (await this.core.apis.MsgApi.getMsgHistory(peer, startMsgId, MsgCount)).msgList : (await this.core.apis.MsgApi.getAioFirstViewLatestMsgs(peer, MsgCount)).msgList;
+            (await this.core.apis.MsgApi.getMsgHistory(peer, startMsgId, +payload.count)).msgList : (await this.core.apis.MsgApi.getAioFirstViewLatestMsgs(peer, +payload.count)).msgList;
         if (msgList.length === 0) throw new Error(`消息${payload.message_seq}不存在`);
         //翻转消息
         if (isReverseOrder) msgList.reverse();

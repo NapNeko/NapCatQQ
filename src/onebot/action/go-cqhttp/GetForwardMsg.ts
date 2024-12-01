@@ -1,20 +1,15 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { OB11Message, OB11MessageData, OB11MessageDataType, OB11MessageForward, OB11MessageNodePlain as OB11MessageNode } from '@/onebot';
 import { ActionName } from '@/onebot/action/router';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/message-unique';
+import { Static, Type } from '@sinclair/typebox';
 
+const SchemaData = Type.Object({
+    message_id: Type.Union([Type.Number(), Type.String()]),
+    id: Type.Union([Type.Number(), Type.String()]),
+});
 
-
-const SchemaData = {
-    type: 'object',
-    properties: {
-        message_id: { type: 'string' },
-        id: { type: 'string' },
-    },
-} as const satisfies JSONSchema;
-
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export class GoCQHTTPGetForwardMsgAction extends OneBotAction<Payload, any> {
     actionName = ActionName.GoCQHTTP_GetForwardMsg;
@@ -60,7 +55,7 @@ export class GoCQHTTPGetForwardMsgAction extends OneBotAction<Payload, any> {
             throw new Error('message_id is required');
         }
 
-        const rootMsgId = MessageUnique.getShortIdByMsgId(msgId);
+        const rootMsgId = MessageUnique.getShortIdByMsgId(msgId.toString());
         const rootMsg = MessageUnique.getMsgIdAndPeerByShortId(rootMsgId ?? +msgId);
         if (!rootMsg) {
             throw new Error('msg not found');

@@ -1,21 +1,18 @@
 import { ActionName } from '@/onebot/action/router';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
 import { uri2local } from "@/common/file";
 import { ChatType, Peer } from "@/core";
 import { AIVoiceChatType } from "@/core/packet/entities/aiChat";
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        character: { type: ['string'] },
-        group_id: { type: ['number', 'string'] },
-        text: { type: 'string' },
-    },
-    required: ['character', 'group_id', 'text'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    character: Type.String(),
+    group_id: Type.Union([Type.Number(), Type.String()]),
+    text: Type.String(),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
+
 
 export class SendGroupAiRecord extends GetPacketStatusDepends<Payload, {
     message_id: number

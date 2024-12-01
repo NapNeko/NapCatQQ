@@ -1,19 +1,15 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { NTGroupMemberRole } from '@/core/types';
 import { ActionName } from '@/onebot/action/router';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        group_id: { type: ['number', 'string'] },
-        user_id: { type: ['number', 'string'] },
-        enable: { type: ['boolean', 'string'] },
-    },
-    required: ['group_id', 'user_id'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
+    user_id: Type.Union([Type.Number(), Type.String()]),
+    enable: Type.Optional(Type.Union([Type.Boolean(), Type.String()])),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export default class SetGroupAdmin extends OneBotAction<Payload, null> {
     actionName = ActionName.SetGroupAdmin;

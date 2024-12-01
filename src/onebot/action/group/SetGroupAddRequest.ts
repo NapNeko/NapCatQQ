@@ -1,19 +1,15 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { NTGroupRequestOperateTypes } from '@/core/types';
 import { ActionName } from '@/onebot/action/router';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        flag: { type: 'string' },
-        approve: { type: ['string', 'boolean'] },
-        reason: { type: 'string', nullable: true },
-    },
-    required: ['flag'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    flag: Type.String(),
+    approve: Type.Optional(Type.Union([Type.Boolean(), Type.String()])),
+    reason: Type.Optional(Type.String()),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export default class SetGroupAddRequest extends OneBotAction<Payload, null> {
     actionName = ActionName.SetGroupAddRequest;

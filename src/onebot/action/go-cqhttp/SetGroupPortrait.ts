@@ -2,28 +2,19 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName, BaseCheckResult } from '@/onebot/action/router';
 import * as fs from 'node:fs';
 import { checkFileExistV2, uri2local } from '@/common/file';
+import { Static, Type } from '@sinclair/typebox';
 
-interface Payload {
-    file: string,
-    group_id: number
-}
+const SchemaData = Type.Object({
+    file: Type.String(),
+    group_id: Type.Union([Type.Number(), Type.String()])
+});
+
+type Payload = Static<typeof SchemaData>;
 
 export default class SetGroupPortrait extends OneBotAction<Payload, any> {
     actionName = ActionName.SetGroupPortrait;
-
-    // 用不着复杂检测
-    protected async check(payload: Payload): Promise<BaseCheckResult> {
-        if (!payload.file || typeof payload.file != 'string' || !payload.group_id || typeof payload.group_id != 'number') {
-            return {
-                valid: false,
-                message: 'file和group_id字段不能为空或者类型错误',
-            };
-        }
-        return {
-            valid: true,
-        };
-    }
-
+    payloadSchema = SchemaData;
+    
     async _handle(payload: Payload): Promise<any> {
         const { path, success } = (await uri2local(this.core.NapCatTempPath, payload.file));
         if (!success) {

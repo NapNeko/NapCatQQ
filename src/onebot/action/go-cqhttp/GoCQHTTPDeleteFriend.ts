@@ -1,22 +1,20 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        friend_id: { type: ['string', 'number'] },
-        user_id: { type: ['string', 'number'] },
-        temp_block: { type: 'boolean' },
-        temp_both_del: { type: 'boolean' },
-    },
+const SchemaData = Type.Object({
+    friend_id: Type.Optional(Type.Union([Type.String(), Type.Number()])),
+    user_id: Type.Optional(Type.Union([Type.String(), Type.Number()])),
+    temp_block: Type.Optional(Type.Boolean()),
+    temp_both_del: Type.Optional(Type.Boolean()),
+}, {
     oneOf: [
         { required: ['friend_id'] },
         { required: ['user_id'] },
     ],
+});
 
-} as const satisfies JSONSchema;
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export class GoCQHTTPDeleteFriend extends OneBotAction<Payload, any> {
     actionName = ActionName.GoCQHTTP_DeleteFriend;
