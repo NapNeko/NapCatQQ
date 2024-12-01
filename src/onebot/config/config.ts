@@ -172,6 +172,7 @@ export function migrateOneBotConfigsV1(config: Partial<v1Config>): OneBotConfig 
     if (config.http) {
         mergedConfig.network.httpServers = [
             mergeConfigs(httpServerDefaultConfigs, {
+                name: 'http-server',
                 enable: config.http.enable,
                 port: config.http.port,
                 host: config.http.host,
@@ -184,6 +185,7 @@ export function migrateOneBotConfigsV1(config: Partial<v1Config>): OneBotConfig 
     if (config.ws) {
         mergedConfig.network.websocketServers = [
             mergeConfigs(websocketServerDefaultConfigs, {
+                name: 'websocket-server',
                 enable: config.ws.enable,
                 port: config.ws.port,
                 host: config.ws.host,
@@ -197,6 +199,7 @@ export function migrateOneBotConfigsV1(config: Partial<v1Config>): OneBotConfig 
     if (config.reverseWs) {
         mergedConfig.network.websocketClients = config.reverseWs.urls.map((url) =>
             mergeConfigs(websocketClientDefaultConfigs, {
+                name: 'websocket-client-' + config.reverseWs?.urls.indexOf(url).toString(),
                 enable: config.reverseWs?.enable,
                 url: url,
                 token: config.token,
