@@ -15,7 +15,7 @@ export default class SetGroupName extends OneBotAction<Payload, null> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
-        let ret = await this.core.apis.GroupApi.setGroupName(payload.group_id.toString(), payload.group_name);
+        const ret = await this.core.apis.GroupApi.setGroupName(payload.group_id.toString(), payload.group_name);
         if (ret.result !== 0) {
             throw new Error(`设置群名称失败 ErrCode: ${ret.result} ErrMsg: ${ret.errMsg}`);
         }
