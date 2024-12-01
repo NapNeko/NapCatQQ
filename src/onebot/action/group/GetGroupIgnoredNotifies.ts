@@ -1,17 +1,6 @@
 import { GroupNotifyMsgStatus } from '@/core';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-
-const SchemaData = {
-    type: 'object',
-    properties: {
-        group_id: { type: ['number', 'string'] },
-    },
-} as const satisfies JSONSchema;
-
-type Payload = FromSchema<typeof SchemaData>;
-
 export class GetGroupIgnoredNotifies extends OneBotAction<void, any> {
     actionName = ActionName.GetGroupIgnoredNotifies;
 

@@ -1,19 +1,16 @@
 import { ChatType, Peer } from '@/core/types';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { MessageUnique } from '@/common/message-unique';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        user_id: { type: ['number', 'string'] },
-        group_id: { type: ['number', 'string'] },
-        message_id: { type: ['number', 'string'] },
-    },
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    user_id: Type.Optional(Type.Union([Type.String(), Type.Number()])),
+    group_id: Type.Optional(Type.Union([Type.String(), Type.Number()])),
+    message_id: Type.Optional(Type.Union([Type.String(), Type.Number()])),
+});
 
-type PlayloadType = FromSchema<typeof SchemaData>;
+type PlayloadType = Static<typeof SchemaData>;
 
 class MarkMsgAsRead extends OneBotAction<PlayloadType, null> {
     async getPeer(payload: PlayloadType): Promise<Peer> {

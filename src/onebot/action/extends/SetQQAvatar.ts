@@ -1,28 +1,18 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
-import { ActionName, BaseCheckResult } from '@/onebot/action/router';
+import { ActionName } from '@/onebot/action/router';
 import * as fs from 'node:fs';
 import { checkFileExist, uri2local } from '@/common/file';
+import { Static, Type } from '@sinclair/typebox';
 
-interface Payload {
-    file: string;
-}
+const SchemaData = Type.Object({
+    file: Type.String(),
+});
+
+type Payload = Static<typeof SchemaData>;
 
 export default class SetAvatar extends OneBotAction<Payload, null> {
     actionName = ActionName.SetQQAvatar;
-
-    // 用不着复杂检测
-    protected async check(payload: Payload): Promise<BaseCheckResult> {
-        if (!payload.file || typeof payload.file != 'string') {
-            return {
-                valid: false,
-                message: 'file字段不能为空或者类型错误',
-            };
-        }
-        return {
-            valid: true,
-        };
-    }
-
+    payloadSchema = SchemaData;
     async _handle(payload: Payload): Promise<null> {
         const { path, success } = (await uri2local(this.core.NapCatTempPath, payload.file));
         if (!success) {
@@ -45,7 +35,6 @@ export default class SetAvatar extends OneBotAction<Payload, null> {
             }
         } else {
             fs.unlink(path, () => { });
-
             throw new Error(`头像${payload.file}设置失败,无法获取头像,文件可能不存在`);
         }
         return null;

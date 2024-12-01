@@ -1,19 +1,12 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        words: {
-            type: 'array',
-            items: { type: 'string' },
-        },
-    },
-    required: ['words'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    words: Type.Array(Type.String()),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export class TranslateEnWordToZn extends OneBotAction<Payload, Array<any> | null> {
     actionName = ActionName.TranslateEnWordToZn;

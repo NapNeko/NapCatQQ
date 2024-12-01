@@ -1,18 +1,14 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        nickname: { type: 'string' },
-        personal_note: { type: 'string' },
-        sex: { type: ['number', 'string'] },//传Sex值？建议传0
-    },
-    required: ['nickname'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    nickname: Type.String(),
+    personal_note: Type.Optional(Type.String()),
+    sex: Type.Optional(Type.Union([Type.Number(), Type.String()])), // 传Sex值？建议传0
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export class SetQQProfile extends OneBotAction<Payload, any> {
     actionName = ActionName.SetQQProfile;

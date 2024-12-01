@@ -2,16 +2,13 @@ import { OB11Group } from '@/onebot';
 import { OB11Construct } from '@/onebot/helper/data';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-// no_cache get时传字符串
-const SchemaData = {
-    type: 'object',
-    properties: {
-        no_cache: { type: ['boolean', 'string'] },
-    },
-} as const satisfies JSONSchema;
+import { Static, Type } from '@sinclair/typebox';
 
-type Payload = FromSchema<typeof SchemaData>;
+const SchemaData = Type.Object({
+    no_cache: Type.Optional(Type.Union([Type.Boolean(), Type.String()])),
+});
+
+type Payload = Static<typeof SchemaData>;
 
 class GetGroupList extends OneBotAction<Payload, OB11Group[]> {
     actionName = ActionName.GetGroupList;

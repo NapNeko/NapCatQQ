@@ -1,21 +1,10 @@
 import { GroupNotifyMsgStatus } from '@/core';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-
-const SchemaData = {
-    type: 'object',
-    properties: {
-        group_id: { type: ['number', 'string'] },
-    },
-} as const satisfies JSONSchema;
-
-type Payload = FromSchema<typeof SchemaData>;
-
 export class GetGroupSystemMsg extends OneBotAction<void, any> {
     actionName = ActionName.GetGroupSystemMsg;
 
-    async _handle(payload: void) {
+    async _handle() {
         const NTQQUserApi = this.core.apis.UserApi;
         const NTQQGroupApi = this.core.apis.GroupApi;
         // 默认10条 该api未完整实现 包括响应数据规范化 类型规范化 

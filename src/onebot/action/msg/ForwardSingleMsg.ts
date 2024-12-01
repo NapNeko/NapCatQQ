@@ -1,20 +1,16 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ChatType, Peer } from '@/core/types';
 import { ActionName } from '@/onebot/action/router';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/message-unique';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        message_id: { type: ['number', 'string'] },
-        group_id: { type: ['number', 'string'] },
-        user_id: { type: ['number', 'string'] },
-    },
-    required: ['message_id'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    message_id: Type.Union([Type.Number(), Type.String()]),
+    group_id: Type.Optional(Type.Union([Type.Number(), Type.String()])),
+    user_id: Type.Optional(Type.Union([Type.Number(), Type.String()])),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 class ForwardSingleMsg extends OneBotAction<Payload, null> {
     protected async getTargetPeer(payload: Payload): Promise<Peer> {

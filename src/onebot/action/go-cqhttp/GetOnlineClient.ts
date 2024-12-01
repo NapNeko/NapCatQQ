@@ -1,14 +1,6 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { JSONSchema } from 'json-schema-to-ts';
 import { sleep } from '@/common/helper';
-
-const SchemaData = {
-    type: 'object',
-    properties: {
-        no_cache: { type: 'boolean' },
-    },
-} as const satisfies JSONSchema;
 
 export class GetOnlineClient extends OneBotAction<void, Array<any>> {
     actionName = ActionName.GetOnlineClient;
