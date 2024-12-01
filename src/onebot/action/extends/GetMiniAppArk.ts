@@ -4,25 +4,33 @@ import { MiniAppInfo, MiniAppInfoHelper } from "@/core/packet/utils/helper/miniA
 import { MiniAppData, MiniAppRawData, MiniAppReqCustomParams, MiniAppReqParams } from "@/core/packet/entities/miniApp";
 import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = Type.Object({
-    type: Type.Optional(Type.Union([Type.Literal('bili'), Type.Literal('weibo')])),
-    title: Type.String(),
-    desc: Type.String(),
-    picUrl: Type.String(),
-    jumpUrl: Type.String(),
-    iconUrl: Type.Optional(Type.String()),
-    sdkId: Type.Optional(Type.String()),
-    appId: Type.Optional(Type.String()),
-    scene: Type.Optional(Type.Union([Type.Number(), Type.String()])),
-    templateType: Type.Optional(Type.Union([Type.Number(), Type.String()])),
-    businessType: Type.Optional(Type.Union([Type.Number(), Type.String()])),
-    verType: Type.Optional(Type.Union([Type.Number(), Type.String()])),
-    shareType: Type.Optional(Type.Union([Type.Number(), Type.String()])),
-    versionId: Type.Optional(Type.String()),
-    withShareTicket: Type.Optional(Type.Union([Type.Number(), Type.String()])),
-    rawArkData: Type.Optional(Type.Union([Type.Boolean(), Type.String()]))
-});
-
+const SchemaData = Type.Union([
+    Type.Object({
+        type: Type.Union([Type.Literal('bili'), Type.Literal('weibo')]),
+        title: Type.String(),
+        desc: Type.String(),
+        picUrl: Type.String(),
+        jumpUrl: Type.String(),
+        rawArkData: Type.Optional(Type.Union([Type.Boolean(), Type.String()]))
+    }),
+    Type.Object({
+        title: Type.String(),
+        desc: Type.String(),
+        picUrl: Type.String(),
+        jumpUrl: Type.String(),
+        iconUrl: Type.String(),
+        appId: Type.String(),
+        scene: Type.Union([Type.Number(), Type.String()]),
+        templateType: Type.Union([Type.Number(), Type.String()]),
+        businessType: Type.Union([Type.Number(), Type.String()]),
+        verType: Type.Union([Type.Number(), Type.String()]),
+        shareType: Type.Union([Type.Number(), Type.String()]),
+        versionId: Type.String(),
+        sdkId: Type.String(),
+        withShareTicket: Type.Union([Type.Number(), Type.String()]),
+        rawArkData: Type.Optional(Type.Union([Type.Boolean(), Type.String()]))
+    })
+]);
 type Payload = Static<typeof SchemaData>;
 
 export class GetMiniAppArk extends GetPacketStatusDepends<Payload, {
@@ -39,13 +47,10 @@ export class GetMiniAppArk extends GetPacketStatusDepends<Payload, {
             picUrl: payload.picUrl,
             jumpUrl: payload.jumpUrl
         } as MiniAppReqCustomParams;
-        if (payload.type) {
+        if ('type' in payload) {
             reqParam = MiniAppInfoHelper.generateReq(customParams, MiniAppInfo.get(payload.type)!.template);
         } else {
             const { appId, scene, iconUrl, templateType, businessType, verType, shareType, versionId, withShareTicket } = payload;
-            if (!appId || !scene || !iconUrl || !templateType || !businessType || !verType || !shareType || !versionId || !withShareTicket) {
-                throw new Error('Missing required parameters');
-            }
             reqParam = MiniAppInfoHelper.generateReq(
                 customParams,
                 {
