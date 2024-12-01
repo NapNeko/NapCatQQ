@@ -1,18 +1,14 @@
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        flag: { type: 'string' },
-        approve: { type: ['string', 'boolean'] },
-        remark: { type: 'string' },
-    },
-    required: ['flag'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    flag: Type.String(),
+    approve: Type.Optional(Type.Union([Type.String(), Type.Boolean()])),
+    remark: Type.Optional(Type.String())
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export default class SetFriendAddRequest extends OneBotAction<Payload, null> {
     actionName = ActionName.SetFriendAddRequest;

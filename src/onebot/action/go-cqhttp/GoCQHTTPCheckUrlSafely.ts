@@ -1,15 +1,12 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        url: { type: 'string' },
-    },
-    required: ['url'],
-} as const satisfies JSONSchema;
-type Payload = FromSchema<typeof SchemaData>;
+const SchemaData = Type.Object({
+    url: Type.String(),
+});
+
+type Payload = Static<typeof SchemaData>;
 
 export class GoCQHTTPCheckUrlSafely extends OneBotAction<Payload, any> {
     actionName = ActionName.GoCQHTTP_CheckUrlSafely;

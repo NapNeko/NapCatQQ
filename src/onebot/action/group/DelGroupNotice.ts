@@ -1,18 +1,13 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { Static, Type } from '@sinclair/typebox';
 
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
+    notice_id: Type.String()
+});
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        group_id: { type: ['number', 'string'] },
-        notice_id: { type: 'string' },
-    },
-    required: ['group_id', 'notice_id'],
-} as const satisfies JSONSchema;
-
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export class DelGroupNotice extends OneBotAction<Payload, any> {
     actionName = ActionName.DelGroupNotice;

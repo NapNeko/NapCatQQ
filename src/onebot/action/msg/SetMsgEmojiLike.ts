@@ -1,19 +1,15 @@
 import { ActionName } from '@/onebot/action/router';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/message-unique';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        message_id: { type: ['string', 'number'] },
-        emoji_id: { type: ['string', 'number'] },
-        set: { type: ['boolean', 'string'] }
-    },
-    required: ['message_id', 'emoji_id'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    message_id: Type.Union([Type.Number(), Type.String()]),
+    emoji_id: Type.Union([Type.Number(), Type.String()]),
+    set: Type.Optional(Type.Union([Type.Boolean(), Type.String()]))
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export class SetMsgEmojiLike extends OneBotAction<Payload, any> {
     actionName = ActionName.SetMsgEmojiLike;

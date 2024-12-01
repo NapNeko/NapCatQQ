@@ -2,17 +2,13 @@ import { OB11Group } from '@/onebot';
 import { OB11Construct } from '@/onebot/helper/data';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        group_id: { type: ['number', 'string'] },
-    },
-    required: ['group_id'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 class GetGroupInfo extends OneBotAction<Payload, OB11Group> {
     actionName = ActionName.GetGroupInfo;

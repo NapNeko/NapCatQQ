@@ -2,18 +2,14 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { OB11User, OB11UserSex } from '@/onebot';
 import { OB11Construct } from '@/onebot/helper/data';
 import { ActionName } from '@/onebot/action/router';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { calcQQLevel } from '@/common/helper';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        user_id: { type: ['number', 'string'] },
-    },
-    required: ['user_id'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    user_id: Type.Union([Type.Number(), Type.String()]),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export default class GoCQHTTPGetStrangerInfo extends OneBotAction<Payload, OB11User> {
     actionName = ActionName.GoCQHTTP_GetStrangerInfo;

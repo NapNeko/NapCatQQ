@@ -1,19 +1,16 @@
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { OB11GroupFile, OB11GroupFileFolder } from '@/onebot';
 import { OB11Construct } from '@/onebot/helper/data';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        group_id: { type: ['string', 'number'] },
-        file_count: { type: ['string', 'number'] },
-    },
-    required: ['group_id'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
+    file_count: Type.Union([Type.Number(), Type.String()], { default: 50 }),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export class GetGroupRootFiles extends OneBotAction<Payload, {
     files: OB11GroupFile[],
@@ -24,7 +21,7 @@ export class GetGroupRootFiles extends OneBotAction<Payload, {
     async _handle(payload: Payload) {
         const ret = await this.core.apis.MsgApi.getGroupFileList(payload.group_id.toString(), {
             sortType: 1,
-            fileCount: +(payload.file_count ?? 50),
+            fileCount: +payload.file_count,
             startIndex: 0,
             sortOrder: 2,
             showOnlinedocFolder: 0,

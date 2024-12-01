@@ -2,17 +2,14 @@ import { OB11User } from '@/onebot';
 import { OB11Construct } from '@/onebot/helper/data';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { Static, Type } from '@sinclair/typebox';
 
-// no_cache get时传字符串
-const SchemaData = {
-    type: 'object',
-    properties: {
-        no_cache: { type: ['boolean', 'string'] },
-    },
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    no_cache: Type.Union([Type.Boolean(), Type.String()]),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
+
 export default class GetFriendList extends OneBotAction<Payload, OB11User[]> {
     actionName = ActionName.GetFriendList;
     payloadSchema = SchemaData;

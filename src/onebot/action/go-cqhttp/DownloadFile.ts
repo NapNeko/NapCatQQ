@@ -4,29 +4,20 @@ import fs from 'fs';
 import { join as joinPath } from 'node:path';
 import { calculateFileMD5, httpDownload } from '@/common/file';
 import { randomUUID } from 'crypto';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { Static, Type } from '@sinclair/typebox';
 
 interface FileResponse {
     file: string;
 }
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        thread_count: { type: ['number', 'string'] },
-        url: { type: 'string' },
-        base64: { type: 'string' },
-        name: { type: 'string' },
-        headers: {
-            type: ['string', 'array'],
-            items: {
-                type: 'string',
-            },
-        },
-    },
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    url: Type.Optional(Type.String()),
+    base64: Type.Optional(Type.String()),
+    name: Type.Optional(Type.String()),
+    headers: Type.Optional(Type.Union([Type.String(), Type.Array(Type.String())])),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export default class GoCQHTTPDownloadFile extends OneBotAction<Payload, FileResponse> {
     actionName = ActionName.GoCQHTTP_DownloadFile;

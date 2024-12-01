@@ -3,21 +3,17 @@ import { ActionName } from '@/onebot/action/router';
 import { ChatType, Peer, SendFileElement } from '@/core/types';
 import fs from 'fs';
 import { uri2local } from '@/common/file';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import { MessageContext } from '@/onebot/api';
+import { SendMessageContext } from '@/onebot/api';
 import { ContextMode, createContext } from '@/onebot/action/msg/SendMsg';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        user_id: { type: ['number', 'string'] },
-        file: { type: 'string' },
-        name: { type: 'string' },
-    },
-    required: ['user_id', 'file', 'name'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    user_id: Type.Union([Type.Number(), Type.String()]),
+    file: Type.String(),
+    name: Type.String(),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export default class GoCQHTTPUploadPrivateFile extends OneBotAction<Payload, null> {
     actionName = ActionName.GOCQHTTP_UploadPrivateFile;
@@ -45,7 +41,7 @@ export default class GoCQHTTPUploadPrivateFile extends OneBotAction<Payload, nul
             throw new Error(downloadResult.errMsg);
         }
 
-        const msgContext: MessageContext = {
+        const msgContext: SendMessageContext = {
             peer: await createContext(this.core, {
                 user_id: payload.user_id.toString(),
                 group_id: undefined,

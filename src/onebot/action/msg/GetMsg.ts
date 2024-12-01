@@ -1,23 +1,18 @@
 import { OB11Message } from '@/onebot';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/message-unique';
 import { RawMessage } from '@/core';
 import { AdapterConfigWrap } from '@/onebot/config/config';
-
+import { Static, Type } from '@sinclair/typebox';
 
 export type ReturnDataType = OB11Message
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        message_id: { type: ['number', 'string'] },
-    },
-    required: ['message_id'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    message_id: Type.Union([Type.Number(), Type.String()]),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 class GetMsg extends OneBotAction<Payload, OB11Message> {
     actionName = ActionName.GetMsg;

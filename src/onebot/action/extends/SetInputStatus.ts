@@ -1,18 +1,14 @@
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { ChatType } from '@/core';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        event_type: { type: 'number' },
-        user_id: { type: ['number', 'string'] },
-    },
-    required: ['event_type', 'user_id'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    user_id: Type.Union([Type.Number(), Type.String()]),
+    event_type: Type.Number(),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export class SetInputStatus extends OneBotAction<Payload, any> {
     actionName = ActionName.SetInputStatus;

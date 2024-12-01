@@ -1,16 +1,12 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        longNick: { type: 'string' },
-    },
-    required: ['longNick'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    longNick: Type.String(),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export class SetLongNick extends OneBotAction<Payload, any> {
     actionName = ActionName.SetLongNick;

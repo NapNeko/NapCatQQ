@@ -1,24 +1,20 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { MessageUnique } from '@/common/message-unique';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        message_id: { type: ['number', 'string'] },
-    },
-    required: ['message_id'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    message_id: Type.Union([Type.Number(), Type.String()]),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export default class SetEssenceMsg extends OneBotAction<Payload, any> {
     actionName = ActionName.SetEssenceMsg;
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<any> {
-        const msg = MessageUnique.getMsgIdAndPeerByShortId(parseInt(payload.message_id.toString()));
+        const msg = MessageUnique.getMsgIdAndPeerByShortId(+payload.message_id);
         if (!msg) {
             throw new Error('msg not found');
         }
