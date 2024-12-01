@@ -22,7 +22,7 @@ export class GetProfileLike extends OneBotAction<Payload, any> {
         const ret = await this.core.apis.UserApi.getProfileLike(user_uid ?? this.core.selfInfo.uid, +payload.start, +payload.count, +payload.type);
         const listdata = ret.info.userLikeInfos[0].voteInfo.userInfos;
         for (const item of listdata) {
-            item.uin = parseInt((await this.core.apis.UserApi.getUinByUidV2(item.uid)) || '');
+            item.uin = +((await this.core.apis.UserApi.getUinByUidV2(item.uid)) ?? '');
         }
         return ret.info.userLikeInfos[0].voteInfo;
     }

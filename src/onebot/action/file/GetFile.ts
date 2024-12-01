@@ -16,11 +16,6 @@ export interface GetFileResponse {
 const GetFileBase_PayloadSchema = Type.Object({
     file: Type.Optional(Type.String()),
     file_id: Type.Optional(Type.String())
-}, {
-    oneOf: [
-        { required: ['file'] },
-        { required: ['file_id'] }
-    ]
 });
 
 

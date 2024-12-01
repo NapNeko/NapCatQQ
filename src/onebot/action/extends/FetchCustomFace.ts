@@ -13,7 +13,6 @@ export class FetchCustomFace extends OneBotAction<Payload, string[]> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        //48 可能正好是QQ需要的一个页面的数量 Tagged Mlikiowa
         const ret = await this.core.apis.MsgApi.fetchFavEmojiList(+payload.count);
         return ret.emojiInfoList.map(e => e.url);
     }

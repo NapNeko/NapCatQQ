@@ -7,7 +7,7 @@ import { Static, Type } from '@sinclair/typebox';
 
 const SchemaData = Type.Object({
     group_id: Type.Union([Type.Number(), Type.String()]),
-    file_count: Type.Optional(Type.Union([Type.Number(), Type.String()])),
+    file_count: Type.Union([Type.Number(), Type.String()], { default: 50 }),
 });
 
 type Payload = Static<typeof SchemaData>;
@@ -21,7 +21,7 @@ export class GetGroupRootFiles extends OneBotAction<Payload, {
     async _handle(payload: Payload) {
         const ret = await this.core.apis.MsgApi.getGroupFileList(payload.group_id.toString(), {
             sortType: 1,
-            fileCount: +(payload.file_count ?? 50),
+            fileCount: +payload.file_count,
             startIndex: 0,
             sortOrder: 2,
             showOnlinedocFolder: 0,

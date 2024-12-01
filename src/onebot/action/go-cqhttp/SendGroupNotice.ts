@@ -8,11 +8,11 @@ const SchemaData = Type.Object({
     group_id: Type.Union([Type.Number(), Type.String()]),
     content: Type.String(),
     image: Type.Optional(Type.String()),
-    pinned: Type.Optional(Type.Union([Type.Number(), Type.String()])),
-    type: Type.Optional(Type.Union([Type.Number(), Type.String()])),
-    confirm_required: Type.Optional(Type.Union([Type.Number(), Type.String()])),
-    is_show_edit_card: Type.Optional(Type.Union([Type.Number(), Type.String()])),
-    tip_window_type: Type.Optional(Type.Union([Type.Number(), Type.String()]))
+    pinned: Type.Union([Type.Number(), Type.String()], { default: 0 }),
+    type: Type.Union([Type.Number(), Type.String()], { default: 1 }),
+    confirm_required: Type.Union([Type.Number(), Type.String()], { default: 1 }),
+    is_show_edit_card: Type.Union([Type.Number(), Type.String()], { default: 0 }),
+    tip_window_type: Type.Union([Type.Number(), Type.String()], { default: 0 })
 });
 
 type Payload = Static<typeof SchemaData>;
@@ -46,21 +46,14 @@ export class SendGroupNotice extends OneBotAction<Payload, null> {
 
             UploadImage = ImageUploadResult.picInfo;
         }
-
-        const noticeType = +(payload.type ?? 1);
-        const noticePinned = +(payload.pinned ?? 0);
-
-        const noticeShowEditCard = +(payload.is_show_edit_card ?? 0);
-        const noticeTipWindowType = +(payload.tip_window_type ?? 0);
-        const noticeConfirmRequired = +(payload.confirm_required ?? 1);
         const publishGroupBulletinResult = await this.core.apis.WebApi.setGroupNotice(
             payload.group_id.toString(),
             payload.content,
-            noticePinned,
-            noticeType,
-            noticeShowEditCard,
-            noticeTipWindowType,
-            noticeConfirmRequired,
+            +payload.pinned,
+            +payload.type,
+            +payload.is_show_edit_card,
+            +payload.tip_window_type,
+            +payload.confirm_required,
             UploadImage?.id,
             UploadImage?.width,
             UploadImage?.height

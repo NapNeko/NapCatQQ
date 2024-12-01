@@ -1,48 +1,29 @@
 import { ActionName } from '@/onebot/action/router';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
 import { MiniAppInfo, MiniAppInfoHelper } from "@/core/packet/utils/helper/miniAppHelper";
 import { MiniAppData, MiniAppRawData, MiniAppReqCustomParams, MiniAppReqParams } from "@/core/packet/entities/miniApp";
+import { Static, Type } from '@sinclair/typebox';
 
-// Todo
-const SchemaData = {
-    type: 'object',
-    properties: {
-        type: {
-            type: 'string',
-            enum: ['bili', 'weibo']
-        },
-        title: { type: 'string' },
-        desc: { type: 'string' },
-        picUrl: { type: 'string' },
-        jumpUrl: { type: 'string' },
-        iconUrl: { type: 'string' },
-        sdkId: { type: 'string' },
-        appId: { type: 'string' },
-        scene: { type: ['number', 'string'] },
-        templateType: { type: ['number', 'string'] },
-        businessType: { type: ['number', 'string'] },
-        verType: { type: ['number', 'string'] },
-        shareType: { type: ['number', 'string'] },
-        versionId: { type: 'string' },
-        withShareTicket: { type: ['number', 'string'] },
-        rawArkData: { type: ['boolean', 'string'] }
-    },
-    oneOf: [
-        {
-            required: ['type', 'title', 'desc', 'picUrl', 'jumpUrl']
-        },
-        {
-            required: [
-                'title', 'desc', 'picUrl', 'jumpUrl',
-                'iconUrl', 'appId', 'scene', 'templateType', 'businessType',
-                'verType', 'shareType', 'versionId', 'withShareTicket'
-            ]
-        }
-    ]
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    type: Type.Optional(Type.Union([Type.Literal('bili'), Type.Literal('weibo')])),
+    title: Type.String(),
+    desc: Type.String(),
+    picUrl: Type.String(),
+    jumpUrl: Type.String(),
+    iconUrl: Type.Optional(Type.String()),
+    sdkId: Type.Optional(Type.String()),
+    appId: Type.Optional(Type.String()),
+    scene: Type.Optional(Type.Union([Type.Number(), Type.String()])),
+    templateType: Type.Optional(Type.Union([Type.Number(), Type.String()])),
+    businessType: Type.Optional(Type.Union([Type.Number(), Type.String()])),
+    verType: Type.Optional(Type.Union([Type.Number(), Type.String()])),
+    shareType: Type.Optional(Type.Union([Type.Number(), Type.String()])),
+    versionId: Type.Optional(Type.String()),
+    withShareTicket: Type.Optional(Type.Union([Type.Number(), Type.String()])),
+    rawArkData: Type.Optional(Type.Union([Type.Boolean(), Type.String()]))
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export class GetMiniAppArk extends GetPacketStatusDepends<Payload, {
     data: MiniAppData | MiniAppRawData
@@ -62,6 +43,9 @@ export class GetMiniAppArk extends GetPacketStatusDepends<Payload, {
             reqParam = MiniAppInfoHelper.generateReq(customParams, MiniAppInfo.get(payload.type)!.template);
         } else {
             const { appId, scene, iconUrl, templateType, businessType, verType, shareType, versionId, withShareTicket } = payload;
+            if (!appId || !scene || !iconUrl || !templateType || !businessType || !verType || !shareType || !versionId || !withShareTicket) {
+                throw new Error('Missing required parameters');
+            }
             reqParam = MiniAppInfoHelper.generateReq(
                 customParams,
                 {

@@ -7,11 +7,6 @@ const SchemaData = Type.Object({
     user_id: Type.Optional(Type.Union([Type.String(), Type.Number()])),
     temp_block: Type.Optional(Type.Boolean()),
     temp_both_del: Type.Optional(Type.Boolean()),
-}, {
-    oneOf: [
-        { required: ['friend_id'] },
-        { required: ['user_id'] },
-    ],
 });
 
 type Payload = Static<typeof SchemaData>;
