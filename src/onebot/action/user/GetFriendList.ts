@@ -5,7 +5,7 @@ import { ActionName } from '@/onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
 const SchemaData = Type.Object({
-    no_cache: Type.Union([Type.Boolean(), Type.String()]),
+    no_cache: Type.Optional(Type.Union([Type.Boolean(), Type.String()])),
 });
 
 type Payload = Static<typeof SchemaData>;
