@@ -15,7 +15,6 @@ import {
     RawMessage,
     SendMessageElement,
     SendTextElement,
-    BaseEmojiType,
     FaceType,
     GrayTipElement,
 } from '@/core';
@@ -26,12 +25,9 @@ import { EventType } from '@/onebot/event/OneBotEvent';
 import { encodeCQCode } from '@/onebot/helper/cqcode';
 import { uri2local } from '@/common/file';
 import { RequestUtil } from '@/common/request';
-import fs from 'node:fs';
-import fsPromise from 'node:fs/promises';
+import fsPromise, { constants } from 'node:fs/promises';
 import { OB11FriendAddNoticeEvent } from '@/onebot/event/notice/OB11FriendAddNoticeEvent';
-// import { decodeSysMessage } from '@/core/packet/proto/old/ProfileLike';
 import { ForwardMsgBuilder } from "@/common/forward-msg-builder";
-import { decodeSysMessage } from "@/core/helper/adaptDecoder";
 import { GroupChange, PushMsgBody } from "@/core/packet/transformer/proto";
 import { NapProtoMsg } from '@napneko/nap-proto-core';
 import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
@@ -887,16 +883,16 @@ export class OneBotMsgApi {
         try {
             for (const fileElement of sendElements) {
                 if (fileElement.elementType === ElementType.PTT) {
-                    totalSize += fs.statSync(fileElement.pttElement.filePath).size;
+                    totalSize += (await fsPromise.stat(fileElement.pttElement.filePath)).size;
                 }
                 if (fileElement.elementType === ElementType.FILE) {
-                    totalSize += fs.statSync(fileElement.fileElement.filePath).size;
+                    totalSize += (await fsPromise.stat(fileElement.fileElement.filePath)).size;
                 }
                 if (fileElement.elementType === ElementType.VIDEO) {
-                    totalSize += fs.statSync(fileElement.videoElement.filePath).size;
+                    totalSize += (await fsPromise.stat(fileElement.videoElement.filePath)).size;
                 }
                 if (fileElement.elementType === ElementType.PIC) {
-                    totalSize += fs.statSync(fileElement.picElement.sourcePath).size;
+                    totalSize += (await fsPromise.stat(fileElement.picElement.sourcePath)).size;
                 }
             }
             //且 PredictTime ((totalSize / 1024 / 512) * 1000)不等于Nan
@@ -916,9 +912,9 @@ export class OneBotMsgApi {
         }, returnMsg.msgId);
 
         setTimeout(() => {
-            deleteAfterSentFiles.forEach(file => {
+            deleteAfterSentFiles.forEach(async file => {
                 try {
-                    if (fs.existsSync(file)) {
+                    if (await fsPromise.access(file, constants.W_OK).then(() => true).catch(() => false)) {
                         fsPromise.unlink(file).then().catch(e => this.core.context.logger.logError('发送消息删除文件失败', e));
                     }
                 } catch (error) {

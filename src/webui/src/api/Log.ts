@@ -9,13 +9,13 @@ export const LogHandler: RequestHandler = async (req, res) => {
     if (filename.includes('..')) {
         return sendError(res, 'ID不合法');
     }
-    const logContent = WebUiConfigWrapper.GetLogContent(filename);
+    const logContent = await WebUiConfigWrapper.GetLogContent(filename);
     return sendSuccess(res, logContent);
 };
 
 // 日志列表
 export const LogListHandler: RequestHandler = async (_, res) => {
-    const logList = WebUiConfigWrapper.GetLogsList();
+    const logList = await WebUiConfigWrapper.GetLogsList();
     return sendSuccess(res, logList);
 };
 // 实时日志（SSE）

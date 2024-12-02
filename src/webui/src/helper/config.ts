@@ -1,5 +1,5 @@
 import { webUiPathWrapper } from '@/webui';
-import { existsSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
+import fs, { constants } from 'node:fs/promises';
 import * as net from 'node:net';
 import { resolve } from 'node:path';
 
@@ -90,18 +90,18 @@ export class WebUiConfigWrapper {
         try {
             const configPath = resolve(webUiPathWrapper.configPath, './webui.json');
 
-            if (!existsSync(configPath)) {
-                writeFileSync(configPath, JSON.stringify(defaultconfig, null, 4));
+            if (!await fs.access(configPath, constants.R_OK | constants.W_OK).then(() => true).catch(() => false)) {
+                await fs.writeFile(configPath, JSON.stringify(defaultconfig, null, 4));
             }
 
-            const fileContent = readFileSync(configPath, 'utf-8');
+            const fileContent = await fs.readFile(configPath, 'utf-8');
             // 更新配置字段后新增字段可能会缺失，同步一下
             const parsedConfig = this.applyDefaults(JSON.parse(fileContent) as Partial<WebUiConfigType>, defaultconfig);
 
             if (!parsedConfig.prefix.startsWith('/')) parsedConfig.prefix = '/' + parsedConfig.prefix;
             if (parsedConfig.prefix.endsWith('/')) parsedConfig.prefix = parsedConfig.prefix.slice(0, -1);
             // 配置已经被操作过了，还是回写一下吧，不然新配置不会出现在配置文件里
-            writeFileSync(configPath, JSON.stringify(parsedConfig, null, 4));
+            await fs.writeFile(configPath, JSON.stringify(parsedConfig, null, 4));
             // 不希望回写的配置放后面
 
             // 查询主机地址是否可用
@@ -137,19 +137,19 @@ export class WebUiConfigWrapper {
         return resolve(webUiPathWrapper.logsPath);
     }
     // 获取日志列表
-    public static GetLogsList(): string[] {
-        if (existsSync(webUiPathWrapper.logsPath)) {
-            return readdirSync(webUiPathWrapper.logsPath)
+    public static async GetLogsList(): Promise<string[]> {
+        if (await fs.access(webUiPathWrapper.logsPath, constants.F_OK).then(() => true).catch(() => false)) {
+            return (await fs.readdir(webUiPathWrapper.logsPath))
                 .filter((file) => file.endsWith('.log'))
                 .map((file) => file.replace('.log', ''));
         }
         return [];
     }
     // 获取指定日志文件内容
-    public static GetLogContent(filename: string): string {
+    public static async GetLogContent(filename: string): Promise<string> {
         const logPath = resolve(webUiPathWrapper.logsPath, `${filename}.log`);
-        if (existsSync(logPath)) {
-            return readFileSync(logPath, 'utf-8');
+        if (await fs.access(logPath, constants.R_OK).then(() => true).catch(() => false)) {
+            return await fs.readFile(logPath, 'utf-8');
         }
         return '';
     }
