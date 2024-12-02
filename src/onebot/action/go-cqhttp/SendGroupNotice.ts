@@ -1,7 +1,7 @@
 import { checkFileExist, uri2local } from '@/common/file';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { unlink } from 'node:fs';
+import { unlink } from 'node:fs/promises';
 import { Static, Type } from '@sinclair/typebox';
 
 const SchemaData = Type.Object({
@@ -41,8 +41,7 @@ export class SendGroupNotice extends OneBotAction<Payload, null> {
                 throw new Error(`群公告${payload.image}设置失败,图片上传失败`);
             }
 
-            unlink(path, () => {
-            });
+            unlink(path).catch(() => { });
 
             UploadImage = ImageUploadResult.picInfo;
         }

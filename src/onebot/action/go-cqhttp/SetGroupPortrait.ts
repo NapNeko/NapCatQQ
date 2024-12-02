@@ -1,9 +1,8 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
-import { ActionName, BaseCheckResult } from '@/onebot/action/router';
-import * as fs from 'node:fs';
+import { ActionName } from '@/onebot/action/router';
 import { checkFileExistV2, uri2local } from '@/common/file';
 import { Static, Type } from '@sinclair/typebox';
-
+import fs from 'node:fs/promises';
 const SchemaData = Type.Object({
     file: Type.String(),
     group_id: Type.Union([Type.Number(), Type.String()])
@@ -14,7 +13,7 @@ type Payload = Static<typeof SchemaData>;
 export default class SetGroupPortrait extends OneBotAction<Payload, any> {
     actionName = ActionName.SetGroupPortrait;
     payloadSchema = SchemaData;
-    
+
     async _handle(payload: Payload): Promise<any> {
         const { path, success } = (await uri2local(this.core.NapCatTempPath, payload.file));
         if (!success) {
@@ -23,7 +22,7 @@ export default class SetGroupPortrait extends OneBotAction<Payload, any> {
         if (path) {
             await checkFileExistV2(path, 5000); // 文件不存在QQ会崩溃，需要提前判断
             const ret = await this.core.apis.GroupApi.setGroupAvatar(payload.group_id.toString(), path);
-            fs.unlink(path, () => { });
+            fs.unlink(path).catch(() => { });
             if (!ret) {
                 throw new Error(`头像${payload.file}设置失败,api无返回`);
             }
@@ -34,7 +33,7 @@ export default class SetGroupPortrait extends OneBotAction<Payload, any> {
             }
             return ret;
         } else {
-            fs.unlink(path, () => { });
+            fs.unlink(path).catch(() => { });
             throw new Error(`头像${payload.file}设置失败,无法获取头像,文件可能不存在`);
         }
     }

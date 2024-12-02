@@ -1,6 +1,6 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import * as fs from 'node:fs';
+import fs from 'node:fs/promises';
 import { checkFileExist, uri2local } from '@/common/file';
 import { Static, Type } from '@sinclair/typebox';
 
@@ -21,9 +21,7 @@ export default class SetAvatar extends OneBotAction<Payload, null> {
         if (path) {
             await checkFileExist(path, 5000);// 避免崩溃
             const ret = await this.core.apis.UserApi.setQQAvatar(path);
-            fs.unlink(path, () => {
-            });
-
+            fs.unlink(path).catch(() => { });
             if (!ret) {
                 throw new Error(`头像${payload.file}设置失败,api无返回`);
             }
@@ -34,7 +32,7 @@ export default class SetAvatar extends OneBotAction<Payload, null> {
                 throw new Error(`头像${payload.file}设置失败,未知的错误,${ret.result}:${ret.errMsg}`);
             }
         } else {
-            fs.unlink(path, () => { });
+            fs.unlink(path).catch(() => { });
             throw new Error(`头像${payload.file}设置失败,无法获取头像,文件可能不存在`);
         }
         return null;
