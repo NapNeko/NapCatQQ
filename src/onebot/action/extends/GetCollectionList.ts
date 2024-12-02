@@ -14,6 +14,6 @@ export class GetCollectionList extends OneBotAction<Payload, any> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        return await this.core.apis.CollectionApi.getAllCollection(parseInt(payload.category.toString()), +payload.count);
+        return await this.core.apis.CollectionApi.getAllCollection(+payload.category, +payload.count);
     }
 }

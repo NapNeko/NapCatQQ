@@ -452,7 +452,7 @@ export class OneBotMsgApi {
         },
 
         [OB11MessageDataType.face]: async ({ data: { id } }) => {
-            let parsedFaceId = parseInt(id);
+            let parsedFaceId = +id;
             // 从face_config.json中获取表情名称
             const sysFaces = faceConfig.sysface;
             const face: any = sysFaces.find((systemFace) => systemFace.QSid === parsedFaceId.toString());
@@ -460,7 +460,6 @@ export class OneBotMsgApi {
                 this.core.context.logger.logError('不支持的ID', id);
                 return undefined;
             }
-            parsedFaceId = parseInt(parsedFaceId.toString());
             let faceType = 1;
             if (parsedFaceId >= 222) {
                 faceType = 2;
@@ -958,14 +957,14 @@ export class OneBotMsgApi {
     }
     groupChangDecreseType2String(type: number): GroupDecreaseSubType {
         switch (type) {
-        case 130:
-            return 'leave';
-        case 131:
-            return 'kick';
-        case 3:
-            return 'kick_me';
-        default:
-            return 'kick';
+            case 130:
+                return 'leave';
+            case 131:
+                return 'kick';
+            case 3:
+                return 'kick_me';
+            default:
+                return 'kick';
         }
     }
 

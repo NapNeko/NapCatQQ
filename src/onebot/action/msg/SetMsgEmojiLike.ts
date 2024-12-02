@@ -16,7 +16,7 @@ export class SetMsgEmojiLike extends OneBotAction<Payload, any> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const msg = MessageUnique.getMsgIdAndPeerByShortId(parseInt(payload.message_id.toString()));
+        const msg = MessageUnique.getMsgIdAndPeerByShortId(+payload.message_id);
         if (!msg) {
             throw new Error('msg not found');
         }
