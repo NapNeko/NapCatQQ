@@ -25,7 +25,7 @@ class ForwardSingleMsg extends OneBotAction<Payload, null> {
     }
 
     async _handle(payload: Payload): Promise<null> {
-        const msg = MessageUnique.getMsgIdAndPeerByShortId(parseInt(payload.message_id.toString()));
+        const msg = MessageUnique.getMsgIdAndPeerByShortId(+payload.message_id);
         if (!msg) {
             throw new Error(`无法找到消息${payload.message_id}`);
         }
