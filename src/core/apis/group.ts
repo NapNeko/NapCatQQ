@@ -175,8 +175,13 @@ export class NTQQGroupApi {
     async refreshGroupMemberCache(groupCode: string) {
         try {
             const members = await this.getGroupMemberAll(groupCode, true);
-            let groupData = (await this.GetGroupMembersV3(groupCode)).infos;
-            if (groupData.size === 0 || groupData.size !== members.result.infos.size) {
+            // 首先填入基础信息
+            const existingMembers = this.groupMemberCache.get(groupCode) ?? new Map<string, GroupMember>();
+            members.result.infos.forEach((value, key) => {
+                existingMembers.set(value.uid, { ...value, ...existingMembers.get(value.uid) });
+            });
+            // 后台补全复杂信息
+            let event = (async () => {
                 let data = (await Promise.allSettled(members.result.ids.map(e => this.core.apis.UserApi.getUserDetailInfo(e.uid)))).filter(e => e.status === 'fulfilled').map(e => e.value);
                 data.forEach(e => {
                     const existingMember = members.result.infos.get(e.uid);
@@ -184,14 +189,12 @@ export class NTQQGroupApi {
                         members.result.infos.set(e.uid, { ...existingMember, ...e });
                     }
                 });
-            } else {
-                groupData.forEach((v, k) => {
-                    if (members.result.infos.has(k)) {
-                        members.result.infos.set(k, { ...members.result.infos.get(k), ...v });
-                    }
-                });
+                this.groupMemberCache.set(groupCode, members.result.infos);
+            })().then().catch(e => this.context.logger.logError(e));
+            // 处理首次空缺
+            if (!this.groupMemberCache.get(groupCode)) {
+                await event;
             }
-            this.groupMemberCache.set(groupCode, members.result.infos);
         } catch (e) {
             this.context.logger.logError(`刷新群成员缓存失败, ${e}`);
         }
@@ -202,7 +205,7 @@ export class NTQQGroupApi {
         const memberUinOrUidStr = memberUinOrUid.toString();
         let members = this.groupMemberCache.get(groupCodeStr);
         if (!members) {
-            this.refreshGroupMemberCache(groupCodeStr);
+            await this.refreshGroupMemberCache(groupCodeStr);
         }
 
         function getMember() {
