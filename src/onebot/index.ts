@@ -1,8 +1,6 @@
 import {
     BuddyReqType,
     ChatType,
-    DataSource,
-    NTGroupMemberRole,
     GroupNotifyMsgStatus,
     GroupNotifyMsgType,
     InstanceContext,
@@ -41,8 +39,6 @@ import { OB11InputStatusEvent } from '@/onebot/event/notice/OB11InputStatusEvent
 import { MessageUnique } from '@/common/message-unique';
 import { proxiedListenerOf } from '@/common/proxy-handler';
 import { OB11FriendRequestEvent } from '@/onebot/event/request/OB11FriendRequest';
-import { OB11GroupAdminNoticeEvent } from '@/onebot/event/notice/OB11GroupAdminNoticeEvent';
-// import { GroupDecreaseSubType, OB11GroupDecreaseEvent } from '@/onebot/event/notice/OB11GroupDecreaseEvent';
 import { OB11GroupRequestEvent } from '@/onebot/event/request/OB11GroupRequest';
 import { OB11FriendRecallNoticeEvent } from '@/onebot/event/notice/OB11FriendRecallNoticeEvent';
 import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecallNoticeEvent';
@@ -373,47 +369,7 @@ export class NapCatOneBot11Adapter {
 
                     const flag = notify.group.groupCode + '|' + notify.seq + '|' + notify.type;
                     this.context.logger.logDebug('收到群通知', notify);
-
                     if (
-                        [
-                            GroupNotifyMsgType.SET_ADMIN,
-                            GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_CANCELED,
-                            GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_ADMIN,
-                        ].includes(notify.type)
-                    ) {
-                        const member1 = await this.core.apis.GroupApi.getGroupMember(
-                            notify.group.groupCode,
-                            notify.user1.uid
-                        );
-                        this.context.logger.logDebug('有管理员变动通知');
-                        // refreshGroupMembers(notify.group.groupCode).then();
-                        this.context.logger.logDebug('开始获取变动的管理员');
-                        if (member1) {
-                            this.context.logger.logDebug('变动管理员获取成功');
-                            const groupAdminNoticeEvent = new OB11GroupAdminNoticeEvent(
-                                this.core,
-                                parseInt(notify.group.groupCode),
-                                parseInt(member1.uin),
-                                [
-                                    GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_CANCELED,
-                                    GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_ADMIN,
-                                ].includes(notify.type)
-                                    ? 'unset'
-                                    : 'set'
-                            );
-                            this.networkManager
-                                .emitEvent(groupAdminNoticeEvent)
-                                .catch((e) =>
-                                    this.context.logger.logError('处理群管理员变动失败', e)
-                                );
-                        } else {
-                            this.context.logger.logDebug(
-                                '获取群通知的成员信息失败',
-                                notify,
-                                this.core.apis.GroupApi.getGroup(notify.group.groupCode)
-                            );
-                        }
-                    } else if (
                         [GroupNotifyMsgType.REQUEST_JOIN_NEED_ADMINI_STRATOR_PASS].includes(notify.type) &&
                         notify.status == GroupNotifyMsgStatus.KUNHANDLE
                     ) {
@@ -483,33 +439,6 @@ export class NapCatOneBot11Adapter {
                 }
             }
         };
-
-        groupListener.onMemberInfoChange = async (groupCode, dataSource, members) => {
-            //this.context.logger.logDebug('收到群成员信息变动通知', groupCode, changeType);
-            if (dataSource === DataSource.LOCAL) {
-                const existMembers = this.core.apis.GroupApi.groupMemberCache.get(groupCode);
-                if (!existMembers) return;
-                members.forEach((member) => {
-                    const existMember = existMembers.get(member.uid);
-                    if (!existMember?.isChangeRole) return;
-                    this.context.logger.logDebug('变动管理员获取成功');
-                    const groupAdminNoticeEvent = new OB11GroupAdminNoticeEvent(
-                        this.core,
-                        parseInt(groupCode),
-                        parseInt(member.uin),
-                        member.role === NTGroupMemberRole.KADMIN ? 'set' : 'unset'
-                    );
-                    this.networkManager
-                        .emitEvent(groupAdminNoticeEvent)
-                        .catch((e) =>
-                            this.context.logger.logError('处理群管理员变动失败', e)
-                        );
-                    existMember.isChangeRole = false;
-                    this.context.logger.logDebug('群管理员变动处理完毕');
-                });
-            }
-        };
-
         this.context.session
             .getGroupService()
             .addKernelGroupListener(proxiedListenerOf(groupListener, this.context.logger));
