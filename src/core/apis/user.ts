@@ -181,13 +181,13 @@ export class NTQQUserApi {
     //后期改成流水线处理
     async getUinByUidV2(Uid: string) {
         let uin = (await this.context.session.getGroupService().getUinByUids([Uid])).uins.get(Uid);
-        if (uin) return uin;
+        if (uin && uin !== '0') return uin;
         uin = (await this.context.session.getProfileService().getUinByUid('FriendsServiceImpl', [Uid])).get(Uid);
-        if (uin) return uin;
+        if (uin && uin !== '0') return uin;
         uin = (await this.context.session.getUixConvertService().getUin([Uid])).uinInfo.get(Uid);
-        if (uin) return uin;
+        if (uin && uin !== '0') return uin;
         uin = (await this.core.apis.FriendApi.getBuddyIdMap(true)).getKey(Uid);
-        if (uin) return uin;
+        if (uin && uin !== '0') return uin;
         uin = (await this.getUserDetailInfo(Uid)).uin; //从QQ Native 转换
         return uin;
     }
