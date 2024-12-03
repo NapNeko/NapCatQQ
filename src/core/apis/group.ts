@@ -33,6 +33,7 @@ export class NTQQGroupApi {
         this.groups = await this.getGroups();
         for (const group of this.groups) {
             this.groupCache.set(group.groupCode, group);
+            this.refreshGroupMemberCache(group.groupCode).then().catch(e => this.context.logger.logError(e));
         }
         this.context.logger.logDebug(`加载${this.groups.length}个群组缓存完成`);
         // process.pid 调试点
@@ -54,11 +55,13 @@ export class NTQQGroupApi {
             pageLimit: 300,
         }, pskey);
     }
+
     async getGroupShutUpMemberList(groupCode: string) {
         const data = this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onShutUpMemberListChanged', (group_id) => group_id === groupCode, 1, 1000);
         this.context.session.getGroupService().getGroupShutUpMemberList(groupCode);
         return (await data)[1];
     }
+
     async clearGroupNotifiesUnreadCount(uk: boolean) {
         return this.context.session.getGroupService().clearGroupNotifiesUnreadCount(uk);
     }
@@ -139,26 +142,31 @@ export class NTQQGroupApi {
     async getGroupMemberAll(groupCode: string, forced = false) {
         return this.context.session.getGroupService().getAllMemberList(groupCode, forced);
     }
+
     async refreshGroupMemberCache(groupCode: string) {
         try {
             const members = await this.getGroupMemberAll(groupCode, true);
+            let data = (await Promise.allSettled(members.result.ids.map(e => this.core.apis.UserApi.getUserDetailInfo(e.uid)))).filter(e => e.status === 'fulfilled').map(e => e.value);
+            data.forEach(e => {
+                const existingMember = members.result.infos.get(e.uid);
+                if (existingMember) {
+                    members.result.infos.set(e.uid, { ...existingMember, ...e });
+                }
+            });
             this.groupMemberCache.set(groupCode, members.result.infos);
         } catch (e) {
             this.context.logger.logError(`刷新群成员缓存失败, ${e}`);
         }
     }
+
     async getGroupMember(groupCode: string | number, memberUinOrUid: string | number) {
         const groupCodeStr = groupCode.toString();
         const memberUinOrUidStr = memberUinOrUid.toString();
         let members = this.groupMemberCache.get(groupCodeStr);
         if (!members) {
-            try {
-                members = (await this.getGroupMemberAll(groupCodeStr)).result.infos;
-                this.groupMemberCache.set(groupCodeStr, members);
-            } catch (e) {
-                return null;
-            }
+            this.refreshGroupMemberCache(groupCodeStr);
         }
+
         function getMember() {
             let member: GroupMember | undefined;
             if (isNumeric(memberUinOrUidStr)) {
@@ -171,7 +179,7 @@ export class NTQQGroupApi {
 
         let member = getMember();
         if (!member) {
-            members = members = (await this.getGroupMemberAll(groupCodeStr)).result.infos;
+            members = (await this.getGroupMemberAll(groupCodeStr)).result.infos;
             member = getMember();
         }
         return member;
