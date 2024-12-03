@@ -993,10 +993,12 @@ export class OneBotMsgApi {
             const groupAmin = new NapProtoMsg(GroupAdmin).decode(SysMessage.body.msgContent);
             await this.core.apis.GroupApi.refreshGroupMemberCache(groupAmin.groupUin.toString());
             let enabled = false;
-            let uid = groupAmin.body.extraEnable.adminUid;
+            let uid = '';
             if (groupAmin.body.extraEnable != null) {
+                uid = groupAmin.body.extraEnable.adminUid;
                 enabled = true;
             } else if (groupAmin.body.extraDisable != null) {
+                uid = groupAmin.body.extraDisable.adminUid;
                 enabled = false;
             }
             return new OB11GroupAdminNoticeEvent(
@@ -1008,28 +1010,5 @@ export class OneBotMsgApi {
         } else if (SysMessage.contentHead.type == 528 && SysMessage.contentHead.subType == 39 && SysMessage.body?.msgContent) {
             return await this.obContext.apis.UserApi.parseLikeEvent(SysMessage.body?.msgContent);
         }
-
-        /*
-        if (msgType === 732 && subType === 16 && subSubType === 16) {
-            const greyTip = GreyTipWrapper.fromBinary(Uint8Array.from(sysMsg.bodyWrapper!.wrappedBody.slice(7)));
-            if (greyTip.subTypeId === 36) {
-                const emojiLikeToOthers = EmojiLikeToOthersWrapper1
-                    .fromBinary(greyTip.rest)
-                    .wrapper!
-                    .body!;
-                if (emojiLikeToOthers.attributes?.operation !== 1) { // Un-like
-                    return;
-                }
-                const eventOrEmpty = await this.apis.GroupApi.createGroupEmojiLikeEvent(
-                    greyTip.groupCode.toString(),
-                    await this.core.apis.UserApi.getUinByUidV2(emojiLikeToOthers.attributes!.senderUid),
-                    emojiLikeToOthers.msgSpec!.msgSeq.toString(),
-                    emojiLikeToOthers.attributes!.emojiId,
-                );
-                // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-                eventOrEmpty && await this.networkManager.emitEvent(eventOrEmpty);
-            }
-        }
-        */
     }
 }
