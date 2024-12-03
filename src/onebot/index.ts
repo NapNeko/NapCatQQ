@@ -351,7 +351,6 @@ export class NapCatOneBot11Adapter {
         const groupListener = new NodeIKernelGroupListener();
 
         groupListener.onGroupNotifiesUpdated = async (_, notifies) => {
-            //console.log('ob11 onGroupNotifiesUpdated', notifies[0]);
             await this.core.apis.GroupApi.clearGroupNotifiesUnreadCount(false);
             if (
                 ![
