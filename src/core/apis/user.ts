@@ -90,7 +90,7 @@ export class NTQQUserApi {
         };
         return RetUser;
     }
-
+    
     async getUserDetailInfo(uid: string): Promise<User> {
         let retUser = await solveAsyncProblem(async (uid) => this.fetchUserDetailInfo(uid, UserDetailSource.KDB), uid);
         if (retUser && retUser.uin !== '0') {

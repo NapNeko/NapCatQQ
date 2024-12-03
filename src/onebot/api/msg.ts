@@ -968,10 +968,9 @@ export class OneBotMsgApi {
 
     async parseSysMessage(msg: number[]) {
         const SysMessage = new NapProtoMsg(PushMsgBody).decode(Uint8Array.from(msg));
-        console.log(Buffer.from(msg).toString('hex'));
         if (SysMessage.contentHead.type == 33 && SysMessage.body?.msgContent) {
             const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
-            await this.core.apis.GroupApi.refreshGroupMemberCache(groupChange.groupUin.toString());
+            await this.core.apis.GroupApi.refreshGroupMemberCache(groupChange.groupUin.toString()).then().catch();
             return new OB11GroupIncreaseEvent(
                 this.core,
                 groupChange.groupUin,
@@ -981,7 +980,7 @@ export class OneBotMsgApi {
             );
         } else if (SysMessage.contentHead.type == 34 && SysMessage.body?.msgContent) {
             const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
-            await this.core.apis.GroupApi.refreshGroupMemberCache(groupChange.groupUin.toString());
+            this.core.apis.GroupApi.refreshGroupMemberCache(groupChange.groupUin.toString()).then().catch();
             return new OB11GroupDecreaseEvent(
                 this.core,
                 groupChange.groupUin,
@@ -991,7 +990,7 @@ export class OneBotMsgApi {
             );
         } else if (SysMessage.contentHead.type == 44 && SysMessage.body?.msgContent) {
             const groupAmin = new NapProtoMsg(GroupAdmin).decode(SysMessage.body.msgContent);
-            await this.core.apis.GroupApi.refreshGroupMemberCache(groupAmin.groupUin.toString());
+            await this.core.apis.GroupApi.refreshGroupMemberCache(groupAmin.groupUin.toString()).then().catch();
             let enabled = false;
             let uid = '';
             if (groupAmin.body.extraEnable != null) {
