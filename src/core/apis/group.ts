@@ -157,6 +157,7 @@ export class NTQQGroupApi {
         } catch (e) {
             this.context.logger.logError(`刷新群成员缓存失败, 群号: ${groupCode}, 错误: ${e}`);
         }
+        return this.groupMemberCache;
     }
     // 后台补全复杂信息
     // let event = (async () => {
@@ -180,7 +181,7 @@ export class NTQQGroupApi {
         // 检查群缓存
         let members = this.groupMemberCache.get(groupCodeStr);
         if (!members) {
-            await this.refreshGroupMemberCache(groupCodeStr);
+            members = (await this.refreshGroupMemberCache(groupCodeStr)).get(groupCodeStr);
         }
 
         function getMember() {
