@@ -146,31 +146,33 @@ export class NTQQGroupApi {
     async refreshGroupMemberCache(groupCode: string) {
         try {
             const members = await this.getGroupMemberAll(groupCode, true);
-            // 首先填入基础信息
-            const existingMembers = this.groupMemberCache.get(groupCode) ?? new Map<string, GroupMember>();
-            members.result.infos.forEach((value, key) => {
+            let existingMembers = this.groupMemberCache.get(groupCode);
+            if (!existingMembers) {
+                existingMembers = new Map<string, GroupMember>();
+                this.groupMemberCache.set(groupCode, existingMembers);
+            }
+            members.result.infos.forEach((value) => {
                 existingMembers.set(value.uid, { ...value, ...existingMembers.get(value.uid) });
             });
-            // 后台补全复杂信息
-            let event = (async () => {
-                let data = (await Promise.allSettled(members.result.ids.map(e => this.core.apis.UserApi.getUserDetailInfo(e.uid)))).filter(e => e.status === 'fulfilled').map(e => e.value);
-                data.forEach(e => {
-                    const existingMember = members.result.infos.get(e.uid);
-                    if (existingMember) {
-                        members.result.infos.set(e.uid, { ...existingMember, ...e });
-                    }
-                });
-                this.groupMemberCache.set(groupCode, members.result.infos);
-            })().then().catch(e => this.context.logger.logError(e));
-            // 处理首次空缺
-            if (!this.groupMemberCache.get(groupCode)) {
-                await event;
-            }
         } catch (e) {
-            this.context.logger.logError(`刷新群成员缓存失败, ${e}`);
+            this.context.logger.logError(`刷新群成员缓存失败, 群号: ${groupCode}, 错误: ${e}`);
         }
     }
-
+    // 后台补全复杂信息
+    // let event = (async () => {
+    //     let data = (await Promise.allSettled(members.result.ids.map(e => this.core.apis.UserApi.getUserDetailInfo(e.uid)))).filter(e => e.status === 'fulfilled').map(e => e.value);
+    //     data.forEach(e => {
+    //         const existingMember = members.result.infos.get(e.uid);
+    //         if (existingMember) {
+    //             members.result.infos.set(e.uid, { ...existingMember, ...e });
+    //         }
+    //     });
+    //     this.groupMemberCache.set(groupCode, members.result.infos);
+    // })().then().catch(e => this.context.logger.logError(e));
+    // 处理首次空缺
+    // if (!this.groupMemberCache.get(groupCode)) {
+    //     await event;
+    // }
     async getGroupMember(groupCode: string | number, memberUinOrUid: string | number) {
         const groupCodeStr = groupCode.toString();
         const memberUinOrUidStr = memberUinOrUid.toString();
