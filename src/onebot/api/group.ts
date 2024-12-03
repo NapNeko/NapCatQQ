@@ -7,15 +7,10 @@ import {
     MessageElement,
     NapCatCore,
     NTGrayTipElementSubTypeV2,
-    NTMsgType,
     RawMessage,
-    TipGroupElement,
-    TipGroupElementType,
 } from '@/core';
 import { NapCatOneBot11Adapter } from '@/onebot';
 import { OB11GroupBanEvent } from '@/onebot/event/notice/OB11GroupBanEvent';
-import { OB11GroupIncreaseEvent } from '@/onebot/event/notice/OB11GroupIncreaseEvent';
-import { OB11GroupDecreaseEvent } from '@/onebot/event/notice/OB11GroupDecreaseEvent';
 import fastXmlParser from 'fast-xml-parser';
 import { OB11GroupMsgEmojiLikeEvent } from '@/onebot/event/notice/OB11MsgEmojiLikeEvent';
 import { MessageUnique } from '@/common/message-unique';
@@ -65,67 +60,6 @@ export class OneBotGroupApi {
         }
         return undefined;
     }
-
-    // async parseGroupIncreaseEvent(GroupCode: string, grayTipElement: GrayTipElement) {
-    //     this.core.context.logger.logDebug('收到新人被邀请进群消息', grayTipElement);
-    //     const xmlElement = grayTipElement.xmlElement;
-    //     if (xmlElement?.content) {
-    //         const regex = /jp="(\d+)"/g;
-
-    //         const matches = [];
-    //         let match = null;
-
-    //         while ((match = regex.exec(xmlElement.content)) !== null) {
-    //             matches.push(match[1]);
-    //         }
-    //         if (matches.length === 2) {
-    //             const [inviter, invitee] = matches;
-    //             return new OB11GroupIncreaseEvent(
-    //                 this.core,
-    //                 parseInt(GroupCode),
-    //                 parseInt(invitee),
-    //                 parseInt(inviter),
-    //                 'invite',
-    //             );
-    //         }
-    //     }
-    //     return undefined;
-    // }
-
-    // async parseGroupMemberIncreaseEvent(GroupCode: string, grayTipElement: GrayTipElement) {
-    //     const groupElement = grayTipElement?.groupElement;
-    //     if (!groupElement) return undefined;
-    //     const member = await this.core.apis.UserApi.getUserDetailInfo(groupElement.memberUid);
-    //     const memberUin = member?.uin;
-    //     const adminMember = await this.core.apis.GroupApi.getGroupMember(GroupCode, groupElement.adminUid);
-    //     if (memberUin) {
-    //         const operatorUin = adminMember?.uin ?? memberUin;
-    //         return new OB11GroupIncreaseEvent(
-    //             this.core,
-    //             parseInt(GroupCode),
-    //             parseInt(memberUin),
-    //             parseInt(operatorUin),
-    //         );
-    //     } else {
-    //         return undefined;
-    //     }
-    // }
-
-    // async parseGroupKickEvent(GroupCode: string, grayTipElement: GrayTipElement) {
-    //     const groupElement = grayTipElement?.groupElement;
-    //     if (!groupElement) return undefined;
-    //     const adminUin = (await this.core.apis.GroupApi.getGroupMember(GroupCode, groupElement.adminUid))?.uin ?? (await this.core.apis.UserApi.getUidByUinV2(groupElement.adminUid));
-    //     if (adminUin) {
-    //         return new OB11GroupDecreaseEvent(
-    //             this.core,
-    //             parseInt(GroupCode),
-    //             parseInt(this.core.selfInfo.uin),
-    //             parseInt(adminUin),
-    //             'kick_me',
-    //         );
-    //     }
-    //     return undefined;
-    // }
 
     async parseGroupEmojiLikeEventByGrayTip(
         groupCode: string,
@@ -186,31 +120,6 @@ export class OneBotGroupApi {
         }
         return undefined;
     }
-
-    // async parseGroupElement(msg: RawMessage, groupElement: TipGroupElement, elementWrapper: GrayTipElement) {
-    //     if (groupElement.type == TipGroupElementType.KMEMBERADD) {
-    //         const MemberIncreaseEvent = await this.obContext.apis.GroupApi.parseGroupMemberIncreaseEvent(msg.peerUid, elementWrapper);
-    //         if (MemberIncreaseEvent) return MemberIncreaseEvent;
-    //     } else if (groupElement.type === TipGroupElementType.KSHUTUP) {
-    //         const BanEvent = await this.obContext.apis.GroupApi.parseGroupBanEvent(msg.peerUid, elementWrapper);
-    //         if (BanEvent) return BanEvent;
-    //     } else if (groupElement.type == TipGroupElementType.KQUITTE) {
-    //         this.core.apis.GroupApi.quitGroup(msg.peerUid).then();
-    //         try {
-    //             const KickEvent = await this.obContext.apis.GroupApi.parseGroupKickEvent(msg.peerUid, elementWrapper);
-    //             if (KickEvent) return KickEvent;
-    //         } catch (e) {
-    //             return new OB11GroupDecreaseEvent(
-    //                 this.core,
-    //                 parseInt(msg.peerUid),
-    //                 parseInt(this.core.selfInfo.uin),
-    //                 0,
-    //                 'leave',
-    //             );
-    //         }
-    //     }
-    //     return undefined;
-    // }
 
     async parsePaiYiPai(msg: RawMessage, jsonStr: string) {
         const json = JSON.parse(jsonStr);

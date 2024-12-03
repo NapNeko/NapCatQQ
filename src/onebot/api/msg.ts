@@ -969,7 +969,7 @@ export class OneBotMsgApi {
         const SysMessage = new NapProtoMsg(PushMsgBody).decode(Uint8Array.from(msg));
         if (SysMessage.contentHead.type == 33 && SysMessage.body?.msgContent) {
             const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
-            console.log(JSON.stringify(groupChange));
+            await this.core.apis.GroupApi.refreshGroupMemberCache(groupChange.groupUin.toString());
             return new OB11GroupIncreaseEvent(
                 this.core,
                 groupChange.groupUin,
@@ -979,6 +979,7 @@ export class OneBotMsgApi {
             );
         } else if (SysMessage.contentHead.type == 34 && SysMessage.body?.msgContent) {
             const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
+            await this.core.apis.GroupApi.refreshGroupMemberCache(groupChange.groupUin.toString());
             return new OB11GroupDecreaseEvent(
                 this.core,
                 groupChange.groupUin,
