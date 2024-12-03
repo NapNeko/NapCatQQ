@@ -32,6 +32,8 @@ import { GroupChange, PushMsgBody } from "@/core/packet/transformer/proto";
 import { NapProtoMsg } from '@napneko/nap-proto-core';
 import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
 import { OB11GroupDecreaseEvent, GroupDecreaseSubType } from '../event/notice/OB11GroupDecreaseEvent';
+import { GroupAdmin } from '@/core/packet/transformer/proto/message/groupAdmin';
+import { OB11GroupAdminNoticeEvent } from '../event/notice/OB11GroupAdminNoticeEvent';
 
 type RawToOb11Converters = {
     [Key in keyof MessageElement as Key extends `${string}Element` ? Key : never]: (
@@ -965,8 +967,8 @@ export class OneBotMsgApi {
     }
 
     async parseSysMessage(msg: number[]) {
-        // Todo Refactor
         const SysMessage = new NapProtoMsg(PushMsgBody).decode(Uint8Array.from(msg));
+        console.log(Buffer.from(msg).toString('hex'));
         if (SysMessage.contentHead.type == 33 && SysMessage.body?.msgContent) {
             const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
             await this.core.apis.GroupApi.refreshGroupMemberCache(groupChange.groupUin.toString());
@@ -986,6 +988,22 @@ export class OneBotMsgApi {
                 groupChange.memberUid ? +await this.core.apis.UserApi.getUinByUidV2(groupChange.memberUid) : 0,
                 groupChange.operatorUid ? +await this.core.apis.UserApi.getUinByUidV2(groupChange.operatorUid) : 0,
                 this.groupChangDecreseType2String(groupChange.decreaseType),
+            );
+        } else if (SysMessage.contentHead.type == 44 && SysMessage.body?.msgContent) {
+            const groupAmin = new NapProtoMsg(GroupAdmin).decode(SysMessage.body.msgContent);
+            await this.core.apis.GroupApi.refreshGroupMemberCache(groupAmin.groupUin.toString());
+            let enabled = false;
+            let uid = groupAmin.body.extraEnable.adminUid;
+            if (groupAmin.body.extraEnable != null) {
+                enabled = true;
+            } else if (groupAmin.body.extraDisable != null) {
+                enabled = false;
+            }
+            return new OB11GroupAdminNoticeEvent(
+                this.core,
+                groupAmin.groupUin,
+                +await this.core.apis.UserApi.getUinByUidV2(uid),
+                enabled ? 'set' : 'unset'
             );
         } else if (SysMessage.contentHead.type == 528 && SysMessage.contentHead.subType == 39 && SysMessage.body?.msgContent) {
             return await this.obContext.apis.UserApi.parseLikeEvent(SysMessage.body?.msgContent);
