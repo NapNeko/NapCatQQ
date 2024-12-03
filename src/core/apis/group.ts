@@ -79,6 +79,35 @@ export class NTQQGroupApi {
         return groupList;
     }
 
+    async GetGroupMembersV3(groupQQ: string, num = 3000, timeout = 2500): Promise<{
+        infos: Map<string, GroupMember>;
+        finish: boolean;
+        hasNext: boolean | undefined;
+        listenerMode: boolean;
+    }> {
+        const sceneId = this.context.session.getGroupService().createMemberListScene(groupQQ, 'groupMemberList_MainWindow_1');
+        const once = this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onMemberListChange', (params) => params.sceneId === sceneId, 0, timeout)
+            .catch(() => { });
+        const result = await this.context.session.getGroupService().getNextMemberList(sceneId, undefined, num);
+        if (result.errCode !== 0) {
+            throw new Error('获取群成员列表出错,' + result.errMsg);
+        }
+        let resMode2;
+        if (result.result.finish && result.result.infos.size === 0) {
+            const ret = (await once)?.[0];
+            if (ret) {
+                resMode2 = ret;
+            }
+        }
+        this.context.session.getGroupService().destroyMemberListScene(sceneId);
+        return {
+            infos: new Map([...(resMode2?.infos ?? []), ...result.result.infos]),
+            finish: result.result.finish,
+            hasNext: resMode2?.hasNext,
+            listenerMode: resMode2?.hasNext !== undefined
+        };
+    }
+
     async getGroupExtFE0Info(groupCode: string[], forced = true) {
         return this.context.session.getGroupService().getGroupExt0xEF0Info(
             groupCode,
@@ -146,13 +175,22 @@ export class NTQQGroupApi {
     async refreshGroupMemberCache(groupCode: string) {
         try {
             const members = await this.getGroupMemberAll(groupCode, true);
-            let data = (await Promise.allSettled(members.result.ids.map(e => this.core.apis.UserApi.getUserDetailInfo(e.uid)))).filter(e => e.status === 'fulfilled').map(e => e.value);
-            data.forEach(e => {
-                const existingMember = members.result.infos.get(e.uid);
-                if (existingMember) {
-                    members.result.infos.set(e.uid, { ...existingMember, ...e });
-                }
-            });
+            let groupData = (await this.GetGroupMembersV3(groupCode)).infos;
+            if (groupData.size === 0 || groupData.size !== members.result.infos.size) {
+                let data = (await Promise.allSettled(members.result.ids.map(e => this.core.apis.UserApi.getUserDetailInfo(e.uid)))).filter(e => e.status === 'fulfilled').map(e => e.value);
+                data.forEach(e => {
+                    const existingMember = members.result.infos.get(e.uid);
+                    if (existingMember) {
+                        members.result.infos.set(e.uid, { ...existingMember, ...e });
+                    }
+                });
+            } else {
+                groupData.forEach((v, k) => {
+                    if (members.result.infos.has(k)) {
+                        members.result.infos.set(k, { ...members.result.infos.get(k), ...v });
+                    }
+                });
+            }
             this.groupMemberCache.set(groupCode, members.result.infos);
         } catch (e) {
             this.context.logger.logError(`刷新群成员缓存失败, ${e}`);
