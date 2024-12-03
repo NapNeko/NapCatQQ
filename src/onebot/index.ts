@@ -413,104 +413,73 @@ export class NapCatOneBot11Adapter {
                                 this.core.apis.GroupApi.getGroup(notify.group.groupCode)
                             );
                         }
-                    } else
-                        // if (
-                        //     notify.type == GroupNotifyMsgType.MEMBER_LEAVE_NOTIFY_ADMIN ||
-                        //     notify.type == GroupNotifyMsgType.KICK_MEMBER_NOTIFY_ADMIN
-                        // ) {
-                        //     this.context.logger.logDebug('有成员退出通知', notify);
-                        //     const member1Uin = await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid);
-                        //     let operatorId = member1Uin;
-                        //     let subType: GroupDecreaseSubType = 'leave';
-                        //     if (notify.user2.uid) {
-                        //         // 是被踢的
-                        //         const member2Uin = await this.core.apis.UserApi.getUinByUidV2(notify.user2.uid);
-                        //         if (member2Uin) {
-                        //             operatorId = member2Uin;
-                        //         }
-                        //         subType = 'kick';
-                        //     }
-                        //     const groupDecreaseEvent = new OB11GroupDecreaseEvent(
-                        //         this.core,
-                        //         parseInt(notify.group.groupCode),
-                        //         parseInt(member1Uin),
-                        //         parseInt(operatorId),
-                        //         subType
-                        //     );
-                        //     this.networkManager
-                        //         .emitEvent(groupDecreaseEvent)
-                        //         .catch((e) =>
-                        //             this.context.logger.logError('处理群成员退出失败', e)
-                        //         );
-                        //     // notify.status == 1 表示未处理 2表示处理完成
-                        // } else
-                        if (
-                            [GroupNotifyMsgType.REQUEST_JOIN_NEED_ADMINI_STRATOR_PASS].includes(notify.type) &&
-                            notify.status == GroupNotifyMsgStatus.KUNHANDLE
-                        ) {
-                            this.context.logger.logDebug('有加群请求');
-                            try {
-                                let requestUin = await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid);
-                                if (isNaN(parseInt(requestUin))) {
-                                    requestUin = (await this.core.apis.UserApi.getUserDetailInfo(notify.user1.uid)).uin;
-                                }
-                                const groupRequestEvent = new OB11GroupRequestEvent(
-                                    this.core,
-                                    parseInt(notify.group.groupCode),
-                                    parseInt(requestUin),
-                                    'add',
-                                    notify.postscript,
-                                    flag
-                                );
-                                this.networkManager
-                                    .emitEvent(groupRequestEvent)
-                                    .catch((e) =>
-                                        this.context.logger.logError('处理加群请求失败', e)
-                                    );
-                            } catch (e) {
-                                this.context.logger.logError(
-                                    '获取加群人QQ号失败 Uid:',
-                                    notify.user1.uid,
-                                    e
-                                );
+                    } else if (
+                        [GroupNotifyMsgType.REQUEST_JOIN_NEED_ADMINI_STRATOR_PASS].includes(notify.type) &&
+                        notify.status == GroupNotifyMsgStatus.KUNHANDLE
+                    ) {
+                        this.context.logger.logDebug('有加群请求');
+                        try {
+                            let requestUin = await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid);
+                            if (isNaN(parseInt(requestUin))) {
+                                requestUin = (await this.core.apis.UserApi.getUserDetailInfo(notify.user1.uid)).uin;
                             }
-                        } else if (
-                            notify.type == GroupNotifyMsgType.INVITED_BY_MEMBER &&
-                            notify.status == GroupNotifyMsgStatus.KUNHANDLE
-                        ) {
-                            this.context.logger.logDebug(`收到邀请我加群通知:${notify}`);
-                            const groupInviteEvent = new OB11GroupRequestEvent(
+                            const groupRequestEvent = new OB11GroupRequestEvent(
                                 this.core,
                                 parseInt(notify.group.groupCode),
-                                parseInt(await this.core.apis.UserApi.getUinByUidV2(notify.user2.uid)),
-                                'invite',
-                                notify.postscript,
-                                flag
-                            );
-                            this.networkManager
-                                .emitEvent(groupInviteEvent)
-                                .catch((e) =>
-                                    this.context.logger.logError('处理邀请本人加群失败', e)
-                                );
-                        } else if (
-                            notify.type == GroupNotifyMsgType.INVITED_NEED_ADMINI_STRATOR_PASS &&
-                            notify.status == GroupNotifyMsgStatus.KUNHANDLE
-                        ) {
-                            this.context.logger.logDebug(`收到群员邀请加群通知:${notify}`);
-                            const groupInviteEvent = new OB11GroupRequestEvent(
-                                this.core,
-                                parseInt(notify.group.groupCode),
-                                parseInt(await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid)),
+                                parseInt(requestUin),
                                 'add',
                                 notify.postscript,
                                 flag
                             );
                             this.networkManager
-                                .emitEvent(groupInviteEvent)
+                                .emitEvent(groupRequestEvent)
                                 .catch((e) =>
-                                    this.context.logger.logError('处理邀请本人加群失败', e)
+                                    this.context.logger.logError('处理加群请求失败', e)
                                 );
+                        } catch (e) {
+                            this.context.logger.logError(
+                                '获取加群人QQ号失败 Uid:',
+                                notify.user1.uid,
+                                e
+                            );
                         }
+                    } else if (
+                        notify.type == GroupNotifyMsgType.INVITED_BY_MEMBER &&
+                        notify.status == GroupNotifyMsgStatus.KUNHANDLE
+                    ) {
+                        this.context.logger.logDebug(`收到邀请我加群通知:${notify}`);
+                        const groupInviteEvent = new OB11GroupRequestEvent(
+                            this.core,
+                            parseInt(notify.group.groupCode),
+                            parseInt(await this.core.apis.UserApi.getUinByUidV2(notify.user2.uid)),
+                            'invite',
+                            notify.postscript,
+                            flag
+                        );
+                        this.networkManager
+                            .emitEvent(groupInviteEvent)
+                            .catch((e) =>
+                                this.context.logger.logError('处理邀请本人加群失败', e)
+                            );
+                    } else if (
+                        notify.type == GroupNotifyMsgType.INVITED_NEED_ADMINI_STRATOR_PASS &&
+                        notify.status == GroupNotifyMsgStatus.KUNHANDLE
+                    ) {
+                        this.context.logger.logDebug(`收到群员邀请加群通知:${notify}`);
+                        const groupInviteEvent = new OB11GroupRequestEvent(
+                            this.core,
+                            parseInt(notify.group.groupCode),
+                            parseInt(await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid)),
+                            'add',
+                            notify.postscript,
+                            flag
+                        );
+                        this.networkManager
+                            .emitEvent(groupInviteEvent)
+                            .catch((e) =>
+                                this.context.logger.logError('处理邀请本人加群失败', e)
+                            );
+                    }
                 }
             }
         };
