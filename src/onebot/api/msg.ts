@@ -23,7 +23,7 @@ import { NapCatOneBot11Adapter, OB11Message, OB11MessageData, OB11MessageDataTyp
 import { OB11Construct } from '@/onebot/helper/data';
 import { EventType } from '@/onebot/event/OneBotEvent';
 import { encodeCQCode } from '@/onebot/helper/cqcode';
-import { uri2local } from '@/common/file';
+import { uriToLocalFile } from '@/common/file';
 import { RequestUtil } from '@/common/request';
 import fsPromise, { constants } from 'node:fs/promises';
 import { OB11FriendAddNoticeEvent } from '@/onebot/event/notice/OB11FriendAddNoticeEvent';
@@ -514,7 +514,7 @@ export class OneBotMsgApi {
 
             let thumb = sendMsg.data.thumb;
             if (thumb) {
-                const uri2LocalRes = await uri2local(this.core.NapCatTempPath, thumb);
+                const uri2LocalRes = await uriToLocalFile(this.core.NapCatTempPath, thumb);
                 if (uri2LocalRes.success) thumb = uri2LocalRes.path;
             }
             return await this.core.apis.FileApi.createValidSendVideoElement(context, path, fileName, thumb);
@@ -932,7 +932,7 @@ export class OneBotMsgApi {
         { data: inputdata }: OB11MessageFileBase,
         { deleteAfterSentFiles }: SendMessageContext,
     ) {
-        const realUri = inputdata.url || inputdata.file || inputdata.path || '';
+        const realUri = inputdata.url ?? inputdata.file ?? inputdata.path ?? '';
         if (realUri.length === 0) {
             this.core.context.logger.logError('文件消息缺少参数', inputdata);
             throw Error('文件消息缺少参数');
@@ -942,7 +942,7 @@ export class OneBotMsgApi {
             fileName,
             errMsg,
             success,
-        } = (await uri2local(this.core.NapCatTempPath, realUri));
+        } = (await uriToLocalFile(this.core.NapCatTempPath, realUri));
 
         if (!success) {
             this.core.context.logger.logError('文件下载失败', errMsg);

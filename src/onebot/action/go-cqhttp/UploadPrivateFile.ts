@@ -2,7 +2,7 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { ChatType, Peer, SendFileElement } from '@/core/types';
 import fs from 'fs';
-import { uri2local } from '@/common/file';
+import { uriToLocalFile } from '@/common/file';
 import { SendMessageContext } from '@/onebot/api';
 import { ContextMode, createContext } from '@/onebot/action/msg/SendMsg';
 import { Static, Type } from '@sinclair/typebox';
@@ -36,7 +36,7 @@ export default class GoCQHTTPUploadPrivateFile extends OneBotAction<Payload, nul
         if (fs.existsSync(file)) {
             file = `file://${file}`;
         }
-        const downloadResult = await uri2local(this.core.NapCatTempPath, file);
+        const downloadResult = await uriToLocalFile(this.core.NapCatTempPath, file);
         if (!downloadResult.success) {
             throw new Error(downloadResult.errMsg);
         }

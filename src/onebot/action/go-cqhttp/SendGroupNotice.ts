@@ -1,4 +1,4 @@
-import { checkFileExist, uri2local } from '@/common/file';
+import { checkFileExist, uriToLocalFile } from '@/common/file';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { unlink } from 'node:fs/promises';
@@ -28,7 +28,7 @@ export class SendGroupNotice extends OneBotAction<Payload, null> {
             const {
                 path,
                 success,
-            } = (await uri2local(this.core.NapCatTempPath, payload.image));
+            } = (await uriToLocalFile(this.core.NapCatTempPath, payload.image));
             if (!success) {
                 throw new Error(`群公告${payload.image}设置失败,image字段可能格式不正确`);
             }
