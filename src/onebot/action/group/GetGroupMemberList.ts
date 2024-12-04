@@ -21,7 +21,8 @@ export class GetGroupMemberList extends OneBotAction<Payload, OB11GroupMember[]>
         const memberCache = this.core.apis.GroupApi.groupMemberCache;
         let groupMembers = memberCache.get(groupIdStr);
         if (noCache || !groupMembers) {
-            await this.core.apis.GroupApi.refreshGroupMemberCache(groupIdStr);
+            this.core.apis.GroupApi.refreshGroupMemberCache(groupIdStr).then().catch();
+            //下次刷新
             groupMembers = memberCache.get(groupIdStr);
             if (!groupMembers) {
                 throw new Error(`Failed to get group member list for group ${groupIdStr}`);
