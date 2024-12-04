@@ -193,7 +193,7 @@ export interface NodeIKernelGroupService {
 
     getGroupNotifiesUnreadCount(unknown: boolean): Promise<GeneralCallResult>;
 
-    clearGroupNotifiesUnreadCount(unknown: boolean): void;
+    clearGroupNotifiesUnreadCount(doubt: boolean): void;
 
     operateSysNotify(
         doubt: boolean,
