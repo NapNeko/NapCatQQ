@@ -80,7 +80,6 @@ export class NTQQFileApi {
         });
 
         await this.copyFile(filePath, mediaPath);
-        console.log('copyFile', filePath, mediaPath);
         const fileSize = await this.getFileSize(filePath);
         return {
             md5: fileMd5,
