@@ -1,6 +1,5 @@
 import {
     GeneralCallResult,
-    Group,
     GroupMember,
     NTGroupMemberRole,
     NTGroupRequestOperateTypes,
@@ -112,24 +111,16 @@ export class NTQQGroupApi {
         return this.context.session.getGroupService().getAllMemberList(groupCode, forced);
     }
 
-
     async refreshGroupMemberCache(groupCode: string) {
         try {
             const members = await this.getGroupMemberAll(groupCode, true);
-            let existingMembers = this.groupMemberCache.get(groupCode);
-            if (!existingMembers) {
-                existingMembers = new Map<string, GroupMember>();
-                this.groupMemberCache.set(groupCode, existingMembers);
-            }
-            members.result.infos.forEach((value) => {
-                existingMembers.set(value.uid, { ...value, ...existingMembers.get(value.uid) });
-            });
+            this.groupMemberCache.set(groupCode, members.result.infos);
         } catch (e) {
             this.context.logger.logError(`刷新群成员缓存失败, 群号: ${groupCode}, 错误: ${e}`);
         }
         return this.groupMemberCache;
     }
-
+    
     async getGroupMember(groupCode: string | number, memberUinOrUid: string | number) {
         const groupCodeStr = groupCode.toString();
         const memberUinOrUidStr = memberUinOrUid.toString();
@@ -161,15 +152,15 @@ export class NTQQGroupApi {
         return this.context.session.getGroupService().getGroupRecommendContactArkJson(groupCode);
     }
 
-    async CreatGroupFileFolder(groupCode: string, folderName: string) {
+    async creatGroupFileFolder(groupCode: string, folderName: string) {
         return this.context.session.getRichMediaService().createGroupFolder(groupCode, folderName);
     }
 
-    async DelGroupFile(groupCode: string, files: Array<string>) {
+    async delGroupFile(groupCode: string, files: Array<string>) {
         return this.context.session.getRichMediaService().deleteGroupFile(groupCode, [102], files);
     }
 
-    async DelGroupFileFolder(groupCode: string, folderId: string) {
+    async delGroupFileFolder(groupCode: string, folderId: string) {
         return this.context.session.getRichMediaService().deleteGroupFolder(groupCode, folderId);
     }
 
