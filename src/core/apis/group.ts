@@ -16,7 +16,6 @@ import { NTEventWrapper } from '@/common/event';
 export class NTQQGroupApi {
     context: InstanceContext;
     core: NapCatCore;
-    groupCache: Map<string, Group> = new Map<string, Group>();
     groupMemberCache: Map<string, Map<string, GroupMember>> = new Map<string, Map<string, GroupMember>>();
     essenceLRU = new LimitedHashTable<number, string>(1000);
 
@@ -24,17 +23,15 @@ export class NTQQGroupApi {
         this.context = context;
         this.core = core;
     }
-    
+
     async initApi() {
         this.initCache().then().catch(e => this.context.logger.logError(e));
     }
 
     async initCache() {
-        await this.core.apis.GroupApi.refreshGroups();
-        for (const group of this.groupCache.keys()) {
-            await this.refreshGroupMemberCache(group);
+        for (const group of await this.getGroups(true)) {
+            this.refreshGroupMemberCache(group.groupCode).then().catch();
         }
-        this.context.logger.logDebug(`加载${this.groupCache.size}个群组缓存完成`);
     }
 
     async fetchGroupEssenceList(groupCode: string) {
@@ -111,36 +108,10 @@ export class NTQQGroupApi {
         );
     }
 
-    async getGroup(groupCode: string, forced = false) {
-        let group = this.groupCache.get(groupCode.toString());
-        if (!group) {
-            try {
-                const groupList = await this.getGroups(forced);
-                if (groupList.length) {
-                    groupList.forEach(g => {
-                        this.groupCache.set(g.groupCode, g);
-                    });
-                }
-            } catch (e) {
-                return undefined;
-            }
-        }
-        group = this.groupCache.get(groupCode.toString());
-        return group;
-    }
-
     async getGroupMemberAll(groupCode: string, forced = false) {
         return this.context.session.getGroupService().getAllMemberList(groupCode, forced);
     }
 
-    async refreshGroups() {
-        let groups = await this.getGroups(true);
-        let tempGroupCache = new Map<string, Group>();
-        for (const group of groups) {
-            tempGroupCache.set(group.groupCode, group);
-        }
-        this.groupCache = tempGroupCache;
-    }
 
     async refreshGroupMemberCache(groupCode: string) {
         try {
