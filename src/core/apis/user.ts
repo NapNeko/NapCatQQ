@@ -184,7 +184,7 @@ export class NTQQUserApi {
                 break;
             }
         }
-        return uid;
+        return uid ?? '';
     }
 
     async getUinByUidV2(Uid: string) {
@@ -203,7 +203,7 @@ export class NTQQUserApi {
                 break;
             }
         }
-        return uin;
+        return uin ?? '0';
     }
 
     async getRecentContactListSnapShot(count: number) {

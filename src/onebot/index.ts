@@ -405,8 +405,8 @@ export class NapCatOneBot11Adapter {
                         this.context.logger.logDebug(`收到邀请我加群通知:${notify}`);
                         const groupInviteEvent = new OB11GroupRequestEvent(
                             this.core,
-                            parseInt(notify.group.groupCode),
-                            parseInt(await this.core.apis.UserApi.getUinByUidV2(notify.user2.uid)),
+                            +notify.group.groupCode,
+                            +await this.core.apis.UserApi.getUinByUidV2(notify.user2.uid),
                             'invite',
                             notify.postscript,
                             flag
@@ -423,8 +423,8 @@ export class NapCatOneBot11Adapter {
                         this.context.logger.logDebug(`收到群员邀请加群通知:${notify}`);
                         const groupInviteEvent = new OB11GroupRequestEvent(
                             this.core,
-                            parseInt(notify.group.groupCode),
-                            parseInt(await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid)),
+                            +notify.group.groupCode,
+                            +await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid),
                             'add',
                             notify.postscript,
                             flag
@@ -571,6 +571,8 @@ export class NapCatOneBot11Adapter {
     }
 
     private async emitFriendRecallMsg(message: RawMessage, oriMessageId: number, element: MessageElement) {
+        const operatorUid = element.grayTipElement?.revokeElement.operatorUid;
+        if (!operatorUid) return undefined;
         return new OB11FriendRecallNoticeEvent(
             this.core,
             +message.senderUin,
@@ -581,7 +583,7 @@ export class NapCatOneBot11Adapter {
     private async emitGroupRecallMsg(message: RawMessage, oriMessageId: number, element: MessageElement) {
         const operatorUid = element.grayTipElement?.revokeElement.operatorUid;
         if (!operatorUid) return undefined;
-        const operatorId = message.senderUin ?? await this.core.apis.UserApi.getUinByUidV2(operatorUid);
+        const operatorId = await this.core.apis.UserApi.getUinByUidV2(operatorUid);
         return new OB11GroupRecallNoticeEvent(
             this.core,
             +message.peerUin,
