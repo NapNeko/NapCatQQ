@@ -1,6 +1,6 @@
 import { ActionName } from '@/onebot/action/router';
 import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
-import { uri2local } from "@/common/file";
+import { uriToLocalFile } from "@/common/file";
 import { ChatType, Peer } from "@/core";
 import { AIVoiceChatType } from "@/core/packet/entities/aiChat";
 import { Static, Type } from '@sinclair/typebox';
@@ -23,7 +23,7 @@ export class SendGroupAiRecord extends GetPacketStatusDepends<Payload, {
     async _handle(payload: Payload) {
         const rawRsp = await this.core.apis.PacketApi.pkt.operation.GetAiVoice(+payload.group_id, payload.character, payload.text, AIVoiceChatType.Sound);
         const url = await this.core.apis.PacketApi.pkt.operation.GetGroupPttUrl(+payload.group_id, rawRsp.msgInfoBody[0].index);
-        const { path, errMsg, success } = (await uri2local(this.core.NapCatTempPath, url));
+        const { path, errMsg, success } = (await uriToLocalFile(this.core.NapCatTempPath, url));
         if (!success) {
             throw new Error(errMsg);
         }

@@ -6,7 +6,6 @@ import {
     Peer,
     PicElement,
     PicSubType,
-    PicType,
     RawMessage,
     SendFileElement,
     SendPicElement,
@@ -17,7 +16,7 @@ import path from 'path';
 import fs from 'fs';
 import fsPromises from 'fs/promises';
 import { InstanceContext, NapCatCore, SearchResultItem } from '@/core';
-import * as fileType from 'file-type';
+import { fileTypeFromFile } from 'file-type';
 import imageSize from 'image-size';
 import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 import { RkeyManager } from '@/core/helper/rkey';
@@ -41,7 +40,7 @@ export class NTQQFileApi {
         this.rkeyManager = new RkeyManager([
             'https://rkey.napneko.icu/rkeys'
         ],
-        this.context.logger
+            this.context.logger
         );
     }
 
@@ -62,7 +61,7 @@ export class NTQQFileApi {
 
     async uploadFile(filePath: string, elementType: ElementType = ElementType.PIC, elementSubType: number = 0) {
         const fileMd5 = await calculateFileMD5(filePath);
-        const extOrEmpty = (await fileType.fileTypeFromFile(filePath))?.ext;
+        let extOrEmpty = await fileTypeFromFile(filePath).then(e => e?.ext ?? '').catch(e => '');
         const ext = extOrEmpty ? `.${extOrEmpty}` : '';
         let fileName = `${path.basename(filePath)}`;
         if (fileName.indexOf('.') === -1) {
@@ -81,6 +80,7 @@ export class NTQQFileApi {
         });
 
         await this.copyFile(filePath, mediaPath);
+        console.log('copyFile', filePath, mediaPath);
         const fileSize = await this.getFileSize(filePath);
         return {
             md5: fileMd5,
@@ -158,7 +158,7 @@ export class NTQQFileApi {
 
         let fileExt = 'mp4';
         try {
-            const tempExt = (await fileType.fileTypeFromFile(filePath))?.ext;
+            const tempExt = (await fileTypeFromFile(filePath))?.ext;
             if (tempExt) fileExt = tempExt;
         } catch (e) {
             this.context.logger.logError('获取文件类型失败', e);
@@ -306,18 +306,18 @@ export class NTQQFileApi {
                     element.elementType === ElementType.FILE
                 ) {
                     switch (element.elementType) {
-                    case ElementType.PIC:
+                        case ElementType.PIC:
                             element.picElement!.sourcePath = elementResults[elementIndex];
-                        break;
-                    case ElementType.VIDEO:
+                            break;
+                        case ElementType.VIDEO:
                             element.videoElement!.filePath = elementResults[elementIndex];
-                        break;
-                    case ElementType.PTT:
+                            break;
+                        case ElementType.PTT:
                             element.pttElement!.filePath = elementResults[elementIndex];
-                        break;
-                    case ElementType.FILE:
+                            break;
+                        case ElementType.FILE:
                             element.fileElement!.filePath = elementResults[elementIndex];
-                        break;
+                            break;
                     }
                     elementIndex++;
                 }

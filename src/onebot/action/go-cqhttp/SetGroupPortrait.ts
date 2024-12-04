@@ -1,6 +1,6 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { checkFileExistV2, uri2local } from '@/common/file';
+import { checkFileExistV2, uriToLocalFile } from '@/common/file';
 import { Static, Type } from '@sinclair/typebox';
 import fs from 'node:fs/promises';
 const SchemaData = Type.Object({
@@ -15,7 +15,7 @@ export default class SetGroupPortrait extends OneBotAction<Payload, any> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<any> {
-        const { path, success } = (await uri2local(this.core.NapCatTempPath, payload.file));
+        const { path, success } = (await uriToLocalFile(this.core.NapCatTempPath, payload.file));
         if (!success) {
             throw new Error(`头像${payload.file}设置失败,file字段可能格式不正确`);
         }

@@ -1,7 +1,7 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import fs from 'node:fs/promises';
-import { checkFileExist, uri2local } from '@/common/file';
+import { checkFileExist, uriToLocalFile } from '@/common/file';
 import { Static, Type } from '@sinclair/typebox';
 
 const SchemaData = Type.Object({
@@ -14,7 +14,7 @@ export default class SetAvatar extends OneBotAction<Payload, null> {
     actionName = ActionName.SetQQAvatar;
     payloadSchema = SchemaData;
     async _handle(payload: Payload): Promise<null> {
-        const { path, success } = (await uri2local(this.core.NapCatTempPath, payload.file));
+        const { path, success } = (await uriToLocalFile(this.core.NapCatTempPath, payload.file));
         if (!success) {
             throw new Error(`头像${payload.file}设置失败,file字段可能格式不正确`);
         }
