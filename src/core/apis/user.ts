@@ -26,7 +26,7 @@ export class NTQQUserApi {
             uids,
         );
     }
-    
+
     // 默认获取自己的 type = 2 获取别人 type = 1
     async getProfileLike(uid: string, start: number, count: number, type: number = 2) {
         return this.context.session.getProfileLikeService().getBuddyProfileLike({
@@ -99,7 +99,7 @@ export class NTQQUserApi {
         };
         return RetUser;
     }
-    
+
     async getUserDetailInfo(uid: string): Promise<User> {
         let retUser = await solveAsyncProblem(async (uid) => this.fetchUserDetailInfo(uid, UserDetailSource.KDB), uid);
         if (retUser && retUser.uin !== '0') {
@@ -173,31 +173,38 @@ export class NTQQUserApi {
         return skey;
     }
 
-    //后期改成流水线处理
     async getUidByUinV2(Uin: string) {
-        let uid = (await this.context.session.getGroupService().getUidByUins([Uin])).uids.get(Uin);
-        if (uid) return uid;
-        uid = (await this.context.session.getProfileService().getUidByUin('FriendsServiceImpl', [Uin])).get(Uin);
-        if (uid) return uid;
-        uid = (await this.context.session.getUixConvertService().getUid([Uin])).uidInfo.get(Uin);
-        if (uid) return uid;
-        const unverifiedUid = (await this.getUserDetailInfoByUin(Uin)).detail.uid;//从QQ Native 特殊转换
-        if (unverifiedUid.indexOf('*') == -1) uid = unverifiedUid;
-        //if (uid) return uid;
+        const services = [
+            () => this.context.session.getGroupService().getUidByUins([Uin]).then((data) => data.uids.get(Uin)).catch(() => undefined),
+            () => this.context.session.getProfileService().getUidByUin('FriendsServiceImpl', [Uin]).then((data) => data.get(Uin)).catch(() => undefined),
+            () => this.context.session.getUixConvertService().getUid([Uin]).then((data) => data.uidInfo.get(Uin)).catch(() => undefined),
+            () => this.getUserDetailInfoByUin(Uin).then((data) => data.detail.uid).catch(() => undefined),
+        ];
+        let uid: string | undefined = undefined;
+        for (const service of services) {
+            uid = await service();
+            if (uid && uid.indexOf('*') == -1 && uid !== '') {
+                break;
+            }
+        }
         return uid;
     }
 
-    //后期改成流水线处理
     async getUinByUidV2(Uid: string) {
-        let uin = (await this.context.session.getGroupService().getUinByUids([Uid])).uins.get(Uid);
-        if (uin && uin !== '0') return uin;
-        uin = (await this.context.session.getProfileService().getUinByUid('FriendsServiceImpl', [Uid])).get(Uid);
-        if (uin && uin !== '0') return uin;
-        uin = (await this.context.session.getUixConvertService().getUin([Uid])).uinInfo.get(Uid);
-        if (uin && uin !== '0') return uin;
-        uin = (await this.core.apis.FriendApi.getBuddyIdMap(true)).getKey(Uid);
-        if (uin && uin !== '0') return uin;
-        uin = (await this.getUserDetailInfo(Uid)).uin; //从QQ Native 转换
+        const services = [
+            () => this.context.session.getGroupService().getUinByUids([Uid]).then((data) => data.uins.get(Uid)).catch(() => undefined),
+            () => this.context.session.getProfileService().getUinByUid('FriendsServiceImpl', [Uid]).then((data) => data.get(Uid)).catch(() => undefined),
+            () => this.context.session.getUixConvertService().getUin([Uid]).then((data) => data.uinInfo.get(Uid)).catch(() => undefined),
+            () => this.core.apis.FriendApi.getBuddyIdMap(true).then((data) => data.getKey(Uid)).catch(() => undefined),
+            () => this.getUserDetailInfo(Uid).then((data) => data.uin).catch(() => undefined),
+        ];
+        let uin: string | undefined = undefined;
+        for (const service of services) {
+            uin = await service();
+            if (uin && uin !== '0' && uin !== '') {
+                break;
+            }
+        }
         return uin;
     }
 
