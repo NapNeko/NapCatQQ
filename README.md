@@ -36,6 +36,13 @@ NapCatQQ 是现代化的基于 NTQQ 的 Bot 协议端实现
 ## 回家旅途
 [QQ Group](https://qm.qq.com/q/I6LU87a0Yq)
 
+## 性能/OneBot协议标准问题/开发方向
+NapCat 已实现90％+的OneBot/GoCQ标准接口,并提供兼容性保留接口，其设计理念遵守 无数据库/异步优先/后台刷新 的性能思想。
+
+由此设计带来一系列好处,在开发中,获取群员列表通常小于50Ms,单条文本消息发送在320Ms以内,在1k+的群聊流程运行,同时带来一些副作用，上报数据中大量使用Magic生成字段, 消息Id无法持久，无法上报撤回消息原始内容。
+
+NapCat在设计理念下遵守OneBot规范大多数要求并且积极改进,任何合理的标准化issue与pr将被接收。
+
 ## 感谢他们
 感谢 [Lagrange](https://github.com/LagrangeDev/Lagrange.Core) 对本项目的大力支持 参考部分代码 已获授权
 
