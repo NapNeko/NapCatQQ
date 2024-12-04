@@ -18,33 +18,23 @@ export class NTQQGroupApi {
     core: NapCatCore;
     groupCache: Map<string, Group> = new Map<string, Group>();
     groupMemberCache: Map<string, Map<string, GroupMember>> = new Map<string, Map<string, GroupMember>>();
-    groups: Group[] = [];
     essenceLRU = new LimitedHashTable<number, string>(1000);
-    session: any;
 
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
         this.core = core;
     }
+    
     async initApi() {
         this.initCache().then().catch(e => this.context.logger.logError(e));
     }
-    async initCache() {
-        this.groups = await this.getGroups();
-        for (const group of this.groups) {
-            this.groupCache.set(group.groupCode, group);
-            this.refreshGroupMemberCache(group.groupCode).then().catch(e => this.context.logger.logError(e));
-        }
-        this.context.logger.logDebug(`加载${this.groups.length}个群组缓存完成`);
-        // process.pid 调试点
-    }
 
-    async getCoreAndBaseInfo(uids: string[]) {
-        return await this.core.eventWrapper.callNoListenerEvent(
-            'NodeIKernelProfileService/getCoreAndBaseInfo',
-            'nodeStore',
-            uids,
-        );
+    async initCache() {
+        await this.core.apis.GroupApi.refreshGroups();
+        for (const group of this.groupCache.keys()) {
+            await this.refreshGroupMemberCache(group);
+        }
+        this.context.logger.logDebug(`加载${this.groupCache.size}个群组缓存完成`);
     }
 
     async fetchGroupEssenceList(groupCode: string) {
@@ -62,15 +52,15 @@ export class NTQQGroupApi {
         return (await data)[1];
     }
 
-    async clearGroupNotifiesUnreadCount(uk: boolean) {
-        return this.context.session.getGroupService().clearGroupNotifiesUnreadCount(uk);
+    async clearGroupNotifiesUnreadCount(doubt: boolean) {
+        return this.context.session.getGroupService().clearGroupNotifiesUnreadCount(doubt);
     }
 
-    async setGroupAvatar(gc: string, filePath: string) {
-        return this.context.session.getGroupService().setHeader(gc, filePath);
+    async setGroupAvatar(groupCode: string, filePath: string) {
+        return this.context.session.getGroupService().setHeader(groupCode, filePath);
     }
 
-    async getGroups(forced = false) {
+    async getGroups(forced: boolean = false) {
         const [, , groupList] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelGroupService/getGroupList',
             'NodeIKernelGroupListener/onGroupListUpdate',
@@ -79,9 +69,9 @@ export class NTQQGroupApi {
         return groupList;
     }
 
-    async getGroupExtFE0Info(groupCode: string[], forced = true) {
+    async getGroupExtFE0Info(groupCodes: Array<string>, forced = true) {
         return this.context.session.getGroupService().getGroupExt0xEF0Info(
-            groupCode,
+            groupCodes,
             [],
             {
                 bindGuildId: 1,
@@ -143,6 +133,15 @@ export class NTQQGroupApi {
         return this.context.session.getGroupService().getAllMemberList(groupCode, forced);
     }
 
+    async refreshGroups() {
+        let groups = await this.getGroups(true);
+        let tempGroupCache = new Map<string, Group>();
+        for (const group of groups) {
+            tempGroupCache.set(group.groupCode, group);
+        }
+        this.groupCache = tempGroupCache;
+    }
+
     async refreshGroupMemberCache(groupCode: string) {
         try {
             const members = await this.getGroupMemberAll(groupCode, true);
@@ -159,46 +158,29 @@ export class NTQQGroupApi {
         }
         return this.groupMemberCache;
     }
-    // 后台补全复杂信息
-    // let event = (async () => {
-    //     let data = (await Promise.allSettled(members.result.ids.map(e => this.core.apis.UserApi.getUserDetailInfo(e.uid)))).filter(e => e.status === 'fulfilled').map(e => e.value);
-    //     data.forEach(e => {
-    //         const existingMember = members.result.infos.get(e.uid);
-    //         if (existingMember) {
-    //             members.result.infos.set(e.uid, { ...existingMember, ...e });
-    //         }
-    //     });
-    //     this.groupMemberCache.set(groupCode, members.result.infos);
-    // })().then().catch(e => this.context.logger.logError(e));
-    // 处理首次空缺
-    // if (!this.groupMemberCache.get(groupCode)) {
-    //     await event;
-    // }
+
     async getGroupMember(groupCode: string | number, memberUinOrUid: string | number) {
         const groupCodeStr = groupCode.toString();
         const memberUinOrUidStr = memberUinOrUid.toString();
 
-        // 检查群缓存
+        // 获取群成员缓存
         let members = this.groupMemberCache.get(groupCodeStr);
         if (!members) {
             members = (await this.refreshGroupMemberCache(groupCodeStr)).get(groupCodeStr);
         }
 
-        function getMember() {
-            let member: GroupMember | undefined;
+        const getMember = () => {
             if (isNumeric(memberUinOrUidStr)) {
-                member = Array.from(members!.values()).find(member => member.uin === memberUinOrUidStr);
+                return Array.from(members!.values()).find(member => member.uin === memberUinOrUidStr);
             } else {
-                member = members!.get(memberUinOrUidStr);
+                return members!.get(memberUinOrUidStr);
             }
-            return member;
-        }
-
+        };
 
         let member = getMember();
-        // 不存在群友缓存 尝试刷新
+        // 如果缓存中不存在该成员，尝试刷新缓存
         if (!member) {
-            await this.refreshGroupMemberCache(groupCode.toString());
+            members = (await this.refreshGroupMemberCache(groupCodeStr)).get(groupCodeStr);
             member = getMember();
         }
         return member;
@@ -212,7 +194,7 @@ export class NTQQGroupApi {
         return this.context.session.getRichMediaService().createGroupFolder(groupCode, folderName);
     }
 
-    async DelGroupFile(groupCode: string, files: string[]) {
+    async DelGroupFile(groupCode: string, files: Array<string>) {
         return this.context.session.getRichMediaService().deleteGroupFile(groupCode, [102], files);
     }
 
@@ -220,14 +202,14 @@ export class NTQQGroupApi {
         return this.context.session.getRichMediaService().deleteGroupFolder(groupCode, folderId);
     }
 
-    async addGroupEssence(GroupCode: string, msgId: string) {
+    async addGroupEssence(groupCode: string, msgId: string) {
         const MsgData = await this.context.session.getMsgService().getMsgsIncludeSelf({
             chatType: 2,
             guildId: '',
-            peerUid: GroupCode,
+            peerUid: groupCode,
         }, msgId, 1, false);
         const param = {
-            groupCode: GroupCode,
+            groupCode: groupCode,
             msgRandom: parseInt(MsgData.msgList[0].msgRandom),
             msgSeq: parseInt(MsgData.msgList[0].msgSeq),
         };
@@ -238,9 +220,9 @@ export class NTQQGroupApi {
         return this.context.session.getGroupService().kickMemberV2(param);
     }
 
-    async deleteGroupBulletin(GroupCode: string, noticeId: string) {
+    async deleteGroupBulletin(groupCode: string, noticeId: string) {
         const psKey = (await this.core.apis.UserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com')!;
-        return this.context.session.getGroupService().deleteGroupBulletin(GroupCode, psKey, noticeId);
+        return this.context.session.getGroupService().deleteGroupBulletin(groupCode, psKey, noticeId);
     }
 
     async quitGroupV2(GroupCode: string, needDeleteLocalMsg: boolean) {
@@ -251,37 +233,37 @@ export class NTQQGroupApi {
         return this.context.session.getGroupService().quitGroupV2(param);
     }
 
-    async removeGroupEssenceBySeq(GroupCode: string, msgRandom: string, msgSeq: string) {
+    async removeGroupEssenceBySeq(groupCode: string, msgRandom: string, msgSeq: string) {
         const param = {
-            groupCode: GroupCode,
+            groupCode: groupCode,
             msgRandom: parseInt(msgRandom),
             msgSeq: parseInt(msgSeq),
         };
         return this.context.session.getGroupService().removeGroupEssence(param);
     }
 
-    async removeGroupEssence(GroupCode: string, msgId: string) {
+    async removeGroupEssence(groupCode: string, msgId: string) {
         const MsgData = await this.context.session.getMsgService().getMsgsIncludeSelf({
             chatType: 2,
             guildId: '',
-            peerUid: GroupCode,
+            peerUid: groupCode,
         }, msgId, 1, false);
         const param = {
-            groupCode: GroupCode,
+            groupCode: groupCode,
             msgRandom: parseInt(MsgData.msgList[0].msgRandom),
             msgSeq: parseInt(MsgData.msgList[0].msgSeq),
         };
         return this.context.session.getGroupService().removeGroupEssence(param);
     }
 
-    async getSingleScreenNotifies(doubt: boolean, num: number) {
+    async getSingleScreenNotifies(doubt: boolean, count: number) {
         const [, , , notifies] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelGroupService/getSingleScreenNotifies',
             'NodeIKernelGroupListener/onGroupSingleScreenNotifies',
             [
                 doubt,
                 '',
-                num,
+                count,
             ],
         );
         return notifies;
@@ -305,44 +287,43 @@ export class NTQQGroupApi {
         return ret.groupInfos.find(g => g.groupCode === groupCode);
     }
 
-    async getGroupMemberEx(GroupCode: string, uid: string, forced = false, retry = 2) {
+    async getGroupMemberEx(groupCode: string, uid: string, forced: boolean = false, retry: number = 2) {
         const data = await solveAsyncProblem((eventWrapper: NTEventWrapper, GroupCode: string, uid: string, forced = false) => {
             return eventWrapper.callNormalEventV2(
                 'NodeIKernelGroupService/getMemberInfo',
                 'NodeIKernelGroupListener/onMemberInfoChange',
-                [GroupCode, [uid], forced],
+                [groupCode, [uid], forced],
                 (ret) => ret.result === 0,
                 (params, _, members) => params === GroupCode && members.size > 0 && members.has(uid),
                 1,
                 forced ? 2500 : 250
             );
-        }, this.core.eventWrapper, GroupCode, uid, forced);
+        }, this.core.eventWrapper, groupCode, uid, forced);
         if (data && data[3] instanceof Map && data[3].has(uid)) {
             return data[3].get(uid);
         }
         if (retry > 0) {
-            const trydata = await this.getGroupMemberEx(GroupCode, uid, true, retry - 1) as GroupMember | undefined;
+            const trydata = await this.getGroupMemberEx(groupCode, uid, true, retry - 1) as GroupMember | undefined;
             if (trydata) return trydata;
         }
         return undefined;
     }
 
-    async getGroupFileCount(group_ids: Array<string>) {
-        return this.context.session.getRichMediaService().batchGetGroupFileCount(group_ids);
+    async getGroupFileCount(groupCodes: Array<string>) {
+        return this.context.session.getRichMediaService().batchGetGroupFileCount(groupCodes);
     }
 
-    async getArkJsonGroupShare(GroupCode: string) {
+    async getArkJsonGroupShare(groupCode: string) {
         const ret = await this.core.eventWrapper.callNoListenerEvent(
             'NodeIKernelGroupService/getGroupRecommendContactArkJson',
-            GroupCode,
+            groupCode,
         ) as GeneralCallResult & { arkJson: string };
         return ret.arkJson;
     }
 
-    //需要异常处理
-    async uploadGroupBulletinPic(GroupCode: string, imageurl: string) {
+    async uploadGroupBulletinPic(groupCode: string, imageurl: string) {
         const _Pskey = (await this.core.apis.UserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com')!;
-        return this.context.session.getGroupService().uploadGroupBulletinPic(GroupCode, _Pskey, imageurl);
+        return this.context.session.getGroupService().uploadGroupBulletinPic(groupCode, _Pskey, imageurl);
     }
 
     async handleGroupRequest(flag: string, operateType: NTGroupRequestOperateTypes, reason?: string) {
@@ -364,36 +345,36 @@ export class NTQQGroupApi {
             });
     }
 
-    async quitGroup(groupQQ: string) {
-        return this.context.session.getGroupService().quitGroup(groupQQ);
+    async quitGroup(groupCode: string) {
+        return this.context.session.getGroupService().quitGroup(groupCode);
     }
 
-    async kickMember(groupQQ: string, kickUids: string[], refuseForever: boolean = false, kickReason: string = '') {
-        return this.context.session.getGroupService().kickMember(groupQQ, kickUids, refuseForever, kickReason);
+    async kickMember(groupCode: string, kickUids: string[], refuseForever: boolean = false, kickReason: string = '') {
+        return this.context.session.getGroupService().kickMember(groupCode, kickUids, refuseForever, kickReason);
     }
 
-    async banMember(groupQQ: string, memList: Array<{ uid: string, timeStamp: number }>) {
+    async banMember(groupCode: string, memList: Array<{ uid: string, timeStamp: number }>) {
         // timeStamp为秒数, 0为解除禁言
-        return this.context.session.getGroupService().setMemberShutUp(groupQQ, memList);
+        return this.context.session.getGroupService().setMemberShutUp(groupCode, memList);
     }
 
-    async banGroup(groupQQ: string, shutUp: boolean) {
-        return this.context.session.getGroupService().setGroupShutUp(groupQQ, shutUp);
+    async banGroup(groupCode: string, shutUp: boolean) {
+        return this.context.session.getGroupService().setGroupShutUp(groupCode, shutUp);
     }
 
-    async setMemberCard(groupQQ: string, memberUid: string, cardName: string) {
-        return this.context.session.getGroupService().modifyMemberCardName(groupQQ, memberUid, cardName);
+    async setMemberCard(groupCode: string, memberUid: string, cardName: string) {
+        return this.context.session.getGroupService().modifyMemberCardName(groupCode, memberUid, cardName);
     }
 
-    async setMemberRole(groupQQ: string, memberUid: string, role: NTGroupMemberRole) {
-        return this.context.session.getGroupService().modifyMemberRole(groupQQ, memberUid, role);
+    async setMemberRole(groupCode: string, memberUid: string, role: NTGroupMemberRole) {
+        return this.context.session.getGroupService().modifyMemberRole(groupCode, memberUid, role);
     }
 
-    async setGroupName(groupQQ: string, groupName: string) {
-        return this.context.session.getGroupService().modifyGroupName(groupQQ, groupName, false);
+    async setGroupName(groupCode: string, groupName: string) {
+        return this.context.session.getGroupService().modifyGroupName(groupCode, groupName, false);
     }
 
-    async publishGroupBulletin(groupQQ: string, content: string, picInfo: {
+    async publishGroupBulletin(groupCode: string, content: string, picInfo: {
         id: string,
         width: number,
         height: number
@@ -407,11 +388,11 @@ export class NTQQGroupApi {
             pinned: pinned,
             confirmRequired: confirmRequired,
         };
-        return this.context.session.getGroupService().publishGroupBulletin(groupQQ, psKey!, data);
+        return this.context.session.getGroupService().publishGroupBulletin(groupCode, psKey!, data);
     }
 
-    async getGroupRemainAtTimes(GroupCode: string) {
-        return this.context.session.getGroupService().getGroupRemainAtTimes(GroupCode);
+    async getGroupRemainAtTimes(groupCode: string) {
+        return this.context.session.getGroupService().getGroupRemainAtTimes(groupCode);
     }
 
     async getMemberExtInfo(groupCode: string, uin: string) {

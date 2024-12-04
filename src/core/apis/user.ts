@@ -18,6 +18,15 @@ export class NTQQUserApi {
     async getStatusByUid(uid: string) {
         return this.context.session.getProfileService().getStatus(uid);
     }
+
+    async getCoreAndBaseInfo(uids: string[]) {
+        return await this.core.eventWrapper.callNoListenerEvent(
+            'NodeIKernelProfileService/getCoreAndBaseInfo',
+            'nodeStore',
+            uids,
+        );
+    }
+    
     // 默认获取自己的 type = 2 获取别人 type = 1
     async getProfileLike(uid: string, start: number, count: number, type: number = 2) {
         return this.context.session.getProfileLikeService().getBuddyProfileLike({
