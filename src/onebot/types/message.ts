@@ -71,6 +71,14 @@ export enum OB11MessageDataType {
     location = 'location'
 }
 
+export interface OB11MessagePoke {
+    type: OB11MessageDataType.poke;
+    data: {
+        type: string;
+        id: string;
+    };
+}
+
 // 商城表情消息接口定义
 export interface OB11MessageMFace {
     type: OB11MessageDataType.mface;
@@ -247,7 +255,7 @@ export type OB11MessageData =
     OB11MessageAt | OB11MessageReply |
     OB11MessageImage | OB11MessageRecord | OB11MessageFile | OB11MessageVideo |
     OB11MessageNode | OB11MessageIdMusic | OB11MessageCustomMusic | OB11MessageJson |
-    OB11MessageDice | OB11MessageRPS | OB11MessageMarkdown | OB11MessageForward | OB11MessageContext;
+    OB11MessageDice | OB11MessageRPS | OB11MessageMarkdown | OB11MessageForward | OB11MessageContext | OB11MessagePoke;
 
 // 发送消息接口定义
 export interface OB11PostSendMsg {

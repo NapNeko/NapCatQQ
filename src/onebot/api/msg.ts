@@ -153,6 +153,17 @@ export class OneBotMsgApi {
 
         faceElement: async element => {
             const faceIndex = element.faceIndex;
+            if (element.faceType == FaceType.Poke) {
+                return {
+                    type: OB11MessageDataType.poke,
+                    data: {
+                        type: element?.pokeType?.toString() ?? '0',
+                        id: faceIndex.toString(),
+                    }
+                }
+
+            }
+
             if (faceIndex === FaceIndex.DICE) {
                 return {
                     type: OB11MessageDataType.dice,
