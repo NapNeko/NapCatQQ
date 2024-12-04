@@ -8,14 +8,10 @@ import { LRUCache } from '@/common/lru-cache';
 export class NTQQUserApi {
     context: InstanceContext;
     core: NapCatCore;
-    private uidCache: LRUCache<string, string>;
-    private uinCache: LRUCache<string, string>;
 
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
         this.core = core;
-        this.uidCache = new LRUCache(1000);
-        this.uinCache = new LRUCache(1000);
     }
 
     async getCoreAndBaseInfo(uids: string[]) {
@@ -174,9 +170,6 @@ export class NTQQUserApi {
     }
 
     async getUidByUinV2(Uin: string) {
-        if (this.uidCache.get(Uin)) {
-            return this.uidCache.get(Uin);
-        }
         const services = [
             () => this.context.session.getUixConvertService().getUid([Uin]).then((data) => data.uidInfo.get(Uin)).catch(() => undefined),
             () => promisify<string, string[], Map<string, string>>
@@ -188,7 +181,6 @@ export class NTQQUserApi {
         for (const service of services) {
             uid = await service();
             if (uid && uid.indexOf('*') == -1 && uid !== '') {
-                this.uidCache.put(Uin, uid);
                 break;
             }
         }
@@ -196,9 +188,6 @@ export class NTQQUserApi {
     }
 
     async getUinByUidV2(Uid: string) {
-        if (this.uinCache.get(Uid)) {
-            return this.uinCache.get(Uid);
-        }
         const services = [
             () => this.context.session.getUixConvertService().getUin([Uid]).then((data) => data.uinInfo.get(Uid)).catch(() => undefined),
             () => this.context.session.getGroupService().getUinByUids([Uid]).then((data) => data.uins.get(Uid)).catch(() => undefined),
@@ -211,7 +200,6 @@ export class NTQQUserApi {
         for (const service of services) {
             uin = await service();
             if (uin && uin !== '0' && uin !== '') {
-                this.uinCache.put(Uid, uin);
                 break;
             }
         }
