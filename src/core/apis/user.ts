@@ -170,6 +170,9 @@ export class NTQQUserApi {
     }
 
     async getUidByUinV2(Uin: string) {
+        if (!Uin) {
+            return '';
+        }
         const services = [
             () => this.context.session.getUixConvertService().getUid([Uin]).then((data) => data.uidInfo.get(Uin)).catch(() => undefined),
             () => promisify<string, string[], Map<string, string>>
@@ -188,6 +191,9 @@ export class NTQQUserApi {
     }
 
     async getUinByUidV2(Uid: string) {
+        if (!Uid) {
+            return '0';
+        }
         const services = [
             () => this.context.session.getUixConvertService().getUin([Uid]).then((data) => data.uinInfo.get(Uid)).catch(() => undefined),
             () => this.context.session.getGroupService().getUinByUids([Uid]).then((data) => data.uins.get(Uid)).catch(() => undefined),
