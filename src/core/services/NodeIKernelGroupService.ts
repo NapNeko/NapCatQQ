@@ -187,11 +187,11 @@ export interface NodeIKernelGroupService {
 
     destroyGroup(groupCode: string): void;
 
-    getSingleScreenNotifies(doubted: boolean, start_seq: string, num: number): Promise<GeneralCallResult>;
+    getSingleScreenNotifies(doubt: boolean, startSeq: string, count: number): Promise<GeneralCallResult>;
 
     clearGroupNotifies(groupCode: string): void;
 
-    getGroupNotifiesUnreadCount(unknown: boolean): Promise<GeneralCallResult>;
+    getGroupNotifiesUnreadCount(doubt: boolean): Promise<GeneralCallResult>;
 
     clearGroupNotifiesUnreadCount(doubt: boolean): void;
 
