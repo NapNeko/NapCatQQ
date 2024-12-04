@@ -4,14 +4,14 @@ import { GeneralCallResult } from '@/core/services/common';
 
 export interface NodeIKernelProfileService {
     getOtherFlag(callfrom: string, uids: string[]): Promise<Map<string, any>>;
-    
+
     getVasInfo(callfrom: string, uids: string[]): Promise<Map<string, any>>;
 
     getRelationFlag(callfrom: string, uids: string[]): Promise<Map<string, any>>;
 
-    getUidByUin(callfrom: string, uin: Array<string>): Promise<Map<string, string>>;
+    getUidByUin(callfrom: string, uin: Array<string>): Map<string, string>;
 
-    getUinByUid(callfrom: string, uid: Array<string>): Promise<Map<string, string>>;
+    getUinByUid(callfrom: string, uid: Array<string>): Map<string, string>;
 
     getCoreAndBaseInfo(callfrom: string, uids: string[]): Promise<Map<string, SimpleInfo>>;
 

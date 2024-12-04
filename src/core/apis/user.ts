@@ -2,14 +2,20 @@ import { ModifyProfileParams, User, UserDetailSource } from '@/core/types';
 import { RequestUtil } from '@/common/request';
 import { InstanceContext, NapCatCore, ProfileBizType } from '..';
 import { solveAsyncProblem } from '@/common/helper';
+import { promisify } from 'node:util';
+import { LRUCache } from '@/common/lru-cache';
 
 export class NTQQUserApi {
     context: InstanceContext;
     core: NapCatCore;
+    private uidCache: LRUCache<string, string>;
+    private uinCache: LRUCache<string, string>;
 
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
         this.core = core;
+        this.uidCache = new LRUCache(1000);
+        this.uinCache = new LRUCache(1000);
     }
 
     async getCoreAndBaseInfo(uids: string[]) {
@@ -163,20 +169,26 @@ export class NTQQUserApi {
         if (!skey) {
             throw new Error('SKey is Empty');
         }
+
         return skey;
     }
 
     async getUidByUinV2(Uin: string) {
+        if (this.uidCache.get(Uin)) {
+            return this.uidCache.get(Uin);
+        }
         const services = [
-            () => this.context.session.getGroupService().getUidByUins([Uin]).then((data) => data.uids.get(Uin)).catch(() => undefined),
-            () => this.context.session.getProfileService().getUidByUin('FriendsServiceImpl', [Uin]).then((data) => data.get(Uin)).catch(() => undefined),
             () => this.context.session.getUixConvertService().getUid([Uin]).then((data) => data.uidInfo.get(Uin)).catch(() => undefined),
+            () => promisify<string, string[], Map<string, string>>
+                (this.context.session.getProfileService().getUidByUin)('FriendsServiceImpl', [Uin]).then((data) => data.get(Uin)).catch(() => undefined),
+            () => this.context.session.getGroupService().getUidByUins([Uin]).then((data) => data.uids.get(Uin)).catch(() => undefined),
             () => this.getUserDetailInfoByUin(Uin).then((data) => data.detail.uid).catch(() => undefined),
         ];
         let uid: string | undefined = undefined;
         for (const service of services) {
             uid = await service();
             if (uid && uid.indexOf('*') == -1 && uid !== '') {
+                this.uidCache.put(Uin, uid);
                 break;
             }
         }
@@ -184,10 +196,14 @@ export class NTQQUserApi {
     }
 
     async getUinByUidV2(Uid: string) {
+        if (this.uinCache.get(Uid)) {
+            return this.uinCache.get(Uid);
+        }
         const services = [
-            () => this.context.session.getGroupService().getUinByUids([Uid]).then((data) => data.uins.get(Uid)).catch(() => undefined),
-            () => this.context.session.getProfileService().getUinByUid('FriendsServiceImpl', [Uid]).then((data) => data.get(Uid)).catch(() => undefined),
             () => this.context.session.getUixConvertService().getUin([Uid]).then((data) => data.uinInfo.get(Uid)).catch(() => undefined),
+            () => this.context.session.getGroupService().getUinByUids([Uid]).then((data) => data.uins.get(Uid)).catch(() => undefined),
+            () => promisify<string, string[], Map<string, string>>
+                (this.context.session.getProfileService().getUinByUid)('FriendsServiceImpl', [Uid]).then((data) => data.get(Uid)).catch(() => undefined),
             () => this.core.apis.FriendApi.getBuddyIdMap(true).then((data) => data.getKey(Uid)).catch(() => undefined),
             () => this.getUserDetailInfo(Uid).then((data) => data.uin).catch(() => undefined),
         ];
@@ -195,6 +211,7 @@ export class NTQQUserApi {
         for (const service of services) {
             uin = await service();
             if (uin && uin !== '0' && uin !== '') {
+                this.uinCache.put(Uid, uin);
                 break;
             }
         }
