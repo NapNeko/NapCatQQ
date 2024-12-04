@@ -13,6 +13,6 @@ export class CreateGroupFileFolder extends  OneBotAction<Payload, any>  {
     actionName = ActionName.GoCQHTTP_CreateGroupFileFolder;
     payloadSchema = SchemaData;
     async _handle(payload: Payload) {
-        return (await this.core.apis.GroupApi.CreatGroupFileFolder(payload.group_id.toString(), payload.folder_name)).resultWithGroupItem;
+        return (await this.core.apis.GroupApi.creatGroupFileFolder(payload.group_id.toString(), payload.folder_name)).resultWithGroupItem;
     }
 }

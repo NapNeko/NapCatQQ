@@ -980,7 +980,14 @@ export class OneBotMsgApi {
             );
         } else if (SysMessage.contentHead.type == 34 && SysMessage.body?.msgContent) {
             const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
-            this.core.apis.GroupApi.refreshGroupMemberCache(groupChange.groupUin.toString()).then().catch();
+            if (groupChange.memberUid === this.core.selfInfo.uid) {
+                setTimeout(() => {
+                    this.core.apis.GroupApi.groupMemberCache.delete(groupChange.groupUin.toString());
+                }, 5000);
+                // 自己被踢了 5S后回收
+            } else {
+                this.core.apis.GroupApi.refreshGroupMemberCache(groupChange.groupUin.toString()).then().catch();
+            }
             return new OB11GroupDecreaseEvent(
                 this.core,
                 groupChange.groupUin,
