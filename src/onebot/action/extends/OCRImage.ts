@@ -1,6 +1,6 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { checkFileExist, uri2local } from '@/common/file';
+import { checkFileExist, uriToLocalFile } from '@/common/file';
 import fs from 'fs';
 import { Static, Type } from '@sinclair/typebox';
 
@@ -15,7 +15,7 @@ export class OCRImage extends OneBotAction<Payload, any> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const { path, success } = (await uri2local(this.core.NapCatTempPath, payload.image));
+        const { path, success } = (await uriToLocalFile(this.core.NapCatTempPath, payload.image));
         if (!success) {
             throw new Error(`OCR ${payload.image}失败,image字段可能格式不正确`);
         }

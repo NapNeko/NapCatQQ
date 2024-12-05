@@ -1,8 +1,6 @@
 import {
     BuddyReqType,
     ChatType,
-    DataSource,
-    NTGroupMemberRole,
     GroupNotifyMsgStatus,
     GroupNotifyMsgType,
     InstanceContext,
@@ -41,8 +39,6 @@ import { OB11InputStatusEvent } from '@/onebot/event/notice/OB11InputStatusEvent
 import { MessageUnique } from '@/common/message-unique';
 import { proxiedListenerOf } from '@/common/proxy-handler';
 import { OB11FriendRequestEvent } from '@/onebot/event/request/OB11FriendRequest';
-import { OB11GroupAdminNoticeEvent } from '@/onebot/event/notice/OB11GroupAdminNoticeEvent';
-// import { GroupDecreaseSubType, OB11GroupDecreaseEvent } from '@/onebot/event/notice/OB11GroupDecreaseEvent';
 import { OB11GroupRequestEvent } from '@/onebot/event/request/OB11GroupRequest';
 import { OB11FriendRecallNoticeEvent } from '@/onebot/event/notice/OB11FriendRecallNoticeEvent';
 import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecallNoticeEvent';
@@ -337,7 +333,7 @@ export class NapCatOneBot11Adapter {
                             this.core,
                             +requesterUin,
                             req.extWords,
-                            req.friendUid + '|' + req.reqTime
+                            req.reqTime
                         )
                     );
                 } catch (e) {
@@ -355,7 +351,6 @@ export class NapCatOneBot11Adapter {
         const groupListener = new NodeIKernelGroupListener();
 
         groupListener.onGroupNotifiesUpdated = async (_, notifies) => {
-            //console.log('ob11 onGroupNotifiesUpdated', notifies[0]);
             await this.core.apis.GroupApi.clearGroupNotifiesUnreadCount(false);
             if (
                 ![
@@ -370,177 +365,78 @@ export class NapCatOneBot11Adapter {
                     if (notifyTime < this.bootTime) {
                         continue;
                     }
-
-                    const flag = notify.group.groupCode + '|' + notify.seq + '|' + notify.type;
+                    const flag = notify.seq;
                     this.context.logger.logDebug('收到群通知', notify);
-
                     if (
-                        [
-                            GroupNotifyMsgType.SET_ADMIN,
-                            GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_CANCELED,
-                            GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_ADMIN,
-                        ].includes(notify.type)
+                        [GroupNotifyMsgType.REQUEST_JOIN_NEED_ADMINI_STRATOR_PASS].includes(notify.type) &&
+                        notify.status == GroupNotifyMsgStatus.KUNHANDLE
                     ) {
-                        const member1 = await this.core.apis.GroupApi.getGroupMember(
-                            notify.group.groupCode,
-                            notify.user1.uid
-                        );
-                        this.context.logger.logDebug('有管理员变动通知');
-                        // refreshGroupMembers(notify.group.groupCode).then();
-                        this.context.logger.logDebug('开始获取变动的管理员');
-                        if (member1) {
-                            this.context.logger.logDebug('变动管理员获取成功');
-                            const groupAdminNoticeEvent = new OB11GroupAdminNoticeEvent(
-                                this.core,
-                                parseInt(notify.group.groupCode),
-                                parseInt(member1.uin),
-                                [
-                                    GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_CANCELED,
-                                    GroupNotifyMsgType.CANCEL_ADMIN_NOTIFY_ADMIN,
-                                ].includes(notify.type)
-                                    ? 'unset'
-                                    : 'set'
-                            );
-                            this.networkManager
-                                .emitEvent(groupAdminNoticeEvent)
-                                .catch((e) =>
-                                    this.context.logger.logError('处理群管理员变动失败', e)
-                                );
-                        } else {
-                            this.context.logger.logDebug(
-                                '获取群通知的成员信息失败',
-                                notify,
-                                this.core.apis.GroupApi.getGroup(notify.group.groupCode)
-                            );
-                        }
-                    } else
-                        // if (
-                        //     notify.type == GroupNotifyMsgType.MEMBER_LEAVE_NOTIFY_ADMIN ||
-                        //     notify.type == GroupNotifyMsgType.KICK_MEMBER_NOTIFY_ADMIN
-                        // ) {
-                        //     this.context.logger.logDebug('有成员退出通知', notify);
-                        //     const member1Uin = await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid);
-                        //     let operatorId = member1Uin;
-                        //     let subType: GroupDecreaseSubType = 'leave';
-                        //     if (notify.user2.uid) {
-                        //         // 是被踢的
-                        //         const member2Uin = await this.core.apis.UserApi.getUinByUidV2(notify.user2.uid);
-                        //         if (member2Uin) {
-                        //             operatorId = member2Uin;
-                        //         }
-                        //         subType = 'kick';
-                        //     }
-                        //     const groupDecreaseEvent = new OB11GroupDecreaseEvent(
-                        //         this.core,
-                        //         parseInt(notify.group.groupCode),
-                        //         parseInt(member1Uin),
-                        //         parseInt(operatorId),
-                        //         subType
-                        //     );
-                        //     this.networkManager
-                        //         .emitEvent(groupDecreaseEvent)
-                        //         .catch((e) =>
-                        //             this.context.logger.logError('处理群成员退出失败', e)
-                        //         );
-                        //     // notify.status == 1 表示未处理 2表示处理完成
-                        // } else
-                        if (
-                            [GroupNotifyMsgType.REQUEST_JOIN_NEED_ADMINI_STRATOR_PASS].includes(notify.type) &&
-                            notify.status == GroupNotifyMsgStatus.KUNHANDLE
-                        ) {
-                            this.context.logger.logDebug('有加群请求');
-                            try {
-                                let requestUin = await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid);
-                                if (isNaN(parseInt(requestUin))) {
-                                    requestUin = (await this.core.apis.UserApi.getUserDetailInfo(notify.user1.uid)).uin;
-                                }
-                                const groupRequestEvent = new OB11GroupRequestEvent(
-                                    this.core,
-                                    parseInt(notify.group.groupCode),
-                                    parseInt(requestUin),
-                                    'add',
-                                    notify.postscript,
-                                    flag
-                                );
-                                this.networkManager
-                                    .emitEvent(groupRequestEvent)
-                                    .catch((e) =>
-                                        this.context.logger.logError('处理加群请求失败', e)
-                                    );
-                            } catch (e) {
-                                this.context.logger.logError(
-                                    '获取加群人QQ号失败 Uid:',
-                                    notify.user1.uid,
-                                    e
-                                );
+                        this.context.logger.logDebug('有加群请求');
+                        try {
+                            let requestUin = await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid);
+                            if (isNaN(parseInt(requestUin))) {
+                                requestUin = (await this.core.apis.UserApi.getUserDetailInfo(notify.user1.uid)).uin;
                             }
-                        } else if (
-                            notify.type == GroupNotifyMsgType.INVITED_BY_MEMBER &&
-                            notify.status == GroupNotifyMsgStatus.KUNHANDLE
-                        ) {
-                            this.context.logger.logDebug(`收到邀请我加群通知:${notify}`);
-                            const groupInviteEvent = new OB11GroupRequestEvent(
+                            const groupRequestEvent = new OB11GroupRequestEvent(
                                 this.core,
                                 parseInt(notify.group.groupCode),
-                                parseInt(await this.core.apis.UserApi.getUinByUidV2(notify.user2.uid)),
-                                'invite',
-                                notify.postscript,
-                                flag
-                            );
-                            this.networkManager
-                                .emitEvent(groupInviteEvent)
-                                .catch((e) =>
-                                    this.context.logger.logError('处理邀请本人加群失败', e)
-                                );
-                        } else if (
-                            notify.type == GroupNotifyMsgType.INVITED_NEED_ADMINI_STRATOR_PASS &&
-                            notify.status == GroupNotifyMsgStatus.KUNHANDLE
-                        ) {
-                            this.context.logger.logDebug(`收到群员邀请加群通知:${notify}`);
-                            const groupInviteEvent = new OB11GroupRequestEvent(
-                                this.core,
-                                parseInt(notify.group.groupCode),
-                                parseInt(await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid)),
+                                parseInt(requestUin),
                                 'add',
                                 notify.postscript,
                                 flag
                             );
                             this.networkManager
-                                .emitEvent(groupInviteEvent)
+                                .emitEvent(groupRequestEvent)
                                 .catch((e) =>
-                                    this.context.logger.logError('处理邀请本人加群失败', e)
+                                    this.context.logger.logError('处理加群请求失败', e)
                                 );
+                        } catch (e) {
+                            this.context.logger.logError(
+                                '获取加群人QQ号失败 Uid:',
+                                notify.user1.uid,
+                                e
+                            );
                         }
+                    } else if (
+                        notify.type == GroupNotifyMsgType.INVITED_BY_MEMBER &&
+                        notify.status == GroupNotifyMsgStatus.KUNHANDLE
+                    ) {
+                        this.context.logger.logDebug(`收到邀请我加群通知:${notify}`);
+                        const groupInviteEvent = new OB11GroupRequestEvent(
+                            this.core,
+                            +notify.group.groupCode,
+                            +await this.core.apis.UserApi.getUinByUidV2(notify.user2.uid),
+                            'invite',
+                            notify.postscript,
+                            flag
+                        );
+                        this.networkManager
+                            .emitEvent(groupInviteEvent)
+                            .catch((e) =>
+                                this.context.logger.logError('处理邀请本人加群失败', e)
+                            );
+                    } else if (
+                        notify.type == GroupNotifyMsgType.INVITED_NEED_ADMINI_STRATOR_PASS &&
+                        notify.status == GroupNotifyMsgStatus.KUNHANDLE
+                    ) {
+                        this.context.logger.logDebug(`收到群员邀请加群通知:${notify}`);
+                        const groupInviteEvent = new OB11GroupRequestEvent(
+                            this.core,
+                            +notify.group.groupCode,
+                            +await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid),
+                            'add',
+                            notify.postscript,
+                            flag
+                        );
+                        this.networkManager
+                            .emitEvent(groupInviteEvent)
+                            .catch((e) =>
+                                this.context.logger.logError('处理邀请本人加群失败', e)
+                            );
+                    }
                 }
             }
         };
-
-        groupListener.onMemberInfoChange = async (groupCode, dataSource, members) => {
-            //this.context.logger.logDebug('收到群成员信息变动通知', groupCode, changeType);
-            if (dataSource === DataSource.LOCAL) {
-                const existMembers = this.core.apis.GroupApi.groupMemberCache.get(groupCode);
-                if (!existMembers) return;
-                members.forEach((member) => {
-                    const existMember = existMembers.get(member.uid);
-                    if (!existMember?.isChangeRole) return;
-                    this.context.logger.logDebug('变动管理员获取成功');
-                    const groupAdminNoticeEvent = new OB11GroupAdminNoticeEvent(
-                        this.core,
-                        parseInt(groupCode),
-                        parseInt(member.uin),
-                        member.role === NTGroupMemberRole.KADMIN ? 'set' : 'unset'
-                    );
-                    this.networkManager
-                        .emitEvent(groupAdminNoticeEvent)
-                        .catch((e) =>
-                            this.context.logger.logError('处理群管理员变动失败', e)
-                        );
-                    existMember.isChangeRole = false;
-                    this.context.logger.logDebug('群管理员变动处理完毕');
-                });
-            }
-        };
-
         this.context.session
             .getGroupService()
             .addKernelGroupListener(proxiedListenerOf(groupListener, this.context.logger));
@@ -625,21 +521,27 @@ export class NapCatOneBot11Adapter {
             // 群名片修改事件解析 任何都该判断
             if (message.senderUin && message.senderUin !== '0') {
                 const cardChangedEvent = await this.apis.GroupApi.parseCardChangedEvent(message);
-                cardChangedEvent && await this.networkManager.emitEvent(cardChangedEvent);
+                if (cardChangedEvent) {
+                    await this.networkManager.emitEvent(cardChangedEvent);
+                }
             }
             if (message.msgType === NTMsgType.KMSGTYPEFILE) {
                 // 文件为单元素消息
                 const elementWrapper = message.elements.find(e => !!e.fileElement);
                 if (elementWrapper?.fileElement) {
                     const uploadGroupFileEvent = await this.apis.GroupApi.parseGroupUploadFileEvene(message, elementWrapper.fileElement, elementWrapper);
-                    uploadGroupFileEvent && await this.networkManager.emitEvent(uploadGroupFileEvent);
+                    if (uploadGroupFileEvent) {
+                        await this.networkManager.emitEvent(uploadGroupFileEvent);
+                    }
                 }
             } else if (message.msgType === NTMsgType.KMSGTYPEGRAYTIPS) {
                 // 灰条为单元素消息
                 const grayTipElement = message.elements[0].grayTipElement;
                 if (grayTipElement) {
                     const event = await this.apis.GroupApi.parseGrayTipElement(message, grayTipElement);
-                    event && await this.networkManager.emitEvent(event);
+                    if (event) {
+                        await this.networkManager.emitEvent(event);
+                    }
                 }
             }
         } catch (e) {
@@ -654,7 +556,10 @@ export class NapCatOneBot11Adapter {
                 const grayTipElement = message.elements[0].grayTipElement;
                 if (grayTipElement) {
                     const event = await this.apis.MsgApi.parsePrivateMsgEvent(message, grayTipElement);
-                    event && await this.networkManager.emitEvent(event);
+                    if (event) {
+                        await this.networkManager.emitEvent(event);
+                    }
+
                 }
             }
         } catch (e) {
@@ -674,6 +579,8 @@ export class NapCatOneBot11Adapter {
     }
 
     private async emitFriendRecallMsg(message: RawMessage, oriMessageId: number, element: MessageElement) {
+        const operatorUid = element.grayTipElement?.revokeElement.operatorUid;
+        if (!operatorUid) return undefined;
         return new OB11FriendRecallNoticeEvent(
             this.core,
             +message.senderUin,
@@ -684,7 +591,7 @@ export class NapCatOneBot11Adapter {
     private async emitGroupRecallMsg(message: RawMessage, oriMessageId: number, element: MessageElement) {
         const operatorUid = element.grayTipElement?.revokeElement.operatorUid;
         if (!operatorUid) return undefined;
-        const operatorId = message.senderUin ?? await this.core.apis.UserApi.getUinByUidV2(operatorUid);
+        const operatorId = await this.core.apis.UserApi.getUinByUidV2(operatorUid);
         return new OB11GroupRecallNoticeEvent(
             this.core,
             +message.peerUin,

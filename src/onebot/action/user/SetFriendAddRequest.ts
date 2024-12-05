@@ -3,7 +3,7 @@ import { ActionName } from '@/onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
 const SchemaData = Type.Object({
-    flag: Type.String(),
+    flag: Type.Union([Type.String(), Type.Number()]),
     approve: Type.Optional(Type.Union([Type.String(), Type.Boolean()])),
     remark: Type.Optional(Type.String())
 });
@@ -16,14 +16,13 @@ export default class SetFriendAddRequest extends OneBotAction<Payload, null> {
 
     async _handle(payload: Payload): Promise<null> {
         const approve = payload.approve?.toString() !== 'false';
-        await this.core.apis.FriendApi.handleFriendRequest(payload.flag, approve);
+        const notify = (await this.core.apis.FriendApi.getBuddyReq()).buddyReqs.find(e => e.reqTime == payload.flag.toString());
+        if (!notify) {
+            throw new Error('No such request');
+        }
+        await this.core.apis.FriendApi.handleFriendRequest(notify, approve);
         if (payload.remark) {
-            const data = payload.flag.split('|');
-            if (data.length < 2) {
-                throw new Error('Invalid flag');
-            }
-            const friendUid = data[0];
-            await this.core.apis.FriendApi.setBuddyRemark(friendUid, payload.remark);
+            await this.core.apis.FriendApi.setBuddyRemark(notify.friendUid, payload.remark);
         }
         return null;
     }

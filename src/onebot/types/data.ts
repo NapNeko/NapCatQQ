@@ -11,6 +11,17 @@ export interface OB11User {
     categoryName?: string; // 分组名称
     categoryId?: number; // 分组ID 999为特别关心
 }
+export interface Notify {
+    request_id: number;
+    invitor_uin: number;
+    invitor_nick?: string;
+    group_id?: number;
+    group_name?: string;
+    message?: string;
+    checked: boolean;
+    actor: number;
+    requester_nick?: string;
+}
 
 export enum OB11UserSex {
     male = 'male', // 男性

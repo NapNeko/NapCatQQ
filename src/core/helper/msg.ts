@@ -1,7 +1,7 @@
-import * as fileType from 'file-type';
+import { fileTypeFromFile } from 'file-type';
 import { PicType } from '../types';
 export async function getFileTypeForSendType(picPath: string): Promise<PicType> {
-    const fileTypeResult = (await fileType.fileTypeFromFile(picPath))?.ext ?? 'jpg';
+    const fileTypeResult = (await fileTypeFromFile(picPath))?.ext ?? 'jpg';
     const picTypeMap: { [key: string]: PicType } = {
         //'webp': PicType.NEWPIC_WEBP,
         'gif': PicType.NEWPIC_GIF,

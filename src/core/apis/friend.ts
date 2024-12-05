@@ -1,4 +1,4 @@
-import { FriendV2 } from '@/core/types';
+import { FriendRequest, FriendV2 } from '@/core/types';
 import { BuddyListReqType, InstanceContext, NapCatCore } from '@/core';
 import { LimitedHashTable } from '@/common/message-unique';
 
@@ -79,16 +79,10 @@ export class NTQQFriendApi {
         return ret;
     }
 
-    async handleFriendRequest(flag: string, accept: boolean) {
-        const data = flag.split('|');
-        if (data.length < 2) {
-            return;
-        }
-        const friendUid = data[0];
-        const reqTime = data[1];
+    async handleFriendRequest(notify: FriendRequest, accept: boolean) {
         this.context.session.getBuddyService()?.approvalFriendRequest({
-            friendUid: friendUid,
-            reqTime: reqTime,
+            friendUid: notify.friendUid,
+            reqTime: notify.reqTime,
             accept,
         });
     }

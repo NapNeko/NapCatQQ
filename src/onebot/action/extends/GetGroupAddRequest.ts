@@ -1,32 +1,36 @@
 import { GroupNotifyMsgStatus } from '@/core';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
+import { Notify } from '@/onebot/types';
 
-interface OB11GroupRequestNotify {
-    group_id: number,
-    user_id: number,
-    flag: string
-}
-
-export default class GetGroupAddRequest extends OneBotAction<null, OB11GroupRequestNotify[] | null> {
+export default class GetGroupAddRequest extends OneBotAction<null, Notify[] | null> {
     actionName = ActionName.GetGroupIgnoreAddRequest;
 
-    async _handle(payload: null): Promise<OB11GroupRequestNotify[] | null> {
-        const ignoredNotifies = await this.core.apis.GroupApi.getSingleScreenNotifies(true, 10);
-        const retData: any = {
-            join_requests: await Promise.all(
-                ignoredNotifies
-                    .filter(notify => notify.type === 7)
-                    .map(async SSNotify => ({
-                        request_id: SSNotify.seq,
-                        requester_uin: await this.core.apis.UserApi.getUinByUidV2(SSNotify.user1?.uid),
-                        requester_nick: SSNotify.user1?.nickName,
-                        group_id: SSNotify.group?.groupCode,
-                        group_name: SSNotify.group?.groupName,
-                        checked: SSNotify.status !== GroupNotifyMsgStatus.KUNHANDLE,
-                        actor: await this.core.apis.UserApi.getUinByUidV2(SSNotify.user2?.uid) || 0,
-                    }))),
-        };
+    async _handle(payload: null): Promise<Notify[] | null> {
+        const NTQQUserApi = this.core.apis.UserApi;
+        const NTQQGroupApi = this.core.apis.GroupApi;
+        const ignoredNotifies = await NTQQGroupApi.getSingleScreenNotifies(true, 10);
+        const retData: Notify[] = [];
+
+        const notifyPromises = ignoredNotifies
+            .filter(notify => notify.type === 7)
+            .map(async SSNotify => {
+                const invitorUin = SSNotify.user1?.uid ? +await NTQQUserApi.getUinByUidV2(SSNotify.user1.uid) : 0;
+                const actorUin = SSNotify.user2?.uid ? +await NTQQUserApi.getUinByUidV2(SSNotify.user2.uid) : 0;
+                retData.push({
+                    request_id: +SSNotify.seq,
+                    invitor_uin: invitorUin,
+                    invitor_nick: SSNotify.user1?.nickName,
+                    group_id: +SSNotify.group?.groupCode,
+                    message: SSNotify?.postscript,
+                    group_name: SSNotify.group?.groupName,
+                    checked: SSNotify.status !== GroupNotifyMsgStatus.KUNHANDLE,
+                    actor: actorUin,
+                    requester_nick: SSNotify.user1?.nickName,
+                });
+            });
+
+        await Promise.all(notifyPromises);
 
         return retData;
     }

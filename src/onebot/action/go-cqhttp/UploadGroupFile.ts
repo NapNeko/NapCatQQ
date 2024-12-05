@@ -2,7 +2,7 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { ChatType, Peer } from '@/core/types';
 import fs from 'fs';
-import { uri2local } from '@/common/file';
+import { uriToLocalFile } from '@/common/file';
 import { SendMessageContext } from '@/onebot/api';
 import { Static, Type } from '@sinclair/typebox';
 
@@ -25,7 +25,7 @@ export default class GoCQHTTPUploadGroupFile extends OneBotAction<Payload, null>
         if (fs.existsSync(file)) {
             file = `file://${file}`;
         }
-        const downloadResult = await uri2local(this.core.NapCatTempPath, file);
+        const downloadResult = await uriToLocalFile(this.core.NapCatTempPath, file);
         const peer: Peer = {
             chatType: ChatType.KCHATTYPEGROUP,
             peerUid: payload.group_id.toString(),
