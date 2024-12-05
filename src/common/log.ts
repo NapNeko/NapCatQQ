@@ -315,5 +315,5 @@ function replyElementToText(replyElement: any, msg: RawMessage, recursiveLevel: 
     return `[回复消息 ${recordMsgOrNull && recordMsgOrNull.peerUin != '284840486' && recordMsgOrNull.peerUin != '1094950020'
         ? rawMessageToText(recordMsgOrNull, recursiveLevel + 1)
         : `未找到消息记录 (MsgId = ${replyElement.sourceMsgIdInRecords})`
-        }]`;
+    }]`;
 }

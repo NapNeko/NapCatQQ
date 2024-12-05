@@ -20,7 +20,7 @@ export default class SetGroupAddRequest extends OneBotAction<Payload, null> {
         const approve = payload.approve?.toString() !== 'false';
         const reason = payload.reason ?? ' ';
 
-        let notify = await this.findNotify(flag);
+        const notify = await this.findNotify(flag);
         if (!notify) {
             throw new Error('No such request');
         }

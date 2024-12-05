@@ -18,7 +18,7 @@ export default class SetGroupBan extends OneBotAction<Payload, null> {
         const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
         if (!uid) throw new Error('uid error');
         await this.core.apis.GroupApi.banMember(payload.group_id.toString(),
-            [{ uid: uid, timeStamp: +payload.duration}]);
+            [{ uid: uid, timeStamp: +payload.duration }]);
         return null;
     }
 }

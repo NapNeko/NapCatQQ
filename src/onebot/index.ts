@@ -521,21 +521,27 @@ export class NapCatOneBot11Adapter {
             // 群名片修改事件解析 任何都该判断
             if (message.senderUin && message.senderUin !== '0') {
                 const cardChangedEvent = await this.apis.GroupApi.parseCardChangedEvent(message);
-                cardChangedEvent && await this.networkManager.emitEvent(cardChangedEvent);
+                if (cardChangedEvent) {
+                    await this.networkManager.emitEvent(cardChangedEvent);
+                }
             }
             if (message.msgType === NTMsgType.KMSGTYPEFILE) {
                 // 文件为单元素消息
                 const elementWrapper = message.elements.find(e => !!e.fileElement);
                 if (elementWrapper?.fileElement) {
                     const uploadGroupFileEvent = await this.apis.GroupApi.parseGroupUploadFileEvene(message, elementWrapper.fileElement, elementWrapper);
-                    uploadGroupFileEvent && await this.networkManager.emitEvent(uploadGroupFileEvent);
+                    if (uploadGroupFileEvent) {
+                        await this.networkManager.emitEvent(uploadGroupFileEvent);
+                    }
                 }
             } else if (message.msgType === NTMsgType.KMSGTYPEGRAYTIPS) {
                 // 灰条为单元素消息
                 const grayTipElement = message.elements[0].grayTipElement;
                 if (grayTipElement) {
                     const event = await this.apis.GroupApi.parseGrayTipElement(message, grayTipElement);
-                    event && await this.networkManager.emitEvent(event);
+                    if (event) {
+                        await this.networkManager.emitEvent(event);
+                    }
                 }
             }
         } catch (e) {
@@ -550,7 +556,10 @@ export class NapCatOneBot11Adapter {
                 const grayTipElement = message.elements[0].grayTipElement;
                 if (grayTipElement) {
                     const event = await this.apis.MsgApi.parsePrivateMsgEvent(message, grayTipElement);
-                    event && await this.networkManager.emitEvent(event);
+                    if (event) {
+                        await this.networkManager.emitEvent(event);
+                    }
+
                 }
             }
         } catch (e) {

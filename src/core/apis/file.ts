@@ -40,7 +40,7 @@ export class NTQQFileApi {
         this.rkeyManager = new RkeyManager([
             'https://rkey.napneko.icu/rkeys'
         ],
-            this.context.logger
+        this.context.logger
         );
     }
 
@@ -61,7 +61,7 @@ export class NTQQFileApi {
 
     async uploadFile(filePath: string, elementType: ElementType = ElementType.PIC, elementSubType: number = 0) {
         const fileMd5 = await calculateFileMD5(filePath);
-        let extOrEmpty = await fileTypeFromFile(filePath).then(e => e?.ext ?? '').catch(e => '');
+        const extOrEmpty = await fileTypeFromFile(filePath).then(e => e?.ext ?? '').catch(e => '');
         const ext = extOrEmpty ? `.${extOrEmpty}` : '';
         let fileName = `${path.basename(filePath)}`;
         if (fileName.indexOf('.') === -1) {
@@ -305,18 +305,18 @@ export class NTQQFileApi {
                     element.elementType === ElementType.FILE
                 ) {
                     switch (element.elementType) {
-                        case ElementType.PIC:
+                    case ElementType.PIC:
                             element.picElement!.sourcePath = elementResults[elementIndex];
-                            break;
-                        case ElementType.VIDEO:
+                        break;
+                    case ElementType.VIDEO:
                             element.videoElement!.filePath = elementResults[elementIndex];
-                            break;
-                        case ElementType.PTT:
+                        break;
+                    case ElementType.PTT:
                             element.pttElement!.filePath = elementResults[elementIndex];
-                            break;
-                        case ElementType.FILE:
+                        break;
+                    case ElementType.FILE:
                             element.fileElement!.filePath = elementResults[elementIndex];
-                            break;
+                        break;
                     }
                     elementIndex++;
                 }
