@@ -891,51 +891,55 @@ export class OneBotMsgApi {
         if (!sendElements.length) {
             throw new Error('消息体无法解析, 请检查是否发送了不支持的消息类型');
         }
-        let totalSize = 0;
-        let timeout = 10000;
-        try {
-            for (const fileElement of sendElements) {
-                if (fileElement.elementType === ElementType.PTT) {
-                    totalSize += (await fsPromise.stat(fileElement.pttElement.filePath)).size;
+    
+        const calculateTotalSize = async (elements: SendMessageElement[]): Promise<number> => {
+            const sizePromises = elements.map(async element => {
+                switch (element.elementType) {
+                    case ElementType.PTT:
+                        return (await fsPromise.stat(element.pttElement.filePath)).size;
+                    case ElementType.FILE:
+                        return (await fsPromise.stat(element.fileElement.filePath)).size;
+                    case ElementType.VIDEO:
+                        return (await fsPromise.stat(element.videoElement.filePath)).size;
+                    case ElementType.PIC:
+                        return (await fsPromise.stat(element.picElement.sourcePath)).size;
+                    default:
+                        return 0;
                 }
-                if (fileElement.elementType === ElementType.FILE) {
-                    totalSize += (await fsPromise.stat(fileElement.fileElement.filePath)).size;
-                }
-                if (fileElement.elementType === ElementType.VIDEO) {
-                    totalSize += (await fsPromise.stat(fileElement.videoElement.filePath)).size;
-                }
-                if (fileElement.elementType === ElementType.PIC) {
-                    totalSize += (await fsPromise.stat(fileElement.picElement.sourcePath)).size;
-                }
-            }
-            //且 PredictTime ((totalSize / 1024 / 512) * 1000)不等于Nan
-            const PredictTime = totalSize / 1024 / 256 * 1000;
-            if (!Number.isNaN(PredictTime)) {
-                timeout += PredictTime;// 10S Basic Timeout + PredictTime( For File 512kb/s )
-            }
-        } catch (e) {
+            });
+            const sizes = await Promise.all(sizePromises);
+            return sizes.reduce((total, size) => total + size, 0);
+        };
+    
+        const totalSize = await calculateTotalSize(sendElements).catch(e => {
             this.core.context.logger.logError('发送消息计算预计时间异常', e);
-        }
+            return 0;
+        });
+    
+        const timeout = 10000 + (totalSize / 1024 / 256 * 1000);
+    
         const returnMsg = await this.core.apis.MsgApi.sendMsg(peer, sendElements, waitComplete, timeout);
         if (!returnMsg) throw new Error('发送消息失败');
+    
         returnMsg.id = MessageUnique.createUniqueMsgId({
             chatType: peer.chatType,
             guildId: '',
             peerUid: peer.peerUid,
         }, returnMsg.msgId);
-
-        setTimeout(() => {
-            deleteAfterSentFiles.forEach(async file => {
+    
+        setTimeout(async () => {
+            const deletePromises = deleteAfterSentFiles.map(async file => {
                 try {
                     if (await fsPromise.access(file, constants.W_OK).then(() => true).catch(() => false)) {
-                        fsPromise.unlink(file).then().catch(e => this.core.context.logger.logError('发送消息删除文件失败', e));
+                        await fsPromise.unlink(file);
                     }
-                } catch (error) {
-                    this.core.context.logger.logError('发送消息删除文件失败', (error as Error).message);
+                } catch (e) {
+                    this.core.context.logger.logError('发送消息删除文件失败', e);
                 }
             });
+            await Promise.all(deletePromises);
         }, 60000);
-
+    
         return returnMsg;
     }
 
