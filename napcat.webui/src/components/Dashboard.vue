@@ -1,18 +1,28 @@
 <template>
     <t-layout class="dashboard-container">
-        <div ref="menuRef">
-            <SidebarMenu :menu-items="menuItems" class="sidebar-menu" />
+        <div v-if="!mediaQuery.matches">
+            <SidebarMenu
+                :menu-items="menuItems"
+                class="sidebar-menu"
+                :menu-width="sidebarWidth"
+            />
         </div>
         <t-layout>
             <router-view />
         </t-layout>
+        <div v-if="mediaQuery.matches" class="bottom-menu">
+            <BottomMenu :menu-items="menuItems" />
+        </div>
     </t-layout>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import SidebarMenu from './webui/Nav.vue';
+import BottomMenu from './webui/NavBottom.vue';
 import emitter from '@/ts/event-bus';
+const mediaQuery = window.matchMedia('(max-width: 768px)');
+const sidebarWidth = ['232px', '64px'];
 interface MenuItem {
     value: string;
     icon: string;
@@ -27,13 +37,18 @@ const menuItems = ref<MenuItem[]>([
     { value: 'item5', icon: 'system-log', label: '日志查看', route: '/dashboard/log-view' },
     { value: 'item6', icon: 'info-circle', label: '关于我们', route: '/dashboard/about-us' },
 ]);
-const menuRef = ref<HTMLDivElement | null>(null);
 emitter.on('sendMenu', (event) => {
-    emitter.emit('sendWidth', menuRef.value?.offsetWidth);
-    localStorage.setItem('menuWidth', menuRef.value?.offsetWidth?.toString() || '0');
+    const menuWidth = event ? sidebarWidth[1] : sidebarWidth[0];
+    emitter.emit('sendWidth', menuWidth);
+    localStorage.setItem('menuWidth', menuWidth.toString() || '0');
 });
+
 onMounted(() => {
-    localStorage.setItem('menuWidth', menuRef.value?.offsetWidth?.toString() || '0');
+    if (mediaQuery.matches){
+        localStorage.setItem('menuWidth', '0');
+    }
+});
+onUnmounted(() => {
 });
 </script>
 
@@ -49,10 +64,32 @@ onMounted(() => {
     position: relative;
     z-index: 2;
 }
+.bottom-menu {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 2;
+}
 
 @media (max-width: 768px) {
     .content {
         padding: 10px;
+    }
+}
+</style>
+<style>
+@media (max-width: 768px) {
+    .t-head-menu__inner .t-menu:first-child {
+        margin-left: 0;
+    }
+    .t-head-menu__inner{
+        width: 100%;
+    }
+    .t-head-menu .t-menu{
+        justify-content: space-evenly;
+    }
+    .t-menu__content{
+        display: none;
     }
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-    <t-card class="layout">
+    <t-card class="layout" :bordered="false">
         <div class="login-container">
             <h2 class="sotheby-font">WebUi Login</h2>
             <t-form ref="form" :data="formData" colon :label-width="0" @submit="onSubmit">

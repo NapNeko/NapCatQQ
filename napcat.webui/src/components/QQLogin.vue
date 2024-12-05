@@ -1,5 +1,5 @@
 <template>
-    <t-card class="layout">
+    <t-card class="layout" :bordered="false">
         <div class="login-container">
             <h2 class="sotheby-font">QQ Login</h2>
             <div class="login-methods">

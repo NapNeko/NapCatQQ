@@ -1,5 +1,5 @@
 <template>
-    <t-menu theme="light" default-value="2-1" :collapsed="collapsed" class="sidebar-menu">
+    <t-menu theme="light" :width="menuWidth" :collapsed="collapsed" class="sidebar-menu">
         <template #logo>
             <div class="logo">
                 <img class="logo-img" :width="collapsed ? 35 : 'auto'" src="@/assets/logo_webui.png" alt="logo" />
@@ -43,10 +43,11 @@ type MenuItem = {
     icon?: string;
     disabled?: boolean;
 };
-
 defineProps<{
     menuItems: MenuItem[];
+    menuWidth: string | number | Array<string | number>;
 }>();
+const mediaQuery = window.matchMedia('(max-width: 800px)');
 const collapsed = ref<boolean>(localStorage.getItem('sidebar-collapsed') === 'true');
 const iconName = ref<string>(collapsed.value ? 'menu-unfold' : 'menu-fold');
 const disBtn = ref<boolean>(false);
@@ -57,12 +58,10 @@ const changeCollapsed = (): void => {
     localStorage.setItem('sidebar-collapsed', collapsed.value.toString());
 };
 watch(collapsed, (newValue, oldValue) => {
-    setTimeout(() => {
-        emitter.emit('sendMenu', collapsed.value);
-    }, 300);
+    emitter.emit('sendMenu', collapsed.value);
 });
 onMounted(() => {
-    const mediaQuery = window.matchMedia('(max-width: 800px)');
+    emitter.emit('sendMenu', collapsed.value);
     const handleMediaChange = (e: MediaQueryListEvent) => {
         disBtn.value = e.matches;
         if (e.matches) {

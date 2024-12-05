@@ -5,12 +5,13 @@
   "type": "module",
   "scripts": {
     "webui:lint": "eslint --fix src/**/*.{js,ts,vue}",
-    "webui:dev": "vite",
+    "webui:dev": "vite --host",
     "webui:build": "vite build",
     "webui:preview": "vite preview"
   },
   "dependencies": {
     "eslint-plugin-prettier": "^5.2.1",
+    "event-source-polyfill": "^1.0.31",
     "qrcode": "^1.5.4",
     "tdesign-icons-vue-next": "^0.3.3",
     "tdesign-vue-next": "^1.10.3",
@@ -20,6 +21,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.1.0",
     "@eslint/js": "^9.14.0",
+    "@types/event-source-polyfill": "^1.0.5",
     "@types/qrcode": "^1.5.5",
     "@vitejs/plugin-legacy": "^5.4.3",
     "@vitejs/plugin-vue": "^5.1.4",
