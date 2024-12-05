@@ -52,8 +52,6 @@
     "winston": "^3.17.0"
   },
   "dependencies": {
-    "@esbuild/win32-x64": "^0.24.0",
-    "@rollup/rollup-win32-x64-msvc": "^4.28.0",
     "event-source-polyfill": "^1.0.31",
     "express": "^5.0.0",
     "fluent-ffmpeg": "^2.1.2",
