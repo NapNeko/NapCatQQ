@@ -40,6 +40,11 @@ import {
     Aside as TAside,
     Popconfirm as Tpopconfirm,
     Empty as TEmpty,
+    Dropdown as TDropdown,
+    Typography as TTypographyText,
+    TreeSelect as TTreeSelect,
+    Loading as TLoading,
+    HeadMenu as THeadMenu
 } from 'tdesign-vue-next';
 import { router } from './router';
 import 'tdesign-vue-next/es/style/index.css';
@@ -84,4 +89,9 @@ app.use(TFooter);
 app.use(TAside);
 app.use(Tpopconfirm);
 app.use(TEmpty);
+app.use(TDropdown);
+app.use(TTypographyText);
+app.use(TTreeSelect);
+app.use(TLoading);
+app.use(THeadMenu);
 app.mount('#app');

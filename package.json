@@ -25,6 +25,7 @@
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/cors": "^2.8.17",
+    "@sinclair/typebox": "^0.34.9",
     "@types/express": "^5.0.0",
     "@types/fluent-ffmpeg": "^2.1.24",
     "@types/node": "^22.0.1",
@@ -48,15 +49,18 @@
     "vite": "^6.0.1",
     "vite-plugin-cp": "^4.0.8",
     "vite-tsconfig-paths": "^5.1.0",
-    "winston": "^3.17.0",
-    "@sinclair/typebox": "^0.34.9"
+    "winston": "^3.17.0"
   },
   "dependencies": {
+    "@esbuild/win32-x64": "^0.24.0",
+    "@rollup/rollup-win32-x64-msvc": "^4.28.0",
+    "event-source-polyfill": "^1.0.31",
     "express": "^5.0.0",
     "fluent-ffmpeg": "^2.1.2",
     "piscina": "^4.7.0",
     "qrcode-terminal": "^0.12.0",
     "silk-wasm": "^3.6.1",
+    "tdesign-icons-vue-next": "^0.3.3",
     "ws": "^8.18.0"
   }
 }
