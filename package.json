@@ -13,7 +13,8 @@
     "dev:shell": "vite build --mode shell",
     "dev:webui": "cd napcat.webui && npm run webui:dev",
     "lint": "eslint --fix src/**/*.{js,ts,vue}",
-    "depend": "cd dist && npm install --omit=dev"
+    "depend": "cd dist && npm install --omit=dev",
+    "dev:depend": "npm i && cd napcat.webui && npm i"
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.24.7",
@@ -25,6 +26,7 @@
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/cors": "^2.8.17",
+    "@sinclair/typebox": "^0.34.9",
     "@types/express": "^5.0.0",
     "@types/fluent-ffmpeg": "^2.1.24",
     "@types/node": "^22.0.1",
@@ -48,8 +50,7 @@
     "vite": "^6.0.1",
     "vite-plugin-cp": "^4.0.8",
     "vite-tsconfig-paths": "^5.1.0",
-    "winston": "^3.17.0",
-    "@sinclair/typebox": "^0.34.9"
+    "winston": "^3.17.0"
   },
   "dependencies": {
     "express": "^5.0.0",

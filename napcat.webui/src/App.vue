@@ -109,4 +109,4 @@ onUnmounted(() => {
     window.removeEventListener('resize', haddingFbars);
 });
 </script>
-<style scoped></style>
+<style></style>

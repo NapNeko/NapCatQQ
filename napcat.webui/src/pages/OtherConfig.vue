@@ -1,6 +1,13 @@
 <template>
     <div class="title">
-        <t-divider content="其余配置" align="left" />
+        <t-divider content="其余配置" align="left">
+            <template #content>
+                <div style="display: flex; justify-content: center; align-items: center">
+                    <setting-icon />
+                    <div style="margin-left: 5px">其余配置</div>
+                </div>
+            </template>
+        </t-divider>
     </div>
     <t-card class="card">
         <div class="other-config-container">
@@ -29,11 +36,12 @@ import { ref, onMounted } from 'vue';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { OneBotConfig } from '../../../src/onebot/config/config';
 import { QQLoginManager } from '@/backend/shell';
+import { SettingIcon } from 'tdesign-icons-vue-next';
 
 const otherConfig = ref<Partial<OneBotConfig>>({
     musicSignUrl: '',
     enableLocalFile2Url: false,
-    parseMultMsg: true
+    parseMultMsg: true,
 });
 
 const labelAlign = ref<string>();
