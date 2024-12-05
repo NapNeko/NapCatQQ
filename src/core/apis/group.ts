@@ -7,6 +7,7 @@ import {
     KickMemberV2Req,
     MemberExtSourceType,
     NapCatCore,
+    GroupNotify,
 } from '@/core';
 import { isNumeric, solveAsyncProblem } from '@/common/helper';
 import { LimitedHashTable } from '@/common/message-unique';
@@ -120,7 +121,7 @@ export class NTQQGroupApi {
         }
         return this.groupMemberCache;
     }
-    
+
     async getGroupMember(groupCode: string | number, memberUinOrUid: string | number) {
         const groupCodeStr = groupCode.toString();
         const memberUinOrUidStr = memberUinOrUid.toString();
@@ -288,20 +289,15 @@ export class NTQQGroupApi {
         return this.context.session.getGroupService().uploadGroupBulletinPic(groupCode, _Pskey, imageurl);
     }
 
-    async handleGroupRequest(flag: string, operateType: NTGroupRequestOperateTypes, reason?: string) {
-        const flagitem = flag.split('|');
-        const groupCode = flagitem[0];
-        const seq = flagitem[1];
-        const type = parseInt(flagitem[2]);
-
+    async handleGroupRequest(notify: GroupNotify, operateType: NTGroupRequestOperateTypes, reason?: string) {
         return this.context.session.getGroupService().operateSysNotify(
             false,
             {
                 operateType: operateType,
                 targetMsg: {
-                    seq: seq,  // 通知序列号
-                    type: type,
-                    groupCode: groupCode,
+                    seq: notify.seq,  // 通知序列号
+                    type: notify.type,
+                    groupCode: notify.group.groupCode,
                     postscript: reason ?? ' ', // 仅传空值可能导致处理失败，故默认给个空格
                 },
             });
