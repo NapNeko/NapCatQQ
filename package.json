@@ -13,7 +13,8 @@
     "dev:shell": "vite build --mode shell",
     "dev:webui": "cd napcat.webui && npm run webui:dev",
     "lint": "eslint --fix src/**/*.{js,ts,vue}",
-    "depend": "cd dist && npm install --omit=dev"
+    "depend": "cd dist && npm install --omit=dev",
+    "dev:depend": "npm i && cd napcat.webui && npm i"
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.24.7",
@@ -52,13 +53,11 @@
     "winston": "^3.17.0"
   },
   "dependencies": {
-    "event-source-polyfill": "^1.0.31",
     "express": "^5.0.0",
     "fluent-ffmpeg": "^2.1.2",
     "piscina": "^4.7.0",
     "qrcode-terminal": "^0.12.0",
     "silk-wasm": "^3.6.1",
-    "tdesign-icons-vue-next": "^0.3.3",
     "ws": "^8.18.0"
   }
 }
