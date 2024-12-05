@@ -29,6 +29,7 @@ export interface TextElement {
 }
 
 export interface FaceElement {
+    pokeType?: number;
     faceIndex: number;
     faceType: FaceType;
     faceText?: string;

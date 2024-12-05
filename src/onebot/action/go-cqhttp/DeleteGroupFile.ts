@@ -17,6 +17,6 @@ export class DeleteGroupFile extends OneBotAction<Payload, any> {
     async _handle(payload: Payload) {
         const data = FileNapCatOneBotUUID.decodeModelId(payload.file_id);
         if (!data) throw new Error('Invalid file_id');
-        return await this.core.apis.GroupApi.DelGroupFile(payload.group_id.toString(), [data.fileId]);
+        return await this.core.apis.GroupApi.delGroupFile(payload.group_id.toString(), [data.fileId]);
     }
 }

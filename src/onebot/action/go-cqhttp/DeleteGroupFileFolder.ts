@@ -14,7 +14,7 @@ export class DeleteGroupFileFolder extends OneBotAction<Payload, any> {
     actionName = ActionName.GoCQHTTP_DeleteGroupFileFolder;
     payloadSchema = SchemaData;
     async _handle(payload: Payload) {
-        return (await this.core.apis.GroupApi.DelGroupFileFolder(
+        return (await this.core.apis.GroupApi.delGroupFileFolder(
             payload.group_id.toString(), payload.folder ?? payload.folder_id ?? '')).groupFileCommonResult;
     }
 }

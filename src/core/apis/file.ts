@@ -6,7 +6,6 @@ import {
     Peer,
     PicElement,
     PicSubType,
-    PicType,
     RawMessage,
     SendFileElement,
     SendPicElement,
@@ -17,7 +16,7 @@ import path from 'path';
 import fs from 'fs';
 import fsPromises from 'fs/promises';
 import { InstanceContext, NapCatCore, SearchResultItem } from '@/core';
-import * as fileType from 'file-type';
+import { fileTypeFromFile } from 'file-type';
 import imageSize from 'image-size';
 import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 import { RkeyManager } from '@/core/helper/rkey';
@@ -62,7 +61,7 @@ export class NTQQFileApi {
 
     async uploadFile(filePath: string, elementType: ElementType = ElementType.PIC, elementSubType: number = 0) {
         const fileMd5 = await calculateFileMD5(filePath);
-        const extOrEmpty = (await fileType.fileTypeFromFile(filePath))?.ext;
+        const extOrEmpty = await fileTypeFromFile(filePath).then(e => e?.ext ?? '').catch(e => '');
         const ext = extOrEmpty ? `.${extOrEmpty}` : '';
         let fileName = `${path.basename(filePath)}`;
         if (fileName.indexOf('.') === -1) {
@@ -158,7 +157,7 @@ export class NTQQFileApi {
 
         let fileExt = 'mp4';
         try {
-            const tempExt = (await fileType.fileTypeFromFile(filePath))?.ext;
+            const tempExt = (await fileTypeFromFile(filePath))?.ext;
             if (tempExt) fileExt = tempExt;
         } catch (e) {
             this.context.logger.logError('获取文件类型失败', e);

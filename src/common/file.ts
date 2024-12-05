@@ -1,9 +1,7 @@
 import fs from 'fs';
 import { stat } from 'fs/promises';
 import crypto, { randomUUID } from 'crypto';
-import util from 'util';
 import path from 'node:path';
-import * as fileType from 'file-type';
 import { solveProblem } from '@/common/helper';
 
 export interface HttpDownloadOptions {
@@ -15,7 +13,6 @@ type Uri2LocalRes = {
     success: boolean,
     errMsg: string,
     fileName: string,
-    ext: string,
     path: string
 }
 
@@ -71,27 +68,6 @@ async function checkFile(path: string): Promise<void> {
         }
     }
     // 如果文件存在，则无需做任何事情，Promise 解决（resolve）自身
-}
-
-export async function file2base64(path: string) {
-    const readFile = util.promisify(fs.readFile);
-    const result = {
-        err: '',
-        data: '',
-    };
-    try {
-        try {
-            await checkFileExist(path, 5000);
-        } catch (e: any) {
-            result.err = e.toString();
-            return result;
-        }
-        const data = await readFile(path);
-        result.data = data.toString('base64');
-    } catch (err: any) {
-        result.err = err.toString();
-    }
-    return result;
 }
 
 export function calculateFileMD5(filePath: string): Promise<string> {
@@ -160,20 +136,6 @@ export async function httpDownload(options: string | HttpDownloadOptions): Promi
     return Buffer.from(buffer);
 }
 
-export async function checkFileV2(filePath: string) {
-    try {
-        const ext: string | undefined = (await fileType.fileTypeFromFile(filePath))?.ext;
-        if (ext) {
-            fs.renameSync(filePath, filePath + `.${ext}`);
-            filePath += `.${ext}`;
-            return { success: true, ext: ext, path: filePath };
-        }
-    } catch (e) {
-        // log("获取文件类型失败", filePath,e.stack)
-    }
-    return { success: false, ext: '', path: filePath };
-}
-
 export enum FileUriType {
     Unknown = 0,
     Local = 1,
@@ -213,63 +175,35 @@ export async function checkUriType(Uri: string) {
     return { Uri: Uri, Type: FileUriType.Unknown };
 }
 
-export async function uri2local(dir: string, uri: string, filename: string | undefined = undefined): Promise<Uri2LocalRes> {
+export async function uriToLocalFile(dir: string, uri: string): Promise<Uri2LocalRes> {
     const { Uri: HandledUri, Type: UriType } = await checkUriType(uri);
 
-    //解析失败
-    const tempName = randomUUID();
-    if (!filename) filename = randomUUID();
+    const filename = randomUUID();
+    const filePath = path.join(dir, filename);
 
-    //解析Http和Https协议
-    if (UriType == FileUriType.Unknown) {
-        return { success: false, errMsg: `未知文件类型, uri= ${uri}`, fileName: '', ext: '', path: '' };
-    }
-
-    //解析File协议和本地文件
-    if (UriType == FileUriType.Local) {
+    switch (UriType) {
+    case FileUriType.Local: {
         const fileExt = path.extname(HandledUri);
-        let filename = path.basename(HandledUri, fileExt);
-        filename += fileExt;
-        //复制文件到临时文件并保持后缀
-        const filenameTemp = tempName + fileExt;
-        const filePath = path.join(dir, filenameTemp);
-        fs.copyFileSync(HandledUri, filePath);
-        return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath };
+        const localFileName = path.basename(HandledUri, fileExt) + fileExt;
+        const tempFilePath = path.join(dir, filename + fileExt);
+        fs.copyFileSync(HandledUri, tempFilePath);
+        return { success: true, errMsg: '', fileName: localFileName, path: tempFilePath };
     }
 
-    //接下来都要有文件名
-    if (UriType == FileUriType.Remote) {
-        const pathInfo = path.parse(decodeURIComponent(new URL(HandledUri).pathname));
-        if (pathInfo.name) {
-            const pathlen = 200 - dir.length - pathInfo.name.length;
-            filename = pathlen > 0 ? pathInfo.name.substring(0, pathlen) : pathInfo.name.substring(pathInfo.name.length, pathInfo.name.length - 10);//过长截断
-            if (pathInfo.ext) {
-                filename += pathInfo.ext;
-            }
-        }
-        filename = filename.replace(/[/\\:*?"<>|]/g, '_');
-        const fileExt = path.extname(HandledUri).replace(/[/\\:*?"<>|]/g, '_').substring(0, 10);
-        const filePath = path.join(dir, tempName + fileExt);
+    case FileUriType.Remote: {
         const buffer = await httpDownload(HandledUri);
-        //没有文件就创建
         fs.writeFileSync(filePath, buffer, { flag: 'wx' });
-        return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath };
+        return { success: true, errMsg: '', fileName: filename, path: filePath };
     }
 
-    //解析Base64
-    if (UriType == FileUriType.Base64) {
+    case FileUriType.Base64: {
         const base64 = HandledUri.replace(/^base64:\/\//, '');
-        const buffer = Buffer.from(base64, 'base64');
-        let filePath = path.join(dir, filename);
-        let fileExt = '';
-        fs.writeFileSync(filePath, buffer);
-        const { success, ext, path: fileTypePath } = await checkFileV2(filePath);
-        if (success) {
-            filePath = fileTypePath;
-            fileExt = ext;
-            filename = filename + '.' + ext;
-        }
-        return { success: true, errMsg: '', fileName: filename, ext: fileExt, path: filePath };
+        const base64Buffer = Buffer.from(base64, 'base64');
+        fs.writeFileSync(filePath, base64Buffer, { flag: 'wx' });
+        return { success: true, errMsg: '', fileName: filename, path: filePath };
     }
-    return { success: false, errMsg: `未知文件类型, uri= ${uri}`, fileName: '', ext: '', path: '' };
+
+    default:
+        return { success: false, errMsg: `识别URL失败, uri= ${uri}`, fileName: '', path: '' };
+    }
 }

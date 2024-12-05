@@ -1,6 +1,5 @@
 import https from 'node:https';
 import http from 'node:http';
-import { readFileSync } from 'node:fs';
 
 export class RequestUtil {
     // 适用于获取服务器下发cookies时获取，仅GET
@@ -111,25 +110,5 @@ export class RequestUtil {
     // 请求返回都是原始内容
     static async HttpGetText(url: string, method: string = 'GET', data?: any, headers: { [key: string]: string } = {}) {
         return this.HttpGetJson<string>(url, method, data, headers, false, false);
-    }
-
-    static async createFormData(boundary: string, filePath: string): Promise<Buffer> {
-        let type = 'image/png';
-        if (filePath.endsWith('.jpg')) {
-            type = 'image/jpeg';
-        }
-        const formDataParts = [
-            `------${boundary}\r\n`,
-            `Content-Disposition: form-data; name="share_image"; filename="${filePath}"\r\n`,
-            'Content-Type: ' + type + '\r\n\r\n',
-        ];
-
-        const fileContent = readFileSync(filePath);
-        const footer = `\r\n------${boundary}--`;
-        return Buffer.concat([
-            Buffer.from(formDataParts.join(''), 'utf8'),
-            fileContent,
-            Buffer.from(footer, 'utf8'),
-        ]);
     }
 }
