@@ -333,7 +333,7 @@ export class NapCatOneBot11Adapter {
                             this.core,
                             +requesterUin,
                             req.extWords,
-                            req.friendUid + '|' + req.reqTime
+                            req.reqTime
                         )
                     );
                 } catch (e) {
@@ -365,8 +365,7 @@ export class NapCatOneBot11Adapter {
                     if (notifyTime < this.bootTime) {
                         continue;
                     }
-
-                    const flag = notify.group.groupCode + '|' + notify.seq + '|' + notify.type;
+                    const flag = notify.seq;
                     this.context.logger.logDebug('收到群通知', notify);
                     if (
                         [GroupNotifyMsgType.REQUEST_JOIN_NEED_ADMINI_STRATOR_PASS].includes(notify.type) &&
