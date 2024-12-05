@@ -33,7 +33,9 @@
                             </t-button>
                         </t-tooltip>
                     </t-col>
-                    <t-col v-if="LogDataType === 'history'" flex="auto"
+                    <t-col
+                        v-if="LogDataType === 'history'"
+                        flex="auto"
                         style="display: inline-flex; justify-content: center">
                         <t-tooltip content="历史日志">
                             <t-button variant="text" shape="square" @click="historyLog">
@@ -168,6 +170,7 @@ const optValue = ref<OptionItem>({
 const openTypeList = (data: OptionItem) => {
     optValue.value = data;
 };
+const logType = ['debug', 'info', 'warn', 'error', 'fatal'];
 //清理log
 const clearLogs = () => {
     if (LogDataType.value === 'realtime') {
@@ -218,23 +221,45 @@ const stopTimer = () => {
         intervalId.value = null;
     }
 };
+const extractContent = (text: string): string | null => {
+    const regex = /\[([^\]]+)]/;
+    const match = regex.exec(text);
+    if (match && match[1]) {
+        const extracted = match[1].toLowerCase();
+        if (logType.includes(extracted)) {
+            return match[1];
+        }
+    }
+    return null;
+};
 const loadData = (text: string, loadType: string) => {
     const lines = text.split(/\r\n/);
     lines.forEach((line) => {
-        let remoteJson = JSON.parse(line) as { message: string, level: string };
-        const type = remoteJson.level;
-        const actualType = type || 'other';
-        const color = actualType && typeKey.value[actualType] ? typeKey.value[actualType] : undefined;
-        const data: logHtml = {
-            type: actualType,
-            content: remoteJson.message,
-            color: color,
-            time: '',
-        };
-
         if (loadType === 'realtime') {
+            let remoteJson = JSON.parse(line) as { message: string, level: string };
+            const type = remoteJson.level;
+            const actualType = type || 'other';
+            const color = actualType && typeKey.value[actualType] ? typeKey.value[actualType] : undefined;
+            const data: logHtml = {
+                type: actualType,
+                content: remoteJson.message,
+                color: color,
+                time: '',
+            };
             updateLogList(realtimeLogHtmlList, actualType, data);
         } else if (loadType === 'history') {
+            const type = extractContent(line);
+            const actualType = type || 'other';
+            const timeRegex = /(\d{2}-\d{2} \d{2}:\d{2}:\d{2})|(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/;
+            const match = timeRegex.exec(line);
+            let time = match ? match[0] : null;
+            const color = actualType && typeKey.value[actualType] ? typeKey.value[actualType] : undefined;
+            const data: logHtml = {
+                type: actualType,
+                content: line.slice(match ? match[0].length : 0) || '',
+                color: color,
+                time: time ? time + ' ' : '',
+            };
             updateLogList(historyLogHtmlList, actualType, data);
         }
     });
@@ -245,7 +270,7 @@ const updateLogList = (logList: Ref<Map<string, Array<logHtml>>>, actualType: st
     if (Array.isArray(allLogs)) {
         allLogs.push(data);
     }
-    if (actualType !== 'unknown') {
+    if (actualType !== 'other') {
         const typeLogs = logList.value.get(actualType);
         if (Array.isArray(typeLogs)) {
             typeLogs.push(data);
@@ -338,6 +363,7 @@ const fetchRealTimeLogs = async () => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         //@ts-expect-error
         eventSource.value.onmessage = (event: MessageEvent) => {
+            console.log(event.data)
             loadData(event.data, 'realtime');
         };
     }
