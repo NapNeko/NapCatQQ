@@ -51,9 +51,9 @@ export class OneBotGroupApi {
         if (memberUin && adminUin) {
             return new OB11GroupBanEvent(
                 this.core,
-                +GroupCode,
-                +memberUin,
-                +adminUin,
+                parseInt(GroupCode),
+                parseInt(memberUin),
+                parseInt(adminUin),
                 duration,
                 subType,
             );
@@ -98,8 +98,8 @@ export class OneBotGroupApi {
         }
         return new OB11GroupMsgEmojiLikeEvent(
             this.core,
-            +groupCode,
-            +senderUin,
+            parseInt(groupCode),
+            parseInt(senderUin),
             MessageUnique.getShortIdByMsgId(replyMsg.msgId)!,
             [{
                 emoji_id: emojiId,
@@ -111,10 +111,9 @@ export class OneBotGroupApi {
     async parseCardChangedEvent(msg: RawMessage) {
         if (msg.senderUin && msg.senderUin !== '0') {
             const member = await this.core.apis.GroupApi.getGroupMember(msg.peerUid, msg.senderUin);
-            const oldName = member?.cardName || member?.nick || '';
-            if (member && oldName !== msg.sendMemberName) {
+            if (member && member.cardName !== msg.sendMemberName) {
                 const newCardName = msg.sendMemberName ?? '';
-                const event = new OB11GroupCardEvent(this.core, parseInt(msg.peerUid), parseInt(msg.senderUin), newCardName, oldName);
+                const event = new OB11GroupCardEvent(this.core, parseInt(msg.peerUid), parseInt(msg.senderUin), newCardName, member.cardName);
                 member.cardName = newCardName;
                 return event;
             }
