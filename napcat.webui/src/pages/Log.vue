@@ -33,11 +33,8 @@
                             </t-button>
                         </t-tooltip>
                     </t-col>
-                    <t-col
-                        v-if="LogDataType === 'history'"
-                        flex="auto"
-                        style="display: inline-flex; justify-content: center"
-                    >
+                    <t-col v-if="LogDataType === 'history'" flex="auto"
+                        style="display: inline-flex; justify-content: center">
                         <t-tooltip content="历史日志">
                             <t-button variant="text" shape="square" @click="historyLog">
                                 <history-icon></history-icon>
@@ -46,8 +43,8 @@
                     </t-col>
                     <t-col flex="auto" style="display: inline-flex; justify-content: center">
                         <div class="tag-box">
-                            <t-tag class="t-tag"
-                            :style="{backgroundImage:typeKey[optValue.description]}">{{ optValue.content }}</t-tag>
+                            <t-tag class="t-tag" :style="{ backgroundImage: typeKey[optValue.description] }">{{
+                                optValue.content }}</t-tag>
                         </div>
                         <t-dropdown :options="options" :min-column-width="112" @click="openTypeList">
                             <t-button variant="text" shape="square">
@@ -59,33 +56,19 @@
             </template>
             <template #content>
                 <div class="content" ref="contentBox">
-                    <div
-                        v-for="item in LogDataType === 'realtime'
-                            ? realtimeLogHtmlList.get(optValue.description)
-                            : historyLogHtmlList.get(optValue.description)"
-                    >
-                        <span>{{ item.time }}</span
-                        ><span :id="item.type">{{ item.content }}</span>
+                    <div v-for="item in LogDataType === 'realtime'
+                        ? realtimeLogHtmlList.get(optValue.description)
+                        : historyLogHtmlList.get(optValue.description)">
+                        <span>{{ item.time }}</span><span :id="item.type">{{ item.content }}</span>
                     </div>
                 </div>
             </template>
         </t-card>
     </div>
-    <t-dialog
-        v-model:visible="visibleBody"
-        header="历史日志"
-        :destroy-on-close="true"
-        :show-in-attached-element="true"
-        :on-confirm="GetLogList"
-        class=".t-dialog__ctx .t-dialog__position"
-    >
-        <t-select
-            v-model="value"
-            :options="logFileData"
-            placeholder="请选择日志"
-            :multiple="true"
-            style="text-align: left"
-        />
+    <t-dialog v-model:visible="visibleBody" header="历史日志" :destroy-on-close="true" :show-in-attached-element="true"
+        :on-confirm="GetLogList" class=".t-dialog__ctx .t-dialog__position">
+        <t-select v-model="value" :options="logFileData" placeholder="请选择日志" :multiple="true"
+            style="text-align: left" />
     </t-dialog>
 </template>
 <script setup lang="ts">
@@ -140,7 +123,6 @@ const options = ref<OptionItem[]>([
         description: 'fatal',
     },
 ]);
-const logType = ['debug', 'info', 'warn', 'error', 'fatal'];
 const typeKey = ref<Record<string, string>>({
     all: 'linear-gradient(60deg,#16a085 0%, #f4d03f 100%)',
     debug: 'linear-gradient(-225deg, #5271c4 0%, #b19fff 48%, #eca1fe 100%)',
@@ -236,31 +218,18 @@ const stopTimer = () => {
         intervalId.value = null;
     }
 };
-const extractContent = (text: string): string | null => {
-    const regex = /\[([^\]]+)]/;
-    const match = regex.exec(text);
-    if (match && match[1]) {
-        const extracted = match[1].toLowerCase();
-        if (logType.includes(extracted)) {
-            return match[1];
-        }
-    }
-    return null;
-};
 const loadData = (text: string, loadType: string) => {
     const lines = text.split(/\r\n/);
     lines.forEach((line) => {
-        const type = extractContent(line);
+        let remoteJson = JSON.parse(line) as { message: string, level: string };
+        const type = remoteJson.level;
         const actualType = type || 'other';
-        const timeRegex = /(\d{2}-\d{2} \d{2}:\d{2}:\d{2})|(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/;
-        const match = timeRegex.exec(line);
-        let time = match ? match[0] : null;
         const color = actualType && typeKey.value[actualType] ? typeKey.value[actualType] : undefined;
         const data: logHtml = {
             type: actualType,
-            content: line.slice(match ? match[0].length : 0) || '',
+            content: remoteJson.message,
             color: color,
-            time: time ? time + ' ' : '',
+            time: '',
         };
 
         if (loadType === 'realtime') {
@@ -463,12 +432,15 @@ onUnmounted(() => {
 .title {
     padding: 20px 20px 0 20px;
 }
+
 .tab-box {
     margin: 0 20px;
 }
+
 .card-box {
     margin: 10px 20px;
 }
+
 .content {
     height: 56vh;
     background-image: url('@/assets/logo.png');
@@ -481,15 +453,18 @@ onUnmounted(() => {
     font-size: 15px;
     line-height: 16px;
 }
+
 .content span {
     white-space: pre-wrap;
     word-break: break-all;
     overflow-wrap: break-word;
 }
+
 @keyframes fadeInOnce {
     0% {
         opacity: 0;
     }
+
     100% {
         opacity: 1;
     }
@@ -499,6 +474,7 @@ onUnmounted(() => {
     0% {
         opacity: 1;
     }
+
     100% {
         opacity: 0;
     }
@@ -507,20 +483,24 @@ onUnmounted(() => {
 .content div {
     animation: fadeInOnce 0.5s forwards;
 }
+
 ::-webkit-scrollbar {
     width: 5px;
     background: #f1f1f1;
 }
+
 ::-webkit-scrollbar-thumb {
     background-color: #888888;
     border-radius: 4px;
 }
+
 .tag-box {
     display: flex;
     justify-content: center;
     align-items: center;
     margin-right: 5px;
 }
+
 .t-tag {
     min-width: 60px;
     text-align: center;
@@ -529,42 +509,49 @@ onUnmounted(() => {
     color: white;
     font-weight: 500;
 }
+
 #debug {
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-image: linear-gradient(-225deg, #5271c4 0%, #b19fff 48%, #eca1fe 100%);
 }
+
 #info {
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-image: linear-gradient(-225deg, #22e1ff 0%, #1d8fe1 48%, #625eb1 100%);
 }
+
 #warn {
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-image: linear-gradient(225deg, #e14fad 0%, #f9d423 48%, #e37318 100%);
 }
+
 #error {
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-image: linear-gradient(to left, #ffe29f 0%, #ffa99f 48%, #d94541 100%);
 }
+
 #fatal {
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-image: linear-gradient(to right, #fd0700, #ec567f);
 }
+
 #other {
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-image: linear-gradient(to top, #3f51b1 0%, #5a55ae 13%, #7b5fac 25%, #8f6aae 38%, #a86aa4 50%, #cc6b8e 62%, #f18271 75%, #f3a469 87%, #f7c978 100%);
 }
+
 @media (max-width: 786px) {
     .content {
         height: 50vh;
@@ -578,6 +565,7 @@ onUnmounted(() => {
 .card {
     padding: 5px 10px 20px 10px !important;
 }
+
 @media (max-width: 786px) {
     .card {
         padding: 0 !important;
