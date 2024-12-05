@@ -18,13 +18,14 @@ export const LogListHandler: RequestHandler = async (_, res) => {
     const logList = await WebUiConfigWrapper.GetLogsList();
     return sendSuccess(res, logList);
 };
+
 // 实时日志（SSE）
 export const LogRealTimeHandler: RequestHandler = async (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Connection', 'keep-alive');
     const listener = (log: string) => {
         try {
-            res.write(`${log}\n`);
+            res.write(`data: ${log}\n\n`);
         } catch (error) {
             console.error('向客户端写入日志数据时出错:', error);
         }
