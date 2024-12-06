@@ -17,7 +17,160 @@ export enum GroupInfoSource {
     KRECENTCONTACT,
     KMOREPANEL
 }
-
+export interface GroupDetailInfo {
+    groupCode: string;
+    groupUin: string;
+    ownerUid: string;
+    ownerUin: string;
+    groupFlag: number;
+    groupFlagExt: number;
+    maxMemberNum: number;
+    memberNum: number;
+    groupOption: number;
+    classExt: number;
+    groupName: string;
+    fingerMemo: string;
+    groupQuestion: string;
+    certType: number;
+    richFingerMemo: string;
+    tagRecord: any[];
+    shutUpAllTimestamp: number;
+    shutUpMeTimestamp: number;
+    groupTypeFlag: number;
+    privilegeFlag: number;
+    groupSecLevel: number;
+    groupFlagExt3: number;
+    isConfGroup: number;
+    isModifyConfGroupFace: number;
+    isModifyConfGroupName: number;
+    groupFlagExt4: number;
+    groupMemo: string;
+    cmdUinMsgSeq: number;
+    cmdUinJoinTime: number;
+    cmdUinUinFlag: number;
+    cmdUinMsgMask: number;
+    groupSecLevelInfo: number;
+    cmdUinPrivilege: number;
+    cmdUinFlagEx2: number;
+    appealDeadline: number;
+    remarkName: string;
+    isTop: boolean;
+    groupFace: number;
+    groupGeoInfo: {
+        ownerUid: string;
+        SetTime: number;
+        CityId: number;
+        Longitude: string;
+        Latitude: string;
+        GeoContent: string;
+        poiId: string;
+    };
+    certificationText: string;
+    cmdUinRingtoneId: number;
+    longGroupName: string;
+    autoAgreeJoinGroupUserNumForConfGroup: number;
+    autoAgreeJoinGroupUserNumForNormalGroup: number;
+    cmdUinFlagExt3Grocery: number;
+    groupCardPrefix: {
+        introduction: string;
+        rptPrefix: any[];
+    };
+    groupExt: {
+        groupInfoExtSeq: number;
+        reserve: number;
+        luckyWordId: string;
+        lightCharNum: number;
+        luckyWord: string;
+        starId: number;
+        essentialMsgSwitch: number;
+        todoSeq: number;
+        blacklistExpireTime: number;
+        isLimitGroupRtc: number;
+        companyId: number;
+        hasGroupCustomPortrait: number;
+        bindGuildId: string;
+        groupOwnerId: {
+            memberUin: string;
+            memberUid: string;
+            memberQid: string;
+        };
+        essentialMsgPrivilege: number;
+        msgEventSeq: string;
+        inviteRobotSwitch: number;
+        gangUpId: string;
+        qqMusicMedalSwitch: number;
+        showPlayTogetherSwitch: number;
+        groupFlagPro1: string;
+        groupBindGuildIds: {
+            guildIds: any[];
+        };
+        viewedMsgDisappearTime: string;
+        groupExtFlameData: {
+            switchState: number;
+            state: number;
+            dayNums: any[];
+            version: number;
+            updateTime: string;
+            isDisplayDayNum: boolean;
+        };
+        groupBindGuildSwitch: number;
+        groupAioBindGuildId: string;
+        groupExcludeGuildIds: {
+            guildIds: any[];
+        };
+        fullGroupExpansionSwitch: number;
+        fullGroupExpansionSeq: string;
+        inviteRobotMemberSwitch: number;
+        inviteRobotMemberExamine: number;
+        groupSquareSwitch: number;
+    };
+    msgLimitFrequency: number;
+    hlGuildAppid: number;
+    hlGuildSubType: number;
+    isAllowRecallMsg: number;
+    confUin: string;
+    confMaxMsgSeq: number;
+    confToGroupTime: number;
+    groupSchoolInfo: {
+        location: string;
+        grade: number;
+        school: string;
+    };
+    activeMemberNum: number;
+    groupGrade: number;
+    groupCreateTime: number;
+    subscriptionUin: string;
+    subscriptionUid: string;
+    noFingerOpenFlag: number;
+    noCodeFingerOpenFlag: number;
+    isGroupFreeze: number;
+    allianceId: string;
+    groupExtOnly: {
+        tribeId: number;
+        moneyForAddGroup: number;
+    };
+    isAllowConfGroupMemberModifyGroupName: number;
+    isAllowConfGroupMemberNick: number;
+    isAllowConfGroupMemberAtAll: number;
+    groupClassText: string;
+    groupFreezeReason: number;
+    headPortraitSeq: number;
+    groupHeadPortrait: {
+        portraitCnt: number;
+        portraitInfo: any[];
+        defaultId: number;
+        verifyingPortraitCnt: number;
+        verifyingPortraitInfo: any[];
+    };
+    cmdUinJoinMsgSeq: number;
+    cmdUinJoinRealMsgSeq: number;
+    groupAnswer: string;
+    groupAdminMaxNum: number;
+    inviteNoAuthNumLimit: string;
+    hlGuildOrgId: number;
+    isAllowHlGuildBinary: number;
+    localExitGroupReason: number;
+}
 export interface GroupExt0xEF0InfoFilter {
     bindGuildId: number;
     blacklistExpireTime: number;
