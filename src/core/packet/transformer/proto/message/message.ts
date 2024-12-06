@@ -54,12 +54,20 @@ export const PushMsg = {
     generalFlag: ProtoField(9, ScalarType.INT32, true),
 };
 
+export const GroupChangeInfo = {
+    operator: ProtoField(1, () => GroupChangeOperator, true),
+};
+
+export const GroupChangeOperator = {
+    operatorUid: ProtoField(1, ScalarType.STRING, true),
+};
+
 export const GroupChange = {
     groupUin: ProtoField(1, ScalarType.UINT32),
     flag: ProtoField(2, ScalarType.UINT32),
     memberUid: ProtoField(3, ScalarType.STRING, true),
     decreaseType: ProtoField(4, ScalarType.UINT32),
-    operatorUid: ProtoField(5, ScalarType.STRING, true),
+    operatorInfo: ProtoField(5, ScalarType.BYTES, true),
     increaseType: ProtoField(6, ScalarType.UINT32),
     field7: ProtoField(7, ScalarType.BYTES, true),
 };

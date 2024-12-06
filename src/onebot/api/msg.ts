@@ -28,12 +28,12 @@ import { RequestUtil } from '@/common/request';
 import fsPromise, { constants } from 'node:fs/promises';
 import { OB11FriendAddNoticeEvent } from '@/onebot/event/notice/OB11FriendAddNoticeEvent';
 import { ForwardMsgBuilder } from "@/common/forward-msg-builder";
-import { GroupChange, PushMsgBody } from "@/core/packet/transformer/proto";
 import { NapProtoMsg } from '@napneko/nap-proto-core';
 import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
 import { OB11GroupDecreaseEvent, GroupDecreaseSubType } from '../event/notice/OB11GroupDecreaseEvent';
 import { GroupAdmin } from '@/core/packet/transformer/proto/message/groupAdmin';
 import { OB11GroupAdminNoticeEvent } from '../event/notice/OB11GroupAdminNoticeEvent';
+import { GroupChange, GroupChangeInfo, PushMsgBody } from '@/core/packet/transformer/proto';
 
 type RawToOb11Converters = {
     [Key in keyof MessageElement as Key extends `${string}Element` ? Key : never]: (
@@ -891,42 +891,42 @@ export class OneBotMsgApi {
         if (!sendElements.length) {
             throw new Error('消息体无法解析, 请检查是否发送了不支持的消息类型');
         }
-    
+
         const calculateTotalSize = async (elements: SendMessageElement[]): Promise<number> => {
             const sizePromises = elements.map(async element => {
                 switch (element.elementType) {
-                case ElementType.PTT:
-                    return (await fsPromise.stat(element.pttElement.filePath)).size;
-                case ElementType.FILE:
-                    return (await fsPromise.stat(element.fileElement.filePath)).size;
-                case ElementType.VIDEO:
-                    return (await fsPromise.stat(element.videoElement.filePath)).size;
-                case ElementType.PIC:
-                    return (await fsPromise.stat(element.picElement.sourcePath)).size;
-                default:
-                    return 0;
+                    case ElementType.PTT:
+                        return (await fsPromise.stat(element.pttElement.filePath)).size;
+                    case ElementType.FILE:
+                        return (await fsPromise.stat(element.fileElement.filePath)).size;
+                    case ElementType.VIDEO:
+                        return (await fsPromise.stat(element.videoElement.filePath)).size;
+                    case ElementType.PIC:
+                        return (await fsPromise.stat(element.picElement.sourcePath)).size;
+                    default:
+                        return 0;
                 }
             });
             const sizes = await Promise.all(sizePromises);
             return sizes.reduce((total, size) => total + size, 0);
         };
-    
+
         const totalSize = await calculateTotalSize(sendElements).catch(e => {
             this.core.context.logger.logError('发送消息计算预计时间异常', e);
             return 0;
         });
-    
+
         const timeout = 10000 + (totalSize / 1024 / 256 * 1000);
-    
+
         const returnMsg = await this.core.apis.MsgApi.sendMsg(peer, sendElements, waitComplete, timeout);
         if (!returnMsg) throw new Error('发送消息失败');
-    
+
         returnMsg.id = MessageUnique.createUniqueMsgId({
             chatType: peer.chatType,
             guildId: '',
             peerUid: peer.peerUid,
         }, returnMsg.msgId);
-    
+
         setTimeout(async () => {
             const deletePromises = deleteAfterSentFiles.map(async file => {
                 try {
@@ -939,7 +939,7 @@ export class OneBotMsgApi {
             });
             await Promise.all(deletePromises);
         }, 60000);
-    
+
         return returnMsg;
     }
 
@@ -970,14 +970,14 @@ export class OneBotMsgApi {
     }
     groupChangDecreseType2String(type: number): GroupDecreaseSubType {
         switch (type) {
-        case 130:
-            return 'leave';
-        case 131:
-            return 'kick';
-        case 3:
-            return 'kick_me';
-        default:
-            return 'kick';
+            case 130:
+                return 'leave';
+            case 131:
+                return 'kick';
+            case 3:
+                return 'kick_me';
+            default:
+                return 'kick';
         }
     }
 
@@ -986,15 +986,20 @@ export class OneBotMsgApi {
         if (SysMessage.contentHead.type == 33 && SysMessage.body?.msgContent) {
             const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
             this.core.apis.GroupApi.refreshGroupMemberCache(groupChange.groupUin.toString()).then().catch();
+            const operatorUid = groupChange.operatorInfo?.toString();
             return new OB11GroupIncreaseEvent(
                 this.core,
                 groupChange.groupUin,
                 groupChange.memberUid ? +await this.core.apis.UserApi.getUinByUidV2(groupChange.memberUid) : 0,
-                groupChange.operatorUid ? +await this.core.apis.UserApi.getUinByUidV2(groupChange.operatorUid) : 0,
+                operatorUid ? +await this.core.apis.UserApi.getUinByUidV2(operatorUid) : 0,
                 groupChange.decreaseType == 131 ? 'invite' : 'approve',
             );
         } else if (SysMessage.contentHead.type == 34 && SysMessage.body?.msgContent) {
             const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
+            // 自身被踢出时operatorInfo会是一个protobuf 否则大多数情况为一个string
+            const operatorUid = groupChange.decreaseType === 3 && groupChange.operatorInfo ?
+                new NapProtoMsg(GroupChangeInfo).decode(groupChange.operatorInfo).operator?.operatorUid :
+                groupChange.operatorInfo?.toString();
             if (groupChange.memberUid === this.core.selfInfo.uid) {
                 setTimeout(() => {
                     this.core.apis.GroupApi.groupMemberCache.delete(groupChange.groupUin.toString());
@@ -1007,7 +1012,7 @@ export class OneBotMsgApi {
                 this.core,
                 groupChange.groupUin,
                 groupChange.memberUid ? +await this.core.apis.UserApi.getUinByUidV2(groupChange.memberUid) : 0,
-                groupChange.operatorUid ? +await this.core.apis.UserApi.getUinByUidV2(groupChange.operatorUid) : 0,
+                operatorUid ? +await this.core.apis.UserApi.getUinByUidV2(operatorUid) : 0,
                 this.groupChangDecreseType2String(groupChange.decreaseType),
             );
         } else if (SysMessage.contentHead.type == 44 && SysMessage.body?.msgContent) {
