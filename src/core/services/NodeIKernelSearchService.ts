@@ -16,7 +16,7 @@ export interface NodeIKernelSearchService {
         penetrate: string
     }): Promise<GeneralCallResult>;// needs 1 arguments
 
-    searchLocalInfo(keywords: string, unknown: number/*4*/): unknown;
+    searchLocalInfo(keywords: string, type: number/*4*/): unknown;
 
     cancelSearchLocalInfo(...args: any[]): unknown;// needs 3 arguments
 

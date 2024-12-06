@@ -149,7 +149,7 @@ export interface NodeIKernelGroupService {
 
     getGroupExtList(force: boolean): Promise<GeneralCallResult>;
 
-    getGroupDetailInfo(groupCode: string, groupInfoSource: GroupInfoSource): Promise<unknown>;
+    getGroupDetailInfo(groupCode: string, groupInfoSource: GroupInfoSource): Promise<GeneralCallResult>;
 
     getMemberExtInfo(param: GroupExtParam): Promise<unknown>;//req
 

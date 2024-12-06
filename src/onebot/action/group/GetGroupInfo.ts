@@ -17,15 +17,14 @@ class GetGroupInfo extends OneBotAction<Payload, OB11Group> {
     async _handle(payload: Payload) {
         const group = (await this.core.apis.GroupApi.getGroups()).find(e => e.groupCode == payload.group_id.toString());
         if (!group) {
-            const data = await this.core.apis.GroupApi.searchGroup(payload.group_id.toString());
-            if (!data) throw new Error('Group not found');
+            const data = await this.core.apis.GroupApi.fetchGroupDetail(payload.group_id.toString());
             return {
-                ...data.searchGroupInfo,
+                ...data,
                 group_id: +payload.group_id,
-                group_name: data.searchGroupInfo.groupName,
-                member_count: data.searchGroupInfo.memberNum,
-                max_member_count: data.searchGroupInfo.maxMemberNum,
-            };
+                group_name: data.groupName,
+                member_count: data.memberNum,
+                max_member_count: data.maxMemberNum,
+            }
         }
         return OB11Construct.group(group);
     }

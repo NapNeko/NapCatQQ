@@ -8,6 +8,7 @@ import {
     MemberExtSourceType,
     NapCatCore,
     GroupNotify,
+    GroupInfoSource,
 } from '@/core';
 import { isNumeric, solveAsyncProblem } from '@/common/helper';
 import { LimitedHashTable } from '@/common/message-unique';
@@ -22,6 +23,19 @@ export class NTQQGroupApi {
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
         this.core = core;
+    }
+
+    async fetchGroupDetail(groupCode: string) {
+        let [, detailInfo] = await this.core.eventWrapper.callNormalEventV2(
+            'NodeIKernelGroupService/getGroupDetailInfo',
+            'NodeIKernelGroupListener/onGroupDetailInfoChange',
+            [groupCode, GroupInfoSource.KDATACARD],
+            (ret) => ret.result === 0,
+            (detailInfo) => detailInfo.groupCode === groupCode,
+            1,
+            5000
+        );
+        return detailInfo;
     }
 
     async initApi() {
