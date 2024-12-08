@@ -124,7 +124,7 @@ export class PacketMsgReplyElement extends IPacketMsgElement<SendReplyElement> {
     }
 
     get isGroupReply(): boolean {
-        return this.messageClientSeq !== 0;
+        return this.messageClientSeq === 0;
     }
 
     buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
