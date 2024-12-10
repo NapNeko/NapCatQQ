@@ -1,9 +1,7 @@
-import { request } from '@/utils/request.js';
-
 export class githubApiManager {
     public async GetBaseData(): Promise<Response | null> {
         try {
-            const ConfigResponse = await request('https://api.github.com/repos/NapNeko/NapCatQQ', {
+            const ConfigResponse = await fetch('https://api.github.com/repos/NapNeko/NapCatQQ', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -19,7 +17,7 @@ export class githubApiManager {
     }
     public async GetReleasesData(): Promise<Response | null> {
         try {
-            const ConfigResponse = await request('https://api.github.com/repos/NapNeko/NapCatQQ/releases', {
+            const ConfigResponse = await fetch('https://api.github.com/repos/NapNeko/NapCatQQ/releases', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -35,7 +33,7 @@ export class githubApiManager {
     }
     public async GetPullsData(): Promise<Response | null> {
         try {
-            const ConfigResponse = await request('https://api.github.com/repos/NapNeko/NapCatQQ/pulls', {
+            const ConfigResponse = await fetch('https://api.github.com/repos/NapNeko/NapCatQQ/pulls', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -51,7 +49,7 @@ export class githubApiManager {
     }
     public async GetContributors(): Promise<Response | null> {
         try {
-            const ConfigResponse = await request('https://api.github.com/repos/NapNeko/NapCatQQ/contributors', {
+            const ConfigResponse = await fetch('https://api.github.com/repos/NapNeko/NapCatQQ/contributors', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
