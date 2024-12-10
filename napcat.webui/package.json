@@ -12,6 +12,7 @@
   "dependencies": {
     "eslint-plugin-prettier": "^5.2.1",
     "event-source-polyfill": "^1.0.31",
+    "mitt": "^3.0.1",
     "qrcode": "^1.5.4",
     "tdesign-icons-vue-next": "^0.3.3",
     "tdesign-vue-next": "^1.10.3",

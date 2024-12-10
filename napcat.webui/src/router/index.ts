@@ -7,6 +7,7 @@ import NetWork from '../pages/NetWork.vue';
 import QQLogin from '../components/QQLogin.vue';
 import WebUiLogin from '../components/WebUiLogin.vue';
 import OtherConfig from '../pages/OtherConfig.vue';
+import { MessagePlugin } from 'tdesign-vue-next';
 
 const routes: Array<RouteRecordRaw> = [
     { path: '/', redirect: '/webui' },
@@ -26,7 +27,22 @@ const routes: Array<RouteRecordRaw> = [
     },
 ];
 
-export const router = createRouter({
+const router = createRouter({
     history: createWebHashHistory(),
     routes,
 });
+
+router.beforeEach((to, from, next) => {
+    const token = localStorage.getItem('auth');
+    if (!token && to.path !== '/webui' && to.path !== '/qqlogin') {
+        MessagePlugin.error('Token 过期啦, 重新登录吧');
+        localStorage.clear();
+        setTimeout(() => {
+            next('/webui');
+        }, 500);
+    } else {
+        next();
+    }
+});
+
+export default router;
