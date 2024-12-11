@@ -47,6 +47,7 @@ import { NodeIKernelRecentContactListener } from '@/core/listeners/NodeIKernelRe
 import { BotOfflineEvent } from './event/notice/BotOfflineEvent';
 import { AdapterConfigWrap, mergeOneBotConfigs, migrateOneBotConfigsV1, NetworkConfigAdapter, OneBotConfig } from './config/config';
 import { OB11Message } from './types';
+import { OB11PluginAdapter } from './network/plugin';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -106,7 +107,12 @@ export class NapCatOneBot11Adapter {
         const serviceInfo = await this.creatOneBotLog(ob11Config);
         this.context.logger.log(`[Notice] [OneBot11] ${serviceInfo}`);
 
-        // //创建NetWork服务
+        //创建NetWork服务
+
+        // 注册Plugin
+        this.networkManager.registerAdapter(
+            new OB11PluginAdapter('plugin', this.core, this.actions)
+        );
         for (const key of ob11Config.network.httpServers) {
             if (key.enable) {
                 this.networkManager.registerAdapter(
@@ -443,7 +449,7 @@ export class NapCatOneBot11Adapter {
     }
 
     private async emitMsg(message: RawMessage) {
-        const network = Object.values(this.configLoader.configData.network).flat() as Array<AdapterConfigWrap>;
+        const network = await this.networkManager.getAllConfig();
         this.context.logger.logDebug('收到新消息 RawMessage', message);
         await Promise.allSettled([
             this.handleMsg(message, network),
@@ -483,7 +489,7 @@ export class NapCatOneBot11Adapter {
                 ob11Msg.stringMsg.target_id = parseInt(message.peerUin);
                 ob11Msg.arrayMsg.target_id = parseInt(message.peerUin);
             }
-            if (e.messagePostFormat == 'string') {
+            if ('messagePostFormat' in e && e.messagePostFormat == 'string') {
                 msgMap.set(e.name, structuredClone(ob11Msg.stringMsg));
             } else {
                 msgMap.set(e.name, structuredClone(ob11Msg.arrayMsg));
