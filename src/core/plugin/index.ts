@@ -1,10 +1,10 @@
-import { OB11Message } from "@/onebot";
+import { NapCatOneBot11Adapter, OB11Message } from "@/onebot";
+import SendGroupMsg from "@/onebot/action/group/SendGroupMsg";
 import { NapCatCore } from "..";
-import { ActionMap } from "@/onebot/action";
 
-export const plugin_onmessage = async (adapter: string, core: NapCatCore, action: ActionMap, message: OB11Message) => {
+export const plugin_onmessage = async (adapter: string, core: NapCatCore, obCore: NapCatOneBot11Adapter, message: OB11Message) => {
     if (message.raw_message === 'ping') {
-        const ret = await action.get('send_group_msg')?.handle({ group_id: message.group_id, message: 'pong' }, adapter);
+        const ret = await new SendGroupMsg(obCore, core).handle({ group_id: String(message.group_id), message: 'pong' }, adapter);
         console.log(ret);
     }
 }
