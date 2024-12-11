@@ -1,5 +1,5 @@
 import { IOB11NetworkAdapter, OB11EmitEventContent, OB11NetworkReloadType } from './index';
-import { OB11Message } from '@/onebot';
+import { NapCatOneBot11Adapter, OB11Message } from '@/onebot';
 import { NapCatCore } from '@/core';
 import { ActionMap } from '../action';
 import { AdapterConfig } from '../config/config';
@@ -12,6 +12,7 @@ export class OB11PluginAdapter implements IOB11NetworkAdapter {
     constructor(
         public name: string,
         public core: NapCatCore,
+        public obCore: NapCatOneBot11Adapter,
         public actions: ActionMap,
     ) {
         // 基础配置
@@ -26,7 +27,7 @@ export class OB11PluginAdapter implements IOB11NetworkAdapter {
 
     onEvent<T extends OB11EmitEventContent>(event: T) {
         if (event.post_type === 'message') {
-             plugin_onmessage(this.config.name, this.core, this.actions, event as OB11Message).then().catch();
+             plugin_onmessage(this.config.name, this.core, this.obCore, event as OB11Message).then().catch();
         }
     }
 

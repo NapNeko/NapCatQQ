@@ -111,7 +111,7 @@ export class NapCatOneBot11Adapter {
 
         // 注册Plugin
         this.networkManager.registerAdapter(
-            new OB11PluginAdapter('plugin', this.core, this.actions)
+            new OB11PluginAdapter('plugin', this.core, this,this.actions)
         );
         for (const key of ob11Config.network.httpServers) {
             if (key.enable) {
