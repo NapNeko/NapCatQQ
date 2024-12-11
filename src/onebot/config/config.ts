@@ -28,6 +28,7 @@ interface v1Config {
 export interface AdapterConfigInner {
     name: string;
     enable: boolean;
+
 }
 export type AdapterConfigWrap = AdapterConfigInner & Partial<NetworkConfigAdapter>;
 
@@ -127,7 +128,7 @@ export const mergeNetworkDefaultConfig = {
     websocketClients: websocketClientDefaultConfigs,
 } as const;
 
-export type NetworkConfigAdapter = HttpServerConfig | HttpClientConfig | WebsocketServerConfig | WebsocketClientConfig;
+export type NetworkConfigAdapter = HttpServerConfig | HttpClientConfig | WebsocketServerConfig | WebsocketClientConfig | AdapterConfig;
 type NetworkConfigKeys = keyof typeof mergeNetworkDefaultConfig;
 
 export function mergeOneBotConfigs(
