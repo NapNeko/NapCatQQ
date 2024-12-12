@@ -33,7 +33,13 @@ NapCatQQ 是现代化的基于 NTQQ 的 Bot 协议端实现
 [Server.Other](https://docs.napcat.cyou/)
 
 ## 回家旅途
-[QQ Group](https://qm.qq.com/q/I6LU87a0Yq)
+[QQ Group#1](https://qm.qq.com/q/I6LU87a0Yq)
+
+[QQ Group#2](https://qm.qq.com/q/uqh4I87KoM)
+
+[Telegram](https://t.me/+-qb24vgBfeI2OTFl)
+
+> QQ Group#2 准许Bot / Telegram与QQ Group#2 为新建Group
 
 ## 性能设计/协议标准
 NapCat 已实现90％+的 OneBot / GoCQ 标准接口，并提供兼容性保留接口，其设计理念遵守 无数据库/异步优先/后台刷新 的性能思想。
