@@ -100,6 +100,7 @@ export class QQBasicInfoWrapper {
     getAppidV2ByMajor(QQVersion: string) {
         const majorPath = getMajorPath(QQVersion);
         const appid = parseAppidFromMajor(majorPath);
+        console.log(appid);
         return appid;
     }
 
