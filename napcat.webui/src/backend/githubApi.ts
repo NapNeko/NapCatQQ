@@ -1,7 +1,7 @@
 export class githubApiManager {
     public async GetBaseData(): Promise<Response | null> {
         try {
-            const ConfigResponse= await fetch('https://api.github.com/repos/NapNeko/NapCatQQ', {
+            const ConfigResponse = await fetch('https://api.github.com/repos/NapNeko/NapCatQQ', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

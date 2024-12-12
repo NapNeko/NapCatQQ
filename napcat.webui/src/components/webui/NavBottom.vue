@@ -1,5 +1,5 @@
 <template>
-    <t-head-menu theme="light"  class="bottom-menu">
+    <t-head-menu theme="light" class="bottom-menu">
         <router-link v-for="item in menuItems" :key="item.value" :to="item.route">
             <t-tooltip :content="item.label" placement="top">
                 <t-menu-item :value="item.value" :disabled="item.disabled" class="menu-item">
@@ -7,15 +7,13 @@
                         <t-icon :name="item.icon" />
                     </template>
 
-<!--                    {{item.label}}-->
+                    <!--                    {{item.label}}-->
                 </t-menu-item>
             </t-tooltip>
         </router-link>
     </t-head-menu>
 </template>
 <script setup lang="ts">
-import { defineProps } from 'vue';
-
 type MenuItem = {
     value: string;
     label: string;
