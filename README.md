@@ -37,7 +37,7 @@ NapCatQQ 是现代化的基于 NTQQ 的 Bot 协议端实现
 
 [QQ Group#2](https://qm.qq.com/q/uqh4I87KoM)
 
-[Telegram](https://t.me/+-qb24vgBfeI2OTFl)
+[Telegram](https://t.me/MelodicMoonlight)
 
 > QQ Group#2 准许Bot / Telegram与QQ Group#2 为新建Group
 
