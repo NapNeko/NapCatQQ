@@ -30,9 +30,6 @@ NapCatQQ 是现代化的基于 NTQQ 的 Bot 协议端实现
 
 [Cloudflare.Pages](https://napneko.pages.dev/)
 
-[Server.Other](https://napcat.cyou/)
-
-
 ## 回家旅途
 [QQ Group](https://qm.qq.com/q/I6LU87a0Yq)
 
