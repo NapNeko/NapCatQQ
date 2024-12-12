@@ -3,7 +3,7 @@ import { NapCatOneBot11Adapter, OB11Message } from '@/onebot';
 import { NapCatCore } from '@/core';
 import { ActionMap } from '../action';
 import { AdapterConfig } from '../config/config';
-import { plugin_onmessage } from '@/core/plugin';
+import { plugin_onmessage } from '@/plugin';
 
 export class OB11PluginAdapter implements IOB11NetworkAdapter {
     isEnable: boolean = true;

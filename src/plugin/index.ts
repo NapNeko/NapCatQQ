@@ -1,6 +1,6 @@
 import { NapCatOneBot11Adapter, OB11Message } from "@/onebot";
 import SendGroupMsg from "@/onebot/action/group/SendGroupMsg";
-import { NapCatCore } from "..";
+import { NapCatCore } from "../core";
 
 export const plugin_onmessage = async (adapter: string, core: NapCatCore, obCore: NapCatOneBot11Adapter, message: OB11Message) => {
     if (message.raw_message === 'ping') {
