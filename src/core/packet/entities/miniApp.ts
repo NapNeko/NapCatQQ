@@ -3,6 +3,7 @@ export interface MiniAppReqCustomParams {
     desc: string;
     picUrl: string;
     jumpUrl: string;
+    webUrl?: string;
 }
 
 export interface MiniAppReqTemplateParams {

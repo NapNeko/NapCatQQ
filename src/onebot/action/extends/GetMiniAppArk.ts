@@ -11,7 +11,8 @@ const SchemaData = Type.Union([
         desc: Type.String(),
         picUrl: Type.String(),
         jumpUrl: Type.String(),
-        rawArkData: Type.Optional(Type.Union([Type.Boolean(), Type.String()]))
+        webUrl: Type.Optional(Type.String()),
+        rawArkData: Type.Optional(Type.Union([Type.String()]))
     }),
     Type.Object({
         title: Type.String(),
@@ -19,6 +20,7 @@ const SchemaData = Type.Union([
         picUrl: Type.String(),
         jumpUrl: Type.String(),
         iconUrl: Type.String(),
+        webUrl: Type.Optional(Type.String()),
         appId: Type.String(),
         scene: Type.Union([Type.Number(), Type.String()]),
         templateType: Type.Union([Type.Number(), Type.String()]),
@@ -28,7 +30,7 @@ const SchemaData = Type.Union([
         versionId: Type.String(),
         sdkId: Type.String(),
         withShareTicket: Type.Union([Type.Number(), Type.String()]),
-        rawArkData: Type.Optional(Type.Union([Type.Boolean(), Type.String()]))
+        rawArkData: Type.Optional(Type.Union([Type.String()]))
     })
 ]);
 type Payload = Static<typeof SchemaData>;
@@ -45,7 +47,8 @@ export class GetMiniAppArk extends GetPacketStatusDepends<Payload, {
             title: payload.title,
             desc: payload.desc,
             picUrl: payload.picUrl,
-            jumpUrl: payload.jumpUrl
+            jumpUrl: payload.jumpUrl,
+            webUrl: payload.webUrl,
         } as MiniAppReqCustomParams;
         if ('type' in payload) {
             reqParam = MiniAppInfoHelper.generateReq(customParams, MiniAppInfo.get(payload.type)!.template);
@@ -63,13 +66,13 @@ export class GetMiniAppArk extends GetPacketStatusDepends<Payload, {
                     verType: +verType,
                     shareType: +shareType,
                     versionId: versionId,
-                    withShareTicket: +withShareTicket
+                    withShareTicket: +withShareTicket,
                 }
             );
         }
         const arkData = await this.core.apis.PacketApi.pkt.operation.GetMiniAppAdaptShareInfo(reqParam);
         return {
-            data: payload.rawArkData ? arkData : MiniAppInfoHelper.RawToSend(arkData)
+            data: payload.rawArkData === 'true' ? arkData : MiniAppInfoHelper.RawToSend(arkData)
         };
     }
 }
