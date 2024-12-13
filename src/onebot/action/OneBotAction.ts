@@ -29,7 +29,7 @@ export class OB11Response {
 }
 
 export abstract class OneBotAction<PayloadType, ReturnDataType> {
-    actionName: ActionName = ActionName.Unknown;
+    actionName: typeof ActionName[keyof typeof ActionName] = ActionName.Unknown;
     core: NapCatCore;
     private validate: ValidateFunction<any> | undefined = undefined;
     payloadSchema: any = undefined;
