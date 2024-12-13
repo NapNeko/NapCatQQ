@@ -103,10 +103,7 @@ import { GetAiCharacters } from "@/onebot/action/extends/GetAiCharacters";
 import { GetGuildList } from './guild/GetGuildList';
 import { GetGuildProfile } from './guild/GetGuildProfile';
 
-
-export type ActionMap = Map<string, OneBotAction<any, any>>;
-
-export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore): ActionMap {
+export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 
     const actionHandlers = [
         new GetGroupInfoEx(obContext, core),
@@ -220,12 +217,33 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new SendGroupAiRecord(obContext, core),
         new GetAiCharacters(obContext, core),
     ];
-    const actionMap = new Map();
+
+    type ValueType<K> = K extends `${typeof actionHandlers[number]['actionName']}` | `${typeof actionHandlers[number]['actionName']}_async` | `${typeof actionHandlers[number]['actionName']}_rate_limited` ? typeof actionHandlers[number] : never;
+
+    class TypedMap<K extends string> {
+        private map = new Map<K, ValueType<K>>();
+
+        set(key: K, value: ValueType<K>): void {
+            this.map.set(key, value);
+        }
+
+        get(key: K): ValueType<K> | undefined {
+            return this.map.get(key);
+        }
+    }
+
+    const actionMap = new TypedMap<
+        `${typeof actionHandlers[number]['actionName']}` |
+        `${typeof actionHandlers[number]['actionName']}_async` |
+        `${typeof actionHandlers[number]['actionName']}_rate_limited`
+    >();
+
     for (const action of actionHandlers) {
         actionMap.set(action.actionName, action);
-        actionMap.set(action.actionName + '_async', action);
-        actionMap.set(action.actionName + '_rate_limited', action);
+        actionMap.set(`${action.actionName}_async`, action);
+        actionMap.set(`${action.actionName}_rate_limited`, action);
     }
 
     return actionMap;
 }
+export type ActionMap = ReturnType<typeof createActionMap>
