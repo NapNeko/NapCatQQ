@@ -1,5 +1,3 @@
-import { request } from '@/utils/request.js';
-
 import { EventSourcePolyfill } from 'event-source-polyfill';
 type LogListItem = string;
 type LogListData = LogListItem[];
@@ -15,7 +13,7 @@ export class LogManager {
     }
     public async GetLogList(): Promise<LogListData> {
         try {
-            const ConfigResponse = await request(`${this.apiPrefix}/Log/GetLogList`, {
+            const ConfigResponse = await fetch(`${this.apiPrefix}/Log/GetLogList`, {
                 method: 'GET',
                 headers: {
                     Authorization: 'Bearer ' + this.retCredential,
@@ -35,7 +33,7 @@ export class LogManager {
     }
     public async GetLog(FileName: string): Promise<string> {
         try {
-            const ConfigResponse = await request(`${this.apiPrefix}/Log/GetLog?id=${FileName}`, {
+            const ConfigResponse = await fetch(`${this.apiPrefix}/Log/GetLog?id=${FileName}`, {
                 method: 'GET',
                 headers: {
                     Authorization: 'Bearer ' + this.retCredential,

@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue';
 import * as QRCode from 'qrcode';
 import { useRouter } from 'vue-router';
 import { MessagePlugin } from 'tdesign-vue-next';
@@ -41,6 +41,7 @@ const qrcodeCanvas = ref<HTMLCanvasElement | null>(null);
 const qqLoginManager = new QQLoginManager(localStorage.getItem('auth') || '');
 let heartBeatTimer: number | null = null;
 let qrcodeUrl: string = '';
+
 const selectAccount = async (accountName: string): Promise<void> => {
     const { result, errMsg } = await qqLoginManager.setQuickLogin(accountName);
     if (result) {
@@ -74,10 +75,6 @@ const HeartBeat = async (): Promise<void> => {
         if (heartBeatTimer) {
             clearInterval(heartBeatTimer);
         }
-        // //判断是否已经调转
-        // if (router.currentRoute.value.path !== '/dashboard/basic-info') {
-        //     return;
-        // }
         await MessagePlugin.success('登录成功即将跳转');
         await router.push({ path: '/dashboard/basic-info' });
     } else if (isLogined?.qrcodeurl && qrcodeUrl !== isLogined.qrcodeurl) {
@@ -89,6 +86,7 @@ const HeartBeat = async (): Promise<void> => {
 const InitPages = async (): Promise<void> => {
     quickLoginList.value = await qqLoginManager.getQQQuickLoginList();
     qrcodeUrl = await qqLoginManager.getQQLoginQrcode();
+    await nextTick();
     generateQrCode(qrcodeUrl, qrcodeCanvas.value);
 };
 
@@ -102,6 +100,14 @@ onMounted(() => {
 onBeforeUnmount(() => {
     if (heartBeatTimer) {
         clearInterval(heartBeatTimer);
+    }
+
+});
+
+watch(loginMethod, async (newMethod) => {
+    if (newMethod === 'qrcode') {
+        await nextTick();
+        generateQrCode(qrcodeUrl, qrcodeCanvas.value);
     }
 });
 

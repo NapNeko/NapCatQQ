@@ -1,6 +1,5 @@
-import { request } from '@/utils/request.js';
 import { OneBotConfig } from '../../../src/onebot/config/config';
-
+import { ResponseCode } from '../../../src/webui/src/const/status';
 export class QQLoginManager {
     private retCredential: string;
     private readonly apiPrefix: string;
@@ -14,7 +13,7 @@ export class QQLoginManager {
     // TODO:
     public async GetOB11Config(): Promise<OneBotConfig> {
         try {
-            const ConfigResponse = await request(`${this.apiPrefix}/OB11Config/GetConfig`, {
+            const ConfigResponse = await fetch(`${this.apiPrefix}/OB11Config/GetConfig`, {
                 method: 'POST',
                 headers: {
                     Authorization: 'Bearer ' + this.retCredential,
@@ -23,8 +22,8 @@ export class QQLoginManager {
             });
             if (ConfigResponse.status == 200) {
                 const ConfigResponseJson = await ConfigResponse.json();
-                if (ConfigResponseJson.code == 0) {
-                    return ConfigResponseJson?.data as OneBotConfig;
+                if (ConfigResponseJson.code == ResponseCode.Success) {
+                    return ConfigResponseJson;
                 }
             }
         } catch (error) {
@@ -35,7 +34,7 @@ export class QQLoginManager {
 
     public async SetOB11Config(config: OneBotConfig): Promise<boolean> {
         try {
-            const ConfigResponse = await request(`${this.apiPrefix}/OB11Config/SetConfig`, {
+            const ConfigResponse = await fetch(`${this.apiPrefix}/OB11Config/SetConfig`, {
                 method: 'POST',
                 headers: {
                     Authorization: 'Bearer ' + this.retCredential,
@@ -57,7 +56,7 @@ export class QQLoginManager {
 
     public async checkQQLoginStatus(): Promise<boolean> {
         try {
-            const QQLoginResponse = await request(`${this.apiPrefix}/QQLogin/CheckLoginStatus`, {
+            const QQLoginResponse = await fetch(`${this.apiPrefix}/QQLogin/CheckLoginStatus`, {
                 method: 'POST',
                 headers: {
                     Authorization: 'Bearer ' + this.retCredential,
@@ -77,7 +76,7 @@ export class QQLoginManager {
     }
     public async checkQQLoginStatusWithQrcode(): Promise<{ qrcodeurl: string; isLogin: string } | undefined> {
         try {
-            const QQLoginResponse = await request(`${this.apiPrefix}/QQLogin/CheckLoginStatus`, {
+            const QQLoginResponse = await fetch(`${this.apiPrefix}/QQLogin/CheckLoginStatus`, {
                 method: 'POST',
                 headers: {
                     Authorization: 'Bearer ' + this.retCredential,
@@ -98,7 +97,7 @@ export class QQLoginManager {
 
     public async checkWebUiLogined(): Promise<boolean> {
         try {
-            const LoginResponse = await request(`${this.apiPrefix}/auth/check`, {
+            const LoginResponse = await fetch(`${this.apiPrefix}/auth/check`, {
                 method: 'POST',
                 headers: {
                     Authorization: 'Bearer ' + this.retCredential,
@@ -119,7 +118,7 @@ export class QQLoginManager {
 
     public async loginWithToken(token: string): Promise<string | null> {
         try {
-            const loginResponse = await request(`${this.apiPrefix}/auth/login`, {
+            const loginResponse = await fetch(`${this.apiPrefix}/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -140,7 +139,7 @@ export class QQLoginManager {
 
     public async getQQLoginQrcode(): Promise<string> {
         try {
-            const QQLoginResponse = await request(`${this.apiPrefix}/QQLogin/GetQQLoginQrcode`, {
+            const QQLoginResponse = await fetch(`${this.apiPrefix}/QQLogin/GetQQLoginQrcode`, {
                 method: 'POST',
                 headers: {
                     Authorization: 'Bearer ' + this.retCredential,
@@ -161,7 +160,7 @@ export class QQLoginManager {
 
     public async getQQQuickLoginList(): Promise<string[]> {
         try {
-            const QQLoginResponse = await request(`${this.apiPrefix}/QQLogin/GetQuickLoginList`, {
+            const QQLoginResponse = await fetch(`${this.apiPrefix}/QQLogin/GetQuickLoginList`, {
                 method: 'POST',
                 headers: {
                     Authorization: 'Bearer ' + this.retCredential,
@@ -182,7 +181,7 @@ export class QQLoginManager {
 
     public async setQuickLogin(uin: string): Promise<{ result: boolean; errMsg: string }> {
         try {
-            const QQLoginResponse = await request(`${this.apiPrefix}/QQLogin/SetQuickLogin`, {
+            const QQLoginResponse = await fetch(`${this.apiPrefix}/QQLogin/SetQuickLogin`, {
                 method: 'POST',
                 headers: {
                     Authorization: 'Bearer ' + this.retCredential,
