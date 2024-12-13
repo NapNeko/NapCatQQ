@@ -23,7 +23,7 @@ export class QQLoginManager {
             if (ConfigResponse.status == 200) {
                 const ConfigResponseJson = await ConfigResponse.json();
                 if (ConfigResponseJson.code == ResponseCode.Success) {
-                    return ConfigResponseJson;
+                    return ConfigResponseJson.data;
                 }
             }
         } catch (error) {
