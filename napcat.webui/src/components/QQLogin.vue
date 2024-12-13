@@ -4,31 +4,17 @@
             <h2 class="sotheby-font">QQ Login</h2>
             <div class="login-methods">
                 <t-tooltip content="快速登录">
-                    <t-button
-                        id="quick-login"
-                        class="login-method"
-                        :class="{ active: loginMethod === 'quick' }"
-                        @click="loginMethod = 'quick'"
-                        >Quick Login</t-button
-                    >
+                    <t-button id="quick-login" class="login-method" :class="{ active: loginMethod === 'quick' }"
+                        @click="loginMethod = 'quick'">Quick Login</t-button>
                 </t-tooltip>
                 <t-tooltip content="二维码登录">
-                    <t-button
-                        id="qrcode-login"
-                        class="login-method"
-                        :class="{ active: loginMethod === 'qrcode' }"
-                        @click="loginMethod = 'qrcode'"
-                        >QR Code</t-button
-                    >
+                    <t-button id="qrcode-login" class="login-method" :class="{ active: loginMethod === 'qrcode' }"
+                        @click="loginMethod = 'qrcode'">QR Code</t-button>
                 </t-tooltip>
             </div>
             <div v-show="loginMethod === 'quick'" id="quick-login-dropdown" class="login-form">
-                <t-select
-                    id="quick-login-select"
-                    v-model="selectedAccount"
-                    placeholder="Select Account"
-                    @change="selectAccount"
-                >
+                <t-select id="quick-login-select" v-model="selectedAccount" placeholder="Select Account"
+                    @change="selectAccount">
                     <t-option v-for="account in quickLoginList" :key="account" :value="account">{{ account }}</t-option>
                 </t-select>
             </div>
@@ -41,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import * as QRCode from 'qrcode';
 import { useRouter } from 'vue-router';
 import { MessagePlugin } from 'tdesign-vue-next';
@@ -104,18 +90,28 @@ const InitPages = async (): Promise<void> => {
     quickLoginList.value = await qqLoginManager.getQQQuickLoginList();
     qrcodeUrl = await qqLoginManager.getQQLoginQrcode();
     generateQrCode(qrcodeUrl, qrcodeCanvas.value);
-    heartBeatTimer = window.setInterval(HeartBeat, 3000);
 };
 
 onMounted(() => {
-    InitPages();
+    InitPages().then().catch((err) => {
+        console.error('InitPages Error:', err);
+    });
+    heartBeatTimer = window.setInterval(HeartBeat, 3000);
 });
+
+onBeforeUnmount(() => {
+    if (heartBeatTimer) {
+        clearInterval(heartBeatTimer);
+    }
+});
+
 </script>
 
 <style scoped>
 .layout {
     height: 100vh;
 }
+
 .login-container {
     padding: 20px;
     border-radius: 5px;
