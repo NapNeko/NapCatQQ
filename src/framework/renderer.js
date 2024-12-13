@@ -24,7 +24,7 @@ export const onSettingWindowCreated = async (view) => {
     `;
 
     view.querySelector('.nc_openwebui').addEventListener('click', () => {
-        window.open(webui, '_blank');
+        window.napcat.openInnerUrl(webui);
     });
     view.querySelector('.nc_openwebui_ex').addEventListener('click', () => {
         window.napcat.openExternalUrl(webui);

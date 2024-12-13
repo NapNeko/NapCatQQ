@@ -6,6 +6,9 @@ const napcat = {
     openExternalUrl: async (url) => {
         ipcRenderer.send('open_external_url', url);
     },
+    openInnerUrl: async (url) => {
+        ipcRenderer.send('napcat_open_inner_url', url);
+    },
     getWebUiUrlReact: async () => {
         return ipcRenderer.invoke('napcat_get_reactweb');
     }
