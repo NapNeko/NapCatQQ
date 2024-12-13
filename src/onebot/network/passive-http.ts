@@ -105,7 +105,7 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
             return res.json(hello);
         }
         const actionName = req.path.split('/')[1];
-        const action = this.actions.get(actionName);
+        const action = this.actions.get(actionName as any);
         if (action) {
             try {
                 const result = await action.handle(payload, this.name);
