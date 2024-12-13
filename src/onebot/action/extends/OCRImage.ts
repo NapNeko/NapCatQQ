@@ -10,8 +10,7 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export class OCRImage extends OneBotAction<Payload, any> {
-    actionName = ActionName.OCRImage;
+class OCRImageBase extends OneBotAction<Payload, any> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
@@ -34,6 +33,10 @@ export class OCRImage extends OneBotAction<Payload, any> {
     }
 }
 
-export class IOCRImage extends OCRImage {
+export class OCRImage extends OCRImageBase {
+    actionName = ActionName.OCRImage;
+}
+
+export class IOCRImage extends OCRImageBase {
     actionName = ActionName.IOCRImage;
 }

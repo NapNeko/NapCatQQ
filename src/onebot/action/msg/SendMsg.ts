@@ -88,8 +88,7 @@ function getSpecialMsgNum(payload: OB11PostSendMsg, msgType: OB11MessageDataType
     return 0;
 }
 
-export class SendMsg extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
-    actionName = ActionName.SendMsg;
+export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
     contextMode = ContextMode.Normal;
 
     protected async check(payload: OB11PostSendMsg): Promise<BaseCheckResult> {
@@ -379,4 +378,6 @@ export class SendMsg extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
     }
 }
 
-export default SendMsg;
+export default class SendMsg extends SendMsgBase {
+    actionName = ActionName.SendMsg;
+}
