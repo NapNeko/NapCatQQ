@@ -8,6 +8,7 @@ import QQLogin from '../components/QQLogin.vue';
 import WebUiLogin from '../components/WebUiLogin.vue';
 import OtherConfig from '../pages/OtherConfig.vue';
 import { MessagePlugin } from 'tdesign-vue-next';
+import { QQLoginManager } from '@/backend/shell';
 
 const routes: Array<RouteRecordRaw> = [
     { path: '/', redirect: '/webui' },
@@ -32,17 +33,22 @@ const router = createRouter({
     routes,
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
+    const isPublicRoute = ['/webui', '/qqlogin'].includes(to.path);
     const token = localStorage.getItem('auth');
-    if (!token && to.path !== '/webui' && to.path !== '/qqlogin') {
-        MessagePlugin.error('Token 过期啦, 重新登录吧');
-        localStorage.clear();
-        setTimeout(() => {
-            next('/webui');
-        }, 500);
-    } else {
-        next();
+
+    if (!isPublicRoute) {
+        if (!token) {
+            MessagePlugin.error('请先登录');
+            return next('/webui');
+        }
+        const login = await new QQLoginManager(token).checkWebUiLogined();
+        if (!login) {
+            MessagePlugin.error('请先登录');
+            return next('/webui');
+        }
     }
+    next();
 });
 
 export default router;
