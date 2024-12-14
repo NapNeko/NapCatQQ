@@ -218,32 +218,29 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new GetAiCharacters(obContext, core),
     ];
 
-    type ValueType<K> = K extends `${typeof actionHandlers[number]['actionName']}` | `${typeof actionHandlers[number]['actionName']}_async` | `${typeof actionHandlers[number]['actionName']}_rate_limited` ? typeof actionHandlers[number] : never;
+    type HandlerUnion = typeof actionHandlers[number];
+    type MapType = {
+        [H in HandlerUnion as H['actionName']]: H;
+    } & {
+        [H in HandlerUnion as `${H['actionName']}_async`]: H;
+    } & {
+        [H in HandlerUnion as `${H['actionName']}_rate_limited`]: H;
+    };
 
-    class TypedMap<K extends string> {
-        private map = new Map<K, ValueType<K>>();
+    const _map = new Map<keyof MapType, HandlerUnion>();
 
-        set(key: K, value: ValueType<K>): void {
-            this.map.set(key, value);
-        }
+    actionHandlers.forEach(h => {
+        _map.set(h.actionName as keyof MapType, h);
+        _map.set(`${h.actionName}_async` as keyof MapType, h);
+        _map.set(`${h.actionName}_rate_limited` as keyof MapType, h);
+    });
 
-        get(key: K): ValueType<K> | undefined {
-            return this.map.get(key);
-        }
+    function get<K extends keyof MapType>(key: K): MapType[K];
+    function get<K extends keyof MapType>(key: K): null;
+    function get<K extends keyof MapType>(key: K): HandlerUnion | null | MapType[K] {
+        return _map.get(key as keyof MapType) ?? null;
     }
 
-    const actionMap = new TypedMap<
-        `${typeof actionHandlers[number]['actionName']}` |
-        `${typeof actionHandlers[number]['actionName']}_async` |
-        `${typeof actionHandlers[number]['actionName']}_rate_limited`
-    >();
-
-    for (const action of actionHandlers) {
-        actionMap.set(action.actionName, action);
-        actionMap.set(`${action.actionName}_async`, action);
-        actionMap.set(`${action.actionName}_rate_limited`, action);
-    }
-
-    return actionMap;
+    return { get };
 }
 export type ActionMap = ReturnType<typeof createActionMap>

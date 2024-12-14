@@ -3,8 +3,6 @@ import { ActionName, BaseCheckResult } from '@/onebot/action/router';
 
 
 export abstract class GetPacketStatusDepends<PT, RT> extends OneBotAction<PT, RT> {
-    actionName = ActionName.GetPacketStatus;
-
     protected async check(payload: PT): Promise<BaseCheckResult>{
         if (!this.core.apis.PacketApi.available) {
             return {
@@ -18,6 +16,8 @@ export abstract class GetPacketStatusDepends<PT, RT> extends OneBotAction<PT, RT
 }
 
 export class GetPacketStatus extends GetPacketStatusDepends<any, null> {
+    actionName = ActionName.GetPacketStatus;
+
     async _handle(payload: any) {
         return null;
     }

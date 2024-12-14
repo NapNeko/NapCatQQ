@@ -5,12 +5,15 @@ interface ReturnType {
     yes: boolean;
 }
 
-export default class CanSendRecord extends OneBotAction<any, ReturnType> {
-    actionName = ActionName.CanSendRecord;
-
+export class CanSend extends OneBotAction<any, ReturnType> {
     async _handle(_payload: void): Promise<ReturnType> {
         return {
             yes: true,
         };
     }
+}
+
+
+export default class CanSendRecord extends CanSend{
+    actionName = ActionName.CanSendRecord;
 }
