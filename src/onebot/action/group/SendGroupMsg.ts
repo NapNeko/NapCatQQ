@@ -1,9 +1,9 @@
-import SendMsg, { ContextMode } from '@/onebot/action/msg/SendMsg';
+import {ContextMode, SendMsgBase} from '@/onebot/action/msg/SendMsg';
 import { ActionName, BaseCheckResult } from '@/onebot/action/router';
 import { OB11PostSendMsg } from '@/onebot/types';
 
 // 未检测参数
-class SendGroupMsg extends SendMsg {
+class SendGroupMsg extends SendMsgBase {
     actionName = ActionName.SendGroupMsg;
     contextMode: ContextMode = ContextMode.Group;
 
