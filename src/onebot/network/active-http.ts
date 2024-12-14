@@ -11,7 +11,8 @@ import { ActionMap } from '@/onebot/action';
 export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     logger: LogWrapper;
     isEnable: boolean = false;
-    public config: HttpClientConfig;
+    config: HttpClientConfig;
+
     constructor(
         public name: string,
         config: HttpClientConfig,
@@ -24,39 +25,27 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     }
 
     onEvent<T extends OB11EmitEventContent>(event: T) {
-        if (!this.isEnable) {
-            return;
-        }
+        this.emitEventAsync(event).catch(e => this.logger.logError('[OneBot] [Http Client] 新消息事件HTTP上报返回快速操作失败', e));
+    }
+
+    async emitEventAsync<T extends OB11EmitEventContent>(event: T) {
+        if (!this.isEnable) return;
+
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
             'x-self-id': this.core.selfInfo.uin,
         };
+
         const msgStr = JSON.stringify(event);
-        if (this.config.token && this.config.token.length > 0) {
+        if (this.config.token) {
             const hmac = createHmac('sha1', this.config.token);
             hmac.update(msgStr);
-            const sig = hmac.digest('hex');
-            headers['x-signature'] = 'sha1=' + sig;
+            headers['x-signature'] = 'sha1=' + hmac.digest('hex');
         }
-        RequestUtil.HttpGetText(this.config.url, 'POST', msgStr, headers).then(async (res) => {
-            let resJson: QuickAction;
-            try {
-                resJson = JSON.parse(res);
-                //logDebug('新消息事件HTTP上报返回快速操作: ', JSON.stringify(resJson));
-            } catch (e) {
-                this.logger.logDebug('[OneBot] [Http Client] 新消息事件HTTP上报没有返回快速操作，不需要处理');
-                return;
-            }
-            try {
-                this.obContext.apis.QuickActionApi
-                    .handleQuickOperation(event as QuickActionEvent, resJson)
-                    .catch(e => this.logger.logError(e));
-            } catch (e: any) {
-                this.logger.logError('[OneBot] [Http Client] 新消息事件HTTP上报返回快速操作失败', e);
-            }
-        }).catch((e) => {
-            this.logger.logError('[OneBot] [Http Client] 新消息事件HTTP上报失败', e);
-        });
+
+        const data = await RequestUtil.HttpGetText(this.config.url, 'POST', msgStr, headers);
+        const resJson: QuickAction = JSON.parse(data);
+        await this.obContext.apis.QuickActionApi.handleQuickOperation(event as QuickActionEvent, resJson);
     }
 
     open() {
@@ -66,20 +55,24 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
     close() {
         this.isEnable = false;
     }
-    async reload(newconfig: HttpClientConfig) {
+
+    async reload(newConfig: HttpClientConfig) {
         const wasEnabled = this.isEnable;
         const oldUrl = this.config.url;
-        this.config = newconfig;
-        if (newconfig.enable && !wasEnabled) {
+        this.config = newConfig;
+
+        if (newConfig.enable && !wasEnabled) {
             this.open();
             return OB11NetworkReloadType.NetWorkOpen;
-        } else if (!newconfig.enable && wasEnabled) {
+        } else if (!newConfig.enable && wasEnabled) {
             this.close();
             return OB11NetworkReloadType.NetWorkClose;
         }
-        if (oldUrl !== newconfig.url) {
+
+        if (oldUrl !== newConfig.url) {
             return OB11NetworkReloadType.NetWorkReload;
         }
+
         return OB11NetworkReloadType.Normal;
     }
 }

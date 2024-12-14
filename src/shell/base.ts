@@ -354,8 +354,6 @@ export class NapCatShell {
         };
         this.core = new NapCatCore(this.context, selfInfo);
 
-
-
     }
     async InitNapCat() {
         await this.core.initCore();
