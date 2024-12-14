@@ -82,11 +82,20 @@ export class OneBotQuickActionApi {
             this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, deleteAfterSentFiles, false).then().catch(e => this.core.context.logger.logError(e));
         }
     }
+    async findNotify(flag: string) {
+        let notify = (await this.core.apis.GroupApi.getSingleScreenNotifies(false, 100)).find(e => e.seq == flag);
+        if (!notify) {
+            notify = (await this.core.apis.GroupApi.getSingleScreenNotifies(true, 100)).find(e => e.seq == flag);
+        }
+        return notify;
+    }
 
     async handleGroupRequest(request: OB11GroupRequestEvent, quickAction: QuickActionGroupRequest) {
-        if (!isNull(quickAction.approve)) {
+        let noify = await this.findNotify(request.flag);
+
+        if (!isNull(quickAction.approve) && noify) {
             this.core.apis.GroupApi.handleGroupRequest(
-                request.flag,
+                noify,
                 quickAction.approve ? NTGroupRequestOperateTypes.KAGREE : NTGroupRequestOperateTypes.KREFUSE,
                 quickAction.reason,
             ).catch(e => this.core.context.logger.logError(e));
@@ -94,8 +103,9 @@ export class OneBotQuickActionApi {
     }
 
     async handleFriendRequest(request: OB11FriendRequestEvent, quickAction: QuickActionFriendRequest) {
-        if (!isNull(quickAction.approve)) {
-            this.core.apis.FriendApi.handleFriendRequest(request.flag, !!quickAction.approve).then().catch(e => this.core.context.logger.logError(e));
+        const notify = (await this.core.apis.FriendApi.getBuddyReq()).buddyReqs.find(e => e.reqTime == request.flag.toString());
+        if (!isNull(quickAction.approve) && notify) {
+            this.core.apis.FriendApi.handleFriendRequest(notify, !!quickAction.approve).then().catch(e => this.core.context.logger.logError(e));
         }
     }
 }
