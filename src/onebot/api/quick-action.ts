@@ -18,8 +18,8 @@ import { ContextMode, createContext, normalize } from '@/onebot/action/msg/SendM
 import { isNull } from '@/common/helper';
 
 export class OneBotQuickActionApi {
-    private obContext: NapCatOneBot11Adapter;
-    private core: NapCatCore;
+    obContext: NapCatOneBot11Adapter;
+    core: NapCatCore;
     constructor(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
         this.obContext = obContext;
         this.core = core;
