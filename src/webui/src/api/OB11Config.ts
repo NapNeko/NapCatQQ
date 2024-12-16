@@ -10,15 +10,15 @@ import { sendError, sendSuccess } from '@webapi/utils/response';
 import { isEmpty } from '@webapi/utils/check';
 
 // 获取OneBot11配置
-export const OB11GetConfigHandler: RequestHandler = async (_, res) => {
+export const OB11GetConfigHandler: RequestHandler = (_, res) => {
     // 获取QQ登录状态
-    const isLogin = await WebUiDataRuntime.getQQLoginStatus();
+    const isLogin = WebUiDataRuntime.getQQLoginStatus();
     // 如果未登录，返回错误
     if (!isLogin) {
         return sendError(res, 'Not Login');
     }
     // 获取登录的QQ号
-    const uin = await WebUiDataRuntime.getQQLoginUin();
+    const uin = WebUiDataRuntime.getQQLoginUin();
     // 读取配置文件
     const configFilePath = resolve(webUiPathWrapper.configPath, `./onebot11_${uin}.json`);
     // 尝试解析配置文件
@@ -39,7 +39,7 @@ export const OB11GetConfigHandler: RequestHandler = async (_, res) => {
 // 写入OneBot11配置
 export const OB11SetConfigHandler: RequestHandler = async (req, res) => {
     // 获取QQ登录状态
-    const isLogin = await WebUiDataRuntime.getQQLoginStatus();
+    const isLogin = WebUiDataRuntime.getQQLoginStatus();
     // 如果未登录，返回错误
     if (!isLogin) {
         return sendError(res, 'Not Login');

@@ -175,7 +175,9 @@ async function handleLogin(
 
         loginService.getLoginList().then((res) => {
             // 遍历 res.LocalLoginInfoList[x].isQuickLogin是否可以 res.LocalLoginInfoList[x].uin 转为string 加入string[] 最后遍历完成调用WebUiDataRuntime.setQQQuickLoginList
-            WebUiDataRuntime.setQQQuickLoginList(res.LocalLoginInfoList.filter((item) => item.isQuickLogin).map((item) => item.uin.toString()));
+            const list = res.LocalLoginInfoList.filter((item) => item.isQuickLogin);
+            WebUiDataRuntime.setQQQuickLoginList(list.map((item) => item.uin.toString()));
+            WebUiDataRuntime.setQQNewLoginList(list);
         });
 
         WebUiDataRuntime.setQuickLoginCall(async (uin: string) => {
@@ -285,7 +287,7 @@ export async function NCoreInitShell() {
 
     await initializeEngine(engine, basicInfoWrapper, dataPathGlobal, systemPlatform, systemVersion);
     await initializeLoginService(loginService, basicInfoWrapper, dataPathGlobal, systemVersion, hostname);
-    
+
     program.option('-q, --qq [number]', 'QQ号').parse(process.argv);
     const cmdOptions = program.opts();
     const quickLoginUin = cmdOptions.qq;
