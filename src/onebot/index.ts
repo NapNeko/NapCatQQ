@@ -31,7 +31,6 @@ import {
     OneBotMsgApi,
     OneBotQuickActionApi,
     OneBotUserApi,
-    StableOneBotApiWrapper,
 } from '@/onebot/api';
 import { ActionMap, createActionMap } from '@/onebot/action';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
@@ -55,7 +54,7 @@ export class NapCatOneBot11Adapter {
     readonly context: InstanceContext;
 
     configLoader: OB11ConfigLoader;
-    public readonly apis: StableOneBotApiWrapper;
+    public readonly apis;
     networkManager: OB11NetworkManager;
     actions: ActionMap;
     private readonly bootTime = Date.now() / 1000;
@@ -72,7 +71,7 @@ export class NapCatOneBot11Adapter {
             UserApi: new OneBotUserApi(this, core),
             FriendApi: new OneBotFriendApi(this, core),
             MsgApi: new OneBotMsgApi(this, core),
-            QuickActionApi: new OneBotQuickActionApi(this, core),
+            QuickActionApi: new OneBotQuickActionApi(this, core)
         } as const;
         this.actions = createActionMap(this, core);
         this.networkManager = new OB11NetworkManager();

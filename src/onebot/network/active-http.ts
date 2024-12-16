@@ -30,7 +30,6 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
 
     async emitEventAsync<T extends OB11EmitEventContent>(event: T) {
         if (!this.isEnable) return;
-
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
             'x-self-id': this.core.selfInfo.uin,
@@ -46,10 +45,9 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
         const data = await RequestUtil.HttpGetText(this.config.url, 'POST', msgStr, headers);
         const resJson: QuickAction = data ? JSON.parse(data) : {};
 
-        if (!this.obContext.apis.QuickActionApi.handleQuickOperation) {
+        if (!this.obContext.apis || !this.obContext.apis.QuickActionApi.handleQuickOperation) {
             throw new Error('apis.QuickActionApi.handleQuickOperation 异常');
         }
-
         await this.obContext.apis.QuickActionApi.handleQuickOperation(event as QuickActionEvent, resJson);
     }
 
