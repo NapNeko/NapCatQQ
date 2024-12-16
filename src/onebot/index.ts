@@ -215,7 +215,12 @@ export class NapCatOneBot11Adapter {
                     await this.networkManager.closeSomeAdaterWhenOpen([existingAdapter]);
                 }
             } else if (adapterConfig.enable) {
-                const newAdapter = new adapterClass(adapterConfig.name, adapterConfig, this.core, this.actions);
+                let newAdapter = new adapterClass( adapterConfig.name, adapterConfig, this.core, this.actions );
+
+                if (adapterClass === OB11ActiveHttpAdapter) {
+                    newAdapter = new adapterClass(adapterConfig.name, adapterConfig, this.core, this, this.actions);
+                }
+
                 await this.networkManager.registerAdapterAndOpen(newAdapter);
             }
         }
