@@ -157,9 +157,9 @@ export class NapCatOneBot11Adapter {
         this.initBuddyListener();
         this.initGroupListener();
 
-        await WebUiDataRuntime.setQQLoginUin(selfInfo.uin.toString());
-        await WebUiDataRuntime.setQQLoginStatus(true);
-        await WebUiDataRuntime.setOnOB11ConfigChanged(async (newConfig) => {
+        WebUiDataRuntime.setQQLoginInfo(selfInfo);
+        WebUiDataRuntime.setQQLoginStatus(true);
+        WebUiDataRuntime.setOnOB11ConfigChanged(async (newConfig) => {
             const prev = this.configLoader.configData;
             this.configLoader.save(newConfig);
             this.context.logger.log(`OneBot11 配置更改：${JSON.stringify(prev)} -> ${JSON.stringify(newConfig)}`);
@@ -207,7 +207,7 @@ export class NapCatOneBot11Adapter {
                 }
             }
         }
-        // 通知新配置重载 删除关闭的 加入新开的 
+        // 通知新配置重载 删除关闭的 加入新开的
         for (const adapterConfig of nowConfig) {
             const existingAdapter = this.networkManager.findSomeAdapter(adapterConfig.name);
             if (existingAdapter) {

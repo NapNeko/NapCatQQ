@@ -18,7 +18,7 @@ export const LoginHandler: RequestHandler = async (req, res) => {
         return sendError(res, 'token is empty');
     }
     // 检查登录频率
-    if (!(await WebUiDataRuntime.checkLoginRate(WebUiConfigData.loginRate))) {
+    if (!WebUiDataRuntime.checkLoginRate(WebUiConfigData.loginRate)) {
         return sendError(res, 'login rate limit');
     }
     //验证config.token是否等于token

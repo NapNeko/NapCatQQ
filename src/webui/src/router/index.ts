@@ -11,6 +11,7 @@ import { sendSuccess } from '@webapi/utils/response';
 import { QQLoginRouter } from '@webapi/router/QQLogin';
 import { AuthRouter } from '@webapi/router/auth';
 import { LogRouter } from '@webapi/router/Log';
+import { BaseRouter } from '@webapi/router/Base';
 
 const router = Router();
 
@@ -21,6 +22,8 @@ router.use(auth);
 router.all('/test', (_, res) => {
     return sendSuccess(res);
 });
+// router:基础信息相关路由
+router.use('/base', BaseRouter);
 // router:WebUI登录相关路由
 router.use('/auth', AuthRouter);
 // router:QQ登录相关路由
