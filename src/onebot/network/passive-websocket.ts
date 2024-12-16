@@ -166,7 +166,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
     }
 
     private async handleMessage(wsClient: WebSocket, message: any) {
-        let receiveData: { action: ActionName, params?: any, echo?: any } = { action: ActionName.Unknown, params: {} };
+        let receiveData: { action: typeof ActionName[keyof typeof ActionName], params?: any, echo?: any } = { action: ActionName.Unknown, params: {} };
         let echo = undefined;
         try {
             receiveData = JSON.parse(message.toString());
@@ -177,7 +177,7 @@ export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
             return;
         }
         receiveData.params = (receiveData?.params) ? receiveData.params : {};//兼容类型验证 不然类型校验爆炸
-        const action = this.actions.get(receiveData.action);
+        const action = this.actions.get(receiveData.action as any);
         if (!action) {
             this.logger.logError('[OneBot] [WebSocket Client] 发生错误', '不支持的API ' + receiveData.action);
             this.checkStateAndReply<any>(OB11Response.error('不支持的API ' + receiveData.action, 1404, echo), wsClient);

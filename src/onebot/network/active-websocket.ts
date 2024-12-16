@@ -2,7 +2,7 @@ import { IOB11NetworkAdapter, OB11EmitEventContent, OB11NetworkReloadType } from
 import { WebSocket } from 'ws';
 import { OB11HeartbeatEvent } from '@/onebot/event/meta/OB11HeartbeatEvent';
 import { NapCatCore } from '@/core';
-import { ActionName } from '@/onebot/action/router';
+import {  ActionName } from '@/onebot/action/router';
 import { OB11Response } from '@/onebot/action/OneBotAction';
 import { LogWrapper } from '@/common/log';
 import { ActionMap } from '@/onebot/action';
@@ -133,7 +133,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
     }
 
     private async handleMessage(message: any) {
-        let receiveData: { action: ActionName, params?: any, echo?: any } = { action: ActionName.Unknown, params: {} };
+        let receiveData: { action: typeof ActionName[keyof typeof ActionName], params?: any, echo?: any } = { action: ActionName.Unknown, params: {} };
         let echo = undefined;
 
         try {
@@ -145,7 +145,7 @@ export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
             return;
         }
         receiveData.params = (receiveData?.params) ? receiveData.params : {};// 兼容类型验证
-        const action = this.actions.get(receiveData.action);
+        const action = this.actions.get(receiveData.action as any);
         if (!action) {
             this.logger.logError('[OneBot] [WebSocket Client] 发生错误', '不支持的Api ' + receiveData.action);
             this.checkStateAndReply<any>(OB11Response.error('不支持的Api ' + receiveData.action, 1404, echo));
