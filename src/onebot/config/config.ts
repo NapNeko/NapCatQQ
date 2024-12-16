@@ -38,15 +38,13 @@ export interface AdapterConfig extends AdapterConfigInner {
 
 const createDefaultAdapterConfig = <T extends AdapterConfig>(config: T): T => config;
 
-export const pluginDefaultConfigs = createDefaultAdapterConfig({
-    name: 'plugin',
-    messagePostFormat: 'array',
-    reportSelfMessage: false,
-    enable: true,
-    debug: false,
-});
-
-export type PluginConfig = typeof pluginDefaultConfigs;
+export interface PluginConfig extends AdapterConfig {
+    name: string;
+    enable: boolean;
+    messagePostFormat: string;
+    reportSelfMessage: boolean;
+    debug: boolean;
+}
 
 export const httpServerDefaultConfigs = createDefaultAdapterConfig({
     name: 'http-server',

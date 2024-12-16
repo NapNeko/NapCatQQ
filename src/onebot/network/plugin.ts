@@ -8,8 +8,15 @@ import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
 
 export class OB11PluginAdapter extends IOB11NetworkAdapter<PluginConfig> {
     constructor(
-        name: string, config: PluginConfig, core: NapCatCore, obContext: NapCatOneBot11Adapter, actions: ActionMap
+        name: string, core: NapCatCore, obContext: NapCatOneBot11Adapter, actions: ActionMap
     ) {
+        const config = {
+            name: name,
+            messagePostFormat: 'array',
+            reportSelfMessage: false,
+            enable: true,
+            debug: false,
+        };
         super(name, config, core, obContext, actions);
     }
 
@@ -20,11 +27,11 @@ export class OB11PluginAdapter extends IOB11NetworkAdapter<PluginConfig> {
     }
 
     open() {
-
+        this.isEnable = true;
     }
 
     async close() {
-
+        this.isEnable = false;
     }
 
     async reload() {
