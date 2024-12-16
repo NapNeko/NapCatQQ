@@ -89,7 +89,11 @@
                         <t-tag class="tag-item pgk-color"> WebUi: {{ pkg.version }} </t-tag>
                         <t-tag class="tag-item nc-color">
                             NapCat:
-                            {{ githubReleasesData&&githubReleasesData[0] ?.tag_name ? githubReleasesData[0].tag_name : napCatVersion }}
+                            {{ napCatVersion }}
+                        </t-tag>
+                         <t-tag v-if="githubReleasesData&&githubReleasesData[0] ?.tag_name" class="tag-item nc-color">
+                            New NapCat:
+                            {{ githubReleasesData[0].tag_name }}
                         </t-tag>
                         <t-tag class="tag-item td-color"> TDesign: {{ pkg.dependencies['tdesign-vue-next'] }} </t-tag>
                     </span>
