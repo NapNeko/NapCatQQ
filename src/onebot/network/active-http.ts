@@ -44,7 +44,7 @@ export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
         }
 
         const data = await RequestUtil.HttpGetText(this.config.url, 'POST', msgStr, headers);
-        const resJson: QuickAction = JSON.parse(data);
+        const resJson: QuickAction = data ? JSON.parse(data) : {};
         await this.obContext.apis.QuickActionApi.handleQuickOperation(event as QuickActionEvent, resJson);
     }
 
