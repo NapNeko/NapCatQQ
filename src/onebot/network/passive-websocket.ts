@@ -1,36 +1,30 @@
-import { IOB11NetworkAdapter, OB11EmitEventContent, OB11NetworkReloadType } from './index';
+import { OB11EmitEventContent, OB11NetworkReloadType } from './index';
 import urlParse from 'url';
 import { WebSocket, WebSocketServer } from 'ws';
 import { Mutex } from 'async-mutex';
 import { OB11Response } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { NapCatCore } from '@/core';
-import { LogWrapper } from '@/common/log';
 import { OB11HeartbeatEvent } from '@/onebot/event/meta/OB11HeartbeatEvent';
 import { IncomingMessage } from 'http';
 import { ActionMap } from '@/onebot/action';
 import { LifeCycleSubType, OB11LifeCycleEvent } from '@/onebot/event/meta/OB11LifeCycleEvent';
 import { WebsocketServerConfig } from '@/onebot/config/config';
+import { NapCatOneBot11Adapter } from "@/onebot";
+import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
 
-export class OB11PassiveWebSocketAdapter implements IOB11NetworkAdapter {
+export class OB11PassiveWebSocketAdapter extends IOB11NetworkAdapter<WebsocketServerConfig> {
     wsServer: WebSocketServer;
     wsClients: WebSocket[] = [];
     wsClientsMutex = new Mutex();
-    isEnable: boolean = false;
     heartbeatInterval: number = 0;
-    logger: LogWrapper;
-    public config: WebsocketServerConfig;
     private heartbeatIntervalId: NodeJS.Timeout | null = null;
     wsClientWithEvent: WebSocket[] = [];
 
     constructor(
-        public name: string,
-        config: WebsocketServerConfig,
-        public core: NapCatCore,
-        public actions: ActionMap,
+        name: string, config: WebsocketServerConfig, core: NapCatCore, obContext: NapCatOneBot11Adapter, actions: ActionMap
     ) {
-        this.config = structuredClone(config);
-        this.logger = core.context.logger;
+        super(name, config, core, obContext, actions);
         this.wsServer = new WebSocketServer({
             port: this.config.port,
             host: this.config.host === '0.0.0.0' ? '' : this.config.host,

@@ -1,29 +1,21 @@
-import { IOB11NetworkAdapter, OB11EmitEventContent, OB11NetworkReloadType } from '@/onebot/network/index';
+import { OB11EmitEventContent, OB11NetworkReloadType } from '@/onebot/network/index';
 import { WebSocket } from 'ws';
 import { OB11HeartbeatEvent } from '@/onebot/event/meta/OB11HeartbeatEvent';
 import { NapCatCore } from '@/core';
-import {  ActionName } from '@/onebot/action/router';
+import { ActionName } from '@/onebot/action/router';
 import { OB11Response } from '@/onebot/action/OneBotAction';
-import { LogWrapper } from '@/common/log';
 import { ActionMap } from '@/onebot/action';
 import { LifeCycleSubType, OB11LifeCycleEvent } from '@/onebot/event/meta/OB11LifeCycleEvent';
 import { WebsocketClientConfig } from '@/onebot/config/config';
+import { NapCatOneBot11Adapter } from "@/onebot";
+import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
 
-export class OB11ActiveWebSocketAdapter implements IOB11NetworkAdapter {
-    isEnable: boolean = false;
-    logger: LogWrapper;
+export class OB11ActiveWebSocketAdapter extends IOB11NetworkAdapter<WebsocketClientConfig> {
     private connection: WebSocket | null = null;
     private heartbeatRef: NodeJS.Timeout | null = null;
-    public config: WebsocketClientConfig;
 
-    constructor(
-        public name: string,
-        confg: WebsocketClientConfig,
-        public core: NapCatCore,
-        public actions: ActionMap,
-    ) {
-        this.logger = core.context.logger;
-        this.config = structuredClone(confg);
+    constructor(name: string, config: WebsocketClientConfig, core: NapCatCore, obContext: NapCatOneBot11Adapter, actions: ActionMap) {
+        super(name, config, core, obContext, actions);
     }
 
     onEvent<T extends OB11EmitEventContent>(event: T) {
