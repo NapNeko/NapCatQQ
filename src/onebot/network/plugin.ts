@@ -1,33 +1,21 @@
-import { IOB11NetworkAdapter, OB11EmitEventContent, OB11NetworkReloadType } from './index';
+import { OB11EmitEventContent, OB11NetworkReloadType } from './index';
 import { NapCatOneBot11Adapter, OB11Message } from '@/onebot';
 import { NapCatCore } from '@/core';
-import { AdapterConfig } from '../config/config';
+import { PluginConfig } from '../config/config';
 import { plugin_onmessage } from '@/plugin';
 import { ActionMap } from '../action';
+import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
 
-export class OB11PluginAdapter implements IOB11NetworkAdapter {
-    isEnable: boolean = true;
-    public config: AdapterConfig;
-
+export class OB11PluginAdapter extends IOB11NetworkAdapter<PluginConfig> {
     constructor(
-        public name: string,
-        public core: NapCatCore,
-        public obCore: NapCatOneBot11Adapter,
-        public actions: ActionMap,
+        name: string, config: PluginConfig, core: NapCatCore, obContext: NapCatOneBot11Adapter, actions: ActionMap
     ) {
-        // 基础配置
-        this.config = {
-            name: name,
-            messagePostFormat: 'array',
-            reportSelfMessage: false,
-            enable: true,
-            debug: false,
-        }
+        super(name, config, core, obContext, actions);
     }
 
     onEvent<T extends OB11EmitEventContent>(event: T) {
         if (event.post_type === 'message') {
-             plugin_onmessage(this.config.name, this.core, this.obCore, event as OB11Message,this.actions).then().catch();
+            plugin_onmessage(this.config.name, this.core, this.obContext, event as OB11Message,this.actions).then().catch();
         }
     }
 

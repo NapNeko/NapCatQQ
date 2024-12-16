@@ -16,7 +16,6 @@ import {
 } from '@/core';
 import { OB11ConfigLoader } from '@/onebot/config';
 import {
-    IOB11NetworkAdapter,
     OB11ActiveHttpAdapter,
     OB11ActiveWebSocketAdapter,
     OB11NetworkManager,
@@ -44,9 +43,17 @@ import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecal
 import { LRUCache } from '@/common/lru-cache';
 import { NodeIKernelRecentContactListener } from '@/core/listeners/NodeIKernelRecentContactListener';
 import { BotOfflineEvent } from './event/notice/BotOfflineEvent';
-import { AdapterConfigWrap, mergeOneBotConfigs, migrateOneBotConfigsV1, NetworkConfigAdapter, OneBotConfig } from './config/config';
+import {
+    AdapterConfigWrap,
+    mergeOneBotConfigs,
+    migrateOneBotConfigsV1,
+    NetworkConfigAdapter,
+    OneBotConfig,
+    pluginDefaultConfigs
+} from './config/config';
 import { OB11Message } from './types';
 import { OB11PluginAdapter } from './network/plugin';
+import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -110,12 +117,12 @@ export class NapCatOneBot11Adapter {
 
         // 注册Plugin 如果需要基于NapCat进行快速开发
         // this.networkManager.registerAdapter(
-        //     new OB11PluginAdapter('plugin', this.core, this,this.actions)
+        //     new OB11PluginAdapter('myPlugin', pluginDefaultConfigs, this.core, this,this.actions)
         // );
         for (const key of ob11Config.network.httpServers) {
             if (key.enable) {
                 this.networkManager.registerAdapter(
-                    new OB11PassiveHttpAdapter(key.name, key, this.core, this.actions)
+                    new OB11PassiveHttpAdapter(key.name, key, this.core, this, this.actions)
                 );
             }
         }
@@ -133,6 +140,7 @@ export class NapCatOneBot11Adapter {
                         key.name,
                         key,
                         this.core,
+                        this,
                         this.actions
                     )
                 );
@@ -145,6 +153,7 @@ export class NapCatOneBot11Adapter {
                         key.name,
                         key,
                         this.core,
+                        this,
                         this.actions
                     )
                 );
@@ -191,10 +200,12 @@ export class NapCatOneBot11Adapter {
         await this.handleConfigChange(prev.network.websocketClients, now.network.websocketClients, OB11ActiveWebSocketAdapter);
     }
 
-    private async handleConfigChange(
+    private async handleConfigChange<CT extends NetworkConfigAdapter>(
         prevConfig: NetworkConfigAdapter[],
         nowConfig: NetworkConfigAdapter[],
-        adapterClass: new (...args: any[]) => IOB11NetworkAdapter
+        adapterClass: new (
+            ...args: ConstructorParameters<typeof IOB11NetworkAdapter<CT>>
+        ) => IOB11NetworkAdapter<CT>
     ): Promise<void> {
         // 比较旧的在新的找不到的回收
         for (const adapterConfig of prevConfig) {
@@ -215,12 +226,7 @@ export class NapCatOneBot11Adapter {
                     await this.networkManager.closeSomeAdaterWhenOpen([existingAdapter]);
                 }
             } else if (adapterConfig.enable) {
-                let newAdapter = new adapterClass( adapterConfig.name, adapterConfig, this.core, this.actions );
-
-                if (adapterClass === OB11ActiveHttpAdapter) {
-                    newAdapter = new adapterClass(adapterConfig.name, adapterConfig, this.core, this, this.actions);
-                }
-
+                const newAdapter = new adapterClass(adapterConfig.name, adapterConfig as CT, this.core, this, this.actions);
                 await this.networkManager.registerAdapterAndOpen(newAdapter);
             }
         }

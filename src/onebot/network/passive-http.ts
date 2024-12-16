@@ -1,4 +1,4 @@
-import { IOB11NetworkAdapter, OB11NetworkReloadType } from './index';
+import { OB11NetworkReloadType } from './index';
 import express, { Express, Request, Response } from 'express';
 import http from 'http';
 import { NapCatCore } from '@/core';
@@ -6,20 +6,15 @@ import { OB11Response } from '@/onebot/action/OneBotAction';
 import { ActionMap } from '@/onebot/action';
 import cors from 'cors';
 import { HttpServerConfig } from '@/onebot/config/config';
+import { NapCatOneBot11Adapter } from "@/onebot";
+import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
 
-export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
+export class OB11PassiveHttpAdapter extends IOB11NetworkAdapter<HttpServerConfig> {
     private app: Express | undefined;
     private server: http.Server | undefined;
-    isEnable: boolean = false;
-    public config: HttpServerConfig;
 
-    constructor(
-        public name: string,
-        config: HttpServerConfig,
-        public core: NapCatCore,
-        public actions: ActionMap,
-    ) {
-        this.config = structuredClone(config);
+    constructor(name: string, config: HttpServerConfig, core: NapCatCore, obContext: NapCatOneBot11Adapter, actions: ActionMap) {
+        super(name, config, core, obContext, actions);
     }
 
     onEvent() {
