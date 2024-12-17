@@ -1,5 +1,5 @@
 import { ActionName } from '@/onebot/action/router';
-import CanSendRecord, {CanSend} from './CanSendRecord';
+import CanSendRecord, { CanSend } from './CanSendRecord';
 
 interface ReturnType {
     yes: boolean;
