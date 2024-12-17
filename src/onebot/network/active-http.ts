@@ -1,27 +1,18 @@
-import { IOB11NetworkAdapter, OB11EmitEventContent, OB11NetworkReloadType } from '@/onebot/network/index';
+import { OB11EmitEventContent, OB11NetworkReloadType } from '@/onebot/network/index';
 import { createHmac } from 'crypto';
-import { LogWrapper } from '@/common/log';
 import { QuickAction, QuickActionEvent } from '@/onebot/types';
 import { NapCatCore } from '@/core';
 import { NapCatOneBot11Adapter } from '..';
 import { RequestUtil } from '@/common/request';
 import { HttpClientConfig } from '@/onebot/config/config';
 import { ActionMap } from '@/onebot/action';
+import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
 
-export class OB11ActiveHttpAdapter implements IOB11NetworkAdapter {
-    logger: LogWrapper;
-    isEnable: boolean = false;
-    config: HttpClientConfig;
-
+export class OB11ActiveHttpAdapter extends IOB11NetworkAdapter<HttpClientConfig> {
     constructor(
-        public name: string,
-        config: HttpClientConfig,
-        public core: NapCatCore,
-        public obContext: NapCatOneBot11Adapter,
-        public actions: ActionMap,
+        name: string, config: HttpClientConfig, core: NapCatCore, obContext: NapCatOneBot11Adapter, actions: ActionMap
     ) {
-        this.logger = core.context.logger;
-        this.config = structuredClone(config);
+        super(name, config, core, obContext, actions);
     }
 
     onEvent<T extends OB11EmitEventContent>(event: T) {

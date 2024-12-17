@@ -38,6 +38,14 @@ export interface AdapterConfig extends AdapterConfigInner {
 
 const createDefaultAdapterConfig = <T extends AdapterConfig>(config: T): T => config;
 
+export interface PluginConfig extends AdapterConfig {
+    name: string;
+    enable: boolean;
+    messagePostFormat: string;
+    reportSelfMessage: boolean;
+    debug: boolean;
+}
+
 export const httpServerDefaultConfigs = createDefaultAdapterConfig({
     name: 'http-server',
     enable: false as boolean,
@@ -128,7 +136,7 @@ export const mergeNetworkDefaultConfig = {
     websocketClients: websocketClientDefaultConfigs,
 } as const;
 
-export type NetworkConfigAdapter = HttpServerConfig | HttpClientConfig | WebsocketServerConfig | WebsocketClientConfig | AdapterConfig;
+export type NetworkConfigAdapter = HttpServerConfig | HttpClientConfig | WebsocketServerConfig | WebsocketClientConfig | PluginConfig;
 type NetworkConfigKeys = keyof typeof mergeNetworkDefaultConfig;
 
 export function mergeOneBotConfigs(
