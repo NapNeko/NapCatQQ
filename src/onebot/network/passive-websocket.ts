@@ -17,7 +17,6 @@ export class OB11PassiveWebSocketAdapter extends IOB11NetworkAdapter<WebsocketSe
     wsServer: WebSocketServer;
     wsClients: WebSocket[] = [];
     wsClientsMutex = new Mutex();
-    heartbeatInterval: number = 0;
     private heartbeatIntervalId: NodeJS.Timeout | null = null;
     wsClientWithEvent: WebSocket[] = [];
 
@@ -100,7 +99,7 @@ export class OB11PassiveWebSocketAdapter extends IOB11NetworkAdapter<WebsocketSe
         this.logger.log('[OneBot] [WebSocket Server] Server Started', typeof (addressInfo) === 'string' ? addressInfo : addressInfo?.address + ':' + addressInfo?.port);
 
         this.isEnable = true;
-        if (this.heartbeatInterval > 0) {
+        if (this.config.heartInterval > 0) {
             this.registerHeartBeat();
         }
 
@@ -134,11 +133,11 @@ export class OB11PassiveWebSocketAdapter extends IOB11NetworkAdapter<WebsocketSe
             this.wsClientsMutex.runExclusive(async () => {
                 this.wsClientWithEvent.forEach((wsClient) => {
                     if (wsClient.readyState === WebSocket.OPEN) {
-                        wsClient.send(JSON.stringify(new OB11HeartbeatEvent(this.core, this.heartbeatInterval, this.core.selfInfo.online ?? true, true)));
+                        wsClient.send(JSON.stringify(new OB11HeartbeatEvent(this.core, this.config.heartInterval, this.core.selfInfo.online ?? true, true)));
                     }
                 });
             });
-        }, this.heartbeatInterval);
+        }, this.config.heartInterval);
     }
 
     private authorize(token: string | undefined, wsClient: WebSocket, wsReq: IncomingMessage) {
@@ -185,7 +184,7 @@ export class OB11PassiveWebSocketAdapter extends IOB11NetworkAdapter<WebsocketSe
         const wasEnabled = this.isEnable;
         const oldPort = this.config.port;
         const oldHost = this.config.host;
-        const oldHeartbeatInterval = this.heartbeatInterval;
+        const oldHeartbeatInterval = this.config.heartInterval;
         this.config = newConfig;
 
         if (newConfig.enable && !wasEnabled) {
@@ -214,7 +213,6 @@ export class OB11PassiveWebSocketAdapter extends IOB11NetworkAdapter<WebsocketSe
                 clearInterval(this.heartbeatIntervalId);
                 this.heartbeatIntervalId = null;
             }
-            this.heartbeatInterval = newConfig.heartInterval;
             if (newConfig.heartInterval > 0 && this.isEnable) {
                 this.registerHeartBeat();
             }
