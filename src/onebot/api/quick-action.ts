@@ -91,7 +91,7 @@ export class OneBotQuickActionApi {
     }
 
     async handleGroupRequest(request: OB11GroupRequestEvent, quickAction: QuickActionGroupRequest) {
-        let noify = await this.findNotify(request.flag);
+        const noify = await this.findNotify(request.flag);
 
         if (!isNull(quickAction.approve) && noify) {
             this.core.apis.GroupApi.handleGroupRequest(

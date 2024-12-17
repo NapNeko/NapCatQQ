@@ -1,4 +1,4 @@
-import {ContextMode, SendMsgBase} from './SendMsg';
+import { ContextMode, SendMsgBase } from './SendMsg';
 import { ActionName, BaseCheckResult } from '@/onebot/action/router';
 import { OB11PostSendMsg } from '@/onebot/types';
 

@@ -26,7 +26,7 @@ export class NTQQGroupApi {
     }
 
     async fetchGroupDetail(groupCode: string) {
-        let [, detailInfo] = await this.core.eventWrapper.callNormalEventV2(
+        const [, detailInfo] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelGroupService/getGroupDetailInfo',
             'NodeIKernelGroupListener/onGroupDetailInfoChange',
             [groupCode, GroupInfoSource.KDATACARD],

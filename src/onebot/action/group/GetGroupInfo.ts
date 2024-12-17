@@ -24,7 +24,7 @@ class GetGroupInfo extends OneBotAction<Payload, OB11Group> {
                 group_name: data.groupName,
                 member_count: data.memberNum,
                 max_member_count: data.maxMemberNum,
-            }
+            };
         }
         return OB11Construct.group(group);
     }
