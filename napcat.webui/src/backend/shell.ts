@@ -158,6 +158,27 @@ export class QQLoginManager {
         return '';
     }
 
+    public async getQQLoginInfo(): Promise<string> {
+        try {
+            const QQLoginResponse = await fetch(`${this.apiPrefix}/QQLogin/GetQQLoginInfo`, {
+                method: 'POST',
+                headers: {
+                    Authorization: 'Bearer ' + this.retCredential,
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (QQLoginResponse.status == 200) {
+                const QQLoginResponseJson = await QQLoginResponse.json();
+                if (QQLoginResponseJson.code == 0) {
+                    return QQLoginResponseJson.data || '';
+                }
+            }
+        } catch (error) {
+            console.error('Error getting QQ login Info:', error);
+        }
+        return '';
+    }
+
     public async getQQQuickLoginList(): Promise<string[]> {
         try {
             const QQLoginResponse = await fetch(`${this.apiPrefix}/QQLogin/GetQuickLoginList`, {
