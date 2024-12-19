@@ -8,6 +8,13 @@
                 </div>
             </template>
         </t-divider>
+        <t-divider align="right">
+            <span style="height: 32px;display: block">&nbsp;</span>
+<!--            <t-button @click="addConfig()">-->
+<!--                <template #icon><add-icon /></template>-->
+<!--                添加配置</t-button-->
+<!--            >-->
+        </t-divider>
     </div>
     <t-card class="card">
         <div class="other-config-container">
@@ -123,6 +130,8 @@ onMounted(() => {
 <style scoped>
 .title {
     padding: 20px 20px 0 20px;
+    display: flex;
+    justify-content: space-between;
 }
 .card {
     margin: 0 20px;
