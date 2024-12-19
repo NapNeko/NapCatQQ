@@ -69,9 +69,15 @@ const getQQLoginInfo = () => {
     info.loading = true;
     const loginManager = new QQLoginManager(storedCredential);
     // TODO 目前没有给定返回类型,后续视情况拓展后指定
-    info.data = loginManager.getQQLoginInfo();
 
-    info.loading = false;
+    loginManager
+        .getQQLoginInfo()
+        .then((res) => {
+            info.data = res;
+        })
+        .finally(() => {
+            info.loading = false;
+        });
 };
 
 onMounted(() => {

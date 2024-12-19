@@ -158,7 +158,7 @@ export class QQLoginManager {
         return '';
     }
 
-    public async getQQLoginInfo(): Promise<string> {
+    public async getQQLoginInfo(): Promise<object | ''> {
         try {
             const QQLoginResponse = await fetch(`${this.apiPrefix}/QQLogin/GetQQLoginInfo`, {
                 method: 'POST',
