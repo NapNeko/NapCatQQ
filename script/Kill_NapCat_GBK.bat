@@ -3,7 +3,7 @@
 FOR /F "tokens=2 delims=," %%I IN ('tasklist /FI "WINDOWTITLE eq Administrator:  NapCat" /FO CSV /NH') DO (
     SET "MainPID=%%~I"
 )
-TITLE NapCatPID^:%MainPID%
+TITLE Kill NapCat
 if exist "%SystemRoot%\SysWOW64" path %path%;%windir%\SysNative;%SystemRoot%\SysWOW64;%~dp0
 bcdedit >nul
 if '%errorlevel%' NEQ '0' (goto UACPrompt) else (goto UACAdmin)
