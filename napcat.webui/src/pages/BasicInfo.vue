@@ -22,7 +22,6 @@
             <t-descriptions-item label="在线状态">
                 <t-tag :theme="info.data.online ? 'success' : 'danger'">{{ info.data.online ? '在线' : '离线' }}</t-tag>
             </t-descriptions-item>
-            <t-descriptions-item label="Uid">{{ info.data.uid }}</t-descriptions-item>
         </t-descriptions>
     </t-card>
 </template>

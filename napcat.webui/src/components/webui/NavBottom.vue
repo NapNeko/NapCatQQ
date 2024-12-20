@@ -1,5 +1,5 @@
 <template>
-    <t-head-menu theme="light" class="bottom-menu">
+    <t-head-menu theme="light" class="bottom-menu" default-value="item1">
         <router-link v-for="item in menuItems" :key="item.value" :to="item.route">
             <t-tooltip :content="item.label" placement="top">
                 <t-menu-item :value="item.value" :disabled="item.disabled" class="menu-item">

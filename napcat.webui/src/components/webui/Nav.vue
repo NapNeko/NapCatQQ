@@ -1,5 +1,5 @@
 <template>
-    <t-menu theme="light" :width="menuWidth" :collapsed="collapsed" class="sidebar-menu">
+    <t-menu theme="light" :width="menuWidth" :collapsed="collapsed" class="sidebar-menu" default-value="item1">
         <template #logo>
             <div class="logo">
                 <img class="logo-img" :width="collapsed ? 35 : 'auto'" src="@/assets/logo_webui.png" alt="logo" />
