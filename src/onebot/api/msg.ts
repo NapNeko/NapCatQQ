@@ -33,7 +33,8 @@ import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
 import { OB11GroupDecreaseEvent, GroupDecreaseSubType } from '../event/notice/OB11GroupDecreaseEvent';
 import { GroupAdmin } from '@/core/packet/transformer/proto/message/groupAdmin';
 import { OB11GroupAdminNoticeEvent } from '../event/notice/OB11GroupAdminNoticeEvent';
-import { GroupChange, GroupChangeInfo, PushMsgBody } from '@/core/packet/transformer/proto';
+import { GroupChange, GroupChangeInfo, GroupInvite, PushMsgBody } from '@/core/packet/transformer/proto';
+import { OB11GroupRequestEvent } from '../event/request/OB11GroupRequest';
 
 type RawToOb11Converters = {
     [Key in keyof MessageElement as Key extends `${string}Element` ? Key : never]: (
@@ -895,16 +896,16 @@ export class OneBotMsgApi {
         const calculateTotalSize = async (elements: SendMessageElement[]): Promise<number> => {
             const sizePromises = elements.map(async element => {
                 switch (element.elementType) {
-                case ElementType.PTT:
-                    return (await fsPromise.stat(element.pttElement.filePath)).size;
-                case ElementType.FILE:
-                    return (await fsPromise.stat(element.fileElement.filePath)).size;
-                case ElementType.VIDEO:
-                    return (await fsPromise.stat(element.videoElement.filePath)).size;
-                case ElementType.PIC:
-                    return (await fsPromise.stat(element.picElement.sourcePath)).size;
-                default:
-                    return 0;
+                    case ElementType.PTT:
+                        return (await fsPromise.stat(element.pttElement.filePath)).size;
+                    case ElementType.FILE:
+                        return (await fsPromise.stat(element.fileElement.filePath)).size;
+                    case ElementType.VIDEO:
+                        return (await fsPromise.stat(element.videoElement.filePath)).size;
+                    case ElementType.PIC:
+                        return (await fsPromise.stat(element.picElement.sourcePath)).size;
+                    default:
+                        return 0;
                 }
             });
             const sizes = await Promise.all(sizePromises);
@@ -970,14 +971,14 @@ export class OneBotMsgApi {
     }
     groupChangDecreseType2String(type: number): GroupDecreaseSubType {
         switch (type) {
-        case 130:
-            return 'leave';
-        case 131:
-            return 'kick';
-        case 3:
-            return 'kick_me';
-        default:
-            return 'kick';
+            case 130:
+                return 'leave';
+            case 131:
+                return 'kick';
+            case 3:
+                return 'kick_me';
+            default:
+                return 'kick';
         }
     }
 
@@ -1033,7 +1034,35 @@ export class OneBotMsgApi {
                 +await this.core.apis.UserApi.getUinByUidV2(uid),
                 enabled ? 'set' : 'unset'
             );
-        } else if (SysMessage.contentHead.type == 528 && SysMessage.contentHead.subType == 39 && SysMessage.body?.msgContent) {
+        } else if (SysMessage.contentHead.type == 87 && SysMessage.body?.msgContent) {
+            let groupInvite = new NapProtoMsg(GroupInvite).decode(SysMessage.body.msgContent);
+            let request_seq = '';
+            await this.core.eventWrapper.registerListen('NodeIKernelMsgListener/onRecvMsg', (msgs) => {
+                for (const msg of msgs) {
+                    if (msg.senderUid === groupInvite.invitorUid && msg.msgType === 11) {
+                        let jumpUrl = JSON.parse(msg.elements.find(e => e.elementType === 10)?.arkElement?.bytesData ?? '').meta?.news?.jumpUrl;
+                        let jumpUrlParams = new URLSearchParams(jumpUrl);
+                        let groupcode = jumpUrlParams.get('groupcode');
+                        let receiveruin = jumpUrlParams.get('receiveruin');
+                        let msgseq = jumpUrlParams.get('msgseq');
+                        request_seq = msgseq ?? '';
+                        if (groupcode === groupInvite.groupUin.toString() && receiveruin === this.core.selfInfo.uin) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }, 1, 1000);
+            return new OB11GroupRequestEvent(
+                this.core,
+                +groupInvite.groupUin,
+                +await this.core.apis.UserApi.getUinByUidV2(groupInvite.invitorUid),
+                'invite',
+                '',
+                request_seq
+            );
+        }
+        else if (SysMessage.contentHead.type == 528 && SysMessage.contentHead.subType == 39 && SysMessage.body?.msgContent) {
             return await this.obContext.apis.UserApi.parseLikeEvent(SysMessage.body?.msgContent);
         }
     }

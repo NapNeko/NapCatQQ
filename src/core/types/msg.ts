@@ -508,7 +508,7 @@ export interface RawMessage {
  */
 export interface QueryMsgsParams {
     chatInfo: Peer;
-    filterMsgType: [];
+    filterMsgType: Array<{ type: NTMsgType, subType: Array<number> }>;
     filterSendersUid: string[];
     filterMsgFromTime: string;
     filterMsgToTime: string;
