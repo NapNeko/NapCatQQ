@@ -310,7 +310,7 @@ export class NapCatOneBot11Adapter {
                 guildId: ''
             };
             const msg = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeq(peer, msgSeq)).msgList.find(e => e.msgType == NTMsgType.KMSGTYPEGRAYTIPS);
-            const element = msg?.elements[0];
+            const element = msg?.elements.find(e => !!e.grayTipElement?.revokeElement);
             if (msg && element) {
                 const recallEvent = await this.emitRecallMsg(msg, element);
                 try {
