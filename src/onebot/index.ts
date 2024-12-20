@@ -467,6 +467,10 @@ export class NapCatOneBot11Adapter {
     }
 
     private async handleMsg(message: RawMessage, network: Array<AdapterConfigWrap>) {
+        // 过滤无效消息
+        if (message.msgType === NTMsgType.KMSGTYPENULL) {
+            return;
+        }
         try {
             const ob11Msg = await this.apis.MsgApi.parseMessageV2(message, this.configLoader.configData.parseMultMsg);
             if (ob11Msg) {
