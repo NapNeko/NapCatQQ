@@ -17,6 +17,7 @@
     "dev:depend": "npm i && cd napcat.webui && npm i"
   },
   "devDependencies": {
+    "esbuild": "0.24.0",
     "@babel/preset-typescript": "^7.24.7",
     "@eslint/compat": "^1.2.2",
     "@eslint/eslintrc": "^3.1.0",
@@ -50,8 +51,7 @@
     "vite": "^6.0.1",
     "vite-plugin-cp": "^4.0.8",
     "vite-tsconfig-paths": "^5.1.0",
-    "winston": "^3.17.0",
-    "esbuild": "^0.24.0"
+    "winston": "^3.17.0"
   },
   "dependencies": {
     "express": "^5.0.0",
