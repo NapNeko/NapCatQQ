@@ -17,6 +17,7 @@ import {
     SendTextElement,
     FaceType,
     GrayTipElement,
+    GroupNotify,
 } from '@/core';
 import faceConfig from '@/core/external/face_config.json';
 import { NapCatOneBot11Adapter, OB11Message, OB11MessageData, OB11MessageDataType, OB11MessageFileBase, OB11MessageForward, } from '@/onebot';
@@ -35,6 +36,7 @@ import { GroupAdmin } from '@/core/packet/transformer/proto/message/groupAdmin';
 import { OB11GroupAdminNoticeEvent } from '../event/notice/OB11GroupAdminNoticeEvent';
 import { GroupChange, GroupChangeInfo, GroupInvite, PushMsgBody } from '@/core/packet/transformer/proto';
 import { OB11GroupRequestEvent } from '../event/request/OB11GroupRequest';
+import { LRUCache } from '@/common/lru-cache';
 
 type RawToOb11Converters = {
     [Key in keyof MessageElement as Key extends `${string}Element` ? Key : never]: (
@@ -68,7 +70,8 @@ function keyCanBeParsed(key: string, parser: RawToOb11Converters): key is keyof 
 export class OneBotMsgApi {
     obContext: NapCatOneBot11Adapter;
     core: NapCatCore;
-
+    notifyGroupInvite: LRUCache<string, GroupNotify> = new LRUCache(50);
+    // seq -> notify
     rawToOb11Converters: RawToOb11Converters = {
         textElement: async element => {
             if (element.atType === NTMsgAtType.ATTYPEUNKNOWN) {
@@ -1037,22 +1040,61 @@ export class OneBotMsgApi {
         } else if (SysMessage.contentHead.type == 87 && SysMessage.body?.msgContent) {
             let groupInvite = new NapProtoMsg(GroupInvite).decode(SysMessage.body.msgContent);
             let request_seq = '';
-            await this.core.eventWrapper.registerListen('NodeIKernelMsgListener/onRecvMsg', (msgs) => {
-                for (const msg of msgs) {
-                    if (msg.senderUid === groupInvite.invitorUid && msg.msgType === 11) {
-                        let jumpUrl = JSON.parse(msg.elements.find(e => e.elementType === 10)?.arkElement?.bytesData ?? '').meta?.news?.jumpUrl;
-                        let jumpUrlParams = new URLSearchParams(jumpUrl);
-                        let groupcode = jumpUrlParams.get('groupcode');
-                        let receiveruin = jumpUrlParams.get('receiveruin');
-                        let msgseq = jumpUrlParams.get('msgseq');
-                        request_seq = msgseq ?? '';
-                        if (groupcode === groupInvite.groupUin.toString() && receiveruin === this.core.selfInfo.uin) {
-                            return true;
+            try {
+                await this.core.eventWrapper.registerListen('NodeIKernelMsgListener/onRecvMsg', (msgs) => {
+                    for (const msg of msgs) {
+                        if (msg.senderUid === groupInvite.invitorUid && msg.msgType === 11) {
+                            let jumpUrl = JSON.parse(msg.elements.find(e => e.elementType === 10)?.arkElement?.bytesData ?? '').meta?.news?.jumpUrl;
+                            let jumpUrlParams = new URLSearchParams(jumpUrl);
+                            let groupcode = jumpUrlParams.get('groupcode');
+                            let receiveruin = jumpUrlParams.get('receiveruin');
+                            let msgseq = jumpUrlParams.get('msgseq');
+                            request_seq = msgseq ?? '';
+                            if (groupcode === groupInvite.groupUin.toString() && receiveruin === this.core.selfInfo.uin) {
+                                return true;
+                            }
                         }
                     }
-                }
-                return false;
-            }, 1, 1000);
+                    return false;
+                }, 1, 1000);
+            } catch (error) {
+                request_seq = '';
+            }
+            // 未拉取到seq
+            if (request_seq === '') {
+                return;
+            }
+            // 创建个假的
+            this.notifyGroupInvite.put(request_seq, {
+                seq: request_seq,
+                type: 1,
+                group: {
+                    groupCode: groupInvite.groupUin.toString(),
+                    groupName: '',
+                },
+                user1: {
+                    uid: groupInvite.invitorUid,
+                    nickName: '',
+                },
+                user2: {
+                    uid: this.core.selfInfo.uid,
+                    nickName: '',
+                },
+                actionUser: {
+                    uid: groupInvite.invitorUid,
+                    nickName: '',
+                },
+                actionTime: Date.now().toString(),
+                postscript: '',
+                repeatSeqs: [],
+                warningTips: '',
+                invitationExt: {
+                    srcType: 1,
+                    groupCode: groupInvite.groupUin.toString(),
+                    waitStatus: 1,
+                },
+                status: 1
+            })
             return new OB11GroupRequestEvent(
                 this.core,
                 +groupInvite.groupUin,
