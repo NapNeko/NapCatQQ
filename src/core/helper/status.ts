@@ -1,6 +1,5 @@
 import os from "node:os";
 import EventEmitter from "node:events";
-import { cpus } from "node:os";
 
 export interface SystemStatus {
     cpu: {
@@ -39,7 +38,7 @@ export class StatusHelper {
             usage: ((active / total) * 100).toFixed(2),
             model: os.cpus()[0].model,
             speed: os.cpus()[0].speed,
-            core: cpus().length
+            core: os.cpus().length
         };
     }
 
@@ -51,7 +50,7 @@ export class StatusHelper {
     private qqUsage() {
         const mem = process.memoryUsage();
         console.log(JSON.stringify(mem));
-        const numCpus = cpus().length;
+        const numCpus = os.cpus().length;
         const usageDiff = process.cpuUsage(this.currentUsage);
         const endTime = process.hrtime(this.currentTime);
         this.currentUsage = process.cpuUsage();
