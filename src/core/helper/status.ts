@@ -1,6 +1,6 @@
 import os from "node:os";
-import pidusage from 'pidusage';
 import EventEmitter from "node:events";
+import { cpus } from "node:os";
 
 export interface SystemStatus {
     cpu: {
@@ -10,8 +10,10 @@ export interface SystemStatus {
             system: string
             qq: string
         },
+        core: number
     },
     memory: {
+        total: string
         usage: {
             system: string
             qq: string
@@ -20,6 +22,9 @@ export interface SystemStatus {
 }
 
 export class StatusHelper {
+    private currentUsage = process.cpuUsage();
+    private currentTime = process.hrtime();
+
     private get sysCpuInfo() {
         const { total, active } = os.cpus().map(cpu => {
             const times = cpu.times;
@@ -33,34 +38,50 @@ export class StatusHelper {
         return {
             usage: ((active / total) * 100).toFixed(2),
             model: os.cpus()[0].model,
-            speed: os.cpus()[0].speed
+            speed: os.cpus()[0].speed,
+            core: cpus().length
         };
     }
 
     private get sysMemoryUsage() {
         const { total, free } = { total: os.totalmem(), free: os.freemem() };
-        return ((total - free) / total * 100).toFixed(2);
+        return ((total - free) / 1024 / 1024).toFixed(2);
     }
 
-    private async qqUsage() {
-        return await pidusage(process.pid);
+    private qqUsage() {
+        const mem = process.memoryUsage();
+        console.log(JSON.stringify(mem));
+        const numCpus = cpus().length;
+        const usageDiff = process.cpuUsage(this.currentUsage);
+        const endTime = process.hrtime(this.currentTime);
+        this.currentUsage = process.cpuUsage();
+        this.currentTime = process.hrtime();
+        const usageMS = (usageDiff.user + usageDiff.system) / 1e3;
+        const totalMS = endTime[0] * 1e3 + endTime[1] / 1e6;
+        const normPercent = (usageMS / totalMS / numCpus) * 100;
+        return {
+            cpu: normPercent.toFixed(2),
+            memory: ((mem.heapTotal + mem.external + mem.arrayBuffers) / 1024 / 1024).toFixed(2)
+        };
     }
 
-    async systemStatus(): Promise<SystemStatus> {
-        const qqUsage = await this.qqUsage();
+    systemStatus(): SystemStatus {
+        const qqUsage = this.qqUsage();
         return {
             cpu: {
+                core: this.sysCpuInfo.core,
                 model: this.sysCpuInfo.model,
                 speed: (this.sysCpuInfo.speed / 1000).toFixed(2),
                 usage: {
                     system: this.sysCpuInfo.usage,
-                    qq: qqUsage.cpu.toFixed(2)
+                    qq: qqUsage.cpu
                 },
             },
             memory: {
+                total: (os.totalmem() / 1024 / 1024).toFixed(2),
                 usage: {
                     system: this.sysMemoryUsage,
-                    qq: (qqUsage.memory / os.totalmem() * 100).toFixed(2)
+                    qq: qqUsage.memory
                 }
             },
         };
@@ -87,8 +108,8 @@ class StatusHelperSubscription extends EventEmitter {
     }
 
     private startInterval(time: number) {
-        this.interval ??= setInterval(async () => {
-            const status = await this.statusHelper.systemStatus();
+        this.interval ??= setInterval(() => {
+            const status = this.statusHelper.systemStatus();
             this.emit('statusUpdate', status);
         }, time);
     }
