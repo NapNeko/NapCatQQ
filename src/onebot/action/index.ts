@@ -102,6 +102,7 @@ import { SendGroupAiRecord } from "@/onebot/action/group/SendGroupAiRecord";
 import { GetAiCharacters } from "@/onebot/action/extends/GetAiCharacters";
 import { GetGuildList } from './guild/GetGuildList';
 import { GetGuildProfile } from './guild/GetGuildProfile';
+import { GetClientkey } from './extends/GetClientKey';
 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 
@@ -123,6 +124,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new GetGroupRootFiles(obContext, core),
         new SetGroupSign(obContext, core),
         new SendGroupSign(obContext, core),
+        new GetClientkey(obContext, core),
         // onebot11
         new SendLike(obContext, core),
         new GetMsg(obContext, core),
