@@ -1,5 +1,3 @@
-import { GetClientkey } from "./extends/GetClientKey";
-
 export type BaseCheckResult = ValidCheckResult | InvalidCheckResult;
 
 export interface ValidCheckResult {
