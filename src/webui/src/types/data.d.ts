@@ -1,4 +1,5 @@
 import type { LoginListItem, SelfInfo } from '@/core';
+import type { OneBotConfig } from "@/onebot/config/config";
 
 interface LoginRuntimeType {
     LoginCurrentTime: number;
