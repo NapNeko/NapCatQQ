@@ -49,7 +49,6 @@ export class StatusHelper {
 
     private qqUsage() {
         const mem = process.memoryUsage();
-        console.log(JSON.stringify(mem));
         const numCpus = os.cpus().length;
         const usageDiff = process.cpuUsage(this.currentUsage);
         const endTime = process.hrtime(this.currentTime);
