@@ -21,28 +21,40 @@ export interface SystemStatus {
 }
 
 export class StatusHelper {
-    private currentUsage = process.cpuUsage();
-    private currentTime = process.hrtime();
+    private psCpuUsage = process.cpuUsage();
+    private psCurrentTime = process.hrtime();
+    private cpuTimes = os.cpus().map(cpu => cpu.times);
 
-    private get sysCpuInfo() {
-        const { total, active } = os.cpus().map(cpu => {
-            const times = cpu.times;
-            const total = times.user + times.nice + times.sys + times.idle + times.irq;
-            const active = total - times.idle;
-            return { total, active };
+    private replaceNaN(value: number) {
+        return isNaN(value) ? 0 : value;
+    }
+
+    private sysCpuInfo() {
+        const currentTimes = os.cpus().map(cpu => cpu.times);
+        const { total, active } = currentTimes.map((times, index) => {
+            const prevTimes = this.cpuTimes[index];
+            const totalCurrent = times.user + times.nice + times.sys + times.idle + times.irq;
+            const totalPrev = prevTimes.user + prevTimes.nice + prevTimes.sys + prevTimes.idle + prevTimes.irq;
+            const activeCurrent = totalCurrent - times.idle;
+            const activePrev = totalPrev - prevTimes.idle;
+            return {
+                total: totalCurrent - totalPrev,
+                active: activeCurrent - activePrev
+            };
         }).reduce((acc, cur) => ({
             total: acc.total + cur.total,
             active: acc.active + cur.active
         }), { total: 0, active: 0 });
+        this.cpuTimes = currentTimes;
         return {
-            usage: ((active / total) * 100).toFixed(2),
+            usage: this.replaceNaN(((active / total) * 100)).toFixed(2),
             model: os.cpus()[0].model,
             speed: os.cpus()[0].speed,
             core: os.cpus().length
         };
     }
 
-    private get sysMemoryUsage() {
+    private sysMemoryUsage() {
         const { total, free } = { total: os.totalmem(), free: os.freemem() };
         return ((total - free) / 1024 / 1024).toFixed(2);
     }
@@ -50,35 +62,36 @@ export class StatusHelper {
     private qqUsage() {
         const mem = process.memoryUsage();
         const numCpus = os.cpus().length;
-        const usageDiff = process.cpuUsage(this.currentUsage);
-        const endTime = process.hrtime(this.currentTime);
-        this.currentUsage = process.cpuUsage();
-        this.currentTime = process.hrtime();
+        const usageDiff = process.cpuUsage(this.psCpuUsage);
+        const endTime = process.hrtime(this.psCurrentTime);
+        this.psCpuUsage = process.cpuUsage();
+        this.psCurrentTime = process.hrtime();
         const usageMS = (usageDiff.user + usageDiff.system) / 1e3;
         const totalMS = endTime[0] * 1e3 + endTime[1] / 1e6;
         const normPercent = (usageMS / totalMS / numCpus) * 100;
         return {
-            cpu: normPercent.toFixed(2),
+            cpu: this.replaceNaN(normPercent).toFixed(2),
             memory: ((mem.heapTotal + mem.external + mem.arrayBuffers) / 1024 / 1024).toFixed(2)
         };
     }
 
     systemStatus(): SystemStatus {
         const qqUsage = this.qqUsage();
+        const sysCpuInfo = this.sysCpuInfo();
         return {
             cpu: {
-                core: this.sysCpuInfo.core,
-                model: this.sysCpuInfo.model,
-                speed: (this.sysCpuInfo.speed / 1000).toFixed(2),
+                core: sysCpuInfo.core,
+                model: sysCpuInfo.model,
+                speed: (sysCpuInfo.speed / 1000).toFixed(2),
                 usage: {
-                    system: this.sysCpuInfo.usage,
+                    system: sysCpuInfo.usage,
                     qq: qqUsage.cpu
                 },
             },
             memory: {
                 total: (os.totalmem() / 1024 / 1024).toFixed(2),
                 usage: {
-                    system: this.sysMemoryUsage,
+                    system: this.sysMemoryUsage(),
                     qq: qqUsage.memory
                 }
             },
