@@ -19,12 +19,11 @@ export default class SetGroupAddRequest extends OneBotAction<Payload, null> {
         const flag = payload.flag.toString();
         const approve = payload.approve?.toString() !== 'false';
         const reason = payload.reason ?? ' ';
-
-        const notify = await this.findNotify(flag);
+        let invite_notify = this.obContext.apis.MsgApi.notifyGroupInvite.get(flag);
+        const notify = invite_notify ?? await this.findNotify(flag);
         if (!notify) {
             throw new Error('No such request');
         }
-
         await this.core.apis.GroupApi.handleGroupRequest(
             notify,
             approve ? NTGroupRequestOperateTypes.KAGREE : NTGroupRequestOperateTypes.KREFUSE,

@@ -91,11 +91,13 @@ export class OneBotQuickActionApi {
     }
 
     async handleGroupRequest(request: OB11GroupRequestEvent, quickAction: QuickActionGroupRequest) {
-        const noify = await this.findNotify(request.flag);
+        
+        let invite_notify = this.obContext.apis.MsgApi.notifyGroupInvite.get(request.flag);
+        const notify = invite_notify ?? await this.findNotify(request.flag);
 
-        if (!isNull(quickAction.approve) && noify) {
+        if (!isNull(quickAction.approve) && notify) {
             this.core.apis.GroupApi.handleGroupRequest(
-                noify,
+                notify,
                 quickAction.approve ? NTGroupRequestOperateTypes.KAGREE : NTGroupRequestOperateTypes.KREFUSE,
                 quickAction.reason,
             ).catch(e => this.core.context.logger.logError(e));
