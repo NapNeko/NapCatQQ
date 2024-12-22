@@ -11,6 +11,7 @@ const LoginRuntime: LoginRuntimeType = {
         uin: '',
         nick: '',
     },
+    QQVersion: 'unknown',
     NapCatHelper: {
         onOB11ConfigChanged: async () => {
             return;
@@ -100,4 +101,12 @@ export const WebUiDataRuntime = {
     getPackageJson() {
         return LoginRuntime.packageJson;
     },
+
+    setQQVersion(version: string) {
+        LoginRuntime.QQVersion = version;
+    },
+
+    getQQVersion() {
+        return LoginRuntime.QQVersion;
+    }
 };

@@ -18,6 +18,7 @@ export interface SystemStatus {
             qq: string
         }
     },
+    arch: string
 }
 
 export class StatusHelper {
@@ -95,6 +96,7 @@ export class StatusHelper {
                     qq: qqUsage.memory
                 }
             },
+            arch: `${os.platform()} ${os.arch()} ${os.release()}`
         };
     }
 }
