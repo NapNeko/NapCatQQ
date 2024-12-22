@@ -8,6 +8,7 @@ interface LoginRuntimeType {
     QQQRCodeURL: string;
     QQLoginUin: string;
     QQLoginInfo: SelfInfo;
+    QQVersion: string;
     NapCatHelper: {
         onQuickLoginRequested: (uin: string) => Promise<{ result: boolean; message: string }>;
         onOB11ConfigChanged: (ob11: OneBotConfig) => Promise<void>;
