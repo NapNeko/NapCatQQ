@@ -102,8 +102,8 @@ import { SendGroupAiRecord } from "@/onebot/action/group/SendGroupAiRecord";
 import { GetAiCharacters } from "@/onebot/action/extends/GetAiCharacters";
 import { GetGuildList } from './guild/GetGuildList';
 import { GetGuildProfile } from './guild/GetGuildProfile';
-import { GetClientkey } from './extends/GetClientKey';
-
+import { GetClientkey } from './extends/GetClientkey';
+ 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 
     const actionHandlers = [
