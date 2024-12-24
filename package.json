@@ -17,7 +17,7 @@
     "dev:depend": "npm i && cd napcat.webui && npm i"
   },
   "devDependencies": {
-    "esbuild": "0.24.0",
+    "esbuild": "0.24.2",
     "@babel/preset-typescript": "^7.24.7",
     "@eslint/compat": "^1.2.2",
     "@eslint/eslintrc": "^3.1.0",
