@@ -32,7 +32,7 @@ NapCatQQ 是现代化的基于 NTQQ 的 Bot 协议端实现
 
 [Server.Other](https://docs.napcat.cyou/)
 
-[Qbot.News](https://neko.qbots.news)
+[Qbot.News](https://neko.qbot.news)
 
 ## 回家旅途
 [QQ Group#1](https://qm.qq.com/q/I6LU87a0Yq)
