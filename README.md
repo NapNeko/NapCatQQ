@@ -1,6 +1,6 @@
 <div align="center">
   
-  ![Logo](https://socialify.git.ci/NapNeko/NapCatQQ/image?font=Jost&logo=https%3A%2F%2Fnapneko.github.io%2Fassets%2Flogo.png&name=1&owner=1&pattern=Diagonal%20Stripes&stargazers=1&theme=Auto)
+![NapCatQQ](https://socialify.git.ci/NapNeko/NapCatQQ/image?font=Jost&logo=https%3A%2F%2Fnapneko.github.io%2Fassets%2Fnewlogo.png&name=1&owner=1&pattern=Diagonal+Stripes&stargazers=1&theme=Auto)
   
 </div>
 
