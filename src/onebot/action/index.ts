@@ -103,6 +103,7 @@ import { GetAiCharacters } from "@/onebot/action/extends/GetAiCharacters";
 import { GetGuildList } from './guild/GetGuildList';
 import { GetGuildProfile } from './guild/GetGuildProfile';
 import { GetClientkey } from './extends/GetClientkey';
+import { SendPacket } from './extends/SendPacket';
  
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 
@@ -218,6 +219,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new GetAiRecord(obContext, core),
         new SendGroupAiRecord(obContext, core),
         new GetAiCharacters(obContext, core),
+        new SendPacket(obContext, core),
     ];
 
     type HandlerUnion = typeof actionHandlers[number];

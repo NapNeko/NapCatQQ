@@ -23,7 +23,9 @@ export class PacketClientSession {
     get operation() {
         return this.context.operation;
     }
-
+    get client() {
+        return this.context.client;
+    }
     // TODO: global message element adapter (?
     get msgConverter() {
         return this.context.msgConverter;
