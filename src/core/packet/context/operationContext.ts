@@ -149,7 +149,7 @@ export class PacketOperationContext {
         }
     }
 
-    async AllPoke(uin: number, groupUin?: number) {
+    async SendPoke(uin: number, groupUin?: number) {
         await (groupUin ? this.GroupPoke(uin,groupUin) : this.FriendPoke(uin));
     }
 }
