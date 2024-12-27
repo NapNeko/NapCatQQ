@@ -145,4 +145,6 @@ export const ActionName = {
     SendGroupAiRecord: "send_group_ai_record",
 
     GetClientkey: "get_clientkey",
+    
+    SendPoke: 'send_poke',
 } as const;
