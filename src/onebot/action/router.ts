@@ -146,5 +146,5 @@ export const ActionName = {
 
     GetClientkey: "get_clientkey",
     
-    AllPoke: 'all_poke',
+    SendPoke: 'send_poke',
 } as const;

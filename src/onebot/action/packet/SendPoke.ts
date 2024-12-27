@@ -9,11 +9,11 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export class AllPoke extends GetPacketStatusDepends<Payload, any> {
-    actionName = ActionName.AllPoke;
+export class SendPoke extends GetPacketStatusDepends<Payload, any> {
+    actionName = ActionName.SendPoke;
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        await this.core.apis.PacketApi.pkt.operation.AllPoke(+payload.user_id, payload.group_id ? +payload.group_id : undefined);
+        await this.core.apis.PacketApi.pkt.operation.SendPoke(+payload.user_id, payload.group_id ? +payload.group_id : undefined);
     }
 }
