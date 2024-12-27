@@ -104,7 +104,8 @@ import { GetGuildList } from './guild/GetGuildList';
 import { GetGuildProfile } from './guild/GetGuildProfile';
 import { GetClientkey } from './extends/GetClientkey';
 import { SendPacket } from './extends/SendPacket';
- 
+import { SendPoke } from "@/onebot/action/packet/SendPoke";
+
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 
     const actionHandlers = [
@@ -220,6 +221,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new SendGroupAiRecord(obContext, core),
         new GetAiCharacters(obContext, core),
         new SendPacket(obContext, core),
+        new SendPoke(obContext, core),
     ];
 
     type HandlerUnion = typeof actionHandlers[number];
