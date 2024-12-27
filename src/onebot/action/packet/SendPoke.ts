@@ -14,6 +14,10 @@ export class SendPoke extends GetPacketStatusDepends<Payload, any> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        await this.core.apis.PacketApi.pkt.operation.SendPoke(+payload.user_id, payload.group_id ? +payload.group_id : undefined);
+        if (payload.group_id) {
+            this.core.apis.PacketApi.pkt.operation.GroupPoke(+payload.group_id, +payload.user_id);
+        } else {
+            this.core.apis.PacketApi.pkt.operation.FriendPoke(+payload.user_id);
+        }
     }
 }
