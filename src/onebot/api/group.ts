@@ -8,6 +8,8 @@ import {
     NapCatCore,
     NTGrayTipElementSubTypeV2,
     RawMessage,
+    TipGroupElement,
+    TipGroupElementType,
 } from '@/core';
 import { NapCatOneBot11Adapter } from '@/onebot';
 import { OB11GroupBanEvent } from '@/onebot/event/notice/OB11GroupBanEvent';
@@ -19,6 +21,7 @@ import { OB11GroupPokeEvent } from '@/onebot/event/notice/OB11PokeEvent';
 import { OB11GroupEssenceEvent } from '@/onebot/event/notice/OB11GroupEssenceEvent';
 import { OB11GroupTitleEvent } from '@/onebot/event/notice/OB11GroupTitleEvent';
 import { OB11GroupUploadNoticeEvent } from '../event/notice/OB11GroupUploadNoticeEvent';
+import { OB11GroupNameEvent } from '../event/notice/OB11GroupNameEvent';
 import { pathToFileURL } from 'node:url';
 import { FileNapCatOneBotUUID } from '@/common/helper';
 
@@ -204,10 +207,22 @@ export class OneBotGroupApi {
         );
     }
 
+    async parseGroupElement(msg: RawMessage, element: TipGroupElement, elementWrapper: GrayTipElement) {
+        if (element.type === TipGroupElementType.KGROUPNAMEMODIFIED) {
+            this.core.context.logger.logDebug('收到群名称变更事件', element);
+            return new OB11GroupNameEvent(
+                this.core,
+                parseInt(msg.peerUid),
+                parseInt(await this.core.apis.UserApi.getUinByUidV2(element.memberUid)),
+                element.groupName,
+            );
+        }
+    }
+
     async parseGrayTipElement(msg: RawMessage, grayTipElement: GrayTipElement) {
         if (grayTipElement.subElementType === NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_GROUP) {
             // 解析群组事件 由sysmsg解析
-            // return await this.parseGroupElement(msg, grayTipElement.groupElement, grayTipElement);
+            return await this.parseGroupElement(msg, grayTipElement.groupElement, grayTipElement);
 
         } else if (grayTipElement.subElementType === NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_XMLMSG) {
             // 筛选出表情回应 事件
