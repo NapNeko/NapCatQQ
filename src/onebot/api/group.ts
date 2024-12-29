@@ -216,6 +216,9 @@ export class OneBotGroupApi {
                 parseInt(await this.core.apis.UserApi.getUinByUidV2(element.memberUid)),
                 element.groupName,
             );
+        } else if (element.type === TipGroupElementType.KSHUTUP) {
+            let event = await this.parseGroupBanEvent(msg.peerUid, elementWrapper);
+            return event;
         }
     }
 
@@ -223,7 +226,6 @@ export class OneBotGroupApi {
         if (grayTipElement.subElementType === NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_GROUP) {
             // 解析群组事件 由sysmsg解析
             return await this.parseGroupElement(msg, grayTipElement.groupElement, grayTipElement);
-
         } else if (grayTipElement.subElementType === NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_XMLMSG) {
             // 筛选出表情回应 事件
             if (grayTipElement.xmlElement?.templId === '10382') {
