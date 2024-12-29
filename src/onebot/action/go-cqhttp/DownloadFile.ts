@@ -2,7 +2,7 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import fs from 'fs';
 import { join as joinPath } from 'node:path';
-import { calculateFileMD5, httpDownload, uriToLocalFile } from '@/common/file';
+import { calculateFileMD5, uriToLocalFile } from '@/common/file';
 import { randomUUID } from 'crypto';
 import { Static, Type } from '@sinclair/typebox';
 
