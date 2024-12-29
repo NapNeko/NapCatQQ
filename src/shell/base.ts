@@ -271,7 +271,7 @@ export async function NCoreInitShell() {
     const logger = new LogWrapper(pathWrapper.logsPath);
     handleUncaughtExceptions(logger);
     process.on('exit', (code: number) => {
-        umamiTrace.trackEvent('framework/exit', code.toString());
+        umamiTrace.trackEvent('shell/exit', code.toString());
     });
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
