@@ -30,6 +30,9 @@ export default class GoCQHTTPDownloadFile extends OneBotAction<Payload, FileResp
 
         if (payload.base64) {
             fs.writeFileSync(filePath, payload.base64, 'base64');
+        } else if (payload.url?.startsWith('file://')) {
+            const path = payload.url.substring(7);
+            fs.copyFileSync(path, filePath);
         } else if (payload.url) {
             const headers = this.getHeaders(payload.headers);
             const buffer = await httpDownload({ url: payload.url, headers: headers });
