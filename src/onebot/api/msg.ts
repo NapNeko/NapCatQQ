@@ -990,7 +990,27 @@ export class OneBotMsgApi {
         if (SysMessage.contentHead.type == 33 && SysMessage.body?.msgContent) {
             const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
             this.core.apis.GroupApi.refreshGroupMemberCache(groupChange.groupUin.toString()).then().catch();
-            const operatorUid = groupChange.operatorInfo ? Buffer.from(groupChange.operatorInfo).toString() : '';
+            let operatorUid = groupChange.operatorInfo ? Buffer.from(groupChange.operatorInfo).toString() : '';
+
+            let groupRole = this.core.apis.GroupApi.groupMemberCache.get(groupChange.groupUin.toString())?.get(this.core.selfInfo.uid.toString())?.role;
+            let isAdminOrOwner = groupRole === 3 || groupRole === 4;
+            if (isAdminOrOwner && !operatorUid) {
+                let dataNotify: GroupNotify | undefined;
+                await this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onGroupNotifiesUpdated',
+                    (doubt, notifies) => {
+                        for (const notify of notifies) {
+                            if (notify.group.groupCode === groupChange.groupUin.toString() && notify.user1.uid === groupChange.memberUid) {
+                                dataNotify = notify;
+                                return true;
+                            }
+                        }
+                        return false;
+                    }, 1, 1000).catch(undefined);
+                if (dataNotify) {
+                    operatorUid = dataNotify.actionUser.uid ?? dataNotify.user2.uid;
+                }
+            }
+
             return new OB11GroupIncreaseEvent(
                 this.core,
                 groupChange.groupUin,
@@ -1001,9 +1021,29 @@ export class OneBotMsgApi {
         } else if (SysMessage.contentHead.type == 34 && SysMessage.body?.msgContent) {
             const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
             // 自身被踢出时operatorInfo会是一个protobuf 否则大多数情况为一个string
-            const operatorUid = groupChange.decreaseType === 3 && groupChange.operatorInfo ?
+            let operatorUid = groupChange.decreaseType === 3 && groupChange.operatorInfo ?
                 new NapProtoMsg(GroupChangeInfo).decode(groupChange.operatorInfo).operator?.operatorUid :
                 groupChange.operatorInfo?.toString();
+            let groupRole = this.core.apis.GroupApi.groupMemberCache.get(groupChange.groupUin.toString())?.get(this.core.selfInfo.uid.toString())?.role;
+            let isAdminOrOwner = groupRole === 3 || groupRole === 4;
+
+            if (isAdminOrOwner && !operatorUid) {
+                let dataNotify: GroupNotify | undefined;
+                await this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onGroupNotifiesUpdated',
+                    (doubt, notifies) => {
+                        for (const notify of notifies) {
+                            if (notify.group.groupCode === groupChange.groupUin.toString() && notify.user1.uid === groupChange.memberUid) {
+                                dataNotify = notify;
+                                return true;
+                            }
+                        }
+                        return false;
+                    }, 1, 1000).catch(undefined);
+                if (dataNotify) {
+                    operatorUid = dataNotify.actionUser.uid ?? dataNotify.user2.uid;
+                }
+            }
+
             if (groupChange.memberUid === this.core.selfInfo.uid) {
                 setTimeout(() => {
                     this.core.apis.GroupApi.groupMemberCache.delete(groupChange.groupUin.toString());
