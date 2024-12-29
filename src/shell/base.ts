@@ -270,10 +270,13 @@ export async function NCoreInitShell() {
     const pathWrapper = new NapCatPathWrapper();
     const logger = new LogWrapper(pathWrapper.logsPath);
     handleUncaughtExceptions(logger);
-    umamiTrace.trackEvent('shell/boot');
+    process.on('exit', (code: number) => {
+        umamiTrace.trackEvent('framework/exit', code.toString());
+    });
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
-
+    umamiTrace.init(basicInfoWrapper.getFullQQVesion());
+    umamiTrace.trackEvent('shell/boot');
     const o3Service = wrapper.NodeIO3MiscService.get();
     o3Service.addO3MiscListener(new NodeIO3MiscListener());
 
