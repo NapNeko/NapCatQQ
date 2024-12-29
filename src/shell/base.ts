@@ -29,9 +29,11 @@ import { InitWebUi } from '@/webui';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { napCatVersion } from '@/common/version';
 import { NodeIO3MiscListener } from '@/core/listeners/NodeIO3MiscListener';
+import { umamiTrace } from '@/common/umami';
 // NapCat Shell App ES 入口文件
 async function handleUncaughtExceptions(logger: LogWrapper) {
     process.on('uncaughtException', (err) => {
+        umamiTrace.trackEvent('framework/error', err.message);
         logger.logError('[NapCat] [Error] Unhandled Exception:', err.message);
     });
     process.on('unhandledRejection', (reason, promise) => {
@@ -222,7 +224,7 @@ async function handleLogin(
                 logger.log(`可用于快速登录的 QQ：\n${historyLoginList
                     .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
                     .join('\n')
-                }`);
+                    }`);
             }
             loginService.getQRCodePicture();
         }
@@ -266,7 +268,7 @@ export async function NCoreInitShell() {
     const pathWrapper = new NapCatPathWrapper();
     const logger = new LogWrapper(pathWrapper.logsPath);
     handleUncaughtExceptions(logger);
-
+    umamiTrace.trackEvent('shell/boot');
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
 
@@ -297,7 +299,7 @@ export async function NCoreInitShell() {
     o3Service.reportAmgomWeather('login', 'a1', [dataTimestape, '0', '0']);
 
     const selfInfo = await handleLogin(loginService, logger, pathWrapper, quickLoginUin, historyLoginList);
-
+    umamiTrace.trackEvent('shell/login');
     const amgomDataPiece = 'eb1fd6ac257461580dc7438eb099f23aae04ca679f4d88f53072dc56e3bb1129';
     o3Service.setAmgomDataPiece(basicInfoWrapper.QQVersionAppid, new Uint8Array(Buffer.from(amgomDataPiece, 'hex')));
 
