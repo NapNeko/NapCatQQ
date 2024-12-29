@@ -153,6 +153,7 @@ async function handleLogin(
         };
 
         loginListener.onQRCodeSessionFailed = (errType: number, errCode: number, errMsg: string) => {
+            umamiTrace.trackEvent('shell/login/error/' + errType.toString() + '-' + errCode.toString(), errMsg);
             if (!isLogined) {
                 logger.logError('[Core] [Login] Login Error,ErrCode: ', errCode, ' ErrMsg:', errMsg);
                 if (errType == 1 && errCode == 3) {
@@ -163,7 +164,8 @@ async function handleLogin(
         };
 
         loginListener.onLoginFailed = (args) => {
-            logger.logError('[Core] [Login] Login Error , ErrInfo: ', args);
+            umamiTrace.trackEvent('shell/login/error/' + args.toString(), args.toString());
+            logger.logError('[Core] [Login] Login Error , ErrInfo: ', args.toString());
         };
 
         loginService.addKernelLoginListener(proxiedListenerOf(loginListener, logger));
