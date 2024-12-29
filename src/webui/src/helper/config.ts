@@ -90,7 +90,7 @@ export class WebUiConfigWrapper {
         try {
             const configPath = resolve(webUiPathWrapper.configPath, './webui.json');
 
-            if (!await fs.access(configPath, constants.R_OK | constants.W_OK).then(() => true).catch(() => false)) {
+            if (!await fs.access(configPath, constants.R_OK).then(() => true).catch(() => false)) {
                 await fs.writeFile(configPath, JSON.stringify(defaultconfig, null, 4));
             }
 
