@@ -24,19 +24,26 @@ export async function NCoreInitFramework(
 ) {
     //在进入本层前是否登录未进行判断
     console.log('NapCat Framework App Loading...');
-    umamiTrace.trackEvent('framework/login');
+
     process.on('uncaughtException', (err) => {
         umamiTrace.trackEvent('framework/error', err.message);
         console.log('[NapCat] [Error] Unhandled Exception:', err.message);
     });
+    
     process.on('unhandledRejection', (reason, promise) => {
         console.log('[NapCat] [Error] unhandledRejection:', reason);
+    });
+
+    process.on('exit', (code: number) => {
+        umamiTrace.trackEvent('framework/exit', code.toString());
     });
 
     const pathWrapper = new NapCatPathWrapper();
     const logger = new LogWrapper(pathWrapper.logsPath);
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
+    umamiTrace.init(basicInfoWrapper.getFullQQVesion());
+    umamiTrace.trackEvent('framework/login');
     //直到登录成功后，执行下一步
     const selfInfo = await new Promise<SelfInfo>((resolveSelfInfo) => {
         const loginListener = new NodeIKernelLoginListener();
