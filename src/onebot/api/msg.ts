@@ -990,7 +990,7 @@ export class OneBotMsgApi {
         if (SysMessage.contentHead.type == 33 && SysMessage.body?.msgContent) {
             const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
             this.core.apis.GroupApi.refreshGroupMemberCache(groupChange.groupUin.toString()).then().catch();
-            const operatorUid = groupChange.operatorInfo?.toString();
+            const operatorUid = groupChange.operatorInfo ? Buffer.from(groupChange.operatorInfo).toString() : '';
             return new OB11GroupIncreaseEvent(
                 this.core,
                 groupChange.groupUin,
