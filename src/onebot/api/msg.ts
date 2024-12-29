@@ -994,6 +994,9 @@ export class OneBotMsgApi {
 
             let groupRole = this.core.apis.GroupApi.groupMemberCache.get(groupChange.groupUin.toString())?.get(this.core.selfInfo.uid.toString())?.role;
             let isAdminOrOwner = groupRole === 3 || groupRole === 4;
+
+            console.log(Buffer.from(msg).toString('hex'));
+
             if (isAdminOrOwner && !operatorUid) {
                 let dataNotify: GroupNotify | undefined;
                 await this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onGroupNotifiesUpdated',
@@ -1007,8 +1010,9 @@ export class OneBotMsgApi {
                         return false;
                     }, 1, 1000).catch(undefined);
                 if (dataNotify) {
-                    operatorUid = dataNotify.actionUser.uid ?? dataNotify.user2.uid;
+                    operatorUid = !!dataNotify.actionUser.uid ?  dataNotify.actionUser.uid :dataNotify.user2.uid;
                 }
+                console.log(dataNotify);
             }
 
             return new OB11GroupIncreaseEvent(
@@ -1027,6 +1031,7 @@ export class OneBotMsgApi {
             let groupRole = this.core.apis.GroupApi.groupMemberCache.get(groupChange.groupUin.toString())?.get(this.core.selfInfo.uid.toString())?.role;
             let isAdminOrOwner = groupRole === 3 || groupRole === 4;
 
+            console.log(Buffer.from(msg).toString('hex'));
             if (isAdminOrOwner && !operatorUid) {
                 let dataNotify: GroupNotify | undefined;
                 await this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onGroupNotifiesUpdated',
@@ -1039,8 +1044,9 @@ export class OneBotMsgApi {
                         }
                         return false;
                     }, 1, 1000).catch(undefined);
+                console.log(dataNotify);
                 if (dataNotify) {
-                    operatorUid = dataNotify.actionUser.uid ?? dataNotify.user2.uid;
+                    operatorUid = !!dataNotify.actionUser.uid ?  dataNotify.actionUser.uid :dataNotify.user2.uid;
                 }
             }
 
