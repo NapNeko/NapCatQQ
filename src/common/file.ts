@@ -175,10 +175,9 @@ export async function checkUriType(Uri: string) {
     return { Uri: Uri, Type: FileUriType.Unknown };
 }
 
-export async function uriToLocalFile(dir: string, uri: string): Promise<Uri2LocalRes> {
+export async function uriToLocalFile(dir: string, uri: string, filename: string = randomUUID(), headers?: Record<string, string>): Promise<Uri2LocalRes> {
     const { Uri: HandledUri, Type: UriType } = await checkUriType(uri);
 
-    const filename = randomUUID();
     const filePath = path.join(dir, filename);
 
     switch (UriType) {
@@ -191,7 +190,7 @@ export async function uriToLocalFile(dir: string, uri: string): Promise<Uri2Loca
     }
 
     case FileUriType.Remote: {
-        const buffer = await httpDownload(HandledUri);
+        const buffer = await httpDownload({ url: HandledUri, headers: headers });
         fs.writeFileSync(filePath, buffer, { flag: 'wx' });
         return { success: true, errMsg: '', fileName: filename, path: filePath };
     }
