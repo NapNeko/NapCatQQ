@@ -9,6 +9,7 @@ import { NodeIKernelLoginService } from '@/core/services';
 import { NodeIQQNTWrapperSession, WrapperNodeApi } from '@/core/wrapper';
 import { InitWebUi, WebUiConfig } from '@/webui';
 import { NapCatOneBot11Adapter } from '@/onebot';
+import { umamiTrace } from '@/common/umami';
 
 //Framework ES入口文件
 export async function getWebUiUrl() {
@@ -23,8 +24,9 @@ export async function NCoreInitFramework(
 ) {
     //在进入本层前是否登录未进行判断
     console.log('NapCat Framework App Loading...');
-
+    umamiTrace.trackEvent('framework/login');
     process.on('uncaughtException', (err) => {
+        umamiTrace.trackEvent('framework/error', err.message);
         console.log('[NapCat] [Error] Unhandled Exception:', err.message);
     });
     process.on('unhandledRejection', (reason, promise) => {
