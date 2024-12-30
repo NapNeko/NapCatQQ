@@ -11,6 +11,7 @@ export class UmamiTraceCore {
     hostname: string = 'trace.napneko.icu';
     ua: string = '';
     workname: string = 'default';
+    bootTime = Date.now();
     init(qqversion: string, guid: string, workname: string) {
         this.qqversion = qqversion;
         this.workname = workname;
@@ -43,8 +44,12 @@ export class UmamiTraceCore {
         const data = {
             napcat_version: this.napcatVersion,
             qq_version: this.qqversion,
-            guid: guid,
-            workname: this.workname,
+            napcat_working: this.workname,
+            device_guid: this.guid,
+            device_platform: os.platform(),
+            device_arch: os.arch(),
+            boot_time: new Date(this.bootTime + 8 * 60 * 60 * 1000).toISOString().replace('T', ' ').substring(0, 19),
+            sys_time: new Date(Date.now() - os.uptime() * 1000 + 8 * 60 * 60 * 1000).toISOString().replace('T', ' ').substring(0, 19)
         };
         this.sendEvent(
             {
@@ -70,14 +75,7 @@ export class UmamiTraceCore {
             language: language || 'en-US',
             screen: '1920x1080',
             data: {
-                ...data,
-                napcat_version: this.napcatVersion,
-                qq_version: this.qqversion,
-                workname: this.workname,
-                guid: this.guid,
-                platform: os.platform(),
-                arch: os.arch(),
-                uptime: new Date(Date.now() - os.uptime() * 1000).toISOString().replace('T', ' ').substring(0, 19)
+                ...data
             }
         };
         this.sendRequest(payload, type);
