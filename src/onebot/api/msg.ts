@@ -1012,16 +1012,8 @@ export class OneBotMsgApi {
 
     async parseSysMessage(msg: number[]) {
         const SysMessage = new NapProtoMsg(PushMsgBody).decode(Uint8Array.from(msg));
-        if (SysMessage.contentHead.type == 85 && SysMessage.body?.msgContent) {
-            const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
-            return new OB11GroupIncreaseEvent(
-                this.core,
-                groupChange.groupUin,
-                +this.core.selfInfo.uin,
-                groupChange.memberUid ? +await this.core.apis.UserApi.getUinByUidV2(groupChange.memberUid) : 0,
-                'approve'
-            );
-        } else if (SysMessage.contentHead.type == 33 && SysMessage.body?.msgContent) {
+        // 邀请需要解grayTipElement
+        if (SysMessage.contentHead.type == 33 && SysMessage.body?.msgContent) {
             const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
             this.core.apis.GroupApi.refreshGroupMemberCache(groupChange.groupUin.toString()).then().catch();
             let operatorUid = await this.waitGroupNotify(
