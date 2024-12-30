@@ -71,7 +71,7 @@ export class UmamiTraceCore {
             website: this.website,
             hostname: this.hostname,
             title: 'NapCat ' + this.napcatVersion,
-            url: `/${this.qqversion}/${this.napcatVersion}/${this.workname}/${eventName}` + (!!data ? `?data=${data}` : ''),
+            url: `/${this.qqversion}/${this.napcatVersion}/${this.workname}/${eventName}` + (!!data ? `/${data}` : ''),
             referrer: this.referrer,
         };
         this.sendRequest(payload);
