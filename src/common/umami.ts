@@ -6,7 +6,7 @@ export class UmamiTraceCore {
     qqversion = '1.0.0';
     guid = 'default-user';
     heartbeatInterval: NodeJS.Timeout | null = null;
-    website: string = '1fabb2b1-c3a3-4416-b1be-31e2cbdce978';
+    website: string = '596cbbb2-1740-4373-a807-cf3d0637bfa7';
     referrer: string = 'https://trace.napneko.icu/';
     hostname: string = 'trace.napneko.icu';
     ua: string = '';
@@ -55,7 +55,7 @@ export class UmamiTraceCore {
             hostname: this.hostname,
             referrer: this.referrer,
             website: this.website,
-            language: language || 'es-US',
+            language: language || 'en-US',
             napcat_version: this.napcatVersion,
             qq_version: this.qqversion,
             ...data
