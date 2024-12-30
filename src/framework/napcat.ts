@@ -26,7 +26,7 @@ export async function NCoreInitFramework(
     console.log('NapCat Framework App Loading...');
 
     process.on('uncaughtException', (err) => {
-        UmamiTrace.sendEvent('framework/error', { name: err.name });
+        UmamiTrace.sendTrace('framework/error', err.message);
         console.log('[NapCat] [Error] Unhandled Exception:', err.message);
     });
 
@@ -40,8 +40,8 @@ export async function NCoreInitFramework(
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
     let guid = loginService.getMachineGuid();
     UmamiTrace.init(basicInfoWrapper.getFullQQVesion(), guid);
-    UmamiTrace.sendTrace('framework/boot');
-    UmamiTrace.sendEvent('framework/login');
+    UmamiTrace.sendTrace('framework/boot/init');
+    UmamiTrace.sendTrace('framework/login/success');
     //直到登录成功后，执行下一步
     const selfInfo = await new Promise<SelfInfo>((resolveSelfInfo) => {
         const loginListener = new NodeIKernelLoginListener();
