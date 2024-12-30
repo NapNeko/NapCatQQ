@@ -10,9 +10,10 @@ export class UmamiTraceCore {
     referrer: string = 'https://trace.napneko.icu/';
     hostname: string = 'trace.napneko.icu';
     ua: string = '';
-
-    init(qqversion: string, guid: string) {
+    workname: string = 'default';
+    init(qqversion: string, guid: string, workname: string) {
         this.qqversion = qqversion;
+        this.workname = workname;
         let UaList = {
             'linux': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML like Gecko) Chrome/124.0.0.0 Safari/537.36 PTST/240508.140043',
             'win32': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.2128.93 Safari/537.36',
@@ -42,7 +43,8 @@ export class UmamiTraceCore {
         const data = {
             napcat_version: this.napcatVersion,
             qq_version: this.qqversion,
-            guid: guid
+            guid: guid,
+            workname: this.workname,
         };
         this.sendRequest({ website: this.website, ...data }, 'identify');
     }
@@ -58,6 +60,7 @@ export class UmamiTraceCore {
             language: language || 'en-US',
             napcat_version: this.napcatVersion,
             qq_version: this.qqversion,
+            workname: this.workname,
             ...data
         };
         this.sendRequest(payload);
@@ -68,7 +71,7 @@ export class UmamiTraceCore {
             website: this.website,
             hostname: this.hostname,
             title: 'NapCat ' + this.napcatVersion,
-            url: `/${this.qqversion}/${this.napcatVersion}/${eventName}` + (!!data ? `?data=${data}` : ''),
+            url: `/${this.qqversion}/${this.napcatVersion}/${this.workname}/${eventName}` + (!!data ? `?data=${data}` : ''),
             referrer: this.referrer,
         };
         this.sendRequest(payload);
@@ -108,7 +111,7 @@ export class UmamiTraceCore {
             this.sendEvent('heartbeat', {
                 title: 'NapCat ' + this.napcatVersion,
                 language: process.env.LANG || 'en-US',
-                url: `/${this.qqversion}/${this.napcatVersion}/heartbeat`,
+                url: `/${this.qqversion}/${this.napcatVersion}/${this.workname}/heartbeat`,
                 version: this.napcatVersion,
                 qq_version: this.qqversion,
                 user_id: this.guid

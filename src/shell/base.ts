@@ -33,7 +33,7 @@ import { UmamiTrace } from '@/common/umami';
 // NapCat Shell App ES 入口文件
 async function handleUncaughtExceptions(logger: LogWrapper) {
     process.on('uncaughtException', (err) => {
-        UmamiTrace.sendTrace('framework/error', err.message);
+        UmamiTrace.sendTrace('uncaught/error', err.message);
         logger.logError('[NapCat] [Error] Unhandled Exception:', err.message);
     });
     process.on('unhandledRejection', (reason, promise) => {
@@ -153,7 +153,7 @@ async function handleLogin(
         };
 
         loginListener.onQRCodeSessionFailed = (errType: number, errCode: number, errMsg: string) => {
-            UmamiTrace.sendTrace('shell/qrlogin/error?', [errType, errCode, errMsg].toString());
+            UmamiTrace.sendTrace('qrlogin/error', [errType, errCode, errMsg].toString());
             if (!isLogined) {
                 logger.logError('[Core] [Login] Login Error,ErrCode: ', errCode, ' ErrMsg:', errMsg);
                 if (errType == 1 && errCode == 3) {
@@ -164,7 +164,7 @@ async function handleLogin(
         };
 
         loginListener.onLoginFailed = (args) => {
-            UmamiTrace.sendTrace('shell/login/error', args.toString());
+            UmamiTrace.sendTrace('login/error', args.toString());
             logger.logError('[Core] [Login] Login Error , ErrInfo: ', args.toString());
         };
 
@@ -298,10 +298,10 @@ export async function NCoreInitShell() {
 
     const dataTimestape = new Date().getTime().toString();
     o3Service.reportAmgomWeather('login', 'a1', [dataTimestape, '0', '0']);
-    UmamiTrace.init(basicInfoWrapper.getFullQQVesion(), loginService.getMachineGuid());
-    UmamiTrace.sendTrace('shell/boot/init');
+    UmamiTrace.init(basicInfoWrapper.getFullQQVesion(), loginService.getMachineGuid(), 'shell');
+    UmamiTrace.sendTrace('boot/init');
     const selfInfo = await handleLogin(loginService, logger, pathWrapper, quickLoginUin, historyLoginList);
-    UmamiTrace.sendTrace('shell/login/success');
+    UmamiTrace.sendTrace('login/success');
     const amgomDataPiece = 'eb1fd6ac257461580dc7438eb099f23aae04ca679f4d88f53072dc56e3bb1129';
     o3Service.setAmgomDataPiece(basicInfoWrapper.QQVersionAppid, new Uint8Array(Buffer.from(amgomDataPiece, 'hex')));
 

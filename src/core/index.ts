@@ -156,9 +156,9 @@ export class NapCatCore {
 
         msgListener.onKickedOffLine = (Info: KickedOffLineInfo) => {
             if (this.context.workingEnv === NapCatCoreWorkingEnv.Framework) {
-                UmamiTrace.sendTrace('framework/kickoff');
+                UmamiTrace.sendTrace('event/kickoff');
             } else {
-                UmamiTrace.sendTrace('shell/kickoff');
+                UmamiTrace.sendTrace('event/kickoff');
             }
             // 下线通知
             this.context.logger.logError('[KickedOffLine] [' + Info.tipsTitle + '] ' + Info.tipsDesc);
