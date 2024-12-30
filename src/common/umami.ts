@@ -46,22 +46,25 @@ export class UmamiTraceCore {
             guid: guid,
             workname: this.workname,
         };
-        this.sendRequest({ website: this.website, ...data }, 'identify');
+        this.sendRequest({ website: this.website, data}, 'identify');
     }
 
-    sendEvent(event: string, data?: object) {
+    sendEvent(event: string | object, data?: object) {
         const env = process.env;
         const language = env.LANG || env.LANGUAGE || env.LC_ALL || env.LC_MESSAGES;
         const payload = {
-            name: event,
+            ...(typeof event === 'string' ? { event } : event),
             hostname: this.hostname,
             referrer: this.referrer,
             website: this.website,
             language: language || 'en-US',
-            napcat_version: this.napcatVersion,
-            qq_version: this.qqversion,
-            workname: this.workname,
-            ...data
+            data: {
+                ...data,
+                napcat_version: this.napcatVersion,
+                qq_version: this.qqversion,
+                workname: this.workname,
+                guid: this.guid
+            }
         };
         this.sendRequest(payload);
     }
@@ -108,13 +111,10 @@ export class UmamiTraceCore {
             clearInterval(this.heartbeatInterval);
         }
         this.heartbeatInterval = setInterval(() => {
-            this.sendEvent('heartbeat', {
+            this.sendEvent({
+                name: 'heartbeat',
                 title: 'NapCat ' + this.napcatVersion,
-                language: process.env.LANG || 'en-US',
                 url: `/${this.qqversion}/${this.napcatVersion}/${this.workname}/heartbeat`,
-                version: this.napcatVersion,
-                qq_version: this.qqversion,
-                user_id: this.guid
             });
         }, 5 * 60 * 1000);
     }
