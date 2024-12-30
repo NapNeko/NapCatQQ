@@ -56,6 +56,7 @@ export interface GrayTipElement {
     aioOpGrayTipElement: TipAioOpGrayTipElement;
     groupElement: TipGroupElement;
     xmlElement: {
+        busiId: string;
         content: string;
         templId: string;
     };
