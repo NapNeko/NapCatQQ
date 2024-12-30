@@ -58,6 +58,7 @@ export class UmamiTraceCore {
             language: language || 'es-US',
             napcat_version: this.napcatVersion,
             qq_version: this.qqversion,
+            ...data
         };
         this.sendRequest(payload);
     }
