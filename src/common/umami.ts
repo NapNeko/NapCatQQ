@@ -1,17 +1,17 @@
 import https from 'node:https';
 import { napCatVersion } from './version';
 import os from 'os';
-export class UmamiTrace {
-    static napcatVersion = napCatVersion;
-    static qqversion = '1.0.0';
-    static guid = 'default-user';
-    static heartbeatInterval: NodeJS.Timeout | null = null;
-    static website: string = '1fabb2b1-c3a3-4416-b1be-31e2cbdce978';
-    static referrer: string = 'https://trace.napneko.icu/';
-    static hostname: string = 'trace.napneko.icu';
-    static ua: string = '';
+export class UmamiTraceCore {
+    napcatVersion = napCatVersion;
+    qqversion = '1.0.0';
+    guid = 'default-user';
+    heartbeatInterval: NodeJS.Timeout | null = null;
+    website: string = '1fabb2b1-c3a3-4416-b1be-31e2cbdce978';
+    referrer: string = 'https://trace.napneko.icu/';
+    hostname: string = 'trace.napneko.icu';
+    ua: string = '';
 
-    static init(qqversion: string, guid: string) {
+    init(qqversion: string, guid: string) {
         this.qqversion = qqversion;
         let UaList = {
             'linux': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML like Gecko) Chrome/124.0.0.0 Safari/537.36 PTST/240508.140043',
@@ -37,7 +37,7 @@ export class UmamiTrace {
         this.startHeartbeat();
     }
 
-    static identifyUser(guid: string) {
+    identifyUser(guid: string) {
         this.guid = guid;
         const data = {
             napcat_version: this.napcatVersion,
@@ -47,7 +47,7 @@ export class UmamiTrace {
         this.sendRequest({ website: this.website, ...data }, 'identify');
     }
 
-    static sendEvent(event: string, data?: object) {
+    sendEvent(event: string, data?: object) {
         const env = process.env;
         const language = env.LANG || env.LANGUAGE || env.LC_ALL || env.LC_MESSAGES;
         const payload = {
@@ -62,7 +62,7 @@ export class UmamiTrace {
         this.sendRequest(payload);
     }
 
-    static sendTrace(eventName: string) {
+    sendTrace(eventName: string) {
         const payload = {
             website: this.website,
             hostname: this.hostname,
@@ -73,7 +73,7 @@ export class UmamiTrace {
         this.sendRequest(payload);
     }
 
-    static sendRequest(payload: object, type = 'event') {
+    sendRequest(payload: object, type = 'event') {
         const options = {
             hostname: '104.19.42.72', // 固定 IP 或者从 hostUrl 获取
             port: 443,
@@ -94,12 +94,12 @@ export class UmamiTrace {
 
             });
         });
-       
+
         request.write(JSON.stringify({ type, payload }));
         request.end();
     }
 
-    static startHeartbeat() {
+    startHeartbeat() {
         if (this.heartbeatInterval) {
             clearInterval(this.heartbeatInterval);
         }
@@ -115,10 +115,11 @@ export class UmamiTrace {
         }, 5 * 60 * 1000);
     }
 
-    static stopHeartbeat() {
+    stopHeartbeat() {
         if (this.heartbeatInterval) {
             clearInterval(this.heartbeatInterval);
             this.heartbeatInterval = null;
         }
     }
 }
+export const UmamiTrace = new UmamiTraceCore();
