@@ -19,7 +19,7 @@ export class umamiTrace {
                 'website': '596cbbb2-1740-4373-a807-cf3d0637bfa7',
                 'hostname': 'trace.napneko.icu',
                 'title': 'NapCat ' + umamiTrace.napcatVersion,
-                'url': '/' + umamiTrace.qqversion + '/' + umamiTrace.napcatVersion + '/' + eventName + (info ? '' : '/' + info),
+                'url': '/' + umamiTrace.qqversion + '/' + umamiTrace.napcatVersion + '/' + eventName + (!info ? '' : '/' + info),
                 'referrer': 'https://napcat.onebot.napneko.icu/',
             }
         };
