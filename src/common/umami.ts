@@ -63,12 +63,12 @@ export class UmamiTraceCore {
         this.sendRequest(payload);
     }
 
-    sendTrace(eventName: string) {
+    sendTrace(eventName: string, data: string = '') {
         const payload = {
             website: this.website,
             hostname: this.hostname,
             title: 'NapCat ' + this.napcatVersion,
-            url: `/${this.qqversion}/${this.napcatVersion}/${eventName}`,
+            url: `/${this.qqversion}/${this.napcatVersion}/${eventName}` + (!!data ? `?data=${data}` : ''),
             referrer: this.referrer,
         };
         this.sendRequest(payload);
