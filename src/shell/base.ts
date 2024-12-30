@@ -155,7 +155,7 @@ async function handleLogin(
         loginListener.onQRCodeSessionFailed = (errType: number, errCode: number, errMsg: string) => {
             UmamiTrace.sendTrace('qrlogin/error', [errType, errCode, errMsg].toString());
             if (!isLogined) {
-                logger.logError('[Core] [Login] Login Error,ErrCode: ', errCode, ' ErrMsg:', errMsg);
+                logger.logError('[Core] [Login] Login Error,ErrType: ', errType, ' ErrCode:', errCode);
                 if (errType == 1 && errCode == 3) {
                     // 二维码过期刷新
                 }
@@ -163,9 +163,10 @@ async function handleLogin(
             }
         };
 
-        loginListener.onLoginFailed = (args) => {
+        loginListener.onLoginFailed = (...args) => {
             UmamiTrace.sendTrace('login/error', args.toString());
-            logger.logError('[Core] [Login] Login Error , ErrInfo: ', args.toString());
+            console.log(args);
+            logger.logError('[Core] [Login] Login Error , ErrInfo: ', JSON.stringify(args));
         };
 
         loginService.addKernelLoginListener(proxiedListenerOf(loginListener, logger));
