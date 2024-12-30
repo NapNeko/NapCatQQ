@@ -30,7 +30,7 @@ import os from 'node:os';
 import { NodeIKernelMsgListener, NodeIKernelProfileListener } from '@/core/listeners';
 import { proxiedListenerOf } from '@/common/proxy-handler';
 import { NTQQPacketApi } from './apis/packet';
-import { umamiTrace } from '@/common/umami';
+import { UmamiTrace } from '@/common/umami';
 export * from './wrapper';
 export * from './types';
 export * from './services';
@@ -156,9 +156,9 @@ export class NapCatCore {
 
         msgListener.onKickedOffLine = (Info: KickedOffLineInfo) => {
             if (this.context.workingEnv === NapCatCoreWorkingEnv.Framework) {
-                umamiTrace.trackEvent('framework/kickoff');
+                UmamiTrace.sendEvent('framework/kickoff');
             } else {
-                umamiTrace.trackEvent('shell/kickoff');
+                UmamiTrace.sendEvent('shell/kickoff');
             }
             // 下线通知
             this.context.logger.logError('[KickedOffLine] [' + Info.tipsTitle + '] ' + Info.tipsDesc);
