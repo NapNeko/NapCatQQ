@@ -24,6 +24,7 @@ import { OB11GroupUploadNoticeEvent } from '../event/notice/OB11GroupUploadNotic
 import { OB11GroupNameEvent } from '../event/notice/OB11GroupNameEvent';
 import { pathToFileURL } from 'node:url';
 import { FileNapCatOneBotUUID } from '@/common/helper';
+import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
 
 export class OneBotGroupApi {
     obContext: NapCatOneBot11Adapter;
@@ -219,7 +220,29 @@ export class OneBotGroupApi {
         } else if (element.type === TipGroupElementType.KSHUTUP) {
             let event = await this.parseGroupBanEvent(msg.peerUid, elementWrapper);
             return event;
+        } else if (element.type === TipGroupElementType.KMEMBERADD) {
+            // 自己的通知 协议推送为type->85 在这里实现为了避免邀请出现问题
+            if (element.memberUid == this.core.selfInfo.uid) {
+                this.core.apis.GroupApi.refreshGroupMemberCache(msg.peerUid).then().catch();
+                return new OB11GroupIncreaseEvent(
+                    this.core,
+                    parseInt(msg.peerUid),
+                    +this.core.selfInfo.uin,
+                    element.adminUid ? +await this.core.apis.UserApi.getUinByUidV2(element.adminUid) : 0,
+                    'approve'
+                );
+            }
         }
+    }
+    
+    async parseSelfInviteEvent(msg: RawMessage, inviterUin: string, inviteeUin: string) {
+        return new OB11GroupIncreaseEvent(
+            this.core,
+            parseInt(msg.peerUid),
+            +inviteeUin,
+            +inviterUin,
+            'invite'
+        );
     }
 
     async parseGrayTipElement(msg: RawMessage, grayTipElement: GrayTipElement) {
@@ -227,8 +250,21 @@ export class OneBotGroupApi {
             // 解析群组事件 由sysmsg解析
             return await this.parseGroupElement(msg, grayTipElement.groupElement, grayTipElement);
         } else if (grayTipElement.subElementType === NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_XMLMSG) {
-            // 筛选出表情回应 事件
-            if (grayTipElement.xmlElement?.templId === '10382') {
+            // 筛选自身入群情况
+            // if (grayTipElement.xmlElement.busiId === '10145') {
+            //     const inviteData = new fastXmlParser.XMLParser({
+            //         ignoreAttributes: false,
+            //         attributeNamePrefix: '',
+            //     }).parse(grayTipElement.xmlElement.content);
+
+            //     const inviterUin: string = inviteData.gtip.qq[0].jp;
+            //     const inviteeUin: string = inviteData.gtip.qq[1].jp;
+            //     //刷新群缓存
+            //     if (inviteeUin === this.core.selfInfo.uin) {
+            //         this.core.apis.GroupApi.refreshGroupMemberCache(msg.peerUid).then().catch();
+            //         return this.parseSelfInviteEvent(msg, inviterUin, inviteeUin);
+            //     }
+            } else if (grayTipElement.xmlElement?.templId === '10382') {
                 return await this.obContext.apis.GroupApi.parseGroupEmojiLikeEventByGrayTip(msg.peerUid, grayTipElement);
             } else {
                 //return await this.obContext.apis.GroupApi.parseGroupIncreaseEvent(msg.peerUid, grayTipElement);

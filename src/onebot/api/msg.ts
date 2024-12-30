@@ -972,6 +972,7 @@ export class OneBotMsgApi {
 
         return { path, fileName: inputdata.name ?? fileName };
     }
+
     groupChangDecreseType2String(type: number): GroupDecreaseSubType {
         switch (type) {
             case 130:
@@ -985,12 +986,41 @@ export class OneBotMsgApi {
         }
     }
 
+    async waitGroupNotify(groupUin: string, memberUid?: string, operatorUid?: string) {
+        let groupRole = this.core.apis.GroupApi.groupMemberCache.get(groupUin)?.get(this.core.selfInfo.uid.toString())?.role;
+        let isAdminOrOwner = groupRole === 3 || groupRole === 4;
+
+        if (isAdminOrOwner && !operatorUid) {
+            let dataNotify: GroupNotify | undefined;
+            await this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onGroupNotifiesUpdated',
+                (doubt, notifies) => {
+                    for (const notify of notifies) {
+                        if (notify.group.groupCode === groupUin && notify.user1.uid === memberUid) {
+                            dataNotify = notify;
+                            return true;
+                        }
+                    }
+                    return false;
+                }, 1, 1000).catch(undefined);
+            if (dataNotify) {
+                return !dataNotify.actionUser.uid ? dataNotify.user2.uid : dataNotify.actionUser.uid;
+            }
+        }
+
+        return operatorUid;
+    }
+
     async parseSysMessage(msg: number[]) {
         const SysMessage = new NapProtoMsg(PushMsgBody).decode(Uint8Array.from(msg));
+        // 邀请需要解grayTipElement
         if (SysMessage.contentHead.type == 33 && SysMessage.body?.msgContent) {
             const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
             this.core.apis.GroupApi.refreshGroupMemberCache(groupChange.groupUin.toString()).then().catch();
-            const operatorUid = groupChange.operatorInfo ? Buffer.from(groupChange.operatorInfo).toString() : '';
+            let operatorUid = await this.waitGroupNotify(
+                groupChange.groupUin.toString(),
+                groupChange.memberUid,
+                groupChange.operatorInfo ? Buffer.from(groupChange.operatorInfo).toString() : ''
+            );
             return new OB11GroupIncreaseEvent(
                 this.core,
                 groupChange.groupUin,
@@ -998,12 +1028,17 @@ export class OneBotMsgApi {
                 operatorUid ? +await this.core.apis.UserApi.getUinByUidV2(operatorUid) : 0,
                 groupChange.decreaseType == 131 ? 'invite' : 'approve',
             );
+
         } else if (SysMessage.contentHead.type == 34 && SysMessage.body?.msgContent) {
             const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
             // 自身被踢出时operatorInfo会是一个protobuf 否则大多数情况为一个string
-            const operatorUid = groupChange.decreaseType === 3 && groupChange.operatorInfo ?
-                new NapProtoMsg(GroupChangeInfo).decode(groupChange.operatorInfo).operator?.operatorUid :
-                groupChange.operatorInfo?.toString();
+            let operatorUid = await this.waitGroupNotify(
+                groupChange.groupUin.toString(),
+                groupChange.memberUid,
+                groupChange.decreaseType === 3 && groupChange.operatorInfo ?
+                    new NapProtoMsg(GroupChangeInfo).decode(groupChange.operatorInfo).operator?.operatorUid :
+                    groupChange.operatorInfo?.toString()
+            );
             if (groupChange.memberUid === this.core.selfInfo.uid) {
                 setTimeout(() => {
                     this.core.apis.GroupApi.groupMemberCache.delete(groupChange.groupUin.toString());
@@ -1103,8 +1138,7 @@ export class OneBotMsgApi {
                 '',
                 request_seq
             );
-        }
-        else if (SysMessage.contentHead.type == 528 && SysMessage.contentHead.subType == 39 && SysMessage.body?.msgContent) {
+        } else if (SysMessage.contentHead.type == 528 && SysMessage.contentHead.subType == 39 && SysMessage.body?.msgContent) {
             return await this.obContext.apis.UserApi.parseLikeEvent(SysMessage.body?.msgContent);
         }
     }
