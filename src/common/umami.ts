@@ -112,7 +112,7 @@ export class UmamiTraceCore {
             res.on('data', (data) => {
 
             });
-        });
+        }).on('error', () => {} );
 
         request.write(JSON.stringify({ type, payload }));
         request.end();
