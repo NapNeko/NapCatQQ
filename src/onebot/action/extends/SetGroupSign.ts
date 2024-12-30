@@ -17,7 +17,7 @@ class SetGroupSignBase extends GetPacketStatusDepends<Payload, any> {
 }
 
 export class SetGroupSign extends SetGroupSignBase {
-    actionName = ActionName.SendGroupSign;
+    actionName = ActionName.SetGroupSign;
 }
 
 export class SendGroupSign extends SetGroupSignBase {
