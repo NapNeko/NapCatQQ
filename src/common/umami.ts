@@ -1,6 +1,6 @@
 import https from 'node:https';
 import { napCatVersion } from './version';
-import os from 'os';
+import os from 'node:os';
 export class UmamiTraceCore {
     napcatVersion = napCatVersion;
     qqversion = '1.0.0';
@@ -46,10 +46,20 @@ export class UmamiTraceCore {
             guid: guid,
             workname: this.workname,
         };
-        this.sendRequest({ website: this.website, data}, 'identify');
+        this.sendEvent(
+            {
+                website: this.website,
+                hostname: this.hostname,
+                referrer: this.referrer,
+                tittle: 'NapCat ' + this.napcatVersion,
+                url: `/${this.qqversion}/${this.napcatVersion}/${this.workname}/identify`,
+            },
+            data,
+            'identify'
+        );
     }
 
-    sendEvent(event: string | object, data?: object) {
+    sendEvent(event: string | object, data?: object, type = 'event') {
         const env = process.env;
         const language = env.LANG || env.LANGUAGE || env.LC_ALL || env.LC_MESSAGES;
         const payload = {
@@ -58,15 +68,20 @@ export class UmamiTraceCore {
             referrer: this.referrer,
             website: this.website,
             language: language || 'en-US',
+            screen: '1920x1080',
             data: {
                 ...data,
                 napcat_version: this.napcatVersion,
                 qq_version: this.qqversion,
                 workname: this.workname,
-                guid: this.guid
+                guid: this.guid,
+                platform: os.platform(),
+                arch: os.arch(),
+                cpus: os.cpus(),
+                uptime: os.uptime(),
             }
         };
-        this.sendRequest(payload);
+        this.sendRequest(payload, type);
     }
 
     sendTrace(eventName: string, data: string = '') {
