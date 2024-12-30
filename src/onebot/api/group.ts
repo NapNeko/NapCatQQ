@@ -234,7 +234,7 @@ export class OneBotGroupApi {
             }
         }
     }
-    
+
     async parseSelfInviteEvent(msg: RawMessage, inviterUin: string, inviteeUin: string) {
         return new OB11GroupIncreaseEvent(
             this.core,
@@ -264,7 +264,8 @@ export class OneBotGroupApi {
             //         this.core.apis.GroupApi.refreshGroupMemberCache(msg.peerUid).then().catch();
             //         return this.parseSelfInviteEvent(msg, inviterUin, inviteeUin);
             //     }
-            } else if (grayTipElement.xmlElement?.templId === '10382') {
+            // } else 
+            if (grayTipElement.xmlElement?.templId === '10382') {
                 return await this.obContext.apis.GroupApi.parseGroupEmojiLikeEventByGrayTip(msg.peerUid, grayTipElement);
             } else {
                 //return await this.obContext.apis.GroupApi.parseGroupIncreaseEvent(msg.peerUid, grayTipElement);
