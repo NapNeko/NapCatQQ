@@ -29,11 +29,11 @@ import { InitWebUi } from '@/webui';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { napCatVersion } from '@/common/version';
 import { NodeIO3MiscListener } from '@/core/listeners/NodeIO3MiscListener';
-import { umamiTrace } from '@/common/umami';
+import { UmamiTrace } from '@/common/umami';
 // NapCat Shell App ES 入口文件
 async function handleUncaughtExceptions(logger: LogWrapper) {
     process.on('uncaughtException', (err) => {
-        umamiTrace.trackEvent('framework/error', err.message);
+        UmamiTrace.sendEvent('framework/error', { name: err.name, message: err.message });
         logger.logError('[NapCat] [Error] Unhandled Exception:', err.message);
     });
     process.on('unhandledRejection', (reason, promise) => {
@@ -153,7 +153,7 @@ async function handleLogin(
         };
 
         loginListener.onQRCodeSessionFailed = (errType: number, errCode: number, errMsg: string) => {
-            umamiTrace.trackEvent('shell/login/error/' + errType.toString() + '-' + errCode.toString(), errMsg);
+            UmamiTrace.sendEvent('shell/qrlogin/error', { errType, errCode, errMsg });
             if (!isLogined) {
                 logger.logError('[Core] [Login] Login Error,ErrCode: ', errCode, ' ErrMsg:', errMsg);
                 if (errType == 1 && errCode == 3) {
@@ -164,7 +164,7 @@ async function handleLogin(
         };
 
         loginListener.onLoginFailed = (args) => {
-            umamiTrace.trackEvent('shell/login/error/' + args.toString(), args.toString());
+            UmamiTrace.sendEvent('shell/login/error', { args });
             logger.logError('[Core] [Login] Login Error , ErrInfo: ', args.toString());
         };
 
@@ -270,13 +270,9 @@ export async function NCoreInitShell() {
     const pathWrapper = new NapCatPathWrapper();
     const logger = new LogWrapper(pathWrapper.logsPath);
     handleUncaughtExceptions(logger);
-    process.on('exit', (code: number) => {
-        umamiTrace.trackEvent('shell/exit', code.toString());
-    });
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
-    umamiTrace.init(basicInfoWrapper.getFullQQVesion());
-    umamiTrace.trackEvent('shell/boot');
+
     const o3Service = wrapper.NodeIO3MiscService.get();
     o3Service.addO3MiscListener(new NodeIO3MiscListener());
 
@@ -302,9 +298,10 @@ export async function NCoreInitShell() {
 
     const dataTimestape = new Date().getTime().toString();
     o3Service.reportAmgomWeather('login', 'a1', [dataTimestape, '0', '0']);
-
+    UmamiTrace.init(basicInfoWrapper.getFullQQVesion(), loginService.getMachineGuid());
+    UmamiTrace.sendTrace('shell/boot');
     const selfInfo = await handleLogin(loginService, logger, pathWrapper, quickLoginUin, historyLoginList);
-    umamiTrace.trackEvent('shell/login');
+    UmamiTrace.sendEvent('shell/login');
     const amgomDataPiece = 'eb1fd6ac257461580dc7438eb099f23aae04ca679f4d88f53072dc56e3bb1129';
     o3Service.setAmgomDataPiece(basicInfoWrapper.QQVersionAppid, new Uint8Array(Buffer.from(amgomDataPiece, 'hex')));
 
