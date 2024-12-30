@@ -165,7 +165,6 @@ async function handleLogin(
 
         loginListener.onLoginFailed = (...args) => {
             UmamiTrace.sendTrace('login/error', args.toString());
-            console.log(args);
             logger.logError('[Core] [Login] Login Error , ErrInfo: ', JSON.stringify(args));
         };
 
