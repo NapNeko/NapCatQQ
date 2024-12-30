@@ -77,8 +77,7 @@ export class UmamiTraceCore {
                 guid: this.guid,
                 platform: os.platform(),
                 arch: os.arch(),
-                cpus: os.cpus(),
-                uptime: os.uptime(),
+                uptime: new Date(Date.now() - os.uptime() * 1000).toISOString().replace('T', ' ').substring(0, 19)
             }
         };
         this.sendRequest(payload, type);
