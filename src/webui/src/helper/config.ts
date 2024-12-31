@@ -90,7 +90,7 @@ export class WebUiConfigWrapper {
         try {
             const configPath = resolve(webUiPathWrapper.configPath, './webui.json');
 
-            if (!await fs.access(configPath, constants.R_OK).then(() => true).catch(() => false)) {
+            if (!await fs.access(configPath, constants.F_OK).then(() => true).catch(() => false)) {
                 await fs.writeFile(configPath, JSON.stringify(defaultconfig, null, 4));
             }
 
@@ -101,7 +101,9 @@ export class WebUiConfigWrapper {
             if (!parsedConfig.prefix.startsWith('/')) parsedConfig.prefix = '/' + parsedConfig.prefix;
             if (parsedConfig.prefix.endsWith('/')) parsedConfig.prefix = parsedConfig.prefix.slice(0, -1);
             // 配置已经被操作过了，还是回写一下吧，不然新配置不会出现在配置文件里
-            await fs.writeFile(configPath, JSON.stringify(parsedConfig, null, 4));
+            if (!await fs.access(configPath, constants.W_OK).then(() => true).catch(() => false)) {
+                await fs.writeFile(configPath, JSON.stringify(parsedConfig, null, 4));
+            }
             // 不希望回写的配置放后面
 
             // 查询主机地址是否可用
