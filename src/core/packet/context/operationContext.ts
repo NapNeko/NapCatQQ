@@ -21,7 +21,7 @@ export class PacketOperationContext {
     }
 
     async GroupPoke(groupUin: number, uin: number) {
-        const req = trans.SendPoke.build(groupUin, uin);
+        const req = trans.SendPoke.build(uin, groupUin);
         await this.context.client.sendOidbPacket(req);
     }
 
