@@ -15,7 +15,7 @@ export class SendPoke extends GetPacketStatusDepends<Payload, any> {
 
     async _handle(payload: Payload) {
         if (payload.group_id) {
-            this.core.apis.PacketApi.pkt.operation.GroupPoke(+payload.group_id, +payload.user_id);
+            this.core.apis.PacketApi.pkt.operation.GroupPoke(+payload.user_id, +payload.group_id);
         } else {
             this.core.apis.PacketApi.pkt.operation.FriendPoke(+payload.user_id);
         }
