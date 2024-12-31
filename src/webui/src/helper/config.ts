@@ -104,6 +104,9 @@ export class WebUiConfigWrapper {
             if (await fs.access(configPath, constants.W_OK).then(() => true).catch(() => false)) {
                 await fs.writeFile(configPath, JSON.stringify(parsedConfig, null, 4));
             }
+            else {
+                console.warn(`文件: ${configPath} 没有写入权限, 配置的更改部分可能会在重启后还原.`);
+            }
             // 不希望回写的配置放后面
 
             // 查询主机地址是否可用
