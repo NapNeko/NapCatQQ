@@ -12,6 +12,7 @@ export class UmamiTraceCore {
     ua: string = '';
     workname: string = 'default';
     bootTime = Date.now();
+    cache: string = '';
     init(qqversion: string, guid: string, workname: string) {
         this.qqversion = qqversion;
         this.workname = workname;
@@ -101,7 +102,8 @@ export class UmamiTraceCore {
             headers: {
                 "Host": "umami.napneko.icu",
                 "Content-Type": "application/json",
-                "User-Agent": this.ua
+                "User-Agent": this.ua,
+                ...(this.cache ? { 'x-umami-cache': this.cache } : {})
             }
         };
 
@@ -110,9 +112,11 @@ export class UmamiTraceCore {
 
             });
             res.on('data', (data) => {
-
+                if (!this.cache) {
+                    this.cache = data.toString();
+                }
             });
-        }).on('error', () => {} );
+        }).on('error', () => { });
 
         request.write(JSON.stringify({ type, payload }));
         request.end();
