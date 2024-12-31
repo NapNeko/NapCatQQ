@@ -14,6 +14,6 @@ export class GroupPoke extends GetPacketStatusDepends<Payload, any> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        await this.core.apis.PacketApi.pkt.operation.GroupPoke(+payload.user_id, +payload.group_id);
+        await this.core.apis.PacketApi.pkt.operation.GroupPoke(+payload.group_id, +payload.user_id);
     }
 }
