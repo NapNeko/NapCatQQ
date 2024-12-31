@@ -101,7 +101,7 @@ export class WebUiConfigWrapper {
             if (!parsedConfig.prefix.startsWith('/')) parsedConfig.prefix = '/' + parsedConfig.prefix;
             if (parsedConfig.prefix.endsWith('/')) parsedConfig.prefix = parsedConfig.prefix.slice(0, -1);
             // 配置已经被操作过了，还是回写一下吧，不然新配置不会出现在配置文件里
-            if (!await fs.access(configPath, constants.W_OK).then(() => true).catch(() => false)) {
+            if (await fs.access(configPath, constants.W_OK).then(() => true).catch(() => false)) {
                 await fs.writeFile(configPath, JSON.stringify(parsedConfig, null, 4));
             }
             // 不希望回写的配置放后面
