@@ -4,7 +4,7 @@ import { InstanceContext, NapCatCore, ProfileBizType } from '..';
 import { solveAsyncProblem } from '@/common/helper';
 import { promisify } from 'node:util';
 import { LRUCache } from '@/common/lru-cache';
-import { Fallback } from '@/common/fall-back';
+import { Fallback, FallbackUtil } from '@/common/fall-back';
 
 export class NTQQUserApi {
     context: InstanceContext;
@@ -175,16 +175,13 @@ export class NTQQUserApi {
             return '';
         }
 
-        let isValidUin = (uin: string | undefined) => {
-            if (uin !== undefined && uin !== '0' && uin !== '') { return uin; } throw new Error('uin is invalid');
-        }
+        const fallback =
+            new Fallback<string | undefined>((uid) => FallbackUtil.boolchecker(uid, uid !== undefined && uid.indexOf('*') === -1 && uid !== ''))
+                .add(() => this.context.session.getUixConvertService().getUid([uin]).then((data) => data.uidInfo.get(uin)))
+                .add(() => this.context.session.getProfileService().getUidByUin('FriendsServiceImpl', [uin]).get(uin))
+                .add(() => this.context.session.getGroupService().getUidByUins([uin]).then((data) => data.uids.get(uin)))
+                .add(() => this.getUserDetailInfoByUin(uin).then((data) => data.detail.uid));
 
-        const fallback = new Fallback<string>()
-            .add(async () => isValidUin(await this.context.session.getUixConvertService().getUid([uin]).then((data) => data.uidInfo.get(uin))))
-            .add(() =>isValidUin(this.context.session.getProfileService().getUidByUin('FriendsServiceImpl', [uin]).get(uin)))
-            .add(async () => isValidUin(await this.context.session.getGroupService().getUidByUins([uin]).then((data) => data.uids.get(uin))))
-            .add(async () => isValidUin(await this.getUserDetailInfoByUin(uin).then((data) => data.detail.uid)));
-            
         const uid = await fallback.run().catch(() => '0');
         return uid ?? '';
     }
@@ -194,18 +191,11 @@ export class NTQQUserApi {
             return '0';
         }
 
-        let isValidUid = (uid: string | undefined) => {
-            if (uid !== undefined && uid.indexOf('*') === -1 && uid !== '') {
-                return uid;
-            }
-            throw new Error('uid is invalid');
-        }
-
-        const fallback = new Fallback<string>()
-            .add(async () => isValidUid(await this.context.session.getUixConvertService().getUin([uid]).then((data) => data.uinInfo.get(uid))))
-            .add(() =>isValidUid(this.context.session.getProfileService().getUinByUid('FriendsServiceImpl', [uid]).get(uid)))
-            .add(async () => isValidUid(await this.context.session.getGroupService().getUinByUids([uid]).then((data) => data.uins.get(uid))))
-            .add(async () => isValidUid(await this.getUserDetailInfo(uid).then((data) => data.uin)));
+        const fallback = new Fallback<string | undefined>((uin) => FallbackUtil.boolchecker(uin, uin !== undefined && uin !== '0' && uin !== ''))
+            .add(() => this.context.session.getUixConvertService().getUin([uid]).then((data) => data.uinInfo.get(uid)))
+            .add(() => this.context.session.getProfileService().getUinByUid('FriendsServiceImpl', [uid]).get(uid))
+            .add(() => this.context.session.getGroupService().getUinByUids([uid]).then((data) => data.uins.get(uid)))
+            .add(() => this.getUserDetailInfo(uid).then((data) => data.uin));
 
         const uin = await fallback.run().catch(() => '0');
         return uin ?? '0';
