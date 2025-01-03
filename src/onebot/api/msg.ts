@@ -797,6 +797,13 @@ export class OneBotMsgApi {
 
     private async handlePrivateMessage(resMsg: OB11Message, msg: RawMessage) {
         resMsg.sub_type = 'friend';
+        if (await this.core.apis.FriendApi.isBuddy(msg.senderUid)) {
+            let nickname = (await this.core.apis.UserApi.getCoreAndBaseInfo([msg.senderUid])).get(msg.senderUid)?.coreInfo.nick;
+            if (nickname) {
+                resMsg.sender.nickname = nickname;
+                return;
+            }
+        }
         resMsg.sender.nickname = (await this.core.apis.UserApi.getUserDetailInfo(msg.senderUid)).nick;
     }
 

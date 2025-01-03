@@ -8,7 +8,7 @@ import {
     WebHonorType,
 } from '@/core';
 import { NapCatCore } from '..';
-import { createReadStream, readFileSync, statSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { basename } from 'node:path';
 
