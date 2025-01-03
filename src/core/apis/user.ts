@@ -4,6 +4,7 @@ import { InstanceContext, NapCatCore, ProfileBizType } from '..';
 import { solveAsyncProblem } from '@/common/helper';
 import { promisify } from 'node:util';
 import { LRUCache } from '@/common/lru-cache';
+import { Fallback } from '@/common/fall-back';
 
 export class NTQQUserApi {
     context: InstanceContext;
@@ -169,46 +170,44 @@ export class NTQQUserApi {
         return skey;
     }
 
-    async getUidByUinV2(Uin: string) {
-        if (!Uin) {
+    async getUidByUinV2(uin: string) {
+        if (!uin) {
             return '';
         }
-        const services = [
-            () => this.context.session.getUixConvertService().getUid([Uin]).then((data) => data.uidInfo.get(Uin)).catch(() => undefined),
-            () => promisify<string, string[], Map<string, string>>
-            (this.context.session.getProfileService().getUidByUin)('FriendsServiceImpl', [Uin]).then((data) => data.get(Uin)).catch(() => undefined),
-            () => this.context.session.getGroupService().getUidByUins([Uin]).then((data) => data.uids.get(Uin)).catch(() => undefined),
-            () => this.getUserDetailInfoByUin(Uin).then((data) => data.detail.uid).catch(() => undefined),
-        ];
-        let uid: string | undefined = undefined;
-        for (const service of services) {
-            uid = await service();
-            if (uid && uid.indexOf('*') == -1 && uid !== '') {
-                break;
-            }
+
+        let isValidUin = (uin: string | undefined) => {
+            if (uin !== undefined && uin !== '0' && uin !== '') { return uin; } throw new Error('uin is invalid');
         }
+
+        const fallback = new Fallback<string>()
+            .add(async () => isValidUin(await this.context.session.getUixConvertService().getUid([uin]).then((data) => data.uidInfo.get(uin))))
+            .add(() =>isValidUin(this.context.session.getProfileService().getUidByUin('FriendsServiceImpl', [uin]).get(uin)))
+            .add(async () => isValidUin(await this.context.session.getGroupService().getUidByUins([uin]).then((data) => data.uids.get(uin))))
+            .add(async () => isValidUin(await this.getUserDetailInfoByUin(uin).then((data) => data.detail.uid)));
+            
+        const uid = await fallback.run().catch(() => '0');
         return uid ?? '';
     }
 
-    async getUinByUidV2(Uid: string) {
-        if (!Uid) {
+    async getUinByUidV2(uid: string) {
+        if (!uid) {
             return '0';
         }
-        const services = [
-            () => this.context.session.getUixConvertService().getUin([Uid]).then((data) => data.uinInfo.get(Uid)).catch(() => undefined),
-            () => this.context.session.getGroupService().getUinByUids([Uid]).then((data) => data.uins.get(Uid)).catch(() => undefined),
-            () => promisify<string, string[], Map<string, string>>
-            (this.context.session.getProfileService().getUinByUid)('FriendsServiceImpl', [Uid]).then((data) => data.get(Uid)).catch(() => undefined),
-            () => this.core.apis.FriendApi.getBuddyIdMap(true).then((data) => data.getKey(Uid)).catch(() => undefined),
-            () => this.getUserDetailInfo(Uid).then((data) => data.uin).catch(() => undefined),
-        ];
-        let uin: string | undefined = undefined;
-        for (const service of services) {
-            uin = await service();
-            if (uin && uin !== '0' && uin !== '') {
-                break;
+
+        let isValidUid = (uid: string | undefined) => {
+            if (uid !== undefined && uid.indexOf('*') === -1 && uid !== '') {
+                return uid;
             }
+            throw new Error('uid is invalid');
         }
+
+        const fallback = new Fallback<string>()
+            .add(async () => isValidUid(await this.context.session.getUixConvertService().getUin([uid]).then((data) => data.uinInfo.get(uid))))
+            .add(() =>isValidUid(this.context.session.getProfileService().getUinByUid('FriendsServiceImpl', [uid]).get(uid)))
+            .add(async () => isValidUid(await this.context.session.getGroupService().getUinByUids([uid]).then((data) => data.uins.get(uid))))
+            .add(async () => isValidUid(await this.getUserDetailInfo(uid).then((data) => data.uin)));
+
+        const uin = await fallback.run().catch(() => '0');
         return uin ?? '0';
     }
 
