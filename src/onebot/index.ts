@@ -390,9 +390,6 @@ export class NapCatOneBot11Adapter {
                         this.context.logger.logDebug('有加群请求');
                         try {
                             let requestUin = await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid);
-                            if (isNaN(parseInt(requestUin))) {
-                                requestUin = (await this.core.apis.UserApi.getUserDetailInfo(notify.user1.uid)).uin;
-                            }
                             const groupRequestEvent = new OB11GroupRequestEvent(
                                 this.core,
                                 parseInt(notify.group.groupCode),

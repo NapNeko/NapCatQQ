@@ -2,8 +2,6 @@ import { ModifyProfileParams, User, UserDetailSource } from '@/core/types';
 import { RequestUtil } from '@/common/request';
 import { InstanceContext, NapCatCore, ProfileBizType } from '..';
 import { solveAsyncProblem } from '@/common/helper';
-import { promisify } from 'node:util';
-import { LRUCache } from '@/common/lru-cache';
 import { Fallback, FallbackUtil } from '@/common/fall-back';
 
 export class NTQQUserApi {
@@ -106,6 +104,19 @@ export class NTQQUserApi {
         if (retUser && retUser.uin === '0') {
             retUser.uin = await this.core.apis.UserApi.getUidByUinV2(uid) ?? '0';
         }
+        return retUser;
+    }
+
+    async getUserDetailInfoV2(uid: string): Promise<User> {
+        const fallback = new Fallback<User>((user) => FallbackUtil.boolchecker(user, user !== undefined && user.uin !== '0'))
+            .add(() => this.fetchUserDetailInfo(uid, UserDetailSource.KDB))
+            .add(() => this.fetchUserDetailInfo(uid, UserDetailSource.KSERVER));
+        const retUser = await fallback.run().then(async (user) => {
+            if (user && user.uin === '0') {
+                user.uin = await this.core.apis.UserApi.getUidByUinV2(uid) ?? '0';
+            }
+            return user;
+        });
         return retUser;
     }
 
