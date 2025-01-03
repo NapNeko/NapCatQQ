@@ -14,21 +14,22 @@ export class UmamiTraceCore {
     workname: string = 'default';
     bootTime = Date.now();
     cache: string = '';
-
+    platform = process.platform;
+    
     init(qqversion: string, guid: string, workname: string) {
         this.qqversion = qqversion;
         this.workname = workname;
         const UaList = {
-            linux: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML like Gecko) Chrome/124.0.0.0 Safari/537.36 PTST/240508.140043',
+            linux: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.11 (KHTML, like Gecko) Ubuntu/11.10 Chromium/27.0.1453.93 Chrome/27.0.1453.93 Safari/537.36',
             win32: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.2128.93 Safari/537.36',
             darwin: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36',
         };
 
         try {
-            if (process.platform === 'win32') {
+            if (this.platform === 'win32') {
                 const ntVersion = os.release();
                 UaList.win32 = `Mozilla/5.0 (Windows NT ${ntVersion}; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.2128.93 Safari/537.36`;
-            } else if (process.platform === 'darwin') {
+            } else if (this.platform === 'darwin') {
                 const macVersion = os.release();
                 UaList.darwin = `Mozilla/5.0 (Macintosh; Intel Mac OS X ${macVersion}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36`;
             }
@@ -36,7 +37,7 @@ export class UmamiTraceCore {
             this.ua = UaList.win32;
         }
 
-        this.ua = UaList[process.platform as keyof typeof UaList] || UaList.win32;
+        this.ua = UaList[this.platform as keyof typeof UaList] || UaList.win32;
 
         this.identifyUser(guid);
         this.startHeartbeat();
@@ -49,7 +50,7 @@ export class UmamiTraceCore {
             qq_version: this.qqversion,
             napcat_working: this.workname,
             device_guid: this.guid,
-            device_platform: os.platform(),
+            device_platform: this.platform,
             device_arch: os.arch(),
             boot_time: new Date(this.bootTime + 8 * 60 * 60 * 1000).toISOString().replace('T', ' ').substring(0, 19),
             sys_time: new Date(Date.now() - os.uptime() * 1000 + 8 * 60 * 60 * 1000).toISOString().replace('T', ' ').substring(0, 19),
