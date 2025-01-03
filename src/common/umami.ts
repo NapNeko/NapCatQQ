@@ -1,6 +1,7 @@
 import https from 'node:https';
 import { napCatVersion } from './version';
 import os from 'node:os';
+
 export class UmamiTraceCore {
     napcatVersion = napCatVersion;
     qqversion = '1.0.0';
@@ -13,13 +14,14 @@ export class UmamiTraceCore {
     workname: string = 'default';
     bootTime = Date.now();
     cache: string = '';
+
     init(qqversion: string, guid: string, workname: string) {
         this.qqversion = qqversion;
         this.workname = workname;
-        let UaList = {
-            'linux': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML like Gecko) Chrome/124.0.0.0 Safari/537.36 PTST/240508.140043',
-            'win32': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.2128.93 Safari/537.36',
-            'darwin': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36',
+        const UaList = {
+            linux: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML like Gecko) Chrome/124.0.0.0 Safari/537.36 PTST/240508.140043',
+            win32: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.2128.93 Safari/537.36',
+            darwin: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36',
         };
 
         try {
@@ -50,14 +52,14 @@ export class UmamiTraceCore {
             device_platform: os.platform(),
             device_arch: os.arch(),
             boot_time: new Date(this.bootTime + 8 * 60 * 60 * 1000).toISOString().replace('T', ' ').substring(0, 19),
-            sys_time: new Date(Date.now() - os.uptime() * 1000 + 8 * 60 * 60 * 1000).toISOString().replace('T', ' ').substring(0, 19)
+            sys_time: new Date(Date.now() - os.uptime() * 1000 + 8 * 60 * 60 * 1000).toISOString().replace('T', ' ').substring(0, 19),
         };
         this.sendEvent(
             {
                 website: this.website,
                 hostname: this.hostname,
                 referrer: this.referrer,
-                tittle: 'NapCat ' + this.napcatVersion,
+                title: 'NapCat ' + this.napcatVersion,
                 url: `/${this.qqversion}/${this.napcatVersion}/${this.workname}/identify`,
             },
             data,
@@ -76,8 +78,8 @@ export class UmamiTraceCore {
             language: language || 'en-US',
             screen: '1920x1080',
             data: {
-                ...data
-            }
+                ...data,
+            },
         };
         this.sendRequest(payload, type);
     }
@@ -87,7 +89,7 @@ export class UmamiTraceCore {
             website: this.website,
             hostname: this.hostname,
             title: 'NapCat ' + this.napcatVersion,
-            url: `/${this.qqversion}/${this.napcatVersion}/${this.workname}/${eventName}` + (!!data ? `/${data}` : ''),
+            url: `/${this.qqversion}/${this.napcatVersion}/${this.workname}/${eventName}` + (data ? `/${data}` : ''),
             referrer: this.referrer,
         };
         this.sendRequest(payload);
@@ -142,4 +144,5 @@ export class UmamiTraceCore {
         }
     }
 }
+
 export const UmamiTrace = new UmamiTraceCore();
