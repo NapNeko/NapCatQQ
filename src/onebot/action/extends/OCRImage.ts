@@ -14,22 +14,23 @@ class OCRImageBase extends OneBotAction<Payload, any> {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const { path, success } = (await uriToLocalFile(this.core.NapCatTempPath, payload.image));
+        const { path, success } = await uriToLocalFile(this.core.NapCatTempPath, payload.image);
         if (!success) {
-            throw new Error(`OCR ${payload.image}失败,image字段可能格式不正确`);
+            throw new Error(`OCR ${payload.image}失败, image字段可能格式不正确`);
         }
         if (path) {
-            await checkFileExist(path, 5000); // 避免崩溃
-            const ret = await this.core.apis.SystemApi.ocrImage(path);
-            fs.unlink(path, () => { });
-
-            if (!ret) {
-                throw new Error(`OCR ${payload.image}失败`);
+            try {
+                await checkFileExist(path, 5000); // 避免崩溃
+                const ret = await this.core.apis.SystemApi.ocrImage(path);
+                if (!ret) {
+                    throw new Error(`OCR ${payload.image}失败`);
+                }
+                return ret.result;
+            } finally {
+                fs.unlink(path, () => { });
             }
-            return ret.result;
         }
-        fs.unlink(path, () => { });
-        throw new Error(`OCR ${payload.image}失败,文件可能不存在`);
+        throw new Error(`OCR ${payload.image}失败, 文件可能不存在`);
     }
 }
 
