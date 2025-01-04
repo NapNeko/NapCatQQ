@@ -83,5 +83,5 @@ export abstract class OneBotAction<PayloadType, ReturnDataType> {
         }
     }
 
-    abstract _handle(payload: PayloadType, adaptername: string): PromiseLike<ReturnDataType>;
+    abstract _handle(payload: PayloadType, adaptername: string): Promise<ReturnDataType>;
 }
