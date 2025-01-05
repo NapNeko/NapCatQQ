@@ -9,7 +9,6 @@ import { NodeIKernelLoginService } from '@/core/services';
 import { NodeIQQNTWrapperSession, WrapperNodeApi } from '@/core/wrapper';
 import { InitWebUi, WebUiConfig } from '@/webui';
 import { NapCatOneBot11Adapter } from '@/onebot';
-import { UmamiTrace } from '@/common/umami';
 
 //Framework ES入口文件
 export async function getWebUiUrl() {
@@ -26,7 +25,6 @@ export async function NCoreInitFramework(
     console.log('NapCat Framework App Loading...');
 
     process.on('uncaughtException', (err) => {
-        UmamiTrace.sendTrace('uncaught/error', err.message);
         console.log('[NapCat] [Error] Unhandled Exception:', err.message);
     });
 
@@ -38,10 +36,6 @@ export async function NCoreInitFramework(
     const logger = new LogWrapper(pathWrapper.logsPath);
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
-    let guid = loginService.getMachineGuid();
-    UmamiTrace.init(basicInfoWrapper.getFullQQVesion(), guid,'framework');
-    UmamiTrace.sendTrace('boot/init');
-    UmamiTrace.sendTrace('login/success');
     //直到登录成功后，执行下一步
     const selfInfo = await new Promise<SelfInfo>((resolveSelfInfo) => {
         const loginListener = new NodeIKernelLoginListener();
