@@ -106,23 +106,39 @@ export class UmamiTraceCore {
                 "Host": "umami.napneko.icu",
                 "Content-Type": "application/json",
                 "User-Agent": this.ua,
-                ...(this.cache ? { 'x-umami-cache': this.cache } : {})
+                ...(this.cache ? { 'x-umami-cache': this.filterInvalidChars(this.cache) } : {})
             }
         };
-
-        const request = https.request(options, (res) => {
-            res.on('error', (error) => {
-
+        try {
+            const request = https.request(options, (res) => {
+                let responseData = '';
+    
+                res.on('data', (chunk) => {
+                    responseData += chunk;
+                });
+    
+                res.on('end', () => {
+                    if (!this.cache) {
+                        this.cache = responseData;
+                        console.log('Umami cache:', this.cache);
+                    }
+                });
+    
+                res.on('error', (error) => {
+                });
             });
-            res.on('data', (data) => {
-                if (!this.cache) {
-                    this.cache = data.toString();
-                }
+    
+            request.on('error', (error) => {
             });
-        }).on('error', () => { });
-
-        request.write(JSON.stringify({ type, payload }));
-        request.end();
+    
+            request.write(JSON.stringify({ type, payload }));
+            request.end();
+        } catch (error) {
+        }
+    }
+    
+    filterInvalidChars(value: string): string {
+        return value.replace(/[^\x00-\x7F]/g, '');
     }
 
     startHeartbeat() {
