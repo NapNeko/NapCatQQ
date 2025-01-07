@@ -19,7 +19,6 @@ export default class GoCQHTTPGetStrangerInfo extends OneBotAction<Payload, OB11U
         const extendData = await this.core.apis.UserApi.getUserDetailInfoByUin(user_id);
         let uid = (await this.core.apis.UserApi.getUidByUinV2(user_id));
         if (!uid) uid = extendData.detail.uid;
-        console.log(uid);
         const info = (await this.core.apis.UserApi.getUserDetailInfo(uid));
         return {
             ...extendData.detail.simpleInfo.coreInfo,
