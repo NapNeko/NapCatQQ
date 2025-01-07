@@ -193,7 +193,7 @@ export class NTQQUserApi {
                 .add(() => this.context.session.getGroupService().getUidByUins([uin]).then((data) => data.uids.get(uin)))
                 .add(() => this.getUserDetailInfoByUin(uin).then((data) => data.detail.uid));
 
-        const uid = await fallback.run().catch(() => '0');
+        const uid = await fallback.run().catch(() => '');
         return uid ?? '';
     }
 

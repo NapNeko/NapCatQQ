@@ -20,19 +20,19 @@ export class Fallback<T> {
         for (const handler of this.handlers) {
             try {
                 const result = await handler();
-                try {
-                    return await this.checker(result);
-                } catch (checkerError) {
-                    errors.push(checkerError instanceof Error ? checkerError : new Error(String(checkerError)));
+                let data = await this.checker(result);
+                if (data) {
+                    return data;
                 }
             } catch (error) {
+                console.log(error);
                 errors.push(error instanceof Error ? error : new Error(String(error)));
             }
         }
         throw new AggregateError(errors, 'All handlers failed');
     }
 }
-export class FallbackUtil{
+export class FallbackUtil {
     static boolchecker<T>(value: T, condition: boolean): T {
         if (condition) {
             return value;
