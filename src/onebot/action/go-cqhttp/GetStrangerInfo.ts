@@ -13,12 +13,13 @@ type Payload = Static<typeof SchemaData>;
 
 export default class GoCQHTTPGetStrangerInfo extends OneBotAction<Payload, OB11User> {
     actionName = ActionName.GoCQHTTP_GetStrangerInfo;
-
+    payloadSchema = SchemaData;
     async _handle(payload: Payload): Promise<OB11User> {
         const user_id = payload.user_id.toString();
         const extendData = await this.core.apis.UserApi.getUserDetailInfoByUin(user_id);
         let uid = (await this.core.apis.UserApi.getUidByUinV2(user_id));
         if (!uid) uid = extendData.detail.uid;
+        console.log(uid);
         const info = (await this.core.apis.UserApi.getUserDetailInfo(uid));
         return {
             ...extendData.detail.simpleInfo.coreInfo,
