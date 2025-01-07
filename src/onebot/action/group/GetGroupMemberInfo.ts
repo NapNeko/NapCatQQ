@@ -26,20 +26,35 @@ class GetGroupMemberInfo extends OneBotAction<Payload, OB11GroupMember> {
         return uid;
     }
 
-    async _handle(payload: Payload) {
-        const isNocache = this.parseBoolean(payload.no_cache ?? true);
-        const uid = await this.getUid(payload.user_id);
-        const groupMember = this.core.apis.GroupApi.groupMemberCache.get(payload.group_id.toString())?.get(uid);
-        let [member, info] = await Promise.all([
+    private async getGroupMemberInfo(payload: Payload, uid: string, isNocache: boolean) {
+        const groupMemberCache = this.core.apis.GroupApi.groupMemberCache.get(payload.group_id.toString());
+        let groupMember = groupMemberCache?.get(uid);
+
+        const [member, info] = await Promise.all([
             this.core.apis.GroupApi.getGroupMemberEx(payload.group_id.toString(), uid, isNocache),
             this.core.apis.UserApi.getUserDetailInfo(uid),
         ]);
-        if (!member || !groupMember) throw new Error(`群(${payload.group_id})成员${payload.user_id}不存在`);
-        if (info) {
-            member = { ...groupMember, ...member, ...info };
-        } else {
+
+        if (!member) throw new Error(`群(${payload.group_id})成员${payload.user_id}不存在`);
+
+        if (!groupMember && this.core.apis.GroupApi.groupMemberCacheEvent.get(payload.group_id.toString())) {
+            groupMember = (await this.core.apis.GroupApi.refreshGroupMemberCache(payload.group_id.toString(), true))?.get(uid);
+        }
+
+        if (!groupMember) throw new Error(`群(${payload.group_id})成员${payload.user_id}不存在`);
+
+        return info ? { ...groupMember, ...member, ...info } : member;
+    }
+
+    async _handle(payload: Payload) {
+        const isNocache = this.parseBoolean(payload.no_cache ?? true);
+        const uid = await this.getUid(payload.user_id);
+        const member = await this.getGroupMemberInfo(payload, uid, isNocache);
+
+        if (!member) {
             this.core.context.logger.logDebug(`获取群成员详细信息失败, 只能返回基础信息`);
         }
+
         return OB11Construct.groupMember(payload.group_id.toString(), member);
     }
 }
