@@ -7,36 +7,10 @@ export class OB11ActiveHttpSSEAdapter extends OB11PassiveHttpAdapter {
     private sseClients: Response[] = [];
 
     async handleRequest(req: Request, res: Response): Promise<any> {
-        if (!this.isEnable) {
-            this.core.context.logger.log(`[OneBot] [HTTP Server Adapter] Server is closed`);
-            return res.json(OB11Response.error('Server is closed', 200));
-        }
-
-        let payload = req.body;
-        if (req.method == 'get') {
-            payload = req.query;
-        } else if (req.query) {
-            payload = { ...req.query, ...req.body };
-        }
-        if (req.path === '' || req.path === '/') {
-            const hello = OB11Response.ok({});
-            hello.message = 'NapCat4 Ss Running';
-            return res.json(hello);
-        }
         if (req.path === '/_events') {
             return this.createSseSupport(req, res);
-        }
-        const actionName = req.path.split('/')[1];
-        const action = this.actions.get(actionName as any);
-        if (action) {
-            try {
-                const result = await action.handle(payload, this.name);
-                return res.json(result);
-            } catch (error: any) {
-                return res.json(OB11Response.error(error?.stack?.toString() || error?.message || 'Error Handle', 200));
-            }
         } else {
-            return res.json(OB11Response.error('不支持的Api ' + actionName, 200));
+            super.httpApiRequest(req, res);
         }
     }
 
