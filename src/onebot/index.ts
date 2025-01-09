@@ -53,6 +53,7 @@ import {
 import { OB11Message } from './types';
 import { OB11PluginAdapter } from './network/plugin';
 import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
+import { OB11ActiveHttpSSEAdapter } from './network/active-http-sse';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -86,6 +87,9 @@ export class NapCatOneBot11Adapter {
         let log = `[network] 配置加载\n`;
         for (const key of ob11Config.network.httpServers) {
             log += `HTTP服务: ${key.host}:${key.port}, : ${key.enable ? '已启动' : '未启动'}\n`;
+        }
+        for (const key of ob11Config.network.httpSseServers) {
+            log += `HTTP-SSE服务: ${key.host}:${key.port}, : ${key.enable ? '已启动' : '未启动'}\n`;
         }
         for (const key of ob11Config.network.httpClients) {
             log += `HTTP上报服务: ${key.url}, : ${key.enable ? '已启动' : '未启动'}\n`;
@@ -122,6 +126,13 @@ export class NapCatOneBot11Adapter {
             if (key.enable) {
                 this.networkManager.registerAdapter(
                     new OB11PassiveHttpAdapter(key.name, key, this.core, this, this.actions)
+                );
+            }
+        }
+        for(const key of ob11Config.network.httpSseServers){
+            if(key.enable) {
+                this.networkManager.registerAdapter(
+                    new OB11ActiveHttpSSEAdapter(key.name, key, this.core, this, this.actions)
                 );
             }
         }
@@ -389,7 +400,7 @@ export class NapCatOneBot11Adapter {
                     ) {
                         this.context.logger.logDebug('有加群请求');
                         try {
-                            let requestUin = await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid);
+                            const requestUin = await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid);
                             const groupRequestEvent = new OB11GroupRequestEvent(
                                 this.core,
                                 parseInt(notify.group.groupCode),
