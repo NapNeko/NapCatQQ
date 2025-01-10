@@ -189,8 +189,8 @@ export const VideoExtBizInfo = {
 export const PicExtBizInfo = {
     BizType: ProtoField(1, ScalarType.UINT32),
     TextSummary: ProtoField(2, ScalarType.STRING),
-    BytesPbReserveC2c: ProtoField(11, ScalarType.BYTES),
-    BytesPbReserveTroop: ProtoField(12, ScalarType.BYTES),
+    BytesPbReserveC2c: ProtoField(11, () => BytesPbReserveC2c),
+    BytesPbReserveTroop: ProtoField(12, () => BytesPbReserveTroop),
     FromScene: ProtoField(1001, ScalarType.UINT32),
     ToScene: ProtoField(1002, ScalarType.UINT32),
     OldFileId: ProtoField(1003, ScalarType.UINT32),
@@ -210,4 +210,28 @@ export const UploadReq = {
 export const UploadInfo = {
     FileInfo: ProtoField(1, () => FileInfo),
     SubFileType: ProtoField(2, ScalarType.UINT32),
+};
+
+export const BytesPbReserveC2c = {
+    subType: ProtoField(1, ScalarType.UINT32),
+    field3: ProtoField(3, ScalarType.UINT32),
+    field4: ProtoField(4, ScalarType.UINT32),
+    field8: ProtoField(8, ScalarType.STRING),
+    field10: ProtoField(10, ScalarType.UINT32),
+    field12: ProtoField(12, ScalarType.STRING),
+    field18: ProtoField(18, ScalarType.STRING),
+    field19: ProtoField(19, ScalarType.STRING),
+    field20: ProtoField(20, ScalarType.BYTES),
+};
+
+export const BytesPbReserveTroop = {
+    subType: ProtoField(1, ScalarType.UINT32),
+    field3: ProtoField(3, ScalarType.UINT32),
+    field4: ProtoField(4, ScalarType.UINT32),
+    field9: ProtoField(9, ScalarType.STRING),
+    field10: ProtoField(10, ScalarType.UINT32),
+    field12: ProtoField(12, ScalarType.STRING),
+    field18: ProtoField(18, ScalarType.STRING),
+    field19: ProtoField(19, ScalarType.STRING),
+    field21: ProtoField(21, ScalarType.BYTES),
 };
