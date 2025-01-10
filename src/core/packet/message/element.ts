@@ -256,6 +256,8 @@ export class PacketMsgPicElement extends IPacketMsgElement<SendPicElement> {
     width: number;
     height: number;
     picType: PicType;
+    picSubType: number;
+    summary: string;
     sha1: string | null = null;
     msgInfo: NapProtoEncodeStructType<typeof MsgInfo> | null = null;
     groupPicExt: NapProtoEncodeStructType<typeof CustomFace> | null = null;
@@ -270,6 +272,10 @@ export class PacketMsgPicElement extends IPacketMsgElement<SendPicElement> {
         this.width = element.picElement.picWidth;
         this.height = element.picElement.picHeight;
         this.picType = element.picElement.picType;
+        this.picSubType = element.picElement.picSubType ?? 0;
+        this.summary = element.picElement.summary === '' ? (
+            element.picElement.picSubType === 0 ? '[图片]' : '[动画表情]'
+        ) : element.picElement.summary;
     }
 
     get valid(): boolean {
@@ -288,7 +294,7 @@ export class PacketMsgPicElement extends IPacketMsgElement<SendPicElement> {
     }
 
     toPreview(): string {
-        return "[图片]";
+        return this.summary;
     }
 }
 

@@ -58,8 +58,11 @@ class UploadPrivateImage extends PacketTransformer<typeof proto.NTV2RichMediaRes
                 compatQMsgSceneType: 1,
                 extBizInfo: {
                     pic: {
-                        bytesPbReserveTroop: Buffer.from("0800180020004200500062009201009a0100a2010c080012001800200028003a00", 'hex'),
-                        textSummary: "Nya~",  // TODO:
+                        bizType: img.picSubType,
+                        bytesPbReserveC2C: {
+                            subType: img.picSubType,
+                        },
+                        textSummary: img.summary,
                     },
                     video: {
                         bytesPbReserve: Buffer.alloc(0),
