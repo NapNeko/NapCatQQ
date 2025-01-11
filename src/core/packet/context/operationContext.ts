@@ -13,11 +13,16 @@ import { MiniAppRawData, MiniAppReqParams } from "@/core/packet/entities/miniApp
 import { AIVoiceChatType } from "@/core/packet/entities/aiChat";
 import { NapProtoDecodeStructType, NapProtoEncodeStructType } from "@napneko/nap-proto-core";
 import { IndexNode, MsgInfo } from "@/core/packet/transformer/proto";
+import { OidbPacket } from "@/core/packet/transformer/base";
 
 export class PacketOperationContext {
     private readonly context: PacketContext;
     constructor(context: PacketContext) {
         this.context = context;
+    }
+
+    async sendPacket<T extends boolean = false>(pkt: OidbPacket, rsp?: T): Promise<T extends true ? Buffer : void> {
+        return await this.context.client.sendOidbPacket(pkt, rsp);
     }
 
     async GroupPoke(groupUin: number, uin: number) {
