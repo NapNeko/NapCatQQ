@@ -37,7 +37,7 @@ NapCatQQ 是现代化的基于 NTQQ 的 Bot 协议端实现
 ## 回家旅途
 [QQ Group#1](https://qm.qq.com/q/I6LU87a0Yq)
 
-[QQ Group#2](https://qm.qq.com/q/uqh4I87KoM)
+[QQ Group#2](https://qm.qq.com/q/HaRcfrHpUk)
 
 [Telegram](https://t.me/MelodicMoonlight)
 
