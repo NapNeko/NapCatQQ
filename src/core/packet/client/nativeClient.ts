@@ -5,8 +5,9 @@ import fs from "fs";
 import { IPacketClient } from "@/core/packet/client/baseClient";
 import { constants } from "node:os";
 import { LRUCache } from "@/common/lru-cache";
-import { PacketContext } from "@/core/packet/context/packetContext";
 import { LogStack } from "@/core/packet/context/clientContext";
+import { NapCoreContext } from "@/core/packet/context/napCoreContext";
+import { PacketLogger } from "@/core/packet/context/loggerContext";
 
 // 0 send 1 recv
 export interface NativePacketExportType {
@@ -19,8 +20,8 @@ export class NativePacketClient extends IPacketClient {
     private readonly MoeHooExport: { exports: NativePacketExportType } = { exports: {} };
     private readonly sendEvent = new LRUCache<number, string>(500); // seq->trace_id
 
-    constructor(context: PacketContext, logStack: LogStack) {
-        super(context, logStack);
+    constructor(napCore: NapCoreContext, logger: PacketLogger, logStack: LogStack) {
+        super(napCore, logger, logStack);
     }
 
     check(): boolean {

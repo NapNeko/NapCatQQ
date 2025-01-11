@@ -1,7 +1,8 @@
 import { Data, WebSocket, ErrorEvent } from "ws";
 import { IPacketClient, RecvPacket } from "@/core/packet/client/baseClient";
-import { PacketContext } from "@/core/packet/context/packetContext";
 import { LogStack } from "@/core/packet/context/clientContext";
+import { NapCoreContext } from "@/core/packet/context/napCoreContext";
+import { PacketLogger } from "@/core/packet/context/loggerContext";
 
 export class WsPacketClient extends IPacketClient {
     private websocket: WebSocket | null = null;
@@ -13,15 +14,15 @@ export class WsPacketClient extends IPacketClient {
     private isInitialized: boolean = false;
     private initPayload: { pid: number, recv: string, send: string } | null = null;
 
-    constructor(context: PacketContext, logStack: LogStack) {
-        super(context, logStack);
-        this.clientUrl = this.context.napcore.config.packetServer
-            ? this.clientUrlWrap(this.context.napcore.config.packetServer)
+    constructor(napCore: NapCoreContext, logger: PacketLogger, logStack: LogStack) {
+        super(napCore, logger, logStack);
+        this.clientUrl = this.napcore.config.packetServer
+            ? this.clientUrlWrap(this.napcore.config.packetServer)
             : this.clientUrlWrap('127.0.0.1:8083');
     }
 
     check(): boolean {
-        if (!this.context.napcore.config.packetServer) {
+        if (!this.napcore.config.packetServer) {
             this.logStack.pushLogWarn(`wsPacketClient 未配置服务器地址`);
             return false;
         }
@@ -67,7 +68,7 @@ export class WsPacketClient extends IPacketClient {
             this.websocket.onopen = () => {
                 this.available = true;
                 this.reconnectAttempts = 0;
-                this.context.logger.info(`wsPacketClient 已连接到 ${this.clientUrl}`);
+                this.logger.info(`wsPacketClient 已连接到 ${this.clientUrl}`);
                 if (!this.isInitialized && this.initPayload) {
                     this.websocket!.send(JSON.stringify({
                         action: 'init',
@@ -79,15 +80,15 @@ export class WsPacketClient extends IPacketClient {
             };
             this.websocket.onclose = () => {
                 this.available = false;
-                this.context.logger.warn(`WebSocket 连接关闭，尝试重连...`);
+                this.logger.warn(`WebSocket 连接关闭，尝试重连...`);
                 reject(new Error('WebSocket 连接关闭'));
             };
             this.websocket.onmessage = (event) => this.handleMessage(event.data).catch(err => {
-                this.context.logger.error(`处理消息时出错: ${err}`);
+                this.logger.error(`处理消息时出错: ${err}`);
             });
             this.websocket.onerror = (event: ErrorEvent) => {
                 this.available = false;
-                this.context.logger.error(`WebSocket 出错: ${event.message}`);
+                this.logger.error(`WebSocket 出错: ${event.message}`);
                 this.websocket?.close();
                 reject(new Error(`WebSocket 出错: ${event.message}`));
             };
@@ -106,7 +107,7 @@ export class WsPacketClient extends IPacketClient {
             const event = this.cb.get(`${trace_id_md5}${action}`);
             if (event) await event(json.data);
         } catch (error) {
-            this.context.logger.error(`解析ws消息时出错: ${(error as Error).message}`);
+            this.logger.error(`解析ws消息时出错: ${(error as Error).message}`);
         }
     }
 }

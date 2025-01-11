@@ -1,17 +1,17 @@
-import { PacketContext } from "@/core/packet/context/packetContext";
 import { IPacketClient } from "@/core/packet/client/baseClient";
 import { NativePacketClient } from "@/core/packet/client/nativeClient";
 import { WsPacketClient } from "@/core/packet/client/wsClient";
 import { OidbPacket } from "@/core/packet/transformer/base";
 import { PacketLogger } from "@/core/packet/context/loggerContext";
+import { NapCoreContext } from "@/core/packet/context/napCoreContext";
 
 type clientPriority = {
-    [key: number]: (context: PacketContext, logStack: LogStack) => IPacketClient;
+    [key: number]: (napCore: NapCoreContext, logger: PacketLogger, logStack: LogStack) => IPacketClient;
 }
 
 const clientPriority: clientPriority = {
-    10: (context: PacketContext, logStack: LogStack) => new NativePacketClient(context, logStack),
-    1: (context: PacketContext, logStack: LogStack) => new WsPacketClient(context, logStack),
+    10: (napCore: NapCoreContext, logger: PacketLogger, logStack: LogStack) => new NativePacketClient(napCore, logger, logStack),
+    1: (napCore: NapCoreContext, logger: PacketLogger, logStack: LogStack) => new WsPacketClient(napCore, logger, logStack),
 };
 
 export class LogStack {
@@ -51,13 +51,15 @@ export class LogStack {
 }
 
 export class PacketClientContext {
-    private readonly context: PacketContext;
+    private readonly napCore: NapCoreContext;
+    private readonly logger: PacketLogger;
     private readonly logStack: LogStack;
     private readonly _client: IPacketClient;
 
-    constructor(context: PacketContext) {
-        this.context = context;
-        this.logStack = new LogStack(context.logger);
+    constructor(napCore: NapCoreContext, logger: PacketLogger) {
+        this.napCore = napCore;
+        this.logger = logger;
+        this.logStack = new LogStack(logger);
         this._client = this.newClient();
     }
 
@@ -79,23 +81,23 @@ export class PacketClientContext {
     }
 
     private newClient(): IPacketClient {
-        const prefer = this.context.napcore.config.packetBackend;
+        const prefer = this.napCore.config.packetBackend;
         let client: IPacketClient | null;
         switch (prefer) {
         case "native":
-            this.context.logger.info("使用指定的 NativePacketClient 作为后端");
-            client = new NativePacketClient(this.context, this.logStack);
+            this.logger.info("使用指定的 NativePacketClient 作为后端");
+            client = new NativePacketClient(this.napCore, this.logger, this.logStack);
             break;
         case "frida":
-            this.context.logger.info("[Core] [Packet] 使用指定的 FridaPacketClient 作为后端");
-            client = new WsPacketClient(this.context, this.logStack);
+            this.logger.info("[Core] [Packet] 使用指定的 FridaPacketClient 作为后端");
+            client = new WsPacketClient(this.napCore, this.logger, this.logStack);
             break;
         case "auto":
         case undefined:
             client = this.judgeClient();
             break;
         default:
-            this.context.logger.error(`未知的PacketBackend ${prefer}，请检查配置文件！`);
+            this.logger.error(`未知的PacketBackend ${prefer}，请检查配置文件！`);
             client = null;
         }
         if (!client?.check()) {
@@ -110,7 +112,7 @@ export class PacketClientContext {
     private judgeClient(): IPacketClient {
         const sortedClients = Object.entries(clientPriority)
             .map(([priority, clientFactory]) => {
-                const client = clientFactory(this.context, this.logStack);
+                const client = clientFactory(this.napCore, this.logger, this.logStack);
                 const score = +priority * +client.check();
                 return { client, score };
             })
@@ -120,7 +122,7 @@ export class PacketClientContext {
         if (!selectedClient) {
             throw new Error("[Core] [Packet] 无可用的后端，NapCat.Packet将不会加载！");
         }
-        this.context.logger.info(`自动选择 ${selectedClient.constructor.name} 作为后端`);
+        this.logger.info(`自动选择 ${selectedClient.constructor.name} 作为后端`);
         return selectedClient;
     }
 }

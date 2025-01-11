@@ -1,5 +1,4 @@
 import { PacketHighwayClient } from "@/core/packet/highway/client";
-import { PacketContext } from "@/core/packet/context/packetContext";
 import { PacketLogger } from "@/core/packet/context/loggerContext";
 import FetchSessionKey from "@/core/packet/transformer/highway/FetchSessionKey";
 import { int32ip2str, oidbIpv4s2HighwayIpv4s } from "@/core/packet/highway/utils";
@@ -16,6 +15,8 @@ import { NapProtoMsg } from "@napneko/nap-proto-core";
 import * as proto from "@/core/packet/transformer/proto";
 import * as trans from "@/core/packet/transformer";
 import fs from "fs";
+import { NapCoreContext } from "@/core/packet/context/napCoreContext";
+import { PacketClientContext } from "@/core/packet/context/clientContext";
 
 export const BlockSize = 1024 * 1024;
 
@@ -33,23 +34,25 @@ export interface PacketHighwaySig {
 }
 
 export class PacketHighwayContext {
-    private readonly context: PacketContext;
+    private readonly napcore: NapCoreContext;
+    private readonly client: PacketClientContext;
     protected sig: PacketHighwaySig;
     protected logger: PacketLogger;
     protected hwClient: PacketHighwayClient;
     private cachedPrepareReq: Promise<void> | null = null;
 
-    constructor(context: PacketContext) {
-        this.context = context;
+    constructor(napcore: NapCoreContext, logger: PacketLogger, client: PacketClientContext) {
+        this.napcore = napcore;
+        this.client = client;
         this.sig = {
-            uin: String(context.napcore.basicInfo.uin),
-            uid: context.napcore.basicInfo.uid,
+            uin: String(this.napcore.basicInfo.uin),
+            uid: this.napcore.basicInfo.uid,
             sigSession: null,
             sessionKey: null,
             serverAddr: [],
         };
-        this.logger = context.logger;
-        this.hwClient = new PacketHighwayClient(this.sig, context.logger);
+        this.logger = logger;
+        this.hwClient = new PacketHighwayClient(this.sig, this.logger);
     }
 
     private async checkAvailable() {
@@ -66,7 +69,7 @@ export class PacketHighwayContext {
     private async prepareUpload(): Promise<void> {
         this.logger.debug('[Highway] on prepareUpload!');
         const packet = FetchSessionKey.build();
-        const req = await this.context.client.sendOidbPacket(packet, true);
+        const req = await this.client.sendOidbPacket(packet, true);
         const rsp = FetchSessionKey.parse(req);
         this.sig.sigSession = rsp.httpConn.sigSession;
         this.sig.sessionKey = rsp.httpConn.sessionKey;
@@ -136,7 +139,7 @@ export class PacketHighwayContext {
     private async uploadGroupImage(groupUin: number, img: PacketMsgPicElement): Promise<void> {
         img.sha1 = Buffer.from(await calculateSha1(img.path)).toString('hex');
         const req = UploadGroupImage.build(groupUin, img);
-        const resp = await this.context.client.sendOidbPacket(req, true);
+        const resp = await this.client.sendOidbPacket(req, true);
         const preRespData = UploadGroupImage.parse(resp);
         const ukey = preRespData.upload.uKey;
         if (ukey && ukey != "") {
@@ -173,7 +176,7 @@ export class PacketHighwayContext {
     private async uploadC2CImage(peerUid: string, img: PacketMsgPicElement): Promise<void> {
         img.sha1 = Buffer.from(await calculateSha1(img.path)).toString('hex');
         const req = trans.UploadPrivateImage.build(peerUid, img);
-        const resp = await this.context.client.sendOidbPacket(req, true);
+        const resp = await this.client.sendOidbPacket(req, true);
         const preRespData = trans.UploadPrivateImage.parse(resp);
         const ukey = preRespData.upload.uKey;
         if (ukey && ukey != "") {
@@ -211,7 +214,7 @@ export class PacketHighwayContext {
         video.fileSha1 = Buffer.from(await calculateSha1(video.filePath)).toString('hex');
         video.thumbSha1 = Buffer.from(await calculateSha1(video.thumbPath)).toString('hex');
         const req = trans.UploadGroupVideo.build(groupUin, video);
-        const resp = await this.context.client.sendOidbPacket(req, true);
+        const resp = await this.client.sendOidbPacket(req, true);
         const preRespData = trans.UploadGroupVideo.parse(resp);
         const ukey = preRespData.upload.uKey;
         if (ukey && ukey != "") {
@@ -276,7 +279,7 @@ export class PacketHighwayContext {
         video.fileSha1 = Buffer.from(await calculateSha1(video.filePath)).toString('hex');
         video.thumbSha1 = Buffer.from(await calculateSha1(video.thumbPath)).toString('hex');
         const req = trans.UploadPrivateVideo.build(peerUid, video);
-        const resp = await this.context.client.sendOidbPacket(req, true);
+        const resp = await this.client.sendOidbPacket(req, true);
         const preRespData = trans.UploadPrivateVideo.parse(resp);
         const ukey = preRespData.upload.uKey;
         if (ukey && ukey != "") {
@@ -339,7 +342,7 @@ export class PacketHighwayContext {
     private async uploadGroupPtt(groupUin: number, ptt: PacketMsgPttElement): Promise<void> {
         ptt.fileSha1 = Buffer.from(await calculateSha1(ptt.filePath)).toString('hex');
         const req = trans.UploadGroupPtt.build(groupUin, ptt);
-        const resp = await this.context.client.sendOidbPacket(req, true);
+        const resp = await this.client.sendOidbPacket(req, true);
         const preRespData = trans.UploadGroupPtt.parse(resp);
         const ukey = preRespData.upload.uKey;
         if (ukey && ukey != "") {
@@ -375,7 +378,7 @@ export class PacketHighwayContext {
     private async uploadC2CPtt(peerUid: string, ptt: PacketMsgPttElement): Promise<void> {
         ptt.fileSha1 = Buffer.from(await calculateSha1(ptt.filePath)).toString('hex');
         const req = trans.UploadPrivatePtt.build(peerUid, ptt);
-        const resp = await this.context.client.sendOidbPacket(req, true);
+        const resp = await this.client.sendOidbPacket(req, true);
         const preRespData = trans.UploadPrivatePtt.parse(resp);
         const ukey = preRespData.upload.uKey;
         if (ukey && ukey != "") {
@@ -413,7 +416,7 @@ export class PacketHighwayContext {
         file.fileMd5 = await computeMd5AndLengthWithLimit(file.filePath);
         file.fileSha1 = await calculateSha1(file.filePath);
         const req = trans.UploadGroupFile.build(groupUin, file);
-        const resp = await this.context.client.sendOidbPacket(req, true);
+        const resp = await this.client.sendOidbPacket(req, true);
         const preRespData = trans.UploadGroupFile.parse(resp);
         if (!preRespData?.upload?.boolFileExist) {
             this.logger.debug(`[Highway] uploadGroupFileReq file not exist, need upload!`);
@@ -476,7 +479,7 @@ export class PacketHighwayContext {
         file.fileMd5 = await computeMd5AndLengthWithLimit(file.filePath);
         file.fileSha1 = await calculateSha1(file.filePath);
         const req = await trans.UploadPrivateFile.build(this.sig.uid, peerUid, file);
-        const res = await this.context.client.sendOidbPacket(req, true);
+        const res = await this.client.sendOidbPacket(req, true);
         const preRespData  = trans.UploadPrivateFile.parse(res);
         if (!preRespData.upload?.boolFileExist) {
             this.logger.debug(`[Highway] uploadC2CFileReq file not exist, need upload!`);
@@ -531,7 +534,7 @@ export class PacketHighwayContext {
         file.fileUuid = preRespData.upload?.uuid;
         file.fileHash = preRespData.upload?.fileAddon;
         const fileExistReq = trans.DownloadOfflineFile.build(file.fileUuid!, file.fileHash!, this.sig.uid, peerUid);
-        const fileExistRes = await this.context.client.sendOidbPacket(fileExistReq, true);
+        const fileExistRes = await this.client.sendOidbPacket(fileExistReq, true);
         file._e37_800_rsp = trans.DownloadOfflineFile.parse(fileExistRes);
         file._private_send_uid = this.sig.uid;
         file._private_recv_uid = peerUid;
