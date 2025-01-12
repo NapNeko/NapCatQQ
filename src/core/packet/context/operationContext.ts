@@ -14,9 +14,11 @@ import { AIVoiceChatType } from "@/core/packet/entities/aiChat";
 import { NapProtoDecodeStructType, NapProtoEncodeStructType } from "@napneko/nap-proto-core";
 import { IndexNode, MsgInfo } from "@/core/packet/transformer/proto";
 import { OidbPacket } from "@/core/packet/transformer/base";
+import { ImageOcrResult } from "@/core/packet/entities/ocrResult";
 
 export class PacketOperationContext {
     private readonly context: PacketContext;
+
     constructor(context: PacketContext) {
         this.context = context;
     }
@@ -93,6 +95,46 @@ export class PacketOperationContext {
                 this.context.logger.error(`上传第${index + 1}个资源失败：${result.reason.stack}`);
             }
         });
+    }
+
+    async UploadImage(img: PacketMsgPicElement) {
+        await this.context.highway.uploadImage({
+            chatType: ChatType.KCHATTYPEC2C,
+            peerUid: this.context.napcore.basicInfo.uid
+        }, img);
+        const index = img.msgInfo?.msgInfoBody?.at(0)?.index;
+        if (!index) {
+            throw new Error('img.msgInfo?.msgInfoBody![0].index! is undefined');
+        }
+        return await this.GetImageUrl(this.context.napcore.basicInfo.uid, index);
+    }
+
+    async GetImageUrl(selfUid: string, node: NapProtoEncodeStructType<typeof IndexNode>) {
+        const req = trans.DownloadImage.build(selfUid, node);
+        const resp = await this.context.client.sendOidbPacket(req, true);
+        const res = trans.DownloadImage.parse(resp);
+        return `https://${res.download.info.domain}${res.download.info.urlPath}${res.download.rKeyParam}`;
+    }
+
+    async ImageOCR(imgUrl: string) {
+        const req = trans.ImageOCR.build(imgUrl);
+        const resp = await this.context.client.sendOidbPacket(req, true);
+        const res = trans.ImageOCR.parse(resp);
+        return {
+            texts: res.ocrRspBody.textDetections.map((item) => {
+                return {
+                    text: item.detectedText,
+                    confidence: item.confidence,
+                    coordinates: item.polygon.coordinates.map((c) => {
+                        return {
+                            x: c.x,
+                            y: c.y
+                        };
+                    }),
+                };
+            }),
+            language: res.ocrRspBody.language
+        } as ImageOcrResult;
     }
 
     async UploadForwardMsg(msg: PacketMsg[], groupUin: number = 0) {

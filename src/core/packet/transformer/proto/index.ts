@@ -29,3 +29,4 @@ export * from "./oidb/Oidb.0xEB7";
 export * from "./oidb/Oidb.0xED3_1";
 export * from "./oidb/Oidb.0XFE1_2";
 export * from "./oidb/OidbBase";
+export * from "./oidb/Oidb.0xE07";
