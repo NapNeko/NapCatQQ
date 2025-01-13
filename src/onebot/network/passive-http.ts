@@ -1,4 +1,4 @@
-import { OB11NetworkReloadType } from './index';
+import { OB11EmitEventContent, OB11NetworkReloadType } from './index';
 import express, { Express, Request, Response } from 'express';
 import http from 'http';
 import { NapCatCore } from '@/core';
@@ -17,7 +17,7 @@ export class OB11PassiveHttpAdapter extends IOB11NetworkAdapter<HttpServerConfig
         super(name, config, core, obContext, actions);
     }
 
-    onEvent() {
+    onEvent<T extends OB11EmitEventContent>(event: T) {
         // http server is passive, no need to emit event
     }
 
@@ -82,12 +82,7 @@ export class OB11PassiveHttpAdapter extends IOB11NetworkAdapter<HttpServerConfig
         }
     }
 
-    private async handleRequest(req: Request, res: Response) {
-        if (!this.isEnable) {
-            this.core.context.logger.log(`[OneBot] [HTTP Server Adapter] Server is closed`);
-            return res.json(OB11Response.error('Server is closed', 200));
-        }
-
+    async httpApiRequest(req: Request, res: Response) {
         let payload = req.body;
         if (req.method == 'get') {
             payload = req.query;
@@ -111,6 +106,15 @@ export class OB11PassiveHttpAdapter extends IOB11NetworkAdapter<HttpServerConfig
         } else {
             return res.json(OB11Response.error('不支持的Api ' + actionName, 200));
         }
+    }
+
+    async handleRequest(req: Request, res: Response) {
+        if (!this.isEnable) {
+            this.core.context.logger.log(`[OneBot] [HTTP Server Adapter] Server is closed`);
+            return res.json(OB11Response.error('Server is closed', 200));
+        }
+
+        return this.httpApiRequest(req, res);
     }
 
     async reload(newConfig: HttpServerConfig) {
