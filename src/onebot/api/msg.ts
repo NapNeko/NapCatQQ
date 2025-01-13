@@ -206,7 +206,7 @@ export class OneBotMsgApi {
             const dir = emojiId.substring(0, 2);
             const url = `https://gxh.vip.qq.com/club/item/parcel/item/${dir}/${emojiId}/raw300.gif`;
             const filename = `${dir}-${emojiId}.gif`;
-            FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "", filename)
+            FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "", filename);
             return {
                 type: OB11MessageDataType.image,
                 data: {
@@ -798,7 +798,7 @@ export class OneBotMsgApi {
     private async handlePrivateMessage(resMsg: OB11Message, msg: RawMessage) {
         resMsg.sub_type = 'friend';
         if (await this.core.apis.FriendApi.isBuddy(msg.senderUid)) {
-            let nickname = (await this.core.apis.UserApi.getCoreAndBaseInfo([msg.senderUid])).get(msg.senderUid)?.coreInfo.nick;
+            const nickname = (await this.core.apis.UserApi.getCoreAndBaseInfo([msg.senderUid])).get(msg.senderUid)?.coreInfo.nick;
             if (nickname) {
                 resMsg.sender.nickname = nickname;
                 return;
@@ -906,16 +906,16 @@ export class OneBotMsgApi {
         const calculateTotalSize = async (elements: SendMessageElement[]): Promise<number> => {
             const sizePromises = elements.map(async element => {
                 switch (element.elementType) {
-                    case ElementType.PTT:
-                        return (await fsPromise.stat(element.pttElement.filePath)).size;
-                    case ElementType.FILE:
-                        return (await fsPromise.stat(element.fileElement.filePath)).size;
-                    case ElementType.VIDEO:
-                        return (await fsPromise.stat(element.videoElement.filePath)).size;
-                    case ElementType.PIC:
-                        return (await fsPromise.stat(element.picElement.sourcePath)).size;
-                    default:
-                        return 0;
+                case ElementType.PTT:
+                    return (await fsPromise.stat(element.pttElement.filePath)).size;
+                case ElementType.FILE:
+                    return (await fsPromise.stat(element.fileElement.filePath)).size;
+                case ElementType.VIDEO:
+                    return (await fsPromise.stat(element.videoElement.filePath)).size;
+                case ElementType.PIC:
+                    return (await fsPromise.stat(element.picElement.sourcePath)).size;
+                default:
+                    return 0;
                 }
             });
             const sizes = await Promise.all(sizePromises);
@@ -982,20 +982,20 @@ export class OneBotMsgApi {
 
     groupChangDecreseType2String(type: number): GroupDecreaseSubType {
         switch (type) {
-            case 130:
-                return 'leave';
-            case 131:
-                return 'kick';
-            case 3:
-                return 'kick_me';
-            default:
-                return 'kick';
+        case 130:
+            return 'leave';
+        case 131:
+            return 'kick';
+        case 3:
+            return 'kick_me';
+        default:
+            return 'kick';
         }
     }
 
     async waitGroupNotify(groupUin: string, memberUid?: string, operatorUid?: string) {
-        let groupRole = this.core.apis.GroupApi.groupMemberCache.get(groupUin)?.get(this.core.selfInfo.uid.toString())?.role;
-        let isAdminOrOwner = groupRole === 3 || groupRole === 4;
+        const groupRole = this.core.apis.GroupApi.groupMemberCache.get(groupUin)?.get(this.core.selfInfo.uid.toString())?.role;
+        const isAdminOrOwner = groupRole === 3 || groupRole === 4;
 
         if (isAdminOrOwner && !operatorUid) {
             let dataNotify: GroupNotify | undefined;
@@ -1023,7 +1023,7 @@ export class OneBotMsgApi {
         if (SysMessage.contentHead.type == 33 && SysMessage.body?.msgContent) {
             const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
             await this.core.apis.GroupApi.refreshGroupMemberCache(groupChange.groupUin.toString(), true);
-            let operatorUid = await this.waitGroupNotify(
+            const operatorUid = await this.waitGroupNotify(
                 groupChange.groupUin.toString(),
                 groupChange.memberUid,
                 groupChange.operatorInfo ? Buffer.from(groupChange.operatorInfo).toString() : ''
@@ -1039,7 +1039,7 @@ export class OneBotMsgApi {
         } else if (SysMessage.contentHead.type == 34 && SysMessage.body?.msgContent) {
             const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
             // 自身被踢出时operatorInfo会是一个protobuf 否则大多数情况为一个string
-            let operatorUid = await this.waitGroupNotify(
+            const operatorUid = await this.waitGroupNotify(
                 groupChange.groupUin.toString(),
                 groupChange.memberUid,
                 groupChange.decreaseType === 3 && groupChange.operatorInfo ?
@@ -1080,17 +1080,17 @@ export class OneBotMsgApi {
                 enabled ? 'set' : 'unset'
             );
         } else if (SysMessage.contentHead.type == 87 && SysMessage.body?.msgContent) {
-            let groupInvite = new NapProtoMsg(GroupInvite).decode(SysMessage.body.msgContent);
+            const groupInvite = new NapProtoMsg(GroupInvite).decode(SysMessage.body.msgContent);
             let request_seq = '';
             try {
                 await this.core.eventWrapper.registerListen('NodeIKernelMsgListener/onRecvMsg', (msgs) => {
                     for (const msg of msgs) {
                         if (msg.senderUid === groupInvite.invitorUid && msg.msgType === 11) {
-                            let jumpUrl = JSON.parse(msg.elements.find(e => e.elementType === 10)?.arkElement?.bytesData ?? '').meta?.news?.jumpUrl;
-                            let jumpUrlParams = new URLSearchParams(jumpUrl);
-                            let groupcode = jumpUrlParams.get('groupcode');
-                            let receiveruin = jumpUrlParams.get('receiveruin');
-                            let msgseq = jumpUrlParams.get('msgseq');
+                            const jumpUrl = JSON.parse(msg.elements.find(e => e.elementType === 10)?.arkElement?.bytesData ?? '').meta?.news?.jumpUrl;
+                            const jumpUrlParams = new URLSearchParams(jumpUrl);
+                            const groupcode = jumpUrlParams.get('groupcode');
+                            const receiveruin = jumpUrlParams.get('receiveruin');
+                            const msgseq = jumpUrlParams.get('msgseq');
                             request_seq = msgseq ?? '';
                             if (groupcode === groupInvite.groupUin.toString() && receiveruin === this.core.selfInfo.uin) {
                                 return true;
@@ -1136,7 +1136,7 @@ export class OneBotMsgApi {
                     waitStatus: 1,
                 },
                 status: 1
-            })
+            });
             return new OB11GroupRequestEvent(
                 this.core,
                 +groupInvite.groupUin,

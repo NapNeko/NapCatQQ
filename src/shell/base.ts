@@ -222,7 +222,7 @@ async function handleLogin(
                 logger.log(`可用于快速登录的 QQ：\n${historyLoginList
                     .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
                     .join('\n')
-                    }`);
+                }`);
             }
             loginService.getQRCodePicture();
         }

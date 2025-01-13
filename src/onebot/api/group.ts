@@ -218,7 +218,7 @@ export class OneBotGroupApi {
                 element.groupName,
             );
         } else if (element.type === TipGroupElementType.KSHUTUP) {
-            let event = await this.parseGroupBanEvent(msg.peerUid, elementWrapper);
+            const event = await this.parseGroupBanEvent(msg.peerUid, elementWrapper);
             return event;
         } else if (element.type === TipGroupElementType.KMEMBERADD) {
             // 自己的通知 协议推送为type->85 在这里实现为了避免邀请出现问题
