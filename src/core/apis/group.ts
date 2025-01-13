@@ -18,7 +18,6 @@ export class NTQQGroupApi {
     context: InstanceContext;
     core: NapCatCore;
     groupMemberCache: Map<string, Map<string, GroupMember>> = new Map<string, Map<string, GroupMember>>();
-    groupMemberCacheEvent: Map<string, boolean> = new Map<string, boolean>();
     essenceLRU = new LimitedHashTable<number, string>(1000);
 
     constructor(context: InstanceContext, core: NapCatCore) {
@@ -128,15 +127,12 @@ export class NTQQGroupApi {
     }
 
     async refreshGroupMemberCache(groupCode: string, isWait = true) {
-        this.groupMemberCacheEvent.set(groupCode, true);
         const updateCache = async () => {
             try {
                 const members = await this.getGroupMemberAll(groupCode, true);
                 this.groupMemberCache.set(groupCode, members.result.infos);
             } catch (e) {
                 this.context.logger.logError(`刷新群成员缓存失败, 群号: ${groupCode}, 错误: ${e}`);
-            } finally {
-                this.groupMemberCacheEvent.set(groupCode, false);
             }
         };
 

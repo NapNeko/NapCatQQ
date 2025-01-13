@@ -35,13 +35,7 @@ class GetGroupMemberInfo extends OneBotAction<Payload, OB11GroupMember> {
             this.core.apis.UserApi.getUserDetailInfo(uid),
         ]);
 
-        if (!member) throw new Error(`群(${payload.group_id})成员${payload.user_id}不存在`);
-
-        if (!groupMember && this.core.apis.GroupApi.groupMemberCacheEvent.get(payload.group_id.toString())) {
-            groupMember = (await this.core.apis.GroupApi.refreshGroupMemberCache(payload.group_id.toString(), true))?.get(uid);
-        }
-
-        if (!groupMember) throw new Error(`群(${payload.group_id})成员${payload.user_id}不存在`);
+        if (!member || !groupMember) throw new Error(`群(${payload.group_id})成员${payload.user_id}不存在`);
 
         return info ? { ...groupMember, ...member, ...info } : member;
     }
