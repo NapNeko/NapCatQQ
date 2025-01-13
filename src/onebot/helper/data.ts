@@ -90,6 +90,7 @@ export class OB11Construct {
             file_name: file.fileName,
             busid: file.busId,
             size: +file.fileSize,
+            file_size: +file.fileSize,
             upload_time: file.uploadTime,
             dead_time: file.deadTime,
             modify_time: file.modifyTime,
