@@ -92,7 +92,7 @@ export class OneBotQuickActionApi {
 
     async handleGroupRequest(request: OB11GroupRequestEvent, quickAction: QuickActionGroupRequest) {
         
-        let invite_notify = this.obContext.apis.MsgApi.notifyGroupInvite.get(request.flag);
+        const invite_notify = this.obContext.apis.MsgApi.notifyGroupInvite.get(request.flag);
         const notify = invite_notify ?? await this.findNotify(request.flag);
 
         if (!isNull(quickAction.approve) && notify) {

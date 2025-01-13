@@ -28,7 +28,7 @@ class GetGroupMemberInfo extends OneBotAction<Payload, OB11GroupMember> {
 
     private async getGroupMemberInfo(payload: Payload, uid: string, isNocache: boolean) {
         const groupMemberCache = this.core.apis.GroupApi.groupMemberCache.get(payload.group_id.toString());
-        let groupMember = groupMemberCache?.get(uid);
+        const groupMember = groupMemberCache?.get(uid);
 
         const [member, info] = await Promise.all([
             this.core.apis.GroupApi.getGroupMemberEx(payload.group_id.toString(), uid, isNocache),

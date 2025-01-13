@@ -20,7 +20,7 @@ export class Fallback<T> {
         for (const handler of this.handlers) {
             try {
                 const result = await handler();
-                let data = await this.checker(result);
+                const data = await this.checker(result);
                 if (data) {
                     return data;
                 }
