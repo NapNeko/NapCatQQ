@@ -59,6 +59,13 @@ export const httpServerDefaultConfigs = createDefaultAdapterConfig({
 });
 export type HttpServerConfig = typeof httpServerDefaultConfigs;
 
+export const httpSseServerDefaultConfigs = createDefaultAdapterConfig({
+    ...httpServerDefaultConfigs,
+    name: 'http-sse-server',
+    reportSelfMessage: false,
+});
+export type HttpSseServerConfig = typeof httpSseServerDefaultConfigs;
+
 export const httpClientDefaultConfigs = createDefaultAdapterConfig({
     name: 'http-client',
     enable: false as boolean,
@@ -99,6 +106,7 @@ export type WebsocketClientConfig = typeof websocketClientDefaultConfigs;
 
 export interface NetworkConfig {
     httpServers: Array<HttpServerConfig>;
+    httpSseServers: Array<HttpSseServerConfig>;
     httpClients: Array<HttpClientConfig>;
     websocketServers: Array<WebsocketServerConfig>;
     websocketClients: Array<WebsocketClientConfig>;
@@ -120,6 +128,7 @@ const createDefaultConfig = <T>(config: T): T => config;
 export const defaultOneBotConfigs = createDefaultConfig<OneBotConfig>({
     network: {
         httpServers: [],
+        httpSseServers: [],
         httpClients: [],
         websocketServers: [],
         websocketClients: [],
