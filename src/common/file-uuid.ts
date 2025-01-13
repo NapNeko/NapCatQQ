@@ -1,5 +1,4 @@
 import { Peer } from '@/core';
-import { LRUCache } from './lru-cache';
 import { randomUUID } from 'crypto';
 
 interface FileUUIDData {
@@ -11,11 +10,49 @@ interface FileUUIDData {
     fileUUID?: string;
 }
 
-class FileUUIDManager {
-    private cache: LRUCache<string, FileUUIDData>;
+class TimeBasedCache<K, V> {
+    private cache: Map<K, { value: V, timestamp: number }>;
+    private ttl: number;
 
-    constructor(capacity: number) {
-        this.cache = new LRUCache<string, FileUUIDData>(capacity);
+    constructor(ttl: number) {
+        this.cache = new Map();
+        this.ttl = ttl;
+    }
+
+    public put(key: K, value: V): void {
+        const timestamp = Date.now();
+        this.cache.set(key, { value, timestamp });
+        this.cleanup();
+    }
+
+    public get(key: K): V | undefined {
+        const entry = this.cache.get(key);
+        if (entry) {
+            const currentTime = Date.now();
+            if (currentTime - entry.timestamp < this.ttl) {
+                return entry.value;
+            } else {
+                this.cache.delete(key);
+            }
+        }
+        return undefined;
+    }
+
+    private cleanup(): void {
+        const currentTime = Date.now();
+        for (const [key, entry] of this.cache.entries()) {
+            if (currentTime - entry.timestamp >= this.ttl) {
+                this.cache.delete(key);
+            }
+        }
+    }
+}
+
+class FileUUIDManager {
+    private cache: TimeBasedCache<string, FileUUIDData>;
+
+    constructor(ttl: number) {
+        this.cache = new TimeBasedCache<string, FileUUIDData>(ttl);
     }
 
     public encode(data: FileUUIDData, endString: string = "", customUUID?: string): string {
@@ -32,8 +69,8 @@ class FileUUIDManager {
 export class FileNapCatOneBotUUIDWrap {
     private manager: FileUUIDManager;
 
-    constructor(capacity: number = 100) {
-        this.manager = new FileUUIDManager(capacity);
+    constructor(ttl: number = 86400000) {
+        this.manager = new FileUUIDManager(ttl);
     }
 
     public encodeModelId(peer: Peer, modelId: string, fileId: string, fileUUID: string = "", endString: string = "", customUUID?: string): string {
