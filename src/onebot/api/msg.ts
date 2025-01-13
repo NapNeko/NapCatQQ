@@ -1022,7 +1022,7 @@ export class OneBotMsgApi {
         // 邀请需要解grayTipElement
         if (SysMessage.contentHead.type == 33 && SysMessage.body?.msgContent) {
             const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
-            await this.core.apis.GroupApi.refreshGroupMemberCache(groupChange.groupUin.toString(), false);
+            await this.core.apis.GroupApi.refreshGroupMemberCache(groupChange.groupUin.toString(), true);
             let operatorUid = await this.waitGroupNotify(
                 groupChange.groupUin.toString(),
                 groupChange.memberUid,
@@ -1052,7 +1052,7 @@ export class OneBotMsgApi {
                 }, 5000);
                 // 自己被踢了 5S后回收
             } else {
-                await this.core.apis.GroupApi.refreshGroupMemberCache(groupChange.groupUin.toString(), false);
+                await this.core.apis.GroupApi.refreshGroupMemberCache(groupChange.groupUin.toString(), true);
             }
             return new OB11GroupDecreaseEvent(
                 this.core,
@@ -1063,7 +1063,7 @@ export class OneBotMsgApi {
             );
         } else if (SysMessage.contentHead.type == 44 && SysMessage.body?.msgContent) {
             const groupAmin = new NapProtoMsg(GroupAdmin).decode(SysMessage.body.msgContent);
-            await this.core.apis.GroupApi.refreshGroupMemberCache(groupAmin.groupUin.toString(), false);
+            await this.core.apis.GroupApi.refreshGroupMemberCache(groupAmin.groupUin.toString(), true);
             let enabled = false;
             let uid = '';
             if (groupAmin.body.extraEnable != null) {

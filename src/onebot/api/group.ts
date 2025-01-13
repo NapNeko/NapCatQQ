@@ -223,7 +223,7 @@ export class OneBotGroupApi {
         } else if (element.type === TipGroupElementType.KMEMBERADD) {
             // 自己的通知 协议推送为type->85 在这里实现为了避免邀请出现问题
             if (element.memberUid == this.core.selfInfo.uid) {
-                await this.core.apis.GroupApi.refreshGroupMemberCache(msg.peerUid, false);
+                await this.core.apis.GroupApi.refreshGroupMemberCache(msg.peerUid, true);
                 return new OB11GroupIncreaseEvent(
                     this.core,
                     parseInt(msg.peerUid),
