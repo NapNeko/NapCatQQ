@@ -110,7 +110,6 @@ export interface OB11MessageContext {
 // 文件消息基础接口定义
 export interface OB11MessageFileBase {
     data: {
-        file_unique?: string;
         path?: string;
         thumb?: string;
         name?: string;

@@ -1,5 +1,5 @@
 import { ActionName } from '@/onebot/action/router';
-import { FileNapCatOneBotUUID } from "@/common/helper";
+import { FileNapCatOneBotUUID } from '@/common/file-uuid';
 import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
 import { Static, Type } from '@sinclair/typebox';
 

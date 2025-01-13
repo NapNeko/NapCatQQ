@@ -180,8 +180,11 @@ export class NapCatOneBot11Adapter {
         WebUiDataRuntime.setQQLoginStatus(true);
         WebUiDataRuntime.setOnOB11ConfigChanged(async (newConfig) => {
             const prev = this.configLoader.configData;
+            // 保证默认配置
+            newConfig = mergeOneBotConfigs(newConfig);
+
             this.configLoader.save(newConfig);
-            this.context.logger.log(`OneBot11 配置更改：${JSON.stringify(prev)} -> ${JSON.stringify(newConfig)}`);
+            //this.context.logger.log(`OneBot11 配置更改：${JSON.stringify(prev)} -> ${JSON.stringify(newConfig)}`);
             await this.reloadNetwork(prev, newConfig);
         });
     }

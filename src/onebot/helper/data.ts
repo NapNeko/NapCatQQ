@@ -1,4 +1,5 @@
-import { calcQQLevel, FileNapCatOneBotUUID } from '@/common/helper';
+import { calcQQLevel } from '@/common/helper';
+import { FileNapCatOneBotUUID } from '@/common/file-uuid';
 import { FriendV2, Group, GroupFileInfoUpdateParamType, GroupMember, SelfInfo, NTSex } from '@/core';
 import {
     OB11Group,
