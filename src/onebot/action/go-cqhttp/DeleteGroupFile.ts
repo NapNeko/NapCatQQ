@@ -1,7 +1,7 @@
 
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { FileNapCatOneBotUUID } from '@/common/helper';
+import { FileNapCatOneBotUUID } from '@/common/file-uuid';
 import { Static, Type } from '@sinclair/typebox';
 
 const SchemaData = Type.Object({
@@ -16,7 +16,7 @@ export class DeleteGroupFile extends OneBotAction<Payload, any> {
     payloadSchema = SchemaData;
     async _handle(payload: Payload) {
         const data = FileNapCatOneBotUUID.decodeModelId(payload.file_id);
-        if (!data) throw new Error('Invalid file_id');
+        if (!data || !data.fileId) throw new Error('Invalid file_id');
         return await this.core.apis.GroupApi.delGroupFile(payload.group_id.toString(), [data.fileId]);
     }
 }

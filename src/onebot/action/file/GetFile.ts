@@ -1,6 +1,6 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import fs from 'fs/promises';
-import { FileNapCatOneBotUUID } from '@/common/helper';
+import { FileNapCatOneBotUUID } from '@/common/file-uuid';
 import { ActionName } from '@/onebot/action/router';
 import { OB11MessageImage, OB11MessageVideo } from '@/onebot/types';
 import { Static, Type } from '@sinclair/typebox';
@@ -28,7 +28,7 @@ export class GetFileBase extends OneBotAction<GetFilePayload, GetFileResponse> {
         payload.file ||= payload.file_id || '';
         //接收消息标记模式
         const contextMsgFile = FileNapCatOneBotUUID.decode(payload.file);
-        if (contextMsgFile) {
+        if (contextMsgFile && contextMsgFile.msgId && contextMsgFile.elementId) {
             const { peer, msgId, elementId } = contextMsgFile;
             const downloadPath = await this.core.apis.FileApi.downloadMedia(msgId, peer.chatType, peer.peerUid, elementId, '', '');
             const rawMessage = (await this.core.apis.MsgApi.getMsgsByMsgId(peer, [msgId]))?.msgList
@@ -68,7 +68,7 @@ export class GetFileBase extends OneBotAction<GetFilePayload, GetFileResponse> {
 
         //群文件模式
         const contextModelIdFile = FileNapCatOneBotUUID.decodeModelId(payload.file);
-        if (contextModelIdFile) {
+        if (contextModelIdFile && contextModelIdFile.modelId) {
             const { peer, modelId } = contextModelIdFile;
             const downloadPath = await this.core.apis.FileApi.downloadFileForModelId(peer, modelId, '');
             const res: GetFileResponse = {

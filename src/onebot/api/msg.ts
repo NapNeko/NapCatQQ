@@ -1,4 +1,4 @@
-import { FileNapCatOneBotUUID } from '@/common/helper';
+import { FileNapCatOneBotUUID } from '@/common/file-uuid';
 import { MessageUnique } from '@/common/message-unique';
 import { pathToFileURL } from 'node:url';
 import {
@@ -116,18 +116,22 @@ export class OneBotMsgApi {
                     peerUid: msg.peerUid,
                     guildId: '',
                 };
-                const encodedFileId = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, element.fileUuid, "." + element.fileName);
+                FileNapCatOneBotUUID.encode(
+                    peer,
+                    msg.msgId,
+                    elementWrapper.elementId,
+                    element.fileUuid,
+                    element.fileName
+                );
                 return {
                     type: OB11MessageDataType.image,
                     data: {
                         summary: element.summary,
-                        file: encodedFileId,
+                        file: element.fileName,
                         sub_type: element.picSubType,
-                        file_id: encodedFileId,
                         url: await this.core.apis.FileApi.getImageUrl(element),
                         path: element.filePath,
                         file_size: element.fileSize,
-                        file_unique: element.md5HexStr ?? element.fileName,
                     },
                 };
             } catch (e: any) {
@@ -142,15 +146,15 @@ export class OneBotMsgApi {
                 peerUid: msg.peerUid,
                 guildId: '',
             };
+            const file = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, element.fileUuid, element.fileName);
             return {
                 type: OB11MessageDataType.file,
                 data: {
-                    file: element.fileName,
+                    file: file,
                     path: element.filePath,
                     url: pathToFileURL(element.filePath).href,
-                    file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, element.fileUuid, "." + element.fileName),
+                    file_id: file,
                     file_size: element.fileSize,
-                    file_unique: element.fileMd5 ?? element.fileSha ?? element.fileName,
                 },
             };
         },
@@ -201,18 +205,18 @@ export class OneBotMsgApi {
             const { emojiId } = _;
             const dir = emojiId.substring(0, 2);
             const url = `https://gxh.vip.qq.com/club/item/parcel/item/${dir}/${emojiId}/raw300.gif`;
+            const filename = `${dir}-${emojiId}.gif`;
+            FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "", filename)
             return {
                 type: OB11MessageDataType.image,
                 data: {
                     summary: _.faceName, // 商城表情名称
-                    file: 'marketface',
-                    file_id: FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "", "." + _.key + ".jpg"),
+                    file: filename,
                     path: url,
                     url: url,
                     key: _.key,
                     emoji_id: _.emojiId,
                     emoji_package_id: _.emojiPackageId,
-                    file_unique: _.key
                 },
             };
         },
@@ -327,16 +331,14 @@ export class OneBotMsgApi {
             if (!videoDownUrl) {
                 videoDownUrl = element.filePath;
             }
-            const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "", "." + element.fileName);
+            const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, element.fileUuid, element.fileName);
             return {
                 type: OB11MessageDataType.video,
                 data: {
                     file: fileCode,
                     path: videoDownUrl,
                     url: videoDownUrl ?? pathToFileURL(element.filePath).href,
-                    file_id: fileCode,
                     file_size: element.fileSize,
-                    file_unique: element.videoMd5 ?? element.thumbMd5 ?? element.fileName,
                 },
             };
         },
@@ -347,16 +349,14 @@ export class OneBotMsgApi {
                 peerUid: msg.peerUid,
                 guildId: '',
             };
-            const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "", "." + element.fileName);
+            const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "", element.fileName);
             return {
                 type: OB11MessageDataType.voice,
                 data: {
                     file: fileCode,
                     path: element.filePath,
                     url: pathToFileURL(element.filePath).href,
-                    file_id: fileCode,
                     file_size: element.fileSize,
-                    file_unique: element.fileUuid
                 },
             };
         },
