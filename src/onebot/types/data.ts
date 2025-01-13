@@ -75,6 +75,7 @@ export interface OB11Sender {
 }
 
 export interface OB11GroupFile {
+    file_size: number; // 文件大小 GOCQHTTP 群文件Api扩展
     group_id: number; // 群ID
     file_id: string; // 文件ID
     file_name: string; // 文件名称
