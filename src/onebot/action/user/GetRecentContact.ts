@@ -1,23 +1,21 @@
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import BaseAction from '../BaseAction';
-import { ActionName } from '../types';
+
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ActionName } from '@/onebot/action/router';
 import { AdapterConfigWrap } from '@/onebot/config/config';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        count: { type: ['number', 'string'] },
-    },
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    count: Type.Union([Type.Number(), Type.String()], { default: 10 }),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
-export default class GetRecentContact extends BaseAction<Payload, any> {
+export default class GetRecentContact extends OneBotAction<Payload, any> {
     actionName = ActionName.GetRecentContact;
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload, adapter: string) {
-        const ret = await this.core.apis.UserApi.getRecentContactListSnapShot(+(payload.count || 10));
+        const ret = await this.core.apis.UserApi.getRecentContactListSnapShot(+payload.count);
         const network = Object.values(this.obContext.configLoader.configData.network) as Array<AdapterConfigWrap>;
         //烘焙消息
         const msgFormat = network.flat().find(e => e.name === adapter)?.messagePostFormat ?? 'array';

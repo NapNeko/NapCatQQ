@@ -1,22 +1,18 @@
-import BaseAction from '../BaseAction';
-import { ChatType, Peer } from '@/core/entities';
-import { ActionName } from '../types';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ChatType, Peer } from '@/core/types';
+import { ActionName } from '@/onebot/action/router';
 import { MessageUnique } from '@/common/message-unique';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        message_id: { type: ['number', 'string'] },
-        group_id: { type: ['number', 'string'] },
-        user_id: { type: ['number', 'string'] },
-    },
-    required: ['message_id'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    message_id: Type.Union([Type.Number(), Type.String()]),
+    group_id: Type.Optional(Type.Union([Type.Number(), Type.String()])),
+    user_id: Type.Optional(Type.Union([Type.Number(), Type.String()])),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
-class ForwardSingleMsg extends BaseAction<Payload, null> {
+class ForwardSingleMsg extends OneBotAction<Payload, null> {
     protected async getTargetPeer(payload: Payload): Promise<Peer> {
         if (payload.user_id) {
             const peerUid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
@@ -29,7 +25,7 @@ class ForwardSingleMsg extends BaseAction<Payload, null> {
     }
 
     async _handle(payload: Payload): Promise<null> {
-        const msg = MessageUnique.getMsgIdAndPeerByShortId(parseInt(payload.message_id.toString()));
+        const msg = MessageUnique.getMsgIdAndPeerByShortId(+payload.message_id);
         if (!msg) {
             throw new Error(`无法找到消息${payload.message_id}`);
         }

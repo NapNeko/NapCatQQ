@@ -1,6 +1,6 @@
 <div align="center">
   
-  ![Logo](https://socialify.git.ci/NapNeko/NapCatQQ/image?font=Jost&logo=https%3A%2F%2Fnapneko.github.io%2Fassets%2Flogo.png&name=1&owner=1&pattern=Diagonal%20Stripes&stargazers=1&theme=Auto)
+![NapCatQQ](https://socialify.git.ci/NapNeko/NapCatQQ/image?font=Jost&logo=https%3A%2F%2Fnapneko.github.io%2Fassets%2Fnewlogo.png&name=1&owner=1&pattern=Diagonal+Stripes&stargazers=1&theme=Auto)
   
 </div>
 
@@ -30,13 +30,25 @@ NapCatQQ 是现代化的基于 NTQQ 的 Bot 协议端实现
 
 [Cloudflare.Pages](https://napneko.pages.dev/)
 
-[Server.China](https://napneko.com/)
+[Server.Other](https://docs.napcat.cyou/)
 
-[Server.Other](https://napcat.cyou/)
-
+[Qbot.News](https://neko.qbot.news)
 
 ## 回家旅途
-[QQ Group](https://qm.qq.com/q/VfjAq5HIMS)
+[QQ Group#1](https://qm.qq.com/q/I6LU87a0Yq)
+
+[QQ Group#2](https://qm.qq.com/q/HaRcfrHpUk)
+
+[Telegram](https://t.me/MelodicMoonlight)
+
+> QQ Group#2 准许Bot / Telegram与QQ Group#2 为新建Group
+
+## 性能设计/协议标准
+NapCat 已实现90％+的 OneBot / GoCQ 标准接口，并提供兼容性保留接口，其设计理念遵守 无数据库/异步优先/后台刷新 的性能思想。
+
+由此设计带来一系列好处，在开发中，获取群员列表通常小于50Ms，单条文本消息发送在320Ms以内，在1k+的群聊流畅运行，同时带来一些副作用，消息Id无法持久，无法上报撤回消息原始内容。
+
+NapCat 在设计理念下遵守 OneBot 规范大多数要求并且积极改进，任何合理的标准化 Issue 与 Pr 将被接收。
 
 ## 感谢他们
 感谢 [Lagrange](https://github.com/LagrangeDev/Lagrange.Core) 对本项目的大力支持 参考部分代码 已获授权
@@ -47,12 +59,8 @@ NapCatQQ 是现代化的基于 NTQQ 的 Bot 协议端实现
 
 ---
 
-## 延缓Native模块与NapCat对新版QQ适配
-为未来持续与高效的使用Native模块 模块代码转为完全非Git仓库的本地保存源码 并进行相关重构
-
-同时为了保证稳定 NapCat 本体通常会在3 Week+的周期进行新版本适配
-
-因此此时推荐使用release指定版本
+## 特殊感谢
+[LLOneBot](https://github.com/LLOneBot/LLOneBot) 相关的开发曾参与本项目
 
 ## 开源附加
 

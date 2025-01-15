@@ -1,25 +1,22 @@
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import BaseAction from '../BaseAction';
-import { ActionName } from '../types';
-import { FileNapCatOneBotUUID } from '@/common/helper';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        group_id: { type: ['string', 'number'] },
-        file_id: { type: 'string' },
-    },
-    required: ['group_id', 'file_id'],
-} as const satisfies JSONSchema;
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ActionName } from '@/onebot/action/router';
+import { FileNapCatOneBotUUID } from '@/common/file-uuid';
+import { Static, Type } from '@sinclair/typebox';
 
-type Payload = FromSchema<typeof SchemaData>;
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
+    file_id: Type.String(),
+});
 
-export class DeleteGroupFile extends BaseAction<Payload, any> {
+type Payload = Static<typeof SchemaData>;
+
+export class DeleteGroupFile extends OneBotAction<Payload, any> {
     actionName = ActionName.GOCQHTTP_DeleteGroupFile;
     payloadSchema = SchemaData;
     async _handle(payload: Payload) {
         const data = FileNapCatOneBotUUID.decodeModelId(payload.file_id);
-        if (!data) throw new Error('Invalid file_id');
-        return await this.core.apis.GroupApi.DelGroupFile(payload.group_id.toString(), [data.fileId]);
+        if (!data || !data.fileId) throw new Error('Invalid file_id');
+        return await this.core.apis.GroupApi.delGroupFile(payload.group_id.toString(), [data.fileId]);
     }
 }

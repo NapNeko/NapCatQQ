@@ -1,5 +1,5 @@
 import { OneBotConfig } from '../../../src/onebot/config/config';
-
+import { ResponseCode } from '../../../src/webui/src/const/status';
 export class QQLoginManager {
     private retCredential: string;
     private readonly apiPrefix: string;
@@ -22,8 +22,8 @@ export class QQLoginManager {
             });
             if (ConfigResponse.status == 200) {
                 const ConfigResponseJson = await ConfigResponse.json();
-                if (ConfigResponseJson.code == 0) {
-                    return ConfigResponseJson?.data as OneBotConfig;
+                if (ConfigResponseJson.code == ResponseCode.Success) {
+                    return ConfigResponseJson.data;
                 }
             }
         } catch (error) {
@@ -73,6 +73,26 @@ export class QQLoginManager {
             console.error('Error checking QQ login status:', error);
         }
         return false;
+    }
+    public async checkQQLoginStatusWithQrcode(): Promise<{ qrcodeurl: string; isLogin: string } | undefined> {
+        try {
+            const QQLoginResponse = await fetch(`${this.apiPrefix}/QQLogin/CheckLoginStatus`, {
+                method: 'POST',
+                headers: {
+                    Authorization: 'Bearer ' + this.retCredential,
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (QQLoginResponse.status == 200) {
+                const QQLoginResponseJson = await QQLoginResponse.json();
+                if (QQLoginResponseJson.code == 0) {
+                    return QQLoginResponseJson.data;
+                }
+            }
+        } catch (error) {
+            console.error('Error checking QQ login status:', error);
+        }
+        return undefined;
     }
 
     public async checkWebUiLogined(): Promise<boolean> {

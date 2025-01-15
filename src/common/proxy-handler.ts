@@ -1,4 +1,4 @@
-import { LogWrapper } from './log';
+import { LogWrapper } from '@/common/log';
 
 export function proxyHandlerOf(logger: LogWrapper) {
     return {

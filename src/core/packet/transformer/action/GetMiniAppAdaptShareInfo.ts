@@ -30,7 +30,7 @@ class GetMiniAppAdaptShareInfo extends PacketTransformer<typeof proto.MiniAppAda
                 shareType: req.shareType,
                 versionId: req.versionId,
                 withShareTicket: req.withShareTicket,
-                webURL: "",
+                webURL: req.webUrl ?? "",
                 appidRich: Buffer.alloc(0),
                 template: {
                     templateId: "",

@@ -1,18 +1,14 @@
-import { ActionName } from '../types';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { ActionName } from '@/onebot/action/router';
 import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
 import { AIVoiceChatType } from "@/core/packet/entities/aiChat";
+import { Type, Static } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        group_id: { type: ['number', 'string'] },
-        chat_type: { type: ['number', 'string'] },
-    },
-    required: ['group_id'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
+    chat_type: Type.Union([Type.Union([Type.Number(), Type.String()])], { default: 1 }),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 interface GetAiCharactersResponse {
     type: string;
@@ -28,7 +24,7 @@ export class GetAiCharacters extends GetPacketStatusDepends<Payload, GetAiCharac
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const rawList = await this.core.apis.PacketApi.pkt.operation.FetchAiVoiceList(+payload.group_id, +(payload.chat_type ?? 1) as AIVoiceChatType);
+        const rawList = await this.core.apis.PacketApi.pkt.operation.FetchAiVoiceList(+payload.group_id, +payload.chat_type as AIVoiceChatType);
         return rawList?.map((item) => ({
             type: item.category,
             characters: item.voices.map((voice) => ({

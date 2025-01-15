@@ -1,8 +1,9 @@
 import { LRUCache } from "@/common/lru-cache";
 import crypto, { createHash } from "crypto";
-import { PacketContext } from "@/core/packet/context/packetContext";
 import { OidbPacket, PacketHexStr } from "@/core/packet/transformer/base";
 import { LogStack } from "@/core/packet/context/clientContext";
+import { NapCoreContext } from "@/core/packet/context/napCoreContext";
+import { PacketLogger } from "@/core/packet/context/loggerContext";
 
 export interface RecvPacket {
     type: string, // 仅recv
@@ -27,13 +28,15 @@ function randText(len: number): string {
 
 
 export abstract class IPacketClient {
-    protected readonly context: PacketContext;
+    protected readonly napcore: NapCoreContext;
+    protected readonly logger: PacketLogger;
     protected readonly cb = new LRUCache<string, (json: RecvPacketData) => Promise<void>>(500); // trace_id-type callback
     logStack: LogStack;
     available: boolean = false;
 
-    protected constructor(context: PacketContext, logStack: LogStack) {
-        this.context = context;
+    protected constructor(napCore: NapCoreContext, logger: PacketLogger, logStack: LogStack) {
+        this.napcore = napCore;
+        this.logger = logger;
         this.logStack = logStack;
     }
 
@@ -81,7 +84,7 @@ export abstract class IPacketClient {
         const md5 = crypto.createHash('md5').update(data).digest('hex');
         const trace_id = (randText(4) + md5 + data).slice(0, data.length / 2);
         return this.sendCommand(cmd, data, trace_id, rsp, 20000, async () => {
-            await this.context.napcore.sendSsoCmdReqByContend(cmd, trace_id);
+            await this.napcore.sendSsoCmdReqByContend(cmd, trace_id);
         });
     }
 

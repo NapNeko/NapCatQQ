@@ -7,6 +7,8 @@ import NetWork from '../pages/NetWork.vue';
 import QQLogin from '../components/QQLogin.vue';
 import WebUiLogin from '../components/WebUiLogin.vue';
 import OtherConfig from '../pages/OtherConfig.vue';
+import { MessagePlugin } from 'tdesign-vue-next';
+import { QQLoginManager } from '@/backend/shell';
 
 const routes: Array<RouteRecordRaw> = [
     { path: '/', redirect: '/webui' },
@@ -26,7 +28,27 @@ const routes: Array<RouteRecordRaw> = [
     },
 ];
 
-export const router = createRouter({
+const router = createRouter({
     history: createWebHashHistory(),
     routes,
 });
+
+router.beforeEach(async (to, from, next) => {
+    const isPublicRoute = ['/webui', '/qqlogin'].includes(to.path);
+    const token = localStorage.getItem('auth');
+
+    if (!isPublicRoute) {
+        if (!token) {
+            MessagePlugin.error('请先登录');
+            return next('/webui');
+        }
+        const login = await new QQLoginManager(token).checkWebUiLogined();
+        if (!login) {
+            MessagePlugin.error('请先登录');
+            return next('/webui');
+        }
+    }
+    next();
+});
+
+export default router;

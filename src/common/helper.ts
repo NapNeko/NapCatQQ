@@ -1,7 +1,7 @@
 import path from 'node:path';
 import fs from 'fs';
 import os from 'node:os';
-import { Peer, QQLevel } from '@/core';
+import { QQLevel } from '@/core';
 
 export async function solveProblem<T extends (...arg: any[]) => any>(func: T, ...args: Parameters<T>): Promise<ReturnType<T> | undefined> {
     return new Promise<ReturnType<T> | undefined>((resolve) => {
@@ -22,81 +22,6 @@ export async function solveAsyncProblem<T extends (...args: any[]) => Promise<an
             resolve(undefined);
         });
     });
-}
-
-export class FileNapCatOneBotUUID {
-    static encodeModelId(peer: Peer, modelId: string, fileId: string, fileUUID: string = "", endString: string = ""): string {
-        const data = `NapCatOneBot|ModelIdFile|${peer.chatType}|${peer.peerUid}|${modelId}|${fileId}|${fileUUID}`;
-        //前四个字节塞data长度
-        const length = Buffer.alloc(4 + data.length);
-        length.writeUInt32BE(data.length * 2, 0);//储存data的hex长度
-        length.write(data, 4);
-        return length.toString('hex') + endString;
-    }
-
-    static decodeModelId(uuid: string): undefined | {
-        peer: Peer,
-        modelId: string,
-        fileId: string,
-        fileUUID?: string
-    } {
-        //前四个字节是data长度
-        const length = Buffer.from(uuid.slice(0, 8), 'hex').readUInt32BE(0);
-        //根据length计算需要读取的长度
-        const dataId = uuid.slice(8, 8 + length);
-        //hex还原为string
-        const realData = Buffer.from(dataId, 'hex').toString();
-        if (!realData.startsWith('NapCatOneBot|ModelIdFile|')) return undefined;
-        const data = realData.split('|');
-        if (data.length < 6) return undefined;  // compatibility requirement
-        const [, , chatType, peerUid, modelId, fileId, fileUUID = undefined] = data;
-        return {
-            peer: {
-                chatType: +chatType,
-                peerUid: peerUid,
-            },
-            modelId,
-            fileId,
-            fileUUID
-        };
-    }
-
-    static encode(peer: Peer, msgId: string, elementId: string, fileUUID: string = "", endString: string = ""): string {
-        const data = `NapCatOneBot|MsgFile|${peer.chatType}|${peer.peerUid}|${msgId}|${elementId}|${fileUUID}`;
-        //前四个字节塞data长度
-        //一个字节8位 一个ascii字符1字节 一个hex字符4位 表示一个ascii字符需要两个hex字符
-        const length = Buffer.alloc(4 + data.length);
-        length.writeUInt32BE(data.length * 2, 0);
-        length.write(data, 4);
-        return length.toString('hex') + endString;
-    }
-
-    static decode(uuid: string): undefined | {
-        peer: Peer,
-        msgId: string,
-        elementId: string,
-        fileUUID?: string
-    } {
-        //前四个字节是data长度
-        const length = Buffer.from(uuid.slice(0, 8), 'hex').readUInt32BE(0);
-        //根据length计算需要读取的长度
-        const dataId = uuid.slice(8, 8 + length);
-        //hex还原为string
-        const realData = Buffer.from(dataId, 'hex').toString();
-        if (!realData.startsWith('NapCatOneBot|MsgFile|')) return undefined;
-        const data = realData.split('|');
-        if (data.length < 6) return undefined;  // compatibility requirement
-        const [, , chatType, peerUid, msgId, elementId, fileUUID = undefined] = data;
-        return {
-            peer: {
-                chatType: +chatType,
-                peerUid: peerUid,
-            },
-            msgId,
-            elementId,
-            fileUUID
-        };
-    }
 }
 
 export function sleep(ms: number): Promise<void> {

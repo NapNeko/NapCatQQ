@@ -3,22 +3,15 @@
         "target": "ESNext",
         "jsx": "preserve",
         "jsxImportSource": "vue",
-        "lib": [
-            "DOM",
-            "DOM.Iterable"
-        ],
+        "lib": ["DOM", "DOM.Iterable", "ES2022"],
         "baseUrl": ".",
         "module": "esnext",
         "moduleResolution": "bundler",
         "paths": {
-            "@/*": [
-                "src/*"
-            ]
+            "@/*": ["src/*"]
         },
         "resolveJsonModule": true,
-        "types": [
-            "vite/client"
-        ],
+        "types": ["vite/client"],
         "strict": true,
         "strictNullChecks": true,
         "noUnusedLocals": true,
@@ -30,5 +23,5 @@
     },
     "include": ["src"],
     "exclude": ["node_modules"],
-    "references": [{"path": "./tsconfig.node.json"}]
+    "references": [{ "path": "./tsconfig.node.json" }]
 }

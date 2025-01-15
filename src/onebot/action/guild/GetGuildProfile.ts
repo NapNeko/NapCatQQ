@@ -1,7 +1,7 @@
-import BaseAction from '../BaseAction';
-import { ActionName } from '../types';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ActionName } from '@/onebot/action/router';
 
-export default class GetGuildProfile extends BaseAction<null, null> {
+export class GetGuildProfile extends OneBotAction<null, null> {
     actionName = ActionName.GetGuildProfile;
 
     async _handle(payload: null): Promise<null> {

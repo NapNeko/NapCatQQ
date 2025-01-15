@@ -1,12 +1,12 @@
 import { LogLevel, LogWrapper } from "@/common/log";
-import { PacketContext } from "@/core/packet/context/packetContext";
+import { NapCoreContext } from "@/core/packet/context/napCoreContext";
 
 // TODO: check bind?
 export class PacketLogger {
     private readonly napLogger: LogWrapper;
 
-    constructor(context: PacketContext) {
-        this.napLogger = context.napcore.logger;
+    constructor(napcore: NapCoreContext) {
+        this.napLogger = napcore.logger;
     }
 
     private _log(level: LogLevel, ...msg: any[]): void {

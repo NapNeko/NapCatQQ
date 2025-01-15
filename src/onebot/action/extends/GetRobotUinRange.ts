@@ -1,10 +1,10 @@
-import BaseAction from '../BaseAction';
-import { ActionName } from '../types';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ActionName } from '@/onebot/action/router';
 
-export class GetRobotUinRange extends BaseAction<void, Array<any>> {
+export class GetRobotUinRange extends OneBotAction<void, Array<any>> {
     actionName = ActionName.GetRobotUinRange;
 
-    async _handle(payload: void) {
+    async _handle() {
         return await this.core.apis.UserApi.getRobotUinRange();
     }
 }

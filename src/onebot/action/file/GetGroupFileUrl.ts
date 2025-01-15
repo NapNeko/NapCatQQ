@@ -1,18 +1,14 @@
-import { ActionName } from '../types';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import { FileNapCatOneBotUUID } from "@/common/helper";
+import { ActionName } from '@/onebot/action/router';
+import { FileNapCatOneBotUUID } from '@/common/file-uuid';
 import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        group_id: { type: ['number', 'string'] },
-        file_id: { type: ['string'] },
-    },
-    required: ['group_id', 'file_id'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
+    file_id: Type.String(),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 interface GetGroupFileUrlResponse {
     url?: string;

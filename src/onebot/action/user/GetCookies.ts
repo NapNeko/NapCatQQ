@@ -1,23 +1,18 @@
-import BaseAction from '../BaseAction';
-import { ActionName } from '../types';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ActionName } from '@/onebot/action/router';
+import { Static, Type } from '@sinclair/typebox';
 interface Response {
     cookies: string,
     bkn: string
 }
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        domain: { type: 'string' },
-    },
-    required: ['domain'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    domain: Type.String()
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
-export class GetCookies extends BaseAction<Payload, Response> {
+export class GetCookies extends OneBotAction<Payload, Response> {
     actionName = ActionName.GetCookies;
     payloadSchema = SchemaData;
 

@@ -1,20 +1,16 @@
-import BaseAction from '../BaseAction';
-import { ActionName } from '../types';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ActionName } from '@/onebot/action/router';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        group_id: { type: ['number', 'string'] },
-        user_id: { type: ['number', 'string'] },
-        duration: { type: ['number', 'string'] },
-    },
-    required: ['group_id', 'user_id', 'duration'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
+    user_id: Type.Union([Type.Number(), Type.String()]),
+    duration: Type.Union([Type.Number(), Type.String()], { default: 0 }),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
-export default class SetGroupBan extends BaseAction<Payload, null> {
+export default class SetGroupBan extends OneBotAction<Payload, null> {
     actionName = ActionName.SetGroupBan;
     payloadSchema = SchemaData;
 
@@ -22,7 +18,7 @@ export default class SetGroupBan extends BaseAction<Payload, null> {
         const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
         if (!uid) throw new Error('uid error');
         await this.core.apis.GroupApi.banMember(payload.group_id.toString(),
-            [{ uid: uid, timeStamp: parseInt(payload.duration.toString()) }]);
+            [{ uid: uid, timeStamp: +payload.duration }]);
         return null;
     }
 }

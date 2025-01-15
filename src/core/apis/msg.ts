@@ -1,14 +1,9 @@
-import { ChatType, GetFileListParam, Peer, RawMessage, SendMessageElement, SendStatusType } from '@/core/entities';
-import { InstanceContext, NapCatCore } from '@/core';
+import { ChatType, GetFileListParam, Peer, RawMessage, SendMessageElement, SendStatusType } from '@/core/types';
+import { GroupFileInfoUpdateItem, InstanceContext, NapCatCore } from '@/core';
 import { GeneralCallResult } from '@/core/services/common';
 
 export class NTQQMsgApi {
-    getMsgByClientSeqAndTime(peer: Peer, replyMsgClientSeq: string, replyMsgTime: string) {
-        return this.context.session.getMsgService().getMsgByClientSeqAndTime(peer, replyMsgClientSeq, replyMsgTime);
-    }
-    // nt_qq//global//nt_data//Emoji//emoji-resource//sysface_res/apng/ 下可以看到所有QQ表情预览
-    // nt_qq\global\nt_data\Emoji\emoji-resource\face_config.json 里面有所有表情的id, 自带表情id是QSid, 标准emoji表情id是QCid
-    // 其实以官方文档为准是最好的，https://bot.q.qq.com/wiki/develop/api-v2/openapi/emoji/model.html#EmojiType
+
 
     context: InstanceContext;
     core: NapCatCore;
@@ -17,7 +12,10 @@ export class NTQQMsgApi {
         this.context = context;
         this.core = core;
     }
-
+    getMsgByClientSeqAndTime(peer: Peer, replyMsgClientSeq: string, replyMsgTime: string) {
+        // https://bot.q.qq.com/wiki/develop/api-v2/openapi/emoji/model.html#EmojiType 可以用过特殊方式拉取
+        return this.context.session.getMsgService().getMsgByClientSeqAndTime(peer, replyMsgClientSeq, replyMsgTime);
+    }
     async getAioFirstViewLatestMsgs(peer: Peer, MsgCount: number) {
         return this.context.session.getMsgService().getAioFirstViewLatestMsgs(peer, MsgCount);
     }
@@ -25,9 +23,11 @@ export class NTQQMsgApi {
     async sendShowInputStatusReq(peer: Peer, eventType: number) {
         return this.context.session.getMsgService().sendShowInputStatusReq(peer.chatType, eventType, peer.peerUid);
     }
+
     async getSourceOfReplyMsgV2(peer: Peer, clientSeq: string, time: string) {
         return this.context.session.getMsgService().getSourceOfReplyMsgV2(peer, clientSeq, time);
     }
+
     async getMsgEmojiLikesList(peer: Peer, msgSeq: string, emojiId: string, emojiType: string, count: number = 20) {
         //注意此处emojiType 可选值一般为1-2 2好像是unicode表情dec值 大部分情况 Taged Mlikiowa
         return this.context.session.getMsgService().getMsgEmojiLikesList(peer, msgSeq, emojiId, emojiType, '', false, count);
@@ -111,7 +111,7 @@ export class NTQQMsgApi {
             pageLimit: 1,
         });
     }
-    // 客户端还在用别慌 
+    // 客户端还在用别慌
     async getMsgsBySeqAndCount(peer: Peer, seq: string, count: number, desc: boolean, isReverseOrder: boolean) {
         return await this.context.session.getMsgService().getMsgsBySeqAndCount(peer, seq, count, desc, isReverseOrder);
     }
@@ -136,19 +136,29 @@ export class NTQQMsgApi {
     }
 
     async getGroupFileList(GroupCode: string, params: GetFileListParam) {
-        const [, groupFileListResult] = await this.core.eventWrapper.callNormalEventV2(
-            'NodeIKernelRichMediaService/getGroupFileList',
-            'NodeIKernelMsgListener/onGroupFileInfoUpdate',
-            [
-                GroupCode,
-                params,
-            ],
-            () => true,
-            () => true, // 应当通过 groupFileListResult 判断
-            1,
-            5000,
-        );
-        return groupFileListResult.item;
+        const item: GroupFileInfoUpdateItem[] = [];
+        let index = params.startIndex;
+        while (true) {
+            params.startIndex = index;
+            const [, groupFileListResult] = await this.core.eventWrapper.callNormalEventV2(
+                'NodeIKernelRichMediaService/getGroupFileList',
+                'NodeIKernelMsgListener/onGroupFileInfoUpdate',
+                [
+                    GroupCode,
+                    params,
+                ],
+                () => true,
+                () => true, // 应当通过 groupFileListResult 判断
+                1,
+                5000,
+            );
+            if (!groupFileListResult?.item?.length) break;
+            item.push(...groupFileListResult.item);
+            if (groupFileListResult.isEnd) break;
+            if (item.length === params.fileCount) break;
+            index = groupFileListResult.nextIndex;
+        }
+        return item;
     }
 
     async getMsgHistory(peer: Peer, msgId: string, count: number, isReverseOrder: boolean = false) {

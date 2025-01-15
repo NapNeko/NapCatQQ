@@ -1,5 +1,5 @@
 import { GetFileBase, GetFilePayload, GetFileResponse } from './GetFile';
-import { ActionName } from '../types';
+import { ActionName } from '@/onebot/action/router';
 import { spawn } from 'node:child_process';
 import { promises as fs } from 'fs';
 import { decode } from 'silk-wasm';

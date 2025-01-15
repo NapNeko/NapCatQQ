@@ -24,14 +24,14 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { hostname, systemName, systemVersion } from '@/common/system';
 import { NTEventWrapper } from '@/common/event';
-import { DataSource, GroupMember, KickedOffLineInfo, SelfInfo, SelfStatusInfo } from '@/core/entities';
+import { GroupMember, KickedOffLineInfo, SelfInfo, SelfStatusInfo } from '@/core/types';
 import { NapCatConfigLoader } from '@/core/helper/config';
 import os from 'node:os';
-import { NodeIKernelGroupListener, NodeIKernelMsgListener, NodeIKernelProfileListener } from '@/core/listeners';
+import { NodeIKernelMsgListener, NodeIKernelProfileListener } from '@/core/listeners';
 import { proxiedListenerOf } from '@/common/proxy-handler';
 import { NTQQPacketApi } from './apis/packet';
 export * from './wrapper';
-export * from './entities';
+export * from './types';
 export * from './services';
 export * from './listeners';
 
@@ -127,7 +127,7 @@ export class NapCatCore {
                 await api.initApi();
             }
         }
-        this.initNapCatCoreListeners().then().catch(this.context.logger.logError.bind(this.context.logger));
+        this.initNapCatCoreListeners().then().catch((e) => this.context.logger.logError(e));
 
         this.context.logger.setFileLogEnabled(
             this.configLoader.configData.fileLog,
@@ -152,9 +152,10 @@ export class NapCatCore {
     // Renamed from 'InitDataListener'
     async initNapCatCoreListeners() {
         const msgListener = new NodeIKernelMsgListener();
+
         msgListener.onKickedOffLine = (Info: KickedOffLineInfo) => {
             // 下线通知
-            this.context.logger.logError.bind(this.context.logger)('[KickedOffLine] [' + Info.tipsTitle + '] ' + Info.tipsDesc);
+            this.context.logger.logError('[KickedOffLine] [' + Info.tipsTitle + '] ' + Info.tipsDesc);
             this.selfInfo.online = false;
         };
         msgListener.onRecvMsg = (msgs) => {
@@ -163,7 +164,6 @@ export class NapCatCore {
         msgListener.onAddSendMsg = (msg) => {
             this.context.logger.logMessage(msg, this.selfInfo);
         };
-        //await sleep(2500);
         this.context.session.getMsgService().addKernelMsgListener(
             proxiedListenerOf(msgListener, this.context.logger),
         );
@@ -185,92 +185,6 @@ export class NapCatCore {
         this.context.session.getProfileService().addKernelProfileListener(
             proxiedListenerOf(profileListener, this.context.logger),
         );
-
-        // 群相关
-        const groupListener = new NodeIKernelGroupListener();
-        groupListener.onGroupListUpdate = (updateType, groupList) => {
-            // console.log("onGroupListUpdate", updateType, groupList)
-            groupList.map(g => {
-                const existGroup = this.apis.GroupApi.groupCache.get(g.groupCode);
-                //群成员数量变化 应该刷新缓存
-                if (existGroup && g.memberCount === existGroup.memberCount) {
-                    Object.assign(existGroup, g);
-                } else {
-                    this.apis.GroupApi.groupCache.set(g.groupCode, g);
-                    // 获取群成员
-                }
-                const sceneId = this.context.session.getGroupService().createMemberListScene(g.groupCode, 'groupMemberList_MainWindow');
-                this.context.session.getGroupService().getNextMemberList(sceneId, undefined, 3000).then( /* r => {
-                    // console.log(`get group ${g.groupCode} members`, r);
-                    // r.result.infos.forEach(member => {
-                    // });
-                    // groupMembers.set(g.groupCode, r.result.infos);
-                } */);
-                this.context.session.getGroupService().destroyMemberListScene(sceneId);
-            });
-        };
-        groupListener.onMemberListChange = (arg) => {
-            // TODO: 应该加一个内部自己维护的成员变动callback，用于判断成员变化通知
-            const groupCode = arg.sceneId.split('_')[0];
-            if (this.apis.GroupApi.groupMemberCache.has(groupCode)) {
-                const existMembers = this.apis.GroupApi.groupMemberCache.get(groupCode)!;
-                arg.infos.forEach((member, uid) => {
-                    //console.log('onMemberListChange', member);
-                    const existMember = existMembers.get(uid);
-                    if (existMember) {
-                        Object.assign(existMember, member);
-                    } else {
-                        existMembers.set(uid, member);
-                    }
-                    //移除成员
-                    if (member.isDelete) {
-                        existMembers.delete(uid);
-                    }
-                });
-            } else {
-                this.apis.GroupApi.groupMemberCache.set(groupCode, arg.infos);
-            }
-        };
-        groupListener.onMemberInfoChange = (groupCode, dataSource, members) => {
-            if (dataSource === DataSource.LOCAL && members.get(this.selfInfo.uid)?.isDelete) {
-                // 自身退群或者被踢退群 5s用于Api操作 之后不再出现
-                setTimeout(() => {
-                    this.apis.GroupApi.groupCache.delete(groupCode);
-                }, 5000);
-
-            }
-            const existMembers = this.apis.GroupApi.groupMemberCache.get(groupCode);
-            if (existMembers) {
-                members.forEach((member, uid) => {
-                    const existMember = existMembers.get(uid);
-                    if (existMember) {
-                        // 检查管理变动
-                        member.isChangeRole = this.checkAdminEvent(groupCode, member, existMember);
-                        // 更新成员信息
-                        Object.assign(existMember, member);
-                    } else {
-                        existMembers.set(uid, member);
-                    }
-                    //移除成员
-                    if (member.isDelete) {
-                        existMembers.delete(uid);
-                    }
-                });
-            } else {
-                this.apis.GroupApi.groupMemberCache.set(groupCode, members);
-            }
-        };
-        this.context.session.getGroupService().addKernelGroupListener(
-            proxiedListenerOf(groupListener, this.context.logger),
-        );
-    }
-
-    checkAdminEvent(groupCode: string, memberNew: GroupMember, memberOld: GroupMember | undefined): boolean {
-        if (memberNew.role !== memberOld?.role) {
-            this.context.logger.logDebug(`群 ${groupCode} ${memberNew.nick} 角色变更为 ${memberNew.role === 3 ? '管理员' : '群员'}`);
-            return true;
-        }
-        return false;
     }
 }
 

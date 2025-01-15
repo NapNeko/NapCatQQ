@@ -5,27 +5,28 @@ import {
     IMAGE_HTTP_HOST_NT,
     Peer,
     PicElement,
-    PicType,
+    PicSubType,
     RawMessage,
     SendFileElement,
     SendPicElement,
     SendPttElement,
     SendVideoElement,
-} from '@/core/entities';
+} from '@/core/types';
 import path from 'path';
 import fs from 'fs';
 import fsPromises from 'fs/promises';
 import { InstanceContext, NapCatCore, SearchResultItem } from '@/core';
-import * as fileType from 'file-type';
+import { fileTypeFromFile } from 'file-type';
 import imageSize from 'image-size';
 import { ISizeCalculationResult } from 'image-size/dist/types/interface';
-import { RkeyManager } from '../helper/rkey';
-import { calculateFileMD5, isGIF } from '@/common/file';
+import { RkeyManager } from '@/core/helper/rkey';
+import { calculateFileMD5 } from '@/common/file';
 import pathLib from 'node:path';
 import { defaultVideoThumbB64, getVideoInfo } from '@/common/video';
 import ffmpeg from 'fluent-ffmpeg';
 import { encodeSilk } from '@/common/audio';
-import { MessageContext } from '@/onebot/api';
+import { SendMessageContext } from '@/onebot/api';
+import { getFileTypeForSendType } from '../helper/msg';
 
 export class NTQQFileApi {
     context: InstanceContext;
@@ -36,7 +37,11 @@ export class NTQQFileApi {
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
         this.core = core;
-        this.rkeyManager = new RkeyManager(['https://llob.linyuchen.net/rkey', 'http://napcat-sign.wumiao.wang:2082/rkey'], this.context.logger);
+        this.rkeyManager = new RkeyManager([
+            'https://rkey.napneko.icu/rkeys'
+        ],
+        this.context.logger
+        );
     }
 
     async copyFile(filePath: string, destPath: string) {
@@ -56,7 +61,7 @@ export class NTQQFileApi {
 
     async uploadFile(filePath: string, elementType: ElementType = ElementType.PIC, elementSubType: number = 0) {
         const fileMd5 = await calculateFileMD5(filePath);
-        const extOrEmpty = (await fileType.fileTypeFromFile(filePath))?.ext;
+        const extOrEmpty = await fileTypeFromFile(filePath).then(e => e?.ext ?? '').catch(e => '');
         const ext = extOrEmpty ? `.${extOrEmpty}` : '';
         let fileName = `${path.basename(filePath)}`;
         if (fileName.indexOf('.') === -1) {
@@ -85,7 +90,7 @@ export class NTQQFileApi {
         };
     }
 
-    async createValidSendFileElement(context: MessageContext, filePath: string, fileName: string = '', folderId: string = '',): Promise<SendFileElement> {
+    async createValidSendFileElement(context: SendMessageContext, filePath: string, fileName: string = '', folderId: string = '',): Promise<SendFileElement> {
         const {
             fileName: _fileName,
             path,
@@ -102,12 +107,12 @@ export class NTQQFileApi {
                 fileName: fileName || _fileName,
                 folderId: folderId,
                 filePath: path,
-                fileSize: (fileSize).toString(),
+                fileSize: fileSize.toString(),
             },
         };
     }
 
-    async createValidSendPicElement(context: MessageContext, picPath: string, summary: string = '', subType: 0 | 1 = 0,): Promise<SendPicElement> {
+    async createValidSendPicElement(context: SendMessageContext, picPath: string, summary: string = '', subType: PicSubType = 0): Promise<SendPicElement> {
         const { md5, fileName, path, fileSize } = await this.core.apis.FileApi.uploadFile(picPath, ElementType.PIC, subType);
         if (fileSize === 0) {
             throw new Error('文件异常，大小为0');
@@ -125,7 +130,7 @@ export class NTQQFileApi {
                 fileName: fileName,
                 sourcePath: path,
                 original: true,
-                picType: isGIF(picPath) ? PicType.gif : PicType.jpg,
+                picType: await getFileTypeForSendType(picPath),
                 picSubType: subType,
                 fileUuid: '',
                 fileSubId: '',
@@ -135,27 +140,27 @@ export class NTQQFileApi {
         };
     }
 
-    async createValidSendVideoElement(context: MessageContext, filePath: string, fileName: string = '', diyThumbPath: string = ''): Promise<SendVideoElement> {
-        const logger = this.core.context.logger;
+    async createValidSendVideoElement(context: SendMessageContext, filePath: string, fileName: string = '', diyThumbPath: string = ''): Promise<SendVideoElement> {
         let videoInfo = {
-            width: 1920, height: 1080,
+            width: 1920,
+            height: 1080,
             time: 15,
             format: 'mp4',
             size: 0,
             filePath,
         };
         try {
-            videoInfo = await getVideoInfo(filePath, logger);
+            videoInfo = await getVideoInfo(filePath, this.context.logger);
         } catch (e) {
-            logger.logError.bind(logger)('获取视频信息失败，将使用默认值', e);
+            this.context.logger.logError('获取视频信息失败，将使用默认值', e);
         }
 
         let fileExt = 'mp4';
         try {
-            const tempExt = (await fileType.fileTypeFromFile(filePath))?.ext;
+            const tempExt = (await fileTypeFromFile(filePath))?.ext;
             if (tempExt) fileExt = tempExt;
         } catch (e) {
-            this.context.logger.logError.bind(logger)('获取文件类型失败', e);
+            this.context.logger.logError('获取文件类型失败', e);
         }
         const newFilePath = filePath + '.' + fileExt;
         fs.copyFileSync(filePath, newFilePath);
@@ -176,7 +181,7 @@ export class NTQQFileApi {
             ffmpeg(filePath)
                 .on('error', (err) => {
                     try {
-                        logger.logDebug('获取视频封面失败，使用默认封面', err);
+                        this.context.logger.logDebug('获取视频封面失败，使用默认封面', err);
                         if (diyThumbPath) {
                             fsPromises.copyFile(diyThumbPath, thumbPath).then(() => {
                                 resolve(thumbPath);
@@ -186,7 +191,7 @@ export class NTQQFileApi {
                             resolve(thumbPath);
                         }
                     } catch (error) {
-                        logger.logError.bind(logger)('获取视频封面失败，使用默认封面失败', error);
+                        this.context.logger.logError('获取视频封面失败，使用默认封面失败', error);
                     }
                 })
                 .screenshots({
@@ -223,6 +228,7 @@ export class NTQQFileApi {
     }
 
     async createValidSendPttElement(pttPath: string): Promise<SendPttElement> {
+
         const { converted, path: silkPath, duration } = await encodeSilk(pttPath, this.core.NapCatTempPath, this.core.context.logger);
         if (!silkPath) {
             throw new Error('语音转换失败, 请检查语音文件是否正常');
@@ -232,8 +238,7 @@ export class NTQQFileApi {
             throw new Error('文件异常，大小为0');
         }
         if (converted) {
-            fsPromises.unlink(silkPath).then().catch(
-                (e) => this.context.logger.logError.bind(this.context.logger)('删除临时文件失败', e)
+            fsPromises.unlink(silkPath).then().catch((e) => this.context.logger.logError('删除临时文件失败', e)
             );
         }
         return {
@@ -320,7 +325,7 @@ export class NTQQFileApi {
     }
 
     async downloadMedia(msgId: string, chatType: ChatType, peerUid: string, elementId: string, thumbPath: string, sourcePath: string, timeout = 1000 * 60 * 2, force: boolean = false) {
-        // 用于下载收到的消息中的图片等
+        // 用于下载文件
         if (sourcePath && fs.existsSync(sourcePath)) {
             if (force) {
                 try {
@@ -412,15 +417,17 @@ export class NTQQFileApi {
         }
 
         const url: string = element.originImageUrl ?? '';
+
         const md5HexStr = element.md5HexStr;
         const fileMd5 = element.md5HexStr;
-
-        if (url) {
-            const parsedUrl = new URL(IMAGE_HTTP_HOST + url);
+        const parsedUrl = new URL(IMAGE_HTTP_HOST + url);
+        const imageAppid = parsedUrl.searchParams.get('appid');
+        const isNTV2 = imageAppid && ['1406', '1407'].includes(imageAppid);
+        const imageFileId = parsedUrl.searchParams.get('fileid');
+        if (url && isNTV2 && imageFileId) {
             const rkeyData = await this.getRkeyData();
-            return this.getImageUrlFromParsedUrl(parsedUrl, rkeyData);
+            return this.getImageUrlFromParsedUrl(imageFileId, imageAppid, rkeyData);
         }
-
         return this.getImageUrlFromMd5(fileMd5, md5HexStr);
     }
 
@@ -445,7 +452,7 @@ export class NTQQFileApi {
                 }
             }
         } catch (error: any) {
-            this.context.logger.logError.bind(this.context.logger)('获取rkey失败', error.message);
+            this.context.logger.logError('获取rkey失败', error.message);
         }
 
         if (!rkeyData.online_rkey) {
@@ -455,26 +462,19 @@ export class NTQQFileApi {
                 rkeyData.private_rkey = tempRkeyData.private_rkey;
                 rkeyData.online_rkey = tempRkeyData.expired_time > Date.now() / 1000;
             } catch (e) {
-                this.context.logger.logError.bind(this.context.logger)('获取rkey失败 Fallback Old Mode', e);
+                this.context.logger.logError('获取rkey失败 Fallback Old Mode', e);
             }
         }
 
         return rkeyData;
     }
 
-    private getImageUrlFromParsedUrl(parsedUrl: URL, rkeyData: any): string {
-        const imageAppid = parsedUrl.searchParams.get('appid');
-        const isNTV2 = imageAppid && ['1406', '1407'].includes(imageAppid);
-        const imageFileId = parsedUrl.searchParams.get('fileid');
-        if (isNTV2 && rkeyData.online_rkey) {
-            const rkey = imageAppid === '1406' ? rkeyData.private_rkey : rkeyData.group_rkey;
-            return IMAGE_HTTP_HOST_NT + `/download?appid=${imageAppid}&fileid=${imageFileId}&rkey=${rkey}`;
-        } else if (isNTV2 && imageFileId) {
-            const rkey = imageAppid === '1406' ? rkeyData.private_rkey : rkeyData.group_rkey;
-            return IMAGE_HTTP_HOST + `/download?appid=${imageAppid}&fileid=${imageFileId}&rkey=${rkey}`;
+    private getImageUrlFromParsedUrl(imageFileId: string, appid: string, rkeyData: any): string {
+        const rkey = appid === '1406' ? rkeyData.private_rkey : rkeyData.group_rkey;
+        if (rkeyData.online_rkey) {
+            return IMAGE_HTTP_HOST_NT + `/download?appid=${appid}&fileid=${imageFileId}&rkey=${rkey}`;
         }
-
-        return '';
+        return IMAGE_HTTP_HOST + `/download?appid=${appid}&fileid=${imageFileId}&rkey=${rkey}`;
     }
 
     private getImageUrlFromMd5(fileMd5: string | undefined, md5HexStr: string | undefined): string {

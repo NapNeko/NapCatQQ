@@ -4,11 +4,11 @@ import {
     GroupExtParam,
     GroupInfoSource,
     GroupMember,
-    GroupMemberRole,
+    NTGroupMemberRole,
     GroupNotifyMsgType,
-    GroupRequestOperateTypes,
+    NTGroupRequestOperateTypes,
     KickMemberV2Req,
-} from '@/core/entities';
+} from '@/core/types';
 import { GeneralCallResult } from '@/core/services/common';
 
 export interface NodeIKernelGroupService {
@@ -137,7 +137,7 @@ export interface NodeIKernelGroupService {
 
     kickMember(groupCode: string, memberUids: string[], refuseForever: boolean, kickReason: string): Promise<void>;
 
-    modifyMemberRole(groupCode: string, uid: string, role: GroupMemberRole): void;
+    modifyMemberRole(groupCode: string, uid: string, role: NTGroupMemberRole): void;
 
     modifyMemberCardName(groupCode: string, uid: string, cardName: string): void;
 
@@ -149,7 +149,7 @@ export interface NodeIKernelGroupService {
 
     getGroupExtList(force: boolean): Promise<GeneralCallResult>;
 
-    getGroupDetailInfo(groupCode: string, groupInfoSource: GroupInfoSource): Promise<unknown>;
+    getGroupDetailInfo(groupCode: string, groupInfoSource: GroupInfoSource): Promise<GeneralCallResult>;
 
     getMemberExtInfo(param: GroupExtParam): Promise<unknown>;//req
 
@@ -163,7 +163,7 @@ export interface NodeIKernelGroupService {
 
     getGroupPortrait(): void;
 
-    modifyGroupName(groupCode: string, groupName: string, arg: false): void;
+    modifyGroupName(groupCode: string, groupName: string, isNormalMember: boolean): Promise<GeneralCallResult>;
 
     modifyGroupRemark(groupCode: string, remark: string): void;
 
@@ -187,20 +187,20 @@ export interface NodeIKernelGroupService {
 
     destroyGroup(groupCode: string): void;
 
-    getSingleScreenNotifies(doubted: boolean, start_seq: string, num: number): Promise<GeneralCallResult>;
+    getSingleScreenNotifies(doubt: boolean, startSeq: string, count: number): Promise<GeneralCallResult>;
 
     clearGroupNotifies(groupCode: string): void;
 
-    getGroupNotifiesUnreadCount(unknown: boolean): Promise<GeneralCallResult>;
+    getGroupNotifiesUnreadCount(doubt: boolean): Promise<GeneralCallResult>;
 
-    clearGroupNotifiesUnreadCount(unknown: boolean): void;
+    clearGroupNotifiesUnreadCount(doubt: boolean): void;
 
     operateSysNotify(
         doubt: boolean,
         operateMsg: {
-            operateType: GroupRequestOperateTypes, // 2 拒绝
+            operateType: NTGroupRequestOperateTypes,
             targetMsg: {
-                seq: string,  // 通知序列号
+                seq: string,
                 type: GroupNotifyMsgType,
                 groupCode: string,
                 postscript: string

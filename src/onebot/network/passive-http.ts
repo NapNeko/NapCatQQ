@@ -1,28 +1,23 @@
-import { IOB11NetworkAdapter, OB11NetworkReloadType } from './index';
+import { OB11EmitEventContent, OB11NetworkReloadType } from './index';
 import express, { Express, Request, Response } from 'express';
 import http from 'http';
 import { NapCatCore } from '@/core';
-import { OB11Response } from '../action/OB11Response';
+import { OB11Response } from '@/onebot/action/OneBotAction';
 import { ActionMap } from '@/onebot/action';
 import cors from 'cors';
-import { HttpServerConfig } from '../config/config';
+import { HttpServerConfig } from '@/onebot/config/config';
+import { NapCatOneBot11Adapter } from "@/onebot";
+import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
 
-export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
+export class OB11PassiveHttpAdapter extends IOB11NetworkAdapter<HttpServerConfig> {
     private app: Express | undefined;
     private server: http.Server | undefined;
-    isEnable: boolean = false;
-    public config: HttpServerConfig;
 
-    constructor(
-        public name: string,
-        config: HttpServerConfig,
-        public core: NapCatCore,
-        public actions: ActionMap,
-    ) {
-        this.config = structuredClone(config);
+    constructor(name: string, config: HttpServerConfig, core: NapCatCore, obContext: NapCatOneBot11Adapter, actions: ActionMap) {
+        super(name, config, core, obContext, actions);
     }
 
-    onEvent() {
+    onEvent<T extends OB11EmitEventContent>(event: T) {
         // http server is passive, no need to emit event
     }
 
@@ -87,21 +82,20 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
         }
     }
 
-    private async handleRequest(req: Request, res: Response) {
-        if (!this.isEnable) {
-            this.core.context.logger.log(`[OneBot] [HTTP Server Adapter] Server is closed`);
-            return res.json(OB11Response.error('Server is closed', 200));
-        }
-
+    async httpApiRequest(req: Request, res: Response) {
         let payload = req.body;
         if (req.method == 'get') {
             payload = req.query;
         } else if (req.query) {
             payload = { ...req.query, ...req.body };
         }
-
+        if (req.path === '' || req.path === '/') {
+            const hello = OB11Response.ok({});
+            hello.message = 'NapCat4 Ss Running';
+            return res.json(hello);
+        }
         const actionName = req.path.split('/')[1];
-        const action = this.actions.get(actionName);
+        const action = this.actions.get(actionName as any);
         if (action) {
             try {
                 const result = await action.handle(payload, this.name);
@@ -110,8 +104,17 @@ export class OB11PassiveHttpAdapter implements IOB11NetworkAdapter {
                 return res.json(OB11Response.error(error?.stack?.toString() || error?.message || 'Error Handle', 200));
             }
         } else {
-            return res.json(OB11Response.error('不支持的api ' + actionName, 200));
+            return res.json(OB11Response.error('不支持的Api ' + actionName, 200));
         }
+    }
+
+    async handleRequest(req: Request, res: Response) {
+        if (!this.isEnable) {
+            this.core.context.logger.log(`[OneBot] [HTTP Server Adapter] Server is closed`);
+            return res.json(OB11Response.error('Server is closed', 200));
+        }
+
+        return this.httpApiRequest(req, res);
     }
 
     async reload(newConfig: HttpServerConfig) {

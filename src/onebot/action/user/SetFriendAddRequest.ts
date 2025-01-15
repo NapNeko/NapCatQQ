@@ -1,33 +1,28 @@
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import BaseAction from '../BaseAction';
-import { ActionName } from '../types';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ActionName } from '@/onebot/action/router';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        flag: { type: 'string' },
-        approve: { type: ['string', 'boolean'] },
-        remark: { type: 'string' },
-    },
-    required: ['flag'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    flag: Type.Union([Type.String(), Type.Number()]),
+    approve: Type.Optional(Type.Union([Type.String(), Type.Boolean()])),
+    remark: Type.Optional(Type.String())
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
-export default class SetFriendAddRequest extends BaseAction<Payload, null> {
+export default class SetFriendAddRequest extends OneBotAction<Payload, null> {
     actionName = ActionName.SetFriendAddRequest;
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
         const approve = payload.approve?.toString() !== 'false';
-        await this.core.apis.FriendApi.handleFriendRequest(payload.flag, approve);
+        const notify = (await this.core.apis.FriendApi.getBuddyReq()).buddyReqs.find(e => e.reqTime == payload.flag.toString());
+        if (!notify) {
+            throw new Error('No such request');
+        }
+        await this.core.apis.FriendApi.handleFriendRequest(notify, approve);
         if (payload.remark) {
-            const data = payload.flag.split('|');
-            if (data.length < 2) {
-                throw new Error('Invalid flag');
-            }
-            const friendUid = data[0];
-            await this.core.apis.FriendApi.setBuddyRemark(friendUid, payload.remark);
+            await this.core.apis.FriendApi.setBuddyRemark(notify.friendUid, payload.remark);
         }
         return null;
     }

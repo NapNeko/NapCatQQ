@@ -1,47 +1,39 @@
-import { ActionName } from '../types';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { ActionName } from '@/onebot/action/router';
 import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
 import { MiniAppInfo, MiniAppInfoHelper } from "@/core/packet/utils/helper/miniAppHelper";
 import { MiniAppData, MiniAppRawData, MiniAppReqCustomParams, MiniAppReqParams } from "@/core/packet/entities/miniApp";
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        type: {
-            type: 'string',
-            enum: ['bili', 'weibo']
-        },
-        title: { type: 'string' },
-        desc: { type: 'string' },
-        picUrl: { type: 'string' },
-        jumpUrl: { type: 'string' },
-        iconUrl: { type: 'string' },
-        sdkId: { type: 'string' },
-        appId: { type: 'string' },
-        scene: { type: ['number', 'string'] },
-        templateType: { type: ['number', 'string'] },
-        businessType: { type: ['number', 'string'] },
-        verType: { type: ['number', 'string'] },
-        shareType: { type: ['number', 'string'] },
-        versionId: { type: 'string' },
-        withShareTicket: { type: ['number', 'string'] },
-        rawArkData: { type: ['boolean', 'string'] }
-    },
-    oneOf: [
-        {
-            required: ['type', 'title', 'desc', 'picUrl', 'jumpUrl']
-        },
-        {
-            required: [
-                'title', 'desc', 'picUrl', 'jumpUrl',
-                'iconUrl', 'appId', 'scene', 'templateType', 'businessType',
-                'verType', 'shareType', 'versionId', 'withShareTicket'
-            ]
-        }
-    ]
-} as const satisfies JSONSchema;
-
-type Payload = FromSchema<typeof SchemaData>;
+const SchemaData = Type.Union([
+    Type.Object({
+        type: Type.Union([Type.Literal('bili'), Type.Literal('weibo')]),
+        title: Type.String(),
+        desc: Type.String(),
+        picUrl: Type.String(),
+        jumpUrl: Type.String(),
+        webUrl: Type.Optional(Type.String()),
+        rawArkData: Type.Optional(Type.Union([Type.String()]))
+    }),
+    Type.Object({
+        title: Type.String(),
+        desc: Type.String(),
+        picUrl: Type.String(),
+        jumpUrl: Type.String(),
+        iconUrl: Type.String(),
+        webUrl: Type.Optional(Type.String()),
+        appId: Type.String(),
+        scene: Type.Union([Type.Number(), Type.String()]),
+        templateType: Type.Union([Type.Number(), Type.String()]),
+        businessType: Type.Union([Type.Number(), Type.String()]),
+        verType: Type.Union([Type.Number(), Type.String()]),
+        shareType: Type.Union([Type.Number(), Type.String()]),
+        versionId: Type.String(),
+        sdkId: Type.String(),
+        withShareTicket: Type.Union([Type.Number(), Type.String()]),
+        rawArkData: Type.Optional(Type.Union([Type.String()]))
+    })
+]);
+type Payload = Static<typeof SchemaData>;
 
 export class GetMiniAppArk extends GetPacketStatusDepends<Payload, {
     data: MiniAppData | MiniAppRawData
@@ -55,9 +47,10 @@ export class GetMiniAppArk extends GetPacketStatusDepends<Payload, {
             title: payload.title,
             desc: payload.desc,
             picUrl: payload.picUrl,
-            jumpUrl: payload.jumpUrl
+            jumpUrl: payload.jumpUrl,
+            webUrl: payload.webUrl,
         } as MiniAppReqCustomParams;
-        if (payload.type) {
+        if ('type' in payload) {
             reqParam = MiniAppInfoHelper.generateReq(customParams, MiniAppInfo.get(payload.type)!.template);
         } else {
             const { appId, scene, iconUrl, templateType, businessType, verType, shareType, versionId, withShareTicket } = payload;
@@ -73,13 +66,13 @@ export class GetMiniAppArk extends GetPacketStatusDepends<Payload, {
                     verType: +verType,
                     shareType: +shareType,
                     versionId: versionId,
-                    withShareTicket: +withShareTicket
+                    withShareTicket: +withShareTicket,
                 }
             );
         }
         const arkData = await this.core.apis.PacketApi.pkt.operation.GetMiniAppAdaptShareInfo(reqParam);
         return {
-            data: payload.rawArkData ? arkData : MiniAppInfoHelper.RawToSend(arkData)
+            data: payload.rawArkData === 'true' ? arkData : MiniAppInfoHelper.RawToSend(arkData)
         };
     }
 }

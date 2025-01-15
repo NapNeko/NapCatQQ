@@ -1,38 +1,28 @@
-import BaseAction from '../BaseAction';
-import { ActionName, BaseCheckResult } from '../types';
-import * as fs from 'node:fs';
-import { checkFileReceived, uri2local } from '@/common/file';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ActionName } from '@/onebot/action/router';
+import { checkFileExistV2, uriToLocalFile } from '@/common/file';
+import { Static, Type } from '@sinclair/typebox';
+import fs from 'node:fs/promises';
+const SchemaData = Type.Object({
+    file: Type.String(),
+    group_id: Type.Union([Type.Number(), Type.String()])
+});
 
-interface Payload {
-    file: string,
-    group_id: number
-}
+type Payload = Static<typeof SchemaData>;
 
-export default class SetGroupPortrait extends BaseAction<Payload, any> {
+export default class SetGroupPortrait extends OneBotAction<Payload, any> {
     actionName = ActionName.SetGroupPortrait;
-
-    // 用不着复杂检测
-    protected async check(payload: Payload): Promise<BaseCheckResult> {
-        if (!payload.file || typeof payload.file != 'string' || !payload.group_id || typeof payload.group_id != 'number') {
-            return {
-                valid: false,
-                message: 'file和group_id字段不能为空或者类型错误',
-            };
-        }
-        return {
-            valid: true,
-        };
-    }
+    payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<any> {
-        const { path, success } = (await uri2local(this.core.NapCatTempPath, payload.file));
+        const { path, success } = (await uriToLocalFile(this.core.NapCatTempPath, payload.file));
         if (!success) {
             throw new Error(`头像${payload.file}设置失败,file字段可能格式不正确`);
         }
         if (path) {
-            await checkFileReceived(path, 5000); // 文件不存在QQ会崩溃，需要提前判断
+            await checkFileExistV2(path, 5000); // 文件不存在QQ会崩溃，需要提前判断
             const ret = await this.core.apis.GroupApi.setGroupAvatar(payload.group_id.toString(), path);
-            fs.unlink(path, () => { });
+            fs.unlink(path).catch(() => { });
             if (!ret) {
                 throw new Error(`头像${payload.file}设置失败,api无返回`);
             }
@@ -43,7 +33,7 @@ export default class SetGroupPortrait extends BaseAction<Payload, any> {
             }
             return ret;
         } else {
-            fs.unlink(path, () => { });
+            fs.unlink(path).catch(() => { });
             throw new Error(`头像${payload.file}设置失败,无法获取头像,文件可能不存在`);
         }
     }

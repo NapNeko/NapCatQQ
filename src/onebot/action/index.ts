@@ -8,7 +8,7 @@ import SendGroupMsg from './group/SendGroupMsg';
 import SendPrivateMsg from './msg/SendPrivateMsg';
 import SendMsg from './msg/SendMsg';
 import DeleteMsg from './msg/DeleteMsg';
-import BaseAction from './BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import GetVersionInfo from './system/GetVersionInfo';
 import CanSendRecord from './system/CanSendRecord';
 import CanSendImage from './system/CanSendImage';
@@ -22,7 +22,6 @@ import GoCQHTTPGetStrangerInfo from './go-cqhttp/GetStrangerInfo';
 import SendLike from './user/SendLike';
 import SetGroupAddRequest from './group/SetGroupAddRequest';
 import SetGroupLeave from './group/SetGroupLeave';
-import GetGuildList from './guild/GetGuildList';
 import SetFriendAddRequest from './user/SetFriendAddRequest';
 import SetGroupWholeBan from './group/SetGroupWholeBan';
 import SetGroupName from './group/SetGroupName';
@@ -70,7 +69,6 @@ import { FetchEmojiLike } from './extends/FetchEmojiLike';
 import { FetchUserProfileLike } from './extends/FetchUserProfileLike';
 import { NapCatCore } from '@/core';
 import { NapCatOneBot11Adapter } from '@/onebot';
-import GetGuildProfile from './guild/GetGuildProfile';
 import { SetInputStatus } from './extends/SetInputStatus';
 import { GetCSRF } from './system/GetCSRF';
 import { DelGroupNotice } from './group/DelGroupNotice';
@@ -102,11 +100,13 @@ import { GetMiniAppArk } from "@/onebot/action/extends/GetMiniAppArk";
 import { GetAiRecord } from "@/onebot/action/group/GetAiRecord";
 import { SendGroupAiRecord } from "@/onebot/action/group/SendGroupAiRecord";
 import { GetAiCharacters } from "@/onebot/action/extends/GetAiCharacters";
+import { GetGuildList } from './guild/GetGuildList';
+import { GetGuildProfile } from './guild/GetGuildProfile';
+import { GetClientkey } from './extends/GetClientkey';
+import { SendPacket } from './extends/SendPacket';
+import { SendPoke } from "@/onebot/action/packet/SendPoke";
 
-
-export type ActionMap = Map<string, BaseAction<any, any>>;
-
-export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore): ActionMap {
+export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 
     const actionHandlers = [
         new GetGroupInfoEx(obContext, core),
@@ -126,6 +126,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new GetGroupRootFiles(obContext, core),
         new SetGroupSign(obContext, core),
         new SendGroupSign(obContext, core),
+        new GetClientkey(obContext, core),
         // onebot11
         new SendLike(obContext, core),
         new GetMsg(obContext, core),
@@ -219,13 +220,33 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new GetAiRecord(obContext, core),
         new SendGroupAiRecord(obContext, core),
         new GetAiCharacters(obContext, core),
+        new SendPacket(obContext, core),
+        new SendPoke(obContext, core),
     ];
-    const actionMap = new Map();
-    for (const action of actionHandlers) {
-        actionMap.set(action.actionName, action);
-        actionMap.set(action.actionName + '_async', action);
-        actionMap.set(action.actionName + '_rate_limited', action);
+
+    type HandlerUnion = typeof actionHandlers[number];
+    type MapType = {
+        [H in HandlerUnion as H['actionName']]: H;
+    } & {
+        [H in HandlerUnion as `${H['actionName']}_async`]: H;
+    } & {
+        [H in HandlerUnion as `${H['actionName']}_rate_limited`]: H;
+    };
+
+    const _map = new Map<keyof MapType, HandlerUnion>();
+
+    actionHandlers.forEach(h => {
+        _map.set(h.actionName as keyof MapType, h);
+        _map.set(`${h.actionName}_async` as keyof MapType, h);
+        _map.set(`${h.actionName}_rate_limited` as keyof MapType, h);
+    });
+
+    function get<K extends keyof MapType>(key: K): MapType[K];
+    function get<K extends keyof MapType>(key: K): null;
+    function get<K extends keyof MapType>(key: K): HandlerUnion | null | MapType[K] {
+        return _map.get(key as keyof MapType) ?? null;
     }
 
-    return actionMap;
+    return { get };
 }
+export type ActionMap = ReturnType<typeof createActionMap>

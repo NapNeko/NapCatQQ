@@ -1,9 +1,9 @@
 import winston, { format, transports } from 'winston';
 import { truncateString } from '@/common/helper';
 import path from 'node:path';
-import fs from 'node:fs';
-import { AtType, ChatType, ElementType, MessageElement, RawMessage, SelfInfo } from '@/core';
-
+import fs from 'node:fs/promises';
+import { NTMsgAtType, ChatType, ElementType, MessageElement, RawMessage, SelfInfo } from '@/core';
+import EventEmitter from 'node:events';
 export enum LogLevel {
     DEBUG = 'debug',
     INFO = 'info',
@@ -23,6 +23,36 @@ function getFormattedTimestamp() {
     const milliseconds = now.getMilliseconds().toString().padStart(3, '0');
     return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}.${milliseconds}`;
 }
+
+const logEmitter = new EventEmitter();
+export type LogListener = (msg: string) => void;
+class Subscription {
+    public static MAX_HISTORY = 100;
+    public static history: string[] = [];
+
+    subscribe(listener: LogListener) {
+        for (const history of Subscription.history) {
+            try {
+                listener(history);
+            } catch (_) {
+                // ignore
+            }
+        }
+        logEmitter.on('log', listener);
+    }
+    unsubscribe(listener: LogListener) {
+        logEmitter.off('log', listener);
+    }
+    notify(msg: string) {
+        logEmitter.emit('log', msg);
+        if (Subscription.history.length >= Subscription.MAX_HISTORY) {
+            Subscription.history.shift();
+        }
+        Subscription.history.push(msg);
+    }
+}
+
+export const logSubscription = new Subscription();
 
 export class LogWrapper {
     fileLogEnabled = true;
@@ -47,7 +77,7 @@ export class LogWrapper {
                     filename: logPath,
                     level: 'debug',
                     maxsize: 5 * 1024 * 1024, // 5MB
-                    maxFiles: 5
+                    maxFiles: 5,
                 }),
                 new transports.Console({
                     format: format.combine(
@@ -56,9 +86,9 @@ export class LogWrapper {
                             const userInfo = meta.userInfo ? `${meta.userInfo} | ` : '';
                             return `${timestamp} [${level}] ${userInfo}${message}`;
                         })
-                    )
-                })
-            ]
+                    ),
+                }),
+            ],
         });
 
         this.setLogSelfInfo({ nick: '', uid: '' });
@@ -67,26 +97,20 @@ export class LogWrapper {
 
     cleanOldLogs(logDir: string) {
         const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-        fs.readdir(logDir, (err, files) => {
-            if (err) {
-                this.logger.error('Failed to read log directory', err);
-                return;
-            }
-            files.forEach(file => {
+        fs.readdir(logDir).then((files) => {
+            files.forEach((file) => {
                 const filePath = path.join(logDir, file);
                 this.deleteOldLogFile(filePath, oneWeekAgo);
             });
+        }).catch((err) => {
+            this.logger.error('Failed to read log directory', err);
         });
     }
 
     private deleteOldLogFile(filePath: string, oneWeekAgo: number) {
-        fs.stat(filePath, (err, stats) => {
-            if (err) {
-                this.logger.error('Failed to get file stats', err);
-                return;
-            }
+        fs.stat(filePath).then((stats) => {
             if (stats.mtime.getTime() < oneWeekAgo) {
-                fs.unlink(filePath, err => {
+                fs.unlink(filePath).catch((err) => {
                     if (err) {
                         if (err.code === 'ENOENT') {
                             this.logger.warn(`File already deleted: ${filePath}`);
@@ -98,6 +122,8 @@ export class LogWrapper {
                     }
                 });
             }
+        }).catch((err) => {
+            this.logger.error('Failed to get file stats', err);
         });
     }
 
@@ -111,7 +137,7 @@ export class LogWrapper {
         });
     }
 
-    setLogSelfInfo(selfInfo: { nick: string, uid: string }) {
+    setLogSelfInfo(selfInfo: { nick: string; uid: string }) {
         const userInfo = `${selfInfo.nick}`;
         this.logger.defaultMeta = { userInfo };
     }
@@ -135,14 +161,16 @@ export class LogWrapper {
     }
 
     formatMsg(msg: any[]) {
-        return msg.map(msgItem => {
-            if (msgItem instanceof Error) {
-                return msgItem.stack;
-            } else if (typeof msgItem === 'object') {
-                return JSON.stringify(truncateString(JSON.parse(JSON.stringify(msgItem, null, 2))));
-            }
-            return msgItem;
-        }).join(' ');
+        return msg
+            .map((msgItem) => {
+                if (msgItem instanceof Error) {
+                    return msgItem.stack;
+                } else if (typeof msgItem === 'object') {
+                    return JSON.stringify(truncateString(JSON.parse(JSON.stringify(msgItem, null, 2))));
+                }
+                return msgItem;
+            })
+            .join(' ');
     }
 
     _log(level: LogLevel, ...args: any[]) {
@@ -155,6 +183,7 @@ export class LogWrapper {
             // eslint-disable-next-line no-control-regex
             this.logger.log(level, message.replace(/\x1B[@-_][0-?]*[ -/]*[@-~]/g, ''));
         }
+        logSubscription.notify(JSON.stringify({ level, message }));
     }
 
     log(...args: any[]) {
@@ -270,25 +299,21 @@ function msgElementToText(element: MessageElement, msg: RawMessage, recursiveLev
 }
 
 function textElementToText(textElement: any): string {
-    if (textElement.atType === AtType.notAt) {
+    if (textElement.atType === NTMsgAtType.ATTYPEUNKNOWN) {
         const originalContentLines = textElement.content.split('\n');
         return `${originalContentLines[0]}${originalContentLines.length > 1 ? ' ...' : ''}`;
-    } else if (textElement.atType === AtType.atAll) {
+    } else if (textElement.atType === NTMsgAtType.ATTYPEALL) {
         return `@全体成员`;
-    } else if (textElement.atType === AtType.atUser) {
+    } else if (textElement.atType === NTMsgAtType.ATTYPEONE) {
         return `${textElement.content} (${textElement.atUid})`;
     }
     return '';
 }
 
 function replyElementToText(replyElement: any, msg: RawMessage, recursiveLevel: number): string {
-    const recordMsgOrNull = msg.records.find(
-        record => replyElement.sourceMsgIdInRecords === record.msgId,
-    );
-    return `[回复消息 ${recordMsgOrNull &&
-        recordMsgOrNull.peerUin != '284840486' && recordMsgOrNull.peerUin != '1094950020'
-        ?
-        rawMessageToText(recordMsgOrNull, recursiveLevel + 1) :
-        `未找到消息记录 (MsgId = ${replyElement.sourceMsgIdInRecords})`
+    const recordMsgOrNull = msg.records.find((record) => replyElement.sourceMsgIdInRecords === record.msgId);
+    return `[回复消息 ${recordMsgOrNull && recordMsgOrNull.peerUin != '284840486' && recordMsgOrNull.peerUin != '1094950020'
+        ? rawMessageToText(recordMsgOrNull, recursiveLevel + 1)
+        : `未找到消息记录 (MsgId = ${replyElement.sourceMsgIdInRecords})`
     }]`;
 }

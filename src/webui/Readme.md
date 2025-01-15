@@ -1,3 +1,3 @@
 # The Path of NapCatQQ
 
-Tiny WebUi for NapCatQQ
+Tiny WebUi Backend for NapCatQQ

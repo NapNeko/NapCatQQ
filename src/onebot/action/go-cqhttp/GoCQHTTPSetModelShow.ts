@@ -1,19 +1,10 @@
-import BaseAction from '../BaseAction';
-import { ActionName } from '../types';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-
-const SchemaData = {
-    type: 'object',
-    properties: {},
-} as const satisfies JSONSchema;
-type Payload = FromSchema<typeof SchemaData>;
-
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ActionName } from '@/onebot/action/router';
 //兼容性代码
-export class GoCQHTTPSetModelShow extends BaseAction<Payload, any> {
+export class GoCQHTTPSetModelShow extends OneBotAction<void, any> {
     actionName = ActionName.GoCQHTTP_SetModelShow;
-    payloadSchema = SchemaData;
 
-    async _handle(payload: Payload) {
+    async _handle(payload: void) {
         return null;
     }
 }

@@ -10,12 +10,14 @@ class OB11PokeEvent extends OB11BaseNoticeEvent {
 
 export class OB11FriendPokeEvent extends OB11PokeEvent {
     raw_info: any;
+    sender_id: number;
 
     //raw_message nb等框架标准为string
-    constructor(core: NapCatCore, user_id: number, target_id: number, raw_message: any) {
+    constructor(core: NapCatCore, user_id: number, sender_id: number, target_id: number, raw_message: any) {
         super(core);
         this.target_id = target_id;
         this.user_id = user_id;
+        this.sender_id = sender_id;
         this.raw_info = raw_message;
     }
 }

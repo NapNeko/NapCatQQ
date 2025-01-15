@@ -31,7 +31,7 @@ export class NTQQPacketApi {
         await this.InitSendPacket(this.context.basicInfoWrapper.getFullQQVesion())
             .then()
             .catch((err) => {
-                this.logger.logError.bind(this.core.context.logger);
+                this.logger.logError(err);
                 this.errStack.push(err);
             });
     }

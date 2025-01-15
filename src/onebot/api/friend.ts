@@ -1,7 +1,6 @@
 import { GrayTipElement, NapCatCore } from '@/core';
-
 import { NapCatOneBot11Adapter } from '@/onebot';
-import { OB11FriendPokeEvent } from '../event/notice/OB11PokeEvent';
+import { OB11FriendPokeEvent } from '@/onebot/event/notice/OB11PokeEvent';
 
 export class OneBotFriendApi {
     obContext: NapCatOneBot11Adapter;
@@ -13,16 +12,17 @@ export class OneBotFriendApi {
     }
 
     //使用前预先判断 busiId 1061
-    async parsePrivatePokeEvent(grayTipElement: GrayTipElement) {
+    async parsePrivatePokeEvent(grayTipElement: GrayTipElement, uin: number) {
         const json = JSON.parse(grayTipElement.jsonGrayTipElement.jsonStr);
-        let pokedetail: Array<{ uid: string }> = json.items;
+        const pokedetail: Array<{ uid: string }> = json.items;
         //筛选item带有uid的元素
-        pokedetail = pokedetail.filter(item => item.uid);
-        if (pokedetail.length == 2) {
+        const poke_uid = pokedetail.filter(item => item.uid);
+        if (poke_uid.length == 2) {
             return new OB11FriendPokeEvent(
                 this.core,
-                parseInt((await this.core.apis.UserApi.getUinByUidV2(pokedetail[0].uid))),
-                parseInt((await this.core.apis.UserApi.getUinByUidV2(pokedetail[1].uid))),
+                uin,
+                parseInt((await this.core.apis.UserApi.getUinByUidV2(poke_uid[0].uid))),
+                parseInt((await this.core.apis.UserApi.getUinByUidV2(poke_uid[1].uid))),
                 pokedetail,
             );
         }

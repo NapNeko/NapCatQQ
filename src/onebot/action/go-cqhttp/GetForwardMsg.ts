@@ -1,22 +1,17 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { OB11Message, OB11MessageData, OB11MessageDataType, OB11MessageForward, OB11MessageNodePlain as OB11MessageNode } from '@/onebot';
-import { ActionName } from '../types';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { ActionName } from '@/onebot/action/router';
 import { MessageUnique } from '@/common/message-unique';
+import { Static, Type } from '@sinclair/typebox';
 
+const SchemaData = Type.Object({
+    message_id: Type.Optional(Type.Union([Type.Number(), Type.String()])),
+    id: Type.Optional(Type.Union([Type.Number(), Type.String()])),
+});
 
+type Payload = Static<typeof SchemaData>;
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        message_id: { type: 'string' },
-        id: { type: 'string' },
-    },
-} as const satisfies JSONSchema;
-
-type Payload = FromSchema<typeof SchemaData>;
-
-export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
+export class GoCQHTTPGetForwardMsgAction extends OneBotAction<Payload, any> {
     actionName = ActionName.GoCQHTTP_GetForwardMsg;
     payloadSchema = SchemaData;
 
@@ -41,7 +36,7 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
             for (const msgdata of message.message) {
                 if ((msgdata as OB11MessageData).type === OB11MessageDataType.forward) {
                     const newNode = this.createTemplateNode(message);
-                    newNode.data.message = await this.parseForward((msgdata as OB11MessageForward).data.content);
+                    newNode.data.message = await this.parseForward((msgdata as OB11MessageForward).data.content ?? []);
 
                     templateNode.data.message.push(newNode);
                 } else {
@@ -60,7 +55,7 @@ export class GoCQHTTPGetForwardMsgAction extends BaseAction<Payload, any> {
             throw new Error('message_id is required');
         }
 
-        const rootMsgId = MessageUnique.getShortIdByMsgId(msgId);
+        const rootMsgId = MessageUnique.getShortIdByMsgId(msgId.toString());
         const rootMsg = MessageUnique.getMsgIdAndPeerByShortId(rootMsgId ?? +msgId);
         if (!rootMsg) {
             throw new Error('msg not found');

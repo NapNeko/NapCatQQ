@@ -5,3 +5,4 @@ export { default as GroupSign } from './GroupSign';
 export { default as GetStrangerInfo } from './GetStrangerInfo';
 export { default as SendPoke } from './SendPoke';
 export { default as SetSpecialTitle } from './SetSpecialTitle';
+export { default as ImageOCR } from './ImageOCR';

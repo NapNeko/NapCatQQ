@@ -1,20 +1,16 @@
-import BaseAction from '../BaseAction';
-import { ActionName } from '../types';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ActionName } from '@/onebot/action/router';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        group_id: { type: ['number', 'string'] },
-        user_id: { type: ['number', 'string'] },
-        card: { type: 'string' },
-    },
-    required: ['group_id', 'user_id', 'card'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
+    user_id: Type.Union([Type.Number(), Type.String()]),
+    card: Type.Optional(Type.String())
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
-export default class SetGroupCard extends BaseAction<Payload, null> {
+export default class SetGroupCard extends OneBotAction<Payload, null> {
     actionName = ActionName.SetGroupCard;
     payloadSchema = SchemaData;
 
