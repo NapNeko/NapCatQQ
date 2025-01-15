@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import { systemPlatform } from '@/common/system';
 import { getDefaultQQVersionConfigInfo, getQQPackageInfoPath, getQQVersionConfigPath, parseAppidFromMajor } from './helper';
 import AppidTable from '@/core/external/appid.json';
-import { LogWrapper } from './log';
+import { LogWrapper } from '@/common/log';
 import { getMajorPath } from '@/core';
 
 export class QQBasicInfoWrapper {

@@ -1,16 +1,12 @@
-import { ActionName } from '../types';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { ActionName } from '@/onebot/action/router';
 import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        user_id: { type: ['number', 'string'] },
-    },
-    required: ['user_id'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    user_id: Type.Union([Type.Number(), Type.String()])
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export class FriendPoke extends GetPacketStatusDepends<Payload, any> {
     actionName = ActionName.FriendPoke;

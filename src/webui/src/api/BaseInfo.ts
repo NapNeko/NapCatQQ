@@ -1,15 +1,15 @@
 import { RequestHandler } from 'express';
-import { WebUiDataRuntime } from '../helper/Data';
+import { WebUiDataRuntime } from '@webapi/helper/Data';
 
-export const LogFileListHandler: RequestHandler = async (req, res) => {
-    res.send({
-        code: 0,
-        data: {
-            uin: 0,
-            nick: 'NapCat',
-            avatar: 'https://q1.qlogo.cn/g?b=qq&nk=0&s=640',
-            status: 'online',
-            boottime: Date.now()
-        }
-    });
+import { sendSuccess } from '@webapi/utils/response';
+
+export const PackageInfoHandler: RequestHandler = (_, res) => {
+    const data = WebUiDataRuntime.getPackageJson();
+    sendSuccess(res, data);
+};
+
+
+export const QQVersionHandler: RequestHandler = (_, res) => {
+    const data = WebUiDataRuntime.getQQVersion();
+    sendSuccess(res, data);
 };

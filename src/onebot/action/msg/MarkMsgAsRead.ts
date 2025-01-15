@@ -1,21 +1,18 @@
-import { ChatType, Peer } from '@/core/entities';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import BaseAction from '../BaseAction';
-import { ActionName } from '../types';
+import { ChatType, Peer } from '@/core/types';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ActionName } from '@/onebot/action/router';
 import { MessageUnique } from '@/common/message-unique';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        user_id: { type: ['number', 'string'] },
-        group_id: { type: ['number', 'string'] },
-        message_id: { type: ['number', 'string'] },
-    },
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    user_id: Type.Optional(Type.Union([Type.String(), Type.Number()])),
+    group_id: Type.Optional(Type.Union([Type.String(), Type.Number()])),
+    message_id: Type.Optional(Type.Union([Type.String(), Type.Number()])),
+});
 
-type PlayloadType = FromSchema<typeof SchemaData>;
+type PlayloadType = Static<typeof SchemaData>;
 
-class MarkMsgAsRead extends BaseAction<PlayloadType, null> {
+class MarkMsgAsRead extends OneBotAction<PlayloadType, null> {
     async getPeer(payload: PlayloadType): Promise<Peer> {
         if (payload.message_id) {
             const s_peer = MessageUnique.getMsgIdAndPeerByShortId(+payload.message_id)?.Peer;
@@ -65,7 +62,7 @@ export class GoCQHTTPMarkMsgAsRead extends MarkMsgAsRead {
     actionName = ActionName.GoCQHTTP_MarkMsgAsRead;
 }
 
-export class MarkAllMsgAsRead extends BaseAction<any, null> {
+export class MarkAllMsgAsRead extends OneBotAction<any, null> {
     actionName = ActionName._MarkAllMsgAsRead;
 
     async _handle(): Promise<null> {

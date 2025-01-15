@@ -1,24 +1,15 @@
-import { ActionName } from '../types';
-import BaseAction from '../BaseAction';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { ActionName } from '@/onebot/action/router';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { MessageUnique } from '@/common/message-unique';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        message_id: {
-            oneOf: [
-                { type: 'number' },
-                { type: 'string' },
-            ],
-        },
-    },
-    required: ['message_id'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    message_id: Type.Union([Type.Number(), Type.String()]),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
-class DeleteMsg extends BaseAction<Payload, void> {
+class DeleteMsg extends OneBotAction<Payload, void> {
     actionName = ActionName.DeleteMsg;
     payloadSchema = SchemaData;
 

@@ -1,8 +1,7 @@
 import { WebApiGroupNoticeFeed } from '@/core';
-import BaseAction from '../BaseAction';
-import { ActionName } from '../types';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ActionName } from '@/onebot/action/router';
+import { Static, Type } from '@sinclair/typebox';
 interface GroupNotice {
     sender_id: number;
     publish_time: number;
@@ -17,19 +16,15 @@ interface GroupNotice {
     };
 }
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        group_id: { type: ['number', 'string'] },
-    },
-    required: ['group_id'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 type ApiGroupNotice = GroupNotice & WebApiGroupNoticeFeed;
 
-export class GetGroupNotice extends BaseAction<Payload, GroupNotice[]> {
+export class GetGroupNotice extends OneBotAction<Payload, GroupNotice[]> {
     actionName = ActionName.GoCQHTTP_GetGroupNotice;
     payloadSchema = SchemaData;
 

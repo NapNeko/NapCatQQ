@@ -4,7 +4,7 @@ import path from 'node:path';
 import { randomUUID } from 'crypto';
 import { spawn } from 'node:child_process';
 import { EncodeResult, getDuration, getWavFileInfo, isSilk, isWav } from 'silk-wasm';
-import { LogWrapper } from './log';
+import { LogWrapper } from '@/common/log';
 import { EncodeArgs } from "@/common/audio-worker";
 
 const ALLOW_SAMPLE_RATE = [8000, 12000, 16000, 24000, 32000, 44100, 48000];
@@ -96,7 +96,7 @@ export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: Log
             };
         }
     } catch (error: any) {
-        logger.logError.bind(logger)('convert silk failed', error.stack);
+        logger.logError('convert silk failed', error.stack);
         return {};
     }
 }

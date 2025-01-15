@@ -1,16 +1,19 @@
-import BaseAction from '../BaseAction';
-import { ActionName } from '../types';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ActionName } from '@/onebot/action/router';
 
 interface ReturnType {
     yes: boolean;
 }
 
-export default class CanSendRecord extends BaseAction<any, ReturnType> {
-    actionName = ActionName.CanSendRecord;
-
+export class CanSend extends OneBotAction<any, ReturnType> {
     async _handle(_payload: void): Promise<ReturnType> {
         return {
             yes: true,
         };
     }
+}
+
+
+export default class CanSendRecord extends CanSend{
+    actionName = ActionName.CanSendRecord;
 }

@@ -1,16 +1,14 @@
-import BaseAction from '../BaseAction';
-import { ActionName } from '../types';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ActionName } from '@/onebot/action/router';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        model: { type: 'string' },
-    }
-} as const satisfies JSONSchema;
-type Payload = FromSchema<typeof SchemaData>;
+const SchemaData = Type.Object({
+    model:  Type.String(),
+});
 
-export class GoCQHTTPGetModelShow extends BaseAction<Payload, any> {
+type Payload = Static<typeof SchemaData>;
+
+export class GoCQHTTPGetModelShow extends OneBotAction<Payload, any> {
     actionName = ActionName.GoCQHTTP_GetModelShow;
     payloadSchema = SchemaData;
 

@@ -1,26 +1,22 @@
-import BaseAction from '../BaseAction';
-import { ActionName } from '../types';
-import { ChatType, Peer } from '@/core/entities';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ActionName } from '@/onebot/action/router';
+import { ChatType, Peer } from '@/core/types';
 import fs from 'fs';
-import { uri2local } from '@/common/file';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import { MessageContext } from '@/onebot/api';
+import { uriToLocalFile } from '@/common/file';
+import { SendMessageContext } from '@/onebot/api';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        group_id: { type: ['number', 'string'] },
-        file: { type: 'string' },
-        name: { type: 'string' },
-        folder: { type: 'string' },
-        folder_id: { type: 'string' },//临时扩展
-    },
-    required: ['group_id', 'file', 'name'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
+    file: Type.String(),
+    name: Type.String(),
+    folder: Type.Optional(Type.String()),
+    folder_id: Type.Optional(Type.String()),//临时扩展
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
-export default class GoCQHTTPUploadGroupFile extends BaseAction<Payload, null> {
+export default class GoCQHTTPUploadGroupFile extends OneBotAction<Payload, null> {
     actionName = ActionName.GoCQHTTP_UploadGroupFile;
     payloadSchema = SchemaData;
 
@@ -29,7 +25,7 @@ export default class GoCQHTTPUploadGroupFile extends BaseAction<Payload, null> {
         if (fs.existsSync(file)) {
             file = `file://${file}`;
         }
-        const downloadResult = await uri2local(this.core.NapCatTempPath, file);
+        const downloadResult = await uriToLocalFile(this.core.NapCatTempPath, file);
         const peer: Peer = {
             chatType: ChatType.KCHATTYPEGROUP,
             peerUid: payload.group_id.toString(),
@@ -37,7 +33,7 @@ export default class GoCQHTTPUploadGroupFile extends BaseAction<Payload, null> {
         if (!downloadResult.success) {
             throw new Error(downloadResult.errMsg);
         }
-        const msgContext: MessageContext = {
+        const msgContext: SendMessageContext = {
             peer: peer,
             deleteAfterSentFiles: []
         };

@@ -1,4 +1,4 @@
-import {
+import type {
     NapCatOneBot11Adapter,
     OB11Message,
     OB11MessageAt,
@@ -10,34 +10,35 @@ import {
     QuickActionGroupMessage,
     QuickActionGroupRequest,
 } from '@/onebot';
-import { GroupRequestOperateTypes, NapCatCore, Peer } from '@/core';
-import { OB11FriendRequestEvent } from '@/onebot/event/request/OB11FriendRequest';
-import { OB11GroupRequestEvent } from '@/onebot/event/request/OB11GroupRequest';
+import { NTGroupRequestOperateTypes, type NapCatCore, type Peer } from '@/core';
+import type { OB11FriendRequestEvent } from '@/onebot/event/request/OB11FriendRequest';
+import type { OB11GroupRequestEvent } from '@/onebot/event/request/OB11GroupRequest';
+
 import { ContextMode, createContext, normalize } from '@/onebot/action/msg/SendMsg';
 import { isNull } from '@/common/helper';
 
 export class OneBotQuickActionApi {
-    constructor(
-        public obContext: NapCatOneBot11Adapter,
-        public core: NapCatCore,
-    ) {
+    obContext: NapCatOneBot11Adapter;
+    core: NapCatCore;
+    constructor(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
+        this.obContext = obContext;
+        this.core = core;
     }
 
     async handleQuickOperation(eventContext: QuickActionEvent, quickAction: QuickAction) {
-        const logger = this.core.context.logger;
         if (eventContext.post_type === 'message') {
             await this.handleMsg(eventContext as OB11Message, quickAction)
-                .catch(logger.logError.bind(logger));
+                .catch(e => this.core.context.logger.logError(e));
         }
         if (eventContext.post_type === 'request') {
             const friendRequest = eventContext as OB11FriendRequestEvent;
             const groupRequest = eventContext as OB11GroupRequestEvent;
             if ((friendRequest).request_type === 'friend') {
                 await this.handleFriendRequest(friendRequest, quickAction)
-                    .catch(logger.logError.bind(logger));
+                    .catch(e => this.core.context.logger.logError(e));
             } else if (groupRequest.request_type === 'group') {
                 await this.handleGroupRequest(groupRequest, quickAction)
-                    .catch(logger.logError.bind(logger));
+                    .catch(e => this.core.context.logger.logError(e));
             }
         }
     }
@@ -51,7 +52,7 @@ export class OneBotQuickActionApi {
             group_id: msg.group_id?.toString(),
             user_id: msg.user_id?.toString(),
         }, peerContextMode);
-        
+
         if (reply) {
             // let group: Group | undefined;
             let replyMessage: OB11MessageData[] = [];
@@ -78,23 +79,35 @@ export class OneBotQuickActionApi {
                 sendElements,
                 deleteAfterSentFiles,
             } = await this.obContext.apis.MsgApi.createSendElements(replyMessage, peer);
-            this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, deleteAfterSentFiles, false).then().catch(this.core.context.logger.logError.bind(this.core.context.logger));
+            this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, deleteAfterSentFiles, false).then().catch(e => this.core.context.logger.logError(e));
         }
+    }
+    async findNotify(flag: string) {
+        let notify = (await this.core.apis.GroupApi.getSingleScreenNotifies(false, 100)).find(e => e.seq == flag);
+        if (!notify) {
+            notify = (await this.core.apis.GroupApi.getSingleScreenNotifies(true, 100)).find(e => e.seq == flag);
+        }
+        return notify;
     }
 
     async handleGroupRequest(request: OB11GroupRequestEvent, quickAction: QuickActionGroupRequest) {
-        if (!isNull(quickAction.approve)) {
+        
+        const invite_notify = this.obContext.apis.MsgApi.notifyGroupInvite.get(request.flag);
+        const notify = invite_notify ?? await this.findNotify(request.flag);
+
+        if (!isNull(quickAction.approve) && notify) {
             this.core.apis.GroupApi.handleGroupRequest(
-                request.flag,
-                quickAction.approve ? GroupRequestOperateTypes.approve : GroupRequestOperateTypes.reject,
+                notify,
+                quickAction.approve ? NTGroupRequestOperateTypes.KAGREE : NTGroupRequestOperateTypes.KREFUSE,
                 quickAction.reason,
-            ).catch(this.core.context.logger.logError.bind(this.core.context.logger));
+            ).catch(e => this.core.context.logger.logError(e));
         }
     }
 
     async handleFriendRequest(request: OB11FriendRequestEvent, quickAction: QuickActionFriendRequest) {
-        if (!isNull(quickAction.approve)) {
-            this.core.apis.FriendApi.handleFriendRequest(request.flag, !!quickAction.approve).then().catch(this.core.context.logger.logError.bind(this.core.context.logger));
+        const notify = (await this.core.apis.FriendApi.getBuddyReq()).buddyReqs.find(e => e.reqTime == request.flag.toString());
+        if (!isNull(quickAction.approve) && notify) {
+            this.core.apis.FriendApi.handleFriendRequest(notify, !!quickAction.approve).then().catch(e => this.core.context.logger.logError(e));
         }
     }
 }

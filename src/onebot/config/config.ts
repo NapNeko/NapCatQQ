@@ -28,6 +28,7 @@ interface v1Config {
 export interface AdapterConfigInner {
     name: string;
     enable: boolean;
+
 }
 export type AdapterConfigWrap = AdapterConfigInner & Partial<NetworkConfigAdapter>;
 
@@ -36,6 +37,14 @@ export interface AdapterConfig extends AdapterConfigInner {
 }
 
 const createDefaultAdapterConfig = <T extends AdapterConfig>(config: T): T => config;
+
+export interface PluginConfig extends AdapterConfig {
+    name: string;
+    enable: boolean;
+    messagePostFormat: string;
+    reportSelfMessage: boolean;
+    debug: boolean;
+}
 
 export const httpServerDefaultConfigs = createDefaultAdapterConfig({
     name: 'http-server',
@@ -49,6 +58,13 @@ export const httpServerDefaultConfigs = createDefaultAdapterConfig({
     debug: false,
 });
 export type HttpServerConfig = typeof httpServerDefaultConfigs;
+
+export const httpSseServerDefaultConfigs = createDefaultAdapterConfig({
+    ...httpServerDefaultConfigs,
+    name: 'http-sse-server',
+    reportSelfMessage: false,
+});
+export type HttpSseServerConfig = typeof httpSseServerDefaultConfigs;
 
 export const httpClientDefaultConfigs = createDefaultAdapterConfig({
     name: 'http-client',
@@ -90,6 +106,7 @@ export type WebsocketClientConfig = typeof websocketClientDefaultConfigs;
 
 export interface NetworkConfig {
     httpServers: Array<HttpServerConfig>;
+    httpSseServers: Array<HttpSseServerConfig>;
     httpClients: Array<HttpClientConfig>;
     websocketServers: Array<WebsocketServerConfig>;
     websocketClients: Array<WebsocketClientConfig>;
@@ -103,6 +120,7 @@ export interface OneBotConfig {
     network: NetworkConfig; // 网络配置
     musicSignUrl: string; // 音乐签名地址
     enableLocalFile2Url: boolean;
+    parseMultMsg: boolean;
 }
 
 const createDefaultConfig = <T>(config: T): T => config;
@@ -110,12 +128,14 @@ const createDefaultConfig = <T>(config: T): T => config;
 export const defaultOneBotConfigs = createDefaultConfig<OneBotConfig>({
     network: {
         httpServers: [],
+        httpSseServers: [],
         httpClients: [],
         websocketServers: [],
         websocketClients: [],
     },
     musicSignUrl: '',
     enableLocalFile2Url: false,
+    parseMultMsg: true
 });
 
 export const mergeNetworkDefaultConfig = {
@@ -125,7 +145,7 @@ export const mergeNetworkDefaultConfig = {
     websocketClients: websocketClientDefaultConfigs,
 } as const;
 
-export type NetworkConfigAdapter = HttpServerConfig | HttpClientConfig | WebsocketServerConfig | WebsocketClientConfig;
+export type NetworkConfigAdapter = HttpServerConfig | HttpClientConfig | WebsocketServerConfig | WebsocketClientConfig | PluginConfig;
 type NetworkConfigKeys = keyof typeof mergeNetworkDefaultConfig;
 
 export function mergeOneBotConfigs(
@@ -149,6 +169,12 @@ export function mergeOneBotConfigs(
     if (userConfig.musicSignUrl !== undefined) {
         mergedConfig.musicSignUrl = userConfig.musicSignUrl;
     }
+    if (userConfig.enableLocalFile2Url !== undefined) {
+        mergedConfig.enableLocalFile2Url = userConfig.enableLocalFile2Url;
+    }
+    if (userConfig.parseMultMsg !== undefined) {
+        mergedConfig.parseMultMsg = userConfig.parseMultMsg;
+    }
     return mergedConfig;
 }
 
@@ -164,6 +190,7 @@ export function migrateOneBotConfigsV1(config: Partial<v1Config>): OneBotConfig 
     if (config.http) {
         mergedConfig.network.httpServers = [
             mergeConfigs(httpServerDefaultConfigs, {
+                name: 'http-server',
                 enable: config.http.enable,
                 port: config.http.port,
                 host: config.http.host,
@@ -176,6 +203,7 @@ export function migrateOneBotConfigsV1(config: Partial<v1Config>): OneBotConfig 
     if (config.ws) {
         mergedConfig.network.websocketServers = [
             mergeConfigs(websocketServerDefaultConfigs, {
+                name: 'websocket-server',
                 enable: config.ws.enable,
                 port: config.ws.port,
                 host: config.ws.host,
@@ -189,6 +217,7 @@ export function migrateOneBotConfigsV1(config: Partial<v1Config>): OneBotConfig 
     if (config.reverseWs) {
         mergedConfig.network.websocketClients = config.reverseWs.urls.map((url) =>
             mergeConfigs(websocketClientDefaultConfigs, {
+                name: 'websocket-client-' + config.reverseWs?.urls.indexOf(url).toString(),
                 enable: config.reverseWs?.enable,
                 url: url,
                 token: config.token,

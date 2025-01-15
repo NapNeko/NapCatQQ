@@ -1,9 +1,9 @@
-import SendMsg, { ContextMode } from './SendMsg';
-import { ActionName, BaseCheckResult } from '../types';
-import { OB11PostSendMsg } from '../../types';
+import { ContextMode, SendMsgBase } from './SendMsg';
+import { ActionName, BaseCheckResult } from '@/onebot/action/router';
+import { OB11PostSendMsg } from '@/onebot/types';
 
 // 未检测参数
-class SendPrivateMsg extends SendMsg {
+class SendPrivateMsg extends SendMsgBase {
     actionName = ActionName.SendPrivateMsg;
     contextMode: ContextMode = ContextMode.Private;
 

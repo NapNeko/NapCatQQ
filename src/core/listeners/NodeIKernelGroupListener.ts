@@ -1,4 +1,4 @@
-import { DataSource, Group, GroupListUpdateType, GroupMember, GroupNotify, ShutUpGroupMember } from '@/core/entities';
+import { DataSource, Group, GroupDetailInfo, GroupListUpdateType, GroupMember, GroupNotify, ShutUpGroupMember } from '@/core/types';
 
 export class NodeIKernelGroupListener {
     onGroupListInited(listEmpty: boolean): any { }
@@ -28,7 +28,7 @@ export class NodeIKernelGroupListener {
     onGroupConfMemberChange(...args: unknown[]): any {
     }
 
-    onGroupDetailInfoChange(...args: unknown[]): any {
+    onGroupDetailInfoChange(detailInfo: GroupDetailInfo): any {
     }
 
     onGroupExtListUpdate(...args: unknown[]): any {

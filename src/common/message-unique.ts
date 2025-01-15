@@ -78,7 +78,7 @@ class MessageUniqueWrapper {
     private readonly msgDataMap: LimitedHashTable<string, number>;
     private readonly msgIdMap: LimitedHashTable<string, number>;
 
-    constructor(maxMap: number = 1000) {
+    constructor(maxMap: number = 5000) {
         this.msgIdMap = new LimitedHashTable<string, number>(maxMap);
         this.msgDataMap = new LimitedHashTable<string, number>(maxMap);
     }

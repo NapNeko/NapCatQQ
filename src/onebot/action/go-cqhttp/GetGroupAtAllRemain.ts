@@ -1,17 +1,14 @@
-import BaseAction from '../BaseAction';
-import { ActionName } from '../types';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ActionName } from '@/onebot/action/router';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        group_id: { type: ['number', 'string'] }
-    },
-    required: ['group_id'],
-} as const satisfies JSONSchema;
-type Payload = FromSchema<typeof SchemaData>;
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()])
+});
 
-export class GoCQHTTPGetGroupAtAllRemain extends BaseAction<Payload, any> {
+type Payload = Static<typeof SchemaData>;
+
+export class GoCQHTTPGetGroupAtAllRemain extends OneBotAction<Payload, any> {
     actionName = ActionName.GoCQHTTP_GetGroupAtAllRemain;
     payloadSchema = SchemaData;
 

@@ -1,23 +1,24 @@
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import BaseAction from '../BaseAction';
-import { ActionName } from '../types';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        group_id: { type: ['number', 'string'] },
-        group_name: { type: 'string' },
-    },
-    required: ['group_id', 'group_name'],
-} as const satisfies JSONSchema;
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ActionName } from '@/onebot/action/router';
+import { Static, Type } from '@sinclair/typebox';
 
-type Payload = FromSchema<typeof SchemaData>;
-export default class SetGroupName extends BaseAction<Payload, null> {
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
+    group_name: Type.String(),
+});
+
+type Payload = Static<typeof SchemaData>;
+
+export default class SetGroupName extends OneBotAction<Payload, null> {
     actionName = ActionName.SetGroupName;
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
-        await this.core.apis.GroupApi.setGroupName(payload.group_id.toString(), payload.group_name);
+        const ret = await this.core.apis.GroupApi.setGroupName(payload.group_id.toString(), payload.group_name);
+        if (ret.result !== 0) {
+            throw new Error(`设置群名称失败 ErrCode: ${ret.result} ErrMsg: ${ret.errMsg}`);
+        }
         return null;
     }
 }

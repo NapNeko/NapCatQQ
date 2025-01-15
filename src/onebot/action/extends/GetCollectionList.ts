@@ -1,23 +1,19 @@
-import BaseAction from '../BaseAction';
-import { ActionName } from '../types';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ActionName } from '@/onebot/action/router';
+import { Type, Static } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        category: { type: ['number', 'string'] },
-        count: { type: ['number', 'string'] },
-    },
-    required: ['category', 'count'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    category: Type.Union([Type.Number(), Type.String()]),
+    count: Type.Union([Type.Union([Type.Number(), Type.String()])], { default: 1 }),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
-export class GetCollectionList extends BaseAction<Payload, any> {
+export class GetCollectionList extends OneBotAction<Payload, any> {
     actionName = ActionName.GetCollectionList;
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        return await this.core.apis.CollectionApi.getAllCollection(parseInt(payload.category.toString()), +(payload.count ?? 1));
+        return await this.core.apis.CollectionApi.getAllCollection(+payload.category, +payload.count);
     }
 }

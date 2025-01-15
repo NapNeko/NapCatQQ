@@ -1,15 +1,5 @@
 import crypto from 'crypto';
 
-interface WebUiCredentialInnerJson {
-    CreatedTime: number;
-    TokenEncoded: string;
-}
-
-interface WebUiCredentialJson {
-    Data: WebUiCredentialInnerJson;
-    Hmac: string;
-}
-
 export class AuthHelper {
     private static readonly secretKey = Math.random().toString(36).slice(2);
 
@@ -24,9 +14,7 @@ export class AuthHelper {
             TokenEncoded: token,
         };
         const jsonString = JSON.stringify(innerJson);
-        const hmac = crypto.createHmac('sha256', AuthHelper.secretKey)
-            .update(jsonString, 'utf8')
-            .digest('hex');
+        const hmac = crypto.createHmac('sha256', AuthHelper.secretKey).update(jsonString, 'utf8').digest('hex');
         return { Data: innerJson, Hmac: hmac };
     }
 
@@ -38,7 +26,8 @@ export class AuthHelper {
     public static async checkCredential(credentialJson: WebUiCredentialJson): Promise<boolean> {
         try {
             const jsonString = JSON.stringify(credentialJson.Data);
-            const calculatedHmac = crypto.createHmac('sha256', AuthHelper.secretKey)
+            const calculatedHmac = crypto
+                .createHmac('sha256', AuthHelper.secretKey)
                 .update(jsonString, 'utf8')
                 .digest('hex');
             return calculatedHmac === credentialJson.Hmac;
@@ -53,7 +42,10 @@ export class AuthHelper {
      * @param credentialJson 已签名的凭证JSON对象。
      * @returns 布尔值，表示凭证是否有效且token匹配。
      */
-    public static async validateCredentialWithinOneHour(token: string, credentialJson: WebUiCredentialJson): Promise<boolean> {
+    public static async validateCredentialWithinOneHour(
+        token: string,
+        credentialJson: WebUiCredentialJson
+    ): Promise<boolean> {
         const isValid = await AuthHelper.checkCredential(credentialJson);
         if (!isValid) {
             return false;

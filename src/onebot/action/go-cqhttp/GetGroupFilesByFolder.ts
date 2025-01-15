@@ -1,29 +1,26 @@
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import BaseAction from '../BaseAction';
-import { ActionName } from '../types';
-import { OB11Entities } from '@/onebot/entities';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        group_id: { type: ['string', 'number'] },
-        folder_id: { type: 'string' },
-        folder: { type: 'string' },
-        file_count: { type: ['string', 'number'] },
-    },
-    required: ['group_id'],
-} as const satisfies JSONSchema;
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ActionName } from '@/onebot/action/router';
+import { OB11Construct } from '@/onebot/helper/data';
+import { Static, Type } from '@sinclair/typebox';
 
-type Payload = FromSchema<typeof SchemaData>;
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
+    folder_id: Type.Optional(Type.String()),
+    folder: Type.Optional(Type.String()),
+    file_count: Type.Union([Type.Number(), Type.String()], { default: 50 }),
+});
 
-export class GetGroupFilesByFolder extends BaseAction<any, any> {
+type Payload = Static<typeof SchemaData>;
+
+export class GetGroupFilesByFolder extends OneBotAction<any, any> {
     actionName = ActionName.GoCQHTTP_GetGroupFilesByFolder;
     payloadSchema = SchemaData;
     async _handle(payload: Payload) {
 
         const ret = await this.core.apis.MsgApi.getGroupFileList(payload.group_id.toString(), {
             sortType: 1,
-            fileCount: +(payload.file_count ?? 50),
+            fileCount: +payload.file_count,
             startIndex: 0,
             sortOrder: 2,
             showOnlinedocFolder: 0,
@@ -31,7 +28,7 @@ export class GetGroupFilesByFolder extends BaseAction<any, any> {
         }).catch(() => []);
         return {
             files: ret.filter(item => item.fileInfo)
-                .map(item => OB11Entities.file(item.peerId, item.fileInfo!)),
+                .map(item => OB11Construct.file(item.peerId, item.fileInfo!)),
             folders: [] as [],
         };
     }

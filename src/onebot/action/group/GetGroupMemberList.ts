@@ -1,42 +1,49 @@
 import { OB11GroupMember } from '@/onebot';
-import { OB11Entities } from '@/onebot/entities';
-import BaseAction from '../BaseAction';
-import { ActionName } from '../types';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { OB11Construct } from '@/onebot/helper/data';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ActionName } from '@/onebot/action/router';
+import { Static, Type } from '@sinclair/typebox';
+import { GroupMember } from '@/core';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        group_id: { type: ['number', 'string'] },
-        no_cache: { type: ['boolean', 'string'] },
-    },
-    required: ['group_id'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
+    no_cache: Type.Optional(Type.Union([Type.Boolean(), Type.String()]))
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
-export class GetGroupMemberList extends BaseAction<Payload, OB11GroupMember[]> {
+export class GetGroupMemberList extends OneBotAction<Payload, OB11GroupMember[]> {
     actionName = ActionName.GetGroupMemberList;
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         const groupIdStr = payload.group_id.toString();
-        const noCache = payload.no_cache ? this.stringToBoolean(payload.no_cache) : false;
-        const memberCache = this.core.apis.GroupApi.groupMemberCache;
-        let groupMembers;
-        try {
-            groupMembers = await this.core.apis.GroupApi.getGroupMembersV2(groupIdStr, 3000, noCache);
-        } catch (error) {
-            groupMembers = memberCache.get(groupIdStr) ?? await this.core.apis.GroupApi.getGroupMembersV2(groupIdStr);
-        }
-        const memberPromises = Array.from(groupMembers.values()).map(item =>
-            OB11Entities.groupMember(groupIdStr, item)
+        const noCache = this.parseBoolean(payload.no_cache ?? false);
+        const groupMembers = await this.getGroupMembers(groupIdStr, noCache);
+        const _groupMembers = await Promise.all(
+            Array.from(groupMembers.values()).map(item =>
+                OB11Construct.groupMember(groupIdStr, item)
+            )
         );
-        const _groupMembers = await Promise.all(memberPromises);
-        const MemberMap = new Map(_groupMembers.map(member => [member.user_id, member]));
-        return Array.from(MemberMap.values());
+        return Array.from(new Map(_groupMembers.map(member => [member.user_id, member])).values());
     }
-    stringToBoolean(str: string | boolean): boolean {
-        return typeof str === 'boolean' ? str : str.toLowerCase() === "true";
+
+    private parseBoolean(value: boolean | string): boolean {
+        return typeof value === 'string' ? value === 'true' : value;
+    }
+
+    private async getGroupMembers(groupIdStr: string, noCache: boolean): Promise<Map<string, GroupMember>> {
+        const memberCache = this.core.apis.GroupApi.groupMemberCache;
+        let groupMembers = memberCache.get(groupIdStr);
+
+        if (noCache || !groupMembers) {
+            const data = this.core.apis.GroupApi.refreshGroupMemberCache(groupIdStr, true).then().catch();
+            groupMembers = memberCache.get(groupIdStr) || (await data);
+            if (!groupMembers) {
+                throw new Error(`Failed to get group member list for group ${groupIdStr}`);
+            }
+        }
+
+        return groupMembers;
     }
 }

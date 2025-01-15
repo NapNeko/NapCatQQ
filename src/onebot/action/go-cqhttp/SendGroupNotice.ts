@@ -1,27 +1,23 @@
-import { checkFileReceived, uri2local } from '@/common/file';
-import BaseAction from '../BaseAction';
-import { ActionName } from '../types';
-import { unlink } from 'node:fs';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { checkFileExist, uriToLocalFile } from '@/common/file';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ActionName } from '@/onebot/action/router';
+import { unlink } from 'node:fs/promises';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        group_id: { type: ['number', 'string'] },
-        content: { type: 'string' },
-        image: { type: 'string' },
-        pinned: { type: ['number', 'string'] },
-        type: { type: ['number', 'string'] },
-        confirm_required: { type: ['number', 'string'] },
-        is_show_edit_card: { type: ['number', 'string'] },
-        tip_window_type: { type: ['number', 'string'] },
-    },
-    required: ['group_id', 'content'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
+    content: Type.String(),
+    image: Type.Optional(Type.String()),
+    pinned: Type.Union([Type.Number(), Type.String()], { default: 0 }),
+    type: Type.Union([Type.Number(), Type.String()], { default: 1 }),
+    confirm_required: Type.Union([Type.Number(), Type.String()], { default: 1 }),
+    is_show_edit_card: Type.Union([Type.Number(), Type.String()], { default: 0 }),
+    tip_window_type: Type.Union([Type.Number(), Type.String()], { default: 0 })
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
-export class SendGroupNotice extends BaseAction<Payload, null> {
+export class SendGroupNotice extends OneBotAction<Payload, null> {
     actionName = ActionName.GoCQHTTP_SendGroupNotice;
 
     async _handle(payload: Payload) {
@@ -32,39 +28,31 @@ export class SendGroupNotice extends BaseAction<Payload, null> {
             const {
                 path,
                 success,
-            } = (await uri2local(this.core.NapCatTempPath, payload.image));
+            } = (await uriToLocalFile(this.core.NapCatTempPath, payload.image));
             if (!success) {
                 throw new Error(`群公告${payload.image}设置失败,image字段可能格式不正确`);
             }
             if (!path) {
                 throw new Error(`群公告${payload.image}设置失败,获取资源失败`);
             }
-            await checkFileReceived(path, 5000); // 文件不存在QQ会崩溃，需要提前判断
+            await checkFileExist(path, 5000);
             const ImageUploadResult = await this.core.apis.GroupApi.uploadGroupBulletinPic(payload.group_id.toString(), path);
             if (ImageUploadResult.errCode != 0) {
                 throw new Error(`群公告${payload.image}设置失败,图片上传失败`);
             }
 
-            unlink(path, () => {
-            });
+            unlink(path).catch(() => { });
 
             UploadImage = ImageUploadResult.picInfo;
         }
-
-        const noticeType = +(payload.type ?? 1);
-        const noticePinned = +(payload.pinned ?? 0);
-
-        const noticeShowEditCard = +(payload.is_show_edit_card ?? 0);
-        const noticeTipWindowType = +(payload.tip_window_type ?? 0);
-        const noticeConfirmRequired = +(payload.confirm_required ?? 1);
         const publishGroupBulletinResult = await this.core.apis.WebApi.setGroupNotice(
             payload.group_id.toString(),
             payload.content,
-            noticePinned,
-            noticeType,
-            noticeShowEditCard,
-            noticeTipWindowType,
-            noticeConfirmRequired,
+            +payload.pinned,
+            +payload.type,
+            +payload.is_show_edit_card,
+            +payload.tip_window_type,
+            +payload.confirm_required,
             UploadImage?.id,
             UploadImage?.width,
             UploadImage?.height

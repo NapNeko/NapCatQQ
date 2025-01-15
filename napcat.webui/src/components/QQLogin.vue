@@ -1,40 +1,33 @@
 <template>
-    <div class="login-container">
-        <h2 class="sotheby-font">QQ Login</h2>
-        <div class="login-methods">
-            <t-button
-                id="quick-login"
-                class="login-method"
-                :class="{ active: loginMethod === 'quick' }"
-                @click="loginMethod = 'quick'"
-                >Quick Login</t-button
-            >
-            <t-button
-                id="qrcode-login"
-                class="login-method"
-                :class="{ active: loginMethod === 'qrcode' }"
-                @click="loginMethod = 'qrcode'"
-                >QR Code</t-button
-            >
+    <t-card class="layout" :bordered="false">
+        <div class="login-container">
+            <h2 class="sotheby-font">QQ Login</h2>
+            <div class="login-methods">
+                <t-tooltip content="快速登录">
+                    <t-button id="quick-login" class="login-method" :class="{ active: loginMethod === 'quick' }"
+                        @click="loginMethod = 'quick'">Quick Login</t-button>
+                </t-tooltip>
+                <t-tooltip content="二维码登录">
+                    <t-button id="qrcode-login" class="login-method" :class="{ active: loginMethod === 'qrcode' }"
+                        @click="loginMethod = 'qrcode'">QR Code</t-button>
+                </t-tooltip>
+            </div>
+            <div v-show="loginMethod === 'quick'" id="quick-login-dropdown" class="login-form">
+                <t-select id="quick-login-select" v-model="selectedAccount" placeholder="Select Account"
+                    @change="selectAccount">
+                    <t-option v-for="account in quickLoginList" :key="account" :value="account">{{ account }}</t-option>
+                </t-select>
+            </div>
+            <div v-show="loginMethod === 'qrcode'" id="qrcode" class="qrcode">
+                <canvas ref="qrcodeCanvas"></canvas>
+            </div>
         </div>
-        <div v-show="loginMethod === 'quick'" id="quick-login-dropdown" class="login-form">
-            <t-select
-                id="quick-login-select"
-                v-model="selectedAccount"
-                placeholder="Select Account"
-                @change="selectAccount"
-            >
-                <t-option v-for="account in quickLoginList" :key="account" :value="account">{{ account }}</t-option>
-            </t-select>
-        </div>
-        <div v-show="loginMethod === 'qrcode'" id="qrcode" class="qrcode">
-            <canvas ref="qrcodeCanvas"></canvas>
-        </div>
-    </div>
+        <t-footer class="footer">Power By NapCat.WebUi</t-footer>
+    </t-card>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue';
 import * as QRCode from 'qrcode';
 import { useRouter } from 'vue-router';
 import { MessagePlugin } from 'tdesign-vue-next';
@@ -47,10 +40,14 @@ const selectedAccount = ref<string>('');
 const qrcodeCanvas = ref<HTMLCanvasElement | null>(null);
 const qqLoginManager = new QQLoginManager(localStorage.getItem('auth') || '');
 let heartBeatTimer: number | null = null;
+let qrcodeUrl: string = '';
 
 const selectAccount = async (accountName: string): Promise<void> => {
     const { result, errMsg } = await qqLoginManager.setQuickLogin(accountName);
     if (result) {
+        if (heartBeatTimer) {
+            clearInterval(heartBeatTimer);
+        }
         await MessagePlugin.success('登录成功即将跳转');
         await router.push({ path: '/dashboard/basic-info' });
     } else {
@@ -73,36 +70,61 @@ const generateQrCode = (data: string, canvas: HTMLCanvasElement | null): void =>
 };
 
 const HeartBeat = async (): Promise<void> => {
-    const isLogined = await qqLoginManager.checkQQLoginStatus();
-    if (isLogined) {
+    const isLogined = await qqLoginManager.checkQQLoginStatusWithQrcode();
+    if (isLogined?.isLogin) {
         if (heartBeatTimer) {
             clearInterval(heartBeatTimer);
         }
+        await MessagePlugin.success('登录成功即将跳转');
         await router.push({ path: '/dashboard/basic-info' });
+    } else if (isLogined?.qrcodeurl && qrcodeUrl !== isLogined.qrcodeurl) {
+        qrcodeUrl = isLogined.qrcodeurl;
+        generateQrCode(qrcodeUrl, qrcodeCanvas.value);
     }
 };
 
 const InitPages = async (): Promise<void> => {
     quickLoginList.value = await qqLoginManager.getQQQuickLoginList();
-    const qrcodeData = await qqLoginManager.getQQLoginQrcode();
-    generateQrCode(qrcodeData, qrcodeCanvas.value);
-    heartBeatTimer = window.setInterval(HeartBeat, 3000);
+    qrcodeUrl = await qqLoginManager.getQQLoginQrcode();
+    await nextTick();
+    generateQrCode(qrcodeUrl, qrcodeCanvas.value);
 };
 
 onMounted(() => {
-    InitPages();
+    InitPages().then().catch((err) => {
+        console.error('InitPages Error:', err);
+    });
+    heartBeatTimer = window.setInterval(HeartBeat, 3000);
 });
+
+onBeforeUnmount(() => {
+    if (heartBeatTimer) {
+        clearInterval(heartBeatTimer);
+    }
+
+});
+
+watch(loginMethod, async (newMethod) => {
+    if (newMethod === 'qrcode') {
+        await nextTick();
+        generateQrCode(qrcodeUrl, qrcodeCanvas.value);
+    }
+});
+
 </script>
 
 <style scoped>
+.layout {
+    height: 100vh;
+}
+
 .login-container {
     padding: 20px;
     border-radius: 5px;
-    background-color: white;
     max-width: 400px;
     min-width: 300px;
     position: relative;
-    margin: 0 auto;
+    margin: 50px auto;
 }
 
 @media (max-width: 600px) {
@@ -161,7 +183,5 @@ onMounted(() => {
     bottom: 20px;
     left: 0;
     right: 0;
-    width: 100%;
-    background-color: white;
 }
 </style>

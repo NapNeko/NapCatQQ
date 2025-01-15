@@ -3,7 +3,7 @@ import { LogWrapper } from '@/common/log';
 import { proxiedListenerOf } from '@/common/proxy-handler';
 import { QQBasicInfoWrapper } from '@/common/qq-basic-info';
 import { InstanceContext, loadQQWrapper, NapCatCore, NapCatCoreWorkingEnv } from '@/core';
-import { SelfInfo } from '@/core/entities';
+import { SelfInfo } from '@/core/types';
 import { NodeIKernelLoginListener } from '@/core/listeners';
 import { NodeIKernelLoginService } from '@/core/services';
 import { NodeIQQNTWrapperSession, WrapperNodeApi } from '@/core/wrapper';
@@ -27,6 +27,7 @@ export async function NCoreInitFramework(
     process.on('uncaughtException', (err) => {
         console.log('[NapCat] [Error] Unhandled Exception:', err.message);
     });
+
     process.on('unhandledRejection', (reason, promise) => {
         console.log('[NapCat] [Error] unhandledRejection:', reason);
     });
@@ -58,7 +59,7 @@ export async function NCoreInitFramework(
     await loaderObject.core.initCore();
 
     //启动WebUi
-    InitWebUi(logger, pathWrapper).then().catch(logger.logError.bind(logger));
+    InitWebUi(logger, pathWrapper).then().catch(e => logger.logError(e));
     //初始化LLNC的Onebot实现
     await new NapCatOneBot11Adapter(loaderObject.core, loaderObject.context, pathWrapper).InitOneBot();
 }

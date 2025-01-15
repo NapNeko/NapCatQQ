@@ -1,7 +1,7 @@
-import BaseAction from '../BaseAction';
-import { ActionName } from '../types';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ActionName } from '@/onebot/action/router';
 
-export default class GetStatus extends BaseAction<any, any> {
+export default class GetStatus extends OneBotAction<any, any> {
     actionName = ActionName.GetStatus;
 
     async _handle(payload: any): Promise<any> {

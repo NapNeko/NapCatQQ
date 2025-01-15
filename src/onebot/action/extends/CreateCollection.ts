@@ -1,19 +1,15 @@
-import BaseAction from '../BaseAction';
-import { ActionName } from '../types';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ActionName } from '@/onebot/action/router';
+import { Type, Static } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        rawData: { type: 'string' },
-        brief: { type: 'string' },
-    },
-    required: ['brief', 'rawData'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    rawData: Type.String(),
+    brief: Type.String(),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
-export class CreateCollection extends BaseAction<Payload, any> {
+export class CreateCollection extends OneBotAction<Payload, any> {
     actionName = ActionName.CreateCollection;
     payloadSchema = SchemaData;
 

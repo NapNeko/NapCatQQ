@@ -1,7 +1,8 @@
-import { ModifyProfileParams, User, UserDetailSource } from '@/core/entities';
+import { ModifyProfileParams, User, UserDetailSource } from '@/core/types';
 import { RequestUtil } from '@/common/request';
 import { InstanceContext, NapCatCore, ProfileBizType } from '..';
 import { solveAsyncProblem } from '@/common/helper';
+import { Fallback, FallbackUtil } from '@/common/fall-back';
 
 export class NTQQUserApi {
     context: InstanceContext;
@@ -11,35 +12,26 @@ export class NTQQUserApi {
         this.context = context;
         this.core = core;
     }
-    //self_tind格式
-    async createUidFromTinyId(tinyId: string) {
-        return this.context.session.getMsgService().createUidFromTinyId(this.core.selfInfo.uin, tinyId);
+
+    async getCoreAndBaseInfo(uids: string[]) {
+        return await this.core.eventWrapper.callNoListenerEvent(
+            'NodeIKernelProfileService/getCoreAndBaseInfo',
+            'nodeStore',
+            uids,
+        );
     }
-    async getStatusByUid(uid: string) {
-        return this.context.session.getProfileService().getStatus(uid);
-    }
-    async getProfileLike(uid: string, start: number, count: number) {
+
+    // 默认获取自己的 type = 2 获取别人 type = 1
+    async getProfileLike(uid: string, start: number, count: number, type: number = 2) {
         return this.context.session.getProfileLikeService().getBuddyProfileLike({
             friendUids: [uid],
             basic: 1,
             vote: 1,
             favorite: 0,
             userProfile: 1,
-            type: 2,
+            type: type,
             start: start,
             limit: count,
-        });
-    }
-    async fetchOtherProfileLike(uid: string) {
-        return this.context.session.getProfileLikeService().getBuddyProfileLike({
-            friendUids: [uid],
-            basic: 1,
-            vote: 1,
-            favorite: 0,
-            userProfile: 0,
-            type: 1,
-            start: 0,
-            limit: 20,
         });
     }
     async setLongNick(longNick: string) {
@@ -115,6 +107,19 @@ export class NTQQUserApi {
         return retUser;
     }
 
+    async getUserDetailInfoV2(uid: string): Promise<User> {
+        const fallback = new Fallback<User>((user) => FallbackUtil.boolchecker(user, user !== undefined && user.uin !== '0'))
+            .add(() => this.fetchUserDetailInfo(uid, UserDetailSource.KDB))
+            .add(() => this.fetchUserDetailInfo(uid, UserDetailSource.KSERVER));
+        const retUser = await fallback.run().then(async (user) => {
+            if (user && user.uin === '0') {
+                user.uin = await this.core.apis.UserApi.getUidByUinV2(uid) ?? '0';
+            }
+            return user;
+        });
+        return retUser;
+    }
+
     async modifySelfProfile(param: ModifyProfileParams) {
         return this.context.session.getProfileService().modifyDesktopMiniProfile(param);
     }
@@ -172,35 +177,39 @@ export class NTQQUserApi {
         if (!skey) {
             throw new Error('SKey is Empty');
         }
+
         return skey;
     }
 
-    //后期改成流水线处理
-    async getUidByUinV2(Uin: string) {
-        let uid = (await this.context.session.getGroupService().getUidByUins([Uin])).uids.get(Uin);
-        if (uid) return uid;
-        uid = (await this.context.session.getProfileService().getUidByUin('FriendsServiceImpl', [Uin])).get(Uin);
-        if (uid) return uid;
-        uid = (await this.context.session.getUixConvertService().getUid([Uin])).uidInfo.get(Uin);
-        if (uid) return uid;
-        const unverifiedUid = (await this.getUserDetailInfoByUin(Uin)).detail.uid;//从QQ Native 特殊转换
-        if (unverifiedUid.indexOf('*') == -1) uid = unverifiedUid;
-        //if (uid) return uid;
-        return uid;
+    async getUidByUinV2(uin: string) {
+        if (!uin) {
+            return '';
+        }
+
+        const fallback =
+            new Fallback<string | undefined>((uid) => FallbackUtil.boolchecker(uid, uid !== undefined && uid.indexOf('*') === -1 && uid !== ''))
+                .add(() => this.context.session.getUixConvertService().getUid([uin]).then((data) => data.uidInfo.get(uin)))
+                .add(() => this.context.session.getProfileService().getUidByUin('FriendsServiceImpl', [uin]).get(uin))
+                .add(() => this.context.session.getGroupService().getUidByUins([uin]).then((data) => data.uids.get(uin)))
+                .add(() => this.getUserDetailInfoByUin(uin).then((data) => data.detail.uid));
+
+        const uid = await fallback.run().catch(() => '');
+        return uid ?? '';
     }
 
-    //后期改成流水线处理
-    async getUinByUidV2(Uid: string) {
-        let uin = (await this.context.session.getGroupService().getUinByUids([Uid])).uins.get(Uid);
-        if (uin) return uin;
-        uin = (await this.context.session.getProfileService().getUinByUid('FriendsServiceImpl', [Uid])).get(Uid);
-        if (uin) return uin;
-        uin = (await this.context.session.getUixConvertService().getUin([Uid])).uinInfo.get(Uid);
-        if (uin) return uin;
-        uin = (await this.core.apis.FriendApi.getBuddyIdMap(true)).getKey(Uid);
-        if (uin) return uin;
-        uin = (await this.getUserDetailInfo(Uid)).uin; //从QQ Native 转换
-        return uin;
+    async getUinByUidV2(uid: string) {
+        if (!uid) {
+            return '0';
+        }
+
+        const fallback = new Fallback<string | undefined>((uin) => FallbackUtil.boolchecker(uin, uin !== undefined && uin !== '0' && uin !== ''))
+            .add(() => this.context.session.getUixConvertService().getUin([uid]).then((data) => data.uinInfo.get(uid)))
+            .add(() => this.context.session.getProfileService().getUinByUid('FriendsServiceImpl', [uid]).get(uid))
+            .add(() => this.context.session.getGroupService().getUinByUids([uid]).then((data) => data.uins.get(uid)))
+            .add(() => this.getUserDetailInfo(uid).then((data) => data.uin));
+
+        const uin = await fallback.run().catch(() => '0');
+        return uin ?? '0';
     }
 
     async getRecentContactListSnapShot(count: number) {

@@ -1,25 +1,21 @@
-import BaseAction from '../BaseAction';
-import { ActionName } from '../types';
-import { ChatType, Peer, SendFileElement } from '@/core/entities';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ActionName } from '@/onebot/action/router';
+import { ChatType, Peer, SendFileElement } from '@/core/types';
 import fs from 'fs';
-import { uri2local } from '@/common/file';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
-import { MessageContext } from '@/onebot/api';
-import { ContextMode, createContext } from '../msg/SendMsg';
+import { uriToLocalFile } from '@/common/file';
+import { SendMessageContext } from '@/onebot/api';
+import { ContextMode, createContext } from '@/onebot/action/msg/SendMsg';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        user_id: { type: ['number', 'string'] },
-        file: { type: 'string' },
-        name: { type: 'string' },
-    },
-    required: ['user_id', 'file', 'name'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    user_id: Type.Union([Type.Number(), Type.String()]),
+    file: Type.String(),
+    name: Type.String(),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
-export default class GoCQHTTPUploadPrivateFile extends BaseAction<Payload, null> {
+export default class GoCQHTTPUploadPrivateFile extends OneBotAction<Payload, null> {
     actionName = ActionName.GOCQHTTP_UploadPrivateFile;
     payloadSchema = SchemaData;
 
@@ -40,12 +36,12 @@ export default class GoCQHTTPUploadPrivateFile extends BaseAction<Payload, null>
         if (fs.existsSync(file)) {
             file = `file://${file}`;
         }
-        const downloadResult = await uri2local(this.core.NapCatTempPath, file);
+        const downloadResult = await uriToLocalFile(this.core.NapCatTempPath, file);
         if (!downloadResult.success) {
             throw new Error(downloadResult.errMsg);
         }
 
-        const msgContext: MessageContext = {
+        const msgContext: SendMessageContext = {
             peer: await createContext(this.core, {
                 user_id: payload.user_id.toString(),
                 group_id: undefined,

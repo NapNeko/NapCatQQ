@@ -1,13 +1,9 @@
-import BaseAction from '../BaseAction';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
 import fs from 'fs/promises';
-import { FileNapCatOneBotUUID } from '@/common/helper';
-import { ActionName } from '../types';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { FileNapCatOneBotUUID } from '@/common/file-uuid';
+import { ActionName } from '@/onebot/action/router';
 import { OB11MessageImage, OB11MessageVideo } from '@/onebot/types';
-
-//  interface GetFilePayload {
-//     file: string; // 文件名或者fileUuid
-// }
+import { Static, Type } from '@sinclair/typebox';
 
 export interface GetFileResponse {
     file?: string;  // path
@@ -16,28 +12,23 @@ export interface GetFileResponse {
     file_name?: string;
     base64?: string;
 }
-const GetFileBase_PayloadSchema = {
-    type: 'object',
-    properties: {
-        file: { type: 'string' },
-        file_id: { type: 'string' }
-    },
-    oneOf: [
-        { required: ['file'] },
-        { required: ['file_id'] }
-    ]
-} as const satisfies JSONSchema;
 
-export type GetFilePayload = FromSchema<typeof GetFileBase_PayloadSchema>;
+const GetFileBase_PayloadSchema = Type.Object({
+    file: Type.Optional(Type.String()),
+    file_id: Type.Optional(Type.String())
+});
 
-export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
+
+export type GetFilePayload = Static<typeof GetFileBase_PayloadSchema>;
+
+export class GetFileBase extends OneBotAction<GetFilePayload, GetFileResponse> {
     payloadSchema = GetFileBase_PayloadSchema;
 
     async _handle(payload: GetFilePayload): Promise<GetFileResponse> {
         payload.file ||= payload.file_id || '';
         //接收消息标记模式
         const contextMsgFile = FileNapCatOneBotUUID.decode(payload.file);
-        if (contextMsgFile) {
+        if (contextMsgFile && contextMsgFile.msgId && contextMsgFile.elementId) {
             const { peer, msgId, elementId } = contextMsgFile;
             const downloadPath = await this.core.apis.FileApi.downloadMedia(msgId, peer.chatType, peer.peerUid, elementId, '', '');
             const rawMessage = (await this.core.apis.MsgApi.getMsgsByMsgId(peer, [msgId]))?.msgList
@@ -50,12 +41,12 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
             let url = '';
             if (mixElement?.picElement && rawMessage) {
                 const tempData =
-                    await this.obContext.apis.MsgApi.rawToOb11Converters.picElement?.(mixElement?.picElement, rawMessage, mixElement) as OB11MessageImage | undefined;
+                    await this.obContext.apis.MsgApi.rawToOb11Converters.picElement?.(mixElement?.picElement, rawMessage, mixElement, { parseMultMsg: false }) as OB11MessageImage | undefined;
                 url = tempData?.data.url ?? '';
             }
             if (mixElement?.videoElement && rawMessage) {
                 const tempData =
-                    await this.obContext.apis.MsgApi.rawToOb11Converters.videoElement?.(mixElement?.videoElement, rawMessage, mixElement) as OB11MessageVideo | undefined;
+                    await this.obContext.apis.MsgApi.rawToOb11Converters.videoElement?.(mixElement?.videoElement, rawMessage, mixElement, { parseMultMsg: false }) as OB11MessageVideo | undefined;
                 url = tempData?.data.url ?? '';
             }
             const res: GetFileResponse = {
@@ -77,7 +68,7 @@ export class GetFileBase extends BaseAction<GetFilePayload, GetFileResponse> {
 
         //群文件模式
         const contextModelIdFile = FileNapCatOneBotUUID.decodeModelId(payload.file);
-        if (contextModelIdFile) {
+        if (contextModelIdFile && contextModelIdFile.modelId) {
             const { peer, modelId } = contextModelIdFile;
             const downloadPath = await this.core.apis.FileApi.downloadFileForModelId(peer, modelId, '');
             const res: GetFileResponse = {

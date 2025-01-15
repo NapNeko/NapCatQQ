@@ -1,16 +1,8 @@
-import BaseAction from '../BaseAction';
-import { ActionName } from '../types';
-import { JSONSchema } from 'json-schema-to-ts';
+import { OneBotAction } from '@/onebot/action/OneBotAction';
+import { ActionName } from '@/onebot/action/router';
 import { sleep } from '@/common/helper';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        no_cache: { type: 'boolean' },
-    },
-} as const satisfies JSONSchema;
-
-export class GetOnlineClient extends BaseAction<void, Array<any>> {
+export class GetOnlineClient extends OneBotAction<void, Array<any>> {
     actionName = ActionName.GetOnlineClient;
 
     async _handle(payload: void) {

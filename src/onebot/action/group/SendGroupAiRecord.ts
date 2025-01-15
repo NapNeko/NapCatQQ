@@ -1,21 +1,18 @@
-import { ActionName } from '../types';
-import { FromSchema, JSONSchema } from 'json-schema-to-ts';
+import { ActionName } from '@/onebot/action/router';
 import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
-import { uri2local } from "@/common/file";
+import { uriToLocalFile } from "@/common/file";
 import { ChatType, Peer } from "@/core";
 import { AIVoiceChatType } from "@/core/packet/entities/aiChat";
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = {
-    type: 'object',
-    properties: {
-        character: { type: ['string'] },
-        group_id: { type: ['number', 'string'] },
-        text: { type: 'string' },
-    },
-    required: ['character', 'group_id', 'text'],
-} as const satisfies JSONSchema;
+const SchemaData = Type.Object({
+    character: Type.String(),
+    group_id: Type.Union([Type.Number(), Type.String()]),
+    text: Type.String(),
+});
 
-type Payload = FromSchema<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
+
 
 export class SendGroupAiRecord extends GetPacketStatusDepends<Payload, {
     message_id: number
@@ -24,15 +21,9 @@ export class SendGroupAiRecord extends GetPacketStatusDepends<Payload, {
     payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const rawRsp = await this.core.apis.PacketApi.pkt.operation.GetAiVoice(+payload.group_id, payload.character, payload.text, AIVoiceChatType.Sound);
-        const url = await this.core.apis.PacketApi.pkt.operation.GetGroupPttUrl(+payload.group_id, rawRsp.msgInfoBody[0].index);
-        const { path, errMsg, success } = (await uri2local(this.core.NapCatTempPath, url));
-        if (!success) {
-            throw new Error(errMsg);
-        }
-        const peer = { chatType: ChatType.KCHATTYPEGROUP, peerUid: payload.group_id.toString() } as Peer;
-        const element = await this.core.apis.FileApi.createValidSendPttElement(path);
-        const sendRes = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, [element], [path]);
-        return { message_id: sendRes.id ?? -1 };
+        await this.core.apis.PacketApi.pkt.operation.GetAiVoice(+payload.group_id, payload.character, payload.text, AIVoiceChatType.Sound);
+        return {
+            message_id: 0  // can't get message_id from GetAiVoice
+        };
     }
 }

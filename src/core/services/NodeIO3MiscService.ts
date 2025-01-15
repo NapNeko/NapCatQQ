@@ -1,4 +1,4 @@
-import { NodeIO3MiscListener } from "../listeners/NodeIO3MiscListener";
+import { NodeIO3MiscListener } from "@/core/listeners/NodeIO3MiscListener";
 
 export interface NodeIO3MiscService {
     get(): NodeIO3MiscService;
