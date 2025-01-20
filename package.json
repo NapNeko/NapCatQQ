@@ -28,6 +28,7 @@
     "@rollup/plugin-node-resolve": "^16.0.0",
     "@types/cors": "^2.8.17",
     "@sinclair/typebox": "^0.34.9",
+    "@swc/core": "^1.10.8",
     "@types/express": "^5.0.0",
     "@types/fluent-ffmpeg": "^2.1.24",
     "@types/node": "^22.0.1",

@@ -1,5 +1,8 @@
 {
     "compilerOptions": {
+        "emitDecoratorMetadata": true,
+        "strictPropertyInitialization": false,
+        "experimentalDecorators": true,
         "target": "ES2021",
         "useDefineForClassFields": true,
         "module": "ESNext",
@@ -10,7 +13,6 @@
         ],
         "skipLibCheck": true,
         "moduleResolution": "Node",
-        "experimentalDecorators": true,
         "allowImportingTsExtensions": false,
         "allowSyntheticDefaultImports": true,
         "resolveJsonModule": true,
