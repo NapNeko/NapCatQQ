@@ -139,13 +139,14 @@ export const defaultOneBotConfigs = createDefaultConfig<OneBotConfig>({
 });
 
 export const mergeNetworkDefaultConfig = {
+    httpSseServers: httpSseServerDefaultConfigs,
     httpServers: httpServerDefaultConfigs,
     httpClients: httpClientDefaultConfigs,
     websocketServers: websocketServerDefaultConfigs,
     websocketClients: websocketClientDefaultConfigs,
 } as const;
 
-export type NetworkConfigAdapter = HttpServerConfig | HttpClientConfig | WebsocketServerConfig | WebsocketClientConfig | PluginConfig;
+export type NetworkConfigAdapter = HttpServerConfig | HttpSseServerConfig | HttpClientConfig | WebsocketServerConfig | WebsocketClientConfig | PluginConfig;
 type NetworkConfigKeys = keyof typeof mergeNetworkDefaultConfig;
 
 export function mergeOneBotConfigs(
