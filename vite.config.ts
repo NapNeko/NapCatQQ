@@ -17,7 +17,6 @@ const createPluginOptions = (additionalTargets: { src: string; dest: string; fla
             { src: './manifest.json', dest: 'dist' },
             { src: './src/core/external/napcat.json', dest: 'dist/config/' },
             { src: './src/native/packet', dest: 'dist/moehoo', flatten: false },
-            { src: './napcat.webui/dist/', dest: 'dist/static/', flatten: false },
             { src: './src/framework/liteloader.cjs', dest: 'dist' },
             { src: './src/framework/napcat.cjs', dest: 'dist' },
             { src: './src/framework/preload.cjs', dest: 'dist' },

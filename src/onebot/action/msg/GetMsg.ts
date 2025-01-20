@@ -3,7 +3,6 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { MessageUnique } from '@/common/message-unique';
 import { RawMessage } from '@/core';
-import { AdapterConfigWrap } from '@/onebot/config/config';
 import { Static, Type } from '@sinclair/typebox';
 
 export type ReturnDataType = OB11Message
@@ -20,7 +19,7 @@ class GetMsg extends OneBotAction<Payload, OB11Message> {
 
     async _handle(payload: Payload, adapter: string) {
         // log("history msg ids", Object.keys(msgHistory));
-        const network = Object.values(this.obContext.configLoader.configData.network) as Array<AdapterConfigWrap>;
+        const network = Object.values(this.obContext.configLoader.configData.network);
         const msgFormat = network.flat().find(e => e.name === adapter)?.messagePostFormat ?? 'array';
         if (!payload.message_id) {
             throw Error('参数message_id不能为空');

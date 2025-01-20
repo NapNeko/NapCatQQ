@@ -3,7 +3,7 @@ import { OB11Message } from '@/onebot';
 import { ActionName } from '@/onebot/action/router';
 import { ChatType } from '@/core/types';
 import { MessageUnique } from '@/common/message-unique';
-import { AdapterConfigWrap } from '@/onebot/config/config';
+
 import { Static, Type } from '@sinclair/typebox';
 
 interface Response {
@@ -42,7 +42,7 @@ export default class GetFriendMsgHistory extends OneBotAction<Payload, Response>
         await Promise.all(msgList.map(async msg => {
             msg.id = MessageUnique.createUniqueMsgId({ guildId: '', chatType: msg.chatType, peerUid: msg.peerUid }, msg.msgId);
         }));
-        const network = Object.values(this.obContext.configLoader.configData.network) as Array<AdapterConfigWrap>;
+        const network = Object.values(this.obContext.configLoader.configData.network);
         //烘焙消息
         const ob11MsgList = (await Promise.all(
             msgList.map(msg => this.obContext.apis.MsgApi.parseMessage(msg, network.flat().find(e => e.name === adapter)?.messagePostFormat ?? 'array')))

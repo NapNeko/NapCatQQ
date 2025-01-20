@@ -3,7 +3,6 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { MessageUnique } from '@/common/message-unique';
 import crypto from 'crypto';
-import { AdapterConfigWrap } from '@/onebot/config/config';
 import { Static, Type } from '@sinclair/typebox';
 
 const SchemaData = Type.Object({
@@ -28,7 +27,7 @@ export class GetGroupEssence extends OneBotAction<Payload, any> {
     }
 
     async _handle(payload: Payload, adapter: string) {
-        const network = Object.values(this.obContext.configLoader.configData.network) as Array<AdapterConfigWrap>;
+        const network = Object.values(this.obContext.configLoader.configData.network);
         const msgFormat = network.flat().find(e => e.name === adapter)?.messagePostFormat ?? 'array';
         const msglist = (await this.core.apis.WebApi.getGroupEssenceMsgAll(payload.group_id.toString())).flatMap((e) => e.data.msg_list);
         if (!msglist) {
