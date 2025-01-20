@@ -18,7 +18,7 @@ export interface BuddyCategoryType {
 export interface CoreInfo {
     uid: string;
     uin: string;
-    nick: string;
+    nick?: string;
     remark: string;
 }
 
