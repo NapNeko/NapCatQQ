@@ -129,8 +129,8 @@ export class NapCatOneBot11Adapter {
                 );
             }
         }
-        for(const key of ob11Config.network.httpSseServers){
-            if(key.enable) {
+        for (const key of ob11Config.network.httpSseServers) {
+            if (key.enable) {
                 this.networkManager.registerAdapter(
                     new OB11ActiveHttpSSEAdapter(key.name, key, this.core, this, this.actions)
                 );
@@ -210,6 +210,7 @@ export class NapCatOneBot11Adapter {
 
         await this.handleConfigChange(prev.network.httpServers, now.network.httpServers, OB11PassiveHttpAdapter);
         await this.handleConfigChange(prev.network.httpClients, now.network.httpClients, OB11ActiveHttpAdapter);
+        await this.handleConfigChange(prev.network.httpSseServers, now.network.httpSseServers, OB11ActiveHttpSSEAdapter);
         await this.handleConfigChange(prev.network.websocketServers, now.network.websocketServers, OB11PassiveWebSocketAdapter);
         await this.handleConfigChange(prev.network.websocketClients, now.network.websocketClients, OB11ActiveWebSocketAdapter);
     }

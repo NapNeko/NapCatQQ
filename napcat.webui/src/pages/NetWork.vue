@@ -19,9 +19,11 @@
         <t-tabs ref="tabsRef" :style="{ width: tabsWidth + 'px' }" default-value="all" @change="selectType">
             <t-tab-panel value="all" label="全部"></t-tab-panel>
             <t-tab-panel value="httpServers" label="HTTP 服务器"></t-tab-panel>
+            <t-tab-panel value="httpSeeServers" label="HTTP SSE 服务器"></t-tab-panel>
             <t-tab-panel value="httpClients" label="HTTP 客户端"></t-tab-panel>
             <t-tab-panel value="websocketServers" label="WebSocket 服务器"></t-tab-panel>
             <t-tab-panel value="websocketClients" label="WebSocket 客户端"></t-tab-panel>
+
         </t-tabs>
     </div>
     <t-loading attach="#alice" :loading="!loadPage" :showOverlay="false">
@@ -199,6 +201,7 @@
                 >
                     <t-select v-model="newTab.type" @change="onloadDefault">
                         <t-option value="httpServers">HTTP 服务器</t-option>
+                        <t-option value="httpSseServers">HTTP SSE 服务器</t-option>
                         <t-option value="httpClients">HTTP 客户端</t-option>
                         <t-option value="websocketServers">WebSocket 服务器</t-option>
                         <t-option value="websocketClients">WebSocket 客户端</t-option>
@@ -266,6 +269,7 @@ const componentMap: Record<
     | typeof WebsocketClientComponent
 > = {
     httpServers: HttpServerComponent,
+    httpSseServers: HttpServerComponent,
     httpClients: HttpClientComponent,
     websocketServers: WebsocketServerComponent,
     websocketClients: WebsocketClientComponent,
@@ -279,6 +283,7 @@ const configIndex = ref<number>(0);
 const networkConfig: NetworkConfig & { [key: string]: any } = {
     websocketClients: [],
     websocketServers: [],
+    httpSseServers: [],
     httpClients: [],
     httpServers: [],
 };
@@ -289,6 +294,7 @@ const WebConfg = ref(
         ['all', []],
         ['httpServers', []],
         ['httpClients', []],
+        ['httpSseServers', []],
         ['websocketServers', []],
         ['websocketClients', []],
     ])
@@ -296,6 +302,7 @@ const WebConfg = ref(
 const typeCh: Record<ComponentKey, string> = {
     httpServers: 'HTTP 服务器',
     httpClients: 'HTTP 客户端',
+    httpSseServers: 'HTTP SSE 服务器',
     websocketServers: 'WebSocket 服务器',
     websocketClients: 'WebSocket 客户端',
 };
