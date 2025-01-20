@@ -20,7 +20,7 @@ import {
     GroupNotify,
 } from '@/core';
 import faceConfig from '@/core/external/face_config.json';
-import { NapCatOneBot11Adapter, OB11Message, OB11MessageData, OB11MessageDataType, OB11MessageFileBase, OB11MessageForward, } from '@/onebot';
+import { NapCatOneBot11Adapter, OB11Message, OB11MessageData, OB11MessageDataType, OB11MessageFileBase, OB11MessageForward, OB11MessageImage, OB11MessageVideo, } from '@/onebot';
 import { OB11Construct } from '@/onebot/helper/data';
 import { EventType } from '@/onebot/event/OneBotEvent';
 import { encodeCQCode } from '@/onebot/helper/cqcode';
@@ -906,16 +906,16 @@ export class OneBotMsgApi {
         const calculateTotalSize = async (elements: SendMessageElement[]): Promise<number> => {
             const sizePromises = elements.map(async element => {
                 switch (element.elementType) {
-                case ElementType.PTT:
-                    return (await fsPromise.stat(element.pttElement.filePath)).size;
-                case ElementType.FILE:
-                    return (await fsPromise.stat(element.fileElement.filePath)).size;
-                case ElementType.VIDEO:
-                    return (await fsPromise.stat(element.videoElement.filePath)).size;
-                case ElementType.PIC:
-                    return (await fsPromise.stat(element.picElement.sourcePath)).size;
-                default:
-                    return 0;
+                    case ElementType.PTT:
+                        return (await fsPromise.stat(element.pttElement.filePath)).size;
+                    case ElementType.FILE:
+                        return (await fsPromise.stat(element.fileElement.filePath)).size;
+                    case ElementType.VIDEO:
+                        return (await fsPromise.stat(element.videoElement.filePath)).size;
+                    case ElementType.PIC:
+                        return (await fsPromise.stat(element.picElement.sourcePath)).size;
+                    default:
+                        return 0;
                 }
             });
             const sizes = await Promise.all(sizePromises);
@@ -956,40 +956,66 @@ export class OneBotMsgApi {
 
     private async handleOb11FileLikeMessage(
         { data: inputdata }: OB11MessageFileBase,
-        { deleteAfterSentFiles }: SendMessageContext,
+        { deleteAfterSentFiles }: SendMessageContext
     ) {
-        const realUri = inputdata.url ?? inputdata.file ?? inputdata.path ?? '';
-        if (realUri.length === 0) {
+        let realUri = [inputdata.url, inputdata.file, inputdata.path].find(uri => uri && uri.trim()) ?? '';
+        if (!realUri) {
             this.core.context.logger.logError('文件消息缺少参数', inputdata);
-            throw Error('文件消息缺少参数');
-        }
-        const {
-            path,
-            fileName,
-            errMsg,
-            success,
-        } = (await uriToLocalFile(this.core.NapCatTempPath, realUri));
-
-        if (!success) {
-            this.core.context.logger.logError('文件下载失败', errMsg);
-            throw Error('文件下载失败' + errMsg);
+            throw new Error('文件消息缺少参数');
         }
 
-        deleteAfterSentFiles.push(path);
-
-        return { path, fileName: inputdata.name ?? fileName };
+        const downloadFile = async (uri: string) => {
+            const { path, fileName, errMsg, success } = await uriToLocalFile(this.core.NapCatTempPath, uri);
+            if (!success) {
+                this.core.context.logger.logError('文件下载失败', errMsg);
+                throw new Error('文件下载失败: ' + errMsg);
+            }
+            return { path, fileName };
+        };
+        try {
+            const { path, fileName } = await downloadFile(realUri);
+            deleteAfterSentFiles.push(path);
+            return { path, fileName: inputdata.name ?? fileName };
+        } catch {
+            realUri = await this.handleObfuckName(realUri);
+            const { path, fileName } = await downloadFile(realUri);
+            deleteAfterSentFiles.push(path);
+            return { path, fileName: inputdata.name ?? fileName };
+        }
     }
-
+    async handleObfuckName(name: string) {
+        const contextMsgFile = FileNapCatOneBotUUID.decode(name);
+        if (contextMsgFile && contextMsgFile.msgId && contextMsgFile.elementId) {
+            const { peer, msgId, elementId } = contextMsgFile;
+            const rawMessage = (await this.core.apis.MsgApi.getMsgsByMsgId(peer, [msgId]))?.msgList.find(msg => msg.msgId === msgId);
+            const mixElement = rawMessage?.elements.find(e => e.elementId === elementId);
+            const mixElementInner = mixElement?.videoElement ?? mixElement?.fileElement ?? mixElement?.pttElement ?? mixElement?.picElement;
+            if (!mixElementInner) throw new Error('element not found');
+            let url = '';
+            if (mixElement?.picElement && rawMessage) {
+                const tempData =
+                    await this.obContext.apis.MsgApi.rawToOb11Converters.picElement?.(mixElement?.picElement, rawMessage, mixElement, { parseMultMsg: false }) as OB11MessageImage | undefined;
+                url = tempData?.data.url ?? '';
+            }
+            if (mixElement?.videoElement && rawMessage) {
+                const tempData =
+                    await this.obContext.apis.MsgApi.rawToOb11Converters.videoElement?.(mixElement?.videoElement, rawMessage, mixElement, { parseMultMsg: false }) as OB11MessageVideo | undefined;
+                url = tempData?.data.url ?? '';
+            }
+            return url !== '' ? url : await this.core.apis.FileApi.downloadMedia(msgId, peer.chatType, peer.peerUid, elementId, '', '');
+        }
+        throw new Error('文件名解析失败');
+    }
     groupChangDecreseType2String(type: number): GroupDecreaseSubType {
         switch (type) {
-        case 130:
-            return 'leave';
-        case 131:
-            return 'kick';
-        case 3:
-            return 'kick_me';
-        default:
-            return 'kick';
+            case 130:
+                return 'leave';
+            case 131:
+                return 'kick';
+            case 3:
+                return 'kick_me';
+            default:
+                return 'kick';
         }
     }
 
