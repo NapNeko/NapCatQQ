@@ -4,6 +4,7 @@ import { ActionName } from '@/onebot/action/router';
 import { MessageUnique } from '@/common/message-unique';
 import { RawMessage } from '@/core';
 import { Static, Type } from '@sinclair/typebox';
+import { NetworkAdapterConfig } from '@/onebot/config/config';
 
 export type ReturnDataType = OB11Message
 
@@ -17,10 +18,8 @@ class GetMsg extends OneBotAction<Payload, OB11Message> {
     actionName = ActionName.GetMsg;
     payloadSchema = SchemaData;
 
-    async _handle(payload: Payload, adapter: string) {
+    async _handle(payload: Payload, adapter: string, config: NetworkAdapterConfig) {
         // log("history msg ids", Object.keys(msgHistory));
-        const network = Object.values(this.obContext.configLoader.configData.network);
-        const msgFormat = network.flat().find(e => e.name === adapter)?.messagePostFormat ?? 'array';
         if (!payload.message_id) {
             throw Error('参数message_id不能为空');
         }
@@ -37,7 +36,7 @@ class GetMsg extends OneBotAction<Payload, OB11Message> {
         } else {
             msg = (await this.core.apis.MsgApi.getMsgsByMsgId(peer, [msgIdWithPeer?.MsgId || payload.message_id.toString()])).msgList[0];
         }
-        const retMsg = await this.obContext.apis.MsgApi.parseMessage(msg, msgFormat);
+        const retMsg = await this.obContext.apis.MsgApi.parseMessage(msg, config.messagePostFormat);
         if (!retMsg) throw Error('消息为空');
         try {
             retMsg.message_id = MessageUnique.createUniqueMsgId(peer, msg.msgId)!;

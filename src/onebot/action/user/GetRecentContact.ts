@@ -1,6 +1,7 @@
 
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
+import { NetworkAdapterConfig } from '@/onebot/config/config';
 import { Static, Type } from '@sinclair/typebox';
 
 const SchemaData = Type.Object({
@@ -13,16 +14,14 @@ export default class GetRecentContact extends OneBotAction<Payload, any> {
     actionName = ActionName.GetRecentContact;
     payloadSchema = SchemaData;
 
-    async _handle(payload: Payload, adapter: string) {
+    async _handle(payload: Payload, adapter: string, config: NetworkAdapterConfig) {
         const ret = await this.core.apis.UserApi.getRecentContactListSnapShot(+payload.count);
-        const network = Object.values(this.obContext.configLoader.configData.network);
         //烘焙消息
-        const msgFormat = network.flat().find(e => e.name === adapter)?.messagePostFormat ?? 'array';
         return await Promise.all(ret.info.changedList.map(async (t) => {
             const FastMsg = await this.core.apis.MsgApi.getMsgsByMsgId({ chatType: t.chatType, peerUid: t.peerUid }, [t.msgId]);
             if (FastMsg.msgList.length > 0) {
                 //扩展ret.info.changedList
-                const lastestMsg = await this.obContext.apis.MsgApi.parseMessage(FastMsg.msgList[0], msgFormat);
+                const lastestMsg = await this.obContext.apis.MsgApi.parseMessage(FastMsg.msgList[0], config.messagePostFormat);
                 return {
                     lastestMsg: lastestMsg,
                     peerUin: t.peerUin,
