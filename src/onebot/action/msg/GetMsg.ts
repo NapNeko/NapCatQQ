@@ -36,7 +36,7 @@ class GetMsg extends OneBotAction<Payload, OB11Message> {
         } else {
             msg = (await this.core.apis.MsgApi.getMsgsByMsgId(peer, [msgIdWithPeer?.MsgId || payload.message_id.toString()])).msgList[0];
         }
-        const retMsg = await this.obContext.apis.MsgApi.parseMessage(msg, config.messagePostFormat);
+        const retMsg = await this.obContext.apis.MsgApi.parseMessage(msg, config?.messagePostFormat);
         if (!retMsg) throw Error('消息为空');
         try {
             retMsg.message_id = MessageUnique.createUniqueMsgId(peer, msg.msgId)!;
