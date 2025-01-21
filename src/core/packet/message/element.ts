@@ -160,10 +160,12 @@ export class PacketMsgReplyElement extends IPacketMsgElement<SendReplyElement> {
 export class PacketMsgFaceElement extends IPacketMsgElement<SendFaceElement> {
     faceId: number;
     isLargeFace: boolean;
+    resultId?: string;
 
     constructor(element: SendFaceElement) {
         super(element);
         this.faceId = element.faceElement.faceIndex;
+        this.resultId = element.faceElement.resultId;
         this.isLargeFace = element.faceElement.faceType === FaceType.AniSticke;
     }
 
@@ -176,10 +178,10 @@ export class PacketMsgFaceElement extends IPacketMsgElement<SendFaceElement> {
                         aniStickerPackId: "1",
                         aniStickerId: "8",
                         faceId: this.faceId,
-                        field4: 1,
-                        field6: "",
+                        sourceType: 1,
+                        resultId: this.resultId,
                         preview: "",
-                        field9: 1
+                        ramdomType: 1
                     }),
                     businessType: 1
                 }

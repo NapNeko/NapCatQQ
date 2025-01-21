@@ -342,11 +342,11 @@ export const QBigFaceExtra = {
     AniStickerPackId: ProtoField(1, ScalarType.STRING, true),
     AniStickerId: ProtoField(2, ScalarType.STRING, true),
     faceId: ProtoField(3, ScalarType.INT32, true),
-    Field4: ProtoField(4, ScalarType.INT32, true),
+    sourceType: ProtoField(4, ScalarType.INT32, true),
     AniStickerType: ProtoField(5, ScalarType.INT32, true),
-    field6: ProtoField(6, ScalarType.STRING, true),
+    resultId: ProtoField(6, ScalarType.STRING, true),
     preview: ProtoField(7, ScalarType.STRING, true),
-    field9: ProtoField(9, ScalarType.INT32, true),
+    ramdomType: ProtoField(9, ScalarType.INT32, true),
 };
 
 export const QSmallFaceExtra = {
