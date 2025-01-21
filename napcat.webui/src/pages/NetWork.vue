@@ -293,7 +293,6 @@ const delConfig = (item: any) => {
 };
 
 const selectType = (key: ComponentKey) => {
-    console.log(WebConfg.value, key, WebConfg.value.get(key));
     cardConfig.value = WebConfg.value.get(key) || [];
 };
 
