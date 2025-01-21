@@ -164,6 +164,8 @@ export interface OB11MessageFace {
     type: OB11MessageDataType.face;
     data: {
         id: string;
+        resultId?: string;
+        chainCount?: number;
     };
 }
 
