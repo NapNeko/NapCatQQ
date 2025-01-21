@@ -36,9 +36,24 @@
 import { ref, watch } from 'vue';
 import { WebsocketServerConfig } from '../../../../src/onebot/config/config';
 
+const defaultConfig: WebsocketServerConfig = {
+    name: 'websocket-server',
+    enable: false,
+    host: '0.0.0.0',
+    port: 3001,
+    messagePostFormat: 'array',
+    reportSelfMessage: false,
+    token: '',
+    enableForcePushEvent: true,
+    debug: false,
+    heartInterval: 30000
+};
+
 const props = defineProps<{
     config: WebsocketServerConfig;
 }>();
+
+const config = ref(Object.assign({}, defaultConfig, props.config));
 
 const messageFormatOptions = ref([
     { label: 'Array', value: 'array' },
@@ -46,10 +61,10 @@ const messageFormatOptions = ref([
 ]);
 
 watch(
-    () => props.config.messagePostFormat,
+    () => config.value.messagePostFormat,
     (newValue) => {
         if (newValue !== 'array' && newValue !== 'string') {
-            props.config.messagePostFormat = 'array';
+            config.value.messagePostFormat = 'array';
         }
     }
 );
