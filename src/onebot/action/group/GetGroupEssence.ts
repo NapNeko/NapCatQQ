@@ -3,8 +3,8 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { MessageUnique } from '@/common/message-unique';
 import crypto from 'crypto';
-import { AdapterConfigWrap } from '@/onebot/config/config';
 import { Static, Type } from '@sinclair/typebox';
+import { NetworkAdapterConfig } from '@/onebot/config/config';
 
 const SchemaData = Type.Object({
     group_id: Type.Union([Type.Number(), Type.String()]),
@@ -27,9 +27,7 @@ export class GetGroupEssence extends OneBotAction<Payload, any> {
         };
     }
 
-    async _handle(payload: Payload, adapter: string) {
-        const network = Object.values(this.obContext.configLoader.configData.network) as Array<AdapterConfigWrap>;
-        const msgFormat = network.flat().find(e => e.name === adapter)?.messagePostFormat ?? 'array';
+    async _handle(payload: Payload, adapter: string, config: NetworkAdapterConfig) {
         const msglist = (await this.core.apis.WebApi.getGroupEssenceMsgAll(payload.group_id.toString())).flatMap((e) => e.data.msg_list);
         if (!msglist) {
             throw new Error('获取失败');
@@ -50,7 +48,7 @@ export class GetGroupEssence extends OneBotAction<Payload, any> {
                     operator_nick: msg.add_digest_nick,
                     message_id: message_id,
                     operator_time: msg.add_digest_time,
-                    content: (await this.obContext.apis.MsgApi.parseMessage(rawMessage, msgFormat))?.message
+                    content: (await this.obContext.apis.MsgApi.parseMessage(rawMessage, config.messagePostFormat))?.message
                 };
             }
             const msgTempData = JSON.stringify({
