@@ -346,7 +346,7 @@ export const QBigFaceExtra = {
     AniStickerType: ProtoField(5, ScalarType.INT32, true),
     resultId: ProtoField(6, ScalarType.STRING, true),
     preview: ProtoField(7, ScalarType.STRING, true),
-    ramdomType: ProtoField(9, ScalarType.INT32, true),
+    randomType: ProtoField(9, ScalarType.INT32, true),
 };
 
 export const QSmallFaceExtra = {

@@ -494,7 +494,7 @@ export class OneBotMsgApi {
                     stickerType: face.AniStickerType,
                     packId: face.AniStickerPackId,
                     sourceType: 1,
-                    resultId,
+                    resultId: resultId?.toString(),
                     chainCount,
                 },
             };
