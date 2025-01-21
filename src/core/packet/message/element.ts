@@ -181,7 +181,7 @@ export class PacketMsgFaceElement extends IPacketMsgElement<SendFaceElement> {
                         sourceType: 1,
                         resultId: this.resultId,
                         preview: "",
-                        ramdomType: 1
+                        randomType: 1
                     }),
                     businessType: 1
                 }
