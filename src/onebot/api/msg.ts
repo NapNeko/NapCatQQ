@@ -190,7 +190,10 @@ export class OneBotMsgApi {
                 return {
                     type: OB11MessageDataType.face,
                     data: {
-                        id: element.faceIndex.toString()
+                        id: element.faceIndex.toString(),
+                        raw: element,
+                        resultId: element.resultId,
+                        chainCount: element.chainCount,
                     },
                 };
             }
@@ -464,7 +467,7 @@ export class OneBotMsgApi {
                 undefined;
         },
 
-        [OB11MessageDataType.face]: async ({ data: { id } }) => {
+        [OB11MessageDataType.face]: async ({ data: { id, resultId, chainCount } }) => {
             const parsedFaceId = +id;
             // 从face_config.json中获取表情名称
             const sysFaces = faceConfig.sysface;
@@ -491,6 +494,8 @@ export class OneBotMsgApi {
                     stickerType: face.AniStickerType,
                     packId: face.AniStickerPackId,
                     sourceType: 1,
+                    resultId,
+                    chainCount,
                 },
             };
         },

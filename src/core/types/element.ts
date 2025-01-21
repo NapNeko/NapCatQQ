@@ -40,6 +40,7 @@ export interface FaceElement {
     resultId?: string;
     surpriseId?: string;
     randomType?: number;
+    chainCount?: number;
 }
 export interface GrayTipRovokeElement {
     operatorRole: string;
