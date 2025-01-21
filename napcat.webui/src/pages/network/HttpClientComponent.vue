@@ -27,9 +27,21 @@
 import { ref, watch } from 'vue';
 import { HttpClientConfig } from '../../../../src/onebot/config/config';
 
+const defaultConfig: HttpClientConfig = {
+    name: 'http-client',
+    enable: false,
+    url: 'http://localhost:8080',
+    messagePostFormat: 'array',
+    reportSelfMessage: false,
+    token: '',
+    debug: false
+};
+
 const props = defineProps<{
     config: HttpClientConfig;
 }>();
+
+const config = ref(Object.assign({}, defaultConfig, props.config));
 
 const messageFormatOptions = ref([
     { label: 'Array', value: 'array' },
@@ -37,10 +49,10 @@ const messageFormatOptions = ref([
 ]);
 
 watch(
-    () => props.config.messagePostFormat,
+    () => config.value.messagePostFormat,
     (newValue) => {
         if (newValue !== 'array' && newValue !== 'string') {
-            props.config.messagePostFormat = 'array';
+            config.value.messagePostFormat = 'array';
         }
     }
 );

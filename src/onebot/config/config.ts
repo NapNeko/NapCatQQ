@@ -1,8 +1,6 @@
 import { Type, Static } from '@sinclair/typebox';
 import Ajv from 'ajv';
 
-const ajv = new Ajv({ useDefaults: true });
-
 const HttpServerConfigSchema = Type.Object({
     name: Type.String({ default: 'http-server' }),
     enable: Type.Boolean({ default: false }),
@@ -72,13 +70,13 @@ const PluginConfigSchema = Type.Object({
 });
 
 const NetworkConfigSchema = Type.Object({
-    httpServers: Type.Array(HttpServerConfigSchema),
-    httpSseServers: Type.Array(HttpSseServerConfigSchema),
-    httpClients: Type.Array(HttpClientConfigSchema),
-    websocketServers: Type.Array(WebsocketServerConfigSchema),
-    websocketClients: Type.Array(WebsocketClientConfigSchema),
-    plugins: Type.Array(PluginConfigSchema)
-});
+    httpServers: Type.Array(HttpServerConfigSchema, { default: [] }),
+    httpSseServers: Type.Array(HttpSseServerConfigSchema, { default: [] }),
+    httpClients: Type.Array(HttpClientConfigSchema, { default: [] }),
+    websocketServers: Type.Array(WebsocketServerConfigSchema, { default: [] }),
+    websocketClients: Type.Array(WebsocketClientConfigSchema, { default: [] }),
+    plugins: Type.Array(PluginConfigSchema, { default: [] })
+}, { default: {} });
 
 const OneBotConfigSchema = Type.Object({
     network: NetworkConfigSchema,
@@ -86,7 +84,6 @@ const OneBotConfigSchema = Type.Object({
     enableLocalFile2Url: Type.Boolean({ default: false }),
     parseMultMsg: Type.Boolean({ default: true })
 });
-
 
 export type OneBotConfig = Static<typeof OneBotConfigSchema>;
 export type HttpServerConfig = Static<typeof HttpServerConfigSchema>;
@@ -96,11 +93,13 @@ export type WebsocketServerConfig = Static<typeof WebsocketServerConfigSchema>;
 export type WebsocketClientConfig = Static<typeof WebsocketClientConfigSchema>;
 export type PluginConfig = Static<typeof PluginConfigSchema>;
 
-export type NetworkAdapterConfig = HttpServerConfig | HttpSseServerConfig | HttpClientConfig | WebsocketServerConfig | WebsocketClientConfig| PluginConfig;
+export type NetworkAdapterConfig = HttpServerConfig | HttpSseServerConfig | HttpClientConfig | WebsocketServerConfig | WebsocketClientConfig | PluginConfig;
+export type NetworkConfigKey = keyof OneBotConfig['network'];
 
-const validate = ajv.compile(OneBotConfigSchema);
 
 export function loadConfig(config: Partial<OneBotConfig>): OneBotConfig {
+    const ajv = new Ajv({ useDefaults: true });
+    const validate = ajv.compile(OneBotConfigSchema);
     const valid = validate(config);
     if (!valid) {
         throw new Error(ajv.errorsText(validate.errors));

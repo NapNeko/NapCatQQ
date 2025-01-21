@@ -36,9 +36,24 @@
 import { ref, watch } from 'vue';
 import { HttpSseServerConfig } from '../../../../src/onebot/config/config';
 
+const defaultConfig: HttpSseServerConfig = {
+    name: 'http-sse-server',
+    enable: false,
+    port: 3000,
+    host: '0.0.0.0',
+    enableCors: true,
+    enableWebsocket: true,
+    messagePostFormat: 'array',
+    token: '',
+    debug: false,
+    reportSelfMessage: false
+};
+
 const props = defineProps<{
     config: HttpSseServerConfig;
 }>();
+
+const config = ref(Object.assign({}, defaultConfig, props.config));
 
 const messageFormatOptions = ref([
     { label: 'Array', value: 'array' },
@@ -46,10 +61,10 @@ const messageFormatOptions = ref([
 ]);
 
 watch(
-    () => props.config.messagePostFormat,
+    () => config.value.messagePostFormat,
     (newValue) => {
         if (newValue !== 'array' && newValue !== 'string') {
-            props.config.messagePostFormat = 'array';
+            config.value.messagePostFormat = 'array';
         }
     }
 );
