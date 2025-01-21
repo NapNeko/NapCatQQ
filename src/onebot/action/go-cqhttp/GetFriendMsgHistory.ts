@@ -3,8 +3,9 @@ import { OB11Message } from '@/onebot';
 import { ActionName } from '@/onebot/action/router';
 import { ChatType } from '@/core/types';
 import { MessageUnique } from '@/common/message-unique';
-import { AdapterConfigWrap } from '@/onebot/config/config';
+
 import { Static, Type } from '@sinclair/typebox';
+import { NetworkAdapterConfig } from '@/onebot/config/config';
 
 interface Response {
     messages: OB11Message[];
@@ -23,7 +24,7 @@ export default class GetFriendMsgHistory extends OneBotAction<Payload, Response>
     actionName = ActionName.GetFriendMsgHistory;
     payloadSchema = SchemaData;
 
-    async _handle(payload: Payload, adapter: string): Promise<Response> {
+    async _handle(payload: Payload, adapter: string, config: NetworkAdapterConfig): Promise<Response> {
         //处理参数
         const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
 
@@ -42,10 +43,9 @@ export default class GetFriendMsgHistory extends OneBotAction<Payload, Response>
         await Promise.all(msgList.map(async msg => {
             msg.id = MessageUnique.createUniqueMsgId({ guildId: '', chatType: msg.chatType, peerUid: msg.peerUid }, msg.msgId);
         }));
-        const network = Object.values(this.obContext.configLoader.configData.network) as Array<AdapterConfigWrap>;
         //烘焙消息
         const ob11MsgList = (await Promise.all(
-            msgList.map(msg => this.obContext.apis.MsgApi.parseMessage(msg, network.flat().find(e => e.name === adapter)?.messagePostFormat ?? 'array')))
+            msgList.map(msg => this.obContext.apis.MsgApi.parseMessage(msg, config.messagePostFormat)))
         ).filter(msg => msg !== undefined);
         return { 'messages': ob11MsgList };
     }

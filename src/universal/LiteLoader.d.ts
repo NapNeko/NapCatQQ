@@ -1,6 +1,6 @@
 declare global {
     namespace globalThis {
-        var LiteLoader: Symbol;
+        const LiteLoader: symbol;
     }
 }
-export {}
+export {};

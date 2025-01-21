@@ -3,8 +3,8 @@ import { OB11Message } from '@/onebot';
 import { ActionName } from '@/onebot/action/router';
 import { ChatType, Peer } from '@/core/types';
 import { MessageUnique } from '@/common/message-unique';
-import { AdapterConfigWrap } from '@/onebot/config/config';
 import { Static, Type } from '@sinclair/typebox';
+import { NetworkAdapterConfig } from '@/onebot/config/config';
 
 interface Response {
     messages: OB11Message[];
@@ -25,7 +25,7 @@ export default class GoCQHTTPGetGroupMsgHistory extends OneBotAction<Payload, Re
     actionName = ActionName.GoCQHTTP_GetGroupMsgHistory;
     payloadSchema = SchemaData;
 
-    async _handle(payload: Payload, adapter: string): Promise<Response> {
+    async _handle(payload: Payload, adapter: string, config: NetworkAdapterConfig): Promise<Response> {
         //处理参数
         const isReverseOrder = typeof payload.reverseOrder === 'string' ? payload.reverseOrder === 'true' : !!payload.reverseOrder;
         const peer: Peer = { chatType: ChatType.KCHATTYPEGROUP, peerUid: payload.group_id.toString() };
@@ -41,11 +41,9 @@ export default class GoCQHTTPGetGroupMsgHistory extends OneBotAction<Payload, Re
         await Promise.all(msgList.map(async msg => {
             msg.id = MessageUnique.createUniqueMsgId({ guildId: '', chatType: msg.chatType, peerUid: msg.peerUid }, msg.msgId);
         }));
-        const network = Object.values(this.obContext.configLoader.configData.network) as Array<AdapterConfigWrap>;
         //烘焙消息
-        const msgFormat = network.flat().find(e => e.name === adapter)?.messagePostFormat ?? 'array';
         const ob11MsgList = (await Promise.all(
-            msgList.map(msg => this.obContext.apis.MsgApi.parseMessage(msg, msgFormat)))
+            msgList.map(msg => this.obContext.apis.MsgApi.parseMessage(msg, config.messagePostFormat)))
         ).filter(msg => msg !== undefined);
         return { 'messages': ob11MsgList };
     }
