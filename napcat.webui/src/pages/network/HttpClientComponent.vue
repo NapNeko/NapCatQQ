@@ -2,22 +2,22 @@
     <div>
         <t-form labelAlign="left">
             <t-form-item label="启用">
-                <t-switch v-model="config.enable" />
+                <t-switch v-model="props.config.data.enable" />
             </t-form-item>
             <t-form-item label="URL">
-                <t-input v-model="config.url" />
+                <t-input v-model="props.config.data.url" />
             </t-form-item>
             <t-form-item label="消息格式">
-                <t-select v-model="config.messagePostFormat" :options="messageFormatOptions" />
+                <t-select v-model="props.config.data.messagePostFormat" :options="messageFormatOptions" />
             </t-form-item>
             <t-form-item label="报告自身消息">
-                <t-switch v-model="config.reportSelfMessage" />
+                <t-switch v-model="props.config.data.reportSelfMessage" />
             </t-form-item>
             <t-form-item label="Token">
-                <t-input v-model="config.token" />
+                <t-input v-model="props.config.data.token" />
             </t-form-item>
             <t-form-item label="调试模式">
-                <t-switch v-model="config.debug" />
+                <t-switch v-model="props.config.data.debug" />
             </t-form-item>
         </t-form>
     </div>
@@ -34,14 +34,14 @@ const defaultConfig: HttpClientConfig = {
     messagePostFormat: 'array',
     reportSelfMessage: false,
     token: '',
-    debug: false
+    debug: false,
 };
 
 const props = defineProps<{
-    config: HttpClientConfig;
+    config: { data: HttpClientConfig };
 }>();
 
-const config = ref(Object.assign({}, defaultConfig, props.config));
+props.config.data = { ...defaultConfig, ...props.config.data };
 
 const messageFormatOptions = ref([
     { label: 'Array', value: 'array' },
@@ -49,10 +49,10 @@ const messageFormatOptions = ref([
 ]);
 
 watch(
-    () => config.value.messagePostFormat,
+    () => props.config.data.messagePostFormat,
     (newValue) => {
         if (newValue !== 'array' && newValue !== 'string') {
-            config.value.messagePostFormat = 'array';
+            props.config.data.messagePostFormat = 'array';
         }
     }
 );
