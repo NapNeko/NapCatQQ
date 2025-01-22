@@ -13,7 +13,7 @@ import { WebsocketServerConfig } from '@/onebot/config/config';
 import { NapCatOneBot11Adapter } from "@/onebot";
 import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
 
-export class OB11PassiveWebSocketAdapter extends IOB11NetworkAdapter<WebsocketServerConfig> {
+export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketServerConfig> {
     wsServer: WebSocketServer;
     wsClients: WebSocket[] = [];
     wsClientsMutex = new Mutex();
@@ -176,7 +176,7 @@ export class OB11PassiveWebSocketAdapter extends IOB11NetworkAdapter<WebsocketSe
             this.checkStateAndReply<any>(OB11Response.error('不支持的API ' + receiveData.action, 1404, echo), wsClient);
             return;
         }
-        const retdata = await action.websocketHandle(receiveData.params, echo ?? '', this.name);
+        const retdata = await action.websocketHandle(receiveData.params, echo ?? '', this.name, this.config);
         this.checkStateAndReply<any>({ ...retdata }, wsClient);
     }
 

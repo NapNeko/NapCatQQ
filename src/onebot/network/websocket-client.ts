@@ -10,7 +10,7 @@ import { WebsocketClientConfig } from '@/onebot/config/config';
 import { NapCatOneBot11Adapter } from "@/onebot";
 import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
 
-export class OB11ActiveWebSocketAdapter extends IOB11NetworkAdapter<WebsocketClientConfig> {
+export class OB11WebSocketClientAdapter extends IOB11NetworkAdapter<WebsocketClientConfig> {
     private connection: WebSocket | null = null;
     private heartbeatRef: NodeJS.Timeout | null = null;
 
@@ -143,7 +143,7 @@ export class OB11ActiveWebSocketAdapter extends IOB11NetworkAdapter<WebsocketCli
             this.checkStateAndReply<any>(OB11Response.error('不支持的Api ' + receiveData.action, 1404, echo));
             return;
         }
-        const retdata = await action.websocketHandle(receiveData.params, echo ?? '', this.name);
+        const retdata = await action.websocketHandle(receiveData.params, echo ?? '', this.name, this.config);
         this.checkStateAndReply<any>({ ...retdata });
     }
     async reload(newConfig: WebsocketClientConfig) {

@@ -9,7 +9,7 @@ import { HttpServerConfig } from '@/onebot/config/config';
 import { NapCatOneBot11Adapter } from "@/onebot";
 import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
 
-export class OB11PassiveHttpAdapter extends IOB11NetworkAdapter<HttpServerConfig> {
+export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig> {
     private app: Express | undefined;
     private server: http.Server | undefined;
 
@@ -98,7 +98,7 @@ export class OB11PassiveHttpAdapter extends IOB11NetworkAdapter<HttpServerConfig
         const action = this.actions.get(actionName as any);
         if (action) {
             try {
-                const result = await action.handle(payload, this.name);
+                const result = await action.handle(payload, this.name, this.config);
                 return res.json(result);
             } catch (error: any) {
                 return res.json(OB11Response.error(error?.stack?.toString() || error?.message || 'Error Handle', 200));
