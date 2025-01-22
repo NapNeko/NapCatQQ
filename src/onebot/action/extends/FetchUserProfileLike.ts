@@ -10,7 +10,7 @@ type Payload = Static<typeof SchemaData>;
 
 export class FetchUserProfileLike extends OneBotAction<Payload, any> {
     actionName = ActionName.FetchUserProfileLike;
-
+    payloadSchema = SchemaData;
     async _handle(payload: Payload) {
         return await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
     }
