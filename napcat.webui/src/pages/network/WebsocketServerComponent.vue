@@ -2,31 +2,31 @@
     <div>
         <t-form labelAlign="left">
             <t-form-item label="启用">
-                <t-switch v-model="config.enable" />
+                <t-switch v-model="props.config.data.enable" />
             </t-form-item>
             <t-form-item label="主机">
-                <t-input v-model="config.host" />
+                <t-input v-model="props.config.data.host" />
             </t-form-item>
             <t-form-item label="端口">
-                <t-input v-model.number="config.port" type="number" />
+                <t-input v-model.number="props.config.data.port" type="number" />
             </t-form-item>
             <t-form-item label="消息格式">
-                <t-select v-model="config.messagePostFormat" :options="messageFormatOptions" />
+                <t-select v-model="props.config.data.messagePostFormat" :options="messageFormatOptions" />
             </t-form-item>
             <t-form-item label="上报自身消息">
-                <t-switch v-model="config.reportSelfMessage" />
+                <t-switch v-model="props.config.data.reportSelfMessage" />
             </t-form-item>
             <t-form-item label="Token">
-                <t-input v-model="config.token" />
+                <t-input v-model="props.config.data.token" />
             </t-form-item>
             <t-form-item label="强制推送事件">
-                <t-switch v-model="config.enableForcePushEvent" />
+                <t-switch v-model="props.config.data.enableForcePushEvent" />
             </t-form-item>
             <t-form-item label="调试模式">
-                <t-switch v-model="config.debug" />
+                <t-switch v-model="props.config.data.debug" />
             </t-form-item>
             <t-form-item label="心跳间隔">
-                <t-input v-model.number="config.heartInterval" type="number" />
+                <t-input v-model.number="props.config.data.heartInterval" type="number" />
             </t-form-item>
         </t-form>
     </div>
@@ -46,14 +46,14 @@ const defaultConfig: WebsocketServerConfig = {
     token: '',
     enableForcePushEvent: true,
     debug: false,
-    heartInterval: 30000
+    heartInterval: 30000,
 };
 
 const props = defineProps<{
-    config: WebsocketServerConfig;
+    config: { data: WebsocketServerConfig };
 }>();
 
-const config = ref(Object.assign({}, defaultConfig, props.config));
+props.config.data = { ...defaultConfig, ...props.config.data };
 
 const messageFormatOptions = ref([
     { label: 'Array', value: 'array' },
@@ -61,10 +61,10 @@ const messageFormatOptions = ref([
 ]);
 
 watch(
-    () => config.value.messagePostFormat,
+    () => props.config.data.messagePostFormat,
     (newValue) => {
         if (newValue !== 'array' && newValue !== 'string') {
-            config.value.messagePostFormat = 'array';
+            props.config.data.messagePostFormat = 'array';
         }
     }
 );

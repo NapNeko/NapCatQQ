@@ -2,28 +2,28 @@
     <div>
         <t-form labelAlign="left">
             <t-form-item label="启用">
-                <t-switch v-model="config.enable" />
+                <t-switch v-model="props.config.data.enable" />
             </t-form-item>
             <t-form-item label="端口">
-                <t-input v-model.number="config.port" type="number" />
+                <t-input v-model.number="props.config.data.port" type="number" />
             </t-form-item>
             <t-form-item label="主机">
-                <t-input v-model="config.host" type="text" />
+                <t-input v-model="props.config.data.host" type="text" />
             </t-form-item>
             <t-form-item label="启用 CORS">
-                <t-switch v-model="config.enableCors" />
+                <t-switch v-model="props.config.data.enableCors" />
             </t-form-item>
             <t-form-item label="启用 WS">
-                <t-switch v-model="config.enableWebsocket" />
+                <t-switch v-model="props.config.data.enableWebsocket" />
             </t-form-item>
             <t-form-item label="消息格式">
-                <t-select v-model="config.messagePostFormat" :options="messageFormatOptions" />
+                <t-select v-model="props.config.data.messagePostFormat" :options="messageFormatOptions" />
             </t-form-item>
             <t-form-item label="Token">
-                <t-input v-model="config.token" type="text" />
+                <t-input v-model="props.config.data.token" type="text" />
             </t-form-item>
             <t-form-item label="调试模式">
-                <t-switch v-model="config.debug" />
+                <t-switch v-model="props.config.data.debug" />
             </t-form-item>
         </t-form>
     </div>
@@ -42,14 +42,14 @@ const defaultConfig: HttpServerConfig = {
     enableWebsocket: true,
     messagePostFormat: 'array',
     token: '',
-    debug: false
+    debug: false,
 };
 
 const props = defineProps<{
-    config: HttpServerConfig;
+    config: { data: HttpServerConfig };
 }>();
 
-const config = ref(Object.assign({}, defaultConfig, props.config));
+props.config.data = { ...defaultConfig, ...props.config.data };
 
 const messageFormatOptions = ref([
     { label: 'Array', value: 'array' },
@@ -57,10 +57,10 @@ const messageFormatOptions = ref([
 ]);
 
 watch(
-    () => config.value.messagePostFormat,
+    () => props.config.data.messagePostFormat,
     (newValue) => {
         if (newValue !== 'array' && newValue !== 'string') {
-            config.value.messagePostFormat = 'array';
+            props.config.data.messagePostFormat = 'array';
         }
     }
 );
