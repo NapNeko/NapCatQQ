@@ -1,9 +1,9 @@
 import { OB11EmitEventContent } from './index';
 import { Request, Response } from 'express';
 import { OB11Response } from '@/onebot/action/OneBotAction';
-import { OB11PassiveHttpAdapter } from './passive-http';
+import { OB11HttpServerAdapter } from './http-server';
 
-export class OB11ActiveHttpSSEAdapter extends OB11PassiveHttpAdapter {
+export class OB11HttpSSEServerAdapter extends OB11HttpServerAdapter {
     private sseClients: Response[] = [];
 
     async handleRequest(req: Request, res: Response): Promise<any> {

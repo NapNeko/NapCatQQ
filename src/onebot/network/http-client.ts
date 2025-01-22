@@ -8,7 +8,7 @@ import { HttpClientConfig } from '@/onebot/config/config';
 import { ActionMap } from '@/onebot/action';
 import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
 
-export class OB11ActiveHttpAdapter extends IOB11NetworkAdapter<HttpClientConfig> {
+export class OB11HttpClientAdapter extends IOB11NetworkAdapter<HttpClientConfig> {
     constructor(
         name: string, config: HttpClientConfig, core: NapCatCore, obContext: NapCatOneBot11Adapter, actions: ActionMap
     ) {

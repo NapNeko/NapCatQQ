@@ -101,7 +101,7 @@ export class OB11NetworkManager {
     }
 }
 
-export * from './active-http';
-export * from './active-websocket';
-export * from './passive-http';
-export * from './passive-websocket';
+export * from './http-client';
+export * from './websocket-client';
+export * from './http-server';
+export * from './websocket-server';

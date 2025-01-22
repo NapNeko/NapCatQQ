@@ -16,12 +16,12 @@ import {
 } from '@/core';
 import { OB11ConfigLoader } from '@/onebot/config';
 import {
-    OB11ActiveHttpAdapter,
-    OB11ActiveWebSocketAdapter,
+    OB11HttpClientAdapter,
+    OB11WebSocketClientAdapter,
     OB11NetworkManager,
     OB11NetworkReloadType,
-    OB11PassiveHttpAdapter,
-    OB11PassiveWebSocketAdapter,
+    OB11HttpServerAdapter,
+    OB11WebSocketServerAdapter,
 } from '@/onebot/network';
 import { NapCatPathWrapper } from '@/common/path';
 import {
@@ -51,7 +51,7 @@ import {
 import { OB11Message } from './types';
 import { OB11PluginAdapter } from './network/plugin';
 import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
-import { OB11ActiveHttpSSEAdapter } from './network/active-http-sse';
+import { OB11HttpSSEServerAdapter } from './network/http-server-sse';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -123,28 +123,28 @@ export class NapCatOneBot11Adapter {
         for (const key of ob11Config.network.httpServers) {
             if (key.enable) {
                 this.networkManager.registerAdapter(
-                    new OB11PassiveHttpAdapter(key.name, key, this.core, this, this.actions)
+                    new OB11HttpServerAdapter(key.name, key, this.core, this, this.actions)
                 );
             }
         }
         for (const key of ob11Config.network.httpSseServers) {
             if (key.enable) {
                 this.networkManager.registerAdapter(
-                    new OB11ActiveHttpSSEAdapter(key.name, key, this.core, this, this.actions)
+                    new OB11HttpSSEServerAdapter(key.name, key, this.core, this, this.actions)
                 );
             }
         }
         for (const key of ob11Config.network.httpClients) {
             if (key.enable) {
                 this.networkManager.registerAdapter(
-                    new OB11ActiveHttpAdapter(key.name, key, this.core, this, this.actions)
+                    new OB11HttpClientAdapter(key.name, key, this.core, this, this.actions)
                 );
             }
         }
         for (const key of ob11Config.network.websocketServers) {
             if (key.enable) {
                 this.networkManager.registerAdapter(
-                    new OB11PassiveWebSocketAdapter(
+                    new OB11WebSocketServerAdapter(
                         key.name,
                         key,
                         this.core,
@@ -157,7 +157,7 @@ export class NapCatOneBot11Adapter {
         for (const key of ob11Config.network.websocketClients) {
             if (key.enable) {
                 this.networkManager.registerAdapter(
-                    new OB11ActiveWebSocketAdapter(
+                    new OB11WebSocketClientAdapter(
                         key.name,
                         key,
                         this.core,
@@ -206,11 +206,11 @@ export class NapCatOneBot11Adapter {
         this.context.logger.log(`[Notice] [OneBot11] 配置变更前:\n${prevLog}`);
         this.context.logger.log(`[Notice] [OneBot11] 配置变更后:\n${newLog}`);
 
-        await this.handleConfigChange(prev.network.httpServers, now.network.httpServers, OB11PassiveHttpAdapter);
-        await this.handleConfigChange(prev.network.httpClients, now.network.httpClients, OB11ActiveHttpAdapter);
-        await this.handleConfigChange(prev.network.httpSseServers, now.network.httpSseServers, OB11ActiveHttpSSEAdapter);
-        await this.handleConfigChange(prev.network.websocketServers, now.network.websocketServers, OB11PassiveWebSocketAdapter);
-        await this.handleConfigChange(prev.network.websocketClients, now.network.websocketClients, OB11ActiveWebSocketAdapter);
+        await this.handleConfigChange(prev.network.httpServers, now.network.httpServers, OB11HttpServerAdapter);
+        await this.handleConfigChange(prev.network.httpClients, now.network.httpClients, OB11HttpClientAdapter);
+        await this.handleConfigChange(prev.network.httpSseServers, now.network.httpSseServers, OB11HttpSSEServerAdapter);
+        await this.handleConfigChange(prev.network.websocketServers, now.network.websocketServers, OB11WebSocketServerAdapter);
+        await this.handleConfigChange(prev.network.websocketClients, now.network.websocketClients, OB11WebSocketClientAdapter);
     }
 
     private async handleConfigChange<CT extends NetworkAdapterConfig>(
