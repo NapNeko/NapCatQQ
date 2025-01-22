@@ -86,10 +86,11 @@ export class NTQQUserApi {
             ...profile.simpleInfo.vasInfo,
             ...profile.commonExt,
             ...profile.simpleInfo.baseInfo,
+            ...profile.simpleInfo.coreInfo,
             qqLevel: profile.commonExt?.qqLevel,
             age: profile.simpleInfo.baseInfo.age,
             pendantId: '',
-            ...profile.simpleInfo.coreInfo
+            nick: profile.simpleInfo.coreInfo.nick || '',
         };
         return RetUser;
     }
