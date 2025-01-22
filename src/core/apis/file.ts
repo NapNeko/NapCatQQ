@@ -474,7 +474,7 @@ export class NTQQFileApi {
         if (rkeyData.online_rkey) {
             return IMAGE_HTTP_HOST_NT + `/download?appid=${appid}&fileid=${imageFileId}&rkey=${rkey}`;
         }
-        return IMAGE_HTTP_HOST + `/download?appid=${appid}&fileid=${imageFileId}&rkey=${rkey}`;
+        return IMAGE_HTTP_HOST + `/download?appid=${appid}&fileid=${imageFileId}&rkey=${rkey}&spec=0`;
     }
 
     private getImageUrlFromMd5(fileMd5: string | undefined, md5HexStr: string | undefined): string {
