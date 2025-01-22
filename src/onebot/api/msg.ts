@@ -91,12 +91,16 @@ export class OneBotMsgApi {
                 let qq: string = 'all';
                 if (element.atType !== NTMsgAtType.ATTYPEALL) {
                     const { atNtUid /* content */ } = element;
-                    let atQQ = element.atUid;
-                    if (!atQQ || atQQ === '0') {
-                        atQQ = await this.core.apis.UserApi.getUinByUidV2(atNtUid);
+                    let atUinStr = element.atUid;
+                    if (!atUinStr || atUinStr === '0') {
+                        atUinStr = await this.core.apis.UserApi.getUinByUidV2(atNtUid);
                     }
-                    if (atQQ) {
-                        qq = atQQ as `${number}`;
+                    let atUin = parseInt(atUinStr);
+                    if (atUin < 0) {
+                        atUin += 4294967296;
+                    }
+                    if (atUinStr) {
+                        qq = `${atUin}`;
                     }
                 }
                 return {
