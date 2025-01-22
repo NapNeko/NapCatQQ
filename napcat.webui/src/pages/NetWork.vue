@@ -149,8 +149,10 @@
                     </t-select>
                 </t-form-item>
                 <div>
-                    <component :is="resolveDynamicComponent(getComponent(newTab.type as ComponentKey))"
-                        :config="newTab.data" />
+                    <component
+                        :is="resolveDynamicComponent(getComponent(newTab.type as ComponentKey))"
+                        :config="newTab"
+                    />
                 </div>
             </t-form>
         </div>
