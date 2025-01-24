@@ -66,7 +66,6 @@ import SetGroupPortrait from './go-cqhttp/SetGroupPortrait';
 import { FetchCustomFace } from './extends/FetchCustomFace';
 import GoCQHTTPUploadPrivateFile from './go-cqhttp/UploadPrivateFile';
 import { FetchEmojiLike } from './extends/FetchEmojiLike';
-import { FetchUserProfileLike } from './extends/FetchUserProfileLike';
 import { NapCatCore } from '@/core';
 import { NapCatOneBot11Adapter } from '@/onebot';
 import { SetInputStatus } from './extends/SetInputStatus';
@@ -205,8 +204,6 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new DeleteGroupFileFolder(obContext, core),
         new GetGroupFileSystemInfo(obContext, core),
         new GetGroupFilesByFolder(obContext, core),
-        new GetGroupSystemMsg(obContext, core),
-        new FetchUserProfileLike(obContext, core),
         new GetPacketStatus(obContext, core),
         new GroupPoke(obContext, core),
         new FriendPoke(obContext, core),
