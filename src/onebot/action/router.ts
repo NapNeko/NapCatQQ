@@ -122,7 +122,6 @@ export const ActionName = {
     GetGroupInfoEx: 'get_group_info_ex',
     GetGroupIgnoreAddRequest: 'get_group_ignore_add_request',
     DelGroupNotice: '_del_group_notice',
-    FetchUserProfileLike: 'fetch_user_profile_like',
     FriendPoke: 'friend_poke',
     GroupPoke: 'group_poke',
     GetPacketStatus: 'nc_get_packet_status',
