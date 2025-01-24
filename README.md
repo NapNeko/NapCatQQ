@@ -53,7 +53,7 @@ NapCat 在设计理念下遵守 OneBot 规范大多数要求并且积极改进�
 ## 感谢他们
 感谢 [Lagrange](https://github.com/LagrangeDev/Lagrange.Core) 对本项目的大力支持 参考部分代码 已获授权
 
-感谢 Tencent Tdesign / Vue3 强力驱动 NapCat.WebUi
+感谢 React 强力驱动 NapCat.WebUi
 
 不过最最重要的 还是需要感谢屏幕前的你哦~
 
