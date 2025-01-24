@@ -8,9 +8,6 @@ const napcat = {
     },
     openInnerUrl: async (url) => {
         ipcRenderer.send('napcat_open_inner_url', url);
-    },
-    getWebUiUrlReact: async () => {
-        return ipcRenderer.invoke('napcat_get_reactweb');
     }
 };
 // 在window对象下导出只读对象
