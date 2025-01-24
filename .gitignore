@@ -4,7 +4,7 @@ package-lock.json
 out/
 dist/
 /src/core.lib/common/
-/localdebug/
+devconfig/*
 
 # Editor
 !.vscode/extensions.json
