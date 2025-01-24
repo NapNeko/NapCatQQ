@@ -1,41 +1,52 @@
-import { defineConfig } from 'vite';
-import vue from '@vitejs/plugin-vue';
-import legacy from '@vitejs/plugin-legacy';
-import path from 'path';
+import react from '@vitejs/plugin-react'
+import path from 'node:path'
+import { defineConfig, loadEnv, normalizePath } from 'vite'
+import { viteStaticCopy } from 'vite-plugin-static-copy'
+import tsconfigPaths from 'vite-tsconfig-paths'
 
-// https://vite.dev/config/
-export default defineConfig({
+const monacoEditorPath = normalizePath(
+  path.resolve(__dirname, 'node_modules/monaco-editor/min/vs')
+)
+
+// https://vitejs.dev/config/
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd())
+  const backendDebugUrl = env.VITE_DEBUG_BACKEND_URL
+  console.log('backendDebugUrl', backendDebugUrl)
+  return {
     plugins: [
-        vue(),
-        legacy({
-            targets: ['defaults', 'not IE 11'],
-            modernPolyfills: ['web.structured-clone'],
-        }),
+      react(),
+      tsconfigPaths(),
+      viteStaticCopy({
+        targets: [
+          {
+            src: monacoEditorPath,
+            dest: 'monaco-editor/min'
+          }
+        ]
+      })
     ],
-    base: './',
-    resolve: {
-        alias: {
-            '@': path.resolve(__dirname, 'src'),
-        },
-    },
+    base: '/webui/',
     server: {
-        proxy: {
-            '/api': 'http://localhost:6099',
-        },
+      proxy: {
+        '/api': backendDebugUrl
+      }
     },
     build: {
-        chunkSizeWarningLimit: 4000,
-        rollupOptions: {
-            output: {
-                chunkFileNames: 'static/js/[name]-[hash].js',
-                entryFileNames: 'static/js/[name]-[hash].js',
-                assetFileNames: 'static/[ext]/[name]-[hash].[ext]',
-                manualChunks(id: string) {
-                    if (id.includes('node_modules')) {
-                        return id.toString().split('node_modules/')[1].split('/')[0].toString();
-                    }
-                },
-            },
-        },
-    },
-});
+      assetsInlineLimit: 0,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'monaco-editor': ['monaco-editor'],
+            'react-dom': ['react-dom'],
+            'react-router-dom': ['react-router-dom'],
+            'react-hook-form': ['react-hook-form'],
+            'react-icons': ['react-icons'],
+            'react-hot-toast': ['react-hot-toast'],
+            qface: ['qface']
+          }
+        }
+      }
+    }
+  }
+})
