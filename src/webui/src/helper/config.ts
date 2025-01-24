@@ -78,7 +78,6 @@ export class WebUiConfigWrapper {
         const defaultconfig: WebUiConfigType = {
             host: '0.0.0.0',
             port: 6099,
-            prefix: '',
             token: '', // 默认先填空，空密码无法登录
             loginRate: 3,
         };
@@ -90,7 +89,12 @@ export class WebUiConfigWrapper {
         try {
             const configPath = resolve(webUiPathWrapper.configPath, './webui.json');
 
-            if (!await fs.access(configPath, constants.F_OK).then(() => true).catch(() => false)) {
+            if (
+                !(await fs
+                    .access(configPath, constants.F_OK)
+                    .then(() => true)
+                    .catch(() => false))
+            ) {
                 await fs.writeFile(configPath, JSON.stringify(defaultconfig, null, 4));
             }
 
@@ -98,13 +102,15 @@ export class WebUiConfigWrapper {
             // 更新配置字段后新增字段可能会缺失，同步一下
             const parsedConfig = this.applyDefaults(JSON.parse(fileContent) as Partial<WebUiConfigType>, defaultconfig);
 
-            if (!parsedConfig.prefix.startsWith('/')) parsedConfig.prefix = '/' + parsedConfig.prefix;
-            if (parsedConfig.prefix.endsWith('/')) parsedConfig.prefix = parsedConfig.prefix.slice(0, -1);
             // 配置已经被操作过了，还是回写一下吧，不然新配置不会出现在配置文件里
-            if (await fs.access(configPath, constants.W_OK).then(() => true).catch(() => false)) {
+            if (
+                await fs
+                    .access(configPath, constants.W_OK)
+                    .then(() => true)
+                    .catch(() => false)
+            ) {
                 await fs.writeFile(configPath, JSON.stringify(parsedConfig, null, 4));
-            }
-            else {
+            } else {
                 console.warn(`文件: ${configPath} 没有写入权限, 配置的更改部分可能会在重启后还原.`);
             }
             // 不希望回写的配置放后面
@@ -143,7 +149,12 @@ export class WebUiConfigWrapper {
     }
     // 获取日志列表
     public static async GetLogsList(): Promise<string[]> {
-        if (await fs.access(webUiPathWrapper.logsPath, constants.F_OK).then(() => true).catch(() => false)) {
+        if (
+            await fs
+                .access(webUiPathWrapper.logsPath, constants.F_OK)
+                .then(() => true)
+                .catch(() => false)
+        ) {
             return (await fs.readdir(webUiPathWrapper.logsPath))
                 .filter((file) => file.endsWith('.log'))
                 .map((file) => file.replace('.log', ''));
@@ -153,7 +164,12 @@ export class WebUiConfigWrapper {
     // 获取指定日志文件内容
     public static async GetLogContent(filename: string): Promise<string> {
         const logPath = resolve(webUiPathWrapper.logsPath, `${filename}.log`);
-        if (await fs.access(logPath, constants.R_OK).then(() => true).catch(() => false)) {
+        if (
+            await fs
+                .access(logPath, constants.R_OK)
+                .then(() => true)
+                .catch(() => false)
+        ) {
             return await fs.readFile(logPath, 'utf-8');
         }
         return '';
