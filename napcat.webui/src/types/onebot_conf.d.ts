@@ -44,9 +44,14 @@ interface WebsocketClientConfig extends AdapterConfig {
   heartInterval: number
 }
 
+interface HttpSseServerConfig extends HttpServerConfig {
+  reportSelfMessage: boolean
+}
+
 interface NetworkConfig {
   httpServers: Array<HttpServerConfig>
   httpClients: Array<HttpClientConfig>
+  httpSseServers: Array<HttpSseServerConfig>
   websocketServers: Array<WebsocketServerConfig>
   websocketClients: Array<WebsocketClientConfig>
 }

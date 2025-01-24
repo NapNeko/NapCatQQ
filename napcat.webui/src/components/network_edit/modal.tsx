@@ -5,12 +5,14 @@ import useConfig from '@/hooks/use-config'
 
 import HTTPClientForm from './http_client'
 import HTTPServerForm from './http_server'
+import HTTPServerSSEForm from './http_sse'
 import WebsocketClientForm from './ws_client'
 import WebsocketServerForm from './ws_server'
 
 const modalTitle = {
   httpServers: 'HTTP Server',
   httpClients: 'HTTP Client',
+  httpSseServers: 'HTTP SSE Server',
   websocketServers: 'Websocket Server',
   websocketClients: 'Websocket Client'
 }
@@ -78,6 +80,14 @@ const NetworkFormModal = <T extends keyof OneBotConfig['network']>(
         return (
           <WebsocketClientForm
             data={data as OneBotConfig['network']['websocketClients'][0]}
+            onClose={onClose}
+            onSubmit={onSubmit}
+          />
+        )
+      case 'httpSseServers':
+        return (
+          <HTTPServerSSEForm
+            data={data as OneBotConfig['network']['httpSseServers'][0]}
             onClose={onClose}
             onSubmit={onSubmit}
           />
