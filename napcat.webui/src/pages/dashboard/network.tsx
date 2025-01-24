@@ -9,6 +9,7 @@ import { IoMdRefresh } from 'react-icons/io'
 import AddButton from '@/components/button/add_button'
 import HTTPClientDisplayCard from '@/components/display_card/http_client'
 import HTTPServerDisplayCard from '@/components/display_card/http_server'
+import HTTPSSEServerDisplayCard from '@/components/display_card/http_sse_server'
 import WebsocketClientDisplayCard from '@/components/display_card/ws_client'
 import WebsocketServerDisplayCard from '@/components/display_card/ws_server'
 import NetworkFormModal from '@/components/network_edit/modal'
@@ -59,7 +60,13 @@ export default function NetworkPage() {
     useState<keyof OneBotConfig['network']>('httpServers')
   const [activeName, setActiveName] = useState<string>('')
   const {
-    network: { httpServers, httpClients, websocketServers, websocketClients }
+    network: {
+      httpServers,
+      httpClients,
+      httpSseServers,
+      websocketServers,
+      websocketClients
+    }
   } = config
   const [loading, setLoading] = useState(false)
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
@@ -204,6 +211,26 @@ export default function NetworkPage() {
             }}
           />
         )
+      case 'httpSseServers':
+        return (
+          <HTTPSSEServerDisplayCard
+            key={item.name}
+            showType={showType}
+            data={item as OneBotConfig['network']['httpSseServers'][0]}
+            onDelete={async () => {
+              await onDelete('httpSseServers', item.name)
+            }}
+            onEdit={() => {
+              onEdit('httpSseServers', item.name)
+            }}
+            onEnable={async () => {
+              await onEnable('httpSseServers', item.name)
+            }}
+            onEnableDebug={async () => {
+              await onEnableDebug('httpSseServers', item.name)
+            }}
+          />
+        )
       case 'websocketServers':
         return (
           <WebsocketServerDisplayCard
@@ -255,7 +282,8 @@ export default function NetworkPage() {
         ...httpServers,
         ...httpClients,
         ...websocketServers,
-        ...websocketClients
+        ...websocketClients,
+        ...httpSseServers
       ]
         .sort((a, b) => a.name.localeCompare(b.name))
         .map((item) => {
@@ -299,6 +327,11 @@ export default function NetworkPage() {
       key: 'httpClients',
       title: 'HTTP客户端',
       items: httpClients.map((item) => renderCard('httpClients', item))
+    },
+    {
+      key: 'httpSseServers',
+      title: 'HTTP SSE服务器',
+      items: httpSseServers.map((item) => renderCard('httpSseServers', item))
     },
     {
       key: 'websocketServers',

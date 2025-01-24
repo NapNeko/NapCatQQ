@@ -11,6 +11,7 @@ const initialState: ConfigState = {
     network: {
       httpServers: [],
       httpClients: [],
+      httpSseServers: [],
       websocketServers: [],
       websocketClients: []
     },
