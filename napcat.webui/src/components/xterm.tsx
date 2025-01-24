@@ -33,7 +33,7 @@ const XTerm = forwardRef<XTermRef, React.HTMLAttributes<HTMLDivElement>>(
       }
       const terminal = new Terminal({
         allowTransparency: true,
-        fontFamily: '"Fira Code", "Noto Serif SC", monospace' // 添加回退字体
+        fontFamily: '"Fira Code", "Harmony", "Noto Serif SC", monospace'
       })
       terminalRef.current = terminal
       const fitAddon = new FitAddon()
