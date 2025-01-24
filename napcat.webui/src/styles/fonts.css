@@ -8,36 +8,8 @@
 
 @font-face {
   font-family: 'Harmony';
-  src: url('/fonts/harmony/HarmonyOS_Sans_SC_Black.ttf') format('truetype');
-  font-weight: 900;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Harmony';
-  src: url('/fonts/harmony/HarmonyOS_Sans_SC_Medium.ttf') format('truetype');
-  font-weight: 500;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Harmony';
   src: url('/fonts/harmony/HarmonyOS_Sans_SC_Regular.ttf') format('truetype');
   font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Harmony';
-  src: url('/fonts/harmony/HarmonyOS_Sans_SC_Light.ttf') format('truetype');
-  font-weight: 300;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Harmony';
-  src: url('/fonts/harmony/HarmonyOS_Sans_SC_Thin.ttf') format('truetype');
-  font-weight: 100;
   font-style: normal;
 }
 
