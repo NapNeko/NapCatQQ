@@ -1,0 +1,7 @@
+dist
+*.md
+*.html
+yarn.lock
+package-lock.json
+node_modules
+pnpm-lock.yaml

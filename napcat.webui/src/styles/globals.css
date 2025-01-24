@@ -1,0 +1,97 @@
+@import url("https://s1.hdslb.com/bfs/static/jinkela/long/font/regular.css");
+@import url("https://s1.hdslb.com/bfs/static/jinkela/long/font/medium.css");
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Fira+Code:wght@300..700&family=Noto+Serif+SC:wght@200..900&family=Outfit:wght@100..900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+body {
+  font-family: PingFang SC,HarmonyOS_Regular,Helvetica Neue,Microsoft YaHei,sans-serif !important;
+}
+
+@layer components {
+  .hm-medium {
+    font-family: PingFang SC,HarmonyOS_Medium,Helvetica Neue,Microsoft YaHei,sans-serif !important;
+    @apply font-bold;
+  }
+  .font-ubuntu {
+    font-family: 'Ubuntu', sans-serif;
+  }
+  .font-outfit {
+    font-family: 'Outfit', sans-serif;
+  }
+  .font-libre {
+    font-family: 'Libre Baskerville', serif;
+  }
+  .font-noto-serif {
+    font-family: 'Noto Serif SC', serif;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+  -webkit-border-radius: 2em;
+  -moz-border-radius: 2em;
+  border-radius: 2em;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgb(147, 147, 153, 0.5);
+  -webkit-border-radius: 2em;
+  -moz-border-radius: 2em;
+  border-radius: 2em;
+}
+.monaco-editor {
+  outline: none !important;
+  border-radius: 5px !important;
+  overflow: hidden !important;
+}
+
+.monaco-editor, .monaco-editor-background {
+  background-color: transparent !important;
+}
+
+.monaco-editor .margin {
+  background-color: transparent !important;
+}
+
+.minimap canvas:nth-child(2) {
+  opacity: 0.5;
+}
+
+.monaco-editor .scroll-decoration {
+  --vscode-scrollbar-shadow: rgba(0, 0, 0, 0.2);
+}
+
+.monaco-editor .decorationsOverviewRuler {
+  opacity: 0.5;
+}
+
+.monaco-editor .view-overlays .current-line-exact {
+  border-color: rgba(0, 0, 0, 0.2) !important;
+  border-radius: 5px !important;
+}
+
+.ql-hidden {
+  @apply hidden;
+}
+.ql-editor img {
+  @apply inline-block;
+}
+/* input.ql-image {
+  @apply hidden;
+}
+.ql-image svg {
+  fill: none;
+}
+.ql-fill {
+  fill: currentColor;
+}
+.ql-stroke {
+  stroke: currentColor;
+} */
