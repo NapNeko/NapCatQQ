@@ -5,6 +5,25 @@ export enum NTSex {
     GENDER_FEMALE = 2,
     GENDER_PRIVACY = 255,
 }
+export interface NTVoteInfo {
+    age: number;
+    bAvailableCnt: number;
+    bTodayVotedCnt: number;
+    count: number;
+    customId: number;
+    gender: number;
+    giftCount: number;
+    isFriend: boolean;
+    isSvip: boolean;
+    isvip: boolean;
+    lastCharged: number;
+    latestTime: number;
+    nick: string;
+    src: number;
+    uid: string;
+    uin: number;
+}
+
 
 // 好友分类类型
 export interface BuddyCategoryType {

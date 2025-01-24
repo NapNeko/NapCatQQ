@@ -251,7 +251,7 @@ export interface NodeIKernelGroupService {
 
     setGroupShutUp(groupCode: string, shutUp: boolean): void;
 
-    getGroupShutUpMemberList(groupCode: string): Promise<any>;
+    getGroupShutUpMemberList(groupCode: string): Promise<GeneralCallResult>;
 
     setMemberShutUp(groupCode: string, memberTimes: { uid: string, timeStamp: number }[]): Promise<void>;
 

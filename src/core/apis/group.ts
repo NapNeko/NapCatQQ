@@ -9,10 +9,12 @@ import {
     NapCatCore,
     GroupNotify,
     GroupInfoSource,
+    ShutUpGroupMember,
 } from '@/core';
 import { isNumeric, solveAsyncProblem } from '@/common/helper';
 import { LimitedHashTable } from '@/common/message-unique';
 import { NTEventWrapper } from '@/common/event';
+import { CancelableTask, TaskExecutor } from '@/common/cancel-task';
 
 export class NTQQGroupApi {
     context: InstanceContext;
@@ -58,9 +60,28 @@ export class NTQQGroupApi {
     }
 
     async getGroupShutUpMemberList(groupCode: string) {
-        const data = this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onShutUpMemberListChanged', (group_id) => group_id === groupCode, 1, 1000);
-        this.context.session.getGroupService().getGroupShutUpMemberList(groupCode);
-        return (await data)[1];
+        const executor: TaskExecutor<ShutUpGroupMember[]> = async (resolve, reject, onCancel) => {
+            this.core.eventWrapper.registerListen(
+                'NodeIKernelGroupListener/onShutUpMemberListChanged',
+                (group_id) => group_id === groupCode,
+                1,
+                1000
+            ).then((data) => {
+                resolve(data[1])
+            }).catch(reject);
+
+            onCancel(() => {
+                reject(new Error('Task was canceled'));
+            });
+        };
+
+        const task = new CancelableTask(executor);
+        this.context.session.getGroupService().getGroupShutUpMemberList(groupCode).then(e => {
+            if (e.result !== 0) {
+                task.cancel()
+            }
+        })
+        return await task.catch(() => []);
     }
 
     async clearGroupNotifiesUnreadCount(doubt: boolean) {
