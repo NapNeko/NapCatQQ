@@ -1,4 +1,4 @@
-import { BuddyProfileLikeReq, GeneralCallResult } from '@/core';
+import { BuddyProfileLikeReq, GeneralCallResult, NTVoteInfo } from '@/core';
 
 export interface NodeIKernelProfileLikeService {
     addKernelProfileLikeListener(listener: unknown): number;
@@ -9,7 +9,16 @@ export interface NodeIKernelProfileLikeService {
 
     getBuddyProfileLike(req: BuddyProfileLikeReq): Promise<GeneralCallResult & {
         info: {
-            userLikeInfos: Array<any>,
+            userLikeInfos: Array<{
+                voteInfo: {
+                    total_count: number,
+                    new_count: number,
+                    new_nearby_count: number,
+                    last_visit_time: number,
+                    userInfos: Array<NTVoteInfo>
+                }
+
+            }>,
             friendMaxVotes: number,
             start: number
         }
