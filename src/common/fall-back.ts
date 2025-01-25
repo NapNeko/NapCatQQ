@@ -25,7 +25,6 @@ export class Fallback<T> {
                     return data;
                 }
             } catch (error) {
-                console.log(error);
                 errors.push(error instanceof Error ? error : new Error(String(error)));
             }
         }

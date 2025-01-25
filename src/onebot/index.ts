@@ -16,12 +16,12 @@ import {
 } from '@/core';
 import { OB11ConfigLoader } from '@/onebot/config';
 import {
-    OB11ActiveHttpAdapter,
-    OB11ActiveWebSocketAdapter,
+    OB11HttpClientAdapter,
+    OB11WebSocketClientAdapter,
     OB11NetworkManager,
     OB11NetworkReloadType,
-    OB11PassiveHttpAdapter,
-    OB11PassiveWebSocketAdapter,
+    OB11HttpServerAdapter,
+    OB11WebSocketServerAdapter,
 } from '@/onebot/network';
 import { NapCatPathWrapper } from '@/common/path';
 import {
@@ -44,16 +44,14 @@ import { LRUCache } from '@/common/lru-cache';
 import { NodeIKernelRecentContactListener } from '@/core/listeners/NodeIKernelRecentContactListener';
 import { BotOfflineEvent } from './event/notice/BotOfflineEvent';
 import {
-    AdapterConfigWrap,
-    mergeOneBotConfigs,
-    migrateOneBotConfigsV1,
-    NetworkConfigAdapter,
+    NetworkAdapterConfig,
+    loadConfig,
     OneBotConfig,
 } from './config/config';
 import { OB11Message } from './types';
 import { OB11PluginAdapter } from './network/plugin';
 import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
-import { OB11ActiveHttpSSEAdapter } from './network/active-http-sse';
+import { OB11HttpSSEServerAdapter } from './network/http-server-sse';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -71,8 +69,8 @@ export class NapCatOneBot11Adapter {
         this.core = core;
         this.context = context;
         this.configLoader = new OB11ConfigLoader(core, pathWrapper.configPath);
-        this.configLoader.save(migrateOneBotConfigsV1(this.configLoader.configData));
-        this.configLoader.save(mergeOneBotConfigs(this.configLoader.configData));
+        this.configLoader.save(this.configLoader.configData);
+        this.configLoader.save(loadConfig(this.configLoader.configData));
         this.apis = {
             GroupApi: new OneBotGroupApi(this, core),
             UserApi: new OneBotUserApi(this, core),
@@ -125,28 +123,28 @@ export class NapCatOneBot11Adapter {
         for (const key of ob11Config.network.httpServers) {
             if (key.enable) {
                 this.networkManager.registerAdapter(
-                    new OB11PassiveHttpAdapter(key.name, key, this.core, this, this.actions)
+                    new OB11HttpServerAdapter(key.name, key, this.core, this, this.actions)
                 );
             }
         }
-        for(const key of ob11Config.network.httpSseServers){
-            if(key.enable) {
+        for (const key of ob11Config.network.httpSseServers) {
+            if (key.enable) {
                 this.networkManager.registerAdapter(
-                    new OB11ActiveHttpSSEAdapter(key.name, key, this.core, this, this.actions)
+                    new OB11HttpSSEServerAdapter(key.name, key, this.core, this, this.actions)
                 );
             }
         }
         for (const key of ob11Config.network.httpClients) {
             if (key.enable) {
                 this.networkManager.registerAdapter(
-                    new OB11ActiveHttpAdapter(key.name, key, this.core, this, this.actions)
+                    new OB11HttpClientAdapter(key.name, key, this.core, this, this.actions)
                 );
             }
         }
         for (const key of ob11Config.network.websocketServers) {
             if (key.enable) {
                 this.networkManager.registerAdapter(
-                    new OB11PassiveWebSocketAdapter(
+                    new OB11WebSocketServerAdapter(
                         key.name,
                         key,
                         this.core,
@@ -159,7 +157,7 @@ export class NapCatOneBot11Adapter {
         for (const key of ob11Config.network.websocketClients) {
             if (key.enable) {
                 this.networkManager.registerAdapter(
-                    new OB11ActiveWebSocketAdapter(
+                    new OB11WebSocketClientAdapter(
                         key.name,
                         key,
                         this.core,
@@ -181,7 +179,7 @@ export class NapCatOneBot11Adapter {
         WebUiDataRuntime.setOnOB11ConfigChanged(async (newConfig) => {
             const prev = this.configLoader.configData;
             // 保证默认配置
-            newConfig = mergeOneBotConfigs(newConfig);
+            newConfig = loadConfig(newConfig);
 
             this.configLoader.save(newConfig);
             //this.context.logger.log(`OneBot11 配置更改：${JSON.stringify(prev)} -> ${JSON.stringify(newConfig)}`);
@@ -208,15 +206,16 @@ export class NapCatOneBot11Adapter {
         this.context.logger.log(`[Notice] [OneBot11] 配置变更前:\n${prevLog}`);
         this.context.logger.log(`[Notice] [OneBot11] 配置变更后:\n${newLog}`);
 
-        await this.handleConfigChange(prev.network.httpServers, now.network.httpServers, OB11PassiveHttpAdapter);
-        await this.handleConfigChange(prev.network.httpClients, now.network.httpClients, OB11ActiveHttpAdapter);
-        await this.handleConfigChange(prev.network.websocketServers, now.network.websocketServers, OB11PassiveWebSocketAdapter);
-        await this.handleConfigChange(prev.network.websocketClients, now.network.websocketClients, OB11ActiveWebSocketAdapter);
+        await this.handleConfigChange(prev.network.httpServers, now.network.httpServers, OB11HttpServerAdapter);
+        await this.handleConfigChange(prev.network.httpClients, now.network.httpClients, OB11HttpClientAdapter);
+        await this.handleConfigChange(prev.network.httpSseServers, now.network.httpSseServers, OB11HttpSSEServerAdapter);
+        await this.handleConfigChange(prev.network.websocketServers, now.network.websocketServers, OB11WebSocketServerAdapter);
+        await this.handleConfigChange(prev.network.websocketClients, now.network.websocketClients, OB11WebSocketClientAdapter);
     }
 
-    private async handleConfigChange<CT extends NetworkConfigAdapter>(
-        prevConfig: NetworkConfigAdapter[],
-        nowConfig: NetworkConfigAdapter[],
+    private async handleConfigChange<CT extends NetworkAdapterConfig>(
+        prevConfig: NetworkAdapterConfig[],
+        nowConfig: NetworkAdapterConfig[],
         adapterClass: new (
             ...args: ConstructorParameters<typeof IOB11NetworkAdapter<CT>>
         ) => IOB11NetworkAdapter<CT>
@@ -478,7 +477,7 @@ export class NapCatOneBot11Adapter {
         ]);
     }
 
-    private async handleMsg(message: RawMessage, network: Array<AdapterConfigWrap>) {
+    private async handleMsg(message: RawMessage, network: Array<NetworkAdapterConfig>) {
         // 过滤无效消息
         if (message.msgType === NTMsgType.KMSGTYPENULL) {
             return;
@@ -507,7 +506,7 @@ export class NapCatOneBot11Adapter {
             ob11Msg.arrayMsg.user_id.toString() == this.core.selfInfo.uin;
     }
 
-    private createMsgMap(network: Array<AdapterConfigWrap>, ob11Msg: any, isSelfMsg: boolean, message: RawMessage): Map<string, OB11Message> {
+    private createMsgMap(network: Array<NetworkAdapterConfig>, ob11Msg: any, isSelfMsg: boolean, message: RawMessage): Map<string, OB11Message> {
         const msgMap: Map<string, OB11Message> = new Map();
         network.filter(e => e.enable).forEach(e => {
             if (isSelfMsg || message.chatType !== ChatType.KCHATTYPEGROUP) {
@@ -524,7 +523,7 @@ export class NapCatOneBot11Adapter {
         return msgMap;
     }
 
-    private handleDebugNetwork(network: Array<AdapterConfigWrap>, msgMap: Map<string, OB11Message>, message: RawMessage) {
+    private handleDebugNetwork(network: Array<NetworkAdapterConfig>, msgMap: Map<string, OB11Message>, message: RawMessage) {
         const debugNetwork = network.filter(e => e.enable && e.debug);
         if (debugNetwork.length > 0) {
             debugNetwork.forEach(adapter => {
@@ -538,7 +537,7 @@ export class NapCatOneBot11Adapter {
         }
     }
 
-    private handleNotReportSelfNetwork(network: Array<AdapterConfigWrap>, msgMap: Map<string, OB11Message>, isSelfMsg: boolean) {
+    private handleNotReportSelfNetwork(network: Array<NetworkAdapterConfig>, msgMap: Map<string, OB11Message>, isSelfMsg: boolean) {
         if (isSelfMsg) {
             const notReportSelfNetwork = network.filter(e => e.enable && (('reportSelfMessage' in e && !e.reportSelfMessage) || !('reportSelfMessage' in e)));
             notReportSelfNetwork.forEach(adapter => {

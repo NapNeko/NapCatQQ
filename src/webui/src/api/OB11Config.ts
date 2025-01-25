@@ -53,6 +53,6 @@ export const OB11SetConfigHandler: RequestHandler = async (req, res) => {
         await WebUiDataRuntime.setOB11Config(JSON.parse(req.body.config));
         return sendSuccess(res, null);
     } catch (e) {
-        return sendError(res, 'Config Set Error');
+        return sendError(res, 'Error: ' + e);
     }
 };

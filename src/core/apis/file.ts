@@ -462,7 +462,7 @@ export class NTQQFileApi {
                 rkeyData.private_rkey = tempRkeyData.private_rkey;
                 rkeyData.online_rkey = tempRkeyData.expired_time > Date.now() / 1000;
             } catch (e) {
-                this.context.logger.logError('获取rkey失败 Fallback Old Mode', e);
+                this.context.logger.logDebug('获取rkey失败 Fallback Old Mode', e);
             }
         }
 
@@ -474,7 +474,7 @@ export class NTQQFileApi {
         if (rkeyData.online_rkey) {
             return IMAGE_HTTP_HOST_NT + `/download?appid=${appid}&fileid=${imageFileId}&rkey=${rkey}`;
         }
-        return IMAGE_HTTP_HOST + `/download?appid=${appid}&fileid=${imageFileId}&rkey=${rkey}`;
+        return IMAGE_HTTP_HOST + `/download?appid=${appid}&fileid=${imageFileId}&rkey=${rkey}&spec=0`;
     }
 
     private getImageUrlFromMd5(fileMd5: string | undefined, md5HexStr: string | undefined): string {

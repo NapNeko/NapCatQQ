@@ -1,0 +1,9 @@
+{
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.expand": false,
+    "explorer.fileNesting.patterns": {
+        ".env.universal": ".env.*",
+        "tsconfig.json": "tsconfig.*.json, env.d.ts, vite.config.ts",
+        "package.json": "package-lock.json, eslint*, .prettier*, .editorconfig, manifest.json, logo.png, .gitignore, LICENSE"
+    }
+}
