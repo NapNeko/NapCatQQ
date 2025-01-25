@@ -67,7 +67,7 @@ export class NTQQGroupApi {
                 1,
                 1000
             ).then((data) => {
-                resolve(data[1])
+                resolve(data[1]);
             }).catch(reject);
 
             onCancel(() => {
@@ -78,9 +78,9 @@ export class NTQQGroupApi {
         const task = new CancelableTask(executor);
         this.context.session.getGroupService().getGroupShutUpMemberList(groupCode).then(e => {
             if (e.result !== 0) {
-                task.cancel()
+                task.cancel();
             }
-        })
+        });
         return await task.catch(() => []);
     }
 
