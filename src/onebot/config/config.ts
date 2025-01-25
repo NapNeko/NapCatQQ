@@ -98,7 +98,7 @@ export type NetworkConfigKey = keyof OneBotConfig['network'];
 
 
 export function loadConfig(config: Partial<OneBotConfig>): OneBotConfig {
-    const ajv = new Ajv({ useDefaults: true });
+    const ajv = new Ajv({ useDefaults: true, coerceTypes: true });
     const validate = ajv.compile(OneBotConfigSchema);
     const valid = validate(config);
     if (!valid) {
