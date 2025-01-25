@@ -24,6 +24,14 @@ export default class WebUIManager {
     return data.data.Credential
   }
 
+  public static async proxy<T>(url = '') {
+    const data = await serverRequest.get<ServerResponse<string>>(
+      '/base/proxy?url=' + encodeURIComponent(url)
+    )
+    data.data.data = JSON.parse(data.data.data)
+    return  data.data as ServerResponse<T>
+  }
+
   public static async getPackageInfo() {
     const { data } =
       await serverRequest.get<ServerResponse<PackageInfo>>('/base/PackageInfo')
