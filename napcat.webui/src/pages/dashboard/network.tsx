@@ -294,6 +294,13 @@ export default function NetworkPage() {
               true
             )
           }
+          if (httpSseServers.find((i) => i.name === item.name)) {
+            return renderCard(
+              'httpSseServers',
+              item as OneBotConfig['network']['httpSseServers'][0],
+              true
+            )
+          }
           if (httpClients.find((i) => i.name === item.name)) {
             return renderCard(
               'httpClients',
