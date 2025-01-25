@@ -89,6 +89,34 @@ const AddButton: React.FC<AddButtonProps> = (props) => {
           </div>
         </DropdownItem>
         <DropdownItem
+          key="httpSseServers"
+          textValue="httpSseServers"
+          startContent={
+            <div className="w-6 h-6">
+              <HTTPServerIcon />
+            </div>
+          }
+        >
+          <div className="flex gap-1 items-center">
+            HTTP SSE服务器
+            <Tooltip
+              content="「由NapCat建立」一个HTTP SSE服务器，你可以「使用框架连接」此服务器或者「自己构造请求发送」至此服务器。NapCat会根据你配置的IP和端口等建立一个地址，你或者你的框架应该连接到这个地址。"
+              showArrow
+              className="max-w-64"
+            >
+              <Button
+                isIconOnly
+                radius="full"
+                size="sm"
+                variant="light"
+                className="w-4 h-4 min-w-0"
+              >
+                <FaRegCircleQuestion />
+              </Button>
+            </Tooltip>
+          </div>
+        </DropdownItem>
+        <DropdownItem
           key="httpClients"
           textValue="httpClients"
           startContent={
