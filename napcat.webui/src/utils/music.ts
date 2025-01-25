@@ -6,17 +6,17 @@ import type {
   Music163URLResponse
 } from '@/types/music'
 
-import { request } from './request'
-
+import WebUIManager from '@/controllers/webui_manager'
 /**
  * 获取网易云音乐歌单
  * @param id 歌单id
  * @returns 歌单信息
  */
 export const get163MusicList = async (id: string) => {
-  const res = await request.get<Music163ListResponse>(
-    `https://wavesgame.top/playlist/track/all?id=${id}`
-  )
+  let res = await WebUIManager.proxy<Music163ListResponse>('https://wavesgame.top/playlist/track/all?id=' + id);
+  // const res = await request.get<Music163ListResponse>(
+  //   `https://wavesgame.top/playlist/track/all?id=${id}`
+  // )
   if (res?.data?.code !== 200) {
     throw new Error('获取歌曲列表失败')
   }
@@ -39,7 +39,7 @@ export const getSongsURL = async (ids: number[]) => {
   }, [] as number[][])
   const res = await Promise.all(
     _ids.map(async (id) => {
-      const res = await request.get<Music163URLResponse>(
+      const res = await WebUIManager.proxy<Music163URLResponse>(
         `https://wavesgame.top/song/url?id=${id.join(',')}`
       )
       if (res?.data?.code !== 200) {
