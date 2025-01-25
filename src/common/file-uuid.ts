@@ -1,6 +1,72 @@
 import { Peer } from '@/core';
 import { randomUUID } from 'crypto';
 
+class TimeBasedCache<K, V> {
+    private cache = new Map<K, { value: V, timestamp: number, frequency: number }>();
+    private keyList = new Set<K>();
+    private operationCount = 0;
+
+    constructor(private maxCapacity: number, private ttl: number = 30 * 1000 * 60, private cleanupCount: number = 10) {}
+
+    public put(key: K, value: V): void {
+        const timestamp = Date.now();
+        const cacheEntry = { value, timestamp, frequency: 1 };
+        this.cache.set(key, cacheEntry);
+        this.keyList.add(key);
+        this.operationCount++;
+        if (this.keyList.size > this.maxCapacity) this.evict();
+        if (this.operationCount >= this.cleanupCount) this.cleanup(this.cleanupCount);
+    }
+
+    public get(key: K): V | undefined {
+        const entry = this.cache.get(key);
+        if (entry && Date.now() - entry.timestamp < this.ttl) {
+            entry.timestamp = Date.now();
+            entry.frequency++;
+            this.operationCount++;
+            if (this.operationCount >= this.cleanupCount) this.cleanup(this.cleanupCount);
+            return entry.value;
+        } else {
+            this.deleteKey(key);
+        }
+        return undefined;
+    }
+
+    private cleanup(count: number): void {
+        const currentTime = Date.now();
+        let cleaned = 0;
+        for (const key of this.keyList) {
+            if (cleaned >= count) break;
+            const entry = this.cache.get(key);
+            if (entry && currentTime - entry.timestamp >= this.ttl) {
+                this.deleteKey(key);
+                cleaned++;
+            }
+        }
+        this.operationCount = 0; // 重置操作计数器
+    }
+
+    private deleteKey(key: K): void {
+        this.cache.delete(key);
+        this.keyList.delete(key);
+    }
+
+    private evict(): void {
+        while (this.keyList.size > this.maxCapacity) {
+            let oldestKey: K | undefined;
+            let minFrequency = Infinity;
+            for (const key of this.keyList) {
+                const entry = this.cache.get(key);
+                if (entry && entry.frequency < minFrequency) {
+                    minFrequency = entry.frequency;
+                    oldestKey = key;
+                }
+            }
+            if (oldestKey !== undefined) this.deleteKey(oldestKey);
+        }
+    }
+}
+
 interface FileUUIDData {
     peer: Peer;
     modelId?: string;
@@ -10,49 +76,11 @@ interface FileUUIDData {
     fileUUID?: string;
 }
 
-class TimeBasedCache<K, V> {
-    private cache: Map<K, { value: V, timestamp: number }>;
-    private ttl: number;
-
-    constructor(ttl: number) {
-        this.cache = new Map();
-        this.ttl = ttl;
-    }
-
-    public put(key: K, value: V): void {
-        const timestamp = Date.now();
-        this.cache.set(key, { value, timestamp });
-        this.cleanup();
-    }
-
-    public get(key: K): V | undefined {
-        const entry = this.cache.get(key);
-        if (entry) {
-            const currentTime = Date.now();
-            if (currentTime - entry.timestamp < this.ttl) {
-                return entry.value;
-            } else {
-                this.cache.delete(key);
-            }
-        }
-        return undefined;
-    }
-
-    private cleanup(): void {
-        const currentTime = Date.now();
-        for (const [key, entry] of this.cache.entries()) {
-            if (currentTime - entry.timestamp >= this.ttl) {
-                this.cache.delete(key);
-            }
-        }
-    }
-}
-
 class FileUUIDManager {
     private cache: TimeBasedCache<string, FileUUIDData>;
 
     constructor(ttl: number) {
-        this.cache = new TimeBasedCache<string, FileUUIDData>(ttl);
+        this.cache = new TimeBasedCache<string, FileUUIDData>(5000, ttl);
     }
 
     public encode(data: FileUUIDData, endString: string = "", customUUID?: string): string {

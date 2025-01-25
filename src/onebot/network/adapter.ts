@@ -1,11 +1,11 @@
-import { NetworkConfigAdapter } from "@/onebot/config/config";
+import { NetworkAdapterConfig } from "@/onebot/config/config";
 import { LogWrapper } from "@/common/log";
 import { NapCatCore } from "@/core";
 import { NapCatOneBot11Adapter } from "@/onebot";
 import { ActionMap } from "@/onebot/action";
 import { OB11EmitEventContent, OB11NetworkReloadType } from "@/onebot/network/index";
 
-export abstract class IOB11NetworkAdapter<CT extends NetworkConfigAdapter> {
+export abstract class IOB11NetworkAdapter<CT extends NetworkAdapterConfig> {
     name: string;
     isEnable: boolean = false;
     config: CT;

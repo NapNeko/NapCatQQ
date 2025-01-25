@@ -1,4 +1,4 @@
-export type TaskExecutor<T> = (resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void, onCancel: (callback: () => void) => void) => void;
+export type TaskExecutor<T> = (resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void, onCancel: (callback: () => void) => void) => void | Promise<void>;
 
 export class CancelableTask<T> {
     private promise: Promise<T>;
@@ -7,24 +7,30 @@ export class CancelableTask<T> {
     private cancelListeners: Array<() => void> = [];
 
     constructor(executor: TaskExecutor<T>) {
-        this.promise = new Promise<T>((resolve, reject) => {
+        this.promise = new Promise<T>(async (resolve, reject) => {
             const onCancel = (callback: () => void) => {
                 this.cancelCallback = callback;
             };
 
-            executor(
-                (value) => {
-                    if (!this.isCanceled) {
-                        resolve(value);
-                    }
-                },
-                (reason) => {
-                    if (!this.isCanceled) {
-                        reject(reason);
-                    }
-                },
-                onCancel
-            );
+            try {
+                await executor(
+                    (value) => {
+                        if (!this.isCanceled) {
+                            resolve(value);
+                        }
+                    },
+                    (reason) => {
+                        if (!this.isCanceled) {
+                            reject(reason);
+                        }
+                    },
+                    onCancel
+                );
+            } catch (error) {
+                if (!this.isCanceled) {
+                    reject(error);
+                }
+            }
         });
     }
 
@@ -68,9 +74,8 @@ export class CancelableTask<T> {
     }
 }
 
-
 async function demoAwait() {
-    const executor: TaskExecutor<number> = (resolve, reject, onCancel) => {
+    const executor: TaskExecutor<number> = async (resolve, reject, onCancel) => {
         let count = 0;
         const intervalId = setInterval(() => {
             count++;

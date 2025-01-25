@@ -191,14 +191,14 @@ export async function uriToLocalFile(dir: string, uri: string, filename: string 
 
     case FileUriType.Remote: {
         const buffer = await httpDownload({ url: HandledUri, headers: headers });
-        fs.writeFileSync(filePath, buffer, { flag: 'wx' });
+        fs.writeFileSync(filePath, buffer);
         return { success: true, errMsg: '', fileName: filename, path: filePath };
     }
 
     case FileUriType.Base64: {
         const base64 = HandledUri.replace(/^base64:\/\//, '');
         const base64Buffer = Buffer.from(base64, 'base64');
-        fs.writeFileSync(filePath, base64Buffer, { flag: 'wx' });
+        fs.writeFileSync(filePath, base64Buffer);
         return { success: true, errMsg: '', fileName: filename, path: filePath };
     }
 

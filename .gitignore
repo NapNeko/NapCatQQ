@@ -1,14 +1,12 @@
 # Develop
 node_modules/
 package-lock.json
-pnpm-lock.yaml
 out/
 dist/
 /src/core.lib/common/
-/localdebug/
+devconfig/*
 
 # Editor
-.vscode/*
 !.vscode/extensions.json
 .idea/*
 
