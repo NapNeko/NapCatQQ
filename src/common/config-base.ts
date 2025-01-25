@@ -1,6 +1,7 @@
 import path from 'node:path';
 import fs from 'node:fs';
 import type { NapCatCore } from '@/core';
+import json5 from 'json5';
 
 export abstract class ConfigBase<T> {
     name: string;
@@ -46,7 +47,7 @@ export abstract class ConfigBase<T> {
             fs.writeFileSync(configPath, '{}');
         }
         try {
-            this.configData = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+            this.configData = json5.parse(fs.readFileSync(configPath, 'utf-8'));
             this.core.context.logger.logDebug(`[Core] [Config] 配置文件${configPath}加载`, this.configData);
             return this.configData;
         } catch (e: any) {
