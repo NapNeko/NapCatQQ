@@ -28,7 +28,10 @@ export interface OneBotApiDebugProps {
 const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
   const { path, data } = props
   const url = new URL(window.location.origin).href
-  const defaultHttpUrl = url.replace(':6099', ':3000')
+  let defaultHttpUrl = url.replace(':6099', ':3000')
+  if (defaultHttpUrl.endsWith('/')) {
+    defaultHttpUrl = defaultHttpUrl.slice(0, -1)
+  }
   const [httpConfig, setHttpConfig] = useState({
     url: defaultHttpUrl,
     token: ''
