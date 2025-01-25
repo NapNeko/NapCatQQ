@@ -1,11 +1,13 @@
 import { Tab, Tabs } from '@heroui/tabs'
 import { useLocalStorage } from '@uidotdev/usehooks'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { useMediaQuery } from 'react-responsive'
 
 import key from '@/const/key'
+
+import PageLoading from '@/components/page_loading'
 
 import useConfig from '@/hooks/use-config'
 import useMusic from '@/hooks/use-music'
@@ -15,6 +17,7 @@ import WebUIConfigCard from './webui'
 
 export default function ConfigPage() {
   const { config, saveConfigWithoutNetwork, refreshConfig } = useConfig()
+  const [loading, setLoading] = useState(false)
   const {
     control: onebotControl,
     handleSubmit: handleOnebotSubmit,
@@ -82,13 +85,16 @@ export default function ConfigPage() {
     }
   })
 
-  const onRefresh = async () => {
+  const onRefresh = async (shotTip = true) => {
     try {
+      setLoading(true)
       await refreshConfig()
-      toast.success('刷新成功')
+      if (shotTip) toast.success('刷新成功')
     } catch (error) {
       const msg = (error as Error).message
       toast.error(`刷新失败: ${msg}`)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -96,6 +102,10 @@ export default function ConfigPage() {
     resetOneBot()
     resetWebUI()
   }, [config])
+
+  useEffect(() => {
+    onRefresh(false)
+  }, [])
 
   return (
     <section className="w-[1000px] max-w-full md:mx-auto gap-4 py-8 px-2 md:py-10">
@@ -106,12 +116,13 @@ export default function ConfigPage() {
         isVertical={isMediumUp}
         classNames={{
           tabList: 'sticky flex top-14 bg-opacity-50 backdrop-blur-sm',
-          panel: 'w-full',
+          panel: 'w-full relative',
           base: 'md:!w-auto flex-grow-0 flex-shrink-0 mr-0',
           cursor: 'bg-opacity-60 backdrop-blur-sm'
         }}
       >
         <Tab title="OneBot配置" key="onebot">
+          <PageLoading loading={loading} />
           <OneBotConfigCard
             isSubmitting={isOnebotSubmitting}
             onRefresh={onRefresh}
