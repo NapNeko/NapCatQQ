@@ -4,7 +4,7 @@ import { resolve } from 'path';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import { builtinModules } from 'module';
 //依赖排除
-const external = ['silk-wasm', 'ws', 'express', 'qrcode-terminal', 'fluent-ffmpeg', 'piscina', '@ffmpeg.wasm/core-mt', "@ffmpeg.wasm/main"];
+const external = ['silk-wasm', 'ws', 'express', 'qrcode-terminal', 'piscina', '@ffmpeg.wasm/core-mt', "@ffmpeg.wasm/main"];
 const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`)].flat();
 
 let startScripts: string[] | undefined = undefined;
@@ -79,7 +79,6 @@ const UniversalBaseConfig = () =>
             alias: {
                 '@/core': resolve(__dirname, './src/core'),
                 '@': resolve(__dirname, './src'),
-                './lib-cov/fluent-ffmpeg': './lib/fluent-ffmpeg',
                 '@webapi': resolve(__dirname, './src/webui/src'),
             },
         },
@@ -109,7 +108,6 @@ const ShellBaseConfig = () =>
             alias: {
                 '@/core': resolve(__dirname, './src/core'),
                 '@': resolve(__dirname, './src'),
-                './lib-cov/fluent-ffmpeg': './lib/fluent-ffmpeg',
                 '@webapi': resolve(__dirname, './src/webui/src'),
             },
         },
@@ -138,7 +136,6 @@ const FrameworkBaseConfig = () =>
             alias: {
                 '@/core': resolve(__dirname, './src/core'),
                 '@': resolve(__dirname, './src'),
-                './lib-cov/fluent-ffmpeg': './lib/fluent-ffmpeg',
                 '@webapi': resolve(__dirname, './src/webui/src'),
             },
         },

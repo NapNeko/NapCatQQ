@@ -5,7 +5,7 @@ import { randomUUID } from 'crypto';
 import { EncodeResult, getDuration, getWavFileInfo, isSilk, isWav } from 'silk-wasm';
 import { LogWrapper } from '@/common/log';
 import { EncodeArgs } from "@/common/audio-worker";
-import { ffmpegService } from "@/common/ffmpeg";
+import { FFmpegService } from "@/common/ffmpeg";
 
 const ALLOW_SAMPLE_RATE = [8000, 12000, 16000, 24000, 32000, 44100, 48000];
 
@@ -32,7 +32,7 @@ async function handleWavFile(
 ): Promise<{ input: Buffer; sampleRate: number }> {
     const { fmt } = getWavFileInfo(file);
     if (!ALLOW_SAMPLE_RATE.includes(fmt.sampleRate)) {
-        return { input: await ffmpegService.convert(filePath, pcmPath, logger), sampleRate: 24000 };
+        return { input: await FFmpegService.convert(filePath, pcmPath, logger), sampleRate: 24000 };
     }
     return { input: file, sampleRate: fmt.sampleRate };
 }
@@ -46,7 +46,7 @@ export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: Log
             const pcmPath = `${pttPath}.pcm`;
             const { input, sampleRate } = isWav(file)
                 ? (await handleWavFile(file, filePath, pcmPath, logger))
-                : { input: await ffmpegService.convert(filePath, pcmPath, logger), sampleRate: 24000 };
+                : { input: await FFmpegService.convert(filePath, pcmPath, logger), sampleRate: 24000 };
             const silk = await piscina.run({ input: input, sampleRate: sampleRate });
             await fsPromise.writeFile(pttPath, Buffer.from(silk.data));
             logger.log(`语音文件${filePath}转换成功!`, pttPath, '时长:', silk.duration);

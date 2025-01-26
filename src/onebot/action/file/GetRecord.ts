@@ -2,7 +2,7 @@ import { GetFileBase, GetFilePayload, GetFileResponse } from './GetFile';
 import { ActionName } from '@/onebot/action/router';
 import { promises as fs } from 'fs';
 import { decode } from 'silk-wasm';
-import { ffmpegService } from '@/common/ffmpeg';
+import { FFmpegService } from '@/common/ffmpeg';
 
 const out_format = ['mp3' , 'amr' , 'wma' , 'm4a' , 'spx' , 'ogg' , 'wav' , 'flac'];
 
@@ -29,7 +29,7 @@ export default class GetRecord extends GetFileBase {
                     await fs.access(outputFile);
                 } catch (error) {
                     await this.decodeFile(inputFile, pcmFile);
-                    await ffmpegService.convertFile(pcmFile, outputFile, payload.out_format);
+                    await FFmpegService.convertFile(pcmFile, outputFile, payload.out_format);
                 }
                 const base64Data = await fs.readFile(outputFile, { encoding: 'base64' });
                 res.file = outputFile;
