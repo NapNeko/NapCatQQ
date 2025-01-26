@@ -47,7 +47,6 @@ const RealTimeLogs = () => {
           }
           return logLevel.has(log.level)
         })
-        .slice(-100)
         .map((log) => colorizeLogLevelWithTag(log.message, log.level))
         .join('\r\n')
       Xterm.current?.clear()
@@ -65,7 +64,6 @@ const RealTimeLogs = () => {
   useEffect(() => {
     const subscribeLogs = () => {
       try {
-        console.log('subscribeLogs')
         const source = WebUIManager.getRealTimeLogs((data) => {
           setDataArr((prev) => {
             const newData = [...prev, ...data]

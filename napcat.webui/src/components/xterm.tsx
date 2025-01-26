@@ -21,6 +21,7 @@ export type XTermRef = {
   writelnAsync: (data: Parameters<Terminal['writeln']>[0]) => Promise<void>
   clear: () => void
 }
+
 const XTerm = forwardRef<XTermRef, React.HTMLAttributes<HTMLDivElement>>(
   (props, ref) => {
     const domRef = useRef<HTMLDivElement>(null)
@@ -33,15 +34,26 @@ const XTerm = forwardRef<XTermRef, React.HTMLAttributes<HTMLDivElement>>(
       }
       const terminal = new Terminal({
         allowTransparency: true,
-        fontFamily: '"Fira Code", "Harmony", "Noto Serif SC", monospace'
+        fontFamily: '"Fira Code", "Harmony", "Noto Serif SC", monospace',
+        cursorInactiveStyle: 'outline',
+        drawBoldTextInBrightColors: false
       })
       terminalRef.current = terminal
       const fitAddon = new FitAddon()
-      terminal.loadAddon(new WebLinksAddon())
+      terminal.loadAddon(
+        new WebLinksAddon((event, uri) => {
+          if (event.ctrlKey) {
+            window.open(uri, '_blank')
+          }
+        })
+      )
       terminal.loadAddon(fitAddon)
       terminal.loadAddon(new WebglAddon())
       terminal.open(domRef.current)
-      fitAddon.fit()
+
+      setTimeout(() => {
+        fitAddon.fit()
+      }, 0)
 
       terminal.writeln(
         gradientText(
@@ -76,14 +88,20 @@ const XTerm = forwardRef<XTermRef, React.HTMLAttributes<HTMLDivElement>>(
     useEffect(() => {
       if (terminalRef.current) {
         terminalRef.current.options.theme = {
-          background:
-            theme === 'dark' ? 'rgba(0, 0, 0, 0)' : 'rgba(255, 255, 255, 0)',
+          background: theme === 'dark' ? '#00000000' : '#ffffff00',
           foreground: theme === 'dark' ? '#fff' : '#000',
-          selectionBackground: theme === 'dark' ? '#666' : '#ddd',
+          selectionBackground:
+            theme === 'dark'
+              ? 'rgba(179, 0, 0, 0.3)'
+              : 'rgba(255, 167, 167, 0.3)',
           cursor: theme === 'dark' ? '#fff' : '#000',
           cursorAccent: theme === 'dark' ? '#000' : '#fff',
           black: theme === 'dark' ? '#fff' : '#000'
         }
+        terminalRef.current.options.fontWeight =
+          theme === 'dark' ? 'normal' : '600'
+        terminalRef.current.options.fontWeightBold =
+          theme === 'dark' ? 'bold' : '900'
       }
     }, [theme])
 
