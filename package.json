@@ -30,7 +30,6 @@
     "@types/cors": "^2.8.17",
     "@sinclair/typebox": "^0.34.9",
     "@types/express": "^5.0.0",
-    "@types/fluent-ffmpeg": "^2.1.24",
     "@types/node": "^22.0.1",
     "@types/qrcode-terminal": "^0.12.2",
     "@types/ws": "^8.5.12",
@@ -55,8 +54,9 @@
     "winston": "^3.17.0"
   },
   "dependencies": {
+    "@ffmpeg.wasm/core-mt": "^0.13.2",
+    "@ffmpeg.wasm/main": "^0.13.1",
     "express": "^5.0.0",
-    "fluent-ffmpeg": "^2.1.2",
     "piscina": "^4.7.0",
     "qrcode-terminal": "^0.12.0",
     "silk-wasm": "^3.6.1",
