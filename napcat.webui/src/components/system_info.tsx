@@ -1,32 +1,180 @@
+import { Button } from '@heroui/button'
 import { Card, CardBody, CardHeader } from '@heroui/card'
+import { Chip } from '@heroui/chip'
 import { Spinner } from '@heroui/spinner'
+import { Tooltip } from '@heroui/tooltip'
 import { useRequest } from 'ahooks'
-import { FaCircleInfo } from 'react-icons/fa6'
-import { FaQq } from 'react-icons/fa6'
+import { FaCircleInfo, FaInfo, FaQq } from 'react-icons/fa6'
 import { IoLogoChrome, IoLogoOctocat } from 'react-icons/io'
 import { RiMacFill } from 'react-icons/ri'
 
+import useDialog from '@/hooks/use-dialog'
+
+import { request } from '@/utils/request'
+import { compareVersion } from '@/utils/version'
+
 import WebUIManager from '@/controllers/webui_manager'
+import { GithubRelease } from '@/types/github'
 
 import packageJson from '../../package.json'
+import TailwindMarkdown from './tailwind_markdown'
 
 export interface SystemInfoItemProps {
   title: string
   icon?: React.ReactNode
   value?: React.ReactNode
+  endContent?: React.ReactNode
 }
 
 const SystemInfoItem: React.FC<SystemInfoItemProps> = ({
   title,
   value = '--',
-  icon
+  icon,
+  endContent
 }) => {
   return (
     <div className="flex text-sm gap-1 p-2 items-center shadow-sm shadow-danger-50 dark:shadow-danger-100 rounded text-danger-400">
       {icon}
       <div className="w-24">{title}</div>
       <div className="text-danger-200">{value}</div>
+      <div className="ml-auto">{endContent}</div>
     </div>
+  )
+}
+
+export interface NewVersionTipProps {
+  currentVersion?: string
+}
+
+const NewVersionTip = (props: NewVersionTipProps) => {
+  const { currentVersion } = props
+  const dialog = useDialog()
+  const { data: releaseData, error } = useRequest(() =>
+    request.get<GithubRelease[]>(
+      'https://api.github.com/repos/NapNeko/NapCatQQ/releases'
+    )
+  )
+
+  if (error) {
+    return (
+      <Tooltip content="检查新版本失败">
+        <Button
+          isIconOnly
+          radius="full"
+          color="danger"
+          variant="shadow"
+          className="!w-5 !h-5 !min-w-0 text-small shadow-md"
+          onPress={() => {
+            dialog.alert({
+              title: '检查新版本失败',
+              content: error.message
+            })
+          }}
+        >
+          <FaInfo />
+        </Button>
+      </Tooltip>
+    )
+  }
+
+  const latestVersion = releaseData?.data?.[0]?.tag_name
+
+  if (!latestVersion || !currentVersion) {
+    return null
+  }
+
+  if (compareVersion(latestVersion, currentVersion) <= 0) {
+    return null
+  }
+
+  const middleVersions: GithubRelease[] = []
+
+  for (let i = 0; i < releaseData.data.length; i++) {
+    const versionInfo = releaseData.data[i]
+    if (compareVersion(versionInfo.tag_name, currentVersion) > 0) {
+      middleVersions.push(versionInfo)
+    } else {
+      break
+    }
+  }
+
+  return (
+    <Tooltip content="有新版本可用">
+      <Button
+        isIconOnly
+        radius="full"
+        color="danger"
+        variant="shadow"
+        className="!w-5 !h-5 !min-w-0 text-small shadow-md"
+        onPress={() => {
+          dialog.confirm({
+            title: '有新版本可用',
+            content: (
+              <div className="space-y-2">
+                <div className="text-sm space-x-2">
+                  <span>当前版本</span>
+                  <Chip color="primary" variant="flat">
+                    v{currentVersion}
+                  </Chip>
+                </div>
+                <div className="text-sm space-x-2">
+                  <span>最新版本</span>
+                  <Chip color="primary">{latestVersion}</Chip>
+                </div>
+                <div className="text-sm space-y-2 !mt-4">
+                  {middleVersions.map((versionInfo) => (
+                    <div
+                      key={versionInfo.tag_name}
+                      className="p-4 bg-content1 rounded-md shadow-small"
+                    >
+                      <TailwindMarkdown content={versionInfo.body} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ),
+            scrollBehavior: 'inside',
+            size: '3xl',
+            confirmText: '前往下载',
+            onConfirm() {
+              window.open(
+                'https://github.com/NapNeko/NapCatQQ/releases',
+                '_blank'
+              )
+            }
+          })
+        }}
+      >
+        <FaInfo />
+      </Button>
+    </Tooltip>
+  )
+}
+
+const NapCatVersion = () => {
+  const {
+    data: packageData,
+    loading: packageLoading,
+    error: packageError
+  } = useRequest(WebUIManager.getPackageInfo)
+
+  const currentVersion = packageData?.version
+
+  return (
+    <SystemInfoItem
+      title="NapCat 版本"
+      icon={<IoLogoOctocat className="text-xl" />}
+      value={
+        packageError ? (
+          `错误：${packageError.message}`
+        ) : packageLoading ? (
+          <Spinner size="sm" />
+        ) : (
+          currentVersion
+        )
+      }
+      endContent={<NewVersionTip currentVersion={currentVersion} />}
+    />
   )
 }
 
@@ -35,11 +183,6 @@ export interface SystemInfoProps {
 }
 const SystemInfo: React.FC<SystemInfoProps> = (props) => {
   const { archInfo } = props
-  const {
-    data: packageData,
-    loading: packageLoading,
-    error: packageError
-  } = useRequest(WebUIManager.getPackageInfo)
   const {
     data: qqVersionData,
     loading: qqVersionLoading,
@@ -53,19 +196,7 @@ const SystemInfo: React.FC<SystemInfoProps> = (props) => {
       </CardHeader>
       <CardBody className="flex-1">
         <div className="flex flex-col justify-between h-full">
-          <SystemInfoItem
-            title="NapCat 版本"
-            icon={<IoLogoOctocat className="text-xl" />}
-            value={
-              packageError ? (
-                `错误：${packageError.message}`
-              ) : packageLoading ? (
-                <Spinner size="sm" />
-              ) : (
-                packageData?.version
-              )
-            }
-          />
+          <NapCatVersion />
           <SystemInfoItem
             title="WebUI 版本"
             icon={<IoLogoChrome className="text-xl" />}

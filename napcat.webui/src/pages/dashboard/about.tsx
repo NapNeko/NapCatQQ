@@ -1,12 +1,10 @@
 import { Chip } from '@heroui/chip'
 import { Image } from '@heroui/image'
-import { Link } from '@heroui/link'
 import { Spinner } from '@heroui/spinner'
-import { Tooltip } from '@heroui/tooltip'
 import { useRequest } from 'ahooks'
 import clsx from 'clsx'
 
-import { BietiaopIcon, GithubIcon, WebUIIcon } from '@/components/icons'
+import { BietiaopIcon, WebUIIcon } from '@/components/icons'
 import NapCatRepoInfo from '@/components/napcat_repo_info'
 import { title } from '@/components/primitives'
 
@@ -43,11 +41,6 @@ function VersionInfo() {
           data?.version
         )}
       </Chip>
-      <Tooltip content="查看WebUI源码" placement="bottom" showArrow>
-        <Link isExternal href="https://github.com/bietiaop/NextNapCatWebUI">
-          <GithubIcon className="text-default-900 hover:text-default-600 w-8 h-8 hover:drop-shadow-lg transition-all" />
-        </Link>
-      </Tooltip>
     </div>
   )
 }
