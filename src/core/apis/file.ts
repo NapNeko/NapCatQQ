@@ -22,11 +22,11 @@ import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 import { RkeyManager } from '@/core/helper/rkey';
 import { calculateFileMD5 } from '@/common/file';
 import pathLib from 'node:path';
-import { defaultVideoThumbB64, getVideoInfo } from '@/common/video';
-import ffmpeg from 'fluent-ffmpeg';
+import { defaultVideoThumbB64 } from '@/common/video';
 import { encodeSilk } from '@/common/audio';
 import { SendMessageContext } from '@/onebot/api';
 import { getFileTypeForSendType } from '../helper/msg';
+import { FFmpegService } from '@/common/ffmpeg';
 
 export class NTQQFileApi {
     context: InstanceContext;
@@ -40,7 +40,7 @@ export class NTQQFileApi {
         this.rkeyManager = new RkeyManager([
             'https://rkey.napneko.icu/rkeys'
         ],
-        this.context.logger
+            this.context.logger
         );
     }
 
@@ -149,12 +149,6 @@ export class NTQQFileApi {
             size: 0,
             filePath,
         };
-        try {
-            videoInfo = await getVideoInfo(filePath, this.context.logger);
-        } catch (e) {
-            this.context.logger.logError('获取视频信息失败，将使用默认值', e);
-        }
-
         let fileExt = 'mp4';
         try {
             const tempExt = (await fileTypeFromFile(filePath))?.ext;
@@ -162,53 +156,29 @@ export class NTQQFileApi {
         } catch (e) {
             this.context.logger.logError('获取文件类型失败', e);
         }
-        const newFilePath = filePath + '.' + fileExt;
+        const newFilePath = `${filePath}.${fileExt}`;
         fs.copyFileSync(filePath, newFilePath);
         context.deleteAfterSentFiles.push(newFilePath);
         filePath = newFilePath;
+
         const { fileName: _fileName, path, fileSize, md5 } = await this.core.apis.FileApi.uploadFile(filePath, ElementType.VIDEO);
         if (fileSize === 0) {
             throw new Error('文件异常，大小为0');
         }
-        videoInfo.size = fileSize;
-        let thumb = path.replace(`${pathLib.sep}Ori${pathLib.sep}`, `${pathLib.sep}Thumb${pathLib.sep}`);
-        thumb = pathLib.dirname(thumb);
+        const thumbDir = path.replace(`${pathLib.sep}Ori${pathLib.sep}`, `${pathLib.sep}Thumb${pathLib.sep}`);
+        fs.mkdirSync(pathLib.dirname(thumbDir), { recursive: true });
+        const thumbPath = pathLib.join(pathLib.dirname(thumbDir), `${md5}_0.png`);
+        try {
+            videoInfo = await FFmpegService.getVideoInfo(filePath, thumbPath);
+        } catch (error) {
+            fs.writeFileSync(thumbPath, Buffer.from(defaultVideoThumbB64, 'base64'));
+        }
 
-        const thumbPath = new Map();
-        const _thumbPath = await new Promise<string | undefined>((resolve, reject) => {
-            const thumbFileName = `${md5}_0.png`;
-            const thumbPath = pathLib.join(thumb, thumbFileName);
-            ffmpeg(filePath)
-                .on('error', (err) => {
-                    try {
-                        this.context.logger.logDebug('获取视频封面失败，使用默认封面', err);
-                        if (diyThumbPath) {
-                            fsPromises.copyFile(diyThumbPath, thumbPath).then(() => {
-                                resolve(thumbPath);
-                            }).catch(reject);
-                        } else {
-                            fs.writeFileSync(thumbPath, Buffer.from(defaultVideoThumbB64, 'base64'));
-                            resolve(thumbPath);
-                        }
-                    } catch (error) {
-                        this.context.logger.logError('获取视频封面失败，使用默认封面失败', error);
-                    }
-                })
-                .screenshots({
-                    timestamps: [0],
-                    filename: thumbFileName,
-                    folder: thumb,
-                    size: videoInfo.width + 'x' + videoInfo.height,
-                })
-                .on('end', () => {
-                    resolve(thumbPath);
-                });
-        });
-        const thumbSize = _thumbPath ? (await fsPromises.stat(_thumbPath)).size : 0;
-        thumbPath.set(0, _thumbPath);
-        const thumbMd5 = _thumbPath ? await calculateFileMD5(_thumbPath) : '';
+        const thumbSize = (await fsPromises.stat(thumbPath)).size;
+        const thumbMd5 = await calculateFileMD5(thumbPath);
         context.deleteAfterSentFiles.push(path);
-        const uploadName = (fileName || _fileName).toLocaleLowerCase().endsWith('.' + fileExt.toLocaleLowerCase()) ? (fileName || _fileName) : (fileName || _fileName) + '.' + fileExt;
+
+        const uploadName = (fileName || _fileName).toLocaleLowerCase().endsWith(`.${fileExt.toLocaleLowerCase()}`) ? (fileName || _fileName) : `${fileName || _fileName}.${fileExt}`;
         return {
             elementType: ElementType.VIDEO,
             elementId: '',
@@ -218,15 +188,14 @@ export class NTQQFileApi {
                 videoMd5: md5,
                 thumbMd5,
                 fileTime: videoInfo.time,
-                thumbPath: thumbPath,
+                thumbPath: new Map([[0, thumbPath]]),
                 thumbSize,
                 thumbWidth: videoInfo.width,
                 thumbHeight: videoInfo.height,
-                fileSize: '' + fileSize,
+                fileSize: fileSize.toString(),
             },
         };
     }
-
     async createValidSendPttElement(pttPath: string): Promise<SendPttElement> {
 
         const { converted, path: silkPath, duration } = await encodeSilk(pttPath, this.core.NapCatTempPath, this.core.context.logger);
@@ -305,18 +274,18 @@ export class NTQQFileApi {
                     element.elementType === ElementType.FILE
                 ) {
                     switch (element.elementType) {
-                    case ElementType.PIC:
+                        case ElementType.PIC:
                             element.picElement!.sourcePath = elementResults[elementIndex];
-                        break;
-                    case ElementType.VIDEO:
+                            break;
+                        case ElementType.VIDEO:
                             element.videoElement!.filePath = elementResults[elementIndex];
-                        break;
-                    case ElementType.PTT:
+                            break;
+                        case ElementType.PTT:
                             element.pttElement!.filePath = elementResults[elementIndex];
-                        break;
-                    case ElementType.FILE:
+                            break;
+                        case ElementType.FILE:
                             element.fileElement!.filePath = elementResults[elementIndex];
-                        break;
+                            break;
                     }
                     elementIndex++;
                 }
