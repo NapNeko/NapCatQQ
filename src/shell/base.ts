@@ -263,12 +263,6 @@ async function initializeSession(
 }
 
 export async function NCoreInitShell() {
-    try {
-        let info = await FFmpegService.getVideoInfo("F:\\BVideo\\123.mp4","F:\\BVideo\\1.jpg");
-        console.log(info);
-    } catch (error) {
-        console.log(error);
-    }
     console.log('NapCat Shell App Loading...');
     const pathWrapper = new NapCatPathWrapper();
     const logger = new LogWrapper(pathWrapper.logsPath);
