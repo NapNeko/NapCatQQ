@@ -166,14 +166,14 @@ export class NTQQFileApi {
             throw new Error('文件异常，大小为0');
         }
         const thumbDir = path.replace(`${pathLib.sep}Ori${pathLib.sep}`, `${pathLib.sep}Thumb${pathLib.sep}`);
+        fs.mkdirSync(pathLib.dirname(thumbDir), { recursive: true });
         const thumbPath = pathLib.join(pathLib.dirname(thumbDir), `${md5}_0.png`);
         try {
-            await FFmpegService.getVideoInfo(filePath, thumbPath);
+            videoInfo = await FFmpegService.getVideoInfo(filePath, thumbPath);
         } catch (error) {
             fs.writeFileSync(thumbPath, Buffer.from(defaultVideoThumbB64, 'base64'));
         }
 
-        videoInfo.size = fileSize;
         const thumbSize = (await fsPromises.stat(thumbPath)).size;
         const thumbMd5 = await calculateFileMD5(thumbPath);
         context.deleteAfterSentFiles.push(path);
