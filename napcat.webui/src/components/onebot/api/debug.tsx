@@ -2,12 +2,14 @@ import { Button } from '@heroui/button'
 import { Card, CardBody, CardHeader } from '@heroui/card'
 import { Input } from '@heroui/input'
 import { Snippet } from '@heroui/snippet'
+import { useLocalStorage } from '@uidotdev/usehooks'
 import { motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { IoLink, IoSend } from 'react-icons/io5'
 import { PiCatDuotone } from 'react-icons/pi'
 
+import key from '@/const/key'
 import { OneBotHttpApiContent, OneBotHttpApiPath } from '@/const/ob_api'
 
 import ChatInputModal from '@/components/chat_input/modal'
@@ -27,12 +29,10 @@ export interface OneBotApiDebugProps {
 
 const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
   const { path, data } = props
-  const url = new URL(window.location.origin).href
-  let defaultHttpUrl = url.replace(':6099', ':3000')
-  if (defaultHttpUrl.endsWith('/')) {
-    defaultHttpUrl = defaultHttpUrl.slice(0, -1)
-  }
-  const [httpConfig, setHttpConfig] = useState({
+  const currentURL = new URL(window.location.origin)
+  currentURL.port = '3000'
+  const defaultHttpUrl = currentURL.href
+  const [httpConfig, setHttpConfig] = useLocalStorage(key.httpDebugConfig, {
     url: defaultHttpUrl,
     token: ''
   })
@@ -50,8 +50,10 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
     const r = toast.loading('正在发送请求...')
     try {
       const parsedRequestBody = JSON.parse(requestBody)
+      const requestURL = new URL(httpConfig.url)
+      requestURL.pathname = path
       request
-        .post(httpConfig.url + path, parsedRequestBody, {
+        .post(requestURL.href, parsedRequestBody, {
           headers: {
             Authorization: `Bearer ${httpConfig.token}`
           },
