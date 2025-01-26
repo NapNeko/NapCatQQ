@@ -4,7 +4,7 @@ import { resolve } from 'path';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import { builtinModules } from 'module';
 //依赖排除
-const external = ['silk-wasm', 'ws', 'express', 'qrcode-terminal', 'fluent-ffmpeg', 'piscina'];
+const external = ['silk-wasm', 'ws', 'express', 'qrcode-terminal', 'fluent-ffmpeg', 'piscina', '@ffmpeg.wasm/core-mt', "@ffmpeg.wasm/main"];
 const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`)].flat();
 
 let startScripts: string[] | undefined = undefined;

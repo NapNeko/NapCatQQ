@@ -29,6 +29,7 @@ import { InitWebUi } from '@/webui';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { napCatVersion } from '@/common/version';
 import { NodeIO3MiscListener } from '@/core/listeners/NodeIO3MiscListener';
+import { ffmpegService } from '@/common/ffmpeg';
 // NapCat Shell App ES 入口文件
 async function handleUncaughtExceptions(logger: LogWrapper) {
     process.on('uncaughtException', (err) => {
@@ -262,6 +263,11 @@ async function initializeSession(
 }
 
 export async function NCoreInitShell() {
+    try {
+        await ffmpegService.extractThumbnail("F:\\BVideo\\123.mp4","F:\\BVideo\\123.jpg");
+    } catch (error) {
+        console.log(error);
+    }
     console.log('NapCat Shell App Loading...');
     const pathWrapper = new NapCatPathWrapper();
     const logger = new LogWrapper(pathWrapper.logsPath);

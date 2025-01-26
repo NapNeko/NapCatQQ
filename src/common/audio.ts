@@ -2,14 +2,12 @@ import Piscina from 'piscina';
 import fsPromise from 'fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'crypto';
-import { spawn } from 'node:child_process';
 import { EncodeResult, getDuration, getWavFileInfo, isSilk, isWav } from 'silk-wasm';
 import { LogWrapper } from '@/common/log';
 import { EncodeArgs } from "@/common/audio-worker";
+import { ffmpegService } from "@/common/ffmpeg";
 
 const ALLOW_SAMPLE_RATE = [8000, 12000, 16000, 24000, 32000, 44100, 48000];
-const EXIT_CODES = [0, 255];
-const FFMPEG_PATH = process.env.FFMPEG_PATH ?? 'ffmpeg';
 
 async function getWorkerPath() {
     return new URL(/* @vite-ignore */ './audio-worker.mjs', import.meta.url).href;
@@ -26,30 +24,6 @@ async function guessDuration(pttPath: string, logger: LogWrapper) {
     return duration;
 }
 
-async function convert(filePath: string, pcmPath: string, logger: LogWrapper): Promise<Buffer> {
-    return new Promise<Buffer>((resolve, reject) => {
-        const cp = spawn(FFMPEG_PATH, ['-y', '-i', filePath, '-ar', '24000', '-ac', '1', '-f', 's16le', pcmPath]);
-        cp.on('error', (err: Error) => {
-            logger.log('FFmpeg处理转换出错: ', err.message);
-            reject(err);
-        });
-        cp.on('exit', async (code, signal) => {
-            if (code == null || EXIT_CODES.includes(code)) {
-                try {
-                    const data = await fsPromise.readFile(pcmPath);
-                    await fsPromise.unlink(pcmPath);
-                    resolve(data);
-                } catch (err) {
-                    reject(err);
-                }
-            } else {
-                logger.log(`FFmpeg exit: code=${code ?? 'unknown'} sig=${signal ?? 'unknown'}`);
-                reject(new Error('FFmpeg处理转换失败'));
-            }
-        });
-    });
-}
-
 async function handleWavFile(
     file: Buffer,
     filePath: string,
@@ -58,7 +32,7 @@ async function handleWavFile(
 ): Promise<{ input: Buffer; sampleRate: number }> {
     const { fmt } = getWavFileInfo(file);
     if (!ALLOW_SAMPLE_RATE.includes(fmt.sampleRate)) {
-        return { input: await convert(filePath, pcmPath, logger), sampleRate: 24000 };
+        return { input: await ffmpegService.convert(filePath, pcmPath, logger), sampleRate: 24000 };
     }
     return { input: file, sampleRate: fmt.sampleRate };
 }
@@ -72,7 +46,7 @@ export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: Log
             const pcmPath = `${pttPath}.pcm`;
             const { input, sampleRate } = isWav(file)
                 ? (await handleWavFile(file, filePath, pcmPath, logger))
-                : { input: await convert(filePath, pcmPath, logger), sampleRate: 24000 };
+                : { input: await ffmpegService.convert(filePath, pcmPath, logger), sampleRate: 24000 };
             const silk = await piscina.run({ input: input, sampleRate: sampleRate });
             await fsPromise.writeFile(pttPath, Buffer.from(silk.data));
             logger.log(`语音文件${filePath}转换成功!`, pttPath, '时长:', silk.duration);
