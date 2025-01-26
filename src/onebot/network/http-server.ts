@@ -91,7 +91,7 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
         }
         if (req.path === '' || req.path === '/') {
             const hello = OB11Response.ok({});
-            hello.message = 'NapCat4 Ss Running';
+            hello.message = 'NapCat4 Is Running';
             return res.json(hello);
         }
         const actionName = req.path.split('/')[1];
