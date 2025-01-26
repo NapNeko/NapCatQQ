@@ -55,6 +55,8 @@
     "winston": "^3.17.0"
   },
   "dependencies": {
+    "@ffmpeg.wasm/core-mt": "^0.13.2",
+    "@ffmpeg.wasm/main": "^0.13.1",
     "express": "^5.0.0",
     "fluent-ffmpeg": "^2.1.2",
     "piscina": "^4.7.0",
