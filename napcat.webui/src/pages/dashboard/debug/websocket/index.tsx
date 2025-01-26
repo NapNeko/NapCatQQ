@@ -1,8 +1,11 @@
 import { Button } from '@heroui/button'
 import { Card, CardBody } from '@heroui/card'
 import { Input } from '@heroui/input'
+import { useLocalStorage } from '@uidotdev/usehooks'
 import { useCallback, useState } from 'react'
 import toast from 'react-hot-toast'
+
+import key from '@/const/key'
 
 import ChatInputModal from '@/components/chat_input/modal'
 import OneBotMessageList from '@/components/onebot/message_list'
@@ -12,9 +15,11 @@ import WSStatus from '@/components/onebot/ws_status'
 import { useWebSocketDebug } from '@/hooks/use-websocket-debug'
 
 export default function WSDebug() {
-  const url = new URL(window.location.origin).href
-  const defaultWsUrl = url.replace('http', 'ws').replace(':6099', ':3000')
-  const [socketConfig, setSocketConfig] = useState({
+  const url = new URL(window.location.origin)
+  url.port = '3000'
+  url.protocol = 'ws:'
+  const defaultWsUrl = url.href
+  const [socketConfig, setSocketConfig] = useLocalStorage(key.wsDebugConfig, {
     url: defaultWsUrl,
     token: ''
   })
