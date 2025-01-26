@@ -139,7 +139,8 @@ const NewVersionTip = (props: NewVersionTipProps) => {
             onConfirm() {
               window.open(
                 'https://github.com/NapNeko/NapCatQQ/releases',
-                '_blank'
+                '_blank',
+                'noopener'
               )
             }
           })
