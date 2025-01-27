@@ -67,7 +67,7 @@ import imageSize from 'image-size';
         }
     }
 
-    public static async convert(filePath: string, pcmPath: string, logger: LogWrapper): Promise<Buffer> {
+    public static async convert(filePath: string, pcmPath: string): Promise<Buffer> {
         const ffmpegInstance = await FFmpeg.create({ core: '@ffmpeg.wasm/core-mt' });
         const inputFileName = `${randomUUID()}.input`;
         const outputFileName = `${randomUUID()}.pcm`;
@@ -87,12 +87,12 @@ import imageSize from 'image-size';
             try {
                 ffmpegInstance.fs.unlink(outputFileName);
             } catch (unlinkError) {
-                logger.log('Error unlinking output file:', unlinkError);
+                console.error('Error unlinking output file:', unlinkError);
             }
             try {
                 ffmpegInstance.fs.unlink(inputFileName);
             } catch (unlinkError) {
-                logger.log('Error unlinking input file:', unlinkError);
+                console.error('Error unlinking output file:', unlinkError);
             }
         }
     }
@@ -142,7 +142,7 @@ export default async function handleFFmpegTask({ method, args }: FFmpegTask): Pr
         case 'convertFile':
             return await FFmpegService.convertFile(...args as [string, string, string]);
         case 'convert':
-            return await FFmpegService.convert(...args as [string, string, LogWrapper]);
+            return await FFmpegService.convert(...args as [string, string]);
         case 'getVideoInfo':
             return await FFmpegService.getVideoInfo(...args as [string, string]);
         default:
