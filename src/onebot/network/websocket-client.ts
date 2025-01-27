@@ -9,6 +9,7 @@ import { LifeCycleSubType, OB11LifeCycleEvent } from '@/onebot/event/meta/OB11Li
 import { WebsocketClientConfig } from '@/onebot/config/config';
 import { NapCatOneBot11Adapter } from "@/onebot";
 import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
+import json5 from 'json5';
 
 export class OB11WebSocketClientAdapter extends IOB11NetworkAdapter<WebsocketClientConfig> {
     private connection: WebSocket | null = null;
@@ -129,7 +130,7 @@ export class OB11WebSocketClientAdapter extends IOB11NetworkAdapter<WebsocketCli
         let echo = undefined;
 
         try {
-            receiveData = JSON.parse(message.toString());
+            receiveData = json5.parse(message.toString());
             echo = receiveData.echo;
             this.logger.logDebug('[OneBot] [WebSocket Client] 收到正向Websocket消息', receiveData);
         } catch (e) {

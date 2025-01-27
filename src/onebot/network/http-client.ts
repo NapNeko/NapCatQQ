@@ -7,6 +7,7 @@ import { RequestUtil } from '@/common/request';
 import { HttpClientConfig } from '@/onebot/config/config';
 import { ActionMap } from '@/onebot/action';
 import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
+import json5 from 'json5';
 
 export class OB11HttpClientAdapter extends IOB11NetworkAdapter<HttpClientConfig> {
     constructor(
@@ -34,7 +35,7 @@ export class OB11HttpClientAdapter extends IOB11NetworkAdapter<HttpClientConfig>
         }
 
         const data = await RequestUtil.HttpGetText(this.config.url, 'POST', msgStr, headers);
-        const resJson: QuickAction = data ? JSON.parse(data) : {};
+        const resJson: QuickAction = data ? json5.parse(data) : {};
 
         await this.obContext.apis.QuickActionApi.handleQuickOperation(event as QuickActionEvent, resJson);
     }

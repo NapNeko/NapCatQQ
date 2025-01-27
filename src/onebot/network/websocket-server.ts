@@ -12,6 +12,7 @@ import { LifeCycleSubType, OB11LifeCycleEvent } from '@/onebot/event/meta/OB11Li
 import { WebsocketServerConfig } from '@/onebot/config/config';
 import { NapCatOneBot11Adapter } from "@/onebot";
 import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
+import json5 from 'json5';
 
 export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketServerConfig> {
     wsServer: WebSocketServer;
@@ -162,7 +163,7 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
         let receiveData: { action: typeof ActionName[keyof typeof ActionName], params?: any, echo?: any } = { action: ActionName.Unknown, params: {} };
         let echo = undefined;
         try {
-            receiveData = JSON.parse(message.toString());
+            receiveData = json5.parse(message.toString());
             echo = receiveData.echo;
             //this.logger.logDebug('收到正向Websocket消息', receiveData);
         } catch (e) {
