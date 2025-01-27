@@ -30,11 +30,11 @@ export class FFmpegService {
         await piscina.destroy();
     }
 
-    public static async convert(filePath: string, pcmPath: string, logger: LogWrapper): Promise<Buffer> {
+    public static async convert(filePath: string, pcmPath: string): Promise<Buffer> {
         const piscina = new Piscina<EncodeArgs, EncodeResult>({
             filename: await getWorkerPath(),
         });
-        const result = await piscina.run({ method: 'convert', args: [filePath, pcmPath, logger] });
+        const result = await piscina.run({ method: 'convert', args: [filePath, pcmPath] });
         await piscina.destroy();
         return result;
     }
