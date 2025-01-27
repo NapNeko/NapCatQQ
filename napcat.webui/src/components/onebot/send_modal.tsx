@@ -10,6 +10,7 @@ import {
 import { useCallback, useRef } from 'react'
 import toast from 'react-hot-toast'
 
+import ChatInputModal from '@/components/chat_input/modal'
 import CodeEditor from '@/components/code_editor'
 import type { CodeEditorRef } from '@/components/code_editor'
 
@@ -72,6 +73,8 @@ const OneBotSendModal: React.FC<OneBotSendModalProps> = (props) => {
                 </div>
               </ModalBody>
               <ModalFooter>
+                <ChatInputModal />
+
                 <Button color="danger" variant="flat" onPress={onClose}>
                   取消
                 </Button>

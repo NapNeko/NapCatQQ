@@ -50,8 +50,8 @@ const Modal: React.FC<ModalProps> = React.memo((props) => {
         onNativeClose()
       }}
       classNames={{
-        backdrop: 'z-[99999999]',
-        wrapper: 'z-[999999999]'
+        backdrop: 'z-[99]',
+        wrapper: 'z-[99]'
       }}
       {...rest}
     >

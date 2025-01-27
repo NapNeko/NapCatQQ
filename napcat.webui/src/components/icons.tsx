@@ -1125,7 +1125,7 @@ export const WebUIIcon = (props: IconSvgProps) => (
     >
       <g
         id="svgGroup"
-        stroke-linecap="round"
+        strokeLinecap="round"
         stroke="#000"
         fill="transparent"
         style={{
@@ -1173,7 +1173,7 @@ export const WebUIIcon = (props: IconSvgProps) => (
     >
       <g
         id="svgGroup"
-        stroke-linecap="round"
+        strokeLinecap="round"
         stroke="#000"
         fill="transparent"
         style={{
@@ -1220,7 +1220,7 @@ export const WebUIIcon = (props: IconSvgProps) => (
     >
       <g
         id="svgGroup"
-        stroke-linecap="round"
+        strokeLinecap="round"
         stroke="#000"
         fill="transparent"
         style={{
@@ -1270,7 +1270,7 @@ export const WebUIIcon = (props: IconSvgProps) => (
     >
       <g
         id="svgGroup"
-        stroke-linecap="round"
+        strokeLinecap="round"
         stroke="#000"
         fill="transparent"
         style={{
@@ -1320,7 +1320,7 @@ export const WebUIIcon = (props: IconSvgProps) => (
     >
       <g
         id="svgGroup"
-        stroke-linecap="round"
+        strokeLinecap="round"
         stroke="#000"
         fill="transparent"
         style={{
@@ -1372,7 +1372,7 @@ export const BietiaopIcon = (props: IconSvgProps) => (
     >
       <g
         id="svgGroup"
-        stroke-linecap="round"
+        strokeLinecap="round"
         stroke="#000"
         fill="transparent"
         style={{
@@ -1422,7 +1422,7 @@ export const BietiaopIcon = (props: IconSvgProps) => (
     >
       <g
         id="svgGroup"
-        stroke-linecap="round"
+        strokeLinecap="round"
         stroke="#000"
         fill="transparent"
         style={{
@@ -1469,7 +1469,7 @@ export const BietiaopIcon = (props: IconSvgProps) => (
     >
       <g
         id="svgGroup"
-        stroke-linecap="round"
+        strokeLinecap="round"
         stroke="#000"
         fill="transparent"
         style={{
@@ -1519,7 +1519,7 @@ export const BietiaopIcon = (props: IconSvgProps) => (
     >
       <g
         id="svgGroup"
-        stroke-linecap="round"
+        strokeLinecap="round"
         stroke="#000"
         fill="transparent"
         style={{
@@ -1566,7 +1566,7 @@ export const BietiaopIcon = (props: IconSvgProps) => (
     >
       <g
         id="svgGroup"
-        stroke-linecap="round"
+        strokeLinecap="round"
         stroke="#000"
         fill="transparent"
         style={{
@@ -1613,7 +1613,7 @@ export const BietiaopIcon = (props: IconSvgProps) => (
     >
       <g
         id="svgGroup"
-        stroke-linecap="round"
+        strokeLinecap="round"
         stroke="#000"
         fill="transparent"
         style={{
@@ -1660,7 +1660,7 @@ export const BietiaopIcon = (props: IconSvgProps) => (
     >
       <g
         id="svgGroup"
-        stroke-linecap="round"
+        strokeLinecap="round"
         stroke="#000"
         fill="transparent"
         style={{
@@ -1707,7 +1707,7 @@ export const BietiaopIcon = (props: IconSvgProps) => (
     >
       <g
         id="svgGroup"
-        stroke-linecap="round"
+        strokeLinecap="round"
         stroke="#000"
         fill="transparent"
         style={{
