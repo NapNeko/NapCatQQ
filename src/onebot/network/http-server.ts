@@ -59,11 +59,14 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
             });
             req.on('end', () => {
                 try {
-                    req.body = json5.parse(rawData);
+                    req.body = json5.parse(rawData || '{}');
                     next();
                 } catch (err) {
                     return res.status(400).send('Invalid JSON');
                 }
+            });
+            req.on('error', (err) => {
+                return res.status(400).send('Invalid JSON');
             });
         });
 
