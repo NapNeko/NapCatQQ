@@ -44,6 +44,7 @@ body {
   -moz-border-radius: 2em;
   border-radius: 2em;
 }
+
 .monaco-editor {
   outline: none !important;
   border-radius: 5px !important;
@@ -73,6 +74,10 @@ body {
 .monaco-editor .view-overlays .current-line-exact {
   border-color: rgba(0, 0, 0, 0.2) !important;
   border-radius: 5px !important;
+}
+
+.context-view.monaco-menu-container * {
+    font-family: PingFang SC,"Harmony",Helvetica Neue,Microsoft YaHei,sans-serif !important;
 }
 
 .ql-hidden {

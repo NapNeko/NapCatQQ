@@ -187,7 +187,7 @@ export default function AudioPlayer(props: AudioPlayerProps) {
   return (
     <div
       className={clsx(
-        'fixed right-0 bottom-0 z-[9999] w-full md:w-96',
+        'fixed right-0 bottom-0 z-[52] w-full md:w-96',
         !translateX && !translateY && 'transition-transform',
         isCollapsed && 'md:hover:!translate-x-80'
       )}

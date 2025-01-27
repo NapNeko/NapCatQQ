@@ -4,7 +4,7 @@ import { Input } from '@heroui/input'
 import { Snippet } from '@heroui/snippet'
 import { useLocalStorage } from '@uidotdev/usehooks'
 import { motion } from 'motion/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import { IoLink, IoSend } from 'react-icons/io5'
 import { PiCatDuotone } from 'react-icons/pi'
@@ -41,6 +41,7 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
   const [isCodeEditorOpen, setIsCodeEditorOpen] = useState(false)
   const [isResponseOpen, setIsResponseOpen] = useState(false)
   const [isFetching, setIsFetching] = useState(false)
+  const responseRef = useRef<HTMLDivElement>(null)
   const parsedRequest = parse(data.request)
   const parsedResponse = parse(data.response)
 
@@ -69,6 +70,11 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
         })
         .finally(() => {
           setIsFetching(false)
+          setIsResponseOpen(true)
+          responseRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          })
           toast.dismiss(r)
         })
     } catch (error) {
@@ -84,8 +90,8 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
   }, [path])
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold mb-4 flex items-center gap-1 text-danger-400 ">
+    <section className="p-4 pt-14 rounded-lg shadow-md">
+      <h1 className="text-2xl font-bold mb-4 flex items-center gap-1 text-danger-400">
         <PiCatDuotone />
         {data.description}
       </h1>
@@ -93,6 +99,9 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
         <Snippet
           className="bg-default-50 bg-opacity-50 backdrop-blur-md"
           symbol={<IoLink size={18} className="inline-block mr-1" />}
+          tooltipProps={{
+            content: '点击复制地址'
+          }}
         >
           {path}
         </Snippet>
@@ -125,7 +134,10 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
           <IoSend />
         </Button>
       </div>
-      <Card shadow="sm" className="my-4 bg-opacity-50 backdrop-blur-md">
+      <Card
+        shadow="sm"
+        className="my-4 bg-opacity-50 backdrop-blur-md overflow-visible z-20"
+      >
         <CardHeader className="font-noto-serif font-bold text-lg gap-1 pb-0">
           <span className="mr-2">请求体</span>
           <Button
@@ -140,7 +152,7 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
         </CardHeader>
         <CardBody>
           <motion.div
-            className="overflow-hidden"
+            ref={responseRef}
             initial={{ opacity: 0, height: 0 }}
             animate={{
               opacity: isCodeEditorOpen ? 1 : 0,
@@ -223,7 +235,7 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
         <h2 className="text-xl font-semibold mt-4 mb-2">响应体结构</h2>
         <DisplayStruct schema={parsedResponse} />
       </div>
-    </div>
+    </section>
   )
 }
 

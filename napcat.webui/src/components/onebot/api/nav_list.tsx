@@ -19,9 +19,8 @@ const OneBotApiNavList: React.FC<OneBotApiNavListProps> = (props) => {
   return (
     <motion.div
       className={clsx(
-        'flex-shrink-0 absolute md:!top-0 md:bottom-0 left-0 !overflow-hidden md:relative md:w-auto z-20',
-        openSideBar &&
-          'bottom-8 z-10 bg-background bg-opacity-20 backdrop-blur-md top-14'
+        'h-[calc(100vh-3.5rem)] left-0 !overflow-hidden md:w-auto z-20 top-[3.3rem] md:top-[3rem] absolute md:sticky md:float-start',
+        openSideBar && 'bg-background bg-opacity-20 backdrop-blur-md'
       )}
       initial={{ width: 0 }}
       transition={{
@@ -32,7 +31,7 @@ const OneBotApiNavList: React.FC<OneBotApiNavListProps> = (props) => {
       animate={{ width: openSideBar ? '16rem' : '0rem' }}
       style={{ overflowY: openSideBar ? 'auto' : 'hidden' }}
     >
-      <div className="w-64 h-full overflow-y-auto px-2 float-right">
+      <div className="w-64 h-full overflow-y-auto px-2 pt-2 pb-10 md:pb-0">
         <Input
           className="sticky top-0 z-10 text-danger-600"
           classNames={{

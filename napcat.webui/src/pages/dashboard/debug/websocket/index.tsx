@@ -7,7 +7,6 @@ import toast from 'react-hot-toast'
 
 import key from '@/const/key'
 
-import ChatInputModal from '@/components/chat_input/modal'
 import OneBotMessageList from '@/components/onebot/message_list'
 import OneBotSendModal from '@/components/onebot/send_modal'
 import WSStatus from '@/components/onebot/ws_status'
@@ -82,7 +81,6 @@ export default function WSDebug() {
                   {FilterMessagesType}
                 </div>
                 <OneBotSendModal sendMessage={sendMessage} />
-                <ChatInputModal />
               </div>
             </div>
           </CardBody>

@@ -2,7 +2,7 @@ import { BreadcrumbItem, Breadcrumbs } from '@heroui/breadcrumbs'
 import { Button } from '@heroui/button'
 import { useLocalStorage } from '@uidotdev/usehooks'
 import clsx from 'clsx'
-import { motion } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useMemo, useRef } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { MdMenu, MdMenuOpen } from 'react-icons/md'
@@ -79,7 +79,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }, [location.pathname])
   return (
     <div
-      className="h-screen relative flex bg-danger-50 dark:bg-black"
+      className="h-screen relative flex bg-danger-50 dark:bg-black items-stretch"
       style={{
         backgroundImage: `url(${b64img})`,
         backgroundSize: 'cover'
@@ -89,13 +89,22 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <div
         ref={contentRef}
         className={clsx(
-          'overflow-y-auto relative flex-1 rounded-md m-1 bg-content1 pb-10 md:pb-0',
+          'overflow-y-auto flex-1 rounded-md m-1 bg-content1 pb-10 md:pb-0',
           openSideBar ? 'ml-0' : 'ml-1',
           !b64img && 'shadow-inner',
-          b64img && '!bg-opacity-50 backdrop-blur-none dark:bg-background'
+          b64img && '!bg-opacity-50 backdrop-blur-none dark:bg-background',
+          'overflow-x-hidden'
         )}
       >
-        <div className="h-10 flex items-center hm-medium text-xl sticky top-2 left-0 backdrop-blur-lg z-20 shadow-sm bg-background dark:bg-background shadow-danger-50 dark:shadow-danger-100 m-2 rounded-full !bg-opacity-50">
+        <div
+          className={clsx(
+            'h-10 flex items-center hm-medium text-xl backdrop-blur-lg rounded-full',
+            'dark:bg-background dark:shadow-danger-100',
+            'bg-background !bg-opacity-50',
+            'shadow-sm shadow-danger-50',
+            'z-30 m-2 mb-0 sticky top-2 left-0'
+          )}
+        >
           <motion.div
             className={clsx(
               'mr-1 ease-in-out ml-0 md:relative',
@@ -117,7 +126,19 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </motion.div>
           <Breadcrumbs isDisabled size="lg">
             {title?.map((item, index) => (
-              <BreadcrumbItem key={index}>{item}</BreadcrumbItem>
+              <BreadcrumbItem key={index}>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={item}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {item}
+                  </motion.div>
+                </AnimatePresence>
+              </BreadcrumbItem>
             ))}
           </Breadcrumbs>
         </div>

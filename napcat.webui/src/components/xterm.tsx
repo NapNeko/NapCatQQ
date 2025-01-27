@@ -36,7 +36,9 @@ const XTerm = forwardRef<XTermRef, React.HTMLAttributes<HTMLDivElement>>(
         allowTransparency: true,
         fontFamily: '"Fira Code", "Harmony", "Noto Serif SC", monospace',
         cursorInactiveStyle: 'outline',
-        drawBoldTextInBrightColors: false
+        drawBoldTextInBrightColors: false,
+        letterSpacing: 0,
+        lineHeight: 1.0
       })
       terminalRef.current = terminal
       const fitAddon = new FitAddon()
@@ -50,10 +52,6 @@ const XTerm = forwardRef<XTermRef, React.HTMLAttributes<HTMLDivElement>>(
       terminal.loadAddon(fitAddon)
       terminal.loadAddon(new WebglAddon())
       terminal.open(domRef.current)
-
-      setTimeout(() => {
-        fitAddon.fit()
-      }, 0)
 
       terminal.writeln(
         gradientText(
@@ -69,16 +67,16 @@ const XTerm = forwardRef<XTermRef, React.HTMLAttributes<HTMLDivElement>>(
       const resizeObserver = new ResizeObserver(() => {
         fitAddon.fit()
       })
-      resizeObserver.observe(domRef.current)
 
-      const handleFontLoad = () => {
-        terminal.refresh(0, terminal.rows - 1)
-      }
-      document.fonts.addEventListener('loadingdone', handleFontLoad)
+      // 字体加载完成后重新调整终端大小
+      document.fonts.ready.then(() => {
+        fitAddon.fit()
+
+        resizeObserver.observe(domRef.current!)
+      })
 
       return () => {
         resizeObserver.disconnect()
-        document.fonts.removeEventListener('loadingdone', handleFontLoad)
         setTimeout(() => {
           terminal.dispose()
         }, 0)
