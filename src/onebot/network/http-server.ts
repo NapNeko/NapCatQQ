@@ -8,6 +8,7 @@ import cors from 'cors';
 import { HttpServerConfig } from '@/onebot/config/config';
 import { NapCatOneBot11Adapter } from "@/onebot";
 import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
+import json5 from 'json5';
 
 export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig> {
     private app: Express | undefined;
@@ -52,12 +53,17 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
         this.app.use((req, res, next) => {
             // 兼容处理没有带content-type的请求
             req.headers['content-type'] = 'application/json';
-            const originalJson = express.json({ limit: '5000mb' });
-            originalJson(req, res, (err) => {
-                if (err) {
+            let rawData = '';
+            req.on('data', (chunk) => {
+                rawData += chunk;
+            });
+            req.on('end', () => {
+                try {
+                    req.body = json5.parse(rawData);
+                    next();
+                } catch (err) {
                     return res.status(400).send('Invalid JSON');
                 }
-                next();
             });
         });
 
