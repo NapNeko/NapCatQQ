@@ -24,12 +24,20 @@ export default class WebUIManager {
     return data.data.Credential
   }
 
+  public static async changePassword(oldToken: string, newToken: string) {
+    const { data } = await serverRequest.post<ServerResponse<boolean>>(
+      '/auth/update_token',
+      { oldToken, newToken }
+    )
+    return data.data
+  }
+
   public static async proxy<T>(url = '') {
     const data = await serverRequest.get<ServerResponse<string>>(
       '/base/proxy?url=' + encodeURIComponent(url)
     )
     data.data.data = JSON.parse(data.data.data)
-    return  data.data as ServerResponse<T>
+    return data.data as ServerResponse<T>
   }
 
   public static async getPackageInfo() {
