@@ -62,3 +62,19 @@ export const checkHandler: RequestHandler = async (req, res) => {
         return sendError(res, 'Authorization Faild');
     }
 };
+
+// 修改密码（token）
+export const UpdateTokenHandler: RequestHandler = async (req, res) => {
+    const { oldToken, newToken } = req.body;
+
+    if (isEmpty(oldToken) || isEmpty(newToken)) {
+        return sendError(res, 'oldToken or newToken is empty');
+    }
+
+    try {
+        await WebUiConfig.UpdateToken(oldToken, newToken);
+        return sendSuccess(res, 'Token updated successfully');
+    } catch (e: any) {
+        return sendError(res, `Failed to update token: ${e.message}`);
+    }
+};

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { checkHandler, LoginHandler, LogoutHandler } from '@webapi/api/Auth';
+import { checkHandler, LoginHandler, LogoutHandler, UpdateTokenHandler } from '@webapi/api/Auth';
 
 const router = Router();
 // router:登录
@@ -9,5 +9,7 @@ router.post('/login', LoginHandler);
 router.post('/check', checkHandler);
 // router:注销
 router.post('/logout', LogoutHandler);
+// router:更新token
+router.post('/update_token', UpdateTokenHandler);
 
 export { router as AuthRouter };
