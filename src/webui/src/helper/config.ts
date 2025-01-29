@@ -68,7 +68,15 @@ export class WebUiConfigWrapper {
     WebUiConfigData: WebUiConfigType | undefined = undefined;
 
     private applyDefaults<T>(obj: Partial<T>, defaults: T): T {
-        return { ...defaults, ...obj };
+        const result = { ...defaults } as T;
+        for (const key in obj) {
+            if (obj[key] && typeof obj[key] === 'object' && !Array.isArray(obj[key])) {
+                result[key] = this.applyDefaults(obj[key], defaults[key]);
+            } else if (obj[key] !== undefined) {
+                result[key] = obj[key] as T[Extract<keyof T, string>];
+            }
+        }
+        return result;
     }
 
     async GetWebUIConfig(): Promise<WebUiConfigType> {
@@ -99,10 +107,8 @@ export class WebUiConfigWrapper {
             }
 
             const fileContent = await fs.readFile(configPath, 'utf-8');
-            // 更新配置字段后新增字段可能会缺失，同步一下
             const parsedConfig = this.applyDefaults(JSON.parse(fileContent) as Partial<WebUiConfigType>, defaultconfig);
 
-            // 配置已经被操作过了，还是回写一下吧，不然新配置不会出现在配置文件里
             if (
                 await fs
                     .access(configPath, constants.W_OK)
@@ -113,9 +119,7 @@ export class WebUiConfigWrapper {
             } else {
                 console.warn(`文件: ${configPath} 没有写入权限, 配置的更改部分可能会在重启后还原.`);
             }
-            // 不希望回写的配置放后面
 
-            // 查询主机地址是否可用
             const [host_err, host] = await tryUseHost(parsedConfig.host)
                 .then((data) => [null, data])
                 .catch((err) => [err, null]);
@@ -124,7 +128,6 @@ export class WebUiConfigWrapper {
                 parsedConfig.port = 0; // 设置为0，禁用WebUI
             } else {
                 parsedConfig.host = host;
-                // 修正端口占用情况
                 const [port_err, port] = await tryUsePort(parsedConfig.port, parsedConfig.host)
                     .then((data) => [null, data])
                     .catch((err) => [err, null]);
@@ -141,6 +144,32 @@ export class WebUiConfigWrapper {
             console.log('读取配置文件失败', e);
         }
         return defaultconfig; // 理论上这行代码到不了，到了只能返回默认配置了
+    }
+
+    async UpdateWebUIConfig(newConfig: Partial<WebUiConfigType>): Promise<void> {
+        const configPath = resolve(webUiPathWrapper.configPath, './webui.json');
+        const currentConfig = await this.GetWebUIConfig();
+        const updatedConfig = this.applyDefaults(newConfig, currentConfig);
+
+        if (
+            await fs
+                .access(configPath, constants.W_OK)
+                .then(() => true)
+                .catch(() => false)
+        ) {
+            await fs.writeFile(configPath, JSON.stringify(updatedConfig, null, 4));
+            this.WebUiConfigData = updatedConfig;
+        } else {
+            console.warn(`文件: ${configPath} 没有写入权限, 配置的更改部分可能会在重启后还原.`);
+        }
+    }
+
+    async UpdateToken(oldToken: string, newToken: string): Promise<void> {
+        const currentConfig = await this.GetWebUIConfig();
+        if (currentConfig.token !== oldToken) {
+            throw new Error('旧 token 不匹配');
+        }
+        await this.UpdateWebUIConfig({ token: newToken });
     }
 
     // 获取日志文件夹路径
