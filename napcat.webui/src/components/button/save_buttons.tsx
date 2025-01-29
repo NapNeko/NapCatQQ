@@ -5,7 +5,7 @@ import { IoMdRefresh } from 'react-icons/io'
 export interface SaveButtonsProps {
   onSubmit: () => void
   reset: () => void
-  refresh: () => void
+  refresh?: () => void
   isSubmitting: boolean
 }
 
@@ -27,21 +27,23 @@ const SaveButtons: React.FC<SaveButtonsProps> = ({
         取消更改
       </Button>
       <Button
-        color="primary"
+        color="danger"
         isLoading={isSubmitting}
         onPress={() => onSubmit()}
       >
         保存
       </Button>
-      <Button
-        isIconOnly
-        color="secondary"
-        radius="full"
-        variant="flat"
-        onPress={() => refresh()}
-      >
-        <IoMdRefresh size={24} />
-      </Button>
+      {refresh && (
+        <Button
+          isIconOnly
+          color="secondary"
+          radius="full"
+          variant="flat"
+          onPress={() => refresh()}
+        >
+          <IoMdRefresh size={24} />
+        </Button>
+      )}
     </div>
   </div>
 )

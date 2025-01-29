@@ -1,69 +1,99 @@
-import { Card, CardBody } from '@heroui/card'
 import { Input } from '@heroui/input'
-import { Controller } from 'react-hook-form'
-import type { Control } from 'react-hook-form'
+import { useLocalStorage } from '@uidotdev/usehooks'
+import { useEffect } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import toast from 'react-hot-toast'
+
+import key from '@/const/key'
 
 import SaveButtons from '@/components/button/save_buttons'
 import ImageInput from '@/components/input/image_input'
 
+import useMusic from '@/hooks/use-music'
+
 import { siteConfig } from '@/config/site'
 
-export interface WebUIConfigCardProps {
-  control: Control<IConfig['webui']>
-  onSubmit: () => void
-  reset: () => void
-  isSubmitting: boolean
-  onRefresh: () => void
-}
-const WebUIConfigCard: React.FC<WebUIConfigCardProps> = (props) => {
-  const { control, onSubmit, reset, isSubmitting, onRefresh } = props
+const WebUIConfigCard = () => {
+  const {
+    control,
+    handleSubmit: handleWebuiSubmit,
+    formState: { isSubmitting },
+    setValue: setWebuiValue
+  } = useForm<IConfig['webui']>({
+    defaultValues: {
+      background: '',
+      musicListID: '',
+      customIcons: {}
+    }
+  })
+
+  const [b64img, setB64img] = useLocalStorage(key.backgroundImage, '')
+  const [customIcons, setCustomIcons] = useLocalStorage<Record<string, string>>(
+    key.customIcons,
+    {}
+  )
+  const { setListId, listId } = useMusic()
+
+  const reset = () => {
+    setWebuiValue('musicListID', listId)
+    setWebuiValue('customIcons', customIcons)
+    setWebuiValue('background', b64img)
+  }
+
+  const onSubmit = handleWebuiSubmit((data) => {
+    try {
+      setListId(data.musicListID)
+      setCustomIcons(data.customIcons)
+      setB64img(data.background)
+      toast.success('保存成功')
+    } catch (error) {
+      const msg = (error as Error).message
+      toast.error(`保存失败: ${msg}`)
+    }
+  })
+
+  useEffect(() => {
+    reset()
+  }, [listId, customIcons, b64img])
+
   return (
     <>
       <title>WebUI配置 - NapCat WebUI</title>
-      <Card className="bg-opacity-50 backdrop-blur-sm">
-        <CardBody className="items-center py-5">
-          <div className="w-96 max-w-full flex flex-col gap-2">
-            <Controller
-              control={control}
-              name="musicListID"
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  label="网易云音乐歌单ID（网页内音乐播放器）"
-                  placeholder="请输入歌单ID"
-                />
-              )}
-            />
-            <div className="flex flex-col gap-2">
-              <div className="flex-shrink-0 w-full">背景图</div>
-              <Controller
-                control={control}
-                name="background"
-                render={({ field }) => <ImageInput {...field} />}
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <div>自定义图标</div>
-              {siteConfig.navItems.map((item) => (
-                <Controller
-                  key={item.label}
-                  control={control}
-                  name={`customIcons.${item.label}`}
-                  render={({ field }) => (
-                    <ImageInput {...field} label={item.label} />
-                  )}
-                />
-              ))}
-            </div>
-            <SaveButtons
-              onSubmit={onSubmit}
-              reset={reset}
-              isSubmitting={isSubmitting}
-              refresh={onRefresh}
-            />
-          </div>
-        </CardBody>
-      </Card>
+      <Controller
+        control={control}
+        name="musicListID"
+        render={({ field }) => (
+          <Input
+            {...field}
+            label="网易云音乐歌单ID（网页内音乐播放器）"
+            placeholder="请输入歌单ID"
+          />
+        )}
+      />
+      <div className="flex flex-col gap-2">
+        <div className="flex-shrink-0 w-full">背景图</div>
+        <Controller
+          control={control}
+          name="background"
+          render={({ field }) => <ImageInput {...field} />}
+        />
+      </div>
+      <div className="flex flex-col gap-2">
+        <div>自定义图标</div>
+        {siteConfig.navItems.map((item) => (
+          <Controller
+            key={item.label}
+            control={control}
+            name={`customIcons.${item.label}`}
+            render={({ field }) => <ImageInput {...field} label={item.label} />}
+          />
+        ))}
+      </div>
+      <SaveButtons
+        onSubmit={onSubmit}
+        reset={reset}
+        isSubmitting={isSubmitting}
+      />
     </>
   )
 }
