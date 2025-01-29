@@ -61,5 +61,8 @@
     "qrcode-terminal": "^0.12.0",
     "silk-wasm": "^3.6.1",
     "ws": "^8.18.0"
+  },
+  "overrides": {
+    "peek-readable": "5.3.1"
   }
 }
