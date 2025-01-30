@@ -2,7 +2,7 @@
   "name": "napcat",
   "private": true,
   "type": "module",
-  "version": "4.4.15",
+  "version": "4.4.16",
   "scripts": {
     "build:universal": "npm run build:webui && vite build --mode universal || exit 1",
     "build:framework": "npm run build:webui && vite build --mode framework || exit 1",
@@ -63,6 +63,10 @@
     "ws": "^8.18.0"
   },
   "overrides": {
-    "peek-readable": "5.3.1"
+    "strtok3": {
+      "dependencies": {
+        "peek-readable": "5.3.1"
+      }
+    }
   }
 }
