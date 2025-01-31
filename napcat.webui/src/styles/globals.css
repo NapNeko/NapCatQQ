@@ -1,5 +1,5 @@
 @import url('./fonts.css');
-
+@import url('./text.css');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

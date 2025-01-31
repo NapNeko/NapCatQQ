@@ -32,7 +32,7 @@ export async function auth(req: Request, res: Response, next: NextFunction) {
         // 获取配置
         const config = await WebUiConfig.GetWebUIConfig();
         // 验证凭证在1小时内有效且token与原始token相同
-        const credentialJson = await AuthHelper.validateCredentialWithinOneHour(config.token, Credential);
+        const credentialJson = AuthHelper.validateCredentialWithinOneHour(config.token, Credential);
         if (credentialJson) {
             // 通过验证
             return next();

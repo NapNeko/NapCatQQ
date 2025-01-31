@@ -13,7 +13,6 @@ import { useTheme } from '@/hooks/use-theme'
 import logo from '@/assets/images/logo.png'
 import type { MenuItem } from '@/config/site'
 
-import { title } from '../primitives'
 import Menus from './menus'
 
 interface SideBarProps {
@@ -49,18 +48,14 @@ const SideBar: React.FC<SideBarProps> = (props) => {
     >
       <motion.div className="w-64 flex flex-col items-stretch h-full transition-transform duration-300 ease-in-out z-30 relative float-right">
         <div className="flex justify-center items-center mt-2 gap-2">
-          <Image height={40} src={logo} className="mb-2" />
+          <Image radius="none" height={40} src={logo} className="mb-2" />
           <div
             className={clsx(
               'flex items-center hm-medium',
-              title({
-                shadow: true,
-                color: isDark ? 'violet' : 'pink'
-              }),
-              '!text-2xl'
+              '!text-2xl shiny-text'
             )}
           >
-            WebUI
+            NapCat
           </div>
         </div>
         <div className="overflow-y-auto flex flex-col flex-1 px-4">
