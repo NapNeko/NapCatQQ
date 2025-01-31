@@ -1,15 +1,26 @@
-@import url("./fonts.css");
+@import url('./fonts.css');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 body {
-  font-family: PingFang SC,"Harmony",Helvetica Neue,Microsoft YaHei,sans-serif !important;
+  font-family:
+    PingFang SC,
+    'Harmony',
+    Helvetica Neue,
+    Microsoft YaHei,
+    sans-serif !important;
 }
 
 @layer components {
   .hm-medium {
-    font-family: PingFang SC,"Harmony",Helvetica Neue,Microsoft YaHei,sans-serif !important;
+    font-family:
+      PingFang SC,
+      'Harmony',
+      Helvetica Neue,
+      Microsoft YaHei,
+      sans-serif !important;
     @apply font-bold;
   }
   .font-ubuntu {
@@ -51,7 +62,8 @@ body {
   overflow: hidden !important;
 }
 
-.monaco-editor, .monaco-editor-background {
+.monaco-editor,
+.monaco-editor-background {
   background-color: transparent !important;
 }
 
@@ -77,7 +89,12 @@ body {
 }
 
 .context-view.monaco-menu-container * {
-    font-family: PingFang SC,"Harmony",Helvetica Neue,Microsoft YaHei,sans-serif !important;
+  font-family:
+    PingFang SC,
+    'Harmony',
+    Helvetica Neue,
+    Microsoft YaHei,
+    sans-serif !important;
 }
 
 .ql-hidden {
@@ -86,15 +103,3 @@ body {
 .ql-editor img {
   @apply inline-block;
 }
-/* input.ql-image {
-  @apply hidden;
-}
-.ql-image svg {
-  fill: none;
-}
-.ql-fill {
-  fill: currentColor;
-}
-.ql-stroke {
-  stroke: currentColor;
-} */
