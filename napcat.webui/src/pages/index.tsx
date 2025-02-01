@@ -1,8 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { Route, Routes, useLocation } from 'react-router-dom'
 
-import UnderConstruction from '@/components/under_construction'
-
 import DefaultLayout from '@/layouts/default'
 
 import DashboardIndexPage from './dashboard'
@@ -11,6 +9,7 @@ import ConfigPage from './dashboard/config'
 import DebugPage from './dashboard/debug'
 import HttpDebug from './dashboard/debug/http'
 import WSDebug from './dashboard/debug/websocket'
+import FileManagerPage from './dashboard/file_manager'
 import LogsPage from './dashboard/logs'
 import NetworkPage from './dashboard/network'
 import TerminalPage from './dashboard/terminal'
@@ -36,7 +35,7 @@ export default function IndexPage() {
               <Route path="ws" element={<WSDebug />} />
               <Route path="http" element={<HttpDebug />} />
             </Route>
-            <Route element={<UnderConstruction />} path="/file_manager" />
+            <Route element={<FileManagerPage />} path="/file_manager" />
             <Route element={<TerminalPage />} path="/terminal" />
             <Route element={<AboutPage />} path="/about" />
           </Routes>
