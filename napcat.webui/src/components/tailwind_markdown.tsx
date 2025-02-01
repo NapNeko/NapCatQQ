@@ -19,7 +19,7 @@ const TailwindMarkdown: React.FC<{ content: string }> = ({ content }) => {
         p: ({ node, ...props }) => <p className="m-0" {...props} />,
         a: ({ node, ...props }) => (
           <a
-            className="text-blue-500 hover:underline"
+            className="text-primary-500 inline-block hover:underline"
             target="_blank"
             {...props}
           />
@@ -32,12 +32,12 @@ const TailwindMarkdown: React.FC<{ content: string }> = ({ content }) => {
         ),
         blockquote: ({ node, ...props }) => (
           <blockquote
-            className="border-l-4 border-gray-300 pl-4 italic"
+            className="border-l-4 border-default-300 pl-4 italic"
             {...props}
           />
         ),
         code: ({ node, ...props }) => (
-          <code className="bg-gray-100 p-1 rounded" {...props} />
+          <code className="bg-default-100 p-1 rounded text-xs" {...props} />
         )
       }}
     >
