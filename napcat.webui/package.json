@@ -10,6 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@heroui/avatar": "2.2.7",
     "@heroui/breadcrumbs": "2.2.7",
     "@heroui/button": "2.2.10",
