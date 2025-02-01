@@ -14,10 +14,12 @@ const useConfig = () => {
     key: T,
     value: OneBotConfig['network'][T][0]
   ) => {
-    if (
-      value.name &&
-      config.network[key].some((item) => item.name === value.name)
-    ) {
+    const allNetworkNames = Object.keys(config.network).reduce((acc, key) => {
+      const _key = key as keyof OneBotConfig['network']
+      return acc.concat(config.network[_key].map((item) => item.name))
+    }, [] as string[])
+
+    if (value.name && allNetworkNames.includes(value.name)) {
       throw new Error('已经存在相同的配置项名')
     }
 
