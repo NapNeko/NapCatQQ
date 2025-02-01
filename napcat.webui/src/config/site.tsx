@@ -1,6 +1,8 @@
 import {
   BugIcon2,
+  FileIcon,
   InfoIcon,
+  LogIcon,
   RouteIcon,
   SettingsIcon,
   SignalTowerIcon,
@@ -49,10 +51,10 @@ export const siteConfig = {
       href: '/config'
     },
     {
-      label: '系统日志',
+      label: 'NapCat日志',
       icon: (
         <div className="w-5 h-5">
-          <TerminalIcon />
+          <LogIcon />
         </div>
       ),
       href: '/logs'
@@ -74,6 +76,24 @@ export const siteConfig = {
           href: '/debug/ws'
         }
       ]
+    },
+    {
+      label: '文件管理',
+      icon: (
+        <div className="w-5 h-5">
+          <FileIcon />
+        </div>
+      ),
+      href: '/file_manager'
+    },
+    {
+      label: '系统终端',
+      icon: (
+        <div className="w-5 h-5">
+          <TerminalIcon />
+        </div>
+      ),
+      href: '/terminal'
     },
     {
       label: '关于我们',

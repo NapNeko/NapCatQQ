@@ -9,6 +9,14 @@ export interface Log {
   message: string
 }
 
+export interface TerminalSession {
+  id: string
+}
+
+export interface TerminalInfo {
+  id: string
+}
+
 export default class WebUIManager {
   public static async checkWebUiLogined() {
     const { data } =
@@ -129,5 +137,95 @@ export default class WebUIManager {
     }
 
     return eventSource
+  }
+
+  public static async createTerminal(
+    cols: number,
+    rows: number
+  ): Promise<TerminalSession> {
+    const { data } = await serverRequest.post<ServerResponse<TerminalSession>>(
+      '/Log/terminal/create',
+      { cols, rows }
+    )
+    return data.data
+  }
+
+  public static async sendTerminalInput(
+    id: string,
+    input: string
+  ): Promise<void> {
+    await serverRequest.post(`/Log/terminal/${id}/input`, { input })
+  }
+
+  public static getTerminalStream(id: string, onData: (data: string) => void) {
+    const token = localStorage.getItem('token')
+    if (!token) throw new Error('未登录')
+
+    const _token = JSON.parse(token)
+    const eventSource = new EventSourcePolyfill(
+      `/api/Log/terminal/${id}/stream`,
+      {
+        headers: {
+          Authorization: `Bearer ${_token}`,
+          Accept: 'text/event-stream'
+        },
+        withCredentials: true
+      }
+    )
+
+    eventSource.onmessage = (event) => {
+      try {
+        const { data } = JSON.parse(event.data)
+        onData(data)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    return eventSource
+  }
+
+  public static async closeTerminal(id: string): Promise<void> {
+    await serverRequest.post(`/Log/terminal/${id}/close`)
+  }
+
+  public static async getTerminalList(): Promise<TerminalInfo[]> {
+    const { data } =
+      await serverRequest.get<ServerResponse<TerminalInfo[]>>(
+        '/Log/terminal/list'
+      )
+    return data.data
+  }
+
+  public static connectTerminal(
+    id: string,
+    onData: (data: string) => void
+  ): WebSocket {
+    const token = localStorage.getItem('token')
+    if (!token) throw new Error('未登录')
+
+    const _token = JSON.parse(token)
+    const ws = new WebSocket(
+      `ws://${window.location.host}/api/ws/terminal?id=${id}&token=${_token}`
+    )
+
+    ws.onmessage = (event) => {
+      try {
+        const { data } = JSON.parse(event.data)
+        onData(data)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    ws.onerror = (error) => {
+      console.error('WebSocket连接出错:', error)
+    }
+
+    ws.onclose = () => {
+      console.log('WebSocket连接关闭')
+    }
+
+    return ws
   }
 }
