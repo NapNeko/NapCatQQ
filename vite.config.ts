@@ -4,7 +4,16 @@ import { resolve } from 'path';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import { builtinModules } from 'module';
 //依赖排除
-const external = ['silk-wasm', 'ws', 'express', 'qrcode-terminal', 'piscina', '@ffmpeg.wasm/core-mt', "@ffmpeg.wasm/main"];
+const external = [
+    'silk-wasm',
+    'ws',
+    'express',
+    'qrcode-terminal',
+    'piscina',
+    '@ffmpeg.wasm/core-mt',
+    '@ffmpeg.wasm/main',
+    'node-pty',
+];
 const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`)].flat();
 
 let startScripts: string[] | undefined = undefined;
@@ -56,7 +65,6 @@ const FrameworkBaseConfigPlugin: PluginOption[] = [
     nodeResolve(),
 ];
 
-
 const ShellBaseConfigPlugin: PluginOption[] = [
     cp({
         targets: [
@@ -100,7 +108,6 @@ const UniversalBaseConfig = () =>
             },
         },
     });
-
 
 const ShellBaseConfig = () =>
     defineConfig({

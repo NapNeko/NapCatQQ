@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { type ReactNode, createContext, forwardRef, useContext } from 'react'
 
-interface TabsContextValue {
+export interface TabsContextValue {
   activeKey: string
   onChange: (key: string) => void
 }
@@ -11,7 +11,7 @@ const TabsContext = createContext<TabsContextValue>({
   onChange: () => {}
 })
 
-interface TabsProps {
+export interface TabsProps {
   activeKey: string
   onChange: (key: string) => void
   children: ReactNode
@@ -26,7 +26,7 @@ export function Tabs({ activeKey, onChange, children, className }: TabsProps) {
   )
 }
 
-interface TabListProps {
+export interface TabListProps {
   children: ReactNode
   className?: string
 }
@@ -37,38 +37,44 @@ export function TabList({ children, className }: TabListProps) {
   )
 }
 
-interface TabProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface TabProps extends React.ButtonHTMLAttributes<HTMLDivElement> {
   value: string
   className?: string
   children: ReactNode
+  isSelected?: boolean
 }
 
-export const Tab = forwardRef<HTMLButtonElement, TabProps>(
-  ({ value, className, children, ...props }, ref) => {
-    const { activeKey, onChange } = useContext(TabsContext)
+export const Tab = forwardRef<HTMLDivElement, TabProps>(
+  ({ className, isSelected, value, ...props }, ref) => {
+    const { onChange } = useContext(TabsContext)
+
+    const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+      onChange(value)
+      props.onClick?.(e)
+    }
 
     return (
-      <button
+      <div
         ref={ref}
-        onClick={() => onChange(value)}
+        role="tab"
+        aria-selected={isSelected}
+        onClick={handleClick}
         className={clsx(
-          'px-4 py-2 rounded-t transition-colors',
-          activeKey === value
-            ? 'bg-primary text-white'
-            : 'hover:bg-default-100',
+          'px-2 py-1 flex items-center gap-1 text-sm font-medium border-b-2 transition-colors',
+          isSelected
+            ? 'border-danger text-danger'
+            : 'border-transparent hover:border-default',
           className
         )}
         {...props}
-      >
-        {children}
-      </button>
+      />
     )
   }
 )
 
 Tab.displayName = 'Tab'
 
-interface TabPanelProps {
+export interface TabPanelProps {
   value: string
   children: ReactNode
   className?: string

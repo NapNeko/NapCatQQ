@@ -4,7 +4,7 @@
   "version": "0.0.6",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host=0.0.0.0",
     "build": "tsc && vite build",
     "lint": "eslint -c eslint.config.mjs ./src/**/**/*.{ts,tsx} --fix",
     "preview": "vite preview"
