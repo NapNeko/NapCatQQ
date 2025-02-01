@@ -11,6 +11,7 @@ import { cors } from '@webapi/middleware/cors';
 import { createUrl } from '@webapi/utils/url';
 import { sendSuccess } from '@webapi/utils/response';
 import { join } from 'node:path';
+import { terminalManager } from '@webapi/terminal/terminal_manager';
 
 // 实例化Express
 const app = express();
@@ -45,6 +46,8 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
     // ------------挂载路由------------
     // 挂载静态路由（前端），路径为 [/前缀]/webui
     app.use('/webui', express.static(pathWrapper.staticPath));
+    // 初始化WebSocket服务器
+    terminalManager.initialize(app);
     // 挂载API接口
     app.use('/api', ALLRouter);
     // 所有剩下的请求都转到静态页面
