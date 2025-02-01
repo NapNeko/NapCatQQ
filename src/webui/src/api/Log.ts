@@ -49,7 +49,7 @@ export const CreateTerminalHandler: RequestHandler = async (req, res) => {
     }
 };
 
-export const GetTerminalListHandler: RequestHandler = (req, res) => {
+export const GetTerminalListHandler: RequestHandler = (_, res) => {
     const list = terminalManager.getTerminalList();
     return sendSuccess(res, list);
 };
@@ -58,43 +58,4 @@ export const CloseTerminalHandler: RequestHandler = (req, res) => {
     const id = req.params.id;
     terminalManager.closeTerminal(id);
     return sendSuccess(res, {});
-};
-
-// 终端数据交换
-export const TerminalHandler: RequestHandler = (req, res) => {
-    const id = req.params.id;
-    if (!terminalManager.getTerminal(id)) {
-        return sendError(res, '终端不存在');
-    }
-
-    if (req.body.input) {
-        terminalManager.writeTerminal(id, req.body.input);
-    }
-
-    return sendSuccess(res, {});
-};
-
-// 终端数据流（SSE）
-export const TerminalStreamHandler: RequestHandler = (req, res) => {
-    const id = req.params.id;
-    const instance = terminalManager.getTerminal(id);
-
-    if (!instance) {
-        return sendError(res, '终端不存在');
-    }
-
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Connection', 'keep-alive');
-
-    const dataHandler = (data: string) => {
-        if (!res.writableEnded) {
-            res.write(`data: ${JSON.stringify({ type: 'output', data })}\n\n`);
-        }
-    };
-
-    const dispose = terminalManager.onTerminalData(id, dataHandler);
-
-    req.on('close', () => {
-        dispose();
-    });
 };
