@@ -21,7 +21,6 @@ import { SortableTab } from '@/components/tabs/sortable_tab.tsx'
 import { TerminalInstance } from '@/components/terminal/terminal-instance'
 
 import terminalManager from '@/controllers/terminal_manager'
-import WebUIManager from '@/controllers/webui_manager'
 
 interface TerminalTab {
   id: string
@@ -34,7 +33,7 @@ export default function TerminalPage() {
 
   useEffect(() => {
     // 获取已存在的终端列表
-    WebUIManager.getTerminalList().then((terminals) => {
+    terminalManager.getTerminalList().then((terminals) => {
       if (terminals.length === 0) return
 
       const newTabs = terminals.map((terminal) => ({
@@ -49,7 +48,7 @@ export default function TerminalPage() {
 
   const createNewTerminal = async () => {
     try {
-      const { id } = await WebUIManager.createTerminal(80, 24)
+      const { id } = await terminalManager.createTerminal(80, 24)
       const newTab = {
         id,
         title: id
@@ -65,7 +64,7 @@ export default function TerminalPage() {
 
   const closeTerminal = async (id: string) => {
     try {
-      await WebUIManager.closeTerminal(id)
+      await terminalManager.closeTerminal(id)
       terminalManager.removeTerminal(id)
       if (selectedTab === id) {
         const previousIndex = tabs.findIndex((tab) => tab.id === id) - 1
@@ -153,6 +152,12 @@ export default function TerminalPage() {
             />
           </div>
           <div className="flex-grow overflow-hidden">
+            {tabs.length === 0 && (
+              <div className="flex flex-col gap-2 items-center justify-center h-full text-gray-500 py-5">
+                <IoAdd className="text-4xl" />
+                <div className="text-sm">点击右上角按钮创建终端</div>
+              </div>
+            )}
             {tabs.map((tab) => (
               <TabPanel key={tab.id} value={tab.id} className="h-full">
                 <TerminalInstance id={tab.id} />

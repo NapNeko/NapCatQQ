@@ -1,3 +1,5 @@
+import { serverRequest } from '@/utils/request'
+
 type TerminalCallback = (data: string) => void
 
 interface TerminalConnection {
@@ -7,9 +9,37 @@ interface TerminalConnection {
   buffer: string[] // 添加缓存数组
 }
 
+export interface TerminalSession {
+  id: string
+}
+
+export interface TerminalInfo {
+  id: string
+}
+
 class TerminalManager {
   private connections: Map<string, TerminalConnection> = new Map()
   private readonly MAX_BUFFER_SIZE = 1000 // 限制缓存大小
+
+  async createTerminal(cols: number, rows: number): Promise<TerminalSession> {
+    const { data } = await serverRequest.post<ServerResponse<TerminalSession>>(
+      '/Log/terminal/create',
+      { cols, rows }
+    )
+    return data.data
+  }
+
+  async closeTerminal(id: string): Promise<void> {
+    await serverRequest.post(`/Log/terminal/${id}/close`)
+  }
+
+  async getTerminalList(): Promise<TerminalInfo[]> {
+    const { data } =
+      await serverRequest.get<ServerResponse<TerminalInfo[]>>(
+        '/Log/terminal/list'
+      )
+    return data.data
+  }
 
   connectTerminal(id: string, callback: TerminalCallback): WebSocket {
     let conn = this.connections.get(id)
