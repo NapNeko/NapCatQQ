@@ -3,7 +3,6 @@ import { AuthHelper } from '../helper/SignToken';
 import { LogWrapper } from '@/common/log';
 import { WebSocket, WebSocketServer } from 'ws';
 import os from 'os';
-import { spawn, ChildProcess } from 'child_process';
 import { IPty, spawn as ptySpawn } from 'node-pty';
 
 interface TerminalInstance {
