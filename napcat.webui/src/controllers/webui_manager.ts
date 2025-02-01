@@ -150,41 +150,6 @@ export default class WebUIManager {
     return data.data
   }
 
-  public static async sendTerminalInput(
-    id: string,
-    input: string
-  ): Promise<void> {
-    await serverRequest.post(`/Log/terminal/${id}/input`, { input })
-  }
-
-  public static getTerminalStream(id: string, onData: (data: string) => void) {
-    const token = localStorage.getItem('token')
-    if (!token) throw new Error('未登录')
-
-    const _token = JSON.parse(token)
-    const eventSource = new EventSourcePolyfill(
-      `/api/Log/terminal/${id}/stream`,
-      {
-        headers: {
-          Authorization: `Bearer ${_token}`,
-          Accept: 'text/event-stream'
-        },
-        withCredentials: true
-      }
-    )
-
-    eventSource.onmessage = (event) => {
-      try {
-        const { data } = JSON.parse(event.data)
-        onData(data)
-      } catch (error) {
-        console.error(error)
-      }
-    }
-
-    return eventSource
-  }
-
   public static async closeTerminal(id: string): Promise<void> {
     await serverRequest.post(`/Log/terminal/${id}/close`)
   }
@@ -205,9 +170,15 @@ export default class WebUIManager {
     if (!token) throw new Error('未登录')
 
     const _token = JSON.parse(token)
-    const ws = new WebSocket(
-      `ws://${window.location.host}/api/ws/terminal?id=${id}&token=${_token}`
-    )
+
+    const url = new URL(window.location.origin)
+    url.protocol = "ws://"
+    url.pathname = "/api/ws/terminal"
+    url.searchParams.set('token', _token)
+    url.searchParams.set("id", id)
+      console.log(url.toString())
+
+    const ws = new WebSocket(url.toString())
 
     ws.onmessage = (event) => {
       try {

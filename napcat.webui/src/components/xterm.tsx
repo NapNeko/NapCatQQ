@@ -25,12 +25,13 @@ export type XTermRef = {
 export interface XTermProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onInput'> {
   onInput?: (data: string) => void
+  onKey?: (key: string, event: KeyboardEvent) => void
 }
 
 const XTerm = forwardRef<XTermRef, XTermProps>((props, ref) => {
   const domRef = useRef<HTMLDivElement>(null)
   const terminalRef = useRef<Terminal | null>(null)
-  const { className, onInput, ...rest } = props
+  const { className, onInput, onKey, ...rest } = props
   const { theme } = useTheme()
   useEffect(() => {
     if (!domRef.current) {
@@ -40,9 +41,7 @@ const XTerm = forwardRef<XTermRef, XTermProps>((props, ref) => {
       allowTransparency: true,
       fontFamily: '"Fira Code", "Harmony", "Noto Serif SC", monospace',
       cursorInactiveStyle: 'outline',
-      drawBoldTextInBrightColors: false,
-      letterSpacing: 0,
-      lineHeight: 1.0
+      drawBoldTextInBrightColors: false
     })
     terminalRef.current = terminal
     const fitAddon = new FitAddon()
@@ -71,6 +70,12 @@ const XTerm = forwardRef<XTermRef, XTermProps>((props, ref) => {
     terminal.onData((data) => {
       if (onInput) {
         onInput(data)
+      }
+    })
+
+    terminal.onKey((event) => {
+      if (onKey) {
+        onKey(event.key, event.domEvent)
       }
     })
 

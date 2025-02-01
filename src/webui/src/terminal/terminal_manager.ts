@@ -1,54 +1,64 @@
 import { WebUiConfig } from '@/webui';
 import { AuthHelper } from '../helper/SignToken';
-import { spawn, type ChildProcess } from 'child_process';
-import * as os from 'os';
+import { LogWrapper } from '@/common/log';
 import { WebSocket, WebSocketServer } from 'ws';
+import os from 'os';
+import { spawn, ChildProcess } from 'child_process';
+import { IPty, spawn as ptySpawn } from 'node-pty';
 
 interface TerminalInstance {
-    process: ChildProcess;
+    pty: IPty; // 改用 PTY 实例
     lastAccess: number;
-    dataHandlers: Set<(data: string) => void>;
+    sockets: Set<WebSocket>;
 }
 
 class TerminalManager {
     private terminals: Map<string, TerminalInstance> = new Map();
     private wss: WebSocketServer | null = null;
 
-    initialize(server: any) {
+    initialize(req: any, socket: any, head: any, logger?: LogWrapper) {
+        logger?.log('[NapCat] [WebUi] terminal websocket initialized');
         this.wss = new WebSocketServer({
-            server,
-            path: '/api/ws/terminal',
-        });
-
-        this.wss.on('connection', async (ws, req) => {
-            try {
-                const url = new URL(req.url || '', 'ws://localhost');
+            noServer: true,
+            verifyClient: async (info, cb) => {
+                // 验证 token
+                const url = new URL(info.req.url || '', 'ws://localhost');
                 const token = url.searchParams.get('token');
                 const terminalId = url.searchParams.get('id');
 
                 if (!token || !terminalId) {
-                    ws.close();
+                    cb(false, 401, 'Unauthorized');
                     return;
                 }
 
-                // 验证 token
                 // 解析token
                 let Credential: WebUiCredentialJson;
                 try {
                     Credential = JSON.parse(Buffer.from(token, 'base64').toString('utf-8'));
                 } catch (e) {
-                    ws.close();
+                    cb(false, 401, 'Unauthorized');
                     return;
                 }
                 const config = await WebUiConfig.GetWebUIConfig();
                 const validate = AuthHelper.validateCredentialWithinOneHour(config.token, Credential);
-
                 if (!validate) {
-                    ws.close();
+                    cb(false, 401, 'Unauthorized');
                     return;
                 }
+                cb(true);
+            },
+        });
+        this.wss.handleUpgrade(req, socket, head, (ws) => {
+            this.wss?.emit('connection', ws, req);
+        });
+        this.wss.on('connection', async (ws, req) => {
+            logger?.log('建立终端连接');
+            try {
+                const url = new URL(req.url || '', 'ws://localhost');
+                const terminalId = url.searchParams.get('id')!;
 
                 const instance = this.terminals.get(terminalId);
+
                 if (!instance) {
                     ws.close();
                     return;
@@ -59,21 +69,24 @@ class TerminalManager {
                         ws.send(JSON.stringify({ type: 'output', data }));
                     }
                 };
-                instance.dataHandlers.add(dataHandler);
 
-                ws.on('message', (message) => {
-                    try {
-                        const data = JSON.parse(message.toString());
-                        if (data.type === 'input') {
-                            this.writeTerminal(terminalId, data.data);
+                instance.sockets.add(ws);
+                instance.lastAccess = Date.now();
+
+                ws.on('message', (data) => {
+                    if (instance) {
+                        const result = JSON.parse(data.toString());
+                        if (result.type === 'input') {
+                            instance.pty.write(result.data);
                         }
-                    } catch (error) {
-                        console.error('Failed to process terminal input:', error);
                     }
                 });
 
                 ws.on('close', () => {
-                    instance.dataHandlers.delete(dataHandler);
+                    instance.sockets.delete(ws);
+                    if (instance.sockets.size === 0) {
+                        instance.pty.kill();
+                    }
                 });
             } catch (err) {
                 console.error('WebSocket authentication failed:', err);
@@ -84,64 +97,52 @@ class TerminalManager {
 
     createTerminal(id: string) {
         const shell = os.platform() === 'win32' ? 'powershell.exe' : 'bash';
-        const shellProcess = spawn(shell, [], {
-            env: process.env,
-            shell: true,
+        const pty = ptySpawn(shell, [], {
+            name: 'xterm-256color',
+            cols: 80,
+            rows: 24,
+            cwd: process.cwd(),
+            env: {
+                ...process.env,
+                // 统一编码设置
+                LANG: os.platform() === 'win32' ? 'chcp 65001' : 'zh_CN.UTF-8',
+                TERM: 'xterm-256color',
+            },
         });
 
         const instance: TerminalInstance = {
-            process: shellProcess,
+            pty,
             lastAccess: Date.now(),
-            dataHandlers: new Set(),
+            sockets: new Set(),
         };
 
-        // 修改这里，使用 shellProcess 而不是 process
-        shellProcess.stdout.on('data', (data) => {
-            const str = data.toString();
-            instance.dataHandlers.forEach((handler) => handler(str));
+        pty.onData((data: any) => {
+            instance.sockets.forEach((ws) => {
+                if (ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({ type: 'output', data }));
+                }
+            });
         });
 
-        shellProcess.stderr.on('data', (data) => {
-            const str = data.toString();
-            instance.dataHandlers.forEach((handler) => handler(str));
+        pty.onExit(() => {
+            this.closeTerminal(id);
         });
 
         this.terminals.set(id, instance);
         return instance;
     }
 
-    getTerminal(id: string) {
-        return this.terminals.get(id);
-    }
-
     closeTerminal(id: string) {
         const instance = this.terminals.get(id);
         if (instance) {
-            instance.process.kill();
+            instance.pty.kill();
+            instance.sockets.forEach((ws) => ws.close());
             this.terminals.delete(id);
         }
     }
 
-    onTerminalData(id: string, handler: (data: string) => void) {
-        const instance = this.terminals.get(id);
-        if (instance) {
-            instance.dataHandlers.add(handler);
-            return () => {
-                instance.dataHandlers.delete(handler);
-            };
-        }
-        return () => {};
-    }
-
-    writeTerminal(id: string, data: string) {
-        const instance = this.terminals.get(id);
-        if (instance && instance.process.stdin) {
-            instance.process.stdin.write(data, (error) => {
-                if (error) {
-                    console.error('Failed to write to terminal:', error);
-                }
-            });
-        }
+    getTerminal(id: string) {
+        return this.terminals.get(id);
     }
 
     getTerminalList() {
