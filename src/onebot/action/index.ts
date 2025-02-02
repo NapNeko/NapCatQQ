@@ -219,6 +219,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new GetAiCharacters(obContext, core),
         new SendPacket(obContext, core),
         new SendPoke(obContext, core),
+        new GetGroupSystemMsg(obContext, core),
     ];
 
     type HandlerUnion = typeof actionHandlers[number];
