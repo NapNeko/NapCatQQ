@@ -6,7 +6,7 @@ interface GetClientkeyResponse {
 }
 
 export class GetClientkey extends OneBotAction<void, GetClientkeyResponse> {
-    actionName = ActionName.GetClientkey;
+    override actionName = ActionName.GetClientkey;
 
     async _handle() {
         return { clientkey: (await this.core.apis.UserApi.forceFetchClientKey()).clientKey };

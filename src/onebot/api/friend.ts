@@ -5,7 +5,6 @@ import { OB11FriendPokeEvent } from '@/onebot/event/notice/OB11PokeEvent';
 export class OneBotFriendApi {
     obContext: NapCatOneBot11Adapter;
     core: NapCatCore;
-    friendList: Map<string, any> = new Map();//此处作为缓存 uin->info
     constructor(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
         this.obContext = obContext;
         this.core = core;
@@ -17,7 +16,7 @@ export class OneBotFriendApi {
         const pokedetail: Array<{ uid: string }> = json.items;
         //筛选item带有uid的元素
         const poke_uid = pokedetail.filter(item => item.uid);
-        if (poke_uid.length == 2) {
+        if (poke_uid.length == 2 && poke_uid[0]?.uid && poke_uid[1]?.uid) {
             return new OB11FriendPokeEvent(
                 this.core,
                 uin,

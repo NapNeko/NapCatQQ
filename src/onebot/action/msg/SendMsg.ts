@@ -36,10 +36,10 @@ export function normalize(message: OB11MessageMixType, autoEscape = false): OB11
     ) : Array.isArray(message) ? message : [message];
 }
 
-export async function createContext(core: NapCatCore, payload: OB11PostContext, contextMode: ContextMode): Promise<Peer> {
-    // This function determines the type of message by the existence of user_id / group_id,
-    // not message_type.
-    // This redundant design of Ob11 here should be blamed.
+export async function createContext(core: NapCatCore, payload: OB11PostContext | undefined, contextMode: ContextMode = ContextMode.Normal): Promise<Peer> {
+    if (!payload) {
+        throw new Error('请指定 group_id 或 user_id');
+    }
     if ((contextMode === ContextMode.Group || contextMode === ContextMode.Normal) && payload.group_id) {
         return {
             chatType: ChatType.KCHATTYPEGROUP,
@@ -91,7 +91,7 @@ function getSpecialMsgNum(payload: OB11PostSendMsg, msgType: OB11MessageDataType
 export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
     contextMode = ContextMode.Normal;
 
-    protected async check(payload: OB11PostSendMsg): Promise<BaseCheckResult> {
+    protected override async check(payload: OB11PostSendMsg): Promise<BaseCheckResult> {
         const messages = normalize(payload.message);
         const nodeElementLength = getSpecialMsgNum(payload, OB11MessageDataType.node);
         if (nodeElementLength > 0 && nodeElementLength != messages.length) {
@@ -121,8 +121,8 @@ export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
                 returnMsgAndResId = packetMode
                     ? await this.handleForwardedNodesPacket(peer, messages as OB11MessageNode[], payload.source, payload.news, payload.summary, payload.prompt)
                     : await this.handleForwardedNodes(peer, messages as OB11MessageNode[]);
-            } catch (e: any) {
-                throw Error(packetMode ? `发送伪造合并转发消息失败: ${e?.stack}` : `发送合并转发消息失败: ${e?.stack}`);
+            } catch (e: unknown) {
+                throw Error(packetMode ? `发送伪造合并转发消息失败: ${(e as Error)?.stack}` : `发送合并转发消息失败: ${(e as Error)?.stack}`);
             }
             if (!returnMsgAndResId) {
                 throw Error('发送合并转发消息失败：returnMsgAndResId 为空！');
@@ -133,7 +133,7 @@ export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
                     peerUid: peer.peerUid,
                     chatType: peer.chatType,
                 }, (returnMsgAndResId.message).msgId);
-                return { message_id: msgShortId!, res_id: returnMsgAndResId.res_id };
+                return { message_id: msgShortId!, res_id: returnMsgAndResId.res_id! };
             } else if (returnMsgAndResId.res_id && !returnMsgAndResId.message) {
                 throw Error(`发送转发消息（res_id：${returnMsgAndResId.res_id} 失败`);
             }
@@ -185,7 +185,7 @@ export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
                 const packetMsgElements: rawMsgWithSendMsg = {
                     senderUin: Number((node.data.user_id ?? node.data.uin) ?? parentMeta?.user_id) || +this.core.selfInfo.uin,
                     senderName: (node.data.nickname || node.data.name) ?? parentMeta?.nickname ?? 'QQ用户',
-                    groupId: msgPeer.chatType === ChatType.KCHATTYPEGROUP ? +msgPeer.peerUid : undefined,
+                    groupId: msgPeer.chatType === ChatType.KCHATTYPEGROUP ? +msgPeer.peerUid : 0,
                     time: Number(node.data.time) || Date.now(),
                     msg: sendElements,
                 };
@@ -202,10 +202,12 @@ export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
                 }
                 const msg = (await this.core.apis.MsgApi.getMsgsByMsgId(nodeMsg.Peer, [nodeMsg.MsgId])).msgList[0];
                 this.core.context.logger.logDebug(`handleForwardedNodesPacket[PureRaw] 开始转换 ${stringifyWithBigInt(msg)}`);
-                await this.core.apis.FileApi.downloadRawMsgMedia([msg]);
-                const transformedMsg = this.core.apis.PacketApi.pkt.msgConverter.rawMsgToPacketMsg(msg, msgPeer);
-                this.core.context.logger.logDebug(`handleForwardedNodesPacket[PureRaw] 转换为 ${stringifyWithBigInt(transformedMsg)}`);
-                packetMsg.push(transformedMsg);
+                if (msg) {
+                    await this.core.apis.FileApi.downloadRawMsgMedia([msg]);
+                    const transformedMsg = this.core.apis.PacketApi.pkt.msgConverter.rawMsgToPacketMsg(msg, msgPeer);
+                    this.core.context.logger.logDebug(`handleForwardedNodesPacket[PureRaw] 转换为 ${stringifyWithBigInt(transformedMsg)}`);
+                    packetMsg.push(transformedMsg);
+                }
             } else {
                 this.core.context.logger.logDebug(`handleForwardedNodesPacket 跳过元素 ${stringifyWithBigInt(node)}`);
             }
@@ -238,8 +240,8 @@ export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
         const res_id = uploadReturnData?.res_id;
         const finallySendElements = uploadReturnData?.finallySendElements;
         if (!finallySendElements) throw Error('转发消息失败，生成节点为空');
-        const returnMsg = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(msgPeer, [finallySendElements], [], true).catch(_ => undefined);
-        return { message: returnMsg ?? null, res_id };
+        const returnMsg = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(msgPeer, [finallySendElements], []).catch(() => undefined);
+        return { message: returnMsg ?? null, res_id: res_id! };
     }
 
     private async handleForwardedNodes(destPeer: Peer, messageNodes: OB11MessageNode[]): Promise<{
@@ -297,7 +299,7 @@ export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
                     const AllElement: SendMessageElement[][] = [MixElement, ...SingleElement].filter(e => e !== undefined && e.length !== 0);
                     const MsgNodeList: Promise<RawMessage | undefined>[] = [];
                     for (const sendElementsSplitElement of AllElement) {
-                        MsgNodeList.push(this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(selfPeer, sendElementsSplitElement, [], true).catch(_ => undefined));
+                        MsgNodeList.push(this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(selfPeer, sendElementsSplitElement, []).catch(() => undefined));
                     }
                     (await Promise.allSettled(MsgNodeList)).map((result) => {
                         if (result.status === 'fulfilled' && result.value) {
@@ -305,8 +307,8 @@ export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
                             MessageUnique.createUniqueMsgId(selfPeer, result.value.msgId);
                         }
                     });
-                } catch (e: any) {
-                    this.core.context.logger.logDebug('生成转发消息节点失败', e?.stack);
+                } catch (e: unknown) {
+                    this.core.context.logger.logDebug('生成转发消息节点失败', (e as Error).stack);
                 }
             }
         }
@@ -321,11 +323,13 @@ export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
                 continue;
             }
             const nodeMsg = (await this.core.apis.MsgApi.getMsgsByMsgId(nodeMsgPeer.Peer, [msgId])).msgList[0];
-            srcPeer = srcPeer ?? { chatType: nodeMsg.chatType, peerUid: nodeMsg.peerUid };
-            if (srcPeer.peerUid !== nodeMsg.peerUid) {
-                needSendSelf = true;
+            if (nodeMsg) {
+                srcPeer = srcPeer ?? { chatType: nodeMsg.chatType, peerUid: nodeMsg.peerUid };
+                if (srcPeer.peerUid !== nodeMsg.peerUid) {
+                    needSendSelf = true;
+                }
+                nodeMsgArray.push(nodeMsg);
             }
-            nodeMsgArray.push(nodeMsg);
         }
         nodeMsgIds = nodeMsgArray.map(msg => msg.msgId);
         let retMsgIds: string[] = [];
@@ -347,8 +351,8 @@ export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
             return {
                 message: await this.core.apis.MsgApi.multiForwardMsg(srcPeer!, destPeer, retMsgIds)
             };
-        } catch (e: any) {
-            this.core.context.logger.logError('forward failed', e?.stack);
+        } catch (e: unknown) {
+            this.core.context.logger.logError('forward failed', (e as Error)?.stack);
             return {
                 message: null
             };
@@ -371,13 +375,13 @@ export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
             this.core.context.logger.logDebug('需要clone的消息无法解析，将会忽略掉', msg);
         }
         try {
-            return await this.core.apis.MsgApi.sendMsg(selfPeer, sendElements, true);
-        } catch (e: any) {
-            this.core.context.logger.logError(e?.stack, '克隆转发消息失败,将忽略本条消息', msg);
+            return await this.core.apis.MsgApi.sendMsg(selfPeer, sendElements);
+        } catch (e: unknown) {
+            this.core.context.logger.logError((e as Error)?.stack, '克隆转发消息失败,将忽略本条消息', msg);
         }
+        return;
     }
 }
-
 export default class SendMsg extends SendMsgBase {
-    actionName = ActionName.SendMsg;
+    override actionName = ActionName.SendMsg;
 }

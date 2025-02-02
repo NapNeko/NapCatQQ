@@ -158,7 +158,7 @@ export interface NodeIKernelRichMediaService {
     downloadFileForFileInfo(fileInfo: CommonFileInfo[], savePath: string): unknown;
 
     createGroupFolder(GroupCode: string, FolderName: string): Promise<GeneralCallResult & {
-        resultWithGroupItem: { result: any, groupItem: Array<any> }
+        resultWithGroupItem: { result: unknown, groupItem: Array<unknown> }
     }>;
 
     downloadFile(commonFile: CommonFileInfo, arg2: unknown, arg3: unknown, savePath: string): unknown;
@@ -217,9 +217,9 @@ export interface NodeIKernelRichMediaService {
 
     deleteGroupFile(GroupCode: string, params: Array<number>, Files: Array<string>): Promise<GeneralCallResult & {
         transGroupFileResult: {
-            result: any
-            successFileIdList: Array<any>
-            failFileIdList: Array<any>
+            result: unknown
+            successFileIdList: Array<unknown>
+            failFileIdList: Array<unknown>
         }
     }>;
 

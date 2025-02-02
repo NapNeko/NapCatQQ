@@ -10,7 +10,7 @@ export interface NodeIKernelMsgService {
 
     addKernelMsgListener(nodeIKernelMsgListener: NodeIKernelMsgListener): number;
 
-    sendMsg(msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<any, any>): Promise<GeneralCallResult>;
+    sendMsg(msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<unknown, unknown>): Promise<GeneralCallResult>;
 
     recallMsg(peer: Peer, msgIds: string[]): Promise<GeneralCallResult>;
 
@@ -114,9 +114,9 @@ export interface NodeIKernelMsgService {
 
     addLocalTofuRecordMsg(...args: unknown[]): unknown;
 
-    addLocalRecordMsg(Peer: Peer, msgId: string, ele: MessageElement, attr: Array<any> | number, front: boolean): Promise<unknown>;
+    addLocalRecordMsg(Peer: Peer, msgId: string, ele: MessageElement, attr: Array<unknown> | number, front: boolean): Promise<unknown>;
 
-    deleteMsg(Peer: Peer, msgIds: Array<string>): Promise<any>;
+    deleteMsg(Peer: Peer, msgIds: Array<string>): Promise<unknown>;
 
     updateElementExtBufForUI(...args: unknown[]): unknown;
 

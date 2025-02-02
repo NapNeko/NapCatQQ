@@ -201,7 +201,7 @@ export class NTQQMsgApi {
         return this.context.session.getMsgService().getTempChatInfo(chatType, peerUid);
     }
 
-    async sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
+    async sendMsg(peer: Peer, msgElements: SendMessageElement[], timeout = 10000) {
         //唉？！我有个想法
         if (peer.chatType === ChatType.KCHATTYPETEMPC2CFROMGROUP && peer.guildId && peer.guildId !== '') {
             const member = await this.core.apis.GroupApi.getGroupMember(peer.guildId, peer.peerUid);
@@ -268,7 +268,7 @@ export class NTQQMsgApi {
             if (!arkElement) {
                 continue;
             }
-            const forwardData: any = JSON.parse(arkElement.arkElement?.bytesData ?? '');
+            const forwardData: { app: string } = JSON.parse(arkElement.arkElement?.bytesData ?? '');
             if (forwardData.app != 'com.tencent.multimsg') {
                 continue;
             }

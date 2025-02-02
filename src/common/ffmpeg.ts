@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Piscina from 'piscina';
 import { VideoInfo } from './video';
 

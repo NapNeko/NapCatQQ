@@ -35,9 +35,9 @@ export class StatusHelper {
         const { total, active } = currentTimes.map((times, index) => {
             const prevTimes = this.cpuTimes[index];
             const totalCurrent = times.user + times.nice + times.sys + times.idle + times.irq;
-            const totalPrev = prevTimes.user + prevTimes.nice + prevTimes.sys + prevTimes.idle + prevTimes.irq;
+            const totalPrev = (prevTimes?.user ?? 0) + (prevTimes?.nice ?? 0) + (prevTimes?.sys ?? 0) + (prevTimes?.idle ?? 0) + (prevTimes?.irq ?? 0);
             const activeCurrent = totalCurrent - times.idle;
-            const activePrev = totalPrev - prevTimes.idle;
+            const activePrev = totalPrev - (prevTimes?.idle ?? 0);
             return {
                 total: totalCurrent - totalPrev,
                 active: activeCurrent - activePrev
@@ -49,8 +49,8 @@ export class StatusHelper {
         this.cpuTimes = currentTimes;
         return {
             usage: this.replaceNaN(((active / total) * 100)).toFixed(2),
-            model: os.cpus()[0].model,
-            speed: os.cpus()[0].speed,
+            model: os.cpus()[0]?.model ?? 'none',
+            speed: os.cpus()[0]?.speed ?? 0,
             core: os.cpus().length
         };
     }

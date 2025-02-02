@@ -42,7 +42,7 @@ export interface OB11Return<DataType> {
     retcode: number;
     data: DataType;
     message: string;
-    echo?: any; // ws调用api才有此字段
+    echo?: unknown; // ws调用api才有此字段
     wording?: string;  // go-cqhttp字段，错误信息
 }
 

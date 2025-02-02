@@ -3,6 +3,7 @@ import { ActionName } from '@/onebot/action/router';
 import { checkFileExist, uriToLocalFile } from '@/common/file';
 import fs from 'fs';
 import { Static, Type } from '@sinclair/typebox';
+import { GeneralCallResultStatus } from '@/core';
 
 const SchemaData = Type.Object({
     image: Type.String(),
@@ -10,8 +11,8 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-class OCRImageBase extends OneBotAction<Payload, any> {
-    payloadSchema = SchemaData;
+class OCRImageBase extends OneBotAction<Payload, GeneralCallResultStatus> {
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         const { path, success } = await uriToLocalFile(this.core.NapCatTempPath, payload.image);
@@ -35,9 +36,9 @@ class OCRImageBase extends OneBotAction<Payload, any> {
 }
 
 export class OCRImage extends OCRImageBase {
-    actionName = ActionName.OCRImage;
+    override actionName = ActionName.OCRImage;
 }
 
 export class IOCRImage extends OCRImageBase {
-    actionName = ActionName.IOCRImage;
+    override actionName = ActionName.IOCRImage;
 }

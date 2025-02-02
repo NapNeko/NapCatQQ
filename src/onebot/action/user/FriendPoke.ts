@@ -8,9 +8,9 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export class FriendPoke extends GetPacketStatusDepends<Payload, any> {
-    actionName = ActionName.FriendPoke;
-    payloadSchema = SchemaData;
+export class FriendPoke extends GetPacketStatusDepends<Payload, void> {
+    override actionName = ActionName.FriendPoke;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         await this.core.apis.PacketApi.pkt.operation.FriendPoke(+payload.user_id);

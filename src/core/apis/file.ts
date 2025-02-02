@@ -27,6 +27,7 @@ import { encodeSilk } from '@/common/audio';
 import { SendMessageContext } from '@/onebot/api';
 import { getFileTypeForSendType } from '../helper/msg';
 import { FFmpegService } from '@/common/ffmpeg';
+import { rkeyDataType } from '../types/file';
 
 export class NTQQFileApi {
     context: InstanceContext;
@@ -61,7 +62,7 @@ export class NTQQFileApi {
 
     async uploadFile(filePath: string, elementType: ElementType = ElementType.PIC, elementSubType: number = 0) {
         const fileMd5 = await calculateFileMD5(filePath);
-        const extOrEmpty = await fileTypeFromFile(filePath).then(e => e?.ext ?? '').catch(e => '');
+        const extOrEmpty = await fileTypeFromFile(filePath).then(e => e?.ext ?? '').catch(() => '');
         const ext = extOrEmpty ? `.${extOrEmpty}` : '';
         let fileName = `${path.basename(filePath)}`;
         if (fileName.indexOf('.') === -1) {
@@ -140,7 +141,7 @@ export class NTQQFileApi {
         };
     }
 
-    async createValidSendVideoElement(context: SendMessageContext, filePath: string, fileName: string = '', diyThumbPath: string = ''): Promise<SendVideoElement> {
+    async createValidSendVideoElement(context: SendMessageContext, filePath: string, fileName: string = '', _diyThumbPath: string = ''): Promise<SendVideoElement> {
         let videoInfo = {
             width: 1920,
             height: 1080,
@@ -170,10 +171,16 @@ export class NTQQFileApi {
         const thumbPath = pathLib.join(pathLib.dirname(thumbDir), `${md5}_0.png`);
         try {
             videoInfo = await FFmpegService.getVideoInfo(filePath, thumbPath);
-        } catch (error) {
+        } catch {
             fs.writeFileSync(thumbPath, Buffer.from(defaultVideoThumbB64, 'base64'));
         }
-
+        if (_diyThumbPath) {
+            try {
+                await this.copyFile(_diyThumbPath, thumbPath);
+            } catch (e) {
+                this.context.logger.logError('复制自定义缩略图失败', e);
+            }
+        }
         const thumbSize = (await fsPromises.stat(thumbPath)).size;
         const thumbMd5 = await calculateFileMD5(thumbPath);
         context.deleteAfterSentFiles.push(path);
@@ -275,16 +282,16 @@ export class NTQQFileApi {
                 ) {
                     switch (element.elementType) {
                     case ElementType.PIC:
-                            element.picElement!.sourcePath = elementResults[elementIndex];
+                            element.picElement!.sourcePath = elementResults?.[elementIndex] ?? '';
                         break;
                     case ElementType.VIDEO:
-                            element.videoElement!.filePath = elementResults[elementIndex];
+                            element.videoElement!.filePath = elementResults?.[elementIndex] ?? '';
                         break;
                     case ElementType.PTT:
-                            element.pttElement!.filePath = elementResults[elementIndex];
+                            element.pttElement!.filePath = elementResults?.[elementIndex] ?? '';
                         break;
                     case ElementType.FILE:
-                            element.fileElement!.filePath = elementResults[elementIndex];
+                            element.fileElement!.filePath = elementResults?.[elementIndex] ?? '';
                         break;
                     }
                     elementIndex++;
@@ -299,7 +306,7 @@ export class NTQQFileApi {
             if (force) {
                 try {
                     await fsPromises.unlink(sourcePath);
-                } catch (e) {
+                } catch {
                     //
                 }
             } else {
@@ -401,27 +408,27 @@ export class NTQQFileApi {
     }
 
     private async getRkeyData() {
-        const rkeyData = {
+        const rkeyData: rkeyDataType = {
             private_rkey: 'CAQSKAB6JWENi5LM_xp9vumLbuThJSaYf-yzMrbZsuq7Uz2qEc3Rbib9LP4',
             group_rkey: 'CAQSKAB6JWENi5LM_xp9vumLbuThJSaYf-yzMrbZsuq7Uz2qffcqm614gds',
             online_rkey: false
         };
 
         try {
-            if (this.core.apis.PacketApi.available) {
+            if (this.core.apis.PacketApi.available && this.packetRkey?.[0] && this.packetRkey?.[1]) {
                 const rkey_expired_private = !this.packetRkey || this.packetRkey[0].time + Number(this.packetRkey[0].ttl) < Date.now() / 1000;
                 const rkey_expired_group = !this.packetRkey || this.packetRkey[0].time + Number(this.packetRkey[0].ttl) < Date.now() / 1000;
                 if (rkey_expired_private || rkey_expired_group) {
                     this.packetRkey = await this.core.apis.PacketApi.pkt.operation.FetchRkey();
                 }
                 if (this.packetRkey && this.packetRkey.length > 0) {
-                    rkeyData.group_rkey = this.packetRkey[1].rkey.slice(6);
-                    rkeyData.private_rkey = this.packetRkey[0].rkey.slice(6);
+                    rkeyData.group_rkey = this.packetRkey[1]?.rkey.slice(6) ?? '';
+                    rkeyData.private_rkey = this.packetRkey[0]?.rkey.slice(6) ?? '';
                     rkeyData.online_rkey = true;
                 }
             }
-        } catch (error: any) {
-            this.context.logger.logError('获取rkey失败', error.message);
+        } catch (error: unknown) {
+            this.context.logger.logError('获取rkey失败', (error as Error).message);
         }
 
         if (!rkeyData.online_rkey) {
@@ -438,7 +445,7 @@ export class NTQQFileApi {
         return rkeyData;
     }
 
-    private getImageUrlFromParsedUrl(imageFileId: string, appid: string, rkeyData: any): string {
+    private getImageUrlFromParsedUrl(imageFileId: string, appid: string, rkeyData: rkeyDataType): string {
         const rkey = appid === '1406' ? rkeyData.private_rkey : rkeyData.group_rkey;
         if (rkeyData.online_rkey) {
             return IMAGE_HTTP_HOST_NT + `/download?appid=${appid}&fileid=${imageFileId}&rkey=${rkey}`;

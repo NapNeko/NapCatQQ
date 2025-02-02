@@ -11,9 +11,9 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export class SetMsgEmojiLike extends OneBotAction<Payload, any> {
-    actionName = ActionName.SetMsgEmojiLike;
-    payloadSchema = SchemaData;
+export class SetMsgEmojiLike extends OneBotAction<Payload, unknown> {
+    override actionName = ActionName.SetMsgEmojiLike;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         const msg = MessageUnique.getMsgIdAndPeerByShortId(+payload.message_id);
@@ -26,7 +26,7 @@ export class SetMsgEmojiLike extends OneBotAction<Payload, any> {
         payload.set = payload.set ?? true;
 
         const msgData = (await this.core.apis.MsgApi.getMsgsByMsgId(msg.Peer, [msg.MsgId])).msgList;
-        if (!msgData || msgData.length === 0 || !msgData[0].msgSeq) {
+        if (!msgData || msgData.length === 0 || !msgData[0]?.msgSeq) {
             throw new Error('find msg by msgid error');
         }
 

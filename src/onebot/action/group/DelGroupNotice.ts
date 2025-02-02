@@ -9,9 +9,9 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export class DelGroupNotice extends OneBotAction<Payload, any> {
-    actionName = ActionName.DelGroupNotice;
-    payloadSchema = SchemaData;
+export class DelGroupNotice extends OneBotAction<Payload, void> {
+    override actionName = ActionName.DelGroupNotice;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         const group = payload.group_id.toString();

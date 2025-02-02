@@ -38,8 +38,8 @@ type Payload = Static<typeof SchemaData>;
 export class GetMiniAppArk extends GetPacketStatusDepends<Payload, {
     data: MiniAppData | MiniAppRawData
 }> {
-    actionName = ActionName.GetMiniAppArk;
-    payloadSchema = SchemaData;
+    override actionName = ActionName.GetMiniAppArk;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         let reqParam: MiniAppReqParams;

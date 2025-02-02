@@ -46,7 +46,7 @@ export interface WebApiGroupMemberRet {
     em: string;
     cache: number;
     adm_num: number;
-    levelname: any;
+    levelname: string;
     mems: WebApiGroupMember[];
     count: number;
     svr_time: number;
@@ -99,7 +99,7 @@ export interface WebApiGroupNoticeRet {
     sta: number,
     gln: number
     tst: number,
-    ui: any
+    ui: unknown
     server_time: number
     svrt: number
     ad: number
@@ -115,7 +115,7 @@ export interface GroupEssenceMsg {
     add_digest_uin: string;
     add_digest_nick: string;
     add_digest_time: number;
-    msg_content: any[];
+    msg_content: unknown[];
     can_be_removed: true;
 }
 

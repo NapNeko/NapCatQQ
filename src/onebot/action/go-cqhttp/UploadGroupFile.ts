@@ -17,8 +17,8 @@ const SchemaData = Type.Object({
 type Payload = Static<typeof SchemaData>;
 
 export default class GoCQHTTPUploadGroupFile extends OneBotAction<Payload, null> {
-    actionName = ActionName.GoCQHTTP_UploadGroupFile;
-    payloadSchema = SchemaData;
+    override actionName = ActionName.GoCQHTTP_UploadGroupFile;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
         let file = payload.file;
@@ -38,7 +38,7 @@ export default class GoCQHTTPUploadGroupFile extends OneBotAction<Payload, null>
             deleteAfterSentFiles: []
         };
         const sendFileEle = await this.core.apis.FileApi.createValidSendFileElement(msgContext, downloadResult.path, payload.name, payload.folder ?? payload.folder_id);
-        await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, [sendFileEle], msgContext.deleteAfterSentFiles, true);
+        await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, [sendFileEle], msgContext.deleteAfterSentFiles);
         return null;
     }
 }

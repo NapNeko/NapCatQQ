@@ -32,7 +32,7 @@ export class NTQQWebApi {
         }).toString()}`;
         try {
             return RequestUtil.HttpGetText(url, 'GET', '', { 'Cookie': this.cookieToString(cookieObject) });
-        } catch (e) {
+        } catch {
             return undefined;
         }
     }
@@ -67,7 +67,7 @@ export class NTQQWebApi {
         }
     }
 
-    async getGroupMembers(GroupCode: string, cached: boolean = true): Promise<WebApiGroupMember[]> {
+    async getGroupMembers(GroupCode: string): Promise<WebApiGroupMember[]> {
         //logDebug('webapi 获取群成员', GroupCode);
         const memberData: Array<WebApiGroupMember> = new Array<WebApiGroupMember>();
         const cookieObject = await this.core.apis.UserApi.getCookies('qun.qq.com');
@@ -88,7 +88,9 @@ export class NTQQWebApi {
             return [];
         } else {
             for (const key in fastRet.mems) {
-                memberData.push(fastRet.mems[key]);
+                if (fastRet.mems[key]) {
+                    memberData.push(fastRet.mems[key]);
+                }
             }
         }
         //初始化获取PageNum
@@ -116,7 +118,9 @@ export class NTQQWebApi {
                 continue;
             }
             for (const key in ret.mems) {
-                memberData.push(ret.mems[key]);
+                if (ret.mems[key]) {
+                    memberData.push(ret.mems[key]);
+                }
             }
         }
         return memberData;
@@ -185,7 +189,7 @@ export class NTQQWebApi {
                 { 'Cookie': this.cookieToString(cookieObject) }
             );
             return ret;
-        } catch (e) {
+        } catch {
             return undefined;
         }
     }
@@ -210,12 +214,12 @@ export class NTQQWebApi {
                 { 'Cookie': this.cookieToString(cookieObject) }
             );
             return ret?.ec === 0 ? ret : undefined;
-        } catch (e) {
+        } catch {
             return undefined;
         }
     }
 
-    private async getDataInternal(cookieObject: any, groupCode: string, type: number) {
+    private async getDataInternal(cookieObject: { [key: string]: string }, groupCode: string, type: number) {
         let resJson;
         try {
             const res = await RequestUtil.HttpGetText(
@@ -228,7 +232,7 @@ export class NTQQWebApi {
                 { 'Cookie': this.cookieToString(cookieObject) }
             );
             const match = /window\.__INITIAL_STATE__=(.*?);/.exec(res);
-            if (match) {
+            if (match?.[1]) {
                 resJson = JSON.parse(match[1].trim());
             }
             return type === 1 ? resJson?.talkativeList : resJson?.actorList;
@@ -238,13 +242,18 @@ export class NTQQWebApi {
         }
     }
 
-    private async getHonorList(cookieObject: any, groupCode: string, type: number) {
+    private async getHonorList(cookieObject: { [key: string]: string }, groupCode: string, type: number) {
         const data = await this.getDataInternal(cookieObject, groupCode, type);
         if (!data) {
             this.context.logger.logError(`获取类型 ${type} 的荣誉信息失败`);
             return [];
         }
-        return data.map((item: any) => ({
+        return data.map((item: {
+            uin: string,
+            name: string,
+            avatar: string,
+            desc: string,
+        }) => ({
             user_id: item?.uin,
             nickname: item?.name,
             avatar: item?.avatar,
@@ -254,7 +263,15 @@ export class NTQQWebApi {
 
     async getGroupHonorInfo(groupCode: string, getType: WebHonorType) {
         const cookieObject = await this.core.apis.UserApi.getCookies('qun.qq.com');
-        const HonorInfo: any = { group_id: groupCode };
+        let HonorInfo = {
+            group_id: groupCode,
+            current_talkative: {},
+            talkative_list: [],
+            performer_list: [],
+            legend_list: [],
+            emotion_list: [],
+            strong_newbie_list: [],
+        };
 
         if (getType === WebHonorType.TALKATIVE || getType === WebHonorType.ALL) {
             const talkativeList = await this.getHonorList(cookieObject, groupCode, 1);
@@ -284,12 +301,12 @@ export class NTQQWebApi {
         return HonorInfo;
     }
 
-    private cookieToString(cookieObject: any) {
+    private cookieToString(cookieObject: { [key: string]: string }) {
         return Object.entries(cookieObject).map(([key, value]) => `${key}=${value}`).join('; ');
     }
 
-    public getBknFromCookie(cookieObject: any) {
-        const sKey = cookieObject.skey as string;
+    public getBknFromCookie(cookieObject: { [key: string]: string }) {
+        const sKey = cookieObject['skey'] as string;
 
         let hash = 5381;
         for (let i = 0; i < sKey.length; i++) {

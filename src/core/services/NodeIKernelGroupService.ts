@@ -20,7 +20,7 @@ export interface NodeIKernelGroupService {
     getAllGroupPrivilegeFlag(troopUinList: string[], serviceType: number): Promise<unknown>;
     // <---
     getGroupExt0xEF0Info(enableGroupCodes: string[], bannedGroupCodes: string[], filter: GroupExt0xEF0InfoFilter, forceFetch: boolean):
-        Promise<GeneralCallResult & { result: { groupExtInfos: Map<string, any> } }>;
+        Promise<GeneralCallResult & { result: { groupExtInfos: Map<string, unknown> } }>;
 
     kickMemberV2(param: KickMemberV2Req): Promise<GeneralCallResult>;
 
@@ -153,7 +153,7 @@ export interface NodeIKernelGroupService {
 
     getMemberExtInfo(param: GroupExtParam): Promise<unknown>;//req
 
-    getGroupAllInfo(groupId: string, sourceId: number): Promise<any>;
+    getGroupAllInfo(groupId: string, sourceId: number): Promise<unknown>;
 
     getDiscussExistInfo(): unknown;
 
@@ -213,7 +213,7 @@ export interface NodeIKernelGroupService {
 
     deleteGroupBulletin(groupCode: string, seq: string, noticeId: string): void;
 
-    publishGroupBulletin(groupCode: string, pskey: string, data: any): Promise<GeneralCallResult>;
+    publishGroupBulletin(groupCode: string, pskey: string, data: unknown): Promise<GeneralCallResult>;
 
     publishInstructionForNewcomers(groupCode: string, arg: unknown): void;
 

@@ -13,8 +13,8 @@ const SchemaData = Type.Object({
 type Payload = Static<typeof SchemaData>;
 
 export class GetGroupMemberList extends OneBotAction<Payload, OB11GroupMember[]> {
-    actionName = ActionName.GetGroupMemberList;
-    payloadSchema = SchemaData;
+    override actionName = ActionName.GetGroupMemberList;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         const groupIdStr = payload.group_id.toString();

@@ -16,7 +16,8 @@ export class CalculateStreamBytesTransform extends stream.Transform {
         this.byteArrayList = [];
     }
 
-    _transform(chunk: Buffer, _: BufferEncoding, callback: stream.TransformCallback): void {
+    // eslint-disable-next-line no-undef
+    override _transform(chunk: Buffer, _: BufferEncoding, callback: stream.TransformCallback): void {
         try {
             this.buffer = Buffer.concat([this.buffer, chunk]);
             let offset = 0;
@@ -37,7 +38,7 @@ export class CalculateStreamBytesTransform extends stream.Transform {
         }
     }
 
-    _flush(callback: stream.TransformCallback): void {
+    override _flush(callback: stream.TransformCallback): void {
         try {
             if (this.buffer.length > 0) this.sha1.update(this.buffer);
             const finalDigest = this.sha1.final();

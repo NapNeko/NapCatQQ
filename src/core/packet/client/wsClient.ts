@@ -52,7 +52,7 @@ export class WsPacketClient extends IPacketClient {
             try {
                 await this.connect();
                 return;
-            } catch (error) {
+            } catch {
                 this.reconnectAttempts++;
                 this.logStack.pushLogWarn(`第 ${this.reconnectAttempts}/${this.maxReconnectAttempts} 次尝试重连失败！`);
                 await this.delay(5000);

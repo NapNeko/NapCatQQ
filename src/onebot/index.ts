@@ -41,7 +41,6 @@ import { OB11GroupRequestEvent } from '@/onebot/event/request/OB11GroupRequest';
 import { OB11FriendRecallNoticeEvent } from '@/onebot/event/notice/OB11FriendRecallNoticeEvent';
 import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecallNoticeEvent';
 import { LRUCache } from '@/common/lru-cache';
-import { NodeIKernelRecentContactListener } from '@/core/listeners/NodeIKernelRecentContactListener';
 import { BotOfflineEvent } from './event/notice/BotOfflineEvent';
 import {
     NetworkAdapterConfig,
@@ -49,7 +48,6 @@ import {
     OneBotConfig,
 } from './config/config';
 import { OB11Message } from './types';
-import { OB11PluginAdapter } from './network/plugin';
 import { IOB11NetworkAdapter } from '@/onebot/network/adapter';
 import { OB11HttpSSEServerAdapter } from './network/http-server-sse';
 
@@ -187,18 +185,6 @@ export class NapCatOneBot11Adapter {
         });
     }
 
-    initRecentContactListener() {
-        const recentContactListener = new NodeIKernelRecentContactListener();
-        recentContactListener.onRecentContactNotification = function (
-            msgList: any[] /* arg0: { msgListUnreadCnt: string }, arg1: number */
-        ) {
-            msgList.forEach((msg) => {
-                if (msg.chatType == ChatType.KCHATTYPEGROUP) {
-                    // log("recent contact", msgList, arg0, arg1);
-                }
-            });
-        };
-    }
 
     private async reloadNetwork(prev: OneBotConfig, now: OneBotConfig): Promise<void> {
         const prevLog = await this.creatOneBotLog(prev);
@@ -352,6 +338,7 @@ export class NapCatOneBot11Adapter {
             this.core.apis.FriendApi.clearBuddyReqUnreadCnt();
             for (let i = 0; i < reqs.unreadNums; i++) {
                 const req = reqs.buddyReqs[i];
+                if (!req) continue;
                 if (!!req.isInitiator || (req.isDecide && req.reqType !== BuddyReqType.KMEINITIATORWAITPEERCONFIRM)) {
                     continue;
                 }
@@ -381,6 +368,7 @@ export class NapCatOneBot11Adapter {
 
         groupListener.onGroupNotifiesUpdated = async (_, notifies) => {
             await this.core.apis.GroupApi.clearGroupNotifiesUnreadCount(false);
+            if (!notifies[0]?.type) return;
             if (
                 ![
                     GroupNotifyMsgType.SET_ADMIN,
@@ -506,7 +494,10 @@ export class NapCatOneBot11Adapter {
             ob11Msg.arrayMsg.user_id.toString() == this.core.selfInfo.uin;
     }
 
-    private createMsgMap(network: Array<NetworkAdapterConfig>, ob11Msg: any, isSelfMsg: boolean, message: RawMessage): Map<string, OB11Message> {
+    private createMsgMap(network: Array<NetworkAdapterConfig>, ob11Msg: {
+        stringMsg: OB11Message;
+        arrayMsg: OB11Message;
+    }, isSelfMsg: boolean, message: RawMessage): Map<string, OB11Message> {
         const msgMap: Map<string, OB11Message> = new Map();
         network.filter(e => e.enable).forEach(e => {
             if (isSelfMsg || message.chatType !== ChatType.KCHATTYPEGROUP) {
@@ -566,7 +557,7 @@ export class NapCatOneBot11Adapter {
                 }
             } else if (message.msgType === NTMsgType.KMSGTYPEGRAYTIPS) {
                 // 灰条为单元素消息
-                const grayTipElement = message.elements[0].grayTipElement;
+                const grayTipElement = message.elements[0]?.grayTipElement;
                 if (grayTipElement) {
                     const event = await this.apis.GroupApi.parseGrayTipElement(message, grayTipElement);
                     if (event) {
@@ -583,7 +574,7 @@ export class NapCatOneBot11Adapter {
         try {
             if (message.msgType === NTMsgType.KMSGTYPEGRAYTIPS) {
                 // 灰条为单元素消息
-                const grayTipElement = message.elements[0].grayTipElement;
+                const grayTipElement = message.elements[0]?.grayTipElement;
                 if (grayTipElement) {
                     const event = await this.apis.MsgApi.parsePrivateMsgEvent(message, grayTipElement);
                     if (event) {
@@ -605,7 +596,7 @@ export class NapCatOneBot11Adapter {
         } else if (message.chatType == ChatType.KCHATTYPEGROUP) {
             return await this.emitGroupRecallMsg(message, oriMessageId, element);
         }
-
+        return;
     }
 
     private async emitFriendRecallMsg(message: RawMessage, oriMessageId: number, element: MessageElement) {

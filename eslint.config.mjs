@@ -12,6 +12,7 @@ const customTsFlatConfig = [
             globals: {
                 ...globals.browser,
                 ...globals.node,
+                NodeJS: 'readonly', // 添加 NodeJS 全局变量
             },
         },
         files: ['**/*.{ts,tsx}'],
@@ -24,6 +25,7 @@ const customTsFlatConfig = [
         plugins: {
             '@typescript-eslint': tsEslintPlugin,
         },
+        ignores: ['src/webui/**'], // 忽略 src/webui/ 目录所有文件
     },
 ];
 

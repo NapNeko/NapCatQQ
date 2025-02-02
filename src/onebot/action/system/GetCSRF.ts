@@ -1,10 +1,10 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 
-export class GetCSRF extends OneBotAction<any, any> {
-    actionName = ActionName.GetCSRF;
+export class GetCSRF extends OneBotAction<void, { token: number }> {
+    override actionName = ActionName.GetCSRF;
 
-    async _handle(payload: any) {
+    async _handle() {
         const sKey = await this.core.apis.UserApi.getSKey();
         if (!sKey) {
             throw new Error('SKey is undefined');

@@ -5,11 +5,11 @@ import { OidbPacket } from '@/core/packet/transformer/base';
 import { PacketLogger } from '@/core/packet/context/loggerContext';
 import { NapCoreContext } from '@/core/packet/context/napCoreContext';
 
-type clientPriority = {
+type clientPriorityType = {
     [key: number]: (napCore: NapCoreContext, logger: PacketLogger, logStack: LogStack) => IPacketClient;
 }
 
-const clientPriority: clientPriority = {
+const clientPriority: clientPriorityType = {
     10: (napCore: NapCoreContext, logger: PacketLogger, logStack: LogStack) => new NativePacketClient(napCore, logger, logStack),
     1: (napCore: NapCoreContext, logger: PacketLogger, logStack: LogStack) => new WsPacketClient(napCore, logger, logStack),
 };

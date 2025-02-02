@@ -16,8 +16,8 @@ const SchemaData = Type.Object({
 type Payload = Static<typeof SchemaData>;
 
 export default class GoCQHTTPUploadPrivateFile extends OneBotAction<Payload, null> {
-    actionName = ActionName.GOCQHTTP_UploadPrivateFile;
-    payloadSchema = SchemaData;
+    override actionName = ActionName.GOCQHTTP_UploadPrivateFile;
+    override payloadSchema = SchemaData;
 
     async getPeer(payload: Payload): Promise<Peer> {
         if (payload.user_id) {
@@ -43,13 +43,12 @@ export default class GoCQHTTPUploadPrivateFile extends OneBotAction<Payload, nul
 
         const msgContext: SendMessageContext = {
             peer: await createContext(this.core, {
-                user_id: payload.user_id.toString(),
-                group_id: undefined,
+                user_id: payload.user_id.toString()
             }, ContextMode.Private),
             deleteAfterSentFiles: []
         };
         const sendFileEle: SendFileElement = await this.core.apis.FileApi.createValidSendFileElement(msgContext, downloadResult.path, payload.name);
-        await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(await this.getPeer(payload), [sendFileEle], msgContext.deleteAfterSentFiles, true);
+        await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(await this.getPeer(payload), [sendFileEle], msgContext.deleteAfterSentFiles);
         return null;
     }
 }

@@ -1,10 +1,6 @@
 import { ActionName } from '@/onebot/action/router';
-import CanSendRecord, { CanSend } from './CanSendRecord';
-
-interface ReturnType {
-    yes: boolean;
-}
+import { CanSend } from './CanSendRecord';
 
 export default class CanSendImage extends CanSend {
-    actionName = ActionName.CanSendImage;
+    override actionName = ActionName.CanSendImage;
 }

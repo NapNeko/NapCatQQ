@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FFmpeg } from '@ffmpeg.wasm/main';
 import { randomUUID } from 'crypto';
 import { readFileSync, statSync, writeFileSync } from 'fs';

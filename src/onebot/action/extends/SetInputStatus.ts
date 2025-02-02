@@ -10,9 +10,9 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export class SetInputStatus extends OneBotAction<Payload, any> {
-    actionName = ActionName.SetInputStatus;
-
+export class SetInputStatus extends OneBotAction<Payload, unknown> {
+    override actionName = ActionName.SetInputStatus;
+    override payloadSchema = SchemaData;
     async _handle(payload: Payload) {
         const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
         if (!uid) throw new Error('uid is empty');

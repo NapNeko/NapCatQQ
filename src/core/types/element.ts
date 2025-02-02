@@ -94,7 +94,7 @@ export interface VideoElement {
     thumbHeight?: number;
     busiType?: 0; //
     subBusiType?: 0; // 未知
-    thumbPath?: Map<number, any>;
+    thumbPath?: Map<number, unknown>;
     transferStatus?: 0; // 未知
     progress?: 0;  // 下载进度？
     invalidState?: 0; // 未知
