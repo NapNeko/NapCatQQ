@@ -58,6 +58,7 @@
     "@ffmpeg.wasm/main": "^0.13.1",
     "@homebridge/node-pty-prebuilt-multiarch": "^0.12.0-beta.5",
     "express": "^5.0.0",
+    "express-rate-limit": "^7.5.0",
     "piscina": "^4.7.0",
     "qrcode-terminal": "^0.12.0",
     "silk-wasm": "^3.6.1",
