@@ -1,35 +1,21 @@
 import { BreadcrumbItem, Breadcrumbs } from '@heroui/breadcrumbs'
-import { Button, ButtonGroup } from '@heroui/button'
-import { Code } from '@heroui/code'
+import { Button } from '@heroui/button'
 import { Input } from '@heroui/input'
-import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader
-} from '@heroui/modal'
-import { Spinner } from '@heroui/spinner'
-import {
-  SortDescriptor,
-  Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow
-} from '@heroui/table'
-import { Tooltip } from '@heroui/tooltip'
-import { Selection } from '@react-types/shared'
+import type { Selection, SortDescriptor } from '@react-types/shared'
 import path from 'path-browserify'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
-import { FiCopy, FiEdit2, FiMove, FiPlus, FiTrash2 } from 'react-icons/fi'
+import { FiMove, FiPlus } from 'react-icons/fi'
+import { MdRefresh } from 'react-icons/md'
+import { TbTrash } from 'react-icons/tb'
 import { TiArrowBack } from 'react-icons/ti'
 import { useLocation, useNavigate } from 'react-router-dom'
 
-import CodeEditor from '@/components/code_editor'
-import FileIcon from '@/components/file_icon'
+import CreateFileModal from '@/components/file_manage/create_file_modal'
+import FileEditModal from '@/components/file_manage/file_edit_modal'
+import FileTable from '@/components/file_manage/file_table'
+import MoveModal from '@/components/file_manage/move_modal'
+import RenameModal from '@/components/file_manage/rename_modal'
 
 import useDialog from '@/hooks/use-dialog'
 
@@ -38,7 +24,6 @@ import FileManager, { FileInfo } from '@/controllers/file_manager'
 export default function FileManagerPage() {
   const [files, setFiles] = useState<FileInfo[]>([])
   const [loading, setLoading] = useState(false)
-  // 修改初始排序状态
   const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
     column: 'name',
     direction: 'ascending'
@@ -46,7 +31,11 @@ export default function FileManagerPage() {
   const dialog = useDialog()
   const location = useLocation()
   const navigate = useNavigate()
-  const currentPath = decodeURIComponent(location.hash.slice(1) || '/')
+  // 修改 currentPath 初始化逻辑，去掉可能的前导斜杠
+  let currentPath = decodeURIComponent(location.hash.slice(1) || '/')
+  if (/^\/[A-Z]:$/i.test(currentPath)) {
+    currentPath = currentPath.slice(1)
+  }
   const [editingFile, setEditingFile] = useState<{
     path: string
     content: string
@@ -59,22 +48,18 @@ export default function FileManagerPage() {
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false)
   const [renamingFile, setRenamingFile] = useState<string>('')
   const [moveTargetPath, setMoveTargetPath] = useState('')
+  const [jumpPath, setJumpPath] = useState('')
 
-  const sortFiles = (files: FileInfo[], descriptor: SortDescriptor) => {
+  const sortFiles = (files: FileInfo[], descriptor: typeof sortDescriptor) => {
     return [...files].sort((a, b) => {
-      // 始终保持目录在前面
-      if (a.isDirectory !== b.isDirectory) {
-        return a.isDirectory ? -1 : 1
-      }
-
+      if (a.isDirectory !== b.isDirectory) return a.isDirectory ? -1 : 1
       const direction = descriptor.direction === 'ascending' ? 1 : -1
-
       switch (descriptor.column) {
         case 'name':
           return direction * a.name.localeCompare(b.name)
         case 'type': {
           const aType = a.isDirectory ? '目录' : '文件'
-          const bType = b.isDirectory ? '目录' : '文件'
+          const bType = a.isDirectory ? '目录' : '文件'
           return direction * aType.localeCompare(bType)
         }
         case 'size':
@@ -93,8 +78,8 @@ export default function FileManagerPage() {
   const loadFiles = async () => {
     setLoading(true)
     try {
-      const files = await FileManager.listFiles(currentPath)
-      setFiles(sortFiles(files, sortDescriptor))
+      const fileList = await FileManager.listFiles(currentPath)
+      setFiles(sortFiles(fileList, sortDescriptor))
     } catch (error) {
       toast.error('加载文件列表失败')
       setFiles([])
@@ -106,38 +91,26 @@ export default function FileManagerPage() {
     loadFiles()
   }, [currentPath])
 
-  const handleSortChange = (descriptor: SortDescriptor) => {
+  const handleSortChange = (descriptor: typeof sortDescriptor) => {
     setSortDescriptor(descriptor)
     setFiles((prev) => sortFiles(prev, descriptor))
   }
 
   const handleDirectoryClick = (dirPath: string) => {
-    // Windows 系统下处理盘符切换
-    if (dirPath.match(/^[A-Z]:\\?$/i)) {
-      navigate(`/file_manager#${encodeURIComponent(dirPath)}`)
-      return
-    }
-
-    // 处理返回上级目录
     if (dirPath === '..') {
-      // 检查是否在盘符根目录（如 C:）
       if (/^[A-Z]:$/i.test(currentPath)) {
         navigate('/file_manager#/')
         return
       }
-
       const parentPath = path.dirname(currentPath)
-      // 如果已经在根目录，则显示盘符列表（Windows）或保持在根目录（其他系统）
-      if (parentPath === currentPath) {
-        navigate('/file_manager#/')
-        return
-      }
-      navigate(`/file_manager#${encodeURIComponent(parentPath)}`)
+      navigate(
+        `/file_manager#${encodeURIComponent(parentPath === currentPath ? '/' : parentPath)}`
+      )
       return
     }
-
-    const newPath = path.join(currentPath, dirPath)
-    navigate(`/file_manager#${encodeURIComponent(newPath)}`)
+    navigate(
+      `/file_manager#${encodeURIComponent(path.join(currentPath, dirPath))}`
+    )
   }
 
   const handleEdit = async (filePath: string) => {
@@ -164,11 +137,7 @@ export default function FileManagerPage() {
   const handleDelete = async (filePath: string) => {
     dialog.confirm({
       title: '删除文件',
-      content: (
-        <div>
-          确定要删除文件 <Code>{filePath}</Code> 吗？
-        </div>
-      ),
+      content: <div>确定要删除文件 {filePath} 吗？</div>,
       onConfirm: async () => {
         try {
           await FileManager.delete(filePath)
@@ -186,14 +155,12 @@ export default function FileManagerPage() {
     const newPath = path.join(currentPath, newFileName)
     try {
       if (fileType === 'directory') {
-        const result = await FileManager.createDirectory(newPath)
-        if (!result) {
+        if (!(await FileManager.createDirectory(newPath))) {
           toast.error('目录已存在')
           return
         }
       } else {
-        const result = await FileManager.createFile(newPath)
-        if (!result) {
+        if (!(await FileManager.createFile(newPath))) {
           toast.error('文件已存在')
           return
         }
@@ -203,26 +170,24 @@ export default function FileManagerPage() {
       setNewFileName('')
       loadFiles()
     } catch (error) {
-      const err = error as Error
-      toast.error(err?.message || '创建失败')
+      toast.error((error as Error)?.message || '创建失败')
     }
   }
 
   const handleBatchDelete = async () => {
-    // 处理 Selection 类型
     const selectedArray =
-      selectedFiles === 'all'
-        ? files.map((f) => f.name)
-        : Array.from(selectedFiles as Set<string>)
-
+      selectedFiles instanceof Set
+        ? Array.from(selectedFiles)
+        : files.map((f) => f.name)
     if (selectedArray.length === 0) return
-
     dialog.confirm({
       title: '批量删除',
       content: <div>确定要删除选中的 {selectedArray.length} 个项目吗？</div>,
       onConfirm: async () => {
         try {
-          const paths = selectedArray.map((key) => path.join(currentPath, key))
+          const paths = selectedArray.map((key) =>
+            path.join(currentPath, key.toString())
+          )
           await FileManager.batchDelete(paths)
           toast.success('批量删除成功')
           setSelectedFiles(new Set())
@@ -234,13 +199,13 @@ export default function FileManagerPage() {
     })
   }
 
-  // 处理重命名
   const handleRename = async () => {
     if (!renamingFile || !newFileName) return
     try {
-      const oldPath = path.join(currentPath, renamingFile)
-      const newPath = path.join(currentPath, newFileName)
-      await FileManager.rename(oldPath, newPath)
+      await FileManager.rename(
+        path.join(currentPath, renamingFile),
+        path.join(currentPath, newFileName)
+      )
       toast.success('重命名成功')
       setIsRenameModalOpen(false)
       setRenamingFile('')
@@ -251,13 +216,13 @@ export default function FileManagerPage() {
     }
   }
 
-  // 处理移动
   const handleMove = async (sourceName: string) => {
     if (!moveTargetPath) return
     try {
-      const sourcePath = path.join(currentPath, sourceName)
-      const targetPath = path.join(moveTargetPath, sourceName)
-      await FileManager.move(sourcePath, targetPath)
+      await FileManager.move(
+        path.join(currentPath, sourceName),
+        path.join(moveTargetPath, sourceName)
+      )
       toast.success('移动成功')
       setIsMoveModalOpen(false)
       setMoveTargetPath('')
@@ -267,20 +232,17 @@ export default function FileManagerPage() {
     }
   }
 
-  // 处理批量移动
   const handleBatchMove = async () => {
     if (!moveTargetPath) return
     const selectedArray =
-      selectedFiles === 'all'
-        ? files.map((f) => f.name)
-        : Array.from(selectedFiles as Set<string>)
-
+      selectedFiles instanceof Set
+        ? Array.from(selectedFiles)
+        : files.map((f) => f.name)
     if (selectedArray.length === 0) return
-
     try {
       const items = selectedArray.map((name) => ({
-        sourcePath: path.join(currentPath, name),
-        targetPath: path.join(moveTargetPath, name)
+        sourcePath: path.join(currentPath, name.toString()),
+        targetPath: path.join(moveTargetPath, name.toString())
       }))
       await FileManager.batchMove(items)
       toast.success('批量移动成功')
@@ -293,14 +255,11 @@ export default function FileManagerPage() {
     }
   }
 
-  // 添加复制路径处理函数
   const handleCopyPath = (fileName: string) => {
-    const fullPath = path.join(currentPath, fileName)
-    navigator.clipboard.writeText(fullPath)
+    navigator.clipboard.writeText(path.join(currentPath, fileName))
     toast.success('路径已复制')
   }
 
-  // 修改移动按钮的点击处理
   const handleMoveClick = (fileName: string) => {
     setRenamingFile(fileName)
     setMoveTargetPath('')
@@ -309,7 +268,7 @@ export default function FileManagerPage() {
 
   return (
     <div className="p-4">
-      <div className="mb-4 flex items-center gap-4">
+      <div className="mb-4 flex items-center gap-4 sticky top-14 z-10 bg-content1 py-1">
         <Button
           color="danger"
           size="sm"
@@ -317,10 +276,10 @@ export default function FileManagerPage() {
           variant="flat"
           onPress={() => handleDirectoryClick('..')}
           className="text-lg"
-          radius="full"
         >
           <TiArrowBack />
         </Button>
+
         <Button
           color="danger"
           size="sm"
@@ -328,24 +287,34 @@ export default function FileManagerPage() {
           variant="flat"
           onPress={() => setIsCreateModalOpen(true)}
           className="text-lg"
-          radius="full"
         >
           <FiPlus />
         </Button>
-        {(selectedFiles === 'all' ||
-          (selectedFiles as Set<string>).size > 0) && (
+
+        <Button
+          color="danger"
+          isLoading={loading}
+          size="sm"
+          isIconOnly
+          variant="flat"
+          onPress={loadFiles}
+          className="text-lg"
+        >
+          <MdRefresh />
+        </Button>
+        {((selectedFiles instanceof Set && selectedFiles.size > 0) ||
+          selectedFiles === 'all') && (
           <>
             <Button
               color="danger"
               size="sm"
               variant="flat"
               onPress={handleBatchDelete}
-              startContent={<FiTrash2 />}
+              className="text-sm"
+              startContent={<TbTrash className="text-lg" />}
             >
-              删除选中项 (
-              {selectedFiles === 'all'
-                ? files.length
-                : (selectedFiles as Set<string>).size}
+              (
+              {selectedFiles instanceof Set ? selectedFiles.size : files.length}
               )
             </Button>
             <Button
@@ -356,13 +325,16 @@ export default function FileManagerPage() {
                 setMoveTargetPath('')
                 setIsMoveModalOpen(true)
               }}
-              startContent={<FiMove />}
+              className="text-sm"
+              startContent={<FiMove className="text-lg" />}
             >
-              移动选中项
+              (
+              {selectedFiles instanceof Set ? selectedFiles.size : files.length}
+              )
             </Button>
           </>
         )}
-        <Breadcrumbs>
+        <Breadcrumbs className="flex-1 shadow-small px-2 py-2 rounded-lg">
           {currentPath.split('/').map((part, index, parts) => (
             <BreadcrumbItem
               key={part}
@@ -376,280 +348,86 @@ export default function FileManagerPage() {
             </BreadcrumbItem>
           ))}
         </Breadcrumbs>
+        <Input
+          type="text"
+          placeholder="输入跳转路径"
+          value={jumpPath}
+          onChange={(e) => setJumpPath(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && jumpPath.trim() !== '') {
+              navigate(`/file_manager#${encodeURIComponent(jumpPath.trim())}`)
+            }
+          }}
+          className="ml-auto w-64"
+        />
       </div>
 
-      <Table
-        aria-label="文件列表"
+      <FileTable
+        files={files}
+        currentPath={currentPath}
+        loading={loading}
         sortDescriptor={sortDescriptor}
         onSortChange={handleSortChange}
+        selectedFiles={selectedFiles}
         onSelectionChange={setSelectedFiles}
-        defaultSelectedKeys={[]}
-        selectedKeys={selectedFiles}
-        selectionMode="multiple"
-      >
-        <TableHeader>
-          <TableColumn key="name" allowsSorting>
-            名称
-          </TableColumn>
-          <TableColumn key="type" allowsSorting>
-            类型
-          </TableColumn>
-          <TableColumn key="size" allowsSorting>
-            大小
-          </TableColumn>
-          <TableColumn key="mtime" allowsSorting>
-            修改时间
-          </TableColumn>
-          <TableColumn key="actions">操作</TableColumn>
-        </TableHeader>
-        <TableBody
-          isLoading={loading}
-          loadingContent={
-            <div className="flex justify-center items-center h-full">
-              <Spinner />
-            </div>
-          }
-          items={files}
-        >
-          {(file) => (
-            <TableRow key={file.name}>
-              <TableCell>
-                <Button
-                  variant="light"
-                  onPress={() => {
-                    if (file.isDirectory) {
-                      handleDirectoryClick(file.name)
-                    } else {
-                      handleEdit(path.join(currentPath, file.name))
-                    }
-                  }}
-                  className="text-left justify-start"
-                  startContent={
-                    <FileIcon name={file.name} isDirectory={file.isDirectory} />
-                  }
-                >
-                  {file.name}
-                </Button>
-              </TableCell>
-              <TableCell>{file.isDirectory ? '目录' : '文件'}</TableCell>
-              <TableCell>
-                {isNaN(file.size) || file.isDirectory
-                  ? '-'
-                  : `${file.size} 字节`}
-              </TableCell>
-              <TableCell>{new Date(file.mtime).toLocaleString()}</TableCell>
-              <TableCell>
-                <ButtonGroup size="sm">
-                  <Tooltip content="重命名">
-                    <Button
-                      isIconOnly
-                      color="danger"
-                      variant="flat"
-                      onPress={() => {
-                        setRenamingFile(file.name)
-                        setNewFileName(file.name)
-                        setIsRenameModalOpen(true)
-                      }}
-                    >
-                      <FiEdit2 />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip content="移动">
-                    <Button
-                      isIconOnly
-                      color="danger"
-                      variant="flat"
-                      onPress={() => handleMoveClick(file.name)}
-                    >
-                      <FiMove />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip content="复制路径">
-                    <Button
-                      isIconOnly
-                      color="danger"
-                      variant="flat"
-                      onPress={() => handleCopyPath(file.name)}
-                    >
-                      <FiCopy />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip content="删除">
-                    <Button
-                      isIconOnly
-                      color="danger"
-                      variant="flat"
-                      onPress={() =>
-                        handleDelete(path.join(currentPath, file.name))
-                      }
-                    >
-                      <FiTrash2 />
-                    </Button>
-                  </Tooltip>
-                </ButtonGroup>
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+        onDirectoryClick={handleDirectoryClick}
+        onEdit={handleEdit}
+        onRenameRequest={(name) => {
+          setRenamingFile(name)
+          setNewFileName(name)
+          setIsRenameModalOpen(true)
+        }}
+        onMoveRequest={handleMoveClick}
+        onCopyPath={handleCopyPath}
+        onDelete={handleDelete}
+      />
 
-      {/* 文件编辑对话框 */}
-      <Modal
-        size="full"
+      <FileEditModal
         isOpen={!!editingFile}
+        file={editingFile}
         onClose={() => setEditingFile(null)}
-      >
-        <ModalContent>
-          <ModalHeader className="flex items-center gap-2 bg-content2 bg-opacity-50">
-            <span>编辑文件</span>
-            <Code className="text-xs">{editingFile?.path}</Code>
-          </ModalHeader>
-          <ModalBody className="p-0">
-            <div className="h-full">
-              <CodeEditor
-                height="100%"
-                value={editingFile?.content}
-                onChange={(value) =>
-                  setEditingFile((prev) =>
-                    prev ? { ...prev, content: value || '' } : null
-                  )
-                }
-                options={{ wordWrap: 'on' }}
-              />
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              color="danger"
-              variant="flat"
-              onPress={() => setEditingFile(null)}
-            >
-              取消
-            </Button>
-            <Button color="danger" onPress={handleSave}>
-              保存
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+        onSave={handleSave}
+        onContentChange={(newContent) =>
+          setEditingFile((prev) =>
+            prev ? { ...prev, content: newContent ?? '' } : null
+          )
+        }
+      />
 
-      {/* 新建文件/目录对话框 */}
-      <Modal
+      <CreateFileModal
         isOpen={isCreateModalOpen}
+        fileType={fileType}
+        newFileName={newFileName}
+        onTypeChange={setFileType}
+        onNameChange={(e) => setNewFileName(e.target.value)}
         onClose={() => setIsCreateModalOpen(false)}
-      >
-        <ModalContent>
-          <ModalHeader>新建</ModalHeader>
-          <ModalBody>
-            <div className="flex flex-col gap-4">
-              <ButtonGroup color="danger">
-                <Button
-                  variant={fileType === 'file' ? 'solid' : 'flat'}
-                  onPress={() => setFileType('file')}
-                >
-                  文件
-                </Button>
-                <Button
-                  variant={fileType === 'directory' ? 'solid' : 'flat'}
-                  onPress={() => setFileType('directory')}
-                >
-                  目录
-                </Button>
-              </ButtonGroup>
-              <Input
-                label="名称"
-                value={newFileName}
-                onChange={(e) => setNewFileName(e.target.value)}
-              />
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              color="danger"
-              variant="flat"
-              onPress={() => setIsCreateModalOpen(false)}
-            >
-              取消
-            </Button>
-            <Button color="danger" onPress={handleCreate}>
-              创建
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+        onCreate={handleCreate}
+      />
 
-      {/* 重命名对话框 */}
-      <Modal
+      <RenameModal
         isOpen={isRenameModalOpen}
+        newFileName={newFileName}
+        onNameChange={(e) => setNewFileName(e.target.value)}
         onClose={() => setIsRenameModalOpen(false)}
-      >
-        <ModalContent>
-          <ModalHeader>重命名</ModalHeader>
-          <ModalBody>
-            <Input
-              label="新名称"
-              value={newFileName}
-              onChange={(e) => setNewFileName(e.target.value)}
-            />
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              color="danger"
-              variant="flat"
-              onPress={() => setIsRenameModalOpen(false)}
-            >
-              取消
-            </Button>
-            <Button color="danger" onPress={handleRename}>
-              确定
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+        onRename={handleRename}
+      />
 
-      {/* 移动对话框 */}
-      <Modal isOpen={isMoveModalOpen} onClose={() => setIsMoveModalOpen(false)}>
-        <ModalContent>
-          <ModalHeader>移动到</ModalHeader>
-          <ModalBody>
-            <div className="flex flex-col gap-4">
-              <Input
-                label="目标路径"
-                value={moveTargetPath}
-                onChange={(e) => setMoveTargetPath(e.target.value)}
-                placeholder="请输入完整目标路径"
-              />
-              <p className="text-sm text-gray-500">
-                当前选择：
-                {selectedFiles === 'all' ||
-                (selectedFiles as Set<string>).size > 0
-                  ? `${selectedFiles === 'all' ? files.length : (selectedFiles as Set<string>).size} 个项目`
-                  : renamingFile}
-              </p>
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              color="danger"
-              variant="flat"
-              onPress={() => setIsMoveModalOpen(false)}
-            >
-              取消
-            </Button>
-            <Button
-              color="danger"
-              onPress={() =>
-                selectedFiles === 'all' ||
-                (selectedFiles as Set<string>).size > 0
-                  ? handleBatchMove()
-                  : handleMove(renamingFile)
-              }
-            >
-              确定
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <MoveModal
+        isOpen={isMoveModalOpen}
+        moveTargetPath={moveTargetPath}
+        selectionInfo={
+          selectedFiles instanceof Set && selectedFiles.size > 0
+            ? `${selectedFiles.size} 个项目`
+            : renamingFile
+        }
+        onClose={() => setIsMoveModalOpen(false)}
+        onMove={() =>
+          selectedFiles instanceof Set && selectedFiles.size > 0
+            ? handleBatchMove()
+            : handleMove(renamingFile)
+        }
+        onSelect={(dir) => setMoveTargetPath(dir)} // 替换原有 onTargetChange
+      />
     </div>
   )
 }
