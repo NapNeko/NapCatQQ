@@ -4,6 +4,7 @@ import { LogWrapper } from '@/common/log';
 import { WebSocket, WebSocketServer } from 'ws';
 import os from 'os';
 import { IPty, spawn as ptySpawn } from 'node-pty';
+import { randomUUID } from 'crypto';
 
 interface TerminalInstance {
     pty: IPty; // 改用 PTY 实例
@@ -94,7 +95,9 @@ class TerminalManager {
         });
     }
 
-    createTerminal(id: string) {
+    // 修改：移除参数 id，使用 crypto.randomUUID 生成终端 id
+    createTerminal() {
+        const id = randomUUID();
         const shell = os.platform() === 'win32' ? 'powershell.exe' : 'bash';
         const pty = ptySpawn(shell, [], {
             name: 'xterm-256color',
@@ -128,7 +131,8 @@ class TerminalManager {
         });
 
         this.terminals.set(id, instance);
-        return instance;
+        // 返回生成的 id 及对应实例，方便后续通知客户端使用该 id
+        return { id, instance };
     }
 
     closeTerminal(id: string) {
