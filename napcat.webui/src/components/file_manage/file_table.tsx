@@ -12,7 +12,8 @@ import {
 } from '@heroui/table'
 import { Tooltip } from '@heroui/tooltip'
 import path from 'path-browserify'
-import { FiCopy, FiEdit2, FiMove, FiTrash2 } from 'react-icons/fi'
+import { BiRename } from 'react-icons/bi'
+import { FiCopy, FiMove, FiTrash2 } from 'react-icons/fi'
 
 import FileIcon from '@/components/file_icon'
 
@@ -115,7 +116,7 @@ export default function FileTable({
                     variant="flat"
                     onPress={() => onRenameRequest(file.name)}
                   >
-                    <FiEdit2 />
+                    <BiRename />
                   </Button>
                 </Tooltip>
                 <Tooltip content="移动">
