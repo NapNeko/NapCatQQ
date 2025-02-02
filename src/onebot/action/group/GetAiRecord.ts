@@ -1,6 +1,6 @@
 import { ActionName } from '@/onebot/action/router';
-import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
-import { AIVoiceChatType } from "@/core/packet/entities/aiChat";
+import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
+import { AIVoiceChatType } from '@/core/packet/entities/aiChat';
 import { Static, Type } from '@sinclair/typebox';
 
 const SchemaData = Type.Object({

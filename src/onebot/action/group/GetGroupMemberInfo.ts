@@ -46,7 +46,7 @@ class GetGroupMemberInfo extends OneBotAction<Payload, OB11GroupMember> {
         const member = await this.getGroupMemberInfo(payload, uid, isNocache);
 
         if (!member) {
-            this.core.context.logger.logDebug(`获取群成员详细信息失败, 只能返回基础信息`);
+            this.core.context.logger.logDebug('获取群成员详细信息失败, 只能返回基础信息');
         }
 
         return OB11Construct.groupMember(payload.group_id.toString(), member);

@@ -1,9 +1,9 @@
 import * as stream from 'node:stream';
-import { ReadStream } from "node:fs";
-import { HighwayTcpUploader } from "@/core/packet/highway/uploader/highwayTcpUploader";
-import { HighwayHttpUploader } from "@/core/packet/highway/uploader/highwayHttpUploader";
-import { PacketHighwaySig } from "@/core/packet/highway/highwayContext";
-import { PacketLogger } from "@/core/packet/context/loggerContext";
+import { ReadStream } from 'node:fs';
+import { HighwayTcpUploader } from '@/core/packet/highway/uploader/highwayTcpUploader';
+import { HighwayHttpUploader } from '@/core/packet/highway/uploader/highwayHttpUploader';
+import { PacketHighwaySig } from '@/core/packet/highway/highwayContext';
+import { PacketLogger } from '@/core/packet/context/loggerContext';
 
 export interface PacketHighwayTrans {
     uin: string;

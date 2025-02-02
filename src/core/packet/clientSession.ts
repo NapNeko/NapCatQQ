@@ -1,5 +1,5 @@
-import { PacketContext } from "@/core/packet/context/packetContext";
-import { NapCatCore } from "@/core";
+import { PacketContext } from '@/core/packet/context/packetContext';
+import { NapCatCore } from '@/core';
 
 export class PacketClientSession {
     private readonly context: PacketContext;

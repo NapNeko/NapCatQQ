@@ -1,14 +1,14 @@
-import * as crypto from "crypto";
-import { PushMsgBody } from "@/core/packet/transformer/proto";
-import { NapProtoEncodeStructType } from "@napneko/nap-proto-core";
-import { PacketMsg, PacketSendMsgElement } from "@/core/packet/message/message";
-import { IPacketMsgElement, PacketMsgTextElement } from "@/core/packet/message/element";
-import { SendTextElement } from "@/core";
+import * as crypto from 'crypto';
+import { PushMsgBody } from '@/core/packet/transformer/proto';
+import { NapProtoEncodeStructType } from '@napneko/nap-proto-core';
+import { PacketMsg, PacketSendMsgElement } from '@/core/packet/message/message';
+import { IPacketMsgElement, PacketMsgTextElement } from '@/core/packet/message/element';
+import { SendTextElement } from '@/core';
 
 export class PacketMsgBuilder {
     protected static failBackText = new PacketMsgTextElement(
         {
-            textElement: { content: "[该消息类型暂不支持查看]" }
+            textElement: { content: '[该消息类型暂不支持查看]' }
         } as SendTextElement
     );
 
@@ -24,7 +24,7 @@ export class PacketMsgBuilder {
             }
             return {
                 responseHead: {
-                    fromUid: "",
+                    fromUid: '',
                     fromUin: node.senderUin,
                     toUid: node.groupId ? undefined : selfUid,
                     forward: node.groupId ? undefined : {

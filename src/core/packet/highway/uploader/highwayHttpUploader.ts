@@ -1,9 +1,9 @@
-import crypto from "node:crypto";
-import http from "node:http";
-import { NapProtoMsg } from "@napneko/nap-proto-core";
-import { IHighwayUploader } from "@/core/packet/highway/uploader/highwayUploader";
-import { Frame } from "@/core/packet/highway/frame";
-import * as proto from "@/core/packet/transformer/proto";
+import crypto from 'node:crypto';
+import http from 'node:http';
+import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { IHighwayUploader } from '@/core/packet/highway/uploader/highwayUploader';
+import { Frame } from '@/core/packet/highway/frame';
+import * as proto from '@/core/packet/transformer/proto';
 
 export class HighwayHttpUploader extends IHighwayUploader {
     async upload(): Promise<void> {

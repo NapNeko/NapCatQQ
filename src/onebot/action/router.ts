@@ -134,16 +134,16 @@ export const ActionName = {
 
     GetGroupIgnoredNotifies: 'get_group_ignored_notifies',
 
-    SetGroupSign: "set_group_sign",
-    SendGroupSign: "send_group_sign",
-    SendPacket: "send_packet",
-    GetMiniAppArk: "get_mini_app_ark",
+    SetGroupSign: 'set_group_sign',
+    SendGroupSign: 'send_group_sign',
+    SendPacket: 'send_packet',
+    GetMiniAppArk: 'get_mini_app_ark',
     // UploadForwardMsg : "upload_forward_msg",
-    GetAiRecord: "get_ai_record",
-    GetAiCharacters: "get_ai_characters",
-    SendGroupAiRecord: "send_group_ai_record",
+    GetAiRecord: 'get_ai_record',
+    GetAiCharacters: 'get_ai_characters',
+    SendGroupAiRecord: 'send_group_ai_record',
 
-    GetClientkey: "get_clientkey",
+    GetClientkey: 'get_clientkey',
     
     SendPoke: 'send_poke',
 } as const;

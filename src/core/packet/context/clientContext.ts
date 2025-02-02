@@ -1,9 +1,9 @@
-import { IPacketClient } from "@/core/packet/client/baseClient";
-import { NativePacketClient } from "@/core/packet/client/nativeClient";
-import { WsPacketClient } from "@/core/packet/client/wsClient";
-import { OidbPacket } from "@/core/packet/transformer/base";
-import { PacketLogger } from "@/core/packet/context/loggerContext";
-import { NapCoreContext } from "@/core/packet/context/napCoreContext";
+import { IPacketClient } from '@/core/packet/client/baseClient';
+import { NativePacketClient } from '@/core/packet/client/nativeClient';
+import { WsPacketClient } from '@/core/packet/client/wsClient';
+import { OidbPacket } from '@/core/packet/transformer/base';
+import { PacketLogger } from '@/core/packet/context/loggerContext';
+import { NapCoreContext } from '@/core/packet/context/napCoreContext';
 
 type clientPriority = {
     [key: number]: (napCore: NapCoreContext, logger: PacketLogger, logStack: LogStack) => IPacketClient;
@@ -77,22 +77,22 @@ export class PacketClientContext {
 
     async sendOidbPacket<T extends boolean = false>(pkt: OidbPacket, rsp?: T): Promise<T extends true ? Buffer : void> {
         const raw = await this._client.sendOidbPacket(pkt, rsp);
-        return (rsp ? Buffer.from(raw.hex_data, "hex") : undefined) as T extends true ? Buffer : void;
+        return (rsp ? Buffer.from(raw.hex_data, 'hex') : undefined) as T extends true ? Buffer : void;
     }
 
     private newClient(): IPacketClient {
         const prefer = this.napCore.config.packetBackend;
         let client: IPacketClient | null;
         switch (prefer) {
-        case "native":
-            this.logger.info("使用指定的 NativePacketClient 作为后端");
+        case 'native':
+            this.logger.info('使用指定的 NativePacketClient 作为后端');
             client = new NativePacketClient(this.napCore, this.logger, this.logStack);
             break;
-        case "frida":
-            this.logger.info("[Core] [Packet] 使用指定的 FridaPacketClient 作为后端");
+        case 'frida':
+            this.logger.info('[Core] [Packet] 使用指定的 FridaPacketClient 作为后端');
             client = new WsPacketClient(this.napCore, this.logger, this.logStack);
             break;
-        case "auto":
+        case 'auto':
         case undefined:
             client = this.judgeClient();
             break;
@@ -101,10 +101,10 @@ export class PacketClientContext {
             client = null;
         }
         if (!client?.check()) {
-            throw new Error("[Core] [Packet] 无可用的后端，NapCat.Packet将不会加载！");
+            throw new Error('[Core] [Packet] 无可用的后端，NapCat.Packet将不会加载！');
         }
         if (!client) {
-            throw new Error("[Core] [Packet] 后端异常，NapCat.Packet将不会加载！");
+            throw new Error('[Core] [Packet] 后端异常，NapCat.Packet将不会加载！');
         }
         return client;
     }
@@ -120,7 +120,7 @@ export class PacketClientContext {
             .sort((a, b) => b.score - a.score);
         const selectedClient = sortedClients[0]?.client;
         if (!selectedClient) {
-            throw new Error("[Core] [Packet] 无可用的后端，NapCat.Packet将不会加载！");
+            throw new Error('[Core] [Packet] 无可用的后端，NapCat.Packet将不会加载！');
         }
         this.logger.info(`自动选择 ${selectedClient.constructor.name} 作为后端`);
         return selectedClient;

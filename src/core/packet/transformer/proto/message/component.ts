@@ -1,5 +1,5 @@
-import { ProtoField, ScalarType } from "@napneko/nap-proto-core";
-import { Elem } from "@/core/packet/transformer/proto";
+import { ProtoField, ScalarType } from '@napneko/nap-proto-core';
+import { Elem } from '@/core/packet/transformer/proto';
 
 export const Attr = {
     codePage: ProtoField(1, ScalarType.INT32),

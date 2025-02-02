@@ -1,11 +1,11 @@
-import net from "node:net";
-import stream from "node:stream";
-import crypto from "node:crypto";
-import { NapProtoMsg } from "@napneko/nap-proto-core";
-import { BlockSize } from "@/core/packet/highway/highwayContext";
-import { Frame } from "@/core/packet/highway/frame";
-import { IHighwayUploader } from "@/core/packet/highway/uploader/highwayUploader";
-import * as proto from "@/core/packet/transformer/proto";
+import net from 'node:net';
+import stream from 'node:stream';
+import crypto from 'node:crypto';
+import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { BlockSize } from '@/core/packet/highway/highwayContext';
+import { Frame } from '@/core/packet/highway/frame';
+import { IHighwayUploader } from '@/core/packet/highway/uploader/highwayUploader';
+import * as proto from '@/core/packet/transformer/proto';
 
 class HighwayTcpUploaderTransform extends stream.Transform {
     uploader: HighwayTcpUploader;

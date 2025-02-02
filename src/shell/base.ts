@@ -273,7 +273,7 @@ export async function NCoreInitShell() {
     const o3Service = wrapper.NodeIO3MiscService.get();
     o3Service.addO3MiscListener(new NodeIO3MiscListener());
 
-    logger.log(`[NapCat] [Core] NapCat.Core Version: ` + napCatVersion);
+    logger.log('[NapCat] [Core] NapCat.Core Version: ' + napCatVersion);
     InitWebUi(logger, pathWrapper).then().catch(e => logger.logError(e));
 
     const engine = wrapper.NodeIQQNTWrapperEngine.get();

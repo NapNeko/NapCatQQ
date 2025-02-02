@@ -1,5 +1,5 @@
-import * as crypto from "node:crypto";
-import { PacketMsg } from "@/core/packet/message/message";
+import * as crypto from 'node:crypto';
+import { PacketMsg } from '@/core/packet/message/message';
 
 interface ForwardMsgJson {
     app: string
@@ -50,15 +50,15 @@ interface ForwardAdaptMsgElement {
 }
 
 export class ForwardMsgBuilder {
-    private static build(resId: string, msg: ForwardAdaptMsg[], source?: string, news?: ForwardMsgJsonMetaDetail["news"], summary?: string, prompt?: string): ForwardMsgJson {
+    private static build(resId: string, msg: ForwardAdaptMsg[], source?: string, news?: ForwardMsgJsonMetaDetail['news'], summary?: string, prompt?: string): ForwardMsgJson {
         const id = crypto.randomUUID();
         const isGroupMsg = msg.some(m => m.isGroupMsg);
         if (!source) {
-            source = isGroupMsg ? "群聊的聊天记录" : msg.map(m => m.senderName).filter((v, i, a) => a.indexOf(v) === i).slice(0, 4).join('和') + '的聊天记录';
+            source = isGroupMsg ? '群聊的聊天记录' : msg.map(m => m.senderName).filter((v, i, a) => a.indexOf(v) === i).slice(0, 4).join('和') + '的聊天记录';
         }
         if (!news) {
             news = msg.length === 0 ? [{
-                text: "Nya~ This message is send from NapCat.Packet!",
+                text: 'Nya~ This message is send from NapCat.Packet!',
             }] : msg.map(m => ({
                 text: `${m.senderName}: ${m.msg?.map(msg => msg.preview).join('')}`,
             }));
@@ -67,15 +67,15 @@ export class ForwardMsgBuilder {
             summary = `查看${msg.length}条转发消息`;
         }
         if (!prompt) {
-            prompt = "[聊天记录]";
+            prompt = '[聊天记录]';
         }
         return {
-            app: "com.tencent.multimsg",
+            app: 'com.tencent.multimsg',
             config: {
                 autosize: 1,
                 forward: 1,
                 round: 1,
-                type: "normal",
+                type: 'normal',
                 width: 300
             },
             desc: prompt,
@@ -93,8 +93,8 @@ export class ForwardMsgBuilder {
                 }
             },
             prompt,
-            ver: "0.0.0.5",
-            view: "contact",
+            ver: '0.0.0.5',
+            view: 'contact',
         };
     }
 
@@ -102,12 +102,12 @@ export class ForwardMsgBuilder {
         return this.build(resId, []);
     }
 
-    static fromPacketMsg(resId: string, packetMsg: PacketMsg[], source?: string, news?: ForwardMsgJsonMetaDetail["news"], summary?: string, prompt?: string): ForwardMsgJson {
+    static fromPacketMsg(resId: string, packetMsg: PacketMsg[], source?: string, news?: ForwardMsgJsonMetaDetail['news'], summary?: string, prompt?: string): ForwardMsgJson {
         return this.build(resId, packetMsg.map(msg => ({
             senderName: msg.senderName,
             isGroupMsg: msg.groupId !== undefined,
             msg: msg.msg.map(m => ({
-                preview: m.valid ? m.toPreview() : "[该消息类型暂不支持查看]",
+                preview: m.valid ? m.toPreview() : '[该消息类型暂不支持查看]',
             }))
         })), source, news, summary, prompt);
     }

@@ -86,14 +86,14 @@ export class QQBasicInfoWrapper {
         try {
             const majorAppid = this.getAppidV2ByMajor(fullVersion);
             if (majorAppid) {
-                this.context.logger.log(`[QQ版本兼容性检测] 当前版本Appid未内置 通过Major获取 为了更好的性能请尝试更新NapCat`);
+                this.context.logger.log('[QQ版本兼容性检测] 当前版本Appid未内置 通过Major获取 为了更好的性能请尝试更新NapCat');
                 return { appid: majorAppid, qua: this.getQUAFallback() };
             }
         } catch (error) {
-            this.context.logger.log(`[QQ版本兼容性检测] 通过Major 获取Appid异常 请检测NapCat/QQNT是否正常`);
+            this.context.logger.log('[QQ版本兼容性检测] 通过Major 获取Appid异常 请检测NapCat/QQNT是否正常');
         }
         // 最终兜底为老版本
-        this.context.logger.log(`[QQ版本兼容性检测] 获取Appid异常 请检测NapCat/QQNT是否正常`);
+        this.context.logger.log('[QQ版本兼容性检测] 获取Appid异常 请检测NapCat/QQNT是否正常');
         this.context.logger.log(`[QQ版本兼容性检测] ${fullVersion} 版本兼容性不佳，可能会导致一些功能无法正常使用`,);
         return { appid: this.getAppIdFallback(), qua: this.getQUAFallback() };
     }

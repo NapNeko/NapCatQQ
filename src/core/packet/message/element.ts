@@ -1,5 +1,5 @@
-import * as zlib from "node:zlib";
-import { NapProtoEncodeStructType, NapProtoMsg } from "@napneko/nap-proto-core";
+import * as zlib from 'node:zlib';
+import { NapProtoEncodeStructType, NapProtoMsg } from '@napneko/nap-proto-core';
 import {
     CustomFace,
     Elem,
@@ -12,7 +12,7 @@ import {
     OidbSvcTrpcTcp0XE37_800Response,
     FileExtra,
     GroupFileExtra
-} from "@/core/packet/transformer/proto";
+} from '@/core/packet/transformer/proto';
 import {
     BaseEmojiType,
     FaceType,
@@ -29,9 +29,9 @@ import {
     SendStructLongMsgElement,
     SendTextElement,
     SendVideoElement
-} from "@/core";
-import { ForwardMsgBuilder } from "@/common/forward-msg-builder";
-import { PacketMsg, PacketSendMsgElement } from "@/core/packet/message/message";
+} from '@/core';
+import { ForwardMsgBuilder } from '@/common/forward-msg-builder';
+import { PacketMsg, PacketSendMsgElement } from '@/core/packet/message/message';
 
 // raw <-> packet
 // TODO: SendStructLongMsgElement
@@ -153,7 +153,7 @@ export class PacketMsgReplyElement extends IPacketMsgElement<SendReplyElement> {
     }
 
     toPreview(): string {
-        return "[回复消息]";
+        return '[回复消息]';
     }
 }
 
@@ -175,12 +175,12 @@ export class PacketMsgFaceElement extends IPacketMsgElement<SendFaceElement> {
                 commonElem: {
                     serviceType: 37,
                     pbElem: new NapProtoMsg(QBigFaceExtra).encode({
-                        aniStickerPackId: "1",
-                        aniStickerId: "8",
+                        aniStickerPackId: '1',
+                        aniStickerId: '8',
                         faceId: this.faceId,
                         sourceType: 1,
                         resultId: this.resultId,
-                        preview: "",
+                        preview: '',
                         randomType: 1
                     }),
                     businessType: 1
@@ -198,8 +198,8 @@ export class PacketMsgFaceElement extends IPacketMsgElement<SendFaceElement> {
                     serviceType: 33,
                     pbElem: new NapProtoMsg(QSmallFaceExtra).encode({
                         faceId: this.faceId,
-                        preview: "",
-                        preview2: ""
+                        preview: '',
+                        preview2: ''
                     }),
                     businessType: 1
                 }
@@ -208,7 +208,7 @@ export class PacketMsgFaceElement extends IPacketMsgElement<SendFaceElement> {
     }
 
     toPreview(): string {
-        return "[表情]";
+        return '[表情]';
     }
 }
 
@@ -341,7 +341,7 @@ export class PacketMsgVideoElement extends IPacketMsgElement<SendVideoElement> {
     }
 
     toPreview(): string {
-        return "[视频]";
+        return '[视频]';
     }
 }
 
@@ -378,7 +378,7 @@ export class PacketMsgPttElement extends IPacketMsgElement<SendPttElement> {
     }
 
     toPreview(): string {
-        return "[语音]";
+        return '[语音]';
     }
 }
 
@@ -450,7 +450,7 @@ export class PacketMsgFileElement extends IPacketMsgElement<SendFileElement> {
                     fileSize: BigInt(this.fileSize),
                     fileName: this.fileName,
                     fileSha: this.fileSha1,
-                    extInfoString: "",
+                    extInfoString: '',
                     fileMd5: this.fileMd5,
                 }
             }
@@ -489,7 +489,7 @@ export class PacketMsgLightAppElement extends IPacketMsgElement<SendArkElement> 
     }
 
     toPreview(): string {
-        return "[卡片消息]";
+        return '[卡片消息]';
     }
 }
 
@@ -540,6 +540,6 @@ export class PacketMultiMsgElement extends IPacketMsgElement<SendStructLongMsgEl
     }
 
     toPreview(): string {
-        return "[聊天记录]";
+        return '[聊天记录]';
     }
 }

@@ -1,5 +1,5 @@
-import * as stream from "node:stream";
-import { Sha1Stream } from "@/core/packet/utils/crypto/sha1Stream";
+import * as stream from 'node:stream';
+import { Sha1Stream } from '@/core/packet/utils/crypto/sha1Stream';
 
 export class CalculateStreamBytesTransform extends stream.Transform {
     private readonly blockSize = 1024 * 1024;

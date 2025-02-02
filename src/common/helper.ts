@@ -172,8 +172,8 @@ export function stringifyWithBigInt(obj: any) {
 }
 
 export function parseAppidFromMajor(nodeMajor: string): string | undefined {
-    const hexSequence = "A4 09 00 00 00 35";
-    const sequenceBytes = Buffer.from(hexSequence.replace(/ /g, ""), "hex");
+    const hexSequence = 'A4 09 00 00 00 35';
+    const sequenceBytes = Buffer.from(hexSequence.replace(/ /g, ''), 'hex');
     const filePath = path.resolve(nodeMajor);
     const fileContent = fs.readFileSync(filePath);
 
@@ -192,7 +192,7 @@ export function parseAppidFromMajor(nodeMajor: string): string | undefined {
         const content = fileContent.subarray(start, end);
         if (!content.every(byte => byte === 0x00)) {
             try {
-                return content.toString("utf-8");
+                return content.toString('utf-8');
             } catch (error) {
                 break;
             }

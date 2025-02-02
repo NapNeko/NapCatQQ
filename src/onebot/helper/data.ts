@@ -23,7 +23,7 @@ export class OB11Construct {
             ...rawFriend.baseInfo,
             ...rawFriend.coreInfo,
             user_id: parseInt(rawFriend.coreInfo.uin),
-            nickname: rawFriend.coreInfo.nick ?? "",
+            nickname: rawFriend.coreInfo.nick ?? '',
             remark: rawFriend.coreInfo.remark ?? rawFriend.coreInfo.nick,
             sex: this.sex(rawFriend.baseInfo.sex),
             level: 0,

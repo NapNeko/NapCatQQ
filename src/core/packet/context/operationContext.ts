@@ -1,20 +1,20 @@
 import * as crypto from 'crypto';
-import { PacketContext } from "@/core/packet/context/packetContext";
-import * as trans from "@/core/packet/transformer";
-import { PacketMsg } from "@/core/packet/message/message";
+import { PacketContext } from '@/core/packet/context/packetContext';
+import * as trans from '@/core/packet/transformer';
+import { PacketMsg } from '@/core/packet/message/message';
 import {
     PacketMsgFileElement,
     PacketMsgPicElement,
     PacketMsgPttElement,
     PacketMsgVideoElement
-} from "@/core/packet/message/element";
-import { ChatType } from "@/core";
-import { MiniAppRawData, MiniAppReqParams } from "@/core/packet/entities/miniApp";
-import { AIVoiceChatType } from "@/core/packet/entities/aiChat";
-import { NapProtoDecodeStructType, NapProtoEncodeStructType } from "@napneko/nap-proto-core";
-import { IndexNode, MsgInfo } from "@/core/packet/transformer/proto";
-import { OidbPacket } from "@/core/packet/transformer/base";
-import { ImageOcrResult } from "@/core/packet/entities/ocrResult";
+} from '@/core/packet/message/element';
+import { ChatType } from '@/core';
+import { MiniAppRawData, MiniAppReqParams } from '@/core/packet/entities/miniApp';
+import { AIVoiceChatType } from '@/core/packet/entities/aiChat';
+import { NapProtoDecodeStructType, NapProtoEncodeStructType } from '@napneko/nap-proto-core';
+import { IndexNode, MsgInfo } from '@/core/packet/transformer/proto';
+import { OidbPacket } from '@/core/packet/transformer/base';
+import { ImageOcrResult } from '@/core/packet/entities/ocrResult';
 
 export class PacketOperationContext {
     private readonly context: PacketContext;

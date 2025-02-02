@@ -1,4 +1,4 @@
-import { ProtoField, ScalarType } from "@napneko/nap-proto-core";
+import { ProtoField, ScalarType } from '@napneko/nap-proto-core';
 import {
     C2C,
     ForwardHead,
@@ -8,7 +8,7 @@ import {
     ResponseGrp, RichText,
     Trans0X211,
     WPATmp
-} from "@/core/packet/transformer/proto";
+} from '@/core/packet/transformer/proto';
 
 export const ContentHead = {
     type: ProtoField(1, ScalarType.UINT32),

@@ -1,6 +1,6 @@
-import { NCoreInitShell } from "@/shell/base";
-export * from "@/framework/napcat";
-export * from "@/shell/base";
+import { NCoreInitShell } from '@/shell/base';
+export * from '@/framework/napcat';
+export * from '@/shell/base';
 
 interface LiteLoaderGlobal extends Global {
     LiteLoader?: unknown;

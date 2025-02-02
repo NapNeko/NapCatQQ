@@ -1,6 +1,6 @@
 import { ActionName } from '@/onebot/action/router';
 import { FileNapCatOneBotUUID } from '@/common/file-uuid';
-import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
+import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
 import { Static, Type } from '@sinclair/typebox';
 
 const SchemaData = Type.Object({

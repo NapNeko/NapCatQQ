@@ -7,8 +7,8 @@ export abstract class GetPacketStatusDepends<PT, RT> extends OneBotAction<PT, RT
         if (!this.core.apis.PacketApi.available) {
             return {
                 valid: false,
-                message: "packetBackend不可用，请参照文档 https://napneko.github.io/config/advanced 和启动日志检查packetBackend状态或进行配置！" +
-                    "错误堆栈信息：" + this.core.apis.PacketApi.clientLogStack,
+                message: 'packetBackend不可用，请参照文档 https://napneko.github.io/config/advanced 和启动日志检查packetBackend状态或进行配置！' +
+                    '错误堆栈信息：' + this.core.apis.PacketApi.clientLogStack,
             };
         }
         return await super.check(payload);

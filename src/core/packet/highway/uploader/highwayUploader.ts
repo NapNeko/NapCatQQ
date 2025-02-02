@@ -1,8 +1,8 @@
-import * as tea from "@/core/packet/utils/crypto/tea";
-import { NapProtoMsg } from "@napneko/nap-proto-core";
-import { PacketHighwayTrans } from "@/core/packet/highway/client";
-import { PacketLogger } from "@/core/packet/context/loggerContext";
-import * as proto from "@/core/packet/transformer/proto";
+import * as tea from '@/core/packet/utils/crypto/tea';
+import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { PacketHighwayTrans } from '@/core/packet/highway/client';
+import { PacketLogger } from '@/core/packet/context/loggerContext';
+import * as proto from '@/core/packet/transformer/proto';
 
 export abstract class IHighwayUploader {
     readonly trans: PacketHighwayTrans;
@@ -32,7 +32,7 @@ export abstract class IHighwayUploader {
             msgBaseHead: {
                 version: 1,
                 uin: this.trans.uin,
-                command: "PicUp.DataUp",
+                command: 'PicUp.DataUp',
                 seq: 0,
                 retryTimes: 0,
                 appId: 1600001604,
