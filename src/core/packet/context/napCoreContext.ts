@@ -1,4 +1,4 @@
-import { NapCatCore } from "@/core";
+import { NapCatCore } from '@/core';
 
 export interface NapCoreCompatBasicInfo {
     readonly uin: number;

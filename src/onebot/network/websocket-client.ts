@@ -7,8 +7,8 @@ import { OB11Response } from '@/onebot/action/OneBotAction';
 import { ActionMap } from '@/onebot/action';
 import { LifeCycleSubType, OB11LifeCycleEvent } from '@/onebot/event/meta/OB11LifeCycleEvent';
 import { WebsocketClientConfig } from '@/onebot/config/config';
-import { NapCatOneBot11Adapter } from "@/onebot";
-import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
+import { NapCatOneBot11Adapter } from '@/onebot';
+import { IOB11NetworkAdapter } from '@/onebot/network/adapter';
 import json5 from 'json5';
 
 export class OB11WebSocketClientAdapter extends IOB11NetworkAdapter<WebsocketClientConfig> {

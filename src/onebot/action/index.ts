@@ -85,9 +85,9 @@ import { GetRkey } from './extends/GetRkey';
 import { SetSpecialTittle } from './extends/SetSpecialTittle';
 import { GetGroupShutList } from './group/GetGroupShutList';
 import { GetGroupMemberList } from './group/GetGroupMemberList';
-import { GetGroupFileUrl } from "@/onebot/action/file/GetGroupFileUrl";
-import { GetPacketStatus } from "@/onebot/action/packet/GetPacketStatus";
-import { FriendPoke } from "@/onebot/action/user/FriendPoke";
+import { GetGroupFileUrl } from '@/onebot/action/file/GetGroupFileUrl';
+import { GetPacketStatus } from '@/onebot/action/packet/GetPacketStatus';
+import { FriendPoke } from '@/onebot/action/user/FriendPoke';
 import { GetCredentials } from './system/GetCredentials';
 import { SendGroupSign, SetGroupSign } from './extends/SetGroupSign';
 import { GoCQHTTPGetGroupAtAllRemain } from './go-cqhttp/GetGroupAtAllRemain';
@@ -95,15 +95,15 @@ import { GoCQHTTPCheckUrlSafely } from './go-cqhttp/GoCQHTTPCheckUrlSafely';
 import { GoCQHTTPGetModelShow } from './go-cqhttp/GoCQHTTPGetModelShow';
 import { GoCQHTTPSetModelShow } from './go-cqhttp/GoCQHTTPSetModelShow';
 import { GoCQHTTPDeleteFriend } from './go-cqhttp/GoCQHTTPDeleteFriend';
-import { GetMiniAppArk } from "@/onebot/action/extends/GetMiniAppArk";
-import { GetAiRecord } from "@/onebot/action/group/GetAiRecord";
-import { SendGroupAiRecord } from "@/onebot/action/group/SendGroupAiRecord";
-import { GetAiCharacters } from "@/onebot/action/extends/GetAiCharacters";
+import { GetMiniAppArk } from '@/onebot/action/extends/GetMiniAppArk';
+import { GetAiRecord } from '@/onebot/action/group/GetAiRecord';
+import { SendGroupAiRecord } from '@/onebot/action/group/SendGroupAiRecord';
+import { GetAiCharacters } from '@/onebot/action/extends/GetAiCharacters';
 import { GetGuildList } from './guild/GetGuildList';
 import { GetGuildProfile } from './guild/GetGuildProfile';
 import { GetClientkey } from './extends/GetClientkey';
 import { SendPacket } from './extends/SendPacket';
-import { SendPoke } from "@/onebot/action/packet/SendPoke";
+import { SendPoke } from '@/onebot/action/packet/SendPoke';
 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 

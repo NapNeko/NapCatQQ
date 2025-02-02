@@ -1,4 +1,4 @@
-import { ElementType, MessageElement, NTGrayTipElementSubTypeV2, PicSubType, PicType, TipAioOpGrayTipElement, TipGroupElement, NTVideoType, FaceType } from "./msg";
+import { ElementType, MessageElement, NTGrayTipElementSubTypeV2, PicSubType, PicType, TipAioOpGrayTipElement, TipGroupElement, NTVideoType, FaceType } from './msg';
 
 type ElementFullBase = Omit<MessageElement, 'elementType' | 'elementId' | 'extBufForUI'>;
 

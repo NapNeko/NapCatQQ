@@ -28,7 +28,7 @@ import { uriToLocalFile } from '@/common/file';
 import { RequestUtil } from '@/common/request';
 import fsPromise, { constants } from 'node:fs/promises';
 import { OB11FriendAddNoticeEvent } from '@/onebot/event/notice/OB11FriendAddNoticeEvent';
-import { ForwardMsgBuilder } from "@/common/forward-msg-builder";
+import { ForwardMsgBuilder } from '@/common/forward-msg-builder';
 import { NapProtoMsg } from '@napneko/nap-proto-core';
 import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
 import { OB11GroupDecreaseEvent, GroupDecreaseSubType } from '../event/notice/OB11GroupDecreaseEvent';
@@ -203,7 +203,7 @@ export class OneBotMsgApi {
             const dir = emojiId.substring(0, 2);
             const url = `https://gxh.vip.qq.com/club/item/parcel/item/${dir}/${emojiId}/raw300.gif`;
             const filename = `${dir}-${emojiId}.gif`;
-            FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "", filename);
+            FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, '', filename);
             return {
                 type: OB11MessageDataType.image,
                 data: {
@@ -346,7 +346,7 @@ export class OneBotMsgApi {
                 peerUid: msg.peerUid,
                 guildId: '',
             };
-            const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "", element.fileName);
+            const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, '', element.fileName);
             return {
                 type: OB11MessageDataType.voice,
                 data: {
@@ -657,14 +657,14 @@ export class OneBotMsgApi {
 
         [OB11MessageDataType.miniapp]: async () => undefined,
 
-        [OB11MessageDataType.contact]: async ({ data: { type = "qq", id } }, context) => {
-            if (type === "qq") {
+        [OB11MessageDataType.contact]: async ({ data: { type = 'qq', id } }, context) => {
+            if (type === 'qq') {
                 const arkJson = await this.core.apis.UserApi.getBuddyRecommendContactArkJson(id.toString(), '');
                 return this.ob11ToRawConverters.json({
                     data: { data: arkJson.arkMsg },
                     type: OB11MessageDataType.json
                 }, context);
-            } else if (type === "group") {
+            } else if (type === 'group') {
                 const arkJson = await this.core.apis.GroupApi.getGroupRecommendContactArkJson(id.toString());
                 return this.ob11ToRawConverters.json({
                     data: { data: arkJson.arkJson },

@@ -6,7 +6,7 @@ import { NapCatOneBot11Adapter } from '..';
 import { RequestUtil } from '@/common/request';
 import { HttpClientConfig } from '@/onebot/config/config';
 import { ActionMap } from '@/onebot/action';
-import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
+import { IOB11NetworkAdapter } from '@/onebot/network/adapter';
 import json5 from 'json5';
 
 export class OB11HttpClientAdapter extends IOB11NetworkAdapter<HttpClientConfig> {

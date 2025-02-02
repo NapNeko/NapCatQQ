@@ -303,7 +303,7 @@ function textElementToText(textElement: any): string {
         const originalContentLines = textElement.content.split('\n');
         return `${originalContentLines[0]}${originalContentLines.length > 1 ? ' ...' : ''}`;
     } else if (textElement.atType === NTMsgAtType.ATTYPEALL) {
-        return `@全体成员`;
+        return '@全体成员';
     } else if (textElement.atType === NTMsgAtType.ATTYPEONE) {
         return `${textElement.content} (${textElement.atUid})`;
     }

@@ -1,7 +1,7 @@
-import * as proto from "@/core/packet/transformer/proto";
-import { NapProtoEncodeStructType, NapProtoMsg } from "@napneko/nap-proto-core";
-import { OidbPacket, PacketTransformer } from "@/core/packet/transformer/base";
-import OidbBase from "@/core/packet/transformer/oidb/oidbBase";
+import * as proto from '@/core/packet/transformer/proto';
+import { NapProtoEncodeStructType, NapProtoMsg } from '@napneko/nap-proto-core';
+import { OidbPacket, PacketTransformer } from '@/core/packet/transformer/base';
+import OidbBase from '@/core/packet/transformer/oidb/oidbBase';
 
 class DownloadGroupPtt extends PacketTransformer<typeof proto.NTV2RichMediaResp> {
     constructor() {

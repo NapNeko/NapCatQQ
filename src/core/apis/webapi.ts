@@ -322,18 +322,18 @@ export class NTQQWebApi {
                     data: pskey,
                     appid: 5
                 },
-                appid: "qun",
+                appid: 'qun',
                 checksum: img_md5,
                 check_type: 0,
                 file_len: img_size,
                 env: {
-                    refer: "qzone",
-                    deviceInfo: "h5"
+                    refer: 'qzone',
+                    deviceInfo: 'h5'
                 },
                 model: 0,
                 biz_req: {
                     sPicTitle: img_name,
-                    sPicDesc: "",
+                    sPicDesc: '',
                     sAlbumName: sAlbumName,
                     sAlbumID: sAlbumID,
                     iAlbumTypeID: 0,
@@ -341,7 +341,7 @@ export class NTQQWebApi {
                     iUploadType: 0,
                     iUpPicType: 0,
                     iBatchID: time,
-                    sPicPath: "",
+                    sPicPath: '',
                     iPicWidth: 0,
                     iPicHight: 0,
                     iWaterType: 0,
@@ -349,19 +349,19 @@ export class NTQQWebApi {
                     iNeedFeeds: 1,
                     iUploadTime: time,
                     mapExt: {
-                        appid: "qun",
+                        appid: 'qun',
                         userid: gc
                     }
                 },
-                session: "",
+                session: '',
                 asy_upload: 0,
-                cmd: "FileUpload"
+                cmd: 'FileUpload'
             }]
         };
         const api = `https://h5.qzone.qq.com/webapp/json/sliceUpload/FileBatchControl/${img_md5}?g_tk=${GTK}`;
         const post = await RequestUtil.HttpGetJson(api, 'POST', body, {
-            "Cookie": cookie,
-            "Content-Type": "application/json"
+            'Cookie': cookie,
+            'Content-Type': 'application/json'
         });
 
         return post;

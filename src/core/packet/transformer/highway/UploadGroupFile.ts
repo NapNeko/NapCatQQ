@@ -1,8 +1,8 @@
-import * as proto from "@/core/packet/transformer/proto";
-import { NapProtoMsg } from "@napneko/nap-proto-core";
-import { OidbPacket, PacketTransformer } from "@/core/packet/transformer/base";
-import OidbBase from "@/core/packet/transformer/oidb/oidbBase";
-import { PacketMsgFileElement } from "@/core/packet/message/element";
+import * as proto from '@/core/packet/transformer/proto';
+import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { OidbPacket, PacketTransformer } from '@/core/packet/transformer/base';
+import OidbBase from '@/core/packet/transformer/oidb/oidbBase';
+import { PacketMsgFileElement } from '@/core/packet/message/element';
 
 class UploadGroupFile extends PacketTransformer<typeof proto.OidbSvcTrpcTcp0x6D6Response> {
     constructor() {

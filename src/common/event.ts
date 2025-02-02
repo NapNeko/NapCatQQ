@@ -209,8 +209,8 @@ export class NTEventWrapper {
         }
 
         const ListenerNameList = listenerAndMethod.split('/');
-        const ListenerMainName = ListenerNameList[0]??"";
-        const ListenerSubName = ListenerNameList[1]??"";
+        const ListenerMainName = ListenerNameList[0]??'';
+        const ListenerSubName = ListenerNameList[1]??'';
 
         return new Promise<[EventRet: Awaited<ReturnType<EventType>>, ...Parameters<ListenerType>]>(
             (resolve, reject) => {

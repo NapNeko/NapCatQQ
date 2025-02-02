@@ -1,5 +1,5 @@
-import Piscina from "piscina";
-import { VideoInfo } from "./video";
+import Piscina from 'piscina';
+import { VideoInfo } from './video';
 
 type EncodeArgs = {
     method: 'extractThumbnail' | 'convertFile' | 'convert' | 'getVideoInfo';

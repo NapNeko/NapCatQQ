@@ -1,4 +1,4 @@
-import { encode } from "silk-wasm";
+import { encode } from 'silk-wasm';
 
 export interface EncodeArgs {
     input: ArrayBufferView | ArrayBuffer

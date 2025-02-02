@@ -108,9 +108,9 @@ class FFmpegService {
             const message = msg.join(' ');
             const durationMatch = message.match(/Duration: (\d+):(\d+):(\d+\.\d+)/);
             if (durationMatch) {
-                const hours = parseInt(durationMatch[1] ?? "0", 10);
-                const minutes = parseInt(durationMatch[2] ?? "0", 10);
-                const seconds = parseFloat(durationMatch[3] ?? "0");
+                const hours = parseInt(durationMatch[1] ?? '0', 10);
+                const minutes = parseInt(durationMatch[2] ?? '0', 10);
+                const seconds = parseFloat(durationMatch[3] ?? '0');
                 duration = hours * 3600 + minutes * 60 + seconds;
             }
         });

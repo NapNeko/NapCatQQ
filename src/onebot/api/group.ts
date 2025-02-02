@@ -148,7 +148,7 @@ export class OneBotGroupApi {
     async parseOtherJsonEvent(msg: RawMessage, jsonStr: string, context: InstanceContext) {
         const json = JSON.parse(jsonStr);
         const type = json.items[json.items.length - 1]?.txt;
-        if (type === "头衔") {
+        if (type === '头衔') {
             const memberUin = json.items[1].param[0];
             const title = json.items[3].txt;
             context.logger.logDebug('收到群成员新头衔消息', json);
@@ -158,7 +158,7 @@ export class OneBotGroupApi {
                 parseInt(memberUin),
                 title,
             );
-        } else if (type === "移出") {
+        } else if (type === '移出') {
             context.logger.logDebug('收到机器人被踢消息', json);
             return;
         } else {

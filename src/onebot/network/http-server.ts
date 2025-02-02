@@ -6,8 +6,8 @@ import { OB11Response } from '@/onebot/action/OneBotAction';
 import { ActionMap } from '@/onebot/action';
 import cors from 'cors';
 import { HttpServerConfig } from '@/onebot/config/config';
-import { NapCatOneBot11Adapter } from "@/onebot";
-import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
+import { NapCatOneBot11Adapter } from '@/onebot';
+import { IOB11NetworkAdapter } from '@/onebot/network/adapter';
 import json5 from 'json5';
 
 export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig> {
@@ -119,7 +119,7 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
 
     async handleRequest(req: Request, res: Response) {
         if (!this.isEnable) {
-            this.core.context.logger.log(`[OneBot] [HTTP Server Adapter] Server is closed`);
+            this.core.context.logger.log('[OneBot] [HTTP Server Adapter] Server is closed');
             return res.json(OB11Response.error('Server is closed', 200));
         }
 

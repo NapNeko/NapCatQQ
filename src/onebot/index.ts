@@ -50,7 +50,7 @@ import {
 } from './config/config';
 import { OB11Message } from './types';
 import { OB11PluginAdapter } from './network/plugin';
-import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
+import { IOB11NetworkAdapter } from '@/onebot/network/adapter';
 import { OB11HttpSSEServerAdapter } from './network/http-server-sse';
 
 //OneBot实现类
@@ -82,7 +82,7 @@ export class NapCatOneBot11Adapter {
         this.networkManager = new OB11NetworkManager();
     }
     async creatOneBotLog(ob11Config: OneBotConfig) {
-        let log = `[network] 配置加载\n`;
+        let log = '[network] 配置加载\n';
         for (const key of ob11Config.network.httpServers) {
             log += `HTTP服务: ${key.host}:${key.port}, : ${key.enable ? '已启动' : '未启动'}\n`;
         }

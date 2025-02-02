@@ -52,7 +52,7 @@ export function loadQQWrapper(QQVersion: string): WrapperNodeApi {
     }
     let wrapperNodePath = path.resolve(appPath, 'wrapper.node');
     if (!fs.existsSync(wrapperNodePath)) {
-        wrapperNodePath = path.join(appPath, `./resources/app/wrapper.node`);
+        wrapperNodePath = path.join(appPath, './resources/app/wrapper.node');
     }
     //老版本兼容 未来去掉
     if (!fs.existsSync(wrapperNodePath)) {
@@ -74,7 +74,7 @@ export function getMajorPath(QQVersion: string): string {
     }
     let majorPath = path.resolve(appPath, 'major.node');
     if (!fs.existsSync(majorPath)) {
-        majorPath = path.join(appPath, `./resources/app/major.node`);
+        majorPath = path.join(appPath, './resources/app/major.node');
     }
     //老版本兼容 未来去掉
     if (!fs.existsSync(majorPath)) {
@@ -177,7 +177,7 @@ export class NapCatCore {
         profileListener.onSelfStatusChanged = (Info: SelfStatusInfo) => {
             if (Info.status == 20) {
                 this.selfInfo.online = false;
-                this.context.logger.log("账号状态变更为离线");
+                this.context.logger.log('账号状态变更为离线');
             } else {
                 this.selfInfo.online = true;
             }

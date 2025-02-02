@@ -4,8 +4,8 @@ import path from 'node:path';
 import { randomUUID } from 'crypto';
 import { EncodeResult, getDuration, getWavFileInfo, isSilk, isWav } from 'silk-wasm';
 import { LogWrapper } from '@/common/log';
-import { EncodeArgs } from "@/common/audio-worker";
-import { FFmpegService } from "@/common/ffmpeg";
+import { EncodeArgs } from '@/common/audio-worker';
+import { FFmpegService } from '@/common/ffmpeg';
 
 const ALLOW_SAMPLE_RATE = [8000, 12000, 16000, 24000, 32000, 44100, 48000];
 

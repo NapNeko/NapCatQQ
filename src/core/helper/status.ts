@@ -1,5 +1,5 @@
-import os from "node:os";
-import EventEmitter from "node:events";
+import os from 'node:os';
+import EventEmitter from 'node:events';
 
 export interface SystemStatus {
     cpu: {

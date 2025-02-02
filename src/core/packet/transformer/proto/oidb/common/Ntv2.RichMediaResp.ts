@@ -1,5 +1,5 @@
-import { ProtoField, ScalarType } from "@napneko/nap-proto-core";
-import { CommonHead, MsgInfo, PicUrlExtInfo, VideoExtInfo } from "@/core/packet/transformer/proto";
+import { ProtoField, ScalarType } from '@napneko/nap-proto-core';
+import { CommonHead, MsgInfo, PicUrlExtInfo, VideoExtInfo } from '@/core/packet/transformer/proto';
 
 
 export const NTV2RichMediaResp = {

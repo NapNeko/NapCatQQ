@@ -4,7 +4,7 @@ import { NapCatCore } from '@/core';
 import { PluginConfig } from '../config/config';
 import { plugin_onmessage } from '@/plugin';
 import { ActionMap } from '../action';
-import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
+import { IOB11NetworkAdapter } from '@/onebot/network/adapter';
 
 export class OB11PluginAdapter extends IOB11NetworkAdapter<PluginConfig> {
     constructor(

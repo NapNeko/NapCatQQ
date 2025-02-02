@@ -18,7 +18,7 @@ export class GoCQHTTPGetModelShow extends OneBotAction<Payload, any> {
         }
         return [{
             variants: {
-                model_show: "napcat",
+                model_show: 'napcat',
                 need_pay: false
             }
         }];
