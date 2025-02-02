@@ -89,7 +89,11 @@ class TerminalManager {
                     instance.sockets.delete(ws);
                     if (instance.sockets.size === 0 && !instance.isClosing) {
                         instance.isClosing = true;
-                        instance.pty.kill();
+                        if (os.platform() === 'win32') {
+                            process.kill(instance.pty.pid);
+                        } else {
+                            instance.pty.kill();
+                        }
                     }
                 });
             } catch (err) {
@@ -145,7 +149,11 @@ class TerminalManager {
         if (instance) {
             if (!instance.isClosing) {
                 instance.isClosing = true;
-                instance.pty.kill();
+                if (os.platform() === 'win32') {
+                    process.kill(instance.pty.pid);
+                } else {
+                    instance.pty.kill();
+                }
             }
             instance.sockets.forEach((ws) => ws.close());
             this.terminals.delete(id);
