@@ -28,6 +28,10 @@ const getRootDirs = async (): Promise<string[]> => {
 // 规范化路径
 const normalizePath = (inputPath: string): string => {
     if (!inputPath) return isWindows ? 'C:\\' : '/';
+    // 如果是Windows且输入为纯盘符（可能带或不带斜杠），统一返回 "X:\"
+    if (isWindows && /^[A-Z]:[\\/]*$/i.test(inputPath)) {
+        return inputPath.slice(0, 2) + '\\';
+    }
     return path.normalize(inputPath);
 };
 
@@ -40,16 +44,6 @@ interface FileInfo {
 
 // 添加系统文件黑名单
 const SYSTEM_FILES = new Set(['pagefile.sys', 'swapfile.sys', 'hiberfil.sys', 'System Volume Information']);
-
-// 检查文件或目录是否存在
-const checkExists = async (pathToCheck: string): Promise<boolean> => {
-    try {
-        await fs.access(pathToCheck);
-        return true;
-    } catch {
-        return false;
-    }
-};
 
 // 检查同类型的文件或目录是否存在
 const checkSameTypeExists = async (pathToCheck: string, isDirectory: boolean): Promise<boolean> => {
@@ -67,6 +61,7 @@ export const ListFilesHandler: RequestHandler = async (req, res) => {
     try {
         const requestPath = (req.query.path as string) || (isWindows ? 'C:\\' : '/');
         const normalizedPath = normalizePath(requestPath);
+        const onlyDirectory = req.query.onlyDirectory === 'true';
 
         // 如果是根路径且在Windows系统上，返回盘符列表
         if (isWindows && (!requestPath || requestPath === '/' || requestPath === '\\')) {
@@ -95,7 +90,7 @@ export const ListFilesHandler: RequestHandler = async (req, res) => {
         }
 
         const files = await fs.readdir(normalizedPath);
-        const fileInfos: FileInfo[] = [];
+        let fileInfos: FileInfo[] = [];
 
         for (const file of files) {
             // 跳过系统文件
@@ -117,9 +112,14 @@ export const ListFilesHandler: RequestHandler = async (req, res) => {
             }
         }
 
+        // 如果请求参数 onlyDirectory 为 true，则只返回目录信息
+        if (onlyDirectory) {
+            fileInfos = fileInfos.filter((info) => info.isDirectory);
+        }
+
         return sendSuccess(res, fileInfos);
     } catch (error) {
-        // console.error('读取目录失败:', error);
+        console.error('读取目录失败:', error);
         return sendError(res, '读取目录失败');
     }
 };

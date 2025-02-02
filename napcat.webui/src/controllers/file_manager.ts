@@ -15,6 +15,14 @@ export default class FileManager {
     return data.data
   }
 
+  // 新增：按目录获取
+  public static async listDirectories(path: string = '/') {
+    const { data } = await serverRequest.get<ServerResponse<FileInfo[]>>(
+      `/File/list?path=${encodeURIComponent(path)}&onlyDirectory=true`
+    )
+    return data.data
+  }
+
   public static async createDirectory(path: string): Promise<boolean> {
     const { data } = await serverRequest.post<ServerResponse<boolean>>(
       '/File/mkdir',
