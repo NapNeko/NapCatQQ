@@ -11,6 +11,8 @@ interface TerminalInstance {
     pty: IPty; // 改用 PTY 实例
     lastAccess: number;
     sockets: Set<WebSocket>;
+    // 新增标识，用于防止重复关闭
+    isClosing: boolean;
 }
 
 class TerminalManager {
@@ -85,7 +87,8 @@ class TerminalManager {
 
                 ws.on('close', () => {
                     instance.sockets.delete(ws);
-                    if (instance.sockets.size === 0) {
+                    if (instance.sockets.size === 0 && !instance.isClosing) {
+                        instance.isClosing = true;
                         instance.pty.kill();
                     }
                 });
@@ -117,6 +120,7 @@ class TerminalManager {
             pty,
             lastAccess: Date.now(),
             sockets: new Set(),
+            isClosing: false,
         };
 
         pty.onData((data: any) => {
@@ -139,7 +143,10 @@ class TerminalManager {
     closeTerminal(id: string) {
         const instance = this.terminals.get(id);
         if (instance) {
-            instance.pty.kill();
+            if (!instance.isClosing) {
+                instance.isClosing = true;
+                instance.pty.kill();
+            }
             instance.sockets.forEach((ws) => ws.close());
             this.terminals.delete(id);
         }
