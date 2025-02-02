@@ -60,12 +60,16 @@ export class NTEventWrapper {
             [key: string]: () => { [key: string]: (...params: Parameters<T>) => Promise<ReturnType<T>> };
         };
         if (eventNameArr.length > 1) {
-            const serviceName = 'get' + eventNameArr[0].replace('NodeIKernel', '');
+            const serviceName = 'get' + (eventNameArr[0]?.replace('NodeIKernel', '') ?? '');
             const eventName = eventNameArr[1];
-            const services = (this.WrapperSession as unknown as eventType)[serviceName]();
+            const services = (this.WrapperSession as unknown as eventType)[serviceName]?.();
+            if (!services || !eventName) {
+                return undefined;
+            }
             let event = services[eventName];
+
             //重新绑定this
-            event = event.bind(services);
+            event = event?.bind(services);
             if (event) {
                 return event as T;
             }
@@ -126,8 +130,8 @@ export class NTEventWrapper {
     ) {
         return new Promise<Parameters<ListenerType>>((resolve, reject) => {
             const ListenerNameList = listenerAndMethod.split('/');
-            const ListenerMainName = ListenerNameList[0];
-            const ListenerSubName = ListenerNameList[1];
+            const ListenerMainName = ListenerNameList[0] ?? '';
+            const ListenerSubName = ListenerNameList[1] ?? '';
             const id = randomUUID();
             let complete = 0;
             let retData: Parameters<ListenerType> | undefined = undefined;
@@ -205,8 +209,8 @@ export class NTEventWrapper {
         }
 
         const ListenerNameList = listenerAndMethod.split('/');
-        const ListenerMainName = ListenerNameList[0];
-        const ListenerSubName = ListenerNameList[1];
+        const ListenerMainName = ListenerNameList[0]??"";
+        const ListenerSubName = ListenerNameList[1]??"";
 
         return new Promise<[EventRet: Awaited<ReturnType<EventType>>, ...Parameters<ListenerType>]>(
             (resolve, reject) => {

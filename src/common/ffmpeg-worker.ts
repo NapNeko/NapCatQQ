@@ -1,18 +1,17 @@
 import { FFmpeg } from '@ffmpeg.wasm/main';
 import { randomUUID } from 'crypto';
 import { readFileSync, statSync, writeFileSync } from 'fs';
-import type { LogWrapper } from './log';
 import type { VideoInfo } from './video';
 import { fileTypeFromFile } from 'file-type';
 import imageSize from 'image-size';
- class FFmpegService {
+class FFmpegService {
     public static async extractThumbnail(videoPath: string, thumbnailPath: string): Promise<void> {
         const ffmpegInstance = await FFmpeg.create({ core: '@ffmpeg.wasm/core-mt' });
         const videoFileName = `${randomUUID()}.mp4`;
         const outputFileName = `${randomUUID()}.jpg`;
         try {
             ffmpegInstance.fs.writeFile(videoFileName, readFileSync(videoPath));
-            let code = await ffmpegInstance.run('-i', videoFileName, '-ss', '00:00:01.000', '-vframes', '1', outputFileName);
+            const code = await ffmpegInstance.run('-i', videoFileName, '-ss', '00:00:01.000', '-vframes', '1', outputFileName);
             if (code !== 0) {
                 throw new Error('Error extracting thumbnail: FFmpeg process exited with code ' + code);
             }
@@ -44,7 +43,7 @@ import imageSize from 'image-size';
             const params = format === 'amr'
                 ? ['-f', 's16le', '-ar', '24000', '-ac', '1', '-i', inputFileName, '-ar', '8000', '-b:a', '12.2k', outputFileName]
                 : ['-f', 's16le', '-ar', '24000', '-ac', '1', '-i', inputFileName, outputFileName];
-            let code = await ffmpegInstance.run(...params);
+            const code = await ffmpegInstance.run(...params);
             if (code !== 0) {
                 throw new Error('Error extracting thumbnail: FFmpeg process exited with code ' + code);
             }
@@ -74,7 +73,7 @@ import imageSize from 'image-size';
         try {
             ffmpegInstance.fs.writeFile(inputFileName, readFileSync(filePath));
             const params = ['-y', '-i', inputFileName, '-ar', '24000', '-ac', '1', '-f', 's16le', outputFileName];
-            let code = await ffmpegInstance.run(...params);
+            const code = await ffmpegInstance.run(...params);
             if (code !== 0) {
                 throw new Error('FFmpeg process exited with code ' + code);
             }
@@ -96,27 +95,27 @@ import imageSize from 'image-size';
             }
         }
     }
-    
+
     public static async getVideoInfo(videoPath: string, thumbnailPath: string): Promise<VideoInfo> {
         await FFmpegService.extractThumbnail(videoPath, thumbnailPath);
-        let fileType = (await fileTypeFromFile(videoPath))?.ext ?? 'mp4';
+        const fileType = (await fileTypeFromFile(videoPath))?.ext ?? 'mp4';
         const inputFileName = `${randomUUID()}.${fileType}`;
         const ffmpegInstance = await FFmpeg.create({ core: '@ffmpeg.wasm/core-mt' });
         ffmpegInstance.fs.writeFile(inputFileName, readFileSync(videoPath));
         ffmpegInstance.setLogging(true);
         let duration = 60;
-        ffmpegInstance.setLogger((level, ...msg) => {
+        ffmpegInstance.setLogger((_level, ...msg) => {
             const message = msg.join(' ');
             const durationMatch = message.match(/Duration: (\d+):(\d+):(\d+\.\d+)/);
             if (durationMatch) {
-                const hours = parseInt(durationMatch[1], 10);
-                const minutes = parseInt(durationMatch[2], 10);
-                const seconds = parseFloat(durationMatch[3]);
+                const hours = parseInt(durationMatch[1] ?? "0", 10);
+                const minutes = parseInt(durationMatch[2] ?? "0", 10);
+                const seconds = parseFloat(durationMatch[3] ?? "0");
                 duration = hours * 3600 + minutes * 60 + seconds;
             }
         });
         await ffmpegInstance.run('-i', inputFileName);
-        let image = imageSize(thumbnailPath);
+        const image = imageSize(thumbnailPath);
         ffmpegInstance.fs.unlink(inputFileName);
         const fileSize = statSync(videoPath).size;
         return {
@@ -126,7 +125,7 @@ import imageSize from 'image-size';
             format: fileType,
             size: fileSize,
             filePath: videoPath
-        }
+        };
     }
 }
 type FFmpegMethod = 'extractThumbnail' | 'convertFile' | 'convert' | 'getVideoInfo';
@@ -137,15 +136,15 @@ interface FFmpegTask {
 }
 export default async function handleFFmpegTask({ method, args }: FFmpegTask): Promise<any> {
     switch (method) {
-        case 'extractThumbnail':
-            return await FFmpegService.extractThumbnail(...args as [string, string]);
-        case 'convertFile':
-            return await FFmpegService.convertFile(...args as [string, string, string]);
-        case 'convert':
-            return await FFmpegService.convert(...args as [string, string]);
-        case 'getVideoInfo':
-            return await FFmpegService.getVideoInfo(...args as [string, string]);
-        default:
-            throw new Error(`Unknown method: ${method}`);
+    case 'extractThumbnail':
+        return await FFmpegService.extractThumbnail(...args as [string, string]);
+    case 'convertFile':
+        return await FFmpegService.convertFile(...args as [string, string, string]);
+    case 'convert':
+        return await FFmpegService.convert(...args as [string, string]);
+    case 'getVideoInfo':
+        return await FFmpegService.getVideoInfo(...args as [string, string]);
+    default:
+        throw new Error(`Unknown method: ${method}`);
     }
 }
