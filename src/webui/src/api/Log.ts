@@ -40,8 +40,7 @@ export const LogRealTimeHandler: RequestHandler = async (req, res) => {
 // 终端相关处理器
 export const CreateTerminalHandler: RequestHandler = async (req, res) => {
     try {
-        const id = Math.random().toString(36).substring(2);
-        terminalManager.createTerminal(id);
+        const { id } = terminalManager.createTerminal();
         return sendSuccess(res, { id });
     } catch (error) {
         console.error('Failed to create terminal:', error);
