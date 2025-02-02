@@ -1,9 +1,10 @@
+import './init-dynamic-dirname';
 import { WebUiConfig } from '@/webui';
 import { AuthHelper } from '../helper/SignToken';
 import { LogWrapper } from '@/common/log';
 import { WebSocket, WebSocketServer } from 'ws';
 import os from 'os';
-import { IPty, spawn as ptySpawn } from '@homebridge/node-pty-prebuilt-multiarch';
+import { type IPty, spawn as ptySpawn } from '@homebridge/node-pty-prebuilt-multiarch';
 import { randomUUID } from 'crypto';
 
 interface TerminalInstance {

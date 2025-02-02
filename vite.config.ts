@@ -12,7 +12,7 @@ const external = [
     'piscina',
     '@ffmpeg.wasm/core-mt',
     '@ffmpeg.wasm/main',
-    'node-pty',
+    '@homebridge/node-pty-prebuilt-multiarch',
 ];
 const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`)].flat();
 
