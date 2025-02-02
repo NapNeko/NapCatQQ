@@ -3,7 +3,7 @@ import { AuthHelper } from '../helper/SignToken';
 import { LogWrapper } from '@/common/log';
 import { WebSocket, WebSocketServer } from 'ws';
 import os from 'os';
-import { IPty, spawn as ptySpawn } from 'node-pty';
+import { IPty, spawn as ptySpawn } from '@homebridge/node-pty-prebuilt-multiarch';
 import { randomUUID } from 'crypto';
 
 interface TerminalInstance {
