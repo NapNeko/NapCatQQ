@@ -1,12 +1,11 @@
 import { OB11EmitEventContent } from './index';
 import { Request, Response } from 'express';
-import { OB11Response } from '@/onebot/action/OneBotAction';
 import { OB11HttpServerAdapter } from './http-server';
 
 export class OB11HttpSSEServerAdapter extends OB11HttpServerAdapter {
     private sseClients: Response[] = [];
 
-    async handleRequest(req: Request, res: Response): Promise<any> {
+    override async handleRequest(req: Request, res: Response): Promise<any> {
         if (req.path === '/_events') {
             return this.createSseSupport(req, res);
         } else {
@@ -26,7 +25,7 @@ export class OB11HttpSSEServerAdapter extends OB11HttpServerAdapter {
         });
     }
 
-    onEvent<T extends OB11EmitEventContent>(event: T) {
+    override onEvent<T extends OB11EmitEventContent>(event: T) {
         this.sseClients.forEach((res) => {
             res.write(`data: ${JSON.stringify(event)}\n\n`);
         });

@@ -190,7 +190,7 @@ export async function uriToLocalFile(dir: string, uri: string, filename: string 
     }
 
     case FileUriType.Remote: {
-        const buffer = await httpDownload({ url: HandledUri, headers: headers });
+        const buffer = await httpDownload({ url: HandledUri, headers: headers ?? {} });
         fs.writeFileSync(filePath, buffer);
         return { success: true, errMsg: '', fileName: filename, path: filePath };
     }

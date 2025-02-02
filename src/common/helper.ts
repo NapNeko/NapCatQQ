@@ -166,7 +166,7 @@ export function calcQQLevel(level?: QQLevel) {
 }
 
 export function stringifyWithBigInt(obj: any) {
-    return JSON.stringify(obj, (key, value) =>
+    return JSON.stringify(obj, (_key, value) =>
         typeof value === 'bigint' ? value.toString() : value
     );
 }

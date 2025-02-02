@@ -68,7 +68,10 @@ export class LimitedHashTable<K, V> {
         const listSize = Math.min(size, keyList.length);
         for (let i = 0; i < listSize; i++) {
             const key = keyList[listSize - i];
-            result.push({ key, value: this.keyToValue.get(key)! });
+            if (key !== undefined) {
+                result.push({ key, value: this.keyToValue.get(key)! });
+            }
+
         }
         return result;
     }
@@ -96,8 +99,10 @@ class MessageUniqueWrapper {
     createUniqueMsgId(peer: Peer, msgId: string) {
         const key = `${msgId}|${peer.chatType}|${peer.peerUid}`;
         const hash = crypto.createHash('md5').update(key).digest();
-        //设置第一个bit为0 保证shortId为正数
-        hash[0] &= 0x7f;
+        if (hash[0]) {
+            //设置第一个bit为0 保证shortId为正数
+            hash[0] &= 0x7f;
+        }
         const shortId = hash.readInt32BE(0);
         //减少性能损耗
         this.msgIdMap.set(msgId, shortId);
@@ -110,11 +115,11 @@ class MessageUniqueWrapper {
         if (data) {
             const [msgId, chatTypeStr, peerUid] = data.split('|');
             const peer: Peer = {
-                chatType: parseInt(chatTypeStr),
-                peerUid,
+                chatType: parseInt(chatTypeStr ?? '0'),
+                peerUid: peerUid ?? '',
                 guildId: '',
             };
-            return { MsgId: msgId, Peer: peer };
+            return { MsgId: msgId ?? '0', Peer: peer };
         }
         return undefined;
     }

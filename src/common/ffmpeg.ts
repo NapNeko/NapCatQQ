@@ -1,6 +1,5 @@
 import Piscina from "piscina";
 import { VideoInfo } from "./video";
-import type { LogWrapper } from "./log";
 
 type EncodeArgs = {
     method: 'extractThumbnail' | 'convertFile' | 'convert' | 'getVideoInfo';

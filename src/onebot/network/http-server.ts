@@ -18,7 +18,7 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
         super(name, config, core, obContext, actions);
     }
 
-    onEvent<T extends OB11EmitEventContent>(event: T) {
+    onEvent<T extends OB11EmitEventContent>(_event: T) {
         // http server is passive, no need to emit event
     }
 
@@ -65,7 +65,7 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
                     return res.status(400).send('Invalid JSON');
                 }
             });
-            req.on('error', (err) => {
+            req.on('error', (_err) => {
                 return res.status(400).send('Invalid JSON');
             });
         });
