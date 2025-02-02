@@ -112,7 +112,7 @@ export default function TerminalPage() {
           className="h-full overflow-hidden"
         >
           <div className="flex items-center gap-2 flex-shrink-0 flex-grow-0">
-            <TabList className="flex-1 !overflow-x-auto hide-scrollbar">
+            <TabList className="flex-1 !overflow-x-auto w-full hide-scrollbar">
               <SortableContext
                 items={tabs}
                 strategy={horizontalListSortingStrategy}
@@ -123,7 +123,7 @@ export default function TerminalPage() {
                     id={tab.id}
                     value={tab.id}
                     isSelected={selectedTab === tab.id}
-                    className="flex gap-2 items-center"
+                    className="flex gap-2 items-center flex-shrink-0"
                   >
                     {tab.title}
                     <Button
@@ -131,7 +131,7 @@ export default function TerminalPage() {
                       radius="full"
                       variant="flat"
                       size="sm"
-                      className="min-w-0 w-4 h-4"
+                      className="min-w-0 w-4 h-4 flex-shrink-0"
                       onPress={() => closeTerminal(tab.id)}
                       color={selectedTab === tab.id ? 'danger' : 'default'}
                     >
