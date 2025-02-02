@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import winston, { format, transports } from 'winston';
 import { truncateString } from '@/common/helper';
 import path from 'node:path';
@@ -34,7 +35,7 @@ class Subscription {
         for (const history of Subscription.history) {
             try {
                 listener(history);
-            } catch (_) {
+            } catch {
                 // ignore
             }
         }
@@ -68,7 +69,7 @@ export class LogWrapper {
             format: format.combine(
                 format.timestamp({ format: 'MM-DD HH:mm:ss' }),
                 format.printf(({ timestamp, level, message, ...meta }) => {
-                    const userInfo = meta.userInfo ? `${meta.userInfo} | ` : '';
+                    const userInfo = meta['userInfo'] ? `${meta['userInfo']} | ` : '';
                     return `${timestamp} [${level}] ${userInfo}${message}`;
                 })
             ),
@@ -83,7 +84,7 @@ export class LogWrapper {
                     format: format.combine(
                         format.colorize(),
                         format.printf(({ timestamp, level, message, ...meta }) => {
-                            const userInfo = meta.userInfo ? `${meta.userInfo} | ` : '';
+                            const userInfo = meta['userInfo'] ? `${meta['userInfo']} | ` : '';
                             return `${timestamp} [${level}] ${userInfo}${message}`;
                         })
                     ),

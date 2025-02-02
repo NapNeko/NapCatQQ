@@ -29,7 +29,6 @@ import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
 export class OneBotGroupApi {
     obContext: NapCatOneBot11Adapter;
     core: NapCatCore;
-    GroupMemberList: Map<string, any> = new Map();//此处作为缓存 group_id->memberUin->info
     constructor(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
         this.obContext = obContext;
         this.core = core;
@@ -130,10 +129,10 @@ export class OneBotGroupApi {
 
         //判断业务类型
         //Poke事件
-        const pokedetail: any[] = json.items;
+        const pokedetail: Array<{ uid: string }> = json.items;
         //筛选item带有uid的元素
         const poke_uid = pokedetail.filter(item => item.uid);
-        if (poke_uid.length == 2) {
+        if (poke_uid.length == 2 && poke_uid[0]?.uid && poke_uid[1]?.uid) {
             return new OB11GroupPokeEvent(
                 this.core,
                 parseInt(msg.peerUid),
@@ -164,6 +163,7 @@ export class OneBotGroupApi {
         } else {
             context.logger.logWarn('收到未知的灰条消息', json);
         }
+        return;
     }
 
     async parseEssenceMsg(msg: RawMessage, jsonStr: string) {
@@ -181,13 +181,16 @@ export class OneBotGroupApi {
         const msgData = await this.core.apis.MsgApi.getMsgsBySeqAndCount(Peer, msgSeq.toString(), 1, true, true);
         const msgList = (await this.core.apis.WebApi.getGroupEssenceMsgAll(Group)).flatMap((e) => e.data.msg_list);
         const realMsg = msgList.find((e) => e.msg_seq.toString() == msgSeq);
-        return new OB11GroupEssenceEvent(
-            this.core,
-            parseInt(msg.peerUid),
-            MessageUnique.getShortIdByMsgId(msgData.msgList[0].msgId)!,
-            parseInt(msgData.msgList[0].senderUin),
-            parseInt(realMsg?.add_digest_uin ?? '0'),
-        );
+        if (msgData.msgList[0]) {
+            return new OB11GroupEssenceEvent(
+                this.core,
+                parseInt(msg.peerUid),
+                MessageUnique.getShortIdByMsgId(msgData.msgList[0].msgId)!,
+                parseInt(msgData.msgList[0].senderUin),
+                parseInt(realMsg?.add_digest_uin ?? '0'),
+            );
+        }
+        return;
         // 获取MsgSeq+Peer可获取具体消息
     }
 
@@ -233,6 +236,7 @@ export class OneBotGroupApi {
                 );
             }
         }
+        return;
     }
 
     async parseSelfInviteEvent(msg: RawMessage, inviterUin: string, inviteeUin: string) {

@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck 
 export class Sha1Stream {
     readonly Sha1BlockSize = 64;
     readonly Sha1DigestSize = 20;

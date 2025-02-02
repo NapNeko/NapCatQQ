@@ -5,3 +5,5 @@ export * from './msg';
 export * from './user';
 export * from './webapi';
 export * from './system';
+export * from './packet';
+export * from './file';

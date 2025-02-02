@@ -1,3 +1,4 @@
+import { NTVoteInfo } from '@/core';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { Type, Static } from '@sinclair/typebox';
@@ -10,9 +11,25 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export class GetProfileLike extends OneBotAction<Payload, any> {
-    actionName = ActionName.GetProfileLike;
-    payloadSchema = SchemaData;
+export class GetProfileLike extends OneBotAction<Payload, {
+    uid: string;
+    time: string;
+    favoriteInfo: {
+        userInfos: Array<NTVoteInfo>;
+        total_count: number;
+        last_time: number;
+        today_count: number;
+    };
+    voteInfo: {
+        total_count: number;
+        new_count: number;
+        new_nearby_count: number;
+        last_visit_time: number;
+        userInfos: Array<NTVoteInfo>;
+    };
+}> {
+    override actionName = ActionName.GetProfileLike;
+    override payloadSchema = SchemaData;
     async _handle(payload: Payload) {
         const isSelf = this.core.selfInfo.uin === payload.user_id || !payload.user_id;
         const userUid = isSelf || !payload.user_id ? this.core.selfInfo.uid : await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());

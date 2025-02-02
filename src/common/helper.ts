@@ -1,14 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import path from 'node:path';
 import fs from 'fs';
 import os from 'node:os';
 import { QQLevel } from '@/core';
+import { QQVersionConfigType } from './types';
 
 export async function solveProblem<T extends (...arg: any[]) => any>(func: T, ...args: Parameters<T>): Promise<ReturnType<T> | undefined> {
     return new Promise<ReturnType<T> | undefined>((resolve) => {
         try {
             const result = func(...args);
             resolve(result);
-        } catch (e) {
+        } catch {
             resolve(undefined);
         }
     });
@@ -193,7 +195,7 @@ export function parseAppidFromMajor(nodeMajor: string): string | undefined {
         if (!content.every(byte => byte === 0x00)) {
             try {
                 return content.toString('utf-8');
-            } catch (error) {
+            } catch {
                 break;
             }
         }

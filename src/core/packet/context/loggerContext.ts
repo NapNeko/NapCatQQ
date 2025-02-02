@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { LogLevel, LogWrapper } from '@/common/log';
 import { NapCoreContext } from '@/core/packet/context/napCoreContext';
 

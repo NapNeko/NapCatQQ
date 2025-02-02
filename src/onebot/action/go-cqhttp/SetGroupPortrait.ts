@@ -3,6 +3,7 @@ import { ActionName } from '@/onebot/action/router';
 import { checkFileExistV2, uriToLocalFile } from '@/common/file';
 import { Static, Type } from '@sinclair/typebox';
 import fs from 'node:fs/promises';
+import { GeneralCallResult } from '@/core';
 const SchemaData = Type.Object({
     file: Type.String(),
     group_id: Type.Union([Type.Number(), Type.String()])
@@ -10,11 +11,11 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export default class SetGroupPortrait extends OneBotAction<Payload, any> {
-    actionName = ActionName.SetGroupPortrait;
-    payloadSchema = SchemaData;
+export default class SetGroupPortrait extends OneBotAction<Payload, GeneralCallResult> {
+    override actionName = ActionName.SetGroupPortrait;
+    override payloadSchema = SchemaData;
 
-    async _handle(payload: Payload): Promise<any> {
+    async _handle(payload: Payload): Promise<GeneralCallResult> {
         const { path, success } = (await uriToLocalFile(this.core.NapCatTempPath, payload.file));
         if (!success) {
             throw new Error(`头像${payload.file}设置失败,file字段可能格式不正确`);

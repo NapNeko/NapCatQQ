@@ -22,7 +22,7 @@ const GetFileBase_PayloadSchema = Type.Object({
 export type GetFilePayload = Static<typeof GetFileBase_PayloadSchema>;
 
 export class GetFileBase extends OneBotAction<GetFilePayload, GetFileResponse> {
-    payloadSchema = GetFileBase_PayloadSchema;
+    override payloadSchema = GetFileBase_PayloadSchema;
 
     async _handle(payload: GetFilePayload): Promise<GetFileResponse> {
         payload.file ||= payload.file_id || '';
@@ -113,5 +113,5 @@ export class GetFileBase extends OneBotAction<GetFilePayload, GetFileResponse> {
 }
 
 export default class GetFile extends GetFileBase {
-    actionName = ActionName.GetFile;
+    override actionName = ActionName.GetFile;
 }

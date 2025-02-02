@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export type TaskExecutor<T> = (resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void, onCancel: (callback: () => void) => void) => void | Promise<void>;
 
 export class CancelableTask<T> {
@@ -7,30 +8,34 @@ export class CancelableTask<T> {
     private cancelListeners: Array<() => void> = [];
 
     constructor(executor: TaskExecutor<T>) {
-        this.promise = new Promise<T>(async (resolve, reject) => {
+        this.promise = new Promise<T>((resolve, reject) => {
             const onCancel = (callback: () => void) => {
                 this.cancelCallback = callback;
             };
 
-            try {
-                await executor(
-                    (value) => {
-                        if (!this.isCanceled) {
-                            resolve(value);
-                        }
-                    },
-                    (reason) => {
-                        if (!this.isCanceled) {
-                            reject(reason);
-                        }
-                    },
-                    onCancel
-                );
-            } catch (error) {
-                if (!this.isCanceled) {
-                    reject(error);
+            const execute = async () => {
+                try {
+                    await executor(
+                        (value) => {
+                            if (!this.isCanceled) {
+                                resolve(value);
+                            }
+                        },
+                        (reason) => {
+                            if (!this.isCanceled) {
+                                reject(reason);
+                            }
+                        },
+                        onCancel
+                    );
+                } catch (error) {
+                    if (!this.isCanceled) {
+                        reject(error);
+                    }
                 }
-            }
+            };
+
+            execute();
         });
     }
 

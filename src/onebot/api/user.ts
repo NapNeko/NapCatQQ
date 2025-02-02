@@ -1,4 +1,4 @@
-import { GrayTipRovokeElement, NapCatCore, RawMessage } from '@/core';
+import { NapCatCore } from '@/core';
 import { NapCatOneBot11Adapter } from '@/onebot';
 import { OB11ProfileLikeEvent } from '@/onebot/event/notice/OB11ProfileLikeEvent';
 import { decodeProfileLikeTip } from '@/core/helper/adaptDecoder';

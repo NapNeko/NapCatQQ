@@ -8,7 +8,6 @@ import SendGroupMsg from './group/SendGroupMsg';
 import SendPrivateMsg from './msg/SendPrivateMsg';
 import SendMsg from './msg/SendMsg';
 import DeleteMsg from './msg/DeleteMsg';
-import { OneBotAction } from '@/onebot/action/OneBotAction';
 import GetVersionInfo from './system/GetVersionInfo';
 import CanSendRecord from './system/CanSendRecord';
 import CanSendImage from './system/CanSendImage';
@@ -239,10 +238,11 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         _map.set(`${h.actionName}_rate_limited` as keyof MapType, h);
     });
 
-    function get<K extends keyof MapType>(key: K): MapType[K];
-    function get<K extends keyof MapType>(key: K): null;
-    function get<K extends keyof MapType>(key: K): HandlerUnion | null | MapType[K] {
-        return _map.get(key as keyof MapType) ?? null;
+    // function get<K extends keyof MapType>(key: K): MapType[K];
+    // function get<K extends keyof MapType>(key: K): null;
+    // function get<K extends keyof MapType>(key: K): HandlerUnion | null | MapType[K]
+    function get<K extends keyof MapType>(key: K): MapType[K] | undefined {
+        return _map.get(key as keyof MapType) as MapType[K] | undefined;
     }
 
     return { get };

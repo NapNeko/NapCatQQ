@@ -1,7 +1,7 @@
 import { GeneralCallResult } from './common';
 
 export interface NodeIKernelCollectionService {
-    addKernelCollectionListener(...args: any[]): void;//needs 1 arguments
+    addKernelCollectionListener(...args: unknown[]): void;//needs 1 arguments
 
     removeKernelCollectionListener(listenerId: number): void;
 
@@ -55,37 +55,37 @@ export interface NodeIKernelCollectionService {
     }
     >;
 
-    getCollectionContent(...args: any[]): unknown;//needs 5 arguments
+    getCollectionContent(...args: unknown[]): unknown;//needs 5 arguments
 
-    getCollectionCustomGroupList(...args: any[]): unknown;//needs 0 arguments
+    getCollectionCustomGroupList(...args: unknown[]): unknown;//needs 0 arguments
 
-    getCollectionUserInfo(...args: any[]): unknown;//needs 0 arguments
+    getCollectionUserInfo(...args: unknown[]): unknown;//needs 0 arguments
 
-    searchCollectionItemList(...args: any[]): unknown;//needs 2 arguments
+    searchCollectionItemList(...args: unknown[]): unknown;//needs 2 arguments
 
-    addMsgToCollection(...args: any[]): unknown;//needs 2 arguments
+    addMsgToCollection(...args: unknown[]): unknown;//needs 2 arguments
 
-    collectionArkShare(...args: any[]): unknown;//needs 1 arguments
+    collectionArkShare(...args: unknown[]): unknown;//needs 1 arguments
 
-    collectionFileForward(...args: any[]): unknown;//needs 3 arguments
+    collectionFileForward(...args: unknown[]): unknown;//needs 3 arguments
 
-    downloadCollectionFile(...args: any[]): unknown;//needs 4 arguments
+    downloadCollectionFile(...args: unknown[]): unknown;//needs 4 arguments
 
-    downloadCollectionFileThumbPic(...args: any[]): unknown;//needs 4 arguments
+    downloadCollectionFileThumbPic(...args: unknown[]): unknown;//needs 4 arguments
 
-    downloadCollectionPic(...args: any[]): unknown;//needs 3 arguments
+    downloadCollectionPic(...args: unknown[]): unknown;//needs 3 arguments
 
-    cancelDownloadCollectionFile(...args: any[]): unknown;//needs 1 arguments
+    cancelDownloadCollectionFile(...args: unknown[]): unknown;//needs 1 arguments
 
-    deleteCollectionItemList(...args: any[]): unknown;//needs 1 arguments
+    deleteCollectionItemList(...args: unknown[]): unknown;//needs 1 arguments
 
-    editCollectionItem(...args: any[]): unknown;//needs 2 arguments
+    editCollectionItem(...args: unknown[]): unknown;//needs 2 arguments
 
-    getEditPicInfoByPath(...args: any[]): unknown;//needs 1 arguments
+    getEditPicInfoByPath(...args: unknown[]): unknown;//needs 1 arguments
 
-    collectionFastUpload(...args: any[]): unknown;//needs 1 arguments
+    collectionFastUpload(...args: unknown[]): unknown;//needs 1 arguments
 
-    editCollectionItemAfterFastUpload(...args: any[]): unknown;//needs 2 arguments
+    editCollectionItemAfterFastUpload(...args: unknown[]): unknown;//needs 2 arguments
 
-    createNewCollectionItem(...args: any[]): unknown;//needs 1 arguments
+    createNewCollectionItem(...args: unknown[]): unknown;//needs 1 arguments
 }

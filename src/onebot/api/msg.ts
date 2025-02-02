@@ -44,7 +44,7 @@ type RawToOb11Converters = {
         msg: RawMessage,
         elementWrapper: MessageElement,
         context: RecvMessageContext
-    ) => PromiseLike<OB11MessageData | null>
+    ) => Promise<OB11MessageData | null | undefined>
 }
 
 type Ob11ToRawConverters = {
@@ -128,9 +128,9 @@ export class OneBotMsgApi {
                         file_size: element.fileSize,
                     },
                 };
-            } catch (e: any) {
-                this.core.context.logger.logError('获取图片url失败', e.stack);
-                return null;
+            } catch (e) {
+                this.core.context.logger.logError('获取图片url失败', (e as Error).stack);
+                return;
             }
         },
 
@@ -296,7 +296,7 @@ export class OneBotMsgApi {
                         peerUid: msg.peerUid,
                         guildId: '0',
                     }, msg.parentMsgIdList[0] ?? msg.msgId, elementWrapper.elementId);
-                } catch (error) {
+                } catch {
                     this.core.context.logger.logWarn('合并获取视频 URL 失败');
                 }
             } else {
@@ -306,7 +306,7 @@ export class OneBotMsgApi {
                         peerUid: msg.peerUid,
                         guildId: '0',
                     }, msg.msgId, elementWrapper.elementId);
-                } catch (error) {
+                } catch {
                     this.core.context.logger.logWarn('获取视频 URL 失败');
                 }
             }
@@ -358,7 +358,7 @@ export class OneBotMsgApi {
             };
         },
 
-        multiForwardMsgElement: async (_, msg, wrapper, context) => {
+        multiForwardMsgElement: async (_, msg, _wrapper, context) => {
             const parentMsgPeer = msg.parentMsgPeer ?? {
                 chatType: msg.chatType,
                 guildId: '',
@@ -465,7 +465,13 @@ export class OneBotMsgApi {
             const parsedFaceId = +id;
             // 从face_config.json中获取表情名称
             const sysFaces = faceConfig.sysface;
-            const face: any = sysFaces.find((systemFace) => systemFace.QSid === parsedFaceId.toString());
+            const face: {
+                QSid?: string,
+                QDes?: string,
+                AniStickerId?: string,
+                AniStickerType?: number,
+                AniStickerPackId?: string,
+            } | undefined = sysFaces.find((systemFace) => systemFace.QSid === parsedFaceId.toString());
             if (!face) {
                 this.core.context.logger.logError('不支持的ID', id);
                 return undefined;
@@ -622,7 +628,7 @@ export class OneBotMsgApi {
                 //throw Error('音乐消息签名地址未配置');
             }
             try {
-                const musicJson = await RequestUtil.HttpGetJson<any>(signUrl, 'POST', postData);
+                const musicJson = await RequestUtil.HttpGetJson<string>(signUrl, 'POST', postData);
                 return this.ob11ToRawConverters.json({
                     data: { data: musicJson },
                     type: OB11MessageDataType.json
@@ -630,6 +636,7 @@ export class OneBotMsgApi {
             } catch (e) {
                 this.core.context.logger.logError('生成音乐消息失败', e);
             }
+            return undefined;
         },
 
         [OB11MessageDataType.node]: async () => undefined,
@@ -671,6 +678,7 @@ export class OneBotMsgApi {
                     type: OB11MessageDataType.json
                 }, context);
             }
+            return undefined;
         }
     };
 
@@ -688,6 +696,7 @@ export class OneBotMsgApi {
                 return new OB11FriendAddNoticeEvent(this.core, Number(await this.core.apis.UserApi.getUinByUidV2(msg.peerUid)));
             }
         }
+        return;
     }
 
     private async getMultiMessages(msg: RawMessage, parentMsgPeer: Peer) {
@@ -696,11 +705,14 @@ export class OneBotMsgApi {
         //首次列表不存在则开始创建
         msg.parentMsgIdList.push(msg.msgId);
         //拉取下级消息
-        return (await this.core.apis.MsgApi.getMultiMsg(
-            parentMsgPeer,
-            msg.parentMsgIdList[0],
-            msg.msgId
-        ))?.msgList;
+        if (msg.parentMsgIdList[0]) {
+            return (await this.core.apis.MsgApi.getMultiMsg(
+                parentMsgPeer,
+                msg.parentMsgIdList[0],
+                msg.msgId
+            ))?.msgList;
+        }
+        return undefined;
     }
 
     private async parseMultiMessageContent(
@@ -831,7 +843,7 @@ export class OneBotMsgApi {
                             msg: RawMessage,
                             elementWrapper: MessageElement,
                             context: RecvMessageContext
-                        ) => PromiseLike<OB11MessageData | null>;
+                        ) => Promise<OB11MessageData | null>;
                         const parsedElement = await converters?.(
                             element[key],
                             msg,
@@ -844,6 +856,7 @@ export class OneBotMsgApi {
                         return parsedElement;
                     }
                 }
+                return [];
             },
         ));
 
@@ -897,7 +910,7 @@ export class OneBotMsgApi {
         return { sendElements, deleteAfterSentFiles };
     }
 
-    async sendMsgWithOb11UniqueId(peer: Peer, sendElements: SendMessageElement[], deleteAfterSentFiles: string[], waitComplete = true) {
+    async sendMsgWithOb11UniqueId(peer: Peer, sendElements: SendMessageElement[], deleteAfterSentFiles: string[]) {
         if (!sendElements.length) {
             throw new Error('消息体无法解析, 请检查是否发送了不支持的消息类型');
         }
@@ -928,7 +941,7 @@ export class OneBotMsgApi {
 
         const timeout = 10000 + (totalSize / 1024 / 256 * 1000);
 
-        const returnMsg = await this.core.apis.MsgApi.sendMsg(peer, sendElements, waitComplete, timeout);
+        const returnMsg = await this.core.apis.MsgApi.sendMsg(peer, sendElements, timeout);
         if (!returnMsg) throw new Error('发送消息失败');
 
         returnMsg.id = MessageUnique.createUniqueMsgId({
@@ -1025,7 +1038,7 @@ export class OneBotMsgApi {
         if (isAdminOrOwner && !operatorUid) {
             let dataNotify: GroupNotify | undefined;
             await this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onGroupNotifiesUpdated',
-                (doubt, notifies) => {
+                (_doubt, notifies) => {
                     for (const notify of notifies) {
                         if (notify.group.groupCode === groupUin && notify.user1.uid === memberUid) {
                             dataNotify = notify;
@@ -1124,7 +1137,7 @@ export class OneBotMsgApi {
                     }
                     return false;
                 }, 1, 1000);
-            } catch (error) {
+            } catch {
                 request_seq = '';
             }
             // 未拉取到seq
@@ -1173,5 +1186,6 @@ export class OneBotMsgApi {
         } else if (SysMessage.contentHead.type == 528 && SysMessage.contentHead.subType == 39 && SysMessage.body?.msgContent) {
             return await this.obContext.apis.UserApi.parseLikeEvent(SysMessage.body?.msgContent);
         }
+        return undefined;
     }
 }

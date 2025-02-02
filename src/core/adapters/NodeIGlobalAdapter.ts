@@ -1,25 +1,26 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 export class NodeIGlobalAdapter {
-    onLog(...args: unknown[]) {
+    onLog(..._args: unknown[]) {
     }
 
-    onGetSrvCalTime(...args: unknown[]) {
+    onGetSrvCalTime(..._args: unknown[]) {
     }
 
-    onShowErrUITips(...args: unknown[]) {
+    onShowErrUITips(..._args: unknown[]) {
     }
 
-    fixPicImgType(...args: unknown[]) {
+    fixPicImgType(..._args: unknown[]) {
     }
 
-    getAppSetting(...args: unknown[]) {
+    getAppSetting(..._args: unknown[]) {
     }
 
-    onInstallFinished(...args: unknown[]) {
+    onInstallFinished(..._args: unknown[]) {
     }
 
-    onUpdateGeneralFlag(...args: unknown[]) {
+    onUpdateGeneralFlag(..._args: unknown[]) {
     }
 
-    onGetOfflineMsg(...args: unknown[]) {
+    onGetOfflineMsg(..._args: unknown[]) {
     }
 }

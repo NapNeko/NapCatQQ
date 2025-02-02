@@ -7,7 +7,7 @@ export class OB11ProfileLikeEvent extends OB11BaseNoticeEvent {
     operator_id: number;
     operator_nick: string;
     times: number;
-    time: number;
+    override time: number;
 
     constructor(core: NapCatCore, operatorId: number, operatorNick: string, times: number, time: number) {
         super(core);

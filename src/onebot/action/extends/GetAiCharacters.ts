@@ -20,8 +20,8 @@ interface GetAiCharactersResponse {
 }
 
 export class GetAiCharacters extends GetPacketStatusDepends<Payload, GetAiCharactersResponse[]> {
-    actionName = ActionName.GetAiCharacters;
-    payloadSchema = SchemaData;
+    override actionName = ActionName.GetAiCharacters;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         const rawList = await this.core.apis.PacketApi.pkt.operation.FetchAiVoiceList(+payload.group_id, +payload.chat_type as AIVoiceChatType);

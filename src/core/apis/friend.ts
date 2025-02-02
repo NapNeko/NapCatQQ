@@ -13,7 +13,7 @@ export class NTQQFriendApi {
     async setBuddyRemark(uid: string, remark: string) {
         return this.context.session.getBuddyService().setBuddyRemark({ uid, remark });
     }
-    async getBuddyV2SimpleInfoMap(refresh = false) {
+    async getBuddyV2SimpleInfoMap() {
         const buddyService = this.context.session.getBuddyService();
         const buddyListV2 = await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL);
         const uids = buddyListV2.data.flatMap(item => item.buddyUids);
@@ -24,13 +24,13 @@ export class NTQQFriendApi {
         );
     }
 
-    async getBuddy(refresh = false): Promise<FriendV2[]> {
-        return Array.from((await this.getBuddyV2SimpleInfoMap(refresh)).values());
+    async getBuddy(): Promise<FriendV2[]> {
+        return Array.from((await this.getBuddyV2SimpleInfoMap()).values());
     }
 
-    async getBuddyIdMap(refresh = false): Promise<LimitedHashTable<string, string>> {
+    async getBuddyIdMap(): Promise<LimitedHashTable<string, string>> {
         const retMap: LimitedHashTable<string, string> = new LimitedHashTable<string, string>(5000);
-        const data = await this.getBuddyV2SimpleInfoMap(refresh);
+        const data = await this.getBuddyV2SimpleInfoMap();
         data.forEach((value) => retMap.set(value.uin!, value.uid!));
         return retMap;
     }

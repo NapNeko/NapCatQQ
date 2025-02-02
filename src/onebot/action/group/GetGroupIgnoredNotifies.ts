@@ -9,7 +9,7 @@ interface RetData {
 }
 
 export class GetGroupIgnoredNotifies extends OneBotAction<void, RetData> {
-    actionName = ActionName.GetGroupIgnoredNotifies;
+    override actionName = ActionName.GetGroupIgnoredNotifies;
 
     async _handle(): Promise<RetData> {
         const SingleScreenNotifies = await this.core.apis.GroupApi.getSingleScreenNotifies(false, 50);

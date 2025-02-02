@@ -36,10 +36,10 @@
         "strictBindCallApply": true,
         "alwaysStrict": true,
         "noImplicitThis": true,
-        "noImplicitReturns": false, // false for now
-        "noPropertyAccessFromIndexSignature": false, // false for now
+        "noImplicitReturns": true,
+        "noPropertyAccessFromIndexSignature": true,
         "noUncheckedIndexedAccess": true,
-        "exactOptionalPropertyTypes": true,
+        "exactOptionalPropertyTypes": false,// 精准可选
         "forceConsistentCasingInFileNames": true,
         "useUnknownInCatchVariables": true,
         "noImplicitOverride": true,

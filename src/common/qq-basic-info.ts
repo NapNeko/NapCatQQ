@@ -4,6 +4,7 @@ import { getDefaultQQVersionConfigInfo, getQQPackageInfoPath, getQQVersionConfig
 import AppidTable from '@/core/external/appid.json';
 import { LogWrapper } from '@/common/log';
 import { getMajorPath } from '@/core';
+import { QQAppidTableType, QQPackageInfoType, QQVersionConfigType } from './types';
 
 export class QQBasicInfoWrapper {
     QQMainPath: string | undefined;
@@ -89,7 +90,7 @@ export class QQBasicInfoWrapper {
                 this.context.logger.log('[QQ版本兼容性检测] 当前版本Appid未内置 通过Major获取 为了更好的性能请尝试更新NapCat');
                 return { appid: majorAppid, qua: this.getQUAFallback() };
             }
-        } catch (error) {
+        } catch {
             this.context.logger.log('[QQ版本兼容性检测] 通过Major 获取Appid异常 请检测NapCat/QQNT是否正常');
         }
         // 最终兜底为老版本

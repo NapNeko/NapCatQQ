@@ -54,10 +54,10 @@ class Store {
         // 分批次扫描
         while (scanned < this.scanLimit && this.scanCursor < keys.length) {
             const key = keys[this.scanCursor++];
-            const entry = this.store.get(key)!;
+            const entry = this.store.get(key!)!;
 
             if (entry.expiresAt && entry.expiresAt < now) {
-                this.store.delete(key);
+                this.store.delete(key!);
             }
 
             scanned++;

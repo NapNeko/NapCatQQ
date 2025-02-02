@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NodeIQQNTWrapperSession } from '@/core/wrapper';
 import { randomUUID } from 'crypto';
 import { ListenerNamingMapping, ServiceNamingMapping } from '@/core';
@@ -75,6 +76,7 @@ export class NTEventWrapper {
             }
             return undefined;
         }
+        return undefined;
     }
 
     createListenerFunction<T>(listenerMainName: string, uniqueCode: string = ''): T {

@@ -9,8 +9,8 @@ const SchemaData = Type.Object({
 type Payload = Static<typeof SchemaData>;
 
 export class GetUserStatus extends GetPacketStatusDepends<Payload, { status: number; ext_status: number; } | undefined> {
-    actionName = ActionName.GetUserStatus;
-    payloadSchema = SchemaData;
+    override actionName = ActionName.GetUserStatus;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         return await this.core.apis.PacketApi.pkt.operation.GetStrangerStatus(+payload.user_id);

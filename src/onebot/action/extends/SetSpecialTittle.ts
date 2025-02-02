@@ -10,9 +10,9 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export class SetSpecialTittle extends GetPacketStatusDepends<Payload, any> {
-    actionName = ActionName.SetSpecialTittle;
-    payloadSchema = SchemaData;
+export class SetSpecialTittle extends GetPacketStatusDepends<Payload, void> {
+    override actionName = ActionName.SetSpecialTittle;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());

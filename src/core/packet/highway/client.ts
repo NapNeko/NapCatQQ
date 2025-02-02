@@ -27,7 +27,8 @@ export class PacketHighwayClient {
     port: number = 80;
     logger: PacketLogger;
 
-    constructor(sig: PacketHighwaySig, logger: PacketLogger, server: string = 'htdata3.qq.com', port: number = 80) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    constructor(sig: PacketHighwaySig, logger: PacketLogger, _server: string = 'htdata3.qq.com', _port: number = 80) {
         this.sig = sig;
         this.logger = logger;
     }

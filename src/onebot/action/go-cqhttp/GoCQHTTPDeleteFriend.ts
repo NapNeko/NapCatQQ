@@ -11,9 +11,9 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export class GoCQHTTPDeleteFriend extends OneBotAction<Payload, any> {
-    actionName = ActionName.GoCQHTTP_DeleteFriend;
-    payloadSchema = SchemaData;
+export class GoCQHTTPDeleteFriend extends OneBotAction<Payload, unknown> {
+    override actionName = ActionName.GoCQHTTP_DeleteFriend;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         const uin = payload.friend_id ?? payload.user_id ?? '';

@@ -25,8 +25,8 @@ type Payload = Static<typeof SchemaData>;
 type ApiGroupNotice = GroupNotice & WebApiGroupNoticeFeed;
 
 export class GetGroupNotice extends OneBotAction<Payload, GroupNotice[]> {
-    actionName = ActionName.GoCQHTTP_GetGroupNotice;
-    payloadSchema = SchemaData;
+    override actionName = ActionName.GoCQHTTP_GetGroupNotice;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         const group = payload.group_id.toString();
@@ -36,6 +36,9 @@ export class GetGroupNotice extends OneBotAction<Payload, GroupNotice[]> {
         }
         const retNotices: GroupNotice[] = new Array<ApiGroupNotice>();
         for (const key in ret.feeds) {
+            if (!ret.feeds[key]) {
+                continue;
+            }
             const retApiNotice: WebApiGroupNoticeFeed = ret.feeds[key];
             const retNotice: GroupNotice = {
                 notice_id: retApiNotice.fid,

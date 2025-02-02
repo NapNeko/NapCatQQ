@@ -51,7 +51,7 @@ export class RkeyManager {
         return now > this.rkeyData.expired_time;
     }
 
-    async refreshRkey(): Promise<any> {
+    async refreshRkey() {
         //刷新rkey
         for (const url of this.serverUrl) {
             try {

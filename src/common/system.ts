@@ -6,7 +6,7 @@ let osName: string;
 
 try {
     osName = os.hostname();
-} catch (e) {
+} catch {
     osName = 'NapCat'; // + crypto.randomUUID().substring(0, 4);
 }
 

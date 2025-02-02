@@ -1,17 +1,17 @@
 //QQVersionType
-type QQPackageInfoType = {
+export type QQPackageInfoType = {
     version: string;
     buildVersion: string;
     platform: string;
     eleArch: string;
 }
-type QQVersionConfigType = {
+export type QQVersionConfigType = {
     baseVersion: string;
     curVersion: string;
     prevVersion: string;
-    onErrorVersions: Array<any>;
+    onErrorVersions: Array<unknown>;
     buildId: string;
 }
-type QQAppidTableType = {
+export type QQAppidTableType = {
     [key: string]: { appid: string, qua: string };
 }

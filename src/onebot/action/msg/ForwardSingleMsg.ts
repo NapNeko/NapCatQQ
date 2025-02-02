@@ -42,11 +42,11 @@ class ForwardSingleMsg extends OneBotAction<Payload, null> {
 }
 
 export class ForwardFriendSingleMsg extends ForwardSingleMsg {
-    payloadSchema = SchemaData;
-    actionName = ActionName.ForwardFriendSingleMsg;
+    override payloadSchema = SchemaData;
+    override actionName = ActionName.ForwardFriendSingleMsg;
 }
 
 export class ForwardGroupSingleMsg extends ForwardSingleMsg {
-    payloadSchema = SchemaData;
-    actionName = ActionName.ForwardGroupSingleMsg;
+    override payloadSchema = SchemaData;
+    override actionName = ActionName.ForwardGroupSingleMsg;
 }

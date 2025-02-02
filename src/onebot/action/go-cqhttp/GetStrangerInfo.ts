@@ -11,10 +11,10 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export default class GoCQHTTPGetStrangerInfo extends OneBotAction<Payload, OB11User> {
-    actionName = ActionName.GoCQHTTP_GetStrangerInfo;
-    payloadSchema = SchemaData;
-    async _handle(payload: Payload): Promise<OB11User> {
+export default class GoCQHTTPGetStrangerInfo extends OneBotAction<Payload, OB11User & { uid: string }> {
+    override actionName = ActionName.GoCQHTTP_GetStrangerInfo;
+    override payloadSchema = SchemaData;
+    async _handle(payload: Payload) {
         const user_id = payload.user_id.toString();
         const extendData = await this.core.apis.UserApi.getUserDetailInfoByUin(user_id);
         let uid = (await this.core.apis.UserApi.getUidByUinV2(user_id));
@@ -28,7 +28,7 @@ export default class GoCQHTTPGetStrangerInfo extends OneBotAction<Payload, OB11U
             ...extendData.detail.simpleInfo.status ?? {},
             user_id: parseInt(extendData.detail.uin) ?? 0,
             uid: info.uid ?? uid,
-            nickname: extendData.detail.simpleInfo.coreInfo.nick,
+            nickname: extendData.detail.simpleInfo.coreInfo.nick ?? '',
             age: extendData.detail.simpleInfo.baseInfo.age ?? info.age,
             qid: extendData.detail.simpleInfo.baseInfo.qid,
             qqLevel: calcQQLevel(extendData.detail.commonExt?.qqLevel ?? info.qqLevel),

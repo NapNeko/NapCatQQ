@@ -14,7 +14,7 @@ function from(source: string) {
     const capture = pattern.exec(source);
     if (!capture) return null;
     const [, type, attrs] = capture;
-    const data: Record<string, any> = {};
+    const data: Record<string, unknown> = {};
     if (attrs) {
         attrs.slice(1).split(',').forEach((str) => {
             const index = str.indexOf('=');
@@ -24,7 +24,7 @@ function from(source: string) {
     return { type, data, capture };
 }
 
-function convert(type: string, data: any) {
+function convert(type: string, data: unknown) {
     return {
         type,
         data,
@@ -32,18 +32,21 @@ function convert(type: string, data: any) {
 }
 
 export function decodeCQCode(source: string): OB11MessageData[] {
-    const elements: any[] = [];
+    const elements: Array<unknown> = [];
     let result: ReturnType<typeof from>;
     while ((result = from(source))) {
         const { type, data, capture } = result;
-        if (capture.index) {
-            elements.push(convert('text', { text: unescape(source.slice(0, capture.index)) }));
+        if (type) {
+            if (capture.index) {
+                elements.push(convert('text', { text: unescape(source.slice(0, capture.index)) }));
+            }
+            elements.push(convert(type, data));
+            source = source.slice(capture.index + capture[0].length);
         }
-        elements.push(convert(type, data));
-        source = source.slice(capture.index + capture[0].length);
+
     }
     if (source) elements.push(convert('text', { text: unescape(source) }));
-    return elements;
+    return elements as OB11MessageData[];
 }
 
 function CQCodeEscapeText(text: string) {

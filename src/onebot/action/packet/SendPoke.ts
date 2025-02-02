@@ -9,9 +9,9 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export class SendPoke extends GetPacketStatusDepends<Payload, any> {
-    actionName = ActionName.SendPoke;
-    payloadSchema = SchemaData;
+export class SendPoke extends GetPacketStatusDepends<Payload, void> {
+    override actionName = ActionName.SendPoke;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         if (payload.group_id) {

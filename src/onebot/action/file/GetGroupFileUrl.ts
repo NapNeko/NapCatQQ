@@ -15,8 +15,8 @@ interface GetGroupFileUrlResponse {
 }
 
 export class GetGroupFileUrl extends GetPacketStatusDepends<Payload, GetGroupFileUrlResponse> {
-    actionName = ActionName.GOCQHTTP_GetGroupFileUrl;
-    payloadSchema = SchemaData;
+    override actionName = ActionName.GOCQHTTP_GetGroupFileUrl;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         const contextMsgFile = FileNapCatOneBotUUID.decode(payload.file_id) || FileNapCatOneBotUUID.decodeModelId(payload.file_id);

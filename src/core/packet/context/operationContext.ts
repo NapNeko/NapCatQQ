@@ -61,7 +61,7 @@ export class PacketOperationContext {
             }
             status = Number((extBigInt & 0xff00n) + ((extBigInt >> 16n) & 0xffn));
             return { status: 10, ext_status: status };
-        } catch (e) {
+        } catch {
             return undefined;
         }
     }

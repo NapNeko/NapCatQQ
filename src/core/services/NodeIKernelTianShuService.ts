@@ -3,6 +3,6 @@ export interface NodeIKernelTianShuService {
 
     removeKernelTianShuListener(listenerId:number): void;
 
-    reportTianShuNumeralRed(...args: any[]): unknown;// needs 1 arguments
+    reportTianShuNumeralRed(...args: unknown[]): unknown;// needs 1 arguments
 
 }

@@ -12,9 +12,9 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export class GetGroupEssence extends OneBotAction<Payload, any> {
-    actionName = ActionName.GoCQHTTP_GetEssenceMsg;
-    payloadSchema = SchemaData;
+export class GetGroupEssence extends OneBotAction<Payload, unknown> {
+    override actionName = ActionName.GoCQHTTP_GetEssenceMsg;
+    override payloadSchema = SchemaData;
 
     private async msgSeqToMsgId(peer: Peer, msgSeq: string, msgRandom: string) {
         const replyMsgList = (await this.core.apis.MsgApi.getMsgsBySeqAndCount(peer, msgSeq, 1, true, true)).msgList.find((msg) => msg.msgSeq === msgSeq && msg.msgRandom === msgRandom);
@@ -27,7 +27,7 @@ export class GetGroupEssence extends OneBotAction<Payload, any> {
         };
     }
 
-    async _handle(payload: Payload, adapter: string, config: NetworkAdapterConfig) {
+    async _handle(payload: Payload, _adapter: string, config: NetworkAdapterConfig) {
         const msglist = (await this.core.apis.WebApi.getGroupEssenceMsgAll(payload.group_id.toString())).flatMap((e) => e.data.msg_list);
         if (!msglist) {
             throw new Error('获取失败');
@@ -58,7 +58,9 @@ export class GetGroupEssence extends OneBotAction<Payload, any> {
             });
             const hash = crypto.createHash('md5').update(msgTempData).digest();
             //设置第一个bit为0 保证shortId为正数
-            hash[0] &= 0x7f;
+            if(hash[0]){
+                hash[0] &= 0x7f;
+            }
             const shortId = hash.readInt32BE(0);
             this.core.apis.GroupApi.essenceLRU.set(shortId, msgTempData);
             return {
