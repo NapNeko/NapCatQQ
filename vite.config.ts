@@ -10,9 +10,7 @@ const external = [
     'express',
     'qrcode-terminal',
     'piscina',
-    '@ffmpeg.wasm/core-mt',
-    '@ffmpeg.wasm/main',
-    '@homebridge/node-pty-prebuilt-multiarch',
+    '@ffmpeg.wasm/core-mt'
 ];
 const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`)].flat();
 
@@ -31,6 +29,7 @@ const UniversalBaseConfigPlugin: PluginOption[] = [
             { src: './manifest.json', dest: 'dist' },
             { src: './src/core/external/napcat.json', dest: 'dist/config/' },
             { src: './src/native/packet', dest: 'dist/moehoo', flatten: false },
+            { src: './src/native/pty', dest: 'dist/pty', flatten: false },
             { src: './napcat.webui/dist/', dest: 'dist/static/', flatten: false },
             { src: './src/framework/liteloader.cjs', dest: 'dist' },
             { src: './src/framework/napcat.cjs', dest: 'dist' },
@@ -53,6 +52,7 @@ const FrameworkBaseConfigPlugin: PluginOption[] = [
             { src: './manifest.json', dest: 'dist' },
             { src: './src/core/external/napcat.json', dest: 'dist/config/' },
             { src: './src/native/packet', dest: 'dist/moehoo', flatten: false },
+            { src: './src/native/pty', dest: 'dist/pty', flatten: false },
             { src: './napcat.webui/dist/', dest: 'dist/static/', flatten: false },
             { src: './src/framework/liteloader.cjs', dest: 'dist' },
             { src: './src/framework/napcat.cjs', dest: 'dist' },
@@ -69,6 +69,7 @@ const ShellBaseConfigPlugin: PluginOption[] = [
     cp({
         targets: [
             { src: './src/native/packet', dest: 'dist/moehoo', flatten: false },
+            { src: './src/native/pty', dest: 'dist/pty', flatten: false },
             { src: './napcat.webui/dist/', dest: 'dist/static/', flatten: false },
             { src: './src/core/external/napcat.json', dest: 'dist/config/' },
             { src: './package.json', dest: 'dist' },
@@ -99,6 +100,7 @@ const UniversalBaseConfig = () =>
                     napcat: 'src/universal/napcat.ts',
                     'audio-worker': 'src/common/audio-worker.ts',
                     'ffmpeg-worker': 'src/common/ffmpeg-worker.ts',
+                    'worker/conoutSocketWorker': 'src/pty/worker/conoutSocketWorker.ts',
                 },
                 formats: ['es'],
                 fileName: (_, entryName) => `${entryName}.mjs`,
@@ -128,6 +130,7 @@ const ShellBaseConfig = () =>
                     napcat: 'src/shell/napcat.ts',
                     'audio-worker': 'src/common/audio-worker.ts',
                     'ffmpeg-worker': 'src/common/ffmpeg-worker.ts',
+                    'worker/conoutSocketWorker': 'src/pty/worker/conoutSocketWorker.ts',
                 },
                 formats: ['es'],
                 fileName: (_, entryName) => `${entryName}.mjs`,
@@ -157,6 +160,7 @@ const FrameworkBaseConfig = () =>
                     napcat: 'src/framework/napcat.ts',
                     'audio-worker': 'src/common/audio-worker.ts',
                     'ffmpeg-worker': 'src/common/ffmpeg-worker.ts',
+                    'worker/conoutSocketWorker': 'src/pty/worker/conoutSocketWorker.ts',
                 },
                 formats: ['es'],
                 fileName: (_, entryName) => `${entryName}.mjs`,

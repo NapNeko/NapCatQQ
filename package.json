@@ -51,12 +51,12 @@
     "vite": "^6.0.1",
     "vite-plugin-cp": "^4.0.8",
     "vite-tsconfig-paths": "^5.1.0",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "@homebridge/node-pty-prebuilt-multiarch": "^0.12.0-beta.5",
+    "@ffmpeg.wasm/main": "^0.13.1"
   },
   "dependencies": {
     "@ffmpeg.wasm/core-mt": "^0.13.2",
-    "@ffmpeg.wasm/main": "^0.13.1",
-    "@homebridge/node-pty-prebuilt-multiarch": "^0.12.0-beta.5",
     "express": "^5.0.0",
     "express-rate-limit": "^7.5.0",
     "piscina": "^4.7.0",
