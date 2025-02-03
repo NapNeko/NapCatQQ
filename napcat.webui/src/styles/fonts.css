@@ -1,111 +1,17 @@
-/* HarmonyOS Sans SC */
 @font-face {
-  font-family: 'Harmony';
-  src: url('/webui/fonts/harmony/HarmonyOS_Sans_SC_Bold.ttf') format('truetype');
-  font-weight: bold;
-  font-style: normal;
+  font-family: 'Aa偷吃可爱长大的';
+  src: url('../fonts/AaCute.ttf') format('truetype');
+  font-weight: normal;
 }
-
 @font-face {
-  font-family: 'Harmony';
-  src: url('/webui/fonts/harmony/HarmonyOS_Sans_SC_Regular.ttf') format('truetype');
+  font-family: 'JetBrains Mono';
+  src: url('../fonts/JetBrainsMono.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
-
-/* Ubuntu */
-@font-face {
-  font-family: 'Ubuntu';
-  src: url('/webui/fonts/ubuntu/Ubuntu-Bold.ttf') format('truetype');
-  font-weight: bold;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Ubuntu';
-  src: url('/webui/fonts/ubuntu/Ubuntu-Regular.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Ubuntu';
-  src: url('/webui/fonts/ubuntu/Ubuntu-Light.ttf') format('truetype');
-  font-weight: 300;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Ubuntu';
-  src: url('/webui/fonts/ubuntu/Ubuntu-BoldItalic.ttf') format('truetype');
-  font-weight: bold;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'Ubuntu';
-  src: url('/webui/fonts/ubuntu/Ubuntu-Italic.ttf') format('truetype');
-  font-weight: normal;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'Ubuntu';
-  src: url('/webui/fonts/ubuntu/Ubuntu-LightItalic.ttf') format('truetype');
-  font-weight: 300;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'Ubuntu';
-  src: url('/webui/fonts/ubuntu/Ubuntu-Medium.ttf') format('truetype');
-  font-weight: 500;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Ubuntu';
-  src: url('/webui/fonts/ubuntu/Ubuntu-MediumItalic.ttf') format('truetype');
-  font-weight: 500;
-  font-style: italic;
-}
-
-/* LibreBaskerville */
-@font-face {
-  font-family: 'Libre Baskerville';
-  src: url('/webui/fonts/LibreBaskerville/LibreBaskerville-Bold.ttf') format('truetype');
-  font-weight: bold;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Libre Baskerville';
-  src: url('/webui/fonts/LibreBaskerville/LibreBaskerville-Regular.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Libre Baskerville';
-  src: url('/webui/fonts/LibreBaskerville/LibreBaskerville-Italic.ttf') format('truetype');
-  font-weight: normal;
-  font-style: italic;
-}
-
-/* NotoSerifSC */
-@font-face {
-  font-family: 'Noto Serif SC';
-  src: url('/webui/fonts/NotoSerifSC-VariableFont_wght.ttf') format('truetype');
-}
-
-/* Outfit */
-@font-face {
-  font-family: 'Outfit';
-  src: url('/webui/fonts/Outfit-VariableFont_wght.ttf') format('truetype');
-}
-
-/* FiraCode */
-@font-face {
-  font-family: 'Fira Code';
-  src: url('/webui/fonts/FiraCode-VariableFont_wght.ttf') format('truetype');
+.xterm {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-smooth: always;
 }

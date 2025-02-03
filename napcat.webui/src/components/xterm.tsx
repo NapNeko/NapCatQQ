@@ -39,9 +39,11 @@ const XTerm = forwardRef<XTermRef, XTermProps>((props, ref) => {
     }
     const terminal = new Terminal({
       allowTransparency: true,
-      fontFamily: '"Fira Code", "Harmony", "Noto Serif SC", monospace',
+      fontFamily: '"JetBrains Mono", "Aa偷吃可爱长大的", "Noto Serif SC", monospace',
       cursorInactiveStyle: 'outline',
-      drawBoldTextInBrightColors: false
+      drawBoldTextInBrightColors: false,
+      fontSize: 14,
+      lineHeight: 1.2
     })
     terminalRef.current = terminal
     const fitAddon = new FitAddon()
@@ -53,7 +55,7 @@ const XTerm = forwardRef<XTermRef, XTermProps>((props, ref) => {
       })
     )
     terminal.loadAddon(fitAddon)
-    terminal.loadAddon(new WebglAddon())
+    //terminal.loadAddon(new WebglAddon())
     terminal.open(domRef.current)
 
     terminal.writeln(

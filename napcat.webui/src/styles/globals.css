@@ -7,7 +7,7 @@
 body {
   font-family:
     PingFang SC,
-    'Harmony',
+    'Aa偷吃可爱长大的',
     Helvetica Neue,
     Microsoft YaHei,
     sans-serif !important;
@@ -17,23 +17,23 @@ body {
   .hm-medium {
     font-family:
       PingFang SC,
-      'Harmony',
+      'Aa偷吃可爱长大的',
       Helvetica Neue,
       Microsoft YaHei,
       sans-serif !important;
     @apply font-bold;
   }
   .font-ubuntu {
-    font-family: 'Ubuntu', sans-serif;
+    font-family: 'Aa偷吃可爱长大的', sans-serif;
   }
   .font-outfit {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Aa偷吃可爱长大的', sans-serif;
   }
   .font-libre {
-    font-family: 'Libre Baskerville', serif;
+    font-family: 'Aa偷吃可爱长大的', serif;
   }
   .font-noto-serif {
-    font-family: 'Noto Serif SC', serif;
+    font-family: 'Aa偷吃可爱长大的', serif;
   }
   .hide-scrollbar::-webkit-scrollbar {
     width: 0 !important;
