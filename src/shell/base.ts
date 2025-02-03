@@ -24,7 +24,7 @@ import fs from 'fs';
 import os from 'os';
 import { LoginListItem, NodeIKernelLoginService } from '@/core/services';
 import { program } from 'commander';
-import qrcode from 'qrcode-terminal';
+import qrcode from '@/qrcode/lib/main';
 import { NapCatOneBot11Adapter } from '@/onebot';
 import { InitWebUi } from '@/webui';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';

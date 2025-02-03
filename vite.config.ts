@@ -8,7 +8,6 @@ const external = [
     'silk-wasm',
     'ws',
     'express',
-    'qrcode-terminal',
     'piscina',
     '@ffmpeg.wasm/core-mt'
 ];
