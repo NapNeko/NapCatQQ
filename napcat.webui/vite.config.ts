@@ -29,6 +29,11 @@ export default defineConfig(({ mode }) => {
     base: '/webui/',
     server: {
       proxy: {
+        '/api/ws/terminal': {
+          target: backendDebugUrl,
+          ws: true,
+          changeOrigin: true
+        },
         '/api': backendDebugUrl
       }
     },
