@@ -941,29 +941,31 @@ export class OneBotMsgApi {
 
         const timeout = 10000 + (totalSize / 1024 / 256 * 1000);
 
-        const returnMsg = await this.core.apis.MsgApi.sendMsg(peer, sendElements, timeout);
-        if (!returnMsg) throw new Error('发送消息失败');
-
-        returnMsg.id = MessageUnique.createUniqueMsgId({
-            chatType: peer.chatType,
-            guildId: '',
-            peerUid: peer.peerUid,
-        }, returnMsg.msgId);
-
-        setTimeout(async () => {
-            const deletePromises = deleteAfterSentFiles.map(async file => {
-                try {
-                    if (await fsPromise.access(file, constants.W_OK).then(() => true).catch(() => false)) {
-                        await fsPromise.unlink(file);
+        try {
+            const returnMsg = await this.core.apis.MsgApi.sendMsg(peer, sendElements, timeout);
+            if (!returnMsg) throw new Error('发送消息失败');
+            returnMsg.id = MessageUnique.createUniqueMsgId({
+                chatType: peer.chatType,
+                guildId: '',
+                peerUid: peer.peerUid,
+            }, returnMsg.msgId);
+            return returnMsg;
+        } catch (error) {
+            throw new Error((error as Error).message);
+        } finally {
+            setTimeout(async () => {
+                const deletePromises = deleteAfterSentFiles.map(async file => {
+                    try {
+                        if (await fsPromise.access(file, constants.W_OK).then(() => true).catch(() => false)) {
+                            await fsPromise.unlink(file);
+                        }
+                    } catch (e) {
+                        this.core.context.logger.logError('发送消息删除文件失败', e);
                     }
-                } catch (e) {
-                    this.core.context.logger.logError('发送消息删除文件失败', e);
-                }
-            });
-            await Promise.all(deletePromises);
-        }, 60000);
-
-        return returnMsg;
+                });
+                await Promise.all(deletePromises);
+            }, 60000);
+        }
     }
 
     private async handleOb11FileLikeMessage(
