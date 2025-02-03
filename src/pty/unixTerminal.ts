@@ -1,4 +1,5 @@
-/* eslint-disable prefer-rest-params */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-undef */
 /**
  * Copyright (c) 2012-2015, Christopher Jeffrey (MIT License)
  * Copyright (c) 2016, Daniel Imms (MIT License).
@@ -26,14 +27,14 @@ const DEFAULT_NAME = 'xterm';
 const DESTROY_SOCKET_TIMEOUT_MS = 200;
 
 export class UnixTerminal extends Terminal {
-    protected _fd: number;
-    protected _pty: string;
+    protected override _fd: number;
+    protected override _pty: string;
 
-    protected _file: string;
-    protected _name: string;
+    protected override _file: string;
+    protected override _name: string;
 
-    protected _readable: boolean;
-    protected _writable: boolean;
+    protected override _readable: boolean;
+    protected override _writable: boolean;
 
     private _boundClose: boolean = false;
     private _emittedClose: boolean = false;
@@ -67,9 +68,9 @@ export class UnixTerminal extends Terminal {
         }
 
         const cwd = opt.cwd || process.cwd();
-        env.PWD = cwd;
-        const name = opt.name || env.TERM || DEFAULT_NAME;
-        env.TERM = name;
+        env['PWD'] = cwd;
+        const name = opt.name || env['TERM'] || DEFAULT_NAME;
+        env['TERM'] = name;
         const parsedEnv = this._parseEnv(env);
 
         const encoding = (opt.encoding === undefined ? 'utf8' : opt.encoding);
@@ -212,7 +213,7 @@ export class UnixTerminal extends Terminal {
         self._pty = term.pty;
 
         self._file = process.argv[0] || 'node';
-        self._name = process.env.TERM || '';
+        self._name = process.env['TERM'] || '';
 
         self._readable = true;
         self._writable = true;
@@ -246,7 +247,7 @@ export class UnixTerminal extends Terminal {
     public kill(signal?: string): void {
         try {
             process.kill(this.pid, signal || 'SIGHUP');
-        } catch (e) { /* swallow */ }
+        } catch { /* swallow */ }
     }
 
     /**
@@ -279,7 +280,7 @@ export class UnixTerminal extends Terminal {
     }
 
     private _sanitizeEnv(env: IProcessEnv): void {
-    // Make sure we didn't start our server from inside tmux.
+        // Make sure we didn't start our server from inside tmux.
         delete env['TMUX'];
         delete env['TMUX_PANE'];
 

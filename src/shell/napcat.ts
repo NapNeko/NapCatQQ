@@ -1,2 +1,2 @@
-import { NCoreInitShell } from "./base";
+import { NCoreInitShell } from './base';
 NCoreInitShell();

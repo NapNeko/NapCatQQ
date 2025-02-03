@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-undef */
 /**
  * Copyright (c) 2012-2015, Christopher Jeffrey, Peter Sunde (MIT License)
  * Copyright (c) 2016, Daniel Imms (MIT License).
@@ -147,7 +149,7 @@ export class WindowsPtyAgent {
                 consoleProcessList.forEach((pid: number) => {
                     try {
                         process.kill(pid);
-                    } catch (e) {
+                    } catch{
                         // Ignore if process cannot be found (kill ESRCH error)
                     }
                 });
@@ -165,7 +167,7 @@ export class WindowsPtyAgent {
             processList.forEach(pid => {
                 try {
                     process.kill(pid);
-                } catch (e) {
+                } catch {
                     // Ignore if process cannot be found (kill ESRCH error)
                 }
             });
@@ -201,7 +203,7 @@ export class WindowsPtyAgent {
         const osVersion = (/(\d+)\.(\d+)\.(\d+)/g).exec(os.release());
         let buildNumber: number = 0;
         if (osVersion && osVersion.length === 4) {
-            buildNumber = parseInt(osVersion[3]);
+            buildNumber = parseInt(osVersion[3]!);
         }
         return buildNumber;
     }
@@ -253,20 +255,20 @@ export function argsToCommandLine(file: string, args: ArgvOrCommandLine): string
         }
         const arg = argv[argIndex];
         // if it is empty or it contains whitespace and is not already quoted
-        const hasLopsidedEnclosingQuote = xOr((arg[0] !== '"'), (arg[arg.length - 1] !== '"'));
-        const hasNoEnclosingQuotes = ((arg[0] !== '"') && (arg[arg.length - 1] !== '"'));
+        const hasLopsidedEnclosingQuote = xOr((arg![0] !== '"'), (arg![arg!.length - 1] !== '"'));
+        const hasNoEnclosingQuotes = ((arg![0] !== '"') && (arg![arg!.length - 1] !== '"'));
         const quote =
             arg === '' ||
-            (arg.indexOf(' ') !== -1 ||
-                arg.indexOf('\t') !== -1) &&
-            ((arg.length > 1) &&
+            (arg!.indexOf(' ') !== -1 ||
+                arg!.indexOf('\t') !== -1) &&
+            ((arg!.length > 1) &&
                 (hasLopsidedEnclosingQuote || hasNoEnclosingQuotes));
         if (quote) {
             result += '"';
         }
         let bsCount = 0;
-        for (let i = 0; i < arg.length; i++) {
-            const p = arg[i];
+        for (let i = 0; i < arg!.length; i++) {
+            const p = arg![i];
             if (p === '\\') {
                 bsCount++;
             } else if (p === '"') {

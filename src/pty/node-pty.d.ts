@@ -225,6 +225,7 @@ declare module '@/pty' {
      * @returns an `IDisposable` to stop listening.
      */
     export interface IEvent<T> {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (listener: (e: T) => any): IDisposable;
     }
   }
