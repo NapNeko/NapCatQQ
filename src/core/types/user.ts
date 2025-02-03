@@ -77,7 +77,7 @@ interface VideoInfo {
 // 扩展在线业务信息
 interface ExtOnlineBusinessInfo {
     buf: string;
-    customStatus: any;
+    customStatus: unknown;
     videoBizInfo: VideoBizInfo;
     videoInfo: VideoInfo;
 }
@@ -97,7 +97,7 @@ interface UserStatus {
     termType: number;
     netType: number;
     iconType: number;
-    customStatus: any;
+    customStatus: unknown;
     setTime: string;
     specialFlag: number;
     abiFlag: number;
@@ -112,8 +112,8 @@ interface UserStatus {
 // 特权图标
 interface PrivilegeIcon {
     jumpUrl: string;
-    openIconList: any[];
-    closeIconList: any[];
+    openIconList: unknown[];
+    closeIconList: unknown[];
 }
 
 // 增值服务信息
@@ -137,7 +137,7 @@ interface VasInfo {
     fontEffect: number;
     newLoverDiamondFlag: number;
     extendNameplateId: number;
-    diyNameplateIDs: any[];
+    diyNameplateIDs: unknown[];
     vipStartFlag: number;
     vipDataFlag: number;
     gameNameplateId: string;
@@ -183,7 +183,7 @@ interface CommonExt {
     address: string;
     regTime: number;
     interest: string;
-    labels: any[];
+    labels: string[];
     qqLevel: QQLevel;
 }
 
@@ -214,8 +214,8 @@ export interface SimpleInfo {
     status: UserStatus | null;
     vasInfo: VasInfo | null;
     relationFlags: RelationFlags | null;
-    otherFlags: any;
-    intimate: any;
+    otherFlags: unknown;
+    intimate: unknown;
 }
 
 // 好友类型
@@ -229,7 +229,7 @@ export interface SelfStatusInfo {
     termType: number;
     netType: number;
     iconType: number;
-    customStatus: any;
+    customStatus: unknown;
     setTime: string;
 }
 
@@ -248,7 +248,7 @@ export interface ModifyProfileParams {
     longNick: string;
     sex: NTSex;
     birthday: { birthday_year: string, birthday_month: string, birthday_day: string };
-    location: any;
+    location: unknown;
 }
 
 // 好友资料点赞请求

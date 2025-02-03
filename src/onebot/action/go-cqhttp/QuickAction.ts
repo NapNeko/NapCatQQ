@@ -8,7 +8,7 @@ interface Payload {
 }
 
 export class GoCQHTTPHandleQuickAction extends OneBotAction<Payload, null> {
-    actionName = ActionName.GoCQHTTP_HandleQuickAction;
+    override actionName = ActionName.GoCQHTTP_HandleQuickAction;
 
     async _handle(payload: Payload): Promise<null> {
         this.obContext.apis.QuickActionApi

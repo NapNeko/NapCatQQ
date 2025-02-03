@@ -1,5 +1,5 @@
-import { ProtoField, ScalarType } from "@napneko/nap-proto-core";
-import { MultiMediaReqHead } from "./common/Ntv2.RichMediaReq";
+import { ProtoField, ScalarType } from '@napneko/nap-proto-core';
+import { MultiMediaReqHead } from './common/Ntv2.RichMediaReq';
 
 //Req
 export const OidbSvcTrpcTcp0X9067_202 = {

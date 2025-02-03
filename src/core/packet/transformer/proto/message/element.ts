@@ -1,4 +1,4 @@
-import { ProtoField, ScalarType } from "@napneko/nap-proto-core";
+import { ProtoField, ScalarType } from '@napneko/nap-proto-core';
 
 export const Elem = {
     text: ProtoField(1, () => Text, true),

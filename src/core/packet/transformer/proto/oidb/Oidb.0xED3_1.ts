@@ -1,4 +1,4 @@
-import { ProtoField, ScalarType } from "@napneko/nap-proto-core";
+import { ProtoField, ScalarType } from '@napneko/nap-proto-core';
 
 // Send Poke
 export const OidbSvcTrpcTcp0XED3_1 = {

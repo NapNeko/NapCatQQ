@@ -3,10 +3,10 @@ import { EventType } from '@/onebot/event/OneBotEvent';
 import { NapCatCore } from '@/core';
 
 export class OB11GroupRequestEvent extends OB11GroupNoticeEvent {
-    post_type = EventType.REQUEST;
+    override post_type = EventType.REQUEST;
     request_type = 'group';
 
-    user_id: number;
+    override user_id: number;
     comment: string;
     flag: string;
     sub_type: string;

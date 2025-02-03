@@ -12,8 +12,8 @@ const SchemaData = Type.Object({
 type Payload = Static<typeof SchemaData>;
 
 export default class SetGroupAdmin extends OneBotAction<Payload, null> {
-    actionName = ActionName.SetGroupAdmin;
-    payloadSchema = SchemaData;
+    override actionName = ActionName.SetGroupAdmin;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
         const enable = typeof payload.enable === 'string' ? payload.enable === 'true' : !!payload.enable;

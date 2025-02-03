@@ -1,7 +1,7 @@
 import { OneBotEvent } from '@/onebot/event/OneBotEvent';
 import { OB11Message } from '@/onebot';
 import { NetworkAdapterConfig } from '@/onebot/config/config';
-import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
+import { IOB11NetworkAdapter } from '@/onebot/network/adapter';
 
 export type OB11EmitEventContent = OneBotEvent | OB11Message;
 export enum OB11NetworkReloadType {

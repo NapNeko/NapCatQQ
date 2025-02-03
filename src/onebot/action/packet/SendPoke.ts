@@ -1,5 +1,5 @@
 import { ActionName } from '@/onebot/action/router';
-import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
+import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
 import { Static, Type } from '@sinclair/typebox';
 
 const SchemaData = Type.Object({
@@ -9,9 +9,9 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export class SendPoke extends GetPacketStatusDepends<Payload, any> {
-    actionName = ActionName.SendPoke;
-    payloadSchema = SchemaData;
+export class SendPoke extends GetPacketStatusDepends<Payload, void> {
+    override actionName = ActionName.SendPoke;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         if (payload.group_id) {

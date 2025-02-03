@@ -1,13 +1,13 @@
-import { OB11EmitEventContent, OB11NetworkReloadType } from './index';
-import express, { Express, Request, Response } from 'express';
+import {  OB11EmitEventContent, OB11NetworkReloadType } from './index';
+import express, { Express, NextFunction, Request, Response } from 'express';
 import http from 'http';
 import { NapCatCore } from '@/core';
 import { OB11Response } from '@/onebot/action/OneBotAction';
 import { ActionMap } from '@/onebot/action';
 import cors from 'cors';
 import { HttpServerConfig } from '@/onebot/config/config';
-import { NapCatOneBot11Adapter } from "@/onebot";
-import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
+import { NapCatOneBot11Adapter } from '@/onebot';
+import { IOB11NetworkAdapter } from '@/onebot/network/adapter';
 import json5 from 'json5';
 
 export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig> {
@@ -18,7 +18,8 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
         super(name, config, core, obContext, actions);
     }
 
-    onEvent<T extends OB11EmitEventContent>(event: T) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    override onEvent<T extends OB11EmitEventContent>(_event: T) {
         // http server is passive, no need to emit event
     }
 
@@ -61,17 +62,18 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
                 try {
                     req.body = json5.parse(rawData || '{}');
                     next();
-                } catch (err) {
+                } catch {
                     return res.status(400).send('Invalid JSON');
                 }
+                return;
             });
-            req.on('error', (err) => {
+            req.on('error', () => {
                 return res.status(400).send('Invalid JSON');
             });
         });
-
+        //@ts-expect-error authorize
         this.app.use((req, res, next) => this.authorize(this.config.token, req, res, next));
-        this.app.use(async (req, res, _) => {
+        this.app.use(async (req, res) => {
             await this.handleRequest(req, res);
         });
         this.server.listen(this.config.port, () => {
@@ -79,10 +81,10 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
         });
     }
 
-    private authorize(token: string | undefined, req: Request, res: Response, next: any) {
+    private authorize(token: string | undefined, req: Request, res: Response, next: NextFunction) {
         if (!token || token.length == 0) return next();//客户端未设置密钥
         const HeaderClientToken = req.headers.authorization?.split('Bearer ').pop() || '';
-        const QueryClientToken = req.query.access_token;
+        const QueryClientToken = req.query['access_token'];
         const ClientToken = typeof (QueryClientToken) === 'string' && QueryClientToken !== '' ? QueryClientToken : HeaderClientToken;
         if (ClientToken === token) {
             return next();
@@ -104,13 +106,14 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
             return res.json(hello);
         }
         const actionName = req.path.split('/')[1];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const action = this.actions.get(actionName as any);
         if (action) {
             try {
                 const result = await action.handle(payload, this.name, this.config);
                 return res.json(result);
-            } catch (error: any) {
-                return res.json(OB11Response.error(error?.stack?.toString() || error?.message || 'Error Handle', 200));
+            } catch (error: unknown) {
+                return res.json(OB11Response.error((error as Error)?.stack?.toString() || (error as Error)?.message || 'Error Handle', 200));
             }
         } else {
             return res.json(OB11Response.error('不支持的Api ' + actionName, 200));
@@ -119,11 +122,12 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
 
     async handleRequest(req: Request, res: Response) {
         if (!this.isEnable) {
-            this.core.context.logger.log(`[OneBot] [HTTP Server Adapter] Server is closed`);
-            return res.json(OB11Response.error('Server is closed', 200));
+            this.core.context.logger.log('[OneBot] [HTTP Server Adapter] Server is closed');
+            res.json(OB11Response.error('Server is closed', 200));
+            return;
         }
-
-        return this.httpApiRequest(req, res);
+        this.httpApiRequest(req, res);
+        return;
     }
 
     async reload(newConfig: HttpServerConfig) {

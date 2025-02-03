@@ -16,8 +16,8 @@ export class GetGroupRootFiles extends OneBotAction<Payload, {
     files: OB11GroupFile[],
     folders: OB11GroupFileFolder[],
 }> {
-    actionName = ActionName.GoCQHTTP_GetGroupRootFiles;
-    payloadSchema = SchemaData;
+    override actionName = ActionName.GoCQHTTP_GetGroupRootFiles;
+    override payloadSchema = SchemaData;
     async _handle(payload: Payload) {
         const ret = await this.core.apis.MsgApi.getGroupFileList(payload.group_id.toString(), {
             sortType: 1,

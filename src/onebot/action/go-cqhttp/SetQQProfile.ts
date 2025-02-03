@@ -1,3 +1,4 @@
+import { NTQQUserApi } from '@/core/apis';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
@@ -9,10 +10,9 @@ const SchemaData = Type.Object({
 });
 
 type Payload = Static<typeof SchemaData>;
-
-export class SetQQProfile extends OneBotAction<Payload, any> {
-    actionName = ActionName.SetQQProfile;
-    payloadSchema = SchemaData;
+export class SetQQProfile extends OneBotAction<Payload, Awaited<ReturnType<NTQQUserApi['modifySelfProfile']>> | null> {
+    override actionName = ActionName.SetQQProfile;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         const self = this.core.selfInfo;

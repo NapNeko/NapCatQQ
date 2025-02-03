@@ -1,6 +1,6 @@
-import Piscina from "piscina";
-import { VideoInfo } from "./video";
-import type { LogWrapper } from "./log";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import Piscina from 'piscina';
+import { VideoInfo } from './video';
 
 type EncodeArgs = {
     method: 'extractThumbnail' | 'convertFile' | 'convert' | 'getVideoInfo';

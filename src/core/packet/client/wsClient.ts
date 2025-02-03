@@ -1,8 +1,8 @@
-import { Data, WebSocket, ErrorEvent } from "ws";
-import { IPacketClient, RecvPacket } from "@/core/packet/client/baseClient";
-import { LogStack } from "@/core/packet/context/clientContext";
-import { NapCoreContext } from "@/core/packet/context/napCoreContext";
-import { PacketLogger } from "@/core/packet/context/loggerContext";
+import { Data, WebSocket, ErrorEvent } from 'ws';
+import { IPacketClient, RecvPacket } from '@/core/packet/client/baseClient';
+import { LogStack } from '@/core/packet/context/clientContext';
+import { NapCoreContext } from '@/core/packet/context/napCoreContext';
+import { PacketLogger } from '@/core/packet/context/loggerContext';
 
 export class WsPacketClient extends IPacketClient {
     private websocket: WebSocket | null = null;
@@ -23,7 +23,7 @@ export class WsPacketClient extends IPacketClient {
 
     check(): boolean {
         if (!this.napcore.config.packetServer) {
-            this.logStack.pushLogWarn(`wsPacketClient 未配置服务器地址`);
+            this.logStack.pushLogWarn('wsPacketClient 未配置服务器地址');
             return false;
         }
         return true;
@@ -52,7 +52,7 @@ export class WsPacketClient extends IPacketClient {
             try {
                 await this.connect();
                 return;
-            } catch (error) {
+            } catch {
                 this.reconnectAttempts++;
                 this.logStack.pushLogWarn(`第 ${this.reconnectAttempts}/${this.maxReconnectAttempts} 次尝试重连失败！`);
                 await this.delay(5000);
@@ -80,7 +80,7 @@ export class WsPacketClient extends IPacketClient {
             };
             this.websocket.onclose = () => {
                 this.available = false;
-                this.logger.warn(`WebSocket 连接关闭，尝试重连...`);
+                this.logger.warn('WebSocket 连接关闭，尝试重连...');
                 reject(new Error('WebSocket 连接关闭'));
             };
             this.websocket.onmessage = (event) => this.handleMessage(event.data).catch(err => {

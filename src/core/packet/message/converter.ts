@@ -15,7 +15,7 @@ import {
     SendStructLongMsgElement,
     SendTextElement,
     SendVideoElement
-} from "@/core";
+} from '@/core';
 import {
     IPacketMsgElement,
     PacketMsgAtElement,
@@ -30,8 +30,8 @@ import {
     PacketMsgTextElement,
     PacketMsgVideoElement,
     PacketMultiMsgElement
-} from "@/core/packet/message/element";
-import { PacketMsg, PacketSendMsgElement } from "@/core/packet/message/message";
+} from '@/core/packet/message/element';
+import { PacketMsg, PacketSendMsgElement } from '@/core/packet/message/message';
 
 const SupportedElementTypes = [
     ElementType.TEXT,
@@ -146,7 +146,7 @@ export class PacketMsgConverter {
                 ? msg.sendMemberName
                 : msg.sendNickName && msg.sendNickName !== ''
                     ? msg.sendNickName
-                    : "QQ用户",
+                    : 'QQ用户',
             time: +msg.msgTime,
             msg: msg.elements.map((element) => {
                 if (!this.isValidElementType(element.elementType)) return null;

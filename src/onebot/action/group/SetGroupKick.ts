@@ -11,8 +11,8 @@ const SchemaData = Type.Object({
 type Payload = Static<typeof SchemaData>;
 
 export default class SetGroupKick extends OneBotAction<Payload, null> {
-    actionName = ActionName.SetGroupKick;
-    payloadSchema = SchemaData;
+    override actionName = ActionName.SetGroupKick;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
         const rejectReq = payload.reject_add_request?.toString() == 'true';

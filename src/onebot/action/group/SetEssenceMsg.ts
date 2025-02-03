@@ -9,11 +9,11 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export default class SetEssenceMsg extends OneBotAction<Payload, any> {
-    actionName = ActionName.SetEssenceMsg;
-    payloadSchema = SchemaData;
+export default class SetEssenceMsg extends OneBotAction<Payload, unknown> {
+    override actionName = ActionName.SetEssenceMsg;
+    override payloadSchema = SchemaData;
 
-    async _handle(payload: Payload): Promise<any> {
+    async _handle(payload: Payload) {
         const msg = MessageUnique.getMsgIdAndPeerByShortId(+payload.message_id);
         if (!msg) {
             throw new Error('msg not found');

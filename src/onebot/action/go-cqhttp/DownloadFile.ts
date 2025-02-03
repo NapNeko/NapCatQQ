@@ -20,8 +20,8 @@ const SchemaData = Type.Object({
 type Payload = Static<typeof SchemaData>;
 
 export default class GoCQHTTPDownloadFile extends OneBotAction<Payload, FileResponse> {
-    actionName = ActionName.GoCQHTTP_DownloadFile;
-    payloadSchema = SchemaData;
+    override actionName = ActionName.GoCQHTTP_DownloadFile;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<FileResponse> {
         const isRandomName = !payload.name;

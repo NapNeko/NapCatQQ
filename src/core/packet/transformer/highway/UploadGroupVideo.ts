@@ -1,9 +1,9 @@
-import * as proto from "@/core/packet/transformer/proto";
-import { NapProtoMsg } from "@napneko/nap-proto-core";
-import { OidbPacket, PacketTransformer } from "@/core/packet/transformer/base";
-import OidbBase from "@/core/packet/transformer/oidb/oidbBase";
-import crypto from "node:crypto";
-import { PacketMsgVideoElement } from "@/core/packet/message/element";
+import * as proto from '@/core/packet/transformer/proto';
+import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { OidbPacket, PacketTransformer } from '@/core/packet/transformer/base';
+import OidbBase from '@/core/packet/transformer/oidb/oidbBase';
+import crypto from 'node:crypto';
+import { PacketMsgVideoElement } from '@/core/packet/message/element';
 
 class UploadGroupVideo extends PacketTransformer<typeof proto.NTV2RichMediaResp> {
     constructor() {
@@ -11,7 +11,7 @@ class UploadGroupVideo extends PacketTransformer<typeof proto.NTV2RichMediaResp>
     }
 
     build(groupUin: number, video: PacketMsgVideoElement): OidbPacket {
-        if (!video.fileSize || !video.thumbSize) throw new Error("video.fileSize or video.thumbSize is empty");
+        if (!video.fileSize || !video.thumbSize) throw new Error('video.fileSize or video.thumbSize is empty');
         const data = new NapProtoMsg(proto.NTV2RichMediaReq).encode({
             reqHead: {
                 common: {
@@ -37,7 +37,7 @@ class UploadGroupVideo extends PacketTransformer<typeof proto.NTV2RichMediaResp>
                             fileSize: +video.fileSize,
                             fileHash: video.fileMd5,
                             fileSha1: video.fileSha1,
-                            fileName: "nya.mp4",
+                            fileName: 'nya.mp4',
                             type: {
                                 type: 2,
                                 picFormat: 0,
@@ -55,7 +55,7 @@ class UploadGroupVideo extends PacketTransformer<typeof proto.NTV2RichMediaResp>
                             fileSize: +video.thumbSize,
                             fileHash: video.thumbMd5,
                             fileSha1: video.thumbSha1,
-                            fileName: "nya.jpg",
+                            fileName: 'nya.jpg',
                             type: {
                                 type: 1,
                                 picFormat: 0,
@@ -77,7 +77,7 @@ class UploadGroupVideo extends PacketTransformer<typeof proto.NTV2RichMediaResp>
                 extBizInfo: {
                     pic: {
                         bizType: 0,
-                        textSummary: "Nya~",
+                        textSummary: 'Nya~',
                     },
                     video: {
                         bytesPbReserve: Buffer.from([0x80, 0x01, 0x00]),

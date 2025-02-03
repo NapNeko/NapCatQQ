@@ -1,9 +1,9 @@
-import * as proto from "@/core/packet/transformer/proto";
-import { NapProtoMsg } from "@napneko/nap-proto-core";
-import { OidbPacket, PacketTransformer } from "@/core/packet/transformer/base";
-import OidbBase from "@/core/packet/transformer/oidb/oidbBase";
-import crypto from "node:crypto";
-import { PacketMsgPttElement } from "@/core/packet/message/element";
+import * as proto from '@/core/packet/transformer/proto';
+import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { OidbPacket, PacketTransformer } from '@/core/packet/transformer/base';
+import OidbBase from '@/core/packet/transformer/oidb/oidbBase';
+import crypto from 'node:crypto';
+import { PacketMsgPttElement } from '@/core/packet/message/element';
 
 class UploadPrivatePtt extends PacketTransformer<typeof proto.NTV2RichMediaResp> {
     constructor() {
@@ -58,7 +58,7 @@ class UploadPrivatePtt extends PacketTransformer<typeof proto.NTV2RichMediaResp>
                 compatQMsgSceneType: 1,
                 extBizInfo: {
                     pic: {
-                        textSummary: "Nya~",
+                        textSummary: 'Nya~',
                     },
                     ptt: {
                         bytesReserve: Buffer.from([0x08, 0x00, 0x38, 0x00]),

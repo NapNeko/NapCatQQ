@@ -11,9 +11,11 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export class GoCQHTTPGetForwardMsgAction extends OneBotAction<Payload, any> {
-    actionName = ActionName.GoCQHTTP_GetForwardMsg;
-    payloadSchema = SchemaData;
+export class GoCQHTTPGetForwardMsgAction extends OneBotAction<Payload, {
+    messages: OB11Message[] | undefined;
+}> {
+    override actionName = ActionName.GoCQHTTP_GetForwardMsg;
+    override payloadSchema = SchemaData;
 
     private createTemplateNode(message: OB11Message): OB11MessageNode {
         return {
@@ -49,7 +51,7 @@ export class GoCQHTTPGetForwardMsgAction extends OneBotAction<Payload, any> {
         return retMsg;
     }
 
-    async _handle(payload: Payload): Promise<any> {
+    async _handle(payload: Payload) {
         const msgId = payload.message_id || payload.id;
         if (!msgId) {
             throw new Error('message_id is required');
@@ -67,6 +69,9 @@ export class GoCQHTTPGetForwardMsgAction extends OneBotAction<Payload, any> {
         }
 
         const singleMsg = data.msgList[0];
+        if (!singleMsg) {
+            throw new Error('找不到相关的聊天记录');
+        }
         const resMsg = (await this.obContext.apis.MsgApi.parseMessageV2(singleMsg))?.arrayMsg;//强制array 以便处理
         if (!(resMsg?.message?.[0] as OB11MessageForward)?.data?.content) {
             throw new Error('找不到相关的聊天记录');

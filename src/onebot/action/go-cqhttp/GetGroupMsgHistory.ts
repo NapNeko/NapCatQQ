@@ -22,10 +22,10 @@ type Payload = Static<typeof SchemaData>;
 
 
 export default class GoCQHTTPGetGroupMsgHistory extends OneBotAction<Payload, Response> {
-    actionName = ActionName.GoCQHTTP_GetGroupMsgHistory;
-    payloadSchema = SchemaData;
+    override actionName = ActionName.GoCQHTTP_GetGroupMsgHistory;
+    override payloadSchema = SchemaData;
 
-    async _handle(payload: Payload, adapter: string, config: NetworkAdapterConfig): Promise<Response> {
+    async _handle(payload: Payload, _adapter: string, config: NetworkAdapterConfig): Promise<Response> {
         //处理参数
         const isReverseOrder = typeof payload.reverseOrder === 'string' ? payload.reverseOrder === 'true' : !!payload.reverseOrder;
         const peer: Peer = { chatType: ChatType.KCHATTYPEGROUP, peerUid: payload.group_id.toString() };

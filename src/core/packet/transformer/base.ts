@@ -1,5 +1,5 @@
-import { NapProtoDecodeStructType } from "@napneko/nap-proto-core";
-import { PacketMsgBuilder } from "@/core/packet/message/builder";
+import { NapProtoDecodeStructType } from '@napneko/nap-proto-core';
+import { PacketMsgBuilder } from '@/core/packet/message/builder';
 
 export type PacketHexStr = string & { readonly hexNya: unique symbol };
 

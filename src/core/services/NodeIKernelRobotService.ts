@@ -29,7 +29,7 @@ export interface NodeIKernelRobotService {
 
     setRobotPickTts(arg1: unknown, arg2: unknown): unknown;
 
-    getRobotUinRange(data: any): Promise<{ response: { robotUinRanges: any } }>;
+    getRobotUinRange(data: unknown): Promise<{ response: { robotUinRanges: Array<unknown> } }>;
 
     isNull(): boolean;
 }

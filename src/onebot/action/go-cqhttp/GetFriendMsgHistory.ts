@@ -21,10 +21,10 @@ const SchemaData = Type.Object({
 type Payload = Static<typeof SchemaData>;
 
 export default class GetFriendMsgHistory extends OneBotAction<Payload, Response> {
-    actionName = ActionName.GetFriendMsgHistory;
-    payloadSchema = SchemaData;
+    override actionName = ActionName.GetFriendMsgHistory;
+    override payloadSchema = SchemaData;
 
-    async _handle(payload: Payload, adapter: string, config: NetworkAdapterConfig): Promise<Response> {
+    async _handle(payload: Payload, _adapter: string, config: NetworkAdapterConfig): Promise<Response> {
         //处理参数
         const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
 

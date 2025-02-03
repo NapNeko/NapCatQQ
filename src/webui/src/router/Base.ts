@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PackageInfoHandler, QQVersionHandler } from '../api/BaseInfo';
-import { StatusRealTimeHandler } from "@webapi/api/Status";
+import { StatusRealTimeHandler } from '@webapi/api/Status';
 import { GetProxyHandler } from '../api/Proxy';
 
 const router = Router();

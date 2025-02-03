@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export type TaskExecutor<T> = (resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void, onCancel: (callback: () => void) => void) => void | Promise<void>;
 
 export class CancelableTask<T> {
@@ -7,30 +8,34 @@ export class CancelableTask<T> {
     private cancelListeners: Array<() => void> = [];
 
     constructor(executor: TaskExecutor<T>) {
-        this.promise = new Promise<T>(async (resolve, reject) => {
+        this.promise = new Promise<T>((resolve, reject) => {
             const onCancel = (callback: () => void) => {
                 this.cancelCallback = callback;
             };
 
-            try {
-                await executor(
-                    (value) => {
-                        if (!this.isCanceled) {
-                            resolve(value);
-                        }
-                    },
-                    (reason) => {
-                        if (!this.isCanceled) {
-                            reject(reason);
-                        }
-                    },
-                    onCancel
-                );
-            } catch (error) {
-                if (!this.isCanceled) {
-                    reject(error);
+            const execute = async () => {
+                try {
+                    await executor(
+                        (value) => {
+                            if (!this.isCanceled) {
+                                resolve(value);
+                            }
+                        },
+                        (reason) => {
+                            if (!this.isCanceled) {
+                                reject(reason);
+                            }
+                        },
+                        onCancel
+                    );
+                } catch (error) {
+                    if (!this.isCanceled) {
+                        reject(error);
+                    }
                 }
-            }
+            };
+
+            execute();
         });
     }
 
@@ -71,42 +76,5 @@ export class CancelableTask<T> {
         return {
             next: () => this.promise.then(value => ({ value, done: true })),
         };
-    }
-}
-
-async function demoAwait() {
-    const executor: TaskExecutor<number> = async (resolve, reject, onCancel) => {
-        let count = 0;
-        const intervalId = setInterval(() => {
-            count++;
-            console.log(`Task is running... Count: ${count}`);
-            if (count === 5) {
-                clearInterval(intervalId);
-                resolve(count);
-            }
-        }, 1000);
-
-        onCancel(() => {
-            clearInterval(intervalId);
-            console.log('Task has been canceled.');
-            reject(new Error('Task was canceled'));
-        });
-    };
-
-    const task = new CancelableTask(executor);
-
-    task.onCancel(() => {
-        console.log('Cancel listener triggered.');
-    });
-
-    setTimeout(() => {
-        task.cancel(); // 取消任务
-    }, 6000);
-
-    try {
-        const result = await task;
-        console.log(`Task completed with result: ${result}`);
-    } catch (error) {
-        console.error('Task failed:', error);
     }
 }

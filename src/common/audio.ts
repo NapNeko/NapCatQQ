@@ -4,8 +4,8 @@ import path from 'node:path';
 import { randomUUID } from 'crypto';
 import { EncodeResult, getDuration, getWavFileInfo, isSilk, isWav } from 'silk-wasm';
 import { LogWrapper } from '@/common/log';
-import { EncodeArgs } from "@/common/audio-worker";
-import { FFmpegService } from "@/common/ffmpeg";
+import { EncodeArgs } from '@/common/audio-worker';
+import { FFmpegService } from '@/common/ffmpeg';
 
 const ALLOW_SAMPLE_RATE = [8000, 12000, 16000, 24000, 32000, 44100, 48000];
 
@@ -27,12 +27,11 @@ async function guessDuration(pttPath: string, logger: LogWrapper) {
 async function handleWavFile(
     file: Buffer,
     filePath: string,
-    pcmPath: string,
-    logger: LogWrapper
+    pcmPath: string
 ): Promise<{ input: Buffer; sampleRate: number }> {
     const { fmt } = getWavFileInfo(file);
     if (!ALLOW_SAMPLE_RATE.includes(fmt.sampleRate)) {
-        return { input: await FFmpegService.convert(filePath, pcmPath, logger), sampleRate: 24000 };
+        return { input: await FFmpegService.convert(filePath, pcmPath), sampleRate: 24000 };
     }
     return { input: file, sampleRate: fmt.sampleRate };
 }
@@ -45,8 +44,8 @@ export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: Log
             logger.log(`语音文件${filePath}需要转换成silk`);
             const pcmPath = `${pttPath}.pcm`;
             const { input, sampleRate } = isWav(file)
-                ? (await handleWavFile(file, filePath, pcmPath, logger))
-                : { input: await FFmpegService.convert(filePath, pcmPath, logger), sampleRate: 24000 };
+                ? (await handleWavFile(file, filePath, pcmPath))
+                : { input: await FFmpegService.convert(filePath, pcmPath), sampleRate: 24000 };
             const silk = await piscina.run({ input: input, sampleRate: sampleRate });
             await fsPromise.writeFile(pttPath, Buffer.from(silk.data));
             logger.log(`语音文件${filePath}转换成功!`, pttPath, '时长:', silk.duration);
@@ -59,8 +58,8 @@ export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: Log
             let duration = 0;
             try {
                 duration = getDuration(file) / 1000;
-            } catch (e: any) {
-                logger.log('获取语音文件时长失败, 使用文件大小推测时长', filePath, e.stack);
+            } catch (e: unknown) {
+                logger.log('获取语音文件时长失败, 使用文件大小推测时长', filePath, (e as Error).stack);
                 duration = await guessDuration(filePath, logger);
             }
             return {
@@ -69,8 +68,8 @@ export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: Log
                 duration,
             };
         }
-    } catch (error: any) {
-        logger.logError('convert silk failed', error.stack);
+    } catch (error: unknown) {
+        logger.logError('convert silk failed', (error as Error).stack);
         return {};
     }
 }
