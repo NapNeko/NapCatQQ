@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Copyright (c) 2012-2015, Christopher Jeffrey, Peter Sunde (MIT License)
  * Copyright (c) 2016, Daniel Imms (MIT License).
@@ -135,7 +136,8 @@ export class WindowsTerminal extends Terminal {
    * openpty
    */
 
-    public static open(options?: IPtyOpenOptions): void {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public static open(_options?: IPtyOpenOptions): void {
         throw new Error('open() not supported on windows, use Fork() instead.');
     }
 
@@ -176,6 +178,8 @@ export class WindowsTerminal extends Terminal {
         });
     }
 
+    // @ts-expect-error - This is a private method that is not part of the public API.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     private _deferNoArgs<A>(deferredFn: () => void): void {
         // If the terminal is ready, execute.
         if (this._isReady) {

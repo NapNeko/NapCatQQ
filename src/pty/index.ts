@@ -24,6 +24,7 @@ export function require_dlopen(modulename: string) {
     const module = { exports: {} };
     const import__dirname = dirname(fileURLToPath(import.meta.url));
     process.dlopen(module, path.join(import__dirname, modulename));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return module.exports as any;
 }
 /**
