@@ -535,8 +535,12 @@ export class OneBotMsgApi {
             let thumb = sendMsg.data.thumb;
             if (thumb) {
                 const uri2LocalRes = await uriToLocalFile(this.core.NapCatTempPath, thumb);
-                if (uri2LocalRes.success) thumb = uri2LocalRes.path;
+                if (uri2LocalRes.success) {
+                    thumb = uri2LocalRes.path;
+                    context.deleteAfterSentFiles.push(thumb);
+                }
             }
+
             return await this.core.apis.FileApi.createValidSendVideoElement(context, path, fileName, thumb);
         },
 
