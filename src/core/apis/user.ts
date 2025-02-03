@@ -46,6 +46,15 @@ export class NTQQUserApi {
         });
     }
 
+    async setDiySelfOnlineStatus(faceId: string, wording: string, faceType: string) {
+        return this.context.session.getMsgService().setStatus({
+            status: 10,
+            extStatus: 2000,
+            customStatus: { faceId: faceId, wording: wording, faceType: faceType },
+            batteryStatus: 0
+        });
+    }
+
     async getBuddyRecommendContactArkJson(uin: string, sencenID = '') {
         return this.context.session.getBuddyService().getBuddyRecommendContactArkJson(uin, sencenID);
     }
