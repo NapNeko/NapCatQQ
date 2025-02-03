@@ -1,4 +1,5 @@
 import { Button, ButtonGroup } from '@heroui/button'
+import { Pagination } from '@heroui/pagination'
 import { Spinner } from '@heroui/spinner'
 import {
   type Selection,
@@ -10,10 +11,10 @@ import {
   TableHeader,
   TableRow
 } from '@heroui/table'
-import { Tooltip } from '@heroui/tooltip'
 import path from 'path-browserify'
+import { useState } from 'react'
 import { BiRename } from 'react-icons/bi'
-import { FiCopy, FiMove, FiTrash2 } from 'react-icons/fi'
+import { FiCopy, FiDownload, FiMove, FiTrash2 } from 'react-icons/fi'
 
 import FileIcon from '@/components/file_icon'
 
@@ -29,11 +30,15 @@ interface FileTableProps {
   onSelectionChange: (selected: Selection) => void
   onDirectoryClick: (dirPath: string) => void
   onEdit: (filePath: string) => void
+  onPreview: (filePath: string) => void
   onRenameRequest: (name: string) => void
   onMoveRequest: (name: string) => void
   onCopyPath: (fileName: string) => void
   onDelete: (filePath: string) => void
+  onDownload: (filePath: string) => void
 }
+
+const PAGE_SIZE = 20
 
 export default function FileTable({
   files,
@@ -45,11 +50,18 @@ export default function FileTable({
   onSelectionChange,
   onDirectoryClick,
   onEdit,
+  onPreview,
   onRenameRequest,
   onMoveRequest,
   onCopyPath,
-  onDelete
+  onDelete,
+  onDownload
 }: FileTableProps) {
+  const [page, setPage] = useState(1)
+  const pages = Math.ceil(files.length / PAGE_SIZE)
+  const start = (page - 1) * PAGE_SIZE
+  const end = start + PAGE_SIZE
+  const displayFiles = files.slice(start, end)
   return (
     <Table
       aria-label="文件列表"
@@ -59,6 +71,19 @@ export default function FileTable({
       defaultSelectedKeys={[]}
       selectedKeys={selectedFiles}
       selectionMode="multiple"
+      bottomContent={
+        <div className="flex w-full justify-center">
+          <Pagination
+            isCompact
+            showControls
+            showShadow
+            color="danger"
+            page={page}
+            total={pages}
+            onChange={(page) => setPage(page)}
+          />
+        </div>
+      }
     >
       <TableHeader>
         <TableColumn key="name" allowsSorting>
@@ -82,34 +107,52 @@ export default function FileTable({
             <Spinner />
           </div>
         }
-        items={files}
+        items={displayFiles}
       >
-        {(file: FileInfo) => (
-          <TableRow key={file.name}>
-            <TableCell>
-              <Button
-                variant="light"
-                onPress={() =>
-                  file.isDirectory
-                    ? onDirectoryClick(file.name)
-                    : onEdit(path.join(currentPath, file.name))
-                }
-                className="text-left justify-start"
-                startContent={
-                  <FileIcon name={file.name} isDirectory={file.isDirectory} />
-                }
-              >
-                {file.name}
-              </Button>
-            </TableCell>
-            <TableCell>{file.isDirectory ? '目录' : '文件'}</TableCell>
-            <TableCell>
-              {isNaN(file.size) || file.isDirectory ? '-' : `${file.size} 字节`}
-            </TableCell>
-            <TableCell>{new Date(file.mtime).toLocaleString()}</TableCell>
-            <TableCell>
-              <ButtonGroup size="sm">
-                <Tooltip content="重命名">
+        {(file: FileInfo) => {
+          const filePath = path.join(currentPath, file.name)
+          // 判断预览类型
+          const ext = path.extname(file.name).toLowerCase()
+          const previewable = [
+            '.png',
+            '.jpg',
+            '.jpeg',
+            '.gif',
+            '.bmp',
+            '.mp4',
+            '.webm',
+            '.mp3',
+            '.wav'
+          ].includes(ext)
+          return (
+            <TableRow key={file.name}>
+              <TableCell>
+                <Button
+                  variant="light"
+                  onPress={() =>
+                    file.isDirectory
+                      ? onDirectoryClick(file.name)
+                      : previewable
+                        ? onPreview(filePath)
+                        : onEdit(filePath)
+                  }
+                  className="text-left justify-start"
+                  startContent={
+                    <FileIcon name={file.name} isDirectory={file.isDirectory} />
+                  }
+                >
+                  {file.name}
+                </Button>
+              </TableCell>
+              <TableCell>{file.isDirectory ? '目录' : '文件'}</TableCell>
+              <TableCell>
+                {isNaN(file.size) || file.isDirectory
+                  ? '-'
+                  : `${file.size} 字节`}
+              </TableCell>
+              <TableCell>{new Date(file.mtime).toLocaleString()}</TableCell>
+              <TableCell>
+                <ButtonGroup size="sm">
                   <Button
                     isIconOnly
                     color="danger"
@@ -118,8 +161,6 @@ export default function FileTable({
                   >
                     <BiRename />
                   </Button>
-                </Tooltip>
-                <Tooltip content="移动">
                   <Button
                     isIconOnly
                     color="danger"
@@ -128,8 +169,6 @@ export default function FileTable({
                   >
                     <FiMove />
                   </Button>
-                </Tooltip>
-                <Tooltip content="复制路径">
                   <Button
                     isIconOnly
                     color="danger"
@@ -138,21 +177,27 @@ export default function FileTable({
                   >
                     <FiCopy />
                   </Button>
-                </Tooltip>
-                <Tooltip content="删除">
                   <Button
                     isIconOnly
                     color="danger"
                     variant="flat"
-                    onPress={() => onDelete(path.join(currentPath, file.name))}
+                    onPress={() => onDownload(filePath)}
+                  >
+                    <FiDownload />
+                  </Button>
+                  <Button
+                    isIconOnly
+                    color="danger"
+                    variant="flat"
+                    onPress={() => onDelete(filePath)}
                   >
                     <FiTrash2 />
                   </Button>
-                </Tooltip>
-              </ButtonGroup>
-            </TableCell>
-          </TableRow>
-        )}
+                </ButtonGroup>
+              </TableCell>
+            </TableRow>
+          )
+        }}
       </TableBody>
     </Table>
   )

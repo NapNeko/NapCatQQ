@@ -11,6 +11,9 @@ import {
     RenameHandler,
     MoveHandler,
     BatchMoveHandler,
+    DownloadHandler,
+    BatchDownloadHandler, // 新增下载处理方法
+    UploadHandler, // 添加上传处理器
 } from '../api/File';
 
 const router = Router();
@@ -32,5 +35,7 @@ router.post('/batchDelete', BatchDeleteHandler);
 router.post('/rename', RenameHandler);
 router.post('/move', MoveHandler);
 router.post('/batchMove', BatchMoveHandler);
-
+router.post('/download', DownloadHandler);
+router.post('/batchDownload', BatchDownloadHandler);
+router.post('/upload', UploadHandler); // 添加上传处理路由
 export { router as FileRouter };
