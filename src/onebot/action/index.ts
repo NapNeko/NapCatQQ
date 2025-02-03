@@ -103,7 +103,7 @@ import { GetGuildProfile } from './guild/GetGuildProfile';
 import { GetClientkey } from './extends/GetClientkey';
 import { SendPacket } from './extends/SendPacket';
 import { SendPoke } from '@/onebot/action/packet/SendPoke';
-import { SeDiyOnlineStatus } from './extends/SetDiyOnlineStatus';
+import { SetDiyOnlineStatus } from './extends/SetDiyOnlineStatus';
 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 
@@ -210,7 +210,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new GetUserStatus(obContext, core),
         new GetRkey(obContext, core),
         new SetSpecialTittle(obContext, core),
-        new SeDiyOnlineStatus(obContext, core),
+        new SetDiyOnlineStatus(obContext, core),
         // new UploadForwardMsg(obContext, core),
         new GetGroupShutList(obContext, core),
         new GetGroupFileUrl(obContext, core),

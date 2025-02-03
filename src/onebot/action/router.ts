@@ -90,7 +90,7 @@ export const ActionName = {
 
     // 以下为扩展napcat扩展
     Unknown: 'unknown',
-    SeDiyOnlineStatus: 'set_diy_online_status',
+    SetDiyOnlineStatus: 'set_diy_online_status',
     SharePeer: 'ArkSharePeer',
     ShareGroupEx: 'ArkShareGroup',
     // RebootNormal : 'reboot_normal', //无快速登录重新启动
