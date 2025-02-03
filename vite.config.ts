@@ -8,7 +8,6 @@ const external = [
     'silk-wasm',
     'ws',
     'express',
-    'piscina',
     '@ffmpeg.wasm/core-mt'
 ];
 const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`)].flat();

@@ -1,4 +1,4 @@
-import Piscina from 'piscina';
+import Piscina from 'piscina/src';
 import fsPromise from 'fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'crypto';
