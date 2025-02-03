@@ -47,6 +47,7 @@ export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: Log
                 ? (await handleWavFile(file, filePath, pcmPath))
                 : { input: await FFmpegService.convert(filePath, pcmPath), sampleRate: 24000 };
             const silk = await piscina.run({ input: input, sampleRate: sampleRate });
+            fsPromise.unlink(pcmPath).catch((e) => logger.logError('删除临时文件失败', pcmPath, e));
             await fsPromise.writeFile(pttPath, Buffer.from(silk.data));
             logger.log(`语音文件${filePath}转换成功!`, pttPath, '时长:', silk.duration);
             return {
