@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import Piscina from 'piscina/src';
+import Piscina from 'piscina';
 import { VideoInfo } from './video';
 
 type EncodeArgs = {

@@ -1,4 +1,4 @@
-import Piscina from 'piscina/src';
+import Piscina from 'piscina';
 import fsPromise from 'fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'crypto';
@@ -19,7 +19,7 @@ const piscina = new Piscina<EncodeArgs, EncodeResult>({
 
 async function guessDuration(pttPath: string, logger: LogWrapper) {
     const pttFileInfo = await fsPromise.stat(pttPath);
-    const duration = Math.max(1, Math.floor(pttFileInfo.size / 1024 / 3));  // 3kb/s
+    const duration = Math.max(1, Math.floor(pttFileInfo.size / 1024 / 3)); // 3kb/s
     logger.log('通过文件大小估算语音的时长:', duration);
     return duration;
 }
@@ -44,7 +44,7 @@ export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: Log
             logger.log(`语音文件${filePath}需要转换成silk`);
             const pcmPath = `${pttPath}.pcm`;
             const { input, sampleRate } = isWav(file)
-                ? (await handleWavFile(file, filePath, pcmPath))
+                ? await handleWavFile(file, filePath, pcmPath)
                 : { input: await FFmpegService.convert(filePath, pcmPath), sampleRate: 24000 };
             const silk = await piscina.run({ input: input, sampleRate: sampleRate });
             fsPromise.unlink(pcmPath).catch((e) => logger.logError('删除临时文件失败', pcmPath, e));
