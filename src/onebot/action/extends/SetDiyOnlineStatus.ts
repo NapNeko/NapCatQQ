@@ -10,8 +10,8 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export class SeDiyOnlineStatus extends OneBotAction<Payload, string> {
-    override actionName = ActionName.SeDiyOnlineStatus;
+export class SetDiyOnlineStatus extends OneBotAction<Payload, string> {
+    override actionName = ActionName.SetDiyOnlineStatus;
     override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
