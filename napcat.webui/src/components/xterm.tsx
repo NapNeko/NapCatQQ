@@ -1,6 +1,5 @@
 import { FitAddon } from '@xterm/addon-fit'
 import { WebLinksAddon } from '@xterm/addon-web-links'
-import { WebglAddon } from '@xterm/addon-webgl'
 import { Terminal } from '@xterm/xterm'
 import '@xterm/xterm/css/xterm.css'
 import clsx from 'clsx'
@@ -55,7 +54,6 @@ const XTerm = forwardRef<XTermRef, XTermProps>((props, ref) => {
       })
     )
     terminal.loadAddon(fitAddon)
-    //terminal.loadAddon(new WebglAddon())
     terminal.open(domRef.current)
 
     terminal.writeln(
