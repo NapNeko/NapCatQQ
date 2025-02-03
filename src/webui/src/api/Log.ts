@@ -2,6 +2,7 @@ import type { RequestHandler } from 'express';
 import { sendError, sendSuccess } from '../utils/response';
 import { WebUiConfigWrapper } from '../helper/config';
 import { logSubscription } from '@/common/log';
+import { terminalManager } from '../terminal/terminal_manager';
 
 // 日志记录
 export const LogHandler: RequestHandler = async (req, res) => {
@@ -34,4 +35,26 @@ export const LogRealTimeHandler: RequestHandler = async (req, res) => {
     req.on('close', () => {
         logSubscription.unsubscribe(listener);
     });
+};
+
+// 终端相关处理器
+export const CreateTerminalHandler: RequestHandler = async (req, res) => {
+    try {
+        const { id } = terminalManager.createTerminal();
+        return sendSuccess(res, { id });
+    } catch (error) {
+        console.error('Failed to create terminal:', error);
+        return sendError(res, '创建终端失败');
+    }
+};
+
+export const GetTerminalListHandler: RequestHandler = (_, res) => {
+    const list = terminalManager.getTerminalList();
+    return sendSuccess(res, list);
+};
+
+export const CloseTerminalHandler: RequestHandler = (req, res) => {
+    const id = req.params.id;
+    terminalManager.closeTerminal(id);
+    return sendSuccess(res, {});
 };
