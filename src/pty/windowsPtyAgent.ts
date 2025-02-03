@@ -63,31 +63,11 @@ export class WindowsPtyAgent {
         }
         if (this._useConpty) {
             if (!conptyNative) {
-                try {
-                    conptyNative = require_dlopen('./pty/' + process.platform + '.' + process.arch + '/conpty.node');
-                } catch (outerError) {
-                    try {
-                        conptyNative = require_dlopen('./pty/' + process.platform + '.' + process.arch + '/conpty.node');
-                    } catch (innerError) {
-                        console.error('innerError', innerError);
-                        // Re-throw the exception from the Release require if the Debug require fails as well
-                        throw outerError;
-                    }
-                }
+                conptyNative = require_dlopen('./pty/' + process.platform + '.' + process.arch + '/conpty.node');
             }
         } else {
             if (!winptyNative) {
-                try {
-                    winptyNative = require_dlopen('./pty/' + process.platform + '.' + process.arch + '/pty.node');
-                } catch (outerError) {
-                    try {
-                        winptyNative = require_dlopen('./pty/' + process.platform + '.' + process.arch + '/pty.node');
-                    } catch (innerError) {
-                        console.error('innerError', innerError);
-                        // Re-throw the exception from the Release require if the Debug require fails as well
-                        throw outerError;
-                    }
-                }
+                winptyNative = require_dlopen('./pty/' + process.platform + '.' + process.arch + '/pty.node');
             }
         }
         this._ptyNative = this._useConpty ? conptyNative : winptyNative;
