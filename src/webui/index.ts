@@ -3,6 +3,7 @@
  */
 
 import express from 'express';
+import { createServer } from 'http';
 import { LogWrapper } from '@/common/log';
 import { NapCatPathWrapper } from '@/common/path';
 import { WebUiConfigWrapper } from '@webapi/helper/config';
@@ -11,10 +12,11 @@ import { cors } from '@webapi/middleware/cors';
 import { createUrl } from '@webapi/utils/url';
 import { sendSuccess } from '@webapi/utils/response';
 import { join } from 'node:path';
+import { terminalManager } from '@webapi/terminal/terminal_manager';
 
 // 实例化Express
 const app = express();
-
+const server = createServer(app);
 /**
  * 初始化并启动WebUI服务。
  * 该函数配置了Express服务器以支持JSON解析和静态文件服务，并监听6099端口。
@@ -45,6 +47,10 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
     // ------------挂载路由------------
     // 挂载静态路由（前端），路径为 [/前缀]/webui
     app.use('/webui', express.static(pathWrapper.staticPath));
+    // 初始化WebSocket服务器
+    server.on('upgrade', (request, socket, head) => {
+        terminalManager.initialize(request, socket, head, logger);
+    });
     // 挂载API接口
     app.use('/api', ALLRouter);
     // 所有剩下的请求都转到静态页面
@@ -61,7 +67,7 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
     // ------------路由挂载结束------------
 
     // ------------启动服务------------
-    app.listen(config.port, config.host, async () => {
+    server.listen(config.port, config.host, async () => {
         // 启动后打印出相关地址
         const port = config.port.toString(),
             searchParams = { token: config.token };

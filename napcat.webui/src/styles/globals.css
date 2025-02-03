@@ -35,6 +35,20 @@ body {
   .font-noto-serif {
     font-family: 'Noto Serif SC', serif;
   }
+  .hide-scrollbar::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+  }
+  .hide-scrollbar::-webkit-scrollbar-thumb {
+    width: 0 !important;
+    height: 0 !important;
+    background-color: transparent !important;
+  }
+  .hide-scrollbar::-webkit-scrollbar-track {
+    width: 0 !important;
+    height: 0 !important;
+    background-color: transparent !important;
+  }
 }
 
 ::-webkit-scrollbar {

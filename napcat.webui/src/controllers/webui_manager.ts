@@ -9,6 +9,14 @@ export interface Log {
   message: string
 }
 
+export interface TerminalSession {
+  id: string
+}
+
+export interface TerminalInfo {
+  id: string
+}
+
 export default class WebUIManager {
   public static async checkWebUiLogined() {
     const { data } =
