@@ -54,10 +54,10 @@
     "winston": "^3.17.0",
     "@homebridge/node-pty-prebuilt-multiarch": "^0.12.0-beta.5",
     "@ffmpeg.wasm/main": "^0.13.1",
-    "piscina": "^4.7.0",
     "express-rate-limit": "^7.5.0"
   },
   "dependencies": {
+    "piscina": "^4.7.0",
     "@ffmpeg.wasm/core-mt": "^0.13.2",
     "express": "^5.0.0",
     "silk-wasm": "^3.6.1",
