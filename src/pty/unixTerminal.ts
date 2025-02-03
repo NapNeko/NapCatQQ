@@ -11,8 +11,9 @@ import { Terminal, DEFAULT_COLS, DEFAULT_ROWS } from '@homebridge/node-pty-prebu
 import { IProcessEnv, IPtyForkOptions, IPtyOpenOptions } from '@homebridge/node-pty-prebuilt-multiarch/src/interfaces';
 import { ArgvOrCommandLine } from '@homebridge/node-pty-prebuilt-multiarch/src/types';
 import { assign } from '@homebridge/node-pty-prebuilt-multiarch/src/utils';
+import { pty_loader } from './prebuild-loader';
+export const pty = pty_loader();
 
-import pty from './prebuild-loader';
 let helperPath: string;
 helperPath = '../build/Release/spawn-helper';
 
@@ -172,8 +173,8 @@ export class UnixTerminal extends Terminal {
     get ptsName(): string { return this._pty; }
 
     /**
-   * openpty
-   */
+ * openpty
+ */
 
     public static open(opt: IPtyOpenOptions): UnixTerminal {
         const self: UnixTerminal = Object.create(UnixTerminal.prototype);
@@ -249,20 +250,20 @@ export class UnixTerminal extends Terminal {
     }
 
     /**
-   * Gets the name of the process.
-   */
+ * Gets the name of the process.
+ */
     public get process(): string {
         if (process.platform === 'darwin') {
             const title = pty.process(this._fd);
-            return (title !== 'kernel_task' ) ? title : this._file;
+            return (title !== 'kernel_task') ? title : this._file;
         }
 
         return pty.process(this._fd, this._pty) || this._file;
     }
 
     /**
-   * TTY
-   */
+ * TTY
+ */
 
     public resize(cols: number, rows: number): void {
         if (cols <= 0 || rows <= 0 || isNaN(cols) || isNaN(rows) || cols === Infinity || rows === Infinity) {
