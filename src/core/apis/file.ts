@@ -181,9 +181,12 @@ export class NTQQFileApi {
                 this.context.logger.logError('复制自定义缩略图失败', e);
             }
         }
+        context.deleteAfterSentFiles.push(thumbPath);
+        
         const thumbSize = (await fsPromises.stat(thumbPath)).size;
         const thumbMd5 = await calculateFileMD5(thumbPath);
-        context.deleteAfterSentFiles.push(path);
+        context.deleteAfterSentFiles.push(thumbPath);
+
 
         const uploadName = (fileName || _fileName).toLocaleLowerCase().endsWith(`.${fileExt.toLocaleLowerCase()}`) ? (fileName || _fileName) : `${fileName || _fileName}.${fileExt}`;
         return {
