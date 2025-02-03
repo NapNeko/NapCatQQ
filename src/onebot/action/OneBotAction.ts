@@ -5,7 +5,7 @@ import { NapCatOneBot11Adapter, OB11Return } from '@/onebot';
 import { NetworkAdapterConfig } from '../config/config';
 
 export class OB11Response {
-    private static createResponse<T>(data: T, status: string, retcode: number, message: string = '', echo: any = null): OB11Return<T> {
+    private static createResponse<T>(data: T, status: string, retcode: number, message: string = '', echo: unknown = null): OB11Return<T> {
         return {
             status,
             retcode,
@@ -20,11 +20,11 @@ export class OB11Response {
         return this.createResponse(data, status, retcode, message);
     }
 
-    static ok<T>(data: T, echo: any = null): OB11Return<T> {
+    static ok<T>(data: T, echo: unknown = null): OB11Return<T> {
         return this.createResponse(data, 'ok', 0, '', echo);
     }
 
-    static error(err: string, retcode: number, echo: any = null): OB11Return<null> {
+    static error(err: string, retcode: number, echo: unknown = null): OB11Return<null> {
         return this.createResponse(null, 'failed', retcode, err, echo);
     }
 }
@@ -32,8 +32,8 @@ export class OB11Response {
 export abstract class OneBotAction<PayloadType, ReturnDataType> {
     actionName: typeof ActionName[keyof typeof ActionName] = ActionName.Unknown;
     core: NapCatCore;
-    private validate: ValidateFunction<any> | undefined = undefined;
-    payloadSchema: any = undefined;
+    private validate?: ValidateFunction<unknown> = undefined;
+    payloadSchema?: unknown = undefined;
     obContext: NapCatOneBot11Adapter;
 
     constructor(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
@@ -64,13 +64,13 @@ export abstract class OneBotAction<PayloadType, ReturnDataType> {
         try {
             const resData = await this._handle(payload, adaptername, config);
             return OB11Response.ok(resData);
-        } catch (e: any) {
+        } catch (e: unknown) {
             this.core.context.logger.logError('发生错误', e);
-            return OB11Response.error((e as Error).message.toString() || e?.stack?.toString() || '未知错误，可能操作超时', 200);
+            return OB11Response.error((e as Error).message.toString() || (e as Error)?.stack?.toString() || '未知错误，可能操作超时', 200);
         }
     }
 
-    public async websocketHandle(payload: PayloadType, echo: any, adaptername: string, config: NetworkAdapterConfig): Promise<OB11Return<ReturnDataType | null>> {
+    public async websocketHandle(payload: PayloadType, echo: unknown, adaptername: string, config: NetworkAdapterConfig): Promise<OB11Return<ReturnDataType | null>> {
         const result = await this.check(payload);
         if (!result.valid) {
             return OB11Response.error(result.message, 1400, echo);
@@ -78,9 +78,9 @@ export abstract class OneBotAction<PayloadType, ReturnDataType> {
         try {
             const resData = await this._handle(payload, adaptername, config);
             return OB11Response.ok(resData, echo);
-        } catch (e: any) {
+        } catch (e: unknown) {
             this.core.context.logger.logError('发生错误', e);
-            return OB11Response.error((e as Error).message.toString() || e.stack?.toString(), 1200, echo);
+            return OB11Response.error(((e as Error).message.toString() || (e as Error).stack?.toString()) ?? 'Error', 1200, echo);
         }
     }
 

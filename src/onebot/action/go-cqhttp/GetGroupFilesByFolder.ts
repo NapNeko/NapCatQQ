@@ -13,9 +13,12 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export class GetGroupFilesByFolder extends OneBotAction<any, any> {
-    actionName = ActionName.GoCQHTTP_GetGroupFilesByFolder;
-    payloadSchema = SchemaData;
+export class GetGroupFilesByFolder extends OneBotAction<Payload, {
+    files: ReturnType<typeof OB11Construct.file>[],
+    folders: never[],
+}> {
+    override actionName = ActionName.GoCQHTTP_GetGroupFilesByFolder;
+    override payloadSchema = SchemaData;
     async _handle(payload: Payload) {
 
         const ret = await this.core.apis.MsgApi.getGroupFileList(payload.group_id.toString(), {

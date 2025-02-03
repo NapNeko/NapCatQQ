@@ -1,9 +1,9 @@
 import * as os from 'os';
 import offset from '@/core/external/offset.json';
-import { InstanceContext, NapCatCore } from "@/core";
-import { LogWrapper } from "@/common/log";
-import { PacketClientSession } from "@/core/packet/clientSession";
-import { napCatVersion } from "@/common/version";
+import { InstanceContext, NapCatCore } from '@/core';
+import { LogWrapper } from '@/common/log';
+import { PacketClientSession } from '@/core/packet/clientSession';
+import { napCatVersion } from '@/common/version';
 
 interface OffsetType {
     [key: string]: {

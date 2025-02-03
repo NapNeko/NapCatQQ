@@ -58,8 +58,8 @@ function timeoutPromise(timeout: number, errorMsg: string): Promise<void> {
 async function checkFile(path: string): Promise<void> {
     try {
         await stat(path);
-    } catch (error: any) {
-        if (error.code === 'ENOENT') {
+    } catch (error: unknown) {
+        if ((error as Error & { code: string }).code === 'ENOENT') {
             // 如果文件不存在，则抛出一个错误
             throw new Error(`文件不存在: ${path}`);
         } else {
@@ -169,6 +169,7 @@ export async function checkUriType(Uri: string) {
             const data = uri.split(',')[1];
             if (data) return { Uri: data, Type: FileUriType.Base64 };
         }
+        return;
     }, Uri);
     if (OtherFileRet) return OtherFileRet;
 
@@ -190,7 +191,7 @@ export async function uriToLocalFile(dir: string, uri: string, filename: string 
     }
 
     case FileUriType.Remote: {
-        const buffer = await httpDownload({ url: HandledUri, headers: headers });
+        const buffer = await httpDownload({ url: HandledUri, headers: headers ?? {} });
         fs.writeFileSync(filePath, buffer);
         return { success: true, errMsg: '', fileName: filename, path: filePath };
     }

@@ -69,7 +69,7 @@ export class NTQQUserApi {
     }
 
     async fetchUserDetailInfo(uid: string, mode: UserDetailSource = UserDetailSource.KDB) {
-        const [_retData, profile] = await this.core.eventWrapper.callNormalEventV2(
+        const [, profile] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelProfileService/fetchUserDetailInfo',
             'NodeIKernelProfileListener/onUserDetailInfoChanged',
             [
@@ -130,10 +130,10 @@ export class NTQQUserApi {
         const requestUrl = 'https://ssl.ptlogin2.qq.com/jump?ptlang=1033&clientuin=' + this.core.selfInfo.uin +
             '&clientkey=' + ClientKeyData.clientKey + '&u1=https%3A%2F%2F' + domain + '%2F' + this.core.selfInfo.uin + '%2Finfocenter&keyindex=19%27';
         const data = await RequestUtil.HttpsGetCookies(requestUrl);
-        if (!data.p_skey || data.p_skey.length == 0) {
+        if (!data['p_skey'] || data['p_skey'].length == 0) {
             try {
                 const pskey = (await this.getPSkey([domain])).domainPskeyMap.get(domain);
-                if (pskey) data.p_skey = pskey;
+                if (pskey) data['p_skey'] = pskey;
             } catch {
                 return data;
             }
@@ -145,7 +145,7 @@ export class NTQQUserApi {
         return await this.context.session.getTipOffService().getPskey(domainList, true);
     }
 
-    async getRobotUinRange(): Promise<Array<any>> {
+    async getRobotUinRange(): Promise<Array<unknown>> {
         const robotUinRanges = await this.context.session.getRobotService().getRobotUinRange({
             justFetchMsgConfig: '1',
             type: 1,

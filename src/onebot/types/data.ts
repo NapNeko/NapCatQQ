@@ -1,5 +1,4 @@
 export interface OB11User {
-    [key: string]: any;
     user_id: number; // 用户ID
     nickname: string; // 昵称
     remark?: string; // 备注

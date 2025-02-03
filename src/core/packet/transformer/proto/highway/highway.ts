@@ -1,5 +1,5 @@
-import { ProtoField, ScalarType } from "@napneko/nap-proto-core";
-import { MsgInfoBody } from "@/core/packet/transformer/proto";
+import { ProtoField, ScalarType } from '@napneko/nap-proto-core';
+import { MsgInfoBody } from '@/core/packet/transformer/proto';
 
 export const DataHighwayHead = {
     version: ProtoField(1, ScalarType.UINT32),

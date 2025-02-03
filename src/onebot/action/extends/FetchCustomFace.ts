@@ -9,8 +9,8 @@ const SchemaData = Type.Object({
 type Payload = Static<typeof SchemaData>;
 
 export class FetchCustomFace extends OneBotAction<Payload, string[]> {
-    actionName = ActionName.FetchCustomFace;
-    payloadSchema = SchemaData;
+    override actionName = ActionName.FetchCustomFace;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         const ret = await this.core.apis.MsgApi.fetchFavEmojiList(+payload.count);

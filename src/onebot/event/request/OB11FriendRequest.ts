@@ -3,7 +3,7 @@ import { EventType } from '@/onebot/event/OneBotEvent';
 import { NapCatCore } from '@/core';
 
 export class OB11FriendRequestEvent extends OB11BaseNoticeEvent {
-    post_type = EventType.REQUEST;
+    override post_type = EventType.REQUEST;
     request_type = 'friend';
 
     user_id: number;

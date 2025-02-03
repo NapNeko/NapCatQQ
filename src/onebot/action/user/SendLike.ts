@@ -10,8 +10,8 @@ const SchemaData = Type.Object({
 type Payload = Static<typeof SchemaData>;
 
 export default class SendLike extends OneBotAction<Payload, null> {
-    actionName = ActionName.SendLike;
-    payloadSchema = SchemaData;
+    override actionName = ActionName.SendLike;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
         const qq = payload.user_id.toString();

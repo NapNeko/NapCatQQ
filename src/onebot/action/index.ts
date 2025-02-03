@@ -8,7 +8,6 @@ import SendGroupMsg from './group/SendGroupMsg';
 import SendPrivateMsg from './msg/SendPrivateMsg';
 import SendMsg from './msg/SendMsg';
 import DeleteMsg from './msg/DeleteMsg';
-import { OneBotAction } from '@/onebot/action/OneBotAction';
 import GetVersionInfo from './system/GetVersionInfo';
 import CanSendRecord from './system/CanSendRecord';
 import CanSendImage from './system/CanSendImage';
@@ -85,9 +84,9 @@ import { GetRkey } from './extends/GetRkey';
 import { SetSpecialTittle } from './extends/SetSpecialTittle';
 import { GetGroupShutList } from './group/GetGroupShutList';
 import { GetGroupMemberList } from './group/GetGroupMemberList';
-import { GetGroupFileUrl } from "@/onebot/action/file/GetGroupFileUrl";
-import { GetPacketStatus } from "@/onebot/action/packet/GetPacketStatus";
-import { FriendPoke } from "@/onebot/action/user/FriendPoke";
+import { GetGroupFileUrl } from '@/onebot/action/file/GetGroupFileUrl';
+import { GetPacketStatus } from '@/onebot/action/packet/GetPacketStatus';
+import { FriendPoke } from '@/onebot/action/user/FriendPoke';
 import { GetCredentials } from './system/GetCredentials';
 import { SendGroupSign, SetGroupSign } from './extends/SetGroupSign';
 import { GoCQHTTPGetGroupAtAllRemain } from './go-cqhttp/GetGroupAtAllRemain';
@@ -95,15 +94,15 @@ import { GoCQHTTPCheckUrlSafely } from './go-cqhttp/GoCQHTTPCheckUrlSafely';
 import { GoCQHTTPGetModelShow } from './go-cqhttp/GoCQHTTPGetModelShow';
 import { GoCQHTTPSetModelShow } from './go-cqhttp/GoCQHTTPSetModelShow';
 import { GoCQHTTPDeleteFriend } from './go-cqhttp/GoCQHTTPDeleteFriend';
-import { GetMiniAppArk } from "@/onebot/action/extends/GetMiniAppArk";
-import { GetAiRecord } from "@/onebot/action/group/GetAiRecord";
-import { SendGroupAiRecord } from "@/onebot/action/group/SendGroupAiRecord";
-import { GetAiCharacters } from "@/onebot/action/extends/GetAiCharacters";
+import { GetMiniAppArk } from '@/onebot/action/extends/GetMiniAppArk';
+import { GetAiRecord } from '@/onebot/action/group/GetAiRecord';
+import { SendGroupAiRecord } from '@/onebot/action/group/SendGroupAiRecord';
+import { GetAiCharacters } from '@/onebot/action/extends/GetAiCharacters';
 import { GetGuildList } from './guild/GetGuildList';
 import { GetGuildProfile } from './guild/GetGuildProfile';
 import { GetClientkey } from './extends/GetClientkey';
 import { SendPacket } from './extends/SendPacket';
-import { SendPoke } from "@/onebot/action/packet/SendPoke";
+import { SendPoke } from '@/onebot/action/packet/SendPoke';
 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 
@@ -239,10 +238,11 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         _map.set(`${h.actionName}_rate_limited` as keyof MapType, h);
     });
 
-    function get<K extends keyof MapType>(key: K): MapType[K];
-    function get<K extends keyof MapType>(key: K): null;
-    function get<K extends keyof MapType>(key: K): HandlerUnion | null | MapType[K] {
-        return _map.get(key as keyof MapType) ?? null;
+    // function get<K extends keyof MapType>(key: K): MapType[K];
+    // function get<K extends keyof MapType>(key: K): null;
+    // function get<K extends keyof MapType>(key: K): HandlerUnion | null | MapType[K]
+    function get<K extends keyof MapType>(key: K): MapType[K] | undefined {
+        return _map.get(key as keyof MapType) as MapType[K] | undefined;
     }
 
     return { get };

@@ -12,7 +12,7 @@ insert_final_newline = true
 # Set default charset
 charset = utf-8
 
-# 2 space indentation
+# 4 space indentation
 [*.{cjs,mjs,js,jsx,ts,tsx,css,scss,sass,html,json}]
 indent_style = space
 indent_size = 4

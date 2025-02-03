@@ -59,7 +59,7 @@ export class NTQQGroupApi {
         }, pskey);
     }
 
-    async getGroupShutUpMemberList(groupCode: string) {
+    async getGroupShutUpMemberList(groupCode: string): Promise<ShutUpGroupMember[]> {
         const executor: TaskExecutor<ShutUpGroupMember[]> = async (resolve, reject, onCancel) => {
             this.core.eventWrapper.registerListen(
                 'NodeIKernelGroupListener/onShutUpMemberListChanged',
@@ -215,6 +215,9 @@ export class NTQQGroupApi {
             guildId: '',
             peerUid: groupCode,
         }, msgId, 1, false);
+        if (!MsgData.msgList[0]) {
+            throw new Error('消息不存在');
+        }
         const param = {
             groupCode: groupCode,
             msgRandom: parseInt(MsgData.msgList[0].msgRandom),
@@ -255,6 +258,9 @@ export class NTQQGroupApi {
             guildId: '',
             peerUid: groupCode,
         }, msgId, 1, false);
+        if (!MsgData.msgList[0]) {
+            throw new Error('消息不存在');
+        }
         const param = {
             groupCode: groupCode,
             msgRandom: parseInt(MsgData.msgList[0].msgRandom),

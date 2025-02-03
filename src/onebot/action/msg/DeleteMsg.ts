@@ -10,8 +10,8 @@ const SchemaData = Type.Object({
 type Payload = Static<typeof SchemaData>;
 
 class DeleteMsg extends OneBotAction<Payload, void> {
-    actionName = ActionName.DeleteMsg;
-    payloadSchema = SchemaData;
+    override actionName = ActionName.DeleteMsg;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         const msg = MessageUnique.getMsgIdAndPeerByShortId(Number(payload.message_id));

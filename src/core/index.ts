@@ -24,7 +24,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { hostname, systemName, systemVersion } from '@/common/system';
 import { NTEventWrapper } from '@/common/event';
-import { GroupMember, KickedOffLineInfo, SelfInfo, SelfStatusInfo } from '@/core/types';
+import { KickedOffLineInfo, SelfInfo, SelfStatusInfo } from '@/core/types';
 import { NapCatConfigLoader } from '@/core/helper/config';
 import os from 'node:os';
 import { NodeIKernelMsgListener, NodeIKernelProfileListener } from '@/core/listeners';
@@ -52,13 +52,13 @@ export function loadQQWrapper(QQVersion: string): WrapperNodeApi {
     }
     let wrapperNodePath = path.resolve(appPath, 'wrapper.node');
     if (!fs.existsSync(wrapperNodePath)) {
-        wrapperNodePath = path.join(appPath, `./resources/app/wrapper.node`);
+        wrapperNodePath = path.join(appPath, './resources/app/wrapper.node');
     }
     //老版本兼容 未来去掉
     if (!fs.existsSync(wrapperNodePath)) {
         wrapperNodePath = path.join(path.dirname(process.execPath), `./resources/app/versions/${QQVersion}/wrapper.node`);
     }
-    const nativemodule: any = { exports: {} };
+    const nativemodule: { exports: WrapperNodeApi } = { exports: {} as WrapperNodeApi };
     process.dlopen(nativemodule, wrapperNodePath);
     return nativemodule.exports;
 }
@@ -74,7 +74,7 @@ export function getMajorPath(QQVersion: string): string {
     }
     let majorPath = path.resolve(appPath, 'major.node');
     if (!fs.existsSync(majorPath)) {
-        majorPath = path.join(appPath, `./resources/app/major.node`);
+        majorPath = path.join(appPath, './resources/app/major.node');
     }
     //老版本兼容 未来去掉
     if (!fs.existsSync(majorPath)) {
@@ -177,7 +177,7 @@ export class NapCatCore {
         profileListener.onSelfStatusChanged = (Info: SelfStatusInfo) => {
             if (Info.status == 20) {
                 this.selfInfo.online = false;
-                this.context.logger.log("账号状态变更为离线");
+                this.context.logger.log('账号状态变更为离线');
             } else {
                 this.selfInfo.online = true;
             }

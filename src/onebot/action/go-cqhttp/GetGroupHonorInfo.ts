@@ -10,9 +10,9 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export class GetGroupHonorInfo extends OneBotAction<Payload, Array<any>> {
-    actionName = ActionName.GetGroupHonorInfo;
-    payloadSchema = SchemaData;
+export class GetGroupHonorInfo extends OneBotAction<Payload, Array<unknown>> {
+    override actionName = ActionName.GetGroupHonorInfo;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         if (!payload.type) {

@@ -10,18 +10,19 @@ import {
     loadQQWrapper,
     NapCatCore,
     NapCatCoreWorkingEnv,
+    NodeIQQNTWrapperEngine,
     NodeIQQNTWrapperSession,
     PlatformType,
     WrapperNodeApi,
+    WrapperSessionInitConfig,
 } from '@/core';
 import { QQBasicInfoWrapper } from '@/common/qq-basic-info';
 import { hostname, systemVersion } from '@/common/system';
 import { proxiedListenerOf } from '@/common/proxy-handler';
-
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
-import { NodeIKernelLoginService } from '@/core/services';
+import { LoginListItem, NodeIKernelLoginService } from '@/core/services';
 import { program } from 'commander';
 import qrcode from 'qrcode-terminal';
 import { NapCatOneBot11Adapter } from '@/onebot';
@@ -29,13 +30,12 @@ import { InitWebUi } from '@/webui';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { napCatVersion } from '@/common/version';
 import { NodeIO3MiscListener } from '@/core/listeners/NodeIO3MiscListener';
-import { FFmpegService } from '@/common/ffmpeg';
 // NapCat Shell App ES 入口文件
 async function handleUncaughtExceptions(logger: LogWrapper) {
     process.on('uncaughtException', (err) => {
         logger.logError('[NapCat] [Error] Unhandled Exception:', err.message);
     });
-    process.on('unhandledRejection', (reason, promise) => {
+    process.on('unhandledRejection', (reason) => {
         logger.logError('[NapCat] [Error] unhandledRejection:', reason);
     });
 }
@@ -65,7 +65,7 @@ function getPlatformType(): PlatformType {
 }
 
 async function initializeEngine(
-    engine: any,
+    engine: NodeIQQNTWrapperEngine,
     basicInfoWrapper: QQBasicInfoWrapper,
     dataPathGlobal: string,
     systemPlatform: PlatformType,
@@ -79,7 +79,7 @@ async function initializeEngine(
             app_version: basicInfoWrapper.getFullQQVesion(),
             os_version: systemVersion,
             use_xlog: false,
-            qua: basicInfoWrapper.QQVersionQua,
+            qua: basicInfoWrapper.QQVersionQua ?? '',
             global_path_config: {
                 desktopGlobalPath: dataPathGlobal,
             },
@@ -111,7 +111,7 @@ async function handleLogin(
     logger: LogWrapper,
     pathWrapper: NapCatPathWrapper,
     quickLoginUin: string | undefined,
-    historyLoginList: any[]
+    historyLoginList: LoginListItem[]
 ): Promise<SelfInfo> {
     return new Promise<SelfInfo>((resolve) => {
         const loginListener = new NodeIKernelLoginListener();
@@ -151,7 +151,7 @@ async function handleLogin(
             });
         };
 
-        loginListener.onQRCodeSessionFailed = (errType: number, errCode: number, errMsg: string) => {
+        loginListener.onQRCodeSessionFailed = (errType: number, errCode: number) => {
             if (!isLogined) {
                 logger.logError('[Core] [Login] Login Error,ErrType: ', errType, ' ErrCode:', errCode);
                 if (errType == 1 && errCode == 3) {
@@ -232,8 +232,7 @@ async function handleLogin(
 
 async function initializeSession(
     session: NodeIQQNTWrapperSession,
-    sessionConfig: any,
-    logger: LogWrapper
+    sessionConfig: WrapperSessionInitConfig
 ) {
     return new Promise<void>((resolve, reject) => {
         const sessionListener = new NodeIKernelSessionListener();
@@ -252,7 +251,7 @@ async function initializeSession(
         );
         try {
             session.startNT(0);
-        } catch (_) {
+        } catch {
             try {
                 session.startNT();
             } catch (e: unknown) {
@@ -273,7 +272,7 @@ export async function NCoreInitShell() {
     const o3Service = wrapper.NodeIO3MiscService.get();
     o3Service.addO3MiscListener(new NodeIO3MiscListener());
 
-    logger.log(`[NapCat] [Core] NapCat.Core Version: ` + napCatVersion);
+    logger.log('[NapCat] [Core] NapCat.Core Version: ' + napCatVersion);
     InitWebUi(logger, pathWrapper).then().catch(e => logger.logError(e));
 
     const engine = wrapper.NodeIQQNTWrapperEngine.get();
@@ -290,7 +289,7 @@ export async function NCoreInitShell() {
 
     program.option('-q, --qq [number]', 'QQ号').parse(process.argv);
     const cmdOptions = program.opts();
-    const quickLoginUin = cmdOptions.qq;
+    const quickLoginUin = cmdOptions['qq'];
     const historyLoginList = (await loginService.getLoginList()).LocalLoginInfoList;
 
     const dataTimestape = new Date().getTime().toString();
@@ -312,7 +311,7 @@ export async function NCoreInitShell() {
         dataPath,
     );
 
-    await initializeSession(session, sessionConfig, logger);
+    await initializeSession(session, sessionConfig);
 
     const accountDataPath = path.resolve(dataPath, './NapCat/data');
     fs.mkdirSync(dataPath, { recursive: true });

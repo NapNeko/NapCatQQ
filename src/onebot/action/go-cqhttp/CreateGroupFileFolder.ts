@@ -8,10 +8,13 @@ const SchemaData = Type.Object({
 });
 
 type Payload = Static<typeof SchemaData>;
-
-export class CreateGroupFileFolder extends  OneBotAction<Payload, any>  {
-    actionName = ActionName.GoCQHTTP_CreateGroupFileFolder;
-    payloadSchema = SchemaData;
+interface ResponseType{
+    result:unknown;
+    groupItem:unknown;
+}
+export class CreateGroupFileFolder extends  OneBotAction<Payload, ResponseType>  {
+    override actionName = ActionName.GoCQHTTP_CreateGroupFileFolder;
+    override payloadSchema = SchemaData;
     async _handle(payload: Payload) {
         return (await this.core.apis.GroupApi.creatGroupFileFolder(payload.group_id.toString(), payload.folder_name)).resultWithGroupItem;
     }

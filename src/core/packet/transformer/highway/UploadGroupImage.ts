@@ -1,9 +1,9 @@
-import * as proto from "@/core/packet/transformer/proto";
-import { NapProtoMsg } from "@napneko/nap-proto-core";
-import { OidbPacket, PacketTransformer } from "@/core/packet/transformer/base";
-import OidbBase from "@/core/packet/transformer/oidb/oidbBase";
-import crypto from "node:crypto";
-import { PacketMsgPicElement } from "@/core/packet/message/element";
+import * as proto from '@/core/packet/transformer/proto';
+import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { OidbPacket, PacketTransformer } from '@/core/packet/transformer/base';
+import OidbBase from '@/core/packet/transformer/oidb/oidbBase';
+import crypto from 'node:crypto';
+import { PacketMsgPicElement } from '@/core/packet/message/element';
 
 class UploadGroupImage extends PacketTransformer<typeof proto.NTV2RichMediaResp> {
     constructor() {

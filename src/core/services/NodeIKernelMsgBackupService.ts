@@ -3,25 +3,25 @@ export interface NodeIKernelMsgBackupService {
 
     removeKernelMsgBackupListener(listenerId: number): void;
 
-    getMsgBackupLocation(...args: any[]): unknown;// needs 0 arguments
+    getMsgBackupLocation(...args: unknown[]): unknown;// needs 0 arguments
 
-    setMsgBackupLocation(...args: any[]): unknown;// needs 1 arguments
+    setMsgBackupLocation(...args: unknown[]): unknown;// needs 1 arguments
 
-    requestMsgBackup(...args: any[]): unknown;// needs 0 arguments
+    requestMsgBackup(...args: unknown[]): unknown;// needs 0 arguments
 
-    requestMsgRestore(...args: any[]): unknown;// needs 1 arguments
+    requestMsgRestore(...args: unknown[]): unknown;// needs 1 arguments
 
-    requestMsgMigrate(...args: any[]): unknown;// needs 1 arguments
+    requestMsgMigrate(...args: unknown[]): unknown;// needs 1 arguments
 
-    getLocalStorageBackup(...args: any[]): unknown;// needs 0 arguments
+    getLocalStorageBackup(...args: unknown[]): unknown;// needs 0 arguments
 
-    deleteLocalBackup(...args: any[]): unknown;// needs 1 arguments
+    deleteLocalBackup(...args: unknown[]): unknown;// needs 1 arguments
 
-    clearCache(...args: any[]): unknown;// needs 0 arguments
+    clearCache(...args: unknown[]): unknown;// needs 0 arguments
 
-    start(...args: any[]): unknown;// needs 1 arguments
+    start(...args: unknown[]): unknown;// needs 1 arguments
 
-    stop(...args: any[]): unknown;// needs 1 arguments
+    stop(...args: unknown[]): unknown;// needs 1 arguments
 
-    pause(...args: any[]): unknown;// needs 2 arguments
+    pause(...args: unknown[]): unknown;// needs 2 arguments
 }

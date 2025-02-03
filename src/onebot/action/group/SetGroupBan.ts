@@ -11,8 +11,8 @@ const SchemaData = Type.Object({
 type Payload = Static<typeof SchemaData>;
 
 export default class SetGroupBan extends OneBotAction<Payload, null> {
-    actionName = ActionName.SetGroupBan;
-    payloadSchema = SchemaData;
+    override actionName = ActionName.SetGroupBan;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
         const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());

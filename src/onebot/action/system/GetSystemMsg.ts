@@ -9,7 +9,7 @@ interface RetData {
 }
 
 export class GetGroupSystemMsg extends OneBotAction<void, RetData> {
-    actionName = ActionName.GetGroupSystemMsg;
+    override actionName = ActionName.GetGroupSystemMsg;
 
     async _handle(): Promise<RetData> {
         const SingleScreenNotifies = await this.core.apis.GroupApi.getSingleScreenNotifies(false, 50);

@@ -1,15 +1,16 @@
-import { MsfChangeReasonType, MsfStatusType } from "@/core/types/adapter";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { MsfChangeReasonType, MsfStatusType } from '@/core/types/adapter';
 
 export class NodeIDependsAdapter {
-    onMSFStatusChange(statusType: MsfStatusType, changeReasonType: MsfChangeReasonType) {
+    onMSFStatusChange(_statusType: MsfStatusType, _changeReasonType: MsfChangeReasonType) {
 
     }
 
-    onMSFSsoError(args: unknown) {
+    onMSFSsoError(_args: unknown) {
 
     }
 
-    getGroupCode(args: unknown) {
+    getGroupCode(_args: unknown) {
 
     }
 }

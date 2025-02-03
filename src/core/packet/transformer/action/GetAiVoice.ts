@@ -1,8 +1,8 @@
-import * as proto from "@/core/packet/transformer/proto";
-import { NapProtoMsg } from "@napneko/nap-proto-core";
-import { OidbPacket, PacketTransformer } from "@/core/packet/transformer/base";
-import OidbBase from "@/core/packet/transformer/oidb/oidbBase";
-import { AIVoiceChatType } from "@/core/packet/entities/aiChat";
+import * as proto from '@/core/packet/transformer/proto';
+import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { OidbPacket, PacketTransformer } from '@/core/packet/transformer/base';
+import OidbBase from '@/core/packet/transformer/oidb/oidbBase';
+import { AIVoiceChatType } from '@/core/packet/entities/aiChat';
 
 class GetAiVoice extends PacketTransformer<typeof proto.OidbSvcTrpcTcp0X929B_0Resp> {
     constructor() {

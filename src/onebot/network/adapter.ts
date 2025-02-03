@@ -1,9 +1,9 @@
-import { NetworkAdapterConfig } from "@/onebot/config/config";
-import { LogWrapper } from "@/common/log";
-import { NapCatCore } from "@/core";
-import { NapCatOneBot11Adapter } from "@/onebot";
-import { ActionMap } from "@/onebot/action";
-import { OB11EmitEventContent, OB11NetworkReloadType } from "@/onebot/network/index";
+import { NetworkAdapterConfig } from '@/onebot/config/config';
+import { LogWrapper } from '@/common/log';
+import { NapCatCore } from '@/core';
+import { NapCatOneBot11Adapter } from '@/onebot';
+import { ActionMap } from '@/onebot/action';
+import { OB11EmitEventContent, OB11NetworkReloadType } from '@/onebot/network/index';
 
 export abstract class IOB11NetworkAdapter<CT extends NetworkAdapterConfig> {
     name: string;
@@ -29,5 +29,5 @@ export abstract class IOB11NetworkAdapter<CT extends NetworkAdapterConfig> {
 
     abstract close(): void | Promise<void>;
 
-    abstract reload(config: any): OB11NetworkReloadType | Promise<OB11NetworkReloadType>;
+    abstract reload(config: unknown): OB11NetworkReloadType | Promise<OB11NetworkReloadType>;
 }

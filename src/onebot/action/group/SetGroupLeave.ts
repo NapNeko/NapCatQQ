@@ -9,11 +9,11 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export default class SetGroupLeave extends OneBotAction<Payload, any> {
-    actionName = ActionName.SetGroupLeave;
-    payloadSchema = SchemaData;
+export default class SetGroupLeave extends OneBotAction<Payload, void> {
+    override actionName = ActionName.SetGroupLeave;
+    override payloadSchema = SchemaData;
 
-    async _handle(payload: Payload): Promise<any> {
+    async _handle(payload: Payload): Promise<void> {
         await this.core.apis.GroupApi.quitGroup(payload.group_id.toString());
     }
 }

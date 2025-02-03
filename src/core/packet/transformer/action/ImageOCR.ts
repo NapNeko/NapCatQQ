@@ -1,7 +1,7 @@
-import * as proto from "@/core/packet/transformer/proto";
-import { NapProtoMsg } from "@napneko/nap-proto-core";
-import { OidbPacket, PacketTransformer } from "@/core/packet/transformer/base";
-import OidbBase from "@/core/packet/transformer/oidb/oidbBase";
+import * as proto from '@/core/packet/transformer/proto';
+import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { OidbPacket, PacketTransformer } from '@/core/packet/transformer/base';
+import OidbBase from '@/core/packet/transformer/oidb/oidbBase';
 
 class ImageOCR extends PacketTransformer<typeof proto.OidbSvcTrpcTcp0xE07_0_Response> {
     constructor() {
@@ -16,11 +16,11 @@ class ImageOCR extends PacketTransformer<typeof proto.OidbSvcTrpcTcp0xE07_0_Resp
                 entrance: 1,
                 ocrReqBody: {
                     imageUrl: url,
-                    originMd5: "",
-                    afterCompressMd5: "",
-                    afterCompressFileSize: "",
-                    afterCompressWeight: "",
-                    afterCompressHeight: "",
+                    originMd5: '',
+                    afterCompressMd5: '',
+                    afterCompressFileSize: '',
+                    afterCompressWeight: '',
+                    afterCompressHeight: '',
                     isCut: false,
                 }
             }

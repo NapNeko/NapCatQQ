@@ -1,4 +1,4 @@
-import { GeneralCallResult } from "./common";
+import { GeneralCallResult } from './common';
 
 export interface NodeIKernelMSFService {
     getServerTime(): string;
