@@ -30,7 +30,7 @@ export interface NodeIKernelMsgService {
 
     kickOffLine(DevInfo: unknown): unknown;
 
-    setStatus(args: { status: number, extStatus: number, batteryStatus: number }): Promise<GeneralCallResult>;
+    setStatus(args: { status: number, extStatus: number, batteryStatus: number, customStatus?: { faceId: string, wording: string, faceType: string } }): Promise<GeneralCallResult>;
 
     fetchStatusMgrInfo(): unknown;
 
