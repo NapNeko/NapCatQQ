@@ -45,6 +45,12 @@ export default function FilePreviewModal({
     }
   )
 
+  useEffect(() => {
+    if (filePath) {
+      run()
+    }
+  }, [filePath])
+
   let contentElement = null
   if (!supportedPreviewExts.includes(ext)) {
     contentElement = <div>暂不支持预览此文件类型</div>
@@ -67,12 +73,6 @@ export default function FilePreviewModal({
       </div>
     )
   }
-
-  useEffect(() => {
-    if (filePath) {
-      run()
-    }
-  }, [])
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} scrollBehavior="inside" size="3xl">
