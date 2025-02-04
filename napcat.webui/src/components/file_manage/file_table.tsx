@@ -12,15 +12,19 @@ import {
   TableRow
 } from '@heroui/table'
 import path from 'path-browserify'
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { BiRename } from 'react-icons/bi'
 import { FiCopy, FiDownload, FiMove, FiTrash2 } from 'react-icons/fi'
+import { PhotoSlider } from 'react-photo-view'
 
 import FileIcon from '@/components/file_icon'
 
 import type { FileInfo } from '@/controllers/file_manager'
 
-interface FileTableProps {
+import { supportedPreviewExts } from './file_preview_modal'
+import ImageNameButton, { PreviewImage, imageExts } from './image_name_button'
+
+export interface FileTableProps {
   files: FileInfo[]
   currentPath: string
   loading: boolean
@@ -62,143 +66,180 @@ export default function FileTable({
   const start = (page - 1) * PAGE_SIZE
   const end = start + PAGE_SIZE
   const displayFiles = files.slice(start, end)
+  const [showImage, setShowImage] = useState(false)
+  const [previewIndex, setPreviewIndex] = useState(0)
+  const [previewImages, setPreviewImages] = useState<PreviewImage[]>([])
+
+  const addPreviewImage = useCallback((image: PreviewImage) => {
+    setPreviewImages((prev) => {
+      const exists = prev.some((p) => p.key === image.key)
+      if (exists) return prev
+      return [...prev, image]
+    })
+  }, [])
+
+  useEffect(() => {
+    setPreviewImages([])
+    setPreviewIndex(0)
+    setShowImage(false)
+  }, [files])
+
+  const onPreviewImage = (name: string, images: PreviewImage[]) => {
+    const index = images.findIndex((image) => image.key === name)
+    if (index === -1) {
+      return
+    }
+    setPreviewIndex(index)
+    setShowImage(true)
+  }
+
   return (
-    <Table
-      aria-label="文件列表"
-      sortDescriptor={sortDescriptor}
-      onSortChange={onSortChange}
-      onSelectionChange={onSelectionChange}
-      defaultSelectedKeys={[]}
-      selectedKeys={selectedFiles}
-      selectionMode="multiple"
-      bottomContent={
-        <div className="flex w-full justify-center">
-          <Pagination
-            isCompact
-            showControls
-            showShadow
-            color="danger"
-            page={page}
-            total={pages}
-            onChange={(page) => setPage(page)}
-          />
-        </div>
-      }
-    >
-      <TableHeader>
-        <TableColumn key="name" allowsSorting>
-          名称
-        </TableColumn>
-        <TableColumn key="type" allowsSorting>
-          类型
-        </TableColumn>
-        <TableColumn key="size" allowsSorting>
-          大小
-        </TableColumn>
-        <TableColumn key="mtime" allowsSorting>
-          修改时间
-        </TableColumn>
-        <TableColumn key="actions">操作</TableColumn>
-      </TableHeader>
-      <TableBody
-        isLoading={loading}
-        loadingContent={
-          <div className="flex justify-center items-center h-full">
-            <Spinner />
+    <>
+      <PhotoSlider
+        images={previewImages}
+        visible={showImage}
+        onClose={() => setShowImage(false)}
+        index={previewIndex}
+        onIndexChange={setPreviewIndex}
+      />
+      <Table
+        aria-label="文件列表"
+        sortDescriptor={sortDescriptor}
+        onSortChange={onSortChange}
+        onSelectionChange={onSelectionChange}
+        defaultSelectedKeys={[]}
+        selectedKeys={selectedFiles}
+        selectionMode="multiple"
+        bottomContent={
+          <div className="flex w-full justify-center">
+            <Pagination
+              isCompact
+              showControls
+              showShadow
+              color="danger"
+              page={page}
+              total={pages}
+              onChange={(page) => setPage(page)}
+            />
           </div>
         }
-        items={displayFiles}
       >
-        {(file: FileInfo) => {
-          const filePath = path.join(currentPath, file.name)
-          // 判断预览类型
-          const ext = path.extname(file.name).toLowerCase()
-          const previewable = [
-            '.png',
-            '.jpg',
-            '.jpeg',
-            '.gif',
-            '.bmp',
-            '.mp4',
-            '.webm',
-            '.mp3',
-            '.wav'
-          ].includes(ext)
-          return (
-            <TableRow key={file.name}>
-              <TableCell>
-                <Button
-                  variant="light"
-                  onPress={() =>
-                    file.isDirectory
-                      ? onDirectoryClick(file.name)
-                      : previewable
-                        ? onPreview(filePath)
-                        : onEdit(filePath)
-                  }
-                  className="text-left justify-start"
-                  startContent={
-                    <FileIcon name={file.name} isDirectory={file.isDirectory} />
-                  }
-                >
-                  {file.name}
-                </Button>
-              </TableCell>
-              <TableCell>{file.isDirectory ? '目录' : '文件'}</TableCell>
-              <TableCell>
-                {isNaN(file.size) || file.isDirectory
-                  ? '-'
-                  : `${file.size} 字节`}
-              </TableCell>
-              <TableCell>{new Date(file.mtime).toLocaleString()}</TableCell>
-              <TableCell>
-                <ButtonGroup size="sm">
-                  <Button
-                    isIconOnly
-                    color="danger"
-                    variant="flat"
-                    onPress={() => onRenameRequest(file.name)}
-                  >
-                    <BiRename />
-                  </Button>
-                  <Button
-                    isIconOnly
-                    color="danger"
-                    variant="flat"
-                    onPress={() => onMoveRequest(file.name)}
-                  >
-                    <FiMove />
-                  </Button>
-                  <Button
-                    isIconOnly
-                    color="danger"
-                    variant="flat"
-                    onPress={() => onCopyPath(file.name)}
-                  >
-                    <FiCopy />
-                  </Button>
-                  <Button
-                    isIconOnly
-                    color="danger"
-                    variant="flat"
-                    onPress={() => onDownload(filePath)}
-                  >
-                    <FiDownload />
-                  </Button>
-                  <Button
-                    isIconOnly
-                    color="danger"
-                    variant="flat"
-                    onPress={() => onDelete(filePath)}
-                  >
-                    <FiTrash2 />
-                  </Button>
-                </ButtonGroup>
-              </TableCell>
-            </TableRow>
-          )
-        }}
-      </TableBody>
-    </Table>
+        <TableHeader>
+          <TableColumn key="name" allowsSorting>
+            名称
+          </TableColumn>
+          <TableColumn key="type" allowsSorting>
+            类型
+          </TableColumn>
+          <TableColumn key="size" allowsSorting>
+            大小
+          </TableColumn>
+          <TableColumn key="mtime" allowsSorting>
+            修改时间
+          </TableColumn>
+          <TableColumn key="actions">操作</TableColumn>
+        </TableHeader>
+        <TableBody
+          isLoading={loading}
+          loadingContent={
+            <div className="flex justify-center items-center h-full">
+              <Spinner />
+            </div>
+          }
+        >
+          {displayFiles.map((file: FileInfo) => {
+            const filePath = path.join(currentPath, file.name)
+            const ext = path.extname(file.name).toLowerCase()
+            const previewable = supportedPreviewExts.includes(ext)
+            const images = previewImages
+            return (
+              <TableRow key={file.name}>
+                <TableCell>
+                  {imageExts.includes(ext) ? (
+                    <ImageNameButton
+                      name={file.name}
+                      filePath={filePath}
+                      onPreview={() => onPreviewImage(file.name, images)}
+                      onAddPreview={addPreviewImage}
+                    />
+                  ) : (
+                    <Button
+                      variant="light"
+                      onPress={() =>
+                        file.isDirectory
+                          ? onDirectoryClick(file.name)
+                          : previewable
+                            ? onPreview(filePath)
+                            : onEdit(filePath)
+                      }
+                      className="text-left justify-start"
+                      startContent={
+                        <FileIcon
+                          name={file.name}
+                          isDirectory={file.isDirectory}
+                        />
+                      }
+                    >
+                      {file.name}
+                    </Button>
+                  )}
+                </TableCell>
+                <TableCell>{file.isDirectory ? '目录' : '文件'}</TableCell>
+                <TableCell>
+                  {isNaN(file.size) || file.isDirectory
+                    ? '-'
+                    : `${file.size} 字节`}
+                </TableCell>
+                <TableCell>{new Date(file.mtime).toLocaleString()}</TableCell>
+                <TableCell>
+                  <ButtonGroup size="sm">
+                    <Button
+                      isIconOnly
+                      color="danger"
+                      variant="flat"
+                      onPress={() => onRenameRequest(file.name)}
+                    >
+                      <BiRename />
+                    </Button>
+                    <Button
+                      isIconOnly
+                      color="danger"
+                      variant="flat"
+                      onPress={() => onMoveRequest(file.name)}
+                    >
+                      <FiMove />
+                    </Button>
+                    <Button
+                      isIconOnly
+                      color="danger"
+                      variant="flat"
+                      onPress={() => onCopyPath(file.name)}
+                    >
+                      <FiCopy />
+                    </Button>
+                    <Button
+                      isIconOnly
+                      color="danger"
+                      variant="flat"
+                      onPress={() => onDownload(filePath)}
+                    >
+                      <FiDownload />
+                    </Button>
+                    <Button
+                      isIconOnly
+                      color="danger"
+                      variant="flat"
+                      onPress={() => onDelete(filePath)}
+                    >
+                      <FiTrash2 />
+                    </Button>
+                  </ButtonGroup>
+                </TableCell>
+              </TableRow>
+            )
+          })}
+        </TableBody>
+      </Table>
+    </>
   )
 }

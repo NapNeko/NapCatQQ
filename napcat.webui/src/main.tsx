@@ -1,4 +1,5 @@
 import ReactDOM from 'react-dom/client'
+import 'react-photo-view/dist/react-photo-view.css'
 import { BrowserRouter } from 'react-router-dom'
 
 import App from '@/App.tsx'
