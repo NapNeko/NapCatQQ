@@ -70,7 +70,12 @@ export default function ImageNameButton({
         ) : loading || !data ? (
           <Spinner size="sm" />
         ) : (
-          <Image src={data} alt={name} className="w-8 h-8 flex-shrink-0" radius="sm" />
+          <Image
+            src={data}
+            alt={name}
+            className="w-8 h-8 flex-shrink-0"
+            radius="sm"
+          />
         )
       }
     >
