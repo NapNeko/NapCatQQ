@@ -6,35 +6,14 @@
 
 body {
   font-family:
+    'Aa偷吃可爱长大的',
     PingFang SC,
-    'Harmony',
     Helvetica Neue,
     Microsoft YaHei,
     sans-serif !important;
 }
 
 @layer components {
-  .hm-medium {
-    font-family:
-      PingFang SC,
-      'Harmony',
-      Helvetica Neue,
-      Microsoft YaHei,
-      sans-serif !important;
-    @apply font-bold;
-  }
-  .font-ubuntu {
-    font-family: 'Ubuntu', sans-serif;
-  }
-  .font-outfit {
-    font-family: 'Outfit', sans-serif;
-  }
-  .font-libre {
-    font-family: 'Libre Baskerville', serif;
-  }
-  .font-noto-serif {
-    font-family: 'Noto Serif SC', serif;
-  }
   .hide-scrollbar::-webkit-scrollbar {
     width: 0 !important;
     height: 0 !important;
@@ -105,7 +84,7 @@ body {
 .context-view.monaco-menu-container * {
   font-family:
     PingFang SC,
-    'Harmony',
+    'Aa偷吃可爱长大的',
     Helvetica Neue,
     Microsoft YaHei,
     sans-serif !important;
@@ -116,4 +95,11 @@ body {
 }
 .ql-editor img {
   @apply inline-block;
+}
+
+.xterm {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-smooth: always;
 }

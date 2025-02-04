@@ -98,7 +98,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       >
         <div
           className={clsx(
-            'h-10 flex items-center hm-medium text-xl backdrop-blur-lg rounded-full',
+            'h-10 flex items-center font-bold text-xl backdrop-blur-lg rounded-full',
             'dark:bg-background dark:shadow-danger-100',
             'bg-background !bg-opacity-50',
             'shadow-sm shadow-danger-50',

@@ -6,7 +6,11 @@ import { terminalManager } from '../terminal/terminal_manager';
 
 // 日志记录
 export const LogHandler: RequestHandler = async (req, res) => {
-    const filename = req.query.id as string;
+    const filename = req.query['id'];
+    if (!filename || typeof filename !== 'string') {
+        return sendError(res, 'ID不能为空');
+    }
+
     if (filename.includes('..')) {
         return sendError(res, 'ID不合法');
     }
@@ -40,7 +44,8 @@ export const LogRealTimeHandler: RequestHandler = async (req, res) => {
 // 终端相关处理器
 export const CreateTerminalHandler: RequestHandler = async (req, res) => {
     try {
-        const { id } = terminalManager.createTerminal();
+        const { cols, rows } = req.body;
+        const { id } = terminalManager.createTerminal(cols, rows);
         return sendSuccess(res, { id });
     } catch (error) {
         console.error('Failed to create terminal:', error);
@@ -54,7 +59,10 @@ export const GetTerminalListHandler: RequestHandler = (_, res) => {
 };
 
 export const CloseTerminalHandler: RequestHandler = (req, res) => {
-    const id = req.params.id;
+    const id = req.params['id'];
+    if (!id) {
+        return sendError(res, 'ID不能为空');
+    }
     terminalManager.closeTerminal(id);
     return sendSuccess(res, {});
 };

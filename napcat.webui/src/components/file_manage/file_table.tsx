@@ -58,7 +58,7 @@ export default function FileTable({
   onDownload
 }: FileTableProps) {
   const [page, setPage] = useState(1)
-  const pages = Math.ceil(files.length / PAGE_SIZE)
+  const pages = Math.ceil(files.length / PAGE_SIZE) || 1
   const start = (page - 1) * PAGE_SIZE
   const end = start + PAGE_SIZE
   const displayFiles = files.slice(start, end)

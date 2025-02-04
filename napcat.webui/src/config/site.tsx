@@ -51,7 +51,7 @@ export const siteConfig = {
       href: '/config'
     },
     {
-      label: 'NapCat日志',
+      label: '猫猫日志',
       icon: (
         <div className="w-5 h-5">
           <LogIcon />

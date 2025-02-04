@@ -27,7 +27,7 @@ const NetworkItemDisplay: React.FC<NetworkItemDisplayProps> = ({
       <CardBody className="items-center md:gap-1 p-1 md:p-2">
         <div
           className={clsx(
-            'font-outfit flex-1',
+            'flex-1',
             size === 'md' ? 'text-2xl md:text-3xl' : 'text-xl md:text-2xl',
             title({
               color: size === 'md' ? 'pink' : 'yellow',
