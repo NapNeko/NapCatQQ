@@ -16,7 +16,6 @@ import { compareVersion } from '@/utils/version'
 import WebUIManager from '@/controllers/webui_manager'
 import { GithubRelease } from '@/types/github'
 
-import packageJson from '../../package.json'
 import TailwindMarkdown from './tailwind_markdown'
 
 export interface SystemInfoItemProps {
@@ -199,11 +198,6 @@ const SystemInfo: React.FC<SystemInfoProps> = (props) => {
         <div className="flex flex-col justify-between h-full">
           <NapCatVersion />
           <SystemInfoItem
-            title="WebUI 版本"
-            icon={<IoLogoChrome className="text-xl" />}
-            value={packageJson.version}
-          />
-          <SystemInfoItem
             title="QQ 版本"
             icon={<FaQq className="text-lg" />}
             value={
@@ -215,6 +209,11 @@ const SystemInfo: React.FC<SystemInfoProps> = (props) => {
                 qqVersionData
               )
             }
+          />
+          <SystemInfoItem
+            title="WebUI 版本"
+            icon={<IoLogoChrome className="text-xl" />}
+            value="Next"
           />
           <SystemInfoItem
             title="系统版本"
