@@ -22,7 +22,6 @@ import { OB11GroupEssenceEvent } from '@/onebot/event/notice/OB11GroupEssenceEve
 import { OB11GroupTitleEvent } from '@/onebot/event/notice/OB11GroupTitleEvent';
 import { OB11GroupUploadNoticeEvent } from '../event/notice/OB11GroupUploadNoticeEvent';
 import { OB11GroupNameEvent } from '../event/notice/OB11GroupNameEvent';
-import { pathToFileURL } from 'node:url';
 import { FileNapCatOneBotUUID } from '@/common/file-uuid';
 import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
 
@@ -202,8 +201,7 @@ export class OneBotGroupApi {
                 id: FileNapCatOneBotUUID.encode({
                     chatType: ChatType.KCHATTYPEGROUP,
                     peerUid: msg.peerUid,
-                }, msg.msgId, elementWrapper.elementId, elementWrapper?.fileElement?.fileUuid, element.fileName),
-                url: pathToFileURL(element.filePath).href,
+                }, msg.msgId, elementWrapper.elementId, elementWrapper?.fileElement?.fileUuid, element.fileMd5 ?? element.fileUuid),
                 name: element.fileName,
                 size: parseInt(element.fileSize),
                 busid: element.fileBizId ?? 0,

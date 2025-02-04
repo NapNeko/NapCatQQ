@@ -34,6 +34,8 @@ export class NTQQFileApi {
     core: NapCatCore;
     rkeyManager: RkeyManager;
     packetRkey: Array<{ rkey: string; time: number; type: number; ttl: bigint }> | undefined;
+    private fetchRkeyFailures: number = 0;
+    private readonly MAX_RKEY_FAILURES: number = 8;
 
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
@@ -41,9 +43,25 @@ export class NTQQFileApi {
         this.rkeyManager = new RkeyManager([
             'https://rkey.napneko.icu/rkeys'
         ],
-        this.context.logger
+            this.context.logger
         );
     }
+
+    private async fetchRkeyWithRetry() {
+        if (this.fetchRkeyFailures >= this.MAX_RKEY_FAILURES) {
+            throw new Error('Native.FetchRkey 已被禁用');
+        }
+        try {
+            let ret = await this.core.apis.PacketApi.pkt.operation.FetchRkey();
+            this.fetchRkeyFailures = 0; // Reset failures on success
+            return ret;
+        } catch (error) {
+            this.fetchRkeyFailures++;
+            this.context.logger.logError('FetchRkey 失败', (error as Error).message);
+            throw error;
+        }
+    }
+
 
     async copyFile(filePath: string, destPath: string) {
         await this.core.util.copyFile(filePath, destPath);
@@ -182,7 +200,6 @@ export class NTQQFileApi {
             }
         }
         context.deleteAfterSentFiles.push(thumbPath);
-        
         const thumbSize = (await fsPromises.stat(thumbPath)).size;
         const thumbMd5 = await calculateFileMD5(thumbPath);
         context.deleteAfterSentFiles.push(thumbPath);
@@ -283,18 +300,18 @@ export class NTQQFileApi {
                     element.elementType === ElementType.FILE
                 ) {
                     switch (element.elementType) {
-                    case ElementType.PIC:
+                        case ElementType.PIC:
                             element.picElement!.sourcePath = elementResults?.[elementIndex] ?? '';
-                        break;
-                    case ElementType.VIDEO:
+                            break;
+                        case ElementType.VIDEO:
                             element.videoElement!.filePath = elementResults?.[elementIndex] ?? '';
-                        break;
-                    case ElementType.PTT:
+                            break;
+                        case ElementType.PTT:
                             element.pttElement!.filePath = elementResults?.[elementIndex] ?? '';
-                        break;
-                    case ElementType.FILE:
+                            break;
+                        case ElementType.FILE:
                             element.fileElement!.filePath = elementResults?.[elementIndex] ?? '';
-                        break;
+                            break;
                     }
                     elementIndex++;
                 }
@@ -421,7 +438,7 @@ export class NTQQFileApi {
                 const rkey_expired_private = !this.packetRkey || this.packetRkey[0].time + Number(this.packetRkey[0].ttl) < Date.now() / 1000;
                 const rkey_expired_group = !this.packetRkey || this.packetRkey[0].time + Number(this.packetRkey[0].ttl) < Date.now() / 1000;
                 if (rkey_expired_private || rkey_expired_group) {
-                    this.packetRkey = await this.core.apis.PacketApi.pkt.operation.FetchRkey();
+                    this.packetRkey = await this.fetchRkeyWithRetry();
                 }
                 if (this.packetRkey && this.packetRkey.length > 0) {
                     rkeyData.group_rkey = this.packetRkey[1]?.rkey.slice(6) ?? '';
@@ -430,7 +447,7 @@ export class NTQQFileApi {
                 }
             }
         } catch (error: unknown) {
-            this.context.logger.logError('获取rkey失败', (error as Error).message);
+            this.context.logger.logDebug('获取native.rkey失败', (error as Error).message);
         }
 
         if (!rkeyData.online_rkey) {
@@ -439,11 +456,11 @@ export class NTQQFileApi {
                 rkeyData.group_rkey = tempRkeyData.group_rkey;
                 rkeyData.private_rkey = tempRkeyData.private_rkey;
                 rkeyData.online_rkey = tempRkeyData.expired_time > Date.now() / 1000;
-            } catch (e) {
-                this.context.logger.logDebug('获取rkey失败 Fallback Old Mode', e);
+            } catch (error: unknown) {
+                this.context.logger.logDebug('获取remote.rkey失败', (error as Error).message);
             }
         }
-
+        // 进行 fallback.rkey 模式
         return rkeyData;
     }
 
