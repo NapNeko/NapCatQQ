@@ -44,8 +44,8 @@ import { LRUCache } from '@/common/lru-cache';
 import { BotOfflineEvent } from './event/notice/BotOfflineEvent';
 import {
     NetworkAdapterConfig,
-    loadConfig,
     OneBotConfig,
+    OneBotConfigSchema,
 } from './config/config';
 import { OB11Message } from './types';
 import { IOB11NetworkAdapter } from '@/onebot/network/adapter';
@@ -66,9 +66,7 @@ export class NapCatOneBot11Adapter {
     constructor(core: NapCatCore, context: InstanceContext, pathWrapper: NapCatPathWrapper) {
         this.core = core;
         this.context = context;
-        this.configLoader = new OB11ConfigLoader(core, pathWrapper.configPath);
-        this.configLoader.save(this.configLoader.configData);
-        this.configLoader.save(loadConfig(this.configLoader.configData));
+        this.configLoader = new OB11ConfigLoader(core, pathWrapper.configPath, OneBotConfigSchema);
         this.apis = {
             GroupApi: new OneBotGroupApi(this, core),
             UserApi: new OneBotUserApi(this, core),
@@ -176,9 +174,6 @@ export class NapCatOneBot11Adapter {
         WebUiDataRuntime.setQQLoginStatus(true);
         WebUiDataRuntime.setOnOB11ConfigChanged(async (newConfig) => {
             const prev = this.configLoader.configData;
-            // 保证默认配置
-            newConfig = loadConfig(newConfig);
-
             this.configLoader.save(newConfig);
             //this.context.logger.log(`OneBot11 配置更改：${JSON.stringify(prev)} -> ${JSON.stringify(newConfig)}`);
             await this.reloadNetwork(prev, newConfig);
