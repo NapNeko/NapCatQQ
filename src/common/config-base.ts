@@ -34,7 +34,6 @@ export abstract class ConfigBase<T> {
             if (fs.existsSync(defaultConfigPath)) {
                 this.configData = this.loadConfig(defaultConfigPath);
             }
-            this.validate(this.configData);
             this.save();
             return this.configData;
         }
