@@ -1,4 +1,4 @@
-import {  OB11EmitEventContent, OB11NetworkReloadType } from './index';
+import { OB11EmitEventContent, OB11NetworkReloadType } from './index';
 import express, { Express, NextFunction, Request, Response } from 'express';
 import http from 'http';
 import { NapCatCore } from '@/core';
@@ -60,7 +60,7 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
             });
             req.on('end', () => {
                 try {
-                    req.body = json5.parse(rawData || '{}');
+                    req.body = { ...json5.parse(rawData || '{}'), ...req.body };
                     next();
                 } catch {
                     return res.status(400).send('Invalid JSON');
