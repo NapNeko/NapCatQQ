@@ -43,7 +43,9 @@ export abstract class ConfigBase<T> {
 
     private loadConfig(configPath: string): T {
         try {
-            this.configData = json5.parse(fs.readFileSync(configPath, 'utf-8'));
+            let newConfigData = json5.parse(fs.readFileSync(configPath, 'utf-8'));
+            this.validate(newConfigData);
+            this.configData = newConfigData;
             this.core.context.logger.logDebug(`[Core] [Config] 配置文件${configPath}加载`, this.configData);
             return this.configData;
         } catch (e: unknown) {
