@@ -82,7 +82,7 @@ const OneBotConfigSchema = Type.Object({
     network: NetworkConfigSchema,
     musicSignUrl: Type.String({ default: '' }),
     enableLocalFile2Url: Type.Boolean({ default: false }),
-    parseMultMsg: Type.Boolean({ default: true })
+    parseMultMsg: Type.Boolean({ default: false })
 });
 
 export type OneBotConfig = Static<typeof OneBotConfigSchema>;
