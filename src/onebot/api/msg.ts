@@ -1,6 +1,5 @@
 import { FileNapCatOneBotUUID } from '@/common/file-uuid';
 import { MessageUnique } from '@/common/message-unique';
-import { pathToFileURL } from 'node:url';
 import {
     NTMsgAtType,
     ChatType,
@@ -146,7 +145,6 @@ export class OneBotMsgApi {
                 data: {
                     file: file,
                     path: element.filePath,
-                    url: pathToFileURL(element.filePath).href,
                     file_id: file,
                     file_size: element.fileSize,
                 },
@@ -334,7 +332,7 @@ export class OneBotMsgApi {
                 data: {
                     file: fileCode,
                     path: videoDownUrl,
-                    url: videoDownUrl ?? pathToFileURL(element.filePath).href,
+                    url: videoDownUrl,
                     file_size: element.fileSize,
                 },
             };
@@ -352,7 +350,6 @@ export class OneBotMsgApi {
                 data: {
                     file: fileCode,
                     path: element.filePath,
-                    url: pathToFileURL(element.filePath).href,
                     file_size: element.fileSize,
                 },
             };
