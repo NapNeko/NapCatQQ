@@ -138,7 +138,7 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
         shadow="sm"
         className="my-4 bg-opacity-50 backdrop-blur-md overflow-visible z-20"
       >
-        <CardHeader className="font-noto-serif font-bold text-lg gap-1 pb-0">
+        <CardHeader className="font-bold text-lg gap-1 pb-0">
           <span className="mr-2">请求体</span>
           <Button
             color="warning"
@@ -186,7 +186,7 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
         className="my-4 relative bg-opacity-50 backdrop-blur-md"
       >
         <PageLoading loading={isFetching} />
-        <CardHeader className="font-noto-serif font-bold text-lg gap-1 pb-0">
+        <CardHeader className="font-bold text-lg gap-1 pb-0">
           <span className="mr-2">响应</span>
           <Button
             color="warning"

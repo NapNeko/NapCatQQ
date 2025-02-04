@@ -100,7 +100,7 @@ export default function TerminalPage() {
   )
 
   return (
-    <div className="flex flex-col gap-2 p-4">
+    <div className="flex flex-col gap-2 p-4 h-[calc(100vh-6rem)] md:h-[calc(100vh-4rem)]">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}

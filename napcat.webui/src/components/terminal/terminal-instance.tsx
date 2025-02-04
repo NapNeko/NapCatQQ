@@ -10,23 +10,24 @@ interface TerminalInstanceProps {
 
 export function TerminalInstance({ id }: TerminalInstanceProps) {
   const termRef = useRef<XTermRef>(null)
+  const connected = useRef(false)
+
+  const handleData = (data: string) => {
+    try {
+      const parsed = JSON.parse(data)
+      if (parsed.data) {
+        termRef.current?.write(parsed.data)
+      }
+    } catch (e) {
+      termRef.current?.write(data)
+    }
+  }
 
   useEffect(() => {
-    const handleData = (data: string) => {
-      try {
-        const parsed = JSON.parse(data)
-        if (parsed.data) {
-          termRef.current?.write(parsed.data)
-        }
-      } catch (e) {
-        termRef.current?.write(data)
-      }
-    }
-
-    TerminalManager.connectTerminal(id, handleData)
-
     return () => {
-      TerminalManager.disconnectTerminal(id, handleData)
+      if (connected.current) {
+        TerminalManager.disconnectTerminal(id, handleData)
+      }
     }
   }, [id])
 
@@ -34,5 +35,22 @@ export function TerminalInstance({ id }: TerminalInstanceProps) {
     TerminalManager.sendInput(id, data)
   }
 
-  return <XTerm ref={termRef} onInput={handleInput} className="w-full h-full" />
+  const handleResize = (cols: number, rows: number) => {
+    if (!connected.current) {
+      connected.current = true
+      console.log('instance', rows, cols)
+      TerminalManager.connectTerminal(id, handleData, { rows, cols })
+    } else {
+      TerminalManager.sendResize(id, cols, rows)
+    }
+  }
+
+  return (
+    <XTerm
+      ref={termRef}
+      onInput={handleInput}
+      onResize={handleResize} // 使用 fitAddon 改变后触发的 resize 回调
+      className="w-full h-full"
+    />
+  )
 }
