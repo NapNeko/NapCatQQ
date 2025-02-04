@@ -15,7 +15,7 @@ import { useWebSocketDebug } from '@/hooks/use-websocket-debug'
 
 export default function WSDebug() {
   const url = new URL(window.location.origin)
-  url.port = '3000'
+  url.port = '3001'
   url.protocol = 'ws:'
   const defaultWsUrl = url.href
   const [socketConfig, setSocketConfig] = useLocalStorage(key.wsDebugConfig, {

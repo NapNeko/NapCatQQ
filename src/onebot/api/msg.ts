@@ -857,7 +857,7 @@ export class OneBotMsgApi {
                         return parsedElement;
                     }
                 }
-                return [];
+                return;
             },
         ));
 

@@ -15,7 +15,7 @@ import { IOB11NetworkAdapter } from '@/onebot/network/adapter';
 import json5 from 'json5';
 
 export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketServerConfig> {
-    wsServer: WebSocketServer;
+    wsServer?: WebSocketServer;
     wsClients: WebSocket[] = [];
     wsClientsMutex = new Mutex();
     private heartbeatIntervalId: NodeJS.Timeout | null = null;
@@ -30,7 +30,11 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
             host: this.config.host === '0.0.0.0' ? '' : this.config.host,
             maxPayload: 1024 * 1024 * 1024,
         });
-        this.wsServer.on('connection', async (wsClient, wsReq) => {
+        this.createServer(this.wsServer);
+
+    }
+    createServer(newServer: WebSocketServer) {
+        newServer.on('connection', async (wsClient, wsReq) => {
             if (!this.isEnable) {
                 wsClient.close();
                 return;
@@ -40,7 +44,7 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
             const paramUrl = wsReq.url?.indexOf('?') !== -1 ? wsReq.url?.substring(0, wsReq.url?.indexOf('?')) : wsReq.url;
             const isApiConnect = paramUrl === '/api' || paramUrl === '/api/';
             if (!isApiConnect) {
-                this.connectEvent(core, wsClient);
+                this.connectEvent(this.core, wsClient);
             }
 
             wsClient.on('error', (err) => this.logger.log('[OneBot] [WebSocket Server] Client Error:', err.message));
@@ -74,7 +78,6 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
             });
         }).on('error', (err) => this.logger.log('[OneBot] [WebSocket Server] Server Error:', err.message));
     }
-
     connectEvent(core: NapCatCore, wsClient: WebSocket) {
         try {
             this.checkStateAndReply<unknown>(new OB11LifeCycleEvent(core, LifeCycleSubType.CONNECT), wsClient);
@@ -96,7 +99,7 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
             this.logger.logError('[OneBot] [WebSocket Server] Cannot open a opened WebSocket server');
             return;
         }
-        const addressInfo = this.wsServer.address();
+        const addressInfo = this.wsServer?.address();
         this.logger.log('[OneBot] [WebSocket Server] Server Started', typeof (addressInfo) === 'string' ? addressInfo : addressInfo?.address + ':' + addressInfo?.port);
 
         this.isEnable = true;
@@ -108,7 +111,7 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
 
     async close() {
         this.isEnable = false;
-        this.wsServer.close((err) => {
+        this.wsServer?.close((err) => {
             if (err) {
                 this.logger.logError('[OneBot] [WebSocket Server] Error closing server:', err.message);
             } else {
@@ -205,6 +208,7 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
                 host: newConfig.host === '0.0.0.0' ? '' : newConfig.host,
                 maxPayload: 1024 * 1024 * 1024,
             });
+            this.createServer(this.wsServer);
             if (newConfig.enable) {
                 this.open();
             }
