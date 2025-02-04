@@ -18,11 +18,10 @@ interface FilePreviewModalProps {
   onClose: () => void
 }
 
-const imageExts = ['.png', '.jpg', '.jpeg', '.gif', '.bmp']
-const videoExts = ['.mp4', '.webm']
-const audioExts = ['.mp3', '.wav']
+export const videoExts = ['.mp4', '.webm']
+export const audioExts = ['.mp3', '.wav']
 
-const supportedPreviewExts = [...imageExts, ...videoExts, ...audioExts]
+export const supportedPreviewExts = [...videoExts, ...audioExts]
 
 export default function FilePreviewModal({
   isOpen,
@@ -31,7 +30,7 @@ export default function FilePreviewModal({
 }: FilePreviewModalProps) {
   const ext = path.extname(filePath).toLowerCase()
   const { data, loading, error, run } = useRequest(
-    async (path: string) => FileManager.downloadToURL(path),
+    async () => FileManager.downloadToURL(filePath),
     {
       refreshDeps: [filePath],
       refreshDepsAction: () => {
@@ -39,7 +38,7 @@ export default function FilePreviewModal({
         if (!filePath || !supportedPreviewExts.includes(ext)) {
           return
         }
-        run(filePath)
+        run()
       }
     }
   )
@@ -55,20 +54,20 @@ export default function FilePreviewModal({
         <Spinner />
       </div>
     )
-  } else if (imageExts.includes(ext)) {
-    contentElement = (
-      <img src={data} alt="预览" className="max-w-full max-h-96" />
-    )
   } else if (videoExts.includes(ext)) {
-    contentElement = (
-      <video src={data} controls className="max-w-full max-h-96" />
-    )
+    contentElement = <video src={data} controls className="max-w-full" />
   } else if (audioExts.includes(ext)) {
     contentElement = <audio src={data} controls className="w-full" />
+  } else {
+    contentElement = (
+      <div className="flex justify-center items-center h-full">
+        <Spinner />
+      </div>
+    )
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} scrollBehavior="inside">
+    <Modal isOpen={isOpen} onClose={onClose} scrollBehavior="inside" size="3xl">
       <ModalContent>
         <ModalHeader>文件预览</ModalHeader>
         <ModalBody className="flex justify-center items-center">
