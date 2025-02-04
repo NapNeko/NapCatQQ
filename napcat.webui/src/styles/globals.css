@@ -11,6 +11,10 @@ body {
     Helvetica Neue,
     Microsoft YaHei,
     sans-serif !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-smooth: always;
 }
 
 @layer components {
@@ -95,11 +99,4 @@ body {
 }
 .ql-editor img {
   @apply inline-block;
-}
-
-.xterm {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-  font-smooth: always;
 }
