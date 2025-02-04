@@ -20,7 +20,7 @@ const WebsocketServerForm: React.FC<WebsocketServerFormProps> = ({
     enable: false,
     name: '',
     host: '0.0.0.0',
-    port: 3000,
+    port: 3001,
     reportSelfMessage: false,
     enableForcePushEvent: true,
     messagePostFormat: 'array',
