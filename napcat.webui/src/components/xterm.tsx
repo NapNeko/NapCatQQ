@@ -99,7 +99,7 @@ const XTerm = forwardRef<XTermRef, XTermProps>((props, ref) => {
       if (theme === 'dark') {
         terminalRef.current.options.theme = {
           background: '#00000000',
-          black: '#000000',
+          black: '#ffffff',
           red: '#cd3131',
           green: '#0dbc79',
           yellow: '#e5e510',
