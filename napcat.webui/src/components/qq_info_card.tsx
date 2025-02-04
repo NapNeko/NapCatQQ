@@ -23,9 +23,7 @@ const QQInfoCard: React.FC<QQInfoCardProps> = ({ data, error, loading }) => {
       <PageLoading loading={loading} />
       {error ? (
         <CardBody className="items-center gap-1 justify-center">
-          <div className="font-outfit flex-1 text-content1-foreground">
-            Error
-          </div>
+          <div className="flex-1 text-content1-foreground">Error</div>
           <div className="whitespace-nowrap text-nowrap flex-shrink-0">
             {error.message}
           </div>
@@ -51,10 +49,8 @@ const QQInfoCard: React.FC<QQInfoCardProps> = ({ data, error, loading }) => {
             ></div>
           </div>
           <div className="flex-col justify-center">
-            <div className="font-outfit text-lg truncate">{data?.nick}</div>
-            <div className="font-ubuntu text-danger-500 text-sm">
-              {data?.uin}
-            </div>
+            <div className="text-lg truncate">{data?.nick}</div>
+            <div className="text-danger-500 text-sm">{data?.uin}</div>
           </div>
         </CardBody>
       )}

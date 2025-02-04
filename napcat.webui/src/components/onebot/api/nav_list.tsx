@@ -67,7 +67,7 @@ const OneBotApiNavList: React.FC<OneBotApiNavListProps> = (props) => {
             onPress={() => onSelect(apiName as OneBotHttpApiPath)}
           >
             <CardBody>
-              <h2 className="font-ubuntu font-bold">{api.description}</h2>
+              <h2 className="font-bold">{api.description}</h2>
               <div
                 className={clsx('text-sm text-danger-200', {
                   '!text-danger-400': apiName === selectedApi
