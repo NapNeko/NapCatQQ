@@ -4,6 +4,8 @@ import { Chip } from '@heroui/chip'
 import { Spinner } from '@heroui/spinner'
 import { Tooltip } from '@heroui/tooltip'
 import { useRequest } from 'ahooks'
+import { useEffect } from 'react'
+import { BsStars } from 'react-icons/bs'
 import { FaCircleInfo, FaInfo, FaQq } from 'react-icons/fa6'
 import { IoLogoChrome, IoLogoOctocat } from 'react-icons/io'
 import { RiMacFill } from 'react-icons/ri'
@@ -97,6 +99,42 @@ const NewVersionTip = (props: NewVersionTipProps) => {
     }
   }
 
+  const AISummaryComponent = () => {
+    const {
+      data: aiSummaryData,
+      loading: aiSummaryLoading,
+      error: aiSummaryError,
+      run: runAiSummary
+    } = useRequest(
+      (version) =>
+        request.get<ServerResponse<string | null>>(
+          `https://release.nc.152710.xyz/?version=${version}`,
+          {
+            timeout: 30000
+          }
+        ),
+      {
+        manual: true
+      }
+    )
+
+    useEffect(() => {
+      runAiSummary(currentVersion)
+    }, [currentVersion, runAiSummary])
+
+    if (aiSummaryLoading) {
+      return (
+        <div className="flex justify-center py-1">
+          <Spinner size="sm" />
+        </div>
+      )
+    }
+    if (aiSummaryError) {
+      return <div className="text-center text-danger-500">AI 摘要获取失败</div>
+    }
+    return <span className="text-default-700">{aiSummaryData?.data.data}</span>
+  }
+
   return (
     <Tooltip content="有新版本可用">
       <Button
@@ -119,6 +157,13 @@ const NewVersionTip = (props: NewVersionTipProps) => {
                 <div className="text-sm space-x-2">
                   <span>最新版本</span>
                   <Chip color="primary">{latestVersion}</Chip>
+                </div>
+                <div className="p-2 rounded-md bg-content2 text-sm">
+                  <div className="text-danger-400 font-bold flex items-center gap-1 mb-1">
+                    <BsStars />
+                    <span>AI总结</span>
+                  </div>
+                  {<AISummaryComponent />}
                 </div>
                 <div className="text-sm space-y-2 !mt-4">
                   {middleVersions.map((versionInfo) => (
