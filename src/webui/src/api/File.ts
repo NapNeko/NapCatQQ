@@ -268,7 +268,11 @@ export const BatchMoveHandler: RequestHandler = async (req, res) => {
 // 新增：文件下载处理方法（注意流式传输，不将整个文件读入内存）
 export const DownloadHandler: RequestHandler = async (req, res) => {
     try {
-        const filePath = normalizePath(req.query['path'] as string);
+        const filePath = normalizePath( req.query[ 'path' ] as string );
+        if (!filePath) {
+            return sendError( res, '参数错误' );
+        }
+        
         const stat = await fsProm.stat(filePath);
 
         res.setHeader('Content-Type', 'application/octet-stream');
