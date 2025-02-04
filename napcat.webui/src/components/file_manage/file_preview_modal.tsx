@@ -9,6 +9,7 @@ import {
 import { Spinner } from '@heroui/spinner'
 import { useRequest } from 'ahooks'
 import path from 'path-browserify'
+import { useEffect } from 'react'
 
 import FileManager from '@/controllers/file_manager'
 
@@ -33,6 +34,7 @@ export default function FilePreviewModal({
     async () => FileManager.downloadToURL(filePath),
     {
       refreshDeps: [filePath],
+      manual: true,
       refreshDepsAction: () => {
         const ext = path.extname(filePath).toLowerCase()
         if (!filePath || !supportedPreviewExts.includes(ext)) {
@@ -65,6 +67,12 @@ export default function FilePreviewModal({
       </div>
     )
   }
+
+  useEffect(() => {
+    if (filePath) {
+      run()
+    }
+  }, [])
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} scrollBehavior="inside" size="3xl">

@@ -33,6 +33,7 @@ export default function ImageNameButton({
     async () => FileManager.downloadToURL(filePath),
     {
       refreshDeps: [filePath],
+      manual: true,
       refreshDepsAction: () => {
         const ext = path.extname(filePath).toLowerCase()
         if (!filePath || !imageExts.includes(ext)) {
@@ -52,6 +53,11 @@ export default function ImageNameButton({
     }
   }, [data, name, onAddPreview])
 
+  useEffect(() => {
+    if (filePath) {
+      run()
+    }
+  }, [])
   return (
     <Button
       variant="light"
