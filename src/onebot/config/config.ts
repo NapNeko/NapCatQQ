@@ -78,7 +78,7 @@ const NetworkConfigSchema = Type.Object({
     plugins: Type.Array(PluginConfigSchema, { default: [] })
 }, { default: {} });
 
-const OneBotConfigSchema = Type.Object({
+export const OneBotConfigSchema = Type.Object({
     network: NetworkConfigSchema,
     musicSignUrl: Type.String({ default: '' }),
     enableLocalFile2Url: Type.Boolean({ default: false }),

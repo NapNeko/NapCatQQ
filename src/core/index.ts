@@ -25,7 +25,7 @@ import fs from 'node:fs';
 import { hostname, systemName, systemVersion } from '@/common/system';
 import { NTEventWrapper } from '@/common/event';
 import { KickedOffLineInfo, SelfInfo, SelfStatusInfo } from '@/core/types';
-import { NapCatConfigLoader } from '@/core/helper/config';
+import { NapCatConfigLoader, NapcatConfigSchema } from '@/core/helper/config';
 import os from 'node:os';
 import { NodeIKernelMsgListener, NodeIKernelProfileListener } from '@/core/listeners';
 import { proxiedListenerOf } from '@/common/proxy-handler';
@@ -99,7 +99,7 @@ export class NapCatCore {
         this.context = context;
         this.util = this.context.wrapper.NodeQQNTWrapperUtil;
         this.eventWrapper = new NTEventWrapper(context.session);
-        this.configLoader = new NapCatConfigLoader(this, this.context.pathWrapper.configPath);
+        this.configLoader = new NapCatConfigLoader(this, this.context.pathWrapper.configPath,NapcatConfigSchema);
         this.apis = {
             FileApi: new NTQQFileApi(this.context, this),
             SystemApi: new NTQQSystemApi(this.context, this),
