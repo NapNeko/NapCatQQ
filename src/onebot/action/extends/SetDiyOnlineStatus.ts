@@ -17,8 +17,8 @@ export class SetDiyOnlineStatus extends OneBotAction<Payload, string> {
     async _handle(payload: Payload) {
         const ret = await this.core.apis.UserApi.setDiySelfOnlineStatus(
             payload.face_id.toString(),
-            payload.face_type.toString(),
             payload.wording,
+            payload.face_type.toString(),
         );
         if (ret.result !== 0) {
             throw new Error('设置在线状态失败');
