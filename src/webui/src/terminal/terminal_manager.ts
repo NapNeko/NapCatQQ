@@ -13,6 +13,8 @@ interface TerminalInstance {
     sockets: Set<WebSocket>;
     // 新增标识，用于防止重复关闭
     isClosing: boolean;
+    // 新增：存储终端历史输出
+    buffer: string;
 }
 
 class TerminalManager {
@@ -67,20 +69,23 @@ class TerminalManager {
                     return;
                 }
 
-                const dataHandler = (data: string) => {
-                    if (ws.readyState === WebSocket.OPEN) {
-                        ws.send(JSON.stringify({ type: 'output', data }));
-                    }
-                };
-
                 instance.sockets.add(ws);
                 instance.lastAccess = Date.now();
+
+                // 新增：发送当前终端内容给新连接
+                if (ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({ type: 'output', data: instance.buffer }));
+                }
 
                 ws.on('message', (data) => {
                     if (instance) {
                         const result = JSON.parse(data.toString());
                         if (result.type === 'input') {
                             instance.pty.write(result.data);
+                        }
+                        // 新增：处理 resize 消息
+                        if (result.type === 'resize') {
+                            instance.pty.resize(result.cols, result.rows);
                         }
                     }
                 });
@@ -103,18 +108,17 @@ class TerminalManager {
         });
     }
 
-    // 修改：移除参数 id，使用 crypto.randomUUID 生成终端 id
-    createTerminal() {
+    // 修改：新增 cols 和 rows 参数，同步 xterm 尺寸，防止错位
+    createTerminal(cols: number, rows: number) {
         const id = randomUUID();
         const shell = os.platform() === 'win32' ? 'powershell.exe' : 'bash';
         const pty = ptySpawn(shell, [], {
             name: 'xterm-256color',
-            cols: 80,
-            rows: 24,
+            cols, // 使用客户端传入的 cols
+            rows, // 使用客户端传入的 rows
             cwd: process.cwd(),
             env: {
                 ...process.env,
-                // 统一编码设置
                 LANG: os.platform() === 'win32' ? 'chcp 65001' : 'zh_CN.UTF-8',
                 TERM: 'xterm-256color',
             },
@@ -125,9 +129,13 @@ class TerminalManager {
             lastAccess: Date.now(),
             sockets: new Set(),
             isClosing: false,
+            buffer: '', // 初始化终端内容缓存
         };
 
         pty.onData((data: any) => {
+            // 追加数据到 buffer
+            instance.buffer += data;
+            // 发送数据给已连接的 websocket
             instance.sockets.forEach((ws) => {
                 if (ws.readyState === WebSocket.OPEN) {
                     ws.send(JSON.stringify({ type: 'output', data }));

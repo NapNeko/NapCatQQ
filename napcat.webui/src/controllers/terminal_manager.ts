@@ -41,9 +41,16 @@ class TerminalManager {
     return data.data
   }
 
-  connectTerminal(id: string, callback: TerminalCallback): WebSocket {
+  connectTerminal(
+    id: string,
+    callback: TerminalCallback,
+    config?: {
+      cols?: number
+      rows?: number
+    }
+  ): WebSocket {
     let conn = this.connections.get(id)
-
+    const { cols = 80, rows = 24 } = config || {}
     if (!conn) {
       const url = new URL(window.location.href)
       url.protocol = url.protocol.replace('http', 'ws')
@@ -74,6 +81,7 @@ class TerminalManager {
 
       ws.onopen = () => {
         if (conn) conn.isConnected = true
+        this.sendResize(id, cols, rows)
       }
 
       ws.onclose = () => {
@@ -109,6 +117,13 @@ class TerminalManager {
     const conn = this.connections.get(id)
     if (conn?.ws.readyState === WebSocket.OPEN) {
       conn.ws.send(JSON.stringify({ type: 'input', data }))
+    }
+  }
+
+  sendResize(id: string, cols: number, rows: number) {
+    const conn = this.connections.get(id)
+    if (conn?.ws.readyState === WebSocket.OPEN) {
+      conn.ws.send(JSON.stringify({ type: 'resize', cols, rows }))
     }
   }
 }

@@ -36,7 +36,7 @@ export default function Hitokoto() {
           <div className="text-danger-400">一言加载失败：{error.message}</div>
         ) : (
           <>
-            <div className="font-noto-serif">{data?.hitokoto}</div>
+            <div>{data?.hitokoto}</div>
             <div className="text-right">
               —— <span className="text-default-400">{data?.from}</span>{' '}
               {data?.from_who}
