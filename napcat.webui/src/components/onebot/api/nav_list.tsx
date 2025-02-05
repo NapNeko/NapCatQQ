@@ -33,11 +33,11 @@ const OneBotApiNavList: React.FC<OneBotApiNavListProps> = (props) => {
     >
       <div className="w-64 h-full overflow-y-auto px-2 pt-2 pb-10 md:pb-0">
         <Input
-          className="sticky top-0 z-10 text-danger-600"
+          className="sticky top-0 z-10 text-primary-600"
           classNames={{
             inputWrapper:
-              'bg-opacity-30 bg-danger-50 backdrop-blur-sm border border-danger-300 mb-2',
-            input: 'bg-transparent !text-danger-400 !placeholder-danger-400'
+              'bg-opacity-30 bg-primary-50 backdrop-blur-sm border border-primary-300 mb-2',
+            input: 'bg-transparent !text-primary-400 !placeholder-primary-400'
           }}
           radius="full"
           placeholder="搜索 API"
@@ -51,7 +51,7 @@ const OneBotApiNavList: React.FC<OneBotApiNavListProps> = (props) => {
             key={apiName}
             shadow="none"
             className={clsx(
-              'w-full border border-danger-100 rounded-lg mb-1 bg-opacity-30 backdrop-blur-sm text-danger-400',
+              'w-full border border-primary-100 rounded-lg mb-1 bg-opacity-30 backdrop-blur-sm text-primary-400',
               {
                 hidden: !(
                   apiName.includes(searchValue) ||
@@ -59,7 +59,7 @@ const OneBotApiNavList: React.FC<OneBotApiNavListProps> = (props) => {
                 )
               },
               {
-                '!bg-opacity-40 border border-danger-400 bg-danger-50 text-danger-600':
+                '!bg-opacity-40 border border-primary-400 bg-primary-50 text-primary-600':
                   apiName === selectedApi
               }
             )}
@@ -69,8 +69,8 @@ const OneBotApiNavList: React.FC<OneBotApiNavListProps> = (props) => {
             <CardBody>
               <h2 className="font-bold">{api.description}</h2>
               <div
-                className={clsx('text-sm text-danger-200', {
-                  '!text-danger-400': apiName === selectedApi
+                className={clsx('text-sm text-primary-200', {
+                  '!text-primary-400': apiName === selectedApi
                 })}
               >
                 {apiName}

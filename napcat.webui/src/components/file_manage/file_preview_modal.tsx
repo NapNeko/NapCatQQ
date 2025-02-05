@@ -82,7 +82,7 @@ export default function FilePreviewModal({
           {contentElement}
         </ModalBody>
         <ModalFooter>
-          <Button color="danger" variant="flat" onPress={onClose}>
+          <Button color="primary" variant="flat" onPress={onClose}>
             关闭
           </Button>
         </ModalFooter>

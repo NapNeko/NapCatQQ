@@ -27,7 +27,7 @@ const SchemaType = ({
       name = '固定值'
       break
   }
-  let chipColor: 'primary' | 'success' | 'danger' | 'warning' | 'secondary' =
+  let chipColor: 'primary' | 'success' | 'primary' | 'warning' | 'secondary' =
     'primary'
   switch (type) {
     case 'enum':
@@ -37,7 +37,7 @@ const SchemaType = ({
       chipColor = 'secondary'
       break
     case 'array':
-      chipColor = 'danger'
+      chipColor = 'primary'
       break
     case 'object':
       chipColor = 'success'

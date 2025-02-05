@@ -91,7 +91,7 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
 
   return (
     <section className="p-4 pt-14 rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold mb-4 flex items-center gap-1 text-danger-400">
+      <h1 className="text-2xl font-bold mb-4 flex items-center gap-1 text-primary-400">
         <PiCatDuotone />
         {data.description}
       </h1>
@@ -125,7 +125,7 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
         />
         <Button
           onPress={sendRequest}
-          color="danger"
+          color="primary"
           size="lg"
           radius="full"
           isIconOnly

@@ -65,7 +65,7 @@ const Modal: React.FC<ModalProps> = React.memo((props) => {
             <ModalFooter>
               {showCancel && (
                 <Button
-                  color="danger"
+                  color="primary"
                   variant="light"
                   onPress={() => {
                     onCancel?.()
@@ -76,7 +76,7 @@ const Modal: React.FC<ModalProps> = React.memo((props) => {
                 </Button>
               )}
               <Button
-                color="danger"
+                color="primary"
                 onPress={() => {
                   onConfirm?.()
                   nativeClose()

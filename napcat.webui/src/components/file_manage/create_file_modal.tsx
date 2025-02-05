@@ -33,7 +33,7 @@ export default function CreateFileModal({
         <ModalHeader>新建</ModalHeader>
         <ModalBody>
           <div className="flex flex-col gap-4">
-            <ButtonGroup color="danger">
+            <ButtonGroup color="primary">
               <Button
                 variant={fileType === 'file' ? 'solid' : 'flat'}
                 onPress={() => onTypeChange('file')}
@@ -51,10 +51,10 @@ export default function CreateFileModal({
           </div>
         </ModalBody>
         <ModalFooter>
-          <Button color="danger" variant="flat" onPress={onClose}>
+          <Button color="primary" variant="flat" onPress={onClose}>
             取消
           </Button>
-          <Button color="danger" onPress={onCreate}>
+          <Button color="primary" onPress={onCreate}>
             创建
           </Button>
         </ModalFooter>

@@ -1,6 +1,7 @@
 import { Card, CardBody } from '@heroui/card'
 import { Image } from '@heroui/image'
 import { Link } from '@heroui/link'
+import { Skeleton } from '@heroui/skeleton'
 import { Spinner } from '@heroui/spinner'
 import { useRequest } from 'ahooks'
 import { useMemo } from 'react'
@@ -22,7 +23,7 @@ function VersionInfo() {
   return (
     <div className="flex items-center gap-2 text-2xl font-bold">
       <div className="flex items-center gap-2">
-        <div className="text-danger-500 drop-shadow-md">NapCat</div>
+        <div className="text-primary-500 drop-shadow-md">NapCat</div>
         {error ? (
           error.message
         ) : loading ? (
@@ -30,7 +31,7 @@ function VersionInfo() {
         ) : (
           <RotatingText
             texts={['WebUI', data?.version ?? '']}
-            mainClassName="overflow-hidden flex items-center bg-danger-500 px-2 rounded-lg text-default-50 shadow-md"
+            mainClassName="overflow-hidden flex items-center bg-primary-500 px-2 rounded-lg text-default-50 shadow-md"
             staggerFrom={'last'}
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
@@ -78,16 +79,12 @@ export default function AboutPage() {
       const imageUrl = getImageUrl(baseUrl)
 
       if (!imageUrl) {
-        return (
-          <div className="flex-1 h-32 flex items-center justify-center bg-default-100 rounded-lg">
-            <Spinner />
-          </div>
-        )
+        return <Skeleton className="h-16 rounded-lg" />
       }
 
       return (
         <Image
-          className="flex-1 pointer-events-none select-none"
+          className="flex-1 pointer-events-none select-none rounded-none"
           src={imageUrl}
           alt={alt}
         />
@@ -107,12 +104,12 @@ export default function AboutPage() {
           <div className="flex-1 flex flex-col gap-2 py-2">
             <VersionInfo />
             <div className="space-y-1">
-              <p className="font-bold text-danger-400">NapCat 是什么?</p>
+              <p className="font-bold text-primary-400">NapCat 是什么?</p>
               <p className="text-default-800">
                 基于TypeScript构建的Bot框架,通过相应的启动器或者框架,主动调用QQ
                 Node模块提供给客户端的接口,实现Bot的功能.
               </p>
-              <p className="font-bold text-danger-400">魔法版介绍</p>
+              <p className="font-bold text-primary-400">魔法版介绍</p>
               <p className="text-default-800">
                 猫猫框架通过魔法的手段获得了 QQ 的发送消息、接收消息等接口。
                 为了方便使用，猫猫框架将通过一种名为 OneBot 的约定将你的 HTTP /
@@ -131,7 +128,7 @@ export default function AboutPage() {
             href="https://qm.qq.com/q/F9cgs1N3Mc"
           >
             <CardBody className="flex-row items-center gap-2">
-              <span className="p-2 rounded-small bg-primary-50">
+              <span className="p-2 rounded-small bg-primary-50 text-primary-500">
                 <BsTencentQq size={16} />
               </span>
               <span>官方社群1</span>
@@ -146,7 +143,7 @@ export default function AboutPage() {
             href="https://qm.qq.com/q/hSt0u9PVn"
           >
             <CardBody className="flex-row items-center gap-2">
-              <span className="p-2 rounded-small bg-primary-50">
+              <span className="p-2 rounded-small bg-primary-50 text-primary-500">
                 <BsTencentQq size={16} />
               </span>
               <span>官方社群2</span>
@@ -161,7 +158,7 @@ export default function AboutPage() {
             href="https://t.me/MelodicMoonlight"
           >
             <CardBody className="flex-row items-center gap-2">
-              <span className="p-2 rounded-small bg-primary-50">
+              <span className="p-2 rounded-small bg-primary-50 text-primary-500">
                 <BsTelegram size={16} />
               </span>
               <span>Telegram</span>
@@ -176,7 +173,7 @@ export default function AboutPage() {
             href="https://napcat.napneko.icu/"
           >
             <CardBody className="flex-row items-center gap-2">
-              <span className="p-2 rounded-small bg-primary-50">
+              <span className="p-2 rounded-small bg-primary-50 text-primary-500">
                 <IoDocument size={16} />
               </span>
               <span>使用文档</span>

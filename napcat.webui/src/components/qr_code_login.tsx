@@ -11,7 +11,7 @@ const QrCodeLogin: React.FC<QrCodeLoginProps> = ({ qrcode }) => {
       <div className="bg-white p-2 rounded-md w-fit mx-auto relative overflow-hidden">
         {!qrcode && (
           <div className="absolute left-2 top-2 right-2 bottom-2 bg-white bg-opacity-50 backdrop-blur flex items-center justify-center">
-            <Spinner color="danger" />
+            <Spinner color="primary" />
           </div>
         )}
         <QRCodeSVG size={180} value={qrcode} />

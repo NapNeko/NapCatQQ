@@ -34,10 +34,10 @@ const SystemInfoItem: React.FC<SystemInfoItemProps> = ({
   endContent
 }) => {
   return (
-    <div className="flex text-sm gap-1 p-2 items-center shadow-sm shadow-danger-50 dark:shadow-danger-100 rounded text-danger-400">
+    <div className="flex text-sm gap-1 p-2 items-center shadow-sm shadow-primary-50 dark:shadow-primary-100 rounded text-primary-400">
       {icon}
       <div className="w-24">{title}</div>
-      <div className="text-danger-200">{value}</div>
+      <div className="text-primary-200">{value}</div>
       <div className="ml-auto">{endContent}</div>
     </div>
   )
@@ -62,7 +62,7 @@ const NewVersionTip = (props: NewVersionTipProps) => {
         <Button
           isIconOnly
           radius="full"
-          color="danger"
+          color="primary"
           variant="shadow"
           className="!w-5 !h-5 !min-w-0 text-small shadow-md"
           onPress={() => {
@@ -130,7 +130,7 @@ const NewVersionTip = (props: NewVersionTipProps) => {
       )
     }
     if (aiSummaryError) {
-      return <div className="text-center text-danger-500">AI 摘要获取失败</div>
+      return <div className="text-center text-primary-500">AI 摘要获取失败</div>
     }
     return <span className="text-default-700">{aiSummaryData?.data.data}</span>
   }
@@ -140,7 +140,7 @@ const NewVersionTip = (props: NewVersionTipProps) => {
       <Button
         isIconOnly
         radius="full"
-        color="danger"
+        color="primary"
         variant="shadow"
         className="!w-5 !h-5 !min-w-0 text-small shadow-md"
         onPress={() => {
@@ -159,7 +159,7 @@ const NewVersionTip = (props: NewVersionTipProps) => {
                   <Chip color="primary">{latestVersion}</Chip>
                 </div>
                 <div className="p-2 rounded-md bg-content2 text-sm">
-                  <div className="text-danger-400 font-bold flex items-center gap-1 mb-1">
+                  <div className="text-primary-400 font-bold flex items-center gap-1 mb-1">
                     <BsStars />
                     <span>AI总结</span>
                   </div>
@@ -234,8 +234,8 @@ const SystemInfo: React.FC<SystemInfoProps> = (props) => {
     error: qqVersionError
   } = useRequest(WebUIManager.getQQVersion)
   return (
-    <Card className="bg-opacity-60 shadow-sm shadow-danger-50 dark:shadow-danger-100 overflow-visible flex-1">
-      <CardHeader className="pb-0 items-center gap-1 text-danger-500 font-extrabold">
+    <Card className="bg-opacity-60 shadow-sm shadow-primary-50 dark:shadow-primary-100 overflow-visible flex-1">
+      <CardHeader className="pb-0 items-center gap-1 text-primary-500 font-extrabold">
         <FaCircleInfo className="text-lg" />
         <span>系统信息</span>
       </CardHeader>

@@ -41,7 +41,7 @@ export default function HttpDebug() {
         >
           <Button
             isIconOnly
-            color="danger"
+            color="primary"
             radius="md"
             variant="shadow"
             size="sm"

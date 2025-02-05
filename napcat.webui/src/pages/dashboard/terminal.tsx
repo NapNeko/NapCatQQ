@@ -133,7 +133,7 @@ export default function TerminalPage() {
                       size="sm"
                       className="min-w-0 w-4 h-4 flex-shrink-0"
                       onPress={() => closeTerminal(tab.id)}
-                      color={selectedTab === tab.id ? 'danger' : 'default'}
+                      color={selectedTab === tab.id ? 'primary' : 'default'}
                     >
                       <IoClose />
                     </Button>
@@ -143,7 +143,7 @@ export default function TerminalPage() {
             </TabList>
             <Button
               isIconOnly
-              color="danger"
+              color="primary"
               size="sm"
               variant="flat"
               onPress={createNewTerminal}

@@ -43,7 +43,7 @@ const ImageInput: React.FC<ImageInputProps> = ({ onChange, value, label }) => {
           onChange('')
           if (inputRef.current) inputRef.current.value = ''
         }}
-        color="danger"
+        color="primary"
         variant="flat"
         size="sm"
       >

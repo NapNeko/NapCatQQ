@@ -109,7 +109,7 @@ const OneBotItemRender = ({ data, index, style }: OneBotItemRenderProps) => {
                 <PopoverTrigger>
                   <Button
                     size="sm"
-                    color="danger"
+                    color="primary"
                     variant="flat"
                     radius="full"
                     isIconOnly

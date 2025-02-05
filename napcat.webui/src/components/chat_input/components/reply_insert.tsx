@@ -19,7 +19,7 @@ const ReplyInsert = ({ insertReply }: ReplyInsertProps) => {
         <Tooltip content="回复消息">
           <div className="max-w-fit">
             <PopoverTrigger>
-              <Button color="danger" variant="flat" isIconOnly radius="full">
+              <Button color="primary" variant="flat" isIconOnly radius="full">
                 <BsChatQuoteFill className="text-lg" />
               </Button>
             </PopoverTrigger>
@@ -38,7 +38,7 @@ const ReplyInsert = ({ insertReply }: ReplyInsertProps) => {
             }}
           />
           <Button
-            color="danger"
+            color="primary"
             variant="flat"
             radius="full"
             isIconOnly

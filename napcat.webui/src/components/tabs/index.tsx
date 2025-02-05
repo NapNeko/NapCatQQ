@@ -62,7 +62,7 @@ export const Tab = forwardRef<HTMLDivElement, TabProps>(
         className={clsx(
           'px-2 py-1 flex items-center gap-1 text-sm font-medium border-b-2 transition-colors',
           isSelected
-            ? 'border-danger text-danger'
+            ? 'border-primary text-primary'
             : 'border-transparent hover:border-default',
           className
         )}
