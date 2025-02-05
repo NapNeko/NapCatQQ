@@ -66,7 +66,7 @@ export abstract class ConfigBase<T> {
 
     private handleError(e: unknown, message: string): void {
         if (e instanceof SyntaxError) {
-            this.core.context.logger.logError(`[Core] [Config] 操作配置文件格式错误，请检查配置文件:`, e.message);
+            this.core.context.logger.logError('[Core] [Config] 操作配置文件格式错误，请检查配置文件:', e.message);
         } else {
             this.core.context.logger.logError(`[Core] [Config] ${message}:`, (e as Error).message);
         }
