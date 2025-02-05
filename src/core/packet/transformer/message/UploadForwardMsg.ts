@@ -13,12 +13,12 @@ class UploadForwardMsg extends PacketTransformer<typeof proto.SendLongMsgResp> {
         const msgBody = this.msgBuilder.buildFakeMsg(selfUid, msg);
         const longMsgResultData = new NapProtoMsg(proto.LongMsgResult).encode(
             {
-                action: {
+                action: [{
                     actionCommand: 'MultiMsg',
                     actionData: {
                         msgBody: msgBody
                     }
-                }
+                }]
             }
         );
         const payload = zlib.gzipSync(Buffer.from(longMsgResultData));
