@@ -1,5 +1,5 @@
 import { ConfigBase } from '@/common/config-base';
-import { NapCatCore } from '@/core';
+import type { NapCatCore } from '@/core';
 import { OneBotConfig } from './config';
 import { AnySchema } from 'ajv';
 
