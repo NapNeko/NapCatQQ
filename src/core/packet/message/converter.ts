@@ -1,8 +1,8 @@
 import {
-    Peer,
     ChatType,
     ElementType,
     MessageElement,
+    Peer,
     RawMessage,
     SendArkElement,
     SendFaceElement,
@@ -31,7 +31,9 @@ import {
     PacketMsgVideoElement,
     PacketMultiMsgElement
 } from '@/core/packet/message/element';
-import { PacketMsg, PacketSendMsgElement } from '@/core/packet/message/message';
+import {PacketMsg, PacketSendMsgElement} from '@/core/packet/message/message';
+import {NapProtoDecodeStructType} from '@napneko/nap-proto-core';
+import {Elem} from '@/core/packet/transformer/proto';
 
 const SupportedElementTypes = [
     ElementType.TEXT,
@@ -153,5 +155,17 @@ export class PacketMsgConverter {
                 return this.rawToPacketMsgConverters[element.elementType](element);
             }).filter((e) => e !== null)
         };
+    }
+
+    packetMsgToRaw(msg: NapProtoDecodeStructType<typeof Elem>[]): [MessageElement, NapProtoDecodeStructType<typeof Elem> | null][] {
+        const converters = [PacketMsgTextElement.parseElement,
+            PacketMsgAtElement.parseElement, PacketMsgReplyElement.parseElement, PacketMsgPicElement.parseElement];
+        return msg.map((element) => {
+            for (const converter of converters) {
+                const result = converter(element);
+                if (result) return result;
+            }
+            return null;
+        }).filter((e) => e !== null);
     }
 }

@@ -1,20 +1,22 @@
 import * as zlib from 'node:zlib';
-import { NapProtoEncodeStructType, NapProtoMsg } from '@napneko/nap-proto-core';
+import {NapProtoDecodeStructType, NapProtoEncodeStructType, NapProtoMsg} from '@napneko/nap-proto-core';
 import {
     CustomFace,
     Elem,
+    FileExtra,
+    GroupFileExtra,
     MarkdownData,
     MentionExtra,
+    MsgInfo,
     NotOnlineImage,
+    OidbSvcTrpcTcp0XE37_800Response,
     QBigFaceExtra,
     QSmallFaceExtra,
-    MsgInfo,
-    OidbSvcTrpcTcp0XE37_800Response,
-    FileExtra,
-    GroupFileExtra
 } from '@/core/packet/transformer/proto';
 import {
+    ElementType,
     FaceType,
+    MessageElement,
     NTMsgAtType,
     PicType,
     SendArkElement,
@@ -29,8 +31,11 @@ import {
     SendTextElement,
     SendVideoElement
 } from '@/core';
-import { ForwardMsgBuilder } from '@/common/forward-msg-builder';
-import { PacketMsg, PacketSendMsgElement } from '@/core/packet/message/message';
+import {ForwardMsgBuilder} from '@/common/forward-msg-builder';
+import {PacketMsg, PacketSendMsgElement} from '@/core/packet/message/message';
+
+export type ParseElementFnR = [MessageElement, NapProtoDecodeStructType<typeof Elem> | null] | undefined;
+type ParseElementFn = (elem: NapProtoDecodeStructType<typeof Elem>) => ParseElementFnR;
 
 // raw <-> packet
 // TODO: SendStructLongMsgElement
@@ -50,6 +55,8 @@ export abstract class IPacketMsgElement<T extends PacketSendMsgElement> {
     buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
         return [];
     }
+
+    static parseElement: ParseElementFn;
 
     toPreview(): string {
         return '[暂不支持该消息类型喵~]';
@@ -72,10 +79,29 @@ export class PacketMsgTextElement extends IPacketMsgElement<SendTextElement> {
         }];
     }
 
+    static override parseElement = (elem: NapProtoDecodeStructType<typeof Elem>): ParseElementFnR => {
+        if (elem.text?.str && (elem.text?.attr6Buf === undefined || elem.text?.attr6Buf?.length === 0)) {
+            return [{
+                textElement: {
+                    content: elem.text?.str,
+                    atType: NTMsgAtType.ATTYPEUNKNOWN,
+                    atUid: '',
+                    atTinyId: '',
+                    atNtUid: '',
+                },
+                elementType: ElementType.UNKNOWN,
+                elementId: '',
+            }, null];
+        }
+        return undefined;
+    };
+
     override toPreview(): string {
         return this.text;
-    }
+    };
 }
+
+
 
 export class PacketMsgAtElement extends PacketMsgTextElement {
     targetUid: string;
@@ -101,6 +127,22 @@ export class PacketMsgAtElement extends PacketMsgTextElement {
             }
         }];
     }
+    static override parseElement = (elem: NapProtoDecodeStructType<typeof Elem>): ParseElementFnR => {
+        if (elem.text?.str && (elem.text?.attr6Buf?.length ?? 100) >= 11) {
+            return [{
+                textElement: {
+                    content: elem.text?.str,
+                    atType: NTMsgAtType.ATTYPEONE,
+                    atUid: String(Buffer.from(elem.text!.attr6Buf!).readUInt32BE(7)),  // FIXME: hack
+                    atTinyId: '',
+                    atNtUid: '',
+                },
+                elementType: ElementType.UNKNOWN,
+                elementId: '',
+            }, null];
+        }
+        return undefined;
+    };
 }
 
 export class PacketMsgReplyElement extends IPacketMsgElement<SendReplyElement> {
@@ -142,6 +184,22 @@ export class PacketMsgReplyElement extends IPacketMsgElement<SendReplyElement> {
             }
         }];
     }
+
+    static override parseElement = (elem: NapProtoDecodeStructType<typeof Elem>): ParseElementFnR => {
+        if (elem.srcMsg && elem.srcMsg.pbReserve) {
+            const reserve = elem.srcMsg.pbReserve;
+            return [{
+                replyElement: {
+                    replayMsgSeq: String(reserve.friendSeq ?? elem.srcMsg?.origSeqs?.[0] ?? 0),
+                    replayMsgId: String(reserve.messageId ?? 0),
+                    senderUin: String(elem?.srcMsg ?? 0)
+                },
+                elementType: ElementType.UNKNOWN,
+                elementId: '',
+            }, null];
+        }
+        return undefined;
+    };
 
     override toPreview(): string {
         return '[回复消息]';
@@ -197,6 +255,46 @@ export class PacketMsgFaceElement extends IPacketMsgElement<SendFaceElement> {
             }];
         }
     }
+
+    static override parseElement = (elem: NapProtoDecodeStructType<typeof Elem>): ParseElementFnR => {
+        if (elem.face?.index) {
+            return [{
+                faceElement: {
+                    faceIndex: elem.face.index,
+                    faceType: FaceType.Normal
+                },
+                elementType: ElementType.UNKNOWN,
+                elementId: '',
+            }, null];
+        }
+        if (elem?.commonElem?.serviceType === 37 && elem?.commonElem?.pbElem) {
+            const qface = new NapProtoMsg(QBigFaceExtra).decode(elem?.commonElem?.pbElem);
+            if (qface?.faceId) {
+                return [{
+                    faceElement: {
+                        faceIndex: qface.faceId,
+                        faceType: FaceType.Normal
+                    },
+                    elementType: ElementType.UNKNOWN,
+                    elementId: '',
+                }, null];
+            }
+        }
+        if (elem?.commonElem?.serviceType === 33 && elem?.commonElem?.pbElem) {
+            const qface = new NapProtoMsg(QSmallFaceExtra).decode(elem?.commonElem?.pbElem);
+            if (qface?.faceId) {
+                return [{
+                    faceElement: {
+                        faceIndex: qface.faceId,
+                        faceType: FaceType.Normal
+                    },
+                    elementType: ElementType.UNKNOWN,
+                    elementId: '',
+                }, null];
+            }
+        }
+        return undefined;
+    };
 
     override toPreview(): string {
         return '[表情]';
@@ -285,6 +383,60 @@ export class PacketMsgPicElement extends IPacketMsgElement<SendPicElement> {
             }
         }];
     }
+
+    static override parseElement = (elem: NapProtoDecodeStructType<typeof Elem>): ParseElementFnR => {
+        if (elem?.commonElem?.serviceType === 48 || [10, 20].includes(elem?.commonElem?.businessType ?? 0)) {
+            const extra = new NapProtoMsg(MsgInfo).decode(elem.commonElem!.pbElem!);
+            const msgInfoBody = extra.msgInfoBody[0];
+            const index = msgInfoBody?.index;
+            return [{
+                picElement: {
+                    fileSize: index?.info.fileSize ?? 0,
+                    picWidth: index?.info?.width ?? 0,
+                    picHeight: index?.info?.height ?? 0,
+                    fileName: index?.info?.fileHash ?? '',
+                    sourcePath: '',
+                    original: false,
+                    picType: PicType.NEWPIC_APNG,
+                    fileUuid: '',
+                    fileSubId: '',
+                    thumbFileSize: 0,
+                    summary: '[图片]',
+                    thumbPath: new Map(),
+                },
+                elementType: ElementType.UNKNOWN,
+                elementId: '',
+            }, elem];
+        }
+        if (elem?.notOnlineImage) {
+            const img = elem?.notOnlineImage; // url in originImageUrl
+            const preImg: MessageElement = {
+                picElement: {
+                    fileSize: img.fileLen ?? 0,
+                    picWidth: img.picWidth ?? 0,
+                    picHeight: img.picHeight ?? 0,
+                    fileName: Buffer.from(img.picMd5!).toString('hex') ?? '',
+                    sourcePath: '',
+                    original: false,
+                    picType: PicType.NEWPIC_APNG,
+                    fileUuid: '',
+                    fileSubId: '',
+                    thumbFileSize: 0,
+                    summary: '[图片]',
+                    thumbPath: new Map(),
+                },
+                elementType: ElementType.UNKNOWN,
+                elementId: '',
+            };
+            if (img.origUrl?.includes('&fileid=')) {
+                preImg.picElement!.originImageUrl = `https://multimedia.nt.qq.com.cn${img.origUrl}`;
+            } else {
+                preImg.picElement!.originImageUrl = `https://gchat.qpic.cn${img.origUrl}`;
+            }
+            return [preImg, elem];
+        }
+        return undefined;
+    };
 
     override toPreview(): string {
         return this.summary;
