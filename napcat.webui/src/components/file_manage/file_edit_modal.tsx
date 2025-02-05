@@ -81,10 +81,10 @@ export default function FileEditModal({
           </div>
         </ModalBody>
         <ModalFooter>
-          <Button color="danger" variant="flat" onPress={onClose}>
+          <Button color="primary" variant="flat" onPress={onClose}>
             取消
           </Button>
-          <Button color="danger" onPress={onSave}>
+          <Button color="primary" onPress={onSave}>
             保存
           </Button>
         </ModalFooter>

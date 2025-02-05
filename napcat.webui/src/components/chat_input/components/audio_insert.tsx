@@ -110,7 +110,7 @@ const AudioInsert = () => {
         <Tooltip content="发送音频">
           <div className="max-w-fit">
             <PopoverTrigger>
-              <Button color="danger" variant="flat" isIconOnly radius="full">
+              <Button color="primary" variant="flat" isIconOnly radius="full">
                 <IoMic className="text-xl" />
               </Button>
             </PopoverTrigger>
@@ -120,7 +120,7 @@ const AudioInsert = () => {
           <Tooltip content="上传音频">
             <Button
               className="text-lg"
-              color="danger"
+              color="primary"
               isIconOnly
               variant="flat"
               radius="full"
@@ -137,7 +137,7 @@ const AudioInsert = () => {
                 <PopoverTrigger tooltip="输入音频地址">
                   <Button
                     className="text-lg"
-                    color="danger"
+                    color="primary"
                     isIconOnly
                     variant="flat"
                     radius="full"
@@ -154,7 +154,7 @@ const AudioInsert = () => {
                 placeholder="请输入音频地址"
               />
               <Button
-                color="danger"
+                color="primary"
                 variant="flat"
                 isIconOnly
                 radius="full"
@@ -177,7 +177,7 @@ const AudioInsert = () => {
                 <PopoverTrigger>
                   <Button
                     className="text-lg"
-                    color="danger"
+                    color="primary"
                     isIconOnly
                     variant="flat"
                     radius="full"
@@ -190,7 +190,7 @@ const AudioInsert = () => {
             <PopoverContent className="flex-col gap-2 p-4">
               <div className="flex gap-2">
                 <Button
-                  color={isRecording ? 'danger' : 'danger'}
+                  color={isRecording ? 'primary' : 'primary'}
                   variant="flat"
                   onPress={isRecording ? stopRecording : startRecording}
                 >
@@ -198,7 +198,7 @@ const AudioInsert = () => {
                 </Button>
                 {showPreview && audioPreview && (
                   <Button
-                    color="danger"
+                    color="primary"
                     variant="flat"
                     onPress={handleShowPreview}
                   >
@@ -212,7 +212,7 @@ const AudioInsert = () => {
                     className={clsx(
                       'w-4 h-4 rounded-full',
                       isRecording
-                        ? 'animate-pulse bg-danger-400'
+                        ? 'animate-pulse bg-primary-400'
                         : 'bg-success-400'
                     )}
                   ></span>

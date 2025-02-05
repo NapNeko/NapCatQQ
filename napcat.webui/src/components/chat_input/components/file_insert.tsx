@@ -35,7 +35,7 @@ const FileInsert = () => {
         <Tooltip content="发送文件">
           <div className="max-w-fit">
             <PopoverTrigger>
-              <Button color="danger" variant="flat" isIconOnly radius="full">
+              <Button color="primary" variant="flat" isIconOnly radius="full">
                 <FaFolder className="text-lg" />
               </Button>
             </PopoverTrigger>
@@ -45,7 +45,7 @@ const FileInsert = () => {
           <Tooltip content="上传文件">
             <Button
               className="text-lg"
-              color="danger"
+              color="primary"
               isIconOnly
               variant="flat"
               radius="full"
@@ -62,7 +62,7 @@ const FileInsert = () => {
                 <PopoverTrigger tooltip="输入文件地址">
                   <Button
                     className="text-lg"
-                    color="danger"
+                    color="primary"
                     isIconOnly
                     variant="flat"
                     radius="full"
@@ -79,7 +79,7 @@ const FileInsert = () => {
                 placeholder="请输入文件地址"
               />
               <Button
-                color="danger"
+                color="primary"
                 variant="flat"
                 isIconOnly
                 radius="full"

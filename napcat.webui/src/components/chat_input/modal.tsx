@@ -15,7 +15,7 @@ export default function ChatInputModal() {
 
   return (
     <>
-      <Button onPress={onOpen} color="danger" radius="full" variant="flat">
+      <Button onPress={onOpen} color="primary" radius="full" variant="flat">
         构造聊天消息
       </Button>
       <Modal
@@ -36,7 +36,7 @@ export default function ChatInputModal() {
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button color="danger" onPress={onClose} variant="flat">
+                <Button color="primary" onPress={onClose} variant="flat">
                   关闭
                 </Button>
               </ModalFooter>

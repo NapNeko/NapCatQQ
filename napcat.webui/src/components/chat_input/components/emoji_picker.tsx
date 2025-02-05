@@ -55,7 +55,7 @@ const EmojiPicker = ({ onInsertEmoji, onOpenChange }: EmojiPickerProps) => {
         <Tooltip content="插入表情">
           <div className="max-w-fit">
             <PopoverTrigger>
-              <Button color="danger" variant="flat" isIconOnly radius="full">
+              <Button color="primary" variant="flat" isIconOnly radius="full">
                 <MdEmojiEmotions className="text-xl" />
               </Button>
             </PopoverTrigger>
@@ -65,7 +65,7 @@ const EmojiPicker = ({ onInsertEmoji, onOpenChange }: EmojiPickerProps) => {
           {visibleEmojis.map((emoji) => (
             <Button
               key={emoji.id}
-              color="danger"
+              color="primary"
               variant="flat"
               isIconOnly
               radius="full"

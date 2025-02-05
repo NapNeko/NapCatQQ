@@ -86,13 +86,13 @@ function DirectoryTree({
         onPress={handleClick}
         className="py-1 px-2 text-left justify-start min-w-0 min-h-0 h-auto text-sm rounded-md"
         size="sm"
-        color="danger"
+        color="primary"
         variant={variant}
         startContent={
           <div
             className={clsx(
               'rounded-md',
-              isSeleted ? 'bg-danger-600' : 'bg-danger-50'
+              isSeleted ? 'bg-primary-600' : 'bg-primary-50'
             )}
           >
             {expanded ? <IoRemove /> : <IoAdd />}
@@ -105,7 +105,7 @@ function DirectoryTree({
         <div>
           {loading ? (
             <div className="flex py-1 px-8">
-              <Spinner size="sm" color="danger" />
+              <Spinner size="sm" color="primary" />
             </div>
           ) : (
             dirs.map((dirName) => {
@@ -155,10 +155,10 @@ export default function MoveModal({
           <p className="text-sm text-default-500">移动项：{selectionInfo}</p>
         </ModalBody>
         <ModalFooter>
-          <Button color="danger" variant="flat" onPress={onClose}>
+          <Button color="primary" variant="flat" onPress={onClose}>
             取消
           </Button>
-          <Button color="danger" onPress={onMove}>
+          <Button color="primary" onPress={onMove}>
             确定
           </Button>
         </ModalFooter>

@@ -30,7 +30,7 @@ const OneBotDisplayResponse: React.FC<OneBotDisplayResponseProps> = ({
           <PopoverTrigger>
             <Button
               size="sm"
-              color="danger"
+              color="primary"
               variant="flat"
               radius="full"
               className="text-medium"

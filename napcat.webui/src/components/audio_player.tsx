@@ -231,7 +231,7 @@ export default function AudioPlayer(props: AudioPlayerProps) {
                 : 'top-3 -left-8 rounded-l-full bg-opacity-50 backdrop-blur-md'
             )}
             variant="solid"
-            color="danger"
+            color="primary"
             size="sm"
             onPress={() => setIsCollapsed(!isCollapsed)}
           >

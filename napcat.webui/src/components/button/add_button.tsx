@@ -33,7 +33,7 @@ const AddButton: React.FC<AddButtonProps> = (props) => {
     >
       <DropdownTrigger>
         <Button
-          color="danger"
+          color="primary"
           startContent={<IoAddCircleOutline className="text-2xl" />}
         >
           新建
