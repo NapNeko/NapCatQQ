@@ -74,6 +74,9 @@ export default function ImageNameButton({
             src={data}
             alt={name}
             className="w-8 h-8 flex-shrink-0"
+            classNames={{
+              wrapper: 'w-8 h-8 flex-shrink-0'
+            }}
             radius="sm"
           />
         )

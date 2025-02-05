@@ -82,7 +82,7 @@ export default function FileTable({
     setPreviewImages([])
     setPreviewIndex(0)
     setShowImage(false)
-  }, [files])
+  }, [currentPath])
 
   const onPreviewImage = (name: string, images: PreviewImage[]) => {
     const index = images.findIndex((image) => image.key === name)
