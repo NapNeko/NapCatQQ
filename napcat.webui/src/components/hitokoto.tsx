@@ -33,7 +33,7 @@ export default function Hitokoto() {
       <div className="relative">
         {loading && <PageLoading />}
         {error ? (
-          <div className="text-danger-400">一言加载失败：{error.message}</div>
+          <div className="text-primary-400">一言加载失败：{error.message}</div>
         ) : (
           <>
             <div>{data?.hitokoto}</div>
@@ -52,7 +52,7 @@ export default function Hitokoto() {
             isLoading={loading}
             isIconOnly
             radius="full"
-            color="danger"
+            color="primary"
             variant="flat"
           >
             <IoRefresh />

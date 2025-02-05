@@ -34,7 +34,7 @@ export default function HoverTiltedCard({
   rotateAmplitude = 14,
   showTooltip = false,
   overlayContent = (
-    <div className="text-center mt-6 px-4 py-0.5 shadow-lg rounded-full bg-danger-600 text-default-100 bg-opacity-80">
+    <div className="text-center mt-6 px-4 py-0.5 shadow-lg rounded-full bg-primary-600 text-default-100 bg-opacity-80">
       NapCat
     </div>
   ),

@@ -10,7 +10,7 @@ const DiceInsert = () => {
   return (
     <Tooltip content="发送骰子">
       <Button
-        color="danger"
+        color="primary"
         variant="flat"
         isIconOnly
         radius="full"

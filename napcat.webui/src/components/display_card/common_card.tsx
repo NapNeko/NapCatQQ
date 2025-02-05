@@ -78,7 +78,7 @@ const NetworkDisplayCard = <T extends keyof NetworkType>({
             {debug ? '关闭调试' : '开启调试'}
           </Button>
           <Button
-            color="danger"
+            color="primary"
             startContent={<MdDeleteForever />}
             onPress={handleDelete}
           >

@@ -55,7 +55,7 @@ const SystemStatusDisplay: React.FC<SystemStatusDisplayProps> = ({ data }) => {
   }
 
   return (
-    <Card className="bg-opacity-60 shadow-sm shadow-danger-50 dark:shadow-danger-100 col-span-1 lg:col-span-2 relative overflow-hidden">
+    <Card className="bg-opacity-60 shadow-sm shadow-primary-50 dark:shadow-primary-100 col-span-1 lg:col-span-2 relative overflow-hidden">
       <div className="absolute h-full right-0 top-0">
         <Image
           src={bkg}
@@ -69,7 +69,7 @@ const SystemStatusDisplay: React.FC<SystemStatusDisplayProps> = ({ data }) => {
       </div>
       <CardBody className="overflow-visible md:flex-row gap-4 items-center justify-stretch z-10">
         <div className="flex-1 w-full md:max-w-96">
-          <h2 className="text-lg font-semibold flex items-center gap-1 text-danger-400">
+          <h2 className="text-lg font-semibold flex items-center gap-1 text-primary-400">
             <GiCpu className="text-xl" />
             <span>CPU</span>
           </h2>
@@ -88,7 +88,7 @@ const SystemStatusDisplay: React.FC<SystemStatusDisplayProps> = ({ data }) => {
               unit="%"
             />
           </div>
-          <h2 className="text-lg font-semibold flex items-center gap-1 text-danger-400 mt-2">
+          <h2 className="text-lg font-semibold flex items-center gap-1 text-primary-400 mt-2">
             <BiSolidMemoryCard className="text-xl" />
             <span>内存</span>
           </h2>

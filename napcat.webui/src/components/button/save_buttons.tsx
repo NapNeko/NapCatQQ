@@ -27,7 +27,7 @@ const SaveButtons: React.FC<SaveButtonsProps> = ({
         取消更改
       </Button>
       <Button
-        color="danger"
+        color="primary"
         isLoading={isSubmitting}
         onPress={() => onSubmit()}
       >

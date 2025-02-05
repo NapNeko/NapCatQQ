@@ -79,7 +79,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }, [location.pathname])
   return (
     <div
-      className="h-screen relative flex bg-danger-50 dark:bg-black items-stretch"
+      className="h-screen relative flex bg-primary-50 dark:bg-black items-stretch"
       style={{
         backgroundImage: `url(${b64img})`,
         backgroundSize: 'cover'
@@ -99,9 +99,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <div
           className={clsx(
             'h-10 flex items-center font-bold text-xl backdrop-blur-lg rounded-full',
-            'dark:bg-background dark:shadow-danger-100',
+            'dark:bg-background dark:shadow-primary-100',
             'bg-background !bg-opacity-50',
-            'shadow-sm shadow-danger-50',
+            'shadow-sm shadow-primary-50',
             'z-30 m-2 mb-0 sticky top-2 left-0'
           )}
         >

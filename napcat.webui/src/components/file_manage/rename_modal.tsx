@@ -31,10 +31,10 @@ export default function RenameModal({
           <Input label="新名称" value={newFileName} onChange={onNameChange} />
         </ModalBody>
         <ModalFooter>
-          <Button color="danger" variant="flat" onPress={onClose}>
+          <Button color="primary" variant="flat" onPress={onClose}>
             取消
           </Button>
-          <Button color="danger" onPress={onRename}>
+          <Button color="primary" onPress={onRename}>
             确定
           </Button>
         </ModalFooter>

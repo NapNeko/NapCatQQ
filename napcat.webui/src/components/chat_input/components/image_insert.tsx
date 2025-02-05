@@ -23,7 +23,7 @@ const ImageInsert = ({ insertImage, onOpenChange }: ImageInsertProps) => {
         <Tooltip content="插入图片">
           <div className="max-w-fit">
             <PopoverTrigger>
-              <Button color="danger" variant="flat" isIconOnly radius="full">
+              <Button color="primary" variant="flat" isIconOnly radius="full">
                 <MdImage className="text-xl" />
               </Button>
             </PopoverTrigger>
@@ -33,7 +33,7 @@ const ImageInsert = ({ insertImage, onOpenChange }: ImageInsertProps) => {
           <Tooltip content="上传图片">
             <Button
               className="text-lg"
-              color="danger"
+              color="primary"
               isIconOnly
               variant="flat"
               radius="full"
@@ -50,7 +50,7 @@ const ImageInsert = ({ insertImage, onOpenChange }: ImageInsertProps) => {
                 <PopoverTrigger tooltip="输入图片地址">
                   <Button
                     className="text-lg"
-                    color="danger"
+                    color="primary"
                     isIconOnly
                     variant="flat"
                     radius="full"
@@ -67,7 +67,7 @@ const ImageInsert = ({ insertImage, onOpenChange }: ImageInsertProps) => {
                 placeholder="请输入图片地址"
               />
               <Button
-                color="danger"
+                color="primary"
                 variant="flat"
                 isIconOnly
                 radius="full"

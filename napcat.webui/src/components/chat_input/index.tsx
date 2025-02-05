@@ -190,7 +190,7 @@ const ChatInput = () => {
         <DiceInsert />
         <RPSInsert />
         <Button
-          color="danger"
+          color="primary"
           onPress={() => {
             const messages = getChatMessage()
             showStructuredMessage(messages)
