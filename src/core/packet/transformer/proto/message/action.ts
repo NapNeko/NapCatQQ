@@ -2,7 +2,7 @@ import { ProtoField, ScalarType } from '@napneko/nap-proto-core';
 import { PushMsgBody } from '@/core/packet/transformer/proto';
 
 export const LongMsgResult = {
-    action: ProtoField(2, () => LongMsgAction)
+    action: ProtoField(2, () => LongMsgAction, false, true)
 };
 
 export const LongMsgAction = {

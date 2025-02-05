@@ -4,12 +4,12 @@ import { OidbPacket, PacketTransformer } from '@/core/packet/transformer/base';
 import OidbBase from '@/core/packet/transformer/oidb/oidbBase';
 import { IndexNode } from '@/core/packet/transformer/proto';
 
-class DownloadImage extends PacketTransformer<typeof proto.NTV2RichMediaResp> {
+class DownloadGroupImage extends PacketTransformer<typeof proto.NTV2RichMediaResp> {
     constructor() {
         super();
     }
 
-    build(selfUid: string, node: NapProtoEncodeStructType<typeof IndexNode>): OidbPacket {
+    build(group_uin: number, node: NapProtoEncodeStructType<typeof IndexNode>): OidbPacket {
         const body = new NapProtoMsg(proto.NTV2RichMediaReq).encode({
             reqHead: {
                 common: {
@@ -19,11 +19,10 @@ class DownloadImage extends PacketTransformer<typeof proto.NTV2RichMediaResp> {
                 scene: {
                     requestType: 2,
                     businessType: 1,
-                    sceneType: 1,
-                    c2C: {
-                        accountType: 2,
-                        targetUid: selfUid
-                    },
+                    sceneType: 2,
+                    group: {
+                        groupUin: group_uin
+                    }
                 },
                 client: {
                     agentType: 2,
@@ -39,7 +38,7 @@ class DownloadImage extends PacketTransformer<typeof proto.NTV2RichMediaResp> {
                 }
             }
         });
-        return OidbBase.build(0x11C5, 200, body, true, false);
+        return OidbBase.build(0x11C4, 200, body, true, false);
     }
 
     parse(data: Buffer) {
@@ -48,4 +47,4 @@ class DownloadImage extends PacketTransformer<typeof proto.NTV2RichMediaResp> {
     }
 }
 
-export default new DownloadImage();
+export default new DownloadGroupImage();
