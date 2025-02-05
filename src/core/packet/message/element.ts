@@ -137,18 +137,9 @@ export class PacketMsgReplyElement extends IPacketMsgElement<SendReplyElement> {
                 pbReserve: {
                     messageId: this.messageId,
                 },
-                toUin: BigInt(0),
+                toUin: BigInt(this.targetUin),
+                type: 1,
             }
-        }, {
-            text: this.isGroupReply ? {
-                str: 'nya~',
-                pbReserve: new NapProtoMsg(MentionExtra).encode({
-                    type: this.targetUin === 0 ? 1 : 2,
-                    uin: 0,
-                    field5: 0,
-                    uid: String(this.targetUid),
-                }),
-            } : undefined,
         }];
     }
 

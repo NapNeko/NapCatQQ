@@ -332,7 +332,7 @@ export default function FileManagerPage() {
     <div className="p-4">
       <div className="mb-4 flex items-center gap-4 sticky top-14 z-10 bg-content1 py-1">
         <Button
-          color="danger"
+          color="primary"
           size="sm"
           isIconOnly
           variant="flat"
@@ -343,7 +343,7 @@ export default function FileManagerPage() {
         </Button>
 
         <Button
-          color="danger"
+          color="primary"
           size="sm"
           isIconOnly
           variant="flat"
@@ -354,7 +354,7 @@ export default function FileManagerPage() {
         </Button>
 
         <Button
-          color="danger"
+          color="primary"
           isLoading={loading}
           size="sm"
           isIconOnly
@@ -365,7 +365,7 @@ export default function FileManagerPage() {
           <MdRefresh />
         </Button>
         <Button
-          color="danger"
+          color="primary"
           size="sm"
           isIconOnly
           variant="flat"
@@ -379,7 +379,7 @@ export default function FileManagerPage() {
           selectedFiles === 'all') && (
           <>
             <Button
-              color="danger"
+              color="primary"
               size="sm"
               variant="flat"
               onPress={handleBatchDelete}
@@ -391,7 +391,7 @@ export default function FileManagerPage() {
               )
             </Button>
             <Button
-              color="danger"
+              color="primary"
               size="sm"
               variant="flat"
               onPress={() => {
@@ -406,7 +406,7 @@ export default function FileManagerPage() {
               )
             </Button>
             <Button
-              color="danger"
+              color="primary"
               size="sm"
               variant="flat"
               onPress={handleBatchDownload}

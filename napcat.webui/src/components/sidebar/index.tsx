@@ -63,7 +63,7 @@ const SideBar: React.FC<SideBarProps> = (props) => {
           <div className="mt-auto mb-10 md:mb-0">
             <Button
               className="w-full"
-              color="danger"
+              color="primary"
               radius="full"
               variant="light"
               onPress={toggleTheme}
@@ -75,7 +75,7 @@ const SideBar: React.FC<SideBarProps> = (props) => {
             </Button>
             <Button
               className="w-full mb-2"
-              color="danger"
+              color="primary"
               radius="full"
               variant="light"
               onPress={onRevokeAuth}

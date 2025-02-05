@@ -80,7 +80,7 @@ const MusicInsert = () => {
         <Tooltip content="发送音乐">
           <div className="max-w-fit">
             <PopoverTrigger>
-              <Button color="danger" variant="flat" isIconOnly radius="full">
+              <Button color="primary" variant="flat" isIconOnly radius="full">
                 <IoMusicalNotes className="text-xl" />
               </Button>
             </PopoverTrigger>
@@ -132,7 +132,7 @@ const MusicInsert = () => {
               <Button
                 fullWidth
                 size="lg"
-                color="danger"
+                color="primary"
                 variant="flat"
                 radius="full"
                 onPress={() => {
@@ -236,7 +236,7 @@ const MusicInsert = () => {
                 <Button
                   fullWidth
                   size="lg"
-                  color="danger"
+                  color="primary"
                   variant="flat"
                   radius="full"
                   type="submit"

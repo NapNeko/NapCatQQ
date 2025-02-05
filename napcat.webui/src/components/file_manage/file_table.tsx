@@ -116,7 +116,7 @@ export default function FileTable({
               isCompact
               showControls
               showShadow
-              color="danger"
+              color="primary"
               page={page}
               total={pages}
               onChange={(page) => setPage(page)}
@@ -195,7 +195,7 @@ export default function FileTable({
                   <ButtonGroup size="sm">
                     <Button
                       isIconOnly
-                      color="danger"
+                      color="primary"
                       variant="flat"
                       onPress={() => onRenameRequest(file.name)}
                     >
@@ -203,7 +203,7 @@ export default function FileTable({
                     </Button>
                     <Button
                       isIconOnly
-                      color="danger"
+                      color="primary"
                       variant="flat"
                       onPress={() => onMoveRequest(file.name)}
                     >
@@ -211,7 +211,7 @@ export default function FileTable({
                     </Button>
                     <Button
                       isIconOnly
-                      color="danger"
+                      color="primary"
                       variant="flat"
                       onPress={() => onCopyPath(file.name)}
                     >
@@ -219,7 +219,7 @@ export default function FileTable({
                     </Button>
                     <Button
                       isIconOnly
-                      color="danger"
+                      color="primary"
                       variant="flat"
                       onPress={() => onDownload(filePath)}
                     >
@@ -227,7 +227,7 @@ export default function FileTable({
                     </Button>
                     <Button
                       isIconOnly
-                      color="danger"
+                      color="primary"
                       variant="flat"
                       onPress={() => onDelete(filePath)}
                     >

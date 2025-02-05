@@ -10,7 +10,7 @@ function StatusTag({
   color
 }: {
   title: string
-  color: 'success' | 'danger' | 'warning'
+  color: 'success' | 'primary' | 'warning'
 }) {
   const textClassName = `text-${color} text-sm`
   const bgClassName = `bg-${color}`
@@ -27,7 +27,7 @@ export default function WSStatus({ state }: WSStatusProps) {
     return <StatusTag title="已连接" color="success" />
   }
   if (state === ReadyState.CLOSED) {
-    return <StatusTag title="已关闭" color="danger" />
+    return <StatusTag title="已关闭" color="primary" />
   }
   if (state === ReadyState.CONNECTING) {
     return <StatusTag title="连接中" color="warning" />

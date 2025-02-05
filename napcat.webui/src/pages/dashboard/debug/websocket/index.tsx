@@ -64,7 +64,7 @@ export default function WSDebug() {
               />
               <div className="flex-shrink-0 flex gap-2 col-span-2 md:col-span-1">
                 <Button
-                  color="danger"
+                  color="primary"
                   onPress={handleConnect}
                   size="lg"
                   radius="full"

@@ -28,7 +28,7 @@ import type {
 
 function displayData(data: number, loading: boolean, error?: Error) {
   if (error) {
-    return <MdError className="text-danger-400" />
+    return <MdError className="text-primary-400" />
   }
 
   if (loading) {
@@ -175,7 +175,7 @@ export default function NapCatRepoInfo() {
         className="group h-auto py-3"
         endContent={
           releaseError ? (
-            <MdError className="text-danger-400" />
+            <MdError className="text-primary-400" />
           ) : releaseLoading ? (
             <Spinner size="sm" />
           ) : (
@@ -229,7 +229,7 @@ export default function NapCatRepoInfo() {
           </span>
         }
         startContent={
-          <IconWrapper className="bg-danger/10 text-danger dark:text-danger-500">
+          <IconWrapper className="bg-primary/10 text-primary dark:text-primary-500">
             <BookIcon />
           </IconWrapper>
         }
