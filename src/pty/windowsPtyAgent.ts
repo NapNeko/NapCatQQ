@@ -14,6 +14,8 @@ import { ArgvOrCommandLine } from '@homebridge/node-pty-prebuilt-multiarch/src/t
 import { fork } from 'child_process';
 import { ConoutConnection } from './windowsConoutConnection';
 import { require_dlopen } from '.';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
 let conptyNative: IConptyNative;
 let winptyNative: IWinptyNative;
@@ -149,7 +151,7 @@ export class WindowsPtyAgent {
                 consoleProcessList.forEach((pid: number) => {
                     try {
                         process.kill(pid);
-                    } catch{
+                    } catch {
                         // Ignore if process cannot be found (kill ESRCH error)
                     }
                 });
@@ -176,8 +178,9 @@ export class WindowsPtyAgent {
     }
 
     private _getConsoleProcessList(): Promise<number[]> {
+        const import__dirname = dirname(fileURLToPath(import.meta.url));
         return new Promise<number[]>(resolve => {
-            const agent = fork(path.join(__dirname, 'conpty_console_list_agent'), [this._innerPid.toString()]);
+            const agent = fork(path.join(import__dirname, 'conpty_console_list_agent'), [this._innerPid.toString()]);
             agent.on('message', message => {
                 clearTimeout(timeout);
                 // @ts-expect-error no need to check if it is null
