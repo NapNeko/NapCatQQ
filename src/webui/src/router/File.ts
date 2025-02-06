@@ -13,7 +13,9 @@ import {
     BatchMoveHandler,
     DownloadHandler,
     BatchDownloadHandler, // 新增下载处理方法
-    UploadHandler, // 添加上传处理器
+    UploadHandler,
+    UploadWebUIFontHandler,
+    DeleteWebUIFontHandler, // 添加上传处理器
 } from '../api/File';
 
 const router = Router();
@@ -37,5 +39,8 @@ router.post('/move', MoveHandler);
 router.post('/batchMove', BatchMoveHandler);
 router.post('/download', DownloadHandler);
 router.post('/batchDownload', BatchDownloadHandler);
-router.post('/upload', UploadHandler); // 添加上传处理路由
+router.post('/upload', UploadHandler);
+
+router.post('/font/upload/webui', UploadWebUIFontHandler);
+router.post('/font/delete/webui', DeleteWebUIFontHandler);
 export { router as FileRouter };

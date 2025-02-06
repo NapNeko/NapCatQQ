@@ -10,9 +10,10 @@ import { WebUiConfigWrapper } from '@webapi/helper/config';
 import { ALLRouter } from '@webapi/router';
 import { cors } from '@webapi/middleware/cors';
 import { createUrl } from '@webapi/utils/url';
-import { sendSuccess } from '@webapi/utils/response';
+import { sendError, sendSuccess } from '@webapi/utils/response';
 import { join } from 'node:path';
 import { terminalManager } from '@webapi/terminal/terminal_manager';
+import multer from 'multer'; // 新增：引入multer用于错误捕获
 
 // 实例化Express
 const app = express();
@@ -42,10 +43,22 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
     // CORS中间件
     // TODO:
     app.use(cors);
+
+    // 如果是webui字体文件，挂载字体文件
+    app.use('/webui/fonts/AaCute.woff', async (_req, res, next) => {
+        const isFontExist = await WebUiConfigWrapper.CheckWebUIFontExist();
+        console.log(isFontExist, 'isFontExist');
+        if (isFontExist) {
+            res.sendFile(WebUiConfigWrapper.GetWebUIFontPath());
+        } else {
+            next();
+        }
+    });
+
     // ------------中间件结束------------
 
     // ------------挂载路由------------
-    // 挂载静态路由（前端），路径为 [/前缀]/webui
+    // 挂载静态路由（前端），路径为 /webui
     app.use('/webui', express.static(pathWrapper.staticPath));
     // 初始化WebSocket服务器
     server.on('upgrade', (request, socket, head) => {
@@ -64,7 +77,19 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
     app.all('/', (_req, res) => {
         sendSuccess(res, null, 'NapCat WebAPI is now running!');
     });
-    // ------------路由挂载结束------------
+
+    // 错误处理中间件，捕获multer的错误
+    app.use((err: Error, _: express.Request, res: express.Response, next: express.NextFunction) => {
+        if (err instanceof multer.MulterError) {
+            return sendError(res, err.message, true);
+        }
+        next(err);
+    });
+
+    // 全局错误处理中间件（非multer错误）
+    app.use((_: Error, __: express.Request, res: express.Response, ___: express.NextFunction) => {
+        sendError(res, 'An unknown error occurred.', true);
+    });
 
     // ------------启动服务------------
     server.listen(config.port, config.host, async () => {

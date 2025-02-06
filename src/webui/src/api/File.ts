@@ -1,4 +1,4 @@
-import type { RequestHandler, Request } from 'express';
+import type { RequestHandler } from 'express';
 import { sendError, sendSuccess } from '../utils/response';
 import fsProm from 'fs/promises';
 import fs from 'fs';
@@ -7,7 +7,9 @@ import os from 'os';
 import compressing from 'compressing';
 import { PassThrough } from 'stream';
 import multer from 'multer';
-import { randomUUID } from 'crypto';
+import { WebUiConfigWrapper } from '../helper/config';
+import webUIFontUploader from '../uploader/webui_font';
+import diskUploader from '../uploader/disk';
 
 const isWindows = os.platform() === 'win32';
 
@@ -268,11 +270,11 @@ export const BatchMoveHandler: RequestHandler = async (req, res) => {
 // 新增：文件下载处理方法（注意流式传输，不将整个文件读入内存）
 export const DownloadHandler: RequestHandler = async (req, res) => {
     try {
-        const filePath = normalizePath( req.query[ 'path' ] as string );
+        const filePath = normalizePath(req.query['path'] as string);
         if (!filePath) {
-            return sendError( res, '参数错误' );
+            return sendError(res, '参数错误');
         }
-        
+
         const stat = await fsProm.stat(filePath);
 
         res.setHeader('Content-Type', 'application/octet-stream');
@@ -327,74 +329,71 @@ export const BatchDownloadHandler: RequestHandler = async (req, res) => {
     }
 };
 
-// 修改：使用 Buffer 转码文件名，解决文件上传时乱码问题
-const decodeFileName = (fileName: string): string => {
+// 修改上传处理方法
+export const UploadHandler: RequestHandler = async (req, res) => {
     try {
-        return Buffer.from(fileName, 'binary').toString('utf8');
-    } catch {
-        return fileName;
+        await diskUploader(req, res);
+        return sendSuccess(res, true, '文件上传成功', true);
+    } catch (error) {
+        let errorMessage = '文件上传失败';
+
+        if (error instanceof multer.MulterError) {
+            switch (error.code) {
+                case 'LIMIT_FILE_SIZE':
+                    errorMessage = '文件大小超过限制（40MB）';
+                    break;
+                case 'LIMIT_UNEXPECTED_FILE':
+                    errorMessage = '无效的文件上传字段';
+                    break;
+                default:
+                    errorMessage = `上传错误: ${error.message}`;
+            }
+        } else if (error instanceof Error) {
+            errorMessage = error.message;
+        }
+        return sendError(res, errorMessage, true);
     }
 };
 
-// 修改上传处理方法
-export const UploadHandler: RequestHandler = (req, res) => {
-    const uploadPath = (req.query['path'] || '') as string;
+// 上传WebUI字体文件处理方法
+export const UploadWebUIFontHandler: RequestHandler = async (req, res) => {
+    try {
+        await webUIFontUploader(req, res);
+        return sendSuccess(res, true, '字体文件上传成功', true);
+    } catch (error) {
+        let errorMessage = '字体文件上传失败';
 
-    const storage = multer.diskStorage({
-        destination: (
-            _: Request,
-            file: Express.Multer.File,
-            cb: (error: Error | null, destination: string) => void
-        ) => {
-            try {
-                const decodedName = decodeFileName(file.originalname);
-
-                if (!uploadPath) {
-                    return cb(new Error('上传路径不能为空'), '');
-                }
-
-                if (isWindows && uploadPath === '\\') {
-                    return cb(new Error('根目录不允许上传文件'), '');
-                }
-
-                // 处理文件夹上传的情况
-                if (decodedName.includes('/') || decodedName.includes('\\')) {
-                    const fullPath = path.join(uploadPath, path.dirname(decodedName));
-                    fs.mkdirSync(fullPath, { recursive: true });
-                    cb(null, fullPath);
-                } else {
-                    cb(null, uploadPath);
-                }
-            } catch (error) {
-                cb(error as Error, '');
+        if (error instanceof multer.MulterError) {
+            switch (error.code) {
+                case 'LIMIT_FILE_SIZE':
+                    errorMessage = '字体文件大小超过限制（40MB）';
+                    break;
+                case 'LIMIT_UNEXPECTED_FILE':
+                    errorMessage = '无效的文件上传字段';
+                    break;
+                default:
+                    errorMessage = `上传错误: ${error.message}`;
             }
-        },
-        filename: (_: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
-            try {
-                const decodedName = decodeFileName(file.originalname);
-                const fileName = path.basename(decodedName);
-
-                // 检查文件是否存在
-                const fullPath = path.join(uploadPath, decodedName);
-                if (fs.existsSync(fullPath)) {
-                    const ext = path.extname(fileName);
-                    const name = path.basename(fileName, ext);
-                    cb(null, `${name}-${randomUUID()}${ext}`);
-                } else {
-                    cb(null, fileName);
-                }
-            } catch (error) {
-                cb(error as Error, '');
-            }
-        },
-    });
-
-    const upload = multer({ storage }).array('files');
-
-    upload(req, res, (err: any) => {
-        if (err) {
-            return sendError(res, err.message || '文件上传失败');
+        } else if (error instanceof Error) {
+            errorMessage = error.message;
         }
+        return sendError(res, errorMessage, true);
+    }
+};
+
+// 删除WebUI字体文件处理方法
+export const DeleteWebUIFontHandler: RequestHandler = async (_req, res) => {
+    try {
+        const fontPath = WebUiConfigWrapper.GetWebUIFontPath();
+        const exists = await WebUiConfigWrapper.CheckWebUIFontExist();
+
+        if (!exists) {
+            return sendSuccess(res, true);
+        }
+
+        await fsProm.unlink(fontPath);
         return sendSuccess(res, true);
-    });
+    } catch (error) {
+        return sendError(res, '删除字体文件失败');
+    }
 };
