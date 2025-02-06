@@ -23,6 +23,9 @@ const router = Router();
 const apiLimiter = rateLimit({
     windowMs: 1 * 60 * 1000, // 1分钟内
     max: 60, // 最大60个请求
+    validate: {
+        xForwardedForHeader: false,
+    },
 });
 
 router.use(apiLimiter);
