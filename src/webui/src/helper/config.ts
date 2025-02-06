@@ -203,4 +203,32 @@ export class WebUiConfigWrapper {
         }
         return '';
     }
+
+    // 获取字体文件夹内的字体列表
+    public static async GetFontList(): Promise<string[]> {
+        const fontsPath = resolve(webUiPathWrapper.configPath, './fonts');
+        if (
+            await fs
+                .access(fontsPath, constants.F_OK)
+                .then(() => true)
+                .catch(() => false)
+        ) {
+            return (await fs.readdir(fontsPath)).filter((file) => file.endsWith('.ttf'));
+        }
+        return [];
+    }
+
+    // 判断字体是否存在（webui.woff）
+    public static async CheckWebUIFontExist(): Promise<boolean> {
+        const fontsPath = resolve(webUiPathWrapper.configPath, './fonts');
+        return await fs
+            .access(resolve(fontsPath, './webui.woff'), constants.F_OK)
+            .then(() => true)
+            .catch(() => false);
+    }
+
+    // 获取webui字体文件路径
+    public static GetWebUIFontPath(): string {
+        return resolve(webUiPathWrapper.configPath, './fonts/webui.woff');
+    }
 }

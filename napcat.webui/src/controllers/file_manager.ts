@@ -196,4 +196,26 @@ export default class FileManager {
     )
     return data.data
   }
+
+  public static async uploadWebUIFont(file: File) {
+    const formData = new FormData()
+    formData.append('file', file)
+    const { data } = await serverRequest.post<ServerResponse<boolean>>(
+      '/File/font/upload/webui',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+    )
+    return data.data
+  }
+
+  public static async deleteWebUIFont() {
+    const { data } = await serverRequest.post<ServerResponse<boolean>>(
+      '/File/font/delete/webui'
+    )
+    return data.data
+  }
 }

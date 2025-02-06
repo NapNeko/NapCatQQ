@@ -7,11 +7,13 @@ import toast from 'react-hot-toast'
 import key from '@/const/key'
 
 import SaveButtons from '@/components/button/save_buttons'
+import FileInput from '@/components/input/file_input'
 import ImageInput from '@/components/input/image_input'
 
 import useMusic from '@/hooks/use-music'
 
 import { siteConfig } from '@/config/site'
+import FileManager from '@/controllers/file_manager'
 
 const WebUIConfigCard = () => {
   const {
@@ -59,17 +61,47 @@ const WebUIConfigCard = () => {
   return (
     <>
       <title>WebUI配置 - NapCat WebUI</title>
-      <Controller
-        control={control}
-        name="musicListID"
-        render={({ field }) => (
-          <Input
-            {...field}
-            label="网易云音乐歌单ID（网页内音乐播放器）"
-            placeholder="请输入歌单ID"
+      <div className="flex flex-col gap-2">
+        <div className="flex-shrink-0 w-full">WebUI字体</div>
+        <div className="text-sm text-default-400">
+          此项不需要手动保存，上传成功后需清空网页缓存并刷新
+          <FileInput
+            label="中文字体"
+            onChange={async (file) => {
+              try {
+                await FileManager.uploadWebUIFont(file)
+                toast.success('上传成功')
+                setTimeout(() => {
+                  window.location.reload()
+                }, 1000)
+              } catch (error) {
+                toast.error('上传失败: ' + (error as Error).message)
+              }
+            }}
+            onDelete={async () => {
+              try {
+                await FileManager.deleteWebUIFont()
+              } catch (error) {
+                toast.error('删除失败: ' + (error as Error).message)
+              }
+            }}
           />
-        )}
-      />
+        </div>
+      </div>
+      <div className="flex flex-col gap-2">
+        <div className="flex-shrink-0 w-full">WebUI音乐播放器</div>
+        <Controller
+          control={control}
+          name="musicListID"
+          render={({ field }) => (
+            <Input
+              {...field}
+              label="网易云音乐歌单ID（网页内音乐播放器）"
+              placeholder="请输入歌单ID"
+            />
+          )}
+        />
+      </div>
       <div className="flex flex-col gap-2">
         <div className="flex-shrink-0 w-full">背景图</div>
         <Controller
