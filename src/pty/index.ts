@@ -27,8 +27,3 @@ export function require_dlopen(modulename: string) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return module.exports as any;
 }
-/**
- * Expose the native API when not Windows, note that this is not public API and
- * could be removed at any time.
- */
-export const native = (process.platform !== 'win32' ? require_dlopen('./pty/' + process.platform + '.' + process.arch + '/pty.node') : null);
