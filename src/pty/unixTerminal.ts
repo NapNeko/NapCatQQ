@@ -13,12 +13,13 @@ import { IProcessEnv, IPtyForkOptions, IPtyOpenOptions } from '@homebridge/node-
 import { ArgvOrCommandLine } from '@homebridge/node-pty-prebuilt-multiarch/src/types';
 import { assign } from '@homebridge/node-pty-prebuilt-multiarch/src/utils';
 import { pty_loader } from './prebuild-loader';
+import { fileURLToPath } from 'url';
 export const pty = pty_loader();
 
 let helperPath: string;
 helperPath = '../build/Release/spawn-helper';
-
-helperPath = path.resolve(__dirname, helperPath);
+const import__dirname = path.dirname(fileURLToPath(import.meta.url));
+helperPath = path.resolve(import__dirname, helperPath);
 helperPath = helperPath.replace('app.asar', 'app.asar.unpacked');
 helperPath = helperPath.replace('node_modules.asar', 'node_modules.asar.unpacked');
 
