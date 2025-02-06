@@ -47,7 +47,6 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
     // 如果是webui字体文件，挂载字体文件
     app.use('/webui/fonts/AaCute.woff', async (_req, res, next) => {
         const isFontExist = await WebUiConfigWrapper.CheckWebUIFontExist();
-        console.log(isFontExist, 'isFontExist');
         if (isFontExist) {
             res.sendFile(WebUiConfigWrapper.GetWebUIFontPath());
         } else {

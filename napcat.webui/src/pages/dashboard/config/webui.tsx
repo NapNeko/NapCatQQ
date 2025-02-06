@@ -81,6 +81,10 @@ const WebUIConfigCard = () => {
             onDelete={async () => {
               try {
                 await FileManager.deleteWebUIFont()
+                toast.success('删除成功')
+                setTimeout(() => {
+                  window.location.reload()
+                }, 1000)
               } catch (error) {
                 toast.error('删除失败: ' + (error as Error).message)
               }
