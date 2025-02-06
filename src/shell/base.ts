@@ -223,7 +223,7 @@ async function handleLogin(
                 logger.log(`可用于快速登录的 QQ：\n${historyLoginList
                     .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
                     .join('\n')
-                }`);
+                    }`);
             }
             loginService.getQRCodePicture();
         }
@@ -314,7 +314,15 @@ export async function NCoreInitShell() {
     await initializeSession(session, sessionConfig);
 
     const accountDataPath = path.resolve(dataPath, './NapCat/data');
-    fs.mkdirSync(dataPath, { recursive: true });
+    //判断dataPath是否为根目录 或者 D:/ 之类的盘目录
+    if (dataPath !== '/' && /^[a-zA-Z]:\\$/.test(dataPath) === false) {
+        try {
+            fs.mkdirSync(accountDataPath, { recursive: true });
+        } catch (error) {
+            logger.logError('创建accountDataPath失败', error);
+        }
+    }
+
     logger.logDebug('本账号数据/缓存目录：', accountDataPath);
 
     await new NapCatShell(
