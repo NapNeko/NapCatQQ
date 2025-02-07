@@ -294,6 +294,18 @@ export async function NCoreInitShell() {
 
     const dataTimestape = new Date().getTime().toString();
     o3Service.reportAmgomWeather('login', 'a1', [dataTimestape, '0', '0']);
+    if (process.env['NAPCAT_PROXY_PORT']) {
+        session.getMSFService().setNetworkProxy({
+            userName: '',
+            userPwd: '',
+            address: process.env['NAPCAT_PROXY_ADDRESS'] || '127.0.0.1',
+            port: +process.env['NAPCAT_PROXY_PORT'],
+            proxyType: 2,
+            domain: '',
+            isSocket: true
+        });
+        logger.logWarn('已设置代理', process.env['NAPCAT_PROXY_ADDRESS'], process.env['NAPCAT_PROXY_PORT']);
+    }
     const selfInfo = await handleLogin(loginService, logger, pathWrapper, quickLoginUin, historyLoginList);
     const amgomDataPiece = 'eb1fd6ac257461580dc7438eb099f23aae04ca679f4d88f53072dc56e3bb1129';
     o3Service.setAmgomDataPiece(basicInfoWrapper.QQVersionAppid, new Uint8Array(Buffer.from(amgomDataPiece, 'hex')));
