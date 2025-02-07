@@ -11,7 +11,7 @@ export class NodeIKernelSessionListener {
 
     }
 
-    onOpentelemetryInit(args: unknown): any {
+    onOpentelemetryInit(info: { is_init: boolean, is_report: boolean }): any {
 
     }
 

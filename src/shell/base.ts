@@ -236,11 +236,11 @@ async function initializeSession(
 ) {
     return new Promise<void>((resolve, reject) => {
         const sessionListener = new NodeIKernelSessionListener();
-        sessionListener.onSessionInitComplete = (r: unknown) => {
-            if (r === 0) {
+        sessionListener.onOpentelemetryInit = (info) => {
+            if (info.is_init) {
                 resolve();
             } else {
-                reject(new Error('登录异常' + r?.toString()));
+                reject(new Error('opentelemetry init failed'));
             }
         };
         session.init(
