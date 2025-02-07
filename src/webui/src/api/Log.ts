@@ -3,7 +3,8 @@ import { sendError, sendSuccess } from '../utils/response';
 import { WebUiConfigWrapper } from '../helper/config';
 import { logSubscription } from '@/common/log';
 import { terminalManager } from '../terminal/terminal_manager';
-
+// 判断是否是 macos
+const isMacOS = process.platform === 'darwin';
 // 日志记录
 export const LogHandler: RequestHandler = async (req, res) => {
     const filename = req.query['id'];
@@ -43,6 +44,9 @@ export const LogRealTimeHandler: RequestHandler = async (req, res) => {
 
 // 终端相关处理器
 export const CreateTerminalHandler: RequestHandler = async (req, res) => {
+    if (isMacOS) {
+        return sendError(res, 'MacOS不支持终端');
+    }
     try {
         const { cols, rows } = req.body;
         const { id } = terminalManager.createTerminal(cols, rows);

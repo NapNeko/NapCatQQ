@@ -9,14 +9,6 @@ export interface Log {
   message: string
 }
 
-export interface TerminalSession {
-  id: string
-}
-
-export interface TerminalInfo {
-  id: string
-}
-
 export default class WebUIManager {
   public static async checkWebUiLogined() {
     const { data } =
@@ -36,6 +28,13 @@ export default class WebUIManager {
     const { data } = await serverRequest.post<ServerResponse<boolean>>(
       '/auth/update_token',
       { oldToken, newToken }
+    )
+    return data.data
+  }
+
+  public static async checkUsingDefaultToken() {
+    const { data } = await serverRequest.get<ServerResponse<boolean>>(
+      '/auth/check_using_default_token'
     )
     return data.data
   }

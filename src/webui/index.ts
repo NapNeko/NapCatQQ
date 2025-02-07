@@ -10,7 +10,7 @@ import { WebUiConfigWrapper } from '@webapi/helper/config';
 import { ALLRouter } from '@webapi/router';
 import { cors } from '@webapi/middleware/cors';
 import { createUrl } from '@webapi/utils/url';
-import { sendError, sendSuccess } from '@webapi/utils/response';
+import { sendError } from '@webapi/utils/response';
 import { join } from 'node:path';
 import { terminalManager } from '@webapi/terminal/terminal_manager';
 import multer from 'multer'; // 新增：引入multer用于错误捕获
@@ -112,7 +112,9 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
                 `[NapCat] [WebUi] WebUi User Panel Url: ${createUrl(host, port.toString(), '/webui', searchParams)}`
             );
         }
-        logger.log(`[NapCat] [WebUi] WebUi Local Panel Url: ${createUrl('127.0.0.1', port.toString(), '/webui', searchParams)}`);
+        logger.log(
+            `[NapCat] [WebUi] WebUi Local Panel Url: ${createUrl('127.0.0.1', port.toString(), '/webui', searchParams)}`
+        );
     });
     // ------------Over！------------
 }

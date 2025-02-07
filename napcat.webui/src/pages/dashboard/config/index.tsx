@@ -1,6 +1,7 @@
 import { Card, CardBody } from '@heroui/card'
 import { Tab, Tabs } from '@heroui/tabs'
 import { useMediaQuery } from 'react-responsive'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import ChangePasswordCard from './change_password'
 import OneBotConfigCard from './onebot'
@@ -22,6 +23,11 @@ const ConfingPageItem: React.FC<ConfigPageProps> = ({ children }) => {
 
 export default function ConfigPage() {
   const isMediumUp = useMediaQuery({ minWidth: 768 })
+  const navigate = useNavigate()
+  const search = useSearchParams({
+    tab: 'onebot'
+  })[0]
+  const tab = search.get('tab') ?? 'onebot'
 
   return (
     <section className="w-[1000px] max-w-full md:mx-auto gap-4 py-8 px-2 md:py-10">
@@ -30,6 +36,10 @@ export default function ConfigPage() {
         fullWidth
         className="w-full"
         isVertical={isMediumUp}
+        selectedKey={tab}
+        onSelectionChange={(key) => {
+          navigate(`/config?tab=${key}`)
+        }}
         classNames={{
           tabList: 'sticky flex top-14 bg-opacity-50 backdrop-blur-sm',
           panel: 'w-full relative',
