@@ -26,12 +26,25 @@ const server = createServer(app);
  */
 export let WebUiConfig: WebUiConfigWrapper;
 export let webUiPathWrapper: NapCatPathWrapper;
+const MAX_PORT_TRY = 100;
+import * as net from 'node:net';
+
+export async function InitPort(parsedConfig: WebUiConfigType): Promise<[string, number, string]> {
+    try {
+        await tryUseHost(parsedConfig.host);
+        const port = await tryUsePort(parsedConfig.port, parsedConfig.host);
+        return [parsedConfig.host, port, parsedConfig.token];
+    } catch (error) {
+        console.log('host或port不可用', error);
+        return ['', 0, ''];
+    }
+}
 
 export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapper) {
     webUiPathWrapper = pathWrapper;
     WebUiConfig = new WebUiConfigWrapper();
-    const config = await WebUiConfig.GetWebUIConfig();
-    if (config.port == 0) {
+    const [host, port, token] = await InitPort(await WebUiConfig.GetWebUIConfig());
+    if (port == 0) {
         logger.log('[NapCat] [WebUi] Current WebUi is not run.');
         return;
     }
@@ -74,7 +87,7 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
 
     // 初始服务（先放个首页）
     app.all('/', (_req, res) => {
-        sendSuccess(res, null, 'NapCat WebAPI is now running!');
+        res.status(301).header('Location', '/webui').send();
     });
 
     // 错误处理中间件，捕获multer的错误
@@ -91,16 +104,72 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
     });
 
     // ------------启动服务------------
-    server.listen(config.port, config.host, async () => {
+    server.listen(port, host, async () => {
         // 启动后打印出相关地址
-        const port = config.port.toString(),
-            searchParams = { token: config.token };
-        if (config.host !== '' && config.host !== '0.0.0.0') {
+        let searchParams = { token: token };
+        if (host !== '' && host !== '0.0.0.0') {
             logger.log(
-                `[NapCat] [WebUi] WebUi User Panel Url: ${createUrl(config.host, port, '/webui', searchParams)}`
+                `[NapCat] [WebUi] WebUi User Panel Url: ${createUrl(host, port.toString(), '/webui', searchParams)}`
             );
         }
-        logger.log(`[NapCat] [WebUi] WebUi Local Panel Url: ${createUrl('127.0.0.1', port, '/webui', searchParams)}`);
+        logger.log(`[NapCat] [WebUi] WebUi Local Panel Url: ${createUrl('127.0.0.1', port.toString(), '/webui', searchParams)}`);
     });
     // ------------Over！------------
+}
+
+async function tryUseHost(host: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        try {
+            const server = net.createServer();
+            server.on('listening', () => {
+                server.close();
+                resolve(host);
+            });
+
+            server.on('error', (err: any) => {
+                if (err.code === 'EADDRNOTAVAIL') {
+                    reject(new Error('主机地址验证失败，可能为非本机地址'));
+                } else {
+                    reject(new Error(`遇到错误: ${err.code}`));
+                }
+            });
+
+            // 尝试监听 让系统随机分配一个端口
+            server.listen(0, host);
+        } catch (error) {
+            // 这里捕获到的错误应该是启动服务器时的同步错误
+            reject(new Error(`服务器启动时发生错误: ${error}`));
+        }
+    });
+}
+
+async function tryUsePort(port: number, host: string, tryCount: number = 0): Promise<number> {
+    return new Promise((resolve, reject) => {
+        try {
+            const server = net.createServer();
+            server.on('listening', () => {
+                server.close();
+                resolve(port);
+            });
+
+            server.on('error', (err: any) => {
+                if (err.code === 'EADDRINUSE') {
+                    if (tryCount < MAX_PORT_TRY) {
+                        // 使用循环代替递归
+                        resolve(tryUsePort(port + 1, host, tryCount + 1));
+                    } else {
+                        reject(new Error(`端口尝试失败，达到最大尝试次数: ${MAX_PORT_TRY}`));
+                    }
+                } else {
+                    reject(new Error(`遇到错误: ${err.code}`));
+                }
+            });
+
+            // 尝试监听端口
+            server.listen(port, host);
+        } catch (error) {
+            // 这里捕获到的错误应该是启动服务器时的同步错误
+            reject(new Error(`服务器启动时发生错误: ${error}`));
+        }
+    });
 }
