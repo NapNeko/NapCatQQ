@@ -7,6 +7,15 @@ import { WebUiDataRuntime } from '@webapi/helper/Data';
 import { sendSuccess, sendError } from '@webapi/utils/response';
 import { isEmpty } from '@webapi/utils/check';
 
+// 检查是否使用默认Token
+export const CheckDefaultTokenHandler: RequestHandler = async (_, res) => {
+    const webuiToken = await WebUiConfig.GetWebUIConfig();
+    if (webuiToken.token === 'napcat') {
+        return sendSuccess(res, true);
+    }
+    return sendSuccess(res, false);
+};
+
 // 登录
 export const LoginHandler: RequestHandler = async (req, res) => {
     // 获取WebUI配置
@@ -93,7 +102,7 @@ export const UpdateTokenHandler: RequestHandler = async (req, res) => {
     try {
         // 注销当前的Token
         if (authorization) {
-            const CredentialBase64: string = authorization.split(' ')[1];
+            const CredentialBase64: string = authorization.split(' ')[1] as string;
             const Credential = JSON.parse(Buffer.from(CredentialBase64, 'base64').toString());
             AuthHelper.revokeCredential(Credential);
         }
