@@ -4,6 +4,7 @@ import { useMediaQuery } from 'react-responsive'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import ChangePasswordCard from './change_password'
+import LoginConfigCard from './login'
 import OneBotConfigCard from './onebot'
 import WebUIConfigCard from './webui'
 
@@ -58,6 +59,11 @@ export default function ConfigPage() {
           </ConfingPageItem>
         </Tab>
 
+        <Tab title="登录配置" key="login">
+          <ConfingPageItem>
+            <LoginConfigCard />
+          </ConfingPageItem>
+        </Tab>
         <Tab title="修改密码" key="token">
           <ConfingPageItem>
             <ChangePasswordCard />
