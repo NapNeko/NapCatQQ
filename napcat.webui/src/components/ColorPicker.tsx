@@ -6,32 +6,28 @@ import { ColorResult, SketchPicker } from 'react-color'
 
 interface ColorPickerProps {
   color: string
-  onChange: (color: string) => void
+  onChange: (color: ColorResult) => void
 }
 
 const ColorPicker: React.FC<ColorPickerProps> = ({ color, onChange }) => {
   const handleChange = (colorResult: ColorResult) => {
-    const hsl = colorResult.hsl
-    const color = `${hsl.h} ${hsl.s}% ${hsl.l}%`
-    onChange(color)
+    onChange(colorResult)
   }
 
   return (
-    <Popover>
+    <Popover triggerScaleOnOpen={false}>
       <PopoverTrigger>
         <div
-          style={{
-            background: color,
-            width: 36,
-            height: 14,
-            borderRadius: 2,
-            cursor: 'pointer',
-            border: '1px solid #ddd'
-          }}
+          className="w-36 h-8 rounded-md cursor-pointer border border-content4"
+          style={{ background: color }}
         />
       </PopoverTrigger>
       <PopoverContent>
-        <SketchPicker color={color} onChange={handleChange} />
+        <SketchPicker
+          color={color}
+          onChange={handleChange}
+          className="!bg-transparent !shadow-none"
+        />
       </PopoverContent>
     </Popover>
   )

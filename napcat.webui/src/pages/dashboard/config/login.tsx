@@ -1,6 +1,6 @@
 import { Input } from '@heroui/input'
 import { useRequest } from 'ahooks'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 
@@ -16,7 +16,6 @@ const LoginConfigCard = () => {
     error: quickLoginError,
     refreshAsync: refreshQuickLogin
   } = useRequest(QQManager.getQuickLoginQQ)
-  const [loading, setLoading] = useState(false)
   const {
     control,
     handleSubmit: handleOnebotSubmit,
@@ -36,27 +35,21 @@ const LoginConfigCard = () => {
 
   const onSubmit = handleOnebotSubmit((data) => {
     try {
-      setLoading(true)
       QQManager.setQuickLoginQQ(data.quickLoginQQ)
       toast.success('保存成功')
     } catch (error) {
       const msg = (error as Error).message
       toast.error(`保存失败: ${msg}`)
-    } finally {
-      setLoading(false)
     }
   })
 
   const onRefresh = async () => {
     try {
-      setLoading(true)
       await refreshQuickLogin()
       toast.success('刷新成功')
     } catch (error) {
       const msg = (error as Error).message
       toast.error(`刷新失败: ${msg}`)
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -64,7 +57,7 @@ const LoginConfigCard = () => {
     reset()
   }, [quickLoginData])
 
-  if (loading) return <PageLoading loading={true} />
+  if (quickLoginLoading) return <PageLoading loading={true} />
 
   return (
     <>
