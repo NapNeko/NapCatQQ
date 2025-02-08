@@ -1,5 +1,5 @@
-import {FileNapCatOneBotUUID} from '@/common/file-uuid';
-import {MessageUnique} from '@/common/message-unique';
+import { FileNapCatOneBotUUID } from '@/common/file-uuid';
+import { MessageUnique } from '@/common/message-unique';
 import {
     ChatType,
     CustomMusicSignPostData,
@@ -29,22 +29,22 @@ import {
     OB11MessageImage,
     OB11MessageVideo,
 } from '@/onebot';
-import {OB11Construct} from '@/onebot/helper/data';
-import {EventType} from '@/onebot/event/OneBotEvent';
-import {encodeCQCode} from '@/onebot/helper/cqcode';
-import {uriToLocalFile} from '@/common/file';
-import {RequestUtil} from '@/common/request';
-import fsPromise, {constants} from 'node:fs/promises';
-import {OB11FriendAddNoticeEvent} from '@/onebot/event/notice/OB11FriendAddNoticeEvent';
-import {ForwardMsgBuilder} from '@/common/forward-msg-builder';
-import {NapProtoMsg} from '@napneko/nap-proto-core';
-import {OB11GroupIncreaseEvent} from '../event/notice/OB11GroupIncreaseEvent';
-import {GroupDecreaseSubType, OB11GroupDecreaseEvent} from '../event/notice/OB11GroupDecreaseEvent';
-import {GroupAdmin} from '@/core/packet/transformer/proto/message/groupAdmin';
-import {OB11GroupAdminNoticeEvent} from '../event/notice/OB11GroupAdminNoticeEvent';
-import {GroupChange, GroupChangeInfo, GroupInvite, PushMsgBody} from '@/core/packet/transformer/proto';
-import {OB11GroupRequestEvent} from '../event/request/OB11GroupRequest';
-import {LRUCache} from '@/common/lru-cache';
+import { OB11Construct } from '@/onebot/helper/data';
+import { EventType } from '@/onebot/event/OneBotEvent';
+import { encodeCQCode } from '@/onebot/helper/cqcode';
+import { uriToLocalFile } from '@/common/file';
+import { RequestUtil } from '@/common/request';
+import fsPromise, { constants } from 'node:fs/promises';
+import { OB11FriendAddNoticeEvent } from '@/onebot/event/notice/OB11FriendAddNoticeEvent';
+import { ForwardMsgBuilder } from '@/common/forward-msg-builder';
+import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
+import { GroupDecreaseSubType, OB11GroupDecreaseEvent } from '../event/notice/OB11GroupDecreaseEvent';
+import { GroupAdmin } from '@/core/packet/transformer/proto/message/groupAdmin';
+import { OB11GroupAdminNoticeEvent } from '../event/notice/OB11GroupAdminNoticeEvent';
+import { GroupChange, GroupChangeInfo, GroupInvite, PushMsgBody } from '@/core/packet/transformer/proto';
+import { OB11GroupRequestEvent } from '../event/request/OB11GroupRequest';
+import { LRUCache } from '@/common/lru-cache';
 
 type RawToOb11Converters = {
     [Key in keyof MessageElement as Key extends `${string}Element` ? Key : never]: (
@@ -93,12 +93,12 @@ export class OneBotMsgApi {
                 }
                 return {
                     type: OB11MessageDataType.text,
-                    data: {text},
+                    data: { text },
                 };
             } else {
                 let qq: string = 'all';
                 if (element.atType !== NTMsgAtType.ATTYPEALL) {
-                    const {atNtUid, atUid} = element;
+                    const { atNtUid, atUid } = element;
                     qq = !atUid || atUid === '0' ? await this.core.apis.UserApi.getUinByUidV2(atNtUid) : atUid;
                 }
                 return {
@@ -206,7 +206,7 @@ export class OneBotMsgApi {
                 peerUid: msg.peerUid,
                 guildId: '',
             };
-            const {emojiId} = _;
+            const { emojiId } = _;
             const dir = emojiId.substring(0, 2);
             const url = `https://gxh.vip.qq.com/club/item/parcel/item/${dir}/${emojiId}/raw300.gif`;
             const filename = `${dir}-${emojiId}.gif`;
@@ -381,7 +381,7 @@ export class OneBotMsgApi {
             }
             const forward: OB11MessageForward = {
                 type: OB11MessageDataType.forward,
-                data: {id: msg.msgId}
+                data: { id: msg.msgId }
             };
             if (!context.parseMultMsg) return forward;
             forward.data.content = await this.parseMultiMessageContent(
@@ -412,7 +412,7 @@ export class OneBotMsgApi {
     };
 
     ob11ToRawConverters: Ob11ToRawConverters = {
-        [OB11MessageDataType.text]: async ({data: {text}}) => ({
+        [OB11MessageDataType.text]: async ({ data: { text } }) => ({
             elementType: ElementType.TEXT,
             elementId: '',
             textElement: {
@@ -424,7 +424,7 @@ export class OneBotMsgApi {
             },
         }),
 
-        [OB11MessageDataType.at]: async ({data: {qq: atQQ}}, context) => {
+        [OB11MessageDataType.at]: async ({ data: { qq: atQQ } }, context) => {
             function at(atUid: string, atNtUid: string, atType: NTMsgAtType, atName: string): SendTextElement {
                 return {
                     elementType: ElementType.TEXT,
@@ -451,7 +451,7 @@ export class OneBotMsgApi {
             return at(atQQ, uid, NTMsgAtType.ATTYPEONE, info.nick || '');
         },
 
-        [OB11MessageDataType.reply]: async ({data: {id}}) => {
+        [OB11MessageDataType.reply]: async ({ data: { id } }) => {
             const replyMsgM = MessageUnique.getMsgIdAndPeerByShortId(parseInt(id));
             if (!replyMsgM) {
                 this.core.context.logger.logWarn('回复消息不存在', id);
@@ -473,7 +473,7 @@ export class OneBotMsgApi {
                 undefined;
         },
 
-        [OB11MessageDataType.face]: async ({data: {id, resultId, chainCount}}) => {
+        [OB11MessageDataType.face]: async ({ data: { id, resultId, chainCount } }) => {
             const parsedFaceId = +id;
             // 从face_config.json中获取表情名称
             const sysFaces = faceConfig.sysface;
@@ -537,12 +537,12 @@ export class OneBotMsgApi {
         },
 
         [OB11MessageDataType.file]: async (sendMsg, context) => {
-            const {path, fileName} = await this.handleOb11FileLikeMessage(sendMsg, context);
+            const { path, fileName } = await this.handleOb11FileLikeMessage(sendMsg, context);
             return await this.core.apis.FileApi.createValidSendFileElement(context, path, fileName);
         },
 
         [OB11MessageDataType.video]: async (sendMsg, context) => {
-            const {path, fileName} = await this.handleOb11FileLikeMessage(sendMsg, context);
+            const { path, fileName } = await this.handleOb11FileLikeMessage(sendMsg, context);
 
             let thumb = sendMsg.data.thumb;
             if (thumb) {
@@ -560,7 +560,7 @@ export class OneBotMsgApi {
             this.core.apis.FileApi.createValidSendPttElement(
                 (await this.handleOb11FileLikeMessage(sendMsg, context)).path),
 
-        [OB11MessageDataType.json]: async ({data: {data}}) => ({
+        [OB11MessageDataType.json]: async ({ data: { data } }) => ({
             elementType: ElementType.ARK,
             elementId: '',
             arkElement: {
@@ -603,13 +603,13 @@ export class OneBotMsgApi {
         }),
 
         // Need signing
-        [OB11MessageDataType.markdown]: async ({data: {content}}) => ({
+        [OB11MessageDataType.markdown]: async ({ data: { content } }) => ({
             elementType: ElementType.MARKDOWN,
             elementId: '',
-            markdownElement: {content},
+            markdownElement: { content },
         }),
 
-        [OB11MessageDataType.music]: async ({data}, context) => {
+        [OB11MessageDataType.music]: async ({ data }, context) => {
             // 保留, 直到...找到更好的解决方案
             if (data.id !== undefined) {
                 if (!['qq', '163', 'kugou', 'kuwo', 'migu'].includes(data.type)) {
@@ -633,8 +633,8 @@ export class OneBotMsgApi {
 
             let postData: IdMusicSignPostData | CustomMusicSignPostData;
             if (data.id === undefined && data.content) {
-                const {content, ...others} = data;
-                postData = {singer: content, ...others};
+                const { content, ...others } = data;
+                postData = { singer: content, ...others };
             } else {
                 postData = data;
             }
@@ -646,7 +646,7 @@ export class OneBotMsgApi {
             try {
                 const musicJson = await RequestUtil.HttpGetJson<string>(signUrl, 'POST', postData);
                 return this.ob11ToRawConverters.json({
-                    data: {data: musicJson},
+                    data: { data: musicJson },
                     type: OB11MessageDataType.json
                 }, context);
             } catch (e) {
@@ -657,10 +657,10 @@ export class OneBotMsgApi {
 
         [OB11MessageDataType.node]: async () => undefined,
 
-        [OB11MessageDataType.forward]: async ({data}, context) => {
+        [OB11MessageDataType.forward]: async ({ data }, context) => {
             const jsonData = ForwardMsgBuilder.fromResId(data.id);
             return this.ob11ToRawConverters.json({
-                data: {data: JSON.stringify(jsonData)},
+                data: { data: JSON.stringify(jsonData) },
                 type: OB11MessageDataType.json
             }, context);
         },
@@ -680,17 +680,17 @@ export class OneBotMsgApi {
 
         [OB11MessageDataType.miniapp]: async () => undefined,
 
-        [OB11MessageDataType.contact]: async ({data: {type = 'qq', id}}, context) => {
+        [OB11MessageDataType.contact]: async ({ data: { type = 'qq', id } }, context) => {
             if (type === 'qq') {
                 const arkJson = await this.core.apis.UserApi.getBuddyRecommendContactArkJson(id.toString(), '');
                 return this.ob11ToRawConverters.json({
-                    data: {data: arkJson.arkMsg},
+                    data: { data: arkJson.arkMsg },
                     type: OB11MessageDataType.json
                 }, context);
             } else if (type === 'group') {
                 const arkJson = await this.core.apis.GroupApi.getGroupRecommendContactArkJson(id.toString());
                 return this.ob11ToRawConverters.json({
-                    data: {data: arkJson.arkJson},
+                    data: { data: arkJson.arkJson },
                     type: OB11MessageDataType.json
                 }, context);
             }
@@ -867,7 +867,7 @@ export class OneBotMsgApi {
                             element[key],
                             msg,
                             element,
-                            {parseMultMsg}
+                            { parseMultMsg }
                         );
                         if (key === 'faceElement' && !parsedElement) {
                             return null;
@@ -920,13 +920,13 @@ export class OneBotMsgApi {
             ) => Promise<SendMessageElement | undefined>;
             const callResult = converter(
                 sendMsg,
-                {peer, deleteAfterSentFiles},
+                { peer, deleteAfterSentFiles },
             )?.catch(undefined);
             callResultList.push(callResult);
         }
         const ret = await Promise.all(callResultList);
         const sendElements: SendMessageElement[] = ret.filter(ele => !!ele);
-        return {sendElements, deleteAfterSentFiles};
+        return { sendElements, deleteAfterSentFiles };
     }
 
     async sendMsgWithOb11UniqueId(peer: Peer, sendElements: SendMessageElement[], deleteAfterSentFiles: string[]) {
@@ -937,16 +937,16 @@ export class OneBotMsgApi {
         const calculateTotalSize = async (elements: SendMessageElement[]): Promise<number> => {
             const sizePromises = elements.map(async element => {
                 switch (element.elementType) {
-                case ElementType.PTT:
-                    return (await fsPromise.stat(element.pttElement.filePath)).size;
-                case ElementType.FILE:
-                    return (await fsPromise.stat(element.fileElement.filePath)).size;
-                case ElementType.VIDEO:
-                    return (await fsPromise.stat(element.videoElement.filePath)).size;
-                case ElementType.PIC:
-                    return (await fsPromise.stat(element.picElement.sourcePath)).size;
-                default:
-                    return 0;
+                    case ElementType.PTT:
+                        return (await fsPromise.stat(element.pttElement.filePath)).size;
+                    case ElementType.FILE:
+                        return (await fsPromise.stat(element.fileElement.filePath)).size;
+                    case ElementType.VIDEO:
+                        return (await fsPromise.stat(element.videoElement.filePath)).size;
+                    case ElementType.PIC:
+                        return (await fsPromise.stat(element.picElement.sourcePath)).size;
+                    default:
+                        return 0;
                 }
             });
             const sizes = await Promise.all(sizePromises);
@@ -988,8 +988,8 @@ export class OneBotMsgApi {
     }
 
     private async handleOb11FileLikeMessage(
-        {data: inputdata}: OB11MessageFileBase,
-        {deleteAfterSentFiles}: SendMessageContext
+        { data: inputdata }: OB11MessageFileBase,
+        { deleteAfterSentFiles }: SendMessageContext
     ) {
         let realUri = [inputdata.url, inputdata.file, inputdata.path].find(uri => uri && uri.trim()) ?? '';
         if (!realUri) {
@@ -998,29 +998,29 @@ export class OneBotMsgApi {
         }
 
         const downloadFile = async (uri: string) => {
-            const {path, fileName, errMsg, success} = await uriToLocalFile(this.core.NapCatTempPath, uri);
+            const { path, fileName, errMsg, success } = await uriToLocalFile(this.core.NapCatTempPath, uri);
             if (!success) {
                 this.core.context.logger.logError('文件下载失败', errMsg);
                 throw new Error('文件下载失败: ' + errMsg);
             }
-            return {path, fileName};
+            return { path, fileName };
         };
         try {
-            const {path, fileName} = await downloadFile(realUri);
+            const { path, fileName } = await downloadFile(realUri);
             deleteAfterSentFiles.push(path);
-            return {path, fileName: inputdata.name ?? fileName};
+            return { path, fileName: inputdata.name ?? fileName };
         } catch {
             realUri = await this.handleObfuckName(realUri);
-            const {path, fileName} = await downloadFile(realUri);
+            const { path, fileName } = await downloadFile(realUri);
             deleteAfterSentFiles.push(path);
-            return {path, fileName: inputdata.name ?? fileName};
+            return { path, fileName: inputdata.name ?? fileName };
         }
     }
 
     async handleObfuckName(name: string) {
         const contextMsgFile = FileNapCatOneBotUUID.decode(name);
         if (contextMsgFile && contextMsgFile.msgId && contextMsgFile.elementId) {
-            const {peer, msgId, elementId} = contextMsgFile;
+            const { peer, msgId, elementId } = contextMsgFile;
             const rawMessage = (await this.core.apis.MsgApi.getMsgsByMsgId(peer, [msgId]))?.msgList.find(msg => msg.msgId === msgId);
             const mixElement = rawMessage?.elements.find(e => e.elementId === elementId);
             const mixElementInner = mixElement?.videoElement ?? mixElement?.fileElement ?? mixElement?.pttElement ?? mixElement?.picElement;
@@ -1028,12 +1028,12 @@ export class OneBotMsgApi {
             let url = '';
             if (mixElement?.picElement && rawMessage) {
                 const tempData =
-                    await this.obContext.apis.MsgApi.rawToOb11Converters.picElement?.(mixElement?.picElement, rawMessage, mixElement, {parseMultMsg: false}) as OB11MessageImage | undefined;
+                    await this.obContext.apis.MsgApi.rawToOb11Converters.picElement?.(mixElement?.picElement, rawMessage, mixElement, { parseMultMsg: false }) as OB11MessageImage | undefined;
                 url = tempData?.data.url ?? '';
             }
             if (mixElement?.videoElement && rawMessage) {
                 const tempData =
-                    await this.obContext.apis.MsgApi.rawToOb11Converters.videoElement?.(mixElement?.videoElement, rawMessage, mixElement, {parseMultMsg: false}) as OB11MessageVideo | undefined;
+                    await this.obContext.apis.MsgApi.rawToOb11Converters.videoElement?.(mixElement?.videoElement, rawMessage, mixElement, { parseMultMsg: false }) as OB11MessageVideo | undefined;
                 url = tempData?.data.url ?? '';
             }
             return url !== '' ? url : await this.core.apis.FileApi.downloadMedia(msgId, peer.chatType, peer.peerUid, elementId, '', '');
@@ -1043,14 +1043,14 @@ export class OneBotMsgApi {
 
     groupChangDecreseType2String(type: number): GroupDecreaseSubType {
         switch (type) {
-        case 130:
-            return 'leave';
-        case 131:
-            return 'kick';
-        case 3:
-            return 'kick_me';
-        default:
-            return 'kick';
+            case 130:
+                return 'leave';
+            case 131:
+                return 'kick';
+            case 3:
+                return 'kick_me';
+            default:
+                return 'kick';
         }
     }
 
@@ -1069,7 +1069,7 @@ export class OneBotMsgApi {
                         }
                     }
                     return false;
-                }, 1, 1000).catch(undefined);
+                }, 1, 1000).catch(() => undefined);
             if (dataNotify) {
                 return !dataNotify.actionUser.uid ? dataNotify.user2.uid : dataNotify.actionUser.uid;
             }
