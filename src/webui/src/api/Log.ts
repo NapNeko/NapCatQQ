@@ -1,8 +1,8 @@
 import type { RequestHandler } from 'express';
 import { sendError, sendSuccess } from '../utils/response';
-import { WebUiConfigWrapper } from '../helper/config';
 import { logSubscription } from '@/common/log';
 import { terminalManager } from '../terminal/terminal_manager';
+import { WebUiConfig } from '@/webui';
 // 判断是否是 macos
 const isMacOS = process.platform === 'darwin';
 // 日志记录
@@ -15,13 +15,13 @@ export const LogHandler: RequestHandler = async (req, res) => {
     if (filename.includes('..')) {
         return sendError(res, 'ID不合法');
     }
-    const logContent = await WebUiConfigWrapper.GetLogContent(filename);
+    const logContent = await WebUiConfig.GetLogContent(filename);
     return sendSuccess(res, logContent);
 };
 
 // 日志列表
 export const LogListHandler: RequestHandler = async (_, res) => {
-    const logList = await WebUiConfigWrapper.GetLogsList();
+    const logList = await WebUiConfig.GetLogsList();
     return sendSuccess(res, logList);
 };
 

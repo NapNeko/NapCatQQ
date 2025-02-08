@@ -73,4 +73,17 @@ export default class QQManager {
     )
     return data.data.data
   }
+
+  public static async getQuickLoginQQ() {
+    const { data } = await serverRequest.post<ServerResponse<string>>(
+      '/QQLogin/GetQuickLoginQQ'
+    )
+    return data.data
+  }
+
+  public static async setQuickLoginQQ(uin: string) {
+    await serverRequest.post<ServerResponse<null>>('/QQLogin/SetQuickLoginQQ', {
+      uin
+    })
+  }
 }
