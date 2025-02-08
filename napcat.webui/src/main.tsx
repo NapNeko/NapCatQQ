@@ -22,6 +22,11 @@ if (theme && !theme.startsWith('"')) {
   localStorage.setItem(key.theme, JSON.stringify(theme))
 }
 
+const themeStyle = document.createElement('link')
+themeStyle.rel = 'stylesheet'
+themeStyle.href = '/files/theme.css'
+document.head.appendChild(themeStyle)
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   // <React.StrictMode>
   <BrowserRouter basename="/webui/">
