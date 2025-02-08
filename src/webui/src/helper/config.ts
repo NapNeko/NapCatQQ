@@ -148,7 +148,7 @@ const WebUiConfigSchema = Type.Object({
                     '0px 0px 30px 0px rgba(0, 0, 0, .07), 0px 30px 60px 0px rgba(0, 0, 0, .26), inset 0px 0px 1px 0px hsla(0, 0%, 100%, .15)',
             }),
             '--heroui-hover-opacity': Type.String({ default: '.9' }),
-        }),
+        }, { default: {} }),
         light: Type.Object({
             '--heroui-background': Type.String({ default: '0 0% 100%' }),
             '--heroui-foreground-50': Type.String({ default: '240 5.88% 95%' }),
@@ -282,8 +282,8 @@ const WebUiConfigSchema = Type.Object({
                     '0px 0px 30px 0px rgba(0, 0, 0, .04), 0px 30px 60px 0px rgba(0, 0, 0, .12), 0px 0px 1px 0px rgba(0, 0, 0, .3)',
             }),
             '--heroui-hover-opacity': Type.String({ default: '.8' }),
-        }),
-    }),
+        }, { default: {} }),
+    }, { default: {} }),
 });
 
 export type WebUiConfigType = Static<typeof WebUiConfigSchema>;
