@@ -347,6 +347,8 @@ export type SendMarkdownElement = SendElementBase<ElementType.MARKDOWN> & Elemen
 
 export type SendShareLocationElement = SendElementBase<ElementType.SHARELOCATION> & ElementBase<'shareLocationElement'>;
 
+export type SendMultiForwardMsgElement = SendElementBase<ElementType.MULTIFORWARD> & ElementBase<'multiForwardMsgElement'>;
+
 export type SendMessageElement = SendTextElement | SendPttElement |
     SendPicElement | SendReplyElement | SendFaceElement | SendMarketFaceElement | SendFileElement |
     SendVideoElement | SendArkElement | SendMarkdownElement | SendShareLocationElement;

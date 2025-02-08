@@ -8,11 +8,10 @@ import {
     SendFaceElement,
     SendFileElement,
     SendMarkdownElement,
-    SendMarketFaceElement,
+    SendMarketFaceElement, SendMultiForwardMsgElement,
     SendPicElement,
     SendPttElement,
     SendReplyElement,
-    SendStructLongMsgElement,
     SendTextElement,
     SendVideoElement
 } from '@/core';
@@ -46,7 +45,7 @@ const SupportedElementTypes = [
     ElementType.PTT,
     ElementType.ARK,
     ElementType.MARKDOWN,
-    ElementType.STRUCTLONGMSG
+    ElementType.MULTIFORWARD
 ];
 
 type SendMessageTypeElementMap = {
@@ -59,7 +58,7 @@ type SendMessageTypeElementMap = {
     [ElementType.REPLY]: SendReplyElement,
     [ElementType.ARK]: SendArkElement,
     [ElementType.MFACE]: SendMarketFaceElement,
-    [ElementType.STRUCTLONGMSG]: SendStructLongMsgElement,
+    [ElementType.MULTIFORWARD]: SendMultiForwardMsgElement,
     [ElementType.MARKDOWN]: SendMarkdownElement,
 };
 
@@ -118,9 +117,8 @@ export class PacketMsgConverter {
         [ElementType.MARKDOWN]: (element) => {
             return new PacketMsgMarkDownElement(element as SendMarkdownElement);
         },
-        // TODO: check this logic, move it in arkElement?
-        [ElementType.STRUCTLONGMSG]: (element) => {
-            return new PacketMultiMsgElement(element as SendStructLongMsgElement);
+        [ElementType.MULTIFORWARD]: (element) => {
+            return new PacketMultiMsgElement(element as SendMultiForwardMsgElement);
         }
     };
 
