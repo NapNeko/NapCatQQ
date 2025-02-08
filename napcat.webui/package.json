@@ -64,6 +64,7 @@
     "qrcode.react": "^4.2.0",
     "quill": "^2.0.3",
     "react": "^19.0.0",
+    "react-color": "^2.19.3",
     "react-dom": "^19.0.0",
     "react-dropzone": "^14.3.5",
     "react-error-boundary": "^5.0.0",
