@@ -47,11 +47,11 @@ const LoginConfigCard = () => {
     }
   })
 
-  const onRefresh = async (shotTip = true) => {
+  const onRefresh = async () => {
     try {
       setLoading(true)
       await refreshQuickLogin()
-      if (shotTip) toast.success('刷新成功')
+      toast.success('刷新成功')
     } catch (error) {
       const msg = (error as Error).message
       toast.error(`刷新失败: ${msg}`)
@@ -63,10 +63,6 @@ const LoginConfigCard = () => {
   useEffect(() => {
     reset()
   }, [quickLoginData])
-
-  useEffect(() => {
-    onRefresh(false)
-  }, [])
 
   if (loading) return <PageLoading loading={true} />
 
