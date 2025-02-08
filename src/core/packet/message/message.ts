@@ -1,7 +1,7 @@
 import { IPacketMsgElement } from '@/core/packet/message/element';
-import { SendMessageElement, SendStructLongMsgElement } from '@/core';
+import {SendMessageElement, SendMultiForwardMsgElement} from '@/core';
 
-export type PacketSendMsgElement = SendMessageElement | SendStructLongMsgElement
+export type PacketSendMsgElement = SendMessageElement | SendMultiForwardMsgElement
 
 export interface PacketMsg {
     seq?: number;

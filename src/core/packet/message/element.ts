@@ -27,7 +27,7 @@ import {
     SendPicElement,
     SendPttElement,
     SendReplyElement,
-    SendStructLongMsgElement,
+    SendMultiForwardMsgElement,
     SendTextElement,
     SendVideoElement
 } from '@/core';
@@ -661,13 +661,13 @@ export class PacketMsgMarkDownElement extends IPacketMsgElement<SendMarkdownElem
     }
 }
 
-export class PacketMultiMsgElement extends IPacketMsgElement<SendStructLongMsgElement> {
+export class PacketMultiMsgElement extends IPacketMsgElement<SendMultiForwardMsgElement> {
     resid: string;
     message: PacketMsg[];
 
-    constructor(rawElement: SendStructLongMsgElement, message?: PacketMsg[]) {
+    constructor(rawElement: SendMultiForwardMsgElement, message?: PacketMsg[]) {
         super(rawElement);
-        this.resid = rawElement.structLongMsgElement.resId;
+        this.resid = rawElement.multiForwardMsgElement.resId;
         this.message = message ?? [];
     }
 
