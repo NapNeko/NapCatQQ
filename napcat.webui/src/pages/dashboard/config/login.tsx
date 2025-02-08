@@ -33,9 +33,9 @@ const LoginConfigCard = () => {
     setOnebotValue('quickLoginQQ', quickLoginData ?? '')
   }
 
-  const onSubmit = handleOnebotSubmit((data) => {
+  const onSubmit = handleOnebotSubmit(async (data) => {
     try {
-      QQManager.setQuickLoginQQ(data.quickLoginQQ)
+      await QQManager.setQuickLoginQQ(data.quickLoginQQ)
       toast.success('保存成功')
     } catch (error) {
       const msg = (error as Error).message

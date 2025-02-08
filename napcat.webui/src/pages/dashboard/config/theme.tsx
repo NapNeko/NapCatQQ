@@ -7,6 +7,8 @@ import ColorPicker from '@/components/ColorPicker'
 import SaveButtons from '@/components/button/save_buttons'
 import PageLoading from '@/components/page_loading'
 
+import { loadTheme } from '@/utils/theme'
+
 import WebUIManager from '@/controllers/webui_manager'
 
 const ThemeConfigCard = () => {
@@ -33,10 +35,11 @@ const ThemeConfigCard = () => {
     if (data) setOnebotValue('theme', data)
   }
 
-  const onSubmit = handleOnebotSubmit((data) => {
+  const onSubmit = handleOnebotSubmit(async (data) => {
     try {
-      WebUIManager.setThemeConfig(data.theme)
+      await WebUIManager.setThemeConfig(data.theme)
       toast.success('保存成功')
+      loadTheme()
     } catch (error) {
       const msg = (error as Error).message
       toast.error(`保存失败: ${msg}`)
