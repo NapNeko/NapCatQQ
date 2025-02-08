@@ -14,13 +14,13 @@ export const QQVersionHandler: RequestHandler = (_, res) => {
     sendSuccess(res, data);
 };
 
-export const GetThemeConfigHandler: RequestHandler = (_, res) => {
-    const data = WebUiConfig.GetTheme();
+export const GetThemeConfigHandler: RequestHandler = async (_, res) => {
+    const data = await WebUiConfig.GetTheme();
     sendSuccess(res, data);
 };
 
-export const SetThemeConfigHandler: RequestHandler = (req, res) => {
+export const SetThemeConfigHandler: RequestHandler = async (req, res) => {
     const { theme } = req.body;
-    const data = WebUiConfig.UpdateTheme(theme);
-    sendSuccess(res, data);
+    await WebUiConfig.UpdateTheme(theme);
+    sendSuccess(res, { message: '更新成功' });
 };
