@@ -81,6 +81,24 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
         }
     });
 
+    // 如果是自定义色彩，构建一个css文件
+    app.use('/files/theme.css', async (_req, res) => {
+        const colors = await WebUiConfig.GetTheme();
+        // 生成css（分为亮色和暗色，靠class和[data-theme="light"]）
+        let css = '.dark, [data-theme="dark"] {';
+        for (const key in colors.dark) {
+            css += `--${key}: ${colors.dark[key]};`;
+        }
+        css += '}';
+        css += '.light, [data-theme="light"] {';
+        for (const key in colors.light) {
+            css += `--${key}: ${colors.light[key]};`;
+        }
+        css += '}';
+
+        res.send(css);
+    });
+
     // ------------中间件结束------------
 
     // ------------挂载路由------------
