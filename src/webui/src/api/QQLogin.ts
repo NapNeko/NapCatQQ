@@ -3,9 +3,10 @@ import { RequestHandler } from 'express';
 import { WebUiDataRuntime } from '@webapi/helper/Data';
 import { isEmpty } from '@webapi/utils/check';
 import { sendError, sendSuccess } from '@webapi/utils/response';
+import { WebUiConfig } from '@/webui';
 
 // 获取QQ登录二维码
-export const QQGetQRcodeHandler: RequestHandler = async (req, res) => {
+export const QQGetQRcodeHandler: RequestHandler = async (_, res) => {
     // 判断是否已经登录
     if (WebUiDataRuntime.getQQLoginStatus()) {
         // 已经登录
@@ -25,7 +26,7 @@ export const QQGetQRcodeHandler: RequestHandler = async (req, res) => {
 };
 
 // 获取QQ登录状态
-export const QQCheckLoginStatusHandler: RequestHandler = async (req, res) => {
+export const QQCheckLoginStatusHandler: RequestHandler = async (_, res) => {
     const data = {
         isLogin: WebUiDataRuntime.getQQLoginStatus(),
         qrcodeurl: WebUiDataRuntime.getQQLoginQrcodeURL(),
@@ -73,4 +74,17 @@ export const QQGetLoginListNewHandler: RequestHandler = async (_, res) => {
 export const getQQLoginInfoHandler: RequestHandler = async (_, res) => {
     const data = WebUiDataRuntime.getQQLoginInfo();
     return sendSuccess(res, data);
+};
+
+// 获取自动登录QQ账号
+export const getAutoLoginAccountHandler: RequestHandler = async (_, res) => {
+    const data = WebUiConfig.getAutoLoginAccount();
+    return sendSuccess(res, data);
+};
+
+// 设置自动登录QQ账号
+export const setAutoLoginAccountHandler: RequestHandler = async (req, res) => {
+    const { uin } = req.body;
+    await WebUiConfig.UpdateAutoLoginAccount(uin);
+    return sendSuccess(res, null);
 };

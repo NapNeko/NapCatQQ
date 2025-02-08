@@ -59,6 +59,20 @@ export default class WebUIManager {
     return data.data
   }
 
+  public static async getThemeConfig() {
+    const { data } =
+      await serverRequest.get<ServerResponse<ThemeConfig>>('/base/Theme')
+    return data.data
+  }
+
+  public static async setThemeConfig(theme: ThemeConfig) {
+    const { data } = await serverRequest.post<ServerResponse<boolean>>(
+      '/base/SetTheme',
+      { theme }
+    )
+    return data.data
+  }
+
   public static async getLogList() {
     const { data } =
       await serverRequest.get<ServerResponse<string[]>>('/Log/GetLogList')
