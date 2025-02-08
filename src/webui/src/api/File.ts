@@ -7,9 +7,9 @@ import os from 'os';
 import compressing from 'compressing';
 import { PassThrough } from 'stream';
 import multer from 'multer';
-import { WebUiConfigWrapper } from '../helper/config';
 import webUIFontUploader from '../uploader/webui_font';
 import diskUploader from '../uploader/disk';
+import { WebUiConfig } from '@/webui';
 
 const isWindows = os.platform() === 'win32';
 
@@ -384,8 +384,8 @@ export const UploadWebUIFontHandler: RequestHandler = async (req, res) => {
 // 删除WebUI字体文件处理方法
 export const DeleteWebUIFontHandler: RequestHandler = async (_req, res) => {
     try {
-        const fontPath = WebUiConfigWrapper.GetWebUIFontPath();
-        const exists = await WebUiConfigWrapper.CheckWebUIFontExist();
+        const fontPath = WebUiConfig.GetWebUIFontPath();
+        const exists = await WebUiConfig.CheckWebUIFontExist();
 
         if (!exists) {
             return sendSuccess(res, true);

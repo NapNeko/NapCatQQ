@@ -7,6 +7,8 @@ import {
     QQSetQuickLoginHandler,
     QQGetLoginListNewHandler,
     getQQLoginInfoHandler,
+    getAutoLoginAccountHandler,
+    setAutoLoginAccountHandler,
 } from '@webapi/api/QQLogin';
 
 const router = Router();
@@ -22,5 +24,9 @@ router.post('/GetQQLoginQrcode', QQGetQRcodeHandler);
 router.post('/SetQuickLogin', QQSetQuickLoginHandler);
 // router:获取QQ登录信息
 router.post('/GetQQLoginInfo', getQQLoginInfoHandler);
+// router:获取快速登录QQ账号
+router.post('/GetQuickLoginQQ', getAutoLoginAccountHandler);
+// router:设置自动登录QQ账号
+router.post('/SetQuickLoginQQ', setAutoLoginAccountHandler);
 
 export { router as QQLoginRouter };

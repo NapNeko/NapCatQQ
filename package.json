@@ -33,6 +33,7 @@
     "@types/multer": "^1.4.12",
     "@types/node": "^22.0.1",
     "@types/qrcode-terminal": "^0.12.2",
+    "@types/react-color": "^3.0.13",
     "@types/ws": "^8.5.12",
     "@typescript-eslint/eslint-plugin": "^8.3.0",
     "@typescript-eslint/parser": "^8.3.0",

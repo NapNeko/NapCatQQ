@@ -73,12 +73,30 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
 
     // 如果是webui字体文件，挂载字体文件
     app.use('/webui/fonts/AaCute.woff', async (_req, res, next) => {
-        const isFontExist = await WebUiConfigWrapper.CheckWebUIFontExist();
+        const isFontExist = await WebUiConfig.CheckWebUIFontExist();
         if (isFontExist) {
-            res.sendFile(WebUiConfigWrapper.GetWebUIFontPath());
+            res.sendFile(WebUiConfig.GetWebUIFontPath());
         } else {
             next();
         }
+    });
+
+    // 如果是自定义色彩，构建一个css文件
+    app.use('/files/theme.css', async (_req, res) => {
+        const colors = await WebUiConfig.GetTheme();
+
+        let css = ':root, .light, [data-theme="light"] {';
+        for (const key in colors.light) {
+            css += `${key}: ${colors.light[key]};`;
+        }
+        css += '}';
+        css += '.dark, [data-theme="dark"] {';
+        for (const key in colors.dark) {
+            css += `${key}: ${colors.dark[key]};`;
+        }
+        css += '}';
+
+        res.send(css);
     });
 
     // ------------中间件结束------------
