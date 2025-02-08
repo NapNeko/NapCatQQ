@@ -9,7 +9,7 @@ export const NapcatConfigSchema = Type.Object({
     fileLogLevel: Type.String({ default: 'debug' }),
     consoleLogLevel: Type.String({ default: 'info' }),
     packetBackend: Type.String({ default: 'auto' }),
-    packetServer: Type.String({ default: '' })
+    packetServer: Type.String({ default: '' }),
 });
 
 export type NapcatConfig = Static<typeof NapcatConfigSchema>;

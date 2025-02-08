@@ -28,6 +28,7 @@ export let WebUiConfig: WebUiConfigWrapper;
 export let webUiPathWrapper: NapCatPathWrapper;
 const MAX_PORT_TRY = 100;
 import * as net from 'node:net';
+import { WebUiDataRuntime } from './src/helper/Data';
 
 export async function InitPort(parsedConfig: WebUiConfigType): Promise<[string, number, string]> {
     try {
@@ -48,7 +49,20 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
         logger.log('[NapCat] [WebUi] Current WebUi is not run.');
         return;
     }
-
+    setTimeout(async () => {
+        let autoLoginAccount = process.env['NAPCAT_QUICK_ACCOUNT'] || WebUiConfig.getAutoLoginAccount();
+        if (autoLoginAccount) {
+            try {
+                const { result, message } = await WebUiDataRuntime.requestQuickLogin(autoLoginAccount);
+                if (!result) {
+                    throw new Error(message);
+                }
+                console.log(`[NapCat] [WebUi] Auto login account: ${autoLoginAccount}`);
+            } catch (error) {
+                console.log(`[NapCat] [WebUi] Auto login account failed.` + error);
+            }
+        }
+    }, 30000);
     // ------------注册中间件------------
     // 使用express的json中间件
     app.use(express.json());

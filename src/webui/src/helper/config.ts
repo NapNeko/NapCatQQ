@@ -13,6 +13,7 @@ const WebUiConfigSchema = Type.Object({
     port: Type.Number({ default: 6099 }),
     token: Type.String({ default: 'napcat' }),
     loginRate: Type.Number({ default: 10 }),
+    autoLoginAccount: Type.String({ default: '' }),
 });
 
 export type WebUiConfigType = Static<typeof WebUiConfigSchema>;
@@ -124,5 +125,9 @@ export class WebUiConfigWrapper {
     // 获取webui字体文件路径
     public static GetWebUIFontPath(): string {
         return resolve(webUiPathWrapper.configPath, './fonts/webui.woff');
+    }
+
+    public getAutoLoginAccount(): string | undefined {
+        return this.WebUiConfigData?.autoLoginAccount;
     }
 }
