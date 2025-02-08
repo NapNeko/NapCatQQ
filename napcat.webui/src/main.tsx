@@ -8,6 +8,7 @@ import '@/styles/globals.css'
 
 import key from './const/key'
 import WebUIManager from './controllers/webui_manager'
+import { loadTheme } from './utils/theme'
 
 WebUIManager.checkWebUiLogined()
 
@@ -22,10 +23,7 @@ if (theme && !theme.startsWith('"')) {
   localStorage.setItem(key.theme, JSON.stringify(theme))
 }
 
-const themeStyle = document.createElement('link')
-themeStyle.rel = 'stylesheet'
-themeStyle.href = '/files/theme.css'
-document.head.appendChild(themeStyle)
+loadTheme()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   // <React.StrictMode>

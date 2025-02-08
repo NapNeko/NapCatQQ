@@ -30,9 +30,9 @@ const OneBotConfigCard = () => {
     setOnebotValue('parseMultMsg', config.parseMultMsg)
   }
 
-  const onSubmit = handleOnebotSubmit((data) => {
+  const onSubmit = handleOnebotSubmit(async (data) => {
     try {
-      saveConfigWithoutNetwork(data)
+      await saveConfigWithoutNetwork(data)
       toast.success('保存成功')
     } catch (error) {
       const msg = (error as Error).message
