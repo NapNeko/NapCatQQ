@@ -252,7 +252,5 @@ export default {
   theme,
   author: 'NapCat',
   name: 'nc_pink',
-  bgColor: 'hsl(339.2,90.36%,51.18%)',
-  textColor: 'hsl(0,0%,100%)',
   description: 'NapCat Pink Theme'
 } satisfies ThemeInfo

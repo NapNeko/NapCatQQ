@@ -1,4 +1,5 @@
 import { Button } from '@heroui/button'
+import clsx from 'clsx'
 import toast from 'react-hot-toast'
 import { IoMdRefresh } from 'react-icons/io'
 
@@ -7,15 +8,22 @@ export interface SaveButtonsProps {
   reset: () => void
   refresh?: () => void
   isSubmitting: boolean
+  className?: string
 }
 
 const SaveButtons: React.FC<SaveButtonsProps> = ({
   onSubmit,
   reset,
   isSubmitting,
-  refresh
+  refresh,
+  className
 }) => (
-  <div className="max-w-full mx-3 w-96 flex flex-col justify-center gap-3">
+  <div
+    className={clsx(
+      'max-w-full mx-3 w-96 flex flex-col justify-center gap-3',
+      className
+    )}
+  >
     <div className="flex items-center justify-center gap-2 mt-5">
       <Button
         color="default"
