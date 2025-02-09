@@ -34,7 +34,7 @@ const SystemInfoItem: React.FC<SystemInfoItemProps> = ({
   endContent
 }) => {
   return (
-    <div className="flex text-sm gap-1 p-2 items-center shadow-sm shadow-primary-50 dark:shadow-primary-100 rounded text-primary-400">
+    <div className="flex text-sm gap-1 p-2 items-center shadow-sm shadow-primary-100 dark:shadow-primary-100 rounded text-primary-400">
       {icon}
       <div className="w-24">{title}</div>
       <div className="text-primary-200">{value}</div>
@@ -234,7 +234,7 @@ const SystemInfo: React.FC<SystemInfoProps> = (props) => {
     error: qqVersionError
   } = useRequest(WebUIManager.getQQVersion)
   return (
-    <Card className="bg-opacity-60 shadow-sm shadow-primary-50 dark:shadow-primary-100 overflow-visible flex-1">
+    <Card className="bg-opacity-60 shadow-sm shadow-primary-100 dark:shadow-primary-100 overflow-visible flex-1">
       <CardHeader className="pb-0 items-center gap-1 text-primary-500 font-extrabold">
         <FaCircleInfo className="text-lg" />
         <span>系统信息</span>
