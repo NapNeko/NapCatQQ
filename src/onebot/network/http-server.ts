@@ -62,12 +62,12 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
 
         this.app.use((req, res, next) => {
             if (this.isFinished(req)) {
-                next()
-                return
+                next();
+                return;
             }
             if (!this.hasbody(req)) {
-                next()
-                return
+                next();
+                return;
             }
             // 兼容处理没有带content-type的请求
             req.headers['content-type'] = 'application/json';
