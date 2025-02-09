@@ -9,6 +9,12 @@ export default {
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}'
   ],
+  safelist: [
+    {
+      pattern:
+        /bg-(primary|secondary|success|danger|warning)-(50|100|200|300|400|500|600|700|800|900)/
+    }
+  ],
   theme: {
     extend: {}
   },
