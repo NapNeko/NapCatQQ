@@ -9,7 +9,8 @@ import { HttpServerConfig } from '@/onebot/config/config';
 import { NapCatOneBot11Adapter } from '@/onebot';
 import { IOB11NetworkAdapter } from '@/onebot/network/adapter';
 import json5 from 'json5';
-
+import { isFinished } from 'on-finished';
+import typeis from 'type-is';
 export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig> {
     private app: Express | undefined;
     private server: http.Server | undefined;
@@ -45,13 +46,6 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
         this.app = undefined;
     }
 
-    private isFinished(req: Request): boolean {
-        return req.complete;
-    }
-
-    private hasbody(req: Request): boolean {
-        return req.headers['content-length'] !== undefined && req.headers['content-length'] !== '0';
-    }
 
     private initializeServer() {
         this.app = express();
@@ -61,13 +55,13 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
         this.app.use(express.urlencoded({ extended: true, limit: '5000mb' }));
 
         this.app.use((req, res, next) => {
-            if (this.isFinished(req)) {
+            if (isFinished(req)) {
                 next();
                 return;
             }
-            if (!this.hasbody(req)) {
+            if (!typeis.hasBody(req)) {
                 next();
-                return;
+                return
             }
             // 兼容处理没有带content-type的请求
             req.headers['content-type'] = 'application/json';
