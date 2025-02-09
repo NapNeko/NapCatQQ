@@ -61,7 +61,7 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
             }
             if (!typeis.hasBody(req)) {
                 next();
-                return
+                return;
             }
             // 兼容处理没有带content-type的请求
             req.headers['content-type'] = 'application/json';
