@@ -24,7 +24,7 @@ const SystemStatusItem: React.FC<SystemStatusItemProps> = ({
   return (
     <div
       className={clsx(
-        'shadow-sm p-2 rounded-md text-sm bg-content1 bg-opacity-30',
+        'shadow-sm shadow-primary-100 p-2 rounded-md text-sm bg-content1 bg-opacity-30',
         size === 'lg' ? 'col-span-2' : 'col-span-1 flex justify-between'
       )}
     >
@@ -55,7 +55,7 @@ const SystemStatusDisplay: React.FC<SystemStatusDisplayProps> = ({ data }) => {
   }
 
   return (
-    <Card className="bg-opacity-60 shadow-sm shadow-primary-50 dark:shadow-primary-100 col-span-1 lg:col-span-2 relative overflow-hidden">
+    <Card className="bg-opacity-60 shadow-sm shadow-primary-100 col-span-1 lg:col-span-2 relative overflow-hidden">
       <div className="absolute h-full right-0 top-0">
         <Image
           src={bkg}
