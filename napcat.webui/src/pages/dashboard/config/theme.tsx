@@ -38,7 +38,14 @@ const values = [
   '-800',
   '-900'
 ]
-const colors = ['primary', 'secondary', 'success', 'danger', 'warning']
+const colors = [
+  'primary',
+  'secondary',
+  'success',
+  'danger',
+  'warning',
+  'default'
+]
 
 function PreviewThemeCard({ theme, onPreview }: PreviewThemeCardProps) {
   const style = document.createElement('style')
