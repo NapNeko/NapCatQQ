@@ -45,13 +45,30 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
         this.app = undefined;
     }
 
+    private isFinished(req: Request): boolean {
+        return req.complete;
+    }
+
+    private hasbody(req: Request): boolean {
+        return req.headers['content-length'] !== undefined && req.headers['content-length'] !== '0';
+    }
+
     private initializeServer() {
         this.app = express();
         this.server = http.createServer(this.app);
 
         this.app.use(cors());
         this.app.use(express.urlencoded({ extended: true, limit: '5000mb' }));
+
         this.app.use((req, res, next) => {
+            if (this.isFinished(req)) {
+                next()
+                return
+            }
+            if (!this.hasbody(req)) {
+                next()
+                return
+            }
             // 兼容处理没有带content-type的请求
             req.headers['content-type'] = 'application/json';
             let rawData = '';
@@ -98,7 +115,7 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
         if (req.method == 'get') {
             payload = req.query;
         } else if (req.query) {
-            payload = { ...req.query, ...req.body };
+            payload = { ...req.body, ...req.query };
         }
         if (req.path === '' || req.path === '/') {
             const hello = OB11Response.ok({});
