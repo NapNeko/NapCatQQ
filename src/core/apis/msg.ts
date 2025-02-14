@@ -1,5 +1,5 @@
 import { ChatType, GetFileListParam, Peer, RawMessage, SendMessageElement, SendStatusType } from '@/core/types';
-import { GroupFileInfoUpdateItem, InstanceContext, NapCatCore } from '@/core';
+import { GroupFileInfoUpdateItem, InstanceContext, NapCatCore, NodeIKernelMsgService } from '@/core';
 import { GeneralCallResult } from '@/core/services/common';
 
 export class NTQQMsgApi {
@@ -12,6 +12,11 @@ export class NTQQMsgApi {
         this.context = context;
         this.core = core;
     }
+    
+    async clickInlineKeyboardButton(...params: Parameters<NodeIKernelMsgService['clickInlineKeyboardButton']>) {
+        return this.context.session.getMsgService().clickInlineKeyboardButton(...params);
+    }
+
     getMsgByClientSeqAndTime(peer: Peer, replyMsgClientSeq: string, replyMsgTime: string) {
         // https://bot.q.qq.com/wiki/develop/api-v2/openapi/emoji/model.html#EmojiType 可以用过特殊方式拉取
         return this.context.session.getMsgService().getMsgByClientSeqAndTime(peer, replyMsgClientSeq, replyMsgTime);
