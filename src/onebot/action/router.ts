@@ -10,6 +10,7 @@ export interface InvalidCheckResult {
 }
 
 export const ActionName = {
+    GetUnidirectionalFriendList: 'get_unidirectional_friend_list',
     // onebot 11
     SendPrivateMsg: 'send_private_msg',
     SendGroupMsg: 'send_group_msg',
