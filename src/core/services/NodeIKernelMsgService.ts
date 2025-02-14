@@ -468,7 +468,7 @@ export interface NodeIKernelMsgService {
 
     setCurOnScreenMsg(...args: unknown[]): unknown;
 
-    setCurOnScreenMsgForMsgEvent(...args: unknown[]): unknown;
+    setCurOnScreenMsgForMsgEvent(peer: Peer, msgRegList: Map<string, Uint8Array>): void;
 
     getMiscData(key: string): unknown;
 
