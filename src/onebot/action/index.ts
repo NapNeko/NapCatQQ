@@ -104,6 +104,7 @@ import { GetClientkey } from './extends/GetClientkey';
 import { SendPacket } from './extends/SendPacket';
 import { SendPoke } from '@/onebot/action/packet/SendPoke';
 import { SetDiyOnlineStatus } from './extends/SetDiyOnlineStatus';
+import { BotExit } from './extends/BotExit';
 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 
@@ -221,6 +222,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new SendPacket(obContext, core),
         new SendPoke(obContext, core),
         new GetGroupSystemMsg(obContext, core),
+        new BotExit(obContext, core),
     ];
 
     type HandlerUnion = typeof actionHandlers[number];

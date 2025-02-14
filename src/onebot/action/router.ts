@@ -49,7 +49,7 @@ export const ActionName = {
     GetVersionInfo: 'get_version_info',
     // Reboot : 'set_restart',
     // CleanCache : 'clean_cache',
-
+    Exit: 'bot_exit',
     // go-cqhttp
     SetQQProfile: 'set_qq_profile',
     // QidianGetAccountInfo : 'qidian_get_account_info',
