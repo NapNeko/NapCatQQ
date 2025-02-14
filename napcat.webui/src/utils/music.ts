@@ -1,19 +1,21 @@
 import { PlayMode } from '@/const/enum'
 
+import WebUIManager from '@/controllers/webui_manager'
 import type {
   FinalMusic,
   Music163ListResponse,
   Music163URLResponse
 } from '@/types/music'
 
-import WebUIManager from '@/controllers/webui_manager'
 /**
  * 获取网易云音乐歌单
  * @param id 歌单id
  * @returns 歌单信息
  */
 export const get163MusicList = async (id: string) => {
-  let res = await WebUIManager.proxy<Music163ListResponse>('https://wavesgame.top/playlist/track/all?id=' + id);
+  let res = await WebUIManager.proxy<Music163ListResponse>(
+    'https://wavesgame.top/playlist/track/all?id=' + id
+  )
   // const res = await request.get<Music163ListResponse>(
   //   `https://wavesgame.top/playlist/track/all?id=${id}`
   // )
@@ -71,7 +73,7 @@ export const get163MusicListSongs = async (id: string) => {
     if (songURL) {
       finalMusic.push({
         id: song.id,
-        url: songURL,
+        url: songURL.replace(/http:\/\//, '//').replace(/https:\/\//, '//'),
         title: song.name,
         artist: song.ar.map((p) => p.name).join('/'),
         cover: song.al.picUrl
