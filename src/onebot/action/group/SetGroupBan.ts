@@ -17,8 +17,10 @@ export default class SetGroupBan extends OneBotAction<Payload, null> {
     async _handle(payload: Payload): Promise<null> {
         const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
         if (!uid) throw new Error('uid error');
-        await this.core.apis.GroupApi.banMember(payload.group_id.toString(),
+        // 例如无管理员权限时 result: 120101005 errMsg: 'ERR_NOT_GROUP_ADMIN'
+        let ret = await this.core.apis.GroupApi.banMember(payload.group_id.toString(),
             [{ uid: uid, timeStamp: +payload.duration }]);
+        if (ret.result !== 0) throw new Error(ret.errMsg);
         return null;
     }
 }
