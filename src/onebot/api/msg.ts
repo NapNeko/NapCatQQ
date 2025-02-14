@@ -996,24 +996,17 @@ export class OneBotMsgApi {
             this.core.context.logger.logError('文件消息缺少参数', inputdata);
             throw new Error('文件消息缺少参数');
         }
-
-        const downloadFile = async (uri: string) => {
-            const { path, fileName, errMsg, success } = await uriToLocalFile(this.core.NapCatTempPath, uri);
-            if (!success) {
-                this.core.context.logger.logError('文件下载失败', errMsg);
-                throw new Error('文件下载失败: ' + errMsg);
-            }
-            return { path, fileName };
-        };
+        realUri = await this.handleObfuckName(realUri) ?? realUri;
         try {
-            const { path, fileName } = await downloadFile(realUri);
+            const { path, fileName, errMsg, success } = await uriToLocalFile(this.core.NapCatTempPath, realUri);
+            if (!success) {
+                this.core.context.logger.logError('文件处理失败', errMsg);
+                throw new Error('文件处理失败: ' + errMsg);
+            }
             deleteAfterSentFiles.push(path);
             return { path, fileName: inputdata.name ?? fileName };
-        } catch {
-            realUri = await this.handleObfuckName(realUri);
-            const { path, fileName } = await downloadFile(realUri);
-            deleteAfterSentFiles.push(path);
-            return { path, fileName: inputdata.name ?? fileName };
+        } catch (e: unknown) {
+            throw new Error((e as Error).message);
         }
     }
 
@@ -1038,7 +1031,7 @@ export class OneBotMsgApi {
             }
             return url !== '' ? url : await this.core.apis.FileApi.downloadMedia(msgId, peer.chatType, peer.peerUid, elementId, '', '');
         }
-        throw new Error('文件名解析失败');
+        return undefined;
     }
 
     groupChangDecreseType2String(type: number): GroupDecreaseSubType {
