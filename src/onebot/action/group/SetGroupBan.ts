@@ -13,11 +13,10 @@ type Payload = Static<typeof SchemaData>;
 export default class SetGroupBan extends OneBotAction<Payload, null> {
     override actionName = ActionName.SetGroupBan;
     override payloadSchema = SchemaData;
-
     async _handle(payload: Payload): Promise<null> {
         const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
         if (!uid) throw new Error('uid error');
-        // 例如无管理员权限时 result: 120101005 errMsg: 'ERR_NOT_GROUP_ADMIN'
+        // 例如无管理员权限时 result为 120101005 errMsg为 'ERR_NOT_GROUP_ADMIN'
         let ret = await this.core.apis.GroupApi.banMember(payload.group_id.toString(),
             [{ uid: uid, timeStamp: +payload.duration }]);
         if (ret.result !== 0) throw new Error(ret.errMsg);
