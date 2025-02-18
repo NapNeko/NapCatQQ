@@ -232,7 +232,7 @@ export function rawMessageToText(msg: RawMessage, recursiveLevel = 0): string {
             tokens.push(`群聊 [${msg.peerName}(${msg.peerUin})]`);
         }
         if (msg.senderUin !== '0') {
-            tokens.push(`[${msg.sendMemberName ?? msg.sendRemarkName ?? msg.sendNickName}(${msg.senderUin})]`);
+            tokens.push(`[${msg.sendMemberName || msg.sendRemarkName || msg.sendNickName}(${msg.senderUin})]`);
         }
     } else if (msg.chatType == ChatType.KCHATTYPEDATALINE) {
         tokens.push('移动设备');
