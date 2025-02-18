@@ -24,7 +24,6 @@ export class GetPrivateFileUrl extends GetPacketStatusDepends<Payload, GetPrivat
             let msg = await this.core.apis.MsgApi.getMsgsByMsgId(contextMsgFile.peer, [contextMsgFile.msgId]);
             let self_id = this.core.selfInfo.uid;
             let file_hash = msg.msgList[0]?.elements.map(ele => ele.fileElement?.file10MMd5)[0];
-            console.log(file_hash,msg)
             if (file_hash) {
                 return {
                     url: await this.core.apis.PacketApi.pkt.operation.GetPrivateFileUrl(self_id, contextMsgFile.fileUUID, file_hash)
@@ -32,7 +31,6 @@ export class GetPrivateFileUrl extends GetPacketStatusDepends<Payload, GetPrivat
             }
 
         }
-        console.log(contextMsgFile);
         throw new Error('real fileUUID not found!');
     }
 }
