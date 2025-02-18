@@ -7,6 +7,7 @@ const SchemaData = Type.Object({
     bot_appid: Type.String(),
     button_id: Type.String({ default: '' }),
     callback_data: Type.String({ default: '' }),
+    msg_seq: Type.String({ default: '10086' }),
 });
 
 type Payload = Static<typeof SchemaData>;
@@ -18,13 +19,12 @@ export class ClickInlineKeyboardButton extends OneBotAction<Payload, unknown> {
     async _handle(payload: Payload) {
         return await this.core.apis.MsgApi.clickInlineKeyboardButton({
             buttonId: payload.button_id,
-            guildId: '',// 频道使用
             peerId: payload.group_id.toString(),
             botAppid: payload.bot_appid,
-            msgSeq: '10086',
+            msgSeq: payload.msg_seq,
             callback_data: payload.callback_data,
             dmFlag: 0,
-            chatType: 1
+            chatType: 2
         })
     }
 }

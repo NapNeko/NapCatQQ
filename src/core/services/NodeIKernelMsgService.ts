@@ -465,14 +465,14 @@ export interface NodeIKernelMsgService {
     setMsgEmojiLikesForRole(...args: unknown[]): unknown;
 
     clickInlineKeyboardButton(params: {
-        guildId: string,
+        guildId?: string,
         peerId: string,
         botAppid: string,
         msgSeq: string,
         buttonId: string,
         callback_data: string,
         dmFlag: number,
-        chatType: number
+        chatType: number // 1私聊 2群
     }): Promise<GeneralCallResult & { status: number, promptText: string, promptType: number, promptIcon: number }>;
 
     setCurOnScreenMsg(...args: unknown[]): unknown;
