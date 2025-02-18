@@ -1,22 +1,22 @@
 import * as crypto from 'crypto';
-import {PacketContext} from '@/core/packet/context/packetContext';
+import { PacketContext } from '@/core/packet/context/packetContext';
 import * as trans from '@/core/packet/transformer';
-import {PacketMsg} from '@/core/packet/message/message';
+import { PacketMsg } from '@/core/packet/message/message';
 import {
     PacketMsgFileElement,
     PacketMsgPicElement,
     PacketMsgPttElement,
     PacketMsgVideoElement
 } from '@/core/packet/message/element';
-import {ChatType, MsgSourceType, NTMsgType, RawMessage} from '@/core';
-import {MiniAppRawData, MiniAppReqParams} from '@/core/packet/entities/miniApp';
-import {AIVoiceChatType} from '@/core/packet/entities/aiChat';
-import {NapProtoDecodeStructType, NapProtoEncodeStructType, NapProtoMsg} from '@napneko/nap-proto-core';
-import {IndexNode, LongMsgResult, MsgInfo} from '@/core/packet/transformer/proto';
-import {OidbPacket} from '@/core/packet/transformer/base';
-import {ImageOcrResult} from '@/core/packet/entities/ocrResult';
-import {gunzipSync} from 'zlib';
-import {PacketMsgConverter} from '@/core/packet/message/converter';
+import { ChatType, MsgSourceType, NTMsgType, RawMessage } from '@/core';
+import { MiniAppRawData, MiniAppReqParams } from '@/core/packet/entities/miniApp';
+import { AIVoiceChatType } from '@/core/packet/entities/aiChat';
+import { NapProtoDecodeStructType, NapProtoEncodeStructType, NapProtoMsg } from '@napneko/nap-proto-core';
+import { IndexNode, LongMsgResult, MsgInfo } from '@/core/packet/transformer/proto';
+import { OidbPacket } from '@/core/packet/transformer/base';
+import { ImageOcrResult } from '@/core/packet/entities/ocrResult';
+import { gunzipSync } from 'zlib';
+import { PacketMsgConverter } from '@/core/packet/message/converter';
 
 export class PacketOperationContext {
     private readonly context: PacketContext;
@@ -59,10 +59,10 @@ export class PacketOperationContext {
             const res = trans.GetStrangerInfo.parse(resp);
             const extBigInt = BigInt(res.data.status.value);
             if (extBigInt <= 10n) {
-                return {status: Number(extBigInt) * 10, ext_status: 0};
+                return { status: Number(extBigInt) * 10, ext_status: 0 };
             }
             status = Number((extBigInt & 0xff00n) + ((extBigInt >> 16n) & 0xffn));
-            return {status: 10, ext_status: status};
+            return { status: 10, ext_status: status };
         } catch {
             return undefined;
         }
@@ -79,13 +79,13 @@ export class PacketOperationContext {
         const reqList = msg.flatMap(m =>
             m.msg.map(e => {
                 if (e instanceof PacketMsgPicElement) {
-                    return this.context.highway.uploadImage({chatType, peerUid}, e);
+                    return this.context.highway.uploadImage({ chatType, peerUid }, e);
                 } else if (e instanceof PacketMsgVideoElement) {
-                    return this.context.highway.uploadVideo({chatType, peerUid}, e);
+                    return this.context.highway.uploadVideo({ chatType, peerUid }, e);
                 } else if (e instanceof PacketMsgPttElement) {
-                    return this.context.highway.uploadPtt({chatType, peerUid}, e);
+                    return this.context.highway.uploadPtt({ chatType, peerUid }, e);
                 } else if (e instanceof PacketMsgFileElement) {
-                    return this.context.highway.uploadFile({chatType, peerUid}, e);
+                    return this.context.highway.uploadFile({ chatType, peerUid }, e);
                 }
                 return null;
             }).filter(Boolean)
@@ -159,6 +159,12 @@ export class PacketOperationContext {
         const resp = await this.context.client.sendOidbPacket(req, true);
         const res = trans.DownloadGroupFile.parse(resp);
         return `https://${res.download.downloadDns}/ftn_handler/${Buffer.from(res.download.downloadUrl).toString('hex')}/?fname=`;
+    }
+    async GetPrivateFileUrl(self_id: string, fileUUID: string, md5: string) {
+        const req = trans.DownloadPrivateFile.build(self_id, fileUUID, md5);
+        const resp = await this.context.client.sendOidbPacket(req, true);
+        const res = trans.DownloadPrivateFile.parse(resp);
+        return `http://${res.body?.result?.server}:${res.body?.result?.port}${res.body?.result?.url?.slice(8)}&isthumb=0`;
     }
 
     async GetGroupPttUrl(groupUin: number, node: NapProtoEncodeStructType<typeof IndexNode>) {

@@ -10,6 +10,7 @@ export interface InvalidCheckResult {
 }
 
 export const ActionName = {
+    NapCat_GetPrivateFileUrl: 'get_private_file_url',
     ClickInlineKeyboardButton: 'click_inline_keyboard_button',
     GetUnidirectionalFriendList: 'get_unidirectional_friend_list',
     // onebot 11
