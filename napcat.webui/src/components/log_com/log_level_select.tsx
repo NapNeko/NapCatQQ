@@ -16,13 +16,13 @@ const logLevelColor: {
     | 'secondary'
     | 'success'
     | 'warning'
-    | 'danger'
+    | 'primary'
 } = {
   [LogLevel.DEBUG]: 'default',
   [LogLevel.INFO]: 'primary',
   [LogLevel.WARN]: 'warning',
-  [LogLevel.ERROR]: 'danger',
-  [LogLevel.FATAL]: 'danger'
+  [LogLevel.ERROR]: 'primary',
+  [LogLevel.FATAL]: 'primary'
 }
 const LogLevelSelect = (props: LogLevelSelectProps) => {
   const { selectedKeys, onSelectionChange } = props

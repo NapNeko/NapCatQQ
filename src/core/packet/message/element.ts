@@ -1,21 +1,22 @@
-import * as zlib from "node:zlib";
-import { NapProtoEncodeStructType, NapProtoMsg } from "@napneko/nap-proto-core";
+import * as zlib from 'node:zlib';
+import {NapProtoDecodeStructType, NapProtoEncodeStructType, NapProtoMsg} from '@napneko/nap-proto-core';
 import {
     CustomFace,
     Elem,
+    FileExtra,
+    GroupFileExtra,
     MarkdownData,
     MentionExtra,
+    MsgInfo,
     NotOnlineImage,
+    OidbSvcTrpcTcp0XE37_800Response,
     QBigFaceExtra,
     QSmallFaceExtra,
-    MsgInfo,
-    OidbSvcTrpcTcp0XE37_800Response,
-    FileExtra,
-    GroupFileExtra
-} from "@/core/packet/transformer/proto";
+} from '@/core/packet/transformer/proto';
 import {
-    BaseEmojiType,
+    ElementType,
     FaceType,
+    MessageElement,
     NTMsgAtType,
     PicType,
     SendArkElement,
@@ -26,17 +27,21 @@ import {
     SendPicElement,
     SendPttElement,
     SendReplyElement,
-    SendStructLongMsgElement,
+    SendMultiForwardMsgElement,
     SendTextElement,
     SendVideoElement
-} from "@/core";
-import { ForwardMsgBuilder } from "@/common/forward-msg-builder";
-import { PacketMsg, PacketSendMsgElement } from "@/core/packet/message/message";
+} from '@/core';
+import {ForwardMsgBuilder} from '@/common/forward-msg-builder';
+import {PacketMsg, PacketSendMsgElement} from '@/core/packet/message/message';
+
+export type ParseElementFnR = [MessageElement, NapProtoDecodeStructType<typeof Elem> | null] | undefined;
+type ParseElementFn = (elem: NapProtoDecodeStructType<typeof Elem>) => ParseElementFnR;
 
 // raw <-> packet
 // TODO: SendStructLongMsgElement
 export abstract class IPacketMsgElement<T extends PacketSendMsgElement> {
-    protected constructor(rawElement: T) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    protected constructor(_rawElement: T) {
     }
 
     get valid(): boolean {
@@ -51,6 +56,8 @@ export abstract class IPacketMsgElement<T extends PacketSendMsgElement> {
         return [];
     }
 
+    static parseElement: ParseElementFn;
+
     toPreview(): string {
         return '[暂不支持该消息类型喵~]';
     }
@@ -64,7 +71,7 @@ export class PacketMsgTextElement extends IPacketMsgElement<SendTextElement> {
         this.text = element.textElement.content;
     }
 
-    buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
+    override buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
         return [{
             text: {
                 str: this.text
@@ -72,10 +79,29 @@ export class PacketMsgTextElement extends IPacketMsgElement<SendTextElement> {
         }];
     }
 
-    toPreview(): string {
+    static override parseElement = (elem: NapProtoDecodeStructType<typeof Elem>): ParseElementFnR => {
+        if (elem.text?.str && (elem.text?.attr6Buf === undefined || elem.text?.attr6Buf?.length === 0)) {
+            return [{
+                textElement: {
+                    content: elem.text?.str,
+                    atType: NTMsgAtType.ATTYPEUNKNOWN,
+                    atUid: '',
+                    atTinyId: '',
+                    atNtUid: '',
+                },
+                elementType: ElementType.UNKNOWN,
+                elementId: '',
+            }, null];
+        }
+        return undefined;
+    };
+
+    override toPreview(): string {
         return this.text;
-    }
+    };
 }
+
+
 
 export class PacketMsgAtElement extends PacketMsgTextElement {
     targetUid: string;
@@ -87,7 +113,7 @@ export class PacketMsgAtElement extends PacketMsgTextElement {
         this.atAll = element.textElement.atType === NTMsgAtType.ATTYPEALL;
     }
 
-    buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
+    override buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
         return [{
             text: {
                 str: this.text,
@@ -101,6 +127,22 @@ export class PacketMsgAtElement extends PacketMsgTextElement {
             }
         }];
     }
+    static override parseElement = (elem: NapProtoDecodeStructType<typeof Elem>): ParseElementFnR => {
+        if (elem.text?.str && (elem.text?.attr6Buf?.length ?? 100) >= 11) {
+            return [{
+                textElement: {
+                    content: elem.text?.str,
+                    atType: NTMsgAtType.ATTYPEONE,
+                    atUid: String(Buffer.from(elem.text!.attr6Buf!).readUInt32BE(7)),  // FIXME: hack
+                    atTinyId: '',
+                    atNtUid: '',
+                },
+                elementType: ElementType.UNKNOWN,
+                elementId: '',
+            }, null];
+        }
+        return undefined;
+    };
 }
 
 export class PacketMsgReplyElement extends IPacketMsgElement<SendReplyElement> {
@@ -127,7 +169,7 @@ export class PacketMsgReplyElement extends IPacketMsgElement<SendReplyElement> {
         return this.messageClientSeq === 0;
     }
 
-    buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
+    override buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
         return [{
             srcMsg: {
                 origSeqs: [this.isGroupReply ? this.messageClientSeq : this.messageSeq],
@@ -137,23 +179,30 @@ export class PacketMsgReplyElement extends IPacketMsgElement<SendReplyElement> {
                 pbReserve: {
                     messageId: this.messageId,
                 },
-                toUin: BigInt(0),
+                toUin: BigInt(this.targetUin),
+                type: 1,
             }
-        }, {
-            text: this.isGroupReply ? {
-                str: 'nya~',
-                pbReserve: new NapProtoMsg(MentionExtra).encode({
-                    type: this.targetUin === 0 ? 1 : 2,
-                    uin: 0,
-                    field5: 0,
-                    uid: String(this.targetUid),
-                }),
-            } : undefined,
         }];
     }
 
-    toPreview(): string {
-        return "[回复消息]";
+    static override parseElement = (elem: NapProtoDecodeStructType<typeof Elem>): ParseElementFnR => {
+        if (elem.srcMsg && elem.srcMsg.pbReserve) {
+            const reserve = elem.srcMsg.pbReserve;
+            return [{
+                replyElement: {
+                    replayMsgSeq: String(reserve.friendSeq ?? elem.srcMsg?.origSeqs?.[0] ?? 0),
+                    replayMsgId: String(reserve.messageId ?? 0),
+                    senderUin: String(elem?.srcMsg ?? 0)
+                },
+                elementType: ElementType.UNKNOWN,
+                elementId: '',
+            }, null];
+        }
+        return undefined;
+    };
+
+    override toPreview(): string {
+        return '[回复消息]';
     }
 }
 
@@ -169,18 +218,18 @@ export class PacketMsgFaceElement extends IPacketMsgElement<SendFaceElement> {
         this.isLargeFace = element.faceElement.faceType === FaceType.AniSticke;
     }
 
-    buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
+    override buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
         if (this.isLargeFace) {
             return [{
                 commonElem: {
                     serviceType: 37,
                     pbElem: new NapProtoMsg(QBigFaceExtra).encode({
-                        aniStickerPackId: "1",
-                        aniStickerId: "8",
+                        aniStickerPackId: '1',
+                        aniStickerId: '8',
                         faceId: this.faceId,
                         sourceType: 1,
                         resultId: this.resultId,
-                        preview: "",
+                        preview: '',
                         randomType: 1
                     }),
                     businessType: 1
@@ -198,8 +247,8 @@ export class PacketMsgFaceElement extends IPacketMsgElement<SendFaceElement> {
                     serviceType: 33,
                     pbElem: new NapProtoMsg(QSmallFaceExtra).encode({
                         faceId: this.faceId,
-                        preview: "",
-                        preview2: ""
+                        preview: '',
+                        preview2: ''
                     }),
                     businessType: 1
                 }
@@ -207,8 +256,48 @@ export class PacketMsgFaceElement extends IPacketMsgElement<SendFaceElement> {
         }
     }
 
-    toPreview(): string {
-        return "[表情]";
+    static override parseElement = (elem: NapProtoDecodeStructType<typeof Elem>): ParseElementFnR => {
+        if (elem.face?.index) {
+            return [{
+                faceElement: {
+                    faceIndex: elem.face.index,
+                    faceType: FaceType.Normal
+                },
+                elementType: ElementType.UNKNOWN,
+                elementId: '',
+            }, null];
+        }
+        if (elem?.commonElem?.serviceType === 37 && elem?.commonElem?.pbElem) {
+            const qface = new NapProtoMsg(QBigFaceExtra).decode(elem?.commonElem?.pbElem);
+            if (qface?.faceId) {
+                return [{
+                    faceElement: {
+                        faceIndex: qface.faceId,
+                        faceType: FaceType.Normal
+                    },
+                    elementType: ElementType.UNKNOWN,
+                    elementId: '',
+                }, null];
+            }
+        }
+        if (elem?.commonElem?.serviceType === 33 && elem?.commonElem?.pbElem) {
+            const qface = new NapProtoMsg(QSmallFaceExtra).decode(elem?.commonElem?.pbElem);
+            if (qface?.faceId) {
+                return [{
+                    faceElement: {
+                        faceIndex: qface.faceId,
+                        faceType: FaceType.Normal
+                    },
+                    elementType: ElementType.UNKNOWN,
+                    elementId: '',
+                }, null];
+            }
+        }
+        return undefined;
+    };
+
+    override toPreview(): string {
+        return '[表情]';
     }
 }
 
@@ -226,7 +315,7 @@ export class PacketMsgMarkFaceElement extends IPacketMsgElement<SendMarketFaceEl
         this.emojiKey = element.marketFaceElement.key;
     }
 
-    buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
+    override buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
         return [{
             marketFace: {
                 faceName: this.emojiName,
@@ -245,7 +334,7 @@ export class PacketMsgMarkFaceElement extends IPacketMsgElement<SendMarketFaceEl
         }];
     }
 
-    toPreview(): string {
+    override toPreview(): string {
         return `${this.emojiName}`;
     }
 }
@@ -280,11 +369,11 @@ export class PacketMsgPicElement extends IPacketMsgElement<SendPicElement> {
         ) : element.picElement.summary;
     }
 
-    get valid(): boolean {
+    override get valid(): boolean {
         return !!this.msgInfo;
     }
 
-    buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
+    override buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
         if (!this.msgInfo) return [];
         return [{
             commonElem: {
@@ -295,7 +384,61 @@ export class PacketMsgPicElement extends IPacketMsgElement<SendPicElement> {
         }];
     }
 
-    toPreview(): string {
+    static override parseElement = (elem: NapProtoDecodeStructType<typeof Elem>): ParseElementFnR => {
+        if (elem?.commonElem?.serviceType === 48 || [10, 20].includes(elem?.commonElem?.businessType ?? 0)) {
+            const extra = new NapProtoMsg(MsgInfo).decode(elem.commonElem!.pbElem!);
+            const msgInfoBody = extra.msgInfoBody[0];
+            const index = msgInfoBody?.index;
+            return [{
+                picElement: {
+                    fileSize: index?.info.fileSize ?? 0,
+                    picWidth: index?.info?.width ?? 0,
+                    picHeight: index?.info?.height ?? 0,
+                    fileName: index?.info?.fileHash ?? '',
+                    sourcePath: '',
+                    original: false,
+                    picType: PicType.NEWPIC_APNG,
+                    fileUuid: '',
+                    fileSubId: '',
+                    thumbFileSize: 0,
+                    summary: '[图片]',
+                    thumbPath: new Map(),
+                },
+                elementType: ElementType.UNKNOWN,
+                elementId: '',
+            }, elem];
+        }
+        if (elem?.notOnlineImage) {
+            const img = elem?.notOnlineImage; // url in originImageUrl
+            const preImg: MessageElement = {
+                picElement: {
+                    fileSize: img.fileLen ?? 0,
+                    picWidth: img.picWidth ?? 0,
+                    picHeight: img.picHeight ?? 0,
+                    fileName: Buffer.from(img.picMd5!).toString('hex') ?? '',
+                    sourcePath: '',
+                    original: false,
+                    picType: PicType.NEWPIC_APNG,
+                    fileUuid: '',
+                    fileSubId: '',
+                    thumbFileSize: 0,
+                    summary: '[图片]',
+                    thumbPath: new Map(),
+                },
+                elementType: ElementType.UNKNOWN,
+                elementId: '',
+            };
+            if (img.origUrl?.includes('&fileid=')) {
+                preImg.picElement!.originImageUrl = `https://multimedia.nt.qq.com.cn${img.origUrl}`;
+            } else {
+                preImg.picElement!.originImageUrl = `https://gchat.qpic.cn${img.origUrl}`;
+            }
+            return [preImg, elem];
+        }
+        return undefined;
+    };
+
+    override toPreview(): string {
         return this.summary;
     }
 }
@@ -318,18 +461,18 @@ export class PacketMsgVideoElement extends IPacketMsgElement<SendVideoElement> {
         this.fileSize = element.videoElement.fileSize;
         this.filePath = element.videoElement.filePath;
         this.thumbSize = element.videoElement.thumbSize;
-        this.thumbPath = element.videoElement.thumbPath?.get(0);
+        this.thumbPath = element.videoElement.thumbPath?.get(0) as string | undefined;
         this.fileMd5 = element.videoElement.videoMd5;
         this.thumbMd5 = element.videoElement.thumbMd5;
         this.thumbWidth = element.videoElement.thumbWidth;
         this.thumbHeight = element.videoElement.thumbHeight;
     }
 
-    get valid(): boolean {
+    override get valid(): boolean {
         return !!this.msgInfo;
     }
 
-    buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
+    override buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
         if (!this.msgInfo) return [];
         return [{
             commonElem: {
@@ -340,8 +483,8 @@ export class PacketMsgVideoElement extends IPacketMsgElement<SendVideoElement> {
         }];
     }
 
-    toPreview(): string {
-        return "[视频]";
+    override toPreview(): string {
+        return '[视频]';
     }
 }
 
@@ -361,11 +504,11 @@ export class PacketMsgPttElement extends IPacketMsgElement<SendPttElement> {
         this.fileDuration = Math.round(element.pttElement.duration); // TODO: cc
     }
 
-    get valid(): boolean {
+    override get valid(): boolean {
         return false;
     }
 
-    buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
+    override buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
         return [];
         // if (!this.msgInfo) return [];
         // return [{
@@ -377,8 +520,8 @@ export class PacketMsgPttElement extends IPacketMsgElement<SendPttElement> {
         // }];
     }
 
-    toPreview(): string {
-        return "[语音]";
+    override toPreview(): string {
+        return '[语音]';
     }
 }
 
@@ -402,11 +545,11 @@ export class PacketMsgFileElement extends IPacketMsgElement<SendFileElement> {
         this.fileSize = +element.fileElement.fileSize;
     }
 
-    get valid(): boolean {
+    override get valid(): boolean {
         return this.isGroupFile || Boolean(this._e37_800_rsp);
     }
 
-    buildContent(): Uint8Array | undefined {
+    override buildContent(): Uint8Array | undefined {
         if (this.isGroupFile || !this._e37_800_rsp) return undefined;
         return new NapProtoMsg(FileExtra).encode({
             file: {
@@ -437,7 +580,7 @@ export class PacketMsgFileElement extends IPacketMsgElement<SendFileElement> {
         });
     }
 
-    buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
+    override buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
         if (!this.isGroupFile) return [];
         const lb = Buffer.alloc(2);
         const transElemVal = new NapProtoMsg(GroupFileExtra).encode({
@@ -450,7 +593,7 @@ export class PacketMsgFileElement extends IPacketMsgElement<SendFileElement> {
                     fileSize: BigInt(this.fileSize),
                     fileName: this.fileName,
                     fileSha: this.fileSha1,
-                    extInfoString: "",
+                    extInfoString: '',
                     fileMd5: this.fileMd5,
                 }
             }
@@ -464,7 +607,7 @@ export class PacketMsgFileElement extends IPacketMsgElement<SendFileElement> {
         }];
     }
 
-    toPreview(): string {
+    override toPreview(): string {
         return `[文件]${this.fileName}`;
     }
 }
@@ -477,7 +620,7 @@ export class PacketMsgLightAppElement extends IPacketMsgElement<SendArkElement> 
         this.payload = element.arkElement.bytesData;
     }
 
-    buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
+    override buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
         return [{
             lightAppElem: {
                 data: Buffer.concat([
@@ -488,8 +631,8 @@ export class PacketMsgLightAppElement extends IPacketMsgElement<SendArkElement> 
         }];
     }
 
-    toPreview(): string {
-        return "[卡片消息]";
+    override toPreview(): string {
+        return '[卡片消息]';
     }
 }
 
@@ -501,7 +644,7 @@ export class PacketMsgMarkDownElement extends IPacketMsgElement<SendMarkdownElem
         this.content = element.markdownElement.content;
     }
 
-    buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
+    override buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
         return [{
             commonElem: {
                 serviceType: 45,
@@ -513,22 +656,22 @@ export class PacketMsgMarkDownElement extends IPacketMsgElement<SendMarkdownElem
         }];
     }
 
-    toPreview(): string {
+    override toPreview(): string {
         return `[Markdown消息 ${this.content}]`;
     }
 }
 
-export class PacketMultiMsgElement extends IPacketMsgElement<SendStructLongMsgElement> {
+export class PacketMultiMsgElement extends IPacketMsgElement<SendMultiForwardMsgElement> {
     resid: string;
     message: PacketMsg[];
 
-    constructor(rawElement: SendStructLongMsgElement, message?: PacketMsg[]) {
+    constructor(rawElement: SendMultiForwardMsgElement, message?: PacketMsg[]) {
         super(rawElement);
-        this.resid = rawElement.structLongMsgElement.resId;
+        this.resid = rawElement.multiForwardMsgElement.resId;
         this.message = message ?? [];
     }
 
-    buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
+    override buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
         return [{
             lightAppElem: {
                 data: Buffer.concat([
@@ -539,7 +682,7 @@ export class PacketMultiMsgElement extends IPacketMsgElement<SendStructLongMsgEl
         }];
     }
 
-    toPreview(): string {
-        return "[聊天记录]";
+    override toPreview(): string {
+        return '[聊天记录]';
     }
 }

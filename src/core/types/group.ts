@@ -33,7 +33,7 @@ export interface GroupDetailInfo {
     groupQuestion: string;
     certType: number;
     richFingerMemo: string;
-    tagRecord: any[];
+    tagRecord: unknown[];
     shutUpAllTimestamp: number;
     shutUpMeTimestamp: number;
     groupTypeFlag: number;
@@ -73,7 +73,7 @@ export interface GroupDetailInfo {
     cmdUinFlagExt3Grocery: number;
     groupCardPrefix: {
         introduction: string;
-        rptPrefix: any[];
+        rptPrefix: unknown[];
     };
     groupExt: {
         groupInfoExtSeq: number;
@@ -102,13 +102,13 @@ export interface GroupDetailInfo {
         showPlayTogetherSwitch: number;
         groupFlagPro1: string;
         groupBindGuildIds: {
-            guildIds: any[];
+            guildIds: unknown[];
         };
         viewedMsgDisappearTime: string;
         groupExtFlameData: {
             switchState: number;
             state: number;
-            dayNums: any[];
+            dayNums: unknown[];
             version: number;
             updateTime: string;
             isDisplayDayNum: boolean;
@@ -116,7 +116,7 @@ export interface GroupDetailInfo {
         groupBindGuildSwitch: number;
         groupAioBindGuildId: string;
         groupExcludeGuildIds: {
-            guildIds: any[];
+            guildIds: unknown[];
         };
         fullGroupExpansionSwitch: number;
         fullGroupExpansionSeq: string;
@@ -157,10 +157,10 @@ export interface GroupDetailInfo {
     headPortraitSeq: number;
     groupHeadPortrait: {
         portraitCnt: number;
-        portraitInfo: any[];
+        portraitInfo: unknown[];
         defaultId: number;
         verifyingPortraitCnt: number;
-        verifyingPortraitInfo: any[];
+        verifyingPortraitInfo: unknown[];
     };
     cmdUinJoinMsgSeq: number;
     cmdUinJoinRealMsgSeq: number;

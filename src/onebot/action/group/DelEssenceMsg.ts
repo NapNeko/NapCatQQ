@@ -8,12 +8,11 @@ const SchemaData = Type.Object({
 });
 
 type Payload = Static<typeof SchemaData>;
+export default class DelEssenceMsg extends OneBotAction<Payload, unknown> {
+    override actionName = ActionName.DelEssenceMsg;
+    override payloadSchema = SchemaData;
 
-export default class DelEssenceMsg extends OneBotAction<Payload, any> {
-    actionName = ActionName.DelEssenceMsg;
-    payloadSchema = SchemaData;
-
-    async _handle(payload: Payload): Promise<any> {
+    async _handle(payload: Payload): Promise<unknown> {
         const msg = MessageUnique.getMsgIdAndPeerByShortId(+payload.message_id);
         if (!msg) {
             const data = this.core.apis.GroupApi.essenceLRU.getValue(+payload.message_id);

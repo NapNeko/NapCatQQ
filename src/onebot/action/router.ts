@@ -2,18 +2,17 @@ export type BaseCheckResult = ValidCheckResult | InvalidCheckResult;
 
 export interface ValidCheckResult {
     valid: true;
-
-    [k: string | number]: any;
 }
 
 export interface InvalidCheckResult {
     valid: false;
     message: string;
-
-    [k: string | number]: any;
 }
 
 export const ActionName = {
+    NapCat_GetPrivateFileUrl: 'get_private_file_url',
+    ClickInlineKeyboardButton: 'click_inline_keyboard_button',
+    GetUnidirectionalFriendList: 'get_unidirectional_friend_list',
     // onebot 11
     SendPrivateMsg: 'send_private_msg',
     SendGroupMsg: 'send_group_msg',
@@ -53,7 +52,7 @@ export const ActionName = {
     GetVersionInfo: 'get_version_info',
     // Reboot : 'set_restart',
     // CleanCache : 'clean_cache',
-
+    Exit: 'bot_exit',
     // go-cqhttp
     SetQQProfile: 'set_qq_profile',
     // QidianGetAccountInfo : 'qidian_get_account_info',
@@ -94,6 +93,7 @@ export const ActionName = {
 
     // 以下为扩展napcat扩展
     Unknown: 'unknown',
+    SetDiyOnlineStatus: 'set_diy_online_status',
     SharePeer: 'ArkSharePeer',
     ShareGroupEx: 'ArkShareGroup',
     // RebootNormal : 'reboot_normal', //无快速登录重新启动
@@ -134,16 +134,16 @@ export const ActionName = {
 
     GetGroupIgnoredNotifies: 'get_group_ignored_notifies',
 
-    SetGroupSign: "set_group_sign",
-    SendGroupSign: "send_group_sign",
-    SendPacket: "send_packet",
-    GetMiniAppArk: "get_mini_app_ark",
+    SetGroupSign: 'set_group_sign',
+    SendGroupSign: 'send_group_sign',
+    SendPacket: 'send_packet',
+    GetMiniAppArk: 'get_mini_app_ark',
     // UploadForwardMsg : "upload_forward_msg",
-    GetAiRecord: "get_ai_record",
-    GetAiCharacters: "get_ai_characters",
-    SendGroupAiRecord: "send_group_ai_record",
+    GetAiRecord: 'get_ai_record',
+    GetAiCharacters: 'get_ai_characters',
+    SendGroupAiRecord: 'send_group_ai_record',
 
-    GetClientkey: "get_clientkey",
-    
+    GetClientkey: 'get_clientkey',
+
     SendPoke: 'send_poke',
 } as const;

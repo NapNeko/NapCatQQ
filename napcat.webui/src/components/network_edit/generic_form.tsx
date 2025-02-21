@@ -150,7 +150,7 @@ const GenericForm = <T extends keyof NetworkConfigType>({
       </ModalBody>
       <ModalFooter>
         <Button
-          color="danger"
+          color="primary"
           isDisabled={formState.isSubmitting}
           variant="light"
           onPress={onClose}

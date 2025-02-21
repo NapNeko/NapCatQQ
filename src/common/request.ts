@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import https from 'node:https';
 import http from 'node:http';
 
@@ -41,11 +42,13 @@ export class RequestUtil {
 
     private static extractCookies(setCookieHeaders: string[], cookies: { [key: string]: string }) {
         setCookieHeaders.forEach((cookie) => {
-            const parts = cookie.split(';')[0].split('=');
-            const key = parts[0];
-            const value = parts[1];
-            if (key && value && key.length > 0 && value.length > 0) {
-                cookies[key] = value;
+            const parts = cookie.split(';')[0]?.split('=');
+            if (parts) {
+                const key = parts[0];
+                const value = parts[1];
+                if (key && value && key.length > 0 && value.length > 0) {
+                    cookies[key] = value;
+                }
             }
         });
     }

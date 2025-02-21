@@ -11,8 +11,8 @@ const SchemaData = Type.Object({
 type Payload = Static<typeof SchemaData>;
 
 export class SetOnlineStatus extends OneBotAction<Payload, null> {
-    actionName = ActionName.SetOnlineStatus;
-    payloadSchema = SchemaData;
+    override actionName = ActionName.SetOnlineStatus;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         const ret = await this.core.apis.UserApi.setSelfOnlineStatus(

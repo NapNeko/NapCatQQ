@@ -1,7 +1,7 @@
-import * as proto from "@/core/packet/transformer/proto";
-import { NapProtoMsg } from "@napneko/nap-proto-core";
-import { OidbPacket, PacketTransformer } from "@/core/packet/transformer/base";
-import OidbBase from "@/core/packet/transformer/oidb/oidbBase";
+import * as proto from '@/core/packet/transformer/proto';
+import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { OidbPacket, PacketTransformer } from '@/core/packet/transformer/base';
+import OidbBase from '@/core/packet/transformer/oidb/oidbBase';
 
 class GroupSign extends PacketTransformer<typeof proto.OidbSvcTrpcTcpBase> {
     constructor() {
@@ -14,7 +14,7 @@ class GroupSign extends PacketTransformer<typeof proto.OidbSvcTrpcTcpBase> {
                 body: {
                     uin: String(uin),
                     groupUin: String(groupCode),
-                    version: "9.0.90"
+                    version: '9.0.90'
                 }
             }
         );

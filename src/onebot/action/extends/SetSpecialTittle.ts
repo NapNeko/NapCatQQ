@@ -1,5 +1,5 @@
 import { ActionName } from '@/onebot/action/router';
-import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
+import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
 import { Static, Type } from '@sinclair/typebox';
 
 const SchemaData = Type.Object({
@@ -10,9 +10,9 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export class SetSpecialTittle extends GetPacketStatusDepends<Payload, any> {
-    actionName = ActionName.SetSpecialTittle;
-    payloadSchema = SchemaData;
+export class SetSpecialTittle extends GetPacketStatusDepends<Payload, void> {
+    override actionName = ActionName.SetSpecialTittle;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());

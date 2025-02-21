@@ -1,6 +1,6 @@
-import * as proto from "@/core/packet/transformer/proto";
-import { NapProtoMsg } from "@napneko/nap-proto-core";
-import { OidbPacket, PacketHexStrBuilder, PacketTransformer } from "@/core/packet/transformer/base";
+import * as proto from '@/core/packet/transformer/proto';
+import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { OidbPacket, PacketHexStrBuilder, PacketTransformer } from '@/core/packet/transformer/base';
 
 class OidbBase extends PacketTransformer<typeof proto.OidbSvcTrpcTcpBase> {
     constructor() {

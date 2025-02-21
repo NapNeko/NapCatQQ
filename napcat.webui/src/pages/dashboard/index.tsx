@@ -105,7 +105,7 @@ const DashboardIndexPage: React.FC = () => {
           <SystemStatusCard setArchInfo={setArchInfo} />
         </div>
         <Networks />
-        <Card className="bg-opacity-60 shadow-sm shadow-danger-50">
+        <Card className="bg-opacity-60 shadow-sm shadow-primary-100">
           <CardBody>
             <Hitokoto />
           </CardBody>

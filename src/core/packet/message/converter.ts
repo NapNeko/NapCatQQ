@@ -1,21 +1,21 @@
 import {
-    Peer,
     ChatType,
     ElementType,
     MessageElement,
+    Peer,
     RawMessage,
     SendArkElement,
     SendFaceElement,
     SendFileElement,
     SendMarkdownElement,
     SendMarketFaceElement,
+    SendMultiForwardMsgElement,
     SendPicElement,
     SendPttElement,
     SendReplyElement,
-    SendStructLongMsgElement,
     SendTextElement,
     SendVideoElement
-} from "@/core";
+} from '@/core';
 import {
     IPacketMsgElement,
     PacketMsgAtElement,
@@ -30,8 +30,10 @@ import {
     PacketMsgTextElement,
     PacketMsgVideoElement,
     PacketMultiMsgElement
-} from "@/core/packet/message/element";
-import { PacketMsg, PacketSendMsgElement } from "@/core/packet/message/message";
+} from '@/core/packet/message/element';
+import {PacketMsg, PacketSendMsgElement} from '@/core/packet/message/message';
+import {NapProtoDecodeStructType} from '@napneko/nap-proto-core';
+import {Elem} from '@/core/packet/transformer/proto';
 
 const SupportedElementTypes = [
     ElementType.TEXT,
@@ -44,7 +46,7 @@ const SupportedElementTypes = [
     ElementType.PTT,
     ElementType.ARK,
     ElementType.MARKDOWN,
-    ElementType.STRUCTLONGMSG
+    ElementType.MULTIFORWARD
 ];
 
 type SendMessageTypeElementMap = {
@@ -57,7 +59,7 @@ type SendMessageTypeElementMap = {
     [ElementType.REPLY]: SendReplyElement,
     [ElementType.ARK]: SendArkElement,
     [ElementType.MFACE]: SendMarketFaceElement,
-    [ElementType.STRUCTLONGMSG]: SendStructLongMsgElement,
+    [ElementType.MULTIFORWARD]: SendMultiForwardMsgElement,
     [ElementType.MARKDOWN]: SendMarkdownElement,
 };
 
@@ -116,9 +118,8 @@ export class PacketMsgConverter {
         [ElementType.MARKDOWN]: (element) => {
             return new PacketMsgMarkDownElement(element as SendMarkdownElement);
         },
-        // TODO: check this logic, move it in arkElement?
-        [ElementType.STRUCTLONGMSG]: (element) => {
-            return new PacketMultiMsgElement(element as SendStructLongMsgElement);
+        [ElementType.MULTIFORWARD]: (element) => {
+            return new PacketMultiMsgElement(element as SendMultiForwardMsgElement);
         }
     };
 
@@ -146,12 +147,24 @@ export class PacketMsgConverter {
                 ? msg.sendMemberName
                 : msg.sendNickName && msg.sendNickName !== ''
                     ? msg.sendNickName
-                    : "QQ用户",
+                    : 'QQ用户',
             time: +msg.msgTime,
             msg: msg.elements.map((element) => {
                 if (!this.isValidElementType(element.elementType)) return null;
                 return this.rawToPacketMsgConverters[element.elementType](element);
             }).filter((e) => e !== null)
         };
+    }
+
+    packetMsgToRaw(msg: NapProtoDecodeStructType<typeof Elem>[]): [MessageElement, NapProtoDecodeStructType<typeof Elem> | null][] {
+        const converters = [PacketMsgTextElement.parseElement,
+            PacketMsgAtElement.parseElement, PacketMsgReplyElement.parseElement, PacketMsgPicElement.parseElement];
+        return msg.map((element) => {
+            for (const converter of converters) {
+                const result = converter(element);
+                if (result) return result;
+            }
+            return null;
+        }).filter((e) => e !== null);
     }
 }

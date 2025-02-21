@@ -55,15 +55,16 @@ const renderItems = (items: MenuItem[], children = false) => {
             isActive && 'bg-opacity-60',
             b64img && 'backdrop-blur-md text-white'
           )}
-          color="danger"
+          color="primary"
           endContent={
             canOpen ? (
-              // div实现箭头V效果
               <div
                 className={clsx(
                   'ml-auto relative w-3 h-3 transition-transform',
                   open && 'transform rotate-180',
-                  isActive ? 'text-danger-500' : 'text-red-300 dark:text-white',
+                  isActive
+                    ? 'text-primary-500'
+                    : 'text-primary-200 dark:text-white',
                   'before:rounded-full',
                   'before:content-[""]',
                   'before:block',
@@ -95,8 +96,8 @@ const renderItems = (items: MenuItem[], children = false) => {
                 className={clsx(
                   'w-3 h-1.5 rounded-full ml-auto shadow-lg',
                   isActive
-                    ? 'bg-danger-500 animate-spinner-ease-spin'
-                    : 'bg-red-300 dark:bg-white'
+                    ? 'bg-primary-500 animate-spinner-ease-spin'
+                    : 'bg-primary-200 dark:bg-white'
                 )}
               />
             )

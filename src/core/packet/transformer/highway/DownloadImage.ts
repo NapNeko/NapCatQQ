@@ -1,8 +1,8 @@
-import * as proto from "@/core/packet/transformer/proto";
-import { NapProtoEncodeStructType, NapProtoMsg } from "@napneko/nap-proto-core";
-import { OidbPacket, PacketTransformer } from "@/core/packet/transformer/base";
-import OidbBase from "@/core/packet/transformer/oidb/oidbBase";
-import { IndexNode } from "@/core/packet/transformer/proto";
+import * as proto from '@/core/packet/transformer/proto';
+import { NapProtoEncodeStructType, NapProtoMsg } from '@napneko/nap-proto-core';
+import { OidbPacket, PacketTransformer } from '@/core/packet/transformer/base';
+import OidbBase from '@/core/packet/transformer/oidb/oidbBase';
+import { IndexNode } from '@/core/packet/transformer/proto';
 
 class DownloadImage extends PacketTransformer<typeof proto.NTV2RichMediaResp> {
     constructor() {
@@ -14,7 +14,7 @@ class DownloadImage extends PacketTransformer<typeof proto.NTV2RichMediaResp> {
             reqHead: {
                 common: {
                     requestId: 1,
-                    command: 100
+                    command: 200
                 },
                 scene: {
                     requestType: 2,

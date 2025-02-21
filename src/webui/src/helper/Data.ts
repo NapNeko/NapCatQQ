@@ -1,5 +1,7 @@
 import type { LoginRuntimeType } from '../types/data';
 import packageJson from '../../../../package.json';
+import store from '@/common/store';
+
 const LoginRuntime: LoginRuntimeType = {
     LoginCurrentTime: Date.now(),
     LoginCurrentRate: 0,
@@ -26,15 +28,22 @@ const LoginRuntime: LoginRuntimeType = {
 };
 
 export const WebUiDataRuntime = {
-    checkLoginRate(RateLimit: number): boolean {
-        LoginRuntime.LoginCurrentRate++;
-        //console.log(RateLimit, LoginRuntime.LoginCurrentRate, Date.now() - LoginRuntime.LoginCurrentTime);
-        if (Date.now() - LoginRuntime.LoginCurrentTime > 1000 * 60) {
-            LoginRuntime.LoginCurrentRate = 0; //超出时间重置限速
-            LoginRuntime.LoginCurrentTime = Date.now();
+    checkLoginRate(ip: string, RateLimit: number): boolean {
+        const key = `login_rate:${ip}`;
+        const count = store.get<number>(key) || 0;
+
+        if (count === 0) {
+            // 第一次访问，设置计数器为1，并设置60秒过期
+            store.set(key, 1, 60);
             return true;
         }
-        return LoginRuntime.LoginCurrentRate <= RateLimit;
+
+        if (count >= RateLimit) {
+            return false;
+        }
+
+        store.incr(key);
+        return true;
     },
 
     getQQLoginStatus(): LoginRuntimeType['QQLoginStatus'] {
@@ -108,5 +117,5 @@ export const WebUiDataRuntime = {
 
     getQQVersion() {
         return LoginRuntime.QQVersion;
-    }
+    },
 };

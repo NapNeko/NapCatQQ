@@ -1,14 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import path from 'node:path';
 import fs from 'fs';
 import os from 'node:os';
 import { QQLevel } from '@/core';
+import { QQVersionConfigType } from './types';
 
 export async function solveProblem<T extends (...arg: any[]) => any>(func: T, ...args: Parameters<T>): Promise<ReturnType<T> | undefined> {
     return new Promise<ReturnType<T> | undefined>((resolve) => {
         try {
             const result = func(...args);
             resolve(result);
-        } catch (e) {
+        } catch {
             resolve(undefined);
         }
     });
@@ -166,14 +168,14 @@ export function calcQQLevel(level?: QQLevel) {
 }
 
 export function stringifyWithBigInt(obj: any) {
-    return JSON.stringify(obj, (key, value) =>
+    return JSON.stringify(obj, (_key, value) =>
         typeof value === 'bigint' ? value.toString() : value
     );
 }
 
 export function parseAppidFromMajor(nodeMajor: string): string | undefined {
-    const hexSequence = "A4 09 00 00 00 35";
-    const sequenceBytes = Buffer.from(hexSequence.replace(/ /g, ""), "hex");
+    const hexSequence = 'A4 09 00 00 00 35';
+    const sequenceBytes = Buffer.from(hexSequence.replace(/ /g, ''), 'hex');
     const filePath = path.resolve(nodeMajor);
     const fileContent = fs.readFileSync(filePath);
 
@@ -192,8 +194,8 @@ export function parseAppidFromMajor(nodeMajor: string): string | undefined {
         const content = fileContent.subarray(start, end);
         if (!content.every(byte => byte === 0x00)) {
             try {
-                return content.toString("utf-8");
-            } catch (error) {
+                return content.toString('utf-8');
+            } catch {
                 break;
             }
         }

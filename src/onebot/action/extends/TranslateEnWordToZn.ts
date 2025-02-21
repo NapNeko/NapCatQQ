@@ -8,9 +8,9 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export class TranslateEnWordToZn extends OneBotAction<Payload, Array<any> | null> {
-    actionName = ActionName.TranslateEnWordToZn;
-    payloadSchema = SchemaData;
+export class TranslateEnWordToZn extends OneBotAction<Payload, Array<unknown> | null> {
+    override actionName = ActionName.TranslateEnWordToZn;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         const ret = await this.core.apis.SystemApi.translateEnWordToZn(payload.words);

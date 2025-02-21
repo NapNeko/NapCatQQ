@@ -4,9 +4,9 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 
 class GetLoginInfo extends OneBotAction<null, OB11User> {
-    actionName = ActionName.GetLoginInfo;
+    override actionName = ActionName.GetLoginInfo;
 
-    async _handle(payload: null) {
+    async _handle() {
         return OB11Construct.selfInfo(this.core.selfInfo);
     }
 }

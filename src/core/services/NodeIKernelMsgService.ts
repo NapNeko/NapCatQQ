@@ -10,7 +10,7 @@ export interface NodeIKernelMsgService {
 
     addKernelMsgListener(nodeIKernelMsgListener: NodeIKernelMsgListener): number;
 
-    sendMsg(msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<any, any>): Promise<GeneralCallResult>;
+    sendMsg(msgId: string, peer: Peer, msgElements: SendMessageElement[], map: Map<unknown, unknown>): Promise<GeneralCallResult>;
 
     recallMsg(peer: Peer, msgIds: string[]): Promise<GeneralCallResult>;
 
@@ -30,7 +30,7 @@ export interface NodeIKernelMsgService {
 
     kickOffLine(DevInfo: unknown): unknown;
 
-    setStatus(args: { status: number, extStatus: number, batteryStatus: number }): Promise<GeneralCallResult>;
+    setStatus(args: { status: number, extStatus: number, batteryStatus: number, customStatus?: { faceId: string, wording: string, faceType: string } }): Promise<GeneralCallResult>;
 
     fetchStatusMgrInfo(): unknown;
 
@@ -114,9 +114,9 @@ export interface NodeIKernelMsgService {
 
     addLocalTofuRecordMsg(...args: unknown[]): unknown;
 
-    addLocalRecordMsg(Peer: Peer, msgId: string, ele: MessageElement, attr: Array<any> | number, front: boolean): Promise<unknown>;
+    addLocalRecordMsg(Peer: Peer, msgId: string, ele: MessageElement, attr: Array<unknown> | number, front: boolean): Promise<unknown>;
 
-    deleteMsg(Peer: Peer, msgIds: Array<string>): Promise<any>;
+    deleteMsg(Peer: Peer, msgIds: Array<string>): Promise<unknown>;
 
     updateElementExtBufForUI(...args: unknown[]): unknown;
 
@@ -464,11 +464,20 @@ export interface NodeIKernelMsgService {
 
     setMsgEmojiLikesForRole(...args: unknown[]): unknown;
 
-    clickInlineKeyboardButton(...args: unknown[]): unknown;
+    clickInlineKeyboardButton(params: {
+        guildId?: string,
+        peerId: string,
+        botAppid: string,
+        msgSeq: string,
+        buttonId: string,
+        callback_data: string,
+        dmFlag: number,
+        chatType: number // 1私聊 2群
+    }): Promise<GeneralCallResult & { status: number, promptText: string, promptType: number, promptIcon: number }>;
 
     setCurOnScreenMsg(...args: unknown[]): unknown;
 
-    setCurOnScreenMsgForMsgEvent(...args: unknown[]): unknown;
+    setCurOnScreenMsgForMsgEvent(peer: Peer, msgRegList: Map<string, Uint8Array>): void;
 
     getMiscData(key: string): unknown;
 

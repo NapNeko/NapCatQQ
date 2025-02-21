@@ -11,8 +11,8 @@ const SchemaData = Type.Object({
 type Payload = Static<typeof SchemaData>;
 
 class GetGroupList extends OneBotAction<Payload, OB11Group[]> {
-    actionName = ActionName.GetGroupList;
-    payloadSchema = SchemaData;
+    override actionName = ActionName.GetGroupList;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         return OB11Construct.groups(

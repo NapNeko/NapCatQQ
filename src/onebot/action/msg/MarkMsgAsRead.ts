@@ -49,21 +49,21 @@ class MarkMsgAsRead extends OneBotAction<PlayloadType, null> {
 
 // 以下为非标准实现
 export class MarkPrivateMsgAsRead extends MarkMsgAsRead {
-    payloadSchema = SchemaData;
-    actionName = ActionName.MarkPrivateMsgAsRead;
+    override payloadSchema = SchemaData;
+    override actionName = ActionName.MarkPrivateMsgAsRead;
 }
 
 export class MarkGroupMsgAsRead extends MarkMsgAsRead {
-    payloadSchema = SchemaData;
-    actionName = ActionName.MarkGroupMsgAsRead;
+    override payloadSchema = SchemaData;
+    override actionName = ActionName.MarkGroupMsgAsRead;
 }
 
 export class GoCQHTTPMarkMsgAsRead extends MarkMsgAsRead {
-    actionName = ActionName.GoCQHTTP_MarkMsgAsRead;
+    override actionName = ActionName.GoCQHTTP_MarkMsgAsRead;
 }
 
-export class MarkAllMsgAsRead extends OneBotAction<any, null> {
-    actionName = ActionName._MarkAllMsgAsRead;
+export class MarkAllMsgAsRead extends OneBotAction<void, null> {
+    override actionName = ActionName._MarkAllMsgAsRead;
 
     async _handle(): Promise<null> {
         await this.core.apis.MsgApi.markAllMsgAsRead();

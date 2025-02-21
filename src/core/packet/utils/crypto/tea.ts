@@ -1,4 +1,6 @@
 // love from https://github.com/LagrangeDev/lagrangejs/blob/main/src/core/tea.ts & https://github.com/takayama-lily/oicq/blob/main/lib/core/tea.ts
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck 
 const BUF7 = Buffer.alloc(7);
 const deltas = [
     0x9e3779b9, 0x3c6ef372, 0xdaa66d2b, 0x78dde6e4, 0x1715609d, 0xb54cda56, 0x5384540f, 0xf1bbcdc8, 0x8ff34781,

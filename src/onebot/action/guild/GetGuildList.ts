@@ -1,10 +1,10 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 
-export class GetGuildList extends OneBotAction<null, null> {
-    actionName = ActionName.GetGuildList;
+export class GetGuildList extends OneBotAction<void, void> {
+    override actionName = ActionName.GetGuildList;
 
-    async _handle(payload: null): Promise<null> {
-        return null;
+    async _handle(): Promise<void> {
+        return;
     }
 }

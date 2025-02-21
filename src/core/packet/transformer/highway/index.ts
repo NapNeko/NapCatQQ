@@ -12,3 +12,4 @@ export { default as UploadPrivateImage } from './UploadPrivateImage';
 export { default as UploadPrivatePtt } from './UploadPrivatePtt';
 export { default as UploadPrivateVideo } from './UploadPrivateVideo';
 export { default as DownloadImage } from './DownloadImage';
+export { default as DownloadGroupImage } from './DownloadGroupImage';

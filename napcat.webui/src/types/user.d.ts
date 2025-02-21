@@ -164,7 +164,7 @@ interface CommonExt {
   address: string
   regTime: number
   interest: string
-  labels: unknown[]
+  labels: string[]
   qqLevel: QQLevel
 }
 

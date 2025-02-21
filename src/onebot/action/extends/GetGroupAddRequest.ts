@@ -4,9 +4,9 @@ import { ActionName } from '@/onebot/action/router';
 import { Notify } from '@/onebot/types';
 
 export default class GetGroupAddRequest extends OneBotAction<null, Notify[] | null> {
-    actionName = ActionName.GetGroupIgnoreAddRequest;
+    override actionName = ActionName.GetGroupIgnoreAddRequest;
 
-    async _handle(payload: null): Promise<Notify[] | null> {
+    async _handle(): Promise<Notify[] | null> {
         const NTQQUserApi = this.core.apis.UserApi;
         const NTQQGroupApi = this.core.apis.GroupApi;
         const ignoredNotifies = await NTQQGroupApi.getSingleScreenNotifies(true, 10);

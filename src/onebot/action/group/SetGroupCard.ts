@@ -11,8 +11,8 @@ const SchemaData = Type.Object({
 type Payload = Static<typeof SchemaData>;
 
 export default class SetGroupCard extends OneBotAction<Payload, null> {
-    actionName = ActionName.SetGroupCard;
-    payloadSchema = SchemaData;
+    override actionName = ActionName.SetGroupCard;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
         const member = await this.core.apis.GroupApi.getGroupMember(payload.group_id.toString(), payload.user_id.toString());

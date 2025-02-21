@@ -1,6 +1,6 @@
-import { ScalarType } from "@protobuf-ts/runtime";
-import { ProtoField } from "@napneko/nap-proto-core";
-import { ContentHead, MessageBody, MessageControl, RoutingHead } from "@/core/packet/transformer/proto";
+import { ScalarType } from '@protobuf-ts/runtime';
+import { ProtoField } from '@napneko/nap-proto-core';
+import { ContentHead, MessageBody, MessageControl, RoutingHead } from '@/core/packet/transformer/proto';
 
 export const FaceRoamRequest = {
     comm: ProtoField(1, () => PlatInfo, true),

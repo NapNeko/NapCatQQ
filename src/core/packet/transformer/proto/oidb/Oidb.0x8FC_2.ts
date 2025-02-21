@@ -1,4 +1,4 @@
-import { ProtoField, ScalarType } from "@napneko/nap-proto-core";
+import { ProtoField, ScalarType } from '@napneko/nap-proto-core';
 
 
 //设置群头衔 OidbSvcTrpcTcp.0x8fc_2

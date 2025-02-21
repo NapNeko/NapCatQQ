@@ -35,7 +35,7 @@ const VideoInsert = () => {
         <Tooltip content="发送视频">
           <div className="max-w-fit">
             <PopoverTrigger>
-              <Button color="danger" variant="flat" isIconOnly radius="full">
+              <Button color="primary" variant="flat" isIconOnly radius="full">
                 <IoVideocam className="text-xl" />
               </Button>
             </PopoverTrigger>
@@ -45,7 +45,7 @@ const VideoInsert = () => {
           <Tooltip content="上传视频">
             <Button
               className="text-lg"
-              color="danger"
+              color="primary"
               isIconOnly
               variant="flat"
               radius="full"
@@ -62,7 +62,7 @@ const VideoInsert = () => {
                 <PopoverTrigger tooltip="输入视频地址">
                   <Button
                     className="text-lg"
-                    color="danger"
+                    color="primary"
                     isIconOnly
                     variant="flat"
                     radius="full"
@@ -79,7 +79,7 @@ const VideoInsert = () => {
                 placeholder="请输入视频地址"
               />
               <Button
-                color="danger"
+                color="primary"
                 variant="flat"
                 isIconOnly
                 radius="full"

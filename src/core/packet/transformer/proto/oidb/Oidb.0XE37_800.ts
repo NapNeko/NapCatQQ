@@ -1,5 +1,5 @@
-import { ProtoField, ScalarType } from "@napneko/nap-proto-core";
-import { OidbSvcTrpcTcp0XE37_800_1200Metadata } from "@/core/packet/transformer/proto";
+import { ProtoField, ScalarType } from '@napneko/nap-proto-core';
+import { OidbSvcTrpcTcp0XE37_800_1200Metadata } from '@/core/packet/transformer/proto';
 
 export const OidbSvcTrpcTcp0XE37_800 = {
     subCommand: ProtoField(1, ScalarType.UINT32),

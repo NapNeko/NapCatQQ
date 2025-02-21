@@ -82,7 +82,7 @@ export interface NodeIKernelLoginService {
 
     quickLoginWithUin(uin: string): Promise<QuickLoginResult>;
 
-    passwordLogin(param: PasswordLoginArgType): Promise<any>;
+    passwordLogin(param: PasswordLoginArgType): Promise<unknown>;
 
     getQRCodePicture(): boolean;
 }

@@ -10,6 +10,7 @@ import {
 import { useCallback, useRef } from 'react'
 import toast from 'react-hot-toast'
 
+import ChatInputModal from '@/components/chat_input/modal'
 import CodeEditor from '@/components/code_editor'
 import type { CodeEditorRef } from '@/components/code_editor'
 
@@ -42,7 +43,7 @@ const OneBotSendModal: React.FC<OneBotSendModalProps> = (props) => {
 
   return (
     <>
-      <Button onPress={onOpen} color="danger" radius="full" variant="flat">
+      <Button onPress={onOpen} color="primary" radius="full" variant="flat">
         构造请求
       </Button>
       <Modal
@@ -72,11 +73,13 @@ const OneBotSendModal: React.FC<OneBotSendModalProps> = (props) => {
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button color="danger" variant="flat" onPress={onClose}>
+                <ChatInputModal />
+
+                <Button color="primary" variant="flat" onPress={onClose}>
                   取消
                 </Button>
                 <Button
-                  color="danger"
+                  color="primary"
                   onPress={() => handleSendMessage(onClose)}
                 >
                   发送

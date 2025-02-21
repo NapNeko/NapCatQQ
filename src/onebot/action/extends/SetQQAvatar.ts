@@ -11,8 +11,8 @@ const SchemaData = Type.Object({
 type Payload = Static<typeof SchemaData>;
 
 export default class SetAvatar extends OneBotAction<Payload, null> {
-    actionName = ActionName.SetQQAvatar;
-    payloadSchema = SchemaData;
+    override actionName = ActionName.SetQQAvatar;
+    override payloadSchema = SchemaData;
     async _handle(payload: Payload): Promise<null> {
         const { path, success } = (await uriToLocalFile(this.core.NapCatTempPath, payload.file));
         if (!success) {

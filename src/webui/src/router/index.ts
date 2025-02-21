@@ -12,6 +12,7 @@ import { QQLoginRouter } from '@webapi/router/QQLogin';
 import { AuthRouter } from '@webapi/router/auth';
 import { LogRouter } from '@webapi/router/Log';
 import { BaseRouter } from '@webapi/router/Base';
+import { FileRouter } from './File';
 
 const router = Router();
 
@@ -32,5 +33,7 @@ router.use('/QQLogin', QQLoginRouter);
 router.use('/OB11Config', OB11ConfigRouter);
 // router:日志相关路由
 router.use('/Log', LogRouter);
+// file:文件相关路由
+router.use('/File', FileRouter);
 
 export { router as ALLRouter };

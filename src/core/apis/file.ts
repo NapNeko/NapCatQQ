@@ -22,17 +22,20 @@ import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 import { RkeyManager } from '@/core/helper/rkey';
 import { calculateFileMD5 } from '@/common/file';
 import pathLib from 'node:path';
-import { defaultVideoThumbB64, getVideoInfo } from '@/common/video';
-import ffmpeg from 'fluent-ffmpeg';
+import { defaultVideoThumbB64 } from '@/common/video';
 import { encodeSilk } from '@/common/audio';
 import { SendMessageContext } from '@/onebot/api';
 import { getFileTypeForSendType } from '../helper/msg';
+import { FFmpegService } from '@/common/ffmpeg';
+import { rkeyDataType } from '../types/file';
 
 export class NTQQFileApi {
     context: InstanceContext;
     core: NapCatCore;
     rkeyManager: RkeyManager;
     packetRkey: Array<{ rkey: string; time: number; type: number; ttl: bigint }> | undefined;
+    private fetchRkeyFailures: number = 0;
+    private readonly MAX_RKEY_FAILURES: number = 8;
 
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
@@ -43,6 +46,22 @@ export class NTQQFileApi {
         this.context.logger
         );
     }
+
+    private async fetchRkeyWithRetry() {
+        if (this.fetchRkeyFailures >= this.MAX_RKEY_FAILURES) {
+            throw new Error('Native.FetchRkey 已被禁用');
+        }
+        try {
+            let ret = await this.core.apis.PacketApi.pkt.operation.FetchRkey();
+            this.fetchRkeyFailures = 0; // Reset failures on success
+            return ret;
+        } catch (error) {
+            this.fetchRkeyFailures++;
+            this.context.logger.logError('FetchRkey 失败', (error as Error).message);
+            throw error;
+        }
+    }
+
 
     async copyFile(filePath: string, destPath: string) {
         await this.core.util.copyFile(filePath, destPath);
@@ -61,7 +80,7 @@ export class NTQQFileApi {
 
     async uploadFile(filePath: string, elementType: ElementType = ElementType.PIC, elementSubType: number = 0) {
         const fileMd5 = await calculateFileMD5(filePath);
-        const extOrEmpty = await fileTypeFromFile(filePath).then(e => e?.ext ?? '').catch(e => '');
+        const extOrEmpty = await fileTypeFromFile(filePath).then(e => e?.ext ?? '').catch(() => '');
         const ext = extOrEmpty ? `.${extOrEmpty}` : '';
         let fileName = `${path.basename(filePath)}`;
         if (fileName.indexOf('.') === -1) {
@@ -140,7 +159,7 @@ export class NTQQFileApi {
         };
     }
 
-    async createValidSendVideoElement(context: SendMessageContext, filePath: string, fileName: string = '', diyThumbPath: string = ''): Promise<SendVideoElement> {
+    async createValidSendVideoElement(context: SendMessageContext, filePath: string, fileName: string = '', _diyThumbPath: string = ''): Promise<SendVideoElement> {
         let videoInfo = {
             width: 1920,
             height: 1080,
@@ -149,12 +168,6 @@ export class NTQQFileApi {
             size: 0,
             filePath,
         };
-        try {
-            videoInfo = await getVideoInfo(filePath, this.context.logger);
-        } catch (e) {
-            this.context.logger.logError('获取视频信息失败，将使用默认值', e);
-        }
-
         let fileExt = 'mp4';
         try {
             const tempExt = (await fileTypeFromFile(filePath))?.ext;
@@ -162,53 +175,37 @@ export class NTQQFileApi {
         } catch (e) {
             this.context.logger.logError('获取文件类型失败', e);
         }
-        const newFilePath = filePath + '.' + fileExt;
+        const newFilePath = `${filePath}.${fileExt}`;
         fs.copyFileSync(filePath, newFilePath);
         context.deleteAfterSentFiles.push(newFilePath);
         filePath = newFilePath;
+
         const { fileName: _fileName, path, fileSize, md5 } = await this.core.apis.FileApi.uploadFile(filePath, ElementType.VIDEO);
         if (fileSize === 0) {
             throw new Error('文件异常，大小为0');
         }
-        videoInfo.size = fileSize;
-        let thumb = path.replace(`${pathLib.sep}Ori${pathLib.sep}`, `${pathLib.sep}Thumb${pathLib.sep}`);
-        thumb = pathLib.dirname(thumb);
+        const thumbDir = path.replace(`${pathLib.sep}Ori${pathLib.sep}`, `${pathLib.sep}Thumb${pathLib.sep}`);
+        fs.mkdirSync(pathLib.dirname(thumbDir), { recursive: true });
+        const thumbPath = pathLib.join(pathLib.dirname(thumbDir), `${md5}_0.png`);
+        try {
+            videoInfo = await FFmpegService.getVideoInfo(filePath, thumbPath);
+        } catch {
+            fs.writeFileSync(thumbPath, Buffer.from(defaultVideoThumbB64, 'base64'));
+        }
+        if (_diyThumbPath) {
+            try {
+                await this.copyFile(_diyThumbPath, thumbPath);
+            } catch (e) {
+                this.context.logger.logError('复制自定义缩略图失败', e);
+            }
+        }
+        context.deleteAfterSentFiles.push(thumbPath);
+        const thumbSize = (await fsPromises.stat(thumbPath)).size;
+        const thumbMd5 = await calculateFileMD5(thumbPath);
+        context.deleteAfterSentFiles.push(thumbPath);
 
-        const thumbPath = new Map();
-        const _thumbPath = await new Promise<string | undefined>((resolve, reject) => {
-            const thumbFileName = `${md5}_0.png`;
-            const thumbPath = pathLib.join(thumb, thumbFileName);
-            ffmpeg(filePath)
-                .on('error', (err) => {
-                    try {
-                        this.context.logger.logDebug('获取视频封面失败，使用默认封面', err);
-                        if (diyThumbPath) {
-                            fsPromises.copyFile(diyThumbPath, thumbPath).then(() => {
-                                resolve(thumbPath);
-                            }).catch(reject);
-                        } else {
-                            fs.writeFileSync(thumbPath, Buffer.from(defaultVideoThumbB64, 'base64'));
-                            resolve(thumbPath);
-                        }
-                    } catch (error) {
-                        this.context.logger.logError('获取视频封面失败，使用默认封面失败', error);
-                    }
-                })
-                .screenshots({
-                    timestamps: [0],
-                    filename: thumbFileName,
-                    folder: thumb,
-                    size: videoInfo.width + 'x' + videoInfo.height,
-                })
-                .on('end', () => {
-                    resolve(thumbPath);
-                });
-        });
-        const thumbSize = _thumbPath ? (await fsPromises.stat(_thumbPath)).size : 0;
-        thumbPath.set(0, _thumbPath);
-        const thumbMd5 = _thumbPath ? await calculateFileMD5(_thumbPath) : '';
-        context.deleteAfterSentFiles.push(path);
-        const uploadName = (fileName || _fileName).toLocaleLowerCase().endsWith('.' + fileExt.toLocaleLowerCase()) ? (fileName || _fileName) : (fileName || _fileName) + '.' + fileExt;
+
+        const uploadName = (fileName || _fileName).toLocaleLowerCase().endsWith(`.${fileExt.toLocaleLowerCase()}`) ? (fileName || _fileName) : `${fileName || _fileName}.${fileExt}`;
         return {
             elementType: ElementType.VIDEO,
             elementId: '',
@@ -218,15 +215,14 @@ export class NTQQFileApi {
                 videoMd5: md5,
                 thumbMd5,
                 fileTime: videoInfo.time,
-                thumbPath: thumbPath,
+                thumbPath: new Map([[0, thumbPath]]),
                 thumbSize,
                 thumbWidth: videoInfo.width,
                 thumbHeight: videoInfo.height,
-                fileSize: '' + fileSize,
+                fileSize: fileSize.toString(),
             },
         };
     }
-
     async createValidSendPttElement(pttPath: string): Promise<SendPttElement> {
 
         const { converted, path: silkPath, duration } = await encodeSilk(pttPath, this.core.NapCatTempPath, this.core.context.logger);
@@ -238,8 +234,7 @@ export class NTQQFileApi {
             throw new Error('文件异常，大小为0');
         }
         if (converted) {
-            fsPromises.unlink(silkPath).then().catch((e) => this.context.logger.logError('删除临时文件失败', e)
-            );
+            fsPromises.unlink(silkPath).then().catch((e) => this.context.logger.logError('删除临时文件失败', e));
         }
         return {
             elementType: ElementType.PTT,
@@ -306,16 +301,16 @@ export class NTQQFileApi {
                 ) {
                     switch (element.elementType) {
                     case ElementType.PIC:
-                            element.picElement!.sourcePath = elementResults[elementIndex];
+                            element.picElement!.sourcePath = elementResults?.[elementIndex] ?? '';
                         break;
                     case ElementType.VIDEO:
-                            element.videoElement!.filePath = elementResults[elementIndex];
+                            element.videoElement!.filePath = elementResults?.[elementIndex] ?? '';
                         break;
                     case ElementType.PTT:
-                            element.pttElement!.filePath = elementResults[elementIndex];
+                            element.pttElement!.filePath = elementResults?.[elementIndex] ?? '';
                         break;
                     case ElementType.FILE:
-                            element.fileElement!.filePath = elementResults[elementIndex];
+                            element.fileElement!.filePath = elementResults?.[elementIndex] ?? '';
                         break;
                     }
                     elementIndex++;
@@ -330,7 +325,7 @@ export class NTQQFileApi {
             if (force) {
                 try {
                     await fsPromises.unlink(sourcePath);
-                } catch (e) {
+                } catch {
                     //
                 }
             } else {
@@ -432,7 +427,7 @@ export class NTQQFileApi {
     }
 
     private async getRkeyData() {
-        const rkeyData = {
+        const rkeyData: rkeyDataType = {
             private_rkey: 'CAQSKAB6JWENi5LM_xp9vumLbuThJSaYf-yzMrbZsuq7Uz2qEc3Rbib9LP4',
             group_rkey: 'CAQSKAB6JWENi5LM_xp9vumLbuThJSaYf-yzMrbZsuq7Uz2qffcqm614gds',
             online_rkey: false
@@ -440,19 +435,19 @@ export class NTQQFileApi {
 
         try {
             if (this.core.apis.PacketApi.available) {
-                const rkey_expired_private = !this.packetRkey || this.packetRkey[0].time + Number(this.packetRkey[0].ttl) < Date.now() / 1000;
-                const rkey_expired_group = !this.packetRkey || this.packetRkey[0].time + Number(this.packetRkey[0].ttl) < Date.now() / 1000;
+                const rkey_expired_private = !this.packetRkey || (this.packetRkey[0] && this.packetRkey[0].time + Number(this.packetRkey[0].ttl) < Date.now() / 1000);
+                const rkey_expired_group = !this.packetRkey || (this.packetRkey[0] && this.packetRkey[0].time + Number(this.packetRkey[0].ttl) < Date.now() / 1000);
                 if (rkey_expired_private || rkey_expired_group) {
-                    this.packetRkey = await this.core.apis.PacketApi.pkt.operation.FetchRkey();
+                    this.packetRkey = await this.fetchRkeyWithRetry();
                 }
                 if (this.packetRkey && this.packetRkey.length > 0) {
-                    rkeyData.group_rkey = this.packetRkey[1].rkey.slice(6);
-                    rkeyData.private_rkey = this.packetRkey[0].rkey.slice(6);
+                    rkeyData.group_rkey = this.packetRkey[1]?.rkey.slice(6) ?? '';
+                    rkeyData.private_rkey = this.packetRkey[0]?.rkey.slice(6) ?? '';
                     rkeyData.online_rkey = true;
                 }
             }
-        } catch (error: any) {
-            this.context.logger.logError('获取rkey失败', error.message);
+        } catch (error: unknown) {
+            this.context.logger.logDebug('获取native.rkey失败', (error as Error).message);
         }
 
         if (!rkeyData.online_rkey) {
@@ -461,15 +456,15 @@ export class NTQQFileApi {
                 rkeyData.group_rkey = tempRkeyData.group_rkey;
                 rkeyData.private_rkey = tempRkeyData.private_rkey;
                 rkeyData.online_rkey = tempRkeyData.expired_time > Date.now() / 1000;
-            } catch (e) {
-                this.context.logger.logDebug('获取rkey失败 Fallback Old Mode', e);
+            } catch (error: unknown) {
+                this.context.logger.logDebug('获取remote.rkey失败', (error as Error).message);
             }
         }
-
+        // 进行 fallback.rkey 模式
         return rkeyData;
     }
 
-    private getImageUrlFromParsedUrl(imageFileId: string, appid: string, rkeyData: any): string {
+    private getImageUrlFromParsedUrl(imageFileId: string, appid: string, rkeyData: rkeyDataType): string {
         const rkey = appid === '1406' ? rkeyData.private_rkey : rkeyData.group_rkey;
         if (rkeyData.online_rkey) {
             return IMAGE_HTTP_HOST_NT + `/download?appid=${appid}&fileid=${imageFileId}&rkey=${rkey}`;

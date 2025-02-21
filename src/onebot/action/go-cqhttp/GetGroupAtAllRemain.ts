@@ -7,10 +7,14 @@ const SchemaData = Type.Object({
 });
 
 type Payload = Static<typeof SchemaData>;
-
-export class GoCQHTTPGetGroupAtAllRemain extends OneBotAction<Payload, any> {
-    actionName = ActionName.GoCQHTTP_GetGroupAtAllRemain;
-    payloadSchema = SchemaData;
+interface ResponseType {
+    can_at_all: boolean;
+    remain_at_all_count_for_group: number;
+    remain_at_all_count_for_uin: number;
+}
+export class GoCQHTTPGetGroupAtAllRemain extends OneBotAction<Payload, ResponseType> {
+    override actionName = ActionName.GoCQHTTP_GetGroupAtAllRemain;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         const ret = await this.core.apis.GroupApi.getGroupRemainAtTimes(payload.group_id.toString());

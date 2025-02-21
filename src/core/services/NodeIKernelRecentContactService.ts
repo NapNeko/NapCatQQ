@@ -20,10 +20,10 @@ export interface NodeIKernelRecentContactService {
             errMsg: string,
             sortedContactList: Array<number>,
             changedList: Array<{
-                remark: any;
-                peerName: any;
-                sendMemberName: any;
-                sendNickName: any;
+                remark: unknown;
+                peerName: unknown;
+                sendMemberName: unknown;
+                sendNickName: unknown;
                 peerUid: string; peerUin: string, msgTime: string, chatType: ChatType, msgId: string
             }>
         }
@@ -59,7 +59,7 @@ export interface NodeIKernelRecentContactService {
 
     deleteRecentContactsVer2(...args: unknown[]): unknown; // 1 arguments
 
-    getRecentContactList(): Promise<any>;
+    getRecentContactList(): Promise<unknown>;
 
     getMsgUnreadCount(): unknown;
 

@@ -27,41 +27,36 @@ export default function HttpDebug() {
   return (
     <>
       <title>HTTP调试 - NapCat WebUI</title>
-      <div className="w-full h-[calc(100%-3.6rem)] flex items-stretch">
-        <OneBotApiNavList
-          data={oneBotHttpApi}
-          selectedApi={selectedApi}
-          onSelect={setSelectedApi}
-          openSideBar={openSideBar}
-        />
-        <div
-          ref={contentRef}
-          className="flex-1 h-full overflow-x-hidden relative"
+      <OneBotApiNavList
+        data={oneBotHttpApi}
+        selectedApi={selectedApi}
+        onSelect={setSelectedApi}
+        openSideBar={openSideBar}
+      />
+      <div ref={contentRef} className="flex-1 h-full overflow-x-hidden">
+        <motion.div
+          className="absolute top-16 z-30 md:!ml-4"
+          animate={{ marginLeft: openSideBar ? '16rem' : '1rem' }}
+          transition={{ type: 'spring', stiffness: 150, damping: 15 }}
         >
-          <motion.div
-            className="sticky top-0 z-20 md:!ml-4"
-            animate={{ marginLeft: openSideBar ? '16rem' : '1rem' }}
-            transition={{ type: 'spring', stiffness: 150, damping: 15 }}
+          <Button
+            isIconOnly
+            color="primary"
+            radius="md"
+            variant="shadow"
+            size="sm"
+            onPress={() => setOpenSideBar(!openSideBar)}
           >
-            <Button
-              isIconOnly
-              color="danger"
-              radius="md"
-              variant="shadow"
-              size="sm"
-              onPress={() => setOpenSideBar(!openSideBar)}
-            >
-              <TbSquareRoundedChevronLeftFilled
-                size={24}
-                className={clsx(
-                  'transition-transform',
-                  openSideBar ? '' : 'transform rotate-180'
-                )}
-              />
-            </Button>
-          </motion.div>
-          <OneBotApiDebug path={selectedApi} data={data} />
-        </div>
+            <TbSquareRoundedChevronLeftFilled
+              size={24}
+              className={clsx(
+                'transition-transform',
+                openSideBar ? '' : 'transform rotate-180'
+              )}
+            />
+          </Button>
+        </motion.div>
+        <OneBotApiDebug path={selectedApi} data={data} />
       </div>
     </>
   )

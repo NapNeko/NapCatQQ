@@ -3,11 +3,11 @@ import { BizKey, ModifyProfileParams, NodeIKernelProfileListener, ProfileBizType
 import { GeneralCallResult } from '@/core/services/common';
 
 export interface NodeIKernelProfileService {
-    getOtherFlag(callfrom: string, uids: string[]): Promise<Map<string, any>>;
+    getOtherFlag(callfrom: string, uids: string[]): Promise<Map<string, unknown>>;
 
-    getVasInfo(callfrom: string, uids: string[]): Promise<Map<string, any>>;
+    getVasInfo(callfrom: string, uids: string[]): Promise<Map<string, unknown>>;
 
-    getRelationFlag(callfrom: string, uids: string[]): Promise<Map<string, any>>;
+    getRelationFlag(callfrom: string, uids: string[]): Promise<Map<string, unknown>>;
 
     getUidByUin(callfrom: string, uin: Array<string>): Map<string, string>;
 
@@ -70,7 +70,7 @@ export interface NodeIKernelProfileService {
     getProfileQzonePicInfo(uid: string, type: number, force: boolean): Promise<unknown>;
 
     // UserRemarkServiceImpl::getStrangerRemarkByUid []
-    getCoreInfo(sceneId: string, arg: any[]): unknown;
+    getCoreInfo(sceneId: string, arg: unknown[]): unknown;
 
     isNull(): boolean;
 }
