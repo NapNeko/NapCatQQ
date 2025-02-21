@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { LogWrapper } from '@/common/log';
 
 export function proxyHandlerOf(logger: LogWrapper) {
@@ -5,6 +6,7 @@ export function proxyHandlerOf(logger: LogWrapper) {
         get(target: any, prop: any, receiver: any) {
             if (typeof target[prop] === 'undefined') {
                 // 如果方法不存在，返回一个函数，这个函数调用existentMethod
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 return (..._args: unknown[]) => {
                     logger.logDebug(`${target.constructor.name} has no method ${prop}`);
                 };

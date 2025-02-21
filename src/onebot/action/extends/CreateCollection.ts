@@ -9,9 +9,9 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export class CreateCollection extends OneBotAction<Payload, any> {
-    actionName = ActionName.CreateCollection;
-    payloadSchema = SchemaData;
+export class CreateCollection extends OneBotAction<Payload, unknown> {
+    override actionName = ActionName.CreateCollection;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         return await this.core.apis.CollectionApi.createCollection(

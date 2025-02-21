@@ -1,0 +1,33 @@
+@layer base {
+  .shiny-text {
+    @apply text-primary-400 text-opacity-60;
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: shine 5s linear infinite;
+  }
+  .shiny-text {
+    background-image: linear-gradient(
+      120deg,
+      rgba(255, 50, 50, 0) 40%,
+      hsl(var(--heroui-primary-400) / 0.8) 50%,
+      rgba(255, 50, 50, 0) 60%
+    );
+  }
+  .dark .shiny-text {
+    background-image: linear-gradient(
+      120deg,
+      rgba(255, 255, 255, 0) 40%,
+      hsl(var(--heroui-primary-600) / 0.8) 50%,
+      rgba(255, 255, 255, 0) 60%
+    );
+  }
+  @keyframes shine {
+    0% {
+      background-position: 100%;
+    }
+    100% {
+      background-position: -100%;
+    }
+  }
+}

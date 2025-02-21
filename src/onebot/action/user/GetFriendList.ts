@@ -11,8 +11,8 @@ const SchemaData = Type.Object({
 type Payload = Static<typeof SchemaData>;
 
 export default class GetFriendList extends OneBotAction<Payload, OB11User[]> {
-    actionName = ActionName.GetFriendList;
-    payloadSchema = SchemaData;
+    override actionName = ActionName.GetFriendList;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         //全新逻辑

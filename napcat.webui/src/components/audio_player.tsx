@@ -187,7 +187,7 @@ export default function AudioPlayer(props: AudioPlayerProps) {
   return (
     <div
       className={clsx(
-        'fixed right-0 bottom-0 z-[9999] w-full md:w-96',
+        'fixed right-0 bottom-0 z-[52] w-full md:w-96',
         !translateX && !translateY && 'transition-transform',
         isCollapsed && 'md:hover:!translate-x-80'
       )}
@@ -231,7 +231,7 @@ export default function AudioPlayer(props: AudioPlayerProps) {
                 : 'top-3 -left-8 rounded-l-full bg-opacity-50 backdrop-blur-md'
             )}
             variant="solid"
-            color="danger"
+            color="primary"
             size="sm"
             onPress={() => setIsCollapsed(!isCollapsed)}
           >

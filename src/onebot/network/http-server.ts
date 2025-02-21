@@ -1,14 +1,16 @@
 import { OB11EmitEventContent, OB11NetworkReloadType } from './index';
-import express, { Express, Request, Response } from 'express';
+import express, { Express, NextFunction, Request, Response } from 'express';
 import http from 'http';
 import { NapCatCore } from '@/core';
 import { OB11Response } from '@/onebot/action/OneBotAction';
 import { ActionMap } from '@/onebot/action';
 import cors from 'cors';
 import { HttpServerConfig } from '@/onebot/config/config';
-import { NapCatOneBot11Adapter } from "@/onebot";
-import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
-
+import { NapCatOneBot11Adapter } from '@/onebot';
+import { IOB11NetworkAdapter } from '@/onebot/network/adapter';
+import json5 from 'json5';
+import { isFinished } from 'on-finished';
+import typeis from 'type-is';
 export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig> {
     private app: Express | undefined;
     private server: http.Server | undefined;
@@ -17,7 +19,8 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
         super(name, config, core, obContext, actions);
     }
 
-    onEvent<T extends OB11EmitEventContent>(event: T) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    override onEvent<T extends OB11EmitEventContent>(_event: T) {
         // http server is passive, no need to emit event
     }
 
@@ -43,26 +46,45 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
         this.app = undefined;
     }
 
+
     private initializeServer() {
         this.app = express();
         this.server = http.createServer(this.app);
 
         this.app.use(cors());
         this.app.use(express.urlencoded({ extended: true, limit: '5000mb' }));
+
         this.app.use((req, res, next) => {
+            if (isFinished(req)) {
+                next();
+                return;
+            }
+            if (!typeis.hasBody(req)) {
+                next();
+                return;
+            }
             // 兼容处理没有带content-type的请求
             req.headers['content-type'] = 'application/json';
-            const originalJson = express.json({ limit: '5000mb' });
-            originalJson(req, res, (err) => {
-                if (err) {
+            let rawData = '';
+            req.on('data', (chunk) => {
+                rawData += chunk;
+            });
+            req.on('end', () => {
+                try {
+                    req.body = { ...json5.parse(rawData || '{}'), ...req.body };
+                    next();
+                } catch {
                     return res.status(400).send('Invalid JSON');
                 }
-                next();
+                return;
+            });
+            req.on('error', () => {
+                return res.status(400).send('Invalid JSON');
             });
         });
-
+        //@ts-expect-error authorize
         this.app.use((req, res, next) => this.authorize(this.config.token, req, res, next));
-        this.app.use(async (req, res, _) => {
+        this.app.use(async (req, res) => {
             await this.handleRequest(req, res);
         });
         this.server.listen(this.config.port, () => {
@@ -70,10 +92,10 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
         });
     }
 
-    private authorize(token: string | undefined, req: Request, res: Response, next: any) {
+    private authorize(token: string | undefined, req: Request, res: Response, next: NextFunction) {
         if (!token || token.length == 0) return next();//客户端未设置密钥
         const HeaderClientToken = req.headers.authorization?.split('Bearer ').pop() || '';
-        const QueryClientToken = req.query.access_token;
+        const QueryClientToken = req.query['access_token'];
         const ClientToken = typeof (QueryClientToken) === 'string' && QueryClientToken !== '' ? QueryClientToken : HeaderClientToken;
         if (ClientToken === token) {
             return next();
@@ -87,21 +109,22 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
         if (req.method == 'get') {
             payload = req.query;
         } else if (req.query) {
-            payload = { ...req.query, ...req.body };
+            payload = { ...req.body, ...req.query };
         }
         if (req.path === '' || req.path === '/') {
             const hello = OB11Response.ok({});
-            hello.message = 'NapCat4 Ss Running';
+            hello.message = 'NapCat4 Is Running';
             return res.json(hello);
         }
         const actionName = req.path.split('/')[1];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const action = this.actions.get(actionName as any);
         if (action) {
             try {
                 const result = await action.handle(payload, this.name, this.config);
                 return res.json(result);
-            } catch (error: any) {
-                return res.json(OB11Response.error(error?.stack?.toString() || error?.message || 'Error Handle', 200));
+            } catch (error: unknown) {
+                return res.json(OB11Response.error((error as Error)?.stack?.toString() || (error as Error)?.message || 'Error Handle', 200));
             }
         } else {
             return res.json(OB11Response.error('不支持的Api ' + actionName, 200));
@@ -110,11 +133,12 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
 
     async handleRequest(req: Request, res: Response) {
         if (!this.isEnable) {
-            this.core.context.logger.log(`[OneBot] [HTTP Server Adapter] Server is closed`);
-            return res.json(OB11Response.error('Server is closed', 200));
+            this.core.context.logger.log('[OneBot] [HTTP Server Adapter] Server is closed');
+            res.json(OB11Response.error('Server is closed', 200));
+            return;
         }
-
-        return this.httpApiRequest(req, res);
+        this.httpApiRequest(req, res);
+        return;
     }
 
     async reload(newConfig: HttpServerConfig) {

@@ -3,6 +3,7 @@ import { OB11Message, OB11MessageData, OB11MessageDataType, OB11MessageForward, 
 import { ActionName } from '@/onebot/action/router';
 import { MessageUnique } from '@/common/message-unique';
 import { Static, Type } from '@sinclair/typebox';
+import { ChatType, ElementType, MsgSourceType, NTMsgType, RawMessage } from '@/core';
 
 const SchemaData = Type.Object({
     message_id: Type.Optional(Type.Union([Type.Number(), Type.String()])),
@@ -11,9 +12,11 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export class GoCQHTTPGetForwardMsgAction extends OneBotAction<Payload, any> {
-    actionName = ActionName.GoCQHTTP_GetForwardMsg;
-    payloadSchema = SchemaData;
+export class GoCQHTTPGetForwardMsgAction extends OneBotAction<Payload, {
+    messages: OB11Message[] | undefined;
+}> {
+    override actionName = ActionName.GoCQHTTP_GetForwardMsg;
+    override payloadSchema = SchemaData;
 
     private createTemplateNode(message: OB11Message): OB11MessageNode {
         return {
@@ -49,27 +52,78 @@ export class GoCQHTTPGetForwardMsgAction extends OneBotAction<Payload, any> {
         return retMsg;
     }
 
-    async _handle(payload: Payload): Promise<any> {
+    async _handle(payload: Payload) {
         const msgId = payload.message_id || payload.id;
         if (!msgId) {
             throw new Error('message_id is required');
         }
 
+        const fakeForwardMsg = (res_id: string) => {
+            return {
+                chatType: ChatType.KCHATTYPEGROUP,
+                elements: [{
+                    elementType: ElementType.MULTIFORWARD,
+                    elementId: '',
+                    multiForwardMsgElement: {
+                        resId: res_id,
+                        fileName: '',
+                        xmlContent: '',
+                    }
+                }],
+                guildId: '',
+                isOnlineMsg: false,
+                msgId: '',  // TODO: no necessary
+                msgRandom: '0',
+                msgSeq: '',
+                msgTime: '',
+                msgType: NTMsgType.KMSGTYPEMIX,
+                parentMsgIdList: [],
+                parentMsgPeer: {
+                    chatType: ChatType.KCHATTYPEGROUP,
+                    peerUid: '',
+                },
+                peerName: '',
+                peerUid: '284840486',
+                peerUin: '284840486',
+                recallTime: '0',
+                records: [],
+                sendNickName: '',
+                sendRemarkName: '',
+                senderUid: '',
+                senderUin: '1094950020',
+                sourceType: MsgSourceType.K_DOWN_SOURCETYPE_UNKNOWN,
+                subMsgType: 1,
+            } as RawMessage;
+        };
+
+        const protocolFallbackLogic = async (res_id: string) => {
+            const ob = (await this.obContext.apis.MsgApi.parseMessageV2(fakeForwardMsg(res_id)))?.arrayMsg;
+            if (ob) {
+                return {
+                    messages: (ob?.message?.[0] as OB11MessageForward)?.data?.content
+                };
+            }
+            throw new Error('protocolFallbackLogic: 找不到相关的聊天记录');
+        };
+
         const rootMsgId = MessageUnique.getShortIdByMsgId(msgId.toString());
         const rootMsg = MessageUnique.getMsgIdAndPeerByShortId(rootMsgId ?? +msgId);
         if (!rootMsg) {
-            throw new Error('msg not found');
+            return await protocolFallbackLogic(msgId.toString());
         }
         const data = await this.core.apis.MsgApi.getMsgsByMsgId(rootMsg.Peer, [rootMsg.MsgId]);
 
         if (!data || data.result !== 0) {
-            throw new Error('找不到相关的聊天记录' + data?.errMsg);
+            return await protocolFallbackLogic(msgId.toString());
         }
 
         const singleMsg = data.msgList[0];
+        if (!singleMsg) {
+            return await protocolFallbackLogic(msgId.toString());
+        }
         const resMsg = (await this.obContext.apis.MsgApi.parseMessageV2(singleMsg))?.arrayMsg;//强制array 以便处理
         if (!(resMsg?.message?.[0] as OB11MessageForward)?.data?.content) {
-            throw new Error('找不到相关的聊天记录');
+            return await protocolFallbackLogic(msgId.toString());
         }
         return {
             messages: (resMsg?.message?.[0] as OB11MessageForward)?.data?.content

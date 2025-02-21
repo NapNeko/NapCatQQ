@@ -1,4 +1,4 @@
-import { ProtoField, ScalarType } from "@napneko/nap-proto-core";
+import { ProtoField, ScalarType } from '@napneko/nap-proto-core';
 
 export const GroupAdminExtra = {
     adminUid: ProtoField(1, ScalarType.STRING),

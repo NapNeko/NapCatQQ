@@ -16,23 +16,21 @@ export interface QQInfoCardProps {
 const QQInfoCard: React.FC<QQInfoCardProps> = ({ data, error, loading }) => {
   return (
     <Card
-      className="relative bg-danger-100 bg-opacity-60 overflow-hidden flex-shrink-0 shadow-md shadow-danger-300 dark:shadow-danger-50"
+      className="relative bg-primary-100 bg-opacity-60 overflow-hidden flex-shrink-0 shadow-md shadow-primary-300 dark:shadow-primary-50"
       shadow="none"
       radius="lg"
     >
       <PageLoading loading={loading} />
       {error ? (
         <CardBody className="items-center gap-1 justify-center">
-          <div className="font-outfit flex-1 text-content1-foreground">
-            Error
-          </div>
+          <div className="flex-1 text-content1-foreground">Error</div>
           <div className="whitespace-nowrap text-nowrap flex-shrink-0">
             {error.message}
           </div>
         </CardBody>
       ) : (
         <CardBody className="flex-row items-center gap-2 overflow-hidden relative">
-          <div className="absolute right-0 bottom-0 text-5xl text-danger-400">
+          <div className="absolute right-0 bottom-0 text-5xl text-primary-400">
             <BsTencentQq />
           </div>
           <div className="relative flex-shrink-0 z-10">
@@ -45,16 +43,14 @@ const QQInfoCard: React.FC<QQInfoCardProps> = ({ data, error, loading }) => {
             />
             <div
               className={clsx(
-                'w-4 h-4 rounded-full absolute right-0.5 bottom-0 border-2 border-danger-100 z-10',
+                'w-4 h-4 rounded-full absolute right-0.5 bottom-0 border-2 border-primary-100 z-10',
                 data?.online ? 'bg-green-500' : 'bg-gray-500'
               )}
             ></div>
           </div>
           <div className="flex-col justify-center">
-            <div className="font-outfit text-lg truncate">{data?.nick}</div>
-            <div className="font-ubuntu text-danger-500 text-sm">
-              {data?.uin}
-            </div>
+            <div className="text-lg truncate">{data?.nick}</div>
+            <div className="text-primary-500 text-sm">{data?.uin}</div>
           </div>
         </CardBody>
       )}

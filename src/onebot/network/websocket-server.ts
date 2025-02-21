@@ -1,6 +1,6 @@
 import { OB11EmitEventContent, OB11NetworkReloadType } from './index';
 import urlParse from 'url';
-import { WebSocket, WebSocketServer } from 'ws';
+import { RawData, WebSocket, WebSocketServer } from 'ws';
 import { Mutex } from 'async-mutex';
 import { OB11Response } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
@@ -10,11 +10,12 @@ import { IncomingMessage } from 'http';
 import { ActionMap } from '@/onebot/action';
 import { LifeCycleSubType, OB11LifeCycleEvent } from '@/onebot/event/meta/OB11LifeCycleEvent';
 import { WebsocketServerConfig } from '@/onebot/config/config';
-import { NapCatOneBot11Adapter } from "@/onebot";
-import { IOB11NetworkAdapter } from "@/onebot/network/adapter";
+import { NapCatOneBot11Adapter } from '@/onebot';
+import { IOB11NetworkAdapter } from '@/onebot/network/adapter';
+import json5 from 'json5';
 
 export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketServerConfig> {
-    wsServer: WebSocketServer;
+    wsServer?: WebSocketServer;
     wsClients: WebSocket[] = [];
     wsClientsMutex = new Mutex();
     private heartbeatIntervalId: NodeJS.Timeout | null = null;
@@ -29,7 +30,11 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
             host: this.config.host === '0.0.0.0' ? '' : this.config.host,
             maxPayload: 1024 * 1024 * 1024,
         });
-        this.wsServer.on('connection', async (wsClient, wsReq) => {
+        this.createServer(this.wsServer);
+
+    }
+    createServer(newServer: WebSocketServer) {
+        newServer.on('connection', async (wsClient, wsReq) => {
             if (!this.isEnable) {
                 wsClient.close();
                 return;
@@ -39,7 +44,7 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
             const paramUrl = wsReq.url?.indexOf('?') !== -1 ? wsReq.url?.substring(0, wsReq.url?.indexOf('?')) : wsReq.url;
             const isApiConnect = paramUrl === '/api' || paramUrl === '/api/';
             if (!isApiConnect) {
-                this.connectEvent(core, wsClient);
+                this.connectEvent(this.core, wsClient);
             }
 
             wsClient.on('error', (err) => this.logger.log('[OneBot] [WebSocket Server] Client Error:', err.message));
@@ -73,10 +78,9 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
             });
         }).on('error', (err) => this.logger.log('[OneBot] [WebSocket Server] Server Error:', err.message));
     }
-
     connectEvent(core: NapCatCore, wsClient: WebSocket) {
         try {
-            this.checkStateAndReply<any>(new OB11LifeCycleEvent(core, LifeCycleSubType.CONNECT), wsClient);
+            this.checkStateAndReply<unknown>(new OB11LifeCycleEvent(core, LifeCycleSubType.CONNECT), wsClient);
         } catch (e) {
             this.logger.logError('[OneBot] [WebSocket Server] 发送生命周期失败', e);
         }
@@ -95,7 +99,7 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
             this.logger.logError('[OneBot] [WebSocket Server] Cannot open a opened WebSocket server');
             return;
         }
-        const addressInfo = this.wsServer.address();
+        const addressInfo = this.wsServer?.address();
         this.logger.log('[OneBot] [WebSocket Server] Server Started', typeof (addressInfo) === 'string' ? addressInfo : addressInfo?.address + ':' + addressInfo?.port);
 
         this.isEnable = true;
@@ -107,7 +111,7 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
 
     async close() {
         this.isEnable = false;
-        this.wsServer.close((err) => {
+        this.wsServer?.close((err) => {
             if (err) {
                 this.logger.logError('[OneBot] [WebSocket Server] Error closing server:', err.message);
             } else {
@@ -142,7 +146,7 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
 
     private authorize(token: string | undefined, wsClient: WebSocket, wsReq: IncomingMessage) {
         if (!token || token.length == 0) return;//客户端未设置密钥
-        const QueryClientToken = urlParse.parse(wsReq?.url || '', true).query.access_token;
+        const QueryClientToken = urlParse.parse(wsReq?.url || '', true).query['access_token'];
         const HeaderClientToken = wsReq.headers.authorization?.split('Bearer ').pop() || '';
         const ClientToken = typeof (QueryClientToken) === 'string' && QueryClientToken !== '' ? QueryClientToken : HeaderClientToken;
         if (ClientToken === token) {
@@ -158,26 +162,28 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
         }
     }
 
-    private async handleMessage(wsClient: WebSocket, message: any) {
+    private async handleMessage(wsClient: WebSocket, message: RawData) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let receiveData: { action: typeof ActionName[keyof typeof ActionName], params?: any, echo?: any } = { action: ActionName.Unknown, params: {} };
         let echo = undefined;
         try {
-            receiveData = JSON.parse(message.toString());
+            receiveData = json5.parse(message.toString());
             echo = receiveData.echo;
             //this.logger.logDebug('收到正向Websocket消息', receiveData);
-        } catch (e) {
-            this.checkStateAndReply<any>(OB11Response.error('json解析失败,请检查数据格式', 1400, echo), wsClient);
+        } catch {
+            this.checkStateAndReply<unknown>(OB11Response.error('json解析失败,请检查数据格式', 1400, echo), wsClient);
             return;
         }
         receiveData.params = (receiveData?.params) ? receiveData.params : {};//兼容类型验证 不然类型校验爆炸
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const action = this.actions.get(receiveData.action as any);
         if (!action) {
             this.logger.logError('[OneBot] [WebSocket Client] 发生错误', '不支持的API ' + receiveData.action);
-            this.checkStateAndReply<any>(OB11Response.error('不支持的API ' + receiveData.action, 1404, echo), wsClient);
+            this.checkStateAndReply<unknown>(OB11Response.error('不支持的API ' + receiveData.action, 1404, echo), wsClient);
             return;
         }
         const retdata = await action.websocketHandle(receiveData.params, echo ?? '', this.name, this.config);
-        this.checkStateAndReply<any>({ ...retdata }, wsClient);
+        this.checkStateAndReply<unknown>({ ...retdata }, wsClient);
     }
 
     async reload(newConfig: WebsocketServerConfig) {
@@ -202,6 +208,7 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
                 host: newConfig.host === '0.0.0.0' ? '' : newConfig.host,
                 maxPayload: 1024 * 1024 * 1024,
             });
+            this.createServer(this.wsServer);
             if (newConfig.enable) {
                 this.open();
             }

@@ -83,7 +83,7 @@ class FileUUIDManager {
         this.cache = new TimeBasedCache<string, FileUUIDData>(5000, ttl);
     }
 
-    public encode(data: FileUUIDData, endString: string = "", customUUID?: string): string {
+    public encode(data: FileUUIDData, endString: string = '', customUUID?: string): string {
         const uuid = customUUID ? customUUID : randomUUID().replace(/-/g, '') + endString;
         this.cache.put(uuid, data);
         return uuid;
@@ -101,7 +101,7 @@ export class FileNapCatOneBotUUIDWrap {
         this.manager = new FileUUIDManager(ttl);
     }
 
-    public encodeModelId(peer: Peer, modelId: string, fileId: string, fileUUID: string = "", endString: string = "", customUUID?: string): string {
+    public encodeModelId(peer: Peer, modelId: string, fileId: string, fileUUID: string = '', endString: string = '', customUUID?: string): string {
         return this.manager.encode({ peer, modelId, fileId, fileUUID }, endString, customUUID);
     }
 
@@ -109,8 +109,8 @@ export class FileNapCatOneBotUUIDWrap {
         return this.manager.decode(uuid);
     }
 
-    public encode(peer: Peer, msgId: string, elementId: string, fileUUID: string = "", customUUID?: string): string {
-        return this.manager.encode({ peer, msgId, elementId, fileUUID }, "", customUUID);
+    public encode(peer: Peer, msgId: string, elementId: string, fileUUID: string = '', customUUID?: string): string {
+        return this.manager.encode({ peer, msgId, elementId, fileUUID }, '', customUUID);
     }
 
     public decode(uuid: string): FileUUIDData | undefined {

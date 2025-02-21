@@ -28,7 +28,7 @@ export async function NCoreInitFramework(
         console.log('[NapCat] [Error] Unhandled Exception:', err.message);
     });
 
-    process.on('unhandledRejection', (reason, promise) => {
+    process.on('unhandledRejection', (reason) => {
         console.log('[NapCat] [Error] unhandledRejection:', reason);
     });
 

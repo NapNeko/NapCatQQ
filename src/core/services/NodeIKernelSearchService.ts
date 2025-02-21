@@ -18,65 +18,65 @@ export interface NodeIKernelSearchService {
 
     searchLocalInfo(keywords: string, type: number/*4*/): unknown;
 
-    cancelSearchLocalInfo(...args: any[]): unknown;// needs 3 arguments
+    cancelSearchLocalInfo(...args: unknown[]): unknown;// needs 3 arguments
 
-    searchBuddyChatInfo(...args: any[]): unknown;// needs 2 arguments
+    searchBuddyChatInfo(...args: unknown[]): unknown;// needs 2 arguments
 
-    searchMoreBuddyChatInfo(...args: any[]): unknown;// needs 1 arguments
+    searchMoreBuddyChatInfo(...args: unknown[]): unknown;// needs 1 arguments
 
-    cancelSearchBuddyChatInfo(...args: any[]): unknown;// needs 3 arguments
+    cancelSearchBuddyChatInfo(...args: unknown[]): unknown;// needs 3 arguments
 
-    searchContact(...args: any[]): unknown;// needs 2 arguments
+    searchContact(...args: unknown[]): unknown;// needs 2 arguments
 
-    searchMoreContact(...args: any[]): unknown;// needs 1 arguments
+    searchMoreContact(...args: unknown[]): unknown;// needs 1 arguments
 
-    cancelSearchContact(...args: any[]): unknown;// needs 3 arguments
+    cancelSearchContact(...args: unknown[]): unknown;// needs 3 arguments
 
-    searchGroupChatInfo(...args: any[]): unknown;// needs 3 arguments
+    searchGroupChatInfo(...args: unknown[]): unknown;// needs 3 arguments
 
-    resetSearchGroupChatInfoSortType(...args: any[]): unknown;// needs 3 arguments
+    resetSearchGroupChatInfoSortType(...args: unknown[]): unknown;// needs 3 arguments
 
-    resetSearchGroupChatInfoFilterMembers(...args: any[]): unknown;// needs 3 arguments
+    resetSearchGroupChatInfoFilterMembers(...args: unknown[]): unknown;// needs 3 arguments
 
-    searchMoreGroupChatInfo(...args: any[]): unknown;// needs 1 arguments
+    searchMoreGroupChatInfo(...args: unknown[]): unknown;// needs 1 arguments
 
-    cancelSearchGroupChatInfo(...args: any[]): unknown;// needs 3 arguments
+    cancelSearchGroupChatInfo(...args: unknown[]): unknown;// needs 3 arguments
 
-    searchChatsWithKeywords(...args: any[]): unknown;// needs 3 arguments
+    searchChatsWithKeywords(...args: unknown[]): unknown;// needs 3 arguments
 
-    searchMoreChatsWithKeywords(...args: any[]): unknown;// needs 1 arguments
+    searchMoreChatsWithKeywords(...args: unknown[]): unknown;// needs 1 arguments
 
-    cancelSearchChatsWithKeywords(...args: any[]): unknown;// needs 3 arguments
+    cancelSearchChatsWithKeywords(...args: unknown[]): unknown;// needs 3 arguments
 
-    searchChatMsgs(...args: any[]): unknown;// needs 2 arguments
+    searchChatMsgs(...args: unknown[]): unknown;// needs 2 arguments
 
-    searchMoreChatMsgs(...args: any[]): unknown;// needs 1 arguments
+    searchMoreChatMsgs(...args: unknown[]): unknown;// needs 1 arguments
 
-    cancelSearchChatMsgs(...args: any[]): unknown;// needs 3 arguments
+    cancelSearchChatMsgs(...args: unknown[]): unknown;// needs 3 arguments
 
-    searchMsgWithKeywords(...args: any[]): unknown;// needs 2 arguments
+    searchMsgWithKeywords(...args: unknown[]): unknown;// needs 2 arguments
 
-    searchMoreMsgWithKeywords(...args: any[]): unknown;// needs 1 arguments
+    searchMoreMsgWithKeywords(...args: unknown[]): unknown;// needs 1 arguments
 
-    cancelSearchMsgWithKeywords(...args: any[]): unknown;// needs 3 arguments
+    cancelSearchMsgWithKeywords(...args: unknown[]): unknown;// needs 3 arguments
 
     searchFileWithKeywords(keywords: string[], source: number): Promise<string>;// needs 2 arguments
 
-    searchMoreFileWithKeywords(...args: any[]): unknown;// needs 1 arguments
+    searchMoreFileWithKeywords(...args: unknown[]): unknown;// needs 1 arguments
 
-    cancelSearchFileWithKeywords(...args: any[]): unknown;// needs 3 arguments
+    cancelSearchFileWithKeywords(...args: unknown[]): unknown;// needs 3 arguments
 
-    searchAtMeChats(...args: any[]): unknown;// needs 3 arguments
+    searchAtMeChats(...args: unknown[]): unknown;// needs 3 arguments
 
-    searchMoreAtMeChats(...args: any[]): unknown;// needs 1 arguments
+    searchMoreAtMeChats(...args: unknown[]): unknown;// needs 1 arguments
 
-    cancelSearchAtMeChats(...args: any[]): unknown;// needs 3 arguments
+    cancelSearchAtMeChats(...args: unknown[]): unknown;// needs 3 arguments
 
-    searchChatAtMeMsgs(...args: any[]): unknown;// needs 1 arguments
+    searchChatAtMeMsgs(...args: unknown[]): unknown;// needs 1 arguments
 
-    searchMoreChatAtMeMsgs(...args: any[]): unknown;// needs 1 arguments
+    searchMoreChatAtMeMsgs(...args: unknown[]): unknown;// needs 1 arguments
 
-    cancelSearchChatAtMeMsgs(...args: any[]): unknown;// needs 3 arguments
+    cancelSearchChatAtMeMsgs(...args: unknown[]): unknown;// needs 3 arguments
 
     addSearchHistory(param: {
         type: number,//4
@@ -127,10 +127,10 @@ export interface NodeIKernelSearchService {
         id?: number
     }>;
 
-    removeSearchHistory(...args: any[]): unknown;// needs 1 arguments
+    removeSearchHistory(...args: unknown[]): unknown;// needs 1 arguments
 
-    searchCache(...args: any[]): unknown;// needs 3 arguments
+    searchCache(...args: unknown[]): unknown;// needs 3 arguments
 
-    clearSearchCache(...args: any[]): unknown;// needs 1 arguments
+    clearSearchCache(...args: unknown[]): unknown;// needs 1 arguments
 
 }

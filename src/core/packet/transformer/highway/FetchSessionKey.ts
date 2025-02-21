@@ -1,6 +1,6 @@
-import * as proto from "@/core/packet/transformer/proto";
-import { NapProtoMsg } from "@napneko/nap-proto-core";
-import { OidbPacket, PacketHexStrBuilder, PacketTransformer } from "@/core/packet/transformer/base";
+import * as proto from '@/core/packet/transformer/proto';
+import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { OidbPacket, PacketHexStrBuilder, PacketTransformer } from '@/core/packet/transformer/base';
 
 class FetchSessionKey extends PacketTransformer<typeof proto.HttpConn0x6ff_501Response> {
     constructor() {
@@ -20,11 +20,11 @@ class FetchSessionKey extends PacketTransformer<typeof proto.HttpConn0x6ff_501Re
                 field9: 2,
                 field10: 9,
                 field11: 8,
-                ver: "1.0.1"
+                ver: '1.0.1'
             }
         });
         return {
-            cmd: "HttpConn.0x6ff_501",
+            cmd: 'HttpConn.0x6ff_501',
             data: PacketHexStrBuilder(req)
         };
     }

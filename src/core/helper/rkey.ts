@@ -32,7 +32,7 @@ export class RkeyManager {
         }
 
         if (this.failureCount >= this.FAILURE_LIMIT) {
-            this.logger.logError(`[Rkey] 服务存在异常, 图片使用FallBack机制`);
+            this.logger.logError('[Rkey] 服务存在异常, 图片使用FallBack机制');
             throw new Error('获取rkey失败次数过多，请稍后再试');
         }
 
@@ -51,7 +51,7 @@ export class RkeyManager {
         return now > this.rkeyData.expired_time;
     }
 
-    async refreshRkey(): Promise<any> {
+    async refreshRkey() {
         //刷新rkey
         for (const url of this.serverUrl) {
             try {

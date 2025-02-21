@@ -18,8 +18,8 @@ const SchemaData = Type.Object({
 type Payload = Static<typeof SchemaData>;
 
 export class SendGroupNotice extends OneBotAction<Payload, null> {
-    actionName = ActionName.GoCQHTTP_SendGroupNotice;
-
+    override actionName = ActionName.GoCQHTTP_SendGroupNotice;
+    override payloadSchema = SchemaData;
     async _handle(payload: Payload) {
 
         let UploadImage: { id: string, width: number, height: number } | undefined = undefined;

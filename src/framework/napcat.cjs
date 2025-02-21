@@ -15,7 +15,6 @@ let napCatInitialized = false; // 添加一个标志
 function createServiceProxy(ServiceName) {
     return new Proxy(() => { }, {
         get: (target, FunctionName) => {
-            console.log(ServiceName, FunctionName);
             if (ServiceName === 'NodeIQQNTWrapperSession' && FunctionName === 'create') {
                 return () => new Proxy({}, {
                     get: function (target, ClassFunName, receiver) {

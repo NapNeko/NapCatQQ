@@ -35,6 +35,7 @@ const AudioProvider: React.FC<MusicProviderProps> = ({ children }) => {
   const [musicId, setMusicId] = useState<number>(0)
   const [playMode, setPlayMode] = useState<PlayMode>(PlayMode.Loop)
   const music = musicList.find((music) => music.id === musicId)
+  const [token] = useLocalStorage(key.token, '')
   const onNext = () => {
     const nextID = getNextMusic(musicList, musicId, playMode)
     setMusicId(nextID)
@@ -60,8 +61,8 @@ const AudioProvider: React.FC<MusicProviderProps> = ({ children }) => {
     setMusicId(res[0].id)
   }
   useEffect(() => {
-    fetchMusicList(listId)
-  }, [listId])
+    if (listId && token) fetchMusicList(listId)
+  }, [listId, token])
   return (
     <AudioContext.Provider
       value={{

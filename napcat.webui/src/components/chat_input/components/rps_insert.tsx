@@ -10,7 +10,7 @@ const RPSInsert = () => {
   return (
     <Tooltip content="发送猜拳">
       <Button
-        color="danger"
+        color="primary"
         variant="flat"
         isIconOnly
         radius="full"

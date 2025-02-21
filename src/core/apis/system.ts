@@ -25,7 +25,7 @@ export class NTQQSystemApi {
         this.context.session.getMsgService().getOnLineDev();
     }
 
-    async getArkJsonCollection(cid: string) {
+    async getArkJsonCollection() {
         return await this.core.eventWrapper.callNoListenerEvent('NodeIKernelCollectionService/collectionArkShare', '1717662698058');
     }
 

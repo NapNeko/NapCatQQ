@@ -1,7 +1,7 @@
-import * as proto from "@/core/packet/transformer/proto";
-import { NapProtoMsg } from "@napneko/nap-proto-core";
-import { OidbPacket, PacketHexStrBuilder, PacketTransformer } from "@/core/packet/transformer/base";
-import { MiniAppReqParams } from "@/core/packet/entities/miniApp";
+import * as proto from '@/core/packet/transformer/proto';
+import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { OidbPacket, PacketHexStrBuilder, PacketTransformer } from '@/core/packet/transformer/base';
+import { MiniAppReqParams } from '@/core/packet/entities/miniApp';
 
 class GetMiniAppAdaptShareInfo extends PacketTransformer<typeof proto.MiniAppAdaptShareInfoResp> {
     constructor() {
@@ -23,24 +23,24 @@ class GetMiniAppAdaptShareInfo extends PacketTransformer<typeof proto.MiniAppAda
                 templateType: req.templateType,
                 businessType: req.businessType,
                 picUrl: req.picUrl,
-                vidUrl: "",
+                vidUrl: '',
                 jumpUrl: req.jumpUrl,
                 iconUrl: req.iconUrl,
                 verType: req.verType,
                 shareType: req.shareType,
                 versionId: req.versionId,
                 withShareTicket: req.withShareTicket,
-                webURL: req.webUrl ?? "",
+                webURL: req.webUrl ?? '',
                 appidRich: Buffer.alloc(0),
                 template: {
-                    templateId: "",
-                    templateData: ""
+                    templateId: '',
+                    templateData: ''
                 },
-                field20: ""
+                field20: ''
             }
         });
         return {
-            cmd: "LightAppSvc.mini_app_share.AdaptShareInfo",
+            cmd: 'LightAppSvc.mini_app_share.AdaptShareInfo',
             data: PacketHexStrBuilder(data)
         };
     }

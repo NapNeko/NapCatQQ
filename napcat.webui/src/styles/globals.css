@@ -1,28 +1,36 @@
-@import url("./fonts.css");
-
+@import url('./fonts.css');
+@import url('./text.css');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 body {
-  font-family: PingFang SC,"Harmony",Helvetica Neue,Microsoft YaHei,sans-serif !important;
+  font-family:
+    'Aa偷吃可爱长大的',
+    PingFang SC,
+    Helvetica Neue,
+    Microsoft YaHei,
+    sans-serif !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-smooth: always;
 }
 
 @layer components {
-  .hm-medium {
-    font-family: PingFang SC,"Harmony",Helvetica Neue,Microsoft YaHei,sans-serif !important;
-    @apply font-bold;
+  .hide-scrollbar::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
   }
-  .font-ubuntu {
-    font-family: 'Ubuntu', sans-serif;
+  .hide-scrollbar::-webkit-scrollbar-thumb {
+    width: 0 !important;
+    height: 0 !important;
+    background-color: transparent !important;
   }
-  .font-outfit {
-    font-family: 'Outfit', sans-serif;
-  }
-  .font-libre {
-    font-family: 'Libre Baskerville', serif;
-  }
-  .font-noto-serif {
-    font-family: 'Noto Serif SC', serif;
+  .hide-scrollbar::-webkit-scrollbar-track {
+    width: 0 !important;
+    height: 0 !important;
+    background-color: transparent !important;
   }
 }
 
@@ -44,13 +52,15 @@ body {
   -moz-border-radius: 2em;
   border-radius: 2em;
 }
+
 .monaco-editor {
   outline: none !important;
   border-radius: 5px !important;
   overflow: hidden !important;
 }
 
-.monaco-editor, .monaco-editor-background {
+.monaco-editor,
+.monaco-editor-background {
   background-color: transparent !important;
 }
 
@@ -75,21 +85,18 @@ body {
   border-radius: 5px !important;
 }
 
+.context-view.monaco-menu-container * {
+  font-family:
+    PingFang SC,
+    'Aa偷吃可爱长大的',
+    Helvetica Neue,
+    Microsoft YaHei,
+    sans-serif !important;
+}
+
 .ql-hidden {
   @apply hidden;
 }
 .ql-editor img {
   @apply inline-block;
 }
-/* input.ql-image {
-  @apply hidden;
-}
-.ql-image svg {
-  fill: none;
-}
-.ql-fill {
-  fill: currentColor;
-}
-.ql-stroke {
-  stroke: currentColor;
-} */

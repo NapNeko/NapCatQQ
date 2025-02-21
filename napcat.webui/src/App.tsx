@@ -16,6 +16,16 @@ import store from '@/store'
 const WebLoginPage = lazy(() => import('@/pages/web_login'))
 const IndexPage = lazy(() => import('@/pages/index'))
 const QQLoginPage = lazy(() => import('@/pages/qq_login'))
+const DashboardIndexPage = lazy(() => import('@/pages/dashboard'))
+const AboutPage = lazy(() => import('@/pages/dashboard/about'))
+const ConfigPage = lazy(() => import('@/pages/dashboard/config'))
+const DebugPage = lazy(() => import('@/pages/dashboard/debug'))
+const HttpDebug = lazy(() => import('@/pages/dashboard/debug/http'))
+const WSDebug = lazy(() => import('@/pages/dashboard/debug/websocket'))
+const FileManagerPage = lazy(() => import('@/pages/dashboard/file_manager'))
+const LogsPage = lazy(() => import('@/pages/dashboard/logs'))
+const NetworkPage = lazy(() => import('@/pages/dashboard/network'))
+const TerminalPage = lazy(() => import('@/pages/dashboard/terminal'))
 
 function App() {
   return (
@@ -58,9 +68,21 @@ function AuthChecker({ children }: { children: React.ReactNode }) {
 function AppRoutes() {
   return (
     <Routes>
-      <Route element={<IndexPage />} path="/*" />
-      <Route element={<QQLoginPage />} path="/qq_login" />
-      <Route element={<WebLoginPage />} path="/web_login" />
+      <Route path="/" element={<IndexPage />}>
+        <Route index element={<DashboardIndexPage />} />
+        <Route path="network" element={<NetworkPage />} />
+        <Route path="config" element={<ConfigPage />} />
+        <Route path="logs" element={<LogsPage />} />
+        <Route path="debug" element={<DebugPage />}>
+          <Route path="ws" element={<WSDebug />} />
+          <Route path="http" element={<HttpDebug />} />
+        </Route>
+        <Route path="file_manager" element={<FileManagerPage />} />
+        <Route path="terminal" element={<TerminalPage />} />
+        <Route path="about" element={<AboutPage />} />
+      </Route>
+      <Route path="/qq_login" element={<QQLoginPage />} />
+      <Route path="/web_login" element={<WebLoginPage />} />
     </Routes>
   )
 }

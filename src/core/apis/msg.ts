@@ -1,5 +1,5 @@
 import { ChatType, GetFileListParam, Peer, RawMessage, SendMessageElement, SendStatusType } from '@/core/types';
-import { GroupFileInfoUpdateItem, InstanceContext, NapCatCore } from '@/core';
+import { GroupFileInfoUpdateItem, InstanceContext, NapCatCore, NodeIKernelMsgService } from '@/core';
 import { GeneralCallResult } from '@/core/services/common';
 
 export class NTQQMsgApi {
@@ -12,6 +12,11 @@ export class NTQQMsgApi {
         this.context = context;
         this.core = core;
     }
+    
+    async clickInlineKeyboardButton(...params: Parameters<NodeIKernelMsgService['clickInlineKeyboardButton']>) {
+        return this.context.session.getMsgService().clickInlineKeyboardButton(...params);
+    }
+
     getMsgByClientSeqAndTime(peer: Peer, replyMsgClientSeq: string, replyMsgTime: string) {
         // https://bot.q.qq.com/wiki/develop/api-v2/openapi/emoji/model.html#EmojiType 可以用过特殊方式拉取
         return this.context.session.getMsgService().getMsgByClientSeqAndTime(peer, replyMsgClientSeq, replyMsgTime);
@@ -201,7 +206,7 @@ export class NTQQMsgApi {
         return this.context.session.getMsgService().getTempChatInfo(chatType, peerUid);
     }
 
-    async sendMsg(peer: Peer, msgElements: SendMessageElement[], waitComplete = true, timeout = 10000) {
+    async sendMsg(peer: Peer, msgElements: SendMessageElement[], timeout = 10000) {
         //唉？！我有个想法
         if (peer.chatType === ChatType.KCHATTYPETEMPC2CFROMGROUP && peer.guildId && peer.guildId !== '') {
             const member = await this.core.apis.GroupApi.getGroupMember(peer.guildId, peer.peerUid);
@@ -268,7 +273,7 @@ export class NTQQMsgApi {
             if (!arkElement) {
                 continue;
             }
-            const forwardData: any = JSON.parse(arkElement.arkElement?.bytesData ?? '');
+            const forwardData: { app: string } = JSON.parse(arkElement.arkElement?.bytesData ?? '');
             if (forwardData.app != 'com.tencent.multimsg') {
                 continue;
             }

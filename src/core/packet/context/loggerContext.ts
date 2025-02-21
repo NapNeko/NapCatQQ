@@ -1,5 +1,6 @@
-import { LogLevel, LogWrapper } from "@/common/log";
-import { NapCoreContext } from "@/core/packet/context/napCoreContext";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { LogLevel, LogWrapper } from '@/common/log';
+import { NapCoreContext } from '@/core/packet/context/napCoreContext';
 
 // TODO: check bind?
 export class PacketLogger {
@@ -10,7 +11,7 @@ export class PacketLogger {
     }
 
     private _log(level: LogLevel, ...msg: any[]): void {
-        this.napLogger._log(level, "[Core] [Packet] " + msg);
+        this.napLogger._log(level, '[Core] [Packet] ' + msg);
     }
 
     debug(...msg: any[]): void {

@@ -1,4 +1,4 @@
-import { ElementType, MessageElement, NTGrayTipElementSubTypeV2, PicSubType, PicType, TipAioOpGrayTipElement, TipGroupElement, NTVideoType, FaceType } from "./msg";
+import { ElementType, MessageElement, NTGrayTipElementSubTypeV2, PicSubType, PicType, TipAioOpGrayTipElement, TipGroupElement, NTVideoType, FaceType } from './msg';
 
 type ElementFullBase = Omit<MessageElement, 'elementType' | 'elementId' | 'extBufForUI'>;
 
@@ -94,7 +94,7 @@ export interface VideoElement {
     thumbHeight?: number;
     busiType?: 0; //
     subBusiType?: 0; // 未知
-    thumbPath?: Map<number, any>;
+    thumbPath?: Map<number, unknown>;
     transferStatus?: 0; // 未知
     progress?: 0;  // 下载进度？
     invalidState?: 0; // 未知
@@ -346,6 +346,8 @@ export type SendArkElement = SendElementBase<ElementType.ARK> & ElementBase<'ark
 export type SendMarkdownElement = SendElementBase<ElementType.MARKDOWN> & ElementBase<'markdownElement'>;
 
 export type SendShareLocationElement = SendElementBase<ElementType.SHARELOCATION> & ElementBase<'shareLocationElement'>;
+
+export type SendMultiForwardMsgElement = SendElementBase<ElementType.MULTIFORWARD> & ElementBase<'multiForwardMsgElement'>;
 
 export type SendMessageElement = SendTextElement | SendPttElement |
     SendPicElement | SendReplyElement | SendFaceElement | SendMarketFaceElement | SendFileElement |

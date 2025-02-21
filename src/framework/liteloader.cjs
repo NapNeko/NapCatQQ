@@ -2,7 +2,7 @@
 const { ipcMain, BrowserWindow } = require('electron');
 const napcat = require('./napcat.cjs');
 const { shell } = require('electron');
-ipcMain.handle('napcat_get_webui', async (event, arg) => {
+ipcMain.handle('napcat_get_webui', async () => {
     return napcat.NCgetWebUiUrl();
 });
 ipcMain.on('open_external_url', (event, url) => {

@@ -1,111 +1,48 @@
+import { Card, CardBody } from '@heroui/card'
 import { Tab, Tabs } from '@heroui/tabs'
-import { useLocalStorage } from '@uidotdev/usehooks'
-import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import toast from 'react-hot-toast'
+import clsx from 'clsx'
 import { useMediaQuery } from 'react-responsive'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
-import key from '@/const/key'
-
-import PageLoading from '@/components/page_loading'
-
-import useConfig from '@/hooks/use-config'
-import useMusic from '@/hooks/use-music'
-
+import ChangePasswordCard from './change_password'
+import LoginConfigCard from './login'
 import OneBotConfigCard from './onebot'
+import ThemeConfigCard from './theme'
 import WebUIConfigCard from './webui'
 
-export default function ConfigPage() {
-  const { config, saveConfigWithoutNetwork, refreshConfig } = useConfig()
-  const [loading, setLoading] = useState(false)
-  const {
-    control: onebotControl,
-    handleSubmit: handleOnebotSubmit,
-    formState: { isSubmitting: isOnebotSubmitting },
-    setValue: setOnebotValue
-  } = useForm<IConfig['onebot']>({
-    defaultValues: {
-      musicSignUrl: '',
-      enableLocalFile2Url: false,
-      parseMultMsg: false
-    }
-  })
+export interface ConfigPageProps {
+  children?: React.ReactNode
+  size?: 'sm' | 'md' | 'lg'
+}
 
-  const {
-    control: webuiControl,
-    handleSubmit: handleWebuiSubmit,
-    formState: { isSubmitting: isWebuiSubmitting },
-    setValue: setWebuiValue
-  } = useForm<IConfig['webui']>({
-    defaultValues: {
-      background: '',
-      musicListID: '',
-      customIcons: {}
-    }
-  })
-
-  const isMediumUp = useMediaQuery({ minWidth: 768 })
-  const [b64img, setB64img] = useLocalStorage(key.backgroundImage, '')
-  const [customIcons, setCustomIcons] = useLocalStorage<Record<string, string>>(
-    key.customIcons,
-    {}
+const ConfingPageItem: React.FC<ConfigPageProps> = ({
+  children,
+  size = 'md'
+}) => {
+  return (
+    <Card className="bg-opacity-50 backdrop-blur-sm">
+      <CardBody className="items-center py-5">
+        <div
+          className={clsx('max-w-full flex flex-col gap-2', {
+            'w-72': size === 'sm',
+            'w-96': size === 'md',
+            'w-[32rem]': size === 'lg'
+          })}
+        >
+          {children}
+        </div>
+      </CardBody>
+    </Card>
   )
-  const { setListId, listId } = useMusic()
-  const resetOneBot = () => {
-    setOnebotValue('musicSignUrl', config.musicSignUrl)
-    setOnebotValue('enableLocalFile2Url', config.enableLocalFile2Url)
-    setOnebotValue('parseMultMsg', config.parseMultMsg)
-  }
+}
 
-  const resetWebUI = () => {
-    setWebuiValue('musicListID', listId)
-    setWebuiValue('customIcons', customIcons)
-    setWebuiValue('background', b64img)
-  }
-
-  const onOneBotSubmit = handleOnebotSubmit((data) => {
-    try {
-      saveConfigWithoutNetwork(data)
-      toast.success('保存成功')
-    } catch (error) {
-      const msg = (error as Error).message
-      toast.error(`保存失败: ${msg}`)
-    }
-  })
-
-  const onWebuiSubmit = handleWebuiSubmit((data) => {
-    try {
-      setListId(data.musicListID)
-      setCustomIcons(data.customIcons)
-      setB64img(data.background)
-      toast.success('保存成功')
-    } catch (error) {
-      const msg = (error as Error).message
-      toast.error(`保存失败: ${msg}`)
-    }
-  })
-
-  const onRefresh = async (shotTip = true) => {
-    try {
-      setLoading(true)
-      await refreshConfig()
-      if (shotTip) toast.success('刷新成功')
-    } catch (error) {
-      const msg = (error as Error).message
-      toast.error(`刷新失败: ${msg}`)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    resetOneBot()
-    resetWebUI()
-  }, [config])
-
-  useEffect(() => {
-    onRefresh(false)
-  }, [])
+export default function ConfigPage() {
+  const isMediumUp = useMediaQuery({ minWidth: 768 })
+  const navigate = useNavigate()
+  const search = useSearchParams({
+    tab: 'onebot'
+  })[0]
+  const tab = search.get('tab') ?? 'onebot'
 
   return (
     <section className="w-[1000px] max-w-full md:mx-auto gap-4 py-8 px-2 md:py-10">
@@ -114,6 +51,10 @@ export default function ConfigPage() {
         fullWidth
         className="w-full"
         isVertical={isMediumUp}
+        selectedKey={tab}
+        onSelectionChange={(key) => {
+          navigate(`/config?tab=${key}`)
+        }}
         classNames={{
           tabList: 'sticky flex top-14 bg-opacity-50 backdrop-blur-sm',
           panel: 'w-full relative',
@@ -122,23 +63,30 @@ export default function ConfigPage() {
         }}
       >
         <Tab title="OneBot配置" key="onebot">
-          <PageLoading loading={loading} />
-          <OneBotConfigCard
-            isSubmitting={isOnebotSubmitting}
-            onRefresh={onRefresh}
-            onSubmit={onOneBotSubmit}
-            control={onebotControl}
-            reset={resetOneBot}
-          />
+          <ConfingPageItem>
+            <OneBotConfigCard />
+          </ConfingPageItem>
         </Tab>
         <Tab title="WebUI配置" key="webui">
-          <WebUIConfigCard
-            isSubmitting={isWebuiSubmitting}
-            onRefresh={onRefresh}
-            onSubmit={onWebuiSubmit}
-            control={webuiControl}
-            reset={resetWebUI}
-          />
+          <ConfingPageItem>
+            <WebUIConfigCard />
+          </ConfingPageItem>
+        </Tab>
+        <Tab title="登录配置" key="login">
+          <ConfingPageItem>
+            <LoginConfigCard />
+          </ConfingPageItem>
+        </Tab>
+        <Tab title="修改密码" key="token">
+          <ConfingPageItem>
+            <ChangePasswordCard />
+          </ConfingPageItem>
+        </Tab>
+
+        <Tab title="主题配置" key="theme">
+          <ConfingPageItem size="lg">
+            <ThemeConfigCard />
+          </ConfingPageItem>
         </Tab>
       </Tabs>
     </section>

@@ -1,26 +1,34 @@
 import { FileNapCatOneBotUUID } from '@/common/file-uuid';
 import { MessageUnique } from '@/common/message-unique';
-import { pathToFileURL } from 'node:url';
 import {
-    NTMsgAtType,
     ChatType,
     CustomMusicSignPostData,
     ElementType,
     FaceIndex,
+    FaceType,
+    GrayTipElement,
+    GroupNotify,
     IdMusicSignPostData,
     MessageElement,
     NapCatCore,
     NTGrayTipElementSubTypeV2,
+    NTMsgAtType,
     Peer,
     RawMessage,
     SendMessageElement,
     SendTextElement,
-    FaceType,
-    GrayTipElement,
-    GroupNotify,
 } from '@/core';
 import faceConfig from '@/core/external/face_config.json';
-import { NapCatOneBot11Adapter, OB11Message, OB11MessageData, OB11MessageDataType, OB11MessageFileBase, OB11MessageForward, OB11MessageImage, OB11MessageVideo, } from '@/onebot';
+import {
+    NapCatOneBot11Adapter,
+    OB11Message,
+    OB11MessageData,
+    OB11MessageDataType,
+    OB11MessageFileBase,
+    OB11MessageForward,
+    OB11MessageImage,
+    OB11MessageVideo,
+} from '@/onebot';
 import { OB11Construct } from '@/onebot/helper/data';
 import { EventType } from '@/onebot/event/OneBotEvent';
 import { encodeCQCode } from '@/onebot/helper/cqcode';
@@ -28,10 +36,10 @@ import { uriToLocalFile } from '@/common/file';
 import { RequestUtil } from '@/common/request';
 import fsPromise, { constants } from 'node:fs/promises';
 import { OB11FriendAddNoticeEvent } from '@/onebot/event/notice/OB11FriendAddNoticeEvent';
-import { ForwardMsgBuilder } from "@/common/forward-msg-builder";
+import { ForwardMsgBuilder } from '@/common/forward-msg-builder';
 import { NapProtoMsg } from '@napneko/nap-proto-core';
 import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
-import { OB11GroupDecreaseEvent, GroupDecreaseSubType } from '../event/notice/OB11GroupDecreaseEvent';
+import { GroupDecreaseSubType, OB11GroupDecreaseEvent } from '../event/notice/OB11GroupDecreaseEvent';
 import { GroupAdmin } from '@/core/packet/transformer/proto/message/groupAdmin';
 import { OB11GroupAdminNoticeEvent } from '../event/notice/OB11GroupAdminNoticeEvent';
 import { GroupChange, GroupChangeInfo, GroupInvite, PushMsgBody } from '@/core/packet/transformer/proto';
@@ -44,7 +52,7 @@ type RawToOb11Converters = {
         msg: RawMessage,
         elementWrapper: MessageElement,
         context: RecvMessageContext
-    ) => PromiseLike<OB11MessageData | null>
+    ) => Promise<OB11MessageData | null | undefined>
 }
 
 type Ob11ToRawConverters = {
@@ -124,13 +132,12 @@ export class OneBotMsgApi {
                         file: element.fileName,
                         sub_type: element.picSubType,
                         url: await this.core.apis.FileApi.getImageUrl(element),
-                        path: element.filePath,
                         file_size: element.fileSize,
                     },
                 };
-            } catch (e: any) {
-                this.core.context.logger.logError('获取图片url失败', e.stack);
-                return null;
+            } catch (e) {
+                this.core.context.logger.logError('获取图片url失败', (e as Error).stack);
+                return;
             }
         },
 
@@ -140,14 +147,13 @@ export class OneBotMsgApi {
                 peerUid: msg.peerUid,
                 guildId: '',
             };
-            const file = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, element.fileUuid, element.fileName);
+            FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, element.fileUuid, element.fileUuid);
+            FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, element.fileUuid, element.fileName);
             return {
                 type: OB11MessageDataType.file,
                 data: {
-                    file: file,
-                    path: element.filePath,
-                    url: pathToFileURL(element.filePath).href,
-                    file_id: file,
+                    file: element.fileName,
+                    file_id: element.fileUuid,
                     file_size: element.fileSize,
                 },
             };
@@ -203,13 +209,12 @@ export class OneBotMsgApi {
             const dir = emojiId.substring(0, 2);
             const url = `https://gxh.vip.qq.com/club/item/parcel/item/${dir}/${emojiId}/raw300.gif`;
             const filename = `${dir}-${emojiId}.gif`;
-            FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "", filename);
+            FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, '', filename);
             return {
                 type: OB11MessageDataType.image,
                 data: {
                     summary: _.faceName, // 商城表情名称
                     file: filename,
-                    path: url,
                     url: url,
                     key: _.key,
                     emoji_id: _.emojiId,
@@ -266,7 +271,6 @@ export class OneBotMsgApi {
             }
 
 
-
             // 丢弃该消息段
             if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
                 this.core.context.logger.logError(
@@ -296,7 +300,7 @@ export class OneBotMsgApi {
                         peerUid: msg.peerUid,
                         guildId: '0',
                     }, msg.parentMsgIdList[0] ?? msg.msgId, elementWrapper.elementId);
-                } catch (error) {
+                } catch {
                     this.core.context.logger.logWarn('合并获取视频 URL 失败');
                 }
             } else {
@@ -306,7 +310,7 @@ export class OneBotMsgApi {
                         peerUid: msg.peerUid,
                         guildId: '0',
                     }, msg.msgId, elementWrapper.elementId);
-                } catch (error) {
+                } catch {
                     this.core.context.logger.logWarn('获取视频 URL 失败');
                 }
             }
@@ -333,8 +337,7 @@ export class OneBotMsgApi {
                 type: OB11MessageDataType.video,
                 data: {
                     file: fileCode,
-                    path: videoDownUrl,
-                    url: videoDownUrl ?? pathToFileURL(element.filePath).href,
+                    url: videoDownUrl,
                     file_size: element.fileSize,
                 },
             };
@@ -346,27 +349,32 @@ export class OneBotMsgApi {
                 peerUid: msg.peerUid,
                 guildId: '',
             };
-            const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, "", element.fileName);
+            const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, '', element.fileName);
             return {
                 type: OB11MessageDataType.voice,
                 data: {
                     file: fileCode,
-                    path: element.filePath,
-                    url: pathToFileURL(element.filePath).href,
                     file_size: element.fileSize,
                 },
             };
         },
 
-        multiForwardMsgElement: async (_, msg, wrapper, context) => {
+        multiForwardMsgElement: async (element, msg, _wrapper, context) => {
             const parentMsgPeer = msg.parentMsgPeer ?? {
                 chatType: msg.chatType,
                 guildId: '',
                 peerUid: msg.peerUid,
             };
-            const multiMsgs = await this.getMultiMessages(msg, parentMsgPeer);
+            let multiMsgs = await this.getMultiMessages(msg, parentMsgPeer);
             // 拉取失败则跳过
-            if (!multiMsgs) return null;
+            if (!multiMsgs || multiMsgs.length === 0) {
+                try {
+                    multiMsgs = await this.core.apis.PacketApi.pkt.operation.FetchForwardMsg(element.resId);
+                } catch (e) {
+                    this.core.context.logger.logError('Protocol FetchForwardMsg fallback failed!', e);
+                    return null;
+                }
+            }
             const forward: OB11MessageForward = {
                 type: OB11MessageDataType.forward,
                 data: { id: msg.msgId }
@@ -465,7 +473,13 @@ export class OneBotMsgApi {
             const parsedFaceId = +id;
             // 从face_config.json中获取表情名称
             const sysFaces = faceConfig.sysface;
-            const face: any = sysFaces.find((systemFace) => systemFace.QSid === parsedFaceId.toString());
+            const face: {
+                QSid?: string,
+                QDes?: string,
+                AniStickerId?: string,
+                AniStickerType?: number,
+                AniStickerPackId?: string,
+            } | undefined = sysFaces.find((systemFace) => systemFace.QSid === parsedFaceId.toString());
             if (!face) {
                 this.core.context.logger.logError('不支持的ID', id);
                 return undefined;
@@ -529,8 +543,12 @@ export class OneBotMsgApi {
             let thumb = sendMsg.data.thumb;
             if (thumb) {
                 const uri2LocalRes = await uriToLocalFile(this.core.NapCatTempPath, thumb);
-                if (uri2LocalRes.success) thumb = uri2LocalRes.path;
+                if (uri2LocalRes.success) {
+                    thumb = uri2LocalRes.path;
+                    context.deleteAfterSentFiles.push(thumb);
+                }
             }
+
             return await this.core.apis.FileApi.createValidSendVideoElement(context, path, fileName, thumb);
         },
 
@@ -622,7 +640,7 @@ export class OneBotMsgApi {
                 //throw Error('音乐消息签名地址未配置');
             }
             try {
-                const musicJson = await RequestUtil.HttpGetJson<any>(signUrl, 'POST', postData);
+                const musicJson = await RequestUtil.HttpGetJson<string>(signUrl, 'POST', postData);
                 return this.ob11ToRawConverters.json({
                     data: { data: musicJson },
                     type: OB11MessageDataType.json
@@ -630,6 +648,7 @@ export class OneBotMsgApi {
             } catch (e) {
                 this.core.context.logger.logError('生成音乐消息失败', e);
             }
+            return undefined;
         },
 
         [OB11MessageDataType.node]: async () => undefined,
@@ -657,20 +676,21 @@ export class OneBotMsgApi {
 
         [OB11MessageDataType.miniapp]: async () => undefined,
 
-        [OB11MessageDataType.contact]: async ({ data: { type = "qq", id } }, context) => {
-            if (type === "qq") {
+        [OB11MessageDataType.contact]: async ({ data: { type = 'qq', id } }, context) => {
+            if (type === 'qq') {
                 const arkJson = await this.core.apis.UserApi.getBuddyRecommendContactArkJson(id.toString(), '');
                 return this.ob11ToRawConverters.json({
                     data: { data: arkJson.arkMsg },
                     type: OB11MessageDataType.json
                 }, context);
-            } else if (type === "group") {
+            } else if (type === 'group') {
                 const arkJson = await this.core.apis.GroupApi.getGroupRecommendContactArkJson(id.toString());
                 return this.ob11ToRawConverters.json({
                     data: { data: arkJson.arkJson },
                     type: OB11MessageDataType.json
                 }, context);
             }
+            return undefined;
         }
     };
 
@@ -683,11 +703,15 @@ export class OneBotMsgApi {
         if (grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
             if (grayTipElement.jsonGrayTipElement.busiId == 1061) {
                 const PokeEvent = await this.obContext.apis.FriendApi.parsePrivatePokeEvent(grayTipElement, Number(await this.core.apis.UserApi.getUinByUidV2(msg.peerUid)));
-                if (PokeEvent) { return PokeEvent; };
+                if (PokeEvent) {
+                    return PokeEvent;
+                }
+                ;
             } else if (grayTipElement.jsonGrayTipElement.busiId == 19324 && msg.peerUid !== '') {
                 return new OB11FriendAddNoticeEvent(this.core, Number(await this.core.apis.UserApi.getUinByUidV2(msg.peerUid)));
             }
         }
+        return;
     }
 
     private async getMultiMessages(msg: RawMessage, parentMsgPeer: Peer) {
@@ -696,11 +720,14 @@ export class OneBotMsgApi {
         //首次列表不存在则开始创建
         msg.parentMsgIdList.push(msg.msgId);
         //拉取下级消息
-        return (await this.core.apis.MsgApi.getMultiMsg(
-            parentMsgPeer,
-            msg.parentMsgIdList[0],
-            msg.msgId
-        ))?.msgList;
+        if (msg.parentMsgIdList[0]) {
+            return (await this.core.apis.MsgApi.getMultiMsg(
+                parentMsgPeer,
+                msg.parentMsgIdList[0],
+                msg.msgId
+            ))?.msgList;
+        }
+        return undefined;
     }
 
     private async parseMultiMessageContent(
@@ -831,7 +858,7 @@ export class OneBotMsgApi {
                             msg: RawMessage,
                             elementWrapper: MessageElement,
                             context: RecvMessageContext
-                        ) => PromiseLike<OB11MessageData | null>;
+                        ) => Promise<OB11MessageData | null>;
                         const parsedElement = await converters?.(
                             element[key],
                             msg,
@@ -844,6 +871,7 @@ export class OneBotMsgApi {
                         return parsedElement;
                     }
                 }
+                return;
             },
         ));
 
@@ -897,7 +925,7 @@ export class OneBotMsgApi {
         return { sendElements, deleteAfterSentFiles };
     }
 
-    async sendMsgWithOb11UniqueId(peer: Peer, sendElements: SendMessageElement[], deleteAfterSentFiles: string[], waitComplete = true) {
+    async sendMsgWithOb11UniqueId(peer: Peer, sendElements: SendMessageElement[], deleteAfterSentFiles: string[]) {
         if (!sendElements.length) {
             throw new Error('消息体无法解析, 请检查是否发送了不支持的消息类型');
         }
@@ -905,16 +933,16 @@ export class OneBotMsgApi {
         const calculateTotalSize = async (elements: SendMessageElement[]): Promise<number> => {
             const sizePromises = elements.map(async element => {
                 switch (element.elementType) {
-                case ElementType.PTT:
-                    return (await fsPromise.stat(element.pttElement.filePath)).size;
-                case ElementType.FILE:
-                    return (await fsPromise.stat(element.fileElement.filePath)).size;
-                case ElementType.VIDEO:
-                    return (await fsPromise.stat(element.videoElement.filePath)).size;
-                case ElementType.PIC:
-                    return (await fsPromise.stat(element.picElement.sourcePath)).size;
-                default:
-                    return 0;
+                    case ElementType.PTT:
+                        return (await fsPromise.stat(element.pttElement.filePath)).size;
+                    case ElementType.FILE:
+                        return (await fsPromise.stat(element.fileElement.filePath)).size;
+                    case ElementType.VIDEO:
+                        return (await fsPromise.stat(element.videoElement.filePath)).size;
+                    case ElementType.PIC:
+                        return (await fsPromise.stat(element.picElement.sourcePath)).size;
+                    default:
+                        return 0;
                 }
             });
             const sizes = await Promise.all(sizePromises);
@@ -928,29 +956,31 @@ export class OneBotMsgApi {
 
         const timeout = 10000 + (totalSize / 1024 / 256 * 1000);
 
-        const returnMsg = await this.core.apis.MsgApi.sendMsg(peer, sendElements, waitComplete, timeout);
-        if (!returnMsg) throw new Error('发送消息失败');
-
-        returnMsg.id = MessageUnique.createUniqueMsgId({
-            chatType: peer.chatType,
-            guildId: '',
-            peerUid: peer.peerUid,
-        }, returnMsg.msgId);
-
-        setTimeout(async () => {
-            const deletePromises = deleteAfterSentFiles.map(async file => {
-                try {
-                    if (await fsPromise.access(file, constants.W_OK).then(() => true).catch(() => false)) {
-                        await fsPromise.unlink(file);
+        try {
+            const returnMsg = await this.core.apis.MsgApi.sendMsg(peer, sendElements, timeout);
+            if (!returnMsg) throw new Error('发送消息失败');
+            returnMsg.id = MessageUnique.createUniqueMsgId({
+                chatType: peer.chatType,
+                guildId: '',
+                peerUid: peer.peerUid,
+            }, returnMsg.msgId);
+            return returnMsg;
+        } catch (error) {
+            throw new Error((error as Error).message);
+        } finally {
+            setTimeout(async () => {
+                const deletePromises = deleteAfterSentFiles.map(async file => {
+                    try {
+                        if (await fsPromise.access(file, constants.W_OK).then(() => true).catch(() => false)) {
+                            await fsPromise.unlink(file);
+                        }
+                    } catch (e) {
+                        this.core.context.logger.logError('发送消息删除文件失败', e);
                     }
-                } catch (e) {
-                    this.core.context.logger.logError('发送消息删除文件失败', e);
-                }
-            });
-            await Promise.all(deletePromises);
-        }, 60000);
-
-        return returnMsg;
+                });
+                await Promise.all(deletePromises);
+            }, 60000);
+        }
     }
 
     private async handleOb11FileLikeMessage(
@@ -962,26 +992,20 @@ export class OneBotMsgApi {
             this.core.context.logger.logError('文件消息缺少参数', inputdata);
             throw new Error('文件消息缺少参数');
         }
-
-        const downloadFile = async (uri: string) => {
-            const { path, fileName, errMsg, success } = await uriToLocalFile(this.core.NapCatTempPath, uri);
-            if (!success) {
-                this.core.context.logger.logError('文件下载失败', errMsg);
-                throw new Error('文件下载失败: ' + errMsg);
-            }
-            return { path, fileName };
-        };
+        realUri = await this.handleObfuckName(realUri) ?? realUri;
         try {
-            const { path, fileName } = await downloadFile(realUri);
+            const { path, fileName, errMsg, success } = await uriToLocalFile(this.core.NapCatTempPath, realUri);
+            if (!success) {
+                this.core.context.logger.logError('文件处理失败', errMsg);
+                throw new Error('文件处理失败: ' + errMsg);
+            }
             deleteAfterSentFiles.push(path);
             return { path, fileName: inputdata.name ?? fileName };
-        } catch {
-            realUri = await this.handleObfuckName(realUri);
-            const { path, fileName } = await downloadFile(realUri);
-            deleteAfterSentFiles.push(path);
-            return { path, fileName: inputdata.name ?? fileName };
+        } catch (e: unknown) {
+            throw new Error((e as Error).message);
         }
     }
+
     async handleObfuckName(name: string) {
         const contextMsgFile = FileNapCatOneBotUUID.decode(name);
         if (contextMsgFile && contextMsgFile.msgId && contextMsgFile.elementId) {
@@ -1003,18 +1027,19 @@ export class OneBotMsgApi {
             }
             return url !== '' ? url : await this.core.apis.FileApi.downloadMedia(msgId, peer.chatType, peer.peerUid, elementId, '', '');
         }
-        throw new Error('文件名解析失败');
+        return undefined;
     }
+
     groupChangDecreseType2String(type: number): GroupDecreaseSubType {
         switch (type) {
-        case 130:
-            return 'leave';
-        case 131:
-            return 'kick';
-        case 3:
-            return 'kick_me';
-        default:
-            return 'kick';
+            case 130:
+                return 'leave';
+            case 131:
+                return 'kick';
+            case 3:
+                return 'kick_me';
+            default:
+                return 'kick';
         }
     }
 
@@ -1025,7 +1050,7 @@ export class OneBotMsgApi {
         if (isAdminOrOwner && !operatorUid) {
             let dataNotify: GroupNotify | undefined;
             await this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onGroupNotifiesUpdated',
-                (doubt, notifies) => {
+                (_doubt, notifies) => {
                     for (const notify of notifies) {
                         if (notify.group.groupCode === groupUin && notify.user1.uid === memberUid) {
                             dataNotify = notify;
@@ -1033,7 +1058,7 @@ export class OneBotMsgApi {
                         }
                     }
                     return false;
-                }, 1, 1000).catch(undefined);
+                }, 1, 1000).catch(() => undefined);
             if (dataNotify) {
                 return !dataNotify.actionUser.uid ? dataNotify.user2.uid : dataNotify.actionUser.uid;
             }
@@ -1124,7 +1149,7 @@ export class OneBotMsgApi {
                     }
                     return false;
                 }, 1, 1000);
-            } catch (error) {
+            } catch {
                 request_seq = '';
             }
             // 未拉取到seq
@@ -1173,5 +1198,6 @@ export class OneBotMsgApi {
         } else if (SysMessage.contentHead.type == 528 && SysMessage.contentHead.subType == 39 && SysMessage.body?.msgContent) {
             return await this.obContext.apis.UserApi.parseLikeEvent(SysMessage.body?.msgContent);
         }
+        return undefined;
     }
 }

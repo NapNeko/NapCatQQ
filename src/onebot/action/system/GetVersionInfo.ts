@@ -1,12 +1,15 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-
 import { napCatVersion } from '@/common/version';
+interface ResponseType {
+    app_name: string;
+    protocol_version: string;
+    app_version: string;
+}
+export default class GetVersionInfo extends OneBotAction<void, ResponseType> {
+    override actionName = ActionName.GetVersionInfo;
 
-export default class GetVersionInfo extends OneBotAction<any, any> {
-    actionName = ActionName.GetVersionInfo;
-
-    async _handle(payload: any): Promise<any> {
+    async _handle(): Promise<ResponseType> {
         return {
             app_name: 'NapCat.Onebot',
             protocol_version: 'v11',

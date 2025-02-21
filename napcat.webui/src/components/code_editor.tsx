@@ -19,12 +19,6 @@ loader.config({
   }
 })
 
-loader.config({
-  'vs/nls': {
-    availableLanguages: { '*': 'zh-cn' }
-  }
-})
-
 export interface CodeEditorProps extends React.ComponentProps<typeof Editor> {
   test?: string
 }

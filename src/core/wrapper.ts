@@ -71,7 +71,7 @@ export interface NodeQQNTWrapperUtil {
 
     getPinyin(arg0: string, arg1: boolean): unknown;
 
-    matchInPinyin(arg0: any[], arg1: string): unknown; //参数特复杂 arg0是个复杂数据类型
+    matchInPinyin(arg0: unknown[], arg1: string): unknown; //参数特复杂 arg0是个复杂数据类型
 
     makeDirByPath(arg0: string): unknown;
 
@@ -91,7 +91,7 @@ export interface NodeQQNTWrapperUtil {
 
     resetUserDataSavePathToDocument(): unknown;
 
-    getSoBuildInfo(): any; //例如 0[0]_d491dc01e0a_0
+    getSoBuildInfo(): unknown; //例如 0[0]_d491dc01e0a_0
 
     registerCountInstruments(arg0: string, arg1: string[], arg2: number, arg3: number): unknown;
 
@@ -123,9 +123,9 @@ export interface NodeQQNTWrapperUtil {
 
     checkNewUserDataSaveDirAvailable(arg0: string): unknown;
 
-    copyUserData(arg0: string, arg1: string): Promise<any>;
+    copyUserData(arg0: string, arg1: string): Promise<unknown>;
 
-    setUserDataSaveDirectory(arg0: string): Promise<any>;
+    setUserDataSaveDirectory(arg0: string): Promise<unknown>;
 
     hasOtherRunningQQProcess(): boolean;
 

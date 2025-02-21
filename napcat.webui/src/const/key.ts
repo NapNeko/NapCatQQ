@@ -7,7 +7,9 @@ enum key {
   autoPlay = 'auto-play',
   customIcons = 'custom-icons',
   isCollapsedMusicPlayer = 'is-collapsed-music-player',
-  sideBarOpen = 'side-bar-open'
+  sideBarOpen = 'side-bar-open',
+  httpDebugConfig = 'http-debug-config',
+  wsDebugConfig = 'ws-debug-config'
 }
 
 export default key

@@ -8,11 +8,11 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export class GoCQHTTPCheckUrlSafely extends OneBotAction<Payload, any> {
-    actionName = ActionName.GoCQHTTP_CheckUrlSafely;
-    payloadSchema = SchemaData;
+export class GoCQHTTPCheckUrlSafely extends OneBotAction<Payload, { level: number }> {
+    override actionName = ActionName.GoCQHTTP_CheckUrlSafely;
+    override payloadSchema = SchemaData;
 
-    async _handle(payload: Payload) {
+    async _handle() {
         return { level: 1 };
     }
 }

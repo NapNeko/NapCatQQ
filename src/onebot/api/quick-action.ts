@@ -46,9 +46,7 @@ export class OneBotQuickActionApi {
     async handleMsg(msg: OB11Message, quickAction: QuickAction) {
         const reply = quickAction.reply;
         const peerContextMode = msg.message_type == 'private' ? ContextMode.Private : ContextMode.Group;
-
         const peer: Peer = await createContext(this.core, {
-            message_type: undefined,
             group_id: msg.group_id?.toString(),
             user_id: msg.user_id?.toString(),
         }, peerContextMode);
@@ -79,7 +77,7 @@ export class OneBotQuickActionApi {
                 sendElements,
                 deleteAfterSentFiles,
             } = await this.obContext.apis.MsgApi.createSendElements(replyMessage, peer);
-            this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, deleteAfterSentFiles, false).then().catch(e => this.core.context.logger.logError(e));
+            this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, sendElements, deleteAfterSentFiles).then().catch(e => this.core.context.logger.logError(e));
         }
     }
     async findNotify(flag: string) {
@@ -91,7 +89,7 @@ export class OneBotQuickActionApi {
     }
 
     async handleGroupRequest(request: OB11GroupRequestEvent, quickAction: QuickActionGroupRequest) {
-        
+
         const invite_notify = this.obContext.apis.MsgApi.notifyGroupInvite.get(request.flag);
         const notify = invite_notify ?? await this.findNotify(request.flag);
 

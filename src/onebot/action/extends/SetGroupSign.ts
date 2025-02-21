@@ -8,8 +8,8 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-class SetGroupSignBase extends GetPacketStatusDepends<Payload, any> {
-    payloadSchema = SchemaData;
+class SetGroupSignBase extends GetPacketStatusDepends<Payload, void> {
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         return await this.core.apis.PacketApi.pkt.operation.GroupSign(+payload.group_id);
@@ -17,9 +17,9 @@ class SetGroupSignBase extends GetPacketStatusDepends<Payload, any> {
 }
 
 export class SetGroupSign extends SetGroupSignBase {
-    actionName = ActionName.SetGroupSign;
+    override actionName = ActionName.SetGroupSign;
 }
 
 export class SendGroupSign extends SetGroupSignBase {
-    actionName = ActionName.SendGroupSign;
+    override actionName = ActionName.SendGroupSign;
 }

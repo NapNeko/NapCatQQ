@@ -195,7 +195,7 @@ export interface OneBot11GroupUpload extends NoticeBase {
     name: string
     /** 文件大小（字节数） */
     size: number
-    /** busid（目前不清楚有什么作用） */
+    /** busid 无作用 */
     busid: number
   }
 }

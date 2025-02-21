@@ -1,20 +1,19 @@
 import { GetFileBase, GetFilePayload, GetFileResponse } from './GetFile';
 import { ActionName } from '@/onebot/action/router';
-import { spawn } from 'node:child_process';
 import { promises as fs } from 'fs';
 import { decode } from 'silk-wasm';
-const FFMPEG_PATH = process.env.FFMPEG_PATH || 'ffmpeg';
+import { FFmpegService } from '@/common/ffmpeg';
 
-const out_format = ['mp3' , 'amr' , 'wma' , 'm4a' , 'spx' , 'ogg' , 'wav' , 'flac'];
+const out_format = ['mp3', 'amr', 'wma', 'm4a', 'spx', 'ogg', 'wav', 'flac'];
 
 type Payload = {
-    out_format : string
+    out_format: string
 } & GetFilePayload
 
 export default class GetRecord extends GetFileBase {
-    actionName = ActionName.GetRecord;
+    override actionName = ActionName.GetRecord;
 
-    async _handle(payload: Payload): Promise<GetFileResponse> {
+    override async _handle(payload: Payload): Promise<GetFileResponse> {
         const res = await super._handle(payload);
         if (payload.out_format && typeof payload.out_format === 'string') {
             const inputFile = res.file;
@@ -28,9 +27,9 @@ export default class GetRecord extends GetFileBase {
                 await fs.access(inputFile);
                 try {
                     await fs.access(outputFile);
-                } catch (error) {
+                } catch {
                     await this.decodeFile(inputFile, pcmFile);
-                    await this.convertFile(pcmFile, outputFile, payload.out_format);
+                    await FFmpegService.convertFile(pcmFile, outputFile, payload.out_format);
                 }
                 const base64Data = await fs.readFile(outputFile, { encoding: 'base64' });
                 res.file = outputFile;
@@ -53,24 +52,5 @@ export default class GetRecord extends GetFileBase {
             console.error('Error decoding file:', error);
             throw error; // 重新抛出错误以便调用者可以处理
         }
-    }
-
-    private convertFile(inputFile: string, outputFile: string, format: string): Promise<void> {
-        return new Promise((resolve, reject) => {
-            const params = format === 'amr' ? ['-f', 's16le', '-ar', '24000', '-ac', '1', '-i', inputFile, '-ar', '8000', '-b:a', '12.2k', outputFile] : ['-f', 's16le', '-ar', '24000', '-ac', '1', '-i', inputFile, outputFile];
-            const ffmpeg = spawn(FFMPEG_PATH, params);
-
-            ffmpeg.on('close', (code) => {
-                if (code === 0) {
-                    resolve();
-                } else {
-                    reject(new Error(`ffmpeg process exited with code ${code}`));
-                }
-            });
-
-            ffmpeg.on('error', (error: Error) => {
-                reject(error);
-            });
-        });
     }
 }

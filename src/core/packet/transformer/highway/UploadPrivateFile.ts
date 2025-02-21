@@ -1,9 +1,9 @@
-import * as proto from "@/core/packet/transformer/proto";
-import { NapProtoMsg } from "@napneko/nap-proto-core";
-import { OidbPacket, PacketTransformer } from "@/core/packet/transformer/base";
-import OidbBase from "@/core/packet/transformer/oidb/oidbBase";
-import { PacketMsgFileElement } from "@/core/packet/message/element";
-import { computeMd5AndLengthWithLimit } from "@/core/packet/utils/crypto/hash";
+import * as proto from '@/core/packet/transformer/proto';
+import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { OidbPacket, PacketTransformer } from '@/core/packet/transformer/base';
+import OidbBase from '@/core/packet/transformer/oidb/oidbBase';
+import { PacketMsgFileElement } from '@/core/packet/message/element';
+import { computeMd5AndLengthWithLimit } from '@/core/packet/utils/crypto/hash';
 
 class UploadPrivateFile extends PacketTransformer<typeof proto.OidbSvcTrpcTcp0XE37Response> {
     constructor() {
@@ -21,7 +21,7 @@ class UploadPrivateFile extends PacketTransformer<typeof proto.OidbSvcTrpcTcp0XE
                 fileName: file.fileName,
                 md510MCheckSum: await computeMd5AndLengthWithLimit(file.filePath, 10 * 1024 * 1024),
                 sha1CheckSum: file.fileSha1,
-                localPath: "/",
+                localPath: '/',
                 md5CheckSum: file.fileMd5,
                 sha3CheckSum: Buffer.alloc(0)
             },

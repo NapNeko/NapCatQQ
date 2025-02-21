@@ -1,7 +1,7 @@
 import { ActionName } from '@/onebot/action/router';
-import { GetPacketStatusDepends } from "@/onebot/action/packet/GetPacketStatus";
-import { MiniAppInfo, MiniAppInfoHelper } from "@/core/packet/utils/helper/miniAppHelper";
-import { MiniAppData, MiniAppRawData, MiniAppReqCustomParams, MiniAppReqParams } from "@/core/packet/entities/miniApp";
+import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
+import { MiniAppInfo, MiniAppInfoHelper } from '@/core/packet/utils/helper/miniAppHelper';
+import { MiniAppData, MiniAppRawData, MiniAppReqCustomParams, MiniAppReqParams } from '@/core/packet/entities/miniApp';
 import { Static, Type } from '@sinclair/typebox';
 
 const SchemaData = Type.Union([
@@ -38,8 +38,8 @@ type Payload = Static<typeof SchemaData>;
 export class GetMiniAppArk extends GetPacketStatusDepends<Payload, {
     data: MiniAppData | MiniAppRawData
 }> {
-    actionName = ActionName.GetMiniAppArk;
-    payloadSchema = SchemaData;
+    override actionName = ActionName.GetMiniAppArk;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         let reqParam: MiniAppReqParams;

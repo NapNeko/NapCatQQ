@@ -13,12 +13,15 @@ export interface ModalProps {
   content: React.ReactNode
   title?: React.ReactNode
   size?: React.ComponentProps<typeof NextUIModal>['size']
+  scrollBehavior?: React.ComponentProps<typeof NextUIModal>['scrollBehavior']
   onClose?: () => void
   onConfirm?: () => void
   onCancel?: () => void
   backdrop?: 'opaque' | 'blur' | 'transparent'
   showCancel?: boolean
   dismissible?: boolean
+  confirmText?: string
+  cancelText?: string
 }
 
 const Modal: React.FC<ModalProps> = React.memo((props) => {
@@ -26,12 +29,14 @@ const Modal: React.FC<ModalProps> = React.memo((props) => {
     backdrop = 'blur',
     title,
     content,
-    size = 'md',
     showCancel = true,
     dismissible,
+    confirmText = '确定',
+    cancelText = '取消',
     onClose,
     onConfirm,
-    onCancel
+    onCancel,
+    ...rest
   } = props
   const { onClose: onNativeClose } = useDisclosure()
 
@@ -44,11 +49,11 @@ const Modal: React.FC<ModalProps> = React.memo((props) => {
         onClose?.()
         onNativeClose()
       }}
-      size={size}
       classNames={{
-        backdrop: 'z-[99999999]',
-        wrapper: 'z-[999999999]'
+        backdrop: 'z-[99]',
+        wrapper: 'z-[99]'
       }}
+      {...rest}
     >
       <ModalContent>
         {(nativeClose) => (
@@ -56,18 +61,18 @@ const Modal: React.FC<ModalProps> = React.memo((props) => {
             {title && (
               <ModalHeader className="flex flex-col gap-1">{title}</ModalHeader>
             )}
-            <ModalBody>{content}</ModalBody>
+            <ModalBody className="break-all">{content}</ModalBody>
             <ModalFooter>
               {showCancel && (
                 <Button
-                  color="danger"
+                  color="primary"
                   variant="light"
                   onPress={() => {
                     onCancel?.()
                     nativeClose()
                   }}
                 >
-                  取消
+                  {cancelText}
                 </Button>
               )}
               <Button
@@ -77,7 +82,7 @@ const Modal: React.FC<ModalProps> = React.memo((props) => {
                   nativeClose()
                 }}
               >
-                确定
+                {confirmText}
               </Button>
             </ModalFooter>
           </>

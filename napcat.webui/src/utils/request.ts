@@ -45,6 +45,10 @@ serverRequest.interceptors.request.use((config) => {
 })
 
 serverRequest.interceptors.response.use((response) => {
+  // 如果是流式传输的文件
+  if (response.headers['content-type'] === 'application/octet-stream') {
+    return response
+  }
   if (response.data.code !== 0) {
     if (response.data.message === 'Unauthorized') {
       const token = localStorage.getItem(key.token)

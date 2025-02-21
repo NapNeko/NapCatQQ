@@ -1,11 +1,11 @@
-import net from "node:net";
-import stream from "node:stream";
-import crypto from "node:crypto";
-import { NapProtoMsg } from "@napneko/nap-proto-core";
-import { BlockSize } from "@/core/packet/highway/highwayContext";
-import { Frame } from "@/core/packet/highway/frame";
-import { IHighwayUploader } from "@/core/packet/highway/uploader/highwayUploader";
-import * as proto from "@/core/packet/transformer/proto";
+import net from 'node:net';
+import stream from 'node:stream';
+import crypto from 'node:crypto';
+import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { BlockSize } from '@/core/packet/highway/highwayContext';
+import { Frame } from '@/core/packet/highway/frame';
+import { IHighwayUploader } from '@/core/packet/highway/uploader/highwayUploader';
+import * as proto from '@/core/packet/transformer/proto';
 
 class HighwayTcpUploaderTransform extends stream.Transform {
     uploader: HighwayTcpUploader;
@@ -17,7 +17,8 @@ class HighwayTcpUploaderTransform extends stream.Transform {
         this.offset = 0;
     }
 
-    _transform(data: Buffer, _: BufferEncoding, callback: stream.TransformCallback) {
+    // eslint-disable-next-line no-undef
+    override _transform(data: Buffer, _: BufferEncoding, callback: stream.TransformCallback) {
         let chunkOffset = 0;
         while (chunkOffset < data.length) {
             const chunkSize = Math.min(BlockSize, data.length - chunkOffset);
@@ -60,6 +61,7 @@ export class HighwayTcpUploader extends IHighwayUploader {
                     socket.end();
                     reject(new Error('Upload aborted due to timeout'));
                 }
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const [head, _] = Frame.unpack(chunk);
                 handleRspHeader(head);
             });

@@ -11,8 +11,8 @@ const SchemaData = Type.Object({
 type Payload = Static<typeof SchemaData>;
 
 export default class SetFriendAddRequest extends OneBotAction<Payload, null> {
-    actionName = ActionName.SetFriendAddRequest;
-    payloadSchema = SchemaData;
+    override actionName = ActionName.SetFriendAddRequest;
+    override payloadSchema = SchemaData;
 
     async _handle(payload: Payload): Promise<null> {
         const approve = payload.approve?.toString() !== 'false';

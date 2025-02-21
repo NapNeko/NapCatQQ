@@ -1,20 +1,22 @@
 import * as crypto from 'crypto';
-import { PacketContext } from "@/core/packet/context/packetContext";
-import * as trans from "@/core/packet/transformer";
-import { PacketMsg } from "@/core/packet/message/message";
+import { PacketContext } from '@/core/packet/context/packetContext';
+import * as trans from '@/core/packet/transformer';
+import { PacketMsg } from '@/core/packet/message/message';
 import {
     PacketMsgFileElement,
     PacketMsgPicElement,
     PacketMsgPttElement,
     PacketMsgVideoElement
-} from "@/core/packet/message/element";
-import { ChatType } from "@/core";
-import { MiniAppRawData, MiniAppReqParams } from "@/core/packet/entities/miniApp";
-import { AIVoiceChatType } from "@/core/packet/entities/aiChat";
-import { NapProtoDecodeStructType, NapProtoEncodeStructType } from "@napneko/nap-proto-core";
-import { IndexNode, MsgInfo } from "@/core/packet/transformer/proto";
-import { OidbPacket } from "@/core/packet/transformer/base";
-import { ImageOcrResult } from "@/core/packet/entities/ocrResult";
+} from '@/core/packet/message/element';
+import { ChatType, MsgSourceType, NTMsgType, RawMessage } from '@/core';
+import { MiniAppRawData, MiniAppReqParams } from '@/core/packet/entities/miniApp';
+import { AIVoiceChatType } from '@/core/packet/entities/aiChat';
+import { NapProtoDecodeStructType, NapProtoEncodeStructType, NapProtoMsg } from '@napneko/nap-proto-core';
+import { IndexNode, LongMsgResult, MsgInfo } from '@/core/packet/transformer/proto';
+import { OidbPacket } from '@/core/packet/transformer/base';
+import { ImageOcrResult } from '@/core/packet/entities/ocrResult';
+import { gunzipSync } from 'zlib';
+import { PacketMsgConverter } from '@/core/packet/message/converter';
 
 export class PacketOperationContext {
     private readonly context: PacketContext;
@@ -61,7 +63,7 @@ export class PacketOperationContext {
             }
             status = Number((extBigInt & 0xff00n) + ((extBigInt >> 16n) & 0xffn));
             return { status: 10, ext_status: status };
-        } catch (e) {
+        } catch {
             return undefined;
         }
     }
@@ -116,6 +118,13 @@ export class PacketOperationContext {
         return `https://${res.download.info.domain}${res.download.info.urlPath}${res.download.rKeyParam}`;
     }
 
+    async GetGroupImageUrl(groupUin: number, node: NapProtoEncodeStructType<typeof IndexNode>) {
+        const req = trans.DownloadGroupImage.build(groupUin, node);
+        const resp = await this.context.client.sendOidbPacket(req, true);
+        const res = trans.DownloadImage.parse(resp);
+        return `https://${res.download.info.domain}${res.download.info.urlPath}${res.download.rKeyParam}`;
+    }
+
     async ImageOCR(imgUrl: string) {
         const req = trans.ImageOCR.build(imgUrl);
         const resp = await this.context.client.sendOidbPacket(req, true);
@@ -150,6 +159,12 @@ export class PacketOperationContext {
         const resp = await this.context.client.sendOidbPacket(req, true);
         const res = trans.DownloadGroupFile.parse(resp);
         return `https://${res.download.downloadDns}/ftn_handler/${Buffer.from(res.download.downloadUrl).toString('hex')}/?fname=`;
+    }
+    async GetPrivateFileUrl(self_id: string, fileUUID: string, md5: string) {
+        const req = trans.DownloadPrivateFile.build(self_id, fileUUID, md5);
+        const resp = await this.context.client.sendOidbPacket(req, true);
+        const res = trans.DownloadPrivateFile.parse(resp);
+        return `http://${res.body?.result?.server}:${res.body?.result?.port}${res.body?.result?.url?.slice(8)}&isthumb=0`;
     }
 
     async GetGroupPttUrl(groupUin: number, node: NapProtoEncodeStructType<typeof IndexNode>) {
@@ -194,5 +209,75 @@ export class PacketOperationContext {
             if (!res.msgInfo) continue;
             return res.msgInfo;
         }
+    }
+
+    async FetchForwardMsg(res_id: string): Promise<RawMessage[]> {
+        const req = trans.DownloadForwardMsg.build(this.context.napcore.basicInfo.uid, res_id);
+        const resp = await this.context.client.sendOidbPacket(req, true);
+        const res = trans.DownloadForwardMsg.parse(resp);
+        const inflate = gunzipSync(res.result.payload);
+        const result = new NapProtoMsg(LongMsgResult).decode(inflate);
+
+        const main = result.action.find((r) => r.actionCommand === 'MultiMsg');
+        if (!main?.actionData.msgBody) {
+            throw new Error('msgBody is empty');
+        }
+
+        const messagesPromises = main.actionData.msgBody.map(async (msg) => {
+            if (!msg?.body?.richText?.elems) {
+                throw new Error('msg.body.richText.elems is empty');
+            }
+            const rawChains = new PacketMsgConverter().packetMsgToRaw(msg?.body?.richText?.elems);
+            const elements = await Promise.all(
+                rawChains.map(async ([element, rawElem]) => {
+                    if (element.picElement && rawElem?.commonElem?.pbElem) {
+                        const extra = new NapProtoMsg(MsgInfo).decode(rawElem.commonElem.pbElem);
+                        const index = extra?.msgInfoBody[0]?.index;
+                        if (msg?.responseHead.grp !== undefined) {
+                            const groupUin = msg?.responseHead.grp?.groupUin ?? 0;
+                            element.picElement = {
+                                ...element.picElement,
+                                originImageUrl: await this.GetGroupImageUrl(groupUin, index!)
+                            };
+                        } else {
+                            element.picElement = {
+                                ...element.picElement,
+                                originImageUrl: await this.GetImageUrl(this.context.napcore.basicInfo.uid, index!)
+                            };
+                        }
+                        return element;
+                    }
+                    return element;
+                })
+            );
+            return {
+                chatType: ChatType.KCHATTYPEGROUP,
+                elements: elements,
+                guildId: '',
+                isOnlineMsg: false,
+                msgId: '7467703692092974645',  // TODO: no necessary
+                msgRandom: '0',
+                msgSeq: String(msg.contentHead.sequence ?? 0),
+                msgTime: String(msg.contentHead.timeStamp ?? 0),
+                msgType: NTMsgType.KMSGTYPEMIX,
+                parentMsgIdList: [],
+                parentMsgPeer: {
+                    chatType: ChatType.KCHATTYPEGROUP,
+                    peerUid: String(msg?.responseHead.grp?.groupUin ?? 0),
+                },
+                peerName: '',
+                peerUid: '1094950020',
+                peerUin: '1094950020',
+                recallTime: '0',
+                records: [],
+                sendNickName: msg?.responseHead.grp?.memberName ?? '',
+                sendRemarkName: msg?.responseHead.grp?.memberName ?? '',
+                senderUid: '',
+                senderUin: '1094950020',
+                sourceType: MsgSourceType.K_DOWN_SOURCETYPE_UNKNOWN,
+                subMsgType: 1,
+            };
+        });
+        return await Promise.all(messagesPromises);
     }
 }

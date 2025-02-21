@@ -30,7 +30,7 @@ export interface NodeIKernelOnlineStatusService {
     checkLikeStatus(param: {
         businessType: number,
         uins: string[]
-    }): Promise<any>;
+    }): Promise<unknown>;
 
     isNull(): boolean;
 }

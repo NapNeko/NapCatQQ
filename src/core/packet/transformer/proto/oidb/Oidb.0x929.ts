@@ -1,5 +1,5 @@
-import { ProtoField, ScalarType } from "@napneko/nap-proto-core";
-import { MsgInfo } from "@/core/packet/transformer/proto";
+import { ProtoField, ScalarType } from '@napneko/nap-proto-core';
+import { MsgInfo } from '@/core/packet/transformer/proto';
 
 
 export const OidbSvcTrpcTcp0X929D_0 = {

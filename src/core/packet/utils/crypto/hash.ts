@@ -2,7 +2,7 @@
 import * as crypto from 'crypto';
 import * as stream from 'stream';
 import * as fs from 'fs';
-import { CalculateStreamBytesTransform } from "@/core/packet/utils/crypto/sha1StreamBytesTransform";
+import { CalculateStreamBytesTransform } from '@/core/packet/utils/crypto/sha1StreamBytesTransform';
 
 function sha1Stream(readable: stream.Readable) {
     return new Promise<Buffer>((resolve, reject) => {

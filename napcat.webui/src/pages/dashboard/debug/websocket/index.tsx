@@ -1,10 +1,12 @@
 import { Button } from '@heroui/button'
 import { Card, CardBody } from '@heroui/card'
 import { Input } from '@heroui/input'
+import { useLocalStorage } from '@uidotdev/usehooks'
 import { useCallback, useState } from 'react'
 import toast from 'react-hot-toast'
 
-import ChatInputModal from '@/components/chat_input/modal'
+import key from '@/const/key'
+
 import OneBotMessageList from '@/components/onebot/message_list'
 import OneBotSendModal from '@/components/onebot/send_modal'
 import WSStatus from '@/components/onebot/ws_status'
@@ -12,9 +14,11 @@ import WSStatus from '@/components/onebot/ws_status'
 import { useWebSocketDebug } from '@/hooks/use-websocket-debug'
 
 export default function WSDebug() {
-  const url = new URL(window.location.origin).href
-  const defaultWsUrl = url.replace('http', 'ws').replace(':6099', ':3000')
-  const [socketConfig, setSocketConfig] = useState({
+  const url = new URL(window.location.origin)
+  url.port = '3001'
+  url.protocol = 'ws:'
+  const defaultWsUrl = url.href
+  const [socketConfig, setSocketConfig] = useLocalStorage(key.wsDebugConfig, {
     url: defaultWsUrl,
     token: ''
   })
@@ -60,7 +64,7 @@ export default function WSDebug() {
               />
               <div className="flex-shrink-0 flex gap-2 col-span-2 md:col-span-1">
                 <Button
-                  color="danger"
+                  color="primary"
                   onPress={handleConnect}
                   size="lg"
                   radius="full"
@@ -77,7 +81,6 @@ export default function WSDebug() {
                   {FilterMessagesType}
                 </div>
                 <OneBotSendModal sendMessage={sendMessage} />
-                <ChatInputModal />
               </div>
             </div>
           </CardBody>
