@@ -165,7 +165,13 @@ export class NTQQGroupApi {
 
         return this.groupMemberCache.get(groupCode);
     }
-
+    async refreshGroupMemberCachePartial(groupCode: string, uid: string) {
+        const member = await this.getGroupMemberEx(groupCode, uid, true);
+        if (member) {
+            this.groupMemberCache.get(groupCode)?.set(uid, member);
+        }
+        return member;
+    }
     async getGroupMember(groupCode: string | number, memberUinOrUid: string | number) {
         const groupCodeStr = groupCode.toString();
         const memberUinOrUidStr = memberUinOrUid.toString();
