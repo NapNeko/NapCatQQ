@@ -121,6 +121,9 @@ export class OneBotGroupApi {
                 member.cardName = newCardName;
                 return event;
             }
+            if (member && member.nick !== msg.sendNickName) {
+                await this.core.apis.GroupApi.refreshGroupMemberCachePartial(msg.peerUid, msg.senderUid);
+            }
         }
         return undefined;
     }
