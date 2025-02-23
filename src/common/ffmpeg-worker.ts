@@ -5,6 +5,17 @@ import { readFileSync, statSync, writeFileSync } from 'fs';
 import type { VideoInfo } from './video';
 import { fileTypeFromFile } from 'file-type';
 import imageSize from 'image-size';
+import { parentPort } from 'worker_threads';
+export function recvTask<T>(cb: (taskData: T) => Promise<unknown>) {
+    parentPort?.on('message', async (taskData: T) => {
+        try {
+            let ret = await cb(taskData);
+            parentPort?.postMessage(ret);
+        } catch (error: unknown) {
+            parentPort?.postMessage({ error: (error as Error).message });
+        }
+    });
+}
 class FFmpegService {
     public static async extractThumbnail(videoPath: string, thumbnailPath: string): Promise<void> {
         const ffmpegInstance = await FFmpeg.create({ core: '@ffmpeg.wasm/core-mt' });
@@ -137,15 +148,18 @@ interface FFmpegTask {
 }
 export default async function handleFFmpegTask({ method, args }: FFmpegTask): Promise<any> {
     switch (method) {
-    case 'extractThumbnail':
-        return await FFmpegService.extractThumbnail(...args as [string, string]);
-    case 'convertFile':
-        return await FFmpegService.convertFile(...args as [string, string, string]);
-    case 'convert':
-        return await FFmpegService.convert(...args as [string, string]);
-    case 'getVideoInfo':
-        return await FFmpegService.getVideoInfo(...args as [string, string]);
-    default:
-        throw new Error(`Unknown method: ${method}`);
+        case 'extractThumbnail':
+            return await FFmpegService.extractThumbnail(...args as [string, string]);
+        case 'convertFile':
+            return await FFmpegService.convertFile(...args as [string, string, string]);
+        case 'convert':
+            return await FFmpegService.convert(...args as [string, string]);
+        case 'getVideoInfo':
+            return await FFmpegService.getVideoInfo(...args as [string, string]);
+        default:
+            throw new Error(`Unknown method: ${method}`);
     }
 }
+recvTask<FFmpegTask>(async ({ method, args }: FFmpegTask) => {
+    return await handleFFmpegTask({ method, args });
+});
