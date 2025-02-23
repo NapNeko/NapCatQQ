@@ -49,6 +49,7 @@ export class OneBotGroupApi {
                 duration = -1;
             }
         }
+        await this.core.apis.GroupApi.refreshGroupMemberCachePartial(GroupCode, memberUid);
         const adminUin = (await this.core.apis.GroupApi.getGroupMember(GroupCode, adminUid))?.uin;
         if (memberUin && adminUin) {
             return new OB11GroupBanEvent(
@@ -113,6 +114,7 @@ export class OneBotGroupApi {
     async parseCardChangedEvent(msg: RawMessage) {
         if (msg.senderUin && msg.senderUin !== '0') {
             const member = await this.core.apis.GroupApi.getGroupMember(msg.peerUid, msg.senderUin);
+            await this.core.apis.GroupApi.refreshGroupMemberCachePartial(msg.peerUid, msg.senderUid);
             if (member && member.cardName !== msg.sendMemberName) {
                 const newCardName = msg.sendMemberName ?? '';
                 const event = new OB11GroupCardEvent(this.core, parseInt(msg.peerUid), parseInt(msg.senderUin), newCardName, member.cardName);
