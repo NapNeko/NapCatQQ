@@ -1,4 +1,3 @@
-import Piscina from 'piscina';
 import fsPromise from 'fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'crypto';
@@ -6,16 +5,16 @@ import { EncodeResult, getDuration, getWavFileInfo, isSilk, isWav } from 'silk-w
 import { LogWrapper } from '@/common/log';
 import { EncodeArgs } from '@/common/audio-worker';
 import { FFmpegService } from '@/common/ffmpeg';
+import { runTask } from './worker';
+import { fileURLToPath } from 'node:url';
 
 const ALLOW_SAMPLE_RATE = [8000, 12000, 16000, 24000, 32000, 44100, 48000];
 
-async function getWorkerPath() {
-    return new URL(/* @vite-ignore */ './audio-worker.mjs', import.meta.url).href;
+function getWorkerPath() {
+    //return new URL(/* @vite-ignore */ './audio-worker.mjs', import.meta.url).href;
+    return path.join(path.dirname(fileURLToPath(import.meta.url)), 'audio-worker.mjs');
 }
 
-const piscina = new Piscina<EncodeArgs, EncodeResult>({
-    filename: await getWorkerPath(),
-});
 
 async function guessDuration(pttPath: string, logger: LogWrapper) {
     const pttFileInfo = await fsPromise.stat(pttPath);
@@ -46,7 +45,7 @@ export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: Log
             const { input, sampleRate } = isWav(file)
                 ? await handleWavFile(file, filePath, pcmPath)
                 : { input: await FFmpegService.convert(filePath, pcmPath), sampleRate: 24000 };
-            const silk = await piscina.run({ input: input, sampleRate: sampleRate });
+            const silk = await runTask<EncodeArgs, EncodeResult>(getWorkerPath(), { input: input, sampleRate: sampleRate });
             fsPromise.unlink(pcmPath).catch((e) => logger.logError('删除临时文件失败', pcmPath, e));
             await fsPromise.writeFile(pttPath, Buffer.from(silk.data));
             logger.log(`语音文件${filePath}转换成功!`, pttPath, '时长:', silk.duration);
