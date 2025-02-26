@@ -1,5 +1,5 @@
 import { OB11EmitEventContent, OB11NetworkReloadType } from './index';
-import urlParse from 'url';
+import { Hono } from 'hono';
 import { RawData, WebSocket, WebSocketServer } from 'ws';
 import { Mutex } from 'async-mutex';
 import { OB11Response } from '@/onebot/action/OneBotAction';
@@ -12,9 +12,12 @@ import { LifeCycleSubType, OB11LifeCycleEvent } from '@/onebot/event/meta/OB11Li
 import { WebsocketServerConfig } from '@/onebot/config/config';
 import { NapCatOneBot11Adapter } from '@/onebot';
 import { IOB11NetworkAdapter } from '@/onebot/network/adapter';
+import { serve } from '@hono/node-server';
 import json5 from 'json5';
 
 export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketServerConfig> {
+    private app: Hono | undefined;
+    private server: ReturnType<typeof serve> | undefined;
     wsServer?: WebSocketServer;
     wsClients: WebSocket[] = [];
     wsClientsMutex = new Mutex();
@@ -25,14 +28,25 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
         name: string, config: WebsocketServerConfig, core: NapCatCore, obContext: NapCatOneBot11Adapter, actions: ActionMap
     ) {
         super(name, config, core, obContext, actions);
-        this.wsServer = new WebSocketServer({
-            port: this.config.port,
-            host: this.config.host === '0.0.0.0' ? '' : this.config.host,
-            maxPayload: 1024 * 1024 * 1024,
-        });
-        this.createServer(this.wsServer);
-
     }
+
+    private initializeServer() {
+        this.app = new Hono();
+        this.server = serve({
+            fetch: this.app.fetch,
+            port: this.config.port,
+        });
+
+        this.wsServer = new WebSocketServer({ noServer: true });
+        this.server.on('upgrade', (request, socket, head) => {
+            this.wsServer?.handleUpgrade(request, socket, head, (ws) => {
+                this.wsServer?.emit('connection', ws, request);
+            });
+        });
+
+        this.createServer(this.wsServer);
+    }
+
     createServer(newServer: WebSocketServer) {
         newServer.on('connection', async (wsClient, wsReq) => {
             if (!this.isEnable) {
@@ -78,6 +92,7 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
             });
         }).on('error', (err) => this.logger.log('[OneBot] [WebSocket Server] Server Error:', err.message));
     }
+
     connectEvent(core: NapCatCore, wsClient: WebSocket) {
         try {
             this.checkStateAndReply<unknown>(new OB11LifeCycleEvent(core, LifeCycleSubType.CONNECT), wsClient);
@@ -99,25 +114,22 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
             this.logger.logError('[OneBot] [WebSocket Server] Cannot open a opened WebSocket server');
             return;
         }
-        const addressInfo = this.wsServer?.address();
-        this.logger.log('[OneBot] [WebSocket Server] Server Started', typeof (addressInfo) === 'string' ? addressInfo : addressInfo?.address + ':' + addressInfo?.port);
-
+        this.initializeServer();
         this.isEnable = true;
         if (this.config.heartInterval > 0) {
             this.registerHeartBeat();
         }
-
     }
 
     async close() {
         this.isEnable = false;
+        this.server?.close();
         this.wsServer?.close((err) => {
             if (err) {
                 this.logger.logError('[OneBot] [WebSocket Server] Error closing server:', err.message);
             } else {
                 this.logger.log('[OneBot] [WebSocket Server] Server Closed');
             }
-
         });
         if (this.heartbeatIntervalId) {
             clearInterval(this.heartbeatIntervalId);
@@ -146,9 +158,9 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
 
     private authorize(token: string | undefined, wsClient: WebSocket, wsReq: IncomingMessage) {
         if (!token || token.length == 0) return;//客户端未设置密钥
-        const QueryClientToken = urlParse.parse(wsReq?.url || '', true).query['access_token'];
+        const QueryClientToken = new URL(wsReq.url || '', `http://${wsReq.headers.host}`).searchParams.get('access_token');
         const HeaderClientToken = wsReq.headers.authorization?.split('Bearer ').pop() || '';
-        const ClientToken = typeof (QueryClientToken) === 'string' && QueryClientToken !== '' ? QueryClientToken : HeaderClientToken;
+        const ClientToken = QueryClientToken || HeaderClientToken;
         if (ClientToken === token) {
             return;
         }
@@ -203,12 +215,7 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
 
         if (oldPort !== newConfig.port || oldHost !== newConfig.host) {
             this.close();
-            this.wsServer = new WebSocketServer({
-                port: newConfig.port,
-                host: newConfig.host === '0.0.0.0' ? '' : newConfig.host,
-                maxPayload: 1024 * 1024 * 1024,
-            });
-            this.createServer(this.wsServer);
+            this.initializeServer();
             if (newConfig.enable) {
                 this.open();
             }
@@ -229,4 +236,3 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
         return OB11NetworkReloadType.Normal;
     }
 }
-
