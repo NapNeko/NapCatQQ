@@ -1,33 +1,36 @@
 import { OB11EmitEventContent } from './index';
-import { Request, Response } from 'express';
 import { OB11HttpServerAdapter } from './http-server';
+import { Context } from 'hono';
+import { SSEStreamingApi, streamSSE } from 'hono/streaming';
+import { Mutex } from 'async-mutex';
 
 export class OB11HttpSSEServerAdapter extends OB11HttpServerAdapter {
-    private sseClients: Response[] = [];
-
-    override async handleRequest(req: Request, res: Response) {
-        if (req.path === '/_events') {
-            this.createSseSupport(req, res);
+    private sseClients: { context: Context; stream: SSEStreamingApi }[] = [];
+    private mutex = new Mutex();
+    override async httpApiRequest(c: Context): Promise<any> {
+        if (c.req.path === '/_events') {
+            return await this.createSseSupport(c);
         } else {
-            super.httpApiRequest(req, res);
+            return super.httpApiRequest(c);
         }
     }
 
-    private async createSseSupport(req: Request, res: Response) {
-        res.setHeader('Content-Type', 'text/event-stream');
-        res.setHeader('Cache-Control', 'no-cache');
-        res.setHeader('Connection', 'keep-alive');
-        res.flushHeaders();
-
-        this.sseClients.push(res);
-        req.on('close', () => {
-            this.sseClients = this.sseClients.filter((client) => client !== res);
-        });
+    private async createSseSupport(c: Context) {
+        return streamSSE(c, async (stream) => {
+            this.mutex.runExclusive(async () => {
+                this.sseClients.push({ context: c, stream });
+                stream.onAbort(() => {
+                    this.sseClients = this.sseClients.filter(({ stream: s }) => s !== stream);
+                });
+            });
+        })
     }
 
     override onEvent<T extends OB11EmitEventContent>(event: T) {
-        this.sseClients.forEach((res) => {
-            res.write(`data: ${JSON.stringify(event)}\n\n`);
+        this.mutex.runExclusive(async () => {
+            this.sseClients.forEach(({ stream }) => {
+                stream.writeSSE({ data: JSON.stringify(event) });
+            });
         });
     }
 }
