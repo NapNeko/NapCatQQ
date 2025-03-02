@@ -354,8 +354,8 @@ export class OneBotMsgApi {
                 type: OB11MessageDataType.voice,
                 data: {
                     file: fileCode,
-                    path: element.filePath,
                     file_size: element.fileSize,
+                    path: element.filePath,
                 },
             };
         },
