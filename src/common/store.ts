@@ -163,7 +163,7 @@ class Store {
         const current = this.get<StoreValueType>(key);
 
         if (current === null) {
-            this.set(key, 1);
+            this.set(key, 1, 60);
             return 1;
         }
 
@@ -180,7 +180,7 @@ class Store {
         }
 
         const newValue = numericValue + 1;
-        this.set(key, newValue);
+        this.set(key, newValue, 60);
         return newValue;
     }
 }
