@@ -4,5 +4,6 @@
     "fileLogLevel": "debug",
     "consoleLogLevel": "info",
     "packetBackend": "auto",
-    "packetServer": ""
-}
+    "packetServer": "",
+    "o3HookMode": 1
+  }
