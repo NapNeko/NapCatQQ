@@ -42,7 +42,7 @@ export class NTQQFileApi {
         this.core = core;
         this.rkeyManager = new RkeyManager([
             'https://ss.xingzhige.com/music_card/rkey', // 国内
-            'https://rkey.napneko.icu/rkeys' // Cloudflare
+            'https://secret-service.bietiaop.com/rkeys',//国内
         ],
         this.context.logger
         );
