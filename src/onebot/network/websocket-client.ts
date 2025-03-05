@@ -1,5 +1,5 @@
 import { OB11EmitEventContent, OB11NetworkReloadType } from '@/onebot/network/index';
-import { RawData, WebSocket } from 'ws';
+import { RawData } from 'ws';
 import { OB11HeartbeatEvent } from '@/onebot/event/meta/OB11HeartbeatEvent';
 import { NapCatCore } from '@/core';
 import { ActionName } from '@/onebot/action/router';
@@ -10,10 +10,12 @@ import { WebsocketClientConfig } from '@/onebot/config/config';
 import { NapCatOneBot11Adapter } from '@/onebot';
 import { IOB11NetworkAdapter } from '@/onebot/network/adapter';
 import json5 from 'json5';
+import { hc } from 'hono/client';
 
 export class OB11WebSocketClientAdapter extends IOB11NetworkAdapter<WebsocketClientConfig> {
     private connection: WebSocket | null = null;
     private heartbeatRef: NodeJS.Timeout | null = null;
+    private client = hc(this.config.url);
 
     constructor(name: string, config: WebsocketClientConfig, core: NapCatCore, obContext: NapCatOneBot11Adapter, actions: ActionMap) {
         super(name, config, core, obContext, actions);
@@ -65,37 +67,23 @@ export class OB11WebSocketClientAdapter extends IOB11NetworkAdapter<WebsocketCli
     private async tryConnect() {
         if (!this.connection && this.isEnable) {
             let isClosedByError = false;
+            let wsClientX = this.client['ws']?.$ws(0);
+            if (!wsClientX) throw new Error('WebSocket Client Error');
+            this.connection = wsClientX;
 
-            this.connection = new WebSocket(this.config.url, {
-                maxPayload: 1024 * 1024 * 1024,
-                handshakeTimeout: 2000,
-                perMessageDeflate: false,
-                headers: {
-                    'X-Self-ID': this.core.selfInfo.uin,
-                    'Authorization': `Bearer ${this.config.token}`,
-                    'x-client-role': 'Universal',  // 为koishi adpter适配
-                    'User-Agent': 'OneBot/11',
-                },
-
-            });
-            this.connection.on('ping', () => {
-                this.connection?.pong();
-            });
-            this.connection.on('pong', () => {
-                //this.logger.logDebug('[OneBot] [WebSocket Client] 收到pong');
-            });
-            this.connection.on('open', () => {
+            this.connection.addEventListener('open', () => {
                 try {
                     this.connectEvent(this.core);
                 } catch (e) {
                     this.logger.logError('[OneBot] [WebSocket Client] 发送连接生命周期失败', e);
                 }
+            });
 
+            this.connection.addEventListener('message', (event) => {
+                this.handleMessage(event.data);
             });
-            this.connection.on('message', (data) => {
-                this.handleMessage(data);
-            });
-            this.connection.once('close', () => {
+
+            this.connection.addEventListener('close', () => {
                 if (!isClosedByError) {
                     this.logger.logError(`[OneBot] [WebSocket Client] 反向WebSocket (${this.config.url}) 连接意外关闭`);
                     this.logger.logError(`[OneBot] [WebSocket Client] 在 ${Math.floor(this.config.reconnectInterval / 1000)} 秒后尝试重新连接`);
@@ -105,7 +93,8 @@ export class OB11WebSocketClientAdapter extends IOB11NetworkAdapter<WebsocketCli
                     }
                 }
             });
-            this.connection.on('error', (err) => {
+
+            this.connection.addEventListener('error', (err) => {
                 isClosedByError = true;
                 this.logger.logError(`[OneBot] [WebSocket Client] 反向WebSocket (${this.config.url}) 连接错误`, err);
                 this.logger.logError(`[OneBot] [WebSocket Client] 在 ${Math.floor(this.config.reconnectInterval / 1000)} 秒后尝试重新连接`);
@@ -124,6 +113,7 @@ export class OB11WebSocketClientAdapter extends IOB11NetworkAdapter<WebsocketCli
             this.logger.logError('[OneBot] [WebSocket Client] 发送生命周期失败', e);
         }
     }
+
     private async handleMessage(message: RawData) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let receiveData: { action: typeof ActionName[keyof typeof ActionName], params?: any, echo?: any } = { action: ActionName.Unknown, params: {} };
@@ -148,6 +138,7 @@ export class OB11WebSocketClientAdapter extends IOB11NetworkAdapter<WebsocketCli
         const retdata = await action.websocketHandle(receiveData.params, echo ?? '', this.name, this.config);
         this.checkStateAndReply<unknown>({ ...retdata });
     }
+
     async reload(newConfig: WebsocketClientConfig) {
         const wasEnabled = this.isEnable;
         const oldUrl = this.config.url;
