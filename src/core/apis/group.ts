@@ -345,9 +345,9 @@ export class NTQQGroupApi {
         return this.context.session.getGroupService().uploadGroupBulletinPic(groupCode, _Pskey, imageurl);
     }
 
-    async handleGroupRequest(notify: GroupNotify, operateType: NTGroupRequestOperateTypes, reason?: string) {
+    async handleGroupRequest(doubt: boolean, notify: GroupNotify, operateType: NTGroupRequestOperateTypes, reason?: string) {
         return this.context.session.getGroupService().operateSysNotify(
-            false,
+            doubt,
             {
                 operateType: operateType,
                 targetMsg: {
