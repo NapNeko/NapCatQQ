@@ -108,10 +108,12 @@ import { BotExit } from './extends/BotExit';
 import { ClickInlineKeyboardButton } from './extends/ClickInlineKeyboardButton';
 import { GetPrivateFileUrl } from './file/GetPrivateFileUrl';
 import { GetUnidirectionalFriendList } from './extends/GetUnidirectionalFriendList';
+import SetGroupRemark from './extends/SetGroupRemark';
 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 
     const actionHandlers = [
+        new SetGroupRemark(obContext, core),
         new GetGroupInfoEx(obContext, core),
         new FetchEmojiLike(obContext, core),
         new GetFile(obContext, core),
@@ -227,8 +229,8 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new GetGroupSystemMsg(obContext, core),
         new BotExit(obContext, core),
         new ClickInlineKeyboardButton(obContext, core),
-        new GetPrivateFileUrl(obContext,core),
-        new GetUnidirectionalFriendList(obContext,core),
+        new GetPrivateFileUrl(obContext, core),
+        new GetUnidirectionalFriendList(obContext, core),
     ];
 
     type HandlerUnion = typeof actionHandlers[number];

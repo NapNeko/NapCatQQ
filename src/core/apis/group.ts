@@ -27,6 +27,9 @@ export class NTQQGroupApi {
         this.core = core;
     }
 
+    async setGroupRemark(groupCode: string, remark: string) {
+        return this.context.session.getGroupService().modifyGroupRemark(groupCode, remark);
+    }
     async fetchGroupDetail(groupCode: string) {
         const [, detailInfo] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelGroupService/getGroupDetailInfo',
