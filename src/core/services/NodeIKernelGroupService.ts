@@ -165,7 +165,7 @@ export interface NodeIKernelGroupService {
 
     modifyGroupName(groupCode: string, groupName: string, isNormalMember: boolean): Promise<GeneralCallResult>;
 
-    modifyGroupRemark(groupCode: string, remark: string): void;
+    modifyGroupRemark(groupCode: string, remark: string): Promise<GeneralCallResult>;
 
     modifyGroupDetailInfo(groupCode: string, arg: unknown): void;
 
