@@ -31,6 +31,7 @@ import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { napCatVersion } from '@/common/version';
 import { NodeIO3MiscListener } from '@/core/listeners/NodeIO3MiscListener';
 import { sleep } from '@/common/helper';
+
 // NapCat Shell App ES 入口文件
 async function handleUncaughtExceptions(logger: LogWrapper) {
     process.on('uncaughtException', (err) => {
@@ -114,18 +115,20 @@ async function handleLogin(
     quickLoginUin: string | undefined,
     historyLoginList: LoginListItem[]
 ): Promise<SelfInfo> {
+    let context = { isLogined: false };
     let inner_resolve: (value: SelfInfo) => void;
     let selfInfo: Promise<SelfInfo> = new Promise((resolve) => {
         inner_resolve = resolve;
+        handleLoginInner(context, logger, loginService, quickLoginUin, historyLoginList).then().catch(e => logger.logError(e));
     });
     // 连接服务
-    let isLogined = false;
+
     const loginListener = new NodeIKernelLoginListener();
     loginListener.onUserLoggedIn = (userid: string) => {
         logger.logError(`当前账号(${userid})已登录,无法重复登录`);
     };
     loginListener.onQRCodeLoginSucceed = async (loginResult) => {
-        isLogined = true;
+        context.isLogined = true;
         inner_resolve({
             uid: loginResult.uid,
             uin: loginResult.uin,
@@ -156,7 +159,7 @@ async function handleLogin(
     };
 
     loginListener.onQRCodeSessionFailed = (errType: number, errCode: number) => {
-        if (!isLogined) {
+        if (!context.isLogined) {
             logger.logError('[Core] [Login] Login Error,ErrType: ', errType, ' ErrCode:', errCode);
             if (errType == 1 && errCode == 3) {
                 // 二维码过期刷新
@@ -172,6 +175,9 @@ async function handleLogin(
     loginService.connect();
     await waitForNetworkConnection(loginService, logger);
     // 等待网络
+    return await selfInfo;
+}
+async function handleLoginInner(context: { isLogined: boolean }, logger: LogWrapper, loginService: NodeIKernelLoginService, quickLoginUin: string | undefined, historyLoginList: LoginListItem[]) {
     WebUiDataRuntime.setQuickLoginCall(async (uin: string) => {
         return await new Promise((resolve) => {
             if (uin) {
@@ -197,13 +203,13 @@ async function handleLogin(
                 .then(result => {
                     if (result.loginErrorInfo.errMsg) {
                         logger.logError('快速登录错误：', result.loginErrorInfo.errMsg);
-                        if (!isLogined) loginService.getQRCodePicture();
+                        if (!context.isLogined) loginService.getQRCodePicture();
                     }
                 })
                 .catch();
         } else {
             logger.logError('快速登录失败，未找到该 QQ 历史登录记录，将使用二维码登录方式');
-            if (!isLogined) loginService.getQRCodePicture();
+            if (!context.isLogined) loginService.getQRCodePicture();
         }
     } else {
         logger.log('没有 -q 指令指定快速登录，将使用二维码登录方式');
@@ -222,8 +228,6 @@ async function handleLogin(
         WebUiDataRuntime.setQQQuickLoginList(list.map((item) => item.uin.toString()));
         WebUiDataRuntime.setQQNewLoginList(list);
     });
-
-    return await selfInfo;
 }
 
 async function initializeSession(
