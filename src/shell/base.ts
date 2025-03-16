@@ -289,7 +289,7 @@ async function waitForNetworkConnection(loginService: NodeIKernelLoginService, l
     let network_ok = false;
     let tryCount = 0;
     while (!network_ok) {
-        network_ok = loginService.getMsfStatus() === 0;
+        network_ok = loginService.getMsfStatus() !== 3;// win 11 0连接 1未连接
         logger.log('等待网络连接...');
         await sleep(500);
         tryCount++;
