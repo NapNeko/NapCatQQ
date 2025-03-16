@@ -119,9 +119,6 @@ async function handleLogin(
     let inner_resolve: (value: SelfInfo) => void;
     let selfInfo: Promise<SelfInfo> = new Promise((resolve) => {
         inner_resolve = resolve;
-        waitForNetworkConnection(loginService, logger).then(() => {
-            handleLoginInner(context, logger, loginService, quickLoginUin, historyLoginList).then().catch(e => logger.logError(e));
-        });
     });
     // 连接服务
 
@@ -139,7 +136,11 @@ async function handleLogin(
         });
 
     };
-
+    loginListener.onLoginConnected = () => {
+        waitForNetworkConnection(loginService, logger).then(() => {
+            handleLoginInner(context, logger, loginService, quickLoginUin, historyLoginList).then().catch(e => logger.logError(e));
+        });
+    }
     loginListener.onQRCodeGetPicture = ({ pngBase64QrcodeData, qrcodeUrl }) => {
         WebUiDataRuntime.setQQLoginQrcodeURL(qrcodeUrl);
 
@@ -173,6 +174,7 @@ async function handleLogin(
     loginListener.onLoginFailed = (...args) => {
         logger.logError('[Core] [Login] Login Error , ErrInfo: ', JSON.stringify(args));
     };
+
     loginService.addKernelLoginListener(proxiedListenerOf(loginListener, logger));
     loginService.connect();
     return await selfInfo;
