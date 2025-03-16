@@ -30,6 +30,7 @@ import { InitWebUi } from '@/webui';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { napCatVersion } from '@/common/version';
 import { NodeIO3MiscListener } from '@/core/listeners/NodeIO3MiscListener';
+import { sleep } from '@/common/helper';
 // NapCat Shell App ES 入口文件
 async function handleUncaughtExceptions(logger: LogWrapper) {
     process.on('uncaughtException', (err) => {
@@ -113,7 +114,7 @@ async function handleLogin(
     quickLoginUin: string | undefined,
     historyLoginList: LoginListItem[]
 ): Promise<SelfInfo> {
-    return new Promise<SelfInfo>((resolve) => {
+    return new Promise<SelfInfo>(async (resolve) => {
         const loginListener = new NodeIKernelLoginListener();
         let isLogined = false;
 
@@ -199,20 +200,23 @@ async function handleLogin(
                 }
             });
         });
-
+        let network_ok = false;
+        while (!network_ok) {
+            network_ok = loginService.getMsfStatus() === 0;
+            logger.log('等待网络连接...');
+            await sleep(500);
+        }
         if (quickLoginUin) {
             if (historyLoginList.some(u => u.uin === quickLoginUin)) {
                 logger.log('正在快速登录 ', quickLoginUin);
-                setTimeout(() => {
-                    loginService.quickLoginWithUin(quickLoginUin)
-                        .then(result => {
-                            if (result.loginErrorInfo.errMsg) {
-                                logger.logError('快速登录错误：', result.loginErrorInfo.errMsg);
-                                if (!isLogined) loginService.getQRCodePicture();
-                            }
-                        })
-                        .catch();
-                }, 1000);
+                loginService.quickLoginWithUin(quickLoginUin)
+                    .then(result => {
+                        if (result.loginErrorInfo.errMsg) {
+                            logger.logError('快速登录错误：', result.loginErrorInfo.errMsg);
+                            if (!isLogined) loginService.getQRCodePicture();
+                        }
+                    })
+                    .catch();
             } else {
                 logger.logError('快速登录失败，未找到该 QQ 历史登录记录，将使用二维码登录方式');
                 if (!isLogined) loginService.getQRCodePicture();
