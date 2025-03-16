@@ -86,7 +86,7 @@ export class OneBotQuickActionApi {
             notify = (await this.core.apis.GroupApi.getSingleScreenNotifies(true, 100)).find(e => e.seq == flag);
             return { doubt: true, notify };
         }
-        return { doubt: true, notify };
+        return { doubt: false, notify };
     }
 
     async handleGroupRequest(request: OB11GroupRequestEvent, quickAction: QuickActionGroupRequest) {
