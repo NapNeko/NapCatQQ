@@ -119,7 +119,9 @@ async function handleLogin(
     let inner_resolve: (value: SelfInfo) => void;
     let selfInfo: Promise<SelfInfo> = new Promise((resolve) => {
         inner_resolve = resolve;
-        handleLoginInner(context, logger, loginService, quickLoginUin, historyLoginList).then().catch(e => logger.logError(e));
+        waitForNetworkConnection(loginService, logger).then(() => {
+            handleLoginInner(context, logger, loginService, quickLoginUin, historyLoginList).then().catch(e => logger.logError(e));
+        });
     });
     // 连接服务
 
@@ -173,8 +175,6 @@ async function handleLogin(
     };
     loginService.addKernelLoginListener(proxiedListenerOf(loginListener, logger));
     loginService.connect();
-    await waitForNetworkConnection(loginService, logger);
-    // 等待网络
     return await selfInfo;
 }
 async function handleLoginInner(context: { isLogined: boolean }, logger: LogWrapper, loginService: NodeIKernelLoginService, quickLoginUin: string | undefined, historyLoginList: LoginListItem[]) {
