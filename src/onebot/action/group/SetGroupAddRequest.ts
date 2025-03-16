@@ -39,6 +39,6 @@ export default class SetGroupAddRequest extends OneBotAction<Payload, null> {
             notify = (await this.core.apis.GroupApi.getSingleScreenNotifies(true, 100)).find(e => e.seq == flag);
             return { doubt: true, notify };
         }
-        return { doubt: true, notify };
+        return { doubt: false, notify };
     }
 }
