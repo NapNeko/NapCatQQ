@@ -73,6 +73,7 @@ export class OB11Construct {
 
     static group(group: Group): OB11Group {
         return {
+            group_remark: group.remarkName,
             group_id: +group.groupCode,
             group_name: group.groupName,
             member_count: group.memberCount,
