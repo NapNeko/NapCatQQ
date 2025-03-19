@@ -26,7 +26,7 @@ import { SendMessageContext } from '@/onebot/api';
 import { getFileTypeForSendType } from '../helper/msg';
 import { FFmpegService } from '@/common/ffmpeg';
 import { rkeyDataType } from '../types/file';
-import { imageSizeFromFile } from 'image-size/dist/fromFile'
+import { imageSizeFromFile } from 'image-size/fromFile'
 
 export class NTQQFileApi {
     context: InstanceContext;

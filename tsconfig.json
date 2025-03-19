@@ -9,7 +9,7 @@
             "DOM.Iterable"
         ],
         "skipLibCheck": true,
-        "moduleResolution": "Node",
+        "moduleResolution": "bundler",
         "experimentalDecorators": true,
         "allowImportingTsExtensions": false,
         "allowSyntheticDefaultImports": true,
