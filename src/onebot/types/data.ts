@@ -57,6 +57,7 @@ export interface OB11GroupMember {
 }
 
 export interface OB11Group {
+    group_remark: string; // 群备注
     group_id: number; // 群ID
     group_name: string; // 群名称
     member_count?: number; // 成员数量
