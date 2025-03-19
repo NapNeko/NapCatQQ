@@ -17,8 +17,6 @@ import fs from 'fs';
 import fsPromises from 'fs/promises';
 import { InstanceContext, NapCatCore, SearchResultItem } from '@/core';
 import { fileTypeFromFile } from 'file-type';
-import imageSize from 'image-size';
-import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 import { RkeyManager } from '@/core/helper/rkey';
 import { calculateFileMD5 } from '@/common/file';
 import pathLib from 'node:path';
@@ -28,6 +26,7 @@ import { SendMessageContext } from '@/onebot/api';
 import { getFileTypeForSendType } from '../helper/msg';
 import { FFmpegService } from '@/common/ffmpeg';
 import { rkeyDataType } from '../types/file';
+import { imageSizeFromFile } from 'image-size/dist/fromFile'
 
 export class NTQQFileApi {
     context: InstanceContext;
@@ -44,7 +43,7 @@ export class NTQQFileApi {
             'https://ss.xingzhige.com/music_card/rkey', // 国内
             'https://secret-service.bietiaop.com/rkeys',//国内
         ],
-        this.context.logger
+            this.context.logger
         );
     }
 
@@ -137,7 +136,7 @@ export class NTQQFileApi {
         if (fileSize === 0) {
             throw new Error('文件异常，大小为0');
         }
-        const imageSize = await this.core.apis.FileApi.getImageSize(picPath);
+        const imageSize = await imageSizeFromFile(picPath);
         context.deleteAfterSentFiles.push(path);
         return {
             elementType: ElementType.PIC,
@@ -301,18 +300,18 @@ export class NTQQFileApi {
                     element.elementType === ElementType.FILE
                 ) {
                     switch (element.elementType) {
-                    case ElementType.PIC:
+                        case ElementType.PIC:
                             element.picElement!.sourcePath = elementResults?.[elementIndex] ?? '';
-                        break;
-                    case ElementType.VIDEO:
+                            break;
+                        case ElementType.VIDEO:
                             element.videoElement!.filePath = elementResults?.[elementIndex] ?? '';
-                        break;
-                    case ElementType.PTT:
+                            break;
+                        case ElementType.PTT:
                             element.pttElement!.filePath = elementResults?.[elementIndex] ?? '';
-                        break;
-                    case ElementType.FILE:
+                            break;
+                        case ElementType.FILE:
                             element.fileElement!.filePath = elementResults?.[elementIndex] ?? '';
-                        break;
+                            break;
                     }
                     elementIndex++;
                 }
@@ -354,20 +353,6 @@ export class NTQQFileApi {
             timeout,
         );
         return completeRetData.filePath;
-    }
-
-    async getImageSize(filePath: string): Promise<ISizeCalculationResult> {
-        return new Promise((resolve, reject) => {
-            imageSize(filePath, (err: Error | null, dimensions) => {
-                if (err) {
-                    reject(new Error(err.message));
-                } else if (!dimensions) {
-                    reject(new Error('获取图片尺寸失败'));
-                } else {
-                    resolve(dimensions);
-                }
-            });
-        });
     }
 
     async searchForFile(keys: string[]): Promise<SearchResultItem | undefined> {
