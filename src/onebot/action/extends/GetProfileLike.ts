@@ -7,7 +7,7 @@ const SchemaData = Type.Object({
     user_id: Type.Optional(Type.Union([Type.Number(), Type.String()])),
     start: Type.Union([Type.Number(), Type.String()], { default: 0 }),
     count: Type.Union([Type.Number(), Type.String()], { default: 10 }),
-    type: Type.Union([Type.Number(), Type.String()], { default: 1 })
+    type: Type.Union([Type.Number(), Type.String()], { default: 2 })
 });
 
 type Payload = Static<typeof SchemaData>;
