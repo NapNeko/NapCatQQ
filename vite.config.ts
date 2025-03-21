@@ -6,10 +6,6 @@ import { builtinModules } from 'module';
 import wasm from 'vite-plugin-wasm';
 //依赖排除
 const external = [
-    'silk-wasm',
-    'ws',
-    'express',
-    '@ffmpeg.wasm/core-mt'
 ];
 const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`)].flat();
 
@@ -71,7 +67,6 @@ const ShellBaseConfigPlugin: PluginOption[] = [
         targets: [
             { src: './src/native/packet', dest: 'dist/moehoo', flatten: false },
             { src: './src/native/pty', dest: 'dist/pty', flatten: false },
-            { src: './napcat.webui/dist/', dest: 'dist/static/', flatten: false },
             { src: './src/core/external/napcat.json', dest: 'dist/config/' },
             { src: './package.json', dest: 'dist' },
             { src: './launcher/', dest: 'dist', flatten: true },
