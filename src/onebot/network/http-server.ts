@@ -45,11 +45,9 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
         this.app = new Hono();
         this.app.use(cors());
         this.app.use(async (c, next) => this.authorize(this.config.token, c, next));
-        this.app.use(async (c) => {
-            await this.handleRequest(c);
-        });
+        this.app.use((c) => this.handleRequest(c));
         this.server = serve({
-            fetch: this.app.fetch,
+            fetch: this.app.fetch.bind(this.app),
             port: this.config.port,
         });
     }
@@ -68,34 +66,63 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
     }
 
     async httpApiRequest(c: Context) {
-        const payload = await c.req.json();
-        if (c.req.path === '' || c.req.path === '/') {
-            const hello = OB11Response.ok({});
-            hello.message = 'NapCat4 Is Running';
-            return c.json(hello);
-        }
-        const actionName = c.req.path.split('/')[1];
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const action = this.actions.get(actionName as any);
-        if (action) {
-            try {
-                const result = await action.handle(payload, this.name, this.config);
-                return c.json(result);
-            } catch (error: unknown) {
-                return c.json(OB11Response.error((error as Error)?.stack?.toString() || (error as Error)?.message || 'Error Handle', 200));
+        try {
+            // 处理根路径请求
+            if (c.req.path === '' || c.req.path === '/') {
+                const hello = OB11Response.ok({});
+                hello.message = 'NapCat4 Is Running';
+                return c.json(hello);
             }
-        } else {
-            return c.json(OB11Response.error('不支持的Api ' + actionName, 200));
+
+            // 解析请求参数（合并查询参数和请求体）
+            let payload: Record<string, any> = {};
+
+            // 1. 获取URL查询参数
+            const queryParams = c.req.query();
+            if (Object.keys(queryParams).length > 0) {
+                payload = { ...queryParams };
+            }
+
+            // 2. 尝试解析请求体，无论内容类型如何
+            try {
+                const contentType = c.req.header('content-type') || '';
+                if (contentType.includes('application/json')) {
+                    const jsonBody = await c.req.json();
+                    payload = { ...payload, ...jsonBody };
+                } else if (contentType) {
+                    // 其他内容类型通过通用解析器处理
+                    const body = await c.req.parseBody();
+                    payload = { ...payload, ...body };
+                }
+            } catch (parseError) {
+                // 解析失败时继续使用已有参数
+            }
+
+            // 处理API请求
+            const actionName = c.req.path.split('/')[1];
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const action = this.actions.get(actionName as any);
+            if (action) {
+                try {
+                    const result = await action.handle(payload, this.name, this.config);
+                    return c.json(result);
+                } catch (error: unknown) {
+                    return c.json(OB11Response.error((error as Error)?.stack?.toString() || (error as Error)?.message || 'Error Handle', 200));
+                }
+            } else {
+                return c.json(OB11Response.error('不支持的Api ' + actionName, 200));
+            }
+        } catch (error: unknown) {
+            return c.json(OB11Response.error('请求处理失败: ' + ((error as Error)?.message || 'Unknown error'), 200));
         }
     }
 
     async handleRequest(c: Context) {
         if (!this.isEnable) {
             this.core.context.logger.log('[OneBot] [HTTP Server Adapter] Server is closed');
-            c.json(OB11Response.error('Server is closed', 200));
-            return;
+            return c.json(OB11Response.error('Server is closed', 200));
         }
-        await this.httpApiRequest(c);
+        return await this.httpApiRequest(c);  // 添加return关键字
     }
 
     async reload(newConfig: HttpServerConfig) {
