@@ -30,6 +30,8 @@ import { InitWebUi } from '@/webui';
 import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { napCatVersion } from '@/common/version';
 import { NodeIO3MiscListener } from '@/core/listeners/NodeIO3MiscListener';
+import { sleep } from '@/common/helper';
+
 // NapCat Shell App ES 入口文件
 async function handleUncaughtExceptions(logger: LogWrapper) {
     process.on('uncaughtException', (err) => {
@@ -113,120 +115,120 @@ async function handleLogin(
     quickLoginUin: string | undefined,
     historyLoginList: LoginListItem[]
 ): Promise<SelfInfo> {
-    return new Promise<SelfInfo>((resolve) => {
-        const loginListener = new NodeIKernelLoginListener();
-        let isLogined = false;
+    let context = { isLogined: false };
+    let inner_resolve: (value: SelfInfo) => void;
+    let selfInfo: Promise<SelfInfo> = new Promise((resolve) => {
+        inner_resolve = resolve;
+    });
+    // 连接服务
 
-        loginListener.onUserLoggedIn = (userid: string) => {
-            logger.logError(`当前账号(${userid})已登录,无法重复登录`);
-        };
-
-        loginListener.onQRCodeLoginSucceed = async (loginResult) => {
-            isLogined = true;
-            resolve({
-                uid: loginResult.uid,
-                uin: loginResult.uin,
-                nick: '',
-                online: true,
-            });
-        };
-
-        loginListener.onQRCodeGetPicture = ({ pngBase64QrcodeData, qrcodeUrl }) => {
-            WebUiDataRuntime.setQQLoginQrcodeURL(qrcodeUrl);
-
-            const realBase64 = pngBase64QrcodeData.replace(/^data:image\/\w+;base64,/, '');
-            const buffer = Buffer.from(realBase64, 'base64');
-            logger.logWarn('请扫描下面的二维码，然后在手Q上授权登录：');
-            const qrcodePath = path.join(pathWrapper.cachePath, 'qrcode.png');
-            qrcode.generate(qrcodeUrl, { small: true }, (res) => {
-                logger.logWarn([
-                    '\n',
-                    res,
-                    '二维码解码URL: ' + qrcodeUrl,
-                    '如果控制台二维码无法扫码，可以复制解码url到二维码生成网站生成二维码再扫码，也可以打开下方的二维码路径图片进行扫码。',
-                ].join('\n'));
-                fs.writeFile(qrcodePath, buffer, {}, () => {
-                    logger.logWarn('二维码已保存到', qrcodePath);
-                });
-            });
-        };
-
-        loginListener.onQRCodeSessionFailed = (errType: number, errCode: number) => {
-            if (!isLogined) {
-                logger.logError('[Core] [Login] Login Error,ErrType: ', errType, ' ErrCode:', errCode);
-                if (errType == 1 && errCode == 3) {
-                    // 二维码过期刷新
-                }
-                loginService.getQRCodePicture();
-            }
-        };
-
-        loginListener.onLoginFailed = (...args) => {
-            logger.logError('[Core] [Login] Login Error , ErrInfo: ', JSON.stringify(args));
-        };
-
-        loginService.addKernelLoginListener(proxiedListenerOf(loginListener, logger));
-        const isConnect = loginService.connect();
-        if (!isConnect) {
-            logger.logError('核心登录服务连接失败!');
-            return;
-        }
-
-        logger.log('核心登录服务连接成功!');
-
-        loginService.getLoginList().then((res) => {
-            // 遍历 res.LocalLoginInfoList[x].isQuickLogin是否可以 res.LocalLoginInfoList[x].uin 转为string 加入string[] 最后遍历完成调用WebUiDataRuntime.setQQQuickLoginList
-            const list = res.LocalLoginInfoList.filter((item) => item.isQuickLogin);
-            WebUiDataRuntime.setQQQuickLoginList(list.map((item) => item.uin.toString()));
-            WebUiDataRuntime.setQQNewLoginList(list);
+    const loginListener = new NodeIKernelLoginListener();
+    loginListener.onUserLoggedIn = (userid: string) => {
+        logger.logError(`当前账号(${userid})已登录,无法重复登录`);
+    };
+    loginListener.onQRCodeLoginSucceed = async (loginResult) => {
+        context.isLogined = true;
+        inner_resolve({
+            uid: loginResult.uid,
+            uin: loginResult.uin,
+            nick: '',
+            online: true,
         });
 
-        WebUiDataRuntime.setQuickLoginCall(async (uin: string) => {
-            return await new Promise((resolve) => {
-                if (uin) {
-                    logger.log('正在快速登录 ', uin);
-                    loginService.quickLoginWithUin(uin).then(res => {
-                        if (res.loginErrorInfo.errMsg) {
-                            resolve({ result: false, message: res.loginErrorInfo.errMsg });
-                        }
-                        resolve({ result: true, message: '' });
-                    }).catch((e) => {
-                        logger.logError(e);
-                        resolve({ result: false, message: '快速登录发生错误' });
-                    });
-                } else {
-                    resolve({ result: false, message: '快速登录失败' });
-                }
+    };
+    loginListener.onLoginConnected = () => {
+        waitForNetworkConnection(loginService, logger).then(() => {
+            handleLoginInner(context, logger, loginService, quickLoginUin, historyLoginList).then().catch(e => logger.logError(e));
+        });
+    }
+    loginListener.onQRCodeGetPicture = ({ pngBase64QrcodeData, qrcodeUrl }) => {
+        WebUiDataRuntime.setQQLoginQrcodeURL(qrcodeUrl);
+
+        const realBase64 = pngBase64QrcodeData.replace(/^data:image\/\w+;base64,/, '');
+        const buffer = Buffer.from(realBase64, 'base64');
+        logger.logWarn('请扫描下面的二维码，然后在手Q上授权登录：');
+        const qrcodePath = path.join(pathWrapper.cachePath, 'qrcode.png');
+        qrcode.generate(qrcodeUrl, { small: true }, (res) => {
+            logger.logWarn([
+                '\n',
+                res,
+                '二维码解码URL: ' + qrcodeUrl,
+                '如果控制台二维码无法扫码，可以复制解码url到二维码生成网站生成二维码再扫码，也可以打开下方的二维码路径图片进行扫码。',
+            ].join('\n'));
+            fs.writeFile(qrcodePath, buffer, {}, () => {
+                logger.logWarn('二维码已保存到', qrcodePath);
             });
         });
+    };
 
-        if (quickLoginUin) {
-            if (historyLoginList.some(u => u.uin === quickLoginUin)) {
-                logger.log('正在快速登录 ', quickLoginUin);
-                setTimeout(() => {
-                    loginService.quickLoginWithUin(quickLoginUin)
-                        .then(result => {
-                            if (result.loginErrorInfo.errMsg) {
-                                logger.logError('快速登录错误：', result.loginErrorInfo.errMsg);
-                                if (!isLogined) loginService.getQRCodePicture();
-                            }
-                        })
-                        .catch();
-                }, 1000);
-            } else {
-                logger.logError('快速登录失败，未找到该 QQ 历史登录记录，将使用二维码登录方式');
-                if (!isLogined) loginService.getQRCodePicture();
-            }
-        } else {
-            logger.log('没有 -q 指令指定快速登录，将使用二维码登录方式');
-            if (historyLoginList.length > 0) {
-                logger.log(`可用于快速登录的 QQ：\n${historyLoginList
-                    .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
-                    .join('\n')
-                    }`);
+    loginListener.onQRCodeSessionFailed = (errType: number, errCode: number) => {
+        if (!context.isLogined) {
+            logger.logError('[Core] [Login] Login Error,ErrType: ', errType, ' ErrCode:', errCode);
+            if (errType == 1 && errCode == 3) {
+                // 二维码过期刷新
             }
             loginService.getQRCodePicture();
         }
+    };
+
+    loginListener.onLoginFailed = (...args) => {
+        logger.logError('[Core] [Login] Login Error , ErrInfo: ', JSON.stringify(args));
+    };
+
+    loginService.addKernelLoginListener(proxiedListenerOf(loginListener, logger));
+    loginService.connect();
+    return await selfInfo;
+}
+async function handleLoginInner(context: { isLogined: boolean }, logger: LogWrapper, loginService: NodeIKernelLoginService, quickLoginUin: string | undefined, historyLoginList: LoginListItem[]) {
+    WebUiDataRuntime.setQuickLoginCall(async (uin: string) => {
+        return await new Promise((resolve) => {
+            if (uin) {
+                logger.log('正在快速登录 ', uin);
+                loginService.quickLoginWithUin(uin).then(res => {
+                    if (res.loginErrorInfo.errMsg) {
+                        resolve({ result: false, message: res.loginErrorInfo.errMsg });
+                    }
+                    resolve({ result: true, message: '' });
+                }).catch((e) => {
+                    logger.logError(e);
+                    resolve({ result: false, message: '快速登录发生错误' });
+                });
+            } else {
+                resolve({ result: false, message: '快速登录失败' });
+            }
+        });
+    });
+    if (quickLoginUin) {
+        if (historyLoginList.some(u => u.uin === quickLoginUin)) {
+            logger.log('正在快速登录 ', quickLoginUin);
+            loginService.quickLoginWithUin(quickLoginUin)
+                .then(result => {
+                    if (result.loginErrorInfo.errMsg) {
+                        logger.logError('快速登录错误：', result.loginErrorInfo.errMsg);
+                        if (!context.isLogined) loginService.getQRCodePicture();
+                    }
+                })
+                .catch();
+        } else {
+            logger.logError('快速登录失败，未找到该 QQ 历史登录记录，将使用二维码登录方式');
+            if (!context.isLogined) loginService.getQRCodePicture();
+        }
+    } else {
+        logger.log('没有 -q 指令指定快速登录，将使用二维码登录方式');
+        if (historyLoginList.length > 0) {
+            logger.log(`可用于快速登录的 QQ：\n${historyLoginList
+                .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
+                .join('\n')
+                }`);
+        }
+        loginService.getQRCodePicture();
+    }
+
+    loginService.getLoginList().then((res) => {
+        // 遍历 res.LocalLoginInfoList[x].isQuickLogin是否可以 res.LocalLoginInfoList[x].uin 转为string 加入string[] 最后遍历完成调用WebUiDataRuntime.setQQQuickLoginList
+        const list = res.LocalLoginInfoList.filter((item) => item.isQuickLogin);
+        WebUiDataRuntime.setQQQuickLoginList(list.map((item) => item.uin.toString()));
+        WebUiDataRuntime.setQQNewLoginList(list);
     });
 }
 
@@ -284,6 +286,20 @@ async function handleProxy(session: NodeIQQNTWrapperSession, logger: LogWrapper)
         });
     }
 }
+
+async function waitForNetworkConnection(loginService: NodeIKernelLoginService, logger: LogWrapper) {
+    let network_ok = false;
+    let tryCount = 0;
+    while (!network_ok) {
+        network_ok = loginService.getMsfStatus() !== 3;// win 11 0连接 1未连接
+        logger.log('等待网络连接...');
+        await sleep(500);
+        tryCount++;
+    }
+    logger.log('网络已连接');
+    return network_ok;
+}
+
 export async function NCoreInitShell() {
     console.log('NapCat Shell App Loading...');
     const pathWrapper = new NapCatPathWrapper();

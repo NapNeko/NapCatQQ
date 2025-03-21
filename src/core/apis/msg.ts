@@ -136,6 +136,20 @@ export class NTQQMsgApi {
         });
     }
 
+    async queryFirstMsgBySender(peer: Peer, SendersUid: string[]) {
+        console.log(peer, SendersUid);
+        return await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {
+            chatInfo: peer,
+            filterMsgType: [],
+            filterSendersUid: SendersUid,
+            filterMsgToTime: '0',
+            filterMsgFromTime: '0',
+            isReverseOrder: true,
+            isIncludeCurrent: true,
+            pageLimit: 20000,
+        });
+    }
+
     async setMsgRead(peer: Peer) {
         return this.context.session.getMsgService().setMsgRead(peer);
     }

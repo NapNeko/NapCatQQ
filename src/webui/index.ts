@@ -29,7 +29,7 @@ export let webUiPathWrapper: NapCatPathWrapper;
 const MAX_PORT_TRY = 100;
 import * as net from 'node:net';
 import { WebUiDataRuntime } from './src/helper/Data';
-
+export let webUiRuntimePort = 6099;
 export async function InitPort(parsedConfig: WebUiConfigType): Promise<[string, number, string]> {
     try {
         await tryUseHost(parsedConfig.host);
@@ -45,6 +45,7 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
     webUiPathWrapper = pathWrapper;
     WebUiConfig = new WebUiConfigWrapper();
     const [host, port, token] = await InitPort(await WebUiConfig.GetWebUIConfig());
+    webUiRuntimePort = port;
     if (port == 0) {
         logger.log('[NapCat] [WebUi] Current WebUi is not run.');
         return;

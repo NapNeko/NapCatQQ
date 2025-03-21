@@ -7,13 +7,13 @@ import { SelfInfo } from '@/core/types';
 import { NodeIKernelLoginListener } from '@/core/listeners';
 import { NodeIKernelLoginService } from '@/core/services';
 import { NodeIQQNTWrapperSession, WrapperNodeApi } from '@/core/wrapper';
-import { InitWebUi, WebUiConfig } from '@/webui';
+import { InitWebUi, WebUiConfig, webUiRuntimePort } from '@/webui';
 import { NapCatOneBot11Adapter } from '@/onebot';
 
 //Framework ES入口文件
 export async function getWebUiUrl() {
     const WebUiConfigData = (await WebUiConfig.GetWebUIConfig());
-    return 'http://127.0.0.1:' + WebUiConfigData.port + '/webui/?token=' + WebUiConfigData.token;
+    return 'http://127.0.0.1:' + webUiRuntimePort + '/webui/?token=' + WebUiConfigData.token;
 }
 
 export async function NCoreInitFramework(

@@ -1,5 +1,5 @@
 export class NodeIKernelLoginListener {
-    onLoginConnected(...args: any[]): any {
+    onLoginConnected(): Promise<void> | void {
     }
 
     onLoginDisConnected(...args: any[]): any {
