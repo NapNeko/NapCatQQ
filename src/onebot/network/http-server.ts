@@ -25,13 +25,13 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
     open() {
         try {
             if (this.isEnable) {
-                this.core.context.logger.logError('Cannot open a closed HTTP server');
+                this.core.context.logger.logError('[OneBot] [HTTP Server Adapter] 无法打开已经启动的HTTP服务器');
                 return;
             }
             this.initializeServer();
             this.isEnable = true;
         } catch (e) {
-            this.core.context.logger.logError(`[OneBot] [HTTP Server Adapter] Boot Error: ${e}`);
+            this.core.context.logger.logError(`[OneBot] [HTTP Server Adapter] 启动错误: ${e}`);
         }
     }
 
@@ -43,86 +43,155 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
 
     private initializeServer() {
         this.app = new Hono();
+
+        // 注册全局中间件
         this.app.use(cors());
-        this.app.use(async (c, next) => this.authorize(this.config.token, c, next));
-        this.app.use((c) => this.handleRequest(c));
+        this.app.use(this.authMiddleware.bind(this));
+        this.app.use(this.statusCheckMiddleware.bind(this));
+        this.app.use(this.payloadParserMiddleware.bind(this));
+
+        // 注册路由
+        this.app.get('/', this.rootHandler.bind(this));
+        this.app.all('/*', this.actionHandler.bind(this));
+
+        // 启动服务器
         this.server = serve({
             fetch: this.app.fetch.bind(this.app),
             port: this.config.port,
         });
+
+        this.core.context.logger.log(`[OneBot] [HTTP Server Adapter] 服务器已启动于端口 ${this.config.port}`);
     }
 
-    private authorize(token: string | undefined, c: Context, next: Next) {
-        if (!token || token.length === 0) return next(); // 客户端未设置密钥
-        const headerClientToken = c.req.header('authorization')?.split('Bearer ').pop() || '';
-        const queryClientToken = c.req.query('access_token');
-        const clientToken = typeof queryClientToken === 'string' && queryClientToken !== '' ? queryClientToken : headerClientToken;
+    /**
+     * 身份验证中间件
+     */
+    private async authMiddleware(c: Context, next: Next) {
+        const token = this.config.token;
+        if (!token || token.length === 0) {
+            return next(); // 未配置token，跳过验证
+        }
+
+        // 从请求头或查询参数获取token
+        const headerToken = c.req.header('authorization')?.split('Bearer ').pop() || '';
+        const queryToken = c.req.query('access_token');
+        const clientToken = typeof queryToken === 'string' && queryToken !== ''
+            ? queryToken
+            : headerToken;
+
         if (clientToken === token) {
             return next();
         }
+
+        // 验证失败
         c.status(403);
-        c.json({ message: 'token verify failed!' });
-        return;
+        return c.json({ message: 'token验证失败' });
     }
 
-    async httpApiRequest(c: Context) {
-        try {
-            // 处理根路径请求
-            if (c.req.path === '' || c.req.path === '/') {
-                const hello = OB11Response.ok({});
-                hello.message = 'NapCat4 Is Running';
-                return c.json(hello);
-            }
+    /**
+     * 服务器状态检查中间件
+     */
+    private async statusCheckMiddleware(c: Context, next: Next) {
+        if (!this.isEnable) {
+            this.core.context.logger.log('[OneBot] [HTTP Server Adapter] 服务器已关闭');
+            return c.json(OB11Response.error('服务器已关闭', 200));
+        }
+        return next();
+    }
 
-            // 解析请求参数（合并查询参数和请求体）
+    /**
+     * 请求参数解析中间件
+     * 按优先级解析请求参数：JSON > 表单 > 查询参数
+     */
+    private async payloadParserMiddleware(c: Context, next: Next) {
+        try {
+            // 初始化payload对象
             let payload: Record<string, any> = {};
 
-            // 1. 获取URL查询参数
+            // 1. 提取查询参数
             const queryParams = c.req.query();
             if (Object.keys(queryParams).length > 0) {
                 payload = { ...queryParams };
             }
 
-            // 2. 尝试解析请求体，无论内容类型如何
+            // 2. 解析请求体
+            const contentType = c.req.header('content-type') || '';
+            let bodyData = {};
+
             try {
-                const contentType = c.req.header('content-type') || '';
-                if (contentType.includes('application/json')) {
-                    const jsonBody = await c.req.json();
-                    payload = { ...payload, ...jsonBody };
-                } else if (contentType) {
-                    // 其他内容类型通过通用解析器处理
-                    const body = await c.req.parseBody();
-                    payload = { ...payload, ...body };
+                // 优先尝试以JSON格式解析
+                if (contentType.includes('application/json') || contentType === '' || contentType.includes('text/plain')) {
+                    try {
+                        bodyData = await c.req.json();
+                    } catch {
+                        // JSON解析失败时，尝试其他方式
+                    }
+                }
+
+                // 如果JSON解析失败或不是JSON格式，尝试其他格式
+                if (Object.keys(bodyData).length === 0) {
+                    if (contentType.includes('application/x-www-form-urlencoded') ||
+                        contentType.includes('multipart/form-data')) {
+                        bodyData = await c.req.parseBody();
+                    } else if (contentType) {
+                        // 尝试通用解析
+                        bodyData = await c.req.parseBody();
+                    }
                 }
             } catch (parseError) {
-                // 解析失败时继续使用已有参数
+                // 所有解析方式都失败，记录错误但继续处理
+                this.core.context.logger.log(`[OneBot] [HTTP Server Adapter] 请求体解析失败: ${parseError}`);
             }
 
-            // 处理API请求
-            const actionName = c.req.path.split('/')[1];
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const action = this.actions.get(actionName as any);
-            if (action) {
-                try {
-                    const result = await action.handle(payload, this.name, this.config);
-                    return c.json(result);
-                } catch (error: unknown) {
-                    return c.json(OB11Response.error((error as Error)?.stack?.toString() || (error as Error)?.message || 'Error Handle', 200));
-                }
-            } else {
-                return c.json(OB11Response.error('不支持的Api ' + actionName, 200));
-            }
-        } catch (error: unknown) {
-            return c.json(OB11Response.error('请求处理失败: ' + ((error as Error)?.message || 'Unknown error'), 200));
+            // 3. 合并参数
+            payload = { ...payload, ...bodyData };
+
+            // 4. 将解析结果保存到上下文
+            c.set('payload', payload);
+            return next();
+        } catch (error) {
+            this.core.context.logger.logError(`[OneBot] [HTTP Server Adapter] 请求处理错误: ${error}`);
+            return c.json(OB11Response.error(`参数解析失败: ${(error as Error)?.message || '未知错误'}`, 200));
         }
     }
 
-    async handleRequest(c: Context) {
-        if (!this.isEnable) {
-            this.core.context.logger.log('[OneBot] [HTTP Server Adapter] Server is closed');
-            return c.json(OB11Response.error('Server is closed', 200));
+    /**
+     * 根路径处理器
+     */
+    private rootHandler(c: Context) {
+        const response = OB11Response.ok({});
+        response.message = 'NapCat4 Is Running';
+        return c.json(response);
+    }
+
+    /**
+     * API动作处理器
+     */
+    async actionHandler(c: Context) {
+        try {
+            const payload = c.get('payload') as Record<string, any>;
+            const actionName = c.req.path.split('/')[1];
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const action = this.actions.get(actionName as any);
+
+            if (!action) {
+                return c.json(OB11Response.error(`不支持的API: ${actionName}`, 200));
+            }
+
+            try {
+                const result = await action.handle(payload, this.name, this.config);
+                return c.json(result);
+            } catch (error: unknown) {
+                const errorMessage = (error as Error)?.stack || (error as Error)?.message || 'Error Handle';
+                this.core.context.logger.logError(`[OneBot] [HTTP Server Adapter] API处理错误: ${errorMessage}`);
+                return c.json(OB11Response.error(errorMessage, 200));
+            }
+        } catch (error: unknown) {
+            const errorMessage = (error as Error)?.message || '未知错误';
+            this.core.context.logger.logError(`[OneBot] [HTTP Server Adapter] 请求处理失败: ${errorMessage}`);
+            return c.json(OB11Response.error(`请求处理失败: ${errorMessage}`, 200));
         }
-        return await this.httpApiRequest(c);  // 添加return关键字
     }
 
     async reload(newConfig: HttpServerConfig) {
