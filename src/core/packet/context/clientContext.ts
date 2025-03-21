@@ -1,6 +1,5 @@
 import { IPacketClient } from '@/core/packet/client/baseClient';
 import { NativePacketClient } from '@/core/packet/client/nativeClient';
-import { WsPacketClient } from '@/core/packet/client/wsClient';
 import { OidbPacket } from '@/core/packet/transformer/base';
 import { PacketLogger } from '@/core/packet/context/loggerContext';
 import { NapCoreContext } from '@/core/packet/context/napCoreContext';
@@ -10,8 +9,7 @@ type clientPriorityType = {
 }
 
 const clientPriority: clientPriorityType = {
-    10: (napCore: NapCoreContext, logger: PacketLogger, logStack: LogStack) => new NativePacketClient(napCore, logger, logStack),
-    1: (napCore: NapCoreContext, logger: PacketLogger, logStack: LogStack) => new WsPacketClient(napCore, logger, logStack),
+    10: (napCore: NapCoreContext, logger: PacketLogger, logStack: LogStack) => new NativePacketClient(napCore, logger, logStack)
 };
 
 export class LogStack {
@@ -87,10 +85,6 @@ export class PacketClientContext {
         case 'native':
             this.logger.info('使用指定的 NativePacketClient 作为后端');
             client = new NativePacketClient(this.napCore, this.logger, this.logStack);
-            break;
-        case 'frida':
-            this.logger.info('[Core] [Packet] 使用指定的 FridaPacketClient 作为后端');
-            client = new WsPacketClient(this.napCore, this.logger, this.logStack);
             break;
         case 'auto':
         case undefined:
