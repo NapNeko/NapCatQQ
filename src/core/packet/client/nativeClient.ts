@@ -38,12 +38,12 @@ export class NativePacketClient extends IPacketClient {
         return true;
     }
 
-    async init(pid: number, recv: string, send: string): Promise<void> {
+    async init(_pid: number, recv: string, send: string): Promise<void> {
         const platform = process.platform + '.' + process.arch;
         const moehoo_path = path.join(dirname(fileURLToPath(import.meta.url)), './moehoo/MoeHoo.' + platform + '.node');
         process.dlopen(this.MoeHooExport, moehoo_path, constants.dlopen.RTLD_LAZY);
-        
-        this.MoeHooExport.exports.InitHook?.(send, recv, (type: number, uin: string, cmd: string, seq: number, hex_data: string) => {
+
+        this.MoeHooExport.exports.InitHook?.(send, recv, (type: number, _uin: string, cmd: string, seq: number, hex_data: string) => {
             const trace_id = createHash('md5').update(Buffer.from(hex_data, 'hex')).digest('hex');
             if (type === 0 && this.cb.get(trace_id + 'recv')) {
                 //此时为send 提取seq
