@@ -5,6 +5,9 @@ export async function runTask<T, R>(workerScript: string, taskData: T): Promise<
     try {
         return await new Promise<R>((resolve, reject) => {
             worker.on('message', (result: R) => {
+                if ((result as any)?.error) {
+                    reject(new Error((result as { error: string }).error));
+                }
                 resolve(result);
             });
 
