@@ -3,6 +3,7 @@ import { OB11HttpServerAdapter } from './http-server';
 import { Context } from 'hono';
 import { SSEStreamingApi, streamSSE } from 'hono/streaming';
 import { Mutex } from 'async-mutex';
+import { LifeCycleSubType, OB11LifeCycleEvent } from '../event/meta/OB11LifeCycleEvent';
 
 export class OB11HttpSSEServerAdapter extends OB11HttpServerAdapter {
     private sseClients: { context: Context; stream: SSEStreamingApi, mutex: Mutex }[] = [];
@@ -26,7 +27,7 @@ export class OB11HttpSSEServerAdapter extends OB11HttpServerAdapter {
                 client.mutex.release();
             });
 
-            await stream.writeSSE({ data: JSON.stringify({ status: 'connect' }) });
+            await stream.writeSSE({ data: JSON.stringify(new OB11LifeCycleEvent(this.core, LifeCycleSubType.CONNECT)) });
             await client.mutex.waitForUnlock();
         });
     }
