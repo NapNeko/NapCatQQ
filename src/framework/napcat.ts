@@ -7,13 +7,11 @@ import { SelfInfo } from '@/core/types';
 import { NodeIKernelLoginListener } from '@/core/listeners';
 import { NodeIKernelLoginService } from '@/core/services';
 import { NodeIQQNTWrapperSession, WrapperNodeApi } from '@/core/wrapper';
-import { InitWebUi, WebUiConfig, webUiRuntimePort } from '@/webui';
 import { NapCatOneBot11Adapter } from '@/onebot';
 
 //Framework ES入口文件
 export async function getWebUiUrl() {
-    const WebUiConfigData = (await WebUiConfig.GetWebUIConfig());
-    return 'http://127.0.0.1:' + webUiRuntimePort + '/webui/?token=' + WebUiConfigData.token;
+    return 'http://127.0.0.1:' + 6099 + '/webui/?token=napcat';
 }
 
 export async function NCoreInitFramework(
@@ -58,8 +56,6 @@ export async function NCoreInitFramework(
     const loaderObject = new NapCatFramework(wrapper, session, logger, loginService, selfInfo, basicInfoWrapper, pathWrapper);
     await loaderObject.core.initCore();
 
-    //启动WebUi
-    InitWebUi(logger, pathWrapper).then().catch(e => logger.logError(e));
     //初始化LLNC的Onebot实现
     await new NapCatOneBot11Adapter(loaderObject.core, loaderObject.context, pathWrapper).InitOneBot();
 }

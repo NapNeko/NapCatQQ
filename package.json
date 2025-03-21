@@ -23,6 +23,7 @@
     "@eslint/js": "^9.14.0",
     "@ffmpeg.wasm/main": "^0.13.1",
     "@homebridge/node-pty-prebuilt-multiarch": "^0.12.0-beta.5",
+    "@hono/node-server": "^1.13.8",
     "@log4js-node/log4js-api": "^1.0.2",
     "@napneko/nap-proto-core": "^0.0.4",
     "@rollup/plugin-node-resolve": "^16.0.0",
@@ -52,6 +53,7 @@
     "fast-xml-parser": "^4.3.6",
     "file-type": "^20.0.0",
     "globals": "^16.0.0",
+    "hono": "^4.7.2",
     "image-size": "^1.1.1",
     "json5": "^2.2.3",
     "multer": "^1.4.5-lts.1",
@@ -60,15 +62,11 @@
     "typescript-eslint": "^8.13.0",
     "vite": "^6.0.1",
     "vite-plugin-cp": "^4.0.8",
+    "vite-plugin-wasm": "^3.4.1",
     "vite-tsconfig-paths": "^5.1.0",
-    "hono": "^4.7.2",
-    "@hono/node-server": "^1.13.8",
+    "silk-wasm": "^3.6.1",
+    "@hono/node-ws": "^1.1.0",
     "winston": "^3.17.0"
   },
-  "dependencies": {
-    "@ffmpeg.wasm/core-mt": "^0.13.2",
-    "express": "^5.0.0",
-    "silk-wasm": "^3.6.1",
-    "ws": "^8.18.0"
-  }
+  "dependencies": {}
 }

@@ -1,4 +1,3 @@
-import { Data, WebSocket, ErrorEvent } from 'ws';
 import { IPacketClient, RecvPacket } from '@/core/packet/client/baseClient';
 import { LogStack } from '@/core/packet/context/clientContext';
 import { NapCoreContext } from '@/core/packet/context/napCoreContext';
@@ -83,14 +82,14 @@ export class WsPacketClient extends IPacketClient {
                 this.logger.warn('WebSocket 连接关闭，尝试重连...');
                 reject(new Error('WebSocket 连接关闭'));
             };
-            this.websocket.onmessage = (event) => this.handleMessage(event.data).catch(err => {
+            this.websocket.onmessage = (ev: MessageEvent<any>) => this.handleMessage(ev).catch(err => {
                 this.logger.error(`处理消息时出错: ${err}`);
             });
-            this.websocket.onerror = (event: ErrorEvent) => {
+            this.websocket.onerror = (event) => {
                 this.available = false;
-                this.logger.error(`WebSocket 出错: ${event.message}`);
+                this.logger.error(`WebSocket 出错: ${event}`);
                 this.websocket?.close();
-                reject(new Error(`WebSocket 出错: ${event.message}`));
+                reject(new Error(`WebSocket 出错: ${event}`));
             };
         });
     }
@@ -99,9 +98,9 @@ export class WsPacketClient extends IPacketClient {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    private async handleMessage(message: Data): Promise<void> {
+    private async handleMessage(message: MessageEvent): Promise<void> {
         try {
-            const json: RecvPacket = JSON.parse(message.toString());
+            const json: RecvPacket = JSON.parse(message.data.toString());
             const trace_id_md5 = json.trace_id_md5;
             const action = json?.type ?? 'init';
             const event = this.cb.get(`${trace_id_md5}${action}`);

@@ -1,5 +1,4 @@
 import { OB11EmitEventContent, OB11NetworkReloadType } from '@/onebot/network/index';
-import { RawData } from 'ws';
 import { OB11HeartbeatEvent } from '@/onebot/event/meta/OB11HeartbeatEvent';
 import { NapCatCore } from '@/core';
 import { ActionName } from '@/onebot/action/router';
@@ -114,7 +113,7 @@ export class OB11WebSocketClientAdapter extends IOB11NetworkAdapter<WebsocketCli
         }
     }
 
-    private async handleMessage(message: RawData) {
+    private async handleMessage(message: MessageEvent) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let receiveData: { action: typeof ActionName[keyof typeof ActionName], params?: any, echo?: any } = { action: ActionName.Unknown, params: {} };
         let echo = undefined;

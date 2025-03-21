@@ -26,8 +26,6 @@ import { LoginListItem, NodeIKernelLoginService } from '@/core/services';
 import { program } from 'commander';
 import qrcode from '@/qrcode/lib/main';
 import { NapCatOneBot11Adapter } from '@/onebot';
-import { InitWebUi } from '@/webui';
-import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { napCatVersion } from '@/common/version';
 import { NodeIO3MiscListener } from '@/core/listeners/NodeIO3MiscListener';
 import { sleep } from '@/common/helper';
@@ -142,7 +140,6 @@ async function handleLogin(
         });
     }
     loginListener.onQRCodeGetPicture = ({ pngBase64QrcodeData, qrcodeUrl }) => {
-        WebUiDataRuntime.setQQLoginQrcodeURL(qrcodeUrl);
 
         const realBase64 = pngBase64QrcodeData.replace(/^data:image\/\w+;base64,/, '');
         const buffer = Buffer.from(realBase64, 'base64');
@@ -180,24 +177,6 @@ async function handleLogin(
     return await selfInfo;
 }
 async function handleLoginInner(context: { isLogined: boolean }, logger: LogWrapper, loginService: NodeIKernelLoginService, quickLoginUin: string | undefined, historyLoginList: LoginListItem[]) {
-    WebUiDataRuntime.setQuickLoginCall(async (uin: string) => {
-        return await new Promise((resolve) => {
-            if (uin) {
-                logger.log('正在快速登录 ', uin);
-                loginService.quickLoginWithUin(uin).then(res => {
-                    if (res.loginErrorInfo.errMsg) {
-                        resolve({ result: false, message: res.loginErrorInfo.errMsg });
-                    }
-                    resolve({ result: true, message: '' });
-                }).catch((e) => {
-                    logger.logError(e);
-                    resolve({ result: false, message: '快速登录发生错误' });
-                });
-            } else {
-                resolve({ result: false, message: '快速登录失败' });
-            }
-        });
-    });
     if (quickLoginUin) {
         if (historyLoginList.some(u => u.uin === quickLoginUin)) {
             logger.log('正在快速登录 ', quickLoginUin);
@@ -224,12 +203,6 @@ async function handleLoginInner(context: { isLogined: boolean }, logger: LogWrap
         loginService.getQRCodePicture();
     }
 
-    loginService.getLoginList().then((res) => {
-        // 遍历 res.LocalLoginInfoList[x].isQuickLogin是否可以 res.LocalLoginInfoList[x].uin 转为string 加入string[] 最后遍历完成调用WebUiDataRuntime.setQQQuickLoginList
-        const list = res.LocalLoginInfoList.filter((item) => item.isQuickLogin);
-        WebUiDataRuntime.setQQQuickLoginList(list.map((item) => item.uin.toString()));
-        WebUiDataRuntime.setQQNewLoginList(list);
-    });
 }
 
 async function initializeSession(
@@ -312,8 +285,6 @@ export async function NCoreInitShell() {
     o3Service.addO3MiscListener(new NodeIO3MiscListener());
 
     logger.log('[NapCat] [Core] NapCat.Core Version: ' + napCatVersion);
-    InitWebUi(logger, pathWrapper).then().catch(e => logger.logError(e));
-
     const engine = wrapper.NodeIQQNTWrapperEngine.get();
     const loginService = wrapper.NodeIKernelLoginService.get();
     const session = wrapper.NodeIQQNTWrapperSession.create();

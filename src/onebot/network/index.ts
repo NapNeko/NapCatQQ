@@ -104,4 +104,3 @@ export class OB11NetworkManager {
 export * from './http-client';
 export * from './websocket-client';
 export * from './http-server';
-export * from './websocket-server';

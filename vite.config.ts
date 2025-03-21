@@ -3,6 +3,7 @@ import { defineConfig, PluginOption, UserConfig } from 'vite';
 import { resolve } from 'path';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import { builtinModules } from 'module';
+import wasm from 'vite-plugin-wasm';
 //依赖排除
 const external = [
     'silk-wasm',
@@ -42,6 +43,7 @@ const UniversalBaseConfigPlugin: PluginOption[] = [
         ],
     }),
     nodeResolve(),
+    wasm()
 ];
 
 const FrameworkBaseConfigPlugin: PluginOption[] = [
@@ -61,6 +63,7 @@ const FrameworkBaseConfigPlugin: PluginOption[] = [
         ],
     }),
     nodeResolve(),
+    wasm()
 ];
 
 const ShellBaseConfigPlugin: PluginOption[] = [
@@ -78,6 +81,7 @@ const ShellBaseConfigPlugin: PluginOption[] = [
         ],
     }),
     nodeResolve(),
+    wasm()
 ];
 const UniversalBaseConfig = () =>
     defineConfig({
