@@ -20,9 +20,14 @@ export class OB11Construct {
 
     static friends(friends: FriendV2[]): OB11User[] {
         return friends.map(rawFriend => ({
-            ...rawFriend.baseInfo,
-            ...rawFriend.coreInfo,
+            birthday_year: rawFriend.baseInfo.birthday_year,
+            birthday_month: rawFriend.baseInfo.birthday_month,
+            birthday_day: rawFriend.baseInfo.birthday_day,
             user_id: parseInt(rawFriend.coreInfo.uin),
+            age: rawFriend.baseInfo.age,
+            phone_num: rawFriend.baseInfo.phoneNum,
+            email: rawFriend.baseInfo.eMail,
+            category_id: rawFriend.baseInfo.categoryId,
             nickname: rawFriend.coreInfo.nick ?? '',
             remark: rawFriend.coreInfo.remark ?? rawFriend.coreInfo.nick,
             sex: this.sex(rawFriend.baseInfo.sex),
