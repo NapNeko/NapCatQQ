@@ -14,8 +14,8 @@ export default class GetFriendList extends OneBotAction<Payload, OB11User[]> {
     override actionName = ActionName.GetFriendList;
     override payloadSchema = SchemaData;
 
-    async _handle(payload: Payload) {
+    async _handle(_payload: Payload) {
         //全新逻辑
-        return OB11Construct.friends(await this.core.apis.FriendApi.getBuddy(typeof payload.no_cache === 'string' ? payload.no_cache === 'true' : !!payload.no_cache));
+        return OB11Construct.friends(await this.core.apis.FriendApi.getBuddy());
     }
 }

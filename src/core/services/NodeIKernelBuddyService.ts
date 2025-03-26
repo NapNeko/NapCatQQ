@@ -16,7 +16,7 @@ export interface NodeIKernelBuddyService {
 
     getBuddyListFromCache(reqType: BuddyListReqType): Promise<Array<
         {
-            categoryId: number,//9999应该跳过 那是兜底数据吧
+            categoryId: number,//9999为特别关心
             categorySortId: number,//排序方式
             categroyName: string,//分类名
             categroyMbCount: number,//不懂
