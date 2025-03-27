@@ -90,7 +90,30 @@ export class NTQQUserApi {
             () => true,
             (profile) => profile.uid === uid,
         );
-        const RetUser: User = {
+        return profile;
+    }
+
+    async getUserDetailInfo(uid: string): Promise<User> {
+        let profile = await solveAsyncProblem(async (uid) => this.fetchUserDetailInfo(uid, UserDetailSource.KDB), uid);
+        if (profile && profile.uin !== '0' && profile.commonExt) {
+            return {
+                ...profile.simpleInfo.status,
+                ...profile.simpleInfo.vasInfo,
+                ...profile.commonExt,
+                ...profile.simpleInfo.baseInfo,
+                ...profile.simpleInfo.coreInfo,
+                qqLevel: profile.commonExt?.qqLevel,
+                age: profile.simpleInfo.baseInfo.age,
+                pendantId: '',
+                nick: profile.simpleInfo.coreInfo.nick || '',
+            };
+        }
+        this.context.logger.logDebug('[NapCat] [Mark] getUserDetailInfo Mode1 Failed.');
+        profile = await this.fetchUserDetailInfo(uid, UserDetailSource.KSERVER);
+        if (profile && profile.uin === '0') {
+            profile.uin = await this.core.apis.UserApi.getUidByUinV2(uid) ?? '0';
+        }
+        return {
             ...profile.simpleInfo.status,
             ...profile.simpleInfo.vasInfo,
             ...profile.commonExt,
@@ -101,33 +124,6 @@ export class NTQQUserApi {
             pendantId: '',
             nick: profile.simpleInfo.coreInfo.nick || '',
         };
-        return RetUser;
-    }
-
-    async getUserDetailInfo(uid: string): Promise<User> {
-        let retUser = await solveAsyncProblem(async (uid) => this.fetchUserDetailInfo(uid, UserDetailSource.KDB), uid);
-        if (retUser && retUser.uin !== '0') {
-            return retUser;
-        }
-        this.context.logger.logDebug('[NapCat] [Mark] getUserDetailInfo Mode1 Failed.');
-        retUser = await this.fetchUserDetailInfo(uid, UserDetailSource.KSERVER);
-        if (retUser && retUser.uin === '0') {
-            retUser.uin = await this.core.apis.UserApi.getUidByUinV2(uid) ?? '0';
-        }
-        return retUser;
-    }
-
-    async getUserDetailInfoV2(uid: string): Promise<User> {
-        const fallback = new Fallback<User>((user) => FallbackUtil.boolchecker(user, user !== undefined && user.uin !== '0'))
-            .add(() => this.fetchUserDetailInfo(uid, UserDetailSource.KDB))
-            .add(() => this.fetchUserDetailInfo(uid, UserDetailSource.KSERVER));
-        const retUser = await fallback.run().then(async (user) => {
-            if (user && user.uin === '0') {
-                user.uin = await this.core.apis.UserApi.getUidByUinV2(uid) ?? '0';
-            }
-            return user;
-        });
-        return retUser;
     }
 
     async modifySelfProfile(param: ModifyProfileParams) {
