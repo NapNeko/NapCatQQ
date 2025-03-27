@@ -1,4 +1,10 @@
 export interface OB11User {
+    birthday_year?: number; // 生日
+    birthday_month?: number; // 生日
+    birthday_day?: number; // 生日
+    phone_num?: string; // 手机号
+    email?: string; // 邮箱
+    category_id?: number; // 分组ID
     user_id: number; // 用户ID
     nickname: string; // 昵称
     remark?: string; // 备注
