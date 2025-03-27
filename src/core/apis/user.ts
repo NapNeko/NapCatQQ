@@ -93,8 +93,8 @@ export class NTQQUserApi {
         return profile;
     }
 
-    async getUserDetailInfo(uid: string): Promise<User> {
-        let profile = await solveAsyncProblem(async (uid) => this.fetchUserDetailInfo(uid, UserDetailSource.KDB), uid);
+    async getUserDetailInfo(uid: string, no_cache: boolean = false): Promise<User> {
+        let profile = await solveAsyncProblem(async (uid) => this.fetchUserDetailInfo(uid, no_cache ? UserDetailSource.KSERVER : UserDetailSource.KDB), uid);
         if (profile && profile.uin !== '0' && profile.commonExt) {
             return {
                 ...profile.simpleInfo.status,

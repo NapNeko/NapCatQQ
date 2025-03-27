@@ -207,6 +207,7 @@ interface PhotoWall {
 
 // 简单信息
 export interface SimpleInfo {
+    qqLevel?: QQLevel;//临时添加
     uid?: string;
     uin?: string;
     coreInfo: CoreInfo;
