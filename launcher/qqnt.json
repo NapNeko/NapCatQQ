@@ -1,9 +1,9 @@
 {
   "name": "qq-chat",
-  "version": "9.9.18-32793",
-  "verHash": "d43f097e",
-  "linuxVersion": "3.2.16-32793",
-  "linuxVerHash": "ee4bd910",
+  "version": "9.9.18-32869",
+  "verHash": "e735296c",
+  "linuxVersion": "3.2.16-32869",
+  "linuxVerHash": "4c192ba9",
   "private": true,
   "description": "QQ",
   "productName": "QQ",
@@ -34,7 +34,7 @@
       "vuex@4.1.0": "patches/vuex@4.1.0.patch"
     }
   },
-  "buildVersion": "32793",
+  "buildVersion": "32869",
   "isPureShell": true,
   "isByteCodeShell": true,
   "platform": "win32",
