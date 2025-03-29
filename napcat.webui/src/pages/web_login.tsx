@@ -79,6 +79,7 @@ export default function WebLoginPage() {
             <CardBody className="flex gap-5 py-5 px-5 md:px-10">
               <Input
                 isClearable
+                type="password"
                 classNames={{
                   label: 'text-black/50 dark:text-white/90',
                   input: [
