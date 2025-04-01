@@ -16,11 +16,11 @@ export default class GetFriendList extends OneBotAction<Payload, OB11User[]> {
 
     async _handle(_payload: Payload) {
         const buddyMap = await this.core.apis.FriendApi.getBuddyV2SimpleInfoMap();
-
+        const isNocache = typeof _payload.no_cache === 'string' ? _payload.no_cache === 'true' : !!_payload.no_cache;
         await Promise.all(
             Array.from(buddyMap.values()).map(async (buddyInfo) => {
                 try {
-                    const userDetail = await this.core.apis.UserApi.getUserDetailInfo(buddyInfo.coreInfo.uid);
+                    const userDetail = await this.core.apis.UserApi.getUserDetailInfo(buddyInfo.coreInfo.uid, isNocache);
                     const data = buddyMap.get(buddyInfo.coreInfo.uid);
                     if (data) {
                         data.qqLevel = userDetail.qqLevel;
