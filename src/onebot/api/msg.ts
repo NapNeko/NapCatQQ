@@ -34,7 +34,7 @@ import { EventType } from '@/onebot/event/OneBotEvent';
 import { encodeCQCode } from '@/onebot/helper/cqcode';
 import { uriToLocalFile } from '@/common/file';
 import { RequestUtil } from '@/common/request';
-import fsPromise, { constants } from 'node:fs/promises';
+import fsPromise from 'node:fs/promises';
 import { OB11FriendAddNoticeEvent } from '@/onebot/event/notice/OB11FriendAddNoticeEvent';
 import { ForwardMsgBuilder } from '@/common/forward-msg-builder';
 import { NapProtoMsg } from '@napneko/nap-proto-core';
@@ -45,6 +45,7 @@ import { OB11GroupAdminNoticeEvent } from '../event/notice/OB11GroupAdminNoticeE
 import { GroupChange, GroupChangeInfo, GroupInvite, PushMsgBody } from '@/core/packet/transformer/proto';
 import { OB11GroupRequestEvent } from '../event/request/OB11GroupRequest';
 import { LRUCache } from '@/common/lru-cache';
+import { cleanTaskQueue } from '@/common/clean-task';
 
 type RawToOb11Converters = {
     [Key in keyof MessageElement as Key extends `${string}Element` ? Key : never]: (
@@ -970,7 +971,7 @@ export class OneBotMsgApi {
         });
 
         const timeout = 10000 + (totalSize / 1024 / 256 * 1000);
-
+        cleanTaskQueue.addFiles(deleteAfterSentFiles, timeout);
         try {
             const returnMsg = await this.core.apis.MsgApi.sendMsg(peer, sendElements, timeout);
             if (!returnMsg) throw new Error('发送消息失败');
@@ -983,18 +984,18 @@ export class OneBotMsgApi {
         } catch (error) {
             throw new Error((error as Error).message);
         } finally {
-            setTimeout(async () => {
-                const deletePromises = deleteAfterSentFiles.map(async file => {
-                    try {
-                        if (await fsPromise.access(file, constants.W_OK).then(() => true).catch(() => false)) {
-                            await fsPromise.unlink(file);
-                        }
-                    } catch (e) {
-                        this.core.context.logger.logError('发送消息删除文件失败', e);
-                    }
-                });
-                await Promise.all(deletePromises);
-            }, 60000);
+            // setTimeout(async () => {
+            //     const deletePromises = deleteAfterSentFiles.map(async file => {
+            //         try {
+            //             if (await fsPromise.access(file, constants.W_OK).then(() => true).catch(() => false)) {
+            //                 await fsPromise.unlink(file);
+            //             }
+            //         } catch (e) {
+            //             this.core.context.logger.logError('发送消息删除文件失败', e);
+            //         }
+            //     });
+            //     await Promise.all(deletePromises);
+            // }, 60000);
         }
     }
 
