@@ -222,6 +222,11 @@ async function handleLoginInner(context: { isLogined: boolean }, logger: LogWrap
                 }`);
         }
         loginService.getQRCodePicture();
+        try {
+            await WebUiDataRuntime.runWebUiConfigQuickFunction();
+        } catch (error) {
+            logger.logError('WebUi 快速登录失败 执行失败', error);
+        }
     }
 
     loginService.getLoginList().then((res) => {

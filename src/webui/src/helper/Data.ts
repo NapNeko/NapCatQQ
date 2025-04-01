@@ -25,6 +25,9 @@ const LoginRuntime: LoginRuntimeType = {
         NewQQLoginList: [],
     },
     packageJson: packageJson,
+    WebUiConfigQuickFunction: async () => {
+        return;
+    }
 };
 
 export const WebUiDataRuntime = {
@@ -118,4 +121,11 @@ export const WebUiDataRuntime = {
     getQQVersion() {
         return LoginRuntime.QQVersion;
     },
+
+    setWebUiConfigQuickFunction(func: LoginRuntimeType['WebUiConfigQuickFunction']): void {
+        LoginRuntime.WebUiConfigQuickFunction = func;
+    },
+    runWebUiConfigQuickFunction: async function () {
+        await LoginRuntime.WebUiConfigQuickFunction();
+    }
 };
