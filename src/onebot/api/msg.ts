@@ -971,7 +971,6 @@ export class OneBotMsgApi {
         });
 
         const timeout = 10000 + (totalSize / 1024 / 256 * 1000);
-        cleanTaskQueue.addFiles(deleteAfterSentFiles, timeout);
         try {
             const returnMsg = await this.core.apis.MsgApi.sendMsg(peer, sendElements, timeout);
             if (!returnMsg) throw new Error('发送消息失败');
@@ -984,6 +983,7 @@ export class OneBotMsgApi {
         } catch (error) {
             throw new Error((error as Error).message);
         } finally {
+            cleanTaskQueue.addFiles(deleteAfterSentFiles, timeout);
             // setTimeout(async () => {
             //     const deletePromises = deleteAfterSentFiles.map(async file => {
             //         try {
