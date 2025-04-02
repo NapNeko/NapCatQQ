@@ -46,8 +46,6 @@ import { GroupChange, GroupChangeInfo, GroupInvite, PushMsgBody } from '@/core/p
 import { OB11GroupRequestEvent } from '../event/request/OB11GroupRequest';
 import { LRUCache } from '@/common/lru-cache';
 import { cleanTaskQueue } from '@/common/clean-task';
-import { PBString, PBUint64, ProtoBuf, ProtoBufBase, ProtoBufIn, UnWrap } from 'napcat.protobuf/src/protobuf';
-import { GroupMemberTitle } from '../event/notice/GroupMemberTitle';
 
 type RawToOb11Converters = {
     [Key in keyof MessageElement as Key extends `${string}Element` ? Key : never]: (
@@ -1265,36 +1263,42 @@ export class OneBotMsgApi {
             );
         } else if (SysMessage.contentHead.type == 528 && SysMessage.contentHead.subType == 39 && SysMessage.body?.msgContent) {
             return await this.obContext.apis.UserApi.parseLikeEvent(SysMessage.body?.msgContent);
-        } else if (SysMessage.contentHead.type == 732 && SysMessage.contentHead.subType == 16 && SysMessage.body?.msgContent) {
-            let data_wrap = PBString(2);
-            let user_wrap = PBUint64(5);
-            let group_wrap = PBUint64(4);
+        } 
+        // else if (SysMessage.contentHead.type == 732 && SysMessage.contentHead.subType == 16 && SysMessage.body?.msgContent) {
+        //     let data_wrap = PBString(2);
+        //     let user_wrap = PBUint64(5);
+        //     let group_wrap = PBUint64(4);
 
-            ProtoBuf(class extends ProtoBufBase {
-                group = group_wrap;
-                content = ProtoBufIn(5, { data: data_wrap, user: user_wrap });
-            }).decode(SysMessage.body?.msgContent.slice(7));
-            let xml_data = UnWrap(data_wrap);
-            let group = UnWrap(group_wrap).toString();
-            //let user = UnWrap(user_wrap).toString();
-            const parsedParts = this.parseTextWithJson(xml_data);
-            //解析JSON
-            if (parsedParts[1] && parsedParts[3]) {
-                let set_user_id: string = (parsedParts[1].content as { data: string }).data;
-                let uid = await this.core.apis.UserApi.getUidByUinV2(set_user_id);
-                await this.core.apis.GroupApi.refreshGroupMemberCachePartial(group, uid);
-                //let json_data_1_url_search = new URL((parsedParts[3].content as { url: string }).url).searchParams;
-                //let is_new: boolean = json_data_1_url_search.get('isnew') === '1';
-                let new_tittle: string = (parsedParts[3].content as { text: string }).text;
-                //console.log(group, set_user_id, is_new, new_tittle);
-                return new GroupMemberTitle(
-                    this.core,
-                    +group,
-                    +set_user_id,
-                    new_tittle
-                );
-            }
-        }
+        //     ProtoBuf(class extends ProtoBufBase {
+        //         group = group_wrap;
+        //         content = ProtoBufIn(5, { data: data_wrap, user: user_wrap });
+        //     }).decode(SysMessage.body?.msgContent.slice(7));
+        //     let xml_data = UnWrap(data_wrap);
+        //     let group = UnWrap(group_wrap).toString();
+        //     //let user = UnWrap(user_wrap).toString();
+        //     const parsedParts = this.parseTextWithJson(xml_data);
+        //     //解析JSON
+        //     if (parsedParts[1] && parsedParts[3]) {
+        //         let set_user_id: string = (parsedParts[1].content as { data: string }).data;
+        //         let uid = await this.core.apis.UserApi.getUidByUinV2(set_user_id);
+        //         let new_tittle: string = (parsedParts[3].content as { text: string }).text;
+        //         console.log(this.core.apis.GroupApi.groupMemberCache.get(group)?.get(uid)?.memberSpecialTitle, new_tittle)
+        //         if (this.core.apis.GroupApi.groupMemberCache.get(group)?.get(uid)?.memberSpecialTitle == new_tittle) {
+        //             return;
+        //         }
+        //         await this.core.apis.GroupApi.refreshGroupMemberCachePartial(group, uid);
+        //         //let json_data_1_url_search = new URL((parsedParts[3].content as { url: string }).url).searchParams;
+        //         //let is_new: boolean = json_data_1_url_search.get('isnew') === '1';
+
+        //         //console.log(group, set_user_id, is_new, new_tittle);
+        //         return new GroupMemberTitle(
+        //             this.core,
+        //             +group,
+        //             +set_user_id,
+        //             new_tittle
+        //         );
+        //     }
+        // }
         return undefined;
     }
 }
