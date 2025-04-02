@@ -555,7 +555,7 @@ export class OneBotMsgApi {
         },
 
         [OB11MessageDataType.voice]: async (sendMsg, context) =>
-            this.core.apis.FileApi.createValidSendPttElement(
+            this.core.apis.FileApi.createValidSendPttElement(context,
                 (await this.handleOb11FileLikeMessage(sendMsg, context)).path),
 
         [OB11MessageDataType.json]: async ({ data: { data } }) => ({
