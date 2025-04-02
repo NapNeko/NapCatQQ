@@ -231,7 +231,7 @@ export class NTQQFileApi {
             },
         };
     }
-    async createValidSendPttElement(context: SendMessageContext, pttPath: string): Promise<SendPttElement> {
+    async createValidSendPttElement(_context: SendMessageContext, pttPath: string): Promise<SendPttElement> {
 
         const { converted, path: silkPath, duration } = await encodeSilk(pttPath, this.core.NapCatTempPath, this.core.context.logger);
         if (!silkPath) {
