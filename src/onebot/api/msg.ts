@@ -46,6 +46,8 @@ import { GroupChange, GroupChangeInfo, GroupInvite, PushMsgBody } from '@/core/p
 import { OB11GroupRequestEvent } from '../event/request/OB11GroupRequest';
 import { LRUCache } from '@/common/lru-cache';
 import { cleanTaskQueue } from '@/common/clean-task';
+import { PBString, PBUint64, ProtoBuf, ProtoBufBase, ProtoBufIn, UnWrap } from 'napcat.protobuf/src/protobuf';
+import { GroupMemberTitle } from '../event/notice/GroupMemberTitle';
 
 type RawToOb11Converters = {
     [Key in keyof MessageElement as Key extends `${string}Element` ? Key : never]: (
@@ -713,6 +715,56 @@ export class OneBotMsgApi {
         this.obContext = obContext;
         this.core = core;
     }
+    /**
+     * 解析带有JSON标记的文本
+     * @param text 要解析的文本
+     * @returns 解析后的结果数组，每个元素包含类型(text或json)和内容
+     */
+    parseTextWithJson(text: string) {
+        // 匹配<{...}>格式的JSON
+        const regex = /<(\{.*?\})>/g;
+        const parts: Array<{ type: 'text' | 'json', content: string | object }> = [];
+        let lastIndex = 0;
+        let match;
+
+        // 查找所有匹配项
+        while ((match = regex.exec(text)) !== null) {
+            // 添加匹配前的文本
+            if (match.index > lastIndex) {
+                parts.push({
+                    type: 'text',
+                    content: text.substring(lastIndex, match.index)
+                });
+            }
+
+            // 添加JSON部分
+            try {
+                const jsonContent = JSON.parse(match[1] ?? '');
+                parts.push({
+                    type: 'json',
+                    content: jsonContent
+                });
+            } catch (e) {
+                // 如果JSON解析失败，作为普通文本处理
+                parts.push({
+                    type: 'text',
+                    content: match[0]
+                });
+            }
+
+            lastIndex = regex.lastIndex;
+        }
+
+        // 添加最后一部分文本
+        if (lastIndex < text.length) {
+            parts.push({
+                type: 'text',
+                content: text.substring(lastIndex)
+            });
+        }
+
+        return parts;
+    }
 
     async parsePrivateMsgEvent(msg: RawMessage, grayTipElement: GrayTipElement) {
         if (grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
@@ -1213,6 +1265,35 @@ export class OneBotMsgApi {
             );
         } else if (SysMessage.contentHead.type == 528 && SysMessage.contentHead.subType == 39 && SysMessage.body?.msgContent) {
             return await this.obContext.apis.UserApi.parseLikeEvent(SysMessage.body?.msgContent);
+        } else if (SysMessage.contentHead.type == 732 && SysMessage.contentHead.subType == 16 && SysMessage.body?.msgContent) {
+            let data_wrap = PBString(2);
+            let user_wrap = PBUint64(5);
+            let group_wrap = PBUint64(4);
+
+            ProtoBuf(class extends ProtoBufBase {
+                group = group_wrap;
+                content = ProtoBufIn(5, { data: data_wrap, user: user_wrap });
+            }).decode(SysMessage.body?.msgContent.slice(7));
+            let xml_data = UnWrap(data_wrap);
+            let group = UnWrap(group_wrap).toString();
+            //let user = UnWrap(user_wrap).toString();
+            const parsedParts = this.parseTextWithJson(xml_data);
+            //解析JSON
+            if (parsedParts[1] && parsedParts[3]) {
+                let set_user_id: string = (parsedParts[1].content as { data: string }).data;
+                let uid = await this.core.apis.UserApi.getUidByUinV2(set_user_id);
+                await this.core.apis.GroupApi.refreshGroupMemberCachePartial(group, uid);
+                //let json_data_1_url_search = new URL((parsedParts[3].content as { url: string }).url).searchParams;
+                //let is_new: boolean = json_data_1_url_search.get('isnew') === '1';
+                let new_tittle: string = (parsedParts[3].content as { text: string }).text;
+                //console.log(group, set_user_id, is_new, new_tittle);
+                return new GroupMemberTitle(
+                    this.core,
+                    +group,
+                    +set_user_id,
+                    new_tittle
+                );
+            }
         }
         return undefined;
     }
