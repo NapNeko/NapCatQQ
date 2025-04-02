@@ -1,1 +1,1 @@
-export const napCatVersion = '4.7.11';
+export const napCatVersion = '4.7.12';
