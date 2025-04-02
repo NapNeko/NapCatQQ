@@ -182,7 +182,7 @@ export class NTQQFileApi {
         filePath = newFilePath;
 
         const { fileName: _fileName, path, fileSize, md5 } = await this.core.apis.FileApi.uploadFile(filePath, ElementType.VIDEO);
-        context.deleteAfterSentFiles.push(_fileName);
+        context.deleteAfterSentFiles.push(path);
         if (fileSize === 0) {
             throw new Error('文件异常，大小为0');
         }
@@ -231,7 +231,7 @@ export class NTQQFileApi {
             },
         };
     }
-    async createValidSendPttElement(pttPath: string): Promise<SendPttElement> {
+    async createValidSendPttElement(context: SendMessageContext, pttPath: string): Promise<SendPttElement> {
 
         const { converted, path: silkPath, duration } = await encodeSilk(pttPath, this.core.NapCatTempPath, this.core.context.logger);
         if (!silkPath) {
