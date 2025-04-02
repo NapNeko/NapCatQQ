@@ -30,7 +30,7 @@ export class FFmpegService {
     }
 
     public static async getVideoInfo(videoPath: string, thumbnailPath: string): Promise<VideoInfo> {
-        const result = await await runTask<EncodeArgs, EncodeResult>(getWorkerPath(), { method: 'getVideoInfo', args: [videoPath, thumbnailPath] });
+        const result = await runTask<EncodeArgs, EncodeResult>(getWorkerPath(), { method: 'getVideoInfo', args: [videoPath, thumbnailPath] });
         return result;
     }
 }

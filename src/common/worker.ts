@@ -5,8 +5,11 @@ export async function runTask<T, R>(workerScript: string, taskData: T): Promise<
     try {
         return await new Promise<R>((resolve, reject) => {
             worker.on('message', (result: R) => {
+                if ((result as any)?.log) {
+                    console.error('Worker Log--->:', (result as { log: string }).log);
+                }
                 if ((result as any)?.error) {
-                    reject(new Error((result as { error: string }).error));
+                    reject(new Error("Worker error: " + (result as { error: string }).error));
                 }
                 resolve(result);
             });
