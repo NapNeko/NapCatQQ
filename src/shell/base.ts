@@ -139,6 +139,7 @@ async function handleLogin(
     loginListener.onLoginConnected = () => {
         waitForNetworkConnection(loginService, logger).then(() => {
             handleLoginInner(context, logger, loginService, quickLoginUin, historyLoginList).then().catch(e => logger.logError(e));
+            loginListener.onLoginConnected = () => { };
         });
     }
     loginListener.onQRCodeGetPicture = ({ pngBase64QrcodeData, qrcodeUrl }) => {
