@@ -182,6 +182,7 @@ export class NTQQFileApi {
         filePath = newFilePath;
 
         const { fileName: _fileName, path, fileSize, md5 } = await this.core.apis.FileApi.uploadFile(filePath, ElementType.VIDEO);
+        context.deleteAfterSentFiles.push(_fileName);
         if (fileSize === 0) {
             throw new Error('文件异常，大小为0');
         }
