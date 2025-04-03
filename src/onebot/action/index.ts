@@ -81,7 +81,7 @@ import { GetGroupSystemMsg } from './system/GetSystemMsg';
 import { GroupPoke } from './group/GroupPoke';
 import { GetUserStatus } from './extends/GetUserStatus';
 import { GetRkey } from './extends/GetRkey';
-import { SetSpecialTittle } from './extends/SetSpecialTittle';
+import { SetSpecialTitle } from './extends/SetSpecialTitle';
 import { GetGroupShutList } from './group/GetGroupShutList';
 import { GetGroupMemberList } from './group/GetGroupMemberList';
 import { GetGroupFileUrl } from '@/onebot/action/file/GetGroupFileUrl';
@@ -215,7 +215,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new FriendPoke(obContext, core),
         new GetUserStatus(obContext, core),
         new GetRkey(obContext, core),
-        new SetSpecialTittle(obContext, core),
+        new SetSpecialTitle(obContext, core),
         new SetDiyOnlineStatus(obContext, core),
         // new UploadForwardMsg(obContext, core),
         new GetGroupShutList(obContext, core),

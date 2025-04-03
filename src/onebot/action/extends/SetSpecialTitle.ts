@@ -10,8 +10,8 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export class SetSpecialTittle extends GetPacketStatusDepends<Payload, void> {
-    override actionName = ActionName.SetSpecialTittle;
+export class SetSpecialTitle extends GetPacketStatusDepends<Payload, void> {
+    override actionName = ActionName.SetSpecialTitle;
     override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {

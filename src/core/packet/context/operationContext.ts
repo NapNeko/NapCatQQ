@@ -68,8 +68,8 @@ export class PacketOperationContext {
         }
     }
 
-    async SetGroupSpecialTitle(groupUin: number, uid: string, tittle: string) {
-        const req = trans.SetSpecialTitle.build(groupUin, uid, tittle);
+    async SetGroupSpecialTitle(groupUin: number, uid: string, title: string) {
+        const req = trans.SetSpecialTitle.build(groupUin, uid, title);
         await this.context.client.sendOidbPacket(req);
     }
 

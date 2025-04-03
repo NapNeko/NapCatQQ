@@ -1281,21 +1281,21 @@ export class OneBotMsgApi {
         //     if (parsedParts[1] && parsedParts[3]) {
         //         let set_user_id: string = (parsedParts[1].content as { data: string }).data;
         //         let uid = await this.core.apis.UserApi.getUidByUinV2(set_user_id);
-        //         let new_tittle: string = (parsedParts[3].content as { text: string }).text;
-        //         console.log(this.core.apis.GroupApi.groupMemberCache.get(group)?.get(uid)?.memberSpecialTitle, new_tittle)
-        //         if (this.core.apis.GroupApi.groupMemberCache.get(group)?.get(uid)?.memberSpecialTitle == new_tittle) {
+        //         let new_title: string = (parsedParts[3].content as { text: string }).text;
+        //         console.log(this.core.apis.GroupApi.groupMemberCache.get(group)?.get(uid)?.memberSpecialTitle, new_title)
+        //         if (this.core.apis.GroupApi.groupMemberCache.get(group)?.get(uid)?.memberSpecialTitle == new_title) {
         //             return;
         //         }
         //         await this.core.apis.GroupApi.refreshGroupMemberCachePartial(group, uid);
         //         //let json_data_1_url_search = new URL((parsedParts[3].content as { url: string }).url).searchParams;
         //         //let is_new: boolean = json_data_1_url_search.get('isnew') === '1';
 
-        //         //console.log(group, set_user_id, is_new, new_tittle);
+        //         //console.log(group, set_user_id, is_new, new_title);
         //         return new GroupMemberTitle(
         //             this.core,
         //             +group,
         //             +set_user_id,
-        //             new_tittle
+        //             new_title
         //         );
         //     }
         // }

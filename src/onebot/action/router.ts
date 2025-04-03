@@ -31,7 +31,7 @@ export const ActionName = {
     SetGroupCard: 'set_group_card',
     SetGroupName: 'set_group_name',
     SetGroupLeave: 'set_group_leave',
-    SetSpecialTittle: 'set_group_special_title',
+    SetSpecialTitle: 'set_group_special_title',
     SetFriendAddRequest: 'set_friend_add_request',
     SetGroupAddRequest: 'set_group_add_request',
     GetLoginInfo: 'get_login_info',
