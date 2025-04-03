@@ -8,14 +8,14 @@ class SetSpecialTitle extends PacketTransformer<typeof proto.OidbSvcTrpcTcpBase>
         super();
     }
 
-    build(groupCode: number, uid: string, tittle: string): OidbPacket {
+    build(groupCode: number, uid: string, title: string): OidbPacket {
         const oidb_0x8FC_2 = new NapProtoMsg(proto.OidbSvcTrpcTcp0X8FC_2).encode({
             groupUin: +groupCode,
             body: {
                 targetUid: uid,
-                specialTitle: tittle,
+                specialTitle: title,
                 expiredTime: -1,
-                uinName: tittle
+                uinName: title
             }
         });
         return OidbBase.build(0x8FC, 2, oidb_0x8FC_2, false, false);
