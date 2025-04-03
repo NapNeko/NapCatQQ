@@ -3,8 +3,8 @@ import Ajv, { ErrorObject, ValidateFunction } from 'ajv';
 import { NapCatCore } from '@/core';
 import { NapCatOneBot11Adapter, OB11Return } from '@/onebot';
 import { NetworkAdapterConfig } from '../config/config';
-
 import { TSchema } from '@sinclair/typebox';
+
 export class OB11Response {
     private static createResponse<T>(data: T, status: string, retcode: number, message: string = '', echo: unknown = null): OB11Return<T> {
         return {
