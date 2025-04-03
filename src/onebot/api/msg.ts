@@ -373,7 +373,8 @@ export class OneBotMsgApi {
                 try {
                     multiMsgs = await this.core.apis.PacketApi.pkt.operation.FetchForwardMsg(element.resId);
                 } catch (e) {
-                    this.core.context.logger.logError('Protocol FetchForwardMsg fallback failed!', e);
+                    this.core.context.logger.logError(`Protocol FetchForwardMsg fallback failed! 
+                    element = ${JSON.stringify(element)} , error=${e})`);
                     return null;
                 }
             }
@@ -1263,7 +1264,7 @@ export class OneBotMsgApi {
             );
         } else if (SysMessage.contentHead.type == 528 && SysMessage.contentHead.subType == 39 && SysMessage.body?.msgContent) {
             return await this.obContext.apis.UserApi.parseLikeEvent(SysMessage.body?.msgContent);
-        } 
+        }
         // else if (SysMessage.contentHead.type == 732 && SysMessage.contentHead.subType == 16 && SysMessage.body?.msgContent) {
         //     let data_wrap = PBString(2);
         //     let user_wrap = PBUint64(5);
