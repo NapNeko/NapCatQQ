@@ -43,7 +43,7 @@ export abstract class OneBotAction<PayloadType, ReturnDataType> {
 
     protected async check(payload: PayloadType): Promise<BaseCheckResult> {
         if (this.payloadSchema) {
-            this.validate = new Ajv({ allowUnionTypes: true, useDefaults: true }).compile(this.payloadSchema);
+            this.validate = new Ajv({ allowUnionTypes: true, useDefaults: true, coerceTypes: true }).compile(this.payloadSchema);
         }
         if (this.validate && !this.validate(payload)) {
             const errors = this.validate.errors as ErrorObject[];
