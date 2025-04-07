@@ -161,6 +161,13 @@ export class PacketOperationContext {
         return res.move.retCode;
     }
 
+    async RenameGroupFile(groupUin: number, fileUUID: string, currentParentDirectory: string, newName: string) {
+        const req = trans.RenameGroupFile.build(groupUin, fileUUID, currentParentDirectory, newName);
+        const resp = await this.context.client.sendOidbPacket(req, true);
+        const res = trans.RenameGroupFile.parse(resp);
+        return res.rename.retCode;
+    }
+
     async GetGroupFileUrl(groupUin: number, fileUUID: string) {
         const req = trans.DownloadGroupFile.build(groupUin, fileUUID);
         const resp = await this.context.client.sendOidbPacket(req, true);
