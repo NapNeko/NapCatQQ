@@ -6,26 +6,28 @@ import { Static, Type } from '@sinclair/typebox';
 const SchemaData = Type.Object({
     group_id: Type.Union([Type.Number(), Type.String()]),
     file_id: Type.String(),
-    current_parent_directory: Type.String(),
-    target_parent_directory: Type.String(),
 });
 
 type Payload = Static<typeof SchemaData>;
 
-interface MoveGroupFileResponse {
-    retcode: number;
+interface TransGroupFileResponse {
+    ok: boolean;
 }
 
-export class MoveGroupFile extends GetPacketStatusDepends<Payload, MoveGroupFileResponse> {
-    override actionName = ActionName.MoveGroupFile;
+export class TransGroupFile extends GetPacketStatusDepends<Payload, TransGroupFileResponse> {
+    override actionName = ActionName.TransGroupFile;
     override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
         const contextMsgFile = FileNapCatOneBotUUID.decode(payload.file_id) || FileNapCatOneBotUUID.decodeModelId(payload.file_id);
         if (contextMsgFile?.fileUUID) {
-            return {
-                retcode: await this.core.apis.PacketApi.pkt.operation.MoveGroupFile(+payload.group_id, contextMsgFile.fileUUID, payload.current_parent_directory, payload.target_parent_directory)
-            };
+            const result = await this.core.apis.GroupApi.transGroupFile(payload.group_id.toString(), contextMsgFile.fileUUID);
+            if (result.transGroupFileResult.result.retCode === 0) {
+                return {
+                    ok: true
+                };
+            }
+            throw new Error(result.transGroupFileResult.result.retMsg);
         }
         throw new Error('real fileUUID not found!');
     }

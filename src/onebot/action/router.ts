@@ -85,7 +85,6 @@ export const ActionName = {
     GoCQHTTP_GetGroupRootFiles: 'get_group_root_files',
     GoCQHTTP_GetGroupFilesByFolder: 'get_group_files_by_folder',
     GOCQHTTP_GetGroupFileUrl: 'get_group_file_url',
-    GOCQHTTP_MoveGroupFile: 'move_group_file',
     GOCQHTTP_UploadPrivateFile: 'upload_private_file',
     // GOCQHTTP_ReloadEventFilter : 'reload_event_filter',
     GoCQHTTP_DownloadFile: 'download_file',
@@ -130,6 +129,9 @@ export const ActionName = {
     GetUserStatus: 'nc_get_user_status',
     GetRkey: 'nc_get_rkey',
     GetGroupShutList: 'get_group_shut_list',
+
+    MoveGroupFile: 'move_group_file',
+    TransGroupFile: 'trans_group_file',
 
     GetGuildList: 'get_guild_list',
     GetGuildProfile: 'get_guild_service_profile',
