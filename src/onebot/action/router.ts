@@ -132,6 +132,7 @@ export const ActionName = {
 
     MoveGroupFile: 'move_group_file',
     TransGroupFile: 'trans_group_file',
+    RenameGroupFile: 'rename_group_file',
 
     GetGuildList: 'get_guild_list',
     GetGuildProfile: 'get_guild_service_profile',
