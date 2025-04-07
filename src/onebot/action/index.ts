@@ -110,6 +110,7 @@ import { GetPrivateFileUrl } from './file/GetPrivateFileUrl';
 import { GetUnidirectionalFriendList } from './extends/GetUnidirectionalFriendList';
 import SetGroupRemark from './extends/SetGroupRemark';
 import { MoveGroupFile } from './extends/MoveGroupFile';
+import { TransGroupFile } from './extends/TransGroupFile';
 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 
@@ -134,6 +135,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new SendGroupSign(obContext, core),
         new GetClientkey(obContext, core),
         new MoveGroupFile(obContext, core),
+        new TransGroupFile(obContext, core),
         // onebot11
         new SendLike(obContext, core),
         new GetMsg(obContext, core),

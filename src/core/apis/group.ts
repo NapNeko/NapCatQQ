@@ -218,6 +218,10 @@ export class NTQQGroupApi {
         return this.context.session.getRichMediaService().deleteGroupFolder(groupCode, folderId);
     }
 
+    async transGroupFile(groupCode: string, fileId: string) {
+        return this.context.session.getRichMediaService().transGroupFile(groupCode, fileId);
+    }
+
     async addGroupEssence(groupCode: string, msgId: string) {
         const MsgData = await this.context.session.getMsgService().getMsgsIncludeSelf({
             chatType: 2,
