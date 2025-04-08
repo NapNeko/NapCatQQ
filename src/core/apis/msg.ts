@@ -12,7 +12,7 @@ export class NTQQMsgApi {
         this.context = context;
         this.core = core;
     }
-    
+
     async clickInlineKeyboardButton(...params: Parameters<NodeIKernelMsgService['clickInlineKeyboardButton']>) {
         return this.context.session.getMsgService().clickInlineKeyboardButton(...params);
     }
