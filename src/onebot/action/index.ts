@@ -109,6 +109,9 @@ import { ClickInlineKeyboardButton } from './extends/ClickInlineKeyboardButton';
 import { GetPrivateFileUrl } from './file/GetPrivateFileUrl';
 import { GetUnidirectionalFriendList } from './extends/GetUnidirectionalFriendList';
 import SetGroupRemark from './extends/SetGroupRemark';
+import { MoveGroupFile } from './extends/MoveGroupFile';
+import { TransGroupFile } from './extends/TransGroupFile';
+import { RenameGroupFile } from './extends/RenameGroupFile';
 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 
@@ -132,6 +135,9 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new SetGroupSign(obContext, core),
         new SendGroupSign(obContext, core),
         new GetClientkey(obContext, core),
+        new MoveGroupFile(obContext, core),
+        new RenameGroupFile(obContext, core),
+        new TransGroupFile(obContext, core),
         // onebot11
         new SendLike(obContext, core),
         new GetMsg(obContext, core),
