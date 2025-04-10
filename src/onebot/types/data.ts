@@ -63,6 +63,7 @@ export interface OB11GroupMember {
 }
 
 export interface OB11Group {
+    group_all_shut: number; // 群全员禁言
     group_remark: string; // 群备注
     group_id: number; // 群ID
     group_name: string; // 群名称
