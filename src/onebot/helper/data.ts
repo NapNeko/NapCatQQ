@@ -93,6 +93,7 @@ export class OB11Construct {
 
     static group(group: Group): OB11Group {
         return {
+            group_all_shut: (+group.groupShutupExpireTime > 0 )? -1 : 0,
             group_remark: group.remarkName,
             group_id: +group.groupCode,
             group_name: group.groupName,
