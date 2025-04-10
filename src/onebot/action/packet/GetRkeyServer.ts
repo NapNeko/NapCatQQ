@@ -23,7 +23,7 @@ export class GetRkeyServer extends GetPacketStatusDepends<void, { private_rkey?:
         let privateRkeyItem = rkeys.filter(rkey => rkey.type === 10)[0];
         let groupRkeyItem = rkeys.filter(rkey => rkey.type === 20)[0];
 
-        this.expiryTime = Math.floor(Date.now() / 1000) + 3600; // 假设缓存有效期为 1 小时
+        this.expiryTime = Math.floor(Date.now() / 1000) + Math.min(+groupRkeyItem!.ttl.toString(),+privateRkeyItem!.ttl.toString());
 
         // 更新缓存
         this.rkeyCache = {
