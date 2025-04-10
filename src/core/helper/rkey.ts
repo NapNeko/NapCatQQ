@@ -6,7 +6,13 @@ interface ServerRkeyData {
     private_rkey: string;
     expired_time: number;
 }
-
+interface OneBotApiRet {
+    status: string,
+    retcode: number,
+    data: ServerRkeyData,
+    message: string,
+    wording: string,
+}
 interface UrlFailureInfo {
     count: number;
     lastTimestamp: number;
@@ -21,7 +27,7 @@ export class RkeyManager {
         expired_time: 0,
     };
     private urlFailures: Map<string, UrlFailureInfo> = new Map();
-    private readonly FAILURE_LIMIT: number = 8;
+    private readonly FAILURE_LIMIT: number = 4;
     private readonly ONE_DAY: number = 24 * 60 * 60 * 1000;
 
     constructor(serverUrl: string[], logger: LogWrapper) {
@@ -99,7 +105,11 @@ export class RkeyManager {
 
         for (const url of availableUrls) {
             try {
-                const temp = await RequestUtil.HttpGetJson<ServerRkeyData>(url, 'GET');
+                let temp = await RequestUtil.HttpGetJson<ServerRkeyData>(url, 'GET');
+                if ('retcode' in temp) {
+                    // 支持Onebot Ret风格
+                    temp = (temp as unknown as OneBotApiRet).data;
+                }
                 this.rkeyData = {
                     group_rkey: temp.group_rkey.slice(6),
                     private_rkey: temp.private_rkey.slice(6),

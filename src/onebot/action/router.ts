@@ -10,6 +10,8 @@ export interface InvalidCheckResult {
 }
 
 export const ActionName = {
+    GetRkeyEx: 'get_rkey',
+    GetRkeyServer: 'get_rkey_server',
     SetGroupRemark: 'set_group_remark',
     NapCat_GetPrivateFileUrl: 'get_private_file_url',
     ClickInlineKeyboardButton: 'click_inline_keyboard_button',

@@ -112,10 +112,14 @@ import SetGroupRemark from './extends/SetGroupRemark';
 import { MoveGroupFile } from './extends/MoveGroupFile';
 import { TransGroupFile } from './extends/TransGroupFile';
 import { RenameGroupFile } from './extends/RenameGroupFile';
+import { GetRkeyServer } from './packet/GetRkeyServer';
+import { GetRkeyEx } from './packet/GetRkeyEx';
 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 
     const actionHandlers = [
+        new GetRkeyEx(obContext, core),
+        new GetRkeyServer(obContext, core),
         new SetGroupRemark(obContext, core),
         new GetGroupInfoEx(obContext, core),
         new FetchEmojiLike(obContext, core),
