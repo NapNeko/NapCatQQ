@@ -37,8 +37,8 @@ _Modern protocol-side framework implemented based on NTQQ._
 | Docs | [![Github.IO](https://img.shields.io/badge/docs%20on-Github.IO-orange)](https://napneko.github.io/) | [![Cloudflare.Worker](https://img.shields.io/badge/docs%20on-Cloudflare.Worker-black)](https://doc.napneko.icu/) | [![Cloudflare.HKServer](https://img.shields.io/badge/docs%20on-Cloudflare.HKServer-informational)](https://napcat.napneko.icu/) |
 |:-:|:-:|:-:|:-:|
 
-| Docs | [![Cloudflare.Pages](https://img.shields.io/badge/docs%20on-Cloudflare.Pages-blue)](https://napneko.pages.dev/) | [![NapCat.Wiki](https://img.shields.io/badge/docs%20on-NapCat.Wiki-red)](https://www.napcat.wiki) |
-|:-:|:-:|:-:|
+| Docs | [![Cloudflare.Pages](https://img.shields.io/badge/docs%20on-Cloudflare.Pages-blue)](https://napneko.pages.dev/) | [![Server.Other](https://img.shields.io/badge/docs%20on-Server.Other-green)](https://napcat.cyou/) | [![NapCat.Wiki](https://img.shields.io/badge/docs%20on-NapCat.Wiki-red)](https://www.napcat.wiki) |
+|:-:|:-:|:-:|:-:|
 
 | Contact | [![QQ Group#1](https://img.shields.io/badge/QQ%20Group%231-Join-blue)](https://qm.qq.com/q/I6LU87a0Yq) | [![QQ Group#2](https://img.shields.io/badge/QQ%20Group%232-Join-blue)](https://qm.qq.com/q/HaRcfrHpUk) | [![Telegram](https://img.shields.io/badge/Telegram-MelodicMoonlight-blue)](https://t.me/MelodicMoonlight) |
 |:-:|:-:|:-:|:-:|
