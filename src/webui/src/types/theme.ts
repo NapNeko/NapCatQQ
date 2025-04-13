@@ -2,8 +2,6 @@ import { z } from 'zod';
 
 export const themeType = z.object(
     {
-        // dark: Type.Record(Type.String(), Type.String()),
-        // light: Type.Record(Type.String(), Type.String()),
         dark: z.record(z.string(), z.string()),
         light: z.record(z.string(), z.string()),
     }
