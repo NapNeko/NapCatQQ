@@ -34,7 +34,7 @@ export default class GetFriendMsgHistory extends OneBotAction<Payload, Response>
         const hasMessageSeq = !payload.message_seq ? !!payload.message_seq : !(payload.message_seq?.toString() === '' || payload.message_seq?.toString() === '0');
         const startMsgId = hasMessageSeq ? (MessageUnique.getMsgIdAndPeerByShortId(+payload.message_seq!)?.MsgId ?? payload.message_seq!.toString()) : '0';
         const msgList = hasMessageSeq ?
-            (await this.core.apis.MsgApi.getMsgHistory(peer, startMsgId, +payload.count)).msgList : (await this.core.apis.MsgApi.getAioFirstViewLatestMsgs(peer, +payload.count)).msgList;
+            (await this.core.apis.MsgApi.getMsgHistory(peer, startMsgId, +payload.count, isReverseOrder)).msgList : (await this.core.apis.MsgApi.getAioFirstViewLatestMsgs(peer, +payload.count)).msgList;
         if (msgList.length === 0) throw new Error(`消息${payload.message_seq}不存在`);
         //翻转消息
         if (isReverseOrder) msgList.reverse();
