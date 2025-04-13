@@ -1,9 +1,8 @@
 import { ActionName, BaseCheckResult } from './router';
-import Ajv, { ErrorObject, ValidateFunction } from 'ajv';
 import { NapCatCore } from '@/core';
 import { NapCatOneBot11Adapter, OB11Return } from '@/onebot';
 import { NetworkAdapterConfig } from '../config/config';
-import { TSchema } from '@sinclair/typebox';
+import { z } from 'zod';
 
 export class OB11Response {
     private static createResponse<T>(data: T, status: string, retcode: number, message: string = '', echo: unknown = null): OB11Return<T> {
@@ -33,8 +32,7 @@ export class OB11Response {
 export abstract class OneBotAction<PayloadType, ReturnDataType> {
     actionName: typeof ActionName[keyof typeof ActionName] = ActionName.Unknown;
     core: NapCatCore;
-    private validate?: ValidateFunction<unknown> = undefined;
-    payloadSchema?: TSchema = undefined;
+    payloadSchema?: z.ZodType<unknown> = undefined;
     obContext: NapCatOneBot11Adapter;
 
     constructor(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
@@ -42,19 +40,30 @@ export abstract class OneBotAction<PayloadType, ReturnDataType> {
         this.core = core;
     }
 
-    protected async check(payload: PayloadType): Promise<BaseCheckResult> {
-        if (this.payloadSchema) {
-            this.validate = new Ajv({ allowUnionTypes: true, useDefaults: true, coerceTypes: true }).compile(this.payloadSchema);
+    protected async check(payload: unknown): Promise<BaseCheckResult> {
+        if (!this.payloadSchema) {
+            return { valid: true };
         }
-        if (this.validate && !this.validate(payload)) {
-            const errors = this.validate.errors as ErrorObject[];
-            const errorMessages = errors.map(e => `Key: ${e.instancePath.split('/').slice(1).join('.')}, Message: ${e.message}`);
+
+        try {
+            // 使用 zod 验证并转换数据
+            this.payloadSchema.parse(payload);
+            return { valid: true };
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                const errorMessages = error.errors.map(e =>
+                    `Key: ${e.path.join('.')}, Message: ${e.message}`
+                );
+                return {
+                    valid: false,
+                    message: errorMessages.join('\n') || '未知错误',
+                };
+            }
             return {
                 valid: false,
-                message: errorMessages.join('\n') ?? '未知错误',
+                message: '验证过程中发生未知错误'
             };
         }
-        return { valid: true };
     }
 
     public async handle(payload: PayloadType, adaptername: string, config: NetworkAdapterConfig): Promise<OB11Return<ReturnDataType | null>> {

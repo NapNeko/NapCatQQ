@@ -1,13 +1,13 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { Static, Type } from '@sinclair/typebox';
+import { z } from 'zod';
 
-const SchemaData = Type.Object({
-    group_id: Type.String(),
-    remark: Type.String(),
+const SchemaData = z.object({
+    group_id: z.string(),
+    remark: z.string(),
 });
 
-type Payload = Static<typeof SchemaData>;
+type Payload = z.infer<typeof SchemaData>;
 
 export default class SetGroupRemark extends OneBotAction<Payload, null> {
     override actionName = ActionName.SetGroupRemark;

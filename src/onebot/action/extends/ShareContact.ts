@@ -1,15 +1,15 @@
 import { GeneralCallResult } from '@/core';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { Static, Type } from '@sinclair/typebox';
+import { z } from 'zod';
 
-const SchemaData = Type.Object({
-    user_id: Type.Optional(Type.Union([Type.Number(), Type.String()])),
-    group_id: Type.Optional(Type.Union([Type.Number(), Type.String()])),
-    phoneNumber: Type.String({ default: '' }),
+const SchemaData = z.object({
+    user_id: z.union([z.number(), z.string()]).optional(),
+    group_id: z.union([z.number(), z.string()]).optional(),
+    phoneNumber: z.string().default(''),
 });
 
-type Payload = Static<typeof SchemaData>;
+type Payload = z.infer<typeof SchemaData>;
 
 export class SharePeer extends OneBotAction<Payload, GeneralCallResult & {
     arkMsg?: string;
@@ -28,11 +28,11 @@ export class SharePeer extends OneBotAction<Payload, GeneralCallResult & {
     }
 }
 
-const SchemaDataGroupEx = Type.Object({
-    group_id: Type.Union([Type.Number(), Type.String()]),
+const SchemaDataGroupEx = z.object({
+    group_id: z.union([z.number(), z.string()]),
 });
 
-type PayloadGroupEx = Static<typeof SchemaDataGroupEx>;
+type PayloadGroupEx = z.infer<typeof SchemaDataGroupEx>;
 
 export class ShareGroupEx extends OneBotAction<PayloadGroupEx, string> {
     override actionName = ActionName.ShareGroupEx;

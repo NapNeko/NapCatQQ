@@ -1,12 +1,12 @@
 import { ActionName } from '@/onebot/action/router';
 import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
-import { Static, Type } from '@sinclair/typebox';
+import { z } from 'zod';
 
-const SchemaData = Type.Object({
-    user_id: Type.Union([Type.Number(), Type.String()])
+const SchemaData = z.object({
+    user_id: z.union([z.number(), z.string()])
 });
 
-type Payload = Static<typeof SchemaData>;
+type Payload = z.infer<typeof SchemaData>;
 
 export class FriendPoke extends GetPacketStatusDepends<Payload, void> {
     override actionName = ActionName.FriendPoke;

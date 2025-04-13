@@ -1,15 +1,15 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { Static, Type } from '@sinclair/typebox';
+import { z } from 'zod';
 
-const SchemaData = Type.Object({
-    friend_id: Type.Optional(Type.Union([Type.String(), Type.Number()])),
-    user_id: Type.Optional(Type.Union([Type.String(), Type.Number()])),
-    temp_block: Type.Optional(Type.Boolean()),
-    temp_both_del: Type.Optional(Type.Boolean()),
+const SchemaData = z.object({
+    friend_id: z.union([z.string(), z.number()]).optional(),
+    user_id: z.union([z.string(), z.number()]).optional(),
+    temp_block: z.boolean().optional(),
+    temp_both_del: z.boolean().optional(),
 });
 
-type Payload = Static<typeof SchemaData>;
+type Payload = z.infer<typeof SchemaData>;
 
 export class GoCQHTTPDeleteFriend extends OneBotAction<Payload, unknown> {
     override actionName = ActionName.GoCQHTTP_DeleteFriend;

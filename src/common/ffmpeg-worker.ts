@@ -128,7 +128,7 @@ class FFmpegService {
         const [fileInfo, durationInfo] = await Promise.all([
             // 任务1: 获取文件信息和提取缩略图
             (async () => {
-                sendLog(`开始任务1: 获取文件信息和提取缩略图`);
+                sendLog('开始任务1: 获取文件信息和提取缩略图');
 
                 // 获取文件信息 (并行)
                 const fileInfoStartTime = Date.now();
@@ -147,7 +147,7 @@ class FFmpegService {
 
                 // 直接实现缩略图提取 (不调用extractThumbnail方法)
                 const thumbStartTime = Date.now();
-                sendLog(`开始提取缩略图`);
+                sendLog('开始提取缩略图');
 
                 const ffmpegInstance = await withTimeout(
                     FFmpeg.create({ core: '@ffmpeg.wasm/core-mt' }),
@@ -215,7 +215,7 @@ class FFmpegService {
             // 任务2: 获取视频时长
             (async () => {
                 const task2StartTime = Date.now();
-                sendLog(`开始任务2: 获取视频时长`);
+                sendLog('开始任务2: 获取视频时长');
 
                 // 创建FFmpeg实例
                 const ffmpegCreateStartTime = Date.now();
@@ -291,16 +291,16 @@ interface FFmpegTask {
 }
 export default async function handleFFmpegTask({ method, args }: FFmpegTask): Promise<any> {
     switch (method) {
-        case 'extractThumbnail':
-            return await FFmpegService.extractThumbnail(...args as [string, string]);
-        case 'convertFile':
-            return await FFmpegService.convertFile(...args as [string, string, string]);
-        case 'convert':
-            return await FFmpegService.convert(...args as [string, string]);
-        case 'getVideoInfo':
-            return await FFmpegService.getVideoInfo(...args as [string, string]);
-        default:
-            throw new Error(`Unknown method: ${method}`);
+    case 'extractThumbnail':
+        return await FFmpegService.extractThumbnail(...args as [string, string]);
+    case 'convertFile':
+        return await FFmpegService.convertFile(...args as [string, string, string]);
+    case 'convert':
+        return await FFmpegService.convert(...args as [string, string]);
+    case 'getVideoInfo':
+        return await FFmpegService.getVideoInfo(...args as [string, string]);
+    default:
+        throw new Error(`Unknown method: ${method}`);
     }
 }
 recvTask<FFmpegTask>(async ({ method, args }: FFmpegTask) => {
