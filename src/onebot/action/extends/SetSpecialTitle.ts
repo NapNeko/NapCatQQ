@@ -5,7 +5,7 @@ import { z } from 'zod';
 const SchemaData = z.object({
     group_id: z.union([z.number(), z.string()]),
     user_id: z.union([z.number(), z.string()]),
-    special_title: z.string({ default: '' }),
+    special_title: z.string().default(''),
 });
 
 type Payload = z.infer<typeof SchemaData>;
