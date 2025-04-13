@@ -1,15 +1,15 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { NTGroupMemberRole } from '@/core/types';
 import { ActionName } from '@/onebot/action/router';
-import { Static, Type } from '@sinclair/typebox';
+import { z } from 'zod';
 
-const SchemaData = Type.Object({
-    group_id: Type.Union([Type.Number(), Type.String()]),
-    user_id: Type.Union([Type.Number(), Type.String()]),
-    enable: Type.Optional(Type.Union([Type.Boolean(), Type.String()])),
+const SchemaData = z.object({
+    group_id: z.union([z.number(), z.string()]),
+    user_id: z.union([z.number(), z.string()]),
+    enable: z.boolean().default(false),
 });
 
-type Payload = Static<typeof SchemaData>;
+type Payload = z.infer<typeof SchemaData>;
 
 export default class SetGroupAdmin extends OneBotAction<Payload, null> {
     override actionName = ActionName.SetGroupAdmin;

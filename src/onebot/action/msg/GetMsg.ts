@@ -3,16 +3,16 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { MessageUnique } from '@/common/message-unique';
 import { RawMessage } from '@/core';
-import { Static, Type } from '@sinclair/typebox';
+import { z } from 'zod';
 import { NetworkAdapterConfig } from '@/onebot/config/config';
 
 export type ReturnDataType = OB11Message
 
-const SchemaData = Type.Object({
-    message_id: Type.Union([Type.Number(), Type.String()]),
+const SchemaData = z.object({
+    message_id: z.union([z.number(), z.string()]),
 });
 
-type Payload = Static<typeof SchemaData>;
+type Payload = z.infer<typeof SchemaData>;
 
 class GetMsg extends OneBotAction<Payload, OB11Message> {
     override actionName = ActionName.GetMsg;

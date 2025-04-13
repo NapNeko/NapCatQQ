@@ -4,20 +4,20 @@ import fs from 'fs';
 import { join as joinPath } from 'node:path';
 import { calculateFileMD5, uriToLocalFile } from '@/common/file';
 import { randomUUID } from 'crypto';
-import { Static, Type } from '@sinclair/typebox';
+import { z } from 'zod';
 
 interface FileResponse {
     file: string;
 }
 
-const SchemaData = Type.Object({
-    url: Type.Optional(Type.String()),
-    base64: Type.Optional(Type.String()),
-    name: Type.Optional(Type.String()),
-    headers: Type.Optional(Type.Union([Type.String(), Type.Array(Type.String())])),
+const SchemaData = z.object({
+    url: z.string().optional(),
+    base64: z.string().optional(),
+    name: z.string().optional(),
+    headers: z.union([z.string(), z.array(z.string())]).optional(),
 });
 
-type Payload = Static<typeof SchemaData>;
+type Payload = z.infer<typeof SchemaData>;
 
 export default class GoCQHTTPDownloadFile extends OneBotAction<Payload, FileResponse> {
     override actionName = ActionName.GoCQHTTP_DownloadFile;

@@ -2,38 +2,38 @@ import { ActionName } from '@/onebot/action/router';
 import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
 import { MiniAppInfo, MiniAppInfoHelper } from '@/core/packet/utils/helper/miniAppHelper';
 import { MiniAppData, MiniAppRawData, MiniAppReqCustomParams, MiniAppReqParams } from '@/core/packet/entities/miniApp';
-import { Static, Type } from '@sinclair/typebox';
+import { z } from 'zod';
 
-const SchemaData = Type.Union([
-    Type.Object({
-        type: Type.Union([Type.Literal('bili'), Type.Literal('weibo')]),
-        title: Type.String(),
-        desc: Type.String(),
-        picUrl: Type.String(),
-        jumpUrl: Type.String(),
-        webUrl: Type.Optional(Type.String()),
-        rawArkData: Type.Optional(Type.Union([Type.String()]))
+const SchemaData = z.union([
+    z.object({
+        type: z.union([z.literal('bili'), z.literal('weibo')]),
+        title: z.string(),
+        desc: z.string(),
+        picUrl: z.string(),
+        jumpUrl: z.string(),
+        webUrl: z.string().optional(),
+        rawArkData: z.string().optional()
     }),
-    Type.Object({
-        title: Type.String(),
-        desc: Type.String(),
-        picUrl: Type.String(),
-        jumpUrl: Type.String(),
-        iconUrl: Type.String(),
-        webUrl: Type.Optional(Type.String()),
-        appId: Type.String(),
-        scene: Type.Union([Type.Number(), Type.String()]),
-        templateType: Type.Union([Type.Number(), Type.String()]),
-        businessType: Type.Union([Type.Number(), Type.String()]),
-        verType: Type.Union([Type.Number(), Type.String()]),
-        shareType: Type.Union([Type.Number(), Type.String()]),
-        versionId: Type.String(),
-        sdkId: Type.String(),
-        withShareTicket: Type.Union([Type.Number(), Type.String()]),
-        rawArkData: Type.Optional(Type.Union([Type.String()]))
+    z.object({
+        title: z.string(),
+        desc: z.string(),
+        picUrl: z.string(),
+        jumpUrl: z.string(),
+        iconUrl: z.string(),
+        webUrl: z.string().optional(),
+        appId: z.string(),
+        scene: z.union([z.number(), z.string()]),
+        templateType: z.union([z.number(), z.string()]),
+        businessType: z.union([z.number(), z.string()]),
+        verType: z.union([z.number(), z.string()]),
+        shareType: z.union([z.number(), z.string()]),
+        versionId: z.string(),
+        sdkId: z.string(),
+        withShareTicket: z.union([z.number(), z.string()]),
+        rawArkData: z.string().optional()
     })
 ]);
-type Payload = Static<typeof SchemaData>;
+type Payload = z.infer<typeof SchemaData>;
 
 export class GetMiniAppArk extends GetPacketStatusDepends<Payload, {
     data: MiniAppData | MiniAppRawData

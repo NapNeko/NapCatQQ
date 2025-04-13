@@ -1,33 +1,27 @@
 import { webUiPathWrapper } from '@/webui';
-import { Type, Static } from '@sinclair/typebox';
-import Ajv from 'ajv';
 import fs, { constants } from 'node:fs/promises';
-
 import { resolve } from 'node:path';
-
 import { deepMerge } from '../utils/object';
 import { themeType } from '../types/theme';
-
-// 限制尝试端口的次数，避免死循环
-
+import { z } from 'zod';
 // 定义配置的类型
-const WebUiConfigSchema = Type.Object({
-    host: Type.String({ default: '0.0.0.0' }),
-    port: Type.Number({ default: 6099 }),
-    token: Type.String({ default: 'napcat' }),
-    loginRate: Type.Number({ default: 10 }),
-    autoLoginAccount: Type.String({ default: '' }),
+const WebUiConfigSchema = z.object({
+    host: z.string().default('0.0.0.0'),
+    port: z.number().default(6099),
+    token: z.string().default('napcat'),
+    loginRate: z.number().default(10),
+    autoLoginAccount: z.string().default(''),
     theme: themeType,
 });
 
-export type WebUiConfigType = Static<typeof WebUiConfigSchema>;
+export type WebUiConfigType = z.infer<typeof WebUiConfigSchema>;
 
 // 读取当前目录下名为 webui.json 的配置文件，如果不存在则创建初始化配置文件
 export class WebUiConfigWrapper {
     WebUiConfigData: WebUiConfigType | undefined = undefined;
 
     private validateAndApplyDefaults(config: Partial<WebUiConfigType>): WebUiConfigType {
-        new Ajv({ coerceTypes: true, useDefaults: true }).compile(WebUiConfigSchema)(config);
+        config = WebUiConfigSchema.parse(config);
         return config as WebUiConfigType;
     }
 

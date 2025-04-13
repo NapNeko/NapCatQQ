@@ -2,15 +2,15 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { FileNapCatOneBotUUID } from '@/common/file-uuid';
-import { Static, Type } from '@sinclair/typebox';
+import { z } from 'zod';
 import { NTQQGroupApi } from '@/core/apis';
 
-const SchemaData = Type.Object({
-    group_id: Type.Union([Type.Number(), Type.String()]),
-    file_id: Type.String(),
+const SchemaData = z.object({
+    group_id: z.union([z.number(), z.string()]),
+    file_id: z.string(),
 });
 
-type Payload = Static<typeof SchemaData>;
+type Payload = z.infer<typeof SchemaData>;
 
 export class DeleteGroupFile extends OneBotAction<Payload, Awaited<ReturnType<NTQQGroupApi['delGroupFile']>>> {
     override actionName = ActionName.GOCQHTTP_DeleteGroupFile;

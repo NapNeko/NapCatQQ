@@ -36,7 +36,7 @@ export class GetUnidirectionalFriendList extends OneBotAction<void, Friend[]> {
             uint64_uin: self_id,
             uint64_top: 0,
             uint32_req_num: 99,
-            bytes_cookies: ""
+            bytes_cookies: ''
         };
         const packed_data = await this.pack_data(JSON.stringify(req_json));
         const data = Buffer.from(packed_data).toString('hex');

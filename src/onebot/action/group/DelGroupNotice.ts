@@ -1,13 +1,13 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { Static, Type } from '@sinclair/typebox';
+import { z } from 'zod';
 
-const SchemaData = Type.Object({
-    group_id: Type.Union([Type.Number(), Type.String()]),
-    notice_id: Type.String()
+const SchemaData = z.object({
+    group_id: z.union([z.number(), z.string()]),
+    notice_id: z.string()
 });
 
-type Payload = Static<typeof SchemaData>;
+type Payload = z.infer<typeof SchemaData>;
 
 export class DelGroupNotice extends OneBotAction<Payload, void> {
     override actionName = ActionName.DelGroupNotice;
