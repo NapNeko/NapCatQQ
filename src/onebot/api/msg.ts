@@ -1000,16 +1000,16 @@ export class OneBotMsgApi {
         const calculateTotalSize = async (elements: SendMessageElement[]): Promise<number> => {
             const sizePromises = elements.map(async element => {
                 switch (element.elementType) {
-                    case ElementType.PTT:
-                        return (await fsPromise.stat(element.pttElement.filePath)).size;
-                    case ElementType.FILE:
-                        return (await fsPromise.stat(element.fileElement.filePath)).size;
-                    case ElementType.VIDEO:
-                        return (await fsPromise.stat(element.videoElement.filePath)).size;
-                    case ElementType.PIC:
-                        return (await fsPromise.stat(element.picElement.sourcePath)).size;
-                    default:
-                        return 0;
+                case ElementType.PTT:
+                    return (await fsPromise.stat(element.pttElement.filePath)).size;
+                case ElementType.FILE:
+                    return (await fsPromise.stat(element.fileElement.filePath)).size;
+                case ElementType.VIDEO:
+                    return (await fsPromise.stat(element.videoElement.filePath)).size;
+                case ElementType.PIC:
+                    return (await fsPromise.stat(element.picElement.sourcePath)).size;
+                default:
+                    return 0;
                 }
             });
             const sizes = await Promise.all(sizePromises);
@@ -1099,14 +1099,14 @@ export class OneBotMsgApi {
 
     groupChangDecreseType2String(type: number): GroupDecreaseSubType {
         switch (type) {
-            case 130:
-                return 'leave';
-            case 131:
-                return 'kick';
-            case 3:
-                return 'kick_me';
-            default:
-                return 'kick';
+        case 130:
+            return 'leave';
+        case 131:
+            return 'kick';
+        case 3:
+            return 'kick_me';
+        default:
+            return 'kick';
         }
     }
 

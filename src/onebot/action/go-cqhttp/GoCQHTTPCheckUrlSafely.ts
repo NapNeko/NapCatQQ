@@ -1,12 +1,12 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { Static, Type } from '@sinclair/typebox';
+import { z } from 'zod';
 
-const SchemaData = Type.Object({
-    url: Type.String(),
+const SchemaData = z.object({
+    url: z.string(),
 });
 
-type Payload = Static<typeof SchemaData>;
+type Payload = z.infer<typeof SchemaData>;
 
 export class GoCQHTTPCheckUrlSafely extends OneBotAction<Payload, { level: number }> {
     override actionName = ActionName.GoCQHTTP_CheckUrlSafely;

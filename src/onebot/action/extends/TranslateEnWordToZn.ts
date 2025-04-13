@@ -1,12 +1,12 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { Static, Type } from '@sinclair/typebox';
+import { z } from 'zod';
 
-const SchemaData = Type.Object({
-    words: Type.Array(Type.String()),
+const SchemaData = z.object({
+    words: Type.Array(z.string()),
 });
 
-type Payload = Static<typeof SchemaData>;
+type Payload = z.infer<typeof SchemaData>;
 
 export class TranslateEnWordToZn extends OneBotAction<Payload, Array<unknown> | null> {
     override actionName = ActionName.TranslateEnWordToZn;

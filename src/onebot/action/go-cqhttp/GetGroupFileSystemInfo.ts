@@ -1,12 +1,12 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { Static, Type } from '@sinclair/typebox';
+import { z } from 'zod';
 
-const SchemaData = Type.Object({
-    group_id: Type.Union([Type.Number(), Type.String()])
+const SchemaData = z.object({
+    group_id: z.union([z.number(), z.string()])
 });
 
-type Payload = Static<typeof SchemaData>;
+type Payload = z.infer<typeof SchemaData>;
 
 export class GetGroupFileSystemInfo extends OneBotAction<Payload, {
     file_count: number,

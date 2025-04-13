@@ -1,14 +1,14 @@
 import { ActionName } from '@/onebot/action/router';
 import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
 import { AIVoiceChatType } from '@/core/packet/entities/aiChat';
-import { Type, Static } from '@sinclair/typebox';
+import { z } from 'zod';
 
-const SchemaData = Type.Object({
-    group_id: Type.Union([Type.Number(), Type.String()]),
-    chat_type: Type.Union([Type.Union([Type.Number(), Type.String()])], { default: 1 }),
+const SchemaData = z.object({
+    group_id: z.string(),
+    chat_type: z.number().default(1),
 });
 
-type Payload = Static<typeof SchemaData>;
+type Payload = z.infer<typeof SchemaData>;
 
 interface GetAiCharactersResponse {
     type: string;

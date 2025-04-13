@@ -141,7 +141,7 @@ async function handleLogin(
             handleLoginInner(context, logger, loginService, quickLoginUin, historyLoginList).then().catch(e => logger.logError(e));
             loginListener.onLoginConnected = () => { };
         });
-    }
+    };
     loginListener.onQRCodeGetPicture = ({ pngBase64QrcodeData, qrcodeUrl }) => {
         WebUiDataRuntime.setQQLoginQrcodeURL(qrcodeUrl);
 
@@ -220,7 +220,7 @@ async function handleLoginInner(context: { isLogined: boolean }, logger: LogWrap
             logger.log(`可用于快速登录的 QQ：\n${historyLoginList
                 .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
                 .join('\n')
-                }`);
+            }`);
         }
         loginService.getQRCodePicture();
         try {

@@ -1,12 +1,12 @@
 import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
 import { ActionName } from '@/onebot/action/router';
-import { Static, Type } from '@sinclair/typebox';
+import { z } from 'zod';
 
-const SchemaData = Type.Object({
-    group_id: Type.Union([Type.Number(), Type.String()]),
+const SchemaData = z.object({
+    group_id: z.union([z.number(), z.string()]),
 });
 
-type Payload = Static<typeof SchemaData>;
+type Payload = z.infer<typeof SchemaData>;
 
 class SetGroupSignBase extends GetPacketStatusDepends<Payload, void> {
     override payloadSchema = SchemaData;

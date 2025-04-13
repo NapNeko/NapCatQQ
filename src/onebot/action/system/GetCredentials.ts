@@ -1,17 +1,17 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { Static, Type } from '@sinclair/typebox';
+import { z } from 'zod';
 
 interface Response {
     cookies: string,
     token: number
 }
 
-const SchemaData = Type.Object({
-    domain: Type.String()
+const SchemaData = z.object({
+    domain: z.string()
 });
 
-type Payload = Static<typeof SchemaData>;
+type Payload = z.infer<typeof SchemaData>;
 
 
 export class GetCredentials extends OneBotAction<Payload, Response> {

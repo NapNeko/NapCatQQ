@@ -1,13 +1,13 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { Type, Static } from '@sinclair/typebox';
+import { z } from 'zod';
 
-const SchemaData = Type.Object({
-    rawData: Type.String(),
-    brief: Type.String(),
+const SchemaData = z.object({
+    rawData: z.string(),
+    brief: z.string(),
 });
 
-type Payload = Static<typeof SchemaData>;
+type Payload = z.infer<typeof SchemaData>;
 
 export class CreateCollection extends OneBotAction<Payload, unknown> {
     override actionName = ActionName.CreateCollection;

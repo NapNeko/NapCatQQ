@@ -1,15 +1,15 @@
 import { ActionName } from '@/onebot/action/router';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
-import { Static, Type } from '@sinclair/typebox';
+import { z } from 'zod';
 import { NTQQGroupApi } from '@/core/apis';
 
-const SchemaData = Type.Object({
-    group_id: Type.Union([Type.Number(), Type.String()]),
-    folder_id: Type.Optional(Type.String()),
-    folder: Type.Optional(Type.String()),
+const SchemaData = z.object({
+    group_id: z.union([z.number(), z.string()]),
+    folder_id: z.string().optional(),
+    folder: z.string().optional(),
 });
 
-type Payload = Static<typeof SchemaData>;
+type Payload = z.infer<typeof SchemaData>;
 
 export class DeleteGroupFileFolder extends OneBotAction<Payload, Awaited<ReturnType<NTQQGroupApi['delGroupFileFolder']>>['groupFileCommonResult']> {
     override actionName = ActionName.GoCQHTTP_DeleteGroupFileFolder;
