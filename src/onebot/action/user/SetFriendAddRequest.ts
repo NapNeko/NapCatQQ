@@ -1,14 +1,14 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { Static, Type } from '@sinclair/typebox';
+import { z } from 'zod';
 
-const SchemaData = Type.Object({
-    flag: Type.Union([Type.String(), Type.Number()]),
-    approve: Type.Optional(Type.Union([Type.String(), Type.Boolean()])),
-    remark: Type.Optional(Type.String())
+const SchemaData = z.object({
+    flag: z.union([z.string(), z.number()]),
+    approve: z.union([z.string(), z.boolean()]).default(true),
+    remark: z.union([z.string(), z.null()]).nullable().optional()
 });
 
-type Payload = Static<typeof SchemaData>;
+type Payload = z.infer<typeof SchemaData>;
 
 export default class SetFriendAddRequest extends OneBotAction<Payload, null> {
     override actionName = ActionName.SetFriendAddRequest;

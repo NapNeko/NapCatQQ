@@ -9,7 +9,7 @@ export async function runTask<T, R>(workerScript: string, taskData: T): Promise<
                     console.error('Worker Log--->:', (result as { log: string }).log);
                 }
                 if ((result as any)?.error) {
-                    reject(new Error("Worker error: " + (result as { error: string }).error));
+                    reject(new Error('Worker error: ' + (result as { error: string }).error));
                 }
                 resolve(result);
             });

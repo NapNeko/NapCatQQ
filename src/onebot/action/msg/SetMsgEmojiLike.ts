@@ -1,15 +1,15 @@
 import { ActionName } from '@/onebot/action/router';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { MessageUnique } from '@/common/message-unique';
-import { Static, Type } from '@sinclair/typebox';
+import { z } from 'zod';
 
-const SchemaData = Type.Object({
-    message_id: Type.Union([Type.Number(), Type.String()]),
-    emoji_id: Type.Union([Type.Number(), Type.String()]),
-    set: Type.Optional(Type.Union([Type.Boolean(), Type.String()]))
+const SchemaData = z.object({
+    message_id: z.union([z.number(), z.string()]),
+    emoji_id: z.union([z.number(), z.string()]),
+    set: z.boolean().optional(),
 });
 
-type Payload = Static<typeof SchemaData>;
+type Payload = z.infer<typeof SchemaData>;
 
 export class SetMsgEmojiLike extends OneBotAction<Payload, unknown> {
     override actionName = ActionName.SetMsgEmojiLike;

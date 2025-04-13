@@ -2,16 +2,16 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { OB11Construct } from '@/onebot/helper/data';
-import { Static, Type } from '@sinclair/typebox';
+import { z } from 'zod';
 
-const SchemaData = Type.Object({
-    group_id: Type.Union([Type.Number(), Type.String()]),
-    folder_id: Type.Optional(Type.String()),
-    folder: Type.Optional(Type.String()),
-    file_count: Type.Union([Type.Number(), Type.String()], { default: 50 }),
+const SchemaData = z.object({
+    group_id: z.union([z.number(), z.string()]),
+    folder_id: z.string().optional(),
+    folder: z.string().optional(),
+    file_count: z.union([z.number(), z.string()]).default(50),
 });
 
-type Payload = Static<typeof SchemaData>;
+type Payload = z.infer<typeof SchemaData>;
 
 export class GetGroupFilesByFolder extends OneBotAction<Payload, {
     files: ReturnType<typeof OB11Construct.file>[],

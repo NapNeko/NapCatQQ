@@ -2,15 +2,15 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ChatType, Peer } from '@/core/types';
 import { ActionName } from '@/onebot/action/router';
 import { MessageUnique } from '@/common/message-unique';
-import { Static, Type } from '@sinclair/typebox';
+import { z } from 'zod';
 
-const SchemaData = Type.Object({
-    message_id: Type.Union([Type.Number(), Type.String()]),
-    group_id: Type.Optional(Type.Union([Type.Number(), Type.String()])),
-    user_id: Type.Optional(Type.Union([Type.Number(), Type.String()])),
+const SchemaData = z.object({
+    message_id: z.union([z.number(), z.string()]),
+    group_id: z.string().optional(),
+    user_id: z.string().optional(),
 });
 
-type Payload = Static<typeof SchemaData>;
+type Payload = z.infer<typeof SchemaData>;
 
 class ForwardSingleMsg extends OneBotAction<Payload, null> {
     protected async getTargetPeer(payload: Payload): Promise<Peer> {

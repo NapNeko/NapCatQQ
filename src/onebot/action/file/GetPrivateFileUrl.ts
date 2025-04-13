@@ -1,13 +1,13 @@
 import { ActionName } from '@/onebot/action/router';
 import { FileNapCatOneBotUUID } from '@/common/file-uuid';
 import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
-import { Static, Type } from '@sinclair/typebox';
+import { z } from 'zod';
 
-const SchemaData = Type.Object({
-    file_id: Type.String(),
+const SchemaData = z.object({
+    file_id: z.string(),
 });
 
-type Payload = Static<typeof SchemaData>;
+type Payload = z.infer<typeof SchemaData>;
 
 interface GetPrivateFileUrlResponse {
     url?: string;

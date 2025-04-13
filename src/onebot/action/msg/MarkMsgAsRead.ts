@@ -2,15 +2,15 @@ import { ChatType, Peer } from '@/core/types';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { MessageUnique } from '@/common/message-unique';
-import { Static, Type } from '@sinclair/typebox';
+import { z } from 'zod';
 
-const SchemaData = Type.Object({
-    user_id: Type.Optional(Type.Union([Type.String(), Type.Number()])),
-    group_id: Type.Optional(Type.Union([Type.String(), Type.Number()])),
-    message_id: Type.Optional(Type.Union([Type.String(), Type.Number()])),
+const SchemaData = z.object({
+    user_id: z.union([z.string(), z.number()]).optional(),
+    group_id: z.union([z.string(), z.number()]).optional(),
+    message_id: z.union([z.string(), z.number()]).optional(),
 });
 
-type PlayloadType = Static<typeof SchemaData>;
+type PlayloadType = z.infer<typeof SchemaData>;
 
 class MarkMsgAsRead extends OneBotAction<PlayloadType, null> {
     async getPeer(payload: PlayloadType): Promise<Peer> {

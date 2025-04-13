@@ -1,14 +1,14 @@
 import { type NTQQCollectionApi } from '@/core/apis/collection';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { Type, Static } from '@sinclair/typebox';
+import { z } from 'zod';
 
-const SchemaData = Type.Object({
-    category: Type.Union([Type.Number(), Type.String()]),
-    count: Type.Union([Type.Union([Type.Number(), Type.String()])], { default: 1 }),
+const SchemaData = z.object({
+    category: z.number(),
+    count: z.number().default(1),
 });
 
-type Payload = Static<typeof SchemaData>;
+type Payload = z.infer<typeof SchemaData>;
 
 export class GetCollectionList extends OneBotAction<Payload, Awaited<ReturnType<NTQQCollectionApi['getAllCollection']>>> {
     override actionName = ActionName.GetCollectionList;

@@ -1,14 +1,14 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { Static, Type } from '@sinclair/typebox';
+import { z } from 'zod';
 
-const SchemaData = Type.Object({
-    status: Type.Union([Type.Number(), Type.String()]),
-    ext_status: Type.Union([Type.Number(), Type.String()]),
-    battery_status: Type.Union([Type.Number(), Type.String()]),
+const SchemaData = z.object({
+    status: z.union([z.number(), z.string()]),
+    ext_status: z.union([z.number(), z.string()]),
+    battery_status: z.union([z.number(), z.string()]),
 });
 
-type Payload = Static<typeof SchemaData>;
+type Payload = z.infer<typeof SchemaData>;
 
 export class SetOnlineStatus extends OneBotAction<Payload, null> {
     override actionName = ActionName.SetOnlineStatus;
