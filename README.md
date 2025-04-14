@@ -47,8 +47,6 @@ _Modern protocol-side framework implemented based on NTQQ._
 
 + [Lagrange](https://github.com/LagrangeDev/Lagrange.Core) 对本项目的大力支持 参考部分代码 已获授权
 
-+ [LLOneBot](https://github.com/LLOneBot/LLOneBot) 相关的开发曾参与本项目部分开发
-
 + 不过最最重要的 还是需要感谢屏幕前的你哦~
 
 ---
@@ -60,3 +58,7 @@ _Modern protocol-side framework implemented based on NTQQ._
 2. 项目其余逻辑代码采用[本仓库开源许可](./LICENSE).
 
 **本仓库仅用于提高易用性，实现消息推送类功能，此外，禁止任何项目未经仓库主作者授权基于 NapCat 代码开发。使用请遵守当地法律法规，由此造成的问题由使用者和提供违规使用教程者负责。**
+
+## Warnings
+
+[某框架抄袭部分分析](https://napneko.github.io/other/about-copy)
