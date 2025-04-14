@@ -4,10 +4,11 @@ import { ActionName } from '@/onebot/action/router';
 import { MessageUnique } from '@/common/message-unique';
 import { ChatType, ElementType, MsgSourceType, NTMsgType, RawMessage } from '@/core';
 import { z } from 'zod';
+import { isNumeric } from '@/common/helper';
 
 const SchemaData = z.object({
-    message_id: z.union([z.number(), z.string()]).optional(),
-    id: z.union([z.number(), z.string()]).optional(),
+    message_id: z.string().optional(),
+    id: z.string().optional(),
 });
 type Payload = z.infer<typeof SchemaData>;
 
@@ -52,19 +53,21 @@ export class GoCQHTTPGetForwardMsgAction extends OneBotAction<Payload, {
     }
 
     async _handle(payload: Payload) {
+        // 1. 检查消息ID是否存在
         const msgId = payload.message_id || payload.id;
         if (!msgId) {
             throw new Error('message_id is required');
         }
 
-        const fakeForwardMsg = (res_id: string) => {
+        // 2. 定义辅助函数 - 创建伪转发消息对象
+        const createFakeForwardMsg = (resId: string): RawMessage => {
             return {
                 chatType: ChatType.KCHATTYPEGROUP,
                 elements: [{
                     elementType: ElementType.MULTIFORWARD,
                     elementId: '',
                     multiForwardMsgElement: {
-                        resId: res_id,
+                        resId: resId,
                         fileName: '',
                         xmlContent: '',
                     }
@@ -95,8 +98,9 @@ export class GoCQHTTPGetForwardMsgAction extends OneBotAction<Payload, {
             } as RawMessage;
         };
 
-        const protocolFallbackLogic = async (res_id: string) => {
-            const ob = (await this.obContext.apis.MsgApi.parseMessageV2(fakeForwardMsg(res_id)))?.arrayMsg;
+        // 3. 定义协议回退逻辑函数
+        const protocolFallbackLogic = async (resId: string) => {
+            const ob = (await this.obContext.apis.MsgApi.parseMessageV2(createFakeForwardMsg(resId)))?.arrayMsg;
             if (ob) {
                 return {
                     messages: (ob?.message?.[0] as OB11MessageForward)?.data?.content
@@ -104,31 +108,37 @@ export class GoCQHTTPGetForwardMsgAction extends OneBotAction<Payload, {
             }
             throw new Error('protocolFallbackLogic: 找不到相关的聊天记录');
         };
-
+        // 4. 尝试通过正常渠道获取消息
+        // 如果是数字ID，优先使用getMsgsByMsgId获取
+        if (!isNumeric(msgId)) {
+            let ret = await protocolFallbackLogic(msgId);
+            if (ret.messages) {
+                return ret;
+            }
+            throw new Error('ResId无效: 找不到相关的聊天记录');
+        }
         const rootMsgId = MessageUnique.getShortIdByMsgId(msgId.toString());
         const rootMsg = MessageUnique.getMsgIdAndPeerByShortId(rootMsgId ?? +msgId);
-        if (!rootMsg) {
-            return await protocolFallbackLogic(msgId.toString());
-        }
-        const data = await this.core.apis.MsgApi.getMsgsByMsgId(rootMsg.Peer, [rootMsg.MsgId]);
 
-        if (!data || data.result !== 0) {
-            return await protocolFallbackLogic(msgId.toString());
-        }
+        if (rootMsg) {
+            // 5. 获取消息内容
+            const data = await this.core.apis.MsgApi.getMsgsByMsgId(rootMsg.Peer, [rootMsg.MsgId]);
 
-        const singleMsg = data.msgList[0];
-        if (!singleMsg) {
-            return await protocolFallbackLogic(msgId.toString());
-        }
-        const resMsg = (await this.obContext.apis.MsgApi.parseMessageV2(singleMsg))?.arrayMsg;//强制array 以便处理
-        if (!(resMsg?.message?.[0] as OB11MessageForward)?.data?.content) {
-            return await protocolFallbackLogic(msgId.toString());
-        }
-        return {
-            messages: (resMsg?.message?.[0] as OB11MessageForward)?.data?.content
-        };
-        //}
+            if (data && data.result === 0 && data.msgList.length > 0) {
+                const singleMsg = data.msgList[0];
+                if (!singleMsg) {
+                    throw new Error('消息不存在或已过期');
+                }
+                // 6. 解析消息内容
+                const resMsg = (await this.obContext.apis.MsgApi.parseMessageV2(singleMsg))?.arrayMsg;
 
-        // return { message: resMsg };
+                const forwardContent = (resMsg?.message?.[0] as OB11MessageForward)?.data?.content;
+                if (forwardContent) {
+                    return { messages: forwardContent };
+                }
+            }
+        }
+        // 说明消息已过期或者为内层消息 NapCat 一次返回不处理内层消息
+        throw new Error('消息已过期或者为内层消息，无法获取转发消息');
     }
 }
