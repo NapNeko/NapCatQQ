@@ -3,7 +3,7 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 
 const SchemaData = z.object({
-    count: z.number().default(48),
+    count: z.coerce.number().default(48),
 });
 
 type Payload = z.infer<typeof SchemaData>;

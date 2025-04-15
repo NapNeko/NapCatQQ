@@ -3,7 +3,7 @@ import { ActionName } from '@/onebot/action/router';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    longNick: z.string(),
+    longNick: z.coerce.string(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

@@ -7,7 +7,7 @@ interface Response {
 }
 
 const SchemaData = z.object({
-    domain: z.string()
+    domain: z.coerce.string()
 });
 
 type Payload = z.infer<typeof SchemaData>;

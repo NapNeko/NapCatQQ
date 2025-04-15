@@ -9,7 +9,7 @@ import { NetworkAdapterConfig } from '@/onebot/config/config';
 export type ReturnDataType = OB11Message
 
 const SchemaData = z.object({
-    message_id: z.union([z.number(), z.string()]),
+    message_id: z.union([z.coerce.number(), z.coerce.string()]),
 });
 
 type Payload = z.infer<typeof SchemaData>;

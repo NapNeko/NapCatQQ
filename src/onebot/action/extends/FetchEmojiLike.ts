@@ -5,10 +5,10 @@ import { MessageUnique } from '@/common/message-unique';
 import { type NTQQMsgApi } from '@/core/apis';
 
 const SchemaData = z.object({
-    message_id: z.string(),
-    emojiId: z.string(),
-    emojiType: z.string(),
-    count: z.number().default(20),
+    message_id: z.coerce.string(),
+    emojiId: z.coerce.string(),
+    emojiType: z.coerce.string(),
+    count: z.coerce.number().default(20),
 });
 
 type Payload = z.infer<typeof SchemaData>;

@@ -5,8 +5,8 @@ import { z } from 'zod';
 import fs from 'node:fs/promises';
 import { GeneralCallResult } from '@/core';
 const SchemaData = z.object({
-    file: z.string(),
-    group_id: z.union([z.number(), z.string()])
+    file: z.coerce.string(),
+    group_id: z.union([z.coerce.number(), z.coerce.string()])
 });
 
 type Payload = z.infer<typeof SchemaData>;

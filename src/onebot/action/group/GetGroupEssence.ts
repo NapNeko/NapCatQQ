@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { NetworkAdapterConfig } from '@/onebot/config/config';
 
 const SchemaData = z.object({
-    group_id: z.union([z.number(), z.string()]),
+    group_id: z.union([z.coerce.number(), z.coerce.string()]),
 });
 
 type Payload = z.infer<typeof SchemaData>;

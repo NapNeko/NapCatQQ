@@ -6,11 +6,11 @@ import { themeType } from '../types/theme';
 import { z } from 'zod';
 // 定义配置的类型
 const WebUiConfigSchema = z.object({
-    host: z.string().default('0.0.0.0'),
-    port: z.number().default(6099),
-    token: z.string().default('napcat'),
-    loginRate: z.number().default(10),
-    autoLoginAccount: z.string().default(''),
+    host: z.coerce.string().default('0.0.0.0'),
+    port: z.coerce.number().default(6099),
+    token: z.coerce.string().default('napcat'),
+    loginRate: z.coerce.number().default(10),
+    autoLoginAccount: z.coerce.string().default(''),
     theme: themeType,
 });
 

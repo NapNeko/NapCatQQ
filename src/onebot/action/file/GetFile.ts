@@ -14,8 +14,8 @@ export interface GetFileResponse {
 }
 
 const GetFileBase_PayloadSchema = z.object({
-    file: z.string().optional(),
-    file_id: z.string().optional(),
+    file: z.coerce.string().optional(),
+    file_id: z.coerce.string().optional(),
 });
 
 
