@@ -7,7 +7,7 @@ import { SendMessageContext } from '@/onebot/api';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    group_id: z.union([z.coerce.number(), z.coerce.string()]),
+    group_id: z.coerce.string(),
     file: z.coerce.string(),
     name: z.coerce.string(),
     folder: z.coerce.string().optional(),

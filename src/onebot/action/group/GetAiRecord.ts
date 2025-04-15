@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 const SchemaData = z.object({
     character: z.coerce.string(),
-    group_id: z.union([z.coerce.number(), z.coerce.string()]),
+    group_id: z.coerce.string(),
     text: z.coerce.string(),
 });
 

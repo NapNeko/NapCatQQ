@@ -9,7 +9,7 @@ import { NetworkAdapterConfig } from '@/onebot/config/config';
 export type ReturnDataType = OB11Message
 
 const SchemaData = z.object({
-    message_id: z.union([z.coerce.number(), z.coerce.string()]),
+    message_id: z.coerce.string(),
 });
 
 type Payload = z.infer<typeof SchemaData>;
@@ -29,7 +29,7 @@ class GetMsg extends OneBotAction<Payload, OB11Message> {
         }
         const peer = { guildId: '', peerUid: msgIdWithPeer?.Peer.peerUid, chatType: msgIdWithPeer.Peer.chatType };
         const orimsg = this.obContext.recallMsgCache.get(msgIdWithPeer.MsgId);
-        let msg: RawMessage|undefined;
+        let msg: RawMessage | undefined;
         if (orimsg) {
             msg = orimsg;
         } else {

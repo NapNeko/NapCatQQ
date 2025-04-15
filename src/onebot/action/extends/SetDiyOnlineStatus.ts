@@ -3,8 +3,8 @@ import { ActionName } from '@/onebot/action/router';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    face_id: z.union([z.coerce.number(), z.coerce.string()]),// 参考 face_config.json 的 QSid
-    face_type: z.union([z.coerce.number(), z.coerce.string()]).default('1'),
+    face_id:  z.coerce.string(),// 参考 face_config.json 的 QSid
+    face_type: z.coerce.string().default('1'),
     wording: z.coerce.string().default(' '),
 });
 

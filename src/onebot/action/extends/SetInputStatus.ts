@@ -4,7 +4,7 @@ import { ChatType } from '@/core';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    user_id: z.union([z.coerce.number(), z.coerce.string()]),
+    user_id: z.coerce.string(),
     event_type: z.coerce.number(),
 });
 

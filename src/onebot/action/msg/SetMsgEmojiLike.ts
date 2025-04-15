@@ -4,8 +4,8 @@ import { MessageUnique } from '@/common/message-unique';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    message_id: z.union([z.coerce.number(), z.coerce.string()]),
-    emoji_id: z.union([z.coerce.number(), z.coerce.string()]),
+    message_id: z.coerce.string(),
+    emoji_id: z.coerce.string(),
     set: z.coerce.boolean().optional(),
 });
 
