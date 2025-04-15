@@ -10,9 +10,9 @@ interface Response {
     messages: OB11Message[];
 }
 const SchemaData = z.object({
-    user_id: z.union([z.coerce.number(), z.coerce.string()]),
-    message_seq: z.union([z.coerce.number(), z.coerce.string()]).optional(),
-    count: z.union([z.coerce.number(), z.coerce.string()]).default(20),
+    user_id: z.coerce.string(),
+    message_seq: z.coerce.string().optional(),
+    count: z.coerce.number().default(20),
     reverseOrder: z.coerce.boolean().default(false)
 });
 

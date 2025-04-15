@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { NTQQGroupApi } from '@/core/apis';
 
 const SchemaData = z.object({
-    group_id: z.union([z.coerce.number(), z.coerce.string()]),
+    group_id: z.coerce.string(),
     file_id: z.coerce.string(),
 });
 
