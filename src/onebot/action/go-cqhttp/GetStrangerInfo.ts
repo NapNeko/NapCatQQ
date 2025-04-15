@@ -6,8 +6,8 @@ import { calcQQLevel } from '@/common/helper';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    user_id: z.union([z.number(), z.string()]),
-    no_cache: z.boolean().default(false),
+    user_id: z.union([z.coerce.number(), z.coerce.string()]),
+    no_cache: z.coerce.boolean().default(false),
 });
 
 type Payload = z.infer<typeof SchemaData>;

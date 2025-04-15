@@ -3,7 +3,7 @@ import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    user_id: z.number(),
+    user_id: z.coerce.number(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

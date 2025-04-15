@@ -4,8 +4,8 @@ import { ChatType } from '@/core';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    user_id: z.union([z.number(), z.string()]),
-    event_type: z.number(),
+    user_id: z.union([z.coerce.number(), z.coerce.string()]),
+    event_type: z.coerce.number(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

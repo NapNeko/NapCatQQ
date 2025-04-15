@@ -7,30 +7,30 @@ import { z } from 'zod';
 const SchemaData = z.union([
     z.object({
         type: z.union([z.literal('bili'), z.literal('weibo')]),
-        title: z.string(),
-        desc: z.string(),
-        picUrl: z.string(),
-        jumpUrl: z.string(),
-        webUrl: z.string().optional(),
-        rawArkData: z.string().optional()
+        title: z.coerce.string(),
+        desc: z.coerce.string(),
+        picUrl: z.coerce.string(),
+        jumpUrl: z.coerce.string(),
+        webUrl: z.coerce.string().optional(),
+        rawArkData: z.coerce.string().optional()
     }),
     z.object({
-        title: z.string(),
-        desc: z.string(),
-        picUrl: z.string(),
-        jumpUrl: z.string(),
-        iconUrl: z.string(),
-        webUrl: z.string().optional(),
-        appId: z.string(),
-        scene: z.union([z.number(), z.string()]),
-        templateType: z.union([z.number(), z.string()]),
-        businessType: z.union([z.number(), z.string()]),
-        verType: z.union([z.number(), z.string()]),
-        shareType: z.union([z.number(), z.string()]),
-        versionId: z.string(),
-        sdkId: z.string(),
-        withShareTicket: z.union([z.number(), z.string()]),
-        rawArkData: z.string().optional()
+        title: z.coerce.string(),
+        desc: z.coerce.string(),
+        picUrl: z.coerce.string(),
+        jumpUrl: z.coerce.string(),
+        iconUrl: z.coerce.string(),
+        webUrl: z.coerce.string().optional(),
+        appId: z.coerce.string(),
+        scene: z.union([z.coerce.number(), z.coerce.string()]),
+        templateType: z.union([z.coerce.number(), z.coerce.string()]),
+        businessType: z.union([z.coerce.number(), z.coerce.string()]),
+        verType: z.union([z.coerce.number(), z.coerce.string()]),
+        shareType: z.union([z.coerce.number(), z.coerce.string()]),
+        versionId: z.coerce.string(),
+        sdkId: z.coerce.string(),
+        withShareTicket: z.union([z.coerce.number(), z.coerce.string()]),
+        rawArkData: z.coerce.string().optional()
     })
 ]);
 type Payload = z.infer<typeof SchemaData>;

@@ -1,71 +1,71 @@
 import { z } from 'zod';
 
 const HttpServerConfigSchema = z.object({
-    name: z.string().default('http-server'),
-    enable: z.boolean().default(false),
-    port: z.number().default(3000),
-    host: z.string().default('0.0.0.0'),
-    enableCors: z.boolean().default(true),
-    enableWebsocket: z.boolean().default(true),
-    messagePostFormat: z.string().default('array'),
-    token: z.string().default(''),
-    debug: z.boolean().default(false)
+    name: z.coerce.string().default('http-server'),
+    enable: z.coerce.boolean().default(false),
+    port: z.coerce.number().default(3000),
+    host: z.coerce.string().default('0.0.0.0'),
+    enableCors: z.coerce.boolean().default(true),
+    enableWebsocket: z.coerce.boolean().default(true),
+    messagePostFormat: z.coerce.string().default('array'),
+    token: z.coerce.string().default(''),
+    debug: z.coerce.boolean().default(false)
 });
 
 const HttpSseServerConfigSchema = z.object({
-    name: z.string().default('http-sse-server'),
-    enable: z.boolean().default(false),
-    port: z.number().default(3000),
-    host: z.string().default('0.0.0.0'),
-    enableCors: z.boolean().default(true),
-    enableWebsocket: z.boolean().default(true),
-    messagePostFormat: z.string().default('array'),
-    token: z.string().default(''),
-    debug: z.boolean().default(false),
-    reportSelfMessage: z.boolean().default(false)
+    name: z.coerce.string().default('http-sse-server'),
+    enable: z.coerce.boolean().default(false),
+    port: z.coerce.number().default(3000),
+    host: z.coerce.string().default('0.0.0.0'),
+    enableCors: z.coerce.boolean().default(true),
+    enableWebsocket: z.coerce.boolean().default(true),
+    messagePostFormat: z.coerce.string().default('array'),
+    token: z.coerce.string().default(''),
+    debug: z.coerce.boolean().default(false),
+    reportSelfMessage: z.coerce.boolean().default(false)
 });
 
 const HttpClientConfigSchema = z.object({
-    name: z.string().default('http-client'),
-    enable: z.boolean().default(false),
-    url: z.string().default('http://localhost:8080'),
-    messagePostFormat: z.string().default('array'),
-    reportSelfMessage: z.boolean().default(false),
-    token: z.string().default(''),
-    debug: z.boolean().default(false)
+    name: z.coerce.string().default('http-client'),
+    enable: z.coerce.boolean().default(false),
+    url: z.coerce.string().default('http://localhost:8080'),
+    messagePostFormat: z.coerce.string().default('array'),
+    reportSelfMessage: z.coerce.boolean().default(false),
+    token: z.coerce.string().default(''),
+    debug: z.coerce.boolean().default(false)
 });
 
 const WebsocketServerConfigSchema = z.object({
-    name: z.string().default('websocket-server'),
-    enable: z.boolean().default(false),
-    host: z.string().default('0.0.0.0'),
-    port: z.number().default(3001),
-    messagePostFormat: z.string().default('array'),
-    reportSelfMessage: z.boolean().default(false),
-    token: z.string().default(''),
-    enableForcePushEvent: z.boolean().default(true),
-    debug: z.boolean().default(false),
-    heartInterval: z.number().default(30000)
+    name: z.coerce.string().default('websocket-server'),
+    enable: z.coerce.boolean().default(false),
+    host: z.coerce.string().default('0.0.0.0'),
+    port: z.coerce.number().default(3001),
+    messagePostFormat: z.coerce.string().default('array'),
+    reportSelfMessage: z.coerce.boolean().default(false),
+    token: z.coerce.string().default(''),
+    enableForcePushEvent: z.coerce.boolean().default(true),
+    debug: z.coerce.boolean().default(false),
+    heartInterval: z.coerce.number().default(30000)
 });
 
 const WebsocketClientConfigSchema = z.object({
-    name: z.string().default('websocket-client'),
-    enable: z.boolean().default(false),
-    url: z.string().default('ws://localhost:8082'),
-    messagePostFormat: z.string().default('array'),
-    reportSelfMessage: z.boolean().default(false),
-    reconnectInterval: z.number().default(5000),
-    token: z.string().default(''),
-    debug: z.boolean().default(false),
-    heartInterval: z.number().default(30000)
+    name: z.coerce.string().default('websocket-client'),
+    enable: z.coerce.boolean().default(false),
+    url: z.coerce.string().default('ws://localhost:8082'),
+    messagePostFormat: z.coerce.string().default('array'),
+    reportSelfMessage: z.coerce.boolean().default(false),
+    reconnectInterval: z.coerce.number().default(5000),
+    token: z.coerce.string().default(''),
+    debug: z.coerce.boolean().default(false),
+    heartInterval: z.coerce.number().default(30000)
 });
 
 const PluginConfigSchema = z.object({
-    name: z.string().default('plugin'),
-    enable: z.boolean().default(false),
-    messagePostFormat: z.string().default('array'),
-    reportSelfMessage: z.boolean().default(false),
-    debug: z.boolean().default(false),
+    name: z.coerce.string().default('plugin'),
+    enable: z.coerce.boolean().default(false),
+    messagePostFormat: z.coerce.string().default('array'),
+    reportSelfMessage: z.coerce.boolean().default(false),
+    debug: z.coerce.boolean().default(false),
 });
 
 const NetworkConfigSchema = z.object({
@@ -79,9 +79,9 @@ const NetworkConfigSchema = z.object({
 
 export const OneBotConfigSchema = z.object({
     network: NetworkConfigSchema,
-    musicSignUrl: z.string().default(''),
-    enableLocalFile2Url: z.boolean().default(false),
-    parseMultMsg: z.boolean().default(false)
+    musicSignUrl: z.coerce.string().default(''),
+    enableLocalFile2Url: z.coerce.boolean().default(false),
+    parseMultMsg: z.coerce.boolean().default(false)
 });
 
 export type OneBotConfig = z.infer<typeof OneBotConfigSchema>;

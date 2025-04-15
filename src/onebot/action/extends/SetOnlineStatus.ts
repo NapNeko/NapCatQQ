@@ -3,9 +3,9 @@ import { ActionName } from '@/onebot/action/router';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    status: z.union([z.number(), z.string()]),
-    ext_status: z.union([z.number(), z.string()]),
-    battery_status: z.union([z.number(), z.string()]),
+    status: z.union([z.coerce.number(), z.coerce.string()]),
+    ext_status: z.union([z.coerce.number(), z.coerce.string()]),
+    battery_status: z.union([z.coerce.number(), z.coerce.string()]),
 });
 
 type Payload = z.infer<typeof SchemaData>;

@@ -7,8 +7,8 @@ import { z } from 'zod';
 import { isNumeric } from '@/common/helper';
 
 const SchemaData = z.object({
-    message_id: z.string().optional(),
-    id: z.string().optional(),
+    message_id: z.coerce.string().optional(),
+    id: z.coerce.string().optional(),
 });
 type Payload = z.infer<typeof SchemaData>;
 

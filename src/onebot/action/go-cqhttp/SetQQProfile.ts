@@ -4,9 +4,9 @@ import { ActionName } from '@/onebot/action/router';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    nickname: z.string(),
-    personal_note: z.string().optional(),
-    sex: z.union([z.number(), z.string()]).optional(), // 传Sex值？建议传0
+    nickname: z.coerce.string(),
+    personal_note: z.coerce.string().optional(),
+    sex: z.union([z.coerce.number(), z.coerce.string()]).optional(), // 传Sex值？建议传0
 });
 
 type Payload = z.infer<typeof SchemaData>;

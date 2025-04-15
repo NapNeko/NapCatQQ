@@ -5,10 +5,10 @@ import { OB11Construct } from '@/onebot/helper/data';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    group_id: z.union([z.number(), z.string()]),
-    folder_id: z.string().optional(),
-    folder: z.string().optional(),
-    file_count: z.union([z.number(), z.string()]).default(50),
+    group_id: z.union([z.coerce.number(), z.coerce.string()]),
+    folder_id: z.coerce.string().optional(),
+    folder: z.coerce.string().optional(),
+    file_count: z.union([z.coerce.number(), z.coerce.string()]).default(50),
 });
 
 type Payload = z.infer<typeof SchemaData>;

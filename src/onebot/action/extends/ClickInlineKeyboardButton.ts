@@ -3,11 +3,11 @@ import { OneBotAction } from '../OneBotAction';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    group_id: z.string(),
-    bot_appid: z.string(),
-    button_id: z.string().default(''),
-    callback_data: z.string().default(''),
-    msg_seq: z.string().default('10086'),
+    group_id: z.coerce.string(),
+    bot_appid: z.coerce.string(),
+    button_id: z.coerce.string().default(''),
+    callback_data: z.coerce.string().default(''),
+    msg_seq: z.coerce.string().default('10086'),
 });
 type Payload = z.infer<typeof SchemaData>;
 

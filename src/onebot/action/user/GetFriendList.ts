@@ -5,7 +5,7 @@ import { ActionName } from '@/onebot/action/router';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    no_cache: z.boolean().optional(),
+    no_cache: z.coerce.boolean().optional(),
 });
 
 type Payload = z.infer<typeof SchemaData>;
