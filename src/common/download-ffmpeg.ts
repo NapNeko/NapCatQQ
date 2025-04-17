@@ -281,7 +281,7 @@ export async function downloadFFmpeg(
         return null;
     }
 }
-export async function downloadFFmpegIfNotExists(log:LogWrapper) {
+export async function downloadFFmpegIfNotExists(log: LogWrapper) {
     // 仅限Windows
     if (os.platform() !== 'win32') {
         return {
@@ -293,7 +293,7 @@ export async function downloadFFmpegIfNotExists(log:LogWrapper) {
     const ffmpeg_exist = fs.existsSync(path.join(currentPath, 'ffmpeg', 'ffmpeg.exe'));
     const ffprobe_exist = fs.existsSync(path.join(currentPath, 'ffmpeg', 'ffprobe.exe'));
     if (!ffmpeg_exist || !ffprobe_exist) {
-        await downloadFFmpeg('./ffmpeg', './cache', (percentage: number, message: string) => {
+        await downloadFFmpeg(path.join(currentPath, 'ffmpeg'), path.join(currentPath, 'cache'), (percentage: number, message: string) => {
             log.log(`[Ffmpeg] [Download] ${percentage}% - ${message}`);
         });
         return {
