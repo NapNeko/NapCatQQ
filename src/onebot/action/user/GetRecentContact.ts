@@ -3,9 +3,10 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { NetworkAdapterConfig } from '@/onebot/config/config';
 import { z } from 'zod';
+import { coerce } from '@/common/coerce';
 
 const SchemaData = z.object({
-    count: z.coerce.number().default(10),
+    count: coerce.number().default(10),
 });
 
 type Payload = z.infer<typeof SchemaData>;

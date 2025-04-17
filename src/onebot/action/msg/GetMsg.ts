@@ -5,11 +5,11 @@ import { MessageUnique } from '@/common/message-unique';
 import { RawMessage } from '@/core';
 import { z } from 'zod';
 import { NetworkAdapterConfig } from '@/onebot/config/config';
-
+import { coerce } from '@/common/coerce';
 export type ReturnDataType = OB11Message
 
 const SchemaData = z.object({
-    message_id: z.coerce.string(),
+    message_id: coerce.string(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

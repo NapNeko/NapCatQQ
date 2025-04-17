@@ -1,9 +1,10 @@
+import { coerce } from '@/common/coerce';
 import { z } from 'zod';
 
 export const themeType = z.object(
     {
-        dark: z.record(z.coerce.string(), z.coerce.string()),
-        light: z.record(z.coerce.string(), z.coerce.string()),
+        dark: z.record(coerce.string(), coerce.string()),
+        light: z.record(coerce.string(), coerce.string()),
     }
 ).default({
     dark: {

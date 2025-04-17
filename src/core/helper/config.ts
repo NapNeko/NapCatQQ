@@ -1,15 +1,16 @@
 import { ConfigBase } from '@/common/config-base';
 import { NapCatCore } from '@/core';
+import { coerce } from '@/common/coerce';
 import { z } from 'zod';
 
 export const NapcatConfigSchema = z.object({
-    fileLog: z.coerce.boolean().default(false),
-    consoleLog: z.coerce.boolean().default(true),
-    fileLogLevel: z.coerce.string().default('debug'),
-    consoleLogLevel: z.coerce.string().default('info'),
-    packetBackend: z.coerce.string().default('auto'),
-    packetServer: z.coerce.string().default(''),
-    o3HookMode: z.coerce.number().default(0),
+    fileLog: coerce.boolean().default(false),
+    consoleLog: coerce.boolean().default(true),
+    fileLogLevel: coerce.string().default('debug'),
+    consoleLogLevel: coerce.string().default('info'),
+    packetBackend: coerce.string().default('auto'),
+    packetServer: coerce.string().default(''),
+    o3HookMode: coerce.number().default(0),
 });
 
 export type NapcatConfig = z.infer<typeof NapcatConfigSchema>;

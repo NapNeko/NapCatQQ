@@ -2,11 +2,11 @@ import { NTQQUserApi } from '@/core/apis';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { z } from 'zod';
-
+import { coerce } from '@/common/coerce';
 const SchemaData = z.object({
-    nickname: z.coerce.string(),
-    personal_note: z.coerce.string().optional(),
-    sex: z.coerce.string().optional(), // 传Sex值？建议传0
+    nickname: coerce.string(),
+    personal_note: coerce.string().optional(),
+    sex: coerce.string().optional(), // 传Sex值？建议传0
 });
 
 type Payload = z.infer<typeof SchemaData>;

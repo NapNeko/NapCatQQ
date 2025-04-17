@@ -1,12 +1,13 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { z } from 'zod';
+import { coerce } from '@/common/coerce';
 
 const SchemaData = z.object({
-    friend_id: z.coerce.string().optional(),
-    user_id: z.coerce.string().optional(),
-    temp_block: z.coerce.boolean().optional(),
-    temp_both_del: z.coerce.boolean().optional(),
+    friend_id: coerce.string().optional(),
+    user_id: coerce.string().optional(),
+    temp_block: coerce.boolean().optional(),
+    temp_both_del: coerce.boolean().optional(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

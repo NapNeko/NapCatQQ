@@ -3,11 +3,11 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { MessageUnique } from '@/common/message-unique';
 import { z } from 'zod';
-
+import { coerce } from '@/common/coerce';
 const SchemaData = z.object({
-    user_id: z.coerce.string().optional(),
-    group_id: z.coerce.string().optional(),
-    message_id: z.coerce.string().optional(),
+    user_id: coerce.string().optional(),
+    group_id: coerce.string().optional(),
+    message_id: coerce.string().optional(),
 });
 
 type PlayloadType = z.infer<typeof SchemaData>;

@@ -3,12 +3,12 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { MessageUnique } from '@/common/message-unique';
 import { type NTQQMsgApi } from '@/core/apis';
-
+import { coerce } from '@/common/coerce';
 const SchemaData = z.object({
-    message_id: z.coerce.string(),
-    emojiId: z.coerce.string(),
-    emojiType: z.coerce.string(),
-    count: z.coerce.number().default(20),
+    message_id: coerce.string(),
+    emojiId: coerce.string(),
+    emojiType: coerce.string(),
+    count: coerce.number().default(20),
 });
 
 type Payload = z.infer<typeof SchemaData>;

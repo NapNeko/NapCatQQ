@@ -4,13 +4,14 @@ import { resolve } from 'node:path';
 import { deepMerge } from '../utils/object';
 import { themeType } from '../types/theme';
 import { z } from 'zod';
+import { coerce } from '@/common/coerce';
 // 定义配置的类型
 const WebUiConfigSchema = z.object({
-    host: z.coerce.string().default('0.0.0.0'),
-    port: z.coerce.number().default(6099),
-    token: z.coerce.string().default('napcat'),
-    loginRate: z.coerce.number().default(10),
-    autoLoginAccount: z.coerce.string().default(''),
+    host: coerce.string().default('0.0.0.0'),
+    port: coerce.number().default(6099),
+    token: coerce.string().default('napcat'),
+    loginRate: coerce.number().default(10),
+    autoLoginAccount: coerce.string().default(''),
     theme: themeType,
 });
 

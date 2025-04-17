@@ -2,11 +2,11 @@ import { GeneralCallResult } from '@/core';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { z } from 'zod';
-
+import { coerce } from '@/common/coerce';
 const SchemaData = z.object({
-    user_id: z.coerce.string().optional(),
-    group_id: z.coerce.string().optional(),
-    phoneNumber: z.coerce.string().default(''),
+    user_id: coerce.string().optional(),
+    group_id: coerce.string().optional(),
+    phoneNumber: coerce.string().default(''),
 });
 
 type Payload = z.infer<typeof SchemaData>;
@@ -29,7 +29,7 @@ export class SharePeer extends OneBotAction<Payload, GeneralCallResult & {
 }
 
 const SchemaDataGroupEx = z.object({
-    group_id: z.coerce.string(),
+    group_id: coerce.string(),
 });
 
 type PayloadGroupEx = z.infer<typeof SchemaDataGroupEx>;

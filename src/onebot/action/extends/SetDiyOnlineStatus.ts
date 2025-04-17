@@ -1,11 +1,11 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { z } from 'zod';
-
+import { coerce } from '@/common/coerce';
 const SchemaData = z.object({
-    face_id:  z.coerce.string(),// 参考 face_config.json 的 QSid
-    face_type: z.coerce.string().default('1'),
-    wording: z.coerce.string().default(' '),
+    face_id:  coerce.string(),// 参考 face_config.json 的 QSid
+    face_type: coerce.string().default('1'),
+    wording: coerce.string().default(' '),
 });
 
 type Payload = z.infer<typeof SchemaData>;
