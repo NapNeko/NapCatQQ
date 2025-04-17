@@ -1,14 +1,28 @@
 import { readFileSync, statSync, existsSync, mkdirSync } from 'fs';
-import { dirname } from 'path';
+import path, { dirname } from 'path';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import type { VideoInfo } from './video';
 import { fileTypeFromFile } from 'file-type';
 import imageSize from 'image-size';
+import { fileURLToPath } from 'node:url';
+const currentPath = dirname(fileURLToPath(import.meta.url));
 const execFileAsync = promisify(execFile);
-const FFMPEG_CMD = process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg';
-const FFPROBE_CMD = process.platform === 'win32' ? 'ffprobe.exe' : 'ffprobe';
+const getFFmpegPath = (tool: string): string => {
+    const exeName = `${tool}.exe`;
+    const isLocalExeExists = existsSync(path.join(currentPath, 'ffmpeg', exeName));
 
+    if (process.platform === 'win32') {
+        return isLocalExeExists ? path.join(currentPath, 'ffmpeg', exeName) : exeName;
+    }
+    return tool;
+};
+
+const FFMPEG_CMD = getFFmpegPath('ffmpeg');
+const FFPROBE_CMD = getFFmpegPath('ffprobe');
+
+console.log('[Info] ffmpeg:', FFMPEG_CMD);
+console.log('[Info] ffprobe:', FFPROBE_CMD);
 export class FFmpegService {
     // 确保目标目录存在
     private static ensureDirExists(filePath: string): void {
