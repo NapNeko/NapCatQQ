@@ -33,7 +33,7 @@ import { NodeIO3MiscListener } from '@/core/listeners/NodeIO3MiscListener';
 import { sleep } from '@/common/helper';
 import { downloadFFmpegIfNotExists } from '@/common/download-ffmpeg';
 import { FFmpegService } from '@/common/ffmpeg';
-
+import { connectToNamedPipe } from '@/shell/pipe';
 // NapCat Shell App ES 入口文件
 async function handleUncaughtExceptions(logger: LogWrapper) {
     process.on('uncaughtException', (err) => {
@@ -313,9 +313,10 @@ export async function NCoreInitShell() {
     const pathWrapper = new NapCatPathWrapper();
     const logger = new LogWrapper(pathWrapper.logsPath);
     handleUncaughtExceptions(logger);
+    await connectToNamedPipe(logger).catch(e => logger.logError('命名管道连接失败', e));
     downloadFFmpegIfNotExists(logger).then(({ path, reset }) => {
         if (reset && path) {
-            FFmpegService.setFfmpegPath(path,logger);
+            FFmpegService.setFfmpegPath(path, logger);
         }
     }).catch(e => {
         logger.logError('[Ffmpeg] Error:', e);
