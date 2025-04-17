@@ -31,6 +31,8 @@ import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { napCatVersion } from '@/common/version';
 import { NodeIO3MiscListener } from '@/core/listeners/NodeIO3MiscListener';
 import { sleep } from '@/common/helper';
+import { downloadFFmpegIfNotExists } from '@/common/download-ffmpeg';
+import { FFmpegService } from '@/common/ffmpeg';
 
 // NapCat Shell App ES 入口文件
 async function handleUncaughtExceptions(logger: LogWrapper) {
@@ -311,6 +313,11 @@ export async function NCoreInitShell() {
     const pathWrapper = new NapCatPathWrapper();
     const logger = new LogWrapper(pathWrapper.logsPath);
     handleUncaughtExceptions(logger);
+    downloadFFmpegIfNotExists(logger).then(({ path, isExist }) => {
+    if (!isExist && path) {
+        FFmpegService.setFfmpegPath(path);
+    }
+});
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
 

@@ -1,7 +1,6 @@
 import { NCoreInitShell } from './base';
-import * as net from 'net'; // 引入 net 模块
+import * as net from 'net';
 import * as process from 'process';
-
 if (process.platform === 'win32') {
     const pid = process.pid;
     const pipePath = `\\\\.\\pipe\\NapCat_${pid}`;
