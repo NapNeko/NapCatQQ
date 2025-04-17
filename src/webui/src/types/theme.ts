@@ -1,9 +1,10 @@
+import { actionType } from '@/onebot/action/type';
 import { z } from 'zod';
 
 export const themeType = z.object(
     {
-        dark: z.record(z.coerce.string(), z.coerce.string()),
-        light: z.record(z.coerce.string(), z.coerce.string()),
+        dark: z.record(actionType.string(), actionType.string()),
+        light: z.record(actionType.string(), actionType.string()),
     }
 ).default({
     dark: {

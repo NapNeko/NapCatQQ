@@ -2,11 +2,11 @@ import { NTVoteInfo } from '@/core';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { z } from 'zod';
-
+import { actionType } from '../type';
 const SchemaData = z.object({
-    user_id: z.coerce.string().optional(),
-    start: z.coerce.number().default(0),
-    count: z.coerce.number().default(10),
+    user_id: actionType.string().optional(),
+    start: actionType.number().default(0),
+    count: actionType.number().default(10),
 });
 
 type Payload = z.infer<typeof SchemaData>;

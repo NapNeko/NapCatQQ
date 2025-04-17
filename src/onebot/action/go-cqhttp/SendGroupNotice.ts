@@ -3,16 +3,16 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { unlink } from 'node:fs/promises';
 import { z } from 'zod';
-
+import { actionType } from '../type';
 const SchemaData = z.object({
-    group_id: z.coerce.string(),
-    content: z.coerce.string(),
-    image: z.coerce.string().optional(),
-    pinned: z.coerce.number().default(0),
-    type: z.coerce.number().default(1),
-    confirm_required: z.coerce.number().default(1),
-    is_show_edit_card: z.coerce.number().default(0),
-    tip_window_type: z.coerce.number().default(0),
+    group_id: actionType.string(),
+    content: actionType.string(),
+    image: actionType.string().optional(),
+    pinned: actionType.number().default(0),
+    type: actionType.number().default(1),
+    confirm_required: actionType.number().default(1),
+    is_show_edit_card: actionType.number().default(0),
+    tip_window_type: actionType.number().default(0),
 });
 
 type Payload = z.infer<typeof SchemaData>;

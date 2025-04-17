@@ -5,10 +5,10 @@ import { MessageUnique } from '@/common/message-unique';
 import { ChatType, ElementType, MsgSourceType, NTMsgType, RawMessage } from '@/core';
 import { z } from 'zod';
 import { isNumeric } from '@/common/helper';
-
+import { actionType } from '../type';
 const SchemaData = z.object({
-    message_id: z.coerce.string().optional(),
-    id: z.coerce.string().optional(),
+    message_id: actionType.string().optional(),
+    id: actionType.string().optional(),
 });
 type Payload = z.infer<typeof SchemaData>;
 

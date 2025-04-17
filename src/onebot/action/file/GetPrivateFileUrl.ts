@@ -2,9 +2,9 @@ import { ActionName } from '@/onebot/action/router';
 import { FileNapCatOneBotUUID } from '@/common/file-uuid';
 import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
 import { z } from 'zod';
-
+import { actionType } from '../type';
 const SchemaData = z.object({
-    file_id: z.coerce.string(),
+    file_id: actionType.string(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

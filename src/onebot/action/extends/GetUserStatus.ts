@@ -1,9 +1,9 @@
 import { ActionName } from '@/onebot/action/router';
 import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
 import { z } from 'zod';
-
+import { actionType } from '../type';
 const SchemaData = z.object({
-    user_id: z.coerce.number(),
+    user_id: actionType.number(),
 });
 
 type Payload = z.infer<typeof SchemaData>;
