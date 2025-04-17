@@ -3,7 +3,7 @@ import { ChatType, Peer } from '@/core/types';
 import { ActionName } from '@/onebot/action/router';
 import { MessageUnique } from '@/common/message-unique';
 import { z } from 'zod';
-import { actionType } from '../type';
+import { actionType } from '@/common/coerce';
 const SchemaData = z.object({
     message_id: actionType.string(),
     group_id: actionType.string().optional(),

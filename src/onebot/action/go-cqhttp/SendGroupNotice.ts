@@ -3,7 +3,7 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { unlink } from 'node:fs/promises';
 import { z } from 'zod';
-import { actionType } from '../type';
+import { actionType } from '@/common/coerce';
 const SchemaData = z.object({
     group_id: actionType.string(),
     content: actionType.string(),
