@@ -2,11 +2,12 @@ import { PacketHexStr } from '@/core/packet/transformer/base';
 import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
 import { ActionName } from '@/onebot/action/router';
 import { z } from 'zod';
+import { coerce } from '@/common/coerce';
 
 const SchemaData = z.object({
-    cmd: z.coerce.string(),
-    data: z.coerce.string(),
-    rsp: z.coerce.boolean().default(true),
+    cmd: coerce.string(),
+    data: coerce.string(),
+    rsp: coerce.boolean().default(true),
 });
 
 type Payload = z.infer<typeof SchemaData>;

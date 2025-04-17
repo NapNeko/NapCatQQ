@@ -4,10 +4,10 @@ import { ActionName } from '@/onebot/action/router';
 import { FileNapCatOneBotUUID } from '@/common/file-uuid';
 import { z } from 'zod';
 import { NTQQGroupApi } from '@/core/apis';
-
+import { coerce } from '@/common/coerce';
 const SchemaData = z.object({
-    group_id: z.coerce.string(),
-    file_id: z.coerce.string(),
+    group_id: coerce.string(),
+    file_id: coerce.string(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

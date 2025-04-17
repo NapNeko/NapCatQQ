@@ -3,11 +3,12 @@ import { OB11Construct } from '@/onebot/helper/data';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { z } from 'zod';
+import { coerce } from '@/common/coerce';
 
 const SchemaData = z.object({
-    group_id: z.coerce.string(),
-    user_id: z.coerce.string(),
-    no_cache: z.coerce.boolean().default(false),
+    group_id: coerce.string(),
+    user_id: coerce.string(),
+    no_cache: coerce.boolean().default(false),
 });
 
 type Payload = z.infer<typeof SchemaData>;
