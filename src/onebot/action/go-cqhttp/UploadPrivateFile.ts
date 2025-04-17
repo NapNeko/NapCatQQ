@@ -6,11 +6,11 @@ import { uriToLocalFile } from '@/common/file';
 import { SendMessageContext } from '@/onebot/api';
 import { ContextMode, createContext } from '@/onebot/action/msg/SendMsg';
 import { z } from 'zod';
-import { actionType } from '@/common/coerce';
+import { coerce } from '@/common/coerce';
 const SchemaData = z.object({
-    user_id: actionType.string(),
-    file: actionType.string(),
-    name: actionType.string(),
+    user_id: coerce.string(),
+    file: coerce.string(),
+    name: coerce.string(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

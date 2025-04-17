@@ -1,12 +1,12 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { z } from 'zod';
-import { actionType } from '@/common/coerce';
+import { coerce } from '@/common/coerce';
 
 const SchemaData = z.object({
-    group_id: actionType.string(),
-    user_id: actionType.string(),
-    reject_add_request: actionType.boolean().optional(),
+    group_id: coerce.string(),
+    user_id: coerce.string(),
+    reject_add_request: coerce.boolean().optional(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

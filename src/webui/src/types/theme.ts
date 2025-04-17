@@ -1,10 +1,10 @@
-import { actionType } from '@/common/coerce';
+import { coerce } from '@/common/coerce';
 import { z } from 'zod';
 
 export const themeType = z.object(
     {
-        dark: z.record(actionType.string(), actionType.string()),
-        light: z.record(actionType.string(), actionType.string()),
+        dark: z.record(coerce.string(), coerce.string()),
+        light: z.record(coerce.string(), coerce.string()),
     }
 ).default({
     dark: {
