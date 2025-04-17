@@ -3,7 +3,7 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { NetworkAdapterConfig } from '@/onebot/config/config';
 import { z } from 'zod';
-import { actionType } from '../type';
+import { actionType } from '@/common/coerce';
 
 const SchemaData = z.object({
     count: actionType.number().default(10),

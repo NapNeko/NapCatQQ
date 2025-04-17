@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { actionType } from '../action/type';
+import { actionType } from '../../common/coerce';
 
 const HttpServerConfigSchema = z.object({
     name: actionType.string().default('http-server'),

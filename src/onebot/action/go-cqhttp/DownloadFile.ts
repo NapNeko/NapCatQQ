@@ -5,7 +5,7 @@ import { join as joinPath } from 'node:path';
 import { calculateFileMD5, uriToLocalFile } from '@/common/file';
 import { randomUUID } from 'crypto';
 import { z } from 'zod';
-import { actionType } from '../type';
+import { actionType } from '@/common/coerce';
 interface FileResponse {
     file: string;
 }

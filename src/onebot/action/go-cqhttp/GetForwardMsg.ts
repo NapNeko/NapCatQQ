@@ -5,7 +5,7 @@ import { MessageUnique } from '@/common/message-unique';
 import { ChatType, ElementType, MsgSourceType, NTMsgType, RawMessage } from '@/core';
 import { z } from 'zod';
 import { isNumeric } from '@/common/helper';
-import { actionType } from '../type';
+import { actionType } from '@/common/coerce';
 const SchemaData = z.object({
     message_id: actionType.string().optional(),
     id: actionType.string().optional(),

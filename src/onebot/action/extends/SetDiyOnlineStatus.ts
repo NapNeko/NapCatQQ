@@ -1,7 +1,7 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { z } from 'zod';
-import { actionType } from '../type';
+import { actionType } from '@/common/coerce';
 const SchemaData = z.object({
     face_id:  actionType.string(),// 参考 face_config.json 的 QSid
     face_type: actionType.string().default('1'),

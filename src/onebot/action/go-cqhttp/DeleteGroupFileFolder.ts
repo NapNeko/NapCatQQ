@@ -2,7 +2,7 @@ import { ActionName } from '@/onebot/action/router';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { z } from 'zod';
 import { NTQQGroupApi } from '@/core/apis';
-import { actionType } from '../type';
+import { actionType } from '@/common/coerce';
 const SchemaData = z.object({
     group_id: actionType.string(),
     folder_id: actionType.string().optional(),

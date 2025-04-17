@@ -3,7 +3,7 @@ import { OB11Construct } from '@/onebot/helper/data';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { z } from 'zod';
-import { actionType } from '../type';
+import { actionType } from '@/common/coerce';
 
 const SchemaData = z.object({
     no_cache: actionType.boolean().default(false),

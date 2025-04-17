@@ -4,7 +4,7 @@ import { FileNapCatOneBotUUID } from '@/common/file-uuid';
 import { ActionName } from '@/onebot/action/router';
 import { OB11MessageImage, OB11MessageVideo } from '@/onebot/types';
 import { z } from 'zod';
-import { actionType } from '../type';
+import { actionType } from '@/common/coerce';
 export interface GetFileResponse {
     file?: string;  // path
     url?: string;

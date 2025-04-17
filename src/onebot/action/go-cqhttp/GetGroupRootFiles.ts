@@ -4,7 +4,7 @@ import { ActionName } from '@/onebot/action/router';
 import { OB11GroupFile, OB11GroupFileFolder } from '@/onebot';
 import { OB11Construct } from '@/onebot/helper/data';
 import { z } from 'zod';
-import { actionType } from '../type';
+import { actionType } from '@/common/coerce';
 const SchemaData = z.object({
     group_id: actionType.string(),
     file_count: actionType.number().default(50),

@@ -2,7 +2,7 @@ import { type NTQQCollectionApi } from '@/core/apis/collection';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { z } from 'zod';
-import { actionType } from '../type';
+import { actionType } from '@/common/coerce';
 const SchemaData = z.object({
     category: actionType.number(),
     count: actionType.number().default(1),

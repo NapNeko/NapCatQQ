@@ -5,7 +5,7 @@ import { MessageUnique } from '@/common/message-unique';
 import { RawMessage } from '@/core';
 import { z } from 'zod';
 import { NetworkAdapterConfig } from '@/onebot/config/config';
-import { actionType } from '../type';
+import { actionType } from '@/common/coerce';
 export type ReturnDataType = OB11Message
 
 const SchemaData = z.object({

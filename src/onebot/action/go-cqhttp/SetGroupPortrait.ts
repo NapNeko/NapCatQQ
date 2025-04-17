@@ -4,7 +4,7 @@ import { checkFileExistV2, uriToLocalFile } from '@/common/file';
 import { z } from 'zod';
 import fs from 'node:fs/promises';
 import { GeneralCallResult } from '@/core';
-import { actionType } from '../type';
+import { actionType } from '@/common/coerce';
 const SchemaData = z.object({
     file: actionType.string(),
     group_id: actionType.string()

@@ -3,7 +3,7 @@ import { ActionName } from '@/onebot/action/router';
 import fs from 'node:fs/promises';
 import { checkFileExist, uriToLocalFile } from '@/common/file';
 import { z } from 'zod';
-import { actionType } from '../type';
+import { actionType } from '@/common/coerce';
 const SchemaData = z.object({
     file: actionType.string(),
 });
