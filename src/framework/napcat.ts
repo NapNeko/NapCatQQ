@@ -38,9 +38,9 @@ export async function NCoreInitFramework(
     const logger = new LogWrapper(pathWrapper.logsPath);
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
-    downloadFFmpegIfNotExists(logger).then(({ path, isExist }) => {
-        if (!isExist && path) {
-            FFmpegService.setFfmpegPath(path);
+    downloadFFmpegIfNotExists(logger).then(({ path, reset }) => {
+        if (reset && path) {
+            FFmpegService.setFfmpegPath(path,logger);
         }
     }).catch(e => {
         logger.logError('[Ffmpeg] Error:', e);
