@@ -91,7 +91,7 @@ function getSpecialMsgNum(payload: OB11PostSendMsg, msgType: OB11MessageDataType
 export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
     contextMode = ContextMode.Normal;
 
-    protected override async check(payload: OB11PostSendMsg): Promise<BaseCheckResult> {
+    protected override async check(payload: OB11PostSendMsg): Promise<BaseCheckResult & { parsedPayload?: OB11PostSendMsg }> {
         const messages = normalize(payload.message);
         const nodeElementLength = getSpecialMsgNum(payload, OB11MessageDataType.node);
         if (nodeElementLength > 0 && nodeElementLength != messages.length) {
@@ -100,7 +100,7 @@ export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
                 message: '转发消息不能和普通消息混在一起发送,转发需要保证message只有type为node的元素',
             };
         }
-        return { valid: true };
+        return { valid: true , parsedPayload: payload };
     }
 
     async _handle(payload: OB11PostSendMsg): Promise<ReturnDataType> {
