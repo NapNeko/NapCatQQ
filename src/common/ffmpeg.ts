@@ -6,25 +6,31 @@ import type { VideoInfo } from './video';
 import { fileTypeFromFile } from 'file-type';
 import imageSize from 'image-size';
 import { fileURLToPath } from 'node:url';
+import { platform } from 'node:os';
 const currentPath = dirname(fileURLToPath(import.meta.url));
 const execFileAsync = promisify(execFile);
 const getFFmpegPath = (tool: string): string => {
-    const exeName = `${tool}.exe`;
-    const isLocalExeExists = existsSync(path.join(currentPath, 'ffmpeg', exeName));
-
     if (process.platform === 'win32') {
+        const exeName = `${tool}.exe`;
+        const isLocalExeExists = existsSync(path.join(currentPath, 'ffmpeg', exeName));
         return isLocalExeExists ? path.join(currentPath, 'ffmpeg', exeName) : exeName;
     }
     return tool;
 };
-
-const FFMPEG_CMD = getFFmpegPath('ffmpeg');
-const FFPROBE_CMD = getFFmpegPath('ffprobe');
-
+export let FFMPEG_CMD = getFFmpegPath('ffmpeg');
+export let FFPROBE_CMD = getFFmpegPath('ffprobe');
 console.log('[Info] ffmpeg:', FFMPEG_CMD);
 console.log('[Info] ffprobe:', FFPROBE_CMD);
 export class FFmpegService {
     // 确保目标目录存在
+    public static setFfmpegPath(ffmpegPath: string): void {
+        if (platform() === 'win32') {
+            FFMPEG_CMD = path.join(ffmpegPath, 'ffmpeg.exe');
+            FFPROBE_CMD = path.join(ffmpegPath, 'ffprobe.exe');
+            console.log('[Info] ffmpeg:', FFMPEG_CMD);
+            console.log('[Info] ffprobe:', FFPROBE_CMD);
+        }
+    }
     private static ensureDirExists(filePath: string): void {
         const dir = dirname(filePath);
         if (!existsSync(dir)) {
