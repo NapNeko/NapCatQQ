@@ -38,6 +38,12 @@ jobs:
       - name: Build NapCat.Shell
         run: |
           npm i && cd napcat.webui && npm i && cd .. || exit 1
+          curl -sSL https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-04-16-12-54/ffmpeg-n7.1.1-6-g48c0f071d4-win64-lgpl-7.1.zip -o ffmpeg.zip
+          unzip -q ffmpeg.zip -d ffmpeg && rm ffmpeg.zip
+          cd ffmpeg
+          mv ffmpeg.exe ../external/ffmpeg/ffmpeg.exe
+          mv ffprobe.exe ../external/ffmpeg/ffprobe.exe
+          cd ..
           npm run build:shell && npm run depend || exit 1
           rm package-lock.json
       - name: Upload Artifact

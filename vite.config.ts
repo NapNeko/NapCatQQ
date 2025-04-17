@@ -23,6 +23,7 @@ if (process.env.NAPCAT_BUILDSYS == 'linux') {
 const UniversalBaseConfigPlugin: PluginOption[] = [
     cp({
         targets: [
+            { src: './external/ffmpeg/', dest: 'dist/ffmpeg', flatten: true },
             { src: './manifest.json', dest: 'dist' },
             { src: './src/core/external/napcat.json', dest: 'dist/config/' },
             { src: './src/native/packet', dest: 'dist/moehoo', flatten: false },
@@ -46,6 +47,7 @@ const UniversalBaseConfigPlugin: PluginOption[] = [
 const FrameworkBaseConfigPlugin: PluginOption[] = [
     cp({
         targets: [
+            { src: './external/ffmpeg/', dest: 'dist/ffmpeg', flatten: true },
             { src: './manifest.json', dest: 'dist' },
             { src: './src/core/external/napcat.json', dest: 'dist/config/' },
             { src: './src/native/packet', dest: 'dist/moehoo', flatten: false },
@@ -65,6 +67,7 @@ const FrameworkBaseConfigPlugin: PluginOption[] = [
 const ShellBaseConfigPlugin: PluginOption[] = [
     cp({
         targets: [
+            { src: './external/ffmpeg/', dest: 'dist/ffmpeg', flatten: true },
             { src: './src/native/packet', dest: 'dist/moehoo', flatten: false },
             { src: './src/native/pty', dest: 'dist/pty', flatten: false },
             { src: './napcat.webui/dist/', dest: 'dist/static/', flatten: false },
