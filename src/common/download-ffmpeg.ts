@@ -281,28 +281,72 @@ export async function downloadFFmpeg(
         return null;
     }
 }
+
+/**
+ * 检查系统PATH环境变量中是否存在指定可执行文件
+ * @param executable 可执行文件名
+ * @returns 如果找到返回完整路径，否则返回null
+ */
+function findExecutableInPath(executable: string): string | null {
+    // 仅适用于Windows系统
+    if (os.platform() !== 'win32') return null;
+
+    // 获取PATH环境变量
+    const pathEnv = process.env['PATH'] || '';
+    const pathDirs = pathEnv.split(';');
+
+    // 检查每个目录
+    for (const dir of pathDirs) {
+        if (!dir) continue;
+        try {
+            const filePath = path.join(dir, executable);
+            if (fs.existsSync(filePath)) {
+                return filePath;
+            }
+        } catch (error) {
+            continue;
+        }
+    }
+
+    return null;
+}
+
 export async function downloadFFmpegIfNotExists(log: LogWrapper) {
     // 仅限Windows
     if (os.platform() !== 'win32') {
         return {
             path: null,
-            isExist: false
+            reset: false
         };
     }
+    const ffmpegInPath = findExecutableInPath('ffmpeg.exe');
+    const ffprobeInPath = findExecutableInPath('ffprobe.exe');
+
+    if (ffmpegInPath && ffprobeInPath) {
+        const ffmpegDir = path.dirname(ffmpegInPath);
+        return {
+            path: ffmpegDir,
+            reset: true
+        };
+    }
+
+    // 如果环境变量中没有，检查项目目录中是否存在
     const currentPath = path.dirname(fileURLToPath(import.meta.url));
     const ffmpeg_exist = fs.existsSync(path.join(currentPath, 'ffmpeg', 'ffmpeg.exe'));
     const ffprobe_exist = fs.existsSync(path.join(currentPath, 'ffmpeg', 'ffprobe.exe'));
+
     if (!ffmpeg_exist || !ffprobe_exist) {
         await downloadFFmpeg(path.join(currentPath, 'ffmpeg'), path.join(currentPath, 'cache'), (percentage: number, message: string) => {
-            log.log(`[Ffmpeg] [Download] ${percentage}% - ${message}`);
+            log.log(`[FFmpeg] [Download] ${percentage}% - ${message}`);
         });
         return {
             path: path.join(currentPath, 'ffmpeg'),
-            isExist: false
+            reset: true
         }
     }
+
     return {
         path: path.join(currentPath, 'ffmpeg'),
-        isExist: true
+        reset: true
     }
 }

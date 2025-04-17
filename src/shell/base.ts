@@ -313,9 +313,9 @@ export async function NCoreInitShell() {
     const pathWrapper = new NapCatPathWrapper();
     const logger = new LogWrapper(pathWrapper.logsPath);
     handleUncaughtExceptions(logger);
-    downloadFFmpegIfNotExists(logger).then(({ path, isExist }) => {
-        if (!isExist && path) {
-            FFmpegService.setFfmpegPath(path);
+    downloadFFmpegIfNotExists(logger).then(({ path, reset }) => {
+        if (reset && path) {
+            FFmpegService.setFfmpegPath(path,logger);
         }
     }).catch(e => {
         logger.logError('[Ffmpeg] Error:', e);
