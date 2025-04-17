@@ -222,7 +222,7 @@ async function handleLoginInner(context: { isLogined: boolean }, logger: LogWrap
             logger.log(`可用于快速登录的 QQ：\n${historyLoginList
                 .map((u, index) => `${index + 1}. ${u.uin} ${u.nickName}`)
                 .join('\n')
-            }`);
+                }`);
         }
         loginService.getQRCodePicture();
         try {
@@ -314,10 +314,12 @@ export async function NCoreInitShell() {
     const logger = new LogWrapper(pathWrapper.logsPath);
     handleUncaughtExceptions(logger);
     downloadFFmpegIfNotExists(logger).then(({ path, isExist }) => {
-    if (!isExist && path) {
-        FFmpegService.setFfmpegPath(path);
-    }
-});
+        if (!isExist && path) {
+            FFmpegService.setFfmpegPath(path);
+        }
+    }).catch(e => {
+        logger.logError('[Ffmpeg] Error:', e);
+    });
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
 

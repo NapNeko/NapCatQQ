@@ -42,6 +42,8 @@ export async function NCoreInitFramework(
         if (!isExist && path) {
             FFmpegService.setFfmpegPath(path);
         }
+    }).catch(e => {
+        logger.logError('[Ffmpeg] Error:', e);
     });
     //直到登录成功后，执行下一步
     const selfInfo = await new Promise<SelfInfo>((resolveSelfInfo) => {
