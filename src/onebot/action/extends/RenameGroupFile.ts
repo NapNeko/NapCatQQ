@@ -2,12 +2,12 @@ import { ActionName } from '@/onebot/action/router';
 import { FileNapCatOneBotUUID } from '@/common/file-uuid';
 import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
 import { z } from 'zod';
-
+import { actionType } from '../type';
 const SchemaData = z.object({
-    group_id: z.coerce.string(),
-    file_id: z.coerce.string(),
-    current_parent_directory: z.coerce.string(),
-    new_name: z.coerce.string(),
+    group_id: actionType.string(),
+    file_id: actionType.string(),
+    current_parent_directory: actionType.string(),
+    new_name: actionType.string(),
 });
 
 type Payload = z.infer<typeof SchemaData>;
