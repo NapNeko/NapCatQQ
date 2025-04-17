@@ -2,12 +2,12 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { NTGroupRequestOperateTypes } from '@/core/types';
 import { ActionName } from '@/onebot/action/router';
 import { z } from 'zod';
-import { actionType } from '@/common/coerce';
+import { coerce } from '@/common/coerce';
 
 const SchemaData = z.object({
-    flag: actionType.string(),
-    approve: actionType.boolean().default(true),
-    reason: actionType.string().nullable().default(' '),
+    flag: coerce.string(),
+    approve: coerce.boolean().default(true),
+    reason: coerce.string().nullable().default(' '),
 });
 
 type Payload = z.infer<typeof SchemaData>;

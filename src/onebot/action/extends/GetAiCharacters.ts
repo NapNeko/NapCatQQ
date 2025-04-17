@@ -2,10 +2,10 @@ import { ActionName } from '@/onebot/action/router';
 import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
 import { AIVoiceChatType } from '@/core/packet/entities/aiChat';
 import { z } from 'zod';
-import { actionType } from '@/common/coerce';
+import { coerce } from '@/common/coerce';
 const SchemaData = z.object({
-    group_id: actionType.string(),
-    chat_type: actionType.number().default(1),
+    group_id: coerce.string(),
+    chat_type: coerce.number().default(1),
 });
 
 type Payload = z.infer<typeof SchemaData>;

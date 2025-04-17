@@ -1,9 +1,9 @@
 import { z } from 'zod';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { actionType } from '@/common/coerce';
+import { coerce } from '@/common/coerce';
 const SchemaData = z.object({
-    count: actionType.number().default(48),
+    count: coerce.number().default(48),
 });
 
 type Payload = z.infer<typeof SchemaData>;

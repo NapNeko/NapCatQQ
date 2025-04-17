@@ -4,10 +4,10 @@ import { checkFileExistV2, uriToLocalFile } from '@/common/file';
 import { z } from 'zod';
 import fs from 'node:fs/promises';
 import { GeneralCallResult } from '@/core';
-import { actionType } from '@/common/coerce';
+import { coerce } from '@/common/coerce';
 const SchemaData = z.object({
-    file: actionType.string(),
-    group_id: actionType.string()
+    file: coerce.string(),
+    group_id: coerce.string()
 });
 
 type Payload = z.infer<typeof SchemaData>;

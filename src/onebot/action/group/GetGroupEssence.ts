@@ -5,9 +5,9 @@ import { MessageUnique } from '@/common/message-unique';
 import crypto from 'crypto';
 import { z } from 'zod';
 import { NetworkAdapterConfig } from '@/onebot/config/config';
-import { actionType } from '@/common/coerce';
+import { coerce } from '@/common/coerce';
 const SchemaData = z.object({
-    group_id: actionType.string(),
+    group_id: coerce.string(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

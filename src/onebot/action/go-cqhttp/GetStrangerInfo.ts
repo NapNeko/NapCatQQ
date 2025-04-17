@@ -4,11 +4,11 @@ import { OB11Construct } from '@/onebot/helper/data';
 import { ActionName } from '@/onebot/action/router';
 import { calcQQLevel } from '@/common/helper';
 import { z } from 'zod';
-import { actionType } from '@/common/coerce';
+import { coerce } from '@/common/coerce';
 
 const SchemaData = z.object({
-    user_id: actionType.string(),
-    no_cache: actionType.boolean().default(false),
+    user_id: coerce.string(),
+    no_cache: coerce.boolean().default(false),
 });
 
 type Payload = z.infer<typeof SchemaData>;

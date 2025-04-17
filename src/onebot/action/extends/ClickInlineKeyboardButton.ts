@@ -1,14 +1,14 @@
 import { ActionName } from '@/onebot/action/router';
 import { OneBotAction } from '../OneBotAction';
 import { z } from 'zod';
-import { actionType } from '@/common/coerce';
+import { coerce } from '@/common/coerce';
 
 const SchemaData = z.object({
-    group_id: actionType.string(),
-    bot_appid: actionType.string(),
-    button_id: actionType.string().default(''),
-    callback_data: actionType.string().default(''),
-    msg_seq: actionType.string().default('10086'),
+    group_id: coerce.string(),
+    bot_appid: coerce.string(),
+    button_id: coerce.string().default(''),
+    callback_data: coerce.string().default(''),
+    msg_seq: coerce.string().default('10086'),
 });
 type Payload = z.infer<typeof SchemaData>;
 

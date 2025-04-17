@@ -5,16 +5,16 @@ import { join as joinPath } from 'node:path';
 import { calculateFileMD5, uriToLocalFile } from '@/common/file';
 import { randomUUID } from 'crypto';
 import { z } from 'zod';
-import { actionType } from '@/common/coerce';
+import { coerce } from '@/common/coerce';
 interface FileResponse {
     file: string;
 }
 
 const SchemaData = z.object({
-    url: actionType.string().optional(),
-    base64: actionType.string().optional(),
-    name: actionType.string().optional(),
-    headers: z.union([actionType.string(), z.array(actionType.string())]).optional(),
+    url: coerce.string().optional(),
+    base64: coerce.string().optional(),
+    name: coerce.string().optional(),
+    headers: z.union([coerce.string(), z.array(coerce.string())]).optional(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

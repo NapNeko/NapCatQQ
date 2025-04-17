@@ -4,9 +4,9 @@ import { checkFileExist, uriToLocalFile } from '@/common/file';
 import fs from 'fs';
 import { z } from 'zod';
 import { GeneralCallResultStatus } from '@/core';
-import { actionType } from '@/common/coerce';
+import { coerce } from '@/common/coerce';
 const SchemaData = z.object({
-    image: actionType.string(),
+    image: coerce.string(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

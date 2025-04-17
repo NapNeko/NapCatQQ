@@ -1,14 +1,14 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { z } from 'zod';
-import { actionType } from '@/common/coerce';
+import { coerce } from '@/common/coerce';
 interface Response {
     cookies: string,
     bkn: string
 }
 
 const SchemaData = z.object({
-    domain: actionType.string()
+    domain: coerce.string()
 });
 
 type Payload = z.infer<typeof SchemaData>;
