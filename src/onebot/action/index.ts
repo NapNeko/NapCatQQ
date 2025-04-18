@@ -114,6 +114,7 @@ import { TransGroupFile } from './extends/TransGroupFile';
 import { RenameGroupFile } from './extends/RenameGroupFile';
 import { GetRkeyServer } from './packet/GetRkeyServer';
 import { GetRkeyEx } from './packet/GetRkeyEx';
+import { CleanCache } from './system/CleanCache';
 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 
@@ -241,6 +242,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new ClickInlineKeyboardButton(obContext, core),
         new GetPrivateFileUrl(obContext, core),
         new GetUnidirectionalFriendList(obContext, core),
+        new CleanCache(obContext, core),
     ];
 
     type HandlerUnion = typeof actionHandlers[number];
