@@ -32,7 +32,7 @@ export class OB11Response {
 export abstract class OneBotAction<PayloadType, ReturnDataType> {
     actionName: typeof ActionName[keyof typeof ActionName] = ActionName.Unknown;
     core: NapCatCore;
-    payloadSchema?: z.ZodType<PayloadType, z.ZodTypeDef, unknown> = undefined;
+    payloadSchema?: z.ZodType<unknown> = undefined;
     obContext: NapCatOneBot11Adapter;
 
     constructor(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
@@ -40,15 +40,15 @@ export abstract class OneBotAction<PayloadType, ReturnDataType> {
         this.core = core;
     }
 
-    protected async check(payload: unknown): Promise<BaseCheckResult & { parsedPayload?: PayloadType }> {
+    protected async check(payload: unknown): Promise<BaseCheckResult> {
         if (!this.payloadSchema) {
-            return { valid: true, parsedPayload: payload as PayloadType };
+            return { valid: true };
         }
 
         try {
-            // 使用 zod 验证并转换数据，并返回解析后的数据
-            const parsedPayload = this.payloadSchema.parse(payload) as PayloadType;
-            return { valid: true, parsedPayload };
+            // 使用 zod 验证并转换数据
+            this.payloadSchema.parse(payload);
+            return { valid: true };
         } catch (error) {
             if (error instanceof z.ZodError) {
                 const errorMessages = error.errors.map(e =>
@@ -66,13 +66,13 @@ export abstract class OneBotAction<PayloadType, ReturnDataType> {
         }
     }
 
-    public async handle(payload: unknown, adaptername: string, config: NetworkAdapterConfig): Promise<OB11Return<ReturnDataType | null>> {
+    public async handle(payload: PayloadType, adaptername: string, config: NetworkAdapterConfig): Promise<OB11Return<ReturnDataType | null>> {
         const result = await this.check(payload);
         if (!result.valid) {
-            return OB11Response.error(result.message!, 400);
+            return OB11Response.error(result.message, 400);
         }
         try {
-            const resData = await this._handle(result.parsedPayload as PayloadType, adaptername, config);
+            const resData = await this._handle(payload, adaptername, config);
             return OB11Response.ok(resData);
         } catch (e: unknown) {
             this.core.context.logger.logError('发生错误', e);
@@ -80,13 +80,13 @@ export abstract class OneBotAction<PayloadType, ReturnDataType> {
         }
     }
 
-    public async websocketHandle(payload: unknown, echo: unknown, adaptername: string, config: NetworkAdapterConfig): Promise<OB11Return<ReturnDataType | null>> {
+    public async websocketHandle(payload: PayloadType, echo: unknown, adaptername: string, config: NetworkAdapterConfig): Promise<OB11Return<ReturnDataType | null>> {
         const result = await this.check(payload);
         if (!result.valid) {
-            return OB11Response.error(result.message!, 1400, echo);
+            return OB11Response.error(result.message, 1400, echo);
         }
         try {
-            const resData = await this._handle(result.parsedPayload as PayloadType, adaptername, config);
+            const resData = await this._handle(payload, adaptername, config);
             return OB11Response.ok(resData, echo);
         } catch (e: unknown) {
             this.core.context.logger.logError('发生错误', e);

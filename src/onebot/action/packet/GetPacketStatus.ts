@@ -1,9 +1,9 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
-import { ActionName } from '@/onebot/action/router';
+import { ActionName, BaseCheckResult } from '@/onebot/action/router';
 
 
 export abstract class GetPacketStatusDepends<PT, RT> extends OneBotAction<PT, RT> {
-    protected override async check(payload: PT) {
+    protected override async check(payload: PT): Promise<BaseCheckResult>{
         if (!this.core.apis.PacketApi.available) {
             return {
                 valid: false,

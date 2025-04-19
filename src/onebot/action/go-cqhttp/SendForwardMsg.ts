@@ -4,13 +4,18 @@ import { ActionName } from '@/onebot/action/router';
 
 // 未验证
 export class GoCQHTTPSendForwardMsgBase extends SendMsgBase {
-    override async _handle(payload: OB11PostSendMsg) {
+    protected override async check(payload: OB11PostSendMsg) {
         if (payload.messages) payload.message = normalize(payload.messages);
-        return super._handle(payload);
+        return super.check(payload);
     }
 }
 export class GoCQHTTPSendForwardMsg extends GoCQHTTPSendForwardMsgBase {
     override actionName = ActionName.GoCQHTTP_SendForwardMsg;
+
+    protected override async check(payload: OB11PostSendMsg) {
+        if (payload.messages) payload.message = normalize(payload.messages);
+        return super.check(payload);
+    }
 }
 export class GoCQHTTPSendPrivateForwardMsg extends GoCQHTTPSendForwardMsgBase {
     override actionName = ActionName.GoCQHTTP_SendPrivateForwardMsg;
