@@ -5,13 +5,13 @@ import fs from 'fs';
 import { uriToLocalFile } from '@/common/file';
 import { SendMessageContext } from '@/onebot/api';
 import { z } from 'zod';
-import { actionType } from '../type';
+
 const SchemaData = z.object({
-    group_id: actionType.string(),
-    file: actionType.string(),
-    name: actionType.string(),
-    folder: actionType.string().optional(),
-    folder_id: actionType.string().optional(),//临时扩展
+    group_id: z.coerce.string(),
+    file: z.coerce.string(),
+    name: z.coerce.string(),
+    folder: z.coerce.string().optional(),
+    folder_id: z.coerce.string().optional(),//临时扩展
 });
 
 type Payload = z.infer<typeof SchemaData>;

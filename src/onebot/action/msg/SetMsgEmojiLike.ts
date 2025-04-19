@@ -2,12 +2,11 @@ import { ActionName } from '@/onebot/action/router';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { MessageUnique } from '@/common/message-unique';
 import { z } from 'zod';
-import { actionType } from '../type';
 
 const SchemaData = z.object({
-    message_id: actionType.string(),
-    emoji_id: actionType.string(),
-    set: actionType.boolean().optional(),
+    message_id: z.coerce.string(),
+    emoji_id: z.coerce.string(),
+    set: z.coerce.boolean().optional(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

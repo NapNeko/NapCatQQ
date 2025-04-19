@@ -2,10 +2,10 @@ import { type NTQQCollectionApi } from '@/core/apis/collection';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { z } from 'zod';
-import { actionType } from '../type';
+
 const SchemaData = z.object({
-    category: actionType.number(),
-    count: actionType.number().default(1),
+    category: z.coerce.number(),
+    count: z.coerce.number().default(1),
 });
 
 type Payload = z.infer<typeof SchemaData>;

@@ -1,16 +1,15 @@
 import { ConfigBase } from '@/common/config-base';
 import { NapCatCore } from '@/core';
-import { actionType } from '@/onebot/action/type';
 import { z } from 'zod';
 
 export const NapcatConfigSchema = z.object({
-    fileLog: actionType.boolean().default(false),
-    consoleLog: actionType.boolean().default(true),
-    fileLogLevel: actionType.string().default('debug'),
-    consoleLogLevel: actionType.string().default('info'),
-    packetBackend: actionType.string().default('auto'),
-    packetServer: actionType.string().default(''),
-    o3HookMode: actionType.number().default(0),
+    fileLog: z.coerce.boolean().default(false),
+    consoleLog: z.coerce.boolean().default(true),
+    fileLogLevel: z.coerce.string().default('debug'),
+    consoleLogLevel: z.coerce.string().default('info'),
+    packetBackend: z.coerce.string().default('auto'),
+    packetServer: z.coerce.string().default(''),
+    o3HookMode: z.coerce.number().default(0),
 });
 
 export type NapcatConfig = z.infer<typeof NapcatConfigSchema>;

@@ -3,11 +3,11 @@ import { ChatType, Peer } from '@/core/types';
 import { ActionName } from '@/onebot/action/router';
 import { MessageUnique } from '@/common/message-unique';
 import { z } from 'zod';
-import { actionType } from '../type';
+
 const SchemaData = z.object({
-    message_id: actionType.string(),
-    group_id: actionType.string().optional(),
-    user_id: actionType.string().optional(),
+    message_id: z.coerce.string(),
+    group_id: z.coerce.string().optional(),
+    user_id: z.coerce.string().optional(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

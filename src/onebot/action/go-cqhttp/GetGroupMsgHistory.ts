@@ -5,17 +5,16 @@ import { ChatType, Peer } from '@/core/types';
 import { MessageUnique } from '@/common/message-unique';
 import { z } from 'zod';
 import { NetworkAdapterConfig } from '@/onebot/config/config';
-import { actionType } from '../type';
 
 interface Response {
     messages: OB11Message[];
 }
 
 const SchemaData = z.object({
-    group_id: actionType.string(),
-    message_seq: actionType.string().optional(),
-    count: actionType.number().default(20),
-    reverseOrder: actionType.boolean().default(false)
+    group_id: z.coerce.string(),
+    message_seq: z.coerce.string().optional(),
+    count: z.coerce.number().default(20),
+    reverseOrder: z.coerce.boolean().default(false)
 });
 
 
