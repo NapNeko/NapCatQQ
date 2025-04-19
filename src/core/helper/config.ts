@@ -1,6 +1,6 @@
 import { ConfigBase } from '@/common/config-base';
 import { NapCatCore } from '@/core';
-import { actionType } from '@/common/coerce';
+import { actionType } from '@/onebot/action/type';
 import { z } from 'zod';
 
 export const NapcatConfigSchema = z.object({

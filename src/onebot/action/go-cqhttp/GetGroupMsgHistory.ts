@@ -5,7 +5,7 @@ import { ChatType, Peer } from '@/core/types';
 import { MessageUnique } from '@/common/message-unique';
 import { z } from 'zod';
 import { NetworkAdapterConfig } from '@/onebot/config/config';
-import { actionType } from '@/common/coerce';
+import { actionType } from '../type';
 
 interface Response {
     messages: OB11Message[];

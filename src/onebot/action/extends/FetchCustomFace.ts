@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { actionType } from '@/common/coerce';
+import { actionType } from '../type';
 const SchemaData = z.object({
     count: actionType.number().default(48),
 });

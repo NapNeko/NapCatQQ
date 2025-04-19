@@ -4,7 +4,7 @@ import { checkFileExist, uriToLocalFile } from '@/common/file';
 import fs from 'fs';
 import { z } from 'zod';
 import { GeneralCallResultStatus } from '@/core';
-import { actionType } from '@/common/coerce';
+import { actionType } from '../type';
 const SchemaData = z.object({
     image: actionType.string(),
 });

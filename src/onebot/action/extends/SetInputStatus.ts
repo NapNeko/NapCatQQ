@@ -2,7 +2,7 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { ChatType } from '@/core';
 import { z } from 'zod';
-import { actionType } from '@/common/coerce';
+import { actionType } from '../type';
 const SchemaData = z.object({
     user_id: actionType.string(),
     event_type: actionType.number(),

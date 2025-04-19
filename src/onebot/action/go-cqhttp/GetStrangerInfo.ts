@@ -4,7 +4,7 @@ import { OB11Construct } from '@/onebot/helper/data';
 import { ActionName } from '@/onebot/action/router';
 import { calcQQLevel } from '@/common/helper';
 import { z } from 'zod';
-import { actionType } from '@/common/coerce';
+import { actionType } from '../type';
 
 const SchemaData = z.object({
     user_id: actionType.string(),

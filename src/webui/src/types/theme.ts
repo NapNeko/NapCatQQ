@@ -1,4 +1,4 @@
-import { actionType } from '@/common/coerce';
+import { actionType } from '@/onebot/action/type';
 import { z } from 'zod';
 
 export const themeType = z.object(

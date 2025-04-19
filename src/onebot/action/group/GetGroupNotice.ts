@@ -2,7 +2,7 @@ import { WebApiGroupNoticeFeed } from '@/core';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { z } from 'zod';
-import { actionType } from '@/common/coerce';
+import { actionType } from '../type';
 interface GroupNotice {
     sender_id: number;
     publish_time: number;
