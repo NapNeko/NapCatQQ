@@ -20,25 +20,26 @@ export const CheckDefaultTokenHandler: RequestHandler = async (_, res) => {
 export const LoginHandler: RequestHandler = async (req, res) => {
     // 获取WebUI配置
     const WebUiConfigData = await WebUiConfig.GetWebUIConfig();
-    // 获取请求体中的token
-    const { token } = req.body;
+    // 获取请求体中的hash
+    const { hash } = req.body;
     // 获取客户端IP
     const clientIP = req.ip || req.socket.remoteAddress || '';
 
     // 如果token为空，返回错误信息
-    if (isEmpty(token)) {
+    if (isEmpty(hash)) {
         return sendError(res, 'token is empty');
     }
     // 检查登录频率
     if (!WebUiDataRuntime.checkLoginRate(clientIP, WebUiConfigData.loginRate)) {
         return sendError(res, 'login rate limit');
     }
-    //验证config.token是否等于token
-    if (WebUiConfigData.token !== token) {
+    //验证config.token hash是否等于token hash
+    if (!AuthHelper.comparePasswordHash(WebUiConfigData.token, hash)) {
         return sendError(res, 'token is invalid');
     }
+
     // 签发凭证
-    const signCredential = Buffer.from(JSON.stringify(AuthHelper.signCredential(WebUiConfigData.token))).toString(
+    const signCredential = Buffer.from(JSON.stringify(AuthHelper.signCredential(hash))).toString(
         'base64'
     );
     // 返回成功信息
