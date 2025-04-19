@@ -2,11 +2,11 @@ import { ActionName } from '@/onebot/action/router';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { z } from 'zod';
 import { NTQQGroupApi } from '@/core/apis';
-import { coerce } from '@/common/coerce';
+import { actionType } from '@/common/coerce';
 const SchemaData = z.object({
-    group_id: coerce.string(),
-    folder_id: coerce.string().optional(),
-    folder: coerce.string().optional(),
+    group_id: actionType.string(),
+    folder_id: actionType.string().optional(),
+    folder: actionType.string().optional(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

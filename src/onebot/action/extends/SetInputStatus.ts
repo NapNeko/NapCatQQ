@@ -2,10 +2,10 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { ChatType } from '@/core';
 import { z } from 'zod';
-import { coerce } from '@/common/coerce';
+import { actionType } from '@/common/coerce';
 const SchemaData = z.object({
-    user_id: coerce.string(),
-    event_type: coerce.number(),
+    user_id: actionType.string(),
+    event_type: actionType.number(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

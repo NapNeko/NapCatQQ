@@ -2,10 +2,10 @@ import { ActionName } from '@/onebot/action/router';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { MessageUnique } from '@/common/message-unique';
 import { z } from 'zod';
-import { coerce } from '@/common/coerce';
+import { actionType } from '@/common/coerce';
 
 const SchemaData = z.object({
-    message_id: coerce.string(),
+    message_id: actionType.string(),
 });
 
 type Payload = z.infer<typeof SchemaData>;
