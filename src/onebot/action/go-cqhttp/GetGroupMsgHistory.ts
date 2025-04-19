@@ -14,7 +14,7 @@ const SchemaData = z.object({
     group_id: z.union([z.number(), z.string()]),
     message_seq: z.union([z.number(), z.string()]).optional(),
     count: z.union([z.number(), z.string()]).default(20),
-    reverseOrder: z.boolean().default(false)
+    reverseOrder: z.union([z.boolean(), z.string()]).optional()
 });
 
 
@@ -26,13 +26,17 @@ export default class GoCQHTTPGetGroupMsgHistory extends OneBotAction<Payload, Re
     override payloadSchema = SchemaData;
 
     async _handle(payload: Payload, _adapter: string, config: NetworkAdapterConfig): Promise<Response> {
+        //处理参数
+        const isReverseOrder = typeof payload.reverseOrder === 'string' ? payload.reverseOrder === 'true' : !!payload.reverseOrder;
         const peer: Peer = { chatType: ChatType.KCHATTYPEGROUP, peerUid: payload.group_id.toString() };
         const hasMessageSeq = !payload.message_seq ? !!payload.message_seq : !(payload.message_seq?.toString() === '' || payload.message_seq?.toString() === '0');
         //拉取消息
         const startMsgId = hasMessageSeq ? (MessageUnique.getMsgIdAndPeerByShortId(+payload.message_seq!)?.MsgId ?? payload.message_seq!.toString()) : '0';
         const msgList = hasMessageSeq ?
-            (await this.core.apis.MsgApi.getMsgHistory(peer, startMsgId, +payload.count, payload.reverseOrder)).msgList : (await this.core.apis.MsgApi.getAioFirstViewLatestMsgs(peer, +payload.count)).msgList;
+            (await this.core.apis.MsgApi.getMsgHistory(peer, startMsgId, +payload.count, isReverseOrder)).msgList : (await this.core.apis.MsgApi.getAioFirstViewLatestMsgs(peer, +payload.count)).msgList;
         if (msgList.length === 0) throw new Error(`消息${payload.message_seq}不存在`);
+        //翻转消息
+        if (isReverseOrder) msgList.reverse();
         //转换序号
         await Promise.all(msgList.map(async msg => {
             msg.id = MessageUnique.createUniqueMsgId({ guildId: '', chatType: msg.chatType, peerUid: msg.peerUid }, msg.msgId);
