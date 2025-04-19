@@ -2,20 +2,20 @@ import { checkFileExist, uriToLocalFile } from '@/common/file';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { unlink } from 'node:fs/promises';
-import { z } from 'zod';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = z.object({
-    group_id: z.union([z.number(), z.string()]),
-    content: z.string(),
-    image: z.string().optional(),
-    pinned: z.union([z.number(), z.string()]).default(0),
-    type: z.union([z.number(), z.string()]).default(1),
-    confirm_required: z.union([z.number(), z.string()]).default(1),
-    is_show_edit_card: z.union([z.number(), z.string()]).default(0),
-    tip_window_type: z.union([z.number(), z.string()]).default(0),
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
+    content: Type.String(),
+    image: Type.Optional(Type.String()),
+    pinned: Type.Union([Type.Number(), Type.String()], { default: 0 }),
+    type: Type.Union([Type.Number(), Type.String()], { default: 1 }),
+    confirm_required: Type.Union([Type.Number(), Type.String()], { default: 1 }),
+    is_show_edit_card: Type.Union([Type.Number(), Type.String()], { default: 0 }),
+    tip_window_type: Type.Union([Type.Number(), Type.String()], { default: 0 })
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export class SendGroupNotice extends OneBotAction<Payload, null> {
     override actionName = ActionName.GoCQHTTP_SendGroupNotice;

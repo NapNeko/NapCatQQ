@@ -3,14 +3,14 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { OB11GroupFile, OB11GroupFileFolder } from '@/onebot';
 import { OB11Construct } from '@/onebot/helper/data';
-import { z } from 'zod';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = z.object({
-    group_id: z.union([z.number(), z.string()]),
-    file_count: z.union([z.number(), z.string()]).default(50),
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
+    file_count: Type.Union([Type.Number(), Type.String()], { default: 50 }),
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export class GetGroupRootFiles extends OneBotAction<Payload, {
     files: OB11GroupFile[],

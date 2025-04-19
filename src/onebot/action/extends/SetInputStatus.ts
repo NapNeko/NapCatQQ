@@ -1,14 +1,14 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { ChatType } from '@/core';
-import { z } from 'zod';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = z.object({
-    user_id: z.union([z.number(), z.string()]),
-    event_type: z.number(),
+const SchemaData = Type.Object({
+    user_id: Type.Union([Type.Number(), Type.String()]),
+    event_type: Type.Number(),
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export class SetInputStatus extends OneBotAction<Payload, unknown> {
     override actionName = ActionName.SetInputStatus;

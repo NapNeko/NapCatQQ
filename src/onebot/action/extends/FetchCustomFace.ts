@@ -1,12 +1,12 @@
-import { z } from 'zod';
+import { Type, Static } from '@sinclair/typebox';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 
-const SchemaData = z.object({
-    count: z.number().default(48),
+const SchemaData = Type.Object({
+    count: Type.Union([Type.Number(), Type.String()], { default: 48 }),
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export class FetchCustomFace extends OneBotAction<Payload, string[]> {
     override actionName = ActionName.FetchCustomFace;

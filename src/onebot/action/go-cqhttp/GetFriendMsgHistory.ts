@@ -3,21 +3,22 @@ import { OB11Message } from '@/onebot';
 import { ActionName } from '@/onebot/action/router';
 import { ChatType } from '@/core/types';
 import { MessageUnique } from '@/common/message-unique';
-import { z } from 'zod';
+
+import { Static, Type } from '@sinclair/typebox';
 import { NetworkAdapterConfig } from '@/onebot/config/config';
 
 interface Response {
     messages: OB11Message[];
 }
-const SchemaData = z.object({
-    user_id: z.union([z.number(), z.string()]),
-    message_seq: z.union([z.number(), z.string()]).optional(),
-    count: z.union([z.number(), z.string()]).default(20),
-    reverseOrder: z.union([z.boolean(), z.string()]).optional()
+const SchemaData = Type.Object({
+    user_id: Type.Union([Type.Number(), Type.String()]),
+    message_seq: Type.Optional(Type.Union([Type.Number(), Type.String()])),
+    count: Type.Union([Type.Number(), Type.String()], { default: 20 }),
+    reverseOrder: Type.Optional(Type.Union([Type.Boolean(), Type.String()]))
 });
 
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export default class GetFriendMsgHistory extends OneBotAction<Payload, Response> {
     override actionName = ActionName.GetFriendMsgHistory;

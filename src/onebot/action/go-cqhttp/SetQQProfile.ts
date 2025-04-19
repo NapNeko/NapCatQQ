@@ -1,15 +1,15 @@
 import { NTQQUserApi } from '@/core/apis';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { z } from 'zod';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = z.object({
-    nickname: z.string(),
-    personal_note: z.string().optional(),
-    sex: z.union([z.number(), z.string()]).optional(), // 传Sex值？建议传0
+const SchemaData = Type.Object({
+    nickname: Type.String(),
+    personal_note: Type.Optional(Type.String()),
+    sex: Type.Optional(Type.Union([Type.Number(), Type.String()])), // 传Sex值？建议传0
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 export class SetQQProfile extends OneBotAction<Payload, Awaited<ReturnType<NTQQUserApi['modifySelfProfile']>> | null> {
     override actionName = ActionName.SetQQProfile;
     override payloadSchema = SchemaData;

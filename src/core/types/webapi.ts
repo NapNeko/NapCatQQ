@@ -115,7 +115,7 @@ export interface GroupEssenceMsg {
     add_digest_uin: string;
     add_digest_nick: string;
     add_digest_time: number;
-    msg_content: { msg_type: number, text?: string, image_url?: string }[];
+    msg_content: unknown[];
     can_be_removed: true;
 }
 

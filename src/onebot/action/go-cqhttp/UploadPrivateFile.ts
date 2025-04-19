@@ -5,15 +5,15 @@ import fs from 'fs';
 import { uriToLocalFile } from '@/common/file';
 import { SendMessageContext } from '@/onebot/api';
 import { ContextMode, createContext } from '@/onebot/action/msg/SendMsg';
-import { z } from 'zod';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = z.object({
-    user_id: z.union([z.number(), z.string()]),
-    file: z.string(),
-    name: z.string(),
+const SchemaData = Type.Object({
+    user_id: Type.Union([Type.Number(), Type.String()]),
+    file: Type.String(),
+    name: Type.String(),
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export default class GoCQHTTPUploadPrivateFile extends OneBotAction<Payload, null> {
     override actionName = ActionName.GOCQHTTP_UploadPrivateFile;

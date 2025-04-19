@@ -2,15 +2,15 @@ import { OB11GroupMember } from '@/onebot';
 import { OB11Construct } from '@/onebot/helper/data';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { z } from 'zod';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = z.object({
-    group_id: z.union([z.number(), z.string()]),
-    user_id: z.union([z.number(), z.string()]),
-    no_cache: z.boolean().default(false),
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
+    user_id: Type.Union([Type.Number(), Type.String()]),
+    no_cache: Type.Optional(Type.Union([Type.Boolean(), Type.String()])),
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 class GetGroupMemberInfo extends OneBotAction<Payload, OB11GroupMember> {
     override actionName = ActionName.GetGroupMemberInfo;

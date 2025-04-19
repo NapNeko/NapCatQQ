@@ -1,14 +1,14 @@
 import { ActionName } from '@/onebot/action/router';
 import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
-import { z } from 'zod';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = z.object({
-    group_id: z.union([z.number(), z.string()]),
-    user_id: z.union([z.number(), z.string()]),
-    special_title: z.string({ default: '' }),
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
+    user_id: Type.Union([Type.Number(), Type.String()]),
+    special_title: Type.String({ default: '' }),
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export class SetSpecialTitle extends GetPacketStatusDepends<Payload, void> {
     override actionName = ActionName.SetSpecialTitle;

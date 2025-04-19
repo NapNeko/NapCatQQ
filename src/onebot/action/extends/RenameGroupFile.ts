@@ -1,16 +1,16 @@
 import { ActionName } from '@/onebot/action/router';
 import { FileNapCatOneBotUUID } from '@/common/file-uuid';
 import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
-import { z } from 'zod';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = z.object({
-    group_id: z.union([z.number(), z.string()]),
-    file_id: z.string(),
-    current_parent_directory: z.string(),
-    new_name: z.string(),
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
+    file_id: Type.String(),
+    current_parent_directory: Type.String(),
+    new_name: Type.String(),
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 interface RenameGroupFileResponse {
     ok: boolean;

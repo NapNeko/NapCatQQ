@@ -1,15 +1,15 @@
 import { ActionName } from '@/onebot/action/router';
 import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
 import { AIVoiceChatType } from '@/core/packet/entities/aiChat';
-import { z } from 'zod';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = z.object({
-    character: z.string(),
-    group_id: z.union([z.number(), z.string()]),
-    text: z.string(),
+const SchemaData = Type.Object({
+    character: Type.String(),
+    group_id: Type.Union([Type.Number(), Type.String()]),
+    text: Type.String(),
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 
 export class SendGroupAiRecord extends GetPacketStatusDepends<Payload, {

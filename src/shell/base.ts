@@ -143,7 +143,7 @@ async function handleLogin(
             handleLoginInner(context, logger, loginService, quickLoginUin, historyLoginList).then().catch(e => logger.logError(e));
             loginListener.onLoginConnected = () => { };
         });
-    };
+    }
     loginListener.onQRCodeGetPicture = ({ pngBase64QrcodeData, qrcodeUrl }) => {
         WebUiDataRuntime.setQQLoginQrcodeURL(qrcodeUrl);
 
