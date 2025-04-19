@@ -1,15 +1,16 @@
 import { ActionName } from '@/onebot/action/router';
 import { OneBotAction } from '../OneBotAction';
-import { z } from 'zod';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = z.object({
-    group_id: z.string(),
-    bot_appid: z.string(),
-    button_id: z.string().default(''),
-    callback_data: z.string().default(''),
-    msg_seq: z.string().default('10086'),
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
+    bot_appid: Type.String(),
+    button_id: Type.String({ default: '' }),
+    callback_data: Type.String({ default: '' }),
+    msg_seq: Type.String({ default: '10086' }),
 });
-type Payload = z.infer<typeof SchemaData>;
+
+type Payload = Static<typeof SchemaData>;
 
 export class ClickInlineKeyboardButton extends OneBotAction<Payload, unknown> {
     override actionName = ActionName.ClickInlineKeyboardButton;
@@ -24,6 +25,6 @@ export class ClickInlineKeyboardButton extends OneBotAction<Payload, unknown> {
             callback_data: payload.callback_data,
             dmFlag: 0,
             chatType: 2
-        });
+        })
     }
 }

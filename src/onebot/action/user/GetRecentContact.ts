@@ -2,13 +2,13 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { NetworkAdapterConfig } from '@/onebot/config/config';
-import { z } from 'zod';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = z.object({
-    count: z.number().default(10),
+const SchemaData = Type.Object({
+    count: Type.Union([Type.Number(), Type.String()], { default: 10 }),
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export default class GetRecentContact extends OneBotAction<Payload, unknown> {
     override actionName = ActionName.GetRecentContact;

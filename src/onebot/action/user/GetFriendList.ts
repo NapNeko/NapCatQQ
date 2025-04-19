@@ -2,13 +2,13 @@ import { OB11User } from '@/onebot';
 import { OB11Construct } from '@/onebot/helper/data';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { z } from 'zod';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = z.object({
-    no_cache: z.boolean().optional(),
+const SchemaData = Type.Object({
+    no_cache: Type.Optional(Type.Union([Type.Boolean(), Type.String()])),
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export default class GetFriendList extends OneBotAction<Payload, OB11User[]> {
     override actionName = ActionName.GetFriendList;

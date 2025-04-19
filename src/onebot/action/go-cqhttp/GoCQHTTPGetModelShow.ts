@@ -1,12 +1,12 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { z } from 'zod';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = z.object({
-    model: z.string(),
+const SchemaData = Type.Object({
+    model: Type.String(),
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export class GoCQHTTPGetModelShow extends OneBotAction<Payload, Array<{
     variants: {

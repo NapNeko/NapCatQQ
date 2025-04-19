@@ -1,14 +1,14 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { z } from 'zod';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = z.object({
-    face_id: z.union([z.number(), z.string()]),// 参考 face_config.json 的 QSid
-    face_type: z.union([z.number(), z.string()]).default('1'),
-    wording: z.string().default(' '),
+const SchemaData = Type.Object({
+    face_id: Type.Union([Type.Number(), Type.String()]),// 参考 face_config.json 的 QSid
+    face_type: Type.Union([Type.Number(), Type.String()], { default: '1' }),
+    wording: Type.String({ default: ' ' }),
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export class SetDiyOnlineStatus extends OneBotAction<Payload, string> {
     override actionName = ActionName.SetDiyOnlineStatus;

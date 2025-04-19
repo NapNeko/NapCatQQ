@@ -2,14 +2,15 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { OB11Message, OB11MessageData, OB11MessageDataType, OB11MessageForward, OB11MessageNodePlain as OB11MessageNode } from '@/onebot';
 import { ActionName } from '@/onebot/action/router';
 import { MessageUnique } from '@/common/message-unique';
+import { Static, Type } from '@sinclair/typebox';
 import { ChatType, ElementType, MsgSourceType, NTMsgType, RawMessage } from '@/core';
-import { z } from 'zod';
 
-const SchemaData = z.object({
-    message_id: z.union([z.number(), z.string()]).optional(),
-    id: z.union([z.number(), z.string()]).optional(),
+const SchemaData = Type.Object({
+    message_id: Type.Optional(Type.Union([Type.Number(), Type.String()])),
+    id: Type.Optional(Type.Union([Type.Number(), Type.String()])),
 });
-type Payload = z.infer<typeof SchemaData>;
+
+type Payload = Static<typeof SchemaData>;
 
 export class GoCQHTTPGetForwardMsgAction extends OneBotAction<Payload, {
     messages: OB11Message[] | undefined;

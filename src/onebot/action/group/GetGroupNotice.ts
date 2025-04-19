@@ -1,7 +1,7 @@
 import { WebApiGroupNoticeFeed } from '@/core';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { z } from 'zod';
+import { Static, Type } from '@sinclair/typebox';
 interface GroupNotice {
     sender_id: number;
     publish_time: number;
@@ -16,11 +16,11 @@ interface GroupNotice {
     };
 }
 
-const SchemaData = z.object({
-    group_id: z.union([z.number(), z.string()]),
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 type ApiGroupNotice = GroupNotice & WebApiGroupNoticeFeed;
 

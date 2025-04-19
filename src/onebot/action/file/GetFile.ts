@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 import { FileNapCatOneBotUUID } from '@/common/file-uuid';
 import { ActionName } from '@/onebot/action/router';
 import { OB11MessageImage, OB11MessageVideo } from '@/onebot/types';
-import { z } from 'zod';
+import { Static, Type } from '@sinclair/typebox';
 
 export interface GetFileResponse {
     file?: string;  // path
@@ -13,13 +13,13 @@ export interface GetFileResponse {
     base64?: string;
 }
 
-const GetFileBase_PayloadSchema = z.object({
-    file: z.string().optional(),
-    file_id: z.string().optional(),
+const GetFileBase_PayloadSchema = Type.Object({
+    file: Type.Optional(Type.String()),
+    file_id: Type.Optional(Type.String())
 });
 
 
-export type GetFilePayload = z.infer<typeof GetFileBase_PayloadSchema>;
+export type GetFilePayload = Static<typeof GetFileBase_PayloadSchema>;
 
 export class GetFileBase extends OneBotAction<GetFilePayload, GetFileResponse> {
     override payloadSchema = GetFileBase_PayloadSchema;

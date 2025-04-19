@@ -1,13 +1,13 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { z } from 'zod';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = z.object({
-    times: z.union([z.number(), z.string()]).default(1),
-    user_id: z.union([z.number(), z.string()])
+const SchemaData = Type.Object({
+    times: Type.Union([Type.Number(), Type.String()], { default: 1 }),
+    user_id: Type.Union([Type.Number(), Type.String()])
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export default class SendLike extends OneBotAction<Payload, null> {
     override actionName = ActionName.SendLike;

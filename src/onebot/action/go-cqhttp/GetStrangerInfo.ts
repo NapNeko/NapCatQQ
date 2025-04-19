@@ -3,14 +3,14 @@ import { OB11User, OB11UserSex } from '@/onebot';
 import { OB11Construct } from '@/onebot/helper/data';
 import { ActionName } from '@/onebot/action/router';
 import { calcQQLevel } from '@/common/helper';
-import { z } from 'zod';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = z.object({
-    user_id: z.union([z.number(), z.string()]),
-    no_cache: z.boolean().default(false),
+const SchemaData = Type.Object({
+    user_id: Type.Union([Type.Number(), Type.String()]),
+    no_cache: Type.Union([Type.Boolean(), Type.String()], { default: false }),
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export default class GoCQHTTPGetStrangerInfo extends OneBotAction<Payload, OB11User & { uid: string }> {
     override actionName = ActionName.GoCQHTTP_GetStrangerInfo;

@@ -2,14 +2,14 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { checkFileExist, uriToLocalFile } from '@/common/file';
 import fs from 'fs';
-import { z } from 'zod';
+import { Static, Type } from '@sinclair/typebox';
 import { GeneralCallResultStatus } from '@/core';
 
-const SchemaData = z.object({
-    image: z.string(),
+const SchemaData = Type.Object({
+    image: Type.String(),
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 class OCRImageBase extends OneBotAction<Payload, GeneralCallResultStatus> {
     override payloadSchema = SchemaData;

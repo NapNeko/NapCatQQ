@@ -44,7 +44,7 @@ export class NTQQFileApi {
             'https://secret-service.bietiaop.com/rkeys',
             'http://ss.xingzhige.com/music_card/rkey',
         ],
-        this.context.logger
+            this.context.logger
         );
     }
 
@@ -308,18 +308,18 @@ export class NTQQFileApi {
                     element.elementType === ElementType.FILE
                 ) {
                     switch (element.elementType) {
-                    case ElementType.PIC:
+                        case ElementType.PIC:
                             element.picElement!.sourcePath = elementResults?.[elementIndex] ?? '';
-                        break;
-                    case ElementType.VIDEO:
+                            break;
+                        case ElementType.VIDEO:
                             element.videoElement!.filePath = elementResults?.[elementIndex] ?? '';
-                        break;
-                    case ElementType.PTT:
+                            break;
+                        case ElementType.PTT:
                             element.pttElement!.filePath = elementResults?.[elementIndex] ?? '';
-                        break;
-                    case ElementType.FILE:
+                            break;
+                        case ElementType.FILE:
                             element.fileElement!.filePath = elementResults?.[elementIndex] ?? '';
-                        break;
+                            break;
                     }
                     elementIndex++;
                 }

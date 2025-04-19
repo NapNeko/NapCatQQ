@@ -1,16 +1,16 @@
-import { WebHonorType } from '@/core';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { z } from 'zod';
+import { WebHonorType } from '@/core/types';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = z.object({
-    group_id: z.union([z.number(), z.string()]),
-    type: z.nativeEnum(WebHonorType).optional()
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
+    type: Type.Optional(Type.Enum(WebHonorType))
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
-export class GetGroupHonorInfo extends OneBotAction<Payload, unknown> {
+export class GetGroupHonorInfo extends OneBotAction<Payload, Array<unknown>> {
     override actionName = ActionName.GetGroupHonorInfo;
     override payloadSchema = SchemaData;
 

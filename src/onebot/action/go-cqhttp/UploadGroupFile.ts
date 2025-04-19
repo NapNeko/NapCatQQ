@@ -4,17 +4,17 @@ import { ChatType, Peer } from '@/core/types';
 import fs from 'fs';
 import { uriToLocalFile } from '@/common/file';
 import { SendMessageContext } from '@/onebot/api';
-import { z } from 'zod';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = z.object({
-    group_id: z.union([z.number(), z.string()]),
-    file: z.string(),
-    name: z.string(),
-    folder: z.string().optional(),
-    folder_id: z.string().optional(),//临时扩展
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
+    file: Type.String(),
+    name: Type.String(),
+    folder: Type.Optional(Type.String()),
+    folder_id: Type.Optional(Type.String()),//临时扩展
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export default class GoCQHTTPUploadGroupFile extends OneBotAction<Payload, null> {
     override actionName = ActionName.GoCQHTTP_UploadGroupFile;

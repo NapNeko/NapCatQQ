@@ -1,15 +1,15 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { checkFileExistV2, uriToLocalFile } from '@/common/file';
-import { z } from 'zod';
+import { Static, Type } from '@sinclair/typebox';
 import fs from 'node:fs/promises';
 import { GeneralCallResult } from '@/core';
-const SchemaData = z.object({
-    file: z.string(),
-    group_id: z.union([z.number(), z.string()])
+const SchemaData = Type.Object({
+    file: Type.String(),
+    group_id: Type.Union([Type.Number(), Type.String()])
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export default class SetGroupPortrait extends OneBotAction<Payload, GeneralCallResult> {
     override actionName = ActionName.SetGroupPortrait;

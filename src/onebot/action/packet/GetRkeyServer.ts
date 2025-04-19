@@ -30,7 +30,7 @@ export class GetRkeyServer extends GetPacketStatusDepends<void, { private_rkey?:
             private_rkey: privateRkeyItem ? privateRkeyItem.rkey : undefined,
             group_rkey: groupRkeyItem ? groupRkeyItem.rkey : undefined,
             expired_time: this.expiryTime,
-            name: 'NapCat 4'
+            name: "NapCat 4"
         };
 
         return this.rkeyCache;

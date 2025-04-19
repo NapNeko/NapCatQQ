@@ -1,15 +1,15 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { NTGroupRequestOperateTypes } from '@/core/types';
 import { ActionName } from '@/onebot/action/router';
-import { z } from 'zod';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = z.object({
-    flag: z.union([z.string(), z.number()]),
-    approve: z.boolean().default(true),
-    reason: z.union([z.string(), z.null()]).default(' '),
+const SchemaData = Type.Object({
+    flag: Type.Union([Type.String(), Type.Number()]),
+    approve: Type.Optional(Type.Union([Type.Boolean(), Type.String()])),
+    reason: Type.Optional(Type.Union([Type.String({ default: ' ' }), Type.Null()])),
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export default class SetGroupAddRequest extends OneBotAction<Payload, null> {
     override actionName = ActionName.SetGroupAddRequest;

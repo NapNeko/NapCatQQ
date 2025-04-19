@@ -8,7 +8,7 @@ export class GetRkeyEx extends GetPacketStatusDepends<void, unknown> {
         let rkeys = await this.core.apis.PacketApi.pkt.operation.FetchRkey();
         return rkeys.map(rkey => {
             return {
-                type: rkey.type === 10 ? 'private' : 'group',
+                type: rkey.type === 10 ? "private" : "group",
                 rkey: rkey.rkey,
                 created_at: rkey.time,
                 ttl: rkey.ttl,

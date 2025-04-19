@@ -1,15 +1,15 @@
 import { NTVoteInfo } from '@/core';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { z } from 'zod';
+import { Type, Static } from '@sinclair/typebox';
 
-const SchemaData = z.object({
-    user_id: z.string().optional(),
-    start: z.number().default(0),
-    count: z.number().default(10),
+const SchemaData = Type.Object({
+    user_id: Type.Optional(Type.Union([Type.Number(), Type.String()])),
+    start: Type.Union([Type.Number(), Type.String()], { default: 0 }),
+    count: Type.Union([Type.Number(), Type.String()], { default: 10 })
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export class GetProfileLike extends OneBotAction<Payload, {
     uid: string;

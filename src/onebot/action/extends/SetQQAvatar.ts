@@ -2,13 +2,13 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import fs from 'node:fs/promises';
 import { checkFileExist, uriToLocalFile } from '@/common/file';
-import { z } from 'zod';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = z.object({
-    file: z.string(),
+const SchemaData = Type.Object({
+    file: Type.String(),
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export default class SetAvatar extends OneBotAction<Payload, null> {
     override actionName = ActionName.SetQQAvatar;

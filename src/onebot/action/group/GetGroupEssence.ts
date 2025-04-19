@@ -3,14 +3,14 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { MessageUnique } from '@/common/message-unique';
 import crypto from 'crypto';
-import { z } from 'zod';
+import { Static, Type } from '@sinclair/typebox';
 import { NetworkAdapterConfig } from '@/onebot/config/config';
 
-const SchemaData = z.object({
-    group_id: z.union([z.number(), z.string()]),
+const SchemaData = Type.Object({
+    group_id: Type.Union([Type.Number(), Type.String()]),
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 
 export class GetGroupEssence extends OneBotAction<Payload, unknown> {
     override actionName = ActionName.GoCQHTTP_GetEssenceMsg;

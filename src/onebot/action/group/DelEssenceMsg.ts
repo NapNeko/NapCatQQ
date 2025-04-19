@@ -1,13 +1,13 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { MessageUnique } from '@/common/message-unique';
-import { z } from 'zod';
+import { Static, Type } from '@sinclair/typebox';
 
-const SchemaData = z.object({
-    message_id: z.union([z.number(), z.string()]),
+const SchemaData = Type.Object({
+    message_id: Type.Union([Type.Number(), Type.String()]),
 });
 
-type Payload = z.infer<typeof SchemaData>;
+type Payload = Static<typeof SchemaData>;
 export default class DelEssenceMsg extends OneBotAction<Payload, unknown> {
     override actionName = ActionName.DelEssenceMsg;
     override payloadSchema = SchemaData;
