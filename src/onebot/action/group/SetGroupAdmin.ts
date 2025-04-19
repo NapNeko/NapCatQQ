@@ -4,8 +4,8 @@ import { ActionName } from '@/onebot/action/router';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    group_id: z.coerce.string(),
-    user_id: z.coerce.string(),
+    group_id: z.union([z.coerce.number(), z.coerce.string()]),
+    user_id: z.union([z.coerce.number(), z.coerce.string()]),
     enable: z.coerce.boolean().default(false),
 });
 

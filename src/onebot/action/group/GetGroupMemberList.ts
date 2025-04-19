@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { GroupMember } from '@/core';
 
 const SchemaData = z.object({
-    group_id: z.coerce.string(),
+    group_id: z.union([z.coerce.number(), z.coerce.string()]),
     no_cache: z.coerce.boolean().default(false)
 });
 

@@ -6,7 +6,7 @@ import fs from 'node:fs/promises';
 import { GeneralCallResult } from '@/core';
 const SchemaData = z.object({
     file: z.coerce.string(),
-    group_id: z.coerce.string()
+    group_id: z.union([z.coerce.number(), z.coerce.string()])
 });
 
 type Payload = z.infer<typeof SchemaData>;

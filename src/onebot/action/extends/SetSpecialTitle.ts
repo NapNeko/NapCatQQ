@@ -3,8 +3,8 @@ import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    group_id: z.coerce.string(),
-    user_id: z.coerce.string(),
+    group_id: z.union([z.coerce.number(), z.coerce.string()]),
+    user_id: z.union([z.coerce.number(), z.coerce.string()]),
     special_title: z.coerce.string().default(''),
 });
 

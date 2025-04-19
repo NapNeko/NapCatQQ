@@ -5,9 +5,9 @@ import { MessageUnique } from '@/common/message-unique';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    user_id: z.coerce.string().optional(),
-    group_id: z.coerce.string().optional(),
-    message_id: z.coerce.string().optional(),
+    user_id: z.union([z.coerce.string(), z.coerce.number()]).optional(),
+    group_id: z.union([z.coerce.string(), z.coerce.number()]).optional(),
+    message_id: z.union([z.coerce.string(), z.coerce.number()]).optional(),
 });
 
 type PlayloadType = z.infer<typeof SchemaData>;

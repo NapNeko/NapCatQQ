@@ -4,7 +4,7 @@ import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    group_id: z.coerce.string(),
+    group_id: z.union([z.coerce.number(), z.coerce.string()]),
     file_id: z.coerce.string(),
     current_parent_directory: z.coerce.string(),
     target_parent_directory: z.coerce.string(),

@@ -5,14 +5,14 @@ import { unlink } from 'node:fs/promises';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    group_id: z.coerce.string(),
+    group_id: z.union([z.coerce.number(), z.coerce.string()]),
     content: z.coerce.string(),
     image: z.coerce.string().optional(),
-    pinned: z.coerce.number().default(0),
-    type: z.coerce.number().default(1),
-    confirm_required: z.coerce.number().default(1),
-    is_show_edit_card: z.coerce.number().default(0),
-    tip_window_type: z.coerce.number().default(0),
+    pinned: z.union([z.coerce.number(), z.coerce.string()]).default(0),
+    type: z.union([z.coerce.number(), z.coerce.string()]).default(1),
+    confirm_required: z.union([z.coerce.number(), z.coerce.string()]).default(1),
+    is_show_edit_card: z.union([z.coerce.number(), z.coerce.string()]).default(0),
+    tip_window_type: z.union([z.coerce.number(), z.coerce.string()]).default(0),
 });
 
 type Payload = z.infer<typeof SchemaData>;
