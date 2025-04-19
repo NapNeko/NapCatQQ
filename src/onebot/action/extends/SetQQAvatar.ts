@@ -3,9 +3,9 @@ import { ActionName } from '@/onebot/action/router';
 import fs from 'node:fs/promises';
 import { checkFileExist, uriToLocalFile } from '@/common/file';
 import { z } from 'zod';
-import { coerce } from '@/common/coerce';
+import { actionType } from '@/common/coerce';
 const SchemaData = z.object({
-    file: coerce.string(),
+    file: actionType.string(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

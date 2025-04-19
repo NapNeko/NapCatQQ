@@ -3,34 +3,34 @@ import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
 import { MiniAppInfo, MiniAppInfoHelper } from '@/core/packet/utils/helper/miniAppHelper';
 import { MiniAppData, MiniAppRawData, MiniAppReqCustomParams, MiniAppReqParams } from '@/core/packet/entities/miniApp';
 import { z } from 'zod';
-import { coerce } from '@/common/coerce';
+import { actionType } from '@/common/coerce';
 const SchemaData = z.union([
     z.object({
         type: z.union([z.literal('bili'), z.literal('weibo')]),
-        title: coerce.string(),
-        desc: coerce.string(),
-        picUrl: coerce.string(),
-        jumpUrl: coerce.string(),
-        webUrl: coerce.string().optional(),
-        rawArkData: coerce.string().optional()
+        title: actionType.string(),
+        desc: actionType.string(),
+        picUrl: actionType.string(),
+        jumpUrl: actionType.string(),
+        webUrl: actionType.string().optional(),
+        rawArkData: actionType.string().optional()
     }),
     z.object({
-        title: coerce.string(),
-        desc: coerce.string(),
-        picUrl: coerce.string(),
-        jumpUrl: coerce.string(),
-        iconUrl: coerce.string(),
-        webUrl: coerce.string().optional(),
-        appId: coerce.string(),
-        scene: z.union([coerce.number(), coerce.string()]),
-        templateType: z.union([coerce.number(), coerce.string()]),
-        businessType: z.union([coerce.number(), coerce.string()]),
-        verType: z.union([coerce.number(), coerce.string()]),
-        shareType: z.union([coerce.number(), coerce.string()]),
-        versionId: coerce.string(),
-        sdkId: coerce.string(),
-        withShareTicket: z.union([coerce.number(), coerce.string()]),
-        rawArkData: coerce.string().optional()
+        title: actionType.string(),
+        desc: actionType.string(),
+        picUrl: actionType.string(),
+        jumpUrl: actionType.string(),
+        iconUrl: actionType.string(),
+        webUrl: actionType.string().optional(),
+        appId: actionType.string(),
+        scene: z.union([actionType.number(), actionType.string()]),
+        templateType: z.union([actionType.number(), actionType.string()]),
+        businessType: z.union([actionType.number(), actionType.string()]),
+        verType: z.union([actionType.number(), actionType.string()]),
+        shareType: z.union([actionType.number(), actionType.string()]),
+        versionId: actionType.string(),
+        sdkId: actionType.string(),
+        withShareTicket: z.union([actionType.number(), actionType.string()]),
+        rawArkData: actionType.string().optional()
     })
 ]);
 type Payload = z.infer<typeof SchemaData>;

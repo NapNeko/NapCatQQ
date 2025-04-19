@@ -11,4 +11,4 @@ const string = () => z.preprocess(
     val => typeof val !== 'string' ? String(val) : val,
     z.string()
 );
-export const coerce = { boolean, number, string };
+export const actionType = { boolean, number, string };

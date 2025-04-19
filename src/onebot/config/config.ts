@@ -1,72 +1,72 @@
 import { z } from 'zod';
-import { coerce } from '../../common/coerce';
+import { actionType } from '../../common/coerce';
 
 const HttpServerConfigSchema = z.object({
-    name: coerce.string().default('http-server'),
-    enable: coerce.boolean().default(false),
-    port: coerce.number().default(3000),
-    host: coerce.string().default('0.0.0.0'),
-    enableCors: coerce.boolean().default(true),
-    enableWebsocket: coerce.boolean().default(true),
-    messagePostFormat: coerce.string().default('array'),
-    token: coerce.string().default(''),
-    debug: coerce.boolean().default(false)
+    name: actionType.string().default('http-server'),
+    enable: actionType.boolean().default(false),
+    port: actionType.number().default(3000),
+    host: actionType.string().default('0.0.0.0'),
+    enableCors: actionType.boolean().default(true),
+    enableWebsocket: actionType.boolean().default(true),
+    messagePostFormat: actionType.string().default('array'),
+    token: actionType.string().default(''),
+    debug: actionType.boolean().default(false)
 });
 
 const HttpSseServerConfigSchema = z.object({
-    name: coerce.string().default('http-sse-server'),
-    enable: coerce.boolean().default(false),
-    port: coerce.number().default(3000),
-    host: coerce.string().default('0.0.0.0'),
-    enableCors: coerce.boolean().default(true),
-    enableWebsocket: coerce.boolean().default(true),
-    messagePostFormat: coerce.string().default('array'),
-    token: coerce.string().default(''),
-    debug: coerce.boolean().default(false),
-    reportSelfMessage: coerce.boolean().default(false)
+    name: actionType.string().default('http-sse-server'),
+    enable: actionType.boolean().default(false),
+    port: actionType.number().default(3000),
+    host: actionType.string().default('0.0.0.0'),
+    enableCors: actionType.boolean().default(true),
+    enableWebsocket: actionType.boolean().default(true),
+    messagePostFormat: actionType.string().default('array'),
+    token: actionType.string().default(''),
+    debug: actionType.boolean().default(false),
+    reportSelfMessage: actionType.boolean().default(false)
 });
 
 const HttpClientConfigSchema = z.object({
-    name: coerce.string().default('http-client'),
-    enable: coerce.boolean().default(false),
-    url: coerce.string().default('http://localhost:8080'),
-    messagePostFormat: coerce.string().default('array'),
-    reportSelfMessage: coerce.boolean().default(false),
-    token: coerce.string().default(''),
-    debug: coerce.boolean().default(false)
+    name: actionType.string().default('http-client'),
+    enable: actionType.boolean().default(false),
+    url: actionType.string().default('http://localhost:8080'),
+    messagePostFormat: actionType.string().default('array'),
+    reportSelfMessage: actionType.boolean().default(false),
+    token: actionType.string().default(''),
+    debug: actionType.boolean().default(false)
 });
 
 const WebsocketServerConfigSchema = z.object({
-    name: coerce.string().default('websocket-server'),
-    enable: coerce.boolean().default(false),
-    host: coerce.string().default('0.0.0.0'),
-    port: coerce.number().default(3001),
-    messagePostFormat: coerce.string().default('array'),
-    reportSelfMessage: coerce.boolean().default(false),
-    token: coerce.string().default(''),
-    enableForcePushEvent: coerce.boolean().default(true),
-    debug: coerce.boolean().default(false),
-    heartInterval: coerce.number().default(30000)
+    name: actionType.string().default('websocket-server'),
+    enable: actionType.boolean().default(false),
+    host: actionType.string().default('0.0.0.0'),
+    port: actionType.number().default(3001),
+    messagePostFormat: actionType.string().default('array'),
+    reportSelfMessage: actionType.boolean().default(false),
+    token: actionType.string().default(''),
+    enableForcePushEvent: actionType.boolean().default(true),
+    debug: actionType.boolean().default(false),
+    heartInterval: actionType.number().default(30000)
 });
 
 const WebsocketClientConfigSchema = z.object({
-    name: coerce.string().default('websocket-client'),
-    enable: coerce.boolean().default(false),
-    url: coerce.string().default('ws://localhost:8082'),
-    messagePostFormat: coerce.string().default('array'),
-    reportSelfMessage: coerce.boolean().default(false),
-    reconnectInterval: coerce.number().default(5000),
-    token: coerce.string().default(''),
-    debug: coerce.boolean().default(false),
-    heartInterval: coerce.number().default(30000)
+    name: actionType.string().default('websocket-client'),
+    enable: actionType.boolean().default(false),
+    url: actionType.string().default('ws://localhost:8082'),
+    messagePostFormat: actionType.string().default('array'),
+    reportSelfMessage: actionType.boolean().default(false),
+    reconnectInterval: actionType.number().default(5000),
+    token: actionType.string().default(''),
+    debug: actionType.boolean().default(false),
+    heartInterval: actionType.number().default(30000)
 });
 
 const PluginConfigSchema = z.object({
-    name: coerce.string().default('plugin'),
-    enable: coerce.boolean().default(false),
-    messagePostFormat: coerce.string().default('array'),
-    reportSelfMessage: coerce.boolean().default(false),
-    debug: coerce.boolean().default(false),
+    name: actionType.string().default('plugin'),
+    enable: actionType.boolean().default(false),
+    messagePostFormat: actionType.string().default('array'),
+    reportSelfMessage: actionType.boolean().default(false),
+    debug: actionType.boolean().default(false),
 });
 
 const NetworkConfigSchema = z.object({
@@ -80,9 +80,9 @@ const NetworkConfigSchema = z.object({
 
 export const OneBotConfigSchema = z.object({
     network: NetworkConfigSchema,
-    musicSignUrl: coerce.string().default(''),
-    enableLocalFile2Url: coerce.boolean().default(false),
-    parseMultMsg: coerce.boolean().default(false)
+    musicSignUrl: actionType.string().default(''),
+    enableLocalFile2Url: actionType.boolean().default(false),
+    parseMultMsg: actionType.boolean().default(false)
 });
 
 export type OneBotConfig = z.infer<typeof OneBotConfigSchema>;
