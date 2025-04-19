@@ -38,13 +38,15 @@ export async function NCoreInitFramework(
     const logger = new LogWrapper(pathWrapper.logsPath);
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
-    downloadFFmpegIfNotExists(logger).then(({ path, reset }) => {
-        if (reset && path) {
-            FFmpegService.setFfmpegPath(path,logger);
-        }
-    }).catch(e => {
-        logger.logError('[Ffmpeg] Error:', e);
-    });
+    if (!process.env['NAPCAT_DISABLE_FFMPEG_DOWNLOAD']) {
+        downloadFFmpegIfNotExists(logger).then(({ path, reset }) => {
+            if (reset && path) {
+                FFmpegService.setFfmpegPath(path, logger);
+            }
+        }).catch(e => {
+            logger.logError('[Ffmpeg] Error:', e);
+        });
+    }
     //直到登录成功后，执行下一步
     const selfInfo = await new Promise<SelfInfo>((resolveSelfInfo) => {
         const loginListener = new NodeIKernelLoginListener();
