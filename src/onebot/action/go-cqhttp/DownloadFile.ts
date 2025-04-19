@@ -11,10 +11,10 @@ interface FileResponse {
 }
 
 const SchemaData = z.object({
-    url: z.coerce.string().optional(),
-    base64: z.coerce.string().optional(),
-    name: z.coerce.string().optional(),
-    headers: z.union([z.coerce.string(), z.array(z.coerce.string())]).optional(),
+    url: z.string().optional(),
+    base64: z.string().optional(),
+    name: z.string().optional(),
+    headers: z.union([z.string(), z.array(z.string())]).optional(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

@@ -8,9 +8,9 @@ import { ContextMode, createContext } from '@/onebot/action/msg/SendMsg';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    user_id: z.union([z.coerce.number(), z.coerce.string()]),
-    file: z.coerce.string(),
-    name: z.coerce.string(),
+    user_id: z.union([z.number(), z.string()]),
+    file: z.string(),
+    name: z.string(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

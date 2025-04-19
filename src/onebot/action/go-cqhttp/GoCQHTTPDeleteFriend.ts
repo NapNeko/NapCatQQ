@@ -3,10 +3,10 @@ import { ActionName } from '@/onebot/action/router';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    friend_id: z.union([z.coerce.string(), z.coerce.number()]).optional(),
-    user_id: z.union([z.coerce.string(), z.coerce.number()]).optional(),
-    temp_block: z.coerce.boolean().optional(),
-    temp_both_del: z.coerce.boolean().optional(),
+    friend_id: z.union([z.string(), z.number()]).optional(),
+    user_id: z.union([z.string(), z.number()]).optional(),
+    temp_block: z.boolean().optional(),
+    temp_both_del: z.boolean().optional(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

@@ -4,9 +4,9 @@ import { AIVoiceChatType } from '@/core/packet/entities/aiChat';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    character: z.coerce.string(),
-    group_id: z.union([z.coerce.number(), z.coerce.string()]),
-    text: z.coerce.string(),
+    character: z.string(),
+    group_id: z.union([z.number(), z.string()]),
+    text: z.string(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

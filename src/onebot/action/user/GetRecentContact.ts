@@ -5,7 +5,7 @@ import { NetworkAdapterConfig } from '@/onebot/config/config';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    count: z.coerce.number().default(10),
+    count: z.number().default(10),
 });
 
 type Payload = z.infer<typeof SchemaData>;

@@ -4,9 +4,9 @@ import { z } from 'zod';
 import { NTQQGroupApi } from '@/core/apis';
 
 const SchemaData = z.object({
-    group_id: z.union([z.coerce.number(), z.coerce.string()]),
-    folder_id: z.coerce.string().optional(),
-    folder: z.coerce.string().optional(),
+    group_id: z.union([z.number(), z.string()]),
+    folder_id: z.string().optional(),
+    folder: z.string().optional(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

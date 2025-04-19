@@ -5,7 +5,7 @@ import { checkFileExist, uriToLocalFile } from '@/common/file';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    file: z.coerce.string(),
+    file: z.string(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

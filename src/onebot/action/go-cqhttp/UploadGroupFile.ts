@@ -7,11 +7,11 @@ import { SendMessageContext } from '@/onebot/api';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    group_id: z.union([z.coerce.number(), z.coerce.string()]),
-    file: z.coerce.string(),
-    name: z.coerce.string(),
-    folder: z.coerce.string().optional(),
-    folder_id: z.coerce.string().optional(),//临时扩展
+    group_id: z.union([z.number(), z.string()]),
+    file: z.string(),
+    name: z.string(),
+    folder: z.string().optional(),
+    folder_id: z.string().optional(),//临时扩展
 });
 
 type Payload = z.infer<typeof SchemaData>;
