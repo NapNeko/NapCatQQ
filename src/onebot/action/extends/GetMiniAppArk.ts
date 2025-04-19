@@ -3,7 +3,7 @@ import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
 import { MiniAppInfo, MiniAppInfoHelper } from '@/core/packet/utils/helper/miniAppHelper';
 import { MiniAppData, MiniAppRawData, MiniAppReqCustomParams, MiniAppReqParams } from '@/core/packet/entities/miniApp';
 import { z } from 'zod';
-import { actionType } from '@/common/coerce';
+import { actionType } from '../type';
 const SchemaData = z.union([
     z.object({
         type: z.union([z.literal('bili'), z.literal('weibo')]),

@@ -2,7 +2,7 @@ import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { NTGroupRequestOperateTypes } from '@/core/types';
 import { ActionName } from '@/onebot/action/router';
 import { z } from 'zod';
-import { actionType } from '@/common/coerce';
+import { actionType } from '../type';
 
 const SchemaData = z.object({
     flag: actionType.string(),

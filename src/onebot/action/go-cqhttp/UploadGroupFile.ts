@@ -5,7 +5,7 @@ import fs from 'fs';
 import { uriToLocalFile } from '@/common/file';
 import { SendMessageContext } from '@/onebot/api';
 import { z } from 'zod';
-import { actionType } from '@/common/coerce';
+import { actionType } from '../type';
 const SchemaData = z.object({
     group_id: actionType.string(),
     file: actionType.string(),
