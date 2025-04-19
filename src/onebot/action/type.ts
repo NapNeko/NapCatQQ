@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const boolean = () => z.preprocess(
-    val => typeof val === 'string' && (val.toLowerCase() === 'false' || val === '0') ? false : Boolean(val),
+    val => typeof val === 'string' && val.toLowerCase() === 'false' ? false : Boolean(val),
     z.boolean()
 );
 const number = () => z.preprocess(
