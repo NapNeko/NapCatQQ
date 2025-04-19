@@ -4,14 +4,13 @@ import { resolve } from 'node:path';
 import { deepMerge } from '../utils/object';
 import { themeType } from '../types/theme';
 import { z } from 'zod';
-import { actionType } from '@/onebot/action/type';
 // 定义配置的类型
 const WebUiConfigSchema = z.object({
-    host: actionType.string().default('0.0.0.0'),
-    port: actionType.number().default(6099),
-    token: actionType.string().default('napcat'),
-    loginRate: actionType.number().default(10),
-    autoLoginAccount: actionType.string().default(''),
+    host: z.coerce.string().default('0.0.0.0'),
+    port: z.coerce.number().default(6099),
+    token: z.coerce.string().default('napcat'),
+    loginRate: z.coerce.number().default(10),
+    autoLoginAccount: z.coerce.string().default(''),
     theme: themeType,
 });
 

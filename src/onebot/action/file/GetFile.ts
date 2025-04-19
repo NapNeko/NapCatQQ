@@ -4,7 +4,7 @@ import { FileNapCatOneBotUUID } from '@/common/file-uuid';
 import { ActionName } from '@/onebot/action/router';
 import { OB11MessageImage, OB11MessageVideo } from '@/onebot/types';
 import { z } from 'zod';
-import { actionType } from '../type';
+
 export interface GetFileResponse {
     file?: string;  // path
     url?: string;
@@ -14,8 +14,8 @@ export interface GetFileResponse {
 }
 
 const GetFileBase_PayloadSchema = z.object({
-    file: actionType.string().optional(),
-    file_id: actionType.string().optional(),
+    file: z.coerce.string().optional(),
+    file_id: z.coerce.string().optional(),
 });
 
 
