@@ -314,13 +314,15 @@ export async function NCoreInitShell() {
     const logger = new LogWrapper(pathWrapper.logsPath);
     handleUncaughtExceptions(logger);
     await connectToNamedPipe(logger).catch(e => logger.logError('命名管道连接失败', e));
-    downloadFFmpegIfNotExists(logger).then(({ path, reset }) => {
-        if (reset && path) {
-            FFmpegService.setFfmpegPath(path, logger);
-        }
-    }).catch(e => {
-        logger.logError('[Ffmpeg] Error:', e);
-    });
+    if (!process.env['NAPCAT_DISABLE_FFMPEG_DOWNLOAD']) {
+        downloadFFmpegIfNotExists(logger).then(({ path, reset }) => {
+            if (reset && path) {
+                FFmpegService.setFfmpegPath(path, logger);
+            }
+        }).catch(e => {
+            logger.logError('[Ffmpeg] Error:', e);
+        });
+    }
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
 
