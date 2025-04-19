@@ -11,10 +11,10 @@ interface Response {
     messages: OB11Message[];
 }
 const SchemaData = Type.Object({
-    user_id: Type.Union([Type.Number(), Type.String()]),
-    message_seq: Type.Optional(Type.Union([Type.Number(), Type.String()])),
-    count: Type.Union([Type.Number(), Type.String()], { default: 20 }),
-    reverseOrder: Type.Optional(Type.Union([Type.Boolean(), Type.String()]))
+    user_id: Type.String(),
+    message_seq: Type.Optional(Type.String()),
+    count: Type.Number({ default: 20 }),
+    reverseOrder: Type.Boolean({ default: false })
 });
 
 
@@ -27,18 +27,14 @@ export default class GetFriendMsgHistory extends OneBotAction<Payload, Response>
     async _handle(payload: Payload, _adapter: string, config: NetworkAdapterConfig): Promise<Response> {
         //处理参数
         const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
-
-        const isReverseOrder = typeof payload.reverseOrder === 'string' ? payload.reverseOrder === 'true' : !!payload.reverseOrder;
         if (!uid) throw new Error(`记录${payload.user_id}不存在`);
         const friend = await this.core.apis.FriendApi.isBuddy(uid);
         const peer = { chatType: friend ? ChatType.KCHATTYPEC2C : ChatType.KCHATTYPETEMPC2CFROMGROUP, peerUid: uid };
         const hasMessageSeq = !payload.message_seq ? !!payload.message_seq : !(payload.message_seq?.toString() === '' || payload.message_seq?.toString() === '0');
         const startMsgId = hasMessageSeq ? (MessageUnique.getMsgIdAndPeerByShortId(+payload.message_seq!)?.MsgId ?? payload.message_seq!.toString()) : '0';
         const msgList = hasMessageSeq ?
-            (await this.core.apis.MsgApi.getMsgHistory(peer, startMsgId, +payload.count, isReverseOrder)).msgList : (await this.core.apis.MsgApi.getAioFirstViewLatestMsgs(peer, +payload.count)).msgList;
+            (await this.core.apis.MsgApi.getMsgHistory(peer, startMsgId, +payload.count, payload.reverseOrder)).msgList : (await this.core.apis.MsgApi.getAioFirstViewLatestMsgs(peer, +payload.count)).msgList;
         if (msgList.length === 0) throw new Error(`消息${payload.message_seq}不存在`);
-        //翻转消息
-        if (isReverseOrder) msgList.reverse();
         //转换序号
         await Promise.all(msgList.map(async msg => {
             msg.id = MessageUnique.createUniqueMsgId({ guildId: '', chatType: msg.chatType, peerUid: msg.peerUid }, msg.msgId);
