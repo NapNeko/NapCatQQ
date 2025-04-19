@@ -47,6 +47,22 @@ export default function WebLoginPage() {
     }
   }
 
+  // 处理全局键盘事件
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Enter' && !isLoading) {
+      onSubmit()
+    }
+  }
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown)
+
+    // 清理函数
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [tokenValue, isLoading]) // 依赖项包含用于登录的状态
+
   useEffect(() => {
     if (token) {
       onSubmit()
