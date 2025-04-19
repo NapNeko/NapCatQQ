@@ -1,6 +1,6 @@
 interface WebUiCredentialInnerJson {
     CreatedTime: number;
-    TokenEncoded: string;
+    HashEncoded: string;
 }
 
 interface WebUiCredentialJson {
