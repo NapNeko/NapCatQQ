@@ -6,7 +6,7 @@ import { calcQQLevel } from '@/common/helper';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    user_id: z.coerce.string(),
+    user_id: z.union([z.coerce.number(), z.coerce.string()]),
     no_cache: z.coerce.boolean().default(false),
 });
 
