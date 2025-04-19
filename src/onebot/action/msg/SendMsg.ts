@@ -38,7 +38,7 @@ export function normalize(message: OB11MessageMixType, autoEscape = false): OB11
 
 export async function createContext(core: NapCatCore, payload: OB11PostContext | undefined, contextMode: ContextMode = ContextMode.Normal): Promise<Peer> {
     if (!payload) {
-        throw new Error('请指定 group_id 或 user_id');
+        throw new Error('请传递请求内容');
     }
     if ((contextMode === ContextMode.Group || contextMode === ContextMode.Normal) && payload.group_id) {
         return {
@@ -48,7 +48,16 @@ export async function createContext(core: NapCatCore, payload: OB11PostContext |
     }
     if ((contextMode === ContextMode.Private || contextMode === ContextMode.Normal) && payload.user_id) {
         const Uid = await core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
-        if (!Uid) throw new Error('无法获取用户信息');
+        if (!Uid) {
+            if (payload.group_id) {
+                return {
+                    chatType: ChatType.KCHATTYPEGROUP,
+                    peerUid: payload.group_id.toString(),
+                    guildId: ''
+                }
+            }
+            throw new Error('无法获取用户信息');
+        }
         const isBuddy = await core.apis.FriendApi.isBuddy(Uid);
         if (!isBuddy) {
             const ret = await core.apis.MsgApi.getTempChatInfo(ChatType.KCHATTYPETEMPC2CFROMGROUP, Uid);
@@ -78,7 +87,13 @@ export async function createContext(core: NapCatCore, payload: OB11PostContext |
             guildId: '',
         };
     }
-    throw new Error('请指定 group_id 或 user_id');
+    if (contextMode === ContextMode.Private && payload.group_id) {
+        throw new Error('当前私聊发送,请指定 user_id 而不是 group_id');
+    }
+    if (contextMode === ContextMode.Group && payload.user_id) {
+        throw new Error('当前群聊发送,请指定 group_id 而不是 user_id');
+    }
+    throw new Error('请指定正确的 group_id 或 user_id');
 }
 
 function getSpecialMsgNum(payload: OB11PostSendMsg, msgType: OB11MessageDataType): number {
