@@ -50,7 +50,6 @@ import {
 import { OB11Message } from './types';
 import { IOB11NetworkAdapter } from '@/onebot/network/adapter';
 import { OB11HttpSSEServerAdapter } from './network/http-server-sse';
-import { ZodType } from 'zod';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -67,7 +66,7 @@ export class NapCatOneBot11Adapter {
     constructor(core: NapCatCore, context: InstanceContext, pathWrapper: NapCatPathWrapper) {
         this.core = core;
         this.context = context;
-        this.configLoader = new OB11ConfigLoader(core, pathWrapper.configPath, OneBotConfigSchema as ZodType<OneBotConfig>);
+        this.configLoader = new OB11ConfigLoader(core, pathWrapper.configPath, OneBotConfigSchema);
         this.apis = {
             GroupApi: new OneBotGroupApi(this, core),
             UserApi: new OneBotUserApi(this, core),

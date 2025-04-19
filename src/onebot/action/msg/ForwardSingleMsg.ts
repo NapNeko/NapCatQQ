@@ -5,9 +5,9 @@ import { MessageUnique } from '@/common/message-unique';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    message_id: z.union([z.coerce.number(), z.coerce.string()]),
-    group_id: z.coerce.string().optional(),
-    user_id: z.coerce.string().optional(),
+    message_id: z.union([z.number(), z.string()]),
+    group_id: z.string().optional(),
+    user_id: z.string().optional(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

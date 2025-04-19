@@ -4,9 +4,9 @@ import { ActionName } from '@/onebot/action/router';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    user_id: z.union([z.coerce.number(), z.coerce.string()]).optional(),
-    group_id: z.union([z.coerce.number(), z.coerce.string()]).optional(),
-    phoneNumber: z.coerce.string().default(''),
+    user_id: z.union([z.number(), z.string()]).optional(),
+    group_id: z.union([z.number(), z.string()]).optional(),
+    phoneNumber: z.string().default(''),
 });
 
 type Payload = z.infer<typeof SchemaData>;
@@ -29,7 +29,7 @@ export class SharePeer extends OneBotAction<Payload, GeneralCallResult & {
 }
 
 const SchemaDataGroupEx = z.object({
-    group_id: z.union([z.coerce.number(), z.coerce.string()]),
+    group_id: z.union([z.number(), z.string()]),
 });
 
 type PayloadGroupEx = z.infer<typeof SchemaDataGroupEx>;

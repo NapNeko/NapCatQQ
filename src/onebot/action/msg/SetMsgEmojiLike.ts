@@ -4,9 +4,9 @@ import { MessageUnique } from '@/common/message-unique';
 import { z } from 'zod';
 
 const SchemaData = z.object({
-    message_id: z.union([z.coerce.number(), z.coerce.string()]),
-    emoji_id: z.union([z.coerce.number(), z.coerce.string()]),
-    set: z.coerce.boolean().optional(),
+    message_id: z.union([z.number(), z.string()]),
+    emoji_id: z.union([z.number(), z.string()]),
+    set: z.boolean().optional(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

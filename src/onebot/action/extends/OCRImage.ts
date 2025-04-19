@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { GeneralCallResultStatus } from '@/core';
 
 const SchemaData = z.object({
-    image: z.coerce.string(),
+    image: z.string(),
 });
 
 type Payload = z.infer<typeof SchemaData>;

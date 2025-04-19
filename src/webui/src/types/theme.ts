@@ -2,8 +2,8 @@ import { z } from 'zod';
 
 export const themeType = z.object(
     {
-        dark: z.record(z.coerce.string(), z.coerce.string()),
-        light: z.record(z.coerce.string(), z.coerce.string()),
+        dark: z.record(z.string(), z.string()),
+        light: z.record(z.string(), z.string()),
     }
 ).default({
     dark: {

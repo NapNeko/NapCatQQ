@@ -3,13 +3,13 @@ import { NapCatCore } from '@/core';
 import { z } from 'zod';
 
 export const NapcatConfigSchema = z.object({
-    fileLog: z.coerce.boolean().default(false),
-    consoleLog: z.coerce.boolean().default(true),
-    fileLogLevel: z.coerce.string().default('debug'),
-    consoleLogLevel: z.coerce.string().default('info'),
-    packetBackend: z.coerce.string().default('auto'),
-    packetServer: z.coerce.string().default(''),
-    o3HookMode: z.coerce.number().default(0),
+    fileLog: z.boolean().default(false),
+    consoleLog: z.boolean().default(true),
+    fileLogLevel: z.string().default('debug'),
+    consoleLogLevel: z.string().default('info'),
+    packetBackend: z.string().default('auto'),
+    packetServer: z.string().default(''),
+    o3HookMode: z.number().default(0),
 });
 
 export type NapcatConfig = z.infer<typeof NapcatConfigSchema>;

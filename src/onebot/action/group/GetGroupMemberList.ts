@@ -6,8 +6,8 @@ import { z } from 'zod';
 import { GroupMember } from '@/core';
 
 const SchemaData = z.object({
-    group_id: z.union([z.coerce.number(), z.coerce.string()]),
-    no_cache: z.coerce.boolean().default(false)
+    group_id: z.union([z.number(), z.string()]),
+    no_cache: z.boolean().default(false)
 });
 
 type Payload = z.infer<typeof SchemaData>;
