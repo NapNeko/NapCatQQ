@@ -58,12 +58,12 @@
     "vite": "^6.0.1",
     "vite-plugin-cp": "^6.0.0",
     "vite-tsconfig-paths": "^5.1.0",
-    "winston": "^3.17.0",
-    "zod": "^3.24.2"
+    "winston": "^3.17.0"
   },
   "dependencies": {
     "express": "^5.0.0",
     "silk-wasm": "^3.6.1",
-    "ws": "^8.18.0"
+    "ws": "^8.18.0",
+    "zod": "^3.24.2"
   }
 }
