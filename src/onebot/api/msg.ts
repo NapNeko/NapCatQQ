@@ -1105,6 +1105,8 @@ export class OneBotMsgApi {
                 return 'kick';
             case 3:
                 return 'kick_me';
+            case 129:
+                return 'disband';
             default:
                 return 'kick';
         }
