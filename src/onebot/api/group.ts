@@ -258,7 +258,7 @@ export class OneBotGroupApi {
                 align: string,
                 items: Array<{ txt: string, type: string }>
             } = JSON.parse(grayTipElement.jsonGrayTipElement.jsonStr);
-            if (json.items.length > 0 && json.items[0]?.txt.endsWith('加入群')) {
+            if (json.items.length === 1 && json.items[0]?.txt.endsWith('加入群')) {
                 let old_members = structuredClone(this.core.apis.GroupApi.groupMemberCache.get(msg.peerUid));
                 if (!old_members) return;
                 let new_members_map = await this.core.apis.GroupApi.refreshGroupMemberCache(msg.peerUid, true);
