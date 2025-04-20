@@ -250,7 +250,34 @@ export class OneBotGroupApi {
             'invite'
         );
     }
-
+    async parse51TypeEvent(msg: RawMessage, grayTipElement: GrayTipElement) {
+        // 神经腾讯 没了妈妈想出来的
+        // Warn 下面存在高并发危险
+        if (grayTipElement.jsonGrayTipElement.jsonStr) {
+            const json: {
+                align: string,
+                items: Array<{ txt: string, type: string }>
+            } = JSON.parse(grayTipElement.jsonGrayTipElement.jsonStr);
+            if (json.items.length > 0 && json.items[0]?.txt.endsWith('加入群')) {
+                let old_members = structuredClone(this.core.apis.GroupApi.groupMemberCache.get(msg.peerUid));
+                if (!old_members) return;
+                let new_members_map = await this.core.apis.GroupApi.refreshGroupMemberCache(msg.peerUid, true);
+                if (!new_members_map) return;
+                let new_members = Array.from(new_members_map.values());
+                // 对比members查找新成员
+                let new_member = new_members.find((member) => old_members.get(member.uid) == undefined);
+                if (!new_member) return;
+                return new OB11GroupIncreaseEvent(
+                    this.core,
+                    +msg.peerUid,
+                    +new_member.uin,
+                    0,
+                    'invite',
+                );
+            }
+        }
+        return;
+    }
     async parseGrayTipElement(msg: RawMessage, grayTipElement: GrayTipElement) {
         if (grayTipElement.subElementType === NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_GROUP) {
             // 解析群组事件 由sysmsg解析
@@ -282,6 +309,9 @@ export class OneBotGroupApi {
                 return await this.parsePaiYiPai(msg, grayTipElement.jsonGrayTipElement.jsonStr);
             } else if (grayTipElement.jsonGrayTipElement.busiId == JsonGrayBusiId.AIO_GROUP_ESSENCE_MSG_TIP) {
                 return await this.parseEssenceMsg(msg, grayTipElement.jsonGrayTipElement.jsonStr);
+            } else if (+(grayTipElement.jsonGrayTipElement.busiId ?? 0) == 51) {
+                // 51是什么？{"align":"center","items":[{"txt":"下一秒起床通过王者荣耀加入群","type":"nor"}]
+                return await this.parse51TypeEvent(msg, grayTipElement);
             } else {
                 return await this.parseOtherJsonEvent(msg, grayTipElement.jsonGrayTipElement.jsonStr, this.core.context);
             }
