@@ -115,7 +115,7 @@ async function tryDownload(options: string | HttpDownloadOptions, useReferer: bo
     if (useReferer && !headers['Referer']) {
         headers['Referer'] = url;
     }
-    const fetchRes = await fetch(url, { headers }).catch((err) => {
+    const fetchRes = await fetch(url, { headers, redirect: 'follow' }).catch((err) => {
         if (err.cause) {
             throw err.cause;
         }
