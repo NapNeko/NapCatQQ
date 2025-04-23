@@ -106,15 +106,15 @@ export interface NodeIKernelBuddyService {
 
     getAddMeSetting(): unknown;
 
-    getDoubtBuddyReq(): unknown;
+    getDoubtBuddyReq(reqId: string, num: number): Promise<GeneralCallResult>;
 
     getDoubtBuddyUnreadNum(): number;
 
-    approvalDoubtBuddyReq(uid: number, isAgree: boolean): void;
+    approvalDoubtBuddyReq(uid: string, str1: string, str2: string): void;
 
     delDoubtBuddyReq(uid: number): void;
 
-    delAllDoubtBuddyReq(): void;
+    delAllDoubtBuddyReq(): Promise<GeneralCallResult>;
 
     reportDoubtBuddyReqUnread(): void;
 

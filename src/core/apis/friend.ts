@@ -86,4 +86,7 @@ export class NTQQFriendApi {
             accept,
         });
     }
+    async handleDoubtFriendRequest(friendUid: string, str1: string = '', str2: string = '') {
+        this.context.session.getBuddyService().approvalDoubtBuddyReq(friendUid, str1, str2);
+    }
 }
