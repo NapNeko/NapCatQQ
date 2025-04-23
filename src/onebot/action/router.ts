@@ -35,6 +35,7 @@ export const ActionName = {
     SetGroupLeave: 'set_group_leave',
     SetSpecialTitle: 'set_group_special_title',
     SetFriendAddRequest: 'set_friend_add_request',
+    SetFriendRemark: 'set_friend_remark',
     SetGroupAddRequest: 'set_group_add_request',
     GetLoginInfo: 'get_login_info',
     GoCQHTTP_GetStrangerInfo: 'get_stranger_info',

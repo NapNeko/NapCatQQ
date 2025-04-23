@@ -115,10 +115,12 @@ import { RenameGroupFile } from './extends/RenameGroupFile';
 import { GetRkeyServer } from './packet/GetRkeyServer';
 import { GetRkeyEx } from './packet/GetRkeyEx';
 import { CleanCache } from './system/CleanCache';
+import SetFriendRemark from './user/SetFriendRemark';
 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 
     const actionHandlers = [
+        new SetFriendRemark(obContext, core),
         new GetRkeyEx(obContext, core),
         new GetRkeyServer(obContext, core),
         new SetGroupRemark(obContext, core),
