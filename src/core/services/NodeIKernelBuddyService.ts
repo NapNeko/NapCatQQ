@@ -106,7 +106,7 @@ export interface NodeIKernelBuddyService {
 
     getAddMeSetting(): unknown;
 
-    getDoubtBuddyReq(reqId: string, num: number): Promise<GeneralCallResult>;
+    getDoubtBuddyReq(reqId: string, num: number,uk:string): Promise<GeneralCallResult>;
 
     getDoubtBuddyUnreadNum(): number;
 

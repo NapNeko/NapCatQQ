@@ -89,4 +89,28 @@ export class NTQQFriendApi {
     async handleDoubtFriendRequest(friendUid: string, str1: string = '', str2: string = '') {
         this.context.session.getBuddyService().approvalDoubtBuddyReq(friendUid, str1, str2);
     }
+    async getDoubtFriendRequest(count: number) {
+        let date = Date.now().toString();
+        const [, ret] = await this.core.eventWrapper.callNormalEventV2(
+            'NodeIKernelBuddyService/getDoubtBuddyReq',
+            'NodeIKernelBuddyListener/onDoubtBuddyReqChange',
+            [date, count, ''],
+            () => true,
+            (data) => data.reqId === date
+        );
+        let requests = Promise.all(ret.doubtList.map(async (item) => {
+            return {
+                flag: item.uid, //注意强制String 非isNumeric 不遵守则不符合设计
+                uin: await this.core.apis.UserApi.getUinByUidV2(item.uid) ?? 0,// 信息字段
+                nick: item.nick, // 信息字段 这个不是nickname 可能是来源的群内的昵称
+                source: item.source, // 信息字段
+                reason: item.reason, // 信息字段
+                msg: item.msg, // 信息字段
+                group_code: item.groupCode, // 信息字段
+                time: item.reqTime, // 信息字段
+                type: 'doubt' //保留字段
+            };
+        }))
+        return requests;
+    }
 }

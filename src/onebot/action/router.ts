@@ -10,6 +10,10 @@ export interface InvalidCheckResult {
 }
 
 export const ActionName = {
+    // new extends 完全差异OneBot类别
+    GetDoubtFriendsAddRequest: 'get_doubt_friends_add_request',
+    SetDoubtFriendsAddRequest: 'set_doubt_friends_add_request',
+    // napcat
     GetRkeyEx: 'get_rkey',
     GetRkeyServer: 'get_rkey_server',
     SetGroupRemark: 'set_group_remark',

@@ -116,10 +116,14 @@ import { GetRkeyServer } from './packet/GetRkeyServer';
 import { GetRkeyEx } from './packet/GetRkeyEx';
 import { CleanCache } from './system/CleanCache';
 import SetFriendRemark from './user/SetFriendRemark';
+import { SetDoubtFriendsAddRequest } from './new/SetDoubtFriendsAddRequest';
+import { GetDoubtFriendsAddRequest } from './new/GetDoubtFriendsAddRequest';
 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 
     const actionHandlers = [
+        new SetDoubtFriendsAddRequest(obContext, core),
+        new GetDoubtFriendsAddRequest(obContext, core),
         new SetFriendRemark(obContext, core),
         new GetRkeyEx(obContext, core),
         new GetRkeyServer(obContext, core),
