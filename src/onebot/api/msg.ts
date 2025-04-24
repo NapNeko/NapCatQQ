@@ -907,10 +907,10 @@ export class OneBotMsgApi {
             const member = await this.core.apis.GroupApi.getGroupMember(msg.peerUin, msg.senderUin);
             resMsg.group_id = parseInt(ret.tmpChatInfo!.groupCode);
             resMsg.sender.nickname = member?.nick ?? member?.cardName ?? '临时会话';
-            resMsg.temp_source = resMsg.group_id;
+            resMsg.temp_source = 0;
         } else {
             resMsg.group_id = 284840486;
-            resMsg.temp_source = resMsg.group_id;
+            resMsg.temp_source = 0;
             resMsg.sender.nickname = '临时会话';
         }
     }
