@@ -1,14 +1,12 @@
-import { OB11BaseNoticeEvent } from './OB11BaseNoticeEvent';
 import { NapCatCore } from '@/core';
+import { OB11GroupNoticeEvent } from './OB11GroupNoticeEvent';
 
-export class OB11FriendRecallNoticeEvent extends OB11BaseNoticeEvent {
-    notice_type = 'friend_recall';
-    user_id: number;
-    message_id: number;
+export class OB11GroupAdminNoticeEvent extends OB11GroupNoticeEvent {
+    notice_type = 'group_admin';
+    sub_type: 'set' | 'unset';
 
-    public constructor(core: NapCatCore, userId: number, messageId: number) {
-        super(core);
-        this.user_id = userId;
-        this.message_id = messageId;
+    constructor(core: NapCatCore, group_id: number, user_id: number, sub_type: 'set' | 'unset') {
+        super(core, group_id, user_id);
+        this.sub_type = sub_type;
     }
 }
