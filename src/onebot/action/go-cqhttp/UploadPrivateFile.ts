@@ -23,7 +23,7 @@ export default class GoCQHTTPUploadPrivateFile extends OneBotAction<Payload, nul
         if (payload.user_id) {
             const peerUid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
             if (!peerUid) {
-                throw new Error( `私聊${payload.user_id}不存在`);
+                throw new Error(`私聊${payload.user_id}不存在`);
             }
             const isBuddy = await this.core.apis.FriendApi.isBuddy(peerUid);
             return { chatType: isBuddy ? ChatType.KCHATTYPEC2C : ChatType.KCHATTYPETEMPC2CFROMGROUP, peerUid };
@@ -48,6 +48,7 @@ export default class GoCQHTTPUploadPrivateFile extends OneBotAction<Payload, nul
             deleteAfterSentFiles: []
         };
         const sendFileEle: SendFileElement = await this.core.apis.FileApi.createValidSendFileElement(msgContext, downloadResult.path, payload.name);
+        msgContext.deleteAfterSentFiles.push(downloadResult.path);
         await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(await this.getPeer(payload), [sendFileEle], msgContext.deleteAfterSentFiles);
         return null;
     }
