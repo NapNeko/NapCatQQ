@@ -136,7 +136,7 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
       </div>
       <Card
         shadow="sm"
-        className="my-4 bg-opacity-50 backdrop-blur-md overflow-visible z-20"
+        className="my-4 bg-opacity-50 backdrop-blur-md overflow-visible"
       >
         <CardHeader className="font-bold text-lg gap-1 pb-0">
           <span className="mr-2">请求体</span>

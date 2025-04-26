@@ -76,7 +76,7 @@ export function calculateFileMD5(filePath: string): Promise<string> {
         const stream = fs.createReadStream(filePath);
         const hash = crypto.createHash('md5');
 
-        stream.on('data', (data: Buffer) => {
+        stream.on('data', (data) => {
             // 当读取到数据时，更新哈希对象的状态
             hash.update(data);
         });
@@ -115,7 +115,7 @@ async function tryDownload(options: string | HttpDownloadOptions, useReferer: bo
     if (useReferer && !headers['Referer']) {
         headers['Referer'] = url;
     }
-    const fetchRes = await fetch(url, { headers }).catch((err) => {
+    const fetchRes = await fetch(url, { headers, redirect: 'follow' }).catch((err) => {
         if (err.cause) {
             throw err.cause;
         }
@@ -182,28 +182,28 @@ export async function uriToLocalFile(dir: string, uri: string, filename: string 
     const filePath = path.join(dir, filename);
 
     switch (UriType) {
-    case FileUriType.Local: {
-        const fileExt = path.extname(HandledUri);
-        const localFileName = path.basename(HandledUri, fileExt) + fileExt;
-        const tempFilePath = path.join(dir, filename + fileExt);
-        fs.copyFileSync(HandledUri, tempFilePath);
-        return { success: true, errMsg: '', fileName: localFileName, path: tempFilePath };
-    }
+        case FileUriType.Local: {
+            const fileExt = path.extname(HandledUri);
+            const localFileName = path.basename(HandledUri, fileExt) + fileExt;
+            const tempFilePath = path.join(dir, filename + fileExt);
+            fs.copyFileSync(HandledUri, tempFilePath);
+            return { success: true, errMsg: '', fileName: localFileName, path: tempFilePath };
+        }
 
-    case FileUriType.Remote: {
-        const buffer = await httpDownload({ url: HandledUri, headers: headers ?? {} });
-        fs.writeFileSync(filePath, buffer);
-        return { success: true, errMsg: '', fileName: filename, path: filePath };
-    }
+        case FileUriType.Remote: {
+            const buffer = await httpDownload({ url: HandledUri, headers: headers ?? {} });
+            fs.writeFileSync(filePath, buffer);
+            return { success: true, errMsg: '', fileName: filename, path: filePath };
+        }
 
-    case FileUriType.Base64: {
-        const base64 = HandledUri.replace(/^base64:\/\//, '');
-        const base64Buffer = Buffer.from(base64, 'base64');
-        fs.writeFileSync(filePath, base64Buffer);
-        return { success: true, errMsg: '', fileName: filename, path: filePath };
-    }
+        case FileUriType.Base64: {
+            const base64 = HandledUri.replace(/^base64:\/\//, '');
+            const base64Buffer = Buffer.from(base64, 'base64');
+            fs.writeFileSync(filePath, base64Buffer);
+            return { success: true, errMsg: '', fileName: filename, path: filePath };
+        }
 
-    default:
-        return { success: false, errMsg: `识别URL失败, uri= ${uri}`, fileName: '', path: '' };
+        default:
+            return { success: false, errMsg: `识别URL失败, uri= ${uri}`, fileName: '', path: '' };
     }
 }

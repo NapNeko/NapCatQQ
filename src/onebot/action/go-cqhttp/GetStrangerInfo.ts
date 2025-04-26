@@ -7,6 +7,7 @@ import { Static, Type } from '@sinclair/typebox';
 
 const SchemaData = Type.Object({
     user_id: Type.Union([Type.Number(), Type.String()]),
+    no_cache: Type.Union([Type.Boolean(), Type.String()], { default: false }),
 });
 
 type Payload = Static<typeof SchemaData>;
@@ -16,10 +17,11 @@ export default class GoCQHTTPGetStrangerInfo extends OneBotAction<Payload, OB11U
     override payloadSchema = SchemaData;
     async _handle(payload: Payload) {
         const user_id = payload.user_id.toString();
+        const isNocache = typeof payload.no_cache === 'string' ? payload.no_cache === 'true' : !!payload.no_cache;
         const extendData = await this.core.apis.UserApi.getUserDetailInfoByUin(user_id);
         let uid = (await this.core.apis.UserApi.getUidByUinV2(user_id));
         if (!uid) uid = extendData.detail.uid;
-        const info = (await this.core.apis.UserApi.getUserDetailInfo(uid));
+        const info = (await this.core.apis.UserApi.getUserDetailInfo(uid, isNocache));
         return {
             ...extendData.detail.simpleInfo.coreInfo,
             ...extendData.detail.commonExt ?? {},

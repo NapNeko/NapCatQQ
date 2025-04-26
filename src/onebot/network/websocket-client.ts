@@ -37,7 +37,13 @@ export class OB11WebSocketClientAdapter extends IOB11NetworkAdapter<WebsocketCli
             }, this.config.heartInterval);
         }
         this.isEnable = true;
-        await this.tryConnect();
+        try {
+            await this.tryConnect();
+        } catch (error) {
+            this.logger.logError('[OneBot] [WebSocket Client] TryConnect Error , info -> ', error);
+
+        }
+
     }
 
     close() {

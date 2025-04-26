@@ -9,6 +9,7 @@ interface LoginRuntimeType {
     QQLoginUin: string;
     QQLoginInfo: SelfInfo;
     QQVersion: string;
+    WebUiConfigQuickFunction: () => Promise<void>;
     NapCatHelper: {
         onQuickLoginRequested: (uin: string) => Promise<{ result: boolean; message: string }>;
         onOB11ConfigChanged: (ob11: OneBotConfig) => Promise<void>;

@@ -12,7 +12,7 @@ export class NTQQMsgApi {
         this.context = context;
         this.core = core;
     }
-    
+
     async clickInlineKeyboardButton(...params: Parameters<NodeIKernelMsgService['clickInlineKeyboardButton']>) {
         return this.context.session.getMsgService().clickInlineKeyboardButton(...params);
     }
@@ -133,6 +133,20 @@ export class NTQQMsgApi {
             isReverseOrder: false,
             isIncludeCurrent: true,
             pageLimit: 100,
+        });
+    }
+
+    async queryFirstMsgBySender(peer: Peer, SendersUid: string[]) {
+        console.log(peer, SendersUid);
+        return await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {
+            chatInfo: peer,
+            filterMsgType: [],
+            filterSendersUid: SendersUid,
+            filterMsgToTime: '0',
+            filterMsgFromTime: '0',
+            isReverseOrder: true,
+            isIncludeCurrent: true,
+            pageLimit: 20000,
         });
     }
 

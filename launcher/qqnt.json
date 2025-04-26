@@ -1,10 +1,9 @@
 {
   "name": "qq-chat",
-  "version": "9.9.17-30899",
-  "verHash": "ececf273",
-  "linuxVersion": "3.2.15-30899",
-  "linuxVerHash": "63c751e8",
-  "type": "module",
+  "version": "9.9.18-32869",
+  "verHash": "e735296c",
+  "linuxVersion": "3.2.16-32869",
+  "linuxVerHash": "4c192ba9",
   "private": true,
   "description": "QQ",
   "productName": "QQ",
@@ -17,8 +16,25 @@
   "bin": {
     "qd": "externals/devtools/cli/index.js"
   },
+  "appid": {
+    "win32": "537258389",
+    "darwin": "537258412",
+    "linux": "537258424"
+  },
   "main": "./loadNapCat.js",
-  "buildVersion": "30899",
+  "peerDependenciesMeta": {
+    "*": {
+      "optional": true
+    }
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "@vue/runtime-dom@3.5.12": "patches/@vue__runtime-dom@3.5.12.patch",
+      "@swc/helpers@0.5.3": "patches/@swc__helpers@0.5.3.patch",
+      "vuex@4.1.0": "patches/vuex@4.1.0.patch"
+    }
+  },
+  "buildVersion": "32869",
   "isPureShell": true,
   "isByteCodeShell": true,
   "platform": "win32",

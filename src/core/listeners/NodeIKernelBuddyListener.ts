@@ -40,12 +40,30 @@ export class NodeIKernelBuddyListener {
     }
 
     onDelBatchBuddyInfos(arg: unknown): any {
+        console.log('onDelBatchBuddyInfos not implemented', ...arguments);
     }
 
-    onDoubtBuddyReqChange(arg: unknown): any {
+    onDoubtBuddyReqChange(_arg:
+        {
+            reqId: string;
+            cookie: string;
+            doubtList: Array<{
+                uid: string;
+                nick: string;
+                age: number,
+                sex: number;
+                commFriendNum: number;
+                reqTime: string;
+                msg: string;
+                source: string;
+                reason: string;
+                groupCode: string;
+                nameMore?: null;
+            }>;
+        }): void | Promise<void> {
     }
 
-    onDoubtBuddyReqUnreadNumChange(arg: unknown): any {
+    onDoubtBuddyReqUnreadNumChange(_num: number): void | Promise<void> {
     }
 
     onNickUpdated(arg: unknown): any {

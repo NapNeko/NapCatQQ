@@ -1,0 +1,115 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "dev:shell",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "dev:shell"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "build:shell",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "build:shell"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "build:universal",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "build:universal"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "build:framework",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "build:framework"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "build:webui",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "build:webui"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "dev:universal",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "dev:universal"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "dev:framework",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "dev:framework"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "dev:webui",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "dev:webui"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "lint",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "lint"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "depend",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "depend"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "dev:depend",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "dev:depend"
+            ]
+        }
+    ]
+}
