@@ -345,6 +345,7 @@ export class NTQQFileApi {
             'NodeIKernelMsgListener/onRichMediaDownloadComplete',
             [{
                 fileModelId: '0',
+                downSourceType: 0,
                 downloadSourceType: 0,
                 triggerType: 1,
                 msgId: msgId,
