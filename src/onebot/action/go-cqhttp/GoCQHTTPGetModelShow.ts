@@ -3,7 +3,7 @@ import { ActionName } from '@/onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
 
 const SchemaData = Type.Object({
-    model: Type.String(),
+    model: Type.Optional(Type.String()),
 });
 
 type Payload = Static<typeof SchemaData>;
