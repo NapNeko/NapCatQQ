@@ -10,6 +10,13 @@ export interface InvalidCheckResult {
 }
 
 export const ActionName = {
+    // new extends 完全差异OneBot类别
+    GetDoubtFriendsAddRequest: 'get_doubt_friends_add_request',
+    SetDoubtFriendsAddRequest: 'set_doubt_friends_add_request',
+    // napcat
+    GetRkeyEx: 'get_rkey',
+    GetRkeyServer: 'get_rkey_server',
+    SetGroupRemark: 'set_group_remark',
     NapCat_GetPrivateFileUrl: 'get_private_file_url',
     ClickInlineKeyboardButton: 'click_inline_keyboard_button',
     GetUnidirectionalFriendList: 'get_unidirectional_friend_list',
@@ -30,8 +37,9 @@ export const ActionName = {
     SetGroupCard: 'set_group_card',
     SetGroupName: 'set_group_name',
     SetGroupLeave: 'set_group_leave',
-    SetSpecialTittle: 'set_group_special_title',
+    SetSpecialTitle: 'set_group_special_title',
     SetFriendAddRequest: 'set_friend_add_request',
+    SetFriendRemark: 'set_friend_remark',
     SetGroupAddRequest: 'set_group_add_request',
     GetLoginInfo: 'get_login_info',
     GoCQHTTP_GetStrangerInfo: 'get_stranger_info',
@@ -51,7 +59,7 @@ export const ActionName = {
     GetStatus: 'get_status',
     GetVersionInfo: 'get_version_info',
     // Reboot : 'set_restart',
-    // CleanCache : 'clean_cache',
+    CleanCache : 'clean_cache',
     Exit: 'bot_exit',
     // go-cqhttp
     SetQQProfile: 'set_qq_profile',
@@ -128,6 +136,10 @@ export const ActionName = {
     GetUserStatus: 'nc_get_user_status',
     GetRkey: 'nc_get_rkey',
     GetGroupShutList: 'get_group_shut_list',
+
+    MoveGroupFile: 'move_group_file',
+    TransGroupFile: 'trans_group_file',
+    RenameGroupFile: 'rename_group_file',
 
     GetGuildList: 'get_guild_list',
     GetGuildProfile: 'get_guild_service_profile',

@@ -19,7 +19,7 @@ for %%a in ("%RetString%") do (
 SET QQPath=%pathWithoutUninstall%QQ.exe
 
 if not exist "%QQpath%" (
-    echo provided QQ path is invalid: %QQpath%
+    echo provided QQ path is invalid
     pause
     exit /b
 )

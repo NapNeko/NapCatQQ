@@ -27,6 +27,9 @@ export class NTQQGroupApi {
         this.core = core;
     }
 
+    async setGroupRemark(groupCode: string, remark: string) {
+        return this.context.session.getGroupService().modifyGroupRemark(groupCode, remark);
+    }
     async fetchGroupDetail(groupCode: string) {
         const [, detailInfo] = await this.core.eventWrapper.callNormalEventV2(
             'NodeIKernelGroupService/getGroupDetailInfo',
@@ -165,7 +168,13 @@ export class NTQQGroupApi {
 
         return this.groupMemberCache.get(groupCode);
     }
-
+    async refreshGroupMemberCachePartial(groupCode: string, uid: string) {
+        const member = await this.getGroupMemberEx(groupCode, uid, true);
+        if (member) {
+            this.groupMemberCache.get(groupCode)?.set(uid, member);
+        }
+        return member;
+    }
     async getGroupMember(groupCode: string | number, memberUinOrUid: string | number) {
         const groupCodeStr = groupCode.toString();
         const memberUinOrUidStr = memberUinOrUid.toString();
@@ -207,6 +216,10 @@ export class NTQQGroupApi {
 
     async delGroupFileFolder(groupCode: string, folderId: string) {
         return this.context.session.getRichMediaService().deleteGroupFolder(groupCode, folderId);
+    }
+
+    async transGroupFile(groupCode: string, fileId: string) {
+        return this.context.session.getRichMediaService().transGroupFile(groupCode, fileId);
     }
 
     async addGroupEssence(groupCode: string, msgId: string) {
@@ -339,9 +352,9 @@ export class NTQQGroupApi {
         return this.context.session.getGroupService().uploadGroupBulletinPic(groupCode, _Pskey, imageurl);
     }
 
-    async handleGroupRequest(notify: GroupNotify, operateType: NTGroupRequestOperateTypes, reason?: string) {
+    async handleGroupRequest(doubt: boolean, notify: GroupNotify, operateType: NTGroupRequestOperateTypes, reason?: string) {
         return this.context.session.getGroupService().operateSysNotify(
-            false,
+            doubt,
             {
                 operateType: operateType,
                 targetMsg: {

@@ -84,17 +84,19 @@ export class OneBotQuickActionApi {
         let notify = (await this.core.apis.GroupApi.getSingleScreenNotifies(false, 100)).find(e => e.seq == flag);
         if (!notify) {
             notify = (await this.core.apis.GroupApi.getSingleScreenNotifies(true, 100)).find(e => e.seq == flag);
+            return { doubt: true, notify };
         }
-        return notify;
+        return { doubt: false, notify };
     }
 
     async handleGroupRequest(request: OB11GroupRequestEvent, quickAction: QuickActionGroupRequest) {
 
         const invite_notify = this.obContext.apis.MsgApi.notifyGroupInvite.get(request.flag);
-        const notify = invite_notify ?? await this.findNotify(request.flag);
+        const { doubt, notify } = invite_notify ? { doubt: false, notify: invite_notify } : await this.findNotify(request.flag);
 
         if (!isNull(quickAction.approve) && notify) {
             this.core.apis.GroupApi.handleGroupRequest(
+                doubt,
                 notify,
                 quickAction.approve ? NTGroupRequestOperateTypes.KAGREE : NTGroupRequestOperateTypes.KREFUSE,
                 quickAction.reason,

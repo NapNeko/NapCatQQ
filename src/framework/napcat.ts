@@ -7,13 +7,15 @@ import { SelfInfo } from '@/core/types';
 import { NodeIKernelLoginListener } from '@/core/listeners';
 import { NodeIKernelLoginService } from '@/core/services';
 import { NodeIQQNTWrapperSession, WrapperNodeApi } from '@/core/wrapper';
-import { InitWebUi, WebUiConfig } from '@/webui';
+import { InitWebUi, WebUiConfig, webUiRuntimePort } from '@/webui';
 import { NapCatOneBot11Adapter } from '@/onebot';
+import { downloadFFmpegIfNotExists } from '@/common/download-ffmpeg';
+import { FFmpegService } from '@/common/ffmpeg';
 
 //Framework ES入口文件
 export async function getWebUiUrl() {
     const WebUiConfigData = (await WebUiConfig.GetWebUIConfig());
-    return 'http://127.0.0.1:' + WebUiConfigData.port + '/webui/?token=' + WebUiConfigData.token;
+    return 'http://127.0.0.1:' + webUiRuntimePort + '/webui/?token=' + WebUiConfigData.token;
 }
 
 export async function NCoreInitFramework(
@@ -36,6 +38,15 @@ export async function NCoreInitFramework(
     const logger = new LogWrapper(pathWrapper.logsPath);
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
+    if (!process.env['NAPCAT_DISABLE_FFMPEG_DOWNLOAD']) {
+        downloadFFmpegIfNotExists(logger).then(({ path, reset }) => {
+            if (reset && path) {
+                FFmpegService.setFfmpegPath(path, logger);
+            }
+        }).catch(e => {
+            logger.logError('[Ffmpeg] Error:', e);
+        });
+    }
     //直到登录成功后，执行下一步
     const selfInfo = await new Promise<SelfInfo>((resolveSelfInfo) => {
         const loginListener = new NodeIKernelLoginListener();

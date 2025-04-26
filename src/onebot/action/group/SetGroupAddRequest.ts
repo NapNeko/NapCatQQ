@@ -20,11 +20,12 @@ export default class SetGroupAddRequest extends OneBotAction<Payload, null> {
         const approve = payload.approve?.toString() !== 'false';
         const reason = payload.reason ?? ' ';
         const invite_notify = this.obContext.apis.MsgApi.notifyGroupInvite.get(flag);
-        const notify = invite_notify ?? await this.findNotify(flag);
+        const { doubt, notify } = invite_notify ? { doubt: false, notify: invite_notify } : await this.findNotify(flag);
         if (!notify) {
             throw new Error('No such request');
         }
         await this.core.apis.GroupApi.handleGroupRequest(
+            doubt,
             notify,
             approve ? NTGroupRequestOperateTypes.KAGREE : NTGroupRequestOperateTypes.KREFUSE,
             reason,
@@ -36,7 +37,8 @@ export default class SetGroupAddRequest extends OneBotAction<Payload, null> {
         let notify = (await this.core.apis.GroupApi.getSingleScreenNotifies(false, 100)).find(e => e.seq == flag);
         if (!notify) {
             notify = (await this.core.apis.GroupApi.getSingleScreenNotifies(true, 100)).find(e => e.seq == flag);
+            return { doubt: true, notify };
         }
-        return notify;
+        return { doubt: false, notify };
     }
 }

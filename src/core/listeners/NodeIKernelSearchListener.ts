@@ -1,4 +1,4 @@
-import { ChatType } from '@/core';
+import { ChatType, RawMessage } from '@/core';
 export interface SearchGroupInfo {
     groupCode: string;
     ownerUid: string;
@@ -56,7 +56,7 @@ export interface GroupSearchResult {
     nextPos: number;
 }
 export interface NodeIKernelSearchListener {
-    
+
     onSearchGroupResult(params: GroupSearchResult): any;
 
     onSearchFileKeywordsResult(params: {
@@ -94,4 +94,27 @@ export interface NodeIKernelSearchListener {
             }[]
         }[]
     }): any;
+
+    onSearchMsgKeywordsResult(params: {
+        searchId: string,
+        hasMore: boolean,
+        resultItems: Array<{
+            msgId: string,
+            msgSeq: string,
+            msgTime: string,
+            senderUid: string,
+            senderUin: string,
+            senderNick: string,
+            senderNickHits: unknown[],
+            senderRemark: string,
+            senderRemarkHits: unknown[],
+            senderCard: string,
+            senderCardHits: unknown[],
+            fieldType: number,
+            fieldText: string,
+            msgRecord: RawMessage;
+            hitsInfo: Array<unknown>,
+            msgAbstract: unknown,
+        }>
+    }): void | Promise<void>;
 }

@@ -20,16 +20,36 @@ export class OB11Construct {
 
     static friends(friends: FriendV2[]): OB11User[] {
         return friends.map(rawFriend => ({
-            ...rawFriend.baseInfo,
-            ...rawFriend.coreInfo,
+            birthday_year: rawFriend.baseInfo.birthday_year,
+            birthday_month: rawFriend.baseInfo.birthday_month,
+            birthday_day: rawFriend.baseInfo.birthday_day,
             user_id: parseInt(rawFriend.coreInfo.uin),
+            age: rawFriend.baseInfo.age,
+            phone_num: rawFriend.baseInfo.phoneNum,
+            email: rawFriend.baseInfo.eMail,
+            category_id: rawFriend.baseInfo.categoryId,
             nickname: rawFriend.coreInfo.nick ?? '',
             remark: rawFriend.coreInfo.remark ?? rawFriend.coreInfo.nick,
             sex: this.sex(rawFriend.baseInfo.sex),
-            level: 0,
+            level: rawFriend.qqLevel && calcQQLevel(rawFriend.qqLevel) || 0,
         }));
     }
-
+    static friend(friends: FriendV2): OB11User {
+        return {
+            birthday_year: friends.baseInfo.birthday_year,
+            birthday_month: friends.baseInfo.birthday_month,
+            birthday_day: friends.baseInfo.birthday_day,
+            user_id: parseInt(friends.coreInfo.uin),
+            age: friends.baseInfo.age,
+            phone_num: friends.baseInfo.phoneNum,
+            email: friends.baseInfo.eMail,
+            category_id: friends.baseInfo.categoryId,
+            nickname: friends.coreInfo.nick ?? '',
+            remark: friends.coreInfo.remark ?? friends.coreInfo.nick,
+            sex: this.sex(friends.baseInfo.sex),
+            level: 0,
+        };
+    }
     static groupMemberRole(role: number): OB11GroupMemberRole | undefined {
         return {
             4: OB11GroupMemberRole.owner,
@@ -73,6 +93,8 @@ export class OB11Construct {
 
     static group(group: Group): OB11Group {
         return {
+            group_all_shut: (+group.groupShutupExpireTime > 0 )? -1 : 0,
+            group_remark: group.remarkName,
             group_id: +group.groupCode,
             group_name: group.groupName,
             member_count: group.memberCount,

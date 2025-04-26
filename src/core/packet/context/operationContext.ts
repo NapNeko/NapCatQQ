@@ -68,8 +68,8 @@ export class PacketOperationContext {
         }
     }
 
-    async SetGroupSpecialTitle(groupUin: number, uid: string, tittle: string) {
-        const req = trans.SetSpecialTitle.build(groupUin, uid, tittle);
+    async SetGroupSpecialTitle(groupUin: number, uid: string, title: string) {
+        const req = trans.SetSpecialTitle.build(groupUin, uid, title);
         await this.context.client.sendOidbPacket(req);
     }
 
@@ -152,6 +152,20 @@ export class PacketOperationContext {
         const resp = await this.context.client.sendOidbPacket(req, true);
         const res = trans.UploadForwardMsg.parse(resp);
         return res.result.resId;
+    }
+
+    async MoveGroupFile(groupUin: number, fileUUID: string, currentParentDirectory: string, targetParentDirectory: string) {
+        const req = trans.MoveGroupFile.build(groupUin, fileUUID, currentParentDirectory, targetParentDirectory);
+        const resp = await this.context.client.sendOidbPacket(req, true);
+        const res = trans.MoveGroupFile.parse(resp);
+        return res.move.retCode;
+    }
+
+    async RenameGroupFile(groupUin: number, fileUUID: string, currentParentDirectory: string, newName: string) {
+        const req = trans.RenameGroupFile.build(groupUin, fileUUID, currentParentDirectory, newName);
+        const resp = await this.context.client.sendOidbPacket(req, true);
+        const res = trans.RenameGroupFile.parse(resp);
+        return res.rename.retCode;
     }
 
     async GetGroupFileUrl(groupUin: number, fileUUID: string) {

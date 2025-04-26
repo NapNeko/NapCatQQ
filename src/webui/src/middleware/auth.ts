@@ -21,17 +21,18 @@ export async function auth(req: Request, res: Response, next: NextFunction) {
             return sendError(res, 'Unauthorized');
         }
         // 获取token
-        const token = authorization[1];
+        const hash = authorization[1];
+        if(!hash) return sendError(res, 'Unauthorized');
         // 解析token
         let Credential: WebUiCredentialJson;
         try {
-            Credential = JSON.parse(Buffer.from(token, 'base64').toString('utf-8'));
+            Credential = JSON.parse(Buffer.from(hash, 'base64').toString('utf-8'));
         } catch (e) {
             return sendError(res, 'Unauthorized');
         }
         // 获取配置
         const config = await WebUiConfig.GetWebUIConfig();
-        // 验证凭证在1小时内有效且token与原始token相同
+        // 验证凭证在1小时内有效
         const credentialJson = AuthHelper.validateCredentialWithinOneHour(config.token, Credential);
         if (credentialJson) {
             // 通过验证

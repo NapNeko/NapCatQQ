@@ -41,9 +41,10 @@ export class NTQQFileApi {
         this.context = context;
         this.core = core;
         this.rkeyManager = new RkeyManager([
-            'https://rkey.napneko.icu/rkeys'
+            'https://secret-service.bietiaop.com/rkeys',
+            'http://ss.xingzhige.com/music_card/rkey',
         ],
-        this.context.logger
+            this.context.logger
         );
     }
 
@@ -181,22 +182,29 @@ export class NTQQFileApi {
         filePath = newFilePath;
 
         const { fileName: _fileName, path, fileSize, md5 } = await this.core.apis.FileApi.uploadFile(filePath, ElementType.VIDEO);
+        context.deleteAfterSentFiles.push(path);
         if (fileSize === 0) {
             throw new Error('文件异常，大小为0');
         }
         const thumbDir = path.replace(`${pathLib.sep}Ori${pathLib.sep}`, `${pathLib.sep}Thumb${pathLib.sep}`);
         fs.mkdirSync(pathLib.dirname(thumbDir), { recursive: true });
         const thumbPath = pathLib.join(pathLib.dirname(thumbDir), `${md5}_0.png`);
-        try {
-            videoInfo = await FFmpegService.getVideoInfo(filePath, thumbPath);
-        } catch {
-            fs.writeFileSync(thumbPath, Buffer.from(defaultVideoThumbB64, 'base64'));
-        }
         if (_diyThumbPath) {
             try {
                 await this.copyFile(_diyThumbPath, thumbPath);
             } catch (e) {
                 this.context.logger.logError('复制自定义缩略图失败', e);
+            }
+        } else {
+            try {
+                videoInfo = await FFmpegService.getVideoInfo(filePath, thumbPath);
+                if (!fs.existsSync(thumbPath)) {
+                    this.context.logger.logError('获取视频缩略图失败', new Error('缩略图不存在'));
+                    throw new Error('获取视频缩略图失败');
+                }
+            } catch (e) {
+                this.context.logger.logError('获取视频信息失败', e);
+                fs.writeFileSync(thumbPath, Buffer.from(defaultVideoThumbB64, 'base64'));
             }
         }
         context.deleteAfterSentFiles.push(thumbPath);
@@ -223,7 +231,7 @@ export class NTQQFileApi {
             },
         };
     }
-    async createValidSendPttElement(pttPath: string): Promise<SendPttElement> {
+    async createValidSendPttElement(_context: SendMessageContext, pttPath: string): Promise<SendPttElement> {
 
         const { converted, path: silkPath, duration } = await encodeSilk(pttPath, this.core.NapCatTempPath, this.core.context.logger);
         if (!silkPath) {
@@ -300,18 +308,18 @@ export class NTQQFileApi {
                     element.elementType === ElementType.FILE
                 ) {
                     switch (element.elementType) {
-                    case ElementType.PIC:
+                        case ElementType.PIC:
                             element.picElement!.sourcePath = elementResults?.[elementIndex] ?? '';
-                        break;
-                    case ElementType.VIDEO:
+                            break;
+                        case ElementType.VIDEO:
                             element.videoElement!.filePath = elementResults?.[elementIndex] ?? '';
-                        break;
-                    case ElementType.PTT:
+                            break;
+                        case ElementType.PTT:
                             element.pttElement!.filePath = elementResults?.[elementIndex] ?? '';
-                        break;
-                    case ElementType.FILE:
+                            break;
+                        case ElementType.FILE:
                             element.fileElement!.filePath = elementResults?.[elementIndex] ?? '';
-                        break;
+                            break;
                     }
                     elementIndex++;
                 }

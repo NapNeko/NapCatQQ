@@ -81,7 +81,7 @@ import { GetGroupSystemMsg } from './system/GetSystemMsg';
 import { GroupPoke } from './group/GroupPoke';
 import { GetUserStatus } from './extends/GetUserStatus';
 import { GetRkey } from './extends/GetRkey';
-import { SetSpecialTittle } from './extends/SetSpecialTittle';
+import { SetSpecialTitle } from './extends/SetSpecialTitle';
 import { GetGroupShutList } from './group/GetGroupShutList';
 import { GetGroupMemberList } from './group/GetGroupMemberList';
 import { GetGroupFileUrl } from '@/onebot/action/file/GetGroupFileUrl';
@@ -107,10 +107,27 @@ import { SetDiyOnlineStatus } from './extends/SetDiyOnlineStatus';
 import { BotExit } from './extends/BotExit';
 import { ClickInlineKeyboardButton } from './extends/ClickInlineKeyboardButton';
 import { GetPrivateFileUrl } from './file/GetPrivateFileUrl';
+import { GetUnidirectionalFriendList } from './extends/GetUnidirectionalFriendList';
+import SetGroupRemark from './extends/SetGroupRemark';
+import { MoveGroupFile } from './extends/MoveGroupFile';
+import { TransGroupFile } from './extends/TransGroupFile';
+import { RenameGroupFile } from './extends/RenameGroupFile';
+import { GetRkeyServer } from './packet/GetRkeyServer';
+import { GetRkeyEx } from './packet/GetRkeyEx';
+import { CleanCache } from './system/CleanCache';
+import SetFriendRemark from './user/SetFriendRemark';
+import { SetDoubtFriendsAddRequest } from './new/SetDoubtFriendsAddRequest';
+import { GetDoubtFriendsAddRequest } from './new/GetDoubtFriendsAddRequest';
 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 
     const actionHandlers = [
+        new SetDoubtFriendsAddRequest(obContext, core),
+        new GetDoubtFriendsAddRequest(obContext, core),
+        new SetFriendRemark(obContext, core),
+        new GetRkeyEx(obContext, core),
+        new GetRkeyServer(obContext, core),
+        new SetGroupRemark(obContext, core),
         new GetGroupInfoEx(obContext, core),
         new FetchEmojiLike(obContext, core),
         new GetFile(obContext, core),
@@ -129,6 +146,9 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new SetGroupSign(obContext, core),
         new SendGroupSign(obContext, core),
         new GetClientkey(obContext, core),
+        new MoveGroupFile(obContext, core),
+        new RenameGroupFile(obContext, core),
+        new TransGroupFile(obContext, core),
         // onebot11
         new SendLike(obContext, core),
         new GetMsg(obContext, core),
@@ -212,7 +232,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new FriendPoke(obContext, core),
         new GetUserStatus(obContext, core),
         new GetRkey(obContext, core),
-        new SetSpecialTittle(obContext, core),
+        new SetSpecialTitle(obContext, core),
         new SetDiyOnlineStatus(obContext, core),
         // new UploadForwardMsg(obContext, core),
         new GetGroupShutList(obContext, core),
@@ -226,7 +246,9 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new GetGroupSystemMsg(obContext, core),
         new BotExit(obContext, core),
         new ClickInlineKeyboardButton(obContext, core),
-        new GetPrivateFileUrl(obContext,core)
+        new GetPrivateFileUrl(obContext, core),
+        new GetUnidirectionalFriendList(obContext, core),
+        new CleanCache(obContext, core),
     ];
 
     type HandlerUnion = typeof actionHandlers[number];

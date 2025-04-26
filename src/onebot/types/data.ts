@@ -1,4 +1,10 @@
 export interface OB11User {
+    birthday_year?: number; // 生日
+    birthday_month?: number; // 生日
+    birthday_day?: number; // 生日
+    phone_num?: string; // 手机号
+    email?: string; // 邮箱
+    category_id?: number; // 分组ID
     user_id: number; // 用户ID
     nickname: string; // 昵称
     remark?: string; // 备注
@@ -57,6 +63,8 @@ export interface OB11GroupMember {
 }
 
 export interface OB11Group {
+    group_all_shut: number; // 群全员禁言
+    group_remark: string; // 群备注
     group_id: number; // 群ID
     group_name: string; // 群名称
     member_count?: number; // 成员数量

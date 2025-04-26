@@ -49,6 +49,7 @@ export class OneBotGroupApi {
                 duration = -1;
             }
         }
+        await this.core.apis.GroupApi.refreshGroupMemberCachePartial(GroupCode, memberUid);
         const adminUin = (await this.core.apis.GroupApi.getGroupMember(GroupCode, adminUid))?.uin;
         if (memberUin && adminUin) {
             return new OB11GroupBanEvent(
@@ -119,13 +120,15 @@ export class OneBotGroupApi {
                 member.cardName = newCardName;
                 return event;
             }
+            if (member && member.nick !== msg.sendNickName) {
+                await this.core.apis.GroupApi.refreshGroupMemberCachePartial(msg.peerUid, msg.senderUid);
+            }
         }
         return undefined;
     }
 
     async parsePaiYiPai(msg: RawMessage, jsonStr: string) {
         const json = JSON.parse(jsonStr);
-
         //判断业务类型
         //Poke事件
         const pokedetail: Array<{ uid: string }> = json.items;
@@ -146,14 +149,15 @@ export class OneBotGroupApi {
     async parseOtherJsonEvent(msg: RawMessage, jsonStr: string, context: InstanceContext) {
         const json = JSON.parse(jsonStr);
         const type = json.items[json.items.length - 1]?.txt;
+        await this.core.apis.GroupApi.refreshGroupMemberCachePartial(msg.peerUid, msg.senderUid);
         if (type === '头衔') {
             const memberUin = json.items[1].param[0];
             const title = json.items[3].txt;
             context.logger.logDebug('收到群成员新头衔消息', json);
             return new OB11GroupTitleEvent(
                 this.core,
-                parseInt(msg.peerUid),
-                parseInt(memberUin),
+                +msg.peerUid,
+                +memberUin,
                 title,
             );
         } else if (type === '移出') {
@@ -246,7 +250,34 @@ export class OneBotGroupApi {
             'invite'
         );
     }
-
+    async parse51TypeEvent(msg: RawMessage, grayTipElement: GrayTipElement) {
+        // 神经腾讯 没了妈妈想出来的
+        // Warn 下面存在高并发危险
+        if (grayTipElement.jsonGrayTipElement.jsonStr) {
+            const json: {
+                align: string,
+                items: Array<{ txt: string, type: string }>
+            } = JSON.parse(grayTipElement.jsonGrayTipElement.jsonStr);
+            if (json.items.length === 1 && json.items[0]?.txt.endsWith('加入群')) {
+                let old_members = structuredClone(this.core.apis.GroupApi.groupMemberCache.get(msg.peerUid));
+                if (!old_members) return;
+                let new_members_map = await this.core.apis.GroupApi.refreshGroupMemberCache(msg.peerUid, true);
+                if (!new_members_map) return;
+                let new_members = Array.from(new_members_map.values());
+                // 对比members查找新成员
+                let new_member = new_members.find((member) => old_members.get(member.uid) == undefined);
+                if (!new_member) return;
+                return new OB11GroupIncreaseEvent(
+                    this.core,
+                    +msg.peerUid,
+                    +new_member.uin,
+                    0,
+                    'invite',
+                );
+            }
+        }
+        return;
+    }
     async parseGrayTipElement(msg: RawMessage, grayTipElement: GrayTipElement) {
         if (grayTipElement.subElementType === NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_GROUP) {
             // 解析群组事件 由sysmsg解析
@@ -278,6 +309,9 @@ export class OneBotGroupApi {
                 return await this.parsePaiYiPai(msg, grayTipElement.jsonGrayTipElement.jsonStr);
             } else if (grayTipElement.jsonGrayTipElement.busiId == JsonGrayBusiId.AIO_GROUP_ESSENCE_MSG_TIP) {
                 return await this.parseEssenceMsg(msg, grayTipElement.jsonGrayTipElement.jsonStr);
+            } else if (+(grayTipElement.jsonGrayTipElement.busiId ?? 0) == 51) {
+                // 51是什么？{"align":"center","items":[{"txt":"下一秒起床通过王者荣耀加入群","type":"nor"}]
+                return await this.parse51TypeEvent(msg, grayTipElement);
             } else {
                 return await this.parseOtherJsonEvent(msg, grayTipElement.jsonGrayTipElement.jsonStr, this.core.context);
             }

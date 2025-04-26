@@ -10,6 +10,7 @@ export enum OB11MessageType {
 
 // 消息接口定义
 export interface OB11Message {
+    real_seq?: string;// 自行扩展
     temp_source?: number;
     message_sent_type?: string;
     target_id?: number;  // 自己发送消息/私聊消息

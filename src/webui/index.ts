@@ -4,6 +4,7 @@
 
 import express from 'express';
 import { createServer } from 'http';
+import { createServer as createHttpsServer } from 'https';
 import { LogWrapper } from '@/common/log';
 import { NapCatPathWrapper } from '@/common/path';
 import { WebUiConfigWrapper } from '@webapi/helper/config';
@@ -13,11 +14,10 @@ import { createUrl } from '@webapi/utils/url';
 import { sendError } from '@webapi/utils/response';
 import { join } from 'node:path';
 import { terminalManager } from '@webapi/terminal/terminal_manager';
-import multer from 'multer'; // 新增：引入multer用于错误捕获
+import multer from 'multer'; // 引入multer用于错误捕获
 
 // 实例化Express
 const app = express();
-const server = createServer(app);
 /**
  * 初始化并启动WebUI服务。
  * 该函数配置了Express服务器以支持JSON解析和静态文件服务，并监听6099端口。
@@ -29,7 +29,8 @@ export let webUiPathWrapper: NapCatPathWrapper;
 const MAX_PORT_TRY = 100;
 import * as net from 'node:net';
 import { WebUiDataRuntime } from './src/helper/Data';
-
+import { existsSync, readFileSync } from 'node:fs';
+export let webUiRuntimePort = 6099;
 export async function InitPort(parsedConfig: WebUiConfigType): Promise<[string, number, string]> {
     try {
         await tryUseHost(parsedConfig.host);
@@ -40,29 +41,47 @@ export async function InitPort(parsedConfig: WebUiConfigType): Promise<[string, 
         return ['', 0, ''];
     }
 }
+async function checkCertificates(logger: LogWrapper): Promise<{ key: string, cert: string } | null> {
+    try {
+        const certPath = join(webUiPathWrapper.configPath, 'cert.pem');
+        const keyPath = join(webUiPathWrapper.configPath, 'key.pem');
 
+        if (existsSync(certPath) && existsSync(keyPath)) {
+            const cert = readFileSync(certPath, 'utf8');
+            const key = readFileSync(keyPath, 'utf8');
+            logger.log('[NapCat] [WebUi] 找到SSL证书，将启用HTTPS模式');
+            return { cert, key };
+        }
+        return null;
+    } catch (error) {
+        logger.log('[NapCat] [WebUi] 检查SSL证书时出错: ' + error);
+        return null;
+    }
+}
 export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapper) {
     webUiPathWrapper = pathWrapper;
     WebUiConfig = new WebUiConfigWrapper();
     const [host, port, token] = await InitPort(await WebUiConfig.GetWebUIConfig());
+    webUiRuntimePort = port;
     if (port == 0) {
         logger.log('[NapCat] [WebUi] Current WebUi is not run.');
         return;
     }
-    setTimeout(async () => {
-        let autoLoginAccount = process.env['NAPCAT_QUICK_ACCOUNT'] || WebUiConfig.getAutoLoginAccount();
-        if (autoLoginAccount) {
-            try {
-                const { result, message } = await WebUiDataRuntime.requestQuickLogin(autoLoginAccount);
-                if (!result) {
-                    throw new Error(message);
+    WebUiDataRuntime.setWebUiConfigQuickFunction(
+        async () => {
+            let autoLoginAccount = process.env['NAPCAT_QUICK_ACCOUNT'] || WebUiConfig.getAutoLoginAccount();
+            if (autoLoginAccount) {
+                try {
+                    const { result, message } = await WebUiDataRuntime.requestQuickLogin(autoLoginAccount);
+                    if (!result) {
+                        throw new Error(message);
+                    }
+                    console.log(`[NapCat] [WebUi] Auto login account: ${autoLoginAccount}`);
+                } catch (error) {
+                    console.log(`[NapCat] [WebUi] Auto login account failed.` + error);
                 }
-                console.log(`[NapCat] [WebUi] Auto login account: ${autoLoginAccount}`);
-            } catch (error) {
-                console.log(`[NapCat] [WebUi] Auto login account failed.` + error);
             }
-        }
-    }, 30000);
+        });
     // ------------注册中间件------------
     // 使用express的json中间件
     app.use(express.json());
@@ -105,6 +124,9 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
     // 挂载静态路由（前端），路径为 /webui
     app.use('/webui', express.static(pathWrapper.staticPath));
     // 初始化WebSocket服务器
+    const sslCerts = await checkCertificates(logger);
+    const isHttps = !!sslCerts;
+    let server = isHttps && sslCerts ? createHttpsServer(sslCerts, app) : createServer(app);
     server.on('upgrade', (request, socket, head) => {
         terminalManager.initialize(request, socket, head, logger);
     });

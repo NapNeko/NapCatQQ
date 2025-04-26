@@ -3,6 +3,7 @@ import Ajv, { ErrorObject, ValidateFunction } from 'ajv';
 import { NapCatCore } from '@/core';
 import { NapCatOneBot11Adapter, OB11Return } from '@/onebot';
 import { NetworkAdapterConfig } from '../config/config';
+import { TSchema } from '@sinclair/typebox';
 
 export class OB11Response {
     private static createResponse<T>(data: T, status: string, retcode: number, message: string = '', echo: unknown = null): OB11Return<T> {
@@ -33,7 +34,7 @@ export abstract class OneBotAction<PayloadType, ReturnDataType> {
     actionName: typeof ActionName[keyof typeof ActionName] = ActionName.Unknown;
     core: NapCatCore;
     private validate?: ValidateFunction<unknown> = undefined;
-    payloadSchema?: unknown = undefined;
+    payloadSchema?: TSchema = undefined;
     obContext: NapCatOneBot11Adapter;
 
     constructor(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
@@ -43,7 +44,7 @@ export abstract class OneBotAction<PayloadType, ReturnDataType> {
 
     protected async check(payload: PayloadType): Promise<BaseCheckResult> {
         if (this.payloadSchema) {
-            this.validate = new Ajv({ allowUnionTypes: true, useDefaults: true }).compile(this.payloadSchema);
+            this.validate = new Ajv({ allowUnionTypes: true, useDefaults: true, coerceTypes: true }).compile(this.payloadSchema);
         }
         if (this.validate && !this.validate(payload)) {
             const errors = this.validate.errors as ErrorObject[];

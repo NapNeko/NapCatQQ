@@ -5,13 +5,13 @@ export class AuthHelper {
 
     /**
      * 签名凭证方法。
-     * @param token 待签名的凭证字符串。
+     * @param hash 待签名的凭证字符串。
      * @returns 签名后的凭证对象。
      */
-    public static signCredential(token: string): WebUiCredentialJson {
+    public static signCredential(hash: string): WebUiCredentialJson {
         const innerJson: WebUiCredentialInnerJson = {
             CreatedTime: Date.now(),
-            TokenEncoded: token,
+            HashEncoded: hash,
         };
         const jsonString = JSON.stringify(innerJson);
         const hmac = crypto.createHmac('sha256', AuthHelper.secretKey).update(jsonString, 'utf8').digest('hex');
@@ -57,8 +57,7 @@ export class AuthHelper {
         const currentTime = Date.now() / 1000;
         const createdTime = credentialJson.Data.CreatedTime;
         const timeDifference = currentTime - createdTime;
-
-        return timeDifference <= 3600 && credentialJson.Data.TokenEncoded === token;
+        return timeDifference <= 3600 && credentialJson.Data.HashEncoded === AuthHelper.generatePasswordHash(token);
     }
 
     /**
@@ -84,5 +83,24 @@ export class AuthHelper {
         const hmac = crypto.createHmac('sha256', AuthHelper.secretKey).update(jsonString, 'utf8').digest('hex');
 
         return store.exists(`revoked:${hmac}`) > 0;
+    }
+
+    /**
+     * 生成密码Hash
+     * @param password 密码
+     * @returns 生成的Hash值
+     */
+    public static generatePasswordHash(password: string): string {
+        return crypto.createHash('sha256').update(password + '.napcat').digest().toString('hex')
+    }
+
+    /**
+     * 对比密码和Hash值
+     * @param password 密码
+     * @param hash Hash值
+     * @returns 布尔值，表示密码是否匹配Hash值
+     */
+    public static comparePasswordHash(password: string, hash: string): boolean {
+        return this.generatePasswordHash(password) === hash;
     }
 }

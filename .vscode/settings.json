@@ -6,5 +6,7 @@
         "tsconfig.json": "tsconfig.*.json, env.d.ts, vite.config.ts",
         "package.json": "package-lock.json, eslint*, .prettier*, .editorconfig, manifest.json, logo.png, .gitignore, LICENSE"
     },
-    "css.customData": [".vscode/tailwindcss.json"],
+    "css.customData": [
+        ".vscode/tailwindcss.json"
+    ],
 }

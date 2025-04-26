@@ -47,6 +47,22 @@ export default function WebLoginPage() {
     }
   }
 
+  // 处理全局键盘事件
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Enter' && !isLoading) {
+      onSubmit()
+    }
+  }
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown)
+
+    // 清理函数
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [tokenValue, isLoading]) // 依赖项包含用于登录的状态
+
   useEffect(() => {
     if (token) {
       onSubmit()
@@ -79,6 +95,7 @@ export default function WebLoginPage() {
             <CardBody className="flex gap-5 py-5 px-5 md:px-10">
               <Input
                 isClearable
+                type="password"
                 classNames={{
                   label: 'text-black/50 dark:text-white/90',
                   input: [

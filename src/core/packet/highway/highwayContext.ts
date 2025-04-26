@@ -144,7 +144,7 @@ export class PacketHighwayContext {
         const ukey = preRespData.upload.uKey;
         if (ukey && ukey != '') {
             this.logger.debug(`[Highway] uploadGroupImageReq get upload ukey: ${ukey}, need upload!`);
-            const index = preRespData.upload.msgInfo.msgInfoBody[0].index;
+            const index = preRespData.upload.msgInfo.msgInfoBody[0]!.index;
             const sha1 = Buffer.from(index.info.fileSha1, 'hex');
             const md5 = Buffer.from(index.info.fileHash, 'hex');
             const extend = new NapProtoMsg(proto.NTV2RichMediaHighwayExt).encode({
@@ -181,7 +181,7 @@ export class PacketHighwayContext {
         const ukey = preRespData.upload.uKey;
         if (ukey && ukey != '') {
             this.logger.debug(`[Highway] uploadC2CImageReq get upload ukey: ${ukey}, need upload!`);
-            const index = preRespData.upload.msgInfo.msgInfoBody[0].index;
+            const index = preRespData.upload.msgInfo.msgInfoBody[0]!.index;
             const sha1 = Buffer.from(index.info.fileSha1, 'hex');
             const md5 = Buffer.from(index.info.fileHash, 'hex');
             const extend = new NapProtoMsg(proto.NTV2RichMediaHighwayExt).encode({
@@ -219,7 +219,7 @@ export class PacketHighwayContext {
         const ukey = preRespData.upload.uKey;
         if (ukey && ukey != '') {
             this.logger.debug(`[Highway] uploadGroupVideoReq get upload video ukey: ${ukey}, need upload!`);
-            const index = preRespData.upload.msgInfo.msgInfoBody[0].index;
+            const index = preRespData.upload.msgInfo.msgInfoBody[0]!.index;
             const md5 = Buffer.from(index.info.fileHash, 'hex');
             const extend = new NapProtoMsg(proto.NTV2RichMediaHighwayExt).encode({
                 fileUuid: index.fileUuid,
@@ -244,16 +244,16 @@ export class PacketHighwayContext {
             this.logger.debug(`[Highway] uploadGroupVideoReq get upload invalid ukey ${ukey}, don't need upload!`);
         }
         const subFile = preRespData.upload.subFileInfos[0];
-        if (subFile.uKey && subFile.uKey != '') {
-            this.logger.debug(`[Highway] uploadGroupVideoReq get upload video thumb ukey: ${subFile.uKey}, need upload!`);
-            const index = preRespData.upload.msgInfo.msgInfoBody[1].index;
+        if (subFile!.uKey && subFile!.uKey != '') {
+            this.logger.debug(`[Highway] uploadGroupVideoReq get upload video thumb ukey: ${subFile!.uKey}, need upload!`);
+            const index = preRespData.upload.msgInfo.msgInfoBody[1]!.index;
             const md5 = Buffer.from(index.info.fileHash, 'hex');
             const sha1 = Buffer.from(index.info.fileSha1, 'hex');
             const extend = new NapProtoMsg(proto.NTV2RichMediaHighwayExt).encode({
                 fileUuid: index.fileUuid,
-                uKey: subFile.uKey,
+                uKey: subFile!.uKey,
                 network: {
-                    ipv4S: oidbIpv4s2HighwayIpv4s(subFile.ipv4S)
+                    ipv4S: oidbIpv4s2HighwayIpv4s(subFile!.ipv4S)
                 },
                 msgInfoBody: preRespData.upload.msgInfo.msgInfoBody,
                 blockSize: BlockSize,
@@ -269,7 +269,7 @@ export class PacketHighwayContext {
                 extend
             );
         } else {
-            this.logger.debug(`[Highway] uploadGroupVideoReq get upload invalid thumb ukey ${subFile.uKey}, don't need upload!`);
+            this.logger.debug(`[Highway] uploadGroupVideoReq get upload invalid thumb ukey ${subFile!.uKey}, don't need upload!`);
         }
         video.msgInfo = preRespData.upload.msgInfo;
     }
@@ -284,7 +284,7 @@ export class PacketHighwayContext {
         const ukey = preRespData.upload.uKey;
         if (ukey && ukey != '') {
             this.logger.debug(`[Highway] uploadC2CVideoReq get upload video ukey: ${ukey}, need upload!`);
-            const index = preRespData.upload.msgInfo.msgInfoBody[0].index;
+            const index = preRespData.upload.msgInfo.msgInfoBody[0]!.index;
             const md5 = Buffer.from(index.info.fileHash, 'hex');
             const extend = new NapProtoMsg(proto.NTV2RichMediaHighwayExt).encode({
                 fileUuid: index.fileUuid,
@@ -309,16 +309,16 @@ export class PacketHighwayContext {
             this.logger.debug(`[Highway] uploadC2CVideoReq get upload invalid ukey ${ukey}, don't need upload!`);
         }
         const subFile = preRespData.upload.subFileInfos[0];
-        if (subFile.uKey && subFile.uKey != '') {
-            this.logger.debug(`[Highway] uploadC2CVideoReq get upload video thumb ukey: ${subFile.uKey}, need upload!`);
-            const index = preRespData.upload.msgInfo.msgInfoBody[1].index;
+        if (subFile!.uKey && subFile!.uKey != '') {
+            this.logger.debug(`[Highway] uploadC2CVideoReq get upload video thumb ukey: ${subFile!.uKey}, need upload!`);
+            const index = preRespData.upload.msgInfo.msgInfoBody[1]!.index;
             const md5 = Buffer.from(index.info.fileHash, 'hex');
             const sha1 = Buffer.from(index.info.fileSha1, 'hex');
             const extend = new NapProtoMsg(proto.NTV2RichMediaHighwayExt).encode({
                 fileUuid: index.fileUuid,
-                uKey: subFile.uKey,
+                uKey: subFile!.uKey,
                 network: {
-                    ipv4S: oidbIpv4s2HighwayIpv4s(subFile.ipv4S)
+                    ipv4S: oidbIpv4s2HighwayIpv4s(subFile!.ipv4S)
                 },
                 msgInfoBody: preRespData.upload.msgInfo.msgInfoBody,
                 blockSize: BlockSize,
@@ -334,7 +334,7 @@ export class PacketHighwayContext {
                 extend
             );
         } else {
-            this.logger.debug(`[Highway] uploadC2CVideoReq get upload invalid thumb ukey ${subFile.uKey}, don't need upload!`);
+            this.logger.debug(`[Highway] uploadC2CVideoReq get upload invalid thumb ukey ${subFile!.uKey}, don't need upload!`);
         }
         video.msgInfo = preRespData.upload.msgInfo;
     }
@@ -347,7 +347,7 @@ export class PacketHighwayContext {
         const ukey = preRespData.upload.uKey;
         if (ukey && ukey != '') {
             this.logger.debug(`[Highway] uploadGroupPttReq get upload ptt ukey: ${ukey}, need upload!`);
-            const index = preRespData.upload.msgInfo.msgInfoBody[0].index;
+            const index = preRespData.upload.msgInfo.msgInfoBody[0]!.index;
             const md5 = Buffer.from(index.info.fileHash, 'hex');
             const sha1 = Buffer.from(index.info.fileSha1, 'hex');
             const extend = new NapProtoMsg(proto.NTV2RichMediaHighwayExt).encode({
@@ -383,7 +383,7 @@ export class PacketHighwayContext {
         const ukey = preRespData.upload.uKey;
         if (ukey && ukey != '') {
             this.logger.debug(`[Highway] uploadC2CPttReq get upload ptt ukey: ${ukey}, need upload!`);
-            const index = preRespData.upload.msgInfo.msgInfoBody[0].index;
+            const index = preRespData.upload.msgInfo.msgInfoBody[0]!.index;
             const md5 = Buffer.from(index.info.fileHash, 'hex');
             const sha1 = Buffer.from(index.info.fileSha1, 'hex');
             const extend = new NapProtoMsg(proto.NTV2RichMediaHighwayExt).encode({

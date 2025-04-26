@@ -10,6 +10,7 @@ export const NapcatConfigSchema = Type.Object({
     consoleLogLevel: Type.String({ default: 'info' }),
     packetBackend: Type.String({ default: 'auto' }),
     packetServer: Type.String({ default: '' }),
+    o3HookMode: Type.Number({ default: 0 }),
 });
 
 export type NapcatConfig = Static<typeof NapcatConfigSchema>;

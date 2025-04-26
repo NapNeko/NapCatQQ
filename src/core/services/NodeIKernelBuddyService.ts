@@ -16,7 +16,7 @@ export interface NodeIKernelBuddyService {
 
     getBuddyListFromCache(reqType: BuddyListReqType): Promise<Array<
         {
-            categoryId: number,//9999应该跳过 那是兜底数据吧
+            categoryId: number,//9999为特别关心
             categorySortId: number,//排序方式
             categroyName: string,//分类名
             categroyMbCount: number,//不懂
@@ -106,15 +106,15 @@ export interface NodeIKernelBuddyService {
 
     getAddMeSetting(): unknown;
 
-    getDoubtBuddyReq(): unknown;
+    getDoubtBuddyReq(reqId: string, num: number,uk:string): Promise<GeneralCallResult>;
 
     getDoubtBuddyUnreadNum(): number;
 
-    approvalDoubtBuddyReq(uid: number, isAgree: boolean): void;
+    approvalDoubtBuddyReq(uid: string, str1: string, str2: string): void;
 
     delDoubtBuddyReq(uid: number): void;
 
-    delAllDoubtBuddyReq(): void;
+    delAllDoubtBuddyReq(): Promise<GeneralCallResult>;
 
     reportDoubtBuddyReqUnread(): void;
 

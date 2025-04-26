@@ -20,6 +20,8 @@ class GetGroupInfo extends OneBotAction<Payload, OB11Group> {
             const data = await this.core.apis.GroupApi.fetchGroupDetail(payload.group_id.toString());
             return {
                 ...data,
+                group_all_shut: data.shutUpAllTimestamp > 0 ? -1 : 0,
+                group_remark: '',
                 group_id: +payload.group_id,
                 group_name: data.groupName,
                 member_count: data.memberNum,

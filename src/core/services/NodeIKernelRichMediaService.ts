@@ -198,9 +198,29 @@ export interface NodeIKernelRichMediaService {
 
     renameGroupFile(arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown, arg5: unknown): unknown;
 
-    moveGroupFile(arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown, arg5: unknown): unknown;
+    moveGroupFile(groupCode: string, busId: Array<number>, fileList: Array<string>, currentParentDirectory: string, targetParentDirectory: string): Promise<GeneralCallResult & {
+        moveGroupFileResult: {
+            result: {
+                retCode: number,
+                retMsg: symbol,
+                clientWording: string
+            },
+            successFileIdList: Array<string>,
+            failFileIdList: Array<string>
+        }
+    }>;
 
-    transGroupFile(arg1: unknown, arg2: unknown): unknown;
+    transGroupFile(groupCode: string, fileId: string): Promise<GeneralCallResult & {
+        transGroupFileResult: {
+            result: {
+                retCode: number
+                retMsg: string
+                clientWording: string
+            }
+            saveBusId: number
+            saveFilePath: string
+        }
+    }>;
 
     searchGroupFile(
         keywords: Array<string>,

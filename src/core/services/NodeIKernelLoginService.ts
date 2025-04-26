@@ -60,7 +60,10 @@ export interface QuickLoginResult {
 }
 
 export interface NodeIKernelLoginService {
+    getMsfStatus: () => number;
+
     setLoginMiscData(arg0: string, value: string): unknown;
+    
     getMachineGuid(): string;
 
     get(): NodeIKernelLoginService;

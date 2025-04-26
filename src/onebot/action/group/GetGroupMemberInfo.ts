@@ -32,7 +32,7 @@ class GetGroupMemberInfo extends OneBotAction<Payload, OB11GroupMember> {
 
         const [member, info] = await Promise.all([
             this.core.apis.GroupApi.getGroupMemberEx(payload.group_id.toString(), uid, isNocache),
-            this.core.apis.UserApi.getUserDetailInfo(uid),
+            this.core.apis.UserApi.getUserDetailInfo(uid, isNocache),
         ]);
 
         if (!member || !groupMember) throw new Error(`群(${payload.group_id})成员${payload.user_id}不存在`);
