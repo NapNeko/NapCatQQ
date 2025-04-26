@@ -21,7 +21,8 @@ export interface OnRichMediaDownloadCompleteParams {
     clientMsg: string,
     businessId: number,
     userTotalSpacePerDay: unknown,
-    userUsedSpacePerDay: unknown
+    userUsedSpacePerDay: unknown,
+    chatType: number,
 }
 
 export interface GroupFileInfoUpdateParamType {
@@ -97,112 +98,112 @@ export interface TempOnRecvParams {
 }
 
 export class NodeIKernelMsgListener {
-    onAddSendMsg(msgRecord: RawMessage): any {
+    onAddSendMsg(_msgRecord: RawMessage): any {
 
     }
 
-    onBroadcastHelperDownloadComplete(broadcastHelperTransNotifyInfo: unknown): any {
+    onBroadcastHelperDownloadComplete(_broadcastHelperTransNotifyInfo: unknown): any {
 
     }
 
-    onBroadcastHelperProgressUpdate(broadcastHelperTransNotifyInfo: unknown): any {
+    onBroadcastHelperProgressUpdate(_broadcastHelperTransNotifyInfo: unknown): any {
 
     }
 
-    onChannelFreqLimitInfoUpdate(contact: unknown, z: unknown, freqLimitInfo: unknown): any {
+    onChannelFreqLimitInfoUpdate(_contact: unknown, _z: unknown, _freqLimitInfo: unknown): any {
 
     }
 
-    onContactUnreadCntUpdate(hashMap: unknown): any {
+    onContactUnreadCntUpdate(_hashMap: unknown): any {
 
     }
 
-    onCustomWithdrawConfigUpdate(customWithdrawConfig: unknown): any {
+    onCustomWithdrawConfigUpdate(_customWithdrawConfig: unknown): any {
 
     }
 
-    onDraftUpdate(contact: unknown, arrayList: unknown, j2: unknown): any {
+    onDraftUpdate(_contact: unknown, _arrayList: unknown, _j2: unknown): any {
 
     }
 
-    onEmojiDownloadComplete(emojiNotifyInfo: unknown): any {
+    onEmojiDownloadComplete(_emojiNotifyInfo: unknown): any {
 
     }
 
-    onEmojiResourceUpdate(emojiResourceInfo: unknown): any {
+    onEmojiResourceUpdate(_emojiResourceInfo: unknown): any {
 
     }
 
-    onFeedEventUpdate(firstViewDirectMsgNotifyInfo: unknown): any {
+    onFeedEventUpdate(_firstViewDirectMsgNotifyInfo: unknown): any {
 
     }
 
-    onFileMsgCome(arrayList: unknown): any {
+    onFileMsgCome(_arrayList: unknown): any {
 
     }
 
-    onFirstViewDirectMsgUpdate(firstViewDirectMsgNotifyInfo: unknown): any {
+    onFirstViewDirectMsgUpdate(_firstViewDirectMsgNotifyInfo: unknown): any {
 
     }
 
-    onFirstViewGroupGuildMapping(arrayList: unknown): any {
+    onFirstViewGroupGuildMapping(_arrayList: unknown): any {
 
     }
 
-    onGrabPasswordRedBag(i2: unknown, str: unknown, i3: unknown, recvdOrder: unknown, msgRecord: unknown): any {
+    onGrabPasswordRedBag(_i2: unknown, _str: unknown, _i3: unknown, _recvdOrder: unknown, _msgRecord: unknown): any {
 
     }
 
-    onGroupFileInfoAdd(groupItem: unknown): any {
+    onGroupFileInfoAdd(_groupItem: unknown): any {
 
     }
 
-    onGroupFileInfoUpdate(groupFileListResult: GroupFileInfoUpdateParamType): any {
+    onGroupFileInfoUpdate(_groupFileListResult: GroupFileInfoUpdateParamType): any {
 
     }
 
-    onGroupGuildUpdate(groupGuildNotifyInfo: unknown): any {
+    onGroupGuildUpdate(_groupGuildNotifyInfo: unknown): any {
 
     }
 
 
-    onGroupTransferInfoAdd(groupItem: unknown): any {
+    onGroupTransferInfoAdd(_groupItem: unknown): any {
 
     }
 
-    onGroupTransferInfoUpdate(groupFileListResult: unknown): any {
+    onGroupTransferInfoUpdate(_groupFileListResult: unknown): any {
 
     }
 
-    onGuildInteractiveUpdate(guildInteractiveNotificationItem: unknown): any {
+    onGuildInteractiveUpdate(_guildInteractiveNotificationItem: unknown): any {
 
     }
 
-    onGuildMsgAbFlagChanged(guildMsgAbFlag: unknown): any {
+    onGuildMsgAbFlagChanged(_guildMsgAbFlag: unknown): any {
 
     }
 
-    onGuildNotificationAbstractUpdate(guildNotificationAbstractInfo: unknown): any {
+    onGuildNotificationAbstractUpdate(_guildNotificationAbstractInfo: unknown): any {
 
     }
 
-    onHitCsRelatedEmojiResult(downloadRelateEmojiResultInfo: unknown): any {
+    onHitCsRelatedEmojiResult(_downloadRelateEmojiResultInfo: unknown): any {
 
     }
 
-    onHitEmojiKeywordResult(hitRelatedEmojiWordsResult: unknown): any {
+    onHitEmojiKeywordResult(_hitRelatedEmojiWordsResult: unknown): any {
 
     }
 
-    onHitRelatedEmojiResult(relatedWordEmojiInfo: unknown): any {
+    onHitRelatedEmojiResult(_relatedWordEmojiInfo: unknown): any {
 
     }
 
-    onImportOldDbProgressUpdate(importOldDbMsgNotifyInfo: unknown): any {
+    onImportOldDbProgressUpdate(_importOldDbMsgNotifyInfo: unknown): any {
 
     }
 
-    onInputStatusPush(inputStatusInfo: {
+    onInputStatusPush(_inputStatusInfo: {
         chatType: number;
         eventType: number;
         fromUin: string;
@@ -215,55 +216,55 @@ export class NodeIKernelMsgListener {
 
     }
 
-    onKickedOffLine(kickedInfo: KickedOffLineInfo): any {
+    onKickedOffLine(_kickedInfo: KickedOffLineInfo): any {
 
     }
 
-    onLineDev(arrayList: unknown): any {
+    onLineDev(_arrayList: unknown): any {
 
     }
 
-    onLogLevelChanged(j2: unknown): any {
+    onLogLevelChanged(_j2: unknown): any {
 
     }
 
-    onMsgAbstractUpdate(arrayList: unknown): any {
+    onMsgAbstractUpdate(_arrayList: unknown): any {
 
     }
 
-    onMsgBoxChanged(arrayList: unknown): any {
+    onMsgBoxChanged(_arrayList: unknown): any {
 
     }
 
-    onMsgDelete(contact: unknown, arrayList: unknown): any {
+    onMsgDelete(_contact: unknown, _arrayList: unknown): any {
 
     }
 
-    onMsgEventListUpdate(hashMap: unknown): any {
+    onMsgEventListUpdate(_hashMap: unknown): any {
 
     }
 
-    onMsgInfoListAdd(arrayList: unknown): any {
+    onMsgInfoListAdd(_arrayList: unknown): any {
 
     }
 
-    onMsgInfoListUpdate(msgList: RawMessage[]): any {
+    onMsgInfoListUpdate(_msgList: RawMessage[]): any {
 
     }
 
-    onMsgQRCodeStatusChanged(i2: unknown): any {
+    onMsgQRCodeStatusChanged(_i2: unknown): any {
 
     }
 
-    onMsgRecall(chatType: ChatType, uid: string, msgSeq: string): any {
+    onMsgRecall(_chatType: ChatType, _uid: string, _msgSeq: string): any {
 
     }
 
-    onMsgSecurityNotify(msgRecord: unknown): any {
+    onMsgSecurityNotify(_msgRecord: unknown): any {
 
     }
 
-    onMsgSettingUpdate(msgSetting: unknown): any {
+    onMsgSettingUpdate(_msgSetting: unknown): any {
 
     }
 
@@ -279,108 +280,108 @@ export class NodeIKernelMsgListener {
 
     }
 
-    onReadFeedEventUpdate(firstViewDirectMsgNotifyInfo: unknown): any {
+    onReadFeedEventUpdate(_firstViewDirectMsgNotifyInfo: unknown): any {
 
     }
 
-    onRecvGroupGuildFlag(i2: unknown): any {
+    onRecvGroupGuildFlag(_i2: unknown): any {
 
     }
 
-    onRecvMsg(arrayList: RawMessage[]): any {
+    onRecvMsg(_arrayList: RawMessage[]): any {
 
     }
 
-    onRecvMsgSvrRspTransInfo(j2: unknown, contact: unknown, i2: unknown, i3: unknown, str: unknown, bArr: unknown): any {
+    onRecvMsgSvrRspTransInfo(_j2: unknown, _contact: unknown, _i2: unknown, _i3: unknown, _str: unknown, _bArr: unknown): any {
 
     }
 
-    onRecvOnlineFileMsg(arrayList: unknown): any {
+    onRecvOnlineFileMsg(_arrayList: unknown): any {
 
     }
 
-    onRecvS2CMsg(arrayList: unknown): any {
+    onRecvS2CMsg(_arrayList: unknown): any {
 
     }
 
-    onRecvSysMsg(arrayList: Array<number>): any {
+    onRecvSysMsg(_arrayList: Array<number>): any {
 
     }
 
-    onRecvUDCFlag(i2: unknown): any {
+    onRecvUDCFlag(_i2: unknown): any {
 
     }
 
-    onRichMediaDownloadComplete(fileTransNotifyInfo: OnRichMediaDownloadCompleteParams): any {
+    onRichMediaDownloadComplete(_fileTransNotifyInfo: OnRichMediaDownloadCompleteParams): any {
     }
 
-    onRichMediaProgerssUpdate(fileTransNotifyInfo: unknown): any {
-
-    }
-
-    onRichMediaUploadComplete(fileTransNotifyInfo: unknown): any {
+    onRichMediaProgerssUpdate(_fileTransNotifyInfo: unknown): any {
 
     }
 
-    onSearchGroupFileInfoUpdate(searchGroupFileResult: unknown): any {
+    onRichMediaUploadComplete(_fileTransNotifyInfo: unknown): any {
 
     }
 
-    onSendMsgError(j2: unknown, contact: unknown, i2: unknown, str: unknown): any {
+    onSearchGroupFileInfoUpdate(_searchGroupFileResult: unknown): any {
 
     }
 
-    onSysMsgNotification(i2: unknown, j2: unknown, j3: unknown, arrayList: unknown): any {
+    onSendMsgError(_j2: unknown, _contact: unknown, _i2: unknown, _str: unknown): any {
 
     }
 
-    onTempChatInfoUpdate(tempChatInfo: TempOnRecvParams): any {
+    onSysMsgNotification(_i2: unknown, _j2: unknown, _j3: unknown, _arrayList: unknown): any {
 
     }
 
-    onUnreadCntAfterFirstView(hashMap: unknown): any {
+    onTempChatInfoUpdate(_tempChatInfo: TempOnRecvParams): any {
 
     }
 
-    onUnreadCntUpdate(hashMap: unknown): any {
+    onUnreadCntAfterFirstView(_hashMap: unknown): any {
 
     }
 
-    onUserChannelTabStatusChanged(z: unknown): any {
+    onUnreadCntUpdate(_hashMap: unknown): any {
 
     }
 
-    onUserOnlineStatusChanged(z: unknown): any {
+    onUserChannelTabStatusChanged(_z: unknown): any {
 
     }
 
-    onUserTabStatusChanged(arrayList: unknown): any {
+    onUserOnlineStatusChanged(_z: unknown): any {
 
     }
 
-    onlineStatusBigIconDownloadPush(i2: unknown, j2: unknown, str: unknown): any {
+    onUserTabStatusChanged(_arrayList: unknown): any {
 
     }
 
-    onlineStatusSmallIconDownloadPush(i2: unknown, j2: unknown, str: unknown): any {
+    onlineStatusBigIconDownloadPush(_i2: unknown, _j2: unknown, _str: unknown): any {
+
+    }
+
+    onlineStatusSmallIconDownloadPush(_i2: unknown, _j2: unknown, _str: unknown): any {
 
     }
 
     // 第一次发现于Linux
-    onUserSecQualityChanged(...args: unknown[]): any {
+    onUserSecQualityChanged(..._args: unknown[]): any {
 
     }
 
-    onMsgWithRichLinkInfoUpdate(...args: unknown[]): any {
+    onMsgWithRichLinkInfoUpdate(..._args: unknown[]): any {
 
     }
 
-    onRedTouchChanged(...args: unknown[]): any {
+    onRedTouchChanged(..._args: unknown[]): any {
 
     }
 
     // 第一次发现于Win 9.9.9-23159
-    onBroadcastHelperProgerssUpdate(...args: unknown[]): any {
+    onBroadcastHelperProgerssUpdate(..._args: unknown[]): any {
 
     }
 }
