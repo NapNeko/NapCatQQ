@@ -42,7 +42,7 @@
     "async-mutex": "^0.5.0",
     "commander": "^13.0.0",
     "cors": "^2.8.5",
-    "esbuild": "0.25.0",
+    "esbuild": "0.25.3",
     "eslint": "^9.14.0",
     "eslint-import-resolver-typescript": "^4.0.0",
     "eslint-plugin-import": "^2.29.1",
