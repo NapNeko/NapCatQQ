@@ -403,7 +403,7 @@ export interface NTGroupGrayMember {
 }
 /**
  * 群灰色提示邀请者和被邀请者接口
- * 
+ *
  * */
 export interface NTGroupGrayInviterAndInvite {
     invited: NTGroupGrayMember;
@@ -501,6 +501,7 @@ export interface RawMessage {
     elements: MessageElement[];// 消息元素
     sourceType: MsgSourceType;// 消息来源类型
     isOnlineMsg: boolean;// 是否为在线消息
+    clientSeq?: string;
 }
 
 /**

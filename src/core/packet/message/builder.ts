@@ -24,12 +24,15 @@ export class PacketMsgBuilder {
             }
             return {
                 responseHead: {
-                    fromUid: '',
                     fromUin: node.senderUin,
-                    toUid: node.groupId ? undefined : selfUid,
+                    type: 0,
+                    sigMap: 0,
+                    toUin: 0,
+                    fromUid: '',
                     forward: node.groupId ? undefined : {
                         friendName: node.senderName,
                     },
+                    toUid: node.groupId ? undefined : selfUid,
                     grp: node.groupId ? {
                         groupUin: node.groupId,
                         memberName: node.senderName,
@@ -40,16 +43,13 @@ export class PacketMsgBuilder {
                     type: node.groupId ? 82 : 9,
                     subType: node.groupId ? undefined : 4,
                     divSeq: node.groupId ? undefined : 4,
-                    msgId: crypto.randomBytes(4).readUInt32LE(0),
+                    autoReply: 0,
                     sequence: crypto.randomBytes(4).readUInt32LE(0),
                     timeStamp: +node.time.toString().substring(0, 10),
-                    field7: BigInt(1),
-                    field8: 0,
-                    field9: 0,
                     forward: {
                         field1: 0,
                         field2: 0,
-                        field3: node.groupId ? 0 : 2,
+                        field3: node.groupId ? 1 : 2,
                         unknownBase64: avatar,
                         avatar: avatar
                     }
