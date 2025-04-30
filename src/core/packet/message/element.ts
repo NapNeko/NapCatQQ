@@ -10,6 +10,7 @@ import {
     MsgInfo,
     NotOnlineImage,
     OidbSvcTrpcTcp0XE37_800Response,
+    PushMsgBody,
     QBigFaceExtra,
     QSmallFaceExtra,
 } from '@/core/packet/transformer/proto';
@@ -29,7 +30,8 @@ import {
     SendReplyElement,
     SendMultiForwardMsgElement,
     SendTextElement,
-    SendVideoElement
+    SendVideoElement,
+    Peer
 } from '@/core';
 import {ForwardMsgBuilder} from '@/common/forward-msg-builder';
 import {PacketMsg, PacketSendMsgElement} from '@/core/packet/message/message';
@@ -146,41 +148,40 @@ export class PacketMsgAtElement extends PacketMsgTextElement {
 }
 
 export class PacketMsgReplyElement extends IPacketMsgElement<SendReplyElement> {
-    messageId: bigint;
-    messageSeq: number;
-    messageClientSeq: number;
+    time: number;
+    targetMessageId: bigint;
+    targetMessageSeq: number;
+    targetMessageClientSeq: number;
     targetUin: number;
     targetUid: string;
-    time: number;
-    elems: PacketMsg[];
+    targetElems?: NapProtoEncodeStructType<typeof Elem>[];
+    targetSourceMsg?: NapProtoEncodeStructType<typeof PushMsgBody>;
+    targetPeer?: Peer;
 
     constructor(element: SendReplyElement) {
         super(element);
-        this.messageId = BigInt(element.replyElement.replayMsgId ?? 0);
-        this.messageSeq = +(element.replyElement.replayMsgSeq ?? 0);
-        this.messageClientSeq = +(element.replyElement.replyMsgClientSeq ?? 0);
+        this.time = +(element.replyElement.replyMsgTime ?? Math.floor(Date.now() / 1000));
+        this.targetMessageId = BigInt(element.replyElement.replayMsgId ?? 0);
+        this.targetMessageSeq = +(element.replyElement.replayMsgSeq ?? 0);
+        this.targetMessageClientSeq = +(element.replyElement.replyMsgClientSeq ?? 0);
         this.targetUin = +(element.replyElement.senderUin ?? 0);
         this.targetUid = element.replyElement.senderUidStr ?? '';
-        this.time = +(element.replyElement.replyMsgTime ?? 0);
-        this.elems = []; // TODO: in replyElement.sourceMsgTextElems
+        this.targetPeer = element.replyElement._replyMsgPeer;
     }
 
     get isGroupReply(): boolean {
-        return this.messageClientSeq === 0;
+        return this.targetMessageClientSeq === 0;
     }
 
     override buildElement(): NapProtoEncodeStructType<typeof Elem>[] {
         return [{
             srcMsg: {
-                origSeqs: [this.isGroupReply ? this.messageClientSeq : this.messageSeq],
+                origSeqs: [this.isGroupReply ? this.targetMessageSeq : this.targetMessageClientSeq],
                 senderUin: BigInt(this.targetUin),
                 time: this.time,
-                elems: [], // TODO: in replyElement.sourceMsgTextElems
-                pbReserve: {
-                    messageId: this.messageId,
-                },
-                toUin: BigInt(this.targetUin),
-                type: 1,
+                elems: this.targetElems ?? [],
+                sourceMsg: new NapProtoMsg(PushMsgBody).encode(this.targetSourceMsg ?? {}),
+                toUin: BigInt(0),
             }
         }];
     }

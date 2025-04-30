@@ -467,6 +467,8 @@ export class OneBotMsgApi {
                         replayMsgId: replyMsg.msgId,  // raw.msgId
                         senderUin: replyMsg.senderUin,
                         senderUinStr: replyMsg.senderUin,
+                        replyMsgClientSeq: replyMsg.clientSeq,
+                        _replyMsgPeer: replyMsgM.Peer
                     },
                 } :
                 undefined;

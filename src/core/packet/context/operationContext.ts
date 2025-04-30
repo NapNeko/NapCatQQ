@@ -6,13 +6,14 @@ import {
     PacketMsgFileElement,
     PacketMsgPicElement,
     PacketMsgPttElement,
-    PacketMsgVideoElement
+    PacketMsgReplyElement,
+    PacketMsgVideoElement,
 } from '@/core/packet/message/element';
 import { ChatType, MsgSourceType, NTMsgType, RawMessage } from '@/core';
 import { MiniAppRawData, MiniAppReqParams } from '@/core/packet/entities/miniApp';
 import { AIVoiceChatType } from '@/core/packet/entities/aiChat';
 import { NapProtoDecodeStructType, NapProtoEncodeStructType, NapProtoMsg } from '@napneko/nap-proto-core';
-import { IndexNode, LongMsgResult, MsgInfo } from '@/core/packet/transformer/proto';
+import { IndexNode, LongMsgResult, MsgInfo, PushMsgBody } from '@/core/packet/transformer/proto';
 import { OidbPacket } from '@/core/packet/transformer/base';
 import { ImageOcrResult } from '@/core/packet/entities/ocrResult';
 import { gunzipSync } from 'zlib';
@@ -76,22 +77,24 @@ export class PacketOperationContext {
     async UploadResources(msg: PacketMsg[], groupUin: number = 0) {
         const chatType = groupUin ? ChatType.KCHATTYPEGROUP : ChatType.KCHATTYPEC2C;
         const peerUid = groupUin ? String(groupUin) : this.context.napcore.basicInfo.uid;
-        const reqList = msg.flatMap(m =>
-            m.msg.map(e => {
-                if (e instanceof PacketMsgPicElement) {
-                    return this.context.highway.uploadImage({ chatType, peerUid }, e);
-                } else if (e instanceof PacketMsgVideoElement) {
-                    return this.context.highway.uploadVideo({ chatType, peerUid }, e);
-                } else if (e instanceof PacketMsgPttElement) {
-                    return this.context.highway.uploadPtt({ chatType, peerUid }, e);
-                } else if (e instanceof PacketMsgFileElement) {
-                    return this.context.highway.uploadFile({ chatType, peerUid }, e);
-                }
-                return null;
-            }).filter(Boolean)
+        const reqList = msg.flatMap((m) =>
+            m.msg
+                .map((e) => {
+                    if (e instanceof PacketMsgPicElement) {
+                        return this.context.highway.uploadImage({ chatType, peerUid }, e);
+                    } else if (e instanceof PacketMsgVideoElement) {
+                        return this.context.highway.uploadVideo({ chatType, peerUid }, e);
+                    } else if (e instanceof PacketMsgPttElement) {
+                        return this.context.highway.uploadPtt({ chatType, peerUid }, e);
+                    } else if (e instanceof PacketMsgFileElement) {
+                        return this.context.highway.uploadFile({ chatType, peerUid }, e);
+                    }
+                    return null;
+                })
+                .filter(Boolean)
         );
         const res = await Promise.allSettled(reqList);
-        this.context.logger.info(`上传资源${res.length}个，失败${res.filter(r => r.status === 'rejected').length}个`);
+        this.context.logger.info(`上传资源${res.length}个，失败${res.filter((r) => r.status === 'rejected').length}个`);
         res.forEach((result, index) => {
             if (result.status === 'rejected') {
                 this.context.logger.error(`上传第${index + 1}个资源失败：${result.reason.stack}`);
@@ -100,10 +103,13 @@ export class PacketOperationContext {
     }
 
     async UploadImage(img: PacketMsgPicElement) {
-        await this.context.highway.uploadImage({
-            chatType: ChatType.KCHATTYPEC2C,
-            peerUid: this.context.napcore.basicInfo.uid
-        }, img);
+        await this.context.highway.uploadImage(
+            {
+                chatType: ChatType.KCHATTYPEC2C,
+                peerUid: this.context.napcore.basicInfo.uid,
+            },
+            img
+        );
         const index = img.msgInfo?.msgInfoBody?.at(0)?.index;
         if (!index) {
             throw new Error('img.msgInfo?.msgInfoBody![0].index! is undefined');
@@ -137,24 +143,66 @@ export class PacketOperationContext {
                     coordinates: item.polygon.coordinates.map((c) => {
                         return {
                             x: c.x,
-                            y: c.y
+                            y: c.y,
                         };
                     }),
                 };
             }),
-            language: res.ocrRspBody.language
+            language: res.ocrRspBody.language,
         } as ImageOcrResult;
     }
 
-    async UploadForwardMsg(msg: PacketMsg[], groupUin: number = 0) {
+    private async SendPreprocess(msg: PacketMsg[], groupUin: number = 0) {
+        const ps = msg.map((m) => {
+            return m.msg.map(async(e) => {
+                if (e instanceof PacketMsgReplyElement && !e.targetElems) {
+                    this.context.logger.debug(`Cannot find reply element's targetElems, prepare to fetch it...`);
+                    if (!e.targetPeer?.peerUid) {
+                        this.context.logger.error(`targetPeer is undefined!`);
+                    }
+                    let targetMsg: NapProtoEncodeStructType<typeof PushMsgBody>[] | undefined;
+                    if (e.isGroupReply) {
+                        targetMsg = await this.FetchGroupMessage(+(e.targetPeer?.peerUid ?? 0), e.targetMessageSeq, e.targetMessageSeq);
+                    } else {
+                        targetMsg = await this.FetchC2CMessage(await this.context.napcore.basicInfo.uin2uid(e.targetUin), e.targetMessageSeq, e.targetMessageSeq);
+                    }
+                    e.targetElems = targetMsg.at(0)?.body?.richText?.elems;
+                    e.targetSourceMsg = targetMsg.at(0);
+                }
+            });
+        }).flat();
+        await Promise.all(ps)
         await this.UploadResources(msg, groupUin);
+    }
+
+    async FetchGroupMessage(groupUin: number, startSeq: number, endSeq: number): Promise<NapProtoDecodeStructType<typeof PushMsgBody>[]> {
+        const req = trans.FetchGroupMessage.build(groupUin, startSeq, endSeq);
+        const resp = await this.context.client.sendOidbPacket(req, true);
+        const res = trans.FetchGroupMessage.parse(resp);
+        return res.body.messages
+    }
+
+    async FetchC2CMessage(targetUid: string, startSeq: number, endSeq: number): Promise<NapProtoDecodeStructType<typeof PushMsgBody>[]> {
+        const req = trans.FetchC2CMessage.build(targetUid, startSeq, endSeq);
+        const resp = await this.context.client.sendOidbPacket(req, true);
+        const res = trans.FetchC2CMessage.parse(resp);
+        return res.messages
+    }
+
+    async UploadForwardMsg(msg: PacketMsg[], groupUin: number = 0) {
+        await this.SendPreprocess(msg, groupUin);
         const req = trans.UploadForwardMsg.build(this.context.napcore.basicInfo.uid, msg, groupUin);
         const resp = await this.context.client.sendOidbPacket(req, true);
         const res = trans.UploadForwardMsg.parse(resp);
         return res.result.resId;
     }
 
-    async MoveGroupFile(groupUin: number, fileUUID: string, currentParentDirectory: string, targetParentDirectory: string) {
+    async MoveGroupFile(
+        groupUin: number,
+        fileUUID: string,
+        currentParentDirectory: string,
+        targetParentDirectory: string
+    ) {
         const req = trans.MoveGroupFile.build(groupUin, fileUUID, currentParentDirectory, targetParentDirectory);
         const resp = await this.context.client.sendOidbPacket(req, true);
         const res = trans.MoveGroupFile.parse(resp);
@@ -203,12 +251,17 @@ export class PacketOperationContext {
         return res.content.map((item) => {
             return {
                 category: item.category,
-                voices: item.voices
+                voices: item.voices,
             };
         });
     }
 
-    async GetAiVoice(groupUin: number, voiceId: string, text: string, chatType: AIVoiceChatType): Promise<NapProtoDecodeStructType<typeof MsgInfo>> {
+    async GetAiVoice(
+        groupUin: number,
+        voiceId: string,
+        text: string,
+        chatType: AIVoiceChatType
+    ): Promise<NapProtoDecodeStructType<typeof MsgInfo>> {
         let reqTime = 0;
         const reqMaxTime = 30;
         const sessionId = crypto.randomBytes(4).readUInt32BE(0);
@@ -236,6 +289,7 @@ export class PacketOperationContext {
         if (!main?.actionData.msgBody) {
             throw new Error('msgBody is empty');
         }
+        this.context.logger.debug('rawChains ', inflate.toString('hex'));
 
         const messagesPromises = main.actionData.msgBody.map(async (msg) => {
             if (!msg?.body?.richText?.elems) {
@@ -251,12 +305,12 @@ export class PacketOperationContext {
                             const groupUin = msg?.responseHead.grp?.groupUin ?? 0;
                             element.picElement = {
                                 ...element.picElement,
-                                originImageUrl: await this.GetGroupImageUrl(groupUin, index!)
+                                originImageUrl: await this.GetGroupImageUrl(groupUin, index!),
                             };
                         } else {
                             element.picElement = {
                                 ...element.picElement,
-                                originImageUrl: await this.GetImageUrl(this.context.napcore.basicInfo.uid, index!)
+                                originImageUrl: await this.GetImageUrl(this.context.napcore.basicInfo.uid, index!),
                             };
                         }
                         return element;
@@ -269,7 +323,7 @@ export class PacketOperationContext {
                 elements: elements,
                 guildId: '',
                 isOnlineMsg: false,
-                msgId: '7467703692092974645',  // TODO: no necessary
+                msgId: '7467703692092974645', // TODO: no necessary
                 msgRandom: '0',
                 msgSeq: String(msg.contentHead.sequence ?? 0),
                 msgTime: String(msg.contentHead.timeStamp ?? 0),

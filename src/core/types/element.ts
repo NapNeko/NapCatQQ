@@ -1,4 +1,15 @@
-import { ElementType, MessageElement, NTGrayTipElementSubTypeV2, PicSubType, PicType, TipAioOpGrayTipElement, TipGroupElement, NTVideoType, FaceType } from './msg';
+import {
+    ElementType,
+    MessageElement,
+    NTGrayTipElementSubTypeV2,
+    PicSubType,
+    PicType,
+    TipAioOpGrayTipElement,
+    TipGroupElement,
+    NTVideoType,
+    FaceType,
+    Peer
+} from './msg';
 
 type ElementFullBase = Omit<MessageElement, 'elementType' | 'elementId' | 'extBufForUI'>;
 
@@ -213,6 +224,9 @@ export interface ReplyElement {
     senderUidStr?: string;
     replyMsgTime?: string;
     replyMsgClientSeq?: string;
+    // HACK: Attributes that were not originally available,
+    // but were added due to NTQQ and NapCat's internal implementation, are used to supplement NapCat
+    _replyMsgPeer?: Peer;
 }
 
 export interface CalendarElement {
