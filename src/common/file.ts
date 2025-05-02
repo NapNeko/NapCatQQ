@@ -145,8 +145,8 @@ export enum FileUriType {
 
 export async function checkUriType(Uri: string) {
     const LocalFileRet = await solveProblem((uri: string) => {
-        if (fs.existsSync(uri)) {
-            return { Uri: uri, Type: FileUriType.Local };
+        if (fs.existsSync(path.normalize(uri))) {
+            return { Uri: path.normalize(uri), Type: FileUriType.Local };
         }
         return undefined;
     }, Uri);
