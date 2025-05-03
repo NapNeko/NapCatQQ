@@ -39,8 +39,11 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
                 wsClient.close();
                 return;
             }
-            //鉴权
-            this.authorize(this.config.token, wsClient, wsReq);
+            // 鉴权 close 不会立刻销毁 当前返回可避免挂载message事件 close 并未立刻关闭 而是存在timer操作后关闭
+            // 引发高危漏洞
+            if (!this.authorize(this.config.token, wsClient, wsReq)) {
+                return;
+            }
             const paramUrl = wsReq.url?.indexOf('?') !== -1 ? wsReq.url?.substring(0, wsReq.url?.indexOf('?')) : wsReq.url;
             const isApiConnect = paramUrl === '/api' || paramUrl === '/api/';
             if (!isApiConnect) {
@@ -150,10 +153,11 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
         const HeaderClientToken = wsReq.headers.authorization?.split('Bearer ').pop() || '';
         const ClientToken = typeof (QueryClientToken) === 'string' && QueryClientToken !== '' ? QueryClientToken : HeaderClientToken;
         if (ClientToken === token) {
-            return;
+            return true;
         }
         wsClient.send(JSON.stringify(OB11Response.res(null, 'failed', 1403, 'token验证失败')));
         wsClient.close();
+        return false;
     }
 
     private checkStateAndReply<T>(data: T, wsClient: WebSocket) {
