@@ -17,7 +17,6 @@ import fs from 'fs';
 import fsPromises from 'fs/promises';
 import { InstanceContext, NapCatCore, SearchResultItem } from '@/core';
 import { fileTypeFromFile } from 'file-type';
-import imageSize from 'image-size';
 import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 import { RkeyManager } from '@/core/helper/rkey';
 import { calculateFileMD5 } from '@/common/file';
@@ -28,6 +27,7 @@ import { SendMessageContext } from '@/onebot/api';
 import { getFileTypeForSendType } from '../helper/msg';
 import { FFmpegService } from '@/common/ffmpeg';
 import { rkeyDataType } from '../types/file';
+import { imageSizeFromFile } from '@/image-size/fromFile';
 
 export class NTQQFileApi {
     context: InstanceContext;
@@ -365,17 +365,18 @@ export class NTQQFileApi {
     }
 
     async getImageSize(filePath: string): Promise<ISizeCalculationResult> {
-        return new Promise((resolve, reject) => {
-            imageSize(filePath, (err: Error | null, dimensions) => {
-                if (err) {
-                    reject(new Error(err.message));
-                } else if (!dimensions) {
-                    reject(new Error('获取图片尺寸失败'));
-                } else {
-                    resolve(dimensions);
-                }
-            });
-        });
+        return await imageSizeFromFile(filePath)
+        // return new Promise((resolve, reject) => {
+        //     imageSize(filePath, (err: Error | null, dimensions) => {
+        //         if (err) {
+        //             reject(new Error(err.message));
+        //         } else if (!dimensions) {
+        //             reject(new Error('获取图片尺寸失败'));
+        //         } else {
+        //             resolve(dimensions);
+        //         }
+        //     });
+        // });
     }
 
     async searchForFile(keys: string[]): Promise<SearchResultItem | undefined> {
