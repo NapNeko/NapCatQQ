@@ -1,8 +1,9 @@
+<img src="https://napneko.github.io/assets/newnewlogo.png" width = "305" height = "411" alt="NapCat" align=right />
 <div align="center">
 
 # NapCat
 
-![NapCatQQ](https://socialify.git.ci/NapNeko/NapCatQQ/image?font=Jost&logo=https%3A%2F%2Fnapneko.github.io%2Fassets%2Fnewlogo.png&name=1&owner=1&pattern=Diagonal+Stripes&stargazers=1&theme=Auto)
+
 
 _Modern protocol-side framework implemented based on NTQQ._
 
