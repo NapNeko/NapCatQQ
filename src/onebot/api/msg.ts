@@ -100,7 +100,7 @@ export class OneBotMsgApi {
                 let qq: string = 'all';
                 if (element.atType !== NTMsgAtType.ATTYPEALL) {
                     const { atNtUid, atUid } = element;
-                    qq = !atUid || atUid === '0' ? await this.core.apis.UserApi.getUinByUidV2(atNtUid) : atUid;
+                    qq = !atUid || atUid === '0' ? await this.core.apis.UserApi.getUinByUidV2(atNtUid) : String(Number(atUid) >>> 0);
                 }
                 return {
                     type: OB11MessageDataType.at,
