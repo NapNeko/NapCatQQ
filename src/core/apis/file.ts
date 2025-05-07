@@ -28,6 +28,8 @@ import { SendMessageContext } from '@/onebot/api';
 import { getFileTypeForSendType } from '../helper/msg';
 import { FFmpegService } from '@/common/ffmpeg';
 import { rkeyDataType } from '../types/file';
+import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { FileId } from '../packet/transformer/proto/misc/fileid';
 
 export class NTQQFileApi {
     context: InstanceContext;
@@ -78,10 +80,11 @@ export class NTQQFileApi {
         throw new Error('fileUUID or file10MMd5 is undefined');
     }
 
-    async getPttUrl(chatType: ChatType, peer: string, fileUUID?: string) {
-        if (this.core.apis.PacketApi.available) {
+    async getPttUrl(peer: string, fileUUID?: string) {
+        if (this.core.apis.PacketApi.available && fileUUID) {
+            let appid = new NapProtoMsg(FileId).decode(Buffer.from(fileUUID.replaceAll('-', '+').replaceAll('_', '/'), 'base64')).appid;
             try {
-                if (chatType === ChatType.KCHATTYPEGROUP && fileUUID) {
+                if (appid && appid === 1403) {
                     return this.core.apis.PacketApi.pkt.operation.GetGroupPttUrl(+peer, {
                         fileUuid: fileUUID,
                         storeId: 1,
@@ -105,10 +108,11 @@ export class NTQQFileApi {
         throw new Error('packet cant get ptt url');
     }
 
-    async getVideoUrlPacket(chatType: ChatType, peer: string, fileUUID?: string) {
-        if (this.core.apis.PacketApi.available) {
+    async getVideoUrlPacket(peer: string, fileUUID?: string) {
+        if (this.core.apis.PacketApi.available && fileUUID) {
+            let appid = new NapProtoMsg(FileId).decode(Buffer.from(fileUUID.replaceAll('-', '+').replaceAll('_', '/'), 'base64')).appid;
             try {
-                if (chatType === ChatType.KCHATTYPEGROUP && fileUUID) {
+                if (appid && appid === 1415) {
                     return this.core.apis.PacketApi.pkt.operation.GetGroupVideoUrl(+peer, {
                         fileUuid: fileUUID,
                         storeId: 1,
