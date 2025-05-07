@@ -129,7 +129,7 @@ export class NTQQFileApi {
                 this.context.logger.logError('获取文件URL失败', (error as Error).message);
             }
         }
-        throw new Error('packet cant get ptt url');
+        throw new Error('packet cant get video url');
     }
 
     async copyFile(filePath: string, destPath: string) {
