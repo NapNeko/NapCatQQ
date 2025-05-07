@@ -127,14 +127,14 @@ export class PacketOperationContext {
     async GetPttUrl(selfUid: string, node: NapProtoEncodeStructType<typeof IndexNode>) {
         const req = trans.DownloadPtt.build(selfUid, node);
         const resp = await this.context.client.sendOidbPacket(req, true);
-        const res = trans.DownloadImage.parse(resp);
+        const res = trans.DownloadPtt.parse(resp);
         return `https://${res.download.info.domain}${res.download.info.urlPath}${res.download.rKeyParam}`;
     }
 
     async GetVideoUrl(selfUid: string, node: NapProtoEncodeStructType<typeof IndexNode>) {
         const req = trans.DownloadVideo.build(selfUid, node);
         const resp = await this.context.client.sendOidbPacket(req, true);
-        const res = trans.DownloadImage.parse(resp);
+        const res = trans.DownloadVideo.parse(resp);
         return `https://${res.download.info.domain}${res.download.info.urlPath}${res.download.rKeyParam}`;
     }
 
