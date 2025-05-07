@@ -105,7 +105,7 @@ export class NTQQFileApi {
         throw new Error('packet cant get ptt url');
     }
 
-    async getVideoUrlPakcet(chatType: ChatType, peer: string, fileUUID?: string) {
+    async getVideoUrlPacket(chatType: ChatType, peer: string, fileUUID?: string) {
         if (this.core.apis.PacketApi.available) {
             try {
                 if (chatType === ChatType.KCHATTYPEGROUP && fileUUID) {
