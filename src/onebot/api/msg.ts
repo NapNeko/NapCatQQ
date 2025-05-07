@@ -352,7 +352,7 @@ export class OneBotMsgApi {
             if (!videoDownUrl) {
                 if (this.core.apis.PacketApi.available) {
                     try {
-                        videoDownUrl = await this.core.apis.FileApi.getVideoUrlPakcet(msg.chatType, msg.peerUid, element.fileUuid);
+                        videoDownUrl = await this.core.apis.FileApi.getVideoUrlPacket(msg.chatType, msg.peerUid, element.fileUuid);
                     } catch (e) {
                         this.core.context.logger.logError('获取视频url失败', (e as Error).stack);
                         videoDownUrl = element.filePath;
