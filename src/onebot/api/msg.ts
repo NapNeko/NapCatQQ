@@ -385,7 +385,7 @@ export class OneBotMsgApi {
                 try {
                     pttUrl = await this.core.apis.FileApi.getPttUrl(msg.chatType, msg.peerUid, element.fileUuid);
                 } catch (e) {
-                    this.core.context.logger.logError('获取视频url失败', (e as Error).stack);
+                    this.core.context.logger.logError('获取语音url失败', (e as Error).stack);
                     pttUrl = element.filePath;
                 }
             } else {
