@@ -150,12 +150,31 @@ export class OneBotMsgApi {
             };
             FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, element.fileUuid, element.fileUuid);
             FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, element.fileUuid, element.fileName);
+            if (this.core.apis.PacketApi.available) {
+                let url;
+                try {
+                    url = await this.core.apis.FileApi.getFileUrl(msg.chatType, msg.peerUid, element.fileUuid, element.file10MMd5)
+                } catch (error) {
+                    url = '';
+                }
+                if (url) {
+                    return {
+                        type: OB11MessageDataType.file,
+                        data: {
+                            file: element.fileName,
+                            file_id: element.fileUuid,
+                            file_size: element.fileSize,
+                            url: url,
+                        },
+                    }
+                }
+            }
             return {
                 type: OB11MessageDataType.file,
                 data: {
                     file: element.fileName,
                     file_id: element.fileUuid,
-                    file_size: element.fileSize,
+                    file_size: element.fileSize
                 },
             };
         },
@@ -331,7 +350,17 @@ export class OneBotMsgApi {
 
             //开始兜底
             if (!videoDownUrl) {
-                videoDownUrl = element.filePath;
+                if (this.core.apis.PacketApi.available) {
+                    try {
+                        videoDownUrl = await this.core.apis.FileApi.getVideoUrlPakcet(msg.chatType, msg.peerUid, element.fileUuid);
+                    } catch (e) {
+                        this.core.context.logger.logError('获取视频url失败', (e as Error).stack);
+                        videoDownUrl = element.filePath;
+                    }
+                } else {
+                    videoDownUrl = element.filePath;
+                }
+
             }
             const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, element.fileUuid, element.fileName);
             return {
@@ -351,6 +380,28 @@ export class OneBotMsgApi {
                 guildId: '',
             };
             const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, '', element.fileName);
+            let pttUrl = '';
+            if (this.core.apis.PacketApi.available) {
+                try {
+                    pttUrl = await this.core.apis.FileApi.getPttUrl(msg.chatType, msg.peerUid, element.fileUuid);
+                } catch (e) {
+                    this.core.context.logger.logError('获取视频url失败', (e as Error).stack);
+                    pttUrl = element.filePath;
+                }
+            } else {
+                pttUrl = element.filePath;
+            }
+            if (pttUrl) {
+                return {
+                    type: OB11MessageDataType.voice,
+                    data: {
+                        file: fileCode,
+                        path: element.filePath,
+                        url: pttUrl,
+                        file_size: element.fileSize,
+                    },
+                }
+            }
             return {
                 type: OB11MessageDataType.voice,
                 data: {

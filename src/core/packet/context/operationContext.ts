@@ -124,12 +124,41 @@ export class PacketOperationContext {
         return `https://${res.download.info.domain}${res.download.info.urlPath}${res.download.rKeyParam}`;
     }
 
+    async GetPttUrl(selfUid: string, node: NapProtoEncodeStructType<typeof IndexNode>) {
+        const req = trans.DownloadPtt.build(selfUid, node);
+        const resp = await this.context.client.sendOidbPacket(req, true);
+        const res = trans.DownloadImage.parse(resp);
+        return `https://${res.download.info.domain}${res.download.info.urlPath}${res.download.rKeyParam}`;
+    }
+
+    async GetVideoUrl(selfUid: string, node: NapProtoEncodeStructType<typeof IndexNode>) {
+        const req = trans.DownloadVideo.build(selfUid, node);
+        const resp = await this.context.client.sendOidbPacket(req, true);
+        const res = trans.DownloadImage.parse(resp);
+        return `https://${res.download.info.domain}${res.download.info.urlPath}${res.download.rKeyParam}`;
+    }
+
     async GetGroupImageUrl(groupUin: number, node: NapProtoEncodeStructType<typeof IndexNode>) {
         const req = trans.DownloadGroupImage.build(groupUin, node);
         const resp = await this.context.client.sendOidbPacket(req, true);
         const res = trans.DownloadImage.parse(resp);
         return `https://${res.download.info.domain}${res.download.info.urlPath}${res.download.rKeyParam}`;
     }
+
+    async GetGroupPttUrl(groupUin: number, node: NapProtoEncodeStructType<typeof IndexNode>) {
+        const req = trans.DownloadGroupPtt.build(groupUin, node);
+        const resp = await this.context.client.sendOidbPacket(req, true);
+        const res = trans.DownloadImage.parse(resp);
+        return `https://${res.download.info.domain}${res.download.info.urlPath}${res.download.rKeyParam}`;
+    }
+
+    async GetGroupVideoUrl(groupUin: number, node: NapProtoEncodeStructType<typeof IndexNode>) {
+        const req = trans.DownloadGroupVideo.build(groupUin, node);
+        const resp = await this.context.client.sendOidbPacket(req, true);
+        const res = trans.DownloadImage.parse(resp);
+        return `https://${res.download.info.domain}${res.download.info.urlPath}${res.download.rKeyParam}`;
+    }
+
 
     async ImageOCR(imgUrl: string) {
         const req = trans.ImageOCR.build(imgUrl);
@@ -154,7 +183,7 @@ export class PacketOperationContext {
 
     private async SendPreprocess(msg: PacketMsg[], groupUin: number = 0) {
         const ps = msg.map((m) => {
-            return m.msg.map(async(e) => {
+            return m.msg.map(async (e) => {
                 if (e instanceof PacketMsgReplyElement && !e.targetElems) {
                     this.context.logger.debug(`Cannot find reply element's targetElems, prepare to fetch it...`);
                     if (!e.targetPeer?.peerUid) {
@@ -222,18 +251,12 @@ export class PacketOperationContext {
         const res = trans.DownloadGroupFile.parse(resp);
         return `https://${res.download.downloadDns}/ftn_handler/${Buffer.from(res.download.downloadUrl).toString('hex')}/?fname=`;
     }
+
     async GetPrivateFileUrl(self_id: string, fileUUID: string, md5: string) {
         const req = trans.DownloadPrivateFile.build(self_id, fileUUID, md5);
         const resp = await this.context.client.sendOidbPacket(req, true);
         const res = trans.DownloadPrivateFile.parse(resp);
         return `http://${res.body?.result?.server}:${res.body?.result?.port}${res.body?.result?.url?.slice(8)}&isthumb=0`;
-    }
-
-    async GetGroupPttUrl(groupUin: number, node: NapProtoEncodeStructType<typeof IndexNode>) {
-        const req = trans.DownloadGroupPtt.build(groupUin, node);
-        const resp = await this.context.client.sendOidbPacket(req, true);
-        const res = trans.DownloadGroupPtt.parse(resp);
-        return `https://${res.download.info.domain}${res.download.info.urlPath}${res.download.rKeyParam}`;
     }
 
     async GetMiniAppAdaptShareInfo(param: MiniAppReqParams) {

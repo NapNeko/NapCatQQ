@@ -63,6 +63,73 @@ export class NTQQFileApi {
         }
     }
 
+    async getFileUrl(chatType: ChatType, peer: string, fileUUID?: string, file10MMd5?: string | undefined) {
+            try {
+                if (chatType === ChatType.KCHATTYPEGROUP && fileUUID) {
+                    return this.core.apis.PacketApi.pkt.operation.GetGroupFileUrl(+peer, fileUUID);
+                } else if (file10MMd5 && fileUUID) {
+                    return this.core.apis.PacketApi.pkt.operation.GetPrivateFileUrl(peer, fileUUID, file10MMd5);
+                }
+            } catch (error) {
+                this.context.logger.logError('获取文件URL失败', (error as Error).message);
+            }
+        }
+        throw new Error('fileUUID or file10MMd5 is undefined');
+    }
+
+    async getPttUrl(chatType: ChatType, peer: string, fileUUID?: string) {
+        if (this.core.apis.PacketApi.available) {
+            try {
+                if (chatType === ChatType.KCHATTYPEGROUP && fileUUID) {
+                    return this.core.apis.PacketApi.pkt.operation.GetGroupPttUrl(+peer, {
+                        fileUuid: fileUUID,
+                        storeId: 1,
+                        uploadTime: 0,
+                        ttl: 0,
+                        subType: 0,
+                    });
+                } else if (fileUUID) {
+                    return this.core.apis.PacketApi.pkt.operation.GetPttUrl(peer, {
+                        fileUuid: fileUUID,
+                        storeId: 1,
+                        uploadTime: 0,
+                        ttl: 0,
+                        subType: 0,
+                    });
+                }
+            } catch (error) {
+                this.context.logger.logError('获取文件URL失败', (error as Error).message);
+            }
+        }
+        throw new Error('packet cant get ptt url');
+    }
+
+    async getVideoUrlPakcet(chatType: ChatType, peer: string, fileUUID?: string) {
+        if (this.core.apis.PacketApi.available) {
+            try {
+                if (chatType === ChatType.KCHATTYPEGROUP && fileUUID) {
+                    return this.core.apis.PacketApi.pkt.operation.GetGroupVideoUrl(+peer, {
+                        fileUuid: fileUUID,
+                        storeId: 1,
+                        uploadTime: 0,
+                        ttl: 0,
+                        subType: 0,
+                    });
+                } else if (fileUUID) {
+                    return this.core.apis.PacketApi.pkt.operation.GetVideoUrl(peer, {
+                        fileUuid: fileUUID,
+                        storeId: 1,
+                        uploadTime: 0,
+                        ttl: 0,
+                        subType: 0,
+                    });
+                }
+            } catch (error) {
+                this.context.logger.logError('获取文件URL失败', (error as Error).message);
+            }
+        }
+        throw new Error('packet cant get ptt url');
+    }
 
     async copyFile(filePath: string, destPath: string) {
         await this.core.util.copyFile(filePath, destPath);

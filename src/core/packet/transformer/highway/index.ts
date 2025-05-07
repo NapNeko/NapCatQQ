@@ -13,3 +13,6 @@ export { default as UploadPrivatePtt } from './UploadPrivatePtt';
 export { default as UploadPrivateVideo } from './UploadPrivateVideo';
 export { default as DownloadImage } from './DownloadImage';
 export { default as DownloadGroupImage } from './DownloadGroupImage';
+export { default as DownloadVideo } from './DownloadVideo';
+export { default as DownloadGroupVideo } from './DownloadGroupVideo';
+export { default as DownloadPtt } from './DownloadPtt';
