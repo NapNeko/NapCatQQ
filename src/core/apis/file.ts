@@ -64,6 +64,7 @@ export class NTQQFileApi {
     }
 
     async getFileUrl(chatType: ChatType, peer: string, fileUUID?: string, file10MMd5?: string | undefined) {
+        if (this.core.apis.PacketApi.available) {
             try {
                 if (chatType === ChatType.KCHATTYPEGROUP && fileUUID) {
                     return this.core.apis.PacketApi.pkt.operation.GetGroupFileUrl(+peer, fileUUID);
