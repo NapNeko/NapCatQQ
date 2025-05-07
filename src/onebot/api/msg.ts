@@ -396,7 +396,7 @@ export class OneBotMsgApi {
             if (!videoDownUrl) {
                 if (this.core.apis.PacketApi.available) {
                     try {
-                        videoDownUrl = await this.core.apis.FileApi.getVideoUrlPacket(msg.chatType, msg.peerUid, element.fileUuid);
+                        videoDownUrl = await this.core.apis.FileApi.getVideoUrlPacket(msg.peerUid, element.fileUuid);
                     } catch (e) {
                         this.core.context.logger.logError('获取视频url失败', (e as Error).stack);
                         videoDownUrl = element.filePath;
@@ -427,7 +427,7 @@ export class OneBotMsgApi {
             let pttUrl = '';
             if (this.core.apis.PacketApi.available) {
                 try {
-                    pttUrl = await this.core.apis.FileApi.getPttUrl(msg.chatType, msg.peerUid, element.fileUuid);
+                    pttUrl = await this.core.apis.FileApi.getPttUrl(msg.peerUid, element.fileUuid);
                 } catch (e) {
                     this.core.context.logger.logError('获取语音url失败', (e as Error).stack);
                     pttUrl = element.filePath;
