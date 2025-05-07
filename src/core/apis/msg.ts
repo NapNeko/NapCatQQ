@@ -71,6 +71,7 @@ export class NTQQMsgApi {
     async queryMsgsWithFilterExWithSeq(peer: Peer, msgSeq: string) {
         return await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', msgSeq, {
             chatInfo: peer,
+            //searchFields: 3,
             filterMsgType: [],
             filterSendersUid: [],
             filterMsgToTime: '0',
@@ -84,6 +85,7 @@ export class NTQQMsgApi {
         return await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', msgSeq, {
             chatInfo: peer,
             filterMsgType: [],
+            //searchFields: 3,
             filterSendersUid: SendersUid,
             filterMsgToTime: MsgTime,
             filterMsgFromTime: MsgTime,
@@ -100,6 +102,7 @@ export class NTQQMsgApi {
             filterMsgToTime: '0',
             filterMsgFromTime: '0',
             isReverseOrder: false,
+            //searchFields: 3,
             isIncludeCurrent: true,
             pageLimit: 1,
         });
@@ -110,6 +113,7 @@ export class NTQQMsgApi {
             filterMsgType: [],
             filterSendersUid: [],
             filterMsgToTime: '0',
+            //searchFields: 3,
             filterMsgFromTime: '0',
             isReverseOrder: true,
             isIncludeCurrent: true,
@@ -128,6 +132,7 @@ export class NTQQMsgApi {
             chatInfo: peer,//此处为Peer 为关键查询参数 没有啥也没有 by mlik iowa
             filterMsgType: [],
             filterSendersUid: [],
+            //searchFields: 3,
             filterMsgToTime: filterMsgToTime,
             filterMsgFromTime: filterMsgFromTime,
             isReverseOrder: false,
@@ -142,6 +147,7 @@ export class NTQQMsgApi {
             chatInfo: peer,
             filterMsgType: [],
             filterSendersUid: SendersUid,
+            //searchFields: 3,
             filterMsgToTime: '0',
             filterMsgFromTime: '0',
             isReverseOrder: true,
