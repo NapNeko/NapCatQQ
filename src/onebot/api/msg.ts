@@ -244,17 +244,13 @@ export class OneBotMsgApi {
         },
 
         replyElement: async (element, msg) => {
-            const records = msg.records.find(msgRecord => msgRecord.msgId === element?.sourceMsgIdInRecords);
             const peer = {
                 chatType: msg.chatType,
                 peerUid: msg.peerUid,
                 guildId: '',
             };
-            if (!records || !element.replyMsgTime || !element.senderUidStr) {
-                this.core.context.logger.logError('似乎是旧版客户端,获取不到引用的消息', element.replayMsgSeq);
-                return null;
-            }
 
+            // 创建回复数据的通用方法
             const createReplyData = (msgId: string): OB11MessageData => ({
                 type: OB11MessageDataType.reply,
                 data: {
@@ -262,48 +258,96 @@ export class OneBotMsgApi {
                 },
             });
 
-            if (records.peerUin === '284840486' || records.peerUin === '1094950020') {
+            // 查找记录
+            const records = msg.records.find(msgRecord => msgRecord.msgId === element?.sourceMsgIdInRecords);
+
+            // 特定账号的特殊处理
+            if (records && (records.peerUin === '284840486' || records.peerUin === '1094950020')) {
                 return createReplyData(records.msgId);
             }
-            let replyMsgList = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeqV2(peer, element.replayMsgSeq, records.msgTime, [element.senderUidStr])).msgList;
-            let replyMsg = replyMsgList.find(msg => msg.msgRandom === records.msgRandom);
 
-            if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
-                this.core.context.logger.logError(
-                    '筛选结果,筛选消息失败,将使用Fallback-1 Seq: ',
+            // 获取消息的通用方法组
+            const tryFetchMethods = async (msgSeq: string, senderUid?: string, msgTime?: string, msgRandom?: string): Promise<RawMessage | undefined> => {
+                try {
+                    // 方法1：通过序号和时间筛选
+                    if (senderUid && msgTime) {
+                        const replyMsgList = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeqV2(
+                            peer, msgSeq, msgTime, [senderUid]
+                        )).msgList;
+
+                        const replyMsg = msgRandom
+                            ? replyMsgList.find(msg => msg.msgRandom === msgRandom)
+                            : replyMsgList.find(msg => msg.msgSeq === msgSeq);
+
+                        if (replyMsg) return replyMsg;
+
+                        this.core.context.logger.logWarn(`方法1查询失败，序号: ${msgSeq}, 消息数: ${replyMsgList.length}`);
+                    }
+
+                    // 方法2：直接通过序号获取
+                    const replyMsgList = (await this.core.apis.MsgApi.getMsgsBySeqAndCount(
+                        peer, msgSeq, 1, true, true
+                    )).msgList;
+
+                    const replyMsg = msgRandom
+                        ? replyMsgList.find(msg => msg.msgRandom === msgRandom)
+                        : replyMsgList.find(msg => msg.msgSeq === msgSeq);
+
+                    if (replyMsg) return replyMsg;
+
+                    this.core.context.logger.logWarn(`方法2查询失败，序号: ${msgSeq}, 消息数: ${replyMsgList.length}`);
+
+                    // 方法3：另一种筛选方式
+                    if (senderUid) {
+                        const replyMsgList = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeqV3(
+                            peer, msgSeq, [senderUid]
+                        )).msgList;
+
+                        const replyMsg = msgRandom
+                            ? replyMsgList.find(msg => msg.msgRandom === msgRandom)
+                            : replyMsgList.find(msg => msg.msgSeq === msgSeq);
+
+                        if (replyMsg) return replyMsg;
+
+                        this.core.context.logger.logWarn(`方法3查询失败，序号: ${msgSeq}, 消息数: ${replyMsgList.length}`);
+                    }
+
+                    return undefined;
+                } catch (error) {
+                    this.core.context.logger.logError('查询回复消息出错', error);
+                    return undefined;
+                }
+            };
+
+            // 有记录情况下，使用完整信息查询
+            if (records && element.replyMsgTime && element.senderUidStr) {
+                const replyMsg = await tryFetchMethods(
                     element.replayMsgSeq,
-                    ',消息长度:',
-                    replyMsgList.length
+                    element.senderUidStr,
+                    records.msgTime,
+                    records.msgRandom
                 );
-                replyMsgList = (await this.core.apis.MsgApi.getMsgsBySeqAndCount(peer, element.replayMsgSeq, 1, true, true)).msgList;
-                replyMsg = replyMsgList.find(msg => msg.msgRandom === records.msgRandom);
+
+                if (replyMsg) {
+                    return createReplyData(replyMsg.msgId);
+                }
+
+                this.core.context.logger.logError('所有查找方法均失败，获取不到带记录的引用消息', element.replayMsgSeq);
+            } else {
+                // 旧版客户端或不完整记录的情况，也尝试使用相同流程
+                this.core.context.logger.logWarn('似乎是旧版客户端，尝试仅通过序号获取引用消息', element.replayMsgSeq);
+
+                const replyMsg = await tryFetchMethods(element.replayMsgSeq);
+
+                if (replyMsg) {
+                    return createReplyData(replyMsg.msgId);
+                }
+
+                this.core.context.logger.logError('所有查找方法均失败，获取不到旧客户端的引用消息', element.replayMsgSeq);
             }
 
-            if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
-                this.core.context.logger.logWarn(
-                    '筛选消息失败,将使用Fallback-2 Seq:',
-                    element.replayMsgSeq,
-                    ',消息长度:',
-                    replyMsgList.length
-                );
-                replyMsgList = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeqV3(peer, element.replayMsgSeq, [element.senderUidStr])).msgList;
-                replyMsg = replyMsgList.find(msg => msg.msgRandom === records.msgRandom);
-            }
-
-
-            // 丢弃该消息段
-            if (!replyMsg || records.msgRandom !== replyMsg.msgRandom) {
-                this.core.context.logger.logError(
-                    '最终筛选结果,筛选消息失败,获取不到引用的消息 Seq: ',
-                    element.replayMsgSeq,
-                    ',消息长度:',
-                    replyMsgList.length
-                );
-                return null;
-            }
-            return createReplyData(replyMsg.msgId);
+            return null;
         },
-
         videoElement: async (element, msg, elementWrapper) => {
             const peer = {
                 chatType: msg.chatType,

@@ -148,10 +148,11 @@ export interface NodeIKernelMsgService {
         msgList: RawMessage[]
     }>;
 
-    //@deprecated
-    getMsgs(peer: Peer, msgId: string, count: unknown, queryOrder: boolean): Promise<unknown>;
+    // getMsgService/getMsgs { chatType: 2, peerUid: '975206796', privilegeFlag: 336068800 } 0 20 true
+    getMsgs(peer: Peer & { privilegeFlag: number }, msgId: string, count: number, queryOrder: boolean): Promise<GeneralCallResult & {
+        msgList: RawMessage[]
+    }>;
 
-    //@deprecated
     getMsgsIncludeSelf(peer: Peer, msgId: string, count: number, queryOrder: boolean): Promise<GeneralCallResult & {
         msgList: RawMessage[]
     }>;
