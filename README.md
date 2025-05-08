@@ -51,7 +51,7 @@ _Modern protocol-side framework implemented based on NTQQ._
 
 + [Lagrange](https://github.com/LagrangeDev/Lagrange.Core) 对本项目的大力支持 参考部分代码 已获授权
 
-+ [AstrBot](https://github.com/AstrBotDevs/AstrBot) 推荐一下
++ [AstrBot](https://github.com/AstrBotDevs/AstrBot) 是完美适配本项目的LLM Bot框架 在此推荐一下
 
 + 不过最最重要的 还是需要感谢屏幕前的你哦~
 
