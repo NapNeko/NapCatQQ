@@ -397,6 +397,7 @@ export class NTQQFileApi {
                 }
             });
         });
+        return res.flat();
     }
 
     async downloadMedia(msgId: string, chatType: ChatType, peerUid: string, elementId: string, thumbPath: string, sourcePath: string, timeout = 1000 * 60 * 2, force: boolean = false) {
