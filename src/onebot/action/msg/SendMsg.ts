@@ -222,8 +222,8 @@ export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
                 const msg = (await this.core.apis.MsgApi.getMsgsByMsgId(nodeMsg.Peer, [nodeMsg.MsgId])).msgList[0];
                 this.core.context.logger.logDebug(`handleForwardedNodesPacket[PureRaw] 开始转换 ${stringifyWithBigInt(msg)}`);
                 if (msg) {
-                    let msgcahce = await this.core.apis.FileApi.downloadRawMsgMedia([msg]);
-                    delFiles.push(...msgcahce);
+                    let msgCache = await this.core.apis.FileApi.downloadRawMsgMedia([msg]);
+                    delFiles.push(...msgCache);
                     const transformedMsg = this.core.apis.PacketApi.pkt.msgConverter.rawMsgToPacketMsg(msg, msgPeer);
                     this.core.context.logger.logDebug(`handleForwardedNodesPacket[PureRaw] 转换为 ${stringifyWithBigInt(transformedMsg)}`);
                     packetMsg.push(transformedMsg);
