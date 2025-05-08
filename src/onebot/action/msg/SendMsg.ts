@@ -174,9 +174,11 @@ export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
         nickname: string,
     }, dp: number = 0): Promise<{
         finallySendElements: SendArkElement,
-        res_id?: string
+        res_id?: string,
+        deleteAfterSentFiles: string[],
     } | null> {
         const packetMsg: PacketMsg[] = [];
+        let delFiles: string[] = [];
         for (const node of messageNodes) {
             if (dp >= 3) {
                 this.core.context.logger.logWarn('转发消息深度超过3层，将停止解析！');
@@ -192,9 +194,11 @@ export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
                         nickname: (node.data.nickname || node.data.name) ?? parentMeta?.nickname ?? 'QQ用户',
                     }, dp + 1);
                     sendElements = uploadReturnData?.finallySendElements ? [uploadReturnData.finallySendElements] : [];
+                    delFiles.push(...(uploadReturnData?.deleteAfterSentFiles || []));
                 } else {
                     const sendElementsCreateReturn = await this.obContext.apis.MsgApi.createSendElements(OB11Data, msgPeer);
                     sendElements = sendElementsCreateReturn.sendElements;
+                    delFiles.push(...sendElementsCreateReturn.deleteAfterSentFiles);
                 }
 
                 const packetMsgElements: rawMsgWithSendMsg = {
@@ -218,7 +222,8 @@ export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
                 const msg = (await this.core.apis.MsgApi.getMsgsByMsgId(nodeMsg.Peer, [nodeMsg.MsgId])).msgList[0];
                 this.core.context.logger.logDebug(`handleForwardedNodesPacket[PureRaw] 开始转换 ${stringifyWithBigInt(msg)}`);
                 if (msg) {
-                    await this.core.apis.FileApi.downloadRawMsgMedia([msg]);
+                    let msgCache = await this.core.apis.FileApi.downloadRawMsgMedia([msg]);
+                    delFiles.push(...msgCache);
                     const transformedMsg = this.core.apis.PacketApi.pkt.msgConverter.rawMsgToPacketMsg(msg, msgPeer);
                     this.core.context.logger.logDebug(`handleForwardedNodesPacket[PureRaw] 转换为 ${stringifyWithBigInt(transformedMsg)}`);
                     packetMsg.push(transformedMsg);
@@ -234,6 +239,7 @@ export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
         const resid = await this.core.apis.PacketApi.pkt.operation.UploadForwardMsg(packetMsg, msgPeer.chatType === ChatType.KCHATTYPEGROUP ? +msgPeer.peerUid : 0);
         const forwardJson = ForwardMsgBuilder.fromPacketMsg(resid, packetMsg, source, news, summary, prompt);
         return {
+            deleteAfterSentFiles: delFiles,
             finallySendElements: {
                 elementType: ElementType.ARK,
                 elementId: '',
@@ -255,7 +261,7 @@ export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
         const res_id = uploadReturnData?.res_id;
         const finallySendElements = uploadReturnData?.finallySendElements;
         if (!finallySendElements) throw Error('转发消息失败，生成节点为空');
-        const returnMsg = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(msgPeer, [finallySendElements], []).catch(() => undefined);
+        const returnMsg = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(msgPeer, [finallySendElements], uploadReturnData.deleteAfterSentFiles || []).catch(() => undefined);
         return { message: returnMsg ?? null, res_id: res_id! };
     }
 
