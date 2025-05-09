@@ -2,7 +2,7 @@
   "name": "napcat",
   "private": true,
   "type": "module",
-  "version": "4.7.55",
+  "version": "4.7.56",
   "scripts": {
     "build:universal": "npm run build:webui && vite build --mode universal || exit 1",
     "build:framework": "npm run build:webui && vite build --mode framework || exit 1",
