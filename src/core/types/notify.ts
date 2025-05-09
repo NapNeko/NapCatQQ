@@ -132,18 +132,26 @@ export enum BuddyReqType {
     KMEINITIATORWAITPEERCONFIRM = 13
 }
 
+// 其中 ? 代表新版本参数
 export interface FriendRequest {
-    isBuddy?: boolean;
     isInitiator?: boolean;
     isDecide: boolean;
     friendUid: string;
     reqType: BuddyReqType,
     reqTime: string;  // 时间戳 秒
+    flag?: number;  // 0
+    preGroupingId?: number;  // 0
+    commFriendNum?: number;  // 共同好友数
     extWords: string;  // 申请人填写的验证消息
     isUnread: boolean;
+    isDoubt?: boolean;  // 是否是可疑的好友请求
+    nameMore?: string;
     friendNick: string;
     sourceId: number;
-    groupCode: string
+    groupCode: string;
+    isBuddy?: boolean;
+    isAgreed?: boolean;
+    relation?: number;
 }
 
 export interface FriendRequestNotify {
