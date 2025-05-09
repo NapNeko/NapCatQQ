@@ -15,7 +15,10 @@ export default class SetGroupWholeBan extends OneBotAction<Payload, null> {
 
     async _handle(payload: Payload): Promise<null> {
         const enable = payload.enable?.toString() !== 'false';
-        await this.core.apis.GroupApi.banGroup(payload.group_id.toString(), enable);
+        let res = await this.core.apis.GroupApi.banGroup(payload.group_id.toString(), enable);
+        if (res.result !== 0) {
+            throw new Error(`SetGroupWholeBan failed: ${res.errMsg} ${res.result}`);
+        }
         return null;
     }
 }

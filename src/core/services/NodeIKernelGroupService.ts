@@ -249,7 +249,7 @@ export interface NodeIKernelGroupService {
 
     reqToJoinGroup(groupCode: string, arg: unknown): void;
 
-    setGroupShutUp(groupCode: string, shutUp: boolean): void;
+    setGroupShutUp(groupCode: string, shutUp: boolean): Promise<GeneralCallResult>;
 
     getGroupShutUpMemberList(groupCode: string): Promise<GeneralCallResult>;
 
