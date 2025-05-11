@@ -85,9 +85,6 @@ export class OneBotMsgApi {
         textElement: async element => {
             if (element.atType === NTMsgAtType.ATTYPEUNKNOWN) {
                 let text = element.content;
-                if (!text.trim()) {
-                    return null;
-                }
                 // 兼容 9.7.x 换行符
                 if (text.indexOf('\n') === -1 && text.indexOf('\r\n') === -1) {
                     text = text.replace(/\r/g, '\n');
