@@ -8,10 +8,11 @@ import { pipeline } from 'stream/promises';
 import { fileURLToPath } from 'url';
 import { LogWrapper } from './log';
 
-const downloadOri = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-04-16-12-54/ffmpeg-n7.1.1-6-g48c0f071d4-win64-lgpl-7.1.zip"
+const downloadOri = "https://github.com/NapNeko/ffmpeg-build/releases/download/v1.0.0/ffmpeg-7.1.1-win64.zip"
 const urls = [
     "https://github.moeyy.xyz/" + downloadOri,
     "https://ghp.ci/" + downloadOri,
+    "https://gh.api.99988866.xyz/" + downloadOri,
     "https://gh.api.99988866.xyz/" + downloadOri,
     downloadOri
 ];
@@ -336,9 +337,16 @@ export async function downloadFFmpegIfNotExists(log: LogWrapper) {
     const ffprobe_exist = fs.existsSync(path.join(currentPath, 'ffmpeg', 'ffprobe.exe'));
 
     if (!ffmpeg_exist || !ffprobe_exist) {
-        await downloadFFmpeg(path.join(currentPath, 'ffmpeg'), path.join(currentPath, 'cache'), (percentage: number, message: string) => {
+        let url = await downloadFFmpeg(path.join(currentPath, 'ffmpeg'), path.join(currentPath, 'cache'), (percentage: number, message: string) => {
             log.log(`[FFmpeg] [Download] ${percentage}% - ${message}`);
         });
+        if (!url) {
+            log.log('[FFmpeg] [Error] 下载FFmpeg失败');
+            return {
+                path: null,
+                reset: false
+            };
+        }
         return {
             path: path.join(currentPath, 'ffmpeg'),
             reset: true
