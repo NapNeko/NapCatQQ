@@ -12,7 +12,6 @@ import { Writable } from 'stream';
 export function connectToNamedPipe(logger: LogWrapper, timeoutMs: number = 5000): Promise<{ disconnect: () => void }> {
     return new Promise((resolve, reject) => {
         if (process.platform !== 'win32') {
-            logger.log('只有Windows平台支持命名管道');
             // 非Windows平台不reject，而是返回一个空的disconnect函数
             return resolve({ disconnect: () => { } });
         }
