@@ -17,8 +17,6 @@ import fs from 'fs';
 import fsPromises from 'fs/promises';
 import { InstanceContext, NapCatCore, SearchResultItem } from '@/core';
 import { fileTypeFromFile } from 'file-type';
-import imageSize from 'image-size';
-import { ISizeCalculationResult } from 'image-size/dist/types/interface';
 import { RkeyManager } from '@/core/helper/rkey';
 import { calculateFileMD5 } from '@/common/file';
 import pathLib from 'node:path';
@@ -30,6 +28,7 @@ import { FFmpegService } from '@/common/ffmpeg';
 import { rkeyDataType } from '../types/file';
 import { NapProtoMsg } from '@napneko/nap-proto-core';
 import { FileId } from '../packet/transformer/proto/misc/fileid';
+import { imageSizeFallBack } from '@/image-size';
 
 export class NTQQFileApi {
     context: InstanceContext;
@@ -209,7 +208,7 @@ export class NTQQFileApi {
         if (fileSize === 0) {
             throw new Error('文件异常，大小为0');
         }
-        const imageSize = await this.core.apis.FileApi.getImageSize(picPath);
+        const imageSize = await imageSizeFallBack(picPath);
         context.deleteAfterSentFiles.push(path);
         return {
             elementType: ElementType.PIC,
@@ -437,19 +436,6 @@ export class NTQQFileApi {
         return completeRetData.filePath;
     }
 
-    async getImageSize(filePath: string): Promise<ISizeCalculationResult> {
-        return new Promise((resolve, reject) => {
-            imageSize(filePath, (err: Error | null, dimensions) => {
-                if (err) {
-                    reject(new Error(err.message));
-                } else if (!dimensions) {
-                    reject(new Error('获取图片尺寸失败'));
-                } else {
-                    resolve(dimensions);
-                }
-            });
-        });
-    }
 
     async searchForFile(keys: string[]): Promise<SearchResultItem | undefined> {
         const randomResultId = 100000 + Math.floor(Math.random() * 10000);
