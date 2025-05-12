@@ -126,7 +126,9 @@ class JpegParser implements ImageParser {
                     // 寻找FF标记
                     if (buffer[offset] === 0xFF && buffer[offset + 1]! >= 0xC0 && buffer[offset + 1]! <= 0xCF) {
                         const marker = buffer[offset + 1];
-                        if (!marker) break;
+                        if (!marker) {
+                            break;
+                        }
                         // 跳过非SOF标记
                         if (this.isNonSOFMarker(marker)) {
                             offset += 2;
