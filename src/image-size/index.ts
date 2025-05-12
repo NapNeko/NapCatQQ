@@ -161,7 +161,7 @@ class JpegParser implements ImageParser {
                 if (offset > BUFFER_SIZE) {
                     const KEEP_BYTES = 20; // 保留足够数据以处理跨块边界的情况
                     if (offset > KEEP_BYTES) {
-                        buffer = buffer.slice(offset - KEEP_BYTES);
+                        buffer = buffer.subarray(offset - KEEP_BYTES);
                         offset = KEEP_BYTES;
                     }
                 }
