@@ -148,7 +148,7 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
     }
 
     private authorize(token: string | undefined, wsClient: WebSocket, wsReq: IncomingMessage) {
-        if (!token || token.length == 0) return;//客户端未设置密钥
+        if (!token || token.length == 0) return true;//客户端未设置密钥
         const QueryClientToken = urlParse.parse(wsReq?.url || '', true).query['access_token'];
         const HeaderClientToken = wsReq.headers.authorization?.split('Bearer ').pop() || '';
         const ClientToken = typeof (QueryClientToken) === 'string' && QueryClientToken !== '' ? QueryClientToken : HeaderClientToken;

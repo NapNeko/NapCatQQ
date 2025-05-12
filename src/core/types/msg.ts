@@ -508,7 +508,8 @@ export interface RawMessage {
  * 查询消息参数接口
  */
 export interface QueryMsgsParams {
-    chatInfo: Peer;
+    chatInfo: Peer & { privilegeFlag?: number };
+    //searchFields: number;
     filterMsgType: Array<{ type: NTMsgType, subType: Array<number> }>;
     filterSendersUid: string[];
     filterMsgFromTime: string;

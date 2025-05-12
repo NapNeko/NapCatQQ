@@ -334,7 +334,7 @@ export class NapCatOneBot11Adapter {
             for (let i = 0; i < reqs.unreadNums; i++) {
                 const req = reqs.buddyReqs[i];
                 if (!req) continue;
-                if (!!req.isInitiator || (req.isDecide && req.reqType !== BuddyReqType.KMEINITIATORWAITPEERCONFIRM)) {
+                if (!!req.isInitiator || (req.isDecide && req.reqType !== BuddyReqType.KMEINITIATORWAITPEERCONFIRM) || !req.isUnread) {
                     continue;
                 }
                 try {
@@ -352,7 +352,6 @@ export class NapCatOneBot11Adapter {
                 }
             }
         };
-
         this.context.session
             .getBuddyService()
             .addKernelBuddyListener(proxiedListenerOf(buddyListener, this.context.logger));

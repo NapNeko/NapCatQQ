@@ -3,43 +3,43 @@ import { BuddyCategoryType, FriendRequestNotify } from '@/core/types';
 export type OnBuddyChangeParams = BuddyCategoryType[];
 
 export class NodeIKernelBuddyListener {
-    onBuddyListChangedV2(arg: unknown): any {
+    onBuddyListChangedV2(_arg: unknown): any {
     }
 
-    onAddBuddyNeedVerify(arg: unknown): any {
+    onAddBuddyNeedVerify(_arg: unknown): any {
     }
 
-    onAddMeSettingChanged(arg: unknown): any {
+    onAddMeSettingChanged(_arg: unknown): any {
     }
 
-    onAvatarUrlUpdated(arg: unknown): any {
+    onAvatarUrlUpdated(_arg: unknown): any {
     }
 
-    onBlockChanged(arg: unknown): any {
+    onBlockChanged(_arg: unknown): any {
     }
 
-    onBuddyDetailInfoChange(arg: unknown): any {
+    onBuddyDetailInfoChange(_arg: unknown): any {
     }
 
-    onBuddyInfoChange(arg: unknown): any {
+    onBuddyInfoChange(_arg: unknown): any {
     }
 
-    onBuddyListChange(arg: OnBuddyChangeParams): any {
+    onBuddyListChange(_arg: OnBuddyChangeParams): any {
     }
 
-    onBuddyRemarkUpdated(arg: unknown): any {
+    onBuddyRemarkUpdated(_arg: unknown): any {
     }
 
-    onBuddyReqChange(arg: FriendRequestNotify): any {
+    onBuddyReqChange(_arg: FriendRequestNotify): any {
     }
 
-    onBuddyReqUnreadCntChange(arg: unknown): any {
+    onBuddyReqUnreadCntChange(_arg: unknown): any {
     }
 
-    onCheckBuddySettingResult(arg: unknown): any {
+    onCheckBuddySettingResult(_arg: unknown): any {
     }
 
-    onDelBatchBuddyInfos(arg: unknown): any {
+    onDelBatchBuddyInfos(_arg: unknown): any {
         console.log('onDelBatchBuddyInfos not implemented', ...arguments);
     }
 
@@ -66,12 +66,12 @@ export class NodeIKernelBuddyListener {
     onDoubtBuddyReqUnreadNumChange(_num: number): void | Promise<void> {
     }
 
-    onNickUpdated(arg: unknown): any {
+    onNickUpdated(_arg: unknown): any {
     }
 
-    onSmartInfos(arg: unknown): any {
+    onSmartInfos(_arg: unknown): any {
     }
 
-    onSpacePermissionInfos(arg: unknown): any {
+    onSpacePermissionInfos(_arg: unknown): any {
     }
 }

@@ -1,8 +1,9 @@
+<img src="https://napneko.github.io/assets/newnewlogo.png" width = "305" height = "411" alt="NapCat" align=right />
 <div align="center">
 
 # NapCat
 
-![NapCatQQ](https://socialify.git.ci/NapNeko/NapCatQQ/image?font=Jost&logo=https%3A%2F%2Fnapneko.github.io%2Fassets%2Fnewlogo.png&name=1&owner=1&pattern=Diagonal+Stripes&stargazers=1&theme=Auto)
+
 
 _Modern protocol-side framework implemented based on NTQQ._
 
@@ -50,6 +51,8 @@ _Modern protocol-side framework implemented based on NTQQ._
 
 + [Lagrange](https://github.com/LagrangeDev/Lagrange.Core) 对本项目的大力支持 参考部分代码 已获授权
 
++ [AstrBot](https://github.com/AstrBotDevs/AstrBot) 是完美适配本项目的LLM Bot框架 在此推荐一下
+
 + 不过最最重要的 还是需要感谢屏幕前的你哦~
 
 ---
@@ -61,7 +64,3 @@ _Modern protocol-side framework implemented based on NTQQ._
 2. 项目其余逻辑代码采用[本仓库开源许可](./LICENSE).
 
 **本仓库仅用于提高易用性，实现消息推送类功能，此外，禁止任何项目未经仓库主作者授权基于 NapCat 代码开发。使用请遵守当地法律法规，由此造成的问题由使用者和提供违规使用教程者负责。**
-
-## Warnings
-
-[某框架抄袭部分分析](https://napneko.github.io/other/about-copy)
