@@ -192,7 +192,9 @@ class BmpParser implements ImageParser {
             stream.once('error', reject);
             stream.once('readable', () => {
                 const buf = stream.read(26) as Buffer;
-                if (!buf || buf.length < 26) return resolve(undefined);
+                if (!buf || buf.length < 26) {
+                    return resolve(undefined);
+                }
                 if (this.canParse(buf)) {
                     const width = buf.readUInt32LE(18);
                     const height = buf.readUInt32LE(22);
