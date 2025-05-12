@@ -23,10 +23,14 @@ interface ImageParser {
 
 // 魔术匹配
 function matchMagic(buffer: Buffer, magic: number[], offset = 0): boolean {
-    if (buffer.length < offset + magic.length) return false;
+    if (buffer.length < offset + magic.length) {
+        return false;
+    }
 
     for (let i = 0; i < magic.length; i++) {
-        if (buffer[offset + i] !== magic[i]) return false;
+        if (buffer[offset + i] !== magic[i]) {
+            return false;
+        }
     }
     return true;
 }
@@ -46,7 +50,9 @@ class PngParser implements ImageParser {
             stream.once('error', reject);
             stream.once('readable', () => {
                 const buf = stream.read(24) as Buffer;
-                if (!buf || buf.length < 24) return resolve(undefined);
+                if (!buf || buf.length < 24) {
+                    return resolve(undefined);
+                }
                 if (this.canParse(buf)) {
                     const width = buf.readUInt32BE(16);
                     const height = buf.readUInt32BE(20);
@@ -229,7 +235,9 @@ class GifParser implements ImageParser {
             stream.once('error', reject);
             stream.once('readable', () => {
                 const buf = stream.read(10) as Buffer;
-                if (!buf || buf.length < 10) return resolve(undefined);
+                if (!buf || buf.length < 10) {
+                    return resolve(undefined);
+                }
                 if (this.canParse(buf)) {
                     const width = buf.readUInt16LE(6);
                     const height = buf.readUInt16LE(8);
@@ -385,7 +393,9 @@ export async function imageSizeFromFile(filePath: string): Promise<ImageSize | u
         // 先检测类型
         const type = await detectImageType(filePath);
         const parser = parsers.find(p => p.type === type);
-        if (!parser) return undefined;
+        if (!parser) {
+            return undefined;
+        }
 
         // 用流式方式解析尺寸
         const stream = fs.createReadStream(filePath);
