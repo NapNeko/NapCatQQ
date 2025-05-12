@@ -4,10 +4,10 @@ import { execFile } from 'child_process';
 import { promisify } from 'util';
 import type { VideoInfo } from './video';
 import { fileTypeFromFile } from 'file-type';
-import imageSize from 'image-size';
 import { fileURLToPath } from 'node:url';
 import { platform } from 'node:os';
 import { LogWrapper } from './log';
+import { imageSizeFallBack } from '@/image-size';
 const currentPath = dirname(fileURLToPath(import.meta.url));
 const execFileAsync = promisify(execFile);
 const getFFmpegPath = (tool: string): string => {
@@ -157,7 +157,7 @@ export class FFmpegService {
         try {
             await this.extractThumbnail(videoPath, thumbnailPath);
             // 获取图片尺寸
-            const dimensions = imageSize(thumbnailPath);
+            const dimensions = await imageSizeFallBack(thumbnailPath);
 
             return {
                 format: fileType?.ext ?? 'mp4',
