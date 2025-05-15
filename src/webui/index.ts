@@ -122,7 +122,9 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
 
     // ------------挂载路由------------
     // 挂载静态路由（前端），路径为 /webui
-    app.use('/webui', express.static(pathWrapper.staticPath));
+    app.use('/webui', express.static(pathWrapper.staticPath, {
+        maxAge: '1d'
+    }));
     // 初始化WebSocket服务器
     const sslCerts = await checkCertificates(logger);
     const isHttps = !!sslCerts;
