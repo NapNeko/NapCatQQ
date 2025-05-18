@@ -4,7 +4,7 @@ import { Static, Type } from '@sinclair/typebox';
 
 const SchemaData = Type.Object({
     user_id: Type.Number(),
-    target_id: Type.Union([Type.Number(), Type.String()]),
+    target_id: Type.Optional(Type.String()),
 });
 
 type Payload = Static<typeof SchemaData>;
