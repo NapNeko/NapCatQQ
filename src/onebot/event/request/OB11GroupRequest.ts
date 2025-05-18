@@ -2,7 +2,7 @@ import { NapCatCore } from '@/core';
 import { OB11BaseRequestEvent } from './OB11BaseRequestEvent';
 
 export class OB11GroupRequestEvent extends OB11BaseRequestEvent {
-    override readonly request_type: 'group' = 'group';
+    override readonly request_type = 'group' as const;
 
     group_id: number;
     user_id: number;
