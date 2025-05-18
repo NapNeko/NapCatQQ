@@ -13,7 +13,7 @@ export class SendPokeBase extends GetPacketStatusDepends<Payload, void> {
     override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        // 这里的 !! 可以传入空字符串和0 忽略这些数据有利用接口统一接口
+        // 这里的 !! 可以传入空字符串 忽略这些数据有利用接口统一接口
         const target_id = !!payload.target_id ? payload.target_id : payload.user_id;
         const peer_id = !!payload.group_id ? payload.group_id : payload.user_id;
 
