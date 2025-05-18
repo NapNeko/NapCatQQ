@@ -7,7 +7,7 @@ class OidbBase extends PacketTransformer<typeof proto.OidbSvcTrpcTcpBase> {
         super();
     }
 
-    build(cmd: number, subCmd: number, body: Uint8Array, isUid: boolean = true, isLafter: boolean = false): OidbPacket {
+    build(cmd: number, subCmd: number, body: Uint8Array, isUid: boolean = true, _isLafter: boolean = false): OidbPacket {
         const data = new NapProtoMsg(proto.OidbSvcTrpcTcpBase).encode({
             command: cmd,
             subCommand: subCmd,

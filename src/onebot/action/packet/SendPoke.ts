@@ -3,21 +3,33 @@ import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
 import { Static, Type } from '@sinclair/typebox';
 
 const SchemaData = Type.Object({
-    group_id: Type.Optional(Type.Union([Type.Number(), Type.String()])),
-    user_id: Type.Union([Type.Number(), Type.String()]),
+    group_id: Type.Optional(Type.String()),
+    user_id: Type.Optional(Type.String()),
+    target_id: Type.Optional(Type.String()),
 });
 
 type Payload = Static<typeof SchemaData>;
-
-export class SendPoke extends GetPacketStatusDepends<Payload, void> {
-    override actionName = ActionName.SendPoke;
+export class SendPokeBase extends GetPacketStatusDepends<Payload, void> {
     override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        if (payload.group_id) {
-            await this.core.apis.PacketApi.pkt.operation.GroupPoke(+payload.group_id, +payload.user_id);
-        } else {
-            await this.core.apis.PacketApi.pkt.operation.FriendPoke(+payload.user_id);
+        const target_id = payload.target_id ?? payload.user_id;
+        const peer_id = payload.group_id ?? payload.user_id;
+        const is_group = !!payload.group_id;
+        if (!target_id || !peer_id) {
+            throw new Error('请检查参数，缺少 user_id 或 group_id');
         }
+        await this.core.apis.PacketApi.pkt.operation.SendPoke(is_group, +peer_id, +target_id);
     }
+}
+
+
+export class SendPoke extends SendPokeBase {
+    override actionName = ActionName.SendPoke;
+}
+export class GroupPoke extends SendPokeBase {
+    override actionName = ActionName.GroupPoke;
+}
+export class FriendPoke extends SendPokeBase {
+    override actionName = ActionName.FriendPoke;
 }
