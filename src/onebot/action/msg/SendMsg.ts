@@ -104,8 +104,6 @@ function getSpecialMsgNum(payload: OB11PostSendMsg, msgType: OB11MessageDataType
 }
 
 export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
-    contextMode = ContextMode.Normal;
-
     protected override async check(payload: OB11PostSendMsg): Promise<BaseCheckResult> {
         const messages = normalize(payload.message);
         const nodeElementLength = getSpecialMsgNum(payload, OB11MessageDataType.node);
@@ -117,12 +115,13 @@ export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
         }
         return { valid: true };
     }
-
     async _handle(payload: OB11PostSendMsg): Promise<ReturnDataType> {
-        this.contextMode = ContextMode.Normal;
-        if (payload.message_type === 'group') this.contextMode = ContextMode.Group;
-        if (payload.message_type === 'private') this.contextMode = ContextMode.Private;
-        const peer = await createContext(this.core, payload, this.contextMode);
+        return this.base_handle(payload);
+    }
+    async base_handle(payload: OB11PostSendMsg, contextMode: ContextMode = ContextMode.Normal): Promise<ReturnDataType> {
+        if (payload.message_type === 'group') contextMode = ContextMode.Group;
+        if (payload.message_type === 'private') contextMode = ContextMode.Private;
+        const peer = await createContext(this.core, payload, contextMode);
 
         const messages = normalize(
             payload.message,
