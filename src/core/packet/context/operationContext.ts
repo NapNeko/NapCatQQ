@@ -30,13 +30,18 @@ export class PacketOperationContext {
         return await this.context.client.sendOidbPacket(pkt, rsp);
     }
 
-    async GroupPoke(groupUin: number, uin: number) {
-        const req = trans.SendPoke.build(true, groupUin, uin);
+    async GroupPoke(peer: number, uin: number) {
+        const req = trans.SendPoke.build(true, peer, uin);
         await this.context.client.sendOidbPacket(req);
     }
 
-    async FriendPoke(uin: number, target?: number) {
-        const req = trans.SendPoke.build(false, uin, target ?? uin);
+    async FriendPoke(peer: number, target?: number) {
+        const req = trans.SendPoke.build(false, peer, target ?? peer);
+        await this.context.client.sendOidbPacket(req);
+    }
+
+    async SendPoke(is_group: boolean, peer: number, target?: number) {
+        const req = trans.SendPoke.build(is_group, peer, target ?? peer);
         await this.context.client.sendOidbPacket(req);
     }
 
