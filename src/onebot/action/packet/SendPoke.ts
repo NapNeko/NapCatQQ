@@ -3,9 +3,9 @@ import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
 import { Static, Type } from '@sinclair/typebox';
 
 const SchemaData = Type.Object({
-    group_id: Type.Optional(Type.Union([Type.Number(), Type.String()])),
-    user_id: Type.Union([Type.Number(), Type.String()]),
-    target_id: Type.Union([Type.Number(), Type.String()]),
+    group_id: Type.Optional(Type.String()),
+    user_id: Type.String(),
+    target_id: Type.Optional(Type.String()),
 });
 
 type Payload = Static<typeof SchemaData>;
