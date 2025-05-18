@@ -8,11 +8,18 @@ class SendPoke extends PacketTransformer<typeof proto.OidbSvcTrpcTcpBase> {
         super();
     }
 
-    build(peer: number, group?: number): OidbPacket {
+    build(is_group: boolean, peer: number, target: number): OidbPacket {
+        if (is_group) {
+            const data = new NapProtoMsg(proto.OidbSvcTrpcTcp0XED3_1).encode({
+                uin: target,
+                groupUin: peer,
+                ext: 0
+            });
+            return OidbBase.build(0xED3, 1, data);
+        }
         const data = new NapProtoMsg(proto.OidbSvcTrpcTcp0XED3_1).encode({
-            uin: peer,
-            groupUin: group,
-            friendUin: group ?? peer,
+            uin: target,
+            friendUin: peer,
             ext: 0
         });
         return OidbBase.build(0xED3, 1, data);
