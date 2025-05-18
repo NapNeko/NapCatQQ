@@ -31,12 +31,12 @@ export class PacketOperationContext {
     }
 
     async GroupPoke(groupUin: number, uin: number) {
-        const req = trans.SendPoke.build(uin, groupUin);
+        const req = trans.SendPoke.build(true, uin, groupUin);
         await this.context.client.sendOidbPacket(req);
     }
 
-    async FriendPoke(uin: number) {
-        const req = trans.SendPoke.build(uin);
+    async FriendPoke(uin: number, target?: number) {
+        const req = trans.SendPoke.build(false, uin, target ?? uin);
         await this.context.client.sendOidbPacket(req);
     }
 

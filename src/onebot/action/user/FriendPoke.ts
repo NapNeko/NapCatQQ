@@ -3,7 +3,8 @@ import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
 import { Static, Type } from '@sinclair/typebox';
 
 const SchemaData = Type.Object({
-    user_id: Type.Union([Type.Number(), Type.String()])
+    user_id: Type.Number(),
+    target_id: Type.Union([Type.Number(), Type.String()]),
 });
 
 type Payload = Static<typeof SchemaData>;
@@ -13,6 +14,6 @@ export class FriendPoke extends GetPacketStatusDepends<Payload, void> {
     override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        await this.core.apis.PacketApi.pkt.operation.FriendPoke(+payload.user_id);
+        await this.core.apis.PacketApi.pkt.operation.FriendPoke(payload.user_id, payload.target_id ? +payload.target_id : undefined);
     }
 }
