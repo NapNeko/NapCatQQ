@@ -13,12 +13,15 @@ export class SendPokeBase extends GetPacketStatusDepends<Payload, void> {
     override payloadSchema = SchemaData;
 
     async _handle(payload: Payload) {
-        const target_id = payload.target_id ?? payload.user_id;
-        const peer_id = payload.group_id ?? payload.user_id;
+        // 这里的 !! 可以传入空字符串和0 忽略这些数据有利用接口统一接口
+        const target_id = !!payload.target_id ? payload.target_id : payload.user_id;
+        const peer_id = !!payload.group_id ? payload.group_id : payload.user_id;
+
         const is_group = !!payload.group_id;
         if (!target_id || !peer_id) {
             throw new Error('请检查参数，缺少 user_id 或 group_id');
         }
+
         await this.core.apis.PacketApi.pkt.operation.SendPoke(is_group, +peer_id, +target_id);
     }
 }
