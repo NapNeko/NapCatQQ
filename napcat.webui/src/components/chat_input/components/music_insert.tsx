@@ -92,7 +92,9 @@ const MusicInsert = () => {
             className="w-96"
             fullWidth
             selectedKey={mode}
-            onSelectionChange={setMode}
+            onSelectionChange={(key) => {
+              if (key !== null) setMode(key)
+            }}
           >
             <Tab title="主流平台" key="default" className="flex flex-col gap-2">
               <Select
