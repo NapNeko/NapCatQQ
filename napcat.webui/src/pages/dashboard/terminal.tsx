@@ -56,9 +56,9 @@ export default function TerminalPage() {
 
       setTabs((prev) => [...prev, newTab])
       setSelectedTab(id)
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Failed to create terminal:', error)
-      toast.error('创建终端失败')
+      toast.error((error as Error).message)
     }
   }
 
