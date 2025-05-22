@@ -282,7 +282,8 @@ export class NapCatOneBot11Adapter {
                     }, 1, 10 * 60 * 1000);
                     // 10分钟 超时
                     const updatemsg = updatemsgs.find((e) => e.msgId === msg.msgId);
-                    if (updatemsg?.sendStatus == SendStatusType.KSEND_STATUS_SUCCESS || updatemsg?.sendStatus == SendStatusType.KSEND_STATUS_SUCCESS_NOSEQ) {
+                    // updatemsg?.sendStatus == SendStatusType.KSEND_STATUS_SUCCESS_NOSEQ NOSEQ一般是服务器未下发SEQ 这意味着这条消息不应该推送network
+                    if (updatemsg?.sendStatus == SendStatusType.KSEND_STATUS_SUCCESS) {
                         updatemsg.id = MessageUnique.createUniqueMsgId(
                             {
                                 chatType: updatemsg.chatType,
