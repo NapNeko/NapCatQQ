@@ -10,6 +10,8 @@ import {
     GroupNotify,
     GroupInfoSource,
     ShutUpGroupMember,
+    Peer,
+    ChatType,
 } from '@/core';
 import { isNumeric, solveAsyncProblem } from '@/common/helper';
 import { LimitedHashTable } from '@/common/message-unique';
@@ -47,6 +49,22 @@ export class NTQQGroupApi {
         this.initCache().then().catch(e => this.context.logger.logError(e));
     }
 
+    async createGrayTip(groupCode: string, tip: string) {
+        return this.context.session.getMsgService().addLocalJsonGrayTipMsg(
+            {
+                chatType: ChatType.KCHATTYPEGROUP,
+                peerUid: groupCode,
+            } as Peer,
+            {
+                busiId: 2201,
+                jsonStr: JSON.stringify({ "align": "center", "items": [{ "txt": tip, "type": "nor" }] }),
+                recentAbstract: tip,
+                isServer: false
+            },
+            true,
+            true
+        )
+    }
     async initCache() {
         for (const group of await this.getGroups(true)) {
             this.refreshGroupMemberCache(group.groupCode, false).then().catch(e => this.context.logger.logError(e));
