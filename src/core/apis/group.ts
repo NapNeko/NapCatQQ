@@ -128,7 +128,7 @@ export class NTQQGroupApi {
             extInfo.extInfo.inviteRobotMemberExamine = robotMemberExamine;
             groupExtFilter.inviteRobotMemberExamine = 1;
         }
-        this.context.session.getGroupService().modifyGroupExtInfoV2(extInfo, groupExtFilter);
+        return this.context.session.getGroupService().modifyGroupExtInfoV2(extInfo, groupExtFilter);
     }
 
     async setGroupAddOption(groupCode: string, option: {
@@ -147,7 +147,7 @@ export class NTQQGroupApi {
             param.modifyInfo.groupAnswer = option.addOption == 4 ? option.groupAnswer || '' : '';
         }
         param.modifyInfo.addOption = option.addOption;
-        this.context.session.getGroupService().modifyGroupDetailInfoV2(param, 0);
+        return this.context.session.getGroupService().modifyGroupDetailInfoV2(param, 0);
     }
 
     async setGroupSearch(groupCode: string, option: {
@@ -163,7 +163,7 @@ export class NTQQGroupApi {
             param.filter.noFingerOpenFlag = 1;
             param.modifyInfo.noFingerOpenFlag = option.noFingerOpenFlag;
         }
-        this.context.session.getGroupService().modifyGroupDetailInfoV2(param, 0);
+        return this.context.session.getGroupService().modifyGroupDetailInfoV2(param, 0);
     }
 
     async getGroups(forced: boolean = false) {

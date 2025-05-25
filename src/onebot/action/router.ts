@@ -10,6 +10,9 @@ export interface InvalidCheckResult {
 }
 
 export const ActionName = {
+    SetGroupRobotAddOption: 'set_group_robot_add_option',
+    SetGroupAddOption: 'set_group_add_option',
+    SetGroupSearch: 'set_group_search',
     // new extends 完全差异OneBot类别
     GetDoubtFriendsAddRequest: 'get_doubt_friends_add_request',
     SetDoubtFriendsAddRequest: 'set_doubt_friends_add_request',
@@ -59,7 +62,7 @@ export const ActionName = {
     GetStatus: 'get_status',
     GetVersionInfo: 'get_version_info',
     // Reboot : 'set_restart',
-    CleanCache : 'clean_cache',
+    CleanCache: 'clean_cache',
     Exit: 'bot_exit',
     // go-cqhttp
     SetQQProfile: 'set_qq_profile',
