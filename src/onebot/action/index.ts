@@ -116,9 +116,9 @@ import { CleanCache } from './system/CleanCache';
 import SetFriendRemark from './user/SetFriendRemark';
 import { SetDoubtFriendsAddRequest } from './new/SetDoubtFriendsAddRequest';
 import { GetDoubtFriendsAddRequest } from './new/GetDoubtFriendsAddRequest';
-import SetGroupAddOption from './extends/setGroupAddOption';
-import SetGroupRobotAddOption from './extends/setGroupRobotAddOption';
+import SetGroupAddOption from './extends/SetGroupAddOption';
 import SetGroupSearch from './extends/SetGroupSearch';
+import SetGroupRobotAddOption from './extends/SetGroupRobotAddOption';
 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 
