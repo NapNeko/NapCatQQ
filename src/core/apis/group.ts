@@ -17,6 +17,7 @@ import { isNumeric, solveAsyncProblem } from '@/common/helper';
 import { LimitedHashTable } from '@/common/message-unique';
 import { NTEventWrapper } from '@/common/event';
 import { CancelableTask, TaskExecutor } from '@/common/cancel-task';
+import { createGroupDetailInfoV2Param, createGroupExtFilter, createGroupExtInfo } from '../data';
 
 export class NTQQGroupApi {
     context: InstanceContext;
@@ -111,6 +112,58 @@ export class NTQQGroupApi {
 
     async setGroupAvatar(groupCode: string, filePath: string) {
         return this.context.session.getGroupService().setHeader(groupCode, filePath);
+    }
+
+    // 0 0 无需管理员审核
+    // 0 2 需要管理员审核
+    // 1 2 禁止Bot入群( 最好只传一个1 ？)
+    async setGroupRobotAddOption(groupCode: string, robotMemberSwitch?: number, robotMemberExamine?: number) {
+        let extInfo = createGroupExtInfo(groupCode);
+        let groupExtFilter = createGroupExtFilter();
+        if (robotMemberSwitch !== undefined) {
+            extInfo.extInfo.inviteRobotMemberSwitch = robotMemberSwitch;
+            groupExtFilter.inviteRobotMemberSwitch = 1;
+        }
+        if (robotMemberExamine !== undefined) {
+            extInfo.extInfo.inviteRobotMemberExamine = robotMemberExamine;
+            groupExtFilter.inviteRobotMemberExamine = 1;
+        }
+        this.context.session.getGroupService().modifyGroupExtInfoV2(extInfo, groupExtFilter);
+    }
+
+    async setGroupAddOption(groupCode: string, option: {
+        addOption: number;
+        groupQuestion?: string;
+        groupAnswer?: string;
+    }) {
+        let param = createGroupDetailInfoV2Param(groupCode);
+        // 设置要修改的目标
+        param.filter.addOption = 1;
+        if (option.addOption == 4 || option.addOption == 5) {
+            // 4 问题进入答案 5 问题管理员批准
+            param.filter.groupQuestion = 1;
+            param.filter.groupAnswer = option.addOption == 4 ? 1 : 0;
+            param.modifyInfo.groupQuestion = option.groupQuestion || '';
+            param.modifyInfo.groupAnswer = option.addOption == 4 ? option.groupAnswer || '' : '';
+        }
+        param.modifyInfo.addOption = option.addOption;
+        this.context.session.getGroupService().modifyGroupDetailInfoV2(param, 0);
+    }
+
+    async setGroupSearch(groupCode: string, option: {
+        noCodeFingerOpenFlag?: number;
+        noFingerOpenFlag?: number;
+    }) {
+        let param = createGroupDetailInfoV2Param(groupCode);
+        if (option.noCodeFingerOpenFlag) {
+            param.filter.noCodeFingerOpenFlag = 1;
+            param.modifyInfo.noCodeFingerOpenFlag = option.noCodeFingerOpenFlag;
+        }
+        if (option.noFingerOpenFlag) {
+            param.filter.noFingerOpenFlag = 1;
+            param.modifyInfo.noFingerOpenFlag = option.noFingerOpenFlag;
+        }
+        this.context.session.getGroupService().modifyGroupDetailInfoV2(param, 0);
     }
 
     async getGroups(forced: boolean = false) {

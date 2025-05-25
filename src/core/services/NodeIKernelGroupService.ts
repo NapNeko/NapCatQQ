@@ -8,10 +8,22 @@ import {
     GroupNotifyMsgType,
     NTGroupRequestOperateTypes,
     KickMemberV2Req,
+    GroupDetailInfoV2Param,
+    GroupExtInfo,
+    GroupExtFilter,
 } from '@/core/types';
 import { GeneralCallResult } from '@/core/services/common';
 
 export interface NodeIKernelGroupService {
+
+    modifyGroupExtInfoV2(groupExtInfo: GroupExtInfo, groupExtFilter: GroupExtFilter): Promise<GeneralCallResult &
+    {
+        result: {
+            groupCode: string,
+            result: number
+        }
+    }>;
+
     // --->
     // 待启用 For Next Version 3.2.0
     // isTroopMember ? 0 : 111
@@ -168,6 +180,9 @@ export interface NodeIKernelGroupService {
     modifyGroupRemark(groupCode: string, remark: string): Promise<GeneralCallResult>;
 
     modifyGroupDetailInfo(groupCode: string, arg: unknown): void;
+
+    // 第二个参数在大多数情况为0 设置群成员权限 例如上传群文件权限和群成员付费/加入邀请加入时为8
+    modifyGroupDetailInfoV2(param: GroupDetailInfoV2Param, arg: number): Promise<GeneralCallResult>;
 
     setGroupMsgMask(groupCode: string, arg: unknown): void;
 
