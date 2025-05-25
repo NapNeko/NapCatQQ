@@ -116,10 +116,16 @@ import { CleanCache } from './system/CleanCache';
 import SetFriendRemark from './user/SetFriendRemark';
 import { SetDoubtFriendsAddRequest } from './new/SetDoubtFriendsAddRequest';
 import { GetDoubtFriendsAddRequest } from './new/GetDoubtFriendsAddRequest';
+import SetGroupAddOption from './extends/setGroupAddOption';
+import SetGroupRobotAddOption from './extends/setGroupRobotAddOption';
+import SetGroupSearch from './extends/SetGroupSearch';
 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 
     const actionHandlers = [
+        new SetGroupAddOption(obContext, core),
+        new SetGroupRobotAddOption(obContext, core),
+        new SetGroupSearch(obContext, core),
         new SetDoubtFriendsAddRequest(obContext, core),
         new GetDoubtFriendsAddRequest(obContext, core),
         new SetFriendRemark(obContext, core),
