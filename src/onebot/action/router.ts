@@ -10,6 +10,7 @@ export interface InvalidCheckResult {
 }
 
 export const ActionName = {
+    SetGroupKickMembers: 'set_group_kick_members',
     SetGroupRobotAddOption: 'set_group_robot_add_option',
     SetGroupAddOption: 'set_group_add_option',
     SetGroupSearch: 'set_group_search',
