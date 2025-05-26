@@ -1209,7 +1209,9 @@ export class OneBotMsgApi {
     async waitGroupNotify(groupUin: string, memberUid?: string, operatorUid?: string) {
         const groupRole = this.core.apis.GroupApi.groupMemberCache.get(groupUin)?.get(this.core.selfInfo.uid.toString())?.role;
         const isAdminOrOwner = groupRole === 3 || groupRole === 4;
-
+        console.log('isAdminOrOwner:', isAdminOrOwner);
+        console.log('operatorUid:', operatorUid, typeof operatorUid);
+        console.log('memberUid:', memberUid);
         if (isAdminOrOwner && !operatorUid) {
             let dataNotify: GroupNotify | undefined;
             await this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onGroupNotifiesUpdated',
@@ -1239,7 +1241,7 @@ export class OneBotMsgApi {
             const operatorUid = await this.waitGroupNotify(
                 groupChange.groupUin.toString(),
                 groupChange.memberUid,
-                groupChange.operatorInfo ? Buffer.from(groupChange.operatorInfo).toString() : ''
+                groupChange.operatorInfo ? new TextDecoder('utf-8').decode(groupChange.operatorInfo) : undefined
             );
             return new OB11GroupIncreaseEvent(
                 this.core,
@@ -1251,13 +1253,42 @@ export class OneBotMsgApi {
 
         } else if (SysMessage.contentHead.type == 34 && SysMessage.body?.msgContent) {
             const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
-            // 自身被踢出时operatorInfo会是一个protobuf 否则大多数情况为一个string
+
+            let operator_uid_parse: string | undefined = undefined;
+            if (groupChange.operatorInfo) {
+                // 先判断是否可能是protobuf（自身被踢出或以0a开头）
+                if (groupChange.decreaseType === 3 || Buffer.from(groupChange.operatorInfo).toString('hex').startsWith('0a')) {
+                    // 可能是protobuf，尝试解析
+                    try {
+                        operator_uid_parse = new NapProtoMsg(GroupChangeInfo).decode(groupChange.operatorInfo).operator?.operatorUid;
+                    } catch (error) {
+                        // protobuf解析失败，fallback到字符串解析
+                        try {
+                            const decoded = new TextDecoder('utf-8').decode(groupChange.operatorInfo);
+                            // 检查是否包含非ASCII字符，如果包含则丢弃
+                            const isAsciiOnly = [...decoded].every(char => char.charCodeAt(0) >= 32 && char.charCodeAt(0) <= 126);
+                            operator_uid_parse = isAsciiOnly ? decoded : '';
+                        } catch (e2) {
+                            operator_uid_parse = '';
+                        }
+                    }
+                } else {
+                    // 直接进行字符串解析
+                    try {
+                        const decoded = new TextDecoder('utf-8').decode(groupChange.operatorInfo);
+                        // 检查是否包含非ASCII字符，如果包含则丢弃
+                        const isAsciiOnly = [...decoded].every(char => char.charCodeAt(0) >= 32 && char.charCodeAt(0) <= 126);
+                        operator_uid_parse = isAsciiOnly ? decoded : '';
+                    } catch (e) {
+                        operator_uid_parse = '';
+                    }
+                }
+            }
+
             const operatorUid = await this.waitGroupNotify(
                 groupChange.groupUin.toString(),
                 groupChange.memberUid,
-                groupChange.decreaseType === 3 && groupChange.operatorInfo ?
-                    new NapProtoMsg(GroupChangeInfo).decode(groupChange.operatorInfo).operator?.operatorUid :
-                    groupChange.operatorInfo?.toString()
+                operator_uid_parse
             );
             if (groupChange.memberUid === this.core.selfInfo.uid) {
                 setTimeout(() => {
