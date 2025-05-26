@@ -1209,9 +1209,6 @@ export class OneBotMsgApi {
     async waitGroupNotify(groupUin: string, memberUid?: string, operatorUid?: string) {
         const groupRole = this.core.apis.GroupApi.groupMemberCache.get(groupUin)?.get(this.core.selfInfo.uid.toString())?.role;
         const isAdminOrOwner = groupRole === 3 || groupRole === 4;
-        console.log('isAdminOrOwner:', isAdminOrOwner);
-        console.log('operatorUid:', operatorUid, typeof operatorUid);
-        console.log('memberUid:', memberUid);
         if (isAdminOrOwner && !operatorUid) {
             let dataNotify: GroupNotify | undefined;
             await this.core.eventWrapper.registerListen('NodeIKernelGroupListener/onGroupNotifiesUpdated',
