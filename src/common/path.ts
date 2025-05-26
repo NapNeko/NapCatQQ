@@ -14,8 +14,8 @@ export class NapCatPathWrapper {
         this.binaryPath = mainPath;
         let writePath: string;
 
-        if (process.env['NAPCAT_WRITEPATH']) {
-            writePath = process.env['NAPCAT_WRITEPATH'];
+        if (process.env['NAPCAT_WORKDIR']) {
+            writePath = process.env['NAPCAT_WORKDIR'];
         } else if (os.platform() === 'darwin') {
             writePath = path.join(os.homedir(), 'Library', 'Application Support', 'QQ', 'NapCat');
         } else {
