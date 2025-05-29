@@ -48,6 +48,12 @@ export async function NCoreInitFramework(
         });
     }
     //直到登录成功后，执行下一步
+    // const selfInfo = {
+    //     uid: 'u_FUSS0_x06S_9Tf4na_WpUg',
+    //     uin: '3684714082',
+    //     nick: '',
+    //     online: true
+    // }
     const selfInfo = await new Promise<SelfInfo>((resolveSelfInfo) => {
         const loginListener = new NodeIKernelLoginListener();
         loginListener.onQRCodeLoginSucceed = async (loginResult) => {
