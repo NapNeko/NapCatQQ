@@ -53,6 +53,7 @@ const FrameworkBaseConfigPlugin: PluginOption[] = [
             { src: './napcat.webui/dist/', dest: 'dist/static/', flatten: false },
             { src: './src/framework/liteloader.cjs', dest: 'dist' },
             { src: './src/framework/napcat.cjs', dest: 'dist' },
+            { src: './src/framework/nativeLoader.cjs', dest: 'dist' },
             { src: './src/framework/preload.cjs', dest: 'dist' },
             { src: './src/framework/renderer.js', dest: 'dist' },
             { src: './package.json', dest: 'dist' },
