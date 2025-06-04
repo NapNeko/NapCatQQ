@@ -88,7 +88,7 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
             await this.handleRequest(req, res);
         });
         this.server.listen(this.config.port, this.config.host, () => {
-            this.core.context.logger.log(`[OneBot] [HTTP Server Adapter] Start On Port ${this.config.port}`);
+            this.core.context.logger.log(`[OneBot] [HTTP Server Adapter] Start On ${this.config.host}:${this.config.port}`);
         });
     }
 
