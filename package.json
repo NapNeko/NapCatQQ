@@ -48,7 +48,7 @@
     "eslint-plugin-import": "^2.29.1",
     "express-rate-limit": "^7.5.0",
     "fast-xml-parser": "^4.3.6",
-    "file-type": "^20.0.0",
+    "file-type": "^21.0.0",
     "globals": "^16.0.0",
     "json5": "^2.2.3",
     "multer": "^1.4.5-lts.1",
