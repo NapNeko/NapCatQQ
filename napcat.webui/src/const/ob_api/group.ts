@@ -24,9 +24,7 @@ const oneBotHttpApiGroup = {
   },
   '/get_group_system_msg': {
     description: '获取群系统消息',
-    request: z.object({
-      group_id: z.union([z.string(), z.number()]).describe('群号')
-    }),
+    request: z.object({}),
     response: baseResponseSchema.extend({
       data: z.object({
         InvitedRequest: z
@@ -37,6 +35,7 @@ const oneBotHttpApiGroup = {
                 invitor_uin: z.string().describe('邀请人 QQ 号'),
                 invitor_nick: z.string().describe('邀请人昵称'),
                 group_id: z.string().describe('群号'),
+                message: z.string().describe('入群回答'),
                 group_name: z.string().describe('群名称'),
                 checked: z.boolean().describe('是否已处理'),
                 actor: z.string().describe('处理人 QQ 号')
@@ -50,6 +49,7 @@ const oneBotHttpApiGroup = {
             requester_uin: z.string().describe('请求人 QQ 号'),
             requester_nick: z.string().describe('请求人昵称'),
             group_id: z.string().describe('群号'),
+            message: z.string().describe('入群回答'),
             group_name: z.string().describe('群名称'),
             checked: z.boolean().describe('是否已处理'),
             actor: z.string().describe('处理人 QQ 号')
