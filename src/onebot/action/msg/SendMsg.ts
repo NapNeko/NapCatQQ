@@ -19,6 +19,7 @@ import { rawMsgWithSendMsg } from '@/core/packet/message/converter';
 export interface ReturnDataType {
     message_id: number;
     res_id?: string;
+    forward_id?: string;
 }
 
 export enum ContextMode {
@@ -147,7 +148,10 @@ export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
                     peerUid: peer.peerUid,
                     chatType: peer.chatType,
                 }, (returnMsgAndResId.message).msgId);
-                return { message_id: msgShortId!, res_id: returnMsgAndResId.res_id! };
+
+                // 对gocq的forward_id进行兼容
+                const resId = returnMsgAndResId.res_id!;
+                return { message_id: msgShortId!, res_id: resId, forward_id: resId };
             } else if (returnMsgAndResId.res_id && !returnMsgAndResId.message) {
                 throw Error(`发送转发消息（res_id：${returnMsgAndResId.res_id} 失败`);
             }
