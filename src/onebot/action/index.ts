@@ -120,10 +120,12 @@ import SetGroupAddOption from './extends/SetGroupAddOption';
 import SetGroupSearch from './extends/SetGroupSearch';
 import SetGroupRobotAddOption from './extends/SetGroupRobotAddOption';
 import SetGroupKickMembers from './extends/SetGroupKickMembers';
+import { GetGroupDetailInfo } from './group/GetGroupDetailInfo';
 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 
     const actionHandlers = [
+        new GetGroupDetailInfo(obContext, core),
         new SetGroupKickMembers(obContext, core),
         new SetGroupAddOption(obContext, core),
         new SetGroupRobotAddOption(obContext, core),
