@@ -264,7 +264,7 @@ export class NTQQWebApi {
     async getGroupHonorInfo(groupCode: string, getType: WebHonorType) {
         const cookieObject = await this.core.apis.UserApi.getCookies('qun.qq.com');
         let HonorInfo = {
-            group_id: groupCode,
+            group_id: Number(groupCode),
             current_talkative: {},
             talkative_list: [],
             performer_list: [],
