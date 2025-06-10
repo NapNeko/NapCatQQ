@@ -1,13 +1,13 @@
 import multer from 'multer';
-import { WebUiConfigWrapper } from '../helper/config';
 import path from 'path';
 import fs from 'fs';
 import type { Request, Response } from 'express';
+import { WebUiConfig } from '@/webui';
 
 export const webUIFontStorage = multer.diskStorage({
     destination: (_, __, cb) => {
         try {
-            const fontsPath = path.dirname(WebUiConfigWrapper.GetWebUIFontPath());
+            const fontsPath = path.dirname(WebUiConfig.GetWebUIFontPath());
             // 确保字体目录存在
             fs.mkdirSync(fontsPath, { recursive: true });
             cb(null, fontsPath);
