@@ -132,6 +132,7 @@ export const ActionName = {
     FetchEmojiLike: 'fetch_emoji_like',
     SetInputStatus: 'set_input_status',
     GetGroupInfoEx: 'get_group_info_ex',
+    GetGroupDetailInfo: 'get_group_detail_info',
     GetGroupIgnoreAddRequest: 'get_group_ignore_add_request',
     DelGroupNotice: '_del_group_notice',
     FriendPoke: 'friend_poke',
