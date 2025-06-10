@@ -270,7 +270,6 @@ export class NapCatOneBot11Adapter {
                 );
             }
         };
-
         msgListener.onAddSendMsg = async (msg) => {
             try {
                 if (msg.sendStatus == SendStatusType.KSEND_STATUS_SENDING) {
@@ -305,8 +304,18 @@ export class NapCatOneBot11Adapter {
                 peerUid: uid,
                 guildId: ''
             };
-            const msg = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeq(peer, msgSeq)).msgList.find(e => e.msgType == NTMsgType.KMSGTYPEGRAYTIPS);
+            let msg = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeq(peer, msgSeq)).msgList.find(e => e.msgType == NTMsgType.KMSGTYPEGRAYTIPS);
             const element = msg?.elements.find(e => !!e.grayTipElement?.revokeElement);
+            if (element?.grayTipElement?.revokeElement.isSelfOperate && msg) {
+                await this.core.eventWrapper.registerListen('NodeIKernelMsgListener/onMsgRecall',
+                    (chatType: ChatType, uid: string, msgSeq: string) => {
+                        return chatType === msg?.chatType && uid === msg?.peerUid && msgSeq === msg?.msgSeq;
+                    }
+                ).catch(() => {
+                    msg = undefined;
+                    this.context.logger.logDebug('自操作消息撤回事件');
+                });
+            }
             if (msg && element) {
                 const recallEvent = await this.emitRecallMsg(msg, element);
                 try {
@@ -317,6 +326,7 @@ export class NapCatOneBot11Adapter {
                     this.context.logger.logError('处理消息撤回失败', e);
                 }
             }
+
         };
         msgListener.onKickedOffLine = async (kick) => {
             const event = new BotOfflineEvent(this.core, kick.tipsTitle, kick.tipsDesc);

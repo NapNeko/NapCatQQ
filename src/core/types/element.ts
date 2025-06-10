@@ -58,6 +58,7 @@ export interface GrayTipRovokeElement {
     operatorUid: string;
     operatorNick: string;
     operatorRemark: string;
+    isSelfOperate: boolean; // 是否是自己撤回的
     operatorMemRemark?: string;
     wording: string;  // 自定义的撤回提示语
 }
