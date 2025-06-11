@@ -8,7 +8,13 @@ interface GroupNotice {
     notice_id: string;
     message: {
         text: string
+        // 保持一段时间兼容性 防止以往版本出现问题 后续版本可考虑移除
         image: Array<{
+            height: string
+            width: string
+            id: string
+        }>,
+        images: Array<{
             height: string
             width: string
             id: string
@@ -40,15 +46,18 @@ export class GetGroupNotice extends OneBotAction<Payload, GroupNotice[]> {
                 continue;
             }
             const retApiNotice: WebApiGroupNoticeFeed = ret.feeds[key];
+            const image = retApiNotice.msg.pics?.map((pic) => {
+                return { id: pic.id, height: pic.h, width: pic.w };
+            }) || [];
+
             const retNotice: GroupNotice = {
                 notice_id: retApiNotice.fid,
                 sender_id: retApiNotice.u,
                 publish_time: retApiNotice.pubt,
                 message: {
                     text: retApiNotice.msg.text,
-                    image: retApiNotice.msg.pics?.map((pic) => {
-                        return { id: pic.id, height: pic.h, width: pic.w };
-                    }) || [],
+                    image,
+                    images: image,
                 },
             };
             retNotices.push(retNotice);
