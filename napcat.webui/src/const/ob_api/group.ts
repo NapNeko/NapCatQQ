@@ -604,7 +604,7 @@ const oneBotHttpApiGroup = {
     response: baseResponseSchema.extend({
       data: z
         .object({
-          group_id: z.string().describe('群号'),
+          group_id: z.number().describe('群号'),
           current_talkative: z
             .object({
               user_id: z.number().describe('QQ 号'),
