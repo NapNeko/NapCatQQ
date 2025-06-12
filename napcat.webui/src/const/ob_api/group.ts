@@ -38,6 +38,7 @@ const oneBotHttpApiGroup = {
                 message: z.string().describe('入群回答'),
                 group_name: z.string().describe('群名称'),
                 checked: z.boolean().describe('是否已处理'),
+                status: z.number().describe('处理结果。1为未处理，2为同意，3为拒绝'),
                 actor: z.string().describe('处理人 QQ 号')
               })
               .describe('邀请入群请求')
@@ -52,6 +53,7 @@ const oneBotHttpApiGroup = {
             message: z.string().describe('入群回答'),
             group_name: z.string().describe('群名称'),
             checked: z.boolean().describe('是否已处理'),
+            status: z.number().describe('处理结果。1为未处理，2为同意，3为拒绝'),
             actor: z.string().describe('处理人 QQ 号')
           })
         )
