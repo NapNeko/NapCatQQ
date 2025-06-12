@@ -17,7 +17,10 @@ export class GetGroupSystemMsg extends OneBotAction<void, RetData> {
 
         const notifyPromises = SingleScreenNotifies.map(async (SSNotify) => {
             const invitorUin = SSNotify.user1?.uid ? +await this.core.apis.UserApi.getUinByUidV2(SSNotify.user1.uid) : 0;
-            const actorUin = SSNotify.user2?.uid ? +await this.core.apis.UserApi.getUinByUidV2(SSNotify.user2.uid) : 0;
+            // 假设user2和actionUser只能有一个。根据测试InvitedRequest和join_requests都仅actionUser有值，
+            // 保留之前取user2的逻辑。问了作者也说不知道什么情况。
+            const actor = SSNotify.user2?.uid ? SSNotify.user2 : SSNotify.actionUser;
+            const actorUin = actor?.uid ? +await this.core.apis.UserApi.getUinByUidV2(actor.uid) : 0;
             const commonData = {
                 request_id: +SSNotify.seq,
                 invitor_uin: invitorUin,
@@ -28,6 +31,7 @@ export class GetGroupSystemMsg extends OneBotAction<void, RetData> {
                 checked: SSNotify.status !== GroupNotifyMsgStatus.KUNHANDLE,
                 actor: actorUin,
                 requester_nick: SSNotify.user1?.nickName,
+                status: SSNotify.status,
             };
 
             if (SSNotify.type === 1) {
