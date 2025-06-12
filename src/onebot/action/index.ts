@@ -121,6 +121,7 @@ import SetGroupSearch from './extends/SetGroupSearch';
 import SetGroupRobotAddOption from './extends/SetGroupRobotAddOption';
 import SetGroupKickMembers from './extends/SetGroupKickMembers';
 import { GetGroupDetailInfo } from './group/GetGroupDetailInfo';
+import GetGroupAddRequest from './extends/GetGroupAddRequest';
 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 
@@ -257,6 +258,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new GetPrivateFileUrl(obContext, core),
         new GetUnidirectionalFriendList(obContext, core),
         new CleanCache(obContext, core),
+        new GetGroupAddRequest(obContext, core),
     ];
 
     type HandlerUnion = typeof actionHandlers[number];
