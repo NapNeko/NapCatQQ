@@ -122,6 +122,7 @@ import SetGroupRobotAddOption from './extends/SetGroupRobotAddOption';
 import SetGroupKickMembers from './extends/SetGroupKickMembers';
 import { GetGroupDetailInfo } from './group/GetGroupDetailInfo';
 import GetGroupAddRequest from './extends/GetGroupAddRequest';
+import { GetCollectionList } from './extends/GetCollectionList';
 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 
@@ -259,6 +260,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
         new GetUnidirectionalFriendList(obContext, core),
         new CleanCache(obContext, core),
         new GetGroupAddRequest(obContext, core),
+        new GetCollectionList(obContext, core),
     ];
 
     type HandlerUnion = typeof actionHandlers[number];
