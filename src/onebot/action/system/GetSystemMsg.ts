@@ -17,10 +17,10 @@ export class GetGroupSystemMsg extends OneBotAction<void, RetData> {
 
         const notifyPromises = SingleScreenNotifies.map(async (SSNotify) => {
             const invitorUin = SSNotify.user1?.uid ? +await this.core.apis.UserApi.getUinByUidV2(SSNotify.user1.uid) : 0;
-            // 假设user2和actionUser只能有一个。根据测试InvitedRequest和join_requests都仅actionUser有值，
-            // 保留之前取user2的逻辑。问了作者也说不知道什么情况。
-            const actor = SSNotify.user2?.uid ? SSNotify.user2 : SSNotify.actionUser;
-            const actorUin = actor?.uid ? +await this.core.apis.UserApi.getUinByUidV2(actor.uid) : 0;
+            // 根据测试InvitedRequest和join_requests都仅user1与actionUser有值，
+            // 需要验证的邀请，user2有值，表示邀请人。
+            // 出于兼容性，被邀请人占用了invitor的字段，导致邀请人没名可用。暂且先吞了这个值
+            const actorUin = SSNotify.actionUser?.uid ? +await this.core.apis.UserApi.getUinByUidV2(SSNotify.actionUser.uid) : 0;
             const commonData = {
                 request_id: +SSNotify.seq,
                 invitor_uin: invitorUin,
@@ -34,7 +34,7 @@ export class GetGroupSystemMsg extends OneBotAction<void, RetData> {
                 status: SSNotify.status,
             };
 
-            if (SSNotify.type === 1) {
+            if (SSNotify.type === 1 || SSNotify.type === 5) {
                 retData.InvitedRequest.push(commonData);
             } else if (SSNotify.type === 7) {
                 retData.join_requests.push(commonData);
