@@ -1,6 +1,7 @@
 import { NapCatCore } from '@/core';
 
 export interface NapCoreCompatBasicInfo {
+    readonly requireMinNTQQBuild: (buildVer: string) => boolean;
     readonly uin: number;
     readonly uid: string;
     readonly uin2uid: (uin: number) => Promise<string>;
@@ -21,6 +22,7 @@ export class NapCoreContext {
 
     get basicInfo() {
         return {
+            requireMinNTQQBuild: (buildVer: string) => this.core.context.basicInfoWrapper.requireMinNTQQBuild(buildVer),
             uin: +this.core.selfInfo.uin,
             uid: this.core.selfInfo.uid,
             uin2uid: (uin: number) => this.core.apis.UserApi.getUidByUinV2(String(uin)).then(res => res ?? ''),
