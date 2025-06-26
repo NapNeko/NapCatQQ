@@ -40,7 +40,8 @@ export class NativePacketClient extends IPacketClient {
 
     async init(_pid: number, recv: string, send: string): Promise<void> {
         const platform = process.platform + '.' + process.arch;
-        const moehoo_path = path.join(dirname(fileURLToPath(import.meta.url)), './moehoo/MoeHoo.' + platform + '.node');
+        const isNewQQ = this.napcore.basicInfo.requireMinNTQQBuild("36580");
+        const moehoo_path = path.join(dirname(fileURLToPath(import.meta.url)), './moehoo/MoeHoo.' + platform + (isNewQQ ? '.new' : '') + '.node');
         process.dlopen(this.MoeHooExport, moehoo_path, constants.dlopen.RTLD_LAZY);
 
         this.MoeHooExport.exports.InitHook?.(send, recv, (type: number, _uin: string, cmd: string, seq: number, hex_data: string) => {
