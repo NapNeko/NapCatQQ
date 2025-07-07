@@ -9,11 +9,15 @@ interface RetData {
     join_requests: Notify[];
 }
 
-export class GetGroupSystemMsg extends OneBotAction<void, RetData> {
+export class GetGroupSystemMsg extends OneBotAction<{ count?: number }, RetData> {
     override actionName = ActionName.GetGroupSystemMsg;
 
-    async _handle(): Promise<RetData> {
-        const SingleScreenNotifies = await this.core.apis.GroupApi.getSingleScreenNotifies(false, 50);
+    async _handle(params?: { count?: number }): Promise<RetData> {
+        let count = 50;
+        if (params?.count && Number.isInteger(params.count) && params.count > 0) {
+            count = params.count;
+        }
+        const SingleScreenNotifies = await this.core.apis.GroupApi.getSingleScreenNotifies(false, count);
         const retData: RetData = { invited_requests: [], InvitedRequest: [], join_requests: [] };
 
         const notifyPromises = SingleScreenNotifies.map(async (SSNotify) => {
