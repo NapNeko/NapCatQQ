@@ -2,6 +2,7 @@ import { GroupNotifyMsgStatus } from '@/core';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { Notify } from '@/onebot/types';
+import { Static, Type } from '@sinclair/typebox';
 
 interface RetData {
     invited_requests: Notify[];
@@ -9,11 +10,18 @@ interface RetData {
     join_requests: Notify[];
 }
 
-export class GetGroupSystemMsg extends OneBotAction<void, RetData> {
-    override actionName = ActionName.GetGroupSystemMsg;
+const SchemaData = Type.Object({
+    count: Type.Union([Type.Number(), Type.String()], { default: 50 }),
+});
 
-    async _handle(): Promise<RetData> {
-        const SingleScreenNotifies = await this.core.apis.GroupApi.getSingleScreenNotifies(false, 50);
+type Payload = Static<typeof SchemaData>;
+
+export class GetGroupSystemMsg extends OneBotAction<Payload, RetData> {
+    override actionName = ActionName.GetGroupSystemMsg;
+    override payloadSchema = SchemaData;
+
+    async _handle(params: Payload): Promise<RetData> {
+        const SingleScreenNotifies = await this.core.apis.GroupApi.getSingleScreenNotifies(false, +params.count);
         const retData: RetData = { invited_requests: [], InvitedRequest: [], join_requests: [] };
 
         const notifyPromises = SingleScreenNotifies.map(async (SSNotify) => {
