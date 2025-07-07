@@ -139,7 +139,7 @@ jobs:
     - name: Clone Changes Log
       run: curl -o CHANGELOG.md https://fastly.jsdelivr.net/gh/NapNeko/NapCatQQ@main/docs/changelogs/CHANGELOG.v${{ env.VERSION }}.md
         
-    - name: Create Release Draft and Upload Artifacts
+    - name: Create Release and Upload Artifacts
       uses: softprops/action-gh-release@v1
       with:
         name: NapCat V${{ env.VERSION }}
@@ -149,7 +149,6 @@ jobs:
           NapCat.Framework.zip
           NapCat.Shell.zip
           NapCat.Framework.Windows.Once.zip
-        draft: true
 
   build-docker:
     needs: release-napcat
