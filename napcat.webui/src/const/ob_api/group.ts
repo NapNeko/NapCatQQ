@@ -659,24 +659,39 @@ const oneBotHttpApiGroup = {
   },
   '/get_group_ignored_notifies': {
     description: '获取群过滤系统消息',
-    request: z.object({
-      group_id: z.union([z.string(), z.number()]).describe('群号')
-    }),
+    request: z.object({}),
     response: baseResponseSchema.extend({
       data: z.object({
-        join_requests: z
+        InvitedRequest: z
           .array(
-            z.object({
-              request_id: z.string().describe('请求 ID'),
-              requester_uin: z.string().describe('请求人 QQ 号'),
-              requester_nick: z.string().describe('请求人昵称'),
-              group_id: z.string().describe('群号'),
-              group_name: z.string().describe('群名称'),
-              checked: z.boolean().describe('是否已处理'),
-              actor: z.string().describe('处理人 QQ 号')
-            })
+            z
+              .object({
+                request_id: z.string().describe('请求 ID'),
+                invitor_uin: z.string().describe('邀请人 QQ 号'),
+                invitor_nick: z.string().describe('邀请人昵称'),
+                group_id: z.string().describe('群号'),
+                message: z.string().describe('入群回答'),
+                group_name: z.string().describe('群名称'),
+                checked: z.boolean().describe('是否已处理'),
+                status: z.number().describe('处理结果。1为未处理，2为同意，3为拒绝'),
+                actor: z.string().describe('处理人 QQ 号')
+              })
+              .describe('邀请入群请求')
           )
-          .describe('入群请求列表')
+          .describe('邀请入群请求列表'),
+        join_requests: z.array(
+          z.object({
+            request_id: z.string().describe('请求 ID'),
+            requester_uin: z.string().describe('请求人 QQ 号'),
+            requester_nick: z.string().describe('请求人昵称'),
+            group_id: z.string().describe('群号'),
+            message: z.string().describe('入群回答'),
+            group_name: z.string().describe('群名称'),
+            checked: z.boolean().describe('是否已处理'),
+            status: z.number().describe('处理结果。1为未处理，2为同意，3为拒绝'),
+            actor: z.string().describe('处理人 QQ 号')
+          })
+        )
       })
     })
   },
