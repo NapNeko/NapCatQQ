@@ -17,7 +17,11 @@ export class GetGroupIgnoredNotifies extends OneBotAction<void, RetData> {
 
         const notifyPromises = SingleScreenNotifies.map(async (SSNotify) => {
             const invitorUin = SSNotify.user1?.uid ? +await this.core.apis.UserApi.getUinByUidV2(SSNotify.user1.uid) : 0;
-            const actorUin = SSNotify.user2?.uid ? +await this.core.apis.UserApi.getUinByUidV2(SSNotify.user2.uid) : 0;
+            // 根据测试join_requests(7)仅user1与actionUser有值，原来的InvitedRequest(1)无法触发。
+            // 需要验证的邀请(5)，user2有值，表示邀请人。
+            // 出于兼容性，被邀请人占用了invitor的字段，导致邀请人没名可用。暂且先吞了这个值
+            const actionUid = SSNotify.type === 1 ? SSNotify.user2?.uid : SSNotify.actionUser?.uid;
+            const actorUin = actionUid ? +await this.core.apis.UserApi.getUinByUidV2(actionUid) : 0;
             const commonData = {
                 request_id: +SSNotify.seq,
                 invitor_uin: invitorUin,
@@ -28,9 +32,10 @@ export class GetGroupIgnoredNotifies extends OneBotAction<void, RetData> {
                 checked: SSNotify.status !== GroupNotifyMsgStatus.KUNHANDLE,
                 actor: actorUin,
                 requester_nick: SSNotify.user1?.nickName,
+                status: SSNotify.status,
             };
 
-            if (SSNotify.type === 1) {
+            if (SSNotify.type === 1 || SSNotify.type === 5) {
                 retData.InvitedRequest.push(commonData);
             } else if (SSNotify.type === 7) {
                 retData.join_requests.push(commonData);
