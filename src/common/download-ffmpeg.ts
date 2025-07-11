@@ -10,10 +10,14 @@ import { LogWrapper } from './log';
 
 const downloadOri = "https://github.com/NapNeko/ffmpeg-build/releases/download/v1.0.0/ffmpeg-7.1.1-win64.zip"
 const urls = [
-    "https://github.moeyy.xyz/" + downloadOri,
-    "https://ghp.ci/" + downloadOri,
-    "https://gh.api.99988866.xyz/" + downloadOri,
-    "https://gh.api.99988866.xyz/" + downloadOri,
+    "https://j.1win.ggff.net/" + downloadOri,
+    "https://git.yylx.win/" + downloadOri,
+    "https://ghfile.geekertao.top/" + downloadOri,
+    "https://gh-proxy.net/" + downloadOri,
+    "https://ghm.078465.xyz/" + downloadOri,
+    "https://gitproxy.127731.xyz/" + downloadOri,
+    "https://jiashu.1win.eu.org/" + downloadOri,
+    "https://github.tbedu.top/" + downloadOri,
     downloadOri
 ];
 
