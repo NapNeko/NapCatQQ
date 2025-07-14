@@ -44,7 +44,7 @@
     "cors": "^2.8.5",
     "esbuild": "0.25.5",
     "eslint": "^9.14.0",
-    "eslint-import-resolver-typescript": "^4.0.0",
+    "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.29.1",
     "express-rate-limit": "^7.5.0",
     "fast-xml-parser": "^4.3.6",
