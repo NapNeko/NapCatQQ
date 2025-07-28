@@ -7,7 +7,7 @@ const SchemaData = Type.Object({
     flag: Type.Union([Type.String(), Type.Number()]),
     approve: Type.Optional(Type.Union([Type.Boolean(), Type.String()])),
     reason: Type.Optional(Type.Union([Type.String({ default: ' ' }), Type.Null()])),
-    count: Type.Optional(Type.Union([Type.Number()])),
+    count: Type.Optional(Type.Number({ default: 100 })),
 });
 
 type Payload = Static<typeof SchemaData>;
@@ -20,7 +20,7 @@ export default class SetGroupAddRequest extends OneBotAction<Payload, null> {
         const flag = payload.flag.toString();
         const approve = payload.approve?.toString() !== 'false';
         const reason = payload.reason ?? ' ';
-        const count = payload.count ?? 100;
+        const count = typeof payload.count === 'number' ? payload.count : 100;
         const invite_notify = this.obContext.apis.MsgApi.notifyGroupInvite.get(flag);
         const { doubt, notify } = invite_notify ? {
             doubt: false,
