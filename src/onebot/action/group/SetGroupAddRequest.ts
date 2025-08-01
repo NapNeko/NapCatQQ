@@ -20,7 +20,7 @@ export default class SetGroupAddRequest extends OneBotAction<Payload, null> {
         const flag = payload.flag.toString();
         const approve = payload.approve?.toString() !== 'false';
         const reason = payload.reason ?? ' ';
-        const count = typeof payload.count === 'number' ? payload.count : 100;
+        const count = payload.count;
         const invite_notify = this.obContext.apis.MsgApi.notifyGroupInvite.get(flag);
         const { doubt, notify } = invite_notify ? {
             doubt: false,
