@@ -37,7 +37,7 @@ export async function NCoreInitFramework(
     const pathWrapper = new NapCatPathWrapper();
     const logger = new LogWrapper(pathWrapper.logsPath);
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
-    const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
+    const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVersion());
     if (!process.env['NAPCAT_DISABLE_FFMPEG_DOWNLOAD']) {
         downloadFFmpegIfNotExists(logger).then(({ path, reset }) => {
             if (reset && path) {

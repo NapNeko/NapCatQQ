@@ -50,6 +50,7 @@ import {
 import { OB11Message } from './types';
 import { IOB11NetworkAdapter } from '@/onebot/network/adapter';
 import { OB11HttpSSEServerAdapter } from './network/http-server-sse';
+import { OB11PluginAdapter } from './network/plugin';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -169,7 +170,7 @@ export class NapCatOneBot11Adapter {
         this.initBuddyListener();
         this.initGroupListener();
 
-        WebUiDataRuntime.setQQVersion(this.core.context.basicInfoWrapper.getFullQQVesion());
+        WebUiDataRuntime.setQQVersion(this.core.context.basicInfoWrapper.getFullQQVersion());
         WebUiDataRuntime.setQQLoginInfo(selfInfo);
         WebUiDataRuntime.setQQLoginStatus(true);
         WebUiDataRuntime.setOnOB11ConfigChanged(async (newConfig) => {

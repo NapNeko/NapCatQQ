@@ -130,7 +130,7 @@ export class SendMsgBase extends OneBotAction<OB11PostSendMsg, ReturnDataType> {
         );
 
         if (getSpecialMsgNum(payload, OB11MessageDataType.node)) {
-            const packetMode = this.core.apis.PacketApi.available;
+            const packetMode = this.core.apis.PacketApi.packetStatus;
             let returnMsgAndResId: { message: RawMessage | null, res_id?: string } | null;
             try {
                 returnMsgAndResId = packetMode

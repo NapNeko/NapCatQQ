@@ -3,6 +3,7 @@ import { defineConfig, PluginOption, UserConfig } from 'vite';
 import { resolve } from 'path';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import { builtinModules } from 'module';
+import { performanceMonitorPlugin } from './vite-plugin-performance-monitor';
 //依赖排除
 const external = [
     'silk-wasm',
@@ -21,6 +22,11 @@ if (process.env.NAPCAT_BUILDSYS == 'linux') {
 }
 
 const UniversalBaseConfigPlugin: PluginOption[] = [
+    // performanceMonitorPlugin({
+    //     enabled: process.env.NODE_ENV !== 'production',
+    //     exclude: [/node_modules/, /\.min\./, /performance-monitor/],
+    //     include: [/\.ts$/, /\.js$/]
+    // }),
     cp({
         targets: [
             { src: './manifest.json', dest: 'dist' },
@@ -44,6 +50,11 @@ const UniversalBaseConfigPlugin: PluginOption[] = [
 ];
 
 const FrameworkBaseConfigPlugin: PluginOption[] = [
+    // performanceMonitorPlugin({
+    //     enabled: process.env.NODE_ENV !== 'production',
+    //     exclude: [/node_modules/, /\.min\./, /performance-monitor/],
+    //     include: [/\.ts$/, /\.js$/]
+    // }),
     cp({
         targets: [
             { src: './manifest.json', dest: 'dist' },
@@ -64,6 +75,11 @@ const FrameworkBaseConfigPlugin: PluginOption[] = [
 ];
 
 const ShellBaseConfigPlugin: PluginOption[] = [
+    // performanceMonitorPlugin({
+    //     enabled: process.env.NODE_ENV !== 'production',
+    //     exclude: [/node_modules/, /\.min\./, /performance-monitor/],
+    //     include: [/\.ts$/, /\.js$/]
+    // }),
     cp({
         targets: [
             { src: './src/native/packet', dest: 'dist/moehoo', flatten: false },
@@ -177,10 +193,20 @@ export default defineConfig(({ mode }): UserConfig => {
             ...UniversalBaseConfig(),
             plugins: [...UniversalBaseConfigPlugin],
         };
-    } else {
+    } else if (mode == 'shell-analysis') {
+        return {
+            ...ShellBaseConfig(),
+            plugins: [
+                performanceMonitorPlugin({
+                    exclude: [/node_modules/, /\.min\./, /performance-monitor\.ts$/, /packet/],
+                    include: [/\.ts$/, /\.js$/]
+                }),
+                ...ShellBaseConfigPlugin
+            ],
+        };
+    } else
         return {
             ...FrameworkBaseConfig(),
             plugins: [...FrameworkBaseConfigPlugin],
         };
-    }
 });
