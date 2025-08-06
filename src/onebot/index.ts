@@ -114,9 +114,9 @@ export class NapCatOneBot11Adapter {
         //创建NetWork服务
 
         // 注册Plugin 如果需要基于NapCat进行快速开发
-        this.networkManager.registerAdapter(
-            new OB11PluginAdapter('myPlugin', this.core, this,this.actions)
-        );
+        // this.networkManager.registerAdapter(
+        //     new OB11PluginAdapter('myPlugin', this.core, this,this.actions)
+        // );
         for (const key of ob11Config.network.httpServers) {
             if (key.enable) {
                 this.networkManager.registerAdapter(
