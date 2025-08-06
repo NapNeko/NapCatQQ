@@ -11,6 +11,7 @@
     "dev:universal": "vite build --mode universal",
     "dev:framework": "vite build --mode framework",
     "dev:shell": "vite build --mode shell",
+    "dev:shell-analysis": "vite build --mode shell-analysis",
     "dev:webui": "cd napcat.webui && npm run dev",
     "lint": "eslint --fix src/**/*.{js,ts,vue}",
     "depend": "cd dist && npm install --omit=dev",

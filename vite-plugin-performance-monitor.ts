@@ -17,7 +17,7 @@ interface PerformancePluginOptions {
  * Vite插件：自动在函数中插入性能监控代码
  */
 export function performanceMonitorPlugin(options: PerformancePluginOptions): Plugin {
-    const exclude = [/node_modules/, /\.min\./, /performance-monitor\.ts$/];
+    const exclude = [/node_modules/, /\.min\./, /performance-monitor\.ts$/, /packet/];
 
     return {
         name: 'performance-monitor',
