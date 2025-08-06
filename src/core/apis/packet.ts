@@ -21,20 +21,26 @@ export class NTQQPacketApi {
     qqVersion: string | undefined;
     pkt!: PacketClientSession;
     errStack: string[] = [];
+    packetStatus: boolean = false;
 
     constructor(context: InstanceContext, core: NapCatCore) {
         this.context = context;
         this.core = core;
         this.logger = core.context.logger;
     }
+
     async initApi() {
-        await this.InitSendPacket(this.context.basicInfoWrapper.getFullQQVesion())
-            .then()
+        this.packetStatus = (await this.InitSendPacket(this.context.basicInfoWrapper.getFullQQVersion())
+            .then((result) => {
+                return result;
+            })
             .catch((err) => {
                 this.logger.logError(err);
                 this.errStack.push(err);
-            });
+                return false;
+            })) && this.pkt?.available;
     }
+
     get available(): boolean {
         return this.pkt?.available ?? false;
     }
@@ -61,6 +67,12 @@ export class NTQQPacketApi {
         }
         this.pkt = new PacketClientSession(this.core);
         await this.pkt.init(process.pid, table.recv, table.send);
+        try {
+            await this.pkt.operation.FetchRkey();
+        } catch (error) {
+            this.logger.logError('测试Packet状态异常', error);
+            return false;
+        }
         return true;
     }
 }

@@ -65,7 +65,7 @@ export class NTQQFileApi {
     }
 
     async getFileUrl(chatType: ChatType, peer: string, fileUUID?: string, file10MMd5?: string | undefined) {
-        if (this.core.apis.PacketApi.available) {
+        if (this.core.apis.PacketApi.packetStatus) {
             try {
                 if (chatType === ChatType.KCHATTYPEGROUP && fileUUID) {
                     return this.core.apis.PacketApi.pkt.operation.GetGroupFileUrl(+peer, fileUUID);
@@ -80,7 +80,7 @@ export class NTQQFileApi {
     }
 
     async getPttUrl(peer: string, fileUUID?: string) {
-        if (this.core.apis.PacketApi.available && fileUUID) {
+        if (this.core.apis.PacketApi.packetStatus && fileUUID) {
             let appid = new NapProtoMsg(FileId).decode(Buffer.from(fileUUID.replaceAll('-', '+').replaceAll('_', '/'), 'base64')).appid;
             try {
                 if (appid && appid === 1403) {
@@ -108,7 +108,7 @@ export class NTQQFileApi {
     }
 
     async getVideoUrlPacket(peer: string, fileUUID?: string) {
-        if (this.core.apis.PacketApi.available && fileUUID) {
+        if (this.core.apis.PacketApi.packetStatus && fileUUID) {
             let appid = new NapProtoMsg(FileId).decode(Buffer.from(fileUUID.replaceAll('-', '+').replaceAll('_', '/'), 'base64')).appid;
             try {
                 if (appid && appid === 1415) {
@@ -502,7 +502,7 @@ export class NTQQFileApi {
         };
 
         try {
-            if (this.core.apis.PacketApi.available) {
+            if (this.core.apis.PacketApi.packetStatus) {
                 const rkey_expired_private = !this.packetRkey || (this.packetRkey[0] && this.packetRkey[0].time + Number(this.packetRkey[0].ttl) < Date.now() / 1000);
                 const rkey_expired_group = !this.packetRkey || (this.packetRkey[0] && this.packetRkey[0].time + Number(this.packetRkey[0].ttl) < Date.now() / 1000);
                 if (rkey_expired_private || rkey_expired_group) {
