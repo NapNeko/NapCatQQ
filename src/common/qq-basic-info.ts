@@ -42,7 +42,7 @@ export class QQBasicInfoWrapper {
         return this.isQuickUpdate ? this.QQVersionConfig?.buildId : this.QQPackageInfo?.buildVersion;
     }
 
-    getFullQQVesion() {
+    getFullQQVersion() {
         const version = this.isQuickUpdate ? this.QQVersionConfig?.curVersion : this.QQPackageInfo?.version;
         if (!version) throw new Error('QQ版本获取失败');
         return version;

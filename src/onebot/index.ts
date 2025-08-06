@@ -170,7 +170,7 @@ export class NapCatOneBot11Adapter {
         this.initBuddyListener();
         this.initGroupListener();
 
-        WebUiDataRuntime.setQQVersion(this.core.context.basicInfoWrapper.getFullQQVesion());
+        WebUiDataRuntime.setQQVersion(this.core.context.basicInfoWrapper.getFullQQVersion());
         WebUiDataRuntime.setQQLoginInfo(selfInfo);
         WebUiDataRuntime.setQQLoginStatus(true);
         WebUiDataRuntime.setOnOB11ConfigChanged(async (newConfig) => {
