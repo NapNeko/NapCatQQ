@@ -142,7 +142,6 @@ export class NTQQMsgApi {
     }
 
     async queryFirstMsgBySender(peer: Peer, SendersUid: string[]) {
-        console.log(peer, SendersUid);
         return await this.context.session.getMsgService().queryMsgsWithFilterEx('0', '0', '0', {
             chatInfo: peer,
             filterMsgType: [],

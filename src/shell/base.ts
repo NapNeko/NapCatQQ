@@ -80,7 +80,7 @@ async function initializeEngine(
             base_path_prefix: '',
             platform_type: systemPlatform,
             app_type: 4,
-            app_version: basicInfoWrapper.getFullQQVesion(),
+            app_version: basicInfoWrapper.getFullQQVersion(),
             os_version: systemVersion,
             use_xlog: false,
             qua: basicInfoWrapper.QQVersionQua ?? '',
@@ -105,7 +105,7 @@ async function initializeLoginService(
         appid: basicInfoWrapper.QQVersionAppid ?? '',
         platVer: systemVersion,
         commonPath: dataPathGlobal,
-        clientVer: basicInfoWrapper.getFullQQVesion(),
+        clientVer: basicInfoWrapper.getFullQQVersion(),
         hostName: hostname,
     });
 }
@@ -324,7 +324,7 @@ export async function NCoreInitShell() {
         });
     }
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
-    const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVesion());
+    const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVersion());
 
     const o3Service = wrapper.NodeIO3MiscService.get();
     o3Service.addO3MiscListener(new NodeIO3MiscListener());
@@ -363,7 +363,7 @@ export async function NCoreInitShell() {
     const sessionConfig = await genSessionConfig(
         guid,
         basicInfoWrapper.QQVersionAppid,
-        basicInfoWrapper.getFullQQVesion(),
+        basicInfoWrapper.getFullQQVersion(),
         selfInfo.uin,
         selfInfo.uid,
         dataPath,

@@ -147,7 +147,7 @@ export class OneBotMsgApi {
             };
             FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, element.fileUuid, element.fileUuid);
             FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, element.fileUuid, element.fileName);
-            if (this.core.apis.PacketApi.available) {
+            if (this.core.apis.PacketApi.packetStatus) {
                 let url;
                 try {
                     url = await this.core.apis.FileApi.getFileUrl(msg.chatType, msg.peerUid, element.fileUuid, element.file10MMd5)
@@ -391,7 +391,7 @@ export class OneBotMsgApi {
 
             //开始兜底
             if (!videoDownUrl) {
-                if (this.core.apis.PacketApi.available) {
+                if (this.core.apis.PacketApi.packetStatus) {
                     try {
                         videoDownUrl = await this.core.apis.FileApi.getVideoUrlPacket(msg.peerUid, element.fileUuid);
                     } catch (e) {
@@ -422,7 +422,7 @@ export class OneBotMsgApi {
             };
             const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, '', element.fileName);
             let pttUrl = '';
-            if (this.core.apis.PacketApi.available) {
+            if (this.core.apis.PacketApi.packetStatus) {
                 try {
                     pttUrl = await this.core.apis.FileApi.getPttUrl(msg.peerUid, element.fileUuid);
                 } catch (e) {

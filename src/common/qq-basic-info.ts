@@ -42,7 +42,7 @@ export class QQBasicInfoWrapper {
         return this.isQuickUpdate ? this.QQVersionConfig?.buildId : this.QQPackageInfo?.buildVersion;
     }
 
-    getFullQQVesion() {
+    getFullQQVersion() {
         const version = this.isQuickUpdate ? this.QQVersionConfig?.curVersion : this.QQPackageInfo?.version;
         if (!version) throw new Error('QQ版本获取失败');
         return version;
@@ -57,9 +57,9 @@ export class QQBasicInfoWrapper {
     //此方法不要直接使用
     getQUAFallback() {
         const platformMapping: Partial<Record<NodeJS.Platform, string>> = {
-            win32: `V1_WIN_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`,
-            darwin: `V1_MAC_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`,
-            linux: `V1_LNX_${this.getFullQQVesion()}_${this.getQQBuildStr()}_GW_B`,
+            win32: `V1_WIN_${this.getFullQQVersion()}_${this.getQQBuildStr()}_GW_B`,
+            darwin: `V1_MAC_${this.getFullQQVersion()}_${this.getQQBuildStr()}_GW_B`,
+            linux: `V1_LNX_${this.getFullQQVersion()}_${this.getQQBuildStr()}_GW_B`,
         };
         return platformMapping[systemPlatform] ?? (platformMapping.win32)!;
     }
@@ -76,7 +76,7 @@ export class QQBasicInfoWrapper {
     getAppidV2(): { appid: string; qua: string } {
         // 通过已有表 性能好
         const appidTbale = AppidTable as unknown as QQAppidTableType;
-        const fullVersion = this.getFullQQVesion();
+        const fullVersion = this.getFullQQVersion();
         if (fullVersion) {
             const data = appidTbale[fullVersion];
             if (data) {
