@@ -40,7 +40,6 @@ export class NodeIKernelBuddyListener {
     }
 
     onDelBatchBuddyInfos(_arg: unknown): any {
-        console.log('onDelBatchBuddyInfos not implemented', ...arguments);
     }
 
     onDoubtBuddyReqChange(_arg:
