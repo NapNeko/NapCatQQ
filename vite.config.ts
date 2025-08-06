@@ -22,11 +22,11 @@ if (process.env.NAPCAT_BUILDSYS == 'linux') {
 }
 
 const UniversalBaseConfigPlugin: PluginOption[] = [
-    performanceMonitorPlugin({
-        enabled: process.env.NODE_ENV !== 'production',
-        exclude: [/node_modules/, /\.min\./, /performance-monitor/],
-        include: [/\.ts$/, /\.js$/]
-    }),
+    // performanceMonitorPlugin({
+    //     enabled: process.env.NODE_ENV !== 'production',
+    //     exclude: [/node_modules/, /\.min\./, /performance-monitor/],
+    //     include: [/\.ts$/, /\.js$/]
+    // }),
     cp({
         targets: [
             { src: './manifest.json', dest: 'dist' },
@@ -50,11 +50,11 @@ const UniversalBaseConfigPlugin: PluginOption[] = [
 ];
 
 const FrameworkBaseConfigPlugin: PluginOption[] = [
-    performanceMonitorPlugin({
-        enabled: process.env.NODE_ENV !== 'production',
-        exclude: [/node_modules/, /\.min\./, /performance-monitor/],
-        include: [/\.ts$/, /\.js$/]
-    }),
+    // performanceMonitorPlugin({
+    //     enabled: process.env.NODE_ENV !== 'production',
+    //     exclude: [/node_modules/, /\.min\./, /performance-monitor/],
+    //     include: [/\.ts$/, /\.js$/]
+    // }),
     cp({
         targets: [
             { src: './manifest.json', dest: 'dist' },
@@ -75,11 +75,11 @@ const FrameworkBaseConfigPlugin: PluginOption[] = [
 ];
 
 const ShellBaseConfigPlugin: PluginOption[] = [
-    performanceMonitorPlugin({
-        enabled: process.env.NODE_ENV !== 'production',
-        exclude: [/node_modules/, /\.min\./, /performance-monitor/],
-        include: [/\.ts$/, /\.js$/]
-    }),
+    // performanceMonitorPlugin({
+    //     enabled: process.env.NODE_ENV !== 'production',
+    //     exclude: [/node_modules/, /\.min\./, /performance-monitor/],
+    //     include: [/\.ts$/, /\.js$/]
+    // }),
     cp({
         targets: [
             { src: './src/native/packet', dest: 'dist/moehoo', flatten: false },
