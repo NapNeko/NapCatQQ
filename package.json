@@ -47,7 +47,7 @@
     "ajv": "^8.13.0",
     "async-mutex": "^0.5.0",
     "commander": "^13.0.0",
-    "compressing": "^1.10.1",
+    "compressing": "^2.0.0",
     "cors": "^2.8.5",
     "esbuild": "0.25.8",
     "eslint": "^9.14.0",
