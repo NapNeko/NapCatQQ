@@ -189,7 +189,7 @@ export class OneBotGroupApi {
                 this.core,
                 parseInt(msg.peerUid),
                 MessageUnique.getShortIdByMsgId(msgData.msgList[0].msgId)!,
-                parseInt(msgData.msgList[0].senderUin ?? +await this.core.apis.UserApi.getUinByUidV2(msgData.msgList[0].senderUid)),
+                parseInt(msgData.msgList[0].senderUin ?? await this.core.apis.UserApi.getUinByUidV2(msgData.msgList[0].senderUid)),
                 parseInt(realMsg?.add_digest_uin ?? '0'),
             );
         }
