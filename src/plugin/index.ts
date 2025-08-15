@@ -1,5 +1,6 @@
 import { NapCatOneBot11Adapter, OB11Message } from '@/onebot';
 import { ChatType, NapCatCore } from '@/core';
+import { ChatType, NapCatCore } from '@/core';
 import { ActionMap } from '@/onebot/action';
 import { OB11PluginAdapter } from '@/onebot/network/plugin';
 

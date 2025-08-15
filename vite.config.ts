@@ -193,10 +193,20 @@ export default defineConfig(({ mode }): UserConfig => {
             ...UniversalBaseConfig(),
             plugins: [...UniversalBaseConfigPlugin],
         };
-    } else {
+    } else if (mode == 'shell-analysis') {
+        return {
+            ...ShellBaseConfig(),
+            plugins: [
+                performanceMonitorPlugin({
+                    exclude: [/node_modules/, /\.min\./, /performance-monitor\.ts$/, /packet/],
+                    include: [/\.ts$/, /\.js$/]
+                }),
+                ...ShellBaseConfigPlugin
+            ],
+        };
+    } else
         return {
             ...FrameworkBaseConfig(),
             plugins: [...FrameworkBaseConfigPlugin],
         };
-    }
 });
