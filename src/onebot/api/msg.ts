@@ -974,6 +974,7 @@ export class OneBotMsgApi {
     private async handleGroupMessage(resMsg: OB11Message, msg: RawMessage) {
         resMsg.sub_type = 'normal';
         resMsg.group_id = parseInt(msg.peerUin);
+        resMsg.group_name = msg.peerName;
         let member = await this.core.apis.GroupApi.getGroupMember(msg.peerUin, msg.senderUin);
         if (!member) member = await this.core.apis.GroupApi.getGroupMember(msg.peerUin, msg.senderUin);
         if (member) {
