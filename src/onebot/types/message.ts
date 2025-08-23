@@ -21,6 +21,7 @@ export interface OB11Message {
     real_id: number;
     user_id: number | string; // number
     group_id?: number | string; // number
+    group_name?: string; // string
     message_type: 'private' | 'group';
     sub_type?: 'friend' | 'group' | 'normal';
     sender: OB11Sender;
