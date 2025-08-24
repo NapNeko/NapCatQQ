@@ -34,7 +34,10 @@ export class PacketOperationContext {
         const req = trans.SendPoke.build(is_group, peer, target ?? peer);
         await this.context.client.sendOidbPacket(req);
     }
-
+    async SetGroupTodo(groupUin: number, msgSeq: string) {
+        const req = trans.SetGroupTodo.build(groupUin, msgSeq);
+        await this.context.client.sendOidbPacket(req, true);
+    }
     async FetchRkey() {
         const req = trans.FetchRkey.build();
         const resp = await this.context.client.sendOidbPacket(req, true);

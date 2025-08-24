@@ -8,3 +8,4 @@ export { default as SetSpecialTitle } from './SetSpecialTitle';
 export { default as ImageOCR } from './ImageOCR';
 export { default as MoveGroupFile } from './MoveGroupFile';
 export { default as RenameGroupFile } from './RenameGroupFile';
+export { default as SetGroupTodo } from './SetGroupTodo';
