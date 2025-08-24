@@ -40,7 +40,6 @@ import { OB11FriendRequestEvent } from '@/onebot/event/request/OB11FriendRequest
 import { OB11GroupRequestEvent } from '@/onebot/event/request/OB11GroupRequest';
 import { OB11FriendRecallNoticeEvent } from '@/onebot/event/notice/OB11FriendRecallNoticeEvent';
 import { OB11GroupRecallNoticeEvent } from '@/onebot/event/notice/OB11GroupRecallNoticeEvent';
-import { LRUCache } from '@/common/lru-cache';
 import { BotOfflineEvent } from './event/notice/BotOfflineEvent';
 import {
     NetworkAdapterConfig,

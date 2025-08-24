@@ -123,10 +123,12 @@ import SetGroupKickMembers from './extends/SetGroupKickMembers';
 import { GetGroupDetailInfo } from './group/GetGroupDetailInfo';
 import GetGroupAddRequest from './extends/GetGroupAddRequest';
 import { GetCollectionList } from './extends/GetCollectionList';
+import { SetGroupTodo } from './packet/SetGroupTodo';
 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 
     const actionHandlers = [
+        new SetGroupTodo(obContext, core),
         new GetGroupDetailInfo(obContext, core),
         new SetGroupKickMembers(obContext, core),
         new SetGroupAddOption(obContext, core),
