@@ -124,10 +124,14 @@ import { GetGroupDetailInfo } from './group/GetGroupDetailInfo';
 import GetGroupAddRequest from './extends/GetGroupAddRequest';
 import { GetCollectionList } from './extends/GetCollectionList';
 import { SetGroupTodo } from './packet/SetGroupTodo';
+import { GetQunAlbumList } from './extends/GetQunAlbumList';
+import { UploadImageToQunAlbum } from './extends/UploadImageToQunAlbum';
 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 
     const actionHandlers = [
+        new GetQunAlbumList(obContext, core),
+        new UploadImageToQunAlbum(obContext, core),
         new SetGroupTodo(obContext, core),
         new GetGroupDetailInfo(obContext, core),
         new SetGroupKickMembers(obContext, core),

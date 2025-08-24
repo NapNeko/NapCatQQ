@@ -8,10 +8,10 @@ import {
     WebHonorType,
 } from '@/core';
 import { NapCatCore } from '..';
-import { readFileSync } from 'node:fs';
+import { createReadStream, readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { basename } from 'node:path';
-
+import { createStreamUploadChunk, qunAlbumControl } from '../data/webapi';
 export class NTQQWebApi {
     context: InstanceContext;
     core: NapCatCore;
@@ -323,64 +323,105 @@ export class NTQQWebApi {
         }
         return (hash & 0x7FFFFFFF).toString();
     }
-    async createQunAlbumSession(gc: string, sAlbumID: string, sAlbumName: string, path: string, skey: string, pskey: string, uin: string) {
+
+    async getAlbumList(gc: string) {
+        const pskey = (await this.core.apis.UserApi.getPSkey(['qzone.qq.com'])).domainPskeyMap.get('qzone.qq.com') || '';
+        const bkn = this.getBknFromSKey(pskey);
+        const uin = this.core.selfInfo.uin || '10001';
+        const api = `https://h5.qzone.qq.com/proxy/domain/u.photo.qzone.qq.com/cgi-bin/upp/qun_list_album_v2?random=7570&g_tk=${bkn}&format=json&inCharset=utf-8&outCharset=utf-8&qua=V1_IPH_SQ_6.2.0_0_HDBM_T&cmd=qunGetAlbumList&qunId=${gc}&start=0&num=1000&uin=${uin}&getMemberRole=0`;
+        const response = await RequestUtil.HttpGetJson<{ data: { album: Array<{ id: string, title: string }> } }>(api);
+        return response.data.album;
+    }
+
+    async uploadImageToQunAlbum(gc: string, sAlbumID: string, sAlbumName: string, path: string) {
+        const skey = await this.core.apis.UserApi.getSKey() || '';
+        const pskey = (await this.core.apis.UserApi.getPSkey(['qzone.qq.com'])).domainPskeyMap.get('qzone.qq.com') || '';
+        const session = (await this.createQunAlbumSession(gc, sAlbumID, sAlbumName, path, skey, pskey)).data.session;
+        if (!session) throw new Error('创建群相册会话失败');
+
+        const uin = this.core.selfInfo.uin || '10001';
+        const chunk = createStreamUploadChunk(createReadStream(path), uin, session, 16384);
+
+        // 准备上传参数
+        const total = readFileSync(path).length;
+        const GTK = this.getBknFromSKey(pskey);
+        const cookie = `p_uin=${uin}; p_skey=${pskey}; skey=${skey}; uin=${uin}`;
+
+        // 收集所有分片
+        const allChunks: NonNullable<Awaited<ReturnType<typeof chunk.getNextChunk>>>[] = [];
+        let chunked = await chunk.getNextChunk();
+
+        while (chunked) {
+            allChunks.push(chunked);
+            chunked = await chunk.getNextChunk();
+        }
+
+        // 将分片分成3组，每组内部按顺序执行，3组之间并行执行
+        const chunkGroups: typeof allChunks[] = [[], [], []];
+        allChunks.forEach((chunk, index) => {
+            const groupIndex = index % 3;
+            chunkGroups[groupIndex]!.push(chunk);
+        });
+
+        // 创建单个上传分片的函数
+        const uploadChunk = async (chunkData: typeof allChunks[0]) => {
+            const api = `https://h5.qzone.qq.com/webapp/json/sliceUpload/FileUpload?seq=${chunkData.seq}&retry=0&offset=${chunkData.offset}&end=${chunkData.end}&total=${total}&type=json&g_tk=${GTK}`;
+
+            const post = await RequestUtil.HttpGetJson<{ data: { offset: string }, ret: number, msg: string }>(api, 'POST', chunkData, {
+                'Cookie': cookie,
+                'Content-Type': 'application/json',
+                'origin': 'https://h5.qzone.qq.com',
+            });
+            if (post.ret !== 0) throw new Error(`分片 ${chunkData.seq} 上传失败: ${post.msg}`);
+
+            return { seq: chunkData.seq, offset: chunkData.offset, success: true };
+        };
+
+        // 创建每组顺序上传的函数
+        const uploadGroupSequentially = async (group: typeof allChunks) => {
+            const groupResults = [];
+            for (const chunk of group) {
+                const result = await uploadChunk(chunk);
+                groupResults.push(result);
+            }
+            return groupResults;
+        };
+
+        // 3个队列并行执行，每个队列内部按顺序执行
+        const groupPromises = chunkGroups.map(group => uploadGroupSequentially(group));
+        const groupResults = await Promise.all(groupPromises);
+
+        // 合并所有结果
+        const results = groupResults.flat();
+
+        // 按序号排序结果
+        results.sort((a, b) => a.seq - b.seq);
+        return results;
+    }
+
+    async createQunAlbumSession(gc: string, sAlbumID: string, sAlbumName: string, path: string, skey: string, pskey: string) {
         const img = readFileSync(path);
+        const uin = this.core.selfInfo.uin || '10001';
         const img_md5 = createHash('md5').update(img).digest('hex');
         const img_size = img.length;
         const img_name = basename(path);
-        const time = Math.floor(Date.now() / 1000);
         const GTK = this.getBknFromSKey(pskey);
         const cookie = `p_uin=${uin}; p_skey=${pskey}; skey=${skey}; uin=${uin}`;
-        const body = {
-            control_req: [{
-                uin: uin,
-                token: {
-                    type: 4,
-                    data: pskey,
-                    appid: 5
-                },
-                appid: 'qun',
-                checksum: img_md5,
-                check_type: 0,
-                file_len: img_size,
-                env: {
-                    refer: 'qzone',
-                    deviceInfo: 'h5'
-                },
-                model: 0,
-                biz_req: {
-                    sPicTitle: img_name,
-                    sPicDesc: '',
-                    sAlbumName: sAlbumName,
-                    sAlbumID: sAlbumID,
-                    iAlbumTypeID: 0,
-                    iBitmap: 0,
-                    iUploadType: 0,
-                    iUpPicType: 0,
-                    iBatchID: time,
-                    sPicPath: '',
-                    iPicWidth: 0,
-                    iPicHight: 0,
-                    iWaterType: 0,
-                    iDistinctUse: 0,
-                    iNeedFeeds: 1,
-                    iUploadTime: time,
-                    mapExt: {
-                        appid: 'qun',
-                        userid: gc
-                    }
-                },
-                session: '',
-                asy_upload: 0,
-                cmd: 'FileUpload'
-            }]
-        };
+        const body = qunAlbumControl({
+            uin,
+            group_id: gc,
+            pskey,
+            pic_md5: img_md5,
+            img_size,
+            img_name,
+            sAlbumName: sAlbumName,
+            sAlbumID: sAlbumID
+        });
         const api = `https://h5.qzone.qq.com/webapp/json/sliceUpload/FileBatchControl/${img_md5}?g_tk=${GTK}`;
-        const post = await RequestUtil.HttpGetJson(api, 'POST', body, {
+        const post = await RequestUtil.HttpGetJson<{ data: { session: string }, ret: number, msg: string }>(api, 'POST', body, {
             'Cookie': cookie,
             'Content-Type': 'application/json'
         });
-
         return post;
     }
 }
