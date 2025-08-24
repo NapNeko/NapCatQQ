@@ -28,13 +28,13 @@ class GetMsg extends OneBotAction<Payload, OB11Message> {
             throw new Error('消息不存在');
         }
         const peer = { guildId: '', peerUid: msgIdWithPeer?.Peer.peerUid, chatType: msgIdWithPeer.Peer.chatType };
-        const orimsg = this.obContext.recallMsgCache.get(msgIdWithPeer.MsgId);
+        //const orimsg = this.obContext.recallMsgCache.get(msgIdWithPeer.MsgId);
         let msg: RawMessage|undefined;
-        if (orimsg) {
-            msg = orimsg;
-        } else {
+        // if (orimsg) {
+        //     msg = orimsg;
+        // } else {
             msg = (await this.core.apis.MsgApi.getMsgsByMsgId(peer, [msgIdWithPeer?.MsgId || payload.message_id.toString()])).msgList[0];
-        }
+        //}
         if (!msg) throw Error('消息不存在');
         const retMsg = await this.obContext.apis.MsgApi.parseMessage(msg, config.messagePostFormat);
         if (!retMsg) throw Error('消息为空');

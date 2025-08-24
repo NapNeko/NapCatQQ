@@ -61,7 +61,7 @@ export class NapCatOneBot11Adapter {
     networkManager: OB11NetworkManager;
     actions: ActionMap;
     private readonly bootTime = Date.now() / 1000;
-    recallMsgCache = new LRUCache<string, RawMessage>(100);
+    //recallMsgCache = new LRUCache<string, boolean>(100);
 
     constructor(core: NapCatCore, context: InstanceContext, pathWrapper: NapCatPathWrapper) {
         this.core = core;
@@ -306,7 +306,9 @@ export class NapCatOneBot11Adapter {
             };
             let msg = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeq(peer, msgSeq)).msgList.find(e => e.msgType == NTMsgType.KMSGTYPEGRAYTIPS);
             const element = msg?.elements.find(e => !!e.grayTipElement?.revokeElement);
-            if (element?.grayTipElement?.revokeElement.isSelfOperate && msg) {
+            let isSelfOperateDevice = element?.grayTipElement?.revokeElement.operatorUid == this.core.selfInfo.uid;
+            // 其它设备的UID是不一样的 UID跟设备有关 从而放掉其它设备来的recall 避免二次吞掉recall
+            if (msg && element?.grayTipElement?.revokeElement.isSelfOperate &&  isSelfOperateDevice) {
                 await this.core.eventWrapper.registerListen('NodeIKernelMsgListener/onMsgRecall',
                     (chatType: ChatType, uid: string, msgSeq: string) => {
                         return chatType === msg?.chatType && uid === msg?.peerUid && msgSeq === msg?.msgSeq;
