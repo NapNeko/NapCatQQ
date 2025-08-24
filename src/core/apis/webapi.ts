@@ -325,11 +325,15 @@ export class NTQQWebApi {
     }
 
     async getAlbumList(gc: string) {
+        const skey = await this.core.apis.UserApi.getSKey() || '';
         const pskey = (await this.core.apis.UserApi.getPSkey(['qzone.qq.com'])).domainPskeyMap.get('qzone.qq.com') || '';
         const bkn = this.getBknFromSKey(pskey);
         const uin = this.core.selfInfo.uin || '10001';
+        const cookies = `p_uin=${this.core.selfInfo.uin}; p_skey=${pskey}; skey=${skey}; uin=${uin}`;
         const api = `https://h5.qzone.qq.com/proxy/domain/u.photo.qzone.qq.com/cgi-bin/upp/qun_list_album_v2?random=7570&g_tk=${bkn}&format=json&inCharset=utf-8&outCharset=utf-8&qua=V1_IPH_SQ_6.2.0_0_HDBM_T&cmd=qunGetAlbumList&qunId=${gc}&start=0&num=1000&uin=${uin}&getMemberRole=0`;
-        const response = await RequestUtil.HttpGetJson<{ data: { album: Array<{ id: string, title: string }> } }>(api);
+        const response = await RequestUtil.HttpGetJson<{ data: { album: Array<{ id: string, title: string }> } }>(api, 'GET', '', {
+            'Cookie': cookies
+        });
         return response.data.album;
     }
 

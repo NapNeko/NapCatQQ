@@ -1,4 +1,5 @@
 
+import { NTQQWebApi } from '@/core/apis';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
@@ -8,7 +9,7 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export class GetQunAlbumList extends OneBotAction<Payload, unknown> {
+export class GetQunAlbumList extends OneBotAction<Payload,Awaited<ReturnType<NTQQWebApi['getAlbumList']>>> {
     override actionName = ActionName.GetQunAlbumList;
     override payloadSchema = SchemaData;
 
