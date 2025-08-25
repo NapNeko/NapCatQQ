@@ -1,4 +1,4 @@
-import { ReadStream } from "node:fs";
+
 export interface ControlReq {
     appid?: string;
     asy_upload?: number;
@@ -12,7 +12,6 @@ export interface ControlReq {
     session?: string;
     token?: Token;
     uin?: string;
-    [property: string]: any;
 }
 
 export interface BizReq {
@@ -30,36 +29,36 @@ export interface BizReq {
     mapExt: MapExt;
     sAlbumID: string;
     sAlbumName: string;
-    sExif_CameraMaker: string;
-    sExif_CameraModel: string;
-    sExif_Latitude: string;
-    sExif_LatitudeRef: string;
-    sExif_Longitude: string;
-    sExif_LongitudeRef: string;
-    sExif_Time: string;
     sPicDesc: string;
     sPicPath: string;
     sPicTitle: string;
-    [property: string]: any;
+    stExtendInfo: StExtendInfo;
 }
 
 export interface MapExt {
     appid: string;
     userid: string;
-    [property: string]: any;
+}
+
+export interface StExtendInfo {
+    mapParams: MapParams;
+}
+
+export interface MapParams {
+    batch_num: string;
+    photo_num: string;
+    video_num: string;
 }
 
 export interface Env {
     deviceInfo: string;
     refer: string;
-    [property: string]: any;
 }
 
 export interface Token {
     appid: number;
     data: string;
     type: number;
-    [property: string]: any;
 }
 
 export function qunAlbumControl({
@@ -70,7 +69,10 @@ export function qunAlbumControl({
     img_size,
     img_name,
     sAlbumName,
-    sAlbumID
+    sAlbumID,
+    photo_num = "1",
+    video_num = "0",
+    batch_num = "1"
 }: {
     uin: string,
     group_id: string,
@@ -80,10 +82,15 @@ export function qunAlbumControl({
     img_name: string,
     sAlbumName: string,
     sAlbumID: string,
+    photo_num?: string,
+    video_num?: string,
+    batch_num?: string
 }
 ): {
     control_req: ControlReq[]
 } {
+    const timestamp = Math.floor(Date.now() / 1000);
+
     return {
         control_req: [
             {
@@ -109,27 +116,27 @@ export function qunAlbumControl({
                     sAlbumID: sAlbumID,
                     iAlbumTypeID: 0,
                     iBitmap: 0,
-                    iUploadType: 3,
+                    iUploadType: 0,
                     iUpPicType: 0,
-                    iBatchID: +(Date.now().toString() + '4000'),//17位时间戳
+                    iBatchID: timestamp,
                     sPicPath: "",
                     iPicWidth: 0,
                     iPicHight: 0,
                     iWaterType: 0,
                     iDistinctUse: 0,
                     iNeedFeeds: 1,
-                    iUploadTime: +(Math.floor(Date.now() / 1000).toString()),
+                    iUploadTime: timestamp,
                     mapExt: {
                         appid: "qun",
                         userid: group_id
                     },
-                    sExif_CameraMaker: "",
-                    sExif_CameraModel: "",
-                    sExif_Time: "",
-                    sExif_LatitudeRef: "",
-                    sExif_Latitude: "",
-                    sExif_LongitudeRef: "",
-                    sExif_Longitude: ""
+                    stExtendInfo: {
+                        mapParams: {
+                            photo_num: photo_num,
+                            video_num: video_num,
+                            batch_num: batch_num
+                        }
+                    }
                 },
                 session: "",
                 asy_upload: 0,
@@ -167,136 +174,4 @@ export function createStreamUpload(
             iUploadType: 3
         }
     };
-}
-
-class ChunkData {
-    private reader: ReadStream;
-    private uin: string;
-    private chunkSize: number;
-    private offset: number = 0;
-    private seq: number = 0;
-    private buffer: Uint8Array = new Uint8Array(0);
-    private isCompleted: boolean = false;
-    private session: string;
-
-    constructor(file: ReadStream, uin: string, chunkSize: number = 16384, session: string = '') {
-        this.reader = file;
-        this.uin = uin;
-        this.chunkSize = chunkSize;
-        this.session = session;
-    }
-
-    async getNextChunk(): Promise<ReturnType<typeof createStreamUpload> | null> {
-        if (this.isCompleted && this.buffer.length === 0) {
-            return null;
-        }
-
-        try {
-            return new Promise((resolve, reject) => {
-                const processChunk = () => {
-                    // 如果没有数据了，返回 null
-                    if (this.buffer.length === 0) {
-                        resolve(null);
-                        return;
-                    }
-
-                    // 准备当前块数据
-                    const chunkToSend = this.buffer.slice(0, Math.min(this.chunkSize, this.buffer.length));
-                    this.buffer = this.buffer.slice(chunkToSend.length);
-
-                    // 计算位置信息
-                    const start = this.offset;
-                    this.offset += chunkToSend.length;
-                    const end = this.offset;
-
-                    // 转换为 Base64
-                    const base64Data = Buffer.from(chunkToSend).toString('base64');
-
-                    // 创建上传数据对象
-                    const uploadData = createStreamUpload({
-                        uin: this.uin,
-                        session: this.session,
-                        offset: start,
-                        seq: this.seq,
-                        end: end,
-                        slice_size: this.chunkSize,
-                        data: base64Data
-                    });
-
-                    this.seq++;
-
-                    resolve(uploadData);
-                };
-
-                // 如果缓冲区已经有足够数据，直接处理
-                if (this.buffer.length >= this.chunkSize) {
-                    processChunk();
-                    return;
-                }
-
-                // 否则，从流中读取更多数据
-                const dataHandler = (chunk: string | Buffer) => {
-                    // 确保处理的是 Buffer
-                    const bufferChunk = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
-
-                    // 合并缓冲区
-                    const newBuffer = new Uint8Array(this.buffer.length + bufferChunk.length);
-                    newBuffer.set(this.buffer);
-                    newBuffer.set(new Uint8Array(bufferChunk), this.buffer.length);
-                    this.buffer = newBuffer;
-
-                    // 如果有足够的数据，处理并返回
-                    if (this.buffer.length >= this.chunkSize) {
-                        this.reader.removeListener('data', dataHandler);
-                        this.reader.removeListener('end', endHandler);
-                        this.reader.removeListener('error', errorHandler);
-                        processChunk();
-                    }
-                };
-
-                const endHandler = () => {
-                    this.isCompleted = true;
-                    this.reader.removeListener('data', dataHandler);
-                    this.reader.removeListener('end', endHandler);
-                    this.reader.removeListener('error', errorHandler);
-
-                    // 处理剩余数据
-                    processChunk();
-                };
-
-                const errorHandler = (err: Error) => {
-                    this.reader.removeListener('data', dataHandler);
-                    this.reader.removeListener('end', endHandler);
-                    this.reader.removeListener('error', errorHandler);
-                    reject(err);
-                };
-
-                // 添加事件监听器
-                this.reader.on('data', dataHandler);
-                this.reader.on('end', endHandler);
-                this.reader.on('error', errorHandler);
-            });
-        } catch (error) {
-            console.error('Error getting next chunk:', error);
-            throw error;
-        }
-    }
-
-    setSession(session: string): void {
-        this.session = session;
-    }
-
-    getProgress(): number {
-        return this.offset;
-    }
-
-    isFinished(): boolean {
-        return this.isCompleted && this.buffer.length === 0;
-    }
-}
-
-
-// 根据文件流 按chunk持续函数
-export function createStreamUploadChunk(file: ReadStream, uin: string, session: string, chunk: number = 16384): ChunkData {
-    return new ChunkData(file, uin, chunk, session);
 }
