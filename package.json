@@ -32,7 +32,7 @@
     "@napneko/nap-proto-core": "^0.0.4",
     "@rollup/plugin-node-resolve": "^16.0.0",
     "@rollup/plugin-typescript": "^12.1.4",
-    "@sinclair/typebox": "^0.34.38",
+    "@sinclair/typebox": "^0.34.40",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/multer": "^1.4.12",
