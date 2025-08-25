@@ -323,25 +323,50 @@ export class NTQQWebApi {
         }
         return (hash & 0x7FFFFFFF).toString();
     }
-
+    async getAlbumListByNTQQ(gc: string) {
+        return await this.context.session.getAlbumService().getAlbumList({
+            qun_id: gc,
+            attach_info: '',
+            seq: 3331,
+            request_time_line: {
+                request_invoke_time: "0"
+            }
+        })
+    }
     async getAlbumList(gc: string) {
         const skey = await this.core.apis.UserApi.getSKey() || '';
         const pskey = (await this.core.apis.UserApi.getPSkey(['qzone.qq.com'])).domainPskeyMap.get('qzone.qq.com') || '';
-        const bkn = this.getBknFromSKey(pskey);
+        const bkn = this.getBknFromSKey(skey);
         const uin = this.core.selfInfo.uin || '10001';
-        const cookies = `p_uin=${this.core.selfInfo.uin}; p_skey=${pskey}; skey=${skey}; uin=${uin}`;
-        const api = `https://h5.qzone.qq.com/proxy/domain/u.photo.qzone.qq.com/cgi-bin/upp/qun_list_album_v2?random=7570&g_tk=${bkn}&format=json&inCharset=utf-8&outCharset=utf-8&qua=V1_IPH_SQ_6.2.0_0_HDBM_T&cmd=qunGetAlbumList&qunId=${gc}&start=0&num=1000&uin=${uin}&getMemberRole=0`;
-        const response = await RequestUtil.HttpGetJson<{ data: { album: Array<{ id: string, title: string }> } }>(api, 'GET', '', {
+        const cookies = `p_uin=o${this.core.selfInfo.uin}; p_skey=${pskey}; skey=${skey}; uin=o${uin} `;
+        const api = `https://h5.qzone.qq.com/proxy/domain/u.photo.qzone.qq.com/cgi-bin/upp/qun_list_album_v2?`;
+        const params = new URLSearchParams({
+            random: '7570',
+            g_tk: bkn,
+            format: 'json',
+            inCharset: 'utf-8',
+            outCharset: 'utf-8',
+            qua: 'V1_IPH_SQ_6.2.0_0_HDBM_T',
+            cmd: 'qunGetAlbumList',
+            qunId: gc,
+            qunid: gc,
+            start: '0',
+            num: '1000',
+            uin: uin,
+            getMemberRole: '0'
+        });
+        const response = await RequestUtil.HttpGetJson<{ data: { album: Array<{ id: string, title: string }> } }>(api + params.toString(), 'GET', '', {
             'Cookie': cookies
         });
         return response.data.album;
     }
+
     async createQunAlbumSession(gc: string, sAlbumID: string, sAlbumName: string, path: string, skey: string, pskey: string, img_md5: string, uin: string) {
         const img = readFileSync(path);
         const img_size = img.length;
         const img_name = basename(path);
-        const GTK = this.getBknFromSKey(pskey);
-        const cookie = `p_uin=${uin}; p_skey=${pskey}; skey=${skey}; uin=${uin}`;
+        const GTK = this.getBknFromSKey(skey);
+        const cookie = `p_uin=o${uin}; p_skey=${pskey}; skey=${skey}; uin=o${uin}`;
         const body = qunAlbumControl({
             uin,
             group_id: gc,
@@ -364,8 +389,8 @@ export class NTQQWebApi {
         const img_size = statSync(path).size;
         let seq = 0;
         let offset = 0;
-        const GTK = this.getBknFromSKey(pskey);
-        const cookie = `p_uin=${uin}; p_skey=${pskey}; skey=${skey}; uin=${uin}`;
+        const GTK = this.getBknFromSKey(skey);
+        const cookie = `p_uin=o${uin}; p_skey=${pskey}; skey=${skey}; uin=o${uin}`;
 
         const stream = createReadStream(path, { highWaterMark: slice_size });
 

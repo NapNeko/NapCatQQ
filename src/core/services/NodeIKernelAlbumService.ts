@@ -1,11 +1,31 @@
 export interface NodeIKernelAlbumService {
-    
+
     setAlbumServiceInfo(...args: unknown[]): unknown;// needs 3 arguments
 
     getMainPage(...args: unknown[]): unknown;// needs 2 arguments
 
-    getAlbumList(...args: unknown[]): unknown;// needs 1 arguments
-
+    getAlbumList(params: {
+        qun_id: string,
+        attach_info: string,
+        seq: number,
+        request_time_line: {
+            request_invoke_time: string
+        }
+    }): Promise<{
+        response: {
+            seq: number,
+            result: number,
+            errMs: string,//没错就是errMs不是errMsg
+            trace_id: string,
+            is_from_cache: boolean,
+            request_time_line: unknown,
+            album_list: Array<unknown>,
+            attach_info: string,
+            has_more: boolean,
+            right: unknown,
+            banner: unknown
+        }
+    }>
     getAlbumInfo(...args: unknown[]): unknown;// needs 1 arguments
 
     deleteAlbum(...args: unknown[]): unknown;// needs 3 arguments
