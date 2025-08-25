@@ -15,7 +15,7 @@ import { FFmpegService } from '@/common/ffmpeg';
 //Framework ES入口文件
 export async function getWebUiUrl() {
     const WebUiConfigData = (await WebUiConfig.GetWebUIConfig());
-    return 'http://127.0.0.1:' + webUiRuntimePort + '/webui/?token=' + WebUiConfigData.token;
+    return 'http://127.0.0.1:' + webUiRuntimePort + '/webui/?token=' + encodeURIComponent(WebUiConfigData.token);
 }
 
 export async function NCoreInitFramework(
