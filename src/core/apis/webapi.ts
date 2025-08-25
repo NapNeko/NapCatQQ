@@ -402,14 +402,13 @@ export class NTQQWebApi {
             const post = await response.json() as { ret: number, msg: string }; if (post.ret !== 0) {
                 throw new Error(`分片 ${seq} 上传失败: ${post.msg}`);
             }
-            this.context.logger.log(`上传 ${api} 成功`);
             offset += chunk.length;
             seq++;
         }
 
         return { success: true, message: '上传完成' };
     }
-    
+
     async uploadImageToQunAlbum(gc: string, sAlbumID: string, sAlbumName: string, path: string) {
         const skey = await this.core.apis.UserApi.getSKey() || '';
         const pskey = (await this.core.apis.UserApi.getPSkey(['qzone.qq.com'])).domainPskeyMap.get('qzone.qq.com') || '';
