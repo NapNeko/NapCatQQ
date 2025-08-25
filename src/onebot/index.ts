@@ -49,6 +49,7 @@ import {
 import { OB11Message } from './types';
 import { IOB11NetworkAdapter } from '@/onebot/network/adapter';
 import { OB11HttpSSEServerAdapter } from './network/http-server-sse';
+import { OB11PluginAdapter } from './network/plugin';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -61,7 +62,7 @@ export class NapCatOneBot11Adapter {
     actions: ActionMap;
     private readonly bootTime = Date.now() / 1000;
     //recallMsgCache = new LRUCache<string, boolean>(100);
-
+    recallEventCache = new Map<string, any>();
     constructor(core: NapCatCore, context: InstanceContext, pathWrapper: NapCatPathWrapper) {
         this.core = core;
         this.context = context;
@@ -306,14 +307,17 @@ export class NapCatOneBot11Adapter {
             let msg = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeq(peer, msgSeq)).msgList.find(e => e.msgType == NTMsgType.KMSGTYPEGRAYTIPS);
             const element = msg?.elements.find(e => !!e.grayTipElement?.revokeElement);
             if (msg && element?.grayTipElement?.revokeElement.isSelfOperate) {
-                await this.core.eventWrapper.registerListen('NodeIKernelMsgListener/onMsgRecall',
-                    (chatType: ChatType, uid: string, msgSeq: string) => {
-                        return chatType === msg?.chatType && uid === msg?.peerUid && msgSeq === msg?.msgSeq;
-                    }
-                ).catch(() => {
-                    msg = undefined;
-                    this.context.logger.logDebug('自操作消息撤回事件');
-                });
+                const isSelfDevice = this.recallEventCache.has(msg.msgId);
+                if (isSelfDevice) {
+                    await this.core.eventWrapper.registerListen('NodeIKernelMsgListener/onMsgRecall',
+                        (chatType: ChatType, uid: string, msgSeq: string) => {
+                            return chatType === msg?.chatType && uid === msg?.peerUid && msgSeq === msg?.msgSeq;
+                        }
+                    ).catch(() => {
+                        msg = undefined;
+                        this.context.logger.logDebug('自操作消息撤回事件');
+                    });
+                }
             }
             if (msg && element) {
                 const recallEvent = await this.emitRecallMsg(msg, element);
