@@ -12,6 +12,7 @@ import { createReadStream, readFileSync, statSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { basename } from 'node:path';
 import { qunAlbumControl } from '../data/webapi';
+import { createAlbumCommentRequest, createAlbumFeedPublish, createAlbumMediaFeed } from '../data/album';
 export class NTQQWebApi {
     context: InstanceContext;
     core: NapCatCore;
@@ -442,5 +443,74 @@ export class NTQQWebApi {
         const session = (await this.createQunAlbumSession(gc, sAlbumID, sAlbumName, path, skey, pskey, img_md5, uin)).data.session;
         if (!session) throw new Error('创建群相册会话失败');
         await this.uploadQunAlbumSlice(path, session, skey, pskey, uin, 16384);
+    }
+    async getAlbumMediaListByNTQQ(gc: string, albumId: string, attach_info: string = '') {
+        return (await this.context.session.getAlbumService().getMediaList({
+            qun_id: gc,
+            attach_info: attach_info,
+            seq: 0,
+            request_time_line: {
+                request_invoke_time: "0"
+            },
+            album_id: albumId,
+            lloc: '',
+            batch_id: ''
+        })).response;
+    }
+
+    async doAlbumMediaPlainCommentByNTQQ(
+        qunId: string,
+        albumId: string,
+        lloc: string,
+        content: string) {
+        const random_seq = Math.floor(Math.random() * 9000) + 1000;
+        const uin = this.core.selfInfo.uin || '10001';
+        //16位number数字
+        const client_key = Date.now() * 1000
+        return await this.context.session.getAlbumService().doQunComment(
+            random_seq, {
+            map_info: [],
+            map_bytes_info: [],
+            map_user_account: []
+        },
+            qunId,
+            2,
+            createAlbumMediaFeed(uin, albumId, lloc),
+            createAlbumCommentRequest(uin, content, client_key)
+        );
+    }
+
+    async deleteAlbumMediaByNTQQ(
+        qunId: string,
+        albumId: string,
+        lloc: string) {
+        const random_seq = Math.floor(Math.random() * 9000) + 1000;
+        return await this.context.session.getAlbumService().deleteMedias(
+            random_seq,
+            qunId,
+            albumId,
+            [lloc],
+            []
+        );
+    }
+
+    async doAlbumMediaLikeByNTQQ(
+        qunId: string,
+        albumId: string,
+        lloc: string,
+        id: string) {
+        const random_seq = Math.floor(Math.random() * 9000) + 1000;
+        const uin = this.core.selfInfo.uin || '10001';
+        return await this.context.session.getAlbumService().doQunLike(
+            random_seq, {
+            map_info: [],
+            map_bytes_info: [],
+            map_user_account: []
+        }, {
+            id: id,
+            status: 1
+        },
+            createAlbumFeedPublish(qunId, uin, albumId, lloc)
+        )
     }
 }

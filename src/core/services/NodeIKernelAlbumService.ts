@@ -1,3 +1,5 @@
+import { AlbumCommentReplyContent, AlbumFeedLikePublish, AlbumListRequest, AlbumMediaFeed } from "../data/album";
+
 export interface NodeIKernelAlbumService {
 
     setAlbumServiceInfo(...args: unknown[]): unknown;// needs 3 arguments
@@ -19,7 +21,7 @@ export interface NodeIKernelAlbumService {
             trace_id: string,
             is_from_cache: boolean,
             request_time_line: unknown,
-            album_list: Array<unknown>,
+            album_list: Array<{ name: string, album_id: string }>,
             attach_info: string,
             has_more: boolean,
             right: unknown,
@@ -32,11 +34,19 @@ export interface NodeIKernelAlbumService {
 
     addAlbum(...args: unknown[]): unknown;// needs 2 arguments
 
-    deleteMedias(...args: unknown[]): unknown;// needs 4 arguments
+    deleteMedias(seq: number, group_code: string, album_id: string, media_ids: string[], ban_ids: unknown[]): Promise<unknown>;// needs 4 arguments
 
     modifyAlbum(...args: unknown[]): unknown;// needs 3 arguments
 
-    getMediaList(...args: unknown[]): unknown;// needs 1 arguments
+    getMediaList(param: AlbumListRequest): Promise<{
+        response: {
+            seq: number,
+            result: number,
+            errMs: string,//没错就是errMs不是errMsg
+            trace_id: string,
+            request_time_line: unknown,
+        }
+    }>;// needs 1 arguments
 
     quoteToQzone(...args: unknown[]): unknown;// needs 1 arguments
 
@@ -55,12 +65,36 @@ export interface NodeIKernelAlbumService {
     getQunLikes(...args: unknown[]): unknown;// needs 4 arguments
 
     deleteQunFeed(...args: unknown[]): unknown;// needs 1 arguments
-
-    doQunComment(...args: unknown[]): unknown;// needs 6 arguments
+    //seq random
+    //stCommonExt {"map_info":[],"map_bytes_info":[],"map_user_account":[]}
+    //qunId string
+    doQunComment(seq: number, ext: {
+        map_info: unknown[],
+        map_bytes_info: unknown[],
+        map_user_account: unknown[]
+    },
+        qunId: string,
+        commentType: number,
+        feed: AlbumMediaFeed,
+        content: AlbumCommentReplyContent,
+    ): Promise<unknown>;// needs 6 arguments
 
     doQunReply(...args: unknown[]): unknown;// needs 7 arguments
 
-    doQunLike(...args: unknown[]): unknown;// needs 5 arguments
+    doQunLike(
+        seq: number,
+        ext: {
+            map_info: unknown[],
+            map_bytes_info: unknown[],
+            map_user_account: unknown[]
+        },
+        param: {
+            //{"id":"421_1_0_1012959257|V61Yiali4PELg90bThrH4Bo2iI1M5Kab|V5bCgAxMDEyOTU5MjU3e*KqaLVYdic!^||^421_1_0_1012959257|V61Yiali4PELg90bThrH4Bo2iI1M5Kab|17560336594^||^1","status":1}
+            id: string,
+            status: number
+        },
+        like: AlbumFeedLikePublish
+    ): Promise<unknown>;// needs 5 arguments
 
     getRedPoints(...args: unknown[]): unknown;// needs 3 arguments
 
