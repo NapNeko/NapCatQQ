@@ -80,6 +80,8 @@ export class OneBotMsgApi {
     obContext: NapCatOneBot11Adapter;
     core: NapCatCore;
     notifyGroupInvite: LRUCache<string, GroupNotify> = new LRUCache(50);
+    // 语音URL获取熔断器：peerUid -> 失败时间戳
+    pttCircuitBreaker: Map<string, number> = new Map();
     // seq -> notify
     rawToOb11Converters: RawToOb11Converters = {
         textElement: async element => {
@@ -422,14 +424,34 @@ export class OneBotMsgApi {
             };
             const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, '', element.fileName);
             let pttUrl = '';
-            if (this.core.apis.PacketApi.packetStatus) {
+            
+            // 熔断机制
+            const now = Date.now();
+            const lastFailureTime = this.pttCircuitBreaker.get(msg.peerUid) || 0;
+            const circuitBreakerDuration = 10 * 60 * 1000; // 10分钟熔断时间
+            
+            if (this.core.apis.PacketApi.packetStatus && (now - lastFailureTime) > circuitBreakerDuration) {
                 try {
-                    pttUrl = await this.core.apis.FileApi.getPttUrl(msg.peerUid, element.fileUuid);
+                    // 添加超时保护，避免语音URL获取阻塞整个消息批次
+                    const pttUrlPromise = this.core.apis.FileApi.getPttUrl(msg.peerUid, element.fileUuid);
+                    const timeoutPromise = new Promise<string>((_, reject) => {
+                        setTimeout(() => reject(new Error('getPttUrl timeout')), 5000); // 5秒超时
+                    });
+                    pttUrl = await Promise.race([pttUrlPromise, timeoutPromise]);
+                    
+                    // 成功时清除熔断状态
+                    this.pttCircuitBreaker.delete(msg.peerUid);
                 } catch (e) {
-                    this.core.context.logger.logError('获取语音url失败', (e as Error).stack);
+                    this.core.context.logger.logWarn('获取语音url失败，使用本地路径，启动熔断', (e as Error).message);
+                    // 记录失败时间，启动熔断
+                    this.pttCircuitBreaker.set(msg.peerUid, now);
                     pttUrl = element.filePath;
                 }
             } else {
+                // 熔断状态下直接使用本地路径
+                if (lastFailureTime > 0) {
+                    this.core.context.logger.logDebug(`语音URL获取熔断中，剩余时间: ${Math.ceil((circuitBreakerDuration - (now - lastFailureTime)) / 1000)}秒`);
+                }
                 pttUrl = element.filePath;
             }
             if (pttUrl) {
