@@ -548,15 +548,10 @@ export class OneBotMsgApi {
         const cleanupInterval = typeof cfg?.pttCircuitBreakerCleanupIntervalMs === 'number' ? cfg.pttCircuitBreakerCleanupIntervalMs : 5 * 60 * 1000;
         if (now - this._lastPttCircuitBreakerCleanup < cleanupInterval) return;
         this._lastPttCircuitBreakerCleanup = now;
-        const keysToDelete: string[] = [];
         for (const [peerUid, failureTime] of Array.from(this.pttCircuitBreaker.cache.entries())) {
             if (now - failureTime > circuitBreakerDuration) {
-                keysToDelete.push(peerUid);
+                this.pttCircuitBreaker.cache.delete(peerUid);
             }
-        }
-        for (const peerUid of keysToDelete) {
-            this.pttCircuitBreaker.cache.delete(peerUid);
-        }
         }
     }
 
