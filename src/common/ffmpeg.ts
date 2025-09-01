@@ -138,6 +138,28 @@ export class FFmpegService {
         }
     }
 
+    public static async getVideoMetadata(videoPath: string): Promise<VideoInfo> {
+        try {
+            // 并行执行获取文件信息和时长，但不提取缩略图
+            const [fileInfo, duration] = await Promise.all([
+                this.getFileMetadata(videoPath),
+                this.getVideoDuration(videoPath)
+            ]);
+
+            const result: VideoInfo = {
+                width: fileInfo.width,
+                height: fileInfo.height,
+                time: duration,
+                format: fileInfo.format,
+                size: fileInfo.size,
+                filePath: videoPath
+            };
+            return result;
+        } catch (error) {
+            throw error;
+        }
+    }
+
     private static async getFileInfo(videoPath: string, thumbnailPath: string): Promise<{
         format: string,
         size: number,
@@ -171,6 +193,58 @@ export class FFmpegService {
                 size: fileSize,
                 width: 100,
                 height: 100
+            };
+        }
+    }
+
+    private static async getFileMetadata(videoPath: string): Promise<{
+        format: string,
+        size: number,
+        width: number,
+        height: number
+    }> {
+        // 获取文件大小和类型
+        const [fileType, fileSize] = await Promise.all([
+            fileTypeFromFile(videoPath).catch(() => {
+                return null;
+            }),
+            Promise.resolve(statSync(videoPath).size)
+        ]);
+
+        try {
+            // 使用FFprobe获取视频尺寸
+            const { stdout } = await execFileAsync(FFPROBE_CMD, [
+                '-v', 'error',
+                '-select_streams', 'v:0',
+                '-show_entries', 'stream=width,height',
+                '-of', 'csv=s=x:p=0',
+                videoPath
+            ]);
+
+            const dimensions = stdout.trim();
+            let width = 1920;
+            let height = 1080;
+
+            if (dimensions && dimensions.includes('x')) {
+                const [w, h] = dimensions.split('x').map(n => parseInt(n.trim()));
+                if (!isNaN(w) && !isNaN(h)) {
+                    width = w;
+                    height = h;
+                }
+            }
+
+            return {
+                format: fileType?.ext ?? 'mp4',
+                size: fileSize,
+                width,
+                height
+            };
+        } catch (error) {
+            return {
+                format: fileType?.ext ?? 'mp4',
+                size: fileSize,
+                width: 1920,
+                height: 1080
             };
         }
     }

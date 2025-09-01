@@ -45,7 +45,7 @@ export class NTQQFileApi {
             'https://secret-service.bietiaop.com/rkeys',
             'http://ss.xingzhige.com/music_card/rkey',
         ],
-            this.context.logger
+        this.context.logger
         );
     }
 
@@ -260,21 +260,25 @@ export class NTQQFileApi {
         const thumbDir = path.replace(`${pathLib.sep}Ori${pathLib.sep}`, `${pathLib.sep}Thumb${pathLib.sep}`);
         fs.mkdirSync(pathLib.dirname(thumbDir), { recursive: true });
         const thumbPath = pathLib.join(pathLib.dirname(thumbDir), `${md5}_0.png`);
-        if (_diyThumbPath) {
-            try {
+        
+        // 无论是否有自定义缩略图，都获取视频的实际信息（时长、尺寸等）
+        try {
+            if (_diyThumbPath) {
+                // 有自定义缩略图时，复制缩略图但仍获取视频元数据
                 await this.copyFile(_diyThumbPath, thumbPath);
-            } catch (e) {
-                this.context.logger.logError('复制自定义缩略图失败', e);
-            }
-        } else {
-            try {
+                videoInfo = await FFmpegService.getVideoMetadata(filePath);
+            } else {
+                // 没有自定义缩略图时，提取缩略图并获取视频信息
                 videoInfo = await FFmpegService.getVideoInfo(filePath, thumbPath);
                 if (!fs.existsSync(thumbPath)) {
                     this.context.logger.logError('获取视频缩略图失败', new Error('缩略图不存在'));
                     throw new Error('获取视频缩略图失败');
                 }
-            } catch (e) {
-                this.context.logger.logError('获取视频信息失败', e);
+            }
+        } catch (e) {
+            this.context.logger.logError('获取视频信息失败', e);
+            // 确保缩略图存在
+            if (!fs.existsSync(thumbPath)) {
                 fs.writeFileSync(thumbPath, Buffer.from(defaultVideoThumbB64, 'base64'));
             }
         }
@@ -379,18 +383,18 @@ export class NTQQFileApi {
                     element.elementType === ElementType.FILE
                 ) {
                     switch (element.elementType) {
-                        case ElementType.PIC:
+                    case ElementType.PIC:
                             element.picElement!.sourcePath = elementResults?.[elementIndex] ?? '';
-                            break;
-                        case ElementType.VIDEO:
+                        break;
+                    case ElementType.VIDEO:
                             element.videoElement!.filePath = elementResults?.[elementIndex] ?? '';
-                            break;
-                        case ElementType.PTT:
+                        break;
+                    case ElementType.PTT:
                             element.pttElement!.filePath = elementResults?.[elementIndex] ?? '';
-                            break;
-                        case ElementType.FILE:
+                        break;
+                    case ElementType.FILE:
                             element.fileElement!.filePath = elementResults?.[elementIndex] ?? '';
-                            break;
+                        break;
                     }
                     elementIndex++;
                 }
