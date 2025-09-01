@@ -82,7 +82,14 @@ export const OneBotConfigSchema = Type.Object({
     network: NetworkConfigSchema,
     musicSignUrl: Type.String({ default: '' }),
     enableLocalFile2Url: Type.Boolean({ default: false }),
-    parseMultMsg: Type.Boolean({ default: false })
+    parseMultMsg: Type.Boolean({ default: false }),
+    // PTT（按住说话）断路器与请求超时配置
+    pttUrlRequestTimeoutMs: Type.Number({ default: 5000 }),
+    pttCircuitBreakerDurationMs: Type.Number({ default: 10 * 60 * 1000 }),
+    // 断路器缓存的最大条目数（LRU 淘汰）
+    pttCircuitBreakerCapacity: Type.Number({ default: 1000 }),
+    // 访问时清理过期断路器条目的间隔（毫秒）
+    pttCircuitBreakerCleanupIntervalMs: Type.Number({ default: 5 * 60 * 1000 })
 });
 
 export type OneBotConfig = Static<typeof OneBotConfigSchema>;

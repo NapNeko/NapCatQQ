@@ -80,8 +80,9 @@ export class OneBotMsgApi {
     obContext: NapCatOneBot11Adapter;
     core: NapCatCore;
     notifyGroupInvite: LRUCache<string, GroupNotify> = new LRUCache(50);
-    // 语音URL获取熔断器：peerUid -> 失败时间戳
-    pttCircuitBreaker: Map<string, number> = new Map();
+    // 语音URL获取熔断器（LRU，值为最后失败时间戳）：peerUid -> 失败时间戳
+    pttCircuitBreaker: LRUCache<string, number> = new LRUCache(1000);
+    private _lastPttCircuitBreakerCleanup: number = 0;
     // seq -> notify
     rawToOb11Converters: RawToOb11Converters = {
         textElement: async element => {
@@ -426,25 +427,29 @@ export class OneBotMsgApi {
             let pttUrl = '';
             
             // 熔断机制
+            this.cleanupPttCircuitBreaker();
+            this.ensurePttCircuitBreakerConfig();
             const now = Date.now();
             const lastFailureTime = this.pttCircuitBreaker.get(msg.peerUid) || 0;
-            const circuitBreakerDuration = 10 * 60 * 1000; // 10分钟熔断时间
-            
+            const cfg = this.obContext?.configLoader?.configData as any;
+            const circuitBreakerDuration = typeof cfg?.pttCircuitBreakerDurationMs === 'number' ? cfg.pttCircuitBreakerDurationMs : 10 * 60 * 1000;
+            const requestTimeout = typeof cfg?.pttUrlRequestTimeoutMs === 'number' ? cfg.pttUrlRequestTimeoutMs : 5000;
+
             if (this.core.apis.PacketApi.packetStatus && (now - lastFailureTime) > circuitBreakerDuration) {
                 try {
                     // 添加超时保护，避免语音URL获取阻塞整个消息批次
                     const pttUrlPromise = this.core.apis.FileApi.getPttUrl(msg.peerUid, element.fileUuid);
                     const timeoutPromise = new Promise<string>((_, reject) => {
-                        setTimeout(() => reject(new Error('getPttUrl timeout')), 5000); // 5秒超时
+                        setTimeout(() => reject(new Error('getPttUrl timeout')), requestTimeout);
                     });
                     pttUrl = await Promise.race([pttUrlPromise, timeoutPromise]);
                     
                     // 成功时清除熔断状态
-                    this.pttCircuitBreaker.delete(msg.peerUid);
+                    this.pttCircuitBreaker.cache.delete(msg.peerUid);
                 } catch (e) {
                     this.core.context.logger.logWarn('获取语音url失败，使用本地路径，启动熔断', (e as Error).message);
-                    // 记录失败时间，启动熔断
-                    this.pttCircuitBreaker.set(msg.peerUid, now);
+                    // 记录失败时间，启动熔断（使用 LRU put）
+                    this.pttCircuitBreaker.put(msg.peerUid, now);
                     pttUrl = element.filePath;
                 }
             } else {
@@ -523,6 +528,32 @@ export class OneBotMsgApi {
             };
         },
     };
+
+    private ensurePttCircuitBreakerConfig() {
+        try {
+            const cfg = this.obContext?.configLoader?.configData as any;
+            if (!cfg) return;
+            const cap = typeof cfg.pttCircuitBreakerCapacity === 'number' ? cfg.pttCircuitBreakerCapacity : 1000;
+            this.pttCircuitBreaker.resetCapacity(cap);
+        } catch (e) {
+            // ignore
+        }
+    }
+
+    // 清理过期的熔断器条目，基于配置的熔断持续时间
+    cleanupPttCircuitBreaker() {
+        const now = Date.now();
+        const cfg = this.obContext?.configLoader?.configData as any;
+        const circuitBreakerDuration = typeof cfg?.pttCircuitBreakerDurationMs === 'number' ? cfg.pttCircuitBreakerDurationMs : 10 * 60 * 1000;
+        const cleanupInterval = typeof cfg?.pttCircuitBreakerCleanupIntervalMs === 'number' ? cfg.pttCircuitBreakerCleanupIntervalMs : 5 * 60 * 1000;
+        if (now - this._lastPttCircuitBreakerCleanup < cleanupInterval) return;
+        this._lastPttCircuitBreakerCleanup = now;
+        for (const [peerUid, failureTime] of Array.from(this.pttCircuitBreaker.cache.entries())) {
+            if (now - failureTime > circuitBreakerDuration) {
+                this.pttCircuitBreaker.cache.delete(peerUid);
+            }
+        }
+    }
 
     ob11ToRawConverters: Ob11ToRawConverters = {
         [OB11MessageDataType.text]: async ({ data: { text } }) => ({
