@@ -444,7 +444,7 @@ export class OneBotMsgApi {
             };
         },
 
-        pttElement: async (element, msg, elementWrapper) => {
+        pttElement: async (element, msg, elementWrapper, { disableGetUrl }) => {
             const peer = {
                 chatType: msg.chatType,
                 peerUid: msg.peerUid,
@@ -452,7 +452,7 @@ export class OneBotMsgApi {
             };
             const fileCode = FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, '', element.fileName);
             let pttUrl = '';
-            if (this.core.apis.PacketApi.packetStatus) {
+            if (this.core.apis.PacketApi.packetStatus && !disableGetUrl) {
                 try {
                     pttUrl = await registerResource(
                         'ptt-url-get',
