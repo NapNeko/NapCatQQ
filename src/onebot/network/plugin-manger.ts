@@ -14,10 +14,10 @@ export interface PluginPackageJson {
 }
 
 export interface PluginModule<T extends OB11EmitEventContent = OB11EmitEventContent> {
-    plugin_init: (core: NapCatCore, obContext: NapCatOneBot11Adapter, actions: ActionMap, instance: OB11PluginAdapter) => void | Promise<void>;
-    plugin_onmessage?: (adapter: string, core: NapCatCore, obCtx: NapCatOneBot11Adapter, event: OB11Message, actions: ActionMap, instance: OB11PluginAdapter) => void | Promise<void>;
-    plugin_onevent?: (adapter: string, core: NapCatCore, obCtx: NapCatOneBot11Adapter, event: T, actions: ActionMap, instance: OB11PluginAdapter) => void | Promise<void>;
-    plugin_cleanup?: (core: NapCatCore, obContext: NapCatOneBot11Adapter, actions: ActionMap, instance: OB11PluginAdapter) => void | Promise<void>;
+    plugin_init: (core: NapCatCore, obContext: NapCatOneBot11Adapter, actions: ActionMap, instance: OB11PluginMangerAdapter) => void | Promise<void>;
+    plugin_onmessage?: (adapter: string, core: NapCatCore, obCtx: NapCatOneBot11Adapter, event: OB11Message, actions: ActionMap, instance: OB11PluginMangerAdapter) => void | Promise<void>;
+    plugin_onevent?: (adapter: string, core: NapCatCore, obCtx: NapCatOneBot11Adapter, event: T, actions: ActionMap, instance: OB11PluginMangerAdapter) => void | Promise<void>;
+    plugin_cleanup?: (core: NapCatCore, obContext: NapCatOneBot11Adapter, actions: ActionMap, instance: OB11PluginMangerAdapter) => void | Promise<void>;
 }
 
 export interface LoadedPlugin {
@@ -29,7 +29,7 @@ export interface LoadedPlugin {
     module: PluginModule;
 }
 
-export class OB11PluginAdapter extends IOB11NetworkAdapter<PluginConfig> {
+export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
     private readonly pluginPath: string;
     private loadedPlugins: Map<string, LoadedPlugin> = new Map();
 

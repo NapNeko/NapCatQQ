@@ -49,7 +49,8 @@ import {
 import { OB11Message } from './types';
 import { IOB11NetworkAdapter } from '@/onebot/network/adapter';
 import { OB11HttpSSEServerAdapter } from './network/http-server-sse';
-import { OB11PluginAdapter } from './network/plugin';
+import { OB11PluginMangerAdapter } from './network/plugin-manger';
+import { existsSync } from 'node:fs';
 
 //OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -116,6 +117,12 @@ export class NapCatOneBot11Adapter {
         // this.networkManager.registerAdapter(
         //     new OB11PluginAdapter('myPlugin', this.core, this,this.actions)
         // );
+        if (existsSync(this.context.pathWrapper.pluginPath)) {
+            this.context.logger.log(`[Plugins] 插件目录存在，开始加载插件`);
+            this.networkManager.registerAdapter(
+                new OB11PluginMangerAdapter('plugin_manager', this.core, this, this.actions)
+            );
+        }
         for (const key of ob11Config.network.httpServers) {
             if (key.enable) {
                 this.networkManager.registerAdapter(
