@@ -9,6 +9,7 @@ export class NapCatPathWrapper {
     configPath: string;
     cachePath: string;
     staticPath: string;
+    pluginPath: string;
 
     constructor(mainPath: string = dirname(fileURLToPath(import.meta.url))) {
         this.binaryPath = mainPath;
@@ -24,6 +25,7 @@ export class NapCatPathWrapper {
 
         this.logsPath = path.join(writePath, 'logs');
         this.configPath = path.join(writePath, 'config');
+        this.pluginPath = path.join(writePath, 'plugins');//dynamic load
         this.cachePath = path.join(writePath, 'cache');
         this.staticPath = path.join(this.binaryPath, 'static');
         if (!fs.existsSync(this.logsPath)) {
