@@ -32,7 +32,7 @@ export interface LoadedPlugin {
 export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
     private readonly pluginPath: string;
     private loadedPlugins: Map<string, LoadedPlugin> = new Map();
-
+    declare config: PluginConfig;
     constructor(
         name: string, core: NapCatCore, obContext: NapCatOneBot11Adapter, actions: ActionMap
     ) {
