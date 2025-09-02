@@ -68,7 +68,7 @@ export class NTQQPacketApi {
         this.pkt = new PacketClientSession(this.core);
         await this.pkt.init(process.pid, table.recv, table.send);
         try {
-            await this.pkt.operation.FetchRkey();
+            await this.pkt.operation.FetchRkey(1500);
         } catch (error) {
             this.logger.logError('测试Packet状态异常', error);
             return false;

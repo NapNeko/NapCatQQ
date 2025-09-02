@@ -46,6 +46,7 @@ import { GroupChange, GroupChangeInfo, GroupInvite, PushMsgBody } from '@/core/p
 import { OB11GroupRequestEvent } from '../event/request/OB11GroupRequest';
 import { LRUCache } from '@/common/lru-cache';
 import { cleanTaskQueue } from '@/common/clean-task';
+import { registerResource } from '@/common/health';
 
 type RawToOb11Converters = {
     [Key in keyof MessageElement as Key extends `${string}Element` ? Key : never]: (
@@ -69,7 +70,8 @@ export type SendMessageContext = {
 }
 
 export type RecvMessageContext = {
-    parseMultMsg: boolean
+    parseMultMsg: boolean,
+    disableGetUrl: boolean
 }
 
 function keyCanBeParsed(key: string, parser: RawToOb11Converters): key is keyof RawToOb11Converters {
@@ -109,7 +111,7 @@ export class OneBotMsgApi {
             }
         },
 
-        picElement: async (element, msg, elementWrapper) => {
+        picElement: async (element, msg, elementWrapper, { disableGetUrl }) => {
             try {
                 const peer = {
                     chatType: msg.chatType,
@@ -129,7 +131,7 @@ export class OneBotMsgApi {
                         summary: element.summary,
                         file: element.fileName,
                         sub_type: element.picSubType,
-                        url: await this.core.apis.FileApi.getImageUrl(element),
+                        url: disableGetUrl ? (element.filePath ?? '') : await this.core.apis.FileApi.getImageUrl(element),
                         file_size: element.fileSize,
                     },
                 };
@@ -139,7 +141,7 @@ export class OneBotMsgApi {
             }
         },
 
-        fileElement: async (element, msg, elementWrapper) => {
+        fileElement: async (element, msg, elementWrapper, { disableGetUrl }) => {
             const peer = {
                 chatType: msg.chatType,
                 peerUid: msg.peerUid,
@@ -147,10 +149,24 @@ export class OneBotMsgApi {
             };
             FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, element.fileUuid, element.fileUuid);
             FileNapCatOneBotUUID.encode(peer, msg.msgId, elementWrapper.elementId, element.fileUuid, element.fileName);
-            if (this.core.apis.PacketApi.packetStatus) {
+            if (this.core.apis.PacketApi.packetStatus && !disableGetUrl) {
                 let url;
                 try {
-                    url = await this.core.apis.FileApi.getFileUrl(msg.chatType, msg.peerUid, element.fileUuid, element.file10MMd5, 1500)
+                    //url = await this.core.apis.FileApi.getFileUrl(msg.chatType, msg.peerUid, element.fileUuid, element.file10MMd5, 1500)
+                    url = await registerResource(
+                        'file-url-get',
+                        {
+                            resourceFn: async () => {
+                                return await this.core.apis.FileApi.getFileUrl(msg.chatType, msg.peerUid, element.fileUuid, element.file10MMd5, 1500);
+                            },
+                            healthCheckFn: async () => {
+                                return await this.core.apis.PacketApi.pkt.operation.FetchRkey().then(() => true).catch(() => false);
+                            },
+                            testArgs: [],
+                            healthCheckInterval: 30000,
+                            maxHealthCheckFailures: 3
+                        },
+                    );
                 } catch (error) {
                     url = '';
                 }
@@ -345,7 +361,7 @@ export class OneBotMsgApi {
 
             return null;
         },
-        videoElement: async (element, msg, elementWrapper) => {
+        videoElement: async (element, msg, elementWrapper, { disableGetUrl }) => {
             const peer = {
                 chatType: msg.chatType,
                 peerUid: msg.peerUid,
@@ -390,10 +406,24 @@ export class OneBotMsgApi {
             }
 
             //开始兜底
-            if (!videoDownUrl) {
+            if (!videoDownUrl && !disableGetUrl) {
                 if (this.core.apis.PacketApi.packetStatus) {
                     try {
-                        videoDownUrl = await this.core.apis.FileApi.getVideoUrlPacket(msg.peerUid, element.fileUuid, 1500);
+                        //videoDownUrl = await this.core.apis.FileApi.getVideoUrlPacket(msg.peerUid, element.fileUuid, 1500);
+                        videoDownUrl = await registerResource(
+                            'video-url-get',
+                            {
+                                resourceFn: async () => {
+                                    return await this.core.apis.FileApi.getVideoUrlPacket(msg.peerUid, element.fileUuid, 1500);
+                                },
+                                healthCheckFn: async () => {
+                                    return await this.core.apis.PacketApi.pkt.operation.FetchRkey().then(() => true).catch(() => false);
+                                },
+                                testArgs: [],
+                                healthCheckInterval: 30000,
+                                maxHealthCheckFailures: 3
+                            },
+                        );
                     } catch (e) {
                         this.core.context.logger.logError('获取视频url失败', (e as Error).stack);
                         videoDownUrl = element.filePath;
@@ -424,7 +454,21 @@ export class OneBotMsgApi {
             let pttUrl = '';
             if (this.core.apis.PacketApi.packetStatus) {
                 try {
-                    pttUrl = await this.core.apis.FileApi.getPttUrl(msg.peerUid, element.fileUuid, 1500);
+                    pttUrl = await registerResource(
+                        'ptt-url-get',
+                        {
+                            resourceFn: async () => {
+                                return await this.core.apis.FileApi.getPttUrl(msg.peerUid, element.fileUuid, 1500);
+                            },
+                            healthCheckFn: async () => {
+                                return await this.core.apis.PacketApi.pkt.operation.FetchRkey().then(() => true).catch(() => false);
+                            },
+                            testArgs: [],
+                            healthCheckInterval: 30000,
+                            maxHealthCheckFailures: 3
+                        },
+                    );
+                    //pttUrl = await this.core.apis.FileApi.getPttUrl(msg.peerUid, element.fileUuid, 1500);
                 } catch (e) {
                     this.core.context.logger.logError('获取语音url失败', (e as Error).stack);
                     pttUrl = element.filePath;
@@ -908,17 +952,19 @@ export class OneBotMsgApi {
     async parseMessage(
         msg: RawMessage,
         messagePostFormat: string,
-        parseMultMsg: boolean = true
+        parseMultMsg: boolean = true,
+        disableGetUrl: boolean = false
     ) {
         if (messagePostFormat === 'string') {
-            return (await this.parseMessageV2(msg, parseMultMsg))?.stringMsg;
+            return (await this.parseMessageV2(msg, parseMultMsg, disableGetUrl))?.stringMsg;
         }
-        return (await this.parseMessageV2(msg, parseMultMsg))?.arrayMsg;
+        return (await this.parseMessageV2(msg, parseMultMsg, disableGetUrl))?.arrayMsg;
     }
 
     async parseMessageV2(
         msg: RawMessage,
-        parseMultMsg: boolean = true
+        parseMultMsg: boolean = true,
+        disableGetUrl: boolean = false
     ) {
         if (msg.senderUin == '0' || msg.senderUin == '') return;
         if (msg.peerUin == '0' || msg.peerUin == '') return;
@@ -939,7 +985,7 @@ export class OneBotMsgApi {
             return undefined;
         }
 
-        const validSegments = await this.parseMessageSegments(msg, parseMultMsg);
+        const validSegments = await this.parseMessageSegments(msg, parseMultMsg, disableGetUrl);
         resMsg.message = validSegments;
         resMsg.raw_message = validSegments.map(msg => encodeCQCode(msg)).join('').trim();
 
@@ -1010,7 +1056,7 @@ export class OneBotMsgApi {
         }
     }
 
-    private async parseMessageSegments(msg: RawMessage, parseMultMsg: boolean): Promise<OB11MessageData[]> {
+    private async parseMessageSegments(msg: RawMessage, parseMultMsg: boolean, disableGetUrl: boolean = false): Promise<OB11MessageData[]> {
         const msgSegments = await Promise.allSettled(msg.elements.map(
             async (element) => {
                 for (const key in element) {
@@ -1025,7 +1071,7 @@ export class OneBotMsgApi {
                             element[key],
                             msg,
                             element,
-                            { parseMultMsg }
+                            { parseMultMsg, disableGetUrl }
                         );
                         if (key === 'faceElement' && !parsedElement) {
                             return null;
@@ -1179,12 +1225,12 @@ export class OneBotMsgApi {
             let url = '';
             if (mixElement?.picElement && rawMessage) {
                 const tempData =
-                    await this.obContext.apis.MsgApi.rawToOb11Converters.picElement?.(mixElement?.picElement, rawMessage, mixElement, { parseMultMsg: false }) as OB11MessageImage | undefined;
+                    await this.obContext.apis.MsgApi.rawToOb11Converters.picElement?.(mixElement?.picElement, rawMessage, mixElement, { parseMultMsg: false, disableGetUrl: false }) as OB11MessageImage | undefined;
                 url = tempData?.data.url ?? '';
             }
             if (mixElement?.videoElement && rawMessage) {
                 const tempData =
-                    await this.obContext.apis.MsgApi.rawToOb11Converters.videoElement?.(mixElement?.videoElement, rawMessage, mixElement, { parseMultMsg: false }) as OB11MessageVideo | undefined;
+                    await this.obContext.apis.MsgApi.rawToOb11Converters.videoElement?.(mixElement?.videoElement, rawMessage, mixElement, { parseMultMsg: false, disableGetUrl: false }) as OB11MessageVideo | undefined;
                 url = tempData?.data.url ?? '';
             }
             return url !== '' ? url : await this.core.apis.FileApi.downloadMedia(msgId, peer.chatType, peer.peerUid, elementId, '', '');
