@@ -16,7 +16,8 @@ const SchemaData = Type.Object({
     count: Type.Number({ default: 20 }),
     reverseOrder: Type.Boolean({ default: false }),
     disable_get_url: Type.Boolean({ default: false }),
-    parse_mult_msg: Type.Boolean({ default: true })
+    parse_mult_msg: Type.Boolean({ default: true }),
+    quick_reply: Type.Boolean({ default: false }),
 });
 
 
