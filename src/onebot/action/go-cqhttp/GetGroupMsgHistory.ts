@@ -14,7 +14,9 @@ const SchemaData = Type.Object({
     group_id: Type.String(),
     message_seq: Type.Optional(Type.String()),
     count: Type.Number({ default: 20 }),
-    reverseOrder: Type.Boolean({ default: false })
+    reverseOrder: Type.Boolean({ default: false }),
+    disableGetUrl: Type.Boolean({ default: false }),
+    parseMultMsg: Type.Boolean({ default: true }),
 });
 
 
@@ -39,7 +41,7 @@ export default class GoCQHTTPGetGroupMsgHistory extends OneBotAction<Payload, Re
         }));
         //烘焙消息
         const ob11MsgList = (await Promise.all(
-            msgList.map(msg => this.obContext.apis.MsgApi.parseMessage(msg, config.messagePostFormat)))
+            msgList.map(msg => this.obContext.apis.MsgApi.parseMessage(msg, config.messagePostFormat, payload.parseMultMsg, payload.disableGetUrl)))
         ).filter(msg => msg !== undefined);
         return { 'messages': ob11MsgList };
     }

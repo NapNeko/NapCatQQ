@@ -38,9 +38,9 @@ export class PacketOperationContext {
         const req = trans.SetGroupTodo.build(groupUin, msgSeq);
         await this.context.client.sendOidbPacket(req, true);
     }
-    async FetchRkey() {
+    async FetchRkey(timeout: number = 10000) {
         const req = trans.FetchRkey.build();
-        const resp = await this.context.client.sendOidbPacket(req, true);
+        const resp = await this.context.client.sendOidbPacket(req, true, timeout);
         const res = trans.FetchRkey.parse(resp);
         return res.data.rkeyList;
     }
