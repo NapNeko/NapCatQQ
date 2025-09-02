@@ -1,5 +1,5 @@
-import { EventType } from "../onebot/event/OneBotEvent";
-import type { PluginModule } from "../onebot/network/plugin-manger";
+import { EventType } from "@/onebot/event/OneBotEvent";
+import type { PluginModule } from "@/onebot/network/plugin-manger";
 
 const plugin_init: PluginModule["plugin_init"] = async (_core, _obContext, _actions, _instance) => {
     console.log(`[Plugin: example] 插件已初始化`);
