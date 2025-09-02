@@ -42,8 +42,8 @@ export class NTQQFileApi {
         this.context = context;
         this.core = core;
         this.rkeyManager = new RkeyManager([
-            'https://secret-service.bietiaop.com/rkeys',
             'http://ss.xingzhige.com/music_card/rkey',
+            'https://secret-service.bietiaop.com/rkeys',
         ],
             this.context.logger
         );
@@ -260,22 +260,21 @@ export class NTQQFileApi {
         const thumbDir = path.replace(`${pathLib.sep}Ori${pathLib.sep}`, `${pathLib.sep}Thumb${pathLib.sep}`);
         fs.mkdirSync(pathLib.dirname(thumbDir), { recursive: true });
         const thumbPath = pathLib.join(pathLib.dirname(thumbDir), `${md5}_0.png`);
+        try {
+            videoInfo = await FFmpegService.getVideoInfo(filePath, thumbPath);
+            if (!fs.existsSync(thumbPath)) {
+                this.context.logger.logError('获取视频缩略图失败', new Error('缩略图不存在'));
+                throw new Error('获取视频缩略图失败');
+            }
+        } catch (e) {
+            this.context.logger.logError('获取视频信息失败', e);
+            fs.writeFileSync(thumbPath, Buffer.from(defaultVideoThumbB64, 'base64'));
+        }
         if (_diyThumbPath) {
             try {
                 await this.copyFile(_diyThumbPath, thumbPath);
             } catch (e) {
                 this.context.logger.logError('复制自定义缩略图失败', e);
-            }
-        } else {
-            try {
-                videoInfo = await FFmpegService.getVideoInfo(filePath, thumbPath);
-                if (!fs.existsSync(thumbPath)) {
-                    this.context.logger.logError('获取视频缩略图失败', new Error('缩略图不存在'));
-                    throw new Error('获取视频缩略图失败');
-                }
-            } catch (e) {
-                this.context.logger.logError('获取视频信息失败', e);
-                fs.writeFileSync(thumbPath, Buffer.from(defaultVideoThumbB64, 'base64'));
             }
         }
         context.deleteAfterSentFiles.push(thumbPath);
