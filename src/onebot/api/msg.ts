@@ -71,7 +71,8 @@ export type SendMessageContext = {
 
 export type RecvMessageContext = {
     parseMultMsg: boolean,
-    disableGetUrl: boolean
+    disableGetUrl: boolean,
+    quick_reply: boolean
 }
 
 function keyCanBeParsed(key: string, parser: RawToOb11Converters): key is keyof RawToOb11Converters {
@@ -256,7 +257,7 @@ export class OneBotMsgApi {
             };
         },
 
-        replyElement: async (element, msg) => {
+        replyElement: async (element, msg, _, quick_reply) => {
             const peer = {
                 chatType: msg.chatType,
                 peerUid: msg.peerUid,
@@ -293,7 +294,10 @@ export class OneBotMsgApi {
                             : replyMsgList.find(msg => msg.msgSeq === msgSeq);
 
                         if (replyMsg) return replyMsg;
-
+                        if (quick_reply) {
+                            this.core.context.logger.logWarn(`快速回复，跳过方法1查询，序号: ${msgSeq}, 消息数: ${replyMsgList.length}`);
+                            return undefined;
+                        }
                         this.core.context.logger.logWarn(`方法1查询失败，序号: ${msgSeq}, 消息数: ${replyMsgList.length}`);
                     }
 
@@ -953,18 +957,20 @@ export class OneBotMsgApi {
         msg: RawMessage,
         messagePostFormat: string,
         parseMultMsg: boolean = true,
-        disableGetUrl: boolean = false
+        disableGetUrl: boolean = false,
+        quick_reply: boolean = false
     ) {
         if (messagePostFormat === 'string') {
-            return (await this.parseMessageV2(msg, parseMultMsg, disableGetUrl))?.stringMsg;
+            return (await this.parseMessageV2(msg, parseMultMsg, disableGetUrl, quick_reply))?.stringMsg;
         }
-        return (await this.parseMessageV2(msg, parseMultMsg, disableGetUrl))?.arrayMsg;
+        return (await this.parseMessageV2(msg, parseMultMsg, disableGetUrl, quick_reply))?.arrayMsg;
     }
 
     async parseMessageV2(
         msg: RawMessage,
         parseMultMsg: boolean = true,
-        disableGetUrl: boolean = false
+        disableGetUrl: boolean = false,
+        quick_reply: boolean = false
     ) {
         if (msg.senderUin == '0' || msg.senderUin == '') return;
         if (msg.peerUin == '0' || msg.peerUin == '') return;
@@ -985,7 +991,7 @@ export class OneBotMsgApi {
             return undefined;
         }
 
-        const validSegments = await this.parseMessageSegments(msg, parseMultMsg, disableGetUrl);
+        const validSegments = await this.parseMessageSegments(msg, parseMultMsg, disableGetUrl, quick_reply);
         resMsg.message = validSegments;
         resMsg.raw_message = validSegments.map(msg => encodeCQCode(msg)).join('').trim();
 
@@ -1056,7 +1062,7 @@ export class OneBotMsgApi {
         }
     }
 
-    private async parseMessageSegments(msg: RawMessage, parseMultMsg: boolean, disableGetUrl: boolean = false): Promise<OB11MessageData[]> {
+    private async parseMessageSegments(msg: RawMessage, parseMultMsg: boolean, disableGetUrl: boolean = false, quick_reply: boolean = false): Promise<OB11MessageData[]> {
         const msgSegments = await Promise.allSettled(msg.elements.map(
             async (element) => {
                 for (const key in element) {
@@ -1071,7 +1077,7 @@ export class OneBotMsgApi {
                             element[key],
                             msg,
                             element,
-                            { parseMultMsg, disableGetUrl }
+                            { parseMultMsg, disableGetUrl, quick_reply }
                         );
                         if (key === 'faceElement' && !parsedElement) {
                             return null;
@@ -1225,12 +1231,12 @@ export class OneBotMsgApi {
             let url = '';
             if (mixElement?.picElement && rawMessage) {
                 const tempData =
-                    await this.obContext.apis.MsgApi.rawToOb11Converters.picElement?.(mixElement?.picElement, rawMessage, mixElement, { parseMultMsg: false, disableGetUrl: false }) as OB11MessageImage | undefined;
+                    await this.obContext.apis.MsgApi.rawToOb11Converters.picElement?.(mixElement?.picElement, rawMessage, mixElement, { parseMultMsg: false, disableGetUrl: false, quick_reply: false }) as OB11MessageImage | undefined;
                 url = tempData?.data.url ?? '';
             }
             if (mixElement?.videoElement && rawMessage) {
                 const tempData =
-                    await this.obContext.apis.MsgApi.rawToOb11Converters.videoElement?.(mixElement?.videoElement, rawMessage, mixElement, { parseMultMsg: false, disableGetUrl: false }) as OB11MessageVideo | undefined;
+                    await this.obContext.apis.MsgApi.rawToOb11Converters.videoElement?.(mixElement?.videoElement, rawMessage, mixElement, { parseMultMsg: false, disableGetUrl: false, quick_reply: false }) as OB11MessageVideo | undefined;
                 url = tempData?.data.url ?? '';
             }
             return url !== '' ? url : await this.core.apis.FileApi.downloadMedia(msgId, peer.chatType, peer.peerUid, elementId, '', '');
