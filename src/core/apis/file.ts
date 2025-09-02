@@ -64,13 +64,13 @@ export class NTQQFileApi {
         }
     }
 
-    async getFileUrl(chatType: ChatType, peer: string, fileUUID?: string, file10MMd5?: string | undefined) {
+    async getFileUrl(chatType: ChatType, peer: string, fileUUID?: string, file10MMd5?: string | undefined,timeout: number = 20000) {
         if (this.core.apis.PacketApi.packetStatus) {
             try {
                 if (chatType === ChatType.KCHATTYPEGROUP && fileUUID) {
-                    return this.core.apis.PacketApi.pkt.operation.GetGroupFileUrl(+peer, fileUUID);
+                    return this.core.apis.PacketApi.pkt.operation.GetGroupFileUrl(+peer, fileUUID, timeout);
                 } else if (file10MMd5 && fileUUID) {
-                    return this.core.apis.PacketApi.pkt.operation.GetPrivateFileUrl(peer, fileUUID, file10MMd5);
+                    return this.core.apis.PacketApi.pkt.operation.GetPrivateFileUrl(peer, fileUUID, file10MMd5, timeout);
                 }
             } catch (error) {
                 this.context.logger.logError('获取文件URL失败', (error as Error).message);
@@ -79,7 +79,7 @@ export class NTQQFileApi {
         throw new Error('fileUUID or file10MMd5 is undefined');
     }
 
-    async getPttUrl(peer: string, fileUUID?: string) {
+    async getPttUrl(peer: string, fileUUID?: string,timeout: number = 20000) {
         if (this.core.apis.PacketApi.packetStatus && fileUUID) {
             let appid = new NapProtoMsg(FileId).decode(Buffer.from(fileUUID.replaceAll('-', '+').replaceAll('_', '/'), 'base64')).appid;
             try {
@@ -90,7 +90,7 @@ export class NTQQFileApi {
                         uploadTime: 0,
                         ttl: 0,
                         subType: 0,
-                    });
+                    }, timeout);
                 } else if (fileUUID) {
                     return this.core.apis.PacketApi.pkt.operation.GetPttUrl(peer, {
                         fileUuid: fileUUID,
@@ -98,7 +98,7 @@ export class NTQQFileApi {
                         uploadTime: 0,
                         ttl: 0,
                         subType: 0,
-                    });
+                    }, timeout);
                 }
             } catch (error) {
                 this.context.logger.logError('获取文件URL失败', (error as Error).message);
@@ -107,7 +107,7 @@ export class NTQQFileApi {
         throw new Error('packet cant get ptt url');
     }
 
-    async getVideoUrlPacket(peer: string, fileUUID?: string) {
+    async getVideoUrlPacket(peer: string, fileUUID?: string,timeout: number = 20000) {
         if (this.core.apis.PacketApi.packetStatus && fileUUID) {
             let appid = new NapProtoMsg(FileId).decode(Buffer.from(fileUUID.replaceAll('-', '+').replaceAll('_', '/'), 'base64')).appid;
             try {
@@ -118,7 +118,7 @@ export class NTQQFileApi {
                         uploadTime: 0,
                         ttl: 0,
                         subType: 0,
-                    });
+                    }, timeout);
                 } else if (fileUUID) {
                     return this.core.apis.PacketApi.pkt.operation.GetVideoUrl(peer, {
                         fileUuid: fileUUID,
@@ -126,7 +126,7 @@ export class NTQQFileApi {
                         uploadTime: 0,
                         ttl: 0,
                         subType: 0,
-                    });
+                    }, timeout);
                 }
             } catch (error) {
                 this.context.logger.logError('获取文件URL失败', (error as Error).message);
