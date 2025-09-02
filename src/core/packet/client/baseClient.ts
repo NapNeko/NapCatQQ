@@ -80,15 +80,15 @@ export abstract class IPacketClient {
         });
     }
 
-    async sendPacket(cmd: string, data: PacketHexStr, rsp = false): Promise<RecvPacketData> {
+    async sendPacket(cmd: string, data: PacketHexStr, rsp = false, timeout = 20000): Promise<RecvPacketData> {
         const md5 = crypto.createHash('md5').update(data).digest('hex');
         const trace_id = (randText(4) + md5 + data).slice(0, data.length / 2);
-        return this.sendCommand(cmd, data, trace_id, rsp, 20000, async () => {
+        return this.sendCommand(cmd, data, trace_id, rsp, timeout, async () => {
             await this.napcore.sendSsoCmdReqByContend(cmd, trace_id);
         });
     }
 
-    async sendOidbPacket(pkt: OidbPacket, rsp = false): Promise<RecvPacketData> {
-        return this.sendPacket(pkt.cmd, pkt.data, rsp);
+    async sendOidbPacket(pkt: OidbPacket, rsp = false, timeout = 20000): Promise<RecvPacketData> {
+        return this.sendPacket(pkt.cmd, pkt.data, rsp, timeout);
     }
 }

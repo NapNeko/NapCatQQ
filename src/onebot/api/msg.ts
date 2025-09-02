@@ -150,7 +150,7 @@ export class OneBotMsgApi {
             if (this.core.apis.PacketApi.packetStatus) {
                 let url;
                 try {
-                    url = await this.core.apis.FileApi.getFileUrl(msg.chatType, msg.peerUid, element.fileUuid, element.file10MMd5)
+                    url = await this.core.apis.FileApi.getFileUrl(msg.chatType, msg.peerUid, element.fileUuid, element.file10MMd5, 1500)
                 } catch (error) {
                     url = '';
                 }
@@ -393,7 +393,7 @@ export class OneBotMsgApi {
             if (!videoDownUrl) {
                 if (this.core.apis.PacketApi.packetStatus) {
                     try {
-                        videoDownUrl = await this.core.apis.FileApi.getVideoUrlPacket(msg.peerUid, element.fileUuid);
+                        videoDownUrl = await this.core.apis.FileApi.getVideoUrlPacket(msg.peerUid, element.fileUuid, 1500);
                     } catch (e) {
                         this.core.context.logger.logError('获取视频url失败', (e as Error).stack);
                         videoDownUrl = element.filePath;
@@ -424,7 +424,7 @@ export class OneBotMsgApi {
             let pttUrl = '';
             if (this.core.apis.PacketApi.packetStatus) {
                 try {
-                    pttUrl = await this.core.apis.FileApi.getPttUrl(msg.peerUid, element.fileUuid);
+                    pttUrl = await this.core.apis.FileApi.getPttUrl(msg.peerUid, element.fileUuid, 1500);
                 } catch (e) {
                     this.core.context.logger.logError('获取语音url失败', (e as Error).stack);
                     pttUrl = element.filePath;
