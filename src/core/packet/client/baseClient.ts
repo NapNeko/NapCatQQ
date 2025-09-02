@@ -1,4 +1,3 @@
-import { LRUCache } from '@/common/lru-cache';
 import crypto, { createHash } from 'crypto';
 import { OidbPacket, PacketHexStr } from '@/core/packet/transformer/base';
 import { LogStack } from '@/core/packet/context/clientContext';
@@ -7,7 +6,6 @@ import { PacketLogger } from '@/core/packet/context/loggerContext';
 
 export interface RecvPacket {
     type: string, // 仅recv
-    trace_id_md5?: string,
     data: RecvPacketData
 }
 
@@ -30,7 +28,7 @@ function randText(len: number): string {
 export abstract class IPacketClient {
     protected readonly napcore: NapCoreContext;
     protected readonly logger: PacketLogger;
-    protected readonly cb = new LRUCache<string, (json: RecvPacketData) => Promise<void>>(500); // trace_id-type callback
+    protected readonly cb = new Map<string, (json: RecvPacketData) => Promise<any> | any>(); // hash-type callback
     logStack: LogStack;
     available: boolean = false;
 
@@ -44,24 +42,21 @@ export abstract class IPacketClient {
 
     abstract init(pid: number, recv: string, send: string): Promise<void>;
 
-    abstract sendCommandImpl(cmd: string, data: string, trace_id: string): void;
+    abstract sendCommandImpl(cmd: string, data: string, hash: string, timeout: number): void;
 
-    private async registerCallback(trace_id: string, type: string, callback: (json: RecvPacketData) => Promise<void>): Promise<void> {
-        this.cb.put(createHash('md5').update(trace_id).digest('hex') + type, callback);
-    }
-
-    private async sendCommand(cmd: string, data: string, trace_id: string, rsp: boolean = false, timeout: number = 20000, sendcb: (json: RecvPacketData) => void = () => {
+    private async sendCommand(cmd: string, data: string, trace_data: string, rsp: boolean = false, timeout: number = 20000, sendcb: (json: RecvPacketData) => void = () => {
     }): Promise<RecvPacketData> {
         return new Promise<RecvPacketData>((resolve, reject) => {
             if (!this.available) {
                 reject(new Error('packetBackend 当前不可用！'));
             }
-
+            let hash = createHash('md5').update(trace_data).digest('hex');
             const timeoutHandle = setTimeout(() => {
-                reject(new Error(`sendCommand timed out after ${timeout} ms for ${cmd} with trace_id ${trace_id}`));
+                this.cb.delete(hash + 'send');
+                this.cb.delete(hash + 'recv');
+                reject(new Error(`sendCommand timed out after ${timeout} ms for ${cmd} with hash ${hash}`));
             }, timeout);
-
-            this.registerCallback(trace_id, 'send', async (json: RecvPacketData) => {
+            this.cb.set(hash + 'send', async (json: RecvPacketData) => {
                 sendcb(json);
                 if (!rsp) {
                     clearTimeout(timeoutHandle);
@@ -70,21 +65,20 @@ export abstract class IPacketClient {
             });
 
             if (rsp) {
-                this.registerCallback(trace_id, 'recv', async (json: RecvPacketData) => {
+                this.cb.set(hash + 'recv', async (json: RecvPacketData) => {
                     clearTimeout(timeoutHandle);
                     resolve(json);
                 });
             }
-
-            this.sendCommandImpl(cmd, data, trace_id);
+            this.sendCommandImpl(cmd, data, hash, timeout);
         });
     }
 
     async sendPacket(cmd: string, data: PacketHexStr, rsp = false, timeout = 20000): Promise<RecvPacketData> {
         const md5 = crypto.createHash('md5').update(data).digest('hex');
-        const trace_id = (randText(4) + md5 + data).slice(0, data.length / 2);
-        return this.sendCommand(cmd, data, trace_id, rsp, timeout, async () => {
-            await this.napcore.sendSsoCmdReqByContend(cmd, trace_id);
+        const trace_data = (randText(4) + md5 + data).slice(0, data.length / 2);// trace_data
+        return this.sendCommand(cmd, data, trace_data, rsp, timeout, async () => {
+            await this.napcore.sendSsoCmdReqByContend(cmd, trace_data);
         });
     }
 

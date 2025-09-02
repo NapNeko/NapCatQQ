@@ -62,7 +62,6 @@ export class NapCatOneBot11Adapter {
     networkManager: OB11NetworkManager;
     actions: ActionMap;
     private readonly bootTime = Date.now() / 1000;
-    //recallMsgCache = new LRUCache<string, boolean>(100);
     recallEventCache = new Map<string, any>();
     constructor(core: NapCatCore, context: InstanceContext, pathWrapper: NapCatPathWrapper) {
         this.core = core;

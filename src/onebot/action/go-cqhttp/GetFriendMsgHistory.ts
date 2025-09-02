@@ -15,8 +15,8 @@ const SchemaData = Type.Object({
     message_seq: Type.Optional(Type.String()),
     count: Type.Number({ default: 20 }),
     reverseOrder: Type.Boolean({ default: false }),
-    disableGetUrl: Type.Boolean({ default: false }),
-    parseMultMsg: Type.Boolean({ default: true })
+    disable_get_url: Type.Boolean({ default: false }),
+    parse_mult_msg: Type.Boolean({ default: true })
 });
 
 
@@ -43,7 +43,7 @@ export default class GetFriendMsgHistory extends OneBotAction<Payload, Response>
         }));
         //烘焙消息
         const ob11MsgList = (await Promise.all(
-            msgList.map(msg => this.obContext.apis.MsgApi.parseMessage(msg, config.messagePostFormat, payload.parseMultMsg, payload.disableGetUrl)))
+            msgList.map(msg => this.obContext.apis.MsgApi.parseMessage(msg, config.messagePostFormat, payload.parse_mult_msg, payload.disable_get_url)))
         ).filter(msg => msg !== undefined);
         return { 'messages': ob11MsgList };
     }
