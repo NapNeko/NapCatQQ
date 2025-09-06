@@ -13,8 +13,8 @@ import { themeType } from '../types/theme';
 const WebUiConfigSchema = Type.Object({
     host: Type.String({ default: '0.0.0.0' }),
     port: Type.Number({ default: 6099 }),
-    // napcat+<月份日>，例如 napcat0625
-    token: Type.String({ default: 'napcat' + (new Date().getMonth() + 1).toString().padStart(2, '0') + new Date().getDate().toString().padStart(2, '0') }),
+    // napcat+<月份日时>，例如 napcat062511
+    token: Type.String({ default: 'napcat' + (new Date().getMonth() + 1).toString().padStart(2, '0') + new Date().getDate().toString().padStart(2, '0') + new Date().getHours().toString().padStart(2, '0') }),
     loginRate: Type.Number({ default: 10 }),
     autoLoginAccount: Type.String({ default: '' }),
     theme: themeType,

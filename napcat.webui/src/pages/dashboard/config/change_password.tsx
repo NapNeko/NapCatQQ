@@ -14,7 +14,7 @@ import WebUIManager from '@/controllers/webui_manager'
 const ChangePasswordCard = () => {
   const [isDefaultToken, setIsDefaultToken] = useState<boolean>(false)
   const [isLoadingCheck, setIsLoadingCheck] = useState<boolean>(true)
-  
+
   const {
     control,
     handleSubmit: handleWebuiSubmit,
@@ -45,7 +45,7 @@ const ChangePasswordCard = () => {
         setIsLoadingCheck(false)
       }
     }
-    
+
     checkDefaultToken()
   }, [])
 
@@ -58,7 +58,7 @@ const ChangePasswordCard = () => {
         // 正常密码更新
         await WebUIManager.changePassword(data.oldToken, data.newToken)
       }
-      
+
       toast.success('修改成功')
       setToken('')
       localStorage.removeItem(key.token)
@@ -83,7 +83,7 @@ const ChangePasswordCard = () => {
   return (
     <>
       <title>修改密码 - NapCat WebUI</title>
-      
+
       {isDefaultToken && (
         <div className="mb-4 p-3 bg-warning-50 border border-warning-200 rounded-lg">
           <p className="text-warning-700 text-sm">
@@ -91,7 +91,7 @@ const ChangePasswordCard = () => {
           </p>
         </div>
       )}
-      
+
       {!isDefaultToken && (
         <Controller
           control={control}
@@ -106,7 +106,7 @@ const ChangePasswordCard = () => {
           )}
         />
       )}
-      
+
       <Controller
         control={control}
         name="newToken"
@@ -119,7 +119,7 @@ const ChangePasswordCard = () => {
           />
         )}
       />
-      
+
       <SaveButtons
         onSubmit={onSubmit}
         reset={reset}
