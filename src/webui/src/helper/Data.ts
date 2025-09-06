@@ -14,6 +14,12 @@ const LoginRuntime: LoginRuntimeType = {
         nick: '',
     },
     QQVersion: 'unknown',
+    onQQLoginStatusChange: async (status: boolean) => {
+        LoginRuntime.QQLoginStatus = status;
+    },
+    onWebUiTokenChange: async (_token: string) => {
+        return;
+    },
     NapCatHelper: {
         onOB11ConfigChanged: async () => {
             return;
@@ -31,6 +37,12 @@ const LoginRuntime: LoginRuntimeType = {
 };
 
 export const WebUiDataRuntime = {
+    setWebUiTokenChangeCallback(func: (token: string) => Promise<void>): void {
+        LoginRuntime.onWebUiTokenChange = func;
+    },
+    getWebUiTokenChangeCallback(): (token: string) => Promise<void> {
+        return LoginRuntime.onWebUiTokenChange;
+    },
     checkLoginRate(ip: string, RateLimit: number): boolean {
         const key = `login_rate:${ip}`;
         const count = store.get<number>(key) || 0;
@@ -51,6 +63,14 @@ export const WebUiDataRuntime = {
 
     getQQLoginStatus(): LoginRuntimeType['QQLoginStatus'] {
         return LoginRuntime.QQLoginStatus;
+    },
+
+    setQQLoginCallback(func: (status: boolean) => Promise<void>): void {
+        LoginRuntime.onQQLoginStatusChange = func;
+    },
+
+    getQQLoginCallback(): (status: boolean) => Promise<void> {
+        return LoginRuntime.onQQLoginStatusChange;
     },
 
     setQQLoginStatus(status: LoginRuntimeType['QQLoginStatus']): void {

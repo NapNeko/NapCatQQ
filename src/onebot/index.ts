@@ -13,6 +13,8 @@ import {
     SendStatusType,
     NTMsgType,
     MessageElement,
+    ElementType,
+    NTMsgAtType,
 } from '@/core';
 import { OB11ConfigLoader } from '@/onebot/config';
 import {
@@ -178,6 +180,25 @@ export class NapCatOneBot11Adapter {
         WebUiDataRuntime.setQQVersion(this.core.context.basicInfoWrapper.getFullQQVersion());
         WebUiDataRuntime.setQQLoginInfo(selfInfo);
         WebUiDataRuntime.setQQLoginStatus(true);
+        WebUiDataRuntime.getQQLoginCallback()(true);
+        let sendWebUiToken = async (token: string) => {
+            await this.core.apis.MsgApi.sendMsg(
+                { chatType: ChatType.KCHATTYPEC2C, peerUid: selfInfo.uid, guildId: '' },
+                [{
+                    elementType: ElementType.TEXT,
+                    elementId: '',
+                    textElement: {
+                        content: 'Update WebUi Token: ' + token,
+                        atType: NTMsgAtType.ATTYPEUNKNOWN,
+                        atUid: '',
+                        atTinyId: '',
+                        atNtUid: '',
+                    }
+                }],
+                5000
+            )
+        };
+        WebUiDataRuntime.setWebUiTokenChangeCallback(sendWebUiToken);
         WebUiDataRuntime.setOnOB11ConfigChanged(async (newConfig) => {
             const prev = this.configLoader.configData;
             this.configLoader.save(newConfig);
