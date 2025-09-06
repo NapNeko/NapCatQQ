@@ -18,11 +18,17 @@ const CheckDefaultPassword = () => {
     if (data) {
       dialog.confirm({
         title: '修改默认密码',
-        content: '检测到当前密码为默认密码，请尽快修改密码。',
+        content: '检测到当前密码为默认密码，为了您的安全，必须立即修改密码。',
         confirmText: '前往修改',
         onConfirm: () => {
           navigate('/config?tab=token')
-        }
+        },
+        onCancel: () => {
+          navigate('/config?tab=token')
+        },
+        onClose() {
+          navigate('/config?tab=token')
+        },
       })
     }
   }
