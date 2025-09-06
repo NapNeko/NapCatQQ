@@ -13,6 +13,7 @@ import { AuthRouter } from '@webapi/router/auth';
 import { LogRouter } from '@webapi/router/Log';
 import { BaseRouter } from '@webapi/router/Base';
 import { FileRouter } from './File';
+import { WebUIConfigRouter } from './WebUIConfig';
 
 const router = Router();
 
@@ -35,5 +36,7 @@ router.use('/OB11Config', OB11ConfigRouter);
 router.use('/Log', LogRouter);
 // file:文件相关路由
 router.use('/File', FileRouter);
+// router:WebUI配置相关路由
+router.use('/WebUIConfig', WebUIConfigRouter);
 
 export { router as ALLRouter };

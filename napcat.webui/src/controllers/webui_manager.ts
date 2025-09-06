@@ -160,4 +160,55 @@ export default class WebUIManager {
 
     return eventSource
   }
+
+  // 获取WebUI基础配置
+  public static async getWebUIConfig() {
+    const { data } = await serverRequest.get<ServerResponse<WebUIConfig>>(
+      '/WebUIConfig/GetConfig'
+    )
+    return data.data
+  }
+
+  // 更新WebUI基础配置
+  public static async updateWebUIConfig(config: Partial<WebUIConfig>) {
+    const { data } = await serverRequest.post<ServerResponse<boolean>>(
+      '/WebUIConfig/UpdateConfig',
+      config
+    )
+    return data.data
+  }
+
+  // 获取是否禁用WebUI
+  public static async getDisableWebUI() {
+    const { data } = await serverRequest.get<ServerResponse<boolean>>(
+      '/WebUIConfig/GetDisableWebUI'
+    )
+    return data.data
+  }
+
+  // 更新是否禁用WebUI
+  public static async updateDisableWebUI(disable: boolean) {
+    const { data } = await serverRequest.post<ServerResponse<boolean>>(
+      '/WebUIConfig/UpdateDisableWebUI',
+      { disable }
+    )
+    return data.data
+  }
+
+  // 获取是否禁用非局域网访问
+  public static async getDisableNonLANAccess() {
+    const { data } = await serverRequest.get<ServerResponse<boolean>>(
+      '/WebUIConfig/GetDisableNonLANAccess'
+    )
+    return data.data
+  }
+
+  // 更新是否禁用非局域网访问
+  public static async updateDisableNonLANAccess(disable: boolean) {
+    const { data } = await serverRequest.post<ServerResponse<boolean>>(
+      '/WebUIConfig/UpdateDisableNonLANAccess',
+      { disable }
+    )
+    return data.data
+  }
 }

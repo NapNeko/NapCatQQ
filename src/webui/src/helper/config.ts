@@ -19,6 +19,10 @@ const WebUiConfigSchema = Type.Object({
     autoLoginAccount: Type.String({ default: '' }),
     theme: themeType,
     defaultToken: Type.Boolean({ default: true }),
+    // 是否关闭WebUI
+    disableWebUI: Type.Boolean({ default: false }),
+    // 是否关闭非局域网访问
+    disableNonLANAccess: Type.Boolean({ default: false }),
 });
 
 export type WebUiConfigType = Static<typeof WebUiConfigSchema>;
@@ -176,5 +180,27 @@ export class WebUiConfigWrapper {
     // 更新主题内容
     async UpdateTheme(theme: WebUiConfigType['theme']): Promise<void> {
         await this.UpdateWebUIConfig({ theme: theme });
+    }
+
+    // 获取是否禁用WebUI
+    async GetDisableWebUI(): Promise<boolean> {
+        const config = await this.GetWebUIConfig();
+        return config.disableWebUI;
+    }
+
+    // 更新是否禁用WebUI
+    async UpdateDisableWebUI(disable: boolean): Promise<void> {
+        await this.UpdateWebUIConfig({ disableWebUI: disable });
+    }
+
+    // 获取是否禁用非局域网访问
+    async GetDisableNonLANAccess(): Promise<boolean> {
+        const config = await this.GetWebUIConfig();
+        return config.disableNonLANAccess;
+    }
+
+    // 更新是否禁用非局域网访问
+    async UpdateDisableNonLANAccess(disable: boolean): Promise<void> {
+        await this.UpdateWebUIConfig({ disableNonLANAccess: disable });
     }
 }

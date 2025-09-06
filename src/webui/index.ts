@@ -61,7 +61,15 @@ async function checkCertificates(logger: LogWrapper): Promise<{ key: string, cer
 export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapper) {
     webUiPathWrapper = pathWrapper;
     WebUiConfig = new WebUiConfigWrapper();
-    const [host, port, token] = await InitPort(await WebUiConfig.GetWebUIConfig());
+    const config = await WebUiConfig.GetWebUIConfig();
+    
+    // 检查是否禁用WebUI
+    if (config.disableWebUI) {
+        logger.log('[NapCat] [WebUi] WebUI is disabled by configuration.');
+        return;
+    }
+    
+    const [host, port, token] = await InitPort(config);
     webUiRuntimePort = port;
     if (port == 0) {
         logger.log('[NapCat] [WebUi] Current WebUi is not run.');

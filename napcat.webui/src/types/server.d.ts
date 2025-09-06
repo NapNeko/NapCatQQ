@@ -181,3 +181,11 @@ interface ThemeConfig {
   dark: ThemeConfigItem
   light: ThemeConfigItem
 }
+
+interface WebUIConfig {
+  host: string
+  port: number
+  loginRate: number
+  disableWebUI: boolean
+  disableNonLANAccess: boolean
+}

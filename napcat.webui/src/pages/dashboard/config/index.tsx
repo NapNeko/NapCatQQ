@@ -7,6 +7,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import ChangePasswordCard from './change_password'
 import LoginConfigCard from './login'
 import OneBotConfigCard from './onebot'
+import ServerConfigCard from './server'
 import ThemeConfigCard from './theme'
 import WebUIConfigCard from './webui'
 
@@ -65,6 +66,11 @@ export default function ConfigPage() {
         <Tab title="OneBot配置" key="onebot">
           <ConfingPageItem>
             <OneBotConfigCard />
+          </ConfingPageItem>
+        </Tab>
+        <Tab title="服务器配置" key="server">
+          <ConfingPageItem>
+            <ServerConfigCard />
           </ConfingPageItem>
         </Tab>
         <Tab title="WebUI配置" key="webui">
