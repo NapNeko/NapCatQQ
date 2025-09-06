@@ -9,12 +9,12 @@ import { deepMerge } from '../utils/object';
 import { themeType } from '../types/theme';
 
 // 限制尝试端口的次数，避免死循环
-
 // 定义配置的类型
 const WebUiConfigSchema = Type.Object({
     host: Type.String({ default: '0.0.0.0' }),
     port: Type.Number({ default: 6099 }),
-    token: Type.String({ default: 'napcat' }),
+    // napcat+<月份日>，例如 napcat0625
+    token: Type.String({ default: 'napcat' + (new Date().getMonth() + 1).toString().padStart(2, '0') + new Date().getDate().toString().padStart(2, '0') }),
     loginRate: Type.Number({ default: 10 }),
     autoLoginAccount: Type.String({ default: '' }),
     theme: themeType,

@@ -1,4 +1,4 @@
-import GenericForm from './generic_form'
+import GenericForm, { random_token } from './generic_form'
 import type { Field } from './generic_form'
 
 export interface HTTPClientFormProps {
@@ -20,7 +20,7 @@ const HTTPClientForm: React.FC<HTTPClientFormProps> = ({
     url: 'http://localhost:8080',
     reportSelfMessage: false,
     messagePostFormat: 'array',
-    token: '',
+    token: random_token(16),
     debug: false
   }
 

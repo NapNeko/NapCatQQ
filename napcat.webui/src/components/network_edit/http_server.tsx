@@ -1,4 +1,4 @@
-import GenericForm from './generic_form'
+import GenericForm, { random_token } from './generic_form'
 import type { Field } from './generic_form'
 
 export interface HTTPServerFormProps {
@@ -17,12 +17,12 @@ const HTTPServerForm: React.FC<HTTPServerFormProps> = ({
   const defaultValues: HTTPServerFormType[0] = {
     enable: false,
     name: '',
-    host: '0.0.0.0',
+    host: '127.0.0.1',
     port: 3000,
     enableCors: true,
     enableWebsocket: true,
     messagePostFormat: 'array',
-    token: '',
+    token: random_token(16),
     debug: false
   }
 
