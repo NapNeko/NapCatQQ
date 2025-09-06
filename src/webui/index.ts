@@ -62,13 +62,13 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
     webUiPathWrapper = pathWrapper;
     WebUiConfig = new WebUiConfigWrapper();
     const config = await WebUiConfig.GetWebUIConfig();
-    
+
     // 检查是否禁用WebUI
     if (config.disableWebUI) {
         logger.log('[NapCat] [WebUi] WebUI is disabled by configuration.');
         return;
     }
-    
+
     const [host, port, token] = await InitPort(config);
     webUiRuntimePort = port;
     if (port == 0) {
@@ -90,6 +90,19 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
                 }
             }
         });
+    WebUiDataRuntime.setQQLoginCallback(async (_status: boolean) => {
+        try {
+            if ((await WebUiConfig.GetWebUIConfig()).defaultToken) {
+                let randomToken = Math.random().toString(36).slice(-8);
+                await WebUiConfig.UpdateWebUIConfig({ token: randomToken });
+                console.log(`[NapCat] [WebUi] Update WebUi Token: ${randomToken}`);
+                await WebUiDataRuntime.getWebUiTokenChangeCallback()(randomToken);
+            }
+        } catch (error) {
+            console.log(`[NapCat] [WebUi] Update WebUi Token failed.` + error);
+        }
+
+    });
     // ------------注册中间件------------
     // 使用express的json中间件
     app.use(express.json());
@@ -177,6 +190,7 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
             );
         }
     });
+
     // ------------Over！------------
 }
 
