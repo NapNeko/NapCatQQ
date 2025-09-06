@@ -1,11 +1,10 @@
 import { Type, Static } from '@sinclair/typebox';
 import Ajv from 'ajv';
-
 const HttpServerConfigSchema = Type.Object({
     name: Type.String({ default: 'http-server' }),
     enable: Type.Boolean({ default: false }),
     port: Type.Number({ default: 3000 }),
-    host: Type.String({ default: '0.0.0.0' }),
+    host: Type.String({ default: '127.0.0.1' }),
     enableCors: Type.Boolean({ default: true }),
     enableWebsocket: Type.Boolean({ default: true }),
     messagePostFormat: Type.String({ default: 'array' }),
@@ -17,7 +16,7 @@ const HttpSseServerConfigSchema = Type.Object({
     name: Type.String({ default: 'http-sse-server' }),
     enable: Type.Boolean({ default: false }),
     port: Type.Number({ default: 3000 }),
-    host: Type.String({ default: '0.0.0.0' }),
+    host: Type.String({ default: '127.0.0.1' }),
     enableCors: Type.Boolean({ default: true }),
     enableWebsocket: Type.Boolean({ default: true }),
     messagePostFormat: Type.String({ default: 'array' }),
@@ -39,7 +38,7 @@ const HttpClientConfigSchema = Type.Object({
 const WebsocketServerConfigSchema = Type.Object({
     name: Type.String({ default: 'websocket-server' }),
     enable: Type.Boolean({ default: false }),
-    host: Type.String({ default: '0.0.0.0' }),
+    host: Type.String({ default: '127.0.0.1' }),
     port: Type.Number({ default: 3001 }),
     messagePostFormat: Type.String({ default: 'array' }),
     reportSelfMessage: Type.Boolean({ default: false }),

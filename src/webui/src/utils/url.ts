@@ -13,7 +13,6 @@ import { isIP } from 'node:net';
  * @example normalizeHost('2001:4860:4801:51::27') => '[2001:4860:4801:51::27]'
  */
 export const normalizeHost = (host: string) => {
-    if (host === '0.0.0.0') return '127.0.0.1';
     if (isIP(host) === 6) return `[${host}]`;
     return host;
 };

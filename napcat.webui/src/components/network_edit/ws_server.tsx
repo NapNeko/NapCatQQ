@@ -1,4 +1,4 @@
-import GenericForm from './generic_form'
+import GenericForm, { random_token } from './generic_form'
 import type { Field } from './generic_form'
 
 export interface WebsocketServerFormProps {
@@ -19,12 +19,12 @@ const WebsocketServerForm: React.FC<WebsocketServerFormProps> = ({
   const defaultValues: WebsocketServerFormType[0] = {
     enable: false,
     name: '',
-    host: '0.0.0.0',
+    host: '127.0.0.1',
     port: 3001,
     reportSelfMessage: false,
     enableForcePushEvent: true,
     messagePostFormat: 'array',
-    token: '',
+    token: random_token(16),
     debug: false,
     heartInterval: 30000
   }

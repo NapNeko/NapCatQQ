@@ -1,4 +1,4 @@
-import GenericForm from './generic_form'
+import GenericForm, { random_token } from './generic_form'
 import type { Field } from './generic_form'
 
 export interface WebsocketClientFormProps {
@@ -22,7 +22,7 @@ const WebsocketClientForm: React.FC<WebsocketClientFormProps> = ({
     url: 'ws://localhost:8082',
     reportSelfMessage: false,
     messagePostFormat: 'array',
-    token: '',
+    token: random_token(16),
     debug: false,
     heartInterval: 30000,
     reconnectInterval: 30000
