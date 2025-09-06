@@ -33,6 +33,14 @@ export default class WebUIManager {
     return data.data
   }
 
+  public static async changePasswordFromDefault(newToken: string) {
+    const { data } = await serverRequest.post<ServerResponse<boolean>>(
+      '/auth/update_token',
+      { newToken, fromDefault: true }
+    )
+    return data.data
+  }
+
   public static async checkUsingDefaultToken() {
     const { data } = await serverRequest.get<ServerResponse<boolean>>(
       '/auth/check_using_default_token'

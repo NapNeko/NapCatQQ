@@ -93,11 +93,16 @@ export const checkHandler: RequestHandler = async (req, res) => {
 
 // 修改密码（token）
 export const UpdateTokenHandler: RequestHandler = async (req, res) => {
-    const { oldToken, newToken } = req.body;
+    const { oldToken, newToken, fromDefault } = req.body;
     const authorization = req.headers.authorization;
 
-    if (isEmpty(oldToken) || isEmpty(newToken)) {
-        return sendError(res, 'oldToken or newToken is empty');
+    if (isEmpty(newToken)) {
+        return sendError(res, 'newToken is empty');
+    }
+
+    // 如果不是从默认密码更新，则需要验证旧密码
+    if (!fromDefault && isEmpty(oldToken)) {
+        return sendError(res, 'oldToken is required when not updating from default password');
     }
 
     try {
@@ -108,7 +113,18 @@ export const UpdateTokenHandler: RequestHandler = async (req, res) => {
             AuthHelper.revokeCredential(Credential);
         }
 
-        await WebUiConfig.UpdateToken(oldToken, newToken);
+        if (fromDefault) {
+            // 从默认密码更新，直接设置新密码
+            const currentConfig = await WebUiConfig.GetWebUIConfig();
+            if (!currentConfig.defaultToken) {
+                return sendError(res, 'Current password is not default password');
+            }
+            await WebUiConfig.UpdateWebUIConfig({ token: newToken, defaultToken: false });
+        } else {
+            // 正常的密码更新流程
+            await WebUiConfig.UpdateToken(oldToken, newToken);
+        }
+        
         return sendSuccess(res, 'Token updated successfully');
     } catch (e: any) {
         return sendError(res, `Failed to update token: ${e.message}`);

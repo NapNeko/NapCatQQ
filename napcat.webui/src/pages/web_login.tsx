@@ -25,7 +25,6 @@ export default function WebLoginPage() {
   const [tokenValue, setTokenValue] = useState<string>(token || '')
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [, setLocalToken] = useLocalStorage<string>(key.token, '')
-
   const onSubmit = async () => {
     if (!tokenValue) {
       toast.error('请输入token')
