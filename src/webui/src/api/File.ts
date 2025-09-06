@@ -65,6 +65,10 @@ const checkSameTypeExists = async (pathToCheck: string, isDirectory: boolean): P
 
 // 获取目录内容
 export const ListFilesHandler: RequestHandler = async (req, res) => {
+    const webuiToken = await WebUiConfig.GetWebUIConfig();
+    if (webuiToken.defaultToken) {
+        return sendError(res, '默认密码禁止使用');
+    }
     try {
         const requestPath = (req.query['path'] as string) || (isWindows ? 'C:\\' : '/');
         const normalizedPath = normalizePath(requestPath);

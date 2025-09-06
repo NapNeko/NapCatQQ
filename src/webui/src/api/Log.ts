@@ -47,7 +47,7 @@ export const CreateTerminalHandler: RequestHandler = async (req, res) => {
     if (isMacOS) {
         return sendError(res, 'MacOS不支持终端');
     }
-    if ((await WebUiConfig.GetWebUIConfig()).token.startsWith('napcat')) {
+    if ((await WebUiConfig.GetWebUIConfig()).defaultToken) {
         return sendError(res, '该密码禁止创建终端');
     }
     try {

@@ -10,7 +10,7 @@ import { isEmpty } from '@webapi/utils/check';
 // 检查是否使用默认Token
 export const CheckDefaultTokenHandler: RequestHandler = async (_, res) => {
     const webuiToken = await WebUiConfig.GetWebUIConfig();
-    if (webuiToken.token.startsWith('napcat')) {
+    if (webuiToken.defaultToken) {
         return sendSuccess(res, true);
     }
     return sendSuccess(res, false);

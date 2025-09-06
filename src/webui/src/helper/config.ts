@@ -18,6 +18,7 @@ const WebUiConfigSchema = Type.Object({
     loginRate: Type.Number({ default: 10 }),
     autoLoginAccount: Type.String({ default: '' }),
     theme: themeType,
+    defaultToken: Type.Boolean({ default: true }),
 });
 
 export type WebUiConfigType = Static<typeof WebUiConfigSchema>;
@@ -88,7 +89,7 @@ export class WebUiConfigWrapper {
         if (currentConfig.token !== oldToken) {
             throw new Error('旧 token 不匹配');
         }
-        await this.UpdateWebUIConfig({ token: newToken });
+        await this.UpdateWebUIConfig({ token: newToken, defaultToken: false });
     }
 
     // 获取日志文件夹路径
