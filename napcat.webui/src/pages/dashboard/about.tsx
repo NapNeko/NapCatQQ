@@ -155,7 +155,7 @@ export default function AboutPage() {
             shadow="sm"
             isPressable
             isExternal
-            href="https://t.me/MelodicMoonlight"
+            href="https://t.me/napcatqq"
           >
             <CardBody className="flex-row items-center gap-2">
               <span className="p-2 rounded-small bg-primary-50 text-primary-500">
