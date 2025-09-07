@@ -106,6 +106,7 @@ export class NapCatOneBot11Adapter {
             .then((user) => {
                 selfInfo.nick = user.nick;
                 this.context.logger.setLogSelfInfo(selfInfo);
+                        WebUiDataRuntime.getQQLoginCallback()(true);
             })
             .catch(e => this.context.logger.logError(e));
 
@@ -180,7 +181,7 @@ export class NapCatOneBot11Adapter {
         WebUiDataRuntime.setQQVersion(this.core.context.basicInfoWrapper.getFullQQVersion());
         WebUiDataRuntime.setQQLoginInfo(selfInfo);
         WebUiDataRuntime.setQQLoginStatus(true);
-        WebUiDataRuntime.getQQLoginCallback()(true);
+
         let sendWebUiToken = async (token: string) => {
             await this.core.apis.MsgApi.sendMsg(
                 { chatType: ChatType.KCHATTYPEC2C, peerUid: selfInfo.uid, guildId: '' },
