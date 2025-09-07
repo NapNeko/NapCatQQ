@@ -32,7 +32,7 @@ _Modern protocol-side framework implemented based on NTQQ._
 可前往 [Release](https://github.com/NapNeko/NapCatQQ/releases/) 页面下载最新版本
 
 **首次使用**请务必查看如下文档看使用教程
-<!-- 
+
 ## Link
 
 | Docs | [![Github.IO](https://img.shields.io/badge/docs%20on-Github.IO-orange)](https://napneko.github.io/) | [![Cloudflare.Worker](https://img.shields.io/badge/docs%20on-Cloudflare.Worker-black)](https://doc.napneko.icu/) | [![Cloudflare.HKServer](https://img.shields.io/badge/docs%20on-Cloudflare.HKServer-informational)](https://napcat.napneko.icu/) |
@@ -44,8 +44,8 @@ _Modern protocol-side framework implemented based on NTQQ._
 | QQ Group | [![QQ Group#4](https://img.shields.io/badge/QQ%20Group%234-Join-blue)](https://qm.qq.com/q/CMmPbGw0jA) | [![QQ Group#3](https://img.shields.io/badge/QQ%20Group%233-Join-blue)](https://qm.qq.com/q/8zJMLjqy2Y) | [![QQ Group#2](https://img.shields.io/badge/QQ%20Group%232-Join-blue)](https://qm.qq.com/q/HaRcfrHpUk) | [![QQ Group#1](https://img.shields.io/badge/QQ%20Group%231-Join-blue)](https://qm.qq.com/q/I6LU87a0Yq) |
 |:-:|:-:|:-:|:-:|:-:|
 
-| Telegram | [![Telegram](https://img.shields.io/badge/Telegram-MelodicMoonlight-blue)](https://t.me/MelodicMoonlight) |
-|:-:|:-:| -->
+| Telegram | [![Telegram](https://img.shields.io/badge/Telegram-napcatqq-blue)](https://t.me/napcatqq) |
+|:-:|:-:|
 
 ## Thanks
 
