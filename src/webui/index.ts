@@ -216,6 +216,7 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
     // ------------启动服务------------
     server.listen(port, host, async () => {
         let searchParams = { token: token };
+        logger.log(`[NapCat] [WebUi] 🔑 token=${token}`);
         logger.log(
             `[NapCat] [WebUi] WebUi User Panel Url: ${createUrl('127.0.0.1', port.toString(), '/webui', searchParams)}`
         );

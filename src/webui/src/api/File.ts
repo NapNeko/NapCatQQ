@@ -13,6 +13,14 @@ import { WebUiConfig, getInitialWebUiToken, webUiPathWrapper } from '@/webui';
 
 const isWindows = os.platform() === 'win32';
 
+// 安全地从查询参数中提取字符串值，防止类型混淆
+const getQueryStringParam = (param: any): string => {
+    if (Array.isArray(param)) {
+        return String(param[0] || '');
+    }
+    return String(param || '');
+};
+
 // 获取系统根目录列表（Windows返回盘符列表，其他系统返回['/']）
 const getRootDirs = async (): Promise<string[]> => {
     if (!isWindows) return ['/'];
@@ -34,19 +42,27 @@ const getRootDirs = async (): Promise<string[]> => {
 
 // 规范化路径并进行安全验证
 const normalizePath = (inputPath: string): string => {
-    if (!inputPath) return isWindows ? 'C:\\' : '/';
+    if (!inputPath) {
+        // 对于空路径，Windows返回用户主目录，其他系统返回根目录
+        return isWindows ? process.env['USERPROFILE'] || 'C:\\' : '/';
+    }
     
     // 如果是Windows且输入为纯盘符（可能带或不带斜杠），统一返回 "X:\"
     if (isWindows && /^[A-Z]:[\\/]*$/i.test(inputPath)) {
         return inputPath.slice(0, 2) + '\\';
     }
     
-    // 进行路径规范化
-    const normalized = path.normalize(inputPath);
-    
-    // 安全验证：检查是否包含危险的路径遍历模式
-    if (containsPathTraversal(normalized)) {
+    // 安全验证：检查是否包含危险的路径遍历模式（在规范化之前）
+    if (containsPathTraversal(inputPath)) {
         throw new Error('Invalid path: path traversal detected');
+    }
+    
+    // 进行路径规范化
+    const normalized = path.resolve(inputPath);
+    
+    // 再次检查规范化后的路径，确保没有绕过安全检查
+    if (containsPathTraversal(normalized)) {
+        throw new Error('Invalid path: path traversal detected after normalization');
     }
     
     return normalized;
@@ -125,7 +141,7 @@ export const ListFilesHandler: RequestHandler = async (req, res) => {
         return sendError(res, '默认密码禁止使用');
     }
     try {
-        const requestPath = (req.query['path'] as string) || (isWindows ? 'C:\\' : '/');
+        const requestPath = getQueryStringParam(req.query['path']) || (isWindows ? process.env['USERPROFILE'] || 'C:\\' : '/');
         
         let normalizedPath: string;
         try {
@@ -275,7 +291,7 @@ export const ReadFileHandler: RequestHandler = async (req, res) => {
     try {
         let filePath: string;
         try {
-            filePath = normalizePath(req.query['path'] as string);
+            filePath = normalizePath(getQueryStringParam(req.query['path']));
         } catch (pathError) {
             return sendError(res, '无效的文件路径');
         }
@@ -425,7 +441,7 @@ export const DownloadHandler: RequestHandler = async (req, res) => {
     try {
         let filePath: string;
         try {
-            filePath = normalizePath(req.query['path'] as string);
+            filePath = normalizePath(getQueryStringParam(req.query['path']));
         } catch (pathError) {
             return sendError(res, '无效的文件路径');
         }

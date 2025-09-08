@@ -92,42 +92,65 @@ export default function WebLoginPage() {
             </CardHeader>
 
             <CardBody className="flex gap-5 py-5 px-5 md:px-10">
-              <Input
-                isClearable
-                type="password"
-                classNames={{
-                  label: 'text-black/50 dark:text-white/90',
-                  input: [
-                    'bg-transparent',
-                    'text-black/90 dark:text-white/90',
-                    'placeholder:text-default-700/50 dark:placeholder:text-white/60'
-                  ],
-                  innerWrapper: 'bg-transparent',
-                  inputWrapper: [
-                    'shadow-xl',
-                    'bg-default-100/70',
-                    'dark:bg-default/60',
-                    'backdrop-blur-xl',
-                    'backdrop-saturate-200',
-                    'hover:bg-default-0/70',
-                    'dark:hover:bg-default/70',
-                    'group-data-[focus=true]:bg-default-100/50',
-                    'dark:group-data-[focus=true]:bg-default/60',
-                    '!cursor-text'
-                  ]
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  onSubmit()
                 }}
-                isDisabled={isLoading}
-                label="Token"
-                placeholder="请输入token"
-                radius="lg"
-                size="lg"
-                startContent={
-                  <IoKeyOutline className="text-black/50 mb-0.5 dark:text-white/90 text-slate-400 pointer-events-none flex-shrink-0" />
-                }
-                value={tokenValue}
-                onChange={(e) => setTokenValue(e.target.value)}
-                onClear={() => setTokenValue('')}
-              />
+              >
+                {/* 隐藏的用户名字段，帮助浏览器识别登录表单 */}
+                <input
+                  type="text"
+                  name="username"
+                  value="napcat-webui"
+                  autoComplete="username"
+                  className="absolute -left-[9999px] opacity-0 pointer-events-none"
+                  readOnly
+                  tabIndex={-1}
+                  aria-label="Username"
+                />
+                <Input
+                  isClearable
+                  type="password"
+                  name="password"
+                  autoComplete="current-password"
+                  classNames={{
+                    label: 'text-black/50 dark:text-white/90',
+                    input: [
+                      'bg-transparent',
+                      'text-black/90 dark:text-white/90',
+                      'placeholder:text-default-700/50 dark:placeholder:text-white/60'
+                    ],
+                    innerWrapper: 'bg-transparent',
+                    inputWrapper: [
+                      'shadow-xl',
+                      'bg-default-100/70',
+                      'dark:bg-default/60',
+                      'backdrop-blur-xl',
+                      'backdrop-saturate-200',
+                      'hover:bg-default-0/70',
+                      'dark:hover:bg-default/70',
+                      'group-data-[focus=true]:bg-default-100/50',
+                      'dark:group-data-[focus=true]:bg-default/60',
+                      '!cursor-text'
+                    ]
+                  }}
+                  isDisabled={isLoading}
+                  label="Token"
+                  placeholder="请输入token"
+                  radius="lg"
+                  size="lg"
+                  startContent={
+                    <IoKeyOutline className="text-black/50 mb-0.5 dark:text-white/90 text-slate-400 pointer-events-none flex-shrink-0" />
+                  }
+                  value={tokenValue}
+                  onChange={(e) => setTokenValue(e.target.value)}
+                  onClear={() => setTokenValue('')}
+                />
+              </form>
+              <div className="text-center text-small text-default-600 dark:text-default-400 px-2">
+                💡 提示：请从 NapCat 启动日志中查看登录密钥
+              </div>
               <Button
                 className="mx-10 mt-10 text-lg py-7"
                 color="primary"
