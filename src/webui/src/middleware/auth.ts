@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 
-import { WebUiConfig } from '@/webui';
+import { getInitialWebUiToken } from '@/webui';
 
 import { AuthHelper } from '@webapi/helper/SignToken';
 import { sendError } from '@webapi/utils/response';
@@ -30,10 +30,13 @@ export async function auth(req: Request, res: Response, next: NextFunction) {
         } catch (e) {
             return sendError(res, 'Unauthorized');
         }
-        // 获取配置
-        const config = await WebUiConfig.GetWebUIConfig();
+        // 使用启动时缓存的token进行验证，而不是动态读取配置文件 因为有可能运行时手动修改了密码
+        const initialToken = getInitialWebUiToken();
+        if (!initialToken) {
+            return sendError(res, 'Server token not initialized');
+        }
         // 验证凭证在1小时内有效
-        const credentialJson = AuthHelper.validateCredentialWithinOneHour(config.token, Credential);
+        const credentialJson = AuthHelper.validateCredentialWithinOneHour(initialToken, Credential);
         if (credentialJson) {
             // 通过验证
             return next();

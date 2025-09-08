@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 
-import { WebUiConfig } from '@/webui';
+import { WebUiConfig, getInitialWebUiToken, setInitialWebUiToken } from '@/webui';
 
 import { AuthHelper } from '@webapi/helper/SignToken';
 import { WebUiDataRuntime } from '@webapi/helper/Data';
@@ -9,10 +9,7 @@ import { isEmpty } from '@webapi/utils/check';
 
 // 检查是否使用默认Token
 export const CheckDefaultTokenHandler: RequestHandler = async (_, res) => {
-    const webuiToken = await WebUiConfig.GetWebUIConfig();
-    if (webuiToken.defaultToken) {
-        return sendSuccess(res, true);
-    }
+    // 由于密码在WebUI启动时已经确保不是默认密码，这里总是返回false
     return sendSuccess(res, false);
 };
 
@@ -33,8 +30,13 @@ export const LoginHandler: RequestHandler = async (req, res) => {
     if (!WebUiDataRuntime.checkLoginRate(clientIP, WebUiConfigData.loginRate)) {
         return sendError(res, 'login rate limit');
     }
-    //验证config.token hash是否等于token hash
-    if (!AuthHelper.comparePasswordHash(WebUiConfigData.token, hash)) {
+    // 使用启动时缓存的token进行验证，而不是动态读取配置文件
+    const initialToken = getInitialWebUiToken();
+    if (!initialToken) {
+        return sendError(res, 'Server token not initialized');
+    }
+    //验证初始token hash是否等于提交的token hash
+    if (!AuthHelper.comparePasswordHash(initialToken, hash)) {
         return sendError(res, 'token is invalid');
     }
 
@@ -63,8 +65,6 @@ export const LogoutHandler: RequestHandler = async (req, res) => {
 
 // 检查登录状态
 export const checkHandler: RequestHandler = async (req, res) => {
-    // 获取WebUI配置
-    const WebUiConfigData = await WebUiConfig.GetWebUIConfig();
     // 获取请求头中的Authorization
     const authorization = req.headers.authorization;
     // 检查凭证
@@ -79,8 +79,13 @@ export const checkHandler: RequestHandler = async (req, res) => {
             return sendError(res, 'Token has been revoked');
         }
 
+        // 使用启动时缓存的token进行验证
+        const initialToken = getInitialWebUiToken();
+        if (!initialToken) {
+            return sendError(res, 'Server token not initialized');
+        }
         // 验证凭证是否在一小时内有效
-        const valid = AuthHelper.validateCredentialWithinOneHour(WebUiConfigData.token, Credential);
+        const valid = AuthHelper.validateCredentialWithinOneHour(initialToken, Credential);
         // 返回成功信息
         if (valid) return sendSuccess(res, null);
         // 返回错误信息
@@ -120,9 +125,21 @@ export const UpdateTokenHandler: RequestHandler = async (req, res) => {
                 return sendError(res, 'Current password is not default password');
             }
             await WebUiConfig.UpdateWebUIConfig({ token: newToken, defaultToken: false });
+            // 更新内存中的缓存token，使新密码立即生效
+            setInitialWebUiToken(newToken);
         } else {
-            // 正常的密码更新流程
-            await WebUiConfig.UpdateToken(oldToken, newToken);
+            // 正常的密码更新流程 - 使用启动时缓存的token进行验证
+            const initialToken = getInitialWebUiToken();
+            if (!initialToken) {
+                return sendError(res, 'Server token not initialized');
+            }
+            if (initialToken !== oldToken) {
+                return sendError(res, '旧 token 不匹配');
+            }
+            // 直接更新配置文件中的token，不需要通过WebUiConfig.UpdateToken方法
+            await WebUiConfig.UpdateWebUIConfig({ token: newToken, defaultToken: false });
+            // 更新内存中的缓存token，使新密码立即生效
+            setInitialWebUiToken(newToken);
         }
         
         return sendSuccess(res, 'Token updated successfully');
