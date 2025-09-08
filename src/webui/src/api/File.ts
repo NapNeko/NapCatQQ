@@ -32,14 +32,40 @@ const getRootDirs = async (): Promise<string[]> => {
     return drives.length > 0 ? drives : ['C:'];
 };
 
-// 规范化路径
+// 规范化路径并进行安全验证
 const normalizePath = (inputPath: string): string => {
     if (!inputPath) return isWindows ? 'C:\\' : '/';
+    
     // 如果是Windows且输入为纯盘符（可能带或不带斜杠），统一返回 "X:\"
     if (isWindows && /^[A-Z]:[\\/]*$/i.test(inputPath)) {
         return inputPath.slice(0, 2) + '\\';
     }
-    return path.normalize(inputPath);
+    
+    // 进行路径规范化
+    const normalized = path.normalize(inputPath);
+    
+    // 安全验证：检查是否包含危险的路径遍历模式
+    if (containsPathTraversal(normalized)) {
+        throw new Error('Invalid path: path traversal detected');
+    }
+    
+    return normalized;
+};
+
+// 检查路径是否包含路径遍历攻击模式
+const containsPathTraversal = (inputPath: string): boolean => {
+    // 将路径统一为正斜杠格式进行检查
+    const normalizedForCheck = inputPath.replace(/\\/g, '/');
+    
+    // 检查危险模式
+    const dangerousPatterns = [
+        /\.\.\//, // ../ 模式
+        /\/\.\./, // /.. 模式
+        /^\.\./, // 以.. 开头
+        /\.\.$/, // 以.. 结尾
+    ];
+    
+    return dangerousPatterns.some(pattern => pattern.test(normalizedForCheck));
 };
 
 interface FileInfo {
@@ -100,7 +126,14 @@ export const ListFilesHandler: RequestHandler = async (req, res) => {
     }
     try {
         const requestPath = (req.query['path'] as string) || (isWindows ? 'C:\\' : '/');
-        const normalizedPath = normalizePath(requestPath);
+        
+        let normalizedPath: string;
+        try {
+            normalizedPath = normalizePath(requestPath);
+        } catch (pathError) {
+            return sendError(res, '无效的文件路径');
+        }
+        
         const onlyDirectory = req.query['onlyDirectory'] === 'true';
 
         // 如果是根路径且在Windows系统上，返回盘符列表
@@ -168,7 +201,13 @@ export const ListFilesHandler: RequestHandler = async (req, res) => {
 export const CreateDirHandler: RequestHandler = async (req, res) => {
     try {
         const { path: dirPath } = req.body;
-        const normalizedPath = normalizePath(dirPath);
+        
+        let normalizedPath: string;
+        try {
+            normalizedPath = normalizePath(dirPath);
+        } catch (pathError) {
+            return sendError(res, '无效的文件路径');
+        }
 
         // 检查是否已存在同类型（目录）
         if (await checkSameTypeExists(normalizedPath, true)) {
@@ -186,7 +225,14 @@ export const CreateDirHandler: RequestHandler = async (req, res) => {
 export const DeleteHandler: RequestHandler = async (req, res) => {
     try {
         const { path: targetPath } = req.body;
-        const normalizedPath = normalizePath(targetPath);
+        
+        let normalizedPath: string;
+        try {
+            normalizedPath = normalizePath(targetPath);
+        } catch (pathError) {
+            return sendError(res, '无效的文件路径');
+        }
+        
         const stat = await fsProm.stat(normalizedPath);
         if (stat.isDirectory()) {
             await fsProm.rm(normalizedPath, { recursive: true });
@@ -204,7 +250,13 @@ export const BatchDeleteHandler: RequestHandler = async (req, res) => {
     try {
         const { paths } = req.body;
         for (const targetPath of paths) {
-            const normalizedPath = normalizePath(targetPath);
+            let normalizedPath: string;
+            try {
+                normalizedPath = normalizePath(targetPath);
+            } catch (pathError) {
+                return sendError(res, '无效的文件路径');
+            }
+            
             const stat = await fsProm.stat(normalizedPath);
             if (stat.isDirectory()) {
                 await fsProm.rm(normalizedPath, { recursive: true });
@@ -217,11 +269,17 @@ export const BatchDeleteHandler: RequestHandler = async (req, res) => {
         return sendError(res, '批量删除失败');
     }
 };
-const _ = 'C:/Users/Administrator/Desktop/NapCatQQ-Desktop/NapCat/config/webui.json'
+
 // 读取文件内容
 export const ReadFileHandler: RequestHandler = async (req, res) => {
     try {
-        const filePath = normalizePath(req.query['path'] as string);
+        let filePath: string;
+        try {
+            filePath = normalizePath(req.query['path'] as string);
+        } catch (pathError) {
+            return sendError(res, '无效的文件路径');
+        }
+        
         let content = await fsProm.readFile(filePath, 'utf-8');
         
         // 如果是WebUI配置文件，对token进行脱敏处理
@@ -239,7 +297,14 @@ export const ReadFileHandler: RequestHandler = async (req, res) => {
 export const WriteFileHandler: RequestHandler = async (req, res) => {
     try {
         const { path: filePath, content } = req.body;
-        const normalizedPath = normalizePath(filePath);
+        
+        // 安全的路径规范化，如果检测到路径遍历攻击会抛出异常
+        let normalizedPath: string;
+        try {
+            normalizedPath = normalizePath(filePath);
+        } catch (pathError) {
+            return sendError(res, '无效的文件路径');
+        }
         
         let finalContent = content;
         
@@ -271,7 +336,13 @@ export const WriteFileHandler: RequestHandler = async (req, res) => {
 export const CreateFileHandler: RequestHandler = async (req, res) => {
     try {
         const { path: filePath } = req.body;
-        const normalizedPath = normalizePath(filePath);
+        
+        let normalizedPath: string;
+        try {
+            normalizedPath = normalizePath(filePath);
+        } catch (pathError) {
+            return sendError(res, '无效的文件路径');
+        }
 
         // 检查是否已存在同类型（文件）
         if (await checkSameTypeExists(normalizedPath, false)) {
@@ -289,8 +360,16 @@ export const CreateFileHandler: RequestHandler = async (req, res) => {
 export const RenameHandler: RequestHandler = async (req, res) => {
     try {
         const { oldPath, newPath } = req.body;
-        const normalizedOldPath = normalizePath(oldPath);
-        const normalizedNewPath = normalizePath(newPath);
+        
+        let normalizedOldPath: string;
+        let normalizedNewPath: string;
+        try {
+            normalizedOldPath = normalizePath(oldPath);
+            normalizedNewPath = normalizePath(newPath);
+        } catch (pathError) {
+            return sendError(res, '无效的文件路径');
+        }
+        
         await fsProm.rename(normalizedOldPath, normalizedNewPath);
         return sendSuccess(res, true);
     } catch (error) {
@@ -302,8 +381,16 @@ export const RenameHandler: RequestHandler = async (req, res) => {
 export const MoveHandler: RequestHandler = async (req, res) => {
     try {
         const { sourcePath, targetPath } = req.body;
-        const normalizedSourcePath = normalizePath(sourcePath);
-        const normalizedTargetPath = normalizePath(targetPath);
+        
+        let normalizedSourcePath: string;
+        let normalizedTargetPath: string;
+        try {
+            normalizedSourcePath = normalizePath(sourcePath);
+            normalizedTargetPath = normalizePath(targetPath);
+        } catch (pathError) {
+            return sendError(res, '无效的文件路径');
+        }
+        
         await fsProm.rename(normalizedSourcePath, normalizedTargetPath);
         return sendSuccess(res, true);
     } catch (error) {
@@ -316,8 +403,15 @@ export const BatchMoveHandler: RequestHandler = async (req, res) => {
     try {
         const { items } = req.body;
         for (const { sourcePath, targetPath } of items) {
-            const normalizedSourcePath = normalizePath(sourcePath);
-            const normalizedTargetPath = normalizePath(targetPath);
+            let normalizedSourcePath: string;
+            let normalizedTargetPath: string;
+            try {
+                normalizedSourcePath = normalizePath(sourcePath);
+                normalizedTargetPath = normalizePath(targetPath);
+            } catch (pathError) {
+                return sendError(res, '无效的文件路径');
+            }
+            
             await fsProm.rename(normalizedSourcePath, normalizedTargetPath);
         }
         return sendSuccess(res, true);
@@ -329,7 +423,13 @@ export const BatchMoveHandler: RequestHandler = async (req, res) => {
 // 新增：文件下载处理方法（注意流式传输，不将整个文件读入内存）
 export const DownloadHandler: RequestHandler = async (req, res) => {
     try {
-        const filePath = normalizePath(req.query['path'] as string);
+        let filePath: string;
+        try {
+            filePath = normalizePath(req.query['path'] as string);
+        } catch (pathError) {
+            return sendError(res, '无效的文件路径');
+        }
+        
         if (!filePath) {
             return sendError(res, '参数错误');
         }
@@ -371,7 +471,13 @@ export const BatchDownloadHandler: RequestHandler = async (req, res) => {
         const zipStream = new compressing.zip.Stream();
         // 修改：根据文件类型设置 relativePath
         for (const filePath of paths) {
-            const normalizedPath = normalizePath(filePath);
+            let normalizedPath: string;
+            try {
+                normalizedPath = normalizePath(filePath);
+            } catch (pathError) {
+                return sendError(res, '无效的文件路径');
+            }
+            
             const stat = await fsProm.stat(normalizedPath);
             if (stat.isDirectory()) {
                 zipStream.addEntry(normalizedPath, { relativePath: '' });
