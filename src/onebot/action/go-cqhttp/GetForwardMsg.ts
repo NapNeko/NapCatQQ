@@ -130,7 +130,7 @@ export class GoCQHTTPGetForwardMsgAction extends OneBotAction<Payload, {
                     throw new Error('消息不存在或已过期');
                 }
                 // 6. 解析消息内容
-                const resMsg = (await this.obContext.apis.MsgApi.parseMessageV2(singleMsg))?.arrayMsg;
+                const resMsg = (await this.obContext.apis.MsgApi.parseMessage(singleMsg, 'array', true));
 
                 const forwardContent = (resMsg?.message?.[0] as OB11MessageForward)?.data?.content;
                 if (forwardContent) {
