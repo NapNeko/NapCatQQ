@@ -9,7 +9,7 @@ import { PassThrough } from 'stream';
 import multer from 'multer';
 import webUIFontUploader from '../uploader/webui_font';
 import diskUploader from '../uploader/disk';
-import { WebUiConfig } from '@/webui';
+import { WebUiConfig, getInitialWebUiToken, webUiPathWrapper } from '@/webui';
 
 const isWindows = os.platform() === 'win32';
 
@@ -51,6 +51,35 @@ interface FileInfo {
 
 // 添加系统文件黑名单
 const SYSTEM_FILES = new Set(['pagefile.sys', 'swapfile.sys', 'hiberfil.sys', 'System Volume Information']);
+
+// 检查是否为WebUI配置文件
+const isWebUIConfigFile = (filePath: string): boolean => {
+    // 先用字符串快速筛选
+    if (!filePath.includes('webui.json')) {
+        return false;
+    }
+    
+    // 进入更严格的路径判断 - 统一路径分隔符为 /
+    const webUIConfigPath = path.resolve(webUiPathWrapper.configPath, 'webui.json').replace(/\\/g, '/');
+    const targetPath = path.resolve(filePath).replace(/\\/g, '/');
+    
+    // 统一分隔符后进行路径比较
+    return targetPath === webUIConfigPath;
+};
+
+// WebUI配置文件脱敏处理
+const sanitizeWebUIConfig = (content: string): string => {
+    try {
+        const config = JSON.parse(content);
+        if (config.token) {
+            config.token = '******';
+        }
+        return JSON.stringify(config, null, 4);
+    } catch {
+        // 如果解析失败，返回原内容
+        return content;
+    }
+};
 
 // 检查同类型的文件或目录是否存在
 const checkSameTypeExists = async (pathToCheck: string, isDirectory: boolean): Promise<boolean> => {
@@ -188,12 +217,18 @@ export const BatchDeleteHandler: RequestHandler = async (req, res) => {
         return sendError(res, '批量删除失败');
     }
 };
-
+const _ = 'C:/Users/Administrator/Desktop/NapCatQQ-Desktop/NapCat/config/webui.json'
 // 读取文件内容
 export const ReadFileHandler: RequestHandler = async (req, res) => {
     try {
         const filePath = normalizePath(req.query['path'] as string);
-        const content = await fsProm.readFile(filePath, 'utf-8');
+        let content = await fsProm.readFile(filePath, 'utf-8');
+        
+        // 如果是WebUI配置文件，对token进行脱敏处理
+        if (isWebUIConfigFile(filePath)) {
+            content = sanitizeWebUIConfig(content);
+        }
+        
         return sendSuccess(res, content);
     } catch (error) {
         return sendError(res, '读取文件失败');
@@ -205,7 +240,27 @@ export const WriteFileHandler: RequestHandler = async (req, res) => {
     try {
         const { path: filePath, content } = req.body;
         const normalizedPath = normalizePath(filePath);
-        await fsProm.writeFile(normalizedPath, content, 'utf-8');
+        
+        let finalContent = content;
+        
+        // 检查是否为WebUI配置文件
+        if (isWebUIConfigFile(normalizedPath)) {
+            try {
+                // 解析要写入的配置
+                const configToWrite = JSON.parse(content);
+                // 获取内存中的token，覆盖前端传来的token
+                const memoryToken = getInitialWebUiToken();
+                if (memoryToken) {
+                    configToWrite.token = memoryToken;
+                    finalContent = JSON.stringify(configToWrite, null, 4);
+                }
+            } catch (e) {
+                // 如果解析失败 说明不符合json格式 不允许写入
+                return sendError(res, '写入的WebUI配置文件内容格式错误，必须是合法的JSON');
+            }
+        }
+        
+        await fsProm.writeFile(normalizedPath, finalContent, 'utf-8');
         return sendSuccess(res, true);
     } catch (error) {
         return sendError(res, '写入文件失败');
