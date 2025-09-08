@@ -1,7 +1,6 @@
 import { Router } from 'express';
 
 import {
-    CheckDefaultTokenHandler,
     checkHandler,
     LoginHandler,
     LogoutHandler,
