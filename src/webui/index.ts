@@ -4,7 +4,7 @@
 
 import express from 'express';
 import { createServer } from 'http';
-import { randomUUID } from 'node:crypto'
+import { randomUUID, randomBytes } from 'node:crypto'
 import { createServer as createHttpsServer } from 'https';
 import { LogWrapper } from '@/common/log';
 import { NapCatPathWrapper } from '@/common/path';
@@ -91,9 +91,9 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
 
     // 检查并更新默认密码 - 最高优先级
     if (config.defaultToken || config.token === 'napcat' || !config.token) {
-        const randomToken = Math.random().toString(36).slice(-8);
+        const randomToken = randomBytes(6).toString('hex');
         await WebUiConfig.UpdateWebUIConfig({ token: randomToken, defaultToken: false });
-        logger.log(`[NapCat] [WebUi] 🔐 检测到默认密码，已自动更新为安全密码: ${randomToken}`);
+        logger.log(`[NapCat] [WebUi] 🔐 检测到默认密码，已自动更新为安全密码`);
         
         // 存储token到全局变量，等待QQ登录成功后发送
         setPendingTokenToSend(randomToken);
@@ -102,7 +102,7 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
         // 重新获取更新后的配置
         config = await WebUiConfig.GetWebUIConfig();
     } else {
-        logger.log(`[NapCat] [WebUi] ✅ 当前使用安全密码: ${config.token}`);
+        logger.log(`[NapCat] [WebUi] ✅ 当前使用安全密码`);
     }
 
     // 存储启动时的初始token用于鉴权

@@ -7,12 +7,6 @@ import { WebUiDataRuntime } from '@webapi/helper/Data';
 import { sendSuccess, sendError } from '@webapi/utils/response';
 import { isEmpty } from '@webapi/utils/check';
 
-// 检查是否使用默认Token
-export const CheckDefaultTokenHandler: RequestHandler = async (_, res) => {
-    // 由于密码在WebUI启动时已经确保不是默认密码，这里总是返回false
-    return sendSuccess(res, false);
-};
-
 // 登录
 export const LoginHandler: RequestHandler = async (req, res) => {
     // 获取WebUI配置

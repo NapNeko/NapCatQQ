@@ -5,6 +5,12 @@ import { terminalManager } from '../terminal/terminal_manager';
 import { WebUiConfig } from '@/webui';
 // 判断是否是 macos
 const isMacOS = process.platform === 'darwin';
+
+// 日志脱敏函数
+const sanitizeLog = (log: string): string => {
+    // 脱敏 token 参数，将 token=xxx 替换为 token=***
+    return log.replace(/token=[\w\d]+/gi, 'token=***');
+};
 // 日志记录
 export const LogHandler: RequestHandler = async (req, res) => {
     const filename = req.query['id'];
@@ -16,7 +22,8 @@ export const LogHandler: RequestHandler = async (req, res) => {
         return sendError(res, 'ID不合法');
     }
     const logContent = await WebUiConfig.GetLogContent(filename);
-    return sendSuccess(res, logContent);
+    const sanitizedLogContent = sanitizeLog(logContent);
+    return sendSuccess(res, sanitizedLogContent);
 };
 
 // 日志列表
@@ -31,7 +38,8 @@ export const LogRealTimeHandler: RequestHandler = async (req, res) => {
     res.setHeader('Connection', 'keep-alive');
     const listener = (log: string) => {
         try {
-            res.write(`data: ${log}\n\n`);
+            const sanitizedLog = sanitizeLog(log);
+            res.write(`data: ${sanitizedLog}\n\n`);
         } catch (error) {
             console.error('向客户端写入日志数据时出错:', error);
         }
