@@ -4,6 +4,7 @@
 
 import express from 'express';
 import { createServer } from 'http';
+import { randomUUID, randomBytes } from 'node:crypto'
 import { createServer as createHttpsServer } from 'https';
 import { LogWrapper } from '@/common/log';
 import { NapCatPathWrapper } from '@/common/path';
@@ -30,17 +31,42 @@ const MAX_PORT_TRY = 100;
 import * as net from 'node:net';
 import { WebUiDataRuntime } from './src/helper/Data';
 import { existsSync, readFileSync } from 'node:fs';
+
 export let webUiRuntimePort = 6099;
-export async function InitPort(parsedConfig: WebUiConfigType): Promise<[string, number, string]> {
+// 全局变量：存储需要在QQ登录成功后发送的新token
+export let pendingTokenToSend: string | null = null;
+
+/**
+ * 存储WebUI启动时的初始token，用于鉴权
+ * - 无论是否在运行时修改密码，都应该使用此token进行鉴权
+ * - 运行时手动修改的密码将会在下次napcat重启后生效
+ * - 如果需要在运行时修改密码并立即生效，则需要在前端调用路由进行修改
+ */
+let initialWebUiToken: string = '';
+
+export function setInitialWebUiToken(token: string) {
+    initialWebUiToken = token;
+}
+
+export function getInitialWebUiToken(): string {
+    return initialWebUiToken;
+}
+
+export function setPendingTokenToSend(token: string | null) {
+    pendingTokenToSend = token;
+}
+
+export async function InitPort(parsedConfig: WebUiConfigType): Promise<[string, number,string]> {
     try {
         await tryUseHost(parsedConfig.host);
         const port = await tryUsePort(parsedConfig.port, parsedConfig.host);
         return [parsedConfig.host, port, parsedConfig.token];
     } catch (error) {
         console.log('host或port不可用', error);
-        return ['', 0, ''];
+        return ['', 0, randomUUID()];
     }
 }
+
 async function checkCertificates(logger: LogWrapper): Promise<{ key: string, cert: string } | null> {
     try {
         const certPath = join(webUiPathWrapper.configPath, 'cert.pem');
@@ -61,7 +87,27 @@ async function checkCertificates(logger: LogWrapper): Promise<{ key: string, cer
 export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapper) {
     webUiPathWrapper = pathWrapper;
     WebUiConfig = new WebUiConfigWrapper();
-    const config = await WebUiConfig.GetWebUIConfig();
+    let config = await WebUiConfig.GetWebUIConfig();
+
+    // 检查并更新默认密码 - 最高优先级
+    if (config.defaultToken || config.token === 'napcat' || !config.token) {
+        const randomToken = randomBytes(6).toString('hex');
+        await WebUiConfig.UpdateWebUIConfig({ token: randomToken, defaultToken: false });
+        logger.log(`[NapCat] [WebUi] 🔐 检测到默认密码，已自动更新为安全密码`);
+        
+        // 存储token到全局变量，等待QQ登录成功后发送
+        setPendingTokenToSend(randomToken);
+        logger.log(`[NapCat] [WebUi] 📤 新密码将在QQ登录成功后发送给用户`);
+        
+        // 重新获取更新后的配置
+        config = await WebUiConfig.GetWebUIConfig();
+    } else {
+        logger.log(`[NapCat] [WebUi] ✅ 当前使用安全密码`);
+    }
+
+    // 存储启动时的初始token用于鉴权
+    setInitialWebUiToken(config.token);
+    logger.log(`[NapCat] [WebUi] 🔑 已缓存启动时的token用于鉴权，运行时手动修改配置文件密码将不会生效`);
 
     // 检查是否禁用WebUI
     if (config.disableWebUI) {
@@ -90,19 +136,6 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
                 }
             }
         });
-    WebUiDataRuntime.setQQLoginCallback(async (_status: boolean) => {
-        try {
-            if ((await WebUiConfig.GetWebUIConfig()).defaultToken) {
-                let randomToken = Math.random().toString(36).slice(-8);
-                await WebUiConfig.UpdateWebUIConfig({ token: randomToken });
-                console.log(`[NapCat] [WebUi] Update WebUi Token: ${randomToken}`);
-                await WebUiDataRuntime.getWebUiTokenChangeCallback()(randomToken);
-            }
-        } catch (error) {
-            console.log(`[NapCat] [WebUi] Update WebUi Token failed.` + error);
-        }
-
-    });
     // ------------注册中间件------------
     // 使用express的json中间件
     app.use(express.json());
@@ -182,8 +215,8 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
 
     // ------------启动服务------------
     server.listen(port, host, async () => {
-        // 启动后打印出相关地址
         let searchParams = { token: token };
+        logger.log(`[NapCat] [WebUi] 🔑 token=${token}`);
         logger.log(
             `[NapCat] [WebUi] WebUi User Panel Url: ${createUrl('127.0.0.1', port.toString(), '/webui', searchParams)}`
         );

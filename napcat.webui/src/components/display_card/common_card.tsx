@@ -62,24 +62,39 @@ const NetworkDisplayCard = <T extends keyof NetworkType>({
         <ButtonGroup
           fullWidth
           isDisabled={editing}
-          radius="full"
+          radius="sm"
           size="sm"
-          variant="shadow"
+          variant="flat"
         >
-          <Button color="warning" startContent={<FiEdit3 />} onPress={onEdit}>
+          <Button
+            color="warning"
+            startContent={<FiEdit3 size={16} />}
+            onPress={onEdit}
+          >
             编辑
           </Button>
 
           <Button
-            color={debug ? 'success' : 'default'}
-            startContent={<CgDebug />}
+            color={debug ? 'secondary' : 'success'}
+            variant="flat"
+            startContent={
+              <CgDebug
+                style={{
+                  width: '16px',
+                  height: '16px',
+                  minWidth: '16px',
+                  minHeight: '16px'
+                }}
+              />
+            }
             onPress={handleEnableDebug}
           >
             {debug ? '关闭调试' : '开启调试'}
           </Button>
           <Button
-            color="primary"
-            startContent={<MdDeleteForever />}
+            className="bg-danger/20 text-danger hover:bg-danger/30 transition-colors"
+            variant="flat"
+            startContent={<MdDeleteForever size={16} />}
             onPress={handleDelete}
           >
             删除

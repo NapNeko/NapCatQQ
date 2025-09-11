@@ -17,6 +17,7 @@ import {
     NTMsgAtType,
 } from '@/core';
 import { OB11ConfigLoader } from '@/onebot/config';
+import { pendingTokenToSend } from '@/webui/index';
 import {
     OB11HttpClientAdapter,
     OB11WebSocketClientAdapter,
@@ -64,8 +65,8 @@ export class NapCatOneBot11Adapter {
     networkManager: OB11NetworkManager;
     actions: ActionMap;
     private readonly bootTime = Date.now() / 1000;
-    recallEventCache = new Map<string, any>();
-    constructor(core: NapCatCore, context: InstanceContext, pathWrapper: NapCatPathWrapper) {
+    recallEventCache = new Map<string, NodeJS.Timeout>();
+    constructor (core: NapCatCore, context: InstanceContext, pathWrapper: NapCatPathWrapper) {
         this.core = core;
         this.context = context;
         this.configLoader = new OB11ConfigLoader(core, pathWrapper.configPath, OneBotConfigSchema);
@@ -79,7 +80,7 @@ export class NapCatOneBot11Adapter {
         this.actions = createActionMap(this, core);
         this.networkManager = new OB11NetworkManager();
     }
-    async creatOneBotLog(ob11Config: OneBotConfig) {
+    async creatOneBotLog (ob11Config: OneBotConfig) {
         let log = '[network] 配置加载\n';
         for (const key of ob11Config.network.httpServers) {
             log += `HTTP服务: ${key.host}:${key.port}, : ${key.enable ? '已启动' : '未启动'}\n`;
@@ -98,15 +99,44 @@ export class NapCatOneBot11Adapter {
         }
         return log;
     }
-    async InitOneBot() {
+    async InitOneBot () {
         const selfInfo = this.core.selfInfo;
         const ob11Config = this.configLoader.configData;
 
         this.core.apis.UserApi.getUserDetailInfo(selfInfo.uid, false)
-            .then((user) => {
+            .then(async (user) => {
                 selfInfo.nick = user.nick;
                 this.context.logger.setLogSelfInfo(selfInfo);
-                        WebUiDataRuntime.getQQLoginCallback()(true);
+                
+                // 检查是否有待发送的token
+                if (pendingTokenToSend) {
+                    this.context.logger.log('[NapCat] [OneBot] 🔐 检测到待发送的WebUI Token，开始发送');
+                    try {
+                        await this.core.apis.MsgApi.sendMsg(
+                            { chatType: ChatType.KCHATTYPEC2C, peerUid: selfInfo.uid, guildId: '' },
+                            [{
+                                elementType: ElementType.TEXT,
+                                elementId: '',
+                                textElement: {
+                                    content: 
+                                    '[NapCat] 温馨提示:\n'+
+                                    'WebUI密码为默认密码，已进行强制修改\n'+
+                                    '新密码: ' +pendingTokenToSend,
+                                    atType: NTMsgAtType.ATTYPEUNKNOWN,
+                                    atUid: '',
+                                    atTinyId: '',
+                                    atNtUid: '',
+                                }
+                            }],
+                            5000
+                        );
+                        this.context.logger.log('[NapCat] [OneBot] ✅ WebUI Token 消息发送成功');
+                    } catch (error) {
+                        this.context.logger.logError('[NapCat] [OneBot] ❌ WebUI Token 消息发送失败:', error);
+                    }
+                }
+                
+                WebUiDataRuntime.getQQLoginCallback()(true);
             })
             .catch(e => this.context.logger.logError(e));
 
@@ -120,7 +150,7 @@ export class NapCatOneBot11Adapter {
         //     new OB11PluginAdapter('myPlugin', this.core, this,this.actions)
         // );
         if (existsSync(this.context.pathWrapper.pluginPath)) {
-            this.context.logger.log(`[Plugins] 插件目录存在，开始加载插件`);
+            this.context.logger.log('[Plugins] 插件目录存在，开始加载插件');
             this.networkManager.registerAdapter(
                 new OB11PluginMangerAdapter('plugin_manager', this.core, this, this.actions)
             );
@@ -181,25 +211,6 @@ export class NapCatOneBot11Adapter {
         WebUiDataRuntime.setQQVersion(this.core.context.basicInfoWrapper.getFullQQVersion());
         WebUiDataRuntime.setQQLoginInfo(selfInfo);
         WebUiDataRuntime.setQQLoginStatus(true);
-
-        let sendWebUiToken = async (token: string) => {
-            await this.core.apis.MsgApi.sendMsg(
-                { chatType: ChatType.KCHATTYPEC2C, peerUid: selfInfo.uid, guildId: '' },
-                [{
-                    elementType: ElementType.TEXT,
-                    elementId: '',
-                    textElement: {
-                        content: 'Update WebUi Token: ' + token,
-                        atType: NTMsgAtType.ATTYPEUNKNOWN,
-                        atUid: '',
-                        atTinyId: '',
-                        atNtUid: '',
-                    }
-                }],
-                5000
-            )
-        };
-        WebUiDataRuntime.setWebUiTokenChangeCallback(sendWebUiToken);
         WebUiDataRuntime.setOnOB11ConfigChanged(async (newConfig) => {
             const prev = this.configLoader.configData;
             this.configLoader.save(newConfig);
@@ -209,7 +220,7 @@ export class NapCatOneBot11Adapter {
     }
 
 
-    private async reloadNetwork(prev: OneBotConfig, now: OneBotConfig): Promise<void> {
+    private async reloadNetwork (prev: OneBotConfig, now: OneBotConfig): Promise<void> {
         const prevLog = await this.creatOneBotLog(prev);
         const newLog = await this.creatOneBotLog(now);
         this.context.logger.log(`[Notice] [OneBot11] 配置变更前:\n${prevLog}`);
@@ -222,7 +233,7 @@ export class NapCatOneBot11Adapter {
         await this.handleConfigChange(prev.network.websocketClients, now.network.websocketClients, OB11WebSocketClientAdapter);
     }
 
-    private async handleConfigChange<CT extends NetworkAdapterConfig>(
+    private async handleConfigChange<CT extends NetworkAdapterConfig> (
         prevConfig: NetworkAdapterConfig[],
         nowConfig: NetworkAdapterConfig[],
         adapterClass: new (
@@ -254,7 +265,7 @@ export class NapCatOneBot11Adapter {
         }
     }
 
-    private initMsgListener() {
+    private initMsgListener () {
         const msgListener = new NodeIKernelMsgListener();
         msgListener.onRecvSysMsg = (msg) => {
             this.apis.MsgApi.parseSysMessage(msg)
@@ -368,7 +379,7 @@ export class NapCatOneBot11Adapter {
         this.context.session.getMsgService().addKernelMsgListener(proxiedListenerOf(msgListener, this.context.logger));
     }
 
-    private initBuddyListener() {
+    private initBuddyListener () {
         const buddyListener = new NodeIKernelBuddyListener();
 
         buddyListener.onBuddyReqChange = async (reqs) => {
@@ -399,7 +410,7 @@ export class NapCatOneBot11Adapter {
             .addKernelBuddyListener(proxiedListenerOf(buddyListener, this.context.logger));
     }
 
-    private initGroupListener() {
+    private initGroupListener () {
         const groupListener = new NodeIKernelGroupListener();
 
         groupListener.onGroupNotifiesUpdated = async (_, notifies) => {
@@ -492,7 +503,7 @@ export class NapCatOneBot11Adapter {
             .addKernelGroupListener(proxiedListenerOf(groupListener, this.context.logger));
     }
 
-    private async emitMsg(message: RawMessage) {
+    private async emitMsg (message: RawMessage) {
         const network = await this.networkManager.getAllConfig();
         this.context.logger.logDebug('收到新消息 RawMessage', message);
         await Promise.allSettled([
@@ -501,7 +512,7 @@ export class NapCatOneBot11Adapter {
         ]);
     }
 
-    private async handleMsg(message: RawMessage, network: Array<NetworkAdapterConfig>) {
+    private async handleMsg (message: RawMessage, network: Array<NetworkAdapterConfig>) {
         // 过滤无效消息
         if (message.msgType === NTMsgType.KMSGTYPENULL) {
             return;
@@ -522,17 +533,17 @@ export class NapCatOneBot11Adapter {
         }
     }
 
-    private isSelfMessage(ob11Msg: {
-        stringMsg: OB11Message;
-        arrayMsg: OB11Message;
+    private isSelfMessage (ob11Msg: {
+        stringMsg: OB11Message
+        arrayMsg: OB11Message
     }): boolean {
         return ob11Msg.stringMsg.user_id.toString() == this.core.selfInfo.uin ||
             ob11Msg.arrayMsg.user_id.toString() == this.core.selfInfo.uin;
     }
 
-    private createMsgMap(network: Array<NetworkAdapterConfig>, ob11Msg: {
-        stringMsg: OB11Message;
-        arrayMsg: OB11Message;
+    private createMsgMap (network: Array<NetworkAdapterConfig>, ob11Msg: {
+        stringMsg: OB11Message
+        arrayMsg: OB11Message
     }, isSelfMsg: boolean, message: RawMessage): Map<string, OB11Message> {
         const msgMap: Map<string, OB11Message> = new Map();
         network.filter(e => e.enable).forEach(e => {
@@ -550,7 +561,7 @@ export class NapCatOneBot11Adapter {
         return msgMap;
     }
 
-    private handleDebugNetwork(network: Array<NetworkAdapterConfig>, msgMap: Map<string, OB11Message>, message: RawMessage) {
+    private handleDebugNetwork (network: Array<NetworkAdapterConfig>, msgMap: Map<string, OB11Message>, message: RawMessage) {
         const debugNetwork = network.filter(e => e.enable && e.debug);
         if (debugNetwork.length > 0) {
             debugNetwork.forEach(adapter => {
@@ -564,7 +575,7 @@ export class NapCatOneBot11Adapter {
         }
     }
 
-    private handleNotReportSelfNetwork(network: Array<NetworkAdapterConfig>, msgMap: Map<string, OB11Message>, isSelfMsg: boolean) {
+    private handleNotReportSelfNetwork (network: Array<NetworkAdapterConfig>, msgMap: Map<string, OB11Message>, isSelfMsg: boolean) {
         if (isSelfMsg) {
             const notReportSelfNetwork = network.filter(e => e.enable && (('reportSelfMessage' in e && !e.reportSelfMessage) || !('reportSelfMessage' in e)));
             notReportSelfNetwork.forEach(adapter => {
@@ -573,7 +584,7 @@ export class NapCatOneBot11Adapter {
         }
     }
 
-    private async handleGroupEvent(message: RawMessage) {
+    private async handleGroupEvent (message: RawMessage) {
         try {
             // 群名片修改事件解析 任何都该判断
             if (message.senderUin && message.senderUin !== '0') {
@@ -606,7 +617,7 @@ export class NapCatOneBot11Adapter {
         }
     }
 
-    private async handlePrivateMsgEvent(message: RawMessage) {
+    private async handlePrivateMsgEvent (message: RawMessage) {
         try {
             if (message.msgType === NTMsgType.KMSGTYPEGRAYTIPS) {
                 // 灰条为单元素消息
@@ -624,7 +635,7 @@ export class NapCatOneBot11Adapter {
         }
     }
 
-    private async emitRecallMsg(message: RawMessage, element: MessageElement) {
+    private async emitRecallMsg (message: RawMessage, element: MessageElement) {
         const peer: Peer = { chatType: message.chatType, peerUid: message.peerUid, guildId: '' };
         const oriMessageId = MessageUnique.getShortIdByMsgId(message.msgId) ?? MessageUnique.createUniqueMsgId(peer, message.msgId);
         if (message.chatType == ChatType.KCHATTYPEC2C) {
@@ -635,7 +646,7 @@ export class NapCatOneBot11Adapter {
         return;
     }
 
-    private async emitFriendRecallMsg(message: RawMessage, oriMessageId: number, element: MessageElement) {
+    private async emitFriendRecallMsg (message: RawMessage, oriMessageId: number, element: MessageElement) {
         const operatorUid = element.grayTipElement?.revokeElement.operatorUid;
         if (!operatorUid) return undefined;
         return new OB11FriendRecallNoticeEvent(
@@ -645,7 +656,7 @@ export class NapCatOneBot11Adapter {
         );
     }
 
-    private async emitGroupRecallMsg(message: RawMessage, oriMessageId: number, element: MessageElement) {
+    private async emitGroupRecallMsg (message: RawMessage, oriMessageId: number, element: MessageElement) {
         const operatorUid = element.grayTipElement?.revokeElement.operatorUid;
         if (!operatorUid) return undefined;
         const operatorId = await this.core.apis.UserApi.getUinByUidV2(operatorUid);
