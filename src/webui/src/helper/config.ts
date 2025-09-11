@@ -1,4 +1,4 @@
-import { webUiPathWrapper } from '@/webui';
+import { webUiPathWrapper, getInitialWebUiToken } from '@/webui';
 import { Type, Static } from '@sinclair/typebox';
 import Ajv from 'ajv';
 import fs, { constants } from 'node:fs/promises';
@@ -64,6 +64,46 @@ export class WebUiConfigWrapper {
 
     async GetWebUIConfig(): Promise<WebUiConfigType> {
         if (this.WebUiConfigData) {
+           return this.WebUiConfigData
+        }
+
+        try {
+            const configPath = resolve(webUiPathWrapper.configPath, './webui.json');
+            await this.ensureConfigFileExists(configPath);
+            const parsedConfig = await this.readAndValidateConfig(configPath);
+            // 使用内存中缓存的token进行覆盖，确保强兼容性
+            this.WebUiConfigData = {
+                ...parsedConfig,
+                // 首次读取内存中是没有token的，需要进行一层兜底
+                token: getInitialWebUiToken() || parsedConfig.token
+            };           
+            return this.WebUiConfigData;
+        } catch (e) {
+            console.log('读取配置文件失败', e);
+            const defaultConfig = this.validateAndApplyDefaults({});
+            return {
+                ...defaultConfig,
+                token: defaultConfig.token
+            };
+        }
+    }
+
+    async UpdateWebUIConfig(newConfig: Partial<WebUiConfigType>): Promise<void> {
+        const configPath = resolve(webUiPathWrapper.configPath, './webui.json');
+        // 使用原始配置进行合并，避免内存token覆盖影响配置更新
+        const currentConfig = await this.GetRawWebUIConfig();
+        const mergedConfig = deepMerge({ ...currentConfig }, newConfig);
+        const updatedConfig = this.validateAndApplyDefaults(mergedConfig);
+        await this.writeConfig(configPath, updatedConfig);
+        this.WebUiConfigData = updatedConfig;
+    }
+
+    /**
+     * 获取配置文件中实际存储的配置（不被内存token覆盖）
+     * 主要用于配置更新和特殊场景
+     */
+    async GetRawWebUIConfig(): Promise<WebUiConfigType> {
+        if (this.WebUiConfigData) {
             return this.WebUiConfigData;
         }
         try {
@@ -78,18 +118,12 @@ export class WebUiConfigWrapper {
         }
     }
 
-    async UpdateWebUIConfig(newConfig: Partial<WebUiConfigType>): Promise<void> {
-        const configPath = resolve(webUiPathWrapper.configPath, './webui.json');
-        const currentConfig = await this.GetWebUIConfig();
-        const mergedConfig = deepMerge({ ...currentConfig }, newConfig);
-        const updatedConfig = this.validateAndApplyDefaults(mergedConfig);
-        await this.writeConfig(configPath, updatedConfig);
-        this.WebUiConfigData = updatedConfig;
-    }
-
     async UpdateToken(oldToken: string, newToken: string): Promise<void> {
-        const currentConfig = await this.GetWebUIConfig();
-        if (currentConfig.token !== oldToken) {
+        // 使用内存中缓存的token进行验证，确保强兼容性
+        const cachedToken = getInitialWebUiToken();
+        const tokenToCheck = cachedToken || (await this.GetWebUIConfig()).token;
+        
+        if (tokenToCheck !== oldToken) {
             throw new Error('旧 token 不匹配');
         }
         await this.UpdateWebUIConfig({ token: newToken, defaultToken: false });

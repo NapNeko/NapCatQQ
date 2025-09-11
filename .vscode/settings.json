@@ -9,4 +9,9 @@
     "css.customData": [
         ".vscode/tailwindcss.json"
     ],
+    "editor.formatOnPaste": false,
+     "editor.formatOnSave": false,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "never"
+    },
 }

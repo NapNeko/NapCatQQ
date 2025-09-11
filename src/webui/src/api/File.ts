@@ -9,9 +9,17 @@ import { PassThrough } from 'stream';
 import multer from 'multer';
 import webUIFontUploader from '../uploader/webui_font';
 import diskUploader from '../uploader/disk';
-import { WebUiConfig } from '@/webui';
+import { WebUiConfig, getInitialWebUiToken, webUiPathWrapper } from '@/webui';
 
 const isWindows = os.platform() === 'win32';
+
+// 安全地从查询参数中提取字符串值，防止类型混淆
+const getQueryStringParam = (param: any): string => {
+    if (Array.isArray(param)) {
+        return String(param[0] || '');
+    }
+    return String(param || '');
+};
 
 // 获取系统根目录列表（Windows返回盘符列表，其他系统返回['/']）
 const getRootDirs = async (): Promise<string[]> => {
@@ -32,14 +40,68 @@ const getRootDirs = async (): Promise<string[]> => {
     return drives.length > 0 ? drives : ['C:'];
 };
 
-// 规范化路径
+// 规范化路径并进行安全验证
 const normalizePath = (inputPath: string): string => {
-    if (!inputPath) return isWindows ? 'C:\\' : '/';
-    // 如果是Windows且输入为纯盘符（可能带或不带斜杠），统一返回 "X:\"
-    if (isWindows && /^[A-Z]:[\\/]*$/i.test(inputPath)) {
-        return inputPath.slice(0, 2) + '\\';
+    if (!inputPath) {
+        // 对于空路径，Windows返回用户主目录，其他系统返回根目录
+        return isWindows ? process.env['USERPROFILE'] || 'C:\\' : '/';
     }
-    return path.normalize(inputPath);
+    
+    // 对输入路径进行清理，移除潜在的危险字符
+    const cleanedPath = inputPath.replace(/[\x00-\x1f\x7f]/g, ''); // 移除控制字符
+    
+    // 如果是Windows且输入为纯盘符（可能带或不带斜杠），统一返回 "X:\"
+    if (isWindows && /^[A-Z]:[\\/]*$/i.test(cleanedPath)) {
+        return cleanedPath.slice(0, 2) + '\\';
+    }
+    
+    // 安全验证：检查是否包含危险的路径遍历模式（在规范化之前）
+    if (containsPathTraversal(cleanedPath)) {
+        throw new Error('Invalid path: path traversal detected');
+    }
+    
+    // 进行路径规范化
+    const normalized = path.resolve(cleanedPath);
+    
+    // 再次检查规范化后的路径，确保没有绕过安全检查
+    if (containsPathTraversal(normalized)) {
+        throw new Error('Invalid path: path traversal detected after normalization');
+    }
+    
+    // 额外安全检查：确保规范化后的路径不包含连续的路径分隔符
+    const finalPath = normalized.replace(/[\\\/]+/g, path.sep);
+    
+    return finalPath;
+};
+
+// 检查路径是否包含路径遍历攻击模式
+const containsPathTraversal = (inputPath: string): boolean => {
+    // 对输入进行URL解码，防止编码绕过
+    let decodedPath = inputPath;
+    try {
+        decodedPath = decodeURIComponent(inputPath);
+    } catch {
+        // 如果解码失败，使用原始路径
+    }
+    
+    // 将路径统一为正斜杠格式进行检查
+    const normalizedForCheck = decodedPath.replace(/\\/g, '/');
+    
+    // 检查危险模式 - 更全面的路径遍历检测
+    const dangerousPatterns = [
+        /\.\.\//, // ../ 模式
+        /\/\.\./, // /.. 模式
+        /^\.\./, // 以.. 开头
+        /\.\.$/, // 以.. 结尾
+        /\.\.\\/, // ..\ 模式（Windows）
+        /\\\.\./, // \.. 模式（Windows）
+        /%2e%2e/i, // URL编码的..
+        /%252e%252e/i, // 双重URL编码的..
+        /\.\.\x00/, // null字节攻击
+        /\0/, // null字节
+    ];
+    
+    return dangerousPatterns.some(pattern => pattern.test(normalizedForCheck));
 };
 
 interface FileInfo {
@@ -51,6 +113,35 @@ interface FileInfo {
 
 // 添加系统文件黑名单
 const SYSTEM_FILES = new Set(['pagefile.sys', 'swapfile.sys', 'hiberfil.sys', 'System Volume Information']);
+
+// 检查是否为WebUI配置文件
+const isWebUIConfigFile = (filePath: string): boolean => {
+    // 先用字符串快速筛选
+    if (!filePath.includes('webui.json')) {
+        return false;
+    }
+    
+    // 进入更严格的路径判断 - 统一路径分隔符为 /
+    const webUIConfigPath = path.resolve(webUiPathWrapper.configPath, 'webui.json').replace(/\\/g, '/');
+    const targetPath = path.resolve(filePath).replace(/\\/g, '/');
+    
+    // 统一分隔符后进行路径比较
+    return targetPath === webUIConfigPath;
+};
+
+// WebUI配置文件脱敏处理
+const sanitizeWebUIConfig = (content: string): string => {
+    try {
+        const config = JSON.parse(content);
+        if (config.token) {
+            config.token = '******';
+        }
+        return JSON.stringify(config, null, 4);
+    } catch {
+        // 如果解析失败，返回原内容
+        return content;
+    }
+};
 
 // 检查同类型的文件或目录是否存在
 const checkSameTypeExists = async (pathToCheck: string, isDirectory: boolean): Promise<boolean> => {
@@ -70,8 +161,15 @@ export const ListFilesHandler: RequestHandler = async (req, res) => {
         return sendError(res, '默认密码禁止使用');
     }
     try {
-        const requestPath = (req.query['path'] as string) || (isWindows ? 'C:\\' : '/');
-        const normalizedPath = normalizePath(requestPath);
+        const requestPath = getQueryStringParam(req.query['path']) || (isWindows ? process.env['USERPROFILE'] || 'C:\\' : '/');
+        
+        let normalizedPath: string;
+        try {
+            normalizedPath = normalizePath(requestPath);
+        } catch (pathError) {
+            return sendError(res, '无效的文件路径');
+        }
+        
         const onlyDirectory = req.query['onlyDirectory'] === 'true';
 
         // 如果是根路径且在Windows系统上，返回盘符列表
@@ -139,7 +237,18 @@ export const ListFilesHandler: RequestHandler = async (req, res) => {
 export const CreateDirHandler: RequestHandler = async (req, res) => {
     try {
         const { path: dirPath } = req.body;
-        const normalizedPath = normalizePath(dirPath);
+        
+        let normalizedPath: string;
+        try {
+            normalizedPath = normalizePath(dirPath);
+        } catch (pathError) {
+            return sendError(res, '无效的文件路径');
+        }
+
+        // 额外安全检查：确保路径是绝对路径
+        if (!path.isAbsolute(normalizedPath)) {
+            return sendError(res, '路径必须是绝对路径');
+        }
 
         // 检查是否已存在同类型（目录）
         if (await checkSameTypeExists(normalizedPath, true)) {
@@ -157,7 +266,19 @@ export const CreateDirHandler: RequestHandler = async (req, res) => {
 export const DeleteHandler: RequestHandler = async (req, res) => {
     try {
         const { path: targetPath } = req.body;
-        const normalizedPath = normalizePath(targetPath);
+        
+        let normalizedPath: string;
+        try {
+            normalizedPath = normalizePath(targetPath);
+        } catch (pathError) {
+            return sendError(res, '无效的文件路径');
+        }
+        
+        // 额外安全检查：确保路径是绝对路径
+        if (!path.isAbsolute(normalizedPath)) {
+            return sendError(res, '路径必须是绝对路径');
+        }
+        
         const stat = await fsProm.stat(normalizedPath);
         if (stat.isDirectory()) {
             await fsProm.rm(normalizedPath, { recursive: true });
@@ -175,7 +296,18 @@ export const BatchDeleteHandler: RequestHandler = async (req, res) => {
     try {
         const { paths } = req.body;
         for (const targetPath of paths) {
-            const normalizedPath = normalizePath(targetPath);
+            let normalizedPath: string;
+            try {
+                normalizedPath = normalizePath(targetPath);
+            } catch (pathError) {
+                return sendError(res, '无效的文件路径');
+            }
+            
+            // 额外安全检查：确保路径是绝对路径
+            if (!path.isAbsolute(normalizedPath)) {
+                return sendError(res, '路径必须是绝对路径');
+            }
+            
             const stat = await fsProm.stat(normalizedPath);
             if (stat.isDirectory()) {
                 await fsProm.rm(normalizedPath, { recursive: true });
@@ -192,8 +324,25 @@ export const BatchDeleteHandler: RequestHandler = async (req, res) => {
 // 读取文件内容
 export const ReadFileHandler: RequestHandler = async (req, res) => {
     try {
-        const filePath = normalizePath(req.query['path'] as string);
-        const content = await fsProm.readFile(filePath, 'utf-8');
+        let filePath: string;
+        try {
+            filePath = normalizePath(getQueryStringParam(req.query['path']));
+        } catch (pathError) {
+            return sendError(res, '无效的文件路径');
+        }
+        
+        // 额外安全检查：确保路径是绝对路径
+        if (!path.isAbsolute(filePath)) {
+            return sendError(res, '路径必须是绝对路径');
+        }
+        
+        let content = await fsProm.readFile(filePath, 'utf-8');
+        
+        // 如果是WebUI配置文件，对token进行脱敏处理
+        if (isWebUIConfigFile(filePath)) {
+            content = sanitizeWebUIConfig(content);
+        }
+        
         return sendSuccess(res, content);
     } catch (error) {
         return sendError(res, '读取文件失败');
@@ -204,8 +353,40 @@ export const ReadFileHandler: RequestHandler = async (req, res) => {
 export const WriteFileHandler: RequestHandler = async (req, res) => {
     try {
         const { path: filePath, content } = req.body;
-        const normalizedPath = normalizePath(filePath);
-        await fsProm.writeFile(normalizedPath, content, 'utf-8');
+        
+        // 安全的路径规范化，如果检测到路径遍历攻击会抛出异常
+        let normalizedPath: string;
+        try {
+            normalizedPath = normalizePath(filePath);
+        } catch (pathError) {
+            return sendError(res, '无效的文件路径');
+        }
+        
+        // 额外安全检查：确保路径是绝对路径
+        if (!path.isAbsolute(normalizedPath)) {
+            return sendError(res, '路径必须是绝对路径');
+        }
+        
+        let finalContent = content;
+        
+        // 检查是否为WebUI配置文件
+        if (isWebUIConfigFile(normalizedPath)) {
+            try {
+                // 解析要写入的配置
+                const configToWrite = JSON.parse(content);
+                // 获取内存中的token，覆盖前端传来的token
+                const memoryToken = getInitialWebUiToken();
+                if (memoryToken) {
+                    configToWrite.token = memoryToken;
+                    finalContent = JSON.stringify(configToWrite, null, 4);
+                }
+            } catch (e) {
+                // 如果解析失败 说明不符合json格式 不允许写入
+                return sendError(res, '写入的WebUI配置文件内容格式错误，必须是合法的JSON');
+            }
+        }
+        
+        await fsProm.writeFile(normalizedPath, finalContent, 'utf-8');
         return sendSuccess(res, true);
     } catch (error) {
         return sendError(res, '写入文件失败');
@@ -216,7 +397,18 @@ export const WriteFileHandler: RequestHandler = async (req, res) => {
 export const CreateFileHandler: RequestHandler = async (req, res) => {
     try {
         const { path: filePath } = req.body;
-        const normalizedPath = normalizePath(filePath);
+        
+        let normalizedPath: string;
+        try {
+            normalizedPath = normalizePath(filePath);
+        } catch (pathError) {
+            return sendError(res, '无效的文件路径');
+        }
+
+        // 额外安全检查：确保路径是绝对路径
+        if (!path.isAbsolute(normalizedPath)) {
+            return sendError(res, '路径必须是绝对路径');
+        }
 
         // 检查是否已存在同类型（文件）
         if (await checkSameTypeExists(normalizedPath, false)) {
@@ -234,8 +426,21 @@ export const CreateFileHandler: RequestHandler = async (req, res) => {
 export const RenameHandler: RequestHandler = async (req, res) => {
     try {
         const { oldPath, newPath } = req.body;
-        const normalizedOldPath = normalizePath(oldPath);
-        const normalizedNewPath = normalizePath(newPath);
+        
+        let normalizedOldPath: string;
+        let normalizedNewPath: string;
+        try {
+            normalizedOldPath = normalizePath(oldPath);
+            normalizedNewPath = normalizePath(newPath);
+        } catch (pathError) {
+            return sendError(res, '无效的文件路径');
+        }
+        
+        // 额外安全检查：确保路径是绝对路径
+        if (!path.isAbsolute(normalizedOldPath) || !path.isAbsolute(normalizedNewPath)) {
+            return sendError(res, '路径必须是绝对路径');
+        }
+        
         await fsProm.rename(normalizedOldPath, normalizedNewPath);
         return sendSuccess(res, true);
     } catch (error) {
@@ -247,8 +452,21 @@ export const RenameHandler: RequestHandler = async (req, res) => {
 export const MoveHandler: RequestHandler = async (req, res) => {
     try {
         const { sourcePath, targetPath } = req.body;
-        const normalizedSourcePath = normalizePath(sourcePath);
-        const normalizedTargetPath = normalizePath(targetPath);
+        
+        let normalizedSourcePath: string;
+        let normalizedTargetPath: string;
+        try {
+            normalizedSourcePath = normalizePath(sourcePath);
+            normalizedTargetPath = normalizePath(targetPath);
+        } catch (pathError) {
+            return sendError(res, '无效的文件路径');
+        }
+        
+        // 额外安全检查：确保路径是绝对路径
+        if (!path.isAbsolute(normalizedSourcePath) || !path.isAbsolute(normalizedTargetPath)) {
+            return sendError(res, '路径必须是绝对路径');
+        }
+        
         await fsProm.rename(normalizedSourcePath, normalizedTargetPath);
         return sendSuccess(res, true);
     } catch (error) {
@@ -261,8 +479,20 @@ export const BatchMoveHandler: RequestHandler = async (req, res) => {
     try {
         const { items } = req.body;
         for (const { sourcePath, targetPath } of items) {
-            const normalizedSourcePath = normalizePath(sourcePath);
-            const normalizedTargetPath = normalizePath(targetPath);
+            let normalizedSourcePath: string;
+            let normalizedTargetPath: string;
+            try {
+                normalizedSourcePath = normalizePath(sourcePath);
+                normalizedTargetPath = normalizePath(targetPath);
+            } catch (pathError) {
+                return sendError(res, '无效的文件路径');
+            }
+            
+            // 额外安全检查：确保路径是绝对路径
+            if (!path.isAbsolute(normalizedSourcePath) || !path.isAbsolute(normalizedTargetPath)) {
+                return sendError(res, '路径必须是绝对路径');
+            }
+            
             await fsProm.rename(normalizedSourcePath, normalizedTargetPath);
         }
         return sendSuccess(res, true);
@@ -274,9 +504,20 @@ export const BatchMoveHandler: RequestHandler = async (req, res) => {
 // 新增：文件下载处理方法（注意流式传输，不将整个文件读入内存）
 export const DownloadHandler: RequestHandler = async (req, res) => {
     try {
-        const filePath = normalizePath(req.query['path'] as string);
+        let filePath: string;
+        try {
+            filePath = normalizePath(getQueryStringParam(req.query['path']));
+        } catch (pathError) {
+            return sendError(res, '无效的文件路径');
+        }
+        
         if (!filePath) {
             return sendError(res, '参数错误');
+        }
+        
+        // 额外安全检查：确保路径是绝对路径
+        if (!path.isAbsolute(filePath)) {
+            return sendError(res, '路径必须是绝对路径');
         }
 
         const stat = await fsProm.stat(filePath);
@@ -316,12 +557,25 @@ export const BatchDownloadHandler: RequestHandler = async (req, res) => {
         const zipStream = new compressing.zip.Stream();
         // 修改：根据文件类型设置 relativePath
         for (const filePath of paths) {
-            const normalizedPath = normalizePath(filePath);
+            let normalizedPath: string;
+            try {
+                normalizedPath = normalizePath(filePath);
+            } catch (pathError) {
+                return sendError(res, '无效的文件路径');
+            }
+            
+            // 额外安全检查：确保规范化后的路径是绝对路径
+            if (!path.isAbsolute(normalizedPath)) {
+                return sendError(res, '路径必须是绝对路径');
+            }
+            
             const stat = await fsProm.stat(normalizedPath);
             if (stat.isDirectory()) {
                 zipStream.addEntry(normalizedPath, { relativePath: '' });
             } else {
-                zipStream.addEntry(normalizedPath, { relativePath: path.basename(normalizedPath) });
+                // 确保相对路径只使用文件名，防止路径遍历
+                const safeName = path.basename(normalizedPath);
+                zipStream.addEntry(normalizedPath, { relativePath: safeName });
             }
         }
         zipStream.pipe(res);
