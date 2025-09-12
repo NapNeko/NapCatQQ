@@ -2,7 +2,7 @@ import { RequestHandler } from 'express';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { loadConfig, OneBotConfig } from '@/onebot/config/config';
-import { WebUiConfig, webUiPathWrapper } from '@/webui';
+import { webUiPathWrapper } from '@/webui';
 import { WebUiDataRuntime } from '@webapi/helper/Data';
 import { sendError, sendSuccess } from '@webapi/utils/response';
 import { isEmpty } from '@webapi/utils/check';
@@ -46,10 +46,6 @@ export const OB11SetConfigHandler: RequestHandler = async (req, res) => {
     // 如果配置为空，返回错误
     if (isEmpty(req.body.config)) {
         return sendError(res, 'config is empty');
-    }
-    const webuiToken = await WebUiConfig.GetWebUIConfig();
-    if (webuiToken.defaultToken) {
-        return sendError(res, '默认密码禁止写入配置');
     }
     // 写入配置
     try {

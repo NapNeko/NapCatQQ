@@ -141,7 +141,7 @@ export const UpdateTokenHandler: RequestHandler = async (req, res) => {
             return sendError(res, '旧 token 不匹配');
         }
         // 直接更新配置文件中的token，不需要通过WebUiConfig.UpdateToken方法
-        await WebUiConfig.UpdateWebUIConfig({ token: newToken, defaultToken: false });
+        await WebUiConfig.UpdateWebUIConfig({ token: newToken });
         // 更新内存中的缓存token，使新密码立即生效
         setInitialWebUiToken(newToken);
         

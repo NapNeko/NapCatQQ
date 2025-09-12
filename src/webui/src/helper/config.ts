@@ -7,17 +7,17 @@ import { resolve } from 'node:path';
 
 import { deepMerge } from '../utils/object';
 import { themeType } from '../types/theme';
+import { getRandomToken } from '../utils/url'
 
 // 限制尝试端口的次数，避免死循环
 // 定义配置的类型
 const WebUiConfigSchema = Type.Object({
-    host: Type.String({ default: '0.0.0.0' }),
+    host: Type.String({ default: '127.0.0.1' }),
     port: Type.Number({ default: 6099 }),
-    token: Type.String({ default: 'napcat' }),
+    token: Type.String({ default: getRandomToken(8) }),
     loginRate: Type.Number({ default: 10 }),
     autoLoginAccount: Type.String({ default: '' }),
     theme: themeType,
-    defaultToken: Type.Boolean({ default: true }),
     // 是否关闭WebUI
     disableWebUI: Type.Boolean({ default: false }),
     // 是否关闭非局域网访问
@@ -75,16 +75,17 @@ export class WebUiConfigWrapper {
             this.WebUiConfigData = {
                 ...parsedConfig,
                 // 首次读取内存中是没有token的，需要进行一层兜底
-                token: getInitialWebUiToken() || parsedConfig.token
+                token: getInitialWebUiToken() || parsedConfig.token,
             };           
             return this.WebUiConfigData;
         } catch (e) {
             console.log('读取配置文件失败', e);
             const defaultConfig = this.validateAndApplyDefaults({});
-            return {
+            this.WebUiConfigData = {
                 ...defaultConfig,
-                token: defaultConfig.token
-            };
+                token: getInitialWebUiToken() || defaultConfig.token,
+            }
+            return this.WebUiConfigData;
         }
     }
 
@@ -126,7 +127,7 @@ export class WebUiConfigWrapper {
         if (tokenToCheck !== oldToken) {
             throw new Error('旧 token 不匹配');
         }
-        await this.UpdateWebUIConfig({ token: newToken, defaultToken: false });
+        await this.UpdateWebUIConfig({ token: newToken });
     }
 
     // 获取日志文件夹路径

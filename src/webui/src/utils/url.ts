@@ -3,6 +3,7 @@
  */
 
 import { isIP } from 'node:net';
+import { randomBytes } from 'node:crypto'
 
 /**
  * 将 host（主机地址） 转换为标准格式
@@ -44,3 +45,13 @@ export const createUrl = (
     }
     return url.toString();
 };
+
+/**
+ * 生成随机Token
+ * @param length Token长度 默认8
+ * @returns 随机Token字符串
+ * @example getRandomToken
+ */
+export const getRandomToken = (length = 8) => {
+    return randomBytes(36).toString('hex').slice(0, length);
+}
