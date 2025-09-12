@@ -4,14 +4,14 @@
 
 import express from 'express';
 import { createServer } from 'http';
-import { randomUUID, randomBytes } from 'node:crypto'
+import { randomUUID } from 'node:crypto'
 import { createServer as createHttpsServer } from 'https';
 import { LogWrapper } from '@/common/log';
 import { NapCatPathWrapper } from '@/common/path';
 import { WebUiConfigWrapper } from '@webapi/helper/config';
 import { ALLRouter } from '@webapi/router';
 import { cors } from '@webapi/middleware/cors';
-import { createUrl } from '@webapi/utils/url';
+import { createUrl, getRandomToken } from '@webapi/utils/url';
 import { sendError } from '@webapi/utils/response';
 import { join } from 'node:path';
 import { terminalManager } from '@webapi/terminal/terminal_manager';
@@ -90,9 +90,9 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
     let config = await WebUiConfig.GetWebUIConfig();
 
     // 检查并更新默认密码 - 最高优先级
-    if (config.defaultToken || config.token === 'napcat' || !config.token) {
-        const randomToken = randomBytes(6).toString('hex');
-        await WebUiConfig.UpdateWebUIConfig({ token: randomToken, defaultToken: false });
+    if (config.token === 'napcat' || !config.token) {
+        const randomToken = getRandomToken(8);
+        await WebUiConfig.UpdateWebUIConfig({ token: randomToken });
         logger.log(`[NapCat] [WebUi] 🔐 检测到默认密码，已自动更新为安全密码`);
         
         // 存储token到全局变量，等待QQ登录成功后发送
