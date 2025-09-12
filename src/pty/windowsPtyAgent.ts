@@ -203,7 +203,13 @@ export class WindowsPtyAgent {
     }
 
     private _getWindowsBuildNumber(): number {
-        const osVersion = (/(\d+)\.(\d+)\.(\d+)/g).exec(os.release());
+        const release = os.release();
+        // Limit input length to prevent potential DoS attacks
+        if (release.length > 50) {
+            return 0;
+        }
+        // Use non-global regex with more specific pattern to prevent backtracking
+        const osVersion = /^(\d{1,5})\.(\d{1,5})\.(\d{1,10})/.exec(release);
         let buildNumber: number = 0;
         if (osVersion && osVersion.length === 4) {
             buildNumber = parseInt(osVersion[3]!);

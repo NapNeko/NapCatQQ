@@ -66,7 +66,15 @@ export const createDiskStorage = (uploadPath: string) => {
 };
 
 export const createDiskUpload = (uploadPath: string) => {
-    const upload = multer({ storage: createDiskStorage(uploadPath) }).array('files');
+    const upload = multer({ 
+        storage: createDiskStorage(uploadPath),
+        limits: {
+            fileSize: 100 * 1024 * 1024, // 100MB 文件大小限制
+            files: 20, // 最多同时上传20个文件
+            fieldSize: 1024 * 1024, // 1MB 字段大小限制
+            fields: 10 // 最多10个字段
+        }
+    }).array('files');
     return upload;
 };
 
@@ -76,6 +84,18 @@ const diskUploader = (req: Request, res: Response) => {
         createDiskUpload(uploadPath)(req, res, (error) => {
             if (error) {
                 // 错误处理
+                if (error.code === 'LIMIT_FILE_SIZE') {
+                    return reject(new Error('文件大小超过限制（最大100MB）'));
+                }
+                if (error.code === 'LIMIT_FILE_COUNT') {
+                    return reject(new Error('文件数量超过限制（最多20个文件）'));
+                }
+                if (error.code === 'LIMIT_FIELD_VALUE') {
+                    return reject(new Error('字段值大小超过限制'));
+                }
+                if (error.code === 'LIMIT_FIELD_COUNT') {
+                    return reject(new Error('字段数量超过限制'));
+                }
                 return reject(error);
             }
             return resolve(true);
