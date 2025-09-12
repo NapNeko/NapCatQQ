@@ -1,4 +1,4 @@
-import './init-dynamic-dirname';
+// import './init-dynamic-dirname';
 import { WebUiConfig } from '@/webui';
 import { AuthHelper } from '../helper/SignToken';
 import { LogWrapper } from '@/common/log';
