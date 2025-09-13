@@ -7,14 +7,14 @@ import { resolve } from 'node:path';
 
 import { deepMerge } from '../utils/object';
 import { themeType } from '../types/theme';
-import { getRandomToken, getDefaultHost } from '../utils/url'
+import { getRandomToken } from '../utils/url'
 
 // 限制尝试端口的次数，避免死循环
 // 定义配置的类型
 const WebUiConfigSchema = Type.Object({
-    host: Type.String({ default: getDefaultHost() }),
+    host: Type.String({ default: '0.0.0.0' }),
     port: Type.Number({ default: 6099 }),
-    token: Type.String({ default: getRandomToken(8) }),
+    token: Type.String({ default: getRandomToken(12) }),
     loginRate: Type.Number({ default: 10 }),
     autoLoginAccount: Type.String({ default: '' }),
     theme: themeType,
@@ -64,7 +64,7 @@ export class WebUiConfigWrapper {
 
     async GetWebUIConfig(): Promise<WebUiConfigType> {
         if (this.WebUiConfigData) {
-           return this.WebUiConfigData
+            return this.WebUiConfigData
         }
 
         try {
@@ -76,7 +76,7 @@ export class WebUiConfigWrapper {
                 ...parsedConfig,
                 // 首次读取内存中是没有token的，需要进行一层兜底
                 token: getInitialWebUiToken() || parsedConfig.token,
-            };           
+            };
             return this.WebUiConfigData;
         } catch (e) {
             console.log('读取配置文件失败', e);
@@ -123,7 +123,7 @@ export class WebUiConfigWrapper {
         // 使用内存中缓存的token进行验证，确保强兼容性
         const cachedToken = getInitialWebUiToken();
         const tokenToCheck = cachedToken || (await this.GetWebUIConfig()).token;
-        
+
         if (tokenToCheck !== oldToken) {
             throw new Error('旧 token 不匹配');
         }
