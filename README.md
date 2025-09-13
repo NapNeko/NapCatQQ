@@ -33,6 +33,7 @@ _Modern protocol-side framework implemented based on NTQQ._
 
 **首次使用**请务必查看如下文档看使用教程
 
+> 项目非盈利，对接问题/基础问题/下层框架问题 请自行搜索解决，本项目社区不提供此类解答。
 ## Link
 
 | Docs | [![Github.IO](https://img.shields.io/badge/docs%20on-Github.IO-orange)](https://napneko.github.io/) | [![Cloudflare.Worker](https://img.shields.io/badge/docs%20on-Cloudflare.Worker-black)](https://doc.napneko.icu/) | [![Cloudflare.HKServer](https://img.shields.io/badge/docs%20on-Cloudflare.HKServer-informational)](https://napcat.napneko.icu/) |
@@ -46,6 +47,8 @@ _Modern protocol-side framework implemented based on NTQQ._
 
 | Telegram | [![Telegram](https://img.shields.io/badge/Telegram-napcatqq-blue)](https://t.me/napcatqq) |
 |:-:|:-:|
+
+> 请不要在其余社区提及本项目(包括其余协议端/相关应用端项目)引发争论，如有建议到达官方交流群讨论或PR。
 
 ## Thanks
 
