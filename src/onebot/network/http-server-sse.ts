@@ -9,7 +9,7 @@ export class OB11HttpSSEServerAdapter extends OB11HttpServerAdapter {
         if (req.path === '/_events') {
             this.createSseSupport(req, res);
         } else {
-            super.httpApiRequest(req, res);
+            super.httpApiRequest(req, res, true);
         }
     }
 

@@ -186,7 +186,11 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
             this.checkStateAndReply<unknown>(OB11Response.error('不支持的API ' + receiveData.action, 1404, echo), wsClient);
             return;
         }
-        const retdata = await action.websocketHandle(receiveData.params, echo ?? '', this.name, this.config);
+        const retdata = await action.websocketHandle(receiveData.params, echo ?? '', this.name, this.config, {
+            send: async (data: object) => {
+                this.checkStateAndReply<unknown>({ ...OB11Response.ok(data, echo ?? '') }, wsClient);
+            }
+        });
         this.checkStateAndReply<unknown>({ ...retdata }, wsClient);
     }
 
