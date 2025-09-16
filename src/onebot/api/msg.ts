@@ -1124,10 +1124,13 @@ export class OneBotMsgApi {
             if (ignoreTypes.includes(sendMsg.type)) {
                 continue;
             }
-            const converter = this.ob11ToRawConverters[sendMsg.type] as (
+            const converter = this.ob11ToRawConverters[sendMsg.type] as ((
                 sendMsg: Extract<OB11MessageData, { type: OB11MessageData['type'] }>,
                 context: SendMessageContext,
-            ) => Promise<SendMessageElement | undefined>;
+            ) => Promise<SendMessageElement | undefined>) | undefined;
+            if (converter == undefined) {
+                throw new Error('未知的消息类型：' + sendMsg.type);
+            }
             const callResult = converter(
                 sendMsg,
                 { peer, deleteAfterSentFiles },
