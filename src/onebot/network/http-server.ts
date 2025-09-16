@@ -104,7 +104,7 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
         }
     }
 
-    async httpApiRequest(req: Request, res: Response) {
+    async httpApiRequest(req: Request, res: Response, request_sse: boolean = false) {
         let payload = req.body;
         if (req.method == 'get') {
             payload = req.query;
@@ -117,17 +117,31 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
             return res.json(hello);
         }
         const actionName = req.path.split('/')[1];
+        const payload_echo = payload['echo'];
+        const real_echo = payload_echo ?? Math.random().toString(36).substring(2, 15);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const action = this.actions.get(actionName as any);
         if (action) {
             try {
-                const result = await action.handle(payload, this.name, this.config);
+                let stream = false;
+                const result = await action.handle(payload, this.name, this.config, {
+                    send: request_sse ? async (data: object) => {
+                        this.onEvent({ ...OB11Response.ok(data, real_echo), type: 'sse-action' } as unknown as OB11EmitEventContent);
+                    } : async (data: object) => {
+                        stream = true;
+                        res.write(JSON.stringify({ ...OB11Response.ok(data, real_echo), type: 'stream-action' }) + "\r\n\r\n");
+                    }
+                }, real_echo);
+                if (stream) {
+                    res.write(JSON.stringify({ ...result, type: 'stream-action' }) + "\r\n\r\n");
+                    return res.end();
+                };
                 return res.json(result);
             } catch (error: unknown) {
-                return res.json(OB11Response.error((error as Error)?.stack?.toString() || (error as Error)?.message || 'Error Handle', 200));
+                return res.json(OB11Response.error((error as Error)?.stack?.toString() || (error as Error)?.message || 'Error Handle', 200, real_echo));
             }
         } else {
-            return res.json(OB11Response.error('不支持的Api ' + actionName, 200));
+            return res.json(OB11Response.error('不支持的Api ' + actionName, 200, real_echo));
         }
     }
 

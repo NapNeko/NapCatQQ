@@ -10,6 +10,10 @@ export interface InvalidCheckResult {
 }
 
 export const ActionName = {
+    CleanStreamTempFile: 'clean_stream_temp_file',
+    TestStreamDownload: 'test_stream_download',
+    UploadFileStream: 'upload_file_stream',
+    DownloadFileStream: 'download_file_stream',
     DelGroupAlbumMedia: 'del_group_album_media',
     SetGroupAlbumMediaLike: 'set_group_album_media_like',
     DoGroupAlbumComment: 'do_group_album_comment',

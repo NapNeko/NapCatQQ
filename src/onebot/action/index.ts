@@ -130,10 +130,18 @@ import { DoGroupAlbumComment } from './extends/DoGroupAlbumComment';
 import { GetGroupAlbumMediaList } from './extends/GetGroupAlbumMediaList';
 import { SetGroupAlbumMediaLike } from './extends/SetGroupAlbumMediaLike';
 import { DelGroupAlbumMedia } from './extends/DelGroupAlbumMedia';
+import { CleanStreamTempFile } from './stream/CleanStreamTempFile';
+import { DownloadFileStream } from './stream/DownloadFileStream';
+import { TestStreamDownload } from './stream/TestStreamDownload';
+import { UploadFileStream } from './stream/UploadFileStream';
 
 export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
 
     const actionHandlers = [
+        new CleanStreamTempFile(obContext, core),
+        new DownloadFileStream(obContext, core),
+        new TestStreamDownload(obContext, core),
+        new UploadFileStream(obContext, core),
         new DelGroupAlbumMedia(obContext, core),
         new SetGroupAlbumMediaLike(obContext, core),
         new DoGroupAlbumComment(obContext, core),

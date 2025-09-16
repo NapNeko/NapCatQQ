@@ -41,12 +41,12 @@ export class GetFileBase extends OneBotAction<GetFilePayload, GetFileResponse> {
             let url = '';
             if (mixElement?.picElement && rawMessage) {
                 const tempData =
-                    await this.obContext.apis.MsgApi.rawToOb11Converters.picElement?.(mixElement?.picElement, rawMessage, mixElement, { parseMultMsg: false }) as OB11MessageImage | undefined;
+                    await this.obContext.apis.MsgApi.rawToOb11Converters.picElement?.(mixElement?.picElement, rawMessage, mixElement, { parseMultMsg: false, disableGetUrl: false, quick_reply: true }) as OB11MessageImage | undefined;
                 url = tempData?.data.url ?? '';
             }
             if (mixElement?.videoElement && rawMessage) {
                 const tempData =
-                    await this.obContext.apis.MsgApi.rawToOb11Converters.videoElement?.(mixElement?.videoElement, rawMessage, mixElement, { parseMultMsg: false }) as OB11MessageVideo | undefined;
+                    await this.obContext.apis.MsgApi.rawToOb11Converters.videoElement?.(mixElement?.videoElement, rawMessage, mixElement, { parseMultMsg: false, disableGetUrl: false, quick_reply: true }) as OB11MessageVideo | undefined;
                 url = tempData?.data.url ?? '';
             }
             const res: GetFileResponse = {
