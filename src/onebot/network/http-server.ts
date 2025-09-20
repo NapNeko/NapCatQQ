@@ -121,8 +121,8 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
         const real_echo = payload_echo ?? Math.random().toString(36).substring(2, 15);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const action = this.actions.get(actionName as any);
-        const useStream = action.useStream;
         if (action) {
+            const useStream = action.useStream;
             try {
                 const result = await action.handle(payload, this.name, this.config, {
                     send: request_sse ? async (data: object) => {
