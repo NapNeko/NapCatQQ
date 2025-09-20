@@ -87,7 +87,7 @@ export class DownloadFileStream extends OneBotAction<Payload, StreamPacket<Downl
             const totalSize = fileSize || stats.size;
 
             // 发送文件信息
-            req.send({
+            await req.send({
                 type: StreamStatus.Stream,
                 data_type: 'file_info',
                 file_name: fileName,
@@ -104,7 +104,7 @@ export class DownloadFileStream extends OneBotAction<Payload, StreamPacket<Downl
                 const base64Chunk = chunk.toString('base64');
                 bytesRead += chunk.length;
 
-                req.send({
+               await req.send({
                     type: StreamStatus.Stream,
                     data_type: 'file_chunk',
                     index: chunkIndex,

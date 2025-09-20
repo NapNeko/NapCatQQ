@@ -83,17 +83,25 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
     }
     connectEvent(core: NapCatCore, wsClient: WebSocket) {
         try {
-            this.checkStateAndReply<unknown>(new OB11LifeCycleEvent(core, LifeCycleSubType.CONNECT), wsClient);
+            this.checkStateAndReply<unknown>(new OB11LifeCycleEvent(core, LifeCycleSubType.CONNECT), wsClient).catch(e => this.logger.logError('[OneBot] [WebSocket Server] 发送生命周期失败', e));
         } catch (e) {
             this.logger.logError('[OneBot] [WebSocket Server] 发送生命周期失败', e);
         }
     }
 
-    onEvent<T extends OB11EmitEventContent>(event: T) {
+    async onEvent<T extends OB11EmitEventContent>(event: T) {
         this.wsClientsMutex.runExclusive(async () => {
-            this.wsClientWithEvent.forEach((wsClient) => {
-                wsClient.send(JSON.stringify(event));
+            let promises = this.wsClientWithEvent.map((wsClient) => {
+                return new Promise<void>((resolve, reject) => {
+                    if (wsClient.readyState === WebSocket.OPEN) {
+                        wsClient.send(JSON.stringify(event));
+                        resolve();
+                    } else {
+                        reject(new Error('WebSocket is not open'));
+                    }
+                });
             });
+            await Promise.allSettled(promises);
         });
     }
 
@@ -160,10 +168,15 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
         return false;
     }
 
-    private checkStateAndReply<T>(data: T, wsClient: WebSocket) {
-        if (wsClient.readyState === WebSocket.OPEN) {
-            wsClient.send(JSON.stringify(data));
-        }
+    private async checkStateAndReply<T>(data: T, wsClient: WebSocket) {
+        return await new Promise<void>((resolve, reject) => {
+            if (wsClient.readyState === WebSocket.OPEN) {
+                wsClient.send(JSON.stringify(data));
+                resolve();
+            } else {
+                reject(new Error('WebSocket is not open'));
+            }
+        });
     }
 
     private async handleMessage(wsClient: WebSocket, message: RawData) {
@@ -175,7 +188,7 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
             echo = receiveData.echo;
             //this.logger.logDebug('收到正向Websocket消息', receiveData);
         } catch {
-            this.checkStateAndReply<unknown>(OB11Response.error('json解析失败,请检查数据格式', 1400, echo), wsClient);
+            await this.checkStateAndReply<unknown>(OB11Response.error('json解析失败,请检查数据格式', 1400, echo), wsClient);
             return;
         }
         receiveData.params = (receiveData?.params) ? receiveData.params : {};//兼容类型验证 不然类型校验爆炸
@@ -183,15 +196,15 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
         const action = this.actions.get(receiveData.action as any);
         if (!action) {
             this.logger.logError('[OneBot] [WebSocket Client] 发生错误', '不支持的API ' + receiveData.action);
-            this.checkStateAndReply<unknown>(OB11Response.error('不支持的API ' + receiveData.action, 1404, echo), wsClient);
+            await this.checkStateAndReply<unknown>(OB11Response.error('不支持的API ' + receiveData.action, 1404, echo), wsClient);
             return;
         }
         const retdata = await action.websocketHandle(receiveData.params, echo ?? '', this.name, this.config, {
             send: async (data: object) => {
-                this.checkStateAndReply<unknown>({ ...OB11Response.ok(data, echo ?? '', true) }, wsClient);
+                await this.checkStateAndReply<unknown>({ ...OB11Response.ok(data, echo ?? '', true) }, wsClient);
             }
         });
-        this.checkStateAndReply<unknown>({ ...retdata }, wsClient);
+        await this.checkStateAndReply<unknown>({ ...retdata }, wsClient);
     }
 
     async reload(newConfig: WebsocketServerConfig) {

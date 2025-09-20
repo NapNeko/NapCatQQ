@@ -251,7 +251,7 @@ export class OB11PluginAdapter extends IOB11NetworkAdapter<PluginConfig> {
         this.logger.log(`[Plugin Adapter] Unloaded plugin: ${pluginName}`);
     }
 
-    onEvent<T extends OB11EmitEventContent>(event: T) {
+    async onEvent<T extends OB11EmitEventContent>(event: T) {
         if (!this.isEnable) {
             return;
         }

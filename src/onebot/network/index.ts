@@ -20,9 +20,9 @@ export class OB11NetworkManager {
     }
 
     async emitEvent(event: OB11EmitEventContent) {
-        return Promise.all(Array.from(this.adapters.values()).map(adapter => {
+        return Promise.all(Array.from(this.adapters.values()).map(async adapter => {
             if (adapter.isEnable) {
-                return adapter.onEvent(event);
+                return await adapter.onEvent(event);
             }
         }));
     }
@@ -32,19 +32,19 @@ export class OB11NetworkManager {
     }
 
     async emitEventByName(names: string[], event: OB11EmitEventContent) {
-        return Promise.all(names.map(name => {
+        return Promise.all(names.map(async name => {
             const adapter = this.adapters.get(name);
             if (adapter && adapter.isEnable) {
-                return adapter.onEvent(event);
+                return await adapter.onEvent(event);
             }
         }));
     }
 
     async emitEventByNames(map: Map<string, OB11EmitEventContent>) {
-        return Promise.all(Array.from(map.entries()).map(([name, event]) => {
+        return Promise.all(Array.from(map.entries()).map(async ([name, event]) => {
             const adapter = this.adapters.get(name);
             if (adapter && adapter.isEnable) {
-                return adapter.onEvent(event);
+                return await adapter.onEvent(event);
             }
         }));
     }

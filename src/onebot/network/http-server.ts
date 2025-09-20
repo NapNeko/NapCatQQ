@@ -20,7 +20,7 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    override onEvent<T extends OB11EmitEventContent>(_event: T) {
+    override async onEvent<T extends OB11EmitEventContent>(_event: T) {
         // http server is passive, no need to emit event
     }
 
@@ -126,9 +126,14 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
             try {
                 const result = await action.handle(payload, this.name, this.config, {
                     send: request_sse ? async (data: object) => {
-                        this.onEvent({ ...OB11Response.ok(data, real_echo, true) } as unknown as OB11EmitEventContent);
+                        await this.onEvent({ ...OB11Response.ok(data, real_echo, true) } as unknown as OB11EmitEventContent);
                     } : async (data: object) => {
-                        res.write(JSON.stringify({ ...OB11Response.ok(data, real_echo, true) }) + "\r\n\r\n");
+                        let newPromise = new Promise<void>((resolve, _reject) => {
+                            res.write(JSON.stringify({ ...OB11Response.ok(data, real_echo, true) }) + "\r\n\r\n", () => {
+                                resolve();
+                            });
+                        });
+                        return newPromise;
                     }
                 }, real_echo);
                 if (useStream) {

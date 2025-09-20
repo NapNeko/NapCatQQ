@@ -16,7 +16,7 @@ export class OB11HttpClientAdapter extends IOB11NetworkAdapter<HttpClientConfig>
         super(name, config, core, obContext, actions);
     }
 
-    onEvent<T extends OB11EmitEventContent>(event: T) {
+    async onEvent<T extends OB11EmitEventContent>(event: T) {
         this.emitEventAsync(event).catch(e => this.logger.logError('[OneBot] [Http Client] 新消息事件HTTP上报返回快速操作失败', e));
     }
 
