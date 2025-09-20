@@ -10,10 +10,14 @@ export interface InvalidCheckResult {
 }
 
 export const ActionName = {
+    // 所有 Normal Stream Api 表示并未流传输 表示与流传输有关
     CleanStreamTempFile: 'clean_stream_temp_file',
-    TestStreamDownload: 'test_stream_download',
+
+    // 所有 Upload/Download Stream Api 应当 _stream 结尾
+     TestDownloadStream: 'test_download_stream',
     UploadFileStream: 'upload_file_stream',
     DownloadFileStream: 'download_file_stream',
+
     DelGroupAlbumMedia: 'del_group_album_media',
     SetGroupAlbumMediaLike: 'set_group_album_media_like',
     DoGroupAlbumComment: 'do_group_album_comment',

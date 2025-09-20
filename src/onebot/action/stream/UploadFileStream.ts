@@ -1,6 +1,8 @@
 import { ActionName } from '@/onebot/action/router';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { Static, Type } from '@sinclair/typebox';
+import { NetworkAdapterConfig } from '@/onebot/config/config';
+import { StreamPacket, StreamStatus } from './StreamBasic';
 import fs from 'fs';
 import { join as joinPath } from 'node:path';
 import { randomUUID } from 'crypto';
@@ -53,67 +55,50 @@ interface StreamState {
 
 interface StreamResult {
     stream_id: string;
-    status: 'receiving' | 'completed' | 'error' | 'ready';
+    status: 'file_created' | 'chunk_received' | 'file_complete';
     received_chunks: number;
-    total_chunks?: number;
-    missing_chunks?: number[];
+    total_chunks: number;
     file_path?: string;
     file_size?: number;
     sha256?: string;
-    message?: string;
 }
 
-export class UploadFileStream extends OneBotAction<Payload, StreamResult> {
+export class UploadFileStream extends OneBotAction<Payload, StreamPacket<StreamResult>> {
     override actionName = ActionName.UploadFileStream;
     override payloadSchema = SchemaData;
+    override useStream = true;
 
     private static streams = new Map<string, StreamState>();
     private static memoryUsage = 0;
 
-    async _handle(payload: Payload): Promise<StreamResult> {
+    async _handle(payload: Payload, _adaptername: string, _config: NetworkAdapterConfig): Promise<StreamPacket<StreamResult>> {
         const { stream_id, reset, verify_only } = payload;
 
-        try {
-            if (reset) return this.resetStream(stream_id);
-            if (verify_only) return this.verifyStream(stream_id);
+        if (reset) {
+            this.cleanupStream(stream_id);
+            throw new Error('Stream reset completed');
+        }
 
-            const stream = this.getOrCreateStream(payload);
-
-            if (payload.chunk_data && payload.chunk_index !== undefined) {
-                const result = await this.processChunk(stream, payload.chunk_data, payload.chunk_index);
-                if (result.status === 'error') return result;
-            }
-
-            if (payload.is_complete || stream.receivedChunks === stream.totalChunks) {
-                return await this.completeStream(stream);
-            }
-
+        if (verify_only) {
+            const stream = UploadFileStream.streams.get(stream_id);
+            if (!stream) throw new Error('Stream not found');
             return this.getStreamStatus(stream);
-
-        } catch (error) {
-            // 确保在任何错误情况下都清理资源
-            this.cleanupStream(stream_id, true);
-            return this.errorResult(stream_id, error);
         }
-    }
 
-    private resetStream(streamId: string): StreamResult {
-        this.cleanupStream(streamId);
-        return {
-            stream_id: streamId,
-            status: 'ready',
-            received_chunks: 0,
-            message: 'Stream reset'
-        };
-    }
+        const stream = this.getOrCreateStream(payload);
 
-    private verifyStream(streamId: string): StreamResult {
-        const stream = UploadFileStream.streams.get(streamId);
-        if (!stream) {
-            return this.errorResult(streamId, new Error('Stream not found'));
+        if (payload.chunk_data && payload.chunk_index !== undefined) {
+            return await this.processChunk(stream, payload.chunk_data, payload.chunk_index);
         }
+
+        if (payload.is_complete || stream.receivedChunks === stream.totalChunks) {
+            return await this.completeStream(stream);
+        }
+
         return this.getStreamStatus(stream);
     }
+
+
 
     private getOrCreateStream(payload: Payload): StreamState {
         let stream = UploadFileStream.streams.get(payload.stream_id);
@@ -194,7 +179,7 @@ export class UploadFileStream extends OneBotAction<Payload, StreamResult> {
         }, CONFIG.TIMEOUT);
     }
 
-    private async processChunk(stream: StreamState, chunkData: string, chunkIndex: number): Promise<StreamResult> {
+    private async processChunk(stream: StreamState, chunkData: string, chunkIndex: number): Promise<StreamPacket<StreamResult>> {
         // 验证索引
         if (chunkIndex < 0 || chunkIndex >= stream.totalChunks) {
             throw new Error(`Invalid chunk index: ${chunkIndex}`);
@@ -202,30 +187,31 @@ export class UploadFileStream extends OneBotAction<Payload, StreamResult> {
 
         // 检查重复
         if (!stream.missingChunks.has(chunkIndex)) {
-            return this.getStreamStatus(stream, `Chunk ${chunkIndex} already received`);
-        }
-
-        try {
-            const buffer = Buffer.from(chunkData, 'base64');
-
-            // 存储分片
-            if (stream.useMemory) {
-                stream.memoryChunks!.set(chunkIndex, buffer);
-            } else {
-                const chunkPath = joinPath(stream.tempDir!, `${chunkIndex}.chunk`);
-                await fs.promises.writeFile(chunkPath, buffer);
-            }
-
-            // 更新状态
-            stream.missingChunks.delete(chunkIndex);
-            stream.receivedChunks++;
-            this.refreshTimeout(stream);
-
             return this.getStreamStatus(stream);
-
-        } catch (error) {
-            throw new Error(`Chunk processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
+
+        const buffer = Buffer.from(chunkData, 'base64');
+
+        // 存储分片
+        if (stream.useMemory) {
+            stream.memoryChunks!.set(chunkIndex, buffer);
+        } else {
+            const chunkPath = joinPath(stream.tempDir!, `${chunkIndex}.chunk`);
+            await fs.promises.writeFile(chunkPath, buffer);
+        }
+
+        // 更新状态
+        stream.missingChunks.delete(chunkIndex);
+        stream.receivedChunks++;
+        this.refreshTimeout(stream);
+
+        return {
+            type: StreamStatus.Stream,
+            stream_id: stream.id,
+            status: 'chunk_received',
+            received_chunks: stream.receivedChunks,
+            total_chunks: stream.totalChunks
+        };
     }
 
     private refreshTimeout(stream: StreamState): void {
@@ -233,51 +219,42 @@ export class UploadFileStream extends OneBotAction<Payload, StreamResult> {
         stream.timeoutId = this.setupTimeout(stream.id);
     }
 
-    private getStreamStatus(stream: StreamState, message?: string): StreamResult {
-        const missingChunks = Array.from(stream.missingChunks).sort();
-
+    private getStreamStatus(stream: StreamState): StreamPacket<StreamResult> {
         return {
+            type: StreamStatus.Stream,
             stream_id: stream.id,
-            status: 'receiving',
+            status: 'file_created',
             received_chunks: stream.receivedChunks,
-            total_chunks: stream.totalChunks,
-            missing_chunks: missingChunks.length > 0 ? missingChunks : undefined,
-            file_size: stream.fileSize,
-            message
+            total_chunks: stream.totalChunks
         };
     }
 
-    private async completeStream(stream: StreamState): Promise<StreamResult> {
-        try {
-            // 合并分片
-            const finalBuffer = stream.useMemory ?
-                await this.mergeMemoryChunks(stream) :
-                await this.mergeDiskChunks(stream);
+    private async completeStream(stream: StreamState): Promise<StreamPacket<StreamResult>> {
+        // 合并分片
+        const finalBuffer = stream.useMemory ?
+            await this.mergeMemoryChunks(stream) :
+            await this.mergeDiskChunks(stream);
 
-            // 验证SHA256
-            const sha256 = this.validateSha256(stream, finalBuffer);
+        // 验证SHA256
+        const sha256 = this.validateSha256(stream, finalBuffer);
 
-            // 保存文件
-            const finalPath = stream.finalPath || joinPath(this.core.NapCatTempPath, stream.filename);
-            await fs.promises.writeFile(finalPath, finalBuffer);
+        // 保存文件
+        const finalPath = stream.finalPath || joinPath(this.core.NapCatTempPath, stream.filename);
+        await fs.promises.writeFile(finalPath, finalBuffer);
 
-            // 清理资源但保留文件
-            this.cleanupStream(stream.id, false);
+        // 清理资源但保留文件
+        this.cleanupStream(stream.id, false);
 
-            return {
-                stream_id: stream.id,
-                status: 'completed',
-                received_chunks: stream.receivedChunks,
-                total_chunks: stream.totalChunks,
-                file_path: finalPath,
-                file_size: finalBuffer.length,
-                sha256,
-                message: 'Upload completed'
-            };
-
-        } catch (error) {
-            throw new Error(`Stream completion failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        }
+        return {
+            type: StreamStatus.Response,
+            stream_id: stream.id,
+            status: 'file_complete',
+            received_chunks: stream.receivedChunks,
+            total_chunks: stream.totalChunks,
+            file_path: finalPath,
+            file_size: finalBuffer.length,
+            sha256
+        };
     }
 
     private async mergeMemoryChunks(stream: StreamState): Promise<Buffer> {
@@ -356,29 +333,5 @@ export class UploadFileStream extends OneBotAction<Payload, StreamResult> {
             UploadFileStream.streams.delete(streamId);
             console.log(`Stream ${streamId} cleaned up`);
         }
-    }
-
-    private errorResult(streamId: string, error: any): StreamResult {
-        return {
-            stream_id: streamId,
-            status: 'error',
-            received_chunks: 0,
-            message: error instanceof Error ? error.message : 'Unknown error'
-        };
-    }
-
-    // 全局状态查询
-    static getGlobalStatus() {
-        return {
-            activeStreams: this.streams.size,
-            memoryUsageMB: Math.round(this.memoryUsage / 1024 / 1024 * 100) / 100,
-            streams: Array.from(this.streams.values()).map(stream => ({
-                streamId: stream.id,
-                filename: stream.filename,
-                progress: `${stream.receivedChunks}/${stream.totalChunks}`,
-                useMemory: stream.useMemory,
-                createdAt: new Date(stream.createdAt).toISOString()
-            }))
-        };
     }
 }
