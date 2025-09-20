@@ -23,11 +23,22 @@ export class OB11HttpSSEServerAdapter extends OB11HttpServerAdapter {
         req.on('close', () => {
             this.sseClients = this.sseClients.filter((client) => client !== res);
         });
+
     }
 
-    override onEvent<T extends OB11EmitEventContent>(event: T) {
+    override async onEvent<T extends OB11EmitEventContent>(event: T) {
+        let promises: Promise<void>[] = [];
         this.sseClients.forEach((res) => {
-            res.write(`data: ${JSON.stringify(event)}\n\n`);
+            promises.push(new Promise<void>((resolve, reject) => {
+                res.write(`data: ${JSON.stringify(event)}\n\n`, (err) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve();
+                    }
+                });
+            }));
         });
+        await Promise.allSettled(promises);
     }
 }

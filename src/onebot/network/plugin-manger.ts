@@ -251,14 +251,20 @@ export class OB11PluginMangerAdapter extends IOB11NetworkAdapter<PluginConfig> {
         this.logger.log(`[Plugin Adapter] Unloaded plugin: ${pluginName}`);
     }
 
-    onEvent<T extends OB11EmitEventContent>(event: T) {
+    async onEvent<T extends OB11EmitEventContent>(event: T) {
         if (!this.isEnable) {
             return;
         }
 
         // 遍历所有已加载的插件，调用它们的事件处理方法
-        for (const [, plugin] of this.loadedPlugins) {
-            this.callPluginEventHandler(plugin, event);
+        try {
+            await Promise.allSettled(
+                Array.from(this.loadedPlugins.values()).map((plugin) =>
+                    this.callPluginEventHandler(plugin, event)
+                )
+            );
+        } catch (error) {
+            this.logger.logError('[Plugin Adapter] Error handling event:', error);
         }
     }
 

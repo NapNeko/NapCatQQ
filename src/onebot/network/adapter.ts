@@ -23,7 +23,7 @@ export abstract class IOB11NetworkAdapter<CT extends NetworkAdapterConfig> {
         this.logger = core.context.logger;
     }
 
-    abstract onEvent<T extends OB11EmitEventContent>(event: T): void;
+    abstract onEvent<T extends OB11EmitEventContent>(event: T): Promise<void>;
 
     abstract open(): void | Promise<void>;
 
