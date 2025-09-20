@@ -188,7 +188,7 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
         }
         const retdata = await action.websocketHandle(receiveData.params, echo ?? '', this.name, this.config, {
             send: async (data: object) => {
-                this.checkStateAndReply<unknown>({ ...OB11Response.ok(data, echo ?? '') }, wsClient);
+                this.checkStateAndReply<unknown>({ ...OB11Response.ok(data, echo ?? '', true) }, wsClient);
             }
         });
         this.checkStateAndReply<unknown>({ ...retdata }, wsClient);

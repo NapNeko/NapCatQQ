@@ -46,6 +46,7 @@ export interface OB11Return<DataType> {
     message: string;
     echo?: unknown; // ws调用api才有此字段
     wording?: string;  // go-cqhttp字段，错误信息
+    stream?: 'stream-action' | 'normal-action' ; // 流式返回标记
 }
 
 // 消息数据类型枚举

@@ -121,19 +121,18 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
         const real_echo = payload_echo ?? Math.random().toString(36).substring(2, 15);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const action = this.actions.get(actionName as any);
+        const useStream = action.useStream;
         if (action) {
             try {
-                let stream = false;
                 const result = await action.handle(payload, this.name, this.config, {
                     send: request_sse ? async (data: object) => {
-                        this.onEvent({ ...OB11Response.ok(data, real_echo), type: 'sse-action' } as unknown as OB11EmitEventContent);
+                        this.onEvent({ ...OB11Response.ok(data, real_echo, true) } as unknown as OB11EmitEventContent);
                     } : async (data: object) => {
-                        stream = true;
-                        res.write(JSON.stringify({ ...OB11Response.ok(data, real_echo), type: 'stream-action' }) + "\r\n\r\n");
+                        res.write(JSON.stringify({ ...OB11Response.ok(data, real_echo, true) }) + "\r\n\r\n");
                     }
                 }, real_echo);
-                if (stream) {
-                    res.write(JSON.stringify({ ...result, type: 'stream-action' }) + "\r\n\r\n");
+                if (useStream) {
+                    res.write(JSON.stringify({ ...result }) + "\r\n\r\n");
                     return res.end();
                 };
                 return res.json(result);
