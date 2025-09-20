@@ -29,7 +29,7 @@ class OneBotUploadTester:
             headers["Authorization"] = f"Bearer {self.access_token}"
             
         print(f"连接到 {self.ws_url}")
-        self.websocket = await websockets.connect(self.ws_url, extra_headers=headers)
+        self.websocket = await websockets.connect(self.ws_url, additional_headers=headers)
         print("WebSocket 连接成功")
         
     async def disconnect(self):
@@ -38,7 +38,7 @@ class OneBotUploadTester:
             await self.websocket.close()
             print("WebSocket 连接已断开")
             
-    def calculate_file_chunks(self, file_path: str, chunk_size: int = 64 * 1024) -> tuple[List[bytes], str, int]:
+    def calculate_file_chunks(self, file_path: str, chunk_size: int = 64) -> tuple[List[bytes], str, int]:
         """
         计算文件分片和 SHA256
         
@@ -97,7 +97,7 @@ class OneBotUploadTester:
                 print(f"收到其他消息: {data}")
                 continue
     
-    async def upload_file_stream_batch(self, file_path: str, chunk_size: int = 64 * 1024) -> str:
+    async def upload_file_stream_batch(self, file_path: str, chunk_size: int = 64 ) -> str:
         """
         一次性批量上传文件流
         
@@ -134,7 +134,8 @@ class OneBotUploadTester:
                 "total_chunks": total_chunks,
                 "file_size": total_size,
                 "expected_sha256": sha256_hash,
-                "filename": file_path.name
+                "filename": file_path.name,
+                "file_retention": 30 * 1000
             }
             
             # 发送分片
@@ -171,7 +172,7 @@ class OneBotUploadTester:
         else:
             raise Exception(f"文件状态异常: {result}")
     
-    async def test_upload(self, file_path: str, chunk_size: int = 64 * 1024):
+    async def test_upload(self, file_path: str, chunk_size: int = 64 ):
         """测试文件上传"""
         try:
             await self.connect()

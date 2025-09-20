@@ -250,7 +250,7 @@ export class UploadFileStream extends OneBotAction<Payload, StreamPacket<StreamR
         if (stream.fileRetention && stream.fileRetention > 0) {
             setTimeout(() => {
                 unlink(finalPath, err => {
-                    this.core.context.logger.logError(`Failed to delete retained file ${finalPath}:`, err);
+                    if (err) this.core.context.logger.logError(`Failed to delete retained file ${finalPath}:`, err);
                 });
             }, stream.fileRetention);
         }
