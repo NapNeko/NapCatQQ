@@ -7,6 +7,7 @@ import fs from 'fs';
 import { join as joinPath } from 'node:path';
 import { randomUUID } from 'crypto';
 import { createHash } from 'crypto';
+import { unlink } from 'node:fs';
 
 // 简化配置
 const CONFIG = {
@@ -25,7 +26,8 @@ const SchemaData = Type.Object({
     is_complete: Type.Optional(Type.Boolean()),
     filename: Type.Optional(Type.String()),
     reset: Type.Optional(Type.Boolean()),
-    verify_only: Type.Optional(Type.Boolean())
+    verify_only: Type.Optional(Type.Boolean()),
+    file_retention: Type.Number({ default: 5 * 60 * 1000 }) // 默认5分钟 回收 不设置或0为不回收
 });
 
 type Payload = Static<typeof SchemaData>;
@@ -47,6 +49,7 @@ interface StreamState {
     memoryChunks?: Map<number, Buffer>;
     tempDir?: string;
     finalPath?: string;
+    fileRetention?: number;
 
     // 管理
     createdAt: number;
@@ -131,9 +134,9 @@ export class UploadFileStream extends OneBotAction<Payload, StreamPacket<StreamR
             expectedSha256: expected_sha256,
             useMemory,
             createdAt: Date.now(),
-            timeoutId: this.setupTimeout(stream_id)
+            timeoutId: this.setupTimeout(stream_id),
+            fileRetention: payload.file_retention
         };
-
         try {
             if (useMemory) {
                 stream.memoryChunks = new Map();
@@ -244,7 +247,13 @@ export class UploadFileStream extends OneBotAction<Payload, StreamPacket<StreamR
 
         // 清理资源但保留文件
         this.cleanupStream(stream.id, false);
-
+        if (stream.fileRetention && stream.fileRetention > 0) {
+            setTimeout(() => {
+                unlink(finalPath, err => {
+                    this.core.context.logger.logError(`Failed to delete retained file ${finalPath}:`, err);
+                });
+            }, stream.fileRetention);
+        }
         return {
             type: StreamStatus.Response,
             stream_id: stream.id,
