@@ -13,6 +13,15 @@ _Modern protocol-side framework implemented based on NTQQ._
 
 ---
 
+## New Feature
+在 v4.8.115+ 版本开始
+
+1. NapCatQQ 支持 [Stream Api](https://napneko.github.io/develop/file)
+2. NapCatQQ 推荐 message_id/user_id/group_id 均使用字符串类型
+
+- [1] 解决 Docker/跨设备/大文件 的多媒体上下传问题
+- [2] 采用字符串可以解决扩展到int64的问题，同时也可以解决部分语言（如JavaScript）对大整数支持不佳的问题，增加极少成本。
+
 ## Welcome
 + NapCatQQ is a modern implementation of the Bot protocol based on NTQQ.
   - NapCatQQ 是现代化的基于 NTQQ 的 Bot 协议端实现
