@@ -578,7 +578,7 @@ export class OneBotMsgApi {
                 };
             }
 
-            if (!context.peer || context.peer.chatType == ChatType.KCHATTYPEC2C) return undefined;
+            if (!context.peer || !atQQ || context.peer.chatType == ChatType.KCHATTYPEC2C) return undefined; // 过滤掉空atQQ
             if (atQQ === 'all') return at(atQQ, atQQ, NTMsgAtType.ATTYPEALL, '全体成员');
             const atMember = await this.core.apis.GroupApi.getGroupMember(context.peer.peerUid, atQQ);
             if (atMember) {
