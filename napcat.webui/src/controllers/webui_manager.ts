@@ -1,9 +1,10 @@
+import CryptoJS from 'crypto-js'
 import { EventSourcePolyfill } from 'event-source-polyfill'
 
 import { LogLevel } from '@/const/enum'
 
 import { serverRequest } from '@/utils/request'
-import CryptoJS from "crypto-js";
+
 export interface Log {
   level: LogLevel
   message: string
@@ -17,7 +18,7 @@ export default class WebUIManager {
   }
 
   public static async loginWithToken(token: string) {
-    const sha256 = CryptoJS.SHA256(token + '.napcat').toString();
+    const sha256 = CryptoJS.SHA256(token + '.napcat').toString()
     const { data } = await serverRequest.post<ServerResponse<AuthResponse>>(
       '/auth/login',
       { hash: sha256 }
