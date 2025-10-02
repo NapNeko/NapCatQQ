@@ -82,6 +82,7 @@ export default function FileTable({
     setPreviewImages([])
     setPreviewIndex(0)
     setShowImage(false)
+    setPage(1)
   }, [currentPath])
 
   const onPreviewImage = (name: string, images: PreviewImage[]) => {
