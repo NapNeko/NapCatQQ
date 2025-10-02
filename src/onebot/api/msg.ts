@@ -580,6 +580,11 @@ export class OneBotMsgApi {
 
             if (!context.peer || context.peer.chatType == ChatType.KCHATTYPEC2C) return undefined;
             if (atQQ === 'all') return at(atQQ, atQQ, NTMsgAtType.ATTYPEALL, '全体成员');
+            // 检查 peerUid 是否有效
+            if (!context.peer.peerUid) {
+                this.core.context.logger.logWarn('AT消息处理：群组 peerUid 无效', { atQQ });
+                return undefined;
+            }
             const atMember = await this.core.apis.GroupApi.getGroupMember(context.peer.peerUid, atQQ);
             if (atMember) {
                 return at(atQQ, atMember.uid, NTMsgAtType.ATTYPEONE, atMember.nick || atMember.cardName);
