@@ -116,6 +116,16 @@ export class OneBotGroupApi {
             const member = await this.core.apis.GroupApi.getGroupMember(msg.peerUid, msg.senderUin);
             if (member && member.cardName !== msg.sendMemberName) {
                 const newCardName = msg.sendMemberName ?? '';
+                // 防止误触：如果新名片为空且旧名片不为空，不触发事件（可能是转发消息等场景的不可靠数据）
+                if (newCardName === '' && member.cardName !== '') {
+                    this.core.context.logger.logDebug('忽略不可靠的群名片变更事件', { 
+                        peerUid: msg.peerUid, 
+                        senderUin: msg.senderUin, 
+                        oldCard: member.cardName, 
+                        newCard: newCardName 
+                    });
+                    return undefined;
+                }
                 const event = new OB11GroupCardEvent(this.core, parseInt(msg.peerUid), parseInt(msg.senderUin), newCardName, member.cardName);
                 member.cardName = newCardName;
                 return event;
