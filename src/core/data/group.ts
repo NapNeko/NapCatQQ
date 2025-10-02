@@ -1,4 +1,4 @@
-import { GroupDetailInfoV2Param, GroupExtInfo, GroupExtFilter } from '../types';
+import { GroupDetailInfoV2Param, GroupExtInfo, GroupExtFilter } from "../types";
 
 export function createGroupDetailInfoV2Param(group_code: string): GroupDetailInfoV2Param {
     return {
@@ -51,7 +51,7 @@ export function createGroupDetailInfoV2Param(group_code: string): GroupDetailInf
             }, groupSecLevel: 0,
             groupSecLevelInfo: 0,
             subscriptionUin: 0,
-            subscriptionUid: '',
+            subscriptionUid: "",
             allowMemberInvite: 0,
             groupQuestion: 0,
             groupAnswer: 0,
@@ -81,34 +81,34 @@ export function createGroupDetailInfoV2Param(group_code: string): GroupDetailInf
         modifyInfo: {
             noCodeFingerOpenFlag: 0,
             noFingerOpenFlag: 0,
-            groupName: '',
+            groupName: "",
             classExt: 0,
-            classText: '',
-            fingerMemo: '',
-            richFingerMemo: '',
+            classText: "",
+            fingerMemo: "",
+            richFingerMemo: "",
             tagRecord: [],
             groupGeoInfo: {
-                ownerUid: '',
+                ownerUid: "",
                 SetTime: 0,
                 CityId: 0,
-                Longitude: '',
-                Latitude: '',
-                GeoContent: '',
-                poiId: ''
+                Longitude: "",
+                Latitude: "",
+                GeoContent: "",
+                poiId: ""
             },
             groupExtAdminNum: 0,
             flag: 0,
-            groupMemo: '',
-            groupAioSkinUrl: '',
-            groupBoardSkinUrl: '',
-            groupCoverSkinUrl: '',
+            groupMemo: "",
+            groupAioSkinUrl: "",
+            groupBoardSkinUrl: "",
+            groupCoverSkinUrl: "",
             groupGrade: 0,
             activeMemberNum: 0,
             certificationType: 0,
-            certificationText: '',
+            certificationText: "",
             groupNewGuideLines: {
                 enabled: false,
-                content: ''
+                content: ""
             }, groupFace: 0,
             addOption: 0,
             shutUpTime: 0,
@@ -121,15 +121,15 @@ export function createGroupDetailInfoV2Param(group_code: string): GroupDetailInf
             },
             groupSecLevel: 0,
             groupSecLevelInfo: 0,
-            subscriptionUin: '',
-            subscriptionUid: '',
+            subscriptionUin: "",
+            subscriptionUid: "",
             allowMemberInvite: 0,
-            groupQuestion: '',
-            groupAnswer: '',
+            groupQuestion: "",
+            groupAnswer: "",
             groupFlagExt3: 0,
             groupFlagExt3Mask: 0,
             groupOpenAppid: 0,
-            rootId: '',
+            rootId: "",
             msgLimitFrequency: 0,
             hlGuildAppid: 0,
             hlGuildSubType: 0,
@@ -137,20 +137,20 @@ export function createGroupDetailInfoV2Param(group_code: string): GroupDetailInf
             groupFlagExt4: 0,
             groupFlagExt4Mask: 0,
             groupSchoolInfo: {
-                location: '',
+                location: "",
                 grade: 0,
-                school: ''
+                school: ""
             },
             groupCardPrefix:
             {
-                introduction: '',
+                introduction: "",
                 rptPrefix: []
             },
-            allianceId: '',
+            allianceId: "",
             groupFlagPro1: 0,
             groupFlagPro1Mask: 0
         }
-    };
+    }
 }
 export function createGroupExtInfo(group_code: string): GroupExtInfo {
     return {
@@ -205,7 +205,7 @@ export function createGroupExtInfo(group_code: string): GroupExtInfo {
             inviteRobotMemberExamine: 0,
             groupSquareSwitch: 0,
         }
-    };
+    }
 }
 export function createGroupExtFilter(): GroupExtFilter {
     return {
@@ -241,5 +241,5 @@ export function createGroupExtFilter(): GroupExtFilter {
         inviteRobotMemberSwitch: 0,
         inviteRobotMemberExamine: 0,
         groupSquareSwitch: 0,
-    };
+    }
 };

@@ -58,13 +58,13 @@ export class NTQQGroupApi {
             } as Peer,
             {
                 busiId: 2201,
-                jsonStr: JSON.stringify({ 'align': 'center', 'items': [{ 'txt': tip, 'type': 'nor' }] }),
+                jsonStr: JSON.stringify({ "align": "center", "items": [{ "txt": tip, "type": "nor" }] }),
                 recentAbstract: tip,
                 isServer: false
             },
             true,
             true
-        );
+        )
     }
     async initCache() {
         for (const group of await this.getGroups(true)) {

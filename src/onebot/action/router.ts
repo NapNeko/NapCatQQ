@@ -14,7 +14,7 @@ export const ActionName = {
     CleanStreamTempFile: 'clean_stream_temp_file',
 
     // 所有 Upload/Download Stream Api 应当 _stream 结尾
-    TestDownloadStream: 'test_download_stream',
+     TestDownloadStream: 'test_download_stream',
     UploadFileStream: 'upload_file_stream',
     DownloadFileStream: 'download_file_stream',
 

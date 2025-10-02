@@ -1,5 +1,5 @@
-import { OneBotAction, OneBotRequestToolkit } from '../OneBotAction';
-import { NetworkAdapterConfig } from '@/onebot/config/config';
+import { OneBotAction, OneBotRequestToolkit } from "../OneBotAction";
+import { NetworkAdapterConfig } from "@/onebot/config/config";
 export type StreamPacketBasic =   {
     type: StreamStatus;
     data_type?: string;

@@ -110,7 +110,7 @@ export class NTQQFriendApi {
                 time: item.reqTime, // 信息字段
                 type: 'doubt' //保留字段
             };
-        }));
+        }))
         return requests;
     }
 }

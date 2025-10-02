@@ -25,6 +25,6 @@ export class ClickInlineKeyboardButton extends OneBotAction<Payload, unknown> {
             callback_data: payload.callback_data,
             dmFlag: 0,
             chatType: 2
-        });
+        })
     }
 }

@@ -70,9 +70,9 @@ export function qunAlbumControl({
     img_name,
     sAlbumName,
     sAlbumID,
-    photo_num = '1',
-    video_num = '0',
-    batch_num = '1'
+    photo_num = "1",
+    video_num = "0",
+    batch_num = "1"
 }: {
     uin: string,
     group_id: string,
@@ -100,18 +100,18 @@ export function qunAlbumControl({
                     data: pskey,
                     appid: 5
                 },
-                appid: 'qun',
+                appid: "qun",
                 checksum: pic_md5,
                 check_type: 0,
                 file_len: img_size,
                 env: {
-                    refer: 'qzone',
-                    deviceInfo: 'h5'
+                    refer: "qzone",
+                    deviceInfo: "h5"
                 },
                 model: 0,
                 biz_req: {
                     sPicTitle: img_name,
-                    sPicDesc: '',
+                    sPicDesc: "",
                     sAlbumName: sAlbumName,
                     sAlbumID: sAlbumID,
                     iAlbumTypeID: 0,
@@ -119,7 +119,7 @@ export function qunAlbumControl({
                     iUploadType: 0,
                     iUpPicType: 0,
                     iBatchID: timestamp,
-                    sPicPath: '',
+                    sPicPath: "",
                     iPicWidth: 0,
                     iPicHight: 0,
                     iWaterType: 0,
@@ -127,7 +127,7 @@ export function qunAlbumControl({
                     iNeedFeeds: 1,
                     iUploadTime: timestamp,
                     mapExt: {
-                        appid: 'qun',
+                        appid: "qun",
                         userid: group_id
                     },
                     stExtendInfo: {
@@ -138,11 +138,11 @@ export function qunAlbumControl({
                         }
                     }
                 },
-                session: '',
+                session: "",
                 asy_upload: 0,
-                cmd: 'FileUpload'
+                cmd: "FileUpload"
             }]
-    };
+    }
 }
 
 export function createStreamUpload(
@@ -159,16 +159,16 @@ export function createStreamUpload(
 ) {
     return {
         uin: uin,
-        appid: 'qun',
+        appid: "qun",
         session: session,
         offset: offset,//分片起始位置
         data: data,//base64编码数据
-        checksum: '',
+        checksum: "",
         check_type: 0,
         retry: 0,//重试次数
         seq: seq,//分片序号
         end: end,//分片结束位置 文件总大小
-        cmd: 'FileUpload',
+        cmd: "FileUpload",
         slice_size: slice_size,//分片大小16KB 16384
         biz_req: {
             iUploadType: 3

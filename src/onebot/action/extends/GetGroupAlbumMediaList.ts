@@ -5,7 +5,7 @@ import { Static, Type } from '@sinclair/typebox';
 const SchemaData = Type.Object({
     group_id: Type.String(),
     album_id: Type.String(),
-    attach_info: Type.String({ default: '' }),
+    attach_info: Type.String({ default: "" }),
 });
 
 type Payload = Static<typeof SchemaData>;
