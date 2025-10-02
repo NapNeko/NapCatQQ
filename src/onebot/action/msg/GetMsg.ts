@@ -33,7 +33,7 @@ class GetMsg extends OneBotAction<Payload, OB11Message> {
         // if (orimsg) {
         //     msg = orimsg;
         // } else {
-            msg = (await this.core.apis.MsgApi.getMsgsByMsgId(peer, [msgIdWithPeer?.MsgId || payload.message_id.toString()])).msgList[0];
+        msg = (await this.core.apis.MsgApi.getMsgsByMsgId(peer, [msgIdWithPeer?.MsgId || payload.message_id.toString()])).msgList[0];
         //}
         if (!msg) throw Error('消息不存在');
         const retMsg = await this.obContext.apis.MsgApi.parseMessage(msg, config.messagePostFormat);

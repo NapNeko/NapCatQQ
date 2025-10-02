@@ -8,16 +8,16 @@ import { pipeline } from 'stream/promises';
 import { fileURLToPath } from 'url';
 import { LogWrapper } from './log';
 
-const downloadOri = "https://github.com/NapNeko/ffmpeg-build/releases/download/v1.0.0/ffmpeg-7.1.1-win64.zip"
+const downloadOri = 'https://github.com/NapNeko/ffmpeg-build/releases/download/v1.0.0/ffmpeg-7.1.1-win64.zip';
 const urls = [
-    "https://j.1win.ggff.net/" + downloadOri,
-    "https://git.yylx.win/" + downloadOri,
-    "https://ghfile.geekertao.top/" + downloadOri,
-    "https://gh-proxy.net/" + downloadOri,
-    "https://ghm.078465.xyz/" + downloadOri,
-    "https://gitproxy.127731.xyz/" + downloadOri,
-    "https://jiashu.1win.eu.org/" + downloadOri,
-    "https://github.tbedu.top/" + downloadOri,
+    'https://j.1win.ggff.net/' + downloadOri,
+    'https://git.yylx.win/' + downloadOri,
+    'https://ghfile.geekertao.top/' + downloadOri,
+    'https://gh-proxy.net/' + downloadOri,
+    'https://ghm.078465.xyz/' + downloadOri,
+    'https://gitproxy.127731.xyz/' + downloadOri,
+    'https://jiashu.1win.eu.org/' + downloadOri,
+    'https://github.tbedu.top/' + downloadOri,
     downloadOri
 ];
 
@@ -354,11 +354,11 @@ export async function downloadFFmpegIfNotExists(log: LogWrapper) {
         return {
             path: path.join(currentPath, 'ffmpeg'),
             reset: true
-        }
+        };
     }
 
     return {
         path: path.join(currentPath, 'ffmpeg'),
         reset: true
-    }
+    };
 }

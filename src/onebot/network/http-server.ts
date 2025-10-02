@@ -129,7 +129,7 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
                         await this.onEvent({ ...OB11Response.ok(data, real_echo, true) } as unknown as OB11EmitEventContent);
                     } : async (data: object) => {
                         let newPromise = new Promise<void>((resolve, _reject) => {
-                            res.write(JSON.stringify({ ...OB11Response.ok(data, real_echo, true) }) + "\r\n\r\n", () => {
+                            res.write(JSON.stringify({ ...OB11Response.ok(data, real_echo, true) }) + '\r\n\r\n', () => {
                                 resolve();
                             });
                         });
@@ -137,7 +137,7 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
                     }
                 }, real_echo);
                 if (useStream) {
-                    res.write(JSON.stringify({ ...result }) + "\r\n\r\n");
+                    res.write(JSON.stringify({ ...result }) + '\r\n\r\n');
                     return res.end();
                 };
                 return res.json(result);

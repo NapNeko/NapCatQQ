@@ -58,13 +58,13 @@ export class NTQQGroupApi {
             } as Peer,
             {
                 busiId: 2201,
-                jsonStr: JSON.stringify({ "align": "center", "items": [{ "txt": tip, "type": "nor" }] }),
+                jsonStr: JSON.stringify({ 'align': 'center', 'items': [{ 'txt': tip, 'type': 'nor' }] }),
                 recentAbstract: tip,
                 isServer: false
             },
             true,
             true
-        )
+        );
     }
     async initCache() {
         for (const group of await this.getGroups(true)) {
@@ -247,6 +247,12 @@ export class NTQQGroupApi {
         return member;
     }
     async getGroupMember(groupCode: string | number, memberUinOrUid: string | number) {
+        // 添加参数验证，防止 undefined/null 导致的崩溃
+        if (groupCode === undefined || groupCode === null || memberUinOrUid === undefined || memberUinOrUid === null) {
+            this.context.logger.logError('getGroupMember: 无效的参数', { groupCode, memberUinOrUid });
+            return undefined;
+        }
+
         const groupCodeStr = groupCode.toString();
         const memberUinOrUidStr = memberUinOrUid.toString();
 
