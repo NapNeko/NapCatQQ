@@ -20,8 +20,9 @@ export class TransGroupFile extends GetPacketStatusDepends<Payload, TransGroupFi
 
     async _handle(payload: Payload) {
         const contextMsgFile = FileNapCatOneBotUUID.decode(payload.file_id) || FileNapCatOneBotUUID.decodeModelId(payload.file_id);
-        if (contextMsgFile?.fileUUID) {
-            const result = await this.core.apis.GroupApi.transGroupFile(payload.group_id.toString(), contextMsgFile.fileUUID);
+        const fileUUID = contextMsgFile?.fileUUID || contextMsgFile?.fileId;
+        if (fileUUID) {
+            const result = await this.core.apis.GroupApi.transGroupFile(payload.group_id.toString(), fileUUID);
             if (result.transGroupFileResult.result.retCode === 0) {
                 return {
                     ok: true

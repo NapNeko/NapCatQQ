@@ -16,7 +16,7 @@ export class DeleteGroupFile extends OneBotAction<Payload, Awaited<ReturnType<NT
     override actionName = ActionName.GOCQHTTP_DeleteGroupFile;
     override payloadSchema = SchemaData;
     async _handle(payload: Payload) {
-        const data = FileNapCatOneBotUUID.decodeModelId(payload.file_id);
+        const data = FileNapCatOneBotUUID.decode(payload.file_id) || FileNapCatOneBotUUID.decodeModelId(payload.file_id);
         if (!data || !data.fileId) throw new Error('Invalid file_id');
         return await this.core.apis.GroupApi.delGroupFile(payload.group_id.toString(), [data.fileId]);
     }

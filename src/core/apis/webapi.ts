@@ -330,9 +330,9 @@ export class NTQQWebApi {
             attach_info: '',
             seq: 3331,
             request_time_line: {
-                request_invoke_time: "0"
+                request_invoke_time: '0'
             }
-        })
+        });
     }
     async getAlbumList(gc: string) {
         const skey = await this.core.apis.UserApi.getSKey() || '';
@@ -340,7 +340,7 @@ export class NTQQWebApi {
         const bkn = this.getBknFromSKey(skey);
         const uin = this.core.selfInfo.uin || '10001';
         const cookies = `p_uin=o${this.core.selfInfo.uin}; p_skey=${pskey}; skey=${skey}; uin=o${uin} `;
-        const api = `https://h5.qzone.qq.com/proxy/domain/u.photo.qzone.qq.com/cgi-bin/upp/qun_list_album_v2?`;
+        const api = 'https://h5.qzone.qq.com/proxy/domain/u.photo.qzone.qq.com/cgi-bin/upp/qun_list_album_v2?';
         const params = new URLSearchParams({
             random: '7570',
             g_tk: bkn,
@@ -450,7 +450,7 @@ export class NTQQWebApi {
             attach_info: attach_info,
             seq: 0,
             request_time_line: {
-                request_invoke_time: "0"
+                request_invoke_time: '0'
             },
             album_id: albumId,
             lloc: '',
@@ -466,13 +466,13 @@ export class NTQQWebApi {
         const random_seq = Math.floor(Math.random() * 9000) + 1000;
         const uin = this.core.selfInfo.uin || '10001';
         //16位number数字
-        const client_key = Date.now() * 1000
+        const client_key = Date.now() * 1000;
         return await this.context.session.getAlbumService().doQunComment(
             random_seq, {
-            map_info: [],
-            map_bytes_info: [],
-            map_user_account: []
-        },
+                map_info: [],
+                map_bytes_info: [],
+                map_user_account: []
+            },
             qunId,
             2,
             createAlbumMediaFeed(uin, albumId, lloc),
@@ -503,14 +503,14 @@ export class NTQQWebApi {
         const uin = this.core.selfInfo.uin || '10001';
         return await this.context.session.getAlbumService().doQunLike(
             random_seq, {
-            map_info: [],
-            map_bytes_info: [],
-            map_user_account: []
-        }, {
-            id: id,
-            status: 1
-        },
+                map_info: [],
+                map_bytes_info: [],
+                map_user_account: []
+            }, {
+                id: id,
+                status: 1
+            },
             createAlbumFeedPublish(qunId, uin, albumId, lloc)
-        )
+        );
     }
 }

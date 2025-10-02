@@ -108,13 +108,13 @@ export class PerformanceMonitor {
             const totalTime = Array.from(this.stats.values()).reduce((sum, stat) => sum + stat.totalTime, 0);
 
             let logContent = '';
-            logContent += `=== 性能监控详细报告 ===\n`;
+            logContent += '=== 性能监控详细报告 ===\n';
             logContent += `生成时间: ${now.toLocaleString()}\n`;
-            logContent += `统计周期: 60秒\n`;
+            logContent += '统计周期: 60秒\n';
             logContent += `总览: ${totalFunctions} 个函数, ${totalCalls} 次调用, 总耗时: ${totalTime.toFixed(2)}ms\n\n`;
 
             // 详细函数统计
-            logContent += `=== 所有函数详细统计 ===\n`;
+            logContent += '=== 所有函数详细统计 ===\n';
             const allStats = this.getStats().sort((a, b) => b.totalTime - a.totalTime);
             
             allStats.forEach((stat, index) => {
@@ -127,26 +127,26 @@ export class PerformanceMonitor {
                 logContent += `   最小耗时: ${stat.minTime === Infinity ? 'N/A' : stat.minTime.toFixed(4)}ms\n`;
                 logContent += `   最大耗时: ${stat.maxTime.toFixed(4)}ms\n`;
                 logContent += `   性能占比: ${((stat.totalTime / totalTime) * 100).toFixed(2)}%\n`;
-                logContent += `\n`;
+                logContent += '\n';
             });
 
             // 排行榜统计
-            logContent += `=== 总耗时排行榜 (Top 20) ===\n`;
+            logContent += '=== 总耗时排行榜 (Top 20) ===\n';
             this.getTopByTotalTime(20).forEach((stat, index) => {
                 logContent += `${index + 1}. ${stat.name} - 总耗时: ${stat.totalTime.toFixed(2)}ms, 调用: ${stat.callCount}次, 平均: ${stat.averageTime.toFixed(2)}ms\n`;
             });
 
-            logContent += `\n=== 调用次数排行榜 (Top 20) ===\n`;
+            logContent += '\n=== 调用次数排行榜 (Top 20) ===\n';
             this.getTopByCallCount(20).forEach((stat, index) => {
                 logContent += `${index + 1}. ${stat.name} - 调用: ${stat.callCount}次, 总耗时: ${stat.totalTime.toFixed(2)}ms, 平均: ${stat.averageTime.toFixed(2)}ms\n`;
             });
 
-            logContent += `\n=== 平均耗时排行榜 (Top 20) ===\n`;
+            logContent += '\n=== 平均耗时排行榜 (Top 20) ===\n';
             this.getTopByAverageTime(20).forEach((stat, index) => {
                 logContent += `${index + 1}. ${stat.name} - 平均: ${stat.averageTime.toFixed(2)}ms, 调用: ${stat.callCount}次, 总耗时: ${stat.totalTime.toFixed(2)}ms\n`;
             });
 
-            logContent += `\n=== 性能热点分析 ===\n`;
+            logContent += '\n=== 性能热点分析 ===\n';
             // 找出最耗时的前10个函数
             const hotSpots = this.getTopByTotalTime(10);
             hotSpots.forEach((stat, index) => {
@@ -155,11 +155,11 @@ export class PerformanceMonitor {
                 logContent += `   性能影响: ${((stat.totalTime / totalTime) * 100).toFixed(2)}%\n`;
                 logContent += `   调用效率: ${efficiency.toFixed(4)} 调用/ms\n`;
                 logContent += `   优化建议: ${stat.averageTime > 10 ? '考虑优化此函数的执行效率' : 
-                                           stat.callCount > 1000 ? '考虑减少此函数的调用频率' : 
-                                           '性能表现良好'}\n\n`;
+                    stat.callCount > 1000 ? '考虑减少此函数的调用频率' : 
+                        '性能表现良好'}\n\n`;
             });
 
-            logContent += `=== 报告结束 ===\n`;
+            logContent += '=== 报告结束 ===\n';
 
             // 写入文件
             fs.writeFileSync(logPath, logContent, 'utf8');

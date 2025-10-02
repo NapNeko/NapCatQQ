@@ -183,9 +183,9 @@ export class PacketOperationContext {
         const ps = msg.map((m) => {
             return m.msg.map(async (e) => {
                 if (e instanceof PacketMsgReplyElement && !e.targetElems) {
-                    this.context.logger.debug(`Cannot find reply element's targetElems, prepare to fetch it...`);
+                    this.context.logger.debug('Cannot find reply element\'s targetElems, prepare to fetch it...');
                     if (!e.targetPeer?.peerUid) {
-                        this.context.logger.error(`targetPeer is undefined!`);
+                        this.context.logger.error('targetPeer is undefined!');
                     }
                     let targetMsg: NapProtoEncodeStructType<typeof PushMsgBody>[] | undefined;
                     if (e.isGroupReply) {
@@ -198,7 +198,7 @@ export class PacketOperationContext {
                 }
             });
         }).flat();
-        await Promise.all(ps)
+        await Promise.all(ps);
         await this.UploadResources(msg, groupUin);
     }
 
@@ -206,14 +206,14 @@ export class PacketOperationContext {
         const req = trans.FetchGroupMessage.build(groupUin, startSeq, endSeq);
         const resp = await this.context.client.sendOidbPacket(req, true);
         const res = trans.FetchGroupMessage.parse(resp);
-        return res.body.messages
+        return res.body.messages;
     }
 
     async FetchC2CMessage(targetUid: string, startSeq: number, endSeq: number): Promise<NapProtoDecodeStructType<typeof PushMsgBody>[]> {
         const req = trans.FetchC2CMessage.build(targetUid, startSeq, endSeq);
         const resp = await this.context.client.sendOidbPacket(req, true);
         const res = trans.FetchC2CMessage.parse(resp);
-        return res.messages
+        return res.messages;
     }
 
     async UploadForwardMsg(msg: PacketMsg[], groupUin: number = 0) {

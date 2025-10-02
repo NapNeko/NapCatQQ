@@ -154,7 +154,7 @@ export class UploadFileStream extends OneBotAction<Payload, StreamPacket<StreamR
                 try {
                     fs.rmSync(stream.tempDir, { recursive: true, force: true });
                 } catch (cleanupError) {
-                    console.error(`Failed to cleanup temp dir during creation error:`, cleanupError);
+                    console.error('Failed to cleanup temp dir during creation error:', cleanupError);
                 }
             }
             throw error;

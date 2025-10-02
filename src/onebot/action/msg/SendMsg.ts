@@ -55,7 +55,7 @@ export async function createContext(core: NapCatCore, payload: OB11PostContext |
                     chatType: ChatType.KCHATTYPEGROUP,
                     peerUid: payload.group_id.toString(),
                     guildId: ''
-                }
+                };
             }
             throw new Error('无法获取用户信息');
         }

@@ -74,7 +74,7 @@ export class OB11PluginAdapter extends IOB11NetworkAdapter<PluginConfig> {
 
             this.logger.log(`[Plugin Adapter] Loaded ${this.loadedPlugins.size} plugins`);
         } catch (error) {
-            this.logger.logError(`[Plugin Adapter] Error loading plugins:`, error);
+            this.logger.logError('[Plugin Adapter] Error loading plugins:', error);
         }
     }
 

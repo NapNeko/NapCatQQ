@@ -27,14 +27,14 @@ export function createAlbumListRequest(
 ): AlbumListRequest {
     return {
         qun_id: qunId,
-        attach_info: "",
+        attach_info: '',
         seq: seq,
         request_time_line: {
-            request_invoke_time: "0"
+            request_invoke_time: '0'
         },
         album_id: albumId,
-        lloc: "",
-        batch_id: ""
+        lloc: '',
+        batch_id: ''
     };
 }
 
@@ -75,7 +75,7 @@ export function createAlbumMediaFeed(
 ): AlbumMediaFeed {
     return {
         cell_common: {
-            time: ""
+            time: ''
         },
         cell_user_info: {
             user: {
@@ -84,7 +84,7 @@ export function createAlbumMediaFeed(
         },
         cell_media: {
             album_id: albumId,
-            batch_id: "",
+            batch_id: '',
             media_items: [{
                 image: {
                     lloc: lloc
@@ -141,9 +141,9 @@ export function createAlbumCommentRequest(
             type: RichMsgType.KRICHMSGTYPEPLAINTEXT,
             content: content,
             who: 0,
-            uid: "",
-            name: "",
-            url: ""
+            uid: '',
+            name: '',
+            url: ''
         }],
         user: {
             uin: uin
@@ -196,7 +196,7 @@ export function createAlbumFeedPublish(
     return {
         cell_common: {
             time: Date.now(),
-            feed_id: ""
+            feed_id: ''
         },
         cell_user_info: {
             user: {

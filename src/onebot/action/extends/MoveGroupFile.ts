@@ -22,8 +22,9 @@ export class MoveGroupFile extends GetPacketStatusDepends<Payload, MoveGroupFile
 
     async _handle(payload: Payload) {
         const contextMsgFile = FileNapCatOneBotUUID.decode(payload.file_id) || FileNapCatOneBotUUID.decodeModelId(payload.file_id);
-        if (contextMsgFile?.fileUUID) {
-            await this.core.apis.PacketApi.pkt.operation.MoveGroupFile(+payload.group_id, contextMsgFile.fileUUID, payload.current_parent_directory, payload.target_parent_directory);
+        const fileUUID = contextMsgFile?.fileUUID || contextMsgFile?.fileId;
+        if (fileUUID) {
+            await this.core.apis.PacketApi.pkt.operation.MoveGroupFile(+payload.group_id, fileUUID, payload.current_parent_directory, payload.target_parent_directory);
             return {
                 ok: true,
             };

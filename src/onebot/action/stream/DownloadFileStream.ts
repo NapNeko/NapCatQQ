@@ -104,7 +104,7 @@ export class DownloadFileStream extends OneBotAction<Payload, StreamPacket<Downl
                 const base64Chunk = chunk.toString('base64');
                 bytesRead += chunk.length;
 
-               await req.send({
+                await req.send({
                     type: StreamStatus.Stream,
                     data_type: 'file_chunk',
                     index: chunkIndex,

@@ -1,4 +1,4 @@
-import { AlbumCommentReplyContent, AlbumFeedLikePublish, AlbumListRequest, AlbumMediaFeed } from "../data/album";
+import { AlbumCommentReplyContent, AlbumFeedLikePublish, AlbumListRequest, AlbumMediaFeed } from '../data/album';
 
 export interface NodeIKernelAlbumService {
 

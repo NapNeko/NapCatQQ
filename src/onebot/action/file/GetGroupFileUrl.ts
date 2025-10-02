@@ -20,9 +20,10 @@ export class GetGroupFileUrl extends GetPacketStatusDepends<Payload, GetGroupFil
 
     async _handle(payload: Payload) {
         const contextMsgFile = FileNapCatOneBotUUID.decode(payload.file_id) || FileNapCatOneBotUUID.decodeModelId(payload.file_id);
-        if (contextMsgFile?.fileUUID) {
+        const fileUUID = contextMsgFile?.fileUUID || contextMsgFile?.fileId;
+        if (fileUUID) {
             return {
-                url: await this.core.apis.PacketApi.pkt.operation.GetGroupFileUrl(+payload.group_id, contextMsgFile.fileUUID)
+                url: await this.core.apis.PacketApi.pkt.operation.GetGroupFileUrl(+payload.group_id, fileUUID)
             };
         }
         throw new Error('real fileUUID not found!');

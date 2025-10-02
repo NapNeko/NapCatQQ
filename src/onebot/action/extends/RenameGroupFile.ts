@@ -22,8 +22,9 @@ export class RenameGroupFile extends GetPacketStatusDepends<Payload, RenameGroup
 
     async _handle(payload: Payload) {
         const contextMsgFile = FileNapCatOneBotUUID.decode(payload.file_id) || FileNapCatOneBotUUID.decodeModelId(payload.file_id);
-        if (contextMsgFile?.fileUUID) {
-            await this.core.apis.PacketApi.pkt.operation.RenameGroupFile(+payload.group_id, contextMsgFile.fileUUID, payload.current_parent_directory, payload.new_name);
+        const fileUUID = contextMsgFile?.fileUUID || contextMsgFile?.fileId;
+        if (fileUUID) {
+            await this.core.apis.PacketApi.pkt.operation.RenameGroupFile(+payload.group_id, fileUUID, payload.current_parent_directory, payload.new_name);
             return {
                 ok: true,
             };
