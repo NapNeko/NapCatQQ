@@ -200,9 +200,10 @@ export default class WebUIManager {
 
   // 清理缓存
   public static async cleanCache() {
-    const { data } = await serverRequest.post<
-      ServerResponse<{ result: boolean; message: string }>
-    >('/base/CleanCache')
+    const { data } =
+      await serverRequest.post<
+        ServerResponse<{ result: boolean; message: string }>
+      >('/base/CleanCache')
     return data.data
   }
 }
