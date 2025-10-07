@@ -24,3 +24,8 @@ export const SetThemeConfigHandler: RequestHandler = async (req, res) => {
     await WebUiConfig.UpdateTheme(theme);
     sendSuccess(res, { message: '更新成功' });
 };
+
+export const CleanCacheHandler: RequestHandler = async (_, res) => {
+    const result = await WebUiDataRuntime.requestCleanCache();
+    sendSuccess(res, result);
+};

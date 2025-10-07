@@ -217,6 +217,15 @@ export class NapCatOneBot11Adapter {
             //this.context.logger.log(`OneBot11 配置更改：${JSON.stringify(prev)} -> ${JSON.stringify(newConfig)}`);
             await this.reloadNetwork(prev, newConfig);
         });
+        WebUiDataRuntime.setCleanCacheCall(async () => {
+            try {
+                await this.actions.get('clean_cache')?.handle({});
+                return { result: true, message: '缓存清理成功' };
+            } catch (error) {
+                this.context.logger.logError('清理缓存失败:', error);
+                return { result: false, message: `清理缓存失败: ${(error as Error).message}` };
+            }
+        });
     }
 
 

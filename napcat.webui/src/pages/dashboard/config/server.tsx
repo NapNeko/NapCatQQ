@@ -1,16 +1,22 @@
+import { Button } from '@heroui/button'
 import { Input } from '@heroui/input'
 import { Switch } from '@heroui/switch'
 import { useRequest } from 'ahooks'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
+import { MdDeleteSweep } from 'react-icons/md'
 
 import SaveButtons from '@/components/button/save_buttons'
 import PageLoading from '@/components/page_loading'
 
+import useDialog from '@/hooks/use-dialog'
+
 import WebUIManager from '@/controllers/webui_manager'
 
 const ServerConfigCard = () => {
+  const dialog = useDialog()
+  const [isCleaningCache, setIsCleaningCache] = useState(false)
   const {
     data: configData,
     loading: configLoading,
@@ -67,6 +73,42 @@ const ServerConfigCard = () => {
       const msg = (error as Error).message
       toast.error(`刷新失败: ${msg}`)
     }
+  }
+
+  const handleCleanCache = () => {
+    dialog.confirm({
+      title: '清理缓存',
+      content: (
+        <div className="space-y-2">
+          <p>确定要清理缓存吗？此操作将清理以下内容：</p>
+          <ul className="list-disc list-inside text-sm text-default-600">
+            <li>临时文件夹中的所有文件</li>
+            <li>图片缓存 (Pic)</li>
+            <li>语音缓存 (Ptt)</li>
+            <li>视频缓存 (Video)</li>
+            <li>文件缓存 (File)</li>
+            <li>日志文件 (log)</li>
+          </ul>
+          <p className="text-warning text-sm">此操作不可撤销，请谨慎操作。</p>
+        </div>
+      ),
+      onConfirm: async () => {
+        setIsCleaningCache(true)
+        try {
+          const result = await WebUIManager.cleanCache()
+          if (result.result) {
+            toast.success(result.message || '缓存清理成功')
+          } else {
+            toast.error(result.message || '缓存清理失败')
+          }
+        } catch (error) {
+          const msg = (error as Error).message
+          toast.error(`清理缓存失败: ${msg}`)
+        } finally {
+          setIsCleaningCache(false)
+        }
+      }
+    })
   }
 
   useEffect(() => {
@@ -129,6 +171,30 @@ const ServerConfigCard = () => {
               />
             )}
           />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <div className="flex-shrink-0 w-full">维护操作</div>
+          <div className="flex flex-col gap-2 p-4 rounded-lg bg-default-50">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex-1">
+                <div className="font-medium">清理缓存</div>
+                <div className="text-sm text-default-500">
+                  清理临时文件、图片、语音、视频、文件缓存和日志文件
+                </div>
+              </div>
+              <Button
+                color="danger"
+                variant="flat"
+                startContent={<MdDeleteSweep size={20} />}
+                onPress={handleCleanCache}
+                isLoading={isCleaningCache}
+                isDisabled={!!configError}
+              >
+                清理缓存
+              </Button>
+            </div>
+          </div>
         </div>
 
         <div className="flex flex-col gap-2">

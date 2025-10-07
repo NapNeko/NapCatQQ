@@ -27,6 +27,9 @@ const LoginRuntime: LoginRuntimeType = {
         onQuickLoginRequested: async () => {
             return { result: false, message: '' };
         },
+        onCleanCacheRequested: async () => {
+            return { result: false, message: '' };
+        },
         QQLoginList: [],
         NewQQLoginList: [],
     },
@@ -129,6 +132,14 @@ export const WebUiDataRuntime = {
     setOB11Config: function (ob11) {
         return LoginRuntime.NapCatHelper.onOB11ConfigChanged(ob11);
     } as LoginRuntimeType['NapCatHelper']['onOB11ConfigChanged'],
+
+    setCleanCacheCall(func: LoginRuntimeType['NapCatHelper']['onCleanCacheRequested']): void {
+        LoginRuntime.NapCatHelper.onCleanCacheRequested = func;
+    },
+
+    requestCleanCache: function () {
+        return LoginRuntime.NapCatHelper.onCleanCacheRequested();
+    } as LoginRuntimeType['NapCatHelper']['onCleanCacheRequested'],
 
     getPackageJson() {
         return LoginRuntime.packageJson;
