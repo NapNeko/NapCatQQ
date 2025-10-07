@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { GetThemeConfigHandler, PackageInfoHandler, QQVersionHandler, SetThemeConfigHandler } from '../api/BaseInfo';
+import { CleanCacheHandler, GetThemeConfigHandler, PackageInfoHandler, QQVersionHandler, SetThemeConfigHandler } from '../api/BaseInfo';
 import { StatusRealTimeHandler } from '@webapi/api/Status';
 import { GetProxyHandler } from '../api/Proxy';
 
@@ -11,5 +11,6 @@ router.get('/GetSysStatusRealTime', StatusRealTimeHandler);
 router.get('/proxy', GetProxyHandler);
 router.get('/Theme', GetThemeConfigHandler);
 router.post('/SetTheme', SetThemeConfigHandler);
+router.post('/CleanCache', CleanCacheHandler);
 
 export { router as BaseRouter };
