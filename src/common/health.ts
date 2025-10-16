@@ -9,41 +9,50 @@ export interface ResourceConfig<T extends any[], R> {
     healthCheckInterval?: number;
     /** 最大健康检查失败次数，超过后永久禁用，默认 5 次 */
     maxHealthCheckFailures?: number;
-    /** 资源名称（用于日志） */
-    name?: string;
-    /** 测试参数（用于健康检查） */
-    testArgs?: T;
     /** 健康检查函数，如果提供则优先使用此函数进行健康检查 */
     healthCheckFn?: (...args: T) => Promise<boolean>;
+    /** 测试参数（用于健康检查） */
+    testArgs?: T;
 }
 
-interface ResourceState<T extends any[], R> {
-    config: ResourceConfig<T, R>;
+interface ResourceTypeState {
+    /** 资源配置 */
+    config: {
+        resourceFn: (...args: any[]) => Promise<any>;
+        healthCheckFn?: (...args: any[]) => Promise<boolean>;
+        disableTime: number;
+        maxRetries: number;
+        healthCheckInterval: number;
+        maxHealthCheckFailures: number;
+        testArgs?: any[];
+    };
+    /** 是否启用 */
     isEnabled: boolean;
+    /** 禁用截止时间 */
     disableUntil: number;
+    /** 当前重试次数 */
     currentRetries: number;
+    /** 健康检查失败次数 */
     healthCheckFailureCount: number;
+    /** 是否永久禁用 */
     isPermanentlyDisabled: boolean;
-    lastError?: Error;
+    /** 上次健康检查时间 */
     lastHealthCheckTime: number;
-    registrationKey: string;
+    /** 成功次数统计 */
+    successCount: number;
+    /** 失败次数统计 */
+    failureCount: number;
 }
 
 export class ResourceManager {
-    private resources = new Map<string, ResourceState<any, any>>();
+    private resourceTypes = new Map<string, ResourceTypeState>();
     private destroyed = false;
-    private healthCheckTimer?: NodeJS.Timeout;
-    private readonly HEALTH_CHECK_TASK_INTERVAL = 5000; // 5秒执行一次健康检查任务
-
-    constructor() {
-        this.startHealthCheckTask();
-    }
 
     /**
-     * 注册资源（注册即调用，重复注册只实际注册一次）
+     * 调用资源（自动注册或复用已有配置）
      */
-    async register<T extends any[], R>(
-        key: string,
+    async callResource<T extends any[], R>(
+        type: string,
         config: ResourceConfig<T, R>,
         ...args: T
     ): Promise<R> {
@@ -51,81 +60,64 @@ export class ResourceManager {
             throw new Error('ResourceManager has been destroyed');
         }
 
-        const registrationKey = this.generateRegistrationKey(key, config);
+        // 获取或创建资源类型状态
+        let state = this.resourceTypes.get(type);
 
-        // 检查是否已经注册
-        if (this.resources.has(key)) {
-            const existingState = this.resources.get(key)!;
-
-            // 如果是相同的配置，直接调用
-            if (existingState.registrationKey === registrationKey) {
-                return this.callResource<T, R>(key, ...args);
-            }
-
-            // 配置不同，清理旧的并重新注册
-            this.unregister(key);
-        }
-
-        // 创建新的资源状态
-        const state: ResourceState<T, R> = {
-            config: {
-                disableTime: 30000,
-                maxRetries: 3,
-                healthCheckInterval: 60000,
-                maxHealthCheckFailures: 5,
-                name: key,
-                ...config
-            },
-            isEnabled: true,
-            disableUntil: 0,
-            currentRetries: 0,
-            healthCheckFailureCount: 0,
-            isPermanentlyDisabled: false,
-            lastHealthCheckTime: 0,
-            registrationKey
-        };
-
-        this.resources.set(key, state);
-
-        // 注册即调用
-        return await this.callResource<T, R>(key, ...args);
-    }
-
-    /**
-     * 调用资源
-     */
-    async callResource<T extends any[], R>(key: string, ...args: T): Promise<R> {
-        const state = this.resources.get(key) as ResourceState<T, R> | undefined;
         if (!state) {
-            throw new Error(`Resource ${key} not registered`);
+            // 首次注册
+            state = {
+                config: {
+                    resourceFn: config.resourceFn as (...args: any[]) => Promise<any>,
+                    healthCheckFn: config.healthCheckFn as ((...args: any[]) => Promise<boolean>) | undefined,
+                    disableTime: config.disableTime ?? 30000,
+                    maxRetries: config.maxRetries ?? 3,
+                    healthCheckInterval: config.healthCheckInterval ?? 60000,
+                    maxHealthCheckFailures: config.maxHealthCheckFailures ?? 20,
+                    testArgs: config.testArgs as any[] | undefined,
+                },
+                isEnabled: true,
+                disableUntil: 0,
+                currentRetries: 0,
+                healthCheckFailureCount: 0,
+                isPermanentlyDisabled: false,
+                lastHealthCheckTime: 0,
+                successCount: 0,
+                failureCount: 0,
+            };
+            this.resourceTypes.set(type, state);
         }
 
+        // 在调用前检查是否需要进行健康检查
+        await this.checkAndPerformHealthCheck(state);
+
+        // 检查资源状态
         if (state.isPermanentlyDisabled) {
-            throw new Error(`Resource ${key} is permanently disabled due to repeated health check failures`);
+            throw new Error(`Resource type '${type}' is permanently disabled (success: ${state.successCount}, failure: ${state.failureCount})`);
         }
 
-        if (!this.isResourceAvailable(key)) {
+        if (!this.isResourceAvailable(type)) {
             const disableUntilDate = new Date(state.disableUntil).toISOString();
-            throw new Error(`Resource ${key} is currently disabled until ${disableUntilDate}`);
+            throw new Error(`Resource type '${type}' is currently disabled until ${disableUntilDate} (success: ${state.successCount}, failure: ${state.failureCount})`);
         }
 
+        // 调用资源
         try {
-            const result = await state.config.resourceFn(...args);
+            const result = await config.resourceFn(...args);
             this.onResourceSuccess(state);
             return result;
         } catch (error) {
-            this.onResourceFailure(state, error as Error);
+            this.onResourceFailure(state);
             throw error;
         }
     }
 
     /**
-     * 检查资源是否可用
+     * 检查资源类型是否可用
      */
-    isResourceAvailable(key: string): boolean {
-        const state = this.resources.get(key);
+    isResourceAvailable(type: string): boolean {
+        const state = this.resourceTypes.get(type);
         if (!state) {
-            return false;
+            return true; // 未注册的资源类型视为可用
         }
 
         if (state.isPermanentlyDisabled || !state.isEnabled) {
@@ -136,128 +128,97 @@ export class ResourceManager {
     }
 
     /**
-     * 注销资源
+     * 获取资源类型统计信息
      */
-    unregister(key: string): boolean {
-        return this.resources.delete(key);
+    getResourceStats(type: string): { successCount: number; failureCount: number; isEnabled: boolean; isPermanentlyDisabled: boolean } | null {
+        const state = this.resourceTypes.get(type);
+        if (!state) {
+            return null;
+        }
+
+        return {
+            successCount: state.successCount,
+            failureCount: state.failureCount,
+            isEnabled: state.isEnabled,
+            isPermanentlyDisabled: state.isPermanentlyDisabled,
+        };
     }
 
     /**
-     * 销毁管理器，清理所有资源
+     * 获取所有资源类型统计
+     */
+    getAllResourceStats(): Map<string, { successCount: number; failureCount: number; isEnabled: boolean; isPermanentlyDisabled: boolean }> {
+        const stats = new Map();
+        for (const [type, state] of this.resourceTypes) {
+            stats.set(type, {
+                successCount: state.successCount,
+                failureCount: state.failureCount,
+                isEnabled: state.isEnabled,
+                isPermanentlyDisabled: state.isPermanentlyDisabled,
+            });
+        }
+        return stats;
+    }
+
+    /**
+     * 注销资源类型
+     */
+    unregister(type: string): boolean {
+        return this.resourceTypes.delete(type);
+    }
+
+    /**
+     * 销毁管理器
      */
     destroy(): void {
         if (this.destroyed) {
             return;
         }
 
-        this.stopHealthCheckTask();
-        this.resources.clear();
+        this.resourceTypes.clear();
         this.destroyed = true;
     }
 
-    private generateRegistrationKey<T extends any[], R>(key: string, config: ResourceConfig<T, R>): string {
-        const configStr = JSON.stringify({
-            name: config.name,
-            disableTime: config.disableTime,
-            maxRetries: config.maxRetries,
-            healthCheckInterval: config.healthCheckInterval,
-            maxHealthCheckFailures: config.maxHealthCheckFailures,
-            functionStr: config.resourceFn.toString(),
-            healthCheckFnStr: config.healthCheckFn?.toString()
-        });
-
-        return `${key}_${this.simpleHash(configStr)}`;
-    }
-
-    private simpleHash(str: string): string {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-            const char = str.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash = hash & hash; // Convert to 32bit integer
-        }
-        return Math.abs(hash).toString(36);
-    }
-
-    private onResourceSuccess<T extends any[], R>(state: ResourceState<T, R>): void {
-        state.currentRetries = 0;
-        state.disableUntil = 0;
-        state.healthCheckFailureCount = 0;
-        state.lastError = undefined;
-    }
-
-    private onResourceFailure<T extends any[], R>(state: ResourceState<T, R>, error: Error): void {
-        state.currentRetries++;
-        state.lastError = error;
-
-        // 如果重试次数达到上限，禁用资源
-        if (state.currentRetries >= state.config.maxRetries!) {
-            state.disableUntil = Date.now() + state.config.disableTime!;
-            state.currentRetries = 0;
-        }
-    }
-
-    private startHealthCheckTask(): void {
-        if (this.healthCheckTimer) {
+    /**
+     * 检查并执行健康检查（如果需要）
+     */
+    private async checkAndPerformHealthCheck(state: ResourceTypeState): Promise<void> {
+        // 如果资源可用或已永久禁用，无需健康检查
+        if (state.isEnabled && Date.now() >= state.disableUntil) {
             return;
         }
 
-        this.healthCheckTimer = setInterval(() => {
-            this.runHealthCheckTask();
-        }, this.HEALTH_CHECK_TASK_INTERVAL);
-    }
-
-    private stopHealthCheckTask(): void {
-        if (this.healthCheckTimer) {
-            clearInterval(this.healthCheckTimer);
-            this.healthCheckTimer = undefined;
-        }
-    }
-
-    private async runHealthCheckTask(): Promise<void> {
-        if (this.destroyed) {
+        if (state.isPermanentlyDisabled) {
             return;
         }
 
         const now = Date.now();
 
-        for (const [key, state] of this.resources) {
-            // 跳过永久禁用或可用的资源
-            if (state.isPermanentlyDisabled || this.isResourceAvailable(key)) {
-                continue;
-            }
-
-            // 跳过还在禁用期内的资源
-            if (now < state.disableUntil) {
-                continue;
-            }
-
-            // 检查是否需要进行健康检查（根据间隔时间）
-            const lastHealthCheck = state.lastHealthCheckTime || 0;
-            const healthCheckInterval = state.config.healthCheckInterval!;
-
-            if (now - lastHealthCheck < healthCheckInterval) {
-                continue;
-            }
-
-            // 执行健康检查
-            await this.performHealthCheck(state);
+        // 检查是否还在禁用期内
+        if (now < state.disableUntil) {
+            return;
         }
+
+        // 检查是否需要进行健康检查（根据间隔时间）
+        if (now - state.lastHealthCheckTime < state.config.healthCheckInterval) {
+            return;
+        }
+
+        // 执行健康检查
+        await this.performHealthCheck(state);
     }
 
-    private async performHealthCheck<T extends any[], R>(state: ResourceState<T, R>): Promise<void> {
+    private async performHealthCheck(state: ResourceTypeState): Promise<void> {
         state.lastHealthCheckTime = Date.now();
 
         try {
             let healthCheckResult: boolean;
 
-            // 如果有专门的健康检查函数，使用它
             if (state.config.healthCheckFn) {
-                const testArgs = state.config.testArgs || [] as unknown as T;
+                const testArgs = state.config.testArgs || [];
                 healthCheckResult = await state.config.healthCheckFn(...testArgs);
             } else {
-                // 否则使用原始函数进行检查
-                const testArgs = state.config.testArgs || [] as unknown as T;
+                const testArgs = state.config.testArgs || [];
                 await state.config.resourceFn(...testArgs);
                 healthCheckResult = true;
             }
@@ -268,24 +229,40 @@ export class ResourceManager {
                 state.disableUntil = 0;
                 state.currentRetries = 0;
                 state.healthCheckFailureCount = 0;
-                state.lastError = undefined;
             } else {
                 throw new Error('Health check function returned false');
             }
-        } catch (error) {
+        } catch {
             // 健康检查失败，增加失败计数
             state.healthCheckFailureCount++;
-            state.lastError = error as Error;
 
             // 检查是否达到最大健康检查失败次数
-            if (state.healthCheckFailureCount >= state.config.maxHealthCheckFailures!) {
+            if (state.healthCheckFailureCount >= state.config.maxHealthCheckFailures) {
                 // 永久禁用资源
                 state.isPermanentlyDisabled = true;
                 state.disableUntil = 0;
             } else {
                 // 继续禁用一段时间
-                state.disableUntil = Date.now() + state.config.disableTime!;
+                state.disableUntil = Date.now() + state.config.disableTime;
             }
+        }
+    }
+
+    private onResourceSuccess(state: ResourceTypeState): void {
+        state.currentRetries = 0;
+        state.disableUntil = 0;
+        state.healthCheckFailureCount = 0;
+        state.successCount++;
+    }
+
+    private onResourceFailure(state: ResourceTypeState): void {
+        state.currentRetries++;
+        state.failureCount++;
+
+        // 如果重试次数达到上限，禁用资源
+        if (state.currentRetries >= state.config.maxRetries) {
+            state.disableUntil = Date.now() + state.config.disableTime;
+            state.currentRetries = 0;
         }
     }
 }
@@ -295,34 +272,9 @@ export const resourceManager = new ResourceManager();
 
 // 便捷函数
 export async function registerResource<T extends any[], R>(
-    key: string,
+    type: string,
     config: ResourceConfig<T, R>,
     ...args: T
 ): Promise<R> {
-    return resourceManager.register(key, config, ...args);
+    return resourceManager.callResource(type, config, ...args);
 }
-
-// 使用示例：
-/*
-await registerResource(
-  'api-with-health-check',
-  {
-    resourceFn: async (id: string) => {
-      const response = await fetch(`https://api.example.com/data/${id}`);
-      return response.json();
-    },
-    healthCheckFn: async (id: string) => {
-      try {
-        const response = await fetch(`https://api.example.com/health`);
-        return response.ok;
-      } catch {
-        return false;
-      }
-    },
-    testArgs: ['health-check-id'],
-    healthCheckInterval: 30000,
-    maxHealthCheckFailures: 3
-  },
-  'user123'
-);
-*/
