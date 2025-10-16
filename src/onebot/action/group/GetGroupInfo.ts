@@ -18,6 +18,9 @@ class GetGroupInfo extends OneBotAction<Payload, OB11Group> {
         const group = (await this.core.apis.GroupApi.getGroups()).find(e => e.groupCode == payload.group_id.toString());
         if (!group) {
             const data = await this.core.apis.GroupApi.fetchGroupDetail(payload.group_id.toString());
+            if (data.ownerUid && data.ownerUin === '0') {
+                data.ownerUin = await this.core.apis.UserApi.getUinByUidV2(data.ownerUid);
+            }
             return {
                 ...data,
                 group_all_shut: data.shutUpAllTimestamp > 0 ? -1 : 0,
