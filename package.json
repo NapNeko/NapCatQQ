@@ -65,7 +65,7 @@
     "vite": "^7.1.1",
     "vite-plugin-cp": "^6.0.0",
     "vite-tsconfig-paths": "^5.1.0",
-    "winston": "^3.17.0"
+    "winston": "^3.18.3"
   },
   "dependencies": {
     "express": "^5.0.0",
