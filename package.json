@@ -54,7 +54,7 @@
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.32.0",
     "express-rate-limit": "^7.5.0",
-    "fast-xml-parser": "^4.3.6",
+    "fast-xml-parser": "^5.3.0",
     "file-type": "^21.0.0",
     "globals": "^16.0.0",
     "json5": "^2.2.3",
