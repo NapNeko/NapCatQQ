@@ -17,6 +17,8 @@ export const ActionName = {
      TestDownloadStream: 'test_download_stream',
     UploadFileStream: 'upload_file_stream',
     DownloadFileStream: 'download_file_stream',
+    DownloadFileRecordStream: 'download_file_record_stream',
+    DownloadFileImageStream: 'download_file_image_stream',
 
     DelGroupAlbumMedia: 'del_group_album_media',
     SetGroupAlbumMediaLike: 'set_group_album_media_like',
