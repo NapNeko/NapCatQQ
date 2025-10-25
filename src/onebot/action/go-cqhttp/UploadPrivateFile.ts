@@ -1,6 +1,6 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { ChatType, Peer, SendFileElement } from '@/core/types';
+import { ChatType, Peer, SendFileElement, ElementType } from '@/core/types';
 import fs from 'fs';
 import { uriToLocalFile } from '@/common/file';
 import { SendMessageContext } from '@/onebot/api';
@@ -15,7 +15,11 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export default class GoCQHTTPUploadPrivateFile extends OneBotAction<Payload, null> {
+interface UploadPrivateFileResponse {
+    file_id: string | null;
+}
+
+export default class GoCQHTTPUploadPrivateFile extends OneBotAction<Payload, UploadPrivateFileResponse> {
     override actionName = ActionName.GOCQHTTP_UploadPrivateFile;
     override payloadSchema = SchemaData;
 
@@ -31,7 +35,7 @@ export default class GoCQHTTPUploadPrivateFile extends OneBotAction<Payload, nul
         throw new Error('缺少参数 user_id');
     }
 
-    async _handle(payload: Payload): Promise<null> {
+    async _handle(payload: Payload): Promise<UploadPrivateFileResponse> {
         let file = payload.file;
         if (fs.existsSync(file)) {
             file = `file://${file}`;
@@ -49,7 +53,11 @@ export default class GoCQHTTPUploadPrivateFile extends OneBotAction<Payload, nul
         };
         const sendFileEle: SendFileElement = await this.core.apis.FileApi.createValidSendFileElement(msgContext, downloadResult.path, payload.name);
         msgContext.deleteAfterSentFiles.push(downloadResult.path);
-        await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(await this.getPeer(payload), [sendFileEle], msgContext.deleteAfterSentFiles);
-        return null;
+        const returnMsg = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(await this.getPeer(payload), [sendFileEle], msgContext.deleteAfterSentFiles);
+        
+        const fileElement = returnMsg.elements.find(ele => ele.elementType === ElementType.FILE);
+        return {
+            file_id: fileElement?.fileElement?.fileUuid || null
+        };
     }
 }

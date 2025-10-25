@@ -1,6 +1,6 @@
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
-import { ChatType, Peer } from '@/core/types';
+import { ChatType, Peer, ElementType } from '@/core/types';
 import fs from 'fs';
 import { uriToLocalFile } from '@/common/file';
 import { SendMessageContext } from '@/onebot/api';
@@ -16,11 +16,15 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export default class GoCQHTTPUploadGroupFile extends OneBotAction<Payload, null> {
+interface UploadGroupFileResponse {
+    file_id: string | null;
+}
+
+export default class GoCQHTTPUploadGroupFile extends OneBotAction<Payload, UploadGroupFileResponse> {
     override actionName = ActionName.GoCQHTTP_UploadGroupFile;
     override payloadSchema = SchemaData;
 
-    async _handle(payload: Payload): Promise<null> {
+    async _handle(payload: Payload): Promise<UploadGroupFileResponse> {
         let file = payload.file;
         if (fs.existsSync(file)) {
             file = `file://${file}`;
@@ -39,7 +43,11 @@ export default class GoCQHTTPUploadGroupFile extends OneBotAction<Payload, null>
         };
         const sendFileEle = await this.core.apis.FileApi.createValidSendFileElement(msgContext, downloadResult.path, payload.name, payload.folder ?? payload.folder_id);
         msgContext.deleteAfterSentFiles.push(downloadResult.path);
-        await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, [sendFileEle], msgContext.deleteAfterSentFiles);
-        return null;
+        const returnMsg = await this.obContext.apis.MsgApi.sendMsgWithOb11UniqueId(peer, [sendFileEle], msgContext.deleteAfterSentFiles);
+        
+        const fileElement = returnMsg.elements.find(ele => ele.elementType === ElementType.FILE);
+        return {
+            file_id: fileElement?.fileElement?.fileUuid || null
+        };
     }
 }
