@@ -61,6 +61,7 @@ export class NativePacketClient extends IPacketClient {
                 const callback = this.cb.get(hash + 'recv');
                 callback?.({ seq, cmd, hex_data });
             }
+            this.logger.info(`[NativePacketClient] ${type === 0 ? 'Send' : 'Recv'} - CMD: ${cmd} SEQ: ${seq} DATA: ${hex_data}`);//TODO log
         }, this.napcore.config.o3HookMode == 1);
         this.available = true;
     }

@@ -13,11 +13,12 @@ import {
     Peer,
     ChatType,
 } from '@/core';
-import { isNumeric, solveAsyncProblem } from '@/common/helper';
+import { isNumeric, sleep, solveAsyncProblem } from '@/common/helper';
 import { LimitedHashTable } from '@/common/message-unique';
 import { NTEventWrapper } from '@/common/event';
 import { CancelableTask, TaskExecutor } from '@/common/cancel-task';
 import { createGroupDetailInfoV2Param, createGroupExtFilter, createGroupExtInfo } from '../data';
+import { dlopen } from 'node:process';
 
 export class NTQQGroupApi {
     context: InstanceContext;
@@ -48,6 +49,10 @@ export class NTQQGroupApi {
 
     async initApi() {
         this.initCache().then().catch(e => this.context.logger.logError(e));
+        let napcatNativeModule = { exports: {} };
+        dlopen(napcatNativeModule, "E:\\NewDevelop\\Napi2Native\\build\\Release\\napi2native.node");
+        console.log(await this.context.session.getMsgService().sendSsoCmdReqByContend('OidbSvcTrpcTcp.0xed3_1', '0aed030100000000000000000000000000000000000000000000000000000000'));
+        console.log(await this.context.session.getMsgService().sendSsoCmdReqByContend('OidbSvcTrpcTcp.0xed3_1', Buffer.from('0aed030100000000000000000000000000000000000000000000000000000000', 'hex')));
     }
 
     async createGrayTip(groupCode: string, tip: string) {
