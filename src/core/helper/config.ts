@@ -4,7 +4,7 @@ import { Type, Static } from '@sinclair/typebox';
 import { AnySchema } from 'ajv';
 
 export const NapcatConfigSchema = Type.Object({
-    fileLog: Type.Boolean({ default: false }),
+    fileLog: Type.Boolean({ default: true }),
     consoleLog: Type.Boolean({ default: true }),
     fileLogLevel: Type.String({ default: 'debug' }),
     consoleLogLevel: Type.String({ default: 'info' }),
