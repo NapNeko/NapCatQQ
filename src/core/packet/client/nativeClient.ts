@@ -1,22 +1,42 @@
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
-import { IPacketClient } from '@/core/packet/client/baseClient';
 import { constants } from 'node:os';
 import { LogStack } from '@/core/packet/context/clientContext';
 import { NapCoreContext } from '@/core/packet/context/napCoreContext';
 import { PacketLogger } from '@/core/packet/context/loggerContext';
+import { OidbPacket, PacketHexStr } from '@/core/packet/transformer/base';
+import { CancelableTask } from '@/common/cancel-task';
+
+export interface RecvPacket {
+    type: string, // 仅recv
+    data: RecvPacketData
+}
+
+export interface RecvPacketData {
+    seq: number
+    cmd: string
+    data: Buffer
+}
 
 // 0 send 1 recv
 export interface NativePacketExportType {
     initHook?: (send: string, recv: string) => boolean;
 }
 
-export class NativePacketClient extends IPacketClient {
+export class NativePacketClient {
+    protected readonly napcore: NapCoreContext;
+    protected readonly logger: PacketLogger;
+    protected readonly cb = new Map<string, (json: RecvPacketData) => Promise<any> | any>(); // hash-type callback
+    logStack: LogStack;
+    available: boolean = false;
     private readonly supportedPlatforms = ['win32.x64', 'linux.x64', 'linux.arm64', 'darwin.x64', 'darwin.arm64'];
     private readonly MoeHooExport: { exports: NativePacketExportType } = { exports: {} };
+
     constructor(napCore: NapCoreContext, logger: PacketLogger, logStack: LogStack) {
-        super(napCore, logger, logStack);
+        this.napcore = napCore;
+        this.logger = logger;
+        this.logStack = logStack;
     }
 
     check(): boolean {
@@ -42,5 +62,45 @@ export class NativePacketClient extends IPacketClient {
             this.MoeHooExport?.exports.initHook?.(send, recv);
             this.available = true;
         }
+    }
+
+    async sendPacket(cmd: string, data: PacketHexStr, rsp = false, timeout = 5000): Promise<RecvPacketData> {
+        if (!rsp) {
+            this.napcore.sendSsoCmdReqByContend(cmd, Buffer.from(data, 'hex')).catch(err => {
+                this.logger.error(`[PacketClient] sendPacket 无响应命令发送失败 cmd=${cmd} err=${err}`);
+            });
+            return { seq: 0, cmd: cmd, data: Buffer.alloc(0) };
+        }
+
+        const task = new CancelableTask<RecvPacketData>((resolve, reject, onCancel) => {
+            const timeoutId = setTimeout(() => {
+                reject(new Error(`[PacketClient] sendPacket 超时 cmd=${cmd} timeout=${timeout}ms`));
+            }, timeout);
+
+            onCancel(() => {
+                clearTimeout(timeoutId);
+            });
+
+            this.napcore.sendSsoCmdReqByContend(cmd, Buffer.from(data, 'hex'))
+                .then(ret => {
+                    clearTimeout(timeoutId);
+                    const result = ret as { rspbuffer: Buffer };
+                    resolve({
+                        seq: 0,
+                        cmd: cmd,
+                        data: result.rspbuffer
+                    });
+                })
+                .catch(err => {
+                    clearTimeout(timeoutId);
+                    reject(err);
+                });
+        });
+
+        return await task;
+    }
+
+    async sendOidbPacket(pkt: OidbPacket, rsp = false, timeout = 5000): Promise<RecvPacketData> {
+        return await this.sendPacket(pkt.cmd, pkt.data, rsp, timeout);
     }
 }
