@@ -1,4 +1,4 @@
-import { PacketHexStr } from '@/core/packet/transformer/base';
+import { PacketBuf } from '@/core/packet/transformer/base';
 import { GetPacketStatusDepends } from '@/onebot/action/packet/GetPacketStatus';
 import { ActionName } from '@/onebot/action/router';
 import { Static, Type } from '@sinclair/typebox';
@@ -16,7 +16,7 @@ export class SendPacket extends GetPacketStatusDepends<Payload, string | undefin
     override actionName = ActionName.SendPacket;
     async _handle(payload: Payload) {
         const rsp = typeof payload.rsp === 'boolean' ? payload.rsp : payload.rsp === 'true';
-        const data = await this.core.apis.PacketApi.pkt.operation.sendPacket({ cmd: payload.cmd, data: payload.data as PacketHexStr }, rsp);
+        const data = await this.core.apis.PacketApi.pkt.operation.sendPacket({ cmd: payload.cmd, data: Buffer.from(payload.data, 'hex') as PacketBuf }, rsp);
         return typeof data === 'object' ? data.toString('hex') : undefined;
     }
 }

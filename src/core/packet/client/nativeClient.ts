@@ -5,9 +5,7 @@ import { constants } from 'node:os';
 import { LogStack } from '@/core/packet/context/clientContext';
 import { NapCoreContext } from '@/core/packet/context/napCoreContext';
 import { PacketLogger } from '@/core/packet/context/loggerContext';
-import { OidbPacket, PacketHexStr } from '@/core/packet/transformer/base';
-import { CancelableTask } from '@/common/cancel-task';
-
+import { OidbPacket, PacketBuf } from '@/core/packet/transformer/base';
 export interface RecvPacket {
     type: string, // 仅recv
     data: RecvPacketData
@@ -66,13 +64,13 @@ export class NativePacketClient {
 
     async sendPacket(
         cmd: string,
-        data: PacketHexStr,
+        data: PacketBuf,
         rsp = false,
         timeout = 5000
     ): Promise<RecvPacketData> {
         if (!rsp) {
             this.napcore
-                .sendSsoCmdReqByContend(cmd, Buffer.from(data, 'hex'))
+                .sendSsoCmdReqByContend(cmd, data)
                 .catch(err =>
                     this.logger.error(
                         `[PacketClient] sendPacket 无响应命令发送失败 cmd=${cmd} err=${err}`
@@ -82,7 +80,7 @@ export class NativePacketClient {
         }
 
         const sendPromise = this.napcore
-            .sendSsoCmdReqByContend(cmd, Buffer.from(data, 'hex'))
+            .sendSsoCmdReqByContend(cmd, data)
             .then(ret => ({
                 seq: 0,
                 cmd,

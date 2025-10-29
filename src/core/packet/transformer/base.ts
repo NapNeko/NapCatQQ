@@ -1,15 +1,15 @@
 import { NapProtoDecodeStructType } from '@napneko/nap-proto-core';
 import { PacketMsgBuilder } from '@/core/packet/message/builder';
 
-export type PacketHexStr = string & { readonly hexNya: unique symbol };
+export type PacketBuf = Buffer & { readonly hexNya: unique symbol };
 
-export const PacketHexStrBuilder = (str: Uint8Array): PacketHexStr => {
-    return Buffer.from(str).toString('hex') as PacketHexStr;
+export const PacketBufBuilder = (str: Uint8Array): PacketBuf => {
+    return Buffer.from(str) as PacketBuf;
 };
 
 export interface OidbPacket {
     cmd: string;
-    data: PacketHexStr
+    data: PacketBuf
 }
 
 export abstract class PacketTransformer<T> {
