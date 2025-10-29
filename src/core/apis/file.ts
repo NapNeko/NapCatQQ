@@ -64,7 +64,7 @@ export class NTQQFileApi {
         }
     }
 
-    async getFileUrl(chatType: ChatType, peer: string, fileUUID?: string, file10MMd5?: string | undefined,timeout: number = 20000) {
+    async getFileUrl(chatType: ChatType, peer: string, fileUUID?: string, file10MMd5?: string | undefined,timeout: number = 5000) {
         if (this.core.apis.PacketApi.packetStatus) {
             try {
                 if (chatType === ChatType.KCHATTYPEGROUP && fileUUID) {
@@ -79,7 +79,7 @@ export class NTQQFileApi {
         throw new Error('fileUUID or file10MMd5 is undefined');
     }
 
-    async getPttUrl(peer: string, fileUUID?: string,timeout: number = 20000) {
+    async getPttUrl(peer: string, fileUUID?: string,timeout: number = 5000) {
         if (this.core.apis.PacketApi.packetStatus && fileUUID) {
             let appid = new NapProtoMsg(FileId).decode(Buffer.from(fileUUID.replaceAll('-', '+').replaceAll('_', '/'), 'base64')).appid;
             try {
@@ -107,7 +107,7 @@ export class NTQQFileApi {
         throw new Error('packet cant get ptt url');
     }
 
-    async getVideoUrlPacket(peer: string, fileUUID?: string,timeout: number = 20000) {
+    async getVideoUrlPacket(peer: string, fileUUID?: string,timeout: number = 5000) {
         if (this.core.apis.PacketApi.packetStatus && fileUUID) {
             let appid = new NapProtoMsg(FileId).decode(Buffer.from(fileUUID.replaceAll('-', '+').replaceAll('_', '/'), 'base64')).appid;
             try {

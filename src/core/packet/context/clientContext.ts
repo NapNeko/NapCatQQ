@@ -75,24 +75,24 @@ export class PacketClientContext {
 
     async sendOidbPacket<T extends boolean = false>(pkt: OidbPacket, rsp?: T, timeout?: number): Promise<T extends true ? Buffer : void> {
         const raw = await this._client.sendOidbPacket(pkt, rsp, timeout);
-        return (rsp ? Buffer.from(raw.hex_data, 'hex') : undefined) as T extends true ? Buffer : void;
+        return raw.data as T extends true ? Buffer : void;
     }
 
     private newClient(): IPacketClient {
         const prefer = this.napCore.config.packetBackend;
         let client: IPacketClient | null;
         switch (prefer) {
-        case 'native':
-            this.logger.info('使用指定的 NativePacketClient 作为后端');
-            client = new NativePacketClient(this.napCore, this.logger, this.logStack);
-            break;
-        case 'auto':
-        case undefined:
-            client = this.judgeClient();
-            break;
-        default:
-            this.logger.error(`未知的PacketBackend ${prefer}，请检查配置文件！`);
-            client = null;
+            case 'native':
+                this.logger.info('使用指定的 NativePacketClient 作为后端');
+                client = new NativePacketClient(this.napCore, this.logger, this.logStack);
+                break;
+            case 'auto':
+            case undefined:
+                client = this.judgeClient();
+                break;
+            default:
+                this.logger.error(`未知的PacketBackend ${prefer}，请检查配置文件！`);
+                client = null;
         }
         if (!client?.check()) {
             throw new Error('[Core] [Packet] 无可用的后端，NapCat.Packet将不会加载！');
