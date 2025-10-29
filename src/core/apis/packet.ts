@@ -1,5 +1,5 @@
 import * as os from 'os';
-import offset from '@/core/external/offset.json';
+import offset from '@/core/external/napi2native.json';
 import { InstanceContext, NapCatCore } from '@/core';
 import { LogWrapper } from '@/common/log';
 import { PacketClientSession } from '@/core/packet/clientSession';

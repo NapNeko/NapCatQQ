@@ -34,5 +34,5 @@ export class NapCoreContext {
         return this.core.configLoader.configData;
     }
 
-    sendSsoCmdReqByContend = (cmd: string, trace_id: string) => this.core.context.session.getMsgService().sendSsoCmdReqByContend(cmd, trace_id);
+    sendSsoCmdReqByContend = (cmd: string, data: Buffer) => this.core.context.session.getMsgService().sendSsoCmdReqByContend(cmd, data);
 }
