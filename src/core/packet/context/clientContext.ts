@@ -1,16 +1,7 @@
-import { IPacketClient } from '@/core/packet/client/baseClient';
 import { NativePacketClient } from '@/core/packet/client/nativeClient';
 import { OidbPacket } from '@/core/packet/transformer/base';
 import { PacketLogger } from '@/core/packet/context/loggerContext';
 import { NapCoreContext } from '@/core/packet/context/napCoreContext';
-
-type clientPriorityType = {
-    [key: number]: (napCore: NapCoreContext, logger: PacketLogger, logStack: LogStack) => IPacketClient;
-}
-
-const clientPriority: clientPriorityType = {
-    10: (napCore: NapCoreContext, logger: PacketLogger, logStack: LogStack) => new NativePacketClient(napCore, logger, logStack)
-};
 
 export class LogStack {
     private stack: string[] = [];
@@ -52,7 +43,7 @@ export class PacketClientContext {
     private readonly napCore: NapCoreContext;
     private readonly logger: PacketLogger;
     private readonly logStack: LogStack;
-    private readonly _client: IPacketClient;
+    private readonly _client: NativePacketClient;
 
     constructor(napCore: NapCoreContext, logger: PacketLogger) {
         this.napCore = napCore;
@@ -78,45 +69,12 @@ export class PacketClientContext {
         return raw.data as T extends true ? Buffer : void;
     }
 
-    private newClient(): IPacketClient {
-        const prefer = this.napCore.config.packetBackend;
-        let client: IPacketClient | null;
-        switch (prefer) {
-            case 'native':
-                this.logger.info('使用指定的 NativePacketClient 作为后端');
-                client = new NativePacketClient(this.napCore, this.logger, this.logStack);
-                break;
-            case 'auto':
-            case undefined:
-                client = this.judgeClient();
-                break;
-            default:
-                this.logger.error(`未知的PacketBackend ${prefer}，请检查配置文件！`);
-                client = null;
-        }
-        if (!client?.check()) {
-            throw new Error('[Core] [Packet] 无可用的后端，NapCat.Packet将不会加载！');
-        }
-        if (!client) {
-            throw new Error('[Core] [Packet] 后端异常，NapCat.Packet将不会加载！');
+    private newClient(): NativePacketClient {
+        this.logger.info('使用 NativePacketClient 作为后端');
+        const client = new NativePacketClient(this.napCore, this.logger, this.logStack);
+        if (!client.check()) {
+            throw new Error('[Core] [Packet] NativePacketClient 不可用，NapCat.Packet将不会加载！');
         }
         return client;
-    }
-
-    private judgeClient(): IPacketClient {
-        const sortedClients = Object.entries(clientPriority)
-            .map(([priority, clientFactory]) => {
-                const client = clientFactory(this.napCore, this.logger, this.logStack);
-                const score = +priority * +client.check();
-                return { client, score };
-            })
-            .filter(({ score }) => score > 0)
-            .sort((a, b) => b.score - a.score);
-        const selectedClient = sortedClients[0]?.client;
-        if (!selectedClient) {
-            throw new Error('[Core] [Packet] 无可用的后端，NapCat.Packet将不会加载！');
-        }
-        this.logger.info(`自动选择 ${selectedClient.constructor.name} 作为后端`);
-        return selectedClient;
     }
 }
