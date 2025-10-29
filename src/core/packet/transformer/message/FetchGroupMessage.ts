@@ -1,6 +1,6 @@
 import * as proto from '@/core/packet/transformer/proto';
 import { NapProtoMsg } from '@napneko/nap-proto-core';
-import { OidbPacket, PacketHexStrBuilder, PacketTransformer } from '@/core/packet/transformer/base';
+import { OidbPacket, PacketBufBuilder, PacketTransformer } from '@/core/packet/transformer/base';
 
 class FetchGroupMessage extends PacketTransformer<typeof proto.SsoGetGroupMsgResponse> {
     constructor() {
@@ -18,7 +18,7 @@ class FetchGroupMessage extends PacketTransformer<typeof proto.SsoGetGroupMsgRes
         });
         return {
             cmd: 'trpc.msg.register_proxy.RegisterProxy.SsoGetGroupMsg',
-            data: PacketHexStrBuilder(req)
+            data: PacketBufBuilder(req)
         };
     }
 
