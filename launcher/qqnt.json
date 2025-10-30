@@ -1,9 +1,9 @@
 {
   "name": "qq-chat",
-  "verHash": "c50d6326",
-  "version": "9.9.22-40768",
-  "linuxVersion": "3.2.20-40768",
-  "linuxVerHash": "ab90fdfa",
+  "verHash": "2c9d3f6c",
+  "version": "9.9.22-40990",
+  "linuxVersion": "3.2.20-40990",
+  "linuxVerHash": "ec800879",
   "private": true,
   "description": "QQ",
   "productName": "QQ",
@@ -17,7 +17,7 @@
     "qd": "externals/devtools/cli/index.js"
   },
   "main": "./loadNapCat.js",
-  "buildVersion": "40768",
+  "buildVersion": "40990",
   "isPureShell": true,
   "isByteCodeShell": true,
   "platform": "win32",
