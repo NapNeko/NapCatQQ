@@ -32,7 +32,7 @@ function getAddonPath(binaryPath: string): string {
     } else {
         throw new Error(`Unsupported platform: ${platformName} ${archName}`);
     }
-    return path.join(binaryPath, "./nodeffmpeg/", addonFileName);
+    return path.join(binaryPath, "./native/ffmpeg/", addonFileName);
 }
 
 /**

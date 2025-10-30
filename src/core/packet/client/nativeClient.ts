@@ -43,7 +43,7 @@ export class NativePacketClient {
             this.logStack.pushLogWarn(`NativePacketClient: 不支持的平台: ${platform}`);
             return false;
         }
-        const moehoo_path = path.join(dirname(fileURLToPath(import.meta.url)), './moehoo/napi2native.' + platform + '.node');
+        const moehoo_path = path.join(dirname(fileURLToPath(import.meta.url)), './native/napi2native/napi2native.' + platform + '.node');
         if (!fs.existsSync(moehoo_path)) {
             this.logStack.pushLogWarn(`NativePacketClient: 缺失运行时文件: ${moehoo_path}`);
             return false;
@@ -55,7 +55,7 @@ export class NativePacketClient {
         const platform = process.platform + '.' + process.arch;
         const isNewQQ = this.napcore.basicInfo.requireMinNTQQBuild("40824");
         if (isNewQQ) {
-            const moehoo_path = path.join(dirname(fileURLToPath(import.meta.url)), './moehoo/napi2native.' + platform + '.node');
+            const moehoo_path = path.join(dirname(fileURLToPath(import.meta.url)), './native/napi2native/napi2native.' + platform + '.node');
             process.dlopen(this.MoeHooExport, moehoo_path, constants.dlopen.RTLD_LAZY);
             this.MoeHooExport?.exports.initHook?.(send, recv);
             this.available = true;
