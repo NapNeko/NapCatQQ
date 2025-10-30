@@ -53,7 +53,7 @@ export class FFmpegAddonAdapter implements IFFmpegAdapter {
             this.addon = temp_addon.exports as FFmpeg;
             return this.addon !== null;
         } catch (error) {
-            console.error('[FFmpegAddonAdapter] Failed to load addon:', error);
+            console.log('[FFmpegAddonAdapter] Failed to load addon:', error);
             return false;
         }
     }
