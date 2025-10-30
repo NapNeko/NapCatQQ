@@ -20,9 +20,9 @@ function getAddonPath(binaryPath: string): string {
     const archName = arch();
 
     let addonFileName: string = process.platform + '.' + process.arch;
-    let addonPath = path.join(binaryPath, "./native/ffmpeg/", `${addonFileName}.node`);
-    if (existsSync(addonPath)) {
-        throw new Error(`Unsupported platform: ${platformName} ${archName}`);
+    let addonPath = path.join(binaryPath, "./native/ffmpeg/", `ffmpegAddon.${addonFileName}.node`);
+    if (!existsSync(addonPath)) {
+        throw new Error(`Unsupported platform: ${platformName} ${archName} - Addon not found at ${addonPath}`);
     }
     return addonPath;
 }
@@ -44,12 +44,8 @@ export class FFmpegAddonAdapter implements IFFmpegAdapter {
      */
     async isAvailable(): Promise<boolean> {
         try {
-            const addonPath = getAddonPath(this.binaryPath);
-            if (!existsSync(addonPath)) {
-                return false;
-            }
             let temp_addon = { exports: {} };
-            dlopen(temp_addon, addonPath);
+            dlopen(temp_addon, getAddonPath(this.binaryPath));
             this.addon = temp_addon.exports as FFmpeg;
             return this.addon !== null;
         } catch (error) {
