@@ -10,6 +10,7 @@ import { NodeIQQNTWrapperSession, WrapperNodeApi } from '@/core/wrapper';
 import { InitWebUi, WebUiConfig, webUiRuntimePort } from '@/webui';
 import { NapCatOneBot11Adapter } from '@/onebot';
 import { FFmpegService } from '@/common/ffmpeg';
+import { NativePacketHandler } from '@/core/packet/handler/client';
 
 //Framework ES入口文件
 export async function getWebUiUrl() {
@@ -37,7 +38,13 @@ export async function NCoreInitFramework(
     const logger = new LogWrapper(pathWrapper.logsPath);
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVersion());
-    
+    const nativePacketHandler = new NativePacketHandler({ logger }); // 初始化 NativePacketHandler 用于后续使用
+    nativePacketHandler.onAll((packet) => {
+        console.log('[Packet]', packet.uin, packet.cmd, packet.hex_data);
+    });
+    await nativePacketHandler.init(basicInfoWrapper.getFullQQVersion());
+    // 在 init 之后注册监听器
+
     // 初始化 FFmpeg 服务
     await FFmpegService.init(pathWrapper.binaryPath, logger);
     //直到登录成功后，执行下一步
@@ -65,7 +72,7 @@ export async function NCoreInitFramework(
     // 过早进入会导致addKernelMsgListener等Listener添加失败
     // await sleep(2500);
     // 初始化 NapCatFramework
-    const loaderObject = new NapCatFramework(wrapper, session, logger, loginService, selfInfo, basicInfoWrapper, pathWrapper);
+    const loaderObject = new NapCatFramework(wrapper, session, logger, loginService, selfInfo, basicInfoWrapper, pathWrapper, nativePacketHandler);
     await loaderObject.core.initCore();
 
     //启动WebUi
@@ -86,8 +93,10 @@ export class NapCatFramework {
         selfInfo: SelfInfo,
         basicInfoWrapper: QQBasicInfoWrapper,
         pathWrapper: NapCatPathWrapper,
+        packetHandler: NativePacketHandler,
     ) {
         this.context = {
+            packetHandler,
             workingEnv: NapCatCoreWorkingEnv.Framework,
             wrapper,
             session,

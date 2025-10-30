@@ -30,6 +30,7 @@ import os from 'node:os';
 import { NodeIKernelMsgListener, NodeIKernelProfileListener } from '@/core/listeners';
 import { proxiedListenerOf } from '@/common/proxy-handler';
 import { NTQQPacketApi } from './apis/packet';
+import { NativePacketHandler } from './packet/handler/client';
 export * from './wrapper';
 export * from './types';
 export * from './services';
@@ -258,6 +259,7 @@ export interface InstanceContext {
     readonly loginService: NodeIKernelLoginService;
     readonly basicInfoWrapper: QQBasicInfoWrapper;
     readonly pathWrapper: NapCatPathWrapper;
+    readonly packetHandler: NativePacketHandler;
 }
 
 export interface StableNTApiWrapper {
