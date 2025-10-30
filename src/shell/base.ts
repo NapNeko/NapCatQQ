@@ -31,7 +31,6 @@ import { WebUiDataRuntime } from '@/webui/src/helper/Data';
 import { napCatVersion } from '@/common/version';
 import { NodeIO3MiscListener } from '@/core/listeners/NodeIO3MiscListener';
 import { sleep } from '@/common/helper';
-import { downloadFFmpegIfNotExists } from '@/common/download-ffmpeg';
 import { FFmpegService } from '@/common/ffmpeg';
 import { connectToNamedPipe } from '@/shell/pipe';
 // NapCat Shell App ES 入口文件
@@ -313,16 +312,11 @@ export async function NCoreInitShell() {
     const pathWrapper = new NapCatPathWrapper();
     const logger = new LogWrapper(pathWrapper.logsPath);
     handleUncaughtExceptions(logger);
+    
+    // 初始化 FFmpeg 服务
+    await FFmpegService.init(pathWrapper.binaryPath, logger);
+    
     await connectToNamedPipe(logger).catch(e => logger.logError('命名管道连接失败', e));
-    if (!process.env['NAPCAT_DISABLE_FFMPEG_DOWNLOAD']) {
-        downloadFFmpegIfNotExists(logger).then(({ path, reset }) => {
-            if (reset && path) {
-                FFmpegService.setFfmpegPath(path, logger);
-            }
-        }).catch(e => {
-            logger.logError('[Ffmpeg] Error:', e);
-        });
-    }
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVersion());
 

@@ -82,6 +82,7 @@ const ShellBaseConfigPlugin: PluginOption[] = [
     // }),
     cp({
         targets: [
+            { src: './src/native/ffmpeg', dest: 'dist/nodeffmpeg', flatten: false },
             { src: './src/native/packet', dest: 'dist/moehoo', flatten: false },
             { src: './src/native/pty', dest: 'dist/pty', flatten: false },
             { src: './napcat.webui/dist/', dest: 'dist/static/', flatten: false },

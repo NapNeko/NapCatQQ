@@ -9,7 +9,6 @@ import { NodeIKernelLoginService } from '@/core/services';
 import { NodeIQQNTWrapperSession, WrapperNodeApi } from '@/core/wrapper';
 import { InitWebUi, WebUiConfig, webUiRuntimePort } from '@/webui';
 import { NapCatOneBot11Adapter } from '@/onebot';
-import { downloadFFmpegIfNotExists } from '@/common/download-ffmpeg';
 import { FFmpegService } from '@/common/ffmpeg';
 
 //Framework ES入口文件
@@ -38,15 +37,9 @@ export async function NCoreInitFramework(
     const logger = new LogWrapper(pathWrapper.logsPath);
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVersion());
-    if (!process.env['NAPCAT_DISABLE_FFMPEG_DOWNLOAD']) {
-        downloadFFmpegIfNotExists(logger).then(({ path, reset }) => {
-            if (reset && path) {
-                FFmpegService.setFfmpegPath(path, logger);
-            }
-        }).catch(e => {
-            logger.logError('[Ffmpeg] Error:', e);
-        });
-    }
+    
+    // 初始化 FFmpeg 服务
+    await FFmpegService.init(pathWrapper.binaryPath, logger);
     //直到登录成功后，执行下一步
     // const selfInfo = {
     //     uid: 'u_FUSS0_x06S_9Tf4na_WpUg',
