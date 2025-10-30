@@ -19,20 +19,12 @@ function getAddonPath(binaryPath: string): string {
     const platformName = platform();
     const archName = arch();
 
-    let addonFileName: string;
-
-    if (platformName === 'win32' && archName === 'x64') {
-        addonFileName = 'ffmpegAddon.win.x64.node';
-    } else if (platformName === 'linux' && archName === 'x64') {
-        addonFileName = 'ffmpegAddon.linux.x64.node';
-    } else if (platformName === 'linux' && archName === 'arm64') {
-        addonFileName = 'ffmpegAddon.linux.arm64.node';
-    } else if (platformName === 'darwin' && archName === 'arm64') {
-        addonFileName = 'ffmpegAddon.darwin.arm64.node';
-    } else {
+    let addonFileName: string = process.platform + '.' + process.arch;
+    let addonPath = path.join(binaryPath, "./native/ffmpeg/", `${addonFileName}.node`);
+    if (existsSync(addonPath)) {
         throw new Error(`Unsupported platform: ${platformName} ${archName}`);
     }
-    return path.join(binaryPath, "./native/ffmpeg/", addonFileName);
+    return addonPath;
 }
 
 /**
