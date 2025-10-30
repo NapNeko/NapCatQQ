@@ -102,7 +102,6 @@ export class NapCatOneBot11Adapter {
     async InitOneBot () {
         const selfInfo = this.core.selfInfo;
         const ob11Config = this.configLoader.configData;
-
         this.core.apis.UserApi.getUserDetailInfo(selfInfo.uid, false)
             .then(async (user) => {
                 selfInfo.nick = user.nick;
