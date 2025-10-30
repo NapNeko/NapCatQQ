@@ -67,11 +67,11 @@ export class WindowsPtyAgent {
         }
         if (this._useConpty) {
             if (!conptyNative) {
-                conptyNative = require_dlopen('./pty/' + process.platform + '.' + process.arch + '/conpty.node');
+                conptyNative = require_dlopen('./native/pty/' + process.platform + '.' + process.arch + '/conpty.node');
             }
         } else {
             if (!winptyNative) {
-                winptyNative = require_dlopen('./pty/' + process.platform + '.' + process.arch + '/pty.node');
+                winptyNative = require_dlopen('./native/pty/' + process.platform + '.' + process.arch + '/pty.node');
             }
         }
         this._ptyNative = this._useConpty ? conptyNative : winptyNative;
