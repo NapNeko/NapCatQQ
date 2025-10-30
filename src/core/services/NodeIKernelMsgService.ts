@@ -585,7 +585,7 @@ export interface NodeIKernelMsgService {
 
     prepareTempChat(args: unknown): unknown;
 
-    sendSsoCmdReqByContend(cmd: string, param: string): Promise<unknown>;
+    sendSsoCmdReqByContend(cmd: string, param: unknown): Promise<unknown>;
 
     getTempChatInfo(ChatType: number, Uid: string): Promise<TmpChatInfoApi>;
 

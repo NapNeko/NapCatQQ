@@ -1,6 +1,6 @@
 import * as proto from '@/core/packet/transformer/proto';
 import { NapProtoMsg } from '@napneko/nap-proto-core';
-import { OidbPacket, PacketHexStrBuilder, PacketTransformer } from '@/core/packet/transformer/base';
+import { OidbPacket, PacketBufBuilder, PacketTransformer } from '@/core/packet/transformer/base';
 
 class OidbBase extends PacketTransformer<typeof proto.OidbSvcTrpcTcpBase> {
     constructor() {
@@ -16,7 +16,7 @@ class OidbBase extends PacketTransformer<typeof proto.OidbSvcTrpcTcpBase> {
         });
         return {
             cmd: `OidbSvcTrpcTcp.0x${cmd.toString(16).toUpperCase()}_${subCmd}`,
-            data: PacketHexStrBuilder(data),
+            data: PacketBufBuilder(data),
         };
     }
 

@@ -1,4 +1,4 @@
-import { PacketHexStr } from '@/core/packet/transformer/base';
+import { PacketBuf } from '@/core/packet/transformer/base';
 import { OneBotAction } from '@/onebot/action/OneBotAction';
 import { ActionName } from '@/onebot/action/router';
 import { ProtoBuf, ProtoBufBase, PBUint32, PBString } from 'napcat.protobuf';
@@ -39,8 +39,8 @@ export class GetUnidirectionalFriendList extends OneBotAction<void, Friend[]> {
             bytes_cookies: ""
         };
         const packed_data = await this.pack_data(JSON.stringify(req_json));
-        const data = Buffer.from(packed_data).toString('hex');
-        const rsq = { cmd: 'MQUpdateSvc_com_qq_ti.web.OidbSvc.0xe17_0', data: data as PacketHexStr };
+        const data = Buffer.from(packed_data);
+        const rsq = { cmd: 'MQUpdateSvc_com_qq_ti.web.OidbSvc.0xe17_0', data: data as PacketBuf };
         const rsp_data = await this.core.apis.PacketApi.pkt.operation.sendPacket(rsq, true);
         const block_json = ProtoBuf(class extends ProtoBufBase { data = PBString(4); }).decode(rsp_data);
         const block_list: Block[] = JSON.parse(block_json.data).rpt_block_list;

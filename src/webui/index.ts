@@ -93,21 +93,18 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
     if (config.token === 'napcat' || !config.token) {
         const randomToken = getRandomToken(8);
         await WebUiConfig.UpdateWebUIConfig({ token: randomToken });
-        logger.log(`[NapCat] [WebUi] 🔐 检测到默认密码，已自动更新为安全密码`);
+        logger.log(`[NapCat] [WebUi] 检测到默认密码，已自动更新为安全密码`);
         
         // 存储token到全局变量，等待QQ登录成功后发送
         setPendingTokenToSend(randomToken);
-        logger.log(`[NapCat] [WebUi] 📤 新密码将在QQ登录成功后发送给用户`);
+        logger.log(`[NapCat] [WebUi] 新密码将在QQ登录成功后发送给用户`);
         
         // 重新获取更新后的配置
         config = await WebUiConfig.GetWebUIConfig();
-    } else {
-        logger.log(`[NapCat] [WebUi] ✅ 当前使用安全密码`);
     }
 
     // 存储启动时的初始token用于鉴权
     setInitialWebUiToken(config.token);
-    logger.log(`[NapCat] [WebUi] 🔑 已缓存启动时的token用于鉴权，运行时手动修改配置文件密码将不会生效`);
 
     // 检查是否禁用WebUI
     if (config.disableWebUI) {
@@ -216,7 +213,7 @@ export async function InitWebUi(logger: LogWrapper, pathWrapper: NapCatPathWrapp
     // ------------启动服务------------
     server.listen(port, host, async () => {
         let searchParams = { token: token };
-        logger.log(`[NapCat] [WebUi] 🔑 token=${token}`);
+        logger.log(`[NapCat] [WebUi] WebUi Token: ${token}`);
         logger.log(
             `[NapCat] [WebUi] WebUi User Panel Url: ${createUrl('127.0.0.1', port.toString(), '/webui', searchParams)}`
         );

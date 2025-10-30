@@ -31,8 +31,7 @@ const UniversalBaseConfigPlugin: PluginOption[] = [
         targets: [
             { src: './manifest.json', dest: 'dist' },
             { src: './src/core/external/napcat.json', dest: 'dist/config/' },
-            { src: './src/native/packet', dest: 'dist/moehoo', flatten: false },
-            { src: './src/native/pty', dest: 'dist/pty', flatten: false },
+            { src: './src/native/', dest: 'dist/native', flatten: false },
             { src: './napcat.webui/dist/', dest: 'dist/static/', flatten: false },
             { src: './src/framework/liteloader.cjs', dest: 'dist' },
             { src: './src/framework/napcat.cjs', dest: 'dist' },
@@ -57,10 +56,9 @@ const FrameworkBaseConfigPlugin: PluginOption[] = [
     // }),
     cp({
         targets: [
+            { src: './src/native/', dest: 'dist/native', flatten: false },
             { src: './manifest.json', dest: 'dist' },
             { src: './src/core/external/napcat.json', dest: 'dist/config/' },
-            { src: './src/native/packet', dest: 'dist/moehoo', flatten: false },
-            { src: './src/native/pty', dest: 'dist/pty', flatten: false },
             { src: './napcat.webui/dist/', dest: 'dist/static/', flatten: false },
             { src: './src/framework/liteloader.cjs', dest: 'dist' },
             { src: './src/framework/napcat.cjs', dest: 'dist' },
@@ -82,8 +80,7 @@ const ShellBaseConfigPlugin: PluginOption[] = [
     // }),
     cp({
         targets: [
-            { src: './src/native/packet', dest: 'dist/moehoo', flatten: false },
-            { src: './src/native/pty', dest: 'dist/pty', flatten: false },
+            { src: './src/native/', dest: 'dist/native', flatten: false },
             { src: './napcat.webui/dist/', dest: 'dist/static/', flatten: false },
             { src: './src/core/external/napcat.json', dest: 'dist/config/' },
             { src: './package.json', dest: 'dist' },

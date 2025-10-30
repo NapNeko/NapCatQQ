@@ -39,7 +39,7 @@ export class QQBasicInfoWrapper {
 
     //基础函数
     getQQBuildStr() {
-        return this.isQuickUpdate ? this.QQVersionConfig?.buildId : this.QQPackageInfo?.buildVersion;
+        return this.QQVersionConfig?.curVersion.split('-')[1] ?? this.QQPackageInfo?.buildVersion;
     }
 
     getFullQQVersion() {

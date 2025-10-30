@@ -122,28 +122,28 @@ export class PacketOperationContext {
         return `https://${res.download.info.domain}${res.download.info.urlPath}${res.download.rKeyParam}`;
     }
 
-    async GetPttUrl(selfUid: string, node: NapProtoEncodeStructType<typeof IndexNode>,timeout: number = 20000) {
+    async GetPttUrl(selfUid: string, node: NapProtoEncodeStructType<typeof IndexNode>, timeout?: number) {
         const req = trans.DownloadPtt.build(selfUid, node);
         const resp = await this.context.client.sendOidbPacket(req, true, timeout);
         const res = trans.DownloadPtt.parse(resp);
         return `https://${res.download.info.domain}${res.download.info.urlPath}${res.download.rKeyParam}`;
     }
 
-    async GetVideoUrl(selfUid: string, node: NapProtoEncodeStructType<typeof IndexNode>, timeout: number = 20000) {
+    async GetVideoUrl(selfUid: string, node: NapProtoEncodeStructType<typeof IndexNode>, timeout?: number) {
         const req = trans.DownloadVideo.build(selfUid, node);
         const resp = await this.context.client.sendOidbPacket(req, true, timeout);
         const res = trans.DownloadVideo.parse(resp);
         return `https://${res.download.info.domain}${res.download.info.urlPath}${res.download.rKeyParam}`;
     }
 
-    async GetGroupImageUrl(groupUin: number, node: NapProtoEncodeStructType<typeof IndexNode>, timeout: number = 20000) {
+    async GetGroupImageUrl(groupUin: number, node: NapProtoEncodeStructType<typeof IndexNode>, timeout?: number) {
         const req = trans.DownloadGroupImage.build(groupUin, node);
         const resp = await this.context.client.sendOidbPacket(req, true, timeout);
         const res = trans.DownloadImage.parse(resp);
         return `https://${res.download.info.domain}${res.download.info.urlPath}${res.download.rKeyParam}`;
     }
 
-    async GetGroupPttUrl(groupUin: number, node: NapProtoEncodeStructType<typeof IndexNode>, timeout: number = 20000) {
+    async GetGroupPttUrl(groupUin: number, node: NapProtoEncodeStructType<typeof IndexNode>, timeout?: number) {
         const req = trans.DownloadGroupPtt.build(groupUin, node);
         const resp = await this.context.client.sendOidbPacket(req, true, timeout);
         const res = trans.DownloadImage.parse(resp);
@@ -243,14 +243,14 @@ export class PacketOperationContext {
         return res.rename.retCode;
     }
 
-    async GetGroupFileUrl(groupUin: number, fileUUID: string,timeout: number = 20000) {
+    async GetGroupFileUrl(groupUin: number, fileUUID: string, timeout?: number) {
         const req = trans.DownloadGroupFile.build(groupUin, fileUUID);
         const resp = await this.context.client.sendOidbPacket(req, true, timeout);
         const res = trans.DownloadGroupFile.parse(resp);
         return `https://${res.download.downloadDns}/ftn_handler/${Buffer.from(res.download.downloadUrl).toString('hex')}/?fname=`;
     }
 
-    async GetPrivateFileUrl(self_id: string, fileUUID: string, md5: string, timeout: number = 20000) {
+    async GetPrivateFileUrl(self_id: string, fileUUID: string, md5: string, timeout?: number) {
         const req = trans.DownloadPrivateFile.build(self_id, fileUUID, md5);
         const resp = await this.context.client.sendOidbPacket(req, true, timeout);
         const res = trans.DownloadPrivateFile.parse(resp);

@@ -49,7 +49,6 @@ export class NTQQGroupApi {
     async initApi() {
         this.initCache().then().catch(e => this.context.logger.logError(e));
     }
-
     async createGrayTip(groupCode: string, tip: string) {
         return this.context.session.getMsgService().addLocalJsonGrayTipMsg(
             {

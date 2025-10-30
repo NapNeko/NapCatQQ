@@ -1,6 +1,6 @@
 import * as proto from '@/core/packet/transformer/proto';
 import { NapProtoMsg } from '@napneko/nap-proto-core';
-import { OidbPacket, PacketHexStrBuilder, PacketTransformer } from '@/core/packet/transformer/base';
+import { OidbPacket, PacketBufBuilder, PacketTransformer } from '@/core/packet/transformer/base';
 
 class DownloadForwardMsg extends PacketTransformer<typeof proto.RecvLongMsgResp> {
     constructor() {
@@ -25,7 +25,7 @@ class DownloadForwardMsg extends PacketTransformer<typeof proto.RecvLongMsgResp>
         });
         return {
             cmd: 'trpc.group.long_msg_interface.MsgService.SsoRecvLongMsg',
-            data: PacketHexStrBuilder(req)
+            data: PacketBufBuilder(req)
         };
     }
 

@@ -1,6 +1,6 @@
 import * as proto from '@/core/packet/transformer/proto';
 import { NapProtoMsg } from '@napneko/nap-proto-core';
-import { OidbPacket, PacketHexStrBuilder, PacketTransformer } from '@/core/packet/transformer/base';
+import { OidbPacket, PacketBufBuilder, PacketTransformer } from '@/core/packet/transformer/base';
 import { MiniAppReqParams } from '@/core/packet/entities/miniApp';
 
 class GetMiniAppAdaptShareInfo extends PacketTransformer<typeof proto.MiniAppAdaptShareInfoResp> {
@@ -41,7 +41,7 @@ class GetMiniAppAdaptShareInfo extends PacketTransformer<typeof proto.MiniAppAda
         });
         return {
             cmd: 'LightAppSvc.mini_app_share.AdaptShareInfo',
-            data: PacketHexStrBuilder(data)
+            data: PacketBufBuilder(data)
         };
     }
 
