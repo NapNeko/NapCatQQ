@@ -141,6 +141,8 @@ export interface NodeQQNTWrapperUtil {
 }
 
 export interface NodeIQQNTWrapperSession {
+
+    new(): NodeIQQNTWrapperSession;
     create(): NodeIQQNTWrapperSession;
 
     init(
