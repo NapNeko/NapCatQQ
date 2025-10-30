@@ -3,7 +3,7 @@ import { fileURLToPath } from 'url';
 import fs from 'fs';
 import { constants } from 'node:os';
 import { LogWrapper } from '@/common/log';
-import offset from '@/core/external/offset.json';
+import offset from '@/core/external/packet.json';
 interface OffsetType {
     [key: string]: {
         recv: string;
