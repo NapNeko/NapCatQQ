@@ -39,9 +39,9 @@ export async function NCoreInitFramework(
     const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVersion());
     const nativePacketHandler = new NativePacketHandler({ logger }); // 初始化 NativePacketHandler 用于后续使用
-    nativePacketHandler.onAll((packet) => {
-        console.log('[Packet]', packet.uin, packet.cmd, packet.hex_data);
-    });
+    // nativePacketHandler.onAll((packet) => {
+    //     console.log('[Packet]', packet.uin, packet.cmd, packet.hex_data);
+    // });
     await nativePacketHandler.init(basicInfoWrapper.getFullQQVersion());
     // 在 init 之后注册监听器
 

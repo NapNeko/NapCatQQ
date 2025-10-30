@@ -322,9 +322,9 @@ export async function NCoreInitShell() {
     const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVersion());
     const nativePacketHandler = new NativePacketHandler({ logger }); // 初始化 NativePacketHandler 用于后续使用
 
-    nativePacketHandler.onAll((packet) => {
-        console.log('[Packet]', packet.uin, packet.cmd, packet.hex_data);
-    });
+    // nativePacketHandler.onAll((packet) => {
+    //     console.log('[Packet]', packet.uin, packet.cmd, packet.hex_data);
+    // });
     await nativePacketHandler.init(basicInfoWrapper.getFullQQVersion());
 
     const o3Service = wrapper.NodeIO3MiscService.get();
