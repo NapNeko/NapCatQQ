@@ -129,7 +129,7 @@ export class FFmpegAddonAdapter implements IFFmpegAdapter {
      */
     async extractThumbnail(videoPath: string, thumbnailPath: string): Promise<void> {
         const addon = this.ensureAddon();
-        const info = await addon.getVideoInfo(videoPath, 'bmp24');
+        const info = await addon.getVideoInfo(videoPath);
 
         // 将缩略图写入文件
         await writeFile(thumbnailPath, info.image);
