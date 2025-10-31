@@ -139,10 +139,20 @@ export interface NodeQQNTWrapperUtil {
 
     isNull(): unknown;
 }
-
+export interface NodeIQQNTStartupSessionWrapper {
+    create(): NodeIQQNTStartupSessionWrapper;
+    stop(): void;
+    start(): void;
+    createWithModuleList(uk: unknown): unknown;
+    getSessionIdList(): unknown;
+}
 export interface NodeIQQNTWrapperSession {
+    getNTWrapperSession(str: string): NodeIQQNTWrapperSession;
+
+    get(): NodeIQQNTWrapperSession;
 
     new(): NodeIQQNTWrapperSession;
+
     create(): NodeIQQNTWrapperSession;
 
     init(
@@ -271,6 +281,7 @@ export interface WrapperNodeApi {
     NodeIO3MiscService: NodeIO3MiscService;
     NodeQQNTWrapperUtil: NodeQQNTWrapperUtil;
     NodeIQQNTWrapperSession: NodeIQQNTWrapperSession;
+    NodeIQQNTStartupSessionWrapper: NodeIQQNTStartupSessionWrapper
     NodeIQQNTWrapperEngine: NodeIQQNTWrapperEngine;
     NodeIKernelLoginService: NodeIKernelLoginService;
 

@@ -126,7 +126,11 @@ export class OneBotGroupApi {
         }
         return undefined;
     }
-
+    async registerParseGroupReactEvent() {
+        this.obContext.core.context.packetHandler.onCmd('trpc.msg.olpush.OlPushService.MsgPush', async (packet) => {
+            console.log(packet.seq, packet.hex_data);
+        });
+    }
     async parsePaiYiPai(msg: RawMessage, jsonStr: string) {
         const json = JSON.parse(jsonStr);
         //判断业务类型
