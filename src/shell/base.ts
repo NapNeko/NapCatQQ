@@ -10,6 +10,7 @@ import {
     loadQQWrapper,
     NapCatCore,
     NapCatCoreWorkingEnv,
+    NodeIQQNTStartupSessionWrapper,
     NodeIQQNTWrapperEngine,
     NodeIQQNTWrapperSession,
     PlatformType,
@@ -242,7 +243,8 @@ async function handleLoginInner(context: { isLogined: boolean }, logger: LogWrap
 
 async function initializeSession(
     session: NodeIQQNTWrapperSession,
-    sessionConfig: WrapperSessionInitConfig
+    sessionConfig: WrapperSessionInitConfig,
+    startupSession: NodeIQQNTStartupSessionWrapper | null
 ) {
     return new Promise<void>((resolve, reject) => {
         const sessionListener = new NodeIKernelSessionListener();
@@ -259,13 +261,17 @@ async function initializeSession(
             new NodeIDispatcherAdapter(),
             sessionListener,
         );
-        try {
-            session.startNT(0);
-        } catch {
+        if (startupSession) {
+            startupSession.start();
+        } else {
             try {
-                session.startNT();
-            } catch (e: unknown) {
-                reject(new Error('init failed ' + (e as Error).message));
+                session.startNT(0);
+            } catch {
+                try {
+                    session.startNT();
+                } catch (e: unknown) {
+                    reject(new Error('init failed ' + (e as Error).message));
+                }
             }
         }
     });
@@ -335,8 +341,17 @@ export async function NCoreInitShell() {
 
     const engine = wrapper.NodeIQQNTWrapperEngine.get();
     const loginService = wrapper.NodeIKernelLoginService.get();
-    const session = new wrapper.NodeIQQNTWrapperSession();
-
+    let session: NodeIQQNTWrapperSession;
+    let startupSession: NodeIQQNTStartupSessionWrapper | null = null;
+    try {
+        //session = new wrapper.NodeIQQNTWrapperSession();
+        startupSession = wrapper.NodeIQQNTStartupSessionWrapper.create();
+        // data.start();
+        session = wrapper.NodeIQQNTWrapperSession.getNTWrapperSession('nt_1');
+    } catch (e: unknown) {
+        session = wrapper.NodeIQQNTWrapperSession.create();
+        console.log('Error creating session:', e);
+    }
     const [dataPath, dataPathGlobal] = getDataPaths(wrapper);
     const systemPlatform = getPlatformType();
 
@@ -370,7 +385,7 @@ export async function NCoreInitShell() {
         dataPath,
     );
 
-    await initializeSession(session, sessionConfig);
+    await initializeSession(session, sessionConfig, startupSession);
 
     const accountDataPath = path.resolve(dataPath, './NapCat/data');
     //判断dataPath是否为根目录 或者 D:/ 之类的盘目录
