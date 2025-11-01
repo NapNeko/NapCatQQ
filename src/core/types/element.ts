@@ -311,6 +311,10 @@ export interface PttElement {
     voiceType: number;
     waveAmplitudes: number[];
     autoConvertText: number;
+    storeID: number;
+    otherBusinessInfo: {
+        aiVoiceType: number;
+    };
 }
 
 export type SendRecommendedMsgElement = SendElementBase<ElementType.RECOMMENDEDMSG> & ElementBase<'recommendedMsgElement'>;
@@ -349,7 +353,7 @@ export type SendPicElement = SendElementBase<ElementType.PIC> & ElementBase<'pic
 
 export type SendPttElement = SendElementBase<ElementType.PTT> & ElementBase<'pttElement', {
     pttElement: ['fileName', 'filePath', 'md5HexStr', 'fileSize', 'duration', 'formatType', 'voiceType',
-        'voiceChangeType', 'canConvert2Text', 'waveAmplitudes', 'fileSubId', 'playState', 'autoConvertText']
+        'voiceChangeType', 'canConvert2Text', 'waveAmplitudes', 'fileSubId', 'playState', 'autoConvertText', 'storeID', 'otherBusinessInfo']
 }>;
 
 export type SendFileElement = SendElementBase<ElementType.FILE> & ElementBase<'fileElement'>;
