@@ -344,13 +344,16 @@ export async function NCoreInitShell() {
     let session: NodeIQQNTWrapperSession;
     let startupSession: NodeIQQNTStartupSessionWrapper | null = null;
     try {
-        //session = new wrapper.NodeIQQNTWrapperSession();
         startupSession = wrapper.NodeIQQNTStartupSessionWrapper.create();
-        // data.start();
         session = wrapper.NodeIQQNTWrapperSession.getNTWrapperSession('nt_1');
     } catch (e: unknown) {
-        session = wrapper.NodeIQQNTWrapperSession.create();
-        console.log('Error creating session:', e);
+        try {
+            session = wrapper.NodeIQQNTWrapperSession.create();
+        } catch (error) {
+            logger.logError('创建 StartupSession 失败', e);
+            logger.logError('创建 Session 失败', error);
+            throw error;
+        }
     }
     const [dataPath, dataPathGlobal] = getDataPaths(wrapper);
     const systemPlatform = getPlatformType();
