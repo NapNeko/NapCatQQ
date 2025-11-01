@@ -30,7 +30,8 @@ async function handleWavFile(
 ): Promise<{ input: Buffer; sampleRate: number }> {
     const { fmt } = getWavFileInfo(file);
     if (!ALLOW_SAMPLE_RATE.includes(fmt.sampleRate)) {
-        return { input: await FFmpegService.convert(filePath, pcmPath), sampleRate: 24000 };
+        const result = await FFmpegService.convert(filePath, pcmPath);
+        return { input: await fsPromise.readFile(pcmPath), sampleRate: result.sampleRate };
     }
     return { input: file, sampleRate: fmt.sampleRate };
 }
@@ -42,9 +43,18 @@ export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: Log
         if (!isSilk(file)) {
             logger.log(`语音文件${filePath}需要转换成silk`);
             const pcmPath = `${pttPath}.pcm`;
-            const { input, sampleRate } = isWav(file)
-                ? await handleWavFile(file, filePath, pcmPath)
-                : { input: await FFmpegService.convert(filePath, pcmPath), sampleRate: 24000 };
+            // const { input, sampleRate } = isWav(file) ? await handleWavFile(file, filePath, pcmPath): { input: await FFmpegService.convert(filePath, pcmPath) ? await fsPromise.readFile(pcmPath) : Buffer.alloc(0), sampleRate: 24000 };
+            let input: Buffer;
+            let sampleRate: number;
+            if (isWav(file)) {
+                const result = await handleWavFile(file, filePath, pcmPath);
+                input = result.input;
+                sampleRate = result.sampleRate;
+            } else {
+                const result = await FFmpegService.convert(filePath, pcmPath);
+                input = await fsPromise.readFile(pcmPath);
+                sampleRate = result.sampleRate;
+            }
             const silk = await runTask<EncodeArgs, EncodeResult>(getWorkerPath(), { input: input, sampleRate: sampleRate });
             fsPromise.unlink(pcmPath).catch((e) => logger.logError('删除临时文件失败', pcmPath, e));
             await fsPromise.writeFile(pttPath, Buffer.from(silk.data));
@@ -69,7 +79,7 @@ export async function encodeSilk(filePath: string, TEMP_DIR: string, logger: Log
             };
         }
     } catch (error: unknown) {
-        logger.logError('convert silk failed', (error as Error).stack);
+        logger.logError('convert silk failed', error);
         return {};
     }
 }

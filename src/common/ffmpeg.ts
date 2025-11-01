@@ -93,7 +93,7 @@ export class FFmpegService {
     /**
      * 转换为 PCM 格式
      */
-    public static async convert(filePath: string, pcmPath: string): Promise<Buffer> {
+    public static async convert(filePath: string, pcmPath: string): Promise<{ result: boolean, sampleRate: number }> {
         const adapter = await this.getAdapter();
         return adapter.convertToPCM(filePath, pcmPath);
     }

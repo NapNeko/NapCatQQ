@@ -49,7 +49,7 @@ export interface IFFmpegAdapter {
      * @param pcmPath 输出 PCM 文件路径
      * @returns PCM 数据 Buffer
      */
-    convertToPCM(filePath: string, pcmPath: string): Promise<Buffer>;
+    convertToPCM(filePath: string, pcmPath: string): Promise<{ result: boolean, sampleRate: number }>;
 
     /**
      * 转换音频文件

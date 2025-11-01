@@ -67,5 +67,5 @@ export interface FFmpeg {
     /**
      * Decode audio file to raw PCM data
      */
-    decodeAudioToPCM(filePath: string): Promise<AudioPCMResult>;
+    decodeAudioToPCM(filePath: string, pcmPath: string, sampleRate?: number): Promise<{ result: boolean, sampleRate: number }>;
 }
