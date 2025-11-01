@@ -1182,7 +1182,7 @@ export class OneBotMsgApi {
             }, returnMsg.msgId);
             return returnMsg;
         } catch (error) {
-            throw new Error((error as Error).message);
+            throw error;
         } finally {
             cleanTaskQueue.addFiles(deleteAfterSentFiles, timeout);
             // setTimeout(async () => {
