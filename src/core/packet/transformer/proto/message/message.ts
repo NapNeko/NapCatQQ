@@ -74,6 +74,36 @@ export const GroupChange = {
     field7: ProtoField(7, ScalarType.BYTES, true),
 };
 
+// Group Reaction Related
+export const GroupReactionDataInnerDataTarget = {
+    seq: ProtoField(1, ScalarType.UINT64, true),
+};
+
+export const GroupReactionDataContent = {
+    code: ProtoField(1, ScalarType.STRING, true),
+    count: ProtoField(3, ScalarType.UINT32, true),
+    operatorUid: ProtoField(4, ScalarType.STRING, true),
+    type: ProtoField(5, ScalarType.UINT32, true),
+};
+
+export const GroupReactionDataInnerData = {
+    groupReactionTarget: ProtoField(2, () => GroupReactionDataInnerDataTarget, true),
+    groupReactionDataContent: ProtoField(3, () => GroupReactionDataContent, true),
+};
+export const GroupReactionDataInner = {
+    data: ProtoField(1, () => GroupReactionDataInnerData, true),
+};
+export const GroupReactionData = {
+    data: ProtoField(1, () => GroupReactionDataInner, true),
+};
+
+export const GroupReactNotify = {
+    groupUin: ProtoField(4, ScalarType.UINT64, true),
+    field13: ProtoField(13, ScalarType.UINT32, true),
+    groupReactionData: ProtoField(44, () => GroupReactionData, true),
+};
+
+// Group Invite Related
 export const GroupInvite = {
     groupUin: ProtoField(1, ScalarType.UINT32),
     field2: ProtoField(2, ScalarType.UINT32),

@@ -24,6 +24,8 @@ import { OB11GroupUploadNoticeEvent } from '../event/notice/OB11GroupUploadNotic
 import { OB11GroupNameEvent } from '../event/notice/OB11GroupNameEvent';
 import { FileNapCatOneBotUUID } from '@/common/file-uuid';
 import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
+import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { GroupReactNotify, PushMsg } from '@/core/packet/transformer/proto';
 
 export class OneBotGroupApi {
     obContext: NapCatOneBot11Adapter;
@@ -68,6 +70,10 @@ export class OneBotGroupApi {
         groupCode: string,
         grayTipElement: GrayTipElement
     ) {
+        if (this.core.apis.PacketApi.packetStatus === true) {
+            return;
+            //Raw包解析支持时禁用NT解析
+        }
         const emojiLikeData = new fastXmlParser.XMLParser({
             ignoreAttributes: false,
             attributeNamePrefix: '',
@@ -76,7 +82,7 @@ export class OneBotGroupApi {
         const senderUin = emojiLikeData.gtip.qq.jp;
         const msgSeq = emojiLikeData.gtip.url.msgseq;
         const emojiId = emojiLikeData.gtip.face.id;
-        return await this.createGroupEmojiLikeEvent(groupCode, senderUin, msgSeq, emojiId);
+        return await this.createGroupEmojiLikeEvent(groupCode, senderUin, msgSeq, emojiId, true, 1);
     }
 
     async createGroupEmojiLikeEvent(
@@ -84,6 +90,8 @@ export class OneBotGroupApi {
         senderUin: string,
         msgSeq: string,
         emojiId: string,
+        isAdd: boolean = true,
+        count: number = 1,
     ) {
         const peer = {
             chatType: ChatType.KCHATTYPEGROUP,
@@ -106,8 +114,9 @@ export class OneBotGroupApi {
             MessageUnique.getShortIdByMsgId(replyMsg.msgId)!,
             [{
                 emoji_id: emojiId,
-                count: 1,
+                count: count,
             }],
+            isAdd
         );
     }
 
@@ -128,7 +137,36 @@ export class OneBotGroupApi {
     }
     async registerParseGroupReactEvent() {
         this.obContext.core.context.packetHandler.onCmd('trpc.msg.olpush.OlPushService.MsgPush', async (packet) => {
-            console.log(packet.seq, packet.hex_data);
+            let data = new NapProtoMsg(PushMsg).decode(Buffer.from(packet.hex_data, 'hex'));
+            if (data.message.contentHead.type === 732 && data.message.contentHead.subType === 16) {
+                let pbNotify = data.message.body?.msgContent?.slice(7);
+                if (!pbNotify) {
+                    return;
+                }
+                // 开始解析Notify
+                const notify = new NapProtoMsg(GroupReactNotify).decode(pbNotify);
+                if ((notify.field13 ?? 0) === 35) {
+                    // Group React Notify
+                    const groupCode = notify.groupUin?.toString() ?? '';
+                    const operatorUid = notify.groupReactionData?.data?.data?.groupReactionDataContent?.operatorUid ?? '';
+                    const type = notify.groupReactionData?.data?.data?.groupReactionDataContent?.type ?? 0;
+                    const seq = notify.groupReactionData?.data?.data?.groupReactionTarget?.seq?.toString() ?? '';
+                    const code = notify.groupReactionData?.data?.data?.groupReactionDataContent?.code ?? '';
+                    //const count = notify.groupReactionData?.data?.data?.groupReactionDataContent?.count ?? 0;
+                    const senderUin = await this.core.apis.UserApi.getUinByUidV2(operatorUid);
+                    const event = await this.createGroupEmojiLikeEvent(
+                        groupCode,
+                        senderUin,
+                        seq,
+                        code,
+                        type === 1,
+                        1
+                    );
+                    if (event) {
+                        this.obContext.networkManager.emitEvent(event);
+                    }
+                }
+            }
         });
     }
     async parsePaiYiPai(msg: RawMessage, jsonStr: string) {
