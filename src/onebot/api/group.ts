@@ -111,12 +111,13 @@ export class OneBotGroupApi {
             this.core,
             parseInt(groupCode),
             parseInt(senderUin),
-            MessageUnique.getShortIdByMsgId(replyMsg.msgId)!,
+            MessageUnique.createUniqueMsgId({ chatType: ChatType.KCHATTYPEGROUP, guildId: '', peerUid: groupCode }, replyMsg.msgId),
             [{
                 emoji_id: emojiId,
                 count: count,
             }],
-            isAdd
+            isAdd,
+            msgSeq
         );
     }
 

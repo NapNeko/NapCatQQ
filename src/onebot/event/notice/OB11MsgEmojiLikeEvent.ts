@@ -11,8 +11,9 @@ export class OB11GroupMsgEmojiLikeEvent extends OB11GroupNoticeEvent {
     message_id: number;
     likes: MsgEmojiLike[];
     is_add: boolean;
+    message_seq?: string;
 
-    constructor(core: NapCatCore, groupId: number, userId: number, messageId: number, likes: MsgEmojiLike[], isAdd: boolean) {
+    constructor(core: NapCatCore, groupId: number, userId: number, messageId: number, likes: MsgEmojiLike[], isAdd: boolean, messageSeq?: string) {
         super(core, groupId, userId);
         this.group_id = groupId;
         this.user_id = userId;  // 可为空，表示是对别人的消息操作，如果是对bot自己的消息则不为空
