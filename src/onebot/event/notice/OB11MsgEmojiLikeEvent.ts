@@ -10,12 +10,14 @@ export class OB11GroupMsgEmojiLikeEvent extends OB11GroupNoticeEvent {
     notice_type = 'group_msg_emoji_like';
     message_id: number;
     likes: MsgEmojiLike[];
+    is_add: boolean;
 
-    constructor(core: NapCatCore, groupId: number, userId: number, messageId: number, likes: MsgEmojiLike[]) {
+    constructor(core: NapCatCore, groupId: number, userId: number, messageId: number, likes: MsgEmojiLike[], isAdd: boolean) {
         super(core, groupId, userId);
         this.group_id = groupId;
         this.user_id = userId;  // 可为空，表示是对别人的消息操作，如果是对bot自己的消息则不为空
         this.message_id = messageId;
         this.likes = likes;
+        this.is_add = isAdd;
     }
 }
