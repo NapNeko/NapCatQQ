@@ -88,14 +88,11 @@ export class FFmpegAddonAdapter implements IFFmpegAdapter {
     /**
      * 转换为 PCM
      */
-    async convertToPCM(filePath: string, pcmPath: string): Promise<Buffer> {
+    async convertToPCM(filePath: string, pcmPath: string): Promise<{ result: boolean, sampleRate: number }> {
         const addon = this.ensureAddon();
-        const result = await addon.decodeAudioToPCM(filePath);
+        const result = await addon.decodeAudioToPCM(filePath, pcmPath, 24000);
 
-        // 写入文件
-        await writeFile(pcmPath, result.pcm);
-
-        return result.pcm;
+        return result;
     }
 
     /**

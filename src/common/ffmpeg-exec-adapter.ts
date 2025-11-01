@@ -157,7 +157,7 @@ export class FFmpegExecAdapter implements IFFmpegAdapter {
     /**
      * 转换为 PCM
      */
-    async convertToPCM(filePath: string, pcmPath: string): Promise<Buffer> {
+    async convertToPCM(filePath: string, pcmPath: string): Promise<{ result: boolean, sampleRate: number }> {
         try {
             ensureDirExists(pcmPath);
 
@@ -174,7 +174,7 @@ export class FFmpegExecAdapter implements IFFmpegAdapter {
                 throw new Error('转换PCM失败，输出文件不存在');
             }
 
-            return readFileSync(pcmPath);
+            return { result: true, sampleRate: 24000 };
         } catch (error: any) {
             throw new Error(`FFmpeg处理转换出错: ${error.message}`);
         }
