@@ -6,85 +6,85 @@ import crypto from 'node:crypto';
 import { PacketMsgPicElement } from '@/core/packet/message/element';
 
 class UploadGroupImage extends PacketTransformer<typeof proto.NTV2RichMediaResp> {
-    constructor() {
-        super();
-    }
+  constructor () {
+    super();
+  }
 
-    build(groupUin: number, img: PacketMsgPicElement): OidbPacket {
-        const data = new NapProtoMsg(proto.NTV2RichMediaReq).encode(
+  build (groupUin: number, img: PacketMsgPicElement): OidbPacket {
+    const data = new NapProtoMsg(proto.NTV2RichMediaReq).encode(
+      {
+        reqHead: {
+          common: {
+            requestId: 1,
+            command: 100,
+          },
+          scene: {
+            requestType: 2,
+            businessType: 1,
+            sceneType: 2,
+            group: {
+              groupUin,
+            },
+          },
+          client: {
+            agentType: 2,
+          },
+        },
+        upload: {
+          uploadInfo: [
             {
-                reqHead: {
-                    common: {
-                        requestId: 1,
-                        command: 100
-                    },
-                    scene: {
-                        requestType: 2,
-                        businessType: 1,
-                        sceneType: 2,
-                        group: {
-                            groupUin: groupUin
-                        },
-                    },
-                    client: {
-                        agentType: 2
-                    }
+              fileInfo: {
+                fileSize: +img.size,
+                fileHash: img.md5,
+                fileSha1: img.sha1!,
+                fileName: img.name,
+                type: {
+                  type: 1,
+                  picFormat: img.picType,  // TODO: extend NapCat imgType /cc @MliKiowa
+                  videoFormat: 0,
+                  voiceFormat: 0,
                 },
-                upload: {
-                    uploadInfo: [
-                        {
-                            fileInfo: {
-                                fileSize: +img.size,
-                                fileHash: img.md5,
-                                fileSha1: img.sha1!,
-                                fileName: img.name,
-                                type: {
-                                    type: 1,
-                                    picFormat: img.picType,  //TODO: extend NapCat imgType /cc @MliKiowa
-                                    videoFormat: 0,
-                                    voiceFormat: 0,
-                                },
-                                width: img.width,
-                                height: img.height,
-                                time: 0,
-                                original: 1
-                            },
-                            subFileType: 0,
-                        }
-                    ],
-                    tryFastUploadCompleted: true,
-                    srvSendMsg: false,
-                    clientRandomId: crypto.randomBytes(8).readBigUInt64BE() & BigInt('0x7FFFFFFFFFFFFFFF'),
-                    compatQMsgSceneType: 2,
-                    extBizInfo: {
-                        pic: {
-                            bizType: img.picSubType,
-                            bytesPbReserveTroop: {
-                                subType: img.picSubType,
-                            },
-                            textSummary: img.summary,
-                        },
-                        video: {
-                            bytesPbReserve: Buffer.alloc(0),
-                        },
-                        ptt: {
-                            bytesPbReserve: Buffer.alloc(0),
-                            bytesReserve: Buffer.alloc(0),
-                            bytesGeneralFlags: Buffer.alloc(0),
-                        }
-                    },
-                    clientSeq: 0,
-                    noNeedCompatMsg: false,
-                }
-            }
-        );
-        return OidbBase.build(0x11C4, 100, data, true, false);
-    }
+                width: img.width,
+                height: img.height,
+                time: 0,
+                original: 1,
+              },
+              subFileType: 0,
+            },
+          ],
+          tryFastUploadCompleted: true,
+          srvSendMsg: false,
+          clientRandomId: crypto.randomBytes(8).readBigUInt64BE() & BigInt('0x7FFFFFFFFFFFFFFF'),
+          compatQMsgSceneType: 2,
+          extBizInfo: {
+            pic: {
+              bizType: img.picSubType,
+              bytesPbReserveTroop: {
+                subType: img.picSubType,
+              },
+              textSummary: img.summary,
+            },
+            video: {
+              bytesPbReserve: Buffer.alloc(0),
+            },
+            ptt: {
+              bytesPbReserve: Buffer.alloc(0),
+              bytesReserve: Buffer.alloc(0),
+              bytesGeneralFlags: Buffer.alloc(0),
+            },
+          },
+          clientSeq: 0,
+          noNeedCompatMsg: false,
+        },
+      }
+    );
+    return OidbBase.build(0x11C4, 100, data, true, false);
+  }
 
-    parse(data: Buffer) {
-        const oidbBody = OidbBase.parse(data).body;
-        return new NapProtoMsg(proto.NTV2RichMediaResp).decode(oidbBody);
-    }
+  parse (data: Buffer) {
+    const oidbBody = OidbBase.parse(data).body;
+    return new NapProtoMsg(proto.NTV2RichMediaResp).decode(oidbBody);
+  }
 }
 
 export default new UploadGroupImage();

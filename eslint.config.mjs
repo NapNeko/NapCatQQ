@@ -1,32 +1,43 @@
-import eslint from '@eslint/js';
-import tsEslintPlugin from '@typescript-eslint/eslint-plugin';
-import tsEslintParser from '@typescript-eslint/parser';
-import globals from "globals";
+import neostandard from 'neostandard';
 
-const customTsFlatConfig = [
-    {
-        name: 'typescript-eslint/base',
-        languageOptions: {
-            parser: tsEslintParser,
-            sourceType: 'module',
-            globals: {
-                ...globals.browser,
-                ...globals.node,
-                NodeJS: 'readonly', // 添加 NodeJS 全局变量
-            },
-        },
-        files: ['**/*.{ts,tsx}'],
-        rules: {
-            ...tsEslintPlugin.configs.recommended.rules,
-            'quotes': ['error', 'single'], // 使用单引号
-            'semi': ['error', 'always'], // 强制使用分号
-            'indent': ['error', 4], // 使用 4 空格缩进
-        },
-        plugins: {
-            '@typescript-eslint': tsEslintPlugin,
-        },
-        ignores: ['src/webui/**'], // 忽略 src/webui/ 目录所有文件
-    },
+/** 尾随逗号 */
+const commaDangle = val => {
+  if (val?.rules?.['@stylistic/comma-dangle']?.[0] === 'warn') {
+    const rule = val?.rules?.['@stylistic/comma-dangle']?.[1];
+    Object.keys(rule).forEach(key => {
+      rule[key] = 'always-multiline';
+    });
+    val.rules['@stylistic/comma-dangle'][1] = rule;
+  }
+
+  /** 三元表达式 */
+  if (val?.rules?.['@stylistic/indent']) {
+    val.rules['@stylistic/indent'][2] = {
+      ...val.rules?.['@stylistic/indent']?.[2],
+      flatTernaryExpressions: true,
+      offsetTernaryExpressions: false,
+    };
+  }
+
+  /** 支持下划线 - 禁用 camelcase 规则 */
+  if (val?.rules?.camelcase) {
+    val.rules.camelcase = 'off';
+  }
+
+  return val;
+};
+
+/** 忽略的文件 */
+const ignores = [
+  'node_modules',
+  '**/dist/**',
+  'launcher',
 ];
 
-export default [eslint.configs.recommended, ...customTsFlatConfig];
+const options = neostandard({
+  ts: true,
+  ignores,
+  semi: true, // 强制使用分号
+}).map(commaDangle);
+
+export default options;

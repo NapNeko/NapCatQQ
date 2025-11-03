@@ -15,7 +15,7 @@ charset = utf-8
 # 4 space indentation
 [*.{cjs,mjs,js,jsx,ts,tsx,css,scss,sass,html,json}]
 indent_style = space
-indent_size = 4
+indent_size = 2
 
 [*.bat]
 charset = latin1
