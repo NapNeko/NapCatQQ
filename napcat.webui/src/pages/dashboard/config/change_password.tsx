@@ -18,8 +18,8 @@ const ChangePasswordCard = () => {
     reset,
     watch,
   } = useForm<{
-    oldToken: string
-    newToken: string
+    oldToken: string;
+    newToken: string;
   }>({
     defaultValues: {
       oldToken: '',

@@ -3,10 +3,10 @@ import toast from 'react-hot-toast';
 import { serverRequest } from '@/utils/request';
 
 export interface FileInfo {
-  name: string
-  isDirectory: boolean
-  size: number
-  mtime: Date
+  name: string;
+  isDirectory: boolean;
+  size: number;
+  mtime: Date;
 }
 
 export default class FileManager {
@@ -89,7 +89,7 @@ export default class FileManager {
   }
 
   public static async batchMove (
-    items: { sourcePath: string; targetPath: string }[]
+    items: { sourcePath: string; targetPath: string; }[]
   ) {
     const { data } = await serverRequest.post<ServerResponse<boolean>>(
       '/File/batchMove',

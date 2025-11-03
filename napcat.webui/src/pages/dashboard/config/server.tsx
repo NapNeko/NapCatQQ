@@ -24,11 +24,11 @@ const ServerConfigCard = () => {
     formState: { isSubmitting },
     setValue: setConfigValue,
   } = useForm<{
-    host: string
-    port: number
-    loginRate: number
-    disableWebUI: boolean
-    disableNonLANAccess: boolean
+    host: string;
+    port: number;
+    loginRate: number;
+    disableWebUI: boolean;
+    disableNonLANAccess: boolean;
   }>({
     defaultValues: {
       host: '0.0.0.0',
