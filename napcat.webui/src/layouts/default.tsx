@@ -1,88 +1,88 @@
-import { BreadcrumbItem, Breadcrumbs } from '@heroui/breadcrumbs'
-import { Button } from '@heroui/button'
-import { useLocalStorage } from '@uidotdev/usehooks'
-import clsx from 'clsx'
-import { AnimatePresence, motion } from 'motion/react'
-import { useEffect, useMemo, useRef } from 'react'
-import { ErrorBoundary } from 'react-error-boundary'
-import { MdMenu, MdMenuOpen } from 'react-icons/md'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { BreadcrumbItem, Breadcrumbs } from '@heroui/breadcrumbs';
+import { Button } from '@heroui/button';
+import { useLocalStorage } from '@uidotdev/usehooks';
+import clsx from 'clsx';
+import { AnimatePresence, motion } from 'motion/react';
+import { useEffect, useMemo, useRef } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
+import { MdMenu, MdMenuOpen } from 'react-icons/md';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-import key from '@/const/key'
+import key from '@/const/key';
 
-import errorFallbackRender from '@/components/error_fallback'
+import errorFallbackRender from '@/components/error_fallback';
 // import PageLoading from "@/components/Loading/PageLoading";
-import SideBar from '@/components/sidebar'
+import SideBar from '@/components/sidebar';
 
-import useAuth from '@/hooks/auth'
+import useAuth from '@/hooks/auth';
 
-import type { MenuItem } from '@/config/site'
-import { siteConfig } from '@/config/site'
-import QQManager from '@/controllers/qq_manager'
+import type { MenuItem } from '@/config/site';
+import { siteConfig } from '@/config/site';
+import QQManager from '@/controllers/qq_manager';
 
-const menus: MenuItem[] = siteConfig.navItems
+const menus: MenuItem[] = siteConfig.navItems;
 
 const findTitle = (menus: MenuItem[], pathname: string): string[] => {
-  const paths: string[] = []
+  const paths: string[] = [];
 
   if (pathname) {
     for (const item of menus) {
       if (item.href === pathname) {
-        paths.push(item.label)
+        paths.push(item.label);
       } else if (item.items) {
-        const title = findTitle(item.items, pathname)
+        const title = findTitle(item.items, pathname);
 
         if (title.length > 0) {
-          paths.push(item.label)
-          paths.push(...title)
+          paths.push(item.label);
+          paths.push(...title);
         }
       }
     }
   }
 
-  return paths
-}
+  return paths;
+};
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const location = useLocation()
-  const contentRef = useRef<HTMLDivElement>(null)
-  const [openSideBar, setOpenSideBar] = useLocalStorage(key.sideBarOpen, true)
-  const [b64img] = useLocalStorage(key.backgroundImage, '')
-  const navigate = useNavigate()
-  const { isAuth } = useAuth()
+  const location = useLocation();
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [openSideBar, setOpenSideBar] = useLocalStorage(key.sideBarOpen, true);
+  const [b64img] = useLocalStorage(key.backgroundImage, '');
+  const navigate = useNavigate();
+  const { isAuth } = useAuth();
   const checkIsQQLogin = async () => {
     try {
-      const result = await QQManager.checkQQLoginStatus()
+      const result = await QQManager.checkQQLoginStatus();
       if (!result.isLogin) {
         if (isAuth) {
-          navigate('/qq_login', { replace: true })
+          navigate('/qq_login', { replace: true });
         } else {
-          navigate('/web_login', { replace: true })
+          navigate('/web_login', { replace: true });
         }
       }
     } catch (error) {
-      navigate('/web_login', { replace: true })
+      navigate('/web_login', { replace: true });
     }
-  }
+  };
   useEffect(() => {
     contentRef?.current?.scrollTo?.({
       top: 0,
-      behavior: 'smooth'
-    })
-  }, [location.pathname])
+      behavior: 'smooth',
+    });
+  }, [location.pathname]);
   useEffect(() => {
     if (isAuth) {
-      checkIsQQLogin()
+      checkIsQQLogin();
     }
-  }, [isAuth])
+  }, [isAuth]);
   const title = useMemo(() => {
-    return findTitle(menus, location.pathname)
-  }, [location.pathname])
+    return findTitle(menus, location.pathname);
+  }, [location.pathname]);
   return (
     <div
-      className="h-screen relative flex bg-primary-50 dark:bg-black items-stretch"
+      className='h-screen relative flex bg-primary-50 dark:bg-black items-stretch'
       style={{
         backgroundImage: `url(${b64img})`,
-        backgroundSize: 'cover'
+        backgroundSize: 'cover',
       }}
     >
       <SideBar items={menus} open={openSideBar} />
@@ -117,17 +117,17 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           >
             <Button
               isIconOnly
-              radius="full"
-              variant="light"
+              radius='full'
+              variant='light'
               onPress={() => setOpenSideBar(!openSideBar)}
             >
               {openSideBar ? <MdMenuOpen size={24} /> : <MdMenu size={24} />}
             </Button>
           </motion.div>
-          <Breadcrumbs isDisabled size="lg">
+          <Breadcrumbs isDisabled size='lg'>
             {title?.map((item, index) => (
               <BreadcrumbItem key={index}>
-                <AnimatePresence mode="wait">
+                <AnimatePresence mode='wait'>
                   <motion.div
                     key={item}
                     initial={{ opacity: 0, y: -10 }}
@@ -147,7 +147,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </ErrorBoundary>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Layout
+export default Layout;

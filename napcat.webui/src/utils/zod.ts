@@ -19,10 +19,10 @@ import {
   ZodTuple,
   ZodTypeAny,
   ZodUnion,
-  ZodUnknown
-} from 'zod'
+  ZodUnknown,
+} from 'zod';
 
-export type LiteralValue = string | number | boolean | null
+export type LiteralValue = string | number | boolean | null;
 
 export type ParsedSchema = {
   name?: string
@@ -32,37 +32,37 @@ export type ParsedSchema = {
   enum?: LiteralValue[]
   children?: ParsedSchema[]
   description?: string
-}
+};
 
-export function parse(
+export function parse (
   schema: ZodTypeAny,
   name?: string,
   isRoot = true
 ): ParsedSchema | ParsedSchema[] {
-  const optional = schema.isOptional ? schema.isOptional() : false
-  const description = schema.description
+  const optional = schema.isOptional ? schema.isOptional() : false;
+  const description = schema.description;
   if (schema instanceof ZodString) {
-    return { name, type: 'string', optional, description }
+    return { name, type: 'string', optional, description };
   }
 
   if (schema instanceof ZodNumber) {
-    return { name, type: 'number', optional, description }
+    return { name, type: 'number', optional, description };
   }
 
   if (schema instanceof ZodBoolean) {
-    return { name, type: 'boolean', optional, description }
+    return { name, type: 'boolean', optional, description };
   }
 
   if (schema instanceof ZodBigInt) {
-    return { name, type: 'bigint', optional, description }
+    return { name, type: 'bigint', optional, description };
   }
 
   if (schema instanceof ZodDate) {
-    return { name, type: 'date', optional, description }
+    return { name, type: 'date', optional, description };
   }
 
   if (schema instanceof ZodUnknown) {
-    return { name, type: 'unknown', optional, description }
+    return { name, type: 'unknown', optional, description };
   }
 
   if (schema instanceof ZodLiteral) {
@@ -71,8 +71,8 @@ export function parse(
       type: 'value',
       optional,
       value: schema._def.value as LiteralValue,
-      description
-    }
+      description,
+    };
   }
 
   if (schema instanceof ZodEnum) {
@@ -81,16 +81,16 @@ export function parse(
       type: 'enum',
       optional,
       enum: schema._def.values as LiteralValue[],
-      description
-    }
-    return data
+      description,
+    };
+    return data;
   }
 
   if (schema instanceof ZodUnion) {
-    const options = schema._def.options
+    const options = schema._def.options;
     const parsedOptions = options.map(
       (option: ZodTypeAny) => parse(option, undefined, false) as ParsedSchema
-    )
+    );
 
     const basicTypes = [
       'string',
@@ -100,42 +100,42 @@ export function parse(
       'date',
       'unknown',
       'value',
-      'enum'
-    ]
+      'enum',
+    ];
     const optionTypes: (string | string[])[] = parsedOptions.map(
       (option: ParsedSchema) => option.type
-    )
+    );
     const isAllBasicTypes = optionTypes.every((type) =>
       basicTypes.includes(Array.isArray(type) ? type[0] : type)
-    )
+    );
 
     if (isAllBasicTypes) {
       const types = [
         ...new Set(
           optionTypes.flatMap((type) => (Array.isArray(type) ? type[0] : type))
-        )
-      ]
-      return { name, type: types, optional, description }
+        ),
+      ];
+      return { name, type: types, optional, description };
     } else {
       return {
         name,
         type: 'union',
         optional,
         children: parsedOptions,
-        description
-      }
+        description,
+      };
     }
   }
 
   if (schema instanceof ZodObject) {
-    const shape = schema._def.shape()
+    const shape = schema._def.shape();
     const children = Object.keys(shape).map((key) =>
       parse(shape[key], key, false)
-    ) as ParsedSchema[]
+    ) as ParsedSchema[];
     if (isRoot) {
-      return children
+      return children;
     } else {
-      return { name, type: 'object', optional, children, description }
+      return { name, type: 'object', optional, children, description };
     }
   }
 
@@ -144,120 +144,120 @@ export function parse(
       schema._def.type,
       undefined,
       false
-    ) as ParsedSchema
+    ) as ParsedSchema;
     return {
       name,
       type: 'array',
       optional,
       children: Array.isArray(childSchema) ? childSchema : [childSchema],
-      description
-    }
+      description,
+    };
   }
 
   if (schema instanceof ZodNullable || schema instanceof ZodDefault) {
-    return parse(schema._def.innerType, name)
+    return parse(schema._def.innerType, name);
   }
 
   if (schema instanceof ZodOptional) {
-    const data = parse(schema._def.innerType, name)
+    const data = parse(schema._def.innerType, name);
     if (Array.isArray(data)) {
       data.forEach((item) => {
-        item.optional = true
-        item.description = description
-      })
+        item.optional = true;
+        item.description = description;
+      });
     } else {
-      data.optional = true
-      data.description = description
+      data.optional = true;
+      data.description = description;
     }
-    return data
+    return data;
   }
 
   if (schema instanceof ZodRecord) {
-    const valueType = parse(schema._def.valueType) as ParsedSchema
+    const valueType = parse(schema._def.valueType) as ParsedSchema;
     return {
       name,
       type: 'record',
       optional,
       children: [valueType],
-      description
-    }
+      description,
+    };
   }
 
   if (schema instanceof ZodTuple) {
     const items: ParsedSchema[] = schema._def.items.map((item: ZodTypeAny) =>
       parse(item)
-    )
-    return { name, type: 'tuple', optional, children: items, description }
+    );
+    return { name, type: 'tuple', optional, children: items, description };
   }
 
   if (schema instanceof ZodNull) {
-    return { name, type: 'null', optional, description }
+    return { name, type: 'null', optional, description };
   }
 
   if (schema instanceof ZodLazy) {
-    return parse(schema._def.getter(), name)
+    return parse(schema._def.getter(), name);
   }
 
   if (schema instanceof ZodEffects) {
-    return parse(schema._def.schema, name)
+    return parse(schema._def.schema, name);
   }
 
-  return { name, type: 'unknown', optional, description }
+  return { name, type: 'unknown', optional, description };
 }
 
 const generateDefault = (schema: ZodSchema): unknown => {
   if (schema instanceof ZodObject) {
-    const obj: Record<string, unknown> = {}
+    const obj: Record<string, unknown> = {};
     for (const key in schema.shape) {
-      obj[key] = generateDefault(schema.shape[key])
+      obj[key] = generateDefault(schema.shape[key]);
     }
-    return obj
+    return obj;
   }
   if (schema instanceof ZodString) {
-    return 'textValue'
+    return 'textValue';
   }
   if (schema instanceof ZodNumber) {
-    return 0
+    return 0;
   }
   if (schema instanceof ZodBoolean) {
-    return false
+    return false;
   }
   if (schema instanceof ZodArray) {
-    return []
+    return [];
   }
   if (schema instanceof ZodUnion) {
-    return generateDefault(schema._def.options[0])
+    return generateDefault(schema._def.options[0]);
   }
   if (schema instanceof ZodEnum) {
-    return schema._def.values[0]
+    return schema._def.values[0];
   }
   if (schema instanceof ZodLiteral) {
-    return schema._def.value
+    return schema._def.value;
   }
   if (schema instanceof ZodNullable) {
-    return null
+    return null;
   }
   if (schema instanceof ZodOptional) {
-    return generateDefault(schema._def.innerType)
+    return generateDefault(schema._def.innerType);
   }
   if (schema instanceof ZodRecord) {
-    return {}
+    return {};
   }
   if (schema instanceof ZodTuple) {
-    return schema._def.items.map((item: ZodTypeAny) => generateDefault(item))
+    return schema._def.items.map((item: ZodTypeAny) => generateDefault(item));
   }
   if (schema instanceof ZodNull) {
-    return null
+    return null;
   }
   if (schema instanceof ZodLazy) {
-    return generateDefault(schema._def.getter())
+    return generateDefault(schema._def.getter());
   }
   if (schema instanceof ZodEffects) {
-    return generateDefault(schema._def.schema)
+    return generateDefault(schema._def.schema);
   }
-  return null
-}
+  return null;
+};
 
 export const generateDefaultJson = (schema: ZodSchema) => {
-  return JSON.stringify(generateDefault(schema), null, 2)
-}
+  return JSON.stringify(generateDefault(schema), null, 2);
+};

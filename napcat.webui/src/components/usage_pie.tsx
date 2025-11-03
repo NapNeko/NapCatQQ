@@ -1,7 +1,7 @@
-import * as echarts from 'echarts'
-import React, { useEffect, useRef } from 'react'
+import * as echarts from 'echarts';
+import React, { useEffect, useRef } from 'react';
 
-import { useTheme } from '@/hooks/use-theme'
+import { useTheme } from '@/hooks/use-theme';
 
 interface UsagePieProps {
   systemUsage: number
@@ -14,7 +14,7 @@ const defaultOption: echarts.EChartsOption = {
     trigger: 'item',
     formatter: '<center>{b}<br/><b>{d}%</b></center>',
     borderRadius: 10,
-    extraCssText: 'backdrop-filter: blur(10px);'
+    extraCssText: 'backdrop-filter: blur(10px);',
   },
   series: [
     {
@@ -26,49 +26,49 @@ const defaultOption: echarts.EChartsOption = {
         show: true,
         position: 'center',
         formatter: '系统占用',
-        fontSize: 14
+        fontSize: 14,
       },
       itemStyle: {
         borderWidth: 1,
-        borderRadius: 10
+        borderRadius: 10,
       },
       labelLine: {
-        show: false
+        show: false,
       },
       data: [
         {
           value: 100,
-          name: '系统总量'
-        }
-      ]
-    }
-  ]
-}
+          name: '系统总量',
+        },
+      ],
+    },
+  ],
+};
 
 const UsagePie: React.FC<UsagePieProps> = ({
   systemUsage,
   processUsage,
-  title
+  title,
 }) => {
-  const chartRef = useRef<HTMLDivElement>(null)
-  const chartInstance = useRef<echarts.ECharts | null>(null)
-  const { theme } = useTheme()
+  const chartRef = useRef<HTMLDivElement>(null);
+  const chartInstance = useRef<echarts.ECharts | null>(null);
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (chartRef.current) {
-      chartInstance.current = echarts.init(chartRef.current)
-      const option = defaultOption
-      chartInstance.current.setOption(option)
+      chartInstance.current = echarts.init(chartRef.current);
+      const option = defaultOption;
+      chartInstance.current.setOption(option);
       const observer = new ResizeObserver(() => {
-        chartInstance.current?.resize()
-      })
-      observer.observe(chartRef.current)
+        chartInstance.current?.resize();
+      });
+      observer.observe(chartRef.current);
       return () => {
-        chartInstance.current?.dispose()
-        observer.disconnect()
-      }
+        chartInstance.current?.dispose();
+        observer.disconnect();
+      };
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
     if (chartInstance.current) {
@@ -76,13 +76,13 @@ const UsagePie: React.FC<UsagePieProps> = ({
         series: [
           {
             label: {
-              formatter: title
-            }
-          }
-        ]
-      })
+              formatter: title,
+            },
+          },
+        ],
+      });
     }
-  }, [title])
+  }, [title]);
 
   useEffect(() => {
     if (chartInstance.current) {
@@ -94,8 +94,8 @@ const UsagePie: React.FC<UsagePieProps> = ({
               ? 'rgba(0, 0, 0, 0.8)'
               : 'rgba(255, 255, 255, 0.8)',
           textStyle: {
-            color: theme === 'dark' ? '#fff' : '#333'
-          }
+            color: theme === 'dark' ? '#fff' : '#333',
+          },
         },
         color:
           theme === 'dark'
@@ -104,13 +104,13 @@ const UsagePie: React.FC<UsagePieProps> = ({
         series: [
           {
             itemStyle: {
-              borderColor: theme === 'dark' ? '#333' : '#F0A9A7'
-            }
-          }
-        ]
-      })
+              borderColor: theme === 'dark' ? '#333' : '#F0A9A7',
+            },
+          },
+        ],
+      });
     }
-  }, [theme])
+  }, [theme]);
 
   useEffect(() => {
     if (chartInstance.current) {
@@ -120,24 +120,24 @@ const UsagePie: React.FC<UsagePieProps> = ({
             data: [
               {
                 value: processUsage,
-                name: 'QQ占用'
+                name: 'QQ占用',
               },
               {
                 value: systemUsage - processUsage,
-                name: '其他进程占用'
+                name: '其他进程占用',
               },
               {
                 value: 100 - systemUsage,
-                name: '剩余系统总量'
-              }
-            ]
-          }
-        ]
-      })
+                name: '剩余系统总量',
+              },
+            ],
+          },
+        ],
+      });
     }
-  }, [systemUsage, processUsage])
+  }, [systemUsage, processUsage]);
 
-  return <div ref={chartRef} className="w-36 h-36 flex-shrink-0" />
-}
+  return <div ref={chartRef} className='w-36 h-36 flex-shrink-0' />;
+};
 
-export default UsagePie
+export default UsagePie;

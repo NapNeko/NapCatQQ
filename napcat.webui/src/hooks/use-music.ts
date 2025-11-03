@@ -1,11 +1,11 @@
-import React from 'react'
+import React from 'react';
 
-import { AudioContext } from '@/contexts/songs'
+import { AudioContext } from '@/contexts/songs';
 
 const useMusic = () => {
-  const music = React.useContext(AudioContext)
+  const music = React.useContext(AudioContext);
 
-  return music
-}
+  return music;
+};
 
-export default useMusic
+export default useMusic;

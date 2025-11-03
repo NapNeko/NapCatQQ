@@ -1,6 +1,6 @@
-import { Card, CardProps } from '@heroui/card'
-import clsx from 'clsx'
-import React from 'react'
+import { Card, CardProps } from '@heroui/card';
+import clsx from 'clsx';
+import React from 'react';
 
 export interface HoverEffectCardProps extends CardProps {
   children: React.ReactNode
@@ -18,15 +18,15 @@ const HoverEffectCard: React.FC<HoverEffectCardProps> = (props) => {
     className,
     style,
     lightClassName,
-    lightStyle
-  } = props
-  const cardRef = React.useRef<HTMLDivElement | null>(null)
-  const lightRef = React.useRef<HTMLDivElement | null>(null)
-  const [isShowLight, setIsShowLight] = React.useState(false)
+    lightStyle,
+  } = props;
+  const cardRef = React.useRef<HTMLDivElement | null>(null);
+  const lightRef = React.useRef<HTMLDivElement | null>(null);
+  const [isShowLight, setIsShowLight] = React.useState(false);
   const [pos, setPos] = React.useState({
     left: 0,
-    top: 0
-  })
+    top: 0,
+  });
 
   return (
     <Card
@@ -40,53 +40,53 @@ const HoverEffectCard: React.FC<HoverEffectCardProps> = (props) => {
         willChange: 'transform',
         transform:
           'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)',
-        ...style
+        ...style,
       }}
       onMouseEnter={() => {
         if (cardRef.current) {
-          cardRef.current.style.transition = 'transform 0.3s ease-out'
+          cardRef.current.style.transition = 'transform 0.3s ease-out';
         }
       }}
       onMouseLeave={() => {
-        setIsShowLight(false)
+        setIsShowLight(false);
         if (cardRef.current) {
-          cardRef.current.style.transition = 'transform 0.5s'
+          cardRef.current.style.transition = 'transform 0.5s';
           cardRef.current.style.transform =
-            'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)'
+            'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
         }
       }}
       onMouseMove={(e: React.MouseEvent<HTMLDivElement>) => {
         if (cardRef.current) {
-          setIsShowLight(true)
+          setIsShowLight(true);
 
-          const { x, y } = cardRef.current.getBoundingClientRect()
-          const { clientX, clientY } = e
+          const { x, y } = cardRef.current.getBoundingClientRect();
+          const { clientX, clientY } = e;
 
-          const offsetX = clientX - x
-          const offsetY = clientY - y
+          const offsetX = clientX - x;
+          const offsetY = clientY - y;
 
-          const lightWidth = lightStyle?.width?.toString() || '100'
-          const lightHeight = lightStyle?.height?.toString() || '100'
-          const lightWidthNum = parseInt(lightWidth)
-          const lightHeightNum = parseInt(lightHeight)
+          const lightWidth = lightStyle?.width?.toString() || '100';
+          const lightHeight = lightStyle?.height?.toString() || '100';
+          const lightWidthNum = parseInt(lightWidth);
+          const lightHeightNum = parseInt(lightHeight);
 
-          const left = offsetX - lightWidthNum / 2
-          const top = offsetY - lightHeightNum / 2
+          const left = offsetX - lightWidthNum / 2;
+          const top = offsetY - lightHeightNum / 2;
 
           setPos({
             left,
-            top
-          })
+            top,
+          });
 
-          cardRef.current.style.transition = 'transform 0.1s'
+          cardRef.current.style.transition = 'transform 0.1s';
 
-          const rangeX = 400 / 2
-          const rangeY = 400 / 2
+          const rangeX = 400 / 2;
+          const rangeY = 400 / 2;
 
-          const rotateX = ((offsetY - rangeY) / rangeY) * maxXRotation
-          const rotateY = -1 * ((offsetX - rangeX) / rangeX) * maxYRotation
+          const rotateX = ((offsetY - rangeY) / rangeY) * maxXRotation;
+          const rotateY = -1 * ((offsetX - rangeX) / rangeX) * maxYRotation;
 
-          cardRef.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`
+          cardRef.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
         }
       }}
     >
@@ -98,12 +98,12 @@ const HoverEffectCard: React.FC<HoverEffectCardProps> = (props) => {
           lightClassName
         )}
         style={{
-          ...pos
+          ...pos,
         }}
       />
       {children}
     </Card>
-  )
-}
+  );
+};
 
-export default HoverEffectCard
+export default HoverEffectCard;

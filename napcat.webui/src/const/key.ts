@@ -9,7 +9,7 @@ enum key {
   isCollapsedMusicPlayer = 'is-collapsed-music-player',
   sideBarOpen = 'side-bar-open',
   httpDebugConfig = 'http-debug-config',
-  wsDebugConfig = 'ws-debug-config'
+  wsDebugConfig = 'ws-debug-config',
 }
 
-export default key
+export default key;

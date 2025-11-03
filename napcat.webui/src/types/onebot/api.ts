@@ -1,4 +1,4 @@
-import { OB11NodeSegment, OB11Segment } from './segment'
+import { OB11NodeSegment, OB11Segment } from './segment';
 
 export const enum Action {
   /** 发送私聊消息 */
@@ -100,7 +100,7 @@ export const enum Action {
   /** 设置精华消息 */
   setEssenceMsg = 'set_essence_msg',
   /** 删除精华消息 */
-  deleteEssenceMsg = 'delete_essence_msg'
+  deleteEssenceMsg = 'delete_essence_msg',
 }
 
 /** Api请求参数 */

@@ -1,9 +1,9 @@
-import { Chip } from '@heroui/chip'
-import { Select, SelectItem } from '@heroui/select'
-import { SharedSelection } from '@heroui/system'
-import type { Selection } from '@react-types/shared'
+import { Chip } from '@heroui/chip';
+import { Select, SelectItem } from '@heroui/select';
+import { SharedSelection } from '@heroui/system';
+import type { Selection } from '@react-types/shared';
 
-import { LogLevel } from '@/const/enum'
+import { LogLevel } from '@/const/enum';
 
 export interface LogLevelSelectProps {
   selectedKeys: Selection
@@ -22,57 +22,57 @@ const logLevelColor: {
   [LogLevel.INFO]: 'primary',
   [LogLevel.WARN]: 'warning',
   [LogLevel.ERROR]: 'primary',
-  [LogLevel.FATAL]: 'primary'
-}
+  [LogLevel.FATAL]: 'primary',
+};
 const LogLevelSelect = (props: LogLevelSelectProps) => {
-  const { selectedKeys, onSelectionChange } = props
+  const { selectedKeys, onSelectionChange } = props;
   return (
     <Select
       selectedKeys={selectedKeys}
       onSelectionChange={(selectedKeys) => {
         if (selectedKeys !== 'all' && selectedKeys?.size === 0) {
-          selectedKeys = 'all'
+          selectedKeys = 'all';
         }
-        onSelectionChange(selectedKeys)
+        onSelectionChange(selectedKeys);
       }}
-      label="日志级别"
-      selectionMode="multiple"
-      aria-label="Log Level"
+      label='日志级别'
+      selectionMode='multiple'
+      aria-label='Log Level'
       classNames={{
         label: 'mb-2',
         trigger: 'bg-opacity-50 backdrop-blur-sm hover:!bg-opacity-60',
-        popoverContent: 'bg-opacity-50 backdrop-blur-sm'
+        popoverContent: 'bg-opacity-50 backdrop-blur-sm',
       }}
-      size="sm"
+      size='sm'
       items={[
         { label: 'Debug', value: LogLevel.DEBUG },
         { label: 'Info', value: LogLevel.INFO },
         { label: 'Warn', value: LogLevel.WARN },
         { label: 'Error', value: LogLevel.ERROR },
-        { label: 'Fatal', value: LogLevel.FATAL }
+        { label: 'Fatal', value: LogLevel.FATAL },
       ]}
       renderValue={(value) => {
         if (value.length === 5) {
           return (
-            <Chip size="sm" color="primary" variant="flat">
+            <Chip size='sm' color='primary' variant='flat'>
               全部
             </Chip>
-          )
+          );
         }
         return (
-          <div className="flex gap-2">
+          <div className='flex gap-2'>
             {value.map((v) => (
               <Chip
-                size="sm"
+                size='sm'
                 key={v.key}
                 color={logLevelColor[v.data?.value as LogLevel]}
-                variant="flat"
+                variant='flat'
               >
                 {v.data?.label}
               </Chip>
             ))}
           </div>
-        )
+        );
       }}
     >
       {(item) => (
@@ -81,7 +81,7 @@ const LogLevelSelect = (props: LogLevelSelectProps) => {
         </SelectItem>
       )}
     </Select>
-  )
-}
+  );
+};
 
-export default LogLevelSelect
+export default LogLevelSelect;

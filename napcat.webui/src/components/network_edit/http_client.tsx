@@ -1,5 +1,5 @@
-import GenericForm, { random_token } from './generic_form'
-import type { Field } from './generic_form'
+import GenericForm, { random_token } from './generic_form';
+import type { Field } from './generic_form';
 
 export interface HTTPClientFormProps {
   data?: OneBotConfig['network']['httpClients'][0]
@@ -7,12 +7,12 @@ export interface HTTPClientFormProps {
   onSubmit: (data: OneBotConfig['network']['httpClients'][0]) => Promise<void>
 }
 
-type HTTPClientFormType = OneBotConfig['network']['httpClients']
+type HTTPClientFormType = OneBotConfig['network']['httpClients'];
 
 const HTTPClientForm: React.FC<HTTPClientFormProps> = ({
   data,
   onClose,
-  onSubmit
+  onSubmit,
 }) => {
   const defaultValues: HTTPClientFormType[0] = {
     enable: false,
@@ -21,8 +21,8 @@ const HTTPClientForm: React.FC<HTTPClientFormProps> = ({
     reportSelfMessage: false,
     messagePostFormat: 'array',
     token: random_token(16),
-    debug: false
-  }
+    debug: false,
+  };
 
   const fields: Field<'httpClients'>[] = [
     {
@@ -30,14 +30,14 @@ const HTTPClientForm: React.FC<HTTPClientFormProps> = ({
       label: '启用',
       type: 'switch',
       description: '保存后启用此配置',
-      colSpan: 1
+      colSpan: 1,
     },
     {
       name: 'debug',
       label: '开启Debug',
       type: 'switch',
       description: '是否开启调试模式',
-      colSpan: 1
+      colSpan: 1,
     },
     {
       name: 'name',
@@ -45,21 +45,21 @@ const HTTPClientForm: React.FC<HTTPClientFormProps> = ({
       type: 'input',
       placeholder: '请输入名称',
       isRequired: true,
-      isDisabled: !!data
+      isDisabled: !!data,
     },
     {
       name: 'url',
       label: 'URL',
       type: 'input',
       placeholder: '请输入URL',
-      isRequired: true
+      isRequired: true,
     },
     {
       name: 'reportSelfMessage',
       label: '上报自身消息',
       type: 'switch',
       description: '是否上报自身消息',
-      colSpan: 1
+      colSpan: 1,
     },
     {
       name: 'messagePostFormat',
@@ -69,17 +69,17 @@ const HTTPClientForm: React.FC<HTTPClientFormProps> = ({
       isRequired: true,
       options: [
         { key: 'array', value: 'Array' },
-        { key: 'string', value: 'String' }
+        { key: 'string', value: 'String' },
       ],
-      colSpan: 1
+      colSpan: 1,
     },
     {
       name: 'token',
       label: 'Token',
       type: 'input',
-      placeholder: '请输入Token'
-    }
-  ]
+      placeholder: '请输入Token',
+    },
+  ];
 
   return (
     <GenericForm
@@ -89,7 +89,7 @@ const HTTPClientForm: React.FC<HTTPClientFormProps> = ({
       onSubmit={onSubmit}
       fields={fields}
     />
-  )
-}
+  );
+};
 
-export default HTTPClientForm
+export default HTTPClientForm;

@@ -1,7 +1,7 @@
-import { Button } from '@heroui/button'
-import clsx from 'clsx'
-import toast from 'react-hot-toast'
-import { IoMdRefresh } from 'react-icons/io'
+import { Button } from '@heroui/button';
+import clsx from 'clsx';
+import toast from 'react-hot-toast';
+import { IoMdRefresh } from 'react-icons/io';
 
 export interface SaveButtonsProps {
   onSubmit: () => void
@@ -16,7 +16,7 @@ const SaveButtons: React.FC<SaveButtonsProps> = ({
   reset,
   isSubmitting,
   refresh,
-  className
+  className,
 }) => (
   <div
     className={clsx(
@@ -24,18 +24,18 @@ const SaveButtons: React.FC<SaveButtonsProps> = ({
       className
     )}
   >
-    <div className="flex items-center justify-center gap-2 mt-5">
+    <div className='flex items-center justify-center gap-2 mt-5'>
       <Button
-        color="default"
+        color='default'
         onPress={() => {
-          reset()
-          toast.success('重置成功')
+          reset();
+          toast.success('重置成功');
         }}
       >
         取消更改
       </Button>
       <Button
-        color="primary"
+        color='primary'
         isLoading={isSubmitting}
         onPress={() => onSubmit()}
       >
@@ -44,9 +44,9 @@ const SaveButtons: React.FC<SaveButtonsProps> = ({
       {refresh && (
         <Button
           isIconOnly
-          color="secondary"
-          radius="full"
-          variant="flat"
+          color='secondary'
+          radius='full'
+          variant='flat'
           onPress={() => refresh()}
         >
           <IoMdRefresh size={24} />
@@ -54,6 +54,6 @@ const SaveButtons: React.FC<SaveButtonsProps> = ({
       )}
     </div>
   </div>
-)
+);
 
-export default SaveButtons
+export default SaveButtons;

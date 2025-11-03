@@ -1,8 +1,8 @@
-import { z } from 'zod'
-import type { ZodSchema } from 'zod'
+import { z } from 'zod';
+import type { ZodSchema } from 'zod';
 
-import { baseResponseSchema, commonResponseDataSchema } from '../response'
-import messageNodeSchema, { nodeMessage } from './node'
+import { baseResponseSchema, commonResponseDataSchema } from '../response';
+import messageNodeSchema, { nodeMessage } from './node';
 
 const oneBotHttpApiMessagePrivate: Record<
   string,
@@ -17,26 +17,26 @@ const oneBotHttpApiMessagePrivate: Record<
     request: z
       .object({
         user_id: z.union([z.string(), z.number()]).describe('对方QQ号'),
-        message: z.array(messageNodeSchema).describe('消息内容')
+        message: z.array(messageNodeSchema).describe('消息内容'),
       })
       .refine(
         (data) => {
-          const hasReply = data.message.some((item) => item.type === 'reply')
+          const hasReply = data.message.some((item) => item.type === 'reply');
 
           if (hasReply) {
-            return data.message[0].type === 'reply'
+            return data.message[0].type === 'reply';
           }
 
-          return true
+          return true;
         },
         {
           message:
-            '如果 message 包含 reply 类型的消息，那么只能包含一个，而且排在最前面'
+            '如果 message 包含 reply 类型的消息，那么只能包含一个，而且排在最前面',
         }
       ),
     response: baseResponseSchema.extend({
-      data: commonResponseDataSchema
-    })
+      data: commonResponseDataSchema,
+    }),
   },
   '/send_private_forward_msg': {
     description: '发送私聊合并转发消息',
@@ -46,35 +46,35 @@ const oneBotHttpApiMessagePrivate: Record<
       news: z
         .array(
           z.object({
-            text: z.string()
+            text: z.string(),
           })
         )
         .describe('?'),
       prompt: z.string().describe('外显'),
       summary: z.string().describe('底下文本'),
-      source: z.string().describe('内容')
+      source: z.string().describe('内容'),
     }),
     response: baseResponseSchema.extend({
-      data: commonResponseDataSchema
-    })
+      data: commonResponseDataSchema,
+    }),
   },
   '/forward_friend_single_msg': {
     description: '消息转发到私聊',
     request: z.object({
       user_id: z.union([z.string(), z.number()]).describe('对方QQ号'),
-      message_id: z.union([z.string(), z.number()]).describe('消息ID')
+      message_id: z.union([z.string(), z.number()]).describe('消息ID'),
     }),
     response: baseResponseSchema.extend({
-      data: commonResponseDataSchema
-    })
+      data: commonResponseDataSchema,
+    }),
   },
   '/group_poke': {
     description: '发送私聊戳一戳',
     request: z.object({
-      user_id: z.union([z.string(), z.number()]).describe('对方QQ号')
+      user_id: z.union([z.string(), z.number()]).describe('对方QQ号'),
     }),
-    response: baseResponseSchema
-  }
-}
+    response: baseResponseSchema,
+  },
+};
 
-export default oneBotHttpApiMessagePrivate
+export default oneBotHttpApiMessagePrivate;

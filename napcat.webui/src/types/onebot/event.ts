@@ -1,10 +1,10 @@
-import { OB11Segment } from './segment'
+import { OB11Segment } from './segment';
 
 /** 性别枚举 */
 export const enum OB11Sex {
   Male = 'male',
   Female = 'female',
-  Unknown = 'unknown'
+  Unknown = 'unknown',
 }
 
 /** OneBot11消息类型枚举 */
@@ -14,13 +14,13 @@ export const enum OB11Event {
   Request = 'request',
   MetaEvent = 'meta_event',
   /** go-cqhttp拓展 自身事件上报 */
-  MessageSent = 'message_sent'
+  MessageSent = 'message_sent',
 }
 
 /** 消息事件类型 */
 export const enum OB11MessageType {
   Private = 'private',
-  Group = 'group'
+  Group = 'group',
 }
 
 /** 消息子类型 */
@@ -30,7 +30,7 @@ export const enum OB11MessageSubType {
   Other = 'other',
   Normal = 'normal',
   Anonymous = 'anonymous',
-  Notice = 'notice'
+  Notice = 'notice',
 }
 
 /** 通知事件枚举 */
@@ -60,13 +60,13 @@ export const enum OB11NoticeType {
   /** 精华 */
   GroupEssence = 'essence',
   /** 群名片更新 */
-  GroupCard = 'group_card'
+  GroupCard = 'group_card',
 }
 
 /** 请求事件类型 */
 export const enum OB11RequestType {
   Friend = 'friend',
-  Group = 'group'
+  Group = 'group',
 }
 
 export interface FriendSender {
@@ -169,7 +169,7 @@ export interface OB11GroupMessage extends MessageBase {
 }
 
 /** 消息事件 */
-export type OB11Message = OB11PrivateMessage | OB11GroupMessage
+export type OB11Message = OB11PrivateMessage | OB11GroupMessage;
 
 /** 通知事件基类 */
 export interface NoticeBase extends OB11EventBase {
@@ -411,7 +411,7 @@ export type OB11Notice =
   | OneBot11GroupMessageReaction
   | OneBot11GroupMessageReactionLagrange
   | OneBot11GroupEssence
-  | OneBot11GroupCard
+  | OneBot11GroupCard;
 
 /** 请求事件基类 */
 export interface RequestBase extends OB11EventBase {
@@ -448,7 +448,7 @@ export interface OneBot11GroupRequest extends RequestBase {
 }
 
 /** 请求事件 */
-export type OB11Request = OneBot11FriendRequest | OneBot11GroupRequest
+export type OB11Request = OneBot11FriendRequest | OneBot11GroupRequest;
 
 /** 元事件基类 */
 export interface MetaEventBase extends OB11EventBase {
@@ -478,6 +478,6 @@ export interface OneBot11Heartbeat extends MetaEventBase {
 }
 
 /** 元事件 */
-export type OB11Meta = OneBot11Lifecycle | OneBot11Heartbeat
+export type OB11Meta = OneBot11Lifecycle | OneBot11Heartbeat;
 /** 全部事件 */
-export type OB11AllEvent = OB11Message | OB11Notice | OB11Request | OB11Meta
+export type OB11AllEvent = OB11Message | OB11Notice | OB11Request | OB11Meta;

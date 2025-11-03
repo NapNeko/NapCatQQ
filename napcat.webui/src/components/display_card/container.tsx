@@ -1,7 +1,7 @@
-import { Card, CardBody, CardFooter, CardHeader } from '@heroui/card'
-import clsx from 'clsx'
+import { Card, CardBody, CardFooter, CardHeader } from '@heroui/card';
+import clsx from 'clsx';
 
-import { title } from '../primitives'
+import { title } from '../primitives';
 
 export interface ContainerProps {
   title: string
@@ -24,13 +24,13 @@ const DisplayCardContainer: React.FC<ContainerProps> = ({
   action,
   tag,
   enableSwitch,
-  children
+  children,
 }) => {
   return (
-    <Card className="bg-opacity-50 backdrop-blur-sm">
-      <CardHeader className={'pb-0 flex items-center'}>
+    <Card className='bg-opacity-50 backdrop-blur-sm'>
+      <CardHeader className='pb-0 flex items-center'>
         {tag && (
-          <div className="text-center text-default-400 mb-1 absolute top-0 left-1/2 -translate-x-1/2 text-sm pointer-events-none bg-warning-100 dark:bg-warning-50 px-2 rounded-b">
+          <div className='text-center text-default-400 mb-1 absolute top-0 left-1/2 -translate-x-1/2 text-sm pointer-events-none bg-warning-100 dark:bg-warning-50 px-2 rounded-b'>
             {tag}
           </div>
         )}
@@ -39,19 +39,19 @@ const DisplayCardContainer: React.FC<ContainerProps> = ({
             title({
               color: 'foreground',
               size: 'xs',
-              shadow: true
+              shadow: true,
             }),
             'truncate'
           )}
         >
           {_title}
         </h2>
-        <div className="ml-auto">{enableSwitch}</div>
+        <div className='ml-auto'>{enableSwitch}</div>
       </CardHeader>
-      <CardBody className="text-sm">{children}</CardBody>
+      <CardBody className='text-sm'>{children}</CardBody>
       <CardFooter>{action}</CardFooter>
     </Card>
-  )
-}
+  );
+};
 
-export default DisplayCardContainer
+export default DisplayCardContainer;

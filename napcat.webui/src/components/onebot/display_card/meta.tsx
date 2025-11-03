@@ -1,12 +1,12 @@
-import { Chip } from '@heroui/chip'
+import { Chip } from '@heroui/chip';
 
-import { getLifecycleColor, getLifecycleName } from '@/utils/onebot'
+import { getLifecycleColor, getLifecycleName } from '@/utils/onebot';
 
 import type {
   OB11Meta,
   OneBot11Heartbeat,
-  OneBot11Lifecycle
-} from '@/types/onebot'
+  OneBot11Lifecycle,
+} from '@/types/onebot';
 
 export interface OneBotDisplayMetaProps {
   data: OB11Meta
@@ -21,32 +21,32 @@ export interface OneBotDisplayMetaLifecycleProps {
 }
 
 const OneBotDisplayMetaHeartbeat: React.FC<OneBotDisplayMetaHeartbeatProps> = ({
-  data
+  data,
 }) => {
   return (
-    <div className="flex gap-2">
+    <div className='flex gap-2'>
       <Chip>心跳</Chip>
       <Chip>间隔 {data.status.interval}ms</Chip>
     </div>
-  )
-}
+  );
+};
 
 const OneBotDisplayMetaLifecycle: React.FC<OneBotDisplayMetaLifecycleProps> = ({
-  data
+  data,
 }) => {
   return (
-    <div className="flex gap-2">
+    <div className='flex gap-2'>
       <Chip>生命周期</Chip>
       <Chip color={getLifecycleColor(data.sub_type)}>
         {getLifecycleName(data.sub_type)}
       </Chip>
     </div>
-  )
-}
+  );
+};
 
 const OneBotDisplayMeta: React.FC<OneBotDisplayMetaProps> = ({ data }) => {
   return (
-    <div className="h-full flex items-center">
+    <div className='h-full flex items-center'>
       {data.meta_event_type === 'lifecycle' && (
         <OneBotDisplayMetaLifecycle data={data} />
       )}
@@ -54,7 +54,7 @@ const OneBotDisplayMeta: React.FC<OneBotDisplayMetaProps> = ({ data }) => {
         <OneBotDisplayMetaHeartbeat data={data} />
       )}
     </div>
-  )
-}
+  );
+};
 
-export default OneBotDisplayMeta
+export default OneBotDisplayMeta;

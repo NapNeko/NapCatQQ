@@ -1,12 +1,12 @@
-import { Button } from '@heroui/button'
-import { Input } from '@heroui/input'
+import { Button } from '@heroui/button';
+import { Input } from '@heroui/input';
 import {
   Modal,
   ModalBody,
   ModalContent,
   ModalFooter,
-  ModalHeader
-} from '@heroui/modal'
+  ModalHeader,
+} from '@heroui/modal';
 
 interface RenameModalProps {
   isOpen: boolean
@@ -16,29 +16,29 @@ interface RenameModalProps {
   onRename: () => void
 }
 
-export default function RenameModal({
+export default function RenameModal ({
   isOpen,
   newFileName,
   onNameChange,
   onClose,
-  onRename
+  onRename,
 }: RenameModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalContent>
         <ModalHeader>重命名</ModalHeader>
         <ModalBody>
-          <Input label="新名称" value={newFileName} onChange={onNameChange} />
+          <Input label='新名称' value={newFileName} onChange={onNameChange} />
         </ModalBody>
         <ModalFooter>
-          <Button color="primary" variant="flat" onPress={onClose}>
+          <Button color='primary' variant='flat' onPress={onClose}>
             取消
           </Button>
-          <Button color="primary" onPress={onRename}>
+          <Button color='primary' onPress={onRename}>
             确定
           </Button>
         </ModalFooter>
       </ModalContent>
     </Modal>
-  )
+  );
 }

@@ -121,7 +121,7 @@ const theme: ThemeConfig = {
       '0px 0px 15px 0px rgba(0, 0, 0, .06), 0px 2px 30px 0px rgba(0, 0, 0, .22), inset 0px 0px 1px 0px hsla(0, 0%, 100%, .15)',
     '--heroui-box-shadow-large':
       '0px 0px 30px 0px rgba(0, 0, 0, .07), 0px 30px 60px 0px rgba(0, 0, 0, .26), inset 0px 0px 1px 0px hsla(0, 0%, 100%, .15)',
-    '--heroui-hover-opacity': '.9'
+    '--heroui-hover-opacity': '.9',
   },
   light: {
     '--heroui-background': '0 0% 100%',
@@ -245,12 +245,12 @@ const theme: ThemeConfig = {
       '0px 0px 15px 0px rgba(0, 0, 0, .03), 0px 2px 30px 0px rgba(0, 0, 0, .08), 0px 0px 1px 0px rgba(0, 0, 0, .3)',
     '--heroui-box-shadow-large':
       '0px 0px 30px 0px rgba(0, 0, 0, .04), 0px 30px 60px 0px rgba(0, 0, 0, .12), 0px 0px 1px 0px rgba(0, 0, 0, .3)',
-    '--heroui-hover-opacity': '.8'
-  }
-}
+    '--heroui-hover-opacity': '.8',
+  },
+};
 export default {
   theme,
   author: 'HeroUI',
   name: 'heroui',
-  description: 'HeroUI Default Theme'
-} satisfies ThemeInfo
+  description: 'HeroUI Default Theme',
+} satisfies ThemeInfo;

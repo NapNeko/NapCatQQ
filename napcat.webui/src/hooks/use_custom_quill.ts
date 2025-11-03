@@ -1,6 +1,6 @@
-import Quill from 'quill'
-import 'quill/dist/quill.core.css'
-import { useEffect, useRef, useState } from 'react'
+import Quill from 'quill';
+import 'quill/dist/quill.core.css';
+import { useEffect, useRef, useState } from 'react';
 
 interface UseCustomQuillProps {
   modules: Record<string, unknown>
@@ -11,21 +11,21 @@ interface UseCustomQuillProps {
 export const useCustomQuill = ({
   modules,
   formats,
-  placeholder
+  placeholder,
 }: UseCustomQuillProps) => {
-  const quillRef = useRef<HTMLDivElement | null>(null)
-  const [quill, setQuill] = useState<Quill | null>(null)
+  const quillRef = useRef<HTMLDivElement | null>(null);
+  const [quill, setQuill] = useState<Quill | null>(null);
 
   useEffect(() => {
     if (quillRef.current) {
       const quillInstance = new Quill(quillRef.current, {
         modules,
         formats,
-        placeholder
-      })
-      setQuill(quillInstance)
+        placeholder,
+      });
+      setQuill(quillInstance);
     }
-  }, [])
+  }, []);
 
-  return { quillRef, quill, Quill }
-}
+  return { quillRef, quill, Quill };
+};
