@@ -59,20 +59,20 @@ type RawToOb11Converters = {
 
 type Ob11ToRawConverters = {
   [Key in OB11MessageDataType]: (
-    sendMsg: Extract<OB11MessageData, { type: Key }>,
+    sendMsg: Extract<OB11MessageData, { type: Key; }>,
     context: SendMessageContext,
   ) => Promise<SendMessageElement | undefined>
 };
 
 export type SendMessageContext = {
   deleteAfterSentFiles: string[],
-  peer: Peer
+  peer: Peer;
 };
 
 export type RecvMessageContext = {
   parseMultMsg: boolean,
   disableGetUrl: boolean,
-  quick_reply: boolean
+  quick_reply: boolean;
 };
 
 function keyCanBeParsed (key: string, parser: RawToOb11Converters): key is keyof RawToOb11Converters {
@@ -138,6 +138,7 @@ export class OneBotMsgApi {
         };
       } catch (e) {
         this.core.context.logger.logError('获取图片url失败', (e as Error).stack);
+        return null;
       }
     },
 
@@ -167,7 +168,7 @@ export class OneBotMsgApi {
               maxHealthCheckFailures: 3,
             }
           );
-        } catch (error) {
+        } catch (_error) {
           url = '';
         }
         if (url) {
@@ -194,7 +195,7 @@ export class OneBotMsgApi {
 
     faceElement: async element => {
       const faceIndex = element.faceIndex;
-      if (element.faceType == FaceType.Poke) {
+      if (element.faceType === FaceType.Poke) {
         return {
           type: OB11MessageDataType.poke,
           data: {
@@ -574,7 +575,7 @@ export class OneBotMsgApi {
         };
       }
 
-      if (!context.peer || !atQQ || context.peer.chatType == ChatType.KCHATTYPEC2C) return undefined; // 过滤掉空atQQ
+      if (!context.peer || !atQQ || context.peer.chatType === ChatType.KCHATTYPEC2C) return undefined; // 过滤掉空atQQ
       if (atQQ === 'all') return at(atQQ, atQQ, NTMsgAtType.ATTYPEALL, '全体成员');
       const atMember = await this.core.apis.GroupApi.getGroupMember(context.peer.peerUid, atQQ);
       if (atMember) {
@@ -861,7 +862,7 @@ export class OneBotMsgApi {
   parseTextWithJson (text: string) {
     // 匹配<{...}>格式的JSON
     const regex = /<(\{.*?\})>/g;
-    const parts: Array<{ type: 'text' | 'json', content: string | object }> = [];
+    const parts: Array<{ type: 'text' | 'json', content: string | object; }> = [];
     let lastIndex = 0;
     let match;
 
@@ -882,7 +883,7 @@ export class OneBotMsgApi {
           type: 'json',
           content: jsonContent,
         });
-      } catch (e) {
+      } catch (_e) {
         // 如果JSON解析失败，作为普通文本处理
         parts.push({
           type: 'text',
@@ -905,16 +906,17 @@ export class OneBotMsgApi {
   }
 
   async parsePrivateMsgEvent (msg: RawMessage, grayTipElement: GrayTipElement) {
-    if (grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
-      if (grayTipElement.jsonGrayTipElement.busiId == 1061) {
+    if (grayTipElement.subElementType === NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
+      if (grayTipElement.jsonGrayTipElement.busiId === 1061) {
         const PokeEvent = await this.obContext.apis.FriendApi.parsePrivatePokeEvent(grayTipElement, Number(await this.core.apis.UserApi.getUinByUidV2(msg.peerUid)));
         if (PokeEvent) {
           return PokeEvent;
         }
-      } else if (grayTipElement.jsonGrayTipElement.busiId == 19324 && msg.peerUid !== '') {
+      } else if (grayTipElement.jsonGrayTipElement.busiId === 19324 && msg.peerUid !== '') {
         return new OB11FriendAddNoticeEvent(this.core, Number(await this.core.apis.UserApi.getUinByUidV2(msg.peerUid)));
       }
     }
+    return undefined;
   }
 
   private async getMultiMessages (msg: RawMessage, parentMsgPeer: Peer) {
@@ -967,20 +969,20 @@ export class OneBotMsgApi {
     disableGetUrl: boolean = false,
     quick_reply: boolean = false
   ) {
-    if (msg.senderUin == '0' || msg.senderUin == '') return;
-    if (msg.peerUin == '0' || msg.peerUin == '') return;
+    if (msg.senderUin === '0' || msg.senderUin === '') return;
+    if (msg.peerUin === '0' || msg.peerUin === '') return;
 
     const resMsg = this.initializeMessage(msg);
 
-    if (this.core.selfInfo.uin == msg.senderUin) {
+    if (this.core.selfInfo.uin === msg.senderUin) {
       resMsg.message_sent_type = 'self';
     }
 
-    if (msg.chatType == ChatType.KCHATTYPEGROUP) {
+    if (msg.chatType === ChatType.KCHATTYPEGROUP) {
       await this.handleGroupMessage(resMsg, msg);
-    } else if (msg.chatType == ChatType.KCHATTYPEC2C) {
+    } else if (msg.chatType === ChatType.KCHATTYPEC2C) {
       await this.handlePrivateMessage(resMsg, msg);
-    } else if (msg.chatType == ChatType.KCHATTYPETEMPC2CFROMGROUP) {
+    } else if (msg.chatType === ChatType.KCHATTYPETEMPC2CFROMGROUP) {
       await this.handleTempGroupMessage(resMsg, msg);
     } else {
       return undefined;
@@ -1003,7 +1005,7 @@ export class OneBotMsgApi {
       message_seq: msg.id!,
       real_id: msg.id!,
       real_seq: msg.msgSeq,
-      message_type: msg.chatType == ChatType.KCHATTYPEGROUP ? 'group' : 'private',
+      message_type: msg.chatType === ChatType.KCHATTYPEGROUP ? 'group' : 'private',
       sender: {
         user_id: +(msg.senderUin ?? 0),
         nickname: msg.sendNickName,
@@ -1014,7 +1016,7 @@ export class OneBotMsgApi {
       sub_type: 'friend',
       message: [],
       message_format: 'array',
-      post_type: this.core.selfInfo.uin == msg.senderUin ? EventType.MESSAGE_SENT : EventType.MESSAGE,
+      post_type: this.core.selfInfo.uin === msg.senderUin ? EventType.MESSAGE_SENT : EventType.MESSAGE,
     };
   }
 
@@ -1059,7 +1061,7 @@ export class OneBotMsgApi {
 
   private async parseMessageSegments (msg: RawMessage, parseMultMsg: boolean, disableGetUrl: boolean = false, quick_reply: boolean = false): Promise<OB11MessageData[]> {
     const msgSegments = await Promise.allSettled(msg.elements.map(
-      async (element) => {
+      async (element): Promise<OB11MessageData | null> => {
         for (const key in element) {
           if (keyCanBeParsed(key, this.rawToOb11Converters) && element[key]) {
             const converters = this.rawToOb11Converters[key] as (
@@ -1080,6 +1082,7 @@ export class OneBotMsgApi {
             return parsedElement;
           }
         }
+        return null;
       }
     ));
 
@@ -1119,10 +1122,10 @@ export class OneBotMsgApi {
         continue;
       }
       const converter = this.ob11ToRawConverters[sendMsg.type] as ((
-        sendMsg: Extract<OB11MessageData, { type: OB11MessageData['type'] }>,
+        sendMsg: Extract<OB11MessageData, { type: OB11MessageData['type']; }>,
         context: SendMessageContext,
       ) => Promise<SendMessageElement | undefined>) | undefined;
-      if (converter == undefined) {
+      if (converter === undefined) {
         throw new Error('未知的消息类型：' + sendMsg.type);
       }
       const callResult = converter(
@@ -1175,8 +1178,6 @@ export class OneBotMsgApi {
         peerUid: peer.peerUid,
       }, returnMsg.msgId);
       return returnMsg;
-    } catch (error) {
-      throw error;
     } finally {
       cleanTaskQueue.addFiles(deleteAfterSentFiles, timeout);
       // setTimeout(async () => {
@@ -1228,12 +1229,12 @@ export class OneBotMsgApi {
       let url = '';
       if (mixElement?.picElement && rawMessage) {
         const tempData =
-                    await this.obContext.apis.MsgApi.rawToOb11Converters.picElement?.(mixElement?.picElement, rawMessage, mixElement, { parseMultMsg: false, disableGetUrl: false, quick_reply: false }) as OB11MessageImage | undefined;
+          await this.obContext.apis.MsgApi.rawToOb11Converters.picElement?.(mixElement?.picElement, rawMessage, mixElement, { parseMultMsg: false, disableGetUrl: false, quick_reply: false }) as OB11MessageImage | undefined;
         url = tempData?.data.url ?? '';
       }
       if (mixElement?.videoElement && rawMessage) {
         const tempData =
-                    await this.obContext.apis.MsgApi.rawToOb11Converters.videoElement?.(mixElement?.videoElement, rawMessage, mixElement, { parseMultMsg: false, disableGetUrl: false, quick_reply: false }) as OB11MessageVideo | undefined;
+          await this.obContext.apis.MsgApi.rawToOb11Converters.videoElement?.(mixElement?.videoElement, rawMessage, mixElement, { parseMultMsg: false, disableGetUrl: false, quick_reply: false }) as OB11MessageVideo | undefined;
         url = tempData?.data.url ?? '';
       }
       return url !== '' ? url : await this.core.apis.FileApi.downloadMedia(msgId, peer.chatType, peer.peerUid, elementId, '', '');
@@ -1282,7 +1283,7 @@ export class OneBotMsgApi {
   async parseSysMessage (msg: number[]) {
     const SysMessage = new NapProtoMsg(PushMsgBody).decode(Uint8Array.from(msg));
     // 邀请需要解grayTipElement
-    if (SysMessage.contentHead.type == 33 && SysMessage.body?.msgContent) {
+    if (SysMessage.contentHead.type === 33 && SysMessage.body?.msgContent) {
       const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
       await this.core.apis.GroupApi.refreshGroupMemberCache(groupChange.groupUin.toString(), true);
       const operatorUid = await this.waitGroupNotify(
@@ -1295,9 +1296,9 @@ export class OneBotMsgApi {
         groupChange.groupUin,
         groupChange.memberUid ? +await this.core.apis.UserApi.getUinByUidV2(groupChange.memberUid) : 0,
         operatorUid ? +await this.core.apis.UserApi.getUinByUidV2(operatorUid) : 0,
-        groupChange.decreaseType == 131 ? 'invite' : 'approve'
+        groupChange.decreaseType === 131 ? 'invite' : 'approve'
       );
-    } else if (SysMessage.contentHead.type == 34 && SysMessage.body?.msgContent) {
+    } else if (SysMessage.contentHead.type === 34 && SysMessage.body?.msgContent) {
       const groupChange = new NapProtoMsg(GroupChange).decode(SysMessage.body.msgContent);
 
       let operator_uid_parse: string | undefined;
@@ -1307,14 +1308,14 @@ export class OneBotMsgApi {
           // 可能是protobuf，尝试解析
           try {
             operator_uid_parse = new NapProtoMsg(GroupChangeInfo).decode(groupChange.operatorInfo).operator?.operatorUid;
-          } catch (error) {
+          } catch (_error) {
             // protobuf解析失败，fallback到字符串解析
             try {
               const decoded = new TextDecoder('utf-8').decode(groupChange.operatorInfo);
               // 检查是否包含非ASCII字符，如果包含则丢弃
               const isAsciiOnly = [...decoded].every(char => char.charCodeAt(0) >= 32 && char.charCodeAt(0) <= 126);
               operator_uid_parse = isAsciiOnly ? decoded : '';
-            } catch (e2) {
+            } catch (_e2) {
               operator_uid_parse = '';
             }
           }
@@ -1325,7 +1326,7 @@ export class OneBotMsgApi {
             // 检查是否包含非ASCII字符，如果包含则丢弃
             const isAsciiOnly = [...decoded].every(char => char.charCodeAt(0) >= 32 && char.charCodeAt(0) <= 126);
             operator_uid_parse = isAsciiOnly ? decoded : '';
-          } catch (e) {
+          } catch (_e) {
             operator_uid_parse = '';
           }
         }
@@ -1351,7 +1352,7 @@ export class OneBotMsgApi {
         operatorUid ? +await this.core.apis.UserApi.getUinByUidV2(operatorUid) : 0,
         this.groupChangDecreseType2String(groupChange.decreaseType)
       );
-    } else if (SysMessage.contentHead.type == 44 && SysMessage.body?.msgContent) {
+    } else if (SysMessage.contentHead.type === 44 && SysMessage.body?.msgContent) {
       const groupAmin = new NapProtoMsg(GroupAdmin).decode(SysMessage.body.msgContent);
       await this.core.apis.GroupApi.refreshGroupMemberCache(groupAmin.groupUin.toString(), true);
       let enabled = false;
@@ -1369,7 +1370,7 @@ export class OneBotMsgApi {
         +await this.core.apis.UserApi.getUinByUidV2(uid),
         enabled ? 'set' : 'unset'
       );
-    } else if (SysMessage.contentHead.type == 87 && SysMessage.body?.msgContent) {
+    } else if (SysMessage.contentHead.type === 87 && SysMessage.body?.msgContent) {
       const groupInvite = new NapProtoMsg(GroupInvite).decode(SysMessage.body.msgContent);
       let request_seq = '';
       try {
@@ -1435,7 +1436,7 @@ export class OneBotMsgApi {
         '',
         request_seq
       );
-    } else if (SysMessage.contentHead.type == 528 && SysMessage.contentHead.subType == 39 && SysMessage.body?.msgContent) {
+    } else if (SysMessage.contentHead.type === 528 && SysMessage.contentHead.subType === 39 && SysMessage.body?.msgContent) {
       return await this.obContext.apis.UserApi.parseLikeEvent(SysMessage.body?.msgContent);
     }
     // else if (SysMessage.contentHead.type == 732 && SysMessage.contentHead.subType == 16 && SysMessage.body?.msgContent) {

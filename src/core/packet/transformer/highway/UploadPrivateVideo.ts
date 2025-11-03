@@ -6,10 +6,6 @@ import crypto from 'node:crypto';
 import { PacketMsgVideoElement } from '@/core/packet/message/element';
 
 class UploadPrivateVideo extends PacketTransformer<typeof proto.NTV2RichMediaResp> {
-  constructor () {
-    super();
-  }
-
   build (peerUin: string, video: PacketMsgVideoElement): OidbPacket {
     if (!video.fileSize || !video.thumbSize) throw new Error('video.fileSize or video.thumbSize is empty');
     const data = new NapProtoMsg(proto.NTV2RichMediaReq).encode({

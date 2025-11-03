@@ -48,7 +48,8 @@ const normalizePath = (inputPath: string): string => {
   }
 
   // 对输入路径进行清理，移除潜在的危险字符
-  const cleanedPath = inputPath.replace(/[\x00-\x1f\x7f]/g, ''); // 移除控制字符
+  // eslint-disable-next-line no-control-regex
+  const cleanedPath = inputPath.replace(/[\x01-\x1f\x7f]/g, ''); // 移除控制字符
 
   // 如果是Windows且输入为纯盘符（可能带或不带斜杠），统一返回 "X:\"
   if (isWindows && /^[A-Z]:[\\/]*$/i.test(cleanedPath)) {
@@ -69,7 +70,7 @@ const normalizePath = (inputPath: string): string => {
   }
 
   // 额外安全检查：确保规范化后的路径不包含连续的路径分隔符
-  const finalPath = normalized.replace(/[\\\/]+/g, path.sep);
+  const finalPath = normalized.replace(/[\\/]+/g, path.sep);
 
   return finalPath;
 };
@@ -97,6 +98,7 @@ const containsPathTraversal = (inputPath: string): boolean => {
     /\\\.\./, // \.. 模式（Windows）
     /%2e%2e/i, // URL编码的..
     /%252e%252e/i, // 双重URL编码的..
+    // eslint-disable-next-line no-control-regex
     /\.\.\x00/, // null字节攻击
     /\0/, // null字节
   ];
@@ -162,7 +164,7 @@ export const ListFilesHandler: RequestHandler = async (req, res) => {
     let normalizedPath: string;
     try {
       normalizedPath = normalizePath(requestPath);
-    } catch (pathError) {
+    } catch (_pathError) {
       return sendError(res, '无效的文件路径');
     }
 
@@ -210,7 +212,7 @@ export const ListFilesHandler: RequestHandler = async (req, res) => {
           size: stat.size,
           mtime: stat.mtime,
         });
-      } catch (error) {
+      } catch (_error) {
         // 忽略无法访问的文件
         // console.warn(`无法访问文件 ${file}:`, error);
         continue;
@@ -223,8 +225,8 @@ export const ListFilesHandler: RequestHandler = async (req, res) => {
     }
 
     return sendSuccess(res, fileInfos);
-  } catch (error) {
-    console.error('读取目录失败:', error);
+  } catch (_error) {
+    console.error('读取目录失败:', _error);
     return sendError(res, '读取目录失败');
   }
 };
@@ -237,7 +239,7 @@ export const CreateDirHandler: RequestHandler = async (req, res) => {
     let normalizedPath: string;
     try {
       normalizedPath = normalizePath(dirPath);
-    } catch (pathError) {
+    } catch (_pathError) {
       return sendError(res, '无效的文件路径');
     }
 
@@ -253,7 +255,7 @@ export const CreateDirHandler: RequestHandler = async (req, res) => {
 
     await fsProm.mkdir(normalizedPath, { recursive: true });
     return sendSuccess(res, true);
-  } catch (error) {
+  } catch (_error) {
     return sendError(res, '创建目录失败');
   }
 };
@@ -266,7 +268,7 @@ export const DeleteHandler: RequestHandler = async (req, res) => {
     let normalizedPath: string;
     try {
       normalizedPath = normalizePath(targetPath);
-    } catch (pathError) {
+    } catch (_pathError) {
       return sendError(res, '无效的文件路径');
     }
 
@@ -282,7 +284,7 @@ export const DeleteHandler: RequestHandler = async (req, res) => {
       await fsProm.unlink(normalizedPath);
     }
     return sendSuccess(res, true);
-  } catch (error) {
+  } catch (_error) {
     return sendError(res, '删除失败');
   }
 };
@@ -295,7 +297,7 @@ export const BatchDeleteHandler: RequestHandler = async (req, res) => {
       let normalizedPath: string;
       try {
         normalizedPath = normalizePath(targetPath);
-      } catch (pathError) {
+      } catch (_pathError) {
         return sendError(res, '无效的文件路径');
       }
 
@@ -312,7 +314,7 @@ export const BatchDeleteHandler: RequestHandler = async (req, res) => {
       }
     }
     return sendSuccess(res, true);
-  } catch (error) {
+  } catch (_error) {
     return sendError(res, '批量删除失败');
   }
 };
@@ -323,7 +325,7 @@ export const ReadFileHandler: RequestHandler = async (req, res) => {
     let filePath: string;
     try {
       filePath = normalizePath(getQueryStringParam(req.query['path']));
-    } catch (pathError) {
+    } catch (_pathError) {
       return sendError(res, '无效的文件路径');
     }
 
@@ -340,7 +342,7 @@ export const ReadFileHandler: RequestHandler = async (req, res) => {
     }
 
     return sendSuccess(res, content);
-  } catch (error) {
+  } catch (_error) {
     return sendError(res, '读取文件失败');
   }
 };
@@ -354,7 +356,7 @@ export const WriteFileHandler: RequestHandler = async (req, res) => {
     let normalizedPath: string;
     try {
       normalizedPath = normalizePath(filePath);
-    } catch (pathError) {
+    } catch (_pathError) {
       return sendError(res, '无效的文件路径');
     }
 
@@ -376,7 +378,7 @@ export const WriteFileHandler: RequestHandler = async (req, res) => {
           configToWrite.token = memoryToken;
           finalContent = JSON.stringify(configToWrite, null, 4);
         }
-      } catch (e) {
+      } catch (_e) {
         // 如果解析失败 说明不符合json格式 不允许写入
         return sendError(res, '写入的WebUI配置文件内容格式错误，必须是合法的JSON');
       }
@@ -384,7 +386,7 @@ export const WriteFileHandler: RequestHandler = async (req, res) => {
 
     await fsProm.writeFile(normalizedPath, finalContent, 'utf-8');
     return sendSuccess(res, true);
-  } catch (error) {
+  } catch (_error) {
     return sendError(res, '写入文件失败');
   }
 };
@@ -397,7 +399,7 @@ export const CreateFileHandler: RequestHandler = async (req, res) => {
     let normalizedPath: string;
     try {
       normalizedPath = normalizePath(filePath);
-    } catch (pathError) {
+    } catch (_pathError) {
       return sendError(res, '无效的文件路径');
     }
 
@@ -413,7 +415,7 @@ export const CreateFileHandler: RequestHandler = async (req, res) => {
 
     await fsProm.writeFile(normalizedPath, '', 'utf-8');
     return sendSuccess(res, true);
-  } catch (error) {
+  } catch (_error) {
     return sendError(res, '创建文件失败');
   }
 };
@@ -428,7 +430,7 @@ export const RenameHandler: RequestHandler = async (req, res) => {
     try {
       normalizedOldPath = normalizePath(oldPath);
       normalizedNewPath = normalizePath(newPath);
-    } catch (pathError) {
+    } catch (_pathError) {
       return sendError(res, '无效的文件路径');
     }
 
@@ -439,7 +441,7 @@ export const RenameHandler: RequestHandler = async (req, res) => {
 
     await fsProm.rename(normalizedOldPath, normalizedNewPath);
     return sendSuccess(res, true);
-  } catch (error) {
+  } catch (_error) {
     return sendError(res, '重命名失败');
   }
 };
@@ -454,7 +456,7 @@ export const MoveHandler: RequestHandler = async (req, res) => {
     try {
       normalizedSourcePath = normalizePath(sourcePath);
       normalizedTargetPath = normalizePath(targetPath);
-    } catch (pathError) {
+    } catch (_pathError) {
       return sendError(res, '无效的文件路径');
     }
 
@@ -465,7 +467,7 @@ export const MoveHandler: RequestHandler = async (req, res) => {
 
     await fsProm.rename(normalizedSourcePath, normalizedTargetPath);
     return sendSuccess(res, true);
-  } catch (error) {
+  } catch (_error) {
     return sendError(res, '移动失败');
   }
 };
@@ -480,7 +482,7 @@ export const BatchMoveHandler: RequestHandler = async (req, res) => {
       try {
         normalizedSourcePath = normalizePath(sourcePath);
         normalizedTargetPath = normalizePath(targetPath);
-      } catch (pathError) {
+      } catch (_pathError) {
         return sendError(res, '无效的文件路径');
       }
 
@@ -492,7 +494,7 @@ export const BatchMoveHandler: RequestHandler = async (req, res) => {
       await fsProm.rename(normalizedSourcePath, normalizedTargetPath);
     }
     return sendSuccess(res, true);
-  } catch (error) {
+  } catch (_error) {
     return sendError(res, '批量移动失败');
   }
 };
@@ -503,7 +505,7 @@ export const DownloadHandler: RequestHandler = async (req, res) => {
     let filePath: string;
     try {
       filePath = normalizePath(getQueryStringParam(req.query['path']));
-    } catch (pathError) {
+    } catch (_pathError) {
       return sendError(res, '无效的文件路径');
     }
 
@@ -535,7 +537,7 @@ export const DownloadHandler: RequestHandler = async (req, res) => {
     res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`);
     const stream = fs.createReadStream(filePath);
     stream.pipe(res);
-  } catch (error) {
+  } catch (_error) {
     return sendError(res, '下载失败');
   }
 };
@@ -543,7 +545,7 @@ export const DownloadHandler: RequestHandler = async (req, res) => {
 // 批量下载：将多个文件/目录打包为 zip 文件下载
 export const BatchDownloadHandler: RequestHandler = async (req, res) => {
   try {
-    const { paths } = req.body as { paths: string[] };
+    const { paths } = req.body as { paths: string[]; };
     if (!paths || !Array.isArray(paths) || paths.length === 0) {
       return sendError(res, '参数错误');
     }
@@ -556,7 +558,7 @@ export const BatchDownloadHandler: RequestHandler = async (req, res) => {
       let normalizedPath: string;
       try {
         normalizedPath = normalizePath(filePath);
-      } catch (pathError) {
+      } catch (_pathError) {
         return sendError(res, '无效的文件路径');
       }
 
@@ -578,7 +580,7 @@ export const BatchDownloadHandler: RequestHandler = async (req, res) => {
     res.on('finish', () => {
       zipStream.destroy();
     });
-  } catch (error) {
+  } catch (_error) {
     return sendError(res, '下载失败');
   }
 };
@@ -588,11 +590,11 @@ export const UploadHandler: RequestHandler = async (req, res) => {
   try {
     await diskUploader(req, res);
     return sendSuccess(res, true, '文件上传成功', true);
-  } catch (error) {
+  } catch (_error) {
     let errorMessage = '文件上传失败';
 
-    if (error instanceof multer.MulterError) {
-      switch (error.code) {
+    if (_error instanceof multer.MulterError) {
+      switch (_error.code) {
         case 'LIMIT_FILE_SIZE':
           errorMessage = '文件大小超过限制（40MB）';
           break;
@@ -600,10 +602,10 @@ export const UploadHandler: RequestHandler = async (req, res) => {
           errorMessage = '无效的文件上传字段';
           break;
         default:
-          errorMessage = `上传错误: ${error.message}`;
+          errorMessage = `上传错误: ${_error.message}`;
       }
-    } else if (error instanceof Error) {
-      errorMessage = error.message;
+    } else if (_error instanceof Error) {
+      errorMessage = _error.message;
     }
     return sendError(res, errorMessage, true);
   }
@@ -647,7 +649,7 @@ export const DeleteWebUIFontHandler: RequestHandler = async (_req, res) => {
 
     await fsProm.unlink(fontPath);
     return sendSuccess(res, true);
-  } catch (error) {
+  } catch (_error) {
     return sendError(res, '删除字体文件失败');
   }
 };

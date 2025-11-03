@@ -43,7 +43,7 @@ export class NTQQMsgApi {
   }
 
   async getMultiMsg (peer: Peer, rootMsgId: string, parentMsgId: string): Promise<GeneralCallResult & {
-    msgList: RawMessage[]
+    msgList: RawMessage[];
   } | undefined> {
     return this.context.session.getMsgService().getMultiMsg(peer, rootMsgId, parentMsgId);
   }
@@ -288,7 +288,7 @@ export class NTQQMsgApi {
       () => true,
       (msgRecords) => msgRecords.some(
         msgRecord => msgRecord.peerUid === destPeer.peerUid &&
-                    msgRecord.senderUid === this.core.selfInfo.uid
+          msgRecord.senderUid === this.core.selfInfo.uid
       )
     );
     for (const msg of msgList) {
@@ -296,11 +296,11 @@ export class NTQQMsgApi {
       if (!arkElement) {
         continue;
       }
-      const forwardData: { app: string } = JSON.parse(arkElement.arkElement?.bytesData ?? '');
-      if (forwardData.app != 'com.tencent.multimsg') {
+      const forwardData: { app: string; } = JSON.parse(arkElement.arkElement?.bytesData ?? '');
+      if (forwardData.app !== 'com.tencent.multimsg') {
         continue;
       }
-      if (msg.peerUid == destPeer.peerUid && msg.senderUid == this.core.selfInfo.uid) {
+      if (msg.peerUid === destPeer.peerUid && msg.senderUid === this.core.selfInfo.uid) {
         return msg;
       }
     }

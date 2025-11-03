@@ -20,7 +20,7 @@ export default class SetGroupAddOption extends OneBotAction<Payload, null> {
       groupQuestion: payload.group_question,
       groupAnswer: payload.group_answer,
     });
-    if (ret.result != 0) {
+    if (ret.result !== 0) {
       throw new Error(`设置群添加选项失败, ${ret.result}:${ret.errMsg}`);
     }
     return null;

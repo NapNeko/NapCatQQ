@@ -31,7 +31,7 @@ export class AuthHelper {
         .update(jsonString, 'utf8')
         .digest('hex');
       return calculatedHmac === credentialJson.Hmac;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

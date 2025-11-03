@@ -54,13 +54,13 @@ export async function NCoreInitFramework (
   //     nick: '',
   //     online: true
   // }
-  const selfInfo = await new Promise<SelfInfo>((resolveSelfInfo) => {
+  const selfInfo = await new Promise<SelfInfo>((resolve) => {
     const loginListener = new NodeIKernelLoginListener();
     loginListener.onQRCodeLoginSucceed = async (loginResult) => {
-      await new Promise<void>(resolvePendingInit => {
-        registerInitCallback(() => resolvePendingInit());
+      await new Promise<void>(resolve => {
+        registerInitCallback(() => resolve());
       });
-      resolveSelfInfo({
+      resolve({
         uid: loginResult.uid,
         uin: loginResult.uin,
         nick: '', // 获取不到
@@ -69,9 +69,9 @@ export async function NCoreInitFramework (
     };
     loginService.addKernelLoginListener(proxiedListenerOf(loginListener, logger));
   });
-    // 过早进入会导致addKernelMsgListener等Listener添加失败
-    // await sleep(2500);
-    // 初始化 NapCatFramework
+  // 过早进入会导致addKernelMsgListener等Listener添加失败
+  // await sleep(2500);
+  // 初始化 NapCatFramework
   const loaderObject = new NapCatFramework(wrapper, session, logger, loginService, selfInfo, basicInfoWrapper, pathWrapper, nativePacketHandler);
   await loaderObject.core.initCore();
 

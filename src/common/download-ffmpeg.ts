@@ -63,7 +63,7 @@ async function findAvailableUrl (): Promise<string | null> {
       if (available) {
         return url;
       }
-    } catch (error) {
+    } catch (_error) {
       // 忽略错误
     }
   }
@@ -106,8 +106,8 @@ async function downloadFile (url: string, destPath: string, progressCallback?: (
             // 2. 距离上次报告至少500毫秒
             // 3. 确保报告100%完成
             if ((currentPercent !== lastReportedPercent &&
-                            (currentPercent - lastReportedPercent >= 1 || currentPercent === 100)) &&
-                            (now - lastReportTime >= 1000 || currentPercent === 100)) {
+              (currentPercent - lastReportedPercent >= 1 || currentPercent === 100)) &&
+              (now - lastReportTime >= 1000 || currentPercent === 100)) {
               progressCallback(currentPercent);
               lastReportedPercent = currentPercent;
               lastReportTime = now;
@@ -146,60 +146,56 @@ async function downloadFile (url: string, destPath: string, progressCallback?: (
  * @param extractDir 解压目标路径
  */
 async function extractBinDirectory (zipPath: string, extractDir: string): Promise<void> {
-  try {
-    // 确保目标目录存在
-    if (!fs.existsSync(extractDir)) {
-      fs.mkdirSync(extractDir, { recursive: true });
-    }
-
-    // 解压文件
-    const zipStream = new compressing.zip.UncompressStream({ source: zipPath });
-
-    return new Promise<void>((resolve, reject) => {
-      // 监听条目事件
-      zipStream.on('entry', (header, stream, next) => {
-        // 获取文件路径
-        const filePath = header.name;
-
-        // 匹配内层bin目录中的文件
-        // 例如：ffmpeg-n7.1.1-6-g48c0f071d4-win64-lgpl-7.1/bin/ffmpeg.exe
-        if (filePath.includes('/bin/') && filePath.endsWith('.exe')) {
-          // 提取文件名
-          const fileName = path.basename(filePath);
-          const targetPath = path.join(extractDir, fileName);
-
-          // 创建写入流
-          const writeStream = fs.createWriteStream(targetPath);
-
-          // 将流管道连接到文件
-          stream.pipe(writeStream);
-
-          // 监听写入完成事件
-          writeStream.on('finish', () => {
-            next();
-          });
-
-          writeStream.on('error', () => {
-            next();
-          });
-        } else {
-          // 跳过不需要的文件
-          stream.resume();
-          next();
-        }
-      });
-
-      zipStream.on('error', (err) => {
-        reject(err);
-      });
-
-      zipStream.on('finish', () => {
-        resolve();
-      });
-    });
-  } catch (err) {
-    throw err;
+  // 确保目标目录存在
+  if (!fs.existsSync(extractDir)) {
+    fs.mkdirSync(extractDir, { recursive: true });
   }
+
+  // 解压文件
+  const zipStream = new compressing.zip.UncompressStream({ source: zipPath });
+
+  return new Promise<void>((resolve, reject) => {
+    // 监听条目事件
+    zipStream.on('entry', (header, stream, next) => {
+      // 获取文件路径
+      const filePath = header.name;
+
+      // 匹配内层bin目录中的文件
+      // 例如：ffmpeg-n7.1.1-6-g48c0f071d4-win64-lgpl-7.1/bin/ffmpeg.exe
+      if (filePath.includes('/bin/') && filePath.endsWith('.exe')) {
+        // 提取文件名
+        const fileName = path.basename(filePath);
+        const targetPath = path.join(extractDir, fileName);
+
+        // 创建写入流
+        const writeStream = fs.createWriteStream(targetPath);
+
+        // 将流管道连接到文件
+        stream.pipe(writeStream);
+
+        // 监听写入完成事件
+        writeStream.on('finish', () => {
+          next();
+        });
+
+        writeStream.on('error', () => {
+          next();
+        });
+      } else {
+        // 跳过不需要的文件
+        stream.resume();
+        next();
+      }
+    });
+
+    zipStream.on('error', (err) => {
+      reject(err);
+    });
+
+    zipStream.on('finish', () => {
+      resolve();
+    });
+  });
 }
 
 /**
@@ -270,7 +266,7 @@ export async function downloadFFmpeg (
     if (progressCallback) progressCallback(95, '清理临时文件');
     try {
       fs.unlinkSync(zipFilePath);
-    } catch (err) {
+    } catch (_err) {
       // 忽略清理临时文件失败的错误
     }
 
@@ -281,7 +277,7 @@ export async function downloadFFmpeg (
     } else {
       return null;
     }
-  } catch (err) {
+  } catch (_err) {
     return null;
   }
 }
@@ -307,7 +303,7 @@ function findExecutableInPath (executable: string): string | null {
       if (fs.existsSync(filePath)) {
         return filePath;
       }
-    } catch (error) {
+    } catch (_error) {
       continue;
     }
   }

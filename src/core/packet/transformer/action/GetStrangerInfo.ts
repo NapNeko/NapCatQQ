@@ -4,10 +4,6 @@ import { OidbPacket, PacketTransformer } from '@/core/packet/transformer/base';
 import OidbBase from '@/core/packet/transformer/oidb/oidbBase';
 
 class GetStrangerInfo extends PacketTransformer<typeof proto.OidbSvcTrpcTcp0XFE1_2RSP> {
-  constructor () {
-    super();
-  }
-
   build (uin: number): OidbPacket {
     const body = new NapProtoMsg(proto.OidbSvcTrpcTcp0XFE1_2).encode({
       uin,

@@ -31,8 +31,8 @@ export class OneBotQuickActionApi {
         .catch(e => this.core.context.logger.logError(e));
     }
     if (eventContext.post_type === 'request') {
-      const friendRequest = eventContext as OB11FriendRequestEvent;
-      const groupRequest = eventContext as OB11GroupRequestEvent;
+      const friendRequest = eventContext as unknown as OB11FriendRequestEvent;
+      const groupRequest = eventContext as unknown as OB11GroupRequestEvent;
       if ((friendRequest).request_type === 'friend') {
         await this.handleFriendRequest(friendRequest, quickAction)
           .catch(e => this.core.context.logger.logError(e));
@@ -45,7 +45,7 @@ export class OneBotQuickActionApi {
 
   async handleMsg (msg: OB11Message, quickAction: QuickAction) {
     const reply = quickAction.reply;
-    const peerContextMode = msg.message_type == 'private' ? ContextMode.Private : ContextMode.Group;
+    const peerContextMode = msg.message_type === 'private' ? ContextMode.Private : ContextMode.Group;
     const peer: Peer = await createContext(this.core, {
       group_id: msg.group_id?.toString(),
       user_id: msg.user_id?.toString(),
@@ -55,7 +55,7 @@ export class OneBotQuickActionApi {
       // let group: Group | undefined;
       let replyMessage: OB11MessageData[] = [];
 
-      if (msg.message_type == 'group') {
+      if (msg.message_type === 'group') {
         // group = await core.apis.GroupApi.getGroup(msg.group_id!.toString());
         replyMessage.push({
           type: 'reply',
@@ -82,9 +82,9 @@ export class OneBotQuickActionApi {
   }
 
   async findNotify (flag: string) {
-    let notify = (await this.core.apis.GroupApi.getSingleScreenNotifies(false, 100)).find(e => e.seq == flag);
+    let notify = (await this.core.apis.GroupApi.getSingleScreenNotifies(false, 100)).find(e => e.seq === flag);
     if (!notify) {
-      notify = (await this.core.apis.GroupApi.getSingleScreenNotifies(true, 100)).find(e => e.seq == flag);
+      notify = (await this.core.apis.GroupApi.getSingleScreenNotifies(true, 100)).find(e => e.seq === flag);
       return { doubt: true, notify };
     }
     return { doubt: false, notify };
@@ -105,7 +105,7 @@ export class OneBotQuickActionApi {
   }
 
   async handleFriendRequest (request: OB11FriendRequestEvent, quickAction: QuickActionFriendRequest) {
-    const notify = (await this.core.apis.FriendApi.getBuddyReq()).buddyReqs.find(e => e.reqTime == request.flag.toString());
+    const notify = (await this.core.apis.FriendApi.getBuddyReq()).buddyReqs.find(e => e.reqTime === request.flag.toString());
     if (!isNull(quickAction.approve) && notify) {
       this.core.apis.FriendApi.handleFriendRequest(notify, !!quickAction.approve).then().catch(e => this.core.context.logger.logError(e));
     }

@@ -4,10 +4,6 @@ import { OidbPacket, PacketBufBuilder, PacketTransformer } from '@/core/packet/t
 import { MiniAppReqParams } from '@/core/packet/entities/miniApp';
 
 class GetMiniAppAdaptShareInfo extends PacketTransformer<typeof proto.MiniAppAdaptShareInfoResp> {
-  constructor () {
-    super();
-  }
-
   build (req: MiniAppReqParams): OidbPacket {
     const data = new NapProtoMsg(proto.MiniAppAdaptShareInfoReq).encode({
       appId: req.sdkId,

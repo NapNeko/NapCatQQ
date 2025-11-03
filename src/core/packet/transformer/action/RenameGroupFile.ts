@@ -4,10 +4,6 @@ import { OidbPacket, PacketTransformer } from '@/core/packet/transformer/base';
 import OidbBase from '@/core/packet/transformer/oidb/oidbBase';
 
 class RenameGroupFile extends PacketTransformer<typeof proto.OidbSvcTrpcTcp0x6D6Response> {
-  constructor () {
-    super();
-  }
-
   build (groupUin: number, fileUUID: string, currentParentDirectory: string, newName: string): OidbPacket {
     const body = new NapProtoMsg(proto.OidbSvcTrpcTcp0x6D6).encode({
       rename: {

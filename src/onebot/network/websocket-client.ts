@@ -4,10 +4,8 @@ import { OB11HeartbeatEvent } from '@/onebot/event/meta/OB11HeartbeatEvent';
 import { NapCatCore } from '@/core';
 import { ActionName } from '@/onebot/action/router';
 import { OB11Response } from '@/onebot/action/OneBotAction';
-import { ActionMap } from '@/onebot/action';
 import { LifeCycleSubType, OB11LifeCycleEvent } from '@/onebot/event/meta/OB11LifeCycleEvent';
 import { WebsocketClientConfig } from '@/onebot/config/config';
-import { NapCatOneBot11Adapter } from '@/onebot';
 import { IOB11NetworkAdapter } from '@/onebot/network/adapter';
 import json5 from 'json5';
 
@@ -15,11 +13,7 @@ export class OB11WebSocketClientAdapter extends IOB11NetworkAdapter<WebsocketCli
   private connection: WebSocket | null = null;
   private heartbeatRef: NodeJS.Timeout | null = null;
 
-  constructor (name: string, config: WebsocketClientConfig, core: NapCatCore, obContext: NapCatOneBot11Adapter, actions: ActionMap) {
-    super(name, config, core, obContext, actions);
-  }
-
-  async onEvent<T extends OB11EmitEventContent>(event: T) {
+  async onEvent<T extends OB11EmitEventContent> (event: T) {
     if (this.connection && this.connection.readyState === WebSocket.OPEN) {
       this.connection.send(JSON.stringify(event));
     }
@@ -60,7 +54,7 @@ export class OB11WebSocketClientAdapter extends IOB11NetworkAdapter<WebsocketCli
     }
   }
 
-  private async checkStateAndReply<T>(data: T) {
+  private async checkStateAndReply<T> (data: T) {
     return new Promise<void>((resolve, reject) => {
       if (this.connection && this.connection.readyState === WebSocket.OPEN) {
         this.connection.send(JSON.stringify(data));
@@ -134,7 +128,7 @@ export class OB11WebSocketClientAdapter extends IOB11NetworkAdapter<WebsocketCli
   }
 
   private async handleMessage (message: RawData) {
-    let receiveData: { action: typeof ActionName[keyof typeof ActionName], params?: any, echo?: any } = { action: ActionName.Unknown, params: {} };
+    let receiveData: { action: typeof ActionName[keyof typeof ActionName], params?: any, echo?: any; } = { action: ActionName.Unknown, params: {} };
     let echo;
 
     try {

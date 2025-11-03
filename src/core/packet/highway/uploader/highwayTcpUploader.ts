@@ -60,7 +60,7 @@ export class HighwayTcpUploader extends IHighwayUploader {
           socket.end();
           reject(new Error('Upload aborted due to timeout'));
         }
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
         const [head, _] = Frame.unpack(chunk);
         handleRspHeader(head);
       });

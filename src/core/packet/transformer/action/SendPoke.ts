@@ -4,10 +4,6 @@ import { OidbPacket, PacketTransformer } from '@/core/packet/transformer/base';
 import OidbBase from '@/core/packet/transformer/oidb/oidbBase';
 
 class SendPoke extends PacketTransformer<typeof proto.OidbSvcTrpcTcpBase> {
-  constructor () {
-    super();
-  }
-
   build (is_group: boolean, peer: number, target: number): OidbPacket {
     const payload = {
       uin: target,

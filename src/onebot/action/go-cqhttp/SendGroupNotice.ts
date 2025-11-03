@@ -21,7 +21,7 @@ export class SendGroupNotice extends OneBotAction<Payload, null> {
   override actionName = ActionName.GoCQHTTP_SendGroupNotice;
   override payloadSchema = SchemaData;
   async _handle (payload: Payload) {
-    let UploadImage: { id: string, width: number, height: number } | undefined;
+    let UploadImage: { id: string, width: number, height: number; } | undefined;
     if (payload.image) {
       // 公告图逻辑
       const {
@@ -36,7 +36,7 @@ export class SendGroupNotice extends OneBotAction<Payload, null> {
       }
       await checkFileExist(path, 5000);
       const ImageUploadResult = await this.core.apis.GroupApi.uploadGroupBulletinPic(payload.group_id.toString(), path);
-      if (ImageUploadResult.errCode != 0) {
+      if (ImageUploadResult.errCode !== 0) {
         throw new Error(`群公告${payload.image}设置失败,图片上传失败`);
       }
 
@@ -56,7 +56,7 @@ export class SendGroupNotice extends OneBotAction<Payload, null> {
       UploadImage?.width,
       UploadImage?.height
     );
-    if (!publishGroupBulletinResult || publishGroupBulletinResult.ec != 0) {
+    if (!publishGroupBulletinResult || publishGroupBulletinResult.ec !== 0) {
       throw new Error(`设置群公告失败,错误信息:${publishGroupBulletinResult?.em}`);
     }
     return null;

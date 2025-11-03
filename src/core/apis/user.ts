@@ -60,7 +60,7 @@ export class NTQQUserApi {
     return this.context.session.getBuddyService().getBuddyRecommendContactArkJson(uin, sencenID);
   }
 
-  async like (uid: string, count = 1): Promise<{ result: number, errMsg: string, succCounts: number }> {
+  async like (uid: string, count = 1): Promise<{ result: number, errMsg: string, succCounts: number; }> {
     return this.context.session.getProfileLikeService().setBuddyProfileLike({
       friendUid: uid,
       sourceId: 71,
@@ -134,9 +134,9 @@ export class NTQQUserApi {
   async getCookies (domain: string) {
     const ClientKeyData = await this.forceFetchClientKey();
     const requestUrl = 'https://ssl.ptlogin2.qq.com/jump?ptlang=1033&clientuin=' + this.core.selfInfo.uin +
-            '&clientkey=' + ClientKeyData.clientKey + '&u1=https%3A%2F%2F' + domain + '%2F' + this.core.selfInfo.uin + '%2Finfocenter&keyindex=19%27';
+      '&clientkey=' + ClientKeyData.clientKey + '&u1=https%3A%2F%2F' + domain + '%2F' + this.core.selfInfo.uin + '%2Finfocenter&keyindex=19%27';
     const data = await RequestUtil.HttpsGetCookies(requestUrl);
-    if (!data['p_skey'] || data['p_skey'].length == 0) {
+    if (!data['p_skey'] || data['p_skey'].length === 0) {
       try {
         const pskey = (await this.getPSkey([domain])).domainPskeyMap.get(domain);
         if (pskey) data['p_skey'] = pskey;
@@ -194,11 +194,11 @@ export class NTQQUserApi {
     }
 
     const fallback =
-            new Fallback<string | undefined>((uid) => FallbackUtil.boolchecker(uid, uid !== undefined && uid.indexOf('*') === -1 && uid !== ''))
-              .add(() => this.context.session.getUixConvertService().getUid([uin]).then((data) => data.uidInfo.get(uin)))
-              .add(() => this.context.session.getProfileService().getUidByUin('FriendsServiceImpl', [uin]).get(uin))
-              .add(() => this.context.session.getGroupService().getUidByUins([uin]).then((data) => data.uids.get(uin)))
-              .add(() => this.getUserDetailInfoByUin(uin).then((data) => data.detail.uid));
+      new Fallback<string | undefined>((uid) => FallbackUtil.boolchecker(uid, uid !== undefined && uid.indexOf('*') === -1 && uid !== ''))
+        .add(() => this.context.session.getUixConvertService().getUid([uin]).then((data) => data.uidInfo.get(uin)))
+        .add(() => this.context.session.getProfileService().getUidByUin('FriendsServiceImpl', [uin]).get(uin))
+        .add(() => this.context.session.getGroupService().getUidByUins([uin]).then((data) => data.uids.get(uin)))
+        .add(() => this.getUserDetailInfoByUin(uin).then((data) => data.detail.uid));
 
     const uid = await fallback.run().catch(() => '');
     return uid ?? '';

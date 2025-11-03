@@ -13,10 +13,10 @@ export class OneBotFriendApi {
   // 使用前预先判断 busiId 1061
   async parsePrivatePokeEvent (grayTipElement: GrayTipElement, uin: number) {
     const json = JSON.parse(grayTipElement.jsonGrayTipElement.jsonStr);
-    const pokedetail: Array<{ uid: string }> = json.items;
+    const pokedetail: Array<{ uid: string; }> = json.items;
     // 筛选item带有uid的元素
     const poke_uid = pokedetail.filter(item => item.uid);
-    if (poke_uid.length == 2 && poke_uid[0]?.uid && poke_uid[1]?.uid) {
+    if (poke_uid.length === 2 && poke_uid[0]?.uid && poke_uid[1]?.uid) {
       return new OB11FriendPokeEvent(
         this.core,
         uin,

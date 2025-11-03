@@ -18,7 +18,7 @@ export default class SetGroupSearch extends OneBotAction<Payload, null> {
       noCodeFingerOpenFlag: payload.no_code_finger_open,
       noFingerOpenFlag: payload.no_finger_open,
     });
-    if (ret.result != 0) {
+    if (ret.result !== 0) {
       throw new Error(`设置群搜索失败, ${ret.result}:${ret.errMsg}`);
     }
     return null;

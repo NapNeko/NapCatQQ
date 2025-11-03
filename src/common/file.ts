@@ -13,7 +13,7 @@ type Uri2LocalRes = {
   success: boolean,
   errMsg: string,
   fileName: string,
-  path: string
+  path: string;
 };
 
 // 定义一个异步函数来检查文件是否存在
@@ -47,7 +47,7 @@ export async function checkFileExistV2 (path: string, timeout: number = 3000): P
 
 // 转换超时时间至 Promise
 function timeoutPromise (timeout: number, errorMsg: string): Promise<void> {
-  return new Promise((_, reject) => {
+  return new Promise((_resolve, reject) => {
     setTimeout(() => {
       reject(new Error(errorMsg));
     }, timeout);
@@ -59,7 +59,7 @@ async function checkFile (path: string): Promise<void> {
   try {
     await stat(path);
   } catch (error: unknown) {
-    if ((error as Error & { code: string }).code === 'ENOENT') {
+    if ((error as Error & { code: string; }).code === 'ENOENT') {
       // 如果文件不存在，则抛出一个错误
       throw new Error(`文件不存在: ${path}`);
     } else {
@@ -169,6 +169,7 @@ export async function checkUriType (Uri: string) {
       const data = uri.split(',')[1];
       if (data) return { Uri: data, Type: FileUriType.Base64 };
     }
+    return undefined;
   }, Uri);
   if (OtherFileRet) return OtherFileRet;
 

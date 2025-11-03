@@ -5,10 +5,6 @@ import OidbBase from '@/core/packet/transformer/oidb/oidbBase';
 import { AIVoiceChatType } from '@/core/packet/entities/aiChat';
 
 class FetchAiVoiceList extends PacketTransformer<typeof proto.OidbSvcTrpcTcp0X929D_0Resp> {
-  constructor () {
-    super();
-  }
-
   build (groupUin: number, chatType: AIVoiceChatType): OidbPacket {
     const data = new NapProtoMsg(proto.OidbSvcTrpcTcp0X929D_0).encode({
       groupUin,

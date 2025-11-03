@@ -3,10 +3,6 @@ import { NapProtoMsg } from '@napneko/nap-proto-core';
 import { OidbPacket, PacketBufBuilder, PacketTransformer } from '@/core/packet/transformer/base';
 
 class DownloadForwardMsg extends PacketTransformer<typeof proto.RecvLongMsgResp> {
-  constructor () {
-    super();
-  }
-
   build (uid: string, resId: string): OidbPacket {
     const req = new NapProtoMsg(proto.RecvLongMsgReq).encode({
       info: {

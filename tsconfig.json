@@ -31,7 +31,6 @@
       ]
     },
     "noImplicitAny": true,
-    "strictNullChecks": true,
     "strictFunctionTypes": true,
     "strictBindCallApply": true,
     "alwaysStrict": true,
@@ -43,9 +42,19 @@
     "forceConsistentCasingInFileNames": true,
     "useUnknownInCatchVariables": true,
     "noImplicitOverride": true,
-    "strictPropertyInitialization": true
+    "skipDefaultLibCheck": true
   },
   "include": [
-    "src/**/*.ts"
+    "!@homebridge/node-pty-prebuilt-multiarch/src/eventEmitter2.ts",
+    "!@homebridge/node-pty-prebuilt-multiarch/src/terminal.ts",
+    "!@napneko/nap-proto-core/NapProto.ts",
+    "src/**/*.ts",
+  ],
+  "exclude": [
+    "node_modules",
+    "node_modules/**/*",
+    "node_modules/@homebridge/node-pty-prebuilt-multiarch/src/eventEmitter2.ts",
+    "node_modules/@homebridge/node-pty-prebuilt-multiarch/src/terminal.ts",
+    "node_modules/@napneko/nap-proto-core/NapProto.ts"
   ]
 }

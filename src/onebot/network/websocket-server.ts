@@ -1,5 +1,5 @@
 import { OB11EmitEventContent, OB11NetworkReloadType } from './index';
-import urlParse from 'url';
+import { URL } from 'url';
 import { RawData, WebSocket, WebSocketServer } from 'ws';
 import { Mutex } from 'async-mutex';
 import { OB11Response } from '@/onebot/action/OneBotAction';
@@ -89,7 +89,7 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
     }
   }
 
-  async onEvent<T extends OB11EmitEventContent>(event: T) {
+  async onEvent<T extends OB11EmitEventContent> (event: T) {
     this.wsClientsMutex.runExclusive(async () => {
       const promises = this.wsClientWithEvent.map((wsClient) => {
         return new Promise<void>((resolve, reject) => {
@@ -154,8 +154,9 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
   }
 
   private authorize (token: string | undefined, wsClient: WebSocket, wsReq: IncomingMessage) {
-    if (!token || token.length == 0) return true;// 客户端未设置密钥
-    const QueryClientToken = urlParse.parse(wsReq?.url || '', true).query['access_token'];
+    if (!token || token.length === 0) return true;// 客户端未设置密钥
+    const url = new URL(wsReq?.url || '', `http://${wsReq.headers.host}`);
+    const QueryClientToken = url.searchParams.get('access_token');
     const HeaderClientToken = wsReq.headers.authorization?.split('Bearer ').pop() || '';
     const ClientToken = typeof (QueryClientToken) === 'string' && QueryClientToken !== '' ? QueryClientToken : HeaderClientToken;
     if (ClientToken === token) {
@@ -166,7 +167,7 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
     return false;
   }
 
-  private async checkStateAndReply<T>(data: T, wsClient: WebSocket) {
+  private async checkStateAndReply<T> (data: T, wsClient: WebSocket) {
     return await new Promise<void>((resolve, reject) => {
       if (wsClient.readyState === WebSocket.OPEN) {
         wsClient.send(JSON.stringify(data));
@@ -178,7 +179,7 @@ export class OB11WebSocketServerAdapter extends IOB11NetworkAdapter<WebsocketSer
   }
 
   private async handleMessage (wsClient: WebSocket, message: RawData) {
-    let receiveData: { action: typeof ActionName[keyof typeof ActionName], params?: any, echo?: any } = { action: ActionName.Unknown, params: {} };
+    let receiveData: { action: typeof ActionName[keyof typeof ActionName], params?: any, echo?: any; } = { action: ActionName.Unknown, params: {} };
     let echo;
     try {
       receiveData = json5.parse(message.toString());

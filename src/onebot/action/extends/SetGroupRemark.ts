@@ -14,7 +14,7 @@ export default class SetGroupRemark extends OneBotAction<Payload, null> {
   override payloadSchema = SchemaData;
   async _handle (payload: Payload): Promise<null> {
     const ret = await this.core.apis.GroupApi.setGroupRemark(payload.group_id, payload.remark);
-    if (ret.result != 0) {
+    if (ret.result !== 0) {
       throw new Error(`设置群备注失败, ${ret.result}:${ret.errMsg}`);
     }
     return null;

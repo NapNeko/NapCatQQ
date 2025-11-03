@@ -265,11 +265,11 @@ export function argsToCommandLine (file: string, args: ArgvOrCommandLine): strin
     const hasLopsidedEnclosingQuote = xOr((arg![0] !== '"'), (arg![arg!.length - 1] !== '"'));
     const hasNoEnclosingQuotes = ((arg![0] !== '"') && (arg![arg!.length - 1] !== '"'));
     const quote =
-            arg === '' ||
-            (arg!.indexOf(' ') !== -1 ||
-                arg!.indexOf('\t') !== -1) &&
-            ((arg!.length > 1) &&
-                (hasLopsidedEnclosingQuote || hasNoEnclosingQuotes));
+      arg === '' ||
+      ((arg!.indexOf(' ') !== -1 ||
+        arg!.indexOf('\t') !== -1) &&
+        ((arg!.length > 1) &&
+          (hasLopsidedEnclosingQuote || hasNoEnclosingQuotes)));
     if (quote) {
       result += '"';
     }

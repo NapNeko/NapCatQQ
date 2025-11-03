@@ -3,10 +3,6 @@ import { NapProtoMsg } from '@napneko/nap-proto-core';
 import { OidbPacket, PacketBufBuilder, PacketTransformer } from '@/core/packet/transformer/base';
 
 class FetchC2CMessage extends PacketTransformer<typeof proto.SsoGetC2cMsgResponse> {
-  constructor () {
-    super();
-  }
-
   build (targetUid: string, startSeq: number, endSeq: number): OidbPacket {
     const req = new NapProtoMsg(proto.SsoGetC2cMsg).encode({
       friendUid: targetUid,

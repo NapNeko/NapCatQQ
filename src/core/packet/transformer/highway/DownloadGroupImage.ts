@@ -5,10 +5,6 @@ import OidbBase from '@/core/packet/transformer/oidb/oidbBase';
 import { IndexNode } from '@/core/packet/transformer/proto';
 
 class DownloadGroupImage extends PacketTransformer<typeof proto.NTV2RichMediaResp> {
-  constructor () {
-    super();
-  }
-
   build (group_uin: number, node: NapProtoEncodeStructType<typeof IndexNode>): OidbPacket {
     const body = new NapProtoMsg(proto.NTV2RichMediaReq).encode({
       reqHead: {

@@ -3,10 +3,6 @@ import { NapProtoMsg } from '@napneko/nap-proto-core';
 import { OidbPacket, PacketBufBuilder, PacketTransformer } from '@/core/packet/transformer/base';
 
 class OidbBase extends PacketTransformer<typeof proto.OidbSvcTrpcTcpBase> {
-  constructor () {
-    super();
-  }
-
   build (cmd: number, subCmd: number, body: Uint8Array, isUid: boolean = true, _isLafter: boolean = false): OidbPacket {
     const data = new NapProtoMsg(proto.OidbSvcTrpcTcpBase).encode({
       command: cmd,

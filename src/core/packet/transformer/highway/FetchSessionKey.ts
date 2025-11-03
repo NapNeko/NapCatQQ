@@ -3,10 +3,6 @@ import { NapProtoMsg } from '@napneko/nap-proto-core';
 import { OidbPacket, PacketBufBuilder, PacketTransformer } from '@/core/packet/transformer/base';
 
 class FetchSessionKey extends PacketTransformer<typeof proto.HttpConn0x6ff_501Response> {
-  constructor () {
-    super();
-  }
-
   build (): OidbPacket {
     const req = new NapProtoMsg(proto.HttpConn0x6ff_501).encode({
       httpConn: {

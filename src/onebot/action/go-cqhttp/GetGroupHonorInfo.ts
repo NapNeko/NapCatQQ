@@ -10,7 +10,17 @@ const SchemaData = Type.Object({
 
 type Payload = Static<typeof SchemaData>;
 
-export class GetGroupHonorInfo extends OneBotAction<Payload, Array<unknown>> {
+interface HonorInfo {
+  group_id: number;
+  current_talkative: Record<string, unknown>;
+  talkative_list: unknown[];
+  performer_list: unknown[];
+  legend_list: unknown[];
+  emotion_list: unknown[];
+  strong_newbie_list: unknown[];
+}
+
+export class GetGroupHonorInfo extends OneBotAction<Payload, HonorInfo> {
   override actionName = ActionName.GetGroupHonorInfo;
   override payloadSchema = SchemaData;
 

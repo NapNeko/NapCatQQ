@@ -54,7 +54,7 @@ class CleanupQueue {
   private fileExists (filePath: string): boolean {
     try {
       return fs.existsSync(filePath);
-    } catch (error) {
+    } catch (_error) {
       // console.log(`检查文件存在出错: ${filePath}`, error);
       return false;
     }

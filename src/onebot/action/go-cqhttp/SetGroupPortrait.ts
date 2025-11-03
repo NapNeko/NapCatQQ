@@ -27,9 +27,9 @@ export default class SetGroupPortrait extends OneBotAction<Payload, GeneralCallR
       if (!ret) {
         throw new Error(`头像${payload.file}设置失败,api无返回`);
       }
-      if (ret.result as number == 1004022) {
+      if (ret.result as number === 1004022) {
         throw new Error(`头像${payload.file}设置失败，文件可能不是图片格式或权限不足`);
-      } else if (ret.result != 0) {
+      } else if (ret.result !== 0) {
         throw new Error(`头像${payload.file}设置失败,未知的错误,${ret.result}:${ret.errMsg}`);
       }
       return ret;

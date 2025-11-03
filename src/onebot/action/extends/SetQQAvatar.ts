@@ -26,9 +26,9 @@ export default class SetAvatar extends OneBotAction<Payload, null> {
         throw new Error(`头像${payload.file}设置失败,api无返回`);
       }
       // log(`头像设置返回：${JSON.stringify(ret)}`)
-      if (ret.result as number == 1004022) {
+      if (ret.result as number === 1004022) {
         throw new Error(`头像${payload.file}设置失败，文件可能不是图片格式`);
-      } else if (ret.result != 0) {
+      } else if (ret.result !== 0) {
         throw new Error(`头像${payload.file}设置失败,未知的错误,${ret.result}:${ret.errMsg}`);
       }
     } else {

@@ -139,7 +139,7 @@ export class LogWrapper {
     });
   }
 
-  setLogSelfInfo (selfInfo: { nick: string; uid: string }) {
+  setLogSelfInfo (selfInfo: { nick: string; uid: string; }) {
     const userInfo = `${selfInfo.nick}`;
     this.logger.defaultMeta = { userInfo };
   }
@@ -226,16 +226,16 @@ export function rawMessageToText (msg: RawMessage, recursiveLevel = 0): string {
 
   const tokens: string[] = [];
 
-  if (msg.chatType == ChatType.KCHATTYPEC2C) {
+  if (msg.chatType === ChatType.KCHATTYPEC2C) {
     tokens.push(`私聊 (${msg.peerUin})`);
-  } else if (msg.chatType == ChatType.KCHATTYPEGROUP) {
+  } else if (msg.chatType === ChatType.KCHATTYPEGROUP) {
     if (recursiveLevel < 1) {
       tokens.push(`群聊 [${msg.peerName}(${msg.peerUin})]`);
     }
     if (msg.senderUin !== '0') {
       tokens.push(`[${msg.sendMemberName || msg.sendRemarkName || msg.sendNickName}(${msg.senderUin})]`);
     }
-  } else if (msg.chatType == ChatType.KCHATTYPEDATALINE) {
+  } else if (msg.chatType === ChatType.KCHATTYPEDATALINE) {
     tokens.push('移动设备');
   } else {
     tokens.push(`临时消息 (${msg.peerUin})`);
@@ -314,8 +314,8 @@ function textElementToText (textElement: any): string {
 
 function replyElementToText (replyElement: any, msg: RawMessage, recursiveLevel: number): string {
   const recordMsgOrNull = msg.records.find((record) => replyElement.sourceMsgIdInRecords === record.msgId);
-  return `[回复消息 ${recordMsgOrNull && recordMsgOrNull.peerUin != '284840486' && recordMsgOrNull.peerUin != '1094950020'
-        ? rawMessageToText(recordMsgOrNull, recursiveLevel + 1)
-        : `未找到消息记录 (MsgId = ${replyElement.sourceMsgIdInRecords})`
+  return `[回复消息 ${recordMsgOrNull && recordMsgOrNull.peerUin !== '284840486' && recordMsgOrNull.peerUin !== '1094950020'
+    ? rawMessageToText(recordMsgOrNull, recursiveLevel + 1)
+    : `未找到消息记录 (MsgId = ${replyElement.sourceMsgIdInRecords})`
     }]`;
 }

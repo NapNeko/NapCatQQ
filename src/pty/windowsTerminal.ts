@@ -5,6 +5,7 @@
  */
 
 import { Socket } from 'net';
+// @ts-check
 import { Terminal, DEFAULT_COLS, DEFAULT_ROWS } from '@homebridge/node-pty-prebuilt-multiarch/src/terminal';
 import { WindowsPtyAgent } from './windowsPtyAgent';
 import { IPtyOpenOptions, IWindowsPtyForkOptions } from '@homebridge/node-pty-prebuilt-multiarch/src/interfaces';
@@ -173,7 +174,7 @@ export class WindowsTerminal extends Terminal {
 
   // @ts-expect-error - This is a private method that is not part of the public API.
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private _deferNoArgs<A>(deferredFn: () => void): void {
+  private _deferNoArgs<A> (deferredFn: () => void): void {
     // If the terminal is ready, execute.
     if (this._isReady) {
       deferredFn.call(this);
@@ -186,7 +187,7 @@ export class WindowsTerminal extends Terminal {
     });
   }
 
-  private _defer<A>(deferredFn: (arg: A) => void, arg: A): void {
+  private _defer<A> (deferredFn: (arg: A) => void, arg: A): void {
     // If the terminal is ready, execute.
     if (this._isReady) {
       deferredFn.call(this, arg);

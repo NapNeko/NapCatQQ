@@ -4,10 +4,6 @@ import { OidbPacket, PacketTransformer } from '@/core/packet/transformer/base';
 import OidbBase from '@/core/packet/transformer/oidb/oidbBase';
 
 class SetGroupTodo extends PacketTransformer<typeof proto.OidbSvcTrpcTcpBase> {
-  constructor () {
-    super();
-  }
-
   build (peer: number, msgSeq: string): OidbPacket {
     const data = new NapProtoMsg(proto.OidbSvcTrpcTcp0XF90_1).encode({
       groupUin: peer,

@@ -15,7 +15,7 @@ class GetGroupInfo extends OneBotAction<Payload, OB11Group> {
   override payloadSchema = SchemaData;
 
   async _handle (payload: Payload) {
-    const group = (await this.core.apis.GroupApi.getGroups()).find(e => e.groupCode == payload.group_id.toString());
+    const group = (await this.core.apis.GroupApi.getGroups()).find(e => e.groupCode === payload.group_id.toString());
     if (!group) {
       const data = await this.core.apis.GroupApi.fetchGroupDetail(payload.group_id.toString());
       if (data.ownerUid && data.ownerUin === '0') {

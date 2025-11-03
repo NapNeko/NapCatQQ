@@ -21,16 +21,16 @@ import { PacketClientContext } from '@/core/packet/context/clientContext';
 export const BlockSize = 1024 * 1024;
 
 interface HighwayServerAddr {
-  ip: string
-  port: number
+  ip: string;
+  port: number;
 }
 
 export interface PacketHighwaySig {
   uin: string;
   uid: string;
-  sigSession: Uint8Array | null
-  sessionKey: Uint8Array | null
-  serverAddr: HighwayServerAddr[]
+  sigSession: Uint8Array | null;
+  sessionKey: Uint8Array | null;
+  serverAddr: HighwayServerAddr[];
 }
 
 export class PacketHighwayContext {
@@ -142,7 +142,7 @@ export class PacketHighwayContext {
     const resp = await this.client.sendOidbPacket(req, true);
     const preRespData = UploadGroupImage.parse(resp);
     const ukey = preRespData.upload.uKey;
-    if (ukey && ukey != '') {
+    if (ukey && ukey !== '') {
       this.logger.debug(`[Highway] uploadGroupImageReq get upload ukey: ${ukey}, need upload!`);
       const index = preRespData.upload.msgInfo.msgInfoBody[0]!.index;
       const sha1 = Buffer.from(index.info.fileSha1, 'hex');
@@ -179,7 +179,7 @@ export class PacketHighwayContext {
     const resp = await this.client.sendOidbPacket(req, true);
     const preRespData = trans.UploadPrivateImage.parse(resp);
     const ukey = preRespData.upload.uKey;
-    if (ukey && ukey != '') {
+    if (ukey && ukey !== '') {
       this.logger.debug(`[Highway] uploadC2CImageReq get upload ukey: ${ukey}, need upload!`);
       const index = preRespData.upload.msgInfo.msgInfoBody[0]!.index;
       const sha1 = Buffer.from(index.info.fileSha1, 'hex');
@@ -217,7 +217,7 @@ export class PacketHighwayContext {
     const resp = await this.client.sendOidbPacket(req, true);
     const preRespData = trans.UploadGroupVideo.parse(resp);
     const ukey = preRespData.upload.uKey;
-    if (ukey && ukey != '') {
+    if (ukey && ukey !== '') {
       this.logger.debug(`[Highway] uploadGroupVideoReq get upload video ukey: ${ukey}, need upload!`);
       const index = preRespData.upload.msgInfo.msgInfoBody[0]!.index;
       const md5 = Buffer.from(index.info.fileHash, 'hex');
@@ -244,7 +244,7 @@ export class PacketHighwayContext {
       this.logger.debug(`[Highway] uploadGroupVideoReq get upload invalid ukey ${ukey}, don't need upload!`);
     }
     const subFile = preRespData.upload.subFileInfos[0];
-    if (subFile!.uKey && subFile!.uKey != '') {
+    if (subFile!.uKey && subFile!.uKey !== '') {
       this.logger.debug(`[Highway] uploadGroupVideoReq get upload video thumb ukey: ${subFile!.uKey}, need upload!`);
       const index = preRespData.upload.msgInfo.msgInfoBody[1]!.index;
       const md5 = Buffer.from(index.info.fileHash, 'hex');
@@ -282,7 +282,7 @@ export class PacketHighwayContext {
     const resp = await this.client.sendOidbPacket(req, true);
     const preRespData = trans.UploadPrivateVideo.parse(resp);
     const ukey = preRespData.upload.uKey;
-    if (ukey && ukey != '') {
+    if (ukey && ukey !== '') {
       this.logger.debug(`[Highway] uploadC2CVideoReq get upload video ukey: ${ukey}, need upload!`);
       const index = preRespData.upload.msgInfo.msgInfoBody[0]!.index;
       const md5 = Buffer.from(index.info.fileHash, 'hex');
@@ -309,7 +309,7 @@ export class PacketHighwayContext {
       this.logger.debug(`[Highway] uploadC2CVideoReq get upload invalid ukey ${ukey}, don't need upload!`);
     }
     const subFile = preRespData.upload.subFileInfos[0];
-    if (subFile!.uKey && subFile!.uKey != '') {
+    if (subFile!.uKey && subFile!.uKey !== '') {
       this.logger.debug(`[Highway] uploadC2CVideoReq get upload video thumb ukey: ${subFile!.uKey}, need upload!`);
       const index = preRespData.upload.msgInfo.msgInfoBody[1]!.index;
       const md5 = Buffer.from(index.info.fileHash, 'hex');
@@ -345,7 +345,7 @@ export class PacketHighwayContext {
     const resp = await this.client.sendOidbPacket(req, true);
     const preRespData = trans.UploadGroupPtt.parse(resp);
     const ukey = preRespData.upload.uKey;
-    if (ukey && ukey != '') {
+    if (ukey && ukey !== '') {
       this.logger.debug(`[Highway] uploadGroupPttReq get upload ptt ukey: ${ukey}, need upload!`);
       const index = preRespData.upload.msgInfo.msgInfoBody[0]!.index;
       const md5 = Buffer.from(index.info.fileHash, 'hex');
@@ -381,7 +381,7 @@ export class PacketHighwayContext {
     const resp = await this.client.sendOidbPacket(req, true);
     const preRespData = trans.UploadPrivatePtt.parse(resp);
     const ukey = preRespData.upload.uKey;
-    if (ukey && ukey != '') {
+    if (ukey && ukey !== '') {
       this.logger.debug(`[Highway] uploadC2CPttReq get upload ptt ukey: ${ukey}, need upload!`);
       const index = preRespData.upload.msgInfo.msgInfoBody[0]!.index;
       const md5 = Buffer.from(index.info.fileHash, 'hex');

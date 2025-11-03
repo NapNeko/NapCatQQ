@@ -1,25 +1,19 @@
 import { OB11EmitEventContent, OB11NetworkReloadType } from './index';
 import express, { Express, NextFunction, Request, Response } from 'express';
 import http from 'http';
-import { NapCatCore } from '@/core';
 import { OB11Response } from '@/onebot/action/OneBotAction';
-import { ActionMap } from '@/onebot/action';
 import cors from 'cors';
 import { HttpServerConfig } from '@/onebot/config/config';
-import { NapCatOneBot11Adapter } from '@/onebot';
 import { IOB11NetworkAdapter } from '@/onebot/network/adapter';
 import json5 from 'json5';
 import { isFinished } from 'on-finished';
 import typeis from 'type-is';
+
 export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig> {
   private app: Express | undefined;
   private server: http.Server | undefined;
 
-  constructor (name: string, config: HttpServerConfig, core: NapCatCore, obContext: NapCatOneBot11Adapter, actions: ActionMap) {
-    super(name, config, core, obContext, actions);
-  }
-
-  override async onEvent<T extends OB11EmitEventContent>(_event: T) {
+  override async onEvent<T extends OB11EmitEventContent> (_event: T) {
     // http server is passive, no need to emit event
   }
 
@@ -71,7 +65,7 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
           req.body = { ...json5.parse(rawData || '{}'), ...req.body };
           next();
         } catch {
-          return res.status(400).send('Invalid JSON');
+          res.status(400).send('Invalid JSON');
         }
       });
       req.on('error', () => {
@@ -89,7 +83,7 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
   }
 
   private authorize (token: string | undefined, req: Request, res: Response, next: NextFunction) {
-    if (!token || token.length == 0) return next();// 客户端未设置密钥
+    if (!token || token.length === 0) return next();// 客户端未设置密钥
     const HeaderClientToken = req.headers.authorization?.split('Bearer ').pop() || '';
     const QueryClientToken = req.query['access_token'];
     const ClientToken = typeof (QueryClientToken) === 'string' && QueryClientToken !== '' ? QueryClientToken : HeaderClientToken;
@@ -102,7 +96,7 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
 
   async httpApiRequest (req: Request, res: Response, request_sse: boolean = false) {
     let payload = req.body;
-    if (req.method == 'get') {
+    if (req.method === 'get') {
       payload = req.query;
     } else if (req.query) {
       payload = { ...req.body, ...req.query };

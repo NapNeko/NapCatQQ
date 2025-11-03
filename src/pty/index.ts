@@ -1,5 +1,6 @@
 import type { ITerminal, IPtyOpenOptions, IPtyForkOptions, IWindowsPtyForkOptions } from '@homebridge/node-pty-prebuilt-multiarch/src/interfaces';
-import type { ArgvOrCommandLine } from '@homebridge/node-pty-prebuilt-multiarch/src/types';
+import type { ArgvOrCommandLine } from '../../node_modules/@homebridge/node-pty-prebuilt-multiarch/src/types';
+// import type { ArgvOrCommandLine } from '@homebridge/node-pty-prebuilt-multiarch/src/types';
 import { WindowsTerminal } from './windowsTerminal';
 import { UnixTerminal } from './unixTerminal';
 import { fileURLToPath } from 'node:url';
@@ -14,6 +15,7 @@ if (process.platform === 'win32') {
 }
 
 export function spawn (file?: string, args?: ArgvOrCommandLine, opt?: IPtyForkOptions | IWindowsPtyForkOptions): ITerminal {
+  // eslint-disable-next-line new-cap
   return new terminalCtor(file, args, opt);
 }
 

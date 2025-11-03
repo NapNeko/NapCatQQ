@@ -3,7 +3,7 @@ import { NapCatCore } from '@/core';
 
 export interface MsgEmojiLike {
   emoji_id: string,
-  count: number
+  count: number;
 }
 
 export class OB11GroupMsgEmojiLikeEvent extends OB11GroupNoticeEvent {
@@ -13,7 +13,7 @@ export class OB11GroupMsgEmojiLikeEvent extends OB11GroupNoticeEvent {
   is_add: boolean;
   message_seq?: string;
 
-  constructor (core: NapCatCore, groupId: number, userId: number, messageId: number, likes: MsgEmojiLike[], isAdd: boolean, messageSeq?: string) {
+  constructor (core: NapCatCore, groupId: number, userId: number, messageId: number, likes: MsgEmojiLike[], isAdd: boolean, _messageSeq?: string) {
     super(core, groupId, userId);
     this.group_id = groupId;
     this.user_id = userId;  // 可为空，表示是对别人的消息操作，如果是对bot自己的消息则不为空

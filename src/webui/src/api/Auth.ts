@@ -38,7 +38,7 @@ export const LoginHandler: RequestHandler = async (req, res) => {
   const signCredential = Buffer.from(JSON.stringify(AuthHelper.signCredential(hash))).toString(
     'base64'
   );
-    // 返回成功信息
+  // 返回成功信息
   return sendSuccess(res, {
     Credential: signCredential,
   });
@@ -52,7 +52,7 @@ export const LogoutHandler: RequestHandler = async (req, res) => {
     const Credential = JSON.parse(Buffer.from(CredentialBase64, 'base64').toString());
     AuthHelper.revokeCredential(Credential);
     return sendSuccess(res, 'Logged out successfully');
-  } catch (e) {
+  } catch (_e) {
     return sendError(res, 'Logout failed');
   }
 };
@@ -84,7 +84,7 @@ export const checkHandler: RequestHandler = async (req, res) => {
     if (valid) return sendSuccess(res, null);
     // 返回错误信息
     return sendError(res, 'Authorization Failed');
-  } catch (e) {
+  } catch (_e) {
     // 返回错误信息
     return sendError(res, 'Authorization Failed');
   }

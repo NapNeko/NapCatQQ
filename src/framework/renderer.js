@@ -32,6 +32,7 @@ export const onSettingWindowCreated = async (view) => {
   view.querySelector('.nc_webui').addEventListener('click', async () => {
     try {
       await navigator.clipboard.writeText(webui);
+      // eslint-disable-next-line no-undef
       alert('WebUi URL 已复制到剪贴板');
     } catch (err) {
       console.error('复制到剪贴板失败: ', err);

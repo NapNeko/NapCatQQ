@@ -6,10 +6,6 @@ import crypto from 'node:crypto';
 import { PacketMsgPicElement } from '@/core/packet/message/element';
 
 class UploadPrivateImage extends PacketTransformer<typeof proto.NTV2RichMediaResp> {
-  constructor () {
-    super();
-  }
-
   build (peerUin: string, img: PacketMsgPicElement): OidbPacket {
     const data = new NapProtoMsg(proto.NTV2RichMediaReq).encode({
       reqHead: {

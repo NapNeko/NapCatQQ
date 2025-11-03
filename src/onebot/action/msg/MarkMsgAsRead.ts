@@ -40,7 +40,7 @@ class MarkMsgAsRead extends OneBotAction<PlayloadType, null> {
 
   async _handle (payload: PlayloadType): Promise<null> {
     const ret = await this.core.apis.MsgApi.setMsgRead(await this.getPeer(payload));
-    if (ret.result != 0) {
+    if (ret.result !== 0) {
       throw new Error('设置已读失败,' + ret.errMsg);
     }
     return null;

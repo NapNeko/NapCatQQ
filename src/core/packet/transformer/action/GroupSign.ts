@@ -4,10 +4,6 @@ import { OidbPacket, PacketTransformer } from '@/core/packet/transformer/base';
 import OidbBase from '@/core/packet/transformer/oidb/oidbBase';
 
 class GroupSign extends PacketTransformer<typeof proto.OidbSvcTrpcTcpBase> {
-  constructor () {
-    super();
-  }
-
   build (uin: number, groupCode: number): OidbPacket {
     const body = new NapProtoMsg(proto.OidbSvcTrpcTcp0XEB7).encode(
       {

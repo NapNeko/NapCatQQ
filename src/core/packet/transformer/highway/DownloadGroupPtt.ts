@@ -4,10 +4,6 @@ import { OidbPacket, PacketTransformer } from '@/core/packet/transformer/base';
 import OidbBase from '@/core/packet/transformer/oidb/oidbBase';
 
 class DownloadGroupPtt extends PacketTransformer<typeof proto.NTV2RichMediaResp> {
-  constructor () {
-    super();
-  }
-
   build (groupUin: number, node: NapProtoEncodeStructType<typeof proto.IndexNode>): OidbPacket {
     const body = new NapProtoMsg(proto.NTV2RichMediaReq).encode({
       reqHead: {

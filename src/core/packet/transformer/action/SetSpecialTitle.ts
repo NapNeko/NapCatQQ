@@ -4,10 +4,6 @@ import { OidbPacket, PacketTransformer } from '@/core/packet/transformer/base';
 import OidbBase from '@/core/packet/transformer/oidb/oidbBase';
 
 class SetSpecialTitle extends PacketTransformer<typeof proto.OidbSvcTrpcTcpBase> {
-  constructor () {
-    super();
-  }
-
   build (groupCode: number, uid: string, title: string): OidbPacket {
     const oidb_0x8FC_2 = new NapProtoMsg(proto.OidbSvcTrpcTcp0X8FC_2).encode({
       groupUin: +groupCode,

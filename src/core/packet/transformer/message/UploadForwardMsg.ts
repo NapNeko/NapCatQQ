@@ -5,10 +5,6 @@ import { OidbPacket, PacketBufBuilder, PacketTransformer } from '@/core/packet/t
 import { PacketMsg } from '@/core/packet/message/message';
 
 class UploadForwardMsg extends PacketTransformer<typeof proto.SendLongMsgResp> {
-  constructor () {
-    super();
-  }
-
   build (selfUid: string, msg: PacketMsg[], groupUin: number = 0): OidbPacket {
     const msgBody = this.msgBuilder.buildFakeMsg(selfUid, msg);
     const longMsgResultData = new NapProtoMsg(proto.LongMsgResult).encode(

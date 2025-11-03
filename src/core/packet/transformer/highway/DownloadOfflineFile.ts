@@ -4,10 +4,6 @@ import { OidbPacket, PacketTransformer } from '@/core/packet/transformer/base';
 import OidbBase from '@/core/packet/transformer/oidb/oidbBase';
 
 class DownloadOfflineFile extends PacketTransformer<typeof proto.OidbSvcTrpcTcp0XE37Response> {
-  constructor () {
-    super();
-  }
-
   build (fileUUID: string, fileHash: string, senderUid: string, receiverUid: string): OidbPacket {
     const body = new NapProtoMsg(proto.OidbSvcTrpcTcp0XE37_800).encode({
       subCommand: 800,

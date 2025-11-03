@@ -32,6 +32,7 @@ class TerminalManager {
         const terminalId = url.searchParams.get('id');
 
         if (!token || !terminalId) {
+          // eslint-disable-next-line n/no-callback-literal
           cb(false, 401, 'Unauthorized');
           return;
         }
@@ -40,16 +41,19 @@ class TerminalManager {
         let Credential: WebUiCredentialJson;
         try {
           Credential = JSON.parse(Buffer.from(token, 'base64').toString('utf-8'));
-        } catch (e) {
+        } catch (_e) {
+          // eslint-disable-next-line n/no-callback-literal
           cb(false, 401, 'Unauthorized');
           return;
         }
         const config = await WebUiConfig.GetWebUIConfig();
         const validate = AuthHelper.validateCredentialWithinOneHour(config.token, Credential);
         if (!validate) {
+          // eslint-disable-next-line n/no-callback-literal
           cb(false, 401, 'Unauthorized');
           return;
         }
+        // eslint-disable-next-line n/no-callback-literal
         cb(true);
       },
     });

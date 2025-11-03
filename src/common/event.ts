@@ -12,10 +12,10 @@ interface InternalMapKey {
 type EnsureFunc<T> = T extends (...args: any) => any ? T : never;
 
 type FuncKeys<T> = Extract<
-    {
-      [K in keyof T]: EnsureFunc<T[K]> extends never ? never : K;
-    }[keyof T],
-    string
+  {
+    [K in keyof T]: EnsureFunc<T[K]> extends never ? never : K;
+  }[keyof T],
+  string
 >;
 
 export type ListenerClassBase = Record<string, string>;
@@ -51,41 +51,41 @@ export class NTEventWrapper {
   }
 
   createEventFunction<
-        Service extends keyof ServiceNamingMapping,
-        ServiceMethod extends FuncKeys<ServiceNamingMapping[Service]>,
-        T extends (...args: any) => any = EnsureFunc<ServiceNamingMapping[Service][ServiceMethod]>
-    >(eventName: `${Service}/${ServiceMethod}`): T | undefined {
+    Service extends keyof ServiceNamingMapping,
+    ServiceMethod extends FuncKeys<ServiceNamingMapping[Service]>,
+    T extends (...args: any) => any = EnsureFunc<ServiceNamingMapping[Service][ServiceMethod]>
+  > (eventName: `${Service}/${ServiceMethod}`): T | undefined {
     const eventNameArr = eventName.split('/');
-        type eventType = {
-          [key: string]: () => { [key: string]: (...params: Parameters<T>) => Promise<ReturnType<T>> };
-        };
-        if (eventNameArr.length > 1) {
-          const serviceName = 'get' + (eventNameArr[0]?.replace('NodeIKernel', '') ?? '');
-          const eventName = eventNameArr[1];
-          const services = (this.WrapperSession as unknown as eventType)[serviceName]?.();
-          if (!services || !eventName) {
-            return undefined;
-          }
-          let event = services[eventName];
-
-          // 重新绑定this
-          event = event?.bind(services);
-          if (event) {
-            return event as T;
-          }
-          return undefined;
-        }
+    type eventType = {
+      [key: string]: () => { [key: string]: (...params: Parameters<T>) => Promise<ReturnType<T>>; };
+    };
+    if (eventNameArr.length > 1) {
+      const serviceName = 'get' + (eventNameArr[0]?.replace('NodeIKernel', '') ?? '');
+      const eventName = eventNameArr[1];
+      const services = (this.WrapperSession as unknown as eventType)[serviceName]?.();
+      if (!services || !eventName) {
         return undefined;
+      }
+      let event = services[eventName];
+
+      // 重新绑定this
+      event = event?.bind(services);
+      if (event) {
+        return event as T;
+      }
+      return undefined;
+    }
+    return undefined;
   }
 
-  createListenerFunction<T>(listenerMainName: string, uniqueCode: string = ''): T {
+  createListenerFunction<T> (listenerMainName: string, uniqueCode: string = ''): T {
     const existListener = this.listenerManager.get(listenerMainName + uniqueCode);
     if (!existListener) {
       const Listener = this.createProxyDispatch(listenerMainName);
       const ServiceSubName = /^NodeIKernel(.*?)Listener$/.exec(listenerMainName)![1];
       const Service = `NodeIKernel${ServiceSubName}Service/addKernel${ServiceSubName}Listener`;
-      // eslint-disable-next-line
-            // @ts-ignore
+
+      // @ts-ignore
       this.createEventFunction(Service)(Listener as T);
       this.listenerManager.set(listenerMainName + uniqueCode, Listener);
       return Listener as T;
@@ -109,10 +109,10 @@ export class NTEventWrapper {
   }
 
   async callNoListenerEvent<
-        Service extends keyof ServiceNamingMapping,
-        ServiceMethod extends FuncKeys<ServiceNamingMapping[Service]>,
-        EventType extends (...args: any) => any = EnsureFunc<ServiceNamingMapping[Service][ServiceMethod]>
-    >(
+    Service extends keyof ServiceNamingMapping,
+    ServiceMethod extends FuncKeys<ServiceNamingMapping[Service]>,
+    EventType extends (...args: any) => any = EnsureFunc<ServiceNamingMapping[Service][ServiceMethod]>
+  > (
     serviceAndMethod: `${Service}/${ServiceMethod}`,
     ...args: Parameters<EventType>
   ): Promise<Awaited<ReturnType<EventType>>> {
@@ -120,10 +120,10 @@ export class NTEventWrapper {
   }
 
   async registerListen<
-        Listener extends keyof ListenerNamingMapping,
-        ListenerMethod extends FuncKeys<ListenerNamingMapping[Listener]>,
-        ListenerType extends (...args: any) => any = EnsureFunc<ListenerNamingMapping[Listener][ListenerMethod]>
-    >(
+    Listener extends keyof ListenerNamingMapping,
+    ListenerMethod extends FuncKeys<ListenerNamingMapping[Listener]>,
+    ListenerType extends (...args: any) => any = EnsureFunc<ListenerNamingMapping[Listener][ListenerMethod]>
+  > (
     listenerAndMethod: `${Listener}/${ListenerMethod}`,
     checker: (...args: Parameters<ListenerType>) => boolean,
     waitTimes = 1,
@@ -138,7 +138,7 @@ export class NTEventWrapper {
       let retData: Parameters<ListenerType> | undefined;
 
       function sendDataCallback () {
-        if (complete == 0) {
+        if (complete === 0) {
           reject(new Error(' ListenerName:' + listenerAndMethod + ' timeout'));
         } else {
           resolve(retData!);
@@ -171,13 +171,13 @@ export class NTEventWrapper {
   }
 
   async callNormalEventV2<
-        Service extends keyof ServiceNamingMapping,
-        ServiceMethod extends FuncKeys<ServiceNamingMapping[Service]>,
-        Listener extends keyof ListenerNamingMapping,
-        ListenerMethod extends FuncKeys<ListenerNamingMapping[Listener]>,
-        EventType extends (...args: any) => any = EnsureFunc<ServiceNamingMapping[Service][ServiceMethod]>,
-        ListenerType extends (...args: any) => any = EnsureFunc<ListenerNamingMapping[Listener][ListenerMethod]>
-    >(
+    Service extends keyof ServiceNamingMapping,
+    ServiceMethod extends FuncKeys<ServiceNamingMapping[Service]>,
+    Listener extends keyof ListenerNamingMapping,
+    ListenerMethod extends FuncKeys<ListenerNamingMapping[Listener]>,
+    EventType extends (...args: any) => any = EnsureFunc<ServiceNamingMapping[Service][ServiceMethod]>,
+    ListenerType extends (...args: any) => any = EnsureFunc<ListenerNamingMapping[Listener][ListenerMethod]>
+  > (
     serviceAndMethod: `${Service}/${ServiceMethod}`,
     listenerAndMethod: `${Listener}/${ListenerMethod}`,
     args: Parameters<EventType>,
@@ -192,16 +192,16 @@ export class NTEventWrapper {
     let retEvent: any = {};
 
     function sendDataCallback (resolve: any, reject: any) {
-      if (complete == 0) {
+      if (complete === 0) {
         reject(
           new Error(
             'Timeout: NTEvent serviceAndMethod:' +
-                        serviceAndMethod +
-                        ' ListenerName:' +
-                        listenerAndMethod +
-                        ' EventRet:\n' +
-                        JSON.stringify(retEvent, null, 4) +
-                        '\n'
+            serviceAndMethod +
+            ' ListenerName:' +
+            listenerAndMethod +
+            ' EventRet:\n' +
+            JSON.stringify(retEvent, null, 4) +
+            '\n'
           )
         );
       } else {
@@ -248,12 +248,12 @@ export class NTEventWrapper {
             reject(
               new Error(
                 'EventChecker Failed: NTEvent serviceAndMethod:' +
-                                serviceAndMethod +
-                                ' ListenerName:' +
-                                listenerAndMethod +
-                                ' EventRet:\n' +
-                                JSON.stringify(retEvent, null, 4) +
-                                '\n'
+                serviceAndMethod +
+                ' ListenerName:' +
+                listenerAndMethod +
+                ' EventRet:\n' +
+                JSON.stringify(retEvent, null, 4) +
+                '\n'
               )
             );
           }

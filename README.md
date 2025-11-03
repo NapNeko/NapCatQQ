@@ -43,6 +43,37 @@ _Modern protocol-side framework implemented based on NTQQ._
 **首次使用**请务必查看如下文档看使用教程
 
 > 项目非盈利，对接问题/基础问题/下层框架问题 请自行搜索解决，本项目社区不提供此类解答。
+
+## Development Guide
+
+### 代码提交前检查
+
+在提交代码前，**必须**执行以下命令进行代码检查：
+
+```bash
+# 1. 代码格式化修复
+npm run lint:fix
+
+# 2. TypeScript 类型检查
+npm run tsc
+```
+
+#### 关于 TypeScript 类型检查
+
+执行 `npm run tsc` 时，会出现 22 个已知的第三方库类型错误，**这是正常现象**：
+
+```
+Found 22 errors in 3 files.
+
+Errors  Files
+     3  node_modules/@homebridge/node-pty-prebuilt-multiarch/src/eventEmitter2.ts:42
+     2  node_modules/@homebridge/node-pty-prebuilt-multiarch/src/terminal.ts:158
+    17  node_modules/@napneko/nap-proto-core/NapProto.ts:94
+```
+
+这些错误是由于启用了严格类型检查模式导致的第三方库内部类型问题，**不影响项目运行**。
+
+⚠️ **注意**：除了上述 22 个已知错误外，不应该出现其他类型错误。如果有新的错误，请在提交前修复。
 ## Link
 
 | Docs | [![Github.IO](https://img.shields.io/badge/docs%20on-Github.IO-orange)](https://napneko.github.io/) | [![Cloudflare.Worker](https://img.shields.io/badge/docs%20on-Cloudflare.Worker-black)](https://doc.napneko.icu/) | [![Cloudflare.HKServer](https://img.shields.io/badge/docs%20on-Cloudflare.HKServer-informational)](https://napcat.napneko.icu/) |

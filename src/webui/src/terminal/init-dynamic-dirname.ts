@@ -11,6 +11,7 @@ export function callsites () {
       return callSitesWithoutCurrent;
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     new Error().stack;
     return result;
   } finally {

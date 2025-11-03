@@ -4,10 +4,6 @@ import { OidbPacket, PacketTransformer } from '@/core/packet/transformer/base';
 import OidbBase from '@/core/packet/transformer/oidb/oidbBase';
 
 class FetchRkey extends PacketTransformer<typeof proto.OidbSvcTrpcTcp0X9067_202_Rsp_Body> {
-  constructor () {
-    super();
-  }
-
   build (): OidbPacket {
     const data = new NapProtoMsg(proto.OidbSvcTrpcTcp0X9067_202).encode({
       reqHead: {

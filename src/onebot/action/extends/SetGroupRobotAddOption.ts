@@ -19,7 +19,7 @@ export default class SetGroupRobotAddOption extends OneBotAction<Payload, null> 
       payload.robot_member_switch,
       payload.robot_member_examine
     );
-    if (ret.result != 0) {
+    if (ret.result !== 0) {
       throw new Error(`设置群机器人添加选项失败, ${ret.result}:${ret.errMsg}`);
     }
     return null;

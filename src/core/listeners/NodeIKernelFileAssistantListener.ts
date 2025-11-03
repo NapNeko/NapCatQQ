@@ -1,5 +1,5 @@
 export class NodeIKernelFileAssistantListener {
-  onFileStatusChanged (fileStatus: {
+  onFileStatusChanged (_fileStatus: {
     id: string,
     fileStatus: number,
     fileProgress: `${number}`,
@@ -10,16 +10,16 @@ export class NodeIKernelFileAssistantListener {
   }): any {
   }
 
-  onSessionListChanged (...args: unknown[]): any {
+  onSessionListChanged (..._args: unknown[]): any {
   }
 
-  onSessionChanged (...args: unknown[]): any {
+  onSessionChanged (..._args: unknown[]): any {
   }
 
-  onFileListChanged (...args: unknown[]): any {
+  onFileListChanged (..._args: unknown[]): any {
   }
 
-  onFileSearch (searchResult: SearchResultWrapper): any {
+  onFileSearch (_searchResult: SearchResultWrapper): any {
   }
 }
 

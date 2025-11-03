@@ -114,7 +114,7 @@ export async function InitWebUi (logger: LogWrapper, pathWrapper: NapCatPathWrap
 
   const [host, port, token] = await InitPort(config);
   webUiRuntimePort = port;
-  if (port == 0) {
+  if (port === 0) {
     logger.log('[NapCat] [WebUi] Current WebUi is not run.');
     return;
   }

@@ -167,7 +167,7 @@ async function handleLogin (
   loginListener.onQRCodeSessionFailed = (errType: number, errCode: number) => {
     if (!context.isLogined) {
       logger.logError('[Core] [Login] Login Error,ErrType: ', errType, ' ErrCode:', errCode);
-      if (errType == 1 && errCode == 3) {
+      if (errType === 1 && errCode === 3) {
         // 二维码过期刷新
       }
       loginService.getQRCodePicture();
@@ -302,12 +302,12 @@ async function handleProxy (session: NodeIQQNTWrapperSession, logger: LogWrapper
 
 async function waitForNetworkConnection (loginService: NodeIKernelLoginService, logger: LogWrapper) {
   let network_ok = false;
-  let tryCount = 0;
+  let _tryCount = 0;
   while (!network_ok) {
     network_ok = loginService.getMsfStatus() !== 3;// win 11 0连接 1未连接
     logger.log('等待网络连接...');
     await sleep(500);
-    tryCount++;
+    _tryCount++;
   }
   logger.log('网络已连接');
   return network_ok;

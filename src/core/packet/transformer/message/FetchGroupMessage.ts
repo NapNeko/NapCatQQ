@@ -3,10 +3,6 @@ import { NapProtoMsg } from '@napneko/nap-proto-core';
 import { OidbPacket, PacketBufBuilder, PacketTransformer } from '@/core/packet/transformer/base';
 
 class FetchGroupMessage extends PacketTransformer<typeof proto.SsoGetGroupMsgResponse> {
-  constructor () {
-    super();
-  }
-
   build (groupUin: number, startSeq: number, endSeq: number): OidbPacket {
     const req = new NapProtoMsg(proto.SsoGetGroupMsg).encode({
       info: {

@@ -15,9 +15,9 @@ export class QQBasicInfoWrapper {
   QQPackageInfo: QQPackageInfoType | undefined;
   QQVersionAppid: string | undefined;
   QQVersionQua: string | undefined;
-  context: { logger: LogWrapper };
+  context: { logger: LogWrapper; };
 
-  constructor (context: { logger: LogWrapper }) {
+  constructor (context: { logger: LogWrapper; }) {
     // 基础目录获取
     this.context = context;
     this.QQMainPath = process.execPath;
@@ -49,7 +49,7 @@ export class QQBasicInfoWrapper {
 
   requireMinNTQQBuild (buildStr: string) {
     const currentBuild = +(this.getQQBuildStr() ?? '0');
-    if (currentBuild == 0) throw new Error('QQBuildStr获取失败');
+    if (currentBuild === 0) throw new Error('QQBuildStr获取失败');
     return currentBuild >= parseInt(buildStr);
   }
 
@@ -72,7 +72,7 @@ export class QQBasicInfoWrapper {
     return platformMapping[systemPlatform] ?? '537246092';
   }
 
-  getAppidV2 (): { appid: string; qua: string } {
+  getAppidV2 (): { appid: string; qua: string; } {
     // 通过已有表 性能好
     const appidTbale = AppidTable as unknown as QQAppidTableType;
     const fullVersion = this.getFullQQVersion();

@@ -262,6 +262,7 @@ export class NapCatOneBot11Adapter {
           await this.networkManager.closeSomeAdaterWhenOpen([existingAdapter]);
         }
       } else if (adapterConfig.enable) {
+        // eslint-disable-next-line new-cap
         const newAdapter = new adapterClass(adapterConfig.name, adapterConfig as CT, this.core, this, this.actions);
         await this.networkManager.registerAdapterAndOpen(newAdapter);
       }
@@ -314,17 +315,17 @@ export class NapCatOneBot11Adapter {
     };
     msgListener.onAddSendMsg = async (msg) => {
       try {
-        if (msg.sendStatus == SendStatusType.KSEND_STATUS_SENDING) {
+        if (msg.sendStatus === SendStatusType.KSEND_STATUS_SENDING) {
           const [updatemsgs] = await this.core.eventWrapper.registerListen('NodeIKernelMsgListener/onMsgInfoListUpdate', (msgList: RawMessage[]) => {
             const report = msgList.find((e) =>
-              e.senderUin == this.core.selfInfo.uin && e.sendStatus !== SendStatusType.KSEND_STATUS_SENDING && e.msgId === msg.msgId
+              e.senderUin === this.core.selfInfo.uin && e.sendStatus !== SendStatusType.KSEND_STATUS_SENDING && e.msgId === msg.msgId
             );
             return !!report;
           }, 1, 10 * 60 * 1000);
           // 10分钟 超时
           const updatemsg = updatemsgs.find((e) => e.msgId === msg.msgId);
           // updatemsg?.sendStatus == SendStatusType.KSEND_STATUS_SUCCESS_NOSEQ NOSEQ一般是服务器未下发SEQ 这意味着这条消息不应该推送network
-          if (updatemsg?.sendStatus == SendStatusType.KSEND_STATUS_SUCCESS) {
+          if (updatemsg?.sendStatus === SendStatusType.KSEND_STATUS_SUCCESS) {
             updatemsg.id = MessageUnique.createUniqueMsgId(
               {
                 chatType: updatemsg.chatType,
@@ -346,7 +347,7 @@ export class NapCatOneBot11Adapter {
         peerUid: uid,
         guildId: '',
       };
-      let msg = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeq(peer, msgSeq)).msgList.find(e => e.msgType == NTMsgType.KMSGTYPEGRAYTIPS);
+      let msg = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeq(peer, msgSeq)).msgList.find(e => e.msgType === NTMsgType.KMSGTYPEGRAYTIPS);
       const element = msg?.elements.find(e => !!e.grayTipElement?.revokeElement);
       if (msg && element?.grayTipElement?.revokeElement.isSelfOperate) {
         const isSelfDevice = this.recallEventCache.has(msg.msgId);
@@ -552,7 +553,7 @@ export class NapCatOneBot11Adapter {
         ob11Msg.stringMsg.target_id = parseInt(message.peerUin);
         ob11Msg.arrayMsg.target_id = parseInt(message.peerUin);
       }
-      if ('messagePostFormat' in e && e.messagePostFormat == 'string') {
+      if ('messagePostFormat' in e && e.messagePostFormat === 'string') {
         msgMap.set(e.name, structuredClone(ob11Msg.stringMsg));
       } else {
         msgMap.set(e.name, structuredClone(ob11Msg.arrayMsg));
@@ -637,11 +638,12 @@ export class NapCatOneBot11Adapter {
   private async emitRecallMsg (message: RawMessage, element: MessageElement) {
     const peer: Peer = { chatType: message.chatType, peerUid: message.peerUid, guildId: '' };
     const oriMessageId = MessageUnique.getShortIdByMsgId(message.msgId) ?? MessageUnique.createUniqueMsgId(peer, message.msgId);
-    if (message.chatType == ChatType.KCHATTYPEC2C) {
+    if (message.chatType === ChatType.KCHATTYPEC2C) {
       return await this.emitFriendRecallMsg(message, oriMessageId, element);
-    } else if (message.chatType == ChatType.KCHATTYPEGROUP) {
+    } else if (message.chatType === ChatType.KCHATTYPEGROUP) {
       return await this.emitGroupRecallMsg(message, oriMessageId, element);
     }
+    return undefined;
   }
 
   private async emitFriendRecallMsg (message: RawMessage, oriMessageId: number, element: MessageElement) {

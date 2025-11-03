@@ -1,21 +1,21 @@
 export class NodeIKernelStorageCleanListener {
-  onCleanCacheProgressChanged (args: unknown): any {
+  onCleanCacheProgressChanged (_args: unknown): any {
 
   }
 
-  onScanCacheProgressChanged (args: unknown): any {
+  onScanCacheProgressChanged (_args: unknown): any {
 
   }
 
-  onCleanCacheStorageChanged (args: unknown): any {
+  onCleanCacheStorageChanged (_args: unknown): any {
 
   }
 
-  onFinishScan (args: unknown): any {
+  onFinishScan (_args: unknown): any {
 
   }
 
-  onChatCleanDone (args: unknown): any {
+  onChatCleanDone (_args: unknown): any {
 
   }
 }

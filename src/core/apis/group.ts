@@ -141,12 +141,12 @@ export class NTQQGroupApi {
     const param = createGroupDetailInfoV2Param(groupCode);
     // 设置要修改的目标
     param.filter.addOption = 1;
-    if (option.addOption == 4 || option.addOption == 5) {
+    if (option.addOption === 4 || option.addOption === 5) {
       // 4 问题进入答案 5 问题管理员批准
       param.filter.groupQuestion = 1;
-      param.filter.groupAnswer = option.addOption == 4 ? 1 : 0;
+      param.filter.groupAnswer = option.addOption === 4 ? 1 : 0;
       param.modifyInfo.groupQuestion = option.groupQuestion || '';
-      param.modifyInfo.groupAnswer = option.addOption == 4 ? option.groupAnswer || '' : '';
+      param.modifyInfo.groupAnswer = option.addOption === 4 ? option.groupAnswer || '' : '';
     }
     param.modifyInfo.addOption = option.addOption;
     return this.context.session.getGroupService().modifyGroupDetailInfoV2(param, 0);
@@ -418,7 +418,7 @@ export class NTQQGroupApi {
     const ret = await this.core.eventWrapper.callNoListenerEvent(
       'NodeIKernelGroupService/getGroupRecommendContactArkJson',
       groupCode
-    ) as GeneralCallResult & { arkJson: string };
+    ) as GeneralCallResult & { arkJson: string; };
     return ret.arkJson;
   }
 
@@ -449,7 +449,7 @@ export class NTQQGroupApi {
     return this.context.session.getGroupService().kickMember(groupCode, kickUids, refuseForever, kickReason);
   }
 
-  async banMember (groupCode: string, memList: Array<{ uid: string, timeStamp: number }>) {
+  async banMember (groupCode: string, memList: Array<{ uid: string, timeStamp: number; }>) {
     // timeStamp为秒数, 0为解除禁言
     return this.context.session.getGroupService().setMemberShutUp(groupCode, memList);
   }
@@ -473,7 +473,7 @@ export class NTQQGroupApi {
   async publishGroupBulletin (groupCode: string, content: string, picInfo: {
     id: string,
     width: number,
-    height: number
+    height: number;
   } | undefined = undefined, pinned: number = 0, confirmRequired: number = 0) {
     const psKey = (await this.core.apis.UserApi.getPSkey(['qun.qq.com'])).domainPskeyMap.get('qun.qq.com');
     // text是content内容url编码

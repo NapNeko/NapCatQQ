@@ -8,7 +8,7 @@ import { sendError } from '@webapi/utils/response';
 // 鉴权中间件
 export async function auth (req: Request, res: Response, next: NextFunction) {
   // 判断当前url是否为/login 如果是跳过鉴权
-  if (req.url == '/auth/login') {
+  if (req.url === '/auth/login') {
     return next();
   }
 
@@ -27,7 +27,7 @@ export async function auth (req: Request, res: Response, next: NextFunction) {
     let Credential: WebUiCredentialJson;
     try {
       Credential = JSON.parse(Buffer.from(hash, 'base64').toString('utf-8'));
-    } catch (e) {
+    } catch (_e) {
       return sendError(res, 'Unauthorized');
     }
     // 使用启动时缓存的token进行验证，而不是动态读取配置文件 因为有可能运行时手动修改了密码

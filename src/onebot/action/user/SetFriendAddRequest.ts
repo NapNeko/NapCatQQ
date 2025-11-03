@@ -16,7 +16,7 @@ export default class SetFriendAddRequest extends OneBotAction<Payload, null> {
 
   async _handle (payload: Payload): Promise<null> {
     const approve = payload.approve?.toString() !== 'false';
-    const notify = (await this.core.apis.FriendApi.getBuddyReq()).buddyReqs.find(e => e.reqTime == payload.flag.toString());
+    const notify = (await this.core.apis.FriendApi.getBuddyReq()).buddyReqs.find(e => e.reqTime === payload.flag.toString());
     if (!notify) {
       throw new Error('No such request');
     }

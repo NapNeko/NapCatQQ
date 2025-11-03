@@ -176,10 +176,10 @@ export class OneBotGroupApi {
     const json = JSON.parse(jsonStr);
     // 判断业务类型
     // Poke事件
-    const pokedetail: Array<{ uid: string }> = json.items;
+    const pokedetail: Array<{ uid: string; }> = json.items;
     // 筛选item带有uid的元素
     const poke_uid = pokedetail.filter(item => item.uid);
-    if (poke_uid.length == 2 && poke_uid[0]?.uid && poke_uid[1]?.uid) {
+    if (poke_uid.length === 2 && poke_uid[0]?.uid && poke_uid[1]?.uid) {
       return new OB11GroupPokeEvent(
         this.core,
         parseInt(msg.peerUid),
@@ -210,6 +210,7 @@ export class OneBotGroupApi {
     } else {
       context.logger.logWarn('收到未知的灰条消息', json);
     }
+    return undefined;
   }
 
   async parseEssenceMsg (msg: RawMessage, jsonStr: string) {
@@ -217,7 +218,7 @@ export class OneBotGroupApi {
     const searchParams = new URL(json.items[0].jp).searchParams;
     const msgSeq = searchParams.get('msgSeq')!;
     const Group = searchParams.get('groupCode');
-    if (!Group) return;
+    if (!Group) return undefined;
     // const businessId = searchParams.get('businessid');
     const Peer = {
       guildId: '',
@@ -226,7 +227,7 @@ export class OneBotGroupApi {
     };
     const msgData = await this.core.apis.MsgApi.getMsgsBySeqAndCount(Peer, msgSeq.toString(), 1, true, true);
     const msgList = (await this.core.apis.WebApi.getGroupEssenceMsgAll(Group)).flatMap((e) => e.data.msg_list);
-    const realMsg = msgList.find((e) => e.msg_seq.toString() == msgSeq);
+    const realMsg = msgList.find((e) => e.msg_seq.toString() === msgSeq);
     if (msgData.msgList[0]) {
       return new OB11GroupEssenceEvent(
         this.core,
@@ -236,7 +237,7 @@ export class OneBotGroupApi {
         parseInt(realMsg?.add_digest_uin ?? '0')
       );
     }
-
+    return undefined;
     // 获取MsgSeq+Peer可获取具体消息
   }
 
@@ -270,7 +271,7 @@ export class OneBotGroupApi {
       return event;
     } else if (element.type === TipGroupElementType.KMEMBERADD) {
       // 自己的通知 协议推送为type->85 在这里实现为了避免邀请出现问题
-      if (element.memberUid == this.core.selfInfo.uid) {
+      if (element.memberUid === this.core.selfInfo.uid) {
         await this.core.apis.GroupApi.refreshGroupMemberCache(msg.peerUid, true);
         return new OB11GroupIncreaseEvent(
           this.core,
@@ -281,6 +282,7 @@ export class OneBotGroupApi {
         );
       }
     }
+    return undefined;
   }
 
   async parseSelfInviteEvent (msg: RawMessage, inviterUin: string, inviteeUin: string) {
@@ -299,7 +301,7 @@ export class OneBotGroupApi {
     if (grayTipElement.jsonGrayTipElement.jsonStr) {
       const json: {
         align: string,
-        items: Array<{ txt: string, type: string }>
+        items: Array<{ txt: string, type: string; }>;
       } = JSON.parse(grayTipElement.jsonGrayTipElement.jsonStr);
       if (json.items.length === 1 && json.items[0]?.txt.endsWith('加入群')) {
         const old_members = structuredClone(this.core.apis.GroupApi.groupMemberCache.get(msg.peerUid));
@@ -308,7 +310,7 @@ export class OneBotGroupApi {
         if (!new_members_map) return;
         const new_members = Array.from(new_members_map.values());
         // 对比members查找新成员
-        const new_member = new_members.find((member) => old_members.get(member.uid) == undefined);
+        const new_member = new_members.find((member) => old_members.get(member.uid) === undefined);
         if (!new_member) return;
         return new OB11GroupIncreaseEvent(
           this.core,
@@ -319,6 +321,7 @@ export class OneBotGroupApi {
         );
       }
     }
+    return undefined;
   }
 
   async parseGrayTipElement (msg: RawMessage, grayTipElement: GrayTipElement) {
@@ -346,13 +349,13 @@ export class OneBotGroupApi {
       } else {
         // return await this.obContext.apis.GroupApi.parseGroupIncreaseEvent(msg.peerUid, grayTipElement);
       }
-    } else if (grayTipElement.subElementType == NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
+    } else if (grayTipElement.subElementType === NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
       // 解析json事件
-      if (grayTipElement.jsonGrayTipElement.busiId == 1061) {
+      if (grayTipElement.jsonGrayTipElement.busiId === 1061) {
         return await this.parsePaiYiPai(msg, grayTipElement.jsonGrayTipElement.jsonStr);
-      } else if (grayTipElement.jsonGrayTipElement.busiId == JsonGrayBusiId.AIO_GROUP_ESSENCE_MSG_TIP) {
+      } else if (grayTipElement.jsonGrayTipElement.busiId === JsonGrayBusiId.AIO_GROUP_ESSENCE_MSG_TIP) {
         return await this.parseEssenceMsg(msg, grayTipElement.jsonGrayTipElement.jsonStr);
-      } else if (+(grayTipElement.jsonGrayTipElement.busiId ?? 0) == 51) {
+      } else if (+(grayTipElement.jsonGrayTipElement.busiId ?? 0) === 51) {
         // 51是什么？{"align":"center","items":[{"txt":"下一秒起床通过王者荣耀加入群","type":"nor"}]
         return await this.parse51TypeEvent(msg, grayTipElement);
       } else {

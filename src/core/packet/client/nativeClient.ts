@@ -8,13 +8,13 @@ import { PacketLogger } from '@/core/packet/context/loggerContext';
 import { OidbPacket, PacketBuf } from '@/core/packet/transformer/base';
 export interface RecvPacket {
   type: string, // 仅recv
-  data: RecvPacketData
+  data: RecvPacketData;
 }
 
 export interface RecvPacketData {
-  seq: number
-  cmd: string
-  data: Buffer
+  seq: number;
+  cmd: string;
+  data: Buffer;
 }
 
 // 0 send 1 recv
@@ -29,7 +29,7 @@ export class NativePacketClient {
   logStack: LogStack;
   available: boolean = false;
   private readonly supportedPlatforms = ['win32.x64', 'linux.x64', 'linux.arm64', 'darwin.x64', 'darwin.arm64'];
-  private readonly MoeHooExport: { exports: NativePacketExportType } = { exports: {} };
+  private readonly MoeHooExport: { exports: NativePacketExportType; } = { exports: {} };
 
   constructor (napCore: NapCoreContext, logger: PacketLogger, logStack: LogStack) {
     this.napcore = napCore;
@@ -73,7 +73,7 @@ export class NativePacketClient {
         .sendSsoCmdReqByContend(cmd, data)
         .catch(err =>
           this.logger.error(
-                        `[PacketClient] sendPacket 无响应命令发送失败 cmd=${cmd} err=${err}`
+            `[PacketClient] sendPacket 无响应命令发送失败 cmd=${cmd} err=${err}`
           )
         );
       return { seq: 0, cmd, data: Buffer.alloc(0) };
@@ -84,15 +84,15 @@ export class NativePacketClient {
       .then(ret => ({
         seq: 0,
         cmd,
-        data: (ret as { rspbuffer: Buffer }).rspbuffer,
+        data: (ret as { rspbuffer: Buffer; }).rspbuffer,
       }));
 
-    const timeoutPromise = new Promise<RecvPacketData>((_, reject) => {
+    const timeoutPromise = new Promise<RecvPacketData>((_resolve, reject) => {
       setTimeout(
         () =>
           reject(
             new Error(
-                            `[PacketClient] sendPacket 超时 cmd=${cmd} timeout=${timeout}ms`
+              `[PacketClient] sendPacket 超时 cmd=${cmd} timeout=${timeout}ms`
             )
           ),
         timeout

@@ -37,7 +37,7 @@ export class FFmpegExecAdapter implements IFFmpegAdapter {
     private ffprobePath: string = 'ffprobe',
     private binaryPath?: string,
     private logger?: LogWrapper
-  ) {}
+  ) { }
 
   /**
      * 检查 FFmpeg 是否可用，如果不可用则尝试下载
@@ -122,7 +122,7 @@ export class FFmpegExecAdapter implements IFFmpegAdapter {
       if (existsSync(thumbnailPath)) {
         thumbnail = readFileSync(thumbnailPath);
       }
-    } catch (error) {
+    } catch (_error) {
       // 使用默认值
     }
 
@@ -157,7 +157,7 @@ export class FFmpegExecAdapter implements IFFmpegAdapter {
   /**
      * 转换为 PCM
      */
-  async convertToPCM (filePath: string, pcmPath: string): Promise<{ result: boolean, sampleRate: number }> {
+  async convertToPCM (filePath: string, pcmPath: string): Promise<{ result: boolean, sampleRate: number; }> {
     try {
       ensureDirExists(pcmPath);
 

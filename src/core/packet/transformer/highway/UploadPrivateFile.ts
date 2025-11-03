@@ -6,10 +6,6 @@ import { PacketMsgFileElement } from '@/core/packet/message/element';
 import { computeMd5AndLengthWithLimit } from '@/core/packet/utils/crypto/hash';
 
 class UploadPrivateFile extends PacketTransformer<typeof proto.OidbSvcTrpcTcp0XE37Response> {
-  constructor () {
-    super();
-  }
-
   async build (selfUid: string, peerUid: string, file: PacketMsgFileElement): Promise<OidbPacket> {
     const body = new NapProtoMsg(proto.OidbSvcTrpcTcp0XE37_1700).encode({
       command: 1700,

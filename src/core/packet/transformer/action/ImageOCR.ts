@@ -4,10 +4,6 @@ import { OidbPacket, PacketTransformer } from '@/core/packet/transformer/base';
 import OidbBase from '@/core/packet/transformer/oidb/oidbBase';
 
 class ImageOCR extends PacketTransformer<typeof proto.OidbSvcTrpcTcp0xE07_0_Response> {
-  constructor () {
-    super();
-  }
-
   build (url: string): OidbPacket {
     const body = new NapProtoMsg(proto.OidbSvcTrpcTcp0xE07_0).encode(
       {

@@ -15,7 +15,7 @@ export default class SetGroupKickMembers extends OneBotAction<Payload, null> {
   override payloadSchema = SchemaData;
 
   async _handle (payload: Payload): Promise<null> {
-    const rejectReq = payload.reject_add_request?.toString() == 'true';
+    const rejectReq = payload.reject_add_request?.toString() === 'true';
     const uids: string[] = await Promise.all(payload.user_id.map(async uin => await this.core.apis.UserApi.getUidByUinV2(uin)));
     await this.core.apis.GroupApi.kickMember(payload.group_id.toString(), uids.filter(uid => !!uid), rejectReq);
     return null;

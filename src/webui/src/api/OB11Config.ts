@@ -30,7 +30,7 @@ export const OB11GetConfigHandler: RequestHandler = (_, res) => {
     const data = loadConfig(json5.parse(configFileContent)) as OneBotConfig;
     // 返回配置文件
     return sendSuccess(res, data);
-  } catch (e) {
+  } catch (_e) {
     return sendError(res, 'Config Get Error');
   }
 };

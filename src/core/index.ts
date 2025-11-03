@@ -59,7 +59,7 @@ export function loadQQWrapper (QQVersion: string): WrapperNodeApi {
   if (!fs.existsSync(wrapperNodePath)) {
     wrapperNodePath = path.join(path.dirname(process.execPath), `./resources/app/versions/${QQVersion}/wrapper.node`);
   }
-  const nativemodule: { exports: WrapperNodeApi } = { exports: {} as WrapperNodeApi };
+  const nativemodule: { exports: WrapperNodeApi; } = { exports: {} as WrapperNodeApi };
   process.dlopen(nativemodule, wrapperNodePath);
   return nativemodule.exports;
 }
@@ -178,7 +178,7 @@ export class NapCatCore {
       }
     };
     profileListener.onSelfStatusChanged = (Info: SelfStatusInfo) => {
-      if (Info.status == 20) {
+      if (Info.status === 20) {
         this.selfInfo.online = false;
         this.context.logger.log('账号状态变更为离线');
       } else {
@@ -273,5 +273,5 @@ export interface StableNTApiWrapper {
   FriendApi: NTQQFriendApi,
   MsgApi: NTQQMsgApi,
   UserApi: NTQQUserApi,
-  GroupApi: NTQQGroupApi
+  GroupApi: NTQQGroupApi;
 }

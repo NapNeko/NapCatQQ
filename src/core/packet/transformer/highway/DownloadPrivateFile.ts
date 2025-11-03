@@ -4,10 +4,6 @@ import { OidbPacket, PacketTransformer } from '@/core/packet/transformer/base';
 import OidbBase from '@/core/packet/transformer/oidb/oidbBase';
 
 class DownloadPrivateFile extends PacketTransformer<typeof proto.OidbSvcTrpcTcp0XE37_1200Response> {
-  constructor () {
-    super();
-  }
-
   build (selfUid: string, fileUUID: string, fileHash: string): OidbPacket {
     const body = new NapProtoMsg(proto.OidbSvcTrpcTcp0XE37_1200).encode({
       subCommand: 1200,

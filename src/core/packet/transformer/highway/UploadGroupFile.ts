@@ -5,10 +5,6 @@ import OidbBase from '@/core/packet/transformer/oidb/oidbBase';
 import { PacketMsgFileElement } from '@/core/packet/message/element';
 
 class UploadGroupFile extends PacketTransformer<typeof proto.OidbSvcTrpcTcp0x6D6Response> {
-  constructor () {
-    super();
-  }
-
   build (groupUin: number, file: PacketMsgFileElement): OidbPacket {
     const body = new NapProtoMsg(proto.OidbSvcTrpcTcp0x6D6).encode({
       file: {

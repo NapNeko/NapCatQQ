@@ -93,7 +93,7 @@ export class FFmpegService {
   /**
      * 转换为 PCM 格式
      */
-  public static async convert (filePath: string, pcmPath: string): Promise<{ result: boolean, sampleRate: number }> {
+  public static async convert (filePath: string, pcmPath: string): Promise<{ result: boolean, sampleRate: number; }> {
     const adapter = await this.getAdapter();
     return adapter.convertToPCM(filePath, pcmPath);
   }
@@ -126,7 +126,7 @@ export class FFmpegService {
       };
 
       return result;
-    } catch (error) {
+    } catch (_error) {
       // 降级处理:返回默认值
       const fileType = await fileTypeFromFile(videoPath).catch(() => null);
       const fileSize = statSync(videoPath).size;

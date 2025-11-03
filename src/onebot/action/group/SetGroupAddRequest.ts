@@ -42,11 +42,11 @@ export default class SetGroupAddRequest extends OneBotAction<Payload, null> {
 
   private async findNotify (flag: string, count: number = 100): Promise<{
     doubt: boolean,
-    notify: GroupNotify | undefined
+    notify: GroupNotify | undefined;
   }> {
-    let notify = (await this.core.apis.GroupApi.getSingleScreenNotifies(false, count)).find(e => e.seq == flag);
+    let notify = (await this.core.apis.GroupApi.getSingleScreenNotifies(false, count)).find(e => e.seq === flag);
     if (!notify) {
-      notify = (await this.core.apis.GroupApi.getSingleScreenNotifies(true, count)).find(e => e.seq == flag);
+      notify = (await this.core.apis.GroupApi.getSingleScreenNotifies(true, count)).find(e => e.seq === flag);
       return { doubt: true, notify };
     }
     return { doubt: false, notify };

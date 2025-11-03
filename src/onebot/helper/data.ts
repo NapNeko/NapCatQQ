@@ -31,7 +31,7 @@ export class OB11Construct {
       nickname: rawFriend.coreInfo.nick ?? '',
       remark: rawFriend.coreInfo.remark ?? rawFriend.coreInfo.nick,
       sex: this.sex(rawFriend.baseInfo.sex),
-      level: rawFriend.qqLevel && calcQQLevel(rawFriend.qqLevel) || 0,
+      level: (rawFriend.qqLevel && calcQQLevel(rawFriend.qqLevel)) || 0,
     }));
   }
 
@@ -80,7 +80,7 @@ export class OB11Construct {
       age: member.age ?? 0,
       area: '',
       level: member.memberRealLevel?.toString() ?? '0',
-      qq_level: member.qqLevel && calcQQLevel(member.qqLevel) || 0,
+      qq_level: (member.qqLevel && calcQQLevel(member.qqLevel)) || 0,
       join_time: +member.joinTime,
       last_sent_time: +member.lastSpeakTime,
       title_expire_time: 0,
