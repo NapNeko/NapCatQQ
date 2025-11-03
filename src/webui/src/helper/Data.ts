@@ -57,7 +57,7 @@ export const WebUiDataRuntime = {
       return false;
     }
 
-    store.incr(key);
+    store.set(key, count + 1);
     return true;
   },
 
