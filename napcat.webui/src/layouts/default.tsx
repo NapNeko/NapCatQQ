@@ -42,7 +42,7 @@ const findTitle = (menus: MenuItem[], pathname: string): string[] => {
 
   return paths;
 };
-const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const Layout: React.FC<{ children: React.ReactNode; }> = ({ children }) => {
   const location = useLocation();
   const contentRef = useRef<HTMLDivElement>(null);
   const [openSideBar, setOpenSideBar] = useLocalStorage(key.sideBarOpen, true);

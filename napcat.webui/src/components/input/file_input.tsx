@@ -3,10 +3,10 @@ import { Input } from '@heroui/input';
 import { useRef, useState } from 'react';
 
 export interface FileInputProps {
-  onChange: (file: File) => Promise<void> | void
-  onDelete?: () => Promise<void> | void
-  label?: string
-  accept?: string
+  onChange: (file: File) => Promise<void> | void;
+  onDelete?: () => Promise<void> | void;
+  label?: string;
+  accept?: string;
 }
 
 const FileInput: React.FC<FileInputProps> = ({
@@ -34,7 +34,7 @@ const FileInput: React.FC<FileInputProps> = ({
               if (file) {
                 await onChange(file);
               }
-            } catch (_error) {
+            } catch (error) {
               console.error(error);
             } finally {
               setIsLoading(false);
@@ -49,7 +49,7 @@ const FileInput: React.FC<FileInputProps> = ({
           try {
             setIsLoading(true);
             if (onDelete) await onDelete();
-          } catch (_error) {
+          } catch (error) {
             console.error(error);
           } finally {
             setIsLoading(false);

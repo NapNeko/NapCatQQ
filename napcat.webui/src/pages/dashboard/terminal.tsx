@@ -23,8 +23,8 @@ import { TerminalInstance } from '@/components/terminal/terminal-instance';
 import terminalManager from '@/controllers/terminal_manager';
 
 interface TerminalTab {
-  id: string
-  title: string
+  id: string;
+  title: string;
 }
 
 export default function TerminalPage () {

@@ -34,7 +34,7 @@ const OneBotConfigCard = () => {
     try {
       await saveConfigWithoutNetwork(data);
       toast.success('保存成功');
-    } catch (_error) {
+    } catch (error) {
       const msg = (error as Error).message;
       toast.error(`保存失败: ${msg}`);
     }
@@ -45,7 +45,7 @@ const OneBotConfigCard = () => {
       setLoading(true);
       await refreshConfig();
       if (shotTip) toast.success('刷新成功');
-    } catch (_error) {
+    } catch (error) {
       const msg = (error as Error).message;
       toast.error(`刷新失败: ${msg}`);
     } finally {

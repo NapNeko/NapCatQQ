@@ -34,7 +34,7 @@ export default function QQLoginPage () {
     setIsLoading(true);
     try {
       await QQManager.setQuickLogin(uinValue);
-    } catch (_error) {
+    } catch (error) {
       const msg = (error as Error).message;
 
       toast.error(`快速登录QQ失败: ${msg}`);
@@ -60,7 +60,7 @@ export default function QQLoginPage () {
       } else {
         setQrcode(data.qrcodeurl);
       }
-    } catch (_error) {
+    } catch (error) {
       const msg = (error as Error).message;
 
       toast.error(`获取二维码失败: ${msg}`);
@@ -82,7 +82,7 @@ export default function QQLoginPage () {
 
         setQQList(qqList);
       } catch (_error) {
-        const msg = (error as Error).message;
+        const msg = (_error as Error).message;
 
         toast.error(`获取QQ列表失败: ${msg}`);
       }

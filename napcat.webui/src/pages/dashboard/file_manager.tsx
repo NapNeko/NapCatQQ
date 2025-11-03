@@ -41,8 +41,8 @@ export default function FileManagerPage () {
     currentPath = currentPath.slice(1);
   }
   const [editingFile, setEditingFile] = useState<{
-    path: string
-    content: string
+    path: string;
+    content: string;
   } | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newFileName, setNewFileName] = useState('');
@@ -175,7 +175,7 @@ export default function FileManagerPage () {
       setIsCreateModalOpen(false);
       setNewFileName('');
       loadFiles();
-    } catch (_error) {
+    } catch (error) {
       toast.error((error as Error)?.message || '创建失败');
     }
   };

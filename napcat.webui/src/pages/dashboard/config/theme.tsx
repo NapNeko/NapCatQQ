@@ -21,8 +21,8 @@ import { colorKeys, generateTheme, loadTheme } from '@/utils/theme';
 import WebUIManager from '@/controllers/webui_manager';
 
 export type PreviewThemeCardProps = {
-  theme: ThemeInfo
-  onPreview: () => void
+  theme: ThemeInfo;
+  onPreview: () => void;
 };
 
 const values = [
@@ -110,7 +110,7 @@ const ThemeConfigCard = () => {
     formState: { isSubmitting },
     setValue: setOnebotValue,
   } = useForm<{
-    theme: ThemeConfig
+    theme: ThemeConfig;
   }>({
     defaultValues: {
       theme: {
@@ -146,7 +146,7 @@ const ThemeConfigCard = () => {
       await WebUIManager.setThemeConfig(data.theme);
       toast.success('保存成功');
       loadTheme();
-    } catch (_error) {
+    } catch (error) {
       const msg = (error as Error).message;
       toast.error(`保存失败: ${msg}`);
     }
@@ -156,7 +156,7 @@ const ThemeConfigCard = () => {
     try {
       await refreshAsync();
       toast.success('刷新成功');
-    } catch (_error) {
+    } catch (error) {
       const msg = (error as Error).message;
       toast.error(`刷新失败: ${msg}`);
     }

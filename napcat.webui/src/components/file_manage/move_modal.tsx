@@ -15,12 +15,12 @@ import { IoAdd, IoRemove } from 'react-icons/io5';
 import FileManager from '@/controllers/file_manager';
 
 interface MoveModalProps {
-  isOpen: boolean
-  moveTargetPath: string
-  selectionInfo: string
-  onClose: () => void
-  onMove: () => void
-  onSelect: (dir: string) => void // 新增回调
+  isOpen: boolean;
+  moveTargetPath: string;
+  selectionInfo: string;
+  onClose: () => void;
+  onMove: () => void;
+  onSelect: (dir: string) => void; // 新增回调
 }
 
 // 将 DirectoryTree 改为递归组件
@@ -30,9 +30,9 @@ function DirectoryTree ({
   onSelect,
   selectedPath,
 }: {
-  basePath: string
-  onSelect: (dir: string) => void
-  selectedPath?: string
+  basePath: string;
+  onSelect: (dir: string) => void;
+  selectedPath?: string;
 }) {
   const [dirs, setDirs] = useState<string[]>([]);
   const [expanded, setExpanded] = useState(false);
@@ -112,9 +112,9 @@ function DirectoryTree ({
             : (
               dirs.map((dirName) => {
                 const childPath =
-                basePath === '/' && /^[A-Z]:$/i.test(dirName)
-                  ? dirName
-                  : path.join(basePath, dirName);
+                  basePath === '/' && /^[A-Z]:$/i.test(dirName)
+                    ? dirName
+                    : path.join(basePath, dirName);
                 return (
                   <DirectoryTree
                     key={childPath}

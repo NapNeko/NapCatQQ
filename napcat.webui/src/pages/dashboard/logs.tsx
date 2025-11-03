@@ -29,7 +29,7 @@ export default function LogsPage () {
     try {
       const result = await WebUIManager.getLogContent(selectedLog);
       setLogContent(result);
-    } catch (_error) {
+    } catch (error) {
       const msg = (error as Error).message;
       toast.error(`加载日志失败: ${msg}`);
     } finally {

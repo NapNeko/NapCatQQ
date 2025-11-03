@@ -20,13 +20,13 @@ const modalTitle = {
 export interface NetworkFormModalProps<
   T extends keyof OneBotConfig['network']
 > {
-  isOpen: boolean
-  field: T
-  data?: OneBotConfig['network'][T][0]
-  onOpenChange: (isOpen: boolean) => void
+  isOpen: boolean;
+  field: T;
+  data?: OneBotConfig['network'][T][0];
+  onOpenChange: (isOpen: boolean) => void;
 }
 
-const NetworkFormModal = <T extends keyof OneBotConfig['network']>(
+const NetworkFormModal = <T extends keyof OneBotConfig['network']> (
   props: NetworkFormModalProps<T>
 ) => {
   const { isOpen, onOpenChange, field, data } = props;
@@ -41,7 +41,7 @@ const NetworkFormModal = <T extends keyof OneBotConfig['network']>(
         await updateNetworkConfig(field, data);
       }
       toast.success('保存配置成功');
-    } catch (_error) {
+    } catch (error) {
       const msg = (error as Error).message;
 
       toast.error(`保存配置失败: ${msg}`);

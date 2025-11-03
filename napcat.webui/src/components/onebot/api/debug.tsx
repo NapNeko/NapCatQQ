@@ -23,8 +23,8 @@ import { generateDefaultJson, parse } from '@/utils/zod';
 import DisplayStruct from './display_struct';
 
 export interface OneBotApiDebugProps {
-  path: OneBotHttpApiPath
-  data: OneBotHttpApiContent
+  path: OneBotHttpApiPath;
+  data: OneBotHttpApiContent;
 }
 
 const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {

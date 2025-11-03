@@ -19,21 +19,21 @@ import useConfig from '@/hooks/use-config';
 import useDialog from '@/hooks/use-dialog';
 
 export interface SectionProps {
-  title: string
+  title: string;
   color?:
-    | 'violet'
-    | 'yellow'
-    | 'blue'
-    | 'cyan'
-    | 'green'
-    | 'pink'
-    | 'foreground'
-  icon: React.ReactNode
-  children: React.ReactNode
+  | 'violet'
+  | 'yellow'
+  | 'blue'
+  | 'cyan'
+  | 'green'
+  | 'pink'
+  | 'foreground';
+  icon: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export interface EmptySectionProps {
-  isEmpty: boolean
+  isEmpty: boolean;
 }
 
 const EmptySection: React.FC<EmptySectionProps> = ({ isEmpty }) => {
@@ -84,7 +84,7 @@ export default function NetworkPage () {
     try {
       await refreshConfig();
       setLoading(false);
-    } catch (_error) {
+    } catch (error) {
       const msg = (error as Error).message;
 
       toast.error(`获取配置失败: ${msg}`);
@@ -112,7 +112,7 @@ export default function NetworkPage () {
             await deleteNetworkConfig(field, name);
             toast.success('删除配置成功');
             resolve();
-          } catch (_error) {
+          } catch (error) {
             const msg = (error as Error).message;
 
             toast.error(`删除配置失败: ${msg}`);
@@ -134,7 +134,7 @@ export default function NetworkPage () {
     try {
       await enableNetworkConfig(field, name);
       toast.success('更新配置成功');
-    } catch (_error) {
+    } catch (error) {
       const msg = (error as Error).message;
 
       toast.error(`更新配置失败: ${msg}`);
@@ -150,7 +150,7 @@ export default function NetworkPage () {
     try {
       await enableDebugNetworkConfig(field, name);
       toast.success('更新配置成功');
-    } catch (_error) {
+    } catch (error) {
       const msg = (error as Error).message;
 
       toast.error(`更新配置失败: ${msg}`);
@@ -165,7 +165,7 @@ export default function NetworkPage () {
     onOpen();
   };
 
-  const renderCard = <T extends keyof OneBotConfig['network']>(
+  const renderCard = <T extends keyof OneBotConfig['network']> (
     type: T,
     item: OneBotConfig['network'][T][0],
     showType = false

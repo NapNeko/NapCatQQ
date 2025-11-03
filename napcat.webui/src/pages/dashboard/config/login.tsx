@@ -22,7 +22,7 @@ const LoginConfigCard = () => {
     formState: { isSubmitting },
     setValue: setOnebotValue,
   } = useForm<{
-    quickLoginQQ: string
+    quickLoginQQ: string;
   }>({
     defaultValues: {
       quickLoginQQ: '',
@@ -37,7 +37,7 @@ const LoginConfigCard = () => {
     try {
       await QQManager.setQuickLoginQQ(data.quickLoginQQ);
       toast.success('保存成功');
-    } catch (_error) {
+    } catch (error) {
       const msg = (error as Error).message;
       toast.error(`保存失败: ${msg}`);
     }
@@ -47,7 +47,7 @@ const LoginConfigCard = () => {
     try {
       await refreshQuickLogin();
       toast.success('刷新成功');
-    } catch (_error) {
+    } catch (error) {
       const msg = (error as Error).message;
       toast.error(`刷新失败: ${msg}`);
     }

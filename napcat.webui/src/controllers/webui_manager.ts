@@ -6,8 +6,8 @@ import { LogLevel } from '@/const/enum';
 import { serverRequest } from '@/utils/request';
 
 export interface Log {
-  level: LogLevel
-  message: string
+  level: LogLevel;
+  message: string;
 }
 
 export default class WebUIManager {
@@ -34,7 +34,7 @@ export default class WebUIManager {
     return data.data;
   }
 
-  public static async proxy<T>(url = '') {
+  public static async proxy<T> (url = '') {
     const data = await serverRequest.get<ServerResponse<string>>(
       '/base/proxy?url=' + encodeURIComponent(url)
     );
@@ -100,7 +100,7 @@ export default class WebUIManager {
         const data = JSON.parse(event.data);
         data.message = data.message.replace(/\n/g, '\r\n');
         writer([data]);
-      } catch (_error) {
+      } catch (error) {
         console.error(error);
       }
     };
@@ -134,7 +134,7 @@ export default class WebUIManager {
       try {
         const data = JSON.parse(event.data) as SystemStatus;
         writer(data);
-      } catch (_error) {
+      } catch (error) {
         console.error(error);
       }
     };

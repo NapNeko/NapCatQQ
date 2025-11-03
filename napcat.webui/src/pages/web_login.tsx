@@ -39,7 +39,7 @@ export default function WebLoginPage () {
         setLocalToken(data);
         navigate('/qq_login', { replace: true });
       }
-    } catch (_error) {
+    } catch (error) {
       toast.error((error as Error).message);
     } finally {
       setIsLoading(false);

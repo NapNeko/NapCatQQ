@@ -53,7 +53,7 @@ const ServerConfigCard = () => {
     try {
       await WebUIManager.updateWebUIConfig(data);
       toast.success('保存成功');
-    } catch (_error) {
+    } catch (error) {
       const msg = (error as Error).message;
       toast.error(`保存失败: ${msg}`);
     }
@@ -63,7 +63,7 @@ const ServerConfigCard = () => {
     try {
       await refreshConfig();
       toast.success('刷新成功');
-    } catch (_error) {
+    } catch (error) {
       const msg = (error as Error).message;
       toast.error(`刷新失败: ${msg}`);
     }

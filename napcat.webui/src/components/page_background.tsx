@@ -1,5 +1,4 @@
 import { Image } from '@heroui/image';
-import React from 'react';
 
 import bkg_color from '@/assets/images/bkg-color.png';
 
