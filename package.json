@@ -18,7 +18,7 @@
     "dev:depend": "npm i && cd napcat.webui && npm i"
   },
   "devDependencies": {
-    "@babel/core": "^7.28.0",
+    "@babel/core": "^7.28.5",
     "@babel/generator": "^7.28.0",
     "@babel/parser": "^7.28.0",
     "@babel/preset-typescript": "^7.24.7",
