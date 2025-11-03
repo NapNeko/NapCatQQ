@@ -350,15 +350,16 @@ export class OneBotGroupApi {
         // return await this.obContext.apis.GroupApi.parseGroupIncreaseEvent(msg.peerUid, grayTipElement);
       }
     } else if (grayTipElement.subElementType === NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
-      // 解析json事件
-      if (grayTipElement.jsonGrayTipElement.busiId === 1061) {
+      // 解析json事件 busiId好像是string类型的？
+      if (grayTipElement.jsonGrayTipElement.busiId?.toString() === '1061') {
         return await this.parsePaiYiPai(msg, grayTipElement.jsonGrayTipElement.jsonStr);
       } else if (grayTipElement.jsonGrayTipElement.busiId === JsonGrayBusiId.AIO_GROUP_ESSENCE_MSG_TIP) {
         return await this.parseEssenceMsg(msg, grayTipElement.jsonGrayTipElement.jsonStr);
-      } else if (+(grayTipElement.jsonGrayTipElement.busiId ?? 0) === 51) {
+      } else if ((grayTipElement.jsonGrayTipElement.busiId ?? 0).toString() === '51') {
         // 51是什么？{"align":"center","items":[{"txt":"下一秒起床通过王者荣耀加入群","type":"nor"}]
         return await this.parse51TypeEvent(msg, grayTipElement);
       } else {
+        console.log('Unknown JSON event:', grayTipElement.jsonGrayTipElement, JSON.stringify(grayTipElement));
         return await this.parseOtherJsonEvent(msg, grayTipElement.jsonGrayTipElement.jsonStr, this.core.context);
       }
     }

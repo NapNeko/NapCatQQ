@@ -20,16 +20,16 @@ export interface SendElementBase<ET extends ElementType> {
 }
 
 type ElementBase<
-    K extends keyof ElementFullBase,
-    S extends Partial<{ [P in K]: keyof NonNullable<ElementFullBase[P]> | Array<keyof NonNullable<ElementFullBase[P]>> }> = object
+  K extends keyof ElementFullBase,
+  S extends Partial<{ [P in K]: keyof NonNullable<ElementFullBase[P]> | Array<keyof NonNullable<ElementFullBase[P]>> }> = object
 > = {
-  [P in K]:
-  S[P] extends Array<infer U>
+    [P in K]:
+    S[P] extends Array<infer U>
     ? Pick<NonNullable<ElementFullBase[P]>, U & keyof NonNullable<ElementFullBase[P]>>
     : S[P] extends keyof NonNullable<ElementFullBase[P]>
-      ? Pick<NonNullable<ElementFullBase[P]>, S[P]>
-      : NonNullable<ElementFullBase[P]>;
-};
+    ? Pick<NonNullable<ElementFullBase[P]>, S[P]>
+    : NonNullable<ElementFullBase[P]>;
+  };
 
 export interface TextElement {
   content: string;
@@ -63,6 +63,20 @@ export interface GrayTipRovokeElement {
   wording: string;  // 自定义的撤回提示语
 }
 
+export interface XmlToJsonParam {
+  busiType: string;
+  busiId: string;
+  c2cType: number;
+  serviceType: number;
+  ctrlFlag: number;
+  content: string;
+  templId: string;
+  seqId: string;
+  templParam: Map<string, string>;
+  pbReserv: null | string;
+  members: Map<string, string>;
+}
+
 export interface GrayTipElement {
   subElementType: NTGrayTipElementSubTypeV2;
   revokeElement: GrayTipRovokeElement;
@@ -74,8 +88,11 @@ export interface GrayTipElement {
     templId: string;
   };
   jsonGrayTipElement: {
-    busiId?: number;
+    busiId?: number | string;
     jsonStr: string;
+    recentAbstract?: string;
+    isServer?: boolean;
+    xmlToJsonParam?: XmlToJsonParam;
   };
 }
 
@@ -352,7 +369,7 @@ export type SendPicElement = SendElementBase<ElementType.PIC> & ElementBase<'pic
 
 export type SendPttElement = SendElementBase<ElementType.PTT> & ElementBase<'pttElement', {
   pttElement: ['fileName', 'filePath', 'md5HexStr', 'fileSize', 'duration', 'formatType', 'voiceType',
-    'voiceChangeType', 'canConvert2Text', 'waveAmplitudes', 'fileSubId', 'playState', 'autoConvertText', 'storeID', 'otherBusinessInfo']
+    'voiceChangeType', 'canConvert2Text', 'waveAmplitudes', 'fileSubId', 'playState', 'autoConvertText', 'storeID', 'otherBusinessInfo'];
 }>;
 
 export type SendFileElement = SendElementBase<ElementType.FILE> & ElementBase<'fileElement'>;
@@ -368,5 +385,5 @@ export type SendShareLocationElement = SendElementBase<ElementType.SHARELOCATION
 export type SendMultiForwardMsgElement = SendElementBase<ElementType.MULTIFORWARD> & ElementBase<'multiForwardMsgElement'>;
 
 export type SendMessageElement = SendTextElement | SendPttElement |
-    SendPicElement | SendReplyElement | SendFaceElement | SendMarketFaceElement | SendFileElement |
-    SendVideoElement | SendArkElement | SendMarkdownElement | SendShareLocationElement;
+  SendPicElement | SendReplyElement | SendFaceElement | SendMarketFaceElement | SendFileElement |
+  SendVideoElement | SendArkElement | SendMarkdownElement | SendShareLocationElement;
