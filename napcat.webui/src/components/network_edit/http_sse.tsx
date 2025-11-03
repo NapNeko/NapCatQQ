@@ -1,5 +1,5 @@
-import GenericForm, { random_token } from './generic_form'
-import type { Field } from './generic_form'
+import GenericForm, { random_token } from './generic_form';
+import type { Field } from './generic_form';
 
 export interface HTTPServerSSEFormProps {
   data?: OneBotConfig['network']['httpSseServers'][0]
@@ -9,12 +9,12 @@ export interface HTTPServerSSEFormProps {
   ) => Promise<void>
 }
 
-type HTTPServerSSEFormType = OneBotConfig['network']['httpSseServers']
+type HTTPServerSSEFormType = OneBotConfig['network']['httpSseServers'];
 
 const HTTPServerSSEForm: React.FC<HTTPServerSSEFormProps> = ({
   data,
   onClose,
-  onSubmit
+  onSubmit,
 }) => {
   const defaultValues: HTTPServerSSEFormType[0] = {
     enable: false,
@@ -26,8 +26,8 @@ const HTTPServerSSEForm: React.FC<HTTPServerSSEFormProps> = ({
     messagePostFormat: 'array',
     token: random_token(16),
     debug: false,
-    reportSelfMessage: false
-  }
+    reportSelfMessage: false,
+  };
 
   const fields: Field<'httpSseServers'>[] = [
     {
@@ -35,14 +35,14 @@ const HTTPServerSSEForm: React.FC<HTTPServerSSEFormProps> = ({
       label: '启用',
       type: 'switch',
       description: '保存后启用此配置',
-      colSpan: 1
+      colSpan: 1,
     },
     {
       name: 'debug',
       label: '开启Debug',
       type: 'switch',
       description: '是否开启调试模式',
-      colSpan: 1
+      colSpan: 1,
     },
     {
       name: 'name',
@@ -50,35 +50,35 @@ const HTTPServerSSEForm: React.FC<HTTPServerSSEFormProps> = ({
       type: 'input',
       placeholder: '请输入名称',
       isRequired: true,
-      isDisabled: !!data
+      isDisabled: !!data,
     },
     {
       name: 'host',
       label: 'Host',
       type: 'input',
       placeholder: '请输入主机地址',
-      isRequired: true
+      isRequired: true,
     },
     {
       name: 'port',
       label: 'Port',
       type: 'input',
       placeholder: '请输入端口',
-      isRequired: true
+      isRequired: true,
     },
     {
       name: 'enableCors',
       label: '启用CORS',
       type: 'switch',
       description: '是否启用CORS跨域',
-      colSpan: 1
+      colSpan: 1,
     },
     {
       name: 'enableWebsocket',
       label: '启用Websocket',
       type: 'switch',
       description: '是否启用Websocket',
-      colSpan: 1
+      colSpan: 1,
     },
     {
       name: 'messagePostFormat',
@@ -88,23 +88,23 @@ const HTTPServerSSEForm: React.FC<HTTPServerSSEFormProps> = ({
       isRequired: true,
       options: [
         { key: 'array', value: 'Array' },
-        { key: 'string', value: 'String' }
-      ]
+        { key: 'string', value: 'String' },
+      ],
     },
     {
       name: 'token',
       label: 'Token',
       type: 'input',
-      placeholder: '请输入Token'
+      placeholder: '请输入Token',
     },
     {
       name: 'reportSelfMessage',
       label: '上报自身消息',
       type: 'switch',
       description: '是否上报自身消息',
-      colSpan: 1
-    }
-  ]
+      colSpan: 1,
+    },
+  ];
 
   return (
     <GenericForm
@@ -114,7 +114,7 @@ const HTTPServerSSEForm: React.FC<HTTPServerSSEFormProps> = ({
       onSubmit={onSubmit}
       fields={fields}
     />
-  )
-}
+  );
+};
 
-export default HTTPServerSSEForm
+export default HTTPServerSSEForm;

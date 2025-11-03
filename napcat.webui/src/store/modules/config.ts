@@ -1,6 +1,6 @@
-import { PayloadAction, createSlice } from '@reduxjs/toolkit'
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-import type { RootState } from '@/store'
+import type { RootState } from '@/store';
 
 interface ConfigState {
   value: OneBotConfig
@@ -13,26 +13,26 @@ const initialState: ConfigState = {
       httpClients: [],
       httpSseServers: [],
       websocketServers: [],
-      websocketClients: []
+      websocketClients: [],
     },
     musicSignUrl: '',
     enableLocalFile2Url: false,
-    parseMultMsg: true
-  }
-}
+    parseMultMsg: true,
+  },
+};
 
 export const configSlice = createSlice({
   name: 'config',
   initialState,
   reducers: {
     updateConfig: (state, action: PayloadAction<OneBotConfig>) => {
-      state.value = action.payload
-    }
-  }
-})
+      state.value = action.payload;
+    },
+  },
+});
 
-export const { updateConfig } = configSlice.actions
+export const { updateConfig } = configSlice.actions;
 
-export const selectCount = (state: RootState) => state.config.value
+export const selectCount = (state: RootState) => state.config.value;
 
-export default configSlice.reducer
+export default configSlice.reducer;

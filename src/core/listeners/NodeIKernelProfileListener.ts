@@ -1,71 +1,71 @@
 import { User, UserDetailInfoListenerArg } from '@/core/types';
 
 export class NodeIKernelProfileListener {
-    onUserDetailInfoChanged(arg: UserDetailInfoListenerArg): void {
+  onUserDetailInfoChanged (_arg: UserDetailInfoListenerArg): void {
 
-    }
+  }
 
-    onProfileSimpleChanged(...args: unknown[]): any {
+  onProfileSimpleChanged (..._args: unknown[]): any {
 
-    }
+  }
 
-    onProfileDetailInfoChanged(profile: User): any {
+  onProfileDetailInfoChanged (_profile: User): any {
 
-    }
+  }
 
-    onStatusUpdate(...args: unknown[]): any {
+  onStatusUpdate (..._args: unknown[]): any {
 
-    }
+  }
 
-    onSelfStatusChanged(...args: unknown[]): any {
+  onSelfStatusChanged (..._args: unknown[]): any {
 
-    }
+  }
 
-    onStrangerRemarkChanged(...args: unknown[]): any {
+  onStrangerRemarkChanged (..._args: unknown[]): any {
 
-    }
+  }
 
-    onMemberListChange(...args: unknown[]): any {
+  onMemberListChange (..._args: unknown[]): any {
 
-    }
+  }
 
-    onMemberInfoChange(...args: unknown[]): any {
+  onMemberInfoChange (..._args: unknown[]): any {
 
-    }
+  }
 
-    onGroupListUpdate(...args: unknown[]): any {
+  onGroupListUpdate (..._args: unknown[]): any {
 
-    }
+  }
 
-    onGroupAllInfoChange(...args: unknown[]): any {
+  onGroupAllInfoChange (..._args: unknown[]): any {
 
-    }
+  }
 
-    onGroupDetailInfoChange(...args: unknown[]): any {
+  onGroupDetailInfoChange (..._args: unknown[]): any {
 
-    }
+  }
 
-    onGroupConfMemberChange(...args: unknown[]): any {
+  onGroupConfMemberChange (..._args: unknown[]): any {
 
-    }
+  }
 
-    onGroupExtListUpdate(...args: unknown[]): any {
+  onGroupExtListUpdate (..._args: unknown[]): any {
 
-    }
+  }
 
-    onGroupNotifiesUpdated(...args: unknown[]): any {
+  onGroupNotifiesUpdated (..._args: unknown[]): any {
 
-    }
+  }
 
-    onGroupNotifiesUnreadCountUpdated(...args: unknown[]): any {
+  onGroupNotifiesUnreadCountUpdated (..._args: unknown[]): any {
 
-    }
+  }
 
-    onGroupMemberLevelInfoChange(...args: unknown[]): any {
+  onGroupMemberLevelInfoChange (..._args: unknown[]): any {
 
-    }
+  }
 
-    onGroupBulletinChange(...args: unknown[]): any {
+  onGroupBulletinChange (..._args: unknown[]): any {
 
-    }
+  }
 }

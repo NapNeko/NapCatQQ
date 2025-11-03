@@ -1,18 +1,18 @@
 import { NodeIDependsAdapter, NodeIDispatcherAdapter, NodeIGlobalAdapter } from './adapters';
 import {
-    NodeIKernelAvatarService,
-    NodeIKernelBuddyService,
-    NodeIKernelGroupService,
-    NodeIKernelLoginService,
-    NodeIKernelMsgService,
-    NodeIKernelProfileLikeService,
-    NodeIKernelProfileService,
-    NodeIKernelRichMediaService,
-    NodeIKernelRobotService,
-    NodeIKernelSessionListener,
-    NodeIKernelStorageCleanService,
-    NodeIKernelTicketService,
-    NodeIKernelTipOffService,
+  NodeIKernelAvatarService,
+  NodeIKernelBuddyService,
+  NodeIKernelGroupService,
+  NodeIKernelLoginService,
+  NodeIKernelMsgService,
+  NodeIKernelProfileLikeService,
+  NodeIKernelProfileService,
+  NodeIKernelRichMediaService,
+  NodeIKernelRobotService,
+  NodeIKernelSessionListener,
+  NodeIKernelStorageCleanService,
+  NodeIKernelTicketService,
+  NodeIKernelTipOffService,
 } from '@/core/index';
 import { NodeIKernelNodeMiscService } from './services/NodeIKernelNodeMiscService';
 import { NodeIKernelUixConvertService } from './services/NodeIKernelUixConvertService';
@@ -29,331 +29,331 @@ import { NodeIKernelECDHService } from './services/NodeIKernelECDHService';
 import { NodeIO3MiscService } from './services/NodeIO3MiscService';
 
 export interface NodeQQNTWrapperUtil {
-    get(): NodeQQNTWrapperUtil;
+  get(): NodeQQNTWrapperUtil;
 
-    getNTUserDataInfoConfig(): string;
+  getNTUserDataInfoConfig(): string;
 
-    emptyWorkingSet(n: number): void;
+  emptyWorkingSet(n: number): void;
 
-    getSsoCmdOfOidbReq(arg1: number, arg2: number): unknown;
+  getSsoCmdOfOidbReq(arg1: number, arg2: number): unknown;
 
-    getSsoBufferOfOidbReq(...args: unknown[]): unknown; //有点看不懂参数定义 待补充 好像是三个参数
+  getSsoBufferOfOidbReq(...args: unknown[]): unknown; // 有点看不懂参数定义 待补充 好像是三个参数
 
-    getOidbRspInfo(arg: string): unknown; //可能是错的
+  getOidbRspInfo(arg: string): unknown; // 可能是错的
 
-    getFileSize(path: string): Promise<number>; //直接的猜测
+  getFileSize(path: string): Promise<number>; // 直接的猜测
 
-    genFileMd5Buf(arg: string): unknown; //可能是错的
+  genFileMd5Buf(arg: string): unknown; // 可能是错的
 
-    genFileMd5Hex(path: string): unknown; //直接的猜测
+  genFileMd5Hex(path: string): unknown; // 直接的猜测
 
-    genFileShaBuf(path: string): unknown; //直接的猜测
+  genFileShaBuf(path: string): unknown; // 直接的猜测
 
-    genFileCumulateSha1(path: string): unknown; //直接的猜测
+  genFileCumulateSha1(path: string): unknown; // 直接的猜测
 
-    genFileShaHex(path: string): unknown; //直接的猜测
+  genFileShaHex(path: string): unknown; // 直接的猜测
 
-    fileIsExist(path: string): unknown;
+  fileIsExist(path: string): unknown;
 
-    startTrace(path: string): unknown; //可能是错的
+  startTrace(path: string): unknown; // 可能是错的
 
-    copyFile(src: string, dst: string): unknown;
+  copyFile(src: string, dst: string): unknown;
 
-    genFileShaAndMd5Hex(path: string, unknown: number): unknown; //可能是错的
+  genFileShaAndMd5Hex(path: string, unknown: number): unknown; // 可能是错的
 
-    setTraceInfo(unknown: unknown): unknown;
+  setTraceInfo(unknown: unknown): unknown;
 
-    encodeOffLine(unknown: unknown): unknown;
+  encodeOffLine(unknown: unknown): unknown;
 
-    decodeOffLine(arg: string): unknown; //可能是错的 传递hex
+  decodeOffLine(arg: string): unknown; // 可能是错的 传递hex
 
-    DecoderRecentInfo(arg: string): unknown; //可能是错的 传递hex
+  DecoderRecentInfo(arg: string): unknown; // 可能是错的 传递hex
 
-    getPinyin(arg0: string, arg1: boolean): unknown;
+  getPinyin(arg0: string, arg1: boolean): unknown;
 
-    matchInPinyin(arg0: unknown[], arg1: string): unknown; //参数特复杂 arg0是个复杂数据类型
+  matchInPinyin(arg0: unknown[], arg1: string): unknown; // 参数特复杂 arg0是个复杂数据类型
 
-    makeDirByPath(arg0: string): unknown;
+  makeDirByPath(arg0: string): unknown;
 
-    emptyWorkingSet(arg0: number): unknown; //参数是UINT32
+  emptyWorkingSet(arg0: number): unknown; // 参数是UINT32
 
-    runProcess(arg0: string, arg1: boolean): unknown;
+  runProcess(arg0: string, arg1: boolean): unknown;
 
-    runProcessArgs(arg0: string, arg1: { [key: string]: string }, arg2: boolean): unknown;
+  runProcessArgs(arg0: string, arg1: { [key: string]: string }, arg2: boolean): unknown;
 
-    calcThumbSize(arg0: number, arg1: number, arg2: unknown): unknown;
+  calcThumbSize(arg0: number, arg1: number, arg2: unknown): unknown;
 
-    fullWordToHalfWord(word: string): unknown;
+  fullWordToHalfWord(word: string): unknown;
 
-    getNTUserDataInfoConfig(): unknown;
+  getNTUserDataInfoConfig(): unknown;
 
-    pathIsReadableAndWriteable(path: string): unknown; //直接的猜测
+  pathIsReadableAndWriteable(path: string): unknown; // 直接的猜测
 
-    resetUserDataSavePathToDocument(): unknown;
+  resetUserDataSavePathToDocument(): unknown;
 
-    getSoBuildInfo(): unknown; //例如 0[0]_d491dc01e0a_0
+  getSoBuildInfo(): unknown; // 例如 0[0]_d491dc01e0a_0
 
-    registerCountInstruments(arg0: string, arg1: string[], arg2: number, arg3: number): unknown;
+  registerCountInstruments(arg0: string, arg1: string[], arg2: number, arg3: number): unknown;
 
-    registerValueInstruments(arg0: string, arg1: string[], arg2: number, arg3: number): unknown;
+  registerValueInstruments(arg0: string, arg1: string[], arg2: number, arg3: number): unknown;
 
-    registerValueInstrumentsWithBoundary(
-        arg0: string,
-        arg1: unknown,
-        arg2: unknown,
-        arg3: number,
-        arg4: number,
-    ): unknown;
+  registerValueInstrumentsWithBoundary(
+    arg0: string,
+    arg1: unknown,
+    arg2: unknown,
+    arg3: number,
+    arg4: number,
+  ): unknown;
 
-    reportCountIndicators(
-        arg0: string,
-        arg1: Map<unknown, unknown>,
-        arg2: string,
-        arg3: number,
-        arg4: boolean,
-    ): unknown;
+  reportCountIndicators(
+    arg0: string,
+    arg1: Map<unknown, unknown>,
+    arg2: string,
+    arg3: number,
+    arg4: boolean,
+  ): unknown;
 
-    reportValueIndicators(
-        arg0: string,
-        arg1: Map<unknown, unknown>,
-        arg2: string,
-        arg3: boolean,
-        arg4: number,
-    ): unknown;
+  reportValueIndicators(
+    arg0: string,
+    arg1: Map<unknown, unknown>,
+    arg2: string,
+    arg3: boolean,
+    arg4: number,
+  ): unknown;
 
-    checkNewUserDataSaveDirAvailable(arg0: string): unknown;
+  checkNewUserDataSaveDirAvailable(arg0: string): unknown;
 
-    copyUserData(arg0: string, arg1: string): Promise<unknown>;
+  copyUserData(arg0: string, arg1: string): Promise<unknown>;
 
-    setUserDataSaveDirectory(arg0: string): Promise<unknown>;
+  setUserDataSaveDirectory(arg0: string): Promise<unknown>;
 
-    hasOtherRunningQQProcess(): boolean;
+  hasOtherRunningQQProcess(): boolean;
 
-    quitAllRunningQQProcess(arg: boolean): unknown;
+  quitAllRunningQQProcess(arg: boolean): unknown;
 
-    checkNvidiaConfig(): unknown;
+  checkNvidiaConfig(): unknown;
 
-    repairNvidiaConfig(): unknown;
+  repairNvidiaConfig(): unknown;
 
-    getNvidiaDriverVersion(): unknown;
+  getNvidiaDriverVersion(): unknown;
 
-    isNull(): unknown;
+  isNull(): unknown;
 }
 export interface NodeIQQNTStartupSessionWrapper {
-    create(): NodeIQQNTStartupSessionWrapper;
-    stop(): void;
-    start(): void;
-    createWithModuleList(uk: unknown): unknown;
-    getSessionIdList(): unknown;
+  create(): NodeIQQNTStartupSessionWrapper;
+  stop(): void;
+  start(): void;
+  createWithModuleList(uk: unknown): unknown;
+  getSessionIdList(): unknown;
 }
 export interface NodeIQQNTWrapperSession {
-    getNTWrapperSession(str: string): NodeIQQNTWrapperSession;
+  getNTWrapperSession(str: string): NodeIQQNTWrapperSession;
 
-    get(): NodeIQQNTWrapperSession;
+  get(): NodeIQQNTWrapperSession;
 
-    new(): NodeIQQNTWrapperSession;
+  new(): NodeIQQNTWrapperSession;
 
-    create(): NodeIQQNTWrapperSession;
+  create(): NodeIQQNTWrapperSession;
 
-    init(
-        wrapperSessionInitConfig: WrapperSessionInitConfig,
-        nodeIDependsAdapter: NodeIDependsAdapter,
-        nodeIDispatcherAdapter: NodeIDispatcherAdapter,
-        nodeIKernelSessionListener: NodeIKernelSessionListener,
-    ): void;
+  init(
+    wrapperSessionInitConfig: WrapperSessionInitConfig,
+    nodeIDependsAdapter: NodeIDependsAdapter,
+    nodeIDispatcherAdapter: NodeIDispatcherAdapter,
+    nodeIKernelSessionListener: NodeIKernelSessionListener,
+  ): void;
 
-    startNT(session: number): void;
+  startNT(session: number): void;
 
-    startNT(): void;
+  startNT(): void;
 
-    getBdhUploadService(): unknown;
+  getBdhUploadService(): unknown;
 
-    getECDHService(): NodeIKernelECDHService;
+  getECDHService(): NodeIKernelECDHService;
 
-    getMsgService(): NodeIKernelMsgService;
+  getMsgService(): NodeIKernelMsgService;
 
-    getProfileService(): NodeIKernelProfileService;
+  getProfileService(): NodeIKernelProfileService;
 
-    getProfileLikeService(): NodeIKernelProfileLikeService;
+  getProfileLikeService(): NodeIKernelProfileLikeService;
 
-    getGroupService(): NodeIKernelGroupService;
+  getGroupService(): NodeIKernelGroupService;
 
-    getStorageCleanService(): NodeIKernelStorageCleanService;
+  getStorageCleanService(): NodeIKernelStorageCleanService;
 
-    getBuddyService(): NodeIKernelBuddyService;
+  getBuddyService(): NodeIKernelBuddyService;
 
-    getRobotService(): NodeIKernelRobotService;
+  getRobotService(): NodeIKernelRobotService;
 
-    getTicketService(): NodeIKernelTicketService;
+  getTicketService(): NodeIKernelTicketService;
 
-    getTipOffService(): NodeIKernelTipOffService;
+  getTipOffService(): NodeIKernelTipOffService;
 
-    getNodeMiscService(): NodeIKernelNodeMiscService;
+  getNodeMiscService(): NodeIKernelNodeMiscService;
 
-    getRichMediaService(): NodeIKernelRichMediaService;
+  getRichMediaService(): NodeIKernelRichMediaService;
 
-    getMsgBackupService(): NodeIKernelMsgBackupService;
+  getMsgBackupService(): NodeIKernelMsgBackupService;
 
-    getAlbumService(): NodeIKernelAlbumService;
+  getAlbumService(): NodeIKernelAlbumService;
 
-    getTianShuService(): NodeIKernelTianShuService;
+  getTianShuService(): NodeIKernelTianShuService;
 
-    getUnitedConfigService(): NodeIKernelUnitedConfigService;
+  getUnitedConfigService(): NodeIKernelUnitedConfigService;
 
-    getSearchService(): NodeIKernelSearchService;
+  getSearchService(): NodeIKernelSearchService;
 
-    getDirectSessionService(): unknown;
+  getDirectSessionService(): unknown;
 
-    getRDeliveryService(): unknown;
+  getRDeliveryService(): unknown;
 
-    getAvatarService(): NodeIKernelAvatarService;
+  getAvatarService(): NodeIKernelAvatarService;
 
-    getFeedChannelService(): unknown;
+  getFeedChannelService(): unknown;
 
-    getYellowFaceService(): unknown;
+  getYellowFaceService(): unknown;
 
-    getCollectionService(): NodeIKernelCollectionService;
+  getCollectionService(): NodeIKernelCollectionService;
 
-    getSettingService(): unknown;
+  getSettingService(): unknown;
 
-    getQiDianService(): unknown;
+  getQiDianService(): unknown;
 
-    getFileAssistantService(): unknown;
+  getFileAssistantService(): unknown;
 
-    getGuildService(): unknown;
+  getGuildService(): unknown;
 
-    getSkinService(): unknown;
+  getSkinService(): unknown;
 
-    getTestPerformanceService(): NodeIkernelTestPerformanceService;
+  getTestPerformanceService(): NodeIkernelTestPerformanceService;
 
-    getQQPlayService(): unknown;
+  getQQPlayService(): unknown;
 
-    getDbToolsService(): unknown;
+  getDbToolsService(): unknown;
 
-    getUixConvertService(): NodeIKernelUixConvertService;
+  getUixConvertService(): NodeIKernelUixConvertService;
 
-    getOnlineStatusService(): unknown;
+  getOnlineStatusService(): unknown;
 
-    getRemotingService(): unknown;
+  getRemotingService(): unknown;
 
-    getGroupTabService(): unknown;
+  getGroupTabService(): unknown;
 
-    getGroupSchoolService(): unknown;
+  getGroupSchoolService(): unknown;
 
-    getLiteBusinessService(): unknown;
+  getLiteBusinessService(): unknown;
 
-    getGuildMsgService(): unknown;
+  getGuildMsgService(): unknown;
 
-    getLockService(): unknown;
+  getLockService(): unknown;
 
-    getMSFService(): NodeIKernelMSFService;
+  getMSFService(): NodeIKernelMSFService;
 
-    getGuildHotUpdateService(): unknown;
+  getGuildHotUpdateService(): unknown;
 
-    getAVSDKService(): unknown;
+  getAVSDKService(): unknown;
 
-    getRecentContactService(): NodeIKernelRecentContactService;
+  getRecentContactService(): NodeIKernelRecentContactService;
 
-    getConfigMgrService(): unknown;
+  getConfigMgrService(): unknown;
 }
 
 export interface EnginInitDesktopConfig {
-    base_path_prefix: string;
-    platform_type: PlatformType;
-    app_type: 4;
-    app_version: string;
-    os_version: string;
-    use_xlog: boolean;
-    qua: string;
-    global_path_config: {
-        desktopGlobalPath: string;
-    };
-    thumb_config: { maxSide: 324; minSide: 48; longLimit: 6; density: 2 };
+  base_path_prefix: string;
+  platform_type: PlatformType;
+  app_type: 4;
+  app_version: string;
+  os_version: string;
+  use_xlog: boolean;
+  qua: string;
+  global_path_config: {
+    desktopGlobalPath: string;
+  };
+  thumb_config: { maxSide: 324; minSide: 48; longLimit: 6; density: 2 };
 }
 
 export interface NodeIQQNTWrapperEngine {
-    get(): NodeIQQNTWrapperEngine;
+  get(): NodeIQQNTWrapperEngine;
 
-    initWithDeskTopConfig(config: EnginInitDesktopConfig, nodeIGlobalAdapter: NodeIGlobalAdapter): void;
+  initWithDeskTopConfig(config: EnginInitDesktopConfig, nodeIGlobalAdapter: NodeIGlobalAdapter): void;
 }
 
 export interface WrapperNodeApi {
-    NodeIO3MiscService: NodeIO3MiscService;
-    NodeQQNTWrapperUtil: NodeQQNTWrapperUtil;
-    NodeIQQNTWrapperSession: NodeIQQNTWrapperSession;
-    NodeIQQNTStartupSessionWrapper: NodeIQQNTStartupSessionWrapper
-    NodeIQQNTWrapperEngine: NodeIQQNTWrapperEngine;
-    NodeIKernelLoginService: NodeIKernelLoginService;
+  NodeIO3MiscService: NodeIO3MiscService;
+  NodeQQNTWrapperUtil: NodeQQNTWrapperUtil;
+  NodeIQQNTWrapperSession: NodeIQQNTWrapperSession;
+  NodeIQQNTStartupSessionWrapper: NodeIQQNTStartupSessionWrapper
+  NodeIQQNTWrapperEngine: NodeIQQNTWrapperEngine;
+  NodeIKernelLoginService: NodeIKernelLoginService;
 
 }
 export enum PlatformType {
-    KUNKNOWN,
-    KANDROID,
-    KIOS,
-    KWINDOWS,
-    KMAC,
-    KLINUX
+  KUNKNOWN,
+  KANDROID,
+  KIOS,
+  KWINDOWS,
+  KMAC,
+  KLINUX,
 }
 
 export enum DeviceType {
-    KUNKNOWN,
-    KPHONE,
-    KPAD,
-    KCOMPUTER,
+  KUNKNOWN,
+  KPHONE,
+  KPAD,
+  KCOMPUTER,
 }
 
-//推送类型
+// 推送类型
 export enum VendorType {
-    KNOSETONIOS = 0,
-    KSUPPORTGOOGLEPUSH = 99,
-    KSUPPORTHMS = 3,
-    KSUPPORTOPPOPUSH = 4,
-    KSUPPORTTPNS = 2,
-    KSUPPORTVIVOPUSH = 5,
-    KUNSUPPORTANDROIDPUSH = 1,
+  KNOSETONIOS = 0,
+  KSUPPORTGOOGLEPUSH = 99,
+  KSUPPORTHMS = 3,
+  KSUPPORTOPPOPUSH = 4,
+  KSUPPORTTPNS = 2,
+  KSUPPORTVIVOPUSH = 5,
+  KUNSUPPORTANDROIDPUSH = 1,
 }
 
 export interface WrapperSessionInitConfig {
-    selfUin: string;
-    selfUid: string;
-    desktopPathConfig: {
-        account_path: string; // 可以通过NodeQQNTWrapperUtil().getNTUserDataInfoConfig()获取
-    };
-    clientVer: string; // 9.9.8-22355
-    a2: string;
-    d2: string;
-    d2Key: string;
-    machineId: string;
-    platform: PlatformType; // 3是Windows?
-    platVer: string; // 系统版本号, 应该可以固定
-    appid: string;
-    rdeliveryConfig: {
-        appKey: string;
-        systemId: number;
-        appId: string;
-        logicEnvironment: string;
-        platform: PlatformType;
-        language: string;
-        sdkVersion: string;
-        userId: string;
-        appVersion: string;
-        osVersion: string;
-        bundleId: string;
-        serverUrl: string;
-        fixedAfterHitKeys: string[];
-    };
-    defaultFileDownloadPath: string; // 这个可以通过环境变量获取？
-    deviceInfo: {
-        guid: string;
-        buildVer: string;
-        localId: number;
-        devName: string;
-        devType: string;
-        vendorName: string;
-        osVer: string;
-        vendorOsName: string;
-        setMute: boolean;
-        vendorType: VendorType;
-    };
-    deviceConfig: '{"appearance":{"isSplitViewMode":true},"msg":{}}';
+  selfUin: string;
+  selfUid: string;
+  desktopPathConfig: {
+    account_path: string; // 可以通过NodeQQNTWrapperUtil().getNTUserDataInfoConfig()获取
+  };
+  clientVer: string; // 9.9.8-22355
+  a2: string;
+  d2: string;
+  d2Key: string;
+  machineId: string;
+  platform: PlatformType; // 3是Windows?
+  platVer: string; // 系统版本号, 应该可以固定
+  appid: string;
+  rdeliveryConfig: {
+    appKey: string;
+    systemId: number;
+    appId: string;
+    logicEnvironment: string;
+    platform: PlatformType;
+    language: string;
+    sdkVersion: string;
+    userId: string;
+    appVersion: string;
+    osVersion: string;
+    bundleId: string;
+    serverUrl: string;
+    fixedAfterHitKeys: string[];
+  };
+  defaultFileDownloadPath: string; // 这个可以通过环境变量获取？
+  deviceInfo: {
+    guid: string;
+    buildVer: string;
+    localId: number;
+    devName: string;
+    devType: string;
+    vendorName: string;
+    osVer: string;
+    vendorOsName: string;
+    setMute: boolean;
+    vendorType: VendorType;
+  };
+  deviceConfig: '{"appearance":{"isSplitViewMode":true},"msg":{}}';
 }

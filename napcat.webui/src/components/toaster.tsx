@@ -1,9 +1,9 @@
-import { Toaster as HotToaster } from 'react-hot-toast'
+import { Toaster as HotToaster } from 'react-hot-toast';
 
-import { useTheme } from '@/hooks/use-theme'
+import { useTheme } from '@/hooks/use-theme';
 
 export const Toaster = () => {
-  const { isDark } = useTheme()
+  const { isDark } = useTheme();
 
   return (
     <HotToaster
@@ -11,11 +11,11 @@ export const Toaster = () => {
         style: {
           borderRadius: '20px',
           background: isDark ? '#333' : '#fff',
-          color: isDark ? '#fff' : '#333'
-        }
+          color: isDark ? '#fff' : '#333',
+        },
       }}
     />
-  )
-}
+  );
+};
 
-export default Toaster
+export default Toaster;

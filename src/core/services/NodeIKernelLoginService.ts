@@ -2,90 +2,90 @@ import { NodeIKernelLoginListener } from '@/core/listeners/NodeIKernelLoginListe
 import { GeneralCallResult } from './common';
 
 export interface LoginInitConfig {
-    machineId: '';
-    appid: string;
-    platVer: string;
-    commonPath: string;
-    clientVer: string;
-    hostName: string;
+  machineId: '';
+  appid: string;
+  platVer: string;
+  commonPath: string;
+  clientVer: string;
+  hostName: string;
 }
 
 export interface PasswordLoginRetType {
-    result: string,
-    loginErrorInfo: {
-        step: number;
-        errMsg: string;
-        proofWaterUrl: string;
-        newDevicePullQrCodeSig: string;
-        jumpUrl: string,
-        jumpWord: string;
-        tipsTitle: string;
-        tipsContent: string;
-    }
+  result: string,
+  loginErrorInfo: {
+    step: number;
+    errMsg: string;
+    proofWaterUrl: string;
+    newDevicePullQrCodeSig: string;
+    jumpUrl: string,
+    jumpWord: string;
+    tipsTitle: string;
+    tipsContent: string;
+  }
 }
 
 export interface PasswordLoginArgType {
-    uin: string;
-    passwordMd5: string;//passwMD5
-    step: number;//猜测是需要二次认证 参数 一次为0
-    newDeviceLoginSig: string;
-    proofWaterSig: string;
-    proofWaterRand: string;
-    proofWaterSid: string;
+  uin: string;
+  passwordMd5: string;// passwMD5
+  step: number;// 猜测是需要二次认证 参数 一次为0
+  newDeviceLoginSig: string;
+  proofWaterSig: string;
+  proofWaterRand: string;
+  proofWaterSid: string;
 }
 
 export interface LoginListItem {
-    uin: string;
-    uid: string;
-    nickName: string;
-    faceUrl: string;
-    facePath: string;
-    loginType: 1; // 1是二维码登录？
-    isQuickLogin: boolean; // 是否可以快速登录
-    isAutoLogin: boolean; // 是否可以自动登录
+  uin: string;
+  uid: string;
+  nickName: string;
+  faceUrl: string;
+  facePath: string;
+  loginType: 1; // 1是二维码登录？
+  isQuickLogin: boolean; // 是否可以快速登录
+  isAutoLogin: boolean; // 是否可以自动登录
 }
 
 export interface QuickLoginResult {
-    result: string;
-    loginErrorInfo: {
-        step: number,
-        errMsg: string,
-        proofWaterUrl: string,
-        newDevicePullQrCodeSig: string,
-        jumpUrl: string,
-        jumpWord: string,
-        tipsTitle: string,
-        tipsContent: string
-    };
+  result: string;
+  loginErrorInfo: {
+    step: number,
+    errMsg: string,
+    proofWaterUrl: string,
+    newDevicePullQrCodeSig: string,
+    jumpUrl: string,
+    jumpWord: string,
+    tipsTitle: string,
+    tipsContent: string
+  };
 }
 
 export interface NodeIKernelLoginService {
-    getMsfStatus: () => number;
+  getMsfStatus: () => number;
 
-    setLoginMiscData(arg0: string, value: string): unknown;
-    
-    getMachineGuid(): string;
+  setLoginMiscData(arg0: string, value: string): unknown;
 
-    get(): NodeIKernelLoginService;
+  getMachineGuid(): string;
 
-    connect(): boolean;
+  get(): NodeIKernelLoginService;
 
-    addKernelLoginListener(listener: NodeIKernelLoginListener): number;
+  connect(): boolean;
 
-    removeKernelLoginListener(listener: number): void;
+  addKernelLoginListener(listener: NodeIKernelLoginListener): number;
 
-    initConfig(config: LoginInitConfig): void;
+  removeKernelLoginListener(listener: number): void;
 
-    getLoginMiscData(data: string): Promise<GeneralCallResult & { value: string }>;
+  initConfig(config: LoginInitConfig): void;
 
-    getLoginList(): Promise<{
-        result: number,  // 0是ok
-        LocalLoginInfoList: LoginListItem[]
-    }>;
+  getLoginMiscData(data: string): Promise<GeneralCallResult & { value: string }>;
 
-    quickLoginWithUin(uin: string): Promise<QuickLoginResult>;
+  getLoginList(): Promise<{
+    result: number,  // 0是ok
+    LocalLoginInfoList: LoginListItem[]
+  }>;
 
-    passwordLogin(param: PasswordLoginArgType): Promise<unknown>;
+  quickLoginWithUin(uin: string): Promise<QuickLoginResult>;
 
-    getQRCodePicture(): boolean;
+  passwordLogin(param: PasswordLoginArgType): Promise<unknown>;
+
+  getQRCodePicture(): boolean;
 }

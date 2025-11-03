@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import {
-    GetWebUIConfigHandler,
-    GetDisableWebUIHandler,
-    UpdateDisableWebUIHandler,
-    GetDisableNonLANAccessHandler,
-    UpdateDisableNonLANAccessHandler,
-    UpdateWebUIConfigHandler
+  GetWebUIConfigHandler,
+  GetDisableWebUIHandler,
+  UpdateDisableWebUIHandler,
+  GetDisableNonLANAccessHandler,
+  UpdateDisableNonLANAccessHandler,
+  UpdateWebUIConfigHandler,
 } from '@webapi/api/WebUIConfig';
 
 const router = Router();

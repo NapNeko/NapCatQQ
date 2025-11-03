@@ -1,13 +1,13 @@
-import { Button } from '@heroui/button'
+import { Button } from '@heroui/button';
 import {
   ModalBody,
   ModalContent,
   ModalFooter,
   ModalHeader,
   Modal as NextUIModal,
-  useDisclosure
-} from '@heroui/modal'
-import React from 'react'
+  useDisclosure,
+} from '@heroui/modal';
+import React from 'react';
 
 export interface ModalProps {
   content: React.ReactNode
@@ -37,8 +37,8 @@ const Modal: React.FC<ModalProps> = React.memo((props) => {
     onConfirm,
     onCancel,
     ...rest
-  } = props
-  const { onClose: onNativeClose } = useDisclosure()
+  } = props;
+  const { onClose: onNativeClose } = useDisclosure();
 
   return (
     <NextUIModal
@@ -46,12 +46,12 @@ const Modal: React.FC<ModalProps> = React.memo((props) => {
       backdrop={backdrop}
       isDismissable={dismissible}
       onClose={() => {
-        onClose?.()
-        onNativeClose()
+        onClose?.();
+        onNativeClose();
       }}
       classNames={{
         backdrop: 'z-[99]',
-        wrapper: 'z-[99]'
+        wrapper: 'z-[99]',
       }}
       {...rest}
     >
@@ -59,27 +59,27 @@ const Modal: React.FC<ModalProps> = React.memo((props) => {
         {(nativeClose) => (
           <>
             {title && (
-              <ModalHeader className="flex flex-col gap-1">{title}</ModalHeader>
+              <ModalHeader className='flex flex-col gap-1'>{title}</ModalHeader>
             )}
-            <ModalBody className="break-all">{content}</ModalBody>
+            <ModalBody className='break-all'>{content}</ModalBody>
             <ModalFooter>
               {showCancel && (
                 <Button
-                  color="primary"
-                  variant="light"
+                  color='primary'
+                  variant='light'
                   onPress={() => {
-                    onCancel?.()
-                    nativeClose()
+                    onCancel?.();
+                    nativeClose();
                   }}
                 >
                   {cancelText}
                 </Button>
               )}
               <Button
-                color="primary"
+                color='primary'
                 onPress={() => {
-                  onConfirm?.()
-                  nativeClose()
+                  onConfirm?.();
+                  nativeClose();
                 }}
               >
                 {confirmText}
@@ -89,9 +89,9 @@ const Modal: React.FC<ModalProps> = React.memo((props) => {
         )}
       </ModalContent>
     </NextUIModal>
-  )
-})
+  );
+});
 
-Modal.displayName = 'Modal'
+Modal.displayName = 'Modal';
 
-export default Modal
+export default Modal;

@@ -1,85 +1,85 @@
 import { DataSource, Group, GroupDetailInfo, GroupListUpdateType, GroupMember, GroupNotify, ShutUpGroupMember } from '@/core/types';
 
 export class NodeIKernelGroupListener {
-    onGroupListInited(listEmpty: boolean): any { }
-    // 发现于Win 9.9.9 23159
-    onGroupMemberLevelInfoChange(...args: unknown[]): any {
+  onGroupListInited (_listEmpty: boolean): any { }
+  // 发现于Win 9.9.9 23159
+  onGroupMemberLevelInfoChange (..._args: unknown[]): any {
 
-    }
+  }
 
-    onGetGroupBulletinListResult(...args: unknown[]): any {
-    }
+  onGetGroupBulletinListResult (..._args: unknown[]): any {
+  }
 
-    onGroupAllInfoChange(...args: unknown[]): any {
-    }
+  onGroupAllInfoChange (..._args: unknown[]): any {
+  }
 
-    onGroupBulletinChange(...args: unknown[]): any {
-    }
+  onGroupBulletinChange (..._args: unknown[]): any {
+  }
 
-    onGroupBulletinRemindNotify(...args: unknown[]): any {
-    }
+  onGroupBulletinRemindNotify (..._args: unknown[]): any {
+  }
 
-    onGroupArkInviteStateResult(...args: unknown[]): any {
-    }
+  onGroupArkInviteStateResult (..._args: unknown[]): any {
+  }
 
-    onGroupBulletinRichMediaDownloadComplete(...args: unknown[]): any {
-    }
+  onGroupBulletinRichMediaDownloadComplete (..._args: unknown[]): any {
+  }
 
-    onGroupConfMemberChange(...args: unknown[]): any {
-    }
+  onGroupConfMemberChange (..._args: unknown[]): any {
+  }
 
-    onGroupDetailInfoChange(detailInfo: GroupDetailInfo): any {
-    }
+  onGroupDetailInfoChange (_detailInfo: GroupDetailInfo): any {
+  }
 
-    onGroupExtListUpdate(...args: unknown[]): any {
-    }
+  onGroupExtListUpdate (..._args: unknown[]): any {
+  }
 
-    onGroupFirstBulletinNotify(...args: unknown[]): any {
-    }
+  onGroupFirstBulletinNotify (..._args: unknown[]): any {
+  }
 
-    onGroupListUpdate(updateType: GroupListUpdateType, groupList: Group[]): any {
-    }
+  onGroupListUpdate (_updateType: GroupListUpdateType, _groupList: Group[]): any {
+  }
 
-    onGroupNotifiesUpdated(dboubt: boolean, notifies: GroupNotify[]): any {
-    }
+  onGroupNotifiesUpdated (_dboubt: boolean, _notifies: GroupNotify[]): any {
+  }
 
-    onGroupBulletinRichMediaProgressUpdate(...args: unknown[]): any {
-    }
+  onGroupBulletinRichMediaProgressUpdate (..._args: unknown[]): any {
+  }
 
-    onGroupNotifiesUnreadCountUpdated(...args: unknown[]): any {
-    }
+  onGroupNotifiesUnreadCountUpdated (..._args: unknown[]): any {
+  }
 
-    onGroupSingleScreenNotifies(doubt: boolean, seq: string, notifies: GroupNotify[]): any {
-    }
+  onGroupSingleScreenNotifies (_doubt: boolean, _seq: string, _notifies: GroupNotify[]): any {
+  }
 
-    onGroupsMsgMaskResult(...args: unknown[]): any {
-    }
+  onGroupsMsgMaskResult (..._args: unknown[]): any {
+  }
 
-    onGroupStatisticInfoChange(...args: unknown[]): any {
-    }
+  onGroupStatisticInfoChange (..._args: unknown[]): any {
+  }
 
-    onJoinGroupNotify(...args: unknown[]): any {
-    }
+  onJoinGroupNotify (..._args: unknown[]): any {
+  }
 
-    onJoinGroupNoVerifyFlag(...args: unknown[]): any {
-    }
+  onJoinGroupNoVerifyFlag (..._args: unknown[]): any {
+  }
 
-    onMemberInfoChange(groupCode: string, dateSource: DataSource, members: Map<string, GroupMember>): any {
-    }
+  onMemberInfoChange (_groupCode: string, _dateSource: DataSource, _members: Map<string, GroupMember>): any {
+  }
 
-    onMemberListChange(arg: {
-        sceneId: string,
-        ids: string[],
-        infos: Map<string, GroupMember>, // uid -> GroupMember
-        hasPrev: boolean,
-        hasNext: boolean,
-        hasRobot: boolean
-    }): any {
-    }
+  onMemberListChange (_arg: {
+    sceneId: string,
+    ids: string[],
+    infos: Map<string, GroupMember>, // uid -> GroupMember
+    hasPrev: boolean,
+    hasNext: boolean,
+    hasRobot: boolean;
+  }): any {
+  }
 
-    onSearchMemberChange(...args: unknown[]): any {
-    }
+  onSearchMemberChange (..._args: unknown[]): any {
+  }
 
-    onShutUpMemberListChanged(groupCode: string, members: Array<ShutUpGroupMember>): any {
-    }
+  onShutUpMemberListChanged (_groupCode: string, _members: Array<ShutUpGroupMember>): any {
+  }
 }

@@ -1,5 +1,5 @@
 export class NodeIKernelTicketListener {
-    listener(): any {
+  listener (): any {
 
-    }
+  }
 }

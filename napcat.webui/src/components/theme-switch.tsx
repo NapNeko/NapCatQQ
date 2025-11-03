@@ -1,11 +1,11 @@
-import { SwitchProps, useSwitch } from '@heroui/switch'
-import { VisuallyHidden } from '@react-aria/visually-hidden'
-import clsx from 'clsx'
-import { FC, useEffect, useState } from 'react'
+import { SwitchProps, useSwitch } from '@heroui/switch';
+import { VisuallyHidden } from '@react-aria/visually-hidden';
+import clsx from 'clsx';
+import { FC, useEffect, useState } from 'react';
 
-import { MoonFilledIcon, SunFilledIcon } from '@/components/icons'
+import { MoonFilledIcon, SunFilledIcon } from '@/components/icons';
 
-import { useTheme } from '@/hooks/use-theme'
+import { useTheme } from '@/hooks/use-theme';
 
 export interface ThemeSwitchProps {
   className?: string
@@ -14,13 +14,13 @@ export interface ThemeSwitchProps {
 
 export const ThemeSwitch: FC<ThemeSwitchProps> = ({
   className,
-  classNames
+  classNames,
 }) => {
-  const [isMounted, setIsMounted] = useState(false)
+  const [isMounted, setIsMounted] = useState(false);
 
-  const { theme, toggleTheme } = useTheme()
+  const { theme, toggleTheme } = useTheme();
 
-  const onChange = toggleTheme
+  const onChange = toggleTheme;
 
   const {
     Component,
@@ -28,18 +28,18 @@ export const ThemeSwitch: FC<ThemeSwitchProps> = ({
     isSelected,
     getBaseProps,
     getInputProps,
-    getWrapperProps
+    getWrapperProps,
   } = useSwitch({
     isSelected: theme === 'light',
-    onChange
-  })
+    onChange,
+  });
 
   useEffect(() => {
-    setIsMounted(true)
-  }, [isMounted])
+    setIsMounted(true);
+  }, [isMounted]);
 
   // Prevent Hydration Mismatch
-  if (!isMounted) return <div className="w-6 h-6" />
+  if (!isMounted) return <div className='w-6 h-6' />;
 
   return (
     <Component
@@ -49,7 +49,7 @@ export const ThemeSwitch: FC<ThemeSwitchProps> = ({
           'px-px transition-opacity hover:opacity-80 cursor-pointer',
           className,
           classNames?.base
-        )
+        ),
       })}
     >
       <VisuallyHidden>
@@ -68,18 +68,20 @@ export const ThemeSwitch: FC<ThemeSwitchProps> = ({
               '!text-default-500',
               'pt-px',
               'px-0',
-              'mx-0'
+              'mx-0',
             ],
             classNames?.wrapper
-          )
+          ),
         })}
       >
-        {isSelected ? (
-          <MoonFilledIcon size={22} />
-        ) : (
-          <SunFilledIcon size={22} />
-        )}
+        {isSelected
+          ? (
+            <MoonFilledIcon size={22} />
+          )
+          : (
+            <SunFilledIcon size={22} />
+          )}
       </div>
     </Component>
-  )
-}
+  );
+};

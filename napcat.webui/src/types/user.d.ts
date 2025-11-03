@@ -3,7 +3,7 @@ export enum NTSex {
   GENDER_UNKOWN = 0,
   GENDER_MALE = 1,
   GENDER_FEMALE = 2,
-  GENDER_PRIVACY = 255
+  GENDER_PRIVACY = 255,
 }
 
 // 好友分类类型
@@ -171,7 +171,7 @@ interface CommonExt {
 // 好友列表请求类型枚举
 export enum BuddyListReqType {
   KNOMAL,
-  KLETTER
+  KLETTER,
 }
 
 // 图片信息
@@ -200,7 +200,7 @@ export interface SimpleInfo {
 }
 
 // 好友类型
-export type FriendV2 = SimpleInfo
+export type FriendV2 = SimpleInfo;
 
 // 自身状态信息
 export interface SelfStatusInfo {
@@ -322,12 +322,12 @@ export interface SelfInfo extends User {
 }
 
 // 好友类型
-export type Friend = User
+export type Friend = User;
 
 // 业务键枚举
 export enum BizKey {
   KPRIVILEGEICON = 0,
-  KPHOTOWALL = 1
+  KPHOTOWALL = 1,
 }
 
 // 根据UIN获取用户详细信息
@@ -346,7 +346,7 @@ export interface UserDetailInfoByUin {
 // 用户详细信息来源枚举
 export enum UserDetailSource {
   KDB,
-  KSERVER
+  KSERVER,
 }
 
 // 个人资料业务类型枚举
@@ -355,5 +355,5 @@ export enum ProfileBizType {
   KBASEEXTEND = 1,
   KVAS = 2,
   KQZONE = 3,
-  KOTHER = 4
+  KOTHER = 4,
 }

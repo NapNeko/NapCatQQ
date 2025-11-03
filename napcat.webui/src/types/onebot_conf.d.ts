@@ -9,7 +9,7 @@ interface AdapterConfig extends AdapterConfigInner {
   [key: string]: string | boolean | number
 }
 
-type MessageFormat = 'array' | 'string'
+type MessageFormat = 'array' | 'string';
 
 interface HttpServerConfig extends AdapterConfig {
   port: number

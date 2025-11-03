@@ -1,5 +1,5 @@
-import GenericForm, { random_token } from './generic_form'
-import type { Field } from './generic_form'
+import GenericForm, { random_token } from './generic_form';
+import type { Field } from './generic_form';
 
 export interface WebsocketClientFormProps {
   data?: OneBotConfig['network']['websocketClients'][0]
@@ -9,12 +9,12 @@ export interface WebsocketClientFormProps {
   ) => Promise<void>
 }
 
-type WebsocketClientFormType = OneBotConfig['network']['websocketClients']
+type WebsocketClientFormType = OneBotConfig['network']['websocketClients'];
 
 const WebsocketClientForm: React.FC<WebsocketClientFormProps> = ({
   data,
   onClose,
-  onSubmit
+  onSubmit,
 }) => {
   const defaultValues: WebsocketClientFormType[0] = {
     enable: false,
@@ -25,8 +25,8 @@ const WebsocketClientForm: React.FC<WebsocketClientFormProps> = ({
     token: random_token(16),
     debug: false,
     heartInterval: 30000,
-    reconnectInterval: 30000
-  }
+    reconnectInterval: 30000,
+  };
 
   const fields: Field<'websocketClients'>[] = [
     {
@@ -34,14 +34,14 @@ const WebsocketClientForm: React.FC<WebsocketClientFormProps> = ({
       label: '启用',
       type: 'switch',
       description: '保存后启用此配置',
-      colSpan: 1
+      colSpan: 1,
     },
     {
       name: 'debug',
       label: '开启Debug',
       type: 'switch',
       description: '是否开启调试模式',
-      colSpan: 1
+      colSpan: 1,
     },
     {
       name: 'name',
@@ -49,21 +49,21 @@ const WebsocketClientForm: React.FC<WebsocketClientFormProps> = ({
       type: 'input',
       placeholder: '请输入名称',
       isRequired: true,
-      isDisabled: !!data
+      isDisabled: !!data,
     },
     {
       name: 'url',
       label: 'URL',
       type: 'input',
       placeholder: '请输入URL',
-      isRequired: true
+      isRequired: true,
     },
     {
       name: 'reportSelfMessage',
       label: '上报自身消息',
       type: 'switch',
       description: '是否上报自身消息',
-      colSpan: 1
+      colSpan: 1,
     },
     {
       name: 'messagePostFormat',
@@ -73,15 +73,15 @@ const WebsocketClientForm: React.FC<WebsocketClientFormProps> = ({
       isRequired: true,
       options: [
         { key: 'array', value: 'Array' },
-        { key: 'string', value: 'String' }
+        { key: 'string', value: 'String' },
       ],
-      colSpan: 1
+      colSpan: 1,
     },
     {
       name: 'token',
       label: 'Token',
       type: 'input',
-      placeholder: '请输入Token'
+      placeholder: '请输入Token',
     },
     {
       name: 'heartInterval',
@@ -89,7 +89,7 @@ const WebsocketClientForm: React.FC<WebsocketClientFormProps> = ({
       type: 'input',
       placeholder: '请输入心跳间隔',
       isRequired: true,
-      colSpan: 1
+      colSpan: 1,
     },
     {
       name: 'reconnectInterval',
@@ -97,9 +97,9 @@ const WebsocketClientForm: React.FC<WebsocketClientFormProps> = ({
       type: 'input',
       placeholder: '请输入重连间隔',
       isRequired: true,
-      colSpan: 1
-    }
-  ]
+      colSpan: 1,
+    },
+  ];
 
   return (
     <GenericForm
@@ -109,7 +109,7 @@ const WebsocketClientForm: React.FC<WebsocketClientFormProps> = ({
       onSubmit={onSubmit}
       fields={fields}
     />
-  )
-}
+  );
+};
 
-export default WebsocketClientForm
+export default WebsocketClientForm;

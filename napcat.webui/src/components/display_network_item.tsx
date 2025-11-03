@@ -1,7 +1,7 @@
-import { Card, CardBody } from '@heroui/card'
-import clsx from 'clsx'
+import { Card, CardBody } from '@heroui/card';
+import clsx from 'clsx';
 
-import { title } from '@/components/primitives'
+import { title } from '@/components/primitives';
 
 export interface NetworkItemDisplayProps {
   count: number
@@ -12,7 +12,7 @@ export interface NetworkItemDisplayProps {
 const NetworkItemDisplay: React.FC<NetworkItemDisplayProps> = ({
   count,
   label,
-  size = 'md'
+  size = 'md',
 }) => {
   return (
     <Card
@@ -22,16 +22,16 @@ const NetworkItemDisplay: React.FC<NetworkItemDisplayProps> = ({
           ? 'col-span-8 md:col-span-2 bg-primary-50 shadow-primary-100'
           : 'col-span-2 md:col-span-1 bg-warning-100 shadow-warning-200'
       )}
-      shadow="sm"
+      shadow='sm'
     >
-      <CardBody className="items-center md:gap-1 p-1 md:p-2">
+      <CardBody className='items-center md:gap-1 p-1 md:p-2'>
         <div
           className={clsx(
             'flex-1',
             size === 'md' ? 'text-2xl md:text-3xl' : 'text-xl md:text-2xl',
             title({
               color: size === 'md' ? 'pink' : 'yellow',
-              size
+              size,
             })
           )}
         >
@@ -44,7 +44,7 @@ const NetworkItemDisplay: React.FC<NetworkItemDisplayProps> = ({
             title({
               color: size === 'md' ? 'pink' : 'yellow',
               shadow: true,
-              size: 'xxs'
+              size: 'xxs',
             })
           )}
         >
@@ -52,7 +52,7 @@ const NetworkItemDisplay: React.FC<NetworkItemDisplayProps> = ({
         </div>
       </CardBody>
     </Card>
-  )
-}
+  );
+};
 
-export default NetworkItemDisplay
+export default NetworkItemDisplay;

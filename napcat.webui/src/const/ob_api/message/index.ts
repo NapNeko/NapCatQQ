@@ -1,9 +1,9 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
-import { baseResponseSchema, commonResponseDataSchema } from '../response'
-import oneBotHttpApiMessageGroup from './group'
-import messageNodeSchema from './node'
-import oneBotHttpApiMessagePrivate from './private'
+import { baseResponseSchema, commonResponseDataSchema } from '../response';
+import oneBotHttpApiMessageGroup from './group';
+import messageNodeSchema from './node';
+import oneBotHttpApiMessagePrivate from './private';
 
 const fileSchema = z
   .object({
@@ -11,9 +11,9 @@ const fileSchema = z
     url: z.string().describe('路径或链接'),
     file_size: z.string().describe('文件大小'),
     file_name: z.string().describe('文件名'),
-    base64: z.string().describe('文件base64编码')
+    base64: z.string().describe('文件base64编码'),
   })
-  .describe('文件')
+  .describe('文件');
 const messageSchema = z
   .object({
     self_id: z.number().describe('自己QQ号'),
@@ -30,7 +30,7 @@ const messageSchema = z
         sex: z.enum(['male', 'female', 'unknown']).describe('性别'),
         age: z.number().describe('年龄'),
         card: z.string().describe('名片'),
-        role: z.enum(['owner', 'admin', 'member']).describe('角色')
+        role: z.enum(['owner', 'admin', 'member']).describe('角色'),
       })
       .describe('发送人信息'),
     raw_message: z.string().describe('原始消息'),
@@ -40,9 +40,9 @@ const messageSchema = z
     message_format: z.string().describe('消息格式'),
     post_type: z.string().describe('?'),
     message_sent_type: z.string().describe('消息发送类型'),
-    group_id: z.number().describe('群号')
+    group_id: z.number().describe('群号'),
   })
-  .describe('消息')
+  .describe('消息');
 
 const oneBotHttpApiMessage = {
   ...oneBotHttpApiMessagePrivate,
@@ -58,61 +58,61 @@ const oneBotHttpApiMessage = {
         user_id: z
           .union([z.string(), z.number()])
           .optional()
-          .describe('用户QQ号，与 group_id 二选一')
+          .describe('用户QQ号，与 group_id 二选一'),
       })
       .refine(
         (data) =>
           (data.group_id && !data.user_id) || (!data.group_id && data.user_id),
         {
           message: 'group_id 和 user_id 必须二选一，且不能同时存在或同时为空',
-          path: ['group_id', 'user_id']
+          path: ['group_id', 'user_id'],
         }
       ),
-    response: baseResponseSchema
+    response: baseResponseSchema,
   },
   '/mark_group_msg_as_read': {
     description: '标记群消息已读',
     request: z.object({
-      group_id: z.union([z.string(), z.number()]).describe('群号')
+      group_id: z.union([z.string(), z.number()]).describe('群号'),
     }),
-    response: baseResponseSchema
+    response: baseResponseSchema,
   },
   '/mark_private_msg_as_read': {
     description: '标记私聊消息已读',
     request: z.object({
-      user_id: z.union([z.string(), z.number()]).describe('用户QQ号')
+      user_id: z.union([z.string(), z.number()]).describe('用户QQ号'),
     }),
-    response: baseResponseSchema
+    response: baseResponseSchema,
   },
   '/_mark_all_as_read': {
     description: '标记所有消息已读',
     request: z.object({}),
-    response: baseResponseSchema
+    response: baseResponseSchema,
   },
   '/delete_msg': {
     description: '撤回消息',
     request: z.object({
-      message_id: z.union([z.string(), z.number()]).describe('消息ID')
+      message_id: z.union([z.string(), z.number()]).describe('消息ID'),
     }),
-    response: baseResponseSchema
+    response: baseResponseSchema,
   },
   '/get_msg': {
     description: '获取消息',
     request: z.object({
-      message_id: z.union([z.string(), z.number()]).describe('消息ID')
+      message_id: z.union([z.string(), z.number()]).describe('消息ID'),
     }),
     response: baseResponseSchema.extend({
-      data: z.object({})
-    })
+      data: z.object({}),
+    }),
   },
   '/get_image': {
     description: '获取图片',
     request: z.object({
-      file_id: z.string().describe('文件ID')
+      file_id: z.string().describe('文件ID'),
     }),
     response: baseResponseSchema.extend({
-      data: fileSchema
-    })
+      data: fileSchema,
+    }),
   },
   '/get_record': {
     description: '获取语音',
@@ -120,20 +120,20 @@ const oneBotHttpApiMessage = {
       file_id: z.string().describe('文件ID'),
       out_format: z
         .enum(['mp3', 'amr', 'wma', 'm4a', 'spx', 'ogg', 'wav', 'flac'])
-        .describe('输出格式')
+        .describe('输出格式'),
     }),
     response: baseResponseSchema.extend({
-      data: fileSchema
-    })
+      data: fileSchema,
+    }),
   },
   '/get_file': {
     description: '获取文件',
     request: z.object({
-      file_id: z.string().describe('文件ID')
+      file_id: z.string().describe('文件ID'),
     }),
     response: baseResponseSchema.extend({
-      data: fileSchema
-    })
+      data: fileSchema,
+    }),
   },
   '/get_group_msg_history': {
     description: '获取群消息历史',
@@ -141,24 +141,24 @@ const oneBotHttpApiMessage = {
       group_id: z.union([z.string(), z.number()]).describe('群号'),
       message_seq: z.union([z.string(), z.number()]).describe('消息序号'),
       count: z.number().int().positive().describe('获取数量'),
-      reverseOrder: z.boolean().describe('是否倒序')
+      reverseOrder: z.boolean().describe('是否倒序'),
     }),
     response: baseResponseSchema.extend({
       data: z.object({
-        messages: z.array(messageSchema).describe('消息列表')
-      })
-    })
+        messages: z.array(messageSchema).describe('消息列表'),
+      }),
+    }),
   },
   '/set_msg_emoji_like': {
     description: '贴表情',
     request: z.object({
       message_id: z.union([z.string(), z.number()]).describe('消息ID'),
       emoji_id: z.number().describe('表情ID'),
-      set: z.boolean().describe('?')
+      set: z.boolean().describe('?'),
     }),
     response: baseResponseSchema.extend({
-      data: commonResponseDataSchema
-    })
+      data: commonResponseDataSchema,
+    }),
   },
   '/get_friend_msg_history': {
     description: '获取好友消息历史',
@@ -166,18 +166,18 @@ const oneBotHttpApiMessage = {
       user_id: z.union([z.string(), z.number()]).describe('用户QQ号'),
       message_seq: z.union([z.string(), z.number()]).describe('消息序号'),
       count: z.number().int().positive().describe('获取数量'),
-      reverseOrder: z.boolean().describe('是否倒序')
+      reverseOrder: z.boolean().describe('是否倒序'),
     }),
     response: baseResponseSchema.extend({
       data: z.object({
-        messages: z.array(messageSchema)
-      })
-    })
+        messages: z.array(messageSchema),
+      }),
+    }),
   },
   '/get_recent_contact': {
     description: '最近消息列表',
     request: z.object({
-      count: z.number().int().positive().describe('获取数量')
+      count: z.number().int().positive().describe('获取数量'),
     }),
     response: baseResponseSchema.extend({
       data: z.array(
@@ -190,10 +190,10 @@ const oneBotHttpApiMessage = {
           msgId: z.string().describe('消息ID'),
           sendNickName: z.string().describe('发送人昵称'),
           sendMemberName: z.string().describe('发送人?昵称'),
-          peerName: z.string().describe('对方昵称')
+          peerName: z.string().describe('对方昵称'),
         })
-      )
-    })
+      ),
+    }),
   },
   '/fetch_emoji_like': {
     description: '获取贴表情详情',
@@ -206,7 +206,7 @@ const oneBotHttpApiMessage = {
         .union([z.string(), z.number()])
         .optional()
         .describe('用户QQ号'),
-      count: z.number().int().positive().optional().describe('获取数量')
+      count: z.number().int().positive().optional().describe('获取数量'),
     }),
     response: baseResponseSchema.extend({
       data: z.object({
@@ -218,25 +218,25 @@ const oneBotHttpApiMessage = {
               .object({
                 tinyId: z.string().describe('表情ID'),
                 nickName: z.string().describe('昵称?'),
-                headUrl: z.string().describe('头像?')
+                headUrl: z.string().describe('头像?'),
               })
               .describe('表情点赞列表')
           )
           .describe('表情点赞列表'),
         cookie: z.string().describe('cookie'),
         isLastPage: z.boolean().describe('是否最后一页'),
-        isFirstPage: z.boolean().describe('是否第一页')
-      })
-    })
+        isFirstPage: z.boolean().describe('是否第一页'),
+      }),
+    }),
   },
   '/get_forward_msg': {
     description: '获取合并转发消息',
     request: z.object({
-      message_id: z.union([z.string(), z.number()]).describe('消息ID')
+      message_id: z.union([z.string(), z.number()]).describe('消息ID'),
     }),
     response: baseResponseSchema.extend({
-      data: z.object({})
-    })
+      data: z.object({}),
+    }),
   },
   '/send_forward_msg': {
     description: '发送合并转发消息',
@@ -250,20 +250,20 @@ const oneBotHttpApiMessage = {
       news: z
         .array(
           z.object({
-            text: z.string()
+            text: z.string(),
           })
         )
         .describe('?'),
       prompt: z.string().describe('外显'),
       summary: z.string().describe('底下文字'),
-      source: z.string().describe('内容')
+      source: z.string().describe('内容'),
     }),
     response: baseResponseSchema.extend({
       data: commonResponseDataSchema.extend({
-        data: z.object({})
-      })
-    })
-  }
-} as const
+        data: z.object({}),
+      }),
+    }),
+  },
+} as const;
 
-export default oneBotHttpApiMessage
+export default oneBotHttpApiMessage;

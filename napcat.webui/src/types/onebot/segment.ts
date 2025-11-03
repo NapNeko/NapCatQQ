@@ -21,7 +21,7 @@ export type OB11SegmentType =
   | 'node'
   | 'xml'
   | 'json'
-  | 'file'
+  | 'file';
 
 export interface Segment {
   type: OB11SegmentType
@@ -238,7 +238,7 @@ export type OB11SegmentBase =
   | ForwardSegment
   | XmlSegment
   | JsonSegment
-  | FileSegment
+  | FileSegment;
 
 /** 合并转发已有消息节点消息段 */
 export interface DirectNodeSegment extends Segment {
@@ -262,7 +262,7 @@ export interface CustomNodeSegments extends Segment {
 }
 
 /** 合并转发消息段 */
-export type OB11NodeSegment = DirectNodeSegment | CustomNodeSegments
+export type OB11NodeSegment = DirectNodeSegment | CustomNodeSegments;
 
 /** OneBot11消息段 */
-export type OB11Segment = OB11SegmentBase | OB11NodeSegment
+export type OB11Segment = OB11SegmentBase | OB11NodeSegment;

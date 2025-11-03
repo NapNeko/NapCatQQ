@@ -1,8 +1,8 @@
 // Dialog Context
-import React from 'react'
+import React from 'react';
 
-import Modal from '@/components/modal'
-import type { ModalProps } from '@/components/modal'
+import Modal from '@/components/modal';
+import type { ModalProps } from '@/components/modal';
 
 export interface AlertProps
   extends Omit<ModalProps, 'onCancel' | 'showCancel' | 'cancelText'> {
@@ -29,16 +29,16 @@ export interface DialogProviderProps {
 
 export const DialogContext = React.createContext<DialogContextProps>({
   alert: () => {},
-  confirm: () => {}
-})
+  confirm: () => {},
+});
 
 const DialogProvider: React.FC<DialogProviderProps> = ({ children }) => {
-  const [dialogs, setDialogs] = React.useState<ModalItem[]>([])
+  const [dialogs, setDialogs] = React.useState<ModalItem[]>([]);
   const alert = (config: AlertProps) => {
-    const { onConfirm, size = 'md', ...rest } = config
+    const { onConfirm, size = 'md', ...rest } = config;
 
     setDialogs((before) => {
-      const id = before[before.length - 1]?.id + 1 || 0
+      const id = before[before.length - 1]?.id + 1 || 0;
 
       return [
         ...before,
@@ -48,22 +48,22 @@ const DialogProvider: React.FC<DialogProviderProps> = ({ children }) => {
           backdrop: 'blur',
           showCancel: false,
           onConfirm: () => {
-            onConfirm?.()
+            onConfirm?.();
             setTimeout(() => {
-              setDialogs((before) => before.filter((item) => item.id !== id))
-            }, 300)
+              setDialogs((before) => before.filter((item) => item.id !== id));
+            }, 300);
           },
-          ...rest
-        }
-      ]
-    })
-  }
+          ...rest,
+        },
+      ];
+    });
+  };
 
   const confirm = (config: ConfirmProps) => {
-    const { onConfirm, onCancel, size = 'md', ...rest } = config
+    const { onConfirm, onCancel, size = 'md', ...rest } = config;
 
     setDialogs((before) => {
-      const id = before[before.length - 1]?.id + 1 || 0
+      const id = before[before.length - 1]?.id + 1 || 0;
 
       return [
         ...before,
@@ -73,34 +73,34 @@ const DialogProvider: React.FC<DialogProviderProps> = ({ children }) => {
           backdrop: 'blur',
           showCancel: true,
           onConfirm: () => {
-            onConfirm?.()
+            onConfirm?.();
             setTimeout(() => {
-              setDialogs((before) => before.filter((item) => item.id !== id))
-            }, 300)
+              setDialogs((before) => before.filter((item) => item.id !== id));
+            }, 300);
           },
           onCancel: () => {
-            onCancel?.()
+            onCancel?.();
             setTimeout(() => {
-              setDialogs((before) => before.filter((item) => item.id !== id))
-            }, 300)
+              setDialogs((before) => before.filter((item) => item.id !== id));
+            }, 300);
           },
-          ...rest
-        }
-      ]
-    })
-  }
+          ...rest,
+        },
+      ];
+    });
+  };
 
   return (
     <DialogContext.Provider
       value={{
         alert,
-        confirm
+        confirm,
       }}
     >
       {children}
       {dialogs?.map(({ id, ...props }) => <Modal key={id} {...props} />)}
     </DialogContext.Provider>
-  )
-}
+  );
+};
 
-export default DialogProvider
+export default DialogProvider;
