@@ -1,15 +1,15 @@
 export interface ImageOcrResult {
-    texts: TextDetection[];
-    language: string;
+  texts: TextDetection[];
+  language: string;
 }
 
 export interface TextDetection {
-    text: string;
-    confidence: number;
-    coordinates: Coordinate[];
+  text: string;
+  confidence: number;
+  coordinates: Coordinate[];
 }
 
 export interface Coordinate {
-    x: number;
-    y: number;
+  x: number;
+  y: number;
 }

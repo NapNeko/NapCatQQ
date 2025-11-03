@@ -1,5 +1,5 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet } from 'react-router-dom';
 
-export default function DebugPage() {
-  return <Outlet />
+export default function DebugPage () {
+  return <Outlet />;
 }

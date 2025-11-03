@@ -1,17 +1,17 @@
-import { request } from './request'
+import { request } from './request';
 
-const style = document.createElement('style')
-document.head.appendChild(style)
+const style = document.createElement('style');
+document.head.appendChild(style);
 
-export function loadTheme() {
+export function loadTheme () {
   request('/files/theme.css?_t=' + Date.now())
     .then((res) => res.data)
     .then((css) => {
-      style.innerHTML = css
+      style.innerHTML = css;
     })
     .catch(() => {
-      console.error('Failed to load theme.css')
-    })
+      console.error('Failed to load theme.css');
+    });
 }
 
 export const colorKeys = [
@@ -121,21 +121,21 @@ export const colorKeys = [
   '--heroui-divider',
   '--heroui-code-background',
   '--heroui-strong',
-  '--heroui-code-mdx'
-] as const
+  '--heroui-code-mdx',
+] as const;
 
 export const generateTheme = (theme: ThemeConfig, validField?: string) => {
-  let css = `:root ${validField ? `.${validField}` : ''}, .light ${validField ? `.${validField}` : ''}, [data-theme="light"] ${validField ? `.${validField}` : ''} {`
+  let css = `:root ${validField ? `.${validField}` : ''}, .light ${validField ? `.${validField}` : ''}, [data-theme="light"] ${validField ? `.${validField}` : ''} {`;
   for (const key in theme.light) {
-    const _key = key as keyof ThemeConfigItem
-    css += `${_key}: ${theme.light[_key]};`
+    const _key = key as keyof ThemeConfigItem;
+    css += `${_key}: ${theme.light[_key]};`;
   }
-  css += `}`
-  css += `.dark ${validField ? `.${validField}` : ''}, [data-theme="dark"] ${validField ? `.${validField}` : ''} {`
+  css += '}';
+  css += `.dark ${validField ? `.${validField}` : ''}, [data-theme="dark"] ${validField ? `.${validField}` : ''} {`;
   for (const key in theme.dark) {
-    const _key = key as keyof ThemeConfigItem
-    css += `${_key}: ${theme.dark[_key]};`
+    const _key = key as keyof ThemeConfigItem;
+    css += `${_key}: ${theme.dark[_key]};`;
   }
-  css += `}`
-  return css
-}
+  css += '}';
+  return css;
+};

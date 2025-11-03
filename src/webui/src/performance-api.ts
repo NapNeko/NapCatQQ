@@ -4,119 +4,119 @@
 import { Router, Request, Response } from 'express';
 import { performanceMonitor } from '@/common/performance-monitor';
 
-export function createPerformanceRouter(): Router {
-    const router = Router();
+export function createPerformanceRouter (): Router {
+  const router = Router();
 
-    // 获取所有统计数据
-    router.get('/stats', (_req: Request, res: Response) => {
-        try {
-            const stats = performanceMonitor.getStats();
-            res.json({
-                success: true,
-                data: stats,
-                count: stats.length
-            });
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                error: error instanceof Error ? error.message : 'Unknown error'
-            });
-        }
-    });
+  // 获取所有统计数据
+  router.get('/stats', (_req: Request, res: Response) => {
+    try {
+      const stats = performanceMonitor.getStats();
+      res.json({
+        success: true,
+        data: stats,
+        count: stats.length,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  });
 
-    // 获取总耗时排行榜
-    router.get('/stats/total-time', (req: Request, res: Response) => {
-        try {
-            const limit = parseInt(req.query['limit'] as string) || 20;
-            const stats = performanceMonitor.getTopByTotalTime(limit);
-            res.json({
-                success: true,
-                data: stats,
-                count: stats.length
-            });
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                error: error instanceof Error ? error.message : 'Unknown error'
-            });
-        }
-    });
+  // 获取总耗时排行榜
+  router.get('/stats/total-time', (req: Request, res: Response) => {
+    try {
+      const limit = parseInt(req.query['limit'] as string) || 20;
+      const stats = performanceMonitor.getTopByTotalTime(limit);
+      res.json({
+        success: true,
+        data: stats,
+        count: stats.length,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  });
 
-    // 获取调用次数排行榜
-    router.get('/stats/call-count', (req: Request, res: Response) => {
-        try {
-            const limit = parseInt(req.query['limit'] as string) || 20;
-            const stats = performanceMonitor.getTopByCallCount(limit);
-            res.json({
-                success: true,
-                data: stats,
-                count: stats.length
-            });
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                error: error instanceof Error ? error.message : 'Unknown error'
-            });
-        }
-    });
+  // 获取调用次数排行榜
+  router.get('/stats/call-count', (req: Request, res: Response) => {
+    try {
+      const limit = parseInt(req.query['limit'] as string) || 20;
+      const stats = performanceMonitor.getTopByCallCount(limit);
+      res.json({
+        success: true,
+        data: stats,
+        count: stats.length,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  });
 
-    // 获取平均耗时排行榜
-    router.get('/stats/average-time', (req: Request, res: Response) => {
-        try {
-            const limit = parseInt(req.query['limit'] as string) || 20;
-            const stats = performanceMonitor.getTopByAverageTime(limit);
-            res.json({
-                success: true,
-                data: stats,
-                count: stats.length
-            });
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                error: error instanceof Error ? error.message : 'Unknown error'
-            });
-        }
-    });
+  // 获取平均耗时排行榜
+  router.get('/stats/average-time', (req: Request, res: Response) => {
+    try {
+      const limit = parseInt(req.query['limit'] as string) || 20;
+      const stats = performanceMonitor.getTopByAverageTime(limit);
+      res.json({
+        success: true,
+        data: stats,
+        count: stats.length,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  });
 
-    // 清空统计数据
-    router.post('/clear', (_req: Request, res: Response) => {
-        try {
-            performanceMonitor.clear();
-            res.json({
-                success: true,
-                message: 'Performance statistics cleared'
-            });
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                error: error instanceof Error ? error.message : 'Unknown error'
-            });
-        }
-    });
+  // 清空统计数据
+  router.post('/clear', (_req: Request, res: Response) => {
+    try {
+      performanceMonitor.clear();
+      res.json({
+        success: true,
+        message: 'Performance statistics cleared',
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  });
 
-    // 获取性能报告页面
-    router.get('/report', (_req: Request, res: Response) => {
-        try {
-            const totalTimeStats = performanceMonitor.getTopByTotalTime(10);
-            const callCountStats = performanceMonitor.getTopByCallCount(10);
-            const averageTimeStats = performanceMonitor.getTopByAverageTime(10);
+  // 获取性能报告页面
+  router.get('/report', (_req: Request, res: Response) => {
+    try {
+      const totalTimeStats = performanceMonitor.getTopByTotalTime(10);
+      const callCountStats = performanceMonitor.getTopByCallCount(10);
+      const averageTimeStats = performanceMonitor.getTopByAverageTime(10);
 
-            const html = generateReportHTML(totalTimeStats, callCountStats, averageTimeStats);
-            res.setHeader('Content-Type', 'text/html; charset=utf-8');
-            res.send(html);
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                error: error instanceof Error ? error.message : 'Unknown error'
-            });
-        }
-    });
+      const html = generateReportHTML(totalTimeStats, callCountStats, averageTimeStats);
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.send(html);
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  });
 
-    return router;
+  return router;
 }
 
-function generateReportHTML(totalTimeStats: any[], callCountStats: any[], averageTimeStats: any[]): string {
-    return `
+function generateReportHTML (totalTimeStats: any[], callCountStats: any[], averageTimeStats: any[]): string {
+  return `
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>

@@ -1,5 +1,5 @@
-import GenericForm, { random_token } from './generic_form'
-import type { Field } from './generic_form'
+import GenericForm, { random_token } from './generic_form';
+import type { Field } from './generic_form';
 
 export interface HTTPServerFormProps {
   data?: OneBotConfig['network']['httpServers'][0]
@@ -7,12 +7,12 @@ export interface HTTPServerFormProps {
   onSubmit: (data: OneBotConfig['network']['httpServers'][0]) => Promise<void>
 }
 
-type HTTPServerFormType = OneBotConfig['network']['httpServers']
+type HTTPServerFormType = OneBotConfig['network']['httpServers'];
 
 const HTTPServerForm: React.FC<HTTPServerFormProps> = ({
   data,
   onClose,
-  onSubmit
+  onSubmit,
 }) => {
   const defaultValues: HTTPServerFormType[0] = {
     enable: false,
@@ -23,8 +23,8 @@ const HTTPServerForm: React.FC<HTTPServerFormProps> = ({
     enableWebsocket: true,
     messagePostFormat: 'array',
     token: random_token(16),
-    debug: false
-  }
+    debug: false,
+  };
 
   const fields: Field<'httpServers'>[] = [
     {
@@ -32,14 +32,14 @@ const HTTPServerForm: React.FC<HTTPServerFormProps> = ({
       label: '启用',
       type: 'switch',
       description: '保存后启用此配置',
-      colSpan: 1
+      colSpan: 1,
     },
     {
       name: 'debug',
       label: '开启Debug',
       type: 'switch',
       description: '是否开启调试模式',
-      colSpan: 1
+      colSpan: 1,
     },
     {
       name: 'name',
@@ -47,35 +47,35 @@ const HTTPServerForm: React.FC<HTTPServerFormProps> = ({
       type: 'input',
       placeholder: '请输入名称',
       isRequired: true,
-      isDisabled: !!data
+      isDisabled: !!data,
     },
     {
       name: 'host',
       label: 'Host',
       type: 'input',
       placeholder: '请输入主机地址',
-      isRequired: true
+      isRequired: true,
     },
     {
       name: 'port',
       label: 'Port',
       type: 'input',
       placeholder: '请输入端口',
-      isRequired: true
+      isRequired: true,
     },
     {
       name: 'enableCors',
       label: '启用CORS',
       type: 'switch',
       description: '是否启用CORS跨域',
-      colSpan: 1
+      colSpan: 1,
     },
     {
       name: 'enableWebsocket',
       label: '启用Websocket',
       type: 'switch',
       description: '是否启用Websocket',
-      colSpan: 1
+      colSpan: 1,
     },
     {
       name: 'messagePostFormat',
@@ -85,16 +85,16 @@ const HTTPServerForm: React.FC<HTTPServerFormProps> = ({
       isRequired: true,
       options: [
         { key: 'array', value: 'Array' },
-        { key: 'string', value: 'String' }
-      ]
+        { key: 'string', value: 'String' },
+      ],
     },
     {
       name: 'token',
       label: 'Token',
       type: 'input',
-      placeholder: '请输入Token'
-    }
-  ]
+      placeholder: '请输入Token',
+    },
+  ];
 
   return (
     <GenericForm
@@ -104,7 +104,7 @@ const HTTPServerForm: React.FC<HTTPServerFormProps> = ({
       onSubmit={onSubmit}
       fields={fields}
     />
-  )
-}
+  );
+};
 
-export default HTTPServerForm
+export default HTTPServerForm;

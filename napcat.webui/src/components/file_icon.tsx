@@ -11,8 +11,8 @@ import {
   FaFileVideo,
   FaFileWord,
   FaFileZipper,
-  FaFolderClosed
-} from 'react-icons/fa6'
+  FaFolderClosed,
+} from 'react-icons/fa6';
 
 export interface FileIconProps {
   name?: string
@@ -20,12 +20,12 @@ export interface FileIconProps {
 }
 
 const FileIcon = (props: FileIconProps) => {
-  const { name, isDirectory = false } = props
+  const { name, isDirectory = false } = props;
   if (isDirectory) {
-    return <FaFolderClosed className="text-yellow-500" />
+    return <FaFolderClosed className='text-yellow-500' />;
   }
 
-  const ext = name?.split('.').pop() || ''
+  const ext = name?.split('.').pop() || '';
   if (ext) {
     switch (ext.toLowerCase()) {
       case 'jpg':
@@ -50,20 +50,20 @@ const FileIcon = (props: FileIconProps) => {
       case 'fig':
       case 'xd':
       case 'svgz':
-        return <FaFileImage className="text-green-500" />
+        return <FaFileImage className='text-green-500' />;
       case 'pdf':
-        return <FaFilePdf className="text-red-500" />
+        return <FaFilePdf className='text-red-500' />;
       case 'doc':
       case 'docx':
-        return <FaFileWord className="text-blue-500" />
+        return <FaFileWord className='text-blue-500' />;
       case 'xls':
       case 'xlsx':
-        return <FaFileExcel className="text-green-500" />
+        return <FaFileExcel className='text-green-500' />;
       case 'csv':
-        return <FaFileCsv className="text-green-500" />
+        return <FaFileCsv className='text-green-500' />;
       case 'ppt':
       case 'pptx':
-        return <FaFilePowerpoint className="text-red-500" />
+        return <FaFilePowerpoint className='text-red-500' />;
       case 'zip':
       case 'rar':
       case '7z':
@@ -79,18 +79,18 @@ const FileIcon = (props: FileIconProps) => {
       case 'taz':
       case 'tz':
       case 'tzo':
-        return <FaFileZipper className="text-green-500" />
+        return <FaFileZipper className='text-green-500' />;
       case 'txt':
-        return <FaFileLines className="text-gray-500" />
+        return <FaFileLines className='text-gray-500' />;
       case 'mp3':
       case 'wav':
       case 'flac':
-        return <FaFileAudio className="text-green-500" />
+        return <FaFileAudio className='text-green-500' />;
       case 'mp4':
       case 'avi':
       case 'mov':
       case 'wmv':
-        return <FaFileVideo className="text-red-500" />
+        return <FaFileVideo className='text-red-500' />;
       case 'html':
       case 'css':
       case 'js':
@@ -154,13 +154,13 @@ const FileIcon = (props: FileIconProps) => {
       case 'userosscache':
       case 'sln.docstates':
       case 'dll':
-        return <FaFileCode className="text-blue-500" />
+        return <FaFileCode className='text-blue-500' />;
       default:
-        return <FaFile className="text-gray-500" />
+        return <FaFile className='text-gray-500' />;
     }
   }
 
-  return <FaFile className="text-gray-500" />
-}
+  return <FaFile className='text-gray-500' />;
+};
 
-export default FileIcon
+export default FileIcon;

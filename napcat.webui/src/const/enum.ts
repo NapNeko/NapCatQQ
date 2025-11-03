@@ -3,11 +3,11 @@ export enum LogLevel {
   INFO = 'info',
   WARN = 'warn',
   ERROR = 'error',
-  FATAL = 'fatal'
+  FATAL = 'fatal',
 }
 
 export enum PlayMode {
   Loop = 'loop',
   Random = 'random',
-  Single = 'single'
+  Single = 'single',
 }

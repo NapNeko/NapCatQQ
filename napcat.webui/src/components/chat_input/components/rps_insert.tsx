@@ -1,31 +1,31 @@
-import { Button } from '@heroui/button'
-import { Tooltip } from '@heroui/tooltip'
-import { LiaHandScissors } from 'react-icons/lia'
+import { Button } from '@heroui/button';
+import { Tooltip } from '@heroui/tooltip';
+import { LiaHandScissors } from 'react-icons/lia';
 
-import useShowStructuredMessage from '@/hooks/use_show_strcuted_message'
+import useShowStructuredMessage from '@/hooks/use_show_strcuted_message';
 
 const RPSInsert = () => {
-  const showStructuredMessage = useShowStructuredMessage()
+  const showStructuredMessage = useShowStructuredMessage();
 
   return (
-    <Tooltip content="发送猜拳">
+    <Tooltip content='发送猜拳'>
       <Button
-        color="primary"
-        variant="flat"
+        color='primary'
+        variant='flat'
         isIconOnly
-        radius="full"
+        radius='full'
         onPress={() => {
           showStructuredMessage([
             {
-              type: 'rps'
-            }
-          ])
+              type: 'rps',
+            },
+          ]);
         }}
       >
-        <LiaHandScissors className="text-2xl" />
+        <LiaHandScissors className='text-2xl' />
       </Button>
     </Tooltip>
-  )
-}
+  );
+};
 
-export default RPSInsert
+export default RPSInsert;

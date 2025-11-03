@@ -1,46 +1,46 @@
-import Editor, { OnMount } from '@monaco-editor/react'
-import { loader } from '@monaco-editor/react'
-import React from 'react'
+import Editor, { OnMount, loader } from '@monaco-editor/react';
 
-import { useTheme } from '@/hooks/use-theme'
+import React from 'react';
 
-import monaco from '@/monaco'
+import { useTheme } from '@/hooks/use-theme';
+
+import monaco from '@/monaco';
 
 loader.config({
   monaco,
   paths: {
-    vs: '/webui/monaco-editor/min/vs'
-  }
-})
+    vs: '/webui/monaco-editor/min/vs',
+  },
+});
 
 loader.config({
   'vs/nls': {
-    availableLanguages: { '*': 'zh-cn' }
-  }
-})
+    availableLanguages: { '*': 'zh-cn' },
+  },
+});
 
 export interface CodeEditorProps extends React.ComponentProps<typeof Editor> {
   test?: string
 }
 
-export type CodeEditorRef = monaco.editor.IStandaloneCodeEditor
+export type CodeEditorRef = monaco.editor.IStandaloneCodeEditor;
 
 const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
   (props, ref) => {
-    const { isDark } = useTheme()
+    const { isDark } = useTheme();
 
     const handleEditorDidMount: OnMount = (editor, monaco) => {
       if (ref) {
         if (typeof ref === 'function') {
-          ref(editor)
+          ref(editor);
         } else {
-          ;(ref as React.RefObject<CodeEditorRef>).current = editor
+          (ref as React.RefObject<CodeEditorRef>).current = editor;
         }
       }
       if (props.onMount) {
-        props.onMount(editor, monaco)
+        props.onMount(editor, monaco);
       }
-    }
+    };
 
     return (
       <Editor
@@ -48,8 +48,8 @@ const CodeEditor = React.forwardRef<CodeEditorRef, CodeEditorProps>(
         onMount={handleEditorDidMount}
         theme={isDark ? 'vs-dark' : 'light'}
       />
-    )
+    );
   }
-)
+);
 
-export default CodeEditor
+export default CodeEditor;

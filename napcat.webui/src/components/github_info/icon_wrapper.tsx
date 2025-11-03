@@ -1,4 +1,4 @@
-import clsx from 'clsx'
+import clsx from 'clsx';
 
 export interface IconWrapperProps {
   children?: React.ReactNode
@@ -14,6 +14,6 @@ const IconWrapper = ({ children, className }: IconWrapperProps) => (
   >
     {children}
   </div>
-)
+);
 
-export default IconWrapper
+export default IconWrapper;

@@ -10,7 +10,7 @@ type HitokitoType =
   | 'i' /** 诗词 */
   | 'j' /** 网易云 */
   | 'k' /** 哲学 */
-  | 'l' /** 抖机灵 */
+  | 'l'; /** 抖机灵 */
 
 interface IHitokoto {
   id: number

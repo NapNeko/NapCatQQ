@@ -3,80 +3,80 @@ import { BizKey, ModifyProfileParams, NodeIKernelProfileListener, ProfileBizType
 import { GeneralCallResult } from '@/core/services/common';
 
 export interface NodeIKernelProfileService {
-    getOtherFlag(callfrom: string, uids: string[]): Promise<Map<string, unknown>>;
+  getOtherFlag(callfrom: string, uids: string[]): Promise<Map<string, unknown>>;
 
-    getVasInfo(callfrom: string, uids: string[]): Promise<Map<string, unknown>>;
+  getVasInfo(callfrom: string, uids: string[]): Promise<Map<string, unknown>>;
 
-    getRelationFlag(callfrom: string, uids: string[]): Promise<Map<string, unknown>>;
+  getRelationFlag(callfrom: string, uids: string[]): Promise<Map<string, unknown>>;
 
-    getUidByUin(callfrom: string, uin: Array<string>): Map<string, string>;
+  getUidByUin(callfrom: string, uin: Array<string>): Map<string, string>;
 
-    getUinByUid(callfrom: string, uid: Array<string>): Map<string, string>;
+  getUinByUid(callfrom: string, uid: Array<string>): Map<string, string>;
 
-    getCoreAndBaseInfo(callfrom: string, uids: string[]): Promise<Map<string, SimpleInfo>>;
+  getCoreAndBaseInfo(callfrom: string, uids: string[]): Promise<Map<string, SimpleInfo>>;
 
-    fetchUserDetailInfo(trace: string, uids: string[], source: UserDetailSource, bizType: ProfileBizType[]): Promise<GeneralCallResult &
+  fetchUserDetailInfo(trace: string, uids: string[], source: UserDetailSource, bizType: ProfileBizType[]): Promise<GeneralCallResult &
     {
-        source: UserDetailSource,
-        // uid -> detail
-        detail: Map<string, UserDetailInfoListenerArg>,
+      source: UserDetailSource,
+      // uid -> detail
+      detail: Map<string, UserDetailInfoListenerArg>,
     }
     >;
 
-    addKernelProfileListener(listener: NodeIKernelProfileListener): number;
+  addKernelProfileListener(listener: NodeIKernelProfileListener): number;
 
-    removeKernelProfileListener(listenerId: number): void;
+  removeKernelProfileListener(listenerId: number): void;
 
-    prepareRegionConfig(...args: unknown[]): unknown;
+  prepareRegionConfig(...args: unknown[]): unknown;
 
-    getLocalStrangerRemark(): Promise<AnyCnameRecord>;
+  getLocalStrangerRemark(): Promise<AnyCnameRecord>;
 
-    enumCountryOptions(): Array<string>;
+  enumCountryOptions(): Array<string>;
 
-    enumProvinceOptions(country: string): Array<string>;
+  enumProvinceOptions(country: string): Array<string>;
 
-    enumCityOptions(country: string, province: string): unknown;
+  enumCityOptions(country: string, province: string): unknown;
 
-    enumAreaOptions(...args: unknown[]): unknown;
+  enumAreaOptions(...args: unknown[]): unknown;
 
-    modifySelfProfile(...args: unknown[]): Promise<unknown>;
+  modifySelfProfile(...args: unknown[]): Promise<unknown>;
 
-    modifyDesktopMiniProfile(param: ModifyProfileParams): Promise<GeneralCallResult>;
+  modifyDesktopMiniProfile(param: ModifyProfileParams): Promise<GeneralCallResult>;
 
-    setNickName(nickName: string): Promise<unknown>;
+  setNickName(nickName: string): Promise<unknown>;
 
-    setLongNick(longNick: string): Promise<unknown>;
+  setLongNick(longNick: string): Promise<unknown>;
 
-    setBirthday(...args: unknown[]): Promise<unknown>;
+  setBirthday(...args: unknown[]): Promise<unknown>;
 
-    setGander(...args: unknown[]): Promise<unknown>;
+  setGander(...args: unknown[]): Promise<unknown>;
 
-    setHeader(arg: string): Promise<GeneralCallResult>;
+  setHeader(arg: string): Promise<GeneralCallResult>;
 
-    setRecommendImgFlag(...args: unknown[]): Promise<unknown>;
+  setRecommendImgFlag(...args: unknown[]): Promise<unknown>;
 
-    getUserSimpleInfo(force: boolean, uids: string[]): Promise<unknown>;
+  getUserSimpleInfo(force: boolean, uids: string[]): Promise<unknown>;
 
-    getUserDetailInfo(uid: string): Promise<unknown>;
+  getUserDetailInfo(uid: string): Promise<unknown>;
 
-    getUserDetailInfoWithBizInfo(uid: string, Biz: BizKey[]): Promise<GeneralCallResult>;
+  getUserDetailInfoWithBizInfo(uid: string, Biz: BizKey[]): Promise<GeneralCallResult>;
 
-    getUserDetailInfoByUin(uin: string): Promise<UserDetailInfoByUin>;
+  getUserDetailInfoByUin(uin: string): Promise<UserDetailInfoByUin>;
 
-    getZplanAvatarInfos(args: string[]): Promise<unknown>;
+  getZplanAvatarInfos(args: string[]): Promise<unknown>;
 
-    getStatus(uid: string): Promise<unknown>;
+  getStatus(uid: string): Promise<unknown>;
 
-    startStatusPolling(isForceReset: boolean): Promise<unknown>;
+  startStatusPolling(isForceReset: boolean): Promise<unknown>;
 
-    getSelfStatus(): Promise<unknown>;
+  getSelfStatus(): Promise<unknown>;
 
-    setdisableEmojiShortCuts(...args: unknown[]): unknown;
+  setdisableEmojiShortCuts(...args: unknown[]): unknown;
 
-    getProfileQzonePicInfo(uid: string, type: number, force: boolean): Promise<unknown>;
+  getProfileQzonePicInfo(uid: string, type: number, force: boolean): Promise<unknown>;
 
-    // UserRemarkServiceImpl::getStrangerRemarkByUid []
-    getCoreInfo(sceneId: string, arg: unknown[]): unknown;
+  // UserRemarkServiceImpl::getStrangerRemarkByUid []
+  getCoreInfo(sceneId: string, arg: unknown[]): unknown;
 
-    isNull(): boolean;
+  isNull(): boolean;
 }

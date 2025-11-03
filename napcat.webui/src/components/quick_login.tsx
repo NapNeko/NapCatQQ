@@ -1,10 +1,10 @@
-import { Avatar } from '@heroui/avatar'
-import { Button } from '@heroui/button'
-import { Image } from '@heroui/image'
-import { Select, SelectItem } from '@heroui/select'
-import { IoMdRefresh } from 'react-icons/io'
+import { Avatar } from '@heroui/avatar';
+import { Button } from '@heroui/button';
+import { Image } from '@heroui/image';
+import { Select, SelectItem } from '@heroui/select';
+import { IoMdRefresh } from 'react-icons/io';
 
-import { isQQQuickNewItem } from '@/utils/qq'
+import { isQQQuickNewItem } from '@/utils/qq';
 
 export interface QQItem {
   uin: string
@@ -27,67 +27,67 @@ const QuickLogin: React.FC<QuickLoginProps> = ({
   selectedQQ,
   onUpdateQQList,
   handleSelectionChange,
-  onSubmit
+  onSubmit,
 }) => {
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex justify-center">
+    <div className='flex flex-col gap-8'>
+      <div className='flex justify-center'>
         <Image
-          className="shadow-lg"
+          className='shadow-lg'
           height={100}
-          radius="full"
+          radius='full'
           src={`https://q1.qlogo.cn/g?b=qq&nk=${selectedQQ || '0'}&s=100`}
           width={100}
         />
       </div>
-      <div className="flex items-center gap-2">
+      <div className='flex items-center gap-2'>
         <Select
           classNames={{
-            popoverContent: 'bg-opacity-50 backdrop-blur'
+            popoverContent: 'bg-opacity-50 backdrop-blur',
           }}
-          aria-label="QQ Login"
+          aria-label='QQ Login'
           isDisabled={refresh}
           items={qqList}
-          placeholder="请选择QQ"
+          placeholder='请选择QQ'
           renderValue={(items) => {
             return items.map((item) => (
-              <div key={item.key} className="flex items-center gap-2">
+              <div key={item.key} className='flex items-center gap-2'>
                 <Avatar
                   alt={item.key?.toString()}
-                  className="flex-shrink-0"
-                  size="sm"
+                  className='flex-shrink-0'
+                  size='sm'
                   src={
                     isQQQuickNewItem(item.data)
                       ? item.data?.faceUrl
                       : `https://q1.qlogo.cn/g?b=qq&nk=${item.key}&s=1`
                   }
                 />
-                <div className="flex flex-col">
+                <div className='flex flex-col'>
                   {isQQQuickNewItem(item.data)
                     ? `${item.data.nickName}(${item.key?.toString()})`
                     : item.key?.toString()}
                 </div>
               </div>
-            ))
+            ));
           }}
           selectedKeys={[selectedQQ]}
-          size="lg"
+          size='lg'
           onChange={handleSelectionChange}
         >
           {(item) => (
             <SelectItem key={item.uin} textValue={item.uin}>
-              <div className="flex items-center gap-2">
+              <div className='flex items-center gap-2'>
                 <Avatar
                   alt={item.uin}
-                  className="flex-shrink-0"
-                  size="sm"
+                  className='flex-shrink-0'
+                  size='sm'
                   src={
                     isQQQuickNewItem(item)
                       ? item.faceUrl
                       : `https://q1.qlogo.cn/g?b=qq&nk=${item.uin}&s=1`
                   }
                 />
-                <div className="flex flex-col">
+                <div className='flex flex-col'>
                   {isQQQuickNewItem(item)
                     ? `${item.nickName}(${item.uin})`
                     : item.uin}
@@ -98,32 +98,32 @@ const QuickLogin: React.FC<QuickLoginProps> = ({
         </Select>
         <Button
           isIconOnly
-          className="flex-grow-0 flex-shrink-0"
-          color="secondary"
+          className='flex-grow-0 flex-shrink-0'
+          color='secondary'
           isLoading={refresh}
-          radius="full"
-          size="lg"
-          variant="light"
+          radius='full'
+          size='lg'
+          variant='light'
           onPress={onUpdateQQList}
         >
           <IoMdRefresh size={24} />
         </Button>
       </div>
-      <div className="flex justify-center mt-5">
+      <div className='flex justify-center mt-5'>
         <Button
-          className="w-64 max-w-full"
-          color="primary"
+          className='w-64 max-w-full'
+          color='primary'
           isLoading={isLoading}
-          radius="full"
-          size="lg"
-          variant="shadow"
+          radius='full'
+          size='lg'
+          variant='shadow'
           onPress={onSubmit}
         >
           登录
         </Button>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default QuickLogin
+export default QuickLogin;

@@ -1,13 +1,13 @@
-import { Button, ButtonGroup } from '@heroui/button'
-import { Switch } from '@heroui/switch'
-import { useState } from 'react'
-import { CgDebug } from 'react-icons/cg'
-import { FiEdit3 } from 'react-icons/fi'
-import { MdDeleteForever } from 'react-icons/md'
+import { Button, ButtonGroup } from '@heroui/button';
+import { Switch } from '@heroui/switch';
+import { useState } from 'react';
+import { CgDebug } from 'react-icons/cg';
+import { FiEdit3 } from 'react-icons/fi';
+import { MdDeleteForever } from 'react-icons/md';
 
-import DisplayCardContainer from './container'
+import DisplayCardContainer from './container';
 
-type NetworkType = OneBotConfig['network']
+type NetworkType = OneBotConfig['network'];
 
 export type NetworkDisplayCardFields<T extends keyof NetworkType> = Array<{
   label: string
@@ -15,7 +15,7 @@ export type NetworkDisplayCardFields<T extends keyof NetworkType> = Array<{
   render?: (
     value: NetworkType[T][0][keyof NetworkType[T][0]]
   ) => React.ReactNode
-}>
+}>;
 
 export interface NetworkDisplayCardProps<T extends keyof NetworkType> {
   data: NetworkType[T][0]
@@ -36,25 +36,25 @@ const NetworkDisplayCard = <T extends keyof NetworkType>({
   onEdit,
   onEnable,
   onDelete,
-  onEnableDebug
+  onEnableDebug,
 }: NetworkDisplayCardProps<T>) => {
-  const { name, enable, debug } = data
-  const [editing, setEditing] = useState(false)
+  const { name, enable, debug } = data;
+  const [editing, setEditing] = useState(false);
 
   const handleEnable = () => {
-    setEditing(true)
-    onEnable().finally(() => setEditing(false))
-  }
+    setEditing(true);
+    onEnable().finally(() => setEditing(false));
+  };
 
   const handleDelete = () => {
-    setEditing(true)
-    onDelete().finally(() => setEditing(false))
-  }
+    setEditing(true);
+    onDelete().finally(() => setEditing(false));
+  };
 
   const handleEnableDebug = () => {
-    setEditing(true)
-    onEnableDebug().finally(() => setEditing(false))
-  }
+    setEditing(true);
+    onEnableDebug().finally(() => setEditing(false));
+  };
 
   return (
     <DisplayCardContainer
@@ -62,12 +62,12 @@ const NetworkDisplayCard = <T extends keyof NetworkType>({
         <ButtonGroup
           fullWidth
           isDisabled={editing}
-          radius="sm"
-          size="sm"
-          variant="flat"
+          radius='sm'
+          size='sm'
+          variant='flat'
         >
           <Button
-            color="warning"
+            color='warning'
             startContent={<FiEdit3 size={16} />}
             onPress={onEdit}
           >
@@ -76,14 +76,14 @@ const NetworkDisplayCard = <T extends keyof NetworkType>({
 
           <Button
             color={debug ? 'secondary' : 'success'}
-            variant="flat"
+            variant='flat'
             startContent={
               <CgDebug
                 style={{
                   width: '16px',
                   height: '16px',
                   minWidth: '16px',
-                  minHeight: '16px'
+                  minHeight: '16px',
                 }}
               />
             }
@@ -92,8 +92,8 @@ const NetworkDisplayCard = <T extends keyof NetworkType>({
             {debug ? '关闭调试' : '开启调试'}
           </Button>
           <Button
-            className="bg-danger/20 text-danger hover:bg-danger/30 transition-colors"
-            variant="flat"
+            className='bg-danger/20 text-danger hover:bg-danger/30 transition-colors'
+            variant='flat'
             startContent={<MdDeleteForever size={16} />}
             onPress={handleDelete}
           >
@@ -111,7 +111,7 @@ const NetworkDisplayCard = <T extends keyof NetworkType>({
       tag={showType && typeLabel}
       title={name}
     >
-      <div className="grid grid-cols-2 gap-1">
+      <div className='grid grid-cols-2 gap-1'>
         {fields.map((field, index) => (
           <div
             key={index}
@@ -119,17 +119,19 @@ const NetworkDisplayCard = <T extends keyof NetworkType>({
               field.label === 'URL' ? 'col-span-2' : ''
             }`}
           >
-            <span className="text-default-400">{field.label}</span>
-            {field.render ? (
-              field.render(field.value)
-            ) : (
-              <span>{field.value}</span>
-            )}
+            <span className='text-default-400'>{field.label}</span>
+            {field.render
+              ? (
+                field.render(field.value)
+              )
+              : (
+                <span>{field.value}</span>
+              )}
           </div>
         ))}
       </div>
     </DisplayCardContainer>
-  )
-}
+  );
+};
 
-export default NetworkDisplayCard
+export default NetworkDisplayCard;

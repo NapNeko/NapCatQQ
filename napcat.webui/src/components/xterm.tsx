@@ -1,13 +1,13 @@
-import { CanvasAddon } from '@xterm/addon-canvas'
-import { FitAddon } from '@xterm/addon-fit'
-import { WebLinksAddon } from '@xterm/addon-web-links'
+import { CanvasAddon } from '@xterm/addon-canvas';
+import { FitAddon } from '@xterm/addon-fit';
+import { WebLinksAddon } from '@xterm/addon-web-links';
 // import { WebglAddon } from '@xterm/addon-webgl'
-import { Terminal } from '@xterm/xterm'
-import '@xterm/xterm/css/xterm.css'
-import clsx from 'clsx'
-import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
+import { Terminal } from '@xterm/xterm';
+import '@xterm/xterm/css/xterm.css';
+import clsx from 'clsx';
+import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 
-import { useTheme } from '@/hooks/use-theme'
+import { useTheme } from '@/hooks/use-theme';
 
 export type XTermRef = {
   write: (
@@ -20,7 +20,7 @@ export type XTermRef = {
   writelnAsync: (data: Parameters<Terminal['writeln']>[0]) => Promise<void>
   clear: () => void
   terminalRef: React.RefObject<Terminal | null>
-}
+};
 
 export interface XTermProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onInput' | 'onResize'> {
@@ -30,10 +30,10 @@ export interface XTermProps
 }
 
 const XTerm = forwardRef<XTermRef, XTermProps>((props, ref) => {
-  const domRef = useRef<HTMLDivElement>(null)
-  const terminalRef = useRef<Terminal | null>(null)
-  const { className, onInput, onKey, onResize, ...rest } = props
-  const { theme } = useTheme()
+  const domRef = useRef<HTMLDivElement>(null);
+  const terminalRef = useRef<Terminal | null>(null);
+  const { className, onInput, onKey, onResize, ...rest } = props;
+  const { theme } = useTheme();
   useEffect(() => {
     const terminal = new Terminal({
       allowTransparency: true,
@@ -42,57 +42,57 @@ const XTerm = forwardRef<XTermRef, XTermProps>((props, ref) => {
       cursorInactiveStyle: 'outline',
       drawBoldTextInBrightColors: false,
       fontSize: 14,
-      lineHeight: 1.2
-    })
-    terminalRef.current = terminal
-    const fitAddon = new FitAddon()
+      lineHeight: 1.2,
+    });
+    terminalRef.current = terminal;
+    const fitAddon = new FitAddon();
     terminal.loadAddon(
       new WebLinksAddon((event, uri) => {
         if (event.ctrlKey || event.metaKey) {
-          window.open(uri, '_blank')
+          window.open(uri, '_blank');
         }
       })
-    )
-    terminal.loadAddon(fitAddon)
-    terminal.open(domRef.current!)
+    );
+    terminal.loadAddon(fitAddon);
+    terminal.open(domRef.current!);
 
-    terminal.loadAddon(new CanvasAddon())
+    terminal.loadAddon(new CanvasAddon());
     terminal.onData((data) => {
       if (onInput) {
-        onInput(data)
+        onInput(data);
       }
-    })
+    });
 
     terminal.onKey((event) => {
       if (onKey) {
-        onKey(event.key, event.domEvent)
+        onKey(event.key, event.domEvent);
       }
-    })
+    });
 
     const resizeObserver = new ResizeObserver(() => {
-      fitAddon.fit()
+      fitAddon.fit();
       // 获取当前终端尺寸
-      const cols = terminal.cols
-      const rows = terminal.rows
+      const cols = terminal.cols;
+      const rows = terminal.rows;
       if (onResize) {
-        onResize(cols, rows)
+        onResize(cols, rows);
       }
-    })
+    });
 
     // 字体加载完成后重新调整终端大小
     document.fonts.ready.then(() => {
-      fitAddon.fit()
+      fitAddon.fit();
 
-      resizeObserver.observe(domRef.current!)
-    })
+      resizeObserver.observe(domRef.current!);
+    });
 
     return () => {
-      resizeObserver.disconnect()
+      resizeObserver.disconnect();
       setTimeout(() => {
-        terminal.dispose()
-      }, 0)
-    }
-  }, [])
+        terminal.dispose();
+      }, 0);
+    };
+  }, []);
 
   useEffect(() => {
     if (terminalRef.current) {
@@ -115,8 +115,8 @@ const XTerm = forwardRef<XTermRef, XTermProps>((props, ref) => {
           brightWhite: '#e5e5e5',
           foreground: '#cccccc',
           selectionBackground: '#3a3d41',
-          cursor: '#ffffff'
-        }
+          cursor: '#ffffff',
+        };
       } else {
         terminalRef.current.options.theme = {
           background: '#ffffff00',
@@ -136,38 +136,38 @@ const XTerm = forwardRef<XTermRef, XTermProps>((props, ref) => {
           brightWhite: '#b0b0b0',
           foreground: '#000000',
           selectionBackground: '#bfdbfe',
-          cursor: '#007acc'
-        }
+          cursor: '#007acc',
+        };
       }
     }
-  }, [theme])
+  }, [theme]);
 
   useImperativeHandle(
     ref,
     () => ({
       write: (...args) => {
-        return terminalRef.current?.write(...args)
+        return terminalRef.current?.write(...args);
       },
       writeAsync: async (data) => {
         return new Promise((resolve) => {
-          terminalRef.current?.write(data, resolve)
-        })
+          terminalRef.current?.write(data, resolve);
+        });
       },
       writeln: (...args) => {
-        return terminalRef.current?.writeln(...args)
+        return terminalRef.current?.writeln(...args);
       },
       writelnAsync: async (data) => {
         return new Promise((resolve) => {
-          terminalRef.current?.writeln(data, resolve)
-        })
+          terminalRef.current?.writeln(data, resolve);
+        });
       },
       clear: () => {
-        terminalRef.current?.clear()
+        terminalRef.current?.clear();
       },
-      terminalRef: terminalRef
+      terminalRef,
     }),
     []
-  )
+  );
 
   return (
     <div
@@ -181,12 +181,12 @@ const XTerm = forwardRef<XTermRef, XTermProps>((props, ref) => {
       <div
         style={{
           width: '100%',
-          height: '100%'
+          height: '100%',
         }}
         ref={domRef}
-      ></div>
+      />
     </div>
-  )
-})
+  );
+});
 
-export default XTerm
+export default XTerm;

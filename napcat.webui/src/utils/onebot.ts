@@ -1,8 +1,8 @@
-import type { Op } from 'quill'
+import type { Op } from 'quill';
 
-import type { EmojiValue } from '@/components/chat_input/formats/emoji_blot'
-import type { ImageValue } from '@/components/chat_input/formats/image_blot'
-import type { ReplyBlockValue } from '@/components/chat_input/formats/reply_blot'
+import type { EmojiValue } from '@/components/chat_input/formats/emoji_blot';
+import type { ImageValue } from '@/components/chat_input/formats/image_blot';
+import type { ReplyBlockValue } from '@/components/chat_input/formats/reply_blot';
 
 import {
   type AllOB11WsResponse,
@@ -14,8 +14,8 @@ import {
   type OB11PrivateMessage,
   type OB11Segment,
   type OneBot11Lifecycle,
-  type RequestResponse
-} from '../types/onebot'
+  type RequestResponse,
+} from '../types/onebot';
 
 /**
  * 获取事件名称
@@ -26,19 +26,19 @@ import {
 export const getEventName = (event: OB11AllEvent['post_type']): string => {
   switch (event) {
     case 'message':
-      return '消息'
+      return '消息';
     case 'notice':
-      return '通知'
+      return '通知';
     case 'request':
-      return '请求'
+      return '请求';
     case 'meta_event':
-      return '元事件'
+      return '元事件';
     case 'message_sent':
-      return '消息上报'
+      return '消息上报';
     default:
-      return '未知'
+      return '未知';
   }
-}
+};
 
 /**
  * 获取生命周期事件名称
@@ -51,15 +51,15 @@ export const getLifecycleName = (
 ): string => {
   switch (event) {
     case 'enable':
-      return '启用'
+      return '启用';
     case 'disable':
-      return '停用'
+      return '停用';
     case 'connect':
-      return '连接'
+      return '连接';
     default:
-      return '未知'
+      return '未知';
   }
-}
+};
 
 /**
  * 获取生命周期事件Chip颜色
@@ -72,15 +72,15 @@ export const getLifecycleColor = (
 ): 'success' | 'danger' | 'default' => {
   switch (event) {
     case 'enable':
-      return 'success'
+      return 'success';
     case 'disable':
-      return 'danger'
+      return 'danger';
     case 'connect':
-      return 'success'
+      return 'success';
     default:
-      return 'default'
+      return 'default';
   }
-}
+};
 
 /**
  * 判断 OneBot WS 返回值是否为事件
@@ -89,8 +89,8 @@ export const getLifecycleColor = (
  * @description 用于判断 OneBot WS 返回值是否为事件
  */
 export const isOB11Event = (data: AllOB11WsResponse): data is OB11AllEvent => {
-  return 'post_type' in data
-}
+  return 'post_type' in data;
+};
 
 /**
  * 判断 OneBot WS 返回值是否为请求响应
@@ -101,8 +101,8 @@ export const isOB11Event = (data: AllOB11WsResponse): data is OB11AllEvent => {
 export const isOB11RequestResponse = (
   data: AllOB11WsResponse
 ): data is RequestResponse => {
-  return 'status' in data && 'retcode' in data
-}
+  return 'status' in data && 'retcode' in data;
+};
 
 /**
  * 获取请求响应状态文本
@@ -115,15 +115,15 @@ export const getResponseStatusText = (
 ): string => {
   switch (status) {
     case 'ok':
-      return '成功'
+      return '成功';
     case 'failed':
-      return '失败'
+      return '失败';
     case 'async':
-      return '异步'
+      return '异步';
     default:
-      return '未知'
+      return '未知';
   }
-}
+};
 
 /**
  * 获取请求响应状态颜色
@@ -136,15 +136,15 @@ export const getResponseStatusColor = (
 ): 'success' | 'danger' | 'warning' | 'default' => {
   switch (status) {
     case 'ok':
-      return 'success'
+      return 'success';
     case 'failed':
-      return 'danger'
+      return 'danger';
     case 'async':
-      return 'warning'
+      return 'warning';
     default:
-      return 'default'
+      return 'default';
   }
-}
+};
 
 /**
  * 获取通知类型名称
@@ -155,33 +155,33 @@ export const getResponseStatusColor = (
 export const getNoticeTypeName = (type: OB11Notice['notice_type']): string => {
   switch (type) {
     case OB11NoticeType.GroupUpload:
-      return '群文件上传'
+      return '群文件上传';
     case OB11NoticeType.GroupAdmin:
-      return '群管理员变动'
+      return '群管理员变动';
     case OB11NoticeType.GroupDecrease:
-      return '群成员减少'
+      return '群成员减少';
     case OB11NoticeType.GroupIncrease:
-      return '群成员增加'
+      return '群成员增加';
     case OB11NoticeType.GroupBan:
-      return '群禁言'
+      return '群禁言';
     case OB11NoticeType.FriendAdd:
-      return '好友添加'
+      return '好友添加';
     case OB11NoticeType.GroupRecall:
-      return '群消息撤回'
+      return '群消息撤回';
     case OB11NoticeType.FriendRecall:
-      return '好友消息撤回'
+      return '好友消息撤回';
     case OB11NoticeType.Notify:
-      return '通知'
+      return '通知';
     case OB11NoticeType.GroupMsgEmojiLike:
-      return '群消息表情回应'
+      return '群消息表情回应';
     case OB11NoticeType.GroupEssence:
-      return '群消息精华'
+      return '群消息精华';
     case OB11NoticeType.GroupCard:
-      return '群名片更新'
+      return '群名片更新';
     default:
-      return '未知'
+      return '未知';
   }
-}
+};
 
 /**
  * 判断 OneBot 消息是否为私聊消息
@@ -192,8 +192,8 @@ export const getNoticeTypeName = (type: OB11Notice['notice_type']): string => {
 export const isOB11PrivateMessage = (
   data: OB11Message
 ): data is OB11PrivateMessage => {
-  return data.message_type === 'private'
-}
+  return data.message_type === 'private';
+};
 
 /**
  * 判断 OneBot 消息是否为群消息
@@ -204,8 +204,8 @@ export const isOB11PrivateMessage = (
 export const isOB11GroupMessage = (
   data: OB11Message
 ): data is OB11GroupMessage => {
-  return data.message_type === 'group'
-}
+  return data.message_type === 'group';
+};
 
 /**
  * 将 Quill Delta 转换为 OneBot 消息
@@ -217,32 +217,32 @@ export const quillToMessage = (op: Op) => {
   let message: OB11Segment = {
     type: 'text',
     data: {
-      text: op.insert as string
-    }
-  }
+      text: op.insert as string,
+    },
+  };
   if (typeof op.insert !== 'string') {
     if (op.insert?.image) {
       message = {
         type: 'image',
         data: {
-          file: (op.insert.image as ImageValue).src
-        }
-      }
+          file: (op.insert.image as ImageValue).src,
+        },
+      };
     } else if (op.insert?.emoji) {
       message = {
         type: 'face',
         data: {
-          id: (op.insert.emoji as EmojiValue).id
-        }
-      }
+          id: (op.insert.emoji as EmojiValue).id,
+        },
+      };
     } else if (op.insert?.reply) {
       message = {
         type: 'reply',
         data: {
-          id: (op.insert.reply as ReplyBlockValue).messageId
-        }
-      }
+          id: (op.insert.reply as ReplyBlockValue).messageId,
+        },
+      };
     }
   }
-  return message
-}
+  return message;
+};

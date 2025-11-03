@@ -5,11 +5,10 @@ import path from 'node:path';
 let osName: string;
 
 try {
-    osName = os.hostname();
+  osName = os.hostname();
 } catch {
-    osName = 'NapCat'; // + crypto.randomUUID().substring(0, 4);
+  osName = 'NapCat'; // + crypto.randomUUID().substring(0, 4);
 }
-
 
 const homeDir = os.homedir();
 
