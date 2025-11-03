@@ -1,10 +1,10 @@
 import { Router } from 'express';
 
 import {
-    checkHandler,
-    LoginHandler,
-    LogoutHandler,
-    UpdateTokenHandler,
+  checkHandler,
+  LoginHandler,
+  LogoutHandler,
+  UpdateTokenHandler,
 } from '@webapi/api/Auth';
 
 const router = Router();

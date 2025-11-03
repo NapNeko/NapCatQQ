@@ -22,7 +22,7 @@ router.use(auth);
 
 // router:测试用
 router.all('/test', (_, res) => {
-    return sendSuccess(res);
+  return sendSuccess(res);
 });
 // router:基础信息相关路由
 router.use('/base', BaseRouter);

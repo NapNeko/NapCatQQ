@@ -8,22 +8,22 @@ import path, { dirname } from 'node:path';
 let terminalCtor: typeof WindowsTerminal | typeof UnixTerminal;
 
 if (process.platform === 'win32') {
-    terminalCtor = WindowsTerminal;
+  terminalCtor = WindowsTerminal;
 } else {
-    terminalCtor = UnixTerminal;
+  terminalCtor = UnixTerminal;
 }
 
-export function spawn(file?: string, args?: ArgvOrCommandLine, opt?: IPtyForkOptions | IWindowsPtyForkOptions): ITerminal {
-    return new terminalCtor(file, args, opt);
+export function spawn (file?: string, args?: ArgvOrCommandLine, opt?: IPtyForkOptions | IWindowsPtyForkOptions): ITerminal {
+  return new terminalCtor(file, args, opt);
 }
 
-export function open(options: IPtyOpenOptions): ITerminal {
-    return terminalCtor.open(options) as ITerminal;
+export function open (options: IPtyOpenOptions): ITerminal {
+  return terminalCtor.open(options) as ITerminal;
 }
-export function require_dlopen(modulename: string) {
-    const module = { exports: {} };
-    const import__dirname = dirname(fileURLToPath(import.meta.url));
-    process.dlopen(module, path.join(import__dirname, modulename));
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return module.exports as any;
+export function require_dlopen (modulename: string) {
+  const module = { exports: {} };
+  const import__dirname = dirname(fileURLToPath(import.meta.url));
+  process.dlopen(module, path.join(import__dirname, modulename));
+
+  return module.exports as any;
 }

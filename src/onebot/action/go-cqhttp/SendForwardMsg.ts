@@ -4,29 +4,29 @@ import { ActionName } from '@/onebot/action/router';
 
 // 未验证
 export class GoCQHTTPSendForwardMsgBase extends SendMsgBase {
-    protected override async check(payload: OB11PostSendMsg) {
-        if (payload.messages) payload.message = normalize(payload.messages);
-        return super.check(payload);
-    }
+  protected override async check (payload: OB11PostSendMsg) {
+    if (payload.messages) payload.message = normalize(payload.messages);
+    return super.check(payload);
+  }
 }
 export class GoCQHTTPSendForwardMsg extends GoCQHTTPSendForwardMsgBase {
-    override actionName = ActionName.GoCQHTTP_SendForwardMsg;
+  override actionName = ActionName.GoCQHTTP_SendForwardMsg;
 
-    protected override async check(payload: OB11PostSendMsg) {
-        if (payload.messages) payload.message = normalize(payload.messages);
-        return super.check(payload);
-    }
+  protected override async check (payload: OB11PostSendMsg) {
+    if (payload.messages) payload.message = normalize(payload.messages);
+    return super.check(payload);
+  }
 }
 export class GoCQHTTPSendPrivateForwardMsg extends GoCQHTTPSendForwardMsgBase {
-    override actionName = ActionName.GoCQHTTP_SendPrivateForwardMsg;
-    override async _handle(payload: OB11PostSendMsg): Promise<ReturnDataType> {
-        return this.base_handle(payload, ContextMode.Private);
-    }
+  override actionName = ActionName.GoCQHTTP_SendPrivateForwardMsg;
+  override async _handle (payload: OB11PostSendMsg): Promise<ReturnDataType> {
+    return this.base_handle(payload, ContextMode.Private);
+  }
 }
 
 export class GoCQHTTPSendGroupForwardMsg extends GoCQHTTPSendForwardMsgBase {
-    override actionName = ActionName.GoCQHTTP_SendGroupForwardMsg;
-    override async _handle(payload: OB11PostSendMsg): Promise<ReturnDataType> {
-        return this.base_handle(payload, ContextMode.Group);
-    }
+  override actionName = ActionName.GoCQHTTP_SendGroupForwardMsg;
+  override async _handle (payload: OB11PostSendMsg): Promise<ReturnDataType> {
+    return this.base_handle(payload, ContextMode.Group);
+  }
 }

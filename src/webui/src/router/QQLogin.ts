@@ -1,14 +1,14 @@
 import { Router } from 'express';
 
 import {
-    QQCheckLoginStatusHandler,
-    QQGetQRcodeHandler,
-    QQGetQuickLoginListHandler,
-    QQSetQuickLoginHandler,
-    QQGetLoginListNewHandler,
-    getQQLoginInfoHandler,
-    getAutoLoginAccountHandler,
-    setAutoLoginAccountHandler,
+  QQCheckLoginStatusHandler,
+  QQGetQRcodeHandler,
+  QQGetQuickLoginListHandler,
+  QQSetQuickLoginHandler,
+  QQGetLoginListNewHandler,
+  getQQLoginInfoHandler,
+  getAutoLoginAccountHandler,
+  setAutoLoginAccountHandler,
 } from '@webapi/api/QQLogin';
 
 const router = Router();

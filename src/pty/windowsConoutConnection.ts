@@ -30,51 +30,51 @@ const FLUSH_DATA_INTERVAL = 1000;
  * - https://docs.microsoft.com/en-us/windows/console/closepseudoconsole
  */
 export class ConoutConnection implements IDisposable {
-    private _worker: Worker;
-    private _drainTimeout: NodeJS.Timeout | undefined;
-    private _isDisposed: boolean = false;
+  private _worker: Worker;
+  private _drainTimeout: NodeJS.Timeout | undefined;
+  private _isDisposed: boolean = false;
 
-    private _onReady = new EventEmitter2<void>();
-    public get onReady(): IEvent<void> { return this._onReady.event; }
+  private _onReady = new EventEmitter2<void>();
+  public get onReady (): IEvent<void> { return this._onReady.event; }
 
-    constructor(
+  constructor (
     private _conoutPipeName: string
-    ) {
-        const workerData: IWorkerData = { conoutPipeName: _conoutPipeName };
-        const scriptPath = dirname(fileURLToPath(import.meta.url));
-        this._worker = new Worker(join(scriptPath, 'worker/conoutSocketWorker.mjs'), { workerData });
-        this._worker.on('message', (message: ConoutWorkerMessage) => {
-            switch (message) {
-            case ConoutWorkerMessage.READY:
-                this._onReady.fire();
-                return;
-            default:
-                console.warn('Unexpected ConoutWorkerMessage', message);
-            }
-        });
-    }
+  ) {
+    const workerData: IWorkerData = { conoutPipeName: _conoutPipeName };
+    const scriptPath = dirname(fileURLToPath(import.meta.url));
+    this._worker = new Worker(join(scriptPath, 'worker/conoutSocketWorker.mjs'), { workerData });
+    this._worker.on('message', (message: ConoutWorkerMessage) => {
+      switch (message) {
+        case ConoutWorkerMessage.READY:
+          this._onReady.fire();
+          return;
+        default:
+          console.warn('Unexpected ConoutWorkerMessage', message);
+      }
+    });
+  }
 
-    dispose(): void {
-        if (this._isDisposed) {
-            return;
-        }
-        this._isDisposed = true;
-        // Drain all data from the socket before closing
-        this._drainDataAndClose();
+  dispose (): void {
+    if (this._isDisposed) {
+      return;
     }
+    this._isDisposed = true;
+    // Drain all data from the socket before closing
+    this._drainDataAndClose();
+  }
 
-    connectSocket(socket: Socket): void {
-        socket.connect(getWorkerPipeName(this._conoutPipeName));
-    }
+  connectSocket (socket: Socket): void {
+    socket.connect(getWorkerPipeName(this._conoutPipeName));
+  }
 
-    private _drainDataAndClose(): void {
-        if (this._drainTimeout) {
-            clearTimeout(this._drainTimeout);
-        }
-        this._drainTimeout = setTimeout(() => this._destroySocket(), FLUSH_DATA_INTERVAL);
+  private _drainDataAndClose (): void {
+    if (this._drainTimeout) {
+      clearTimeout(this._drainTimeout);
     }
+    this._drainTimeout = setTimeout(() => this._destroySocket(), FLUSH_DATA_INTERVAL);
+  }
 
-    private async _destroySocket(): Promise<void> {
-        await this._worker.terminate();
-    }
+  private async _destroySocket (): Promise<void> {
+    await this._worker.terminate();
+  }
 }

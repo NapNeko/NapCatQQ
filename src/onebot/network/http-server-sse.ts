@@ -3,42 +3,41 @@ import { Request, Response } from 'express';
 import { OB11HttpServerAdapter } from './http-server';
 
 export class OB11HttpSSEServerAdapter extends OB11HttpServerAdapter {
-    private sseClients: Response[] = [];
+  private sseClients: Response[] = [];
 
-    override async handleRequest(req: Request, res: Response) {
-        if (req.path === '/_events') {
-            this.createSseSupport(req, res);
-        } else {
-            super.httpApiRequest(req, res, true);
-        }
+  override async handleRequest (req: Request, res: Response) {
+    if (req.path === '/_events') {
+      this.createSseSupport(req, res);
+    } else {
+      super.httpApiRequest(req, res, true);
     }
+  }
 
-    private async createSseSupport(req: Request, res: Response) {
-        res.setHeader('Content-Type', 'text/event-stream');
-        res.setHeader('Cache-Control', 'no-cache');
-        res.setHeader('Connection', 'keep-alive');
-        res.flushHeaders();
+  private async createSseSupport (req: Request, res: Response) {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
 
-        this.sseClients.push(res);
-        req.on('close', () => {
-            this.sseClients = this.sseClients.filter((client) => client !== res);
+    this.sseClients.push(res);
+    req.on('close', () => {
+      this.sseClients = this.sseClients.filter((client) => client !== res);
+    });
+  }
+
+  override async onEvent<T extends OB11EmitEventContent>(event: T) {
+    const promises: Promise<void>[] = [];
+    this.sseClients.forEach((res) => {
+      promises.push(new Promise<void>((resolve, reject) => {
+        res.write(`data: ${JSON.stringify(event)}\n\n`, (err) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
         });
-
-    }
-
-    override async onEvent<T extends OB11EmitEventContent>(event: T) {
-        let promises: Promise<void>[] = [];
-        this.sseClients.forEach((res) => {
-            promises.push(new Promise<void>((resolve, reject) => {
-                res.write(`data: ${JSON.stringify(event)}\n\n`, (err) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve();
-                    }
-                });
-            }));
-        });
-        await Promise.allSettled(promises);
-    }
+      }));
+    });
+    await Promise.allSettled(promises);
+  }
 }

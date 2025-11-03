@@ -1,6 +1,6 @@
 export const onSettingWindowCreated = async (view) => {
-    let webui = await window.napcat.getWebUiUrl();
-    view.innerHTML = `
+  const webui = await window.napcat.getWebUiUrl();
+  view.innerHTML = `
     <setting-section data-title="">
     <setting-panel>
         <setting-list data-direction="column">
@@ -19,22 +19,22 @@ export const onSettingWindowCreated = async (view) => {
 </setting-section>
     `;
 
-    view.querySelector('.nc_openwebui').addEventListener('click', () => {
-        window.napcat.openInnerUrl(webui);
-    });
-    view.querySelector('.nc_openwebui_ex').addEventListener('click', () => {
-        window.napcat.openExternalUrl(webui);
-    });
+  view.querySelector('.nc_openwebui').addEventListener('click', () => {
+    window.napcat.openInnerUrl(webui);
+  });
+  view.querySelector('.nc_openwebui_ex').addEventListener('click', () => {
+    window.napcat.openExternalUrl(webui);
+  });
 
-    view.querySelector('.nc_webui').innerText = webui;
+  view.querySelector('.nc_webui').innerText = webui;
 
-    // 添加点击复制功能
-    view.querySelector('.nc_webui').addEventListener('click', async () => {
-        try {
-            await navigator.clipboard.writeText(webui);
-            alert('WebUi URL 已复制到剪贴板');
-        } catch (err) {
-            console.error('复制到剪贴板失败: ', err);
-        }
-    });
+  // 添加点击复制功能
+  view.querySelector('.nc_webui').addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(webui);
+      alert('WebUi URL 已复制到剪贴板');
+    } catch (err) {
+      console.error('复制到剪贴板失败: ', err);
+    }
+  });
 };
