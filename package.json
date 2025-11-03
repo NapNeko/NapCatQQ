@@ -30,7 +30,7 @@
     "@homebridge/node-pty-prebuilt-multiarch": "^0.12.0-beta.5",
     "@log4js-node/log4js-api": "^1.0.2",
     "@napneko/nap-proto-core": "^0.0.4",
-    "@rollup/plugin-node-resolve": "^16.0.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-typescript": "^12.1.4",
     "@sinclair/typebox": "^0.34.38",
     "@types/cors": "^2.8.17",
