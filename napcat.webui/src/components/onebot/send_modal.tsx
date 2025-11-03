@@ -15,7 +15,7 @@ import CodeEditor from '@/components/code_editor';
 import type { CodeEditorRef } from '@/components/code_editor';
 
 export interface OneBotSendModalProps {
-  sendMessage: (msg: string) => void
+  sendMessage: (msg: string) => void;
 }
 
 const OneBotSendModal: React.FC<OneBotSendModalProps> = (props) => {
@@ -34,7 +34,7 @@ const OneBotSendModal: React.FC<OneBotSendModalProps> = (props) => {
         sendMessage(msg);
         toast.success('消息发送成功');
         onClose();
-      } catch (error) {
+      } catch (_error) {
         toast.error('消息发送失败');
       }
     },

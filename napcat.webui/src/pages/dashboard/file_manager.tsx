@@ -86,7 +86,7 @@ export default function FileManagerPage () {
     try {
       const fileList = await FileManager.listFiles(currentPath);
       setFiles(sortFiles(fileList, sortDescriptor));
-    } catch (error) {
+    } catch (_error) {
       toast.error('加载文件列表失败');
       setFiles([]);
     }
@@ -123,7 +123,7 @@ export default function FileManagerPage () {
     try {
       const content = await FileManager.readFile(filePath);
       setEditingFile({ path: filePath, content });
-    } catch (error) {
+    } catch (_error) {
       toast.error('打开文件失败');
     }
   };
@@ -135,7 +135,7 @@ export default function FileManagerPage () {
       toast.success('保存成功');
       setEditingFile(null);
       loadFiles();
-    } catch (error) {
+    } catch (_error) {
       toast.error('保存失败');
     }
   };
@@ -149,7 +149,7 @@ export default function FileManagerPage () {
           await FileManager.delete(filePath);
           toast.success('删除成功');
           loadFiles();
-        } catch (error) {
+        } catch (_error) {
           toast.error('删除失败');
         }
       },
@@ -175,7 +175,7 @@ export default function FileManagerPage () {
       setIsCreateModalOpen(false);
       setNewFileName('');
       loadFiles();
-    } catch (error) {
+    } catch (_error) {
       toast.error((error as Error)?.message || '创建失败');
     }
   };
@@ -198,7 +198,7 @@ export default function FileManagerPage () {
           toast.success('批量删除成功');
           setSelectedFiles(new Set());
           loadFiles();
-        } catch (error) {
+        } catch (_error) {
           toast.error('批量删除失败');
         }
       },
@@ -217,7 +217,7 @@ export default function FileManagerPage () {
       setRenamingFile('');
       setNewFileName('');
       loadFiles();
-    } catch (error) {
+    } catch (_error) {
       toast.error('重命名失败');
     }
   };
@@ -233,7 +233,7 @@ export default function FileManagerPage () {
       setIsMoveModalOpen(false);
       setMoveTargetPath('');
       loadFiles();
-    } catch (error) {
+    } catch (_error) {
       toast.error('移动失败');
     }
   };
@@ -256,7 +256,7 @@ export default function FileManagerPage () {
       setMoveTargetPath('');
       setSelectedFiles(new Set());
       loadFiles();
-    } catch (error) {
+    } catch (_error) {
       toast.error('批量移动失败');
     }
   };
@@ -313,7 +313,7 @@ export default function FileManagerPage () {
         .then(() => {
           loadFiles();
         });
-    } catch (error) {
+    } catch (_error) {
       toast.error('上传失败');
     }
   };

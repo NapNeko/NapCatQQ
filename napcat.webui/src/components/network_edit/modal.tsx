@@ -41,7 +41,7 @@ const NetworkFormModal = <T extends keyof OneBotConfig['network']>(
         await updateNetworkConfig(field, data);
       }
       toast.success('保存配置成功');
-    } catch (error) {
+    } catch (_error) {
       const msg = (error as Error).message;
 
       toast.error(`保存配置失败: ${msg}`);

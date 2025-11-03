@@ -27,7 +27,7 @@ export function useWebSocketDebug (url: string, token: string) {
       try {
         const data = JSON.parse(event.data);
         messageHistory.unshift(data);
-      } catch (error) {
+      } catch (_error) {
         toast.error('WebSocket 消息解析失败');
       }
     }, []),

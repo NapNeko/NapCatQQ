@@ -146,7 +146,7 @@ const ThemeConfigCard = () => {
       await WebUIManager.setThemeConfig(data.theme);
       toast.success('保存成功');
       loadTheme();
-    } catch (error) {
+    } catch (_error) {
       const msg = (error as Error).message;
       toast.error(`保存失败: ${msg}`);
     }
@@ -156,7 +156,7 @@ const ThemeConfigCard = () => {
     try {
       await refreshAsync();
       toast.success('刷新成功');
-    } catch (error) {
+    } catch (_error) {
       const msg = (error as Error).message;
       toast.error(`刷新失败: ${msg}`);
     }

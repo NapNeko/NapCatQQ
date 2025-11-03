@@ -1,51 +1,51 @@
 {
-    "compilerOptions": {
-        "target": "ES2021",
-        "useDefineForClassFields": true,
-        "module": "ESNext",
-        "lib": [
-            "ES2021",
-            "DOM",
-            "DOM.Iterable"
-        ],
-        "skipLibCheck": true,
-        "moduleResolution": "Node",
-        "experimentalDecorators": true,
-        "allowImportingTsExtensions": false,
-        "allowSyntheticDefaultImports": true,
-        "resolveJsonModule": true,
-        "isolatedModules": true,
-        "noEmit": true,
-        "jsx": "preserve",
-        "strict": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "noFallthroughCasesInSwitch": true,
-        "sourceMap": true,
-        "paths": {
-            "@/*": [
-                "./src/*"
-            ],
-            "@webapi/*": [
-                "./src/webui/src/*"
-            ]
-        },
-        "noImplicitAny": true,
-        "strictNullChecks": true,
-        "strictFunctionTypes": true,
-        "strictBindCallApply": true,
-        "alwaysStrict": true,
-        "noImplicitThis": true,
-        "noImplicitReturns": true,
-        "noPropertyAccessFromIndexSignature": true,
-        "noUncheckedIndexedAccess": true,
-        "exactOptionalPropertyTypes": false,// 精准可选
-        "forceConsistentCasingInFileNames": true,
-        "useUnknownInCatchVariables": true,
-        "noImplicitOverride": true,
-        "strictPropertyInitialization": true
+  "compilerOptions": {
+    "target": "ES2021",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": [
+      "ES2021",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "skipLibCheck": true,
+    "moduleResolution": "Node",
+    "experimentalDecorators": true,
+    "allowImportingTsExtensions": false,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "preserve",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "sourceMap": true,
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@webapi/*": [
+        "./src/webui/src/*"
+      ]
     },
-    "include": [
-        "src/**/*.ts"
-    ]
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "alwaysStrict": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": false, // 精准可选
+    "forceConsistentCasingInFileNames": true,
+    "useUnknownInCatchVariables": true,
+    "noImplicitOverride": true,
+    "strictPropertyInitialization": true
+  },
+  "include": [
+    "src/**/*.ts"
+  ]
 }

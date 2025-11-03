@@ -59,7 +59,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           navigate('/web_login', { replace: true });
         }
       }
-    } catch (error) {
+    } catch (_error) {
       navigate('/web_login', { replace: true });
     }
   };

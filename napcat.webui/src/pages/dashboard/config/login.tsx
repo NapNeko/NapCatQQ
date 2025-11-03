@@ -37,7 +37,7 @@ const LoginConfigCard = () => {
     try {
       await QQManager.setQuickLoginQQ(data.quickLoginQQ);
       toast.success('保存成功');
-    } catch (error) {
+    } catch (_error) {
       const msg = (error as Error).message;
       toast.error(`保存失败: ${msg}`);
     }
@@ -47,7 +47,7 @@ const LoginConfigCard = () => {
     try {
       await refreshQuickLogin();
       toast.success('刷新成功');
-    } catch (error) {
+    } catch (_error) {
       const msg = (error as Error).message;
       toast.error(`刷新失败: ${msg}`);
     }

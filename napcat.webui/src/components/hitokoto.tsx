@@ -24,7 +24,7 @@ export default function Hitokoto () {
       const text = `${data?.hitokoto} —— ${data?.from} ${data?.from_who}`;
       navigator.clipboard.writeText(text);
       toast.success('复制成功');
-    } catch (error) {
+    } catch (_error) {
       toast.error('复制失败, 请手动复制');
     }
   };

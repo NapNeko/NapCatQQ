@@ -44,7 +44,7 @@ function DirectoryTree ({
       // 直接使用 basePath 调用接口，移除 process.platform 判断
       const list = await FileManager.listDirectories(basePath);
       setDirs(list.map((item) => item.name));
-    } catch (error) {
+    } catch (_error) {
       // ...error handling...
     }
   };

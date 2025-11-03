@@ -18,7 +18,7 @@ export function TerminalInstance ({ id }: TerminalInstanceProps) {
       if (parsed.data) {
         termRef.current?.write(parsed.data);
       }
-    } catch (e) {
+    } catch (_e) {
       termRef.current?.write(data);
     }
   };

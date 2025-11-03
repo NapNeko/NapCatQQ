@@ -84,7 +84,7 @@ export default function NetworkPage () {
     try {
       await refreshConfig();
       setLoading(false);
-    } catch (error) {
+    } catch (_error) {
       const msg = (error as Error).message;
 
       toast.error(`获取配置失败: ${msg}`);
@@ -112,7 +112,7 @@ export default function NetworkPage () {
             await deleteNetworkConfig(field, name);
             toast.success('删除配置成功');
             resolve();
-          } catch (error) {
+          } catch (_error) {
             const msg = (error as Error).message;
 
             toast.error(`删除配置失败: ${msg}`);
@@ -134,7 +134,7 @@ export default function NetworkPage () {
     try {
       await enableNetworkConfig(field, name);
       toast.success('更新配置成功');
-    } catch (error) {
+    } catch (_error) {
       const msg = (error as Error).message;
 
       toast.error(`更新配置失败: ${msg}`);
@@ -150,7 +150,7 @@ export default function NetworkPage () {
     try {
       await enableDebugNetworkConfig(field, name);
       toast.success('更新配置成功');
-    } catch (error) {
+    } catch (_error) {
       const msg = (error as Error).message;
 
       toast.error(`更新配置失败: ${msg}`);

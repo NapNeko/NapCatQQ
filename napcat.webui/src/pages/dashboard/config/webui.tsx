@@ -48,7 +48,7 @@ const WebUIConfigCard = () => {
       setCustomIcons(data.customIcons);
       setB64img(data.background);
       toast.success('保存成功');
-    } catch (error) {
+    } catch (_error) {
       const msg = (error as Error).message;
       toast.error(`保存失败: ${msg}`);
     }
@@ -74,7 +74,7 @@ const WebUIConfigCard = () => {
                 setTimeout(() => {
                   window.location.reload();
                 }, 1000);
-              } catch (error) {
+              } catch (_error) {
                 toast.error('上传失败: ' + (error as Error).message);
               }
             }}
@@ -85,7 +85,7 @@ const WebUIConfigCard = () => {
                 setTimeout(() => {
                   window.location.reload();
                 }, 1000);
-              } catch (error) {
+              } catch (_error) {
                 toast.error('删除失败: ' + (error as Error).message);
               }
             }}

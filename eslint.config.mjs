@@ -24,6 +24,15 @@ const commaDangle = val => {
     val.rules.camelcase = 'off';
   }
 
+  /** 未使用的变量强制报错 */
+  if (val?.rules?.['@typescript-eslint/no-unused-vars']) {
+    val.rules['@typescript-eslint/no-unused-vars'] = ['error', {
+      argsIgnorePattern: '^_',
+      varsIgnorePattern: '^_',
+      caughtErrorsIgnorePattern: '^_',
+    }];
+  }
+
   return val;
 };
 

@@ -51,7 +51,7 @@ const RealTimeLogs = () => {
         .join('\r\n');
       Xterm.current?.clear();
       Xterm.current?.write(_data);
-    } catch (error) {
+    } catch (_error) {
       console.error(error);
       toast.error('获取实时日志失败');
     }
@@ -76,7 +76,7 @@ const RealTimeLogs = () => {
         return () => {
           source.close();
         };
-      } catch (error) {
+      } catch (_error) {
         toast.error('获取实时日志失败');
       }
     };

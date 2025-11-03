@@ -77,7 +77,7 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
           });
           toast.dismiss(r);
         });
-    } catch (error) {
+    } catch (_error) {
       toast.error('请求体 JSON 格式错误');
       setIsFetching(false);
       toast.dismiss(r);

@@ -34,7 +34,7 @@ const FileInput: React.FC<FileInputProps> = ({
               if (file) {
                 await onChange(file);
               }
-            } catch (error) {
+            } catch (_error) {
               console.error(error);
             } finally {
               setIsLoading(false);
@@ -49,7 +49,7 @@ const FileInput: React.FC<FileInputProps> = ({
           try {
             setIsLoading(true);
             if (onDelete) await onDelete();
-          } catch (error) {
+          } catch (_error) {
             console.error(error);
           } finally {
             setIsLoading(false);

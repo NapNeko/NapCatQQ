@@ -59,7 +59,7 @@ const QQInfo: React.FC = () => {
 };
 
 export interface SystemStatusCardProps {
-  setArchInfo: (arch: string | undefined) => void
+  setArchInfo: (arch: string | undefined) => void;
 }
 const SystemStatusCard: React.FC<SystemStatusCardProps> = ({ setArchInfo }) => {
   const [systemStatus, setSystemStatus] = useState<SystemStatus>();
@@ -68,7 +68,7 @@ const SystemStatusCard: React.FC<SystemStatusCardProps> = ({ setArchInfo }) => {
     try {
       const event = WebUIManager.getSystemStatus(setSystemStatus);
       return event;
-    } catch (error) {
+    } catch (_error) {
       toast.error('获取系统状态失败');
     }
   }, []);

@@ -75,7 +75,7 @@ export default function TerminalPage () {
         }
       }
       setTabs((prev) => prev.filter((tab) => tab.id !== id));
-    } catch (error) {
+    } catch (_error) {
       toast.error('关闭终端失败');
     }
   };

@@ -100,7 +100,7 @@ export default class WebUIManager {
         const data = JSON.parse(event.data);
         data.message = data.message.replace(/\n/g, '\r\n');
         writer([data]);
-      } catch (error) {
+      } catch (_error) {
         console.error(error);
       }
     };
@@ -134,7 +134,7 @@ export default class WebUIManager {
       try {
         const data = JSON.parse(event.data) as SystemStatus;
         writer(data);
-      } catch (error) {
+      } catch (_error) {
         console.error(error);
       }
     };

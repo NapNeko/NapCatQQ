@@ -42,7 +42,7 @@ const ChangePasswordCard = () => {
       setToken('');
       localStorage.removeItem(key.token);
       navigate('/web_login');
-    } catch (error) {
+    } catch (_error) {
       const msg = (error as Error).message;
       toast.error(`修改失败: ${msg}`);
     }
