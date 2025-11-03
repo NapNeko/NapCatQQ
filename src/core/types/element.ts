@@ -88,7 +88,7 @@ export interface GrayTipElement {
     templId: string;
   };
   jsonGrayTipElement: {
-    busiId?: number | string;
+    busiId: string;
     jsonStr: string;
     recentAbstract?: string;
     isServer?: boolean;
