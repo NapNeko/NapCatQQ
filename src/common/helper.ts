@@ -119,6 +119,9 @@ export function getDefaultQQVersionConfigInfo (): QQVersionConfigType {
 }
 
 export function getQQPackageInfoPath (exePath: string = '', version?: string): string {
+  if (process.env['NAPCAT_QQ_PACKAGE_INFO_PATH']) {
+    return process.env['NAPCAT_QQ_PACKAGE_INFO_PATH'];
+  }
   let packagePath;
   if (os.platform() === 'darwin') {
     packagePath = path.join(path.dirname(exePath), '..', 'Resources', 'app', 'package.json');
@@ -135,6 +138,9 @@ export function getQQPackageInfoPath (exePath: string = '', version?: string): s
 }
 
 export function getQQVersionConfigPath (exePath: string = ''): string | undefined {
+  if (process.env['NAPCAT_QQ_VERSION_CONFIG_PATH']) {
+    return process.env['NAPCAT_QQ_VERSION_CONFIG_PATH'];
+  }
   let configVersionInfoPath;
   if (os.platform() === 'win32') {
     configVersionInfoPath = path.join(path.dirname(exePath), 'versions', 'config.json');
