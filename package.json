@@ -2,7 +2,7 @@
   "name": "napcat",
   "private": true,
   "type": "module",
-  "version": "4.9.25",
+  "version": "4.9.26",
   "scripts": {
     "build:universal": "npm run build:webui && npm run dev:universal || exit 1",
     "build:framework": "npm run build:webui && npm run dev:framework || exit 1",
