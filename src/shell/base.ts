@@ -24,7 +24,6 @@ import path from 'path';
 import fs from 'fs';
 import os from 'os';
 import { LoginListItem, NodeIKernelLoginService } from '@/core/services';
-import { program } from 'commander';
 import qrcode from '@/qrcode/lib/main';
 import { NapCatOneBot11Adapter } from '@/onebot';
 import { InitWebUi } from '@/webui';
@@ -322,7 +321,9 @@ export async function NCoreInitShell () {
   // 初始化 FFmpeg 服务
   await FFmpegService.init(pathWrapper.binaryPath, logger);
 
-  await connectToNamedPipe(logger).catch(e => logger.logError('命名管道连接失败', e));
+  if (process.env['NAPCAT_DISABLE_PIPE'] !== '1') {
+    await connectToNamedPipe(logger).catch(e => logger.logError('命名管道连接失败', e));
+  }
   const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
   const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVersion());
   const nativePacketHandler = new NativePacketHandler({ logger }); // 初始化 NativePacketHandler 用于后续使用
@@ -362,9 +363,18 @@ export async function NCoreInitShell () {
   await initializeEngine(engine, basicInfoWrapper, dataPathGlobal, systemPlatform, systemVersion);
   await initializeLoginService(loginService, basicInfoWrapper, dataPathGlobal, systemVersion, hostname);
   handleProxy(session, logger);
-  program.option('-q, --qq [number]', 'QQ号').parse(process.argv);
-  const cmdOptions = program.opts();
-  const quickLoginUin = cmdOptions['qq'];
+
+  let quickLoginUin: string | undefined = undefined;
+  try {
+    const args = process.argv;
+    const qIndex = args.findIndex(arg => arg === '-q' || arg === '--qq');
+    if (qIndex !== -1 && qIndex + 1 < args.length) {
+      quickLoginUin = args[qIndex + 1];
+    }
+  } catch (error) {
+    logger.logWarn('解析命令行参数失败，无法使用快速登录功能', error);
+  }
+
   const historyLoginList = (await loginService.getLoginList()).LocalLoginInfoList;
 
   const dataTimestape = new Date().getTime().toString();

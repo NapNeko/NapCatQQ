@@ -23,7 +23,8 @@
     "lint:webui": "cd napcat.webui && eslint src/**/*",
     "lint:fix:webui": "cd napcat.webui && eslint --fix src/**/*",
     "depend": "cd dist && npm install --omit=dev",
-    "dev:depend": "npm i && cd napcat.webui && npm i"
+    "dev:depend": "npm i && cd napcat.webui && npm i",
+    "test:winshell": "pwsh ./tests/nodeTest.ps1"
   },
   "devDependencies": {
     "@babel/core": "^7.28.0",
@@ -57,6 +58,7 @@
     "express-rate-limit": "^7.5.0",
     "fast-xml-parser": "^4.3.6",
     "file-type": "^21.0.0",
+    "fs-extra": "^11.3.2",
     "json5": "^2.2.3",
     "multer": "^2.0.1",
     "napcat.protobuf": "^1.1.4",

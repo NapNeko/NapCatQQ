@@ -14,3 +14,4 @@ devconfig/*
 *.db
 checkVersion.sh
 bun.lockb
+tests/run/
