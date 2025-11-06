@@ -43,6 +43,12 @@ export enum NapCatCoreWorkingEnv {
 }
 
 export function loadQQWrapper (QQVersion: string): WrapperNodeApi {
+  if (process.env['NAPCAT_WRAPPER_PATH']) {
+    const wrapperPath = process.env['NAPCAT_WRAPPER_PATH'];
+    const nativemodule: { exports: WrapperNodeApi; } = { exports: {} as WrapperNodeApi };
+    process.dlopen(nativemodule, wrapperPath);
+    return nativemodule.exports;
+  }
   let appPath;
   if (os.platform() === 'darwin') {
     appPath = path.resolve(path.dirname(process.execPath), '../Resources/app');
