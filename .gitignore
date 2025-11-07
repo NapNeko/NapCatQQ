@@ -15,3 +15,5 @@ devconfig/*
 checkVersion.sh
 bun.lockb
 tests/run/
+guild1.db-wal
+guild1.db-shm
