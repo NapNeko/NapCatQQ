@@ -136,19 +136,38 @@ jobs:
     - name: Extract version from tag
       run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
       
-    - name: Clone Changes Log
-      run: curl -o CHANGELOG.md https://fastly.jsdelivr.net/gh/NapNeko/NapCatQQ@main/docs/changelogs/CHANGELOG.v${{ env.VERSION }}.md
+    - name: Download Windows OneKey Packages
+      run: |
+        LATEST_RELEASE=$(curl -s https://api.github.com/repos/NapNeko/NapCatQQ/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
+        echo "Latest release: $LATEST_RELEASE"
+        curl -L -o NapCat.Shell.Windows.OneKey.zip "https://github.com/NapNeko/NapCatQQ/releases/download/$LATEST_RELEASE/NapCat.Shell.Windows.OneKey.zip" || echo "Shell OneKey not found, will skip"
+        curl -L -o NapCat.Framework.Windows.OneKey.zip "https://github.com/NapNeko/NapCatQQ/releases/download/$LATEST_RELEASE/NapCat.Framework.Windows.OneKey.zip" || echo "Framework OneKey not found, will skip"
+        
+    - name: Generate Release Notes
+      run: |
+        # Create header with version
+        echo "# V${{ env.VERSION }} Refactor" > RELEASE_NOTES.md
+        
+        # Add fixed release information
+        cat .github/release-template/release-info.md >> RELEASE_NOTES.md
+        
+        # Add changelog section
+        echo "" >> RELEASE_NOTES.md
+        chmod +x ./script/generate-changelog.sh
+        ./script/generate-changelog.sh >> RELEASE_NOTES.md
         
     - name: Create Release Draft and Upload Artifacts
       uses: softprops/action-gh-release@v1
       with:
         name: NapCat V${{ env.VERSION }}
         token: ${{ secrets.GITHUB_TOKEN }}
-        body_path: CHANGELOG.md
+        body_path: RELEASE_NOTES.md
         files: |
           NapCat.Framework.zip
           NapCat.Shell.zip
           NapCat.Framework.Windows.Once.zip
+          NapCat.Shell.Windows.OneKey.zip
+          NapCat.Framework.Windows.OneKey.zip
         draft: true
 
   build-docker:
