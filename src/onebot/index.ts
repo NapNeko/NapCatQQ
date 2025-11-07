@@ -347,21 +347,19 @@ export class NapCatOneBot11Adapter {
         peerUid: uid,
         guildId: '',
       };
-      let msg = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeq(peer, msgSeq)).msgList.find(e => e.msgType === NTMsgType.KMSGTYPEGRAYTIPS);
+      const msg = (await this.core.apis.MsgApi.queryMsgsWithFilterExWithSeq(peer, msgSeq)).msgList.find(e => e.msgType === NTMsgType.KMSGTYPEGRAYTIPS);
       const element = msg?.elements.find(e => !!e.grayTipElement?.revokeElement);
+      
+      // Clean up recall event cache if this is a self-device operation
       if (msg && element?.grayTipElement?.revokeElement.isSelfOperate) {
-        const isSelfDevice = this.recallEventCache.has(msg.msgId);
-        if (isSelfDevice) {
-          await this.core.eventWrapper.registerListen('NodeIKernelMsgListener/onMsgRecall',
-            (chatType: ChatType, uid: string, msgSeq: string) => {
-              return chatType === msg?.chatType && uid === msg?.peerUid && msgSeq === msg?.msgSeq;
-            }
-          ).catch(() => {
-            msg = undefined;
-            this.context.logger.logDebug('自操作消息撤回事件');
-          });
+        const cachedTimeout = this.recallEventCache.get(msg.msgId);
+        if (cachedTimeout) {
+          clearTimeout(cachedTimeout);
+          this.recallEventCache.delete(msg.msgId);
+          this.context.logger.logDebug('自操作消息撤回事件');
         }
       }
+      
       if (msg && element) {
         const recallEvent = await this.emitRecallMsg(msg, element);
         try {
