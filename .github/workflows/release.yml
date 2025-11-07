@@ -138,10 +138,13 @@ jobs:
       
     - name: Download Windows OneKey Packages
       run: |
-        LATEST_RELEASE=$(curl -s https://api.github.com/repos/NapNeko/NapCatQQ/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')
+        # Get latest release tag using jq for reliable JSON parsing
+        LATEST_RELEASE=$(curl -s https://api.github.com/repos/NapNeko/NapCatQQ/releases/latest | jq -r '.tag_name')
         echo "Latest release: $LATEST_RELEASE"
-        curl -L -o NapCat.Shell.Windows.OneKey.zip "https://github.com/NapNeko/NapCatQQ/releases/download/$LATEST_RELEASE/NapCat.Shell.Windows.OneKey.zip" || echo "Shell OneKey not found, will skip"
-        curl -L -o NapCat.Framework.Windows.OneKey.zip "https://github.com/NapNeko/NapCatQQ/releases/download/$LATEST_RELEASE/NapCat.Framework.Windows.OneKey.zip" || echo "Framework OneKey not found, will skip"
+        
+        # Download OneKey packages if they exist (non-zero exit code won't fail the step)
+        curl -f -L -o NapCat.Shell.Windows.OneKey.zip "https://github.com/NapNeko/NapCatQQ/releases/download/$LATEST_RELEASE/NapCat.Shell.Windows.OneKey.zip" || echo "Warning: NapCat.Shell.Windows.OneKey.zip not found in latest release"
+        curl -f -L -o NapCat.Framework.Windows.OneKey.zip "https://github.com/NapNeko/NapCatQQ/releases/download/$LATEST_RELEASE/NapCat.Framework.Windows.OneKey.zip" || echo "Warning: NapCat.Framework.Windows.OneKey.zip not found in latest release"
         
     - name: Generate Release Notes
       run: |
