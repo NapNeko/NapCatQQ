@@ -41,13 +41,13 @@ class GetGroupMemberInfo extends OneBotAction<Payload, OB11GroupMember> {
   }
 
   async _handle (payload: Payload) {
-    // 处理 @全体成员 的特殊情况
-    if (payload.user_id === 'all') {
+    // 处理 @全体成员 的特殊情况，跳过 UID 转换直接返回
+    if (payload.user_id === 'all' || payload.user_id === '0') {
       return {
         group_id: +payload.group_id,
-        user_id: 0,
-        nickname: '全体成员',
-        card: '全体成员',
+        user_id: +payload.user_id || 0,
+        nickname: '',
+        card: '',
         sex: 'unknown' as const,
         age: 0,
         area: '',
