@@ -3,122 +3,133 @@ import { NodeIKernelBuddyListener } from '@/core/listeners';
 import { BuddyListReqType } from '@/core/types/user';
 
 export interface NodeIKernelBuddyService {
-  getBuddyListV2(callFrom: string, reqType: BuddyListReqType): Promise<GeneralCallResult & {
+  getBuddyListV2 (callFrom: string, reqType: BuddyListReqType): Promise<GeneralCallResult & {
     data: Array<{
       categoryId: number,
       categorySortId: number,
       categroyName: string,
       categroyMbCount: number,
       onlineCount: number,
-      buddyUids: Array<string>
-    }>
+      buddyUids: Array<string>;
+    }>;
+  }>;
+  getBuddyListV2 (callFrom: string, isPullRefresh: boolean, reqType: BuddyListReqType): Promise<GeneralCallResult & {
+    data: Array<{
+      categoryId: number,
+      categorySortId: number,
+      categroyName: string,
+      categroyMbCount: number,
+      onlineCount: number,
+      buddyUids: Array<string>;
+    }>;
   }>;
 
-  getBuddyListFromCache(reqType: BuddyListReqType): Promise<Array<
-        {
-          categoryId: number, // 9999为特别关心
-          categorySortId: number, // 排序方式
-          categroyName: string, // 分类名
-          categroyMbCount: number, // 不懂
-          onlineCount: number, // 在线数目
-          buddyUids: Array<string>// Uids
-        }>>;
 
-  addKernelBuddyListener(listener: NodeIKernelBuddyListener): number;
+  getBuddyListFromCache (reqType: BuddyListReqType): Promise<Array<
+    {
+      categoryId: number, // 9999为特别关心
+      categorySortId: number, // 排序方式
+      categroyName: string, // 分类名
+      categroyMbCount: number, // 不懂
+      onlineCount: number, // 在线数目
+      buddyUids: Array<string>;// Uids
+    }>>;
 
-  getAllBuddyCount(): number;
+  addKernelBuddyListener (listener: NodeIKernelBuddyListener): number;
 
-  removeKernelBuddyListener(listenerId: number): void;
+  getAllBuddyCount (): number;
+
+  removeKernelBuddyListener (listenerId: number): void;
 
   // getBuddyList(nocache: boolean): Promise<GeneralCallResult>;
 
-  getBuddyNick(uid: number): string;
+  getBuddyNick (uid: number): string;
 
-  getBuddyRemark(uid: number): string;
+  getBuddyRemark (uid: number): string;
 
-  setBuddyRemark(param: { uid: string, remark: string, signInfo?: unknown }): void;
+  setBuddyRemark (param: { uid: string, remark: string, signInfo?: unknown; }): void;
 
-  getAvatarUrl(uid: number): string;
+  getAvatarUrl (uid: number): string;
 
-  isBuddy(uid: string): boolean;
+  isBuddy (uid: string): boolean;
 
-  getCategoryNameWithUid(uid: number): string;
+  getCategoryNameWithUid (uid: number): string;
 
-  getTargetBuddySetting(uid: number): unknown;
+  getTargetBuddySetting (uid: number): unknown;
 
-  getTargetBuddySettingByType(uid: number, type: number): unknown;
+  getTargetBuddySettingByType (uid: number, type: number): unknown;
 
-  getBuddyReqUnreadCnt(): number;
+  getBuddyReqUnreadCnt (): number;
 
-  getBuddyReq(): Promise<GeneralCallResult>;
+  getBuddyReq (): Promise<GeneralCallResult>;
 
-  delBuddyReq(uid: number): void;
+  delBuddyReq (uid: number): void;
 
-  clearBuddyReqUnreadCnt(): Promise<GeneralCallResult>;
+  clearBuddyReqUnreadCnt (): Promise<GeneralCallResult>;
 
-  reqToAddFriends(uid: number, msg: string): void;
+  reqToAddFriends (uid: number, msg: string): void;
 
-  setSpacePermission(uid: number, permission: number): void;
+  setSpacePermission (uid: number, permission: number): void;
 
-  approvalFriendRequest(arg: {
+  approvalFriendRequest (arg: {
     friendUid: string;
     reqTime: string;
     accept: boolean;
   }): Promise<void>;
 
-  delBuddy(param: {
+  delBuddy (param: {
     friendUid: string;
     tempBlock: boolean;
     tempBothDel: boolean;
   }): Promise<unknown>;
 
-  delBatchBuddy(uids: number[]): void;
+  delBatchBuddy (uids: number[]): void;
 
-  getSmartInfos(uid: number): unknown;
+  getSmartInfos (uid: number): unknown;
 
-  setBuddyCategory(uid: number, category: number): void;
+  setBuddyCategory (uid: number, category: number): void;
 
-  setBatchBuddyCategory(uids: number[], category: number): void;
+  setBatchBuddyCategory (uids: number[], category: number): void;
 
-  addCategory(category: string): void;
+  addCategory (category: string): void;
 
-  delCategory(category: string): void;
+  delCategory (category: string): void;
 
-  renameCategory(oldCategory: string, newCategory: string): void;
+  renameCategory (oldCategory: string, newCategory: string): void;
 
-  resortCategory(categorys: string[]): void;
+  resortCategory (categorys: string[]): void;
 
-  pullCategory(uid: number, category: string): void;
+  pullCategory (uid: number, category: string): void;
 
-  setTop(uid: number, isTop: boolean): void;
+  setTop (uid: number, isTop: boolean): void;
 
-  SetSpecialCare(uid: number, isSpecialCare: boolean): void;
+  SetSpecialCare (uid: number, isSpecialCare: boolean): void;
 
-  setMsgNotify(uid: number, isNotify: boolean): void;
+  setMsgNotify (uid: number, isNotify: boolean): void;
 
-  hasBuddyList(): boolean;
+  hasBuddyList (): boolean;
 
-  setBlock(uid: number, isBlock: boolean): void;
+  setBlock (uid: number, isBlock: boolean): void;
 
-  isBlocked(uid: number): boolean;
+  isBlocked (uid: number): boolean;
 
-  modifyAddMeSetting(setting: unknown): void;
+  modifyAddMeSetting (setting: unknown): void;
 
-  getAddMeSetting(): unknown;
+  getAddMeSetting (): unknown;
 
-  getDoubtBuddyReq(reqId: string, num: number, uk:string): Promise<GeneralCallResult>;
+  getDoubtBuddyReq (reqId: string, num: number, uk: string): Promise<GeneralCallResult>;
 
-  getDoubtBuddyUnreadNum(): number;
+  getDoubtBuddyUnreadNum (): number;
 
-  approvalDoubtBuddyReq(uid: string, str1: string, str2: string): void;
+  approvalDoubtBuddyReq (uid: string, str1: string, str2: string): void;
 
-  delDoubtBuddyReq(uid: number): void;
+  delDoubtBuddyReq (uid: number): void;
 
-  delAllDoubtBuddyReq(): Promise<GeneralCallResult>;
+  delAllDoubtBuddyReq (): Promise<GeneralCallResult>;
 
-  reportDoubtBuddyReqUnread(): void;
+  reportDoubtBuddyReqUnread (): void;
 
-  getBuddyRecommendContactArkJson(uid: string, phoneNumber: string): Promise<GeneralCallResult & { arkMsg: string }>;
+  getBuddyRecommendContactArkJson (uid: string, phoneNumber: string): Promise<GeneralCallResult & { arkMsg: string; }>;
 
-  isNull(): boolean;
+  isNull (): boolean;
 }
