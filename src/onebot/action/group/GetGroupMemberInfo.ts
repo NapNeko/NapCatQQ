@@ -41,6 +41,11 @@ class GetGroupMemberInfo extends OneBotAction<Payload, OB11GroupMember> {
   }
 
   async _handle (payload: Payload) {
+    // Handle special case of 'all' which is used for @all mentions
+    if (payload.user_id === 'all') {
+      throw new Error('无法获取全体成员的信息，user_id 不能为 "all"');
+    }
+
     const isNocache = this.parseBoolean(payload.no_cache ?? true);
     const uid = await this.getUid(payload.user_id);
     const member = await this.getGroupMemberInfo(payload, uid, isNocache);

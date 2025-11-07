@@ -15,6 +15,10 @@ export default class SetGroupKick extends OneBotAction<Payload, null> {
   override payloadSchema = SchemaData;
 
   async _handle (payload: Payload): Promise<null> {
+    if (payload.user_id === 'all') {
+      throw new Error('无法踢出全体成员，user_id 不能为 "all"');
+    }
+
     const rejectReq = payload.reject_add_request?.toString() === 'true';
     const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
     if (!uid) throw new Error('get Uid Error');
