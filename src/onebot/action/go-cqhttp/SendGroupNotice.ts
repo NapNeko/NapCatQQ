@@ -37,7 +37,7 @@ export class SendGroupNotice extends OneBotAction<Payload, null> {
       await checkFileExist(path, 5000);
       const ImageUploadResult = await this.core.apis.GroupApi.uploadGroupBulletinPic(payload.group_id.toString(), path);
       if (ImageUploadResult.errCode !== 0) {
-        throw new Error(`群公告${payload.image}设置失败,图片上传失败`);
+        throw new Error(`群公告${payload.image}设置失败,图片上传失败 ， 错误信息:${ImageUploadResult.errMsg}`);
       }
 
       unlink(path).catch(() => { });
