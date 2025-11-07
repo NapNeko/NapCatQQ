@@ -45,9 +45,9 @@ class GetGroupMemberInfo extends OneBotAction<Payload, OB11GroupMember> {
     if (payload.user_id === 'all' || payload.user_id === '0') {
       return {
         group_id: +payload.group_id,
-        user_id: +payload.user_id || 0,
-        nickname: '',
-        card: '',
+        user_id: payload.user_id === 'all' ? 0 : +payload.user_id,
+        nickname: '全体成员',
+        card: '全体成员',
         sex: 'unknown' as const,
         age: 0,
         area: '',
