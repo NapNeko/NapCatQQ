@@ -466,13 +466,15 @@ export class NapCatOneBot11Adapter {
             notify.status === GroupNotifyMsgStatus.KUNHANDLE
           ) {
             this.context.logger.logDebug(`收到邀请我加群通知:${notify}`);
+            const inviterUin = +await this.core.apis.UserApi.getUinByUidV2(notify.user2.uid);
             const groupInviteEvent = new OB11GroupRequestEvent(
               this.core,
               +notify.group.groupCode,
-              +await this.core.apis.UserApi.getUinByUidV2(notify.user2.uid),
+              inviterUin,
               'invite',
               notify.postscript,
-              flag
+              flag,
+              inviterUin
             );
             this.networkManager
               .emitEvent(groupInviteEvent)
@@ -488,9 +490,10 @@ export class NapCatOneBot11Adapter {
               this.core,
               +notify.group.groupCode,
               +await this.core.apis.UserApi.getUinByUidV2(notify.user1.uid),
-              'add',
+              'invite',
               notify.postscript,
-              flag
+              flag,
+              +await this.core.apis.UserApi.getUinByUidV2(notify.user2.uid)
             );
             this.networkManager
               .emitEvent(groupInviteEvent)

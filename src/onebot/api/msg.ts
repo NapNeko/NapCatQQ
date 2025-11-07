@@ -1434,7 +1434,8 @@ export class OneBotMsgApi {
         +await this.core.apis.UserApi.getUinByUidV2(groupInvite.invitorUid),
         'invite',
         '',
-        request_seq
+        request_seq,
+        +await this.core.apis.UserApi.getUinByUidV2(groupInvite.invitorUid)
       );
     } else if (SysMessage.contentHead.type === 528 && SysMessage.contentHead.subType === 39 && SysMessage.body?.msgContent) {
       return await this.obContext.apis.UserApi.parseLikeEvent(SysMessage.body?.msgContent);
