@@ -17,8 +17,14 @@ export class NTQQFriendApi {
 
   async getBuddyV2SimpleInfoMap () {
     const buddyService = this.context.session.getBuddyService();
-    const buddyListV2 = await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL);
-    const uids = buddyListV2.data.flatMap(item => item.buddyUids);
+    let uids: string[] = [];
+    if (this.core.context.basicInfoWrapper.requireMinNTQQBuild('40990')) {
+      const buddyListV2NT = await buddyService.getBuddyListV2('0', true, BuddyListReqType.KNOMAL);
+      uids = buddyListV2NT.data.flatMap(item => item.buddyUids);
+    } else {
+      const buddyListV2 = await buddyService.getBuddyListV2('0', BuddyListReqType.KNOMAL);
+      uids = buddyListV2.data.flatMap(item => item.buddyUids);
+    }
     return await this.core.eventWrapper.callNoListenerEvent(
       'NodeIKernelProfileService/getCoreAndBaseInfo',
       'nodeStore',
