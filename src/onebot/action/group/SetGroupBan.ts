@@ -14,10 +14,6 @@ export default class SetGroupBan extends OneBotAction<Payload, null> {
   override actionName = ActionName.SetGroupBan;
   override payloadSchema = SchemaData;
   async _handle (payload: Payload): Promise<null> {
-    if (payload.user_id === 'all') {
-      throw new Error('无法禁言全体成员，请使用 set_group_whole_ban，user_id 不能为 "all"');
-    }
-
     const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
     if (!uid) throw new Error('uid error');
     const member_role = (await this.core.apis.GroupApi.getGroupMemberEx(payload.group_id.toString(), uid, true))?.role;

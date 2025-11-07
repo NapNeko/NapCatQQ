@@ -16,10 +16,6 @@ export default class SetGroupAdmin extends OneBotAction<Payload, null> {
   override payloadSchema = SchemaData;
 
   async _handle (payload: Payload): Promise<null> {
-    if (payload.user_id === 'all') {
-      throw new Error('无法设置全体成员为管理员，user_id 不能为 "all"');
-    }
-
     const enable = typeof payload.enable === 'string' ? payload.enable === 'true' : !!payload.enable;
     const uid = await this.core.apis.UserApi.getUidByUinV2(payload.user_id.toString());
     if (!uid) throw new Error('get Uid Error');

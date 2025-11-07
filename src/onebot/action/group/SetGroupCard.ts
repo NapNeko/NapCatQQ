@@ -15,10 +15,6 @@ export default class SetGroupCard extends OneBotAction<Payload, null> {
   override payloadSchema = SchemaData;
 
   async _handle (payload: Payload): Promise<null> {
-    if (payload.user_id === 'all') {
-      throw new Error('无法设置全体成员的群名片，user_id 不能为 "all"');
-    }
-
     const member = await this.core.apis.GroupApi.getGroupMember(payload.group_id.toString(), payload.user_id.toString());
     if (member) await this.core.apis.GroupApi.setMemberCard(payload.group_id.toString(), member.uid, payload.card || '');
     return null;

@@ -41,9 +41,28 @@ class GetGroupMemberInfo extends OneBotAction<Payload, OB11GroupMember> {
   }
 
   async _handle (payload: Payload) {
-    // 处理 'all' 的特殊情况，用于 @全体成员
+    // 处理 @全体成员 的特殊情况
     if (payload.user_id === 'all') {
-      throw new Error('无法获取全体成员的信息，user_id 不能为 "all"');
+      return {
+        group_id: +payload.group_id,
+        user_id: 0,
+        nickname: '全体成员',
+        card: '全体成员',
+        sex: 'unknown' as const,
+        age: 0,
+        area: '',
+        level: '0',
+        qq_level: 0,
+        join_time: 0,
+        last_sent_time: 0,
+        title_expire_time: 0,
+        unfriendly: false,
+        card_changeable: false,
+        is_robot: false,
+        shut_up_timestamp: 0,
+        role: 'member' as const,
+        title: '',
+      };
     }
 
     const isNocache = this.parseBoolean(payload.no_cache ?? true);
