@@ -18,7 +18,7 @@ export class NTQQFriendApi {
   async getBuddyV2SimpleInfoMap () {
     const buddyService = this.context.session.getBuddyService();
     let uids: string[] = [];
-    if (this.core.context.basicInfoWrapper.requireMinNTQQBuild('40990')) {
+    if (this.core.context.basicInfoWrapper.requireMinNTQQBuild('41679')) {
       const buddyListV2NT = await buddyService.getBuddyListV2('0', true, BuddyListReqType.KNOMAL);
       uids = buddyListV2NT.data.flatMap(item => item.buddyUids);
     } else {
@@ -55,7 +55,7 @@ export class NTQQFriendApi {
     const buddyService = this.context.session.getBuddyService();
     let uids: string[] = [];
     let buddyListV2: Awaited<ReturnType<typeof buddyService.getBuddyListV2>>['data'];
-    if (this.core.context.basicInfoWrapper.requireMinNTQQBuild('40990')) {
+    if (this.core.context.basicInfoWrapper.requireMinNTQQBuild('41679')) {
       buddyListV2 = (await buddyService.getBuddyListV2('0', true, BuddyListReqType.KNOMAL)).data;
       uids = buddyListV2.flatMap(item => item.buddyUids);
     } else {
