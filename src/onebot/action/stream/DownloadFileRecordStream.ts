@@ -47,8 +47,12 @@ export class DownloadFileRecordStream extends BaseDownloadStream<Payload, Downlo
           streamPath = outputFile;
         } catch {
           // 尝试解码 silk 到 pcm 再用 ffmpeg 转换
-          await this.decodeFile(downloadPath, pcmFile);
-          await FFmpegService.convertFile(pcmFile, outputFile, payload.out_format);
+          if (FFmpegService.getAdapterName() === 'FFmpegAddon') {
+            await FFmpegService.convertFile(downloadPath, outputFile, payload.out_format);
+          } else {
+            await this.decodeFile(downloadPath, pcmFile);
+            await FFmpegService.convertFile(pcmFile, outputFile, payload.out_format);
+          }
           streamPath = outputFile;
         }
       }

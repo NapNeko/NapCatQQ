@@ -49,23 +49,25 @@ export interface AudioPCMResult {
  * FFmpeg interface providing all audio/video processing methods
  */
 export interface FFmpeg {
+  convertFile (inputFile: string, outputFile: string, format: string): Promise<{ success: boolean; }>;
   /**
      * Get video information including resolution, duration, format, codec and first frame thumbnail
      */
-  getVideoInfo(filePath: string, format?: 'bmp' | 'bmp24'): Promise<VideoInfo>;
+  getVideoInfo (filePath: string, format?: 'bmp' | 'bmp24'): Promise<VideoInfo>;
 
   /**
      * Get duration of audio or video file in seconds
      */
-  getDuration(filePath: string): Promise<number>;
+  getDuration (filePath: string): Promise<number>;
 
   /**
      * Convert audio file to NTSILK format (WeChat voice message format)
      */
-  convertToNTSilkTct(inputPath: string, outputPath: string): Promise<void>;
+  convertToNTSilkTct (inputPath: string, outputPath: string): Promise<void>;
 
   /**
      * Decode audio file to raw PCM data
      */
-  decodeAudioToPCM(filePath: string, pcmPath: string, sampleRate?: number): Promise<{ result: boolean, sampleRate: number }>;
+  decodeAudioToPCM (filePath: string, pcmPath: string, sampleRate?: number): Promise<{ result: boolean, sampleRate: number; }>;
+  decodeAudioToFmt (filePath: string, pcmPath: string, format: string): Promise<{ channels: number; sampleRate: number; format: string; }>;
 }
