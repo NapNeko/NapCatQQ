@@ -48,6 +48,14 @@ export class FFmpegService {
     this.initialized = true;
   }
 
+  public static getAdapterName (): string {
+    if (!this.adapter) {
+      throw new Error('FFmpeg service not initialized. Please call FFmpegService.init() first.');
+    }
+    return this.adapter.name;
+
+  }
+
   /**
      * 获取 FFmpeg 适配器
      */

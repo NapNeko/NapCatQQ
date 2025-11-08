@@ -68,11 +68,13 @@ export class FFmpegAddonAdapter implements IFFmpegAdapter {
     const addon = this.ensureAddon();
     const info = await addon.getVideoInfo(videoPath, 'bmp24');
 
+    let format = info.format.includes(',') ? info.format.split(',')[0] ?? info.format : info.format;
+    console.log('[FFmpegAddonAdapter] Detected format:', format);
     return {
       width: info.width,
       height: info.height,
       duration: info.duration,
-      format: info.format,
+      format: format,
       thumbnail: info.image,
     };
   }
@@ -88,7 +90,7 @@ export class FFmpegAddonAdapter implements IFFmpegAdapter {
   /**
      * 转换为 PCM
      */
-  async convertToPCM (filePath: string, pcmPath: string): Promise<{ result: boolean, sampleRate: number }> {
+  async convertToPCM (filePath: string, pcmPath: string): Promise<{ result: boolean, sampleRate: number; }> {
     const addon = this.ensureAddon();
     const result = await addon.decodeAudioToPCM(filePath, pcmPath, 24000);
 
@@ -100,13 +102,8 @@ export class FFmpegAddonAdapter implements IFFmpegAdapter {
      */
   async convertFile (inputFile: string, outputFile: string, format: string): Promise<void> {
     const addon = this.ensureAddon();
-
-    if (format === 'silk' || format === 'ntsilk') {
-      // 使用 Addon 的 NTSILK 转换
-      await addon.convertToNTSilkTct(inputFile, outputFile);
-    } else {
-      throw new Error(`Format '${format}' is not supported by FFmpeg Addon`);
-    }
+    console.log('[FFmpegAddonAdapter] Converting file:', inputFile, 'to', outputFile, 'as', format);
+    await addon.decodeAudioToFmt(inputFile, outputFile, format);
   }
 
   /**

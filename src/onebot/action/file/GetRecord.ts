@@ -7,7 +7,7 @@ import { FFmpegService } from '@/common/ffmpeg';
 const out_format = ['mp3', 'amr', 'wma', 'm4a', 'spx', 'ogg', 'wav', 'flac'];
 
 type Payload = {
-  out_format: string
+  out_format: string;
 } & GetFilePayload;
 
 export default class GetRecord extends GetFileBase {
@@ -28,8 +28,12 @@ export default class GetRecord extends GetFileBase {
         try {
           await fs.access(outputFile);
         } catch {
-          await this.decodeFile(inputFile, pcmFile);
-          await FFmpegService.convertFile(pcmFile, outputFile, payload.out_format);
+          if (FFmpegService.getAdapterName() === 'FFmpegAddon') {
+            await FFmpegService.convertFile(inputFile, outputFile, payload.out_format);
+          } else {
+            await this.decodeFile(inputFile, pcmFile);
+            await FFmpegService.convertFile(pcmFile, outputFile, payload.out_format);
+          }
         }
         const base64Data = await fs.readFile(outputFile, { encoding: 'base64' });
         res.file = outputFile;
