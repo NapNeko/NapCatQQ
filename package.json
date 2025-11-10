@@ -53,7 +53,7 @@
     "commander": "^13.0.0",
     "compressing": "^1.10.1",
     "cors": "^2.8.5",
-    "esbuild": "0.25.8",
+    "esbuild": "0.27.0",
     "eslint": "^9.14.0",
     "express-rate-limit": "^7.5.0",
     "fast-xml-parser": "^4.3.6",
