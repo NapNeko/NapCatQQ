@@ -42,7 +42,7 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/multer": "^1.4.12",
-    "@types/node": "^22.0.1",
+    "@types/node": "^24.10.0",
     "@types/on-finished": "^2.3.4",
     "@types/qrcode-terminal": "^0.12.2",
     "@types/react-color": "^3.0.13",
