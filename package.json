@@ -65,7 +65,7 @@
     "neostandard": "^0.12.2",
     "typescript": "^5.3.3",
     "typescript-eslint": "^8.35.1",
-    "vite": "^7.1.1",
+    "vite": "^7.2.2",
     "vite-plugin-cp": "^6.0.0",
     "vite-tsconfig-paths": "^5.1.0",
     "winston": "^3.17.0"
