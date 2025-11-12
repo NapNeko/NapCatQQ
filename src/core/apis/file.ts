@@ -34,7 +34,7 @@ export class NTQQFileApi {
   context: InstanceContext;
   core: NapCatCore;
   rkeyManager: RkeyManager;
-  packetRkey: Array<{ rkey: string; time: number; type: number; ttl: bigint }> | undefined;
+  packetRkey: Array<{ rkey: string; time: number; type: number; ttl: bigint; }> | undefined;
   private fetchRkeyFailures: number = 0;
   private readonly MAX_RKEY_FAILURES: number = 8;
 
@@ -45,7 +45,7 @@ export class NTQQFileApi {
       'http://ss.xingzhige.com/music_card/rkey',
       'https://secret-service.bietiaop.com/rkeys',
     ],
-    this.context.logger
+      this.context.logger
     );
   }
 
@@ -360,9 +360,9 @@ export class NTQQFileApi {
           m.elements
             .filter(element =>
               element.elementType === ElementType.PIC ||
-                            element.elementType === ElementType.VIDEO ||
-                            element.elementType === ElementType.PTT ||
-                            element.elementType === ElementType.FILE
+              element.elementType === ElementType.VIDEO ||
+              element.elementType === ElementType.PTT ||
+              element.elementType === ElementType.FILE
             )
             .map(element =>
               this.downloadMedia(m.msgId, m.chatType, m.peerUid, element.elementId, '', '', 1000 * 60 * 2, true)
@@ -376,9 +376,9 @@ export class NTQQFileApi {
       m.elements.forEach(element => {
         if (
           element.elementType === ElementType.PIC ||
-                    element.elementType === ElementType.VIDEO ||
-                    element.elementType === ElementType.PTT ||
-                    element.elementType === ElementType.FILE
+          element.elementType === ElementType.VIDEO ||
+          element.elementType === ElementType.PTT ||
+          element.elementType === ElementType.FILE
         ) {
           switch (element.elementType) {
             case ElementType.PIC:
