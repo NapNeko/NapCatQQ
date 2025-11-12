@@ -45,6 +45,7 @@ export class NativePacketHandler {
       }
       process.dlopen(this.MoeHooExport, moehoo_path, constants.dlopen.RTLD_LAZY);
       this.loaded = true;
+      this.logger.log('[PacketHandler] 加载成功');
     } catch (error) {
       this.logger.logError('NativePacketClient 加载出错:', error);
       this.loaded = false;
@@ -216,6 +217,7 @@ export class NativePacketHandler {
       this.MoeHooExport.exports.initHook?.(send, recv, (type: PacketType, uin: string, cmd: string, seq: number, hex_data: string) => {
         this.emitPacket(type, uin, cmd, seq, hex_data);
       }, true);
+      this.logger.log('[PacketHandler] 初始化成功');
       return true;
     } catch (error) {
       this.logger.logError('NativePacketClient 初始化出错:', error);
