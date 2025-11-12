@@ -66,7 +66,7 @@ export class FFmpegAddonAdapter implements IFFmpegAdapter {
      */
   async getVideoInfo (videoPath: string): Promise<VideoInfoResult> {
     const addon = this.ensureAddon();
-    const info = await addon.getVideoInfo(videoPath, 'bmp24');
+    const info = await addon.getVideoInfo(videoPath);
 
     let format = info.format.includes(',') ? info.format.split(',')[0] ?? info.format : info.format;
     console.log('[FFmpegAddonAdapter] Detected format:', format);
