@@ -907,12 +907,12 @@ export class OneBotMsgApi {
 
   async parsePrivateMsgEvent (msg: RawMessage, grayTipElement: GrayTipElement) {
     if (grayTipElement.subElementType === NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_JSON) {
-      if (grayTipElement.jsonGrayTipElement.busiId === 1061) {
+      if (grayTipElement.jsonGrayTipElement.busiId.toString() === '1061') {
         const PokeEvent = await this.obContext.apis.FriendApi.parsePrivatePokeEvent(grayTipElement, Number(await this.core.apis.UserApi.getUinByUidV2(msg.peerUid)));
         if (PokeEvent) {
           return PokeEvent;
         }
-      } else if (grayTipElement.jsonGrayTipElement.busiId === 19324 && msg.peerUid !== '') {
+      } else if (grayTipElement.jsonGrayTipElement.busiId.toString() === '19324' && msg.peerUid !== '') {
         return new OB11FriendAddNoticeEvent(this.core, Number(await this.core.apis.UserApi.getUinByUidV2(msg.peerUid)));
       }
     }
