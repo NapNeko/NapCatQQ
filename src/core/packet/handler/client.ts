@@ -18,7 +18,7 @@ export interface NativePacketExportType {
 }
 
 export type PacketType = 0 | 1; // 0: send, 1: recv
-export type PacketCallback = (data: { type: PacketType, uin: string, cmd: string, seq: number, hex_data: string }) => void;
+export type PacketCallback = (data: { type: PacketType, uin: string, cmd: string, seq: number, hex_data: string; }) => void;
 
 interface ListenerEntry {
   callback: PacketCallback;
@@ -27,14 +27,28 @@ interface ListenerEntry {
 
 export class NativePacketHandler {
   private readonly supportedPlatforms = ['win32.x64', 'linux.x64', 'linux.arm64', 'darwin.x64', 'darwin.arm64'];
-  private readonly MoeHooExport: { exports: NativePacketExportType } = { exports: {} };
+  private readonly MoeHooExport: { exports: NativePacketExportType; } = { exports: {} };
   protected readonly logger: LogWrapper;
+  private loaded: boolean = false;
 
   // 统一的监听器存储 - key: 'all' | 'type:0' | 'type:1' | 'cmd:xxx' | 'exact:type:cmd'
   private readonly listeners: Map<string, Set<ListenerEntry>> = new Map();
 
-  constructor ({ logger }: { logger: LogWrapper }) {
+  constructor ({ logger }: { logger: LogWrapper; }) {
     this.logger = logger;
+    try {
+      const moehoo_path = path.join(dirname(fileURLToPath(import.meta.url)), './native/packet/MoeHoo.' + platform + '.node');
+      if (!fs.existsSync(moehoo_path)) {
+        this.logger.logWarn(`NativePacketClient: 缺失运行时文件: ${moehoo_path}`);
+        this.loaded = false;
+      }
+      process.dlopen(this.MoeHooExport, moehoo_path, constants.dlopen.RTLD_LAZY);
+      this.loaded = true;
+    } catch (error) {
+      this.logger.logError('NativePacketClient 加载出错:', error);
+      this.loaded = false;
+    }
+
   }
 
   /**
@@ -150,10 +164,10 @@ export class NativePacketHandler {
      */
   private emitPacket (type: PacketType, uin: string, cmd: string, seq: number, hex_data: string): void {
     const keys = [
-            `exact:${type}:${cmd}`,  // 精确匹配
-            `cmd:${cmd}`,            // cmd匹配
-            `type:${type}`,          // type匹配
-            'all',                    // 全局
+      `exact:${type}:${cmd}`,  // 精确匹配
+      `cmd:${cmd}`,            // cmd匹配
+      `type:${type}`,          // type匹配
+      'all',                    // 全局
     ];
 
     for (const key of keys) {
@@ -182,6 +196,10 @@ export class NativePacketHandler {
   async init (version: string): Promise<boolean> {
     const version_arch = version + '-' + process.arch;
     try {
+      if (!this.loaded) {
+        this.logger.logWarn('NativePacketClient 未成功加载，无法初始化');
+        return false;
+      }
       const send = typedOffset[version_arch]?.send;
       const recv = typedOffset[version_arch]?.recv;
       if (!send || !recv) {
@@ -193,13 +211,7 @@ export class NativePacketHandler {
         this.logger.logWarn(`NativePacketClient: 不支持的平台: ${platform}`);
         return false;
       }
-      const moehoo_path = path.join(dirname(fileURLToPath(import.meta.url)), './native/packet/MoeHoo.' + platform + '.node');
 
-      process.dlopen(this.MoeHooExport, moehoo_path, constants.dlopen.RTLD_LAZY);
-      if (!fs.existsSync(moehoo_path)) {
-        this.logger.logWarn(`NativePacketClient: 缺失运行时文件: ${moehoo_path}`);
-        return false;
-      }
       this.MoeHooExport.exports.initHook?.(send, recv, (type: PacketType, uin: string, cmd: string, seq: number, hex_data: string) => {
         this.emitPacket(type, uin, cmd, seq, hex_data);
       }, true);
