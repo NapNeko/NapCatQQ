@@ -37,6 +37,7 @@ export class NativePacketHandler {
   constructor ({ logger }: { logger: LogWrapper; }) {
     this.logger = logger;
     try {
+      const platform = process.platform + '.' + process.arch;
       const moehoo_path = path.join(dirname(fileURLToPath(import.meta.url)), './native/packet/MoeHoo.' + platform + '.node');
       if (!fs.existsSync(moehoo_path)) {
         this.logger.logWarn(`NativePacketClient: 缺失运行时文件: ${moehoo_path}`);
