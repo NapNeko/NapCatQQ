@@ -1,0 +1,23 @@
+{
+    "name": "napcat-shell",
+    "version": "0.0.1",
+    "private": true,
+    "type": "module",
+    "main": "index.ts",
+    "scripts": {
+        "build": "vite build"
+    },
+    "dependencies": {
+        "napcat-core": "workspace:*",
+        "napcat-common": "workspace:*",
+        "napcat-onebot": "workspace:*",
+        "napcat-webui-backend": "workspace:*",
+        "napcat-qrcode": "workspace:*"
+    },
+    "devDependencies": {
+        "@types/node": "^22.0.1"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}

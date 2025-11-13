@@ -1,0 +1,29 @@
+{
+    "name": "napcat-pty",
+    "version": "0.0.1",
+    "private": true,
+    "type": "module",
+    "main": "index.ts",
+    "exports": {
+        ".": {
+            "import": "./index.ts"
+        },
+        "./src/*": {
+            "import": "./*"
+        }
+    },
+    "dependencies": {
+        "napcat-core": "workspace:*",
+        "napcat-common": "workspace:*",
+        "napcat-onebot": "workspace:*",
+        "napcat-webui-backend": "workspace:*",
+        "napcat-qrcode": "workspace:*"
+
+    },
+    "devDependencies": {
+        "@types/node": "^22.0.1"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}
