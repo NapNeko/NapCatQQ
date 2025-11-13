@@ -9,8 +9,8 @@ on:
 permissions: write-all
 
 env:
-  OPENROUTER_API_URL: https://openrouter.ai/api/v1/chat/completions
-  OPENROUTER_MODEL: "openrouter/auto"
+  OPENROUTER_API_URL: https://91vip.futureppo.top/v1/chat/completions
+  OPENROUTER_MODEL: "kimi-k2-0905-turbo"
   RELEASE_NAME: "NapCat"
 
 jobs:
