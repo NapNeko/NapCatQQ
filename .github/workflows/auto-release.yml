@@ -1,4 +1,4 @@
-name: "Build Action"
+name: AI RELEASE NapCat
 
 on:
   workflow_dispatch:
