@@ -10,19 +10,26 @@ const external = [
   'express'
 ];
 const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`)].flat();
-const ShellBaseConfigPlugin: PluginOption[] = [
+const FrameworkBaseConfigPlugin: PluginOption[] = [
   cp({
     targets: [
+      { src: '../napcat-napi-loader/', dest: 'dist', flatten: true },
       { src: '../napcat-native/', dest: 'dist/native', flatten: false },
-      { src: '../napcat-webui-frontend/dist/', dest: 'dist/static/', flatten: false },
+      { src: './manifest.json', dest: 'dist' },
       { src: '../napcat-core/external/napcat.json', dest: 'dist/config/' },
+      { src: '../napcat-webui-frontend/dist/', dest: 'dist/static/', flatten: false },
+      { src: './liteloader.cjs', dest: 'dist' },
+      { src: './napcat.cjs', dest: 'dist' },
+      { src: './nativeLoader.cjs', dest: 'dist' },
+      { src: './preload.cjs', dest: 'dist' },
+      { src: './renderer.js', dest: 'dist' },
       { src: '../../package.json', dest: 'dist' },
-      { src: '../napcat-shell-loader', dest: 'dist' }
+      { src: '../../logo.png', dest: 'dist' },
     ],
   }),
   nodeResolve(),
 ];
-const ShellBaseConfig = () =>
+const FrameworkBaseConfig = () =>
   defineConfig({
     resolve: {
       conditions: ['node', 'default'],
@@ -55,7 +62,7 @@ const ShellBaseConfig = () =>
   });
 export default defineConfig((): UserConfig => {
   return {
-    ...ShellBaseConfig(),
-    plugins: [...ShellBaseConfigPlugin],
+    ...FrameworkBaseConfig(),
+    plugins: [...FrameworkBaseConfigPlugin],
   };
 });

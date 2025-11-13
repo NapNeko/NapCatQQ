@@ -7,6 +7,14 @@
     "scripts": {
         "build": "vite build"
     },
+    "exports": {
+        ".": {
+            "import": "./index.ts"
+        },
+        "./*": {
+            "import": "./*"
+        }
+    },
     "dependencies": {
         "napcat-core": "workspace:*",
         "napcat-common": "workspace:*",

@@ -4,11 +4,14 @@
     "private": true,
     "type": "module",
     "main": "index.ts",
+    "scripts": {
+        "build": "vite build"
+    },
     "exports": {
         ".": {
             "import": "./index.ts"
         },
-        "./src/*": {
+        "./*": {
             "import": "./*"
         }
     },

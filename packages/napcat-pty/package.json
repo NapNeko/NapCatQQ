@@ -13,6 +13,7 @@
         }
     },
     "dependencies": {
+        "@homebridge/node-pty-prebuilt-multiarch":"^0.12.0",
         "napcat-core": "workspace:*",
         "napcat-common": "workspace:*",
         "napcat-onebot": "workspace:*",
