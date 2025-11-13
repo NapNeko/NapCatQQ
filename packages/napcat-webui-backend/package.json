@@ -1,0 +1,38 @@
+{
+    "name": "napcat-webui-backend",
+    "version": "0.0.1",
+    "private": true,
+    "type": "module",
+    "main": "src/index.ts",
+    "exports": {
+        ".": {
+            "import": "./index.ts"
+        },
+        "./*": {
+            "import": "./*"
+        }
+    },
+    "dependencies": {
+        "@sinclair/typebox": "^0.34.38",
+        "ajv": "^8.13.0",
+        "compressing": "^1.10.3",
+        "express": "^5.0.0",
+        "express-rate-limit": "^7.5.0",
+        "json5": "^2.2.3",
+        "multer": "^2.0.1",
+        "napcat-common": "workspace:*",
+        "napcat-core": "workspace:*",
+        "napcat-onebot": "workspace:*",
+        "napcat-pty": "workspace:*",
+        "ws": "^8.18.3"
+    },
+    "devDependencies": {
+        "@types/express": "^5.0.0",
+        "@types/multer": "^1.4.12",
+        "@types/node": "^22.0.1",
+        "@types/ws": "^8.5.12"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}

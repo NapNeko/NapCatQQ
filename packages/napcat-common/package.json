@@ -1,0 +1,31 @@
+{
+    "name": "napcat-common",
+    "version": "0.0.1",
+    "private": true,
+    "type": "module",
+    "main": "src/index.ts",
+    "exports": {
+        ".": {
+            "import": "./src/index.ts"
+        },
+        "./src/*": {
+            "import": "./src/*"
+        }
+    },
+    "dependencies": {
+        "compressing": "^1.10.1",
+        "json5": "^2.2.3",
+        "ajv": "^8.13.0",
+        "file-type": "^21.0.0",
+        "napcat-image-size": "workspace:*",
+        "napcat-core": "workspace:*",
+        "silk-wasm": "^3.6.1",
+        "winston": "^3.17.0"
+    },
+    "devDependencies": {
+        "@types/node": "^22.0.1"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}
