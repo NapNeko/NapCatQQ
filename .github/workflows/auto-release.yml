@@ -84,7 +84,7 @@ jobs:
           [ -d NapCat.Framework ] && zip -qr ../NapCat.Framework.zip -r NapCat.Framework
           [ -d NapCat.Shell ] && zip -qr ../NapCat.Shell.zip -r NapCat.Shell
           cd ..
-
+      
       - name: Generate release note via OpenRouter
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
@@ -92,17 +92,32 @@ jobs:
           OPENROUTER_MODEL: ${{ env.OPENROUTER_MODEL }}
         run: |
           set -euo pipefail
-          TAG="${GITHUB_REF#refs/tags/}"
-          COMMITS=$(git log --pretty=format:'%h %s (%an)' -n 30)
+
+          # 当前 tag
+          CURRENT_TAG="${GITHUB_REF#refs/tags/}"
+
+          # 上一个 tag
+          PREV_TAG=$(git describe --tags --abbrev=0 "$CURRENT_TAG^")
+
+          echo "Generating release note from $PREV_TAG to $CURRENT_TAG"
+
+          # 获取 commit title + body + 作者，保留换行
+          COMMITS=$(git log --pretty=format:'%h %B (%an)' "$PREV_TAG".."$CURRENT_TAG" | sed 's/$/\\n/')
+
+          # 读取 prompt
           PROMPT_FILE=".github/prompt/release_note_prompt.txt"
           SYSTEM_PROMPT=$(<"$PROMPT_FILE")
-          USER_CONTENT="TAG: $TAG\n提交列表:\n$COMMITS"
 
+          # 构建用户内容
+          USER_CONTENT="TAG: $CURRENT_TAG\n提交列表:\n$COMMITS"
+
+          # 构建请求 JSON
           BODY=$(jq -n \
             --arg system "$SYSTEM_PROMPT" \
             --arg user "$USER_CONTENT" \
             '{model: env.OPENROUTER_MODEL, messages:[{role:"system", content:$system},{role:"user", content:$user}], temperature:0.2, max_tokens:800}')
 
+          # 调用 OpenRouter
           RESPONSE=$(curl -s -X POST "$OPENROUTER_API_URL" \
             -H "Authorization: Bearer $OPENROUTER_API_KEY" \
             -H "Content-Type: application/json" \
@@ -111,6 +126,7 @@ jobs:
           echo "=== OpenRouter raw response ==="
           echo "$RESPONSE" | jq .
 
+          # 提取生成内容
           RELEASE_BODY=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // .choices[0].text // ""')
 
           if [ -z "$RELEASE_BODY" ]; then
@@ -118,7 +134,8 @@ jobs:
             exit 1
           fi
 
-          echo "$RELEASE_BODY" > CHANGELOG.md
+          # 输出到 CHANGELOG.md
+          echo -e "$RELEASE_BODY" > CHANGELOG.md
           echo "=== generated release note ==="
           cat CHANGELOG.md
 
