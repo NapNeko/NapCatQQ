@@ -3,8 +3,9 @@ name: AI RELEASE NapCat
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
+    tags:
+      - '*'
+
 permissions: write-all
 
 env:
