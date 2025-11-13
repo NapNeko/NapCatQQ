@@ -159,11 +159,11 @@ jobs:
 
       - name: Zip Artifacts
         run: |
-          cd artifacts
-          [ -d NapCat.Framework ] && zip -qr ../NapCat.Framework.zip -r NapCat.Framework
-          [ -d NapCat.Shell ] && zip -qr ../NapCat.Shell.zip -r NapCat.Shell
-          [ -d NapCat.Shell.Windows.Node ] && zip -qr ../NapCat.Shell.Windows.Node.zip -r NapCat.Shell.Windows.Node
-          cd ..
+            cd artifacts
+            [ -d NapCat.Framework ] && (cd NapCat.Framework && zip -qr ../../NapCat.Framework.zip .)
+            [ -d NapCat.Shell ] && (cd NapCat.Shell && zip -qr ../../NapCat.Shell.zip .)
+            [ -d NapCat.Shell.Windows.Node ] && (cd NapCat.Shell.Windows.Node && zip -qr ../../NapCat.Shell.Windows.Node.zip .)
+            cd ..
       
       - name: Generate release note via OpenRouter
         env:
