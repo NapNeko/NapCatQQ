@@ -25,7 +25,7 @@ jobs:
           pnpm run build:framework
           mv packages/napcat-framework/dist framework-dist
           cd framework-dist
-          pnpm install --production
+          pnpm install --prod --shamefully-hoist
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -48,7 +48,7 @@ jobs:
           pnpm run build:shell
           mv packages/napcat-shell/dist shell-dist
           cd shell-dist
-          pnpm install --production
+          pnpm install --prod --shamefully-hoist
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
