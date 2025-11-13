@@ -157,7 +157,7 @@ jobs:
           path: NapCat.Shell.Windows.Node.zip
 
   release-napcat:
-    needs: [Build-LiteLoader, Build-Shell]
+    needs: [Build-LiteLoader, Build-Shell, Download-QNX64]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -173,6 +173,7 @@ jobs:
           cd artifacts
           [ -d NapCat.Framework ] && zip -qr ../NapCat.Framework.zip -r NapCat.Framework
           [ -d NapCat.Shell ] && zip -qr ../NapCat.Shell.zip -r NapCat.Shell
+          [ -d NapCat.Shell.Windows.Node ] && zip -qr ../NapCat.Shell.Windows.Node.zip -r NapCat.Shell.Windows.Node
           cd ..
       
       - name: Generate release note via OpenRouter
@@ -266,6 +267,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           body_path: CHANGELOG.md
           files: |
+            NapCat.Shell.Windows.Node.zip
             NapCat.Framework.zip
             NapCat.Shell.zip
           draft: true
