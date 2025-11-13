@@ -18,9 +18,9 @@ if (versionFolders.length !== 1) {
 }
 
 const BASE_DIR = path.join(versionsDir, versionFolders[0], 'resources', 'app');
-const TARGET_DIR = path.join(__dirname, 'run');
+const TARGET_DIR = path.join(__dirname, 'dist');
 const QQNT_FILE = path.join(__dirname, 'QQNT.dll');
-const NAPCAT_MJS_PATH = path.join(__dirname, '..', 'dist', 'napcat.mjs');
+const NAPCAT_MJS_PATH = path.join(__dirname, '..', 'napcat-shell','dist', 'napcat.mjs');
 
 const itemsToCopy = [
   'avif_convert.dll',
@@ -60,7 +60,7 @@ async function copyAll () {
   process.env.NAPCAT_QQ_PACKAGE_INFO_PATH = path.join(TARGET_DIR, 'package.json');
   process.env.NAPCAT_QQ_VERSION_CONFIG_PATH = path.join(TARGET_DIR, 'config.json');
   process.env.NAPCAT_DISABLE_PIPE = '1';
-  process.env.NAPCAT_WORKDIR = path.join(__dirname, 'run');
+  process.env.NAPCAT_WORKDIR = TARGET_DIR;
 
   console.log('Loading NapCat module...');
   await import(pathToFileURL(NAPCAT_MJS_PATH).href);
