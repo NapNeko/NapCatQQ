@@ -23,7 +23,8 @@ jobs:
           pnpm run build:framework
           mv packages/napcat-framework/dist framework-dist
           cd framework-dist
-          pnpm install --prod --shamefully-hoist
+          npm install --omit=dev
+          rm ./package-lock.json || exit 0
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -47,7 +48,8 @@ jobs:
           pnpm run build:shell
           mv packages/napcat-shell/dist shell-dist
           cd shell-dist
-          pnpm install --prod --shamefully-hoist
+          npm install --omit=dev
+          rm ./package-lock.json || exit 0
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
