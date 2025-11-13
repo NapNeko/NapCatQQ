@@ -1,0 +1,16 @@
+{
+    "name": "napcat-universal",
+    "version": "0.0.1",
+    "private": true,
+    "type": "module",
+    "dependencies": {
+        "napcat-shell": "workspace:*",
+        "napcat-framework": "workspace:*"
+    },
+    "devDependencies": {
+        "@types/node": "^22.0.1"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}

@@ -1,0 +1,33 @@
+import * as proto from '@/napcat-core/packet/transformer/proto';
+import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { OidbPacket, PacketBufBuilder, PacketTransformer } from '@/napcat-core/packet/transformer/base';
+
+class DownloadForwardMsg extends PacketTransformer<typeof proto.RecvLongMsgResp> {
+  build (uid: string, resId: string): OidbPacket {
+    const req = new NapProtoMsg(proto.RecvLongMsgReq).encode({
+      info: {
+        uid: {
+          uid,
+        },
+        resId,
+        acquire: true,
+      },
+      settings: {
+        field1: 2,
+        field2: 0,
+        field3: 0,
+        field4: 0,
+      },
+    });
+    return {
+      cmd: 'trpc.group.long_msg_interface.MsgService.SsoRecvLongMsg',
+      data: PacketBufBuilder(req),
+    };
+  }
+
+  parse (data: Buffer) {
+    return new NapProtoMsg(proto.RecvLongMsgResp).decode(data);
+  }
+}
+
+export default new DownloadForwardMsg();

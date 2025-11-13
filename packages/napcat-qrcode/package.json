@@ -1,0 +1,28 @@
+{
+    "name": "napcat-qrcode",
+    "version": "0.0.1",
+    "private": true,
+    "type": "module",
+    "main": "index.ts",
+    "exports": {
+        ".": {
+            "import": "./index.ts"
+        },
+        "./*": {
+            "import": "./*"
+        }
+    },
+    "dependencies": {
+        "napcat-core": "workspace:*",
+        "napcat-common": "workspace:*",
+        "napcat-onebot": "workspace:*",
+        "napcat-webui-backend": "workspace:*"
+
+    },
+    "devDependencies": {
+        "@types/node": "^22.0.1"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}
