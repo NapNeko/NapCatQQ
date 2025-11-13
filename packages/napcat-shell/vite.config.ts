@@ -3,6 +3,8 @@ import { defineConfig, PluginOption, UserConfig } from 'vite';
 import path, { resolve } from 'path';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import { builtinModules } from 'module';
+import napcatVersion from "napcat-vite/vite-plugin-version.js";
+
 //依赖排除
 const external = [
   'silk-wasm',
@@ -21,6 +23,7 @@ const ShellBaseConfigPlugin: PluginOption[] = [
     ],
   }),
   nodeResolve(),
+  napcatVersion(),
 ];
 const ShellBaseConfig = () =>
   defineConfig({
