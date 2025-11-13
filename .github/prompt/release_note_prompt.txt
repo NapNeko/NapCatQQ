@@ -17,7 +17,7 @@
 
 ## 更新
 按数字序列列出主要变更项，每条尽量一句话
-- 前缀短 commit id，例如：1. a1b2c3d 修复 get_essence_msg_list 崩溃
+- 前缀短 commit id，例如：1. 修复 get_essence_msg_list 崩溃 (a1b2c3d)
 - 保持 4-18 条要点
 
 ## 开发者注意
@@ -55,4 +55,6 @@ NapCat.Shell.Windows.OneKey.zip (无头)
 [安装运行库](https://aka.ms/vs/17/release/vc_redist.x64.exe)
 
 ## 更新
-1. xxxx
+1. 修改了XXXXX
+2. 新增了XXXX
+3. 重构了XXXX
