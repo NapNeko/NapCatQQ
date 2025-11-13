@@ -103,7 +103,7 @@ jobs:
           NODE_VER="22.11.0"
           NODE_URL="https://nodejs.org/dist/v$NODE_VER/node-v$NODE_VER-win-x64.zip"
           NODE_ZIP="node-v$NODE_VER-win-x64.zip"
-          aria2c -x16 -s16 -k1M -o "$NODE_ZIP" "$NODE_URL"
+          aria2c -x1 -s1 -k1M -o "$NODE_ZIP" "$NODE_URL"
 
           NODE_EXTRACT="$TMPDIR/node_extracted"
           mkdir -p "$NODE_EXTRACT"
