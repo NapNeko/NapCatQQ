@@ -123,16 +123,6 @@ jobs:
         rm ./NapCat.Framework.zip -rf
         mv ./NapCat.Shell/NapCat.Shell.zip ./
         mv ./NapCat.Framework/NapCat.Framework.zip ./
-
-        mkdir ./NapCat.Framework.Windows.Once
-        unzip -q ./external/LiteLoaderWrapper.zip -d ./NapCat.Framework.Windows.Once
-        cd ./NapCat.Framework.Windows.Once
-        ls 
-        mkdir -p ./LL/plugins/NapCatQQ
-        unzip -q ../NapCat.Framework.zip -d ./LL/plugins/NapCatQQ
-        zip -q -r NapCat.Framework.Windows.Once.zip *
-        cd ..
-        mv ./NapCat.Framework.Windows.Once/NapCat.Framework.Windows.Once.zip ./
     - name: Extract version from tag
       run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
       
@@ -148,7 +138,6 @@ jobs:
         files: |
           NapCat.Framework.zip
           NapCat.Shell.zip
-          NapCat.Framework.Windows.Once.zip
         draft: true
 
   build-docker:
