@@ -15,13 +15,6 @@
             "import": "./*"
         }
     },
-    "dependencies": {
-        "napcat-core": "workspace:*",
-        "napcat-common": "workspace:*",
-        "napcat-onebot": "workspace:*",
-        "napcat-webui-backend": "workspace:*",
-        "napcat-qrcode": "workspace:*"
-    },
     "devDependencies": {
         "@types/node": "^22.0.1"
     },
