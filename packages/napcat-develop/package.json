@@ -1,0 +1,27 @@
+{
+    "name": "napcat-develop",
+    "version": "0.0.1",
+    "private": true,
+    "type": "module",
+    "main": "index.cjs",
+    "scripts": {
+        "dev": "powershell ./nodeTest.ps1"
+    },
+    "exports": {
+        ".": {
+            "require": "./index.cjs"
+        },
+        "./*": {
+            "require": "./*"
+        }
+    },
+    "dependencies": {
+        "fs-extra": "^11.3.2"
+    },
+    "devDependencies": {
+        "@types/node": "^22.0.1"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}

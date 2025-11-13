@@ -5,4 +5,4 @@ $uninstall = $uninstall.Trim('"')
 $qqPath = Split-Path $uninstall -Parent
 
 Write-Host "QQPath: $qqPath"
-node.exe "tests/loadNapCat.cjs" "$qqPath"
+node.exe "./loadNapCat.cjs" "$qqPath"
