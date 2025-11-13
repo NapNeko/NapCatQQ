@@ -2,7 +2,7 @@
   "name": "napcat",
   "private": true,
   "type": "module",
-  "version": "4.9.42",
+  "version": "0.0.1",
   "scripts": {
     "build:shell": "pnpm --filter napcat-shell run build || exit 1",
     "build:framework": "pnpm --filter napcat-framework run build || exit 1",
