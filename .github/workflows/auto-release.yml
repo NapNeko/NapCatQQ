@@ -112,8 +112,8 @@ jobs:
           # -----------------------------
           # 3) 创建输出目录
           # -----------------------------
-          OUT_DIR="$GITHUB_WORKSPACE/napcat"
-          mkdir -p "$OUT_DIR/napcat"
+          OUT_DIR="$GITHUB_WORKSPACE/NapCat.Shell.Windows.Node"
+          mkdir -p "$OUT_DIR/NapCat.Shell.Windows.Node"
 
           # -----------------------------
           # 4) 解压 NapCat.Shell.zip 到 napcat
@@ -121,40 +121,29 @@ jobs:
           cp -a "$GITHUB_WORKSPACE/artifacts/NapCat.Shell/." "$OUT_DIR/napcat/"
 
           # -----------------------------
-          # 5) 拷贝 QQ 文件到 napcat
+          # 5) 拷贝 QQ 文件到 NapCat.Shell.Windows.Node
           # -----------------------------
           QQ_TARGETS=("avif_convert.dll" "broadcast_ipc.dll" "config.json" "libglib-2.0-0.dll" "libgobject-2.0-0.dll" "libvips-42.dll" "ncnn.dll" "opencv.dll" "package.json" "QBar.dll" "wrapper.node")
           for name in "${QQ_TARGETS[@]}"; do
-            find "$QQ_EXTRACT" -iname "$name" -exec cp -a {} "$OUT_DIR/napcat" \; || true
+            find "$QQ_EXTRACT" -iname "$name" -exec cp -a {} "$OUT_DIR" \; || true
           done
 
           # -----------------------------
           # 6) 拷贝仓库文件 napcat.bat 和 index.js
           # -----------------------------
-          cp -a "$GITHUB_WORKSPACE/packages/napcat-develop/napcat.bat" "$OUT_DIR/napcat/" || true
-          cp -a "$GITHUB_WORKSPACE/packages/napcat-develop/index.js" "$OUT_DIR/napcat/" || true
+          cp -a "$GITHUB_WORKSPACE/packages/napcat-develop/napcat.bat" "$OUT_DIR/" || true
+          cp -a "$GITHUB_WORKSPACE/packages/napcat-develop/index.js" "$OUT_DIR/" || true
 
           # -----------------------------
-          # 7) 拷贝 Node.exe 到 napcat
+          # 7) 拷贝 Node.exe 到 NapCat.Shell.Windows.Node
           # -----------------------------
-          cp -a "$NODE_EXTRACT/node-v$NODE_VER-win-x64/node.exe" "$OUT_DIR/napcat/" || true
-
-          # -----------------------------
-          # 8) 生成 index.txt
-          # -----------------------------
-          echo "NapCat Files Collected on $(date)" > "$GITHUB_WORKSPACE/index.txt"
-
-          # -----------------------------
-          # 9) 打包 napcat，命名为 NapCat.Shell.Windows.Node.zip
-          # -----------------------------
-          cd "$OUT_DIR"
-          zip -qr "$GITHUB_WORKSPACE/NapCat.Shell.Windows.Node.zip" napcat
+          cp -a "$NODE_EXTRACT/node-v$NODE_VER-win-x64/node.exe" "$OUT_DIR/" || true
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: NapCat.Shell.Windows.Node
-          path: NapCat.Shell.Windows.Node.zip
+          path: NapCat.Shell.Windows.Node
 
   release-napcat:
     needs: [Build-LiteLoader, Build-Shell, Download-QNX64]
