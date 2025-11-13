@@ -118,7 +118,7 @@ jobs:
           # -----------------------------
           # 4) 解压 NapCat.Shell.zip 到 napcat
           # -----------------------------
-          unzip -q "$GITHUB_WORKSPACE/artifacts/NapCat.Shell.zip" -d "$OUT_DIR/napcat"
+          cp -a "$GITHUB_WORKSPACE/artifacts/NapCat.Shell/." "$OUT_DIR/napcat/"
 
           # -----------------------------
           # 5) 拷贝 QQ 文件到 napcat
