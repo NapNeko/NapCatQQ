@@ -234,6 +234,9 @@ jobs:
             --arg user "$USER_CONTENT" \
             '{model: env.OPENROUTER_MODEL, messages:[{role:"system", content:$system},{role:"user", content:$user}], temperature:0.2, max_tokens:800}')
 
+          echo "=== OpenRouter request body ==="
+          echo "$BODY" | jq .
+
           # 调用 OpenRouter
           RESPONSE=$(curl -s -X POST "$OPENROUTER_API_URL" \
             -H "Authorization: Bearer $OPENROUTER_API_KEY" \
