@@ -1,5 +1,5 @@
 import { RequestHandler } from 'express';
-import { RequestUtil } from '@/napcat-common/request';
+import { RequestUtil } from 'napcat-common/src/request';
 import { sendError, sendSuccess } from '../utils/response';
 
 export const GetProxyHandler: RequestHandler = async (req, res) => {

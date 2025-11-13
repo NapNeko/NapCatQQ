@@ -1,5 +1,5 @@
 import { RequestHandler } from 'express';
-import { SystemStatus, statusHelperSubscription } from '@/napcat-core/helper/status';
+import { SystemStatus, statusHelperSubscription } from 'napcat-core/helper/status';
 
 export const StatusRealTimeHandler: RequestHandler = async (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
