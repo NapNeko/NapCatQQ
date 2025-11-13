@@ -216,13 +216,13 @@ jobs:
           SYSTEM_PROMPT=$(<"$PROMPT_FILE")
 
           # 构建用户内容
-          USER_CONTENT="当前版本: $CURRENT_TAG\n提交列表:\n$COMMITS"
+          USER_CONTENT="当前真正的版本: $CURRENT_TAG\n提交列表:\n$COMMITS"
 
           # 构建请求 JSON
           BODY=$(jq -n \
             --arg system "$SYSTEM_PROMPT" \
             --arg user "$USER_CONTENT" \
-            '{model: env.OPENROUTER_MODEL, messages:[{role:"system", content:$system},{role:"user", content:$user}], temperature:0.2, max_tokens:800}')
+            '{model: env.OPENROUTER_MODEL, messages:[{role:"system", content:$system},{role:"user", content:$user}], temperature:0.3, max_tokens:800}')
 
           echo "=== OpenRouter request body ==="
           echo "$BODY" | jq .
