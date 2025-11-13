@@ -133,7 +133,7 @@ jobs:
           # -----------------------------
           cp -a "$GITHUB_WORKSPACE/packages/napcat-develop/napcat.bat" "$OUT_DIR/" || true
           cp -a "$GITHUB_WORKSPACE/packages/napcat-develop/index.js" "$OUT_DIR/" || true
-
+          cp -a "$GITHUB_WORKSPACE/packages/napcat-develop/QQNT.dll" "$OUT_DIR/" || true
           # -----------------------------
           # 7) 拷贝 Node.exe 到 NapCat.Shell.Windows.Node
           # -----------------------------
