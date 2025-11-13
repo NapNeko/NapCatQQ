@@ -1,26 +1,28 @@
-name: Build Release (OpenRouter AI notes on tag)
+name: "Build Action"
 
 on:
+  workflow_dispatch:
   push:
+    branches:
+      - main
     tags:
-      - '*'    # 任意 tag push 时触发，可改为 'v*.*.*'
+      - '*'   # 任意 tag push 时触发
 
-permissions:
-  contents: write
+permissions: write-all
 
 env:
   OPENROUTER_API_URL: https://openrouter.ai/api/v1/chat/completions
-  OPENROUTER_MODEL: "deepseek/deepseek-chat-v3-0324:free"
+  OPENROUTER_MODEL: "openrouter/auto"
   RELEASE_NAME: "NapCat"
 
 jobs:
   Build-LiteLoader:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - name: Clone Main Repository
+        uses: actions/checkout@v4
+      - name: Use Node.js 20.X
+        uses: actions/setup-node@v4
         with:
           node-version: 20.x
       - name: Build NapCat.Framework
@@ -32,7 +34,7 @@ jobs:
           mv packages/napcat-framework/dist framework-dist
           cd framework-dist
           npm install --omit=dev
-          rm -f package-lock.json
+          rm ./package-lock.json || exit 0
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -42,10 +44,10 @@ jobs:
   Build-Shell:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - name: Clone Main Repository
+        uses: actions/checkout@v4
+      - name: Use Node.js 20.X
+        uses: actions/setup-node@v4
         with:
           node-version: 20.x
       - name: Build NapCat.Shell
@@ -57,7 +59,7 @@ jobs:
           mv packages/napcat-shell/dist shell-dist
           cd shell-dist
           npm install --omit=dev
-          rm -f package-lock.json
+          rm ./package-lock.json || exit 0
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -68,35 +70,20 @@ jobs:
     needs: [Build-LiteLoader, Build-Shell]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Download artifacts
+      - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
           path: ./artifacts
 
-      - name: Make zips
+      - name: Zip Artifacts
         run: |
-          cd artifacts || exit 0
-          [ -d NapCat.Shell ] && (cd NapCat.Shell && zip -qr ../NapCat.Shell.zip .)
-          [ -d NapCat.Framework ] && (cd NapCat.Framework && zip -qr ../NapCat.Framework.zip .)
+          cd artifacts
+          [ -d NapCat.Framework ] && zip -qr ../NapCat.Framework.zip -r NapCat.Framework
+          [ -d NapCat.Shell ] && zip -qr ../NapCat.Shell.zip -r NapCat.Shell
           cd ..
-          ls -la
-
-      - name: Prepare commits list
-        run: |
-          TAG="${GITHUB_REF#refs/tags/}"
-          git fetch --all --tags || true
-          PREV_TAG=$(git tag --sort=-creatordate | grep -v "^$" | awk -v t="$TAG" '$0!=t{print; exit}')
-          if [ -n "$PREV_TAG" ]; then
-            git log --pretty=format:'%h %s (%an)' "$PREV_TAG..$TAG" > /tmp/commits.txt || git log --pretty=format:'%h %s (%an)' -n 30 > /tmp/commits.txt
-          else
-            git log --pretty=format:'%h %s (%an)' -n 30 > /tmp/commits.txt
-          fi
-          echo "=== commits ==="
-          sed -n '1,200p' /tmp/commits.txt || true
 
       - name: Generate release note via OpenRouter
         env:
@@ -105,62 +92,43 @@ jobs:
           OPENROUTER_MODEL: ${{ env.OPENROUTER_MODEL }}
         run: |
           set -euo pipefail
-          PROMPT_FILE=".github/prompt/release_note_prompt.txt"
           TAG="${GITHUB_REF#refs/tags/}"
-          ARTIFACTS_LIST=$(ls ./artifacts 2>/dev/null | tr '\n' ',' | sed 's/,$//')
-          COMMITS=$(sed 's/"/\\"/g' /tmp/commits.txt || echo "无提交信息")
-          USER_CONTENT="$(printf "TAG: %s\nARTIFACTS: %s\n\n提交列表:\n%s" "$TAG" "$ARTIFACTS_LIST" "$COMMITS")"
-          SYSTEM_PROMPT="$(jq -Rs . < "$PROMPT_FILE")"
+          COMMITS=$(git log --pretty=format:'%h %s (%an)' -n 30)
+          PROMPT_FILE=".github/prompt/release_note_prompt.txt"
+          SYSTEM_PROMPT=$(<"$PROMPT_FILE")
+          USER_CONTENT="TAG: $TAG\n提交列表:\n$COMMITS"
 
           BODY=$(jq -n \
             --arg system "$SYSTEM_PROMPT" \
             --arg user "$USER_CONTENT" \
-            '{model: env.OPENROUTER_MODEL, messages: [{role:"system", content:$system},{role:"user", content:$user}], temperature:0.2, max_tokens:800}')
+            '{model: env.OPENROUTER_MODEL, messages:[{role:"system", content:$system},{role:"user", content:$user}], temperature:0.2, max_tokens:800}')
 
           RESPONSE=$(curl -s -X POST "$OPENROUTER_API_URL" \
-            -H "Content-Type: application/json" \
             -H "Authorization: Bearer $OPENROUTER_API_KEY" \
+            -H "Content-Type: application/json" \
             -d "$BODY")
 
-          echo "$RESPONSE" | jq -r '.choices[0].message.content // .choices[0].text // ""' > /tmp/release_body.txt || true
-          echo "=== generated release note ==="
-          sed -n '1,200p' /tmp/release_body.txt || true
+          echo "=== OpenRouter raw response ==="
+          echo "$RESPONSE" | jq .
 
-      - name: Create or update release & upload assets
-        env:
-          GHTOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }}
-          TAG: "${{ github.ref_name }}"
-        run: |
-          set -euo pipefail
-          BODY=$(sed 's/"/\\"/g' /tmp/release_body.txt || echo "Automated release")
-          # check existing release for this tag
-          EXIST=$(curl -s -H "Authorization: token $GHTOKEN" "https://api.github.com/repos/$REPO/releases/tags/$TAG" || true)
-          RID=$(echo "$EXIST" | jq -r '.id // empty')
-          if [ -n "$RID" ]; then
-            echo "Update existing release id $RID"
-            jq -n --arg body "$BODY" '{body:$body}' > /tmp/update.json
-            curl -s -X PATCH -H "Authorization: token $GHTOKEN" -H "Content-Type: application/json" \
-              "https://api.github.com/repos/$REPO/releases/$RID" -d @/tmp/update.json | jq -r '.id'
-          else
-            echo "Create release for tag $TAG"
-            jq -n --arg tag "$TAG" --arg name "${RELEASE_NAME} $TAG" --arg body "$BODY" \
-              '{tag_name:$tag, name:$name, body:$body, draft:true, prerelease:false}' > /tmp/create.json
-            CREATE_RESP=$(curl -s -X POST -H "Authorization: token $GHTOKEN" -H "Content-Type: application/json" \
-              "https://api.github.com/repos/$REPO/releases" -d @/tmp/create.json)
-            RID=$(echo "$CREATE_RESP" | jq -r '.id')
+          RELEASE_BODY=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // .choices[0].text // ""')
+
+          if [ -z "$RELEASE_BODY" ]; then
+            echo "❌ OpenRouter failed to generate release note, terminating workflow."
+            exit 1
           fi
 
-          upload() {
-            f="$1"
-            [ -f "$f" ] || { echo "skip $f"; return; }
-            NAME=$(basename "$f")
-            UPLOAD_URL=$(curl -s -H "Authorization: token $GHTOKEN" "https://api.github.com/repos/$REPO/releases/$RID" | jq -r '.upload_url')
-            UPLOAD_URL="${UPLOAD_URL%\{*}?name=${NAME}"
-            echo "Uploading $NAME..."
-            curl -s -X POST -H "Authorization: token $GHTOKEN" -H "Content-Type: application/zip" --data-binary @"$f" "$UPLOAD_URL" | jq -r '.id'
-          }
+          echo "$RELEASE_BODY" > CHANGELOG.md
+          echo "=== generated release note ==="
+          cat CHANGELOG.md
 
-          upload "./artifacts/NapCat.Framework.zip"
-          upload "./artifacts/NapCat.Shell.zip"
-          echo "done"
+      - name: Create Release Draft and Upload Artifacts
+        uses: softprops/action-gh-release@v1
+        with:
+          name: NapCat ${{ github.ref_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body_path: CHANGELOG.md
+          files: |
+            NapCat.Framework.zip
+            NapCat.Shell.zip
+          draft: true
