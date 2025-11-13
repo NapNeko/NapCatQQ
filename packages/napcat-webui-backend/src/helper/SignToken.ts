@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import store from '@/napcat-common/store';
+import store from 'napcat-common/src/store';
 export class AuthHelper {
   private static readonly secretKey = Math.random().toString(36).slice(2);
 

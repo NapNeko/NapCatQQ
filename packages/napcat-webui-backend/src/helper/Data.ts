@@ -1,6 +1,6 @@
 import type { LoginRuntimeType } from '../types/data';
 import packageJson from '../../../../package.json';
-import store from '@/napcat-common/store';
+import store from 'napcat-common/src/store';
 
 const LoginRuntime: LoginRuntimeType = {
   LoginCurrentTime: Date.now(),
