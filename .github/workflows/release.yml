@@ -21,13 +21,14 @@ jobs:
           pnpm i
           pnpm --filter napcat-webui-frontend run build || exit 1
           pnpm run build:framework
-          cd packages/napcat-framework/dist
+          mv packages/napcat-framework/dist framework-dist
+          cd framework-dist
           pnpm install --production
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: NapCat.Framework
-          path: packages/napcat-framework/dist
+          path: framework-dist
 
   Build-Shell:
     runs-on: ubuntu-latest
@@ -44,13 +45,14 @@ jobs:
           pnpm i
           pnpm --filter napcat-webui-frontend run build || exit 1
           pnpm run build:shell
-          cd packages/napcat-shell/dist
+          mv packages/napcat-shell/dist shell-dist
+          cd shell-dist
           pnpm install --production
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: NapCat.Shell
-          path: packages/napcat-shell/dist
+          path: shell-dist
 
   release-napcat:
     needs: [Build-LiteLoader, Build-Shell]
