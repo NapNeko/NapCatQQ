@@ -1,0 +1,61 @@
+注意：输出必须严格使用 NapCat 的发布说明格式，并用简体中文。
+
+格式规则：
+1. 第一行：# V{TAG}  
+2. 第二行：[使用文档](https://napneko.github.io/)
+3. 空行后，按下面的节顺序输出（存在则输出，不存在则省略该节）：
+
+## Windows 一键包
+- 简短一句话介绍一键包用途
+- 列出可下载的文件名（只列文件名，不写下载链接）
+
+## 警告
+- 如果有需要特别提醒的兼容/运行库/版本要求，写成加粗警告句
+
+## 如果WinX64缺少运行库或者xxx.dll？
+- 常见运行库建议
+
+## 更新
+按数字序列列出主要变更项，每条尽量一句话
+- 前缀短 commit id，例如：1. a1b2c3d 修复 get_essence_msg_list 崩溃
+- 保持 4-18 条要点
+
+## 开发者注意
+- 列出迁移/接口断裂/配置变更；若无则省略
+
+额外约束：
+- 语言简体中文，面向最终用户
+- 不输出 stack trace、密钥、敏感信息
+- 只列文件名作为 assets，不写链接
+- 若提交为空，输出简短默认说明
+
+下面为示例
+
+# V?.?.?
+[使用文档](https://napneko.github.io/)
+
+## Windows 一键包
+我们为提供了的轻量化一键部署方案
+相对于普通需要安装QQ的方案,下面已内置QQ和Napcat 阅读使用文档参考
+
+你可以下载 
+
+NapCat.Shell.Windows.OneKey.zip (无头) 
+
+启动后可自动化部署一键包,教程参考使用文档安装部分
+
+## 警告
+**注意QQ版本推荐使用 40768+ 版本 最低可以使用40768版本**
+**默认WebUi密钥为随机密码 控制台查看**
+
+**[9.9.22-40990 X64 Win](https://dldir1v6.qq.com/qqfile/qq/QQNT/2c9d3f6c/QQ9.9.22.40990_x64.exe)**
+[LinuxX64 DEB 40990 ](https://dldir1.qq.com/qqfile/qq/QQNT/ec800879/linuxqq_3.2.20-40990_amd64.deb)
+[LinuxX64 RPM 40990 ](https://dldir1.qq.com/qqfile/qq/QQNT/ec800879/linuxqq_3.2.20-40990_x86_64.rpm)
+[LinuxArm64 DEB 40990 ](https://dldir1.qq.com/qqfile/qq/QQNT/ec800879/linuxqq_3.2.20-40990_arm64.deb)
+[LinuxArm64 RPM  40990 ](https://dldir1.qq.com/qqfile/qq/QQNT/ec800879/linuxqq_3.2.20-40990_aarch64.rpm)
+[MAC   DMG   40990 ](https://dldir1v6.qq.com/qqfile/qq/QQNT/c6cb0f5d/QQ_v6.9.82.40990.dmg)
+## 如果WinX64缺少运行库或者xxx.dll？
+[安装运行库](https://aka.ms/vs/17/release/vc_redist.x64.exe)
+
+## 更新
+1. xxxx

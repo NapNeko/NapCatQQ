@@ -1,5 +1,5 @@
 {
-    "name": "napcat-shell",
+    "name": "napcat-vite",
     "version": "0.0.1",
     "private": true,
     "type": "module",
@@ -23,8 +23,7 @@
         "napcat-qrcode": "workspace:*"
     },
     "devDependencies": {
-        "@types/node": "^22.0.1",
-        "napcat-vite": "workspace:*"
+        "@types/node": "^22.0.1"
     },
     "engines": {
         "node": ">=18.0.0"

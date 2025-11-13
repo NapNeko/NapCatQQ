@@ -1,1 +1,1 @@
-export const napCatVersion = '4.9.42';
+export const napCatVersion = import.meta.env.VITE_NAPCAT_VERSION || 'alpha';
