@@ -94,8 +94,24 @@ jobs:
           # 当前 tag
           CURRENT_TAG="${GITHUB_REF#refs/tags/}"
 
-          # 上一个 tag
-          PREV_TAG=$(git describe --tags --abbrev=0 "$CURRENT_TAG^")
+          # 获取所有 tag 按创建时间倒序排列
+          TAGS=( $(git tag --sort=-creatordate) )
+
+          # 找到上一个 tag
+          PREV_TAG=""
+          for i in "${!TAGS[@]}"; do
+            if [ "${TAGS[$i]}" = "$CURRENT_TAG" ]; then
+              if [ $((i+1)) -lt ${#TAGS[@]} ]; then
+                PREV_TAG="${TAGS[$((i+1))]}"
+              fi
+              break
+            fi
+          done
+
+          if [ -z "$PREV_TAG" ]; then
+            echo "❌ Could not find previous tag for $CURRENT_TAG, aborting."
+            exit 1
+          fi
 
           echo "Generating release note from $PREV_TAG to $CURRENT_TAG"
 
