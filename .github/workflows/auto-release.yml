@@ -88,21 +88,25 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           OPENROUTER_API_URL: ${{ env.OPENROUTER_API_URL }}
           OPENROUTER_MODEL: ${{ env.OPENROUTER_MODEL }}
+          GITHUB_OWNER: "NapNeKo"   # 替换成你的 repo owner
+          GITHUB_REPO: "NapCatQQ"   # 替换成你的 repo 名
         run: |
           set -euo pipefail
 
           # 当前 tag
           CURRENT_TAG="${GITHUB_REF#refs/tags/}"
+          echo "Current tag: $CURRENT_TAG"
 
-          # 获取所有 tag 按创建时间倒序排列
-          TAGS=( $(git tag --sort=-creatordate) )
+          # 从 GitHub API 获取 tag 列表
+          TAGS_JSON=$(curl -s "https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/tags?per_page=100")
+          TAGS=( $(echo "$TAGS_JSON" | jq -r '.[].name' | sort -V) )
 
           # 找到上一个 tag
           PREV_TAG=""
           for i in "${!TAGS[@]}"; do
             if [ "${TAGS[$i]}" = "$CURRENT_TAG" ]; then
-              if [ $((i+1)) -lt ${#TAGS[@]} ]; then
-                PREV_TAG="${TAGS[$((i+1))]}"
+              if [ $i -gt 0 ]; then
+                PREV_TAG="${TAGS[$((i-1))]}"
               fi
               break
             fi
@@ -113,10 +117,17 @@ jobs:
             exit 1
           fi
 
-          echo "Generating release note from $PREV_TAG to $CURRENT_TAG"
+          echo "Previous tag: $PREV_TAG"
+
+          # 强制拉取上一个 tag 和当前 tag
+          git fetch origin "refs/tags/$PREV_TAG:refs/tags/$PREV_TAG" --force
+          git fetch origin "refs/tags/$CURRENT_TAG:refs/tags/$CURRENT_TAG" --force
 
           # 获取 commit title + body + 作者，保留换行
           COMMITS=$(git log --pretty=format:'%h %B (%an)' "$PREV_TAG".."$CURRENT_TAG" | sed 's/$/\\n/')
+
+          echo "Commit list from $PREV_TAG to $CURRENT_TAG:"
+          echo -e "$COMMITS"
 
           # 读取 prompt
           PROMPT_FILE=".github/prompt/release_note_prompt.txt"
