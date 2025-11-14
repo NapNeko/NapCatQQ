@@ -31,6 +31,7 @@ import { NodeIKernelMsgListener, NodeIKernelProfileListener } from '@/napcat-cor
 import { proxiedListenerOf } from 'napcat-common/src/proxy-handler';
 import { NTQQPacketApi } from './apis/packet';
 import { NativePacketHandler } from './packet/handler/client';
+import { container, ReceiverServiceRegistry } from './packet/handler/serviceRegister';
 export * from './wrapper';
 export * from './types/index';
 export * from './services/index';
@@ -118,6 +119,15 @@ export class NapCatCore {
       UserApi: new NTQQUserApi(this.context, this),
       GroupApi: new NTQQGroupApi(this.context, this),
     };
+    container.bind(NapCatCore).toConstantValue(this);
+    ReceiverServiceRegistry.forEach((ServiceClass, serviceName) => {
+      container.bind(ServiceClass).toSelf();
+      console.log(`Registering service handler for: ${serviceName}`);
+      this.context.packetHandler.onCmd(serviceName, ({ seq, hex_data }) => {
+        const serviceInstance = container.get(ServiceClass);
+        return serviceInstance.handler(seq, hex_data);
+      });
+    });
   }
 
   async initCore () {

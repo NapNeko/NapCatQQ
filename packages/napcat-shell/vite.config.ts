@@ -19,6 +19,7 @@ const ShellBaseConfigPlugin: PluginOption[] = [
   react({ tsDecorators: true }),
   autoIncludeTSPlugin({
     entries: [
+      { entry: 'napcat.ts', dir: path.resolve(__dirname, '../napcat-core/protocol') },
       { entry: 'napcat.ts', dir: path.resolve(__dirname, '../napcat-onebot/action/test') }
     ]
   }),

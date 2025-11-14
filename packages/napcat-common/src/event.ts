@@ -25,18 +25,18 @@ export class NTEventWrapper {
   private readonly listenerManager: Map<string, ListenerClassBase> = new Map<string, ListenerClassBase>(); // ListenerName-Unique -> Listener实例
   private readonly EventTask = new Map<string, Map<string, Map<string, InternalMapKey>>>(); // tasks ListenerMainName -> ListenerSubName-> uuid -> {timeout,createtime,func}
 
-  constructor (
+  constructor(
     wrapperSession: NodeIQQNTWrapperSession
   ) {
     this.WrapperSession = wrapperSession;
   }
 
-  createProxyDispatch (ListenerMainName: string) {
+  createProxyDispatch(ListenerMainName: string) {
     const dispatcherListenerFunc = this.dispatcherListener.bind(this);
     return new Proxy(
       {},
       {
-        get (target: any, prop: any, receiver: any) {
+        get(target: any, prop: any, receiver: any) {
           if (typeof target[prop] === 'undefined') {
             // 如果方法不存在，返回一个函数，这个函数调用existentMethod
             return (...args: any[]) => {
@@ -54,7 +54,7 @@ export class NTEventWrapper {
     Service extends keyof ServiceNamingMapping,
     ServiceMethod extends FuncKeys<ServiceNamingMapping[Service]>,
     T extends (...args: any) => any = EnsureFunc<ServiceNamingMapping[Service][ServiceMethod]>
-  > (eventName: `${Service}/${ServiceMethod}`): T | undefined {
+  >(eventName: `${Service}/${ServiceMethod}`): T | undefined {
     const eventNameArr = eventName.split('/');
     type eventType = {
       [key: string]: () => { [key: string]: (...params: Parameters<T>) => Promise<ReturnType<T>>; };
@@ -78,8 +78,8 @@ export class NTEventWrapper {
     return undefined;
   }
 
-  createListenerFunction<T,   Listener extends keyof ListenerNamingMapping,
-    ListenerMethod extends FuncKeys<ListenerNamingMapping[Listener]>> (listenerMainName: string, uniqueCode: string = ''): T {
+  createListenerFunction<T, Listener extends keyof ListenerNamingMapping,
+    ListenerMethod extends FuncKeys<ListenerNamingMapping[Listener]>>(listenerMainName: string, uniqueCode: string = ''): T {
     const existListener = this.listenerManager.get(listenerMainName + uniqueCode);
     if (!existListener) {
       const Listener = this.createProxyDispatch(listenerMainName);
@@ -97,7 +97,7 @@ export class NTEventWrapper {
   }
 
   // 统一回调清理事件
-  async dispatcherListener (ListenerMainName: string, ListenerSubName: string, ...args: any[]) {
+  async dispatcherListener(ListenerMainName: string, ListenerSubName: string, ...args: any[]) {
     this.EventTask.get(ListenerMainName)
       ?.get(ListenerSubName)
       ?.forEach((task, uuid) => {
@@ -115,7 +115,7 @@ export class NTEventWrapper {
     Service extends keyof ServiceNamingMapping,
     ServiceMethod extends FuncKeys<ServiceNamingMapping[Service]>,
     EventType extends (...args: any) => any = EnsureFunc<ServiceNamingMapping[Service][ServiceMethod]>
-  > (
+  >(
     serviceAndMethod: `${Service}/${ServiceMethod}`,
     ...args: Parameters<EventType>
   ): Promise<Awaited<ReturnType<EventType>>> {
@@ -126,7 +126,7 @@ export class NTEventWrapper {
     Listener extends keyof ListenerNamingMapping,
     ListenerMethod extends FuncKeys<ListenerNamingMapping[Listener]>,
     ListenerType extends (...args: any) => any = EnsureFunc<ListenerNamingMapping[Listener][ListenerMethod]>
-  > (
+  >(
     listenerAndMethod: `${Listener}/${ListenerMethod}`,
     checker: (...args: Parameters<ListenerType>) => boolean,
     waitTimes = 1,
@@ -140,7 +140,7 @@ export class NTEventWrapper {
       let complete = 0;
       let retData: Parameters<ListenerType> | undefined;
 
-      function sendDataCallback () {
+      function sendDataCallback() {
         if (complete === 0) {
           reject(new Error(' ListenerName:' + listenerAndMethod + ' timeout'));
         } else {
@@ -180,7 +180,7 @@ export class NTEventWrapper {
     ListenerMethod extends FuncKeys<ListenerNamingMapping[Listener]>,
     EventType extends (...args: any) => any = EnsureFunc<ServiceNamingMapping[Service][ServiceMethod]>,
     ListenerType extends (...args: any) => any = EnsureFunc<ListenerNamingMapping[Listener][ListenerMethod]>
-  > (
+  >(
     serviceAndMethod: `${Service}/${ServiceMethod}`,
     listenerAndMethod: `${Listener}/${ListenerMethod}`,
     args: Parameters<EventType>,
@@ -194,7 +194,7 @@ export class NTEventWrapper {
     let retData: Parameters<ListenerType> | undefined;
     let retEvent: any = {};
 
-    function sendDataCallback (resolve: any, reject: any) {
+    function sendDataCallback(resolve: any, reject: any) {
       if (complete === 0) {
         reject(
           new Error(

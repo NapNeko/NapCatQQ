@@ -16,6 +16,7 @@ const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`)].
 const FrameworkBaseConfigPlugin: PluginOption[] = [
   autoIncludeTSPlugin({
     entries: [
+      { entry: 'napcat.ts', dir: path.resolve(__dirname, '../napcat-core/protocol') },
       { entry: 'napcat.ts', dir: path.resolve(__dirname, '../napcat-onebot/action/test') }
     ]
   }),
