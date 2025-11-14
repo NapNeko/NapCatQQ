@@ -4,6 +4,7 @@
     "private": true,
     "type": "module",
     "main": "index.ts",
+    "types": "node-pty.d.ts",
     "exports": {
         ".": {
             "import": "./index.ts"
