@@ -4,9 +4,9 @@ import { WebUiDataRuntime } from '@/napcat-webui-backend/helper/Data';
 import { sendSuccess } from '@/napcat-webui-backend/utils/response';
 import { WebUiConfig } from '@/napcat-webui-backend/index';
 
-export const PackageInfoHandler: RequestHandler = (_, res) => {
-  const data = WebUiDataRuntime.getPackageJson();
-  sendSuccess(res, data);
+export const GetNapCatVersion: RequestHandler = (_, res) => {
+  const data = WebUiDataRuntime.GetNapCatVersion();
+  sendSuccess(res, { version: data });
 };
 
 export const QQVersionHandler: RequestHandler = (_, res) => {

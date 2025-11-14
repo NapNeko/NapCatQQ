@@ -201,7 +201,7 @@ const NapCatVersion = () => {
     data: packageData,
     loading: packageLoading,
     error: packageError,
-  } = useRequest(WebUIManager.getPackageInfo);
+  } = useRequest(WebUIManager.GetNapCatVersion);
 
   const currentVersion = packageData?.version;
 
