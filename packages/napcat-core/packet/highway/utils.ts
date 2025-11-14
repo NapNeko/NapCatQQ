@@ -1,4 +1,4 @@
-import { NapProtoEncodeStructType } from '@napneko/nap-proto-core';
+import { NapProtoEncodeStructType } from 'napcat-protobuf';
 import * as proto from '@/napcat-core/packet/transformer/proto';
 
 export const int32ip2str = (ip: number) => {

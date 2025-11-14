@@ -1,6 +1,6 @@
 import * as crypto from 'crypto';
 import { PushMsgBody } from '@/napcat-core/packet/transformer/proto';
-import { NapProtoEncodeStructType } from '@napneko/nap-proto-core';
+import { NapProtoEncodeStructType } from 'napcat-protobuf';
 import { PacketMsg, PacketSendMsgElement } from '@/napcat-core/packet/message/message';
 import { IPacketMsgElement, PacketMsgTextElement } from '@/napcat-core/packet/message/element';
 import { SendTextElement } from '@/napcat-core/index';

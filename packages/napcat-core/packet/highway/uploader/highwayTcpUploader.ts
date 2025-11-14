@@ -1,7 +1,7 @@
 import net from 'node:net';
 import stream from 'node:stream';
 import crypto from 'node:crypto';
-import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { NapProtoMsg } from 'napcat-protobuf';
 import { BlockSize } from '@/napcat-core/packet/highway/highwayContext';
 import { Frame } from '@/napcat-core/packet/highway/frame';
 import { IHighwayUploader } from '@/napcat-core/packet/highway/uploader/highwayUploader';

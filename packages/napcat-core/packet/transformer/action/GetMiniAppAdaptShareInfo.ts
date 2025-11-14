@@ -1,5 +1,5 @@
 import * as proto from '@/napcat-core/packet/transformer/proto';
-import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { NapProtoMsg } from 'napcat-protobuf';
 import { OidbPacket, PacketBufBuilder, PacketTransformer } from '@/napcat-core/packet/transformer/base';
 import { MiniAppReqParams } from '@/napcat-core/packet/entities/miniApp';
 

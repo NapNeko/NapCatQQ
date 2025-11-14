@@ -1,4 +1,4 @@
-import { ProtoField, ScalarType } from '@napneko/nap-proto-core';
+import { ProtoField, ScalarType } from 'napcat-protobuf';
 
 export const C2C = {
   uin: ProtoField(1, ScalarType.UINT32, true),

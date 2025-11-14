@@ -1,5 +1,5 @@
 import { ScalarType } from '@protobuf-ts/runtime';
-import { ProtoField } from '@napneko/nap-proto-core';
+import { ProtoField } from 'napcat-protobuf';
 import { ContentHead, MessageBody, MessageControl, RoutingHead } from '@/napcat-core/packet/transformer/proto';
 
 export const FaceRoamRequest = {

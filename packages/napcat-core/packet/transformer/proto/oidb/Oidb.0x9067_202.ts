@@ -1,4 +1,4 @@
-import { ProtoField, ScalarType } from '@napneko/nap-proto-core';
+import { ProtoField, ScalarType } from 'napcat-protobuf';
 import { MultiMediaReqHead } from './common/Ntv2.RichMediaReq';
 
 // Req

@@ -12,7 +12,7 @@ import {
 import { ChatType, MsgSourceType, NTMsgType, RawMessage } from 'napcat-core/index';
 import { MiniAppRawData, MiniAppReqParams } from '@/napcat-core/packet/entities/miniApp';
 import { AIVoiceChatType } from '@/napcat-core/packet/entities/aiChat';
-import { NapProtoDecodeStructType, NapProtoEncodeStructType, NapProtoMsg } from '@napneko/nap-proto-core';
+import { NapProtoDecodeStructType, NapProtoEncodeStructType, NapProtoMsg } from 'napcat-protobuf';
 import { IndexNode, LongMsgResult, MsgInfo, PushMsgBody } from '@/napcat-core/packet/transformer/proto';
 import { OidbPacket } from '@/napcat-core/packet/transformer/base';
 import { ImageOcrResult } from '@/napcat-core/packet/entities/ocrResult';

@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import store from 'napcat-common/src/store';
+import type { WebUiCredentialJson, WebUiCredentialInnerJson } from '@/napcat-webui-backend/types';
 export class AuthHelper {
   private static readonly secretKey = Math.random().toString(36).slice(2);
 

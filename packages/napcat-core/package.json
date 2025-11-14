@@ -14,7 +14,7 @@
     },
     "dependencies": {
         "@protobuf-ts/runtime": "^2.11.1",
-        "@napneko/nap-proto-core": "^0.0.4",
+        "napcat-protobuf": "workspace:*",
         "ajv": "^8.13.0",
         "@sinclair/typebox": "^0.34.38",
         "file-type": "^21.0.0",

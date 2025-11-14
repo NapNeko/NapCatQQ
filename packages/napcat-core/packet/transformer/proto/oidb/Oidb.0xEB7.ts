@@ -1,4 +1,4 @@
-import { ProtoField, ScalarType } from '@napneko/nap-proto-core';
+import { ProtoField, ScalarType } from 'napcat-protobuf';
 
 export const OidbSvcTrpcTcp0XEB7_Body = {
   uin: ProtoField(1, ScalarType.STRING),

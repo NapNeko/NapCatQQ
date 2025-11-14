@@ -24,7 +24,7 @@
         "ws": "^8.18.3",
         "file-type": "^21.0.0",
         "async-mutex": "^0.5.0",
-        "@napneko/nap-proto-core": "^0.0.4",
+        "napcat-protobuf": "workspace:*",
         "json5": "^2.2.3",
         "napcat-core": "workspace:*",
         "napcat-webui-backend": "workspace:*",

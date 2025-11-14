@@ -1,4 +1,4 @@
-import { ProtoField, ScalarType } from '@napneko/nap-proto-core';
+import { ProtoField, ScalarType } from 'napcat-protobuf';
 
 export const OidbSvcTrpcTcp0XF90_1 = {
   groupUin: ProtoField(1, ScalarType.UINT32),

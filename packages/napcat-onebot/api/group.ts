@@ -24,7 +24,7 @@ import { OB11GroupUploadNoticeEvent } from '../event/notice/OB11GroupUploadNotic
 import { OB11GroupNameEvent } from '../event/notice/OB11GroupNameEvent';
 import { FileNapCatOneBotUUID } from 'napcat-common/src/file-uuid';
 import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
-import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { NapProtoMsg } from 'napcat-protobuf';
 import { GroupReactNotify, PushMsg } from 'napcat-core/packet/transformer/proto';
 
 export class OneBotGroupApi {

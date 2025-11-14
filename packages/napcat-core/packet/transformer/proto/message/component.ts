@@ -1,4 +1,4 @@
-import { ProtoField, ScalarType } from '@napneko/nap-proto-core';
+import { ProtoField, ScalarType } from 'napcat-protobuf';
 import { Elem } from '@/napcat-core/packet/transformer/proto';
 
 export const Attr = {

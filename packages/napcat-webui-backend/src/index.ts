@@ -3,6 +3,7 @@
  */
 
 import express from 'express';
+import type { WebUiConfigType } from './types';
 import { createServer } from 'http';
 import { randomUUID } from 'node:crypto';
 import { createServer as createHttpsServer } from 'https';
