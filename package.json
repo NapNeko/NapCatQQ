@@ -5,6 +5,7 @@
   "version": "0.0.1",
   "scripts": {
     "build:shell": "pnpm --filter napcat-shell run build || exit 1",
+    "build:shell:dev": "pnpm --filter napcat-shell run build:dev || exit 1",
     "build:framework": "pnpm --filter napcat-framework run build || exit 1",
     "build:webui": "pnpm --filter napcat-webui-frontend run build || exit 1",
     "dev:shell": "pnpm --filter napcat-develop run dev || exit 1",
