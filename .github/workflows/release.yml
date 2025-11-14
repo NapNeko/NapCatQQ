@@ -1,9 +1,17 @@
-name: "Build Release"
+name: Release NapCat
 
 on:
   workflow_dispatch:
+  push:
+    tags:
+      - '*'
 
 permissions: write-all
+
+env:
+  OPENROUTER_API_URL: https://91vip.futureppo.top/v1/chat/completions
+  OPENROUTER_MODEL: "kimi-k2-0905-turbo"
+  RELEASE_NAME: "NapCat"
 
 jobs:
   Build-Framework:
@@ -55,34 +63,202 @@ jobs:
         with:
           name: NapCat.Shell
           path: shell-dist
-
-  release-napcat:
-    needs: [Build-Framework, Build-Shell]
+  Download-QNX64:
+    needs: Build-Shell
     runs-on: ubuntu-latest
     steps:
-      - name: Download All Artifact
-        uses: actions/download-artifact@v4
+      - uses: actions/checkout@v4
 
-      - name: Compress subdirectories
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      - name: Setup tools
         run: |
-          cd ./NapCat.Shell/
-          zip -q -r NapCat.Shell.zip *
-          cd ..
-          cd ./NapCat.Framework/
-          zip -q -r NapCat.Framework.zip *
-          cd ..
-          rm ./NapCat.Shell.zip -rf
-          rm ./NapCat.Framework.zip -rf
-          mv ./NapCat.Shell/NapCat.Shell.zip ./
-          mv ./NapCat.Framework/NapCat.Framework.zip ./
+          sudo apt update
+          sudo apt install -y aria2 unzip zip p7zip-full curl jq
+
+      - name: Download QQ x64, Node.js and Assemble NapCat.Shell.Windows.Node.zip
+        run: |
+          set -euo pipefail
+          TMPDIR=$(mktemp -d)
+          cd "$TMPDIR"
+
+          # -----------------------------
+          # 1) 下载 QQ x64
+          # -----------------------------
+          # JS_URL="https://cdn-go.cn/qq-web/im.qq.com_new/latest/rainbow/windowsConfig.js"
+          # JS_URL="https://slave.docadan488.workers.dev/proxy?url=https://cdn-go.cn/qq-web/im.qq.com_new/latest/rainbow/windowsConfig.js"
+          # NT_URL=$(curl -fsSL "$JS_URL" | grep -oP '"ntDownloadX64Url"\s*:\s*"\K[^"]+')
+          NT_URL="https://dldir1v6.qq.com/qqfile/qq/QQNT/eb263b35/QQ9.9.23.42086_x64.exe"
+          QQ_ZIP="$(basename "$NT_URL")"
+          aria2c -x16 -s16 -k1M -o "$QQ_ZIP" "$NT_URL"
+
+          QQ_EXTRACT="$TMPDIR/qq_extracted"
+          mkdir -p "$QQ_EXTRACT"
+          7z x -y -o"$QQ_EXTRACT" "$QQ_ZIP" >/dev/null
+
+          # -----------------------------
+          # 2) 下载 Node.js Windows x64 zip 22.11.0
+          # -----------------------------
+          NODE_VER="22.11.0"
+          NODE_URL="https://nodejs.org/dist/v$NODE_VER/node-v$NODE_VER-win-x64.zip"
+          NODE_ZIP="node-v$NODE_VER-win-x64.zip"
+          aria2c -x1 -s1 -k1M -o "$NODE_ZIP" "$NODE_URL"
+
+          NODE_EXTRACT="$TMPDIR/node_extracted"
+          mkdir -p "$NODE_EXTRACT"
+          unzip -q "$NODE_ZIP" -d "$NODE_EXTRACT"
+
+          # -----------------------------
+          # 3) 创建输出目录
+          # -----------------------------
+          OUT_DIR="$GITHUB_WORKSPACE/NapCat.Shell.Windows.Node"
+          mkdir -p "$OUT_DIR/NapCat.Shell.Windows.Node"
+
+          # -----------------------------
+          # 4) 解压 NapCat.Shell.zip 到 napcat
+          # -----------------------------
+          cp -a "$GITHUB_WORKSPACE/artifacts/NapCat.Shell/." "$OUT_DIR/napcat/"
+
+          # -----------------------------
+          # 5) 拷贝 QQ 文件到 NapCat.Shell.Windows.Node
+          # -----------------------------
+          QQ_TARGETS=("avif_convert.dll" "broadcast_ipc.dll" "config.json" "libglib-2.0-0.dll" "libgobject-2.0-0.dll" "libvips-42.dll" "ncnn.dll" "opencv.dll" "package.json" "QBar.dll" "wrapper.node")
+          for name in "${QQ_TARGETS[@]}"; do
+            find "$QQ_EXTRACT" -iname "$name" -exec cp -a {} "$OUT_DIR" \; || true
+          done
+
+          # -----------------------------
+          # 6) 拷贝仓库文件 napcat.bat 和 index.js
+          # -----------------------------
+          cp -a "$GITHUB_WORKSPACE/packages/napcat-develop/napcat.bat" "$OUT_DIR/" || true
+          cp -a "$GITHUB_WORKSPACE/packages/napcat-develop/index.js" "$OUT_DIR/" || true
+          cp -a "$GITHUB_WORKSPACE/packages/napcat-develop/QQNT.dll" "$OUT_DIR/" || true
+          # -----------------------------
+          # 7) 拷贝 Node.exe 到 NapCat.Shell.Windows.Node
+          # -----------------------------
+          cp -a "$NODE_EXTRACT/node-v$NODE_VER-win-x64/node.exe" "$OUT_DIR/" || true
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NapCat.Shell.Windows.Node
+          path: NapCat.Shell.Windows.Node
+
+  release-napcat:
+    needs: [Build-Framework, Build-Shell, Download-QNX64]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      - name: Zip Artifacts
+        run: |
+            cd artifacts
+            [ -d NapCat.Framework ] && (cd NapCat.Framework && zip -qr ../../NapCat.Framework.zip .)
+            [ -d NapCat.Shell ] && (cd NapCat.Shell && zip -qr ../../NapCat.Shell.zip .)
+            [ -d NapCat.Shell.Windows.Node ] && (cd NapCat.Shell.Windows.Node && zip -qr ../../NapCat.Shell.Windows.Node.zip .)
+            cd ..
+      
+      - name: Generate release note via OpenRouter
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_API_URL: ${{ env.OPENROUTER_API_URL }}
+          OPENROUTER_MODEL: ${{ env.OPENROUTER_MODEL }}
+          GITHUB_OWNER: "NapNeKo"   # 替换成你的 repo owner
+          GITHUB_REPO: "NapCatQQ"   # 替换成你的 repo 名
+        run: |
+          set -euo pipefail
+
+          # 当前 tag
+          CURRENT_TAG="${GITHUB_REF#refs/tags/}"
+          echo "Current tag: $CURRENT_TAG"
+
+          # 从 GitHub API 获取 tag 列表
+          TAGS_JSON=$(curl -s "https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/tags?per_page=100")
+          TAGS=( $(echo "$TAGS_JSON" | jq -r '.[].name' | sort -V) )
+
+          # 找到上一个 tag
+          PREV_TAG=""
+          for i in "${!TAGS[@]}"; do
+            if [ "${TAGS[$i]}" = "$CURRENT_TAG" ]; then
+              if [ $i -gt 0 ]; then
+                PREV_TAG="${TAGS[$((i-1))]}"
+              fi
+              break
+            fi
+          done
+
+          if [ -z "$PREV_TAG" ]; then
+            echo "❌ Could not find previous tag for $CURRENT_TAG, aborting."
+            exit 1
+          fi
+
+          echo "Previous tag: $PREV_TAG"
+
+          # 强制拉取上一个 tag 和当前 tag
+          git fetch origin "refs/tags/$PREV_TAG:refs/tags/$PREV_TAG" --force
+          git fetch origin "refs/tags/$CURRENT_TAG:refs/tags/$CURRENT_TAG" --force
+
+          # 获取 commit title + body + 作者，保留换行
+          COMMITS=$(git log --pretty=format:'%h %B (%an)' "$PREV_TAG".."$CURRENT_TAG" | sed 's/$/\\n/')
+
+          echo "Commit list from $PREV_TAG to $CURRENT_TAG:"
+          echo -e "$COMMITS"
+
+          # 读取 prompt
+          PROMPT_FILE=".github/prompt/release_note_prompt.txt"
+          SYSTEM_PROMPT=$(<"$PROMPT_FILE")
+
+          # 构建用户内容
+          USER_CONTENT="当前真正的版本: $CURRENT_TAG\n提交列表:\n$COMMITS"
+
+          # 构建请求 JSON
+          BODY=$(jq -n \
+            --arg system "$SYSTEM_PROMPT" \
+            --arg user "$USER_CONTENT" \
+            '{model: env.OPENROUTER_MODEL, messages:[{role:"system", content:$system},{role:"user", content:$user}], temperature:0.3, max_tokens:800}')
+
+          echo "=== OpenRouter request body ==="
+          echo "$BODY" | jq .
+
+          # 调用 OpenRouter
+          RESPONSE=$(curl -s -X POST "$OPENROUTER_API_URL" \
+            -H "Authorization: Bearer $OPENROUTER_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$BODY")
+
+          echo "=== OpenRouter raw response ==="
+          echo "$RESPONSE" | jq .
+
+          # 提取生成内容
+          RELEASE_BODY=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // .choices[0].text // ""')
+
+          if [ -z "$RELEASE_BODY" ]; then
+            echo "❌ OpenRouter failed to generate release note, terminating workflow."
+            exit 1
+          fi
+
+          # 输出到 CHANGELOG.md
+          echo -e "$RELEASE_BODY" > CHANGELOG.md
+          echo "=== generated release note ==="
+          cat CHANGELOG.md
 
       - name: Create Release Draft and Upload Artifacts
         uses: softprops/action-gh-release@v1
         with:
-          name: NapCat
+          name: NapCat ${{ github.ref_name }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          body: Automated release artifact (no version detection)
+          body_path: CHANGELOG.md
           files: |
+            NapCat.Shell.Windows.Node.zip
             NapCat.Framework.zip
             NapCat.Shell.zip
           draft: true
