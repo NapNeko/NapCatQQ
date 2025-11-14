@@ -1,6 +1,6 @@
-import { NodeIQQNTWrapperSession } from '@/napcat-core/wrapper';
+import { NodeIQQNTWrapperSession } from 'napcat-core/wrapper';
 import { randomUUID } from 'crypto';
-import { ListenerNamingMapping, ServiceNamingMapping } from '@/napcat-core';
+import { ListenerNamingMapping, ServiceNamingMapping } from 'napcat-core/index';
 
 interface InternalMapKey {
   timeout: number;

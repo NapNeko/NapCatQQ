@@ -32,7 +32,7 @@ import {
   SendTextElement,
   SendVideoElement,
   Peer,
-} from '@/napcat-core';
+} from 'napcat-core/index';
 import { ForwardMsgBuilder } from 'napcat-common/src/forward-msg-builder';
 import { PacketMsg, PacketSendMsgElement } from '@/napcat-core/packet/message/message';
 

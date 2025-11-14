@@ -1,5 +1,5 @@
 import { PacketHighwayContext } from '@/napcat-core/packet/highway/highwayContext';
-import { NapCatCore } from '@/napcat-core';
+import { NapCatCore } from 'napcat-core/index';
 import { PacketLogger } from '@/napcat-core/packet/context/loggerContext';
 import { NapCoreContext } from '@/napcat-core/packet/context/napCoreContext';
 import { PacketClientContext } from '@/napcat-core/packet/context/clientContext';

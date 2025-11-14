@@ -1,7 +1,7 @@
 import path from 'node:path';
 import fs from 'fs';
 import os from 'node:os';
-import { QQLevel } from '@/napcat-core';
+import { QQLevel } from 'napcat-core/index';
 import { QQVersionConfigType } from './types';
 
 export async function solveProblem<T extends (...arg: any[]) => any> (func: T, ...args: Parameters<T>): Promise<ReturnType<T> | undefined> {
