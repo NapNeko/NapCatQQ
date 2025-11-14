@@ -88,7 +88,8 @@ jobs:
           # -----------------------------
           # 1) 下载 QQ x64
           # -----------------------------
-          JS_URL="https://cdn-go.cn/qq-web/im.qq.com_new/latest/rainbow/windowsConfig.js"
+          # JS_URL="https://cdn-go.cn/qq-web/im.qq.com_new/latest/rainbow/windowsConfig.js"
+          JS_URL="https://slave.docadan488.workers.dev/proxy?url=https://cdn-go.cn/qq-web/im.qq.com_new/latest/rainbow/windowsConfig.js"
           NT_URL=$(curl -fsSL "$JS_URL" | grep -oP '"ntDownloadX64Url"\s*:\s*"\K[^"]+')
           QQ_ZIP="$(basename "$NT_URL")"
           aria2c -x16 -s16 -k1M -o "$QQ_ZIP" "$NT_URL"
