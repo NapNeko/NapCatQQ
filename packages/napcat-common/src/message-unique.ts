@@ -1,4 +1,4 @@
-import { Peer } from '@/napcat-core';
+import { Peer } from 'napcat-core/index';
 import crypto from 'crypto';
 
 export class LimitedHashTable<K, V> {

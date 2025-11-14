@@ -1,5 +1,5 @@
-import type { LoginListItem, SelfInfo } from '@/napcat-core';
-import type { OneBotConfig } from '@/napcat-onebot/config/config';
+import type { LoginListItem, SelfInfo } from 'napcat-core';
+import type { OneBotConfig } from 'napcat-onebot/config/config';
 
 interface LoginRuntimeType {
   LoginCurrentTime: number;

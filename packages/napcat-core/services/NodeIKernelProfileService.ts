@@ -1,5 +1,5 @@
 import { AnyCnameRecord } from 'node:dns';
-import { BizKey, ModifyProfileParams, NodeIKernelProfileListener, ProfileBizType, SimpleInfo, UserDetailInfoByUin, UserDetailInfoListenerArg, UserDetailSource } from '@/napcat-core';
+import { BizKey, ModifyProfileParams, NodeIKernelProfileListener, ProfileBizType, SimpleInfo, UserDetailInfoByUin, UserDetailInfoListenerArg, UserDetailSource } from 'napcat-core/index';
 import { GeneralCallResult } from '@/napcat-core/services/common';
 
 export interface NodeIKernelProfileService {

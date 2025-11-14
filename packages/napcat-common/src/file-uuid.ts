@@ -1,4 +1,4 @@
-import { Peer } from '@/napcat-core';
+import { Peer } from 'napcat-core/index';
 import { randomUUID } from 'crypto';
 
 class TimeBasedCache<K, V> {

@@ -1,5 +1,5 @@
-import { FriendRequest, FriendV2 } from '@/napcat-core/types';
-import { BuddyListReqType, InstanceContext, NapCatCore } from '@/napcat-core/index';
+import { FriendRequest, FriendV2 } from 'napcat-core/types';
+import { BuddyListReqType, InstanceContext, NapCatCore } from 'napcat-core/index';
 import { LimitedHashTable } from 'napcat-common/src/message-unique';
 
 export class NTQQFriendApi {
