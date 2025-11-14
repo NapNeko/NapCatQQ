@@ -42,9 +42,9 @@ export default class WebUIManager {
     return data.data as ServerResponse<T>;
   }
 
-  public static async getPackageInfo () {
+  public static async GetNapCatVersion () {
     const { data } =
-      await serverRequest.get<ServerResponse<PackageInfo>>('/base/PackageInfo');
+      await serverRequest.get<ServerResponse<PackageInfo>>('/base/GetNapCatVersion');
     return data.data;
   }
 

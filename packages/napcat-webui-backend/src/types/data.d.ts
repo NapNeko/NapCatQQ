@@ -18,5 +18,5 @@ interface LoginRuntimeType {
     QQLoginList: string[];
     NewQQLoginList: LoginListItem[];
   };
-  packageJson: object;
+  NapCatVersion: string;
 }

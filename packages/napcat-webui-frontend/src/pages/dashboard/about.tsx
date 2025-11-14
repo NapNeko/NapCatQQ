@@ -19,7 +19,7 @@ import logo from '@/assets/images/logo.png';
 import WebUIManager from '@/controllers/webui_manager';
 
 function VersionInfo () {
-  const { data, loading, error } = useRequest(WebUIManager.getPackageInfo);
+  const { data, loading, error } = useRequest(WebUIManager.GetNapCatVersion);
   return (
     <div className='flex items-center gap-2 text-2xl font-bold'>
       <div className='flex items-center gap-2'>
