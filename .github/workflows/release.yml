@@ -6,7 +6,7 @@ on:
 permissions: write-all
 
 jobs:
-  Build-LiteLoader:
+  Build-Framework:
     runs-on: ubuntu-latest
     steps:
       - name: Clone Main Repository
@@ -57,7 +57,7 @@ jobs:
           path: shell-dist
 
   release-napcat:
-    needs: [Build-LiteLoader, Build-Shell]
+    needs: [Build-Framework, Build-Shell]
     runs-on: ubuntu-latest
     steps:
       - name: Download All Artifact

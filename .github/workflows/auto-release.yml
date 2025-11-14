@@ -14,7 +14,7 @@ env:
   RELEASE_NAME: "NapCat"
 
 jobs:
-  Build-LiteLoader:
+  Build-Framework:
     runs-on: ubuntu-latest
     steps:
       - name: Clone Main Repository
@@ -148,7 +148,7 @@ jobs:
           path: NapCat.Shell.Windows.Node
 
   release-napcat:
-    needs: [Build-LiteLoader, Build-Shell, Download-QNX64]
+    needs: [Build-Framework, Build-Shell, Download-QNX64]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

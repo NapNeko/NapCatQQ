@@ -30,7 +30,7 @@ body:
     id: napcat-version
     attributes:
       label: NapCat 版本
-      description: 可在 LiteLoaderQQNT 的设置页或是 QQNT 的设置页侧栏中找到
+      description: 可在 WebUI 的「系统信息」页中找到
       placeholder: 1.0.0
     validations:
       required: true
