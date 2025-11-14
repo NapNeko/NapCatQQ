@@ -40,7 +40,8 @@
     "allowJs": true
   },
   "include": [
-    "vite-plugin-version.js"
+    "*.js",
+    "**/*.js"
   ],
   "exclude": [
     "node_modules",
