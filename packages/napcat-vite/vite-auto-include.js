@@ -35,7 +35,6 @@ export function autoIncludeTSPlugin(options) {
 
         transform(code, id) {
             for (const [entry, tsFiles] of Object.entries(tsFilesMap)) {
-                // 检查id是否匹配entry（支持完整路径或相对路径）
                 const isMatch = id.endsWith(entry) || id.includes(entry);
                 if (isMatch && tsFiles.length > 0) {
                     const imports = tsFiles.map(filePath => {
@@ -43,11 +42,18 @@ export function autoIncludeTSPlugin(options) {
                         return `import './${relativePath}';`;
                     }).join('\n');
 
-                    return imports + '\n' + code;
+                    const transformedCode = imports + '\n' + code;
+
+                    return {
+                        code: transformedCode,
+                        map: { mappings: '' } // 空映射即可，VSCode 可以在 TS 上断点
+                    };
                 }
             }
-            return code;
+
+            return null;
         },
+
     };
 }
 

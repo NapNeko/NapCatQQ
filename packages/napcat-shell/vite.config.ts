@@ -48,7 +48,7 @@ const ShellBaseConfig = () =>
       },
     },
     build: {
-      sourcemap: false,
+      sourcemap: true,
       target: 'esnext',
       minify: false,
       lib: {
@@ -61,7 +61,7 @@ const ShellBaseConfig = () =>
         fileName: (_, entryName) => `${entryName}.mjs`,
       },
       rollupOptions: {
-        external: [...nodeModules, ...external],
+        external: [...nodeModules, ...external]
       },
     },
   });

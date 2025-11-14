@@ -1,2 +1,9 @@
 {
+    "debug.node.sourceMapPathOverrides": {
+        "../../napcat-onebot/*": "${workspaceFolder}/packages/napcat-onebot/*",
+        "../../napcat-core/*": "${workspaceFolder}/packages/napcat-core/*",
+        "../../napcat-common/*": "${workspaceFolder}/packages/napcat-common/*",
+        "../../napcat-webui-backend/*": "${workspaceFolder}/packages/napcat-webui-backend/*",
+        "../../napcat-pty/*": "${workspaceFolder}/packages/napcat-pty/*"
+    }
 }
