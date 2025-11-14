@@ -1,6 +1,7 @@
 import type { LoginRuntimeType } from '../types/data';
 import packageJson from '../../../../package.json';
 import store from 'napcat-common/src/store';
+import { napCatVersion } from 'napcat-common/src/version';
 
 const LoginRuntime: LoginRuntimeType = {
   LoginCurrentTime: Date.now(),
@@ -35,7 +36,7 @@ const LoginRuntime: LoginRuntimeType = {
 
   },
 };
-
+packageJson.version = napCatVersion;
 export const WebUiDataRuntime = {
   setWebUiTokenChangeCallback (func: (token: string) => Promise<void>): void {
     LoginRuntime.onWebUiTokenChange = func;
