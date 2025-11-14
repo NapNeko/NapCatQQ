@@ -72,7 +72,6 @@ export class OB11HttpServerAdapter extends IOB11NetworkAdapter<HttpServerConfig>
         return res.status(400).send('Invalid JSON');
       });
     });
-    // @ts-ignore
     this.app.use((req, res, next) => this.authorize(this.config.token, req, res, next));
     this.app.use(async (req, res) => {
       await this.handleRequest(req, res);
