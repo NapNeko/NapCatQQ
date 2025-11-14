@@ -232,25 +232,32 @@ jobs:
           echo "$BODY" | jq .
 
           # 调用 OpenRouter
-          RESPONSE=$(curl -s -X POST "$OPENROUTER_API_URL" \
+          if RESPONSE=$(curl -s -X POST "$OPENROUTER_API_URL" \
             -H "Authorization: Bearer $OPENROUTER_API_KEY" \
             -H "Content-Type: application/json" \
-            -d "$BODY")
-          echo "=== raw response ==="
-          echo "$RESPONSE"  
-          echo "=== OpenRouter raw response ==="
-          echo "$RESPONSE" | jq .
+            -d "$BODY"); then
+            echo "=== raw response ==="
+            echo "$RESPONSE"  
+            echo "=== OpenRouter raw response ==="
+            if echo "$RESPONSE" | jq . >/dev/null 2>&1; then
+              echo "$RESPONSE" | jq .
+            else
+              echo "jq failed to parse response"
+            fi
 
-          # 提取生成内容
-          RELEASE_BODY=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // .choices[0].text // ""')
+            # 提取生成内容
+            RELEASE_BODY=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // .choices[0].text // ""' 2>/dev/null || echo "")
 
-          if [ -z "$RELEASE_BODY" ]; then
-            echo "❌ OpenRouter failed to generate release note, terminating workflow."
-            exit 1
+            if [ -z "$RELEASE_BODY" ]; then
+              echo "❌ OpenRouter failed to generate release note, using default.md"
+              cp .github/prompt/default.md CHANGELOG.md
+            else
+              echo -e "$RELEASE_BODY" > CHANGELOG.md
+            fi
+          else
+            echo "❌ Curl failed, using default.md"
+            cp .github/prompt/default.md CHANGELOG.md
           fi
-
-          # 输出到 CHANGELOG.md
-          echo -e "$RELEASE_BODY" > CHANGELOG.md
           echo "=== generated release note ==="
           cat CHANGELOG.md
 
