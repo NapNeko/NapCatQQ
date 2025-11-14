@@ -5,6 +5,7 @@ import nodeResolve from '@rollup/plugin-node-resolve';
 import { autoIncludeTSPlugin } from "napcat-vite/vite-auto-include.js";
 import { builtinModules } from 'module';
 import react from '@vitejs/plugin-react-swc';
+import napcatVersion from "napcat-vite/vite-plugin-version.js";
 //依赖排除
 const external = [
   'silk-wasm',
@@ -36,6 +37,7 @@ const FrameworkBaseConfigPlugin: PluginOption[] = [
     ],
   }),
   nodeResolve(),
+  napcatVersion(),
 ];
 const FrameworkBaseConfig = () =>
   defineConfig({

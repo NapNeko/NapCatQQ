@@ -21,6 +21,7 @@
         "napcat-common": "workspace:*",
         "napcat-onebot": "workspace:*",
         "napcat-webui-backend": "workspace:*",
+        "napcat-vite": "workspace:*",
         "napcat-qrcode": "workspace:*"
     },
     "devDependencies": {
