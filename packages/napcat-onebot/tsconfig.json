@@ -36,9 +36,6 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      "@onebot/*": [
-        "*"
-      ],
       "@/napcat-onebot/*": [
         "*"
       ]
