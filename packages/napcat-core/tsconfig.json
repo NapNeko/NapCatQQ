@@ -36,9 +36,6 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      "@core/*": [
-        "*"
-      ],
       "@/napcat-core/*": [
         "*"
       ]

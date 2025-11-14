@@ -35,14 +35,6 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "baseUrl": ".",
-    "paths": {
-      "@onebot/*": [
-        "*"
-      ],
-      "@/napcat-onebot/*": [
-        "*"
-      ]
-    },
     "skipLibCheck": true,
     "skipDefaultLibCheck": true
   },
