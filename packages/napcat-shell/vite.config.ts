@@ -34,7 +34,7 @@ const ShellBaseConfigPlugin: PluginOption[] = [
   nodeResolve(),
   napcatVersion(),
 ];
-const ShellBaseConfig = () =>
+const ShellBaseConfig = (source_map: boolean = false) =>
   defineConfig({
     resolve: {
       conditions: ['node', 'default'],
@@ -48,7 +48,7 @@ const ShellBaseConfig = () =>
       },
     },
     build: {
-      sourcemap: true,
+      sourcemap: source_map,
       target: 'esnext',
       minify: false,
       lib: {
@@ -65,7 +65,13 @@ const ShellBaseConfig = () =>
       },
     },
   });
-export default defineConfig((): UserConfig => {
+export default defineConfig(({ mode }): UserConfig => {
+  if (mode === 'development') {
+    return {
+      ...ShellBaseConfig(true),
+      plugins: [...ShellBaseConfigPlugin],
+    };
+  }
   return {
     ...ShellBaseConfig(),
     plugins: [...ShellBaseConfigPlugin],

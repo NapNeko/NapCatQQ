@@ -6,6 +6,7 @@
     "main": "index.ts",
     "scripts": {
         "build": "vite build",
+        "build:dev": "vite build --mode development",
         "typecheck": "tsc --noEmit --skipLibCheck -p tsconfig.json"
     },
     "exports": {
