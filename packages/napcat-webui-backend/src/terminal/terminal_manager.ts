@@ -4,7 +4,6 @@ import { AuthHelper } from '../helper/SignToken';
 import { LogWrapper } from 'napcat-common/src/log';
 import { WebSocket, WebSocketServer } from 'ws';
 import os from 'os';
-// @ts-ignore
 import { IPty, spawn as ptySpawn } from 'napcat-pty';
 import { randomUUID } from 'crypto';
 
@@ -136,7 +135,6 @@ class TerminalManager {
       isClosing: false,
       buffer: '', // 初始化终端内容缓存
     };
-// @ts-ignore
     pty.onData((data: any) => {
       // 追加数据到 buffer
       instance.buffer += data;
@@ -147,7 +145,6 @@ class TerminalManager {
         }
       });
     });
-// @ts-ignore
     pty.onExit(() => {
       this.closeTerminal(id);
     });
