@@ -153,6 +153,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+            fetch-depth: 0
 
       - name: Download Artifacts
         uses: actions/download-artifact@v4
@@ -166,7 +168,7 @@ jobs:
             [ -d NapCat.Shell ] && (cd NapCat.Shell && zip -qr ../../NapCat.Shell.zip .)
             [ -d NapCat.Shell.Windows.Node ] && (cd NapCat.Shell.Windows.Node && zip -qr ../../NapCat.Shell.Windows.Node.zip .)
             cd ..
-      
+
       - name: Generate release note via OpenRouter
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
