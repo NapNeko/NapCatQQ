@@ -11,7 +11,7 @@ import {
 import { ChatType, Peer } from '@/napcat-core/index';
 import { calculateSha1, calculateSha1StreamBytes, computeMd5AndLengthWithLimit } from '@/napcat-core/packet/utils/crypto/hash';
 import UploadGroupImage from '@/napcat-core/packet/transformer/highway/UploadGroupImage';
-import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { NapProtoMsg } from 'napcat-protobuf';
 import * as proto from '@/napcat-core/packet/transformer/proto';
 import * as trans from '@/napcat-core/packet/transformer';
 import fs from 'fs';

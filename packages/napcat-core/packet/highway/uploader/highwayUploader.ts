@@ -1,5 +1,5 @@
 // import * as tea from '@/napcat-core/packet/utils/crypto/tea';
-import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { NapProtoMsg } from 'napcat-protobuf';
 import { PacketHighwayTrans } from '@/napcat-core/packet/highway/client';
 import { PacketLogger } from '@/napcat-core/packet/context/loggerContext';
 import * as proto from '@/napcat-core/packet/transformer/proto';

@@ -1,7 +1,23 @@
 import type { LoginListItem, SelfInfo } from 'napcat-core';
 import type { OneBotConfig } from 'napcat-onebot/config/config';
 
-interface LoginRuntimeType {
+export interface WebUiConfigType {
+  host: string;
+  port: number;
+  token: string;
+  loginRate: number;
+}
+export interface WebUiCredentialInnerJson {
+  CreatedTime: number;
+  HashEncoded: string;
+}
+
+export interface WebUiCredentialJson {
+  Data: WebUiCredentialInnerJson;
+  Hmac: string;
+}
+
+export interface LoginRuntimeType {
   LoginCurrentTime: number;
   LoginCurrentRate: number;
   QQLoginStatus: boolean;
@@ -20,3 +36,5 @@ interface LoginRuntimeType {
   };
   NapCatVersion: string;
 }
+
+export default {};

@@ -1,4 +1,4 @@
-import { ProtoField, ScalarType } from '@napneko/nap-proto-core';
+import { ProtoField, ScalarType } from 'napcat-protobuf';
 
 export const GroupRecallMsg = {
   type: ProtoField(1, ScalarType.UINT32),

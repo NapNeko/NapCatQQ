@@ -1,5 +1,5 @@
 // TODO: further refactor in NapCat.Packet v2
-import { NapProtoMsg, ProtoField, ScalarType } from '@napneko/nap-proto-core';
+import { NapProtoMsg, ProtoField, ScalarType } from 'napcat-protobuf';
 
 const LikeDetail = {
   txt: ProtoField(1, ScalarType.STRING),

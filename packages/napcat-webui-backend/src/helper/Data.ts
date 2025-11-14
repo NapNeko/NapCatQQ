@@ -1,6 +1,6 @@
-import type { LoginRuntimeType } from '../types/data';
 import store from 'napcat-common/src/store';
 import { napCatVersion } from 'napcat-common/src/version';
+import type { LoginRuntimeType } from '../types';
 
 const LoginRuntime: LoginRuntimeType = {
   LoginCurrentTime: Date.now(),

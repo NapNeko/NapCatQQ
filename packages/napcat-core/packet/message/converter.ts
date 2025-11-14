@@ -32,7 +32,7 @@ import {
   PacketMultiMsgElement,
 } from '@/napcat-core/packet/message/element';
 import { PacketMsg, PacketSendMsgElement } from '@/napcat-core/packet/message/message';
-import { NapProtoDecodeStructType } from '@napneko/nap-proto-core';
+import { NapProtoDecodeStructType } from 'napcat-protobuf';
 import { Elem } from '@/napcat-core/packet/transformer/proto';
 
 const SupportedElementTypes = [

@@ -1,4 +1,4 @@
-import { ProtoField, ScalarType } from '@napneko/nap-proto-core';
+import { ProtoField, ScalarType } from 'napcat-protobuf';
 import { OidbSvcTrpcTcp0XE37_800_1200Metadata } from '@/napcat-core/packet/transformer/proto';
 
 export const OidbSvcTrpcTcp0XE37_800 = {

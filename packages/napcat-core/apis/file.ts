@@ -26,7 +26,7 @@ import { SendMessageContext } from 'napcat-onebot/api/msg';
 import { getFileTypeForSendType } from '../helper/msg';
 import { FFmpegService } from 'napcat-common/src/ffmpeg';
 import { rkeyDataType } from '../types/file';
-import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { NapProtoMsg } from 'napcat-protobuf';
 import { FileId } from '../packet/transformer/proto/misc/fileid';
 import { imageSizeFallBack } from 'napcat-image-size';
 

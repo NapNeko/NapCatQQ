@@ -1,5 +1,5 @@
 import * as proto from '@/napcat-core/packet/transformer/proto';
-import { NapProtoMsg } from '@napneko/nap-proto-core';
+import { NapProtoMsg } from 'napcat-protobuf';
 import { OidbPacket, PacketBufBuilder, PacketTransformer } from '@/napcat-core/packet/transformer/base';
 
 class FetchSessionKey extends PacketTransformer<typeof proto.HttpConn0x6ff_501Response> {

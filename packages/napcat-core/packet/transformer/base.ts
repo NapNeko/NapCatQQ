@@ -1,4 +1,4 @@
-import { NapProtoDecodeStructType } from '@napneko/nap-proto-core';
+import { NapProtoDecodeStructType } from 'napcat-protobuf';
 import { PacketMsgBuilder } from '@/napcat-core/packet/message/builder';
 
 export type PacketBuf = Buffer & { readonly hexNya: unique symbol; };

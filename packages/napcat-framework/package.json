@@ -5,7 +5,8 @@
     "type": "module",
     "main": "index.ts",
     "scripts": {
-        "build": "vite build"
+        "build": "vite build",
+        "typecheck": "tsc --noEmit --skipLibCheck -p tsconfig.json"
     },
     "exports": {
         ".": {

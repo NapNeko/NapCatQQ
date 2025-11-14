@@ -1,5 +1,5 @@
 import * as proto from '@/napcat-core/packet/transformer/proto';
-import { NapProtoEncodeStructType, NapProtoMsg } from '@napneko/nap-proto-core';
+import { NapProtoEncodeStructType, NapProtoMsg } from 'napcat-protobuf';
 import { OidbPacket, PacketTransformer } from '@/napcat-core/packet/transformer/base';
 import OidbBase from '@/napcat-core/packet/transformer/oidb/oidbBase';
 
