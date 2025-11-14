@@ -1,264 +1,83 @@
-name: AI RELEASE NapCat
+name: Auto Release Docker
 
 on:
-  workflow_dispatch:
-  push:
-    tags:
-      - '*'
-
-permissions: write-all
-
-env:
-  OPENROUTER_API_URL: https://91vip.futureppo.top/v1/chat/completions
-  OPENROUTER_MODEL: "kimi-k2-0905-turbo"
-  RELEASE_NAME: "NapCat"
+  release:
+    types: [published]
 
 jobs:
-  Build-Framework:
+  shell-docker:
     runs-on: ubuntu-latest
     steps:
-      - name: Clone Main Repository
-        uses: actions/checkout@v4
-      - name: Use Node.js 20.X
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-      - name: Build NapCat.Framework
-        run: |
-          npm i -g pnpm
-          pnpm i
-          pnpm --filter napcat-webui-frontend run build || exit 1
-          pnpm run build:framework
-          mv packages/napcat-framework/dist framework-dist
-          cd framework-dist
-          npm install --omit=dev
-          rm ./package-lock.json || exit 0
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: NapCat.Framework
-          path: framework-dist
-
-  Build-Shell:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Clone Main Repository
-        uses: actions/checkout@v4
-      - name: Use Node.js 20.X
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-      - name: Build NapCat.Shell
-        run: |
-          npm i -g pnpm
-          pnpm i
-          pnpm --filter napcat-webui-frontend run build || exit 1
-          pnpm run build:shell
-          mv packages/napcat-shell/dist shell-dist
-          cd shell-dist
-          npm install --omit=dev
-          rm ./package-lock.json || exit 0
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: NapCat.Shell
-          path: shell-dist
-  Download-QNX64:
-    needs: Build-Shell
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: ./artifacts
-
-      - name: Setup tools
-        run: |
-          sudo apt update
-          sudo apt install -y aria2 unzip zip p7zip-full curl jq
-
-      - name: Download QQ x64, Node.js and Assemble NapCat.Shell.Windows.Node.zip
-        run: |
-          set -euo pipefail
-          TMPDIR=$(mktemp -d)
-          cd "$TMPDIR"
-
-          # -----------------------------
-          # 1) 下载 QQ x64
-          # -----------------------------
-          # JS_URL="https://cdn-go.cn/qq-web/im.qq.com_new/latest/rainbow/windowsConfig.js"
-          # JS_URL="https://slave.docadan488.workers.dev/proxy?url=https://cdn-go.cn/qq-web/im.qq.com_new/latest/rainbow/windowsConfig.js"
-          # NT_URL=$(curl -fsSL "$JS_URL" | grep -oP '"ntDownloadX64Url"\s*:\s*"\K[^"]+')
-          NT_URL="https://dldir1v6.qq.com/qqfile/qq/QQNT/eb263b35/QQ9.9.23.42086_x64.exe"
-          QQ_ZIP="$(basename "$NT_URL")"
-          aria2c -x16 -s16 -k1M -o "$QQ_ZIP" "$NT_URL"
-
-          QQ_EXTRACT="$TMPDIR/qq_extracted"
-          mkdir -p "$QQ_EXTRACT"
-          7z x -y -o"$QQ_EXTRACT" "$QQ_ZIP" >/dev/null
-
-          # -----------------------------
-          # 2) 下载 Node.js Windows x64 zip 22.11.0
-          # -----------------------------
-          NODE_VER="22.11.0"
-          NODE_URL="https://nodejs.org/dist/v$NODE_VER/node-v$NODE_VER-win-x64.zip"
-          NODE_ZIP="node-v$NODE_VER-win-x64.zip"
-          aria2c -x1 -s1 -k1M -o "$NODE_ZIP" "$NODE_URL"
-
-          NODE_EXTRACT="$TMPDIR/node_extracted"
-          mkdir -p "$NODE_EXTRACT"
-          unzip -q "$NODE_ZIP" -d "$NODE_EXTRACT"
-
-          # -----------------------------
-          # 3) 创建输出目录
-          # -----------------------------
-          OUT_DIR="$GITHUB_WORKSPACE/NapCat.Shell.Windows.Node"
-          mkdir -p "$OUT_DIR/NapCat.Shell.Windows.Node"
-
-          # -----------------------------
-          # 4) 解压 NapCat.Shell.zip 到 napcat
-          # -----------------------------
-          cp -a "$GITHUB_WORKSPACE/artifacts/NapCat.Shell/." "$OUT_DIR/napcat/"
-
-          # -----------------------------
-          # 5) 拷贝 QQ 文件到 NapCat.Shell.Windows.Node
-          # -----------------------------
-          QQ_TARGETS=("avif_convert.dll" "broadcast_ipc.dll" "config.json" "libglib-2.0-0.dll" "libgobject-2.0-0.dll" "libvips-42.dll" "ncnn.dll" "opencv.dll" "package.json" "QBar.dll" "wrapper.node")
-          for name in "${QQ_TARGETS[@]}"; do
-            find "$QQ_EXTRACT" -iname "$name" -exec cp -a {} "$OUT_DIR" \; || true
-          done
-
-          # -----------------------------
-          # 6) 拷贝仓库文件 napcat.bat 和 index.js
-          # -----------------------------
-          cp -a "$GITHUB_WORKSPACE/packages/napcat-develop/napcat.bat" "$OUT_DIR/" || true
-          cp -a "$GITHUB_WORKSPACE/packages/napcat-develop/index.js" "$OUT_DIR/" || true
-          cp -a "$GITHUB_WORKSPACE/packages/napcat-develop/QQNT.dll" "$OUT_DIR/" || true
-          # -----------------------------
-          # 7) 拷贝 Node.exe 到 NapCat.Shell.Windows.Node
-          # -----------------------------
-          cp -a "$NODE_EXTRACT/node-v$NODE_VER-win-x64/node.exe" "$OUT_DIR/" || true
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: NapCat.Shell.Windows.Node
-          path: NapCat.Shell.Windows.Node
-
-  release-napcat:
-    needs: [Build-Framework, Build-Shell, Download-QNX64]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Download Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: ./artifacts
-
-      - name: Zip Artifacts
-        run: |
-            cd artifacts
-            [ -d NapCat.Framework ] && (cd NapCat.Framework && zip -qr ../../NapCat.Framework.zip .)
-            [ -d NapCat.Shell ] && (cd NapCat.Shell && zip -qr ../../NapCat.Shell.zip .)
-            [ -d NapCat.Shell.Windows.Node ] && (cd NapCat.Shell.Windows.Node && zip -qr ../../NapCat.Shell.Windows.Node.zip .)
-            cd ..
-      
-      - name: Generate release note via OpenRouter
+      - name: Trigger NapCat-Docker docker-publish workflow
         env:
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          OPENROUTER_API_URL: ${{ env.OPENROUTER_API_URL }}
-          OPENROUTER_MODEL: ${{ env.OPENROUTER_MODEL }}
-          GITHUB_OWNER: "NapNeKo"   # 替换成你的 repo owner
-          GITHUB_REPO: "NapCatQQ"   # 替换成你的 repo 名
+          GH_TOKEN: ${{ secrets.NAPCAT_BUILD }}
         run: |
-          set -euo pipefail
-
-          # 当前 tag
-          CURRENT_TAG="${GITHUB_REF#refs/tags/}"
-          echo "Current tag: $CURRENT_TAG"
-
-          # 从 GitHub API 获取 tag 列表
-          TAGS_JSON=$(curl -s "https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/tags?per_page=100")
-          TAGS=( $(echo "$TAGS_JSON" | jq -r '.[].name' | sort -V) )
-
-          # 找到上一个 tag
-          PREV_TAG=""
-          for i in "${!TAGS[@]}"; do
-            if [ "${TAGS[$i]}" = "$CURRENT_TAG" ]; then
-              if [ $i -gt 0 ]; then
-                PREV_TAG="${TAGS[$((i-1))]}"
-              fi
-              break
-            fi
-          done
-
-          if [ -z "$PREV_TAG" ]; then
-            echo "❌ Could not find previous tag for $CURRENT_TAG, aborting."
-            exit 1
-          fi
-
-          echo "Previous tag: $PREV_TAG"
-
-          # 强制拉取上一个 tag 和当前 tag
-          git fetch origin "refs/tags/$PREV_TAG:refs/tags/$PREV_TAG" --force
-          git fetch origin "refs/tags/$CURRENT_TAG:refs/tags/$CURRENT_TAG" --force
-
-          # 获取 commit title + body + 作者，保留换行
-          COMMITS=$(git log --pretty=format:'%h %B (%an)' "$PREV_TAG".."$CURRENT_TAG" | sed 's/$/\\n/')
-
-          echo "Commit list from $PREV_TAG to $CURRENT_TAG:"
-          echo -e "$COMMITS"
-
-          # 读取 prompt
-          PROMPT_FILE=".github/prompt/release_note_prompt.txt"
-          SYSTEM_PROMPT=$(<"$PROMPT_FILE")
-
-          # 构建用户内容
-          USER_CONTENT="当前真正的版本: $CURRENT_TAG\n提交列表:\n$COMMITS"
-
-          # 构建请求 JSON
-          BODY=$(jq -n \
-            --arg system "$SYSTEM_PROMPT" \
-            --arg user "$USER_CONTENT" \
-            '{model: env.OPENROUTER_MODEL, messages:[{role:"system", content:$system},{role:"user", content:$user}], temperature:0.3, max_tokens:800}')
-
-          echo "=== OpenRouter request body ==="
-          echo "$BODY" | jq .
-
-          # 调用 OpenRouter
-          RESPONSE=$(curl -s -X POST "$OPENROUTER_API_URL" \
-            -H "Authorization: Bearer $OPENROUTER_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d "$BODY")
-
-          echo "=== OpenRouter raw response ==="
-          echo "$RESPONSE" | jq .
-
-          # 提取生成内容
-          RELEASE_BODY=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // .choices[0].text // ""')
-
-          if [ -z "$RELEASE_BODY" ]; then
-            echo "❌ OpenRouter failed to generate release note, terminating workflow."
-            exit 1
-          fi
-
-          # 输出到 CHANGELOG.md
-          echo -e "$RELEASE_BODY" > CHANGELOG.md
-          echo "=== generated release note ==="
-          cat CHANGELOG.md
-
-      - name: Create Release Draft and Upload Artifacts
-        uses: softprops/action-gh-release@v1
-        with:
-          name: NapCat ${{ github.ref_name }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          body_path: CHANGELOG.md
-          files: |
-            NapCat.Shell.Windows.Node.zip
-            NapCat.Framework.zip
-            NapCat.Shell.zip
-          draft: true
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            https://api.github.com/repos/NapNeko/NapCat-Docker/actions/workflows/docker-publish.yml/dispatches \
+            -d '{"ref":"main"}'
+  framework-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger NapCat-Framework-Docker docker-publish workflow
+        env:
+          GH_TOKEN: ${{ secrets.NAPCAT_BUILD }}
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            https://api.github.com/repos/NapNeko/NapCat.Docker.Framework/actions/workflows/docker-image.yml/dispatches \
+            -d '{"ref":"main"}'
+  appimage-shell-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Get Latest NapCat Version
+        id: get_version
+        run: |
+            # 获取当前仓库的最新 tag
+            latest_tag=$(git describe --tags $(git rev-list --tags --max-count=1))
+            # 输出调试信息
+            echo "Debug: Latest NapCat Version is ${latest_tag}"
+            echo "latest_tag=${latest_tag}" >> $GITHUB_ENV
+      - name: Trigger Release NapCat AppImage Workflow
+        env:
+            GH_TOKEN: ${{ secrets.NAPCAT_BUILD }}
+            NAPCAT_VERSION: ${{ env.latest_tag }}
+            QQ_VERSION_X86_64: 'https://dldir1v6.qq.com/qqfile/qq/QQNT/8015ff90/linuxqq_3.2.21-42086_x86_64.AppImage' # 写死 QQ 版本
+            QQ_VERSION_ARM64: 'https://dldir1v6.qq.com/qqfile/qq/QQNT/8015ff90/linuxqq_3.2.21-42086_arm64.AppImage' # 写死 QQ 版本
+        run: |
+            echo "Debug: Triggering Release NapCat AppImage with napcat_version=${NAPCAT_VERSION}, qq_version_x86_64=${QQ_VERSION_X86_64}, qq_version_arm64=${QQ_VERSION_ARM64}"
+            curl -X POST \
+                -H "Accept: application/vnd.github+json" \
+                -H "Authorization: Bearer $GH_TOKEN" \
+                https://api.github.com/repos/NapNeko/NapCatAppImageBuild/actions/workflows/release.yml/dispatches \
+                -d "{\"ref\":\"main\",\"inputs\":{\"napcat_version\":\"${NAPCAT_VERSION}\",\"qq_version_x86_64\":\"${QQ_VERSION_X86_64}\",\"qq_version_arm64\":\"${QQ_VERSION_ARM64}\"}}"
+  node-shell-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Get Latest NapCat Version
+        id: get_version
+        run: |
+            # 获取当前仓库的最新 tag
+            latest_tag=$(git describe --tags $(git rev-list --tags --max-count=1))
+            # 输出调试信息
+            echo "Debug: Latest NapCat Version is ${latest_tag}"
+            echo "latest_tag=${latest_tag}" >> $GITHUB_ENV
+      - name: Trigger Release NapCat AppImage Workflow
+        env:
+            GH_TOKEN: ${{ secrets.NAPCAT_BUILD }}
+            NAPCAT_VERSION: ${{ env.latest_tag }}
+            QQ_VERSION_X86_64: 'https://dldir1v6.qq.com/qqfile/qq/QQNT/8015ff90/linuxqq_3.2.21-42086_x86_64.AppImage' # 写死 QQ 版本
+            QQ_VERSION_ARM64: 'https://dldir1v6.qq.com/qqfile/qq/QQNT/8015ff90/linuxqq_3.2.21-42086_arm64.AppImage' # 写死 QQ 版本
+        run: |
+            echo "Debug: Triggering Release NapCat AppImage with napcat_version=${NAPCAT_VERSION}, qq_url_amd64=${QQ_VERSION_X86_64}, qq_url_arm64=${QQ_VERSION_ARM64}"
+            curl -X POST \
+                -H "Accept: application/vnd.github+json" \
+                -H "Authorization: Bearer $GH_TOKEN" \
+                https://api.github.com/repos/NapNeko/NapCatLinuxNodeLoader/actions/workflows/release.yml/dispatches \
+                -d "{\"ref\":\"main\",\"inputs\":{\"napcat_version\":\"${NAPCAT_VERSION}\",\"qq_url_amd64\":\"${QQ_VERSION_X86_64}\",\"qq_url_arm64\":\"${QQ_VERSION_ARM64}\"}}"

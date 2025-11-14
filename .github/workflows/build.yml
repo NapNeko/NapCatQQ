@@ -1,4 +1,4 @@
-name: "Build Action"
+name: Build NapCat Artifacts
 on:
   workflow_dispatch:
   push:
