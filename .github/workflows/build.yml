@@ -8,7 +8,7 @@ on:
 permissions: write-all
 
 jobs:
-  Build-LiteLoader:
+  Build-Framework:
     runs-on: ubuntu-latest
     steps:
       - name: Clone Main Repository
