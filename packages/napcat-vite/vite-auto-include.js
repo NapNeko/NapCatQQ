@@ -12,6 +12,9 @@ export function autoIncludeTSPlugin(options) {
         async buildStart() {
             tsFilesMap = {};
             for (const { entry, dir } of entries) {
+                if (!tsFilesMap[entry]) {
+                    tsFilesMap[entry] = [];
+                }
                 const fullDir = path.resolve(dir);
                 const allTsFiles = await findTSFiles(fullDir);
 
@@ -29,7 +32,7 @@ export function autoIncludeTSPlugin(options) {
                     }
                 });
 
-                tsFilesMap[entry] = validFiles;
+                tsFilesMap[entry].push(...validFiles);
             }
         },
 
