@@ -4,6 +4,8 @@ import path, { resolve } from 'path';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import { builtinModules } from 'module';
 import napcatVersion from "napcat-vite/vite-plugin-version.js";
+import { autoIncludeTSPlugin } from "napcat-vite/vite-auto-include.js";
+import react from '@vitejs/plugin-react-swc';
 
 //依赖排除
 const external = [
@@ -11,8 +13,15 @@ const external = [
   'ws',
   'express'
 ];
+
 const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`)].flat();
 const ShellBaseConfigPlugin: PluginOption[] = [
+  react({ tsDecorators: true }),
+  autoIncludeTSPlugin({
+    entries: [
+      { entry: 'napcat.ts', dir: path.resolve(__dirname, '../napcat-onebot/action/test') }
+    ]
+  }),
   cp({
     targets: [
       { src: '../napcat-native/', dest: 'dist/native', flatten: false },

@@ -2,7 +2,9 @@ import cp from 'vite-plugin-cp';
 import { defineConfig, PluginOption, UserConfig } from 'vite';
 import path, { resolve } from 'path';
 import nodeResolve from '@rollup/plugin-node-resolve';
+import { autoIncludeTSPlugin } from "napcat-vite/vite-auto-include.js";
 import { builtinModules } from 'module';
+import react from '@vitejs/plugin-react-swc';
 //依赖排除
 const external = [
   'silk-wasm',
@@ -11,6 +13,12 @@ const external = [
 ];
 const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`)].flat();
 const FrameworkBaseConfigPlugin: PluginOption[] = [
+  autoIncludeTSPlugin({
+    entries: [
+      { entry: 'napcat.ts', dir: path.resolve(__dirname, '../napcat-onebot/action/test') }
+    ]
+  }),
+  react({ tsDecorators: true }),
   cp({
     targets: [
       { src: '../napcat-napi-loader/', dest: 'dist', flatten: true },

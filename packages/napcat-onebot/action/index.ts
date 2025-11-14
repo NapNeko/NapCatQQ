@@ -136,8 +136,9 @@ import { DownloadFileRecordStream } from './stream/DownloadFileRecordStream';
 import { DownloadFileImageStream } from './stream/DownloadFileImageStream';
 import { TestDownloadStream } from './stream/TestStreamDownload';
 import { UploadFileStream } from './stream/UploadFileStream';
+import { AutoRegisterRouter } from './auto-register';
 
-export function createActionMap (obContext: NapCatOneBot11Adapter, core: NapCatCore) {
+export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
   const actionHandlers = [
     new CleanStreamTempFile(obContext, core),
     new DownloadFileStream(obContext, core),
@@ -288,30 +289,35 @@ export function createActionMap (obContext: NapCatOneBot11Adapter, core: NapCatC
     new GetCollectionList(obContext, core),
   ];
 
-    type HandlerUnion = typeof actionHandlers[number];
-    type MapType = {
-      [H in HandlerUnion as H['actionName']]: H;
-    } & {
-      [H in HandlerUnion as `${H['actionName']}_async`]: H;
-    } & {
-      [H in HandlerUnion as `${H['actionName']}_rate_limited`]: H;
-    };
+  type HandlerUnion = typeof actionHandlers[number];
+  type MapType = {
+    [H in HandlerUnion as H['actionName']]: H;
+  } & {
+    [H in HandlerUnion as `${H['actionName']}_async`]: H;
+  } & {
+    [H in HandlerUnion as `${H['actionName']}_rate_limited`]: H;
+  };
 
-    const _map = new Map<keyof MapType, HandlerUnion>();
+  const _map = new Map<keyof MapType, HandlerUnion>();
 
-    actionHandlers.forEach(h => {
-      _map.set(h.actionName as keyof MapType, h);
-      _map.set(`${h.actionName}_async` as keyof MapType, h);
-      _map.set(`${h.actionName}_rate_limited` as keyof MapType, h);
-    });
-
-    // function get<K extends keyof MapType>(key: K): MapType[K];
-    // function get<K extends keyof MapType>(key: K): null;
-    // function get<K extends keyof MapType>(key: K): HandlerUnion | null | MapType[K]
-    function get<K extends keyof MapType> (key: K): MapType[K] | undefined {
-      return _map.get(key as keyof MapType) as MapType[K] | undefined;
-    }
-
-    return { get };
+  actionHandlers.forEach(h => {
+    _map.set(h.actionName as keyof MapType, h);
+    _map.set(`${h.actionName}_async` as keyof MapType, h);
+    _map.set(`${h.actionName}_rate_limited` as keyof MapType, h);
+  });
+  AutoRegisterRouter.forEach((ActionClass) => {
+    const handlerInstance = new ActionClass(obContext, core); // 延迟实例化
+    const actionName = handlerInstance.actionName; // 获取 actionName
+    _map.set(actionName as keyof MapType, handlerInstance as HandlerUnion);
+    _map.set(`${actionName}_async` as keyof MapType, handlerInstance as HandlerUnion);
+    _map.set(`${actionName}_rate_limited` as keyof MapType, handlerInstance as HandlerUnion);
+  });
+  // function get<K extends keyof MapType>(key: K): MapType[K];
+  // function get<K extends keyof MapType>(key: K): null;
+  // function get<K extends keyof MapType>(key: K): HandlerUnion | null | MapType[K]
+  function get<K extends keyof MapType>(key: K): MapType[K] | undefined {
+    return _map.get(key as keyof MapType) as MapType[K] | undefined;
+  }
+  return { get };
 }
 export type ActionMap = ReturnType<typeof createActionMap>;

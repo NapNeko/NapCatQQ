@@ -10,6 +10,8 @@ export interface InvalidCheckResult {
 }
 
 export const ActionName = {
+  TestAutoRegister01: 'test_auto_register_01',
+  TestAutoRegister02: 'test_auto_register_02',
   // 所有 Normal Stream Api 表示并未流传输 表示与流传输有关
   CleanStreamTempFile: 'clean_stream_temp_file',
 
