@@ -78,15 +78,18 @@ export class NTEventWrapper {
     return undefined;
   }
 
-  createListenerFunction<T> (listenerMainName: string, uniqueCode: string = ''): T {
+  createListenerFunction<T,   Listener extends keyof ListenerNamingMapping,
+    ListenerMethod extends FuncKeys<ListenerNamingMapping[Listener]>> (listenerMainName: string, uniqueCode: string = ''): T {
     const existListener = this.listenerManager.get(listenerMainName + uniqueCode);
     if (!existListener) {
       const Listener = this.createProxyDispatch(listenerMainName);
       const ServiceSubName = /^NodeIKernel(.*?)Listener$/.exec(listenerMainName)![1];
-      const Service = `NodeIKernel${ServiceSubName}Service/addKernel${ServiceSubName}Listener`;
-
-      // @ts-ignore
-      this.createEventFunction(Service)(Listener as T);
+      const Service = `NodeIKernel${ServiceSubName}Service/addKernel${ServiceSubName}Listener` as `${Listener}/${ListenerMethod}`;
+      this.createEventFunction<
+        keyof ServiceNamingMapping,
+        FuncKeys<ServiceNamingMapping[keyof ServiceNamingMapping]>,
+        (...args: any[]) => any
+      >(Service as `${keyof ServiceNamingMapping}/${FuncKeys<ServiceNamingMapping[keyof ServiceNamingMapping]>}`);
       this.listenerManager.set(listenerMainName + uniqueCode, Listener);
       return Listener as T;
     }

@@ -132,7 +132,6 @@ export class PacketMsgConverter {
       time: msg.time,
       msg: msg.msg.map((element) => {
         if (!this.isValidElementType(element.elementType)) return null;
-        // @ts-ignore
         return this.rawToPacketMsgConverters[element.elementType](element as MessageElement);
       }).filter((e) => e !== null),
     };
