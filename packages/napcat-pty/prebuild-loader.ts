@@ -1,4 +1,4 @@
-import { require_dlopen } from '.';
+import { require_dlopen } from 'index';
 export function pty_loader () {
   let pty: any;
   try {
