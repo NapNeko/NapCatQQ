@@ -54,6 +54,7 @@ import { IOB11NetworkAdapter } from '@/napcat-onebot/network/adapter';
 import { OB11HttpSSEServerAdapter } from './network/http-server-sse';
 import { OB11PluginMangerAdapter } from './network/plugin-manger';
 import { existsSync } from 'node:fs';
+import { OneBotFileApi } from './api/file';
 
 interface ApiListType {
   GroupApi: OneBotGroupApi;
@@ -61,6 +62,7 @@ interface ApiListType {
   FriendApi: OneBotFriendApi;
   MsgApi: OneBotMsgApi;
   QuickActionApi: OneBotQuickActionApi;
+  FileApi: OneBotFileApi;
 }
 // OneBot实现类
 export class NapCatOneBot11Adapter {
@@ -83,6 +85,7 @@ export class NapCatOneBot11Adapter {
       FriendApi: new OneBotFriendApi(this, core),
       MsgApi: new OneBotMsgApi(this, core),
       QuickActionApi: new OneBotQuickActionApi(this, core),
+      FileApi: new OneBotFileApi(this, core),
     } as const;
     this.actions = createActionMap(this, core);
     this.networkManager = new OB11NetworkManager();

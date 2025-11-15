@@ -666,7 +666,7 @@ export class OneBotMsgApi {
 
     // File service
     [OB11MessageDataType.image]: async (sendMsg, context) => {
-      return await this.core.apis.FileApi.createValidSendPicElement(
+      return await this.obContext.apis.FileApi.createValidSendPicElement(
         context,
         (await this.handleOb11FileLikeMessage(sendMsg, context)).path,
         sendMsg.data.summary,
@@ -676,7 +676,7 @@ export class OneBotMsgApi {
 
     [OB11MessageDataType.file]: async (sendMsg, context) => {
       const { path, fileName } = await this.handleOb11FileLikeMessage(sendMsg, context);
-      return await this.core.apis.FileApi.createValidSendFileElement(context, path, fileName);
+      return await this.obContext.apis.FileApi.createValidSendFileElement(context, path, fileName);
     },
 
     [OB11MessageDataType.video]: async (sendMsg, context) => {
@@ -691,11 +691,11 @@ export class OneBotMsgApi {
         }
       }
 
-      return await this.core.apis.FileApi.createValidSendVideoElement(context, path, fileName, thumb);
+      return await this.obContext.apis.FileApi.createValidSendVideoElement(context, path, fileName, thumb);
     },
 
     [OB11MessageDataType.voice]: async (sendMsg, context) =>
-      this.core.apis.FileApi.createValidSendPttElement(context,
+      this.obContext.apis.FileApi.createValidSendPttElement(context,
         (await this.handleOb11FileLikeMessage(sendMsg, context)).path),
 
     [OB11MessageDataType.json]: async ({ data: { data } }) => ({
