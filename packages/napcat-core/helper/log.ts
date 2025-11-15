@@ -1,8 +1,8 @@
 import winston, { format, transports } from 'winston';
-import { truncateString } from './helper';
+import { truncateString } from 'napcat-common/src/helper';
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import { NTMsgAtType, ChatType, ElementType, MessageElement, RawMessage, SelfInfo } from 'napcat-core/index';
+import { NTMsgAtType, ChatType, ElementType, MessageElement, RawMessage, SelfInfo } from '@/napcat-core/index';
 import EventEmitter from 'node:events';
 export enum LogLevel {
   DEBUG = 'debug',

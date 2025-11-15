@@ -6,7 +6,7 @@ import * as os from 'os';
 import * as compressing from 'compressing';  // 修正导入方式
 import { pipeline } from 'stream/promises';
 import { fileURLToPath } from 'url';
-import { LogWrapper } from './log';
+import { LogWrapper } from '@/napcat-core/helper/log';
 
 const downloadOri = 'https://github.com/NapNeko/ffmpeg-build/releases/download/v1.0.0/ffmpeg-7.1.1-win64.zip';
 const urls = [

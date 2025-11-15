@@ -1,4 +1,4 @@
-import { ConfigBase } from 'napcat-common/src/config-base';
+import { ConfigBase } from '@/napcat-core/helper/config-base';
 import { NapCatCore } from '@/napcat-core/index';
 import { Type, Static } from '@sinclair/typebox';
 import { AnySchema } from 'ajv';

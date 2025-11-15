@@ -3,7 +3,7 @@ import path from 'path';
 import type { VideoInfo } from './video';
 import { fileTypeFromFile } from 'file-type';
 import { platform } from 'node:os';
-import { LogWrapper } from './log';
+import { LogWrapper } from '@/napcat-core/helper/log';
 import { FFmpegAdapterFactory } from './ffmpeg-adapter-factory';
 import type { IFFmpegAdapter } from './ffmpeg-adapter-interface';
 

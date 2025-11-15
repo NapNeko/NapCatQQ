@@ -1,5 +1,6 @@
-import { LogLevel, LogWrapper } from 'napcat-common/src/log';
+
 import { NapCoreContext } from '@/napcat-core/packet/context/napCoreContext';
+import { LogWrapper, LogLevel } from '@/napcat-core/helper/log';
 
 // TODO: check bind?
 export class PacketLogger {

@@ -1,6 +1,6 @@
 import path from 'node:path';
 import fs from 'node:fs';
-import type { NapCatCore } from 'napcat-core';
+import type { NapCatCore } from '@/napcat-core';
 import json5 from 'json5';
 import Ajv, { AnySchema, ValidateFunction } from 'ajv';
 

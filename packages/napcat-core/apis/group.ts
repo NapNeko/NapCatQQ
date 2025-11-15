@@ -15,9 +15,9 @@ import {
 } from '@/napcat-core/index';
 import { isNumeric, solveAsyncProblem } from 'napcat-common/src/helper';
 import { LimitedHashTable } from 'napcat-common/src/message-unique';
-import { NTEventWrapper } from 'napcat-common/src/event';
 import { CancelableTask, TaskExecutor } from 'napcat-common/src/cancel-task';
 import { createGroupDetailInfoV2Param, createGroupExtFilter, createGroupExtInfo } from '../data';
+import { NTEventWrapper } from '../helper/event';
 
 export class NTQQGroupApi {
   context: InstanceContext;
@@ -395,7 +395,7 @@ export class NTQQGroupApi {
         'NodeIKernelGroupListener/onMemberInfoChange',
         [groupCode, [uid], forced],
         (ret) => ret.result === 0,
-        (params, _, members) => params === GroupCode && members.size > 0 && members.has(uid),
+        (params: string, _: any, members: Map<string, GroupMember>) => params === GroupCode && members.size > 0 && members.has(uid),
         1,
         forced ? 2500 : 250
       );

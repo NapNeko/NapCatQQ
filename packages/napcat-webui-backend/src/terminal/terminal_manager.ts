@@ -2,11 +2,11 @@
 import { WebUiConfig } from '../../index';
 import { AuthHelper } from '../helper/SignToken';
 import type { WebUiCredentialJson } from '@/napcat-webui-backend/src/types';
-import { LogWrapper } from 'napcat-common/src/log';
 import { WebSocket, WebSocketServer } from 'ws';
 import os from 'os';
 import { IPty, spawn as ptySpawn } from 'napcat-pty';
 import { randomUUID } from 'crypto';
+import { LogWrapper } from '@/napcat-core/helper/log';
 
 interface TerminalInstance {
   pty: IPty; // 改用 PTY 实例

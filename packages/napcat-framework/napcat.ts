@@ -1,16 +1,12 @@
 import { NapCatPathWrapper } from 'napcat-common/src/path';
-import { LogWrapper } from 'napcat-common/src/log';
-import { proxiedListenerOf } from 'napcat-common/src/proxy-handler';
-import { QQBasicInfoWrapper } from 'napcat-common/src/qq-basic-info';
-import { InstanceContext, loadQQWrapper, NapCatCore, NapCatCoreWorkingEnv } from 'napcat-core/index';
-import { SelfInfo } from 'napcat-core/types';
-import { NodeIKernelLoginListener } from 'napcat-core/listeners';
-import { NodeIKernelLoginService } from 'napcat-core/services';
-import { NodeIQQNTWrapperSession, WrapperNodeApi } from 'napcat-core/wrapper';
 import { InitWebUi, WebUiConfig, webUiRuntimePort } from 'napcat-webui-backend/index';
 import { NapCatOneBot11Adapter } from 'napcat-onebot/index';
-import { FFmpegService } from 'napcat-common/src/ffmpeg';
 import { NativePacketHandler } from 'napcat-core/packet/handler/client';
+import { FFmpegService } from 'napcat-core/helper/ffmpeg/ffmpeg';
+import { LogWrapper } from 'napcat-core/helper/log';
+import { QQBasicInfoWrapper } from '@/napcat-core/helper/qq-basic-info';
+import { InstanceContext, loadQQWrapper, NapCatCore, NapCatCoreWorkingEnv, NodeIKernelLoginListener, NodeIKernelLoginService, NodeIQQNTWrapperSession, SelfInfo, WrapperNodeApi } from '@/napcat-core';
+import { proxiedListenerOf } from '@/napcat-core/helper/proxy-handler';
 
 // Framework ES入口文件
 export async function getWebUiUrl () {

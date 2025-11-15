@@ -11,7 +11,7 @@ import { decodeCQCode } from '@/napcat-onebot/helper/cqcode';
 import { MessageUnique } from 'napcat-common/src/message-unique';
 import { ChatType, ElementType, NapCatCore, Peer, RawMessage, SendArkElement, SendMessageElement } from 'napcat-core';
 import { OneBotAction } from '@/napcat-onebot/action/OneBotAction';
-import { ForwardMsgBuilder } from 'napcat-common/src/forward-msg-builder';
+import { ForwardMsgBuilder } from '@/napcat-core/helper/forward-msg-builder';
 import { stringifyWithBigInt } from 'napcat-common/src/helper';
 import { PacketMsg } from 'napcat-core/packet/message/message';
 import { rawMsgWithSendMsg } from 'napcat-core/packet/message/converter';
