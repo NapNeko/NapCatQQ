@@ -18,6 +18,8 @@
     "dependencies": {
         "winston": "^3.17.0",
         "json5": "^2.2.3",
+        "inversify": "^7.10.4",
+        "reflect-metadata": "^0.2.2",
         "@protobuf-ts/runtime": "^2.11.1",
         "ajv": "^8.13.0",
         "@sinclair/typebox": "^0.34.38",
