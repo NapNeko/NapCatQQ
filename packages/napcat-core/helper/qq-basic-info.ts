@@ -1,10 +1,10 @@
 import fs from 'node:fs';
-import { systemPlatform } from '@/napcat-common/src/system';
-import { getDefaultQQVersionConfigInfo, getQQPackageInfoPath, getQQVersionConfigPath, parseAppidFromMajor } from './helper';
-import AppidTable from 'napcat-core/external/appid.json';
-import { LogWrapper } from '@/napcat-common/src/log';
-import { getMajorPath } from 'napcat-core';
-import { QQAppidTableType, QQPackageInfoType, QQVersionConfigType } from './types';
+import { systemPlatform } from 'napcat-common/src/system';
+import { getDefaultQQVersionConfigInfo, getQQPackageInfoPath, getQQVersionConfigPath, parseAppidFromMajor } from 'napcat-common/src/helper';
+import AppidTable from '@/napcat-core/external/appid.json';
+import { LogWrapper } from 'napcat-common/src/log';
+import { getMajorPath } from '@/napcat-core/index';
+import { QQAppidTableType, QQPackageInfoType, QQVersionConfigType } from 'napcat-common/src/types';
 
 export class QQBasicInfoWrapper {
   QQMainPath: string | undefined;

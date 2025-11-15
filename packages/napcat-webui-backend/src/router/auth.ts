@@ -5,7 +5,7 @@ import {
   LoginHandler,
   LogoutHandler,
   UpdateTokenHandler,
-} from '@/napcat-webui-backend/api/Auth';
+} from '@/napcat-webui-backend/src/api/Auth';
 
 const router = Router();
 // router:登录

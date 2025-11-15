@@ -4,14 +4,14 @@
 
 import { Router } from 'express';
 
-import { OB11ConfigRouter } from '@/napcat-webui-backend/router/OB11Config';
-import { auth } from '@/napcat-webui-backend/middleware/auth';
-import { sendSuccess } from '@/napcat-webui-backend/utils/response';
+import { OB11ConfigRouter } from '@/napcat-webui-backend/src/router/OB11Config';
+import { auth } from '@/napcat-webui-backend/src/middleware/auth';
+import { sendSuccess } from '@/napcat-webui-backend/src/utils/response';
 
-import { QQLoginRouter } from '@/napcat-webui-backend/router/QQLogin';
-import { AuthRouter } from '@/napcat-webui-backend/router/auth';
-import { LogRouter } from '@/napcat-webui-backend/router/Log';
-import { BaseRouter } from '@/napcat-webui-backend/router/Base';
+import { QQLoginRouter } from '@/napcat-webui-backend/src/router/QQLogin';
+import { AuthRouter } from '@/napcat-webui-backend/src/router/auth';
+import { LogRouter } from '@/napcat-webui-backend/src/router/Log';
+import { BaseRouter } from '@/napcat-webui-backend/src/router/Base';
 import { FileRouter } from './File';
 import { WebUIConfigRouter } from './WebUIConfig';
 

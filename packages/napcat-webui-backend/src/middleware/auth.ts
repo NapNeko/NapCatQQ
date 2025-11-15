@@ -2,9 +2,9 @@ import { NextFunction, Request, Response } from 'express';
 
 import { getInitialWebUiToken } from '@/napcat-webui-backend/index';
 
-import { AuthHelper } from '@/napcat-webui-backend/helper/SignToken';
-import { sendError } from '@/napcat-webui-backend/utils/response';
-import type { WebUiCredentialJson } from '@/napcat-webui-backend/types';
+import { AuthHelper } from '@/napcat-webui-backend/src/helper/SignToken';
+import { sendError } from '@/napcat-webui-backend/src/utils/response';
+import type { WebUiCredentialJson } from '@/napcat-webui-backend/src/types';
 
 // 鉴权中间件
 export async function auth (req: Request, res: Response, next: NextFunction) {

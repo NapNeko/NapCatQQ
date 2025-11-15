@@ -11,7 +11,7 @@
     ],
     "esModuleInterop": true,
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": ".",
     "noEmit": false,
     "sourceMap": true,
     "strict": true,
@@ -36,14 +36,15 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      "@/napcat-webui-backend/*": [
-        "src/*"
+      "@/*": [
+        "../*"
       ]
     },
     "skipLibCheck": true,
     "skipDefaultLibCheck": true
   },
   "include": [
+    "*.ts",
     "src/**/*.ts",
     "src/**/*.d.ts"
   ],

@@ -36,8 +36,8 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      "@/napcat-webui-backend/*": [
-        "src/*"
+      "@/*": [
+        "../*"
       ]
     },
     "skipLibCheck": true,

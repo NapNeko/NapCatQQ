@@ -9,7 +9,7 @@
     "build:framework": "pnpm --filter napcat-framework run build || exit 1",
     "build:webui": "pnpm --filter napcat-webui-frontend run build || exit 1",
     "dev:shell": "pnpm --filter napcat-develop run dev || exit 1",
-    "typecheck": "pnpm -w -r --filter napcat-shell --filter napcat-framework run typecheck"
+    "typecheck": "pnpm -w -r --filter napcat-shell --filter napcat-framework --filter napcat-webui-backend --filter napcat-onebot --filter napcat-core --filter napcat-webui-frontend run typecheck"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^16.0.3",

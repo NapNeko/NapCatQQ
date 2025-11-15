@@ -26,7 +26,7 @@ import os from 'os';
 import { LoginListItem, NodeIKernelLoginService } from 'napcat-core/services';
 import qrcode from 'napcat-qrcode/lib/main';
 import { NapCatOneBot11Adapter } from 'napcat-onebot/index';
-import { InitWebUi } from 'napcat-webui-backend/src/index';
+import { InitWebUi } from 'napcat-webui-backend/index';
 import { WebUiDataRuntime } from 'napcat-webui-backend/src/helper/Data';
 import { napCatVersion } from 'napcat-common/src/version';
 import { NodeIO3MiscListener } from 'napcat-core/listeners/NodeIO3MiscListener';

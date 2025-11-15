@@ -1,11 +1,9 @@
 import { RequestHandler } from 'express';
-
+import { AuthHelper } from '@/napcat-webui-backend/src/helper/SignToken';
+import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
+import { sendSuccess, sendError } from '@/napcat-webui-backend/src/utils/response';
+import { isEmpty } from '@/napcat-webui-backend/src/utils/check';
 import { WebUiConfig, getInitialWebUiToken, setInitialWebUiToken } from '@/napcat-webui-backend/index';
-
-import { AuthHelper } from '@/napcat-webui-backend/helper/SignToken';
-import { WebUiDataRuntime } from '@/napcat-webui-backend/helper/Data';
-import { sendSuccess, sendError } from '@/napcat-webui-backend/utils/response';
-import { isEmpty } from '@/napcat-webui-backend/utils/check';
 
 // 登录
 export const LoginHandler: RequestHandler = async (req, res) => {

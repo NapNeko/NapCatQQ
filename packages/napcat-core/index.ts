@@ -6,7 +6,7 @@ import {
   NTQQSystemApi,
   NTQQUserApi,
   NTQQWebApi,
-} from 'napcat-core/apis';
+} from '@/napcat-core/apis';
 import { NTQQCollectionApi } from '@/napcat-core/apis/collection';
 import {
   NodeIQQNTWrapperSession,

@@ -1,8 +1,8 @@
 import { RequestHandler } from 'express';
 
-import { WebUiDataRuntime } from '@/napcat-webui-backend/helper/Data';
-import { isEmpty } from '@/napcat-webui-backend/utils/check';
-import { sendError, sendSuccess } from '@/napcat-webui-backend/utils/response';
+import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
+import { isEmpty } from '@/napcat-webui-backend/src/utils/check';
+import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/response';
 import { WebUiConfig } from '@/napcat-webui-backend/index';
 
 // 获取QQ登录二维码

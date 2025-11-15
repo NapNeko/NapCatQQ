@@ -1,7 +1,7 @@
 // import './init-dynamic-dirname';
-import { WebUiConfig } from '../index';
+import { WebUiConfig } from '../../index';
 import { AuthHelper } from '../helper/SignToken';
-import type { WebUiCredentialJson } from '@/napcat-webui-backend/types';
+import type { WebUiCredentialJson } from '@/napcat-webui-backend/src/types';
 import { LogWrapper } from 'napcat-common/src/log';
 import { WebSocket, WebSocketServer } from 'ws';
 import os from 'os';
