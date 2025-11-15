@@ -92,7 +92,7 @@ export async function InitWebUi (logger: LogWrapper, pathWrapper: NapCatPathWrap
 
   // 检查并更新默认密码 - 最高优先级
   if (config.token === 'napcat' || !config.token) {
-    const randomToken = getRandomToken(8);
+    const randomToken = process.env['NAPCAT_WEBUI_SECRET_KEY'] || getRandomToken(8);
     await WebUiConfig.UpdateWebUIConfig({ token: randomToken });
     logger.log('[NapCat] [WebUi] 检测到默认密码，已自动更新为安全密码');
 

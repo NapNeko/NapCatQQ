@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import store from 'napcat-common/src/store';
 import type { WebUiCredentialJson, WebUiCredentialInnerJson } from '@/napcat-webui-backend/src/types';
 export class AuthHelper {
-  private static readonly secretKey = Math.random().toString(36).slice(2);
+  private static readonly secretKey = process.env['NAPCAT_WEBUI_JWT_SECRET_KEY'] || Math.random().toString(36).slice(2);
 
   /**
      * 签名凭证方法。
