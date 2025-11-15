@@ -1,13 +1,37 @@
 {
-    "debug.node.sourceMapPathOverrides": {
-        "../../napcat-common/*": "${workspaceFolder}/packages/napcat-common/*",
-        "../../napcat-core/*": "${workspaceFolder}/packages/napcat-core/*",
-        "../../napcat-image-size/*": "${workspaceFolder}/packages/napcat-image-size/*",
-        "../../napcat-shell/*": "${workspaceFolder}/packages/napcat-shell/*",
-        "../../napcat-framework/*": "${workspaceFolder}/packages/napcat-framework/*",
-        "../../napcat-protobuf/*": "${workspaceFolder}/packages/napcat-protobuf/*",
-        "../../napcat-onebot/*": "${workspaceFolder}/packages/napcat-onebot/*",
-        "../../napcat-webui-backend/*": "${workspaceFolder}/packages/napcat-webui-backend/*",
-        "../../napcat-pty/*": "${workspaceFolder}/packages/napcat-pty/*"
-    }
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "explorer.fileNesting.patterns": {
+    ".env.universal": ".env.*",
+    "vite.config.ts": "vite*.ts",
+    "README.md": "CODE_OF_CONDUCT.md, RELEASES.md, CONTRIBUTING.md, CHANGELOG.md, SECURITY.md",
+    "tsconfig.json": "tsconfig.*.json, env.d.ts",
+    "package.json": "package-lock.json, eslint*, .prettier*, .editorconfig, manifest.json, logo.png, .gitignore, LICENSE"
+  },
+  "css.customData": [
+    ".vscode/tailwindcss.json"
+  ],
+  "editor.detectIndentation": false,
+  "editor.tabSize": 2,
+  "editor.formatOnSave": true,
+  "editor.formatOnType": false,
+  "editor.formatOnPaste": true,
+  "editor.formatOnSaveMode": "file",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "always"
+  },
+  "files.autoSave": "onFocusChange",
+  "javascript.preferences.quoteStyle": "single",
+  "typescript.preferences.quoteStyle": "single",
+  "javascript.format.semicolons": "insert",
+  "typescript.format.semicolons": "insert",
+  "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
+  "typescript.format.insertSpaceBeforeFunctionParenthesis": true,
+  "typescript.format.insertSpaceAfterConstructor": true,
+  "javascript.format.insertSpaceAfterConstructor": true,
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.preferences.importModuleSpecifierEnding": "minimal",
+  "javascript.preferences.importModuleSpecifier": "non-relative",
+  "javascript.preferences.importModuleSpecifierEnding": "minimal",
+  "typescript.disableAutomaticTypeAcquisition": true
 }
