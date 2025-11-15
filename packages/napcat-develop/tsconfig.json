@@ -1,7 +1,14 @@
 {
   "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "allowJs": true
+  },
   "include": [
-    "**/*.cjs"
+    "*.cjs",
+    "**/*.cjs",
+    "**/*.ts",
+    "*.js",
+    "**/*.js"
   ],
   "exclude": [
     "node_modules",

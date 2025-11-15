@@ -3,13 +3,13 @@
     "version": "0.0.1",
     "private": true,
     "type": "module",
-    "main": "index.cjs",
+    "main": "index.js",
     "scripts": {
         "dev": "powershell ./nodeTest.ps1"
     },
     "exports": {
         ".": {
-            "require": "./index.cjs"
+            "require": "./index.js"
         },
         "./*": {
             "require": "./*"
