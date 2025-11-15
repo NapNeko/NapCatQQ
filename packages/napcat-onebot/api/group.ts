@@ -30,12 +30,12 @@ import { NapCatOneBot11Adapter } from '..';
 export class OneBotGroupApi {
   obContext: NapCatOneBot11Adapter;
   core: NapCatCore;
-  constructor(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
+  constructor (obContext: NapCatOneBot11Adapter, core: NapCatCore) {
     this.obContext = obContext;
     this.core = core;
   }
 
-  async parseGroupBanEvent(GroupCode: string, grayTipElement: GrayTipElement) {
+  async parseGroupBanEvent (GroupCode: string, grayTipElement: GrayTipElement) {
     const groupElement = grayTipElement?.groupElement;
     if (!groupElement?.shutUp) return undefined;
     const memberUid = groupElement.shutUp.member.uid;
@@ -66,7 +66,7 @@ export class OneBotGroupApi {
     return undefined;
   }
 
-  async parseGroupEmojiLikeEventByGrayTip(
+  async parseGroupEmojiLikeEventByGrayTip (
     groupCode: string,
     grayTipElement: GrayTipElement
   ) {
@@ -85,7 +85,7 @@ export class OneBotGroupApi {
     return await this.createGroupEmojiLikeEvent(groupCode, senderUin, msgSeq, emojiId, true, 1);
   }
 
-  async createGroupEmojiLikeEvent(
+  async createGroupEmojiLikeEvent (
     groupCode: string,
     senderUin: string,
     msgSeq: string,
@@ -121,7 +121,7 @@ export class OneBotGroupApi {
     );
   }
 
-  async parseCardChangedEvent(msg: RawMessage) {
+  async parseCardChangedEvent (msg: RawMessage) {
     if (msg.senderUin && msg.senderUin !== '0') {
       const member = await this.core.apis.GroupApi.getGroupMember(msg.peerUid, msg.senderUin);
       if (member && member.cardName !== msg.sendMemberName) {
@@ -137,7 +137,7 @@ export class OneBotGroupApi {
     return undefined;
   }
 
-  async registerParseGroupReactEvent() {
+  async registerParseGroupReactEvent () {
     this.obContext.core.context.packetHandler.onCmd('trpc.msg.olpush.OlPushService.MsgPush', async (packet) => {
       const data = new NapProtoMsg(PushMsg).decode(Buffer.from(packet.hex_data, 'hex'));
       if (data.message.contentHead.type === 732 && data.message.contentHead.subType === 16) {
@@ -172,7 +172,7 @@ export class OneBotGroupApi {
     });
   }
 
-  async registerParseGroupReactEventByCore() {
+  async registerParseGroupReactEventByCore () {
     this.core.event.on('event:emoji_like', async (data) => {
       console.log('Received emoji_like event from core:', data);
       const event = await this.createGroupEmojiLikeEvent(
@@ -188,7 +188,8 @@ export class OneBotGroupApi {
       }
     });
   }
-  async parsePaiYiPai(msg: RawMessage, jsonStr: string) {
+
+  async parsePaiYiPai (msg: RawMessage, jsonStr: string) {
     const json = JSON.parse(jsonStr);
     // 判断业务类型
     // Poke事件
@@ -207,7 +208,7 @@ export class OneBotGroupApi {
     return undefined;
   }
 
-  async parseOtherJsonEvent(msg: RawMessage, jsonStr: string, context: InstanceContext) {
+  async parseOtherJsonEvent (msg: RawMessage, jsonStr: string, context: InstanceContext) {
     const json = JSON.parse(jsonStr);
     const type = json.items[json.items.length - 1]?.txt;
     await this.core.apis.GroupApi.refreshGroupMemberCachePartial(msg.peerUid, msg.senderUid);
@@ -229,7 +230,7 @@ export class OneBotGroupApi {
     return undefined;
   }
 
-  async parseEssenceMsg(msg: RawMessage, jsonStr: string) {
+  async parseEssenceMsg (msg: RawMessage, jsonStr: string) {
     const json = JSON.parse(jsonStr);
     const searchParams = new URL(json.items[0].jp).searchParams;
     const msgSeq = searchParams.get('msgSeq')!;
@@ -257,7 +258,7 @@ export class OneBotGroupApi {
     // 获取MsgSeq+Peer可获取具体消息
   }
 
-  async parseGroupUploadFileEvene(msg: RawMessage, element: FileElement, elementWrapper: MessageElement) {
+  async parseGroupUploadFileEvene (msg: RawMessage, element: FileElement, elementWrapper: MessageElement) {
     return new OB11GroupUploadNoticeEvent(
       this.core,
       parseInt(msg.peerUid), parseInt(msg.senderUin || ''),
@@ -273,7 +274,7 @@ export class OneBotGroupApi {
     );
   }
 
-  async parseGroupElement(msg: RawMessage, element: TipGroupElement, elementWrapper: GrayTipElement) {
+  async parseGroupElement (msg: RawMessage, element: TipGroupElement, elementWrapper: GrayTipElement) {
     if (element.type === TipGroupElementType.KGROUPNAMEMODIFIED) {
       this.core.context.logger.logDebug('收到群名称变更事件', element);
       return new OB11GroupNameEvent(
@@ -301,7 +302,7 @@ export class OneBotGroupApi {
     return undefined;
   }
 
-  async parseSelfInviteEvent(msg: RawMessage, inviterUin: string, inviteeUin: string) {
+  async parseSelfInviteEvent (msg: RawMessage, inviterUin: string, inviteeUin: string) {
     return new OB11GroupIncreaseEvent(
       this.core,
       parseInt(msg.peerUid),
@@ -311,7 +312,7 @@ export class OneBotGroupApi {
     );
   }
 
-  async parse51TypeEvent(msg: RawMessage, grayTipElement: GrayTipElement) {
+  async parse51TypeEvent (msg: RawMessage, grayTipElement: GrayTipElement) {
     // 神经腾讯 没了妈妈想出来的
     // Warn 下面存在高并发危险
     if (grayTipElement.jsonGrayTipElement.jsonStr) {
@@ -340,7 +341,7 @@ export class OneBotGroupApi {
     return undefined;
   }
 
-  async parseGrayTipElement(msg: RawMessage, grayTipElement: GrayTipElement) {
+  async parseGrayTipElement (msg: RawMessage, grayTipElement: GrayTipElement) {
     if (grayTipElement.subElementType === NTGrayTipElementSubTypeV2.GRAYTIP_ELEMENT_SUBTYPE_GROUP) {
       // 解析群组事件 由sysmsg解析
       return await this.parseGroupElement(msg, grayTipElement.groupElement, grayTipElement);

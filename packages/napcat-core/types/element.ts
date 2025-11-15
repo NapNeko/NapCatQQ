@@ -23,13 +23,13 @@ type ElementBase<
   K extends keyof ElementFullBase,
   S extends Partial<{ [P in K]: keyof NonNullable<ElementFullBase[P]> | Array<keyof NonNullable<ElementFullBase[P]>> }> = object
 > = {
-    [P in K]:
-    S[P] extends Array<infer U>
+  [P in K]:
+  S[P] extends Array<infer U>
     ? Pick<NonNullable<ElementFullBase[P]>, U & keyof NonNullable<ElementFullBase[P]>>
     : S[P] extends keyof NonNullable<ElementFullBase[P]>
-    ? Pick<NonNullable<ElementFullBase[P]>, S[P]>
-    : NonNullable<ElementFullBase[P]>;
-  };
+      ? Pick<NonNullable<ElementFullBase[P]>, S[P]>
+      : NonNullable<ElementFullBase[P]>;
+};
 
 export interface TextElement {
   content: string;

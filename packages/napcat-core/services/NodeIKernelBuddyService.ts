@@ -24,7 +24,6 @@ export interface NodeIKernelBuddyService {
     }>;
   }>;
 
-
   getBuddyListFromCache (reqType: BuddyListReqType): Promise<Array<
     {
       categoryId: number, // 9999为特别关心

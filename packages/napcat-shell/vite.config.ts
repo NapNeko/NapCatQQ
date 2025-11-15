@@ -3,15 +3,15 @@ import { defineConfig, PluginOption, UserConfig } from 'vite';
 import path, { resolve } from 'path';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import { builtinModules } from 'module';
-import napcatVersion from "napcat-vite/vite-plugin-version.js";
-import { autoIncludeTSPlugin } from "napcat-vite/vite-auto-include.js";
+import napcatVersion from 'napcat-vite/vite-plugin-version.js';
+import { autoIncludeTSPlugin } from 'napcat-vite/vite-auto-include.js';
 import react from '@vitejs/plugin-react-swc';
 
-//依赖排除
+// 依赖排除
 const external = [
   'silk-wasm',
   'ws',
-  'express'
+  'express',
 ];
 
 const nodeModules = [...builtinModules, builtinModules.map((m) => `node:${m}`)].flat();
@@ -20,8 +20,8 @@ const ShellBaseConfigPlugin: PluginOption[] = [
   autoIncludeTSPlugin({
     entries: [
       { entry: 'napcat.ts', dir: path.resolve(__dirname, '../napcat-core/protocol') },
-      { entry: 'napcat.ts', dir: path.resolve(__dirname, '../napcat-onebot/action/test') }
-    ]
+      { entry: 'napcat.ts', dir: path.resolve(__dirname, '../napcat-onebot/action/test') },
+    ],
   }),
   cp({
     targets: [
@@ -29,7 +29,7 @@ const ShellBaseConfigPlugin: PluginOption[] = [
       { src: '../napcat-webui-frontend/dist/', dest: 'dist/static/', flatten: false },
       { src: '../napcat-core/external/napcat.json', dest: 'dist/config/' },
       { src: '../../package.json', dest: 'dist' },
-      { src: '../napcat-shell-loader', dest: 'dist' }
+      { src: '../napcat-shell-loader', dest: 'dist' },
     ],
   }),
   nodeResolve(),
@@ -62,7 +62,7 @@ const ShellBaseConfig = (source_map: boolean = false) =>
         fileName: (_, entryName) => `${entryName}.mjs`,
       },
       rollupOptions: {
-        external: [...nodeModules, ...external]
+        external: [...nodeModules, ...external],
       },
     },
   });

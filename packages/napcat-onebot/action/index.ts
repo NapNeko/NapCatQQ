@@ -138,7 +138,7 @@ import { TestDownloadStream } from './stream/TestStreamDownload';
 import { UploadFileStream } from './stream/UploadFileStream';
 import { AutoRegisterRouter } from './auto-register';
 
-export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCore) {
+export function createActionMap (obContext: NapCatOneBot11Adapter, core: NapCatCore) {
   const actionHandlers = [
     new CleanStreamTempFile(obContext, core),
     new DownloadFileStream(obContext, core),
@@ -315,7 +315,7 @@ export function createActionMap(obContext: NapCatOneBot11Adapter, core: NapCatCo
   // function get<K extends keyof MapType>(key: K): MapType[K];
   // function get<K extends keyof MapType>(key: K): null;
   // function get<K extends keyof MapType>(key: K): HandlerUnion | null | MapType[K]
-  function get<K extends keyof MapType>(key: K): MapType[K] | undefined {
+  function get<K extends keyof MapType> (key: K): MapType[K] | undefined {
     return _map.get(key as keyof MapType) as MapType[K] | undefined;
   }
   return { get };

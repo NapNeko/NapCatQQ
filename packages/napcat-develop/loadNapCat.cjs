@@ -33,7 +33,7 @@ const BASE_DIR = path.join(versionsDir, selectedFolder, 'resources', 'app');
 console.log(`BASE_DIR: ${BASE_DIR}`);
 const TARGET_DIR = path.join(__dirname, 'dist');
 const QQNT_FILE = path.join(__dirname, 'QQNT.dll');
-const NAPCAT_MJS_PATH = path.join(__dirname, '..', 'napcat-shell','dist', 'napcat.mjs');
+const NAPCAT_MJS_PATH = path.join(__dirname, '..', 'napcat-shell', 'dist', 'napcat.mjs');
 
 const itemsToCopy = [
   'avif_convert.dll',
@@ -45,15 +45,15 @@ const itemsToCopy = [
   'opencv.dll',
   'package.json',
   'QBar.dll',
-  'wrapper.node'
+  'wrapper.node',
 ];
 
 async function copyAll () {
   const qqntDllPath = path.join(TARGET_DIR, 'QQNT.dll');
   const configPath = path.join(TARGET_DIR, 'config.json');
-  const allItemsExist = await fs.pathExists(qqntDllPath)
-    && await fs.pathExists(configPath)
-    && (await Promise.all(itemsToCopy.map(item => fs.pathExists(path.join(TARGET_DIR, item))))).every(exists => exists);
+  const allItemsExist = await fs.pathExists(qqntDllPath) &&
+    await fs.pathExists(configPath) &&
+    (await Promise.all(itemsToCopy.map(item => fs.pathExists(path.join(TARGET_DIR, item))))).every(exists => exists);
 
   if (!allItemsExist) {
     console.log('Copying required files...');

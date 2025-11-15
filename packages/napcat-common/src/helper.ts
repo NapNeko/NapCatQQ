@@ -3,7 +3,7 @@ import fs from 'fs';
 import os from 'node:os';
 import { QQVersionConfigType, QQLevel } from './types';
 
-export async function solveProblem<T extends (...arg: any[]) => any>(func: T, ...args: Parameters<T>): Promise<ReturnType<T> | undefined> {
+export async function solveProblem<T extends (...arg: any[]) => any> (func: T, ...args: Parameters<T>): Promise<ReturnType<T> | undefined> {
   return new Promise<ReturnType<T> | undefined>((resolve) => {
     try {
       const result = func(...args);
@@ -14,7 +14,7 @@ export async function solveProblem<T extends (...arg: any[]) => any>(func: T, ..
   });
 }
 
-export async function solveAsyncProblem<T extends (...args: any[]) => Promise<any>>(func: T, ...args: Parameters<T>): Promise<Awaited<ReturnType<T>> | undefined> {
+export async function solveAsyncProblem<T extends (...args: any[]) => Promise<any>> (func: T, ...args: Parameters<T>): Promise<Awaited<ReturnType<T>> | undefined> {
   return new Promise<Awaited<ReturnType<T>> | undefined>((resolve) => {
     func(...args).then((result) => {
       resolve(result);
@@ -24,18 +24,18 @@ export async function solveAsyncProblem<T extends (...args: any[]) => Promise<an
   });
 }
 
-export function sleep(ms: number): Promise<void> {
+export function sleep (ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export function PromiseTimer<T>(promise: Promise<T>, ms: number): Promise<T> {
+export function PromiseTimer<T> (promise: Promise<T>, ms: number): Promise<T> {
   const timeoutPromise = new Promise<T>((_resolve, reject) =>
     setTimeout(() => reject(new Error('PromiseTimer: Operation timed out')), ms)
   );
   return Promise.race([promise, timeoutPromise]);
 }
 
-export async function runAllWithTimeout<T>(tasks: Promise<T>[], timeout: number): Promise<T[]> {
+export async function runAllWithTimeout<T> (tasks: Promise<T>[], timeout: number): Promise<T[]> {
   const wrappedTasks = tasks.map((task) =>
     PromiseTimer(task, timeout).then(
       (result) => ({ status: 'fulfilled', value: result }),
@@ -48,15 +48,15 @@ export async function runAllWithTimeout<T>(tasks: Promise<T>[], timeout: number)
     .map((result) => (result as { status: 'fulfilled'; value: T; }).value);
 }
 
-export function isNull(value: any) {
+export function isNull (value: any) {
   return value === undefined || value === null;
 }
 
-export function isNumeric(str: string) {
+export function isNumeric (str: string) {
   return /^\d+$/.test(str);
 }
 
-export function truncateString(obj: any, maxLength = 500) {
+export function truncateString (obj: any, maxLength = 500) {
   if (obj !== null && typeof obj === 'object') {
     Object.keys(obj).forEach((key) => {
       if (typeof obj[key] === 'string') {
@@ -73,7 +73,7 @@ export function truncateString(obj: any, maxLength = 500) {
   return obj;
 }
 
-export function isEqual(obj1: any, obj2: any) {
+export function isEqual (obj1: any, obj2: any) {
   if (obj1 === obj2) return true;
   if (obj1 == null || obj2 == null) return false;
   if (typeof obj1 !== 'object' || typeof obj2 !== 'object') return obj1 === obj2;
@@ -89,7 +89,7 @@ export function isEqual(obj1: any, obj2: any) {
   return true;
 }
 
-export function getDefaultQQVersionConfigInfo(): QQVersionConfigType {
+export function getDefaultQQVersionConfigInfo (): QQVersionConfigType {
   if (os.platform() === 'linux') {
     return {
       baseVersion: '3.2.12.28060',
@@ -117,7 +117,7 @@ export function getDefaultQQVersionConfigInfo(): QQVersionConfigType {
   };
 }
 
-export function getQQPackageInfoPath(exePath: string = '', version?: string): string {
+export function getQQPackageInfoPath (exePath: string = '', version?: string): string {
   if (process.env['NAPCAT_QQ_PACKAGE_INFO_PATH']) {
     return process.env['NAPCAT_QQ_PACKAGE_INFO_PATH'];
   }
@@ -136,7 +136,7 @@ export function getQQPackageInfoPath(exePath: string = '', version?: string): st
   return packagePath;
 }
 
-export function getQQVersionConfigPath(exePath: string = ''): string | undefined {
+export function getQQVersionConfigPath (exePath: string = ''): string | undefined {
   if (process.env['NAPCAT_QQ_VERSION_CONFIG_PATH']) {
     return process.env['NAPCAT_QQ_VERSION_CONFIG_PATH'];
   }
@@ -165,7 +165,7 @@ export function getQQVersionConfigPath(exePath: string = ''): string | undefined
   return configVersionInfoPath;
 }
 
-export function calcQQLevel(level?: QQLevel) {
+export function calcQQLevel (level?: QQLevel) {
   if (!level) return 0;
   // const { penguinNum, crownNum, sunNum, moonNum, starNum } = level;
   const { crownNum, sunNum, moonNum, starNum } = level;
@@ -173,13 +173,13 @@ export function calcQQLevel(level?: QQLevel) {
   return crownNum * 64 + sunNum * 16 + moonNum * 4 + starNum;
 }
 
-export function stringifyWithBigInt(obj: any) {
+export function stringifyWithBigInt (obj: any) {
   return JSON.stringify(obj, (_key, value) =>
     typeof value === 'bigint' ? value.toString() : value
   );
 }
 
-export function parseAppidFromMajor(nodeMajor: string): string | undefined {
+export function parseAppidFromMajor (nodeMajor: string): string | undefined {
   const hexSequence = 'A4 09 00 00 00 35';
   const sequenceBytes = Buffer.from(hexSequence.replace(/ /g, ''), 'hex');
   const filePath = path.resolve(nodeMajor);

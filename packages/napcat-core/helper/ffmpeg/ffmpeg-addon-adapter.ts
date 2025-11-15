@@ -68,13 +68,13 @@ export class FFmpegAddonAdapter implements IFFmpegAdapter {
     const addon = this.ensureAddon();
     const info = await addon.getVideoInfo(videoPath);
 
-    let format = info.format.includes(',') ? info.format.split(',')[0] ?? info.format : info.format;
+    const format = info.format.includes(',') ? info.format.split(',')[0] ?? info.format : info.format;
     console.log('[FFmpegAddonAdapter] Detected format:', format);
     return {
       width: info.width,
       height: info.height,
       duration: info.duration,
-      format: format,
+      format,
       thumbnail: info.image,
     };
   }

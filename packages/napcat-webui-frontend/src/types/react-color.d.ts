@@ -23,6 +23,6 @@ declare module 'react-color' {
   export const CirclePicker: any;
 
   export default {
-    SketchPicker: SketchPicker,
+    SketchPicker,
   } as any;
 }

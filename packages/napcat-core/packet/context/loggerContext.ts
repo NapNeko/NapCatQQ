@@ -1,4 +1,3 @@
-
 import { NapCoreContext } from '@/napcat-core/packet/context/napCoreContext';
 import { LogWrapper, LogLevel } from '@/napcat-core/helper/log';
 

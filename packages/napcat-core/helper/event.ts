@@ -25,18 +25,18 @@ export class NTEventWrapper {
   private readonly listenerManager: Map<string, ListenerClassBase> = new Map<string, ListenerClassBase>(); // ListenerName-Unique -> Listener实例
   private readonly EventTask = new Map<string, Map<string, Map<string, InternalMapKey>>>(); // tasks ListenerMainName -> ListenerSubName-> uuid -> {timeout,createtime,func}
 
-  constructor(
+  constructor (
     wrapperSession: NodeIQQNTWrapperSession
   ) {
     this.WrapperSession = wrapperSession;
   }
 
-  createProxyDispatch(ListenerMainName: string) {
+  createProxyDispatch (ListenerMainName: string) {
     const dispatcherListenerFunc = this.dispatcherListener.bind(this);
     return new Proxy(
       {},
       {
-        get(target: any, prop: any, receiver: any) {
+        get (target: any, prop: any, receiver: any) {
           if (typeof target[prop] === 'undefined') {
             // 如果方法不存在，返回一个函数，这个函数调用existentMethod
             return (...args: any[]) => {
@@ -94,7 +94,7 @@ export class NTEventWrapper {
   }
 
   // 统一回调清理事件
-  async dispatcherListener(ListenerMainName: string, ListenerSubName: string, ...args: any[]) {
+  async dispatcherListener (ListenerMainName: string, ListenerSubName: string, ...args: any[]) {
     this.EventTask.get(ListenerMainName)
       ?.get(ListenerSubName)
       ?.forEach((task, uuid) => {
@@ -137,7 +137,7 @@ export class NTEventWrapper {
       let complete = 0;
       let retData: Parameters<ListenerType> | undefined;
 
-      function sendDataCallback() {
+      function sendDataCallback () {
         if (complete === 0) {
           reject(new Error(' ListenerName:' + listenerAndMethod + ' timeout'));
         } else {
@@ -191,7 +191,7 @@ export class NTEventWrapper {
     let retData: Parameters<ListenerType> | undefined;
     let retEvent: any = {};
 
-    function sendDataCallback(resolve: any, reject: any) {
+    function sendDataCallback (resolve: any, reject: any) {
       if (complete === 0) {
         reject(
           new Error(

@@ -1,4 +1,4 @@
-import { webUiPathWrapper, getInitialWebUiToken } from '@/napcat-webui-backend/index'
+import { webUiPathWrapper, getInitialWebUiToken } from '@/napcat-webui-backend/index';
 import { Type, Static } from '@sinclair/typebox';
 import Ajv from 'ajv';
 import fs, { constants } from 'node:fs/promises';
