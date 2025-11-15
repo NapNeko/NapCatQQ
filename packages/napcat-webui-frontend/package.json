@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --host=0.0.0.0",
     "build": "tsc && vite build",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint -c eslint.config.mjs ./src/**/**/*.{ts,tsx} --fix",
     "preview": "vite preview"
   },

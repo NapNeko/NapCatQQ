@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { GetThemeConfigHandler, GetNapCatVersion, QQVersionHandler, SetThemeConfigHandler } from '../api/BaseInfo';
-import { StatusRealTimeHandler } from '@/napcat-webui-backend/api/Status';
+import { StatusRealTimeHandler } from '@/napcat-webui-backend/src/api/Status';
 import { GetProxyHandler } from '../api/Proxy';
 
 const router = Router();

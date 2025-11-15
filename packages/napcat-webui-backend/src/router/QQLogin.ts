@@ -9,7 +9,7 @@ import {
   getQQLoginInfoHandler,
   getAutoLoginAccountHandler,
   setAutoLoginAccountHandler,
-} from '@/napcat-webui-backend/api/QQLogin';
+} from '@/napcat-webui-backend/src/api/QQLogin';
 
 const router = Router();
 // router:获取快速登录列表

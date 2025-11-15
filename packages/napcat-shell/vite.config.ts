@@ -41,10 +41,10 @@ const ShellBaseConfig = (source_map: boolean = false) =>
       conditions: ['node', 'default'],
       alias: {
         '@/napcat-core': resolve(__dirname, '../napcat-core'),
-        '@/napcat-common': resolve(__dirname, '../napcat-common/src'),
+        '@/napcat-common': resolve(__dirname, '../napcat-common'),
         '@/napcat-onebot': resolve(__dirname, '../napcat-onebot'),
         '@/napcat-pty': resolve(__dirname, '../napcat-pty'),
-        '@/napcat-webui-backend': resolve(__dirname, '../napcat-webui-backend/src'),
+        '@/napcat-webui-backend': resolve(__dirname, '../napcat-webui-backend'),
         '@/image-size': resolve(__dirname, '../image-size'),
       },
     },

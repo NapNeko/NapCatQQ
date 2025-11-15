@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { WebUiConfig } from '@/napcat-webui-backend/index';
-import { sendError, sendSuccess } from '@/napcat-webui-backend/utils/response';
-import { isEmpty } from '@/napcat-webui-backend/utils/check';
+import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/response';
+import { isEmpty } from '@/napcat-webui-backend/src/utils/check';
 
 // 获取WebUI基础配置
 export const GetWebUIConfigHandler: RequestHandler = async (_, res) => {

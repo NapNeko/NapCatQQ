@@ -36,10 +36,9 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      "@/napcat-onebot/*": ["../napcat-onebot/*"],
-      "@/napcat-core/*": ["../napcat-core/*"],
-      "@/napcat-common/*": ["../napcat-common/src/*"],
-      "@/napcat-webui-backend/*": ["../napcat-webui-backend/src/*"]
+      "@/*": [
+        "../*"
+      ]
     },
     "skipLibCheck": true,
     "skipDefaultLibCheck": true

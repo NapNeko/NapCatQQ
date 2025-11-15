@@ -1,5 +1,5 @@
 import { IPacketMsgElement } from '@/napcat-core/packet/message/element';
-import { SendMessageElement, SendMultiForwardMsgElement } from 'napcat-core/index';
+import { SendMessageElement, SendMultiForwardMsgElement } from '@/napcat-core/index';
 
 export type PacketSendMsgElement = SendMessageElement | SendMultiForwardMsgElement;
 

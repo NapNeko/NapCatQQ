@@ -7,7 +7,7 @@ import { SelfInfo } from 'napcat-core/types';
 import { NodeIKernelLoginListener } from 'napcat-core/listeners';
 import { NodeIKernelLoginService } from 'napcat-core/services';
 import { NodeIQQNTWrapperSession, WrapperNodeApi } from 'napcat-core/wrapper';
-import { InitWebUi, WebUiConfig, webUiRuntimePort } from 'napcat-webui-backend/src/index';
+import { InitWebUi, WebUiConfig, webUiRuntimePort } from 'napcat-webui-backend/index';
 import { NapCatOneBot11Adapter } from 'napcat-onebot/index';
 import { FFmpegService } from 'napcat-common/src/ffmpeg';
 import { NativePacketHandler } from 'napcat-core/packet/handler/client';

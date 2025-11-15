@@ -3,22 +3,22 @@
  */
 
 import express from 'express';
-import type { WebUiConfigType } from './types';
+import type { WebUiConfigType } from './src/types';
 import { createServer } from 'http';
 import { randomUUID } from 'node:crypto';
 import { createServer as createHttpsServer } from 'https';
 import { LogWrapper } from 'napcat-common/src/log';
 import { NapCatPathWrapper } from 'napcat-common/src/path';
-import { WebUiConfigWrapper } from '@/napcat-webui-backend/helper/config';
-import { ALLRouter } from '@/napcat-webui-backend/router';
-import { cors } from '@/napcat-webui-backend/middleware/cors';
-import { createUrl, getRandomToken } from '@/napcat-webui-backend/utils/url';
-import { sendError } from '@/napcat-webui-backend/utils/response';
+import { WebUiConfigWrapper } from '@/napcat-webui-backend/src/helper/config';
+import { ALLRouter } from '@/napcat-webui-backend/src/router';
+import { cors } from '@/napcat-webui-backend/src/middleware/cors';
+import { createUrl, getRandomToken } from '@/napcat-webui-backend/src/utils/url';
+import { sendError } from '@/napcat-webui-backend/src/utils/response';
 import { join } from 'node:path';
-import { terminalManager } from '@/napcat-webui-backend/terminal/terminal_manager';
+import { terminalManager } from '@/napcat-webui-backend/src/terminal/terminal_manager';
 import multer from 'multer';
 import * as net from 'node:net';
-import { WebUiDataRuntime } from './helper/Data';
+import { WebUiDataRuntime } from './src/helper/Data';
 import { existsSync, readFileSync } from 'node:fs'; // 引入multer用于错误捕获
 
 // 实例化Express

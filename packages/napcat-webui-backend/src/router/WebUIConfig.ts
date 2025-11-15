@@ -6,7 +6,7 @@ import {
   GetDisableNonLANAccessHandler,
   UpdateDisableNonLANAccessHandler,
   UpdateWebUIConfigHandler,
-} from '@/napcat-webui-backend/api/WebUIConfig';
+} from '@/napcat-webui-backend/src/api/WebUIConfig';
 
 const router = Router();
 

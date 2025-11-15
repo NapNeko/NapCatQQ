@@ -4,6 +4,9 @@
     "private": true,
     "type": "module",
     "main": "src/index.ts",
+    "scripts": {
+        "typecheck": "tsc --noEmit --skipLibCheck -p tsconfig.json"
+    },
     "exports": {
         ".": {
             "import": "./src/index.ts"

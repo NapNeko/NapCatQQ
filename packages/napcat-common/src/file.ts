@@ -2,7 +2,7 @@ import fs from 'fs';
 import { stat } from 'fs/promises';
 import crypto, { randomUUID } from 'crypto';
 import path from 'node:path';
-import { solveProblem } from '@/napcat-common/helper';
+import { solveProblem } from '@/napcat-common/src/helper';
 
 export interface HttpDownloadOptions {
   url: string;

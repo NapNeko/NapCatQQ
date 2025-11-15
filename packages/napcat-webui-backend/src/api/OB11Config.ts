@@ -3,9 +3,9 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { loadConfig, OneBotConfig } from 'napcat-onebot/config/config';
 import { webUiPathWrapper } from '@/napcat-webui-backend/index';
-import { WebUiDataRuntime } from '@/napcat-webui-backend/helper/Data';
-import { sendError, sendSuccess } from '@/napcat-webui-backend/utils/response';
-import { isEmpty } from '@/napcat-webui-backend/utils/check';
+import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
+import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/response';
+import { isEmpty } from '@/napcat-webui-backend/src/utils/check';
 import json5 from 'json5';
 
 // 获取OneBot11配置

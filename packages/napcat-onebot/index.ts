@@ -17,7 +17,7 @@ import {
   NTMsgAtType,
 } from 'napcat-core';
 import { OB11ConfigLoader } from '@/napcat-onebot/config';
-import { pendingTokenToSend } from 'napcat-webui-backend/src/index';
+import { pendingTokenToSend } from 'napcat-webui-backend/index';
 import {
   OB11HttpClientAdapter,
   OB11WebSocketClientAdapter,

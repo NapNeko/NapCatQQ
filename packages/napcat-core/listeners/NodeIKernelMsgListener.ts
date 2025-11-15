@@ -1,5 +1,5 @@
 import { ChatType, KickedOffLineInfo, RawMessage } from '@/napcat-core/types';
-import { CommonFileInfo } from 'napcat-core/index';
+import { CommonFileInfo } from '@/napcat-core/index';
 
 export interface OnRichMediaDownloadCompleteParams {
   fileModelId: string,

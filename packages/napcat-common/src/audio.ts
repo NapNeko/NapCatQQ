@@ -2,9 +2,9 @@ import fsPromise from 'fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'crypto';
 import { EncodeResult, getDuration, getWavFileInfo, isSilk, isWav } from 'silk-wasm';
-import { LogWrapper } from '@/napcat-common/log';
-import { EncodeArgs } from '@/napcat-common/audio-worker';
-import { FFmpegService } from '@/napcat-common/ffmpeg';
+import { LogWrapper } from '@/napcat-common/src/log';
+import { EncodeArgs } from '@/napcat-common/src/audio-worker';
+import { FFmpegService } from '@/napcat-common/src/ffmpeg';
 import { runTask } from './worker';
 import { fileURLToPath } from 'node:url';
 

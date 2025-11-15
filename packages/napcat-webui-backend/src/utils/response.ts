@@ -1,6 +1,6 @@
 import type { Response } from 'express';
 
-import { ResponseCode, HttpStatusCode } from '@/napcat-webui-backend/const/status';
+import { ResponseCode, HttpStatusCode } from '@/napcat-webui-backend/src/const/status';
 
 export const sendResponse = <T>(
   res: Response,

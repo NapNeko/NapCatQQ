@@ -11,7 +11,6 @@ import {
   TipGroupElement,
   TipGroupElementType,
 } from 'napcat-core';
-import { NapCatOneBot11Adapter } from '@/napcat-onebot/index';
 import { OB11GroupBanEvent } from '@/napcat-onebot/event/notice/OB11GroupBanEvent';
 import fastXmlParser from 'fast-xml-parser';
 import { OB11GroupMsgEmojiLikeEvent } from '@/napcat-onebot/event/notice/OB11MsgEmojiLikeEvent';
@@ -26,6 +25,7 @@ import { FileNapCatOneBotUUID } from 'napcat-common/src/file-uuid';
 import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
 import { NapProtoMsg } from 'napcat-protobuf';
 import { GroupReactNotify, PushMsg } from 'napcat-core/packet/transformer/proto';
+import { NapCatOneBot11Adapter } from '..';
 
 export class OneBotGroupApi {
   obContext: NapCatOneBot11Adapter;

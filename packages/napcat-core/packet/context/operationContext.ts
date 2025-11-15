@@ -9,7 +9,7 @@ import {
   PacketMsgReplyElement,
   PacketMsgVideoElement,
 } from '@/napcat-core/packet/message/element';
-import { ChatType, MsgSourceType, NTMsgType, RawMessage } from 'napcat-core/index';
+import { ChatType, MsgSourceType, NTMsgType, RawMessage } from '@/napcat-core/index';
 import { MiniAppRawData, MiniAppReqParams } from '@/napcat-core/packet/entities/miniApp';
 import { AIVoiceChatType } from '@/napcat-core/packet/entities/aiChat';
 import { NapProtoDecodeStructType, NapProtoEncodeStructType, NapProtoMsg } from 'napcat-protobuf';
