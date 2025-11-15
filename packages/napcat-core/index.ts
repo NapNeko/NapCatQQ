@@ -32,6 +32,7 @@ import { proxiedListenerOf } from 'napcat-common/src/proxy-handler';
 import { NTQQPacketApi } from './apis/packet';
 import { NativePacketHandler } from './packet/handler/client';
 import { container, ReceiverServiceRegistry } from './packet/handler/serviceRegister';
+import { appEvent } from './packet/handler/eventList';
 export * from './wrapper';
 export * from './types/index';
 export * from './services/index';
@@ -93,6 +94,7 @@ export function getMajorPath (QQVersion: string): string {
 export class NapCatCore {
   readonly context: InstanceContext;
   readonly eventWrapper: NTEventWrapper;
+  event = appEvent;
   NapCatDataPath: string = '';
   NapCatTempPath: string = '';
   apis: StableNTApiWrapper;
