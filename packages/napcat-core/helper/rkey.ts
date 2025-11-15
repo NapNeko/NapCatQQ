@@ -1,5 +1,5 @@
-import { LogWrapper } from 'napcat-common/src/log';
 import { RequestUtil } from 'napcat-common/src/request';
+import { LogWrapper } from './log';
 
 interface ServerRkeyData {
   group_rkey: string;

@@ -1,5 +1,5 @@
 import * as crypto from 'node:crypto';
-import { PacketMsg } from 'napcat-core/packet/message/message';
+import { PacketMsg } from '@/napcat-core/packet/message/message';
 
 interface ForwardMsgJson {
   app: string

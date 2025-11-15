@@ -16,19 +16,19 @@ import {
   WrapperNodeApi,
   WrapperSessionInitConfig,
 } from '@/napcat-core/wrapper';
-import { LogLevel, LogWrapper } from 'napcat-common/src/log';
+import { LogLevel, LogWrapper } from '@/napcat-core/helper/log';
 import { NodeIKernelLoginService } from '@/napcat-core/services';
-import { QQBasicInfoWrapper } from 'napcat-common/src/qq-basic-info';
+import { QQBasicInfoWrapper } from '@/napcat-core/helper/qq-basic-info';
 import { NapCatPathWrapper } from 'napcat-common/src/path';
 import path from 'node:path';
 import fs from 'node:fs';
 import { hostname, systemName, systemVersion } from 'napcat-common/src/system';
-import { NTEventWrapper } from 'napcat-common/src/event';
+import { NTEventWrapper } from '@/napcat-core/helper/event';
 import { KickedOffLineInfo, SelfInfo, SelfStatusInfo } from '@/napcat-core/types';
 import { NapCatConfigLoader, NapcatConfigSchema } from '@/napcat-core/helper/config';
 import os from 'node:os';
 import { NodeIKernelMsgListener, NodeIKernelProfileListener } from '@/napcat-core/listeners';
-import { proxiedListenerOf } from 'napcat-common/src/proxy-handler';
+import { proxiedListenerOf } from '@/napcat-core/helper/proxy-handler';
 import { NTQQPacketApi } from './apis/packet';
 import { NativePacketHandler } from './packet/handler/client';
 import { container, ReceiverServiceRegistry } from './packet/handler/serviceRegister';

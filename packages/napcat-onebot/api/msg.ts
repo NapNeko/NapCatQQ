@@ -36,7 +36,7 @@ import { uriToLocalFile } from 'napcat-common/src/file';
 import { RequestUtil } from 'napcat-common/src/request';
 import fsPromise from 'node:fs/promises';
 import { OB11FriendAddNoticeEvent } from '@/napcat-onebot/event/notice/OB11FriendAddNoticeEvent';
-import { ForwardMsgBuilder } from 'napcat-common/src/forward-msg-builder';
+import { ForwardMsgBuilder } from '@/napcat-core/helper/forward-msg-builder';
 import { NapProtoMsg } from 'napcat-protobuf';
 import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
 import { GroupDecreaseSubType, OB11GroupDecreaseEvent } from '../event/notice/OB11GroupDecreaseEvent';

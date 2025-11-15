@@ -3,7 +3,7 @@
  * 自动检测并选择最佳的 FFmpeg 适配器
  */
 
-import { LogWrapper } from './log';
+import { LogWrapper } from '@/napcat-core/helper/log';
 import { FFmpegAddonAdapter } from './ffmpeg-addon-adapter';
 import { FFmpegExecAdapter } from './ffmpeg-exec-adapter';
 import type { IFFmpegAdapter } from './ffmpeg-adapter-interface';

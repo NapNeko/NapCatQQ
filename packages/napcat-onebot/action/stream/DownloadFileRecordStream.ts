@@ -5,7 +5,7 @@ import { NetworkAdapterConfig } from '@/napcat-onebot/config/config';
 import { StreamPacket, StreamStatus } from './StreamBasic';
 import fs from 'fs';
 import { decode } from 'silk-wasm';
-import { FFmpegService } from 'napcat-common/src/ffmpeg';
+import { FFmpegService } from '@/napcat-core/helper/ffmpeg/ffmpeg';
 import { BaseDownloadStream, DownloadResult } from './BaseDownloadStream';
 
 const out_format = ['mp3', 'amr', 'wma', 'm4a', 'spx', 'ogg', 'wav', 'flac'];

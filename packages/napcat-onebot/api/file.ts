@@ -1,10 +1,9 @@
 
 
 import { NapCatOneBot11Adapter } from '@/napcat-onebot/index';
-import { encodeSilk } from 'napcat-common/src/audio';
-import { FFmpegService } from 'napcat-common/src/ffmpeg';
+import { encodeSilk } from '@/napcat-core/helper/audio';
+import { FFmpegService } from '@/napcat-core/helper/ffmpeg/ffmpeg';
 import { calculateFileMD5 } from 'napcat-common/src/file';
-import { defaultVideoThumbB64 } from 'napcat-common/src/video';
 import { ElementType, NapCatCore, PicElement, PicSubType, SendFileElement, SendPicElement, SendPttElement, SendVideoElement } from 'napcat-core';
 import { getFileTypeForSendType } from 'napcat-core/helper/msg';
 import { imageSizeFallBack } from 'napcat-image-size';
@@ -13,6 +12,7 @@ import { fileTypeFromFile } from 'file-type';
 import pathLib from 'node:path';
 import fsPromises from 'fs/promises';
 import fs from 'fs';
+import { defaultVideoThumbB64 } from '@/napcat-core/helper/ffmpeg/video';
 export class OneBotFileApi {
     obContext: NapCatOneBot11Adapter;
     core: NapCatCore;

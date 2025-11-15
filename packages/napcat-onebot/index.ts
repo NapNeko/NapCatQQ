@@ -38,7 +38,6 @@ import { ActionMap, createActionMap } from '@/napcat-onebot/action';
 import { WebUiDataRuntime } from 'napcat-webui-backend/src/helper/Data';
 import { OB11InputStatusEvent } from '@/napcat-onebot/event/notice/OB11InputStatusEvent';
 import { MessageUnique } from 'napcat-common/src/message-unique';
-import { proxiedListenerOf } from 'napcat-common/src/proxy-handler';
 import { OB11FriendRequestEvent } from '@/napcat-onebot/event/request/OB11FriendRequest';
 import { OB11GroupRequestEvent } from '@/napcat-onebot/event/request/OB11GroupRequest';
 import { OB11FriendRecallNoticeEvent } from '@/napcat-onebot/event/notice/OB11FriendRecallNoticeEvent';
@@ -54,6 +53,7 @@ import { IOB11NetworkAdapter } from '@/napcat-onebot/network/adapter';
 import { OB11HttpSSEServerAdapter } from './network/http-server-sse';
 import { OB11PluginMangerAdapter } from './network/plugin-manger';
 import { existsSync } from 'node:fs';
+import { proxiedListenerOf } from '@/napcat-core/helper/proxy-handler';
 import { OneBotFileApi } from './api/file';
 
 interface ApiListType {

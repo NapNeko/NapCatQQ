@@ -7,7 +7,6 @@ import type { WebUiConfigType } from './src/types';
 import { createServer } from 'http';
 import { randomUUID } from 'node:crypto';
 import { createServer as createHttpsServer } from 'https';
-import { LogWrapper } from 'napcat-common/src/log';
 import { NapCatPathWrapper } from 'napcat-common/src/path';
 import { WebUiConfigWrapper } from '@/napcat-webui-backend/src/helper/config';
 import { ALLRouter } from '@/napcat-webui-backend/src/router';
@@ -20,6 +19,7 @@ import multer from 'multer';
 import * as net from 'node:net';
 import { WebUiDataRuntime } from './src/helper/Data';
 import { existsSync, readFileSync } from 'node:fs'; // 引入multer用于错误捕获
+import { LogWrapper } from '@/napcat-core/helper/log';
 
 // 实例化Express
 const app = express();

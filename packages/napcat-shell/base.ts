@@ -1,6 +1,5 @@
-import type { SelfInfo } from 'napcat-core/types';
+import type { SelfInfo } from 'napcat-core/index';
 
-import { LogWrapper } from 'napcat-common/src/log';
 import { NodeIKernelLoginListener, NodeIKernelSessionListener } from 'napcat-core/listeners';
 import { NodeIDependsAdapter, NodeIDispatcherAdapter, NodeIGlobalAdapter } from 'napcat-core/adapters';
 import { NapCatPathWrapper } from 'napcat-common/src/path';
@@ -17,9 +16,7 @@ import {
   WrapperNodeApi,
   WrapperSessionInitConfig,
 } from 'napcat-core';
-import { QQBasicInfoWrapper } from 'napcat-common/src/qq-basic-info';
 import { hostname, systemVersion } from 'napcat-common/src/system';
-import { proxiedListenerOf } from 'napcat-common/src/proxy-handler';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
@@ -31,9 +28,12 @@ import { WebUiDataRuntime } from 'napcat-webui-backend/src/helper/Data';
 import { napCatVersion } from 'napcat-common/src/version';
 import { NodeIO3MiscListener } from 'napcat-core/listeners/NodeIO3MiscListener';
 import { sleep } from 'napcat-common/src/helper';
-import { FFmpegService } from 'napcat-common/src/ffmpeg';
+import { FFmpegService } from '@/napcat-core/helper/ffmpeg/ffmpeg';
 import { connectToNamedPipe } from './pipe';
 import { NativePacketHandler } from 'napcat-core/packet/handler/client';
+import { LogWrapper } from '@/napcat-core/helper/log';
+import { proxiedListenerOf } from '@/napcat-core/helper/proxy-handler';
+import { QQBasicInfoWrapper } from '@/napcat-core/helper/qq-basic-info';
 // NapCat Shell App ES 入口文件
 async function handleUncaughtExceptions (logger: LogWrapper) {
   process.on('uncaughtException', (err) => {

@@ -10,7 +10,7 @@ import { promisify } from 'util';
 import { fileTypeFromFile } from 'file-type';
 import { imageSizeFallBack } from 'napcat-image-size/src/index';
 import { downloadFFmpegIfNotExists } from './download-ffmpeg';
-import { LogWrapper } from './log';
+import { LogWrapper } from '@/napcat-core/helper/log';
 import type { IFFmpegAdapter, VideoInfoResult } from './ffmpeg-adapter-interface';
 
 const execFileAsync = promisify(execFile);

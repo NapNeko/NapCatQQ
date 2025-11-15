@@ -2,10 +2,10 @@ import fsPromise from 'fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'crypto';
 import { EncodeResult, getDuration, getWavFileInfo, isSilk, isWav } from 'silk-wasm';
-import { LogWrapper } from '@/napcat-common/src/log';
-import { EncodeArgs } from '@/napcat-common/src/audio-worker';
-import { FFmpegService } from '@/napcat-common/src/ffmpeg';
-import { runTask } from './worker';
+import { LogWrapper } from '@/napcat-core/helper/log';
+import { EncodeArgs } from 'napcat-common/src/audio-worker';
+import { FFmpegService } from '@/napcat-core/helper/ffmpeg/ffmpeg';
+import { runTask } from 'napcat-common/src/worker';
 import { fileURLToPath } from 'node:url';
 
 const ALLOW_SAMPLE_RATE = [8000, 12000, 16000, 24000, 32000, 44100, 48000];

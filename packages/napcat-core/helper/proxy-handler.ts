@@ -1,4 +1,4 @@
-import { LogWrapper } from '@/napcat-common/src/log';
+import { LogWrapper } from '@/napcat-core/helper/log';
 
 export function proxyHandlerOf (logger: LogWrapper) {
   return {

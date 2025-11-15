@@ -1,9 +1,9 @@
 import * as os from 'os';
 import offset from '@/napcat-core/external/napi2native.json';
 import { InstanceContext, NapCatCore } from '@/napcat-core/index';
-import { LogWrapper } from 'napcat-common/src/log';
 import { PacketClientSession } from '@/napcat-core/packet/clientSession';
 import { napCatVersion } from 'napcat-common/src/version';
+import { LogWrapper } from '../helper/log';
 
 interface OffsetType {
   [key: string]: {

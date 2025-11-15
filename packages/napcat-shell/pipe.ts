@@ -1,4 +1,4 @@
-import { LogWrapper } from 'napcat-common/src/log';
+import { LogWrapper } from 'napcat-core/helper/log';
 import * as net from 'net';
 import * as process from 'process';
 import { Writable } from 'stream';

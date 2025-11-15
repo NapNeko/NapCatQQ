@@ -33,7 +33,7 @@ import {
   SendVideoElement,
   Peer,
 } from '@/napcat-core/index';
-import { ForwardMsgBuilder } from 'napcat-common/src/forward-msg-builder';
+import { ForwardMsgBuilder } from '@/napcat-core/helper/forward-msg-builder';
 import { PacketMsg, PacketSendMsgElement } from '@/napcat-core/packet/message/message';
 
 export type ParseElementFnR = [MessageElement, NapProtoDecodeStructType<typeof Elem> | null] | undefined;

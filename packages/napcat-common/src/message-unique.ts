@@ -1,6 +1,5 @@
-import { Peer } from 'napcat-core/index';
 import crypto from 'crypto';
-
+import { Peer } from './types';
 export class LimitedHashTable<K, V> {
   private readonly keyToValue: Map<K, V> = new Map();
   private readonly valueToKey: Map<V, K> = new Map();

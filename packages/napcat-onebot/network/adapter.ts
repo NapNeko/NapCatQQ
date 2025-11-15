@@ -1,5 +1,5 @@
 import { NetworkAdapterConfig } from '@/napcat-onebot/config/config';
-import { LogWrapper } from 'napcat-common/src/log';
+import { LogWrapper } from 'napcat-core/helper/log';
 import { NapCatCore } from 'napcat-core';
 import { NapCatOneBot11Adapter } from '@/napcat-onebot/index';
 import { ActionMap } from '@/napcat-onebot/action';

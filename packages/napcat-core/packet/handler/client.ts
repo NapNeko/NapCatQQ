@@ -2,8 +2,8 @@ import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import { constants } from 'node:os';
-import { LogWrapper } from 'napcat-common/src/log';
 import offset from '@/napcat-core/external/packet.json';
+import { LogWrapper } from '../../helper/log';
 interface OffsetType {
   [key: string]: {
     recv: string;

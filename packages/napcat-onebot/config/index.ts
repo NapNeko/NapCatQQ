@@ -1,4 +1,4 @@
-import { ConfigBase } from 'napcat-common/src/config-base';
+import { ConfigBase } from 'napcat-core/helper/config-base';
 import type { NapCatCore } from 'napcat-core';
 import { OneBotConfig } from './config';
 import { AnySchema } from 'ajv';
