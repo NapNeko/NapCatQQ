@@ -1,8 +1,12 @@
 {
     "debug.node.sourceMapPathOverrides": {
-        "../../napcat-onebot/*": "${workspaceFolder}/packages/napcat-onebot/*",
-        "../../napcat-core/*": "${workspaceFolder}/packages/napcat-core/*",
         "../../napcat-common/*": "${workspaceFolder}/packages/napcat-common/*",
+        "../../napcat-core/*": "${workspaceFolder}/packages/napcat-core/*",
+        "../../napcat-image-size/*": "${workspaceFolder}/packages/napcat-image-size/*",
+        "../../napcat-shell/*": "${workspaceFolder}/packages/napcat-shell/*",
+        "../../napcat-framework/*": "${workspaceFolder}/packages/napcat-framework/*",
+        "../../napcat-protobuf/*": "${workspaceFolder}/packages/napcat-protobuf/*",
+        "../../napcat-onebot/*": "${workspaceFolder}/packages/napcat-onebot/*",
         "../../napcat-webui-backend/*": "${workspaceFolder}/packages/napcat-webui-backend/*",
         "../../napcat-pty/*": "${workspaceFolder}/packages/napcat-pty/*"
     }
