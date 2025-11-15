@@ -1,5 +1,4 @@
 import { NapProtoMsg } from "napcat-protobuf";
-import { appEvent } from "../packet/handler/eventList";
 import { ReceiveService, ServiceBase } from "../packet/handler/serviceRegister";
 import { GroupReactNotify, PushMsg } from "../packet/transformer/proto";
 
@@ -23,7 +22,7 @@ export class OlPushService extends ServiceBase {
                 const code = notify.groupReactionData?.data?.data?.groupReactionDataContent?.code ?? '';
                 const count = notify.groupReactionData?.data?.data?.groupReactionDataContent?.count ?? 0;
                 const senderUin = await this.core.apis.UserApi.getUinByUidV2(operatorUid);
-                appEvent.emit('event:emoji_like', {
+                this.event.emit('event:emoji_like', {
                     groupId: groupCode,
                     senderUin: senderUin,
                     emojiId: code,
