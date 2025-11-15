@@ -11,7 +11,7 @@ import { Socket } from 'net';
 import { ArgvOrCommandLine } from '@homebridge/node-pty-prebuilt-multiarch/src/types';
 import { fork } from 'child_process';
 import { ConoutConnection } from './windowsConoutConnection';
-import { require_dlopen } from '.';
+import { require_dlopen } from './index';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
