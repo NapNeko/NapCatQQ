@@ -53,7 +53,6 @@ export class FFmpegService {
       throw new Error('FFmpeg service not initialized. Please call FFmpegService.init() first.');
     }
     return this.adapter.name;
-
   }
 
   /**

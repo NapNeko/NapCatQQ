@@ -50,7 +50,6 @@ export class NativePacketHandler {
       this.logger.logError('NativePacketClient 加载出错:', error);
       this.loaded = false;
     }
-
   }
 
   /**

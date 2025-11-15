@@ -33,7 +33,7 @@ export class NTQQFileApi {
       'http://ss.xingzhige.com/music_card/rkey',
       'https://secret-service.bietiaop.com/rkeys',
     ],
-      this.context.logger
+    this.context.logger
     );
   }
 
@@ -168,7 +168,6 @@ export class NTQQFileApi {
       ext,
     };
   }
-
 
   async downloadFileForModelId (peer: Peer, modelId: string, unknown: string, timeout = 1000 * 60 * 2) {
     const [, fileTransNotifyInfo] = await this.core.eventWrapper.callNormalEventV2(

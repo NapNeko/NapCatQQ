@@ -45,7 +45,7 @@ export enum NapCatCoreWorkingEnv {
   Framework = 2,
 }
 
-export function loadQQWrapper(QQVersion: string): WrapperNodeApi {
+export function loadQQWrapper (QQVersion: string): WrapperNodeApi {
   if (process.env['NAPCAT_WRAPPER_PATH']) {
     const wrapperPath = process.env['NAPCAT_WRAPPER_PATH'];
     const nativemodule: { exports: WrapperNodeApi; } = { exports: {} as WrapperNodeApi };
@@ -72,7 +72,7 @@ export function loadQQWrapper(QQVersion: string): WrapperNodeApi {
   process.dlopen(nativemodule, wrapperNodePath);
   return nativemodule.exports;
 }
-export function getMajorPath(QQVersion: string): string {
+export function getMajorPath (QQVersion: string): string {
   // major.node
   let appPath;
   if (os.platform() === 'darwin') {
@@ -105,7 +105,7 @@ export class NapCatCore {
   configLoader: NapCatConfigLoader;
 
   // 通过构造器递过去的 runtime info 应该尽量少
-  constructor(context: InstanceContext, selfInfo: SelfInfo) {
+  constructor (context: InstanceContext, selfInfo: SelfInfo) {
     this.selfInfo = selfInfo;
     this.context = context;
     this.util = this.context.wrapper.NodeQQNTWrapperUtil;
@@ -134,7 +134,7 @@ export class NapCatCore {
     });
   }
 
-  async initCore() {
+  async initCore () {
     this.NapCatDataPath = path.join(this.dataPath, 'NapCat');
     fs.mkdirSync(this.NapCatDataPath, { recursive: true });
     this.NapCatTempPath = path.join(this.NapCatDataPath, 'temp');
@@ -163,7 +163,7 @@ export class NapCatCore {
     );
   }
 
-  get dataPath(): string {
+  get dataPath (): string {
     let result = this.context.wrapper.NodeQQNTWrapperUtil.getNTUserDataInfoConfig();
     if (!result) {
       result = path.resolve(os.homedir(), './.config/QQ');
@@ -173,7 +173,7 @@ export class NapCatCore {
   }
 
   // Renamed from 'InitDataListener'
-  async initNapCatCoreListeners() {
+  async initNapCatCoreListeners () {
     const msgListener = new NodeIKernelMsgListener();
 
     msgListener.onKickedOffLine = (Info: KickedOffLineInfo) => {
@@ -211,7 +211,7 @@ export class NapCatCore {
   }
 }
 
-export async function genSessionConfig(
+export async function genSessionConfig (
   guid: string,
   QQVersionAppid: string,
   QQVersion: string,

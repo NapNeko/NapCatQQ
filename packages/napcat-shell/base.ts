@@ -364,7 +364,7 @@ export async function NCoreInitShell () {
   await initializeLoginService(loginService, basicInfoWrapper, dataPathGlobal, systemVersion, hostname);
   handleProxy(session, logger);
 
-  let quickLoginUin: string | undefined = undefined;
+  let quickLoginUin: string | undefined;
   try {
     const args = process.argv;
     const qIndex = args.findIndex(arg => arg === '-q' || arg === '--qq');

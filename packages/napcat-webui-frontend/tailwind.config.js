@@ -1,4 +1,4 @@
-import { heroui } from '@heroui/theme'
+import { heroui } from '@heroui/theme';
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -7,16 +7,16 @@ export default {
     './src/layouts/**/*.{js,ts,jsx,tsx,mdx}',
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}'
+    './node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}',
   ],
   safelist: [
     {
       pattern:
-        /bg-(primary|secondary|success|danger|warning|default)-(50|100|200|300|400|500|600|700|800|900)/
-    }
+        /bg-(primary|secondary|success|danger|warning|default)-(50|100|200|300|400|500|600|700|800|900)/,
+    },
   ],
   theme: {
-    extend: {}
+    extend: {},
   },
   darkMode: 'class',
   plugins: [
@@ -36,7 +36,7 @@ export default {
               600: '#c20e4d',
               700: '#920b3a',
               800: '#610726',
-              900: '#310413'
+              900: '#310413',
             },
             danger: {
               DEFAULT: '#DB3694',
@@ -50,9 +50,9 @@ export default {
               600: '#BC278B',
               700: '#9D1B7F',
               800: '#7F1170',
-              900: '#690A66'
-            }
-          }
+              900: '#690A66',
+            },
+          },
         },
         dark: {
           colors: {
@@ -68,7 +68,7 @@ export default {
               600: '#f871a0',
               700: '#faa0bf',
               800: '#fdd0df',
-              900: '#fee7ef'
+              900: '#fee7ef',
             },
             danger: {
               DEFAULT: '#DB3694',
@@ -82,11 +82,11 @@ export default {
               600: '#F485AE',
               700: '#FBAFC4',
               800: '#FDD7DD',
-              900: '#FEEAF6'
-            }
-          }
-        }
-      }
-    })
-  ]
-}
+              900: '#FEEAF6',
+            },
+          },
+        },
+      },
+    }),
+  ],
+};
