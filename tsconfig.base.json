@@ -6,6 +6,9 @@
     "lib": [
       "ES2021"
     ],
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
     "esModuleInterop": true,
     "outDir": "dist",
     "noEmit": false,
@@ -32,7 +35,9 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["packages/*"]
+      "@/*": [
+        "packages/*"
+      ]
     },
     "skipLibCheck": true,
     "skipDefaultLibCheck": true
