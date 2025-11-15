@@ -14,14 +14,11 @@
     },
     "dependencies": {
         "@protobuf-ts/runtime": "^2.11.1",
-        "napcat-protobuf": "workspace:*",
         "ajv": "^8.13.0",
         "@sinclair/typebox": "^0.34.38",
         "file-type": "^21.0.0",
-        "napcat-image-size": "workspace:*",
-        "napcat-core": "workspace:*",
         "napcat-common": "workspace:*",
-        "napcat-onebot": "workspace:*"
+        "napcat-protobuf": "workspace:*"
     },
     "devDependencies": {
         "@types/node": "^22.0.1"
