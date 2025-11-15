@@ -12,12 +12,25 @@ if (!mainPath) {
 const versionsDir = path.join(mainPath, 'versions');
 console.log(`Looking for version folders in: ${versionsDir}`);
 const versionFolders = fs.readdirSync(versionsDir).filter(f => fs.statSync(path.join(versionsDir, f)).isDirectory());
-if (versionFolders.length !== 1) {
-  console.error('versions 文件夹下必须且只能有一个版本目录');
+let selectedFolder;
+if (versionFolders.length === 0) {
+  console.error('versions 文件夹下没有找到版本目录');
   process.exit(1);
+} else if (versionFolders.length === 1) {
+  selectedFolder = versionFolders[0];
+} else {
+  // 获取时间最新的文件夹
+  const stats = versionFolders.map(folder => {
+    const folderPath = path.join(versionsDir, folder);
+    return { folder, mtime: fs.statSync(folderPath).mtime };
+  });
+  stats.sort((a, b) => b.mtime - a.mtime);
+  selectedFolder = stats[0].folder;
+  console.log(`多个版本文件夹存在，选择最新的: ${selectedFolder}`);
 }
 
-const BASE_DIR = path.join(versionsDir, versionFolders[0], 'resources', 'app');
+const BASE_DIR = path.join(versionsDir, selectedFolder, 'resources', 'app');
+console.log(`BASE_DIR: ${BASE_DIR}`);
 const TARGET_DIR = path.join(__dirname, 'dist');
 const QQNT_FILE = path.join(__dirname, 'QQNT.dll');
 const NAPCAT_MJS_PATH = path.join(__dirname, '..', 'napcat-shell','dist', 'napcat.mjs');
