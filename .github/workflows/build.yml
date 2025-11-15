@@ -22,6 +22,7 @@ jobs:
           npm i -g pnpm
           pnpm i
           pnpm run typecheck || exit 1
+          pnpm test || exit 1
           pnpm --filter napcat-webui-frontend run build || exit 1
           pnpm run build:framework
           mv packages/napcat-framework/dist framework-dist
@@ -46,8 +47,9 @@ jobs:
         run: |
           npm i -g pnpm
           pnpm i
-          pnpm --filter napcat-webui-frontend run build || exit 1
           pnpm run typecheck || exit 1
+          pnpm test || exit 1
+          pnpm --filter napcat-webui-frontend run build || exit 1
           pnpm run build:shell
           mv packages/napcat-shell/dist shell-dist
           cd shell-dist
