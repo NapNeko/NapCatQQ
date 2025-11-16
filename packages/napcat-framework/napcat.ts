@@ -3,10 +3,11 @@ import { InitWebUi, WebUiConfig, webUiRuntimePort } from 'napcat-webui-backend/i
 import { NapCatOneBot11Adapter } from 'napcat-onebot/index';
 import { NativePacketHandler } from 'napcat-core/packet/handler/client';
 import { FFmpegService } from 'napcat-core/helper/ffmpeg/ffmpeg';
-import { LogWrapper } from 'napcat-core/helper/log';
+import { logSubscription, LogWrapper } from 'napcat-core/helper/log';
 import { QQBasicInfoWrapper } from '@/napcat-core/helper/qq-basic-info';
 import { InstanceContext, loadQQWrapper, NapCatCore, NapCatCoreWorkingEnv, NodeIKernelLoginListener, NodeIKernelLoginService, NodeIQQNTWrapperSession, SelfInfo, WrapperNodeApi } from '@/napcat-core';
 import { proxiedListenerOf } from '@/napcat-core/helper/proxy-handler';
+import { statusHelperSubscription } from '@/napcat-core/helper/status';
 
 // Framework ES入口文件
 export async function getWebUiUrl () {
@@ -72,7 +73,7 @@ export async function NCoreInitFramework (
   await loaderObject.core.initCore();
 
   // 启动WebUi
-  InitWebUi(logger, pathWrapper).then().catch(e => logger.logError(e));
+  InitWebUi(logger, pathWrapper, logSubscription, statusHelperSubscription).then().catch(e => logger.logError(e));
   // 初始化LLNC的Onebot实现
   await new NapCatOneBot11Adapter(loaderObject.core, loaderObject.context, pathWrapper).InitOneBot();
 }

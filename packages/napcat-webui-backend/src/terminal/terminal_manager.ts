@@ -6,7 +6,7 @@ import { WebSocket, WebSocketServer } from 'ws';
 import os from 'os';
 import { IPty, spawn as ptySpawn } from 'napcat-pty';
 import { randomUUID } from 'crypto';
-import { LogWrapper } from '@/napcat-core/helper/log';
+import { ILogWrapper } from 'napcat-common/src/log-interface';
 
 interface TerminalInstance {
   pty: IPty; // 改用 PTY 实例
@@ -22,7 +22,7 @@ class TerminalManager {
   private terminals: Map<string, TerminalInstance> = new Map();
   private wss: WebSocketServer | null = null;
 
-  initialize (req: any, socket: any, head: any, logger?: LogWrapper) {
+  initialize (req: any, socket: any, head: any, logger?: ILogWrapper) {
     logger?.log('[NapCat] [WebUi] terminal websocket initialized');
     this.wss = new WebSocketServer({
       noServer: true,

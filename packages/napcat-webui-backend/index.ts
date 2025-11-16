@@ -19,8 +19,9 @@ import multer from 'multer';
 import * as net from 'node:net';
 import { WebUiDataRuntime } from './src/helper/Data';
 import { existsSync, readFileSync } from 'node:fs'; // 引入multer用于错误捕获
-import { LogWrapper } from '@/napcat-core/helper/log';
-
+import { ILogWrapper } from 'napcat-common/src/log-interface';
+import { ISubscription } from 'napcat-common/src/subscription-interface';
+import { IStatusHelperSubscription } from '@/napcat-common/src/status-interface';
 // 实例化Express
 const app = express();
 /**
@@ -31,6 +32,8 @@ const app = express();
  */
 export let WebUiConfig: WebUiConfigWrapper;
 export let webUiPathWrapper: NapCatPathWrapper;
+export let logSubscription: ISubscription;
+export let statusHelperSubscription: IStatusHelperSubscription;
 const MAX_PORT_TRY = 100;
 
 export let webUiRuntimePort = 6099;
@@ -68,7 +71,7 @@ export async function InitPort (parsedConfig: WebUiConfigType): Promise<[string,
   }
 }
 
-async function checkCertificates (logger: LogWrapper): Promise<{ key: string, cert: string } | null> {
+async function checkCertificates (logger: ILogWrapper): Promise<{ key: string, cert: string; } | null> {
   try {
     const certPath = join(webUiPathWrapper.configPath, 'cert.pem');
     const keyPath = join(webUiPathWrapper.configPath, 'key.pem');
@@ -85,8 +88,10 @@ async function checkCertificates (logger: LogWrapper): Promise<{ key: string, ce
     return null;
   }
 }
-export async function InitWebUi (logger: LogWrapper, pathWrapper: NapCatPathWrapper) {
+export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWrapper, Subscription: ISubscription, statusSubscription: IStatusHelperSubscription) {
   webUiPathWrapper = pathWrapper;
+  logSubscription = Subscription;
+  statusHelperSubscription = statusSubscription;
   WebUiConfig = new WebUiConfigWrapper();
   let config = await WebUiConfig.GetWebUIConfig();
 
@@ -216,11 +221,11 @@ export async function InitWebUi (logger: LogWrapper, pathWrapper: NapCatPathWrap
     const searchParams = { token };
     logger.log(`[NapCat] [WebUi] WebUi Token: ${token}`);
     logger.log(
-            `[NapCat] [WebUi] WebUi User Panel Url: ${createUrl('127.0.0.1', port.toString(), '/webui', searchParams)}`
+      `[NapCat] [WebUi] WebUi User Panel Url: ${createUrl('127.0.0.1', port.toString(), '/webui', searchParams)}`
     );
     if (host !== '') {
       logger.log(
-                `[NapCat] [WebUi] WebUi User Panel Url: ${createUrl(host, port.toString(), '/webui', searchParams)}`
+        `[NapCat] [WebUi] WebUi User Panel Url: ${createUrl(host, port.toString(), '/webui', searchParams)}`
       );
     }
   });
