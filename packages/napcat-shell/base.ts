@@ -31,9 +31,10 @@ import { sleep } from 'napcat-common/src/helper';
 import { FFmpegService } from '@/napcat-core/helper/ffmpeg/ffmpeg';
 import { connectToNamedPipe } from './pipe';
 import { NativePacketHandler } from 'napcat-core/packet/handler/client';
-import { LogWrapper } from '@/napcat-core/helper/log';
+import { logSubscription, LogWrapper } from '@/napcat-core/helper/log';
 import { proxiedListenerOf } from '@/napcat-core/helper/proxy-handler';
 import { QQBasicInfoWrapper } from '@/napcat-core/helper/qq-basic-info';
+import { statusHelperSubscription } from '@/napcat-core/helper/status';
 // NapCat Shell App ES 入口文件
 async function handleUncaughtExceptions (logger: LogWrapper) {
   process.on('uncaughtException', (err) => {
@@ -337,7 +338,7 @@ export async function NCoreInitShell () {
   o3Service.addO3MiscListener(new NodeIO3MiscListener());
 
   logger.log('[NapCat] [Core] NapCat.Core Version: ' + napCatVersion);
-  InitWebUi(logger, pathWrapper).then().catch(e => logger.logError(e));
+  InitWebUi(logger, pathWrapper, logSubscription, statusHelperSubscription).then().catch(e => logger.logError(e));
 
   const engine = wrapper.NodeIQQNTWrapperEngine.get();
   const loginService = wrapper.NodeIKernelLoginService.get();

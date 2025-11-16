@@ -1,24 +1,24 @@
 import os from 'node:os';
 import EventEmitter from 'node:events';
-
+import { IStatusHelperSubscription } from 'napcat-common/src/status-interface';
 export interface SystemStatus {
   cpu: {
     model: string,
-    speed: string
+    speed: string;
     usage: {
-      system: string
-      qq: string
+      system: string;
+      qq: string;
     },
-    core: number
+    core: number;
   },
   memory: {
-    total: string
+    total: string;
     usage: {
-      system: string
-      qq: string
-    }
+      system: string;
+      qq: string;
+    };
   },
-  arch: string
+  arch: string;
 }
 
 export class StatusHelper {
@@ -101,7 +101,7 @@ export class StatusHelper {
   }
 }
 
-class StatusHelperSubscription extends EventEmitter {
+class StatusHelperSubscription extends EventEmitter implements IStatusHelperSubscription {
   private statusHelper: StatusHelper;
   private interval: NodeJS.Timeout | null = null;
 

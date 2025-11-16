@@ -1,8 +1,7 @@
 import type { RequestHandler } from 'express';
 import { sendError, sendSuccess } from '../utils/response';
-import { logSubscription } from 'napcat-core/helper/log';
 import { terminalManager } from '../terminal/terminal_manager';
-import { WebUiConfig } from '@/napcat-webui-backend/index';
+import { logSubscription, WebUiConfig } from '@/napcat-webui-backend/index';
 // 判断是否是 macos
 const isMacOS = process.platform === 'darwin';
 

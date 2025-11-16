@@ -3,6 +3,7 @@ import { truncateString } from 'napcat-common/src/helper';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import { NTMsgAtType, ChatType, ElementType, MessageElement, RawMessage, SelfInfo } from '@/napcat-core/index';
+import { ILogWrapper } from 'napcat-common/src/log-interface';
 import EventEmitter from 'node:events';
 export enum LogLevel {
   DEBUG = 'debug',
@@ -56,7 +57,7 @@ class Subscription {
 
 export const logSubscription = new Subscription();
 
-export class LogWrapper {
+export class LogWrapper implements ILogWrapper {
   fileLogEnabled = true;
   consoleLogEnabled = true;
   logger: winston.Logger;

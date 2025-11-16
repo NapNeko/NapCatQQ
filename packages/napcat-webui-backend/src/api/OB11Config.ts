@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { loadConfig, OneBotConfig } from 'napcat-onebot/config/config';
+import { loadConfig, OneBotConfig } from '@/napcat-webui-backend/src/onebot/config';
 import { webUiPathWrapper } from '@/napcat-webui-backend/index';
 import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 import { sendError, sendSuccess } from '@/napcat-webui-backend/src/utils/response';
