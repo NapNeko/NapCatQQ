@@ -1,6 +1,6 @@
 name: Bug 反馈
 description: 报告可能的 NapCat 异常行为
-title: '[BUG] '
+title: "[BUG] "
 labels: bug
 body:
   - type: markdown
@@ -10,6 +10,10 @@ body:
         在提交新的 Bug 反馈前，请确保您：
         * 已经搜索了现有的 issues，并且没有找到可以解决您问题的方法
         * 不与现有的某一 issue 重复
+        * **不接受因发送不当内容而导致的问题报告**
+          - 包括但不限于：多媒体发送失败、转发消息失败、消息被拦截等因 18+ 内容、违规内容或触发风控的问题
+          - 提交 issue 前，请确认您发送的多媒体内容、链接、文本等均为正常合规内容，不会触发平台风控机制
+          - 因违规内容导致的问题，一律不予受理
   - type: input
     id: system-version
     attributes:
