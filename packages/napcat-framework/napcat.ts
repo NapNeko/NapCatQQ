@@ -8,6 +8,8 @@ import { QQBasicInfoWrapper } from '@/napcat-core/helper/qq-basic-info';
 import { InstanceContext, loadQQWrapper, NapCatCore, NapCatCoreWorkingEnv, NodeIKernelLoginListener, NodeIKernelLoginService, NodeIQQNTWrapperSession, SelfInfo, WrapperNodeApi } from '@/napcat-core';
 import { proxiedListenerOf } from '@/napcat-core/helper/proxy-handler';
 import { statusHelperSubscription } from '@/napcat-core/helper/status';
+import { applyPendingUpdates } from '@/napcat-webui-backend/src/api/UpdateNapCat';
+import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 
 // Framework ES入口文件
 export async function getWebUiUrl () {
@@ -32,6 +34,7 @@ export async function NCoreInitFramework (
   });
 
   const pathWrapper = new NapCatPathWrapper();
+  await applyPendingUpdates(pathWrapper);
   const logger = new LogWrapper(pathWrapper.logsPath);
   const basicInfoWrapper = new QQBasicInfoWrapper({ logger });
   const wrapper = loadQQWrapper(basicInfoWrapper.getFullQQVersion());
@@ -73,6 +76,7 @@ export async function NCoreInitFramework (
   await loaderObject.core.initCore();
 
   // 启动WebUi
+  WebUiDataRuntime.setWorkingEnv(NapCatCoreWorkingEnv.Framework);
   InitWebUi(logger, pathWrapper, logSubscription, statusHelperSubscription).then().catch(e => logger.logError(e));
   // 初始化LLNC的Onebot实现
   await new NapCatOneBot11Adapter(loaderObject.core, loaderObject.context, pathWrapper).InitOneBot();

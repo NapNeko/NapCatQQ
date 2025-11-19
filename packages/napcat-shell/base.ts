@@ -35,6 +35,7 @@ import { logSubscription, LogWrapper } from '@/napcat-core/helper/log';
 import { proxiedListenerOf } from '@/napcat-core/helper/proxy-handler';
 import { QQBasicInfoWrapper } from '@/napcat-core/helper/qq-basic-info';
 import { statusHelperSubscription } from '@/napcat-core/helper/status';
+import { applyPendingUpdates } from '@/napcat-webui-backend/src/api/UpdateNapCat';
 // NapCat Shell App ES 入口文件
 async function handleUncaughtExceptions (logger: LogWrapper) {
   process.on('uncaughtException', (err) => {
@@ -318,6 +319,7 @@ export async function NCoreInitShell () {
   const pathWrapper = new NapCatPathWrapper();
   const logger = new LogWrapper(pathWrapper.logsPath);
   handleUncaughtExceptions(logger);
+  await applyPendingUpdates(pathWrapper);
 
   // 初始化 FFmpeg 服务
   await FFmpegService.init(pathWrapper.binaryPath, logger);
@@ -338,8 +340,8 @@ export async function NCoreInitShell () {
   o3Service.addO3MiscListener(new NodeIO3MiscListener());
 
   logger.log('[NapCat] [Core] NapCat.Core Version: ' + napCatVersion);
+  WebUiDataRuntime.setWorkingEnv(NapCatCoreWorkingEnv.Shell);
   InitWebUi(logger, pathWrapper, logSubscription, statusHelperSubscription).then().catch(e => logger.logError(e));
-
   const engine = wrapper.NodeIQQNTWrapperEngine.get();
   const loginService = wrapper.NodeIKernelLoginService.get();
   let session: NodeIQQNTWrapperSession;

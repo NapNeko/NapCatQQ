@@ -1,8 +1,9 @@
 import store from 'napcat-common/src/store';
 import { napCatVersion } from 'napcat-common/src/version';
-import type { LoginRuntimeType } from '../types';
+import { NapCatCoreWorkingEnv, type LoginRuntimeType } from '../types';
 
 const LoginRuntime: LoginRuntimeType = {
+  workingEnv: NapCatCoreWorkingEnv.Unknown,
   LoginCurrentTime: Date.now(),
   LoginCurrentRate: 0,
   QQLoginStatus: false, // 已实现 但太傻了 得去那边注册个回调刷新
@@ -36,6 +37,12 @@ const LoginRuntime: LoginRuntimeType = {
   },
 };
 export const WebUiDataRuntime = {
+  setWorkingEnv (env: NapCatCoreWorkingEnv): void {
+    LoginRuntime.workingEnv = env;
+  },
+  getWorkingEnv (): NapCatCoreWorkingEnv {
+    return LoginRuntime.workingEnv;
+  },
   setWebUiTokenChangeCallback (func: (token: string) => Promise<void>): void {
     LoginRuntime.onWebUiTokenChange = func;
   },

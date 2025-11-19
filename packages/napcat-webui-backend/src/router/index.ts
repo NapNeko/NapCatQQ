@@ -14,6 +14,7 @@ import { LogRouter } from '@/napcat-webui-backend/src/router/Log';
 import { BaseRouter } from '@/napcat-webui-backend/src/router/Base';
 import { FileRouter } from './File';
 import { WebUIConfigRouter } from './WebUIConfig';
+import { UpdateNapCatRouter } from './UpdateNapCat';
 
 const router = Router();
 
@@ -38,5 +39,7 @@ router.use('/Log', LogRouter);
 router.use('/File', FileRouter);
 // router:WebUI配置相关路由
 router.use('/WebUIConfig', WebUIConfigRouter);
+// router:更新NapCat相关路由
+router.use('/UpdateNapCat', UpdateNapCatRouter);
 
 export { router as ALLRouter };

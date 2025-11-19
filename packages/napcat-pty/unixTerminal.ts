@@ -12,7 +12,17 @@ import { ArgvOrCommandLine } from '@homebridge/node-pty-prebuilt-multiarch/src/t
 import { assign } from '@homebridge/node-pty-prebuilt-multiarch/src/utils';
 import { pty_loader } from './prebuild-loader';
 import { fileURLToPath } from 'url';
-export const pty = pty_loader();
+
+// 懒加载pty，避免在模块导入时立即执行pty_loader()
+let _pty: any;
+export const pty: any = new Proxy({}, {
+  get (_target, prop) {
+    if (!_pty) {
+      _pty = pty_loader();
+    }
+    return _pty[prop];
+  }
+});
 
 let helperPath: string;
 helperPath = '../build/Release/spawn-helper';
