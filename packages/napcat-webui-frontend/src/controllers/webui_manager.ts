@@ -48,6 +48,15 @@ export default class WebUIManager {
     return data.data;
   }
 
+  public static async UpdateNapCat () {
+    const { data } = await serverRequest.post<ServerResponse<any>>(
+      '/UpdateNapCat/update',
+      {},
+      { timeout: 60000 } // 1分钟超时
+    );
+    return data;
+  }
+
   public static async getQQVersion () {
     const { data } =
       await serverRequest.get<ServerResponse<string>>('/base/QQVersion');

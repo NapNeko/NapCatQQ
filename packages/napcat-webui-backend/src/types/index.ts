@@ -30,8 +30,13 @@ export interface WebUiCredentialJson {
   Data: WebUiCredentialInnerJson;
   Hmac: string;
 }
-
+export enum NapCatCoreWorkingEnv {
+  Unknown = 0,
+  Shell = 1,
+  Framework = 2,
+}
 export interface LoginRuntimeType {
+  workingEnv: NapCatCoreWorkingEnv;
   LoginCurrentTime: number;
   LoginCurrentRate: number;
   QQLoginStatus: boolean;
