@@ -95,7 +95,13 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
   WebUiConfig = new WebUiConfigWrapper();
   let config = await WebUiConfig.GetWebUIConfig();
 
-  // 检查并更新默认密码 - 最高优先级
+  // 检查是否禁用WebUI（若禁用则不进行密码检测）
+  if (config.disableWebUI) {
+    logger.log('[NapCat] [WebUi] WebUI is disabled by configuration.');
+    return;
+  }
+
+  // 检查并更新默认密码（仅在启用WebUI时）
   if (config.token === 'napcat' || !config.token) {
     const randomToken = process.env['NAPCAT_WEBUI_SECRET_KEY'] || getRandomToken(8);
     await WebUiConfig.UpdateWebUIConfig({ token: randomToken });
@@ -111,12 +117,6 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
 
   // 存储启动时的初始token用于鉴权
   setInitialWebUiToken(config.token);
-
-  // 检查是否禁用WebUI
-  if (config.disableWebUI) {
-    logger.log('[NapCat] [WebUi] WebUI is disabled by configuration.');
-    return;
-  }
 
   const [host, port, token] = await InitPort(config);
   webUiRuntimePort = port;
