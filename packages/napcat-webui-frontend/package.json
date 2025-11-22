@@ -48,6 +48,7 @@
     "@monaco-editor/react": "4.7.0-rc.0",
     "@react-aria/visually-hidden": "^3.8.19",
     "@reduxjs/toolkit": "^2.5.1",
+    "@simplewebauthn/browser": "^13.2.2",
     "@uidotdev/usehooks": "^2.4.1",
     "@xterm/addon-canvas": "^0.7.0",
     "@xterm/addon-fit": "^0.10.0",

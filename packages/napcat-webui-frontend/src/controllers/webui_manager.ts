@@ -212,4 +212,35 @@ export default class WebUIManager {
     );
     return data.data;
   }
+
+  // Passkey相关方法
+  public static async generatePasskeyRegistrationOptions () {
+    const { data } = await serverRequest.post<ServerResponse<any>>(
+      '/auth/passkey/generate-registration-options'
+    );
+    return data.data;
+  }
+
+  public static async verifyPasskeyRegistration (response: any) {
+    const { data } = await serverRequest.post<ServerResponse<any>>(
+      '/auth/passkey/verify-registration',
+      { response }
+    );
+    return data.data;
+  }
+
+  public static async generatePasskeyAuthenticationOptions () {
+    const { data } = await serverRequest.post<ServerResponse<any>>(
+      '/auth/passkey/generate-authentication-options'
+    );
+    return data.data;
+  }
+
+  public static async verifyPasskeyAuthentication (response: any) {
+    const { data } = await serverRequest.post<ServerResponse<any>>(
+      '/auth/passkey/verify-authentication',
+      { response }
+    );
+    return data.data;
+  }
 }

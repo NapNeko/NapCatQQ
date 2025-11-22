@@ -1,5 +1,6 @@
 import { RequestHandler } from 'express';
 import { AuthHelper } from '@/napcat-webui-backend/src/helper/SignToken';
+import { PasskeyHelper } from '@/napcat-webui-backend/src/helper/PasskeyHelper';
 import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 import { sendSuccess, sendError } from '@/napcat-webui-backend/src/utils/response';
 import { isEmpty } from '@/napcat-webui-backend/src/utils/check';
@@ -146,5 +147,117 @@ export const UpdateTokenHandler: RequestHandler = async (req, res) => {
     return sendSuccess(res, 'Token updated successfully');
   } catch (e: any) {
     return sendError(res, `Failed to update token: ${e.message}`);
+  }
+};
+
+// 生成Passkey注册选项
+export const GeneratePasskeyRegistrationOptionsHandler: RequestHandler = async (_req, res) => {
+  try {
+    // 使用固定用户ID，因为WebUI只有一个用户
+    const userId = 'napcat-user';
+    const userName = 'NapCat User';
+
+    // 从请求头获取host来确定RP_ID
+    const host = _req.get('host') || 'localhost';
+    const hostname = host.split(':')[0] || 'localhost'; // 移除端口
+    // 对于本地开发，使用localhost而不是IP地址
+    const rpId = (hostname === '127.0.0.1' || hostname === 'localhost') ? 'localhost' : hostname;
+
+    const options = await PasskeyHelper.generateRegistrationOptions(userId, userName, rpId);
+    return sendSuccess(res, options);
+  } catch (error) {
+    return sendError(res, `Failed to generate registration options: ${(error as Error).message}`);
+  }
+};
+
+// 验证Passkey注册
+export const VerifyPasskeyRegistrationHandler: RequestHandler = async (req, res) => {
+  try {
+    const { response } = req.body;
+    if (!response) {
+      return sendError(res, 'Response is required');
+    }
+
+    const origin = req.get('origin') || req.protocol + '://' + req.get('host');
+    const host = req.get('host') || 'localhost';
+    const hostname = host.split(':')[0] || 'localhost'; // 移除端口
+    // 对于本地开发，使用localhost而不是IP地址
+    const rpId = (hostname === '127.0.0.1' || hostname === 'localhost') ? 'localhost' : hostname;
+    const userId = 'napcat-user';
+    const verification = await PasskeyHelper.verifyRegistration(userId, response, origin, rpId);
+
+    if (verification.verified) {
+      return sendSuccess(res, { verified: true });
+    } else {
+      return sendError(res, 'Registration failed');
+    }
+  } catch (error) {
+    return sendError(res, `Registration verification failed: ${(error as Error).message}`);
+  }
+};
+
+// 生成Passkey认证选项
+export const GeneratePasskeyAuthenticationOptionsHandler: RequestHandler = async (_req, res) => {
+  try {
+    const userId = 'napcat-user';
+
+    if (!(await PasskeyHelper.hasPasskeys(userId))) {
+      return sendError(res, 'No passkeys registered');
+    }
+
+    // 从请求头获取host来确定RP_ID
+    const host = _req.get('host') || 'localhost';
+    const hostname = host.split(':')[0] || 'localhost'; // 移除端口
+    // 对于本地开发，使用localhost而不是IP地址
+    const rpId = (hostname === '127.0.0.1' || hostname === 'localhost') ? 'localhost' : hostname;
+
+    const options = await PasskeyHelper.generateAuthenticationOptions(userId, rpId);
+    return sendSuccess(res, options);
+  } catch (error) {
+    return sendError(res, `Failed to generate authentication options: ${(error as Error).message}`);
+  }
+};
+
+// 验证Passkey认证
+export const VerifyPasskeyAuthenticationHandler: RequestHandler = async (req, res) => {
+  try {
+    const { response } = req.body;
+    if (!response) {
+      return sendError(res, 'Response is required');
+    }
+
+    // 获取WebUI配置用于限速检查
+    const WebUiConfigData = await WebUiConfig.GetWebUIConfig();
+    // 获取客户端IP
+    const clientIP = req.ip || req.socket.remoteAddress || '';
+
+    // 检查登录频率
+    if (!WebUiDataRuntime.checkLoginRate(clientIP, WebUiConfigData.loginRate)) {
+      return sendError(res, 'login rate limit');
+    }
+
+    const origin = req.get('origin') || req.protocol + '://' + req.get('host');
+    const host = req.get('host') || 'localhost';
+    const hostname = host.split(':')[0] || 'localhost'; // 移除端口
+    // 对于本地开发，使用localhost而不是IP地址
+    const rpId = (hostname === '127.0.0.1' || hostname === 'localhost') ? 'localhost' : hostname;
+    const userId = 'napcat-user';
+    const verification = await PasskeyHelper.verifyAuthentication(userId, response, origin, rpId);
+
+    if (verification.verified) {
+      // 使用与普通登录相同的凭证签发
+      const initialToken = getInitialWebUiToken();
+      if (!initialToken) {
+        return sendError(res, 'Server token not initialized');
+      }
+      const signCredential = Buffer.from(JSON.stringify(AuthHelper.signCredential(AuthHelper.generatePasswordHash(initialToken)))).toString('base64');
+      return sendSuccess(res, {
+        Credential: signCredential,
+      });
+    } else {
+      return sendError(res, 'Authentication failed');
+    }
+  } catch (error) {
+    return sendError(res, `Authentication verification failed: ${(error as Error).message}`);
   }
 };
