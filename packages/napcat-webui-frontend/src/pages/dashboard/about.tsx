@@ -1,5 +1,4 @@
 import { Card, CardBody } from '@heroui/card';
-import { Button } from '@heroui/button';
 import { Image } from '@heroui/image';
 import { Link } from '@heroui/link';
 import { Skeleton } from '@heroui/skeleton';
@@ -8,7 +7,6 @@ import { useRequest } from 'ahooks';
 import { useMemo } from 'react';
 import { BsTelegram, BsTencentQq } from 'react-icons/bs';
 import { IoDocument } from 'react-icons/io5';
-import toast from 'react-hot-toast';
 
 import HoverTiltedCard from '@/components/hover_titled_card';
 import NapCatRepoInfo from '@/components/napcat_repo_info';
@@ -22,40 +20,6 @@ import WebUIManager from '@/controllers/webui_manager';
 
 function VersionInfo () {
   const { data, loading, error } = useRequest(WebUIManager.GetNapCatVersion);
-
-  // 更新NapCat
-  const { run: updateNapCat, loading: updating } = useRequest(
-    WebUIManager.UpdateNapCat,
-    {
-      manual: true,
-      onSuccess: (response) => {
-        console.log('UpdateNapCat onSuccess response:', response);
-        console.log('response.code:', response.code);
-        console.log('response.data:', response.data);
-        console.log('response.message:', response.message);
-
-        if (response.code === 0) {
-          const message = response.data?.message || '更新完成';
-          console.log('显示消息:', message);
-          toast.success(message, {
-            duration: 5000,
-          });
-        } else {
-          console.log('显示错误消息:', response.message || '更新失败');
-          toast.error(response.message || '更新失败');
-        }
-      },
-      onError: (error) => {
-        toast.error('更新失败: ' + error.message);
-      },
-    }
-  );
-
-  const handleUpdate = () => {
-    if (!updating) {
-      updateNapCat();
-    }
-  };
 
   return (
     <div className='flex items-center gap-4'>
@@ -84,16 +48,6 @@ function VersionInfo () {
               />
             )}
       </div>
-      <Button
-        color="primary"
-        variant="solid"
-        size="sm"
-        isLoading={updating}
-        onPress={handleUpdate}
-        isDisabled={updating}
-      >
-        {updating ? '更新中...' : '更新'}
-      </Button>
     </div>
   );
 }
