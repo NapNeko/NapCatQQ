@@ -14,10 +14,11 @@ const SchemaData = Type.Object({
   user_id: Type.String(),
   message_seq: Type.Optional(Type.String()),
   count: Type.Number({ default: 20 }),
-  reverseOrder: Type.Boolean({ default: false }),
+  reverse_order: Type.Boolean({ default: false }),
   disable_get_url: Type.Boolean({ default: false }),
   parse_mult_msg: Type.Boolean({ default: true }),
   quick_reply: Type.Boolean({ default: false }),
+  reverseOrder: Type.Boolean({ default: false }),// @deprecated 兼容旧版本
 });
 
 type Payload = Static<typeof SchemaData>;
@@ -35,7 +36,7 @@ export default class GetFriendMsgHistory extends OneBotAction<Payload, Response>
     const hasMessageSeq = !payload.message_seq ? !!payload.message_seq : !(payload.message_seq?.toString() === '' || payload.message_seq?.toString() === '0');
     const startMsgId = hasMessageSeq ? (MessageUnique.getMsgIdAndPeerByShortId(+payload.message_seq!)?.MsgId ?? payload.message_seq!.toString()) : '0';
     const msgList = hasMessageSeq
-      ? (await this.core.apis.MsgApi.getMsgHistory(peer, startMsgId, +payload.count, payload.reverseOrder)).msgList
+      ? (await this.core.apis.MsgApi.getMsgHistory(peer, startMsgId, +payload.count, payload.reverse_order || payload.reverseOrder)).msgList
       : (await this.core.apis.MsgApi.getAioFirstViewLatestMsgs(peer, +payload.count)).msgList;
     if (msgList.length === 0) throw new Error(`消息${payload.message_seq}不存在`);
     // 转换序号
