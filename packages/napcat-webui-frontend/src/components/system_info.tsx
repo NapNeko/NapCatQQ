@@ -1,13 +1,19 @@
 import { Card, CardBody, CardHeader } from '@heroui/card';
+import { Button } from '@heroui/button';
+import { Chip } from '@heroui/chip';
 import { Spinner } from '@heroui/spinner';
+import { Tooltip } from '@heroui/tooltip';
 import { useRequest } from 'ahooks';
-import { FaCircleInfo, FaQq } from 'react-icons/fa6';
+import { FaCircleInfo, FaInfo, FaQq } from 'react-icons/fa6';
 import { IoLogoChrome, IoLogoOctocat } from 'react-icons/io';
 import { RiMacFill } from 'react-icons/ri';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 
 
 import WebUIManager from '@/controllers/webui_manager';
+import useDialog from '@/hooks/use-dialog';
 
 
 export interface SystemInfoItemProps {
@@ -186,6 +192,75 @@ export interface NewVersionTipProps {
 //   );
 // };
 
+const NewVersionTip = (props: NewVersionTipProps) => {
+  const { currentVersion } = props;
+  const dialog = useDialog();
+  const { data: latestVersion, error } = useRequest(WebUIManager.getLatestTag);
+  const [updating, setUpdating] = useState(false);
+
+  if (error || !latestVersion || !currentVersion || latestVersion === currentVersion) {
+    return null;
+  }
+
+  return (
+    <Tooltip content='有新版本可用'>
+      <Button
+        isIconOnly
+        radius='full'
+        color='primary'
+        variant='shadow'
+        className='!w-5 !h-5 !min-w-0 text-small shadow-md'
+        onPress={() => {
+          dialog.confirm({
+            title: '有新版本可用',
+            content: (
+              <div className='space-y-2'>
+                <div className='text-sm space-x-2'>
+                  <span>当前版本</span>
+                  <Chip color='primary' variant='flat'>
+                    {currentVersion}
+                  </Chip>
+                </div>
+                <div className='text-sm space-x-2'>
+                  <span>最新版本</span>
+                  <Chip color='primary'>{latestVersion}</Chip>
+                </div>
+                {updating && (
+                  <div className='flex justify-center'>
+                    <Spinner size='sm' />
+                  </div>
+                )}
+              </div>
+            ),
+            confirmText: updating ? '更新中...' : '更新',
+            onConfirm: async () => {
+              setUpdating(true);
+              toast('更新中，预计需要几分钟，请耐心等待', {
+                duration: 3000,
+              });
+              try {
+                await WebUIManager.UpdateNapCat();
+                toast.success('更新完成,重启生效', {
+                  duration: 5000,
+                });
+              } catch (error) {
+                console.error('Update failed:', error);
+                toast.success('更新异常', {
+                  duration: 5000,
+                });
+              } finally {
+                setUpdating(false);
+              }
+            },
+          });
+        }}
+      >
+        <FaInfo />
+      </Button>
+    </Tooltip>
+  );
+};
+
 const NapCatVersion = () => {
   const {
     data: packageData,
@@ -212,6 +287,7 @@ const NapCatVersion = () => {
               currentVersion
             )
       }
+      endContent={<NewVersionTip currentVersion={currentVersion} />}
     />
   );
 };

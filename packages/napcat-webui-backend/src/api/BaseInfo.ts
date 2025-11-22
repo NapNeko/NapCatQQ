@@ -3,10 +3,20 @@ import { WebUiDataRuntime } from '@/napcat-webui-backend/src/helper/Data';
 
 import { sendSuccess } from '@/napcat-webui-backend/src/utils/response';
 import { WebUiConfig } from '@/napcat-webui-backend/index';
+import { getLatestTag } from 'napcat-common/src/helper';
 
 export const GetNapCatVersion: RequestHandler = (_, res) => {
   const data = WebUiDataRuntime.GetNapCatVersion();
   sendSuccess(res, { version: data });
+};
+
+export const getLatestTagHandler: RequestHandler = async (_, res) => {
+  try {
+    const latestTag = await getLatestTag();
+    sendSuccess(res, latestTag);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch latest tag' });
+  }
 };
 
 export const QQVersionHandler: RequestHandler = (_, res) => {
