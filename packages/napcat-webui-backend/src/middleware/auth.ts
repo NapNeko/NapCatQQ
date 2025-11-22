@@ -12,6 +12,12 @@ export async function auth (req: Request, res: Response, next: NextFunction) {
   if (req.url === '/auth/login') {
     return next();
   }
+  if (req.url === '/auth/passkey/generate-authentication-options' ||
+    req.url === '/auth/passkey/verify-authentication') {
+    return next();
+  }
+
+
 
   // 判断是否有Authorization头
   if (req.headers?.authorization) {

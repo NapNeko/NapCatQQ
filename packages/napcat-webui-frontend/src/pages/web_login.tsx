@@ -24,7 +24,78 @@ export default function WebLoginPage () {
   const navigate = useNavigate();
   const [tokenValue, setTokenValue] = useState<string>(token || '');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isPasskeyLoading, setIsPasskeyLoading] = useState<boolean>(true); // 初始为true，表示正在检查passkey
   const [, setLocalToken] = useLocalStorage<string>(key.token, '');
+
+  // Helper function to decode base64url
+  function base64UrlToUint8Array (base64Url: string): Uint8Array {
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const binaryString = atob(base64);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes;
+  }
+
+  // Helper function to encode Uint8Array to base64url
+  function uint8ArrayToBase64Url (uint8Array: Uint8Array): string {
+    const base64 = btoa(String.fromCharCode(...uint8Array));
+    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  }
+
+  // 自动检查并尝试passkey登录
+  const tryPasskeyLogin = async () => {
+    try {
+      // 检查是否有passkey
+      const options = await WebUIManager.generatePasskeyAuthenticationOptions();
+
+      // 如果有passkey，自动进行认证
+      const credential = await navigator.credentials.get({
+        publicKey: {
+          challenge: base64UrlToUint8Array(options.challenge) as BufferSource,
+          allowCredentials: options.allowCredentials?.map((cred: any) => ({
+            id: base64UrlToUint8Array(cred.id) as BufferSource,
+            type: cred.type,
+            transports: cred.transports,
+          })),
+          userVerification: options.userVerification,
+        },
+      }) as PublicKeyCredential;
+
+      if (!credential) {
+        throw new Error('Passkey authentication cancelled');
+      }
+
+      // 准备响应进行验证 - 转换为base64url字符串格式
+      const authResponse = credential.response as AuthenticatorAssertionResponse;
+      const response = {
+        id: credential.id,
+        rawId: uint8ArrayToBase64Url(new Uint8Array(credential.rawId)),
+        response: {
+          authenticatorData: uint8ArrayToBase64Url(new Uint8Array(authResponse.authenticatorData)),
+          clientDataJSON: uint8ArrayToBase64Url(new Uint8Array(authResponse.clientDataJSON)),
+          signature: uint8ArrayToBase64Url(new Uint8Array(authResponse.signature)),
+          userHandle: authResponse.userHandle ? uint8ArrayToBase64Url(new Uint8Array(authResponse.userHandle)) : null,
+        },
+        type: credential.type,
+      };
+
+      // 验证认证
+      const data = await WebUIManager.verifyPasskeyAuthentication(response);
+
+      if (data && data.Credential) {
+        setLocalToken(data.Credential);
+        navigate('/qq_login', { replace: true });
+        return true; // 登录成功
+      }
+    } catch (error) {
+      // passkey登录失败，继续显示token登录界面
+      console.log('Passkey login failed or not available:', error);
+    }
+    return false; // 登录失败
+  };
+
   const onSubmit = async () => {
     if (!tokenValue) {
       toast.error('请输入token');
@@ -48,7 +119,7 @@ export default function WebLoginPage () {
 
   // 处理全局键盘事件
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'Enter' && !isLoading) {
+    if (e.key === 'Enter' && !isLoading && !isPasskeyLoading) {
       onSubmit();
     }
   };
@@ -60,12 +131,19 @@ export default function WebLoginPage () {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [tokenValue, isLoading]); // 依赖项包含用于登录的状态
+  }, [tokenValue, isLoading, isPasskeyLoading]); // 依赖项包含用于登录的状态
 
   useEffect(() => {
+    // 如果URL中有token，直接登录
     if (token) {
       onSubmit();
+      return;
     }
+
+    // 否则尝试passkey自动登录
+    tryPasskeyLogin().finally(() => {
+      setIsPasskeyLoading(false);
+    });
   }, []);
 
   return (
@@ -92,6 +170,11 @@ export default function WebLoginPage () {
             </CardHeader>
 
             <CardBody className='flex gap-5 py-5 px-5 md:px-10'>
+              {isPasskeyLoading && (
+                <div className='text-center text-small text-default-600 dark:text-default-400 px-2'>
+                  🔐 正在检查Passkey...
+                </div>
+              )}
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -135,7 +218,7 @@ export default function WebLoginPage () {
                       '!cursor-text',
                     ],
                   }}
-                  isDisabled={isLoading}
+                  isDisabled={isLoading || isPasskeyLoading}
                   label='Token'
                   placeholder='请输入token'
                   radius='lg'
