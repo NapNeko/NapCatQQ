@@ -3,7 +3,7 @@ export class NodeIKernelStorageCleanListener {
 
   }
 
-  onScanCacheProgressChanged (_args: unknown): any {
+  onScanCacheProgressChanged (_current_progress: number, _total_progress: number): any {
 
   }
 
@@ -11,7 +11,7 @@ export class NodeIKernelStorageCleanListener {
 
   }
 
-  onFinishScan (_args: unknown): any {
+  onFinishScan (_sizes: Array<`${number}`>): any {
 
   }
 
