@@ -3,39 +3,56 @@ import { GeneralCallResult } from './common';
 
 export interface NodeIKernelStorageCleanService {
 
-  addKernelStorageCleanListener(listener: NodeIKernelStorageCleanListener): number;
+  addKernelStorageCleanListener (listener: NodeIKernelStorageCleanListener): number;
 
-  removeKernelStorageCleanListener(listenerId: number): void;
+  removeKernelStorageCleanListener (listenerId: number): void;
+  // [
+  // "hotUpdate",
+  // [
+  //   "C:\\Users\\nanaeo\\AppData\\Roaming\\QQ\\packages"
+  // ]
+  // ],
+  // [
+  // "tmp",
+  // [
+  //   "C:\\Users\\nanaeo\\AppData\\Roaming\\QQ\\tmp"
+  // ]
+  // ],
+  // [
+  // "SilentCacheappSessionPartation9212",
+  // [
+  //   "C:\\Users\\nanaeo\\AppData\\Roaming\\QQ\\Partitions\\qqnt_9212"
+  // ]
+  // ]
+  addCacheScanedPaths (paths: Map<`tmp` | `SilentCacheappSessionPartation9212` | `hotUpdate`, unknown>): unknown;
 
-  addCacheScanedPaths(arg: unknown): unknown;
+  addFilesScanedPaths (arg: unknown): unknown;
 
-  addFilesScanedPaths(arg: unknown): unknown;
-
-  scanCache(): Promise<GeneralCallResult & {
-    size: string[]
+  scanCache (): Promise<GeneralCallResult & {
+    size: string[];
   }>;
 
-  addReportData(arg: unknown): unknown;
+  addReportData (arg: unknown): unknown;
 
-  reportData(): unknown;
+  reportData (): unknown;
 
-  getChatCacheInfo(arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown): unknown;
+  getChatCacheInfo (arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown): unknown;
 
-  getFileCacheInfo(arg1: unknown, arg2: unknown, arg3: unknown, arg44: unknown, args5: unknown): unknown;
+  getFileCacheInfo (arg1: unknown, arg2: unknown, arg3: unknown, arg44: unknown, args5: unknown): unknown;
 
-  clearChatCacheInfo(arg1: unknown, arg2: unknown): unknown;
+  clearChatCacheInfo (arg1: unknown, arg2: unknown): unknown;
 
-  clearCacheDataByKeys(arg: unknown): unknown;
+  clearCacheDataByKeys (keys: Array<string>): Promise<GeneralCallResult>;
 
-  setSilentScan(arg: unknown): unknown;
+  setSilentScan (is_silent: boolean): unknown;
 
-  closeCleanWindow(): unknown;
+  closeCleanWindow (): unknown;
 
-  clearAllChatCacheInfo(): unknown;
+  clearAllChatCacheInfo (): unknown;
 
-  endScan(arg: unknown): unknown;
+  endScan (arg: unknown): unknown;
 
-  addNewDownloadOrUploadFile(arg: unknown): unknown;
+  addNewDownloadOrUploadFile (arg: unknown): unknown;
 
-  isNull(): boolean;
+  isNull (): boolean;
 }
