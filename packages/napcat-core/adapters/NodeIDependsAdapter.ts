@@ -5,7 +5,7 @@ export class NodeIDependsAdapter {
 
   }
 
-  onMSFSsoError (_args: unknown) {
+  onMSFSsoError (_code: number, _desc: string) {
 
   }
 
