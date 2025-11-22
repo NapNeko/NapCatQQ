@@ -2,6 +2,7 @@ import path from 'node:path';
 import fs from 'fs';
 import os from 'node:os';
 import { QQVersionConfigType, QQLevel } from './types';
+import { RequestUtil } from './request';
 
 export async function solveProblem<T extends (...arg: any[]) => any> (func: T, ...args: Parameters<T>): Promise<ReturnType<T> | undefined> {
   return new Promise<ReturnType<T> | undefined>((resolve) => {
@@ -210,4 +211,81 @@ export function parseAppidFromMajor (nodeMajor: string): string | undefined {
   }
 
   return undefined;
+}
+
+const baseUrl = 'https://github.com/NapNeko/NapCatQQ.git/info/refs?service=git-upload-pack';
+const urls = [
+  'https://j.1win.ggff.net/' + baseUrl,
+  'https://git.yylx.win/' + baseUrl,
+  'https://ghfile.geekertao.top/' + baseUrl,
+  'https://gh-proxy.net/' + baseUrl,
+  'https://ghm.078465.xyz/' + baseUrl,
+  'https://gitproxy.127731.xyz/' + baseUrl,
+  'https://jiashu.1win.eu.org/' + baseUrl,
+  baseUrl,
+];
+
+async function testUrl (url: string): Promise<boolean> {
+  try {
+    await PromiseTimer(RequestUtil.HttpGetText(url), 5000);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function findAvailableUrl (): Promise<string | null> {
+  for (const url of urls) {
+    if (await testUrl(url)) {
+      return url;
+    }
+  }
+  return null;
+}
+
+export async function getAllTags (): Promise<string[]> {
+  const availableUrl = await findAvailableUrl();
+  if (!availableUrl) {
+    throw new Error('No available URL for fetching tags');
+  }
+  const raw = await RequestUtil.HttpGetText(availableUrl);
+  return raw
+    .split('\n')
+    .map(line => {
+      const match = line.match(/refs\/tags\/(.+)$/);
+      return match ? match[1] : null;
+    })
+    .filter(tag => tag !== null && !tag!.endsWith('^{}')) as string[];
+}
+
+
+export async function getLatestTag (): Promise<string> {
+  const tags = await getAllTags();
+
+  tags.sort((a, b) => compareVersion(a, b));
+
+  const latest = tags.at(-1);
+  if (!latest) {
+    throw new Error('No tags found');
+  }
+  return latest;
+}
+
+
+function compareVersion (a: string, b: string): number {
+  const normalize = (v: string) =>
+    v.replace(/^v/, '') // 去掉开头的 v
+      .split('.')
+      .map(n => parseInt(n) || 0);
+
+  const pa = normalize(a);
+  const pb = normalize(b);
+  const len = Math.max(pa.length, pb.length);
+
+  for (let i = 0; i < len; i++) {
+    const na = pa[i] || 0;
+    const nb = pb[i] || 0;
+    if (na !== nb) return na - nb;
+  }
+  return 0;
 }

@@ -48,6 +48,12 @@ export default class WebUIManager {
     return data.data;
   }
 
+  public static async getLatestTag () {
+    const { data } =
+      await serverRequest.get<ServerResponse<string>>('/base/getLatestTag');
+    return data.data;
+  }
+
   public static async UpdateNapCat () {
     const { data } = await serverRequest.post<ServerResponse<any>>(
       '/UpdateNapCat/update',

@@ -6,30 +6,30 @@ import type { ModalProps } from '@/components/modal';
 
 export interface AlertProps
   extends Omit<ModalProps, 'onCancel' | 'showCancel' | 'cancelText'> {
-  onConfirm?: () => void
+  onConfirm?: () => void;
 }
 
 export interface ConfirmProps extends ModalProps {
-  onConfirm?: () => void
-  onCancel?: () => void
+  onConfirm?: () => void;
+  onCancel?: () => void;
 }
 
 export interface ModalItem extends ModalProps {
-  id: number
+  id: number;
 }
 
 export interface DialogContextProps {
-  alert: (config: AlertProps) => void
-  confirm: (config: ConfirmProps) => void
+  alert: (config: AlertProps) => void;
+  confirm: (config: ConfirmProps) => void;
 }
 
 export interface DialogProviderProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 export const DialogContext = React.createContext<DialogContextProps>({
-  alert: () => {},
-  confirm: () => {},
+  alert: () => { },
+  confirm: () => { },
 });
 
 const DialogProvider: React.FC<DialogProviderProps> = ({ children }) => {
