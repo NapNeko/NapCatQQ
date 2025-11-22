@@ -54,7 +54,7 @@ import { GetOnlineClient } from './go-cqhttp/GetOnlineClient';
 import { IOCRImage, OCRImage } from './extends/OCRImage';
 import { TranslateEnWordToZn } from './extends/TranslateEnWordToZn';
 import { SetQQProfile } from './go-cqhttp/SetQQProfile';
-import { ShareGroupEx, SharePeer } from './extends/ShareContact';
+import { SendArkShare, SendGroupArkShare, ShareGroupEx, SharePeer } from './extends/ShareContact';
 import { CreateCollection } from './extends/CreateCollection';
 import { SetLongNick } from './extends/SetLongNick';
 import DelEssenceMsg from './group/DelEssenceMsg';
@@ -170,6 +170,8 @@ export function createActionMap (obContext: NapCatOneBot11Adapter, core: NapCatC
     new SetQQProfile(obContext, core),
     new ShareGroupEx(obContext, core),
     new SharePeer(obContext, core),
+    new SendGroupArkShare(obContext, core),
+    new SendArkShare(obContext, core),
     new CreateCollection(obContext, core),
     new SetLongNick(obContext, core),
     new ForwardFriendSingleMsg(obContext, core),

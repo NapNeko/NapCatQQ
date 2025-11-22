@@ -141,7 +141,7 @@ const oneBotHttpApiMessage = {
       group_id: z.union([z.string(), z.number()]).describe('群号'),
       message_seq: z.union([z.string(), z.number()]).describe('消息序号'),
       count: z.number().int().positive().describe('获取数量'),
-      reverseOrder: z.boolean().describe('是否倒序'),
+      reverse_order: z.boolean().describe('是否倒序'),
     }),
     response: baseResponseSchema.extend({
       data: z.object({
@@ -166,7 +166,7 @@ const oneBotHttpApiMessage = {
       user_id: z.union([z.string(), z.number()]).describe('用户QQ号'),
       message_seq: z.union([z.string(), z.number()]).describe('消息序号'),
       count: z.number().int().positive().describe('获取数量'),
-      reverseOrder: z.boolean().describe('是否倒序'),
+      reverse_order: z.boolean().describe('是否倒序'),
     }),
     response: baseResponseSchema.extend({
       data: z.object({

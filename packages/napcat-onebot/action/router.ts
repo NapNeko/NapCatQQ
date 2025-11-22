@@ -125,8 +125,11 @@ export const ActionName = {
   // 以下为扩展napcat扩展
   Unknown: 'unknown',
   SetDiyOnlineStatus: 'set_diy_online_status',
-  SharePeer: 'ArkSharePeer',
-  ShareGroupEx: 'ArkShareGroup',
+  SharePeer: 'ArkSharePeer',// @deprecated
+  ShareGroupEx: 'ArkShareGroup',// @deprecated
+  // 标准化接口
+  SendGroupArkShare: 'send_group_ark_share',
+  SendArkShare: 'send_ark_share',
   // RebootNormal : 'reboot_normal', //无快速登录重新启动
   GetRobotUinRange: 'get_robot_uin_range',
   SetOnlineStatus: 'set_online_status',

@@ -15,7 +15,7 @@ const oneBotHttpApiUser = {
       data: commonResponseDataSchema,
     }),
   },
-  '/ArkSharePeer': {
+  '/send_ark_share': {
     description: '获取推荐好友/群聊卡片',
     request: z
       .object({
@@ -27,7 +27,7 @@ const oneBotHttpApiUser = {
           .union([z.string(), z.number()])
           .optional()
           .describe('用户ID，与 group_id 二选一'),
-        phoneNumber: z.string().optional().describe('对方手机号码'),
+        phone_number: z.string().optional().describe('对方手机号码'),
       })
       .refine(
         (data) =>
@@ -45,7 +45,7 @@ const oneBotHttpApiUser = {
       }),
     }),
   },
-  '/ArkShareGroup': {
+  '/send_group_ark_share': {
     description: '获取推荐群聊卡片',
     request: z.object({
       group_id: z.union([z.string(), z.number()]).describe('群聊ID'),
