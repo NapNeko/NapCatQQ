@@ -85,7 +85,11 @@ const Layout: React.FC<{ children: React.ReactNode; }> = ({ children }) => {
         backgroundSize: 'cover',
       }}
     >
-      <SideBar items={menus} open={openSideBar} />
+      <SideBar
+        items={menus}
+        open={openSideBar}
+        onClose={() => setOpenSideBar(false)}
+      />
       <div
         ref={contentRef}
         className={clsx(
@@ -107,7 +111,7 @@ const Layout: React.FC<{ children: React.ReactNode; }> = ({ children }) => {
         >
           <motion.div
             className={clsx(
-              'mr-1 ease-in-out ml-0 md:relative',
+              'mr-1 ease-in-out ml-0 md:relative z-50 md:z-auto',
               openSideBar && 'pl-2 absolute',
               'md:!ml-0 md:pl-0'
             )}
