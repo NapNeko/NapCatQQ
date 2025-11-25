@@ -268,7 +268,8 @@ export async function getLatestTag (): Promise<string> {
   if (!latest) {
     throw new Error('No tags found');
   }
-  return latest;
+  // 去掉开头的 v
+  return latest.replace(/^v/, '');
 }
 
 
