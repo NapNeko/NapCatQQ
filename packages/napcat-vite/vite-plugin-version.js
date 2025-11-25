@@ -26,7 +26,7 @@ export default function vitePluginNapcatVersion () {
         const data = JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
         if (data?.tag) return data.tag;
       }
-    } catch {}
+    } catch { }
     return null;
   }
 
@@ -36,7 +36,7 @@ export default function vitePluginNapcatVersion () {
         cacheFile,
         JSON.stringify({ tag, time: new Date().toISOString() }, null, 2)
       );
-    } catch {}
+    } catch { }
   }
 
   async function fetchLatestTag () {
@@ -58,7 +58,7 @@ export default function vitePluginNapcatVersion () {
             try {
               const json = JSON.parse(data);
               if (Array.isArray(json) && json[0]?.name) {
-                resolve(json[0].name);
+                resolve(json[0].name.replace(/^v/, ''));
               } else reject(new Error('Invalid GitHub tag response'));
             } catch (e) {
               reject(e);
@@ -79,7 +79,7 @@ export default function vitePluginNapcatVersion () {
       return tag;
     } catch (e) {
       console.warn('[vite-plugin-napcat-version] Failed to fetch tag:', e.message);
-      return cached ?? 'v0.0.0';
+      return cached ?? '0.0.0';
     }
   }
 
@@ -110,7 +110,7 @@ export default function vitePluginNapcatVersion () {
             lastTag = tag;
             ctx.server?.ws.send({ type: 'full-reload' });
           }
-        } catch {}
+        } catch { }
       }
     },
   };
