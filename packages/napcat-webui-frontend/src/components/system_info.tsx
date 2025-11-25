@@ -218,12 +218,12 @@ const NewVersionTip = (props: NewVersionTipProps) => {
                 <div className='text-sm space-x-2'>
                   <span>当前版本</span>
                   <Chip color='primary' variant='flat'>
-                    {currentVersion}
+                    v{currentVersion}
                   </Chip>
                 </div>
                 <div className='text-sm space-x-2'>
                   <span>最新版本</span>
-                  <Chip color='primary'>{latestVersion}</Chip>
+                  <Chip color='primary'>v{latestVersion}</Chip>
                 </div>
                 {updating && (
                   <div className='flex justify-center'>
