@@ -26,7 +26,5 @@ dist-ssr
 # NPM LOCK files
 package-lock.json
 yarn.lock
-pnpm-lock.yaml
-
 
 dist.zip
