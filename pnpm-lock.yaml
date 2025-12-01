@@ -403,8 +403,8 @@ importers:
         specifier: 2.4.10
         version: 2.4.10(@heroui/system@2.4.7(@heroui/theme@2.4.6(tailwindcss@3.4.18))(framer-motion@12.23.24(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(@heroui/theme@2.4.6(tailwindcss@3.4.18))(@types/react@19.2.4)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@heroui/kbd':
-        specifier: 2.2.7
-        version: 2.2.7(@heroui/theme@2.4.6(tailwindcss@3.4.18))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        specifier: 2.2.22
+        version: 2.2.22(@heroui/theme@2.4.6(tailwindcss@3.4.18))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@heroui/link':
         specifier: 2.2.8
         version: 2.2.8(@heroui/system@2.4.7(@heroui/theme@2.4.6(tailwindcss@3.4.18))(framer-motion@12.23.24(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(@heroui/theme@2.4.6(tailwindcss@3.4.18))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -1167,10 +1167,10 @@ packages:
       react: '>=18 || >=19.0.0-rc.0'
       react-dom: '>=18 || >=19.0.0-rc.0'
 
-  '@heroui/kbd@2.2.7':
-    resolution: {integrity: sha512-FjSdCvOI/QlQcXVj2MO2CcSnzQ0+x7nAKscuPhxtc8sa9ddBTgb79Q1waaiGlvrlnHO/XpicAYiA2PyvQmn9tQ==}
+  '@heroui/kbd@2.2.22':
+    resolution: {integrity: sha512-PKhgwGB7i53kBuqB1YdFZsg7H9fJ8YESMRRPwRRyPSz5feMdwGidyXs+/ix7lrlYp4mlC3wtPp7L79SEyPCpBA==}
     peerDependencies:
-      '@heroui/theme': '>=2.4.0'
+      '@heroui/theme': '>=2.4.17'
       react: '>=18 || >=19.0.0-rc.0'
       react-dom: '>=18 || >=19.0.0-rc.0'
 
@@ -6358,13 +6358,12 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
 
-  '@heroui/kbd@2.2.7(@heroui/theme@2.4.6(tailwindcss@3.4.18))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
+  '@heroui/kbd@2.2.22(@heroui/theme@2.4.6(tailwindcss@3.4.18))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
     dependencies:
-      '@heroui/react-utils': 2.1.4(react@19.2.0)
-      '@heroui/shared-utils': 2.1.3
-      '@heroui/system-rsc': 2.3.6(@heroui/theme@2.4.6(tailwindcss@3.4.18))(react@19.2.0)
+      '@heroui/react-utils': 2.1.14(react@19.2.0)
+      '@heroui/shared-utils': 2.1.12
+      '@heroui/system-rsc': 2.3.20(@heroui/theme@2.4.6(tailwindcss@3.4.18))(react@19.2.0)
       '@heroui/theme': 2.4.6(tailwindcss@3.4.18)
-      '@react-aria/utils': 3.26.0(react@19.2.0)
       react: 19.2.0
       react-dom: 19.2.0(react@19.2.0)
 
