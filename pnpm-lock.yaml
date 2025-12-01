@@ -588,7 +588,7 @@ importers:
         version: 3.32.1(react@19.2.0)
       '@trivago/prettier-plugin-sort-imports':
         specifier: ^5.2.2
-        version: 5.2.2(prettier@3.6.2)
+        version: 5.2.2(prettier@3.7.3)
       '@types/crypto-js':
         specifier: ^4.2.2
         version: 4.2.2
@@ -633,7 +633,7 @@ importers:
         version: 11.1.0(eslint@9.39.1(jiti@1.21.7))
       eslint-plugin-prettier:
         specifier: 5.2.3
-        version: 5.2.3(eslint@9.39.1(jiti@1.21.7))(prettier@3.6.2)
+        version: 5.2.3(eslint@9.39.1(jiti@1.21.7))(prettier@3.7.3)
       eslint-plugin-unused-imports:
         specifier: ^4.1.4
         version: 4.3.0(@typescript-eslint/eslint-plugin@8.46.4(@typescript-eslint/parser@8.46.4(eslint@9.39.1(jiti@1.21.7))(typescript@5.9.3))(eslint@9.39.1(jiti@1.21.7))(typescript@5.9.3))(eslint@9.39.1(jiti@1.21.7))
@@ -641,8 +641,8 @@ importers:
         specifier: ^8.5.1
         version: 8.5.6
       prettier:
-        specifier: ^3.4.2
-        version: 3.6.2
+        specifier: ^3.7.3
+        version: 3.7.3
       typescript:
         specifier: ^5.7.3
         version: 5.9.3
@@ -4738,8 +4738,8 @@ packages:
     resolution: {integrity: sha512-GbK2cP9nraSSUF9N2XwUwqfzlAFlMNYYl+ShE/V+H8a9uNl/oUqB1w2EL54Jh0OlyRSd8RfWYJ3coVS4TROP2w==}
     engines: {node: '>=6.0.0'}
 
-  prettier@3.6.2:
-    resolution: {integrity: sha512-I7AIg5boAr5R0FFtJ6rCfD+LFsWHp81dolrFD8S79U9tb8Az2nGrJncnMSnys+bpQJfRUzqs9hnA81OAA3hCuQ==}
+  prettier@3.7.3:
+    resolution: {integrity: sha512-QgODejq9K3OzoBbuyobZlUhznP5SKwPqp+6Q6xw6o8gnhr4O85L2U915iM2IDcfF2NPXVaM9zlo9tdwipnYwzg==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -8201,7 +8201,7 @@ snapshots:
 
   '@tokenizer/token@0.3.0': {}
 
-  '@trivago/prettier-plugin-sort-imports@5.2.2(prettier@3.6.2)':
+  '@trivago/prettier-plugin-sort-imports@5.2.2(prettier@3.7.3)':
     dependencies:
       '@babel/generator': 7.28.5
       '@babel/parser': 7.28.5
@@ -8209,7 +8209,7 @@ snapshots:
       '@babel/types': 7.28.5
       javascript-natural-sort: 0.7.1
       lodash: 4.17.21
-      prettier: 3.6.2
+      prettier: 3.7.3
     transitivePeerDependencies:
       - supports-color
 
@@ -9468,10 +9468,10 @@ snapshots:
       resolve: 1.22.11
       semver: 6.3.1
 
-  eslint-plugin-prettier@5.2.3(eslint@9.39.1(jiti@1.21.7))(prettier@3.6.2):
+  eslint-plugin-prettier@5.2.3(eslint@9.39.1(jiti@1.21.7))(prettier@3.7.3):
     dependencies:
       eslint: 9.39.1(jiti@1.21.7)
-      prettier: 3.6.2
+      prettier: 3.7.3
       prettier-linter-helpers: 1.0.0
       synckit: 0.9.3
 
@@ -10917,7 +10917,7 @@ snapshots:
     dependencies:
       fast-diff: 1.3.0
 
-  prettier@3.6.2: {}
+  prettier@3.7.3: {}
 
   process-nextick-args@2.0.1: {}
 
