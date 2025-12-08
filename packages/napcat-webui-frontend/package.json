@@ -30,7 +30,7 @@
     "@heroui/link": "2.2.8",
     "@heroui/listbox": "2.3.10",
     "@heroui/modal": "2.2.8",
-    "@heroui/navbar": "2.2.9",
+    "@heroui/navbar": "2.2.25",
     "@heroui/pagination": "^2.2.9",
     "@heroui/popover": "2.3.10",
     "@heroui/select": "2.4.10",
