@@ -436,8 +436,8 @@ importers:
         specifier: 2.2.11
         version: 2.2.11(@heroui/system@2.4.7(@heroui/theme@2.4.6(tailwindcss@3.4.18))(framer-motion@12.23.24(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(@heroui/theme@2.4.6(tailwindcss@3.4.18))(framer-motion@12.23.24(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@heroui/spinner':
-        specifier: 2.2.7
-        version: 2.2.7(@heroui/theme@2.4.6(tailwindcss@3.4.18))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        specifier: 2.2.24
+        version: 2.2.24(@heroui/theme@2.4.6(tailwindcss@3.4.18))(framer-motion@12.23.24(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@heroui/switch':
         specifier: 2.2.9
         version: 2.2.9(@heroui/system@2.4.7(@heroui/theme@2.4.6(tailwindcss@3.4.18))(framer-motion@12.23.24(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(@heroui/theme@2.4.6(tailwindcss@3.4.18))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -1322,6 +1322,13 @@ packages:
 
   '@heroui/spacer@2.2.21':
     resolution: {integrity: sha512-WKD+BlgHfqJ8lrkkg/6cvzSWNsbRjzr24HpZnv6cDeWX95wVLTOco9HVR8ohwStMqwu5zYeUd1bw6yCDVTo53w==}
+    peerDependencies:
+      '@heroui/theme': '>=2.4.17'
+      react: '>=18 || >=19.0.0-rc.0'
+      react-dom: '>=18 || >=19.0.0-rc.0'
+
+  '@heroui/spinner@2.2.24':
+    resolution: {integrity: sha512-HfKkFffrIN9UdJY2UaenlB8xEwIzolCCFCwU0j3wVnLMX+Dw+ixwaELdAxX14Z6gPQYec6AROKetkWWit14rlw==}
     peerDependencies:
       '@heroui/theme': '>=2.4.17'
       react: '>=18 || >=19.0.0-rc.0'
@@ -6644,6 +6651,17 @@ snapshots:
       react: 19.2.0
       react-dom: 19.2.0(react@19.2.0)
 
+  '@heroui/spinner@2.2.24(@heroui/theme@2.4.6(tailwindcss@3.4.18))(framer-motion@12.23.24(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
+    dependencies:
+      '@heroui/shared-utils': 2.1.12
+      '@heroui/system': 2.4.23(@heroui/theme@2.4.6(tailwindcss@3.4.18))(framer-motion@12.23.24(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      '@heroui/system-rsc': 2.3.20(@heroui/theme@2.4.6(tailwindcss@3.4.18))(react@19.2.0)
+      '@heroui/theme': 2.4.6(tailwindcss@3.4.18)
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
+    transitivePeerDependencies:
+      - framer-motion
+
   '@heroui/spinner@2.2.7(@heroui/theme@2.4.6(tailwindcss@3.4.18))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
     dependencies:
       '@heroui/react-utils': 2.1.4(react@19.2.0)
@@ -6834,7 +6852,7 @@ snapshots:
     dependencies:
       '@react-aria/i18n': 3.12.4(react@19.2.0)
       '@react-aria/interactions': 3.22.5(react@19.2.0)
-      '@react-aria/label': 3.7.13(react@19.2.0)
+      '@react-aria/label': 3.7.13(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@react-aria/listbox': 3.13.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@react-aria/menu': 3.16.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@react-aria/selection': 3.21.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -7352,12 +7370,14 @@ snapshots:
       react: 19.2.0
       react-dom: 19.2.0(react@19.2.0)
 
-  '@react-aria/label@3.7.13(react@19.2.0)':
+  '@react-aria/label@3.7.13(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
     dependencies:
-      '@react-aria/utils': 3.26.0(react@19.2.0)
+      '@react-aria/utils': 3.31.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@react-types/shared': 3.32.1(react@19.2.0)
       '@swc/helpers': 0.5.17
       react: 19.2.0
+    transitivePeerDependencies:
+      - react-dom
 
   '@react-aria/label@3.7.22(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
     dependencies:
@@ -7461,9 +7481,9 @@ snapshots:
   '@react-aria/selection@3.21.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
     dependencies:
       '@react-aria/focus': 3.19.0(react@19.2.0)
-      '@react-aria/i18n': 3.12.4(react@19.2.0)
+      '@react-aria/i18n': 3.12.13(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@react-aria/interactions': 3.22.5(react@19.2.0)
-      '@react-aria/utils': 3.26.0(react@19.2.0)
+      '@react-aria/utils': 3.31.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@react-stately/selection': 3.20.6(react@19.2.0)
       '@react-types/shared': 3.32.1(react@19.2.0)
       '@swc/helpers': 0.5.17
