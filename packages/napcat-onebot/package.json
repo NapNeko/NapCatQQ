@@ -39,7 +39,7 @@
         "@types/type-is": "^1.6.7",
         "@types/on-finished": "^2.3.4",
         "@types/express": "^5.0.0",
-        "@types/node": "^22.0.1"
+        "@types/node": "^24.10.1"
     },
     "engines": {
         "node": ">=18.0.0"

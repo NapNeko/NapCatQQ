@@ -21,7 +21,7 @@
         "silk-wasm": "^3.6.1"
     },
     "devDependencies": {
-        "@types/node": "^22.0.1"
+        "@types/node": "^24.10.1"
     },
     "engines": {
         "node": ">=18.0.0"
