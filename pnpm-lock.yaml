@@ -52,8 +52,8 @@ importers:
         specifier: ^8.13.0
         version: 8.17.1
       file-type:
-        specifier: ^21.0.0
-        version: 21.1.0
+        specifier: ^21.1.1
+        version: 21.1.1
       silk-wasm:
         specifier: ^3.6.1
         version: 3.7.1
@@ -77,8 +77,8 @@ importers:
         specifier: ^1.10.1
         version: 1.10.3
       file-type:
-        specifier: ^21.0.0
-        version: 21.1.0
+        specifier: ^21.1.1
+        version: 21.1.1
       inversify:
         specifier: ^7.10.4
         version: 7.10.4(reflect-metadata@0.2.2)
@@ -167,8 +167,8 @@ importers:
         specifier: ^4.3.6
         version: 4.5.3
       file-type:
-        specifier: ^21.0.0
-        version: 21.1.0
+        specifier: ^21.1.1
+        version: 21.1.1
       json5:
         specifier: ^2.2.3
         version: 2.2.3
@@ -2436,8 +2436,8 @@ packages:
   '@tanstack/virtual-core@3.11.3':
     resolution: {integrity: sha512-v2mrNSnMwnPJtcVqNvV0c5roGCBqeogN8jDtgtuHCphdwBasOZ17x8UV8qpHUh+u0MLfX43c0uUHKje0s+Zb0w==}
 
-  '@tokenizer/inflate@0.3.1':
-    resolution: {integrity: sha512-4oeoZEBQdLdt5WmP/hx1KZ6D3/Oid/0cUb2nk4F0pTDAWy+KCH3/EnAkZF/bvckWo8I33EqBm01lIPgmgc8rCA==}
+  '@tokenizer/inflate@0.4.1':
+    resolution: {integrity: sha512-2mAv+8pkG6GIZiF1kNg1jAjh27IDxEPKwdGul3snfztFerfPGI1LjDezZp3i7BElXompqEtPmoPx6c2wgtWsOA==}
     engines: {node: '>=18'}
 
   '@tokenizer/token@0.3.0':
@@ -3700,8 +3700,8 @@ packages:
     resolution: {integrity: sha512-QgXo+mXTe8ljeqUFaX3QVHc5osSItJ/Km+xpocx0aSqWGMSCf6qYs/VnzZgS864Pjn5iceMRFigeAV7AfTlaig==}
     engines: {node: '>= 12'}
 
-  file-type@21.1.0:
-    resolution: {integrity: sha512-boU4EHmP3JXkwDo4uhyBhTt5pPstxB6eEXKJBu2yu2l7aAMMm7QQYQEzssJmKReZYrFdFOJS8koVo6bXIBGDqA==}
+  file-type@21.1.1:
+    resolution: {integrity: sha512-ifJXo8zUqbQ/bLbl9sFoqHNTNWbnPY1COImFfM6CCy7z+E+jC1eY9YfOKkx0fckIg+VljAy2/87T61fp0+eEkg==}
     engines: {node: '>=20'}
 
   fill-range@7.1.1:
@@ -8191,10 +8191,9 @@ snapshots:
 
   '@tanstack/virtual-core@3.11.3': {}
 
-  '@tokenizer/inflate@0.3.1':
+  '@tokenizer/inflate@0.4.1':
     dependencies:
       debug: 4.4.3
-      fflate: 0.8.2
       token-types: 6.1.1
     transitivePeerDependencies:
       - supports-color
@@ -9688,9 +9687,9 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  file-type@21.1.0:
+  file-type@21.1.1:
     dependencies:
-      '@tokenizer/inflate': 0.3.1
+      '@tokenizer/inflate': 0.4.1
       strtok3: 10.3.4
       token-types: 6.1.1
       uint8array-extras: 1.5.0
