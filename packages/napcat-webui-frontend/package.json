@@ -61,7 +61,7 @@
     "echarts": "^5.5.1",
     "event-source-polyfill": "^1.0.31",
     "framer-motion": "^12.0.6",
-    "monaco-editor": "^0.52.2",
+    "monaco-editor": "^0.55.1",
     "motion": "^12.0.6",
     "path-browserify": "^1.0.1",
     "qface": "^1.4.1",
