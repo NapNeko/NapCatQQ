@@ -98,7 +98,7 @@
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@types/react-window": "^1.8.8",
-    "@vitejs/plugin-react": "^4.3.4",
+    "@vitejs/plugin-react": "^5.1.1",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.19.0",
     "eslint-plugin-import": "^2.31.0",
