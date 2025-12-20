@@ -1,19 +1,20 @@
-import { Card, CardBody } from '@heroui/card';
+import { Card, CardBody, CardHeader } from '@heroui/card';
+import { Chip } from '@heroui/chip';
+import { Divider } from '@heroui/divider';
 import { Image } from '@heroui/image';
 import { Link } from '@heroui/link';
-import { Skeleton } from '@heroui/skeleton';
 import { Spinner } from '@heroui/spinner';
 import { useRequest } from 'ahooks';
-import { useMemo } from 'react';
-import { BsTelegram, BsTencentQq } from 'react-icons/bs';
-import { IoDocument } from 'react-icons/io5';
-
-import HoverTiltedCard from '@/components/hover_titled_card';
-import NapCatRepoInfo from '@/components/napcat_repo_info';
-import RotatingText from '@/components/rotating_text';
-
-import { usePreloadImages } from '@/hooks/use-preload-images';
-import { useTheme } from '@/hooks/use-theme';
+import {
+  BsCodeSlash,
+  BsCpu,
+  BsGithub,
+  BsGlobe,
+  BsPlugin,
+  BsTelegram,
+  BsTencentQq
+} from 'react-icons/bs';
+import { IoDocument, IoRocketSharp } from 'react-icons/io5';
 
 import logo from '@/assets/images/logo.png';
 import WebUIManager from '@/controllers/webui_manager';
@@ -22,184 +23,168 @@ function VersionInfo () {
   const { data, loading, error } = useRequest(WebUIManager.GetNapCatVersion);
 
   return (
-    <div className='flex items-center gap-4'>
-      <div className='flex items-center gap-2 text-2xl font-bold'>
-        <div className='text-primary-500 drop-shadow-md'>NapCat</div>
-        {error
-          ? (
-            error.message
-          )
-          : loading
-            ? (
-              <Spinner size='sm' />
-            )
-            : (
-              <RotatingText
-                texts={['WebUI', data?.version ?? '']}
-                mainClassName='overflow-hidden flex items-center bg-primary-500 px-2 rounded-lg text-default-50 shadow-md'
-                staggerFrom='last'
-                initial={{ y: '100%' }}
-                animate={{ y: 0 }}
-                exit={{ y: '-120%' }}
-                staggerDuration={0.025}
-                splitLevelClassName='overflow-hidden'
-                transition={{ type: 'spring', damping: 30, stiffness: 400 }}
-                rotationInterval={2000}
-              />
-            )}
-      </div>
+    <div className='flex items-center gap-2'>
+      {error ? (
+        <Chip color="danger" variant="flat" size="sm">{error.message}</Chip>
+      ) : loading ? (
+        <Spinner size='sm' color="default" />
+      ) : (
+        <div className="flex items-center gap-2">
+          <Chip size="sm" color="default" variant="flat" className="text-default-500">WebUI v0.0.6</Chip>
+          <Chip size="sm" color="primary" variant="flat">Core {data?.version}</Chip>
+        </div>
+      )}
     </div>
   );
 }
 
 export default function AboutPage () {
-  const { isDark } = useTheme();
-
-  const imageUrls = useMemo(
-    () => [
-      'https://next.ossinsight.io/widgets/official/compose-recent-active-contributors/thumbnail.png?repo_id=777721566&limit=30&image_size=auto&color_scheme=light',
-      'https://next.ossinsight.io/widgets/official/compose-recent-active-contributors/thumbnail.png?repo_id=777721566&limit=30&image_size=auto&color_scheme=dark',
-      'https://next.ossinsight.io/widgets/official/compose-activity-trends/thumbnail.png?repo_id=41986369&image_size=auto&color_scheme=light',
-      'https://next.ossinsight.io/widgets/official/compose-activity-trends/thumbnail.png?repo_id=41986369&image_size=auto&color_scheme=dark',
-    ],
-    []
-  );
-
-  const { loadedUrls, isLoading } = usePreloadImages(imageUrls);
-
-  const getImageUrl = useMemo(
-    () => (baseUrl: string) => {
-      const theme = isDark ? 'dark' : 'light';
-      const fullUrl = baseUrl.replace(
-        /color_scheme=(?:light|dark)/,
-        `color_scheme=${theme}`
-      );
-      return isLoading ? null : loadedUrls[fullUrl] ? fullUrl : null;
+  const features = [
+    {
+      icon: <IoRocketSharp size={20} />,
+      title: '高性能架构',
+      desc: 'Node.js + Native 混合架构，资源占用低，响应速度快。',
+      className: 'bg-primary-50 text-primary'
     },
-    [isDark, isLoading, loadedUrls]
-  );
-
-  const renderImage = useMemo(
-    () => (baseUrl: string, alt: string) => {
-      const imageUrl = getImageUrl(baseUrl);
-
-      if (!imageUrl) {
-        return <Skeleton className='h-16 rounded-lg' />;
-      }
-
-      return (
-        <Image
-          className='flex-1 pointer-events-none select-none rounded-none'
-          src={imageUrl}
-          alt={alt}
-        />
-      );
+    {
+      icon: <BsGlobe size={20} />,
+      title: '全平台支持',
+      desc: '适配 Windows、Linux 及 Docker 环境。',
+      className: 'bg-success-50 text-success'
     },
-    [getImageUrl]
-  );
+    {
+      icon: <BsCodeSlash size={20} />,
+      title: 'OneBot 11',
+      desc: '深度集成标准协议，兼容现有生态。',
+      className: 'bg-warning-50 text-warning'
+    },
+    {
+      icon: <BsPlugin size={20} />,
+      title: '极易扩展',
+      desc: '提供丰富的 API 接口与 WebHook 支持。',
+      className: 'bg-secondary-50 text-secondary'
+    }
+  ];
+
+  const links = [
+    { icon: <BsGithub />, name: 'GitHub', href: 'https://github.com/NapNeko/NapCatQQ' },
+    { icon: <BsTelegram />, name: 'Telegram', href: 'https://t.me/napcatqq' },
+    { icon: <BsTencentQq />, name: 'QQ 群 1', href: 'https://qm.qq.com/q/F9cgs1N3Mc' },
+    { icon: <BsTencentQq />, name: 'QQ 群 2', href: 'https://qm.qq.com/q/hSt0u9PVn' },
+    { icon: <IoDocument />, name: '文档', href: 'https://napcat.napneko.icu/' },
+  ];
+
+  const cardStyle = "bg-default/40 backdrop-blur-lg border-none shadow-none";
 
   return (
-    <>
-      <title>关于 NapCat WebUI</title>
-      <section className='max-w-7xl py-8 md:py-10 px-5 mx-auto space-y-10'>
-        <div className='w-full flex flex-col md:flex-row gap-4'>
-          <div className='flex flex-col md:flex-row items-center'>
-            <HoverTiltedCard imageSrc={logo} overlayContent='' />
-          </div>
-          <div className='flex-1 flex flex-col gap-2 py-2'>
-            <VersionInfo />
-            <div className='space-y-1'>
-              <p className='font-bold text-primary-400'>NapCat 是什么?</p>
-              <p className='text-default-800'>
-                基于TypeScript构建的Bot框架,通过相应的启动器或者框架,主动调用QQ
-                Node模块提供给客户端的接口,实现Bot的功能.
+    <div className='flex flex-col h-full w-full gap-6 p-2 md:p-6'>
+      <title>关于 - NapCat WebUI</title>
+
+      {/* 头部标题区 */}
+      <div className="flex flex-col gap-2">
+        <h1 className="text-2xl font-bold flex items-center gap-3 text-default-900">
+          <Image src={logo} alt="NapCat Logo" width={32} height={32} />
+          关于 NapCat
+        </h1>
+        <div className="flex items-center gap-4 text-small text-default-500">
+          <p>现代化、轻量级的 QQ 机器人框架</p>
+          <Divider orientation="vertical" className="h-4" />
+          <VersionInfo />
+        </div>
+      </div>
+
+      <Divider className="opacity-50" />
+
+      {/* 主内容区：双栏布局 */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-grow">
+
+        {/* 左侧：介绍与特性 */}
+        <div className="lg:col-span-2 space-y-6">
+          <Card shadow="sm" className={cardStyle}>
+            <CardHeader className="pb-0 pt-4 px-4 flex-col items-start">
+              <h2 className="text-lg font-bold">项目简介</h2>
+            </CardHeader>
+            <CardBody className="py-4 text-default-600 leading-relaxed space-y-2">
+              <p>
+                NapCat (瞌睡猫) 是一个致力于打破 QQ 机器人开发壁垒的开源项目。我们利用 NTQQ 的底层能力，
+                构建了一个无需 GUI 即可在服务器端稳定运行的 Headless 框架。
               </p>
-              <p className='font-bold text-primary-400'>魔法版介绍</p>
-              <p className='text-default-800'>
-                猫猫框架通过魔法的手段获得了 QQ 的发送消息、接收消息等接口。
-                为了方便使用，猫猫框架将通过一种名为 OneBot 的约定将你的 HTTP /
-                WebSocket 请求按照规范读取，
-                再去调用猫猫框架所获得的QQ发送接口之类的接口。
+              <p>
+                无论是个人开发者还是企业用户，NapCat 都能提供开箱即用的 OneBot 11 协议支持，
+                助您快速将创意转化为现实。
               </p>
-            </div>
+            </CardBody>
+          </Card>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {features.map((item, index) => (
+              <Card key={index} shadow="sm" className={cardStyle}>
+                <CardBody className="flex flex-row items-start gap-4 p-4">
+                  <div className={`p-3 rounded-lg ${item.className}`}>
+                    {item.icon}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-default-900">{item.title}</h3>
+                    <p className="text-small text-default-500 mt-1">{item.desc}</p>
+                  </div>
+                </CardBody>
+              </Card>
+            ))}
           </div>
         </div>
-        <div className='flex flex-row gap-2 flex-wrap justify-around'>
-          <Card
-            as={Link}
-            shadow='sm'
-            isPressable
-            isExternal
-            href='https://qm.qq.com/q/F9cgs1N3Mc'
-          >
-            <CardBody className='flex-row items-center gap-2'>
-              <span className='p-2 rounded-small bg-primary-50 text-primary-500'>
-                <BsTencentQq size={16} />
-              </span>
-              <span>官方社群1</span>
+
+        {/* 右侧：信息与链接 */}
+        <div className="space-y-6">
+          <Card shadow="sm" className={cardStyle}>
+            <CardHeader className="pb-0 pt-4 px-4">
+              <h2 className="text-lg font-bold">相关资源</h2>
+            </CardHeader>
+            <CardBody className="py-4">
+              <div className="flex flex-col gap-2">
+                {links.map((link, idx) => (
+                  <Link
+                    key={idx}
+                    isExternal
+                    href={link.href}
+                    className="flex items-center justify-between p-3 rounded-xl hover:bg-default-100/50 transition-colors text-default-600"
+                  >
+                    <span className="flex items-center gap-3">
+                      {link.icon}
+                      {link.name}
+                    </span>
+                    <span className="text-tiny text-default-400">跳转 &rarr;</span>
+                  </Link>
+                ))}
+              </div>
             </CardBody>
           </Card>
 
-          <Card
-            as={Link}
-            shadow='sm'
-            isPressable
-            isExternal
-            href='https://qm.qq.com/q/hSt0u9PVn'
-          >
-            <CardBody className='flex-row items-center gap-2'>
-              <span className='p-2 rounded-small bg-primary-50 text-primary-500'>
-                <BsTencentQq size={16} />
-              </span>
-              <span>官方社群2</span>
-            </CardBody>
-          </Card>
-
-          <Card
-            as={Link}
-            shadow='sm'
-            isPressable
-            isExternal
-            href='https://t.me/napcatqq'
-          >
-            <CardBody className='flex-row items-center gap-2'>
-              <span className='p-2 rounded-small bg-primary-50 text-primary-500'>
-                <BsTelegram size={16} />
-              </span>
-              <span>Telegram</span>
-            </CardBody>
-          </Card>
-
-          <Card
-            as={Link}
-            shadow='sm'
-            isPressable
-            isExternal
-            href='https://napcat.napneko.icu/'
-          >
-            <CardBody className='flex-row items-center gap-2'>
-              <span className='p-2 rounded-small bg-primary-50 text-primary-500'>
-                <IoDocument size={16} />
-              </span>
-              <span>使用文档</span>
+          <Card shadow="sm" className={cardStyle}>
+            <CardHeader className="pb-0 pt-4 px-4">
+              <h2 className="text-lg font-bold flex items-center gap-2">
+                <BsCpu /> 技术栈
+              </h2>
+            </CardHeader>
+            <CardBody className="py-4">
+              <div className="flex flex-wrap gap-2">
+                {['TypeScript', 'React', 'Vite', 'Node.js', 'Electron', 'HeroUI'].map((tech) => (
+                  <Chip key={tech} size="sm" variant="flat" className="bg-default-100/50 text-default-600">
+                    {tech}
+                  </Chip>
+                ))}
+              </div>
             </CardBody>
           </Card>
         </div>
-        <div className='flex flex-col md:flex-row md:items-start gap-4'>
-          <div className='w-full flex flex-col gap-4'>
-            {renderImage(
-              'https://next.ossinsight.io/widgets/official/compose-recent-active-contributors/thumbnail.png?repo_id=777721566&limit=30&image_size=auto&color_scheme=light',
-              'Contributors'
-            )}
-            {renderImage(
-              'https://next.ossinsight.io/widgets/official/compose-activity-trends/thumbnail.png?repo_id=41986369&image_size=auto&color_scheme=light',
-              'Activity Trends'
-            )}
-          </div>
+      </div>
 
-          <NapCatRepoInfo />
-        </div>
-      </section>
-    </>
+      {/* 底部版权 - 移出 grid 布局 */}
+      <div className="w-full text-center text-tiny text-default-400 py-4 mt-auto flex flex-col items-center gap-1">
+        <p className="flex items-center justify-center gap-1">
+          Made with <span className="text-danger">❤️</span> by NapCat Team
+        </p>
+        <p>MIT License © {new Date().getFullYear()}</p>
+      </div>
+    </div>
   );
 }

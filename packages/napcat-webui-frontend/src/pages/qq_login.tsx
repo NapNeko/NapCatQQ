@@ -6,6 +6,8 @@ import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
+import logo from '@/assets/images/logo.png';
+
 import HoverEffectCard from '@/components/effect_card';
 import { title } from '@/components/primitives';
 import QrCodeLogin from '@/components/qr_code_login';
@@ -13,9 +15,9 @@ import QuickLogin from '@/components/quick_login';
 import type { QQItem } from '@/components/quick_login';
 import { ThemeSwitch } from '@/components/theme-switch';
 
-import logo from '@/assets/images/logo.png';
 import QQManager from '@/controllers/qq_manager';
 import PureLayout from '@/layouts/pure';
+import { motion } from 'motion/react';
 
 export default function QQLoginPage () {
   const navigate = useNavigate();
@@ -112,7 +114,12 @@ export default function QQLoginPage () {
     <>
       <title>QQ登录 - NapCat WebUI</title>
       <PureLayout>
-        <div className='w-[608px] max-w-full py-8 px-2 md:px-8 overflow-hidden'>
+        <motion.div
+          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.5, type: 'spring', stiffness: 120, damping: 20 }}
+          className='w-[608px] max-w-full py-8 px-2 md:px-8 overflow-hidden'
+        >
           <HoverEffectCard
             className='items-center gap-4 pt-0 pb-6 bg-default-50'
             maxXRotation={3}
@@ -169,7 +176,7 @@ export default function QQLoginPage () {
               </Button>
             </CardBody>
           </HoverEffectCard>
-        </div>
+        </motion.div>
       </PureLayout>
     </>
   );

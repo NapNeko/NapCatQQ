@@ -7,7 +7,6 @@ import PageLoading from '@/components/page_loading';
 import Toaster from '@/components/toaster';
 
 import DialogProvider from '@/contexts/dialog';
-import AudioProvider from '@/contexts/songs';
 
 import useAuth from '@/hooks/auth';
 
@@ -33,13 +32,11 @@ function App () {
       <Provider store={store}>
         <PageBackground />
         <Toaster />
-        <AudioProvider>
-          <Suspense fallback={<PageLoading />}>
-            <AuthChecker>
-              <AppRoutes />
-            </AuthChecker>
-          </Suspense>
-        </AudioProvider>
+        <Suspense fallback={<PageLoading />}>
+          <AuthChecker>
+            <AppRoutes />
+          </AuthChecker>
+        </Suspense>
       </Provider>
     </DialogProvider>
   );

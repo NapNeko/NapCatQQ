@@ -94,7 +94,7 @@ const HoverEffectCard: React.FC<HoverEffectCardProps> = (props) => {
         ref={lightRef}
         className={clsx(
           isShowLight ? 'opacity-100' : 'opacity-0',
-          'absolute rounded-full blur-[150px] filter transition-opacity duration-300 dark:bg-[#2850ff] bg-[#ff4132] w-[100px] h-[100px]',
+          'absolute rounded-full blur-[100px] filter transition-opacity duration-300 bg-gradient-to-r from-primary-400 to-secondary-400 w-[150px] h-[150px]',
           lightClassName
         )}
         style={{

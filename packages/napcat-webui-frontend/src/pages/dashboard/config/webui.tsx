@@ -1,4 +1,3 @@
-import { Input } from '@heroui/input';
 import { Button } from '@heroui/button';
 import { useLocalStorage } from '@uidotdev/usehooks';
 import { useEffect, useState } from 'react';
@@ -10,8 +9,6 @@ import key from '@/const/key';
 import SaveButtons from '@/components/button/save_buttons';
 import FileInput from '@/components/input/file_input';
 import ImageInput from '@/components/input/image_input';
-
-import useMusic from '@/hooks/use-music';
 
 import { siteConfig } from '@/config/site';
 import FileManager from '@/controllers/file_manager';
@@ -43,7 +40,6 @@ const WebUIConfigCard = () => {
   } = useForm<IConfig['webui']>({
     defaultValues: {
       background: '',
-      musicListID: '',
       customIcons: {},
     },
   });
@@ -53,7 +49,6 @@ const WebUIConfigCard = () => {
     key.customIcons,
     {}
   );
-  const { setListId, listId } = useMusic();
   const [registrationOptions, setRegistrationOptions] = useState<any>(null);
   const [isLoadingOptions, setIsLoadingOptions] = useState(false);
 
@@ -75,14 +70,12 @@ const WebUIConfigCard = () => {
   };
 
   const reset = () => {
-    setWebuiValue('musicListID', listId);
     setWebuiValue('customIcons', customIcons);
     setWebuiValue('background', b64img);
   };
 
   const onSubmit = handleWebuiSubmit((data) => {
     try {
-      setListId(data.musicListID);
       setCustomIcons(data.customIcons);
       setB64img(data.background);
       toast.success('保存成功');
@@ -94,7 +87,7 @@ const WebUIConfigCard = () => {
 
   useEffect(() => {
     reset();
-  }, [listId, customIcons, b64img]);
+  }, [customIcons, b64img]);
 
   return (
     <>
@@ -129,20 +122,6 @@ const WebUIConfigCard = () => {
             }}
           />
         </div>
-      </div>
-      <div className='flex flex-col gap-2'>
-        <div className='flex-shrink-0 w-full'>WebUI音乐播放器</div>
-        <Controller
-          control={control}
-          name='musicListID'
-          render={({ field }) => (
-            <Input
-              {...field}
-              label='网易云音乐歌单ID（网页内音乐播放器）'
-              placeholder='请输入歌单ID'
-            />
-          )}
-        />
       </div>
       <div className='flex flex-col gap-2'>
         <div className='flex-shrink-0 w-full'>背景图</div>
