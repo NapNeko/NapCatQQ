@@ -50,12 +50,13 @@ const renderItems = (items: MenuItem[], children = false) => {
       <div key={item.href + item.label}>
         <Button
           className={clsx(
-            'flex items-center w-full text-left justify-start dark:text-white',
-            // children && 'rounded-l-lg',
-            isActive && 'bg-opacity-60',
+            'flex items-center w-full text-left justify-start dark:text-white transition-all duration-300',
+            isActive
+              ? 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-400 shadow-none font-semibold translate-x-1'
+              : 'hover:bg-default-100 hover:translate-x-1',
             b64img && 'backdrop-blur-md text-white'
           )}
-          color='primary'
+          color={isActive ? 'primary' : 'default'}
           endContent={
             canOpen
               ? (
@@ -104,7 +105,6 @@ const renderItems = (items: MenuItem[], children = false) => {
                 />
               )
           }
-          radius='full'
           startContent={
             customIcons[item.label]
               ? (
@@ -147,7 +147,7 @@ const renderItems = (items: MenuItem[], children = false) => {
 };
 
 interface MenusProps {
-  items: MenuItem[]
+  items: MenuItem[];
 }
 const Menus: React.FC<MenusProps> = (props) => {
   const { items } = props;

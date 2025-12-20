@@ -79,10 +79,11 @@ const Layout: React.FC<{ children: React.ReactNode; }> = ({ children }) => {
   }, [location.pathname]);
   return (
     <div
-      className='h-screen relative flex bg-primary-50 dark:bg-black items-stretch'
+      className='h-screen relative flex items-stretch overflow-hidden'
       style={{
-        backgroundImage: `url(${b64img})`,
+        backgroundImage: b64img ? `url(${b64img})` : undefined,
         backgroundSize: 'cover',
+        backgroundPosition: 'center',
       }}
     >
       <SideBar
@@ -90,14 +91,19 @@ const Layout: React.FC<{ children: React.ReactNode; }> = ({ children }) => {
         open={openSideBar}
         onClose={() => setOpenSideBar(false)}
       />
-      <div
+      <motion.div
+        layout
         ref={contentRef}
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4 }}
         className={clsx(
-          'overflow-y-auto flex-1 rounded-md m-1 bg-content1 pb-10 md:pb-0',
-          openSideBar ? 'ml-0' : 'ml-1',
-          !b64img && 'shadow-inner',
-          b64img && '!bg-opacity-50 backdrop-blur-none dark:bg-background',
-          'overflow-x-hidden'
+          'flex-1 overflow-y-auto',
+          'bg-white/60 dark:bg-black/40 backdrop-blur-xl',
+          'shadow-[0_8px_32px_0_rgba(31,38,135,0.07)]',
+          'transition-all duration-300 ease-in-out',
+          openSideBar ? 'm-3 ml-0 rounded-3xl border border-white/40 dark:border-white/10' : 'm-0 rounded-none',
+          'pb-10 md:pb-0'
         )}
       >
         <div
@@ -109,15 +115,12 @@ const Layout: React.FC<{ children: React.ReactNode; }> = ({ children }) => {
             'z-30 m-2 mb-0 sticky top-2 left-0'
           )}
         >
-          <motion.div
+          <div
             className={clsx(
               'mr-1 ease-in-out ml-0 md:relative z-50 md:z-auto',
-              openSideBar && 'pl-2 absolute',
+              openSideBar && 'pl-2',
               'md:!ml-0 md:pl-0'
             )}
-            transition={{ type: 'spring', stiffness: 150, damping: 15 }}
-            initial={{ marginLeft: 0 }}
-            animate={{ marginLeft: openSideBar ? '15rem' : 0 }}
           >
             <Button
               isIconOnly
@@ -127,7 +130,7 @@ const Layout: React.FC<{ children: React.ReactNode; }> = ({ children }) => {
             >
               {openSideBar ? <MdMenuOpen size={24} /> : <MdMenu size={24} />}
             </Button>
-          </motion.div>
+          </div>
           <Breadcrumbs isDisabled size='lg'>
             {title?.map((item, index) => (
               <BreadcrumbItem key={index}>
@@ -149,7 +152,7 @@ const Layout: React.FC<{ children: React.ReactNode; }> = ({ children }) => {
         <ErrorBoundary fallbackRender={errorFallbackRender}>
           {children}
         </ErrorBoundary>
-      </div>
+      </motion.div>
     </div>
   );
 };

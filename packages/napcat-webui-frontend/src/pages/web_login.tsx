@@ -8,15 +8,17 @@ import { toast } from 'react-hot-toast';
 import { IoKeyOutline } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
 
+import logo from '@/assets/images/logo.png';
+
 import key from '@/const/key';
 
 import HoverEffectCard from '@/components/effect_card';
 import { title } from '@/components/primitives';
 import { ThemeSwitch } from '@/components/theme-switch';
 
-import logo from '@/assets/images/logo.png';
 import WebUIManager from '@/controllers/webui_manager';
 import PureLayout from '@/layouts/pure';
+import { motion } from 'motion/react';
 
 export default function WebLoginPage () {
   const urlSearchParams = new URLSearchParams(window.location.search);
@@ -150,7 +152,12 @@ export default function WebLoginPage () {
     <>
       <title>WebUI登录 - NapCat WebUI</title>
       <PureLayout>
-        <div className='w-[608px] max-w-full py-8 px-2 md:px-8 overflow-hidden'>
+        <motion.div
+          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.5, type: "spring", stiffness: 120, damping: 20 }}
+          className='w-[608px] max-w-full py-8 px-2 md:px-8 overflow-hidden'
+        >
           <HoverEffectCard
             className='items-center gap-4 pt-0 pb-6 bg-default-50'
             maxXRotation={3}
@@ -257,7 +264,7 @@ export default function WebLoginPage () {
               </Button>
             </CardBody>
           </HoverEffectCard>
-        </div>
+        </motion.div>
       </PureLayout>
     </>
   );
