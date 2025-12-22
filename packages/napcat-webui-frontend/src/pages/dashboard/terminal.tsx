@@ -112,7 +112,7 @@ export default function TerminalPage () {
           className='h-full overflow-hidden'
         >
           <div className='flex items-center gap-2 flex-shrink-0 flex-grow-0'>
-            <TabList className='flex-1 !overflow-x-auto w-full hide-scrollbar'>
+            <TabList className='flex-1 !overflow-x-auto w-full hide-scrollbar bg-white/40 dark:bg-black/20 backdrop-blur-md p-1 rounded-lg border border-white/20'>
               <SortableContext
                 items={tabs}
                 strategy={horizontalListSortingStrategy}

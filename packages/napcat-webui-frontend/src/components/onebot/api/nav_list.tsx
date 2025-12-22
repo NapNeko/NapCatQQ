@@ -7,10 +7,10 @@ import { useState } from 'react';
 import type { OneBotHttpApi, OneBotHttpApiPath } from '@/const/ob_api';
 
 export interface OneBotApiNavListProps {
-  data: OneBotHttpApi
-  selectedApi: OneBotHttpApiPath
-  onSelect: (apiName: OneBotHttpApiPath) => void
-  openSideBar: boolean
+  data: OneBotHttpApi;
+  selectedApi: OneBotHttpApiPath;
+  onSelect: (apiName: OneBotHttpApiPath) => void;
+  openSideBar: boolean;
 }
 
 const OneBotApiNavList: React.FC<OneBotApiNavListProps> = (props) => {
@@ -19,8 +19,8 @@ const OneBotApiNavList: React.FC<OneBotApiNavListProps> = (props) => {
   return (
     <motion.div
       className={clsx(
-        'h-[calc(100vh-3.5rem)] left-0 !overflow-hidden md:w-auto z-20 top-[3.3rem] md:top-[3rem] absolute md:sticky md:float-start',
-        openSideBar && 'bg-background bg-opacity-20 backdrop-blur-md'
+        'h-[calc(100vh-3.5rem)] left-0 !overflow-hidden md:w-auto z-20 top-[3.3rem] md:top-[3rem] absolute md:sticky md:float-start rounded-r-xl border-r border-white/20',
+        openSideBar && 'bg-white/40 dark:bg-black/40 backdrop-blur-2xl border-white/20 shadow-xl'
       )}
       initial={{ width: 0 }}
       transition={{
@@ -33,11 +33,11 @@ const OneBotApiNavList: React.FC<OneBotApiNavListProps> = (props) => {
     >
       <div className='w-64 h-full overflow-y-auto px-2 pt-2 pb-10 md:pb-0'>
         <Input
-          className='sticky top-0 z-10 text-primary-600'
+          className='sticky top-0 z-10 text-default-600'
           classNames={{
             inputWrapper:
-              'bg-opacity-30 bg-primary-50 backdrop-blur-sm border border-primary-300 mb-2',
-            input: 'bg-transparent !text-primary-400 !placeholder-primary-400',
+              'bg-white/40 dark:bg-white/10 backdrop-blur-md border border-white/20 mb-2 hover:bg-white/60 dark:hover:bg-white/20 transition-all',
+            input: 'bg-transparent text-default-700 placeholder:text-default-400',
           }}
           radius='full'
           placeholder='搜索 API'
@@ -51,7 +51,7 @@ const OneBotApiNavList: React.FC<OneBotApiNavListProps> = (props) => {
             key={apiName}
             shadow='none'
             className={clsx(
-              'w-full border border-primary-100 rounded-lg mb-1 bg-opacity-30 backdrop-blur-sm text-primary-400',
+              'w-full border border-transparent rounded-xl mb-1 bg-transparent hover:bg-white/40 dark:hover:bg-white/10 transition-all text-default-600 dark:text-gray-300',
               {
                 hidden: !(
                   apiName.includes(searchValue) ||
@@ -59,7 +59,7 @@ const OneBotApiNavList: React.FC<OneBotApiNavListProps> = (props) => {
                 ),
               },
               {
-                '!bg-opacity-40 border border-primary-400 bg-primary-50 text-primary-600':
+                '!bg-white/60 dark:!bg-white/10 !border-white/20 shadow-sm !text-primary font-medium':
                   apiName === selectedApi,
               }
             )}
@@ -69,8 +69,8 @@ const OneBotApiNavList: React.FC<OneBotApiNavListProps> = (props) => {
             <CardBody>
               <h2 className='font-bold'>{api.description}</h2>
               <div
-                className={clsx('text-sm text-primary-200', {
-                  '!text-primary-400': apiName === selectedApi,
+                className={clsx('text-sm text-default-400', {
+                  '!text-primary': apiName === selectedApi,
                 })}
               >
                 {apiName}

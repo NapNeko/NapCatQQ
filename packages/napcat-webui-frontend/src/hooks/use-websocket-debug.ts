@@ -1,5 +1,4 @@
 import type { Selection } from '@react-types/shared';
-import { useReactive } from 'ahooks';
 import { useCallback, useState } from 'react';
 import toast from 'react-hot-toast';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
@@ -11,8 +10,8 @@ import { isOB11Event, isOB11RequestResponse } from '@/utils/onebot';
 import type { AllOB11WsResponse } from '@/types/onebot';
 
 export { ReadyState } from 'react-use-websocket';
-export function useWebSocketDebug (url: string, token: string) {
-  const messageHistory = useReactive<AllOB11WsResponse[]>([]);
+export function useWebSocketDebug (url: string, token: string, connectOnMount: boolean = true) {
+  const [messageHistory, setMessageHistory] = useState<AllOB11WsResponse[]>([]);
   const [filterTypes, setFilterTypes] = useState<Selection>('all');
 
   const filteredMessages = messageHistory.filter((msg) => {
@@ -22,11 +21,18 @@ export function useWebSocketDebug (url: string, token: string) {
     return false;
   });
 
-  const { sendMessage, readyState } = useWebSocket(url, {
+  const { sendMessage, readyState } = useWebSocket(connectOnMount ? url : null, {
+    share: false,
     onMessage: useCallback((event: WebSocketEventMap['message']) => {
       try {
         const data = JSON.parse(event.data);
-        messageHistory.unshift(data);
+        setMessageHistory((prev) => {
+          const newHistory = [data, ...prev];
+          if (newHistory.length > 500) {
+            return newHistory.slice(0, 500);
+          }
+          return newHistory;
+        });
       } catch (_error) {
         toast.error('WebSocket 消息解析失败');
       }
@@ -39,7 +45,7 @@ export function useWebSocketDebug (url: string, token: string) {
       console.error('WebSocket error:', event);
     },
     onOpen: () => {
-      messageHistory.splice(0, messageHistory.length);
+      setMessageHistory([]);
     },
   });
 
@@ -49,6 +55,10 @@ export function useWebSocketDebug (url: string, token: string) {
     }
     sendMessage(msg);
   };
+
+  const clearMessages = useCallback(() => {
+    setMessageHistory([]);
+  }, []);
 
   const FilterMessagesType = renderFilterMessageType(
     filterTypes,
@@ -63,5 +73,6 @@ export function useWebSocketDebug (url: string, token: string) {
     filterTypes,
     setFilterTypes,
     FilterMessagesType,
+    clearMessages,
   };
 }

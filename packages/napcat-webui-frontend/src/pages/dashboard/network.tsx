@@ -388,8 +388,8 @@ export default function NetworkPage () {
           className='max-w-full'
           items={tabs}
           classNames={{
-            tabList: 'bg-opacity-50 backdrop-blur-sm',
-            cursor: 'bg-opacity-60 backdrop-blur-sm',
+            tabList: 'bg-white/40 dark:bg-black/20 backdrop-blur-md',
+            cursor: 'bg-white/80 dark:bg-white/10 backdrop-blur-md shadow-sm',
           }}
         >
           {(item) => (

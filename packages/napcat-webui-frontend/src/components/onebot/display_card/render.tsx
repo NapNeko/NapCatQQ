@@ -30,14 +30,14 @@ const itemVariants = {
   },
 };
 
-function RequestComponent ({ data: _ }: { data: OB11Request }) {
+function RequestComponent ({ data: _ }: { data: OB11Request; }) {
   return <div>Request消息，暂未适配</div>;
 }
 
 export interface OneBotItemRenderProps {
-  data: AllOB11WsResponse[]
-  index: number
-  style: React.CSSProperties
+  data: AllOB11WsResponse[];
+  index: number;
+  style: React.CSSProperties;
 }
 
 export const getItemSize = (event: OB11AllEvent['post_type']) => {
@@ -90,7 +90,7 @@ const OneBotItemRender = ({ data, index, style }: OneBotItemRenderProps) => {
         animate='visible'
         className='h-full px-2'
       >
-        <Card className='w-full h-full py-2 bg-opacity-50 backdrop-blur-sm'>
+        <Card className='w-full h-full py-2 bg-white/60 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-white/10 shadow-sm'>
           <CardHeader className='py-0 text-default-500 flex-row gap-2'>
             <div className='font-bold'>
               {isEvent ? getEventName(msg.post_type) : '请求响应'}

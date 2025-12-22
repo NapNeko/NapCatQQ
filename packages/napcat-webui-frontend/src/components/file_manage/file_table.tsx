@@ -25,21 +25,21 @@ import { supportedPreviewExts } from './file_preview_modal';
 import ImageNameButton, { PreviewImage, imageExts } from './image_name_button';
 
 export interface FileTableProps {
-  files: FileInfo[]
-  currentPath: string
-  loading: boolean
-  sortDescriptor: SortDescriptor
-  onSortChange: (descriptor: SortDescriptor) => void
-  selectedFiles: Selection
-  onSelectionChange: (selected: Selection) => void
-  onDirectoryClick: (dirPath: string) => void
-  onEdit: (filePath: string) => void
-  onPreview: (filePath: string) => void
-  onRenameRequest: (name: string) => void
-  onMoveRequest: (name: string) => void
-  onCopyPath: (fileName: string) => void
-  onDelete: (filePath: string) => void
-  onDownload: (filePath: string) => void
+  files: FileInfo[];
+  currentPath: string;
+  loading: boolean;
+  sortDescriptor: SortDescriptor;
+  onSortChange: (descriptor: SortDescriptor) => void;
+  selectedFiles: Selection;
+  onSelectionChange: (selected: Selection) => void;
+  onDirectoryClick: (dirPath: string) => void;
+  onEdit: (filePath: string) => void;
+  onPreview: (filePath: string) => void;
+  onRenameRequest: (name: string) => void;
+  onMoveRequest: (name: string) => void;
+  onCopyPath: (fileName: string) => void;
+  onDelete: (filePath: string) => void;
+  onDownload: (filePath: string) => void;
 }
 
 const PAGE_SIZE = 20;
@@ -112,7 +112,7 @@ export default function FileTable ({
         selectedKeys={selectedFiles}
         selectionMode='multiple'
         bottomContent={
-          <div className='flex w-full justify-center'>
+          <div className='flex w-full justify-center p-2 border-t border-white/10'>
             <Pagination
               isCompact
               showControls
@@ -121,9 +121,17 @@ export default function FileTable ({
               page={page}
               total={pages}
               onChange={(page) => setPage(page)}
+              classNames={{
+                cursor: 'bg-primary shadow-lg',
+              }}
             />
           </div>
         }
+        classNames={{
+          wrapper: 'bg-white/60 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-white/10 shadow-sm p-0',
+          th: 'bg-white/40 dark:bg-white/5 backdrop-blur-md text-default-600',
+          td: 'group-data-[first=true]:first:before:rounded-none group-data-[first=true]:last:before:rounded-none',
+        }}
       >
         <TableHeader>
           <TableColumn key='name' allowsSorting>
@@ -180,7 +188,7 @@ export default function FileTable ({
                             name={file.name}
                             isDirectory={file.isDirectory}
                           />
-                      }
+                        }
                       >
                         {file.name}
                       </Button>
@@ -194,43 +202,43 @@ export default function FileTable ({
                 </TableCell>
                 <TableCell>{new Date(file.mtime).toLocaleString()}</TableCell>
                 <TableCell>
-                  <ButtonGroup size='sm'>
+                  <ButtonGroup size='sm' variant='light'>
                     <Button
                       isIconOnly
-                      color='primary'
-                      variant='flat'
+                      color='default'
+                      className='text-default-500 hover:text-primary'
                       onPress={() => onRenameRequest(file.name)}
                     >
                       <BiRename />
                     </Button>
                     <Button
                       isIconOnly
-                      color='primary'
-                      variant='flat'
+                      color='default'
+                      className='text-default-500 hover:text-primary'
                       onPress={() => onMoveRequest(file.name)}
                     >
                       <FiMove />
                     </Button>
                     <Button
                       isIconOnly
-                      color='primary'
-                      variant='flat'
+                      color='default'
+                      className='text-default-500 hover:text-primary'
                       onPress={() => onCopyPath(file.name)}
                     >
                       <FiCopy />
                     </Button>
                     <Button
                       isIconOnly
-                      color='primary'
-                      variant='flat'
+                      color='default'
+                      className='text-default-500 hover:text-primary'
                       onPress={() => onDownload(filePath)}
                     >
                       <FiDownload />
                     </Button>
                     <Button
                       isIconOnly
-                      color='primary'
-                      variant='flat'
+                      color='danger'
+                      className='text-danger hover:bg-danger/10'
                       onPress={() => onDelete(filePath)}
                     >
                       <FiTrash2 />

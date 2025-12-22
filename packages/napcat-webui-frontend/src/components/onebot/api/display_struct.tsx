@@ -8,15 +8,15 @@ import { TbSquareRoundedChevronRightFilled } from 'react-icons/tb';
 import type { LiteralValue, ParsedSchema } from '@/utils/zod';
 
 interface DisplayStructProps {
-  schema: ParsedSchema | ParsedSchema[]
+  schema: ParsedSchema | ParsedSchema[];
 }
 
 const SchemaType = ({
   type,
   value,
 }: {
-  type: string
-  value?: LiteralValue
+  type: string;
+  value?: LiteralValue;
 }) => {
   let name = type;
   switch (type) {
@@ -57,7 +57,7 @@ const SchemaType = ({
 };
 
 const SchemaLabel: React.FC<{
-  schema: ParsedSchema
+  schema: ParsedSchema;
 }> = ({ schema }) => (
   <>
     {Array.isArray(schema.type)
@@ -81,8 +81,8 @@ const SchemaLabel: React.FC<{
 );
 
 const SchemaContainer: React.FC<{
-  schema: ParsedSchema
-  children: React.ReactNode
+  schema: ParsedSchema;
+  children: React.ReactNode;
 }> = ({ schema, children }) => {
   const [expanded, setExpanded] = useState(false);
 
@@ -126,7 +126,7 @@ const SchemaContainer: React.FC<{
   );
 };
 
-const RenderSchema: React.FC<{ schema: ParsedSchema }> = ({ schema }) => {
+const RenderSchema: React.FC<{ schema: ParsedSchema; }> = ({ schema }) => {
   if (schema.type === 'object') {
     return (
       <SchemaContainer schema={schema}>
@@ -193,7 +193,7 @@ const RenderSchema: React.FC<{ schema: ParsedSchema }> = ({ schema }) => {
 
 const DisplayStruct: React.FC<DisplayStructProps> = ({ schema }) => {
   return (
-    <div className='p-4 bg-content2 rounded-lg bg-opacity-50'>
+    <div className=''>
       {Array.isArray(schema)
         ? (
           schema.map((s, i) => <RenderSchema key={s.name || i} schema={s} />)
