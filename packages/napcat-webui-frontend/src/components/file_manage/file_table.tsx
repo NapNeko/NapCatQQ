@@ -137,13 +137,13 @@ export default function FileTable ({
           <TableColumn key='name' allowsSorting>
             名称
           </TableColumn>
-          <TableColumn key='type' allowsSorting>
+          <TableColumn key='type' allowsSorting className='hidden md:table-cell'>
             类型
           </TableColumn>
-          <TableColumn key='size' allowsSorting>
+          <TableColumn key='size' allowsSorting className='hidden md:table-cell'>
             大小
           </TableColumn>
-          <TableColumn key='mtime' allowsSorting>
+          <TableColumn key='mtime' allowsSorting className='hidden md:table-cell'>
             修改时间
           </TableColumn>
           <TableColumn key='actions'>操作</TableColumn>
@@ -194,13 +194,13 @@ export default function FileTable ({
                       </Button>
                     )}
                 </TableCell>
-                <TableCell>{file.isDirectory ? '目录' : '文件'}</TableCell>
-                <TableCell>
+                <TableCell className='hidden md:table-cell'>{file.isDirectory ? '目录' : '文件'}</TableCell>
+                <TableCell className='hidden md:table-cell'>
                   {isNaN(file.size) || file.isDirectory
                     ? '-'
                     : `${file.size} 字节`}
                 </TableCell>
-                <TableCell>{new Date(file.mtime).toLocaleString()}</TableCell>
+                <TableCell className='hidden md:table-cell'>{new Date(file.mtime).toLocaleString()}</TableCell>
                 <TableCell>
                   <ButtonGroup size='sm' variant='light'>
                     <Button

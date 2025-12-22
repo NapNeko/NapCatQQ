@@ -375,9 +375,8 @@ export default function NetworkPage () {
           <AddButton onOpen={handleClickCreate} />
           <Button
             isIconOnly
-            color='primary'
+            className="bg-default-100/50 hover:bg-default-200/50 text-default-700 backdrop-blur-md"
             radius='full'
-            variant='flat'
             onPress={refresh}
           >
             <IoMdRefresh size={24} />

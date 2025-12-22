@@ -1,15 +1,17 @@
 import { Button } from '@heroui/button';
+import { useLocalStorage } from '@uidotdev/usehooks';
 import clsx from 'clsx';
 import { AnimatePresence, motion } from 'motion/react';
 import React from 'react';
 import { IoMdLogOut } from 'react-icons/io';
 import { MdDarkMode, MdLightMode } from 'react-icons/md';
 
+import key from '@/const/key';
 import useAuth from '@/hooks/auth';
 import useDialog from '@/hooks/use-dialog';
 import { useTheme } from '@/hooks/use-theme';
-
 import type { MenuItem } from '@/config/site';
+
 import Menus from './menus';
 
 interface SideBarProps {
@@ -22,6 +24,7 @@ const SideBar: React.FC<SideBarProps> = (props) => {
   const { open, items, onClose } = props;
   const { toggleTheme, isDark } = useTheme();
   const { revokeAuth } = useAuth();
+  const [b64img] = useLocalStorage(key.backgroundImage, '');
   const dialog = useDialog();
   const onRevokeAuth = () => {
     dialog.confirm({
@@ -47,7 +50,9 @@ const SideBar: React.FC<SideBarProps> = (props) => {
       </AnimatePresence>
       <motion.div
         className={clsx(
-          'overflow-hidden fixed top-0 left-0 h-full z-50 bg-background md:bg-transparent md:static shadow-md md:shadow-none rounded-r-md md:rounded-none'
+          'overflow-hidden fixed top-0 left-0 h-full z-50 md:static shadow-md md:shadow-none rounded-r-md md:rounded-none',
+          b64img ? 'bg-black/20 backdrop-blur-md border-r border-white/10' : 'bg-background',
+          'md:bg-transparent md:border-r-0 md:backdrop-blur-none'
         )}
         initial={{ width: 0 }}
         animate={{ width: open ? '16rem' : 0 }}

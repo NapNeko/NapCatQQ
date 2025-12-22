@@ -6,17 +6,17 @@ import type { Selection } from '@react-types/shared';
 import { LogLevel } from '@/const/enum';
 
 export interface LogLevelSelectProps {
-  selectedKeys: Selection
-  onSelectionChange: (keys: SharedSelection) => void
+  selectedKeys: Selection;
+  onSelectionChange: (keys: SharedSelection) => void;
 }
 const logLevelColor: {
   [key in LogLevel]:
-    | 'default'
-    | 'primary'
-    | 'secondary'
-    | 'success'
-    | 'warning'
-    | 'primary'
+  | 'default'
+  | 'primary'
+  | 'secondary'
+  | 'success'
+  | 'warning'
+  | 'primary'
 } = {
   [LogLevel.DEBUG]: 'default',
   [LogLevel.INFO]: 'primary',
@@ -40,7 +40,7 @@ const LogLevelSelect = (props: LogLevelSelectProps) => {
       aria-label='Log Level'
       classNames={{
         label: 'mb-2',
-        trigger: 'bg-opacity-50 backdrop-blur-sm hover:!bg-opacity-60',
+        trigger: 'bg-default-100/50 backdrop-blur-sm hover:!bg-default-200/50',
         popoverContent: 'bg-opacity-50 backdrop-blur-sm',
       }}
       size='sm'

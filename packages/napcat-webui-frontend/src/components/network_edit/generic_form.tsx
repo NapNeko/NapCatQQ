@@ -109,6 +109,11 @@ const GenericForm = <T extends keyof NetworkConfigType> ({
                           isDisabled={field.isDisabled}
                           label={field.label}
                           placeholder={field.placeholder}
+                          classNames={{
+                            inputWrapper:
+                              'bg-default-100/50 dark:bg-white/5 backdrop-blur-md border border-transparent hover:bg-default-200/50 dark:hover:bg-white/10 transition-all shadow-sm data-[hover=true]:border-default-300',
+                            input: 'bg-transparent text-default-700 placeholder:text-default-400',
+                          }}
                         />
                       );
                     case 'select':
@@ -121,6 +126,10 @@ const GenericForm = <T extends keyof NetworkConfigType> ({
                           placeholder={field.placeholder}
                           selectedKeys={[controllerField.value as string]}
                           value={controllerField.value.toString()}
+                          classNames={{
+                            trigger: 'bg-default-100/50 dark:bg-white/5 backdrop-blur-md border border-transparent hover:bg-default-200/50 dark:hover:bg-white/10 transition-all shadow-sm data-[hover=true]:border-default-300',
+                            value: 'text-default-700',
+                          }}
                         >
                           {field.options?.map((option) => (
                             <SelectItem key={option.key} value={option.value}>

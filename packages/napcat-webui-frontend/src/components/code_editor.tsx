@@ -8,19 +8,10 @@ import monaco from '@/monaco';
 
 loader.config({
   monaco,
-  paths: {
-    vs: '/webui/monaco-editor/min/vs',
-  },
-});
-
-loader.config({
-  'vs/nls': {
-    availableLanguages: { '*': 'zh-cn' },
-  },
 });
 
 export interface CodeEditorProps extends React.ComponentProps<typeof Editor> {
-  test?: string
+  test?: string;
 }
 
 export type CodeEditorRef = monaco.editor.IStandaloneCodeEditor;

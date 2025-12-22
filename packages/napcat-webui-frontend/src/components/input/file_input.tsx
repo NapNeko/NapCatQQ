@@ -7,6 +7,7 @@ export interface FileInputProps {
   onDelete?: () => Promise<void> | void;
   label?: string;
   accept?: string;
+  placeholder?: string;
 }
 
 const FileInput: React.FC<FileInputProps> = ({
@@ -14,6 +15,7 @@ const FileInput: React.FC<FileInputProps> = ({
   onDelete,
   label,
   accept,
+  placeholder,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -25,8 +27,13 @@ const FileInput: React.FC<FileInputProps> = ({
           ref={inputRef}
           label={label}
           type='file'
-          placeholder='选择文件'
+          placeholder={placeholder || '选择文件'}
           accept={accept}
+          classNames={{
+            inputWrapper:
+              'bg-default-100/50 dark:bg-white/5 backdrop-blur-md border border-transparent hover:bg-default-200/50 dark:hover:bg-white/10 transition-all shadow-sm data-[hover=true]:border-default-300',
+            input: 'bg-transparent text-default-700 placeholder:text-default-400',
+          }}
           onChange={async (e) => {
             try {
               setIsLoading(true);
