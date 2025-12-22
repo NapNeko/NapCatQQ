@@ -34,6 +34,11 @@ export default defineConfig(({ mode }) => {
           ws: true,
           changeOrigin: true,
         },
+        '/api/Debug/ws': {
+          target: backendDebugUrl,
+          ws: true,
+          changeOrigin: true,
+        },
         '/api': backendDebugUrl,
         '/files': backendDebugUrl,
       },

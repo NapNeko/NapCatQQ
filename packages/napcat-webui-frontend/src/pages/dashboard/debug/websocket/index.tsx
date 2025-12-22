@@ -3,9 +3,9 @@ import { Card, CardBody } from '@heroui/card';
 import { Input } from '@heroui/input';
 import { useLocalStorage } from '@uidotdev/usehooks';
 import clsx from 'clsx';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { IoFlash, IoFlashOff } from 'react-icons/io5';
+import { IoFlash, IoFlashOff, IoRefresh } from 'react-icons/io5';
 
 import key from '@/const/key';
 
@@ -33,13 +33,68 @@ export default function WSDebug () {
   const { sendMessage, readyState, FilterMessagesType, filteredMessages, clearMessages } =
     useWebSocketDebug(socketConfig.url, socketConfig.token, shouldConnect);
 
+  // Auto fetch adapter and set URL
+  useEffect(() => {
+    // 检查是否应该覆盖 URL
+    const isDefaultUrl = socketConfig.url === defaultWsUrl || socketConfig.url === '';
+    const isWebDebugUrl = socketConfig.url && socketConfig.url.includes('/api/Debug/ws');
+
+    if (!isDefaultUrl && !isWebDebugUrl) {
+      setInputUrl(socketConfig.url);
+      setInputToken(socketConfig.token);
+      return; // 已经有自定义/有效的配置，跳过自动创建
+    }
+
+    const initAdapter = async () => {
+      try {
+        const response = await fetch('/api/Debug/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        const data = await response.json();
+        if (data.code === 0) {
+          //const adapterName = data.data.adapterName;
+          const token = data.data.token;
+          const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+
+          if (token) {
+            // URL 中不再包含 Token，Token 单独放入输入框
+            const wsUrl = `${protocol}//${window.location.host}/api/Debug/ws`;
+
+            setSocketConfig({
+              url: wsUrl,
+              token: token
+            });
+            setInputUrl(wsUrl);
+            setInputToken(token);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to create debug adapter:', error);
+      }
+    };
+
+    initAdapter();
+  }, []);
+
   const handleConnect = useCallback(() => {
-    if (!inputUrl.startsWith('ws://') && !inputUrl.startsWith('wss://')) {
+    // 允许以 / 开头的相对路径（如代理情况），以及标准的 ws/wss
+    let finalUrl = inputUrl;
+    if (finalUrl.startsWith('/')) {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      finalUrl = `${protocol}//${window.location.host}${finalUrl}`;
+    }
+
+    if (!finalUrl.startsWith('ws://') && !finalUrl.startsWith('wss://')) {
       toast.error('WebSocket URL 不合法');
       return;
     }
+
     setSocketConfig({
-      url: inputUrl,
+      url: finalUrl,
       token: inputToken,
     });
     setShouldConnect(true);
@@ -48,6 +103,12 @@ export default function WSDebug () {
   const handleDisconnect = useCallback(() => {
     setShouldConnect(false);
   }, []);
+
+  const handleResetConfig = useCallback(() => {
+    setSocketConfig({ url: '', token: '' });
+    // 刷新页面以重新触发初始逻辑
+    window.location.reload();
+  }, [setSocketConfig]);
 
   return (
     <>
@@ -101,16 +162,29 @@ export default function WSDebug () {
                   input: hasBackground ? 'text-white placeholder:text-white/50' : '',
                 }}
               />
-              <Button
-                onPress={shouldConnect ? handleDisconnect : handleConnect}
-                size='md'
-                radius='full'
-                color={shouldConnect ? 'danger' : 'primary'}
-                className='font-bold shadow-lg min-w-[100px]'
-                startContent={shouldConnect ? <IoFlashOff /> : <IoFlash />}
-              >
-                {shouldConnect ? '断开' : '连接'}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  isIconOnly
+                  size="md"
+                  radius="full"
+                  color="warning"
+                  variant="flat"
+                  onPress={handleResetConfig}
+                  title="重置配置"
+                >
+                  <IoRefresh className="text-xl" />
+                </Button>
+                <Button
+                  onPress={shouldConnect ? handleDisconnect : handleConnect}
+                  size='md'
+                  radius='full'
+                  color={shouldConnect ? 'danger' : 'primary'}
+                  className='font-bold shadow-lg min-w-[100px] flex-1'
+                  startContent={shouldConnect ? <IoFlashOff /> : <IoFlash />}
+                >
+                  {shouldConnect ? '断开' : '连接'}
+                </Button>
+              </div>
             </div>
 
             {/* Status Bar */}

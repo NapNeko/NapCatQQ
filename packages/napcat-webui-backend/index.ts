@@ -22,6 +22,7 @@ import { existsSync, readFileSync } from 'node:fs'; // 引入multer用于错误�
 import { ILogWrapper } from 'napcat-common/src/log-interface';
 import { ISubscription } from 'napcat-common/src/subscription-interface';
 import { IStatusHelperSubscription } from '@/napcat-common/src/status-interface';
+import { handleDebugWebSocket } from '@/napcat-webui-backend/src/api/Debug';
 // 实例化Express
 const app = express();
 /**
@@ -187,7 +188,15 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
   const isHttps = !!sslCerts;
   const server = isHttps && sslCerts ? createHttpsServer(sslCerts, app) : createServer(app);
   server.on('upgrade', (request, socket, head) => {
-    terminalManager.initialize(request, socket, head, logger);
+    const url = new URL(request.url || '', `http://${request.headers.host}`);
+
+    // 检查是否是调试 WebSocket 连接
+    if (url.pathname.startsWith('/api/Debug/ws')) {
+      handleDebugWebSocket(request, socket, head);
+    } else {
+      // 默认为终端 WebSocket
+      terminalManager.initialize(request, socket, head, logger);
+    }
   });
   // 挂载API接口
   app.use('/api', ALLRouter);

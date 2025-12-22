@@ -19,12 +19,45 @@ export default function HttpDebug () {
   const [backgroundImage] = useLocalStorage<string>(key.backgroundImage, '');
   const hasBackground = !!backgroundImage;
 
+  const [adapterName, setAdapterName] = useState<string>('');
+
   // Auto-collapse sidebar on mobile initial load
   useEffect(() => {
     if (window.innerWidth < 768) {
       setOpenSideBar(false);
     }
   }, []);
+
+  // Initialize Debug Adapter
+  useEffect(() => {
+    let currentAdapterName = '';
+
+    const initAdapter = async () => {
+      try {
+        const response = await fetch('/api/Debug/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        const data = await response.json();
+        if (data.code === 0) {
+          currentAdapterName = data.data.adapterName;
+          setAdapterName(currentAdapterName);
+        }
+      } catch (error) {
+        console.error('Failed to create debug adapter:', error);
+      }
+    };
+
+    initAdapter();
+
+    return () => {
+      // 不再主动关闭 adapter，由后端自动管理活跃状态
+    };
+  }, []);
+
 
   const handleSelectApi = (api: OneBotHttpApiPath) => {
     if (!openApis.includes(api)) {
@@ -149,7 +182,11 @@ export default function HttpDebug () {
                       api === activeApi ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
                     )}
                   >
-                    <OneBotApiDebug path={api} data={oneBotHttpApi[api]} />
+                    <OneBotApiDebug
+                      path={api}
+                      data={oneBotHttpApi[api]}
+                      adapterName={adapterName}
+                    />
                   </div>
                 ))}
               </div>

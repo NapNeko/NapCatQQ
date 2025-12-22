@@ -6,7 +6,7 @@ import { Tab, Tabs } from '@heroui/tabs';
 import { Chip } from '@heroui/chip';
 import { useLocalStorage } from '@uidotdev/usehooks';
 import clsx from 'clsx';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { IoChevronDown, IoSend, IoSettingsSharp, IoCopy } from 'react-icons/io5';
 import { TbCode, TbMessageCode } from 'react-icons/tb';
@@ -19,7 +19,7 @@ import CodeEditor from '@/components/code_editor';
 import PageLoading from '@/components/page_loading';
 
 import { request } from '@/utils/request';
-import { parseAxiosResponse } from '@/utils/url';
+
 import { generateDefaultJson, parse } from '@/utils/zod';
 
 import DisplayStruct from './display_struct';
@@ -27,10 +27,11 @@ import DisplayStruct from './display_struct';
 export interface OneBotApiDebugProps {
   path: OneBotHttpApiPath;
   data: OneBotHttpApiContent;
+  adapterName?: string;
 }
 
 const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
-  const { path, data } = props;
+  const { path, data, adapterName } = props;
   const currentURL = new URL(window.location.origin);
   currentURL.port = '3000';
   const defaultHttpUrl = currentURL.href;
@@ -38,12 +39,15 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
     url: defaultHttpUrl,
     token: '',
   });
+
   const [requestBody, setRequestBody] = useState('{}');
   const [responseContent, setResponseContent] = useState('');
   const [isFetching, setIsFetching] = useState(false);
   const [activeTab, setActiveTab] = useState<any>('request');
   const [responseExpanded, setResponseExpanded] = useState(true);
   const [responseStatus, setResponseStatus] = useState<{ code: number; text: string; } | null>(null);
+  const [responseHeight, setResponseHeight] = useLocalStorage('napcat_debug_response_height', 240); // 默认高度
+
   const parsedRequest = parse(data.request);
   const parsedResponse = parse(data.response);
   const [backgroundImage] = useLocalStorage<string>(key.backgroundImage, '');
@@ -54,8 +58,42 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
     setIsFetching(true);
     setResponseStatus(null);
     const r = toast.loading('正在发送请求...');
+
     try {
       const parsedRequestBody = JSON.parse(requestBody);
+
+      // 如果有 adapterName，走后端转发
+      if (adapterName) {
+        request.post(`/api/Debug/call/${adapterName}`, {
+          action: path.replace(/^\//, ''), // 去掉开头的 /
+          params: parsedRequestBody
+        }, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }).then((res) => {
+          if (res.data.code === 0) {
+            setResponseContent(JSON.stringify(res.data.data, null, 2));
+            setResponseStatus({ code: 200, text: 'OK' });
+          } else {
+            setResponseContent(JSON.stringify(res.data, null, 2));
+            setResponseStatus({ code: 500, text: res.data.message });
+          }
+          setResponseExpanded(true);
+          toast.success('请求成功');
+        }).catch((err) => {
+          toast.error('请求失败：' + err.message);
+          setResponseContent(JSON.stringify({ error: err.message }, null, 2));
+          setResponseStatus({ code: 500, text: 'Error' });
+          setResponseExpanded(true);
+        }).finally(() => {
+          setIsFetching(false);
+          toast.dismiss(r);
+        });
+        return;
+      }
+
+      // 回退到旧逻辑 (直接请求)
       const requestURL = new URL(httpConfig.url);
       requestURL.pathname = path;
       request
@@ -63,17 +101,16 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
           headers: {
             Authorization: `Bearer ${httpConfig.token}`,
           },
-          responseType: 'text',
-        })
+        }) // 移除 responseType: 'text'，以便 axios 自动解析 JSON
         .then((res) => {
-          setResponseContent(parseAxiosResponse(res));
+          setResponseContent(JSON.stringify(res.data, null, 2));
           setResponseStatus({ code: res.status, text: res.statusText });
           setResponseExpanded(true);
           toast.success('请求成功');
         })
         .catch((err) => {
           toast.error('请求失败：' + err.message);
-          setResponseContent(parseAxiosResponse(err.response));
+          setResponseContent(JSON.stringify(err.response?.data || { error: err.message }, null, 2));
           if (err.response) {
             setResponseStatus({ code: err.response.status, text: err.response.statusText });
           }
@@ -95,6 +132,50 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
     setResponseContent('');
     setResponseStatus(null);
   }, [path]);
+
+  // Height Resizing Logic
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    const startY = e.clientY;
+    const startHeight = responseHeight;
+
+    const handleMouseMove = (mv: MouseEvent) => {
+      const delta = startY - mv.clientY;
+      // 向上拖动 -> 增加高度
+      setResponseHeight(Math.max(100, Math.min(window.innerHeight - 200, startHeight + delta)));
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, [responseHeight, setResponseHeight]);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    // 阻止默认滚动行为可能需要谨慎，这里尽量只阻止 handle 上的
+    // e.preventDefault(); 
+    const touch = e.touches[0];
+    const startY = touch.clientY;
+    const startHeight = responseHeight;
+
+    const handleTouchMove = (mv: TouchEvent) => {
+      const mvTouch = mv.touches[0];
+      const delta = startY - mvTouch.clientY;
+      setResponseHeight(Math.max(100, Math.min(window.innerHeight - 200, startHeight + delta)));
+    };
+
+    const handleTouchEnd = () => {
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+
+    document.addEventListener('touchmove', handleTouchMove);
+    document.addEventListener('touchend', handleTouchEnd);
+  }, [responseHeight, setResponseHeight]);
+
 
   return (
     <section className='h-full flex flex-col overflow-hidden bg-transparent'>
@@ -231,14 +312,27 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
       <div className='flex-shrink-0 px-3 pb-3'>
         <div
           className={clsx(
-            'rounded-xl transition-all overflow-hidden border border-white/5',
+            'rounded-xl transition-all overflow-hidden border border-white/5 flex flex-col',
             hasBackground ? 'bg-white/5' : 'bg-white/5 dark:bg-black/5'
           )}
         >
+          {/* Header & Resize Handle */}
           <div
-            className='flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-white/5 transition-all select-none'
+            className='flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-white/5 transition-all select-none relative group'
             onClick={() => setResponseExpanded(!responseExpanded)}
           >
+            {/* Invisble Resize Area that becomes visible/active */}
+            {responseExpanded && (
+              <div
+                className="absolute -top-1 left-0 w-full h-3 cursor-ns-resize z-50 flex items-center justify-center opacity-0 hover:opacity-100 group-hover:opacity-100 transition-opacity"
+                onMouseDown={(e) => { e.stopPropagation(); handleMouseDown(e); }}
+                onTouchStart={(e) => { e.stopPropagation(); handleTouchStart(e); }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="w-12 h-1 bg-white/20 rounded-full" />
+              </div>
+            )}
+
             <div className='flex items-center gap-2'>
               <IoChevronDown className={clsx('text-[10px] transition-transform duration-300 opacity-20', !responseExpanded && '-rotate-90')} />
               <span className='text-[10px] font-semibold tracking-wide opacity-30 uppercase'>Response</span>
@@ -254,15 +348,27 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
               </Button>
             </div>
           </div>
+
+          {/* Response Content - Code Editor */}
           {responseExpanded && (
-            <div className='h-36 overflow-auto relative font-mono text-[11px] px-4 pb-3 no-scrollbar transition-all'>
+            <div style={{ height: responseHeight }} className="relative bg-black/5 dark:bg-black/20">
               <PageLoading loading={isFetching} />
-              <div className={clsx(
-                'whitespace-pre-wrap break-all leading-relaxed opacity-40 transition-opacity',
-                hasBackground ? 'text-white' : 'text-default-600'
-              )}>
-                {responseContent || '...'}
-              </div>
+              <CodeEditor
+                value={responseContent || '// Waiting for response...'}
+                language='json'
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 11,
+                  lineNumbers: 'off',
+                  scrollBeyondLastLine: false,
+                  wordWrap: 'on',
+                  readOnly: true,
+                  folding: true,
+                  padding: { top: 8, bottom: 8 },
+                  renderLineHighlight: 'none',
+                  automaticLayout: true
+                }}
+              />
             </div>
           )}
         </div>

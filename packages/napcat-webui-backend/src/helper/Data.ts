@@ -15,6 +15,7 @@ const LoginRuntime: LoginRuntimeType = {
     nick: '',
   },
   QQVersion: 'unknown',
+  OneBotContext: null,
   onQQLoginStatusChange: async (status: boolean) => {
     LoginRuntime.QQLoginStatus = status;
   },
@@ -153,5 +154,13 @@ export const WebUiDataRuntime = {
   },
   runWebUiConfigQuickFunction: async function () {
     await LoginRuntime.WebUiConfigQuickFunction();
+  },
+
+  setOneBotContext (context: any): void {
+    LoginRuntime.OneBotContext = context;
+  },
+
+  getOneBotContext (): any | null {
+    return LoginRuntime.OneBotContext;
   },
 };
