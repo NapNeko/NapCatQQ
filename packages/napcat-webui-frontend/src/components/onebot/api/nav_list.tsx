@@ -2,7 +2,6 @@ import { Button } from '@heroui/button';
 import { Card, CardBody } from '@heroui/card';
 import { Input } from '@heroui/input';
 import clsx from 'clsx';
-import { ScrollShadow } from "@heroui/scroll-shadow";
 import { motion } from 'motion/react';
 import { useState } from 'react';
 import { TbApi, TbLayoutSidebarLeftCollapseFilled, TbSearch } from 'react-icons/tb';
@@ -74,7 +73,7 @@ const OneBotApiNavList: React.FC<OneBotApiNavListProps> = (props) => {
             />
           </div>
 
-          <ScrollShadow className='flex-1 p-3 flex flex-col gap-2 overflow-y-auto scroll-smooth' size={40}>
+          <div className='flex-1 p-3 flex flex-col gap-2 overflow-y-auto scroll-smooth'>
             {Object.entries(data).map(([apiName, api]) => {
               const isMatch = apiName.toLowerCase().includes(searchValue.toLowerCase()) ||
                 api.description?.toLowerCase().includes(searchValue.toLowerCase());
@@ -120,7 +119,7 @@ const OneBotApiNavList: React.FC<OneBotApiNavListProps> = (props) => {
                 </div>
               );
             })}
-          </ScrollShadow>
+          </div>
         </div>
       </motion.div>
     </>
