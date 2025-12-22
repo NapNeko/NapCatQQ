@@ -36,7 +36,7 @@
     "@heroui/popover": "2.3.10",
     "@heroui/select": "2.4.10",
     "@heroui/skeleton": "^2.2.6",
-    "@heroui/slider": "2.4.8",
+    "@heroui/slider": "2.4.26",
     "@heroui/snippet": "2.2.11",
     "@heroui/spinner": "2.2.7",
     "@heroui/switch": "2.2.9",
