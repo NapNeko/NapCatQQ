@@ -24,7 +24,7 @@ const NetworkItemDisplay: React.FC<NetworkItemDisplayProps> = ({
       className={clsx(
         'backdrop-blur-sm border border-white/40 dark:border-white/10 shadow-sm transition-all',
         hasBackground
-          ? 'bg-white/20 dark:bg-black/10 hover:bg-white/40 dark:hover:bg-black/20'
+          ? 'bg-white/10 dark:bg-black/10 hover:bg-white/20 dark:hover:bg-black/20'
           : 'bg-white/60 dark:bg-black/40 hover:bg-white/70 dark:hover:bg-black/30',
         size === 'md'
           ? 'col-span-8 md:col-span-2'
@@ -35,16 +35,18 @@ const NetworkItemDisplay: React.FC<NetworkItemDisplayProps> = ({
       <CardBody className='items-center md:gap-1 p-1 md:p-2'>
         <div
           className={clsx(
-            'flex-1 font-mono font-bold text-default-700 dark:text-gray-200',
+            'flex-1 font-mono font-bold',
             size === 'md' ? 'text-4xl md:text-5xl' : 'text-2xl md:text-3xl',
+            hasBackground ? 'text-white drop-shadow-sm' : 'text-default-700 dark:text-gray-200'
           )}
         >
           {count}
         </div>
         <div
           className={clsx(
-            'whitespace-nowrap text-nowrap flex-shrink-0 font-medium text-default-500',
+            'whitespace-nowrap text-nowrap flex-shrink-0 font-medium',
             size === 'md' ? 'text-sm' : 'text-xs',
+            hasBackground ? 'text-white/80' : 'text-default-500'
           )}
         >
           {label}
