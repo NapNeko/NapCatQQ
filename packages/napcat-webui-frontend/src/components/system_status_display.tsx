@@ -28,20 +28,17 @@ const SystemStatusItem: React.FC<SystemStatusItemProps> = ({
   return (
     <div
       className={clsx(
-        'p-2 rounded-lg text-sm border border-white/20 transition-colors',
+        'py-1.5 text-sm transition-colors',
         size === 'lg' ? 'col-span-2' : 'col-span-1 flex justify-between',
-        hasBackground
-          ? 'bg-white/10 hover:bg-white/20'
-          : 'bg-white/50 dark:bg-white/5 hover:bg-white/70 dark:hover:bg-white/10'
       )}
     >
       <div className={clsx(
         'w-24 font-medium',
-        hasBackground ? 'text-white/90' : 'text-default-600'
+        hasBackground ? 'text-white/90' : 'text-default-600 dark:text-gray-300'
       )}>{title}</div>
       <div className={clsx(
         'font-mono text-xs',
-        hasBackground ? 'text-white/70' : 'text-default-500'
+        hasBackground ? 'text-white/80' : 'text-default-500'
       )}>
         {value}
         {unit && <span className="ml-0.5 opacity-70">{unit}</span>}

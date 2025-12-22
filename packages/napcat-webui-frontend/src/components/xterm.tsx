@@ -35,13 +35,17 @@ const XTerm = forwardRef<XTermRef, XTermProps>((props, ref) => {
   const { className, onInput, onKey, onResize, ...rest } = props;
   const { theme } = useTheme();
   useEffect(() => {
+    // 根据屏幕宽度决定字体大小，手机端使用更小的字体
+    const isMobile = window.innerWidth < 768;
+    const fontSize = isMobile ? 11 : 14;
+
     const terminal = new Terminal({
       allowTransparency: true,
       fontFamily:
         '"JetBrains Mono", "Aa偷吃可爱长大的", "Noto Serif SC", monospace',
       cursorInactiveStyle: 'outline',
       drawBoldTextInBrightColors: false,
-      fontSize: 14,
+      fontSize: fontSize,
       lineHeight: 1.2,
     });
     terminalRef.current = terminal;
@@ -56,7 +60,10 @@ const XTerm = forwardRef<XTermRef, XTermProps>((props, ref) => {
     terminal.loadAddon(fitAddon);
     terminal.open(domRef.current!);
 
-    terminal.loadAddon(new CanvasAddon());
+    // 只在非手机端使用 Canvas 渲染器，手机端使用默认 DOM 渲染器以避免渲染问题
+    if (!isMobile) {
+      terminal.loadAddon(new CanvasAddon());
+    }
     terminal.onData((data) => {
       if (onInput) {
         onInput(data);

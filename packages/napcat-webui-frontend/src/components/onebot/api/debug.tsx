@@ -1,14 +1,15 @@
 import { Button } from '@heroui/button';
-import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Input } from '@heroui/input';
-import { Snippet } from '@heroui/snippet';
-import { Modal, ModalBody, ModalContent, ModalHeader } from '@heroui/modal';
 import { Popover, PopoverContent, PopoverTrigger } from '@heroui/popover';
+import { Tooltip } from '@heroui/tooltip';
+import { Tab, Tabs } from '@heroui/tabs';
+import { Chip } from '@heroui/chip';
 import { useLocalStorage } from '@uidotdev/usehooks';
-import { useEffect, useRef, useState } from 'react';
+import clsx from 'clsx';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { IoLink, IoSend, IoSettingsSharp } from 'react-icons/io5';
-import { TbApi, TbCode } from 'react-icons/tb';
+import { IoChevronDown, IoSend, IoSettingsSharp, IoCopy } from 'react-icons/io5';
+import { TbCode, TbMessageCode } from 'react-icons/tb';
 
 import key from '@/const/key';
 import { OneBotHttpApiContent, OneBotHttpApiPath } from '@/const/ob_api';
@@ -40,14 +41,18 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
   const [requestBody, setRequestBody] = useState('{}');
   const [responseContent, setResponseContent] = useState('');
   const [isFetching, setIsFetching] = useState(false);
-  const [isStructOpen, setIsStructOpen] = useState(false);
-  const responseRef = useRef<HTMLDivElement>(null);
+  const [activeTab, setActiveTab] = useState<any>('request');
+  const [responseExpanded, setResponseExpanded] = useState(true);
+  const [responseStatus, setResponseStatus] = useState<{ code: number; text: string; } | null>(null);
   const parsedRequest = parse(data.request);
   const parsedResponse = parse(data.response);
+  const [backgroundImage] = useLocalStorage<string>(key.backgroundImage, '');
+  const hasBackground = !!backgroundImage;
 
   const sendRequest = async () => {
     if (isFetching) return;
     setIsFetching(true);
+    setResponseStatus(null);
     const r = toast.loading('正在发送请求...');
     try {
       const parsedRequestBody = JSON.parse(requestBody);
@@ -62,18 +67,20 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
         })
         .then((res) => {
           setResponseContent(parseAxiosResponse(res));
-          toast.success('请求发送完成，请查看响应');
+          setResponseStatus({ code: res.status, text: res.statusText });
+          setResponseExpanded(true);
+          toast.success('请求成功');
         })
         .catch((err) => {
-          toast.error('请求发送失败：' + err.message);
+          toast.error('请求失败：' + err.message);
           setResponseContent(parseAxiosResponse(err.response));
+          if (err.response) {
+            setResponseStatus({ code: err.response.status, text: err.response.statusText });
+          }
+          setResponseExpanded(true);
         })
         .finally(() => {
           setIsFetching(false);
-          responseRef.current?.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start',
-          });
           toast.dismiss(r);
         });
     } catch (_error) {
@@ -86,88 +93,36 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
   useEffect(() => {
     setRequestBody(generateDefaultJson(data.request));
     setResponseContent('');
+    setResponseStatus(null);
   }, [path]);
 
   return (
-    <section className='h-full flex flex-col gap-3 md:gap-4 p-3 md:p-6 bg-white/60 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-white/10 shadow-sm rounded-2xl overflow-hidden'>
-      <div className='flex flex-col md:flex-row md:items-center justify-between border-b border-white/10 pb-3 md:pb-4 gap-3'>
-        <div className='flex items-center gap-2 md:gap-4 overflow-hidden'>
-          <h1 className='text-lg md:text-xl font-bold flex items-center gap-2 text-primary-500 flex-shrink-0'>
-            <TbApi size={24} />
-            <span className='truncate'>{data.description}</span>
-          </h1>
-          <Snippet
-            className='bg-white/40 dark:bg-black/20 backdrop-blur-md shadow-sm border border-white/20 hidden md:flex'
-            symbol={<IoLink size={16} className='inline-block mr-1' />}
-            tooltipProps={{ content: '点击复制地址' }}
-            size="sm"
-          >
-            {path}
-          </Snippet>
+    <section className='h-full flex flex-col overflow-hidden bg-transparent'>
+      {/* URL Bar */}
+      <div className='flex flex-wrap md:flex-nowrap items-center gap-2 p-2 md:p-4 pb-2 flex-shrink-0'>
+        <div className={clsx(
+          'flex-grow flex items-center gap-2 px-3 md:px-4 h-10 rounded-xl transition-all w-full md:w-auto',
+          hasBackground ? 'bg-white/5' : 'bg-black/5 dark:bg-white/5'
+        )}>
+          <Chip size="sm" variant="shadow" color="primary" className="font-bold text-[10px] h-5 min-w-[40px]">POST</Chip>
+          <span className={clsx(
+            'text-xs font-mono truncate select-all flex-1 opacity-50',
+            hasBackground ? 'text-white' : 'text-default-600'
+          )}>{path}</span>
         </div>
 
-        <div className='flex gap-2 items-center flex-shrink-0'>
-          <Button
-            size='sm'
-            variant='flat'
-            color='default'
-            radius='full'
-            isIconOnly
-            className='bg-white/40 dark:bg-white/10 md:hidden font-medium text-default-700'
-            onPress={() => setIsStructOpen(true)}
-          >
-            <TbCode className="text-lg" />
-          </Button>
-          <Button
-            size='sm'
-            variant='flat'
-            color='default'
-            radius='full'
-            className='bg-white/40 dark:bg-white/10 hidden md:flex font-medium text-default-700'
-            startContent={<TbCode className="text-lg" />}
-            onPress={() => setIsStructOpen(true)}
-          >
-            数据定义
-          </Button>
-
-          <Popover placement='bottom-end'>
+        <div className='flex items-center gap-2 flex-shrink-0 ml-auto'>
+          <Popover placement='bottom-end' backdrop='blur'>
             <PopoverTrigger>
-              <Button
-                size='sm'
-                variant='flat'
-                color='default'
-                radius='full'
-                className='bg-white/40 dark:bg-white/10 text-default-700 font-medium'
-                startContent={<IoSettingsSharp className="animate-spin-slow-on-hover text-lg" />}
-              >
-                配置
+              <Button size='sm' variant='light' radius='full' isIconOnly className='h-10 w-10 opacity-40 hover:opacity-100'>
+                <IoSettingsSharp className="text-lg" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className='w-[340px] p-4 bg-white/80 dark:bg-black/80 backdrop-blur-xl border border-white/20 shadow-xl rounded-2xl'>
-              <div className='flex flex-col gap-4 w-full'>
-                <h3 className='font-bold text-lg text-default-700'>请求配置</h3>
-                <Input
-                  label='HTTP URL'
-                  placeholder='输入 HTTP URL'
-                  value={httpConfig.url}
-                  onChange={(e) => setHttpConfig({ ...httpConfig, url: e.target.value })}
-                  variant='bordered'
-                  labelPlacement='outside'
-                  classNames={{
-                    inputWrapper: 'bg-default-100/50 backdrop-blur-sm border-default-200/50',
-                  }}
-                />
-                <Input
-                  label='Token'
-                  placeholder='输入 Token'
-                  value={httpConfig.token}
-                  onChange={(e) => setHttpConfig({ ...httpConfig, token: e.target.value })}
-                  variant='bordered'
-                  labelPlacement='outside'
-                  classNames={{
-                    inputWrapper: 'bg-default-100/50 backdrop-blur-sm border-default-200/50',
-                  }}
-                />
+            <PopoverContent className='w-[260px] p-3 rounded-xl border border-white/10 shadow-2xl bg-white/80 dark:bg-black/80 backdrop-blur-xl'>
+              <div className='flex flex-col gap-2'>
+                <p className='text-[10px] font-bold opacity-30 uppercase tracking-widest'>Debug Setup</p>
+                <Input label='Base URL' value={httpConfig.url} onChange={(e) => setHttpConfig({ ...httpConfig, url: e.target.value })} size='sm' variant='flat' />
+                <Input label='Token' value={httpConfig.token} onChange={(e) => setHttpConfig({ ...httpConfig, token: e.target.value })} size='sm' variant='flat' />
               </div>
             </PopoverContent>
           </Popover>
@@ -176,133 +131,143 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
             onPress={sendRequest}
             color='primary'
             radius='full'
-            className='font-bold px-6 shadow-lg shadow-primary/30'
+            size='sm'
+            className='h-10 px-6 font-bold shadow-md shadow-primary/20 hover:scale-[1.02] active:scale-[0.98]'
             isLoading={isFetching}
-            startContent={!isFetching && <IoSend />}
+            startContent={!isFetching && <IoSend className="text-xs" />}
           >
             发送
           </Button>
         </div>
       </div>
 
-      <div className='flex-1 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 min-h-0 overflow-auto'>
-        {/* Request Column */}
-        <Card className='bg-white/40 dark:bg-white/5 backdrop-blur-md border border-white/20 shadow-sm h-full flex flex-col'>
-          <CardHeader className='font-bold text-lg gap-2 pb-2 px-4 pt-4 border-b border-white/10 flex-shrink-0 justify-between items-center'>
-            <div className='flex items-center gap-2'>
-              <span className='w-2 h-6 rounded-full bg-primary-500'></span>
-              请求体 (Request)
-            </div>
-            <div className='flex gap-2'>
-              <ChatInputModal />
+      <div className='flex-1 flex flex-col min-h-0 bg-transparent'>
+        <div className='px-4 flex flex-wrap items-center justify-between flex-shrink-0 min-h-[36px] gap-2 py-1'>
+          <Tabs
+            size="sm"
+            variant="underlined"
+            selectedKey={activeTab}
+            onSelectionChange={setActiveTab}
+            classNames={{
+              cursor: 'bg-primary h-0.5',
+              tab: 'px-0 mr-5 h-8',
+              tabList: 'p-0 border-none',
+              tabContent: 'text-[11px] font-bold opacity-30 group-data-[selected=true]:opacity-80 transition-opacity'
+            }}
+          >
+            <Tab key="request" title="请求参数" />
+            <Tab key="docs" title="接口定义" />
+          </Tabs>
+          <div className='flex items-center gap-1 ml-auto'>
+            <ChatInputModal>
+              {(onOpen) => (
+                <Tooltip content="构造消息 (CQ码)" closeDelay={0}>
+                  <Button
+                    isIconOnly
+                    size='sm'
+                    variant='light'
+                    radius='full'
+                    className='h-7 w-7 text-primary/80 bg-primary/10 hover:bg-primary/20'
+                    onPress={onOpen}
+                  >
+                    <TbMessageCode size={16} />
+                  </Button>
+                </Tooltip>
+              )}
+            </ChatInputModal>
+
+            <Tooltip content="生成示例参数" closeDelay={0}>
               <Button
+                isIconOnly
                 size='sm'
-                color='primary'
-                variant='flat'
+                variant='light'
                 radius='full'
-                className="bg-primary/10 text-primary"
+                className='h-7 w-7 text-default-400 hover:text-primary hover:bg-default-100/50'
                 onPress={() => setRequestBody(generateDefaultJson(data.request))}
               >
-                内置示例
+                <TbCode size={16} />
               </Button>
-            </div>
-          </CardHeader>
-          <CardBody className='p-0 flex-1 relative'>
-            <div className='absolute inset-0'>
+            </Tooltip>
+          </div>
+        </div>
+
+        <div className='flex-1 min-h-0 relative px-3 pb-2 mt-1'>
+          <div className={clsx(
+            'h-full rounded-xl overflow-y-auto no-scrollbar transition-all',
+            hasBackground ? 'bg-transparent' : 'bg-white/10 dark:bg-black/10'
+          )}>
+            {activeTab === 'request' ? (
               <CodeEditor
                 value={requestBody}
                 onChange={(value) => setRequestBody(value ?? '')}
                 language='json'
                 options={{
                   minimap: { enabled: false },
-                  fontSize: 13,
-                  padding: { top: 10, bottom: 10 },
+                  fontSize: 12,
                   scrollBeyondLastLine: false,
+                  wordWrap: 'on',
+                  padding: { top: 12 },
+                  lineNumbersMinChars: 3
                 }}
               />
-            </div>
-          </CardBody>
-        </Card>
-
-        <Card className='bg-white/40 dark:bg-white/5 backdrop-blur-md border border-white/20 shadow-sm h-full flex flex-col'>
-          <PageLoading loading={isFetching} />
-          <CardHeader className='font-bold text-lg gap-2 pb-2 px-4 pt-4 border-b border-white/10 flex-shrink-0 justify-between items-center'>
-            <div className='flex items-center gap-2'>
-              <span className='w-2 h-6 rounded-full bg-secondary-500'></span>
-              响应 (Response)
-            </div>
-            <Button
-              size='sm'
-              color='primary'
-              variant='flat'
-              radius='full'
-              className="bg-primary/10 text-primary"
-              onPress={() => {
-                navigator.clipboard.writeText(responseContent);
-                toast.success('已复制');
-              }}
-            >
-              复制内容
-            </Button>
-          </CardHeader>
-          <CardBody className='p-0 flex-1 relative bg-black/5 dark:bg-black/30'>
-            <div className='absolute inset-0 overflow-auto p-4'>
-              <pre className='text-xs font-mono whitespace-pre-wrap break-all'>
-                {responseContent || <span className='text-default-400 italic'>等待请求响应...</span>}
-              </pre>
-            </div>
-          </CardBody>
-        </Card>
+            ) : (
+              <div className='p-6 space-y-10'>
+                <section>
+                  <h3 className='text-[10px] font-bold opacity-20 uppercase tracking-[0.2em] mb-4'>Request - 请求数据结构</h3>
+                  <DisplayStruct schema={parsedRequest} />
+                </section>
+                <div className='h-px bg-white/5 w-full' />
+                <section>
+                  <h3 className='text-[10px] font-bold opacity-20 uppercase tracking-[0.2em] mb-4'>Response - 返回数据结构</h3>
+                  <DisplayStruct schema={parsedResponse} />
+                </section>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Struct Display - maybe put in a modal or separate tab? 
-          For now, putting it in a collapsed/compact area at bottom is tricky with "h-[calc(100vh)]".
-          User wants "Thorough optimization".
-          I will make Struct Display a Drawer or Modal, OR put it below if we want scrolling.
-          But I set height to fixed full screen.
-          Let's put Struct Display in a Tab or Toggle at Top?
-          Or just let the main container scroll and remove fixed height?
-          Layout choice: Fixed height editors are good for workflow. Structure is reference.
-          I will leave Struct Display OUT of the fixed view, or add a toggle to show it.
-          Let's add a "View Structure" button in header that opens a Modal.
-          Yes, that's cleaner.
-      */}
-      <Modal
-        isOpen={isStructOpen}
-        onOpenChange={setIsStructOpen}
-        size='5xl'
-        scrollBehavior='inside'
-        backdrop='blur'
-        classNames={{
-          base: 'bg-white/80 dark:bg-black/80 backdrop-blur-xl border border-white/20',
-          header: 'border-b border-white/10',
-          body: 'p-6',
-        }}
-      >
-        <ModalContent>
-          {() => (
-            <>
-              <ModalHeader className='flex flex-col gap-1'>
-                API 数据结构定义
-              </ModalHeader>
-              <ModalBody>
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                  <div>
-                    <h2 className='text-xl font-bold mb-4 text-primary-500'>请求体结构 (Request)</h2>
-                    <DisplayStruct schema={parsedRequest} />
-                  </div>
-                  <div>
-                    <h2 className='text-xl font-bold mb-4 text-secondary-500'>响应体结构 (Response)</h2>
-                    <DisplayStruct schema={parsedResponse} />
-                  </div>
-                </div>
-              </ModalBody>
-            </>
+      {/* Response Area */}
+      <div className='flex-shrink-0 px-3 pb-3'>
+        <div
+          className={clsx(
+            'rounded-xl transition-all overflow-hidden border border-white/5',
+            hasBackground ? 'bg-white/5' : 'bg-white/5 dark:bg-black/5'
           )}
-        </ModalContent>
-      </Modal>
+        >
+          <div
+            className='flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-white/5 transition-all select-none'
+            onClick={() => setResponseExpanded(!responseExpanded)}
+          >
+            <div className='flex items-center gap-2'>
+              <IoChevronDown className={clsx('text-[10px] transition-transform duration-300 opacity-20', !responseExpanded && '-rotate-90')} />
+              <span className='text-[10px] font-semibold tracking-wide opacity-30 uppercase'>Response</span>
+            </div>
+            <div className='flex items-center gap-2'>
+              {responseStatus && (
+                <Chip size="sm" variant="flat" color={responseStatus.code >= 200 && responseStatus.code < 300 ? 'success' : 'danger'} className="h-4 text-[9px] font-mono px-1.5 opacity-50">
+                  {responseStatus.code}
+                </Chip>
+              )}
+              <Button size='sm' variant='light' isIconOnly radius='full' className='h-6 w-6 opacity-20 hover:opacity-80 transition-opacity' onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(responseContent); toast.success('已复制'); }}>
+                <IoCopy size={10} />
+              </Button>
+            </div>
+          </div>
+          {responseExpanded && (
+            <div className='h-36 overflow-auto relative font-mono text-[11px] px-4 pb-3 no-scrollbar transition-all'>
+              <PageLoading loading={isFetching} />
+              <div className={clsx(
+                'whitespace-pre-wrap break-all leading-relaxed opacity-40 transition-opacity',
+                hasBackground ? 'text-white' : 'text-default-600'
+              )}>
+                {responseContent || '...'}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </section>
-
   );
 };
 

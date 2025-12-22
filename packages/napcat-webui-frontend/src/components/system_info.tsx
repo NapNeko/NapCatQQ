@@ -33,18 +33,18 @@ const SystemInfoItem: React.FC<SystemInfoItemProps> = ({
 }) => {
   return (
     <div className={clsx(
-      'flex text-sm gap-2 p-3 items-center rounded-lg border border-white/20 transition-colors',
+      'flex text-sm gap-3 py-2 items-center transition-colors',
       hasBackground
-        ? 'bg-white/10 hover:bg-white/20 text-white/90'
-        : 'bg-white/50 dark:bg-white/5 hover:bg-white/70 dark:hover:bg-white/10 text-default-600 dark:text-gray-300'
+        ? 'text-white/90'
+        : 'text-default-600 dark:text-gray-300'
     )}>
-      <div className="text-lg opacity-80">{icon}</div>
+      <div className="text-lg opacity-70">{icon}</div>
       <div className='w-24 font-medium'>{title}</div>
       <div className={clsx(
-        'text-xs font-mono',
-        hasBackground ? 'text-white/70' : 'text-default-500'
+        'text-xs font-mono flex-1',
+        hasBackground ? 'text-white/80' : 'text-default-500'
       )}>{value}</div>
-      <div className='ml-auto'>{endContent}</div>
+      <div>{endContent}</div>
     </div>
   );
 };

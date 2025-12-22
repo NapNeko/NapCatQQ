@@ -1,11 +1,13 @@
-import { Button } from '@heroui/button';
-import { Card, CardBody } from '@heroui/card';
 import { Input } from '@heroui/input';
 import clsx from 'clsx';
-import { motion } from 'motion/react';
-import { useState } from 'react';
-import { TbApi, TbLayoutSidebarLeftCollapseFilled, TbSearch } from 'react-icons/tb';
+import { AnimatePresence, motion } from 'motion/react';
+import { useMemo, useState } from 'react';
+import { TbChevronRight, TbFolder, TbSearch } from 'react-icons/tb';
 
+import oneBotHttpApiGroup from '@/const/ob_api/group';
+import oneBotHttpApiMessage from '@/const/ob_api/message';
+import oneBotHttpApiSystem from '@/const/ob_api/system';
+import oneBotHttpApiUser from '@/const/ob_api/user';
 import type { OneBotHttpApi, OneBotHttpApiPath } from '@/const/ob_api';
 
 export interface OneBotApiNavListProps {
@@ -19,53 +21,77 @@ export interface OneBotApiNavListProps {
 const OneBotApiNavList: React.FC<OneBotApiNavListProps> = (props) => {
   const { data, selectedApi, onSelect, openSideBar, onToggle } = props;
   const [searchValue, setSearchValue] = useState('');
+  const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
+
+  const groups = useMemo(() => {
+    const rawGroups = [
+      { id: 'user', label: '账号相关', keys: Object.keys(oneBotHttpApiUser) },
+      { id: 'message', label: '消息相关', keys: Object.keys(oneBotHttpApiMessage) },
+      { id: 'group', label: '群聊相关', keys: Object.keys(oneBotHttpApiGroup) },
+      { id: 'system', label: '系统操作', keys: Object.keys(oneBotHttpApiSystem) },
+    ];
+
+    return rawGroups.map(g => {
+      const apis = g.keys
+        .filter(k => k in data)
+        .map(k => ({ path: k as OneBotHttpApiPath, ...data[k as OneBotHttpApiPath] }))
+        .filter(api =>
+          api.path.toLowerCase().includes(searchValue.toLowerCase()) ||
+          api.description?.toLowerCase().includes(searchValue.toLowerCase())
+        );
+      return { ...g, apis };
+    }).filter(g => g.apis.length > 0);
+  }, [data, searchValue]);
+
+  const toggleGroup = (id: string) => {
+    setExpandedGroups(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
   return (
     <>
-      {/* Mobile backdrop overlay */}
-      {openSideBar && (
-        <div
-          className="fixed inset-0 bg-black/20 backdrop-blur-[1px] z-10 md:hidden"
-          onClick={() => onToggle?.(false)}
-        />
-      )}
+      {/* Mobile backdrop overlay - below header (z-40) */}
+      <AnimatePresence>
+        {openSideBar && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-black/50 backdrop-blur-[2px] z-30 md:hidden"
+            onClick={() => onToggle?.(false)}
+          />
+        )}
+      </AnimatePresence>
+
       <motion.div
         className={clsx(
-          'h-full z-20 flex-shrink-0 border border-white/10 dark:border-white/5 bg-white/60 dark:bg-black/60 backdrop-blur-2xl shadow-xl overflow-hidden rounded-2xl',
-          'fixed md:relative left-0 top-0 md:top-auto md:left-auto'
+          'h-full z-40 flex-shrink-0 border-r border-white/10 dark:border-white/5 overflow-hidden transition-all',
+          // Mobile: absolute position, drawer style
+          // Desktop: relative position, pushing content
+          'absolute md:relative left-0 top-0',
+          'bg-white/80 dark:bg-black/80 md:bg-transparent backdrop-blur-2xl md:backdrop-blur-none'
         )}
         initial={false}
-        animate={{ width: openSideBar ? 280 : 0, opacity: openSideBar ? 1 : 0 }}
+        animate={{
+          width: openSideBar ? 260 : 0,
+          opacity: openSideBar ? 1 : 0,
+          x: (window.innerWidth < 768 && !openSideBar) ? -260 : 0  // Optional: slide out completely on mobile
+        }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
-        <div className='w-[280px] h-full flex flex-col'>
-          <div className='p-3 md:p-4 flex justify-between items-center border-b border-white/10'>
-            <span className='font-bold text-lg px-2 flex items-center gap-2'>
-              <TbApi className="text-primary" /> API 列表
-            </span>
-            {onToggle && (
-              <Button
-                isIconOnly
-                size='sm'
-                variant='light'
-                onPress={() => onToggle(false)}
-                className="text-default-500 hover:text-default-800"
-              >
-                <TbLayoutSidebarLeftCollapseFilled size={20} />
-              </Button>
-            )}
-          </div>
-
-          <div className='p-3 pb-0'>
+        <div className='w-[260px] h-full flex flex-col'>
+          <div className='p-3'>
             <Input
               classNames={{
                 inputWrapper:
-                  'bg-white/40 dark:bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/60 dark:hover:bg-white/20 transition-all shadow-sm',
-                input: 'bg-transparent text-default-700 placeholder:text-default-400',
+                  'bg-white/5 dark:bg-white/5 border border-white/10 hover:bg-white/10 transition-all shadow-none',
+                input: 'bg-transparent text-xs placeholder:opacity-30',
               }}
               isClearable
               radius='lg'
-              placeholder='搜索 API...'
-              startContent={<TbSearch className="text-default-400" />}
+              placeholder='搜索接口...'
+              startContent={<TbSearch size={14} className="opacity-30" />}
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               onClear={() => setSearchValue('')}
@@ -73,49 +99,68 @@ const OneBotApiNavList: React.FC<OneBotApiNavListProps> = (props) => {
             />
           </div>
 
-          <div className='flex-1 p-3 flex flex-col gap-2 overflow-y-auto scroll-smooth'>
-            {Object.entries(data).map(([apiName, api]) => {
-              const isMatch = apiName.toLowerCase().includes(searchValue.toLowerCase()) ||
-                api.description?.toLowerCase().includes(searchValue.toLowerCase());
-              if (!isMatch) return null;
-
-              const isSelected = apiName === selectedApi;
-
+          <div className='flex-1 px-2 pb-4 flex flex-col gap-1 overflow-y-auto no-scrollbar'>
+            {groups.map((group) => {
+              const isOpen = expandedGroups.includes(group.id) || searchValue.length > 0;
               return (
-                <div
-                  key={apiName}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => onSelect(apiName as OneBotHttpApiPath)}
-                  onKeyDown={(e) => e.key === 'Enter' && onSelect(apiName as OneBotHttpApiPath)}
-                  className="cursor-pointer focus:outline-none"
-                >
-                  <Card
-                    shadow='none'
-                    className={clsx(
-                      'w-full border border-transparent transition-all duration-200 group min-h-[60px]',
-                      isSelected
-                        ? 'bg-primary/10 border-primary/20 shadow-sm'
-                        : 'bg-transparent hover:bg-white/40 dark:hover:bg-white/5'
-                    )}
+                <div key={group.id} className="flex flex-col">
+                  {/* Group Header */}
+                  <div
+                    className="flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer hover:bg-white/5 transition-all group/header"
+                    onClick={() => toggleGroup(group.id)}
                   >
-                    <CardBody className='p-3 text-left'>
-                      <div className='flex flex-col gap-1'>
-                        <span className={clsx(
-                          'font-medium text-sm transition-colors',
-                          isSelected ? 'text-primary-600 dark:text-primary-400' : 'text-default-700 dark:text-default-200 group-hover:text-default-900'
-                        )}>
-                          {api.description}
-                        </span>
-                        <span className={clsx(
-                          'text-xs font-mono truncate transition-colors',
-                          isSelected ? 'text-primary-400 dark:text-primary-300' : 'text-default-400 group-hover:text-default-500'
-                        )}>
-                          {apiName}
-                        </span>
-                      </div>
-                    </CardBody>
-                  </Card>
+                    <TbChevronRight
+                      size={12}
+                      className={clsx(
+                        'transition-transform duration-200 opacity-20 group-hover/header:opacity-50',
+                        isOpen && 'rotate-90'
+                      )}
+                    />
+                    <TbFolder className="text-primary/60" size={16} />
+                    <span className="text-[13px] font-medium opacity-70 flex-1">{group.label}</span>
+                    <span className="text-[11px] opacity-20 font-mono tracking-tighter">({group.apis.length})</span>
+                  </div>
+
+                  {/* Group Content */}
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden flex flex-col gap-1 ml-4 border-l border-white/5 pl-2 my-1"
+                      >
+                        {group.apis.map((api) => {
+                          const isSelected = api.path === selectedApi;
+                          return (
+                            <div
+                              key={api.path}
+                              onClick={() => onSelect(api.path)}
+                              className={clsx(
+                                'flex flex-col gap-0.5 px-3 py-2 rounded-lg cursor-pointer transition-all border border-transparent select-none',
+                                isSelected
+                                  ? 'bg-primary/20 border-primary/20 shadow-sm'
+                                  : 'hover:bg-white/5'
+                              )}
+                            >
+                              <span className={clsx(
+                                'text-[12px] font-medium transition-colors truncate',
+                                isSelected ? 'text-primary' : 'opacity-60'
+                              )}>
+                                {api.description}
+                              </span>
+                              <span className={clsx(
+                                'text-[10px] font-mono truncate transition-all',
+                                isSelected ? 'text-primary/60' : 'opacity-20'
+                              )}>
+                                {api.path}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               );
             })}

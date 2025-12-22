@@ -10,21 +10,27 @@ import {
 
 import ChatInput from '.';
 
-export default function ChatInputModal () {
+interface ChatInputModalProps {
+  children?: (onOpen: () => void) => React.ReactNode;
+}
+
+export default function ChatInputModal ({ children }: ChatInputModalProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   return (
     <>
-      <Button
-        onPress={onOpen}
-        color='primary'
-        radius='full'
-        variant='flat'
-        size='sm'
-        className="bg-primary/10 text-primary"
-      >
-        构造消息
-      </Button>
+      {children ? children(onOpen) : (
+        <Button
+          onPress={onOpen}
+          color='primary'
+          radius='full'
+          variant='flat'
+          size='sm'
+          className="bg-primary/10 text-primary"
+        >
+          构造消息
+        </Button>
+      )}
       <Modal
         size='4xl'
         scrollBehavior='inside'
