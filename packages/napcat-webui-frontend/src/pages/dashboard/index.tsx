@@ -1,9 +1,6 @@
 import { Card, CardBody } from '@heroui/card';
-import { useLocalStorage } from '@uidotdev/usehooks';
 import { useRequest } from 'ahooks';
-import clsx from 'clsx';
 import { useCallback, useEffect, useState, useRef } from 'react';
-import key from '@/const/key';
 
 import toast from 'react-hot-toast';
 
@@ -95,9 +92,6 @@ const SystemStatusCard: React.FC<SystemStatusCardProps> = ({ setArchInfo }) => {
 
 const DashboardIndexPage: React.FC = () => {
   const [archInfo, setArchInfo] = useState<string>();
-  // @ts-ignore
-  const [backgroundImage] = useLocalStorage<string>(key.backgroundImage, '');
-  const hasBackground = !!backgroundImage;
 
   return (
     <>
@@ -111,10 +105,7 @@ const DashboardIndexPage: React.FC = () => {
           <SystemStatusCard setArchInfo={setArchInfo} />
         </div>
         <Networks />
-        <Card className={clsx(
-          'backdrop-blur-sm border border-white/40 dark:border-white/10 shadow-sm transition-all',
-          hasBackground ? 'bg-white/10 dark:bg-black/10' : 'bg-white/60 dark:bg-black/40'
-        )}>
+        <Card className='bg-opacity-60 shadow-sm shadow-primary-100'>
           <CardBody>
             <Hitokoto />
           </CardBody>

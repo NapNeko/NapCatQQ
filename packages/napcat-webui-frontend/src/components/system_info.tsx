@@ -3,16 +3,15 @@ import { Button } from '@heroui/button';
 import { Chip } from '@heroui/chip';
 import { Spinner } from '@heroui/spinner';
 import { Tooltip } from '@heroui/tooltip';
-import { useLocalStorage } from '@uidotdev/usehooks';
 import { useRequest } from 'ahooks';
-import clsx from 'clsx';
 import { FaCircleInfo, FaInfo, FaQq } from 'react-icons/fa6';
 import { IoLogoChrome, IoLogoOctocat } from 'react-icons/io';
 import { RiMacFill } from 'react-icons/ri';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
-import key from '@/const/key';
+
+
 import WebUIManager from '@/controllers/webui_manager';
 import useDialog from '@/hooks/use-dialog';
 
@@ -22,7 +21,6 @@ export interface SystemInfoItemProps {
   icon?: React.ReactNode;
   value?: React.ReactNode;
   endContent?: React.ReactNode;
-  hasBackground?: boolean;
 }
 
 const SystemInfoItem: React.FC<SystemInfoItemProps> = ({
@@ -30,21 +28,12 @@ const SystemInfoItem: React.FC<SystemInfoItemProps> = ({
   value = '--',
   icon,
   endContent,
-  hasBackground = false,
 }) => {
   return (
-    <div className={clsx(
-      'flex text-sm gap-2 p-3 items-center rounded-lg border border-white/20 transition-colors',
-      hasBackground
-        ? 'bg-white/10 hover:bg-white/20 text-white/90'
-        : 'bg-white/50 dark:bg-white/5 hover:bg-white/70 dark:hover:bg-white/10 text-default-600 dark:text-gray-300'
-    )}>
-      <div className="text-lg opacity-80">{icon}</div>
-      <div className='w-24 font-medium'>{title}</div>
-      <div className={clsx(
-        'text-xs font-mono',
-        hasBackground ? 'text-white/70' : 'text-default-500'
-      )}>{value}</div>
+    <div className='flex text-sm gap-1 p-2 items-center shadow-sm shadow-primary-100 dark:shadow-primary-100 rounded text-primary-400'>
+      {icon}
+      <div className='w-24'>{title}</div>
+      <div className='text-primary-200'>{value}</div>
       <div className='ml-auto'>{endContent}</div>
     </div>
   );
@@ -272,11 +261,7 @@ const NewVersionTip = (props: NewVersionTipProps) => {
   );
 };
 
-interface NapCatVersionProps {
-  hasBackground?: boolean;
-}
-
-const NapCatVersion: React.FC<NapCatVersionProps> = ({ hasBackground = false }) => {
+const NapCatVersion = () => {
   const {
     data: packageData,
     loading: packageLoading,
@@ -289,7 +274,6 @@ const NapCatVersion: React.FC<NapCatVersionProps> = ({ hasBackground = false }) 
     <SystemInfoItem
       title='NapCat 版本'
       icon={<IoLogoOctocat className='text-xl' />}
-      hasBackground={hasBackground}
       value={
         packageError
           ? (
@@ -318,28 +302,18 @@ const SystemInfo: React.FC<SystemInfoProps> = (props) => {
     loading: qqVersionLoading,
     error: qqVersionError,
   } = useRequest(WebUIManager.getQQVersion);
-  const [backgroundImage] = useLocalStorage<string>(key.backgroundImage, '');
-  const hasBackground = !!backgroundImage;
-
   return (
-    <Card className={clsx(
-      'backdrop-blur-sm border border-white/40 dark:border-white/10 shadow-sm overflow-visible flex-1',
-      hasBackground ? 'bg-white/10 dark:bg-black/10' : 'bg-white/60 dark:bg-black/40'
-    )}>
-      <CardHeader className={clsx(
-        'pb-0 items-center gap-2 font-bold px-4 pt-4',
-        hasBackground ? 'text-white drop-shadow-sm' : 'text-default-700 dark:text-white'
-      )}>
-        <FaCircleInfo className='text-lg opacity-80' />
+    <Card className='bg-opacity-60 shadow-sm shadow-primary-100 dark:shadow-primary-100 overflow-visible flex-1'>
+      <CardHeader className='pb-0 items-center gap-1 text-primary-500 font-extrabold'>
+        <FaCircleInfo className='text-lg' />
         <span>系统信息</span>
       </CardHeader>
       <CardBody className='flex-1'>
-        <div className='flex flex-col gap-2 justify-between h-full'>
-          <NapCatVersion hasBackground={hasBackground} />
+        <div className='flex flex-col justify-between h-full'>
+          <NapCatVersion />
           <SystemInfoItem
             title='QQ 版本'
             icon={<FaQq className='text-lg' />}
-            hasBackground={hasBackground}
             value={
               qqVersionError
                 ? (
@@ -358,13 +332,11 @@ const SystemInfo: React.FC<SystemInfoProps> = (props) => {
             title='WebUI 版本'
             icon={<IoLogoChrome className='text-xl' />}
             value='Next'
-            hasBackground={hasBackground}
           />
           <SystemInfoItem
             title='系统版本'
             icon={<RiMacFill className='text-xl' />}
             value={archInfo}
-            hasBackground={hasBackground}
           />
         </div>
       </CardBody>
