@@ -12,21 +12,21 @@ import { useTheme } from '@/hooks/use-theme';
 export type XTermRef = {
   write: (
     ...args: Parameters<Terminal['write']>
-  ) => ReturnType<Terminal['write']>
-  writeAsync: (data: Parameters<Terminal['write']>[0]) => Promise<void>
+  ) => ReturnType<Terminal['write']>;
+  writeAsync: (data: Parameters<Terminal['write']>[0]) => Promise<void>;
   writeln: (
     ...args: Parameters<Terminal['writeln']>
-  ) => ReturnType<Terminal['writeln']>
-  writelnAsync: (data: Parameters<Terminal['writeln']>[0]) => Promise<void>
-  clear: () => void
-  terminalRef: React.RefObject<Terminal | null>
+  ) => ReturnType<Terminal['writeln']>;
+  writelnAsync: (data: Parameters<Terminal['writeln']>[0]) => Promise<void>;
+  clear: () => void;
+  terminalRef: React.RefObject<Terminal | null>;
 };
 
 export interface XTermProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onInput' | 'onResize'> {
-  onInput?: (data: string) => void
-  onKey?: (key: string, event: KeyboardEvent) => void
-  onResize?: (cols: number, rows: number) => void // 新增属性
+  onInput?: (data: string) => void;
+  onKey?: (key: string, event: KeyboardEvent) => void;
+  onResize?: (cols: number, rows: number) => void; // 新增属性
 }
 
 const XTerm = forwardRef<XTermRef, XTermProps>((props, ref) => {

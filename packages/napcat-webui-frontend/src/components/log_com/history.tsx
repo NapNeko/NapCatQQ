@@ -2,8 +2,11 @@ import { Button } from '@heroui/button';
 import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Select, SelectItem } from '@heroui/select';
 import type { Selection } from '@react-types/shared';
+import { useLocalStorage } from '@uidotdev/usehooks';
+import clsx from 'clsx';
 import { useEffect, useRef, useState } from 'react';
 
+import key from '@/const/key';
 import { colorizeLogLevel } from '@/utils/terminal';
 
 import PageLoading from '../page_loading';
@@ -12,15 +15,15 @@ import type { XTermRef } from '../xterm';
 import LogLevelSelect from './log_level_select';
 
 export interface HistoryLogsProps {
-  list: string[]
-  onSelect: (name: string) => void
-  selectedLog?: string
-  refreshList: () => void
-  refreshLog: () => void
-  listLoading?: boolean
-  logLoading?: boolean
-  listError?: Error
-  logContent?: string
+  list: string[];
+  onSelect: (name: string) => void;
+  selectedLog?: string;
+  refreshList: () => void;
+  refreshLog: () => void;
+  listLoading?: boolean;
+  logLoading?: boolean;
+  listError?: Error;
+  logContent?: string;
 }
 const HistoryLogs: React.FC<HistoryLogsProps> = (props) => {
   const {
@@ -39,6 +42,8 @@ const HistoryLogs: React.FC<HistoryLogsProps> = (props) => {
   const [logLevel, setLogLevel] = useState<Selection>(
     new Set(['info', 'warn', 'error'])
   );
+  const [backgroundImage] = useLocalStorage<string>(key.backgroundImage, '');
+  const hasBackground = !!backgroundImage;
 
   const logToColored = (log: string) => {
     const logs = log
@@ -83,7 +88,10 @@ const HistoryLogs: React.FC<HistoryLogsProps> = (props) => {
   return (
     <>
       <title>历史日志 - NapCat WebUI</title>
-      <Card className='max-w-full h-full bg-opacity-50 backdrop-blur-sm'>
+      <Card className={clsx(
+        'max-w-full h-full backdrop-blur-sm border border-white/40 dark:border-white/10 shadow-sm',
+        hasBackground ? 'bg-white/20 dark:bg-black/10' : 'bg-white/60 dark:bg-black/40'
+      )}>
         <CardHeader className='flex-row justify-start gap-3'>
           <Select
             label='选择日志'
@@ -92,7 +100,7 @@ const HistoryLogs: React.FC<HistoryLogsProps> = (props) => {
             errorMessage={listError?.message}
             classNames={{
               trigger:
-                'hover:!bg-content3 bg-opacity-50 backdrop-blur-sm hover:!bg-opacity-60',
+                'bg-default-100/50 backdrop-blur-sm hover:!bg-default-200/50',
             }}
             placeholder='选择日志'
             onChange={(e) => {
@@ -118,11 +126,13 @@ const HistoryLogs: React.FC<HistoryLogsProps> = (props) => {
             selectedKeys={logLevel}
             onSelectionChange={setLogLevel}
           />
-          <Button className='flex-shrink-0' onPress={onDownloadLog}>
-            下载日志
-          </Button>
-          <Button onPress={refreshList}>刷新列表</Button>
-          <Button onPress={refreshLog}>刷新日志</Button>
+          <div className='flex gap-2 ml-auto'>
+            <Button className='flex-shrink-0' onPress={onDownloadLog} size='sm' variant='flat' color='primary'>
+              下载日志
+            </Button>
+            <Button onPress={refreshList} size='sm' variant='flat'>刷新列表</Button>
+            <Button onPress={refreshLog} size='sm' variant='flat'>刷新日志</Button>
+          </div>
         </CardHeader>
         <CardBody className='relative'>
           <PageLoading loading={logLoading} />

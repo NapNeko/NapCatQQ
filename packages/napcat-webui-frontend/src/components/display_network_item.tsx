@@ -1,5 +1,7 @@
 import { Card, CardBody } from '@heroui/card';
+import { useLocalStorage } from '@uidotdev/usehooks';
 import clsx from 'clsx';
+import key from '@/const/key';
 
 
 
@@ -14,10 +16,16 @@ const NetworkItemDisplay: React.FC<NetworkItemDisplayProps> = ({
   label,
   size = 'md',
 }) => {
+  const [backgroundImage] = useLocalStorage<string>(key.backgroundImage, '');
+  const hasBackground = !!backgroundImage;
+
   return (
     <Card
       className={clsx(
-        'bg-white/60 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-white/10 shadow-sm transition-all hover:bg-white/70 dark:hover:bg-black/30',
+        'backdrop-blur-sm border border-white/40 dark:border-white/10 shadow-sm transition-all',
+        hasBackground
+          ? 'bg-white/20 dark:bg-black/10 hover:bg-white/40 dark:hover:bg-black/20'
+          : 'bg-white/60 dark:bg-black/40 hover:bg-white/70 dark:hover:bg-black/30',
         size === 'md'
           ? 'col-span-8 md:col-span-2'
           : 'col-span-2 md:col-span-1'

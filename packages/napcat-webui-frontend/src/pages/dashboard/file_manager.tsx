@@ -2,6 +2,7 @@ import { BreadcrumbItem, Breadcrumbs } from '@heroui/breadcrumbs';
 import { Button } from '@heroui/button';
 import { Input } from '@heroui/input';
 import type { Selection, SortDescriptor } from '@react-types/shared';
+import { useLocalStorage } from '@uidotdev/usehooks';
 import clsx from 'clsx';
 import { motion } from 'motion/react';
 import path from 'path-browserify';
@@ -14,6 +15,7 @@ import { TbTrash } from 'react-icons/tb';
 import { TiArrowBack } from 'react-icons/ti';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+import key from '@/const/key';
 import CreateFileModal from '@/components/file_manage/create_file_modal';
 import FileEditModal from '@/components/file_manage/file_edit_modal';
 import FilePreviewModal from '@/components/file_manage/file_preview_modal';
@@ -328,123 +330,139 @@ export default function FileManagerPage () {
     useFsAccessApi: false, // 添加此选项以避免某些浏览器的文件系统API问题
   });
 
+  const [backgroundImage] = useLocalStorage<string>(key.backgroundImage, '');
+  const hasBackground = !!backgroundImage;
+
   return (
-    <div className='h-full flex flex-col relative gap-4 w-full p-4'>
-      <div className='mb-4 flex items-center gap-4 sticky top-14 z-10 bg-white/60 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-white/10 shadow-sm py-2 px-4 rounded-xl'>
-        <Button
-          color='primary'
-          size='sm'
-          isIconOnly
-          variant='flat'
-          onPress={() => handleDirectoryClick('..')}
-          className='text-lg'
-        >
-          <TiArrowBack />
-        </Button>
+    <div className='h-full flex flex-col relative gap-4 w-full p-2 md:p-4'>
+      <div className={clsx(
+        'mb-4 flex flex-col md:flex-row items-stretch md:items-center gap-4 sticky top-14 z-10 backdrop-blur-sm shadow-sm py-2 px-4 rounded-xl transition-colors',
+        hasBackground
+          ? 'bg-white/20 dark:bg-black/10 border border-white/40 dark:border-white/10'
+          : 'bg-white/60 dark:bg-black/40 border border-white/40 dark:border-white/10'
+      )}>
+        <div className='flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 md:pb-0'>
+          <Button
+            color='primary'
+            size='sm'
+            isIconOnly
+            variant='flat'
+            onPress={() => handleDirectoryClick('..')}
+            className='text-lg min-w-8'
+          >
+            <TiArrowBack />
+          </Button>
 
-        <Button
-          color='primary'
-          size='sm'
-          isIconOnly
-          variant='flat'
-          onPress={() => setIsCreateModalOpen(true)}
-          className='text-lg'
-        >
-          <FiPlus />
-        </Button>
+          <Button
+            color='primary'
+            size='sm'
+            isIconOnly
+            variant='flat'
+            onPress={() => setIsCreateModalOpen(true)}
+            className='text-lg min-w-8'
+          >
+            <FiPlus />
+          </Button>
 
-        <Button
-          color='primary'
-          isLoading={loading}
-          size='sm'
-          isIconOnly
-          variant='flat'
-          onPress={loadFiles}
-          className='text-lg'
-        >
-          <MdRefresh />
-        </Button>
-        <Button
-          color='primary'
-          size='sm'
-          isIconOnly
-          variant='flat'
-          onPress={() => setShowUpload((prev) => !prev)}
-          className='text-lg'
-        >
-          <FiUpload />
-        </Button>
+          <Button
+            color='primary'
+            isLoading={loading}
+            size='sm'
+            isIconOnly
+            variant='flat'
+            onPress={loadFiles}
+            className='text-lg min-w-8'
+          >
+            <MdRefresh />
+          </Button>
+          <Button
+            color='primary'
+            size='sm'
+            isIconOnly
+            variant='flat'
+            onPress={() => setShowUpload((prev) => !prev)}
+            className='text-lg min-w-8'
+          >
+            <FiUpload />
+          </Button>
 
-        {((selectedFiles instanceof Set && selectedFiles.size > 0) ||
-          selectedFiles === 'all') && (
-            <>
-              <Button
-                color='primary'
-                size='sm'
-                variant='flat'
-                onPress={handleBatchDelete}
-                className='text-sm'
-                startContent={<TbTrash className='text-lg' />}
-              >
-                (
-                {selectedFiles instanceof Set ? selectedFiles.size : files.length}
-                )
-              </Button>
-              <Button
-                color='primary'
-                size='sm'
-                variant='flat'
+          {((selectedFiles instanceof Set && selectedFiles.size > 0) ||
+            selectedFiles === 'all') && (
+              <>
+                <Button
+                  color='primary'
+                  size='sm'
+                  variant='flat'
+                  onPress={handleBatchDelete}
+                  className='text-sm px-2 min-w-fit'
+                  startContent={<TbTrash className='text-lg' />}
+                >
+                  (
+                  {selectedFiles instanceof Set ? selectedFiles.size : files.length}
+                  )
+                </Button>
+                <Button
+                  color='primary'
+                  size='sm'
+                  variant='flat'
+                  onPress={() => {
+                    setMoveTargetPath('');
+                    setIsMoveModalOpen(true);
+                  }}
+                  className='text-sm px-2 min-w-fit'
+                  startContent={<FiMove className='text-lg' />}
+                >
+                  (
+                  {selectedFiles instanceof Set ? selectedFiles.size : files.length}
+                  )
+                </Button>
+                <Button
+                  color='primary'
+                  size='sm'
+                  variant='flat'
+                  onPress={handleBatchDownload}
+                  className='text-sm px-2 min-w-fit'
+                  startContent={<FiDownload className='text-lg' />}
+                >
+                  (
+                  {selectedFiles instanceof Set ? selectedFiles.size : files.length}
+                  )
+                </Button>
+              </>
+            )}
+        </div>
+
+        <div className='flex flex-col md:flex-row flex-1 gap-2 overflow-hidden items-stretch md:items-center'>
+          <Breadcrumbs className='flex-1 bg-white/40 dark:bg-black/20 backdrop-blur-md shadow-sm border border-white/20 px-2 py-2 rounded-lg overflow-x-auto hide-scrollbar whitespace-nowrap'>
+            {currentPath.split('/').map((part, index, parts) => (
+              <BreadcrumbItem
+                key={part}
+                isCurrent={index === parts.length - 1}
                 onPress={() => {
-                  setMoveTargetPath('');
-                  setIsMoveModalOpen(true);
+                  const newPath = parts.slice(0, index + 1).join('/');
+                  navigate(`/file_manager#${encodeURIComponent(newPath)}`);
                 }}
-                className='text-sm'
-                startContent={<FiMove className='text-lg' />}
               >
-                (
-                {selectedFiles instanceof Set ? selectedFiles.size : files.length}
-                )
-              </Button>
-              <Button
-                color='primary'
-                size='sm'
-                variant='flat'
-                onPress={handleBatchDownload}
-                className='text-sm'
-                startContent={<FiDownload className='text-lg' />}
-              >
-                (
-                {selectedFiles instanceof Set ? selectedFiles.size : files.length}
-                )
-              </Button>
-            </>
-          )}
-        <Breadcrumbs className='flex-1 bg-white/40 dark:bg-black/20 backdrop-blur-md shadow-sm border border-white/20 px-2 py-2 rounded-lg'>
-          {currentPath.split('/').map((part, index, parts) => (
-            <BreadcrumbItem
-              key={part}
-              isCurrent={index === parts.length - 1}
-              onPress={() => {
-                const newPath = parts.slice(0, index + 1).join('/');
-                navigate(`/file_manager#${encodeURIComponent(newPath)}`);
-              }}
-            >
-              {part}
-            </BreadcrumbItem>
-          ))}
-        </Breadcrumbs>
-        <Input
-          type='text'
-          placeholder='输入跳转路径'
-          value={jumpPath}
-          onChange={(e) => setJumpPath(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && jumpPath.trim() !== '') {
-              navigate(`/file_manager#${encodeURIComponent(jumpPath.trim())}`);
-            }
-          }}
-          className='ml-auto w-64'
-        />
+                {part}
+              </BreadcrumbItem>
+            ))}
+          </Breadcrumbs>
+          <Input
+            type='text'
+            placeholder='输入跳转路径'
+            value={jumpPath}
+            onChange={(e) => setJumpPath(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && jumpPath.trim() !== '') {
+                navigate(`/file_manager#${encodeURIComponent(jumpPath.trim())}`);
+              }
+            }}
+            className='w-full md:w-64'
+            classNames={{
+              inputWrapper: 'bg-white/40 dark:bg-black/20 backdrop-blur-md',
+            }}
+          />
+        </div>
       </div>
 
       <motion.div

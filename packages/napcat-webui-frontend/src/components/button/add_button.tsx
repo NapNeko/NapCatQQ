@@ -18,7 +18,7 @@ import {
 } from '../icons';
 
 export interface AddButtonProps {
-  onOpen: (key: keyof OneBotConfig['network']) => void
+  onOpen: (key: keyof OneBotConfig['network']) => void;
 }
 
 const AddButton: React.FC<AddButtonProps> = (props) => {
@@ -33,7 +33,7 @@ const AddButton: React.FC<AddButtonProps> = (props) => {
     >
       <DropdownTrigger>
         <Button
-          color='primary'
+          className="bg-default-100/50 hover:bg-default-200/50 text-default-700 backdrop-blur-md"
           startContent={<IoAddCircleOutline className='text-2xl' />}
         >
           新建
@@ -41,7 +41,7 @@ const AddButton: React.FC<AddButtonProps> = (props) => {
       </DropdownTrigger>
       <DropdownMenu
         aria-label='Create Network Config'
-        color='primary'
+        color='default'
         variant='flat'
         onAction={(key) => {
           onOpen(key as keyof OneBotConfig['network']);

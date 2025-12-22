@@ -8,7 +8,7 @@ import { useLocalStorage } from '@uidotdev/usehooks';
 import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { IoLink, IoSend, IoSettingsSharp } from 'react-icons/io5';
-import { PiCatDuotone } from 'react-icons/pi';
+import { TbApi, TbCode } from 'react-icons/tb';
 
 import key from '@/const/key';
 import { OneBotHttpApiContent, OneBotHttpApiPath } from '@/const/ob_api';
@@ -89,42 +89,58 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
   }, [path]);
 
   return (
-    <section className='p-6 pt-14 rounded-2xl bg-white/60 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-white/10 shadow-sm mx-4 mt-4 flex flex-col gap-4 h-[calc(100vh-6rem)] overflow-hidden'>
-      <div className='flex flex-col gap-4'>
-        <div className='flex items-center justify-between'>
-          <h1 className='text-2xl font-bold flex items-center gap-2 text-primary-500'>
-            <PiCatDuotone />
-            {data.description}
+    <section className='h-full flex flex-col gap-3 md:gap-4 p-3 md:p-6 bg-white/60 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-white/10 shadow-sm rounded-2xl overflow-hidden'>
+      <div className='flex flex-col md:flex-row md:items-center justify-between border-b border-white/10 pb-3 md:pb-4 gap-3'>
+        <div className='flex items-center gap-2 md:gap-4 overflow-hidden'>
+          <h1 className='text-lg md:text-xl font-bold flex items-center gap-2 text-primary-500 flex-shrink-0'>
+            <TbApi size={24} />
+            <span className='truncate'>{data.description}</span>
           </h1>
           <Snippet
-            className='bg-white/40 dark:bg-black/20 backdrop-blur-md shadow-sm border border-white/20'
-            symbol={<IoLink size={18} className='inline-block mr-1' />}
+            className='bg-white/40 dark:bg-black/20 backdrop-blur-md shadow-sm border border-white/20 hidden md:flex'
+            symbol={<IoLink size={16} className='inline-block mr-1' />}
             tooltipProps={{ content: '点击复制地址' }}
+            size="sm"
           >
             {path}
           </Snippet>
-          <Button
-            size='sm'
-            variant='ghost'
-            color='primary'
-            className='border-primary/20 hover:bg-primary/10'
-            onPress={() => setIsStructOpen(true)}
-          >
-            查看数据定义
-          </Button>
         </div>
 
-        <div className='flex gap-2 items-center justify-end'>
+        <div className='flex gap-2 items-center flex-shrink-0'>
+          <Button
+            size='sm'
+            variant='flat'
+            color='default'
+            radius='full'
+            isIconOnly
+            className='bg-white/40 dark:bg-white/10 md:hidden font-medium text-default-700'
+            onPress={() => setIsStructOpen(true)}
+          >
+            <TbCode className="text-lg" />
+          </Button>
+          <Button
+            size='sm'
+            variant='flat'
+            color='default'
+            radius='full'
+            className='bg-white/40 dark:bg-white/10 hidden md:flex font-medium text-default-700'
+            startContent={<TbCode className="text-lg" />}
+            onPress={() => setIsStructOpen(true)}
+          >
+            数据定义
+          </Button>
+
           <Popover placement='bottom-end'>
             <PopoverTrigger>
               <Button
-                variant='ghost'
+                size='sm'
+                variant='flat'
                 color='default'
-                isIconOnly
                 radius='full'
-                className='border-white/20 hover:bg-white/20 text-default-600'
+                className='bg-white/40 dark:bg-white/10 text-default-700 font-medium'
+                startContent={<IoSettingsSharp className="animate-spin-slow-on-hover text-lg" />}
               >
-                <IoSettingsSharp className="animate-spin-slow-on-hover" />
+                配置
               </Button>
             </PopoverTrigger>
             <PopoverContent className='w-[340px] p-4 bg-white/80 dark:bg-black/80 backdrop-blur-xl border border-white/20 shadow-xl rounded-2xl'>
@@ -159,18 +175,17 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
           <Button
             onPress={sendRequest}
             color='primary'
-            size='lg'
             radius='full'
-            className='font-bold px-8 shadow-lg shadow-primary/30'
+            className='font-bold px-6 shadow-lg shadow-primary/30'
             isLoading={isFetching}
             startContent={!isFetching && <IoSend />}
           >
-            发送请求
+            发送
           </Button>
         </div>
       </div>
 
-      <div className='flex-1 grid grid-cols-1 xl:grid-cols-2 gap-4 min-h-0 overflow-hidden'>
+      <div className='flex-1 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 min-h-0 overflow-auto'>
         {/* Request Column */}
         <Card className='bg-white/40 dark:bg-white/5 backdrop-blur-md border border-white/20 shadow-sm h-full flex flex-col'>
           <CardHeader className='font-bold text-lg gap-2 pb-2 px-4 pt-4 border-b border-white/10 flex-shrink-0 justify-between items-center'>
@@ -183,7 +198,9 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
               <Button
                 size='sm'
                 color='primary'
-                variant='light'
+                variant='flat'
+                radius='full'
+                className="bg-primary/10 text-primary"
                 onPress={() => setRequestBody(generateDefaultJson(data.request))}
               >
                 内置示例
@@ -207,7 +224,6 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
           </CardBody>
         </Card>
 
-        {/* Response Column */}
         <Card className='bg-white/40 dark:bg-white/5 backdrop-blur-md border border-white/20 shadow-sm h-full flex flex-col'>
           <PageLoading loading={isFetching} />
           <CardHeader className='font-bold text-lg gap-2 pb-2 px-4 pt-4 border-b border-white/10 flex-shrink-0 justify-between items-center'>
@@ -217,8 +233,10 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
             </div>
             <Button
               size='sm'
-              color='success'
-              variant='light'
+              color='primary'
+              variant='flat'
+              radius='full'
+              className="bg-primary/10 text-primary"
               onPress={() => {
                 navigator.clipboard.writeText(responseContent);
                 toast.success('已复制');

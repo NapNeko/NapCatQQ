@@ -4,9 +4,9 @@ import { Input } from '@heroui/input';
 import { useRef } from 'react';
 
 export interface ImageInputProps {
-  onChange: (base64: string) => void
-  value: string
-  label?: string
+  onChange: (base64: string) => void;
+  value: string;
+  label?: string;
 }
 
 const ImageInput: React.FC<ImageInputProps> = ({ onChange, value, label }) => {
@@ -26,6 +26,11 @@ const ImageInput: React.FC<ImageInputProps> = ({ onChange, value, label }) => {
         type='file'
         placeholder='选择图片'
         accept='image/*'
+        classNames={{
+          inputWrapper:
+            'bg-default-100/50 dark:bg-white/5 backdrop-blur-md border border-transparent hover:bg-default-200/50 dark:hover:bg-white/10 transition-all shadow-sm data-[hover=true]:border-default-300',
+          input: 'bg-transparent text-default-700 placeholder:text-default-400',
+        }}
         onChange={async (e) => {
           const file = e.target.files?.[0];
           if (file) {

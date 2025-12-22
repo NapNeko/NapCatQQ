@@ -1,9 +1,12 @@
 import { Button } from '@heroui/button';
 import type { Selection } from '@react-types/shared';
+import { useLocalStorage } from '@uidotdev/usehooks';
+import clsx from 'clsx';
 import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { IoDownloadOutline } from 'react-icons/io5';
 
+import key from '@/const/key';
 import { colorizeLogLevelWithTag } from '@/utils/terminal';
 
 import WebUIManager, { Log } from '@/controllers/webui_manager';
@@ -18,6 +21,8 @@ const RealTimeLogs = () => {
     new Set(['info', 'warn', 'error'])
   );
   const [dataArr, setDataArr] = useState<Log[]>([]);
+  const [backgroundImage] = useLocalStorage<string>(key.backgroundImage, '');
+  const hasBackground = !!backgroundImage;
 
   const onDownloadLog = () => {
     const logContent = dataArr
@@ -91,7 +96,10 @@ const RealTimeLogs = () => {
   return (
     <>
       <title>实时日志 - NapCat WebUI</title>
-      <div className='flex items-center gap-2'>
+      <div className={clsx(
+        'flex items-center gap-2 p-2 rounded-2xl border backdrop-blur-sm transition-all shadow-sm mb-4',
+        hasBackground ? 'bg-white/20 dark:bg-black/10 border-white/40 dark:border-white/10' : 'bg-white/60 dark:bg-black/40 border-white/40 dark:border-white/10'
+      )}>
         <LogLevelSelect
           selectedKeys={logLevel}
           onSelectionChange={setLogLevel}
@@ -100,6 +108,8 @@ const RealTimeLogs = () => {
           className='flex-shrink-0'
           onPress={onDownloadLog}
           startContent={<IoDownloadOutline className='text-lg' />}
+          color='primary'
+          variant='flat'
         >
           下载日志
         </Button>

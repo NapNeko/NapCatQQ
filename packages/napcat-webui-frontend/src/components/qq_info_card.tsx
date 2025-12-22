@@ -1,8 +1,10 @@
 import { Card, CardBody } from '@heroui/card';
 import { Image } from '@heroui/image';
+import { useLocalStorage } from '@uidotdev/usehooks';
 import clsx from 'clsx';
 import { BsTencentQq } from 'react-icons/bs';
 
+import key from '@/const/key';
 import { SelfInfo } from '@/types/user';
 
 import PageLoading from './page_loading';
@@ -14,9 +16,14 @@ export interface QQInfoCardProps {
 }
 
 const QQInfoCard: React.FC<QQInfoCardProps> = ({ data, error, loading }) => {
+  const [backgroundImage] = useLocalStorage<string>(key.backgroundImage, '');
+  const hasBackground = !!backgroundImage;
   return (
     <Card
-      className='relative bg-white/60 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-white/10 overflow-hidden flex-shrink-0 shadow-sm'
+      className={clsx(
+        'relative backdrop-blur-sm border border-white/40 dark:border-white/10 overflow-hidden flex-shrink-0 shadow-sm',
+        hasBackground ? 'bg-white/10 dark:bg-black/10' : 'bg-white/60 dark:bg-black/40'
+      )}
       shadow='none'
       radius='lg'
     >
@@ -32,9 +39,11 @@ const QQInfoCard: React.FC<QQInfoCardProps> = ({ data, error, loading }) => {
         )
         : (
           <CardBody className='flex-row items-center gap-4 overflow-hidden relative p-4'>
-            <div className='absolute right-[-10px] bottom-[-10px] text-7xl text-default-400/10 rotate-12 pointer-events-none'>
-              <BsTencentQq />
-            </div>
+            {!hasBackground && (
+              <div className='absolute right-[-10px] bottom-[-10px] text-7xl text-default-400/10 rotate-12 pointer-events-none'>
+                <BsTencentQq />
+              </div>
+            )}
             <div className='relative flex-shrink-0 z-10'>
               <Image
                 src={
@@ -51,10 +60,16 @@ const QQInfoCard: React.FC<QQInfoCardProps> = ({ data, error, loading }) => {
               />
             </div>
             <div className='flex-col justify-center z-10'>
-              <div className='text-xl font-bold text-default-800 dark:text-gray-100 truncate mb-0.5'>
+              <div className={clsx(
+                'text-xl font-bold truncate mb-0.5',
+                hasBackground ? 'text-white drop-shadow-sm' : 'text-default-800 dark:text-gray-100'
+              )}>
                 {data?.nick || '未知用户'}
               </div>
-              <div className='text-default-500 font-mono text-xs tracking-wider opacity-80'>
+              <div className={clsx(
+                'font-mono text-xs tracking-wider',
+                hasBackground ? 'text-white/80' : 'text-default-500 opacity-80'
+              )}>
                 {data?.uin || 'Unknown'}
               </div>
             </div>

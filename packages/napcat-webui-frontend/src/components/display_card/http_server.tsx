@@ -4,12 +4,12 @@ import NetworkDisplayCard from './common_card';
 import type { NetworkDisplayCardFields } from './common_card';
 
 interface HTTPServerDisplayCardProps {
-  data: OneBotConfig['network']['httpServers'][0]
-  showType?: boolean
-  onEdit: () => void
-  onEnable: () => Promise<void>
-  onDelete: () => Promise<void>
-  onEnableDebug: () => Promise<void>
+  data: OneBotConfig['network']['httpServers'][0];
+  showType?: boolean;
+  onEdit: () => void;
+  onEnable: () => Promise<void>;
+  onDelete: () => Promise<void>;
+  onEnableDebug: () => Promise<void>;
 }
 
 const HTTPServerDisplayCard: React.FC<HTTPServerDisplayCardProps> = (props) => {

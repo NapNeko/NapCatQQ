@@ -3,14 +3,14 @@ import clsx from 'clsx';
 import React, { forwardRef } from 'react';
 
 export interface SwitchCardProps {
-  label?: string
-  description?: string
-  value?: boolean
-  onValueChange?: (value: boolean) => void
-  name?: string
-  onBlur?: React.FocusEventHandler
-  disabled?: boolean
-  onChange?: React.ChangeEventHandler<HTMLInputElement>
+  label?: string;
+  description?: string;
+  value?: boolean;
+  onValueChange?: (value: boolean) => void;
+  name?: string;
+  onBlur?: React.FocusEventHandler;
+  disabled?: boolean;
+  onChange?: React.ChangeEventHandler<HTMLInputElement>;
 }
 
 const SwitchCard = forwardRef<HTMLInputElement, SwitchCardProps>(
@@ -22,9 +22,9 @@ const SwitchCard = forwardRef<HTMLInputElement, SwitchCardProps>(
       <Switch
         classNames={{
           base: clsx(
-            'inline-flex flex-row-reverse w-full max-w-md bg-content1 hover:bg-content2 items-center',
-            'justify-between cursor-pointer rounded-lg gap-2 p-3 border-2 border-transparent',
-            'data-[selected=true]:border-primary bg-opacity-50 backdrop-blur-sm'
+            'inline-flex flex-row-reverse w-full max-w-full bg-default-100/50 dark:bg-white/5 hover:bg-default-200/50 dark:hover:bg-white/10 items-center',
+            'justify-between cursor-pointer rounded-xl gap-2 p-4 border border-transparent transition-all duration-200',
+            'data-[selected=true]:border-primary/50 data-[selected=true]:bg-primary/5 backdrop-blur-md'
           ),
         }}
         {...props}

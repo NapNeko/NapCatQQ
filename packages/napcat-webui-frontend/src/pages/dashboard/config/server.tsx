@@ -1,5 +1,4 @@
 import { Input } from '@heroui/input';
-import { Switch } from '@heroui/switch';
 import { useRequest } from 'ahooks';
 import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -7,6 +6,7 @@ import toast from 'react-hot-toast';
 
 import SaveButtons from '@/components/button/save_buttons';
 import PageLoading from '@/components/page_loading';
+import SwitchCard from '@/components/switch_card';
 
 import WebUIManager from '@/controllers/webui_manager';
 
@@ -79,8 +79,8 @@ const ServerConfigCard = () => {
     <>
       <title>服务器配置 - NapCat WebUI</title>
       <div className='flex flex-col gap-4'>
-        <div className='flex flex-col gap-2'>
-          <div className='flex-shrink-0 w-full'>服务器配置</div>
+        <div className='flex flex-col gap-3'>
+          <div className='flex-shrink-0 w-full font-bold text-default-600 dark:text-default-400 px-1'>服务器配置</div>
           <Controller
             control={control}
             name='host'
@@ -92,6 +92,11 @@ const ServerConfigCard = () => {
                 description='服务器监听的IP地址，0.0.0.0表示监听所有网卡'
                 isDisabled={!!configError}
                 errorMessage={configError ? '获取配置失败' : undefined}
+                classNames={{
+                  inputWrapper:
+                    'bg-default-100/50 dark:bg-white/5 backdrop-blur-md border border-transparent hover:bg-default-200/50 dark:hover:bg-white/10 transition-all shadow-sm data-[hover=true]:border-default-300',
+                  input: 'bg-transparent text-default-700 placeholder:text-default-400',
+                }}
               />
             )}
           />
@@ -109,6 +114,11 @@ const ServerConfigCard = () => {
                 isDisabled={!!configError}
                 errorMessage={configError ? '获取配置失败' : undefined}
                 onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                classNames={{
+                  inputWrapper:
+                    'bg-default-100/50 dark:bg-white/5 backdrop-blur-md border border-transparent hover:bg-default-200/50 dark:hover:bg-white/10 transition-all shadow-sm data-[hover=true]:border-default-300',
+                  input: 'bg-transparent text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500',
+                }}
               />
             )}
           />
@@ -126,47 +136,42 @@ const ServerConfigCard = () => {
                 isDisabled={!!configError}
                 errorMessage={configError ? '获取配置失败' : undefined}
                 onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                classNames={{
+                  inputWrapper:
+                    'bg-default-100/50 dark:bg-white/5 backdrop-blur-md border border-transparent hover:bg-default-200/50 dark:hover:bg-white/10 transition-all shadow-sm data-[hover=true]:border-default-300',
+                  input: 'bg-transparent text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500',
+                }}
               />
             )}
           />
         </div>
 
-        <div className='flex flex-col gap-2'>
-          <div className='flex-shrink-0 w-full'>安全配置</div>
+        <div className='flex flex-col gap-3'>
+          <div className='flex-shrink-0 w-full font-bold text-default-600 dark:text-default-400 px-1'>安全配置</div>
           <Controller
             control={control}
             name='disableWebUI'
             render={({ field }) => (
-              <Switch
-                isSelected={field.value}
-                onValueChange={(value) => field.onChange(value)}
-                isDisabled={!!configError}
-              >
-                <div className='flex flex-col'>
-                  <span>禁用WebUI</span>
-                  <span className='text-sm text-default-400'>
-                    启用后将完全禁用WebUI服务，需要重启生效
-                  </span>
-                </div>
-              </Switch>
+              <SwitchCard
+                value={field.value}
+                onValueChange={(value: boolean) => field.onChange(value)}
+                disabled={!!configError}
+                label='禁用WebUI'
+                description='启用后将完全禁用WebUI服务，需要重启生效'
+              />
             )}
           />
           <Controller
             control={control}
             name='disableNonLANAccess'
             render={({ field }) => (
-              <Switch
-                isSelected={field.value}
-                onValueChange={(value) => field.onChange(value)}
-                isDisabled={!!configError}
-              >
-                <div className='flex flex-col'>
-                  <span>禁用非局域网访问</span>
-                  <span className='text-sm text-default-400'>
-                    启用后只允许局域网内的设备访问WebUI，提高安全性
-                  </span>
-                </div>
-              </Switch>
+              <SwitchCard
+                value={field.value}
+                onValueChange={(value: boolean) => field.onChange(value)}
+                disabled={!!configError}
+                label='禁用非局域网访问'
+                description='启用后只允许局域网内的设备访问WebUI，提高安全性'
+              />
             )}
           />
         </div>

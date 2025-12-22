@@ -15,8 +15,15 @@ export default function ChatInputModal () {
 
   return (
     <>
-      <Button onPress={onOpen} color='primary' radius='full' variant='flat'>
-        构造聊天消息
+      <Button
+        onPress={onOpen}
+        color='primary'
+        radius='full'
+        variant='flat'
+        size='sm'
+        className="bg-primary/10 text-primary"
+      >
+        构造消息
       </Button>
       <Modal
         size='4xl'

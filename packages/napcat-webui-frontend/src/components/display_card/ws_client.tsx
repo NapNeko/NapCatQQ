@@ -4,12 +4,12 @@ import NetworkDisplayCard from './common_card';
 import type { NetworkDisplayCardFields } from './common_card';
 
 interface WebsocketClientDisplayCardProps {
-  data: OneBotConfig['network']['websocketClients'][0]
-  showType?: boolean
-  onEdit: () => void
-  onEnable: () => Promise<void>
-  onDelete: () => Promise<void>
-  onEnableDebug: () => Promise<void>
+  data: OneBotConfig['network']['websocketClients'][0];
+  showType?: boolean;
+  onEdit: () => void;
+  onEnable: () => Promise<void>;
+  onDelete: () => Promise<void>;
+  onEnableDebug: () => Promise<void>;
 }
 
 const WebsocketClientDisplayCard: React.FC<WebsocketClientDisplayCardProps> = (

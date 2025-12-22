@@ -4,11 +4,11 @@ import toast from 'react-hot-toast';
 import { IoMdRefresh } from 'react-icons/io';
 
 export interface SaveButtonsProps {
-  onSubmit: () => void
-  reset: () => void
-  refresh?: () => void
-  isSubmitting: boolean
-  className?: string
+  onSubmit: () => void;
+  reset: () => void;
+  refresh?: () => void;
+  isSubmitting: boolean;
+  className?: string;
 }
 
 const SaveButtons: React.FC<SaveButtonsProps> = ({
@@ -20,13 +20,15 @@ const SaveButtons: React.FC<SaveButtonsProps> = ({
 }) => (
   <div
     className={clsx(
-      'max-w-full mx-3 w-96 flex flex-col justify-center gap-3',
+      'w-full flex flex-col justify-center gap-3',
       className
     )}
   >
     <div className='flex items-center justify-center gap-2 mt-5'>
       <Button
-        color='default'
+        radius="full"
+        variant="flat"
+        className="font-medium bg-default-100 text-default-600 dark:bg-default-50/50"
         onPress={() => {
           reset();
           toast.success('重置成功');
@@ -36,6 +38,8 @@ const SaveButtons: React.FC<SaveButtonsProps> = ({
       </Button>
       <Button
         color='primary'
+        radius="full"
+        className="font-medium shadow-md shadow-primary/20"
         isLoading={isSubmitting}
         onPress={() => onSubmit()}
       >
@@ -44,12 +48,12 @@ const SaveButtons: React.FC<SaveButtonsProps> = ({
       {refresh && (
         <Button
           isIconOnly
-          color='secondary'
           radius='full'
           variant='flat'
+          className="text-default-500 bg-default-100 dark:bg-default-50/50"
           onPress={() => refresh()}
         >
-          <IoMdRefresh size={24} />
+          <IoMdRefresh size={20} />
         </Button>
       )}
     </div>

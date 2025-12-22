@@ -93,11 +93,13 @@ const WebUIConfigCard = () => {
     <>
       <title>WebUI配置 - NapCat WebUI</title>
       <div className='flex flex-col gap-2'>
-        <div className='flex-shrink-0 w-full'>WebUI字体</div>
+        <div className='flex-shrink-0 w-full font-bold text-default-600 dark:text-default-400 px-1'>WebUI字体</div>
         <div className='text-sm text-default-400'>
           此项不需要手动保存，上传成功后需清空网页缓存并刷新
           <FileInput
             label='中文字体'
+            placeholder='选择字体文件'
+            accept='.ttf,.otf,.woff,.woff2'
             onChange={async (file) => {
               try {
                 await FileManager.uploadWebUIFont(file);
@@ -124,26 +126,35 @@ const WebUIConfigCard = () => {
         </div>
       </div>
       <div className='flex flex-col gap-2'>
-        <div className='flex-shrink-0 w-full'>背景图</div>
+        <div className='flex-shrink-0 w-full font-bold text-default-600 dark:text-default-400 px-1'>背景图</div>
         <Controller
           control={control}
           name='background'
-          render={({ field }) => <ImageInput {...field} />}
+          render={({ field }) => (
+            <ImageInput
+              {...field}
+            />
+          )}
         />
       </div>
       <div className='flex flex-col gap-2'>
-        <div>自定义图标</div>
+        <div className='flex-shrink-0 w-full font-bold text-default-600 dark:text-default-400 px-1'>自定义图标</div>
         {siteConfig.navItems.map((item) => (
           <Controller
             key={item.label}
             control={control}
             name={`customIcons.${item.label}`}
-            render={({ field }) => <ImageInput {...field} label={item.label} />}
+            render={({ field }) => (
+              <ImageInput
+                {...field}
+                label={item.label}
+              />
+            )}
           />
         ))}
       </div>
       <div className='flex flex-col gap-2'>
-        <div className='flex-shrink-0 w-full'>Passkey认证</div>
+        <div className='flex-shrink-0 w-full font-bold text-default-600 dark:text-default-400 px-1'>Passkey认证</div>
         <div className='text-sm text-default-400 mb-2'>
           注册Passkey后，您可以更便捷地登录WebUI，无需每次输入token
         </div>

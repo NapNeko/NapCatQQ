@@ -12,10 +12,13 @@ import {
   horizontalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { Button } from '@heroui/button';
+import { useLocalStorage } from '@uidotdev/usehooks';
+import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { IoAdd, IoClose } from 'react-icons/io5';
 
+import key from '@/const/key';
 import { TabList, TabPanel, Tabs } from '@/components/tabs';
 import { SortableTab } from '@/components/tabs/sortable_tab.tsx';
 import { TerminalInstance } from '@/components/terminal/terminal-instance';
@@ -30,6 +33,8 @@ interface TerminalTab {
 export default function TerminalPage () {
   const [tabs, setTabs] = useState<TerminalTab[]>([]);
   const [selectedTab, setSelectedTab] = useState<string>('');
+  const [backgroundImage] = useLocalStorage<string>(key.backgroundImage, '');
+  const hasBackground = !!backgroundImage;
 
   useEffect(() => {
     // 获取已存在的终端列表
@@ -112,35 +117,40 @@ export default function TerminalPage () {
           className='h-full overflow-hidden'
         >
           <div className='flex items-center gap-2 flex-shrink-0 flex-grow-0'>
-            <TabList className='flex-1 !overflow-x-auto w-full hide-scrollbar bg-white/40 dark:bg-black/20 backdrop-blur-md p-1 rounded-lg border border-white/20'>
-              <SortableContext
-                items={tabs}
-                strategy={horizontalListSortingStrategy}
-              >
-                {tabs.map((tab) => (
-                  <SortableTab
-                    key={tab.id}
-                    id={tab.id}
-                    value={tab.id}
-                    isSelected={selectedTab === tab.id}
-                    className='flex gap-2 items-center flex-shrink-0'
-                  >
-                    {tab.title}
-                    <Button
-                      isIconOnly
-                      radius='full'
-                      variant='flat'
-                      size='sm'
-                      className='min-w-0 w-4 h-4 flex-shrink-0'
-                      onPress={() => closeTerminal(tab.id)}
-                      color={selectedTab === tab.id ? 'primary' : 'default'}
+            {tabs.length > 0 && (
+              <TabList className={clsx(
+                'flex-1 !overflow-x-auto w-full hide-scrollbar backdrop-blur-sm p-1 rounded-lg border border-white/20',
+                hasBackground ? 'bg-white/20 dark:bg-black/10' : 'bg-white/40 dark:bg-black/20'
+              )}>
+                <SortableContext
+                  items={tabs}
+                  strategy={horizontalListSortingStrategy}
+                >
+                  {tabs.map((tab) => (
+                    <SortableTab
+                      key={tab.id}
+                      id={tab.id}
+                      value={tab.id}
+                      isSelected={selectedTab === tab.id}
+                      className='flex gap-2 items-center flex-shrink-0'
                     >
-                      <IoClose />
-                    </Button>
-                  </SortableTab>
-                ))}
-              </SortableContext>
-            </TabList>
+                      {tab.title}
+                      <Button
+                        isIconOnly
+                        radius='full'
+                        variant='flat'
+                        size='sm'
+                        className='min-w-0 w-4 h-4 flex-shrink-0'
+                        onPress={() => closeTerminal(tab.id)}
+                        color={selectedTab === tab.id ? 'primary' : 'default'}
+                      >
+                        <IoClose />
+                      </Button>
+                    </SortableTab>
+                  ))}
+                </SortableContext>
+              </TabList>
+            )}
             <Button
               isIconOnly
               color='primary'

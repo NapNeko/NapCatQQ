@@ -1,6 +1,5 @@
 import { Button } from '@heroui/button';
 import clsx from 'clsx';
-import { motion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import { TbSquareRoundedChevronLeftFilled } from 'react-icons/tb';
 
@@ -27,36 +26,39 @@ export default function HttpDebug () {
   return (
     <>
       <title>HTTP调试 - NapCat WebUI</title>
-      <OneBotApiNavList
-        data={oneBotHttpApi}
-        selectedApi={selectedApi}
-        onSelect={setSelectedApi}
-        openSideBar={openSideBar}
-      />
-      <div ref={contentRef} className='flex-1 h-full overflow-x-hidden'>
-        <motion.div
-          className='absolute top-16 z-30 md:!ml-4'
-          animate={{ marginLeft: openSideBar ? '16rem' : '1rem' }}
-          transition={{ type: 'spring', stiffness: 150, damping: 15 }}
+      <div className='flex h-[calc(100vh-3.5rem)] overflow-hidden relative p-2 md:p-4 gap-2 md:gap-4'>
+        <OneBotApiNavList
+          data={oneBotHttpApi}
+          selectedApi={selectedApi}
+          onSelect={(api) => {
+            setSelectedApi(api);
+            // Auto-close sidebar on mobile after selection
+            if (window.innerWidth < 768) {
+              setOpenSideBar(false);
+            }
+          }}
+          openSideBar={openSideBar}
+          onToggle={setOpenSideBar}
+        />
+        <div
+          ref={contentRef}
+          className='flex-1 h-full overflow-hidden flex flex-col relative'
         >
-          <Button
-            isIconOnly
-            color='primary'
-            radius='md'
-            variant='shadow'
-            size='sm'
-            onPress={() => setOpenSideBar(!openSideBar)}
-          >
-            <TbSquareRoundedChevronLeftFilled
-              size={24}
-              className={clsx(
-                'transition-transform',
-                openSideBar ? '' : 'transform rotate-180'
-              )}
-            />
-          </Button>
-        </motion.div>
-        <OneBotApiDebug path={selectedApi} data={data} />
+          {/* Toggle Button Container - positioned on top-left of content if sidebar is closed */}
+          <div className='absolute top-2 left-2 z-30'>
+            <Button
+              isIconOnly
+              size="sm"
+              variant="flat"
+              className={clsx("bg-white/40 dark:bg-black/40 backdrop-blur-md transition-opacity rounded-full shadow-sm", openSideBar ? "opacity-0 pointer-events-none md:opacity-0" : "opacity-100")}
+              onPress={() => setOpenSideBar(true)}
+            >
+              <TbSquareRoundedChevronLeftFilled className="transform rotate-180" />
+            </Button>
+          </div>
+
+          <OneBotApiDebug path={selectedApi} data={data} />
+        </div>
       </div>
     </>
   );

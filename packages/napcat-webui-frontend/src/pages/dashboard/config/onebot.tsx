@@ -74,6 +74,11 @@ const OneBotConfigCard = () => {
             {...field}
             label='音乐签名地址'
             placeholder='请输入音乐签名地址'
+            classNames={{
+              inputWrapper:
+                'bg-default-100/50 dark:bg-white/5 backdrop-blur-md border border-transparent hover:bg-default-200/50 dark:hover:bg-white/10 transition-all shadow-sm data-[hover=true]:border-default-300',
+              input: 'bg-transparent text-default-700 placeholder:text-default-400',
+            }}
           />
         )}
       />
