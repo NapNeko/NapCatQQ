@@ -455,7 +455,11 @@ export class NapCatShell {
 
   async InitNapCat () {
     await this.core.initCore();
-    new NapCatOneBot11Adapter(this.core, this.context, this.context.pathWrapper).InitOneBot()
+    const oneBotAdapter = new NapCatOneBot11Adapter(this.core, this.context, this.context.pathWrapper);
+    // 注册到 WebUiDataRuntime，供调试功能使用
+    WebUiDataRuntime.setOneBotContext(oneBotAdapter);
+    oneBotAdapter.InitOneBot()
       .catch(e => this.context.logger.logError('初始化OneBot失败', e));
   }
 }
+

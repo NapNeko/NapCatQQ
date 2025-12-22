@@ -15,6 +15,7 @@ import { BaseRouter } from '@/napcat-webui-backend/src/router/Base';
 import { FileRouter } from './File';
 import { WebUIConfigRouter } from './WebUIConfig';
 import { UpdateNapCatRouter } from './UpdateNapCat';
+import DebugRouter from '@/napcat-webui-backend/src/api/Debug';
 
 const router = Router();
 
@@ -41,5 +42,7 @@ router.use('/File', FileRouter);
 router.use('/WebUIConfig', WebUIConfigRouter);
 // router:更新NapCat相关路由
 router.use('/UpdateNapCat', UpdateNapCatRouter);
+// router:调试相关路由
+router.use('/Debug', DebugRouter);
 
 export { router as ALLRouter };

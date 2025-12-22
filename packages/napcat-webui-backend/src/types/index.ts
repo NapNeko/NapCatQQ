@@ -47,6 +47,7 @@ export interface LoginRuntimeType {
   onQQLoginStatusChange: (status: boolean) => Promise<void>;
   onWebUiTokenChange: (token: string) => Promise<void>;
   WebUiConfigQuickFunction: () => Promise<void>;
+  OneBotContext: any | null; // OneBot 上下文，用于调试功能
   NapCatHelper: {
     onQuickLoginRequested: (uin: string) => Promise<{ result: boolean; message: string; }>;
     onOB11ConfigChanged: (ob11: OneBotConfig) => Promise<void>;
