@@ -62,7 +62,6 @@ class DebugAdapter {
    */
   async onEvent (event: any) {
     this.updateActivity();
-    console.log(`[Debug] Adapter ${this.name} 收到事件, 类型: ${event.post_type || 'unknown'}, 客户端数: ${this.wsClients.size}`);
 
     const payload = JSON.stringify(event);
 
@@ -163,7 +162,6 @@ class DebugAdapter {
   addWsClient (ws: WebSocket) {
     this.wsClients.add(ws);
     this.updateActivity();
-    console.log(`[Debug] WebSocket 客户端已连接 (${this.wsClients.size})`);
 
     // 发送生命周期事件 (Connect)
     const oneBotContext = WebUiDataRuntime.getOneBotContext();
@@ -182,7 +180,6 @@ class DebugAdapter {
    */
   removeWsClient (ws: WebSocket) {
     this.wsClients.delete(ws);
-    console.log(`[Debug] WebSocket 客户端已断开 (${this.wsClients.size})`);
   }
 
   updateActivity () {
@@ -255,7 +252,6 @@ class DebugAdapterManager {
     const oneBotContext = WebUiDataRuntime.getOneBotContext();
     if (oneBotContext) {
       oneBotContext.networkManager.adapters.set(adapter.name, adapter as any);
-      console.log(`[Debug] 已注册调试适配器: ${adapter.name}, NetworkManager中适配器数量: ${oneBotContext.networkManager.adapters.size}`);
     } else {
       console.warn('[Debug] OneBot 未初始化，无法注册适配器');
     }
