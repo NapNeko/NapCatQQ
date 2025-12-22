@@ -10,7 +10,6 @@ import { FaCircleInfo, FaInfo, FaQq } from 'react-icons/fa6';
 import { IoLogoChrome, IoLogoOctocat } from 'react-icons/io';
 import { RiMacFill } from 'react-icons/ri';
 import { useState } from 'react';
-import toast from 'react-hot-toast';
 
 import key from '@/const/key';
 import WebUIManager from '@/controllers/webui_manager';
@@ -203,15 +202,160 @@ export interface NewVersionTipProps {
 //   );
 // };
 
+// 更新状态类型
+type UpdateStatus = 'idle' | 'updating' | 'success' | 'error';
+
+// 更新对话框内容组件
+const UpdateDialogContent: React.FC<{
+  currentVersion: string;
+  latestVersion: string;
+  status: UpdateStatus;
+  errorMessage?: string;
+}> = ({ currentVersion, latestVersion, status, errorMessage }) => {
+  return (
+    <div className='space-y-4'>
+      {/* 版本信息 */}
+      <div className='space-y-2'>
+        <div className='text-sm space-x-2'>
+          <span>当前版本</span>
+          <Chip color='primary' variant='flat'>
+            v{currentVersion}
+          </Chip>
+        </div>
+        <div className='text-sm space-x-2'>
+          <span>最新版本</span>
+          <Chip color='primary'>v{latestVersion}</Chip>
+        </div>
+      </div>
+
+      {/* 更新状态显示 */}
+      {status === 'updating' && (
+        <div className='flex flex-col items-center justify-center gap-3 py-4 px-4 rounded-lg bg-primary-50/50 dark:bg-primary-900/20 border border-primary-200/50 dark:border-primary-700/30'>
+          <Spinner size='md' color='primary' />
+          <div className='text-center'>
+            <p className='text-sm font-medium text-primary-600 dark:text-primary-400'>
+              正在更新中...
+            </p>
+            <p className='text-xs text-default-500 mt-1'>
+              请耐心等待，更新可能需要几分钟
+            </p>
+          </div>
+        </div>
+      )}
+
+      {status === 'success' && (
+        <div className='flex flex-col items-center justify-center gap-3 py-4 px-4 rounded-lg bg-success-50/50 dark:bg-success-900/20 border border-success-200/50 dark:border-success-700/30'>
+          <div className='w-12 h-12 rounded-full bg-success-100 dark:bg-success-900/40 flex items-center justify-center'>
+            <svg className='w-6 h-6 text-success-600 dark:text-success-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M5 13l4 4L19 7' />
+            </svg>
+          </div>
+          <div className='text-center'>
+            <p className='text-sm font-medium text-success-600 dark:text-success-400'>
+              更新完成
+            </p>
+            <p className='text-xs text-default-500 mt-1'>
+              请重启 NapCat 以应用新版本
+            </p>
+          </div>
+          <div className='mt-2 p-3 rounded-lg bg-warning-50/50 dark:bg-warning-900/20 border border-warning-200/50 dark:border-warning-700/30'>
+            <p className='text-xs text-warning-700 dark:text-warning-400 flex items-center gap-1'>
+              <svg className='w-4 h-4' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' />
+              </svg>
+              <span>请手动重启 NapCat，更新才会生效</span>
+            </p>
+          </div>
+        </div>
+      )}
+
+      {status === 'error' && (
+        <div className='flex flex-col items-center justify-center gap-3 py-4 px-4 rounded-lg bg-danger-50/50 dark:bg-danger-900/20 border border-danger-200/50 dark:border-danger-700/30'>
+          <div className='w-12 h-12 rounded-full bg-danger-100 dark:bg-danger-900/40 flex items-center justify-center'>
+            <svg className='w-6 h-6 text-danger-600 dark:text-danger-400' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M6 18L18 6M6 6l12 12' />
+            </svg>
+          </div>
+          <div className='text-center'>
+            <p className='text-sm font-medium text-danger-600 dark:text-danger-400'>
+              更新失败
+            </p>
+            <p className='text-xs text-default-500 mt-1'>
+              {errorMessage || '请稍后重试或手动更新'}
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const NewVersionTip = (props: NewVersionTipProps) => {
   const { currentVersion } = props;
   const dialog = useDialog();
   const { data: latestVersion, error } = useRequest(WebUIManager.getLatestTag);
-  const [updating, setUpdating] = useState(false);
+  const [updateStatus, setUpdateStatus] = useState<UpdateStatus>('idle');
 
   if (error || !latestVersion || !currentVersion || latestVersion === currentVersion) {
     return null;
   }
+
+  const handleUpdate = async () => {
+    setUpdateStatus('updating');
+
+    try {
+      await WebUIManager.UpdateNapCat();
+      setUpdateStatus('success');
+      // 显示更新成功对话框
+      dialog.alert({
+        title: '更新完成',
+        content: (
+          <UpdateDialogContent
+            currentVersion={currentVersion}
+            latestVersion={latestVersion}
+            status='success'
+          />
+        ),
+        confirmText: '我知道了',
+        size: 'md',
+      });
+    } catch (err) {
+      console.error('Update failed:', err);
+      const errMessage = err instanceof Error ? err.message : '未知错误';
+      setUpdateStatus('error');
+      // 显示更新失败对话框
+      dialog.alert({
+        title: '更新失败',
+        content: (
+          <UpdateDialogContent
+            currentVersion={currentVersion}
+            latestVersion={latestVersion}
+            status='error'
+            errorMessage={errMessage}
+          />
+        ),
+        confirmText: '确定',
+        size: 'md',
+      });
+    }
+  };
+
+  const showUpdateDialog = () => {
+    dialog.confirm({
+      title: '发现新版本',
+      content: (
+        <UpdateDialogContent
+          currentVersion={currentVersion}
+          latestVersion={latestVersion}
+          status='idle'
+        />
+      ),
+      confirmText: '立即更新',
+      cancelText: '稍后更新',
+      size: 'md',
+      onConfirm: handleUpdate,
+    });
+  };
 
   return (
     <Tooltip content='有新版本可用'>
@@ -221,50 +365,8 @@ const NewVersionTip = (props: NewVersionTipProps) => {
         color='primary'
         variant='shadow'
         className='!w-5 !h-5 !min-w-0 text-small shadow-md'
-        onPress={() => {
-          dialog.confirm({
-            title: '有新版本可用',
-            content: (
-              <div className='space-y-2'>
-                <div className='text-sm space-x-2'>
-                  <span>当前版本</span>
-                  <Chip color='primary' variant='flat'>
-                    v{currentVersion}
-                  </Chip>
-                </div>
-                <div className='text-sm space-x-2'>
-                  <span>最新版本</span>
-                  <Chip color='primary'>v{latestVersion}</Chip>
-                </div>
-                {updating && (
-                  <div className='flex justify-center'>
-                    <Spinner size='sm' />
-                  </div>
-                )}
-              </div>
-            ),
-            confirmText: updating ? '更新中...' : '更新',
-            onConfirm: async () => {
-              setUpdating(true);
-              toast('更新中，预计需要几分钟，请耐心等待', {
-                duration: 3000,
-              });
-              try {
-                await WebUIManager.UpdateNapCat();
-                toast.success('更新完成,重启生效', {
-                  duration: 5000,
-                });
-              } catch (error) {
-                console.error('Update failed:', error);
-                toast.success('更新异常', {
-                  duration: 5000,
-                });
-              } finally {
-                setUpdating(false);
-              }
-            },
-          });
-        }}
+        isLoading={updateStatus === 'updating'}
+        onPress={showUpdateDialog}
       >
         <FaInfo />
       </Button>
