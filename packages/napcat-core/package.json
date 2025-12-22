@@ -16,7 +16,7 @@
         }
     },
     "dependencies": {
-        "winston": "^3.17.0",
+        "winston": "^3.19.0",
         "json5": "^2.2.3",
         "inversify": "^7.10.4",
         "reflect-metadata": "^0.2.2",
