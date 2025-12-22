@@ -24,9 +24,10 @@ export default function WSDebug () {
   });
   const [inputUrl, setInputUrl] = useState(socketConfig.url);
   const [inputToken, setInputToken] = useState(socketConfig.token);
+  const [shouldConnect, setShouldConnect] = useState(false);
 
-  const { sendMessage, readyState, FilterMessagesType, filteredMessages } =
-    useWebSocketDebug(socketConfig.url, socketConfig.token);
+  const { sendMessage, readyState, FilterMessagesType, filteredMessages, clearMessages } =
+    useWebSocketDebug(socketConfig.url, socketConfig.token, shouldConnect);
 
   const handleConnect = useCallback(() => {
     if (!inputUrl.startsWith('ws://') && !inputUrl.startsWith('wss://')) {
@@ -37,13 +38,18 @@ export default function WSDebug () {
       url: inputUrl,
       token: inputToken,
     });
-  }, [inputUrl, inputToken]);
+    setShouldConnect(true);
+  }, [inputUrl, inputToken, setSocketConfig]);
+
+  const handleDisconnect = useCallback(() => {
+    setShouldConnect(false);
+  }, []);
 
   return (
     <>
       <title>Websocket调试 - NapCat WebUI</title>
       <div className='h-[calc(100vh-4rem)] overflow-hidden flex flex-col'>
-        <Card className='mx-2 mt-2 flex-shrink-0 bg-opacity-50 backdrop-blur-sm'>
+        <Card className='mx-2 mt-2 flex-shrink-0 bg-white/60 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-white/10 shadow-sm'>
           <CardBody className='gap-2'>
             <div className='grid gap-2 items-center md:grid-cols-5'>
               <Input
@@ -64,23 +70,33 @@ export default function WSDebug () {
               />
               <div className='flex-shrink-0 flex gap-2 col-span-2 md:col-span-1'>
                 <Button
-                  color='primary'
-                  onPress={handleConnect}
+                  onPress={shouldConnect ? handleDisconnect : handleConnect}
                   size='lg'
                   radius='full'
+                  color={shouldConnect ? 'danger' : 'primary'}
                   className='w-full md:w-auto'
                 >
-                  连接
+                  {shouldConnect ? '断开' : '连接'}
                 </Button>
               </div>
             </div>
-            <div className='p-2 border border-default-100 bg-content1 bg-opacity-50 rounded-md dark:bg-[rgb(30,30,30)]'>
+            <div className='p-2 rounded-lg bg-white/50 dark:bg-white/5 border border-white/20 transition-colors'>
               <div className='grid gap-2 md:grid-cols-5 items-center md:w-fit'>
                 <WSStatus state={readyState} />
                 <div className='md:w-64 max-w-full col-span-2'>
                   {FilterMessagesType}
                 </div>
-                <OneBotSendModal sendMessage={sendMessage} />
+                <div className='flex gap-2 justify-end col-span-2 md:col-span-2'>
+                  <Button
+                    size='sm'
+                    color='danger'
+                    variant='flat'
+                    onPress={clearMessages}
+                  >
+                    清空日志
+                  </Button>
+                  <OneBotSendModal sendMessage={sendMessage} />
+                </div>
               </div>
             </div>
           </CardBody>

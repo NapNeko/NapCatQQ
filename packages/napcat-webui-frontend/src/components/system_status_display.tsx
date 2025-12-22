@@ -9,10 +9,10 @@ import bkg from '@/assets/images/bg/1AD934174C0107F14BAD8776D29C5F90.png';
 import UsagePie from './usage_pie';
 
 export interface SystemStatusItemProps {
-  title: string
-  value?: string | number
-  size?: 'md' | 'lg'
-  unit?: string
+  title: string;
+  value?: string | number;
+  size?: 'md' | 'lg';
+  unit?: string;
 }
 
 const SystemStatusItem: React.FC<SystemStatusItemProps> = ({
@@ -24,21 +24,21 @@ const SystemStatusItem: React.FC<SystemStatusItemProps> = ({
   return (
     <div
       className={clsx(
-        'shadow-sm shadow-primary-100 p-2 rounded-md text-sm bg-content1 bg-opacity-30',
+        'p-2 rounded-lg text-sm bg-white/50 dark:bg-white/5 border border-white/20 transition-colors hover:bg-white/70 dark:hover:bg-white/10',
         size === 'lg' ? 'col-span-2' : 'col-span-1 flex justify-between'
       )}
     >
-      <div className='w-24'>{title}</div>
-      <div className='text-default-400'>
+      <div className='w-24 text-default-600 font-medium'>{title}</div>
+      <div className='text-default-500 font-mono text-xs'>
         {value}
-        {unit}
+        {unit && <span className="ml-0.5 opacity-70">{unit}</span>}
       </div>
     </div>
   );
 };
 
 export interface SystemStatusDisplayProps {
-  data?: SystemStatus
+  data?: SystemStatus;
 }
 
 const SystemStatusDisplay: React.FC<SystemStatusDisplayProps> = ({ data }) => {
@@ -55,7 +55,7 @@ const SystemStatusDisplay: React.FC<SystemStatusDisplayProps> = ({ data }) => {
   }
 
   return (
-    <Card className='bg-opacity-60 shadow-sm shadow-primary-100 col-span-1 lg:col-span-2 relative overflow-hidden'>
+    <Card className='bg-white/60 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-white/10 shadow-sm col-span-1 lg:col-span-2 relative overflow-hidden'>
       <div className='absolute h-full right-0 top-0'>
         <Image
           src={bkg}
@@ -69,8 +69,8 @@ const SystemStatusDisplay: React.FC<SystemStatusDisplayProps> = ({ data }) => {
       </div>
       <CardBody className='overflow-visible md:flex-row gap-4 items-center justify-stretch z-10'>
         <div className='flex-1 w-full md:max-w-96'>
-          <h2 className='text-lg font-semibold flex items-center gap-1 text-primary-400'>
-            <GiCpu className='text-xl' />
+          <h2 className='text-lg font-semibold flex items-center gap-2 text-default-700 dark:text-gray-200 mb-2'>
+            <GiCpu className='text-xl opacity-80' />
             <span>CPU</span>
           </h2>
           <div className='grid grid-cols-2 gap-2'>
@@ -88,8 +88,8 @@ const SystemStatusDisplay: React.FC<SystemStatusDisplayProps> = ({ data }) => {
               unit='%'
             />
           </div>
-          <h2 className='text-lg font-semibold flex items-center gap-1 text-primary-400 mt-2'>
-            <BiSolidMemoryCard className='text-xl' />
+          <h2 className='text-lg font-semibold flex items-center gap-2 text-default-700 dark:text-gray-200 mb-2 mt-4'>
+            <BiSolidMemoryCard className='text-xl opacity-80' />
             <span>内存</span>
           </h2>
           <div className='grid grid-cols-2 gap-2'>

@@ -30,10 +30,10 @@ const SystemInfoItem: React.FC<SystemInfoItemProps> = ({
   endContent,
 }) => {
   return (
-    <div className='flex text-sm gap-1 p-2 items-center shadow-sm shadow-primary-100 dark:shadow-primary-100 rounded text-primary-400'>
-      {icon}
-      <div className='w-24'>{title}</div>
-      <div className='text-primary-200'>{value}</div>
+    <div className='flex text-sm gap-2 p-3 items-center rounded-lg text-default-600 dark:text-gray-300 bg-white/50 dark:bg-white/5 border border-white/20 transition-colors hover:bg-white/70 dark:hover:bg-white/10'>
+      <div className="text-lg opacity-80">{icon}</div>
+      <div className='w-24 font-medium'>{title}</div>
+      <div className='text-default-500 text-xs font-mono'>{value}</div>
       <div className='ml-auto'>{endContent}</div>
     </div>
   );
@@ -303,13 +303,13 @@ const SystemInfo: React.FC<SystemInfoProps> = (props) => {
     error: qqVersionError,
   } = useRequest(WebUIManager.getQQVersion);
   return (
-    <Card className='bg-opacity-60 shadow-sm shadow-primary-100 dark:shadow-primary-100 overflow-visible flex-1'>
-      <CardHeader className='pb-0 items-center gap-1 text-primary-500 font-extrabold'>
-        <FaCircleInfo className='text-lg' />
+    <Card className='bg-white/60 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-white/10 shadow-sm overflow-visible flex-1'>
+      <CardHeader className='pb-0 items-center gap-2 text-default-700 dark:text-white font-bold px-4 pt-4'>
+        <FaCircleInfo className='text-lg opacity-80' />
         <span>系统信息</span>
       </CardHeader>
       <CardBody className='flex-1'>
-        <div className='flex flex-col justify-between h-full'>
+        <div className='flex flex-col gap-2 justify-between h-full'>
           <NapCatVersion />
           <SystemInfoItem
             title='QQ 版本'

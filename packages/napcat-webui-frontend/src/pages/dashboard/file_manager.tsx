@@ -329,8 +329,8 @@ export default function FileManagerPage () {
   });
 
   return (
-    <div className='p-4'>
-      <div className='mb-4 flex items-center gap-4 sticky top-14 z-10 bg-content1 py-1'>
+    <div className='h-full flex flex-col relative gap-4 w-full p-4'>
+      <div className='mb-4 flex items-center gap-4 sticky top-14 z-10 bg-white/60 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-white/10 shadow-sm py-2 px-4 rounded-xl'>
         <Button
           color='primary'
           size='sm'
@@ -418,8 +418,8 @@ export default function FileManagerPage () {
                 )
               </Button>
             </>
-        )}
-        <Breadcrumbs className='flex-1 shadow-small px-2 py-2 rounded-lg'>
+          )}
+        <Breadcrumbs className='flex-1 bg-white/40 dark:bg-black/20 backdrop-blur-md shadow-sm border border-white/20 px-2 py-2 rounded-lg'>
           {currentPath.split('/').map((part, index, parts) => (
             <BreadcrumbItem
               key={part}

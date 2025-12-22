@@ -1,12 +1,12 @@
 import { Card, CardBody } from '@heroui/card';
 import clsx from 'clsx';
 
-import { title } from '@/components/primitives';
+
 
 export interface NetworkItemDisplayProps {
-  count: number
-  label: string
-  size?: 'sm' | 'md'
+  count: number;
+  label: string;
+  size?: 'sm' | 'md';
 }
 
 const NetworkItemDisplay: React.FC<NetworkItemDisplayProps> = ({
@@ -17,35 +17,26 @@ const NetworkItemDisplay: React.FC<NetworkItemDisplayProps> = ({
   return (
     <Card
       className={clsx(
-        'bg-opacity-60 shadow-sm md:rounded-3xl',
+        'bg-white/60 dark:bg-black/40 backdrop-blur-xl border border-white/40 dark:border-white/10 shadow-sm transition-all hover:bg-white/70 dark:hover:bg-black/30',
         size === 'md'
-          ? 'col-span-8 md:col-span-2 bg-primary-50 shadow-primary-100'
-          : 'col-span-2 md:col-span-1 bg-warning-100 shadow-warning-200'
+          ? 'col-span-8 md:col-span-2'
+          : 'col-span-2 md:col-span-1'
       )}
-      shadow='sm'
+      shadow='none'
     >
       <CardBody className='items-center md:gap-1 p-1 md:p-2'>
         <div
           className={clsx(
-            'flex-1',
-            size === 'md' ? 'text-2xl md:text-3xl' : 'text-xl md:text-2xl',
-            title({
-              color: size === 'md' ? 'pink' : 'yellow',
-              size,
-            })
+            'flex-1 font-mono font-bold text-default-700 dark:text-gray-200',
+            size === 'md' ? 'text-4xl md:text-5xl' : 'text-2xl md:text-3xl',
           )}
         >
           {count}
         </div>
         <div
           className={clsx(
-            'whitespace-nowrap text-nowrap flex-shrink-0',
-            size === 'md' ? 'text-sm md:text-base' : 'text-xs md:text-sm',
-            title({
-              color: size === 'md' ? 'pink' : 'yellow',
-              shadow: true,
-              size: 'xxs',
-            })
+            'whitespace-nowrap text-nowrap flex-shrink-0 font-medium text-default-500',
+            size === 'md' ? 'text-sm' : 'text-xs',
           )}
         >
           {label}
