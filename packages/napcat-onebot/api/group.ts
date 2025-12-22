@@ -174,7 +174,6 @@ export class OneBotGroupApi {
 
   async registerParseGroupReactEventByCore () {
     this.core.event.on('event:emoji_like', async (data) => {
-      console.log('Received emoji_like event from core:', data);
       const event = await this.createGroupEmojiLikeEvent(
         data.groupId,
         data.senderUin,
