@@ -3,8 +3,8 @@ import { SharedSelection } from '@heroui/system';
 import type { Selection } from '@react-types/shared';
 
 export interface FilterMessageTypeProps {
-  filterTypes: Selection
-  onSelectionChange: (keys: SharedSelection) => void
+  filterTypes: Selection;
+  onSelectionChange: (keys: SharedSelection) => void;
 }
 const items = [
   { label: '元事件', value: 'meta_event' },
@@ -26,6 +26,7 @@ const FilterMessageType: React.FC<FilterMessageTypeProps> = (props) => {
       }}
       label='筛选消息类型'
       selectionMode='multiple'
+      className='w-full'
       items={items}
       renderValue={(value) => {
         if (value.length === items.length) {

@@ -43,7 +43,7 @@ const OneBotSendModal: React.FC<OneBotSendModalProps> = (props) => {
 
   return (
     <>
-      <Button onPress={onOpen} color='primary' radius='full' variant='flat'>
+      <Button onPress={onOpen} color='primary' radius='full' variant='flat' size='sm' className="font-medium">
         构造请求
       </Button>
       <Modal
