@@ -47,7 +47,7 @@
     "@heroui/tooltip": "2.2.8",
     "@monaco-editor/loader": "^1.4.0",
     "@monaco-editor/react": "4.7.0-rc.0",
-    "@react-aria/visually-hidden": "^3.8.19",
+    "@react-aria/visually-hidden": "^3.8.29",
     "@reduxjs/toolkit": "^2.5.1",
     "@simplewebauthn/browser": "^13.2.2",
     "@uidotdev/usehooks": "^2.4.1",
