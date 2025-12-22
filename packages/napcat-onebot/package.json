@@ -18,7 +18,7 @@
     "dependencies": {
         "napcat.protobuf": "^1.1.4",
         "fast-xml-parser": "^4.3.6",
-        "type-is": "^1.6.7",
+        "type-is": "^2.0.1",
         "on-finished": "^2.3.5",
         "ajv": "^8.13.0",
         "@sinclair/typebox": "^0.34.38",
