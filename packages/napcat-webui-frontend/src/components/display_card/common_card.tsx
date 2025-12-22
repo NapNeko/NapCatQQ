@@ -26,6 +26,7 @@ export interface NetworkDisplayCardProps<T extends keyof NetworkType> {
   onEnable: () => Promise<void>;
   onDelete: () => Promise<void>;
   onEnableDebug: () => Promise<void>;
+  showType?: boolean;
 }
 
 const NetworkDisplayCard = <T extends keyof NetworkType> ({
