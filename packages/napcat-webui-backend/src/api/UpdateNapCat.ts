@@ -188,20 +188,10 @@ export const UpdateNapCatHandler: RequestHandler = async (_req, res) => {
   try {
     // 获取最新release信息
     const latestRelease = await getLatestRelease() as Release;
-
-    // 验证 release 响应
-    if (!latestRelease || !latestRelease.tag_name) {
-      throw new Error('无法获取最新版本信息，请稍后重试');
-    }
-
-    if (!latestRelease.assets || !Array.isArray(latestRelease.assets)) {
-      throw new Error('无法获取下载资源列表，可能是 GitHub API 请求限制，请稍后重试');
-    }
-
     const ReleaseName = WebUiDataRuntime.getWorkingEnv() === NapCatCoreWorkingEnv.Framework ? 'NapCat.Framework.zip' : 'NapCat.Shell.zip';
     const shellZipAsset = latestRelease.assets.find(asset => asset.name === ReleaseName);
     if (!shellZipAsset) {
-      throw new Error(`未找到${ReleaseName}文件，可用的资源: ${latestRelease.assets.map(a => a.name).join(', ')}`);
+      throw new Error(`未找到${ReleaseName}文件`);
     }
 
     // 创建临时目录
@@ -289,13 +279,12 @@ export const UpdateNapCatHandler: RequestHandler = async (_req, res) => {
       // 发送成功响应
       const message = failedFiles.length > 0
         ? `更新完成，重启应用以应用剩余${failedFiles.length}个文件的更新`
-        : '更新完成，请重启 NapCat 以应用更新';
+        : '更新完成';
       sendSuccess(res, {
         status: 'completed',
         message,
         newVersion: latestRelease.tag_name,
-        failedFilesCount: failedFiles.length,
-        needRestart: true
+        failedFilesCount: failedFiles.length
       });
 
     } catch (error) {

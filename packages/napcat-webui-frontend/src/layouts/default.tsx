@@ -99,10 +99,8 @@ const Layout: React.FC<{ children: React.ReactNode; }> = ({ children }) => {
         transition={{ duration: 0.4 }}
         className={clsx(
           'flex-1 overflow-y-auto',
-          'bg-white/60 dark:bg-black/40 backdrop-blur-xl',
-          'shadow-[0_8px_32px_0_rgba(31,38,135,0.07)]',
           'transition-all duration-300 ease-in-out',
-          openSideBar ? 'm-3 ml-0 rounded-3xl border border-white/40 dark:border-white/10' : 'm-0 rounded-none',
+          openSideBar ? 'ml-0' : 'ml-0',
           'pb-10 md:pb-0'
         )}
       >
