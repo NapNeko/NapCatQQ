@@ -1,10 +1,12 @@
 import { Button } from '@heroui/button';
+import { useLocalStorage } from '@uidotdev/usehooks';
 import clsx from 'clsx';
 import { AnimatePresence, motion } from 'motion/react';
 import React from 'react';
 import { IoMdLogOut } from 'react-icons/io';
 import { MdDarkMode, MdLightMode } from 'react-icons/md';
 
+import key from '@/const/key';
 import useAuth from '@/hooks/auth';
 import useDialog from '@/hooks/use-dialog';
 import { useTheme } from '@/hooks/use-theme';
@@ -23,6 +25,9 @@ const SideBar: React.FC<SideBarProps> = (props) => {
   const { toggleTheme, isDark } = useTheme();
   const { revokeAuth } = useAuth();
   const dialog = useDialog();
+  const [backgroundImage] = useLocalStorage<string>(key.backgroundImage, '');
+  const hasBackground = !!backgroundImage;
+
   const onRevokeAuth = () => {
     dialog.confirm({
       title: '退出登录',
@@ -48,7 +53,9 @@ const SideBar: React.FC<SideBarProps> = (props) => {
       <motion.div
         className={clsx(
           'overflow-hidden fixed top-0 left-0 h-full z-50 md:static md:shadow-none rounded-r-2xl md:rounded-none',
-          'bg-content1/70 backdrop-blur-xl backdrop-saturate-150 shadow-xl',
+          hasBackground
+            ? 'bg-transparent backdrop-blur-md'
+            : 'bg-content1/70 backdrop-blur-xl backdrop-saturate-150 shadow-xl',
           'md:bg-transparent md:backdrop-blur-none md:backdrop-saturate-100 md:shadow-none'
         )}
         initial={{ width: 0 }}

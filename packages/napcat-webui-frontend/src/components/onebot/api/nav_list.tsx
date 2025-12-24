@@ -1,9 +1,11 @@
 import { Input } from '@heroui/input';
+import { useLocalStorage } from '@uidotdev/usehooks';
 import clsx from 'clsx';
 import { AnimatePresence, motion } from 'motion/react';
 import { useMemo, useState } from 'react';
 import { TbChevronRight, TbFolder, TbSearch } from 'react-icons/tb';
 
+import key from '@/const/key';
 import oneBotHttpApiGroup from '@/const/ob_api/group';
 import oneBotHttpApiMessage from '@/const/ob_api/message';
 import oneBotHttpApiSystem from '@/const/ob_api/system';
@@ -22,6 +24,8 @@ const OneBotApiNavList: React.FC<OneBotApiNavListProps> = (props) => {
   const { data, selectedApi, onSelect, openSideBar, onToggle } = props;
   const [searchValue, setSearchValue] = useState('');
   const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
+  const [backgroundImage] = useLocalStorage<string>(key.backgroundImage, '');
+  const hasBackground = !!backgroundImage;
 
   const groups = useMemo(() => {
     const rawGroups = [
@@ -70,7 +74,9 @@ const OneBotApiNavList: React.FC<OneBotApiNavListProps> = (props) => {
           // Mobile: absolute position, drawer style
           // Desktop: relative position, pushing content
           'absolute md:relative left-0 top-0',
-          'bg-white/80 dark:bg-black/80 md:bg-transparent backdrop-blur-2xl md:backdrop-blur-none'
+          hasBackground
+            ? 'bg-white/10 dark:bg-black/40 backdrop-blur-xl md:bg-transparent md:backdrop-blur-none'
+            : 'bg-white/80 dark:bg-black/40 backdrop-blur-xl md:bg-transparent md:backdrop-blur-none'
         )}
         initial={false}
         animate={{
@@ -139,7 +145,7 @@ const OneBotApiNavList: React.FC<OneBotApiNavListProps> = (props) => {
                               className={clsx(
                                 'flex flex-col gap-0.5 px-3 py-2 rounded-lg cursor-pointer transition-all border border-transparent select-none',
                                 isSelected
-                                  ? 'bg-primary/20 border-primary/20 shadow-sm'
+                                  ? (hasBackground ? '' : 'bg-primary/20 border-primary/20 shadow-sm')
                                   : 'hover:bg-white/5'
                               )}
                             >

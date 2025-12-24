@@ -142,11 +142,13 @@ const SystemStatusDisplay: React.FC<SystemStatusDisplayProps> = ({ data }) => {
             systemUsage={Number(data?.cpu.usage.system) || 0}
             processUsage={Number(data?.cpu.usage.qq) || 0}
             title='CPU占用'
+            hasBackground={hasBackground}
           />
           <UsagePie
             systemUsage={memoryUsage.system}
             processUsage={memoryUsage.qq}
             title='内存占用'
+            hasBackground={hasBackground}
           />
         </div>
       </CardBody>

@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import clsx from 'clsx';
 
 import { useTheme } from '@/hooks/use-theme';
 
@@ -6,12 +7,14 @@ interface UsagePieProps {
   systemUsage: number;
   processUsage: number;
   title?: string;
+  hasBackground?: boolean;
 }
 
 const UsagePie: React.FC<UsagePieProps> = ({
   systemUsage,
   processUsage,
   title,
+  hasBackground,
 }) => {
   const { theme } = useTheme();
 
@@ -91,15 +94,24 @@ const UsagePie: React.FC<UsagePieProps> = ({
       {/* Center Content */}
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none">
         {title && (
-          <span className="text-[10px] text-default-500 font-medium mb-0.5 opacity-80 uppercase tracking-widest scale-90">
+          <span className={clsx(
+            "text-[10px] font-medium mb-0.5 opacity-80 uppercase tracking-widest scale-90",
+            hasBackground ? 'text-white/80' : 'text-default-500 dark:text-default-400'
+          )}>
             {title}
           </span>
         )}
         <div className="flex items-baseline gap-0.5">
-          <span className="text-2xl font-bold font-mono tracking-tight text-default-900 dark:text-gray-100">
+          <span className={clsx(
+            "text-2xl font-bold font-mono tracking-tight",
+            hasBackground ? 'text-white' : 'text-default-900 dark:text-white'
+          )}>
             {Math.round(cleanSystem)}
           </span>
-          <span className="text-xs text-default-400 font-bold">%</span>
+          <span className={clsx(
+            "text-xs font-bold",
+            hasBackground ? 'text-white/60' : 'text-default-400 dark:text-default-500'
+          )}>%</span>
         </div>
       </div>
     </div>
