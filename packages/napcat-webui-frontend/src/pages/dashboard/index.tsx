@@ -2,7 +2,7 @@ import { Card, CardBody } from '@heroui/card';
 import { useLocalStorage } from '@uidotdev/usehooks';
 import { useRequest } from 'ahooks';
 import clsx from 'clsx';
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import key from '@/const/key';
 
 import toast from 'react-hot-toast';
@@ -65,7 +65,7 @@ export interface SystemStatusCardProps {
   setArchInfo: (arch: string | undefined) => void;
 }
 const SystemStatusCard: React.FC<SystemStatusCardProps> = ({ setArchInfo }) => {
-  const [systemStatus, setSystemStatus] = useState<SystemStatus>();
+  const [systemStatus, setSystemStatus] = useLocalStorage<SystemStatus | undefined>('napcat_system_status_cache', undefined);
   const isSetted = useRef(false);
   const getStatus = useCallback(() => {
     try {
@@ -94,7 +94,7 @@ const SystemStatusCard: React.FC<SystemStatusCardProps> = ({ setArchInfo }) => {
 };
 
 const DashboardIndexPage: React.FC = () => {
-  const [archInfo, setArchInfo] = useState<string>();
+  const [archInfo, setArchInfo] = useLocalStorage<string | undefined>('napcat_arch_info_cache', undefined);
   // @ts-ignore
   const [backgroundImage] = useLocalStorage<string>(key.backgroundImage, '');
   const hasBackground = !!backgroundImage;

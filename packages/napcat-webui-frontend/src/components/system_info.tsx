@@ -293,7 +293,11 @@ const UpdateDialogContent: React.FC<{
 const NewVersionTip = (props: NewVersionTipProps) => {
   const { currentVersion } = props;
   const dialog = useDialog();
-  const { data: latestVersion, error } = useRequest(WebUIManager.getLatestTag);
+  const { data: latestVersion, error } = useRequest(WebUIManager.getLatestTag, {
+    cacheKey: 'napcat-latest-tag',
+    staleTime: 10 * 60 * 1000,
+    cacheTime: 30 * 60 * 1000,
+  });
   const [updateStatus, setUpdateStatus] = useState<UpdateStatus>('idle');
 
   if (error || !latestVersion || !currentVersion || latestVersion === currentVersion) {
@@ -362,9 +366,7 @@ const NewVersionTip = (props: NewVersionTipProps) => {
       <Button
         isIconOnly
         radius='full'
-        color='primary'
-        variant='shadow'
-        className='!w-5 !h-5 !min-w-0 text-small shadow-md'
+        className='!w-5 !h-5 !min-w-0 text-[10px] shadow-lg shadow-pink-500/40 bg-gradient-to-tr from-[#D33FF0] to-[#FF709F] text-white'
         isLoading={updateStatus === 'updating'}
         onPress={showUpdateDialog}
       >
@@ -383,7 +385,11 @@ const NapCatVersion: React.FC<NapCatVersionProps> = ({ hasBackground = false }) 
     data: packageData,
     loading: packageLoading,
     error: packageError,
-  } = useRequest(WebUIManager.GetNapCatVersion);
+  } = useRequest(WebUIManager.GetNapCatVersion, {
+    cacheKey: 'napcat-version',
+    staleTime: 60 * 60 * 1000,
+    cacheTime: 24 * 60 * 60 * 1000,
+  });
 
   const currentVersion = packageData?.version;
 
@@ -419,7 +425,11 @@ const SystemInfo: React.FC<SystemInfoProps> = (props) => {
     data: qqVersionData,
     loading: qqVersionLoading,
     error: qqVersionError,
-  } = useRequest(WebUIManager.getQQVersion);
+  } = useRequest(WebUIManager.getQQVersion, {
+    cacheKey: 'qq-version',
+    staleTime: 60 * 60 * 1000,
+    cacheTime: 24 * 60 * 60 * 1000,
+  });
   const [backgroundImage] = useLocalStorage<string>(key.backgroundImage, '');
   const hasBackground = !!backgroundImage;
 
