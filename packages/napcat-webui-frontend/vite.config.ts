@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       tsconfigPaths(),
-      ViteImageOptimizer({}),
+      ViteImageOptimizer({})
     ],
     base: '/webui/',
     server: {
@@ -40,9 +40,9 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks (id) {
             if (id.includes('node_modules')) {
-              if (id.includes('@heroui/')) {
-                return 'heroui';
-              }
+              // if (id.includes('@heroui/')) {
+              //   return 'heroui';
+              // }
               if (id.includes('react-dom')) {
                 return 'react-dom';
               }
