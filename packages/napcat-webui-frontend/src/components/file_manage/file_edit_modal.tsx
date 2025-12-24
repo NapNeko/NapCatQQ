@@ -11,11 +11,11 @@ import {
 import CodeEditor from '@/components/code_editor';
 
 interface FileEditModalProps {
-  isOpen: boolean
-  file: { path: string; content: string } | null
-  onClose: () => void
-  onSave: () => void
-  onContentChange: (newContent?: string) => void
+  isOpen: boolean;
+  file: { path: string; content: string; } | null;
+  onClose: () => void;
+  onSave: () => void;
+  onContentChange: (newContent?: string) => void;
 }
 
 export default function FileEditModal ({
@@ -65,12 +65,20 @@ export default function FileEditModal ({
   return (
     <Modal size='full' isOpen={isOpen} onClose={onClose}>
       <ModalContent>
-        <ModalHeader className='flex items-center gap-2 bg-content2 bg-opacity-50'>
+        <ModalHeader className='flex items-center gap-2 border-b border-default-200/50'>
           <span>编辑文件</span>
           <Code className='text-xs'>{file?.path}</Code>
+          <div className="ml-auto text-xs text-default-400 font-normal px-2">
+            按 <span className="px-1 py-0.5 rounded border border-default-300 bg-default-100">Ctrl/Cmd + S</span> 保存
+          </div>
         </ModalHeader>
-        <ModalBody className='p-0'>
-          <div className='h-full'>
+        <ModalBody className='p-4 bg-content2/50'>
+          <div className='h-full' onKeyDown={(e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+              e.preventDefault();
+              onSave();
+            }
+          }}>
             <CodeEditor
               height='100%'
               value={file?.content || ''}
@@ -80,7 +88,7 @@ export default function FileEditModal ({
             />
           </div>
         </ModalBody>
-        <ModalFooter>
+        <ModalFooter className="border-t border-default-200/50">
           <Button color='primary' variant='flat' onPress={onClose}>
             取消
           </Button>

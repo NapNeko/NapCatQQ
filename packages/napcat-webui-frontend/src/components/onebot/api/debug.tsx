@@ -274,8 +274,9 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
 
         <div className='flex-1 min-h-0 relative px-3 pb-2 mt-1'>
           <div className={clsx(
-            'h-full rounded-xl overflow-y-auto no-scrollbar transition-all',
-            hasBackground ? 'bg-transparent' : 'bg-white/10 dark:bg-black/10'
+            'h-full transition-all',
+            activeTab !== 'request' && 'rounded-xl overflow-y-auto no-scrollbar',
+            hasBackground ? 'bg-transparent' : (activeTab !== 'request' && 'bg-white/10 dark:bg-black/10')
           )}>
             {activeTab === 'request' ? (
               <CodeEditor
@@ -351,7 +352,7 @@ const OneBotApiDebug: React.FC<OneBotApiDebugProps> = (props) => {
 
           {/* Response Content - Code Editor */}
           {responseExpanded && (
-            <div style={{ height: responseHeight }} className="relative bg-black/5 dark:bg-black/20">
+            <div style={{ height: responseHeight }} className="relative bg-transparent">
               <PageLoading loading={isFetching} />
               <CodeEditor
                 value={responseContent || '// Waiting for response...'}

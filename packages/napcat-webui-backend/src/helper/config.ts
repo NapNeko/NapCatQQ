@@ -176,17 +176,35 @@ export class WebUiConfigWrapper {
     return [];
   }
 
-  // 判断字体是否存在（webui.woff）
+  // 判断字体是否存在（支持多种格式）
   async CheckWebUIFontExist (): Promise<boolean> {
-    const fontsPath = resolve(webUiPathWrapper.configPath, './fonts');
+    const fontPath = await this.GetWebUIFontPath();
+    if (!fontPath) return false;
     return await fs
-      .access(resolve(fontsPath, './webui.woff'), constants.F_OK)
+      .access(fontPath, constants.F_OK)
       .then(() => true)
       .catch(() => false);
   }
 
-  // 获取webui字体文件路径
-  GetWebUIFontPath (): string {
+  // 获取webui字体文件路径（支持多种格式）
+  async GetWebUIFontPath (): Promise<string | null> {
+    const fontsPath = resolve(webUiPathWrapper.configPath, './fonts');
+    const extensions = ['.woff', '.woff2', '.ttf', '.otf'];
+    for (const ext of extensions) {
+      const fontPath = resolve(fontsPath, `webui${ext}`);
+      const exists = await fs
+        .access(fontPath, constants.F_OK)
+        .then(() => true)
+        .catch(() => false);
+      if (exists) {
+        return fontPath;
+      }
+    }
+    return null;
+  }
+
+  // 同步版本，用于 multer 配置
+  GetWebUIFontPathSync (): string {
     return resolve(webUiPathWrapper.configPath, './fonts/webui.woff');
   }
 

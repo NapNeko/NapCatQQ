@@ -61,7 +61,7 @@ const OneBotSendModal: React.FC<OneBotSendModalProps> = (props) => {
                 构造请求
               </ModalHeader>
               <ModalBody>
-                <div className='h-96 dark:bg-[rgb(30,30,30)] p-2 rounded-md border border-default-100'>
+                <div className='h-96'>
                   <CodeEditor
                     height='100%'
                     defaultLanguage='json'

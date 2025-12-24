@@ -640,10 +640,10 @@ export const UploadWebUIFontHandler: RequestHandler = async (req, res) => {
 // 删除WebUI字体文件处理方法
 export const DeleteWebUIFontHandler: RequestHandler = async (_req, res) => {
   try {
-    const fontPath = WebUiConfig.GetWebUIFontPath();
+    const fontPath = await WebUiConfig.GetWebUIFontPath();
     const exists = await WebUiConfig.CheckWebUIFontExist();
 
-    if (!exists) {
+    if (!exists || !fontPath) {
       return sendSuccess(res, true);
     }
 

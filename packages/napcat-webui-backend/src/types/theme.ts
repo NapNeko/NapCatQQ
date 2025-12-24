@@ -4,9 +4,11 @@ export const themeType = Type.Object(
   {
     dark: Type.Record(Type.String(), Type.String()),
     light: Type.Record(Type.String(), Type.String()),
+    fontMode: Type.String({ default: 'system' }),
   },
   {
     default: {
+      fontMode: 'system',
       dark: {
         '--heroui-background': '0 0% 0%',
         '--heroui-foreground-50': '240 5.88% 10%',
@@ -124,11 +126,11 @@ export const themeType = Type.Object(
         '--heroui-border-width-medium': '2px',
         '--heroui-border-width-large': '3px',
         '--heroui-box-shadow-small':
-                    '0px 0px 5px 0px rgba(0, 0, 0, .05), 0px 2px 10px 0px rgba(0, 0, 0, .2), inset 0px 0px 1px 0px hsla(0, 0%, 100%, .15)',
+          '0px 0px 5px 0px rgba(0, 0, 0, .05), 0px 2px 10px 0px rgba(0, 0, 0, .2), inset 0px 0px 1px 0px hsla(0, 0%, 100%, .15)',
         '--heroui-box-shadow-medium':
-                    '0px 0px 15px 0px rgba(0, 0, 0, .06), 0px 2px 30px 0px rgba(0, 0, 0, .22), inset 0px 0px 1px 0px hsla(0, 0%, 100%, .15)',
+          '0px 0px 15px 0px rgba(0, 0, 0, .06), 0px 2px 30px 0px rgba(0, 0, 0, .22), inset 0px 0px 1px 0px hsla(0, 0%, 100%, .15)',
         '--heroui-box-shadow-large':
-                    '0px 0px 30px 0px rgba(0, 0, 0, .07), 0px 30px 60px 0px rgba(0, 0, 0, .26), inset 0px 0px 1px 0px hsla(0, 0%, 100%, .15)',
+          '0px 0px 30px 0px rgba(0, 0, 0, .07), 0px 30px 60px 0px rgba(0, 0, 0, .26), inset 0px 0px 1px 0px hsla(0, 0%, 100%, .15)',
         '--heroui-hover-opacity': '.9',
       },
       light: {
@@ -248,11 +250,11 @@ export const themeType = Type.Object(
         '--heroui-border-width-medium': '2px',
         '--heroui-border-width-large': '3px',
         '--heroui-box-shadow-small':
-                    '0px 0px 5px 0px rgba(0, 0, 0, .02), 0px 2px 10px 0px rgba(0, 0, 0, .06), 0px 0px 1px 0px rgba(0, 0, 0, .3)',
+          '0px 0px 5px 0px rgba(0, 0, 0, .02), 0px 2px 10px 0px rgba(0, 0, 0, .06), 0px 0px 1px 0px rgba(0, 0, 0, .3)',
         '--heroui-box-shadow-medium':
-                    '0px 0px 15px 0px rgba(0, 0, 0, .03), 0px 2px 30px 0px rgba(0, 0, 0, .08), 0px 0px 1px 0px rgba(0, 0, 0, .3)',
+          '0px 0px 15px 0px rgba(0, 0, 0, .03), 0px 2px 30px 0px rgba(0, 0, 0, .08), 0px 0px 1px 0px rgba(0, 0, 0, .3)',
         '--heroui-box-shadow-large':
-                    '0px 0px 30px 0px rgba(0, 0, 0, .04), 0px 30px 60px 0px rgba(0, 0, 0, .12), 0px 0px 1px 0px rgba(0, 0, 0, .3)',
+          '0px 0px 30px 0px rgba(0, 0, 0, .04), 0px 30px 60px 0px rgba(0, 0, 0, .12), 0px 0px 1px 0px rgba(0, 0, 0, .3)',
         '--heroui-hover-opacity': '.8',
       },
     },

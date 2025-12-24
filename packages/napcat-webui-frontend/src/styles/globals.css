@@ -5,20 +5,7 @@
 @tailwind utilities;
 
 body {
-  font-family:
-    'Aa偷吃可爱长大的',
-    'Quicksand',
-    'Nunito',
-    'Inter',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    'Helvetica Neue',
-    Arial,
-    'PingFang SC',
-    'Microsoft YaHei',
-    sans-serif !important;
+  font-family: var(--font-family-base, 'Quicksand', 'Nunito', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif) !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -27,6 +14,9 @@ body {
 }
 
 :root {
+  /* 字体变量：可被 JS 动态覆盖 */
+  --font-family-fallbacks: 'Quicksand', 'Nunito', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-family-base: var(--font-family-fallbacks);
   --heroui-primary: 217.2 91.2% 59.8%;
   /* 自然的现代蓝 */
   --heroui-primary-foreground: 210 40% 98%;
@@ -152,22 +142,4 @@ h6 {
 
 .ql-editor img {
   @apply inline-block;
-}
-
-/* GPU-accelerated navigation indicator animation */
-@keyframes nav-indicator-spin {
-  0% {
-    transform: rotate(0deg) translateZ(0);
-  }
-
-  100% {
-    transform: rotate(360deg) translateZ(0);
-  }
-}
-
-.animate-nav-spin {
-  animation: nav-indicator-spin 2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-  will-change: transform;
-  backface-visibility: hidden;
-  perspective: 1000px;
 }
