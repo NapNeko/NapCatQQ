@@ -27,6 +27,7 @@ const ShellBaseConfigPlugin: PluginOption[] = [
     targets: [
       { src: '../napcat-native/', dest: 'dist/native', flatten: false },
       { src: '../napcat-webui-frontend/dist/', dest: 'dist/static/', flatten: false },
+      { src: '../napcat-webui-backend/src/assets/sw_template.js', dest: 'dist/static/' },
       { src: '../napcat-core/external/napcat.json', dest: 'dist/config/' },
       { src: '../../package.json', dest: 'dist' },
       { src: '../napcat-shell-loader', dest: 'dist' },

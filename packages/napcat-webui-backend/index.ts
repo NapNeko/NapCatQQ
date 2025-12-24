@@ -200,7 +200,11 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
   app.get('/webui/sw.js', async (_req, res) => {
     try {
       // 读取模板文件
-      const templatePath = resolve(__dirname, 'src/assets/sw_template.js');
+      let templatePath = resolve(__dirname, 'static', 'sw_template.js');
+      if (!existsSync(templatePath)) {
+        templatePath = resolve(__dirname, 'src', 'assets', 'sw_template.js');
+      }
+
       let swContent = readFileSync(templatePath, 'utf-8');
 
       // 替换版本号
