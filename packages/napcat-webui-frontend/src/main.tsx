@@ -8,7 +8,7 @@ import '@/styles/globals.css';
 
 import key from './const/key';
 import WebUIManager from './controllers/webui_manager';
-import { loadTheme } from './utils/theme';
+import { initFont, loadTheme } from './utils/theme';
 
 WebUIManager.checkWebUiLogined();
 
@@ -24,6 +24,7 @@ if (theme && !theme.startsWith('"')) {
 }
 
 loadTheme();
+initFont();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   // <React.StrictMode>
@@ -34,3 +35,19 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   </BrowserRouter>
   // </React.StrictMode>
 );
+
+if (!import.meta.env.DEV) {
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      const baseUrl = import.meta.env.BASE_URL;
+      const swUrl = `${baseUrl}sw.js`;
+      navigator.serviceWorker.register(swUrl, { scope: baseUrl })
+        .then((registration) => {
+          console.log('SW registered: ', registration);
+        })
+        .catch((registrationError) => {
+          console.log('SW registration failed: ', registrationError);
+        });
+    });
+  }
+}

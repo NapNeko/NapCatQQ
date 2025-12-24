@@ -23,6 +23,13 @@ import { ILogWrapper } from 'napcat-common/src/log-interface';
 import { ISubscription } from 'napcat-common/src/subscription-interface';
 import { IStatusHelperSubscription } from '@/napcat-common/src/status-interface';
 import { handleDebugWebSocket } from '@/napcat-webui-backend/src/api/Debug';
+import compression from 'compression';
+import { napCatVersion } from 'napcat-common/src/version';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 // 实例化Express
 const app = express();
 /**
@@ -143,18 +150,31 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
   // ------------注册中间件------------
   // 使用express的json中间件
   app.use(express.json());
+  // 启用gzip压缩（对所有响应启用，阈值1KB）
+  app.use(compression({
+    level: 6, // 压缩级别 1-9，6 是性能和压缩率的平衡点
+    threshold: 1024, // 只压缩大于 1KB 的响应
+    filter: (req, res) => {
+      // 不压缩 SSE 和 WebSocket 升级请求
+      if (req.headers['accept'] === 'text/event-stream') {
+        return false;
+      }
+      // 使用默认过滤器
+      return compression.filter(req, res);
+    },
+  }));
 
   // CORS中间件
   // TODO:
   app.use(cors);
 
-  // 如果是webui字体文件，挂载字体文件
-  app.use('/webui/fonts/AaCute.woff', async (_req, res, next) => {
-    const isFontExist = await WebUiConfig.CheckWebUIFontExist();
-    if (isFontExist) {
-      res.sendFile(WebUiConfig.GetWebUIFontPath());
+  // 自定义字体文件路由 - 返回用户上传的字体文件
+  app.use('/webui/fonts/CustomFont.woff', async (_req, res) => {
+    const fontPath = await WebUiConfig.GetWebUIFontPath();
+    if (fontPath) {
+      res.sendFile(fontPath);
     } else {
-      next();
+      res.status(404).send('Custom font not found');
     }
   });
 
@@ -174,6 +194,28 @@ export async function InitWebUi (logger: ILogWrapper, pathWrapper: NapCatPathWra
     css += '}';
 
     res.send(css);
+  });
+
+  // 动态生成 sw.js
+  app.get('/webui/sw.js', async (_req, res) => {
+    try {
+      // 读取模板文件
+      const templatePath = resolve(__dirname, 'src/assets/sw_template.js');
+      let swContent = readFileSync(templatePath, 'utf-8');
+
+      // 替换版本号
+      // 使用 napCatVersion，如果为 alpha 则尝试加上时间戳或其他标识以避免缓存冲突，或者直接使用
+      // 用户要求控制 sw.js 版本，napCatVersion 是核心控制点
+      swContent = swContent.replace('{{VERSION}}', napCatVersion);
+
+      res.header('Content-Type', 'application/javascript');
+      res.header('Service-Worker-Allowed', '/webui/');
+      res.header('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.send(swContent);
+    } catch (error) {
+      console.error('[NapCat] [WebUi] Error generating sw.js', error);
+      res.status(500).send('Error generating service worker');
+    }
   });
 
   // ------------中间件结束------------

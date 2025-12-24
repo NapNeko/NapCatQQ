@@ -126,7 +126,7 @@ export class NapCatCore {
     container.bind(TypedEventEmitter).toConstantValue(this.event);
     ReceiverServiceRegistry.forEach((ServiceClass, serviceName) => {
       container.bind(ServiceClass).toSelf();
-      console.log(`Registering service handler for: ${serviceName}`);
+      //console.log(`Registering service handler for: ${serviceName}`);
       this.context.packetHandler.onCmd(serviceName, ({ seq, hex_data }) => {
         const serviceInstance = container.get(ServiceClass);
         return serviceInstance.handler(seq, hex_data);

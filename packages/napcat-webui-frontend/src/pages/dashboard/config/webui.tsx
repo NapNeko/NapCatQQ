@@ -7,11 +7,9 @@ import toast from 'react-hot-toast';
 import key from '@/const/key';
 
 import SaveButtons from '@/components/button/save_buttons';
-import FileInput from '@/components/input/file_input';
 import ImageInput from '@/components/input/image_input';
 
 import { siteConfig } from '@/config/site';
-import FileManager from '@/controllers/file_manager';
 import WebUIManager from '@/controllers/webui_manager';
 
 // Base64URL to Uint8Array converter
@@ -37,10 +35,10 @@ const WebUIConfigCard = () => {
     handleSubmit: handleWebuiSubmit,
     formState: { isSubmitting },
     setValue: setWebuiValue,
-  } = useForm<IConfig['webui']>({
+  } = useForm({
     defaultValues: {
       background: '',
-      customIcons: {},
+      customIcons: {} as Record<string, string>,
     },
   });
 
@@ -92,39 +90,6 @@ const WebUIConfigCard = () => {
   return (
     <>
       <title>WebUI配置 - NapCat WebUI</title>
-      <div className='flex flex-col gap-2'>
-        <div className='flex-shrink-0 w-full font-bold text-default-600 dark:text-default-400 px-1'>WebUI字体</div>
-        <div className='text-sm text-default-400'>
-          此项不需要手动保存，上传成功后需清空网页缓存并刷新
-          <FileInput
-            label='中文字体'
-            placeholder='选择字体文件'
-            accept='.ttf,.otf,.woff,.woff2'
-            onChange={async (file) => {
-              try {
-                await FileManager.uploadWebUIFont(file);
-                toast.success('上传成功');
-                setTimeout(() => {
-                  window.location.reload();
-                }, 1000);
-              } catch (error) {
-                toast.error('上传失败: ' + (error as Error).message);
-              }
-            }}
-            onDelete={async () => {
-              try {
-                await FileManager.deleteWebUIFont();
-                toast.success('删除成功');
-                setTimeout(() => {
-                  window.location.reload();
-                }, 1000);
-              } catch (error) {
-                toast.error('删除失败: ' + (error as Error).message);
-              }
-            }}
-          />
-        </div>
-      </div>
       <div className='flex flex-col gap-2'>
         <div className='flex-shrink-0 w-full font-bold text-default-600 dark:text-default-400 px-1'>背景图</div>
         <Controller

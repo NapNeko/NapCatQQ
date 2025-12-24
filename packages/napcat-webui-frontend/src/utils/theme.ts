@@ -3,6 +3,11 @@ import { request } from './request';
 const style = document.createElement('style');
 document.head.appendChild(style);
 
+// 字体样式标签
+const fontStyle = document.createElement('style');
+fontStyle.id = 'dynamic-font-style';
+document.head.appendChild(fontStyle);
+
 export function loadTheme () {
   request('/files/theme.css?_t=' + Date.now())
     .then((res) => res.data)
@@ -13,6 +18,29 @@ export function loadTheme () {
       console.error('Failed to load theme.css');
     });
 }
+
+// 动态加载字体 CSS
+const loadFontCSS = (mode: string) => {
+  let css = '';
+
+  if (mode === 'aacute') {
+    css = `
+@font-face {
+  font-family: 'Aa偷吃可爱长大的';
+  src: url('/webui/fonts/AaCute.woff') format('woff');
+  font-display: swap;
+}`;
+  } else if (mode === 'custom') {
+    css = `
+@font-face {
+  font-family: 'CustomFont';
+  src: url('/webui/fonts/CustomFont.woff') format('woff');
+  font-display: swap;
+}`;
+  }
+
+  fontStyle.innerHTML = css;
+};
 
 export const colorKeys = [
   '--heroui-background',
@@ -138,4 +166,54 @@ export const generateTheme = (theme: ThemeConfig, validField?: string) => {
   }
   css += '}';
   return css;
+};
+
+export const applyFont = (mode: string) => {
+  const root = document.documentElement;
+
+  // 先加载字体 CSS
+  loadFontCSS(mode);
+
+  if (mode === 'aacute') {
+    root.style.setProperty('--font-family-base', "'Aa偷吃可爱长大的', var(--font-family-fallbacks)", 'important');
+  } else if (mode === 'custom') {
+    root.style.setProperty('--font-family-base', "'CustomFont', var(--font-family-fallbacks)", 'important');
+  } else {
+    // system or default - restore default
+    root.style.setProperty('--font-family-base', 'var(--font-family-fallbacks)', 'important');
+  }
+};
+
+const FONT_MODE_CACHE_KEY = 'webui-font-mode-cache';
+
+export const initFont = () => {
+  // 先从缓存读取，立即应用
+  const cached = localStorage.getItem(FONT_MODE_CACHE_KEY);
+  if (cached) {
+    applyFont(cached);
+  } else {
+    // 默认使用系统字体
+    applyFont('system');
+  }
+
+  // 后台拉取最新配置并更新缓存
+  request('/api/base/Theme')
+    .then((res) => {
+      const data = res.data as { data: ThemeConfig; };
+      const fontMode = data?.data?.fontMode || 'system';
+      // 更新缓存
+      localStorage.setItem(FONT_MODE_CACHE_KEY, fontMode);
+      // 如果与当前不同，则应用新字体
+      if (fontMode !== cached) {
+        applyFont(fontMode);
+      }
+    })
+    .catch((e) => {
+      console.error('Failed to fetch font config', e);
+    });
+};
+
+// 保存时更新缓存
+export const updateFontCache = (fontMode: string) => {
+  localStorage.setItem(FONT_MODE_CACHE_KEY, fontMode);
 };

@@ -36,8 +36,18 @@ const XTerm = forwardRef<XTermRef, XTermProps>((props, ref) => {
   const { theme } = useTheme();
   useEffect(() => {
     // 根据屏幕宽度决定字体大小，手机端使用更小的字体
-    const isMobile = window.innerWidth < 768;
-    const fontSize = isMobile ? 11 : 14;
+    const width = window.innerWidth;
+    // 按屏幕宽度自适应字体大小
+    let fontSize = 16;
+    if (width < 400) {
+      fontSize = 4;
+    } else if (width < 600) {
+      fontSize = 5;
+    } else if (width < 900) {
+      fontSize = 6;
+    } else if (width < 1280) {
+      fontSize = 12;
+    } // ≥1280: 16
 
     const terminal = new Terminal({
       allowTransparency: true,
@@ -60,10 +70,8 @@ const XTerm = forwardRef<XTermRef, XTermProps>((props, ref) => {
     terminal.loadAddon(fitAddon);
     terminal.open(domRef.current!);
 
-    // 只在非手机端使用 Canvas 渲染器，手机端使用默认 DOM 渲染器以避免渲染问题
-    if (!isMobile) {
-      terminal.loadAddon(new CanvasAddon());
-    }
+    // 所有端都使用 Canvas 渲染器（包括手机端）
+    terminal.loadAddon(new CanvasAddon());
     terminal.onData((data) => {
       if (onInput) {
         onInput(data);
