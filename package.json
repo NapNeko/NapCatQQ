@@ -29,6 +29,7 @@
   "dependencies": {
     "express": "^5.0.0",
     "silk-wasm": "^3.6.1",
+    "vite-plugin-font": "^5.1.2",
     "ws": "^8.18.3"
   }
 }

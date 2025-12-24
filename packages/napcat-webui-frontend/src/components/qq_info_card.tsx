@@ -40,7 +40,7 @@ const QQInfoCard: React.FC<QQInfoCardProps> = ({ data, error, loading }) => {
         : (
           <CardBody className='flex-row items-center gap-4 overflow-hidden relative p-4'>
             {!hasBackground && (
-              <div className='absolute right-[-10px] bottom-[-10px] text-7xl text-default-400/10 rotate-12 pointer-events-none'>
+              <div className='absolute right-[-10px] bottom-[-10px] text-7xl text-default-400/10 rotate-12 pointer-events-none dark:hidden'>
                 <BsTencentQq />
               </div>
             )}

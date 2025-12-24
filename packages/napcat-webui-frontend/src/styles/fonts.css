@@ -1,11 +1,14 @@
 @font-face {
   font-family: 'Aa偷吃可爱长大的';
   src: url('/fonts/AaCute.woff') format('woff');
+  font-display: swap;
 }
+
 @font-face {
   font-family: 'JetBrains Mono';
   src: url('/fonts/JetBrainsMono.ttf') format('truetype');
 }
+
 @font-face {
   font-family: 'JetBrains Mono';
   src: url('/fonts/JetBrainsMono-Italic.ttf') format('truetype');

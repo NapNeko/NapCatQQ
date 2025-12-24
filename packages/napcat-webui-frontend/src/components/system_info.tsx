@@ -1,12 +1,12 @@
 import { Card, CardBody, CardHeader } from '@heroui/card';
-import { Button } from '@heroui/button';
+
 import { Chip } from '@heroui/chip';
 import { Spinner } from '@heroui/spinner';
 import { Tooltip } from '@heroui/tooltip';
 import { useLocalStorage } from '@uidotdev/usehooks';
 import { useRequest } from 'ahooks';
 import clsx from 'clsx';
-import { FaCircleInfo, FaInfo, FaQq } from 'react-icons/fa6';
+import { FaCircleInfo, FaQq } from 'react-icons/fa6';
 import { IoLogoChrome, IoLogoOctocat } from 'react-icons/io';
 import { RiMacFill } from 'react-icons/ri';
 import { useState } from 'react';
@@ -363,15 +363,19 @@ const NewVersionTip = (props: NewVersionTipProps) => {
 
   return (
     <Tooltip content='有新版本可用'>
-      <Button
-        isIconOnly
-        radius='full'
-        className='!w-5 !h-5 !min-w-0 text-[10px] shadow-lg shadow-pink-500/40 bg-gradient-to-tr from-[#D33FF0] to-[#FF709F] text-white'
-        isLoading={updateStatus === 'updating'}
-        onPress={showUpdateDialog}
-      >
-        <FaInfo />
-      </Button>
+      <div className="cursor-pointer" onClick={updateStatus === 'updating' ? undefined : showUpdateDialog}>
+        <Chip
+          size="sm"
+          color="danger"
+          variant="flat"
+          classNames={{
+            content: "font-bold text-[10px] px-1",
+            base: "h-5 min-h-5"
+          }}
+        >
+          {updateStatus === 'updating' ? <Spinner size="sm" color="danger" /> : 'New'}
+        </Chip>
+      </div>
     </Tooltip>
   );
 };

@@ -6,6 +6,7 @@
 
 body {
   font-family:
+    'Aa偷吃可爱长大的',
     'Quicksand',
     'Nunito',
     'Inter',
@@ -18,27 +19,38 @@ body {
     'PingFang SC',
     'Microsoft YaHei',
     sans-serif !important;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-    font-smooth: always;
-    letter-spacing: 0.02em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-smooth: always;
+  letter-spacing: 0.02em;
 }
 
 :root {
-  --heroui-primary: 217.2 91.2% 59.8%; /* 自然的现代蓝 */
+  --heroui-primary: 217.2 91.2% 59.8%;
+  /* 自然的现代蓝 */
   --heroui-primary-foreground: 210 40% 98%;
   --heroui-radius: 0.75rem;
   --text-primary: 222.2 47.4% 11.2%;
   --text-secondary: 215.4 16.3% 46.9%;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   color: hsl(var(--text-primary));
   letter-spacing: -0.02em;
 }
 
-.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6 {
   color: hsl(210 40% 98%);
 }
 
@@ -52,11 +64,13 @@ h1, h2, h3, h4, h5, h6 {
     width: 0 !important;
     height: 0 !important;
   }
+
   .hide-scrollbar::-webkit-scrollbar-thumb {
     width: 0 !important;
     height: 0 !important;
     background-color: transparent !important;
   }
+
   .hide-scrollbar::-webkit-scrollbar-track {
     width: 0 !important;
     height: 0 !important;
@@ -80,7 +94,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 182, 193, 0.4); /* 浅粉色滚动条 */
+  background-color: rgba(255, 182, 193, 0.4);
+  /* 浅粉色滚动条 */
   border-radius: 3px;
   transition: all 0.3s;
 }
@@ -123,16 +138,36 @@ h1, h2, h3, h4, h5, h6 {
 
 .context-view.monaco-menu-container * {
   font-family:
-    PingFang SC,
-    'Aa偷吃可爱长大的',
-    Helvetica Neue,
-    Microsoft YaHei,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    'PingFang SC',
+    'Microsoft YaHei',
     sans-serif !important;
 }
 
 .ql-hidden {
   @apply hidden;
 }
+
 .ql-editor img {
   @apply inline-block;
+}
+
+/* GPU-accelerated navigation indicator animation */
+@keyframes nav-indicator-spin {
+  0% {
+    transform: rotate(0deg) translateZ(0);
+  }
+
+  100% {
+    transform: rotate(360deg) translateZ(0);
+  }
+}
+
+.animate-nav-spin {
+  animation: nav-indicator-spin 2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  will-change: transform;
+  backface-visibility: hidden;
+  perspective: 1000px;
 }

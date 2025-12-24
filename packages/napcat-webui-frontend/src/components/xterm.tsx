@@ -42,7 +42,7 @@ const XTerm = forwardRef<XTermRef, XTermProps>((props, ref) => {
     const terminal = new Terminal({
       allowTransparency: true,
       fontFamily:
-        '"JetBrains Mono", "Aa偷吃可爱长大的", "Noto Serif SC", monospace',
+        'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", "JetBrains Mono", monospace',
       cursorInactiveStyle: 'outline',
       drawBoldTextInBrightColors: false,
       fontSize: fontSize,
