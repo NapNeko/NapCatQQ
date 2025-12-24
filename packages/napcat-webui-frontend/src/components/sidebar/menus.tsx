@@ -97,11 +97,12 @@ const renderItems = (items: MenuItem[], children = false) => {
               : (
                 <div
                   className={clsx(
-                    'w-3 h-1.5 rounded-full ml-auto shadow-lg',
+                    'w-3 h-1.5 rounded-full ml-auto',
                     isActive
-                      ? 'bg-primary-500 animate-spinner-ease-spin'
-                      : 'bg-primary-200 dark:bg-white'
+                      ? 'bg-primary-500 animate-nav-spin'
+                      : 'bg-primary-200 dark:bg-white shadow-lg'
                   )}
+                  aria-hidden="true"
                 />
               )
           }

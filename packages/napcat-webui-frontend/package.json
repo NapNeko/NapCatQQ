@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --host=0.0.0.0",
     "build": "tsc && vite build",
+    "fontmin": "node scripts/fontmin.cjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint -c eslint.config.mjs ./src/**/**/*.{ts,tsx} --fix",
     "preview": "vite preview"
@@ -49,7 +50,6 @@
     "@monaco-editor/react": "4.7.0-rc.0",
     "@react-aria/visually-hidden": "^3.8.19",
     "@reduxjs/toolkit": "^2.5.1",
-    "@simplewebauthn/browser": "^13.2.2",
     "@uidotdev/usehooks": "^2.4.1",
     "@xterm/addon-canvas": "^0.7.0",
     "@xterm/addon-fit": "^0.10.0",
@@ -60,7 +60,6 @@
     "clsx": "^2.1.1",
     "crypto-js": "^4.2.0",
     "event-source-polyfill": "^1.0.31",
-    "framer-motion": "^12.0.6",
     "monaco-editor": "^0.52.2",
     "motion": "^12.0.6",
     "path-browserify": "^1.0.1",
@@ -78,7 +77,6 @@
     "react-markdown": "^9.0.3",
     "react-photo-view": "^1.2.7",
     "react-redux": "^9.2.0",
-    "react-responsive": "^10.0.0",
     "react-router-dom": "^7.1.4",
     "react-use-websocket": "^4.11.1",
     "react-window": "^1.8.11",
@@ -110,8 +108,11 @@
     "prettier": "^3.4.2",
     "typescript": "^5.7.3",
     "vite": "^6.0.5",
+    "vite-plugin-font": "^5.1.2",
     "vite-plugin-static-copy": "^2.2.0",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^5.1.4",
+    "fontmin": "^0.9.9",
+    "glob": "^10.3.10"
   },
   "overrides": {
     "ahooks": {

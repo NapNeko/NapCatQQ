@@ -16,7 +16,20 @@ export default {
     },
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        mono: [
+          'ui-monospace',
+          'SFMono-Regular',
+          'SF Mono',
+          'Menlo',
+          'Consolas',
+          'Liberation Mono',
+          'JetBrains Mono',
+          'monospace',
+        ],
+      },
+    },
   },
   darkMode: 'class',
   plugins: [
