@@ -23,7 +23,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@heroui/accordion": "^2.2.8",
     "@heroui/avatar": "2.2.7",
-    "@heroui/breadcrumbs": "2.2.7",
+    "@heroui/breadcrumbs": "2.2.24",
     "@heroui/button": "2.2.10",
     "@heroui/card": "2.2.10",
     "@heroui/checkbox": "2.3.9",
