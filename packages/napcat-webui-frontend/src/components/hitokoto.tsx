@@ -19,7 +19,6 @@ export default function Hitokoto () {
     loading,
     run,
   } = useRequest(() => request.get<IHitokoto>('https://hitokoto.152710.xyz/'), {
-    pollingInterval: 10000,
     throttleWait: 1000,
   });
   const backupData = {
