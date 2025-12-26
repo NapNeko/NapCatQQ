@@ -749,26 +749,31 @@ export class OneBotMsgApi {
 
     [OB11MessageDataType.music]: async ({ data }, context) => {
       // 保留, 直到...找到更好的解决方案
+      const supportedPlatforms = ['qq', '163', 'kugou', 'kuwo', 'migu'];
+      const supportedPlatformsWithCustom = [...supportedPlatforms, 'custom'];
+
+      // 验证音乐类型
       if (data.id !== undefined) {
-        if (!['qq', '163', 'kugou', 'kuwo', 'migu'].includes(data.type)) {
-          this.core.context.logger.logError('音乐卡片type错误, 只支持qq、163、kugou、kuwo、migu，当前type:', data.type);
+        if (!supportedPlatforms.includes(data.type)) {
+          this.core.context.logger.logError(`[音乐卡片] type参数错误: "${data.type}"，仅支持: ${supportedPlatforms.join('、')}`);
           return undefined;
         }
       } else {
-        if (!['qq', '163', 'kugou', 'kuwo', 'migu', 'custom'].includes(data.type)) {
-          this.core.context.logger.logError('音乐卡片type错误, 只支持qq、163、kugou、kuwo、migu、custom，当前type:', data.type);
+        if (!supportedPlatformsWithCustom.includes(data.type)) {
+          this.core.context.logger.logError(`[音乐卡片] type参数错误: "${data.type}"，仅支持: ${supportedPlatformsWithCustom.join('、')}`);
           return undefined;
         }
         if (!data.url) {
-          this.core.context.logger.logError('自定义音卡缺少参数url');
+          this.core.context.logger.logError('[音乐卡片] 自定义音乐卡片缺少必需参数: url');
           return undefined;
         }
         if (!data.image) {
-          this.core.context.logger.logError('自定义音卡缺少参数image');
+          this.core.context.logger.logError('[音乐卡片] 自定义音乐卡片缺少必需参数: image');
           return undefined;
         }
       }
 
+      // 构建请求数据
       let postData: IdMusicSignPostData | CustomMusicSignPostData;
       if (data.id === undefined && data.content) {
         const { content, ...others } = data;
@@ -776,11 +781,14 @@ export class OneBotMsgApi {
       } else {
         postData = data;
       }
+
+      // 获取签名服务地址
       let signUrl = this.obContext.configLoader.configData.musicSignUrl;
       if (!signUrl) {
         signUrl = 'https://ss.xingzhige.com/music_card/card';// 感谢思思！已获思思许可 其余地方使用请自行询问
-        // throw Error('音乐消息签名地址未配置');
       }
+
+      // 请求签名服务
       try {
         const musicJson = await RequestUtil.HttpGetJson<string>(signUrl, 'POST', postData);
         return this.ob11ToRawConverters.json({
@@ -788,9 +796,16 @@ export class OneBotMsgApi {
           type: OB11MessageDataType.json,
         }, context);
       } catch (e) {
-        this.core.context.logger.logError('生成音乐消息失败', e);
+        const errorMessage = e instanceof Error ? e.message : String(e);
+        this.core.context.logger.logError(
+          '[音乐卡片签名失败] 签名服务请求出错!\n' +
+          `  ├─ 音乐类型: ${data.type}\n` +
+          `  ├─ 音乐ID: ${data.id ?? '自定义'}\n` +
+          `  ├─ 错误信息: ${errorMessage}\n` +
+          '  └─ 提示: 请检查网络连接，或尝试在配置中更换其他音乐签名服务地址(musicSignUrl)'
+        );
+        return undefined;
       }
-      return undefined;
     },
 
     [OB11MessageDataType.node]: async () => undefined,
