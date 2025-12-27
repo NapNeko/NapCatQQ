@@ -1,3 +1,4 @@
+/* eslint-disable @stylistic/indent */
 import { BreadcrumbItem, Breadcrumbs } from '@heroui/breadcrumbs';
 import { Button } from '@heroui/button';
 import { Input } from '@heroui/input';
@@ -320,9 +321,9 @@ export default function FileManagerPage () {
     }
   };
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
-    noClick: true,
+    noClick: true, // 禁用自动点击，使用 open() 手动触发
     onDragOver: (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -340,7 +341,8 @@ export default function FileManagerPage () {
         hasBackground
           ? 'bg-white/20 dark:bg-black/10 border border-white/40 dark:border-white/10'
           : 'bg-white/60 dark:bg-black/40 border border-white/40 dark:border-white/10'
-      )}>
+      )}
+      >
         <div className='flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 md:pb-0'>
           <Button
             color='primary'
@@ -470,7 +472,7 @@ export default function FileManagerPage () {
         animate={{ height: showUpload ? 'auto' : 0 }}
         transition={{ duration: 0.2 }}
         className={clsx(
-          'border-dashed rounded-lg text-center',
+          'border-dashed rounded-lg text-center overflow-hidden',
           isDragActive ? 'border-primary bg-primary/10' : 'border-default-300',
           showUpload ? 'mb-4 border-2' : 'border-none'
         )}
@@ -479,9 +481,15 @@ export default function FileManagerPage () {
           e.stopPropagation();
         }}
       >
-        <div {...getRootProps()} className='w-full h-full p-4'>
+        <div {...getRootProps()} className='w-full h-full p-4 cursor-pointer hover:bg-default-100 transition-colors'>
           <input {...getInputProps()} multiple />
-          <p>拖拽文件或文件夹到此处上传，或点击选择文件</p>
+          <div className='flex flex-col items-center gap-2'>
+            <FiUpload className='text-3xl text-primary' />
+            <p className='text-default-600'>拖拽文件到此处上传</p>
+            <Button color='primary' size='sm' variant='flat' onPress={open}>
+              点击选择文件
+            </Button>
+          </div>
         </div>
       </motion.div>
 
