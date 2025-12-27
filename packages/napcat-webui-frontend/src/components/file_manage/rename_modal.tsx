@@ -9,11 +9,11 @@ import {
 } from '@heroui/modal';
 
 interface RenameModalProps {
-  isOpen: boolean
-  newFileName: string
-  onNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  onClose: () => void
-  onRename: () => void
+  isOpen: boolean;
+  newFileName: string;
+  onNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onClose: () => void;
+  onRename: () => void;
 }
 
 export default function RenameModal ({
@@ -24,17 +24,17 @@ export default function RenameModal ({
   onRename,
 }: RenameModalProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal radius='sm' isOpen={isOpen} onClose={onClose}>
       <ModalContent>
         <ModalHeader>重命名</ModalHeader>
         <ModalBody>
-          <Input label='新名称' value={newFileName} onChange={onNameChange} />
+          <Input radius='sm' label='新名称' value={newFileName} onChange={onNameChange} />
         </ModalBody>
         <ModalFooter>
-          <Button color='primary' variant='flat' onPress={onClose}>
+          <Button radius='sm' color='primary' variant='flat' onPress={onClose}>
             取消
           </Button>
-          <Button color='primary' onPress={onRename}>
+          <Button radius='sm' color='primary' onPress={onRename}>
             确定
           </Button>
         </ModalFooter>

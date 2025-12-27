@@ -10,17 +10,17 @@ import FileManager from '@/controllers/file_manager';
 import FileIcon from '../file_icon';
 
 export interface PreviewImage {
-  key: string
-  src: string
-  alt: string
+  key: string;
+  src: string;
+  alt: string;
 }
 export const imageExts = ['.png', '.jpg', '.jpeg', '.gif', '.bmp'];
 
 export interface ImageNameButtonProps {
-  name: string
-  filePath: string
-  onPreview: () => void
-  onAddPreview: (image: PreviewImage) => void
+  name: string;
+  filePath: string;
+  onPreview: () => void;
+  onAddPreview: (image: PreviewImage) => void;
 }
 
 export default function ImageNameButton ({
@@ -61,6 +61,7 @@ export default function ImageNameButton ({
 
   return (
     <Button
+      radius='sm'
       variant='light'
       className='text-left justify-start'
       onPress={onPreview}

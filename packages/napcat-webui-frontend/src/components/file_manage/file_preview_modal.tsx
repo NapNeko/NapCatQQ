@@ -14,9 +14,9 @@ import { useEffect } from 'react';
 import FileManager from '@/controllers/file_manager';
 
 interface FilePreviewModalProps {
-  isOpen: boolean
-  filePath: string
-  onClose: () => void
+  isOpen: boolean;
+  filePath: string;
+  onClose: () => void;
 }
 
 export const videoExts = ['.mp4', '.webm'];
@@ -75,14 +75,14 @@ export default function FilePreviewModal ({
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} scrollBehavior='inside' size='3xl'>
+    <Modal radius='sm' isOpen={isOpen} onClose={onClose} scrollBehavior='inside' size='3xl'>
       <ModalContent>
         <ModalHeader>文件预览</ModalHeader>
         <ModalBody className='flex justify-center items-center'>
           {contentElement}
         </ModalBody>
         <ModalFooter>
-          <Button color='primary' variant='flat' onPress={onClose}>
+          <Button radius='sm' color='primary' variant='flat' onPress={onClose}>
             关闭
           </Button>
         </ModalFooter>

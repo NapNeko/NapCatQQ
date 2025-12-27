@@ -1,3 +1,5 @@
+/* eslint-disable @stylistic/jsx-closing-bracket-location */
+/* eslint-disable @stylistic/jsx-closing-tag-location */
 import { Button } from '@heroui/button';
 import { Tooltip } from '@heroui/tooltip';
 import { useLocalStorage } from '@uidotdev/usehooks';
@@ -40,30 +42,36 @@ export default function Hitokoto () {
     }
   };
   return (
-    <div>
-      <div className='relative flex flex-col items-center justify-center p-6 min-h-[120px]'>
+    <div className='overflow-hidden'>
+      <div className='relative flex flex-col items-center justify-center p-4 md:p-6'>
         {loading && !data && <PageLoading />}
         {data && (
           <>
             <IoMdQuote className={clsx(
-              "text-4xl mb-4",
-              hasBackground ? "text-white/30" : "text-primary/20"
-            )} />
+              'text-4xl mb-4',
+              hasBackground ? 'text-white/30' : 'text-primary/20'
+            )}
+            />
             <div className={clsx(
-              "text-xl font-medium tracking-wide leading-relaxed italic",
-              hasBackground ? "text-white drop-shadow-sm" : "text-default-700 dark:text-gray-200"
-            )}>
+              'text-xl font-medium tracking-wide leading-relaxed italic',
+              hasBackground ? 'text-white drop-shadow-sm' : 'text-default-700 dark:text-gray-200'
+            )}
+            >
               " {data?.hitokoto} "
             </div>
             <div className='mt-4 flex flex-col items-center text-sm'>
               <span className={clsx(
                 'font-bold',
                 hasBackground ? 'text-white/90' : 'text-primary-500/80'
-              )}>—— {data?.from}</span>
+              )}
+              >—— {data?.from}
+              </span>
               {data?.from_who && <span className={clsx(
-                "text-xs mt-1",
-                hasBackground ? "text-white/70" : "text-default-400"
-              )}>{data?.from_who}</span>}
+                'text-xs mt-1',
+                hasBackground ? 'text-white/70' : 'text-default-400'
+              )}
+              >                {data?.from_who}
+              </span>}
             </div>
           </>
         )}
@@ -72,8 +80,8 @@ export default function Hitokoto () {
         <Tooltip content='刷新' placement='top'>
           <Button
             className={clsx(
-              "transition-colors",
-              hasBackground ? "text-white/60 hover:text-white" : "text-default-400 hover:text-primary"
+              'transition-colors',
+              hasBackground ? 'text-white/60 hover:text-white' : 'text-default-400 hover:text-primary'
             )}
             onPress={run}
             size='sm'
@@ -88,8 +96,8 @@ export default function Hitokoto () {
         <Tooltip content='复制' placement='top'>
           <Button
             className={clsx(
-              "transition-colors",
-              hasBackground ? "text-white/60 hover:text-white" : "text-default-400 hover:text-success"
+              'transition-colors',
+              hasBackground ? 'text-white/60 hover:text-white' : 'text-default-400 hover:text-success'
             )}
             onPress={onCopy}
             size='sm'

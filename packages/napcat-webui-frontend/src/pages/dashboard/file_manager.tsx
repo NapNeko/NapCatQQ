@@ -337,7 +337,7 @@ export default function FileManagerPage () {
   return (
     <div className='h-full flex flex-col relative gap-4 w-full p-2 md:p-4'>
       <div className={clsx(
-        'mb-4 flex flex-col md:flex-row items-stretch md:items-center gap-4 sticky top-14 z-10 backdrop-blur-sm shadow-sm py-2 px-4 rounded-xl transition-colors',
+        'mb-4 flex flex-col md:flex-row items-stretch md:items-center gap-4 sticky top-14 z-10 backdrop-blur-sm shadow-sm py-2 px-4 rounded-sm transition-colors',
         hasBackground
           ? 'bg-white/20 dark:bg-black/10 border border-white/40 dark:border-white/10'
           : 'bg-white/60 dark:bg-black/40 border border-white/40 dark:border-white/10'
@@ -345,6 +345,7 @@ export default function FileManagerPage () {
       >
         <div className='flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1 md:pb-0'>
           <Button
+            radius='sm'
             color='primary'
             size='sm'
             isIconOnly
@@ -356,6 +357,7 @@ export default function FileManagerPage () {
           </Button>
 
           <Button
+            radius='sm'
             color='primary'
             size='sm'
             isIconOnly
@@ -367,6 +369,7 @@ export default function FileManagerPage () {
           </Button>
 
           <Button
+            radius='sm'
             color='primary'
             isLoading={loading}
             size='sm'
@@ -378,6 +381,7 @@ export default function FileManagerPage () {
             <MdRefresh />
           </Button>
           <Button
+            radius='sm'
             color='primary'
             size='sm'
             isIconOnly
@@ -392,6 +396,7 @@ export default function FileManagerPage () {
             selectedFiles === 'all') && (
               <>
                 <Button
+                  radius='sm'
                   color='primary'
                   size='sm'
                   variant='flat'
@@ -404,6 +409,7 @@ export default function FileManagerPage () {
                   )
                 </Button>
                 <Button
+                  radius='sm'
                   color='primary'
                   size='sm'
                   variant='flat'
@@ -419,6 +425,7 @@ export default function FileManagerPage () {
                   )
                 </Button>
                 <Button
+                  radius='sm'
                   color='primary'
                   size='sm'
                   variant='flat'
@@ -435,7 +442,10 @@ export default function FileManagerPage () {
         </div>
 
         <div className='flex flex-col md:flex-row flex-1 gap-2 overflow-hidden items-stretch md:items-center'>
-          <Breadcrumbs className='flex-1 bg-white/40 dark:bg-black/20 backdrop-blur-md shadow-sm border border-white/20 px-2 py-2 rounded-lg overflow-x-auto hide-scrollbar whitespace-nowrap'>
+          <Breadcrumbs
+            radius='sm'
+            className='flex-1 bg-white/40 dark:bg-black/20 backdrop-blur-md shadow-sm border border-white/20 px-2 py-2 rounded-sm overflow-x-auto hide-scrollbar whitespace-nowrap'
+          >
             {currentPath.split('/').map((part, index, parts) => (
               <BreadcrumbItem
                 key={part}
@@ -450,6 +460,7 @@ export default function FileManagerPage () {
             ))}
           </Breadcrumbs>
           <Input
+            radius='sm'
             type='text'
             placeholder='输入跳转路径'
             value={jumpPath}
@@ -472,7 +483,7 @@ export default function FileManagerPage () {
         animate={{ height: showUpload ? 'auto' : 0 }}
         transition={{ duration: 0.2 }}
         className={clsx(
-          'border-dashed rounded-lg text-center overflow-hidden',
+          'border-dashed rounded-sm text-center overflow-hidden',
           isDragActive ? 'border-primary bg-primary/10' : 'border-default-300',
           showUpload ? 'mb-4 border-2' : 'border-none'
         )}
@@ -486,7 +497,7 @@ export default function FileManagerPage () {
           <div className='flex flex-col items-center gap-2'>
             <FiUpload className='text-3xl text-primary' />
             <p className='text-default-600'>拖拽文件到此处上传</p>
-            <Button color='primary' size='sm' variant='flat' onPress={open}>
+            <Button radius='sm' color='primary' size='sm' variant='flat' onPress={open}>
               点击选择文件
             </Button>
           </div>

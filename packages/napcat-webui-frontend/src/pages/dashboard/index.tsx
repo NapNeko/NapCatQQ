@@ -102,7 +102,7 @@ const DashboardIndexPage: React.FC = () => {
   return (
     <>
       <title>基础信息 - NapCat WebUI</title>
-      <section className='w-full p-2 md:p-4 md:max-w-[1000px] mx-auto'>
+      <section className='w-full p-2 md:p-4 md:max-w-[1000px] mx-auto overflow-hidden'>
         <div className='grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch'>
           <div className='flex flex-col gap-2'>
             <QQInfo />
@@ -112,10 +112,11 @@ const DashboardIndexPage: React.FC = () => {
         </div>
         <Networks />
         <Card className={clsx(
-          'backdrop-blur-sm border border-white/40 dark:border-white/10 shadow-sm transition-all',
+          'backdrop-blur-sm border border-white/40 dark:border-white/10 shadow-sm transition-all overflow-hidden',
           hasBackground ? 'bg-white/10 dark:bg-black/10' : 'bg-white/60 dark:bg-black/40'
-        )}>
-          <CardBody>
+        )}
+        >
+          <CardBody className='overflow-hidden'>
             <Hitokoto />
           </CardBody>
         </Card>

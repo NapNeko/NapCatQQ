@@ -7,17 +7,17 @@ import { IoMdRefresh } from 'react-icons/io';
 import { isQQQuickNewItem } from '@/utils/qq';
 
 export interface QQItem {
-  uin: string
+  uin: string;
 }
 
 interface QuickLoginProps {
-  qqList: (QQItem | LoginListItem)[]
-  refresh: boolean
-  isLoading: boolean
-  selectedQQ: string
-  onUpdateQQList: () => void
-  handleSelectionChange: React.ChangeEventHandler<HTMLSelectElement>
-  onSubmit: () => void
+  qqList: (QQItem | LoginListItem)[];
+  refresh: boolean;
+  isLoading: boolean;
+  selectedQQ: string;
+  onUpdateQQList: () => void;
+  handleSelectionChange: React.ChangeEventHandler<HTMLSelectElement>;
+  onSubmit: () => void;
 }
 
 const QuickLogin: React.FC<QuickLoginProps> = ({

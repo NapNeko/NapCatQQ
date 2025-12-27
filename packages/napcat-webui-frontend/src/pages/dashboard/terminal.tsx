@@ -158,7 +158,7 @@ export default function TerminalPage () {
               variant='flat'
               onPress={createNewTerminal}
               startContent={<IoAdd />}
-              className='text-xl'
+              className='text-xl ml-auto'
             />
           </div>
           <div className='flex-grow overflow-hidden'>

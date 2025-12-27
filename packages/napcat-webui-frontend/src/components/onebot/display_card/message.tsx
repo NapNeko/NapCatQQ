@@ -13,18 +13,18 @@ import type {
 import { renderMessageContent } from '../render_message';
 
 export interface OneBotMessageProps {
-  data: OB11Message
+  data: OB11Message;
 }
 
 export interface OneBotMessageGroupProps {
-  data: OB11GroupMessage
+  data: OB11GroupMessage;
 }
 
 export interface OneBotMessagePrivateProps {
-  data: OB11PrivateMessage
+  data: OB11PrivateMessage;
 }
 
-const MessageContent: React.FC<{ data: OB11Message }> = ({ data }) => {
+const MessageContent: React.FC<{ data: OB11Message; }> = ({ data }) => {
   return (
     <div className='h-full flex flex-col overflow-hidden flex-1'>
       <div className='flex gap-2 items-center flex-shrink-0'>
@@ -35,8 +35,8 @@ const MessageContent: React.FC<{ data: OB11Message }> = ({ data }) => {
           <span
             className={clsx(
               isOB11GroupMessage(data) &&
-                data.sender.card &&
-                'text-default-400 font-normal'
+              data.sender.card &&
+              'text-default-400 font-normal'
             )}
           >
             {data.sender.nickname}
@@ -73,7 +73,7 @@ const OneBotMessageGroup: React.FC<OneBotMessageGroupProps> = ({ data }) => {
     <div className='h-full overflow-hidden flex flex-col w-full'>
       <div className='flex items-center p-1 flex-shrink-0'>
         <Avatar
-          src={`https://p.qlogo.cn/gh/${data.group_id}/${data.group_id}/640/`}
+          src={`https://p.qlogo.cn/gh/${data.group_id}/${data.group_id}/0/`}
           alt='群头像'
           size='sm'
           className='flex-shrink-0 mr-2'

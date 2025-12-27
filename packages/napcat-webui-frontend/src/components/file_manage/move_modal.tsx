@@ -83,15 +83,16 @@ function DirectoryTree ({
   return (
     <div className='ml-4'>
       <Button
+        radius='sm'
         onPress={handleClick}
-        className='py-1 px-2 text-left justify-start min-w-0 min-h-0 h-auto text-sm rounded-md'
+        className='py-1 px-2 text-left justify-start min-w-0 min-h-0 h-auto text-sm rounded-sm'
         size='sm'
         color='primary'
         variant={variant}
         startContent={
           <div
             className={clsx(
-              'rounded-md',
+              'rounded-sm',
               isSeleted ? 'bg-primary-600' : 'bg-primary-50'
             )}
           >
@@ -140,11 +141,11 @@ export default function MoveModal ({
   onSelect,
 }: MoveModalProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal radius='sm' isOpen={isOpen} onClose={onClose}>
       <ModalContent>
         <ModalHeader>选择目标目录</ModalHeader>
         <ModalBody>
-          <div className='rounded-md p-2 border border-default-300 overflow-auto max-h-60'>
+          <div className='rounded-sm p-2 border border-default-300 overflow-auto max-h-60'>
             <DirectoryTree
               basePath='/'
               onSelect={onSelect}
@@ -157,10 +158,10 @@ export default function MoveModal ({
           <p className='text-sm text-default-500'>移动项：{selectionInfo}</p>
         </ModalBody>
         <ModalFooter>
-          <Button color='primary' variant='flat' onPress={onClose}>
+          <Button radius='sm' color='primary' variant='flat' onPress={onClose}>
             取消
           </Button>
-          <Button color='primary' onPress={onMove}>
+          <Button radius='sm' color='primary' onPress={onMove}>
             确定
           </Button>
         </ModalFooter>
