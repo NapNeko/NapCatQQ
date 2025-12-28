@@ -1,0 +1,252 @@
+# =============================================================================
+# PR 构建工作流
+# =============================================================================
+# 功能：
+#   1. 在 PR 提交时自动构建 Framework 和 Shell 包
+#   2. 支持通过 /build 命令手动触发构建（仅协作者/组织成员）
+#   3. 在 PR 中发布构建状态评论，并持续更新（不会重复创建）
+#   4. 支持 Fork PR 的构建（使用 pull_request_target 获取写权限）
+#
+# 安全说明：
+#   - 使用 pull_request_target 事件，在 base 分支上下文运行
+#   - 构建脚本始终从 base 分支 checkout，避免恶意 PR 篡改脚本
+#   - PR 代码单独 checkout 到 workspace 目录
+# =============================================================================
+
+name: PR Build
+
+# =============================================================================
+# 触发条件
+# =============================================================================
+on:
+  # PR 事件：打开、同步（新推送）、重新打开时触发
+  # 注意：使用 pull_request_target 而非 pull_request，以便对 Fork PR 有写权限
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+  # Issue 评论事件：用于响应 /build 命令
+  issue_comment:
+    types: [created]
+
+# =============================================================================
+# 权限配置
+# =============================================================================
+permissions:
+  contents: read # 读取仓库内容
+  pull-requests: write # 写入 PR 评论
+  issues: write # 写入 Issue 评论（/build 命令响应）
+  actions: read # 读取 Actions 信息（获取构建日志链接）
+
+# =============================================================================
+# 并发控制
+# =============================================================================
+# 同一 PR 的多次构建会取消之前未完成的构建，避免资源浪费
+concurrency:
+  group: pr-build-${{ github.event.pull_request.number || github.event.issue.number || github.run_id }}
+  cancel-in-progress: true
+
+# =============================================================================
+# 任务定义
+# =============================================================================
+jobs:
+  # ---------------------------------------------------------------------------
+  # Job 1: 检查构建条件
+  # ---------------------------------------------------------------------------
+  # 判断是否应该触发构建：
+  #   - pull_request_target 事件：总是触发
+  #   - issue_comment 事件：检查是否为 /build 命令，且用户有权限
+  # ---------------------------------------------------------------------------
+  check-build:
+    runs-on: ubuntu-latest
+    outputs:
+      should_build: ${{ steps.check.outputs.should_build }} # 是否应该构建
+      pr_number: ${{ steps.check.outputs.pr_number }} # PR 编号
+      pr_sha: ${{ steps.check.outputs.pr_sha }} # PR 最新提交 SHA
+      pr_head_repo: ${{ steps.check.outputs.pr_head_repo }} # PR 源仓库（用于 Fork）
+      pr_head_ref: ${{ steps.check.outputs.pr_head_ref }} # PR 源分支
+    steps:
+      # 仅 checkout 脚本目录，加快速度
+      - name: Checkout scripts
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+          sparse-checkout-cone-mode: false
+
+      # 使用 Node.js 24 以支持原生 TypeScript 执行
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # 执行检查脚本，判断是否触发构建
+      - name: Check trigger condition
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node --experimental-strip-types .github/scripts/pr-build-check.ts
+
+  # ---------------------------------------------------------------------------
+  # Job 2: 更新评论为"构建中"状态
+  # ---------------------------------------------------------------------------
+  # 在 PR 中创建或更新评论，显示构建正在进行中
+  # ---------------------------------------------------------------------------
+  update-comment-building:
+    needs: check-build
+    if: needs.check-build.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout scripts
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+          sparse-checkout-cone-mode: false
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # 更新 PR 评论，显示构建中状态
+      - name: Update building comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ needs.check-build.outputs.pr_number }}
+          PR_SHA: ${{ needs.check-build.outputs.pr_sha }}
+        run: node --experimental-strip-types .github/scripts/pr-build-building.ts
+
+  # ---------------------------------------------------------------------------
+  # Job 3: 构建 Framework 包
+  # ---------------------------------------------------------------------------
+  # 执行 napcat-framework 的构建流程
+  # ---------------------------------------------------------------------------
+  build-framework:
+    needs: [check-build, update-comment-building]
+    if: needs.check-build.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.build.outcome }} # 构建结果：success/failure
+      error: ${{ steps.build.outputs.error }} # 错误信息（如有）
+    steps:
+      # 【安全】先从 base 分支 checkout 构建脚本
+      # 这样即使 PR 中修改了脚本，也不会被执行
+      - name: Checkout scripts from base
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+          sparse-checkout-cone-mode: false
+          path: _scripts
+
+      # 将 PR 代码 checkout 到单独的 workspace 目录
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ needs.check-build.outputs.pr_head_repo }}
+          ref: ${{ needs.check-build.outputs.pr_sha }}
+          path: workspace
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # 执行构建，使用 base 分支的脚本处理 workspace 中的代码
+      - name: Build
+        id: build
+        working-directory: workspace
+        run: node --experimental-strip-types ../_scripts/.github/scripts/pr-build-run.ts framework
+        continue-on-error: true # 允许失败，后续更新评论时处理
+
+      # 构建成功时上传产物
+      - name: Upload Artifact
+        if: steps.build.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: NapCat.Framework
+          path: workspace/framework-dist
+          retention-days: 7 # 保留 7 天
+
+  # ---------------------------------------------------------------------------
+  # Job 4: 构建 Shell 包
+  # ---------------------------------------------------------------------------
+  # 执行 napcat-shell 的构建流程（与 Framework 并行执行）
+  # ---------------------------------------------------------------------------
+  build-shell:
+    needs: [check-build, update-comment-building]
+    if: needs.check-build.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.build.outcome }} # 构建结果：success/failure
+      error: ${{ steps.build.outputs.error }} # 错误信息（如有）
+    steps:
+      # 【安全】先从 base 分支 checkout 构建脚本
+      - name: Checkout scripts from base
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+          sparse-checkout-cone-mode: false
+          path: _scripts
+
+      # 将 PR 代码 checkout 到单独的 workspace 目录
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ needs.check-build.outputs.pr_head_repo }}
+          ref: ${{ needs.check-build.outputs.pr_sha }}
+          path: workspace
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # 执行构建
+      - name: Build
+        id: build
+        working-directory: workspace
+        run: node --experimental-strip-types ../_scripts/.github/scripts/pr-build-run.ts shell
+        continue-on-error: true
+
+      # 构建成功时上传产物
+      - name: Upload Artifact
+        if: steps.build.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: NapCat.Shell
+          path: workspace/shell-dist
+          retention-days: 7 # 保留 7 天
+
+  # ---------------------------------------------------------------------------
+  # Job 5: 更新评论为构建结果
+  # ---------------------------------------------------------------------------
+  # 汇总所有构建结果，更新 PR 评论显示最终状态
+  # 使用 always() 确保即使构建失败/取消也会执行
+  # ---------------------------------------------------------------------------
+  update-comment-result:
+    needs: [check-build, update-comment-building, build-framework, build-shell]
+    if: always() && needs.check-build.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout scripts
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+          sparse-checkout-cone-mode: false
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # 更新评论，显示构建结果和下载链接
+      - name: Update result comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ needs.check-build.outputs.pr_number }}
+          PR_SHA: ${{ needs.check-build.outputs.pr_sha }}
+          RUN_ID: ${{ github.run_id }}
+          # 获取构建状态，如果 job 被跳过则标记为 cancelled
+          FRAMEWORK_STATUS: ${{ needs.build-framework.outputs.status || 'cancelled' }}
+          FRAMEWORK_ERROR: ${{ needs.build-framework.outputs.error }}
+          SHELL_STATUS: ${{ needs.build-shell.outputs.status || 'cancelled' }}
+          SHELL_ERROR: ${{ needs.build-shell.outputs.error }}
+        run: node --experimental-strip-types .github/scripts/pr-build-result.ts
