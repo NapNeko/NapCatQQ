@@ -15,8 +15,12 @@ import { NapProtoMsg } from 'napcat-protobuf';
 import * as proto from '@/napcat-core/packet/transformer/proto';
 import * as trans from '@/napcat-core/packet/transformer';
 import fs from 'fs';
+import path from 'path';
 import { NapCoreContext } from '@/napcat-core/packet/context/napCoreContext';
 import { PacketClientContext } from '@/napcat-core/packet/context/clientContext';
+import { FFmpegService } from '@/napcat-core/helper/ffmpeg/ffmpeg';
+import { defaultVideoThumbB64 } from '@/napcat-core/helper/ffmpeg/video';
+import { calculateFileMD5 } from 'napcat-common/src/file';
 
 export const BlockSize = 1024 * 1024;
 
@@ -105,13 +109,74 @@ export class PacketHighwayContext {
     if (+(video.fileSize ?? 0) > 1024 * 1024 * 100) {
       throw new Error(`[Highway] 视频文件过大: ${(+(video.fileSize ?? 0) / (1024 * 1024)).toFixed(2)} MB > 100 MB，请使用文件上传！`);
     }
-    if (peer.chatType === ChatType.KCHATTYPEGROUP) {
-      await this.uploadGroupVideo(+peer.peerUid, video);
-    } else if (peer.chatType === ChatType.KCHATTYPEC2C) {
-      await this.uploadC2CVideo(peer.peerUid, video);
-    } else {
-      throw new Error(`[Highway] unsupported chatType: ${peer.chatType}`);
+
+    // 如果缺少视频缩略图，自动生成一个
+    let tempThumbPath: string | null = null;
+    if (!video.thumbPath || !fs.existsSync(video.thumbPath)) {
+      tempThumbPath = await this.ensureVideoThumb(video);
     }
+
+    try {
+      if (peer.chatType === ChatType.KCHATTYPEGROUP) {
+        await this.uploadGroupVideo(+peer.peerUid, video);
+      } else if (peer.chatType === ChatType.KCHATTYPEC2C) {
+        await this.uploadC2CVideo(peer.peerUid, video);
+      } else {
+        throw new Error(`[Highway] unsupported chatType: ${peer.chatType}`);
+      }
+    } finally {
+      // 清理临时生成的缩略图文件
+      if (tempThumbPath && fs.existsSync(tempThumbPath)) {
+        const thumbToClean = tempThumbPath;
+        fs.promises.unlink(thumbToClean)
+          .then(() => this.logger.debug(`[Highway] Cleaned up temp thumbnail: ${thumbToClean}`))
+          .catch((e) => this.logger.warn(`[Highway] Failed to clean up temp thumbnail: ${thumbToClean}, reason: ${e instanceof Error ? e.message : e}`));
+      }
+    }
+  }
+
+  /**
+   * 确保视频缩略图存在，如果不存在则自动生成
+   * @returns 生成的临时缩略图路径，用于后续清理
+   */
+  private async ensureVideoThumb (video: PacketMsgVideoElement): Promise<string> {
+    if (!video.filePath) {
+      throw new Error('video.filePath is empty, cannot generate thumbnail');
+    }
+
+    // 生成缩略图路径
+    const videoDir = path.dirname(video.filePath);
+    const videoBasename = path.basename(video.filePath, path.extname(video.filePath));
+    const thumbPath = path.join(videoDir, `${videoBasename}_thumb.png`);
+
+    this.logger.debug(`[Highway] Video thumb missing, generating at: ${thumbPath}`);
+
+    try {
+      // 尝试使用 FFmpeg 提取视频缩略图
+      await FFmpegService.extractThumbnail(video.filePath, thumbPath);
+      if (fs.existsSync(thumbPath)) {
+        this.logger.debug('[Highway] Video thumbnail generated successfully using FFmpeg');
+      } else {
+        throw new Error('FFmpeg failed to generate thumbnail');
+      }
+    } catch (e) {
+      // FFmpeg 失败时（包括未初始化的情况）使用默认缩略图
+      this.logger.warn(`[Highway] Failed to extract thumbnail, using default. Reason: ${e instanceof Error ? e.message : e}`);
+      fs.writeFileSync(thumbPath, Buffer.from(defaultVideoThumbB64, 'base64'));
+    }
+
+    // 更新视频元素的缩略图信息
+    video.thumbPath = thumbPath;
+    const thumbStat = fs.statSync(thumbPath);
+    video.thumbSize = thumbStat.size;
+    video.thumbMd5 = await calculateFileMD5(thumbPath);
+    // 默认缩略图尺寸（与 defaultVideoThumbB64 匹配的尺寸）
+    if (!video.thumbWidth) video.thumbWidth = 240;
+    if (!video.thumbHeight) video.thumbHeight = 383;
+
+    this.logger.debug(`[Highway] Video thumb info set: path=${thumbPath}, size=${video.thumbSize}, md5=${video.thumbMd5}`);
+
+    return thumbPath;
   }
 
   async uploadPtt (peer: Peer, ptt: PacketMsgPttElement): Promise<void> {
