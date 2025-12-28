@@ -13,7 +13,8 @@
  */
 
 import { GitHubAPI, getEnv, getRepository } from './lib/github.ts';
-import { generateResultComment, COMMENT_MARKER, BuildTarget, BuildStatus } from './lib/comment.ts';
+import { generateResultComment, COMMENT_MARKER } from './lib/comment.ts';
+import type { BuildTarget, BuildStatus } from './lib/comment.ts';
 
 function parseStatus (value: string | undefined): BuildStatus {
   if (value === 'success' || value === 'failure' || value === 'cancelled') {

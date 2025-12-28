@@ -11,7 +11,8 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { GitHubAPI, getEnv, getRepository, setOutput, PullRequest } from './lib/github.ts';
+import { GitHubAPI, getEnv, getRepository, setOutput } from './lib/github.ts';
+import type { PullRequest } from './lib/github.ts';
 
 // ============== 类型定义 ==============
 
