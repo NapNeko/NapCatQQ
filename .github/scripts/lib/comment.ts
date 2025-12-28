@@ -10,6 +10,7 @@ export interface BuildTarget {
   name: string;
   status: BuildStatus;
   error?: string;
+  downloadUrl?: string;  // Artifact 直接下载链接
 }
 
 // ============== 辅助函数 ==============
@@ -70,8 +71,8 @@ export function generateResultComment (
   runId: string,
   repository: string
 ): string {
-  const artifactUrl = `https://github.com/${repository}/actions/runs/${runId}/artifacts`;
-  const logUrl = `https://github.com/${repository}/actions/runs/${runId}`;
+  // 链接到 run 详情页，页面底部有 Artifacts 下载区域
+  const runUrl = `https://github.com/${repository}/actions/runs/${runId}`;
 
   const allSuccess = targets.every(t => t.status === 'success');
   const anyCancelled = targets.some(t => t.status === 'cancelled');
@@ -82,8 +83,14 @@ export function generateResultComment (
       ? '⚪ 构建已取消'
       : '❌ 构建失败';
 
-  const downloadLink = (status: BuildStatus) =>
-    status === 'success' ? `[📦 下载](${artifactUrl})` : '—';
+  const downloadLink = (target: BuildTarget) => {
+    if (target.status !== 'success') return '—';
+    if (target.downloadUrl) {
+      return `[📦 下载](${target.downloadUrl})`;
+    }
+    // 回退到 run 详情页
+    return `[📦 下载](${runUrl}#artifacts)`;
+  };
 
   const lines: string[] = [
     COMMENT_MARKER,
@@ -91,12 +98,12 @@ export function generateResultComment (
     '',
     '| 构建目标 | 状态 | 下载 |',
     '| :--- | :--- | :--- |',
-    ...targets.map(t => `| ${t.name} | ${getStatusIcon(t.status)} | ${downloadLink(t.status)} |`),
+    ...targets.map(t => `| ${t.name} | ${getStatusIcon(t.status)} | ${downloadLink(t)} |`),
     '',
     '---',
     '',
     `📝 **提交**: \`${formatSha(prSha)}\``,
-    `🔗 **构建日志**: [查看详情](${logUrl})`,
+    `🔗 **构建日志**: [查看详情](${runUrl})`,
   ];
 
   // 添加错误详情

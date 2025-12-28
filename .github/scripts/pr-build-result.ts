@@ -43,13 +43,39 @@ async function main (): Promise<void> {
   console.log(`Framework: ${frameworkStatus}${frameworkError ? ` (${frameworkError})` : ''}`);
   console.log(`Shell: ${shellStatus}${shellError ? ` (${shellError})` : ''}\n`);
 
-  const targets: BuildTarget[] = [
-    { name: 'NapCat.Framework', status: frameworkStatus, error: frameworkError },
-    { name: 'NapCat.Shell', status: shellStatus, error: shellError },
-  ];
-
   const github = new GitHubAPI(token);
   const repository = `${owner}/${repo}`;
+
+  // 获取 artifacts 列表，生成直接下载链接
+  const artifactMap: Record<string, string> = {};
+  try {
+    const artifacts = await github.getRunArtifacts(owner, repo, runId);
+    console.log(`Found ${artifacts.length} artifacts`);
+    for (const artifact of artifacts) {
+      // 生成直接下载链接：https://github.com/{owner}/{repo}/actions/runs/{run_id}/artifacts/{artifact_id}
+      const downloadUrl = `https://github.com/${repository}/actions/runs/${runId}/artifacts/${artifact.id}`;
+      artifactMap[artifact.name] = downloadUrl;
+      console.log(`  - ${artifact.name}: ${downloadUrl}`);
+    }
+  } catch (e) {
+    console.log(`Warning: Failed to get artifacts: ${(e as Error).message}`);
+  }
+
+  const targets: BuildTarget[] = [
+    {
+      name: 'NapCat.Framework',
+      status: frameworkStatus,
+      error: frameworkError,
+      downloadUrl: artifactMap['NapCat.Framework'],
+    },
+    {
+      name: 'NapCat.Shell',
+      status: shellStatus,
+      error: shellError,
+      downloadUrl: artifactMap['NapCat.Shell'],
+    },
+  ];
+
   const comment = generateResultComment(targets, prSha, runId, repository);
 
   await github.createOrUpdateComment(owner, repo, prNumber, comment, COMMENT_MARKER);

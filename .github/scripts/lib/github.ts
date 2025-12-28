@@ -24,7 +24,14 @@ export interface Repository {
   };
 }
 
-// ============== GitHub API Client ==============
+export interface Artifact {
+  id: number;
+  name: string;
+  size_in_bytes: number;
+  archive_download_url: string;
+}
+
+// ============== GitHub API Client ==========================
 
 export class GitHubAPI {
   private token: string;
@@ -74,6 +81,13 @@ export class GitHubAPI {
     } catch {
       return false;
     }
+  }
+
+  async getRunArtifacts (owner: string, repo: string, runId: string): Promise<Artifact[]> {
+    const data = await this.request<{ artifacts: Artifact[]; }>(
+      `/repos/${owner}/${repo}/actions/runs/${runId}/artifacts`
+    );
+    return data.artifacts;
   }
 
   async createComment (owner: string, repo: string, issueNumber: number, body: string): Promise<void> {
