@@ -23,6 +23,7 @@ import { OB11GroupUploadNoticeEvent } from '../event/notice/OB11GroupUploadNotic
 import { OB11GroupNameEvent } from '../event/notice/OB11GroupNameEvent';
 import { FileNapCatOneBotUUID } from 'napcat-common/src/file-uuid';
 import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
+import { OB11GroupTipsEvent } from '../event/notice/OB11GroupTipsEvent';
 import { NapProtoMsg } from 'napcat-protobuf';
 import { GroupReactNotify, PushMsg } from 'napcat-core/packet/transformer/proto';
 import { NapCatOneBot11Adapter } from '..';
@@ -223,6 +224,14 @@ export class OneBotGroupApi {
       );
     } else if (type === '移出') {
       context.logger.logDebug('收到机器人被踢消息', json);
+    } else if (json.items?.some((item: { txt: string; }) => item.txt?.includes('谨防') || item.txt?.includes('诈骗'))) {
+      const content = json.items.map((item: { txt: string; }) => item.txt).filter((txt: string) => txt).join('');
+      context.logger.logDebug('收到群反诈骗提示消息', json);
+      return new OB11GroupTipsEvent(
+        this.core,
+        +msg.peerUid,
+        content
+      );
     } else {
       context.logger.logWarn('收到未知的灰条消息', json);
     }
