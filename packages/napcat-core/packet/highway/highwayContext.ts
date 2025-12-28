@@ -112,7 +112,16 @@ export class PacketHighwayContext {
 
     // 如果缺少视频缩略图，自动生成一个
     let tempThumbPath: string | null = null;
-    if (!video.thumbPath || !fs.existsSync(video.thumbPath)) {
+    let thumbExists = false;
+    if (video.thumbPath) {
+      try {
+        await fs.promises.access(video.thumbPath, fs.constants.F_OK);
+        thumbExists = true;
+      } catch {
+        thumbExists = false;
+      }
+    }
+    if (!video.thumbPath || !thumbExists) {
       tempThumbPath = await this.ensureVideoThumb(video);
     }
 
@@ -126,11 +135,16 @@ export class PacketHighwayContext {
       }
     } finally {
       // 清理临时生成的缩略图文件
-      if (tempThumbPath && fs.existsSync(tempThumbPath)) {
+      if (tempThumbPath) {
         const thumbToClean = tempThumbPath;
         fs.promises.unlink(thumbToClean)
           .then(() => this.logger.debug(`[Highway] Cleaned up temp thumbnail: ${thumbToClean}`))
-          .catch((e) => this.logger.warn(`[Highway] Failed to clean up temp thumbnail: ${thumbToClean}, reason: ${e instanceof Error ? e.message : e}`));
+          .catch((e) => {
+            // 文件不存在时忽略错误
+            if ((e as NodeJS.ErrnoException).code !== 'ENOENT') {
+              this.logger.warn(`[Highway] Failed to clean up temp thumbnail: ${thumbToClean}, reason: ${e instanceof Error ? e.message : e}`);
+            }
+          });
       }
     }
   }
@@ -154,20 +168,21 @@ export class PacketHighwayContext {
     try {
       // 尝试使用 FFmpeg 提取视频缩略图
       await FFmpegService.extractThumbnail(video.filePath, thumbPath);
-      if (fs.existsSync(thumbPath)) {
+      try {
+        await fs.promises.access(thumbPath, fs.constants.F_OK);
         this.logger.debug('[Highway] Video thumbnail generated successfully using FFmpeg');
-      } else {
+      } catch {
         throw new Error('FFmpeg failed to generate thumbnail');
       }
     } catch (e) {
       // FFmpeg 失败时（包括未初始化的情况）使用默认缩略图
       this.logger.warn(`[Highway] Failed to extract thumbnail, using default. Reason: ${e instanceof Error ? e.message : e}`);
-      fs.writeFileSync(thumbPath, Buffer.from(defaultVideoThumbB64, 'base64'));
+      await fs.promises.writeFile(thumbPath, Buffer.from(defaultVideoThumbB64, 'base64'));
     }
 
     // 更新视频元素的缩略图信息
     video.thumbPath = thumbPath;
-    const thumbStat = fs.statSync(thumbPath);
+    const thumbStat = await fs.promises.stat(thumbPath);
     video.thumbSize = thumbStat.size;
     video.thumbMd5 = await calculateFileMD5(thumbPath);
     // 默认缩略图尺寸（与 defaultVideoThumbB64 匹配的尺寸）
