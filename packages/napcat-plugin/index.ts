@@ -1,6 +1,6 @@
-import { createActionMap } from "napcat-onebot/action";
-import { EventType } from "napcat-onebot/event/OneBotEvent";
-import type { PluginModule } from "napcat-onebot/network/plugin";
+import { createActionMap } from 'napcat-onebot/action';
+import { EventType } from 'napcat-onebot/event/OneBotEvent';
+import type { PluginModule } from 'napcat-onebot/network/plugin';
 
 /**
  * 导入 napcat 包时候不使用 @/napcat...，直接使用 napcat...
