@@ -9,7 +9,7 @@ export default defineConfig({
   resolve: {
     conditions: ['node', 'default'],
     alias: {
-      '@/napcat-core': resolve(__dirname, '../core'),
+      '@/napcat-core': resolve(__dirname, '../napcat-core'),
       '@': resolve(__dirname, '../'),
     },
   },
