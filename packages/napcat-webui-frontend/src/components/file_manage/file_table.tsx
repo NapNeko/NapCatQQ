@@ -105,6 +105,7 @@ export default function FileTable ({
       />
       <Table
         aria-label='文件列表'
+        radius='sm'
         sortDescriptor={sortDescriptor}
         onSortChange={onSortChange}
         onSelectionChange={onSelectionChange}
@@ -175,6 +176,7 @@ export default function FileTable ({
                     )
                     : (
                       <Button
+                        radius='sm'
                         variant='light'
                         onPress={() =>
                           file.isDirectory
@@ -202,7 +204,7 @@ export default function FileTable ({
                 </TableCell>
                 <TableCell className='hidden md:table-cell'>{new Date(file.mtime).toLocaleString()}</TableCell>
                 <TableCell>
-                  <ButtonGroup size='sm' variant='light'>
+                  <ButtonGroup radius='sm' size='sm' variant='light'>
                     <Button
                       isIconOnly
                       color='default'

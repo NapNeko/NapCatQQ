@@ -37,6 +37,7 @@ const NetworkDisplayCard = <T extends keyof NetworkType> ({
   onEnable,
   onDelete,
   onEnableDebug,
+  showType,
 }: NetworkDisplayCardProps<T>) => {
   const { name, enable, debug } = data;
   const [editing, setEditing] = useState(false);
@@ -60,15 +61,16 @@ const NetworkDisplayCard = <T extends keyof NetworkType> ({
 
   return (
     <DisplayCardContainer
-      className="w-full max-w-[420px]"
+      className='w-full max-w-[420px]'
+      tag={showType ? typeLabel : undefined}
       action={
-        <div className="flex gap-2 w-full">
+        <div className='flex gap-2 w-full'>
           <Button
             fullWidth
             radius='full'
             size='sm'
             variant='flat'
-            className="flex-1 bg-default-100 dark:bg-default-50 text-default-600 font-medium hover:bg-warning/20 hover:text-warning transition-colors"
+            className='flex-1 bg-default-100 dark:bg-default-50 text-default-600 font-medium hover:bg-warning/20 hover:text-warning transition-colors'
             startContent={<FiEdit3 size={16} />}
             onPress={onEdit}
             isDisabled={editing}
@@ -82,10 +84,10 @@ const NetworkDisplayCard = <T extends keyof NetworkType> ({
             size='sm'
             variant='flat'
             className={clsx(
-              "flex-1 bg-default-100 dark:bg-default-50 text-default-600 font-medium transition-colors",
+              'flex-1 bg-default-100 dark:bg-default-50 text-default-600 font-medium transition-colors',
               debug
-                ? "hover:bg-secondary/20 hover:text-secondary data-[hover=true]:text-secondary"
-                : "hover:bg-success/20 hover:text-success data-[hover=true]:text-success"
+                ? 'hover:bg-secondary/20 hover:text-secondary data-[hover=true]:text-secondary'
+                : 'hover:bg-success/20 hover:text-success data-[hover=true]:text-success'
             )}
             startContent={<CgDebug size={16} />}
             onPress={handleEnableDebug}
@@ -113,11 +115,11 @@ const NetworkDisplayCard = <T extends keyof NetworkType> ({
           isSelected={enable}
           onChange={handleEnable}
           classNames={{
-            wrapper: "group-data-[selected=true]:bg-primary-400",
+            wrapper: 'group-data-[selected=true]:bg-primary-400',
           }}
         />
       }
-      title={typeLabel}
+      title={name}
     >
       <div className='grid grid-cols-2 gap-3'>
         {(() => {
@@ -125,29 +127,30 @@ const NetworkDisplayCard = <T extends keyof NetworkType> ({
 
           if (targetFullField) {
             // 模式1：存在全宽字段（如URL），布局为：
-            // Row 1: 名称 (全宽)
+            // Row 1: 类型 (全宽)
             // Row 2: 全宽字段 (全宽)
             return (
               <>
                 <div
                   className='flex flex-col gap-1 p-3 bg-default-100/50 dark:bg-white/10 rounded-xl border border-transparent hover:border-default-200 transition-colors col-span-2'
                 >
-                  <span className='text-xs text-default-500 dark:text-white/50 font-medium tracking-wide'>名称</span>
-                  <div className="text-sm font-medium text-default-700 dark:text-white/90 truncate">
-                    {name}
+                  <span className='text-xs text-default-500 dark:text-white/50 font-medium tracking-wide'>类型</span>
+                  <div className='text-sm font-medium text-default-700 dark:text-white/90 truncate'>
+                    {typeLabel}
                   </div>
                 </div>
                 <div
                   className='flex flex-col gap-1 p-3 bg-default-100/50 dark:bg-white/10 rounded-xl border border-transparent hover:border-default-200 transition-colors col-span-2'
                 >
                   <span className='text-xs text-default-500 dark:text-white/50 font-medium tracking-wide'>{targetFullField.label}</span>
-                  <div className="text-sm font-medium text-default-700 dark:text-white/90 truncate">
+                  <div className='text-sm font-medium text-default-700 dark:text-white/90 truncate'>
                     {targetFullField.render
                       ? targetFullField.render(targetFullField.value)
                       : (
                         <span className={clsx(
                           typeof targetFullField.value === 'string' && (targetFullField.value.startsWith('http') || targetFullField.value.includes('.') || targetFullField.value.includes(':')) ? 'font-mono' : ''
-                        )}>
+                        )}
+                        >
                           {String(targetFullField.value)}
                         </span>
                       )}
@@ -157,7 +160,7 @@ const NetworkDisplayCard = <T extends keyof NetworkType> ({
             );
           } else {
             // 模式2：无全宽字段，布局为 4 个小块 (2行 x 2列)
-            // Row 1: 名称 | Field 0
+            // Row 1: 类型 | Field 0
             // Row 2: Field 1 | Field 2
             const displayFields = fields.slice(0, 3);
             return (
@@ -165,9 +168,9 @@ const NetworkDisplayCard = <T extends keyof NetworkType> ({
                 <div
                   className='flex flex-col gap-1 p-3 bg-default-100/50 dark:bg-white/10 rounded-xl border border-transparent hover:border-default-200 transition-colors'
                 >
-                  <span className='text-xs text-default-500 dark:text-white/50 font-medium tracking-wide'>名称</span>
-                  <div className="text-sm font-medium text-default-700 dark:text-white/90 truncate">
-                    {name}
+                  <span className='text-xs text-default-500 dark:text-white/50 font-medium tracking-wide'>类型</span>
+                  <div className='text-sm font-medium text-default-700 dark:text-white/90 truncate'>
+                    {typeLabel}
                   </div>
                 </div>
                 {displayFields.map((field, index) => (
@@ -176,7 +179,7 @@ const NetworkDisplayCard = <T extends keyof NetworkType> ({
                     className='flex flex-col gap-1 p-3 bg-default-100/50 dark:bg-white/10 rounded-xl border border-transparent hover:border-default-200 transition-colors'
                   >
                     <span className='text-xs text-default-500 dark:text-white/50 font-medium tracking-wide'>{field.label}</span>
-                    <div className="text-sm font-medium text-default-700 dark:text-white/90 truncate">
+                    <div className='text-sm font-medium text-default-700 dark:text-white/90 truncate'>
                       {field.render
                         ? (
                           field.render(field.value)
@@ -184,7 +187,8 @@ const NetworkDisplayCard = <T extends keyof NetworkType> ({
                         : (
                           <span className={clsx(
                             typeof field.value === 'string' && (field.value.startsWith('http') || field.value.includes('.') || field.value.includes(':')) ? 'font-mono' : ''
-                          )}>
+                          )}
+                          >
                             {String(field.value)}
                           </span>
                         )}

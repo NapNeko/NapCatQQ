@@ -10,9 +10,8 @@ import { Controller, useForm, useWatch } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { FaFont, FaUserAstronaut, FaCheck } from 'react-icons/fa';
 import { FaPaintbrush } from 'react-icons/fa6';
-import { IoIosColorPalette } from 'react-icons/io';
+import { IoIosColorPalette, IoMdRefresh } from 'react-icons/io';
 import { MdDarkMode, MdLightMode } from 'react-icons/md';
-import { IoMdRefresh } from 'react-icons/io';
 
 import themes from '@/const/themes';
 
@@ -77,8 +76,8 @@ function PreviewThemeCard ({ theme, onPreview, isSelected }: PreviewThemeCardPro
       )}
     >
       {isSelected && (
-        <div className="absolute top-1 right-1 z-10">
-          <Chip size="sm" color="primary" variant="solid">
+        <div className='absolute top-1 right-1 z-10'>
+          <Chip size='sm' color='primary' variant='solid'>
             <FaCheck size={10} />
           </Chip>
         </div>
@@ -91,20 +90,20 @@ function PreviewThemeCard ({ theme, onPreview, isSelected }: PreviewThemeCardPro
           <FaUserAstronaut />
           {theme.author ?? '未知'}
         </div>
-        <div className='text-xs text-primary-200'>{theme.description}</div>
+        <div className='text-xs text-primary-200 whitespace-nowrap overflow-hidden text-ellipsis w-full'>{theme.description}</div>
       </CardHeader>
       <CardBody>
         <div className='flex flex-col gap-1'>
           {colors.map((color) => (
-            <div className='flex gap-1 items-center flex-wrap' key={color}>
-              <div className='text-xs w-4 text-right'>
+            <div className='flex gap-1 items-center flex-nowrap' key={color}>
+              <div className='text-xs w-4 text-right flex-shrink-0'>
                 {color[0].toUpperCase()}
               </div>
               {values.map((value) => (
                 <div
                   key={value}
                   className={clsx(
-                    'w-2 h-2 rounded-full shadow-small',
+                    'w-2 h-2 rounded-full shadow-small flex-shrink-0',
                     `bg-${color}${value}`
                   )}
                 />
@@ -135,9 +134,9 @@ const isThemeColorsEqual = (a: ThemeConfig, b: ThemeConfig): boolean => {
 
 // 字体模式显示名称映射
 const fontModeNames: Record<string, string> = {
-  'aacute': 'Aa 偷吃可爱长大的',
-  'system': '系统默认',
-  'custom': '自定义字体',
+  aacute: 'Aa 偷吃可爱长大的',
+  system: '系统默认',
+  custom: '自定义字体',
 };
 
 const ThemeConfigCard = () => {
@@ -169,11 +168,16 @@ const ThemeConfigCard = () => {
   const originalDataRef = useRef<ThemeConfig | null>(null);
 
   // 在组件挂载时创建 style 标签，并在卸载时清理
+  // 同时在卸载时恢复字体到已保存的状态（避免"伪自动保存"问题）
   useEffect(() => {
     const styleTag = document.createElement('style');
     document.head.appendChild(styleTag);
     styleTagRef.current = styleTag;
     return () => {
+      // 组件卸载时，恢复到已保存的字体设置
+      if (originalDataRef.current?.fontMode) {
+        applyFont(originalDataRef.current.fontMode);
+      }
       if (styleTagRef.current) {
         document.head.removeChild(styleTagRef.current);
       }
@@ -259,14 +263,12 @@ const ThemeConfigCard = () => {
   const savedThemeName = useMemo(() => {
     if (!originalDataRef.current) return null;
     return themes.find(t => isThemeColorsEqual(t.theme, originalDataRef.current!))?.name || '自定义';
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataLoaded, hasUnsavedChanges]);
 
   // 已保存的字体模式显示名称
   const savedFontModeDisplayName = useMemo(() => {
     const mode = originalDataRef.current?.fontMode || 'aacute';
     return fontModeNames[mode] || mode;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataLoaded, hasUnsavedChanges]);
 
   if (loading) return <PageLoading loading />;
@@ -282,33 +284,33 @@ const ThemeConfigCard = () => {
       <title>主题配置 - NapCat WebUI</title>
 
       {/* 顶部操作栏 */}
-      <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-md border-b border-divider">
-        <div className="flex items-center justify-between p-4">
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-default-400">当前主题:</span>
-              <Chip size="sm" color="primary" variant="flat">
+      <div className='sticky top-0 z-20 bg-background/80 backdrop-blur-md border-b border-divider'>
+        <div className='flex items-center justify-between p-4'>
+          <div className='flex items-center gap-3 flex-wrap'>
+            <div className='flex items-center gap-2 text-sm'>
+              <span className='text-default-400'>当前主题:</span>
+              <Chip size='sm' color='primary' variant='flat'>
                 {savedThemeName || '加载中...'}
               </Chip>
             </div>
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-default-400">字体:</span>
-              <Chip size="sm" color="secondary" variant="flat">
+            <div className='flex items-center gap-2 text-sm'>
+              <span className='text-default-400'>字体:</span>
+              <Chip size='sm' color='secondary' variant='flat'>
                 {savedFontModeDisplayName}
               </Chip>
             </div>
             {hasUnsavedChanges && (
-              <Chip size="sm" color="warning" variant="solid">
+              <Chip size='sm' color='warning' variant='solid'>
                 有未保存的更改
               </Chip>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className='flex items-center gap-2'>
             <Button
-              size="sm"
-              radius="full"
-              variant="flat"
-              className="font-medium bg-default-100 text-default-600 dark:bg-default-50/50"
+              size='sm'
+              radius='full'
+              variant='flat'
+              className='font-medium bg-default-100 text-default-600 dark:bg-default-50/50'
               onPress={() => {
                 reset();
                 toast.success('已重置');
@@ -318,10 +320,10 @@ const ThemeConfigCard = () => {
               取消更改
             </Button>
             <Button
-              size="sm"
+              size='sm'
               color='primary'
-              radius="full"
-              className="font-medium shadow-md shadow-primary/20"
+              radius='full'
+              className='font-medium shadow-md shadow-primary/20'
               isLoading={isSubmitting}
               onPress={() => onSubmit()}
               isDisabled={!hasUnsavedChanges}
@@ -329,11 +331,11 @@ const ThemeConfigCard = () => {
               保存
             </Button>
             <Button
-              size="sm"
+              size='sm'
               isIconOnly
               radius='full'
               variant='flat'
-              className="text-default-500 bg-default-100 dark:bg-default-50/50"
+              className='text-default-500 bg-default-100 dark:bg-default-50/50'
               onPress={onRefresh}
             >
               <IoMdRefresh size={18} />
@@ -342,7 +344,7 @@ const ThemeConfigCard = () => {
         </div>
       </div>
 
-      <div className="p-4">
+      <div className='p-4'>
         <Accordion variant='splitted' defaultExpandedKeys={['font', 'select']}>
           <AccordionItem
             key='font'
@@ -355,18 +357,18 @@ const ThemeConfigCard = () => {
             <div className='flex flex-col gap-4'>
               <Controller
                 control={control}
-                name="theme.fontMode"
+                name='theme.fontMode'
                 render={({ field }) => (
                   <Select
-                    label="字体预设"
+                    label='字体预设'
                     selectedKeys={field.value ? [field.value] : ['aacute']}
                     onChange={(e) => field.onChange(e.target.value)}
-                    className="max-w-xs"
+                    className='max-w-xs'
                     disallowEmptySelection
                   >
-                    <SelectItem key="aacute">Aa 偷吃可爱长大的</SelectItem>
-                    <SelectItem key="system">系统默认</SelectItem>
-                    <SelectItem key="custom">自定义字体</SelectItem>
+                    <SelectItem key='aacute'>Aa 偷吃可爱长大的</SelectItem>
+                    <SelectItem key='system'>系统默认</SelectItem>
+                    <SelectItem key='custom'>自定义字体</SelectItem>
                   </Select>
                 )}
               />
