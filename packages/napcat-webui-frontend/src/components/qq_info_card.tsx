@@ -48,7 +48,7 @@ const QQInfoCard: React.FC<QQInfoCardProps> = ({ data, error, loading }) => {
               <Image
                 src={
                   data?.avatarUrl ??
-                  `https://q1.qlogo.cn/g?b=qq&nk=${data?.uin}&s=1`
+                  `https://q1.qlogo.cn/g?b=qq&nk=${data?.uin}&s=0`
                 }
                 className='shadow-sm rounded-full w-14 aspect-square ring-2 ring-white/50 dark:ring-white/10'
               />
@@ -63,13 +63,15 @@ const QQInfoCard: React.FC<QQInfoCardProps> = ({ data, error, loading }) => {
               <div className={clsx(
                 'text-xl font-bold truncate mb-0.5',
                 hasBackground ? 'text-white drop-shadow-sm' : 'text-default-800 dark:text-gray-100'
-              )}>
+              )}
+              >
                 {data?.nick || '未知用户'}
               </div>
               <div className={clsx(
                 'font-mono text-xs tracking-wider',
                 hasBackground ? 'text-white/80' : 'text-default-500 opacity-80'
-              )}>
+              )}
+              >
                 {data?.uin || 'Unknown'}
               </div>
             </div>
