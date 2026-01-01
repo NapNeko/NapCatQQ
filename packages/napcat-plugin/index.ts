@@ -1,4 +1,4 @@
-import { createActionMap } from 'napcat-onebot/action';
+import type { createActionMap } from 'napcat-onebot/action';
 import { EventType } from 'napcat-onebot/event/OneBotEvent';
 import type { PluginModule } from 'napcat-onebot/network/plugin';
 
