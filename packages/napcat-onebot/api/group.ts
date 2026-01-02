@@ -23,6 +23,7 @@ import { OB11GroupUploadNoticeEvent } from '../event/notice/OB11GroupUploadNotic
 import { OB11GroupNameEvent } from '../event/notice/OB11GroupNameEvent';
 import { FileNapCatOneBotUUID } from 'napcat-common/src/file-uuid';
 import { OB11GroupIncreaseEvent } from '../event/notice/OB11GroupIncreaseEvent';
+import { OB11GroupGrayTipEvent } from '../event/notice/OB11GroupGrayTipEvent';
 import { NapProtoMsg } from 'napcat-protobuf';
 import { GroupReactNotify, PushMsg } from 'napcat-core/packet/transformer/proto';
 import { NapCatOneBot11Adapter } from '..';
@@ -207,8 +208,8 @@ export class OneBotGroupApi {
     return undefined;
   }
 
-  async parseOtherJsonEvent (msg: RawMessage, jsonStr: string, context: InstanceContext) {
-    const json = JSON.parse(jsonStr);
+  async parseOtherJsonEvent (msg: RawMessage, jsonGrayTipElement: GrayTipElement['jsonGrayTipElement'], context: InstanceContext) {
+    const json = JSON.parse(jsonGrayTipElement.jsonStr);
     const type = json.items[json.items.length - 1]?.txt;
     await this.core.apis.GroupApi.refreshGroupMemberCachePartial(msg.peerUid, msg.senderUid);
     if (type === '头衔') {
@@ -224,7 +225,33 @@ export class OneBotGroupApi {
     } else if (type === '移出') {
       context.logger.logDebug('收到机器人被踢消息', json);
     } else {
-      context.logger.logWarn('收到未知的灰条消息', json);
+      // 未知灰条消息 - 生成事件上报，便于检测伪造灰条攻击
+      context.logger.logWarn('收到未知的灰条消息', {
+        busiId: jsonGrayTipElement.busiId,
+        senderUin: msg.senderUin,
+        peerUin: msg.peerUin,
+        json,
+      });
+
+      // 如果有真实发送者（非0），生成事件上报，可用于检测和撤回伪造灰条
+      if (msg.senderUin && msg.senderUin !== '0') {
+        const peer = { chatType: ChatType.KCHATTYPEGROUP, guildId: '', peerUid: msg.peerUid };
+        const messageId = MessageUnique.createUniqueMsgId(peer, msg.msgId);
+        return new OB11GroupGrayTipEvent(
+          this.core,
+          +msg.peerUin,
+          +msg.senderUin,
+          messageId,
+          jsonGrayTipElement.busiId,
+          jsonGrayTipElement.jsonStr,
+          {
+            msgSeq: msg.msgSeq,
+            msgTime: msg.msgTime,
+            msgId: msg.msgId,
+            json,
+          }
+        );
+      }
     }
     return undefined;
   }
@@ -375,8 +402,7 @@ export class OneBotGroupApi {
         // 51是什么？{"align":"center","items":[{"txt":"下一秒起床通过王者荣耀加入群","type":"nor"}]
         return await this.parse51TypeEvent(msg, grayTipElement);
       } else {
-        console.log('Unknown JSON event:', grayTipElement.jsonGrayTipElement, JSON.stringify(grayTipElement));
-        return await this.parseOtherJsonEvent(msg, grayTipElement.jsonGrayTipElement.jsonStr, this.core.context);
+        return await this.parseOtherJsonEvent(msg, grayTipElement.jsonGrayTipElement, this.core.context);
       }
     }
     return undefined;
