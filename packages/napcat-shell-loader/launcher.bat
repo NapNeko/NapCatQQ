@@ -1,7 +1,7 @@
 @echo off
-chcp 65001
+chcp 65001 >nul
 net session >nul 2>&1
-if %errorLevel% == 0 (
+if %ERRORLEVEL% == 0 (
     echo Administrator mode detected.
 ) else (
     echo Please run this script in administrator mode.

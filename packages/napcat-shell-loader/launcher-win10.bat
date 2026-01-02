@@ -1,11 +1,11 @@
 @echo off
-chcp 65001
+chcp 65001 >nul
 net session >nul 2>&1
-if %errorLevel% == 0 (
+if %ERRORLEVEL% == 0 (
     echo Administrator mode detected.
 ) else (
     echo Please run this script in administrator mode.
-    powershell -Command "Start-Process 'cmd.exe' -ArgumentList '/c cd /d \"%cd%\" && \"%~f0\" %*' -Verb runAs" 
+    powershell -Command "Start-Process 'cmd.exe' -ArgumentList '/c cd /d \"%cd%\" && \"%~f0\" %*' -Verb runAs"
     exit
 )
 
@@ -37,5 +37,5 @@ echo (async () =^> {await import("file:///%NAPCAT_MAIN_PATH%")})() > "%NAPCAT_LO
 
 "%NAPCAT_LAUNCHER_PATH%" "%QQPath%" "%NAPCAT_INJECT_PATH%" %*
 
-REM 可选参数: -q <QQ号码> 用于快速登录，不传则使用二维码登录
-REM 示例: "%NAPCAT_LAUNCHER_PATH%" "%QQPath%" "%NAPCAT_INJECT_PATH%" -q 123456
+REM Optional: -q <QQ_NUMBER> for quick login, omit for QR code login
+REM Example: "%NAPCAT_LAUNCHER_PATH%" "%QQPath%" "%NAPCAT_INJECT_PATH%" -q 123456
