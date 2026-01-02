@@ -1,5 +1,5 @@
 @echo off
-chcp 65001
+chcp 65001 >nul
 set NAPCAT_PATCH_PACKAGE=%cd%\qqnt.json
 set NAPCAT_LOAD_PATH=%cd%\loadNapCat.js
 set NAPCAT_INJECT_PATH=%cd%\NapCatWinBootHook.dll
@@ -28,7 +28,7 @@ echo (async () =^> {await import("file:///%NAPCAT_MAIN_PATH%")})() > "%NAPCAT_LO
 
 "%NAPCAT_LAUNCHER_PATH%" "%QQPath%" "%NAPCAT_INJECT_PATH%" %*
 
-REM 可选参数: -q <QQ号码> 用于快速登录，不传则使用二维码登录
-REM 示例: "%NAPCAT_LAUNCHER_PATH%" "%QQPath%" "%NAPCAT_INJECT_PATH%" -q 123456
+REM Optional: -q <QQ_NUMBER> for quick login, omit for QR code login
+REM Example: "%NAPCAT_LAUNCHER_PATH%" "%QQPath%" "%NAPCAT_INJECT_PATH%" -q 123456
 
 pause

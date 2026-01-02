@@ -1,5 +1,5 @@
 @echo off
-chcp 65001
+chcp 65001 >nul
 set NAPCAT_PATCH_PACKAGE=%cd%\qqnt.json
 set NAPCAT_LOAD_PATH=%cd%\loadNapCat.js
 set NAPCAT_INJECT_PATH=%cd%\NapCatWinBootHook.dll
