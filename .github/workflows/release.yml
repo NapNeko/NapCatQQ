@@ -199,64 +199,64 @@ jobs:
           done
 
           if [ -z "$PREV_TAG" ]; then
-            echo "❌ Could not find previous tag for $CURRENT_TAG, aborting."
-            exit 1
-          fi
-
-          echo "Previous tag: $PREV_TAG"
-
-          # 强制拉取上一个 tag 和当前 tag
-          git fetch origin "refs/tags/$PREV_TAG:refs/tags/$PREV_TAG" --force
-          git fetch origin "refs/tags/$CURRENT_TAG:refs/tags/$CURRENT_TAG" --force
-
-          # 获取 commit title + body + 作者，保留换行
-          COMMITS=$(git log --pretty=format:'%h %B (%an)' "$PREV_TAG".."$CURRENT_TAG" | sed 's/$/\\n/')
-
-          echo "Commit list from $PREV_TAG to $CURRENT_TAG:"
-          echo -e "$COMMITS"
-
-          # 读取 prompt
-          PROMPT_FILE=".github/prompt/release_note_prompt.txt"
-          SYSTEM_PROMPT=$(<"$PROMPT_FILE")
-
-          # 构建用户内容
-          USER_CONTENT="当前真正的版本: $CURRENT_TAG\n提交列表:\n$COMMITS"
-
-          # 构建请求 JSON
-          BODY=$(jq -n \
-            --arg system "$SYSTEM_PROMPT" \
-            --arg user "$USER_CONTENT" \
-            '{model: env.OPENROUTER_MODEL, messages:[{role:"system", content:$system},{role:"user", content:$user}], temperature:0.3, max_tokens:800}')
-
-          echo "=== OpenRouter request body ==="
-          echo "$BODY" | jq .
-
-          # 调用 OpenRouter
-          if RESPONSE=$(curl -s -X POST "$OPENROUTER_API_URL" \
-            -H "Authorization: Bearer $OPENROUTER_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d "$BODY"); then
-            echo "=== raw response ==="
-            echo "$RESPONSE"  
-            echo "=== OpenRouter raw response ==="
-            if echo "$RESPONSE" | jq . >/dev/null 2>&1; then
-              echo "$RESPONSE" | jq .
-            else
-              echo "jq failed to parse response"
-            fi
-
-            # 提取生成内容
-            RELEASE_BODY=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // .choices[0].text // ""' 2>/dev/null || echo "")
-
-            if [ -z "$RELEASE_BODY" ]; then
-              echo "❌ OpenRouter failed to generate release note, using default.md"
-              cp .github/prompt/default.md CHANGELOG.md
-            else
-              echo -e "$RELEASE_BODY" > CHANGELOG.md
-            fi
-          else
-            echo "❌ Curl failed, using default.md"
+            echo "⚠️ Could not find previous tag for $CURRENT_TAG, using default release notes."
             cp .github/prompt/default.md CHANGELOG.md
+          else
+            echo "Previous tag: $PREV_TAG"
+
+            # 强制拉取上一个 tag 和当前 tag
+            git fetch origin "refs/tags/$PREV_TAG:refs/tags/$PREV_TAG" --force
+            git fetch origin "refs/tags/$CURRENT_TAG:refs/tags/$CURRENT_TAG" --force
+
+            # 获取 commit title + body + 作者，保留换行
+            COMMITS=$(git log --pretty=format:'%h %B (%an)' "$PREV_TAG".."$CURRENT_TAG" | sed 's/$/\\n/')
+
+            echo "Commit list from $PREV_TAG to $CURRENT_TAG:"
+            echo -e "$COMMITS"
+
+            # 读取 prompt
+            PROMPT_FILE=".github/prompt/release_note_prompt.txt"
+            SYSTEM_PROMPT=$(<"$PROMPT_FILE")
+
+            # 构建用户内容
+            USER_CONTENT="当前真正的版本: $CURRENT_TAG\n提交列表:\n$COMMITS"
+
+            # 构建请求 JSON
+            BODY=$(jq -n \
+              --arg system "$SYSTEM_PROMPT" \
+              --arg user "$USER_CONTENT" \
+              '{model: env.OPENROUTER_MODEL, messages:[{role:"system", content:$system},{role:"user", content:$user}], temperature:0.3, max_tokens:800}')
+
+            echo "=== OpenRouter request body ==="
+            echo "$BODY" | jq .
+
+            # 调用 OpenRouter
+            if RESPONSE=$(curl -s -X POST "$OPENROUTER_API_URL" \
+              -H "Authorization: Bearer $OPENROUTER_API_KEY" \
+              -H "Content-Type: application/json" \
+              -d "$BODY"); then
+              echo "=== raw response ==="
+              echo "$RESPONSE"
+              echo "=== OpenRouter raw response ==="
+              if echo "$RESPONSE" | jq . >/dev/null 2>&1; then
+                echo "$RESPONSE" | jq .
+              else
+                echo "jq failed to parse response"
+              fi
+
+              # 提取生成内容
+              RELEASE_BODY=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // .choices[0].text // ""' 2>/dev/null || echo "")
+
+              if [ -z "$RELEASE_BODY" ]; then
+                echo "❌ OpenRouter failed to generate release note, using default.md"
+                cp .github/prompt/default.md CHANGELOG.md
+              else
+                echo -e "$RELEASE_BODY" > CHANGELOG.md
+              fi
+            else
+              echo "❌ Curl failed, using default.md"
+              cp .github/prompt/default.md CHANGELOG.md
+            fi
           fi
           echo "=== generated release note ==="
           cat CHANGELOG.md
