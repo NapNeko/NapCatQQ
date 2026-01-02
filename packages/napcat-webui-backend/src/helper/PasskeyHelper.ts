@@ -37,7 +37,7 @@ export class PasskeyHelper {
       } catch {
         await fs.writeFile(passkeyFile, JSON.stringify({}, null, 2));
       }
-    } catch (error) {
+    } catch (_error) {
       // Directory or file already exists or other error
     }
   }
@@ -49,7 +49,8 @@ export class PasskeyHelper {
       const data = await fs.readFile(passkeyFile, 'utf-8');
       const passkeys = JSON.parse(data);
       return typeof passkeys === 'object' && passkeys !== null ? passkeys : {};
-    } catch (error) {
+    } catch (_error) {
+      console.error('Failed to read passkey file:', _error);
       return {};
     }
   }
@@ -82,8 +83,8 @@ export class PasskeyHelper {
     const options = await generateRegistrationOptions({
       rpName: RP_NAME,
       rpID: rpId,
-      userID: new TextEncoder().encode(userId),
-      userName: userName,
+      userID: new TextEncoder().encode(userId) as Uint8Array<ArrayBuffer>,
+      userName,
       attestationType: 'none',
       excludeCredentials: userPasskeys.map(passkey => ({
         id: passkey.id,
