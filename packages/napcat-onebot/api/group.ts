@@ -255,7 +255,6 @@ export class OneBotGroupApi {
     }
     return undefined;
   }
-  }
 
   async parseEssenceMsg (msg: RawMessage, jsonStr: string) {
     const json = JSON.parse(jsonStr);
