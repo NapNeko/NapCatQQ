@@ -221,11 +221,15 @@ export class OneBotGroupApi {
       const memberUin = json.items?.[1]?.param?.[0];
       const title = json.items?.[3]?.txt;
       context.logger.logDebug('收到群成员新头衔消息', json);
+      if (memberUin == null || title == null) {
+        context.logger.logWarn('收到格式异常的群成员新头衔灰条消息', json);
+        return undefined;
+      }
       return new OB11GroupTitleEvent(
         this.core,
         +msg.peerUid,
-        +(memberUin ?? 0),
-        title ?? ''
+        +memberUin,
+        title
       );
     } else if (type === '移出') {
       context.logger.logDebug('收到机器人被踢消息', json);
