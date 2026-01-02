@@ -230,21 +230,7 @@ export class OneBotGroupApi {
     } else if (type === '移出') {
       context.logger.logDebug('收到机器人被踢消息', json);
     } else {
-      // 未知灰条消息 - 生成事件上报，便于检测伪造灰条攻击
-      context.logger.logWarn('收到未知的灰条消息', {
-        busiId: jsonGrayTipElement.busiId,
-        recentAbstract: jsonGrayTipElement.recentAbstract,
-        isServer: jsonGrayTipElement.isServer,
-        chatType: msg.chatType,
-        peerUid: msg.peerUid,
-        peerUin: msg.peerUin,
-        senderUid: msg.senderUid,
-        senderUin: msg.senderUin,
-        msgSeq: msg.msgSeq,
-        msgTime: msg.msgTime,
-        msgId: msg.msgId,
-        json,
-      }, jsonGrayTipElement.jsonStr);
+      context.logger.logWarn('收到未知的灰条消息', json);
 
       // 如果有真实发送者（非0），生成事件上报，可用于检测和撤回伪造灰条
       const senderUin = Number(msg.senderUin) || 0;
