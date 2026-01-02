@@ -19,6 +19,7 @@ import { OB11GroupCardEvent } from '@/napcat-onebot/event/notice/OB11GroupCardEv
 import { OB11GroupPokeEvent } from '@/napcat-onebot/event/notice/OB11PokeEvent';
 import { OB11GroupEssenceEvent } from '@/napcat-onebot/event/notice/OB11GroupEssenceEvent';
 import { OB11GroupTitleEvent } from '@/napcat-onebot/event/notice/OB11GroupTitleEvent';
+import { OB11GroupGrayTipEvent } from '@/napcat-onebot/event/notice/OB11GroupGrayTipEvent';
 import { OB11GroupUploadNoticeEvent } from '../event/notice/OB11GroupUploadNoticeEvent';
 import { OB11GroupNameEvent } from '../event/notice/OB11GroupNameEvent';
 import { FileNapCatOneBotUUID } from 'napcat-common/src/file-uuid';
@@ -206,27 +207,68 @@ export class OneBotGroupApi {
     }
     return undefined;
   }
-
-  async parseOtherJsonEvent (msg: RawMessage, jsonStr: string, context: InstanceContext) {
-    const json = JSON.parse(jsonStr);
-    const type = json.items[json.items.length - 1]?.txt;
+  async parseOtherJsonEvent (msg: RawMessage, jsonGrayTipElement: GrayTipElement['jsonGrayTipElement'], context: InstanceContext) {
+    let json: { items?: { txt?: string; param?: string[] }[] };
+    try {
+      json = JSON.parse(jsonGrayTipElement.jsonStr);
+    } catch (e) {
+      context.logger.logWarn('灰条消息JSON解析失败', jsonGrayTipElement.jsonStr, e);
+      return undefined;
+    }
+    const type = json.items?.[json.items.length - 1]?.txt;
     await this.core.apis.GroupApi.refreshGroupMemberCachePartial(msg.peerUid, msg.senderUid);
     if (type === '头衔') {
-      const memberUin = json.items[1].param[0];
-      const title = json.items[3].txt;
+      const memberUin = json.items?.[1]?.param?.[0];
+      const title = json.items?.[3]?.txt;
       context.logger.logDebug('收到群成员新头衔消息', json);
       return new OB11GroupTitleEvent(
         this.core,
         +msg.peerUid,
-        +memberUin,
-        title
+        +(memberUin ?? 0),
+        title ?? ''
       );
     } else if (type === '移出') {
       context.logger.logDebug('收到机器人被踢消息', json);
     } else {
-      context.logger.logWarn('收到未知的灰条消息', json);
+      // 未知灰条消息 - 生成事件上报，便于检测伪造灰条攻击
+      context.logger.logWarn('收到未知的灰条消息', {
+        busiId: jsonGrayTipElement.busiId,
+        recentAbstract: jsonGrayTipElement.recentAbstract,
+        isServer: jsonGrayTipElement.isServer,
+        chatType: msg.chatType,
+        peerUid: msg.peerUid,
+        peerUin: msg.peerUin,
+        senderUid: msg.senderUid,
+        senderUin: msg.senderUin,
+        msgSeq: msg.msgSeq,
+        msgTime: msg.msgTime,
+        msgId: msg.msgId,
+        json,
+      }, jsonGrayTipElement.jsonStr);
+
+      // 如果有真实发送者（非0），生成事件上报，可用于检测和撤回伪造灰条
+      const senderUin = Number(msg.senderUin) || 0;
+      if (senderUin !== 0) {
+        const peer = { chatType: ChatType.KCHATTYPEGROUP, guildId: '', peerUid: msg.peerUid };
+        const messageId = MessageUnique.createUniqueMsgId(peer, msg.msgId);
+        return new OB11GroupGrayTipEvent(
+          this.core,
+          +msg.peerUin,
+          senderUin,
+          messageId,
+          jsonGrayTipElement.busiId,
+          jsonGrayTipElement.jsonStr,
+          {
+            msgSeq: msg.msgSeq,
+            msgTime: msg.msgTime,
+            msgId: msg.msgId,
+            json,
+          }
+        );
+      }
     }
     return undefined;
+  }
   }
 
   async parseEssenceMsg (msg: RawMessage, jsonStr: string) {
@@ -376,7 +418,7 @@ export class OneBotGroupApi {
         return await this.parse51TypeEvent(msg, grayTipElement);
       } else {
         console.log('Unknown JSON event:', grayTipElement.jsonGrayTipElement, JSON.stringify(grayTipElement));
-        return await this.parseOtherJsonEvent(msg, grayTipElement.jsonGrayTipElement.jsonStr, this.core.context);
+        return await this.parseOtherJsonEvent(msg, grayTipElement.jsonGrayTipElement, this.core.context);
       }
     }
     return undefined;
