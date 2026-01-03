@@ -2,13 +2,7 @@
 const path = require('path');
 
 async function initializeNapCat (session, loginService, registerCallback) {
-  // const logFile = path.join(currentPath, 'napcat.log');
-
   console.log('[NapCat] [Info] 开始初始化NapCat');
-
-  // fs.writeFileSync(logFile, '', { flag: 'w' });
-
-  // fs.writeFileSync(logFile, '[NapCat] [Info] NapCat 初始化成功\n', { flag: 'a' });
 
   try {
     const currentPath = path.dirname(__filename);
