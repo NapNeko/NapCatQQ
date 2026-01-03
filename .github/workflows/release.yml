@@ -198,6 +198,10 @@ jobs:
         with:
           path: ./artifacts
 
+      - name: Download NapCat.Shell.Windows.OneKey.zip
+        run: |
+            curl -L -o NapCat.Shell.Windows.OneKey.zip https://github.com/NapNeko/NapCatResource/raw/main/NapCat.Shell.Windows.OneKey.zip
+
       - name: Zip Artifacts
         run: |
             cd artifacts
@@ -434,4 +438,5 @@ jobs:
             NapCat.Shell.Windows.Node.zip
             NapCat.Framework.zip
             NapCat.Shell.zip
+            NapCat.Shell.Windows.OneKey.zip
           draft: true
